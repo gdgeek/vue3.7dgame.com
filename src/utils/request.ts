@@ -5,7 +5,8 @@ import { TOKEN_KEY } from "@/enums/CacheEnum";
 
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: import.meta.env.VITE_APP_BASE_API,
+  // baseURL: import.meta.env.VITE_APP_BASE_API,
+  baseURL: "https://api.7dgame.com",
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
 });
@@ -14,6 +15,7 @@ const service = axios.create({
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const accessToken = localStorage.getItem(TOKEN_KEY);
+    console.log(accessToken);
     if (accessToken) {
       config.headers.Authorization = accessToken;
     }
@@ -27,42 +29,49 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   (response: AxiosResponse) => {
-    // 检查配置的响应类型是否为二进制类型（'blob' 或 'arraybuffer'）, 如果是，直接返回响应对象
-    if (
-      response.config.responseType === "blob" ||
-      response.config.responseType === "arraybuffer"
-    ) {
-      return response;
-    }
-
-    const { code, data, msg } = response.data;
-    if (code === ResultEnum.SUCCESS) {
-      return data;
-    }
-
-    ElMessage.error(msg || "系统出错");
-    return Promise.reject(new Error(msg || "Error"));
+    return response;
   },
   (error: any) => {
     // 异常处理
-    if (error.response.data) {
-      const { code, msg } = error.response.data;
-      if (code === ResultEnum.TOKEN_INVALID) {
-        ElMessageBox.confirm("当前页面已失效，请重新登录", "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
-        }).then(() => {
-          const userStore = useUserStoreHook();
-          userStore.resetToken().then(() => {
-            location.reload();
-          });
+    if (
+      (typeof error.response === "undefined" &&
+        error.message === "Network Error") ||
+      (typeof error.response !== "undefined" && error.response.status === 401)
+    ) {
+      ElMessage({
+        message: "登陆过期，请重新登录",
+        type: "error",
+        duration: 5 * 1000,
+      });
+      // 清除token
+      // todo
+      return Promise.reject("");
+    } else {
+      ElMessage({
+        message: error.message,
+        type: "error",
+        duration: 5 * 1000,
+      });
+      setTimeout(() => {
+        let message = "";
+        try {
+          message = JSON.parse(error.response.data.message);
+        } catch {
+          if (typeof error.response === "undefined") {
+            message = error.message;
+          } else {
+            message = error.response.data.message;
+          }
+        }
+        ElMessage.error({
+          message: message,
+          type: "error",
+          duration: 5 * 1000,
         });
-      } else {
-        ElMessage.error(msg || "系统出错");
-      }
+      }, 300);
+
+      return Promise.reject(error.response.data);
     }
-    return Promise.reject(error.message);
   }
 );
 

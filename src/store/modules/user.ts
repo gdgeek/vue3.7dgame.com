@@ -23,8 +23,8 @@ export const useUserStore = defineStore("user", () => {
     return new Promise<void>((resolve, reject) => {
       AuthAPI.login(loginData)
         .then((data) => {
-          const { tokenType, accessToken } = data;
-          localStorage.setItem(TOKEN_KEY, tokenType + " " + accessToken); // Bearer eyJhbGciOiJIUzI1NiJ9.xxx.xxx
+          const access_token = data.data.access_token;
+          localStorage.setItem(TOKEN_KEY, "Bearer" + " " + access_token); // Bearer eyJhbGciOiJIUzI1NiJ9.xxx.xxx
           resolve();
         })
         .catch((error) => {

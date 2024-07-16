@@ -1,7 +1,7 @@
 /**
  * 登录请求参数
  */
-export interface LoginData {
+export type LoginData = {
   /**
    * 用户名
    */
@@ -14,35 +14,38 @@ export interface LoginData {
   /**
    * 验证码缓存key
    */
-  captchaKey?: string;
+  // captchaKey?: string;
 
   /**
    * 验证码
    */
-  captchaCode?: string;
-}
+  // captchaCode?: string;
+};
 
 /**
  * 登录响应
  */
-export interface LoginResult {
-  /**
-   * 访问token
-   */
-  accessToken?: string;
-  /**
-   * 过期时间(单位：毫秒)
-   */
-  expires?: number;
-  /**
-   * 刷新token
-   */
-  refreshToken?: string;
-  /**
-   * token 类型
-   */
-  tokenType?: string;
-}
+type Data = {
+  username: string;
+  id: number;
+  nickname: string | null;
+  info: string | null;
+  avatar_id: string | null;
+  email: string | null;
+  emailBind: boolean;
+};
+
+type User = {
+  username: string;
+  data: Data;
+  roles: string[];
+};
+
+export type LoginResult = {
+  data: any;
+  access_token: string;
+  user: User;
+};
 
 /**
  * 验证码响应

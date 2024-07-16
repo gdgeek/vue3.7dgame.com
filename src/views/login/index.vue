@@ -1,294 +1,288 @@
-<template>
-  <div class="login-container">
-    <!-- 顶部 -->
-    <div class="absolute-lt flex-x-end p-3 w-full">
-      <el-switch
-        v-model="isDark"
-        inline-prompt
-        active-icon="Moon"
-        inactive-icon="Sunny"
-        @change="toggleTheme"
-      />
-      <lang-select class="ml-2 cursor-pointer" />
-    </div>
-    <!-- 登录表单 -->
-    <el-card class="!border-none !bg-transparent !rounded-4% w-100 <sm:w-85">
-      <div class="text-center relative">
-        <h2>{{ defaultSettings.title }}</h2>
-        <el-tag class="ml-2 absolute-rt">{{ defaultSettings.version }}</el-tag>
-      </div>
-
-      <el-form
-        ref="loginFormRef"
-        :model="loginData"
-        :rules="loginRules"
-        class="login-form"
-      >
-        <!-- 用户名 -->
-        <el-form-item prop="username">
-          <div class="flex-y-center w-full">
-            <svg-icon icon-class="user" class="mx-2" />
-            <el-input
-              ref="username"
-              v-model="loginData.username"
-              :placeholder="$t('login.username')"
-              name="username"
-              size="large"
-              class="h-[48px]"
-            />
-          </div>
-        </el-form-item>
-
-        <!-- 密码 -->
-        <el-tooltip
-          :visible="isCapslock"
-          :content="$t('login.capsLock')"
-          placement="right"
-        >
-          <el-form-item prop="password">
-            <div class="flex-y-center w-full">
-              <svg-icon icon-class="lock" class="mx-2" />
-              <el-input
-                v-model="loginData.password"
-                :placeholder="$t('login.password')"
-                type="password"
-                name="password"
-                @keyup="checkCapslock"
-                @keyup.enter="handleLogin"
-                size="large"
-                class="h-[48px] pr-2"
-                show-password
-              />
-            </div>
-          </el-form-item>
-        </el-tooltip>
-
-        <!-- 验证码 -->
-        <el-form-item prop="captchaCode">
-          <div class="flex-y-center w-full">
-            <svg-icon icon-class="captcha" class="mx-2" />
-            <el-input
-              v-model="loginData.captchaCode"
-              auto-complete="off"
-              size="large"
-              class="flex-1"
-              :placeholder="$t('login.captchaCode')"
-              @keyup.enter="handleLogin"
-            />
-
-            <el-image
-              @click="getCaptcha"
-              :src="captchaBase64"
-              class="rounded-tr-md rounded-br-md cursor-pointer h-[48px]"
-            />
-          </div>
-        </el-form-item>
-
-        <!-- 登录按钮 -->
-        <el-button
-          :loading="loading"
-          type="primary"
-          size="large"
-          class="w-full"
-          @click.prevent="handleLogin"
-          >{{ $t("login.login") }}
-        </el-button>
-
-        <!-- 账号密码提示 -->
-        <div class="mt-10 text-sm">
-          <span>{{ $t("login.username") }}: admin</span>
-          <span class="ml-4"> {{ $t("login.password") }}: 123456</span>
-        </div>
-      </el-form>
-    </el-card>
-
-    <!-- ICP备案 -->
-    <div class="absolute bottom-1 text-[10px] text-center" v-show="icpVisible">
-      <p>
-        Copyright © 2021 - 2024 youlai.tech All Rights Reserved. 有来技术
-        版权所有
-      </p>
-      <p>皖ICP备20006496号-3</p>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { useSettingsStore, useUserStore } from "@/store";
-import AuthAPI from "@/api/auth";
+import { ref, computed } from "vue";
+import { RouterLink, useRouter } from "vue-router";
+import { FormInstance } from "element-plus";
+import { useUserStore } from "@/store/modules/user";
 import { LoginData } from "@/api/auth/model";
-import type { FormInstance } from "element-plus";
-import { LocationQuery, useRoute } from "vue-router";
-import router from "@/router";
-import defaultSettings from "@/settings";
-import { ThemeEnum } from "@/enums/ThemeEnum";
+import { TOKEN_KEY } from "@/enums/CacheEnum";
 
 const userStore = useUserStore();
-const settingsStore = useSettingsStore();
-const route = useRoute();
 
-// Internationalization
-const { t } = useI18n();
-
-// Reactive states
-const isDark = ref(settingsStore.theme === ThemeEnum.DARK);
-const icpVisible = ref(true);
-const loading = ref(false); // 按钮loading
-const isCapslock = ref(false); // 是否大写锁定
-const captchaBase64 = ref(); // 验证码图片Base64字符串
-const loginFormRef = ref<FormInstance>(); // 登录表单ref
-const { height } = useWindowSize();
-
-const loginData = ref<LoginData>({
-  username: "admin",
-  password: "123456",
+const form = ref<LoginData>({
+  username: "huyuelong",
+  password: "123456hu",
 });
 
-const loginRules = computed(() => {
+const rules = computed(() => {
   return {
     username: [
-      {
-        required: true,
-        trigger: "blur",
-        message: t("login.message.username.required"),
-      },
+      { required: true, message: "请输入用户名称", trigger: "blur" },
+      { min: 5, message: "用户名称长度应该大于5", trigger: "blur" },
     ],
     password: [
-      {
-        required: true,
-        trigger: "blur",
-        message: t("login.message.password.required"),
-      },
-      {
-        min: 6,
-        message: t("login.message.password.min"),
-        trigger: "blur",
-      },
-    ],
-    captchaCode: [
-      {
-        required: true,
-        trigger: "blur",
-        message: t("login.message.captchaCode.required"),
-      },
+      { required: true, message: "请输入密码", trigger: "blur" },
+      { min: 6, message: "密码长度应该大于6", trigger: "blur" },
     ],
   };
 });
 
-/** 获取验证码 */
-function getCaptcha() {
-  AuthAPI.getCaptcha().then((data) => {
-    loginData.value.captchaKey = data.captchaKey;
-    captchaBase64.value = data.captchaBase64;
-  });
-}
+const router = useRouter();
+const formRef = ref<FormInstance>();
+const isShow = ref(false);
+const title = ref<string | Record<string, string>>("");
 
-// 登录
-function handleLogin() {
-  loginFormRef.value?.validate((valid: boolean) => {
+// 登录成功
+const succeed = (data: any) => {
+  ElMessage.success("登录成功");
+  console.log(data);
+  const token = data.access_token;
+  console.log(token);
+  if (token) {
+    setToken(token);
+    router.push("/"); // 登录成功后重定向到首页
+  } else {
+    failed("登录响应中缺少 access_token");
+  }
+};
+
+// 设置token
+const setToken = (token: string) => {
+  localStorage.setItem(TOKEN_KEY, "Bearer " + token);
+};
+
+// 登录失败
+const failed = (message: any) => {
+  error(message);
+};
+
+// 提交登录表单
+function submit() {
+  formRef.value?.validate((valid: boolean) => {
     if (valid) {
-      loading.value = true;
       userStore
-        .login(loginData.value)
-        .then(() => {
-          const { path, queryParams } = parseRedirect();
-          router.push({ path: path, query: queryParams });
+        .login(form.value)
+        .then((data) => {
+          succeed(data);
         })
-        .catch(() => {
-          getCaptcha();
-        })
-        .finally(() => {
-          loading.value = false;
+        .catch((error) => {
+          failed(error);
         });
     }
   });
 }
+// const submit = () => {
+//   formRef.value?.validate(async (valid: boolean) => {
+//     if (valid) {
+//       const res = await AuthAPI.login(form.value);
+//       console.log("res:", res.data.access_token);
+//     }
+//   });
+// };
 
-// 解析 redirect 字符串 为 path 和  queryParams
-function parseRedirect(): {
-  path: string;
-  queryParams: Record<string, string>;
-} {
-  const query: LocationQuery = route.query;
-  const redirect = (query.redirect as string) ?? "/";
-
-  const url = new URL(redirect, window.location.origin);
-  const path = url.pathname;
-  const queryParams: Record<string, string> = {};
-
-  url.searchParams.forEach((value, key) => {
-    queryParams[key] = value;
-  });
-
-  return { path, queryParams };
-}
-
-/** 主题切换 */
-const toggleTheme = () => {
-  const newTheme =
-    settingsStore.theme === ThemeEnum.DARK ? ThemeEnum.LIGHT : ThemeEnum.DARK;
-  settingsStore.changeTheme(newTheme);
+// 显示错误信息
+const error = (msg: string | Record<string, string>) => {
+  title.value =
+    typeof msg === "string"
+      ? msg
+      : Object.keys(msg)
+        .map((key) => `${key} : ${msg[key]}`)
+        .join("\n");
+  isShow.value = true;
 };
-
-/** 根据屏幕宽度切换设备模式 */
-watchEffect(() => {
-  if (height.value < 600) {
-    icpVisible.value = false;
-  } else {
-    icpVisible.value = true;
-  }
-});
-
-/** 检查输入大小写 */
-function checkCapslock(event: KeyboardEvent) {
-  // 防止浏览器密码自动填充时报错
-  if (event instanceof KeyboardEvent) {
-    isCapslock.value = event.getModifierState("CapsLock");
-  }
-}
-
-onMounted(() => {
-  getCaptcha();
-});
 </script>
 
-<style lang="scss" scoped>
-html.dark .login-container {
-  background: url("@/assets/images/login-bg-dark.jpg") no-repeat center right;
+<template>
+  <body>
+    <div class="header">
+      <RouterLink to="/" class="logo">
+        <img src="/public/favicon.ico" alt="">
+        <span class="project_title">苹果AR元气项目</span>
+      </RouterLink>
+      <div class="header-right">
+        <el-button>平台注册/登录</el-button>
+      </div>
+      <div class="blog">
+        <a>开发博客</a>
+      </div>
+    </div>
+    <div class="content">
+      <div>
+        <h2 class="login-title">登录账号</h2>
+        <el-form ref="formRef" class="login-body" :rules="rules" :model="form" label-width="75px">
+          <el-form-item label="用户名" prop="username">
+            <el-input v-model="form.username" suffix-icon="User" />
+          </el-form-item>
+          <el-form-item label="密码" prop="password">
+            <el-input v-model="form.password" type="password" suffix-icon="Lock" />
+          </el-form-item>
+
+          <el-form-item class="login-button">
+            <el-button style="width: 120px" type="primary" @click="submit">
+              进入
+            </el-button>
+          </el-form-item>
+        </el-form>
+        <div class="login-link">
+          <router-link to="/site/signup">
+            <el-link type="primary" :underline="false">注册用户</el-link>
+          </router-link>
+          <br />
+          <router-link to="/site/request-password-reset">
+            <el-link type="primary" :underline="false">找回密码</el-link>
+          </router-link>
+          <br />
+        </div>
+        <div v-if="isShow" class="error-message">{{ title }}</div>
+      </div>
+    </div>
+    <div class="footer">
+      <div class="copyright">
+        <RouterLink to="https://bujiaban.com" target="_blank" :underline="false">
+          <el-icon><HomeFilled /></el-icon>
+          上海不加班网络有限公司(Apple Reality Spirit)
+        </RouterLink>
+        <!-- <br> -->
+        <a href="https://beian.miit.gov.cn/" target="_blank" :underline="false">
+          <el-icon><Document /></el-icon>
+          沪ICP备15039333号
+        </a>
+        <a href="#">
+          <el-icon><InfoFilled /></el-icon>
+          2024
+        </a>
+      </div>
+    </div>
+  </body>
+</template>
+
+<style scoped lang="scss">
+body {
+  height: 100%;
+  margin: 0;
+  position: fixedg;
 }
 
-.login-container {
-  overflow-y: auto;
-  background: url("@/assets/images/login-bg.jpg") no-repeat center right;
+body {
+  display: flex;
+  flex-direction:column;
+}
 
-  @apply wh-full flex-center;
+.header,
+.footer {
+  height: 7%;
+  width: 100%;
+  background-color: #f1f1f1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
 
-  .login-form {
-    padding: 30px 10px;
+.logo {
+  position: absolute;
+  left: 10px;
+  img {
+    width: 32px;
+    height: 32px;
+    vertical-align: middle;
+    margin-left: 12px;
+  }
+  .project_title {
+    margin-left: 10px;
+    color: #909399;
+    font-size: 14px;
+    font-family: 'SourceHanSansSC-VF';
+    font-weight: 400;
   }
 }
 
-.el-form-item {
-  background: var(--el-input-bg-color);
-  border: 1px solid var(--el-border-color);
-  border-radius: 5px;
+.blog {
+  position: absolute;
+  margin-left: 300px;
+  height: 60px;
+  line-height: 60px;
+  color: #909399;
+  font-size: 14px;
+  font-family: 'SourceHanSansSC-VF';
+  font-weight: 400;
+  &:hover {
+    color: #000000; 
+  }
 }
 
-:deep(.el-input) {
-  .el-input__wrapper {
-    padding: 0;
-    background-color: transparent;
-    box-shadow: none;
+.header-right{
+  position: absolute;
+  right: 10px;
+}
 
-    &.is-focus,
-    &:hover {
-      box-shadow: none !important;
-    }
+.content {
+  flex: 1;
+  width: 100%;
+  background-image: url('/public/media/bg/02.jpg');
+  background-size: 100% auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    input:-webkit-autofill {
-      /* 通过延时渲染背景色变相去除背景颜色 */
-      transition: background-color 1000s ease-in-out 0s;
-    }
+  .login-title {
+    margin: 20px 0;
+    font-weight: bold;
+    color: #444;
+    text-align: center;
   }
+
+  .login-body {
+    max-width: 100%;
+    height: 100%;
+    padding: 10px 40px 0 10px;
+    margin-top: 36px;
+  }
+
+  .login-button {
+    text-align: right;
+  }
+
+  .login-link {
+    padding: 0 10px;
+    margin-bottom: 20px;
+  }
+
+  .login-link a {
+    font-size: 16px;
+    color: rgb(28 160 212);
+  }
+
+  .error-message {
+    margin-top: 10px;
+    color: red;
+    text-align: center;
+  }
+}
+
+.footer {
+  text-align: center;
+  font-size: 12px;
+  margin: 0 30px;
+  line-height: 80px;
+  .copyright {
+    position: absolute;
+    right: 10px;
+  }
+  .copyright a {
+    color: rgb(3, 3, 3);
+    padding: 0 20px;
+    font-size: 14px;
+  }
+  .copyright a:hover {
+    color: rgb(11, 175, 240);
+  }
+}
+.fixed-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 1;
 }
 </style>
+
+
