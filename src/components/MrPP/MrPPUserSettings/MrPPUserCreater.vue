@@ -109,7 +109,7 @@
           </el-descriptions-item>
         </el-descriptions>
 
-        <aside style=" float: right;margin-top: 10px; margin-bottom: 15px">
+        <aside style="float: right; margin-top: 10px; margin-bottom: 15px">
           <el-button type="primary" plain size="mini" @click="gotoCreator">
             <i class="el-icon-edit"></i>
             进入

@@ -5,7 +5,7 @@
       <div class="setting-item" @click="toggle">
         <svg-icon
           :icon-class="isFullscreen ? 'fullscreen-exit' : 'fullscreen'"
-        />
+        ></svg-icon>
       </div>
 
       <!-- 布局大小 -->
@@ -14,21 +14,21 @@
         effect="dark"
         placement="bottom"
       >
-        <size-select class="setting-item" />
+        <size-select class="setting-item"></size-select>
       </el-tooltip>
 
       <!-- 语言选择 -->
-      <lang-select class="setting-item" />
+      <lang-select class="setting-item"></lang-select>
     </template>
 
     <!-- 用户头像 -->
     <el-dropdown class="setting-item" trigger="click">
       <div class="flex-center h100% p10px">
         <img
-          :src="userStore.user.avatar + '?imageView2/1/w/80/h/80'"
+          :src="userStore.userInfo.data.avatar_id + '?imageView2/1/w/80/h/80'"
           class="rounded-full mr-10px w24px w24px"
         />
-        <span>{{ userStore.user.username }}</span>
+        <span>{{ userStore.userInfo.data.username }}</span>
       </div>
       <template #dropdown>
         <el-dropdown-menu>
@@ -51,7 +51,7 @@
     <!-- 设置 -->
     <template v-if="defaultSettings.showSettings">
       <div class="setting-item" @click="settingStore.settingsVisible = true">
-        <svg-icon icon-class="setting" />
+        <svg-icon icon-class="setting"></svg-icon>
       </div>
     </template>
   </div>
@@ -81,7 +81,7 @@ const { isFullscreen, toggle } = useFullscreen();
 /**
  * 注销
  */
-function logout() {
+const logout = () => {
   ElMessageBox.confirm("确定注销并退出系统吗？", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
@@ -97,7 +97,7 @@ function logout() {
         router.push(`/login?redirect=${route.fullPath}`);
       });
   });
-}
+};
 </script>
 <style lang="scss" scoped>
 .setting-item {

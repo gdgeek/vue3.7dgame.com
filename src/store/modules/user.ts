@@ -97,20 +97,25 @@ export const useUserStore = defineStore("user", () => {
     });
   }
 
-  // user logout
-  function logout() {
-    return new Promise<void>((resolve, reject) => {
-      AuthAPI.logout()
-        .then(() => {
-          localStorage.setItem(TOKEN_KEY, "");
-          location.reload(); // 清空路由
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
-  }
+  // 用户登出
+  // function logout() {
+  //   return new Promise<void>((resolve, reject) => {
+  //     AuthAPI.logout()
+  //       .then(() => {
+  //         console.log("测试");
+  //         localStorage.setItem(TOKEN_KEY, "");
+  //         location.reload(); // 清空路由
+  //         resolve();
+  //       })
+  //       .catch((error) => {
+  //         reject(error);
+  //       });
+  //   });
+  // }
+  const logout = async () => {
+    await localStorage.setItem(TOKEN_KEY, "");
+    location.reload(); // 清空路由
+  };
 
   // remove token
   function resetToken() {
