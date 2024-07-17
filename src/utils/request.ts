@@ -2,6 +2,7 @@ import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { useUserStoreHook } from "@/store/modules/user";
 import { ResultEnum } from "@/enums/ResultEnum";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
+import { useUserStore } from "@/store/modules/user";
 
 // 创建 axios 实例
 const service = axios.create({
@@ -43,8 +44,9 @@ service.interceptors.response.use(
         type: "error",
         duration: 5 * 1000,
       });
-      // 清除token
-      // todo
+      // 清除重置token
+      const userStore = useUserStore();
+      userStore.resetToken();
       return Promise.reject("");
     } else {
       ElMessage({

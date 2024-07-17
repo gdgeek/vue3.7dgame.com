@@ -1,13 +1,20 @@
 /**
  * 登录用户信息
  */
-export interface UserInfo {
-  userId?: number;
-  username?: string;
-  nickname?: string;
-  avatar?: string;
+type Data = {
+  username: string;
+  id: number;
+  nickname: string | null;
+  info: string | null;
+  avatar_id: string | null;
+  email: string | null;
+  emailBind: boolean;
+};
+
+export interface getUserInfoData {
+  username: string;
+  data: Data;
   roles: string[];
-  perms: string[];
 }
 
 /**
