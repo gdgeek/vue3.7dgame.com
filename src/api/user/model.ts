@@ -15,6 +15,7 @@ export interface getUserInfoData {
   username: string;
   data: Data;
   roles: string[];
+  perms?: string[];
 }
 
 /**

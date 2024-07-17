@@ -11,8 +11,11 @@ export function setupPermission() {
   router.beforeEach(async (to, from, next) => {
     NProgress.start();
     const hasToken = localStorage.getItem(TOKEN_KEY);
+    console.log("hasToken2:", hasToken);
     if (hasToken) {
+      console.log("to.path:", to.path);
       if (to.path === "/login") {
+        console.log("登录页");
         // 如果已登录，跳转首页
         next({ path: "/" });
         NProgress.done();
@@ -37,7 +40,11 @@ export function setupPermission() {
         } else {
           const permissionStore = usePermissionStore();
           try {
+            console.log("测试");
+            userStore.getUserInfo();
             const { roles } = await userStore.getUserInfo();
+            console.log("roles:", roles);
+            console.log("测试");
             const accessRoutes = await permissionStore.generateRoutes(roles);
             accessRoutes.forEach((route: RouteRecordRaw) => {
               router.addRoute(route);
@@ -80,20 +87,20 @@ export function setupPermission() {
   });
 }
 
-// 是否有权限
+/** 判断是否有权限 */
 export function hasAuth(
   value: string | string[],
   type: "button" | "role" = "button"
 ) {
-  const { roles } = useUserStore().userInfo;
-  //「超级管理员」拥有所有的按钮权限
-  if (type === "button" && roles.includes("ROOT")) {
+  const { roles, perms } = useUserStore().userInfo;
+
+  // 超级管理员 拥有所有权限
+  if (type === "button" && roles.includes("manager")) {
     return true;
   }
-  // const auths = type === "button" ? perms : roles;
-  // return typeof value === "string"
-  //   ? auths.includes(value)
-  //   : auths.some((perm) => {
-  //       return value.includes(perm);
-  //     });
+
+  const auths = type === "button" ? perms : roles;
+  return typeof value === "string"
+    ? auths?.includes(value)
+    : value.some((perm) => auths?.includes(perm));
 }

@@ -2,9 +2,9 @@
   <!-- 顶部导航栏 -->
   <div class="navbar-container">
     <!-- 导航栏左侧 -->
-    <NavbarLeft />
+    <NavbarLeft></NavbarLeft>
     <!-- 导航栏右侧 -->
-    <NavbarRight />
+    <NavbarRight></NavbarRight>
   </div>
 </template>
 

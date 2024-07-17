@@ -41,7 +41,8 @@ const succeed = (data: any) => {
   console.log("token:", token);
   if (token) {
     setToken(token);
-    console.log("Token set successfully");
+    const res = localStorage.getItem(TOKEN_KEY);
+    console.log("Token set successfully", res);
     nextTick(() => {
       router.push("/"); // 确保目标路径正确
       console.log("Routing to home"); // 确认路由跳转
@@ -60,23 +61,23 @@ const setToken = (token: string) => {
 };
 
 // 解析 redirect 字符串 为 path 和  queryParams
-// function parseRedirect(): {
-//   path: string;
-//   queryParams: Record<string, string>;
-// } {
-//   const query: LocationQuery = route.query;
-//   const redirect = (query.redirect as string) ?? "/";
+function parseRedirect(): {
+  path: string;
+  queryParams: Record<string, string>;
+} {
+  const query: LocationQuery = route.query;
+  const redirect = (query.redirect as string) ?? "/";
 
-//   const url = new URL(redirect, window.location.origin);
-//   const path = url.pathname;
-//   const queryParams: Record<string, string> = {};
+  const url = new URL(redirect, window.location.origin);
+  const path = url.pathname;
+  const queryParams: Record<string, string> = {};
 
-//   url.searchParams.forEach((value, key) => {
-//     queryParams[key] = value;
-//   });
+  url.searchParams.forEach((value, key) => {
+    queryParams[key] = value;
+  });
 
-//   return { path, queryParams };
-// }
+  return { path, queryParams };
+}
 
 // 登录失败
 const failed = (message: any) => {
@@ -84,35 +85,39 @@ const failed = (message: any) => {
 };
 
 // 提交登录表单
-// function submit() {
-//   formRef.value?.validate((valid: boolean) => {
-//     if (valid) {
-//       userStore
-//         .login(form.value)
-//         .then((data) => {
-//           succeed(data);
-//         })
-//         .catch((error) => {
-//           failed(error);
-//         });
-//     }
-//   });
-// }
-const submit = () => {
-  formRef.value?.validate(async (valid: boolean) => {
+function submit() {
+  formRef.value?.validate((valid: boolean) => {
     if (valid) {
-      const res = await AuthAPI.login(form.value);
-      // console.log("res:", res.data);
-      try {
-        await succeed(res.data);
-      } catch (error) {
-        failed(error);
-      }
-    } else {
-      failed("表单验证失败");
+      AuthAPI.login(form.value)
+        .then((data) => {
+          console.log("data", data.data);
+          succeed(data.data);
+          userStore.getUserInfo();
+          const { path, queryParams } = parseRedirect();
+          console.log("path:", path, "queryParams:", queryParams);
+          router.push({ path: path, query: queryParams });
+        })
+        .catch((error) => {
+          failed(error);
+        });
     }
   });
-};
+}
+// const submit = () => {
+//   formRef.value?.validate(async (valid: boolean) => {
+//     if (valid) {
+//       const res = await AuthAPI.login(form.value);
+//       console.log("res:", res.data);
+//       try {
+//         await succeed(res.data);
+//       } catch (error) {
+//         failed(error);
+//       }
+//     } else {
+//       failed("表单验证失败");
+//     }
+//   });
+// };
 
 // 显示错误信息
 const error = (msg: string | Record<string, string>) => {

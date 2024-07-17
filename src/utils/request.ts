@@ -16,7 +16,7 @@ const service = axios.create({
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const accessToken = localStorage.getItem(TOKEN_KEY);
-    console.log(accessToken);
+    // console.log("accessToken:", accessToken);
     if (accessToken) {
       config.headers.Authorization = accessToken;
     }

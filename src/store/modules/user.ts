@@ -19,11 +19,33 @@ export const useUserStore = defineStore("user", () => {
       email: null,
       emailBind: false,
     },
-    roles: [],
+    roles: ["user"],
+    perms: [
+      "sys:menu:delete",
+      "sys:dept:edit",
+      "sys:dict_type:add",
+      "sys:dict:edit",
+      "sys:dict:delete",
+      "sys:dict_type:edit",
+      "sys:menu:add",
+      "sys:user:add",
+      "sys:role:edit",
+      "sys:dept:delete",
+      "sys:user:edit",
+      "sys:user:delete",
+      "sys:user:password:reset",
+      "sys:dept:add",
+      "sys:role:delete",
+      "sys:dict_type:delete",
+      "sys:menu:edit",
+      "sys:dict:add",
+      "sys:role:add",
+      "sys:user:query",
+      "sys:user:export",
+      "sys:user:import",
+    ],
   };
   const userInfo = ref<getUserInfoData>(defaultUserInfo);
-
-  // const userInfo = ref<LoginResult>();
 
   /**
    * 登录
@@ -36,7 +58,7 @@ export const useUserStore = defineStore("user", () => {
       AuthAPI.login(loginData)
         .then((data) => {
           const access_token = data.data.access_token;
-          localStorage.setItem(TOKEN_KEY, "Bearer" + " " + access_token); // Bearer eyJhbGciOiJIUzI1NiJ9.xxx.xxx
+          localStorage.setItem(TOKEN_KEY, "Bearer" + " " + access_token);
           resolve();
         })
         .catch((error) => {
@@ -59,6 +81,13 @@ export const useUserStore = defineStore("user", () => {
             return;
           }
           Object.assign(userInfo.value!, { ...data });
+          if (
+            !Array.isArray(userInfo.value.roles) ||
+            userInfo.value.roles.length === 0
+          ) {
+            userInfo.value.roles = ["user"]; // 你可以设置一个默认角色
+          }
+          console.log("userInfo.value:", userInfo.value);
           // commit("setUser", data);
           resolve(data);
         })
