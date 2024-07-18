@@ -12,7 +12,7 @@
         active-icon="Moon"
         inactive-icon="Sunny"
         @change="changeTheme"
-      />
+      ></el-switch>
     </div>
 
     <el-divider>{{ $t("settings.interface") }}</el-divider>
@@ -22,27 +22,27 @@
       <ThemeColorPicker
         v-model="settingsStore.themeColor"
         @update:model-value="changeThemeColor"
-      />
+      ></ThemeColorPicker>
     </div>
 
     <div class="settings-option">
       <span class="text-xs">{{ $t("settings.tagsView") }}</span>
-      <el-switch v-model="settingsStore.tagsView" />
+      <el-switch v-model="settingsStore.tagsView"></el-switch>
     </div>
 
     <div class="settings-option">
       <span class="text-xs">{{ $t("settings.fixedHeader") }}</span>
-      <el-switch v-model="settingsStore.fixedHeader" />
+      <el-switch v-model="settingsStore.fixedHeader"></el-switch>
     </div>
 
     <div class="settings-option">
       <span class="text-xs">{{ $t("settings.sidebarLogo") }}</span>
-      <el-switch v-model="settingsStore.sidebarLogo" />
+      <el-switch v-model="settingsStore.sidebarLogo"></el-switch>
     </div>
 
     <div class="settings-option">
       <span class="text-xs">{{ $t("settings.watermark") }}</span>
-      <el-switch v-model="settingsStore.watermarkEnabled" />
+      <el-switch v-model="settingsStore.watermarkEnabled"></el-switch>
     </div>
 
     <el-divider>{{ $t("settings.navigation") }}</el-divider>
@@ -50,7 +50,7 @@
     <LayoutSelect
       v-model="settingsStore.layout"
       @update:model-value="changeLayout"
-    />
+    ></LayoutSelect>
   </el-drawer>
 </template>
 

@@ -3,8 +3,8 @@
     <hamburger
       :is-active="appStore.sidebar.opened"
       @toggle-click="toggleSideBar"
-    />
-    <breadcrumb />
+    ></hamburger>
+    <breadcrumb></breadcrumb>
   </div>
 </template>
 

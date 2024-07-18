@@ -7,7 +7,7 @@
       class="hamburger"
       :class="{ 'is-active': isActive }"
       icon-class="indent-decrease"
-    />
+    ></svg-icon>
   </div>
 </template>
 <script setup lang="ts">

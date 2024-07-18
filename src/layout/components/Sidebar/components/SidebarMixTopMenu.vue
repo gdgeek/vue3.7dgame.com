@@ -18,7 +18,7 @@
           <svg-icon
             v-if="route.meta && route.meta.icon"
             :icon-class="route.meta.icon"
-          />
+          ></svg-icon>
           <span v-if="route.path === '/'"> 首页 </span>
           <template v-else>
             <span v-if="route.meta && route.meta.title" class="ml-1">

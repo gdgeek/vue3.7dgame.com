@@ -1,8 +1,13 @@
-import router from "@/router";
-import { useUserStore, usePermissionStore } from "@/store";
+import {
+  NavigationGuardNext,
+  RouteLocationNormalized,
+  RouteRecordRaw,
+} from "vue-router";
+
 import NProgress from "@/utils/nprogress";
-import { RouteRecordRaw } from "vue-router";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
+import router from "@/router";
+import { usePermissionStore, useUserStore } from "@/store";
 
 export function setupPermission() {
   // 白名单路由
@@ -11,72 +16,58 @@ export function setupPermission() {
   router.beforeEach(async (to, from, next) => {
     NProgress.start();
     const hasToken = localStorage.getItem(TOKEN_KEY);
-    console.log("hasToken2:", hasToken);
+    console.log("hasToken:", hasToken);
+
     if (hasToken) {
-      console.log("to.path:", to.path);
       if (to.path === "/login") {
-        console.log("登录页");
-        // 如果已登录，跳转首页
+        // 如果已登录，跳转到首页
         next({ path: "/" });
         NProgress.done();
       } else {
         const userStore = useUserStore();
         const hasRoles =
           userStore.userInfo.roles && userStore.userInfo.roles.length > 0;
+        console.log("hasRoles:", hasRoles);
+
         if (hasRoles) {
-          // 未匹配到任何路由，跳转404
+          // 如果未匹配到任何路由，跳转到404页面
           if (to.matched.length === 0) {
-            from.name ? next({ name: from.name }) : next("/404");
+            next(from.name ? { name: from.name } : "/404");
           } else {
+            console.log("测试1");
             // 如果路由参数中有 title，覆盖路由元信息中的 title
             const title =
               (to.params.title as string) || (to.query.title as string);
             if (title) {
               to.meta.title = title;
             }
-
             next();
           }
         } else {
+          console.log("测试2");
           const permissionStore = usePermissionStore();
           try {
-            console.log("测试");
-            userStore.getUserInfo();
-            const { roles } = await userStore.getUserInfo();
-            console.log("roles:", roles);
-            console.log("测试");
-            const accessRoutes = await permissionStore.generateRoutes(roles);
-            accessRoutes.forEach((route: RouteRecordRaw) => {
-              router.addRoute(route);
-            });
+            await userStore.getUserInfo();
+            const dynamicRoutes = await permissionStore.generateRoutes();
+            dynamicRoutes.forEach((route: RouteRecordRaw) =>
+              router.addRoute(route)
+            );
             next({ ...to, replace: true });
           } catch (error) {
-            // 移除 token 并跳转登录页
+            // 移除 token 并重定向到登录页，携带当前页面路由作为跳转参数
             await userStore.resetToken();
-            // 重定向到登录页，并携带当前页面路由和参数，作为登录成功后跳转的页面
-            const params = new URLSearchParams(
-              to.query as Record<string, string>
-            );
-            const queryString = params.toString();
-            const redirect = queryString
-              ? `${to.path}?${queryString}`
-              : to.path;
-            next(`/login?redirect=${encodeURIComponent(redirect)}`);
+            redirectToLogin(to, next);
             NProgress.done();
           }
         }
       }
     } else {
       // 未登录
-      if (whiteList.indexOf(to.path) !== -1) {
-        // 在白名单，直接进入
-        next();
+      if (whiteList.includes(to.path)) {
+        next(); // 在白名单，直接进入
       } else {
         // 不在白名单，重定向到登录页
-        const params = new URLSearchParams(to.query as Record<string, string>);
-        const queryString = params.toString();
-        const redirect = queryString ? `${to.path}?${queryString}` : to.path;
-        next(`/login?redirect=${encodeURIComponent(redirect)}`);
+        redirectToLogin(to, next);
         NProgress.done();
       }
     }
@@ -85,6 +76,17 @@ export function setupPermission() {
   router.afterEach(() => {
     NProgress.done();
   });
+}
+
+/** 重定向到登录页 */
+function redirectToLogin(
+  to: RouteLocationNormalized,
+  next: NavigationGuardNext
+) {
+  const params = new URLSearchParams(to.query as Record<string, string>);
+  const queryString = params.toString();
+  const redirect = queryString ? `${to.path}?${queryString}` : to.path;
+  next(`/login?redirect=${encodeURIComponent(redirect)}`);
 }
 
 /** 判断是否有权限 */
@@ -101,6 +103,6 @@ export function hasAuth(
 
   const auths = type === "button" ? perms : roles;
   return typeof value === "string"
-    ? auths?.includes(value)
-    : value.some((perm) => auths?.includes(perm));
+    ? auths!.includes(value)
+    : value.some((perm) => auths!.includes(perm));
 }

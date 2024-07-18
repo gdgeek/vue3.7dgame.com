@@ -11,12 +11,12 @@ type Data = {
   emailBind: boolean;
 };
 
-export interface getUserInfoData {
+export type getUserInfoData = {
   username: string;
   data: Data;
   roles: string[];
   perms?: string[];
-}
+};
 
 /**
  * 用户查询对象类型

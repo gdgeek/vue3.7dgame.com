@@ -85,39 +85,40 @@ const failed = (message: any) => {
 };
 
 // 提交登录表单
-function submit() {
-  formRef.value?.validate((valid: boolean) => {
-    if (valid) {
-      AuthAPI.login(form.value)
-        .then((data) => {
-          console.log("data", data.data);
-          succeed(data.data);
-          userStore.getUserInfo();
-          const { path, queryParams } = parseRedirect();
-          console.log("path:", path, "queryParams:", queryParams);
-          router.push({ path: path, query: queryParams });
-        })
-        .catch((error) => {
-          failed(error);
-        });
-    }
-  });
-}
-// const submit = () => {
-//   formRef.value?.validate(async (valid: boolean) => {
+// function submit() {
+//   formRef.value?.validate((valid: boolean) => {
 //     if (valid) {
-//       const res = await AuthAPI.login(form.value);
-//       console.log("res:", res.data);
-//       try {
-//         await succeed(res.data);
-//       } catch (error) {
-//         failed(error);
-//       }
-//     } else {
-//       failed("表单验证失败");
+//       AuthAPI.login(form.value)
+//         .then((data) => {
+//           console.log("data", data.data);
+//           succeed(data.data);
+//           userStore.getUserInfo();
+//           const { path, queryParams } = parseRedirect();
+//           console.log("path:", path, "queryParams:", queryParams);
+//           router.push({ path: path, query: queryParams });
+//         })
+//         .catch((error) => {
+//           failed(error);
+//         });
 //     }
 //   });
-// };
+// }
+
+const submit = () => {
+  formRef.value?.validate(async (valid: boolean) => {
+    try {
+      const res = await AuthAPI.login(form.value);
+      await succeed(res.data);
+      const userin = await userStore.getUserInfo();
+      console.log("userin:", userin);
+      const { path, queryParams } = await parseRedirect();
+      console.log("path:", path, "queryParams:", queryParams);
+      await router.push({ path: path, query: queryParams });
+    } catch (error) {
+      failed(error);
+    }
+  });
+};
 
 // 显示错误信息
 const error = (msg: string | Record<string, string>) => {

@@ -40,7 +40,7 @@ service.interceptors.response.use(
       (typeof error.response !== "undefined" && error.response.status === 401)
     ) {
       ElMessage({
-        message: "登陆过期，请重新登录",
+        message: "登录过期，请重新登录",
         type: "error",
         duration: 5 * 1000,
       });

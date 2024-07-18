@@ -16,7 +16,7 @@
       :item="route"
       :base-path="resolvePath(route.path)"
       :is-collapse="!appStore.sidebar.opened"
-    />
+    ></SidebarMenuItem>
   </el-menu>
 </template>
 

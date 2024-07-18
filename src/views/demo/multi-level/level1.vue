@@ -9,7 +9,7 @@
     >
 
     <el-alert :closable="false" title="菜单一级">
-      <router-view />
+      <router-view></router-view>
     </el-alert>
   </div>
 </template>

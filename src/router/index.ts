@@ -4,6 +4,7 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 export const Layout = () => import("@/layout/index.vue");
 
 import Structure from "@/layout/structure/index.vue";
+import { Meta, RouteVO } from "@/api/menu/model";
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
   {
@@ -25,25 +26,6 @@ export const constantRoutes: RouteRecordRaw[] = [
   },
 
   {
-    // path: "/",
-    // name: "/",
-    // component: Layout,
-    // redirect: "/home/index",
-    // children: [
-    //   {
-    //     meta: { title: "个人中心" },
-    //     path: "home",
-    //     redirect: "/home/index",
-    //     component: Structure,
-    //     children: [
-    //       {
-    //         meta: { title: "首页" },
-    //         path: "index",
-    //         name: "HomeIndex",
-    //         component: () => import("@/views/home/index.vue"),
-    //       },
-    //     ],
-    //   },
     path: "/",
     name: "/",
     component: Layout,
@@ -62,6 +44,75 @@ export const constantRoutes: RouteRecordRaw[] = [
           keepAlive: true,
         },
       },
+
+      {
+        path: "ResourceAdmin",
+        component: Layout,
+        redirect: "/ResourceAdmin/index",
+        name: "ResourceAdmin",
+        meta: {
+          title: "资源管理",
+          icon: "system",
+          hidden: false,
+          alwaysShow: false,
+          params: null,
+        },
+        children: [
+          {
+            path: "voxel",
+            name: "",
+            component: () => import("@/views/dashboard/index.vue"),
+            meta: {
+              title: "体素管理",
+              icon: "",
+              hidden: false,
+              alwaysShow: false,
+              params: null,
+            },
+            children: [
+              {
+                path: "index",
+                name: "",
+                component: () => import("@/views/dashboard/index.vue"),
+                meta: {
+                  title: "体素列表",
+                  icon: "",
+                  hidden: false,
+                  alwaysShow: false,
+                  params: null,
+                },
+              },
+            ],
+          },
+          {
+            path: "polygen",
+            name: "",
+            component: () => import("@/views/dashboard/index.vue"),
+            meta: {
+              title: "模型管理",
+              icon: "",
+              hidden: false,
+              alwaysShow: false,
+              params: null,
+            },
+            children: [
+              {
+                path: "index",
+                name: "",
+                component: () => import("@/views/dashboard/index.vue"),
+                meta: {
+                  title: "模型列表",
+                  icon: "",
+                  hidden: false,
+                  alwaysShow: false,
+                  params: null,
+                },
+              },
+            ],
+          },
+        ],
+      },
+
       {
         path: "401",
         component: () => import("@/views/error-page/401.vue"),
@@ -74,58 +125,6 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-
-  // 外部链接
-  // {
-  //   path: "/external-link",
-  //   component: Layout,
-  //   children: [ {
-  //       component: () => import("@/views/external-link/index.vue"),
-  //       path: "https://www.cnblogs.com/haoxianrui/",
-  //       meta: { title: "外部链接", icon: "link" },
-  //     },
-  //   ],
-  // },
-  // 多级嵌套路由
-  /* {
-         path: '/nested',
-         component: Layout,
-         redirect: '/nested/level1/level2',
-         name: 'Nested',
-         meta: {title: '多级菜单', icon: 'nested'},
-         children: [
-             {
-                 path: 'level1',
-                 component: () => import('@/views/nested/level1/index.vue'),
-                 name: 'Level1',
-                 meta: {title: '菜单一级'},
-                 redirect: '/nested/level1/level2',
-                 children: [
-                     {
-                         path: 'level2',
-                         component: () => import('@/views/nested/level1/level2/index.vue'),
-                         name: 'Level2',
-                         meta: {title: '菜单二级'},
-                         redirect: '/nested/level1/level2/level3',
-                         children: [
-                             {
-                                 path: 'level3-1',
-                                 component: () => import('@/views/nested/level1/level2/level3/index1.vue'),
-                                 name: 'Level3-1',
-                                 meta: {title: '菜单三级-1'}
-                             },
-                             {
-                                 path: 'level3-2',
-                                 component: () => import('@/views/nested/level1/level2/level3/index2.vue'),
-                                 name: 'Level3-2',
-                                 meta: {title: '菜单三级-2'}
-                             }
-                         ]
-                     }
-                 ]
-             },
-         ]
-     }*/
 ];
 
 /**
@@ -149,5 +148,27 @@ export function setupRouter(app: App<Element>) {
 export function resetRouter() {
   router.replace({ path: "/login" });
 }
+
+// 将路由转换为 RouteVO 格式的函数，只获取根路由 "/" 下的子路由数据，并且子路由路径前添加 "/"
+function convertRoutes(routes: RouteRecordRaw[]): RouteVO[] {
+  return routes.map((route) => {
+    const { path, component, redirect, name, meta, children } = route;
+    const formattedPath = path === "/" ? "/" : `/${path}`;
+    return {
+      path: formattedPath,
+      component: component ? (component as any).name : undefined,
+      redirect: (redirect as string) || undefined,
+      name: typeof name === "string" ? name : undefined,
+      meta: meta as Meta,
+      children: children ? convertRoutes(children) : [],
+    };
+  });
+}
+
+// 提取 path 为 "/" 及其子路由的部分
+const mainRoute = constantRoutes.find((route) => route.path === "/");
+export const routerData: RouteVO[] = mainRoute
+  ? convertRoutes(mainRoute.children || [])
+  : [];
 
 export default router;

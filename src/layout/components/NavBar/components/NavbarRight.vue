@@ -98,6 +98,8 @@ const logout = () => {
       });
   });
 };
+
+onBeforeMount(() => userStore.getUserInfo());
 </script>
 <style lang="scss" scoped>
 .setting-item {

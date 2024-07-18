@@ -7,7 +7,7 @@
           mode="out-in"
         >
           <keep-alive :include="cachedViews">
-            <component :is="Component" :key="route.path" />
+            <component :is="Component" :key="route.path"></component>
           </keep-alive>
         </transition>
       </template>

@@ -6,6 +6,7 @@ import { store } from "@/store";
 import { LoginData, LoginResult } from "@/api/auth/model";
 import { getUserInfoData } from "@/api/user/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
+import { error } from "console";
 
 export const useUserStore = defineStore("user", () => {
   const defaultUserInfo: getUserInfoData = {
@@ -68,34 +69,59 @@ export const useUserStore = defineStore("user", () => {
   }
 
   // 获取信息(用户昵称、头像、角色集合、权限集合)
-  function getUserInfo() {
-    return new Promise<getUserInfoData>((resolve, reject) => {
-      UserAPI.getInfo()
-        .then((data) => {
-          if (!data) {
-            reject("Verification failed, please Login again.");
-            return;
-          }
-          if (!data.roles || data.roles.length <= 0) {
-            reject("getUserInfo: roles must be a non-null array!");
-            return;
-          }
-          Object.assign(userInfo.value!, { ...data });
-          if (
-            !Array.isArray(userInfo.value.roles) ||
-            userInfo.value.roles.length === 0
-          ) {
-            userInfo.value.roles = ["user"]; // 你可以设置一个默认角色
-          }
-          console.log("userInfo.value:", userInfo.value);
-          // commit("setUser", data);
-          resolve(data);
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
-  }
+  // function getUserInfo() {
+  //   return new Promise<getUserInfoData>((resolve, reject) => {
+  //     UserAPI.getInfo()
+  //       .then((data) => {
+  //         if (!data) {
+  //           reject("Verification failed, please Login again.");
+  //           return;
+  //         }
+  //         if (!data.roles || data.roles.length <= 0) {
+  //           reject("getUserInfo: roles must be a non-null array!");
+  //           return;
+  //         }
+  //         Object.assign(userInfo.value!, { ...data });
+  //         // 确保 roles 为非空字符数组
+  //         if (
+  //           !Array.isArray(userInfo.value.roles) ||
+  //           userInfo.value.roles.length === 0
+  //         ) {
+  //           userInfo.value.roles = ["user"]; // 你可以设置一个默认角色
+  //         }
+  //         console.log("userInfo.value:", userInfo.value);
+  //         // commit("setUser", data);
+  //         resolve(data);
+  //       })
+  //       .catch((error) => {
+  //         reject(error);
+  //       });
+  //   });
+  // }
+
+  const getUserInfo = async () => {
+    const res = await UserAPI.getInfo();
+    userInfo.value.username = res.data.username;
+    userInfo.value.roles = res.data.roles;
+    userInfo.value.data = {
+      username: res.data.data.username,
+      id: res.data.data.id,
+      nickname: res.data.data.nickname,
+      info: res.data.data.info,
+      avatar_id: res.data.data.avatar_id,
+      email: res.data.data.email,
+      emailBind: res.data.data.emailBind,
+    };
+    if (!res.data) {
+      console.error("Verification failed, please Login again.");
+      return;
+    }
+    if (!res.data.roles || res.data.roles.length <= 0) {
+      console.error("getUserInfo: roles must be a non-null array!");
+      return;
+    }
+    return userInfo.value;
+  };
 
   // 用户登出
   // function logout() {
@@ -115,6 +141,21 @@ export const useUserStore = defineStore("user", () => {
   const logout = async () => {
     await localStorage.setItem(TOKEN_KEY, "");
     location.reload(); // 清空路由
+    // 用户数据清空
+    userInfo.value = {
+      username: "",
+      data: {
+        username: "",
+        id: 0,
+        nickname: "",
+        info: "",
+        avatar_id: "",
+        email: "",
+        emailBind: false,
+      },
+      roles: [],
+      perms: [],
+    };
   };
 
   // remove token
