@@ -85,8 +85,8 @@ const error = (msg: string | Record<string, string>) => {
     typeof msg === "string"
       ? msg
       : Object.keys(msg)
-        .map((key) => `${key} : ${msg[key]}`)
-        .join("\n");
+          .map((key) => `${key} : ${msg[key]}`)
+          .join("\n");
   isShow.value = true;
 };
 </script>
@@ -95,8 +95,8 @@ const error = (msg: string | Record<string, string>) => {
   <body>
     <div class="header">
       <RouterLink to="/" class="logo">
-        <img src="/public/favicon.ico" alt="">
-        <span class="project_title">苹果AR元气项目</span>
+        <img src="/public/favicon.ico" alt="" />
+        <span class="project_title">Voxel Party</span>
       </RouterLink>
       <div class="header-right">
         <el-button>平台注册/登录</el-button>
@@ -108,12 +108,22 @@ const error = (msg: string | Record<string, string>) => {
     <div class="content">
       <div>
         <h2 class="login-title">登录账号</h2>
-        <el-form ref="formRef" class="login-body" :rules="rules" :model="form" label-width="75px">
+        <el-form
+          ref="formRef"
+          class="login-body"
+          :rules="rules"
+          :model="form"
+          label-width="75px"
+        >
           <el-form-item label="用户名" prop="username">
             <el-input v-model="form.username" suffix-icon="User" />
           </el-form-item>
           <el-form-item label="密码" prop="password">
-            <el-input v-model="form.password" type="password" suffix-icon="Lock" />
+            <el-input
+              v-model="form.password"
+              type="password"
+              suffix-icon="Lock"
+            />
           </el-form-item>
 
           <el-form-item class="login-button">
@@ -137,10 +147,10 @@ const error = (msg: string | Record<string, string>) => {
     </div>
     <div class="footer">
       <div class="copyright">
-        <RouterLink to="https://bujiaban.com" target="_blank" :underline="false">
-          <el-icon><HomeFilled /></el-icon>
-          上海不加班网络有限公司(Apple Reality Spirit)
-        </RouterLink>
+        <a href="https://bujiaban.com/" target="_blank" :underline="false">
+          <el-icon><HomeFilled /> </el-icon>
+          上海不加班网络有限公司（https://bujiaban.com）
+        </a>
         <!-- <br> -->
         <a href="https://beian.miit.gov.cn/" target="_blank" :underline="false">
           <el-icon><Document /></el-icon>
@@ -164,7 +174,7 @@ body {
 
 body {
   display: flex;
-  flex-direction:column;
+  flex-direction: column;
 }
 
 .header,
@@ -191,7 +201,7 @@ body {
     margin-left: 10px;
     color: #909399;
     font-size: 14px;
-    font-family: 'SourceHanSansSC-VF';
+    font-family: "SourceHanSansSC-VF";
     font-weight: 400;
   }
 }
@@ -203,14 +213,14 @@ body {
   line-height: 60px;
   color: #909399;
   font-size: 14px;
-  font-family: 'SourceHanSansSC-VF';
+  font-family: "SourceHanSansSC-VF";
   font-weight: 400;
   &:hover {
-    color: #000000; 
+    color: #000000;
   }
 }
 
-.header-right{
+.header-right {
   position: absolute;
   right: 10px;
 }
@@ -218,7 +228,7 @@ body {
 .content {
   flex: 1;
   width: 100%;
-  background-image: url('/public/media/bg/02.jpg');
+  background-image: url("/public/media/bg/02.jpg");
   background-size: 100% auto;
   display: flex;
   align-items: center;
@@ -284,5 +294,3 @@ body {
   z-index: 1;
 }
 </style>
-
-
