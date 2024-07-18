@@ -1,0 +1,26 @@
+{
+    "sourceFile": "Dockerfile",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 2,
+            "patches": [
+                {
+                    "date": 1721276615886,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1721276880530,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,8 +1,9 @@\n FROM node:22-alpine AS build\n WORKDIR /app\n COPY package.json ./\n-RUN npm install \n+RUN npm install pnpm -g\n+RUN pnpm install\n COPY . .\n RUN npm run build:stage\n \n FROM nginx:1.19.0-alpine AS prod-stage\n"
+                },
+                {
+                    "date": 1721276906834,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -3,9 +3,9 @@\n COPY package.json ./\n RUN npm install pnpm -g\n RUN pnpm install\n COPY . .\n-RUN npm run build:stage\n+RUN pnpm run build\n \n FROM nginx:1.19.0-alpine AS prod-stage\n COPY --from=build /app/dist /usr/share/nginx/html\n EXPOSE 80\n"
+                }
+            ],
+            "date": 1721276615886,
+            "name": "Commit-0",
+            "content": "FROM node:22-alpine AS build\nWORKDIR /app\nCOPY package.json ./\nRUN npm install \nCOPY . .\nRUN npm run build:stage\n\nFROM nginx:1.19.0-alpine AS prod-stage\nCOPY --from=build /app/dist /usr/share/nginx/html\nEXPOSE 80\nCMD [\"nginx\",\"-g\",\"daemon off;\"]\n"
+        }
+    ]
+}
