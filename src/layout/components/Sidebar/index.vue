@@ -16,10 +16,7 @@
         :collapse="!appStore.sidebar.opened"
       ></SidebarLogo>
       <el-scrollbar>
-        <SidebarMenu
-          :menu-list="permissionStore.routes"
-          base-path=""
-        ></SidebarMenu>
+        <SidebarMenu :menu-list="routerData" base-path=""></SidebarMenu>
       </el-scrollbar>
       <NavbarRight v-if="layout === LayoutEnum.TOP"></NavbarRight>
     </template>
@@ -29,10 +26,11 @@
 <script setup lang="ts">
 import { useSettingsStore, usePermissionStore, useAppStore } from "@/store";
 import { LayoutEnum } from "@/enums/LayoutEnum";
+import { routerData } from "@/router";
 
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
-const permissionStore = usePermissionStore();
+// const permissionStore = usePermissionStore();
 
 const sidebarLogo = computed(() => settingsStore.sidebarLogo);
 const layout = computed(() => settingsStore.layout);

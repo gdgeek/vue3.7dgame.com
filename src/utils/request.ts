@@ -3,6 +3,7 @@ import { useUserStoreHook } from "@/store/modules/user";
 import { ResultEnum } from "@/enums/ResultEnum";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { useUserStore } from "@/store/modules/user";
+import env from "@/environment";
 
 // 创建 axios 实例
 const service = axios.create({

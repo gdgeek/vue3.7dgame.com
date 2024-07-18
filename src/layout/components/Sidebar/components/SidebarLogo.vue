@@ -26,7 +26,9 @@ defineProps({
   },
 });
 
-const logo = ref(new URL(`../../../../assets/logo.png`, import.meta.url).href);
+const logo = ref(
+  new URL("../../../../../public/media/image/logo.gif", import.meta.url).href
+);
 </script>
 
 <style lang="scss" scoped>

@@ -11,7 +11,7 @@
 </template>
 <script>
 import { mapState } from "vuex";
-import environment from "@/environment.js";
+import env from "@/environment";
 // import Document from "@/components/Document.vue";
 import Book from "@/components/Book.vue";
 // import DocumentList from "@/components/Home/DocumentList.vue";
