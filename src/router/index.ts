@@ -3,6 +3,7 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 
 export const Layout = () => import("@/layout/index.vue");
 
+import Structure from "@/layout/structure/index.vue";
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
   {
@@ -24,6 +25,25 @@ export const constantRoutes: RouteRecordRaw[] = [
   },
 
   {
+    // path: "/",
+    // name: "/",
+    // component: Layout,
+    // redirect: "/home/index",
+    // children: [
+    //   {
+    //     meta: { title: "个人中心" },
+    //     path: "home",
+    //     redirect: "/home/index",
+    //     component: Structure,
+    //     children: [
+    //       {
+    //         meta: { title: "首页" },
+    //         path: "index",
+    //         name: "HomeIndex",
+    //         component: () => import("@/views/home/index.vue"),
+    //       },
+    //     ],
+    //   },
     path: "/",
     name: "/",
     component: Layout,
@@ -32,14 +52,14 @@ export const constantRoutes: RouteRecordRaw[] = [
       {
         path: "dashboard",
         component: () => import("@/views/dashboard/index.vue"),
-        name: "Dashboard", // 用于 keep-alive, 必须与SFC自动推导或者显示声明的组件name一致
-        // https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
+        // 用于 keep-alive 功能，需要与 SFC 中自动推导或显式声明的组件名称一致
+        // 参考文档: https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
+        name: "Dashboard",
         meta: {
           title: "dashboard",
           icon: "homepage",
           affix: true,
           keepAlive: true,
-          alwaysShow: false,
         },
       },
       {

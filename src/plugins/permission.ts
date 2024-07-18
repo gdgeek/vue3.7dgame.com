@@ -19,7 +19,7 @@ export function setupPermission() {
       } else {
         const userStore = useUserStore();
         const hasRoles =
-          userStore.user.roles && userStore.user.roles.length > 0;
+          userStore.userInfo.roles && userStore.userInfo.roles.length > 0;
         if (hasRoles) {
           // 未匹配到任何路由，跳转404
           if (to.matched.length === 0) {
@@ -85,15 +85,15 @@ export function hasAuth(
   value: string | string[],
   type: "button" | "role" = "button"
 ) {
-  const { roles, perms } = useUserStore().user;
+  const { roles } = useUserStore().userInfo;
   //「超级管理员」拥有所有的按钮权限
   if (type === "button" && roles.includes("ROOT")) {
     return true;
   }
-  const auths = type === "button" ? perms : roles;
-  return typeof value === "string"
-    ? auths.includes(value)
-    : auths.some((perm) => {
-        return value.includes(perm);
-      });
+  // const auths = type === "button" ? perms : roles;
+  // return typeof value === "string"
+  //   ? auths.includes(value)
+  //   : auths.some((perm) => {
+  //       return value.includes(perm);
+  //     });
 }

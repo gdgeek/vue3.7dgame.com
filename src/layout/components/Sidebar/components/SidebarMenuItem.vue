@@ -22,7 +22,7 @@
           <SidebarMenuItemTitle
             :icon="onlyOneChild.meta.icon || (item.meta && item.meta.icon)"
             :title="onlyOneChild.meta.title"
-          />
+          ></SidebarMenuItemTitle>
         </el-menu-item>
       </AppLink>
     </template>
@@ -34,7 +34,7 @@
           v-if="item.meta"
           :icon="item.meta && item.meta.icon"
           :title="item.meta.title"
-        />
+        ></SidebarMenuItemTitle>
       </template>
 
       <SidebarMenuItem
@@ -43,7 +43,7 @@
         :is-nest="true"
         :item="child"
         :base-path="resolvePath(child.path)"
-      />
+      ></SidebarMenuItem>
     </el-sub-menu>
   </div>
 </template>

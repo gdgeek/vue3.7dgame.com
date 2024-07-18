@@ -3,15 +3,27 @@ import UserAPI from "@/api/user";
 import { resetRouter } from "@/router";
 import { store } from "@/store";
 
-import { LoginData } from "@/api/auth/model";
-import { UserInfo } from "@/api/user/model";
+import { LoginData, LoginResult } from "@/api/auth/model";
+import { getUserInfoData } from "@/api/user/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 
 export const useUserStore = defineStore("user", () => {
-  const user = ref<UserInfo>({
+  const defaultUserInfo: getUserInfoData = {
+    username: "",
+    data: {
+      username: "",
+      id: 0,
+      nickname: null,
+      info: null,
+      avatar_id: null,
+      email: null,
+      emailBind: false,
+    },
     roles: [],
-    perms: [],
-  });
+  };
+  const userInfo = ref<getUserInfoData>(defaultUserInfo);
+
+  // const userInfo = ref<LoginResult>();
 
   /**
    * 登录
@@ -35,7 +47,7 @@ export const useUserStore = defineStore("user", () => {
 
   // 获取信息(用户昵称、头像、角色集合、权限集合)
   function getUserInfo() {
-    return new Promise<UserInfo>((resolve, reject) => {
+    return new Promise<getUserInfoData>((resolve, reject) => {
       UserAPI.getInfo()
         .then((data) => {
           if (!data) {
@@ -46,7 +58,8 @@ export const useUserStore = defineStore("user", () => {
             reject("getUserInfo: roles must be a non-null array!");
             return;
           }
-          Object.assign(user.value, { ...data });
+          Object.assign(userInfo.value!, { ...data });
+          // commit("setUser", data);
           resolve(data);
         })
         .catch((error) => {
@@ -81,7 +94,7 @@ export const useUserStore = defineStore("user", () => {
   }
 
   return {
-    user,
+    userInfo,
     login,
     getUserInfo,
     logout,
