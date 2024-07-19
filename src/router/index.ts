@@ -47,7 +47,7 @@ export const constantRoutes: RouteRecordRaw[] = [
 
       {
         path: "ResourceAdmin",
-        component: Layout,
+        component: null,
         redirect: "/ResourceAdmin/index",
         name: "/ResourceAdmin",
         meta: {
@@ -114,7 +114,7 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
       {
         path: "system",
-        component: Layout,
+        component: null,
         redirect: "/system/user",
         name: "/system",
         meta: {
