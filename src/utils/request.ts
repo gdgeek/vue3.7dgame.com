@@ -4,6 +4,7 @@ import { ResultEnum } from "@/enums/ResultEnum";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { useUserStore } from "@/store/modules/user";
 import env from "@/environment";
+import router from "@/router";
 
 // 创建 axios 实例
 const service = axios.create({
@@ -48,6 +49,7 @@ service.interceptors.response.use(
       // 清除重置token
       const userStore = useUserStore();
       userStore.resetToken();
+      router.push({ path: "/site" });
       return Promise.reject("");
     } else {
       ElMessage({

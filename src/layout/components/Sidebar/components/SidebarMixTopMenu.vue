@@ -19,7 +19,7 @@
             v-if="route.meta && route.meta.icon"
             :icon-class="route.meta.icon"
           ></svg-icon>
-          <span v-if="route.path === '/'"> 首页 </span>
+          <span v-if="route.path === '/'">首页</span>
           <template v-else>
             <span v-if="route.meta && route.meta.title" class="ml-1">
               {{ translateRouteTitle(route.meta.title) }}
@@ -36,15 +36,22 @@ import { usePermissionStore, useAppStore } from "@/store";
 import { translateRouteTitle } from "@/utils/i18n";
 import variables from "@/styles/variables.module.scss";
 import { RouteRecordRaw } from "vue-router";
+import { RouteVO } from "@/api/menu/model";
+import { routerData } from "@/router";
 
 const appStore = useAppStore();
 const permissionStore = usePermissionStore();
 const router = useRouter();
 
+// 避免 activeTopMenuPath 缓存被清理，从当前路由路径获取顶部菜单路径，eg. /system/user → /system
+const activeTopMenuPath = useRoute().path.replace(/\/[^\/]+$/, "") || "/";
+appStore.activeTopMenu(activeTopMenuPath);
+
+// 激活的顶部菜单路径
 const activePath = computed(() => appStore.activeTopMenuPath);
 
-// 顶部菜单集合
-const mixTopMenus = ref<RouteRecordRaw[]>([]);
+// 混合模式顶部菜单集合
+const mixTopMenus = ref<RouteVO[]>([]);
 
 /**
  * 菜单选择事件
@@ -60,13 +67,13 @@ const handleMenuSelect = (routePath: string) => {
 /**
  * 默认跳转到左侧第一个菜单
  */
-const goToFirstMenu = (menus: RouteRecordRaw[]) => {
+const goToFirstMenu = (menus: RouteVO[]) => {
   if (menus.length === 0) return;
 
   const [first] = menus;
 
   if (first.children && first.children.length > 0) {
-    goToFirstMenu(first.children as RouteRecordRaw[]);
+    goToFirstMenu(first.children as RouteVO[]);
   } else if (first.name) {
     router.push({
       name: first.name,
@@ -76,7 +83,7 @@ const goToFirstMenu = (menus: RouteRecordRaw[]) => {
 
 // 初始化顶部菜单
 onMounted(() => {
-  mixTopMenus.value = permissionStore.routes.filter(
+  mixTopMenus.value = routerData.filter(
     (item) => !item.meta || !item.meta.hidden
   );
 });

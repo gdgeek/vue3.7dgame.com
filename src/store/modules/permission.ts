@@ -15,15 +15,13 @@ export const usePermissionStore = defineStore("permission", () => {
   /**
    * 混合模式左侧菜单列表
    */
-  const mixLeftMenus = ref<RouteRecordRaw[]>([]);
+  const mixLeftMenus = ref<RouteVO[]>([]);
 
   /**
    * 生成动态路由
    */
-  console.log("data:", routerData);
   function generateRoutes() {
     return new Promise<RouteRecordRaw[]>((resolve, reject) => {
-      console.log("data:", routerData);
       const dynamicRoutes = transformRoutes(routerData);
       routes.value = constantRoutes.concat(dynamicRoutes);
       resolve(dynamicRoutes);
@@ -36,7 +34,10 @@ export const usePermissionStore = defineStore("permission", () => {
    * @param topMenuPath - 顶部菜单路径
    */
   const setMixLeftMenus = (topMenuPath: string) => {
-    const matchedItem = routes.value.find((item) => item.path === topMenuPath);
+    console.log("data:", routerData);
+    console.log("topMenuPath:", routerData[1].path);
+    const matchedItem = routerData.find((item) => item.path === topMenuPath);
+    console.log("matchedItem:", matchedItem);
     if (matchedItem && matchedItem.children) {
       mixLeftMenus.value = matchedItem.children;
     }
@@ -71,7 +72,7 @@ const transformRoutes = (routes: RouteVO[]) => {
     }
 
     if (tmpRoute.children) {
-      tmpRoute.children = transformRoutes(route.children);
+      tmpRoute.children = transformRoutes(route.children!);
     }
 
     asyncRoutes.push(tmpRoute);

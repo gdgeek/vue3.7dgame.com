@@ -106,16 +106,20 @@ const failed = (message: any) => {
 
 const submit = () => {
   formRef.value?.validate(async (valid: boolean) => {
-    try {
-      const res = await AuthAPI.login(form.value);
-      await succeed(res.data);
-      const userin = await userStore.getUserInfo();
-      console.log("userin:", userin);
-      const { path, queryParams } = await parseRedirect();
-      console.log("path:", path, "queryParams:", queryParams);
-      await router.push({ path: path, query: queryParams });
-    } catch (error) {
-      failed(error);
+    if (valid) {
+      try {
+        const res = await AuthAPI.login(form.value);
+        await succeed(res.data);
+        const userin = await userStore.getUserInfo();
+        console.log("userin:", userin);
+        const { path, queryParams } = await parseRedirect();
+        console.log("path:", path, "queryParams:", queryParams);
+        await router.push({ path: path, query: queryParams });
+      } catch (error) {
+        failed(error);
+      }
+    } else {
+      ElMessage({ type: "error", message: "表单校验未通过" });
     }
   });
 };
@@ -206,16 +210,22 @@ const error = (msg: string | Record<string, string>) => {
           target="_blank"
           :underline="false"
         >
-          <el-icon><HomeFilled></HomeFilled></el-icon>
+          <el-icon>
+            <HomeFilled></HomeFilled>
+          </el-icon>
           上海不加班网络有限公司(Apple Reality Spirit)
         </RouterLink>
         <!-- <br> -->
         <a href="https://beian.miit.gov.cn/" target="_blank" :underline="false">
-          <el-icon><Document></Document></el-icon>
+          <el-icon>
+            <Document></Document>
+          </el-icon>
           沪ICP备15039333号
         </a>
         <a href="#">
-          <el-icon><InfoFilled></InfoFilled></el-icon>
+          <el-icon>
+            <InfoFilled></InfoFilled>
+          </el-icon>
           2024
         </a>
       </div>
@@ -256,7 +266,8 @@ body {
 
   .project_title {
     margin-left: 10px;
-    font-family: SourceHanSansSC-VF, sans-serif; /* 添加通用字体族 */
+    font-family: SourceHanSansSC-VF, sans-serif;
+    /* 添加通用字体族 */
     font-size: 14px;
     font-weight: 400;
     color: #909399;
@@ -316,7 +327,8 @@ body {
 
       h1 {
         margin-top: 0;
-        font-family: SourceHanSansSC-VF, sans-serif; /* 添加通用字体族 */
+        font-family: SourceHanSansSC-VF, sans-serif;
+        /* 添加通用字体族 */
         font-size: 36px;
         font-weight: 400;
         color: #666;
@@ -324,7 +336,8 @@ body {
 
       h4 {
         margin-top: 0;
-        font-family: SourceHanSansSC-VF, sans-serif; /* 添加通用字体族 */
+        font-family: SourceHanSansSC-VF, sans-serif;
+        /* 添加通用字体族 */
         font-size: 18px;
         font-weight: 400;
         color: #494949;
@@ -346,15 +359,18 @@ body {
       }
 
       el-button {
-        align-self: center; /* 水平居中 */
-        margin-top: 2px; /* 上下间隔10px */
+        align-self: center;
+        /* 水平居中 */
+        margin-top: 2px;
+        /* 上下间隔10px */
       }
     }
   }
 
   .login-title {
     margin: 20px 0;
-    font-family: SourceHanSansSC-VF, sans-serif; /* 添加通用字体族 */
+    font-family: SourceHanSansSC-VF, sans-serif;
+    /* 添加通用字体族 */
     font-weight: bold;
     color: #444;
     text-align: center;
@@ -377,14 +393,16 @@ body {
   }
 
   .login-link a {
-    font-family: SourceHanSansSC-VF, sans-serif; /* 添加通用字体族 */
+    font-family: SourceHanSansSC-VF, sans-serif;
+    /* 添加通用字体族 */
     font-size: 16px;
     color: rgb(28 160 212);
   }
 
   .error-message {
     margin-top: 10px;
-    font-family: SourceHanSansSC-VF, sans-serif; /* 添加通用字体族 */
+    font-family: SourceHanSansSC-VF, sans-serif;
+    /* 添加通用字体族 */
     color: red;
     text-align: center;
   }
@@ -403,7 +421,8 @@ body {
 
   .copyright a {
     padding: 0 10px;
-    font-family: SourceHanSansSC-VF, sans-serif; /* 添加通用字体族 */
+    font-family: SourceHanSansSC-VF, sans-serif;
+    /* 添加通用字体族 */
     font-size: 14px;
     color: rgb(3 3 3);
   }

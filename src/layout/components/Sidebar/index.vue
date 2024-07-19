@@ -28,6 +28,8 @@ import { useSettingsStore, usePermissionStore, useAppStore } from "@/store";
 import { LayoutEnum } from "@/enums/LayoutEnum";
 import { routerData } from "@/router";
 
+console.log("routerData", routerData);
+
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
 // const permissionStore = usePermissionStore();

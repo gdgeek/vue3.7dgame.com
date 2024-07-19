@@ -38,7 +38,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         // 参考文档: https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
         name: "Dashboard",
         meta: {
-          title: "dashboard",
+          title: "个人中心",
           icon: "homepage",
           affix: true,
           keepAlive: true,
@@ -49,7 +49,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: "ResourceAdmin",
         component: Layout,
         redirect: "/ResourceAdmin/index",
-        name: "ResourceAdmin",
+        name: "/ResourceAdmin",
         meta: {
           title: "资源管理",
           icon: "system",
@@ -112,6 +112,73 @@ export const constantRoutes: RouteRecordRaw[] = [
           },
         ],
       },
+      {
+        path: "system",
+        component: Layout,
+        redirect: "/system/user",
+        name: "/system",
+        meta: {
+          title: "系统管理",
+          icon: "system",
+          hidden: false,
+          alwaysShow: false,
+          params: null,
+        },
+        children: [
+          {
+            path: "user",
+            component: () => import("@/views/dashboard/index.vue"),
+            name: "User",
+            meta: {
+              title: "用户管理",
+              icon: "el-icon-User",
+              hidden: false,
+              keepAlive: true,
+              alwaysShow: false,
+              params: null,
+            },
+          },
+          {
+            path: "role",
+            component: () => import("@/views/dashboard/index.vue"),
+            name: "Role",
+            meta: {
+              title: "角色管理",
+              icon: "role",
+              hidden: false,
+              keepAlive: true,
+              alwaysShow: false,
+              params: null,
+            },
+          },
+          {
+            path: "menu",
+            component: () => import("@/views/dashboard/index.vue"),
+            name: "Menu",
+            meta: {
+              title: "菜单管理",
+              icon: "menu",
+              hidden: false,
+              keepAlive: true,
+              alwaysShow: false,
+              params: null,
+            },
+          },
+          {
+            path: "dept",
+            component: () => import("@/views/dashboard/index.vue"),
+            name: "Dept",
+            meta: {
+              title: "部门管理",
+              icon: "tree",
+              hidden: false,
+              keepAlive: true,
+              alwaysShow: false,
+              params: null,
+            },
+          },
+        ],
+      },
 
       {
         path: "401",
@@ -150,10 +217,13 @@ export function resetRouter() {
 }
 
 // 将路由转换为 RouteVO 格式的函数，只获取根路由 "/" 下的子路由数据，并且子路由路径前添加 "/"
-function convertRoutes(routes: RouteRecordRaw[]): RouteVO[] {
+function convertRoutes(routes: RouteRecordRaw[], isRoot = false): RouteVO[] {
   return routes.map((route) => {
     const { path, component, redirect, name, meta, children } = route;
-    const formattedPath = path === "/" ? "/" : `/${path}`;
+
+    // 根据是否是根路径来决定是否在路径前添加 `/`
+    const formattedPath = isRoot ? `/${path}` : path;
+
     return {
       path: formattedPath,
       component: component ? (component as any).name : undefined,
@@ -168,7 +238,7 @@ function convertRoutes(routes: RouteRecordRaw[]): RouteVO[] {
 // 提取 path 为 "/" 及其子路由的部分
 const mainRoute = constantRoutes.find((route) => route.path === "/");
 export const routerData: RouteVO[] = mainRoute
-  ? convertRoutes(mainRoute.children || [])
+  ? convertRoutes(mainRoute.children || [], true)
   : [];
 
 export default router;

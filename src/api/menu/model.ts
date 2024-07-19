@@ -5,7 +5,7 @@ export interface RouteVO {
   /**
    * 子路由列表
    */
-  children: RouteVO[];
+  children?: RouteVO[];
   /**
    * 组件路径
    */
@@ -49,6 +49,7 @@ export interface Meta {
    * 拥有路由权限的角色编码
    */
   roles?: string[];
+  params?: string;
   /**
    * 路由title
    */
