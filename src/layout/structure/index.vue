@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- <home-header></home-header> -->
+    <home-header></home-header>
     <el-container>
       <el-main>
         <el-row :gutter="20">

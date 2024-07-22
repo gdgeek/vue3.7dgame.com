@@ -25,7 +25,7 @@
     <el-dropdown class="setting-item" trigger="click">
       <div class="flex-center h100% p10px">
         <img
-          :src="userStore.userInfo.data.avatar_id + '?imageView2/1/w/80/h/80'"
+          :src="userStore.userInfo.data.avatar.url + '?imageView2/1/w/80/h/80'"
           class="rounded-full mr-10px w24px w24px"
         />
         <span>{{ userStore.userInfo.data.username }}</span>

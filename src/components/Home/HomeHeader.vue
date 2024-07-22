@@ -5,7 +5,7 @@
         <div class="home-avatar-container">
           <el-avatar
             class="home-avatar-child"
-            icon="el-icon-user-solid"
+            icon="avatar"
             :src="avatarUrl"
             :size="100"
             style="float: left"
@@ -13,7 +13,9 @@
           ></el-avatar>
           <div>
             <div class="home-avatar-info">
-              <h3 class="home-avatar-name">{{ nickName }}</h3>
+              <h3 class="home-avatar-name">
+                {{ nickName }}
+              </h3>
               <!-- <small v-if="textarea != ''" style="color: #777777">
                 {{ textarea }}
               </small> -->
@@ -32,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import "element-ui/lib/theme-chalk/display.css";
+// import "element-ui/lib/theme-chalk/display.css";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/store/modules/user";
 
@@ -41,16 +43,16 @@ const router = useRouter();
 
 // 头像
 const avatarUrl = computed(() => {
-  if (typeof userStore.userInfo.data.avatar_id === "undefined" || null) {
+  if (typeof userStore.userInfo.data.avatar.url === "undefined" || null) {
     return "";
   } else {
-    return userStore.userInfo.data.avatar_id;
+    return userStore.userInfo.data.avatar.url;
   }
 });
 
 // 用户名
 const nickName = computed(() => {
-  if (typeof userStore.userInfo.data.nickname === "undefined" || null) {
+  if (!userStore.userInfo.data.nickname) {
     return userStore.userInfo.username;
   } else {
     return userStore.userInfo?.data.nickname;

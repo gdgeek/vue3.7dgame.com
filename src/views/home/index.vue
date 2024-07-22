@@ -24,12 +24,14 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import environment from "@/environment.js";
+import environment from "@/environment";
 import Book from "@/components/Home/Book.vue";
 // import LocalPage from "@/components/Home/LocalPage.vue";
 
 // Define `env` as a computed property if it's coming from environment
 const env = environment;
+console.log(env.canDocument());
+console.log(import.meta.env.VITE_APP_BASE_MODE);
 
 // Define `information` if you're using Vuex or other state management
 const information = computed(() => {

@@ -15,6 +15,15 @@ export const useUserStore = defineStore("user", () => {
       nickname: null,
       info: null,
       avatar_id: null,
+      avatar: {
+        id: 0,
+        md5: "",
+        type: "jpg",
+        url: "",
+        filename: "",
+        size: 0,
+        key: "",
+      },
       email: null,
       emailBind: false,
     },
@@ -99,6 +108,7 @@ export const useUserStore = defineStore("user", () => {
 
   const getUserInfo = async () => {
     const res = await UserAPI.getInfo();
+    console.log(res.data);
     userInfo.value.username = res.data.username;
     userInfo.value.roles = res.data.roles;
     userInfo.value.data = {
@@ -107,6 +117,15 @@ export const useUserStore = defineStore("user", () => {
       nickname: res.data.data.nickname,
       info: res.data.data.info,
       avatar_id: res.data.data.avatar_id,
+      avatar: {
+        id: res.data.data.avatar.id,
+        md5: res.data.data.avatar.md5,
+        type: res.data.data.avatar.type,
+        url: res.data.data.avatar.url,
+        filename: res.data.data.avatar.filename,
+        size: res.data.data.avatar.size,
+        key: res.data.data.avatar.key,
+      },
       email: res.data.data.email,
       emailBind: res.data.data.emailBind,
     };
@@ -148,6 +167,15 @@ export const useUserStore = defineStore("user", () => {
         nickname: "",
         info: "",
         avatar_id: "",
+        avatar: {
+          id: 0,
+          md5: "",
+          type: "jpg",
+          url: "",
+          filename: "",
+          size: 0,
+          key: "",
+        },
         email: "",
         emailBind: false,
       },

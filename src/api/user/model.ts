@@ -1,12 +1,23 @@
 /**
  * 登录用户信息
  */
+type Avatar = {
+  id: number;
+  md5: string;
+  type: string;
+  url: string;
+  filename: string;
+  size: number;
+  key: string;
+};
+
 type Data = {
   username: string;
   id: number;
   nickname: string | null;
   info: string | null;
   avatar_id: string | null;
+  avatar: Avatar;
   email: string | null;
   emailBind: boolean;
 };

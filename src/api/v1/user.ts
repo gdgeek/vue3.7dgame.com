@@ -4,7 +4,7 @@ import qs from "querystringify";
 
 import path from "path-browserify";
 
-export const getUserCreationAPI = () => {
+export const getUserCreation = () => {
   const query = {
     expand:
       "pictureCount,videoCount,polygenCount,postCount,likeCount, verseCount",

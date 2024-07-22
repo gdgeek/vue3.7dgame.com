@@ -5,7 +5,8 @@ import environment from "@/environment.js";
 // 创建一个 axios 实例
 const service = axios.create({
   // baseURL: environment.doc, // url = base url + request url
-  baseURL: "https://hololens2.cn/wp-json/wp/v2/",
+  baseURL: import.meta.env.VITE_APP_DOC_API,
+  // baseURL: "https://hololens2.cn/wp-json/wp/v2/",
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 20000, // request timeout
 });

@@ -4,6 +4,7 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 export const Layout = () => import("@/layout/index.vue");
 
 import Structure from "@/layout/structure/index.vue";
+import Empty from "@/layout/empty/index.vue";
 import { Meta, RouteVO } from "@/api/menu/model";
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
@@ -29,20 +30,28 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: "/",
     name: "/",
     component: Layout,
-    redirect: "/dashboard",
+    redirect: "/home/index",
     children: [
       {
-        path: "dashboard",
-        component: () => import("@/views/home/index.vue"),
+        path: "home",
+        component: Structure,
         // 用于 keep-alive 功能，需要与 SFC 中自动推导或显式声明的组件名称一致
         // 参考文档: https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
-        name: "Dashboard",
+        name: "Home",
         meta: {
           title: "个人中心",
           icon: "homepage",
           affix: true,
           keepAlive: true,
         },
+        children: [
+          {
+            meta: { title: "我的主页" },
+            path: "index",
+            name: "HomeIndex",
+            component: () => import("@/views/home/index.vue"),
+          },
+        ],
       },
 
       {
@@ -301,6 +310,59 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: "404",
         component: () => import("@/views/error-page/404.vue"),
         meta: { hidden: true },
+      },
+    ],
+  },
+
+  {
+    meta: { title: "正文" },
+    path: "/home/document",
+    name: "HomeDocument",
+    component: () => import("@/views/home/document.vue"),
+  },
+  {
+    meta: { title: "分类" },
+    path: "/home/category",
+    name: "HomeCategory",
+    component: () => import("@/views/home/category.vue"),
+  },
+  // {
+  //   meta: { title: "支付中心" },
+  //   path: "pay",
+  //   name: "SettingsPay",
+  //   component: () => import("@/views/settings/pay.vue"),
+  // },
+  {
+    meta: { title: "创作历程" },
+    path: "/home/creator",
+    name: "SettingsCreator",
+    component: () => import("@/views/home/creator.vue"),
+  },
+
+  {
+    path: "/settings",
+    name: "Settings",
+    meta: { title: "设置" },
+    redirect: "/settings/account",
+    component: Empty,
+    children: [
+      {
+        path: "account",
+        name: "SettingsAccount",
+        meta: { title: "账号设置" },
+        component: () => import("@/views/settings/account.vue"),
+      },
+      {
+        meta: { title: "个人资料" },
+        path: "edit",
+        name: "SettingsEdit",
+        component: () => import("@/views/settings/edit.vue"),
+      },
+      {
+        meta: { title: "用户展示" },
+        path: "people",
+        name: "SettingsPeople",
+        component: () => import("@/views/settings/people.vue"),
       },
     ],
   },
