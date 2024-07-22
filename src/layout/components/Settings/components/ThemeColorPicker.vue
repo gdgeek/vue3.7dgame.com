@@ -3,7 +3,7 @@
     v-model="currentColor"
     :predefine="colorPresets"
     popper-class="theme-picker-dropdown"
-  />
+  ></el-color-picker>
 </template>
 
 <script lang="ts" setup>

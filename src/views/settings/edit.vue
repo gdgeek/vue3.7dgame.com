@@ -32,7 +32,7 @@
           class="section-margin-left"
         >
           <el-form
-            ref="nicknameForm"
+            ref="nickNameFormRef"
             :model="nicknameForm"
             :rules="nicknameRules"
             label-width="80px"
@@ -47,7 +47,7 @@
                 style="width: 100%"
                 placeholder="昵称"
                 autocomplete="off"
-                @keyup.enter.native="submitNickname"
+                @keyup.enter="submitNickname"
               >
                 <template #suffix>
                   <el-button
@@ -101,19 +101,19 @@
           class="section-margin-left box-margin-bottom"
         >
           <el-form
-            ref="infoForm"
+            ref="ruleFormRef"
             :model="infoForm"
             :rules="infoRules"
             label-width="80px"
           >
             <el-form-item label="性别">
               <el-radio-group v-model="infoForm.sex">
-                <el-radio-button label="man">
-                  <i class="el-icon-male el-icon--left"></i>
+                <el-radio-button label="man" value="man">
+                  <el-icon><Male></Male></el-icon>
                   男
                 </el-radio-button>
-                <el-radio-button label="woman">
-                  <i class="el-icon-female el-icon--left"></i>
+                <el-radio-button label="woman" value="woman">
+                  <el-icon><Female></Female></el-icon>
                   女
                 </el-radio-button>
               </el-radio-group>
@@ -125,21 +125,11 @@
                 placeholder="请选择活动区域"
               >
                 <el-option
-                  label="科技、信息技术"
-                  value="科技、信息技术"
+                  v-for="item in industryOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
                 ></el-option>
-                <el-option label="经济、金融" value="经济、金融"></el-option>
-                <el-option label="教育、医疗" value="教育医疗"></el-option>
-                <el-option
-                  label="能源、制造业"
-                  value="能源、制造业"
-                ></el-option>
-                <el-option
-                  label="农、林、渔、牧"
-                  value="农、林、渔、牧"
-                ></el-option>
-                <el-option label="服务业" value="服务业"></el-option>
-                <el-option label="其它行业" value="其它行业"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="居住地" prop="selectedOptions">
@@ -267,27 +257,47 @@ import { ref, computed, onMounted } from "vue";
 import { useUserStore } from "@/store/modules/user";
 import { useRoute } from "vue-router";
 import { putUserData } from "@/api/v1/user";
-import { regionDataPlus, CodeToText } from "element-china-area-data";
+import { regionData, codeToText } from "element-china-area-data";
 import { postFile } from "@/api/v1/files";
-import { ElMessage } from "element-plus";
-import { useCropper } from "vue-cropper";
+import { ElMessage, FormInstance, FormRules } from "element-plus";
+import VueCropper from "vue-cropper";
+import type { InfoType } from "@/api/user/model";
 
 const userStore = useUserStore();
+const ruleFormRef = ref<FormInstance>();
+const nickNameFormRef = ref<FormInstance>();
 const route = useRoute();
 // const userData = computed(() => store.getters.userData);
 const imageUrl = computed(() => userStore.userInfo.data.avatar.url || null);
 
 const isDisable = ref(false);
 
-const nicknameForm = ref({
+type nickNameType = {
+  nickname: string;
+};
+
+const nicknameForm = ref<nickNameType>({
   nickname: "",
 });
-const nicknameRules = ref({
+
+type Rule = {
+  required?: boolean;
+  message?: string;
+  trigger?: string;
+  min?: number;
+  validator?: (
+    rule: Rule,
+    value: string,
+    callback: (error?: Error) => void
+  ) => void;
+};
+
+const nicknameRules = ref<Record<string, Rule[]>>({
   nickname: [
     { required: true, message: "请输入用户昵称", trigger: "blur" },
     { min: 2, message: "昵称长度应该大于2", trigger: "blur" },
     {
-      validator: (rule, value, callback) => {
+      validator: (rule, value, callback: (error?: Error) => void) => {
         if (value === "") {
           callback(new Error("昵称不能为空"));
         } else if (!/^[\u4e00-\u9fa5_a-zA-Z0-9-]+$/.test(value)) {
@@ -301,13 +311,14 @@ const nicknameRules = ref({
   ],
 });
 
-const infoForm = ref({
-  sex: "",
+// 基本信息表单
+const infoForm = ref<InfoType>({
+  sex: "man",
   industry: "",
   selectedOptions: [],
   textarea: "",
 });
-const infoRules = ref({
+const infoRules = ref<FormRules<InfoType>>({
   industry: [{ required: true, message: "请选择行业", trigger: "change" }],
   selectedOptions: [
     { required: true, message: "请选择居住地", trigger: "change" },
@@ -318,7 +329,38 @@ const infoRules = ref({
   ],
 });
 
-const addressOptions = ref(regionDataPlus);
+const industryOptions = [
+  {
+    label: "科技、信息技术",
+    value: "科技、信息技术",
+  },
+  {
+    label: "经济、金融",
+    value: "经济、金融",
+  },
+  {
+    label: "教育、医疗",
+    value: "教育、医疗",
+  },
+  {
+    label: "能源、制造业",
+    value: "能源、制造业",
+  },
+  {
+    label: "农、林、渔、牧",
+    value: "农、林、渔、牧",
+  },
+  {
+    label: "服务业",
+    value: "服务业",
+  },
+  {
+    label: "其他行业",
+    value: "其他行业",
+  },
+];
+
+const addressOptions = ref(regionData);
 const dialogVisible = ref(false);
 const option = ref({
   img: "",
@@ -334,19 +376,25 @@ const option = ref({
   centerBox: true,
   infoTrue: true,
   fixedBox: true,
-  autoCropWidth: 200,
-  autoCropHeight: 200,
+  autoCropWidth: 300,
+  autoCropHeight: 300,
 });
 const loading = ref(false);
-const cropper = ref(null);
+// const cropper = ref(null);
 
 const submitNickname = async () => {
-  try {
-    await putUserData({ nickname: nicknameForm.value.nickname });
-    ElMessage.success("昵称更新成功");
-  } catch (error) {
-    ElMessage.error("昵称更新失败");
-  }
+  nickNameFormRef.value?.validate(async (valid: boolean) => {
+    if (valid) {
+      try {
+        await putUserData({ nickname: nicknameForm.value.nickname });
+        ElMessage.success("昵称更新成功");
+      } catch (error) {
+        ElMessage.error("昵称更新失败");
+      }
+    } else {
+      ElMessage({ type: "error", message: "表单校验未通过" });
+    }
+  });
 };
 
 const handleChangeUpload = (file: File) => {
@@ -362,24 +410,44 @@ const handleChange = (value: any) => {
   infoForm.value.selectedOptions = value;
 };
 
-const saveInfo = async () => {
-  try {
-    await putUserData(infoForm.value);
-    ElMessage.success("信息更新成功");
-  } catch (error) {
-    ElMessage.error("信息更新失败");
-  }
+const saveInfo = () => {
+  ruleFormRef.value?.validate(async (valid: boolean) => {
+    if (valid) {
+      try {
+        const infoFormJS = await JSON.stringify(infoForm.value);
+        console.log("infoForm.value", infoFormJS);
+        await putUserData({ info: infoFormJS });
+        ElMessage.success("信息更新成功");
+      } catch (error) {
+        ElMessage.error("信息更新失败");
+      }
+    } else {
+      ElMessage({ type: "error", message: "表单校验未通过" });
+    }
+  });
 };
+
+type CropperType = {
+  getCropData: () => Promise<{ img: Blob }>;
+  rotate: (degrees: number) => void;
+  changeScale: (num: number) => void;
+};
+
+const cropper: globalThis.Ref<null | CropperType> = ref(null);
 
 const finish = async () => {
   loading.value = true;
   try {
-    const { img } = await cropper.value.getCropData();
-    const formData = new FormData();
-    formData.append("file", img);
-    await postFile(formData);
-    ElMessage.success("头像上传成功");
-    dialogVisible.value = false;
+    if (cropper.value) {
+      const { img } = await cropper.value.getCropData();
+      const formData = new FormData();
+      formData.append("file", img);
+      await postFile(formData);
+      ElMessage.success("头像上传成功");
+      dialogVisible.value = false;
+    } else {
+      throw new Error("裁剪器未初始化");
+    }
   } catch (error) {
     ElMessage.error("头像上传失败");
   } finally {
@@ -387,25 +455,86 @@ const finish = async () => {
   }
 };
 
-const rotateLeftHandle = () => cropper.value.rotate(-90);
-const rotateRightHandle = () => cropper.value.rotate(90);
-const changeScaleHandle = (num: number) => cropper.value.changeScale(num);
+// 左旋转
+const rotateLeftHandle = () => cropper.value?.rotate(-90);
+// 右旋转
+const rotateRightHandle = () => cropper.value?.rotate(90);
+// 放大/缩小
+const changeScaleHandle = (num: number) => cropper.value?.changeScale(num);
 
 const cropMoving = (data: any) => {
   // handle crop moving logic here
 };
 
-onMounted(() => {
-  if (userStore.userInfo.data) {
-    nicknameForm.value.nickname = userData.value.nickname || "";
-    infoForm.value.sex = userData.value.sex || "";
-    infoForm.value.industry = userData.value.industry || "";
-    infoForm.value.selectedOptions = userData.value.address || [];
-    infoForm.value.textarea = userData.value.introduction || "";
+onMounted(async () => {
+  await userStore.getUserInfo();
+  const parsedInfo = userStore.userInfo.data?.parsedInfo;
+  nicknameForm.value.nickname = userStore.userInfo.data?.nickname || "";
+  if (parsedInfo) {
+    infoForm.value.sex = parsedInfo.sex || "";
+    infoForm.value.industry = parsedInfo.industry || "";
+    infoForm.value.selectedOptions = parsedInfo.selectedOptions || [];
+    infoForm.value.textarea = parsedInfo.textarea || "";
   }
 });
 </script>
 
-<style scoped>
-/* Add your styles here */
+<style lang="scss" scoped>
+@media screen and (min-width: 900px) {
+  .section-margin-left {
+    margin-left: 12%;
+  }
+}
+.box-card {
+  margin: 1.6% 1.6% 0.6%;
+}
+.box-title {
+  line-height: 10px;
+  padding: 2px 0;
+  margin-left: 1%;
+  color: #4d4f52;
+}
+.box-margin-bottom {
+  margin-bottom: 28px;
+}
+.font-color {
+  font-weight: 500;
+}
+.user-explain {
+  font-size: 12px;
+  line-height: 20px;
+}
+.cropper-content {
+  .cropper {
+    width: auto;
+    height: 350px;
+  }
+}
+
+.avatar-uploader {
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader:hover {
+  border-color: #409eff;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 132px;
+  height: 132px;
+  line-height: 132px;
+  text-align: center;
+  border: 1px dashed #d9d9d9;
+  margin-right: 12px;
+  border-radius: 6px;
+}
+.avatar {
+  width: 132px;
+  height: 132px;
+  display: block;
+  border-radius: 6px;
+  margin-right: 12px;
+}
 </style>

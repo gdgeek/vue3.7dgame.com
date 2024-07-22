@@ -3,7 +3,7 @@ import UserAPI from "@/api/user";
 import { resetRouter } from "@/router";
 import { store } from "@/store";
 import { LoginData, LoginResult } from "@/api/auth/model";
-import { getUserInfoData } from "@/api/user/model";
+import { getUserInfoData, InfoType } from "@/api/user/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 
 export const useUserStore = defineStore("user", () => {
@@ -13,7 +13,7 @@ export const useUserStore = defineStore("user", () => {
       username: "",
       id: 0,
       nickname: null,
-      info: null,
+      info: "",
       avatar_id: null,
       avatar: {
         id: 0,
@@ -107,37 +107,57 @@ export const useUserStore = defineStore("user", () => {
   // }
 
   const getUserInfo = async () => {
-    const res = await UserAPI.getInfo();
-    console.log(res.data);
-    userInfo.value.username = res.data.username;
-    userInfo.value.roles = res.data.roles;
-    userInfo.value.data = {
-      username: res.data.data.username,
-      id: res.data.data.id,
-      nickname: res.data.data.nickname,
-      info: res.data.data.info,
-      avatar_id: res.data.data.avatar_id,
-      avatar: {
-        id: res.data.data.avatar.id,
-        md5: res.data.data.avatar.md5,
-        type: res.data.data.avatar.type,
-        url: res.data.data.avatar.url,
-        filename: res.data.data.avatar.filename,
-        size: res.data.data.avatar.size,
-        key: res.data.data.avatar.key,
-      },
-      email: res.data.data.email,
-      emailBind: res.data.data.emailBind,
-    };
-    if (!res.data) {
-      console.error("Verification failed, please Login again.");
-      return;
+    try {
+      const res = await UserAPI.getInfo();
+      console.log("res", res);
+
+      // 确保数据存在
+      if (!res.data) {
+        console.error("Verification failed, please Login again.");
+        return;
+      }
+      if (!res.data.roles || res.data.roles.length <= 0) {
+        console.error("getUserInfo: roles must be a non-null array!");
+        return;
+      }
+
+      // 将 info 从字符串解析为对象
+      let parsedInfo: InfoType | undefined;
+      if (res.data.data.info) {
+        try {
+          parsedInfo = JSON.parse(res.data.data.info);
+        } catch (e) {
+          console.error("Failed to parse info:", e);
+        }
+      }
+
+      // 更新 userInfo
+      userInfo.value.username = res.data.username;
+      userInfo.value.roles = res.data.roles;
+      userInfo.value.data = {
+        username: res.data.data.username,
+        id: res.data.data.id,
+        nickname: res.data.data.nickname,
+        info: res.data.data.info,
+        parsedInfo: parsedInfo, // 存储解析后的 info 对象
+        avatar_id: res.data.data.avatar_id,
+        avatar: {
+          id: res.data.data.avatar.id,
+          md5: res.data.data.avatar.md5,
+          type: res.data.data.avatar.type,
+          url: res.data.data.avatar.url,
+          filename: res.data.data.avatar.filename,
+          size: res.data.data.avatar.size,
+          key: res.data.data.avatar.key,
+        },
+        email: res.data.data.email,
+        emailBind: res.data.data.emailBind,
+      };
+
+      return userInfo.value;
+    } catch (error) {
+      console.error("Error fetching user info:", error);
     }
-    if (!res.data.roles || res.data.roles.length <= 0) {
-      console.error("getUserInfo: roles must be a non-null array!");
-      return;
-    }
-    return userInfo.value;
   };
 
   // 用户登出

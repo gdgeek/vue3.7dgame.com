@@ -1,7 +1,7 @@
 /**
  * 登录用户信息
  */
-type Avatar = {
+export type Avatar = {
   id: number;
   md5: string;
   type: string;
@@ -11,17 +11,26 @@ type Avatar = {
   key: string;
 };
 
-type Data = {
+export type InfoType = {
+  sex: string;
+  industry: string;
+  selectedOptions: string[];
+  textarea: string;
+};
+
+export type Data = {
   username: string;
   id: number;
   nickname: string | null;
-  info: string | null;
+  info?: string | null;
+  parsedInfo?: InfoType;
   avatar_id: string | null;
   avatar: Avatar;
   email: string | null;
   emailBind: boolean;
 };
 
+// 获取用户信息数据类型
 export type getUserInfoData = {
   username: string;
   data: Data;

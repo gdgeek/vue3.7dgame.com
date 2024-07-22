@@ -51,6 +51,58 @@ export const constantRoutes: RouteRecordRaw[] = [
             name: "HomeIndex",
             component: () => import("@/views/home/index.vue"),
           },
+          {
+            meta: { title: "正文" },
+            path: "/home/document",
+            name: "HomeDocument",
+            component: () => import("@/views/home/document.vue"),
+          },
+          {
+            meta: { title: "分类" },
+            path: "/home/category",
+            name: "HomeCategory",
+            component: () => import("@/views/home/category.vue"),
+          },
+          // {
+          //   meta: { title: "支付中心" },
+          //   path: "pay",
+          //   name: "SettingsPay",
+          //   component: () => import("@/views/settings/pay.vue"),
+          // },
+          {
+            meta: { title: "创作历程" },
+            path: "/home/creator",
+            name: "SettingsCreator",
+            component: () => import("@/views/home/creator.vue"),
+          },
+        ],
+      },
+
+      {
+        path: "settings",
+        name: "Settings",
+        meta: { title: "设置" },
+        redirect: "/settings/account",
+        component: Empty,
+        children: [
+          {
+            path: "account",
+            name: "SettingsAccount",
+            meta: { title: "账号设置" },
+            component: () => import("@/views/settings/account.vue"),
+          },
+          {
+            meta: { title: "个人资料" },
+            path: "edit",
+            name: "SettingsEdit",
+            component: () => import("@/views/settings/edit.vue"),
+          },
+          {
+            meta: { title: "用户展示" },
+            path: "people",
+            name: "SettingsPeople",
+            component: () => import("@/views/settings/people.vue"),
+          },
         ],
       },
 
@@ -313,59 +365,6 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-
-  {
-    meta: { title: "正文" },
-    path: "/home/document",
-    name: "HomeDocument",
-    component: () => import("@/views/home/document.vue"),
-  },
-  {
-    meta: { title: "分类" },
-    path: "/home/category",
-    name: "HomeCategory",
-    component: () => import("@/views/home/category.vue"),
-  },
-  // {
-  //   meta: { title: "支付中心" },
-  //   path: "pay",
-  //   name: "SettingsPay",
-  //   component: () => import("@/views/settings/pay.vue"),
-  // },
-  {
-    meta: { title: "创作历程" },
-    path: "/home/creator",
-    name: "SettingsCreator",
-    component: () => import("@/views/home/creator.vue"),
-  },
-
-  {
-    path: "/settings",
-    name: "Settings",
-    meta: { title: "设置" },
-    redirect: "/settings/account",
-    component: Empty,
-    children: [
-      {
-        path: "account",
-        name: "SettingsAccount",
-        meta: { title: "账号设置" },
-        component: () => import("@/views/settings/account.vue"),
-      },
-      {
-        meta: { title: "个人资料" },
-        path: "edit",
-        name: "SettingsEdit",
-        component: () => import("@/views/settings/edit.vue"),
-      },
-      {
-        meta: { title: "用户展示" },
-        path: "people",
-        name: "SettingsPeople",
-        component: () => import("@/views/settings/people.vue"),
-      },
-    ],
-  },
 ];
 
 /**
@@ -390,24 +389,39 @@ export function resetRouter() {
   router.replace({ path: "/login" });
 }
 
+// 指定要移除的路由路径列表
+const pathsToRemove = [
+  "/home/document",
+  "/home/category",
+  "/home/creator",
+  "settings",
+];
+
+// 检查路径是否在移除列表中
+const isRemoveRoute = (path: string): boolean => {
+  return pathsToRemove.includes(path);
+};
+
 // 将路由转换为 RouteVO 格式的函数，只获取根路由 "/" 下的子路由数据，并且子路由路径前添加 "/"
-function convertRoutes(routes: RouteRecordRaw[], isRoot = false): RouteVO[] {
-  return routes.map((route) => {
-    const { path, component, redirect, name, meta, children } = route;
+const convertRoutes = (routes: RouteRecordRaw[], isRoot = false): RouteVO[] => {
+  return routes
+    .filter((route) => !isRemoveRoute(route.path))
+    .map((route) => {
+      const { path, component, redirect, name, meta, children } = route;
 
-    // 根据是否是根路径来决定是否在路径前添加 `/`
-    const formattedPath = isRoot ? `/${path}` : path;
+      // 根据是否是根路径来决定是否在路径前添加 `/`
+      const formattedPath = isRoot ? `/${path}` : path;
 
-    return {
-      path: formattedPath,
-      component: component ? (component as any).name : undefined,
-      redirect: (redirect as string) || undefined,
-      name: typeof name === "string" ? name : undefined,
-      meta: meta as Meta,
-      children: children ? convertRoutes(children) : [],
-    };
-  });
-}
+      return {
+        path: formattedPath,
+        component: component ? (component as any).name : undefined,
+        redirect: (redirect as string) || undefined,
+        name: typeof name === "string" ? name : undefined,
+        meta: meta as Meta,
+        children: children ? convertRoutes(children) : [],
+      };
+    });
+};
 
 // 提取 path 为 "/" 及其子路由的部分
 const mainRoute = constantRoutes.find((route) => route.path === "/");
