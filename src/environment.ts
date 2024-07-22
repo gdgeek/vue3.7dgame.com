@@ -1,54 +1,54 @@
 function canRegister(): boolean {
-  return process.env.VUE_APP_BASE_MODE === "mrpp.com";
+  return import.meta.env.VITE_APP_BASE_MODE === "mrpp.com";
 }
 
 function useCloud(): boolean {
-  return process.env.VUE_APP_BASE_MODE !== "local";
+  return import.meta.env.VITE_APP_BASE_MODE !== "local";
 }
 
 function canDocument(): boolean {
-  return process.env.VUE_APP_BASE_MODE !== "local";
+  return import.meta.env.VITE_APP_BASE_MODE !== "local";
 }
 
 function canWeb(): boolean {
-  return process.env.VUE_APP_BASE_MODE === "mrpp.com";
+  return import.meta.env.VITE_APP_BASE_MODE === "mrpp.com";
 }
 
 function canBlog(): boolean {
-  return process.env.VUE_APP_BASE_MODE === "7dgame.com";
+  return import.meta.env.VITE_APP_BASE_MODE === "7dgame.com";
 }
 
 function canStory(): boolean {
   return (
-    process.env.VUE_APP_BASE_MODE === "local" ||
-    process.env.VUE_APP_BASE_MODE === "7dgame.com"
+    import.meta.env.VITE_APP_BASE_MODE === "local" ||
+    import.meta.env.VITE_APP_BASE_MODE === "7dgame.com"
   );
 }
 
 function canSetup(): boolean {
-  return process.env.VUE_APP_BASE_MODE === "local";
+  return import.meta.env.VITE_APP_BASE_MODE === "local";
 }
 
 function mrpp(): boolean {
-  return process.env.VUE_APP_BASE_MODE === "mrpp.com";
+  return import.meta.env.VITE_APP_BASE_MODE === "mrpp.com";
 }
 
 function mrcn(): boolean {
   return (
-    process.env.VUE_APP_BASE_MODE === "4mr.cn" ||
-    process.env.VUE_APP_BASE_MODE === "7dgame.com"
+    import.meta.env.VITE_APP_BASE_MODE === "4mr.cn" ||
+    import.meta.env.VITE_APP_BASE_MODE === "7dgame.com"
   );
 }
 
 function local(): boolean {
-  return process.env.VUE_APP_BASE_MODE === "local";
+  return import.meta.env.VITE_APP_BASE_MODE === "local";
 }
 
 function canManager(): boolean {
   return (
-    process.env.VUE_APP_BASE_MODE === "local" ||
-    process.env.VUE_APP_BASE_MODE === "4mr.cn" ||
-    process.env.VUE_APP_BASE_MODE === "7dgame.com"
+    import.meta.env.VITE_APP_BASE_MODE === "local" ||
+    import.meta.env.VITE_APP_BASE_MODE === "4mr.cn" ||
+    import.meta.env.VITE_APP_BASE_MODE === "7dgame.com"
   );
 }
 
@@ -85,7 +85,7 @@ function title(): string {
 }
 
 function subtitle(): string {
-  switch (process.env.VUE_APP_BASE_MODE) {
+  switch (import.meta.env.VITE_APP_BASE_MODE) {
     case "4mr.cn":
       return "内部版本";
     case "7dgame.com":
@@ -102,11 +102,11 @@ function replaceIP(input: string): string {
 }
 
 const environment = {
-  local: !!process.env.VUE_APP_LOCAL,
-  mode: process.env.VUE_APP_BASE_MODE || "",
+  local: !!import.meta.env.VITE_APP_LOCAL,
+  mode: import.meta.env.VITE_APP_BASE_MODE || "",
   ip: getIP(),
-  api: process.env.VUE_APP_BASE_API || "",
-  doc: process.env.VUE_APP_DOC_API || "",
+  api: import.meta.env.VITE_APP_BASE_API || "",
+  doc: import.meta.env.VITE_APP_DOC_API || "",
   version: 3,
   canRegister,
   canWeb,
@@ -120,7 +120,7 @@ const environment = {
   canDocument,
   mrcn,
   mrpp,
-  // local,
+  local,
   replaceIP,
 };
 

@@ -2,11 +2,9 @@ import AuthAPI from "@/api/auth";
 import UserAPI from "@/api/user";
 import { resetRouter } from "@/router";
 import { store } from "@/store";
-
 import { LoginData, LoginResult } from "@/api/auth/model";
 import { getUserInfoData } from "@/api/user/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
-import { error } from "console";
 
 export const useUserStore = defineStore("user", () => {
   const defaultUserInfo: getUserInfoData = {
