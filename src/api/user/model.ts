@@ -2,12 +2,12 @@
  * 登录用户信息
  */
 export type Avatar = {
-  id: number;
+  id?: number;
   md5: string;
-  type: string;
+  type?: string;
   url: string;
   filename: string;
-  size: number;
+  size?: number;
   key: string;
 };
 

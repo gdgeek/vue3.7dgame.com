@@ -167,20 +167,18 @@
       <!-- vueCropper 剪裁图片dialog实现 -->
       <el-dialog
         title="头像截取"
-        v-model:visible="dialogVisible"
+        v-model="dialogVisible"
         class="crop-dialog"
         append-to-body
       >
         <div class="cropper-content">
           <div class="cropper" style="text-align: center">
-            <vue-cropper
-              ref="cropper"
+            <VueCropper
+              ref="cropperRef"
               :img="option.img"
-              :output-size="option.size"
               :output-type="option.outputType"
               :info="true"
               :full="option.full"
-              :can-move="option.canMove"
               :can-move-box="option.canMoveBox"
               :original="option.original"
               :auto-crop="option.autoCrop"
@@ -191,15 +189,14 @@
               :fixed-box="option.fixedBox"
               :auto-crop-width="option.autoCropWidth"
               :auto-crop-height="option.autoCropHeight"
-              @crop-moving="cropMoving"
-            ></vue-cropper>
+            ></VueCropper>
           </div>
         </div>
         <template #footer>
           <div class="dialog-footer">
             <el-button-group style="float: left">
               <el-button
-                size="mini"
+                size="small"
                 type="primary"
                 plain
                 @click="rotateLeftHandle"
@@ -207,7 +204,7 @@
                 左旋转
               </el-button>
               <el-button
-                size="mini"
+                size="small"
                 type="primary"
                 plain
                 @click="rotateRightHandle"
@@ -215,7 +212,7 @@
                 右旋转
               </el-button>
               <el-button
-                size="mini"
+                size="small"
                 type="primary"
                 plain
                 @click="changeScaleHandle(1)"
@@ -223,7 +220,7 @@
                 放大
               </el-button>
               <el-button
-                size="mini"
+                size="small"
                 type="primary"
                 plain
                 @click="changeScaleHandle(-1)"
@@ -232,11 +229,11 @@
               </el-button>
             </el-button-group>
             <el-button-group>
-              <el-button size="mini" @click="dialogVisible = false">
+              <el-button size="small" @click="dialogVisible = false">
                 取 消
               </el-button>
               <el-button
-                size="mini"
+                size="small"
                 type="primary"
                 :loading="loading"
                 @click="finish"
@@ -255,15 +252,24 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useUserStore } from "@/store/modules/user";
+import { useFileStore } from "@/store/modules/config";
 import { useRoute } from "vue-router";
 import { putUserData } from "@/api/v1/user";
 import { regionData, codeToText } from "element-china-area-data";
 import { postFile } from "@/api/v1/files";
 import { ElMessage, FormInstance, FormRules } from "element-plus";
+import "vue-cropper/dist/index.css";
 import VueCropper from "vue-cropper";
-import type { InfoType } from "@/api/user/model";
+import type { Avatar, InfoType } from "@/api/user/model";
+import { FileHandler } from "@/assets/js/file/server";
+
+// 注册组件
+const components = {
+  VueCropper,
+};
 
 const userStore = useUserStore();
+const fileStore = useFileStore();
 const ruleFormRef = ref<FormInstance>();
 const nickNameFormRef = ref<FormInstance>();
 const route = useRoute();
@@ -360,29 +366,54 @@ const industryOptions = [
   },
 ];
 
+type optionType = {
+  img: string | ArrayBuffer | null; // 裁剪图片的地址
+  info: true; // 裁剪框的大小信息
+  outputSize: number; // 裁剪生成图片的质量 [1至0.1]
+  outputType: "jpeg"; // 裁剪生成图片的格式
+  canScale: boolean; // 图片是否允许滚轮缩放
+  autoCrop: boolean; // 是否默认生成截图框
+  autoCropWidth: number; // 默认生成截图框宽度
+  autoCropHeight: number; // 默认生成截图框高度
+  fixedBox: boolean; // 固定截图框大小 不允许改变
+  fixed: boolean; // 是否开启截图框宽高固定比例
+  fixedNumber: Array<number>; // 截图框的宽高比例  需要配合centerBox一起使用才能生效
+  full: boolean; // 是否输出原图比例的截图
+  canMoveBox: boolean; // 截图框能否拖动
+  original: boolean; // 上传图片按照原始比例渲染
+  centerBox: boolean; // 截图框是否被限制在图片里面
+  infoTrue: boolean; // true 为展示真实输出图片宽高 false 展示看到的截图框宽高
+};
+
 const addressOptions = ref(regionData);
 const dialogVisible = ref(false);
-const option = ref({
-  img: "",
-  size: 1,
-  outputType: "jpeg",
-  full: false,
-  canMove: true,
-  canMoveBox: true,
-  original: false,
-  autoCrop: true,
-  fixed: true,
-  fixedNumber: [1, 1],
-  centerBox: true,
-  infoTrue: true,
-  fixedBox: true,
-  autoCropWidth: 300,
-  autoCropHeight: 300,
-});
 const loading = ref(false);
-// const cropper = ref(null);
+const cropperRef = ref<any>({});
+const option = ref<optionType>({
+  img: "", // 裁剪图片的地址
+  info: true, // 裁剪框的大小信息
+  outputSize: 1, // 裁剪生成图片的质量
+  outputType: "jpeg", // 裁剪生成图片的格式
+  canScale: true, // 图片是否允许滚轮缩放
+  autoCrop: true, // 是否默认生成截图框
+  canMoveBox: true, // 截图框能否拖动
+  autoCropWidth: 300, // 默认生成截图框宽度
+  autoCropHeight: 300, // 默认生成截图框高度
+  fixedBox: false, // 固定截图框大小 不允许改变
+  fixed: true, // 是否开启截图框宽高固定比例
+  fixedNumber: [1, 1], // 截图框的宽高比例
+  full: false, // 是否输出原图比例的截图
+  original: false, // 上传图片按照原始比例渲染
+  centerBox: true, // 截图框是否被限制在图片里面
+  infoTrue: true, // true 为展示真实输出图片宽高 false 展示看到的截图框宽高
+});
 
+// 更新昵称
 const submitNickname = async () => {
+  isDisable.value = true;
+  setTimeout(() => {
+    isDisable.value = false; // 防重复提交，两秒后才能再次点击
+  }, 2000);
   nickNameFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
@@ -397,20 +428,17 @@ const submitNickname = async () => {
   });
 };
 
-const handleChangeUpload = (file: File) => {
-  const reader = new FileReader();
-  reader.onload = () => {
-    option.value.img = reader.result as string;
-    dialogVisible.value = true;
-  };
-  reader.readAsDataURL(file);
-};
-
+// 表单切换
 const handleChange = (value: any) => {
   infoForm.value.selectedOptions = value;
 };
 
+// 更新基本信息
 const saveInfo = () => {
+  isDisable.value = true;
+  setTimeout(() => {
+    isDisable.value = false; // 防重复提交，两秒后才能再次点击
+  }, 2000);
   ruleFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
@@ -427,44 +455,111 @@ const saveInfo = () => {
   });
 };
 
+const handleChangeUpload = async (file: any, fileList: File[]) => {
+  const selectedFile = file.raw;
+  if (selectedFile) {
+    const isJPG = [
+      "image/jpeg",
+      "image/png",
+      "image/bmp",
+      "image/gif",
+    ].includes(selectedFile.type);
+    const isLt2M = selectedFile.size / 1024 / 1024 < 2;
+
+    if (!isJPG) {
+      ElMessage.error("上传头像图片只能是 JPG/PNG/BMP/GIF 格式!");
+      return;
+    }
+    if (!isLt2M) {
+      ElMessage.error("上传头像图片大小不能超过 2MB!");
+      return;
+    }
+
+    // 上传成功后将图片地址赋值给裁剪框显示图片
+    await nextTick();
+    const res = URL.createObjectURL(selectedFile);
+    option.value.img = res;
+    console.log("option.value.img", option.value.img);
+    loading.value = false;
+    dialogVisible.value = true;
+  } else {
+    ElMessage.error("请选择有效的文件!");
+  }
+};
+
+// 左旋转
+const rotateLeftHandle = () => cropperRef.value?.rotateLeft();
+// 右旋转
+const rotateRightHandle = () => cropperRef.value?.rotateRight();
+// 放大/缩小
+const changeScaleHandle = (num: number) => {
+  num = num || 1;
+  cropperRef.value?.changeScale(num);
+};
+
 type CropperType = {
   getCropData: () => Promise<{ img: Blob }>;
   rotate: (degrees: number) => void;
   changeScale: (num: number) => void;
 };
 
-const cropper: globalThis.Ref<null | CropperType> = ref(null);
+// 保存头像
+// const saveAvatar = async (
+//   md5: string,
+//   extension: string,
+//   file: File,
+//   handler: FileHandler | null
+// ) => {
+//   const data: Avatar = {
+//     md5,
+//     key: md5 + extension,
+//     filename: file.name,
+//     url: fileStore.store.fileUrl(md5, extension, handler, "backup"),
+//   };
 
-const finish = async () => {
-  loading.value = true;
-  try {
-    if (cropper.value) {
-      const { img } = await cropper.value.getCropData();
-      const formData = new FormData();
-      formData.append("file", img);
-      await postFile(formData);
-      ElMessage.success("头像上传成功");
-      dialogVisible.value = false;
-    } else {
-      throw new Error("裁剪器未初始化");
-    }
-  } catch (error) {
-    ElMessage.error("头像上传失败");
-  } finally {
-    loading.value = false;
-  }
-};
+//   try {
+//     const post = await postFile(data);
+//     const put = await putUserData({ avatar_id: post.data.id });
+//     // 假设 refreshUserdata 是一个方法
+//     refreshUserdata(put.data);
+//     ElMessage.success("修改头像成功");
+//   } catch (err) {
+//     console.error(err);
+//   }
 
-// 左旋转
-const rotateLeftHandle = () => cropper.value?.rotate(-90);
-// 右旋转
-const rotateRightHandle = () => cropper.value?.rotate(90);
-// 放大/缩小
-const changeScaleHandle = (num: number) => cropper.value?.changeScale(num);
+//   loading.value = false;
+// };
 
-const cropMoving = (data: any) => {
-  // handle crop moving logic here
-};
+// 完成截图
+// async function finish() {
+//   const cropper = cropperRef as any; // 需要根据你的 cropper 实际类型调整
+//   cropper.getCropBlob(async (blob: Blob) => {
+//     blob.name = userData.value.username + ".avatar";
+//     blob.extension = ".jpg";
+
+//     const file = blob as File;
+//     const md5 = await store.fileMD5(file);
+//     const handler = await store.publicHandler();
+
+//     const has = await store.fileHas(md5, file.extension, handler, "backup");
+
+//     if (!has) {
+//       await store.fileUpload(
+//         md5,
+//         file.extension,
+//         file,
+//         (p) => {},
+//         handler,
+//         "backup"
+//       );
+//     }
+
+//     await saveAvatar(md5, file.extension, file, handler);
+
+//     dialogVisible.value = false;
+//     loading.value = true;
+//   });
+// }
 
 onMounted(async () => {
   await userStore.getUserInfo();
