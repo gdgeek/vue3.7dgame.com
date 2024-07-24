@@ -1,17 +1,18 @@
 import COS from 'cos-js-sdk-v5';
 import { token, store, cloud } from '@/api/v1/tencent-cloud';
 import { fileMD5, fileOpen, sleep } from './base';
-import path from 'path';
+import path from "path-browserify";
+import { FileHandler } from "./server"
 
-// 定义文件处理程序的类型
-interface FileHandler {
-  cos: COS; // COS 实例，用于进行 COS 操作
-  bucket: string; // 存储桶名称
-  region: string; // 区域
-}
+// 文件处理程序类型
+// type FileHandler = {
+//   cos: COS; // COS 实例，用于进行 COS 操作
+//   bucket: string; // 存储桶名称
+//   region: string; // 区域
+// }
 
-// 定义文件信息的类型
-interface FileInfo {
+// 文件信息类型
+type FileInfo = {
   bucket: {
     bucket: string; 
     region: string; 
@@ -138,7 +139,7 @@ const fileDownload = async (
         Bucket: handler.bucket,
         Region: handler.region,
         Key: filename,
-        onProgress: (progressData) => {
+        onProgress: (progressData: { percent: number; }) => {
           progress(progressData.percent); // 更新进度
         },
       });
@@ -168,10 +169,10 @@ const fileUpload = async (
         Region: handler.region,
         Key: filename,
         Body: file,
-        onHashProgress: (progressData) => {
+        onHashProgress: (progressData: any) => {
           console.log('校验中', JSON.stringify(progressData)); // 校验进度
         },
-        onProgress: (progressData) => {
+        onProgress: (progressData: { percent: number; }) => {
           progress(progressData.percent); // 上传进度
           console.log('上传中', JSON.stringify(progressData));
         },
@@ -194,7 +195,7 @@ const getUrl = (info: FileInfo, file: { md5: string; ext: string }, handler: Fil
       Expires: 60,
       Sign: true,
     },
-    (err, data) => {
+    (err: any, data: { Url: any; }) => {
       console.log(err || (data && data.Url));
     }
   );
@@ -212,7 +213,7 @@ const fileUrl = (md5: string, extension: string, handler: FileHandler, dir = '')
       Expires: 60,
       Sign: true,
     },
-    (err, data) => {
+    (err: any, data: { Url: any; }) => {
       console.log(err || (data && data.Url));
     }
   );

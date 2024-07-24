@@ -2,15 +2,18 @@ import { fileMD5, fileOpen, sleep } from './base';
 import env from '@/environment';
 import axios from 'axios';
 import { uploadFile } from '@/api/v1/upload';
-import path from 'path';
+import path from 'path-browserify';
 
-// 文件处理程序接口
-export interface FileHandler {
+// 文件处理程序类型
+export type FileHandler = {
   bucket: string;
-}
+  region?: string; // 如果需要 region 属性
+  cos?: any; // 如果需要 cos 属性
+};
 
-// 文件信息接口
-interface FileInfo {
+
+// 文件信息类型
+type FileInfo = {
   bucket: string;
 }
 

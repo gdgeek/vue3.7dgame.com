@@ -261,7 +261,7 @@ import { ElMessage, FormInstance, FormRules } from "element-plus";
 import "vue-cropper/dist/index.css";
 import VueCropper from "vue-cropper";
 import type { Avatar, InfoType } from "@/api/user/model";
-import { FileHandler } from "@/assets/js/file/server";
+import type { FileHandler } from "@/assets/js/file/server";
 
 // 注册组件
 const components = {
@@ -504,62 +504,79 @@ type CropperType = {
 };
 
 // 保存头像
-// const saveAvatar = async (
-//   md5: string,
-//   extension: string,
-//   file: File,
-//   handler: FileHandler | null
-// ) => {
-//   const data: Avatar = {
-//     md5,
-//     key: md5 + extension,
-//     filename: file.name,
-//     url: fileStore.store.fileUrl(md5, extension, handler, "backup"),
-//   };
+const saveAvatar = async (
+  md5: string,
+  extension: string,
+  file: File,
+  handler: FileHandler
+) => {
+  const data: Avatar = {
+    md5,
+    key: md5 + extension,
+    filename: file.name,
+    url: fileStore.store.fileUrl(md5, extension, handler, "backup"),
+  };
 
-//   try {
-//     const post = await postFile(data);
-//     const put = await putUserData({ avatar_id: post.data.id });
-//     // 假设 refreshUserdata 是一个方法
-//     refreshUserdata(put.data);
-//     ElMessage.success("修改头像成功");
-//   } catch (err) {
-//     console.error(err);
-//   }
+  try {
+    const post = await postFile(data);
+    const put = await putUserData({ avatar_id: post.data.id });
+    // 假设 refreshUserdata 是一个方法
+    // refreshUserdata(put.data);
+    ElMessage.success("修改头像成功");
+  } catch (err) {
+    console.error(err);
+  }
 
-//   loading.value = false;
-// };
+  loading.value = false;
+};
 
 // 完成截图
-// async function finish() {
-//   const cropper = cropperRef as any; // 需要根据你的 cropper 实际类型调整
-//   cropper.getCropBlob(async (blob: Blob) => {
-//     blob.name = userData.value.username + ".avatar";
-//     blob.extension = ".jpg";
+async function finish() {
+  const cropper = cropperRef as any; // 需要根据你的 cropper 实际类型调整
+  cropper.getCropBlob(async (blob: Blob) => {
+    // 创建 File 对象并设置 name 和 extension 属性
+    const file = new File([blob], userStore.userInfo.username + ".avatar", {
+      type: "image/jpeg",
+    });
 
-//     const file = blob as File;
-//     const md5 = await store.fileMD5(file);
-//     const handler = await store.publicHandler();
+    const md5 = await fileStore.store.fileMD5(file);
+    const handler = (await fileStore.store.publicHandler()) as FileHandler;
 
-//     const has = await store.fileHas(md5, file.extension, handler, "backup");
+    // 确保 handler 存在
+    if (!handler) {
+      ElMessage.error("处理文件时出错");
+      return;
+    }
 
-//     if (!has) {
-//       await store.fileUpload(
-//         md5,
-//         file.extension,
-//         file,
-//         (p) => {},
-//         handler,
-//         "backup"
-//       );
-//     }
+    const has = await fileStore.store.fileHas(
+      md5,
+      file.name.split(".").pop() || "", // 获取文件扩展名
+      handler,
+      "backup"
+    );
 
-//     await saveAvatar(md5, file.extension, file, handler);
+    if (!has) {
+      await fileStore.store.fileUpload(
+        md5,
+        file.name.split(".").pop() || "", // 获取文件扩展名
+        file,
+        (p) => {},
+        handler,
+        "backup"
+      );
+    }
 
-//     dialogVisible.value = false;
-//     loading.value = true;
-//   });
-// }
+    await saveAvatar(
+      md5,
+      "." + (file.name.split(".").pop() || ""),
+      file,
+      handler
+    );
+
+    dialogVisible.value = false;
+    loading.value = true;
+  });
+}
 
 onMounted(async () => {
   await userStore.getUserInfo();
