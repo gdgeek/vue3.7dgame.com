@@ -15,7 +15,7 @@
           v-if="creation"
           label-class-name="info-content-label"
           :column="2"
-          size="mini"
+          size="small"
           border
         >
           <el-descriptions-item>
@@ -98,7 +98,7 @@
         </el-descriptions>
 
         <aside style="margin-top: 10px; margin-bottom: 15px; float: right">
-          <el-button type="primary" plain size="mini" @click="gotoCreator">
+          <el-button type="primary" plain size="small" @click="gotoCreator">
             <i class="el-icon-edit"></i>
             进入
           </el-button>

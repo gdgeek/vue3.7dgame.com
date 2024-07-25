@@ -31,6 +31,7 @@
         </div>
         <AppMain></AppMain>
         <Settings v-if="defaultSettings.showSettings"></Settings>
+        <Footer :maxwidth="true"></Footer>
         <!-- 返回顶部 -->
         <el-backtop target=".main-container">
           <svg-icon icon-class="backtop" size="24px"></svg-icon>
@@ -46,6 +47,7 @@
       </div>
       <AppMain></AppMain>
       <Settings v-if="defaultSettings.showSettings"></Settings>
+      <Footer :maxwidth="true"></Footer>
       <!-- 返回顶部 -->
       <el-backtop target=".main-container">
         <svg-icon icon-class="backtop" size="24px"></svg-icon>
@@ -57,6 +59,7 @@
 <script setup lang="ts">
 import { useAppStore, useSettingsStore, usePermissionStore } from "@/store";
 import defaultSettings from "@/settings";
+import Footer from "./components/NavBar/components/Footer.vue";
 import { DeviceEnum } from "@/enums/DeviceEnum";
 import { LayoutEnum } from "@/enums/LayoutEnum";
 

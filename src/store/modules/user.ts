@@ -109,7 +109,6 @@ export const useUserStore = defineStore("user", () => {
   const getUserInfo = async () => {
     try {
       const res = await UserAPI.getInfo();
-      console.log("res", res);
 
       // 确保数据存在
       if (!res.data) {
@@ -153,7 +152,7 @@ export const useUserStore = defineStore("user", () => {
         email: res.data.data.email,
         emailBind: res.data.data.emailBind,
       };
-
+      console.log("res", userInfo.value);
       return userInfo.value;
     } catch (error) {
       console.error("Error fetching user info:", error);

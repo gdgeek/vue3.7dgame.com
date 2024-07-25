@@ -1,56 +1,56 @@
-<template>
+<!-- <template>
   <div v-if="env.canDocument()">
-    <Book
-      v-if="env.mrpp()"
-      :items="mrpp"
-      :document-path="'/home/document'"
-      :category-path="'/home/category'"
-      :category="true"
-    ></Book>
-    <Book
-      v-if="env.mrcn()"
-      :items="mrcn"
-      :document-path="'/home/document'"
-      :category-path="'/home/category'"
-      :category="false"
-    ></Book>
+    <Book v-if="env.mrpp()" :items="mrpp"></Book>
+    <Book v-if="env.mrcn()" :items="mrcn"></Book>
     <el-tabs v-if="env.local()" type="border-card" lazy>
-      <el-tab-pane :label="information.data.title">
-        <!-- <LocalPage></LocalPage> -->
+      <el-tab-pane :label="informationStore.title">
+        <LocalPage></LocalPage>
+      </el-tab-pane>
+    </el-tabs>
+  </div>
+</template> -->
+<template>
+  <div>
+    <!-- <Book v-if="env.mrpp()" :items="mrpp"></Book> -->
+    <Book :items="mrcn"></Book>
+    <el-tabs v-if="env.local()" type="border-card" lazy>
+      <el-tab-pane :label="informationStore.title">
+        <LocalPage></LocalPage>
       </el-tab-pane>
     </el-tabs>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import environment from "@/environment";
+import { computed, ref } from "vue";
+import { useInfomationStore } from "@/store/modules/information";
+import environment from "@/environment.js";
+import Document from "@/components/Document.vue";
 import Book from "@/components/Home/Book.vue";
-// import LocalPage from "@/components/Home/LocalPage.vue";
+import DocumentList from "@/components/Home/DocumentList.vue";
+import LocalPage from "@/components/Home/LocalPage.vue";
 
-// Define `env` as a computed property if it's coming from environment
-const env = environment;
-console.log(env.canDocument());
-console.log(import.meta.env.VITE_APP_BASE_MODE);
+// 定义组件的 props 和暴露的属性
+const props = defineProps<{}>();
 
-// Define `information` if you're using Vuex or other state management
-const information = computed(() => {
-  // Replace this with actual state management logic
-  // return store.state.information
-  return { data: { title: "Title" } }; // Example static data
-});
+const informationStore = useInfomationStore();
+console.log("informationStore", informationStore.description);
 
-const mrpp = [
+// 处理 environment 对象
+const env = computed(() => environment);
+
+// 定义 data 属性
+const mrpp = ref([
   { label: "首页", type: "document", id: 999 },
   { label: "新闻", type: "category", id: 74 },
   { label: "相关下载", type: "category", id: 77 },
   { label: "案例教程", type: "category", id: 79 },
-];
+]);
 
-const mrcn = [
+const mrcn = ref([
   { label: "首页", type: "document", id: 999 },
   { label: "新闻", type: "category", id: 74 },
   { label: "相关下载", type: "category", id: 84 },
   { label: "案例教程", type: "category", id: 79 },
-];
+]);
 </script>

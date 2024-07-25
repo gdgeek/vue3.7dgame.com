@@ -16,9 +16,9 @@
               <h3 class="home-avatar-name">
                 {{ nickName }}
               </h3>
-              <!-- <small v-if="textarea != ''" style="color: #777777">
+              <small v-if="textarea != ''" style="color: #777777">
                 {{ textarea }}
-              </small> -->
+              </small>
             </div>
           </div>
         </div>
@@ -59,52 +59,18 @@ const nickName = computed(() => {
   }
 });
 
+// 个人简介
+const textarea = computed(() => {
+  if (!userStore.userInfo.data.parsedInfo?.textarea) {
+    return "";
+  } else {
+    return userStore.userInfo.data.parsedInfo?.textarea;
+  }
+});
+
 const gotoEdit = () => {
   router.push("/settings/edit");
 };
-
-// import { mapGetters } from "vuex";
-// export default {
-//   name: "MrPPUserHeader",
-//   computed: {
-//     ...mapGetters(["userData"]),
-//     avatarUrl() {
-//       if (typeof this.userData.avatar === "undefined") {
-//         return "";
-//       }
-//       return this.userData.avatar.url;
-//     },
-//     nickName() {
-//       if (
-//         typeof this.userData.nickname === "undefined" ||
-//         this.userData.nickname === null
-//       ) {
-//         return this.userData.username;
-//       }
-//       return this.userData.nickname;
-//     },
-//   },
-//   created() {
-//     const info = JSON.parse(this.userData.info);
-//     if (!!info && typeof info.textarea !== "undefined") {
-//       this.textarea = info.textarea;
-//     }
-//     if (!!info && typeof info.sex !== "undefined") {
-//       this.sex = info.sex;
-//     }
-//   },
-//   data() {
-//     return {
-//       textarea: "",
-//       sex: "man",
-//     };
-//   },
-//   methods: {
-//     gotoEdit() {
-//       this.$router.push({ path: "/settings/edit" });
-//     },
-//   },
-// };
 </script>
 
 <style lang="scss" scoped>

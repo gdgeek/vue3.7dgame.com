@@ -1,6 +1,12 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import setupPlugins from "@/plugins";
+import "vue-cropper/dist/index.css";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { fas } from "@fortawesome/free-solid-svg-icons";
+
+library.add(fas);
 
 // 本地SVG图标
 import "virtual:svg-icons-register";
@@ -12,5 +18,6 @@ import "uno.css";
 import "animate.css";
 
 const app = createApp(App);
+app.component("FontAwesomeIcon", FontAwesomeIcon);
 app.use(setupPlugins);
 app.mount("#app");

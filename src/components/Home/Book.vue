@@ -6,7 +6,8 @@
         :post-id="item.id"
         :category="category"
         :category-path="categoryPath"
-      ></Document>
+      >
+      </Document>
       <DocumentList
         v-if="item.type === 'category'"
         :category-id="item.id"
@@ -21,18 +22,27 @@ import { defineProps } from "vue";
 import Document from "@/components/Home/Document.vue";
 import DocumentList from "@/components/Home/DocumentList.vue";
 
-interface Item {
-  label: string;
-  type: string;
-  id: number;
-}
-
+console.log("book");
+// 定义 props 类型
 const props = defineProps<{
-  items: Item[];
-  documentPath: string;
-  categoryPath: string;
-  category: boolean;
+  items?: { label: string; type: string; id: number }[];
+  documentPath?: string;
+  categoryPath?: string;
+  category?: boolean;
 }>();
 
-const { items, documentPath, categoryPath, category } = props;
+// 提供默认值
+const items = computed(
+  () =>
+    props.items ?? [
+      { label: "首页", type: "document", id: 999 },
+      { label: "新闻", type: "category", id: 74 },
+      { label: "相关下载", type: "category", id: 84 },
+      { label: "案例教程", type: "category", id: 79 },
+    ]
+);
+
+const documentPath = computed(() => props.documentPath ?? "/home/document");
+const categoryPath = computed(() => props.categoryPath ?? "/home/category");
+const category = computed(() => props.category ?? true);
 </script>

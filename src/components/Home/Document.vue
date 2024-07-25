@@ -2,19 +2,17 @@
   <div>
     <el-card v-if="data" shadow="never">
       <template #header>
-        <div>
-          <h2 id="title" v-html="data.title.rendered"></h2>
-          <span v-if="category">
-            <router-link
-              v-for="(item, index) in data._embedded['wp:term'][0]"
-              :key="index"
-              :to="`${categoryPath}?id=${item.id}`"
-              style="margin-right: 10px"
-            >
-              <el-tag size="mini">{{ item.name }}</el-tag>
-            </router-link>
-          </span>
-        </div>
+        <h2 id="title" v-html="data.title.rendered"></h2>
+        <span v-if="category">
+          <router-link
+            v-for="(item, index) in data._embedded['wp:term'][0]"
+            :key="index"
+            :to="`${categoryPath}?id=${item.id}`"
+            style="margin-right: 10px"
+          >
+            <el-tag size="small">{{ item.name }}</el-tag>
+          </router-link>
+        </span>
       </template>
       <div>
         <main style="margin-top: 15px">
@@ -32,9 +30,7 @@
 
     <el-card v-else shadow="never">
       <template #header>
-        <div>
-          <el-skeleton :rows="1"></el-skeleton>
-        </div>
+        <el-skeleton :rows="1"></el-skeleton>
       </template>
       <el-skeleton :rows="20"></el-skeleton>
     </el-card>
@@ -43,33 +39,50 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-// import { useStore } from "vuex";
 import moment from "moment";
 import { Article } from "@/api/home/wordpress";
 
 moment.locale("zh-cn");
 
+// 定义 Props 类型
+interface Item {
+  id: number;
+  name: string;
+}
+
+interface Data {
+  title: { rendered: string };
+  content: { rendered: string };
+  date: string;
+  _embedded: {
+    "wp:term": Item[][];
+  };
+}
+
+// 定义 Props
 const props = defineProps<{
   postId: number;
   categoryPath?: string;
   category?: boolean;
 }>();
 
-const data = ref<any>(null);
+// 初始化响应式数据
+const data = ref<Data | null>(null);
 
-// const store = useStore();
+// 计算属性
+const categoryPath = computed(() => props.categoryPath ?? "/home/category");
+const category = computed(() => props.category ?? true);
 
-const dateTime = (date: string) => moment(date).format("YYYY-MM-DD HH:mm:ss");
-
+// 获取文章数据
 onMounted(async () => {
   try {
-    const response = await Article(props.postId);
-    data.value = response.data;
+    const res = await Article(props.postId);
+    data.value = res.data;
   } catch (error) {
     console.error("Failed to fetch article:", error);
   }
 });
 
-const categoryPath = props.categoryPath ?? "/home/category";
-const category = props.category ?? true;
+// 格式化日期
+const dateTime = (date: string) => moment(date).format("YYYY-MM-DD HH:mm:ss");
 </script>

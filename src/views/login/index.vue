@@ -196,7 +196,7 @@ const error = (msg: string | Record<string, string>) => {
           <el-button
             style="width: 100%"
             @click="$router.push({ path: '/site/download' })"
-            size="mini"
+            size="small"
           >
             下载相关程序
           </el-button>
@@ -217,9 +217,7 @@ const error = (msg: string | Record<string, string>) => {
         </RouterLink>
         <!-- <br> -->
         <a href="https://beian.miit.gov.cn/" target="_blank" :underline="false">
-          <el-icon>
-            <Document></Document>
-          </el-icon>
+          <el-icon><List></List></el-icon>
           沪ICP备15039333号
         </a>
         <a href="#">

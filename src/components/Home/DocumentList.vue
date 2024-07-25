@@ -6,7 +6,7 @@
       placement="top"
       effect="light"
     >
-      <el-tag size="mini" style="margin-left: 68px; margin-bottom: 15px">
+      <el-tag size="small" style="margin-left: 68px; margin-bottom: 15px">
         {{ category.name }}
       </el-tag>
     </el-tooltip>
@@ -25,13 +25,12 @@
             <img
               align="left"
               class="document-list-img"
-              style=""
               :src="item.jetpack_featured_media_url"
               fit="cover"
             />
             <div class="document-list-text">
-              <h3>{{ sanitizeHtml(item.title.rendered) }}</h3>
-              <div>{{ sanitizeHtml(item.excerpt.rendered) }}</div>
+              <h3 v-html="item.title.rendered"></h3>
+              <div v-html="item.excerpt.rendered"></div>
             </div>
           </div>
         </el-card>
@@ -46,7 +45,7 @@
       </el-timeline-item>
     </el-timeline>
     <el-pagination
-      v-if="pagination.count && pagination.count > 1"
+      v-if="pagination.count! > 1"
       :current-page="pagination.current"
       :page-count="pagination.count"
       :page-size="pagination.size"
@@ -59,21 +58,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
 import moment from "moment";
-import DOMPurify from "dompurify";
 import { Posts, getCategory } from "@/api/home/wordpress";
 
 moment.locale("zh-cn");
 
-const route = useRoute();
 const router = useRouter();
 
-const categoryId = ref(parseInt(route.query.id as string));
-const reverse = ref(false);
-const category = ref<any>(null);
-const data = ref<any>(null);
+// 定义 Props 类型
+interface Item {
+  id: number;
+  title: { rendered: string };
+  excerpt: { rendered: string };
+  date: string;
+  jetpack_featured_media_url: string;
+}
+
+interface Category {
+  description: string;
+  name: string;
+}
 
 interface Pagination {
   current: number;
@@ -82,6 +88,21 @@ interface Pagination {
   total: number | null;
 }
 
+// 定义 Props
+const props = withDefaults(
+  defineProps<{
+    categoryId: number;
+    documentPath?: string;
+  }>(),
+  {
+    documentPath: "/home/document",
+  }
+);
+
+// 初始化响应式数据
+const reverse = ref(false);
+const category = ref<Category | null>(null);
+const data = ref<Item[] | null>(null);
 const pagination = ref<Pagination>({
   current: 1,
   count: null,
@@ -89,42 +110,47 @@ const pagination = ref<Pagination>({
   total: null,
 });
 
+// 获取分类数据和文章数据
 const refresh = async () => {
-  const categoryData = await getCategory(categoryId.value);
-  category.value = categoryData.data;
-  const postsData = await Posts(
-    categoryId.value,
-    pagination.value.size,
-    pagination.value.current
-  );
-  data.value = postsData.data;
-  pagination.value = {
-    current: pagination.value.current,
-    count: parseInt(postsData.headers["x-wp-totalpages"]),
-    size: pagination.value.size,
-    total: parseInt(postsData.headers["x-wp-total"]),
-  };
+  try {
+    const categoryResponse = await getCategory(props.categoryId);
+    category.value = categoryResponse.data;
+
+    const postsResponse = await Posts(
+      props.categoryId,
+      pagination.value.size,
+      pagination.value.current
+    );
+
+    data.value = postsResponse.data;
+    pagination.value = {
+      current: pagination.value.current,
+      count: parseInt(postsResponse.headers["x-wp-totalpages"]),
+      size: pagination.value.size,
+      total: parseInt(postsResponse.headers["x-wp-total"]),
+    };
+  } catch (error) {
+    console.error("Failed to fetch data:", error);
+  }
 };
 
+onMounted(() => {
+  refresh();
+});
+
+// 计算日期时间
+const dateTime = (date: Date) => moment(date).format("YYYY-MM-DD HH:mm:ss");
+
+// 处理分页变化
 const handleCurrentChange = (page: number) => {
   pagination.value.current = page;
   refresh();
 };
 
-const dateTime = (date: Date) => {
-  return moment(date).format("YYYY-MM-DD HH:mm:ss");
-};
-
+// 选择项目
 const select = (id: number) => {
-  router.push({ path: "/home/document", query: { id } });
+  router.push({ path: props.documentPath, query: { id } });
 };
-
-// 输入数据进行适当的消毒, 防止 xss 攻击
-const sanitizeHtml = (html: string) => {
-  return DOMPurify.sanitize(html);
-};
-
-onMounted(refresh);
 </script>
 
 <style lang="scss" scoped>
@@ -132,6 +158,7 @@ onMounted(refresh);
   cursor: pointer;
   margin: 0px;
 }
+
 .document-list-img {
   height: 100px;
   border-radius: 4px;
@@ -140,6 +167,7 @@ onMounted(refresh);
   margin-left: 20px;
   margin-bottom: 10px;
 }
+
 .document-list-text {
   margin: 20px;
   margin-right: 20px;
