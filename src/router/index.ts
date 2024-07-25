@@ -109,7 +109,7 @@ export const constantRoutes: RouteRecordRaw[] = [
       {
         path: "ResourceAdmin",
         component: null,
-        redirect: "/ResourceAdmin/index",
+        redirect: "/ResourceAdmin/voxel",
         name: "/ResourceAdmin",
         meta: {
           title: "资源管理",
@@ -122,7 +122,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           {
             path: "voxel",
             name: "",
-            component: () => import("@/views/dashboard/index.vue"),
+            component: Empty,
             meta: {
               title: "体素管理",
               icon: "",
@@ -134,7 +134,7 @@ export const constantRoutes: RouteRecordRaw[] = [
               {
                 path: "index",
                 name: "",
-                component: () => import("@/views/dashboard/index.vue"),
+                component: () => import("@/views/voxel/index.vue"),
                 meta: {
                   title: "体素列表",
                   icon: "",
@@ -146,7 +146,7 @@ export const constantRoutes: RouteRecordRaw[] = [
               {
                 path: "upload",
                 name: "",
-                component: () => import("@/views/dashboard/index.vue"),
+                component: () => import("@/views/voxel/upload.vue"),
                 meta: {
                   title: "体素上传",
                   icon: "",
@@ -160,7 +160,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           {
             path: "polygen",
             name: "",
-            component: () => import("@/views/dashboard/index.vue"),
+            component: Empty,
             meta: {
               title: "模型管理",
               icon: "",
@@ -198,7 +198,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           {
             path: "picture",
             name: "",
-            component: () => import("@/views/dashboard/index.vue"),
+            component: Empty,
             meta: {
               title: "图片管理",
               icon: "el-icon-picture",
@@ -236,7 +236,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           {
             path: "video",
             name: "",
-            component: () => import("@/views/dashboard/index.vue"),
+            component: Empty,
             meta: {
               title: "视频管理",
               icon: "el-icon-video-camera",
@@ -274,7 +274,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           {
             path: "audio",
             name: "",
-            component: () => import("@/views/dashboard/index.vue"),
+            component: Empty,
             meta: {
               title: "音频管理",
               icon: "el-icon-headset",

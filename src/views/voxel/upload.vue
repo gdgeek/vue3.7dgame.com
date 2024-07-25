@@ -1,0 +1,32 @@
+<template>
+  <div>
+    <mr-p-p-upload dir="voxel" :file-type="fileType" @save-resource="saveVoxel">
+      <div>选择模型（.vox文件），并上传</div>
+    </mr-p-p-upload>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
+import { postVoxel } from "@/api/resources/index";
+
+const fileType = ref(".vox");
+const router = useRouter();
+
+const saveVoxel = (name: string, file_id: string, callback: () => void) => {
+  postVoxel({ name, file_id })
+    .then((response) => {
+      console.log(response.data);
+      router.push({
+        path: "/voxel/view",
+        query: { id: response.data.id },
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+    .finally(callback);
+};
+</script>
