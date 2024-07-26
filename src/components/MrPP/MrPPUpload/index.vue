@@ -30,6 +30,7 @@
 import { ref, reactive } from "vue";
 import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
+import { FileHandler } from "@/assets/js/file/server";
 
 const props = withDefaults(
   defineProps<{
@@ -43,6 +44,8 @@ const props = withDefaults(
     advanced: false,
   }
 );
+
+const emit = defineEmits(["saveResource"]);
 const fileStore = useFileStore();
 
 const data = reactive([
@@ -91,50 +94,84 @@ const progress = (p: number, idx: number) => {
 };
 
 // 保存文件信息到数据库
+// const saveFile = async (
+//   md5: string,
+//   extension: string,
+//   file: File,
+//   handler: FileHandler
+// ) => {
+//   progress(1, 1);
+//   const response = await postFile({
+//     filename: file.name,
+//     md5,
+//     key: `${md5}${extension}`,
+//     url: fileStore.store.fileUrl(md5, extension, handler, props.dir!),
+//   });
+//   // progress(2, 1);
+//   // return response;
+//   emit("saveResource", file.name, response.data.id, () => {
+//     progress(2, 1);
+//   });
+// };
 const saveFile = async (
   md5: string,
   extension: string,
   file: File,
-  handler: any
+  handler: FileHandler
 ) => {
-  progress(1, 1);
-  const response = await postFile({
+  const data = {
     filename: file.name,
     md5,
-    key: `${md5}${extension}`,
-    url: fileStore.store.fileUrl(md5, extension, handler, props.dir!),
-  });
-  progress(2, 1);
-  return response;
+    key: md5 + extension,
+    url: fileStore.store.fileUrl(md5, extension, handler, props.dir || ""),
+  };
+
+  progress(1, 1);
+
+  try {
+    const response = await postFile(data);
+    emit("saveResource", data.filename, response.data.id, () => {
+      progress(2, 1);
+    });
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 // 选择文件并上传
 const select = async () => {
-  const file = await fileStore.store.fileOpen(props.fileType);
-  isDisabled.value = !isDisabled.value;
-  const md5 = await fileStore.store.fileMD5(file, (p: number) =>
-    progress(p, 0)
-  );
-  const handler = await fileStore.store.publicHandler();
-  const has = await fileStore.store.fileHas(
-    md5,
-    file.extension!,
-    handler,
-    props.dir!
-  );
-
-  if (!has) {
-    await fileStore.store.fileUpload(
+  try {
+    const file = await fileStore.store.fileOpen(props.fileType);
+    isDisabled.value = !isDisabled.value;
+    const md5 = await fileStore.store.fileMD5(file, (p: number) =>
+      progress(p, 0)
+    );
+    const handler = await fileStore.store.publicHandler();
+    const has = await fileStore.store.fileHas(
       md5,
       file.extension!,
-      file,
-      (p: number) => progress(p, 1),
+      // file.type.split("/").pop()!,
       handler,
       props.dir!
     );
-  }
+    console.log("Has:", has);
 
-  await saveFile(md5, file.extension!, file, handler);
+    if (!has) {
+      await fileStore.store.fileUpload(
+        md5,
+        file.extension!,
+        // file.type.split("/").pop()!,
+        file,
+        (p: number) => progress(p, 1),
+        handler,
+        props.dir!
+      );
+    }
+    await saveFile(md5, file.extension!, file, handler);
+    // await saveFile(md5, file.type.split("/").pop()!, file, handler);
+  } catch (error) {
+    console.error("Error in select function:", error);
+  }
 };
 </script>
 

@@ -21,14 +21,14 @@ type FileInfo = {
 type ProgressCallback = (percent: number) => void;
 
 // 生成文件 URL
-const fileUrl = (name: string, extension: string, handler: FileHandler | null = null, dir: string = ''): string => {
+const fileUrl = (name: string, extension: string, handler: FileHandler | null = null, dir: string = ""): string => {
   const filename = name + extension;
   const url = `${env.api}/${path.join('storage', handler?.bucket || '', dir, filename)}`;
   return url;
 };
 
 // 检查文件是否存在
-const fileHas = (name: string, extension: string, handler: FileHandler | null = null, dir: string = ''): Promise<boolean> => {
+const fileHas = (name: string, extension: string, handler: FileHandler | null = null, dir: string = ""): Promise<boolean> => {
   return new Promise((resolve) => {
     axios.head(env.replaceIP(fileUrl(name, extension, handler, dir)))
       .then(() => resolve(true))

@@ -3,54 +3,53 @@
     <br />
     <el-container>
       <el-header>
-        <MrPPHeader
+        <mr-p-p-header
           :sorted="sorted"
           :searched="searched"
           @search="search"
           @sort="sort"
         >
           <el-button-group :inline="true">
-            <router-link to="/ResourceAdmin/voxel/upload">
-              <el-button size="small" type="primary" icon="UploadFilled">
-                <span class="hidden-sm-and-down">上传模型</span>
+            <router-link to="/ResourceAdmin/picture/upload">
+              <el-button size="small" type="primary" icon="uploadFilled">
+                <span class="hidden-sm-and-down">上传图片</span>
               </el-button>
             </router-link>
           </el-button-group>
-        </MrPPHeader>
+        </mr-p-p-header>
       </el-header>
       <el-main>
         <el-row :gutter="10">
           <el-col
             v-for="(item, index) in items"
             :key="index"
+            :data="item"
             :xs="24"
             :sm="12"
             :md="8"
             :lg="6"
             :xl="4"
           >
-            <MrPPCard
+            <mr-p-p-card
               :item="item"
               @named="namedWindow"
               @deleted="deletedWindow"
             >
               <template #enter>
-                <router-link :to="'/voxel/view?id=' + item.id">
-                  <el-button-group :inline="true">
-                    <el-button
-                      v-if="item.info === null || item.image === null"
-                      type="warning"
-                      size="small"
-                    >
-                      初始化模型数据
-                    </el-button>
-                    <el-button v-else type="primary" size="small">
-                      查看模型
-                    </el-button>
-                  </el-button-group>
+                <router-link :to="`/ResourceAdmin/picture/view?id=${item.id}`">
+                  <el-button
+                    v-if="item.info === null || item.image === null"
+                    type="warning"
+                    size="small"
+                  >
+                    初始化图片数据
+                  </el-button>
+                  <el-button v-else type="primary" size="small">
+                    查看图片
+                  </el-button>
                 </router-link>
               </template>
-            </MrPPCard>
+            </mr-p-p-card>
           </el-col>
         </el-row>
       </el-main>
@@ -68,29 +67,22 @@
         </el-card>
       </el-footer>
     </el-container>
+    <br />
   </div>
 </template>
 
 <script setup lang="ts">
+import "element-plus/theme-chalk/index.css";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { ElMessage, ElMessageBox } from "element-plus";
-import "element-plus/theme-chalk/index.css";
-import { getVoxels, putVoxel, deleteVoxel } from "@/api/resources/index";
+import { getPictures, putPicture, deletePicture } from "@/api/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 
-interface Pagination {
-  current: number;
-  count: number;
-  size: number;
-  total: number;
-}
-
 const items = ref<any[]>([]);
-const sorted = ref<string>("-created_at");
-const searched = ref<string>("");
-const pagination = ref<Pagination>({
+const sorted = ref("-created_at");
+const searched = ref("");
+const pagination = ref({
   current: 1,
   count: 1,
   size: 20,
@@ -99,14 +91,16 @@ const pagination = ref<Pagination>({
 
 const router = useRouter();
 
+// 处理分页
 const handleCurrentChange = (page: number) => {
   pagination.value.current = page;
   refresh();
   console.log(pagination.value.current);
 };
 
-const namedWindow = (item: any) => {
-  ElMessageBox.prompt("请输入新名称", "修改模型名称", {
+// 图片名称修改
+const namedWindow = (item: { id: string; name: string }) => {
+  ElMessageBox.prompt("请输入新名称", "修改图片名称", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     closeOnClickModal: false,
@@ -114,10 +108,16 @@ const namedWindow = (item: any) => {
   })
     .then(({ value }) => {
       named(item.id, value);
-      ElMessage.success(`新的模型名称: ${value}`);
+      ElMessage({
+        type: "success",
+        message: "新的图片名称: " + value,
+      });
     })
     .catch(() => {
-      ElMessage.info("取消输入");
+      ElMessage({
+        type: "info",
+        message: "取消输入",
+      });
     });
 };
 
@@ -131,18 +131,15 @@ const search = (value: string) => {
   refresh();
 };
 
-const named = (id: number, newValue: string) => {
-  const voxel = { name: newValue };
-  putVoxel(id, voxel)
-    .then(() => {
-      refresh();
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+const named = (id: string, newValue: string) => {
+  const picture = { name: newValue };
+  putPicture(id, picture)
+    .then(() => refresh())
+    .catch((err) => console.error(err));
 };
 
-const deletedWindow = (item: any) => {
+// 图片删除
+const deletedWindow = (item: { id: string }) => {
   ElMessageBox.confirm("此操作将永久删除该文件, 是否继续?", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
@@ -151,33 +148,34 @@ const deletedWindow = (item: any) => {
   })
     .then(() => {
       deleted(item.id);
-      ElMessage.success("删除成功!");
+      ElMessage({
+        type: "success",
+        message: "删除成功!",
+      });
     })
     .catch(() => {
-      ElMessage.info("已取消删除");
+      ElMessage({
+        type: "info",
+        message: "已取消删除",
+      });
     });
 };
 
-const deleted = (id: number) => {
-  deleteVoxel(id)
-    .then(() => {
-      refresh();
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+const deleted = (id: string) => {
+  deletePicture(id)
+    .then(() => refresh())
+    .catch((err) => console.error(err));
 };
 
 const succeed = (data: any[]) => {
-  console.log(data);
   items.value = data;
+  console.log("item:", data);
 };
 
 // 刷新数据
 const refresh = () => {
-  getVoxels(sorted.value, searched.value, pagination.value.current)
+  getPictures(sorted.value, searched.value, pagination.value.current)
     .then((response) => {
-      console.log("response.headers", response.headers);
       pagination.value = {
         current: parseInt(response.headers["x-pagination-current-page"]),
         count: parseInt(response.headers["x-pagination-page-count"]),
@@ -188,23 +186,8 @@ const refresh = () => {
         succeed(response.data);
       }
     })
-    .catch((error) => {
-      console.log(error);
-    });
+    .catch((err) => console.error(err));
 };
 
-onMounted(() => {
-  refresh();
-});
+onMounted(() => refresh());
 </script>
-
-<style scoped>
-.hidden-sm-and-down {
-  display: none;
-}
-@media (min-width: 768px) {
-  .hidden-sm-and-down {
-    display: inline;
-  }
-}
-</style>

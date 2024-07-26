@@ -195,7 +195,7 @@ const getUrl = (info: FileInfo, file: { md5: string; ext: string }, handler: Fil
       Expires: 60,
       Sign: true,
     },
-    (err: any, data: { Url: any; }) => {
+    (err: any, data: { Url: string; }) => {
       console.log(err || (data && data.Url));
     }
   );

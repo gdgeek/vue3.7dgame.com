@@ -210,7 +210,7 @@ export const constantRoutes: RouteRecordRaw[] = [
               {
                 path: "index",
                 name: "",
-                component: () => import("@/views/dashboard/index.vue"),
+                component: () => import("@/views/picture/index.vue"),
                 meta: {
                   title: "图片列表",
                   icon: "el-icon-list",
@@ -222,9 +222,21 @@ export const constantRoutes: RouteRecordRaw[] = [
               {
                 path: "upload",
                 name: "",
-                component: () => import("@/views/dashboard/index.vue"),
+                component: () => import("@/views/picture/upload.vue"),
                 meta: {
                   title: "图片上传",
+                  icon: "el-icon-uploadFilled",
+                  hidden: false,
+                  alwaysShow: false,
+                  params: null,
+                },
+              },
+              {
+                path: "view",
+                name: "",
+                component: () => import("@/views/picture/view.vue"),
+                meta: {
+                  title: "图片处理",
                   icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
@@ -395,6 +407,7 @@ const pathsToRemove = [
   "/home/category",
   "/home/creator",
   "settings",
+  "view",
 ];
 
 // 检查路径是否在移除列表中
