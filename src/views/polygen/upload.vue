@@ -1,37 +1,35 @@
 <template>
   <div>
     <mr-p-p-upload
-      dir="picture"
+      dir="polygen"
       :file-type="fileType"
-      @save-resource="savePicture"
+      @save-resource="savePolygen"
     >
-      <div>选择图片并上传</div>
+      <div>选择模型（.glb文件），并上传</div>
     </mr-p-p-upload>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { postPolygen } from "@/api/resources/index";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
-import { postPicture } from "@/api/resources/index";
 
 // 定义允许的文件类型
-const fileType = ref("image/gif, image/jpeg, image/png");
-
+const fileType = ref(".glb");
 const router = useRouter();
 
-// 图片保存
-const savePicture = async (
+// 模型保存
+const savePolygen = async (
   name: string,
   file_id: number,
   callback: () => void
 ) => {
   try {
-    const response = await postPicture({ name, file_id });
+    const response = await postPolygen({ name, file_id });
     // 跳转到图片查看页面，并传递图片 ID
     router.push({
-      path: "/ResourceAdmin/picture/view",
+      path: "/ResourceAdmin/polygen/view",
       query: { id: response.data.id },
     });
   } catch (err) {

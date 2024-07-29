@@ -29,6 +29,9 @@ export type PictureInfo = {
   author: Author;
 };
 
+// TODO:体素信息
+export type VoxelInfo = {};
+
 export type ApiResponse<T> = {
   data: T;
 };

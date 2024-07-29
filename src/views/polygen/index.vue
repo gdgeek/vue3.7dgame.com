@@ -10,9 +10,9 @@
           @sort="sort"
         >
           <el-button-group :inline="true">
-            <router-link to="/ResourceAdmin/picture/upload">
-              <el-button size="small" type="primary" icon="uploadFilled">
-                <span class="hidden-sm-and-down">上传图片</span>
+            <router-link to="/polygen/upload">
+              <el-button size="mini" type="primary" icon="el-icon-upload">
+                <span class="hidden-sm-and-down">上传模型</span>
               </el-button>
             </router-link>
           </el-button-group>
@@ -36,17 +36,19 @@
               @deleted="deletedWindow"
             >
               <template #enter>
-                <router-link :to="`/ResourceAdmin/picture/view?id=${item.id}`">
-                  <el-button
-                    v-if="item.info === null || item.image === null"
-                    type="warning"
-                    size="small"
-                  >
-                    初始化图片数据
-                  </el-button>
-                  <el-button v-else type="primary" size="small">
-                    查看图片
-                  </el-button>
+                <router-link :to="`/ResourceAdmin/polygen/view?id=${item.id}`">
+                  <el-button-group :inline="true">
+                    <el-button
+                      v-if="item.info === null || item.image === null"
+                      type="warning"
+                      size="mini"
+                    >
+                      初始化模型数据
+                    </el-button>
+                    <el-button v-else type="primary" size="mini">
+                      查看模型
+                    </el-button>
+                  </el-button-group>
                 </router-link>
               </template>
             </mr-p-p-card>
@@ -74,9 +76,11 @@
 <script setup lang="ts">
 import "element-plus/theme-chalk/index.css";
 import { useRouter } from "vue-router";
-import { getPictures, putPicture, deletePicture } from "@/api/resources/index";
+import { getPolygens, putPolygen, deletePolygen } from "@/api/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+
+const router = useRouter();
 
 const items = ref<any[]>([]);
 const sorted = ref("-created_at");
@@ -88,20 +92,38 @@ const pagination = ref({
   total: 20,
 });
 
-const router = useRouter();
+const refresh = async () => {
+  try {
+    const response = await getPolygens(
+      sorted.value,
+      searched.value,
+      pagination.value.current
+    );
+    const headers = response.headers;
+    pagination.value = {
+      current: parseInt(headers["x-pagination-current-page"]),
+      count: parseInt(headers["x-pagination-page-count"]),
+      size: parseInt(headers["x-pagination-per-page"]),
+      total: parseInt(headers["x-pagination-total-count"]),
+    };
+    if (response.data) {
+      items.value = response.data;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-// 处理分页
 const handleCurrentChange = (page: number) => {
   pagination.value.current = page;
   refresh();
-  console.log(pagination.value.current);
 };
 
 const namedWindow = async (item: { id: string; name: string }) => {
   try {
     const { value } = await ElMessageBox.prompt(
       "请输入新名称",
-      "修改图片名称",
+      "修改模型名称",
       {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -116,19 +138,9 @@ const namedWindow = async (item: { id: string; name: string }) => {
   }
 };
 
-const sort = (value: string) => {
-  sorted.value = value;
-  refresh();
-};
-
-const search = (value: string) => {
-  searched.value = value;
-  refresh();
-};
-
 const named = async (id: string, newValue: string) => {
   try {
-    await putPicture(id, { name: newValue });
+    await putPolygen(id, { name: newValue });
     refresh();
   } catch (error) {
     console.error(error);
@@ -152,39 +164,28 @@ const deletedWindow = async (item: { id: string }) => {
 
 const deleted = async (id: string) => {
   try {
-    await deletePicture(id);
+    await deletePolygen(id);
     refresh();
   } catch (error) {
     console.error(error);
   }
 };
 
-const succeed = (data: any[]) => {
-  items.value = data;
-  console.log("item:", data);
+const search = (value: string) => {
+  searched.value = value;
+  refresh();
 };
 
-const refresh = async () => {
-  try {
-    const response = await getPictures(
-      sorted.value,
-      searched.value,
-      pagination.value.current
-    );
-    const headers = response.headers;
-    pagination.value = {
-      current: parseInt(headers["x-pagination-current-page"]),
-      count: parseInt(headers["x-pagination-page-count"]),
-      size: parseInt(headers["x-pagination-per-page"]),
-      total: parseInt(headers["x-pagination-total-count"]),
-    };
-    if (response.data) {
-      items.value = response.data;
-    }
-  } catch (error) {
-    console.error(error);
-  }
+const sort = (value: string) => {
+  sorted.value = value;
+  refresh();
 };
 
-onMounted(() => refresh());
+onMounted(() => {
+  refresh();
+});
 </script>
+
+<style scoped>
+/* Add your styles here */
+</style>

@@ -155,6 +155,18 @@ export const constantRoutes: RouteRecordRaw[] = [
                   params: null,
                 },
               },
+              {
+                path: "view",
+                name: "",
+                component: () => import("@/views/voxel/view.vue"),
+                meta: {
+                  title: "体素处理",
+                  icon: "el-icon-uploadFilled",
+                  hidden: false,
+                  alwaysShow: false,
+                  params: null,
+                },
+              },
             ],
           },
           {
@@ -172,7 +184,7 @@ export const constantRoutes: RouteRecordRaw[] = [
               {
                 path: "index",
                 name: "",
-                component: () => import("@/views/dashboard/index.vue"),
+                component: () => import("@/views/polygen/index.vue"),
                 meta: {
                   title: "模型列表",
                   icon: "",
@@ -184,10 +196,22 @@ export const constantRoutes: RouteRecordRaw[] = [
               {
                 path: "upload",
                 name: "",
-                component: () => import("@/views/dashboard/index.vue"),
+                component: () => import("@/views/polygen/upload.vue"),
                 meta: {
                   title: "模型上传",
                   icon: "",
+                  hidden: false,
+                  alwaysShow: false,
+                  params: null,
+                },
+              },
+              {
+                path: "view",
+                name: "",
+                component: () => import("@/views/polygen/view.vue"),
+                meta: {
+                  title: "模型处理",
+                  icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
                   params: null,

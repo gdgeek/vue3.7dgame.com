@@ -15,12 +15,12 @@ import { postVoxel } from "@/api/resources/index";
 const fileType = ref(".vox");
 const router = useRouter();
 
-const saveVoxel = (name: string, file_id: string, callback: () => void) => {
+const saveVoxel = (name: string, file_id: number, callback: () => void) => {
   postVoxel({ name, file_id })
     .then((response) => {
       console.log(response.data);
       router.push({
-        path: "/voxel/view",
+        path: "/ResourceAdmin/voxel/view",
         query: { id: response.data.id },
       });
     })

@@ -88,10 +88,10 @@ const putResources = (id: number | string, resource: ResourcePut) => {
   });
 };
 
-export const putPolygen = (id: number | string, polygen: ResourcePut) =>
+export const putPolygen = (id: number | string, polygen: any) =>
   putResources(id, polygen);
 
-export const putVoxel = (id: number | string, voxel: ResourcePut) =>
+export const putVoxel = (id: number | string, voxel: any) =>
   putResources(id, voxel);
 
 export const putPicture = (id: number | string, picture: any) =>

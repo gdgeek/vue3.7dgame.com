@@ -73,6 +73,10 @@ const expire = ref<boolean>(false);
 
 const id = computed(() => route.query.id as string);
 
+const prepare = computed(
+  () => pictureData.value !== null && pictureData.value.info !== null
+);
+
 const tableData = computed(() => {
   if (pictureData.value && prepare.value) {
     return [
@@ -90,10 +94,6 @@ const tableData = computed(() => {
 });
 
 const picture = computed(() => convertToHttps(file.value!));
-
-const prepare = computed(
-  () => pictureData.value !== null && pictureData.value.info !== null
-);
 
 onMounted(async () => {
   try {
@@ -214,43 +214,45 @@ const dealWith = async () => {
   }
 };
 
-const deleteWindow = () => {
-  ElMessageBox.confirm("此操作将永久删除该文件, 是否继续?", "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    closeOnClickModal: false,
-    type: "warning",
-  })
-    .then(() => {
-      deletePicture(pictureData.value!.id)
-        .then(() => {
-          ElMessage.success("删除成功!");
-          router.push({ path: "/ResourceAdmin/picture/index" });
-        })
-        .catch((err) => {
-          console.error(err);
-          ElMessage.error("删除失败");
-        });
-    })
-    .catch(() => {
-      ElMessage.info("已取消删除");
+const deleteWindow = async () => {
+  try {
+    await ElMessageBox.confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      closeOnClickModal: false,
+      type: "warning",
     });
+
+    await deletePicture(pictureData.value!.id);
+    ElMessage.success("删除成功!");
+    router.push("/ResourceAdmin/picture/index");
+  } catch {
+    ElMessage.info("已取消删除");
+  }
 };
 
-const namedWindow = () => {
-  ElMessageBox.prompt("请输入新名称", "修改图片名称", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    closeOnClickModal: false,
-    inputValue: pictureData.value!.name,
-  })
-    .then(({ value }) => {
-      named(pictureData.value!.id, value);
-      ElMessage.success(`新的图片名称: ${value}`);
-    })
-    .catch(() => {
+const namedWindow = async () => {
+  try {
+    const { value } = await ElMessageBox.prompt(
+      "请输入新名称",
+      "修改图片名称",
+      {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        closeOnClickModal: false,
+        inputValue: pictureData.value!.name,
+      }
+    );
+
+    if (value) {
+      await named(pictureData.value!.id, value);
+      ElMessage.success("新的图片名称: " + value);
+    } else {
       ElMessage.info("取消输入");
-    });
+    }
+  } catch {
+    ElMessage.info("取消输入");
+  }
 };
 
 const named = async (id: number, name: string) => {
