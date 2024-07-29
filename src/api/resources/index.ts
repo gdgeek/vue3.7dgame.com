@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { convertToHttps } from "@/assets/js/helper";
 import qs from "querystringify";
 import path from "path-browserify";
-import type { ApiResponse, PictureInfo } from "./model";
+import type { ApiResponse, ResourceInfo } from "./model";
 
 type ResourceType = "voxel" | "polygen" | "picture" | "video" | "audio";
 
@@ -97,10 +97,10 @@ export const putVoxel = (id: number | string, voxel: any) =>
 export const putPicture = (id: number | string, picture: any) =>
   putResources(id, picture);
 
-export const putVideo = (id: number | string, video: ResourcePut) =>
+export const putVideo = (id: number | string, video: any) =>
   putResources(id, video);
 
-export const putAudio = (id: number | string, audio: ResourcePut) =>
+export const putAudio = (id: number | string, audio: any) =>
   putResources(id, audio);
 
 // 上传资源
@@ -211,7 +211,7 @@ export const getVoxel = (
 export const getPicture = (
   id: number | string,
   expand: string = "image,file,author"
-): Promise<ApiResponse<PictureInfo>> => {
+): Promise<ApiResponse<ResourceInfo>> => {
   return new Promise((resolve, reject) => {
     getResource("picture", id, expand)
       .then((response) => {
@@ -247,7 +247,7 @@ export const getVideo = (
 export const getAudio = (
   id: number | string,
   expand: string = "image,file,author"
-) => {
+): Promise<ApiResponse<ResourceInfo>> => {
   return new Promise((resolve, reject) => {
     getResource("audio", id, expand)
       .then((response) => {

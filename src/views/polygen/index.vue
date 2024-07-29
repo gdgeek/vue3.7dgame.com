@@ -10,8 +10,8 @@
           @sort="sort"
         >
           <el-button-group :inline="true">
-            <router-link to="/polygen/upload">
-              <el-button size="mini" type="primary" icon="el-icon-upload">
+            <router-link to="/ResourceAdmin/polygen/upload">
+              <el-button size="small" type="primary" icon="uploadFilled">
                 <span class="hidden-sm-and-down">上传模型</span>
               </el-button>
             </router-link>
@@ -41,11 +41,11 @@
                     <el-button
                       v-if="item.info === null || item.image === null"
                       type="warning"
-                      size="mini"
+                      size="small"
                     >
                       初始化模型数据
                     </el-button>
-                    <el-button v-else type="primary" size="mini">
+                    <el-button v-else type="primary" size="small">
                       查看模型
                     </el-button>
                   </el-button-group>
@@ -185,7 +185,3 @@ onMounted(() => {
   refresh();
 });
 </script>
-
-<style scoped>
-/* Add your styles here */
-</style>

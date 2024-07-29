@@ -284,7 +284,7 @@ export const constantRoutes: RouteRecordRaw[] = [
               {
                 path: "index",
                 name: "",
-                component: () => import("@/views/dashboard/index.vue"),
+                component: () => import("@/views/video/index.vue"),
                 meta: {
                   title: "视频列表",
                   icon: "el-icon-list",
@@ -296,9 +296,21 @@ export const constantRoutes: RouteRecordRaw[] = [
               {
                 path: "upload",
                 name: "",
-                component: () => import("@/views/dashboard/index.vue"),
+                component: () => import("@/views/video/upload.vue"),
                 meta: {
                   title: "视频上传",
+                  icon: "el-icon-uploadFilled",
+                  hidden: false,
+                  alwaysShow: false,
+                  params: null,
+                },
+              },
+              {
+                path: "view",
+                name: "",
+                component: () => import("@/views/video/view.vue"),
+                meta: {
+                  title: "视频处理",
                   icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
@@ -322,7 +334,7 @@ export const constantRoutes: RouteRecordRaw[] = [
               {
                 path: "index",
                 name: "",
-                component: () => import("@/views/dashboard/index.vue"),
+                component: () => import("@/views/audio/index.vue"),
                 meta: {
                   title: "音频列表",
                   icon: "",
@@ -334,10 +346,22 @@ export const constantRoutes: RouteRecordRaw[] = [
               {
                 path: "upload",
                 name: "",
-                component: () => import("@/views/dashboard/index.vue"),
+                component: () => import("@/views/audio/upload.vue"),
                 meta: {
                   title: "音频上传",
                   icon: "",
+                  hidden: false,
+                  alwaysShow: false,
+                  params: null,
+                },
+              },
+              {
+                path: "view",
+                name: "",
+                component: () => import("@/views/audio/view.vue"),
+                meta: {
+                  title: "音频处理",
+                  icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
                   params: null,

@@ -16,7 +16,7 @@ export type Author = {
 };
 
 // 图片信息
-export type PictureInfo = {
+export type ResourceInfo = {
   id: number;
   name: string;
   uuid: string;

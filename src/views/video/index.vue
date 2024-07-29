@@ -10,9 +10,9 @@
           @sort="sort"
         >
           <el-button-group :inline="true">
-            <router-link to="/ResourceAdmin/picture/upload">
+            <router-link to="/ResourceAdmin/video/upload">
               <el-button size="small" type="primary" icon="uploadFilled">
-                <span class="hidden-sm-and-down">上传图片</span>
+                <span class="hidden-sm-and-down">上传音频</span>
               </el-button>
             </router-link>
           </el-button-group>
@@ -36,17 +36,15 @@
               @deleted="deletedWindow"
             >
               <template #enter>
-                <router-link :to="`/ResourceAdmin/picture/view?id=${item.id}`">
+                <router-link :to="`/ResourceAdmin/video/view?id=${item.id}`">
                   <el-button
                     v-if="item.info === null || item.image === null"
                     type="warning"
                     size="small"
                   >
-                    初始化图片数据
+                    初始化音频数据
                   </el-button>
-                  <el-button v-else type="primary" size="small">
-                    查看图片
-                  </el-button>
+                  <el-button type="primary" size="small">查看音频</el-button>
                 </router-link>
               </template>
             </mr-p-p-card>
@@ -72,37 +70,33 @@
 </template>
 
 <script setup lang="ts">
-import "element-plus/theme-chalk/index.css";
-import { useRouter } from "vue-router";
-import { getPictures, putPicture, deletePicture } from "@/api/resources/index";
+import { getVideos, putVideo, deleteVideo } from "@/api/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 
 const items = ref<any[]>([]);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
-const pagination = ref({
+const pagination = reactive({
   current: 1,
   count: 1,
   size: 20,
   total: 20,
 });
 
-const router = useRouter();
-
 // 处理分页
-const handleCurrentChange = (page: number) => {
-  pagination.value.current = page;
-  refresh();
-  console.log(pagination.value.current);
+const handleCurrentChange = async (page: number) => {
+  pagination.current = page;
+  await refresh();
+  console.log(pagination.current);
 };
 
-// 修改图片名称
-const namedWindow = async (item: { id: string; name: string }) => {
+// 修改音频名称
+const namedWindow = async (item: any) => {
   try {
     const { value } = await ElMessageBox.prompt(
       "请输入新名称",
-      "修改图片名称",
+      "修改视频名称",
       {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -111,7 +105,7 @@ const namedWindow = async (item: { id: string; name: string }) => {
       }
     );
     await named(item.id, value);
-    ElMessage.success("新的模型名称: " + value);
+    ElMessage.success("新的视频名称: " + value);
   } catch {
     ElMessage.info("取消输入");
   }
@@ -129,17 +123,18 @@ const search = (value: string) => {
   refresh();
 };
 
-// 修改图片名称 API 调用
+// 修改音频名称 API 调用
 const named = async (id: string, newValue: string) => {
   try {
-    await putPicture(id, { name: newValue });
+    await putVideo(id, { name: newValue });
     refresh();
   } catch (error) {
     console.error(error);
   }
 };
 
-const deletedWindow = async (item: { id: string }) => {
+// 删除音频确认
+const deletedWindow = async (item: any) => {
   try {
     await ElMessageBox.confirm("此操作将永久删除该文件, 是否继续?", "提示", {
       confirmButtonText: "确定",
@@ -154,9 +149,10 @@ const deletedWindow = async (item: { id: string }) => {
   }
 };
 
+// 删除音频 API 调用
 const deleted = async (id: string) => {
   try {
-    await deletePicture(id);
+    await deleteVideo(id);
     refresh();
   } catch (error) {
     console.error(error);
@@ -166,18 +162,17 @@ const deleted = async (id: string) => {
 // 刷新数据
 const refresh = async () => {
   try {
-    const response = await getPictures(
+    const response = await getVideos(
       sorted.value,
       searched.value,
-      pagination.value.current
+      pagination.current
     );
-    const headers = response.headers;
-    pagination.value = {
-      current: parseInt(headers["x-pagination-current-page"]),
-      count: parseInt(headers["x-pagination-page-count"]),
-      size: parseInt(headers["x-pagination-per-page"]),
-      total: parseInt(headers["x-pagination-total-count"]),
-    };
+    pagination.current = parseInt(
+      response.headers["x-pagination-current-page"]
+    );
+    pagination.count = parseInt(response.headers["x-pagination-page-count"]);
+    pagination.size = parseInt(response.headers["x-pagination-per-page"]);
+    pagination.total = parseInt(response.headers["x-pagination-total-count"]);
     if (response.data) {
       items.value = response.data;
     }

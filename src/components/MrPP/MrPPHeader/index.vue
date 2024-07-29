@@ -62,8 +62,9 @@
           >
             <template #append>
               <el-button
-                icon="el-icon-search"
+                icon="Search"
                 size="small"
+                class="search"
                 @click="search"
               ></el-button>
             </template>
@@ -127,5 +128,9 @@ const keyDown = (e: KeyboardEvent) => {
   font-size: 15px;
   padding: 0px 0px 0px 0px;
   color: #666;
+}
+
+.search:hover {
+  background-color: #409eff !important;
 }
 </style>
