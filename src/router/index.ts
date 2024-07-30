@@ -1,5 +1,10 @@
 import type { App } from "vue";
-import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
+import {
+  createRouter,
+  createWebHashHistory,
+  createWebHistory,
+  RouteRecordRaw,
+} from "vue-router";
 
 export const Layout = () => import("@/layout/index.vue");
 
@@ -386,7 +391,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         children: [
           {
             path: "list",
-            component: () => import("@/views/dashboard/index.vue"),
+            component: () => import("@/views/meta/list.vue"),
             name: "User",
             meta: {
               title: "元数据列表",
@@ -399,7 +404,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           },
           {
             path: "prefabs",
-            component: () => import("@/views/dashboard/index.vue"),
+            component: () => import("@/views/meta/prefabs.vue"),
             name: "Role",
             meta: {
               title: "系统预设",
@@ -409,6 +414,36 @@ export const constantRoutes: RouteRecordRaw[] = [
               alwaysShow: false,
               params: null,
             },
+          },
+          {
+            path: "prefab-edit",
+            name: "PrefabEdit",
+            meta: { title: "编辑" },
+            component: () => import("@/views/meta/prefab-edit.vue"),
+          },
+          {
+            path: "meta-edit",
+            name: "MetaEdit",
+            meta: { title: "编辑" },
+            component: () => import("@/views/meta/meta-edit.vue"),
+          },
+          {
+            path: "rete-meta",
+            name: "VerseMetaEditor",
+            meta: { title: "【元】" },
+            component: () => import("@/views/meta/rete-meta.vue"),
+          },
+          {
+            path: "script",
+            name: "MetaScript",
+            meta: { title: "脚本" },
+            component: () => import("@/views/meta/script.vue"),
+          },
+          {
+            path: "scene",
+            name: "MetaSceneEditor",
+            meta: { title: "内容编辑" },
+            component: () => import("@/views/meta/scene.vue"),
           },
         ],
       },
@@ -431,7 +466,7 @@ export const constantRoutes: RouteRecordRaw[] = [
  * 创建路由
  */
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes: constantRoutes,
   // 刷新时，滚动条位置还原
   scrollBehavior: () => ({ left: 0, top: 0 }),
@@ -456,6 +491,11 @@ const pathsToRemove = [
   "/home/creator",
   "settings",
   "view",
+  "prefab-edit",
+  "meta-edit",
+  "rete-meta",
+  "script",
+  "scene",
 ];
 
 // 检查路径是否在移除列表中

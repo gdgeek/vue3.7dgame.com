@@ -73,7 +73,9 @@
     "vue": "^3.4.27",
     "vue-cropper": "^1.1.4",
     "vue-i18n": "9.9.1",
-    "vue-router": "^4.3.3"
+    "vue-router": "^4.3.3",
+    "vue-waterfall-plugin-next": "^2.4.3",
+    "vue2-waterfall": "^3.0.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.6.1",

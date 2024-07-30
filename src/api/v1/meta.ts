@@ -1,17 +1,43 @@
 import request from "@/utils/request";
 import qs from "querystringify";
 import path from "path-browserify";
+import { ResourceInfo } from "../resources/model";
+
+type Author = {
+  id: number;
+  nickname: string;
+  email: string | null;
+  username: string;
+};
+
+// 元数据类型
+export type metaInfo = {
+  id: number;
+  author_id: number;
+  info: string | null;
+  data: string | null;
+  image_id: number | null;
+  uuid: string;
+  events: string | null;
+  title: string;
+  prefab: number;
+  image: string | null;
+  resources: ResourceInfo[];
+  editable: boolean;
+  viewable: boolean;
+  author?: Author;
+};
 
 export const postMeta = (data: Record<string, any>) => {
-  return request({
+  return request<metaInfo>({
     url: path.join("v1", "metas"),
     method: "post",
     data,
   });
 };
 
-export const getMeta = (id: number | string, expand = "") => {
-  return request({
+export const getMeta = (id: number, expand = "") => {
+  return request<metaInfo>({
     url: path.join(
       "v1",
       "metas",
@@ -43,7 +69,7 @@ export const getMetas = (
     query["page"] = page;
   }
 
-  return request({
+  return request<metaInfo[]>({
     url: path.join("v1", "metas") + qs.stringify(query, true),
     method: "get",
   });

@@ -20,7 +20,10 @@
         >
           <el-descriptions-item>
             <template #label>
-              <router-link class="info-content-label-link" to="/polygen/index">
+              <router-link
+                class="info-content-label-link"
+                to="/ResourceAdmin/polygen/index"
+              >
                 <font-awesome-icon class="icon" icon="cube"></font-awesome-icon>
                 模型
               </router-link>
@@ -30,7 +33,10 @@
 
           <el-descriptions-item>
             <template #label>
-              <router-link class="info-content-label-link" to="/picture/index">
+              <router-link
+                class="info-content-label-link"
+                to="/ResourceAdmin/picture/index"
+              >
                 <font-awesome-icon
                   class="icon"
                   icon="file-image"
@@ -43,7 +49,10 @@
 
           <el-descriptions-item>
             <template #label>
-              <router-link class="info-content-label-link" to="/video/index">
+              <router-link
+                class="info-content-label-link"
+                to="/ResourceAdmin/video/index"
+              >
                 <font-awesome-icon
                   class="icon"
                   icon="file-video"
