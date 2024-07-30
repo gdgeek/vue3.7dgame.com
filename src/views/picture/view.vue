@@ -181,7 +181,7 @@ const setup = async (
   const handler = await store.publicHandler();
   const has = await store.fileHas(
     md5,
-    file.type.split("/").pop()!, // Extract extension from MIME type
+    file.type.split("/").pop()!, //从MIME类型中提取扩展名
     handler,
     "screenshot/picture"
   );

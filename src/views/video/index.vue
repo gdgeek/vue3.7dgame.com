@@ -12,7 +12,7 @@
           <el-button-group :inline="true">
             <router-link to="/ResourceAdmin/video/upload">
               <el-button size="small" type="primary" icon="uploadFilled">
-                <span class="hidden-sm-and-down">上传音频</span>
+                <span class="hidden-sm-and-down">上传视频</span>
               </el-button>
             </router-link>
           </el-button-group>
@@ -42,9 +42,9 @@
                     type="warning"
                     size="small"
                   >
-                    初始化音频数据
+                    初始化视频数据
                   </el-button>
-                  <el-button type="primary" size="small">查看音频</el-button>
+                  <el-button type="primary" size="small">查看视频</el-button>
                 </router-link>
               </template>
             </mr-p-p-card>

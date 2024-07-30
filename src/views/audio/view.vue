@@ -70,7 +70,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getAudio, putAudio, deleteAudio } from "@/api/resources";
 import type { ResourceInfo } from "@/api/resources/model";
@@ -176,7 +175,7 @@ const thumbnail = async (
   audio: HTMLAudioElement,
   width: number,
   height: number
-): Promise<Blob> => {
+): Promise<File> => {
   return new Promise((resolve, reject) => {
     const imageType = "image/jpeg";
     const canvas = document.createElement("canvas");
@@ -184,11 +183,15 @@ const thumbnail = async (
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext("2d");
-    ctx?.drawImage(bgImg, 0, 0, width, height);
-    canvas.toBlob((blob) => {
-      if (blob) resolve(blob);
-      else reject(new Error("Failed to create thumbnail"));
-    }, imageType);
+    if (ctx) {
+      ctx.drawImage(bgImg, 0, 0, width, height);
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const file = new File([blob], "thumbnail.jpg", { type: imageType });
+          resolve(file);
+        }
+      }, imageType);
+    }
   });
 };
 
@@ -198,10 +201,11 @@ const setup = async (
 ) => {
   if (size.x !== 0) {
     const info = JSON.stringify({ size });
-    const blob = await thumbnail(audio, size.x * 0.5, size.y * 0.5);
-    blob.name = `${audioData.value!.name}.thumbnail`;
-    blob.extension = ".jpg";
-    const file = blob as File;
+    // const blob = await thumbnail(audio, size.x * 0.5, size.y * 0.5);
+    // blob.name = `${audioData.value!.name}.thumbnail`;
+    // blob.extension = ".jpg";
+
+    const file = await thumbnail(audio, size.x * 0.5, size.y * 0.5);
     const md5 = await store.fileMD5(file);
     const handler = await store.publicHandler();
     const has = await store.fileHas(

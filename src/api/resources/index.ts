@@ -229,7 +229,7 @@ export const getPicture = (
 export const getVideo = (
   id: number | string,
   expand: string = "image,file,author"
-) => {
+): Promise<ApiResponse<ResourceInfo>> => {
   return new Promise((resolve, reject) => {
     getResource("video", id, expand)
       .then((response) => {

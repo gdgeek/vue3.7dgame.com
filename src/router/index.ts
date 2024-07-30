@@ -137,7 +137,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 component: () => import("@/views/voxel/index.vue"),
                 meta: {
                   title: "体素列表",
-                  icon: "",
+                  icon: "el-icon-list",
                   hidden: false,
                   alwaysShow: false,
                   params: null,
@@ -149,7 +149,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 component: () => import("@/views/voxel/upload.vue"),
                 meta: {
                   title: "体素上传",
-                  icon: "",
+                  icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
                   params: null,
@@ -187,7 +187,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 component: () => import("@/views/polygen/index.vue"),
                 meta: {
                   title: "模型列表",
-                  icon: "",
+                  icon: "el-icon-list",
                   hidden: false,
                   alwaysShow: false,
                   params: null,
@@ -199,7 +199,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 component: () => import("@/views/polygen/upload.vue"),
                 meta: {
                   title: "模型上传",
-                  icon: "",
+                  icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
                   params: null,
@@ -337,7 +337,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 component: () => import("@/views/audio/index.vue"),
                 meta: {
                   title: "音频列表",
-                  icon: "",
+                  icon: "el-icon-list",
                   hidden: false,
                   alwaysShow: false,
                   params: null,
@@ -349,7 +349,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 component: () => import("@/views/audio/upload.vue"),
                 meta: {
                   title: "音频上传",
-                  icon: "",
+                  icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
                   params: null,
