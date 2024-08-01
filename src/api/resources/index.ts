@@ -5,7 +5,13 @@ import qs from "querystringify";
 import path from "path-browserify";
 import type { ApiResponse, ResourceInfo } from "./model";
 
-type ResourceType = "voxel" | "polygen" | "picture" | "video" | "audio";
+type ResourceType =
+  | "voxel"
+  | "polygen"
+  | "picture"
+  | "video"
+  | "audio"
+  | string;
 
 // 上传资源类型
 type ResourceData = {
@@ -42,7 +48,7 @@ export const getResources = (
 
   const queryString = qs.stringify(query, true);
   const url = `resources${queryString}`; // 拼接 URL
-  return request({
+  return request<ResourceInfo[]>({
     url,
     method: "get",
   });

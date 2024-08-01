@@ -10,21 +10,33 @@ type Author = {
   username: string;
 };
 
+type ImageDetails = {
+  id: number;
+  md5: string;
+  type: string;
+  url: string;
+  filename: string;
+  size: number;
+  key: string;
+};
+
 // 元数据类型
 export type metaInfo = {
   id: number;
   author_id: number;
   info: string | null;
   data: string | null;
+  created_at?: string;
   image_id: number | null;
   uuid: string;
   events: string | null;
   title: string;
   prefab: number;
-  image: string | null;
+  image: ImageDetails;
   resources: ResourceInfo[];
   editable: boolean;
   viewable: boolean;
+  custome?: boolean;
   author?: Author;
 };
 
@@ -75,7 +87,7 @@ export const getMetas = (
   });
 };
 
-export const putMeta = (id: number | string, data: Record<string, any>) => {
+export const putMeta = (id: number, data: Record<string, any>) => {
   return request({
     url: path.join("v1", "metas", id.toString()),
     method: "put",

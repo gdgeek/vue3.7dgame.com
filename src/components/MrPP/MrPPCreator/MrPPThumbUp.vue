@@ -23,21 +23,11 @@
           <el-col :span="10" style="padding-left: 20px">
             <div>
               <div class="grid-content">
-                <el-popover
-                  placement="top-start"
-                  :title="item.title"
-                  :open-delay="500"
-                  width="400px"
-                  trigger="hover"
-                  :content="html(item.body)"
-                >
+                <el-popover placement="top-start" :title="item.title" :open-delay="500" width="400px" trigger="hover"
+                  :content="html(item.body)">
                   <template #reference>
-                    <el-link
-                      :underline="false"
-                      type="primary"
-                      style="display: inline; color: #2190ac; line-height: 24px"
-                      @click="gotoPost(item)"
-                    >
+                    <el-link :underline="false" type="primary"
+                      style="display: inline; color: #2190ac; line-height: 24px" @click="gotoPost(item)">
                       {{ item.title }}
                     </el-link>
                   </template>
@@ -45,7 +35,7 @@
                 <!-- 标签 -->
                 <mr-p-p-tags :tags-map="tagsMap" :message="item"></mr-p-p-tags>
                 <!-- <span v-for="(tags,tegindex) in item.messageTags" :key="tegindex">
-                  <el-tag :type="tagsMap.get(tags.tag_id).type" size="mini" :color="tagsMap.get(tags.tag_id).color" style="margin-left:6px">
+                  <el-tag :type="tagsMap.get(tags.tag_id).type" size="small" :color="tagsMap.get(tags.tag_id).color" style="margin-left:6px">
                     <span class="tagawesome">{{ tagsMap.get(tags.tag_id).name }}</span>
                   </el-tag>
                 </span> -->
@@ -178,7 +168,7 @@ export default {
         .catch(function (error) {
           console.log(error);
         })
-        .finally(() => {});
+        .finally(() => { });
     },
   },
 };
@@ -188,13 +178,16 @@ export default {
 .tagawesome {
   cursor: pointer;
 }
+
 .el-row {
   margin-bottom: 0px;
 }
+
 .el-link:hover {
   color: #4db8db !important;
   /* opacity: 0.9; */
 }
+
 .mrpp-header {
   border-radius: 0px;
   border-top-left-radius: 5px;
@@ -204,6 +197,7 @@ export default {
   border-color: lightgrey;
   background-color: gainsboro;
 }
+
 .mrpp-row {
   border-radius: 0px;
   border-style: solid;
@@ -213,6 +207,7 @@ export default {
   border-right-width: 1px;
   border-color: lightgrey;
 }
+
 .grid-content {
   border-radius: 2px;
   height: 50px;

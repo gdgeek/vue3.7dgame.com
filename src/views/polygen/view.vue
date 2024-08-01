@@ -8,25 +8,15 @@
             <span v-if="polygenData">{{ polygenData.name }}</span>
           </template>
           <div v-loading="expire" class="box-item">
-            <three
-              v-if="polygenData"
-              ref="three"
-              :file="polygenData.file"
-              @loaded="loaded"
-              @progress="progress"
-            ></three>
+            <three v-if="polygenData" ref="three" :file="polygenData.file" @loaded="loaded" @progress="progress">
+            </three>
           </div>
           <el-progress :percentage="percentage"></el-progress>
         </el-card>
         <br />
 
         <el-card v-loading="expire" class="box-card">
-          <el-button
-            style="width: 100%"
-            type="primary"
-            size="mini"
-            @click="createVerse"
-          >
+          <el-button style="width: 100%" type="primary" size="small" @click="createVerse">
             <font-awesome-icon icon="plus"></font-awesome-icon>
             &nbsp;用此模型创建【宇宙】
           </el-button>
@@ -45,11 +35,11 @@
 
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right">
-                <el-button type="primary" size="mini" @click="namedWindow">
+                <el-button type="primary" size="small" @click="namedWindow">
                   <i class="el-icon-edit"></i>
                   改名
                 </el-button>
-                <el-button type="primary" size="mini" @click="deleteWindow">
+                <el-button type="primary" size="small" @click="deleteWindow">
                   <i class="el-icon-delete"></i>
                   删除
                 </el-button>
@@ -242,7 +232,7 @@ const loaded = async (info: any) => {
         md5,
         file.extension,
         file,
-        () => {},
+        () => { },
         handler,
         "screenshot/polygen"
       );

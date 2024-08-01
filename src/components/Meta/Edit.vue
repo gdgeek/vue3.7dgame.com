@@ -2,7 +2,7 @@
   <div class="verse-view">
     <event-dialog
       v-if="item"
-      :node="JSON.parse(item.events)"
+      :node="JSON.parse(item.events!)"
       uuid="uuid"
       @post-event="postEvent"
       ref="dialog"
@@ -17,7 +17,6 @@
         <el-card v-if="item" class="box-card">
           <template #header>
             <div>
-              <i class="el-icon-edit"></i>
               <b id="title">【元数据】名称：</b>
               <span>{{ item.title }}</span>
             </div>
@@ -49,7 +48,7 @@
               label="输入事件"
             >
               <span v-for="(event, index) in events.inputs" :key="index">
-                <el-tag size="mini">
+                <el-tag size="small">
                   {{ event.title }}
                 </el-tag>
                 &nbsp;
@@ -60,38 +59,34 @@
               label="输出事件"
             >
               <span v-for="(event, index) in events.outputs" :key="index">
-                <el-tag size="mini">
+                <el-tag size="small">
                   {{ event.title }}
                 </el-tag>
                 &nbsp;
               </span>
             </el-form-item>
-            <el-form-item v-if="!custom" label="数据">
+            <el-form-item label="数据">
               <el-input type="textarea" v-model="item.data"></el-input>
             </el-form-item>
-            <el-form-item v-if="false" label="信息">
-              <el-input type="textarea" v-model="item.info"></el-input>
+            <el-form-item label="信息">
+              <el-input type="textarea" v-model="item!.info"></el-input>
             </el-form-item>
           </el-form>
         </el-card>
         <br />
         <el-card v-if="item !== null" class="box-card">
           <el-button-group style="float: right; padding: 3px 0">
-            <el-button @click="openDialog" icon="el-icon-magic-stick">
+            <el-button
+              v-if="item.editable"
+              @click="openDialog"
+              icon="MagicStick"
+            >
               事件编辑
             </el-button>
-            <el-button
-              @click="editor"
-              v-if="custom"
-              icon="el-icon-edit-outline"
-            >
+            <el-button v-if="item.viewable" @click="editor" icon="Edit">
               内容编辑
             </el-button>
-            <el-button
-              @click="onSubmit"
-              icon="el-icon-circle-check"
-              type="primary"
-            >
+            <el-button @click="onSubmit" icon="CircleCheck" type="success">
               信息保存
             </el-button>
           </el-button-group>
@@ -123,6 +118,7 @@ import { useRoute, useRouter } from "vue-router";
 import EventDialog from "@/components/Rete/EventDialog.vue";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import type { metaInfo } from "@/api/v1/meta";
+import { ViewCard } from "vue-waterfall-plugin-next/dist/types/types/waterfall";
 
 const route = useRoute();
 const router = useRouter();
@@ -135,20 +131,28 @@ const rules = {
 };
 const itemForm = ref<InstanceType<typeof ElForm> | null>(null);
 const dialog = ref<InstanceType<typeof EventDialog> | null>(null);
-const resourceDialog = ref<InstanceType<typeof ResourceDialog> | null>(null);
+const resourceDialog = ref<InstanceType<typeof ResourceDialog> | null>();
+console.log("resourceDialog:", resourceDialog.value);
 
 const id = computed(() => parseInt(route.query.id as string, 10));
 
-const custom = computed({
-  get() {
-    return item.value?.custom !== 0;
-  },
-  set(value: boolean) {
-    if (item.value) {
-      item.value.custom = value ? 1 : 0;
-    }
-  },
-});
+const emit = defineEmits(["getItem", "putItem"]);
+
+// const custom = computed({
+//   get() {
+//     return item.value?.custom !== 0;
+//   },
+//   set(value: boolean) {
+//     if (item.value) {
+//       item.value.custom = value ? 1 : 0;
+//     }
+//   },
+// });
+
+type Event = {
+  title: string;
+  uuid: string;
+};
 
 const events = computed(() => {
   if (item.value) {
@@ -172,10 +176,9 @@ const refresh = async () => {
   item.value = data;
 };
 
-const getItem = async (id: number, expand: string) => {
+const getItem = async (id: number, expand: any) => {
   return new Promise<metaInfo>((resolve, reject) => {
     try {
-      // Assume `emit` function is available in the setup context
       emit("getItem", id, expand, (data: metaInfo) => {
         resolve(data);
       });
@@ -188,7 +191,6 @@ const getItem = async (id: number, expand: string) => {
 const putItem = async (id: number, data: metaInfo) => {
   return new Promise<metaInfo>((resolve, reject) => {
     try {
-      // Assume `emit` function is available in the setup context
       emit("putItem", id, data, (ret: metaInfo) => {
         resolve(ret);
       });
@@ -217,7 +219,7 @@ const openResources = (
   // Handle resource dialog opening logic here
 };
 
-const selectResources = async (data: any) => {
+const selectResources = async (data: ViewCard) => {
   if (item.value) {
     item.value.image_id = data.image_id;
     await putItem(id.value, item.value);
@@ -228,7 +230,10 @@ const selectResources = async (data: any) => {
 
 const selectImage = () => {
   if (resourceDialog.value) {
-    resourceDialog.value.openIt({ type: "picture" });
+    console.log("测试");
+    resourceDialog.value.openIt({
+      type: "picture",
+    });
   }
 };
 
@@ -259,7 +264,7 @@ const openDialog = () => {
 
 const onSubmit = async () => {
   if (item.value) {
-    item.value.custom = custom.value ? 1 : 0;
+    // item.value.custom = custom.value ? 1 : 0;
     await putItem(id.value, item.value);
     ElMessage.success("保存成功");
     await refresh();

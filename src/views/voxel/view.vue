@@ -23,7 +23,7 @@
           <el-button
             style="width: 100%"
             type="primary"
-            size="mini"
+            size="small"
             @click="createVerse"
           >
             <font-awesome-icon icon="plus"></font-awesome-icon>

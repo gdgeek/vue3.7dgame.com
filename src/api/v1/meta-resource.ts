@@ -1,6 +1,7 @@
 import request from "@/utils/request";
 import qs from "querystringify";
 import path from "path-browserify";
+import { metaInfo } from "./meta";
 
 export const postMetaResource = (data: Record<string, any>) => {
   const url = path.join("v1", "meta-resources");
@@ -38,7 +39,7 @@ export const getMetaResources = (
     "meta-resources",
     "resources" + qs.stringify(query, true)
   );
-  return request({
+  return request<metaInfo[]>({
     url,
     method: "get",
   });

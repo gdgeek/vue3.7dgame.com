@@ -12,28 +12,11 @@
             <section class="audio-bgc">
               <br />
               <div class="audio-box">
-                <div
-                  class="audio-record"
-                  :class="{ 'audio-record-playfast': isPlay }"
-                  @click="handlePlayAudio"
-                ></div>
-                <div
-                  class="audio-record-image"
-                  :class="{ 'audio-record-play': isPlay }"
-                  @click="handlePlayAudio"
-                ></div>
+                <div class="audio-record" :class="{ 'audio-record-playfast': isPlay }" @click="handlePlayAudio"></div>
+                <div class="audio-record-image" :class="{ 'audio-record-play': isPlay }" @click="handlePlayAudio"></div>
               </div>
-              <audio
-                id="audio"
-                controls
-                style="width: 95%; height: 84px"
-                :src="file"
-                preload="auto"
-                @play="listenPlay"
-                @pause="listenPause"
-                @ended="listenEnd"
-                @canplaythrough="dealWith"
-              ></audio>
+              <audio id="audio" controls style="width: 95%; height: 84px" :src="file" preload="auto" @play="listenPlay"
+                @pause="listenPause" @ended="listenEnd" @canplaythrough="dealWith"></audio>
             </section>
           </div>
         </el-card>
@@ -51,11 +34,11 @@
 
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right">
-                <el-button type="primary" size="mini" @click="namedWindow">
+                <el-button type="primary" size="small" @click="namedWindow">
                   <i class="el-icon-edit"></i>
                   改名
                 </el-button>
-                <el-button type="primary" size="mini" @click="deleteWindow">
+                <el-button type="primary" size="small" @click="deleteWindow">
                   <i class="el-icon-delete"></i>
                   删除
                 </el-button>
@@ -219,7 +202,7 @@ const setup = async (
         md5,
         file.type.split("/").pop()!,
         file,
-        () => {},
+        () => { },
         handler,
         "screenshot/audio"
       );
@@ -283,12 +266,11 @@ const named = async (id: number, name: string) => {
   width: 100%;
   height: 350px;
   background: rgb(238, 174, 202);
-  background: radial-gradient(
-    circle,
-    rgba(238, 174, 202, 1) 0%,
-    rgb(169, 196, 228) 100%
-  );
+  background: radial-gradient(circle,
+      rgba(238, 174, 202, 1) 0%,
+      rgb(169, 196, 228) 100%);
 }
+
 .audio-box {
   position: relative;
   margin: auto;
@@ -296,6 +278,7 @@ const named = async (id: number, name: string) => {
   width: 200px;
   height: 200px;
 }
+
 .audio-record {
   position: absolute;
   left: 0;
@@ -309,6 +292,7 @@ const named = async (id: number, name: string) => {
   background: url("/media/bg/audio-record.jpg") center no-repeat;
   background-size: cover;
 }
+
 .audio-record-image {
   position: absolute;
   left: 0;
@@ -322,24 +306,30 @@ const named = async (id: number, name: string) => {
   background: url("/media/bg/audio-img.jpg") center no-repeat;
   background-size: 113%;
 }
+
 .audio-record-play {
   animation: spin 6s infinite linear;
 }
+
 .audio-record-playfast {
   animation: recordfast 0.16s infinite linear;
 }
+
 @keyframes spin {
   0% {
     transform: rotate(0edg);
   }
+
   100% {
     transform: rotate(360deg);
   }
 }
+
 @keyframes recordfast {
   0% {
     transform: rotate(0edg);
   }
+
   100% {
     transform: rotate(1.1deg);
   }

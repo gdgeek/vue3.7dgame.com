@@ -85,12 +85,12 @@
       </el-row>
       <!-- 修改密码弹窗 -->
       <el-dialog
-        title="修改密码"
         v-model="dialogPasswordVisible"
         :close-on-click-modal="false"
         style="min-width: 560px"
         @close="resetForm"
       >
+        <template #header> 修改密码 </template>
         <el-form
           ref="passwordFormRef"
           :model="passwordForm"

@@ -165,12 +165,8 @@
       </el-row>
       <!-- 用户基本信息 end -->
       <!-- vueCropper 剪裁图片dialog实现 -->
-      <el-dialog
-        title="头像截取"
-        v-model="dialogVisible"
-        class="crop-dialog"
-        append-to-body
-      >
+      <el-dialog v-model="dialogVisible" class="crop-dialog" append-to-body>
+        <template #header> 头像截取 </template>
         <div class="cropper-content">
           <div class="cropper" style="text-align: center">
             <VueCropper

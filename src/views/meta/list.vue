@@ -48,15 +48,15 @@
                           src="@/assets/image/none.png"
                           style="
                             width: 100%;
-                            height: 300px;
+                            height: 270px;
                             object-fit: contain;
                           "
                         />
                         <img
                           v-else
-                          style="width: 100%; height: 300px"
+                          style="width: 100%; height: 270px"
                           fit="contain"
-                          :src="item.image!"
+                          :src="item.image.url!"
                           lazy
                         />
                       </router-link>

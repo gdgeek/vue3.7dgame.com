@@ -16,6 +16,7 @@ const getMetaData = async (
 ) => {
   try {
     const response = await getMeta(id, expand);
+    console.log("response:", response);
     callback(response.data);
   } catch (error) {
     console.error(error);
