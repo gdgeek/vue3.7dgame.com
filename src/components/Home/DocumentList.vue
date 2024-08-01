@@ -47,9 +47,9 @@
     <el-pagination
       v-if="pagination.count! > 1"
       :current-page="pagination.current"
-      :page-count="pagination.count"
+      :page-count="pagination.count ?? 0"
       :page-size="pagination.size"
-      :total="pagination.total"
+      :total="pagination.total ?? 0"
       layout="prev, pager, next, jumper"
       background
       @current-change="handleCurrentChange"

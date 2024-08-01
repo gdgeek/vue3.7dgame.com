@@ -273,3 +273,9 @@ const onSubmit = async () => {
 
 onMounted(refresh);
 </script>
+
+<style scoped>
+.box-item {
+  cursor: pointer;
+}
+</style>

@@ -31,18 +31,15 @@ function toFixedVector3(vec: Vector3, n: number): Vector3 {
   return result;
 }
 
-const props = defineProps({
-  file: {
-    type: Object,
-    required: true,
-  },
-  target: {
-    type: Number,
-    default: 1.5,
-  },
-});
+const props = defineProps<{
+  file: { url: string };
+  target?: number;
+}>();
 
-const emit = defineEmits(["loaded", "progress"]);
+const emit = defineEmits<{
+  (e: "loaded", data: { size: Vector3; center: Vector3 }): void;
+  (e: "progress", progress: number): void;
+}>();
 
 const scene = ref<THREE.Scene | null>(null);
 const renderer = ref<THREE.WebGLRenderer | null>(null);
@@ -51,12 +48,12 @@ const sleep = ref(false);
 
 // 刷新场景并加载新模型
 const refresh = () => {
-  if (scene.value && file && file.url) {
+  if (scene.value && props.file && props.file.url) {
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath("/three.js/examples/js/libs/draco/");
     const gltfLoader = new GLTFLoader();
     gltfLoader.setDRACOLoader(dracoLoader);
-    let url = convertToHttps(file.url);
+    let url = convertToHttps(props.file.url);
     // 加载模型
     gltfLoader.load(
       url,
@@ -66,7 +63,7 @@ const refresh = () => {
         box.getCenter(center);
         const size = new Vector3();
         box.getSize(size);
-        const scale = target / size.x;
+        const scale = (props.target ?? 1.5) / size.x;
         model.scene.position.set(
           -center.x * scale,
           -center.y * scale,
@@ -111,9 +108,9 @@ const screenshot = () => {
           const width = content.clientWidth;
           const height = content.clientHeight;
           renderer.value?.setSize(width, height);
-          renderer.value?.render(scene.value, camera.value);
-          camera.value.aspect = width / height;
-          camera.value.updateProjectionMatrix();
+          renderer.value?.render(scene.value!, camera.value!);
+          camera.value!.aspect = width / height;
+          camera.value!.updateProjectionMatrix();
           sleep.value = false;
           resolve(blob);
         }
@@ -131,11 +128,14 @@ const parseNode = async (json: any): Promise<THREE.Object3D> => {
 };
 
 // 监听文件变化
-watch(file, () => {
-  if (file) {
-    refresh();
+watch(
+  () => props.file,
+  () => {
+    if (props.file) {
+      refresh();
+    }
   }
-});
+);
 
 onMounted(() => {
   const content = document.getElementById("three");
@@ -169,7 +169,7 @@ onMounted(() => {
     const animate = () => {
       requestAnimationFrame(animate);
       controls.update();
-      renderer.value?.render(scene.value, camera.value);
+      renderer.value?.render(scene.value!, camera.value!);
     };
 
     animate();
@@ -181,8 +181,8 @@ onMounted(() => {
         const width = content.clientWidth;
         const height = content.clientHeight;
         renderer.value?.setSize(width, height);
-        camera.value.aspect = width / height;
-        camera.value.updateProjectionMatrix();
+        camera.value!.aspect = width / height;
+        camera.value!.updateProjectionMatrix();
       }
     });
 

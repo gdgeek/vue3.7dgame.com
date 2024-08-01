@@ -258,6 +258,8 @@ import "vue-cropper/dist/index.css";
 import VueCropper from "vue-cropper";
 import type { Avatar, InfoType } from "@/api/user/model";
 import type { FileHandler } from "@/assets/js/file/server";
+import { FormItemRule } from "element-plus";
+import type { UploadFile, UploadFiles } from "element-plus";
 
 // 注册组件
 const components = {
@@ -294,7 +296,9 @@ type Rule = {
   ) => void;
 };
 
-const nicknameRules = ref<Record<string, Rule[]>>({
+type Arrayable<T> = T | T[];
+
+const nicknameRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
   nickname: [
     { required: true, message: "请输入用户昵称", trigger: "blur" },
     { min: 2, message: "昵称长度应该大于2", trigger: "blur" },
@@ -311,7 +315,7 @@ const nicknameRules = ref<Record<string, Rule[]>>({
       trigger: "blur",
     },
   ],
-});
+};
 
 // 基本信息表单
 const infoForm = ref<InfoType>({
@@ -451,7 +455,7 @@ const saveInfo = () => {
   });
 };
 
-const handleChangeUpload = async (file: any, fileList: File[]) => {
+const handleChangeUpload = async (file: UploadFile, fileList: UploadFiles) => {
   const selectedFile = file.raw;
   if (selectedFile) {
     const isJPG = [

@@ -102,7 +102,7 @@ function replaceIP(input: string): string {
 }
 
 const environment = {
-  local: !!import.meta.env.VITE_APP_LOCAL,
+  Local: !!import.meta.env.VITE_APP_LOCAL,
   mode: import.meta.env.VITE_APP_BASE_MODE || "",
   ip: getIP(),
   api: import.meta.env.VITE_APP_BASE_API || "",
