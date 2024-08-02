@@ -419,6 +419,7 @@ const doUnbind = async (data: any) => {
 
 defineExpose({
   openIt,
+  open,
 });
 
 type ViewCard = {

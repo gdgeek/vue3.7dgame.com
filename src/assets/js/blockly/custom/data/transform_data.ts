@@ -1,9 +1,26 @@
-import Blockly from 'blockly'
-import DataType from './type'
-const data = {
-  name: 'transform_data'
+import Blockly from 'blockly';
+import DataType from './type';
+import "blockly/lua"
+
+// 定义数据类型
+interface BlockData {
+  name: string;
 }
-const block = {
+
+// 定义 Block 类型
+interface BlockType {
+  title: string;
+  type: string;
+  getBlock: (args: any) => Blockly.Block;
+  getLua: (args: any) => (block: Blockly.Block) => [string, number];
+  toolbox: any;
+}
+
+const data: BlockData = {
+  name: 'transform_data'
+};
+
+const block: BlockType = {
   title: data.name,
   type: DataType.name,
   getBlock({}) {
@@ -34,41 +51,41 @@ const block = {
           colour: DataType.colour,
           tooltip: '',
           helpUrl: ''
-        })
+        });
       }
-    }
-    return block
+    } as Blockly.Block; // 显式地将对象类型转换为 Blockly.Block
+    return block;
   },
   getLua({}) {
-    const lua = function (block) {
-      var value_position = Blockly.Lua.valueToCode(
+    const lua = function (block: Blockly.Block): [string, number] {
+      const value_position = Blockly.Lua.valueToCode(
         block,
         'position',
         Blockly.Lua.ORDER_ATOMIC
-      )
-      var value_scale = Blockly.Lua.valueToCode(
+      );
+      const value_scale = Blockly.Lua.valueToCode(
         block,
         'scale',
         Blockly.Lua.ORDER_ATOMIC
-      )
-      var value_rotate = Blockly.Lua.valueToCode(
+      );
+      const value_rotate = Blockly.Lua.valueToCode(
         block,
         'rotate',
         Blockly.Lua.ORDER_ATOMIC
-      )
+      );
       // TODO: Assemble Lua into code variable.
-      var code =
+      const code =
         'CS.MLua.Transform(' +
         value_position +
         ', ' +
         value_rotate +
         ', ' +
         value_scale +
-        ')'
+        ')';
       // TODO: Change ORDER_NONE to the correct strength.
-      return [code, Blockly.Lua.ORDER_NONE]
-    }
-    return lua
+      return [code, Blockly.Lua.ORDER_NONE];
+    };
+    return lua;
   },
   toolbox: {
     kind: 'block',
@@ -169,5 +186,6 @@ const block = {
       }
     }
   }
-}
-export default block
+};
+
+export default block;

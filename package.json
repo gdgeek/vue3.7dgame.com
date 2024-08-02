@@ -44,6 +44,8 @@
     ]
   },
   "dependencies": {
+    "@casl/ability": "^6.7.1",
+    "@casl/vue": "^2.2.2",
     "@element-plus/icons-vue": "^2.3.1",
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
@@ -53,6 +55,7 @@
     "@vueuse/core": "^10.11.0",
     "animate.css": "^4.1.1",
     "axios": "^1.7.2",
+    "blockly": "^11.1.1",
     "color": "^4.2.3",
     "cos-js-sdk-v5": "^1.8.3",
     "dompurify": "^3.1.6",
@@ -73,10 +76,10 @@
     "vue": "^3.4.27",
     "vue-cropper": "^1.1.4",
     "vue-i18n": "9.9.1",
+    "vue-iframes": "^0.0.21",
     "vue-router": "^4.3.3",
     "vue-waterfall-plugin": "^3.3.1",
-    "vue-waterfall-plugin-next": "^2.4.3",
-    "vue2-waterfall": "^3.0.1"
+    "vue-waterfall-plugin-next": "^2.4.3"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.6.1",
@@ -129,7 +132,7 @@
     "vue-tsc": "^2.0.21"
   },
   "repository": "https://gitee.com/youlaiorg/vue3-element-admin.git",
-  "author": "有来开源组织",
+  "author": "",
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"

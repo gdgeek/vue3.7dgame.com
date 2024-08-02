@@ -2,6 +2,7 @@ import request from "@/utils/request";
 import qs from "querystringify";
 import path from "path-browserify";
 import { ResourceInfo } from "../resources/model";
+import type { cybersType } from "./cyber";
 
 type Author = {
   id: number;
@@ -37,6 +38,7 @@ export type metaInfo = {
   editable: boolean;
   viewable: boolean;
   custome?: boolean;
+  cyber?: cybersType;
   author?: Author;
 };
 

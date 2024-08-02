@@ -13,7 +13,7 @@ import { SoundRegister } from '@/assets/js/blockly/custom/sound'
 import { VoxelRegister } from '@/assets/js/blockly/custom/voxel'
 import { EventRegister } from '@/assets/js/blockly/custom/event'
 
-function AddBlocks(parameters) {
+function AddBlocks(parameters: any) {
   MetaRegister(parameters)
   TriggerRegister(parameters)
   EntityRegister(parameters)
