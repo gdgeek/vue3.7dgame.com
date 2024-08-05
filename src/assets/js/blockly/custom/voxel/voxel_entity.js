@@ -1,6 +1,6 @@
-import Blockly from 'blockly'
+import * as Blockly from 'blockly';
 import DataType from './type'
-import Helper from '../helper'
+import { handler } from '../helper'
 
 const data = {
   name: 'voxel_entity'
@@ -47,7 +47,7 @@ const block = {
     const lua = function (block) {
       var dropdown = block.getFieldValue('Voxel')
 
-      return [Helper.handler(dropdown), Blockly.Lua.ORDER_NONE]
+      return [handler(dropdown), Blockly.Lua.ORDER_NONE]
     }
     return lua
   },

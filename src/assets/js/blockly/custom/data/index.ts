@@ -1,19 +1,15 @@
 import Type from './type';
-import Blockly from 'blockly';
+import * as Blockly from 'blockly';
 
 import Vector3Data from './vector3_data';
 import TransformData from './transform_data';
-// import ModuleToTransformData from './module_to_transform_data';
-import luaGenerator from 'blockly/lua';
-
-interface LuaGenerator {
-  [key: string]: any; // 允许使用字符串作为索引
-}
+import 'blockly/lua';
+import { LuaGenerator } from 'blockly/lua';
 
 interface Data {
   title: string;
-  getBlock: (parameters: any) => any;
-  getLua: (parameters: any) => any;
+  getBlock: (parameters: any) => Blockly.Block;
+  getLua: (parameters: any) => (block: Blockly.Block) => [string, number];
 }
 
 const DataCategory = {
@@ -27,12 +23,15 @@ const DataCategory = {
   ]
 };
 
-function RegisterData(data: Data, parameters: any) {
+// 创建 Lua 生成器实例
+const luaGeneratorInstance = new LuaGenerator() as any;
+
+function RegisterData(data: Data, parameters: any): void {
   Blockly.Blocks[data.title] = data.getBlock(parameters);
-  (luaGenerator as LuaGenerator)[data.title] = data.getLua(parameters);
+  luaGeneratorInstance[data.title] = data.getLua(parameters);
 }
 
-function DataRegister(parameters: any) {
+function DataRegister(parameters: any): void {
   RegisterData(Vector3Data, parameters);
   RegisterData(TransformData, parameters);
   // RegisterData(ModuleToTransformData, parameters);

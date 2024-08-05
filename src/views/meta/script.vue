@@ -77,48 +77,57 @@ const saveable = computed(() => {
 });
 
 const save = () => {
-  blocklyRef.value!.save();
+  if (blocklyRef.value) {
+    blocklyRef.value.save();
+  } else {
+    console.error("blocklyRef is null");
+  }
 };
 
 onMounted(async () => {
-  setBreadcrumbs([
-    { path: "/", meta: { title: "元宇宙实景编程平台" } },
-    { path: "/meta-verse/index", meta: { title: "宇宙" } },
-    { path: ".", meta: { title: "赛博编辑" } },
-  ]);
+  try {
+    setBreadcrumbs([
+      { path: "/", meta: { title: "元宇宙实景编程平台" } },
+      { path: "/meta-verse/index", meta: { title: "宇宙" } },
+      { path: ".", meta: { title: "赛博编辑" } },
+    ]);
 
-  const response = await getMeta(id.value, "cyber,event,share");
-  meta.value = response.data;
-
-  setBreadcrumbs([
-    { path: "/", meta: { title: "元宇宙实景编程平台" } },
-    { path: "/meta-verse/index", meta: { title: "宇宙" } },
-    {
-      path: "/verse/view?id=" + meta.value.id,
-      meta: { title: "【宇宙】" },
-    },
-    {
-      path: "/verse/scene?id=" + meta.value.id,
-      meta: { title: "宇宙编辑" },
-    },
-    {
-      path:
-        "/meta/rete-meta?id=" +
-        meta.value.id +
-        "&title=" +
-        encodeURIComponent(title.value),
-      meta: { title: "元编辑" },
-    },
-    { path: ".", meta: { title: "赛博" } },
-  ]);
-
-  if (meta.value.cyber === null) {
-    if (saveable.value) {
-      const response = await postCyber({ meta_id: meta.value.id });
-      cyber.value = response.data;
+    const response = await getMeta(id.value, "cyber,event,share");
+    meta.value = response.data;
+    if (meta.value && meta.value.cyber !== null) {
+      setBreadcrumbs([
+        { path: "/", meta: { title: "元宇宙实景编程平台" } },
+        { path: "/meta-verse/index", meta: { title: "宇宙" } },
+        {
+          path: "/verse/view?id=" + meta.value!.id,
+          meta: { title: "【宇宙】" },
+        },
+        {
+          path: "/verse/scene?id=" + meta.value!.id,
+          meta: { title: "宇宙编辑" },
+        },
+        {
+          path:
+            "/meta/rete-meta?id=" +
+            meta.value!.id +
+            "&title=" +
+            encodeURIComponent(title.value),
+          meta: { title: "元编辑" },
+        },
+        { path: ".", meta: { title: "赛博" } },
+      ]);
     }
-  } else {
-    cyber.value = meta.value.cyber;
+    if (meta.value!.cyber === null) {
+      if (saveable.value) {
+        const response = await postCyber({ meta_id: meta.value!.id });
+        cyber.value = response.data;
+      }
+    } else {
+      cyber.value = meta.value!.cyber;
+      console.log("cyber:", cyber.value);
+    }
+  } catch (error) {
+    console.error("Error in onMounted:", error);
   }
 });
 

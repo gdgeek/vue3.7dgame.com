@@ -1,29 +1,51 @@
-import Blockly from 'blockly';
+import * as Blockly from 'blockly';
 import DataType from './type';
-import "blockly/lua"
+import { LuaGenerator } from 'blockly/lua';
 
-// 定义数据类型
-interface BlockData {
+const luaGeneratorInstance = new LuaGenerator() as any;
+
+// 定义 data 对象的类型
+interface Data {
   name: string;
 }
 
-// 定义 Block 类型
-interface BlockType {
+// 定义 block 对象的类型
+interface Block {
   title: string;
   type: string;
-  getBlock: (args: any) => Blockly.Block;
-  getLua: (args: any) => (block: Blockly.Block) => [string, number];
-  toolbox: any;
+  getBlock: (parameters: any) => Blockly.Block;
+  getLua: (parameters: any) => (block: Blockly.Block) => [string, number];
+  toolbox: {
+    kind: string;
+    type: string;
+    inputs: {
+      [key: string]: {
+        shadow: {
+          type: string;
+          inputs?: {
+            [key: string]: {
+              shadow: {
+                type: string;
+                fields?: {
+                  NUM: number;
+                };
+              };
+            };
+          };
+        };
+      };
+    };
+  };
 }
 
-const data: BlockData = {
+const data: Data = {
   name: 'transform_data'
 };
 
-const block: BlockType = {
+const block: Block = {
   title: data.name,
   type: DataType.name,
-  getBlock({}) {
+  getBlock({ }): Blockly.Block {
     const block = {
       init: function () {
         this.jsonInit({
@@ -53,37 +75,30 @@ const block: BlockType = {
           helpUrl: ''
         });
       }
-    } as Blockly.Block; // 显式地将对象类型转换为 Blockly.Block
+    } as Blockly.Block; // 使用类型断言来满足 TypeScript 的类型要求
+
     return block;
   },
-  getLua({}) {
+  getLua({ }): (block: Blockly.Block) => [string, number] {
     const lua = function (block: Blockly.Block): [string, number] {
-      const value_position = Blockly.Lua.valueToCode(
+      const value_position = luaGeneratorInstance.valueToCode(
         block,
         'position',
-        Blockly.Lua.ORDER_ATOMIC
+        luaGeneratorInstance.ORDER_ATOMIC
       );
-      const value_scale = Blockly.Lua.valueToCode(
+      const value_scale = luaGeneratorInstance.valueToCode(
         block,
         'scale',
-        Blockly.Lua.ORDER_ATOMIC
+        luaGeneratorInstance.ORDER_ATOMIC
       );
-      const value_rotate = Blockly.Lua.valueToCode(
+      const value_rotate = luaGeneratorInstance.valueToCode(
         block,
         'rotate',
-        Blockly.Lua.ORDER_ATOMIC
+        luaGeneratorInstance.ORDER_ATOMIC
       );
-      // TODO: Assemble Lua into code variable.
-      const code =
-        'CS.MLua.Transform(' +
-        value_position +
-        ', ' +
-        value_rotate +
-        ', ' +
-        value_scale +
-        ')';
-      // TODO: Change ORDER_NONE to the correct strength.
-      return [code, Blockly.Lua.ORDER_NONE];
+
+      const code = `CS.MLua.Transform(${value_position}, ${value_rotate}, ${value_scale})`;
+      return [code, luaGeneratorInstance.ORDER_NONE]; // TODO: Change ORDER_NONE to the correct strength.
     };
     return lua;
   },
@@ -189,3 +204,4 @@ const block: BlockType = {
 };
 
 export default block;
+

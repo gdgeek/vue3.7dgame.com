@@ -1,6 +1,6 @@
-import Blockly from 'blockly'
+import * as Blockly from 'blockly';
 import EventType from './type'
-import Helper from '../helper'
+// import Helper from '../helper'
 const data = {
   name: 'parameters'
 }

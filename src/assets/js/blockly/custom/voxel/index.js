@@ -1,5 +1,5 @@
 import Type from './type'
-import Blockly from 'blockly'
+import * as Blockly from 'blockly';
 import VoxelEntity from './voxel_entity'
 //import PlayVideoCallback from './play_video_callback'
 

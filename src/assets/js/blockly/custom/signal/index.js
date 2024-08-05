@@ -1,5 +1,5 @@
 import Type from './type'
-import Blockly from 'blockly'
+import * as Blockly from 'blockly';
 import OutputSignal from './output_signal'
 import OutputSignalWithParameter from './output_signal_with_parameter'
 import InputSignal from './input_signal'

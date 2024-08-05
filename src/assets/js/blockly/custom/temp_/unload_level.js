@@ -1,4 +1,4 @@
-import Blockly from 'blockly'
+import * as Blockly from 'blockly';
 import EventType from './type'
 const data = {
   name: 'unload_level'

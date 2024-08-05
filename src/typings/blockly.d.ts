@@ -1,10 +1,6 @@
-// declare module "blockly" {
-//   namespace Blockly {
-//     namespace serialization {
-//       namespace workspaces {
-//         function save(workspace: any): any;
-//         function load(data: any, workspace: any): void;
-//       }
-//     }
-//   }
-// }
+declare namespace Blockly {
+  namespace Lua {
+    function valueToCode(block: Block, name: string, order: number): string;
+    const ORDER_NONE: number;
+  }
+}

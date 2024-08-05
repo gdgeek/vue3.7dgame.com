@@ -1,4 +1,4 @@
-import Blockly from 'blockly'
+import * as Blockly from 'blockly';
 import DataType from './type'
 const data = {
   name: 'boom_execute'
@@ -7,7 +7,7 @@ const block = {
   title: data.name,
   type: DataType.name,
   colour: DataType.colour,
-  getBlockJson({}) {
+  getBlockJson({ }) {
     const json = {
       type: data.name,
       message0: '爆炸 %1',
@@ -36,7 +36,7 @@ const block = {
     }
     return data
   },
-  getLua({}) {
+  getLua({ }) {
     const lua = function (block) {
       var value_boom = Blockly.Lua.valueToCode(
         block,

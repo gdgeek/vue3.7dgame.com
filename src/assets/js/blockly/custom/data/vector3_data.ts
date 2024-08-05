@@ -1,13 +1,47 @@
-import Blockly from 'blockly'
-import DataType from './type'
-const data = {
-  name: 'vector3_data'
+import * as Blockly from 'blockly';
+import DataType from './type';
+
+import { LuaGenerator } from 'blockly/lua';
+
+const luaGeneratorInstance = new LuaGenerator() as any;
+
+// 定义 data 对象的类型
+interface Data {
+  name: string;
 }
-const block = {
+
+// 定义 block 对象的类型
+interface Block {
+  title: string;
+  type: string;
+  colour: number;
+  getBlock: (parameters: any) => Blockly.Block;
+  getLua: (parameters: any) => (block: Blockly.Block) => [string, number];
+  toolbox: {
+    kind: string;
+    type: string;
+    inputs: {
+      [key: string]: {
+        shadow: {
+          type: string;
+          fields?: {
+            NUM: number;
+          };
+        };
+      };
+    };
+  };
+}
+
+const data: Data = {
+  name: 'vector3_data'
+};
+
+const block: Block = {
   title: data.name,
   type: DataType.name,
   colour: DataType.colour,
-  getBlock: function ({ }) {
+  getBlock: function ({ }): Blockly.Block {
     const block = {
       init: function () {
         this.jsonInit({
@@ -35,34 +69,35 @@ const block = {
           colour: DataType.colour,
           tooltip: '',
           helpUrl: ''
-        })
+        });
       }
-    }
-    return block
+    } as Blockly.Block; // 使用类型断言来满足 TypeScript 的类型要求
+
+    return block;
   },
-  getLua({ }) {
-    const lua = function (block) {
-      var value_x = Blockly.Lua.valueToCode(
+  getLua({ }): (block: Blockly.Block) => [string, number] {
+    const lua = function (block: Blockly.Block): [string, number] {
+      const value_x = luaGeneratorInstance.valueToCode(
         block,
         'X',
-        Blockly.Lua.ORDER_ATOMIC
-      )
-      var value_y = Blockly.Lua.valueToCode(
+        luaGeneratorInstance.ORDER_ATOMIC
+      );
+      const value_y = luaGeneratorInstance.valueToCode(
         block,
         'Y',
-        Blockly.Lua.ORDER_ATOMIC
-      )
-      var value_z = Blockly.Lua.valueToCode(
+        luaGeneratorInstance.ORDER_ATOMIC
+      );
+      const value_z = luaGeneratorInstance.valueToCode(
         block,
         'Z',
-        Blockly.Lua.ORDER_ATOMIC
-      )
-      // TODO: Assemble Lua into code variable.
-      var code = 'CS.UnityEngine.Vector3(' + [value_x, value_y, value_z] + ')'
-      // TODO: Change ORDER_NONE to the correct strength.
-      return [code, Blockly.Lua.ORDER_NONE]
-    }
-    return lua
+        luaGeneratorInstance.ORDER_ATOMIC
+      );
+
+      // 生成 Lua 代码
+      const code = `CS.UnityEngine.Vector3(${value_x}, ${value_y}, ${value_z})`;
+      return [code, luaGeneratorInstance.ORDER_NONE]; // TODO: Change ORDER_NONE to the correct strength.
+    };
+    return lua;
   },
   toolbox: {
     kind: 'block',
@@ -94,5 +129,6 @@ const block = {
       }
     }
   }
-}
-export default block
+};
+
+export default block;

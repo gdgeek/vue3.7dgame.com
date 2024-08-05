@@ -8,6 +8,8 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
 import ability from "./ability";
 import VueIframe from "vue-iframes";
 
+import highlightDirective from "./directive/highlight";
+
 library.add(fas);
 
 // 本地SVG图标
@@ -21,6 +23,7 @@ import "animate.css";
 
 const app = createApp(App);
 app.component("FontAwesomeIcon", FontAwesomeIcon);
+app.directive("highlight", highlightDirective);
 app.use(setupPlugins);
 // app.use(ability);
 app.use(VueIframe);

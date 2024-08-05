@@ -20,13 +20,15 @@
 </template>
 
 <script setup lang="ts">
-import Blockly from "blockly";
+import * as Blockly from "blockly";
 import "blockly/lua";
-import luaGenerator from "blockly/lua";
 import toolbox from "@/assets/js/blockly/toolbox";
 import { AddBlocks } from "@/assets/js/blockly/blocks";
 import { cybersType, putCyber } from "@/api/v1/cyber";
 import { metaInfo } from "@/api/v1/meta";
+import { LuaGenerator } from "blockly/lua";
+
+const luaGeneratorInstance = new LuaGenerator() as any;
 
 const props = defineProps<{
   cyber: cybersType;
@@ -191,7 +193,7 @@ const handleClick = (tab: any, event: any) => {
   if (activeName.value === "script") {
     script.value =
       "local meta = {}\nindex = ''\n" +
-      Blockly.Lua.workspaceToCode(workspace.value!);
+      luaGeneratorInstance.workspaceToCode(workspace.value!);
     // luaGenerator.workspaceToCode(workspace.value!);
   }
   console.log(tab, event);
@@ -206,7 +208,7 @@ const save = async () => {
   try {
     const scriptValue =
       "local meta = {}\nindex = ''\n" +
-      Blockly.Lua.workspaceToCode(workspace.value);
+      luaGeneratorInstance.workspaceToCode(workspace.value);
     // luaGenerator.workspaceToCode(workspace.value);
 
     await putCyber(props.cyber.id, {

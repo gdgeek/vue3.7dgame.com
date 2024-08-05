@@ -1,5 +1,5 @@
 import Type from './type'
-import Blockly from 'blockly'
+import * as Blockly from 'blockly';
 import BoomExecute from './boom_execute'
 import FunctionExecute from './function_execute'
 //import LineExecute from './line_execute'

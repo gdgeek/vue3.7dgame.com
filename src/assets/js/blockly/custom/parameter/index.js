@@ -1,5 +1,5 @@
 import Type from './type'
-import Blockly from 'blockly'
+import * as Blockly from 'blockly';
 import BooleanParameter from './boolean_parameter'
 import NumberParameter from './number_parameter'
 import StringParameter from './string_parameter'

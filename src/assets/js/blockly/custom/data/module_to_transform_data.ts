@@ -1,31 +1,34 @@
-import Blockly from 'blockly';
+import * as Blockly from 'blockly';
 import DataType from './type';
+import { LuaGenerator } from 'blockly/lua';
 
-// 定义数据类型
-interface BlockData {
+// 定义 data 对象的类型
+interface Data {
   name: string;
 }
 
-// 定义 Block 类型
-interface BlockType {
+// 定义 block 对象的类型
+interface Block {
   title: string;
   type: string;
-  getBlock: (args: any) => Blockly.Block;
-  getLua: (args: { index?: number }) => (block: Blockly.Block) => [string, number];
+  getBlock: (parameters: any) => Blockly.Block;
+  getLua: (parameters: { index: any }) => (block: Blockly.Block) => [string, number];
   toolbox: {
     kind: string;
     type: string;
   };
 }
 
-const data: BlockData = {
+const data: Data = {
   name: 'module_to_transform_data'
 };
 
-const block: BlockType = {
+const luaGeneratorInstance = new LuaGenerator() as any;
+
+const block: Block = {
   title: data.name,
   type: DataType.name,
-  getBlock({ }) {
+  getBlock({ }): Blockly.Block {
     const block = {
       init: function () {
         this.jsonInit({
@@ -45,19 +48,21 @@ const block: BlockType = {
           helpUrl: ''
         });
       }
-    } as Blockly.Block; // 强制转换为 Blockly.Block 类型
+    } as Blockly.Block;
+
     return block;
   },
-  getLua({ index }) {
+  getLua({ index }): (block: Blockly.Block) => [string, number] {
     const lua = function (block: Blockly.Block): [string, number] {
-      const value_entity = Blockly.Lua.valueToCode(
+      const value_entity = luaGeneratorInstance.valueToCode(
         block,
         'entity',
-        Blockly.Lua.ORDER_NONE
+        luaGeneratorInstance.ORDER_NONE
       );
+
       const code = `CS.MLua.Point.ToTransformData(${value_entity})\n`;
-      // TODO: 根据需要调整 ORDER_NONE
-      return [code, Blockly.Lua.ORDER_NONE];
+      // TODO: Change ORDER_NONE to the correct strength.
+      return [code, luaGeneratorInstance.ORDER_NONE];
     };
     return lua;
   },
@@ -68,3 +73,7 @@ const block: BlockType = {
 };
 
 export default block;
+
+
+
+

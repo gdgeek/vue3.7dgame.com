@@ -1,5 +1,5 @@
 import Type from './type'
-import Blockly from 'blockly'
+import * as Blockly from 'blockly';
 
 //import Event from './event.js'
 //import OutEvent from './out_event.js'
