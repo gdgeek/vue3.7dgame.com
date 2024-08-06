@@ -5,6 +5,11 @@ import { LuaGenerator } from 'blockly/lua';
 
 const luaGeneratorInstance = new LuaGenerator() as any;
 
+
+interface Data {
+  name: string;
+}
+
 // 定义参数类型
 interface Parameters {
   action: { name: string; uuid: string }[];
@@ -39,7 +44,7 @@ interface Block {
 }
 
 // 实现 Block 对象
-const data = {
+const data: Data = {
   name: 'meta_action'
 };
 

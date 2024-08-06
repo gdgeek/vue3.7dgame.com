@@ -1,4 +1,4 @@
 export default {
   name: 'Sound',
-  colour: 0
+  colour: 200
 }

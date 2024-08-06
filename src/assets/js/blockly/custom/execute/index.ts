@@ -5,6 +5,15 @@ import FunctionExecute from './function_execute'
 //import LineExecute from './line_execute'
 //import TweenExecute from './tween_execute'
 //import VisualExecute from './visual_execute'
+import { LuaGenerator } from 'blockly/lua';
+
+const luaGeneratorInstance = new LuaGenerator() as any;
+
+interface Data {
+  title: string;
+  getBlock: (parameters: any) => Blockly.Block;
+  getLua: (parameters: any) => (block: Blockly.Block) => string;
+}
 
 const ExecuteCategory = {
   kind: 'category',
@@ -12,11 +21,11 @@ const ExecuteCategory = {
   colour: Type.colour,
   contents: [BoomExecute.toolbox, FunctionExecute.toolbox]
 }
-function RegisterData(data, parameters) {
+function RegisterData(data: Data, parameters: any) {
   Blockly.Blocks[data.title] = data.getBlock(parameters)
-  Blockly.Lua[data.title] = data.getLua(parameters)
+  luaGeneratorInstance[data.title] = data.getLua(parameters)
 }
-function ExecuteRegister(parameters) {
+function ExecuteRegister(parameters: any) {
   RegisterData(BoomExecute, parameters)
   RegisterData(FunctionExecute, parameters)
 }

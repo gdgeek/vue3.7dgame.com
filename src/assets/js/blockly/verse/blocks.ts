@@ -1,9 +1,9 @@
-import { SignalRegister } from '@/assets/js/blockly/custom/signal'
-import { TaskRegister } from '../custom/task'
-import { ParameterRegister } from '../custom/parameter'
-import { DataRegister } from '../custom/data'
+import { SignalRegister } from '@/assets/js/blockly/custom/signal/index'
+import { TaskRegister } from '../custom/task/index'
+import { ParameterRegister } from '../custom/parameter/index'
+import { DataRegister } from '../custom/data/index'
 
-function AddBlocks(parameters) {
+export const AddBlocks = (parameters: any) => {
   SignalRegister(parameters)
   TaskRegister(parameters)
   ParameterRegister(parameters)
@@ -19,4 +19,4 @@ function AddBlocks(parameters) {
   EventRegister(parameters)*/
 }
 
-export { AddBlocks }
+

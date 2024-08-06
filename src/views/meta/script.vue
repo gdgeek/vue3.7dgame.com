@@ -22,7 +22,7 @@
 
               <el-button-group style="float: right">
                 <el-button
-                  v-if="saveable"
+                  v-if="(saveable = true)"
                   type="primary"
                   size="small"
                   @click="save"
@@ -57,6 +57,7 @@ import { cybersType, postCyber } from "@/api/v1/cyber";
 import Coding from "@/components/Coding.vue";
 import { AbilityEditable } from "@/ability/ability";
 import { useAbility } from "@/composables/ability";
+import { ElMessage } from "element-plus";
 
 const loading = ref(false);
 const meta = ref<metaInfo | null>(null);
@@ -80,7 +81,10 @@ const save = () => {
   if (blocklyRef.value) {
     blocklyRef.value.save();
   } else {
-    console.error("blocklyRef is null");
+    ElMessage({
+      message: "blocklyRef 为空，无法保存",
+      type: "error",
+    });
   }
 };
 
@@ -89,51 +93,68 @@ onMounted(async () => {
     setBreadcrumbs([
       { path: "/", meta: { title: "元宇宙实景编程平台" } },
       { path: "/meta-verse/index", meta: { title: "宇宙" } },
-      { path: ".", meta: { title: "赛博编辑" } },
+      { path: "", meta: { title: "赛博编辑" } },
     ]);
 
-    const response = await getMeta(id.value, "cyber,event,share");
-    meta.value = response.data;
-    if (meta.value && meta.value.cyber !== null) {
-      setBreadcrumbs([
-        { path: "/", meta: { title: "元宇宙实景编程平台" } },
-        { path: "/meta-verse/index", meta: { title: "宇宙" } },
-        {
-          path: "/verse/view?id=" + meta.value!.id,
-          meta: { title: "【宇宙】" },
-        },
-        {
-          path: "/verse/scene?id=" + meta.value!.id,
-          meta: { title: "宇宙编辑" },
-        },
-        {
-          path:
-            "/meta/rete-meta?id=" +
-            meta.value!.id +
-            "&title=" +
-            encodeURIComponent(title.value),
-          meta: { title: "元编辑" },
-        },
-        { path: ".", meta: { title: "赛博" } },
-      ]);
-    }
-    if (meta.value!.cyber === null) {
-      if (saveable.value) {
-        const response = await postCyber({ meta_id: meta.value!.id });
-        cyber.value = response.data;
+    loading.value = true;
+    const res = await getMeta(id.value, "cyber,event,share");
+    meta.value = res.data;
+    console.log("meta.value", meta.value);
+
+    setBreadcrumbs([
+      {
+        path: "/",
+        meta: { title: "元宇宙实景编程平台" },
+      },
+      {
+        path: "/meta-verse/index",
+        meta: { title: "宇宙" },
+      },
+      {
+        path: "/verse/view?id=" + meta.value.id,
+        meta: { title: "【宇宙】" },
+      },
+      {
+        path: "/verse/scene?id=" + meta.value.id,
+        meta: { title: "宇宙编辑" },
+      },
+      {
+        path:
+          "/meta/rete-meta?id=" +
+          meta.value.id +
+          "&title=" +
+          encodeURIComponent(title.value),
+        meta: { title: "元编辑" },
+      },
+      {
+        path: ".",
+        meta: { title: "赛博" },
+      },
+    ]);
+
+    if (meta.value.cyber === null) {
+      if (meta.value.editable) {
+        const cyberRes = await postCyber({
+          meta_id: meta.value.id,
+        });
+        cyber.value = cyberRes.data;
       }
     } else {
-      cyber.value = meta.value!.cyber;
-      console.log("cyber:", cyber.value);
+      cyber.value = meta.value.cyber;
     }
-  } catch (error) {
-    console.error("Error in onMounted:", error);
+  } catch (error: any) {
+    ElMessage({
+      message: error.message,
+      type: "error",
+    });
+  } finally {
+    loading.value = false;
   }
 });
 
 onBeforeUnmount(() => {
-  if (saveable.value) {
-    save();
+  if (blocklyRef.value) {
+    blocklyRef.value.save();
   }
 });
 </script>

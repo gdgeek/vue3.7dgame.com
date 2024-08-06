@@ -1,19 +1,19 @@
-function number(value) {
+export const number = (value: string) => {
   return '_G.argument.number(' + value + ')'
 }
-function boolean(value) {
+export const boolean = (value: string) => {
   return '_G.argument.boolean(' + value + ')'
 }
-function string(value) {
+export const string = (value: string) => {
   return '_G.argument.string(' + value + ')'
 }
 
 
-function point(value) {
+export const point = (value: string) => {
   return '_G.argument.point(' + value + ')'
 }
 
-function player(type, value) {
+export const player = (type: any, value: string) => {
   switch (type) {
     case 'index':
       return '_G.argument.index_player(' + value + ')'
@@ -27,18 +27,10 @@ function player(type, value) {
   return '_G.argument.server_player()'
 }
 
-function anchor(key) {
+export const anchor = (key: string) => {
   return "_G.argument.anchor('" + key + "')"
 }
-function range(anchor, radius) {
+export const range = (anchor: string, radius: string) => {
   return '_G.argument.range(' + anchor + ', ' + radius + ')'
 }
-module.exports = {
-  number,
-  string,
-  boolean,
-  range,
-  anchor,
-  player,
-  point
-}
+

@@ -9,7 +9,7 @@
       id="blocklyDiv"
       style="height: 600px; width: 100%"
     ></div>
-    <el-card v-if="activeName === 'script' && script !== ''" class="box-card">
+    <el-card v-if="activeName === 'script'" class="box-card">
       <div v-highlight>
         <pre>
           <code class="lua">{{ script }}</code>
@@ -26,9 +26,11 @@ import toolbox from "@/assets/js/blockly/toolbox";
 import { AddBlocks } from "@/assets/js/blockly/blocks";
 import { cybersType, putCyber } from "@/api/v1/cyber";
 import { metaInfo } from "@/api/v1/meta";
+import type { TabsPaneContext } from "element-plus";
 import { LuaGenerator } from "blockly/lua";
+import { Workspace, WorkspaceSvg } from "blockly";
 
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator();
 
 const props = defineProps<{
   cyber: cybersType;
@@ -37,47 +39,60 @@ const props = defineProps<{
   index: string;
 }>();
 
+console.log("props", props);
+
 const activeName = ref("blockly");
 const script = ref("");
-// const workspace = ref<Blockly.WorkspaceSvg | null>(null);
-const workspace = ref<any>(null);
+const workspace = ref<WorkspaceSvg>();
 
 onMounted(() => {
-  if (props.meta.data) {
-    AddBlocks({
-      index: props.index,
-      resource: getResource(props.meta),
+  try {
+    if (props.meta.data) {
+      AddBlocks({
+        index: props.index,
+        resource: getResource(props.meta),
+      });
+    }
+
+    workspace.value = Blockly.inject("blocklyDiv", {
+      media: "resource/blockly/media/",
+      toolbox,
+      grid: { spacing: 20, length: 3, colour: "#ccc", snap: true },
+      move: {
+        scrollbars: { horizontal: false, vertical: true },
+        drag: true,
+        wheel: false,
+      },
+      zoom: {
+        startScale: 1.0,
+        maxScale: 3,
+        minScale: 0.3,
+        controls: true,
+        wheel: true,
+        pinch: true,
+      },
     });
-  }
 
-  workspace.value = Blockly.inject("blocklyDiv", {
-    media: "resource/blockly/media/",
-    toolbox,
-    grid: { spacing: 20, length: 3, colour: "#ccc", snap: true },
-    move: {
-      scrollbars: { horizontal: false, vertical: true },
-      drag: true,
-      wheel: false,
-    },
-    zoom: {
-      startScale: 1.0,
-      maxScale: 3,
-      minScale: 0.3,
-      controls: true,
-      wheel: true,
-      pinch: true,
-    },
-  }) as Blockly.WorkspaceSvg;
+    if (props.cyber && props.cyber.data) {
+      const res = load(props.cyber.data);
+      console.log("resload", res);
+    }
+    console.log("workspace", workspace.value);
 
-  if (props.cyber && props.cyber.data) {
-    load(props.cyber.data);
+    const luaCode = luaGeneratorInstance.workspaceToCode(
+      workspace.value as Workspace
+    );
+    console.log("luaCode", luaCode);
+
+    script.value = "local meta = {}\nindex = ''\n" + luaCode;
+  } catch (error) {
+    console.error("Error in onMounted:", error);
   }
-  console.log(workspace.value);
 });
 
 const getResource = (meta: metaInfo) => {
   const data = JSON.parse(meta.data!);
-
+  console.log("data", data);
   const ret = {
     action: [],
     trigger: [],
@@ -94,12 +109,14 @@ const getResource = (meta: metaInfo) => {
     },
   };
   ret.events = JSON.parse(meta.events!) || { inputs: [], outputs: [] };
+  console.log("events", ret.events);
   addMetaData(data, ret);
   return ret;
 };
 
 const addMetaData = (data: any, ret: any) => {
   const action = testAction(data);
+  console.log("action", action);
   if (action) {
     ret.action.push(action);
   }
@@ -113,6 +130,8 @@ const addMetaData = (data: any, ret: any) => {
     "text",
     "voxel",
   ]);
+
+  console.log("entity", entity);
 
   if (entity) {
     ret.entity.push(entity);
@@ -158,15 +177,11 @@ const addMetaData = (data: any, ret: any) => {
 };
 
 const testAction = (data: any) => {
-  if (
-    data &&
-    data.parameters &&
-    typeof data.parameters.action !== "undefined"
-  ) {
+  if (data && data.parameters && typeof data.parameters !== "undefined") {
     return {
       uuid: data.parameters.uuid,
-      name: data.parameters.action,
-      parameter: data.parameters.parameter,
+      name: data.parameters.action ?? null,
+      parameter: data.parameters.parameter ?? null,
     };
   }
 };
@@ -175,41 +190,39 @@ const testPoint = (data: any, typeList: string[]) => {
   return typeList.find((type) => data.type.toLowerCase() === type.toLowerCase())
     ? {
         uuid: data.parameters.uuid,
-        name: data.parameters.name,
+        name: data.parameters.name ?? null,
       }
     : undefined;
 };
 
-const load = (data: string) => {
+const load = (data: any) => {
   if (workspace.value) {
-    (Blockly as any).serialization.workspaces.load(
-      JSON.parse(data),
-      workspace.value
-    );
+    try {
+      const parsedData = JSON.parse(data);
+      console.log("parsedData", parsedData.blocks.blocks);
+      const res = Blockly.serialization.workspaces.load(
+        parsedData.blocks.blocks,
+        workspace.value
+      );
+      console.log("blocklyload", res);
+    } catch (error) {
+      console.error("Error loading workspace:", error);
+    }
   }
 };
 
-const handleClick = (tab: any, event: any) => {
-  if (activeName.value === "script") {
-    script.value =
-      "local meta = {}\nindex = ''\n" +
-      luaGeneratorInstance.workspaceToCode(workspace.value!);
-    // luaGenerator.workspaceToCode(workspace.value!);
-  }
-  console.log(tab, event);
-};
+const handleClick = (tab: TabsPaneContext, event: Event) => {};
 
 const save = async () => {
   if (!workspace.value) return;
 
-  const data = (Blockly as any).serialization.workspaces.save(workspace.value);
+  const data = Blockly.serialization.workspaces.save(workspace.value);
   if (props.cyber.data === JSON.stringify(data)) return;
 
   try {
     const scriptValue =
       "local meta = {}\nindex = ''\n" +
       luaGeneratorInstance.workspaceToCode(workspace.value);
-    // luaGenerator.workspaceToCode(workspace.value);
 
     await putCyber(props.cyber.id, {
       data: JSON.stringify(data),

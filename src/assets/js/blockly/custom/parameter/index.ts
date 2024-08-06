@@ -8,6 +8,16 @@ import SystemParameter from './system_parameter'
 import PlayerParameter from './player_parameter'
 import RectangleParameter from './rectangle_parameter'
 import PointParameter from './point_parameter'
+import { LuaGenerator } from 'blockly/lua';
+
+const luaGeneratorInstance = new LuaGenerator() as any;
+
+interface Data {
+  title: string;
+  getBlock: (parameters: any) => Blockly.Block;
+  getLua: (parameters: any) => (block: Blockly.Block) => [string, number];
+}
+
 const ParameterCategory = {
   kind: 'category',
   name: '参数',
@@ -24,11 +34,11 @@ const ParameterCategory = {
   ]
 }
 
-function RegisterData(data, parameters) {
+function RegisterData(data: Data, parameters: any) {
   Blockly.Blocks[data.title] = data.getBlock(parameters)
-  Blockly.Lua[data.title] = data.getLua(parameters)
+  luaGeneratorInstance[data.title] = data.getLua(parameters)
 }
-function ParameterRegister(parameters) {
+function ParameterRegister(parameters: any) {
   RegisterData(BooleanParameter, parameters)
   RegisterData(NumberParameter, parameters)
   RegisterData(StringParameter, parameters)

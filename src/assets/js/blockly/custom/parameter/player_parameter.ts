@@ -1,16 +1,59 @@
 import * as Blockly from 'blockly';
 import EventType from './type'
 // import Helper from '../helper'
-import Argument from '../argument'
-const data = {
+import { player } from '../argument'
+import { LuaGenerator } from 'blockly/lua';
+
+const luaGeneratorInstance = new LuaGenerator() as any;
+
+// 定义数据对象类型
+interface Data {
+  name: string;
+}
+
+// 定义参数类型
+interface Parameters {
+  resource: {
+    action: { name: string; uuid: string }[];
+  };
+}
+
+// 定义 BlockJson 类型
+interface BlockJson {
+  type: string;
+  message0: string;
+  args0: any[];
+  inputsInline: boolean;
+  output: string;
+  colour: number;
+  tooltip: string;
+  helpUrl: string;
+}
+
+// 定义 Block 类型
+interface Block {
+  title: string;
+  type: string;
+  colour: number;
+  getBlockJson: (parameters: Parameters) => BlockJson;
+  getBlock: (parameters: Parameters) => Blockly.Block;
+  getLua: (parameters: { index: any }) => (block: Blockly.Block) => [string, number];
+  toolbox: {
+    kind: string;
+    type: string;
+  };
+}
+
+const data: Data = {
   name: 'player_parameter'
 }
-const block = {
+
+const block: Block = {
   title: data.name,
   type: EventType.name,
   colour: EventType.colour,
   getBlockJson({ resource }) {
-    const json = {
+    const json: BlockJson = {
       type: 'block_type',
       message0: '玩家 %1 ,参数 %2',
       args0: [
@@ -45,20 +88,20 @@ const block = {
         const json = block.getBlockJson(parameters)
         this.jsonInit(json)
       }
-    }
+    } as Blockly.Block
     return data
   },
   getLua() {
-    const lua = function (block) {
+    const lua = function (block: Blockly.Block): [string, number] {
       var type = block.getFieldValue('PlayerType')
 
-      var id = Blockly.Lua.valueToCode(
+      var id = luaGeneratorInstance.valueToCode(
         block,
         'Player',
-        Blockly.Lua.ORDER_ATOMIC
+        luaGeneratorInstance.ORDER_ATOMIC
       )
 
-      return [Argument.player(type, id), Blockly.Lua.ORDER_NONE]
+      return [player(type, id), luaGeneratorInstance.ORDER_NONE]
     }
     return lua
   },
