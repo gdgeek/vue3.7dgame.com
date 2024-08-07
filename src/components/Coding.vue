@@ -47,10 +47,13 @@ const workspace = ref<WorkspaceSvg>();
 onMounted(() => {
   try {
     if (props.meta.data) {
-      AddBlocks({
+      console.log("index", props.index);
+      console.log("resource", getResource(props.meta));
+      const res = AddBlocks({
         index: props.index,
         resource: getResource(props.meta),
       });
+      console.log("AddBlocks", res); // undefined
     }
 
     // 初始化 Blockly 工作区

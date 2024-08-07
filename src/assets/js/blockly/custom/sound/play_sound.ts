@@ -1,9 +1,6 @@
 import DataType from './type'
-
 import * as Blockly from 'blockly';
 import { LuaGenerator, Order } from 'blockly/lua';
-
-const luaGeneratorInstance = new LuaGenerator();
 
 // 定义数据对象类型
 interface Data {
@@ -12,8 +9,9 @@ interface Data {
 
 // 定义参数类型
 interface Parameters {
+  index: string;
   resource: {
-    sound: { name: string; uuid: string }[];
+    sound: { name: string; uuid: string; paramter?: any }[];
   };
 }
 
@@ -30,6 +28,8 @@ interface BlockJson {
   helpUrl: string;
 }
 
+const luaGeneratorInstance = new LuaGenerator();
+
 // 定义 Block 类型
 export interface Block {
   title: string;
@@ -37,7 +37,7 @@ export interface Block {
   colour: number;
   getBlockJson: (parameters: Parameters) => BlockJson;
   getBlock: (parameters: Parameters) => Blockly.BlockSvg;
-  getLua: (parameters: { index: any }) => (block: Blockly.BlockSvg) => string;
+  getLua: (parameters: Parameters) => (block: Blockly.BlockSvg) => string;
   toolbox: {
     kind: string;
     type: string;
@@ -47,6 +47,7 @@ export interface Block {
 const data: Data = {
   name: 'play_sound'
 }
+
 const block: Block = {
   title: data.name,
   type: DataType.name,
@@ -70,24 +71,27 @@ const block: Block = {
     }
     return json
   },
+  
   getBlock(parameters) {
     const data = {
       init: function () {
         const json = block.getBlockJson(parameters)
-        this.jsonInit(json)
+        console.log("json", json)
+        
+        this.jsonInit(json)  //问题所在
       }
     } as Blockly.BlockSvg
+    console.log("play_soundJson", data) //{}
     return data
   },
+
   getLua() {
     const lua = function (block: Blockly.BlockSvg) {
-      var sound = luaGeneratorInstance.valueToCode(
+      const sound = luaGeneratorInstance.valueToCode(
         block,
         'sound',
         Order.NONE
       )
-
-
       return '_G.sound.play(' + sound + ')\n'
 
     }
