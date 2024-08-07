@@ -1,8 +1,8 @@
 import * as Blockly from 'blockly';
 import EventType from './type'
-import { LuaGenerator } from 'blockly/lua';
+import { LuaGenerator, Order } from 'blockly/lua';
 
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator();
 
 // 定义数据对象类型
 interface Data {
@@ -34,8 +34,8 @@ interface Block {
   type: string;
   colour: number;
   getBlockJson: (parameters: Parameters) => BlockJson;
-  getBlock: (parameters: Parameters) => Blockly.Block;
-  getLua: (parameters: { index: any }) => (block: Blockly.Block) => [string, number];
+  getBlock: (parameters: Parameters) => Blockly.BlockSvg;
+  getLua: (parameters: { index: any }) => (block: Blockly.BlockSvg) => [string, number];
   toolbox: {
     kind: string;
     type: string;
@@ -80,20 +80,20 @@ const block: Block = {
         const json = block.getBlockJson(parameters)
         this.jsonInit(json)
       }
-    } as Blockly.Block
+    } as Blockly.BlockSvg
     return data
   },
   getLua() {
-    const lua = function (block: Blockly.Block): [string, number] {
+    const lua = function (block: Blockly.BlockSvg): [string, number] {
       var input = luaGeneratorInstance.valueToCode(
         block,
         'Input',
-        luaGeneratorInstance.ORDER_NONE
+        Order.NONE
       )
       var parameters = luaGeneratorInstance.valueToCode(
         block,
         'Parameter',
-        luaGeneratorInstance.ORDER_ATOMIC
+        Order.ATOMIC
       )
 
       // TODO: Assemble Lua into code variable.
@@ -104,7 +104,7 @@ const block: Block = {
         code = '_G.system.task(' + input + ')'
       }
 
-      return [code, luaGeneratorInstance.ORDER_NONE]
+      return [code, Order.NONE]
     }
     return lua
   },

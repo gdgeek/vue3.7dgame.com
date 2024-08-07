@@ -12,14 +12,14 @@ import EntityUnxploded from './entity_unexploded'
 
 import TweenExecute from './tween_execute'
 import VisualExecute from './visual_execute'
-import { LuaGenerator } from 'blockly/lua';
+import { LuaGenerator, Order } from 'blockly/lua';
 
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator() as LuaGenerator & { [key: string]: any };
 
 interface Data {
   title: string;
-  getBlock: (parameters: any) => Blockly.Block;
-  getLua: (parameters: any) => (block: Blockly.Block) => string | [string, number];
+  getBlock: (parameters: any) => Blockly.BlockSvg;
+  getLua: (parameters: any) => (block: Blockly.BlockSvg) => string | [string, number];
 }
 
 const EntityCategory = {

@@ -2,14 +2,14 @@ import Type from './type'
 import * as Blockly from 'blockly';
 import TextEntity from './text_entity'
 import SetText from './set_text'
-import { LuaGenerator } from 'blockly/lua';
+import { LuaGenerator, Order } from 'blockly/lua';
 
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator() as LuaGenerator & { [key: string]: any };
 
 interface Data {
   title: string;
-  getBlock: (parameters: any) => Blockly.Block;
-  getLua: (parameters: any) => (block: Blockly.Block) => string | [string, number];
+  getBlock: (parameters: any) => Blockly.BlockSvg;
+  getLua: (parameters: any) => (block: Blockly.BlockSvg) => string | [string, number];
 }
 
 const TextCategory = {

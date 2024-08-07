@@ -1,9 +1,9 @@
 import * as Blockly from 'blockly';
 import DataType from './type'
 // import Helper from '../helper'
-import { LuaGenerator } from 'blockly/lua';
+import { LuaGenerator, Order } from 'blockly/lua';
 
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator();
 // 定义数据对象类型
 interface Data {
   name: string;
@@ -35,8 +35,8 @@ interface Block {
   type: string;
   colour: number;
   getBlockJson: (parameters: Parameters) => BlockJson;
-  getBlock: (parameters: Parameters) => Blockly.Block;
-  getLua: (parameters: { index: any }) => (block: Blockly.Block) => string;
+  getBlock: (parameters: Parameters) => Blockly.BlockSvg;
+  getLua: (parameters: { index: any }) => (block: Blockly.BlockSvg) => string;
   toolbox: {
     kind: string;
     type: string;
@@ -80,16 +80,16 @@ const block: Block = {
         const json = block.getBlockJson(parameters)
         this.jsonInit(json)
       }
-    } as Blockly.Block
+    } as Blockly.BlockSvg
     return data
   },
   getLua({ index }) {
-    const lua = function (block: Blockly.Block) {
+    const lua = function (block: Blockly.BlockSvg) {
       var number_distance = block.getFieldValue('distance')
       var value_entity = luaGeneratorInstance.valueToCode(
         block,
         'entity',
-        luaGeneratorInstance.ORDER_NONE
+        Order.NONE
       )
 
       var code =

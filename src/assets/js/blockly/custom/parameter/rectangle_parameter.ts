@@ -2,9 +2,9 @@ import * as Blockly from 'blockly';
 import EventType from './type'
 // import Helper from '../helper'
 import { range } from '../argument'
-import { LuaGenerator } from 'blockly/lua';
+import { LuaGenerator, Order } from 'blockly/lua';
 
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator();
 
 // 定义数据对象类型
 interface Data {
@@ -36,8 +36,8 @@ interface Block {
   type: string;
   colour: number;
   getBlockJson: (parameters: Parameters) => BlockJson;
-  getBlock: (parameters: Parameters) => Blockly.Block;
-  getLua: (parameters: { index: any }) => (block: Blockly.Block) => [string, number];
+  getBlock: (parameters: Parameters) => Blockly.BlockSvg;
+  getLua: (parameters: { index: any }) => (block: Blockly.BlockSvg) => [string, number];
   toolbox: {
     kind: string;
     type: string;
@@ -86,15 +86,15 @@ const block: Block = {
         const json = block.getBlockJson(parameters)
         this.jsonInit(json)
       }
-    } as Blockly.Block
+    } as Blockly.BlockSvg
     return data
   },
   getLua({ index }) {
-    const lua = function (block: Blockly.Block): [string, number] {
+    const lua = function (block: Blockly.BlockSvg): [string, number] {
       var value_anchor = luaGeneratorInstance.valueToCode(
         block,
         'Anchor',
-        luaGeneratorInstance.ORDER_ATOMIC
+        Order.ATOMIC
       )
 
       // TODO: Assemble javascript into code variable.
@@ -103,7 +103,7 @@ const block: Block = {
       var code = range(value_anchor, number_radius)
       // TODO: Change ORDER_NONE to the correct strength.
 
-      return [code, luaGeneratorInstance.ORDER_NONE]
+      return [code, Order.NONE]
     }
     return lua
   },

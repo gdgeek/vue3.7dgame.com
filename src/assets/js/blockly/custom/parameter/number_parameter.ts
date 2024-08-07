@@ -2,9 +2,9 @@ import * as Blockly from 'blockly';
 import EventType from './type'
 // import Helper from '../helper'
 import { number } from '../argument'
-import { LuaGenerator } from 'blockly/lua';
+import { LuaGenerator, Order } from 'blockly/lua';
 
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator();
 
 // 定义数据对象类型
 interface Data {
@@ -36,8 +36,8 @@ interface Block {
   type: string;
   colour: number;
   getBlockJson: (parameters: Parameters) => BlockJson;
-  getBlock: (parameters: Parameters) => Blockly.Block;
-  getLua: (parameters: { index: any }) => (block: Blockly.Block) => [string, number];
+  getBlock: (parameters: Parameters) => Blockly.BlockSvg;
+  getLua: (parameters: { index: any }) => (block: Blockly.BlockSvg) => [string, number];
   toolbox: {
     kind: string;
     type: string;
@@ -78,17 +78,17 @@ const block: Block = {
         const json = block.getBlockJson(parameters)
         this.jsonInit(json)
       }
-    } as Blockly.Block
+    } as Blockly.BlockSvg
     return data
   },
   getLua() {
-    const lua = function (block: Blockly.Block): [string, number] {
+    const lua = function (block: Blockly.BlockSvg): [string, number] {
       var input = luaGeneratorInstance.valueToCode(
         block,
         'Input',
-        luaGeneratorInstance.ORDER_NONE
+        Order.NONE
       )
-      return [number(input), luaGeneratorInstance.ORDER_NONE]
+      return [number(input), Order.NONE]
     }
     return lua
   },

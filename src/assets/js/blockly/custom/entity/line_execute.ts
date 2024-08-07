@@ -1,9 +1,9 @@
 import DataType from './type'
 
 import * as Blockly from 'blockly';
-import { LuaGenerator } from 'blockly/lua';
+import { LuaGenerator, Order } from 'blockly/lua';
 
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator();
 
 // 定义数据对象类型
 interface Data {
@@ -36,8 +36,8 @@ interface Block {
   type: string;
   colour: number;
   getBlockJson: (parameters: Parameters) => BlockJson;
-  getBlock: (parameters: Parameters) => Blockly.Block;
-  getLua: (parameters: { index: any }) => (block: Blockly.Block) => string;
+  getBlock: (parameters: Parameters) => Blockly.BlockSvg;
+  getLua: (parameters: { index: any }) => (block: Blockly.BlockSvg) => string;
   toolbox: {
     kind: string;
     type: string;
@@ -82,20 +82,20 @@ const block: Block = {
         const json = block.getBlockJson(parameters)
         this.jsonInit(json)
       }
-    } as Blockly.Block;
+    } as Blockly.BlockSvg;
     return data
   },
   getLua({ }) {
-    const lua = function (block: Blockly.Block) {
+    const lua = function (block: Blockly.BlockSvg) {
       var value_from = luaGeneratorInstance.valueToCode(
         block,
         'from',
-        luaGeneratorInstance.ORDER_ATOMIC
+        order.ATOMIC
       )
       var value_to = luaGeneratorInstance.valueToCode(
         block,
         'to',
-        luaGeneratorInstance.ORDER_ATOMIC
+        order.ATOMIC
       )
       // TODO: Assemble Lua into code variable.
       var code = 'CS.MLua.Helper.Lined(' + value_from + ', ' + value_to + ')\n'

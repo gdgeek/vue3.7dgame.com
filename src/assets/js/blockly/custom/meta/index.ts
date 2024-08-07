@@ -4,12 +4,12 @@ import MetaAction from './meta_action';
 import RunTask from './run_task';
 
 import 'blockly/lua';
-import { LuaGenerator } from 'blockly/lua';
+import { LuaGenerator, Order } from 'blockly/lua';
 
 interface Data {
   title: string;
-  getBlock: (parameters: any) => Blockly.Block;
-  getLua: (parameters: any) => (block: Blockly.Block) => string;
+  getBlock: (parameters: any) => Blockly.BlockSvg;
+  getLua: (parameters: any) => (block: Blockly.BlockSvg) => string;
 }
 
 // 定义 MetaCategory 对象
@@ -23,7 +23,7 @@ const MetaCategory = {
   ]
 };
 
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator() as LuaGenerator & { [key: string]: any };
 
 // 注册数据到 Blockly
 function RegisterData(data: Data, parameters: any): void {

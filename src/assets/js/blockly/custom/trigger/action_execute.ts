@@ -1,8 +1,8 @@
 import * as Blockly from 'blockly';
 import EventType from './type';
-import { LuaGenerator } from 'blockly/lua';
+import { LuaGenerator, Order } from 'blockly/lua';
 
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator();
 
 // 定义数据对象类型
 interface Data {
@@ -33,8 +33,8 @@ interface Block {
   type: string;
   colour: number;
   getBlockJson: (parameters: Parameters) => BlockJson;
-  getBlock: (parameters: Parameters) => Blockly.Block;
-  getLua: (parameters: { index: any }) => (block: Blockly.Block) => string;
+  getBlock: (parameters: Parameters) => Blockly.BlockSvg;
+  getLua: (parameters: { index: any }) => (block: Blockly.BlockSvg) => string;
   toolbox: {
     kind: string;
     type: string;
@@ -85,12 +85,12 @@ const block: Block = {
         const json = block.getBlockJson(parameters);
         this.jsonInit(json);
       }
-    } as Blockly.Block;
+    } as Blockly.BlockSvg;
 
     return data;
   },
   getLua({ index }) {
-    const lua = function (block: Blockly.Block): string {
+    const lua = function (block: Blockly.BlockSvg): string {
       const generator = luaGeneratorInstance;
 
       const statements_content = generator.valueToCode(

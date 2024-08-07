@@ -7,7 +7,7 @@ import Colour from '@/assets/js/blockly/colour'
 
 import { DataCategory } from '@/assets/js/blockly/custom/data/index'
 import { TaskCategory } from '@/assets/js/blockly/custom/task/index'
-import { SignalCategory } from '@/assets/js/blockly/custom/signal'
+import { SignalCategory } from '@/assets/js/blockly/custom/signal/index'
 
 import { ParameterCategory } from '../custom/parameter'
 const sep = {

@@ -21,14 +21,13 @@
 
 <script setup lang="ts">
 import * as Blockly from "blockly";
-import "blockly/lua";
 import toolbox from "@/assets/js/blockly/toolbox";
 import { AddBlocks } from "@/assets/js/blockly/blocks";
 import { cybersType, putCyber } from "@/api/v1/cyber";
 import { metaInfo } from "@/api/v1/meta";
 import type { TabsPaneContext } from "element-plus";
 import { LuaGenerator } from "blockly/lua";
-import { Workspace, WorkspaceSvg } from "blockly";
+import type { Workspace, WorkspaceSvg } from "blockly";
 
 const luaGeneratorInstance = new LuaGenerator();
 
@@ -54,8 +53,9 @@ onMounted(() => {
       });
     }
 
+    // 初始化 Blockly 工作区
     workspace.value = Blockly.inject("blocklyDiv", {
-      media: "resource/blockly/media/",
+      media: "/src/assets/blockly/media/",
       toolbox,
       grid: { spacing: 20, length: 3, colour: "#ccc", snap: true },
       move: {
@@ -75,13 +75,11 @@ onMounted(() => {
 
     if (props.cyber && props.cyber.data) {
       const res = load(props.cyber.data);
-      console.log("resload", res);
+      console.log("Load result:", res);
     }
-    console.log("workspace", workspace.value);
+    console.log("Initialized workspace:", workspace.value);
 
-    const luaCode = luaGeneratorInstance.workspaceToCode(
-      workspace.value as Workspace
-    );
+    const luaCode = luaGeneratorInstance.workspaceToCode(workspace.value);
     console.log("luaCode", luaCode);
 
     script.value = "local meta = {}\nindex = ''\n" + luaCode;
@@ -199,10 +197,12 @@ const load = (data: any) => {
   if (workspace.value) {
     try {
       const parsedData = JSON.parse(data);
-      console.log("parsedData", parsedData.blocks.blocks);
+      const blocks = parsedData.blocks || [];
+      console.log("blocks", blocks);
       const res = Blockly.serialization.workspaces.load(
-        parsedData.blocks.blocks,
-        workspace.value
+        { blocks: blocks },
+        workspace.value,
+        { recordUndo: true } // 可选，记录撤销操作
       );
       console.log("blocklyload", res);
     } catch (error) {

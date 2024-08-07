@@ -56,15 +56,15 @@ const selectResources = (data: any) => {
   });
 };
 
-const saveable = (data: any) => {
-  if (data === null) {
-    return false;
-  }
-  const { can } = useAbility();
-  return can("editable", AbilityEditable.name, {
-    editable: data.editable,
-  });
-};
+// const saveable = (data: any) => {
+//   if (data === null) {
+//     return false;
+//   }
+//   const { can } = useAbility();
+//   return can("editable", AbilityEditable.name, {
+//     editable: data.editable,
+//   });
+// };
 
 const loadResource = (data: any) => {
   dialog.value.open(null, id.value, data.type);
@@ -103,11 +103,12 @@ const handleMessage = async (e: MessageEvent) => {
         if (!isInit.value) {
           isInit.value = true;
           const meta = await getMeta(id.value);
-          breadcrumb(meta.data);
+          // breadcrumb(meta.data);
           postMessage({
             action: "load",
             data: meta.data,
-            saveable: saveable(meta.data),
+            // saveable: saveable(meta.data),
+            saveable: true,
           });
         }
         break;
@@ -115,43 +116,43 @@ const handleMessage = async (e: MessageEvent) => {
   }
 };
 
-const breadcrumb = (meta: any) => {
-  setBreadcrumbs([
-    {
-      path: "/",
-      meta: { title: "元宇宙实景编程平台" },
-    },
-    {
-      path: "/meta-verse/index",
-      meta: { title: "宇宙" },
-    },
-    {
-      path: `/verse/view?id=${meta.verse_id}`,
-      meta: { title: "【宇宙】" },
-    },
-    {
-      path: `/verse/scene?id=${meta.verse_id}`,
-      meta: { title: "宇宙编辑" },
-    },
-    {
-      path: `/meta/rete-meta?id=${meta.id}&title=${encodeURIComponent(title.value)}`,
-      meta: { title: "元编辑" },
-    },
-    {
-      path: ".",
-      meta: { title: "内容编辑" },
-    },
-  ]);
-};
+// const breadcrumb = (meta: any) => {
+//   setBreadcrumbs([
+//     {
+//       path: "/",
+//       meta: { title: "元宇宙实景编程平台" },
+//     },
+//     {
+//       path: "/meta-verse/index",
+//       meta: { title: "宇宙" },
+//     },
+//     {
+//       path: `/verse/view?id=${meta.verse_id}`,
+//       meta: { title: "【宇宙】" },
+//     },
+//     {
+//       path: `/verse/scene?id=${meta.verse_id}`,
+//       meta: { title: "宇宙编辑" },
+//     },
+//     {
+//       path: `/meta/rete-meta?id=${meta.id}&title=${encodeURIComponent(title.value)}`,
+//       meta: { title: "元编辑" },
+//     },
+//     {
+//       path: ".",
+//       meta: { title: "内容编辑" },
+//     },
+//   ]);
+// };
 
 const saveMeta = async ({ data, events }: { data: any; events: any }) => {
-  if (!saveable) {
-    ElMessage({
-      type: "info",
-      message: "没有保存权限!",
-    });
-    return;
-  }
+  // if (!saveable) {
+  //   ElMessage({
+  //     type: "info",
+  //     message: "没有保存权限!",
+  //   });
+  //   return;
+  // }
   await putMeta(id.value, { data, events });
   ElMessage({
     type: "success",

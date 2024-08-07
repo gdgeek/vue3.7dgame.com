@@ -1,8 +1,8 @@
 import * as Blockly from 'blockly';
 import TriggerType from './type'
 import "blockly/lua"
-import { LuaGenerator } from 'blockly/lua';
-const luaGeneratorInstance = new LuaGenerator() as any;
+import { LuaGenerator, Order } from 'blockly/lua';
+const luaGeneratorInstance = new LuaGenerator();
 
 interface Data {
   name: string;
@@ -33,8 +33,8 @@ interface Block {
   type: string;
   colour: number;
   // getBlockJson: (parameters: BlockParameters) => BlockJson;
-  getBlock: (parameters: BlockParameters) => Blockly.Block;
-  getLua: (parameters: BlockParameters) => (block: Blockly.Block) => string;
+  getBlock: (parameters: BlockParameters) => Blockly.BlockSvg;
+  getLua: (parameters: BlockParameters) => (block: Blockly.BlockSvg) => string;
   toolbox: {
     kind: string;
     type: string;
@@ -68,11 +68,11 @@ const block: Block = {
           helpUrl: ''
         })
       }
-    } as Blockly.Block
+    } as Blockly.BlockSvg
     return block
   },
   getLua({ }) {
-    const lua = function (block: Blockly.Block) {
+    const lua = function (block: Blockly.BlockSvg) {
       var statements_content = luaGeneratorInstance.statementToCode(block, 'content')
       // TODO: Assemble Lua into code variable.
       var code =

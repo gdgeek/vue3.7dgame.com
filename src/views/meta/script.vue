@@ -21,12 +21,7 @@
               / 【script】
 
               <el-button-group style="float: right">
-                <el-button
-                  v-if="(saveable = true)"
-                  type="primary"
-                  size="small"
-                  @click="save"
-                >
+                <el-button type="primary" size="small" @click="save">
                   <font-awesome-icon icon="save"></font-awesome-icon>
                   保存
                 </el-button>
@@ -69,13 +64,13 @@ const breadcrumbStore = useBreadcrumbStore();
 const setBreadcrumbs = breadcrumbStore.setBreadcrumbs;
 
 const id = computed(() => parseInt(route.query.id as string));
-const title = computed(() => route.query.title as string);
+const title = computed(() => meta.value?.title as string);
 const blocklyRef = ref<InstanceType<typeof Coding> | null>(null);
-const saveable = computed(() => {
-  if (meta.value === null) return false;
-  const { can } = useAbility();
-  return can("editable", new AbilityEditable(meta.value!.editable));
-});
+// const saveable = computed(() => {
+//   if (meta.value === null) return false;
+//   const { can } = useAbility();
+//   return can("editable", new AbilityEditable(meta.value!.editable));
+// });
 
 const save = () => {
   if (blocklyRef.value) {
@@ -101,36 +96,36 @@ onMounted(async () => {
     meta.value = res.data;
     console.log("meta.value", meta.value);
 
-    setBreadcrumbs([
-      {
-        path: "/",
-        meta: { title: "元宇宙实景编程平台" },
-      },
-      {
-        path: "/meta-verse/index",
-        meta: { title: "宇宙" },
-      },
-      {
-        path: "/verse/view?id=" + meta.value.id,
-        meta: { title: "【宇宙】" },
-      },
-      {
-        path: "/verse/scene?id=" + meta.value.id,
-        meta: { title: "宇宙编辑" },
-      },
-      {
-        path:
-          "/meta/rete-meta?id=" +
-          meta.value.id +
-          "&title=" +
-          encodeURIComponent(title.value),
-        meta: { title: "元编辑" },
-      },
-      {
-        path: ".",
-        meta: { title: "赛博" },
-      },
-    ]);
+    // setBreadcrumbs([
+    //   {
+    //     path: "/",
+    //     meta: { title: "元宇宙实景编程平台" },
+    //   },
+    //   {
+    //     path: "/meta-verse/index",
+    //     meta: { title: "宇宙" },
+    //   },
+    //   {
+    //     path: "/verse/view?id=" + meta.value.id,
+    //     meta: { title: "【宇宙】" },
+    //   },
+    //   {
+    //     path: "/verse/scene?id=" + meta.value.id,
+    //     meta: { title: "宇宙编辑" },
+    //   },
+    //   {
+    //     path:
+    //       "/meta/rete-meta?id=" +
+    //       meta.value.id +
+    //       "&title=" +
+    //       encodeURIComponent(title.value),
+    //     meta: { title: "元编辑" },
+    //   },
+    //   {
+    //     path: ".",
+    //     meta: { title: "赛博" },
+    //   },
+    // ]);
 
     if (meta.value.cyber === null) {
       if (meta.value.editable) {

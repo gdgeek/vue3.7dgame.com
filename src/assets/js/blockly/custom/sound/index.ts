@@ -1,15 +1,15 @@
 import Type from './type'
 import * as Blockly from 'blockly';
 import SoundEntity from './sound_entity'
-import PlaySound from './play_sound'
-import { LuaGenerator } from 'blockly/lua';
+import PlaySound, { Block } from './play_sound'
+import { LuaGenerator, Order } from 'blockly/lua';
 
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator() as LuaGenerator & { [key: string]: any };
 
 interface Data {
   title: string;
-  getBlock: (parameters: any) => Blockly.Block;
-  getLua: (parameters: any) => (block: Blockly.Block) => string | [string, number];
+  getBlock: (parameters: any) => Blockly.BlockSvg;
+  getLua: (parameters: any) => (block: Blockly.BlockSvg) => string | [string, number];
 }
 
 const SoundCategory = {

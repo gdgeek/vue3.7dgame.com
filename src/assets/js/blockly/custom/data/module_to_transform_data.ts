@@ -1,6 +1,6 @@
 import * as Blockly from 'blockly';
 import DataType from './type';
-import { LuaGenerator } from 'blockly/lua';
+import { LuaGenerator, Order } from 'blockly/lua';
 
 // 定义 data 对象的类型
 interface Data {
@@ -11,8 +11,8 @@ interface Data {
 interface Block {
   title: string;
   type: string;
-  getBlock: (parameters: any) => Blockly.Block;
-  getLua: (parameters: { index: any }) => (block: Blockly.Block) => [string, number];
+  getBlock: (parameters: any) => Blockly.BlockSvg;
+  getLua: (parameters: { index: any }) => (block: Blockly.BlockSvg) => [string, number];
   toolbox: {
     kind: string;
     type: string;
@@ -23,12 +23,12 @@ const data: Data = {
   name: 'module_to_transform_data'
 };
 
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator();
 
 const block: Block = {
   title: data.name,
   type: DataType.name,
-  getBlock({ }): Blockly.Block {
+  getBlock({ }): Blockly.BlockSvg {
     const block = {
       init: function () {
         this.jsonInit({
@@ -48,21 +48,21 @@ const block: Block = {
           helpUrl: ''
         });
       }
-    } as Blockly.Block;
+    } as Blockly.BlockSvg;
 
     return block;
   },
-  getLua({ index }): (block: Blockly.Block) => [string, number] {
-    const lua = function (block: Blockly.Block): [string, number] {
+  getLua({ index }): (block: Blockly.BlockSvg) => [string, number] {
+    const lua = function (block: Blockly.BlockSvg): [string, number] {
       const value_entity = luaGeneratorInstance.valueToCode(
         block,
         'entity',
-        luaGeneratorInstance.ORDER_NONE
+        Order.NONE
       );
 
       const code = `CS.MLua.Point.ToTransformData(${value_entity})\n`;
       // TODO: Change ORDER_NONE to the correct strength.
-      return [code, luaGeneratorInstance.ORDER_NONE];
+      return [code, Order.NONE];
     };
     return lua;
   },

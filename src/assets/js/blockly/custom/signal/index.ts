@@ -4,15 +4,15 @@ import OutputSignal from './output_signal'
 import OutputSignalWithParameter from './output_signal_with_parameter'
 import InputSignal from './input_signal'
 import InitSignal from './init_signal'
-import { LuaGenerator } from 'blockly/lua';
+import { LuaGenerator, Order } from 'blockly/lua';
 
 interface Data {
   title: string;
-  getBlock: (parameters: any) => Blockly.Block;
-  getLua: (parameters: any) => (block: Blockly.Block) => string;
+  getBlock: (parameters: any) => Blockly.BlockSvg;
+  getLua: (parameters: any) => (block: Blockly.BlockSvg) => string;
 }
 
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator() as LuaGenerator & { [key: string]: any };
 
 const SignalCategory = {
   kind: 'category',

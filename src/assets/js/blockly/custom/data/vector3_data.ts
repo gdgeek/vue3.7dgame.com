@@ -1,9 +1,8 @@
 import * as Blockly from 'blockly';
 import DataType from './type';
+import { LuaGenerator, Order } from 'blockly/lua';
 
-import { LuaGenerator } from 'blockly/lua';
-
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator();
 
 // 定义 data 对象的类型
 interface Data {
@@ -15,8 +14,8 @@ interface Block {
   title: string;
   type: string;
   colour: number;
-  getBlock: (parameters: any) => Blockly.Block;
-  getLua: (parameters: any) => (block: Blockly.Block) => [string, number];
+  getBlock: (parameters: any) => Blockly.BlockSvg;
+  getLua: (parameters: any) => (block: Blockly.BlockSvg) => [string, number];
   toolbox: {
     kind: string;
     type: string;
@@ -41,7 +40,7 @@ const block: Block = {
   title: data.name,
   type: DataType.name,
   colour: DataType.colour,
-  getBlock: function ({ }): Blockly.Block {
+  getBlock: function ({ }): Blockly.BlockSvg {
     const block = {
       init: function () {
         this.jsonInit({
@@ -71,31 +70,31 @@ const block: Block = {
           helpUrl: ''
         });
       }
-    } as Blockly.Block; // 使用类型断言来满足 TypeScript 的类型要求
+    } as Blockly.BlockSvg; // 使用类型断言来满足 TypeScript 的类型要求
 
     return block;
   },
-  getLua({ }): (block: Blockly.Block) => [string, number] {
-    const lua = function (block: Blockly.Block): [string, number] {
+  getLua({ }): (block: Blockly.BlockSvg) => [string, number] {
+    const lua = function (block: Blockly.BlockSvg): [string, number] {
       const value_x = luaGeneratorInstance.valueToCode(
         block,
         'X',
-        luaGeneratorInstance.ORDER_ATOMIC
+        Order.ATOMIC
       );
       const value_y = luaGeneratorInstance.valueToCode(
         block,
         'Y',
-        luaGeneratorInstance.ORDER_ATOMIC
+        Order.ATOMIC
       );
       const value_z = luaGeneratorInstance.valueToCode(
         block,
         'Z',
-        luaGeneratorInstance.ORDER_ATOMIC
+        Order.ATOMIC
       );
 
       // 生成 Lua 代码
       const code = `CS.UnityEngine.Vector3(${value_x}, ${value_y}, ${value_z})`;
-      return [code, luaGeneratorInstance.ORDER_NONE]; // TODO: Change ORDER_NONE to the correct strength.
+      return [code, Order.NONE]; // TODO: Change ORDER_NONE to the correct strength.
     };
     return lua;
   },

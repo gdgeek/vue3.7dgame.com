@@ -7,7 +7,7 @@
       :show-close="false"
       @close="cancel"
     >
-      <template #title>
+      <template #header>
         <div class="dialog-footer">
           <el-tabs
             v-model="activeName"

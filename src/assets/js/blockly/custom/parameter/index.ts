@@ -8,14 +8,14 @@ import SystemParameter from './system_parameter'
 import PlayerParameter from './player_parameter'
 import RectangleParameter from './rectangle_parameter'
 import PointParameter from './point_parameter'
-import { LuaGenerator } from 'blockly/lua';
+import { LuaGenerator, Order } from 'blockly/lua';
 
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator() as LuaGenerator & { [key: string]: any };
 
 interface Data {
   title: string;
-  getBlock: (parameters: any) => Blockly.Block;
-  getLua: (parameters: any) => (block: Blockly.Block) => [string, number];
+  getBlock: (parameters: any) => Blockly.BlockSvg;
+  getLua: (parameters: any) => (block: Blockly.BlockSvg) => [string, number];
 }
 
 const ParameterCategory = {

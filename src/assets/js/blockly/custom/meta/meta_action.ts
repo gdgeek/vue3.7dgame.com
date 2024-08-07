@@ -1,9 +1,9 @@
 import * as Blockly from 'blockly';
 import TriggerType from './type';
 import "blockly/lua"
-import { LuaGenerator } from 'blockly/lua';
+import { LuaGenerator, Order } from 'blockly/lua';
 
-const luaGeneratorInstance = new LuaGenerator() as any;
+const luaGeneratorInstance = new LuaGenerator();
 
 
 interface Data {
@@ -35,8 +35,8 @@ interface Block {
   type: string;
   colour: number;
   getBlockJson: (parameters: BlockParameters) => BlockJson;
-  getBlock: (parameters: BlockParameters) => Blockly.Block;
-  getLua: (parameters: BlockParameters) => (block: Blockly.Block) => string;
+  getBlock: (parameters: BlockParameters) => Blockly.BlockSvg;
+  getLua: (parameters: BlockParameters) => (block: Blockly.BlockSvg) => string;
   toolbox: {
     kind: string;
     type: string;
@@ -85,18 +85,18 @@ const block: Block = {
     return json;
   },
 
-  getBlock(parameters: BlockParameters): Blockly.Block {
-    const data: Blockly.Block = {
+  getBlock(parameters: BlockParameters): Blockly.BlockSvg {
+    const data: Blockly.BlockSvg = {
       init: function () {
         const json = block.getBlockJson(parameters);
         this.jsonInit(json);
       }
-    } as Blockly.Block;
+    } as Blockly.BlockSvg;
     return data;
   },
 
   getLua(parameters: BlockParameters) {
-    const lua = function (block: Blockly.Block): string {
+    const lua = function (block: Blockly.BlockSvg): string {
       const dropdown_option = block.getFieldValue('Action');
       const statements_content = luaGeneratorInstance.statementToCode(block, 'content');
 
