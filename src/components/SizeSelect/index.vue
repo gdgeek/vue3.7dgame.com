@@ -1,7 +1,7 @@
 <template>
   <el-dropdown trigger="click" @command="handleSizeChange">
     <div>
-      <svg-icon icon-class="size" />
+      <svg-icon icon-class="size"></svg-icon>
     </div>
     <template #dropdown>
       <el-dropdown-menu>

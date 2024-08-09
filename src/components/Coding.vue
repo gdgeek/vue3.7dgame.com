@@ -201,7 +201,10 @@ const load = (data: any) => {
     try {
       const parsedData = JSON.parse(data);
       const blocks = parsedData.blocks || [];
-      console.log("blocks", blocks);
+      console.log("blocks", workspace.value, blocks);
+      // 保存当前工作区状态
+      const state = Blockly.serialization.workspaces.save(workspace.value);
+      // const res = Blockly.serialization.workspaces.load(state, workspace.value);
       const res = Blockly.serialization.workspaces.load(
         { blocks: blocks },
         workspace.value,

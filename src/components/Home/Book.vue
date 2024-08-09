@@ -18,7 +18,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from "vue";
 import Document from "@/components/Home/Document.vue";
 import DocumentList from "@/components/Home/DocumentList.vue";
 

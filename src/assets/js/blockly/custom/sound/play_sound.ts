@@ -86,12 +86,14 @@ const block: Block = {
   },
 
   getLua() {
+    console.log("c")
     const lua = function (block: Blockly.BlockSvg) {
       const sound = luaGeneratorInstance.valueToCode(
         block,
         'sound',
         Order.NONE
       )
+      console.log("测试4", sound)
       return '_G.sound.play(' + sound + ')\n'
 
     }

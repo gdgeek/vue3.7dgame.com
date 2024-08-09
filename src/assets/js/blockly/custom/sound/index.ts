@@ -20,8 +20,10 @@ const SoundCategory = {
 }
 function RegisterData(data: Data, parameters: any) {
   Blockly.Blocks[data.title] = data.getBlock(parameters)
+  console.log("data.getBlock(parameters)", data.title, data.getBlock(parameters))
   luaGeneratorInstance[data.title] = data.getLua(parameters)
-  console.log("测试3")
+  console.log("data.getLua(parameters)", data.getLua(parameters))
+  console.log("测试3", Blockly)
 }
 function SoundRegister(parameters: any) {
   RegisterData(SoundEntity, parameters)

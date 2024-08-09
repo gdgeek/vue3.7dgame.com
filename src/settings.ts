@@ -22,5 +22,6 @@ const defaultSettings: AppSettings = {
   watermarkEnabled: false,
   watermarkContent: pkg.name,
 };
+console.log("pkg", pkg.name);
 
 export default defaultSettings;

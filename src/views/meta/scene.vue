@@ -34,13 +34,14 @@ const route = useRoute();
 const router = useRouter();
 const breadcrumbStore = useBreadcrumbStore();
 
-const src = path.join("three.js/editor", "meta-editor.html");
+const src = path.join("/static/three.js/editor", "meta-editor.html");
+
 // console.log("src", src);
 const isInit = ref(false);
 const dialog = ref();
 
 const id = computed(() => parseInt(route.query.id as string));
-const title = computed(() => route.query.title as string);
+const title = computed(() => route.query.title?.slice(4) as string);
 
 const setBreadcrumbs = breadcrumbStore.setBreadcrumbs;
 
@@ -88,10 +89,19 @@ const handleMessage = async (e: MessageEvent) => {
         break;
       case "goto":
         if (data.data === "blockly.js") {
-          router.push({
-            path: "/meta/script",
-            query: { id: id.value, title: title.value },
-          });
+          const scriptRoute = router
+            .getRoutes()
+            .find((route) => route.path === "/meta/script");
+          if (scriptRoute && scriptRoute.meta.title) {
+            const metaTitle = scriptRoute.meta.title as string;
+            router.push({
+              path: "/meta/script",
+              query: {
+                id: id.value,
+                title: metaTitle + title.value,
+              },
+            });
+          }
         } else if (data.data === "rete.js") {
           router.push({
             path: "/meta/rete-meta",

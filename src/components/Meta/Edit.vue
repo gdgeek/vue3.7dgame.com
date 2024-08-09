@@ -202,10 +202,22 @@ const putItem = async (id: number, data: metaInfo) => {
 
 const editor = () => {
   if (item.value) {
-    router.push({
-      path: "/meta/scene",
-      query: { id: id.value, title: item.value.title },
-    });
+    // 查找路径 `/meta/scene` 的路由对象
+    const sceneRoute = router
+      .getRoutes()
+      .find((route) => route.path === "/meta/scene");
+    console.log("sceneRoute", sceneRoute);
+    // 如果找到了路由对象并且它有 meta.title，就进行拼接
+    if (sceneRoute && sceneRoute.meta.title) {
+      const metaTitle = sceneRoute.meta.title as string;
+      router.push({
+        path: "/meta/scene",
+        query: {
+          id: id.value,
+          title: metaTitle + item.value.title,
+        },
+      });
+    }
   }
 };
 

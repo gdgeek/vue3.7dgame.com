@@ -436,13 +436,13 @@ export const constantRoutes: RouteRecordRaw[] = [
           {
             path: "script",
             name: "MetaScript",
-            meta: { title: "脚本" },
+            meta: { title: "脚本编辑", keepAlive: true },
             component: () => import("@/views/meta/script.vue"),
           },
           {
             path: "scene",
             name: "MetaSceneEditor",
-            meta: { title: "内容编辑" },
+            meta: { title: "场景编辑", keepAlive: true },
             component: () => import("@/views/meta/scene.vue"),
           },
         ],

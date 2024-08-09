@@ -23,11 +23,21 @@
           <el-col :span="10" style="padding-left: 20px">
             <div>
               <div class="grid-content">
-                <el-popover placement="top-start" :title="item.title" :open-delay="500" width="400px" trigger="hover"
-                  :content="html(item.body)">
+                <el-popover
+                  placement="top-start"
+                  :title="item.title"
+                  :open-delay="500"
+                  width="400px"
+                  trigger="hover"
+                  :content="html(item.body)"
+                >
                   <template #reference>
-                    <el-link :underline="false" type="primary"
-                      style="display: inline; color: #2190ac; line-height: 24px" @click="gotoPost(item)">
+                    <el-link
+                      :underline="false"
+                      type="primary"
+                      style="display: inline; color: #2190ac; line-height: 24px"
+                      @click="gotoPost(item)"
+                    >
                       {{ item.title }}
                     </el-link>
                   </template>
@@ -56,9 +66,16 @@
       </div>
     </section>
     <br />
-    <el-pagination v-if="pagination.count > 1" :current-page="pagination.current" :page-count="pagination.count"
-      :page-size="pagination.size" :total="pagination.total" layout="prev, pager, next, jumper" background
-      @current-change="handleCurrentChange"></el-pagination>
+    <el-pagination
+      v-if="pagination.count > 1"
+      :current-page="pagination.current"
+      :page-count="pagination.count"
+      :page-size="pagination.size"
+      :total="pagination.total"
+      layout="prev, pager, next, jumper"
+      background
+      @current-change="handleCurrentChange"
+    ></el-pagination>
   </div>
 </template>
 
