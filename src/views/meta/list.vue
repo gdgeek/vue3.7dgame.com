@@ -108,7 +108,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 // import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
@@ -171,7 +170,7 @@ const search = (value: string) => {
 
 const addMeta = async () => {
   try {
-    const input = await ElMessageBox.prompt("请输元数据名称", "提示", {
+    const input = await ElMessageBox.prompt("请输入元数据名称", "提示", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
       inputValidator: (value: string) => {
@@ -231,7 +230,7 @@ onMounted(() => {
 .mrpp-title {
   font-size: 15px;
   padding: 0px 0px 0px 0px;
-  color: #666;
+  color: #000000;
 }
 .card-title {
   white-space: nowrap;

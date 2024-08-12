@@ -1,8 +1,9 @@
 import request from "@/utils/request";
 import qs from "querystringify";
 import path from "path-browserify";
+import type { metaInfo } from "./meta";
 import { ResourceInfo } from "../resources/model";
-import type { cybersType } from "./cyber";
+import { cybersType } from "./cyber";
 
 type Author = {
   id: number;
@@ -22,7 +23,7 @@ type ImageDetails = {
 };
 
 // 元数据类型
-export type metaInfo = {
+export type prefabsData = {
   id: number;
   author_id: number;
   info: string | null;
@@ -42,32 +43,39 @@ export type metaInfo = {
   author?: Author;
 };
 
-export const postMeta = (data: Record<string, any>) => {
-  return request<metaInfo>({
-    url: path.join("v1", "metas"),
+// export type prefabsData = metaInfo;
+
+export const deletePrefab = (id: number) => {
+  return request({
+    url: path.join("v1", "prefabs", id.toString()),
+    method: "delete",
+  });
+};
+export const postPrefab = (data: Record<string, any>) => {
+  return request({
+    url: path.join("v1", "prefabs"),
     method: "post",
     data,
   });
 };
 
-export const getMeta = (id: number, expand = "") => {
-  return request<metaInfo>({
+export const getPrefab = (id: number, expand = "") => {
+  return request<prefabsData>({
     url: path.join(
       "v1",
-      "metas",
-      `${id.toString()}${qs.stringify({ expand: expand }, true)}`
+      "prefabs",
+      id.toString() + qs.stringify({ expand: expand }, true)
     ),
     method: "get",
   });
 };
-
-export const getMetas = (
+export const getPrefabs = (
   sort = "-created_at",
   search = "",
   page = 0,
   expand = "image,author"
 ) => {
-  const query: Record<string, any> = {};
+  const query: Record<string, any> = [];
   if (sort === "name") {
     sort = "title";
   } else if (sort === "-name") {
@@ -83,23 +91,16 @@ export const getMetas = (
     query["page"] = page;
   }
 
-  return request<metaInfo[]>({
-    url: path.join("v1", "metas") + qs.stringify(query, true),
+  return request<prefabsData[]>({
+    url: path.join("v1", "prefabs" + qs.stringify(query, true)),
     method: "get",
   });
 };
 
-export const putMeta = (id: number, data: Record<string, any>) => {
+export const putPrefab = (id: number, data: prefabsData) => {
   return request({
-    url: path.join("v1", "metas", id.toString()),
+    url: path.join("v1", "prefabs", id.toString()),
     method: "put",
     data,
-  });
-};
-
-export const deleteMeta = (id: number) => {
-  return request({
-    url: path.join("v1", "metas", id.toString()),
-    method: "delete",
   });
 };

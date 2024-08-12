@@ -20,6 +20,22 @@ import "element-plus/theme-chalk/dark/css-vars.css";
 import "@/styles/index.scss";
 import "uno.css";
 import "animate.css";
+import router from "./router";
+
+// 更新页面标题
+const updateTitle = (title: string) => {
+  document.title = `${title} - 苹果AR元气项目`;
+};
+
+// 监听路由变化更新页面标题
+router.beforeEach((to) => {
+  const metaTitle = to.meta.title as string;
+  if (metaTitle) {
+    updateTitle(metaTitle);
+  } else {
+    updateTitle("");
+  }
+});
 
 const app = createApp(App);
 app.component("FontAwesomeIcon", FontAwesomeIcon);

@@ -76,11 +76,7 @@
         <br />
         <el-card v-if="item !== null" class="box-card">
           <el-button-group style="float: right; padding: 3px 0">
-            <el-button
-              v-if="item.editable"
-              @click="openDialog"
-              icon="MagicStick"
-            >
+            <el-button @click="openDialog" icon="MagicStick">
               事件编辑
             </el-button>
             <el-button v-if="item.viewable" @click="editor" icon="Edit">

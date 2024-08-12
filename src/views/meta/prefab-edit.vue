@@ -1,14 +1,36 @@
 <template>
-  <div class="app-container">
-    <h1>Vue3-Element-Admin-Thin</h1>
+  <div class="meta-edit">
+    <edit @get-item="getPrefabData" @put-item="putPrefabData"></edit>
   </div>
 </template>
 
 <script setup lang="ts">
-defineOptions({
-  name: "Dashboard",
-  inheritAttrs: false,
-});
-</script>
+import Edit from "@/components/Meta/Edit.vue";
+import { getPrefab, putPrefab } from "@/api/v1/prefab";
+const getPrefabData = async (
+  id: number,
+  expand: string,
+  callback: (data: any) => void
+) => {
+  try {
+    const response = await getPrefab(id, expand);
+    console.log("response:", response);
+    callback(response.data);
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-<style lang="scss" scoped></style>
+const putPrefabData = async (
+  id: number,
+  data: any,
+  callback: (data: any) => void
+) => {
+  try {
+    const response = await putPrefab(id, data);
+    callback(response.data);
+  } catch (error) {
+    console.error(error);
+  }
+};
+</script>

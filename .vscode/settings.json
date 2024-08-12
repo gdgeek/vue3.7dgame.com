@@ -77,4 +77,5 @@
   "i18n-ally.localesPaths": [
     "src/lang"
   ],
+  "liveServer.settings.port": 5501,
 }

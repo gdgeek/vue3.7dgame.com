@@ -62,7 +62,7 @@
               <template #header>
                 <el-card shadow="hover" :body-style="{ padding: '0px' }">
                   <div class="mrpp-title">
-                    <b class="card-title" nowrap>{{ title(item) }}</b>
+                    <b class="card-title" nowrap>{{ item.title }}</b>
                   </div>
                   <LazyImg
                     v-if="item.image"
