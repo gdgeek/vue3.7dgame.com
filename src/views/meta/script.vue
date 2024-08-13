@@ -22,7 +22,10 @@
 
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="save">
-                  <font-awesome-icon icon="save"></font-awesome-icon>
+                  <font-awesome-icon
+                    class="icon"
+                    icon="save"
+                  ></font-awesome-icon>
                   保存
                 </el-button>
               </el-button-group>
@@ -153,3 +156,9 @@ onBeforeUnmount(() => {
   }
 });
 </script>
+
+<style scoped>
+.icon {
+  margin-right: 5px;
+}
+</style>
