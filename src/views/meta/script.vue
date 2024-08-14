@@ -5,7 +5,7 @@
         <el-card v-loading="loading" class="box-card">
           <template #header>
             <div class="clearfix">
-              <router-link
+              <!-- <router-link
                 v-if="meta"
                 :to="
                   '/meta/rete-meta?id=' +
@@ -17,7 +17,7 @@
                 <el-link v-if="meta" :underline="false">
                   【元：{{ title }}】
                 </el-link>
-              </router-link>
+              </router-link> -->
               / 【script】
 
               <el-button-group style="float: right">
@@ -31,7 +31,20 @@
               </el-button-group>
             </div>
           </template>
-
+          <el-container>
+            <el-main>
+              <iframe
+                id="editor"
+                :src="
+                  'https://blockly.4mr.cn/?id=' +
+                  Math.floor(Math.random() * (1000000 + 1))
+                "
+                class="content"
+                height="400px"
+                width="100%"
+              ></iframe>
+            </el-main>
+          </el-container>
           <Coding
             v-if="meta !== null"
             :meta="meta"
@@ -45,7 +58,7 @@
     </el-container>
   </div>
 </template>
-
+// meta cyber
 <script setup lang="ts">
 import { ref, computed, onBeforeUnmount, onMounted } from "vue";
 import { useRoute } from "vue-router";
@@ -56,7 +69,21 @@ import Coding from "@/components/Coding.vue";
 import { AbilityEditable } from "@/ability/ability";
 import { useAbility } from "@/composables/ability";
 import { ElMessage } from "element-plus";
+let ready: boolean = false;
+const handleMessage = async (e: MessageEvent) => {
+  /*
+   origin: string;
+   readonly ports: ReadonlyArray<MessagePort>;
+    readonly source
+  */
+  console.error(e.data);
+  const data: any = JSON.parse(e.data);
 
+  if (data.type === "ready") {
+    ready = true;
+    initEditor();
+  }
+};
 const loading = ref(false);
 const meta = ref<metaInfo | null>(null);
 const cyber = ref<cybersType>();
@@ -85,8 +112,15 @@ const save = () => {
     });
   }
 };
-
+const initEditor = () => {
+  if (meta.value === null) return;
+  if (!ready) return;
+  const iframe = document.getElementById("editor") as HTMLIFrameElement;
+  iframe.contentWindow?.postMessage(JSON.stringify(meta.value), "*");
+};
 onMounted(async () => {
+  window.addEventListener("message", handleMessage);
+
   try {
     // setBreadcrumbs([
     //   { path: "/", meta: { title: "元宇宙实景编程平台" } },
@@ -95,51 +129,29 @@ onMounted(async () => {
     // ]);
 
     loading.value = true;
-    const res = await getMeta(id.value, "cyber,event,share");
-    meta.value = res.data;
-    console.log("meta.value", meta.value);
+    const response = await getMeta(id.value, "cyber,event,share");
 
-    // setBreadcrumbs([
-    //   {
-    //     path: "/",
-    //     meta: { title: "元宇宙实景编程平台" },
-    //   },
-    //   {
-    //     path: "/meta-verse/index",
-    //     meta: { title: "宇宙" },
-    //   },
-    //   {
-    //     path: "/verse/view?id=" + meta.value.id,
-    //     meta: { title: "【宇宙】" },
-    //   },
-    //   {
-    //     path: "/verse/scene?id=" + meta.value.id,
-    //     meta: { title: "宇宙编辑" },
-    //   },
-    //   {
-    //     path:
-    //       "/meta/rete-meta?id=" +
-    //       meta.value.id +
-    //       "&title=" +
-    //       encodeURIComponent(title.value),
-    //     meta: { title: "元编辑" },
-    //   },
-    //   {
-    //     path: ".",
-    //     meta: { title: "赛博" },
-    //   },
-    // ]);
+    meta.value = response.data;
+    initEditor();
+    //const iframe = document.getElementById("editor") as HTMLIFrameElement;
+
+    // iframe.contentWindow?.postMessage(JSON.stringify(meta.value), "*");
+
+    console.error(meta.value);
+    console.log("meta.value", meta.value);
 
     if (meta.value.cyber === null) {
       if (meta.value.editable) {
-        const cyberRes = await postCyber({
+        const cyberResponse = await postCyber({
           meta_id: meta.value.id,
         });
-        cyber.value = cyberRes.data;
+
+        cyber.value = cyberResponse.data;
       }
     } else {
       cyber.value = meta.value.cyber;
     }
+    //alert(cyber.value.id);
   } catch (error: any) {
     ElMessage({
       message: error.message,
