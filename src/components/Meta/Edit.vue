@@ -65,10 +65,10 @@
                 &nbsp;
               </span>
             </el-form-item>
-            <el-form-item label="数据">
+            <el-form-item v-if="!custome" label="数据">
               <el-input type="textarea" v-model="item.data"></el-input>
             </el-form-item>
-            <el-form-item label="信息">
+            <el-form-item v-if="false" label="信息">
               <el-input type="textarea" v-model="item!.info"></el-input>
             </el-form-item>
           </el-form>
@@ -134,16 +134,16 @@ const id = computed(() => parseInt(route.query.id as string, 10));
 
 const emit = defineEmits(["getItem", "putItem"]);
 
-// const custom = computed({
-//   get() {
-//     return item.value?.custom !== 0;
-//   },
-//   set(value: boolean) {
-//     if (item.value) {
-//       item.value.custom = value ? 1 : 0;
-//     }
-//   },
-// });
+const custome = computed({
+  get() {
+    return item.value?.custome !== false;
+  },
+  set(value: boolean) {
+    if (item.value) {
+      item.value.custome = value ? true : false;
+    }
+  },
+});
 
 type Event = {
   title: string;

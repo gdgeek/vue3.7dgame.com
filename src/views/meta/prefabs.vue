@@ -144,7 +144,7 @@ const pagination = ref({
 
 const userStore = useUserStore();
 
-const isRoot = computed(() => userStore.userInfo.roles.includes("manager"));
+const isRoot = computed(() => userStore.userInfo.roles.includes("root"));
 
 const url = (id: number) => {
   return isRoot.value ? `/meta/prefab-edit?id=${id}` : "#";

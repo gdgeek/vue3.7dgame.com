@@ -126,6 +126,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         // dts: "src/typings/components.d.ts",
       }),
       Icons({
+        compiler: "vue3",
         // 自动安装图标库
         autoInstall: true,
       }),

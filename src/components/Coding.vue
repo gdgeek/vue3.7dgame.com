@@ -57,7 +57,7 @@ onMounted(() => {
 
     // 初始化 Blockly 工作区
     workspace.value = Blockly.inject("blocklyDiv", {
-      media: "/src/assets/blockly/media/",
+      media: "/src/assets/test/blockly/media",
       toolbox,
       grid: { spacing: 20, length: 3, colour: "#ccc", snap: true },
       move: {
