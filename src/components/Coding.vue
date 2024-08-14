@@ -26,10 +26,9 @@ import { AddBlocks } from "@/assets/js/blockly/blocks";
 import { cybersType, putCyber } from "@/api/v1/cyber";
 import { metaInfo } from "@/api/v1/meta";
 import type { TabsPaneContext } from "element-plus";
-import { LuaGenerator } from "blockly/lua";
 import type { Workspace, WorkspaceSvg } from "blockly";
 
-const luaGeneratorInstance = new LuaGenerator();
+import { luaGenerator } from "blockly/lua";
 
 const props = defineProps<{
   cyber: cybersType;
@@ -82,7 +81,7 @@ onMounted(() => {
     }
     console.log("Initialized workspace:", workspace.value);
 
-    const luaCode = luaGeneratorInstance.workspaceToCode(workspace.value);
+    const luaCode = luaGenerator.workspaceToCode(workspace.value);
     console.log("luaCode", luaCode);
 
     script.value = "local meta = {}\nindex = ''\n" + luaCode;
@@ -200,17 +199,22 @@ const load = (data: any) => {
   if (workspace.value) {
     try {
       const parsedData = JSON.parse(data);
-      const blocks = parsedData.blocks || [];
-      console.log("blocks", workspace.value, blocks);
+
+      const blocks = parsedData.blocks || {};
       // 保存当前工作区状态
       const state = Blockly.serialization.workspaces.save(workspace.value);
-      // const res = Blockly.serialization.workspaces.load(state, workspace.value);
-      const res = Blockly.serialization.workspaces.load(
+
+      const result = Blockly.serialization.workspaces.load(
+        blocks,
+        workspace.value,
+        { recordUndo: true }
+      );
+      /*const result = Blockly.serialization.workspaces.load(
         { blocks: blocks },
         workspace.value,
         { recordUndo: true } // 可选，记录撤销操作
-      );
-      console.log("blocklyload", res);
+      );*/
+      console.log("blocklyload", result);
     } catch (error) {
       console.error("Error loading workspace:", error);
     }
@@ -223,7 +227,10 @@ const save = async () => {
   if (!workspace.value) return;
 
   const data = Blockly.serialization.workspaces.save(workspace.value);
-  if (props.cyber.data === JSON.stringify(data)) return;
+
+  //if (props.cyber.data === JSON.stringify(data)) return;
+
+  const test: string = luaGeneratorInstance.workspaceToCode(workspace.value);
 
   try {
     const scriptValue =

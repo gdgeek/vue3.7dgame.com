@@ -7,7 +7,7 @@ export class Component extends Rete.Component {
     this.root_ = root;
   }
 
-  builder(node) {
+  builder(node:any) {
     const self = this;
     if (
       typeof this.type_.controls !== "undefined" &&

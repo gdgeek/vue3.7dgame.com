@@ -35,6 +35,7 @@ const pathSrc = resolve(__dirname, "src");
 export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   const env = loadEnv(mode, process.cwd());
   return {
+    
     resolve: {
       alias: {
         "@": pathSrc,
@@ -53,6 +54,12 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       },
     },
     server: {
+      cors: {
+        origin: '*', // 允许任何域名
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // 允许任何请求方法
+        allowedHeaders: '*', // 允许任何请求头
+        credentials: true, // 如果需要支持发送凭据的跨域请求，可以设置为 true
+      },
       // 允许IP访问
       host: "0.0.0.0",
       // 应用端口 (默认:3000)

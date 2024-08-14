@@ -30,7 +30,11 @@
     "src/**/*.vue",
     "src/typings/**/*.d.ts",
     "mock/**/*.ts",
-    "vite.config.ts"
-, "src/assets/test/blockly/code.js", "src/assets/js/blockly/custom/signal/type.ts", "src/assets/js/fontok.ts", "src/assets/test/blockly/storage.js"  ],
+    "vite.config.ts",
+    "src/assets/test/blockly/code.js",
+    "src/assets/js/blockly/custom/signal/type.ts",
+    "src/assets/js/fontok.ts",
+    "src/assets/test/blockly/storage.js"
+  ],
   "exclude": ["node_modules", "dist", "**/*.js"]
 }
