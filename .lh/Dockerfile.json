@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 5,
+            "activePatchIndex": 6,
             "patches": [
                 {
                     "date": 1721276615886,
@@ -28,6 +28,10 @@
                 {
                     "date": 1723636097947,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -18,6 +18,5 @@\n \n # 暴露端口\n EXPOSE 80\n \n-# 启动 Nginx\n CMD [\"nginx\", \"-g\", \"daemon off;\"]\n"
+                },
+                {
+                    "date": 1723636501099,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -19,5 +19,4 @@\n # 暴露端口\n EXPOSE 80\n \n CMD [\"nginx\", \"-g\", \"daemon off;\"]\n-  \n\\ No newline at end of file\n"
                 }
             ],
             "date": 1721276615886,
