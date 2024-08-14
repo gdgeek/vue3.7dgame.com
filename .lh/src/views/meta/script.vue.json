@@ -1,0 +1,62 @@
+{
+    "sourceFile": "src/views/meta/script.vue",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 11,
+            "patches": [
+                {
+                    "date": 1723567108531,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1723567145078,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -94,10 +94,11 @@\n     //   { path: \"\", meta: { title: \"赛博编辑\" } },\n     // ]);\n \n     loading.value = true;\n-    const res = await getMeta(id.value, \"cyber,event,share\");\n-    meta.value = res.data;\n+    const response = await getMeta(id.value, \"cyber,event,share\");\n+\n+    meta.value = response.data;\n     console.log(\"meta.value\", meta.value);\n \n     if (meta.value.cyber === null) {\n       if (meta.value.editable) {\n"
+                },
+                {
+                    "date": 1723567160190,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -97,8 +97,9 @@\n     loading.value = true;\n     const response = await getMeta(id.value, \"cyber,event,share\");\n \n     meta.value = response.data;\n+    console.error(meta.value);\n     console.log(\"meta.value\", meta.value);\n \n     if (meta.value.cyber === null) {\n       if (meta.value.editable) {\n"
+                },
+                {
+                    "date": 1723608930072,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -105,8 +105,9 @@\n       if (meta.value.editable) {\n         const cyberRes = await postCyber({\n           meta_id: meta.value.id,\n         });\n+\n         cyber.value = cyberRes.data;\n       }\n     } else {\n       cyber.value = meta.value.cyber;\n"
+                },
+                {
+                    "date": 1723608937755,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -102,13 +102,13 @@\n     console.log(\"meta.value\", meta.value);\n \n     if (meta.value.cyber === null) {\n       if (meta.value.editable) {\n-        const cyberRes = await postCyber({\n+        const cyberResponse = await postCyber({\n           meta_id: meta.value.id,\n         });\n \n-        cyber.value = cyberRes.data;\n+        cyber.value = cyberResponse.data;\n       }\n     } else {\n       cyber.value = meta.value.cyber;\n     }\n"
+                },
+                {
+                    "date": 1723608954485,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -111,8 +111,9 @@\n       }\n     } else {\n       cyber.value = meta.value.cyber;\n     }\n+    alert(cyber.value);\n   } catch (error: any) {\n     ElMessage({\n       message: error.message,\n       type: \"error\",\n"
+                },
+                {
+                    "date": 1723608970454,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -111,9 +111,9 @@\n       }\n     } else {\n       cyber.value = meta.value.cyber;\n     }\n-    alert(cyber.value);\n+    console.error(cyber);\n   } catch (error: any) {\n     ElMessage({\n       message: error.message,\n       type: \"error\",\n"
+                },
+                {
+                    "date": 1723609009629,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -111,9 +111,9 @@\n       }\n     } else {\n       cyber.value = meta.value.cyber;\n     }\n-    console.error(cyber);\n+    alert(cyber.value);\n   } catch (error: any) {\n     ElMessage({\n       message: error.message,\n       type: \"error\",\n"
+                },
+                {
+                    "date": 1723609015323,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -111,9 +111,9 @@\n       }\n     } else {\n       cyber.value = meta.value.cyber;\n     }\n-    alert(cyber.value);\n+    alert(cyber.value.id);\n   } catch (error: any) {\n     ElMessage({\n       message: error.message,\n       type: \"error\",\n"
+                },
+                {
+                    "date": 1723623644124,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -30,9 +30,9 @@\n                 </el-button>\n               </el-button-group>\n             </div>\n           </template>\n-\n+111\n           <Coding\n             v-if=\"meta !== null\"\n             :meta=\"meta\"\n             ref=\"blocklyRef\"\n"
+                },
+                {
+                    "date": 1723623660076,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -34,9 +34,9 @@\n           <el-container>\n             <el-main>\n               <iframe\n                 id=\"editor\"\n-                :src=\"src\"\n+                :src=\"'https://baidu.com'\"\n                 class=\"content\"\n                 height=\"100%\"\n                 width=\"100%\"\n               ></iframe>\n"
+                },
+                {
+                    "date": 1723623677877,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -34,9 +34,9 @@\n           <el-container>\n             <el-main>\n               <iframe\n                 id=\"editor\"\n-                :src=\"'https://baidu.com'\"\n+                :src=\"'http://localhost:3001/'\"\n                 class=\"content\"\n                 height=\"100%\"\n                 width=\"100%\"\n               ></iframe>\n"
+                }
+            ],
+            "date": 1723567108531,
+            "name": "Commit-0",
+            "content": "<template>\n  <div class=\"verse-code\">\n    <el-container>\n      <el-main>\n        <el-card v-loading=\"loading\" class=\"box-card\">\n          <template #header>\n            <div class=\"clearfix\">\n              <router-link\n                v-if=\"meta\"\n                :to=\"\n                  '/meta/rete-meta?id=' +\n                  meta.id +\n                  '&title=' +\n                  encodeURIComponent(title)\n                \"\n              >\n                <el-link v-if=\"meta\" :underline=\"false\">\n                  【元：{{ title }}】\n                </el-link>\n              </router-link>\n              / 【script】\n\n              <el-button-group style=\"float: right\">\n                <el-button type=\"primary\" size=\"small\" @click=\"save\">\n                  <font-awesome-icon\n                    class=\"icon\"\n                    icon=\"save\"\n                  ></font-awesome-icon>\n                  保存\n                </el-button>\n              </el-button-group>\n            </div>\n          </template>\n\n          <Coding\n            v-if=\"meta !== null\"\n            :meta=\"meta\"\n            ref=\"blocklyRef\"\n            :cyber=\"cyber!\"\n            :id=\"id\"\n            :index=\"meta!.uuid\"\n          ></Coding>\n        </el-card>\n      </el-main>\n    </el-container>\n  </div>\n</template>\n\n<script setup lang=\"ts\">\nimport { ref, computed, onBeforeUnmount, onMounted } from \"vue\";\nimport { useRoute } from \"vue-router\";\nimport { useBreadcrumbStore } from \"@/store/modules/breadcrumb\";\nimport { getMeta, metaInfo } from \"@/api/v1/meta\";\nimport { cybersType, postCyber } from \"@/api/v1/cyber\";\nimport Coding from \"@/components/Coding.vue\";\nimport { AbilityEditable } from \"@/ability/ability\";\nimport { useAbility } from \"@/composables/ability\";\nimport { ElMessage } from \"element-plus\";\n\nconst loading = ref(false);\nconst meta = ref<metaInfo | null>(null);\nconst cyber = ref<cybersType>();\n\nconst route = useRoute();\nconst breadcrumbStore = useBreadcrumbStore();\n\nconst setBreadcrumbs = breadcrumbStore.setBreadcrumbs;\n\nconst id = computed(() => parseInt(route.query.id as string));\nconst title = computed(() => meta.value?.title as string);\nconst blocklyRef = ref<InstanceType<typeof Coding> | null>(null);\n// const saveable = computed(() => {\n//   if (meta.value === null) return false;\n//   const { can } = useAbility();\n//   return can(\"editable\", new AbilityEditable(meta.value!.editable));\n// });\n\nconst save = () => {\n  if (blocklyRef.value) {\n    blocklyRef.value.save();\n  } else {\n    ElMessage({\n      message: \"blocklyRef 为空，无法保存\",\n      type: \"error\",\n    });\n  }\n};\n\nonMounted(async () => {\n  try {\n    // setBreadcrumbs([\n    //   { path: \"/\", meta: { title: \"元宇宙实景编程平台\" } },\n    //   { path: \"/meta-verse/index\", meta: { title: \"宇宙\" } },\n    //   { path: \"\", meta: { title: \"赛博编辑\" } },\n    // ]);\n\n    loading.value = true;\n    const res = await getMeta(id.value, \"cyber,event,share\");\n    meta.value = res.data;\n    console.log(\"meta.value\", meta.value);\n\n    if (meta.value.cyber === null) {\n      if (meta.value.editable) {\n        const cyberRes = await postCyber({\n          meta_id: meta.value.id,\n        });\n        cyber.value = cyberRes.data;\n      }\n    } else {\n      cyber.value = meta.value.cyber;\n    }\n  } catch (error: any) {\n    ElMessage({\n      message: error.message,\n      type: \"error\",\n    });\n  } finally {\n    loading.value = false;\n  }\n});\n\nonBeforeUnmount(() => {\n  if (blocklyRef.value) {\n    blocklyRef.value.save();\n  }\n});\n</script>\n\n<style scoped>\n.icon {\n  margin-right: 5px;\n}\n</style>\n"
+        }
+    ]
+}
