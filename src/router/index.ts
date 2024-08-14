@@ -427,12 +427,12 @@ export const constantRoutes: RouteRecordRaw[] = [
             meta: { title: "编辑" },
             component: () => import("@/views/meta/meta-edit.vue"),
           },
-          // {
-          //   path: "rete-meta",
-          //   name: "VerseMetaEditor",
-          //   meta: { title: "【元】" },
-          //   component: () => import("@/views/meta/rete-meta.vue"),
-          // },
+          {
+            path: "rete-meta",
+            name: "VerseMetaEditor",
+            meta: { title: "【元】" },
+            component: () => import("@/views/meta/rete-meta.vue"),
+          },
           {
             path: "script",
             name: "MetaScript",
@@ -447,67 +447,6 @@ export const constantRoutes: RouteRecordRaw[] = [
           },
         ],
       },
-
-      // {
-      //   path: "verse",
-      //   component: null,
-      //   redirect: "/verse/index",
-      //   name: "",
-      //   meta: {
-      //     title: "宇宙",
-      //     icon: "el-icon-sunrise",
-      //     hidden: false,
-      //     alwaysShow: false,
-      //     params: null,
-      //   },
-      //   children: [
-      //     {
-      //       path: "index",
-      //       component: () => import("@/views/meta-verse/index.vue"),
-      //       name: "VerseIndex",
-      //       meta: {
-      //         title: "自己创造",
-      //         icon: "cascader",
-      //       },
-      //     },
-      //     {
-      //       path: "open",
-      //       component: () => import("@/views/meta-verse/open.vue"),
-      //       name: "VerseOpen",
-      //       meta: {
-      //         title: "开放列表",
-      //         icon: "cascader",
-      //       },
-      //     },
-      //     {
-      //       path: "share",
-      //       component: () => import("@/views/meta-verse/share.vue"),
-      //       name: "VerseShare",
-      //       meta: {
-      //         title: "自己创造",
-      //         icon: "cascader",
-      //       },
-      //     },
-      //     {
-      //       path: "view",
-      //       name: "VerseView",
-      //       meta: { title: "【宇宙】" },
-      //       component: () => import("@/views/verse/view.vue"),
-      //     },
-      //     {
-      //       path: "script",
-      //       name: "Script",
-      //       meta: { title: "脚本编辑", keepAlive: true },
-      //       component: (): any => import("@/views/verse/script.vue"),
-      //     },
-      //     {
-      //       path: "scene",
-      //       name: "VerseSceneEditor",
-      //       meta: { title: "场景编辑", keepAlive: true },
-      //       component: () => import("@/views/verse/scene.vue"),
-      //     },
-      //   ],
-      // },
 
       {
         path: "401",
@@ -527,7 +466,7 @@ export const constantRoutes: RouteRecordRaw[] = [
  * 创建路由
  */
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes: constantRoutes,
   // 刷新时，滚动条位置还原
   scrollBehavior: () => ({ left: 0, top: 0 }),

@@ -27,6 +27,7 @@ const savePolygen = async (
 ) => {
   try {
     const response = await postPolygen({ name, file_id });
+    // 跳转到图片查看页面，并传递图片 ID
     router.push({
       path: "/ResourceAdmin/polygen/view",
       query: { id: response.data.id },
