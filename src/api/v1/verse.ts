@@ -4,13 +4,53 @@ import path from "path-browserify";
 import { v4 as uuidv4 } from "uuid";
 import environment from "@/environment";
 
-interface VerseData {
-  [key: string]: any;
-  version?: number;
-  uuid?: string;
-}
+type Author = {
+  id: number;
+  nickname: string;
+  email: string | null;
+  username: string;
+};
 
-export const postVerse = (data: VerseData) => {
+type ImageDetails = {
+  id: number;
+  md5: string;
+  type: string;
+  url: string;
+  filename: string;
+  size: number;
+  key: string;
+};
+
+export type VerseData = {
+  id: number;
+  author_id: number;
+  created_at?: string;
+  name: string;
+  info: string | null;
+  data: string | null;
+  version: number;
+  uuid: string;
+  editable: boolean;
+  viewable: boolean;
+  image: ImageDetails | null;
+  author?: Author;
+};
+
+export type PostVerseData = {
+  image_id?: number;
+  info: string;
+  name: string;
+  uuid: string;
+  version?: number;
+};
+
+export type PutVerseData = {
+  info?: string;
+  name: string;
+  version?: number;
+};
+
+export const postVerse = (data: PostVerseData) => {
   data.version = environment.version;
   data.uuid = data.uuid || uuidv4();
   return request({
@@ -21,7 +61,7 @@ export const postVerse = (data: VerseData) => {
 };
 
 export const getVerse = (id: number | string, expand = "metas,share") => {
-  return request({
+  return request<VerseData>({
     url: path.join(
       "v1",
       "verses",
@@ -83,13 +123,13 @@ export const getVerses = (
   expand = "image,author,share"
 ) => {
   const query = createQueryParams(sort, search, page, expand);
-  return request({
+  return request<VerseData[]>({
     url: path.join("v1", "verses" + qs.stringify(query, true)),
     method: "get",
   });
 };
 
-export const putVerse = (id: number | string, data: VerseData) => {
+export const putVerse = (id: number | string, data: PutVerseData) => {
   data.version = environment.version;
   return request({
     url: path.join("v1", "verses", id.toString()),

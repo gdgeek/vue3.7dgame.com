@@ -5,7 +5,7 @@
         <el-card v-loading="loading" class="box-card">
           <template #header>
             <div class="clearfix">
-              <router-link
+              <!-- <router-link
                 v-if="meta"
                 :to="
                   '/meta/rete-meta?id=' +
@@ -17,7 +17,7 @@
                 <el-link v-if="meta" :underline="false">
                   【元：{{ title }}】
                 </el-link>
-              </router-link>
+              </router-link> -->
               / 【script】
 
               <el-button-group style="float: right">
