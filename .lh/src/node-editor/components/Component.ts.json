@@ -1,0 +1,18 @@
+{
+    "sourceFile": "src/node-editor/components/Component.ts",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1723624877353,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1723624877353,
+            "name": "Commit-0",
+            "content": "import Rete from \"rete\";\nimport { Control } from \"@/node-editor/controls/control\";\nexport class Component extends Rete.Component {\n  constructor(type, root) {\n    super(type.title);\n    this.type_ = type;\n    this.root_ = root;\n  }\n\n  builder(node:any) {\n    const self = this;\n    if (\n      typeof this.type_.controls !== \"undefined\" &&\n      this.type_.controls !== null\n    ) {\n      this.type_.controls.forEach((ctrl) => {\n        node.addControl(\n          new Control(this.editor, { data: ctrl, root: this.root_, node: node })\n        );\n      });\n    }\n\n    if (\n      typeof this.type_.inputs !== \"undefined\" &&\n      this.type_.inputs !== null\n    ) {\n      this.type_.inputs.forEach((input) => {\n        const ipt = new Rete.Input(\n          input.key,\n          input.title,\n          input.socket,\n          input.multiConns\n        );\n        if (typeof input.control !== \"undefined\") {\n          ipt.addControl(\n            new Control(this.editor, {\n              data: input.control,\n              root: this.root_,\n              node: node,\n            })\n          );\n        }\n        node.addInput(ipt);\n      });\n    }\n    if (\n      typeof this.type_.outputs !== \"undefined\" &&\n      this.type_.outputs !== null\n    ) {\n      this.type_.outputs.forEach((output) => {\n        node.addOutput(\n          new Rete.Output(\n            output.key,\n            output.title,\n            output.socket,\n            output.multiConns\n          )\n        );\n      });\n    }\n    return node;\n  }\n  worker(node, inputs, outputs, callback) {\n    const data = {};\n    data.type = this.type_.title;\n    if (\n      typeof this.type_.controls !== \"undefined\" &&\n      this.type_.controls !== null\n    ) {\n      data.parameters = {};\n      this.type_.controls.forEach((ctrl) => {\n        if (typeof ctrl.ignore === \"undefined\" || !ctrl.ignore) {\n          data.parameters[ctrl.key] = node.data[ctrl.key];\n        }\n      });\n    }\n\n    if (\n      typeof this.type_.inputs !== \"undefined\" &&\n      this.type_.inputs !== null\n    ) {\n      data.children = {};\n      this.type_.inputs.forEach((input) => {\n        const items = inputs[input.key];\n\n        data.children[input.key] = [];\n\n        if (items.length === 0) {\n          if (typeof input.control !== \"undefined\") {\n            data.parameters[input.control.key] = node.data[input.control.key];\n          }\n        } else {\n          items.forEach((item) => {\n            data.children[input.key].push(item);\n          });\n        }\n      });\n    }\n\n    if (\n      typeof this.type_.outputs !== \"undefined\" &&\n      this.type_.outputs !== null\n    ) {\n      this.type_.outputs.forEach((output) => {\n        outputs[output.key] = data;\n      });\n    }\n    if (typeof this.type_.root !== \"undefined\" && this.type_.root) {\n      console.log(JSON.stringify(data));\n      callback(JSON.stringify(data));\n    }\n  }\n}\n"
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+{
+    "sourceFile": "tsconfig.json",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1723542515038,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1723542515038,
+            "name": "Commit-0",
+            "content": "{\n  \"compilerOptions\": {\n    \"target\": \"esnext\",\n    \"useDefineForClassFields\": true,\n    \"module\": \"esnext\",\n    \"moduleResolution\": \"node\",\n    \"strict\": true,\n    \"noLib\": false,\n    \"sourceMap\": true,\n    \"resolveJsonModule\": true,\n    \"esModuleInterop\": true,\n    \"lib\": [\"esnext\", \"dom\"],\n    \"baseUrl\": \".\",\n    \"allowJs\": true,\n    // \"checkJs\": false,\n    \"paths\": {\n      \"@/*\": [\"src/*\"]\n    },\n    \"types\": [\"vite/client\", \"unplugin-icons/types/vue\", \"element-plus/global\"],\n    \"skipLibCheck\": true /* Skip type checking all .d.ts files. */,\n    \"allowSyntheticDefaultImports\": true /* 允许默认导入 */,\n    \"forceConsistentCasingInFileNames\": true /* Ensure that casing is correct in imports. */,\n\n    \"jsx\": \"preserve\",\n    \"jsxFactory\": \"h\",\n    \"jsxFragmentFactory\": \"Fragment\"\n  },\n  \"include\": [\n    \"src/**/*.ts\",\n    \"src/**/*.vue\",\n    \"src/typings/**/*.d.ts\",\n    \"mock/**/*.ts\",\n    \"vite.config.ts\",\n    \"src/assets/test/blockly/code.js\",\n    \"src/assets/js/blockly/custom/signal/type.ts\",\n    \"src/assets/js/fontok.ts\",\n    \"src/assets/test/blockly/storage.js\"\n  ],\n  \"exclude\": [\"node_modules\", \"dist\", \"**/*.js\"]\n}\n"
+        }
+    ]
+}
