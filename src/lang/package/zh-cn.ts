@@ -28,8 +28,9 @@ export default {
   navbar: {
     dashboard: "首页",
     logout: "注销登出",
-    document: "项目文档",
-    gitee: "项目地址",
+    AccountSetting: "账号设置",
+    personalCenter: "个人中心",
+    helpSupport: "帮助支持",
   },
   sizeSelect: {
     tooltip: "布局大小",
