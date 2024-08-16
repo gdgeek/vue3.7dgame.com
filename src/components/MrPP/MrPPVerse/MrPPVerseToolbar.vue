@@ -9,23 +9,23 @@
 
     <mr-p-p-verse-qrcode ref="qrcodeRef"></mr-p-p-verse-qrcode>
     <el-button-group v-if="verse" style="float: right" :inline="true">
-      <el-button type="plain" size="mini" @click="qrcode()">
+      <el-button type="info" size="small" @click="qrcode">
         <font-awesome-icon icon="qrcode"></font-awesome-icon>
       </el-button>
 
       <el-button
         v-if="saveable"
-        type="plain"
-        size="mini"
-        icon="el-icon-edit"
-        @click="changedWindow()"
+        type="success"
+        size="small"
+        icon="Edit"
+        @click="changedWindow"
       ></el-button>
       <el-button
         v-if="deleteable"
-        type="plain"
-        size="mini"
-        icon="el-icon-delete"
-        @click="deletedWindow()"
+        type="danger"
+        size="small"
+        icon="delete"
+        @click="deletedWindow"
       ></el-button>
       &nbsp;
     </el-button-group>
@@ -36,8 +36,8 @@
 import { ref, computed, defineProps, defineEmits } from "vue";
 import { useAbility } from "@/ability/ability";
 import { putVerse, deleteVerse } from "@/api/v1/verse";
-import MrPPVerseQrcode from "@/components/MrPP/MrPPQRCodeVerse.vue";
-import MrPPVerseWindowCreate from "@/components/MrPP/MrPPVerseWindowCreate.vue";
+import MrPPVerseQrcode from "@/components/MrPP/MrPPVerse/MrPPQRcodeVerse.vue";
+import MrPPVerseWindowCreate from "@/components/MrPP/MrPPVerse/MrPPVerseWindowCreate.vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 
 const props = defineProps<{
@@ -105,6 +105,7 @@ const del = async () => {
 
 const submitChange = async (form: any, item: any, imageId: number | null) => {
   if (props.verse) {
+    console.log("修改数据", form, item, imageId);
     const data: { name: string; info: string; image_id?: number } = {
       name: form.name,
       info: JSON.stringify(form),
@@ -130,7 +131,8 @@ const submitChange = async (form: any, item: any, imageId: number | null) => {
 
 const changedWindow = () => {
   if (changedDialog.value && props.verse) {
-    changedDialog.value.show();
+    console.log("props.verse", props.verse);
+    changedDialog.value.show(props.verse);
   }
 };
 </script>

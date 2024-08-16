@@ -1,15 +1,16 @@
 <template>
   <el-dialog
     :title="props.dialogTitle"
-    v-model:visible="dialogVisible"
+    v-model="dialogVisible"
+    append-to-body
     :close-on-click-modal="false"
     width="70%"
   >
-    <el-form ref="info" :rules="rules" :model="info" label-width="80px">
+    <el-form ref="formRef" :rules="rules" :model="info" label-width="80px">
       <el-form-item label="封面图片">
         <mr-p-p-cropper
           ref="image"
-          :image-url="imageUrl"
+          :image-url="info.url"
           :file-name="'verse.picture'"
           @save-file="saveFile"
         ></mr-p-p-cropper>
@@ -32,7 +33,7 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submitForm('info')">
+        <el-button type="primary" @click="submitForm">
           {{ props.dialogSubmit }}
         </el-button>
       </span>
@@ -44,6 +45,7 @@
 import MrPPCropper from "@/components/MrPP/MrPPVerse/MrPPCropper.vue";
 import env from "@/environment";
 import { useUserStore } from "@/store/modules/user";
+import { FormInstance } from "element-plus";
 
 const props = defineProps({
   dialogTitle: {
@@ -59,15 +61,16 @@ const props = defineProps({
 const emit = defineEmits(["submit"]);
 
 const dialogVisible = ref(false);
-const imageUrl = ref<string | null>(null);
+// const imageUrl = ref<string | null>(null);
 const imageId = ref<number | null>(null);
 const item = ref<any>(null);
 
 const isManager = computed(() =>
-  useUserStore().userInfo.roles.includes("root")
+  useUserStore().userInfo.roles.includes("manager")
 );
 
 const info = ref({
+  url: "",
   name: "",
   description: "",
   course: -1,
@@ -80,40 +83,48 @@ const rules = {
   ],
 };
 
-const url = computed(() => {
-  return imageUrl.value !== null ? env.replaceIP(imageUrl.value) : null;
+// 监听item变化，更新info
+watchEffect(() => {
+  if (item.value) {
+    info.value.name = item.value.name;
+    info.value.url = item.value.src;
+    const parsedInfo = JSON.parse(item.value.info);
+    if (parsedInfo !== null) {
+      info.value.description = parsedInfo.description;
+      info.value.course = parsedInfo.course;
+    }
+  }
 });
-
-const submitForm = async (formName: string) => {
-  const formRef = ref<any>(null);
-  formRef.value = formName;
-
+// const url = computed(() => item.value.src);
+// console.log("url: ", url.value);
+const formRef = ref<FormInstance>();
+const submitForm = async () => {
   formRef.value?.validate((valid: boolean) => {
     if (valid) {
       emit("submit", info.value, item.value, imageId.value);
     } else {
-      console.log("error submit!!");
-      return false;
+      ElMessage.error("表单验证失败");
     }
   });
 };
 
-const show = (selectedItem: any = null) => {
+const show = (selectedItem: any) => {
   item.value = selectedItem;
-
+  console.log("selectedItem", selectedItem);
   if (item.value) {
     setTimeout(() => {
       const imageComponent = ref<any>(null);
       imageComponent.value = item.value.image.url;
     }, 0);
 
-    info.value.name = item.value.name;
+    // info.value.name = item.value.name;
 
-    const parsedInfo = JSON.parse(item.value.info);
-    if (parsedInfo !== null) {
-      info.value.description = parsedInfo.description;
-      info.value.course = parsedInfo.course;
-    }
+    // const parsedInfo = JSON.parse(item.value.info);
+    // // console.log("parsedInfo: ", parsedInfo);
+    // if (parsedInfo !== null) {
+    //   info.value.description = parsedInfo.description;
+    //   info.value.course = parsedInfo.course;
+    // }
   }
   dialogVisible.value = true;
 };
@@ -125,11 +136,6 @@ const hide = () => {
 const saveFile = (newImageId: number) => {
   imageId.value = newImageId;
 };
-
-// onMounted(() => {
-//   emit("show", show);
-//   emit("hide", hide);
-// });
 
 defineExpose({
   show,

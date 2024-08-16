@@ -15,14 +15,14 @@
 
     <el-dialog
       title="头像截取"
-      v-model:visible="dialogVisible"
+      v-model="dialogVisible"
       class="crop-dialog"
       append-to-body
     >
       <div class="cropper-content">
         <div class="cropper" style="text-align: center">
           <vueCropper
-            ref="cropper"
+            ref="cropperRef"
             :img="option.img"
             :output-size="option.outputSize"
             :output-type="option.outputType"
@@ -46,11 +46,16 @@
 
       <template #footer>
         <el-button-group style="float: left">
-          <el-button size="mini" type="primary" plain @click="rotateLeftHandle">
+          <el-button
+            size="small"
+            type="primary"
+            plain
+            @click="rotateLeftHandle"
+          >
             左旋转
           </el-button>
           <el-button
-            size="mini"
+            size="small"
             type="primary"
             plain
             @click="rotateRightHandle"
@@ -58,7 +63,7 @@
             右旋转
           </el-button>
           <el-button
-            size="mini"
+            size="small"
             type="primary"
             plain
             @click="changeScaleHandle(1)"
@@ -66,7 +71,7 @@
             放大
           </el-button>
           <el-button
-            size="mini"
+            size="small"
             type="primary"
             plain
             @click="changeScaleHandle(-1)"
@@ -86,31 +91,57 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import "vue-cropper/dist/index.css";
+import { VueCropper } from "vue-cropper";
 import { postFile } from "@/api/v1/files";
 import { useFileStore } from "@/store/modules/config";
+import { UploadFile } from "element-plus";
 
-// Prop 定义
-interface Props {
+const props = defineProps<{
+  imageUrl: string | null;
   fileName: string;
-}
+}>();
 
-const props = defineProps<Props>();
-const store = useFileStore().store;
+const emit = defineEmits(["saveFile"]);
 
-// 响应式数据
+const cropperRef = ref<InstanceType<typeof VueCropper> | null>(null);
+
+console.log("props.imageUrl, fileName", props.imageUrl, props.fileName);
+const fileStore = useFileStore();
+
 const url = ref<string | null>(null);
 const dialogVisible = ref(false);
 const loading = ref(false);
 
+type optionType = {
+  img: string | ArrayBuffer | null; // 裁剪图片的地址
+  info: true; // 裁剪框的大小信息
+  outputSize: number; // 裁剪生成图片的质量 [1至0.1]
+  outputType: "jpeg"; // 裁剪生成图片的格式
+  canScale: boolean; // 图片是否允许滚轮缩放
+  autoCrop: boolean; // 是否默认生成截图框
+  canMove: boolean; // 上传图片是否可以移动
+  canMoveBox: boolean; // 截图框能否拖动
+  autoCropWidth: number; // 默认生成截图框宽度
+  autoCropHeight: number; // 默认生成截图框高度
+  fixedBox: boolean; // 固定截图框大小 不允许改变
+  fixed: boolean; // 是否开启截图框宽高固定比例
+  fixedNumber: Array<number>; // 截图框的宽高比例  需要配合centerBox一起使用才能生效
+  full: boolean; // 是否输出原图比例的截图
+  original: boolean; // 上传图片按照原始比例渲染
+  centerBox: boolean; // 截图框是否被限制在图片里面
+  infoTrue: boolean; // true 为展示真实输出图片宽高 false 展示看到的截图框宽高
+};
+
 // 裁剪组件的基础配置 option
-const option = ref({
+const option = ref<optionType>({
   img: "", // 裁剪图片的地址
   info: true, // 裁剪框的大小信息
   outputSize: 1, // 裁剪生成图片的质量
-  outputType: "jpg", // 裁剪生成图片的格式
+  outputType: "jpeg", // 裁剪生成图片的格式
   canScale: true, // 图片是否允许滚轮缩放
   autoCrop: true, // 是否默认生成截图框
+  canMove: true, // 上传图片是否可以移动
   canMoveBox: true, // 截图框能否拖动
   autoCropWidth: 300, // 默认生成截图框宽度
   autoCropHeight: 300, // 默认生成截图框高度
@@ -123,50 +154,53 @@ const option = ref({
   infoTrue: true, // true 为展示真实输出图片宽高 false 展示看到的截图框宽高
 });
 
-// 方法
-const setImageUrl = (url: string) => {
-  url.value = url;
-};
+url.value = props.imageUrl;
+console.log("url", url.value);
 
 // 上传按钮 限制图片大小和类型
-const handleChangeUpload = async (file: any) => {
-  const isJPG =
-    file.raw.type === "image/jpeg" ||
-    file.raw.type === "image/png" ||
-    file.raw.type === "image/bmp" ||
-    file.raw.type === "image/gif";
-  const isLt2M = file.size / 1024 / 1024 < 2;
+const handleChangeUpload = async (file: UploadFile) => {
+  const selectedFile = file.raw;
+  if (selectedFile) {
+    const isJPG = [
+      "image/jpeg",
+      "image/png",
+      "image/bmp",
+      "image/gif",
+    ].includes(selectedFile.type);
+    const isLt2M = selectedFile.size / 1024 / 1024 < 2;
 
-  if (!isJPG) {
-    ElMessage.error("上传头像图片只能是 JPG/PNG/BMP/GIF 格式!");
-    return false;
-  }
-  if (!isLt2M) {
-    ElMessage.error("上传头像图片大小不能超过 2MB!");
-    return false;
-  }
+    if (!isJPG) {
+      ElMessage.error("上传头像图片只能是 JPG/PNG/BMP/GIF 格式!");
+      return false;
+    }
+    if (!isLt2M) {
+      ElMessage.error("上传头像图片大小不能超过 2MB!");
+      return false;
+    }
 
-  option.value.img = URL.createObjectURL(file.raw);
-  loading.value = false;
-  dialogVisible.value = true;
+    await nextTick();
+    option.value.img = URL.createObjectURL(selectedFile);
+    loading.value = false;
+    dialogVisible.value = true;
+  } else {
+    ElMessage.error("请选择有效的文件！");
+  }
 };
 
 // 放大/缩小
 const changeScaleHandle = (num: number) => {
-  const cropper = ref("cropper");
-  cropper.value?.changeScale(num);
+  num = num || 1;
+  cropperRef.value?.changeScale(num);
 };
 
 // 左旋转
 const rotateLeftHandle = () => {
-  const cropper = ref("cropper");
-  cropper.value?.rotateLeft();
+  cropperRef.value?.rotateLeft();
 };
 
 // 右旋转
 const rotateRightHandle = () => {
-  const cropper = ref("cropper");
-  cropper.value?.rotateRight();
+  cropperRef.value?.rotateRight();
 };
 
 // 截图框移动回调函数
@@ -179,17 +213,19 @@ const cropMoving = (data: any) => {
 const saveFile = async (
   md5: string,
   extension: string,
-  file: Blob,
+  file: File,
   handler: any
 ) => {
   const data = {
     filename: file.name,
     md5,
     key: md5 + extension,
-    url: store.state.config.store.fileUrl(md5, extension, handler, "backup"),
+    url: fileStore.store.fileUrl(md5, extension, handler, "backup"),
   };
-
+  console.log("测试1");
   url.value = data.url;
+  console.log("url2", url.value);
+  console.log("测试2");
 
   try {
     const response = await postFile(data);
@@ -201,30 +237,37 @@ const saveFile = async (
 };
 
 const finish = async () => {
-  const cropper = ref("cropper");
-  cropper.value?.getCropBlob(async (blob: Blob) => {
-    blob.name = props.fileName;
-    const md5 = await store.state.config.store.fileMD5(blob);
-    const handler = await store.state.config.store.publicHandler();
+  cropperRef.value?.getCropBlob(async (blob: Blob) => {
+    const fileName = props.fileName;
+    // const fileExtension = ".jpg";
 
-    const has = await store.state.config.store.fileHas(
+    // 将 Blob 转换为 File
+    const file = new File([blob], fileName, { type: "image/jpeg" }) as File & {
+      extension: string;
+    };
+    file.extension = ".jpg";
+
+    const md5 = await fileStore.store.fileMD5(file);
+    const handler = await fileStore.store.publicHandler();
+
+    const has = await fileStore.store.fileHas(
       md5,
-      ".jpg",
+      file.extension,
       handler,
       "backup"
     );
     if (!has) {
-      await store.state.config.store.fileUpload(
+      await fileStore.store.fileUpload(
         md5,
-        ".jpg",
-        blob,
+        file.extension,
+        file,
         (p: any) => {},
         handler,
         "backup"
       );
     }
-
-    await saveFile(md5, ".jpg", blob, handler);
+    console.log("图片数据", md5, file.extension, file, handler);
+    await saveFile(md5, file.extension, file, handler);
 
     dialogVisible.value = false;
     loading.value = true;
@@ -245,9 +288,11 @@ const finish = async () => {
   position: relative;
   overflow: hidden;
 }
+
 .file-uploader:hover {
   border-color: #409eff;
 }
+
 .file-uploader-icon {
   font-size: 28px;
   color: #8c939d;
@@ -259,6 +304,7 @@ const finish = async () => {
   margin-right: 12px;
   border-radius: 6px;
 }
+
 .file {
   width: 132px;
   height: 132px;

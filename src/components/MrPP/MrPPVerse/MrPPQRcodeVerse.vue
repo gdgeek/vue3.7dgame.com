@@ -1,12 +1,18 @@
 <template>
   <el-dialog
     :title="dialogTitle"
-    v-model:visible="dialogVisible"
+    append-to-body
+    v-model="dialogVisible"
     width="80%"
     :close-on-click-modal="false"
   >
     <el-card class="box-card" style="text-align: center">
-      {{ encode(verseId) }}
+      <div
+        v-if="verseId !== -1"
+        style="margin-bottom: 20px; font-size: 20px; font-weight: 700"
+      >
+        {{ encode(verseId) }}
+      </div>
       <qrcode-vue :value="encode(verseId)" :size="size" level="H"></qrcode-vue>
     </el-card>
     <template #footer>
@@ -34,7 +40,6 @@ const dialogTitle = computed(() =>
     : "请用设备扫描二维码，进入场景。"
 );
 
-// Methods
 const encode = (number: number): string => {
   if (number !== -1) {
     return reverseBits(number)

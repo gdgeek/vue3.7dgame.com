@@ -4,7 +4,7 @@ import path from "path-browserify";
 import { v4 as uuidv4 } from "uuid";
 import environment from "@/environment";
 
-type Author = {
+export type Author = {
   id: number;
   nickname: string;
   email: string | null;
@@ -21,6 +21,16 @@ type ImageDetails = {
   key: string;
 };
 
+type Message = {
+  id: string;
+  [key: string]: any;
+};
+
+type VerseOpen = {
+  id: number;
+  [key: string]: any;
+};
+
 export type VerseData = {
   id: number;
   author_id: number;
@@ -32,8 +42,12 @@ export type VerseData = {
   uuid: string;
   editable: boolean;
   viewable: boolean;
-  image: ImageDetails | null;
+  verseOpen: VerseOpen | null;
+  message: Message | null;
+  image: ImageDetails;
   author?: Author;
+  verseShare: string;
+  languages: string[];
 };
 
 export type PostVerseData = {
@@ -77,7 +91,7 @@ const createQueryParams = (
   page: number,
   expand: string
 ): Record<string, any> => {
-  const query: Record<string, any> = {};
+  const query: Record<string, any> = [];
   query["expand"] = expand;
   query["sort"] = sort;
 

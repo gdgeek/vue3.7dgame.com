@@ -255,16 +255,16 @@ import { regionData, codeToText } from "element-china-area-data";
 import { postFile } from "@/api/v1/files";
 import { ElMessage, FormInstance, FormRules } from "element-plus";
 import "vue-cropper/dist/index.css";
-import VueCropper from "vue-cropper";
+import { VueCropper } from "vue-cropper";
 import type { Avatar, InfoType } from "@/api/user/model";
 import type { FileHandler } from "@/assets/js/file/server";
 import { FormItemRule } from "element-plus";
 import type { UploadFile, UploadFiles } from "element-plus";
 
-// 注册组件
-const components = {
-  VueCropper,
-};
+// // 注册组件
+// const components = {
+//   VueCropper,
+// };
 
 const userStore = useUserStore();
 const fileStore = useFileStore();
@@ -273,7 +273,7 @@ const nickNameFormRef = ref<FormInstance>();
 const route = useRoute();
 // const userData = computed(() => store.getters.userData);
 const imageUrl = computed(() => userStore.userInfo.data.avatar.url || null);
-
+console.log("imageUrl", imageUrl);
 const isDisable = ref(false);
 
 type nickNameType = {
@@ -298,7 +298,7 @@ type Rule = {
 
 type Arrayable<T> = T | T[];
 
-const nicknameRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
+const nicknameRules: Partial<Record<string, Arrayable<Rule>>> = {
   nickname: [
     { required: true, message: "请输入用户昵称", trigger: "blur" },
     { min: 2, message: "昵称长度应该大于2", trigger: "blur" },
@@ -532,15 +532,14 @@ const saveAvatar = async (
 
 // 完成截图
 async function finish() {
-  const cropper = cropperRef as any; // 需要根据你的 cropper 实际类型调整
-  cropper.getCropBlob(async (blob: Blob) => {
+  cropperRef.value.getCropBlob(async (blob: Blob) => {
     // 创建 File 对象并设置 name 和 extension 属性
-    const file = new File([blob], userStore.userInfo.username + ".avatar", {
+    const file = new File([blob], userStore.userInfo.username + ".jpg", {
       type: "image/jpeg",
     });
 
     const md5 = await fileStore.store.fileMD5(file);
-    const handler = (await fileStore.store.publicHandler()) as FileHandler;
+    const handler = await fileStore.store.publicHandler();
 
     // 确保 handler 存在
     if (!handler) {

@@ -30,7 +30,6 @@ import Book from "@/components/Home/Book.vue";
 import DocumentList from "@/components/Home/DocumentList.vue";
 import LocalPage from "@/components/Home/LocalPage.vue";
 
-// 定义组件的 props 和暴露的属性
 const props = defineProps<{}>();
 
 const informationStore = useInfomationStore();

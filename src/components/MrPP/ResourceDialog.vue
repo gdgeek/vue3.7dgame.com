@@ -423,7 +423,7 @@ defineExpose({
 });
 
 type ViewCard = {
-  src: any;
+  src: string;
   id?: string;
   name?: string;
   star?: boolean;

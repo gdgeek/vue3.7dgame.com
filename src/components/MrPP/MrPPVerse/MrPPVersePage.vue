@@ -1,12 +1,12 @@
 <template>
   <div class="verse-index">
     <Create
-      v-if="created"
+      v-if="props.created"
       ref="createdDialog"
       :close-on-click-modal="false"
-      :dialog-title="'创建！【宇宙】'"
+      dialog-title="'创建！【宇宙】'"
       dialog-submit="创 建"
-      @submit="(form: any, imageId: number) => submitCreate(form, imageId)"
+      @submit="submitCreate"
     ></Create>
 
     <br />
@@ -21,7 +21,7 @@
           <el-button-group :inline="true">
             <el-button
               v-if="created"
-              size="mini"
+              size="small"
               type="primary"
               @click="createWindow"
             >
@@ -76,6 +76,8 @@ const emit = defineEmits<{
   (e: "loaded", params: any, callback: (val: any) => void): void;
 }>();
 
+const createdDialog = ref<InstanceType<typeof Create> | null>(null);
+
 const router = useRouter();
 
 const dialogVisible = ref(false);
@@ -90,8 +92,9 @@ const pagination = ref<Pagination>({
 });
 
 const createWindow = () => {
-  const createdDialog = ref<InstanceType<typeof Create> | null>(null);
-  createdDialog.value?.show();
+  if (createdDialog.value) {
+    createdDialog.value.show("");
+  }
 };
 
 const submitCreate = async (form: any, imageId: number | null) => {
