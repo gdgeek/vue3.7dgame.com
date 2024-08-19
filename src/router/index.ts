@@ -427,12 +427,12 @@ export const constantRoutes: RouteRecordRaw[] = [
             meta: { title: "编辑" },
             component: () => import("@/views/meta/meta-edit.vue"),
           },
-          // {
-          //   path: "rete-meta",
-          //   name: "VerseMetaEditor",
-          //   meta: { title: "【元】" },
-          //   component: () => import("@/views/meta/rete-meta.vue"),
-          // },
+          {
+            path: "rete-meta",
+            name: "VerseMetaEditor",
+            meta: { title: "【元】" },
+            component: () => import("@/views/meta/rete-meta.vue"),
+          },
           {
             path: "script",
             name: "MetaScript",
@@ -527,7 +527,7 @@ export const constantRoutes: RouteRecordRaw[] = [
  * 创建路由
  */
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes: constantRoutes,
   // 刷新时，滚动条位置还原
   scrollBehavior: () => ({ left: 0, top: 0 }),

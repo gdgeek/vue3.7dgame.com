@@ -83,12 +83,6 @@ export type PostVerseData = {
   version?: number;
 };
 
-export type PutVerseData = {
-  info?: string;
-  name: string;
-  version?: number;
-};
-
 export const postVerse = (data: PostVerseData) => {
   data.version = environment.version;
   data.uuid = data.uuid || uuidv4();
@@ -100,7 +94,7 @@ export const postVerse = (data: PostVerseData) => {
 };
 
 export const getVerse = (id: number | string, expand = "metas,share") => {
-  return request<VerseData>({
+  return request({
     url: path.join(
       "v1",
       "verses",
@@ -162,13 +156,13 @@ export const getVerses = (
   expand = "image,author,share"
 ) => {
   const query = createQueryParams(sort, search, page, expand);
-  return request<VerseData[]>({
+  return request({
     url: path.join("v1", "verses" + qs.stringify(query, true)),
     method: "get",
   });
 };
 
-export const putVerse = (id: number | string, data: PutVerseData) => {
+export const putVerse = (id: number, data: any) => {
   data.version = environment.version;
   return request({
     url: path.join("v1", "verses", id.toString()),

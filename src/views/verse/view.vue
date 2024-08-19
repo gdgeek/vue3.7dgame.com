@@ -186,7 +186,7 @@ const refresh = async () => {
   briefing.value = message.value
     ? message.value
     : {
-        title: `【宇宙】名称：${verse.value.name}`,
+        title: `【宇宙】名称：${verse.value!.name}`,
         body: info.value.description,
       };
 };
