@@ -1,9 +1,9 @@
 <template>
   <div class="verse-view">
-    <el-dialog :title="'修改信息'" v-model:visible="dialog" width="70%">
+    <el-dialog :title="'修改信息'" v-model="dialog" width="70%">
       <MrPPMessageFrom
         ref="editor"
-        :data="briefing"
+        :data="briefing!"
         @post="postMessage"
       ></MrPPMessageFrom>
     </el-dialog>
@@ -34,11 +34,28 @@
         </el-card>
         <br />
 
+        <el-card>
+          <el-form :model="Form" label-width="auto">
+            <el-form-item label="多语言">
+              <el-select v-model="Form.language" placeholder="请选择语言">
+                <el-option label="zh" value="zh"></el-option>
+                <el-option label="en" value="en"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="名字">
+              <el-input v-model="Form.name"></el-input>
+            </el-form-item>
+            <el-form-item label="介绍">
+              <el-input v-model="Form.description"></el-input>
+            </el-form-item>
+          </el-form>
+        </el-card>
+
         <el-card v-if="verse" class="box-card">
           <el-button
             style="width: 100%"
             type="primary"
-            size="mini"
+            size="small"
             @click="comeIn"
           >
             <div v-if="saveable">
@@ -56,10 +73,10 @@
         <Message
           v-if="message"
           ref="message"
-          :message_id="message.id"
+          :messageId="message.id!"
           @set-message="setMessage"
         ></Message>
-        <Reply v-if="message" :message_id="message.id"></Reply>
+        <Reply v-if="message" :messageId="message.id!"></Reply>
       </el-col>
 
       <el-col :sm="8">
@@ -71,13 +88,14 @@
             <InfoContent
               v-if="verse"
               :info="JSON.parse(verse.info!)"
+              :author="verse.author!"
             ></InfoContent>
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right"></el-button-group>
             </aside>
           </div>
           <VerseToolbar
-            :verse="verse"
+            :verse="verse!"
             @deleted="deleted"
             @changed="changed"
           ></VerseToolbar>
@@ -90,7 +108,7 @@
             v-if="!verseOpen"
             style="width: 100%"
             type="primary"
-            size="mini"
+            size="small"
             @click="open"
           >
             <font-awesome-icon icon="eye"></font-awesome-icon>
@@ -100,14 +118,14 @@
             v-else
             style="width: 100%"
             type="primary"
-            size="mini"
+            size="small"
             @click="close"
           >
             <font-awesome-icon icon="eye-slash"></font-awesome-icon>
             &nbsp;关闭【宇宙】
           </el-button>
         </el-card>
-        <Share v-if="saveable" :verse="verse"></Share>
+        <Share v-if="saveable" :verse="verse!"></Share>
         <br />
       </el-col>
     </el-row>
@@ -115,17 +133,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import MrPPMessageFrom from "@/components/MrPP/MrPPMessageFrom.vue";
-import Reply from "@/components/Reply.vue";
-import InfoContent from "@/components/InfoContent.vue";
-import Message from "@/components/Message.vue";
-import Share from "@/components/Share.vue";
+import MrPPMessageFrom from "@/components/MrPP/MrPPVerse/MrPPMessageFrom.vue";
+import Reply from "@/components/MrPP/MrPPVerse/Reply.vue";
+import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
+import Message from "@/components/MrPP/MrPPVerse/Message.vue";
+import Share from "@/components/MrPP/MrPPVerse/Share.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";
 import { getVerse, VerseData } from "@/api/v1/verse";
 import { postVerseOpen, deleteVerseOpen } from "@/api/v1/verse-open";
-import { postMessage } from "@/api/v1/message";
+import { MessageType, postMessageAPI } from "@/api/v1/message";
 import { useUserStore } from "@/store/modules/user";
 import { useTagsStore } from "@/store/modules/tags";
 
@@ -136,12 +153,19 @@ const tagsStore = useTagsStore();
 
 const dialog = ref(false);
 const verse = ref<VerseData>();
-const briefing = ref({ title: "sdfsdf", body: "eee" });
+const briefing = ref<MessageType>();
 
 const tagsMap = computed(() => tagsStore.tagsMap);
 const id = computed(() => parseInt(route.query.id as string));
 const message = computed(() => verse.value?.message ?? null);
 const verseOpen = computed(() => verse.value?.verseOpen ?? null);
+
+const Form = ref({
+  language: verse.value?.languages.language,
+  name: verse.value?.languages.name,
+  description: verse.value?.languages.description,
+});
+
 const info = computed(() =>
   verse.value?.info ? JSON.parse(verse.value.info) : null
 );
@@ -151,12 +175,12 @@ const saveable = computed(() => {
   return verse.value.editable;
 });
 
-const isRoot = computed(() => userStore.userInfo.roles.includes("root"));
+const isRoot = computed(() => userStore.userInfo.roles.includes("manager"));
 
 const refresh = async () => {
   const res = await getVerse(
     id.value,
-    "image,verseOpen,verseShare,author, message"
+    "image,verseOpen,verseShare,author, message, languages"
   );
   verse.value = res.data;
   briefing.value = message.value
@@ -182,7 +206,7 @@ const setMessage = (message: any) => {
 const postMessage = async (data: any) => {
   const info = { target: { type: "verse", id: id.value } };
   data.info = JSON.stringify(info);
-  const response = await postMessage(data);
+  const response = await postMessageAPI(data);
   verse.value!.message = response.data;
 
   const res = await postVerseOpen({

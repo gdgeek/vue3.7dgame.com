@@ -1,6 +1,37 @@
 import request from "@/utils/request";
+import { Author } from "./verse";
+import { ReplyType } from "./reply";
 
-export const postMessage = (data: any) => {
+type MessageTag = {
+  id: number;
+  message_id: number;
+  tag_id: number;
+};
+
+export type Like = {
+  id: number;
+  user_id: number;
+  message_id: number;
+  created_at: string;
+};
+
+export type MessageType = {
+  id?: number;
+  title: string;
+  body: string;
+  author_id?: number;
+  updater_id?: number;
+  created_at?: string;
+  updated_at?: string;
+  info?: string;
+  author?: Author;
+  likesCount?: number;
+  like?: Like | null;
+  replies?: ReplyType[];
+  messageTags?: MessageTag[];
+} | null;
+
+export const postMessageAPI = (data: any) => {
   return request<any>({
     url: "v1/messages",
     method: "post",
@@ -9,7 +40,7 @@ export const postMessage = (data: any) => {
 };
 
 export const getMessage = (id: number) => {
-  return request({
+  return request<MessageType>({
     url:
       "v1/messages/" +
       id +
@@ -35,7 +66,7 @@ export const getMessages = (
     url += "&page=" + page;
   }
 
-  return request({
+  return request<MessageType[]>({
     url,
     method: "get",
   });

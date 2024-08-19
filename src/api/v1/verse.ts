@@ -3,6 +3,7 @@ import qs from "querystringify";
 import path from "path-browserify";
 import { v4 as uuidv4 } from "uuid";
 import environment from "@/environment";
+import { MessageType } from "./message";
 
 export type Author = {
   id: number;
@@ -21,14 +22,38 @@ type ImageDetails = {
   key: string;
 };
 
-type Message = {
-  id: string;
-  [key: string]: any;
-};
+// type Message = {
+//   id: number;
+//   title: string;
+//   body: string;
+//   author_id: number;
+//   updater_id: number;
+//   created_at: string;
+//   updated_at: string;
+//   info: string;
+// };
 
 type VerseOpen = {
   id: number;
-  [key: string]: any;
+  verse_id: number;
+  user_id: number;
+  message_id: number;
+};
+
+export type VerseShare = {
+  id: number;
+  verse_id: number;
+  info: string;
+  editable: 1 | 0;
+  user: Author;
+};
+
+type Languages = {
+  id: number;
+  verse_id: number;
+  language: string;
+  name: string;
+  description: string;
 };
 
 export type VerseData = {
@@ -43,11 +68,11 @@ export type VerseData = {
   editable: boolean;
   viewable: boolean;
   verseOpen: VerseOpen | null;
-  message: Message | null;
+  message: MessageType | null;
   image: ImageDetails;
   author?: Author;
-  verseShare: string;
-  languages: string[];
+  verseShare: VerseShare;
+  languages: Languages;
 };
 
 export type PostVerseData = {

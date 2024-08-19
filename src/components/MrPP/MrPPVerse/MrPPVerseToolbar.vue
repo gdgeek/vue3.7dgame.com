@@ -35,13 +35,13 @@
 <script setup lang="ts">
 import { ref, computed, defineProps, defineEmits } from "vue";
 import { useAbility } from "@/ability/ability";
-import { putVerse, deleteVerse } from "@/api/v1/verse";
+import { putVerse, deleteVerse, VerseData } from "@/api/v1/verse";
 import MrPPVerseQrcode from "@/components/MrPP/MrPPVerse/MrPPQRcodeVerse.vue";
 import MrPPVerseWindowCreate from "@/components/MrPP/MrPPVerse/MrPPVerseWindowCreate.vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 
 const props = defineProps<{
-  verse: { id: number; editable: boolean } | null;
+  verse: VerseData;
 }>();
 
 const emit = defineEmits(["deleted", "changed"]);

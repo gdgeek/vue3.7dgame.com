@@ -7,7 +7,7 @@ export type TagInfo = {
   color: string;
   type: string;
   explan: string;
-  managed: boolean;
+  managed: 0 | 1;
 };
 
 export const useTagsStore = defineStore("tags", () => {

@@ -4,7 +4,7 @@
       v-if="props.created"
       ref="createdDialog"
       :close-on-click-modal="false"
-      dialog-title="'创建！【宇宙】'"
+      dialog-title="创建！【宇宙】"
       dialog-submit="创 建"
       @submit="submitCreate"
     ></Create>

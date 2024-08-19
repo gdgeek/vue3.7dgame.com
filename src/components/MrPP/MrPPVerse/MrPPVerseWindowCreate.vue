@@ -87,7 +87,7 @@ const rules = {
 watchEffect(() => {
   if (item.value) {
     info.value.name = item.value.name;
-    info.value.url = item.value.src;
+    info.value.url = item.value.image.url;
     const parsedInfo = JSON.parse(item.value.info);
     if (parsedInfo !== null) {
       info.value.description = parsedInfo.description;

@@ -63,7 +63,7 @@ const props = defineProps<{
 
 const course = ref<Course | null>(null);
 
-// 用于返回清理后的 HTML
+// 返回清理后的 HTML
 const sanitizedTitle = computed(() => {
   return course.value ? DOMPurify.sanitize(course.value.title.rendered) : "";
 });
