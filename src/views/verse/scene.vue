@@ -174,20 +174,10 @@ const handleMessage = async (e: MessageEvent) => {
 
 onMounted(() => {
   window.addEventListener("message", handleMessage);
-  // setBreadcrumbs({
-  //   list: [
-  //     { path: "/", meta: { title: "元宇宙实景编程平台" } },
-  //     { path: "/meta-verse/index", meta: { title: "宇宙" } },
-  //     { path: `/verse/view?id=${id.value}`, meta: { title: "【宇宙】" } },
-  //     { path: `/verse/scene?id=${id.value}`, meta: { title: "宇宙编辑" } },
-  //     { path: ".", meta: { title: "场景编辑" } },
-  //   ],
-  // });
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
-  // setBreadcrumbs({ list: [] });
 });
 </script>
 

@@ -2,7 +2,7 @@
   <div class="verse-scene">
     <resource-dialog
       @selected="selectResources"
-      @cancel="cancel()"
+      @cancel="cancel"
       ref="dialog"
     ></resource-dialog>
     <el-container>
@@ -20,7 +20,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import { AbilityEditable } from "@/ability/ability";
@@ -57,15 +56,12 @@ const selectResources = (data: any) => {
   });
 };
 
-// const saveable = (data: any) => {
-//   if (data === null) {
-//     return false;
-//   }
-//   const { can } = useAbility();
-//   return can("editable", AbilityEditable.name, {
-//     editable: data.editable,
-//   });
-// };
+const saveable = (data: any) => {
+  if (data === null) {
+    return false;
+  }
+  return data.editable;
+};
 
 const loadResource = (data: any) => {
   dialog.value.open(null, id.value, data.type);
@@ -117,8 +113,8 @@ const handleMessage = async (e: MessageEvent) => {
           postMessage({
             action: "load",
             data: meta.data,
-            // saveable: saveable(meta.data),
-            saveable: true,
+            saveable: saveable(meta.data),
+            // saveable: true,
           });
         }
         break;
@@ -126,71 +122,27 @@ const handleMessage = async (e: MessageEvent) => {
   }
 };
 
-// const breadcrumb = (meta: any) => {
-//   setBreadcrumbs([
-//     {
-//       path: "/",
-//       meta: { title: "元宇宙实景编程平台" },
-//     },
-//     {
-//       path: "/meta-verse/index",
-//       meta: { title: "宇宙" },
-//     },
-//     {
-//       path: `/verse/view?id=${meta.verse_id}`,
-//       meta: { title: "【宇宙】" },
-//     },
-//     {
-//       path: `/verse/scene?id=${meta.verse_id}`,
-//       meta: { title: "宇宙编辑" },
-//     },
-//     {
-//       path: `/meta/rete-meta?id=${meta.id}&title=${encodeURIComponent(title.value)}`,
-//       meta: { title: "元编辑" },
-//     },
-//     {
-//       path: ".",
-//       meta: { title: "内容编辑" },
-//     },
-//   ]);
-// };
-
 const saveMeta = async ({ data, events }: { data: any; events: any }) => {
-  // if (!saveable) {
-  //   ElMessage({
-  //     type: "info",
-  //     message: "没有保存权限!",
-  //   });
-  //   return;
-  // }
+  if (!saveable) {
+    ElMessage({
+      type: "info",
+      message: "没有保存权限!",
+    });
+    return;
+  }
   await putMeta(id.value, { data, events });
   ElMessage({
     type: "success",
-    message: "保存成功!",
+    message: "场景保存成功!",
   });
 };
 
 onMounted(() => {
   window.addEventListener("message", handleMessage);
-  setBreadcrumbs([
-    {
-      path: "/",
-      meta: { title: "元宇宙实景编程平台" },
-    },
-    {
-      path: "/meta-verse/index",
-      meta: { title: "宇宙" },
-    },
-    {
-      path: ".",
-      meta: { title: "场景编辑" },
-    },
-  ]);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
-  setBreadcrumbs([]);
 });
 </script>
 

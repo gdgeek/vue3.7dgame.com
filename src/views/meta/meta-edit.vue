@@ -5,7 +5,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent } from "vue";
 import Edit from "@/components/Meta/Edit.vue";
 import { getMeta, putMeta } from "@/api/v1/meta";
 

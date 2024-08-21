@@ -5,8 +5,8 @@ import env from "@/environment";
 
 // 定义 store
 export const useFileStore = defineStore("fileStore", () => {
-  // const store = env.useCloud() ? cloud : server;
-  const store = env.useCloud() ? server : cloud;
+  const store = env.useCloud() ? cloud : server;
+  // const store = env.useCloud() ? server : cloud;
   console.log("store", env.useCloud());
 
   return {

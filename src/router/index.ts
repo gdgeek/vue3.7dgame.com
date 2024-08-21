@@ -11,6 +11,13 @@ export const Layout = () => import("@/layout/index.vue");
 import Structure from "@/layout/structure/index.vue";
 import Empty from "@/layout/empty/index.vue";
 import { Meta, RouteVO } from "@/api/menu/model";
+import { useUserStore } from "@/store/modules/user";
+import { createPinia, setActivePinia } from "pinia";
+
+const pinia = createPinia();
+setActivePinia(pinia);
+const userStore = useUserStore();
+
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
   {
@@ -510,6 +517,31 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
 
       {
+        path: "manager",
+        component: null,
+        redirect: "/manager/user",
+        name: "",
+        meta: {
+          title: "管理",
+          icon: "el-icon-Management",
+          hidden: false,
+          alwaysShow: false,
+          params: null,
+        },
+        children: [
+          {
+            path: "user",
+            component: () => import("@/views/manager/user.vue"),
+            name: "ManagerUser",
+            meta: {
+              title: "用户管理",
+              icon: "cascader",
+            },
+          },
+        ],
+      },
+
+      {
         path: "401",
         component: () => import("@/views/error-page/401.vue"),
         meta: { hidden: true },
@@ -545,6 +577,8 @@ export function resetRouter() {
   router.replace({ path: "/login" });
 }
 
+await userStore.getUserInfo();
+
 // 指定要移除的路由路径列表
 const pathsToRemove = [
   "/home/document",
@@ -558,6 +592,18 @@ const pathsToRemove = [
   "script",
   "scene",
 ];
+
+console.log("roles", userStore.userInfo.roles);
+const isRoot = computed(() => {
+  return userStore.userInfo.roles.includes("manager");
+});
+
+if (!isRoot.value) {
+  pathsToRemove.push("manager");
+}
+
+// 也可以在首次加载时进行检查
+console.log("Initial roles", userStore.userInfo.roles);
 
 // 检查路径是否在移除列表中
 const isRemoveRoute = (path: string): boolean => {
