@@ -95,9 +95,9 @@
               <br />
             </template>
           </waterfall>
-          <!-- <template v-else>
-              <el-skeleton></el-skeleton>
-            </template> -->
+          <template v-else>
+            <el-skeleton></el-skeleton>
+          </template>
         </el-row>
       </el-main>
       <el-footer>
@@ -240,7 +240,7 @@ const refresh = async () => {
 onMounted(refresh);
 
 type ViewCard = {
-  src: any;
+  src: string;
   id?: string;
   name?: string;
   star?: boolean;
@@ -271,22 +271,21 @@ const viewCards = computed(() => {
 });
 
 const breakpoints = ref({
-  3000: {
-    //当屏幕宽度小于等于3000
-    rowPerView: 8, // 一行8图
-  },
-  1800: {
-    //当屏幕宽度小于等于1800
-    rowPerView: 6, // 一行6图
+  1600: {
+    //当屏幕宽度小于等于1600
+    rowPerView: 4, // 一行4图
   },
   1200: {
     //当屏幕宽度小于等于1200
-    rowPerView: 4,
+    rowPerView: 3, // 一行3图
   },
-
-  500: {
-    //当屏幕宽度小于等于500
-    rowPerView: 2,
+  800: {
+    //当屏幕宽度小于等于800
+    rowPerView: 2, // 一行2图
+  },
+  600: {
+    //当屏幕宽度小于等于600
+    rowPerView: 1, // 一行1图
   },
 });
 </script>

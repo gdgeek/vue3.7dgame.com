@@ -167,6 +167,7 @@ const select = async () => {
         props.dir!
       );
     }
+    console.log("图片数据", md5, file.extension, file, handler);
     await saveFile(md5, file.extension!, file, handler);
     // await saveFile(md5, file.type.split("/").pop()!, file, handler);
   } catch (error) {

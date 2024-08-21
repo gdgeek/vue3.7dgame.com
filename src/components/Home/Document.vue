@@ -2,7 +2,7 @@
   <div>
     <el-card v-if="data" shadow="never">
       <template #header>
-        <h2 id="title" v-html="data.title.rendered"></h2>
+        <h2 id="title" :innerHTML="sanitizedTitle"></h2>
         <span v-if="category">
           <router-link
             v-for="(item, index) in data._embedded['wp:term'][0]"
@@ -20,7 +20,7 @@
             id="content"
             class="text-muted well well-sm no-shadow"
             style="margin: 20px"
-            v-html="data.content.rendered"
+            :innerHTML="sanitizedContent"
           ></p>
         </main>
       </div>
@@ -38,9 +38,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
 import moment from "moment";
 import { Article } from "@/api/home/wordpress";
+import DOMPurify from "dompurify";
 
 moment.locale("zh-cn");
 
@@ -59,17 +59,15 @@ interface Data {
   };
 }
 
-// 定义 Props
+// Props
 const props = defineProps<{
   postId: number;
   categoryPath?: string;
   category?: boolean;
 }>();
 
-// 初始化响应式数据
 const data = ref<Data | null>(null);
 
-// 计算属性
 const categoryPath = computed(() => props.categoryPath ?? "/home/category");
 const category = computed(() => props.category ?? true);
 
@@ -85,4 +83,12 @@ onMounted(async () => {
 
 // 格式化日期
 const dateTime = (date: string) => moment(date).format("YYYY-MM-DD HH:mm:ss");
+
+const sanitizedTitle = computed(() => {
+  return data.value ? DOMPurify.sanitize(data.value.title.rendered) : "";
+});
+
+const sanitizedContent = computed(() => {
+  return data.value ? DOMPurify.sanitize(data.value.content.rendered) : "";
+});
 </script>

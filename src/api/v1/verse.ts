@@ -3,14 +3,87 @@ import qs from "querystringify";
 import path from "path-browserify";
 import { v4 as uuidv4 } from "uuid";
 import environment from "@/environment";
+import { MessageType } from "./message";
 
-interface VerseData {
-  [key: string]: any;
+export type Author = {
+  id: number;
+  nickname: string;
+  email: string | null;
+  username: string;
+};
+
+type ImageDetails = {
+  id: number;
+  md5: string;
+  type: string;
+  url: string;
+  filename: string;
+  size: number;
+  key: string;
+};
+
+// type Message = {
+//   id: number;
+//   title: string;
+//   body: string;
+//   author_id: number;
+//   updater_id: number;
+//   created_at: string;
+//   updated_at: string;
+//   info: string;
+// };
+
+type VerseOpen = {
+  id: number;
+  verse_id: number;
+  user_id: number;
+  message_id: number;
+};
+
+export type VerseShare = {
+  id: number;
+  verse_id: number;
+  info: string;
+  editable: 1 | 0;
+  user: Author;
+};
+
+type Languages = {
+  id: number;
+  verse_id: number;
+  language: string;
+  name: string;
+  description: string;
+};
+
+export type VerseData = {
+  id: number;
+  author_id: number;
+  created_at?: string;
+  name: string;
+  info: string | null;
+  data: string | null;
+  version: number;
+  uuid: string;
+  editable: boolean;
+  viewable: boolean;
+  verseOpen: VerseOpen | null;
+  message: MessageType | null;
+  image: ImageDetails;
+  author?: Author;
+  verseShare: VerseShare;
+  languages: Languages[];
+};
+
+export type PostVerseData = {
+  image_id?: number;
+  info: string;
+  name: string;
+  uuid: string;
   version?: number;
-  uuid?: string;
-}
+};
 
-export const postVerse = (data: VerseData) => {
+export const postVerse = (data: PostVerseData) => {
   data.version = environment.version;
   data.uuid = data.uuid || uuidv4();
   return request({
@@ -20,7 +93,7 @@ export const postVerse = (data: VerseData) => {
   });
 };
 
-export const getVerse = (id: number | string, expand = "metas,share") => {
+export const getVerse = (id: number, expand = "metas,share") => {
   return request({
     url: path.join(
       "v1",
@@ -37,7 +110,7 @@ const createQueryParams = (
   page: number,
   expand: string
 ): Record<string, any> => {
-  const query: Record<string, any> = {};
+  const query: Record<string, any> = [];
   query["expand"] = expand;
   query["sort"] = sort;
 
@@ -89,7 +162,7 @@ export const getVerses = (
   });
 };
 
-export const putVerse = (id: number | string, data: VerseData) => {
+export const putVerse = (id: number, data: any) => {
   data.version = environment.version;
   return request({
     url: path.join("v1", "verses", id.toString()),
