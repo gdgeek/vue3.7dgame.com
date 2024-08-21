@@ -3,8 +3,8 @@
   <waterfall
     v-if="viewCards.length > 0"
     :lazyload="true"
-    :breakpoints="breakpoints"
     :gutter="10"
+    :width="320"
     :list="viewCards"
     :column-count="3"
   >
@@ -130,7 +130,7 @@ const viewCards = computed(() => {
   console.log("viewCards", cards);
   return cards;
 });
-
+/*
 const breakpoints = ref({
   1600: {
     //当屏幕宽度小于等于1600
@@ -148,7 +148,7 @@ const breakpoints = ref({
     //当屏幕宽度小于等于450
     rowPerView: 1, // 一行1图
   },
-});
+});*/
 </script>
 
 <style scoped></style>
