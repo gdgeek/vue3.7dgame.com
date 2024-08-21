@@ -1,7 +1,7 @@
 <template>
   <div id="Reply">
     <el-container>
-      <el-main style="padding-left: 0">
+      <el-main style="padding-left: 40px">
         <div class="block">
           <el-timeline>
             <el-timeline-item timestamp="现在就回复" placement="top">
@@ -17,20 +17,24 @@
                     id="reply-editor"
                     v-model="form.body"
                     :editor-toolbar="customToolbar"
-                    style="width: 80%"
+                    style="width: 100%"
                   ></vue-editor>
                 </el-form-item>
-                <el-form-item>
+                <el-form-item style="float: right; margin-right: 10px">
                   <el-button
-                    style="float: right; padding: 5px 10px"
+                    style="padding: 5px 10px"
                     :disabled="isDisabled"
                     @click="submitForm"
                   >
-                    <font-awesome-icon icon="edit"></font-awesome-icon>
+                    <font-awesome-icon
+                      icon="edit"
+                      style="margin-right: 5px"
+                    ></font-awesome-icon>
                     回复
                   </el-button>
                 </el-form-item>
               </el-form>
+              <br />
             </el-timeline-item>
 
             <div v-if="replies === null">
@@ -47,7 +51,8 @@
               >
                 <div class="replytitle">
                   <div class="replyicon">
-                    <img src="" alt="" class="el-icon-user" />
+                    <img src="" alt="" />
+                    <el-icon><User></User></el-icon>
                   </div>
                   <div class="replynickname">{{ reply.author.nickname }}</div>
                 </div>
@@ -70,10 +75,10 @@
                     &nbsp; &nbsp;
                     <el-button
                       v-if="canDelete(reply)"
-                      icon="el-icon-delete"
                       size="small"
                       type="text"
                       @click="deletedWindow(reply.id)"
+                      ><el-icon><Delete></Delete></el-icon
                     ></el-button>
                   </div>
                 </el-card>
