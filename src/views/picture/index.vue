@@ -19,49 +19,34 @@
         </mr-p-p-header>
       </el-header>
       <el-main>
-        <el-row :gutter="10">
-          <!--
-          <waterfall
-            :lazyload="true"
-            :gutter="10"
-            :width="320"
-            :list="items"
-            :column-count="3"
-          >
-            <template #item="{ item }"> </template>
-          </waterfall>-->
-          <el-col
-            v-for="(item, index) in items"
-            :key="index"
-            :data="item"
-            :xs="24"
-            :sm="12"
-            :md="8"
-            :lg="6"
-            :xl="4"
-          >
-            <mr-p-p-card
-              :item="item"
-              @named="namedWindow"
-              @deleted="deletedWindow"
-            >
-              <template #enter>
-                <router-link :to="`/ResourceAdmin/picture/view?id=${item.id}`">
-                  <el-button
-                    v-if="item.info === null || item.image === null"
-                    type="warning"
-                    size="small"
+        <el-card>
+          <Waterfall :list="items" :width="320" :gutter="10">
+            <template #item="{ item }">
+              <mr-p-p-card
+                :item="item"
+                @named="namedWindow"
+                @deleted="deletedWindow"
+              >
+                <template #enter>
+                  <router-link
+                    :to="`/ResourceAdmin/picture/view?id=${item.id}`"
                   >
-                    初始化图片数据
-                  </el-button>
-                  <el-button v-else type="primary" size="small">
-                    查看图片
-                  </el-button>
-                </router-link>
-              </template>
-            </mr-p-p-card>
-          </el-col>
-        </el-row>
+                    <el-button
+                      v-if="item.info === null || item.image === null"
+                      type="warning"
+                      size="small"
+                    >
+                      初始化图片数据
+                    </el-button>
+                    <el-button v-else type="primary" size="small">
+                      查看图片
+                    </el-button>
+                  </router-link>
+                </template>
+              </mr-p-p-card>
+            </template>
+          </Waterfall>
+        </el-card>
       </el-main>
       <el-footer>
         <el-card class="box-card">

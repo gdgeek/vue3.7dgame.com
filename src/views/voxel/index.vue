@@ -35,10 +35,10 @@
                         type="warning"
                         size="small"
                       >
-                        初始化模型数据
+                        初始化体素数据
                       </el-button>
                       <el-button v-else type="primary" size="small">
-                        查看模型
+                        查看体素
                       </el-button>
                     </el-button-group>
                   </router-link>

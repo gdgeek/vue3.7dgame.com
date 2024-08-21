@@ -19,37 +19,30 @@
         </mr-p-p-header>
       </el-header>
       <el-main>
-        <el-row :gutter="10">
-          <el-col
-            v-for="(item, index) in items"
-            :key="index"
-            :data="item"
-            :xs="24"
-            :sm="12"
-            :md="8"
-            :lg="6"
-            :xl="4"
-          >
-            <mr-p-p-card
-              :item="item"
-              @named="namedWindow"
-              @deleted="deletedWindow"
-            >
-              <template #enter>
-                <router-link :to="`/ResourceAdmin/audio/view?id=${item.id}`">
-                  <el-button
-                    v-if="item.info === null || item.image === null"
-                    type="warning"
-                    size="small"
-                  >
-                    初始化音频数据
-                  </el-button>
-                  <el-button type="primary" size="small">查看音频</el-button>
-                </router-link>
-              </template>
-            </mr-p-p-card>
-          </el-col>
-        </el-row>
+        <el-card>
+          <Waterfall :list="items" :width="320" :gutter="10">
+            <template #item="{ item }">
+              <mr-p-p-card
+                :item="item"
+                @named="namedWindow"
+                @deleted="deletedWindow"
+              >
+                <template #enter>
+                  <router-link :to="`/ResourceAdmin/audio/view?id=${item.id}`">
+                    <el-button
+                      v-if="item.info === null || item.image === null"
+                      type="warning"
+                      size="small"
+                    >
+                      初始化音频数据
+                    </el-button>
+                    <el-button type="primary" size="small">查看音频</el-button>
+                  </router-link>
+                </template>
+              </mr-p-p-card>
+            </template>
+          </Waterfall>
+        </el-card>
       </el-main>
       <el-footer>
         <el-card class="box-card">
@@ -74,6 +67,8 @@ import { getAudios, putAudio, deleteAudio } from "@/api/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 
+import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import "vue-waterfall-plugin-next/dist/style.css";
 const items = ref<any[]>([]);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
