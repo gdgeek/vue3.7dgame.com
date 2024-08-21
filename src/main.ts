@@ -24,7 +24,7 @@ import router from "./router";
 
 // 更新页面标题
 const updateTitle = (title: string) => {
-  document.title = `${title} - 苹果AR元气项目`;
+  document.title = `${title} - 7D Game`;
 };
 
 // 监听路由变化更新页面标题

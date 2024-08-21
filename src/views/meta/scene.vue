@@ -34,7 +34,7 @@ const route = useRoute();
 const router = useRouter();
 const breadcrumbStore = useBreadcrumbStore();
 
-const src = path.join("/static/three.js/editor", "meta-editor.html");
+const src = "https://editor.4mr.cn/three.js/editor/meta-editor.html"; //path.join("", "");
 
 // console.log("src", src);
 const isInit = ref(false);

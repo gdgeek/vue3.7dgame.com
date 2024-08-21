@@ -392,7 +392,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           {
             path: "list",
             component: () => import("@/views/meta/list.vue"),
-            name: "User",
+            name: "List",
             meta: {
               title: "元数据列表",
               icon: "cascader",
