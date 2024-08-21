@@ -36,8 +36,10 @@ interface Props {
 }
 const props = defineProps<Props>();
 
+const emit = defineEmits(["submit"]);
+
 const activeName = ref("blockly");
-const workspace = ref<WorkspaceSvg>(null);
+const workspace = ref<WorkspaceSvg>();
 const script = ref("");
 
 onMounted(() => {
@@ -86,7 +88,7 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
   if (activeName.value === "script") {
     script.value =
       "local verse = {}\nlocal is_playing = false\n\n" +
-      Blockly.Lua.workspaceToCode(workspace.value);
+      luaGeneratorInstance.workspaceToCode(workspace.value);
   }
   console.log(tab, event);
 };

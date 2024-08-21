@@ -338,7 +338,10 @@ const close = async () => {
 };
 
 const comeIn = () => {
-  router.push({ path: "/verse/scene", query: { id: id.value } });
+  router.push({
+    path: "/verse/scene",
+    query: { id: id.value, title: "场景" + "【" + verse.value?.name + "】" },
+  });
 };
 
 onMounted(async () => {

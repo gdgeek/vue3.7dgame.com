@@ -38,11 +38,12 @@ import path from "path-browserify";
 
 const route = useRoute();
 const router = useRouter();
-const knightDataRef = ref<InstanceType<typeof KnightDataDialog>>(null);
+const knightDataRef = ref<InstanceType<typeof KnightDataDialog>>();
 const prefabDialogRef = ref<InstanceType<typeof PrefabDialog>>();
 const metaDialogRef = ref<InstanceType<typeof MetaDialog>>();
 const init = ref(false);
-const saveable = ref(null);
+const saveable = ref();
+const title = computed(() => route.query.title?.slice(2) as string);
 
 const id = computed(() => parseInt(route.query.id as string));
 const editorUrl = computed(() =>
@@ -76,7 +77,7 @@ const setupPrefab = async ({ meta_id, data, uuid }: any) => {
 };
 
 const addPrefab = () => {
-  prefabDialogRef.value?.open();
+  prefabDialogRef.value?.open(id.value);
   ElMessage({
     type: "info",
     message: "添加预设",
@@ -84,7 +85,7 @@ const addPrefab = () => {
 };
 
 const addMeta = () => {
-  metaDialogRef.value?.open();
+  metaDialogRef.value?.open(id.value);
   ElMessage({
     type: "info",
     message: "添加模块",
@@ -138,10 +139,19 @@ const handleMessage = async (e: MessageEvent) => {
         break;
       case "goto":
         if (e.data.data === "blockly.js") {
-          router.push({
-            path: "/verse/script",
-            query: { id: id.value, title: "" },
-          });
+          const scriptRoute = router
+            .getRoutes()
+            .find((route) => route.path === "/verse/script");
+          if (scriptRoute && scriptRoute.meta.title) {
+            const metaTitle = scriptRoute.meta.title as string;
+            router.push({
+              path: "/verse/script",
+              query: {
+                id: id.value,
+                title: metaTitle + title.value,
+              },
+            });
+          }
         }
         break;
       case "ready":

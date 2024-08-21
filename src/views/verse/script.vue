@@ -11,7 +11,7 @@
                 <el-button
                   v-if="saveable"
                   type="primary"
-                  size="mini"
+                  size="small"
                   @click="save"
                 >
                   <font-awesome-icon icon="save"></font-awesome-icon>
@@ -107,13 +107,15 @@ onMounted(async () => {
     script.value = verse.value!.script;
   }
 
-  const data = JSON.parse(verse.value!.data!);
-  data.children.modules.forEach((module: any) => {
-    map.set(module.parameters.meta_id, {
-      uuid: module.parameters.uuid,
-      title: module.parameters.title,
+  const data = JSON.parse(verse.value?.data || "{}");
+  if (data?.children?.modules) {
+    data.children.modules.forEach((module: any) => {
+      map.set(module.parameters.meta_id, {
+        uuid: module.parameters.uuid,
+        title: module.parameters.title,
+      });
     });
-  });
+  }
 
   loading.value = false;
 });

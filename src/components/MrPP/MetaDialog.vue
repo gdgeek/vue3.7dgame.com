@@ -123,14 +123,14 @@ const title = (item: any) => {
   return item.title || item.name || "title";
 };
 
-const open = async (newValue: any, newVerseId: number) => {
+const open = async (newValue?: any, newVerseId?: number) => {
   active.value = {
     items: [],
     sorted: "-created_at",
     searched: "",
     pagination: { current: 1, count: 1, size: 20, total: 20 },
   };
-  verse_id.value = newVerseId;
+  verse_id.value = newVerseId!;
   value.value = newValue;
   await refresh();
   dialogVisible.value = true;
