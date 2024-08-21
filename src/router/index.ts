@@ -484,7 +484,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             component: () => import("@/views/meta-verse/share.vue"),
             name: "VerseShare",
             meta: {
-              title: "自己创造",
+              title: "分享列表",
               icon: "cascader",
             },
           },

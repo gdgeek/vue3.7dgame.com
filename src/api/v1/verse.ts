@@ -72,7 +72,7 @@ export type VerseData = {
   image: ImageDetails;
   author?: Author;
   verseShare: VerseShare;
-  languages: Languages;
+  languages: Languages[];
 };
 
 export type PostVerseData = {
@@ -93,7 +93,7 @@ export const postVerse = (data: PostVerseData) => {
   });
 };
 
-export const getVerse = (id: number | string, expand = "metas,share") => {
+export const getVerse = (id: number, expand = "metas,share") => {
   return request({
     url: path.join(
       "v1",

@@ -12,8 +12,12 @@
       <el-col :sm="16">
         <el-card v-if="verse" class="box-card">
           <template #header>
-            <i v-if="saveable" class="el-icon-edit"></i>
-            <i v-else class="el-icon-view"></i>
+            <i v-if="saveable"
+              ><el-icon><EditPen></EditPen></el-icon
+            ></i>
+            <i v-else>
+              <el-icon><View></View></el-icon>
+            </i>
             <b id="title">【宇宙】名称：</b>
             <span>{{ verse.name }}</span>
           </template>
@@ -35,20 +39,48 @@
         <br />
 
         <el-card>
-          <el-form :model="Form" label-width="auto">
-            <el-form-item label="多语言">
-              <el-select v-model="Form.language" placeholder="请选择语言">
+          <el-form
+            :model="Form"
+            :rules="rules"
+            ref="FormRef"
+            label-width="auto"
+          >
+            <el-form-item label="多语言" prop="language">
+              <el-select
+                v-model="Form.language"
+                placeholder="请选择语言"
+                style="width: 25%"
+              >
                 <el-option label="zh" value="zh"></el-option>
                 <el-option label="en" value="en"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="名字">
-              <el-input v-model="Form.name"></el-input>
+            <el-form-item label="名字" prop="name">
+              <el-input v-model="Form.name" placeholder="请输入名称"></el-input>
             </el-form-item>
-            <el-form-item label="介绍">
-              <el-input v-model="Form.description"></el-input>
+            <el-form-item label="介绍" prop="description">
+              <el-input
+                v-model="Form.description"
+                type="textarea"
+                placeholder="请输入介绍"
+              ></el-input>
             </el-form-item>
           </el-form>
+          <span>
+            <el-button
+              @click="submit"
+              size="small"
+              type="primary"
+              style="margin-left: 65px"
+            >
+              <el-icon style="margin-right: 5px"><Check></Check></el-icon
+              >提交</el-button
+            >
+            <el-button @click="del" size="small" type="danger"
+              ><el-icon style="margin-right: 5px"><Delete></Delete></el-icon
+              >删除</el-button
+            >
+          </span>
         </el-card>
 
         <el-card v-if="verse" class="box-card">
@@ -145,6 +177,13 @@ import { postVerseOpen, deleteVerseOpen } from "@/api/v1/verse-open";
 import { MessageType, postMessageAPI } from "@/api/v1/message";
 import { useUserStore } from "@/store/modules/user";
 import { useTagsStore } from "@/store/modules/tags";
+import { FormInstance } from "element-plus";
+import {
+  dellanguages,
+  getlanguages,
+  postlanguages,
+  putlanguages,
+} from "@/api/v1/multilanguage-verses";
 
 const route = useRoute();
 const router = useRouter();
@@ -161,10 +200,79 @@ const message = computed(() => verse.value?.message ?? null);
 const verseOpen = computed(() => verse.value?.verseOpen ?? null);
 
 const Form = ref({
-  language: verse.value?.languages.language,
-  name: verse.value?.languages.name,
-  description: verse.value?.languages.description,
+  language: "",
+  name: "",
+  description: "",
 });
+
+const FormRef = ref<FormInstance>();
+
+const rules = {
+  language: [{ required: true, message: "请选择语言", trigger: "blur" }],
+  name: [
+    { required: true, message: "请输入名称", trigger: "blur" },
+    { min: 2, max: 50, message: "长度在 2 到 50 个字符", trigger: "blur" },
+  ],
+  description: [{ required: false, message: "请输入介绍", trigger: "blur" }],
+};
+
+watchEffect(() => {
+  if (verse.value?.languages?.length) {
+    const lastLanguage =
+      verse.value.languages[verse.value.languages.length - 1];
+    if (
+      lastLanguage?.language &&
+      lastLanguage?.name &&
+      lastLanguage?.description
+    ) {
+      Form.value!.language = lastLanguage.language;
+      Form.value.name = lastLanguage.name;
+      Form.value.description = lastLanguage.description;
+    }
+  }
+});
+
+const submit = () => {
+  FormRef.value?.validate(async (valid: boolean) => {
+    if (valid) {
+      if (
+        Form.value.language &&
+        Form.value.language ===
+          verse.value?.languages[verse.value.languages.length - 1]?.language
+      ) {
+        await putlanguages(
+          verse.value?.languages[verse.value.languages.length - 1].id,
+          {
+            name: Form.value.name,
+            description: Form.value.description,
+          }
+        );
+        ElMessage.success("修改成功");
+      } else {
+        await postlanguages({
+          verse_id: verse.value!.id,
+          language: Form.value.language,
+          name: Form.value.name,
+          description: Form.value.description,
+        });
+      }
+      await getlanguages(verse.value!.id);
+      ElMessage.success("提交成功");
+    } else {
+      ElMessage.error("表单验证失败");
+    }
+  });
+};
+
+const del = async () => {
+  await dellanguages(
+    verse.value!.languages[verse.value!.languages.length - 1].id
+  );
+  await getlanguages(verse.value!.id);
+  FormRef.value?.resetFields();
+  await refresh();
+  ElMessage.success("删除成功");
+};
 
 const info = computed(() =>
   verse.value?.info ? JSON.parse(verse.value.info) : null
@@ -175,7 +283,7 @@ const saveable = computed(() => {
   return verse.value.editable;
 });
 
-const isRoot = computed(() => userStore.userInfo.roles.includes("manager"));
+const isRoot = computed(() => userStore.userInfo.roles.includes("root"));
 
 const refresh = async () => {
   const res = await getVerse(

@@ -193,7 +193,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
 import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { getResources } from "@/api/resources";
