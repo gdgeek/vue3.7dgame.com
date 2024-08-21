@@ -210,7 +210,7 @@ const editor = () => {
         path: "/meta/scene",
         query: {
           id: id.value,
-          title: metaTitle + item.value.title,
+          title: metaTitle + "【" + item.value.title + "】",
         },
       });
     }

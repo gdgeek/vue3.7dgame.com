@@ -122,12 +122,12 @@ let value = ref(null);
 
 const title = (item: any) => item.title || item.name || "title";
 
-const open = async (val: any, v_id: number) => {
+const open = async (val?: any, v_id?: number) => {
   active.value.items = [];
   active.value.sorted = "-created_at";
   active.value.searched = "";
   active.value.pagination = { current: 1, count: 1, size: 20, total: 20 };
-  verse_id.value = v_id;
+  verse_id.value = v_id!;
   value.value = val;
   await refresh();
   dialogVisible.value = true;
