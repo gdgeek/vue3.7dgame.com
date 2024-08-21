@@ -21,74 +21,72 @@
         </mr-p-p-header>
       </el-header>
       <el-main>
-        <el-row :gutter="10">
-          <el-card style="width: 100%">
-            <Waterfall
-              :list="metaData"
-              :width="320"
-              :gutter="20"
-              :hasAroundGutter="false"
-              :breakpoints="{
-                640: { rowPerView: 1 },
-              }"
-            >
-              <template #item="{ item }">
-                <el-card style="width: 320px" class="box-card">
-                  <template #header>
-                    <div>
-                      <el-card shadow="hover" :body-style="{ padding: '0px' }">
-                        <template #header>
-                          <span class="mrpp-title">
-                            <b class="card-title" nowrap>{{ item.title }}</b>
-                          </span>
-                        </template>
-                        <router-link :to="`/meta/meta-edit?id=${item.id}`">
-                          <img
-                            v-if="!item.image"
-                            src="@/assets/image/none.png"
-                            style="
-                              width: 100%;
-                              height: 270px;
-                              object-fit: contain;
-                            "
-                          />
-                          <img
-                            v-else
-                            style="width: 100%; height: 270px"
-                            fit="contain"
-                            :src="item.image.url!"
-                            lazy
-                          />
-                        </router-link>
-                      </el-card>
-                    </div>
-                  </template>
-                  <div class="clearfix">
-                    <el-button-group style="float: right" :inline="true">
-                      <el-button
-                        @click="editor(item.id)"
-                        type="success"
-                        size="small"
-                        icon="Edit"
-                        >编辑</el-button
-                      >
-
-                      <el-button
-                        @click="del(item.id)"
-                        type="danger"
-                        size="small"
-                        icon="Delete"
-                      >
-                        删除</el-button
-                      >
-                    </el-button-group>
+        <el-card style="width: 100%">
+          <Waterfall
+            :list="metaData"
+            :width="320"
+            :gutter="20"
+            :hasAroundGutter="false"
+            :breakpoints="{
+              640: { rowPerView: 1 },
+            }"
+          >
+            <template #item="{ item }">
+              <el-card style="width: 320px" class="box-card">
+                <template #header>
+                  <div>
+                    <el-card shadow="hover" :body-style="{ padding: '0px' }">
+                      <template #header>
+                        <span class="mrpp-title">
+                          <b class="card-title" nowrap>{{ item.title }}</b>
+                        </span>
+                      </template>
+                      <router-link :to="`/meta/meta-edit?id=${item.id}`">
+                        <img
+                          v-if="!item.image"
+                          src="@/assets/image/none.png"
+                          style="
+                            width: 100%;
+                            height: 270px;
+                            object-fit: contain;
+                          "
+                        />
+                        <img
+                          v-else
+                          style="width: 100%; height: 270px"
+                          fit="contain"
+                          :src="item.image.url!"
+                          lazy
+                        />
+                      </router-link>
+                    </el-card>
                   </div>
-                  <div class="bottom clearfix"></div>
-                </el-card>
-              </template>
-            </Waterfall>
-          </el-card>
-        </el-row>
+                </template>
+                <div class="clearfix">
+                  <el-button-group style="float: right" :inline="true">
+                    <el-button
+                      @click="editor(item.id)"
+                      type="success"
+                      size="small"
+                      icon="Edit"
+                      >编辑</el-button
+                    >
+
+                    <el-button
+                      @click="del(item.id)"
+                      type="danger"
+                      size="small"
+                      icon="Delete"
+                    >
+                      删除</el-button
+                    >
+                  </el-button-group>
+                </div>
+                <div class="bottom clearfix"></div>
+              </el-card>
+            </template>
+          </Waterfall>
+        </el-card>
       </el-main>
       <el-footer>
         <el-card class="box-card">
@@ -119,39 +117,6 @@ import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 
 const router = useRouter();
 const metaData = ref<metaInfo[]>([]);
-const list = ref<any[]>([
-  {
-    item: "1",
-    url: "http://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/picture/f4d72cbfb91946f1eb66d9586fcdaea6.png",
-    index: 1,
-  },
-  {
-    item: "1",
-    url: "http://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/picture/f4d72cbfb91946f1eb66d9586fcdaea6.png",
-    index: 2,
-  },
-  {
-    item: "1",
-    url: "http://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/picture/f4d72cbfb91946f1eb66d9586fcdaea6.png",
-    index: 2,
-  },
-  {
-    item: "1",
-    url: "http://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/picture/f4d72cbfb91946f1eb66d9586fcdaea6.png",
-    index: 2,
-  },
-  {
-    item: "1",
-    url: "http://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/picture/f4d72cbfb91946f1eb66d9586fcdaea6.png",
-    index: 2,
-  },
-  {
-    item: "1",
-    url: "http://7dgame-public-1251022382.cos.ap-nanjing.myqcloud.com/picture/f4d72cbfb91946f1eb66d9586fcdaea6.png",
-    index: 2,
-  },
-]);
-
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
 const pagination = ref<{

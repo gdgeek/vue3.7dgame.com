@@ -1,58 +1,61 @@
 <template>
   <!-- <div> -->
-  <waterfall
-    v-if="viewCards.length > 0"
-    :lazyload="true"
-    :gutter="10"
-    :width="320"
-    :list="viewCards"
-    :column-count="3"
-  >
-    <template #item="{ item }">
-      <el-card style="width: 320px" class="box-card">
-        <template #header>
-          <div>
-            <el-card shadow="hover" :body-style="{ padding: '0px' }">
-              <template #header>
-                <span class="mrpp-title">
-                  <b class="card-title" nowrap>{{ item.name }}</b>
-                </span>
-              </template>
-              <router-link :to="'/verse/view?id=' + item.id">
-                <img
-                  v-if="item.image === null"
-                  src="@/assets/image/none.png"
-                  style="width: 100%; height: 270px; object-fit: contain"
-                />
-                <LazyImg
-                  v-else
-                  :url="item.image.url"
-                  style="width: 100%; height: 270px"
-                  fit="contain"
-                ></LazyImg>
-              </router-link>
-            </el-card>
-            <InfoContent
-              :info="JSON.parse(item.info!)"
-              :author="item.author!"
-            ></InfoContent>
+
+  <el-card style="width: 100%">
+    <waterfall
+      v-if="viewCards.length > 0"
+      :lazyload="true"
+      :gutter="10"
+      :width="320"
+      :list="viewCards"
+      :column-count="3"
+    >
+      <template #item="{ item }">
+        <el-card style="width: 320px" class="box-card">
+          <template #header>
+            <div>
+              <el-card shadow="hover" :body-style="{ padding: '0px' }">
+                <template #header>
+                  <span class="mrpp-title">
+                    <b class="card-title" nowrap>{{ item.name }}</b>
+                  </span>
+                </template>
+                <router-link :to="'/verse/view?id=' + item.id">
+                  <img
+                    v-if="item.image === null"
+                    src="@/assets/image/none.png"
+                    style="width: 100%; height: 270px; object-fit: contain"
+                  />
+                  <LazyImg
+                    v-else
+                    :url="item.image.url"
+                    style="width: 100%; height: 270px"
+                    fit="contain"
+                  ></LazyImg>
+                </router-link>
+              </el-card>
+              <InfoContent
+                :info="JSON.parse(item.info!)"
+                :author="item.author!"
+              ></InfoContent>
+            </div>
+          </template>
+          <div class="clearfix">
+            <router-link :to="'/verse/view?id=' + item.id">
+              <el-button type="primary" size="small">进入</el-button>
+            </router-link>
+            <VerseToolbar
+              :verse="item"
+              @deleted="deleted"
+              @changed="changed"
+            ></VerseToolbar>
           </div>
-        </template>
-        <div class="clearfix">
-          <router-link :to="'/verse/view?id=' + item.id">
-            <el-button type="primary" size="small">进入</el-button>
-          </router-link>
-          <VerseToolbar
-            :verse="item"
-            @deleted="deleted"
-            @changed="changed"
-          ></VerseToolbar>
-        </div>
-        <div class="bottom clearfix"></div>
-      </el-card>
-      <br />
-    </template>
-  </waterfall>
+          <div class="bottom clearfix"></div>
+        </el-card>
+        <br />
+      </template>
+    </waterfall>
+  </el-card>
 </template>
 
 <script setup lang="ts">

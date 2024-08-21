@@ -20,6 +20,16 @@
       </el-header>
       <el-main>
         <el-row :gutter="10">
+          <!--
+          <waterfall
+            :lazyload="true"
+            :gutter="10"
+            :width="320"
+            :list="items"
+            :column-count="3"
+          >
+            <template #item="{ item }"> </template>
+          </waterfall>-->
           <el-col
             v-for="(item, index) in items"
             :key="index"
@@ -77,6 +87,8 @@ import { useRouter } from "vue-router";
 import { getPictures, putPicture, deletePicture } from "@/api/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import "vue-waterfall-plugin-next/dist/style.css";
 
 const items = ref<any[]>([]);
 const sorted = ref<string>("-created_at");

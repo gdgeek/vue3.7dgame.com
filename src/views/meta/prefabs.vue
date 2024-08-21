@@ -26,7 +26,7 @@
         </mr-p-p-header>
       </el-header>
       <el-main>
-        <el-row>
+        <el-card style="width: 100%">
           <waterfall
             v-if="viewCards.length > 0"
             :lazyload="false"
@@ -98,7 +98,7 @@
           <template v-else>
             <el-skeleton></el-skeleton>
           </template>
-        </el-row>
+        </el-card>
       </el-main>
       <el-footer>
         <el-card class="box-card">
