@@ -48,7 +48,7 @@ const title = computed(() => route.query.title?.slice(2) as string);
 const id = computed(() => parseInt(route.query.id as string));
 const editorUrl = computed(() =>
   path.join(
-    "/static/three.js/editor",
+    "https://editor.4mr.cn/three.js/editor",
     "verse-editor.html" + qs.stringify({ id: id.value }, true)
   )
 );
