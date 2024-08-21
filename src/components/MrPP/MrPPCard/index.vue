@@ -9,18 +9,18 @@
             </span>
           </template>
 
-          <img
+          <LazyImg
             v-if="!item.image"
             src="@/assets/image/none.png"
             style="width: 100%; height: 300px; object-fit: contain"
           />
-          <el-image
+          <LazyImg
             v-else
             style="width: 100%; height: 300px"
             fit="contain"
-            :src="item.image.url"
+            :url="item.image.url"
             lazy
-          ></el-image>
+          ></LazyImg>
         </el-card>
 
         <slot name="info"></slot>
@@ -50,6 +50,8 @@
 </template>
 
 <script setup lang="ts">
+import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import "vue-waterfall-plugin-next/dist/style.css";
 const props = defineProps({
   item: {
     type: Object as PropType<{ name: string; image: { url: string } | null }>,

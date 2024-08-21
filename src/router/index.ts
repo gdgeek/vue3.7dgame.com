@@ -150,7 +150,7 @@ export const constantRoutes: RouteRecordRaw[] = [
               },
               {
                 path: "upload",
-                name: "",
+                name: "VoxelUpload",
                 component: () => import("@/views/voxel/upload.vue"),
                 meta: {
                   title: "体素上传",
@@ -162,7 +162,7 @@ export const constantRoutes: RouteRecordRaw[] = [
               },
               {
                 path: "view",
-                name: "",
+                name: "VoxelView",
                 component: () => import("@/views/voxel/view.vue"),
                 meta: {
                   title: "体素处理",

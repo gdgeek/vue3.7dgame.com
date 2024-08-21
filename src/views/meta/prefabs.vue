@@ -48,7 +48,7 @@
                       <router-link :to="url(item.id)">
                         <LazyImg
                           v-if="item.image === null"
-                          src="@/assets/image/none.png"
+                          url="@/assets/image/none.png"
                           style="
                             width: 100%;
                             height: 270px;
