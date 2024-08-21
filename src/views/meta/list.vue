@@ -21,18 +21,17 @@
         </mr-p-p-header>
       </el-header>
       <el-main>
-        <el-row :gutter="10">
-          <el-col
-            v-for="(item, index) in metaData"
-            :key="index"
-            :data="item"
-            :xs="24"
-            :sm="12"
-            :md="8"
-            :lg="6"
-            :xl="4"
+        <el-card style="width: 100%">
+          <Waterfall
+            :list="metaData"
+            :width="320"
+            :gutter="20"
+            :hasAroundGutter="false"
+            :breakpoints="{
+              640: { rowPerView: 1 },
+            }"
           >
-            <div v-if="metaData">
+            <template #item="{ item }">
               <el-card style="width: 320px" class="box-card">
                 <template #header>
                   <div>
@@ -44,7 +43,7 @@
                       </template>
                       <router-link :to="`/meta/meta-edit?id=${item.id}`">
                         <img
-                          v-if="item.image === null"
+                          v-if="!item.image"
                           src="@/assets/image/none.png"
                           style="
                             width: 100%;
@@ -85,10 +84,9 @@
                 </div>
                 <div class="bottom clearfix"></div>
               </el-card>
-              <br />
-            </div>
-          </el-col>
-        </el-row>
+            </template>
+          </Waterfall>
+        </el-card>
       </el-main>
       <el-footer>
         <el-card class="box-card">
@@ -110,8 +108,8 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
-// import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
-// import "vue-waterfall-plugin-next/dist/style.css";
+import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import "vue-waterfall-plugin-next/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
 import { getMetas, postMeta, deleteMeta } from "@/api/v1/meta";
 import type { metaInfo } from "@/api/v1/meta";

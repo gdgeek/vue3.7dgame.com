@@ -19,40 +19,34 @@
         </MrPPHeader>
       </el-header>
       <el-main>
-        <el-row :gutter="10">
-          <el-col
-            v-for="(item, index) in items"
-            :key="index"
-            :xs="24"
-            :sm="12"
-            :md="8"
-            :lg="6"
-            :xl="4"
-          >
-            <MrPPCard
-              :item="item"
-              @named="namedWindow"
-              @deleted="deletedWindow"
-            >
-              <template #enter>
-                <router-link :to="'/voxel/view?id=' + item.id">
-                  <el-button-group :inline="true">
-                    <el-button
-                      v-if="item.info === null || item.image === null"
-                      type="warning"
-                      size="small"
-                    >
-                      初始化模型数据
-                    </el-button>
-                    <el-button v-else type="primary" size="small">
-                      查看模型
-                    </el-button>
-                  </el-button-group>
-                </router-link>
-              </template>
-            </MrPPCard>
-          </el-col>
-        </el-row>
+        <el-card>
+          <Waterfall :list="items" :width="320" :gutter="10">
+            <template #item="{ item }">
+              <MrPPCard
+                :item="item"
+                @named="namedWindow"
+                @deleted="deletedWindow"
+              >
+                <template #enter>
+                  <router-link :to="`/ResourceAdmin/voxel/view?id=${item.id}`">
+                    <el-button-group :inline="true">
+                      <el-button
+                        v-if="item.info === null || item.image === null"
+                        type="warning"
+                        size="small"
+                      >
+                        初始化模型数据
+                      </el-button>
+                      <el-button v-else type="primary" size="small">
+                        查看模型
+                      </el-button>
+                    </el-button-group>
+                  </router-link>
+                </template>
+              </MrPPCard>
+            </template>
+          </Waterfall>
+        </el-card>
       </el-main>
       <el-footer>
         <el-card class="box-card">
@@ -79,6 +73,8 @@ import "element-plus/theme-chalk/index.css";
 import { getVoxels, putVoxel, deleteVoxel } from "@/api/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import "vue-waterfall-plugin-next/dist/style.css";
 
 interface Pagination {
   current: number;

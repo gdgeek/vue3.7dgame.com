@@ -26,11 +26,11 @@
         </mr-p-p-header>
       </el-header>
       <el-main>
-        <el-row>
+        <el-card style="width: 100%">
           <waterfall
             v-if="viewCards.length > 0"
             :lazyload="false"
-            :breakpoints="breakpoints"
+            :width="320"
             :gutter="8"
             :list="viewCards"
             :column-count="3"
@@ -48,7 +48,7 @@
                       <router-link :to="url(item.id)">
                         <LazyImg
                           v-if="item.image === null"
-                          src="@/assets/image/none.png"
+                          url="@/assets/image/none.png"
                           style="
                             width: 100%;
                             height: 270px;
@@ -98,7 +98,7 @@
           <template v-else>
             <el-skeleton></el-skeleton>
           </template>
-        </el-row>
+        </el-card>
       </el-main>
       <el-footer>
         <el-card class="box-card">
@@ -269,7 +269,7 @@ const viewCards = computed(() => {
   console.log("viewCards", cards);
   return cards;
 });
-
+/*
 const breakpoints = ref({
   1600: {
     //当屏幕宽度小于等于1600
@@ -287,7 +287,7 @@ const breakpoints = ref({
     //当屏幕宽度小于等于600
     rowPerView: 1, // 一行1图
   },
-});
+});*/
 </script>
 
 <style scoped>
