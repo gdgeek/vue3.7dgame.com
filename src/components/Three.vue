@@ -1,30 +1,24 @@
 <template>
   <div>
-    <div id="three" style="height: 300px; width: 100%"></div>
+    <div id="three" ref="three" style="height: 300px; width: 100%"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {
-  Scene,
-  PerspectiveCamera,
-  WebGLRenderer,
-  Vector3,
-  Box3,
-  DirectionalLight,
-  AmbientLight,
-  PointLight,
-} from "three";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import ElementResizeDetector from "element-resize-detector";
 import { convertToHttps } from "@/assets/js/helper";
-
+/**
+ *
+ * @param vec
+ * @param n
+ */
 // 将Vector3的坐标值固定到小数点后n位
-function toFixedVector3(vec: Vector3, n: number): Vector3 {
-  const result = new Vector3();
+function toFixedVector3(vec: THREE.Vector3, n: number): THREE.Vector3 {
+  const result = new THREE.Vector3();
   result.x = parseFloat(vec.x.toFixed(n));
   result.y = parseFloat(vec.y.toFixed(n));
   result.z = parseFloat(vec.z.toFixed(n));
@@ -35,19 +29,57 @@ const props = defineProps<{
   file: { url: string };
   target?: number;
 }>();
-
 const emit = defineEmits<{
-  (e: "loaded", data: { size: Vector3; center: Vector3 }): void;
+  (e: "loaded", data: { size: THREE.Vector3; center: THREE.Vector3 }): void;
   (e: "progress", progress: number): void;
 }>();
 
-const scene = ref<THREE.Scene | null>(null);
-const renderer = ref<THREE.WebGLRenderer | null>(null);
-const camera = ref<THREE.PerspectiveCamera | null>(null);
-const sleep = ref(false);
+const three = ref<HTMLDivElement | null>(null);
+
+const scene = new THREE.Scene();
+let camera: THREE.PerspectiveCamera | null = null;
+let renderer: THREE.WebGLRenderer | null = null;
+let sleep = false;
 
 // 刷新场景并加载新模型
 const refresh = () => {
+  if (!props.file || !props.file.url) {
+    return;
+  }
+  const gltfLoader = new GLTFLoader();
+  //gltfLoader.setDRACOLoader(dracoLoader);
+  const url = convertToHttps(props.file.url);
+  gltfLoader.load(
+    url,
+    (model) => {
+      const box = new THREE.Box3().setFromObject(model.scene);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const scale = (props.target ?? 1.5) / size.x;
+      model.scene.position.set(
+        -center.x * scale,
+        -center.y * scale,
+        -center.z * scale
+      );
+      model.scene.scale.set(scale, scale, scale);
+
+      scene?.add(model.scene);
+      emit("loaded", {
+        size: toFixedVector3(size, 5),
+        center: toFixedVector3(
+          new THREE.Vector3(center.x, center.y, center.z),
+          5
+        ),
+      });
+    },
+    (xhr) => {
+      emit("progress", (xhr.loaded / xhr.total) * 100);
+    }
+  );
+
+  /*
   if (scene.value && props.file && props.file.url) {
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath("/three.js/examples/js/libs/draco/");
@@ -79,20 +111,17 @@ const refresh = () => {
         });
       },
       (xhr) => {
-        emit(
-          "progress",
-          parseFloat(((xhr.loaded / xhr.total) * 100).toFixed(1))
-        );
         console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
       }
     );
-  }
+  }*/
 };
 
 // 截图功能
+/*
 const screenshot = () => {
   return new Promise<Blob>((resolve) => {
-    if (!renderer.value || !camera.value || !scene.value) {
+    if (!renderer.value || !camera.value) {
       resolve(new Blob());
       return;
     }
@@ -120,7 +149,7 @@ const screenshot = () => {
     }, "image/jpeg");
   });
 };
-
+*/
 // 解析模型节点
 const parseNode = async (json: any): Promise<THREE.Object3D> => {
   const loader = new THREE.ObjectLoader();
@@ -138,54 +167,58 @@ watch(
 );
 
 onMounted(() => {
-  const content = document.getElementById("three");
+  const content = three.value;
   if (content) {
     const width = content.clientWidth;
     const height = content.clientHeight;
 
-    scene.value = new Scene();
-    camera.value = new PerspectiveCamera(75, width / height, 0.1, 1000);
-    camera.value.position.set(0, 0, 2);
-    renderer.value = new WebGLRenderer({
+    // const scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    camera.position.set(0, 0, 2);
+    renderer = new THREE.WebGLRenderer({
       preserveDrawingBuffer: true,
       antialias: true,
     });
-    renderer.value.setViewport(0, 0, width, height);
-    renderer.value.setSize(width, height);
-    renderer.value.setClearColor(0xeeffff, 1);
-    content.appendChild(renderer.value.domElement);
+    renderer.setViewport(0, 0, width, height);
+    renderer.setSize(width, height);
+    renderer.setClearColor(0xeeffff, 1);
+    content.appendChild(renderer.domElement);
 
     // 初始化轨道控制器
-    const controls = new OrbitControls(camera.value, renderer.value.domElement);
-    controls.update();
+    const controls = new OrbitControls(camera, renderer.domElement);
+    // controls.update();
 
     // 添加光源
-    const light = new DirectionalLight(0xffffff, 1);
+    const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(-0.5, 0, 0.7);
-    scene.value.add(light);
-    scene.value.add(new PointLight(0xffffff, 3));
-    scene.value.add(new AmbientLight(0xffffff, 1));
+    scene.add(light);
+    scene.add(new THREE.PointLight(0xffffff, 3));
+    scene.add(new THREE.AmbientLight(0xffffff, 1));
 
-    const animate = () => {
-      requestAnimationFrame(animate);
-      controls.update();
-      renderer.value?.render(scene.value!, camera.value!);
-    };
-
-    animate();
+    // renderer.render(scene, camera);
 
     // 监听容器尺寸变化
     const erd = new ElementResizeDetector();
     erd.listenTo(content, () => {
-      if (!sleep.value) {
+      if (!sleep && renderer && camera) {
         const width = content.clientWidth;
         const height = content.clientHeight;
-        renderer.value?.setSize(width, height);
-        camera.value!.aspect = width / height;
-        camera.value!.updateProjectionMatrix();
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
       }
     });
 
+    const animate = () => {
+      if (!renderer || !camera) {
+        return;
+      }
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    };
+
+    animate();
     refresh();
   }
 });

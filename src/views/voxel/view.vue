@@ -67,7 +67,7 @@ import { getVoxel, putVoxel, deleteVoxel } from "@/api/resources/index";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
 import { printVector3 } from "@/assets/js/helper";
-import Voxel from "@/components/Voxel/index.vue";
+import Voxel from "@/components/Voxel.vue";
 
 const loading = ref(false);
 const voxelData = ref<any>(null);
