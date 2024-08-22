@@ -44,7 +44,7 @@ const succeed = (data: any) => {
     const res = localStorage.getItem(TOKEN_KEY);
     console.log("Token set successfully", res);
     nextTick(() => {
-      router.push("/"); // 确保目标路径正确
+      router.push("/");
       console.log("Routing to home"); // 确认路由跳转
     });
     // const { path, queryParams } = parseRedirect();
@@ -83,26 +83,6 @@ function parseRedirect(): {
 const failed = (message: any) => {
   error(message);
 };
-
-// 提交登录表单
-// function submit() {
-//   formRef.value?.validate((valid: boolean) => {
-//     if (valid) {
-//       AuthAPI.login(form.value)
-//         .then((data) => {
-//           console.log("data", data.data);
-//           succeed(data.data);
-//           userStore.getUserInfo();
-//           const { path, queryParams } = parseRedirect();
-//           console.log("path:", path, "queryParams:", queryParams);
-//           router.push({ path: path, query: queryParams });
-//         })
-//         .catch((error) => {
-//           failed(error);
-//         });
-//     }
-//   });
-// }
 
 const submit = () => {
   formRef.value?.validate(async (valid: boolean) => {
@@ -213,18 +193,19 @@ const error = (msg: string | Record<string, string>) => {
           <el-icon>
             <HomeFilled></HomeFilled>
           </el-icon>
-          上海不加班网络有限公司(Apple Reality Spirit)
+          上海不加班网络有限公司(Apple Reality Spirit) |
         </RouterLink>
-        <!-- <br> -->
         <a href="https://beian.miit.gov.cn/" target="_blank" :underline="false">
-          <el-icon><List></List></el-icon>
-          沪ICP备15039333号
+          <el-icon>
+            <Grid></Grid>
+          </el-icon>
+          沪ICP备15039333号 |
         </a>
         <a href="#">
           <el-icon>
             <InfoFilled></InfoFilled>
           </el-icon>
-          2024
+          202408
         </a>
       </div>
     </div>
@@ -264,7 +245,7 @@ body {
 
   .project_title {
     margin-left: 10px;
-    font-family: SourceHanSansSC-VF, sans-serif;
+    font-family: "KaiTi", sans-serif;
     /* 添加通用字体族 */
     font-size: 14px;
     font-weight: 400;
@@ -325,7 +306,7 @@ body {
 
       h1 {
         margin-top: 0;
-        font-family: SourceHanSansSC-VF, sans-serif;
+        font-family: "KaiTi", sans-serif;
         /* 添加通用字体族 */
         font-size: 36px;
         font-weight: 400;
@@ -334,7 +315,7 @@ body {
 
       h4 {
         margin-top: 0;
-        font-family: SourceHanSansSC-VF, sans-serif;
+        font-family: "KaiTi", sans-serif;
         /* 添加通用字体族 */
         font-size: 18px;
         font-weight: 400;
@@ -367,7 +348,7 @@ body {
 
   .login-title {
     margin: 20px 0;
-    font-family: SourceHanSansSC-VF, sans-serif;
+    font-family: "KaiTi", sans-serif;
     /* 添加通用字体族 */
     font-weight: bold;
     color: #444;
@@ -391,7 +372,7 @@ body {
   }
 
   .login-link a {
-    font-family: SourceHanSansSC-VF, sans-serif;
+    font-family: "KaiTi", sans-serif;
     /* 添加通用字体族 */
     font-size: 16px;
     color: rgb(28 160 212);
@@ -399,7 +380,7 @@ body {
 
   .error-message {
     margin-top: 10px;
-    font-family: SourceHanSansSC-VF, sans-serif;
+    font-family: "KaiTi", sans-serif;
     /* 添加通用字体族 */
     color: red;
     text-align: center;
@@ -418,8 +399,7 @@ body {
   }
 
   .copyright a {
-    padding: 0 10px;
-    font-family: SourceHanSansSC-VF, sans-serif;
+    font-family: "KaiTi", sans-serif;
     /* 添加通用字体族 */
     font-size: 14px;
     color: rgb(3 3 3);

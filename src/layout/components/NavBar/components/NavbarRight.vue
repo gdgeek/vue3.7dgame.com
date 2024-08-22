@@ -28,7 +28,9 @@
           :src="userStore.userInfo.data.avatar.url + '?imageView2/1/w/80/h/80'"
           class="rounded-full mr-10px w24px w24px"
         />
-        <span>{{ userStore.userInfo.data.username }}</span>
+        <span class="gradient-text">{{
+          userStore.userInfo.data.nickname || userStore.userInfo.data.username
+        }}</span>
       </div>
       <template #dropdown>
         <el-dropdown-menu>
@@ -130,5 +132,22 @@ onBeforeMount(() => userStore.getUserInfo());
 
 .dark .setting-item:hover {
   background: rgb(255 255 255 / 20%);
+}
+
+.gradient-text {
+  font-family: "KaiTi", "Arial", sans-serif; /* 选择合适的字体 */
+  font-size: 16px; /* 设置字体大小 */
+  font-weight: bold; /* 设置字体粗细 */
+  background: linear-gradient(
+    45deg,
+    #ff6a00,
+    #7ece6c,
+    #9376df,
+    #040404
+  ); /* 渐变颜色 */
+  background-clip: text; /* 标准属性：背景裁剪到文本 */
+  -webkit-background-clip: text; /* 使背景渐变应用于文字 */
+  -webkit-text-fill-color: transparent; /* 使文字颜色透明以显示背景渐变 */
+  text-align: center;
 }
 </style>

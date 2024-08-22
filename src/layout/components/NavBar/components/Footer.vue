@@ -20,7 +20,7 @@
             target="_blank"
             :underline="false"
           >
-            <el-icon><List></List></el-icon>
+            <el-icon><Grid></Grid></el-icon>
             <span class="font-text">
               {{ informationStore.beian }}
             </span>

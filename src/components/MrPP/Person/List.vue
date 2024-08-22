@@ -116,6 +116,14 @@ const viewCards = computed(() => {
 });
 
 const breakpoints = ref({
+  3200: {
+    //当屏幕宽度大于等于3200
+    rowPerView: 8, // 一行8图
+  },
+  2400: {
+    //当屏幕宽度大于等于2400
+    rowPerView: 6, // 一行6图
+  },
   1600: {
     //当屏幕宽度小于等于1600
     rowPerView: 4, // 一行4图

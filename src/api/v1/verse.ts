@@ -4,6 +4,7 @@ import path from "path-browserify";
 import { v4 as uuidv4 } from "uuid";
 import environment from "@/environment";
 import { MessageType } from "./message";
+import { metaInfo } from "./meta";
 
 export type Author = {
   id: number;
@@ -56,6 +57,16 @@ type Languages = {
   description: string;
 };
 
+export type Script = {
+  id: number;
+  created_at: string;
+  verse_id: number;
+  script: string;
+  title: string;
+  uuid: string;
+  workspace: string;
+};
+
 export type VerseData = {
   id: number;
   author_id: number;
@@ -71,8 +82,10 @@ export type VerseData = {
   message: MessageType | null;
   image: ImageDetails;
   author?: Author;
-  verseShare: VerseShare;
-  languages: Languages[];
+  verseShare?: VerseShare;
+  languages?: Languages[];
+  metas?: metaInfo[];
+  script?: Script;
 };
 
 export type PostVerseData = {
