@@ -47,7 +47,6 @@
 </template>
 // meta cyber
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useBreadcrumbStore } from "@/store/modules/breadcrumb";
 import { getMeta, metaInfo } from "@/api/v1/meta";
@@ -116,10 +115,7 @@ const meta = ref<metaInfo | null>(null);
 const route = useRoute();
 const breadcrumbStore = useBreadcrumbStore();
 
-const setBreadcrumbs = breadcrumbStore.setBreadcrumbs;
-
 const id = computed(() => parseInt(route.query.id as string));
-const title = computed(() => meta.value?.title as string);
 
 const save = () => {
   postMessage({
