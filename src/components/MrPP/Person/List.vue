@@ -108,7 +108,8 @@ const transformToViewCard = (items: userData[]): ViewCard[] => {
 };
 
 const viewCards = computed(() => {
-  if (!props.items) return [];
+  console.log("props.items:", props.items);
+  if (!props.items || props.items.length === 0) return [];
   const cards = transformToViewCard(props.items);
   console.log("viewCards", cards);
   return cards;

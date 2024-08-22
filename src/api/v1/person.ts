@@ -9,6 +9,7 @@ export type userData = {
   roles: string[];
   avatar: {
     url: string;
+    [key: string]: any;
   };
   [key: string]: any;
 };
@@ -38,7 +39,7 @@ export const putPerson = (id: number, data: any) => {
 
 export const getPerson = (
   sort = "-created_at",
-  search = null,
+  search = "",
   page = 1,
   expand = ""
 ) => {

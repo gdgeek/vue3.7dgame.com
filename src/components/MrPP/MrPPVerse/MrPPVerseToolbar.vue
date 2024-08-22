@@ -33,7 +33,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, defineProps, defineEmits } from "vue";
 import { useAbility } from "@/ability/ability";
 import { putVerse, deleteVerse, VerseData } from "@/api/v1/verse";
 import MrPPVerseQrcode from "@/components/MrPP/MrPPVerse/MrPPQRcodeVerse.vue";
