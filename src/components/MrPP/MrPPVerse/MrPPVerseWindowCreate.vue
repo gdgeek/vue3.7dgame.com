@@ -1,11 +1,13 @@
 <template>
   <el-dialog
-    :title="props.dialogTitle"
     v-model="dialogVisible"
     append-to-body
     :close-on-click-modal="false"
     width="70%"
   >
+    <template #header>
+      {{ dialogTitle }}
+    </template>
     <el-form ref="formRef" :rules="rules" :model="info" label-width="80px">
       <el-form-item label="封面图片">
         <mr-p-p-cropper

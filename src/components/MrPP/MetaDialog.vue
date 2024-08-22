@@ -161,10 +161,11 @@ const clearSearched = () => {
   refresh();
 };
 
-const selected = async (data: any = null) => {
+const selected = async (data: any) => {
   if (data) {
     const title = await input("请输入Model名称");
     data.title = title;
+    console.log("metadata", data);
     emit("selected", data);
   } else {
     emit("selected", null);

@@ -94,11 +94,11 @@ const addMeta = () => {
 
 const selected = async ({ data, setup, title }: any) => {
   console.log("data2", data, setup, title);
-  const res = postMessage({
+  const res = await postMessage({
     action: "add-module",
     data: { data, setup, title },
   });
-  console.log("res", res);
+  console.log("加载meta", res);
 };
 
 const saveVerse = async (verse: any) => {

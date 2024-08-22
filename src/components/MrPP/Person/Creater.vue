@@ -1,10 +1,9 @@
 <template>
-  <el-dialog
-    :title="$props.dialogTitle"
-    v-model="dialogVisible"
-    :close-on-click-modal="false"
-    width="70%"
-  >
+  <el-dialog v-model="dialogVisible" :close-on-click-modal="false" width="70%">
+    >
+    <template #header>
+      {{ props.dialogTitle }}
+    </template>
     <el-form
       ref="formRef"
       :rules="rules"
