@@ -21,7 +21,6 @@ import "@/styles/index.scss";
 import "uno.css";
 import "animate.css";
 import router from "./router";
-
 // 更新页面标题
 const updateTitle = (title: string) => {
   document.title = `${title} - 7D Game`;

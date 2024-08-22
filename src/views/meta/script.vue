@@ -36,7 +36,7 @@
               <iframe
                 style="margin: 0; padding: 0; height: 100%; width: 100%"
                 id="editor"
-                src="https://blockly.4mr.cn/"
+                :src="blocklyUrl"
               ></iframe>
             </el-main>
           </el-container>
@@ -116,6 +116,7 @@ const route = useRoute();
 const breadcrumbStore = useBreadcrumbStore();
 
 const id = computed(() => parseInt(route.query.id as string));
+const blocklyUrl = import.meta.env.VITE_APP_BLOCKLY_URL;
 
 const save = () => {
   postMessage({
