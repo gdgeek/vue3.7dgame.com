@@ -36,7 +36,7 @@
               <iframe
                 style="margin: 0; padding: 0; height: 100%; width: 100%"
                 id="editor"
-                src="http://localhost:3000/"
+                src="https://blockly.4mr.cn/"
               ></iframe>
             </el-main>
           </el-container>

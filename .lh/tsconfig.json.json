@@ -3,11 +3,15 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 0,
+            "activePatchIndex": 1,
             "patches": [
                 {
                     "date": 1723542515038,
                     "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1724317872374,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -30,7 +30,7 @@\n     \"src/**/*.vue\",\n     \"src/typings/**/*.d.ts\",\n     \"mock/**/*.ts\",\n     \"vite.config.ts\"\n-, \"src/assets/test/blockly/code.js\", \"src/assets/js/blockly/custom/signal/type.ts\", \"src/assets/js/fontok.ts\", \"src/assets/test/blockly/storage.js\"  ],\n+, \"src/assets/test/blockly/code.js\", \"src/assets/js/fontok.ts\", \"src/assets/test/blockly/storage.js\"  ],\n   \"exclude\": [\"node_modules\", \"dist\", \"**/*.js\"]\n }\n"
                 }
             ],
             "date": 1723542515038,
