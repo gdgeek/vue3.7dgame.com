@@ -34,7 +34,6 @@
           <el-form
             ref="nickNameFormRef"
             :model="nicknameForm"
-            :rules="nicknameRules"
             label-width="80px"
           >
             <el-form-item

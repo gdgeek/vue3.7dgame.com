@@ -577,7 +577,7 @@ export function resetRouter() {
   router.replace({ path: "/login" });
 }
 
-await userStore.getUserInfo();
+//await userStore.getUserInfo();
 
 // 指定要移除的路由路径列表
 const pathsToRemove = [
