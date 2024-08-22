@@ -602,9 +602,6 @@ if (!isRoot.value) {
   pathsToRemove.push("manager");
 }
 
-// 也可以在首次加载时进行检查
-console.log("Initial roles", userStore.userInfo.roles);
-
 // 检查路径是否在移除列表中
 const isRemoveRoute = (path: string): boolean => {
   return pathsToRemove.includes(path);

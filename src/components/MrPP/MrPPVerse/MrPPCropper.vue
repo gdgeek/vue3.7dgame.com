@@ -13,12 +13,10 @@
       <i v-else class="el-icon-plus file-uploader-icon"></i>
     </el-upload>
 
-    <el-dialog
-      title="头像截取"
-      v-model="dialogVisible"
-      class="crop-dialog"
-      append-to-body
-    >
+    <el-dialog v-model="dialogVisible" class="crop-dialog" append-to-body>
+      <template #header>
+        <span>头像截取</span>
+      </template>
       <div class="cropper-content">
         <div class="cropper" style="text-align: center">
           <vueCropper

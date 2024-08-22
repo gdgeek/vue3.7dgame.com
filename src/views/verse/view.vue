@@ -127,6 +127,7 @@
             </aside>
           </div>
           <VerseToolbar
+            v-if="verse"
             :verse="verse!"
             @deleted="deleted"
             @changed="changed"

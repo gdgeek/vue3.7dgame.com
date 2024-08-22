@@ -34,7 +34,11 @@
       </el-header>
       <el-main>
         <el-row>
-          <List :items="items" @refresh="refresh"></List>
+          <List
+            v-if="items && items.length > 0"
+            :items="items!"
+            @refresh="refresh"
+          ></List>
         </el-row>
       </el-main>
       <el-footer>
@@ -117,9 +121,14 @@ const refresh = () => {
       current: pagination.value.current,
     },
     (val: any) => {
-      items.value = val.data;
-      pagination.value = val.pagination;
-      setTimeout(() => window.dispatchEvent(new Event("resize")), 100);
+      if (val && val.data) {
+        items.value = val.data;
+        console.log("Pageitems", items.value);
+        pagination.value = val.pagination;
+        setTimeout(() => window.dispatchEvent(new Event("resize")), 100);
+      } else {
+        items.value = [];
+      }
     }
   );
 };

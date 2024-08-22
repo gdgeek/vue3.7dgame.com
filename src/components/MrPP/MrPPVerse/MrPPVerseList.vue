@@ -45,7 +45,7 @@
               <el-button type="primary" size="small">进入</el-button>
             </router-link>
             <VerseToolbar
-              :verse="item"
+              :verse="item!"
               @deleted="deleted"
               @changed="changed"
             ></VerseToolbar>
@@ -74,7 +74,7 @@ watch(
   () => props.items,
   (updatedItems) => {
     newItems.value = updatedItems;
-    console.log("New items assigned:", updatedItems);
+    console.log("New items:", updatedItems);
   },
   { immediate: true }
 );

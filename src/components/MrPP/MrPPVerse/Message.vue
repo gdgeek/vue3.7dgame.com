@@ -10,7 +10,10 @@
         :message="message"
       ></mr-p-p-tags> -->
     </el-divider>
-    <el-dialog :title="'修改内容'" v-model:visible="dialog" width="70%">
+    <el-dialog v-model="dialog" width="70%">
+      <template #header>
+        <span>修改内容</span>
+      </template>
       <mr-p-p-message-from
         ref="editor"
         :data="message!"

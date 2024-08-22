@@ -10,12 +10,14 @@ import { getPerson } from "@/api/v1/person";
 
 const loaded = async (data: any, result: Function) => {
   try {
+    console.log("测试", data);
     const response = await getPerson(
       data.sorted,
       data.searched,
       data.current,
       "roles, avatar"
     );
+    console.log("loaded", response);
     const pagination = {
       current: parseInt(response.headers["x-pagination-current-page"]),
       count: parseInt(response.headers["x-pagination-page-count"]),
