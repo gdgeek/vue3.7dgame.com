@@ -23,7 +23,7 @@
       <el-main>
         <el-card style="width: 100%">
           <Waterfall
-            :list="metaData"
+            :list="metaData as unknown as ViewCard[]"
             :width="320"
             :gutter="20"
             :hasAroundGutter="false"
@@ -114,6 +114,7 @@ import { v4 as uuidv4 } from "uuid";
 import { getMetas, postMeta, deleteMeta } from "@/api/v1/meta";
 import type { metaInfo } from "@/api/v1/meta";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import { ViewCard } from "vue-waterfall-plugin-next/dist/types/types/waterfall";
 
 const router = useRouter();
 const metaData = ref<metaInfo[]>([]);
