@@ -1,11 +1,13 @@
 <template>
   <el-dialog
-    :title="dialogTitle"
     append-to-body
     v-model="dialogVisible"
     width="80%"
     :close-on-click-modal="false"
   >
+    <template #header>
+      {{ dialogTitle }}
+    </template>
     <el-card class="box-card" style="text-align: center">
       <div
         v-if="verseId !== -1"

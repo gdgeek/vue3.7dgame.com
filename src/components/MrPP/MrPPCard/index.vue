@@ -13,7 +13,7 @@
             v-if="!item.image"
             src="@/assets/image/none.png"
             style="width: 100%; height: 300px; object-fit: contain"
-          />
+          ></LazyImg>
           <LazyImg
             v-else
             style="width: 100%; height: 300px"

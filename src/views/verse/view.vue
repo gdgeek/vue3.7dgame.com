@@ -1,6 +1,7 @@
 <template>
   <div class="verse-view">
-    <el-dialog :title="'修改信息'" v-model="dialog" width="70%">
+    <el-dialog v-model="dialog" width="70%">
+      <template #header> 修改信息 </template>
       <MrPPMessageFrom
         ref="editor"
         :data="briefing!"
@@ -239,7 +240,7 @@ const submit = () => {
       if (
         Form.value.language &&
         Form.value.language ===
-          verse.value?.languages[verse.value.languages.length - 1]?.language
+          verse.value?.languages![verse.value.languages!.length - 1]?.language
       ) {
         await putlanguages(
           verse.value?.languages[verse.value.languages.length - 1].id,
@@ -267,7 +268,7 @@ const submit = () => {
 
 const del = async () => {
   await dellanguages(
-    verse.value!.languages[verse.value!.languages.length - 1].id
+    verse.value!.languages![verse.value!.languages!.length - 1].id
   );
   await getlanguages(verse.value!.id);
   FormRef.value?.resetFields();

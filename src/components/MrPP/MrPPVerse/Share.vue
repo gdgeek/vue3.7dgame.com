@@ -1,11 +1,7 @@
 <template>
   <div>
-    <el-dialog
-      title="共享给其他用户"
-      v-model="post.visible"
-      width="30%"
-      :close-on-click-modal="false"
-    >
+    <el-dialog v-model="post.visible" width="30%" :close-on-click-modal="false">
+      <template #header> 共享给其他用户 </template>
       <el-form :model="post.form" ref="postRef" label-width="80px">
         <el-form-item
           label="用户名"
@@ -46,12 +42,8 @@
       </el-form>
     </el-dialog>
 
-    <el-dialog
-      title="修改共享信息"
-      v-model="put.visible"
-      width="30%"
-      :close-on-click-modal="false"
-    >
+    <el-dialog v-model="put.visible" width="30%" :close-on-click-modal="false">
+      <template #header> 修改共享信息 </template>
       <el-form :model="put.form" ref="putRef" label-width="80px">
         <el-form-item
           label="用户名"
