@@ -63,8 +63,6 @@ const ready = ref<boolean>(false);
 const saveable = computed(() => script.value !== null && verse.value!.editable);
 let map = new Map<string, any>();
 
-const blocklyUrl = import.meta.env.VITE_APP_BLOCKLY_URL;
-
 const postScript = async (message: any) => {
   if (verse.value === null) {
     ElMessage({
