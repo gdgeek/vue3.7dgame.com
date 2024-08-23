@@ -3,7 +3,8 @@
 <template>
   <!-- 一级路由出口组件 -->
   <!-- <RouterView></RouterView> -->
-  <router-view v-slot="{ Component }">
+
+  <router-view v-slot="{ Component }" v-mouse-effect v-particle-effect>
     <transition name="fade">
       <keep-alive>
         <component :is="Component"></component>
@@ -17,7 +18,11 @@
 .fade-leave-active {
   transition: opacity 0.5s;
 }
-.fade-enter-from, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+
+.fade-enter-from,
+.fade-leave-to
+
+/* .fade-leave-active in <2.1.8 */ {
   opacity: 0;
 }
 </style>
