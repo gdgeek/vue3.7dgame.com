@@ -60,38 +60,43 @@ const parseNode = async (json: any) => {
  *
  * @returns 返回一个Promise对象，resolve参数为Blob对象，reject参数为错误信息
  */
-const screenshot = () => {
-  alert("screenshot");
-  /*
+const screenshot = (): Promise<Blob> => {
   return new Promise<Blob>((resolve, reject) => {
-    if (!renderer.value || !camera.value || !scene.value)
+    if (!renderer || !camera || !scene)
       return reject("Renderer or Camera or Scene is not initialized");
 
-    sleep.value = true;
-    renderer.value.setSize(512, 512);
-    camera.value.aspect = 1 / 1;
-    camera.value.updateProjectionMatrix();
-    renderer.value.render(scene.value, camera.value);
-    const element = renderer.value.domElement;
+    sleep = true;
+    renderer.setSize(512, 512);
+    camera.aspect = 1 / 1;
+    camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+    const element = renderer.domElement;
 
     element.toBlob((blob) => {
       if (!blob) return reject("Failed to create blob");
 
-      const content = document.getElementById("three");
+      const content = three.value;
       if (!content) return reject("Element #three not found");
 
       const width = content.clientWidth;
       const height = content.clientHeight;
-      renderer.value?.setSize(width, height);
-      renderer.value?.render(scene.value!, camera.value!);
-      camera.value!.aspect = width / height;
-      camera.value!.updateProjectionMatrix();
-      sleep.value = false;
-      resolve(blob);
-    }, "image/jpeg");
-  });*/
-};
 
+      if (renderer && camera) {
+        renderer.setSize(width, height);
+        renderer.render(scene, camera);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+
+        sleep = false;
+        resolve(blob);
+      } else {
+        sleep = false;
+        reject("Renderer or Camera is not initialized");
+      }
+    }, "image/jpeg");
+  });
+};
+defineExpose({ screenshot });
 // 刷新场景并加载
 const refresh = () => {
   if (!props.file || !props.file.url) {

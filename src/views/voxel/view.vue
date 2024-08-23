@@ -255,36 +255,37 @@ const loaded = async (info: any) => {
     return;
   }
 
-  const blob = await screenshot();
-  blob.name = voxelData.value.name;
-  blob.extension = ".jpg";
-  const file = blob;
-  const md5 = await store.fileMD5(file);
-  const handler = await store.publicHandler();
+  const blob: Blob | undefined = await three.value?.screenshot();
 
-  const has = await store.fileHas(
-    md5,
-    file.extension,
-    handler,
-    "screenshot/voxel"
-  );
-  if (!has) {
-    await store.fileUpload(
+  alert(blob);
+  if (blob) {
+    alert(voxelData.value.name);
+    const file: File = new File([blob], voxelData.value.name, {
+      type: "image/jpeg",
+      lastModified: new Date().getTime(), // 设定最后修改时间
+    });
+    const extension = ".jpg";
+    const md5 = await store.fileMD5(file);
+    const handler = await store.publicHandler();
+    const has = await store.fileHas(
       md5,
-      file.extension,
-      file,
-      () => {},
+      extension,
       handler,
       "screenshot/voxel"
     );
+
+    if (!has) {
+      await store.fileUpload(
+        md5,
+        extension,
+        file,
+        () => {},
+        handler,
+        "screenshot/voxel"
+      );
+    }
+    await saveFile(md5, extension, info, file, handler);
   }
-
-  await saveFile(md5, file.extension, info, file, handler);
-};
-
-const screenshot = () => {
-  alert(111);
-  return (ref("three").value as any).screenshot();
 };
 
 onMounted(() => {
