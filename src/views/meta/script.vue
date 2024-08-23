@@ -48,7 +48,6 @@
 // meta cyber
 <script setup lang="ts">
 import { useRoute } from "vue-router";
-import { useBreadcrumbStore } from "@/store/modules/breadcrumb";
 import { getMeta, metaInfo } from "@/api/v1/meta";
 import { cybersType, postCyber, putCyber } from "@/api/v1/cyber";
 
@@ -113,7 +112,6 @@ const meta = ref<metaInfo | null>(null);
 //const cyber = ref<cybersType>();
 
 const route = useRoute();
-const breadcrumbStore = useBreadcrumbStore();
 
 const id = computed(() => parseInt(route.query.id as string));
 const blocklyUrl = import.meta.env.VITE_APP_BLOCKLY_URL;

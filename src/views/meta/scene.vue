@@ -22,16 +22,12 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
-import { AbilityEditable } from "@/ability/ability";
-import { useBreadcrumbStore } from "@/store/modules/breadcrumb";
 import env from "@/environment";
 import { putMeta, getMeta } from "@/api/v1/meta";
 import path from "path-browserify";
-import { useAbility } from "@/composables/ability";
 
 const route = useRoute();
 const router = useRouter();
-const breadcrumbStore = useBreadcrumbStore();
 
 const src = "https://editor.4mr.cn/three.js/editor/meta-editor.html"; //path.join("", "");
 
@@ -41,8 +37,6 @@ const dialog = ref();
 
 const id = computed(() => parseInt(route.query.id as string));
 const title = computed(() => route.query.title?.slice(4) as string);
-
-const setBreadcrumbs = breadcrumbStore.setBreadcrumbs;
 
 const cancel = () => {
   // Cancel logic
