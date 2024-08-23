@@ -33,7 +33,7 @@
               <iframe
                 style="margin: 0; padding: 0; height: 100%; width: 100%"
                 id="editor"
-                src="http://localhost:3000/"
+                :src="blocklyUrl"
               ></iframe>
             </el-main>
           </el-container>
@@ -59,7 +59,7 @@ const script = ref<Script>();
 const verse = ref<VerseData>();
 const route = useRoute();
 const id = computed(() => parseInt(route.query.id as string));
-
+const blocklyUrl = import.meta.env.VITE_APP_BLOCKLY_URL;
 const ready = ref<boolean>(false);
 const saveable = computed(() => script.value !== null && verse.value!.editable);
 let map = new Map<string, any>();
