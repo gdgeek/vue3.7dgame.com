@@ -28,7 +28,7 @@ import path from "path-browserify";
 
 const route = useRoute();
 const router = useRouter();
-
+alert(import.meta.env.VITE_APP_EDITOR_URL);
 const src = "https://editor.4mr.cn/three.js/editor/meta-editor.html"; //path.join("", "");
 
 // console.log("src", src);

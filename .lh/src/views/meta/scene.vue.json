@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 2,
+            "activePatchIndex": 3,
             "patches": [
                 {
                     "date": 1723625294540,
@@ -16,6 +16,10 @@
                 {
                     "date": 1724213442952,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -33,9 +33,9 @@\n const route = useRoute();\n const router = useRouter();\n const breadcrumbStore = useBreadcrumbStore();\n \n-const src = \"/static/three.js/editor/meta-editor.html\"; //path.join(\"\", \"\");\n+const src = \"https://editor.4mr.cn/three.js/editor/meta-editor.html\"; //path.join(\"\", \"\");\n \n // console.log(\"src\", src);\n const isInit = ref(false);\n const dialog = ref();\n"
+                },
+                {
+                    "date": 1724397015892,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -27,9 +27,9 @@\n import path from \"path-browserify\";\n \n const route = useRoute();\n const router = useRouter();\n-\n+alert( import.meta.env.VITE_APP_EDITOR_URL)\n const src = \"https://editor.4mr.cn/three.js/editor/meta-editor.html\"; //path.join(\"\", \"\");\n \n // console.log(\"src\", src);\n const isInit = ref(false);\n"
                 }
             ],
             "date": 1723625294540,

@@ -58,7 +58,7 @@ const script = ref<Script>();
 const verse = ref<VerseData>();
 const route = useRoute();
 const id = computed(() => parseInt(route.query.id as string));
-
+const blocklyUrl = import.meta.env.VITE_APP_BLOCKLY_URL;
 const ready = ref<boolean>(false);
 const saveable = computed(() => script.value !== null && verse.value!.editable);
 let map = new Map<string, any>();
