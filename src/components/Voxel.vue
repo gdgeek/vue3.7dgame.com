@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="three" style="height: 300px; width: 100%"></div>
+    <div ref="three" style="height: 300px; width: 100%"></div>
   </div>
 </template>
 
@@ -20,14 +20,11 @@ import {
 } from "three";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import {
   VOXLoader,
   VOXMesh,
   VOXData3DTexture,
-} from "@/assets/js/voxel/VOXLoader";
-
+} from "three/examples/jsm/loaders/VOXLoader.js";
 import { convertToHttps } from "@/assets/js/helper";
 
 const props = defineProps({
@@ -43,10 +40,12 @@ const props = defineProps({
 
 const emit = defineEmits(["loaded", "progress"]);
 
-const scene = ref<THREE.Scene | null>(null);
-const renderer = ref<THREE.WebGLRenderer | null>(null);
-const camera = ref<THREE.PerspectiveCamera | null>(null);
-const sleep = ref(false);
+const three = ref<HTMLDivElement | null>(null);
+
+const scene = new THREE.Scene();
+let camera: THREE.PerspectiveCamera | null = null;
+let renderer: THREE.WebGLRenderer | null = null;
+let sleep = false;
 
 const toFixedVector3 = (vec: Vector3, n: number) => {
   const result = new Vector3();
@@ -63,7 +62,6 @@ const parseNode = async (json: any) => {
     const data = await loader.parseAsync(json);
     return data;
   } catch (e) {
-    alert(e);
     throw e;
   }
 };
@@ -72,8 +70,10 @@ const parseNode = async (json: any) => {
  * 截图函数
  *
  * @returns 返回一个Promise对象，resolve参数为Blob对象，reject参数为错误信息
- */
+
 const screenshot = () => {
+
+
   return new Promise<Blob>((resolve, reject) => {
     if (!renderer.value || !camera.value || !scene.value)
       return reject("Renderer or Camera or Scene is not initialized");
@@ -102,22 +102,23 @@ const screenshot = () => {
     }, "image/jpeg");
   });
 };
-
+*/
 // 刷新场景并加载
 const refresh = () => {
-  if (!scene.value || !props.file) return;
+  if (!props.file || !props.file.url) {
+    return;
+  }
 
-  const dracoLoader = new DRACOLoader();
-  dracoLoader.setDecoderPath("/three.js/examples/js/libs/draco/");
-  const gltf = new GLTFLoader();
-  gltf.setDRACOLoader(dracoLoader);
   const loader = new VOXLoader();
+  const url = convertToHttps(props.file.url);
   // 加载
   loader.load(
-    convertToHttps(props.file.url),
+    url,
     (chunks) => {
       const chunk = chunks[0];
+      console.error(chunks);
       const mesh = new VOXMesh(chunk);
+
       const box = new Box3().setFromObject(mesh);
       const center = new Vector3();
       box.getCenter(center);
@@ -131,7 +132,7 @@ const refresh = () => {
       );
       mesh.scale.set(scale, scale, scale);
 
-      scene.value?.add(mesh);
+      scene?.add(mesh);
       emit("loaded", {
         count: chunk.data.length / 4,
         size: toFixedVector3(size, 5),
@@ -145,61 +146,60 @@ const refresh = () => {
   );
 };
 
-watch(
-  () => props.file,
-  () => {
-    if (props.file) refresh();
-  }
-);
-
 onMounted(() => {
-  const content = document.getElementById("three");
-  if (!content) return;
+  const content = three.value;
+  if (content) {
+    const width = content.clientWidth;
+    const height = content.clientHeight;
 
-  const width = content.clientWidth;
-  const height = content.clientHeight;
-  scene.value = new Scene();
-  camera.value = new PerspectiveCamera(75, width / height, 0.1, 1000);
-  camera.value.position.set(0, 0, 2);
-  renderer.value = new WebGLRenderer({
-    preserveDrawingBuffer: true,
-    antialias: true,
-  });
-  renderer.value.setViewport(0, 0, width, height);
-  renderer.value.setSize(width, height);
-  renderer.value.setClearColor(0xeeffff, 1);
-  content.appendChild(renderer.value.domElement);
-  // 添加控制器
-  const controls = new OrbitControls(camera.value, renderer.value.domElement);
-  controls.update();
-  // 添加光源
-  const light = new DirectionalLight(0xffffff, 1);
-  light.position.set(-0.5, 0, 0.7);
+    // const scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    camera.position.set(0, 0, 2);
+    renderer = new THREE.WebGLRenderer({
+      preserveDrawingBuffer: true,
+      antialias: true,
+    });
+    renderer.setViewport(0, 0, width, height);
+    renderer.setSize(width, height);
+    renderer.setClearColor(0xeeffff, 1);
+    content.appendChild(renderer.domElement);
 
-  scene.value.add(light);
-  scene.value.add(new PointLight(0xffffff, 3));
-  const ambient = new AmbientLight(0xffffff, 1);
-  scene.value.add(ambient);
+    // 初始化轨道控制器
+    const controls = new OrbitControls(camera, renderer.domElement);
+    // controls.update();
 
-  const animate = () => {
-    requestAnimationFrame(animate);
-    controls.update();
-    renderer.value?.render(scene.value!, camera.value!);
-  };
+    // 添加光源
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(-0.5, 0, 0.7);
+    scene.add(light);
+    scene.add(new THREE.PointLight(0xffffff, 3));
+    scene.add(new THREE.AmbientLight(0xffffff, 1));
 
-  animate();
-  // 监听容器尺寸变化
-  const erd = new ElementResizeDetector();
-  erd.listenTo(content, () => {
-    if (!sleep.value && renderer.value && camera.value) {
-      const width = content.clientWidth;
-      const height = content.clientHeight;
-      renderer.value.setSize(width, height);
-      camera.value.aspect = width / height;
-      camera.value.updateProjectionMatrix();
-    }
-  });
+    // renderer.render(scene, camera);
 
-  refresh();
+    // 监听容器尺寸变化
+    const erd = new ElementResizeDetector();
+    erd.listenTo(content, () => {
+      if (!sleep && renderer && camera) {
+        const width = content.clientWidth;
+        const height = content.clientHeight;
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      }
+    });
+
+    const animate = () => {
+      if (!renderer || !camera) {
+        return;
+      }
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    };
+
+    animate();
+    refresh();
+  }
 });
 </script>

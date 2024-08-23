@@ -7,8 +7,14 @@
             <b id="title">模型名称：</b>
             <span v-if="polygenData">{{ polygenData.name }}</span>
           </template>
-          <div v-loading="expire" class="box-item">
-            <three v-if="polygenData" ref="three" :file="polygenData.file" @loaded="loaded" @progress="progress">
+          <div v-loading="false" class="box-item">
+            <three
+              v-if="polygenData"
+              ref="three"
+              :file="polygenData.file"
+              @loaded="loaded"
+              @progress="progress"
+            >
             </three>
           </div>
           <el-progress :percentage="percentage"></el-progress>
@@ -16,7 +22,12 @@
         <br />
 
         <el-card v-loading="expire" class="box-card">
-          <el-button style="width: 100%" type="primary" size="small" @click="createVerse">
+          <el-button
+            style="width: 100%"
+            type="primary"
+            size="small"
+            @click="createVerse"
+          >
             <font-awesome-icon icon="plus"></font-awesome-icon>
             &nbsp;用此模型创建【宇宙】
           </el-button>
@@ -61,10 +72,9 @@ import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
 import { printVector3 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
-
 const loading = ref(false);
 const polygenData = ref<any>(null);
-const expire = ref(false);
+const expire = ref(true);
 const percentage = ref(0);
 
 const route = useRoute();
@@ -94,8 +104,8 @@ const tableData = computed(() => {
   }
 });
 
-const progress = (percentage: number) => {
-  percentage = percentage;
+const progress = (progress: number) => {
+  percentage.value = progress;
 };
 
 const createVerse = async () => {
@@ -205,7 +215,6 @@ const saveFile = async (
   const response = await postFile(data);
   updatePolygen(response.data.id!, info);
 };
-
 const loaded = async (info: any) => {
   if (prepare.value) {
     expire.value = false;
@@ -232,7 +241,7 @@ const loaded = async (info: any) => {
         md5,
         file.extension,
         file,
-        () => { },
+        () => {},
         handler,
         "screenshot/polygen"
       );
