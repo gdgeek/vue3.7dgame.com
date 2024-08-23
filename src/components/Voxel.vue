@@ -6,18 +6,7 @@
 
 <script setup lang="ts">
 import ElementResizeDetector from "element-resize-detector";
-import {
-  Scene,
-  PerspectiveCamera,
-  WebGLRenderer,
-  Vector3,
-  Box3,
-  DirectionalLight,
-  AmbientLight,
-  PointLight,
-  MeshPhysicalMaterial,
-  Mesh,
-} from "three";
+
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import {
@@ -47,8 +36,8 @@ let camera: THREE.PerspectiveCamera | null = null;
 let renderer: THREE.WebGLRenderer | null = null;
 let sleep = false;
 
-const toFixedVector3 = (vec: Vector3, n: number) => {
-  const result = new Vector3();
+const toFixedVector3 = (vec: THREE.Vector3, n: number) => {
+  const result = new THREE.Vector3();
   result.x = parseFloat(vec.x.toFixed(n));
   result.y = parseFloat(vec.y.toFixed(n));
   result.z = parseFloat(vec.z.toFixed(n));
@@ -70,10 +59,10 @@ const parseNode = async (json: any) => {
  * 截图函数
  *
  * @returns 返回一个Promise对象，resolve参数为Blob对象，reject参数为错误信息
-
+ */
 const screenshot = () => {
-
-
+  alert("screenshot");
+  /*
   return new Promise<Blob>((resolve, reject) => {
     if (!renderer.value || !camera.value || !scene.value)
       return reject("Renderer or Camera or Scene is not initialized");
@@ -100,9 +89,9 @@ const screenshot = () => {
       sleep.value = false;
       resolve(blob);
     }, "image/jpeg");
-  });
+  });*/
 };
-*/
+
 // 刷新场景并加载
 const refresh = () => {
   if (!props.file || !props.file.url) {
@@ -119,10 +108,10 @@ const refresh = () => {
       console.error(chunks);
       const mesh = new VOXMesh(chunk);
 
-      const box = new Box3().setFromObject(mesh);
-      const center = new Vector3();
+      const box = new THREE.Box3().setFromObject(mesh);
+      const center = new THREE.Vector3();
       box.getCenter(center);
-      const size = new Vector3();
+      const size = new THREE.Vector3();
       box.getSize(size);
       const scale = props.target / size.x;
       mesh.position.set(
@@ -136,7 +125,10 @@ const refresh = () => {
       emit("loaded", {
         count: chunk.data.length / 4,
         size: toFixedVector3(size, 5),
-        center: toFixedVector3(new Vector3(center.x, center.y, center.z), 5),
+        center: toFixedVector3(
+          new THREE.Vector3(center.x, center.y, center.z),
+          5
+        ),
       });
     },
     (xhr) => {

@@ -8,6 +8,7 @@
     <el-container>
       <el-main>
         <iframe
+          ref="editor"
           id="editor"
           :src="src"
           class="content"
@@ -28,12 +29,14 @@ import path from "path-browserify";
 
 const route = useRoute();
 const router = useRouter();
-alert(import.meta.env.VITE_APP_EDITOR_URL);
-const src = "https://editor.4mr.cn/three.js/editor/meta-editor.html"; //path.join("", "");
+const editUrl = import.meta.env.VITE_APP_EDITOR_URL;
+
+const src = editUrl + "/three.js/editor/meta-editor.html"; //path.join("", "");
 
 // console.log("src", src);
 const isInit = ref(false);
 const dialog = ref();
+const editor = ref<HTMLIFrameElement | null>();
 
 const id = computed(() => parseInt(route.query.id as string));
 const title = computed(() => route.query.title?.slice(4) as string);
@@ -41,12 +44,16 @@ const title = computed(() => route.query.title?.slice(4) as string);
 const cancel = () => {
   // Cancel logic
 };
-
+type Message = {
+  action: string;
+  json: string;
+};
 const selectResources = (data: any) => {
+  console.error("data");
   console.error(data);
   postMessage({
     action: "load_resource",
-    data,
+    json: JSON.stringify(data),
   });
 };
 
@@ -56,15 +63,21 @@ const saveable = (data: any) => {
   }
   return data.editable;
 };
-
 const loadResource = (data: any) => {
   dialog.value.open(null, id.value, data.type);
 };
 
-const postMessage = (data: any) => {
-  data.verify = "mrpp.com";
-  const iframe = document.getElementById("editor") as HTMLIFrameElement;
-  iframe.contentWindow?.postMessage(data, "*");
+const postMessage = (message: Message) => {
+  console.error("postMessage", message);
+
+  if (editor.value && editor.value.contentWindow) {
+    editor.value.contentWindow.postMessage(message, "*");
+  } else {
+    ElMessage({
+      message: "没有编辑器",
+      type: "error",
+    });
+  }
 };
 
 const handleMessage = async (e: MessageEvent) => {
@@ -106,9 +119,10 @@ const handleMessage = async (e: MessageEvent) => {
           // breadcrumb(meta.data);
           postMessage({
             action: "load",
-            data: meta.data,
-            saveable: saveable(meta.data),
-            // saveable: true,
+            json: JSON.stringify({
+              data: meta.data,
+              saveable: saveable(meta.data),
+            }),
           });
         }
         break;

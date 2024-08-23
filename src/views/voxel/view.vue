@@ -70,7 +70,7 @@ import { printVector3 } from "@/assets/js/helper";
 import Voxel from "@/components/Voxel.vue";
 
 const loading = ref(false);
-const voxelData = ref<any>(null);
+let voxelData = ref<any>(null);
 const percentage = ref(0);
 const expire = ref(false);
 
@@ -85,8 +85,9 @@ const prepare = computed(
 );
 
 const tableData = computed(() => {
-  if (voxelData.value && prepare.value) {
+  if (voxelData.value != null && prepare.value) {
     const info = JSON.parse(voxelData.value.info);
+
     return [
       { item: "模型名称", text: voxelData.value.name },
       { item: "创建者", text: voxelData.value.author.nickname },
@@ -100,7 +101,7 @@ const tableData = computed(() => {
     return [];
   }
 });
-
+const three = ref<InstanceType<typeof Voxel> | null>(null);
 const dataInfo = computed(() =>
   prepare.value ? JSON.parse(voxelData.value.info) : null
 );
@@ -282,6 +283,7 @@ const loaded = async (info: any) => {
 };
 
 const screenshot = () => {
+  alert(111);
   return (ref("three").value as any).screenshot();
 };
 

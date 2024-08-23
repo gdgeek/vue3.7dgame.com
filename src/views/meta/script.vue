@@ -36,6 +36,7 @@
               <iframe
                 style="margin: 0; padding: 0; height: 100%; width: 100%"
                 id="editor"
+                ref="editor"
                 :src="blocklyUrl"
               ></iframe>
             </el-main>
@@ -53,6 +54,7 @@ import { cybersType, postCyber, putCyber } from "@/api/v1/cyber";
 
 import { ElMessage } from "element-plus";
 let ready: boolean = false;
+const editor = ref<HTMLIFrameElement | null>(null);
 const postScript = async (message: any) => {
   if (meta.value === null) {
     ElMessage({
@@ -91,26 +93,26 @@ const postScript = async (message: any) => {
   });
 };
 const handleMessage = async (e: MessageEvent) => {
-  console.error(e.data);
-  const data: any = JSON.parse(e.data);
-
-  if (data.type === "ready") {
-    ready = true;
-    initEditor();
-  } else if (data.type === "post") {
-    await postScript(data.message);
-  } else if (data.type === "post:no-change") {
-    ElMessage({
-      message: "没有修改",
-      type: "info",
-    });
-    //alert("no");
+  try {
+    const data: any = JSON.parse(e.data);
+    if (data.type === "ready") {
+      ready = true;
+      initEditor();
+    } else if (data.type === "post") {
+      await postScript(data.message);
+    } else if (data.type === "post:no-change") {
+      ElMessage({
+        message: "没有修改",
+        type: "info",
+      });
+    }
+  } catch (e: any) {
+    console.log("ex:" + e);
+    return;
   }
 };
 const loading = ref(false);
 const meta = ref<metaInfo | null>(null);
-//const cyber = ref<cybersType>();
-
 const route = useRoute();
 
 const id = computed(() => parseInt(route.query.id as string));
@@ -123,8 +125,14 @@ const save = () => {
   });
 };
 const postMessage = (message: any) => {
-  const iframe = document.getElementById("editor") as HTMLIFrameElement;
-  iframe.contentWindow?.postMessage(message, "*");
+  if (editor.value && editor.value.contentWindow) {
+    editor.value.contentWindow.postMessage(message, "*");
+  } else {
+    ElMessage({
+      message: "没有编辑器",
+      type: "error",
+    });
+  }
 };
 const initEditor = () => {
   if (meta.value === null) return;
@@ -248,17 +256,9 @@ const getResource = (meta: metaInfo) => {
 
 onMounted(async () => {
   window.addEventListener("message", handleMessage);
-
   try {
-    // setBreadcrumbs([
-    //   { path: "/", meta: { title: "元宇宙实景编程平台" } },
-    //   { path: "/meta-verse/index", meta: { title: "宇宙" } },
-    //   { path: "", meta: { title: "赛博编辑" } },
-    // ]);
-
     loading.value = true;
     const response = await getMeta(id.value, "cyber,event,share");
-
     meta.value = response.data;
     initEditor();
   } catch (error: any) {

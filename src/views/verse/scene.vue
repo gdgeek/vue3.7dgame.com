@@ -46,9 +46,10 @@ const saveable = ref();
 const title = computed(() => route.query.title?.slice(2) as string);
 
 const id = computed(() => parseInt(route.query.id as string));
+
 const editorUrl = computed(() =>
   path.join(
-    "https://editor.4mr.cn/three.js/editor",
+    import.meta.env.VITE_APP_EDITOR_URL + "/three.js/editor",
     "verse-editor.html" + qs.stringify({ id: id.value }, true)
   )
 );
