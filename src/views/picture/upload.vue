@@ -31,7 +31,7 @@ const savePicture = async (
     const response = await postPicture({ name, file_id });
     // 跳转到图片查看页面，并传递图片 ID
     router.push({
-      path: "/ResourceAdmin/picture/view",
+      path: "/resource/picture/view",
       query: { id: response.data.id },
     });
   } catch (err) {

@@ -27,7 +27,7 @@ const saveVideo = async (
     const response = await postVideo({ name, file_id });
     // 跳转到视频查看页面，并传递视频 ID
     router.push({
-      path: "/ResourceAdmin/video/view",
+      path: "/resource/video/view",
       query: { id: response.data.id },
     });
   } catch (err) {

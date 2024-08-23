@@ -10,7 +10,7 @@
           @sort="sort"
         >
           <el-button-group :inline="true">
-            <router-link to="/ResourceAdmin/polygen/upload">
+            <router-link to="/resource/polygen/upload">
               <el-button size="small" type="primary" icon="uploadFilled">
                 <span class="hidden-sm-and-down">上传模型</span>
               </el-button>
@@ -28,9 +28,7 @@
                 @deleted="deletedWindow"
               >
                 <template #enter>
-                  <router-link
-                    :to="`/ResourceAdmin/polygen/view?id=${item.id}`"
-                  >
+                  <router-link :to="`/resource/polygen/view?id=${item.id}`">
                     <el-button-group :inline="true">
                       <el-button
                         v-if="item.info === null || item.image === null"

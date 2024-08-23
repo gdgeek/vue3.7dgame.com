@@ -154,7 +154,7 @@ const deleteWindow = async () => {
     await deletePolygen(polygenData.value.id);
 
     ElMessage.success("删除成功!");
-    router.push("/ResourceAdmin/polygen/index");
+    router.push("/resource/polygen/index");
   } catch {
     ElMessage.info("已取消删除");
   }

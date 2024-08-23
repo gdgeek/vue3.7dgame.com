@@ -50,6 +50,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         // 用于 keep-alive 功能，需要与 SFC 中自动推导或显式声明的组件名称一致
         // 参考文档: https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
         name: "Home",
+        redirect: "/home/index",
         meta: {
           title: "个人中心",
           icon: "homepage",
@@ -119,10 +120,10 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
 
       {
-        path: "ResourceAdmin",
+        path: "resource",
         component: null,
-        redirect: "/ResourceAdmin/voxel",
-        name: "/ResourceAdmin",
+        redirect: "/resource/voxel",
+        name: "/resource",
         meta: {
           title: "资源管理",
           icon: "system",
@@ -135,6 +136,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             path: "voxel",
             name: "",
             component: Empty,
+            redirect: "index",
             meta: {
               title: "体素管理",
               icon: "",

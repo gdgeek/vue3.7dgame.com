@@ -20,7 +20,7 @@ const saveVoxel = (name: string, file_id: number, callback: () => void) => {
     .then((response) => {
       console.log(response.data);
       router.push({
-        path: "/ResourceAdmin/voxel/view",
+        path: "/resource/voxel/view",
         query: { id: response.data.id },
       });
     })

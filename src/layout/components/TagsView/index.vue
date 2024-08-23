@@ -232,6 +232,7 @@ function refreshSelectedTag(view: TagView) {
 
 function toLastView(visitedViews: TagView[], view?: TagView) {
   const latestView = visitedViews.slice(-1)[0];
+
   if (latestView && latestView.fullPath) {
     router.push(latestView.fullPath);
   } else {

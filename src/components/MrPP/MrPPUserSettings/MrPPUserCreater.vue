@@ -22,7 +22,7 @@
             <template #label>
               <router-link
                 class="info-content-label-link"
-                to="/ResourceAdmin/polygen/index"
+                to="/resource/polygen/index"
               >
                 <font-awesome-icon class="icon" icon="cube"></font-awesome-icon>
                 模型
@@ -35,7 +35,7 @@
             <template #label>
               <router-link
                 class="info-content-label-link"
-                to="/ResourceAdmin/picture/index"
+                to="/resource/picture/index"
               >
                 <font-awesome-icon
                   class="icon"
@@ -51,7 +51,7 @@
             <template #label>
               <router-link
                 class="info-content-label-link"
-                to="/ResourceAdmin/video/index"
+                to="/resource/video/index"
               >
                 <font-awesome-icon
                   class="icon"

@@ -10,7 +10,7 @@
           @sort="sort"
         >
           <el-button-group :inline="true">
-            <router-link to="/ResourceAdmin/voxel/upload">
+            <router-link to="/resource/voxel/upload">
               <el-button size="small" type="primary" icon="UploadFilled">
                 <span class="hidden-sm-and-down">上传模型</span>
               </el-button>
@@ -28,7 +28,7 @@
                 @deleted="deletedWindow"
               >
                 <template #enter>
-                  <router-link :to="`/ResourceAdmin/voxel/view?id=${item.id}`">
+                  <router-link :to="`/resource/voxel/view?id=${item.id}`">
                     <el-button-group :inline="true">
                       <el-button
                         v-if="item.info === null || item.image === null"

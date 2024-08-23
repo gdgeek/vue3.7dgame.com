@@ -10,7 +10,7 @@
           @sort="sort"
         >
           <el-button-group :inline="true">
-            <router-link to="/ResourceAdmin/picture/upload">
+            <router-link to="/resource/picture/upload">
               <el-button size="small" type="primary" icon="uploadFilled">
                 <span class="hidden-sm-and-down">上传图片</span>
               </el-button>
@@ -28,9 +28,7 @@
                 @deleted="deletedWindow"
               >
                 <template #enter>
-                  <router-link
-                    :to="`/ResourceAdmin/picture/view?id=${item.id}`"
-                  >
+                  <router-link :to="`/resource/picture/view?id=${item.id}`">
                     <el-button
                       v-if="item.info === null || item.image === null"
                       type="warning"

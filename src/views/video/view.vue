@@ -209,7 +209,7 @@ const setup = async (
     // blob.name = data.value.name + ".thumbnail";
     // blob.extension = ".jpg";
     const file = await thumbnail(video, size.x * 0.5, size.y * 0.5);
-    alert(JSON.stringify(file));
+    // alert(JSON.stringify(file));
     const md5 = await store.fileMD5(file);
 
     const handler = await store.publicHandler();
@@ -243,7 +243,7 @@ const deleteWindow = async () => {
     });
     await deleteVideo(videoData.value!.id);
     ElMessage.success("删除成功!");
-    router.push({ path: "/ResourceAdmin/video/index" });
+    router.push({ path: "/resource/video/index" });
   } catch {
     ElMessage.info("已取消删除");
   }

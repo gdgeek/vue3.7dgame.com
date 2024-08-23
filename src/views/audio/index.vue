@@ -10,7 +10,7 @@
           @sort="sort"
         >
           <el-button-group :inline="true">
-            <router-link to="/ResourceAdmin/audio/upload">
+            <router-link to="/resource/audio/upload">
               <el-button size="small" type="primary" icon="uploadFilled">
                 <span class="hidden-sm-and-down">上传音频</span>
               </el-button>
@@ -28,7 +28,7 @@
                 @deleted="deletedWindow"
               >
                 <template #enter>
-                  <router-link :to="`/ResourceAdmin/audio/view?id=${item.id}`">
+                  <router-link :to="`/resource/audio/view?id=${item.id}`">
                     <el-button
                       v-if="item.info === null || item.image === null"
                       type="warning"

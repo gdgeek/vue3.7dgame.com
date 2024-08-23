@@ -12,11 +12,28 @@
             <section class="audio-bgc">
               <br />
               <div class="audio-box">
-                <div class="audio-record" :class="{ 'audio-record-playfast': isPlay }" @click="handlePlayAudio"></div>
-                <div class="audio-record-image" :class="{ 'audio-record-play': isPlay }" @click="handlePlayAudio"></div>
+                <div
+                  class="audio-record"
+                  :class="{ 'audio-record-playfast': isPlay }"
+                  @click="handlePlayAudio"
+                ></div>
+                <div
+                  class="audio-record-image"
+                  :class="{ 'audio-record-play': isPlay }"
+                  @click="handlePlayAudio"
+                ></div>
               </div>
-              <audio id="audio" controls style="width: 95%; height: 84px" :src="file" preload="auto" @play="listenPlay"
-                @pause="listenPause" @ended="listenEnd" @canplaythrough="dealWith"></audio>
+              <audio
+                id="audio"
+                controls
+                style="width: 95%; height: 84px"
+                :src="file"
+                preload="auto"
+                @play="listenPlay"
+                @pause="listenPause"
+                @ended="listenEnd"
+                @canplaythrough="dealWith"
+              ></audio>
             </section>
           </div>
         </el-card>
@@ -202,7 +219,7 @@ const setup = async (
         md5,
         file.type.split("/").pop()!,
         file,
-        () => { },
+        () => {},
         handler,
         "screenshot/audio"
       );
@@ -220,7 +237,7 @@ const deleteWindow = async () => {
     });
     await deleteAudio(audioData.value!.id);
     ElMessage.success("删除成功!");
-    router.push({ path: "/ResourceAdmin/audio/index" });
+    router.push({ path: "/resource/audio/index" });
   } catch {
     ElMessage.info("已取消删除");
   }
@@ -266,9 +283,11 @@ const named = async (id: number, name: string) => {
   width: 100%;
   height: 350px;
   background: rgb(238, 174, 202);
-  background: radial-gradient(circle,
-      rgba(238, 174, 202, 1) 0%,
-      rgb(169, 196, 228) 100%);
+  background: radial-gradient(
+    circle,
+    rgba(238, 174, 202, 1) 0%,
+    rgb(169, 196, 228) 100%
+  );
 }
 
 .audio-box {

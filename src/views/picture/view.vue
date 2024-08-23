@@ -206,8 +206,8 @@ const dealWith = async () => {
     // const image = document.getElementById("image") as HTMLImageElement;
     if (image.value) {
       const img: HTMLImageElement = image.value;
-      alert(img.complete);
-      alert(image.value.complete);
+      // alert(img.complete);
+      //alert(image.value.complete);
 
       image.value.crossOrigin = "anonymous";
 
@@ -233,7 +233,7 @@ const deleteWindow = async () => {
 
     await deletePicture(pictureData.value!.id);
     ElMessage.success("删除成功!");
-    router.push("/ResourceAdmin/picture/index");
+    router.push("/resource/picture/index");
   } catch {
     ElMessage.info("已取消删除");
   }
