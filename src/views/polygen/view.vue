@@ -8,14 +8,14 @@
             <span v-if="polygenData">{{ polygenData.name }}</span>
           </template>
           <div v-loading="false" class="box-item">
-            <three
+            <polygn
               v-if="polygenData"
               ref="three"
               :file="polygenData.file"
               @loaded="loaded"
               @progress="progress"
             >
-            </three>
+            </polygn>
           </div>
           <el-progress :percentage="percentage"></el-progress>
         </el-card>
@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import Three from "@/components/Three.vue";
+import Polygn from "@/components/Polygen.vue";
 import { getPolygen, putPolygen, deletePolygen } from "@/api/resources/index";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
@@ -81,6 +81,7 @@ const route = useRoute();
 const router = useRouter();
 const store = useFileStore().store;
 
+const three = ref<InstanceType<typeof Polygn> | null>(null);
 const id = computed(() => route.query.id as string);
 const prepare = computed(
   () => polygenData.value !== null && polygenData.value.info !== null
@@ -222,32 +223,35 @@ const loaded = async (info: any) => {
   }
 
   try {
-    const blob = await screenshot();
-    blob.name = polygenData.value.name;
-    blob.extension = ".jpg";
-    const file = blob;
-    const md5 = await store.fileMD5(file);
-    const handler = await store.publicHandler();
+    const blob: Blob | undefined = await three.value?.screenshot();
 
-    const has = await store.fileHas(
-      md5,
-      file.extension,
-      handler,
-      "screenshot/polygen"
-    );
-
-    if (!has) {
-      await store.fileUpload(
+    if (blob) {
+      const file: File = new File([blob], polygenData.value.name, {
+        type: "image/jpeg",
+        lastModified: new Date().getTime(), // 设定最后修改时间
+      });
+      const extension = ".jpg";
+      const md5 = await store.fileMD5(file);
+      const handler = await store.publicHandler();
+      const has = await store.fileHas(
         md5,
-        file.extension,
-        file,
-        () => {},
+        extension,
         handler,
         "screenshot/polygen"
       );
-    }
 
-    await saveFile(md5, file.extension, info, file, handler);
+      if (!has) {
+        await store.fileUpload(
+          md5,
+          extension,
+          file,
+          () => {},
+          handler,
+          "screenshot/polygen"
+        );
+      }
+      await saveFile(md5, extension, info, file, handler);
+    }
   } catch (error) {
     console.error(error);
   }

@@ -11,6 +11,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import ElementResizeDetector from "element-resize-detector";
 import { convertToHttps } from "@/assets/js/helper";
+import { onMounted, ref, defineProps, defineEmits, defineExpose } from "vue";
 /**
  *
  * @param vec
@@ -78,93 +79,51 @@ const refresh = () => {
       emit("progress", (xhr.loaded / xhr.total) * 100);
     }
   );
-
-  /*
-  if (scene.value && props.file && props.file.url) {
-    const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath("/three.js/examples/js/libs/draco/");
-    const gltfLoader = new GLTFLoader();
-    gltfLoader.setDRACOLoader(dracoLoader);
-    let url = convertToHttps(props.file.url);
-    // 加载模型
-    gltfLoader.load(
-      url,
-      (model) => {
-        const box = new Box3().setFromObject(model.scene);
-        const center = new Vector3();
-        box.getCenter(center);
-        const size = new Vector3();
-        box.getSize(size);
-        const scale = (props.target ?? 1.5) / size.x;
-        model.scene.position.set(
-          -center.x * scale,
-          -center.y * scale,
-          -center.z * scale
-        );
-        model.scene.scale.set(scale, scale, scale);
-
-        scene.value?.add(model.scene);
-        // 触发加载完成事件
-        emit("loaded", {
-          size: toFixedVector3(size, 5),
-          center: toFixedVector3(new Vector3(center.x, center.y, center.z), 5),
-        });
-      },
-      (xhr) => {
-        console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
-      }
-    );
-  }*/
 };
 
 // 截图功能
-/*
-const screenshot = () => {
-  return new Promise<Blob>((resolve) => {
-    if (!renderer.value || !camera.value) {
-      resolve(new Blob());
-      return;
-    }
-    sleep.value = true;
-    renderer.value.setSize(512, 512);
-    camera.value.aspect = 1 / 1;
-    camera.value.updateProjectionMatrix();
-    renderer.value.render(scene.value, camera.value);
-    renderer.value.domElement.toBlob((blob) => {
-      if (blob) {
-        const content = document.getElementById("three");
-        if (content) {
-          const width = content.clientWidth;
-          const height = content.clientHeight;
-          renderer.value?.setSize(width, height);
-          renderer.value?.render(scene.value!, camera.value!);
-          camera.value!.aspect = width / height;
-          camera.value!.updateProjectionMatrix();
-          sleep.value = false;
-          resolve(blob);
-        }
+const screenshot = (): Promise<Blob> => {
+  return new Promise<Blob>((resolve, reject) => {
+    if (!renderer || !camera || !scene)
+      return reject("Renderer or Camera or Scene is not initialized");
+
+    sleep = true;
+    renderer.setSize(512, 512);
+    camera.aspect = 1 / 1;
+    camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+    const element = renderer.domElement;
+
+    element.toBlob((blob) => {
+      if (!blob) return reject("Failed to create blob");
+
+      const content = three.value;
+      if (!content) return reject("Element #three not found");
+
+      const width = content.clientWidth;
+      const height = content.clientHeight;
+
+      if (renderer && camera) {
+        renderer.setSize(width, height);
+        renderer.render(scene, camera);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+
+        sleep = false;
+        resolve(blob);
       } else {
-        resolve(new Blob());
+        sleep = false;
+        reject("Renderer or Camera is not initialized");
       }
     }, "image/jpeg");
   });
 };
-*/
+defineExpose({ screenshot });
 // 解析模型节点
 const parseNode = async (json: any): Promise<THREE.Object3D> => {
   const loader = new THREE.ObjectLoader();
   return loader.parseAsync(json);
 };
-
-// 监听文件变化
-watch(
-  () => props.file,
-  () => {
-    if (props.file) {
-      refresh();
-    }
-  }
-);
 
 onMounted(() => {
   const content = three.value;

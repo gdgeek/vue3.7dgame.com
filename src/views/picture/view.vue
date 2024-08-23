@@ -8,8 +8,9 @@
             <span v-if="pictureData">{{ pictureData.name }}</span>
           </template>
           <div class="box-item" style="text-align: center">
-            <el-image
+            <img
               id="image"
+              ref="image"
               v-loading="expire"
               element-loading-text="正在预处理"
               element-loading-background="rgba(255,255, 255, 0.3)"
@@ -17,7 +18,7 @@
               :src="picture"
               fit="contain"
               @load="dealWith"
-            ></el-image>
+            />
           </div>
         </el-card>
         <br />
@@ -60,6 +61,7 @@ import { postFile } from "@/api/v1/files";
 import { useFileStore } from "@/store/modules/config";
 import type { ResourceInfo } from "@/api/resources/model";
 import { FileHandler } from "@/assets/js/file/server";
+const image = ref<HTMLImageElement | null>(null);
 
 const route = useRoute();
 const router = useRouter();
@@ -94,6 +96,7 @@ const tableData = computed(() => {
 const picture = computed(() => convertToHttps(file.value!));
 
 onMounted(async () => {
+  console.error(image.value);
   try {
     expire.value = true;
     const response = await getPicture(id.value);
@@ -200,12 +203,19 @@ const setup = async (
 
 const dealWith = async () => {
   if (!prepare.value) {
-    const image = document.getElementById("image") as HTMLImageElement;
-    image.crossOrigin = "anonymous";
-    if (image.complete) {
-      const size = await getImageSize(image);
-      console.log(size);
-      await setup(size, image);
+    // const image = document.getElementById("image") as HTMLImageElement;
+    if (image.value) {
+      const img: HTMLImageElement = image.value;
+      alert(img.complete);
+      alert(image.value.complete);
+
+      image.value.crossOrigin = "anonymous";
+
+      if (image.value.complete) {
+        const size = await getImageSize(image.value);
+        console.log(size);
+        await setup(size, image.value);
+      }
     }
   } else {
     expire.value = false;

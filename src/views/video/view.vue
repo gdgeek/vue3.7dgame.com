@@ -174,7 +174,7 @@ const thumbnail = (
   width: number,
   height: number
 ): Promise<File> => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const imageType = "image/jpeg";
     const canvas = document.createElement("canvas");
     canvas.width = width;
@@ -184,7 +184,14 @@ const thumbnail = (
       ctx.drawImage(video, 0, 0, width, height);
       canvas.toBlob((blob) => {
         if (blob) {
-          const file = new File([blob], "thumbnail.jpg", { type: imageType });
+          const file = new File([blob], "thumbnail.jpg", {
+            type: imageType,
+            lastModified: new Date().getTime(),
+          });
+          resolve(file);
+        } else {
+          console.error("Failed to create blob");
+          reject("Failed to create blob");
         }
       }, imageType);
     }
@@ -197,11 +204,14 @@ const setup = async (
 ) => {
   if (size.x !== 0) {
     const info = JSON.stringify({ size });
+
     // const blob = await thumbnail(video, size.x * 0.5, size.y * 0.5);
     // blob.name = data.value.name + ".thumbnail";
     // blob.extension = ".jpg";
     const file = await thumbnail(video, size.x * 0.5, size.y * 0.5);
+    alert(JSON.stringify(file));
     const md5 = await store.fileMD5(file);
+
     const handler = await store.publicHandler();
     const has = await store.fileHas(
       md5,

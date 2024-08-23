@@ -36,7 +36,9 @@
                     >
                       初始化视频数据
                     </el-button>
-                    <el-button type="primary" size="small">查看视频</el-button>
+                    <el-button v-else type="primary" size="small"
+                      >查看视频</el-button
+                    >
                   </router-link>
                 </template>
               </mr-p-p-card>

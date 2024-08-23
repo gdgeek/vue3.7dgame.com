@@ -257,9 +257,7 @@ const loaded = async (info: any) => {
 
   const blob: Blob | undefined = await three.value?.screenshot();
 
-  alert(blob);
   if (blob) {
-    alert(voxelData.value.name);
     const file: File = new File([blob], voxelData.value.name, {
       type: "image/jpeg",
       lastModified: new Date().getTime(), // 设定最后修改时间
