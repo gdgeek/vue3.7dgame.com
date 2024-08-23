@@ -57,10 +57,15 @@ const editorUrl = computed(() =>
 const cancel = () => {};
 
 const postMessage = (data: any) => {
-  data.verify = "mrpp.com";
-  console.log("data3", data);
-  const iframe = document.getElementById("editor") as HTMLIFrameElement;
-  iframe.contentWindow?.postMessage(data, "*");
+  try {
+    data.verify = "mrpp.com";
+    console.log("data3", data);
+    const safeData = JSON.parse(JSON.stringify(data));
+    const iframe = document.getElementById("editor") as HTMLIFrameElement;
+    iframe.contentWindow?.postMessage(safeData, "*");
+  } catch (error) {
+    console.error("Error in postMessage:", error);
+  }
 };
 
 const setupPrefab = async ({ meta_id, data, uuid }: any) => {
@@ -94,12 +99,16 @@ const addMeta = () => {
 };
 
 const selected = async ({ data, setup, title }: any) => {
-  console.log("data2", data, setup, title);
-  const res = await postMessage({
-    action: "add-module",
-    data: { data, setup, title },
-  });
-  console.log("加载meta", res);
+  try {
+    console.log("data2", data, setup, title);
+    const res = await postMessage({
+      action: "add-module",
+      data: { data, setup, title },
+    });
+    console.log("加载meta", res);
+  } catch (error) {
+    console.error("Error in selectedHandler:", error);
+  }
 };
 
 const saveVerse = async (verse: any) => {

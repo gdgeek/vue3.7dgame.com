@@ -51,7 +51,6 @@ import {
   postVerseScript,
   putVerseScript,
 } from "@/api/v1/verse-script";
-import { v4 as uuidv4 } from "uuid";
 import { getVerse, postVerse, Script, VerseData } from "@/api/v1/verse";
 
 const loading = ref(false);

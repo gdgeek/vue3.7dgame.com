@@ -124,16 +124,20 @@ const title = (item: any) => {
 };
 
 const open = async (newValue?: any, newVerseId?: number) => {
-  active.value = {
-    items: [],
-    sorted: "-created_at",
-    searched: "",
-    pagination: { current: 1, count: 1, size: 20, total: 20 },
-  };
-  verse_id.value = newVerseId!;
-  value.value = newValue;
-  await refresh();
-  dialogVisible.value = true;
+  try {
+    active.value = {
+      items: [],
+      sorted: "-created_at",
+      searched: "",
+      pagination: { current: 1, count: 1, size: 20, total: 20 },
+    };
+    verse_id.value = newVerseId!;
+    value.value = newValue;
+    await refresh();
+    dialogVisible.value = true;
+  } catch (error) {
+    console.error("Error in open method:", error);
+  }
 };
 
 const refresh = async () => {
@@ -230,14 +234,20 @@ const transformToViewCard = (items: metaInfo[]): ViewCard[] => {
     return {
       src: item.image?.url,
       id: item.id ? item.id.toString() : undefined,
+      author_id: item.author_id,
       name: item.title,
       info: item.info,
+      data: item.data,
+      events: item.events,
+      title: item.title,
       uuid: item.uuid,
+      prefab: item.prefab,
       image_id: item.image_id,
       image: item.image,
       resources: item.resources,
       editable: item.editable,
       viewable: item.viewable,
+      verseMetas: item.verseMetas,
     };
   });
 };
