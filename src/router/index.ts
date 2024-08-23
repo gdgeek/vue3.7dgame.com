@@ -594,7 +594,8 @@ const pathsToRemove = [
 ];
 
 console.log("roles", userStore.userInfo.roles);
-const isRoot = computed(() => {
+const isRoot = computed(async () => {
+  await userStore.getUserInfo();
   return userStore.userInfo.roles.includes("manager");
 });
 

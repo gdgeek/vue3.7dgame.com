@@ -230,14 +230,20 @@ const transformToViewCard = (items: metaInfo[]): ViewCard[] => {
     return {
       src: item.image?.url,
       id: item.id ? item.id.toString() : undefined,
+      author_id: item.author_id,
       name: item.title,
       info: item.info,
+      data: item.data,
+      events: item.events,
+      title: item.title,
       uuid: item.uuid,
+      prefab: item.prefab,
       image_id: item.image_id,
       image: item.image,
       resources: item.resources,
       editable: item.editable,
       viewable: item.viewable,
+      verseMetas: item.verseMetas,
     };
   });
 };

@@ -33,7 +33,7 @@
               <iframe
                 style="margin: 0; padding: 0; height: 100%; width: 100%"
                 id="editor"
-                src="http://localhost:3000/"
+                :src="blocklyUrl"
               ></iframe>
             </el-main>
           </el-container>
@@ -51,7 +51,6 @@ import {
   postVerseScript,
   putVerseScript,
 } from "@/api/v1/verse-script";
-import { v4 as uuidv4 } from "uuid";
 import { getVerse, postVerse, Script, VerseData } from "@/api/v1/verse";
 
 const loading = ref(false);
@@ -63,6 +62,8 @@ const id = computed(() => parseInt(route.query.id as string));
 const ready = ref<boolean>(false);
 const saveable = computed(() => script.value !== null && verse.value!.editable);
 let map = new Map<string, any>();
+
+const blocklyUrl = import.meta.env.VITE_APP_BLOCKLY_URL;
 
 const postScript = async (message: any) => {
   if (verse.value === null) {

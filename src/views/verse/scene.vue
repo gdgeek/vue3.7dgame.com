@@ -46,6 +46,7 @@ const saveable = ref();
 const title = computed(() => route.query.title?.slice(2) as string);
 
 const id = computed(() => parseInt(route.query.id as string));
+
 const editorUrl = computed(() =>
   path.join(
     "https://editor.4mr.cn/three.js/editor",

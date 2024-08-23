@@ -40,6 +40,7 @@ export type metaInfo = {
   custome?: boolean;
   cyber?: cybersType;
   author?: Author;
+  verseMetas: any[];
 };
 
 export const postMeta = (data: Record<string, any>) => {
