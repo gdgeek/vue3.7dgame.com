@@ -4,31 +4,11 @@
   <el-card style="width: 100%">
     <waterfall
       v-if="viewCards.length > 0"
-      :lazyload="true"
       :width="320"
-      :hasAroundGutter="true"
+      :gutter="10"
+      :hasAroundGutter="false"
       :breakpoints="{
-        2560: {
-          rowPerView: 7,
-        },
-        2240: {
-          rowPerView: 6,
-        },
-        1920: {
-          rowPerView: 5,
-        },
-        1600: {
-          rowPerView: 4,
-        },
-        1260: {
-          rowPerView: 3,
-        },
-        940: {
-          rowPerView: 2,
-        },
-        620: {
-          rowPerView: 1,
-        },
+        640: { rowPerView: 1 },
       }"
       :list="viewCards"
       :column-count="3"
