@@ -185,7 +185,8 @@ export const constantRoutes: RouteRecordRaw[] = [
           },
           {
             path: "polygen",
-            name: "",
+            name: "Polygen",
+            redirect: "/resource/polygen/index",
             component: Empty,
             meta: {
               title: "模型管理",
@@ -197,7 +198,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             children: [
               {
                 path: "index",
-                name: "",
+                name: "PolygenIndex",
                 component: () => import("@/views/polygen/index.vue"),
                 meta: {
                   title: "模型列表",
@@ -237,6 +238,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             path: "picture",
             name: "",
             component: Empty,
+            redirect: "/resource/picture/index",
             meta: {
               title: "图片管理",
               icon: "el-icon-picture",
@@ -285,7 +287,8 @@ export const constantRoutes: RouteRecordRaw[] = [
           },
           {
             path: "video",
-            name: "",
+            name: "Video",
+            redirect: "/resource/video/index",
             component: Empty,
             meta: {
               title: "视频管理",
@@ -297,7 +300,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             children: [
               {
                 path: "index",
-                name: "",
+                name: "VideoIndex",
                 component: () => import("@/views/video/index.vue"),
                 meta: {
                   title: "视频列表",
@@ -335,8 +338,10 @@ export const constantRoutes: RouteRecordRaw[] = [
           },
           {
             path: "audio",
-            name: "",
+            name: "Audio",
             component: Empty,
+
+            redirect: "/resource/audio/index",
             meta: {
               title: "音频管理",
               icon: "el-icon-headset",

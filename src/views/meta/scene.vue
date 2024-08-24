@@ -30,7 +30,6 @@ import path from "path-browserify";
 const route = useRoute();
 const router = useRouter();
 const editUrl = import.meta.env.VITE_APP_EDITOR_URL;
-
 const src = editUrl + "/three.js/editor/meta-editor.html"; //path.join("", "");
 
 // console.log("src", src);
