@@ -49,7 +49,8 @@ const props = defineProps<{
 const emit = defineEmits(["refresh"]);
 
 const getUrl = (item: any) => {
-  return item?.avatar?.url || require("@/assets/image/author-boy.png");
+  //alert(require("@/assets/image/author-boy.png"));
+  return item?.avatar?.url;
 };
 
 const getAblity = (roles: string[]) => {

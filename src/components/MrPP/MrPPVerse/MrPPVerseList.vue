@@ -5,13 +5,36 @@
     <waterfall
       v-if="viewCards.length > 0"
       :lazyload="true"
-      :gutter="10"
       :width="320"
+      :hasAroundGutter="true"
+      :breakpoints="{
+        2560: {
+          rowPerView: 7,
+        },
+        2240: {
+          rowPerView: 6,
+        },
+        1920: {
+          rowPerView: 5,
+        },
+        1600: {
+          rowPerView: 4,
+        },
+        1260: {
+          rowPerView: 3,
+        },
+        940: {
+          rowPerView: 2,
+        },
+        620: {
+          rowPerView: 1,
+        },
+      }"
       :list="viewCards"
       :column-count="3"
     >
       <template #item="{ item }">
-        <el-card style="width: 320px" class="box-card">
+        <el-card style="width: 300px" class="box-card">
           <template #header>
             <div>
               <el-card shadow="hover" :body-style="{ padding: '0px' }">

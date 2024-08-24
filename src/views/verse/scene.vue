@@ -13,13 +13,15 @@
     ></PrefabDialog>
     <el-container>
       <el-main>
+        {{ editorUrl }}
         <iframe
           id="editor"
-          :src="editorUrl"
+          :src="src"
           class="content"
           height="100%"
           width="100%"
-        ></iframe>
+        ></iframe
+        >111
       </el-main>
     </el-container>
   </div>
@@ -32,9 +34,6 @@ import MetaDialog from "@/components/MrPP/MetaDialog.vue";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
 import { putVerse, getVerse } from "@/api/v1/verse";
 import { getPrefab } from "@/api/v1/prefab";
-import { getMeta } from "@/api/v1/meta";
-import qs from "querystringify";
-import path from "path-browserify";
 
 const route = useRoute();
 const router = useRouter();
@@ -46,13 +45,8 @@ const saveable = ref();
 const title = computed(() => route.query.title?.slice(2) as string);
 
 const id = computed(() => parseInt(route.query.id as string));
-
-const editorUrl = computed(() =>
-  path.join(
-    import.meta.env.VITE_APP_EDITOR_URL + "/three.js/editor",
-    "verse-editor.html" + qs.stringify({ id: id.value }, true)
-  )
-);
+const src =
+  import.meta.env.VITE_APP_EDITOR_URL + "/three.js/editor/verse-editor.html";
 
 const cancel = () => {};
 

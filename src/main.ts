@@ -14,7 +14,7 @@ library.add(fas);
 
 // 本地SVG图标
 import "virtual:svg-icons-register";
-
+import 'element-plus/theme-chalk/display.css'
 // 样式
 import "element-plus/theme-chalk/dark/css-vars.css";
 import "@/styles/index.scss";
