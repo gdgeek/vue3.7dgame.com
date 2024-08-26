@@ -90,7 +90,7 @@ const postScript = async (message: any) => {
     verse.value!.script = response.data;
   } else {
     const response = await putVerseScript(script.value.id, {
-      data: JSON.stringify(message.data),
+      workspace: JSON.stringify(message.data),
       script: message.script,
     });
     verse.value!.script = response.data;
