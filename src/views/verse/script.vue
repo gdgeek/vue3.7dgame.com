@@ -33,6 +33,7 @@
               <iframe
                 style="margin: 0; padding: 0; height: 100%; width: 100%"
                 id="editor"
+                ref="editor"
                 :src="blocklyUrl"
               ></iframe>
             </el-main>
@@ -59,7 +60,7 @@ const verse = ref<VerseData>();
 const route = useRoute();
 const id = computed(() => parseInt(route.query.id as string));
 const blocklyUrl = import.meta.env.VITE_APP_BLOCKLY_URL;
-const ready = ref<boolean>(false);
+let ready: boolean = false;
 const saveable = computed(() => script.value !== null && verse.value!.editable);
 let map = new Map<string, any>();
 
@@ -102,53 +103,63 @@ const postScript = async (message: any) => {
 };
 
 const handleMessage = async (e: MessageEvent) => {
-  console.error(e.data);
-  const data: any = JSON.parse(e.data);
+  if (!e.data.action) {
+    return;
+  }
+  const params: any = e.data;
 
-  if (data.type === "ready") {
-    ready.value = true;
+  if (params.action === "ready") {
+    ready = true;
     initEditor();
-  } else if (data.type === "post") {
-    await postScript(data.message);
-  } else if (data.type === "post:no-change") {
+  } else if (params.action === "post") {
+    await postScript(params.data);
+  } else if (params.action === "post:no-change") {
     ElMessage({
       message: "没有修改",
       type: "info",
     });
-    //alert("no");
   }
 };
 
 const save = () => {
-  postMessage({
-    type: "save",
-    message: { language: "lua", data: {} },
-  });
+  postMessage("save", { language: "lua", data: {} });
 };
 
-const postMessage = (message: any) => {
-  const iframe = document.getElementById("editor") as HTMLIFrameElement;
-  iframe.contentWindow?.postMessage(message, "*");
+const editor = ref<HTMLIFrameElement | null>(null);
+const postMessage = (action: string, data: any = {}) => {
+  if (editor.value && editor.value.contentWindow) {
+    editor.value.contentWindow.postMessage(
+      {
+        from: "script.verse.web",
+        action: action,
+        data: JSON.parse(JSON.stringify(data)),
+      },
+      "*"
+    );
+  } else {
+    console.error("没有编辑器");
+    ElMessage({
+      type: "error",
+    });
+  }
 };
 
 const initEditor = () => {
-  if (verse.value === null) return;
-  if (!ready.value) return;
-
-  const data = verse.value!.script
-    ? JSON.parse(verse.value!.script.script)
+  if (!verse.value) return;
+  if (!ready) return;
+  console.error("initEditor", verse.value);
+  //alert(JSON.stringify(verse.value.script?.workspace));
+  const data = verse.value.script?.workspace
+    ? JSON.parse(verse.value!.script.workspace)
     : {};
-  postMessage({
-    type: "init",
-    message: {
-      language: ["lua", "js"],
-      style: ["base", "meta"],
-      data: data,
-      parameters: {
-        index: verse.value!.id,
-        // resource: getResource(meta.value),
-        resource: resource.value,
-      },
+  postMessage("init", {
+    language: ["lua", "js"],
+    style: ["base", "verse"],
+    data: data,
+    parameters: {
+      index: verse.value!.id,
+      // resource: getResource(meta.value),
+      resource: resource.value,
     },
   });
 };
@@ -186,64 +197,9 @@ const resource = computed(() => {
   };
 });
 
-// onMounted(async () => {
-//   loading.value = true;
-
-//   const response = await getVerse(id.value, "metas, module, share, script");
-//   verse.value = response.data;
-
-//   if (!verse.value!.script) {
-//     const vresponse = await postVerseScript({
-//       verse_id: id.value,
-//       title: "script",
-//       uuid: uuidv4(),
-//     });
-//     script.value = vresponse.data;
-//   } else {
-//     script.value = verse.value!.script;
-//   }
-
-//   const data = JSON.parse(verse.value?.data || "{}");
-//   if (data?.children?.modules) {
-//     data.children.modules.forEach((module: any) => {
-//       map.set(module.parameters.meta_id, {
-//         uuid: module.parameters.uuid,
-//         title: module.parameters.title,
-//       });
-//     });
-//   }
-
-//   loading.value = false;
-// });
-
-// onBeforeUnmount(() => {
-//   if (saveable.value) {
-//     save();
-//   }
-// });
-
-// const save = () => {
-//   if (script.value) {
-//     const blockly = script.value.workspace;
-//     const code = ""; // 从 blockly 获取生成的代码
-//     submit(script.value.id, blockly, code);
-//   }
-// };
-
-// const submit = async (
-//   id: number,
-//   blockly: any,
-//   code: string,
-//   end?: Function
-// ) => {
-//   const response = await putVerseScript(id, {
-//     script: code,
-//     workspace: blockly,
-//   });
-//   script.value = response.data;
-//   if (end) end();
-// };
-
+onBeforeUnmount(() => {
+  window.removeEventListener("message", handleMessage);
+});
 onMounted(async () => {
   window.addEventListener("message", handleMessage);
 

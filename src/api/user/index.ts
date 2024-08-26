@@ -9,9 +9,6 @@ class UserAPI {
     return request<getUserInfoData>({
       url: "v1/users/get-data",
       method: "get",
-      // params: {
-      //   token,
-      // },
     });
   }
 }

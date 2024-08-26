@@ -27,7 +27,7 @@ const saveAudio = async (
     const response = await postAudio({ name, file_id });
     // 跳转到音频查看页面，并传递音频 ID
     router.push({
-      path: "/ResourceAdmin/audio/view",
+      path: "/resource/audio/view",
       query: { id: response.data.id },
     });
   } catch (err) {

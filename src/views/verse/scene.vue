@@ -13,26 +13,26 @@
     ></PrefabDialog>
     <el-container>
       <el-main>
-        {{ editorUrl }}
         <iframe
           id="editor"
+          ref="editor"
           :src="src"
           class="content"
           height="100%"
           width="100%"
-        ></iframe
-        >111
+        ></iframe>
       </el-main>
     </el-container>
   </div>
 </template>
 
 <script setup lang="ts">
+import { MessageType } from "@/utils/helper";
 import { useRoute, useRouter } from "vue-router";
 import PrefabDialog from "@/components/MrPP/PrefabDialog.vue";
 import MetaDialog from "@/components/MrPP/MetaDialog.vue";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
-import { putVerse, getVerse } from "@/api/v1/verse";
+import { putVerse, getVerse, VerseData } from "@/api/v1/verse";
 import { getPrefab } from "@/api/v1/prefab";
 
 const route = useRoute();
@@ -40,7 +40,7 @@ const router = useRouter();
 const knightDataRef = ref<InstanceType<typeof KnightDataDialog>>();
 const prefabDialogRef = ref<InstanceType<typeof PrefabDialog>>();
 const metaDialogRef = ref<InstanceType<typeof MetaDialog>>();
-const init = ref(false);
+let init = false;
 const saveable = ref();
 const title = computed(() => route.query.title?.slice(2) as string);
 
@@ -48,17 +48,25 @@ const id = computed(() => parseInt(route.query.id as string));
 const src =
   import.meta.env.VITE_APP_EDITOR_URL + "/three.js/editor/verse-editor.html";
 
+const editor = ref<HTMLIFrameElement>();
 const cancel = () => {};
 
-const postMessage = (data: any) => {
-  try {
-    data.verify = "mrpp.com";
-    console.log("data3", data);
-    const safeData = JSON.parse(JSON.stringify(data));
-    const iframe = document.getElementById("editor") as HTMLIFrameElement;
-    iframe.contentWindow?.postMessage(safeData, "*");
-  } catch (error) {
-    console.error("Error in postMessage:", error);
+const postMessage = (action: string, data: any) => {
+  console.error("postMessage", action);
+  if (editor.value && editor.value.contentWindow) {
+    editor.value.contentWindow.postMessage(
+      {
+        from: "scene.verse.web",
+        action: action,
+        data: JSON.parse(JSON.stringify(data)),
+      },
+      "*"
+    );
+  } else {
+    ElMessage({
+      message: "没有编辑器",
+      type: "error",
+    });
   }
 };
 
@@ -68,10 +76,7 @@ const setupPrefab = async ({ meta_id, data, uuid }: any) => {
     schema: JSON.parse(response.data.data!),
     data: JSON.parse(data),
     callback: (setup: any) => {
-      postMessage({
-        action: "setup-module",
-        data: { uuid, setup },
-      });
+      postMessage("setup-module", { uuid, setup });
     },
   });
 };
@@ -93,19 +98,15 @@ const addMeta = () => {
 };
 
 const selected = async ({ data, setup, title }: any) => {
-  try {
-    console.log("data2", data, setup, title);
-    const res = await postMessage({
-      action: "add-module",
-      data: { data, setup, title },
-    });
-    console.log("加载meta", res);
-  } catch (error) {
-    console.error("Error in selectedHandler:", error);
-  }
+  postMessage("add-module", { data, setup, title });
 };
 
-const saveVerse = async (verse: any) => {
+const saveVerse = async (data: any) => {
+  console.error("save verse", data);
+  if (!data.verse) {
+    return;
+  }
+  const verse: VerseData = data.verse;
   if (!saveable.value) {
     ElMessage({
       type: "info",
@@ -113,7 +114,8 @@ const saveVerse = async (verse: any) => {
     });
     return;
   }
-  await putVerse(id.value, { data: verse });
+  console.error("saveVerse", { data: JSON.stringify(verse) });
+  await putVerse(id.value, { data: JSON.stringify(verse) });
   ElMessage({
     type: "success",
     message: "场景保存成功!!!",
@@ -121,58 +123,62 @@ const saveVerse = async (verse: any) => {
 };
 
 const handleMessage = async (e: MessageEvent) => {
-  if (e.data.from === "mrpp-editor") {
-    switch (e.data.action) {
-      case "edit-meta":
-        router.push({
-          path: "/meta/scene",
-          query: { id: e.data.data.meta_id },
-        });
-        break;
-      case "setup-prefab":
-        setupPrefab(e.data.data);
-        break;
-      case "add-meta":
-        addMeta();
-        break;
-      case "add-prefab":
-        addPrefab();
-        break;
-      case "save-verse":
-        saveVerse(e.data.data);
-        break;
-      case "goto":
-        if (e.data.data === "blockly.js") {
-          const scriptRoute = router
-            .getRoutes()
-            .find((route) => route.path === "/verse/script");
-          if (scriptRoute && scriptRoute.meta.title) {
-            const metaTitle = scriptRoute.meta.title as string;
-            router.push({
-              path: "/verse/script",
-              query: {
-                id: id.value,
-                title: metaTitle + title.value,
-              },
-            });
-          }
-        }
-        break;
-      case "ready":
-        if (!init.value) {
-          init.value = true;
-          const response = await getVerse(id.value, "metas, resources");
-          const verse = response.data;
-          saveable.value = verse ? verse.editable : false;
-          postMessage({
-            action: "load",
-            id: id.value,
-            data: verse,
-            saveable: saveable.value,
+  if (!e.data || !e.data.action) {
+    return;
+  }
+  const action = e.data.action;
+  const data = e.data.data; // ? JSON.parse(params.json) : undefined;
+
+  console.error("handleMessage", action, data);
+  switch (action) {
+    case "edit-meta":
+      router.push({
+        path: "/meta/scene",
+        query: { id: data.meta_id },
+      });
+      break;
+    case "setup-prefab":
+      setupPrefab(data);
+      break;
+    case "add-meta":
+      addMeta();
+      break;
+    case "add-prefab":
+      addPrefab();
+      break;
+    case "save-verse":
+      saveVerse(data);
+      break;
+    case "goto":
+      if (data.target === "blockly.js") {
+        const scriptRoute = router
+          .getRoutes()
+          .find((route) => route.path === "/verse/script");
+        if (scriptRoute && scriptRoute.meta.title) {
+          const metaTitle = scriptRoute.meta.title as string;
+          router.push({
+            path: "/verse/script",
+            query: {
+              id: id.value,
+              title: metaTitle + title.value,
+            },
           });
         }
-        break;
-    }
+      }
+      break;
+    case "ready":
+      if (!init) {
+        init = true;
+        const response = await getVerse(id.value, "metas, resources");
+        const verse = response.data;
+        saveable.value = verse ? verse.editable : false;
+        postMessage("load", {
+          id: id.value,
+          data: verse,
+          saveable: saveable.value,
+        });
+      }
+      break;
   }
 };
 

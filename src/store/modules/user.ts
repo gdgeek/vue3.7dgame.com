@@ -75,36 +75,6 @@ export const useUserStore = defineStore("user", () => {
     });
   }
 
-  // 获取信息(用户昵称、头像、角色集合、权限集合)
-  // function getUserInfo() {
-  //   return new Promise<getUserInfoData>((resolve, reject) => {
-  //     UserAPI.getInfo()
-  //       .then((data) => {
-  //         if (!data) {
-  //           reject("Verification failed, please Login again.");
-  //           return;
-  //         }
-  //         if (!data.roles || data.roles.length <= 0) {
-  //           reject("getUserInfo: roles must be a non-null array!");
-  //           return;
-  //         }
-  //         Object.assign(userInfo.value!, { ...data });
-  //         // 确保 roles 为非空字符数组
-  //         if (
-  //           !Array.isArray(userInfo.value.roles) ||
-  //           userInfo.value.roles.length === 0
-  //         ) {
-  //           userInfo.value.roles = ["user"]; // 你可以设置一个默认角色
-  //         }
-  //         console.log("userInfo.value:", userInfo.value);
-  //         // commit("setUser", data);
-  //         resolve(data);
-  //       })
-  //       .catch((error) => {
-  //         reject(error);
-  //       });
-  //   });
-  // }
 
   const getUserInfo = async () => {
     try {

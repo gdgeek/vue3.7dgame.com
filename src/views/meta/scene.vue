@@ -21,6 +21,7 @@
 </template>
 
 <script setup lang="ts">
+//import { MessageType } from "@/utils/helper";
 import { useRoute, useRouter } from "vue-router";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import env from "@/environment";
@@ -43,17 +44,9 @@ const title = computed(() => route.query.title?.slice(4) as string);
 const cancel = () => {
   // Cancel logic
 };
-type Message = {
-  action: string;
-  json: string;
-};
+
 const selectResources = (data: any) => {
-  console.error("data");
-  console.error(data);
-  postMessage({
-    action: "load_resource",
-    json: JSON.stringify(data),
-  });
+  postMessage("load-resource", data);
 };
 
 const saveable = (data: any) => {
@@ -66,12 +59,20 @@ const loadResource = (data: any) => {
   dialog.value.open(null, id.value, data.type);
 };
 
-const postMessage = (message: Message) => {
-  console.error("postMessage", message);
+const postMessage = (action: string, data: any = {}) => {
+  console.error("postMessage:!", action);
 
   if (editor.value && editor.value.contentWindow) {
-    editor.value.contentWindow.postMessage(message, "*");
+    editor.value.contentWindow.postMessage(
+      {
+        from: "scene.meta.web",
+        action: action,
+        data: JSON.parse(JSON.stringify(data)),
+      },
+      "*"
+    );
   } else {
+    alert(JSON.stringify(action));
     ElMessage({
       message: "没有编辑器",
       type: "error",
@@ -80,52 +81,54 @@ const postMessage = (message: Message) => {
 };
 
 const handleMessage = async (e: MessageEvent) => {
-  const data = e.data;
-  if (data.from === "mrpp-editor") {
-    switch (data.action) {
-      case "save":
-        saveMeta(data);
-        break;
-      case "load_resource":
-        loadResource(data.data);
-        break;
-      case "goto":
-        if (data.data === "blockly.js") {
-          const scriptRoute = router
-            .getRoutes()
-            .find((route) => route.path === "/meta/script");
-          if (scriptRoute && scriptRoute.meta.title) {
-            const metaTitle = scriptRoute.meta.title as string;
-            router.push({
-              path: "/meta/script",
-              query: {
-                id: id.value,
-                title: metaTitle + title.value,
-              },
-            });
-          }
-        } else if (data.data === "rete.js") {
+  if (!e.data || !e.data.action) {
+    return;
+  }
+
+  const action = e.data.action;
+  const data = e.data.data;
+  //const data = e.data;
+
+  switch (action) {
+    case "save":
+      saveMeta(data);
+      break;
+    case "load-resource":
+      loadResource(data);
+      break;
+    case "goto":
+      if (data.target === "blockly.js") {
+        const scriptRoute = router
+          .getRoutes()
+          .find((route) => route.path === "/meta/script");
+        if (scriptRoute && scriptRoute.meta.title) {
+          const metaTitle = scriptRoute.meta.title as string;
           router.push({
-            path: "/meta/rete-meta",
-            query: { id: id.value, title: title.value },
+            path: "/meta/script",
+            query: {
+              id: id.value,
+              title: metaTitle + title.value,
+            },
           });
         }
-        break;
-      case "ready":
-        if (!isInit.value) {
-          isInit.value = true;
-          const meta = await getMeta(id.value);
-          // breadcrumb(meta.data);
-          postMessage({
-            action: "load",
-            json: JSON.stringify({
-              data: meta.data,
-              saveable: saveable(meta.data),
-            }),
-          });
-        }
-        break;
-    }
+      } else if (data.data === "rete.js") {
+        router.push({
+          path: "/meta/rete-meta",
+          query: { id: id.value, title: title.value },
+        });
+      }
+      break;
+    case "ready":
+      if (!isInit.value) {
+        isInit.value = true;
+        const meta = await getMeta(id.value);
+        // breadcrumb(meta.data);
+        postMessage("load", {
+          data: meta.data,
+          saveable: saveable(meta.data),
+        });
+      }
+      break;
   }
 };
 

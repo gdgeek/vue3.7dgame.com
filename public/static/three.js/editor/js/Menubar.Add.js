@@ -35,7 +35,7 @@ function MenubarAdd(editor) {
 
 		editor.signals.messageReceive.add(async function (message) {
 
-			if (message.action === 'load_resource') {
+			if (message.action === 'load-resource') {
 
 				resources.set(message.data.id, message.data)
 
@@ -78,7 +78,7 @@ function MenubarAdd(editor) {
 		option.setClass('option');
 		option.setTextContent("体素");
 		option.onClick(async function () {
-			editor.signals.messageSend.dispatch({ action: 'load_resource', data: { type: 'voxel' } });
+			editor.signals.messageSend.dispatch({ action: 'load-resource', data: { type: 'voxel' } });
 		});
 		options.add(option);
 
@@ -89,7 +89,7 @@ function MenubarAdd(editor) {
 		option.setClass('option');
 		option.setTextContent("模型");
 		option.onClick(async function () {
-			editor.signals.messageSend.dispatch({ action: 'load_resource', data: { type: 'polygen' } });
+			editor.signals.messageSend.dispatch({ action: 'load-resource', data: { type: 'polygen' } });
 		});
 		options.add(option);
 
@@ -98,7 +98,7 @@ function MenubarAdd(editor) {
 		option.setClass('option');
 		option.setTextContent("音频");
 		option.onClick(async function () {
-			editor.signals.messageSend.dispatch({ action: 'load_resource', data: { type: 'audio' } });
+			editor.signals.messageSend.dispatch({ action: 'load-resource', data: { type: 'audio' } });
 		});
 		options.add(option);
 
@@ -106,7 +106,7 @@ function MenubarAdd(editor) {
 		option.setClass('option');
 		option.setTextContent("图片");
 		option.onClick(async function () {
-			editor.signals.messageSend.dispatch({ action: 'load_resource', data: { type: 'picture' } });
+			editor.signals.messageSend.dispatch({ action: 'load-resource', data: { type: 'picture' } });
 		});
 		options.add(option);
 
@@ -114,7 +114,7 @@ function MenubarAdd(editor) {
 		option.setClass('option');
 		option.setTextContent("视频");
 		option.onClick(async function () {
-			editor.signals.messageSend.dispatch({ action: 'load_resource', data: { type: 'video' } });
+			editor.signals.messageSend.dispatch({ action: 'load-resource', data: { type: 'video' } });
 		});
 		options.add(option);
 

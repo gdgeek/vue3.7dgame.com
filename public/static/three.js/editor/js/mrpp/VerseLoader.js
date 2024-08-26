@@ -168,6 +168,8 @@ function VerseLoader(editor) {
 
 				const node = factory.addModule(item)
 
+				alert(JSON.stringify(meta))
+
 				node.userData.custom = meta.custom
 				root.add(node)
 				editor.signals.sceneGraphChanged.dispatch()

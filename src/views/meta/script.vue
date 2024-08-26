@@ -48,6 +48,7 @@
 </template>
 // meta cyber
 <script setup lang="ts">
+import { MessageType } from "@/utils/helper";
 import { useRoute } from "vue-router";
 import { getMeta, metaInfo } from "@/api/v1/meta";
 import { cybersType, postCyber, putCyber } from "@/api/v1/cyber";
@@ -94,13 +95,17 @@ const postScript = async (message: any) => {
 };
 const handleMessage = async (e: MessageEvent) => {
   try {
-    const data: any = JSON.parse(e.data);
-    if (data.type === "ready") {
+    if (!e.data.action) {
+      return;
+    }
+    const params: any = e.data;
+
+    if (params.action === "ready") {
       ready = true;
       initEditor();
-    } else if (data.type === "post") {
-      await postScript(data.message);
-    } else if (data.type === "post:no-change") {
+    } else if (params.action === "post") {
+      await postScript(params.data);
+    } else if (params.action === "post:no-change") {
       ElMessage({
         message: "没有修改",
         type: "info",
@@ -119,36 +124,38 @@ const id = computed(() => parseInt(route.query.id as string));
 const blocklyUrl = import.meta.env.VITE_APP_BLOCKLY_URL;
 
 const save = () => {
-  postMessage({
-    type: "save",
-    message: { language: "lua", data: {} },
-  });
+  postMessage("save");
+  return;
 };
-const postMessage = (message: any) => {
+const postMessage = (action: string, data: any = {}) => {
   if (editor.value && editor.value.contentWindow) {
-    editor.value.contentWindow.postMessage(message, "*");
+    editor.value.contentWindow.postMessage(
+      {
+        from: "script.meta.web",
+        action: action,
+        data: JSON.parse(JSON.stringify(data)),
+      },
+      "*"
+    );
   } else {
+    console.error("没有编辑器");
     ElMessage({
-      message: "没有编辑器",
       type: "error",
     });
   }
 };
 const initEditor = () => {
-  if (meta.value === null) return;
+  if (!meta.value) return;
   if (!ready) return;
 
-  const data = meta.value.cyber ? JSON.parse(meta.value.cyber.data) : {};
-  postMessage({
-    type: "init",
-    message: {
-      language: ["lua", "js"],
-      style: ["base", "meta"],
-      data: data,
-      parameters: {
-        index: meta.value.id,
-        resource: getResource(meta.value),
-      },
+  const data = meta.value.cyber?.data ? JSON.parse(meta.value.cyber.data) : {};
+  postMessage("init", {
+    language: ["lua", "js"],
+    style: ["base", "meta"],
+    data: data,
+    parameters: {
+      index: meta.value.id,
+      resource: getResource(meta.value),
     },
   });
 };
@@ -254,6 +261,9 @@ const getResource = (meta: metaInfo) => {
   return ret;
 };
 
+onBeforeUnmount(() => {
+  window.removeEventListener("message", handleMessage);
+});
 onMounted(async () => {
   window.addEventListener("message", handleMessage);
   try {

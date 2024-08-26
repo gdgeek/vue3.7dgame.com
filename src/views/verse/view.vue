@@ -83,7 +83,7 @@
             >
           </span>
         </el-card>
-
+        <br />
         <el-card v-if="verse" class="box-card">
           <el-button
             style="width: 100%"
