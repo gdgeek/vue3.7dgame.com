@@ -50,7 +50,7 @@
 <script setup lang="ts">
 import { MessageType } from "@/utils/helper";
 import { useRoute } from "vue-router";
-import { getMeta, metaInfo } from "@/api/v1/meta";
+import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
 import { cybersType, postCyber, putCyber } from "@/api/v1/cyber";
 
 import { ElMessage } from "element-plus";
@@ -73,12 +73,18 @@ const postScript = async (message: any) => {
   }
 
   const cyber: cybersType | undefined = meta.value.cyber;
+
+  await putMetaCode(meta.value.id, {
+    blockly: JSON.stringify(message.data),
+    lua: message.script,
+  });
   if (!cyber) {
     const response = await postCyber({
       meta_id: meta.value.id,
       data: JSON.stringify(message.data),
       script: message.script,
     });
+
     meta.value.cyber = response.data;
   } else {
     const response = await putCyber(cyber.id, {
@@ -147,8 +153,10 @@ const postMessage = (action: string, data: any = {}) => {
 const initEditor = () => {
   if (!meta.value) return;
   if (!ready) return;
-
-  const data = meta.value.cyber?.data ? JSON.parse(meta.value.cyber.data) : {};
+  const data = meta.value.metaCode?.blockly
+    ? JSON.parse(meta.value.metaCode?.blockly)
+    : {};
+  //const data = meta.value.cyber?.data ? JSON.parse(meta.value.cyber.data) : {};
   postMessage("init", {
     language: ["lua", "js"],
     style: ["base", "meta"],
@@ -268,7 +276,7 @@ onMounted(async () => {
   window.addEventListener("message", handleMessage);
   try {
     loading.value = true;
-    const response = await getMeta(id.value, "cyber,event,share");
+    const response = await getMeta(id.value, "cyber,event,share,metaCode");
     meta.value = response.data;
     initEditor();
   } catch (error: any) {

@@ -1,3 +1,4 @@
+import { putVerse } from './verse';
 import request from "@/utils/request";
 import qs from "querystringify";
 import path from "path-browserify";
@@ -23,16 +24,7 @@ type ImageDetails = {
   key: string;
 };
 
-// type Message = {
-//   id: number;
-//   title: string;
-//   body: string;
-//   author_id: number;
-//   updater_id: number;
-//   created_at: string;
-//   updated_at: string;
-//   info: string;
-// };
+
 
 type VerseOpen = {
   id: number;
@@ -56,7 +48,12 @@ type Languages = {
   name: string;
   description: string;
 };
-
+export type VerseCode = {
+  blockly: string;
+  lua?: string;
+  js?: string;
+ 
+};
 export type Script = {
   id: number;
   created_at: string;
@@ -86,6 +83,7 @@ export type VerseData = {
   languages?: Languages[];
   metas?: metaInfo[];
   script?: Script;
+  verseCode?: any;
 };
 
 export type PostVerseData = {
@@ -106,6 +104,17 @@ export const postVerse = (data: PostVerseData) => {
   });
 };
 
+export const putVerseCode = (id: number, data: VerseCode) => { 
+  return request({
+    url: path.join(
+      "v1",
+      "verses",
+      `code${qs.stringify({ id: id }, true)}`
+    ),
+    data,
+    method: "put",
+  }); 
+}
 export const getVerse = (id: number, expand = "metas,share") => {
   return request({
     url: path.join(

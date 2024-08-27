@@ -20,7 +20,11 @@ type ImageDetails = {
   size: number;
   key: string;
 };
-
+export type MetaCode = {
+  blockly: string;
+  lua?: string;
+  js?: string;
+};
 // 元数据类型
 export type metaInfo = {
   id: number;
@@ -41,6 +45,7 @@ export type metaInfo = {
   cyber?: cybersType;
   author?: Author;
   verseMetas: any[];
+  metaCode?: MetaCode;
 };
 
 export const postMeta = (data: Record<string, any>) => {
@@ -50,7 +55,17 @@ export const postMeta = (data: Record<string, any>) => {
     data,
   });
 };
-
+export const putMetaCode = (id: number, data: MetaCode) => { 
+  return request({
+    url: path.join(
+      "v1",
+      "metas",
+      `code${qs.stringify({ id: id }, true)}`
+    ),
+    data,
+    method: "put",
+  }); 
+}
 export const getMeta = (id: number, expand = "") => {
   return request<metaInfo>({
     url: path.join(

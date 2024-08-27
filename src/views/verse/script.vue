@@ -5,7 +5,7 @@
         <el-card :loading="loading" class="box-card">
           <template #header>
             <div v-if="verse" class="clearfix">
-              {{ verse.name }} / {{ verse.script!.title }} / 【脚本】
+              {{ verse.name }} / 【脚本】
 
               <el-button-group style="float: right">
                 <el-button
@@ -52,7 +52,13 @@ import {
   postVerseScript,
   putVerseScript,
 } from "@/api/v1/verse-script";
-import { getVerse, postVerse, Script, VerseData } from "@/api/v1/verse";
+import {
+  getVerse,
+  putVerseCode,
+  postVerse,
+  Script,
+  VerseData,
+} from "@/api/v1/verse";
 
 const loading = ref(false);
 const script = ref<Script>();
@@ -81,10 +87,14 @@ const postScript = async (message: any) => {
   }
 
   script.value = verse.value!.script!;
+  await putVerseCode(verse.value!.id, {
+    blockly: message.data,
+    lua: message.script,
+  });
   if (!script.value) {
     const response = await postVerseScript({
-      meta_id: verse.value!.id,
-      data: JSON.stringify(message.data),
+      verse_id: verse.value!.id,
+      workspace: JSON.stringify(message.data),
       script: message.script,
     });
     verse.value!.script = response.data;
@@ -147,10 +157,8 @@ const postMessage = (action: string, data: any = {}) => {
 const initEditor = () => {
   if (!verse.value) return;
   if (!ready) return;
-  console.error("initEditor", verse.value);
-  //alert(JSON.stringify(verse.value.script?.workspace));
-  const data = verse.value.script?.workspace
-    ? JSON.parse(verse.value!.script.workspace)
+  const data = verse.value.verseCode?.blockly
+    ? JSON.parse(verse.value.verseCode.blockly)
     : {};
   postMessage("init", {
     language: ["lua", "js"],
@@ -205,8 +213,11 @@ onMounted(async () => {
 
   try {
     loading.value = true;
-    const response = await getVerse(id.value, "metas, module, share, script");
-
+    const response = await getVerse(
+      id.value,
+      "metas, module, share,script, verseCode"
+    );
+    console.error("verse", response.data);
     verse.value = response.data;
     initEditor();
   } catch (error: any) {
