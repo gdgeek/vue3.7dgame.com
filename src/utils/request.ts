@@ -35,7 +35,6 @@ service.interceptors.response.use(
     return response;
   },
   (error: any) => {
-    
     // 异常处理
     if (
       (typeof error.response === "undefined" &&
@@ -50,7 +49,7 @@ service.interceptors.response.use(
       // 清除重置token
       const userStore = useUserStore();
       userStore.resetToken();
-      router.push({ path: "/site" });
+      router.push({ path: "/login" });
       return Promise.reject("");
     } else {
       ElMessage({
