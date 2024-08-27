@@ -196,7 +196,6 @@ const dialog = ref(false);
 const verse = ref<VerseData>();
 const briefing = ref<MessageType>();
 
-const tagsMap = computed(() => tagsStore.tagsMap);
 const id = computed(() => parseInt(route.query.id as string));
 const message = computed(() => verse.value?.message ?? null);
 const verseOpen = computed(() => verse.value?.verseOpen ?? null);
@@ -218,48 +217,50 @@ const rules = {
   description: [{ required: false, message: "请输入介绍", trigger: "blur" }],
 };
 
-watchEffect(() => {
-  if (verse.value?.languages?.length) {
-    const lastLanguage =
-      verse.value.languages[verse.value.languages.length - 1];
-    if (
-      lastLanguage?.language &&
-      lastLanguage?.name &&
-      lastLanguage?.description
-    ) {
-      Form.value!.language = lastLanguage.language;
-      Form.value.name = lastLanguage.name;
-      Form.value.description = lastLanguage.description;
+watch(
+  () => Form.value.language,
+  (newLanguage) => {
+    // 切换不同的语言时，自动更新表单
+    const selectedLanguage = verse.value?.languages!.find(
+      (lang) => lang.language === newLanguage
+    );
+    if (selectedLanguage) {
+      Form.value.name = selectedLanguage.name;
+      Form.value.description = selectedLanguage.description;
+    } else {
+      Form.value.name = "";
+      Form.value.description = "";
     }
-  }
-});
+  },
+  { immediate: true }
+);
 
 const submit = () => {
   FormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
-      if (
-        Form.value.language &&
-        Form.value.language ===
-          verse.value?.languages![verse.value.languages!.length - 1]?.language
-      ) {
-        await putlanguages(
-          verse.value?.languages[verse.value.languages.length - 1].id,
-          {
-            name: Form.value.name,
-            description: Form.value.description,
-          }
-        );
+      const selectedLanguage = verse.value?.languages!.find(
+        (lang) => lang.language === Form.value.language
+      );
+
+      if (selectedLanguage) {
+        // 有数据则为修改
+        await putlanguages(selectedLanguage.id, {
+          name: Form.value.name,
+          description: Form.value.description,
+        });
         ElMessage.success("修改成功");
       } else {
+        // 没有是数据则为提交
         await postlanguages({
           verse_id: verse.value!.id,
           language: Form.value.language,
           name: Form.value.name,
           description: Form.value.description,
         });
+        ElMessage.success("提交成功");
       }
+
       await getlanguages(verse.value!.id);
-      ElMessage.success("提交成功");
     } else {
       ElMessage.error("表单验证失败");
     }
@@ -293,6 +294,15 @@ const refresh = async () => {
     "image,verseOpen,verseShare,author, message, languages"
   );
   verse.value = res.data;
+
+  const selectedLanguage = verse.value?.languages!.find(
+    (lang) => lang.language === Form.value.language
+  );
+  if (selectedLanguage) {
+    Form.value.name = selectedLanguage.name;
+    Form.value.description = selectedLanguage.description;
+  }
+
   briefing.value = message.value
     ? message.value
     : {
@@ -346,20 +356,9 @@ const comeIn = () => {
   });
 };
 
-onMounted(async () => {
-  await refresh();
-  if (!tagsMap.value) {
-    // store.dispatch("tags/refreshTags");
-    await tagsStore.refreshTags();
-  }
-
-  // store.commit("breadcrumb/setBreadcrumbs", {
-  //   list: [
-  //     { path: "/", meta: { title: "元宇宙实景编程平台" } },
-  //     { path: "/meta-verse", meta: { title: "宇宙" } },
-  //     { path: ".", meta: { title: "【宇宙】" } },
-  //   ],
-  // });
+onMounted(() => {
+  Form.value.language = "zh"; // 默认中文zh
+  refresh();
 });
 </script>
 

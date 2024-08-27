@@ -75,7 +75,6 @@ export const useUserStore = defineStore("user", () => {
     });
   }
 
-
   const getUserInfo = async () => {
     try {
       const res = await UserAPI.getInfo();
