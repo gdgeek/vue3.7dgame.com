@@ -1,4 +1,3 @@
-import { putVerse } from './verse';
 import request from "@/utils/request";
 import qs from "querystringify";
 import path from "path-browserify";
