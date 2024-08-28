@@ -21,6 +21,7 @@
         </mr-p-p-header>
       </el-header>
       <el-main>
+        {{ metaData }}
         <el-card style="width: 100%">
           <Waterfall
             :list="metaData as unknown as ViewCard[]"
@@ -210,6 +211,7 @@ const handleCurrentChange = (page: number) => {
 };
 
 const refresh = async () => {
+  console.log("refresh");
   const response = await getMetas(
     sorted.value,
     searched.value,
@@ -221,6 +223,7 @@ const refresh = async () => {
 };
 
 onMounted(() => {
+  alert("onMounted");
   refresh();
 });
 </script>
