@@ -114,7 +114,6 @@
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
-alert(JSON.stringify(Waterfall));
 import "vue-waterfall-plugin-next/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
 import { getMetas, postMeta, deleteMeta } from "@/api/v1/meta";
