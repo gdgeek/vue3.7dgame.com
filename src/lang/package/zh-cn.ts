@@ -65,6 +65,10 @@ export default {
       scriptEditor: "脚本编辑",
       sceneEditor: "场景编辑",
     },
+    manager: {
+      title: "管理",
+      userManagement: "用户管理",
+    },
   },
   // 登录页面国际化
   login: {
