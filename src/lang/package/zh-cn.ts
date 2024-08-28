@@ -2,7 +2,73 @@ export default {
   // 路由国际化
   route: {
     dashboard: "首页",
-    document: "项目文档",
+    personalCenter: {
+      title: "个人中心",
+      myHomepage: "我的主页",
+      document: "正文",
+      category: "分类",
+      processOfCreation: "创作历程",
+    },
+    settings: {
+      title: "设置",
+      accountSetting: "账号设置",
+      personalData: "个人资料",
+      userPresentation: "用户展示",
+    },
+    resourceManagement: {
+      title: "资源管理",
+      voxelManagement: {
+        title: "体素管理",
+        voxelList: "体素列表",
+        voxelUpload: "体素上传",
+        voxelProcessing: "体素处理",
+      },
+      polygenManagement: {
+        title: "模型管理",
+        polygenList: "模型列表",
+        polygenUpload: "模型上传",
+        polygenProcessing: "模型处理",
+      },
+      pictureManagement: {
+        title: "图片管理",
+        pictureList: "图片列表",
+        pictureUpload: "图片上传",
+        pictureProcessing: "图片处理",
+      },
+      videoManagement: {
+        title: "视频管理",
+        videoList: "视频列表",
+        videoUpload: "视频上传",
+        videoProcessing: "视频处理",
+      },
+      audioManagement: {
+        title: "音频管理",
+        audioList: "音频列表",
+        audioUpload: "音频上传",
+        audioProcessing: "音频处理",
+      },
+    },
+    meta: {
+      title: "元数据",
+      metaList: "元数据列表",
+      systemDefault: "系统预设",
+      edit: "编辑",
+      scriptEditor: "脚本编辑",
+      SceneEditor: "场景编辑",
+    },
+    universe: {
+      title: "宇宙",
+      selfGenerated: "自己创造",
+      systemRecommendation: "系统推荐",
+      shareWithFriends: "朋友分享",
+      viewTitle: "【宇宙】",
+      scriptEditor: "脚本编辑",
+      sceneEditor: "场景编辑",
+    },
+    manager: {
+      title: "管理",
+      userManagement: "用户管理",
+    },
   },
   // 登录页面国际化
   login: {

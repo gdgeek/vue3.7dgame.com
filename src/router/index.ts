@@ -6,6 +6,8 @@ import {
   RouteRecordRaw,
 } from "vue-router";
 
+import { useI18n } from "vue-i18n";
+
 export const Layout = () => import("@/layout/index.vue");
 
 import Structure from "@/layout/structure/index.vue";
@@ -52,26 +54,26 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "Home",
         redirect: "/home/index",
         meta: {
-          title: "个人中心",
+          title: "personalCenter.title",
           icon: "homepage",
           affix: true,
           keepAlive: true,
         },
         children: [
           {
-            meta: { title: "我的主页" },
+            meta: { title: "personalCenter.myHomepage" },
             path: "index",
             name: "HomeIndex",
             component: () => import("@/views/home/index.vue"),
           },
           {
-            meta: { title: "正文" },
+            meta: { title: "personalCenter.document" },
             path: "/home/document",
             name: "HomeDocument",
             component: () => import("@/views/home/document.vue"),
           },
           {
-            meta: { title: "分类" },
+            meta: { title: "personalCenter.category" },
             path: "/home/category",
             name: "HomeCategory",
             component: () => import("@/views/home/category.vue"),
@@ -83,7 +85,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           //   component: () => import("@/views/settings/pay.vue"),
           // },
           {
-            meta: { title: "创作历程" },
+            meta: { title: "personalCenter.processOfCreation" },
             path: "/home/creator",
             name: "SettingsCreator",
             component: () => import("@/views/home/creator.vue"),
@@ -94,24 +96,24 @@ export const constantRoutes: RouteRecordRaw[] = [
       {
         path: "settings",
         name: "Settings",
-        meta: { title: "设置" },
+        meta: { title: "settings.title" },
         redirect: "/settings/account",
         component: Empty,
         children: [
           {
             path: "account",
             name: "SettingsAccount",
-            meta: { title: "账号设置" },
+            meta: { title: "settings.accountSetting" },
             component: () => import("@/views/settings/account.vue"),
           },
           {
-            meta: { title: "个人资料" },
+            meta: { title: "settings.personalData" },
             path: "edit",
             name: "SettingsEdit",
             component: () => import("@/views/settings/edit.vue"),
           },
           {
-            meta: { title: "用户展示" },
+            meta: { title: "settings.userPresentation" },
             path: "people",
             name: "SettingsPeople",
             component: () => import("@/views/settings/people.vue"),
@@ -125,7 +127,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         redirect: "/resource/voxel",
         name: "/resource",
         meta: {
-          title: "资源管理",
+          title: "resourceManagement.title",
           icon: "system",
           hidden: false,
           alwaysShow: false,
@@ -138,7 +140,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             component: Empty,
             redirect: "index",
             meta: {
-              title: "体素管理",
+              title: "resourceManagement.voxelManagement.title",
               icon: "",
               hidden: false,
               alwaysShow: false,
@@ -150,7 +152,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "",
                 component: () => import("@/views/voxel/index.vue"),
                 meta: {
-                  title: "体素列表",
+                  title: "resourceManagement.voxelManagement.voxelList",
                   icon: "el-icon-list",
                   hidden: false,
                   alwaysShow: false,
@@ -162,7 +164,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "VoxelUpload",
                 component: () => import("@/views/voxel/upload.vue"),
                 meta: {
-                  title: "体素上传",
+                  title: "resourceManagement.voxelManagement.voxelUpload",
                   icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
@@ -174,7 +176,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "VoxelView",
                 component: () => import("@/views/voxel/view.vue"),
                 meta: {
-                  title: "体素处理",
+                  title: "resourceManagement.voxelManagement.voxelProcessing",
                   icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
@@ -189,8 +191,8 @@ export const constantRoutes: RouteRecordRaw[] = [
             redirect: "/resource/polygen/index",
             component: Empty,
             meta: {
-              title: "模型管理",
-              icon: "",
+              title: "resourceManagement.polygenManagement.title",
+              icon: "system",
               hidden: false,
               alwaysShow: false,
               params: null,
@@ -201,7 +203,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "PolygenIndex",
                 component: () => import("@/views/polygen/index.vue"),
                 meta: {
-                  title: "模型列表",
+                  title: "resourceManagement.polygenManagement.polygenList",
                   icon: "el-icon-list",
                   hidden: false,
                   alwaysShow: false,
@@ -213,7 +215,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "",
                 component: () => import("@/views/polygen/upload.vue"),
                 meta: {
-                  title: "模型上传",
+                  title: "resourceManagement.polygenManagement.polygenUpload",
                   icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
@@ -225,7 +227,8 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "",
                 component: () => import("@/views/polygen/view.vue"),
                 meta: {
-                  title: "模型处理",
+                  title:
+                    "resourceManagement.polygenManagement.polygenProcessing",
                   icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
@@ -240,7 +243,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             component: Empty,
             redirect: "/resource/picture/index",
             meta: {
-              title: "图片管理",
+              title: "resourceManagement.pictureManagement.title",
               icon: "el-icon-picture",
               hidden: false,
               alwaysShow: false,
@@ -252,7 +255,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "",
                 component: () => import("@/views/picture/index.vue"),
                 meta: {
-                  title: "图片列表",
+                  title: "resourceManagement.pictureManagement.pictureList",
                   icon: "el-icon-list",
                   hidden: false,
                   alwaysShow: false,
@@ -264,7 +267,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "",
                 component: () => import("@/views/picture/upload.vue"),
                 meta: {
-                  title: "图片上传",
+                  title: "resourceManagement.pictureManagement.pictureUpload",
                   icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
@@ -276,7 +279,8 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "",
                 component: () => import("@/views/picture/view.vue"),
                 meta: {
-                  title: "图片处理",
+                  title:
+                    "resourceManagement.pictureManagement.pictureProcessing",
                   icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
@@ -291,7 +295,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             redirect: "/resource/video/index",
             component: Empty,
             meta: {
-              title: "视频管理",
+              title: "resourceManagement.videoManagement.title",
               icon: "el-icon-video-camera",
               hidden: false,
               alwaysShow: false,
@@ -303,7 +307,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "VideoIndex",
                 component: () => import("@/views/video/index.vue"),
                 meta: {
-                  title: "视频列表",
+                  title: "resourceManagement.videoManagement.videoList",
                   icon: "el-icon-list",
                   hidden: false,
                   alwaysShow: false,
@@ -315,7 +319,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "",
                 component: () => import("@/views/video/upload.vue"),
                 meta: {
-                  title: "视频上传",
+                  title: "resourceManagement.videoManagement.videoUpload",
                   icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
@@ -327,7 +331,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "",
                 component: () => import("@/views/video/view.vue"),
                 meta: {
-                  title: "视频处理",
+                  title: "resourceManagement.videoManagement.videoProcessing",
                   icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
@@ -343,7 +347,7 @@ export const constantRoutes: RouteRecordRaw[] = [
 
             redirect: "/resource/audio/index",
             meta: {
-              title: "音频管理",
+              title: "resourceManagement.audioManagement.title",
               icon: "el-icon-headset",
               hidden: false,
               alwaysShow: false,
@@ -355,7 +359,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "",
                 component: () => import("@/views/audio/index.vue"),
                 meta: {
-                  title: "音频列表",
+                  title: "resourceManagement.audioManagement.audioList",
                   icon: "el-icon-list",
                   hidden: false,
                   alwaysShow: false,
@@ -367,7 +371,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "",
                 component: () => import("@/views/audio/upload.vue"),
                 meta: {
-                  title: "音频上传",
+                  title: "resourceManagement.audioManagement.audioUpload",
                   icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
@@ -379,7 +383,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "",
                 component: () => import("@/views/audio/view.vue"),
                 meta: {
-                  title: "音频处理",
+                  title: "resourceManagement.audioManagement.audioProcessing",
                   icon: "el-icon-uploadFilled",
                   hidden: false,
                   alwaysShow: false,
@@ -396,7 +400,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         redirect: "/meta/list",
         name: "/system",
         meta: {
-          title: "元数据",
+          title: "meta.title",
           icon: "el-icon-StarFilled",
           hidden: false,
           alwaysShow: false,
@@ -408,7 +412,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             component: () => import("@/views/meta/list.vue"),
             name: "List",
             meta: {
-              title: "元数据列表",
+              title: "meta.metaList",
               icon: "cascader",
               hidden: false,
               keepAlive: true,
@@ -421,7 +425,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             component: () => import("@/views/meta/prefabs.vue"),
             name: "Role",
             meta: {
-              title: "系统预设",
+              title: "meta.systemDefault",
               icon: "",
               hidden: false,
               keepAlive: true,
@@ -432,13 +436,13 @@ export const constantRoutes: RouteRecordRaw[] = [
           {
             path: "prefab-edit",
             name: "PrefabEdit",
-            meta: { title: "编辑" },
+            meta: { title: "meta.edit" },
             component: () => import("@/views/meta/prefab-edit.vue"),
           },
           {
             path: "meta-edit",
             name: "MetaEdit",
-            meta: { title: "编辑" },
+            meta: { title: "meta.edit" },
             component: () => import("@/views/meta/meta-edit.vue"),
           },
           // {
@@ -450,13 +454,13 @@ export const constantRoutes: RouteRecordRaw[] = [
           {
             path: "script",
             name: "MetaScript",
-            meta: { title: "脚本编辑", keepAlive: true },
+            meta: { title: "meta.scriptEditor", keepAlive: true },
             component: () => import("@/views/meta/script.vue"),
           },
           {
             path: "scene",
             name: "MetaSceneEditor",
-            meta: { title: "场景编辑", keepAlive: true },
+            meta: { title: "meta.sceneEditor", keepAlive: true },
             component: () => import("@/views/meta/scene.vue"),
           },
         ],
@@ -468,7 +472,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         redirect: "/verse/index",
         name: "",
         meta: {
-          title: "宇宙",
+          title: "universe.title",
           icon: "el-icon-sunrise",
           hidden: false,
           alwaysShow: false,
@@ -480,7 +484,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             component: () => import("@/views/meta-verse/index.vue"),
             name: "VerseIndex",
             meta: {
-              title: "自己创造",
+              title: "universe.selfGenerated",
               icon: "cascader",
             },
           },
@@ -489,7 +493,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             component: () => import("@/views/meta-verse/open.vue"),
             name: "VerseOpen",
             meta: {
-              title: "开放列表",
+              title: "universe.systemRecommendation",
               icon: "cascader",
             },
           },
@@ -498,26 +502,26 @@ export const constantRoutes: RouteRecordRaw[] = [
             component: () => import("@/views/meta-verse/share.vue"),
             name: "VerseShare",
             meta: {
-              title: "分享列表",
+              title: "universe.shareWithFriends",
               icon: "cascader",
             },
           },
           {
             path: "view",
             name: "VerseView",
-            meta: { title: "【宇宙】" },
+            meta: { title: "universe.viewTitle" },
             component: () => import("@/views/verse/view.vue"),
           },
           {
             path: "script",
             name: "Script",
-            meta: { title: "脚本编辑", keepAlive: true },
+            meta: { title: "universe.scriptEditor", keepAlive: true },
             component: (): any => import("@/views/verse/script.vue"),
           },
           {
             path: "scene",
             name: "VerseSceneEditor",
-            meta: { title: "场景编辑", keepAlive: true },
+            meta: { title: "universe.sceneEditor", keepAlive: true },
             component: () => import("@/views/verse/scene.vue"),
           },
         ],
@@ -529,7 +533,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         redirect: "/manager/user",
         name: "",
         meta: {
-          title: "管理",
+          title: "manager.title",
           icon: "el-icon-Management",
           hidden: false,
           alwaysShow: false,
@@ -541,7 +545,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             component: () => import("@/views/manager/user.vue"),
             name: "ManagerUser",
             meta: {
-              title: "用户管理",
+              title: "manager.userManagement",
               icon: "cascader",
             },
           },
