@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 6,
+            "activePatchIndex": 7,
             "patches": [
                 {
                     "date": 1721276615886,
@@ -32,6 +32,10 @@
                 {
                     "date": 1723636501099,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -19,5 +19,4 @@\n # 暴露端口\n EXPOSE 80\n \n CMD [\"nginx\", \"-g\", \"daemon off;\"]\n-  \n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1724822372942,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,13 +1,4 @@\n-FROM node:22-alpine AS build\n-WORKDIR /app\n-COPY package.json ./\n-RUN npm install pnpm -g\n-RUN pnpm install vuex\n-RUN pnpm install\n-COPY . .\n-RUN pnpm run build\n-\n # 使用 Nginx 作为生产阶段\n FROM nginx:alpine\n \n # 将自定义的 Nginx 配置文件复制到容器中\n"
                 }
             ],
             "date": 1721276615886,
