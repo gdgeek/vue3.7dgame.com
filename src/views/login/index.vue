@@ -173,13 +173,7 @@ const error = (msg: string | Record<string, string>) => {
         </div> -->
             <div v-if="isShow" class="error-message">{{ title }}</div>
           </div>
-          <el-button
-            style="width: 100%"
-            @click="$router.push({ path: '/site/download' })"
-            size="small"
-          >
-            下载相关程序
-          </el-button>
+          <el-button style="width: 100%" size="small"> 下载相关程序 </el-button>
         </div>
       </div>
     </div>
