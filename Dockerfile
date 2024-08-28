@@ -1,3 +1,12 @@
+FROM node:22-alpine AS build
+WORKDIR /app
+COPY package.json ./
+RUN npm install pnpm -g
+RUN pnpm install vuex
+RUN pnpm install
+COPY . .
+RUN pnpm run build
+
 # 使用 Nginx 作为生产阶段
 FROM nginx:alpine
 
