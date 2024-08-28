@@ -146,7 +146,7 @@ const saveMeta = async ({ data, events }: { data: any; events: any }) => {
   await putMeta(id.value, { data, events });
   ElMessage({
     type: "success",
-    message: "场景保存成功!",
+    message: "场景保存成功~",
   });
 };
 
