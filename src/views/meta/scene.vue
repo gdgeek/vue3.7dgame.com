@@ -72,7 +72,6 @@ const postMessage = (action: string, data: any = {}) => {
       "*"
     );
   } else {
-    alert(JSON.stringify(action));
     ElMessage({
       message: "没有编辑器",
       type: "error",
@@ -89,7 +88,7 @@ const handleMessage = async (e: MessageEvent) => {
   const action = e.data.action;
   const data = e.data.data;
   //const data = e.data;
-  alert(JSON.stringify(e.data));
+  //alert(JSON.stringify(e.data));
   switch (action) {
     case "save":
       saveMeta(data);
@@ -98,16 +97,15 @@ const handleMessage = async (e: MessageEvent) => {
       loadResource(data);
       break;
     case "goto":
-      alert(data.target);
+      // alert(data.target);
       if (data.target === "blockly.js") {
         const scriptRoute = router
           .getRoutes()
           .find((route) => route.path === "/meta/script");
-        alert(1);
+
         if (scriptRoute && scriptRoute.meta.title) {
-          alert(2);
           const metaTitle = scriptRoute.meta.title as string;
-          alert(3);
+
           router.push({
             path: "/meta/script",
             query: {
