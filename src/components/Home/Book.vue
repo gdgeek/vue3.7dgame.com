@@ -21,8 +21,10 @@
 import Document from "@/components/Home/Document.vue";
 import DocumentList from "@/components/Home/DocumentList.vue";
 
+const { t } = useI18n();
+
 console.log("book");
-// 定义 props 类型
+
 const props = defineProps<{
   items?: { label: string; type: string; id: number }[];
   documentPath?: string;
@@ -34,10 +36,10 @@ const props = defineProps<{
 const items = computed(
   () =>
     props.items ?? [
-      { label: "首页", type: "document", id: 999 },
-      { label: "新闻", type: "category", id: 74 },
-      { label: "相关下载", type: "category", id: 84 },
-      { label: "案例教程", type: "category", id: 79 },
+      { label: t("homepage.dashboard"), type: "document", id: 999 },
+      { label: t("homepage.news"), type: "category", id: 74 },
+      { label: t("homepage.relatedDownload"), type: "category", id: 84 },
+      { label: t("homepage.caseCourse"), type: "category", id: 79 },
     ]
 );
 

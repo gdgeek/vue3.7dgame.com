@@ -1,10 +1,10 @@
 <template>
   <el-card>
     <el-tabs lazy style="min-height: 500px">
-      <el-tab-pane label="我的创作">
+      <el-tab-pane :label="$t('homepage.myCreation.title')">
         <!-- <mr-p-p-creator @refresh="refreshAuthor"></mr-p-p-creator> -->
       </el-tab-pane>
-      <el-tab-pane label="我点赞的">
+      <el-tab-pane :label="$t('homepage.myCreation.Iliked')">
         <!-- <mr-p-p-creator @refresh="refreshLiker"></mr-p-p-creator> -->
       </el-tab-pane>
     </el-tabs>
