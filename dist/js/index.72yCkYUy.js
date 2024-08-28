@@ -1,0 +1,1 @@
+import{d as a,e,h as n,B as s}from"./index.D_6c1BO-.js";const t={class:"app-container"},i=[s("h1",null,"Vue3-Element-Admin-Thin",-1)],d=a({name:"Dashboard",inheritAttrs:!1,__name:"index",setup:a=>(a,s)=>(e(),n("div",t,i))});export{d as default};
