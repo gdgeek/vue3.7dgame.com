@@ -98,14 +98,16 @@ const handleMessage = async (e: MessageEvent) => {
       loadResource(data);
       break;
     case "goto":
-      console.error(4);
+      alert(data.target);
       if (data.target === "blockly.js") {
-        console.error(5);
         const scriptRoute = router
           .getRoutes()
           .find((route) => route.path === "/meta/script");
+        alert(1);
         if (scriptRoute && scriptRoute.meta.title) {
+          alert(2);
           const metaTitle = scriptRoute.meta.title as string;
+          alert(3);
           router.push({
             path: "/meta/script",
             query: {
