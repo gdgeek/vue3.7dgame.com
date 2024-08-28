@@ -2,7 +2,73 @@ export default {
   // 路由国际化
   route: {
     dashboard: "Dashboard",
-    document: "Document",
+    personalCenter: {
+      title: "PersonalCenter",
+      myHomepage: "MyHomepage",
+      document: "Document",
+      category: "Category",
+      processOfCreation: "ProcessOfCreation",
+    },
+    settings: {
+      title: "Settings",
+      accountSetting: "AccountSetting",
+      personalData: "PersonalData",
+      userPresentation: "UserPresentation",
+    },
+    resourceManagement: {
+      title: "ResourceManagement",
+      voxelManagement: {
+        title: "VoxelManagement",
+        voxelList: "VoxelList",
+        voxelUpload: "VoxelUpload",
+        voxelProcessing: "VoxelProcessing",
+      },
+      polygenManagement: {
+        title: "PolygenManagement",
+        polygenList: "PolygenList",
+        polygenUpload: "PolygenUpload",
+        polygenProcessing: "PolygenProcessing",
+      },
+      pictureManagement: {
+        title: "PictureManagement",
+        pictureList: "PictureList",
+        pictureUpload: "PictureUpload",
+        pictureProcessing: "PictureProcessing",
+      },
+      videoManagement: {
+        title: "VideoManagement",
+        videoList: "VideoList",
+        videoUpload: "VideoUpload",
+        videoProcessing: "VideoProcessing",
+      },
+      audioManagement: {
+        title: "AudioManagement",
+        audioList: "AudioList",
+        audioUpload: "AudioUpload",
+        audioProcessing: "AudioProcessing",
+      },
+    },
+    meta: {
+      title: "Meta",
+      metaList: "MetaList",
+      systemDefault: "SystemDefault",
+      edit: "Edit",
+      scriptEditor: "ScriptEditor",
+      sceneEditor: "SceneEditor",
+    },
+    universe: {
+      title: "Universe",
+      selfGenerated: "SelfGenerated",
+      systemRecommendation: "SystemRecommendation",
+      shareWithFriends: "ShareWithFriends",
+      viewTitle: "【Universe】",
+      scriptEditor: "ScriptEditor",
+      sceneEditor: "SceneEditor",
+    },
+    manager: {
+      title: "Management",
+      userManagement: "UserManagement",
+    },
   },
   // 登录页面国际化
   login: {

@@ -1,6 +1,5 @@
 <template>
   <el-dialog v-model="dialogVisible" :close-on-click-modal="false" width="70%">
-    >
     <template #header>
       {{ props.dialogTitle }}
     </template>
