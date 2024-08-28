@@ -21,7 +21,7 @@
       <el-main>
         <el-card>
           <Waterfall :list="items" :width="320" :gutter="10">
-            <template #item="{ item }">
+            <template #default="{ item }">
               <mr-p-p-card
                 :item="item"
                 @named="namedWindow"
