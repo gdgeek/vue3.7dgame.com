@@ -89,7 +89,7 @@ const handleMessage = async (e: MessageEvent) => {
   const action = e.data.action;
   const data = e.data.data;
   //const data = e.data;
-  alert(JSON.stringify(e.data.data));
+  alert(JSON.stringify(e.data));
   switch (action) {
     case "save":
       saveMeta(data);
