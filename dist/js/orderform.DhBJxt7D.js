@@ -1,1 +1,0 @@
-import{d as e,ab as s,e as r,h as a,l as o}from"./index.D_6c1BO-.js";const t=e({__name:"orderform",setup:e=>(e,t)=>{const n=s("router-view");return r(),a("section",null,[o(n)])}});export{t as default};
