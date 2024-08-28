@@ -4,22 +4,24 @@
       <el-row>
         <el-col>
           <div class="box-title">
-            <h3 class="font-color">个人资料</h3>
-            <small>用户昵称、头像、基本信息修改</small>
+            <h3 class="font-color">{{ $t("homepage.edit.personalData") }}</h3>
+            <small>{{ $t("homepage.edit.personalDataStatement") }}</small>
           </div>
         </el-col>
         <el-col align="right">
           <span>
             <router-link to="/home/index">
-              <el-button size="small">返回个人中心</el-button>
+              <el-button size="small">{{
+                $t("homepage.edit.return")
+              }}</el-button>
             </router-link>
           </span>
         </el-col>
       </el-row>
       <el-divider></el-divider>
       <div class="box-title box-margin-bottom">
-        <h3 class="font-color">用户昵称</h3>
-        <small>让MrPP社区的其它用户更容易认识您。</small>
+        <h3 class="font-color">{{ $t("homepage.edit.userNickname") }}</h3>
+        <small>{{ $t("homepage.edit.userNicknameStatement") }}</small>
       </div>
       <!-- 用户头像和昵称开始 -->
       <el-row :gutter="24">
@@ -37,14 +39,14 @@
             label-width="80px"
           >
             <el-form-item
-              label="昵称"
+              :label="$t('homepage.edit.nickname')"
               prop="nickname"
               style="margin-bottom: 26px"
             >
               <el-input
                 v-model="nicknameForm.nickname"
                 style="width: 100%"
-                placeholder="昵称"
+                :placeholder="$t('homepage.edit.nickname')"
                 autocomplete="off"
                 @keyup.enter="submitNickname"
               >
@@ -54,13 +56,13 @@
                     :disabled="isDisable"
                     @click="submitNickname"
                   >
-                    确定
+                    {{ $t("homepage.edit.confirm") }}
                   </el-button>
                 </template>
               </el-input>
             </el-form-item>
             <!-- 头像部分 -->
-            <el-form-item label="头像">
+            <el-form-item :label="$t('homepage.edit.avatar')">
               <el-upload
                 class="avatar-uploader"
                 action=""
@@ -74,7 +76,9 @@
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
               </el-upload>
               <div style="float: left">
-                <p class="user-explain">最大尺寸 2 MB。JPG、GIF、PNG。</p>
+                <p class="user-explain">
+                  {{ $t("homepage.edit.avatarStatement") }}
+                </p>
               </div>
             </el-form-item>
             <!-- 头像部分 end -->
@@ -84,9 +88,9 @@
       <!-- 用户头像和昵称 end -->
       <el-divider></el-divider>
       <div class="box-title box-margin-bottom">
-        <h3 class="font-color">基本信息</h3>
+        <h3 class="font-color">{{ $t("homepage.edit.basicInformation") }}</h3>
         <small style="line-height: 16px">
-          请填写你的基本信息，以获得更有乐趣的个性化交互和体验。
+          {{ $t("homepage.edit.basicInformationStatement") }}
         </small>
       </div>
       <!-- 用户基本信息 start -->
@@ -105,23 +109,23 @@
             :rules="infoRules"
             label-width="80px"
           >
-            <el-form-item label="性别">
+            <el-form-item :label="$t('homepage.edit.gender')">
               <el-radio-group v-model="infoForm.sex">
                 <el-radio-button label="man" value="man">
                   <el-icon><Male></Male></el-icon>
-                  男
+                  {{ $t("homepage.edit.man") }}
                 </el-radio-button>
                 <el-radio-button label="woman" value="woman">
                   <el-icon><Female></Female></el-icon>
-                  女
+                  {{ $t("homepage.edit.woman") }}
                 </el-radio-button>
               </el-radio-group>
             </el-form-item>
-            <el-form-item label="行业" prop="industry">
+            <el-form-item :label="$t('homepage.edit.industry')" prop="industry">
               <el-select
                 v-model="infoForm.industry"
                 style="width: 100%"
-                placeholder="请选择活动区域"
+                :placeholder="$t('homepage.edit.industryStatement')"
               >
                 <el-option
                   v-for="item in industryOptions"
@@ -131,7 +135,10 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="居住地" prop="selectedOptions">
+            <el-form-item
+              :label="$t('homepage.edit.placeOfAbode')"
+              prop="selectedOptions"
+            >
               <el-cascader
                 v-model="infoForm.selectedOptions"
                 size="large"
@@ -140,13 +147,16 @@
                 @change="handleChange"
               ></el-cascader>
             </el-form-item>
-            <el-form-item label="个人简介" prop="textarea">
+            <el-form-item
+              :label="$t('homepage.edit.individualResume')"
+              prop="textarea"
+            >
               <el-input
                 v-model="infoForm.textarea"
                 style="width: 100%"
                 type="textarea"
                 :autosize="{ minRows: 4, maxRows: 10 }"
-                placeholder="个人信息的简要介绍"
+                :placeholder="$t('homepage.edit.individualResumeStatement')"
               ></el-input>
             </el-form-item>
             <el-form-item>
@@ -156,7 +166,7 @@
                 :disabled="isDisable"
                 @click="saveInfo"
               >
-                保存
+                {{ $t("homepage.edit.save") }}
               </el-button>
             </el-form-item>
           </el-form>
@@ -165,7 +175,9 @@
       <!-- 用户基本信息 end -->
       <!-- vueCropper 剪裁图片dialog实现 -->
       <el-dialog v-model="dialogVisible" class="crop-dialog" append-to-body>
-        <template #header> 头像截取 </template>
+        <template #header>
+          {{ $t("homepage.edit.avatarCropping.title") }}
+        </template>
         <div class="cropper-content">
           <div class="cropper" style="text-align: center">
             <VueCropper
@@ -196,7 +208,7 @@
                 plain
                 @click="rotateLeftHandle"
               >
-                左旋转
+                {{ $t("homepage.edit.avatarCropping.leftRotation") }}
               </el-button>
               <el-button
                 size="small"
@@ -204,7 +216,7 @@
                 plain
                 @click="rotateRightHandle"
               >
-                右旋转
+                {{ $t("homepage.edit.avatarCropping.rightRotation") }}
               </el-button>
               <el-button
                 size="small"
@@ -212,7 +224,7 @@
                 plain
                 @click="changeScaleHandle(1)"
               >
-                放大
+                {{ $t("homepage.edit.avatarCropping.enlarge") }}
               </el-button>
               <el-button
                 size="small"
@@ -220,12 +232,12 @@
                 plain
                 @click="changeScaleHandle(-1)"
               >
-                缩小
+                {{ $t("homepage.edit.avatarCropping.shrink") }}
               </el-button>
             </el-button-group>
             <el-button-group>
               <el-button size="small" @click="dialogVisible = false">
-                取 消
+                {{ $t("homepage.edit.avatarCropping.cancel") }}
               </el-button>
               <el-button
                 size="small"
@@ -233,7 +245,7 @@
                 :loading="loading"
                 @click="finish"
               >
-                确认
+                {{ $t("homepage.edit.avatarCropping.confirm") }}
               </el-button>
             </el-button-group>
           </div>

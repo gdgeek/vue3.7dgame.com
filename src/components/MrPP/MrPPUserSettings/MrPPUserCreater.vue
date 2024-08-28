@@ -5,7 +5,7 @@
         <div>
           <b>
             <font-awesome-icon icon="edit"></font-awesome-icon>
-            我的创作
+            {{ $t("homepage.myCreation.title") }}
           </b>
           :
         </div>
@@ -25,7 +25,7 @@
                 to="/resource/polygen/index"
               >
                 <font-awesome-icon class="icon" icon="cube"></font-awesome-icon>
-                模型
+                {{ $t("homepage.myCreation.myPolygen") }}
               </router-link>
             </template>
             {{ creation.polygenCount }}
@@ -41,7 +41,7 @@
                   class="icon"
                   icon="file-image"
                 ></font-awesome-icon>
-                图片
+                {{ $t("homepage.myCreation.myPicture") }}
               </router-link>
             </template>
             {{ creation.pictureCount }}
@@ -57,7 +57,7 @@
                   class="icon"
                   icon="file-video"
                 ></font-awesome-icon>
-                视频
+                {{ $t("homepage.myCreation.myVideo") }}
               </router-link>
             </template>
             {{ creation.videoCount }}
@@ -73,7 +73,7 @@
                   class="icon"
                   icon="adjust"
                 ></font-awesome-icon>
-                宇宙
+                {{ $t("homepage.myCreation.myUniverse") }}
               </router-link>
             </template>
             {{ creation.verseCount }}
@@ -86,7 +86,7 @@
                   class="icon"
                   icon="address-card"
                 ></font-awesome-icon>
-                发布
+                {{ $t("homepage.myCreation.myPublish") }}
               </router-link>
             </template>
             {{ creation.postCount }}
@@ -99,7 +99,7 @@
                   class="icon"
                   icon="fa-solid fa-thumbs-up"
                 ></font-awesome-icon>
-                点赞
+                {{ $t("homepage.myCreation.myLike") }}
               </router-link>
             </template>
             {{ creation.likeCount }}
@@ -109,7 +109,7 @@
         <aside style="margin-top: 10px; margin-bottom: 15px; float: right">
           <el-button type="primary" plain size="small" @click="gotoCreator">
             <i class="el-icon-edit"></i>
-            进入
+            {{ $t("homepage.myCreation.enter") }}
           </el-button>
         </aside>
       </div>
@@ -123,7 +123,6 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getUserCreation } from "@/api/v1/user";
 
-// 定义类型
 interface Creation {
   polygenCount: number;
   pictureCount: number;

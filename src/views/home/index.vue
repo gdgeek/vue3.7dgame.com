@@ -22,34 +22,33 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
 import { useInfomationStore } from "@/store/modules/information";
 import environment from "@/environment.js";
-import Document from "@/components/Document.vue";
 import Book from "@/components/Home/Book.vue";
-import DocumentList from "@/components/Home/DocumentList.vue";
 import LocalPage from "@/components/Home/LocalPage.vue";
-
-const props = defineProps<{}>();
 
 const informationStore = useInfomationStore();
 console.log("informationStore", informationStore.description);
 
-// 处理 environment 对象
 const env = computed(() => environment);
 
-// 定义 data 属性
-const mrpp = ref([
-  { label: "首页", type: "document", id: 999 },
-  { label: "新闻", type: "category", id: 74 },
-  { label: "相关下载", type: "category", id: 77 },
-  { label: "案例教程", type: "category", id: 79 },
-]);
+const { t } = useI18n();
 
-const mrcn = ref([
-  { label: "首页", type: "document", id: 999 },
-  { label: "新闻", type: "category", id: 74 },
-  { label: "相关下载", type: "category", id: 84 },
-  { label: "案例教程", type: "category", id: 79 },
-]);
+const mrpp = computed(() => {
+  return [
+    { label: t("homepage.dashboard"), type: "document", id: 999 },
+    { label: t("homepage.news"), type: "category", id: 74 },
+    { label: t("homepage.relatedDownload"), type: "category", id: 77 },
+    { label: t("homepage.caseCourse"), type: "category", id: 79 },
+  ];
+});
+
+const mrcn = computed(() => {
+  return [
+    { label: t("homepage.dashboard"), type: "document", id: 999 },
+    { label: t("homepage.news"), type: "category", id: 74 },
+    { label: t("homepage.relatedDownload"), type: "category", id: 84 },
+    { label: t("homepage.caseCourse"), type: "category", id: 79 },
+  ];
+});
 </script>

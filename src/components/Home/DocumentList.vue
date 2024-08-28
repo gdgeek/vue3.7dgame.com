@@ -29,8 +29,8 @@
               fit="cover"
             />
             <div class="document-list-text">
-              <h3 v-html="item.title.rendered"></h3>
-              <div v-html="item.excerpt.rendered"></div>
+              <h3 :innerHTML="sanitizedTitle(item)"></h3>
+              <div :innerHTML="sanitizedExcerpt(item)"></div>
             </div>
           </div>
         </el-card>
@@ -58,16 +58,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import moment from "moment";
 import { Posts, getCategory } from "@/api/home/wordpress";
+import DOMPurify from "dompurify";
 
 moment.locale("zh-cn");
 
 const router = useRouter();
 
-// 定义 Props 类型
 interface Item {
   id: number;
   title: { rendered: string };
@@ -88,7 +87,6 @@ interface Pagination {
   total: number | null;
 }
 
-// 定义 Props
 const props = withDefaults(
   defineProps<{
     categoryId: number;
@@ -150,6 +148,14 @@ const handleCurrentChange = (page: number) => {
 // 选择项目
 const select = (id: number) => {
   router.push({ path: props.documentPath, query: { id } });
+};
+
+const sanitizedTitle = (item: Item) => {
+  return item ? DOMPurify.sanitize(item.title.rendered) : "";
+};
+
+const sanitizedExcerpt = (item: Item) => {
+  return item ? DOMPurify.sanitize(item.excerpt.rendered) : "";
 };
 </script>
 
