@@ -81,6 +81,7 @@ const postMessage = (action: string, data: any = {}) => {
 };
 
 const handleMessage = async (e: MessageEvent) => {
+  console.error(2.5);
   if (!e.data || !e.data.action) {
     return;
   }
@@ -88,7 +89,7 @@ const handleMessage = async (e: MessageEvent) => {
   const action = e.data.action;
   const data = e.data.data;
   //const data = e.data;
-
+  console.error(3);
   switch (action) {
     case "save":
       saveMeta(data);
@@ -97,7 +98,9 @@ const handleMessage = async (e: MessageEvent) => {
       loadResource(data);
       break;
     case "goto":
+      console.error(4);
       if (data.target === "blockly.js") {
+        console.error(5);
         const scriptRoute = router
           .getRoutes()
           .find((route) => route.path === "/meta/script");

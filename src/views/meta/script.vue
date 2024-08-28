@@ -75,7 +75,7 @@ const postScript = async (message: any) => {
   const cyber: cybersType | undefined = meta.value.cyber;
 
   await putMetaCode(meta.value.id, {
-    blockly: JSON.stringify(message.data),
+    blockly: message.data,
     lua: message.script,
   });
   if (!cyber) {
