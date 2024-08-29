@@ -22,11 +22,6 @@
       </el-header>
       <el-main>
         <el-card style="width: 100%">
-          <Waterfall :list="list">
-            <template #default="{ item }"> {{ item }} </template>
-          </Waterfall>
-          1112
-
           <Waterfall
             :list="metaData as unknown as ViewCard[]"
             :width="320"
@@ -120,8 +115,6 @@ import { getMetas, postMeta, deleteMeta } from "@/api/v1/meta";
 import type { metaInfo } from "@/api/v1/meta";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { ViewCard } from "vue-waterfall-plugin-next/dist/types/types/waterfall";
-
-const list = [{ src: "xxxx.jpg" }, { src: "xxxx.jpg" }, { src: "xxxx.jpg" }];
 
 const router = useRouter();
 const metaData = ref<metaInfo[]>([]);
