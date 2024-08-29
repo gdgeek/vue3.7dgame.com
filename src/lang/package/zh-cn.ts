@@ -138,8 +138,50 @@ export default {
         shrink: "缩小",
         cancel: "取消",
         confirm: "确认",
+        error1: "上传头像图片只能是 JPG/PNG/BMP/GIF 格式!",
+        error2: "上传头像图片大小不能超过 2MB!",
+        error3: "请选择有效的文件！",
+        error4: "处理文件时出错",
+        success: "修改头像成功",
+      },
+      rules: {
+        nickname: {
+          message1: "请输入用户昵称",
+          message2: "昵称长度应该大于2个字符",
+          error1: "昵称不能为空",
+          error2: "昵称仅支持中文、字母、数字、下划线",
+          error3: "昵称更新失败",
+          error4: "表单校验未通过",
+          success: "昵称更新成功",
+        },
+        industry: {
+          message: "请选择行业",
+          label1: "科技、信息技术",
+          label2: "经济、金融",
+          label3: "教育、医疗",
+          label4: "能源、制造业",
+          label5: "农、林、渔、牧",
+          label6: "服务业",
+          label7: "其他行业",
+        },
+        selectedOptions: {
+          message: "请选择居住地",
+        },
+        textarea: {
+          message1: "请输入个人简介",
+          message2: "个人简介应多于10个字符",
+        },
+        success: "信息更新成功",
+        error1: "信息更新失败",
+        error2: "表单校验未通过",
       },
     },
+  },
+  // 体素管理国际化
+  voxel: {
+    uploadVoxel: "上传体素",
+    initializeVoxelData: "初始化体素数据",
+    viewVoxel: "查看体素",
   },
   // 导航栏国际化
   navbar: {

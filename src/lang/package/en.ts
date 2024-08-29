@@ -128,8 +128,8 @@ export default {
       woman: "Woman",
       industry: "Industry",
       industryStatement: "Please select your industry region",
-      placeOfAbode: "PlaceOfAbode",
-      individualResume: "IndividualResume",
+      placeOfAbode: "PlaceOfResidence",
+      individualResume: "PersonalProfile",
       individualResumeStatement: "A brief introduction of personal information",
       save: "Save",
       avatarCropping: {
@@ -140,8 +140,51 @@ export default {
         shrink: "Shrink",
         cancel: "Cancel",
         confirm: "Confirm",
+        error1: "Avatar images can only be in JPG/PNG/BMP/GIF format!",
+        error2: "Avatar image size cannot exceed 2MB!",
+        error3: "Please select a valid file!",
+        error4: "Error processing the file",
+        success: "Avatar updated successfully",
+      },
+      rules: {
+        nickname: {
+          message1: "Please enter a user nickname",
+          message2: "The nickname length should be greater than 2 characters",
+          error1: "The nickname cannot be empty",
+          error2:
+            "The nickname only supports Chinese characters, letters, numbers, and underscores",
+          error3: "Nickname update failed",
+          error4: "Form validation failed",
+          success: "Nickname updated successfully",
+        },
+        industry: {
+          message: "Please select an industry",
+          label1: "Technology, Information Technology",
+          label2: "Economics, Finance",
+          label3: "Education, Healthcare",
+          label4: "Energy, Manufacturing",
+          label5: "Agriculture, Forestry, Fishing, Animal Husbandry",
+          label6: "Services industry",
+          label7: "Other industries",
+        },
+        selectedOptions: {
+          message: "Please select a place of residence",
+        },
+        textarea: {
+          message1: "Please enter a personal profile",
+          message2: "The personal profile should be more than 10 characters",
+        },
+        success: "Information updated successfully",
+        error1: "Information update failed",
+        error2: "Form validation failed",
       },
     },
+  },
+  // 体素管理国际化
+  voxel: {
+    uploadVoxel: "UploadVoxel",
+    initializeVoxelData: "InitializeVoxelData",
+    viewVoxel: "ViewVoxel",
   },
   // 导航栏国际化
   navbar: {

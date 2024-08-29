@@ -135,9 +135,9 @@ onBeforeMount(() => userStore.getUserInfo());
 }
 
 .gradient-text {
-  font-family: "KaiTi", "Arial", sans-serif; /* 选择合适的字体 */
-  font-size: 16px; /* 设置字体大小 */
-  font-weight: bold; /* 设置字体粗细 */
+  font-family: "KaiTi", "Arial", sans-serif;
+  font-size: 16px;
+  font-weight: bold;
   background: linear-gradient(
     45deg,
     #ff6a00,

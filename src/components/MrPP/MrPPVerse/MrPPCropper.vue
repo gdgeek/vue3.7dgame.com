@@ -15,7 +15,7 @@
 
     <el-dialog v-model="dialogVisible" class="crop-dialog" append-to-body>
       <template #header>
-        <span>头像截取</span>
+        <span> {{ $t("homepage.edit.avatarCropping.title") }}</span>
       </template>
       <div class="cropper-content">
         <div class="cropper" style="text-align: center">
@@ -50,7 +50,7 @@
             plain
             @click="rotateLeftHandle"
           >
-            左旋转
+            {{ $t("homepage.edit.avatarCropping.leftRotation") }}
           </el-button>
           <el-button
             size="small"
@@ -58,7 +58,7 @@
             plain
             @click="rotateRightHandle"
           >
-            右旋转
+            {{ $t("homepage.edit.avatarCropping.rightRotation") }}
           </el-button>
           <el-button
             size="small"
@@ -66,7 +66,7 @@
             plain
             @click="changeScaleHandle(1)"
           >
-            放大
+            {{ $t("homepage.edit.avatarCropping.enlarge") }}
           </el-button>
           <el-button
             size="small"
@@ -74,13 +74,15 @@
             plain
             @click="changeScaleHandle(-1)"
           >
-            缩小
+            {{ $t("homepage.edit.avatarCropping.shrink") }}
           </el-button>
         </el-button-group>
         <el-button-group>
-          <el-button @click="dialogVisible = false">取消</el-button>
+          <el-button @click="dialogVisible = false">{{
+            $t("homepage.edit.avatarCropping.cancel")
+          }}</el-button>
           <el-button type="primary" :loading="loading" @click="finish">
-            确认
+            {{ $t("homepage.edit.avatarCropping.confirm") }}
           </el-button>
         </el-button-group>
       </template>
