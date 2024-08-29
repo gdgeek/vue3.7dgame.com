@@ -5,7 +5,7 @@
       :file-type="fileType"
       @save-resource="savePolygen"
     >
-      <div>选择模型（.glb文件），并上传</div>
+      <div>{{ $t("polygen.uploadFile") }}</div>
     </mr-p-p-upload>
   </div>
 </template>

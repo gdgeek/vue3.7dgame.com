@@ -4,7 +4,7 @@
       <el-col :sm="16">
         <el-card class="box-card">
           <template #header>
-            <b id="title">体素名称：</b>
+            <b id="title">{{ $t("voxel.view.title") }}</b>
             <span v-if="voxelData">{{ voxelData.name }}</span>
           </template>
           <div v-loading="false" class="box-item">
@@ -27,28 +27,28 @@
             @click="createVerse"
           >
             <font-awesome-icon icon="plus"></font-awesome-icon>
-            &nbsp;用体素创建【宇宙】
+            &nbsp;{{ $t("voxel.view.titleStatement") }}
           </el-button>
         </el-card>
         <br />
       </el-col>
       <el-col :sm="8">
         <el-card class="box-card">
-          <template #header> <b>体素信息</b>: </template>
+          <template #header> <b>{{ $t("voxel.view.info.title") }}</b>: </template>
           <div class="box-item">
             <el-table :data="tableData" stripe>
-              <el-table-column prop="item" label="条目"></el-table-column>
-              <el-table-column prop="text" label="内容"></el-table-column>
+              <el-table-column prop="item" :label="$t('voxel.view.info.label1')"></el-table-column>
+              <el-table-column prop="text" :label="$t('voxel.view.info.label2')"></el-table-column>
             </el-table>
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right">
                 <el-button type="success" size="small" @click="namedWindow">
                   <i class="el-icon-edit"></i>
-                  改名
+                  {{ $t("voxel.view.info.name") }}
                 </el-button>
                 <el-button type="danger" size="small" @click="deleteWindow">
                   <i class="el-icon-delete"></i>
-                  删除
+                  {{ $t("voxel.view.info.delete") }}
                 </el-button>
               </el-button-group>
             </aside>
@@ -80,6 +80,8 @@ const router = useRouter();
 
 const id = computed(() => route.query.id as string);
 
+const { t } = useI18n();
+
 const prepare = computed(
   () => voxelData.value != null && voxelData.value.info !== null
 );
@@ -89,13 +91,13 @@ const tableData = computed(() => {
     const info = JSON.parse(voxelData.value.info);
 
     return [
-      { item: "模型名称", text: voxelData.value.name },
-      { item: "创建者", text: voxelData.value.author.nickname },
-      { item: "创建时间", text: voxelData.value.created_at },
-      { item: "文件大小", text: voxelData.value.file.size + "字节" },
-      { item: "体素尺寸", text: printVector3(info.size) },
-      { item: "体素中心", text: printVector3(info.center) },
-      { item: "体素数量", text: info.count },
+      { item: t("voxel.view.info.item1"), text: voxelData.value.name },
+      { item: t("voxel.view.info.item2"), text: voxelData.value.author.nickname },
+      { item: t("voxel.view.info.item3"), text: voxelData.value.created_at },
+      { item: t("voxel.view.info.item4"), text: voxelData.value.file.size + t("voxel.view.info.size") },
+      { item: t("voxel.view.info.item5"), text: printVector3(info.size) },
+      { item: t("voxel.view.info.item6"), text: printVector3(info.center) },
+      { item: t("voxel.view.info.item7"), text: info.count },
     ];
   } else {
     return [];
@@ -107,11 +109,11 @@ const dataInfo = computed(() =>
 );
 
 const meshSize = computed(() =>
-  prepare.value ? dataInfo.value.size : "等待更新"
+  prepare.value ? dataInfo.value.size : t("voxel.view.update")
 );
 
 const meshCenter = computed(() =>
-  prepare.value ? dataInfo.value.center : "等待更新"
+  prepare.value ? dataInfo.value.center : t("voxel.view.update")
 );
 
 const loadVoxelData = async () => {
@@ -131,13 +133,13 @@ const progress = (percentage: number) => {
 const createVerse = async () => {
   try {
     const { value } = await ElMessageBox.prompt(
-      "用此模型创建【宇宙】",
-      "提示",
+      t("voxel.view.prompt.message1"),
+      t("voxel.view.prompt.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("voxel.view.prompt.confirm"),
+        cancelButtonText: t("voxel.view.prompt.cancel"),
         inputValue: voxelData.value.name,
-        inputErrorMessage: "请填写相应名称",
+        inputErrorMessage: t("voxel.view.prompt.inputError"),
       }
     );
 
@@ -149,48 +151,48 @@ const createVerse = async () => {
           value,
           voxelData.value
         );
-        ElMessage.success("你创建了新的场景: " + value);
+        ElMessage.success(t("voxel.view.prompt.success") + value);
         setTimeout(() => {
           router.push("/meta-verse/index");
         }, 300);
       } catch (error) {
-        ElMessage.error("创建失败: " + error);
+        ElMessage.error(t("voxel.view.prompt.error") + error);
       } finally {
         loading.value = false;
       }
     } else {
-      ElMessage.info("取消输入");
+      ElMessage.info(t("voxel.view.prompt.info"));
     }
   } catch {
-    ElMessage.info("取消输入");
+    ElMessage.info(t("voxel.view.prompt.info"));
   }
 };
 
 const deleteWindow = async () => {
   try {
-    await ElMessageBox.confirm("此操作将永久删除该文件, 是否继续?", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    await ElMessageBox.confirm(t("voxel.view.confirm.message1"), t("voxel.view.confirm.message2"), {
+      confirmButtonText: t("voxel.view.confirm.confirm"),
+      cancelButtonText: t("voxel.view.confirm.cancel"),
       closeOnClickModal: false,
       type: "warning",
     });
 
     await deleteVoxel(voxelData.value.id);
-    ElMessage.success("删除成功!");
+    ElMessage.success(t("voxel.view.confirm.success"));
     router.push("/resource/voxel/index");
   } catch {
-    ElMessage.info("已取消删除");
+    ElMessage.info(t("voxel.view.confirm.info"));
   }
 };
 
 const namedWindow = async () => {
   try {
     const { value } = await ElMessageBox.prompt(
-      "请输入新名称",
-      "修改模型名称",
+      t("voxel.view.namePrompt.message1"),
+      t("voxel.view.namePrompt.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("voxel.view.namePrompt.confirm"),
+        cancelButtonText: t("voxel.view.namePrompt.cancel"),
         closeOnClickModal: false,
         inputValue: voxelData.value.name,
       }
@@ -198,12 +200,12 @@ const namedWindow = async () => {
 
     if (value) {
       await named(voxelData.value.id, value);
-      ElMessage.success("新的模型名称: " + value);
+      ElMessage.success(t("voxel.view.namePrompt.success") + value);
     } else {
-      ElMessage.info("取消输入");
+      ElMessage.info(t("voxel.view.namePrompt.info"));
     }
   } catch {
-    ElMessage.info("取消输入");
+    ElMessage.info(t("voxel.view.namePrompt.info"));
   }
 };
 

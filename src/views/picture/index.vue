@@ -12,7 +12,7 @@
           <el-button-group :inline="true">
             <router-link to="/resource/picture/upload">
               <el-button size="small" type="primary" icon="uploadFilled">
-                <span class="hidden-sm-and-down">上传图片</span>
+                <span class="hidden-sm-and-down">{{ $t("picture.uploadPicture") }}</span>
               </el-button>
             </router-link>
           </el-button-group>
@@ -34,10 +34,10 @@
                       type="warning"
                       size="small"
                     >
-                      初始化图片数据
+                      {{ $t("picture.initializePictureData") }}
                     </el-button>
                     <el-button v-else type="primary" size="small">
-                      查看图片
+                      {{ $t("picture.viewPicture") }}
                     </el-button>
                   </router-link>
                 </template>
@@ -65,7 +65,6 @@
 </template>
 
 <script setup lang="ts">
-import "element-plus/theme-chalk/index.css";
 import { useRouter } from "vue-router";
 import { getPictures, putPicture, deletePicture } from "@/api/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
@@ -85,6 +84,8 @@ const pagination = ref({
 
 const router = useRouter();
 
+const { t } = useI18n();
+
 // 处理分页
 const handleCurrentChange = (page: number) => {
   pagination.value.current = page;
@@ -96,19 +97,19 @@ const handleCurrentChange = (page: number) => {
 const namedWindow = async (item: { id: string; name: string }) => {
   try {
     const { value } = await ElMessageBox.prompt(
-      "请输入新名称",
-      "修改图片名称",
+      t("picture.prompt.message1"),
+      t("picture.prompt.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("picture.prompt.confirm"),
+        cancelButtonText: t("picture.prompt.cancel"),
         closeOnClickModal: false,
         inputValue: item.name,
       }
     );
     await named(item.id, value);
-    ElMessage.success("新的模型名称: " + value);
+    ElMessage.success(t("picture.prompt.success") + value);
   } catch {
-    ElMessage.info("取消输入");
+    ElMessage.info(t("picture.prompt.info"));
   }
 };
 
@@ -136,16 +137,16 @@ const named = async (id: string, newValue: string) => {
 
 const deletedWindow = async (item: { id: string }) => {
   try {
-    await ElMessageBox.confirm("此操作将永久删除该文件, 是否继续?", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    await ElMessageBox.confirm(t("picture.confirm.message1"), t("picture.confirm.message2"), {
+      confirmButtonText: t("picture.confirm.confirm"),
+      cancelButtonText: t("picture.confirm.cancel"),
       closeOnClickModal: false,
       type: "warning",
     });
     await deleted(item.id);
-    ElMessage.success("删除成功!");
+    ElMessage.success(t("picture.confirm.success"));
   } catch {
-    ElMessage.info("已取消删除");
+    ElMessage.info(t("picture.confirm.info"));
   }
 };
 

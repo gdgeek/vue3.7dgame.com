@@ -5,13 +5,12 @@
       :file-type="fileType"
       @save-resource="savePicture"
     >
-      <div>选择图片并上传</div>
+      <div>{{ $t("picture.uploadFile") }}</div>
     </mr-p-p-upload>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { useRouter } from "vue-router";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 import { postPicture } from "@/api/resources/index";

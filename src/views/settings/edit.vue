@@ -258,7 +258,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
 import { useUserStore } from "@/store/modules/user";
 import { useFileStore } from "@/store/modules/config";
 import { useRoute } from "vue-router";
@@ -595,7 +594,7 @@ async function finish() {
         md5,
         file.name.split(".").pop() || "", // 获取文件扩展名
         file,
-        (p) => {},
+        (p: any) => {},
         handler,
         "backup"
       );

@@ -4,18 +4,18 @@
       <el-col :sm="16">
         <el-card class="box-card">
           <template #header>
-            <b id="title">模型名称：</b>
+            <b id="title">{{ $t("polygen.view.title") }}</b>
             <span v-if="polygenData">{{ polygenData.name }}</span>
           </template>
           <div v-loading="false" class="box-item">
-            <polygn
+            <polygen
               v-if="polygenData"
               ref="three"
               :file="polygenData.file"
               @loaded="loaded"
               @progress="progress"
             >
-            </polygn>
+            </polygen>
           </div>
           <el-progress :percentage="percentage"></el-progress>
         </el-card>
@@ -29,7 +29,7 @@
             @click="createVerse"
           >
             <font-awesome-icon icon="plus"></font-awesome-icon>
-            &nbsp;用此模型创建【宇宙】
+            &nbsp;{{ $t("polygen.view.titleStatement") }}
           </el-button>
         </el-card>
         <br />
@@ -37,22 +37,22 @@
 
       <el-col :sm="8">
         <el-card class="box-card">
-          <template #header> <b>模型信息</b> : </template>
+          <template #header> <b>{{ $t("polygen.view.info.title") }}</b> : </template>
           <div class="box-item">
             <el-table :data="tableData" stripe>
-              <el-table-column prop="item" label="条目"></el-table-column>
-              <el-table-column prop="text" label="内容"></el-table-column>
+              <el-table-column prop="item" :label="$t('polygen.view.info.label1')"></el-table-column>
+              <el-table-column prop="text" :label="$t('polygen.view.info.label2')"></el-table-column>
             </el-table>
 
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="namedWindow">
                   <i class="el-icon-edit"></i>
-                  改名
+                  {{ $t("polygen.view.info.name") }}
                 </el-button>
                 <el-button type="primary" size="small" @click="deleteWindow">
                   <i class="el-icon-delete"></i>
-                  删除
+                  {{ $t("polygen.view.info.delete") }}
                 </el-button>
               </el-button-group>
             </aside>
@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import Polygn from "@/components/Polygen.vue";
+import Polygen from "@/components/Polygen.vue";
 import { getPolygen, putPolygen, deletePolygen } from "@/api/resources/index";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
@@ -81,7 +81,9 @@ const route = useRoute();
 const router = useRouter();
 const store = useFileStore().store;
 
-const three = ref<InstanceType<typeof Polygn> | null>(null);
+const { t } = useI18n();
+
+const three = ref<InstanceType<typeof Polygen> | null>(null);
 const id = computed(() => route.query.id as string);
 const prepare = computed(
   () => polygenData.value !== null && polygenData.value.info !== null
@@ -93,12 +95,12 @@ const dataInfo = computed(() =>
 const tableData = computed(() => {
   if (polygenData.value !== null && prepare.value) {
     return [
-      { item: "模型名称", text: polygenData.value.name },
-      { item: "创建者", text: polygenData.value.author.nickname },
-      { item: "创建时间", text: polygenData.value.created_at },
-      { item: "文件大小", text: `${polygenData.value.file.size}字节` },
-      { item: "模型尺寸", text: printVector3(dataInfo.value.size) },
-      { item: "模型中心点", text: printVector3(dataInfo.value.center) },
+      { item: t("polygen.view.info.item1"), text: polygenData.value.name },
+      { item: t("polygen.view.info.item2"), text: polygenData.value.author.nickname },
+      { item: t("polygen.view.info.item3"), text: polygenData.value.created_at },
+      { item: t("polygen.view.info.item4"), text: `${polygenData.value.file.size}` + t("polygen.view.info.size") },
+      { item: t("polygen.view.info.item5"), text: printVector3(dataInfo.value.size) },
+      { item: t("polygen.view.info.item6"), text: printVector3(dataInfo.value.center) },
     ];
   } else {
     return [];
@@ -112,13 +114,13 @@ const progress = (progress: number) => {
 const createVerse = async () => {
   try {
     const { value } = await ElMessageBox.prompt(
-      "用此模型创建【宇宙】",
-      "提示",
+      t("polygen.view.prompt.message1"),
+      t("polygen.view.prompt.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("polygen.view.prompt.confirm"),
+        cancelButtonText: t("polygen.view.prompt.cancel"),
         inputValue: polygenData.value.name,
-        inputErrorMessage: "请填写相应名称",
+        inputErrorMessage: t("polygen.view.prompt.inputError"),
       }
     );
 
@@ -126,16 +128,16 @@ const createVerse = async () => {
 
     await createVerseFromResource("Polygen", value, polygenData.value);
 
-    ElMessage.success("你创建了新的场景: " + value);
+    ElMessage.success(t("polygen.view.prompt.success") + value);
 
     setTimeout(() => {
       router.push("/meta-verse/index");
     }, 300);
   } catch (error) {
     if (error !== "cancel") {
-      ElMessage.error("创建失败: " + error);
+      ElMessage.error(t("polygen.view.prompt.error") + error);
     } else {
-      ElMessage.info("取消输入");
+      ElMessage.info(t("polygen.view.prompt.info"));
     }
   } finally {
     loading.value = false;
@@ -144,30 +146,30 @@ const createVerse = async () => {
 
 const deleteWindow = async () => {
   try {
-    await ElMessageBox.confirm("此操作将永久删除该文件, 是否继续?", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    await ElMessageBox.confirm(t("polygen.view.confirm.message1"), t("polygen.view.confirm.message2"), {
+      confirmButtonText: t("polygen.view.confirm.confirm"),
+      cancelButtonText: t("polygen.view.confirm.cancel"),
       closeOnClickModal: false,
       type: "warning",
     });
 
     await deletePolygen(polygenData.value.id);
 
-    ElMessage.success("删除成功!");
+    ElMessage.success(t("polygen.view.confirm.success"));
     router.push("/resource/polygen/index");
   } catch {
-    ElMessage.info("已取消删除");
+    ElMessage.info(t("polygen.view.confirm.info"));
   }
 };
 
 const namedWindow = async () => {
   try {
     const { value } = await ElMessageBox.prompt(
-      "请输入新名称",
-      "修改模型名称",
+      t("polygen.view.namePrompt.message1"),
+      t("polygen.view.namePrompt.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("polygen.view.namePrompt.confirm"),
+        cancelButtonText: t("polygen.view.namePrompt.cancel"),
         closeOnClickModal: false,
         inputValue: polygenData.value.name,
       }
@@ -177,9 +179,9 @@ const namedWindow = async () => {
 
     polygenData.value.name = value;
 
-    ElMessage.success("新的模型名称: " + value);
+    ElMessage.success(t("polygen.view.namePrompt.success") + value);
   } catch {
-    ElMessage.info("取消输入");
+    ElMessage.info(t("polygen.view.namePrompt.info"));
   }
 };
 
@@ -258,7 +260,7 @@ const loaded = async (info: any) => {
 };
 
 const screenshot = () => {
-  return (ref("three").value as any).screenshot();
+  return three.screenshot();
 };
 
 onMounted(async () => {

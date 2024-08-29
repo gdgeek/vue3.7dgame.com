@@ -12,7 +12,7 @@
           <el-button-group :inline="true">
             <router-link to="/resource/polygen/upload">
               <el-button size="small" type="primary" icon="uploadFilled">
-                <span class="hidden-sm-and-down">上传模型</span>
+                <span class="hidden-sm-and-down">{{ $t("polygen.uploadPolygen") }}</span>
               </el-button>
             </router-link>
           </el-button-group>
@@ -35,10 +35,10 @@
                         type="warning"
                         size="small"
                       >
-                        初始化模型数据
+                        {{ $t("polygen.initializePolygenData") }}
                       </el-button>
                       <el-button v-else type="primary" size="small">
-                        查看模型
+                        {{  $t("polygen.viewPolygen") }}
                       </el-button>
                     </el-button-group>
                   </router-link>
@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import "element-plus/theme-chalk/index.css";
+// import "element-plus/theme-chalk/index.css";
 import { useRouter } from "vue-router";
 import { getPolygens, putPolygen, deletePolygen } from "@/api/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
@@ -77,6 +77,8 @@ import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 
 const router = useRouter();
+
+const { t } = useI18n();
 
 const items = ref<any[]>([]);
 const sorted = ref("-created_at");
@@ -115,26 +117,26 @@ const handleCurrentChange = (page: number) => {
   refresh();
 };
 
-const namedWindow = async (item: { id: string; name: string }) => {
+const namedWindow = async (item: { id: number; name: string }) => {
   try {
     const { value } = await ElMessageBox.prompt(
-      "请输入新名称",
-      "修改模型名称",
+      t("polygen.prompt.message1"),
+      t("polygen.prompt.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("polygen.prompt.confirm"),
+        cancelButtonText: t("polygen.prompt.cancel"),
         closeOnClickModal: false,
         inputValue: item.name,
       }
     );
     await named(item.id, value);
-    ElMessage.success("新的模型名称: " + value);
+    ElMessage.success(t("polygen.prompt.success") + value);
   } catch {
-    ElMessage.info("取消输入");
+    ElMessage.info(t("polygen.prompt.info"));
   }
 };
 
-const named = async (id: string, newValue: string) => {
+const named = async (id: number, newValue: string) => {
   try {
     await putPolygen(id, { name: newValue });
     refresh();
@@ -145,16 +147,16 @@ const named = async (id: string, newValue: string) => {
 
 const deletedWindow = async (item: { id: string }) => {
   try {
-    await ElMessageBox.confirm("此操作将永久删除该文件, 是否继续?", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    await ElMessageBox.confirm(t("polygen.confirm.message1"), t("polygen.confirm.message1"), {
+      confirmButtonText: t("polygen.confirm.confirm"),
+      cancelButtonText: t("polygen.confirm.cancel"),
       closeOnClickModal: false,
       type: "warning",
     });
     await deleted(item.id);
-    ElMessage.success("删除成功!");
+    ElMessage.success(t("polygen.confirm.success"));
   } catch {
-    ElMessage.info("已取消删除");
+    ElMessage.info(t("polygen.confirm.info"));
   }
 };
 

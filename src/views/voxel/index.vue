@@ -12,7 +12,7 @@
           <el-button-group :inline="true">
             <router-link to="/resource/voxel/upload">
               <el-button size="small" type="primary" icon="UploadFilled">
-                <span class="hidden-sm-and-down">上传模型</span>
+                <span class="hidden-sm-and-down">{{ $t("voxel.uploadVoxel") }}</span>
               </el-button>
             </router-link>
           </el-button-group>
@@ -35,10 +35,10 @@
                         type="warning"
                         size="small"
                       >
-                        初始化体素数据
+                        {{ $t("voxel.initializeVoxelData") }}
                       </el-button>
                       <el-button v-else type="primary" size="small">
-                        查看体素
+                        {{ $t("voxel.viewVoxel") }}
                       </el-button>
                     </el-button-group>
                   </router-link>
@@ -66,10 +66,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
-import "element-plus/theme-chalk/index.css";
 import { getVoxels, putVoxel, deleteVoxel } from "@/api/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
@@ -95,26 +93,31 @@ const pagination = ref<Pagination>({
 
 const router = useRouter();
 
+const { t } = useI18n();
+
 const handleCurrentChange = (page: number) => {
   pagination.value.current = page;
   refresh();
   console.log(pagination.value.current);
 };
 
-const namedWindow = (item: any) => {
-  ElMessageBox.prompt("请输入新名称", "修改模型名称", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    closeOnClickModal: false,
-    inputValue: item.name,
-  })
-    .then(({ value }) => {
-      named(item.id, value);
-      ElMessage.success(`新的模型名称: ${value}`);
-    })
-    .catch(() => {
-      ElMessage.info("取消输入");
-    });
+const namedWindow = async (item: { id: number; name: string }) => {
+  try {
+    const { value } = await ElMessageBox.prompt(
+      t("voxel.prompt.message1"),
+      t("voxel.prompt.message2"),
+      {
+        confirmButtonText: t("voxel.prompt.confirm"),
+        cancelButtonText: t("voxel.prompt.cancel"),
+        closeOnClickModal: false,
+        inputValue: item.name,
+      }
+    );
+    await named(item.id, value);
+    ElMessage.success(t("voxel.prompt.success") + value);
+  } catch {
+    ElMessage.info(t("voxel.prompt.info"));
+  }
 };
 
 const sort = (value: string) => {
@@ -139,18 +142,18 @@ const named = (id: number, newValue: string) => {
 };
 
 const deletedWindow = (item: any) => {
-  ElMessageBox.confirm("此操作将永久删除该文件, 是否继续?", "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
+  ElMessageBox.confirm(t("voxel.confirm.message1"), t("voxel.confirm.message2"), {
+    confirmButtonText: t("voxel.confirm.confirm"),
+    cancelButtonText: t("voxel.confirm.cancel"),
     closeOnClickModal: false,
     type: "warning",
   })
     .then(() => {
       deleted(item.id);
-      ElMessage.success("删除成功!");
+      ElMessage.success(t("voxel.confirm.success"));
     })
     .catch(() => {
-      ElMessage.info("已取消删除");
+      ElMessage.info(t("voxel.confirm.info"));
     });
 };
 

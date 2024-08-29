@@ -11,7 +11,6 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import ElementResizeDetector from "element-resize-detector";
 import { convertToHttps } from "@/assets/js/helper";
-import { onMounted, ref, defineProps, defineEmits, defineExpose } from "vue";
 /**
  *
  * @param vec
