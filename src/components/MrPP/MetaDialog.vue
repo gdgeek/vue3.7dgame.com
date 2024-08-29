@@ -35,7 +35,7 @@
         :list="viewCards"
         :column-count="3"
       >
-        <template #item="{ item }">
+        <template #default="{ item }">
           <el-card style="width: 220px" class="box-card">
             <template #header>
               <el-card shadow="hover" :body-style="{ padding: '0px' }">

@@ -23,7 +23,7 @@
       <el-main>
         <el-card style="width: 100%">
           <Waterfall :list="list">
-            <template #item="{ item }"> {{ item }} </template>
+            <template #default="{ item }"> {{ item }} </template>
           </Waterfall>
           1112
 
@@ -36,7 +36,7 @@
               640: { rowPerView: 1 },
             }"
           >
-            <template #item="{ item }">
+            <template #default="{ item }">
               <el-card style="width: 320px" class="box-card">
                 <template #header>
                   <div>

@@ -8,7 +8,7 @@
       :list="viewCards"
       :column-count="3"
     >
-      <template #item="{ item }">
+      <template #default="{ item }">
         <el-card style="width: 150px" :body-style="{ padding: '0px' }">
           <LazyImg :url="getUrl(item)" class="image"></LazyImg>
           <div style="padding: 14px">

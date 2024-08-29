@@ -52,7 +52,7 @@
         :list="viewCards"
         :column-count="3"
       >
-        <template #item="{ item }">
+        <template #default="{ item }">
           <div style="width: 230px">
             <el-card
               v-if="activeName === 'owner'"
