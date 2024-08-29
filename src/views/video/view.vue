@@ -4,20 +4,20 @@
       <el-col :sm="16">
         <el-card class="box-card">
           <template #header>
-            <b id="title">图片名称：</b>
+            <b id="title">{{ t("video.view.title") }}</b>
             <span v-if="videoData">{{ videoData.name }}</span>
           </template>
           <div class="box-item" style="text-align: center">
             <video
               id="video"
               controls="true"
-              style="height: 300px; width: 100%"
+              style="height: 300px; width: auto"
             >
               <source v-if="file !== null" id="src" :src="file" />
             </video>
             <video
               id="new_video"
-              style="height: 100%; width: 100%"
+              style="height: 100%; width: auto"
               hidden
               @canplaythrough="dealWith"
             ></video>
@@ -27,21 +27,21 @@
       </el-col>
       <el-col :sm="8">
         <el-card class="box-card">
-          <template #header> <b>视频信息</b>: </template>
+          <template #header> <b>{{ $t("video.view.info.title") }}</b>: </template>
           <div class="box-item">
             <el-table :data="tableData" stripe>
-              <el-table-column prop="item" label="条目"></el-table-column>
-              <el-table-column prop="text" label="内容"></el-table-column>
+              <el-table-column prop="item" :label="$t('video.view.info.label1')"></el-table-column>
+              <el-table-column prop="text" :label="$t('video.view.info.label2')"></el-table-column>
             </el-table>
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="namedWindow">
                   <i class="el-icon-edit"></i>
-                  改名
+                  {{ $t('video.view.info.name') }}
                 </el-button>
                 <el-button type="primary" size="small" @click="deleteWindow">
                   <i class="el-icon-delete"></i>
-                  删除
+                  {{ $t('video.view.info.delete') }}
                 </el-button>
               </el-button-group>
             </aside>
@@ -69,6 +69,8 @@ const videoData = ref<ResourceInfo | null>(null);
 const file = ref<string | null>(null);
 const expire = ref(true);
 
+const { t } = useI18n();
+
 const id = computed(() => route.query.id as string);
 const prepare = computed(
   () => videoData.value !== null && videoData.value.info !== null
@@ -89,23 +91,23 @@ const tableData = computed(() => {
   if (videoData.value && prepare.value) {
     return [
       {
-        item: "视频名称",
+        item: t("video.view.info.item1"),
         text: videoData.value.name,
       },
       {
-        item: "创建者",
+        item: t("video.view.info.item2"),
         text: videoData.value.author.nickname,
       },
       {
-        item: "创建时间",
+        item: t("video.view.info.item3"),
         text: videoData.value.created_at,
       },
       {
-        item: "文件大小",
-        text: videoData.value.file.size + "字节",
+        item: t("video.view.info.item4"),
+        text: videoData.value.file.size + t("video.view.info.size"),
       },
       {
-        item: "视频尺寸",
+        item: t("video.view.info.item5"),
         text: printVector2(JSON.parse(videoData.value.info).size),
       },
     ];
@@ -236,27 +238,27 @@ const setup = async (
 
 const deleteWindow = async () => {
   try {
-    await ElMessageBox.confirm("此操作将永久删除该文件, 是否继续?", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    await ElMessageBox.confirm(t("video.view.confirm.message1"), t("video.view.confirm.message2"), {
+      confirmButtonText: t("video.view.confirm.confirm"),
+      cancelButtonText: t("video.view.confirm.cancel"),
       type: "warning",
     });
     await deleteVideo(videoData.value!.id);
-    ElMessage.success("删除成功!");
+    ElMessage.success(t("video.view.confirm.success"));
     router.push({ path: "/resource/video/index" });
   } catch {
-    ElMessage.info("已取消删除");
+    ElMessage.info(t("video.view.confirm.info"));
   }
 };
 
 const namedWindow = async () => {
   try {
     const { value } = await ElMessageBox.prompt(
-      "请输入新名称",
-      "修改图片名称",
+      t("video.view.namePrompt.message1"),
+      t("video.view.namePrompt.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("video.view.namePrompt.confirm"),
+        cancelButtonText: t("video.view.namePrompt.cancel"),
         closeOnClickModal: false,
         inputValue: videoData.value!.name,
       }
@@ -264,12 +266,12 @@ const namedWindow = async () => {
 
     if (value) {
       await named(videoData.value!.id, value);
-      ElMessage.success("新的视频名称: " + value);
+      ElMessage.success(t("video.view.namePrompt.success") + value);
     } else {
-      ElMessage.info("取消输入");
+      ElMessage.info(t("video.view.namePrompt.info"));
     }
   } catch {
-    ElMessage.info("取消输入");
+    ElMessage.info(t("video.view.namePrompt.info"));
   }
 };
 

@@ -12,7 +12,7 @@
           <el-button-group :inline="true">
             <router-link to="/resource/video/upload">
               <el-button size="small" type="primary" icon="uploadFilled">
-                <span class="hidden-sm-and-down">上传视频</span>
+                <span class="hidden-sm-and-down">{{ $t("video.uploadVideo") }}</span>
               </el-button>
             </router-link>
           </el-button-group>
@@ -34,10 +34,10 @@
                       type="warning"
                       size="small"
                     >
-                      初始化视频数据
+                      {{ $t("video.initializeVideoData") }}
                     </el-button>
                     <el-button v-else type="primary" size="small"
-                      >查看视频</el-button
+                      >{{ $t("video.viewVideo") }}</el-button
                     >
                   </router-link>
                 </template>
@@ -81,6 +81,8 @@ const pagination = reactive({
   total: 20,
 });
 
+const { t } = useI18n();
+
 // 处理分页
 const handleCurrentChange = async (page: number) => {
   pagination.current = page;
@@ -92,19 +94,19 @@ const handleCurrentChange = async (page: number) => {
 const namedWindow = async (item: any) => {
   try {
     const { value } = await ElMessageBox.prompt(
-      "请输入新名称",
-      "修改视频名称",
+      t("video.prompt.message1"),
+      t("video.prompt.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("video.prompt.confirm"),
+        cancelButtonText: t("video.prompt.cancel"),
         closeOnClickModal: false,
         inputValue: item.name,
       }
     );
     await named(item.id, value);
-    ElMessage.success("新的视频名称: " + value);
+    ElMessage.success(t("video.prompt.success") + value);
   } catch {
-    ElMessage.info("取消输入");
+    ElMessage.info(t("video.prompt.info"));
   }
 };
 
@@ -133,16 +135,16 @@ const named = async (id: string, newValue: string) => {
 // 删除音频确认
 const deletedWindow = async (item: any) => {
   try {
-    await ElMessageBox.confirm("此操作将永久删除该文件, 是否继续?", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    await ElMessageBox.confirm(t("video.confirm.message1"), t("video.confirm.message2"), {
+      confirmButtonText: t("video.confirm.confirm"),
+      cancelButtonText: t("video.confirm.cancel"),
       closeOnClickModal: false,
       type: "warning",
     });
     await deleted(item.id);
-    ElMessage.success("删除成功!");
+    ElMessage.success(t("video.confirm.success"));
   } catch {
-    ElMessage.info("已取消删除");
+    ElMessage.info(t("video.confirm.info"));
   }
 };
 

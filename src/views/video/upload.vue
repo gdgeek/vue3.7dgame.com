@@ -1,13 +1,12 @@
 <template>
   <div>
     <mr-p-p-upload dir="video" :file-type="fileType" @save-resource="saveVideo">
-      <div>选择视频，并上传</div>
+      <div>{{ $t("video.uploadFile") }}</div>
     </mr-p-p-upload>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { useRouter } from "vue-router";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 import { postVideo } from "@/api/resources/index";

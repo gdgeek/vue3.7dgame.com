@@ -1,5 +1,3 @@
-import { DirectiveBinding } from "vue";
-
 interface Heart {
   el: HTMLElement;
   x: number;

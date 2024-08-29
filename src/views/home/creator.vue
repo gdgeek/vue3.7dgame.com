@@ -12,7 +12,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
 import { useUserStore } from "@/store/modules/user";
 // import MrPPCreator from "@/components/MrPP/";
 import { getMessagesWithLiker } from "@/api/v1/like";

@@ -4,7 +4,7 @@
       <el-col :sm="16">
         <el-card class="box-card">
           <template #header>
-            <b id="title">图片名称：</b>
+            <b id="title">{{ $t("picture.view.title") }}</b>
             <span v-if="pictureData">{{ pictureData.name }}</span>
           </template>
           <div class="box-item" style="text-align: center">
@@ -12,9 +12,9 @@
               id="image"
               ref="image"
               v-loading="expire"
-              element-loading-text="正在预处理"
+              :element-loading-text="$t('picture.view.loadingText')"
               element-loading-background="rgba(255,255, 255, 0.3)"
-              style="height: 300px; width: 100%"
+              style="height: 300px; width: auto"
               :src="picture"
               fit="contain"
               @load="dealWith"
@@ -26,22 +26,22 @@
 
       <el-col :sm="8">
         <el-card class="box-card">
-          <template #header> <b>图片信息</b> : </template>
+          <template #header> <b>{{ $t("picture.view.info.title") }}</b> : </template>
           <div class="box-item">
             <el-table :data="tableData" stripe>
-              <el-table-column prop="item" label="条目"></el-table-column>
-              <el-table-column prop="text" label="内容"></el-table-column>
+              <el-table-column prop="item" :label="$t('picture.view.info.label1')"></el-table-column>
+              <el-table-column prop="text" :label="$t('picture.view.info.label2')"></el-table-column>
             </el-table>
 
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right">
                 <el-button type="success" size="small" @click="namedWindow">
                   <i class="el-icon-edit"></i>
-                  改名
+                  {{ $t("picture.view.info.name") }}
                 </el-button>
                 <el-button type="danger" size="small" @click="deleteWindow">
                   <i class="el-icon-delete"></i>
-                  删除
+                  {{ $t("picture.view.info.delete") }}
                 </el-button>
               </el-button-group>
             </aside>
@@ -73,6 +73,8 @@ const expire = ref<boolean>(false);
 
 const id = computed(() => route.query.id as string);
 
+const { t } = useI18n();
+
 const prepare = computed(
   () => pictureData.value !== null && pictureData.value.info !== null
 );
@@ -80,14 +82,14 @@ const prepare = computed(
 const tableData = computed(() => {
   if (pictureData.value && prepare.value) {
     return [
-      { item: "图片名称", text: pictureData.value.name },
-      { item: "创建者", text: pictureData.value.author.nickname },
-      { item: "创建时间", text: pictureData.value.created_at },
+      { item: t("picture.view.info.item1"), text: pictureData.value.name },
+      { item: t("picture.view.info.item2"), text: pictureData.value.author.nickname },
+      { item: t("picture.view.info.item3"), text: pictureData.value.created_at },
       {
-        item: "图片尺寸",
+        item: t("picture.view.info.item5"),
         text: printVector2(JSON.parse(pictureData.value.info).size),
       },
-      { item: "文件大小", text: `${pictureData.value.file.size}字节` },
+      { item: t("picture.view.info.item4"), text: `${pictureData.value.file.size}` + t("picture.view.info.size") },
     ];
   }
   return [];
@@ -224,29 +226,29 @@ const dealWith = async () => {
 
 const deleteWindow = async () => {
   try {
-    await ElMessageBox.confirm("此操作将永久删除该文件, 是否继续?", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    await ElMessageBox.confirm(t("picture.confirm.message1"), t("picture.confirm.message2"), {
+      confirmButtonText: t("picture.confirm.confirm"),
+      cancelButtonText: t("picture.confirm.cancel"),
       closeOnClickModal: false,
       type: "warning",
     });
 
     await deletePicture(pictureData.value!.id);
-    ElMessage.success("删除成功!");
+    ElMessage.success(t("picture.confirm.success"));
     router.push("/resource/picture/index");
   } catch {
-    ElMessage.info("已取消删除");
+    ElMessage.info(t("picture.confirm.info"));
   }
 };
 
 const namedWindow = async () => {
   try {
     const { value } = await ElMessageBox.prompt(
-      "请输入新名称",
-      "修改图片名称",
+      t("picture.view.namePrompt.message1"),
+      t("picture.view.namePrompt.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("picture.view.namePrompt.confirm"),
+        cancelButtonText: t("picture.view.namePrompt.cancel"),
         closeOnClickModal: false,
         inputValue: pictureData.value!.name,
       }
@@ -254,12 +256,12 @@ const namedWindow = async () => {
 
     if (value) {
       await named(pictureData.value!.id, value);
-      ElMessage.success("新的图片名称: " + value);
+      ElMessage.success(t("picture.view.namePrompt.success") + value);
     } else {
-      ElMessage.info("取消输入");
+      ElMessage.info(t("picture.view.namePrompt.info"));
     }
   } catch {
-    ElMessage.info("取消输入");
+    ElMessage.info(t("picture.view.namePrompt.info"));
   }
 };
 

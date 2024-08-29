@@ -36,6 +36,7 @@
           <el-form
             ref="nickNameFormRef"
             :model="nicknameForm"
+            :rules="nicknameRules"
             label-width="80px"
           >
             <el-form-item
@@ -52,7 +53,7 @@
               >
                 <template #suffix>
                   <el-button
-                    style="margin-right: -5px"
+                    style="margin-right: -10px"
                     :disabled="isDisable"
                     @click="submitNickname"
                   >
@@ -257,7 +258,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
 import { useUserStore } from "@/store/modules/user";
 import { useFileStore } from "@/store/modules/config";
 import { useRoute } from "vue-router";
@@ -272,11 +272,6 @@ import type { FileHandler } from "@/assets/js/file/server";
 import { FormItemRule } from "element-plus";
 import type { UploadFile, UploadFiles } from "element-plus";
 
-// // 注册组件
-// const components = {
-//   VueCropper,
-// };
-
 const userStore = useUserStore();
 const fileStore = useFileStore();
 const ruleFormRef = ref<FormInstance>();
@@ -286,6 +281,8 @@ const route = useRoute();
 const imageUrl = computed(() => userStore.userInfo.data.avatar.url || null);
 console.log("imageUrl", imageUrl);
 const isDisable = ref(false);
+
+const { t } = useI18n();
 
 type nickNameType = {
   nickname: string;
@@ -311,14 +308,22 @@ type Arrayable<T> = T | T[];
 
 const nicknameRules: Partial<Record<string, Arrayable<Rule>>> = {
   nickname: [
-    { required: true, message: "请输入用户昵称", trigger: "blur" },
-    { min: 2, message: "昵称长度应该大于2", trigger: "blur" },
+    {
+      required: true,
+      message: t("homepage.edit.rules.nickname.message1"),
+      trigger: "blur",
+    },
+    {
+      min: 2,
+      message: t("homepage.edit.rules.nickname.message2"),
+      trigger: "blur",
+    },
     {
       validator: (rule, value, callback: (error?: Error) => void) => {
         if (value === "") {
-          callback(new Error("昵称不能为空"));
+          callback(new Error(t("homepage.edit.rules.nickname.error1")));
         } else if (!/^[\u4e00-\u9fa5_a-zA-Z0-9-]+$/.test(value)) {
-          callback(new Error("昵称仅支持中文、字母、数字、下划线"));
+          callback(new Error(t("homepage.edit.rules.nickname.error2")));
         } else {
           callback();
         }
@@ -336,44 +341,62 @@ const infoForm = ref<InfoType>({
   textarea: "",
 });
 const infoRules = ref<FormRules<InfoType>>({
-  industry: [{ required: true, message: "请选择行业", trigger: "change" }],
+  industry: [
+    {
+      required: true,
+      message: t("homepage.edit.rules.industry.message"),
+      trigger: "change",
+    },
+  ],
   selectedOptions: [
-    { required: true, message: "请选择居住地", trigger: "change" },
+    {
+      required: true,
+      message: t("homepage.edit.rules.selectedOptions.message"),
+      trigger: "change",
+    },
   ],
   textarea: [
-    { required: true, message: "请输入个人简介", trigger: "blur" },
-    { min: 10, message: "个人简介应多于10个字符", trigger: "blur" },
+    {
+      required: true,
+      message: t("homepage.edit.rules.textarea.message1"),
+      trigger: "blur",
+    },
+    {
+      min: 10,
+      message: t("homepage.edit.rules.textarea.message2"),
+      trigger: "blur",
+    },
   ],
 });
 
 const industryOptions = [
   {
-    label: "科技、信息技术",
-    value: "科技、信息技术",
+    label: t("homepage.edit.rules.industry.label1"),
+    value: t("homepage.edit.rules.industry.label1"),
   },
   {
-    label: "经济、金融",
-    value: "经济、金融",
+    label: t("homepage.edit.rules.industry.label2"),
+    value: t("homepage.edit.rules.industry.label2"),
   },
   {
-    label: "教育、医疗",
-    value: "教育、医疗",
+    label: t("homepage.edit.rules.industry.label3"),
+    value: t("homepage.edit.rules.industry.label3"),
   },
   {
-    label: "能源、制造业",
-    value: "能源、制造业",
+    label: t("homepage.edit.rules.industry.label4"),
+    value: t("homepage.edit.rules.industry.label4"),
   },
   {
-    label: "农、林、渔、牧",
-    value: "农、林、渔、牧",
+    label: t("homepage.edit.rules.industry.label5"),
+    value: t("homepage.edit.rules.industry.label5"),
   },
   {
-    label: "服务业",
-    value: "服务业",
+    label: t("homepage.edit.rules.industry.label6"),
+    value: t("homepage.edit.rules.industry.label6"),
   },
   {
-    label: "其他行业",
-    value: "其他行业",
+    label: t("homepage.edit.rules.industry.label7"),
+    value: t("homepage.edit.rules.industry.label7"),
   },
 ];
 
@@ -429,12 +452,15 @@ const submitNickname = async () => {
     if (valid) {
       try {
         await putUserData({ nickname: nicknameForm.value.nickname });
-        ElMessage.success("昵称更新成功");
+        ElMessage.success(t("homepage.edit.rules.nickname.success"));
       } catch (error) {
-        ElMessage.error("昵称更新失败");
+        ElMessage.error(t("homepage.edit.rules.nickname.error3"));
       }
     } else {
-      ElMessage({ type: "error", message: "表单校验未通过" });
+      ElMessage({
+        type: "error",
+        message: t("homepage.edit.rules.nickname.error4"),
+      });
     }
   });
 };
@@ -456,12 +482,12 @@ const saveInfo = () => {
         const infoFormJS = await JSON.stringify(infoForm.value);
         console.log("infoForm.value", infoFormJS);
         await putUserData({ info: infoFormJS });
-        ElMessage.success("信息更新成功");
+        ElMessage.success(t("homepage.edit.rules.success"));
       } catch (error) {
-        ElMessage.error("信息更新失败");
+        ElMessage.error(t("homepage.edit.rules.error1"));
       }
     } else {
-      ElMessage({ type: "error", message: "表单校验未通过" });
+      ElMessage({ type: "error", message: t("homepage.edit.rules.error2") });
     }
   });
 };
@@ -478,11 +504,11 @@ const handleChangeUpload = async (file: UploadFile, fileList: UploadFiles) => {
     const isLt2M = selectedFile.size / 1024 / 1024 < 2;
 
     if (!isJPG) {
-      ElMessage.error("上传头像图片只能是 JPG/PNG/BMP/GIF 格式!");
+      ElMessage.error(t("homepage.edit.avatarCropping.error1"));
       return;
     }
     if (!isLt2M) {
-      ElMessage.error("上传头像图片大小不能超过 2MB!");
+      ElMessage.error(t("homepage.edit.avatarCropping.error2"));
       return;
     }
 
@@ -494,7 +520,7 @@ const handleChangeUpload = async (file: UploadFile, fileList: UploadFiles) => {
     loading.value = false;
     dialogVisible.value = true;
   } else {
-    ElMessage.error("请选择有效的文件!");
+    ElMessage.error(t("homepage.edit.avatarCropping.error3"));
   }
 };
 
@@ -531,9 +557,7 @@ const saveAvatar = async (
   try {
     const post = await postFile(data);
     const put = await putUserData({ avatar_id: post.data.id });
-    // 假设 refreshUserdata 是一个方法
-    // refreshUserdata(put.data);
-    ElMessage.success("修改头像成功");
+    ElMessage.success(t("homepage.edit.avatarCropping.success"));
   } catch (err) {
     console.error(err);
   }
@@ -554,7 +578,7 @@ async function finish() {
 
     // 确保 handler 存在
     if (!handler) {
-      ElMessage.error("处理文件时出错");
+      ElMessage.error(t("homepage.edit.avatarCropping.error4"));
       return;
     }
 
@@ -570,7 +594,7 @@ async function finish() {
         md5,
         file.name.split(".").pop() || "", // 获取文件扩展名
         file,
-        (p) => {},
+        (p: any) => {},
         handler,
         "backup"
       );
