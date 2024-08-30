@@ -9,7 +9,7 @@
       {{ dialogTitle }}
     </template>
     <el-form ref="formRef" :rules="rules" :model="info" label-width="80px">
-      <el-form-item label="封面图片">
+      <el-form-item :label="$t('verse.page.form.picture')">
         <mr-p-p-cropper
           ref="image"
           :image-url="info.url"
@@ -17,15 +17,15 @@
           @save-file="saveFile"
         ></mr-p-p-cropper>
       </el-form-item>
-      <el-form-item prop="name" label="名称">
+      <el-form-item prop="name" :label="$t('verse.page.form.name')">
         <el-input v-model="info.name"></el-input>
       </el-form-item>
 
-      <el-form-item label="内容说明">
+      <el-form-item :label="$t('verse.page.form.description')">
         <el-input v-model="info.description" type="textarea"></el-input>
       </el-form-item>
 
-      <el-form-item v-if="isManager" label="绑定教程">
+      <el-form-item v-if="isManager" :label="$t('verse.page.form.course')">
         <el-input v-model="info.course" type="number"></el-input>
       </el-form-item>
 
@@ -34,7 +34,7 @@
 
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button @click="dialogVisible = false">{{ $t("verse.page.form.cancel") }}</el-button>
         <el-button type="primary" @click="submitForm">
           {{ props.dialogSubmit }}
         </el-button>
@@ -49,16 +49,16 @@ import env from "@/environment";
 import { useUserStore } from "@/store/modules/user";
 import { FormInstance } from "element-plus";
 
+const { t } = useI18n();
+
 const props = defineProps({
-  dialogTitle: {
-    type: String,
-    default: "选择文件",
-  },
-  dialogSubmit: {
-    type: String,
-    default: "确定",
-  },
+  dialogTitle: String,
+  dialogSubmit: String,
 });
+
+const dialogTitle = computed(() => props.dialogTitle || t("verse.page.form.dialogTitle"));
+const dialogSubmit = computed(() => props.dialogSubmit || t("verse.page.form.dialogSubmit"));
+
 
 const emit = defineEmits(["submit"]);
 
@@ -68,7 +68,7 @@ const imageId = ref<number | null>(null);
 const item = ref<any>(null);
 
 const isManager = computed(() =>
-  useUserStore().userInfo.roles.includes("manager")
+  useUserStore().userInfo.roles.includes("manager" || "admin" || "root")
 );
 
 const info = ref({
@@ -80,8 +80,8 @@ const info = ref({
 
 const rules = {
   name: [
-    { required: true, message: "请输入活动名称", trigger: "blur" },
-    { min: 3, max: 64, message: "长度在 3 到 64 个字符", trigger: "blur" },
+    { required: true, message:  t("verse.page.form.rules.message1"), trigger: "blur" },
+    { min: 3, max: 64, message: t("verse.page.form.rules.message2"), trigger: "blur" },
   ],
 };
 
@@ -105,7 +105,7 @@ const submitForm = async () => {
     if (valid) {
       emit("submit", info.value, item.value, imageId.value);
     } else {
-      ElMessage.error("表单验证失败");
+      ElMessage.error(t("verse.page.form.error"));
     }
   });
 };

@@ -425,6 +425,282 @@ export default {
       }
     }
   },
+  // 音频管理国际化
+  audio: {
+    uploadAudio: "上传音频",
+    initializeAudioData: "初始化音频数据",
+    viewAudio: "查看音频",
+    prompt: {
+      message1: "请输入新名称",
+      message2: "修改音频名称",
+      confirm: "确认",
+      cancel: "取消",
+      success: "新的音频名称: ",
+      info: "取消输入",
+    },
+    confirm: {
+      message1: "此操作将永久删除该文件, 是否继续?",
+      message2: "提示",
+      confirm: "确认",
+      cancel: "取消",
+      success: "删除成功！",
+      info: "已取消删除",
+    },
+    uploadFile: "选择音频，并上传",
+    view: {
+      title: "音频名称：",
+      info: {
+        title: "音频信息",
+        label1: "条目",
+        label2: "内容",
+        item1: "音频名称",
+        item2: "创建者",
+        item3: "创建时间",
+        item4: "文件大小",
+        size: "字节",
+        name: "改名",
+        delete: "删除",
+      },
+      confirm: {
+        message1: "此操作将永久删除该文件, 是否继续?",
+        message2: "提示",
+        confirm: "确认",
+        cancel: "取消",
+        success: "删除成功！",
+        info: "已取消删除",
+      },
+      namePrompt: {
+        message1: "请输入新名称",
+        message2: "修改音频名称",
+        confirm: "确认",
+        cancel: "取消",
+        success: "新的音频名称: ",
+        info: "取消输入",
+      }
+    }
+  },
+  // 文件上传国际化
+  upload: {
+    title: "选择文件",
+    declared: "请选择对应格式的文件进行上传操作",
+    item1: {
+      title: "预先处理",
+      failed: "md5计算失败",
+      declared: "通过计算得到文件的 md5 编码",
+    },
+    item2: {
+      title: "上传文件",
+      failed: "文件上传失败",
+      declared: "文件正在发送至服务器",
+    },
+    item3: {
+      title: "保存信息",
+      failed: "数据库储存失败",
+      declared: "文件数据存储在数据库中",
+    },
+  },
+  // 元数据国际化
+  meta: {
+    title: "创建【元数据】",
+    edit: "编辑",
+    delete: "删除",
+    confirm: {
+      message1: "此操作将永久删除该【元数据】, 是否继续?",
+      message2: "提示",
+      confirm: "确认",
+      cancel: "取消",
+      success: "删除成功！",
+      info: "已取消删除",
+    },
+    prompt: {
+      message1: "请输入元数据名称",
+      message2: "提示(3-20个字符)",
+      confirm: "确认",
+      cancel: "取消",
+      inputValidator: {
+        item1: "元数据名称不能为空",
+        item2: "元数据名称不能小于3个字符",
+        item3: "元数据名称不能大于20个字符"
+      },
+      success: "元数据名称是: ",
+      info: "取消输入",
+    },
+    metaEdit: {
+      title: "【元数据】名称：",
+      form: {
+        title: "名称",
+        input: "输入事件",
+        output: "输出事件",
+        data: "数据",
+        info: "信息",
+      },
+      eventEdit: "事件编辑",
+      contentEdit: "内容编辑",
+      sava: "信息保存",
+      metaInfo: "【元数据】信息",
+      rules: {
+        message1: "请输入名称",
+        message2: "长度在 3 到 20 个字符"
+      },
+      success: "保存成功",
+    },
+    scene: {
+      error: "没有编辑器",
+      info: "没有保存权限！",
+      success: "场景保存成功~"
+    },
+    script: {
+      save: "保存",
+      error1: "没有元信息",
+      error2: "没有编辑权限",
+      error3: "没有编辑器",
+      success: "保存成功",
+      info: "没有修改"
+    }
+  },
+  // 宇宙部分国际化
+  verse: {
+    page: {
+      dialogTitle: "创建！【宇宙】",
+      dialogSubmit: "创 建",
+      title: "创建【宇宙】",
+      form: {
+        picture: "封面图片",
+        name: "名称",
+        description: "内容说明",
+        course: "绑定教程",
+        cancel: "取 消",
+        dialogTitle: "选择文件",
+        dialogSubmit: "确定",
+        rules: {
+          message1: "请输入活动名称",
+          message2: "长度在 3 到 64 个字符"
+        },
+        error: "表单验证失败"
+      },
+      list: {
+        enter: "进入",
+        infoTable: "内容说明：",
+        infoContent: {
+          author: "作者",
+          learn: "学习",
+          blank: "默认链接",
+          description: "说明"
+        },
+        toolbar: {
+          dialogTitle: "修改数据",
+          dialogSubmit: "确定",
+          confirm: {
+            message1: "此操作将永久删除该【宇宙】，是否继续?",
+            message2: "提示",
+            confirm: "确认",
+            cancel: "取消",
+            success: "删除成功！",
+            info: "已取消删除"
+          },
+          Success: "修改成功!",
+          qrcode: {
+            cancel: "取 消",
+            dialogTitle1: "请用设备扫描二维码，进入",
+            dialogTitle2: "请用设备扫描二维码，进入场景。"
+          }
+        }
+      }
+    },
+    view: {
+      header: "修改信息",
+      title: "【宇宙】名称：",
+      form: {
+        label1: "多语言",
+        label2: "名字",
+        label3: "介绍",
+        placeholder1: "请选择语言",
+        placeholder2: "请输入名称",
+        placeholder3: "请输入介绍",
+        submit: "提交",
+        delete: "删除",
+        rules: {
+          message1: "请选择语言",
+          message2: "请输入名称",
+          message3: "长度在 2 到 50 个字符",
+          message4: "请输入介绍",
+        }
+      },
+      edit: "编辑【宇宙】",
+      eye: "查看【宇宙】",
+      info: "【宇宙】信息",
+      verseOpen: "开放【宇宙】",
+      verseClose: "关闭【宇宙】",
+      success1: "修改成功",
+      success2: "提交成功",
+      success3: "删除成功",
+      success4: "分享成功",
+      success5: "停止共享",
+      error: "表单验证失败",
+      messageTitle: "【宇宙】名称：",
+      scene: "场景",
+      share: {
+        header1: "共享给其他用户",
+        header2: "修改共享信息",
+        form: {
+          label1: "用户名",
+          label2: "相关信息",
+          label3: "编辑权限",
+          placeholder: "请输入用户名",
+          ruleMessage: "用户名不能为空",
+          label4: "可编辑",
+          confirm: "确 认",
+          cancel: "取 消",
+        },
+        title1: "【宇宙】共享",
+        title2: "共享给好友",
+        confirm: {
+          message1: "是否确认关闭共享？",
+          message2: "提示",
+          confirm: "确认",
+          cancel: "取消",
+          success: "关闭成功！",
+          info: "已取消关闭"
+        }
+      },
+      message: {
+        header: "修改内容",
+        loading: "载入...",
+        update: "修改内容",
+        delete: "删除帖子",
+        like: "赞同",
+        edit: "编辑于",
+        message1: "已撤销",
+        message2: "已点赞",
+        confirm: {
+          message1: "是否确定删除？",
+          message2: "提示",
+          confirm: "确认",
+          cancel: "取消",
+          success: "删除成功！",
+          info: "已取消删除"
+        }
+      },
+      reply: {
+        timestamp: "现在就回复",
+        title: "回复",
+        publish: "发布于",
+        rules: {
+          message1: "请填写内容",
+          message2: "长度至少10个字符"
+        },
+        confirm: {
+          message1: "是否确定删除？",
+          message2: "提示",
+          confirm: "确认",
+          cancel: "取消",
+          success: "删除成功！",
+          info: "已取消删除"
+        },
+        success: "回复成功"
+      }
+    }
+  },
   // 导航栏国际化
   navbar: {
     dashboard: "首页",

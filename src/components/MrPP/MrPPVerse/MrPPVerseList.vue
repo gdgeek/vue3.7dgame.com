@@ -45,7 +45,7 @@
           </template>
           <div class="clearfix">
             <router-link :to="'/verse/view?id=' + item.id">
-              <el-button type="primary" size="small">进入</el-button>
+              <el-button type="primary" size="small">{{ $t("verse.page.list.enter") }}</el-button>
             </router-link>
             <VerseToolbar
               :verse="item!"
@@ -71,11 +71,13 @@ import "vue-waterfall-plugin-next/dist/style.css";
 const props = defineProps<{ items: VerseData[] }>();
 const emit = defineEmits<{ (e: "refresh"): void }>();
 
+const { t } = useI18n();
+
 const newItems = ref<VerseData[]>([]);
 
 watch(
   () => props.items,
-  (updatedItems) => {
+  (updatedItems: any) => {
     newItems.value = updatedItems;
     console.log("New items:", updatedItems);
   },
@@ -99,7 +101,7 @@ const infoTable = (item: VerseData) => {
   const info = JSON.parse(item.info!);
   if (info) {
     table.push({
-      value: "内容说明：" + info.description,
+      value: t("verse.page.list.infoTable") + info.description,
     });
   }
   return table;

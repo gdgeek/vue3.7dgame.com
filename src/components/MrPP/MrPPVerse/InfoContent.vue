@@ -9,7 +9,7 @@
       <el-descriptions-item v-if="author">
         <template #label>
           <font-awesome-icon class="icon" icon="user"></font-awesome-icon>
-          作者
+          {{ $t("verse.page.list.infoContent.author") }}
         </template>
         {{ author.nickname || author.username }}
       </el-descriptions-item>
@@ -17,11 +17,11 @@
       <el-descriptions-item v-if="course?.title">
         <template #label>
           <font-awesome-icon class="icon" icon="book"></font-awesome-icon>
-          学习
+          {{ $t("verse.page.list.infoContent.learn") }}
         </template>
         <router-link target="_blank" :to="`/home/document?id=${course.id}`">
           <el-link target="_blank" :innerHTML="sanitizedTitle">
-            默认链接
+            {{ $t("verse.page.list.infoContent.blank") }}
           </el-link>
         </router-link>
       </el-descriptions-item>
@@ -29,7 +29,7 @@
       <el-descriptions-item v-if="info.description">
         <template #label>
           <font-awesome-icon class="icon" icon="info"></font-awesome-icon>
-          说明
+          {{ $t("verse.page.list.infoContent.description") }}
         </template>
         {{ info.description }}
       </el-descriptions-item>
@@ -38,7 +38,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
 import { Post } from "@/api/home/wordpress";
 import type { Author } from "@/api/v1/verse";
 import DOMPurify from "dompurify";

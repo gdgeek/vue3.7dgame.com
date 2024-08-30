@@ -183,7 +183,7 @@ export default {
   // 体素管理国际化
   voxel: {
     uploadVoxel: "UploadVoxel",
-    initializeVoxelData: "InitializeVoxelData",
+    initializeVoxelData: "InitVoxelData",
     viewVoxel: "ViewVoxel",
     prompt: {
       message1: "Please enter a new name",
@@ -252,7 +252,7 @@ export default {
   // 模型管理国际化
   polygen: {
     uploadPolygen: "UploadPolygen",
-    initializePolygenData: "InitializePolygenData",
+    initializePolygenData: "InitPolygenData",
     viewPolygen: "ViewPolygen",
     prompt: {
       message1: "Please enter a new name",
@@ -319,7 +319,7 @@ export default {
   // 图片管理国际化
   picture: {
     uploadPicture: "UploadPicture",
-    initializePictureData: "InitializePictureData",
+    initializePictureData: "InitPictureData",
     viewPicture: "ViewPicture",
     prompt: {
       message1: "Please enter a new name",
@@ -375,7 +375,7 @@ export default {
   // 视频管理国际化
   video: {
     uploadVideo: "UploadVideo",
-    initializeVideoData: "InitializeVideoData",
+    initializeVideoData: "InitVideoData",
     viewVideo: "ViewVideo",
     prompt: {
       message1: "Please enter a new name",
@@ -426,6 +426,282 @@ export default {
         info: "Cancel input",
       }
     }    
+  },
+  // 音频管理国际化
+  audio: {
+    uploadAudio: "UploadAudio",
+    initializeAudioData: "InitAudioData",
+    viewAudio: "ViewAudio",
+    prompt: {
+      message1: "Please enter a new name",
+      message2: "Edit Audio name",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      success: "New Audio name: ",
+      info: "cancel input",
+    },
+    confirm: {
+      message1: "This action will permanently delete the file. Do you want to continue?",
+      message2: "Prompt",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      success: "Deleted successfully!",
+      info: "Deletion canceled",
+    },
+    uploadFile: "Select a audio and upload it",
+    view: {
+      title: "AudioName: ",
+      info: {
+        title: "AudioInformation",
+        label1: "Item",
+        label2: "Content",
+        item1: "AudioName",
+        item2: "Creator",
+        item3: "CreationTime",
+        item4: "FileSize",
+        size: "Bytes",
+        name: "Rename",
+        delete: "Delete",
+      },
+      confirm: {
+        message1: "This action will permanently delete the file. Do you want to continue?",
+        message2: "Prompt",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "Deleted successfully!",
+        info: "Deletion canceled",
+      },
+      namePrompt: {
+        message1: "Please enter a new name",
+        message2: "Edit Audio name",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "New Audio name: ",
+        info: "Cancel input",
+      }
+    }    
+  },
+  // 文件上传国际化
+  upload: {
+    title: "SelectFile",
+    declared: "Please select a file in the appropriate format for upload",
+    item1: {
+      title: "Preprocessing",
+      failed: "MD5 calculation failed",
+      declared: "Calculate the MD5 hash of the file",
+    },
+    item2: {
+      title: "UploadFile",
+      failed: "File upload failed",
+      declared: "The file is being sent to the server",
+    },
+    item3: {
+      title: "SaveInformation",
+      failed: "Database storage failed",
+      declared: "File data is stored in the database",
+    },
+  },
+  // 元数据国际化
+  meta: {
+    title: "Create【Metadata】",
+    edit: "Edit",
+    delete: "Delete",
+    confirm: {
+      message1: "This action will permanently delete the 【Metadata】. Do you want to continue?",
+      message2: "Prompt",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      success: "Deleted successfully!",
+      info: "Deletion canceled",
+    },
+    prompt: {
+      message1: "Please enter a metadata name",
+      message2: "Prompt (3-20 characters)",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      inputValidator: {
+        item1: "Metadata name cannot be empty",
+        item2: "Metadata name cannot be less than 3 characters",
+        item3: "Metadata name cannot be more than 20 characters"
+      },
+      success: "The metadata name is: ",
+      info: "cancel input",
+    },
+    metaEdit: {
+      title: "【Metadata】Name:",
+      form: {
+        title: "Name",
+        input: "InputEvent",
+        output: "OutputEvent",
+        data: "Data",
+        info: "Information",
+      },
+      eventEdit: "EventEditing",
+      contentEdit: "ContentEditing",
+      save: "SaveInformation",
+      metaInfo: "【Metadata】Information",
+      rules: {
+        message1: "Please enter a name",
+        message2: "Length should be between 3 and 20 characters",
+      },
+      success: "Saved successfully"
+    },
+    scene: {
+      error: "No editor available",
+      info: "No permission to save!",
+      success: "Scene saved successfully~"
+    },
+    script: {
+      save: "Save",
+      error1: "No metadata available",
+      error2: "No permission to edit",
+      error3: "No editor available",
+      success: "Saved successfully",
+      info: "No changes made"
+    }    
+  },
+  // 宇宙部分国际化
+  verse: {
+    page: {
+      dialogTitle: "Create!【Universe】",
+      dialogSubmit: "Create",
+      title: "Create【Universe】",
+      form: {
+        picture: "CoverImage",
+        name: "Name",
+        description: "Description",
+        course: "BindCourse",
+        cancel: "Cancel",
+        dialogTitle: "SelectFile",
+        dialogSubmit: "Confirm",
+        rules: {
+          message1: "Please enter an activity name",
+          message2: "Length should be between 3 and 64 characters"
+        },
+        error: "Form validation failed"
+      },
+      list: {
+        enter: "Enter",
+        infoTable: "Description:",
+        infoContent: {
+          author: "Author",
+          learn: "Learn",
+          blank: "DefaultLink",
+          description: "Description"
+        },
+        toolbar: {
+          dialogTitle: "EditData",
+          dialogSubmit: "Confirm",
+          confirm: {
+            message1: "This action will permanently delete the [Universe]. Do you want to continue?",
+            message2: "Prompt",
+            confirm: "Confirm",
+            cancel: "Cancel",
+            success: "Deleted successfully!",
+            info: "Deletion canceled"
+          },
+          success: "Modified successfully!",
+          qrcode: {
+            cancel: "Cancel",
+            dialogTitle1: "Please use a device to scan the QR code to enter",
+            dialogTitle2: "Please use a device to scan the QR code to enter the scene."
+          }          
+        }
+      }
+    },
+    view: {
+      header: "EditInformation",
+      title: "【Universe】Name:",
+      form: {
+        label1: "Multilingual",
+        label2: "Name",
+        label3: "Description",
+        placeholder1: "Please select a language",
+        placeholder2: "Please enter a name",
+        placeholder3: "Please enter a description",
+        submit: "Submit",
+        delete: "Delete",
+        rules: {
+          message1: "Please select a language",
+          message2: "Please enter a name",
+          message3: "Length should be between 2 and 50 characters",
+          message4: "Please enter a description",
+        }
+      },
+      edit: "Edit【Universe】",
+      eye: "View【Universe】",
+      info: "【Universe】Information",
+      verseOpen: "Open【Universe】",
+      verseClose: "Close【Universe】",
+      success1: "Edit successful",
+      success2: "Submission successful",
+      success3: "Deletion successful",
+      success4: "Share successful",
+      success5: "Sharing stopped",
+      error: "Form validation failed",
+      messageTitle: "【Universe】Name:",
+      scene: "scene",
+      share: {
+        header1: "Share with Other Users",
+        header2: "Edit Sharing Information",
+        form: {
+          label1: "Username",
+          label2: "RelatedInfo",
+          label3: "EditPerm",
+          placeholder: "Please enter a username",
+          ruleMessage: "Username cannot be empty",
+          label4: "Editable",
+          confirm: "Confirm",
+          cancel: "Cancel",
+        },
+        title1: "【Universe】Sharing",
+        title2: "ShareWithFriends",
+        confirm: {
+          message1: "Are you sure you want to stop sharing?",
+          message2: "Prompt",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          success: "Sharing stopped successfully!",
+          info: "Sharing stop canceled"
+        }
+      },
+      message: {
+        header: "EditContent",
+        loading: "Loading...",
+        update: "UpdateContent",
+        delete: "DeletePost",
+        like: "Like",
+        edit: "edited on",
+        message1: "Undo",
+        message2: "Liked",
+        confirm: {
+          message1: "Are you sure you want to delete?",
+          message2: "Prompt",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          success: "Deleted successfully!",
+          info: "Deletion canceled"
+        }
+      },
+      reply: {
+        timestamp: "Reply Now",
+        title: "Reply",
+        publish: "Published on",
+        rules: {
+          message1: "Please enter content",
+          message2: "Length must be at least 10 characters"
+        },
+        confirm: {
+          message1: "Are you sure you want to delete?",
+          message2: "Prompt",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          success: "Deleted successfully!",
+          info: "Deletion canceled"
+        },
+        success: "Reply successful"
+      }      
+    }
   },
   
   // 导航栏国际化

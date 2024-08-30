@@ -20,7 +20,7 @@
             >
               <font-awesome-icon icon="plus"></font-awesome-icon>
 
-              <span class="hidden-sm-and-down">创建【元数据】</span>
+              <span class="hidden-sm-and-down">{{ $t("meta.title") }}</span>
             </el-button>
           </el-button-group>
         </mr-p-p-header>
@@ -77,7 +77,7 @@
                       type="success"
                       icon="Edit"
                     >
-                      编辑</el-button
+                    {{ $t("meta.edit") }}</el-button
                     >
 
                     <el-button
@@ -86,7 +86,7 @@
                       type="danger"
                       icon="Delete"
                     >
-                      删除</el-button
+                    {{ $t("meta.delete") }}</el-button
                     >
                   </el-button-group>
                 </div>
@@ -128,10 +128,8 @@ import type { prefabsData } from "@/api/v1/prefab";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { useUserStore } from "@/store/modules/user";
 
-// 引入 Vue Router
 const router = useRouter();
 
-// 数据定义
 const items = ref<prefabsData[]>([]);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
@@ -142,9 +140,9 @@ const pagination = ref({
   total: 20,
 });
 
+const { t } = useI18n();
 const userStore = useUserStore();
-
-const isRoot = computed(() => userStore.userInfo.roles.includes("root"));
+const isRoot = computed(() => userStore.userInfo.roles.includes("admin" || "root"));
 
 const url = (id: number) => {
   return isRoot.value ? `/meta/prefab-edit?id=${id}` : "#";
@@ -157,20 +155,20 @@ const editor = (id: number) => {
 const del = async (id: number) => {
   try {
     await ElMessageBox.confirm(
-      "此操作将永久删除该【元数据】, 是否继续?",
-      "提示",
+      t("meta.confirm.message1"),
+      t("meta.confirm.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("meta.confirm.confirm"),
+        cancelButtonText: t("meta.confirm.cancel"),
         type: "warning",
       }
     );
     await deletePrefab(id);
     await refresh();
-    ElMessage.success("删除成功!");
+    ElMessage.success(t("meta.confirm.success"));
   } catch (e) {
     console.error(e);
-    ElMessage.info("已取消删除");
+    ElMessage.info(t("meta.confirm.info"));
   }
 };
 
@@ -187,21 +185,21 @@ const search = (value: string) => {
 const addPrefab = async () => {
   try {
     const input = await ElMessageBox.prompt(
-      "请输元数据名称",
-      "提示(3-20个字符)",
+      t("meta.prompt.message1"),
+      t("meta.prompt.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("meta.prompt.confirm"),
+        cancelButtonText: t("meta.prompt.cancel"),
         inputValidator: (value: string) => {
-          if (!value) return "元数据名称不能为空";
-          if (value.length < 3) return "元数据名称不能小于3个字符";
-          if (value.length > 20) return "元数据名称不能大于20个字符";
+          if (!value) return t("meta.prompt.inputValidator.item1");
+          if (value.length < 3) return t("meta.prompt.inputValidator.item2");
+          if (value.length > 20) return t("meta.prompt.inputValidator.item3");
           return true;
         },
       }
     );
 
-    ElMessage.success("元数据名称是: " + input.value);
+    ElMessage.success(t("meta.prompt.success") + input.value);
     const data = {
       title: input.value,
       custom: 1,
@@ -211,7 +209,7 @@ const addPrefab = async () => {
     await editPrefab(response.data.id);
   } catch (e) {
     console.error(e);
-    ElMessage.info("取消输入");
+    ElMessage.info(t("meta.prompt.info"));
   }
 };
 

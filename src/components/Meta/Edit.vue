@@ -17,7 +17,7 @@
         <el-card v-if="item" class="box-card">
           <template #header>
             <div>
-              <b id="title">【元数据】名称：</b>
+              <b id="title">{{ $t("meta.metaEdit.title") }}</b>
               <span>{{ item.title }}</span>
             </div>
           </template>
@@ -39,13 +39,13 @@
             :model="item"
             label-width="80px"
           >
-            <el-form-item label="名称" prop="title">
+            <el-form-item :label="$t('meta.metaEdit.form.title')" prop="title">
               <el-input v-model="item.title"></el-input>
             </el-form-item>
 
             <el-form-item
               v-if="events && events.inputs && events.inputs.length > 0"
-              label="输入事件"
+              :label="$t('meta.metaEdit.form.input')"
             >
               <span v-for="(event, index) in events.inputs" :key="index">
                 <el-tag size="small">
@@ -56,7 +56,7 @@
             </el-form-item>
             <el-form-item
               v-if="events && events.outputs && events.outputs.length > 0"
-              label="输出事件"
+              :label="$t('meta.metaEdit.form.output')"
             >
               <span v-for="(event, index) in events.outputs" :key="index">
                 <el-tag size="small">
@@ -65,10 +65,10 @@
                 &nbsp;
               </span>
             </el-form-item>
-            <el-form-item v-if="!custome" label="数据">
+            <el-form-item v-if="!custome" :label="$t('meta.metaEdit.form.data')">
               <el-input type="textarea" v-model="item.data"></el-input>
             </el-form-item>
-            <el-form-item v-if="false" label="信息">
+            <el-form-item v-if="false" :label="$t('meta.metaEdit.form.info')">
               <el-input type="textarea" v-model="item!.info"></el-input>
             </el-form-item>
           </el-form>
@@ -77,13 +77,13 @@
         <el-card v-if="item !== null" class="box-card">
           <el-button-group style="float: right; padding: 3px 0">
             <el-button @click="openDialog" icon="MagicStick">
-              事件编辑
+              {{ $t("meta.metaEdit.eventEdit") }}
             </el-button>
             <el-button v-if="item.viewable" @click="editor" icon="Edit">
-              内容编辑
+              {{ $t("meta.metaEdit.contentEdit") }}
             </el-button>
             <el-button @click="onSubmit" icon="CircleCheck" type="success">
-              信息保存
+              {{ $t("meta.metaEdit.save") }}
             </el-button>
           </el-button-group>
           <br />
@@ -96,7 +96,7 @@
         <el-card class="box-card">
           <template #header>
             <div>
-              <b>【元数据】信息</b>
+              <b>{{ $t("meta.metaEdit.metaInfo") }}</b>
             </div>
           </template>
           <div class="box-item">{{ item }}</div>
@@ -119,10 +119,13 @@ import { ViewCard } from "vue-waterfall-plugin-next/dist/types/types/waterfall";
 const route = useRoute();
 const router = useRouter();
 const item = ref<metaInfo | null>(null);
+
+const { t } = useI18n();
+
 const rules = {
   title: [
-    { required: true, message: "请输入名称", trigger: "blur" },
-    { min: 3, max: 20, message: "长度在 3 到 20 个字符", trigger: "blur" },
+    { required: true, message: t("meta.metaEdit.rules.message1"), trigger: "blur" },
+    { min: 3, max: 20, message: t("meta.metaEdit.rules.message2"), trigger: "blur" },
   ],
 };
 const itemForm = ref<InstanceType<typeof ElForm> | null>(null);
@@ -231,7 +234,7 @@ const selectResources = async (data: ViewCard) => {
   if (item.value) {
     item.value.image_id = data.image_id;
     await putItem(id.value, item.value);
-    ElMessage.success("保存成功");
+    ElMessage.success(t("meta.metaEdit.success"));
     await refresh();
   }
 };
@@ -274,7 +277,7 @@ const onSubmit = async () => {
   if (item.value) {
     // item.value.custom = custom.value ? 1 : 0;
     await putItem(id.value, item.value);
-    ElMessage.success("保存成功");
+    ElMessage.success(t("meta.metaEdit.success"));
     await refresh();
   }
 };

@@ -1,13 +1,12 @@
 <template>
   <div>
     <mr-p-p-upload dir="audio" :file-type="fileType" @save-resource="saveAudio">
-      <div>选择音频，并上传</div>
+      <div>{{ $t("audio.uploadFile") }}</div>
     </mr-p-p-upload>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { useRouter } from "vue-router";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 import { postAudio } from "@/api/resources/index";

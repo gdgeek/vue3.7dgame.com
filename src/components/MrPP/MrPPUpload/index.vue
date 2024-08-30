@@ -27,10 +27,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
 import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
 import { FileHandler } from "@/assets/js/file/server";
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -51,32 +52,32 @@ const fileStore = useFileStore();
 const data = reactive([
   {
     name: "md5",
-    title: "预先处理",
-    failed: "md5计算失败",
-    declared: "通过计算得到文件的 md5 编码",
+    title: t("upload.item1.title"),
+    failed: t("upload.item1.failed"),
+    declared: t("upload.item1.declared"),
     percentage: 0,
     status: "",
   },
   {
     name: "upload",
-    title: "上传文件",
-    failed: "文件上传失败",
-    declared: "文件正在发送至服务器",
+    title: t("upload.item2.title"),
+    failed: t("upload.item2.failed"),
+    declared: t("upload.item2.declared"),
     percentage: 0,
     status: "",
   },
   {
     name: "save",
-    title: "保存信息",
-    failed: "数据库储存失败",
-    declared: "文件数据存储在数据库中",
+    title: t("upload.item3.title"),
+    failed: t("upload.item3.failed"),
+    declared: t("upload.item3.declared"),
     percentage: 0,
     status: "",
   },
 ]);
 
-const title = ref("选择文件");
-const declared = ref("请选择对应格式的文件进行上传操作");
+const title = ref(t("upload.title"));
+const declared = ref(t("upload.declared"));
 const isDisabled = ref(false);
 
 // 更新标题和声明信息

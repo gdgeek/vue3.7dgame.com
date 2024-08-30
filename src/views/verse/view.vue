@@ -1,7 +1,7 @@
 <template>
   <div class="verse-view">
     <el-dialog v-model="dialog" width="70%">
-      <template #header> 修改信息 </template>
+      <template #header> {{ $t("verse.view.header") }} </template>
       <MrPPMessageFrom
         ref="editor"
         :data="briefing!"
@@ -19,7 +19,7 @@
             <i v-else>
               <el-icon><View></View></el-icon>
             </i>
-            <b id="title">【宇宙】名称：</b>
+            <b id="title">{{ $t("verse.view.title") }} </b>
             <span>{{ verse.name }}</span>
           </template>
 
@@ -46,24 +46,24 @@
             ref="FormRef"
             label-width="auto"
           >
-            <el-form-item label="多语言" prop="language">
+            <el-form-item :label="$t('verse.view.form.label1')" prop="language">
               <el-select
                 v-model="Form.language"
-                placeholder="请选择语言"
+                :placeholder="$t('verse.view.form.placeholder1')"
                 style="width: 25%"
               >
                 <el-option label="zh" value="zh"></el-option>
                 <el-option label="en" value="en"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="名字" prop="name">
-              <el-input v-model="Form.name" placeholder="请输入名称"></el-input>
+            <el-form-item :label="$t('verse.view.form.label2')" prop="name">
+              <el-input v-model="Form.name" :placeholder="$t('verse.view.form.placeholder2')"></el-input>
             </el-form-item>
-            <el-form-item label="介绍" prop="description">
+            <el-form-item :label="$t('verse.view.form.label3')" prop="description">
               <el-input
                 v-model="Form.description"
                 type="textarea"
-                placeholder="请输入介绍"
+                :placeholder="$t('verse.view.form.placeholder3')"
               ></el-input>
             </el-form-item>
           </el-form>
@@ -75,11 +75,11 @@
               style="margin-left: 65px"
             >
               <el-icon style="margin-right: 5px"><Check></Check></el-icon
-              >提交</el-button
+              >{{ $t("verse.view.form.submit") }}</el-button
             >
             <el-button @click="del" size="small" type="danger"
               ><el-icon style="margin-right: 5px"><Delete></Delete></el-icon
-              >删除</el-button
+              >{{ $t("verse.view.form.delete") }}</el-button
             >
           </span>
         </el-card>
@@ -93,11 +93,11 @@
           >
             <div v-if="saveable">
               <font-awesome-icon icon="edit"></font-awesome-icon>
-              &nbsp;编辑【宇宙】
+              &nbsp;{{ $t("verse.view.edit") }}
             </div>
             <div v-else>
               <font-awesome-icon icon="eye"></font-awesome-icon>
-              &nbsp;查看【宇宙】
+              &nbsp;{{ $t("verse.view.eye") }}
             </div>
           </el-button>
           <br />
@@ -115,7 +115,7 @@
       <el-col :sm="8">
         <el-card class="box-card">
           <template #header>
-            <b>【宇宙】信息</b>
+            <b>{{ $t("verse.view.info") }}</b>
           </template>
           <div class="box-item">
             <InfoContent
@@ -146,7 +146,7 @@
             @click="open"
           >
             <font-awesome-icon icon="eye"></font-awesome-icon>
-            &nbsp;开放【宇宙】
+            &nbsp;{{ $t("verse.view.verseOpen") }}
           </el-button>
           <el-button
             v-else
@@ -156,7 +156,7 @@
             @click="close"
           >
             <font-awesome-icon icon="eye-slash"></font-awesome-icon>
-            &nbsp;关闭【宇宙】
+            &nbsp;{{ $t("verse.view.verseClose") }}
           </el-button>
         </el-card>
         <Share v-if="saveable" :verse="verse!"></Share>
@@ -208,21 +208,23 @@ const Form = ref({
 
 const FormRef = ref<FormInstance>();
 
+const { t } = useI18n();
+
 const rules = {
-  language: [{ required: true, message: "请选择语言", trigger: "blur" }],
+  language: [{ required: true, message: t("verse.view.form.rules.message1"), trigger: "blur" }],
   name: [
-    { required: true, message: "请输入名称", trigger: "blur" },
-    { min: 2, max: 50, message: "长度在 2 到 50 个字符", trigger: "blur" },
+    { required: true, message: t("verse.view.form.rules.message2"), trigger: "blur" },
+    { min: 2, max: 50, message: t("verse.view.form.rules.message3"), trigger: "blur" },
   ],
-  description: [{ required: false, message: "请输入介绍", trigger: "blur" }],
+  description: [{ required: false, message: t("verse.view.form.rules.message4"), trigger: "blur" }],
 };
 
 watch(
   () => Form.value.language,
-  (newLanguage) => {
+  (newLanguage: any) => {
     // 切换不同的语言时，自动更新表单
     const selectedLanguage = verse.value?.languages!.find(
-      (lang) => lang.language === newLanguage
+      (lang: any) => lang.language === newLanguage
     );
     if (selectedLanguage) {
       Form.value.name = selectedLanguage.name;
@@ -239,7 +241,7 @@ const submit = () => {
   FormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       const selectedLanguage = verse.value?.languages!.find(
-        (lang) => lang.language === Form.value.language
+        (lang: any) => lang.language === Form.value.language
       );
 
       if (selectedLanguage) {
@@ -248,7 +250,7 @@ const submit = () => {
           name: Form.value.name,
           description: Form.value.description,
         });
-        ElMessage.success("修改成功");
+        ElMessage.success(t("verse.view.success1"));
       } else {
         // 没有是数据则为提交
         await postlanguages({
@@ -257,12 +259,12 @@ const submit = () => {
           name: Form.value.name,
           description: Form.value.description,
         });
-        ElMessage.success("提交成功");
+        ElMessage.success(t("verse.view.success2"));
       }
 
       await getlanguages(verse.value!.id);
     } else {
-      ElMessage.error("表单验证失败");
+      ElMessage.error(t("verse.view.error"));
     }
   });
 };
@@ -274,7 +276,7 @@ const del = async () => {
   await getlanguages(verse.value!.id);
   FormRef.value?.resetFields();
   await refresh();
-  ElMessage.success("删除成功");
+  ElMessage.success(t("verse.view.success3"));
 };
 
 const info = computed(() =>
@@ -286,7 +288,7 @@ const saveable = computed(() => {
   return verse.value.editable;
 });
 
-const isRoot = computed(() => userStore.userInfo.roles.includes("root"));
+const isRoot = computed(() => userStore.userInfo.roles.includes("admin" || "root"));
 
 const refresh = async () => {
   const res = await getVerse(
@@ -296,7 +298,7 @@ const refresh = async () => {
   verse.value = res.data;
 
   const selectedLanguage = verse.value?.languages!.find(
-    (lang) => lang.language === Form.value.language
+    (lang: any) => lang.language === Form.value.language
   );
   if (selectedLanguage) {
     Form.value.name = selectedLanguage.name;
@@ -306,7 +308,7 @@ const refresh = async () => {
   briefing.value = message.value
     ? message.value
     : {
-        title: `【宇宙】名称：${verse.value!.name}`,
+        title: t("verse.view.messageTitle") + `${verse.value!.name}`,
         body: info.value.description,
       };
 };
@@ -335,7 +337,7 @@ const postMessage = async (data: any) => {
   });
   verse.value!.verseOpen = res.data;
   dialog.value = false;
-  ElMessage.success("分享成功");
+  ElMessage.success(t("verse.view.success4"));
 };
 
 const open = () => {
@@ -346,13 +348,13 @@ const close = async () => {
   await deleteVerseOpen(verseOpen.value!.id);
   verse.value!.verseOpen = null;
   verse.value!.message = null;
-  ElMessage.success("停止共享");
+  ElMessage.success(t("verse.view.success5"));
 };
 
 const comeIn = () => {
   router.push({
     path: "/verse/scene",
-    query: { id: id.value, title: "场景" + "【" + verse.value?.name + "】" },
+    query: { id: id.value, title: t("verse.view.scene") + "【" + verse.value?.name + "】" },
   });
 };
 
