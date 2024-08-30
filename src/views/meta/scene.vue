@@ -31,7 +31,7 @@ import path from "path-browserify";
 const route = useRoute();
 const router = useRouter();
 const editUrl = import.meta.env.VITE_APP_EDITOR_URL;
-const src = editUrl + "/three.js/editor/meta-editor.html"; //path.join("", "");
+const src = editUrl + "/three.js/editor/meta-editor.html?time=" + Date.now(); //path.join("", "");
 
 // console.log("src", src);
 const isInit = ref(false);
@@ -90,7 +90,7 @@ const handleMessage = async (e: MessageEvent) => {
   const action = e.data.action;
   const data = e.data.data;
   //const data = e.data;
-  //alert(JSON.stringify(e.data));
+  //alert(JSON.stringify(data));
   switch (action) {
     case "save":
       saveMeta(data);
@@ -137,7 +137,7 @@ const handleMessage = async (e: MessageEvent) => {
   }
 };
 
-const saveMeta = async ({ data, events }: { data: any; events: any }) => {
+const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
   if (!saveable) {
     ElMessage({
       type: "info",
@@ -145,7 +145,8 @@ const saveMeta = async ({ data, events }: { data: any; events: any }) => {
     });
     return;
   }
-  await putMeta(id.value, { data, events });
+  //alert(JSON.stringify(meta));
+  await putMeta(id.value, { data: meta, events });
   ElMessage({
     type: "success",
     message: t("meta.scene.success"),

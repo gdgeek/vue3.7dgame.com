@@ -20,14 +20,7 @@
               </el-button-group>
             </div>
           </template>
-          <!-- <blockly-script
-            v-if="script !== null && verse !== null"
-            ref="blockly"
-            :blockly="script.workspace"
-            :resource="resource"
-            :id="script.id"
-            @submit="submit"
-          ></blockly-script> -->
+
           <el-container>
             <el-main style="margin: 0; padding: 0; height: 70vh">
               <iframe
@@ -182,7 +175,8 @@ const resource = computed(() => {
     events.outputs = events.outputs || [];
 
     events.inputs.forEach((input: any) => {
-      const data = map.get(meta.id);
+      const data = map.get(meta.id.toString());
+      // alert(meta.id);
       inputs.push({
         title: `${data.title}:${input.title}`,
         index: data.uuid,
@@ -219,6 +213,17 @@ onMounted(async () => {
     );
     console.error("verse", response.data);
     verse.value = response.data;
+    if (verse.value && verse.value.data) {
+      const json: string = verse.value.data;
+      const data = JSON.parse(json);
+      data.children.modules.forEach((module: any) => {
+        // alert(module.parameters.meta_id);
+        map.set(module.parameters.meta_id.toString(), {
+          uuid: module.parameters.uuid,
+          title: module.parameters.title,
+        });
+      });
+    }
     initEditor();
   } catch (error: any) {
     ElMessage({

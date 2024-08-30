@@ -178,6 +178,9 @@ const testAction = (data: any) => {
   }
 };
 const testPoint = (data: any, typeList: string[]) => {
+  if (!data) {
+    return;
+  }
   return typeList.find((type) => data.type.toLowerCase() === type.toLowerCase())
     ? {
         uuid: data.parameters.uuid,
@@ -201,8 +204,6 @@ const addMetaData = (data: any, ret: any) => {
     "text",
     "voxel",
   ]);
-
-  console.log("entity", entity);
 
   if (entity) {
     ret.entity.push(entity);
@@ -265,8 +266,8 @@ const getResource = (meta: metaInfo) => {
     },
   };
   ret.events = JSON.parse(meta.events!) || { inputs: [], outputs: [] };
-  console.log("events", ret.events);
-  addMetaData(data, ret);
+
+  if (data) addMetaData(data, ret);
   return ret;
 };
 
@@ -275,19 +276,13 @@ onBeforeUnmount(() => {
 });
 onMounted(async () => {
   window.addEventListener("message", handleMessage);
-  try {
-    loading.value = true;
-    const response = await getMeta(id.value, "cyber,event,share,metaCode");
-    meta.value = response.data;
-    initEditor();
-  } catch (error: any) {
-    ElMessage({
-      message: error.message,
-      type: "error",
-    });
-  } finally {
-    loading.value = false;
-  }
+
+  loading.value = true;
+  const response = await getMeta(id.value, "cyber,event,share,metaCode");
+  meta.value = response.data;
+  initEditor();
+
+  loading.value = false;
 });
 </script>
 
