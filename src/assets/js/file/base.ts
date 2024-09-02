@@ -2,36 +2,45 @@ import SparkMD5 from 'spark-md5';
 
 // 文件对象类型
 type FileWithExtension = File & { extension?: string };
+function fileMD5(file: File, progress: (p: number) => void = () => {}): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const spark = new SparkMD5.ArrayBuffer()
+    const reader = new FileReader()
+    const blobSlice =
+      File.prototype.mozSlice ||
+      File.prototype.webkitSlice ||
+      File.prototype.slice
+    const chunkSize = 2097152
+    const chunks = Math.ceil(file.size / chunkSize)
+    let currentChunk = 0
 
-// 计算文件的 MD5 值
-const fileMD5 = (file: File, progress: (p: number) => void = (p: number) => {}): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const spark = new SparkMD5();
-    const reader = new FileReader();
-    const chunkSize = 2097152; // 每个块的大小为2MB
-    const chunks = Math.ceil(file.size / chunkSize); // 总块数
-    let currentChunk = 0;
-
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      spark.append(e.target!.result as ArrayBuffer);
-      currentChunk++;
-      progress((currentChunk + 1) / chunks); // 更新进度
-      if (currentChunk < chunks) {
-        doLoad();
-      } else {
-        resolve(spark.end()); // 计算完成后返回MD5值
+    reader.onload = function (e: ProgressEvent<FileReader>) {
+      if (e.target?.result) {
+        spark.append(e.target.result as ArrayBuffer)
       }
-    };
+      currentChunk++
+      progress((currentChunk + 1) / chunks)
+      if (currentChunk < chunks) {
+        doLoad()
+      } else {
+        resolve(spark.end())
+      }
+    }
 
-    const doLoad = () => {
-      const start = currentChunk * chunkSize;
-      const end = Math.min(start + chunkSize, file.size);
-      const chunk = file.slice(start, end); // 读取文件块
-      reader.readAsArrayBuffer(chunk);
-    };
+    reader.onerror = function () {
+      reject(new Error("File reading failed"))
+    }
 
-    doLoad();
-  });
+    function doLoad() {
+      const start = currentChunk * chunkSize
+      const end = start + chunkSize >= file.size ? file.size : start + chunkSize
+      const chunk = blobSlice.call(file, start, end)
+      reader.readAsArrayBuffer(chunk)
+    }
+
+    doLoad()
+  })
+}
 
 // 打开文件选择对话框并返回选择的文件
 const fileOpen = (accept: string): Promise<FileWithExtension> =>

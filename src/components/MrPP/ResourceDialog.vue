@@ -44,13 +44,12 @@
           </el-divider>
         </div>
       </template>
-      <waterfall
+
+      <Waterfall
         v-if="active !== null && active.items !== null"
-        :lazyload="false"
-        :breakpoints="breakpoints"
-        :gutter="8"
         :list="viewCards"
-        :column-count="3"
+        :width="230"
+        :gutter="10"
       >
         <template #default="{ item }">
           <div style="width: 230px">
@@ -62,7 +61,7 @@
               <template #header>
                 <el-card shadow="hover" :body-style="{ padding: '0px' }">
                   <div class="mrpp-title">
-                    <b class="card-title" nowrap>{{ item.title }}</b>
+                    <b class="card-title" nowrap>{{ title(item) }}</b>
                   </div>
                   <LazyImg
                     v-if="item.image"
@@ -157,7 +156,7 @@
             <br />
           </div>
         </template>
-      </waterfall>
+      </Waterfall>
       <template v-else>
         <el-skeleton></el-skeleton>
       </template>
@@ -212,7 +211,6 @@ const metaId = ref<number | null>(null);
 const value = ref<any>(null);
 const emit = defineEmits(["selected", "cancel"]);
 const binding = ref({
-  // items: [] as metaInfo[],
   items: [] as any[],
   sorted: "-created_at",
   searched: "",
@@ -227,9 +225,6 @@ const owner = ref({
 });
 
 const active = computed(() => {
-  console.log("activeName", activeName.value); // owner
-  console.log("binding.value", binding.value);
-  console.log("owner.value", owner.value);
   return activeName.value === "binding" ? binding.value : owner.value;
 });
 
@@ -295,7 +290,13 @@ const refreshOwner = async () => {
     "image, metaResources"
   );
   owner.value.items = response.data;
-  console.log("owner", owner.value);
+
+  owner.value.pagination = {
+    current: parseInt(response.headers["x-pagination-current-page"]),
+    count: parseInt(response.headers["x-pagination-page-count"]),
+    size: parseInt(response.headers["x-pagination-per-page"]),
+    total: parseInt(response.headers["x-pagination-total-count"]),
+  };
 };
 
 const refreshBinding = async () => {
@@ -307,9 +308,13 @@ const refreshBinding = async () => {
     binding.value.pagination.current,
     "image,author,metaResources"
   );
-  console.log("binding", response.data);
+  binding.value.pagination = {
+    current: parseInt(response.headers["x-pagination-current-page"]),
+    count: parseInt(response.headers["x-pagination-page-count"]),
+    size: parseInt(response.headers["x-pagination-per-page"]),
+    total: parseInt(response.headers["x-pagination-total-count"]),
+  };
   binding.value.items = response.data;
-  console.log("binding.value", binding.value);
 };
 
 const close = () => {
@@ -368,7 +373,7 @@ const refresh = async () => {
   }
 };
 
-const doBinding = async (data: any) => {
+const doUnbind = async (data: any) => {
   try {
     await ElMessageBox.confirm("是否解除资源绑定?", "解除绑定", {
       confirmButtonText: "确定",
@@ -390,7 +395,7 @@ const doBinding = async (data: any) => {
   }
 };
 
-const doUnbind = async (data: any) => {
+const doBinding = async (data: any) => {
   try {
     await ElMessageBox.confirm("是否将资源绑定到场景?", "绑定资源", {
       confirmButtonText: "确定",
