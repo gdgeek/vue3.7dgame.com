@@ -82,15 +82,12 @@ const postMessage = (action: string, data: any = {}) => {
 };
 
 const handleMessage = async (e: MessageEvent) => {
-  console.error(2.5);
   if (!e.data || !e.data.action) {
     return;
   }
 
   const action = e.data.action;
   const data = e.data.data;
-  //const data = e.data;
-  //alert(JSON.stringify(data));
   switch (action) {
     case "save":
       saveMeta(data);
@@ -99,7 +96,6 @@ const handleMessage = async (e: MessageEvent) => {
       loadResource(data);
       break;
     case "goto":
-      // alert(data.target);
       if (data.target === "blockly.js") {
         const scriptRoute = router
           .getRoutes()
@@ -127,7 +123,6 @@ const handleMessage = async (e: MessageEvent) => {
       if (!isInit.value) {
         isInit.value = true;
         const meta = await getMeta(id.value);
-        // breadcrumb(meta.data);
         postMessage("load", {
           data: meta.data,
           saveable: saveable(meta.data),
@@ -145,7 +140,6 @@ const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
     });
     return;
   }
-  //alert(JSON.stringify(meta));
   await putMeta(id.value, { data: meta, events });
   ElMessage({
     type: "success",

@@ -5,7 +5,7 @@ import { store } from "@/store";
 import { LoginData, LoginResult } from "@/api/auth/model";
 import { getUserInfoData, InfoType } from "@/api/user/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
-
+import {Avatar} from "@/api/user/model";
 export const useUserStore = defineStore("user", () => {
   const defaultUserInfo: getUserInfoData = {
     username: "",
@@ -102,24 +102,27 @@ export const useUserStore = defineStore("user", () => {
       // 更新 userInfo
       userInfo.value.username = res.data.username;
       userInfo.value.roles = res.data.roles;
+      const data: any = res.data.data;
+      console.error(data)
+      const avatar:Avatar|null = data.avatar?{
+        id: data.avatar.id,
+        md5: data.avatar.md5,
+        type: data.avatar.type,
+        url: data.avatar.url,
+        filename: data.avatar.filename,
+        size: data.avatar.size,
+        key: data.avatar.key,
+      }:null;
       userInfo.value.data = {
-        username: res.data.data.username,
-        id: res.data.data.id,
-        nickname: res.data.data.nickname,
-        info: res.data.data.info,
+        username: data.username,
+        id: data.id,
+        nickname: data.nickname,
+        info: data.info,
         parsedInfo: parsedInfo, // 存储解析后的 info 对象
-        avatar_id: res.data.data.avatar_id,
-        avatar: {
-          id: res.data.data.avatar.id,
-          md5: res.data.data.avatar.md5,
-          type: res.data.data.avatar.type,
-          url: res.data.data.avatar.url,
-          filename: res.data.data.avatar.filename,
-          size: res.data.data.avatar.size,
-          key: res.data.data.avatar.key,
-        },
-        email: res.data.data.email,
-        emailBind: res.data.data.emailBind,
+        avatar_id: data.avatar_id,
+        avatar:avatar,
+        email: data.email,
+        emailBind: data.emailBind,
       };
       console.log("res", userInfo.value);
       return userInfo.value;
