@@ -48,7 +48,7 @@
                       <router-link :to="url(item.id)">
                         <LazyImg
                           v-if="item.image === null"
-                          url="@/assets/image/none.png"
+                          url="/src/assets/image/none.png"
                           style="
                             width: 100%;
                             height: 270px;
@@ -77,7 +77,7 @@
                       type="success"
                       icon="Edit"
                     >
-                    {{ $t("meta.edit") }}</el-button
+                      {{ $t("meta.edit") }}</el-button
                     >
 
                     <el-button
@@ -86,7 +86,7 @@
                       type="danger"
                       icon="Delete"
                     >
-                    {{ $t("meta.delete") }}</el-button
+                      {{ $t("meta.delete") }}</el-button
                     >
                   </el-button-group>
                 </div>
@@ -142,7 +142,9 @@ const pagination = ref({
 
 const { t } = useI18n();
 const userStore = useUserStore();
-const isRoot = computed(() => userStore.userInfo.roles.includes("admin" || "root"));
+const isRoot = computed(() =>
+  userStore.userInfo.roles.includes("admin" || "root")
+);
 
 const url = (id: number) => {
   return isRoot.value ? `/meta/prefab-edit?id=${id}` : "#";

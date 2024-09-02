@@ -137,9 +137,9 @@ const hide = () => {
   dialogVisible.value = false;
 };
 
-onMounted(() => {
-  show();
-});
+// onMounted(() => {
+//   show();
+// });
 
 defineExpose({
   show,

@@ -1,4 +1,3 @@
-
 export default {
   // 路由国际化
   route: {
@@ -244,8 +243,8 @@ export default {
         cancel: "取消",
         success: "新的体素名称: ",
         info: "取消输入",
-      }
-    }
+      },
+    },
   },
   // 模型管理国际化
   polygen: {
@@ -311,8 +310,8 @@ export default {
         cancel: "取消",
         success: "新的模型名称: ",
         info: "取消输入",
-      }
-    }
+      },
+    },
   },
   // 图片管理国际化
   picture: {
@@ -367,8 +366,8 @@ export default {
         cancel: "取消",
         success: "新的图片名称: ",
         info: "取消输入",
-      }
-    }
+      },
+    },
   },
   // 视频管理国际化
   video: {
@@ -422,8 +421,8 @@ export default {
         cancel: "取消",
         success: "新的视频名称: ",
         info: "取消输入",
-      }
-    }
+      },
+    },
   },
   // 音频管理国际化
   audio: {
@@ -476,8 +475,8 @@ export default {
         cancel: "取消",
         success: "新的音频名称: ",
         info: "取消输入",
-      }
-    }
+      },
+    },
   },
   // 文件上传国际化
   upload: {
@@ -520,7 +519,7 @@ export default {
       inputValidator: {
         item1: "元数据名称不能为空",
         item2: "元数据名称不能小于3个字符",
-        item3: "元数据名称不能大于20个字符"
+        item3: "元数据名称不能大于20个字符",
       },
       success: "元数据名称是: ",
       info: "取消输入",
@@ -540,14 +539,14 @@ export default {
       metaInfo: "【元数据】信息",
       rules: {
         message1: "请输入名称",
-        message2: "长度在 3 到 20 个字符"
+        message2: "长度在 3 到 20 个字符",
       },
       success: "保存成功",
     },
     scene: {
       error: "没有编辑器",
       info: "没有保存权限！",
-      success: "场景保存成功~"
+      success: "场景保存成功~",
     },
     script: {
       save: "保存",
@@ -555,8 +554,8 @@ export default {
       error2: "没有编辑权限",
       error3: "没有编辑器",
       success: "保存成功",
-      info: "没有修改"
-    }
+      info: "没有修改",
+    },
   },
   // 宇宙部分国际化
   verse: {
@@ -574,9 +573,9 @@ export default {
         dialogSubmit: "确定",
         rules: {
           message1: "请输入活动名称",
-          message2: "长度在 3 到 64 个字符"
+          message2: "长度在 3 到 64 个字符",
         },
-        error: "表单验证失败"
+        error: "表单验证失败",
       },
       list: {
         enter: "进入",
@@ -585,7 +584,7 @@ export default {
           author: "作者",
           learn: "学习",
           blank: "默认链接",
-          description: "说明"
+          description: "说明",
         },
         toolbar: {
           dialogTitle: "修改数据",
@@ -596,16 +595,16 @@ export default {
             confirm: "确认",
             cancel: "取消",
             success: "删除成功！",
-            info: "已取消删除"
+            info: "已取消删除",
           },
           Success: "修改成功!",
           qrcode: {
             cancel: "取 消",
             dialogTitle1: "请用设备扫描二维码，进入",
-            dialogTitle2: "请用设备扫描二维码，进入场景。"
-          }
-        }
-      }
+            dialogTitle2: "请用设备扫描二维码，进入场景。",
+          },
+        },
+      },
     },
     view: {
       header: "修改信息",
@@ -624,7 +623,7 @@ export default {
           message2: "请输入名称",
           message3: "长度在 2 到 50 个字符",
           message4: "请输入介绍",
-        }
+        },
       },
       edit: "编辑【宇宙】",
       eye: "查看【宇宙】",
@@ -660,8 +659,8 @@ export default {
           confirm: "确认",
           cancel: "取消",
           success: "关闭成功！",
-          info: "已取消关闭"
-        }
+          info: "已取消关闭",
+        },
       },
       message: {
         header: "修改内容",
@@ -678,8 +677,8 @@ export default {
           confirm: "确认",
           cancel: "取消",
           success: "删除成功！",
-          info: "已取消删除"
-        }
+          info: "已取消删除",
+        },
       },
       reply: {
         timestamp: "现在就回复",
@@ -687,7 +686,7 @@ export default {
         publish: "发布于",
         rules: {
           message1: "请填写内容",
-          message2: "长度至少10个字符"
+          message2: "长度至少10个字符",
         },
         confirm: {
           message1: "是否确定删除？",
@@ -695,11 +694,11 @@ export default {
           confirm: "确认",
           cancel: "取消",
           success: "删除成功！",
-          info: "已取消删除"
+          info: "已取消删除",
         },
-        success: "回复成功"
-      }
-    }
+        success: "回复成功",
+      },
+    },
   },
   // 导航栏国际化
   navbar: {

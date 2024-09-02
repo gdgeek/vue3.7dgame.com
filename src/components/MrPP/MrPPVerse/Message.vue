@@ -41,7 +41,7 @@
               type="text"
               @click="dialog = true"
             >
-            {{ $t("verse.view.message.update") }}
+              {{ $t("verse.view.message.update") }}
             </el-button>
             <el-button
               v-if="canDelete(message)"
@@ -50,7 +50,7 @@
               type="text"
               @click="confirmDeletion(message.id!)"
             >
-            {{ $t("verse.view.message.delete") }}
+              {{ $t("verse.view.message.delete") }}
             </el-button>
           </el-button-group>
         </div>
@@ -77,7 +77,8 @@
         </el-col>
         <el-col :span="10" align="right">
           <small v-if="message" style="color: #8790a7">
-            {{ message.author.nickname }}  {{ $t("verse.view.message.edit") }}  {{ message.updated_at }}
+            {{ message.author!.nickname }} {{ $t("verse.view.message.edit") }}
+            {{ message.updated_at }}
           </small>
         </el-col>
       </el-row>
@@ -168,14 +169,21 @@ const toggleLike = async (like: Like) => {
 
 const confirmDeletion = async (id: number) => {
   try {
-    await ElMessageBox.confirm(t("verse.view.message.confirm.message1"), t("verse.view.message.confirm.message2"), {
-      confirmButtonText: t("verse.view.message.confirm.confirm"),
-      cancelButtonText: t("verse.view.message.confirm.cancel"),
-      closeOnClickModal: false,
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("verse.view.message.confirm.message1"),
+      t("verse.view.message.confirm.message2"),
+      {
+        confirmButtonText: t("verse.view.message.confirm.confirm"),
+        cancelButtonText: t("verse.view.message.confirm.cancel"),
+        closeOnClickModal: false,
+        type: "warning",
+      }
+    );
     await deleteMessage(id);
-    ElMessage({ type: "success", message: t("verse.view.message.confirm.success") });
+    ElMessage({
+      type: "success",
+      message: t("verse.view.message.confirm.success"),
+    });
     message.value = null;
     router.push({ path: "/community/index" });
   } catch {

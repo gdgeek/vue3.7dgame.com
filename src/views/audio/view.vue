@@ -42,11 +42,20 @@
 
       <el-col :sm="8">
         <el-card class="box-card">
-          <template #header> <b>{{ $t("audio.view.info.title") }}</b>: </template>
+          <template #header>
+            <b>{{ $t("audio.view.info.title") }}</b
+            >:
+          </template>
           <div class="box-item">
             <el-table :data="tableData" stripe>
-              <el-table-column prop="item" :label="$t('audio.view.info.label1')"></el-table-column>
-              <el-table-column prop="text" :label="$t('audio.view.info.label2')"></el-table-column>
+              <el-table-column
+                prop="item"
+                :label="$t('audio.view.info.label1')"
+              ></el-table-column>
+              <el-table-column
+                prop="text"
+                :label="$t('audio.view.info.label2')"
+              ></el-table-column>
             </el-table>
 
             <aside style="margin-top: 10px; margin-bottom: 30px">
@@ -81,7 +90,7 @@ const route = useRoute();
 const router = useRouter();
 const store = useFileStore().store;
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 const audioData = ref<ResourceInfo | null>(null);
 const file = ref<string>();
@@ -93,9 +102,15 @@ const tableData = computed(() => {
   if (audioData.value) {
     return [
       { item: t("audio.view.info.item1"), text: audioData.value.name },
-      { item: t("audio.view.info.item2"), text: audioData.value.author.nickname },
+      {
+        item: t("audio.view.info.item2"),
+        text: audioData.value.author.nickname,
+      },
       { item: t("audio.view.info.item3"), text: audioData.value.created_at },
-      { item: t("audio.view.info.item4"), text: `${audioData.value.file.size}` + t("audio.view.info.size") },
+      {
+        item: t("audio.view.info.item4"),
+        text: `${audioData.value.file.size}` + t("audio.view.info.size"),
+      },
     ];
   }
   return [];
@@ -232,11 +247,15 @@ const setup = async (
 
 const deleteWindow = async () => {
   try {
-    await ElMessageBox.confirm(t("audio.view.confirm.message1"), t("audio.view.confirm.message2"), {
-      confirmButtonText: t("audio.view.confirm.confirm"),
-      cancelButtonText: t("audio.view.confirm.cancel"),
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("audio.view.confirm.message1"),
+      t("audio.view.confirm.message2"),
+      {
+        confirmButtonText: t("audio.view.confirm.confirm"),
+        cancelButtonText: t("audio.view.confirm.cancel"),
+        type: "warning",
+      }
+    );
     await deleteAudio(audioData.value!.id);
     ElMessage.success(t("audio.view.confirm.success"));
     router.push({ path: "/resource/audio/index" });

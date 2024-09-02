@@ -12,7 +12,9 @@
           <el-button-group :inline="true">
             <router-link to="/resource/picture/upload">
               <el-button size="small" type="primary" icon="uploadFilled">
-                <span class="hidden-sm-and-down">{{ $t("picture.uploadPicture") }}</span>
+                <span class="hidden-sm-and-down">{{
+                  $t("picture.uploadPicture")
+                }}</span>
               </el-button>
             </router-link>
           </el-button-group>
@@ -137,12 +139,16 @@ const named = async (id: string, newValue: string) => {
 
 const deletedWindow = async (item: { id: string }) => {
   try {
-    await ElMessageBox.confirm(t("picture.confirm.message1"), t("picture.confirm.message2"), {
-      confirmButtonText: t("picture.confirm.confirm"),
-      cancelButtonText: t("picture.confirm.cancel"),
-      closeOnClickModal: false,
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("picture.confirm.message1"),
+      t("picture.confirm.message2"),
+      {
+        confirmButtonText: t("picture.confirm.confirm"),
+        cancelButtonText: t("picture.confirm.cancel"),
+        closeOnClickModal: false,
+        type: "warning",
+      }
+    );
     await deleted(item.id);
     ElMessage.success(t("picture.confirm.success"));
   } catch {

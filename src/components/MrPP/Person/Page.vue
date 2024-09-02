@@ -20,7 +20,7 @@
         >
           <el-button-group :inline="true">
             <el-button
-              v-if="created"
+              v-if="props.created"
               size="small"
               type="primary"
               @click="createWindow"

@@ -34,11 +34,20 @@
       </el-col>
       <el-col :sm="8">
         <el-card class="box-card">
-          <template #header> <b>{{ $t("voxel.view.info.title") }}</b>: </template>
+          <template #header>
+            <b>{{ $t("voxel.view.info.title") }}</b
+            >:
+          </template>
           <div class="box-item">
             <el-table :data="tableData" stripe>
-              <el-table-column prop="item" :label="$t('voxel.view.info.label1')"></el-table-column>
-              <el-table-column prop="text" :label="$t('voxel.view.info.label2')"></el-table-column>
+              <el-table-column
+                prop="item"
+                :label="$t('voxel.view.info.label1')"
+              ></el-table-column>
+              <el-table-column
+                prop="text"
+                :label="$t('voxel.view.info.label2')"
+              ></el-table-column>
             </el-table>
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right">
@@ -92,9 +101,15 @@ const tableData = computed(() => {
 
     return [
       { item: t("voxel.view.info.item1"), text: voxelData.value.name },
-      { item: t("voxel.view.info.item2"), text: voxelData.value.author.nickname },
+      {
+        item: t("voxel.view.info.item2"),
+        text: voxelData.value.author.nickname,
+      },
       { item: t("voxel.view.info.item3"), text: voxelData.value.created_at },
-      { item: t("voxel.view.info.item4"), text: voxelData.value.file.size + t("voxel.view.info.size") },
+      {
+        item: t("voxel.view.info.item4"),
+        text: voxelData.value.file.size + t("voxel.view.info.size"),
+      },
       { item: t("voxel.view.info.item5"), text: printVector3(info.size) },
       { item: t("voxel.view.info.item6"), text: printVector3(info.center) },
       { item: t("voxel.view.info.item7"), text: info.count },
@@ -170,12 +185,16 @@ const createVerse = async () => {
 
 const deleteWindow = async () => {
   try {
-    await ElMessageBox.confirm(t("voxel.view.confirm.message1"), t("voxel.view.confirm.message2"), {
-      confirmButtonText: t("voxel.view.confirm.confirm"),
-      cancelButtonText: t("voxel.view.confirm.cancel"),
-      closeOnClickModal: false,
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("voxel.view.confirm.message1"),
+      t("voxel.view.confirm.message2"),
+      {
+        confirmButtonText: t("voxel.view.confirm.confirm"),
+        cancelButtonText: t("voxel.view.confirm.cancel"),
+        closeOnClickModal: false,
+        type: "warning",
+      }
+    );
 
     await deleteVoxel(voxelData.value.id);
     ElMessage.success(t("voxel.view.confirm.success"));

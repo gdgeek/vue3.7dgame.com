@@ -27,7 +27,9 @@
             >
               <font-awesome-icon icon="plus"></font-awesome-icon>
               &nbsp;
-              <span class="hidden-sm-and-down">{{ $t("verse.page.title") }}</span>
+              <span class="hidden-sm-and-down">{{
+                $t("verse.page.title")
+              }}</span>
             </el-button>
           </el-button-group>
         </MrPPHeader>
