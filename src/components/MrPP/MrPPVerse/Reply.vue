@@ -4,7 +4,7 @@
       <el-main style="padding-left: 40px">
         <div class="block">
           <el-timeline>
-            <el-timeline-item timestamp="现在就回复" placement="top">
+            <el-timeline-item :timestamp="$t('verse.view.reply.timestamp')" placement="top">
               <el-form
                 ref="formRef"
                 :model="form"
@@ -30,7 +30,7 @@
                       icon="edit"
                       style="margin-right: 5px"
                     ></font-awesome-icon>
-                    回复
+                    {{ $t("verse.view.reply.title") }}
                   </el-button>
                 </el-form-item>
               </el-form>
@@ -70,7 +70,7 @@
                     class="bottom clearfix"
                   >
                     <span></span>
-                    发布于
+                    {{ $t("verse.view.reply.publish") }}
                     <time class="time">{{ reply.updated_at }}</time>
                     &nbsp; &nbsp;
                     <el-button
@@ -117,6 +117,8 @@ const props = defineProps<{ messageId: number }>();
 const tagsStore = useTagsStore();
 const userStore = useUserStore();
 
+const { t } = useI18n();
+
 const pagination = ref({ current: 1, count: 1, size: 20, total: 20 });
 const isDisabled = ref(false);
 const form = ref<{ body: string }>({ body: "" });
@@ -131,8 +133,8 @@ const customToolbar = [
 
 const rules = {
   body: [
-    { required: true, message: "请填写内容", trigger: "blur" },
-    { min: 10, message: "长度至少10个字符", trigger: "blur" },
+    { required: true, message: t("verse.view.reply.rules.message1"), trigger: "blur" },
+    { min: 10, message: t("verse.view.reply.rules.message2"), trigger: "blur" },
   ],
 };
 
@@ -161,9 +163,9 @@ const canDelete = (item: any) => {
 };
 const deletedWindow = async (id: number) => {
   try {
-    await ElMessageBox.confirm("是否确定删除?", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    await ElMessageBox.confirm(t("verse.view.reply.confirm.message1"), t("verse.view.reply.confirm.message2"), {
+      confirmButtonText: t("verse.view.reply.confirm.confirm"),
+      cancelButtonText: t("verse.view.reply.confirm.cancel"),
       closeOnClickModal: false,
       type: "warning",
     });
@@ -171,12 +173,12 @@ const deletedWindow = async (id: number) => {
     replies.value = replies.value.filter((reply: any) => reply.id !== id);
     ElMessage({
       type: "success",
-      message: "删除成功!",
+      message: t("verse.view.reply.confirm.success"),
     });
   } catch (e) {
     ElMessage({
       type: "info",
-      message: "已取消删除",
+      message: t("verse.view.reply.confirm.info"),
     });
   }
 };
@@ -204,7 +206,7 @@ const submitForm = async () => {
     replies.value.unshift(response.data);
 
     ElMessage({
-      message: "回复成功",
+      message: t("verse.view.reply.success"),
       type: "success",
     });
   } else {

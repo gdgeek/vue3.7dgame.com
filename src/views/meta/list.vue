@@ -15,7 +15,7 @@
             <el-button size="small" type="primary" @click="addMeta">
               <font-awesome-icon icon="plus"></font-awesome-icon>
               &nbsp;
-              <span class="hidden-sm-and-down">创建【元数据】</span>
+              <span class="hidden-sm-and-down">{{ $t("meta.title") }}</span>
             </el-button>
           </el-button-group>
         </mr-p-p-header>
@@ -69,7 +69,7 @@
                       type="success"
                       size="small"
                       icon="Edit"
-                      >编辑</el-button
+                      >{{ $t("meta.edit") }}</el-button
                     >
 
                     <el-button
@@ -78,7 +78,7 @@
                       size="small"
                       icon="Delete"
                     >
-                      删除</el-button
+                      {{ $t("meta.delete") }}</el-button
                     >
                   </el-button-group>
                 </div>
@@ -127,6 +127,8 @@ const pagination = ref<{
   total: number;
 }>({ current: 1, count: 1, size: 20, total: 20 });
 
+const { t } = useI18n();
+
 const editor = (id: number) => {
   router.push({ path: "/meta/meta-edit", query: { id } });
 };
@@ -134,11 +136,11 @@ const editor = (id: number) => {
 const del = async (id: number) => {
   try {
     await ElMessageBox.confirm(
-      "此操作将永久删除该【组件】, 是否继续?",
-      "提示",
+      t("meta.confirm.message1"),
+      t("meta.confirm.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText:  t("meta.confirm.confirm"),
+        cancelButtonText:  t("meta.confirm.cancel"),
         type: "warning",
       }
     );
@@ -146,13 +148,13 @@ const del = async (id: number) => {
     await refresh();
     ElMessage({
       type: "success",
-      message: "删除成功!",
+      message:  t("meta.confirm.success"),
     });
   } catch (e) {
     console.error(e);
     ElMessage({
       type: "info",
-      message: "已取消删除",
+      message:  t("meta.confirm.info"),
     });
   }
 };
@@ -169,23 +171,23 @@ const search = (value: string) => {
 
 const addMeta = async () => {
   try {
-    const input = await ElMessageBox.prompt("请输入元数据名称", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    const input = await ElMessageBox.prompt( t("meta.prompt.message1"), t("meta.prompt.message2"), {
+      confirmButtonText: t("meta.prompt.confirm"),
+      cancelButtonText: t("meta.prompt.cancel"),
       inputValidator: (value: string) => {
         if (!value) {
-          return "元数据名称不能为空";
+          return t("meta.prompt.inputValidator.item1");
         }
         if (value.length < 3) {
-          return "元数据名称不能小于3个字符";
+          return t("meta.prompt.inputValidator.item2");
         }
         if (value.length > 20) {
-          return "元数据名称不能大于20个字符";
+          return t("meta.prompt.inputValidator.item3");
         }
         return true;
       },
     });
-    ElMessage.success("元数据名称是: " + input.value);
+    ElMessage.success(t("meta.prompt.success") + input.value);
 
     const data = {
       title: input.value,
@@ -196,7 +198,7 @@ const addMeta = async () => {
     await edit(response.data.id);
   } catch (e) {
     console.error();
-    ElMessage.info("取消输入");
+    ElMessage.info(t("meta.prompt.info"));
   }
 };
 

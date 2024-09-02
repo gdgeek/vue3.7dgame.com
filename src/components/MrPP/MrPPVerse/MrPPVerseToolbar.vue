@@ -2,8 +2,8 @@
   <span>
     <mr-p-p-verse-window-create
       ref="changedDialog"
-      dialog-title="修改数据"
-      dialog-submit="修 改"
+      :dialog-title="$t('verse.page.list.toolbar.dialogTitle')"
+      :dialog-submit="$t('verse.page.list.toolbar.dialogSubmit')"
       @submit="submitChange"
     ></mr-p-p-verse-window-create>
 
@@ -43,6 +43,8 @@ const props = defineProps<{
   verse: VerseData;
 }>();
 
+const { t } = useI18n();
+
 const emit = defineEmits(["deleted", "changed"]);
 
 const changedDialog = ref<InstanceType<typeof MrPPVerseWindowCreate> | null>(
@@ -69,11 +71,11 @@ const qrcode = () => {
 const deletedWindow = async () => {
   try {
     await ElMessageBox.confirm(
-      "此操作将永久销毁此【宇宙】, 是否继续?",
-      "提示",
+      t("verse.page.list.toolbar.confirm.message1"),
+      t("verse.page.list.toolbar.confirm.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("verse.page.list.toolbar.confirm.confirm"),
+        cancelButtonText: t("verse.page.list.toolbar.confirm.cancel"),
         closeOnClickModal: false,
         type: "warning",
       }
@@ -82,7 +84,7 @@ const deletedWindow = async () => {
   } catch {
     ElMessage({
       type: "info",
-      message: "已取消删除",
+      message: t("verse.page.list.toolbar.confirm.info"),
     });
   }
 };
@@ -93,7 +95,7 @@ const del = async () => {
       await deleteVerse(props.verse.id);
       ElMessage({
         type: "success",
-        message: "删除成功!",
+        message: t("verse.page.list.toolbar.confirm.success"),
       });
       emit("deleted", props.verse);
     } catch (error) {
@@ -116,7 +118,7 @@ const submitChange = async (form: any, item: any, imageId: number | null) => {
       const response = await putVerse(props.verse.id, data);
       ElMessage({
         type: "success",
-        message: "修改成功!",
+        message: t("verse.page.list.toolbar.success"),
       });
       if (changedDialog.value) {
         changedDialog.value.hide();

@@ -19,14 +19,13 @@
     </el-card>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button @click="dialogVisible = false">{{ $t("verse.page.list.toolbar.qrcode.cancel") }}</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import QrcodeVue from "qrcode.vue";
 import { getVerse } from "@/api/v1/verse";
 
@@ -35,11 +34,13 @@ const value = ref("https://mrpp.com");
 const size = ref(400);
 const verse = ref<{ id: number; name: string } | null>(null);
 
+const { t } = useI18n();
+
 const verseId = computed(() => verse.value?.id ?? -1);
 const dialogTitle = computed(() =>
   verse.value
-    ? `请用设备扫描二维码，进入【${verse.value.name}】。`
-    : "请用设备扫描二维码，进入场景。"
+    ? t("verse.page.list.toolbar.qrcode.dialogTitle1") + `【${verse.value.name}】。`
+    : t("verse.page.list.toolbar.qrcode.dialogTitle2")
 );
 
 const encode = (number: number): string => {

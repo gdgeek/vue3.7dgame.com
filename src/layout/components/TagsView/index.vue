@@ -109,7 +109,7 @@ watch(
 );
 
 const contentMenuVisible = ref(false); // 右键菜单是否显示
-watch(contentMenuVisible, (value) => {
+watch(contentMenuVisible, (value: any) => {
   if (value) {
     document.body.addEventListener("click", closeContentMenu);
   } else {
@@ -363,7 +363,7 @@ const againActiveTop = (newVal: string) => {
 // 如果是混合模式，更改selectedTag，需要对应高亮的activeTop
 watch(
   () => route.name,
-  (newVal) => {
+  (newVal: any) => {
     if (newVal) {
       againActiveTop(newVal as string);
     }

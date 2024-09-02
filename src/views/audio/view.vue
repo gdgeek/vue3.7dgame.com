@@ -4,7 +4,7 @@
       <el-col :sm="16">
         <el-card class="box-card">
           <template #header>
-            <b id="title">音频名称：</b>
+            <b id="title">{{ $t("audio.view.title") }}</b>
             <span v-if="audioData">{{ audioData.name }}</span>
           </template>
           <img id="imgs" :src="imgSrc" style="display: none" />
@@ -42,22 +42,22 @@
 
       <el-col :sm="8">
         <el-card class="box-card">
-          <template #header> <b>音频信息</b>: </template>
+          <template #header> <b>{{ $t("audio.view.info.title") }}</b>: </template>
           <div class="box-item">
             <el-table :data="tableData" stripe>
-              <el-table-column prop="item" label="条目"></el-table-column>
-              <el-table-column prop="text" label="内容"></el-table-column>
+              <el-table-column prop="item" :label="$t('audio.view.info.label1')"></el-table-column>
+              <el-table-column prop="text" :label="$t('audio.view.info.label2')"></el-table-column>
             </el-table>
 
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="namedWindow">
                   <i class="el-icon-edit"></i>
-                  改名
+                  {{ $t("audio.view.info.name") }}
                 </el-button>
                 <el-button type="primary" size="small" @click="deleteWindow">
                   <i class="el-icon-delete"></i>
-                  删除
+                  {{ $t("audio.view.info.delete") }}
                 </el-button>
               </el-button-group>
             </aside>
@@ -79,7 +79,9 @@ import { FileHandler } from "@/assets/js/file/server";
 
 const route = useRoute();
 const router = useRouter();
-const store = useFileStore().store; // Replace with Pinia store if used
+const store = useFileStore().store;
+
+const { t } = useI18n()
 
 const audioData = ref<ResourceInfo | null>(null);
 const file = ref<string>();
@@ -90,10 +92,10 @@ const imgSrc = "/media/bg/audio-cover.jpg";
 const tableData = computed(() => {
   if (audioData.value) {
     return [
-      { item: "音频名称", text: audioData.value.name },
-      { item: "创建者", text: audioData.value.author.nickname },
-      { item: "创建时间", text: audioData.value.created_at },
-      { item: "文件大小", text: `${audioData.value.file.size}字节` },
+      { item: t("audio.view.info.item1"), text: audioData.value.name },
+      { item: t("audio.view.info.item2"), text: audioData.value.author.nickname },
+      { item: t("audio.view.info.item3"), text: audioData.value.created_at },
+      { item: t("audio.view.info.item4"), text: `${audioData.value.file.size}` + t("audio.view.info.size") },
     ];
   }
   return [];
@@ -230,27 +232,27 @@ const setup = async (
 
 const deleteWindow = async () => {
   try {
-    await ElMessageBox.confirm("此操作将永久删除该文件, 是否继续?", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    await ElMessageBox.confirm(t("audio.view.confirm.message1"), t("audio.view.confirm.message2"), {
+      confirmButtonText: t("audio.view.confirm.confirm"),
+      cancelButtonText: t("audio.view.confirm.cancel"),
       type: "warning",
     });
     await deleteAudio(audioData.value!.id);
-    ElMessage.success("删除成功!");
+    ElMessage.success(t("audio.view.confirm.success"));
     router.push({ path: "/resource/audio/index" });
   } catch {
-    ElMessage.info("已取消删除");
+    ElMessage.info(t("audio.view.confirm.info"));
   }
 };
 
 const namedWindow = async () => {
   try {
     const { value } = await ElMessageBox.prompt(
-      "请输入新名称",
-      "修改图片名称",
+      t("audio.view.namePrompt.message1"),
+      t("audio.view.namePrompt.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("audio.view.namePrompt.confirm"),
+        cancelButtonText: t("audio.view.namePrompt.cancel"),
         closeOnClickModal: false,
         inputValue: audioData.value!.name,
       }
@@ -258,12 +260,12 @@ const namedWindow = async () => {
 
     if (value) {
       await named(audioData.value!.id, value);
-      ElMessage.success("新的图片名称: " + value);
+      ElMessage.success(t("audio.view.namePrompt.success") + value);
     } else {
-      ElMessage.info("取消输入");
+      ElMessage.info(t("audio.view.namePrompt.info"));
     }
   } catch {
-    ElMessage.info("取消输入");
+    ElMessage.info(t("audio.view.namePrompt.info"));
   }
 };
 

@@ -1,41 +1,41 @@
 <template>
   <div>
     <el-dialog v-model="post.visible" width="30%" :close-on-click-modal="false">
-      <template #header> 共享给其他用户 </template>
+      <template #header> {{ $t("verse.view.share.header1") }} </template>
       <el-form :model="post.form" ref="postRef" label-width="80px">
         <el-form-item
-          label="用户名"
+          :label="$t('verse.view.share.form.label1')"
           prop="username"
           :rules="[
-            { required: true, message: '用户名不能为空', trigger: 'blur' },
+            { required: true, message: $t('verse.view.share.form.ruleMessage'), trigger: 'blur' },
           ]"
         >
           <el-input
             type="text"
             v-model="post.form.username"
-            placeholder="请输入用户名"
+            :placeholder="$t('verse.view.share.form.placeholder')"
             autocomplete="off"
           ></el-input>
         </el-form-item>
 
-        <el-form-item label="相关信息" prop="content">
+        <el-form-item :label="$t('verse.view.share.form.label2')" prop="content">
           <el-input type="textarea" v-model="post.form.content"></el-input>
         </el-form-item>
-        <el-form-item label="编辑权限" prop="editable">
+        <el-form-item :label="$t('verse.view.share.form.label3')" prop="editable">
           <el-checkbox
             v-model="post.form.editable"
-            label="可编辑"
+            :label="$t('verse.view.share.form.label4')"
             border
           ></el-checkbox>
         </el-form-item>
         <el-form-item>
           <el-button-group :inline="true">
             <el-button size="small" type="primary" @click="onPost">
-              确 认
+              {{ $t("verse.view.share.form.confirm") }}
             </el-button>
 
             <el-button size="small" @click="post.visible = false">
-              取 消
+              {{ $t("verse.view.share.form.cancel") }}
             </el-button>
           </el-button-group>
         </el-form-item>
@@ -43,36 +43,36 @@
     </el-dialog>
 
     <el-dialog v-model="put.visible" width="30%" :close-on-click-modal="false">
-      <template #header> 修改共享信息 </template>
+      <template #header> {{ $t("verse.view.share.header1") }} </template>
       <el-form :model="put.form" ref="putRef" label-width="80px">
         <el-form-item
-          label="用户名"
+          :label="$t('verse.view.share.form.label1')"
           prop="username"
           :rules="[
-            { required: true, message: '用户名不能为空', trigger: 'blur' },
+            { required: true, message: $t('verse.view.share.form.ruleMessage'), trigger: 'blur' },
           ]"
         >
           {{ put.form.username }}
         </el-form-item>
 
-        <el-form-item label="相关信息" prop="content">
+        <el-form-item :label="$t('verse.view.share.form.label2')" prop="content">
           <el-input type="textarea" v-model="put.form.content"></el-input>
         </el-form-item>
-        <el-form-item label="编辑权限" prop="editable">
+        <el-form-item :label="$t('verse.view.share.form.label3')" prop="editable">
           <el-checkbox
             v-model="put.form.editable"
-            label="可编辑"
+            :label="$t('verse.view.share.form.label4')"
             border
           ></el-checkbox>
         </el-form-item>
         <el-form-item>
           <el-button-group :inline="true">
             <el-button size="small" type="primary" @click="onPut">
-              确 认
+              {{ $t("verse.view.share.form.confirm") }}
             </el-button>
 
             <el-button size="small" @click="put.visible = false">
-              取 消
+              {{ $t("verse.view.share.form.cancel") }}
             </el-button>
           </el-button-group>
         </el-form-item>
@@ -83,7 +83,7 @@
     <el-card>
       <template #header>
         <div class="clearfix">
-          <b>【宇宙】共享</b>
+          <b>{{ $t("verse.view.share.title1") }}</b>
         </div>
       </template>
       <el-collapse v-if="items != null && items.length !== 0" accordion>
@@ -136,7 +136,7 @@
         size="small"
       >
         <font-awesome-icon icon="handshake"></font-awesome-icon>
-        &nbsp;共享给好友
+        &nbsp;{{ $t("verse.view.share.title2") }}
       </el-button>
     </el-card>
   </div>
@@ -158,6 +158,8 @@ const props = defineProps<{
 }>();
 
 const items = ref<any[]>([]);
+
+const { t } = useI18n();
 
 const post = reactive({
   visible: false,
@@ -210,21 +212,21 @@ const setup = (item: any) => {
 
 const del = async (id: number) => {
   try {
-    await ElMessageBox.confirm("是否确认关闭共享？", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    await ElMessageBox.confirm(t("verse.view.share.confirm.message1"), t("verse.view.share.confirm.message2"), {
+      confirmButtonText: t("verse.view.share.confirm.confirm"),
+      cancelButtonText: t("verse.view.share.confirm.cancel"),
       type: "warning",
     });
     await deleteVerseShare(id);
     await refresh();
     ElMessage({
       type: "success",
-      message: "删除成功!",
+      message: t("verse.view.share.confirm.success"),
     });
   } catch (e) {
     ElMessage({
       type: "info",
-      message: "已取消删除",
+      message: t("verse.view.share.confirm.info"),
     });
   }
 };

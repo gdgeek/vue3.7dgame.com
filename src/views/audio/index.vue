@@ -12,7 +12,7 @@
           <el-button-group :inline="true">
             <router-link to="/resource/audio/upload">
               <el-button size="small" type="primary" icon="uploadFilled">
-                <span class="hidden-sm-and-down">上传音频</span>
+                <span class="hidden-sm-and-down">{{ $t("audio.uploadAudio") }}</span>
               </el-button>
             </router-link>
           </el-button-group>
@@ -34,9 +34,9 @@
                       type="warning"
                       size="small"
                     >
-                      初始化音频数据
+                      {{ $t("audio.initializeAudioData") }}
                     </el-button>
-                    <el-button type="primary" size="small">查看音频</el-button>
+                    <el-button type="primary" size="small">{{ $t("audio.viewAudio") }}</el-button>
                   </router-link>
                 </template>
               </mr-p-p-card>
@@ -66,9 +66,9 @@
 import { getAudios, putAudio, deleteAudio } from "@/api/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-
 import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
+
 const items = ref<any[]>([]);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
@@ -78,6 +78,8 @@ const pagination = reactive({
   size: 20,
   total: 20,
 });
+
+const { t } = useI18n();
 
 // 处理分页
 const handleCurrentChange = async (page: number) => {
@@ -90,19 +92,19 @@ const handleCurrentChange = async (page: number) => {
 const namedWindow = async (item: any) => {
   try {
     const { value } = await ElMessageBox.prompt(
-      "请输入新名称",
-      "修改音频名称",
+      t("audio.prompt.message1"),
+      t("audio.prompt.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("audio.prompt.confirm"),
+        cancelButtonText: t("audio.prompt.cancel"),
         closeOnClickModal: false,
         inputValue: item.name,
       }
     );
     await named(item.id, value);
-    ElMessage.success("新的音频名称: " + value);
+    ElMessage.success(t("audio.prompt.success") + value);
   } catch {
-    ElMessage.info("取消输入");
+    ElMessage.info(t("audio.prompt.info"));
   }
 };
 
@@ -131,16 +133,16 @@ const named = async (id: string, newValue: string) => {
 // 删除音频确认
 const deletedWindow = async (item: any) => {
   try {
-    await ElMessageBox.confirm("此操作将永久删除该文件, 是否继续?", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    await ElMessageBox.confirm(t("audio.confirm.message1"), t("audio.confirm.message2"), {
+      confirmButtonText: t("audio.confirm.confirm"),
+      cancelButtonText: t("audio.confirm.cancel"),
       closeOnClickModal: false,
       type: "warning",
     });
     await deleted(item.id);
-    ElMessage.success("删除成功!");
+    ElMessage.success(t("audio.confirm.success"));
   } catch {
-    ElMessage.info("已取消删除");
+    ElMessage.info(t("audio.confirm.info"));
   }
 };
 

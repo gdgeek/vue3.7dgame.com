@@ -26,7 +26,7 @@
                     class="icon"
                     icon="save"
                   ></font-awesome-icon>
-                  保存
+                  {{ $t("meta.script.save") }}
                 </el-button>
               </el-button-group>
             </div>
@@ -52,21 +52,22 @@ import { MessageType } from "@/utils/helper";
 import { useRoute } from "vue-router";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
 import { cybersType, postCyber, putCyber } from "@/api/v1/cyber";
-
 import { ElMessage } from "element-plus";
+
 let ready: boolean = false;
 const editor = ref<HTMLIFrameElement | null>(null);
+const { t } = useI18n();
 const postScript = async (message: any) => {
   if (meta.value === null) {
     ElMessage({
-      message: "没有元信息",
+      message: t("meta.script.error1"),
       type: "error",
     });
     return;
   }
   if (!meta.value.editable) {
     ElMessage({
-      message: "没有编辑权限",
+      message:  t("meta.script.error2"),
       type: "error",
     });
     return;
@@ -98,7 +99,7 @@ const postScript = async (message: any) => {
   }
 
   ElMessage({
-    message: "保存成功",
+    message:  t("meta.script.success"),
     type: "success",
   });
 };
@@ -116,7 +117,7 @@ const handleMessage = async (e: MessageEvent) => {
       await postScript(params.data);
     } else if (params.action === "post:no-change") {
       ElMessage({
-        message: "没有修改",
+        message:  t("meta.script.info"),
         type: "info",
       });
     }
@@ -147,7 +148,7 @@ const postMessage = (action: string, data: any = {}) => {
       "*"
     );
   } else {
-    console.error("没有编辑器");
+    console.error( t("meta.script.error3"));
     ElMessage({
       type: "error",
     });

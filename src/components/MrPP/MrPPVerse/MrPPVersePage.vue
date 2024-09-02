@@ -4,8 +4,8 @@
       v-if="props.created"
       ref="createdDialog"
       :close-on-click-modal="false"
-      dialog-title="创建！【宇宙】"
-      dialog-submit="创 建"
+      :dialog-title="$t('verse.page.dialogTitle')"
+      :dialog-submit="$t('verse.page.dialogSubmit')"
       @submit="submitCreate"
     ></Create>
 
@@ -27,7 +27,7 @@
             >
               <font-awesome-icon icon="plus"></font-awesome-icon>
               &nbsp;
-              <span class="hidden-sm-and-down">创建【宇宙】</span>
+              <span class="hidden-sm-and-down">{{ $t("verse.page.title") }}</span>
             </el-button>
           </el-button-group>
         </MrPPHeader>
@@ -153,6 +153,5 @@ const refresh = () => {
   );
 };
 
-// 初始化时刷新数据
 onMounted(refresh);
 </script>

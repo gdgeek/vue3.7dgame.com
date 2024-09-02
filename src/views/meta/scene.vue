@@ -41,6 +41,8 @@ const editor = ref<HTMLIFrameElement | null>();
 const id = computed(() => parseInt(route.query.id as string));
 const title = computed(() => route.query.title?.slice(4) as string);
 
+const { t } = useI18n();
+
 const cancel = () => {
   // Cancel logic
 };
@@ -73,7 +75,7 @@ const postMessage = (action: string, data: any = {}) => {
     );
   } else {
     ElMessage({
-      message: "没有编辑器",
+      message: t("meta.scene.error"),
       type: "error",
     });
   }
@@ -139,7 +141,7 @@ const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
   if (!saveable) {
     ElMessage({
       type: "info",
-      message: "没有保存权限!",
+      message: t("meta.scene.info"),
     });
     return;
   }
@@ -147,7 +149,7 @@ const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
   await putMeta(id.value, { data: meta, events });
   ElMessage({
     type: "success",
-    message: "场景保存成功~",
+    message: t("meta.scene.success"),
   });
 };
 

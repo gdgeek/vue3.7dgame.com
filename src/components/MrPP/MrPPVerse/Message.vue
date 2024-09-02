@@ -12,7 +12,7 @@
     </el-divider>
     <el-dialog v-model="dialog" width="70%">
       <template #header>
-        <span>修改内容</span>
+        <span>{{ $t("verse.view.message.header") }}</span>
       </template>
       <mr-p-p-message-from
         ref="editor"
@@ -24,7 +24,7 @@
     <el-card>
       <template #header>
         <div class="clearfix">
-          <span v-if="!message">载入...</span>
+          <span v-if="!message">{{ $t("verse.view.message.loading") }}</span>
           <span v-else>
             <h4 style="display: inline; color: #494949">{{ message.title }}</h4>
           </span>
@@ -41,7 +41,7 @@
               type="text"
               @click="dialog = true"
             >
-              修改内容
+            {{ $t("verse.view.message.update") }}
             </el-button>
             <el-button
               v-if="canDelete(message)"
@@ -50,7 +50,7 @@
               type="text"
               @click="confirmDeletion(message.id!)"
             >
-              删除帖子
+            {{ $t("verse.view.message.delete") }}
             </el-button>
           </el-button-group>
         </div>
@@ -71,13 +71,13 @@
             @click="toggleLike(message.like!)"
           >
             <font-awesome-icon icon="fa-solid fa-thumbs-up"></font-awesome-icon>
-            赞同
+            {{ $t("verse.view.message.like") }}
             <span v-if="message.likesCount != 0">{{ message.likesCount }}</span>
           </el-button>
         </el-col>
         <el-col :span="10" align="right">
           <small v-if="message" style="color: #8790a7">
-            {{ userInfo.data.nickname }} 编辑于 {{ message.updated_at }}
+            {{ message.author.nickname }}  {{ $t("verse.view.message.edit") }}  {{ message.updated_at }}
           </small>
         </el-col>
       </el-row>
@@ -111,6 +111,8 @@ const tagsStore = useTagsStore();
 const userStore = useUserStore();
 const dialog = ref(false);
 const message = ref<MessageType>();
+
+const { t } = useI18n();
 
 const tagsMap = computed(() => tagsStore.tagsMap);
 const userInfo = computed(() => userStore.userInfo);
@@ -153,10 +155,10 @@ const toggleLike = async (like: Like) => {
   try {
     if (like) {
       await removeLike(props.messageId);
-      ElMessage({ type: "success", message: "已撤销" });
+      ElMessage({ type: "success", message: t("verse.view.message.message1") });
     } else {
       await postLike(props.messageId);
-      ElMessage({ type: "success", message: "已点赞" });
+      ElMessage({ type: "success", message: t("verse.view.message.message2") });
     }
   } catch (error) {
     console.error(error);
@@ -166,18 +168,18 @@ const toggleLike = async (like: Like) => {
 
 const confirmDeletion = async (id: number) => {
   try {
-    await ElMessageBox.confirm("是否确定删除?", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    await ElMessageBox.confirm(t("verse.view.message.confirm.message1"), t("verse.view.message.confirm.message2"), {
+      confirmButtonText: t("verse.view.message.confirm.confirm"),
+      cancelButtonText: t("verse.view.message.confirm.cancel"),
       closeOnClickModal: false,
       type: "warning",
     });
     await deleteMessage(id);
-    ElMessage({ type: "success", message: "删除成功!" });
+    ElMessage({ type: "success", message: t("verse.view.message.confirm.success") });
     message.value = null;
     router.push({ path: "/community/index" });
   } catch {
-    ElMessage({ type: "info", message: "已取消删除" });
+    ElMessage({ type: "info", message: t("verse.view.message.confirm.info") });
   }
 };
 
