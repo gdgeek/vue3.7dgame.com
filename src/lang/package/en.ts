@@ -194,7 +194,8 @@ export default {
       info: "Cancel input",
     },
     confirm: {
-      message1: "This action will permanently delete the file. Do you want to continue?",
+      message1:
+        "This action will permanently delete the file. Do you want to continue?",
       message2: "Prompt",
       confirm: "Confirm",
       cancel: "Cancel",
@@ -232,7 +233,8 @@ export default {
         info: "Cancel input",
       },
       confirm: {
-        message1: "This action will permanently delete the file. Do you want to continue?",
+        message1:
+          "This action will permanently delete the file. Do you want to continue?",
         message2: "Prompt",
         confirm: "Confirm",
         cancel: "Cancel",
@@ -246,8 +248,8 @@ export default {
         cancel: "Cancel",
         success: "New voxel name: ",
         info: "Cancel input",
-      }
-    }    
+      },
+    },
   },
   // 模型管理国际化
   polygen: {
@@ -263,7 +265,8 @@ export default {
       info: "cancel input",
     },
     confirm: {
-      message1: "This action will permanently delete the file. Do you want to continue?",
+      message1:
+        "This action will permanently delete the file. Do you want to continue?",
       message2: "Prompt",
       confirm: "Confirm",
       cancel: "Cancel",
@@ -299,7 +302,8 @@ export default {
         info: "Cancel input",
       },
       confirm: {
-        message1: "This action will permanently delete the file. Do you want to continue?",
+        message1:
+          "This action will permanently delete the file. Do you want to continue?",
         message2: "Prompt",
         confirm: "Confirm",
         cancel: "Cancel",
@@ -313,8 +317,8 @@ export default {
         cancel: "Cancel",
         success: "New polygen name: ",
         info: "Cancel input",
-      }
-    }    
+      },
+    },
   },
   // 图片管理国际化
   picture: {
@@ -330,7 +334,8 @@ export default {
       info: "cancel input",
     },
     confirm: {
-      message1: "This action will permanently delete the file. Do you want to continue?",
+      message1:
+        "This action will permanently delete the file. Do you want to continue?",
       message2: "Prompt",
       confirm: "Confirm",
       cancel: "Cancel",
@@ -355,7 +360,8 @@ export default {
         delete: "Delete",
       },
       confirm: {
-        message1: "This action will permanently delete the file. Do you want to continue?",
+        message1:
+          "This action will permanently delete the file. Do you want to continue?",
         message2: "Prompt",
         confirm: "Confirm",
         cancel: "Cancel",
@@ -369,8 +375,8 @@ export default {
         cancel: "Cancel",
         success: "New picture name: ",
         info: "Cancel input",
-      }
-    }    
+      },
+    },
   },
   // 视频管理国际化
   video: {
@@ -386,7 +392,8 @@ export default {
       info: "cancel input",
     },
     confirm: {
-      message1: "This action will permanently delete the file. Do you want to continue?",
+      message1:
+        "This action will permanently delete the file. Do you want to continue?",
       message2: "Prompt",
       confirm: "Confirm",
       cancel: "Cancel",
@@ -410,7 +417,8 @@ export default {
         delete: "Delete",
       },
       confirm: {
-        message1: "This action will permanently delete the file. Do you want to continue?",
+        message1:
+          "This action will permanently delete the file. Do you want to continue?",
         message2: "Prompt",
         confirm: "Confirm",
         cancel: "Cancel",
@@ -424,8 +432,8 @@ export default {
         cancel: "Cancel",
         success: "New Video name: ",
         info: "Cancel input",
-      }
-    }    
+      },
+    },
   },
   // 音频管理国际化
   audio: {
@@ -441,7 +449,8 @@ export default {
       info: "cancel input",
     },
     confirm: {
-      message1: "This action will permanently delete the file. Do you want to continue?",
+      message1:
+        "This action will permanently delete the file. Do you want to continue?",
       message2: "Prompt",
       confirm: "Confirm",
       cancel: "Cancel",
@@ -464,7 +473,8 @@ export default {
         delete: "Delete",
       },
       confirm: {
-        message1: "This action will permanently delete the file. Do you want to continue?",
+        message1:
+          "This action will permanently delete the file. Do you want to continue?",
         message2: "Prompt",
         confirm: "Confirm",
         cancel: "Cancel",
@@ -478,8 +488,8 @@ export default {
         cancel: "Cancel",
         success: "New Audio name: ",
         info: "Cancel input",
-      }
-    }    
+      },
+    },
   },
   // 文件上传国际化
   upload: {
@@ -507,7 +517,8 @@ export default {
     edit: "Edit",
     delete: "Delete",
     confirm: {
-      message1: "This action will permanently delete the 【Metadata】. Do you want to continue?",
+      message1:
+        "This action will permanently delete the 【Metadata】. Do you want to continue?",
       message2: "Prompt",
       confirm: "Confirm",
       cancel: "Cancel",
@@ -522,7 +533,7 @@ export default {
       inputValidator: {
         item1: "Metadata name cannot be empty",
         item2: "Metadata name cannot be less than 3 characters",
-        item3: "Metadata name cannot be more than 20 characters"
+        item3: "Metadata name cannot be more than 20 characters",
       },
       success: "The metadata name is: ",
       info: "cancel input",
@@ -544,12 +555,12 @@ export default {
         message1: "Please enter a name",
         message2: "Length should be between 3 and 20 characters",
       },
-      success: "Saved successfully"
+      success: "Saved successfully",
     },
     scene: {
       error: "No editor available",
       info: "No permission to save!",
-      success: "Scene saved successfully~"
+      success: "Scene saved successfully~",
     },
     script: {
       save: "Save",
@@ -557,8 +568,8 @@ export default {
       error2: "No permission to edit",
       error3: "No editor available",
       success: "Saved successfully",
-      info: "No changes made"
-    }    
+      info: "No changes made",
+    },
   },
   // 宇宙部分国际化
   verse: {
@@ -576,9 +587,9 @@ export default {
         dialogSubmit: "Confirm",
         rules: {
           message1: "Please enter an activity name",
-          message2: "Length should be between 3 and 64 characters"
+          message2: "Length should be between 3 and 64 characters",
         },
-        error: "Form validation failed"
+        error: "Form validation failed",
       },
       list: {
         enter: "Enter",
@@ -587,27 +598,29 @@ export default {
           author: "Author",
           learn: "Learn",
           blank: "DefaultLink",
-          description: "Description"
+          description: "Description",
         },
         toolbar: {
           dialogTitle: "EditData",
           dialogSubmit: "Confirm",
           confirm: {
-            message1: "This action will permanently delete the [Universe]. Do you want to continue?",
+            message1:
+              "This action will permanently delete the [Universe]. Do you want to continue?",
             message2: "Prompt",
             confirm: "Confirm",
             cancel: "Cancel",
             success: "Deleted successfully!",
-            info: "Deletion canceled"
+            info: "Deletion canceled",
           },
           success: "Modified successfully!",
           qrcode: {
             cancel: "Cancel",
             dialogTitle1: "Please use a device to scan the QR code to enter",
-            dialogTitle2: "Please use a device to scan the QR code to enter the scene."
-          }          
-        }
-      }
+            dialogTitle2:
+              "Please use a device to scan the QR code to enter the scene.",
+          },
+        },
+      },
     },
     view: {
       header: "EditInformation",
@@ -626,7 +639,7 @@ export default {
           message2: "Please enter a name",
           message3: "Length should be between 2 and 50 characters",
           message4: "Please enter a description",
-        }
+        },
       },
       edit: "Edit【Universe】",
       eye: "View【Universe】",
@@ -662,8 +675,8 @@ export default {
           confirm: "Confirm",
           cancel: "Cancel",
           success: "Sharing stopped successfully!",
-          info: "Sharing stop canceled"
-        }
+          info: "Sharing stop canceled",
+        },
       },
       message: {
         header: "EditContent",
@@ -680,8 +693,8 @@ export default {
           confirm: "Confirm",
           cancel: "Cancel",
           success: "Deleted successfully!",
-          info: "Deletion canceled"
-        }
+          info: "Deletion canceled",
+        },
       },
       reply: {
         timestamp: "Reply Now",
@@ -689,7 +702,7 @@ export default {
         publish: "Published on",
         rules: {
           message1: "Please enter content",
-          message2: "Length must be at least 10 characters"
+          message2: "Length must be at least 10 characters",
         },
         confirm: {
           message1: "Are you sure you want to delete?",
@@ -697,13 +710,13 @@ export default {
           confirm: "Confirm",
           cancel: "Cancel",
           success: "Deleted successfully!",
-          info: "Deletion canceled"
+          info: "Deletion canceled",
         },
-        success: "Reply successful"
-      }      
-    }
+        success: "Reply successful",
+      },
+    },
   },
-  
+
   // 导航栏国际化
   navbar: {
     dashboard: "Dashboard",

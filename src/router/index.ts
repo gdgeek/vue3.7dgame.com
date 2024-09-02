@@ -607,7 +607,7 @@ const pathsToRemove = [
 console.log("roles", userStore.userInfo.roles);
 const isRoot = computed(async () => {
   await userStore.getUserInfo();
-  return userStore.userInfo.roles.includes("manager");
+  return userStore.userInfo.roles.includes("admin" || "root");
 });
 
 if (!isRoot.value) {

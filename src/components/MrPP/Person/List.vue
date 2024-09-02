@@ -58,7 +58,6 @@
                 </el-select>
               </el-descriptions-item>
             </el-descriptions>
-            <!-- 权限选择 -->
             <el-button
               v-if="canDelete(item.roles)"
               type="danger"
@@ -203,9 +202,9 @@ const handleRoleChange = async (item: ViewCard) => {
   };
   console.log("roleid", Number(item.id));
   try {
-    await putPerson(data); // 调用修改接口
+    await putPerson(data);
     ElMessage.success("权限更新成功!");
-    refresh(); // 刷新数据
+    refresh();
   } catch (error) {
     ElMessage.error("权限更新失败!");
   }
