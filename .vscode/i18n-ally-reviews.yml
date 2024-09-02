@@ -23,3 +23,16 @@ reviews:
             type: approve
             time: '2024-08-29T03:46:51.003Z'
             resolved: true
+  verse.view.form.rules.message1:
+    locales:
+      en:
+        comments:
+          - user:
+              name: huyuelong
+              email: 949910047@qq.com
+            id: z91QBZbShz6TxQB0mFa1f
+            comment: ''
+            suggestion: Please enter language
+            type: request_change
+            time: '2024-09-02T09:35:08.351Z'
+            resolved: true

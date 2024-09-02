@@ -1,14 +1,15 @@
 <template>
   <div>
     <el-form ref="formRef" :rules="rules" :model="form" label-width="80px">
-      <el-form-item label="多语言" prop="language">
+      <el-form-item :label="$t('verse.view.form.label1')" prop="language">
         <el-select
           @change="handleChange"
           v-model="form.language"
           filterable
           allow-create
           default-first-option
-          placeholder="请选择语言"
+          :placeholder="$t('verse.view.form.placeholder1')"
+          style="width: 25%"
         >
           <el-option
             v-for="item in options"
@@ -19,38 +20,32 @@
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="名字" prop="name">
+      <el-form-item :label="$t('verse.view.form.label2')" prop="name">
         <el-input
-          placeholder="请输入名称"
+          :placeholder="$t('verse.view.form.placeholder2')"
           suffix-icon="el-icon-more-outline"
           v-model="form.name"
         >
         </el-input>
       </el-form-item>
-      <el-form-item label="介绍">
+      <el-form-item :label="$t('verse.view.form.label3')">
         <el-input
           type="textarea"
           :autosize="{ minRows: 2, maxRows: 4 }"
-          placeholder="请输入介绍"
+          :placeholder="$t('verse.view.form.placeholder3')"
           v-model="form.description"
         >
         </el-input>
       </el-form-item>
       <el-form-item>
         <el-button-group>
-          <el-button
-            size="mini"
-            type="primary"
-            icon="el-icon-check"
-            @click="submitForm('form')"
-            >提交</el-button
+          <el-button size="small" type="primary" @click="submitForm"
+            ><el-icon style="margin-right: 5px"><Check></Check></el-icon
+            >{{ $t("verse.view.form.submit") }}</el-button
           >
-          <el-button
-            size="mini"
-            type="primary"
-            icon="el-icon-delete"
-            @click="remove()"
-            >删除</el-button
+          <el-button size="small" type="danger" @click="remove"
+            ><el-icon style="margin-right: 5px"><Delete></Delete></el-icon
+            >{{ $t("verse.view.form.delete") }}</el-button
           >
         </el-button-group>
       </el-form-item>
@@ -89,6 +84,7 @@ interface LanguageProps {
 }
 
 const props = defineProps<LanguageProps>();
+const { t } = useI18n();
 
 const multilanguage = ref(props.languages);
 const formRef = ref<FormInstance>();
@@ -99,13 +95,33 @@ const form = ref<FormModel>({
 });
 
 const rules = ref({
-  name: [
-    { required: true, message: "请输入名称", trigger: "blur" },
-    { min: 2, max: 50, message: "长度在 2 到 50 个字符", trigger: "blur" },
-  ],
   language: [
-    { required: true, message: "请输入语言", trigger: "blur" },
+    {
+      required: true,
+      message: t("verse.view.form.rules.message1"),
+      trigger: "blur",
+    },
     { min: 2, max: 10, message: "长度在 2 到 10 个字符", trigger: "blur" },
+  ],
+  name: [
+    {
+      required: true,
+      message: t("verse.view.form.rules.message2"),
+      trigger: "blur",
+    },
+    {
+      min: 2,
+      max: 50,
+      message: t("verse.view.form.rules.message3"),
+      trigger: "blur",
+    },
+  ],
+  description: [
+    {
+      required: false,
+      message: t("verse.view.form.rules.message4"),
+      trigger: "blur",
+    },
   ],
 });
 
@@ -154,14 +170,18 @@ const remove = async () => {
   if (languageToRemove && languageToRemove.id) {
     try {
       await deleteMultilanguageVerse(languageToRemove.id);
+      formRef.value?.resetFields();
+      form.value.name = "";
+      form.value.description = "";
       await refresh();
+      ElMessage.success(t("verse.view.success3"));
     } catch (error) {
       console.error(error);
     }
   }
 };
 
-const submitForm = async (formName: string) => {
+const submitForm = async () => {
   const valid = await formRef.value!.validate();
   if (valid) {
     const language = multilanguage.value.find(
@@ -173,6 +193,7 @@ const submitForm = async (formName: string) => {
           name: form.value.name,
           description: form.value.description,
         });
+        ElMessage.success(t("verse.view.success1"));
       } else {
         await postMultilanguageVerse({
           verse_id: props.verseId,
@@ -180,17 +201,21 @@ const submitForm = async (formName: string) => {
           name: form.value.name,
           description: form.value.description,
         });
+        ElMessage.success(t("verse.view.success2"));
       }
       await refresh();
     } catch (error) {
       console.error(error);
+      ElMessage.error(t("verse.view.error1"));
     }
   } else {
     console.error("error submit!!");
+    ElMessage.error(t("verse.view.error2"));
   }
 };
 
 onMounted(() => {
+  refresh();
   reload();
 });
 </script>

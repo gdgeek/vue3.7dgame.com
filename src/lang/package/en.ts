@@ -635,7 +635,7 @@ export default {
         submit: "Submit",
         delete: "Delete",
         rules: {
-          message1: "Please select a language",
+          message1: "Please enter language",
           message2: "Please enter a name",
           message3: "Length should be between 2 and 50 characters",
           message4: "Please enter a description",
@@ -651,7 +651,8 @@ export default {
       success3: "Deletion successful",
       success4: "Share successful",
       success5: "Sharing stopped",
-      error: "Form validation failed",
+      error1: "Submission failed",
+      error2: "Form validation failed",
       messageTitle: "【Universe】Name:",
       scene: "scene",
       share: {
