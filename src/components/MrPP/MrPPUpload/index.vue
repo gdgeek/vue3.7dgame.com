@@ -147,6 +147,7 @@ const select = async () => {
     const md5 = await fileStore.store.fileMD5(file, (p: number) =>
       progress(p, 0)
     );
+    alert(md5);
     const handler = await fileStore.store.publicHandler();
     const has = await fileStore.store.fileHas(
       md5,

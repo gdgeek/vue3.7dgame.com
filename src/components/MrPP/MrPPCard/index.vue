@@ -30,12 +30,6 @@
 
         <el-button-group style="float: right" :inline="true">
           <el-button
-            type="success"
-            size="small"
-            icon="Edit"
-            @click="named"
-          ></el-button>
-          <el-button
             type="danger"
             size="small"
             icon="Delete"
