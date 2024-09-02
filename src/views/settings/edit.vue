@@ -278,7 +278,7 @@ const ruleFormRef = ref<FormInstance>();
 const nickNameFormRef = ref<FormInstance>();
 const route = useRoute();
 // const userData = computed(() => store.getters.userData);
-const imageUrl = computed(() => userStore.userInfo.data.avatar.url || null);
+const imageUrl = computed(() => userStore.userInfo.data.avatar?.url || null);
 console.log("imageUrl", imageUrl);
 const isDisable = ref(false);
 
