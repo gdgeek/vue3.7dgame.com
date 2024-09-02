@@ -23,8 +23,6 @@ type ImageDetails = {
   key: string;
 };
 
-
-
 type VerseOpen = {
   id: number;
   verse_id: number;
@@ -51,7 +49,6 @@ export type VerseCode = {
   blockly: string;
   lua?: string;
   js?: string;
- 
 };
 export type Script = {
   id: number;
@@ -103,17 +100,13 @@ export const postVerse = (data: PostVerseData) => {
   });
 };
 
-export const putVerseCode = (id: number, data: VerseCode) => { 
+export const putVerseCode = (id: number, data: VerseCode) => {
   return request({
-    url: path.join(
-      "v1",
-      "verses",
-      `code${qs.stringify({ id: id }, true)}`
-    ),
+    url: path.join("v1", "verses", `code${qs.stringify({ id: id }, true)}`),
     data,
     method: "put",
-  }); 
-}
+  });
+};
 export const getVerse = (id: number, expand = "metas,share") => {
   return request({
     url: path.join(

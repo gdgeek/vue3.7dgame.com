@@ -39,7 +39,7 @@
         </el-card>
         <br />
 
-        <el-card>
+        <!-- <el-card>
           <el-form
             :model="Form"
             :rules="rules"
@@ -57,9 +57,15 @@
               </el-select>
             </el-form-item>
             <el-form-item :label="$t('verse.view.form.label2')" prop="name">
-              <el-input v-model="Form.name" :placeholder="$t('verse.view.form.placeholder2')"></el-input>
+              <el-input
+                v-model="Form.name"
+                :placeholder="$t('verse.view.form.placeholder2')"
+              ></el-input>
             </el-form-item>
-            <el-form-item :label="$t('verse.view.form.label3')" prop="description">
+            <el-form-item
+              :label="$t('verse.view.form.label3')"
+              prop="description"
+            >
               <el-input
                 v-model="Form.description"
                 type="textarea"
@@ -82,7 +88,16 @@
               >{{ $t("verse.view.form.delete") }}</el-button
             >
           </span>
+        </el-card> -->
+
+        <el-card v-if="saveable" class="box-card">
+          <language
+            v-if="verse"
+            :verseId="verse.id"
+            :languages="verse.languages!"
+          ></language>
         </el-card>
+
         <br />
         <el-card v-if="verse" class="box-card">
           <el-button
@@ -174,6 +189,7 @@ import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
 import Message from "@/components/MrPP/MrPPVerse/Message.vue";
 import Share from "@/components/MrPP/MrPPVerse/Share.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";
+import Language from "@/components/MrPP/MrPPVerse/language.vue";
 import { getVerse, VerseData } from "@/api/v1/verse";
 import { postVerseOpen, deleteVerseOpen } from "@/api/v1/verse-open";
 import { MessageType, postMessageAPI } from "@/api/v1/message";
@@ -211,12 +227,33 @@ const FormRef = ref<FormInstance>();
 const { t } = useI18n();
 
 const rules = {
-  language: [{ required: true, message: t("verse.view.form.rules.message1"), trigger: "blur" }],
-  name: [
-    { required: true, message: t("verse.view.form.rules.message2"), trigger: "blur" },
-    { min: 2, max: 50, message: t("verse.view.form.rules.message3"), trigger: "blur" },
+  language: [
+    {
+      required: true,
+      message: t("verse.view.form.rules.message1"),
+      trigger: "blur",
+    },
   ],
-  description: [{ required: false, message: t("verse.view.form.rules.message4"), trigger: "blur" }],
+  name: [
+    {
+      required: true,
+      message: t("verse.view.form.rules.message2"),
+      trigger: "blur",
+    },
+    {
+      min: 2,
+      max: 50,
+      message: t("verse.view.form.rules.message3"),
+      trigger: "blur",
+    },
+  ],
+  description: [
+    {
+      required: false,
+      message: t("verse.view.form.rules.message4"),
+      trigger: "blur",
+    },
+  ],
 };
 
 watch(
@@ -288,7 +325,9 @@ const saveable = computed(() => {
   return verse.value.editable;
 });
 
-const isRoot = computed(() => userStore.userInfo.roles.includes("admin" || "root"));
+const isRoot = computed(() =>
+  userStore.userInfo.roles.includes("admin" || "root")
+);
 
 const refresh = async () => {
   const res = await getVerse(
@@ -354,7 +393,10 @@ const close = async () => {
 const comeIn = () => {
   router.push({
     path: "/verse/scene",
-    query: { id: id.value, title: t("verse.view.scene") + "【" + verse.value?.name + "】" },
+    query: {
+      id: id.value,
+      title: t("verse.view.scene") + "【" + verse.value?.name + "】",
+    },
   });
 };
 

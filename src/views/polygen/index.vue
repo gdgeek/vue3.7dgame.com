@@ -12,7 +12,9 @@
           <el-button-group :inline="true">
             <router-link to="/resource/polygen/upload">
               <el-button size="small" type="primary" icon="uploadFilled">
-                <span class="hidden-sm-and-down">{{ $t("polygen.uploadPolygen") }}</span>
+                <span class="hidden-sm-and-down">{{
+                  $t("polygen.uploadPolygen")
+                }}</span>
               </el-button>
             </router-link>
           </el-button-group>
@@ -38,7 +40,7 @@
                         {{ $t("polygen.initializePolygenData") }}
                       </el-button>
                       <el-button v-else type="primary" size="small">
-                        {{  $t("polygen.viewPolygen") }}
+                        {{ $t("polygen.viewPolygen") }}
                       </el-button>
                     </el-button-group>
                   </router-link>
@@ -147,12 +149,16 @@ const named = async (id: number, newValue: string) => {
 
 const deletedWindow = async (item: { id: string }) => {
   try {
-    await ElMessageBox.confirm(t("polygen.confirm.message1"), t("polygen.confirm.message1"), {
-      confirmButtonText: t("polygen.confirm.confirm"),
-      cancelButtonText: t("polygen.confirm.cancel"),
-      closeOnClickModal: false,
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("polygen.confirm.message1"),
+      t("polygen.confirm.message1"),
+      {
+        confirmButtonText: t("polygen.confirm.confirm"),
+        cancelButtonText: t("polygen.confirm.cancel"),
+        closeOnClickModal: false,
+        type: "warning",
+      }
+    );
     await deleted(item.id);
     ElMessage.success(t("polygen.confirm.success"));
   } catch {
