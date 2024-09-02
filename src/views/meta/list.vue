@@ -139,8 +139,8 @@ const del = async (id: number) => {
       t("meta.confirm.message1"),
       t("meta.confirm.message2"),
       {
-        confirmButtonText:  t("meta.confirm.confirm"),
-        cancelButtonText:  t("meta.confirm.cancel"),
+        confirmButtonText: t("meta.confirm.confirm"),
+        cancelButtonText: t("meta.confirm.cancel"),
         type: "warning",
       }
     );
@@ -148,13 +148,13 @@ const del = async (id: number) => {
     await refresh();
     ElMessage({
       type: "success",
-      message:  t("meta.confirm.success"),
+      message: t("meta.confirm.success"),
     });
   } catch (e) {
     console.error(e);
     ElMessage({
       type: "info",
-      message:  t("meta.confirm.info"),
+      message: t("meta.confirm.info"),
     });
   }
 };
@@ -171,22 +171,26 @@ const search = (value: string) => {
 
 const addMeta = async () => {
   try {
-    const input = await ElMessageBox.prompt( t("meta.prompt.message1"), t("meta.prompt.message2"), {
-      confirmButtonText: t("meta.prompt.confirm"),
-      cancelButtonText: t("meta.prompt.cancel"),
-      inputValidator: (value: string) => {
-        if (!value) {
-          return t("meta.prompt.inputValidator.item1");
-        }
-        if (value.length < 3) {
-          return t("meta.prompt.inputValidator.item2");
-        }
-        if (value.length > 20) {
-          return t("meta.prompt.inputValidator.item3");
-        }
-        return true;
-      },
-    });
+    const input = await ElMessageBox.prompt(
+      t("meta.prompt.message1"),
+      t("meta.prompt.message2"),
+      {
+        confirmButtonText: t("meta.prompt.confirm"),
+        cancelButtonText: t("meta.prompt.cancel"),
+        inputValidator: (value: string) => {
+          if (!value) {
+            return t("meta.prompt.inputValidator.item1");
+          }
+          if (value.length < 3) {
+            return t("meta.prompt.inputValidator.item2");
+          }
+          if (value.length > 20) {
+            return t("meta.prompt.inputValidator.item3");
+          }
+          return true;
+        },
+      }
+    );
     ElMessage.success(t("meta.prompt.success") + input.value);
 
     const data = {
@@ -233,6 +237,7 @@ onMounted(() => {
   padding: 0px 0px 0px 0px;
   color: #000000;
 }
+
 .card-title {
   white-space: nowrap;
   display: block;

@@ -29,9 +29,9 @@ export const deletePerson = (id: number) => {
   });
 };
 
-export const putPerson = (id: number, data: any) => {
+export const putPerson = (data: { id: number; auth: string }) => {
   return request({
-    url: "v1/people/" + id,
+    url: "v1/people/auth",
     method: "put",
     data,
   });
