@@ -45,19 +45,14 @@ const router = useRouter();
 
 // 头像
 const avatarUrl = computed(() => {
-  if (typeof userStore.userInfo.data.avatar.url === "undefined" || null) {
+  if (
+    userStore.userInfo.data.avatar == null ||
+    typeof userStore.userInfo.data.avatar.url === "undefined" ||
+    null
+  ) {
     return "";
   } else {
     return userStore.userInfo.data.avatar.url;
-  }
-});
-
-// 用户名
-const nickName = computed(() => {
-  if (!userStore.userInfo.data.nickname) {
-    return userStore.userInfo.username;
-  } else {
-    return userStore.userInfo?.data.nickname;
   }
 });
 
