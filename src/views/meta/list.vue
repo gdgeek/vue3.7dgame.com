@@ -134,7 +134,7 @@ const editor = (id: number) => {
 const del = async (id: number) => {
   try {
     await ElMessageBox.confirm(
-      "此操作将永久删除该【元数据】, 是否继续?",
+      "此操作将永久删除该【组件】, 是否继续?",
       "提示",
       {
         confirmButtonText: "确定",

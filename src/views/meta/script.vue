@@ -73,9 +73,12 @@ const postScript = async (message: any) => {
   }
 
   const cyber: cybersType | undefined = meta.value.cyber;
-
+  console.error("code", {
+    blockly: JSON.stringify(message.data),
+    lua: message.script,
+  });
   await putMetaCode(meta.value.id, {
-    blockly: message.data,
+    blockly: JSON.stringify(message.data),
     lua: message.script,
   });
   if (!cyber) {
@@ -279,6 +282,7 @@ onMounted(async () => {
   loading.value = true;
   const response = await getMeta(id.value, "cyber,event,share,metaCode");
   meta.value = response.data;
+  console.log("meta", meta.value);
   initEditor();
 
   loading.value = false;

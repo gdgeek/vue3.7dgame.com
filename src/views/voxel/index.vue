@@ -12,7 +12,9 @@
           <el-button-group :inline="true">
             <router-link to="/resource/voxel/upload">
               <el-button size="small" type="primary" icon="UploadFilled">
-                <span class="hidden-sm-and-down">{{ $t("voxel.uploadVoxel") }}</span>
+                <span class="hidden-sm-and-down">{{
+                  $t("voxel.uploadVoxel")
+                }}</span>
               </el-button>
             </router-link>
           </el-button-group>
@@ -142,12 +144,16 @@ const named = (id: number, newValue: string) => {
 };
 
 const deletedWindow = (item: any) => {
-  ElMessageBox.confirm(t("voxel.confirm.message1"), t("voxel.confirm.message2"), {
-    confirmButtonText: t("voxel.confirm.confirm"),
-    cancelButtonText: t("voxel.confirm.cancel"),
-    closeOnClickModal: false,
-    type: "warning",
-  })
+  ElMessageBox.confirm(
+    t("voxel.confirm.message1"),
+    t("voxel.confirm.message2"),
+    {
+      confirmButtonText: t("voxel.confirm.confirm"),
+      cancelButtonText: t("voxel.confirm.cancel"),
+      closeOnClickModal: false,
+      type: "warning",
+    }
+  )
     .then(() => {
       deleted(item.id);
       ElMessage.success(t("voxel.confirm.success"));

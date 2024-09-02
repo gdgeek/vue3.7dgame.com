@@ -157,7 +157,7 @@ const editor = (id: number) => {
 const del = async (id: number) => {
   try {
     await ElMessageBox.confirm(
-      "此操作将永久删除该【元数据】, 是否继续?",
+      "此操作将永久删除该【组件】, 是否继续?",
       "提示",
       {
         confirmButtonText: "确定",
@@ -187,21 +187,21 @@ const search = (value: string) => {
 const addPrefab = async () => {
   try {
     const input = await ElMessageBox.prompt(
-      "请输元数据名称",
+      "请输【组件】名称",
       "提示(3-20个字符)",
       {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         inputValidator: (value: string) => {
-          if (!value) return "元数据名称不能为空";
-          if (value.length < 3) return "元数据名称不能小于3个字符";
-          if (value.length > 20) return "元数据名称不能大于20个字符";
+          if (!value) return "【组件】名称不能为空";
+          if (value.length < 3) return "【组件】名称不能小于3个字符";
+          if (value.length > 20) return "【组件】名称不能大于20个字符";
           return true;
         },
       }
     );
 
-    ElMessage.success("元数据名称是: " + input.value);
+    ElMessage.success("【组件】名称是: " + input.value);
     const data = {
       title: input.value,
       custom: 1,
