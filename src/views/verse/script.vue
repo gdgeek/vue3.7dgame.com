@@ -185,7 +185,7 @@ const resource = computed(() => {
     });
 
     events.outputs.forEach((output: any) => {
-      const data = map.get(meta.id);
+      const data = map.get(meta.id.toString());
       outputs.push({
         title: `${data.title}:${output.title}`,
         index: data.uuid,

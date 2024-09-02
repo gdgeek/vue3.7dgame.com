@@ -163,15 +163,12 @@ function VerseLoader(editor) {
 
 		if (data.children.modules) {
 			data.children.modules.forEach(async item => {
-
+				alert(1)
 				const meta = metas.get(item.parameters.meta_id)
 
 				const node = factory.addModule(item)
 
-				alert(JSON.stringify(meta))
-
 				node.userData.custom = meta.custom
-				root.add(node)
 				editor.signals.sceneGraphChanged.dispatch()
 				if (meta && meta.data && meta.custom != 0) {
 					await factory.readMeta(node, JSON.parse(meta.data), resources)

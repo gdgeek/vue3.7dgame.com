@@ -68,6 +68,7 @@ const sanitizedTitle = computed(() => {
 });
 
 onMounted(async () => {
+  /*
   if (props.info?.course && props.info.course !== -1) {
     try {
       const r = await Post(props.info.course);
@@ -75,7 +76,7 @@ onMounted(async () => {
     } catch (e) {
       console.error(e);
     }
-  }
+  }*/
 });
 </script>
 
