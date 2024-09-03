@@ -18,7 +18,7 @@ import { createPinia, setActivePinia } from "pinia";
 
 const pinia = createPinia();
 setActivePinia(pinia);
-const userStore = useUserStore();
+//const userStore = useUserStore();
 
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
@@ -603,7 +603,7 @@ const pathsToRemove = [
   "script",
   "scene",
 ];
-
+/*
 console.log("roles", userStore.userInfo.roles);
 const isRoot = computed(async () => {
   await userStore.getUserInfo();
@@ -613,7 +613,7 @@ const isRoot = computed(async () => {
 if (!isRoot.value) {
   pathsToRemove.push("manager");
 }
-
+*/
 // 检查路径是否在移除列表中
 const isRemoveRoute = (path: string): boolean => {
   return pathsToRemove.includes(path);

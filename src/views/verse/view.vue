@@ -152,7 +152,7 @@
         </el-card>
         <br />
 
-        <el-card v-if="isRoot">
+        <el-card v-if="can('root')">
           <el-button
             v-if="!verseOpen"
             style="width: 100%"
@@ -175,31 +175,7 @@
           </el-button>
         </el-card>
         <br />
-        <!--
-        <el-card v-if="$can('root')">
-          <el-button
-            v-if="verseOpen === null"
-            style="width: 100%"
-            type="primary"
-            size="mini"
-            @click="open()"
-          >
-            <font-awesome-icon icon="eye" />
-            &nbsp;开放【宇宙】
-          </el-button>
 
-          <el-button
-            v-else
-            style="width: 100%"
-            type="primary"
-            size="mini"
-            @click="close()"
-          >
-            <font-awesome-icon icon="eye-slash" />
-            &nbsp;关闭【宇宙】
-          </el-button>
-        </el-card>
--->
         <Share v-if="saveable" :verse="verse!"></Share>
         <br />
       </el-col>
@@ -227,7 +203,10 @@ import {
   postlanguages,
   putlanguages,
 } from "@/api/v1/multilanguage-verses";
+import { useAbility } from "@casl/vue";
 
+const ability = useAbility();
+const can = ability.can.bind(ability);
 const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
@@ -348,10 +327,6 @@ const saveable = computed(() => {
   if (!verse.value) return false;
   return verse.value.editable;
 });
-
-const isRoot = computed(() =>
-  userStore.userInfo.roles.includes("admin" || "root")
-);
 
 const refresh = async () => {
   const res = await getVerse(

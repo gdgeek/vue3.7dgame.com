@@ -8,7 +8,9 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
 import VueIframe from "vue-iframes";
 import { mouseEffect, particleEffect } from "@/mouse";
 
-import { ability } from './composables/ability';
+import { ability } from '@/ability';
+//import { UpdateAbility } from '@/utils/ability';
+
 import { abilitiesPlugin } from '@casl/vue';
 
 import highlightDirective from "./directive/highlight";
@@ -38,16 +40,18 @@ router.beforeEach((to) => {
     updateTitle("");
   }
 });
-
+//UpdateAbility(ability, [], 0);
 const app = createApp(App);
+app.use(abilitiesPlugin, ability, {
+  useGlobalProperties: true
+});
 app.component("FontAwesomeIcon", FontAwesomeIcon);
 app.directive("highlight", highlightDirective);
 app.directive("mouse-effect", mouseEffect);
 app.directive("particle-effect", particleEffect);
 app.use(setupPlugins);
-// app.use(ability);
 app.use(VueIframe);
 
 // 添加 CASL 插件
-app.use(abilitiesPlugin, ability);
+
 app.mount("#app");

@@ -41,8 +41,9 @@ const succeed = (data: any) => {
   console.log("token:", token);
   if (token) {
     setToken(token);
-    const res = localStorage.getItem(TOKEN_KEY);
-    console.log("Token set successfully", res);
+    const response = localStorage.getItem(TOKEN_KEY);
+    console.log("Token set successfully", response);
+
     nextTick(() => {
       router.push("/");
       console.log("Routing to home"); // 确认路由跳转
@@ -88,8 +89,9 @@ const submit = () => {
   formRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        const res = await AuthAPI.login(form.value);
-        await succeed(res.data);
+        const response = await AuthAPI.login(form.value);
+        //  alert(JSON.stringify(response.data));
+        await succeed(response.data);
         const userin = await userStore.getUserInfo();
         console.log("userin:", userin);
         const { path, queryParams } = await parseRedirect();

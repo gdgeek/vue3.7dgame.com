@@ -2,10 +2,11 @@ import AuthAPI from "@/api/auth";
 import UserAPI from "@/api/user";
 import { resetRouter } from "@/router";
 import { store } from "@/store";
-import { LoginData, LoginResult } from "@/api/auth/model";
+import { LoginData } from "@/api/auth/model";
 import { getUserInfoData, InfoType } from "@/api/user/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
-import {Avatar} from "@/api/user/model";
+import { Avatar } from "@/api/user/model";
+
 export const useUserStore = defineStore("user", () => {
   const defaultUserInfo: getUserInfoData = {
     username: "",
@@ -77,32 +78,36 @@ export const useUserStore = defineStore("user", () => {
 
   const getUserInfo = async () => {
     try {
-      const res = await UserAPI.getInfo();
+      const response = await UserAPI.getInfo();
 
       // 确保数据存在
-      if (!res.data) {
+      if (!response.data) {
         console.error("Verification failed, please Login again.");
         return;
       }
-      if (!res.data.roles || res.data.roles.length <= 0) {
+      if (!response.data.roles || response.data.roles.length <= 0) {
         console.error("getUserInfo: roles must be a non-null array!");
         return;
       }
 
       // 将 info 从字符串解析为对象
       let parsedInfo: InfoType | undefined;
-      if (res.data.data.info) {
+      if (response.data.data.info) {
         try {
-          parsedInfo = JSON.parse(res.data.data.info);
+          parsedInfo = JSON.parse(response.data.data.info);
         } catch (e) {
           console.error("Failed to parse info:", e);
         }
       }
-
+      
+    
       // 更新 userInfo
-      userInfo.value.username = res.data.username;
-      userInfo.value.roles = res.data.roles;
-      const data: any = res.data.data;
+      userInfo.value.username = response.data.username;
+      userInfo.value.roles = response.data.roles;
+      const data: any = response.data.data;
+     // const ability = useAbility();
+     // UpdateAbility(ability, response.data.roles, data.id);
+   
       console.error(data)
       const avatar:Avatar|null = data.avatar?{
         id: data.avatar.id,
