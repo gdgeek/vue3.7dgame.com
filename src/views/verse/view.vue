@@ -355,12 +355,6 @@ const saveable = computed(() => {
   return verse.value.editable;
 });
 
-const isRoot = computed(
-  () =>
-    userStore.userInfo.roles.includes("admin") ||
-    userStore.userInfo.roles.includes("root")
-);
-
 const refresh = async () => {
   const res = await getVerse(
     id.value,
