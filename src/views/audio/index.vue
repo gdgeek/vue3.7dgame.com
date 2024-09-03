@@ -12,7 +12,9 @@
           <el-button-group :inline="true">
             <router-link to="/resource/audio/upload">
               <el-button size="small" type="primary" icon="uploadFilled">
-                <span class="hidden-sm-and-down">{{ $t("audio.uploadAudio") }}</span>
+                <span class="hidden-sm-and-down">{{
+                  $t("audio.uploadAudio")
+                }}</span>
               </el-button>
             </router-link>
           </el-button-group>
@@ -36,7 +38,9 @@
                     >
                       {{ $t("audio.initializeAudioData") }}
                     </el-button>
-                    <el-button type="primary" size="small">{{ $t("audio.viewAudio") }}</el-button>
+                    <el-button type="primary" size="small">{{
+                      $t("audio.viewAudio")
+                    }}</el-button>
                   </router-link>
                 </template>
               </mr-p-p-card>
@@ -133,12 +137,16 @@ const named = async (id: string, newValue: string) => {
 // 删除音频确认
 const deletedWindow = async (item: any) => {
   try {
-    await ElMessageBox.confirm(t("audio.confirm.message1"), t("audio.confirm.message2"), {
-      confirmButtonText: t("audio.confirm.confirm"),
-      cancelButtonText: t("audio.confirm.cancel"),
-      closeOnClickModal: false,
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("audio.confirm.message1"),
+      t("audio.confirm.message2"),
+      {
+        confirmButtonText: t("audio.confirm.confirm"),
+        cancelButtonText: t("audio.confirm.cancel"),
+        closeOnClickModal: false,
+        type: "warning",
+      }
+    );
     await deleted(item.id);
     ElMessage.success(t("audio.confirm.success"));
   } catch {

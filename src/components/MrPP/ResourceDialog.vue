@@ -459,26 +459,6 @@ const viewCards = computed(() => {
   console.log("viewCards", cards);
   return cards;
 });
-
-const breakpoints = ref({
-  3000: {
-    //当屏幕宽度小于等于3000
-    rowPerView: 8, // 一行8图
-  },
-  1800: {
-    //当屏幕宽度小于等于1800
-    rowPerView: 6, // 一行6图
-  },
-  1200: {
-    //当屏幕宽度小于等于1200
-    rowPerView: 4,
-  },
-
-  500: {
-    //当屏幕宽度小于等于500
-    rowPerView: 2,
-  },
-});
 </script>
 
 <style scoped>

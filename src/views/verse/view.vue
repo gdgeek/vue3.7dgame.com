@@ -135,7 +135,7 @@
             v-if="verseOpen === null"
             style="width: 100%"
             type="primary"
-            size="mini"
+            size="small"
             @click="open()"
           >
             <font-awesome-icon icon="eye" />
@@ -146,7 +146,7 @@
             v-else
             style="width: 100%"
             type="primary"
-            size="mini"
+            size="small"
             @click="close()"
           >
             <font-awesome-icon icon="eye-slash" />

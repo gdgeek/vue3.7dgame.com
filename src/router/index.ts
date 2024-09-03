@@ -526,7 +526,6 @@ export const constantRoutes: RouteRecordRaw[] = [
           },
         ],
       },
-
       {
         path: "manager",
         component: null,
@@ -546,6 +545,39 @@ export const constantRoutes: RouteRecordRaw[] = [
             name: "ManagerUser",
             meta: {
               title: "manager.userManagement",
+              icon: "cascader",
+            },
+          },
+        ],
+      },
+      {
+        path: "game",
+        component: null,
+        redirect: "/game/index",
+        name: "Game",
+        meta: {
+          title: "游戏",
+          icon: "el-icon-monitor",
+          hidden: false,
+          alwaysShow: false,
+          params: null,
+        },
+        children: [
+          {
+            path: "index",
+            component: () => import("@/views/game/index.vue"),
+            name: "GameIndex",
+            meta: {
+              title: "游戏配置",
+              icon: "cascader",
+            },
+          },
+          {
+            path: "map",
+            component: () => import("@/views/game/map.vue"),
+            name: "GameMap",
+            meta: {
+              title: "地图配置",
               icon: "cascader",
             },
           },
@@ -608,7 +640,7 @@ const checkAndRemovePaths = async () => {
     userStore.userInfo.roles.includes("admin") ||
     userStore.userInfo.roles.includes("root");
   if (!isRoot) {
-    pathsToRemove.value.push("manager");
+    pathsToRemove.value.push("manager", "game");
   }
 };
 
