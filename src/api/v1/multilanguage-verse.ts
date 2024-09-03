@@ -1,5 +1,18 @@
 import request from "@/utils/request";
-export function postMultilanguageVerse(data: any) {
+
+interface putData {
+  description: string;
+  name: string;
+}
+
+interface postData {
+  description: string;
+  language: string;
+  name: string;
+  verse_id: number;
+}
+
+export function postMultilanguageVerse(data: postData) {
   return request({
     url: "v1/multilanguage-verses",
     method: "post",
@@ -14,7 +27,7 @@ export function getMultilanguageVerse(id: number) {
   });
 }
 
-export function putMultilanguageVerse(id: number, data: any) {
+export function putMultilanguageVerse(id: number, data: putData) {
   return request({
     url: "v1/multilanguage-verses/" + id,
     method: "put",

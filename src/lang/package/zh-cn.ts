@@ -619,7 +619,7 @@ export default {
         submit: "提交",
         delete: "删除",
         rules: {
-          message1: "请选择语言",
+          message1: "请输入语言",
           message2: "请输入名称",
           message3: "长度在 2 到 50 个字符",
           message4: "请输入介绍",
@@ -635,7 +635,8 @@ export default {
       success3: "删除成功",
       success4: "分享成功",
       success5: "停止共享",
-      error: "表单验证失败",
+      error1: "提交失败",
+      error2: "表单验证失败",
       messageTitle: "【宇宙】名称：",
       scene: "场景",
       share: {

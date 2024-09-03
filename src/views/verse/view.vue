@@ -194,7 +194,6 @@ import { getVerse, VerseData } from "@/api/v1/verse";
 import { postVerseOpen, deleteVerseOpen } from "@/api/v1/verse-open";
 import { MessageType, postMessageAPI } from "@/api/v1/message";
 import { useUserStore } from "@/store/modules/user";
-import { useTagsStore } from "@/store/modules/tags";
 import { FormInstance } from "element-plus";
 import {
   dellanguages,
@@ -206,7 +205,6 @@ import {
 const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
-const tagsStore = useTagsStore();
 
 const dialog = ref(false);
 const verse = ref<VerseData>();
@@ -301,7 +299,7 @@ const submit = () => {
 
       await getlanguages(verse.value!.id);
     } else {
-      ElMessage.error(t("verse.view.error"));
+      ElMessage.error(t("verse.view.error2"));
     }
   });
 };
