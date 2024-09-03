@@ -13,7 +13,8 @@ export const Layout = () => import("@/layout/index.vue");
 import Structure from "@/layout/structure/index.vue";
 import Empty from "@/layout/empty/index.vue";
 import { Meta, RouteVO } from "@/api/menu/model";
-import { useUserStore } from "@/store/modules/user";
+
+//import { useUserStore } from "@/store/modules/user";
 import { createPinia, setActivePinia } from "pinia";
 
 const pinia = createPinia();
@@ -526,7 +527,6 @@ export const constantRoutes: RouteRecordRaw[] = [
           },
         ],
       },
-
       {
         path: "manager",
         component: null,
@@ -546,6 +546,39 @@ export const constantRoutes: RouteRecordRaw[] = [
             name: "ManagerUser",
             meta: {
               title: "manager.userManagement",
+              icon: "cascader",
+            },
+          },
+        ],
+      },
+      {
+        path: "game",
+        component: null,
+        redirect: "/game/index",
+        name: "Game",
+        meta: {
+          title: "游戏",
+          icon: "el-icon-monitor",
+          hidden: false,
+          alwaysShow: false,
+          params: null,
+        },
+        children: [
+          {
+            path: "index",
+            component: () => import("@/views/game/index.vue"),
+            name: "GameIndex",
+            meta: {
+              title: "游戏配置",
+              icon: "cascader",
+            },
+          },
+          {
+            path: "map",
+            component: () => import("@/views/game/map.vue"),
+            name: "GameMap",
+            meta: {
+              title: "地图配置",
               icon: "cascader",
             },
           },
@@ -588,10 +621,8 @@ export function resetRouter() {
   router.replace({ path: "/login" });
 }
 
-//await userStore.getUserInfo();
-
 // 指定要移除的路由路径列表
-const pathsToRemove = [
+const pathsToRemove = ref([
   "/home/document",
   "/home/category",
   "/home/creator",
@@ -602,21 +633,23 @@ const pathsToRemove = [
   "rete-meta",
   "script",
   "scene",
-];
-/*
-console.log("roles", userStore.userInfo.roles);
-const isRoot = computed(async () => {
-  await userStore.getUserInfo();
-  return userStore.userInfo.roles.includes("admin" || "root");
-});
+]);
+import { useAbility } from '@casl/vue';
 
-if (!isRoot.value) {
-  pathsToRemove.push("manager");
-}
-*/
+//const ability = useAbility();
+
+//const can = ability.can.bind(ability);
+//alert(can('root','all'))
+const checkAndRemovePaths = async () => {
+  
+  if (!false) {
+    pathsToRemove.value.push("manager", "game");
+  }
+};
+
 // 检查路径是否在移除列表中
 const isRemoveRoute = (path: string): boolean => {
-  return pathsToRemove.includes(path);
+  return pathsToRemove.value.includes(path);
 };
 
 // 将路由转换为 RouteVO 格式的函数，只获取根路由 "/" 下的子路由数据，并且子路由路径前添加 "/"
@@ -640,10 +673,30 @@ const convertRoutes = (routes: RouteRecordRaw[], isRoot = false): RouteVO[] => {
     });
 };
 
-// 提取 path 为 "/" 及其子路由的部分
-const mainRoute = constantRoutes.find((route) => route.path === "/");
-export const routerData: RouteVO[] = mainRoute
-  ? convertRoutes(mainRoute.children || [], true)
-  : [];
+export const routerData = ref<RouteVO[]>([]);
+
+// 初始化路由
+export const initRoutes = async () => {
+  await checkAndRemovePaths();
+
+  // 提取 path 为 "/" 及其子路由的部分
+  const mainRoute = constantRoutes.find((route) => route.path === "/");
+  if (mainRoute) {
+    routerData.value = convertRoutes(mainRoute.children || [], true);
+  } else {
+    routerData.value = [];
+  }
+};
+/*
+watch(
+  () => userStore.userInfo,
+  async () => {
+    await initRoutes();
+  },
+  { immediate: true }
+);*/
+
+// 初始化路由
+initRoutes();
 
 export default router;

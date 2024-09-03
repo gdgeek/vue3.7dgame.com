@@ -80,10 +80,12 @@ const props = defineProps({
   sorted: {
     type: String,
     required: true,
+    default: "",
   },
   searched: {
     type: String,
     required: true,
+    default: "",
   },
   sortByName: {
     type: String,
@@ -92,6 +94,10 @@ const props = defineProps({
   sortByTime: {
     type: String,
     default: "created_at",
+  },
+  hasSearch: {
+    type: Boolean,
+    default: true,
   },
 });
 

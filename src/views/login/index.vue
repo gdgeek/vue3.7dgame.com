@@ -1,20 +1,42 @@
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { ref, computed } from "vue";
+import { ref, computed, nextTick, onMounted } from "vue";
 import { RouterLink, useRouter, LocationQuery, useRoute } from "vue-router";
 import { FormInstance } from "element-plus";
 import { useUserStore } from "@/store/modules/user";
 import { LoginData } from "@/api/auth/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import AuthAPI from "@/api/auth/index";
+import { initRoutes } from "@/router";
+import CryptoJS from "crypto-js";
+
+const secretKey = "bujiaban"; // 密钥
 
 const userStore = useUserStore();
 const route = useRoute();
 
 const form = ref<LoginData>({
-  username: "huyuelong",
-  password: "123456hu",
+  username: "",
+  password: "",
 });
+
+// 加密
+const encryptedPassword = (password: string): string => {
+  return CryptoJS.AES.encrypt(password, secretKey).toString();
+};
+// 解密
+const decryptPassword = (encryptedPassword: string): string => {
+  const bytes = CryptoJS.AES.decrypt(encryptedPassword, secretKey);
+  return bytes.toString(CryptoJS.enc.Utf8);
+};
+
+// 保存用户数据到本地
+const saveLoginData = () => {
+  const expirationTime = Date.now() + 24 * 60 * 60 * 1000; // 24小时有效
+  localStorage.setItem("username", form.value.username);
+  localStorage.setItem("password", encryptedPassword(form.value.password));
+  localStorage.setItem("expirationTime", expirationTime.toString());
+};
 
 const rules = computed(() => {
   return {
@@ -34,34 +56,27 @@ const formRef = ref<FormInstance>();
 const isShow = ref(false);
 const title = ref<string | Record<string, string>>("");
 
-// 登录成功
 const succeed = (data: any) => {
   ElMessage.success("登录成功");
   const token = data.access_token;
-  console.log("token:", token);
   if (token) {
     setToken(token);
-    const response = localStorage.getItem(TOKEN_KEY);
-    console.log("Token set successfully", response);
-
+    saveLoginData();
+    const res = localStorage.getItem(TOKEN_KEY);
+    console.log("Token set successfully", res);
     nextTick(() => {
       router.push("/");
-      console.log("Routing to home"); // 确认路由跳转
+      console.log("Routing to home");
     });
-    // const { path, queryParams } = parseRedirect();
-    // console.log("路由：", path, queryParams);
-    // router.push({ path: path, query: queryParams });
   } else {
     failed("登录响应中缺少 access_token");
   }
 };
 
-// 设置token
 const setToken = (token: string) => {
   localStorage.setItem(TOKEN_KEY, "Bearer " + token);
 };
 
-// 解析 redirect 字符串 为 path 和  queryParams
 function parseRedirect(): {
   path: string;
   queryParams: Record<string, string>;
@@ -80,7 +95,6 @@ function parseRedirect(): {
   return { path, queryParams };
 }
 
-// 登录失败
 const failed = (message: any) => {
   error(message);
 };
@@ -89,9 +103,10 @@ const submit = () => {
   formRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        const response = await AuthAPI.login(form.value);
-        //  alert(JSON.stringify(response.data));
-        await succeed(response.data);
+        const res = await AuthAPI.login(form.value);
+        await initRoutes();
+        await window.location.reload();
+        await succeed(res.data);
         const userin = await userStore.getUserInfo();
         console.log("userin:", userin);
         const { path, queryParams } = await parseRedirect();
@@ -106,7 +121,6 @@ const submit = () => {
   });
 };
 
-// 显示错误信息
 const error = (msg: string | Record<string, string>) => {
   title.value =
     typeof msg === "string"
@@ -116,6 +130,29 @@ const error = (msg: string | Record<string, string>) => {
           .join("\n");
   isShow.value = true;
 };
+
+onMounted(() => {
+  const savedUsername = localStorage.getItem("username");
+  const savedPassword = localStorage.getItem("password");
+  const savedExpirationTime = localStorage.getItem("expirationTime");
+
+  if (savedExpirationTime) {
+    const expirationTime = parseInt(savedExpirationTime, 10);
+    if (Date.now() > expirationTime) {
+      // 密码已过期，清除保存的密码
+      // localStorage.removeItem("username");
+      localStorage.removeItem("password");
+      localStorage.removeItem("expirationTime");
+    } else {
+      if (savedUsername) {
+        form.value.username = savedUsername;
+      }
+      if (savedPassword) {
+        form.value.password = decryptPassword(savedPassword);
+      }
+    }
+  }
+});
 </script>
 
 <template>
@@ -173,7 +210,7 @@ const error = (msg: string | Record<string, string>) => {
           </router-link>
           <br />
         </div> -->
-            <div v-if="isShow" class="error-message">{{ title }}</div>
+            <!-- <div v-if="isShow" class="error-message">{{ title }}</div> -->
           </div>
           <el-button style="width: 100%" size="small"> 下载相关程序 </el-button>
         </div>

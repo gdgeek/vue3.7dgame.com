@@ -14,10 +14,12 @@
         <el-card v-if="verse" class="box-card">
           <template #header>
             <i v-if="saveable"
-              ><el-icon><EditPen></EditPen></el-icon
+              ><el-icon> <EditPen></EditPen> </el-icon
             ></i>
             <i v-else>
-              <el-icon><View></View></el-icon>
+              <el-icon>
+                <View></View>
+              </el-icon>
             </i>
             <b id="title">{{ $t("verse.view.title") }} </b>
             <span>{{ verse.name }}</span>
@@ -175,7 +177,31 @@
           </el-button>
         </el-card>
         <br />
+        <!--
+        <el-card v-if="$can('root')">
+          <el-button
+            v-if="verseOpen === null"
+            style="width: 100%"
+            type="primary"
+            size="small"
+            @click="open()"
+          >
+            <font-awesome-icon icon="eye" />
+            &nbsp;开放【宇宙】
+          </el-button>
 
+          <el-button
+            v-else
+            style="width: 100%"
+            type="primary"
+            size="small"
+            @click="close()"
+          >
+            <font-awesome-icon icon="eye-slash" />
+            &nbsp;关闭【宇宙】
+          </el-button>
+        </el-card>
+-->
         <Share v-if="saveable" :verse="verse!"></Share>
         <br />
       </el-col>
@@ -197,16 +223,17 @@ import { postVerseOpen, deleteVerseOpen } from "@/api/v1/verse-open";
 import { MessageType, postMessageAPI } from "@/api/v1/message";
 import { useUserStore } from "@/store/modules/user";
 import { FormInstance } from "element-plus";
+import { useAbility } from "@casl/vue";
+
+const ability = useAbility();
+const can = ability.can.bind(ability);
 import {
   dellanguages,
   getlanguages,
   postlanguages,
   putlanguages,
 } from "@/api/v1/multilanguage-verses";
-import { useAbility } from "@casl/vue";
 
-const ability = useAbility();
-const can = ability.can.bind(ability);
 const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
@@ -327,6 +354,12 @@ const saveable = computed(() => {
   if (!verse.value) return false;
   return verse.value.editable;
 });
+
+const isRoot = computed(
+  () =>
+    userStore.userInfo.roles.includes("admin") ||
+    userStore.userInfo.roles.includes("root")
+);
 
 const refresh = async () => {
   const res = await getVerse(
