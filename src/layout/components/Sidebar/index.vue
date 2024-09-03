@@ -16,7 +16,7 @@
         :collapse="!appStore.sidebar.opened"
       ></SidebarLogo>
       <el-scrollbar>
-        <SidebarMenu :menu-list="routerData" base-path=""></SidebarMenu>
+        <SidebarMenu :menu-list="routes" base-path=""></SidebarMenu>
       </el-scrollbar>
       <NavbarRight v-if="layout === LayoutEnum.TOP"></NavbarRight>
     </template>
@@ -28,7 +28,8 @@ import { useSettingsStore, usePermissionStore, useAppStore } from "@/store";
 import { LayoutEnum } from "@/enums/LayoutEnum";
 import { routerData } from "@/router";
 
-console.log("routerData", routerData);
+const routes = computed(() => routerData.value);
+console.log("routes1", routes.value);
 
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();

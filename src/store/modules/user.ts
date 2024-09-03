@@ -1,11 +1,11 @@
 import AuthAPI from "@/api/auth";
 import UserAPI from "@/api/user";
-import { resetRouter } from "@/router";
+import { initRoutes, resetRouter } from "@/router";
 import { store } from "@/store";
 import { LoginData, LoginResult } from "@/api/auth/model";
 import { getUserInfoData, InfoType } from "@/api/user/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
-import {Avatar} from "@/api/user/model";
+import { Avatar } from "@/api/user/model";
 export const useUserStore = defineStore("user", () => {
   const defaultUserInfo: getUserInfoData = {
     username: "",
@@ -103,16 +103,17 @@ export const useUserStore = defineStore("user", () => {
       userInfo.value.username = res.data.username;
       userInfo.value.roles = res.data.roles;
       const data: any = res.data.data;
-      console.error(data)
-      const avatar:Avatar|null = data.avatar?{
-        id: data.avatar.id,
-        md5: data.avatar.md5,
-        type: data.avatar.type,
-        url: data.avatar.url,
-        filename: data.avatar.filename,
-        size: data.avatar.size,
-        key: data.avatar.key,
-      }:null;
+      const avatar: Avatar | null = data.avatar
+        ? {
+            id: data.avatar.id,
+            md5: data.avatar.md5,
+            type: data.avatar.type,
+            url: data.avatar.url,
+            filename: data.avatar.filename,
+            size: data.avatar.size,
+            key: data.avatar.key,
+          }
+        : null;
       userInfo.value.data = {
         username: data.username,
         id: data.id,
@@ -120,7 +121,7 @@ export const useUserStore = defineStore("user", () => {
         info: data.info,
         parsedInfo: parsedInfo, // 存储解析后的 info 对象
         avatar_id: data.avatar_id,
-        avatar:avatar,
+        avatar: avatar,
         email: data.email,
         emailBind: data.emailBind,
       };

@@ -22,7 +22,7 @@ export const usePermissionStore = defineStore("permission", () => {
    */
   function generateRoutes() {
     return new Promise<RouteRecordRaw[]>((resolve, reject) => {
-      const dynamicRoutes = transformRoutes(routerData);
+      const dynamicRoutes = transformRoutes(routerData.value);
       routes.value = constantRoutes.concat(dynamicRoutes);
       resolve(dynamicRoutes);
     });
@@ -34,9 +34,9 @@ export const usePermissionStore = defineStore("permission", () => {
    * @param topMenuPath - 顶部菜单路径
    */
   const setMixLeftMenus = (topMenuPath: string) => {
-    console.log("data:", routerData);
-    console.log("topMenuPath:", routerData[1].path);
-    const matchedItem = routerData.find((item) => item.path === topMenuPath);
+    const matchedItem = routerData.value.find(
+      (item) => item.path === topMenuPath
+    );
     console.log("matchedItem:", matchedItem);
     if (matchedItem && matchedItem.children) {
       mixLeftMenus.value = matchedItem.children;

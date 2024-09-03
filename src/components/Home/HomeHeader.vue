@@ -14,7 +14,7 @@
           <div>
             <div class="home-avatar-info">
               <h3 class="home-avatar-name">
-                {{ nickName }}
+                {{ name }}
               </h3>
               <small v-if="textarea != ''" style="color: #777777">
                 {{ textarea }}
@@ -36,12 +36,19 @@
 </template>
 
 <script setup lang="ts">
-// import "element-ui/lib/theme-chalk/display.css";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/store/modules/user";
 
 const userStore = useUserStore();
 const router = useRouter();
+
+const name = computed(() => {
+  if (userStore.userInfo.data.nickname) {
+    return userStore.userInfo.data.nickname;
+  } else {
+    return userStore.userInfo.data.username;
+  }
+});
 
 // 头像
 const avatarUrl = computed(() => {

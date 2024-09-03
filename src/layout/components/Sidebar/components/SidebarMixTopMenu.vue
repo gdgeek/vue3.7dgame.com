@@ -83,7 +83,7 @@ const goToFirstMenu = (menus: RouteVO[]) => {
 
 // 初始化顶部菜单
 onMounted(() => {
-  mixTopMenus.value = routerData.filter(
+  mixTopMenus.value = routerData.value.filter(
     (item) => !item.meta || !item.meta.hidden
   );
 });

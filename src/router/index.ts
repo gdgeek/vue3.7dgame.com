@@ -588,10 +588,8 @@ export function resetRouter() {
   router.replace({ path: "/login" });
 }
 
-//await userStore.getUserInfo();
-
 // 指定要移除的路由路径列表
-const pathsToRemove = [
+const pathsToRemove = ref([
   "/home/document",
   "/home/category",
   "/home/creator",
@@ -602,21 +600,21 @@ const pathsToRemove = [
   "rete-meta",
   "script",
   "scene",
-];
+]);
 
-console.log("roles", userStore.userInfo.roles);
-const isRoot = computed(async () => {
+const checkAndRemovePaths = async () => {
   await userStore.getUserInfo();
-  return userStore.userInfo.roles.includes("admin" || "root");
-});
-
-if (!isRoot.value) {
-  pathsToRemove.push("manager");
-}
+  const isRoot =
+    userStore.userInfo.roles.includes("admin") ||
+    userStore.userInfo.roles.includes("root");
+  if (!isRoot) {
+    pathsToRemove.value.push("manager");
+  }
+};
 
 // 检查路径是否在移除列表中
 const isRemoveRoute = (path: string): boolean => {
-  return pathsToRemove.includes(path);
+  return pathsToRemove.value.includes(path);
 };
 
 // 将路由转换为 RouteVO 格式的函数，只获取根路由 "/" 下的子路由数据，并且子路由路径前添加 "/"
@@ -640,10 +638,30 @@ const convertRoutes = (routes: RouteRecordRaw[], isRoot = false): RouteVO[] => {
     });
 };
 
-// 提取 path 为 "/" 及其子路由的部分
-const mainRoute = constantRoutes.find((route) => route.path === "/");
-export const routerData: RouteVO[] = mainRoute
-  ? convertRoutes(mainRoute.children || [], true)
-  : [];
+export const routerData = ref<RouteVO[]>([]);
+
+// 初始化路由
+export const initRoutes = async () => {
+  await checkAndRemovePaths();
+
+  // 提取 path 为 "/" 及其子路由的部分
+  const mainRoute = constantRoutes.find((route) => route.path === "/");
+  if (mainRoute) {
+    routerData.value = convertRoutes(mainRoute.children || [], true);
+  } else {
+    routerData.value = [];
+  }
+};
+
+watch(
+  () => userStore.userInfo,
+  async () => {
+    await initRoutes();
+  },
+  { immediate: true }
+);
+
+// 初始化路由
+initRoutes();
 
 export default router;

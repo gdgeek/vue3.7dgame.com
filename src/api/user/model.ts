@@ -25,7 +25,7 @@ export type Data = {
   info?: string | null;
   parsedInfo?: InfoType;
   avatar_id: string | null;
-  avatar: Avatar| null;
+  avatar: Avatar | null;
   email: string | null;
   emailBind: boolean;
 };

@@ -3,21 +3,10 @@
     <br />
     <el-container>
       <el-header>
-        <mr-p-p-header
-          :sorted="sorted"
-          :searched="searched"
-          sortByTime="created_at"
-          sortByName="title"
-          @search="search"
-          @sort="sort"
-        >
+        <mr-p-p-header :sorted="sorted" :searched="searched" sortByTime="created_at" sortByName="title" @search="search"
+          @sort="sort">
           <el-button-group :inline="true">
-            <el-button
-              v-if="isRoot"
-              size="small"
-              type="primary"
-              @click="addPrefab"
-            >
+            <el-button v-if="isRoot" size="small" type="primary" @click="addPrefab">
               <font-awesome-icon icon="plus"></font-awesome-icon>
 
               <span class="hidden-sm-and-down">{{ $t("meta.title") }}</span>
@@ -27,14 +16,8 @@
       </el-header>
       <el-main>
         <el-card style="width: 100%">
-          <waterfall
-            v-if="viewCards.length > 0"
-            :lazyload="false"
-            :width="320"
-            :gutter="8"
-            :list="viewCards"
-            :column-count="3"
-          >
+          <waterfall v-if="viewCards.length > 0" :lazyload="false" :width="320" :gutter="8" :list="viewCards"
+            :column-count="3">
             <template #default="{ item }">
               <el-card style="width: 320px" class="box-card">
                 <template #header>
@@ -46,48 +29,24 @@
                         </span>
                       </template>
                       <router-link :to="url(item.id)">
-                        <LazyImg
-                          v-if="item.image === null"
-                          url="/src/assets/image/none.png"
-                          style="
+                        <LazyImg v-if="item.image === null" url="/src/assets/image/none.png" style="
                             width: 100%;
                             height: 270px;
                             object-fit: contain;
-                          "
-                        ></LazyImg>
-                        <LazyImg
-                          v-else
-                          style="width: 100%; height: 270px"
-                          fit="contain"
-                          :url="item.image.url"
-                        ></LazyImg>
+                          "></LazyImg>
+                        <LazyImg v-else style="width: 100%; height: 270px" fit="contain" :url="item.image.url">
+                        </LazyImg>
                       </router-link>
                     </el-card>
                   </div>
                 </template>
                 <div class="clearfix">
-                  <el-button-group
-                    v-if="isRoot"
-                    style="float: right"
-                    :inline="true"
-                  >
-                    <el-button
-                      @click="editor(item.id)"
-                      size="small"
-                      type="success"
-                      icon="Edit"
-                    >
-                      {{ $t("meta.edit") }}</el-button
-                    >
+                  <el-button-group v-if="isRoot" style="float: right" :inline="true">
+                    <el-button @click="editor(item.id)" size="small" type="success" icon="Edit">
+                      {{ $t("meta.edit") }}</el-button>
 
-                    <el-button
-                      @click="del(item.id)"
-                      size="small"
-                      type="danger"
-                      icon="Delete"
-                    >
-                      {{ $t("meta.delete") }}</el-button
-                    >
+                    <el-button @click="del(item.id)" size="small" type="danger" icon="Delete">
+                      {{ $t("meta.delete") }}</el-button>
                   </el-button-group>
                 </div>
                 <div class="bottom clearfix"></div>
@@ -102,15 +61,9 @@
       </el-main>
       <el-footer>
         <el-card class="box-card">
-          <el-pagination
-            :current-page="pagination.current"
-            :page-count="pagination.count"
-            :page-size="pagination.size"
-            :total="pagination.total"
-            layout="prev, pager, next, jumper"
-            background
-            @current-change="handleCurrentChange"
-          ></el-pagination>
+          <el-pagination :current-page="pagination.current" :page-count="pagination.count" :page-size="pagination.size"
+            :total="pagination.total" layout="prev, pager, next, jumper" background
+            @current-change="handleCurrentChange"></el-pagination>
         </el-card>
       </el-footer>
     </el-container>
@@ -143,7 +96,8 @@ const pagination = ref({
 const { t } = useI18n();
 const userStore = useUserStore();
 const isRoot = computed(() =>
-  userStore.userInfo.roles.includes("admin" || "root")
+  userStore.userInfo.roles.includes("admin") || userStore.userInfo.roles.includes("root")
+
 );
 
 const url = (id: number) => {
@@ -296,6 +250,7 @@ const breakpoints = ref({
   padding: 0px 0px 0px 0px;
   color: #000000;
 }
+
 .card-title {
   white-space: nowrap;
   display: block;
