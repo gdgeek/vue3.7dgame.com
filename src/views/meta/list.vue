@@ -224,6 +224,12 @@ const refresh = async () => {
   );
   console.log(response.data);
   metaData.value = response.data;
+  pagination.value = {
+    current: parseInt(response.headers["x-pagination-current-page"]),
+    count: parseInt(response.headers["x-pagination-page-count"]),
+    size: parseInt(response.headers["x-pagination-per-page"]),
+    total: parseInt(response.headers["x-pagination-total-count"]),
+  };
 };
 
 onMounted(() => {

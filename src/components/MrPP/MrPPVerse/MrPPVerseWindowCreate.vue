@@ -34,7 +34,9 @@
 
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="dialogVisible = false">{{ $t("verse.page.form.cancel") }}</el-button>
+        <el-button @click="dialogVisible = false">{{
+          $t("verse.page.form.cancel")
+        }}</el-button>
         <el-button type="primary" @click="submitForm">
           {{ props.dialogSubmit }}
         </el-button>
@@ -56,9 +58,12 @@ const props = defineProps({
   dialogSubmit: String,
 });
 
-const dialogTitle = computed(() => props.dialogTitle || t("verse.page.form.dialogTitle"));
-const dialogSubmit = computed(() => props.dialogSubmit || t("verse.page.form.dialogSubmit"));
-
+const dialogTitle = computed(
+  () => props.dialogTitle || t("verse.page.form.dialogTitle")
+);
+const dialogSubmit = computed(
+  () => props.dialogSubmit || t("verse.page.form.dialogSubmit")
+);
 
 const emit = defineEmits(["submit"]);
 
@@ -80,8 +85,17 @@ const info = ref({
 
 const rules = {
   name: [
-    { required: true, message:  t("verse.page.form.rules.message1"), trigger: "blur" },
-    { min: 3, max: 64, message: t("verse.page.form.rules.message2"), trigger: "blur" },
+    {
+      required: true,
+      message: t("verse.page.form.rules.message1"),
+      trigger: "blur",
+    },
+    {
+      min: 3,
+      max: 64,
+      message: t("verse.page.form.rules.message2"),
+      trigger: "blur",
+    },
   ],
 };
 
@@ -89,7 +103,7 @@ const rules = {
 watchEffect(() => {
   if (item.value) {
     info.value.name = item.value.name;
-    info.value.url = item.value.image.url;
+    info.value.url = item.value.image?.url;
     const parsedInfo = JSON.parse(item.value.info);
     if (parsedInfo !== null) {
       info.value.description = parsedInfo.description;

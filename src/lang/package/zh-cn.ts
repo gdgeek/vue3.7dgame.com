@@ -539,7 +539,7 @@ export default {
       metaInfo: "【元数据】信息",
       rules: {
         message1: "请输入名称",
-        message2: "长度在 3 到 20 个字符",
+        message2: "长度在 2 到 20 个字符",
       },
       success: "保存成功",
     },
