@@ -185,6 +185,13 @@ const refresh = async () => {
     pagination.value.current,
     "image,author"
   );
+  pagination.value = {
+    current: parseInt(response.headers["x-pagination-current-page"]),
+    count: parseInt(response.headers["x-pagination-page-count"]),
+    size: parseInt(response.headers["x-pagination-per-page"]),
+    total: parseInt(response.headers["x-pagination-total-count"]),
+  };
+
   console.log("response.data", response.data);
   items.value = response.data;
   await nextTick();

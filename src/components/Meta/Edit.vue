@@ -65,7 +65,10 @@
                 &nbsp;
               </span>
             </el-form-item>
-            <el-form-item v-if="!custome" :label="$t('meta.metaEdit.form.data')">
+            <el-form-item
+              v-if="!custome"
+              :label="$t('meta.metaEdit.form.data')"
+            >
               <el-input type="textarea" v-model="item.data"></el-input>
             </el-form-item>
             <el-form-item v-if="false" :label="$t('meta.metaEdit.form.info')">
@@ -124,8 +127,17 @@ const { t } = useI18n();
 
 const rules = {
   title: [
-    { required: true, message: t("meta.metaEdit.rules.message1"), trigger: "blur" },
-    { min: 3, max: 20, message: t("meta.metaEdit.rules.message2"), trigger: "blur" },
+    {
+      required: true,
+      message: t("meta.metaEdit.rules.message1"),
+      trigger: "blur",
+    },
+    {
+      min: 2,
+      max: 20,
+      message: t("meta.metaEdit.rules.message2"),
+      trigger: "blur",
+    },
   ],
 };
 const itemForm = ref<InstanceType<typeof ElForm> | null>(null);

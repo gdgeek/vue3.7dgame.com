@@ -123,6 +123,7 @@ const handleMessage = async (e: MessageEvent) => {
       if (!isInit.value) {
         isInit.value = true;
         const meta = await getMeta(id.value);
+
         postMessage("load", {
           data: meta.data,
           saveable: saveable(meta.data),

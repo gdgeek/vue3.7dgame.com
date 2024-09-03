@@ -7,7 +7,11 @@
           :label="$t('verse.view.share.form.label1')"
           prop="username"
           :rules="[
-            { required: true, message: $t('verse.view.share.form.ruleMessage'), trigger: 'blur' },
+            {
+              required: true,
+              message: $t('verse.view.share.form.ruleMessage'),
+              trigger: 'blur',
+            },
           ]"
         >
           <el-input
@@ -18,10 +22,16 @@
           ></el-input>
         </el-form-item>
 
-        <el-form-item :label="$t('verse.view.share.form.label2')" prop="content">
+        <el-form-item
+          :label="$t('verse.view.share.form.label2')"
+          prop="content"
+        >
           <el-input type="textarea" v-model="post.form.content"></el-input>
         </el-form-item>
-        <el-form-item :label="$t('verse.view.share.form.label3')" prop="editable">
+        <el-form-item
+          :label="$t('verse.view.share.form.label3')"
+          prop="editable"
+        >
           <el-checkbox
             v-model="post.form.editable"
             :label="$t('verse.view.share.form.label4')"
@@ -49,16 +59,26 @@
           :label="$t('verse.view.share.form.label1')"
           prop="username"
           :rules="[
-            { required: true, message: $t('verse.view.share.form.ruleMessage'), trigger: 'blur' },
+            {
+              required: true,
+              message: $t('verse.view.share.form.ruleMessage'),
+              trigger: 'blur',
+            },
           ]"
         >
           {{ put.form.username }}
         </el-form-item>
 
-        <el-form-item :label="$t('verse.view.share.form.label2')" prop="content">
+        <el-form-item
+          :label="$t('verse.view.share.form.label2')"
+          prop="content"
+        >
           <el-input type="textarea" v-model="put.form.content"></el-input>
         </el-form-item>
-        <el-form-item :label="$t('verse.view.share.form.label3')" prop="editable">
+        <el-form-item
+          :label="$t('verse.view.share.form.label3')"
+          prop="editable"
+        >
           <el-checkbox
             v-model="put.form.editable"
             :label="$t('verse.view.share.form.label4')"
@@ -78,7 +98,8 @@
         </el-form-item>
       </el-form>
     </el-dialog>
-
+    111
+    <button v-if="can('read', 'Article')">Read Article</button>
     <br />
     <el-card>
       <template #header>
@@ -115,7 +136,7 @@
             {{ JSON.parse(item.info).content }}
             <el-divider size="small" content-position="right">
               <el-button-group size="small" v-if="saveable">
-                <el-button size="small" @click="setup(item)">
+                <el-button size="small" @click="_setup(item)">
                   <el-icon><EditPen></EditPen></el-icon>
                 </el-button>
                 <el-button size="small" @click="del(item.id)">
@@ -152,6 +173,11 @@ import {
 import { AbilityEditable } from "@/ability/ability";
 import { FormInstance } from "element-plus";
 import { VerseData } from "@/api/v1/verse";
+import { useAbility } from "@casl/vue";
+
+const ability = useAbility();
+// 绑定 `can` 方法，确保上下文正确
+const can = ability.can.bind(ability);
 
 const props = defineProps<{
   verse: VerseData;
@@ -202,7 +228,7 @@ const open = () => {
   post.visible = true;
 };
 
-const setup = (item: any) => {
+const _setup = (item: any) => {
   put.form.username = item.user.username;
   put.id = item.id;
   put.form.content = JSON.parse(item.info).content;
@@ -212,11 +238,15 @@ const setup = (item: any) => {
 
 const del = async (id: number) => {
   try {
-    await ElMessageBox.confirm(t("verse.view.share.confirm.message1"), t("verse.view.share.confirm.message2"), {
-      confirmButtonText: t("verse.view.share.confirm.confirm"),
-      cancelButtonText: t("verse.view.share.confirm.cancel"),
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("verse.view.share.confirm.message1"),
+      t("verse.view.share.confirm.message2"),
+      {
+        confirmButtonText: t("verse.view.share.confirm.confirm"),
+        cancelButtonText: t("verse.view.share.confirm.cancel"),
+        type: "warning",
+      }
+    );
     await deleteVerseShare(id);
     await refresh();
     ElMessage({

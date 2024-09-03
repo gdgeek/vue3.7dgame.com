@@ -8,6 +8,9 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
 import VueIframe from "vue-iframes";
 import { mouseEffect, particleEffect } from "@/mouse";
 
+import { ability } from './composables/ability';
+import { abilitiesPlugin } from '@casl/vue';
+
 import highlightDirective from "./directive/highlight";
 
 library.add(fas);
@@ -44,4 +47,7 @@ app.directive("particle-effect", particleEffect);
 app.use(setupPlugins);
 // app.use(ability);
 app.use(VueIframe);
+
+// 添加 CASL 插件
+app.use(abilitiesPlugin, ability);
 app.mount("#app");
