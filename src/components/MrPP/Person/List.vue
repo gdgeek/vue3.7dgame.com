@@ -148,10 +148,21 @@ const rolePriority = {
 };
 
 // 获取角色的最高级别
-const getRoleLevel = (
-  roles: ("root" | "admin" | "manager" | "user")[]
-): number => {
-  return Math.max(...roles.map((role) => rolePriority[role]));
+const getRoleLevel = (roles: string[]): number => {
+  if (roles.find((element) => element === "root") != undefined) {
+    return rolePriority["root"];
+  }
+  if (roles.find((element) => element === "admin") != undefined) {
+    return rolePriority["admin"];
+  }
+  if (roles.find((element) => element === "manager") != undefined) {
+    return rolePriority["manager"];
+  }
+  if (roles.find((element) => element === "user") != undefined) {
+    return rolePriority["user"];
+  }
+
+  return -1;
 };
 
 const canDelete = (
@@ -167,8 +178,8 @@ const canDelete = (
   const currentUserLevel = getRoleLevel(currentUserRoles); // 当前用户的角色级别
   const targetUserLevel = getRoleLevel(
     targetRoles as ("user" | "root" | "admin" | "manager")[]
-  ); // 目标用户的角色级别
-  // 只有当前用户的权限级别高于目标用户才能删除,并显示删除按钮
+  );
+
   return currentUserLevel > targetUserLevel;
 };
 
