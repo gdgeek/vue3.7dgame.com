@@ -146,7 +146,7 @@ const pagination = ref({
 
 const { t } = useI18n();
 const userStore = useUserStore();
-const isRoot = computed(() => can("root"));
+const isRoot = computed(() => can("root", "all"));
 
 const url = (id: number) => {
   return isRoot.value ? `/meta/prefab-edit?id=${id}` : "#";

@@ -1,6 +1,6 @@
 // src/utils/ability.ts
-import { defineAbility } from '@casl/ability';
-import env from '@/environment';
+import { defineAbility } from "@casl/ability";
+import env from "@/environment";
 
 export class AbilityRouter {
   constructor(public path: string) {}
@@ -19,10 +19,17 @@ export class AbilityWorks {
 }
 
 export class AbilityMessage {
-  constructor(public id: number, public managed: number) {}
+  constructor(
+    public id: number,
+    public managed: number
+  ) {}
 }
 
-export function UpdateAbility(ability: any, roles: string[] | null, userId: number) {
+export function UpdateAbility(
+  ability: any,
+  roles: string[] | null,
+  userId: number
+) {
   const newAbility = defineAbility((can) => {
     if (!roles) {
       roles = [];
@@ -32,15 +39,15 @@ export function UpdateAbility(ability: any, roles: string[] | null, userId: numb
     let menu: (string | RegExp)[] = [];
 
     router = router.concat([
-      '/site',
-      '/site/logout',
-      '/site/index',
-      '/site/download',
-      '/site/wechat-signup',
-      '/site/binded-email',
-      '/404',
-      '/test',
-      /^\/test[\/]/
+      "/site",
+      "/site/logout",
+      "/site/index",
+      "/site/download",
+      "/site/wechat-signup",
+      "/site/binded-email",
+      "/404",
+      "/test",
+      /^\/test[\/]/,
     ]);
 
     if (env.canWeb()) {
@@ -56,23 +63,27 @@ export function UpdateAbility(ability: any, roles: string[] | null, userId: numb
       router.push(/^\/setup[\/]/);
     }
 
-    if (roles.includes('root') || roles.includes('manager') || roles.includes('user')) {
-      can('editable', AbilityEditable.name, { editable: true });
-      can('viewable', AbilityViewable.name, { viewable: true });
+    if (
+      roles.includes("root") ||
+      roles.includes("manager") ||
+      roles.includes("user")
+    ) {
+      can("editable", AbilityEditable.name, { editable: true });
+      can("viewable", AbilityViewable.name, { viewable: true });
 
-      can(['update', 'delete'], AbilityWorks.name, { id: userId });
-      can('delete', AbilityMessage.name, { id: userId, managed: 0 });
-      can('update', AbilityMessage.name, { id: userId });
+      can(["update", "delete"], AbilityWorks.name, { id: userId });
+      can("delete", AbilityMessage.name, { id: userId, managed: 0 });
+      can("update", AbilityMessage.name, { id: userId });
 
       router = router.concat([
-        '/verse/rete-verse',
-        '/verse/verse-script',
-        '/verse/script',
-        '/meta/rete-meta',
-        '/meta/script'
+        "/verse/rete-verse",
+        "/verse/verse-script",
+        "/verse/script",
+        "/meta/rete-meta",
+        "/meta/script",
       ]);
       menu = menu.concat([
-        '/site/logout',
+        "/site/logout",
         /^\/resource(\/|$)/,
         /^\/polygen(\/|$)/,
         /^\/voxel(\/|$)/,
@@ -87,58 +98,59 @@ export function UpdateAbility(ability: any, roles: string[] | null, userId: numb
         /^\/discovery(\/|$)/,
         /^\/community(\/|$)/,
         /^\/editor(\/|$)/,
-        /^\/audio(\/|$)/
+        /^\/audio(\/|$)/,
       ]);
 
-      if (roles.includes('root') || roles.includes('admin') || roles.includes('manager')) {
-        can('manager', 'all');
-        can('editable', AbilityEditable.name);
-        can('viewable', AbilityViewable.name);
-        can(['update', 'delete'], AbilityWorks.name);
-        can('delete', AbilityMessage.name, { managed: 0 });
-        can('update', AbilityMessage.name);
+      if (
+        roles.includes("root") ||
+        roles.includes("admin") ||
+        roles.includes("manager")
+      ) {
+        can("manager", "all");
+        can("editable", AbilityEditable.name);
+        can("viewable", AbilityViewable.name);
+        can(["update", "delete"], AbilityWorks.name);
+        can("delete", AbilityMessage.name, { managed: 0 });
+        can("update", AbilityMessage.name);
 
-        menu = menu.concat(['/verse-share/open', /^\/trades(\/|$)/]);
+        menu = menu.concat(["/verse-share/open", /^\/trades(\/|$)/]);
 
-        if (roles.includes('root')) {
-          can('root', 'all');
+        if (roles.includes("root")) {
+          can("root", "all");
           menu = menu.concat([/^\/game(\/|$)/]);
           menu = menu.concat([/^\/manager(\/|$)/]);
         }
-        if (roles.includes('admin')) {
-          can('admin', 'all');
+        if (roles.includes("admin")) {
+          can("admin", "all");
           menu = menu.concat([/^\/game(\/|$)/]);
           menu = menu.concat([/^\/manager(\/|$)/]);
         }
-        if (roles.includes('manager')) {
-          can('manager', 'all');
+        if (roles.includes("manager")) {
+          can("manager", "all");
         }
-        if (roles.includes('user')) {
-          can('user', 'all');
+        if (roles.includes("user")) {
+          can("user", "all");
         }
       }
     }
 
     menu.forEach((item) => {
-      if (typeof item === 'string') {
-
-
-        can(['open', 'goto'], AbilityRouter.name, { path: item });
+      if (typeof item === "string") {
+        can(["open", "goto"], AbilityRouter.name, { path: item });
       } else {
-
-        can(['open', 'goto'], AbilityRouter.name, { path: { $regex: item } });
+        can(["open", "goto"], AbilityRouter.name, { path: { $regex: item } });
       }
     });
 
     router.forEach((item) => {
-      if (typeof item === 'string') {
-        can('goto', AbilityRouter.name, { path: item });
+      if (typeof item === "string") {
+        can("goto", AbilityRouter.name, { path: item });
       } else {
-        can('goto', AbilityRouter.name, { path: { $regex: item } });
+        can("goto", AbilityRouter.name, { path: { $regex: item } });
       }
     });
   });
 
- // alert(111)
+  // alert(111)
   ability.update(newAbility.rules);
 }
