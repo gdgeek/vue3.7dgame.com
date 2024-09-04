@@ -2,16 +2,20 @@
   <div class="verse-view">
     <el-dialog v-model="dialog" width="70%">
       <template #header> {{ $t("verse.view.header") }} </template>
-      <MrPPMessageFrom ref="editor" :data="briefing!" @post="postMessage"></MrPPMessageFrom>
+      <MrPPMessageFrom
+        ref="editor"
+        :data="briefing!"
+        @post="postMessage"
+      ></MrPPMessageFrom>
     </el-dialog>
 
     <el-row :gutter="20" style="margin: 28px 18px 0">
       <el-col :sm="16">
         <el-card v-if="verse" class="box-card">
           <template #header>
-            <i v-if="saveable"><el-icon>
-                <EditPen></EditPen>
-              </el-icon></i>
+            <i v-if="saveable"
+              ><el-icon> <EditPen></EditPen> </el-icon
+            ></i>
             <i v-else>
               <el-icon>
                 <View></View>
@@ -22,8 +26,17 @@
           </template>
 
           <div class="box-item">
-            <el-image v-if="!verse.image" fit="contain" style="width: 100%; height: 300px"></el-image>
-            <el-image v-else fit="contain" style="width: 100%; height: 300px" :src="verse.image.url"></el-image>
+            <el-image
+              v-if="!verse.image"
+              fit="contain"
+              style="width: 100%; height: 300px"
+            ></el-image>
+            <el-image
+              v-else
+              fit="contain"
+              style="width: 100%; height: 300px"
+              :src="verse.image.url"
+            ></el-image>
           </div>
         </el-card>
         <br />
@@ -80,12 +93,21 @@
         </el-card> -->
 
         <el-card v-if="saveable" class="box-card">
-          <language v-if="verse" :verseId="verse.id" :languages="verse.languages!"></language>
+          <language
+            v-if="verse"
+            :verseId="verse.id"
+            :languages="verse.languages!"
+          ></language>
         </el-card>
 
         <br />
         <el-card v-if="verse" class="box-card">
-          <el-button style="width: 100%" type="primary" size="small" @click="comeIn">
+          <el-button
+            style="width: 100%"
+            type="primary"
+            size="small"
+            @click="comeIn"
+          >
             <div v-if="saveable">
               <font-awesome-icon icon="edit"></font-awesome-icon>
               &nbsp;{{ $t("verse.view.edit") }}
@@ -98,7 +120,12 @@
           <br />
         </el-card>
 
-        <Message v-if="message" ref="message" :messageId="message.id!" @set-message="setMessage"></Message>
+        <Message
+          v-if="message"
+          ref="message"
+          :messageId="message.id!"
+          @set-message="setMessage"
+        ></Message>
         <Reply v-if="message" :messageId="message.id!"></Reply>
       </el-col>
 
@@ -108,22 +135,43 @@
             <b>{{ $t("verse.view.info") }}</b>
           </template>
           <div class="box-item">
-            <InfoContent v-if="verse" :info="JSON.parse(verse.info!)" :author="verse.author!"></InfoContent>
+            <InfoContent
+              v-if="verse"
+              :info="JSON.parse(verse.info!)"
+              :author="verse.author!"
+            ></InfoContent>
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right"></el-button-group>
             </aside>
           </div>
-          <VerseToolbar v-if="verse" :verse="verse!" @deleted="deleted" @changed="changed"></VerseToolbar>
+          <VerseToolbar
+            v-if="verse"
+            :verse="verse!"
+            @deleted="deleted"
+            @changed="changed"
+          ></VerseToolbar>
           <br />
         </el-card>
         <br />
 
-        <el-card v-if="isRoot">
-          <el-button v-if="!verseOpen" style="width: 100%" type="primary" size="small" @click="open">
+        <el-card v-if="can('root')">
+          <el-button
+            v-if="!verseOpen"
+            style="width: 100%"
+            type="primary"
+            size="small"
+            @click="open"
+          >
             <font-awesome-icon icon="eye"></font-awesome-icon>
             &nbsp;{{ $t("verse.view.verseOpen") }}
           </el-button>
-          <el-button v-else style="width: 100%" type="primary" size="small" @click="close">
+          <el-button
+            v-else
+            style="width: 100%"
+            type="primary"
+            size="small"
+            @click="close"
+          >
             <font-awesome-icon icon="eye-slash"></font-awesome-icon>
             &nbsp;{{ $t("verse.view.verseClose") }}
           </el-button>
@@ -175,6 +223,9 @@ import { postVerseOpen, deleteVerseOpen } from "@/api/v1/verse-open";
 import { MessageType, postMessageAPI } from "@/api/v1/message";
 import { useUserStore } from "@/store/modules/user";
 import { FormInstance } from "element-plus";
+import { useAbility } from "@casl/vue";
+const ability = useAbility();
+const can = ability.can.bind(ability);
 import {
   dellanguages,
   getlanguages,
@@ -303,11 +354,6 @@ const saveable = computed(() => {
   return verse.value.editable;
 });
 
-const isRoot = computed(() =>
-  userStore.userInfo.roles.includes("admin") || userStore.userInfo.roles.includes("root")
-
-);
-
 const refresh = async () => {
   const res = await getVerse(
     id.value,
@@ -326,9 +372,9 @@ const refresh = async () => {
   briefing.value = message.value
     ? message.value
     : {
-      title: t("verse.view.messageTitle") + `${verse.value!.name}`,
-      body: info.value.description,
-    };
+        title: t("verse.view.messageTitle") + `${verse.value!.name}`,
+        body: info.value.description,
+      };
 };
 
 const deleted = () => {

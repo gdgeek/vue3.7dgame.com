@@ -1,6 +1,7 @@
 <template>
   <div>
     <br />
+    {{ can("open", new AbilityRouter("/game/logout")) }}
     <el-container>
       <el-header>
         <mr-p-p-header
@@ -115,7 +116,11 @@ import { getMetas, postMeta, deleteMeta } from "@/api/v1/meta";
 import type { metaInfo } from "@/api/v1/meta";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { ViewCard } from "vue-waterfall-plugin-next/dist/types/types/waterfall";
+import { useAbility } from "@casl/vue";
 
+import { AbilityRouter } from "@/utils/ability";
+const ability = useAbility();
+const can = ability.can.bind(ability);
 const router = useRouter();
 const metaData = ref<metaInfo[]>([]);
 const sorted = ref<string>("-created_at");

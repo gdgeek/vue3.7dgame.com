@@ -6,7 +6,9 @@ import {
 
 import NProgress from "@/utils/nprogress";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
-import router from "@/router";
+import { useRouter } from "@/router";
+
+const router = useRouter();
 import { usePermissionStore, useUserStore } from "@/store";
 
 export function setupPermission() {

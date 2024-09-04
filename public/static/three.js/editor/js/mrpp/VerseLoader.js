@@ -163,7 +163,7 @@ function VerseLoader(editor) {
 
 		if (data.children.modules) {
 			data.children.modules.forEach(async item => {
-				alert(1)
+
 				const meta = metas.get(item.parameters.meta_id)
 
 				const node = factory.addModule(item)

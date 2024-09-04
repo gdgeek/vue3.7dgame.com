@@ -98,8 +98,6 @@
         </el-form-item>
       </el-form>
     </el-dialog>
-    111
-    <button v-if="can('read', 'Article')">Read Article</button>
     <br />
     <el-card>
       <template #header>
@@ -170,7 +168,7 @@ import {
   deleteVerseShare,
   putVerseShare,
 } from "@/api/v1/verse-share";
-import { AbilityEditable } from "@/ability/ability";
+import { AbilityEditable, UpdateAbility } from "@/utils/ability";
 import { FormInstance } from "element-plus";
 import { VerseData } from "@/api/v1/verse";
 import { useAbility } from "@casl/vue";

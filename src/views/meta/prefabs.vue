@@ -128,7 +128,10 @@ import { getPrefabs, deletePrefab, postPrefab } from "@/api/v1/prefab";
 import type { prefabsData } from "@/api/v1/prefab";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { useUserStore } from "@/store/modules/user";
+import { useAbility } from "@casl/vue";
 
+const ability = useAbility();
+const can = ability.can.bind(ability);
 const router = useRouter();
 
 const items = ref<prefabsData[]>([]);
@@ -143,11 +146,7 @@ const pagination = ref({
 
 const { t } = useI18n();
 const userStore = useUserStore();
-const isRoot = computed(
-  () =>
-    userStore.userInfo.roles.includes("admin") ||
-    userStore.userInfo.roles.includes("root")
-);
+const isRoot = computed(() => can("root"));
 
 const url = (id: number) => {
   return isRoot.value ? `/meta/prefab-edit?id=${id}` : "#";
