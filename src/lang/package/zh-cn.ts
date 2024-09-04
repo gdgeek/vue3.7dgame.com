@@ -54,7 +54,7 @@ export default {
       systemDefault: "系统预设",
       edit: "编辑",
       scriptEditor: "脚本编辑",
-      SceneEditor: "场景编辑",
+      sceneEditor: "场景编辑",
     },
     universe: {
       title: "宇宙",
@@ -701,6 +701,50 @@ export default {
       },
     },
   },
+  // 管理部分国际化
+  manager: {
+    title: "添加用户",
+    creator: {
+      form: {
+        label1: "用户名",
+        label2: "密码",
+        label3: "确认密码",
+        message1: "请输入用户名称",
+        message2: "用户名称长度应该大于5",
+        message3: "用户名请避免使用中文",
+        message4: "请输入密码",
+        message5: "密码长度应该大于6",
+        message6: "请输入校验密码",
+        error1: "请输入密码",
+        error2: "请再次输入密码",
+        error3: "两次输入的密码不一致",
+        error4: "表单校验失败",
+        cancel: "取 消",
+        submit: "注册账号",
+      },
+    },
+    list: {
+      label: "权限:",
+      cancel: "删除",
+      roles: {
+        root: "根用户",
+        admin: "超级管理员",
+        manager: "管理员",
+        user: "用户",
+      },
+      confirm: {
+        message1: "此操作将永久删除该用户, 是否继续?",
+        message2: "提示",
+        confirm: "确认",
+        cancel: "取消",
+        success: "删除成功！",
+        info: "已取消删除",
+      },
+      success: "权限更新成功！",
+      error: "权限更新失败！",
+    },
+  },
+
   // 导航栏国际化
   navbar: {
     dashboard: "首页",

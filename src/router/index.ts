@@ -67,11 +67,10 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "personalCenter.myHomepage",
               hidden: false,
-             },
+            },
             path: "/home/index",
             name: "HomeIndex",
             component: () => import("@/views/home/index.vue"),
-            
           },
           {
             meta: {
@@ -86,7 +85,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "personalCenter.category",
               hidden: false,
-             },
+            },
             path: "/home/category",
             name: "HomeCategory",
             component: () => import("@/views/home/category.vue"),
@@ -112,7 +111,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: "settings.title",
           hidden: true,
-         },
+        },
         redirect: "/settings/account",
         component: Empty,
         children: [
@@ -129,7 +128,7 @@ const routes: RouteRecordRaw[] = [
             component: () => import("@/views/settings/edit.vue"),
           },
           {
-            meta: { title: "settings.userPresentation" , hidden: true},
+            meta: { title: "settings.userPresentation", hidden: true },
             path: "/settings/people",
             name: "SettingsPeople",
             component: () => import("@/views/settings/people.vue"),
@@ -454,7 +453,7 @@ const routes: RouteRecordRaw[] = [
             name: "PrefabEdit",
             meta: {
               title: "meta.edit",
-              hidden: true
+              hidden: true,
             },
             component: () => import("@/views/meta/prefab-edit.vue"),
           },
@@ -463,8 +462,8 @@ const routes: RouteRecordRaw[] = [
             name: "MetaEdit",
             meta: {
               title: "meta.edit",
-              hidden: true
-             },
+              hidden: true,
+            },
             component: () => import("@/views/meta/meta-edit.vue"),
           },
           // {
@@ -479,8 +478,8 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "meta.scriptEditor",
               keepAlive: true,
-              hidden: true
-             },
+              hidden: true,
+            },
             component: () => import("@/views/meta/script.vue"),
           },
           {
@@ -489,8 +488,8 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "meta.sceneEditor",
               keepAlive: true,
-              hidden: true
-             },
+              hidden: true,
+            },
             component: () => import("@/views/meta/scene.vue"),
           },
         ],
@@ -544,8 +543,8 @@ const routes: RouteRecordRaw[] = [
             name: "VerseView",
             meta: {
               title: "universe.viewTitle",
-              hidden: true
-             },
+              hidden: true,
+            },
             component: () => import("@/views/verse/view.vue"),
           },
           {
@@ -554,9 +553,8 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "universe.scriptEditor",
               keepAlive: true,
-              hidden: true
-              
-             },
+              hidden: true,
+            },
             component: (): any => import("@/views/verse/script.vue"),
           },
           {
@@ -565,7 +563,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "universe.sceneEditor",
               keepAlive: true,
-              hidden: true
+              hidden: true,
             },
             component: () => import("@/views/verse/scene.vue"),
           },
@@ -681,16 +679,15 @@ const pathsToRemove = ref([
   "script",
   "scene",
 ]);
-import { useAbility } from '@casl/vue';
+import { useAbility } from "@casl/vue";
 
 //const ability = useAbility();
 
 //const can = ability.can.bind(ability);
 //alert(can('root','all'))
 const checkAndRemovePaths = async () => {
-  
   if (!false) {
-  //  pathsToRemove.value.push("manager", "game");
+    //  pathsToRemove.value.push("manager", "game");
   }
 };
 
@@ -724,7 +721,6 @@ export const routerData = ref<RouteVO[]>([]);
 
 // 初始化路由
 export const initRoutes = async () => {
-  
   await checkAndRemovePaths();
 
   const mainRoute = constantRoutes.find((route) => route.path === "/");
@@ -735,44 +731,45 @@ export const initRoutes = async () => {
   }
 };
 
-import type { AnyAbility } from '@casl/ability';
+import type { AnyAbility } from "@casl/ability";
 /*const ability = useAbility();
 const can = ability.can.bind(ability);
  */
 //initRoutes();
 
 import { AbilityRouter } from "@/utils/ability";
-const check = (route: RouteRecordRaw[], ability: AnyAbility) => { 
+const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   const can = ability.can.bind(ability);
-  route.forEach((route) => { 
-   // alert(route.path)
+  route.forEach((route) => {
+    // alert(route.path)
 
-    console.error(route.path, route.path,can("open", new AbilityRouter(route.path)))
-   
-    console.error(route.meta?.hidden)
+    console.error(
+      route.path,
+      route.path,
+      can("open", new AbilityRouter(route.path))
+    );
+
+    console.error(route.meta?.hidden);
     if (route.meta && !route.meta.hidden) {
-      route.meta.hidden = !can("open", new AbilityRouter(route.path))
+      route.meta.hidden = !can("open", new AbilityRouter(route.path));
     }
     //route.meta.hidden = true//!can("open", new AbilityRouter(route.path))
     //route.meta.hidden = true; //!can("open", new AbilityRouter(route.path))
-   if (route.children) { 
-      check(route.children,ability)
+    if (route.children) {
+      check(route.children, ability);
     }
-
   });
-}
-export const UpdateRoutes = async (ability: AnyAbility) => { 
+};
+export const UpdateRoutes = async (ability: AnyAbility) => {
   constantRoutes = routes;
   const can = ability.can.bind(ability);
   //alert(can("open", new AbilityRouter("game/")))
-  check(constantRoutes, ability)
-  
-  initRoutes();
-  //pathsToRemove.value.push("manager", "game");
- 
-}
-export const useRouter = () => { 
+  check(constantRoutes, ability);
 
   initRoutes();
+  //pathsToRemove.value.push("manager", "game");
+};
+export const useRouter = () => {
+  initRoutes();
   return router;
-}
+};

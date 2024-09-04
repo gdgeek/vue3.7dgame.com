@@ -717,6 +717,50 @@ export default {
       },
     },
   },
+  // 管理部分国际化
+  manager: {
+    title: "AddUser",
+    creator: {
+      form: {
+        label1: "Username",
+        label2: "Password",
+        label3: "ConfirmPassword",
+        message1: "Please enter the username",
+        message2: "Username must be more than 5 characters",
+        message3: "Avoid using Chinese characters in the username",
+        message4: "Please enter the password",
+        message5: "Password must be more than 6 characters",
+        message6: "Please enter the confirmation password",
+        error1: "Please enter the password",
+        error2: "Please enter the password again",
+        error3: "The passwords do not match",
+        error4: "Form validation failed",
+        cancel: "Cancel",
+        submit: "RegisterAccount",
+      },
+    },
+    list: {
+      label: "Perms:",
+      cancel: "Delete",
+      roles: {
+        root: "RootUser",
+        admin: "SuperAdministrator",
+        manager: "Administrator",
+        user: "User",
+      },
+      confirm: {
+        message1:
+          "This action will permanently delete the user. Do you want to continue?",
+        message2: "Prompt",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "Deleted successfully!",
+        info: "Deletion canceled",
+      },
+      success: "Permissions updated successfully!",
+      error: "Permissions update failed!",
+    },
+  },
 
   // 导航栏国际化
   navbar: {

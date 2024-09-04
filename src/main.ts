@@ -26,11 +26,13 @@ import "@/styles/index.scss";
 import "uno.css";
 import "animate.css";
 import { useRouter } from "@/router";
+import { translateRouteTitle } from "./utils/i18n";
 //import { useAbility } from "@casl/vue";
 const router = useRouter();
 // 更新页面标题
+
 const updateTitle = (title: string) => {
-  document.title = `${title} - 7D Game`;
+  document.title = `${translateRouteTitle(title)} - 7D Game`;
 };
 
 // 监听路由变化更新页面标题
@@ -42,6 +44,7 @@ router.beforeEach((to) => {
     updateTitle("");
   }
 });
+
 //UpdateAbility(ability, [], 0);
 const app = createApp(App);
 app.use(abilitiesPlugin, ability, {

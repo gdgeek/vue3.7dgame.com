@@ -1,13 +1,13 @@
 <template>
   <div class="verse-index">
-    <PersonCreater
+    <PersonCreator
       v-if="props.created"
       ref="createdDialogRef"
       :close-on-click-modal="false"
-      dialog-title="添加用户"
+      :dialog-title="$t('manager.title')"
       @refresh="refresh"
-      dialog-submit="添加用户"
-    ></PersonCreater>
+      :dialog-submit="$t('manager.title')"
+    ></PersonCreator>
 
     <br />
     <el-container>
@@ -27,7 +27,7 @@
             >
               <font-awesome-icon icon="plus"></font-awesome-icon>
               &nbsp;
-              <span class="hidden-sm-and-down">添加用户</span>
+              <span class="hidden-sm-and-down">{{ $t("manager.title") }}</span>
             </el-button>
           </el-button-group>
         </MrPPHeader>
@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import PersonCreater from "./Creater.vue";
+import PersonCreator from "./Creator.vue";
 import List from "@/components/MrPP/Person/List.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { userData } from "@/api/v1/person";
@@ -88,7 +88,7 @@ const pagination = ref<Pagination>({
   size: 20,
   total: 20,
 });
-const createdDialogRef = ref<InstanceType<typeof PersonCreater>>();
+const createdDialogRef = ref<InstanceType<typeof PersonCreator>>();
 
 const createWindow = () => {
   if (createdDialogRef.value) {
