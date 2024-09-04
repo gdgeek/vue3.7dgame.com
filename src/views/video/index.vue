@@ -12,7 +12,9 @@
           <el-button-group :inline="true">
             <router-link to="/resource/video/upload">
               <el-button size="small" type="primary" icon="uploadFilled">
-                <span class="hidden-sm-and-down">{{ $t("video.uploadVideo") }}</span>
+                <span class="hidden-sm-and-down">{{
+                  $t("video.uploadVideo")
+                }}</span>
               </el-button>
             </router-link>
           </el-button-group>
@@ -20,7 +22,12 @@
       </el-header>
       <el-main>
         <el-card>
-          <Waterfall :list="items" :width="320" :gutter="10">
+          <Waterfall
+            :list="items"
+            :width="320"
+            :gutter="10"
+            :backgroundColor="'rgba(255, 255, 255, .05)'"
+          >
             <template #default="{ item }">
               <mr-p-p-card
                 :item="item"
@@ -36,9 +43,9 @@
                     >
                       {{ $t("video.initializeVideoData") }}
                     </el-button>
-                    <el-button v-else type="primary" size="small"
-                      >{{ $t("video.viewVideo") }}</el-button
-                    >
+                    <el-button v-else type="primary" size="small">{{
+                      $t("video.viewVideo")
+                    }}</el-button>
                   </router-link>
                 </template>
               </mr-p-p-card>
@@ -135,12 +142,16 @@ const named = async (id: string, newValue: string) => {
 // 删除音频确认
 const deletedWindow = async (item: any) => {
   try {
-    await ElMessageBox.confirm(t("video.confirm.message1"), t("video.confirm.message2"), {
-      confirmButtonText: t("video.confirm.confirm"),
-      cancelButtonText: t("video.confirm.cancel"),
-      closeOnClickModal: false,
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("video.confirm.message1"),
+      t("video.confirm.message2"),
+      {
+        confirmButtonText: t("video.confirm.confirm"),
+        cancelButtonText: t("video.confirm.cancel"),
+        closeOnClickModal: false,
+        type: "warning",
+      }
+    );
     await deleted(item.id);
     ElMessage.success(t("video.confirm.success"));
   } catch {

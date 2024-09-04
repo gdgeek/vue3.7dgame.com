@@ -50,6 +50,7 @@
         :list="viewCards"
         :width="230"
         :gutter="10"
+        :backgroundColor="'rgba(255, 255, 255, .05)'"
       >
         <template #default="{ item }">
           <div style="width: 230px">

@@ -12,6 +12,7 @@
       }"
       :list="viewCards"
       :column-count="3"
+      :backgroundColor="'rgba(255, 255, 255, .05)'"
     >
       <template #default="{ item }">
         <el-card style="width: 300px" class="box-card">
@@ -45,7 +46,9 @@
           </template>
           <div class="clearfix">
             <router-link :to="'/verse/view?id=' + item.id">
-              <el-button type="primary" size="small">{{ $t("verse.page.list.enter") }}</el-button>
+              <el-button type="primary" size="small">{{
+                $t("verse.page.list.enter")
+              }}</el-button>
             </router-link>
             <VerseToolbar
               :verse="item!"

@@ -5,6 +5,7 @@
     :lazyload="true"
     :list="viewCards"
     :gutter="10"
+    :backgroundColor="'rgba(255, 255, 255, .05)'"
   >
     <template #default="{ item }">
       <el-card style="width: 200px" :body-style="{ padding: '0px' }">

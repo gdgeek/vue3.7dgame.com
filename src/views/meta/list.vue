@@ -31,6 +31,7 @@
             :breakpoints="{
               640: { rowPerView: 1 },
             }"
+            :backgroundColor="'rgba(255, 255, 255, .05)'"
           >
             <template #default="{ item }">
               <el-card style="width: 320px" class="box-card">

@@ -28,8 +28,10 @@
 
       <el-descriptions-item v-if="info.description">
         <template #label>
-          <font-awesome-icon class="icon" icon="info"></font-awesome-icon>
-          {{ $t("verse.page.list.infoContent.description") }}
+          <div style="width: 75px">
+            <font-awesome-icon class="icon" icon="info"></font-awesome-icon>
+            {{ $t("verse.page.list.infoContent.description") }}
+          </div>
         </template>
         {{ info.description }}
       </el-descriptions-item>
