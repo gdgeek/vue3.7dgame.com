@@ -15,6 +15,7 @@
 import { UpdateAbility } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
 import { useUserStore } from "@/store/modules/user";
+import { UpdateRoutes } from "@/router";
 const userStore = useUserStore();
 
 const ability = useAbility(); // 提取到 setup 顶层
@@ -23,6 +24,7 @@ watch(
   () => [userStore.userInfo.roles, userStore.userInfo.data.id],
   ([roles, id]) => {
     UpdateAbility(ability, roles, id);
+    UpdateRoutes(ability);
   }
 );
 </script>

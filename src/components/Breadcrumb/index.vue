@@ -22,9 +22,10 @@
 <script setup lang="ts">
 import { RouteLocationMatched } from "vue-router";
 import { compile } from "path-to-regexp";
-import router from "@/router";
+import { useRouter } from "@/router";
+import { useAbility } from "@casl/vue";
+const router = useRouter();
 import { translateRouteTitle } from "@/utils/i18n";
-
 const currentRoute = useRoute();
 const pathCompile = (path: string) => {
   const { params } = currentRoute;

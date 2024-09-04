@@ -73,21 +73,21 @@ export function UpdateAbility(ability: any, roles: string[] | null, userId: numb
       ]);
       menu = menu.concat([
         '/site/logout',
-        '/resource/',
-        /^\/polygen[\/]/,
-        /^\/voxel[\/]/,
-        /^\/space[\/]/,
-        /^\/picture[\/]/,
-        /^\/video[\/]/,
-        /^\/home[\/]/,
-        /^\/verse[\/]/,
-        /^\/meta[\/]/,
-        /^\/meta-verse[\/]/,
-        /^\/settings[\/]/,
-        /^\/discovery[\/]/,
-        /^\/community[\/]/,
-        /^\/editor[\/]/,
-        /^\/audio[\/]/
+        /^\/resource(\/|$)/,
+        /^\/polygen(\/|$)/,
+        /^\/voxel(\/|$)/,
+        /^\/space(\/|$)/,
+        /^\/picture(\/|$)/,
+        /^\/video(\/|$)/,
+        /^\/home(\/|$)/,
+        /^\/verse(\/|$)/,
+        /^\/meta(\/|$)/,
+        /^\/meta-verse(\/|$)/,
+        /^\/settings(\/|$)/,
+        /^\/discovery(\/|$)/,
+        /^\/community(\/|$)/,
+        /^\/editor(\/|$)/,
+        /^\/audio(\/|$)/
       ]);
 
       if (roles.includes('root') || roles.includes('admin') || roles.includes('manager')) {
@@ -98,17 +98,17 @@ export function UpdateAbility(ability: any, roles: string[] | null, userId: numb
         can('delete', AbilityMessage.name, { managed: 0 });
         can('update', AbilityMessage.name);
 
-        menu = menu.concat(['/verse-share/open', /^\/trades[\/]/]);
+        menu = menu.concat(['/verse-share/open', /^\/trades(\/|$)/]);
 
         if (roles.includes('root')) {
           can('root', 'all');
-          menu = menu.concat([/^\/game[\/]/]);
-          menu = menu.concat([/^\/manager[\/]/]);
+          menu = menu.concat([/^\/game(\/|$)/]);
+          menu = menu.concat([/^\/manager(\/|$)/]);
         }
         if (roles.includes('admin')) {
           can('admin', 'all');
-          menu = menu.concat([/^\/game[\/]/]);
-          menu = menu.concat([/^\/manager[\/]/]);
+          menu = menu.concat([/^\/game(\/|$)/]);
+          menu = menu.concat([/^\/manager(\/|$)/]);
         }
         if (roles.includes('manager')) {
           can('manager', 'all');
@@ -121,8 +121,11 @@ export function UpdateAbility(ability: any, roles: string[] | null, userId: numb
 
     menu.forEach((item) => {
       if (typeof item === 'string') {
+
+
         can(['open', 'goto'], AbilityRouter.name, { path: item });
       } else {
+
         can(['open', 'goto'], AbilityRouter.name, { path: { $regex: item } });
       }
     });

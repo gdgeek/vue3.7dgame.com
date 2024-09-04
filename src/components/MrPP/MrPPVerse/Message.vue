@@ -98,7 +98,9 @@ import { postLike, removeLike } from "@/api/v1/like";
 import { AbilityMessage } from "@/ability/ability";
 // import MrPPTags from "@/components/MrPP/MrPPTags.vue";
 import MrPPMessageFrom from "@/components/MrPP/MrPPVerse/MrPPMessageFrom.vue";
-import router from "@/router";
+import { useRouter } from "@/router";
+
+const router = useRouter();
 import { useTagsStore } from "@/store/modules/tags";
 import { useUserStore } from "@/store/modules/user";
 import DOMPurify from "dompurify";

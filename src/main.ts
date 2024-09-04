@@ -25,7 +25,9 @@ import "element-plus/theme-chalk/dark/css-vars.css";
 import "@/styles/index.scss";
 import "uno.css";
 import "animate.css";
-import router from "./router";
+import { useRouter } from "@/router";
+//import { useAbility } from "@casl/vue";
+const router = useRouter();
 // 更新页面标题
 const updateTitle = (title: string) => {
   document.title = `${title} - 7D Game`;

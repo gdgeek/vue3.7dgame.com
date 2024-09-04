@@ -44,11 +44,12 @@ export const constantRoutes: RouteRecordRaw[] = [
   {
     path: "/",
     name: "/",
+    meta: { hidden: false },
     component: Layout,
     redirect: "/home/index",
     children: [
       {
-        path: "home",
+        path: "/home",
         component: Structure,
         // 用于 keep-alive 功能，需要与 SFC 中自动推导或显式声明的组件名称一致
         // 参考文档: https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
@@ -59,22 +60,33 @@ export const constantRoutes: RouteRecordRaw[] = [
           icon: "homepage",
           affix: true,
           keepAlive: true,
+          hidden: false,
         },
         children: [
           {
-            meta: { title: "personalCenter.myHomepage" },
-            path: "index",
+            meta: {
+              title: "personalCenter.myHomepage",
+              hidden: false,
+             },
+            path: "/home/index",
             name: "HomeIndex",
             component: () => import("@/views/home/index.vue"),
+            
           },
           {
-            meta: { title: "personalCenter.document" },
+            meta: {
+              title: "personalCenter.document",
+              hidden: false,
+            },
             path: "/home/document",
             name: "HomeDocument",
             component: () => import("@/views/home/document.vue"),
           },
           {
-            meta: { title: "personalCenter.category" },
+            meta: {
+              title: "personalCenter.category",
+              hidden: false,
+             },
             path: "/home/category",
             name: "HomeCategory",
             component: () => import("@/views/home/category.vue"),
@@ -86,7 +98,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           //   component: () => import("@/views/settings/pay.vue"),
           // },
           {
-            meta: { title: "personalCenter.processOfCreation" },
+            meta: { title: "personalCenter.processOfCreation", hidden: false },
             path: "/home/creator",
             name: "SettingsCreator",
             component: () => import("@/views/home/creator.vue"),
@@ -95,27 +107,30 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
 
       {
-        path: "settings",
+        path: "/settings",
         name: "Settings",
-        meta: { title: "settings.title" },
+        meta: {
+          title: "settings.title",
+          hidden: false,
+         },
         redirect: "/settings/account",
         component: Empty,
         children: [
           {
-            path: "account",
+            path: "/settings/account",
             name: "SettingsAccount",
-            meta: { title: "settings.accountSetting" },
+            meta: { title: "settings.accountSetting", hidden: false },
             component: () => import("@/views/settings/account.vue"),
           },
           {
-            meta: { title: "settings.personalData" },
-            path: "edit",
+            meta: { title: "settings.personalData", hidden: false },
+            path: "/settings/edit",
             name: "SettingsEdit",
             component: () => import("@/views/settings/edit.vue"),
           },
           {
-            meta: { title: "settings.userPresentation" },
-            path: "people",
+            meta: { title: "settings.userPresentation" , hidden: false},
+            path: "/settings/people",
             name: "SettingsPeople",
             component: () => import("@/views/settings/people.vue"),
           },
@@ -123,7 +138,7 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
 
       {
-        path: "resource",
+        path: "/resource",
         component: null,
         redirect: "/resource/voxel",
         name: "/resource",
@@ -136,10 +151,10 @@ export const constantRoutes: RouteRecordRaw[] = [
         },
         children: [
           {
-            path: "voxel",
+            path: "/resource/voxel",
             name: "",
             component: Empty,
-            redirect: "index",
+            redirect: "/resource/voxel/index",
             meta: {
               title: "resourceManagement.voxelManagement.title",
               icon: "",
@@ -149,7 +164,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             },
             children: [
               {
-                path: "index",
+                path: "/resource/voxel/index",
                 name: "",
                 component: () => import("@/views/voxel/index.vue"),
                 meta: {
@@ -161,7 +176,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 },
               },
               {
-                path: "upload",
+                path: "/resource/voxel/upload",
                 name: "VoxelUpload",
                 component: () => import("@/views/voxel/upload.vue"),
                 meta: {
@@ -173,7 +188,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 },
               },
               {
-                path: "view",
+                path: "/resource/voxel/view",
                 name: "VoxelView",
                 component: () => import("@/views/voxel/view.vue"),
                 meta: {
@@ -187,7 +202,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             ],
           },
           {
-            path: "polygen",
+            path: "/resource/polygen",
             name: "Polygen",
             redirect: "/resource/polygen/index",
             component: Empty,
@@ -200,7 +215,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             },
             children: [
               {
-                path: "index",
+                path: "/resource/polygen/index",
                 name: "PolygenIndex",
                 component: () => import("@/views/polygen/index.vue"),
                 meta: {
@@ -212,7 +227,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 },
               },
               {
-                path: "upload",
+                path: "/resource/polygen/upload",
                 name: "",
                 component: () => import("@/views/polygen/upload.vue"),
                 meta: {
@@ -224,7 +239,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 },
               },
               {
-                path: "view",
+                path: "/resource/polygen/view",
                 name: "",
                 component: () => import("@/views/polygen/view.vue"),
                 meta: {
@@ -239,7 +254,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             ],
           },
           {
-            path: "picture",
+            path: "/resource/picture",
             name: "",
             component: Empty,
             redirect: "/resource/picture/index",
@@ -252,7 +267,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             },
             children: [
               {
-                path: "index",
+                path: "/resource/picture/index",
                 name: "",
                 component: () => import("@/views/picture/index.vue"),
                 meta: {
@@ -264,7 +279,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 },
               },
               {
-                path: "upload",
+                path: "/resource/picture/upload",
                 name: "",
                 component: () => import("@/views/picture/upload.vue"),
                 meta: {
@@ -276,7 +291,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 },
               },
               {
-                path: "view",
+                path: "/resource/picture/view",
                 name: "",
                 component: () => import("@/views/picture/view.vue"),
                 meta: {
@@ -291,7 +306,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             ],
           },
           {
-            path: "video",
+            path: "/resource/video",
             name: "Video",
             redirect: "/resource/video/index",
             component: Empty,
@@ -304,7 +319,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             },
             children: [
               {
-                path: "index",
+                path: "/resource/video/index",
                 name: "VideoIndex",
                 component: () => import("@/views/video/index.vue"),
                 meta: {
@@ -316,7 +331,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 },
               },
               {
-                path: "upload",
+                path: "/resource/video/upload",
                 name: "",
                 component: () => import("@/views/video/upload.vue"),
                 meta: {
@@ -328,7 +343,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 },
               },
               {
-                path: "view",
+                path: "/resource/video/view",
                 name: "",
                 component: () => import("@/views/video/view.vue"),
                 meta: {
@@ -342,7 +357,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             ],
           },
           {
-            path: "audio",
+            path: "/resource/audio",
             name: "Audio",
             component: Empty,
 
@@ -356,7 +371,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             },
             children: [
               {
-                path: "index",
+                path: "/resource/audio/index",
                 name: "",
                 component: () => import("@/views/audio/index.vue"),
                 meta: {
@@ -368,7 +383,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 },
               },
               {
-                path: "upload",
+                path: "/resource/audio/upload",
                 name: "",
                 component: () => import("@/views/audio/upload.vue"),
                 meta: {
@@ -380,7 +395,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 },
               },
               {
-                path: "view",
+                path: "/resource/audio/view",
                 name: "",
                 component: () => import("@/views/audio/view.vue"),
                 meta: {
@@ -396,7 +411,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         ],
       },
       {
-        path: "meta",
+        path: "/meta",
         component: null,
         redirect: "/meta/list",
         name: "/system",
@@ -409,7 +424,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         },
         children: [
           {
-            path: "list",
+            path: "/meta/list",
             component: () => import("@/views/meta/list.vue"),
             name: "List",
             meta: {
@@ -422,7 +437,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             },
           },
           {
-            path: "prefabs",
+            path: "/meta/prefabs",
             component: () => import("@/views/meta/prefabs.vue"),
             name: "Role",
             meta: {
@@ -435,15 +450,21 @@ export const constantRoutes: RouteRecordRaw[] = [
             },
           },
           {
-            path: "prefab-edit",
+            path: "/meta/prefab-edit",
             name: "PrefabEdit",
-            meta: { title: "meta.edit" },
+            meta: {
+              title: "meta.edit",
+              hidden: false
+            },
             component: () => import("@/views/meta/prefab-edit.vue"),
           },
           {
-            path: "meta-edit",
+            path: "/meta/meta-edit",
             name: "MetaEdit",
-            meta: { title: "meta.edit" },
+            meta: {
+              title: "meta.edit",
+              hidden: false
+             },
             component: () => import("@/views/meta/meta-edit.vue"),
           },
           // {
@@ -453,22 +474,30 @@ export const constantRoutes: RouteRecordRaw[] = [
           //   component: () => import("@/views/meta/rete-meta.vue"),
           // },
           {
-            path: "script",
+            path: "/meta/script",
             name: "MetaScript",
-            meta: { title: "meta.scriptEditor", keepAlive: true },
+            meta: {
+              title: "meta.scriptEditor",
+              keepAlive: true,
+              hidden: false
+             },
             component: () => import("@/views/meta/script.vue"),
           },
           {
-            path: "scene",
+            path: "/meta/scene",
             name: "MetaSceneEditor",
-            meta: { title: "meta.sceneEditor", keepAlive: true },
+            meta: {
+              title: "meta.sceneEditor",
+              keepAlive: true,
+              hidden: false
+             },
             component: () => import("@/views/meta/scene.vue"),
           },
         ],
       },
 
       {
-        path: "verse",
+        path: "/verse",
         component: null,
         redirect: "/verse/index",
         name: "",
@@ -481,57 +510,72 @@ export const constantRoutes: RouteRecordRaw[] = [
         },
         children: [
           {
-            path: "index",
+            path: "/verse/index",
             component: () => import("@/views/meta-verse/index.vue"),
             name: "VerseIndex",
             meta: {
               title: "universe.selfGenerated",
               icon: "cascader",
+              hidden: false,
             },
           },
           {
-            path: "open",
+            path: "/verse/open",
             component: () => import("@/views/meta-verse/open.vue"),
             name: "VerseOpen",
             meta: {
               title: "universe.systemRecommendation",
               icon: "cascader",
+              hidden: false,
             },
           },
           {
-            path: "share",
+            path: "/verse/share",
             component: () => import("@/views/meta-verse/share.vue"),
             name: "VerseShare",
             meta: {
               title: "universe.shareWithFriends",
               icon: "cascader",
+              hidden: false,
             },
           },
           {
-            path: "view",
+            path: "/verse/view",
             name: "VerseView",
-            meta: { title: "universe.viewTitle" },
+            meta: {
+              title: "universe.viewTitle",
+              hidden: false
+             },
             component: () => import("@/views/verse/view.vue"),
           },
           {
-            path: "script",
+            path: "/verse/script",
             name: "Script",
-            meta: { title: "universe.scriptEditor", keepAlive: true },
+            meta: {
+              title: "universe.scriptEditor",
+              keepAlive: true,
+              hidden: false
+              
+             },
             component: (): any => import("@/views/verse/script.vue"),
           },
           {
-            path: "scene",
+            path: "/verse/scene",
             name: "VerseSceneEditor",
-            meta: { title: "universe.sceneEditor", keepAlive: true },
+            meta: {
+              title: "universe.sceneEditor",
+              keepAlive: true,
+              hidden: false
+            },
             component: () => import("@/views/verse/scene.vue"),
           },
         ],
       },
       {
-        path: "manager",
+        path: "/manager",
         component: null,
         redirect: "/manager/user",
-        name: "",
+        name: "Manager",
         meta: {
           title: "manager.title",
           icon: "el-icon-Management",
@@ -541,18 +585,19 @@ export const constantRoutes: RouteRecordRaw[] = [
         },
         children: [
           {
-            path: "user",
+            path: "/manager/user",
             component: () => import("@/views/manager/user.vue"),
             name: "ManagerUser",
             meta: {
               title: "manager.userManagement",
               icon: "cascader",
+              hidden: false,
             },
           },
         ],
       },
       {
-        path: "game",
+        path: "/game",
         component: null,
         redirect: "/game/index",
         name: "Game",
@@ -565,33 +610,35 @@ export const constantRoutes: RouteRecordRaw[] = [
         },
         children: [
           {
-            path: "index",
+            path: "/game/index",
             component: () => import("@/views/game/index.vue"),
             name: "GameIndex",
             meta: {
               title: "游戏配置",
               icon: "cascader",
+              hidden: false,
             },
           },
           {
-            path: "map",
+            path: "/game/map",
             component: () => import("@/views/game/map.vue"),
             name: "GameMap",
             meta: {
               title: "地图配置",
               icon: "cascader",
+              hidden: false,
             },
           },
         ],
       },
 
       {
-        path: "401",
+        path: "/401",
         component: () => import("@/views/error-page/401.vue"),
         meta: { hidden: true },
       },
       {
-        path: "404",
+        path: "/404",
         component: () => import("@/views/error-page/404.vue"),
         meta: { hidden: true },
       },
@@ -643,7 +690,7 @@ import { useAbility } from '@casl/vue';
 const checkAndRemovePaths = async () => {
   
   if (!false) {
-    pathsToRemove.value.push("manager", "game");
+  //  pathsToRemove.value.push("manager", "game");
   }
 };
 
@@ -677,9 +724,9 @@ export const routerData = ref<RouteVO[]>([]);
 
 // 初始化路由
 export const initRoutes = async () => {
+  
   await checkAndRemovePaths();
 
-  // 提取 path 为 "/" 及其子路由的部分
   const mainRoute = constantRoutes.find((route) => route.path === "/");
   if (mainRoute) {
     routerData.value = convertRoutes(mainRoute.children || [], true);
@@ -687,16 +734,46 @@ export const initRoutes = async () => {
     routerData.value = [];
   }
 };
-/*
-watch(
-  () => userStore.userInfo,
-  async () => {
-    await initRoutes();
-  },
-  { immediate: true }
-);*/
 
-// 初始化路由
-initRoutes();
+import type { AnyAbility } from '@casl/ability';
+/*const ability = useAbility();
+const can = ability.can.bind(ability);
+ */
+//initRoutes();
 
-export default router;
+import { AbilityRouter } from "@/utils/ability";
+const check = (route: RouteRecordRaw[], ability: AnyAbility) => { 
+  const can = ability.can.bind(ability);
+  route.forEach((route) => { 
+   // alert(route.path)
+
+    console.error(route.path, route.path,can("open", new AbilityRouter(route.path)))
+   
+    console.error(route.meta?.hidden)
+    if (!route.meta) {
+      //alert(route.path)
+    } else { 
+      route.meta.hidden = !can("open", new AbilityRouter(route.path))
+    }
+    //route.meta.hidden = true//!can("open", new AbilityRouter(route.path))
+    //route.meta.hidden = true; //!can("open", new AbilityRouter(route.path))
+   if (route.children) { 
+      check(route.children,ability)
+    }
+
+  });
+}
+export const UpdateRoutes = async (ability: AnyAbility) => { 
+  const can = ability.can.bind(ability);
+  //alert(can("open", new AbilityRouter("game/")))
+  check(constantRoutes, ability)
+  
+  initRoutes();
+  //pathsToRemove.value.push("manager", "game");
+ 
+}
+export const useRouter = () => { 
+
+  initRoutes();
+  return router;
+}

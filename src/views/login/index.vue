@@ -105,6 +105,7 @@ const submit = () => {
       try {
         const res = await AuthAPI.login(form.value);
         await initRoutes();
+        // await setupRoutes(1);
         await window.location.reload();
         await succeed(res.data);
         const userin = await userStore.getUserInfo();
