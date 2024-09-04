@@ -8,6 +8,7 @@ const modules = import.meta.glob("../../views/**/**.vue");
 const Layout = () => import("@/layout/index.vue");
 
 export const usePermissionStore = defineStore("permission", () => {
+
   /**
    * 应用中所有的路由列表，包括静态路由和动态路由
    */
@@ -21,9 +22,11 @@ export const usePermissionStore = defineStore("permission", () => {
    * 生成动态路由
    */
   function generateRoutes() {
+   // alert(1)
     return new Promise<RouteRecordRaw[]>((resolve, reject) => {
       const dynamicRoutes = transformRoutes(routerData.value);
       routes.value = constantRoutes.concat(dynamicRoutes);
+     // alert(dynamicRoutes)
       resolve(dynamicRoutes);
     });
   }
