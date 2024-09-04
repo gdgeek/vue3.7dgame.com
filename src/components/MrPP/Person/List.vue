@@ -24,7 +24,7 @@
           <span>{{ item.username }}</span>
           <div class="bottom clearfix">
             <el-descriptions
-              v-if="!canDelete(item.roles)"
+              v-if="!people(item.roles)"
               class="margin-top"
               :title="item.nickname"
               :column="1"
@@ -59,7 +59,7 @@
               </el-descriptions-item>
             </el-descriptions>
             <el-button
-              v-if="canDelete(item.roles)"
+              v-if="people(item.roles)"
               type="danger"
               size="small"
               class="button"
@@ -83,6 +83,10 @@ import "vue-waterfall-plugin-next/dist/style.css";
 import { deletePerson, putPerson, userData } from "@/api/v1/person";
 import { useUserStore } from "@/store/modules/user";
 
+import { AbilityRole } from "@/utils/ability";
+import { useAbility } from "@casl/vue";
+const ability = useAbility();
+const can = ability.can.bind(ability);
 const userStore = useUserStore();
 
 const props = defineProps<{
@@ -165,22 +169,8 @@ const getRoleLevel = (roles: string[]): number => {
   return -1;
 };
 
-const canDelete = (
-  targetRoles: ("user" | "root" | "admin" | "manager")[]
-): boolean => {
-  const currentUserRoles = userStore.userInfo.roles as (
-    | "root"
-    | "admin"
-    | "manager"
-    | "user"
-  )[];
-  // console.log("currentUserRoles", currentUserRoles);
-  const currentUserLevel = getRoleLevel(currentUserRoles); // 当前用户的角色级别
-  const targetUserLevel = getRoleLevel(
-    targetRoles as ("user" | "root" | "admin" | "manager")[]
-  );
-
-  return currentUserLevel > targetUserLevel;
+const people = (roles: string[]): boolean => {
+  return can("people", new AbilityRole(roles));
 };
 
 const refresh = () => {

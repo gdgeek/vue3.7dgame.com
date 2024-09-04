@@ -10,6 +10,18 @@ export class AbilityEditable {
   constructor(public editable: boolean) {}
 }
 
+
+export class AbilityRole {
+ 
+  public role: string;
+  constructor(public roles: string[]) {
+    this.role = roles.includes("root") ? "root" :
+      roles.includes("admin") ? "admin" :
+        roles.includes("manager") ? "manager" :
+          roles.includes("user") ? "user" : "guest";
+  }
+}
+
 export class AbilityViewable {
   constructor(public viewable: boolean) {}
 }
@@ -104,8 +116,10 @@ export function UpdateAbility(
       if (
         roles.includes("root") ||
         roles.includes("admin") ||
-        roles.includes("manager")
+        roles.includes("manager") ||
+        roles.includes("user")
       ) {
+        
         can("manager", "all");
         can("editable", AbilityEditable.name);
         can("viewable", AbilityViewable.name);
@@ -117,11 +131,16 @@ export function UpdateAbility(
 
         if (roles.includes("root")) {
           can("root", "all");
+          can("people", AbilityRole.name, { role: "admin" });
+          can("people", AbilityRole.name, { role: "manager" });
+          can("people", AbilityRole.name, { role: "user" });
           menu = menu.concat([/^\/game(\/|$)/]);
           menu = menu.concat([/^\/manager(\/|$)/]);
         }
         if (roles.includes("admin")) {
           can("admin", "all");
+          can("people", AbilityRole.name, { role: "manager" });
+          can("people", AbilityRole.name, { role: "user" });
           menu = menu.concat([/^\/game(\/|$)/]);
           menu = menu.concat([/^\/manager(\/|$)/]);
         }
