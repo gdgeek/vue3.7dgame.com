@@ -5,9 +5,12 @@
     <el-container>
       <el-header>
         <mr-p-p-header
-          sorted=""
+          :sorted="sorted"
+          :searched="searched"
           sortByTime="created_at"
           sortByName="title"
+          @search="search"
+          @sort="sort"
           :hasSearch="false"
         >
           <el-button-group :inline="true">
@@ -89,6 +92,8 @@ import {
 
 const dialogRef = ref<InstanceType<typeof VerseDialog> | null>(null);
 const items = ref<any[]>([]);
+const sorted = ref<string>("-created_at");
+const searched = ref<string>("");
 const pagination = ref({
   current: 1,
   count: 1,
@@ -178,6 +183,16 @@ const del = async (id: number) => {
 
 const handleCurrentChange = (val: number) => {
   pagination.value.current = val;
+  refresh();
+};
+
+const sort = (value: string) => {
+  sorted.value = value;
+  refresh();
+};
+
+const search = (value: string) => {
+  searched.value = value;
   refresh();
 };
 

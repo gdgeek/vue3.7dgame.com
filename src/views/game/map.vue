@@ -5,9 +5,12 @@
     <el-container>
       <el-header>
         <mr-p-p-header
-          sorted=""
+          :sorted="sorted"
+          :searched="searched"
           sortByTime="created_at"
           sortByName="title"
+          @search="search"
+          @sort="sort"
           :hasSearch="false"
         >
           <el-tag type="success" v-if="data">第{{ data.page + 1 }}地图</el-tag>
@@ -98,8 +101,15 @@ import { getVpMaps, postVpMap, deleteVpMap } from "@/api/v1/vp-map";
 import { putVpGuide, postVpGuide, deleteVpGuide } from "@/api/v1/vp-guide";
 
 const data = ref<any>(null);
-const pagination = ref({ current: 1, count: 1, size: 1, total: 1 });
 const dialogRef = ref<InstanceType<typeof VerseDialog> | null>(null);
+const sorted = ref<string>("-created_at");
+const searched = ref<string>("");
+const pagination = ref({
+  current: 1,
+  count: 1,
+  size: 1,
+  total: 1,
+});
 
 const refresh = async () => {
   const r = await getVpMaps(pagination.value.current);
@@ -202,5 +212,17 @@ const handleCurrentChange = (val: number) => {
   refresh();
 };
 
-onMounted(refresh);
+const sort = (value: string) => {
+  sorted.value = value;
+  refresh();
+};
+
+const search = (value: string) => {
+  searched.value = value;
+  refresh();
+};
+
+onMounted(() => {
+  refresh();
+});
 </script>

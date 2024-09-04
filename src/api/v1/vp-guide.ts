@@ -2,20 +2,20 @@ import request from "@/utils/request";
 import qs from "querystringify";
 import path from "path-browserify";
 
-export function postVpGuide(data: any) {
+export const postVpGuide = (data: any) => {
   return request({
     url: "v1/vp-guides",
     method: "post",
     data: data,
   });
-}
+};
 
-export function getVerses(
+export const getVerses = (
   sort = "-created_at",
   search = "",
   page = 0,
   expand = "image,author,share"
-) {
+) => {
   const query: Record<string, any> = [];
   query["expand"] = expand;
   query["sort"] = sort;
@@ -31,14 +31,14 @@ export function getVerses(
     url: path.join("v1", "vp-guides", "verses" + qs.stringify(query, true)),
     method: "get",
   });
-}
-export function getVpGuide(id: number) {
+};
+export const getVpGuide = (id: number) => {
   return request({
     url: "v1/vp-guides/" + id,
     method: "get",
   });
-}
-export function getVpGuides(page = 0) {
+};
+export const getVpGuides = (page = 0) => {
   const query: Record<string, any> = [];
 
   query["sort"] = "order";
@@ -50,18 +50,18 @@ export function getVpGuides(page = 0) {
     url: path.join("v1", "vp-guides" + qs.stringify(query, true)),
     method: "get",
   });
-}
+};
 
-export function putVpGuide(id: number, data: any) {
+export const putVpGuide = (id: number, data: any) => {
   return request({
     url: "v1/vp-guides/" + id,
     method: "put",
     data,
   });
-}
-export function deleteVpGuide(id: number) {
+};
+export const deleteVpGuide = (id: number) => {
   return request({
     url: "v1/vp-guides/" + id,
     method: "delete",
   });
-}
+};
