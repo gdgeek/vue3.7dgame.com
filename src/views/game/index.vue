@@ -17,7 +17,9 @@
             <el-button size="small" type="primary" @click="addGuide">
               <font-awesome-icon icon="plus"></font-awesome-icon>
               &nbsp;
-              <span class="hidden-sm-and-down">创建【关卡】</span>
+              <span class="hidden-sm-and-down">{{
+                $t("game.index.title")
+              }}</span>
             </el-button>
           </el-button-group>
         </mr-p-p-header>
@@ -25,36 +27,40 @@
       <el-main>
         <el-card>
           <el-table :data="items" style="width: 100%">
-            <el-table-column prop="order" label="顺序" width="180">
+            <el-table-column
+              prop="order"
+              :label="$t('game.index.form.label1')"
+              width="180"
+            >
               <template #default="{ row }">
                 <el-input
                   type="number"
                   @change="(value: any) => onchange(row.id, value)"
                   size="small"
                   v-model="row.order"
-                  placeholder="请输入排序"
+                  :placeholder="$t('game.index.form.placeholder')"
                 ></el-input>
               </template>
             </el-table-column>
             <el-table-column
               prop="level_id"
-              label="宇宙id"
+              :label="$t('game.index.form.label2')"
               width="180"
             ></el-table-column>
             <el-table-column
               prop="level.name"
-              label="宇宙名"
+              :label="$t('game.index.form.label3')"
               width="180"
             ></el-table-column>
 
-            <el-table-column label="操作">
+            <el-table-column :label="$t('game.index.form.label4')">
               <template #default="{ row }">
                 <el-button
                   size="small"
                   type="danger"
                   @click="() => del(row.id)"
                 >
-                  删除
+                  {{ $t("game.index.delete") }}
                 </el-button>
               </template>
             </el-table-column>
@@ -94,6 +100,7 @@ const dialogRef = ref<InstanceType<typeof VerseDialog> | null>(null);
 const items = ref<any[]>([]);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
+const { t } = useI18n();
 const pagination = ref({
   current: 1,
   count: 1,
@@ -118,22 +125,26 @@ const refresh = async () => {
 
 const onchange = async (id: number, val: number) => {
   try {
-    await ElMessageBox.confirm("修改排序?", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("game.index.form.confirm.message1"),
+      t("game.index.form.confirm.message2"),
+      {
+        confirmButtonText: t("game.index.form.confirm.confirm"),
+        cancelButtonText: t("game.index.form.confirm.cancel"),
+        type: "warning",
+      }
+    );
     await putVpGuide(id, { order: val });
     await refresh();
     ElMessage({
       type: "success",
-      message: "修改成功!",
+      message: t("game.index.form.confirm.success"),
     });
   } catch (e) {
     console.error(e);
     ElMessage({
       type: "info",
-      message: "已取消修改",
+      message: t("game.index.form.confirm.info"),
     });
   }
 };
@@ -143,7 +154,7 @@ const selected = async (item: any) => {
     await postVpGuide({ level_id: item.data.id });
     ElMessage({
       type: "success",
-      message: "添加成功!",
+      message: t("game.index.success"),
     });
     await refresh();
   } catch (e) {
@@ -158,11 +169,11 @@ const addGuide = () => {
 const del = async (id: number) => {
   try {
     await ElMessageBox.confirm(
-      "此操作将永久删除该【关卡】, 是否继续?",
-      "提示",
+      t("game.index.confirm.message1"),
+      t("game.index.confirm.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("game.index.confirm.confirm"),
+        cancelButtonText: t("game.index.confirm.cancel"),
         type: "warning",
       }
     );
@@ -170,13 +181,13 @@ const del = async (id: number) => {
     await refresh();
     ElMessage({
       type: "success",
-      message: "删除成功!",
+      message: t("game.index.confirm.success"),
     });
   } catch (e) {
     console.error(e);
     ElMessage({
       type: "info",
-      message: "已取消删除",
+      message: t("game.index.confirm.info"),
     });
   }
 };

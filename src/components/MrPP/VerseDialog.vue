@@ -14,7 +14,9 @@
           @search="search"
           @sort="sort"
         >
-          <el-tag><b>选择【宇宙】</b></el-tag>
+          <el-tag
+            ><b>{{ $t("game.verseDialog.title") }}</b></el-tag
+          >
         </mr-p-p-header>
         <el-divider content-position="left">
           <el-tag
@@ -59,7 +61,7 @@
 
             <div class="clearfix">
               <el-button size="small" @click="selected({ data: item })">
-                选择
+                {{ $t("game.verseDialog.select") }}
               </el-button>
             </div>
             <div class="bottom clearfix"></div>
@@ -87,10 +89,10 @@
           <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
             <el-button-group>
               <el-button type="success" size="small" @click="create">
-                新 建
+                {{ $t("game.verseDialog.create") }}
               </el-button>
               <el-button size="small" @click="dialogVisible = false">
-                取 消
+                {{ $t("game.verseDialog.cancel") }}
               </el-button>
             </el-button-group>
           </el-col>
@@ -117,6 +119,7 @@ const active = ref({
 });
 
 const emit = defineEmits(["selected", "cancel"]);
+const { t } = useI18n();
 
 const title = (item: any) => item.title || item.name || "title";
 
@@ -168,11 +171,11 @@ const selected = async (data: any = null) => {
 const create = async () => {
   try {
     const { value: name } = await ElMessageBox.prompt(
-      "请输入元数据名称",
-      "提示",
+      t("game.verseDialog.prompt.message1"),
+      t("game.verseDialog.prompt.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("game.verseDialog.prompt.confirm"),
+        cancelButtonText: t("game.verseDialog.prompt.cancel"),
       }
     );
 
@@ -186,7 +189,7 @@ const create = async () => {
     dialogVisible.value = false;
   } catch (error) {
     console.log(error);
-    ElMessage.info("取消输入");
+    ElMessage.info(t("game.verseDialog.prompt.info"));
   }
 };
 

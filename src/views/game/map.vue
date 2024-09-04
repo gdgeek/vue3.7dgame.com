@@ -13,18 +13,25 @@
           @sort="sort"
           :hasSearch="false"
         >
-          <el-tag type="success" v-if="data">第{{ data.page + 1 }}地图</el-tag>
+          <el-tag type="success" v-if="data"
+            >{{ $t("game.map.title1") }} {{ data.page + 1
+            }}{{ $t("game.map.title2") }}</el-tag
+          >
           &nbsp;
           <el-button-group :inline="true">
             <el-button size="small" type="primary" @click="addGuide">
               <font-awesome-icon icon="plus"></font-awesome-icon>
               &nbsp;
-              <span class="hidden-sm-and-down">增加关卡</span>
+              <span class="hidden-sm-and-down">{{
+                $t("game.map.addGuide")
+              }}</span>
             </el-button>
             <el-button size="small" type="primary" @click="addMap">
               <font-awesome-icon icon="plus"></font-awesome-icon>
               &nbsp;
-              <span class="hidden-sm-and-down">增加地图</span>
+              <span class="hidden-sm-and-down">{{
+                $t("game.map.addMap")
+              }}</span>
             </el-button>
             <el-button
               size="small"
@@ -34,7 +41,9 @@
             >
               <font-awesome-icon icon="trash"></font-awesome-icon>
               &nbsp;
-              <span class="hidden-sm-and-down">减少地图</span>
+              <span class="hidden-sm-and-down">{{
+                $t("game.map.removeMap")
+              }}</span>
             </el-button>
           </el-button-group>
         </mr-p-p-header>
@@ -42,35 +51,39 @@
       <el-main>
         <el-card>
           <el-table v-if="data" :data="data.guides" style="width: 100%">
-            <el-table-column prop="order" label="顺序" width="180">
+            <el-table-column
+              prop="order"
+              :label="$t('game.map.form.label1')"
+              width="180"
+            >
               <template #default="scope">
                 <el-input
                   type="number"
                   @change="(value: any) => onchange(scope.row.id, value)"
                   size="small"
                   v-model="scope.row.order"
-                  placeholder="请输入排序"
+                  :placeholder="$t('game.map.form.placeholder')"
                 ></el-input>
               </template>
             </el-table-column>
             <el-table-column
               prop="level_id"
-              label="宇宙id"
+              :label="$t('game.map.form.label2')"
               width="180"
             ></el-table-column>
             <el-table-column
               prop="level.name"
-              label="宇宙名"
+              :label="$t('game.map.form.label3')"
               width="180"
             ></el-table-column>
-            <el-table-column label="操作">
+            <el-table-column :label="$t('game.map.form.label4')">
               <template #default="scope">
                 <el-button
                   size="small"
                   type="danger"
                   @click="del(scope.row.id)"
                 >
-                  删除
+                  {{ $t("game.map.delete") }}
                 </el-button>
               </template>
             </el-table-column>
@@ -104,6 +117,7 @@ const data = ref<any>(null);
 const dialogRef = ref<InstanceType<typeof VerseDialog> | null>(null);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
+const { t } = useI18n();
 const pagination = ref({
   current: 1,
   count: 1,
@@ -112,74 +126,82 @@ const pagination = ref({
 });
 
 const refresh = async () => {
-  const r = await getVpMaps(pagination.value.current);
-  data.value = r.data[0];
+  const response = await getVpMaps(pagination.value.current);
+  data.value = response.data[0];
   pagination.value = {
-    current: parseInt(r.headers["x-pagination-current-page"]),
-    count: parseInt(r.headers["x-pagination-page-count"]),
-    size: parseInt(r.headers["x-pagination-per-page"]),
-    total: parseInt(r.headers["x-pagination-total-count"]),
+    current: parseInt(response.headers["x-pagination-current-page"]),
+    count: parseInt(response.headers["x-pagination-page-count"]),
+    size: parseInt(response.headers["x-pagination-per-page"]),
+    total: parseInt(response.headers["x-pagination-total-count"]),
   };
 };
 
 const onchange = async (id: number, val: number) => {
   try {
-    await ElMessageBox.confirm("修改排序?", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("game.map.form.confirm.message1"),
+      t("game.map.form.confirm.message2"),
+      {
+        confirmButtonText: t("game.map.form.confirm.confirm"),
+        cancelButtonText: t("game.map.form.confirm.cancel"),
+        type: "warning",
+      }
+    );
     await putVpGuide(id, { order: val });
     await refresh();
-    ElMessage.success("修改成功!");
+    ElMessage.success(t("game.map.form.confirm.success"));
   } catch (e) {
     console.error(e);
-    ElMessage.info("已取消修改");
+    ElMessage.info(t("game.map.form.confirm.info"));
   }
 };
 
 const selected = async (item: any) => {
   await postVpGuide({ level_id: item.data.id, map_id: data.value.id });
-  ElMessage.success("添加成功!");
+  ElMessage.success(t("game.map.success"));
   refresh();
 };
 
 const addMap = async () => {
   try {
     await ElMessageBox.confirm(
-      `创建地图(${pagination.value.count + 1})?`,
-      "提示",
+      t("game.map.confirm1.message1") + `(${pagination.value.count + 1})?`,
+      t("game.map.form.confirm.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("game.map.confirm1.confirm"),
+        cancelButtonText: t("game.map.confirm1.cancel"),
         type: "warning",
       }
     );
     await postVpMap({ page: pagination.value.count });
     pagination.value.count++;
     pagination.value.current = pagination.value.count;
-    ElMessage.success("创建成功!");
+    ElMessage.success(t("game.map.confirm1.success"));
     refresh();
   } catch (e) {
     console.error(e);
-    ElMessage.info("已取消创建");
+    ElMessage.info(t("game.map.confirm1.info"));
   }
 };
 
 const removeMap = async () => {
   try {
-    await ElMessageBox.confirm(`删除地图(${pagination.value.count})?`, "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("game.map.confirm2.message1") + `(${pagination.value.count})?`,
+      t("game.map.confirm2.message2"),
+      {
+        confirmButtonText: t("game.map.confirm2.confirm"),
+        cancelButtonText: t("game.map.confirm2.cancel"),
+        type: "warning",
+      }
+    );
     await deleteVpMap(data.value.id);
     pagination.value.current = pagination.value.count;
-    ElMessage.success("删除成功!");
+    ElMessage.success(t("game.map.confirm2.success"));
     refresh();
   } catch (e) {
     console.error(e);
-    ElMessage.info("已取消删除");
+    ElMessage.info(t("game.map.confirm2.info"));
   }
 };
 
@@ -190,20 +212,20 @@ const addGuide = () => {
 const del = async (id: number) => {
   try {
     await ElMessageBox.confirm(
-      "此操作将永久删除该【关卡】, 是否继续?",
-      "提示",
+      t("game.map.confirm3.message1"),
+      t("game.map.confirm3.message2"),
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t("game.map.confirm3.confirm"),
+        cancelButtonText: t("game.map.confirm3.cancel"),
         type: "warning",
       }
     );
     await deleteVpGuide(id);
     refresh();
-    ElMessage.success("删除成功!");
+    ElMessage.success(t("game.map.confirm3.success"));
   } catch (e) {
     console.error(e);
-    ElMessage.info("已取消删除");
+    ElMessage.info(t("game.map.confirm3.info"));
   }
 };
 

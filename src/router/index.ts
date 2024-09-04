@@ -600,7 +600,7 @@ const routes: RouteRecordRaw[] = [
         redirect: "/game/index",
         name: "Game",
         meta: {
-          title: "游戏",
+          title: "game.title",
           icon: "el-icon-monitor",
           hidden: false,
           alwaysShow: false,
@@ -612,7 +612,7 @@ const routes: RouteRecordRaw[] = [
             component: () => import("@/views/game/index.vue"),
             name: "GameIndex",
             meta: {
-              title: "游戏配置",
+              title: "game.gameIndex",
               icon: "cascader",
               hidden: false,
             },
@@ -622,7 +622,7 @@ const routes: RouteRecordRaw[] = [
             component: () => import("@/views/game/map.vue"),
             name: "GameMap",
             meta: {
-              title: "地图配置",
+              title: "game.gameMap",
               icon: "cascader",
               hidden: false,
             },

@@ -69,6 +69,11 @@ export default {
       title: "Management",
       userManagement: "UserManagement",
     },
+    game: {
+      title: "Game",
+      gameIndex: "GameSettings",
+      gameMap: "MapSettings",
+    },
   },
   // 登录页面国际化
   login: {
@@ -759,6 +764,100 @@ export default {
       },
       success: "Permissions updated successfully!",
       error: "Permissions update failed!",
+    },
+  },
+  // 游戏部分国际化
+  game: {
+    index: {
+      title: "Create【Level】",
+      delete: "Delete",
+      form: {
+        label1: "Order",
+        label2: "UniverseID",
+        label3: "UniverseName",
+        label4: "Action",
+        placeholder: "Please enter the order",
+        confirm: {
+          message1: "Change the order?",
+          message2: "Prompt",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          success: "Deleted successfully",
+          info: "Order change canceled",
+        },
+      },
+      success: "Added successfully",
+      confirm: {
+        message1:
+          "This action will permanently delete this 【Level】. Do you want to continue?",
+        message2: "Prompt",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "Deleted successfully",
+        info: "Deletion canceled",
+      },
+    },
+    map: {
+      title1: "Level ",
+      title2: " Map",
+      addGuide: "AddLevel",
+      addMap: "AddMap",
+      removeMap: "RemoveMap",
+      delete: "Delete",
+      form: {
+        label1: "Order",
+        label2: "UniverseID",
+        label3: "UniverseName",
+        label4: "Action",
+        placeholder: "Please enter the order",
+        confirm: {
+          message1: "Change the order?",
+          message2: "Prompt",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          success: "Deleted successfully",
+          info: "Order change canceled",
+        },
+      },
+      success: "Added successfully",
+      confirm1: {
+        message1: "Create Map",
+        message2: "Prompt",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "Created successfully",
+        info: "Creation canceled",
+      },
+      confirm2: {
+        message1: "Delete Map",
+        message2: "Prompt",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "Deleted successfully",
+        info: "Deletion canceled",
+      },
+      confirm3: {
+        message1:
+          "This action will permanently delete this 【Level】. Do you want to continue?",
+        message2: "Prompt",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "Deleted successfully",
+        info: "Deletion canceled",
+      },
+    },
+    verseDialog: {
+      title: "Select【Universe】",
+      select: "Select",
+      create: "CreateNew",
+      cancel: "Cancel",
+      prompt: {
+        message1: "Please enter the metadata name",
+        message2: "Prompt",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        info: "Cancel input",
+      },
     },
   },
 
