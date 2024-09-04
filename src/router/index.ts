@@ -22,7 +22,7 @@ setActivePinia(pinia);
 //const userStore = useUserStore();
 
 // 静态路由
-export const constantRoutes: RouteRecordRaw[] = [
+const routes: RouteRecordRaw[] = [
   {
     path: "/redirect",
     component: Layout,
@@ -111,7 +111,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "Settings",
         meta: {
           title: "settings.title",
-          hidden: false,
+          hidden: true,
          },
         redirect: "/settings/account",
         component: Empty,
@@ -119,17 +119,17 @@ export const constantRoutes: RouteRecordRaw[] = [
           {
             path: "/settings/account",
             name: "SettingsAccount",
-            meta: { title: "settings.accountSetting", hidden: false },
+            meta: { title: "settings.accountSetting", hidden: true },
             component: () => import("@/views/settings/account.vue"),
           },
           {
-            meta: { title: "settings.personalData", hidden: false },
+            meta: { title: "settings.personalData", hidden: true },
             path: "/settings/edit",
             name: "SettingsEdit",
             component: () => import("@/views/settings/edit.vue"),
           },
           {
-            meta: { title: "settings.userPresentation" , hidden: false},
+            meta: { title: "settings.userPresentation" , hidden: true},
             path: "/settings/people",
             name: "SettingsPeople",
             component: () => import("@/views/settings/people.vue"),
@@ -194,7 +194,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 meta: {
                   title: "resourceManagement.voxelManagement.voxelProcessing",
                   icon: "el-icon-uploadFilled",
-                  hidden: false,
+                  hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -246,7 +246,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                   title:
                     "resourceManagement.polygenManagement.polygenProcessing",
                   icon: "el-icon-uploadFilled",
-                  hidden: false,
+                  hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -298,7 +298,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                   title:
                     "resourceManagement.pictureManagement.pictureProcessing",
                   icon: "el-icon-uploadFilled",
-                  hidden: false,
+                  hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -349,7 +349,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 meta: {
                   title: "resourceManagement.videoManagement.videoProcessing",
                   icon: "el-icon-uploadFilled",
-                  hidden: false,
+                  hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -401,7 +401,7 @@ export const constantRoutes: RouteRecordRaw[] = [
                 meta: {
                   title: "resourceManagement.audioManagement.audioProcessing",
                   icon: "el-icon-uploadFilled",
-                  hidden: false,
+                  hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -454,7 +454,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             name: "PrefabEdit",
             meta: {
               title: "meta.edit",
-              hidden: false
+              hidden: true
             },
             component: () => import("@/views/meta/prefab-edit.vue"),
           },
@@ -463,7 +463,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             name: "MetaEdit",
             meta: {
               title: "meta.edit",
-              hidden: false
+              hidden: true
              },
             component: () => import("@/views/meta/meta-edit.vue"),
           },
@@ -479,7 +479,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             meta: {
               title: "meta.scriptEditor",
               keepAlive: true,
-              hidden: false
+              hidden: true
              },
             component: () => import("@/views/meta/script.vue"),
           },
@@ -489,7 +489,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             meta: {
               title: "meta.sceneEditor",
               keepAlive: true,
-              hidden: false
+              hidden: true
              },
             component: () => import("@/views/meta/scene.vue"),
           },
@@ -544,7 +544,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             name: "VerseView",
             meta: {
               title: "universe.viewTitle",
-              hidden: false
+              hidden: true
              },
             component: () => import("@/views/verse/view.vue"),
           },
@@ -554,7 +554,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             meta: {
               title: "universe.scriptEditor",
               keepAlive: true,
-              hidden: false
+              hidden: true
               
              },
             component: (): any => import("@/views/verse/script.vue"),
@@ -565,7 +565,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             meta: {
               title: "universe.sceneEditor",
               keepAlive: true,
-              hidden: false
+              hidden: true
             },
             component: () => import("@/views/verse/scene.vue"),
           },
@@ -645,7 +645,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     ],
   },
 ];
-
+export let constantRoutes: RouteRecordRaw[] = routes;
 /**
  * 创建路由
  */
@@ -750,9 +750,7 @@ const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
     console.error(route.path, route.path,can("open", new AbilityRouter(route.path)))
    
     console.error(route.meta?.hidden)
-    if (!route.meta) {
-      //alert(route.path)
-    } else { 
+    if (route.meta && !route.meta.hidden) {
       route.meta.hidden = !can("open", new AbilityRouter(route.path))
     }
     //route.meta.hidden = true//!can("open", new AbilityRouter(route.path))
@@ -764,6 +762,7 @@ const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   });
 }
 export const UpdateRoutes = async (ability: AnyAbility) => { 
+  constantRoutes = routes;
   const can = ability.can.bind(ability);
   //alert(can("open", new AbilityRouter("game/")))
   check(constantRoutes, ability)
