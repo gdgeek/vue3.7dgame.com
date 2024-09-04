@@ -8,10 +8,10 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
 import VueIframe from "vue-iframes";
 import { mouseEffect, particleEffect } from "@/mouse";
 
-import { ability } from '@/ability';
+import { ability } from "@/ability";
 //import { UpdateAbility } from '@/utils/ability';
 
-import { abilitiesPlugin } from '@casl/vue';
+import { abilitiesPlugin } from "@casl/vue";
 
 import highlightDirective from "./directive/highlight";
 
@@ -19,7 +19,7 @@ library.add(fas);
 
 // 本地SVG图标
 import "virtual:svg-icons-register";
-import 'element-plus/theme-chalk/display.css'
+import "element-plus/theme-chalk/display.css";
 // 样式
 import "element-plus/theme-chalk/dark/css-vars.css";
 import "@/styles/index.scss";
@@ -45,7 +45,7 @@ router.beforeEach((to) => {
 //UpdateAbility(ability, [], 0);
 const app = createApp(App);
 app.use(abilitiesPlugin, ability, {
-  useGlobalProperties: true
+  useGlobalProperties: true,
 });
 app.component("FontAwesomeIcon", FontAwesomeIcon);
 app.directive("highlight", highlightDirective);
