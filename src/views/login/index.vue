@@ -1,3 +1,146 @@
+<template>
+  <body :class="{ 'dark-theme': isDark }">
+    <div :class="['header', { 'dark-theme': isDark }]">
+      <RouterLink to="/" class="logo">
+        <img src="/favicon.ico" alt="" />
+        <span class="project_title">{{ $t("login.title") }}</span>
+      </RouterLink>
+      <div class="header-right">
+        <div class="top-bar">
+          <el-switch
+            v-model="isDark"
+            inline-prompt
+            active-icon="Moon"
+            inactive-icon="Sunny"
+            @change="toggleTheme"
+          ></el-switch>
+          <lang-select
+            class="ml-2 cursor-pointer"
+            style="margin-left: 25px"
+          ></lang-select>
+        </div>
+        <el-button>{{ $t("login.register") }}</el-button>
+      </div>
+    </div>
+    <div class="content">
+      <div :class="['box1', { 'dark-theme': isDark }]">
+        <div :class="['box2', { 'dark-theme': isDark }]">
+          <h1>{{ $t("login.h1") }}</h1>
+          <h4>{{ $t("login.h4") }}</h4>
+          <div :class="['box3', { 'dark-theme': isDark }]">
+            <h2 class="login-title">{{ $t("login.loginTitle") }}</h2>
+            <el-form
+              ref="formRef"
+              class="login-form"
+              :rules="rules"
+              :model="form"
+              label-width="75px"
+            >
+              <el-form-item :label="$t('login.username')" prop="username">
+                <el-input v-model="form.username" suffix-icon="User"></el-input>
+              </el-form-item>
+              <el-form-item :label="$t('login.password')" prop="password">
+                <el-input
+                  v-model="form.password"
+                  type="password"
+                  suffix-icon="Lock"
+                ></el-input>
+              </el-form-item>
+
+              <el-form-item class="login-button">
+                <el-button style="width: 100%" type="primary" @click="submit">
+                  {{ $t("login.login") }}
+                </el-button>
+              </el-form-item>
+            </el-form>
+            <!-- <div class="login-link">
+          <router-link to="/site/signup">
+            <el-link type="primary" :underline="false">注册用户</el-link>
+          </router-link>
+          <br />
+          <router-link to="/site/request-password-reset">
+            <el-link type="primary" :underline="false">找回密码</el-link>
+          </router-link>
+          <br />
+        </div> -->
+            <!-- <div v-if="isShow" class="error-message">{{ title }}</div> -->
+          </div>
+          <el-button style="width: 100%" size="small">
+            {{ $t("login.download") }}
+          </el-button>
+        </div>
+      </div>
+    </div>
+    <el-card style="width: 100%">
+      <div
+        class="background-screen-max"
+        style="display: flex; justify-content: flex-end"
+      >
+        <div style="display: flex; align-items: center; gap: 10px">
+          <span
+            v-for="item in informationStore.companies"
+            :key="item.name"
+            style="display: flex; align-items: center"
+          >
+            <el-link
+              :href="item.url"
+              target="_blank"
+              :underline="false"
+              style="display: flex; align-items: center"
+            >
+              <el-icon>
+                <HomeFilled></HomeFilled>
+              </el-icon>
+              <span class="font-text" style="margin-left: 5px">
+                {{ item.name }} ({{ informationStore.description }})
+              </span>
+            </el-link>
+          </span>
+
+          <span
+            v-if="informationStore.beian"
+            style="display: flex; align-items: center"
+          >
+            |
+            <el-link
+              href="https://beian.miit.gov.cn/"
+              target="_blank"
+              :underline="false"
+              style="display: flex; align-items: center; margin-left: 10px"
+            >
+              <el-icon>
+                <Grid></Grid>
+              </el-icon>
+              <span class="font-text" style="margin-left: 5px">
+                {{ informationStore.beian }}
+              </span>
+            </el-link>
+          </span>
+
+          <span
+            v-if="informationStore.version"
+            style="display: flex; align-items: center"
+          >
+            |
+            <el-link
+              target="_blank"
+              :underline="false"
+              style="display: flex; align-items: center; margin-left: 10px"
+            >
+              <el-icon>
+                <InfoFilled></InfoFilled>
+              </el-icon>
+              <span class="font-text" style="margin-left: 5px">
+                {{ informationStore.version }}
+              </span>
+            </el-link>
+          </span>
+        </div>
+      </div>
+    </el-card>
+  </body>
+</template>
+
 <script setup lang="ts">
 import "@/assets/font/font.css";
 import { ref, computed, nextTick, onMounted } from "vue";
@@ -9,11 +152,21 @@ import { TOKEN_KEY } from "@/enums/CacheEnum";
 import AuthAPI from "@/api/auth/index";
 import { initRoutes } from "@/router";
 import CryptoJS from "crypto-js";
+import defaultSettings from "@/settings";
+import { ThemeEnum } from "@/enums/ThemeEnum";
+import { useSettingsStore } from "@/store/modules/settings";
+import { useInfomationStore } from "@/store/modules/information";
+
+const informationStore = useInfomationStore();
+const { t } = useI18n();
 
 const secretKey = "bujiaban"; // 密钥
 
 const userStore = useUserStore();
+const settingsStore = useSettingsStore();
 const route = useRoute();
+
+const isDark = ref(settingsStore.theme === ThemeEnum.DARK);
 
 const form = ref<LoginData>({
   username: "",
@@ -41,12 +194,20 @@ const saveLoginData = () => {
 const rules = computed(() => {
   return {
     username: [
-      { required: true, message: "请输入用户名称", trigger: "blur" },
-      { min: 5, message: "用户名称长度应该大于5", trigger: "blur" },
+      {
+        required: true,
+        message: t("login.rules.username.message1"),
+        trigger: "blur",
+      },
+      { min: 5, message: t("login.rules.username.message2"), trigger: "blur" },
     ],
     password: [
-      { required: true, message: "请输入密码", trigger: "blur" },
-      { min: 6, message: "密码长度应该大于6", trigger: "blur" },
+      {
+        required: true,
+        message: t("login.rules.password.message1"),
+        trigger: "blur",
+      },
+      { min: 6, message: t("login.rules.password.message2"), trigger: "blur" },
     ],
   };
 });
@@ -56,8 +217,15 @@ const formRef = ref<FormInstance>();
 const isShow = ref(false);
 const title = ref<string | Record<string, string>>("");
 
+/** 主题切换 */
+const toggleTheme = () => {
+  const newTheme =
+    settingsStore.theme === ThemeEnum.DARK ? ThemeEnum.LIGHT : ThemeEnum.DARK;
+  settingsStore.changeTheme(newTheme);
+};
+
 const succeed = (data: any) => {
-  ElMessage.success("登录成功");
+  ElMessage.success(t("login.success"));
   const token = data.access_token;
   if (token) {
     setToken(token);
@@ -69,7 +237,7 @@ const succeed = (data: any) => {
       console.log("Routing to home");
     });
   } else {
-    failed("登录响应中缺少 access_token");
+    failed("The login response is missing the access_token");
   }
 };
 
@@ -117,7 +285,7 @@ const submit = () => {
         failed(error);
       }
     } else {
-      ElMessage({ type: "error", message: "表单校验未通过" });
+      ElMessage({ type: "error", message: t("login.error") });
     }
   });
 };
@@ -156,96 +324,6 @@ onMounted(() => {
 });
 </script>
 
-<template>
-  <body>
-    <div class="header">
-      <RouterLink to="/" class="logo">
-        <img src="/favicon.ico" alt="" />
-        <span class="project_title">苹果AR元气项目</span>
-      </RouterLink>
-      <div class="header-right">
-        <el-button>平台注册/登录</el-button>
-      </div>
-      <div class="blog">
-        <a>开发博客</a>
-      </div>
-    </div>
-    <div class="content">
-      <div class="box1">
-        <div class="box2">
-          <h1>欢迎!</h1>
-          <h4>准备好出发了么？</h4>
-          <div class="box3">
-            <h2 class="login-title">登录账号</h2>
-            <el-form
-              ref="formRef"
-              class="login-form"
-              :rules="rules"
-              :model="form"
-              label-width="75px"
-            >
-              <el-form-item label="用户名" prop="username">
-                <el-input v-model="form.username" suffix-icon="User"></el-input>
-              </el-form-item>
-              <el-form-item label="密码" prop="password">
-                <el-input
-                  v-model="form.password"
-                  type="password"
-                  suffix-icon="Lock"
-                ></el-input>
-              </el-form-item>
-
-              <el-form-item class="login-button">
-                <el-button style="width: 100%" type="primary" @click="submit">
-                  登录平台
-                </el-button>
-              </el-form-item>
-            </el-form>
-            <!-- <div class="login-link">
-          <router-link to="/site/signup">
-            <el-link type="primary" :underline="false">注册用户</el-link>
-          </router-link>
-          <br />
-          <router-link to="/site/request-password-reset">
-            <el-link type="primary" :underline="false">找回密码</el-link>
-          </router-link>
-          <br />
-        </div> -->
-            <!-- <div v-if="isShow" class="error-message">{{ title }}</div> -->
-          </div>
-          <el-button style="width: 100%" size="small"> 下载相关程序 </el-button>
-        </div>
-      </div>
-    </div>
-    <div class="footer">
-      <div class="copyright">
-        <RouterLink
-          to="https://bujiaban.com"
-          target="_blank"
-          :underline="false"
-        >
-          <el-icon>
-            <HomeFilled></HomeFilled>
-          </el-icon>
-          上海不加班网络有限公司(Apple Reality Spirit) |
-        </RouterLink>
-        <a href="https://beian.miit.gov.cn/" target="_blank" :underline="false">
-          <el-icon>
-            <Grid></Grid>
-          </el-icon>
-          沪ICP备15039333号 |
-        </a>
-        <a href="#">
-          <el-icon>
-            <InfoFilled></InfoFilled>
-          </el-icon>
-          202408
-        </a>
-      </div>
-    </div>
-  </body>
-</template>
-
 <style scoped lang="scss">
 body {
   position: fixed;
@@ -253,10 +331,17 @@ body {
   flex-direction: column;
   height: 100%;
   margin: 0;
+  background-image: url("/media/bg/02.jpg");
+  background-size: 100% auto;
+  // transition:  0.3s ease;
+
+  &.dark-theme {
+    background-image: url("/media/bg/02.jpg");
+    filter: brightness(80%);
+  }
 }
 
-.header,
-.footer {
+.header {
   position: relative;
   display: flex;
   align-items: center;
@@ -264,6 +349,14 @@ body {
   height: 7%;
   margin-right: 10px;
   background-color: #f1f1f1;
+
+  transition: background-color 0.3s ease;
+  padding: 10px;
+
+  &.dark-theme {
+    background-color: rgb(37, 37, 37);
+    // color: white;
+  }
 }
 
 .logo {
@@ -280,7 +373,6 @@ body {
   .project_title {
     margin-left: 10px;
     font-family: "KaiTi", sans-serif;
-    /* 添加通用字体族 */
     font-size: 14px;
     font-weight: 400;
     color: #909399;
@@ -304,6 +396,18 @@ body {
 .header-right {
   position: absolute;
   right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-right: 20px;
+    width: 100%;
+    padding: 10px;
+  }
 }
 
 .content {
@@ -311,9 +415,9 @@ body {
   flex: 1;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  background-image: url("/media/bg/02.jpg");
-  background-size: 100% auto;
+  // width: 100%;
+  // background-image: url("/media/bg/02.jpg");
+  // background-size: 100% auto;
 
   .box1 {
     display: flex;
@@ -322,6 +426,14 @@ body {
     width: 450px;
     height: 600px;
     background-color: #fff;
+
+    transition: all 0.3s ease;
+
+    &.dark-theme {
+      background-color: rgb(63, 63, 63);
+      border-color: #494949;
+      color: white;
+    }
 
     .box2 {
       display: flex;
@@ -333,6 +445,14 @@ body {
       border: 1px solid #ebeefe;
       border-radius: 4px;
 
+      transition: all 0.3s ease;
+
+      &.dark-theme {
+        background-color: rgb(52, 52, 52);
+        border-color: #494949;
+        color: white;
+      }
+
       &:hover {
         box-shadow: 0 0 10px rgb(0 0 0 / 10%);
         transition: all 0.4s;
@@ -341,7 +461,6 @@ body {
       h1 {
         margin-top: 0;
         font-family: "KaiTi", sans-serif;
-        /* 添加通用字体族 */
         font-size: 36px;
         font-weight: 400;
         color: #666;
@@ -350,10 +469,9 @@ body {
       h4 {
         margin-top: 0;
         font-family: "KaiTi", sans-serif;
-        /* 添加通用字体族 */
         font-size: 18px;
         font-weight: 400;
-        color: #494949;
+        color: #666;
       }
 
       .box3 {
@@ -365,6 +483,14 @@ body {
         background-color: #fff;
         border: 1px solid #ebeefe;
 
+        transition: all 0.3s ease;
+
+        &.dark-theme {
+          background-color: rgb(41, 41, 41);
+          border-color: #1f1f1f;
+          font-style: white;
+        }
+
         &:hover {
           box-shadow: 0 0 10px rgb(0 0 0 / 20%);
           transition: all 0.4s;
@@ -373,9 +499,7 @@ body {
 
       el-button {
         align-self: center;
-        /* 水平居中 */
         margin-top: 2px;
-        /* 上下间隔10px */
       }
     }
   }
@@ -383,7 +507,6 @@ body {
   .login-title {
     margin: 20px 0;
     font-family: "KaiTi", sans-serif;
-    /* 添加通用字体族 */
     font-weight: bold;
     color: #444;
     text-align: center;
@@ -407,7 +530,6 @@ body {
 
   .login-link a {
     font-family: "KaiTi", sans-serif;
-    /* 添加通用字体族 */
     font-size: 16px;
     color: rgb(28 160 212);
   }
@@ -415,39 +537,8 @@ body {
   .error-message {
     margin-top: 10px;
     font-family: "KaiTi", sans-serif;
-    /* 添加通用字体族 */
     color: red;
     text-align: center;
   }
-}
-
-.footer {
-  margin: 0 30px;
-  font-size: 12px;
-  line-height: 80px;
-  text-align: center;
-
-  .copyright {
-    position: absolute;
-    right: 10px;
-  }
-
-  .copyright a {
-    font-family: "KaiTi", sans-serif;
-    /* 添加通用字体族 */
-    font-size: 14px;
-    color: rgb(3 3 3);
-  }
-
-  .copyright a:hover {
-    color: rgb(11 175 240);
-  }
-}
-
-.fixed-footer {
-  position: fixed;
-  bottom: 0;
-  z-index: 1;
-  width: 100%;
 }
 </style>
