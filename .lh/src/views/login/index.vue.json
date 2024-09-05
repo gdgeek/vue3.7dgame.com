@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 20,
+            "activePatchIndex": 22,
             "patches": [
                 {
                     "date": 1721119974502,
@@ -88,6 +88,14 @@
                 {
                     "date": 1725422118377,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -6,9 +6,9 @@\n import { useUserStore } from \"@/store/modules/user\";\n import { LoginData } from \"@/api/auth/model\";\n import { TOKEN_KEY } from \"@/enums/CacheEnum\";\n import AuthAPI from \"@/api/auth/index\";\n-import { initRoutes, setupRoutes } from \"@/router\";\n+import { initRoutes } from \"@/router\";\n import CryptoJS from \"crypto-js\";\n \n const secretKey = \"bujiaban\"; // 密钥\n \n"
+                },
+                {
+                    "date": 1725436263292,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -104,9 +104,8 @@\n     if (valid) {\n       try {\n         const res = await AuthAPI.login(form.value);\n         await initRoutes();\n-        // await setupRoutes(1);\n         await window.location.reload();\n         await succeed(res.data);\n         const userin = await userStore.getUserInfo();\n         console.log(\"userin:\", userin);\n"
+                },
+                {
+                    "date": 1725436288359,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -6,9 +6,9 @@\n import { useUserStore } from \"@/store/modules/user\";\n import { LoginData } from \"@/api/auth/model\";\n import { TOKEN_KEY } from \"@/enums/CacheEnum\";\n import AuthAPI from \"@/api/auth/index\";\n-import { initRoutes } from \"@/router\";\n+//import { initRoutes } from \"@/router\";\n import CryptoJS from \"crypto-js\";\n \n const secretKey = \"bujiaban\"; // 密钥\n \n"
                 }
             ],
             "date": 1721119974502,

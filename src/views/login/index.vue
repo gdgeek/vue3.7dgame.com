@@ -7,7 +7,7 @@ import { useUserStore } from "@/store/modules/user";
 import { LoginData } from "@/api/auth/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import AuthAPI from "@/api/auth/index";
-import { initRoutes } from "@/router";
+//import { initRoutes } from "@/router";
 import CryptoJS from "crypto-js";
 
 const secretKey = "bujiaban"; // 密钥
@@ -104,8 +104,7 @@ const submit = () => {
     if (valid) {
       try {
         const res = await AuthAPI.login(form.value);
-        await initRoutes();
-        // await setupRoutes(1);
+        // await initRoutes();
         await window.location.reload();
         await succeed(res.data);
         const userin = await userStore.getUserInfo();

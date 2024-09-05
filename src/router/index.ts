@@ -681,18 +681,7 @@ const pathsToRemove = ref([
   "script",
   "scene",
 ]);
-import { useAbility } from '@casl/vue';
 
-//const ability = useAbility();
-
-//const can = ability.can.bind(ability);
-//alert(can('root','all'))
-const checkAndRemovePaths = async () => {
-  
-  if (!false) {
-  //  pathsToRemove.value.push("manager", "game");
-  }
-};
 
 // 检查路径是否在移除列表中
 const isRemoveRoute = (path: string): boolean => {
@@ -723,10 +712,7 @@ const convertRoutes = (routes: RouteRecordRaw[], isRoot = false): RouteVO[] => {
 export const routerData = ref<RouteVO[]>([]);
 
 // 初始化路由
-export const initRoutes = async () => {
-  
-  await checkAndRemovePaths();
-
+const initRoutes = async () => {
   const mainRoute = constantRoutes.find((route) => route.path === "/");
   if (mainRoute) {
     routerData.value = convertRoutes(mainRoute.children || [], true);
@@ -736,39 +722,29 @@ export const initRoutes = async () => {
 };
 
 import type { AnyAbility } from '@casl/ability';
-/*const ability = useAbility();
-const can = ability.can.bind(ability);
- */
-//initRoutes();
+
 
 import { AbilityRouter } from "@/utils/ability";
 const check = (route: RouteRecordRaw[], ability: AnyAbility) => { 
   const can = ability.can.bind(ability);
   route.forEach((route) => { 
-   // alert(route.path)
-
+   
     console.error(route.path, route.path,can("open", new AbilityRouter(route.path)))
    
     console.error(route.meta?.hidden)
     if (route.meta && !route.meta.hidden) {
       route.meta.hidden = !can("open", new AbilityRouter(route.path))
     }
-    //route.meta.hidden = true//!can("open", new AbilityRouter(route.path))
-    //route.meta.hidden = true; //!can("open", new AbilityRouter(route.path))
-   if (route.children) { 
+    if (route.children) { 
       check(route.children,ability)
     }
 
   });
 }
 export const UpdateRoutes = async (ability: AnyAbility) => { 
-  constantRoutes = routes;
-  const can = ability.can.bind(ability);
-  //alert(can("open", new AbilityRouter("game/")))
+  constantRoutes =JSON.parse(JSON.stringify(routes));
   check(constantRoutes, ability)
-  
   initRoutes();
-  //pathsToRemove.value.push("manager", "game");
  
 }
 export const useRouter = () => { 
