@@ -1,7 +1,6 @@
 <template>
   <div>
     <br />
-    {{ can("open", new AbilityRouter("/game/logout")) }}
     <el-container>
       <el-header>
         <mr-p-p-header

@@ -55,7 +55,6 @@ const convertToHttps = (url?: string): string => {
       return url.replace('https://', 'http://');
     }
   }
-
   return url;
 };
 
