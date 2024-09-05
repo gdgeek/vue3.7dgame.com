@@ -14,9 +14,11 @@
               icon="ChatDotSquare"
               @click="sort(sortByName)"
             >
-              <span class="hidden-sm-and-down">名称排序</span>
-              <i v-if="sorted_up" class="el-icon-arrow-up"></i>
-              <i v-else class="el-icon-arrow-down"></i>
+              <span class="hidden-sm-and-down">{{
+                $t("MrppHeader.sortByName")
+              }}</span>
+              <el-icon v-if="sorted_up"><ArrowUp></ArrowUp></el-icon>
+              <el-icon v-else><ArrowDown></ArrowDown></el-icon>
             </el-button>
             <el-button
               v-else
@@ -26,7 +28,9 @@
               icon="ChatDotSquare"
               @click="sort(sortByName)"
             >
-              <span class="hidden-sm-and-down">名称排序</span>
+              <span class="hidden-sm-and-down">{{
+                $t("MrppHeader.sortByName")
+              }}</span>
             </el-button>
             <el-button
               v-if="sorted_created_at"
@@ -36,9 +40,11 @@
               label="时间排序"
               @click="sort(sortByTime)"
             >
-              <span class="hidden-sm-and-down">时间排序</span>
-              <i v-if="sorted_up" class="el-icon-arrow-up"></i>
-              <i v-else class="el-icon-arrow-down"></i>
+              <span class="hidden-sm-and-down">{{
+                $t("MrppHeader.sortByTime")
+              }}</span>
+              <el-icon v-if="sorted_up"><ArrowUp></ArrowUp></el-icon>
+              <el-icon v-else><ArrowDown></ArrowDown></el-icon>
             </el-button>
             <el-button
               v-else
@@ -48,7 +54,9 @@
               icon="Clock"
               @click="sort(sortByTime)"
             >
-              <span class="hidden-sm-and-down">时间排序</span>
+              <span class="hidden-sm-and-down">{{
+                $t("MrppHeader.sortByTime")
+              }}</span>
             </el-button>
           </el-button-group>
         </el-col>
@@ -56,7 +64,7 @@
           <el-input
             v-model="input"
             size="small"
-            placeholder="搜索名称"
+            :placeholder="$t('MrppHeader.search')"
             class="input-with-select"
             @keyup.enter="keyDown"
           >

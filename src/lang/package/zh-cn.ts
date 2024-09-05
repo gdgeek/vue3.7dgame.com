@@ -708,6 +708,25 @@ export default {
         },
         success: "回复成功",
       },
+      messageForm: {
+        form: {
+          label1: "标题",
+          label2: "内容",
+          rules: {
+            title: {
+              message1: "请输入标题",
+              message2: "长度在 3 到 100 个字符",
+            },
+            body: {
+              message1: "请输入内容",
+              message2: "长度至少10个字符",
+            },
+          },
+        },
+        submit: "提交",
+        reset: "重置",
+        success: "发帖成功",
+      },
     },
   },
   // 管理部分国际化
@@ -844,6 +863,21 @@ export default {
         info: "取消输入",
       },
     },
+  },
+  // MrppHeader国际化
+  MrppHeader: {
+    sortByName: "名称排序",
+    sortByTime: "时间排序",
+    search: "搜索名称",
+  },
+  // tags国际化
+  tags: {
+    refresh: "刷新",
+    close: "关闭",
+    closeOthers: "关闭其他",
+    closeLeft: "关闭左侧",
+    closeRight: "关闭右侧",
+    closeAll: "关闭全部",
   },
 
   // 导航栏国际化

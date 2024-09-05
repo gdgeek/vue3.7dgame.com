@@ -6,6 +6,8 @@ export default {
 </script>
 
 <script setup lang="ts">
+import { RouterLink } from "vue-router";
+
 function message() {
   return "The webmaster said that you can not enter this page...";
 }
@@ -48,7 +50,10 @@ function message() {
           Please check that the URL you entered is correct, or click the button
           below to return to the homepage.
         </div>
-        <a href="" class="bullshit__return-home">Back to home</a>
+        <!-- <a href="" class="bullshit__return-home">Back to home</a> -->
+        <RouterLink to="/home/index" class="bullshit__return-home"
+          >Back to home</RouterLink
+        >
       </div>
     </div>
   </div>
