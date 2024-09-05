@@ -38,9 +38,14 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/store/modules/user";
+import { ThemeEnum } from "@/enums/ThemeEnum";
+import { useSettingsStore } from "@/store";
 
 const userStore = useUserStore();
 const router = useRouter();
+const settingsStore = useSettingsStore();
+
+const isDark = ref(settingsStore.theme === ThemeEnum.DARK);
 
 const name = computed(() => {
   if (userStore.userInfo.data.nickname) {
@@ -87,10 +92,12 @@ const gotoEdit = () => {
 
 .home-header {
   min-height: 150px;
-  background-image: url("/media/image/header_bg.jpg");
-  // background-image: url('/media/image/bgcsky.jpg');
+  width: auto;
+  // background-image: url("/media/image/header_bg.jpg");
+  background-image: url("/media/image/bgcsky.jpg");
   background-repeat: no-repeat;
   background-size: cover;
+  background-position: center;
 }
 
 .hidden-box {

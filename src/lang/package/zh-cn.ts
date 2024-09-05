@@ -77,23 +77,27 @@ export default {
   },
   // 登录页面国际化
   login: {
+    title: "苹果AR元气项目",
+    register: "平台注册/登录",
+    h1: "欢迎！",
+    h4: "准备好出发了么？",
+    loginTitle: "登录账号",
     username: "用户名",
     password: "密码",
-    login: "登 录",
-    captchaCode: "验证码",
-    capsLock: "大写锁定已打开",
-    message: {
+    login: "登录平台",
+    download: "下载相关程序",
+    rules: {
       username: {
-        required: "请输入用户名",
+        message1: "请输入用户名",
+        message2: "用户名称长度应该大于5",
       },
       password: {
-        required: "请输入密码",
-        min: "密码不能少于6位",
-      },
-      captchaCode: {
-        required: "请输入验证码",
+        message1: "请输入密码",
+        message2: "密码长度应该大于6",
       },
     },
+    success: "登录成功",
+    error: "表单检验未通过",
   },
   // 主页国际化
   homepage: {

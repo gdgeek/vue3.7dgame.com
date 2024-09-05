@@ -77,23 +77,27 @@ export default {
   },
   // 登录页面国际化
   login: {
+    title: "Apple AR Vitality Project",
+    register: "Platform Register/Login",
+    h1: "Welcome!",
+    h4: "Ready to get started?",
+    loginTitle: "Login Account",
     username: "Username",
     password: "Password",
-    login: "Login",
-    captchaCode: "Verify Code",
-    capsLock: "Caps Lock is On",
-    message: {
+    login: "Login to Platform",
+    download: "Download Related Programs",
+    rules: {
       username: {
-        required: "Please enter Username",
+        message1: "Please enter your username",
+        message2: "Username length should be greater than 5",
       },
       password: {
-        required: "Please enter Password",
-        min: "The password can not be less than 6 digits",
-      },
-      captchaCode: {
-        required: "Please enter Verify Code",
+        message1: "Please enter your password",
+        message2: "Password length should be greater than 6",
       },
     },
+    success: "Login Successful",
+    error: "Form Validation Failed",
   },
   // 主页国际化
   homepage: {

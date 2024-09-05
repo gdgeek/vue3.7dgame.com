@@ -1,6 +1,6 @@
 <template>
   <el-card>
-    <div :class="{ 'background-screen-max': maxwidth }">
+    <div :class="{ 'background-screen-max': props.maxwidth }">
       <div style="float: right; height: 40px; padding-right: 10px">
         <span v-for="item in informationStore.companies" :key="item.name">
           <el-link :href="item.url" target="_blank" :underline="false">
