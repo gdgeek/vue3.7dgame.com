@@ -81,7 +81,7 @@ const postScript = async (message: any) => {
 
   script.value = verse.value!.script!;
   await putVerseCode(verse.value!.id, {
-    blockly: message.data,
+    blockly: JSON.stringify(message.data),
     lua: message.script,
   });
   if (!script.value) {
