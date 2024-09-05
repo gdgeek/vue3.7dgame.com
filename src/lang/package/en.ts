@@ -579,6 +579,13 @@ export default {
       success: "Saved successfully",
       info: "No changes made",
     },
+    eventDialog: {
+      title: "Event Management Window",
+      output: "OutputEvent",
+      input: "InputEvent",
+      cancel: "Cancel",
+      confirm: "Confirm",
+    },
   },
   // 宇宙部分国际化
   verse: {

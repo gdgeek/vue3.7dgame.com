@@ -565,6 +565,13 @@ export default {
       success: "保存成功",
       info: "没有修改",
     },
+    eventDialog: {
+      title: "事件管理窗口",
+      output: "输出事件",
+      input: "输入事件",
+      cancel: "取 消",
+      confirm: "确 定",
+    },
   },
   // 宇宙部分国际化
   verse: {
