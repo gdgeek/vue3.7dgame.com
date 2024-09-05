@@ -5,6 +5,7 @@
     :lazyload="true"
     :list="viewCards"
     :gutter="10"
+    :backgroundColor="'rgba(255, 255, 255, .05)'"
   >
     <template #default="{ item }">
       <el-card style="width: 200px" :body-style="{ padding: '0px' }">
@@ -30,7 +31,7 @@
               :column="1"
               size="small"
             >
-              <el-descriptions-item label="权限:">
+              <el-descriptions-item :label="$t('manager.list.label')">
                 {{ getAblity(item.roles) }}
               </el-descriptions-item>
             </el-descriptions>
@@ -41,12 +42,12 @@
               :column="1"
               size="small"
             >
-              <el-descriptions-item label="权限:">
+              <el-descriptions-item :label="$t('manager.list.label')">
                 <el-select
                   v-model="item.selectedRole"
                   placeholder="Select"
                   size="small"
-                  style="float: right; width: 125px"
+                  style="float: right; width: 118px"
                   @change="handleRoleChange(item)"
                 >
                   <el-option
@@ -65,7 +66,7 @@
               class="button"
               @click="deleted(item)"
             >
-              删除
+              {{ $t("manager.list.cancel") }}
             </el-button>
           </div>
         </div>
@@ -88,6 +89,7 @@ import { useAbility } from "@casl/vue";
 const ability = useAbility();
 const can = ability.can.bind(ability);
 const userStore = useUserStore();
+const { t } = useI18n();
 
 const props = defineProps<{
   items: userData[];
@@ -102,13 +104,13 @@ const emit = defineEmits(["refresh"]);
 
 const getAblity = (roles: string[]) => {
   if (roles.includes("root")) {
-    return "根用户";
+    return t("manager.list.roles.root");
   } else if (roles.includes("admin")) {
-    return "超级管理员";
+    return t("manager.list.roles.admin");
   } else if (roles.includes("manager")) {
-    return "管理员";
+    return t("manager.list.roles.manager");
   } else if (roles.includes("user")) {
-    return "用户";
+    return t("manager.list.roles.user");
   }
   return JSON.stringify(roles);
 };
@@ -131,13 +133,13 @@ const getAbilities = (roles: string[]): string[] => {
     .map((role) => {
       switch (role) {
         case "root":
-          return "根用户";
+          return t("manager.list.roles.root");
         case "admin":
-          return "超级管理员";
+          return t("manager.list.roles.admin");
         case "manager":
-          return "管理员";
+          return t("manager.list.roles.manager");
         case "user":
-          return "用户";
+          return t("manager.list.roles.user");
         default:
           return role;
       }
@@ -179,17 +181,21 @@ const refresh = () => {
 
 const deleted = async (item: any) => {
   try {
-    await ElMessageBox.confirm("此操作将永久删除该用户, 是否继续?", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      closeOnClickModal: false,
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("manager.list.confirm.message1"),
+      t("manager.list.confirm.message2"),
+      {
+        confirmButtonText: t("manager.list.confirm.confirm"),
+        cancelButtonText: t("manager.list.confirm.cancel"),
+        closeOnClickModal: false,
+        type: "warning",
+      }
+    );
     await deletePerson(item.id);
-    ElMessage.success("删除成功!");
+    ElMessage.success(t("manager.list.confirm.success"));
     refresh();
   } catch {
-    ElMessage.info("已取消删除");
+    ElMessage.info(t("manager.list.confirm.info"));
   }
 };
 
@@ -204,23 +210,23 @@ const handleRoleChange = async (item: ViewCard) => {
   console.log("roleid", Number(item.id));
   try {
     await putPerson(data);
-    ElMessage.success("权限更新成功!");
+    ElMessage.success(t("manager.list.success"));
     refresh();
   } catch (error) {
-    ElMessage.error("权限更新失败!");
+    ElMessage.error(t("manager.list.error"));
   }
 };
 
 // 将角色名称转换为实际角色数组
 const getAbilitiesFromRole = (role: string): string => {
   switch (role) {
-    case "根用户":
+    case t("manager.list.roles.root"):
       return "root";
-    case "超级管理员":
+    case t("manager.list.roles.admin"):
       return "admin";
-    case "管理员":
+    case t("manager.list.roles.manager"):
       return "manager";
-    case "用户":
+    case t("manager.list.roles.user"):
       return "user";
     default:
       return "";

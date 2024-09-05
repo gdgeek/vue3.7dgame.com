@@ -26,7 +26,7 @@
       <el-col :md="10" :span="24">
         <div class="hidden-sm-and-down hidden-box"></div>
         <div class="home-header-button">
-          <el-button size="small" @click="gotoEdit">{{
+          <el-button size="small" type="primary" @click="gotoEdit">{{
             $t("homepage.edit.title")
           }}</el-button>
         </div>

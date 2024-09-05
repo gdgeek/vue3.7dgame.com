@@ -10,10 +10,18 @@
       class="signup-form"
       label-width="80px"
     >
-      <el-form-item label="用户名" prop="username" style="margin-bottom: 26px">
+      <el-form-item
+        :label="$t('manager.creator.form.label1')"
+        prop="username"
+        style="margin-bottom: 26px"
+      >
         <el-input v-model="form.username" suffix-icon="el-icon-user"></el-input>
       </el-form-item>
-      <el-form-item label="密码" prop="password" style="margin-bottom: 26px">
+      <el-form-item
+        :label="$t('manager.creator.form.label2')"
+        prop="password"
+        style="margin-bottom: 26px"
+      >
         <el-input
           v-model="form.password"
           autocomplete="off"
@@ -22,7 +30,7 @@
         ></el-input>
       </el-form-item>
       <el-form-item
-        label="确认密码"
+        :label="$t('manager.creator.form.label3')"
         prop="checkPassword"
         style="margin-bottom: 26px"
       >
@@ -36,8 +44,12 @@
     </el-form>
 
     <template #footer>
-      <el-button @click="dialogVisible = false">取 消</el-button>
-      <el-button type="primary" @click="submitForm">注册账号</el-button>
+      <el-button @click="dialogVisible = false">{{
+        $t("manager.creator.form.cancel")
+      }}</el-button>
+      <el-button type="primary" @click="submitForm">{{
+        $t("manager.creator.form.submit")
+      }}</el-button>
     </template>
   </el-dialog>
 </template>
@@ -49,15 +61,16 @@ import { postPerson } from "@/api/v1/person";
 const props = defineProps({
   dialogTitle: {
     type: String,
-    default: "选择文件",
+    default: "",
   },
   dialogSubmit: {
     type: String,
-    default: "确定",
+    default: "",
   },
 });
 
 const emit = defineEmits(["refresh"]);
+const { t } = useI18n();
 
 const dialogVisible = ref(false);
 const formRef = ref<FormInstance>();
@@ -74,7 +87,7 @@ const checkUsername = (rule: any, value: string, callback: any) => {
 
 const validatePassword = (rule: any, value: string, callback: any) => {
   if (value === "") {
-    callback(new Error("请输入密码"));
+    callback(new Error(t("manager.creator.form.error1")));
   } else {
     if (form.checkPassword !== "") {
       formRef.value?.validateField("checkPassword");
@@ -85,9 +98,9 @@ const validatePassword = (rule: any, value: string, callback: any) => {
 
 const checkPassword = (rule: any, value: string, callback: any) => {
   if (value === "") {
-    callback(new Error("请再次输入密码"));
+    callback(new Error(t("manager.creator.form.error2")));
   } else if (value !== form.password) {
-    callback(new Error("两次输入密码不一致!"));
+    callback(new Error(t("manager.creator.form.error3")));
   } else {
     callback();
   }
@@ -95,21 +108,33 @@ const checkPassword = (rule: any, value: string, callback: any) => {
 
 const rules = {
   username: [
-    { required: true, message: "请输入用户名称", trigger: "blur" },
-    { min: 5, message: "用户名称长度应该大于5", trigger: "blur" },
+    {
+      required: true,
+      message: t("manager.creator.form.message1"),
+      trigger: "blur",
+    },
+    { min: 5, message: t("manager.creator.form.message2"), trigger: "blur" },
     {
       validator: checkUsername,
-      message: "用户名请避免使用中文",
+      message: t("manager.creator.form.message3"),
       trigger: "change",
     },
   ],
   password: [
-    { required: true, message: "请输入密码", trigger: "blur" },
-    { min: 6, message: "密码长度应该大于6", trigger: "blur" },
+    {
+      required: true,
+      message: t("manager.creator.form.message4"),
+      trigger: "blur",
+    },
+    { min: 6, message: t("manager.creator.form.message5"), trigger: "blur" },
     { validator: validatePassword, trigger: "blur" },
   ],
   checkPassword: [
-    { required: true, message: "请输入校验密码", trigger: "blur" },
+    {
+      required: true,
+      message: t("manager.creator.form.message6"),
+      trigger: "blur",
+    },
     { validator: checkPassword, trigger: "blur" },
   ],
 };
@@ -122,7 +147,7 @@ const submitForm = async () => {
       emit("refresh");
       dialogVisible.value = false;
     } else {
-      ElMessage.error("表单校验失败");
+      ElMessage.error(t("manager.creator.form.error4"));
     }
   } catch (error) {
     console.error("error submit:", error);

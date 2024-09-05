@@ -34,6 +34,7 @@
         :gutter="8"
         :list="viewCards"
         :column-count="3"
+        :backgroundColor="'rgba(255, 255, 255, .05)'"
       >
         <template #default="{ item }">
           <el-card style="width: 220px" class="box-card">

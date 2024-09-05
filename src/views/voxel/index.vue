@@ -22,7 +22,12 @@
       </el-header>
       <el-main>
         <el-card>
-          <Waterfall :list="items" :width="320" :gutter="10">
+          <Waterfall
+            :list="items"
+            :width="320"
+            :gutter="10"
+            :backgroundColor="'rgba(255, 255, 255, .05)'"
+          >
             <template #default="{ item }">
               <MrPPCard
                 :item="item"
