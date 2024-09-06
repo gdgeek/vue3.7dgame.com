@@ -185,6 +185,54 @@ export default {
         error2: "表单校验未通过",
       },
     },
+    account: {
+      title: "账号设置",
+      titleStatement: "账号具体内容的配置和修改",
+      label1: "邮箱",
+      rules1: {
+        message1: "请输入邮箱",
+        message2: "请输入正确的邮箱地址",
+      },
+      placeholder: "绑定邮箱",
+      bind: "绑定",
+      rebind: "重新绑定",
+      label2: "账号密码",
+      change: "修改密码",
+      recover: "找回密码",
+      label3: "旧的密码",
+      label4: "新的密码",
+      label5: "确认密码",
+      confirm: "确认修改",
+      rules2: {
+        old: {
+          message1: "请输入旧密码",
+          message2: "旧密码长度应该大于6",
+          error1: "旧密码不能为空",
+          error2: "新密码不能和旧密码一致！",
+        },
+        new: {
+          message1: "请输入新密码",
+          message2: "新密码长度应该大于6",
+          error1: "请输入密码",
+          error2: "新密码不能和旧密码一致！",
+        },
+        check: {
+          message: "请输入校验密码",
+          error1: "请再次输入密码",
+          error2: "两次输入密码不一致",
+        },
+      },
+      validate1: {
+        success: "密码修改成功",
+        error1: "密码修改失败",
+        error2: "表单校验未通过",
+      },
+      validate2: {
+        success: "绑定成功",
+        error1: "绑定失败",
+        error2: "表单校验未通过",
+      },
+    },
   },
   // 体素管理国际化
   voxel: {
