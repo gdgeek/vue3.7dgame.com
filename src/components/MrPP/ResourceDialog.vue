@@ -74,7 +74,7 @@
                     v-if="item.created_at"
                     style="width: 100%; text-align: center"
                   >
-                    {{ item.created_at }}
+                    {{ BeijingData(item.created_at) }}
                   </div>
                 </el-card>
               </template>
@@ -204,6 +204,7 @@ import {
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import type { metaInfo } from "@/api/v1/meta";
 import { ResourceInfo } from "@/api/resources/model";
+import { BeijingData } from "@/utils/dataChange";
 
 const dialogVisible = ref(false);
 const activeName = ref("binding");

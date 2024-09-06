@@ -50,7 +50,7 @@
                   :url="item.image.url"
                 ></LazyImg>
                 <div style="width: 100%; text-align: center">
-                  {{ item.created_at }}
+                  {{ BeijingData(item.created_at) }}
                 </div>
               </el-card>
             </template>
@@ -103,6 +103,7 @@ import "vue-waterfall-plugin-next/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
 import { getMetas, metaInfo, postMeta } from "@/api/v1/meta";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import { BeijingData } from "@/utils/dataChange";
 
 const emit = defineEmits(["selected", "cancel"]);
 

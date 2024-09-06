@@ -58,20 +58,19 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: "personalCenter.title",
           icon: "homepage",
-          affix: true,
-          keepAlive: true,
           hidden: false,
         },
         children: [
           {
             meta: {
               title: "personalCenter.myHomepage",
+              affix: true,
+              keepAlive: true,
               hidden: false,
-             },
+            },
             path: "/home/index",
             name: "HomeIndex",
             component: () => import("@/views/home/index.vue"),
-            
           },
           {
             meta: {
@@ -86,7 +85,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "personalCenter.category",
               hidden: false,
-             },
+            },
             path: "/home/category",
             name: "HomeCategory",
             component: () => import("@/views/home/category.vue"),
@@ -112,7 +111,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: "settings.title",
           hidden: true,
-         },
+        },
         redirect: "/settings/account",
         component: Empty,
         children: [
@@ -129,7 +128,7 @@ const routes: RouteRecordRaw[] = [
             component: () => import("@/views/settings/edit.vue"),
           },
           {
-            meta: { title: "settings.userPresentation" , hidden: true},
+            meta: { title: "settings.userPresentation", hidden: true },
             path: "/settings/people",
             name: "SettingsPeople",
             component: () => import("@/views/settings/people.vue"),
@@ -454,7 +453,7 @@ const routes: RouteRecordRaw[] = [
             name: "PrefabEdit",
             meta: {
               title: "meta.edit",
-              hidden: true
+              hidden: true,
             },
             component: () => import("@/views/meta/prefab-edit.vue"),
           },
@@ -463,8 +462,8 @@ const routes: RouteRecordRaw[] = [
             name: "MetaEdit",
             meta: {
               title: "meta.edit",
-              hidden: true
-             },
+              hidden: true,
+            },
             component: () => import("@/views/meta/meta-edit.vue"),
           },
           // {
@@ -479,8 +478,8 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "meta.scriptEditor",
               keepAlive: true,
-              hidden: true
-             },
+              hidden: true,
+            },
             component: () => import("@/views/meta/script.vue"),
           },
           {
@@ -489,8 +488,8 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "meta.sceneEditor",
               keepAlive: true,
-              hidden: true
-             },
+              hidden: true,
+            },
             component: () => import("@/views/meta/scene.vue"),
           },
         ],
@@ -544,8 +543,8 @@ const routes: RouteRecordRaw[] = [
             name: "VerseView",
             meta: {
               title: "universe.viewTitle",
-              hidden: true
-             },
+              hidden: true,
+            },
             component: () => import("@/views/verse/view.vue"),
           },
           {
@@ -554,9 +553,8 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "universe.scriptEditor",
               keepAlive: true,
-              hidden: true
-              
-             },
+              hidden: true,
+            },
             component: (): any => import("@/views/verse/script.vue"),
           },
           {
@@ -565,7 +563,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "universe.sceneEditor",
               keepAlive: true,
-              hidden: true
+              hidden: true,
             },
             component: () => import("@/views/verse/scene.vue"),
           },
@@ -602,7 +600,7 @@ const routes: RouteRecordRaw[] = [
         redirect: "/game/index",
         name: "Game",
         meta: {
-          title: "游戏",
+          title: "game.title",
           icon: "el-icon-monitor",
           hidden: false,
           alwaysShow: false,
@@ -614,7 +612,7 @@ const routes: RouteRecordRaw[] = [
             component: () => import("@/views/game/index.vue"),
             name: "GameIndex",
             meta: {
-              title: "游戏配置",
+              title: "game.gameIndex",
               icon: "cascader",
               hidden: false,
             },
@@ -624,7 +622,7 @@ const routes: RouteRecordRaw[] = [
             component: () => import("@/views/game/map.vue"),
             name: "GameMap",
             meta: {
-              title: "地图配置",
+              title: "game.gameMap",
               icon: "cascader",
               hidden: false,
             },
@@ -682,7 +680,6 @@ const pathsToRemove = ref([
   "scene",
 ]);
 
-
 // 检查路径是否在移除列表中
 const isRemoveRoute = (path: string): boolean => {
   return pathsToRemove.value.includes(path);
@@ -721,31 +718,33 @@ const initRoutes = async () => {
   }
 };
 
-import type { AnyAbility } from '@casl/ability';
-
+import type { AnyAbility } from "@casl/ability";
 
 import { AbilityRouter } from "@/utils/ability";
-const check = (route: RouteRecordRaw[], ability: AnyAbility) => { 
+const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   const can = ability.can.bind(ability);
-  route.forEach((route) => { 
-   
+  route.forEach((route) => {
+    console.error(
+      route.path,
+      route.path,
+      can("open", new AbilityRouter(route.path))
+    );
+
+    console.error(route.meta?.hidden);
     if (route.meta && !route.meta.hidden) {
-      route.meta.hidden = !can("open", new AbilityRouter(route.path))
+      route.meta.hidden = !can("open", new AbilityRouter(route.path));
     }
-    if (route.children) { 
-      check(route.children,ability)
+    if (route.children) {
+      check(route.children, ability);
     }
-
   });
-}
-export const UpdateRoutes = async (ability: AnyAbility) => { 
-  constantRoutes =JSON.parse(JSON.stringify(routes));
-  check(constantRoutes, ability)
+};
+export const UpdateRoutes = async (ability: AnyAbility) => {
+  constantRoutes = JSON.parse(JSON.stringify(routes));
+  check(constantRoutes, ability);
   initRoutes();
- 
-}
-export const useRouter = () => { 
-
+};
+export const useRouter = () => {
   initRoutes();
   return router;
-}
+};

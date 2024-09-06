@@ -26,11 +26,19 @@
 
       <el-col :sm="8">
         <el-card class="box-card">
-          <template #header> <b>{{ $t("picture.view.info.title") }}</b> : </template>
+          <template #header>
+            <b>{{ $t("picture.view.info.title") }}</b> :
+          </template>
           <div class="box-item">
             <el-table :data="tableData" stripe>
-              <el-table-column prop="item" :label="$t('picture.view.info.label1')"></el-table-column>
-              <el-table-column prop="text" :label="$t('picture.view.info.label2')"></el-table-column>
+              <el-table-column
+                prop="item"
+                :label="$t('picture.view.info.label1')"
+              ></el-table-column>
+              <el-table-column
+                prop="text"
+                :label="$t('picture.view.info.label2')"
+              ></el-table-column>
             </el-table>
 
             <aside style="margin-top: 10px; margin-bottom: 30px">
@@ -81,15 +89,40 @@ const prepare = computed(
 
 const tableData = computed(() => {
   if (pictureData.value && prepare.value) {
+    // 将数据库存储的时间转换为 UTC 时间
+    const createdAtUtc = new Date(pictureData.value.created_at + "Z"); // 添加 'Z' 表示 UTC 时间
+
+    // 将 UTC 时间转换为北京时间
+    const options: Intl.DateTimeFormatOptions = {
+      timeZone: "Asia/Shanghai",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    };
+    const createdAtBeijing = createdAtUtc.toLocaleString("zh-CN", options);
+
     return [
       { item: t("picture.view.info.item1"), text: pictureData.value.name },
-      { item: t("picture.view.info.item2"), text: pictureData.value.author.nickname },
-      { item: t("picture.view.info.item3"), text: pictureData.value.created_at },
+      {
+        item: t("picture.view.info.item2"),
+        text: pictureData.value.author.nickname,
+      },
+      {
+        item: t("picture.view.info.item3"),
+        // text: pictureData.value.created_at,
+        text: createdAtBeijing,
+      },
       {
         item: t("picture.view.info.item5"),
         text: printVector2(JSON.parse(pictureData.value.info).size),
       },
-      { item: t("picture.view.info.item4"), text: `${pictureData.value.file.size}` + t("picture.view.info.size") },
+      {
+        item: t("picture.view.info.item4"),
+        text: `${pictureData.value.file.size}` + t("picture.view.info.size"),
+      },
     ];
   }
   return [];
@@ -226,12 +259,16 @@ const dealWith = async () => {
 
 const deleteWindow = async () => {
   try {
-    await ElMessageBox.confirm(t("picture.confirm.message1"), t("picture.confirm.message2"), {
-      confirmButtonText: t("picture.confirm.confirm"),
-      cancelButtonText: t("picture.confirm.cancel"),
-      closeOnClickModal: false,
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("picture.confirm.message1"),
+      t("picture.confirm.message2"),
+      {
+        confirmButtonText: t("picture.confirm.confirm"),
+        cancelButtonText: t("picture.confirm.cancel"),
+        closeOnClickModal: false,
+        type: "warning",
+      }
+    );
 
     await deletePicture(pictureData.value!.id);
     ElMessage.success(t("picture.confirm.success"));

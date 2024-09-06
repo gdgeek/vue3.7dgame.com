@@ -58,7 +58,7 @@
                     :url="item.image.url"
                   ></LazyImg>
                   <div style="width: 100%; text-align: center">
-                    {{ item.created_at }}
+                    {{ BeijingData(item.created_at) }}
                   </div>
                 </el-card>
               </template>
@@ -108,6 +108,7 @@ import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
 import { getPrefabs, prefabsData } from "@/api/v1/prefab";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import { BeijingData } from "@/utils/dataChange";
 
 const emit = defineEmits(["selected", "cancel"]);
 const dialogVisible = ref(false);

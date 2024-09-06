@@ -4,7 +4,10 @@
       <el-main style="padding-left: 40px">
         <div class="block">
           <el-timeline>
-            <el-timeline-item :timestamp="$t('verse.view.reply.timestamp')" placement="top">
+            <el-timeline-item
+              :timestamp="$t('verse.view.reply.timestamp')"
+              placement="top"
+            >
               <el-form
                 ref="formRef"
                 :model="form"
@@ -52,7 +55,9 @@
                 <div class="replytitle">
                   <div class="replyicon">
                     <img src="" alt="" />
-                    <el-icon><User></User></el-icon>
+                    <el-icon>
+                      <User></User>
+                    </el-icon>
                   </div>
                   <div class="replynickname">{{ reply.author.nickname }}</div>
                 </div>
@@ -78,7 +83,7 @@
                       size="small"
                       type="text"
                       @click="deletedWindow(reply.id)"
-                      ><el-icon><Delete></Delete></el-icon
+                      ><el-icon> <Delete></Delete> </el-icon
                     ></el-button>
                   </div>
                 </el-card>
@@ -133,7 +138,11 @@ const customToolbar = [
 
 const rules = {
   body: [
-    { required: true, message: t("verse.view.reply.rules.message1"), trigger: "blur" },
+    {
+      required: true,
+      message: t("verse.view.reply.rules.message1"),
+      trigger: "blur",
+    },
     { min: 10, message: t("verse.view.reply.rules.message2"), trigger: "blur" },
   ],
 };
@@ -163,12 +172,16 @@ const canDelete = (item: any) => {
 };
 const deletedWindow = async (id: number) => {
   try {
-    await ElMessageBox.confirm(t("verse.view.reply.confirm.message1"), t("verse.view.reply.confirm.message2"), {
-      confirmButtonText: t("verse.view.reply.confirm.confirm"),
-      cancelButtonText: t("verse.view.reply.confirm.cancel"),
-      closeOnClickModal: false,
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("verse.view.reply.confirm.message1"),
+      t("verse.view.reply.confirm.message2"),
+      {
+        confirmButtonText: t("verse.view.reply.confirm.confirm"),
+        cancelButtonText: t("verse.view.reply.confirm.cancel"),
+        closeOnClickModal: false,
+        type: "warning",
+      }
+    );
     await deleteReply(id);
     replies.value = replies.value.filter((reply: any) => reply.id !== id);
     ElMessage({

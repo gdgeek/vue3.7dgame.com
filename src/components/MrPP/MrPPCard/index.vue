@@ -68,7 +68,6 @@ const deleted = () => {
 .mrpp-title {
   font-size: 15px;
   padding: 0px 0px 0px 0px;
-  color: #666;
 }
 .card-title {
   white-space: nowrap;

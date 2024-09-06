@@ -1,9 +1,11 @@
 <template>
   <div>
     <el-dialog v-model="visible" width="80%" :before-close="handleClose">
-      <template #header> 事件管理窗口 </template>
+      <template #header> {{ $t("meta.eventDialog.title") }} </template>
       <div>
-        <el-divider content-position="left">输出事件</el-divider>
+        <el-divider content-position="left">{{
+          $t("meta.eventDialog.output")
+        }}</el-divider>
         <span v-for="(item, index) in output.list" :key="index">
           <el-tag type="success" closable @close="deleteOutput(item)">
             {{ item.title }}
@@ -26,11 +28,13 @@
             size="small"
             @click="showOutput"
           >
-            + 输出事件
+            + {{ $t("meta.eventDialog.output") }}
           </el-button>
         </span>
 
-        <el-divider content-position="left">输入事件</el-divider>
+        <el-divider content-position="left">{{
+          $t("meta.eventDialog.input")
+        }}</el-divider>
         <span v-for="(item, index) in input.list" :key="index">
           <el-tag type="success" closable @close="deleteInput(item)">
             {{ item.title }}
@@ -53,15 +57,19 @@
             size="small"
             @click="showInput"
           >
-            + 输入事件
+            + {{ $t("meta.eventDialog.input") }}
           </el-button>
         </span>
       </div>
 
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="visible = false">取 消</el-button>
-          <el-button type="primary" @click="enter">确 定</el-button>
+          <el-button @click="visible = false">{{
+            $t("meta.eventDialog.cancel")
+          }}</el-button>
+          <el-button type="primary" @click="enter">{{
+            $t("meta.eventDialog.confirm")
+          }}</el-button>
         </span>
       </template>
     </el-dialog>

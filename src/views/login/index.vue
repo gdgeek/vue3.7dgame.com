@@ -374,7 +374,9 @@ body {
     font-family: "KaiTi", sans-serif;
     font-size: 14px;
     font-weight: 400;
-    color: #909399;
+    &:hover {
+      color: #3876c2;
+    }
   }
 }
 
@@ -462,7 +464,6 @@ body {
         font-family: "KaiTi", sans-serif;
         font-size: 36px;
         font-weight: 400;
-        color: #666;
       }
 
       h4 {
@@ -470,7 +471,6 @@ body {
         font-family: "KaiTi", sans-serif;
         font-size: 18px;
         font-weight: 400;
-        color: #666;
       }
 
       .box3 {
@@ -507,7 +507,6 @@ body {
     margin: 20px 0;
     font-family: "KaiTi", sans-serif;
     font-weight: bold;
-    color: #444;
     text-align: center;
   }
 

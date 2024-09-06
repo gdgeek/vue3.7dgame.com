@@ -34,6 +34,7 @@
             :gutter="8"
             :list="viewCards"
             :column-count="3"
+            :backgroundColor="'rgba(255, 255, 255, .05)'"
           >
             <template #default="{ item }">
               <el-card style="width: 320px" class="box-card">
@@ -303,7 +304,6 @@ const breakpoints = ref({
 .mrpp-title {
   font-size: 15px;
   padding: 0px 0px 0px 0px;
-  color: #000000;
 }
 
 .card-title {

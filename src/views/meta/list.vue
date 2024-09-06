@@ -246,7 +246,6 @@ onMounted(() => {
 .mrpp-title {
   font-size: 15px;
   padding: 0px 0px 0px 0px;
-  color: #000000;
 }
 
 .card-title {

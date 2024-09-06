@@ -37,11 +37,19 @@
 
       <el-col :sm="8">
         <el-card class="box-card">
-          <template #header> <b>{{ $t("polygen.view.info.title") }}</b> : </template>
+          <template #header>
+            <b>{{ $t("polygen.view.info.title") }}</b> :
+          </template>
           <div class="box-item">
             <el-table :data="tableData" stripe>
-              <el-table-column prop="item" :label="$t('polygen.view.info.label1')"></el-table-column>
-              <el-table-column prop="text" :label="$t('polygen.view.info.label2')"></el-table-column>
+              <el-table-column
+                prop="item"
+                :label="$t('polygen.view.info.label1')"
+              ></el-table-column>
+              <el-table-column
+                prop="text"
+                :label="$t('polygen.view.info.label2')"
+              ></el-table-column>
             </el-table>
 
             <aside style="margin-top: 10px; margin-bottom: 30px">
@@ -96,11 +104,26 @@ const tableData = computed(() => {
   if (polygenData.value !== null && prepare.value) {
     return [
       { item: t("polygen.view.info.item1"), text: polygenData.value.name },
-      { item: t("polygen.view.info.item2"), text: polygenData.value.author.nickname },
-      { item: t("polygen.view.info.item3"), text: polygenData.value.created_at },
-      { item: t("polygen.view.info.item4"), text: `${polygenData.value.file.size}` + t("polygen.view.info.size") },
-      { item: t("polygen.view.info.item5"), text: printVector3(dataInfo.value.size) },
-      { item: t("polygen.view.info.item6"), text: printVector3(dataInfo.value.center) },
+      {
+        item: t("polygen.view.info.item2"),
+        text: polygenData.value.author.nickname,
+      },
+      {
+        item: t("polygen.view.info.item3"),
+        text: polygenData.value.created_at,
+      },
+      {
+        item: t("polygen.view.info.item4"),
+        text: `${polygenData.value.file.size}` + t("polygen.view.info.size"),
+      },
+      {
+        item: t("polygen.view.info.item5"),
+        text: printVector3(dataInfo.value.size),
+      },
+      {
+        item: t("polygen.view.info.item6"),
+        text: printVector3(dataInfo.value.center),
+      },
     ];
   } else {
     return [];
@@ -146,12 +169,16 @@ const createVerse = async () => {
 
 const deleteWindow = async () => {
   try {
-    await ElMessageBox.confirm(t("polygen.view.confirm.message1"), t("polygen.view.confirm.message2"), {
-      confirmButtonText: t("polygen.view.confirm.confirm"),
-      cancelButtonText: t("polygen.view.confirm.cancel"),
-      closeOnClickModal: false,
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("polygen.view.confirm.message1"),
+      t("polygen.view.confirm.message2"),
+      {
+        confirmButtonText: t("polygen.view.confirm.confirm"),
+        cancelButtonText: t("polygen.view.confirm.cancel"),
+        closeOnClickModal: false,
+        type: "warning",
+      }
+    );
 
     await deletePolygen(polygenData.value.id);
 
@@ -260,7 +287,7 @@ const loaded = async (info: any) => {
 };
 
 const screenshot = () => {
-  return three.screenshot();
+  return three.value!.screenshot();
 };
 
 onMounted(async () => {

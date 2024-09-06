@@ -579,6 +579,13 @@ export default {
       success: "Saved successfully",
       info: "No changes made",
     },
+    eventDialog: {
+      title: "Event Management Window",
+      output: "OutputEvent",
+      input: "InputEvent",
+      cancel: "Cancel",
+      confirm: "Confirm",
+    },
   },
   // 宇宙部分国际化
   verse: {
@@ -724,6 +731,25 @@ export default {
         },
         success: "Reply successful",
       },
+      messageForm: {
+        form: {
+          label1: "Title",
+          label2: "Content",
+          rules: {
+            title: {
+              message1: "Please enter a title",
+              message2: "Length should be between 3 and 100 characters",
+            },
+            body: {
+              message1: "Please enter content",
+              message2: "Length should be at least 10 characters",
+            },
+          },
+        },
+        submit: "Submit",
+        reset: "Reset",
+        success: "Post submitted successfully",
+      },
     },
   },
   // 管理部分国际化
@@ -863,6 +889,21 @@ export default {
         info: "Cancel input",
       },
     },
+  },
+  // MrppHeader国际化
+  MrppHeader: {
+    sortByName: "SortByName",
+    sortByTime: "SortByTime",
+    search: "SearchName",
+  },
+  // tags国际化
+  tags: {
+    refresh: "Refresh",
+    close: "Close",
+    closeOthers: "CloseOthers",
+    closeLeft: "CloseLeft",
+    closeRight: "CloseRight",
+    closeAll: "CloseAll",
   },
 
   // 导航栏国际化

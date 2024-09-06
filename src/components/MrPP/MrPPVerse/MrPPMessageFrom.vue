@@ -6,11 +6,14 @@
     label-width="100px"
     class="demo-ruleForm"
   >
-    <el-form-item label="标题" prop="title">
+    <el-form-item
+      :label="$t('verse.view.messageForm.form.label1')"
+      prop="title"
+    >
       <el-input v-model="form.title"></el-input>
     </el-form-item>
 
-    <el-form-item label="内容" prop="body">
+    <el-form-item :label="$t('verse.view.messageForm.form.label2')" prop="body">
       <vue-editor
         id="edit"
         v-model="form.body"
@@ -19,10 +22,12 @@
       ></vue-editor>
     </el-form-item>
     <el-form-item>
-      <el-button type="primary" :disabled="isDisabled" @click="submitForm"
-        >提交</el-button
-      >
-      <el-button @click="resetForm">重置</el-button>
+      <el-button type="primary" :disabled="isDisabled" @click="submitForm">{{
+        $t("verse.view.messageForm.submit")
+      }}</el-button>
+      <el-button @click="resetForm">{{
+        $t("verse.view.messageForm.reset")
+      }}</el-button>
     </el-form-item>
   </el-form>
 </template>
@@ -39,6 +44,7 @@ const emit = defineEmits<{
 
 const formRef = ref<FormInstance>();
 const isDisabled = ref(false);
+const { t } = useI18n();
 
 const customToolbar = [
   ["bold", "italic", "underline"],
@@ -53,12 +59,29 @@ const form = ref({
 
 const rules = {
   title: [
-    { required: true, message: "请输入标题", trigger: "blur" },
-    { min: 3, max: 100, message: "长度在 3 到 100 个字符", trigger: "blur" },
+    {
+      required: true,
+      message: t("verse.view.messageForm.form.rules.title.message1"),
+      trigger: "blur",
+    },
+    {
+      min: 3,
+      max: 100,
+      message: t("verse.view.messageForm.form.rules.title.message2"),
+      trigger: "blur",
+    },
   ],
   body: [
-    { required: true, message: "请填写内容", trigger: "blur" },
-    { min: 10, message: "长度至少10个字符", trigger: "blur" },
+    {
+      required: true,
+      message: t("verse.view.messageForm.form.rules.body.message1"),
+      trigger: "blur",
+    },
+    {
+      min: 10,
+      message: t("verse.view.messageForm.form.rules.body.message2"),
+      trigger: "blur",
+    },
   ],
 };
 
@@ -77,7 +100,7 @@ const submitForm = async () => {
     if (valid) {
       emit("post", form.value);
       ElMessage({
-        message: "发帖成功",
+        message: t("verse.view.messageForm.success"),
         type: "success",
       });
     } else {

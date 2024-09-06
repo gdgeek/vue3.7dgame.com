@@ -118,6 +118,7 @@ import EventDialog from "@/components/Rete/EventDialog.vue";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import type { metaInfo } from "@/api/v1/meta";
 import { ViewCard } from "vue-waterfall-plugin-next/dist/types/types/waterfall";
+import { translateRouteTitle } from "@/utils/i18n";
 
 const route = useRoute();
 const router = useRouter();
@@ -220,7 +221,7 @@ const editor = () => {
     console.log("sceneRoute", sceneRoute);
     // 如果找到了路由对象并且它有 meta.title，就进行拼接
     if (sceneRoute && sceneRoute.meta.title) {
-      const metaTitle = sceneRoute.meta.title as string;
+      const metaTitle = translateRouteTitle(sceneRoute.meta.title) as string;
       router.push({
         path: "/meta/scene",
         query: {
