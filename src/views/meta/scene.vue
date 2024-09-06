@@ -28,13 +28,30 @@ import env from "@/environment";
 import { putMeta, getMeta } from "@/api/v1/meta";
 import path from "path-browserify";
 
+import { useAppStore } from "@/store/modules/app";
+const appStore = useAppStore();
 const route = useRoute();
 const router = useRouter();
-const editUrl = import.meta.env.VITE_APP_EDITOR_URL;
-const src = editUrl + "/three.js/editor/meta-editor.html?time=" + Date.now(); //path.join("", "");
+//const editUrl = import.meta.env.VITE_APP_EDITOR_URL;
+//const src = editUrl + "/three.js/editor/meta-editor.html?time=" + Date.now(); //path.join("", "");
 
+const src = ref(
+  import.meta.env.VITE_APP_EDITOR_URL +
+    "/three.js/editor/meta-editor.html?language=" +
+    appStore.language
+);
+watch(
+  () => appStore.language, // 监听 language 的变化
+  async (newValue, oldValue) => {
+    src.value =
+      import.meta.env.VITE_APP_EDITOR_URL +
+      "/three.js/editor/verse-editor.html?language=" +
+      newValue;
+    await refresh();
+  }
+);
 // console.log("src", src);
-const isInit = ref(false);
+let init = false;
 const dialog = ref();
 const editor = ref<HTMLIFrameElement | null>();
 
@@ -120,19 +137,20 @@ const handleMessage = async (e: MessageEvent) => {
       }
       break;
     case "ready":
-      if (!isInit.value) {
-        isInit.value = true;
-        const meta = await getMeta(id.value);
-
-        postMessage("load", {
-          data: meta.data,
-          saveable: saveable(meta.data),
-        });
+      if (!init) {
+        init = true;
+        refresh();
       }
       break;
   }
 };
-
+const refresh = async () => {
+  const meta = await getMeta(id.value);
+  postMessage("load", {
+    data: meta.data,
+    saveable: saveable(meta.data),
+  });
+};
 const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
   if (!saveable) {
     ElMessage({

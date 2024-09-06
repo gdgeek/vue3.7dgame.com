@@ -77,7 +77,7 @@ export default {
   },
   // 登录页面国际化
   login: {
-    title: "苹果AR元气项目",
+    title: "混合现实编程平台",
     register: "平台注册/登录",
     h1: "欢迎！",
     h4: "准备好出发了么？",
