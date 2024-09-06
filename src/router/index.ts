@@ -729,9 +729,6 @@ const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   const can = ability.can.bind(ability);
   route.forEach((route) => { 
    
-    console.error(route.path, route.path,can("open", new AbilityRouter(route.path)))
-   
-    console.error(route.meta?.hidden)
     if (route.meta && !route.meta.hidden) {
       route.meta.hidden = !can("open", new AbilityRouter(route.path))
     }

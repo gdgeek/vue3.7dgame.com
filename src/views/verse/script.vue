@@ -27,7 +27,7 @@
                 style="margin: 0; padding: 0; height: 100%; width: 100%"
                 id="editor"
                 ref="editor"
-                :src="blocklyUrl"
+                :src="src"
               ></iframe>
             </el-main>
           </el-container>
@@ -52,16 +52,28 @@ import {
   Script,
   VerseData,
 } from "@/api/v1/verse";
+import { useAppStore } from "@/store/modules/app";
+const appStore = useAppStore();
 
 const loading = ref(false);
 const script = ref<Script>();
 const verse = ref<VerseData>();
 const route = useRoute();
 const id = computed(() => parseInt(route.query.id as string));
-const blocklyUrl = import.meta.env.VITE_APP_BLOCKLY_URL;
+const src = ref(
+  import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + appStore.language
+);
 let ready: boolean = false;
 const saveable = computed(() => script.value !== null && verse.value!.editable);
 let map = new Map<string, any>();
+
+watch(
+  () => appStore.language, // 监听 language 的变化
+  (newValue, oldValue) => {
+    src.value = import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + newValue;
+    initEditor();
+  }
+);
 
 const postScript = async (message: any) => {
   if (verse.value === null) {

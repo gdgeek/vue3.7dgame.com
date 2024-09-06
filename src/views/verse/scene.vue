@@ -35,6 +35,9 @@ import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
 import { putVerse, getVerse, VerseData } from "@/api/v1/verse";
 import { getPrefab } from "@/api/v1/prefab";
 
+import { useAppStore } from "@/store/modules/app";
+const appStore = useAppStore();
+
 const route = useRoute();
 const router = useRouter();
 const knightDataRef = ref<InstanceType<typeof KnightDataDialog>>();
@@ -45,12 +48,36 @@ const saveable = ref();
 const title = computed(() => route.query.title?.slice(2) as string);
 
 const id = computed(() => parseInt(route.query.id as string));
-const src =
-  import.meta.env.VITE_APP_EDITOR_URL + "/three.js/editor/verse-editor.html";
-
+const src = ref(
+  import.meta.env.VITE_APP_EDITOR_URL +
+    "/three.js/editor/verse-editor.html?language=" +
+    appStore.language
+);
 const editor = ref<HTMLIFrameElement>();
 const cancel = () => {};
 
+//alert(appStore.language);
+
+watch(
+  () => appStore.language, // 监听 language 的变化
+  async (newValue, oldValue) => {
+    src.value =
+      import.meta.env.VITE_APP_EDITOR_URL +
+      "/three.js/editor/verse-editor.html?language=" +
+      newValue;
+    await refresh();
+  }
+);
+const refresh = async () => {
+  const response = await getVerse(id.value, "metas, resources");
+  const verse = response.data;
+  saveable.value = verse ? verse.editable : false;
+  postMessage("load", {
+    id: id.value,
+    data: verse,
+    saveable: saveable.value,
+  });
+};
 const postMessage = (action: string, data: any) => {
   console.error("postMessage", action);
   if (editor.value && editor.value.contentWindow) {
@@ -169,14 +196,7 @@ const handleMessage = async (e: MessageEvent) => {
     case "ready":
       if (!init) {
         init = true;
-        const response = await getVerse(id.value, "metas, resources");
-        const verse = response.data;
-        saveable.value = verse ? verse.editable : false;
-        postMessage("load", {
-          id: id.value,
-          data: verse,
-          saveable: saveable.value,
-        });
+        refresh();
       }
       break;
   }

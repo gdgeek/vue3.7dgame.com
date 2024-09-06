@@ -37,7 +37,7 @@
                 style="margin: 0; padding: 0; height: 100%; width: 100%"
                 id="editor"
                 ref="editor"
-                :src="blocklyUrl"
+                :src="src"
               ></iframe>
             </el-main>
           </el-container>
@@ -54,6 +54,8 @@ import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
 import { cybersType, postCyber, putCyber } from "@/api/v1/cyber";
 import { ElMessage } from "element-plus";
 
+import { useAppStore } from "@/store/modules/app";
+const appStore = useAppStore();
 let ready: boolean = false;
 const editor = ref<HTMLIFrameElement | null>(null);
 const { t } = useI18n();
@@ -67,7 +69,7 @@ const postScript = async (message: any) => {
   }
   if (!meta.value.editable) {
     ElMessage({
-      message:  t("meta.script.error2"),
+      message: t("meta.script.error2"),
       type: "error",
     });
     return;
@@ -99,7 +101,7 @@ const postScript = async (message: any) => {
   }
 
   ElMessage({
-    message:  t("meta.script.success"),
+    message: t("meta.script.success"),
     type: "success",
   });
 };
@@ -117,7 +119,7 @@ const handleMessage = async (e: MessageEvent) => {
       await postScript(params.data);
     } else if (params.action === "post:no-change") {
       ElMessage({
-        message:  t("meta.script.info"),
+        message: t("meta.script.info"),
         type: "info",
       });
     }
@@ -131,7 +133,16 @@ const meta = ref<metaInfo | null>(null);
 const route = useRoute();
 
 const id = computed(() => parseInt(route.query.id as string));
-const blocklyUrl = import.meta.env.VITE_APP_BLOCKLY_URL;
+const src = ref(
+  import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + appStore.language
+);
+watch(
+  () => appStore.language, // 监听 language 的变化
+  (newValue, oldValue) => {
+    src.value = import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + newValue;
+    initEditor();
+  }
+);
 
 const save = () => {
   postMessage("save");
@@ -148,7 +159,7 @@ const postMessage = (action: string, data: any = {}) => {
       "*"
     );
   } else {
-    console.error( t("meta.script.error3"));
+    console.error(t("meta.script.error3"));
     ElMessage({
       type: "error",
     });
