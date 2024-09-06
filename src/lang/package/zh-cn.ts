@@ -105,6 +105,12 @@ export default {
     news: "新闻",
     relatedDownload: "相关下载",
     caseCourse: "案例教程",
+    greeting: {
+      morning: "早上好，",
+      noon: "中午好，",
+      afternoon: "下午好，",
+      evening: "晚上好，",
+    },
     myCreation: {
       title: "我的创作",
       myPolygen: "模型",

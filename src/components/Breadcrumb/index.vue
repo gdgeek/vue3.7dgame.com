@@ -42,7 +42,7 @@ function getBreadcrumb() {
   const first = matched[0];
   if (!isDashboard(first)) {
     matched = [
-      { path: "/dashboard", meta: { title: "dashboard" } } as any,
+      { path: "/home/index", meta: { title: "dashboard" } } as any,
     ].concat(matched);
   }
   breadcrumbs.value = matched.filter((item) => {
