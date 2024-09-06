@@ -77,7 +77,7 @@ export default {
   },
   // 登录页面国际化
   login: {
-    title: "Apple AR Vitality Project",
+    title: "MrPP.com",
     register: "Platform Register/Login",
     h1: "Welcome!",
     h4: "Ready to get started?",
