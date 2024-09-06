@@ -32,7 +32,9 @@ const router = useRouter();
 // 更新页面标题
 
 const updateTitle = (title: string) => {
-  document.title = `${translateRouteTitle(title)} - 7D Game`;
+  document.title = title
+    ? `${translateRouteTitle(title)} - 7D Game`
+    : "7D Game";
 };
 
 // 监听路由变化更新页面标题
