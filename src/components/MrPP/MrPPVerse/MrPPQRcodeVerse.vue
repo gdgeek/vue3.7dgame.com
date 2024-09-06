@@ -19,7 +19,9 @@
     </el-card>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="dialogVisible = false">{{ $t("verse.page.list.toolbar.qrcode.cancel") }}</el-button>
+        <el-button @click="dialogVisible = false">{{
+          $t("verse.page.list.toolbar.qrcode.cancel")
+        }}</el-button>
       </span>
     </template>
   </el-dialog>
@@ -39,7 +41,8 @@ const { t } = useI18n();
 const verseId = computed(() => verse.value?.id ?? -1);
 const dialogTitle = computed(() =>
   verse.value
-    ? t("verse.page.list.toolbar.qrcode.dialogTitle1") + `【${verse.value.name}】。`
+    ? t("verse.page.list.toolbar.qrcode.dialogTitle1") +
+      `【${verse.value.name}】。`
     : t("verse.page.list.toolbar.qrcode.dialogTitle2")
 );
 

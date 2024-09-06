@@ -19,7 +19,7 @@
           @sort="sort"
         >
           <el-tag>
-            <b>选择预设数据</b>
+            <b>{{ $t("verse.view.prefabDialog.title") }}</b>
           </el-tag>
         </mr-p-p-header>
         <el-divider content-position="left">
@@ -63,9 +63,9 @@
                 </el-card>
               </template>
               <div class="clearfix">
-                <el-button size="small" @click="setup({ data: item })"
-                  >选择</el-button
-                >
+                <el-button size="small" @click="setup({ data: item })">{{
+                  $t("verse.view.prefabDialog.select")
+                }}</el-button>
               </div>
               <div class="bottom clearfix"></div>
             </el-card>
@@ -92,9 +92,9 @@
           </el-col>
           <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
             <el-button-group>
-              <el-button size="small" @click="dialogVisible = false"
-                >取消</el-button
-              >
+              <el-button size="small" @click="dialogVisible = false">{{
+                $t("verse.view.prefabDialog.cancel")
+              }}</el-button>
             </el-button-group>
           </el-col>
         </el-row>
@@ -112,6 +112,7 @@ import { BeijingData } from "@/utils/dataChange";
 
 const emit = defineEmits(["selected", "cancel"]);
 const dialogVisible = ref(false);
+const { t } = useI18n();
 const active = ref({
   items: [] as prefabsData[],
   sorted: "-created_at",
@@ -164,7 +165,7 @@ const setup = ({ data }: { data: prefabsData }) => {
 const selected = async (data: any = null) => {
   console.log("data", data);
   if (data) {
-    const title = await input("请输入Model名称");
+    const title = await input(t("verse.view.prefabDialog.input"));
     data.title = title;
     emit("selected", data);
   } else {
@@ -175,16 +176,16 @@ const selected = async (data: any = null) => {
 
 const input = (text: string) => {
   return new Promise<string>((resolve, reject) => {
-    ElMessageBox.prompt(text, "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    ElMessageBox.prompt(text, t("verse.view.prefabDialog.prompt.message"), {
+      confirmButtonText: t("verse.view.prefabDialog.prompt.confirm"),
+      cancelButtonText: t("verse.view.prefabDialog.prompt.cancel"),
     })
       .then(({ value }) => resolve(value))
       .catch(() => {
         reject();
         ElMessage({
           type: "info",
-          message: "取消输入",
+          message: t("verse.view.prefabDialog.prompt.info"),
         });
       });
   });
