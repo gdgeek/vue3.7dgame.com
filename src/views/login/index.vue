@@ -28,7 +28,7 @@
           <h1>{{ $t("login.h1") }}</h1>
           <h4>{{ $t("login.h4") }}</h4>
           <br />
-          <el-tabs style="width: 100%" type="border-card">
+          <el-tabs style="width: 100%" type="border-card" stretch="true">
             <el-tab-pane label="Name & Password">
               <h2 class="login-title">{{ $t("login.loginTitle") }}</h2>
               <el-form
@@ -476,29 +476,6 @@ body {
         font-family: "KaiTi", sans-serif;
         font-size: 18px;
         font-weight: 400;
-      }
-
-      .box3 {
-        align-self: center;
-        width: 350px;
-        height: 300px;
-        margin-top: 20px;
-        margin-bottom: 20px;
-        background-color: #fff;
-        border: 1px solid #ebeefe;
-
-        transition: all 0.3s ease;
-
-        &.dark-theme {
-          background-color: rgb(41, 41, 41);
-          border-color: #1f1f1f;
-          font-style: white;
-        }
-
-        &:hover {
-          box-shadow: 0 0 10px rgb(0 0 0 / 20%);
-          transition: all 0.4s;
-        }
       }
 
       el-button {
