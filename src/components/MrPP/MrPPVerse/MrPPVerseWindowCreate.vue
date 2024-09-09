@@ -8,7 +8,7 @@
     <template #header>
       {{ dialogTitle }}
     </template>
-    <el-form ref="formRef" :rules="rules" :model="info" label-width="80px">
+    <el-form ref="formRef" :rules="rules" :model="info" label-width="auto">
       <el-form-item :label="$t('verse.page.form.picture')">
         <mr-p-p-cropper
           ref="image"

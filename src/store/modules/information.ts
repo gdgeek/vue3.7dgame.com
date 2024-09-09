@@ -18,6 +18,13 @@ export const useInfomationStore = defineStore("information", () => {
       // return [{ name: "上海游七网络科技有限公司", url: "https://u7gm.com" }];
       if (lang.value === "zh-cn") {
         return [{ name: "上海游七网络科技有限公司", url: "https://u7gm.com" }];
+      } else if (lang.value === "ja") {
+        return [
+          {
+            name: "上海遊七ネットワーク技術有限公司",
+            url: "https://u7gm.com",
+          },
+        ];
       } else {
         return [
           {
@@ -30,6 +37,13 @@ export const useInfomationStore = defineStore("information", () => {
     if (lang.value === "zh-cn") {
       return [
         { name: "上海不加班网络科技有限公司", url: "https://bujiaban.com" },
+      ];
+    } else if (lang.value === "ja") {
+      return [
+        {
+          name: "上海残業なしネットワーク技術有限公司",
+          url: "https://bujiaban.com",
+        },
       ];
     } else {
       return [

@@ -98,6 +98,12 @@ export default {
     },
     success: "登录成功",
     error: "表单检验未通过",
+    logout: {
+      message1: "确定注销并退出系统吗？",
+      message2: "提示",
+      confirm: "确定",
+      cancel: "取消",
+    },
   },
   // 主页国际化
   homepage: {
@@ -598,7 +604,7 @@ export default {
       },
       eventEdit: "事件编辑",
       contentEdit: "内容编辑",
-      sava: "信息保存",
+      save: "信息保存",
       metaInfo: "【元数据】信息",
       rules: {
         message1: "请输入名称",

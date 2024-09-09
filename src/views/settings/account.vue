@@ -12,7 +12,7 @@
           <el-form
             ref="emailFormRef"
             :model="emailForm"
-            label-width="100px"
+            label-width="auto"
             style="min-width: 300px"
           >
             <el-form-item
@@ -70,8 +70,8 @@
       </el-row>
       <br />
       <el-row :gutter="24">
-        <el-col :xs="16" :sm="16" :md="10" :lg="6" :xl="6">
-          <el-form label-width="100px" style="min-width: 300px">
+        <el-col :xs="16" :sm="16" :md="10" :lg="9" :xl="6">
+          <el-form label-width="auto" style="min-width: 300px">
             <el-form-item :label="$t('homepage.account.label2')">
               <el-button-group>
                 <el-button type="warning" @click="dialogPasswordVisible = true">
@@ -96,12 +96,12 @@
         style="min-width: 560px"
         @close="resetForm"
       >
-        <template #header> $t('homepage.account.change') </template>
+        <template #header> {{ $t("homepage.account.change") }} </template>
         <el-form
           ref="passwordFormRef"
           :model="passwordForm"
           :rules="passwordRules"
-          label-width="80px"
+          label-width="auto"
         >
           <el-row :gutter="24">
             <el-col :xs="20" :sm="20" :md="14" :lg="14" :xl="14" :offset="4">

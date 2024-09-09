@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-form ref="formRef" :rules="rules" :model="form" label-width="80px">
+    <el-form ref="formRef" :rules="rules" :model="form" label-width="auto">
       <el-form-item :label="$t('verse.view.form.label1')" prop="language">
         <el-select
           @change="handleChange"

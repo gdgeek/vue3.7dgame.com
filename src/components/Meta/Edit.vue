@@ -37,7 +37,7 @@
             :rules="rules"
             v-if="item"
             :model="item"
-            label-width="80px"
+            label-width="auto"
           >
             <el-form-item :label="$t('meta.metaEdit.form.title')" prop="title">
               <el-input v-model="item.title"></el-input>

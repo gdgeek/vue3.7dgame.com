@@ -34,7 +34,7 @@
               class="login-form"
               :rules="rules"
               :model="form"
-              label-width="75px"
+              label-width="auto"
             >
               <el-form-item :label="$t('login.username')" prop="username">
                 <el-input v-model="form.username" suffix-icon="User"></el-input>
@@ -513,7 +513,7 @@ body {
   .login-form {
     max-width: 100%;
     height: 100%;
-    padding: 10px 40px 0 10px;
+    padding: 10px 10px 0 10px;
     margin-top: 36px;
   }
 

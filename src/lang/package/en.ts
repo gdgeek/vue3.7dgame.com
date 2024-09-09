@@ -98,6 +98,12 @@ export default {
     },
     success: "Login Successful",
     error: "Form Validation Failed",
+    logout: {
+      message1: "Are you sure you want to log out and exit the system?",
+      message2: "Prompt",
+      confirm: "Confirm",
+      cancel: "Cancel",
+    },
   },
   // 主页国际化
   homepage: {

@@ -37,7 +37,7 @@
             ref="nickNameFormRef"
             :model="nicknameForm"
             :rules="nicknameRules"
-            label-width="80px"
+            label-width="auto"
           >
             <el-form-item
               :label="$t('homepage.edit.nickname')"
@@ -108,7 +108,7 @@
             ref="ruleFormRef"
             :model="infoForm"
             :rules="infoRules"
-            label-width="80px"
+            label-width="auto"
           >
             <el-form-item :label="$t('homepage.edit.gender')">
               <el-radio-group v-model="infoForm.sex">
