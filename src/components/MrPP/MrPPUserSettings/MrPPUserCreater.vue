@@ -73,7 +73,7 @@
                   class="icon"
                   icon="adjust"
                 ></font-awesome-icon>
-                {{ $t("homepage.myCreation.myUniverse") }}
+                {{ $t("homepage.myCreation.myProject") }}
               </router-link>
             </template>
             {{ creation.verseCount }}

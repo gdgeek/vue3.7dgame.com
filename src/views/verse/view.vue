@@ -154,7 +154,7 @@
         </el-card>
         <br />
 
-        <el-card v-if="can('root', 'all')">
+        <el-card v-if="can('admin', 'all')">
           <el-button
             v-if="!verseOpen"
             style="width: 100%"

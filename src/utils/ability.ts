@@ -120,7 +120,7 @@ export function UpdateAbility(
         roles.includes("user")
       ) {
         
-        can("manager", "all");
+        can("user", "all");
         can("editable", AbilityEditable.name);
         can("viewable", AbilityViewable.name);
         can(["update", "delete"], AbilityWorks.name);
@@ -128,27 +128,24 @@ export function UpdateAbility(
         can("update", AbilityMessage.name);
 
         menu = menu.concat(["/verse-share/open", /^\/trades(\/|$)/]);
-
-        if (roles.includes("root")) {
-          can("root", "all");
-          can("people", AbilityRole.name, { role: "admin" });
-          can("people", AbilityRole.name, { role: "manager" });
-          can("people", AbilityRole.name, { role: "user" });
-          menu = menu.concat([/^\/game(\/|$)/]);
-          menu = menu.concat([/^\/manager(\/|$)/]);
-        }
-        if (roles.includes("admin")) {
-          can("admin", "all");
-          can("people", AbilityRole.name, { role: "manager" });
-          can("people", AbilityRole.name, { role: "user" });
-          menu = menu.concat([/^\/game(\/|$)/]);
-          menu = menu.concat([/^\/manager(\/|$)/]);
-        }
-        if (roles.includes("manager")) {
+        if (roles.includes("root") ||
+          roles.includes("admin") ||
+          roles.includes("manager")) {
           can("manager", "all");
-        }
-        if (roles.includes("user")) {
-          can("user", "all");
+          if (roles.includes("root") ||
+            roles.includes("admin")) {
+            
+            can("admin", "all");
+            can("people", AbilityRole.name, { role: "manager" });
+            can("people", AbilityRole.name, { role: "user" });
+            menu = menu.concat([/^\/game(\/|$)/]);
+            menu = menu.concat([/^\/manager(\/|$)/]);
+
+            if (roles.includes("root")) {
+              can("root", "all");
+              can("people", AbilityRole.name, { role: "admin" });
+            }
+          }
         }
       }
     }

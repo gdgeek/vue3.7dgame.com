@@ -501,7 +501,7 @@ const routes: RouteRecordRaw[] = [
         redirect: "/verse/index",
         name: "",
         meta: {
-          title: "universe.title",
+          title: "project.title",
           icon: "el-icon-sunrise",
           hidden: false,
           alwaysShow: false,
@@ -513,7 +513,7 @@ const routes: RouteRecordRaw[] = [
             component: () => import("@/views/meta-verse/index.vue"),
             name: "VerseIndex",
             meta: {
-              title: "universe.selfGenerated",
+              title: "project.selfGenerated",
               icon: "cascader",
               hidden: false,
             },
@@ -523,7 +523,7 @@ const routes: RouteRecordRaw[] = [
             component: () => import("@/views/meta-verse/open.vue"),
             name: "VerseOpen",
             meta: {
-              title: "universe.systemRecommendation",
+              title: "project.systemRecommendation",
               icon: "cascader",
               hidden: false,
             },
@@ -533,7 +533,7 @@ const routes: RouteRecordRaw[] = [
             component: () => import("@/views/meta-verse/share.vue"),
             name: "VerseShare",
             meta: {
-              title: "universe.shareWithFriends",
+              title: "project.shareWithFriends",
               icon: "cascader",
               hidden: false,
             },
@@ -542,7 +542,7 @@ const routes: RouteRecordRaw[] = [
             path: "/verse/view",
             name: "VerseView",
             meta: {
-              title: "universe.viewTitle",
+              title: "project.viewTitle",
               hidden: true,
             },
             component: () => import("@/views/verse/view.vue"),
@@ -551,7 +551,7 @@ const routes: RouteRecordRaw[] = [
             path: "/verse/script",
             name: "Script",
             meta: {
-              title: "universe.scriptEditor",
+              title: "project.scriptEditor",
               keepAlive: true,
               hidden: true,
             },
@@ -561,7 +561,7 @@ const routes: RouteRecordRaw[] = [
             path: "/verse/scene",
             name: "VerseSceneEditor",
             meta: {
-              title: "universe.sceneEditor",
+              title: "project.sceneEditor",
               keepAlive: true,
               hidden: true,
             },
