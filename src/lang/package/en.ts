@@ -111,6 +111,12 @@ export default {
     news: "News",
     relatedDownload: "RelatedDownload",
     caseCourse: "CaseCourse",
+    greeting: {
+      morning: "Good morning,",
+      noon: "Good noon,",
+      afternoon: "Good afternoon,",
+      evening: "Good evening,",
+    },
     myCreation: {
       title: "Creation",
       myPolygen: "Polygen",

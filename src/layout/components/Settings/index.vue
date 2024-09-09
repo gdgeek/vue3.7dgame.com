@@ -45,7 +45,9 @@
       <el-switch v-model="settingsStore.watermarkEnabled"></el-switch>
     </div>
 
-    <el-divider>{{ $t("settings.navigation") }}</el-divider>
+    <el-divider style="white-space: nowrap">{{
+      $t("settings.navigation")
+    }}</el-divider>
 
     <LayoutSelect
       v-model="settingsStore.layout"
