@@ -56,7 +56,7 @@ export default {
       scriptEditor: "脚本编辑",
       sceneEditor: "场景编辑",
     },
-    universe: {
+    project: {
       title: "宇宙",
       selfGenerated: "自己创造",
       systemRecommendation: "系统推荐",
@@ -110,7 +110,7 @@ export default {
       myPolygen: "模型",
       myPicture: "图片",
       myVideo: "视频",
-      myUniverse: "宇宙",
+      myProject: "宇宙",
       myPublish: "发布",
       myLike: "点赞",
       enter: "进入",

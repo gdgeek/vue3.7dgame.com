@@ -27,33 +27,42 @@
         <div :class="['box2', { 'dark-theme': isDark }]">
           <h1>{{ $t("login.h1") }}</h1>
           <h4>{{ $t("login.h4") }}</h4>
-          <div :class="['box3', { 'dark-theme': isDark }]">
-            <h2 class="login-title">{{ $t("login.loginTitle") }}</h2>
-            <el-form
-              ref="formRef"
-              class="login-form"
-              :rules="rules"
-              :model="form"
-              label-width="75px"
-            >
-              <el-form-item :label="$t('login.username')" prop="username">
-                <el-input v-model="form.username" suffix-icon="User"></el-input>
-              </el-form-item>
-              <el-form-item :label="$t('login.password')" prop="password">
-                <el-input
-                  v-model="form.password"
-                  type="password"
-                  suffix-icon="Lock"
-                ></el-input>
-              </el-form-item>
+          <br />
+          <el-tabs style="width: 100%" type="border-card">
+            <el-tab-pane label="Name & Password">
+              <h2 class="login-title">{{ $t("login.loginTitle") }}</h2>
+              <el-form
+                ref="formRef"
+                class="login-form"
+                :rules="rules"
+                :model="form"
+                label-width="75px"
+              >
+                <el-form-item :label="$t('login.username')" prop="username">
+                  <el-input
+                    v-model="form.username"
+                    suffix-icon="User"
+                  ></el-input>
+                </el-form-item>
+                <el-form-item :label="$t('login.password')" prop="password">
+                  <el-input
+                    v-model="form.password"
+                    type="password"
+                    suffix-icon="Lock"
+                  ></el-input>
+                </el-form-item>
 
-              <el-form-item class="login-button">
-                <el-button style="width: 100%" type="primary" @click="submit">
-                  {{ $t("login.login") }}
-                </el-button>
-              </el-form-item>
-            </el-form>
-            <!-- <div class="login-link">
+                <el-form-item class="login-button">
+                  <el-button style="width: 100%" type="primary" @click="submit">
+                    {{ $t("login.login") }}
+                  </el-button>
+                </el-form-item>
+              </el-form>
+            </el-tab-pane>
+            <el-tab-pane label="Apple ID">Config</el-tab-pane>
+          </el-tabs>
+
+          <!-- <div class="login-link">
           <router-link to="/site/signup">
             <el-link type="primary" :underline="false">注册用户</el-link>
           </router-link>
@@ -63,11 +72,7 @@
           </router-link>
           <br />
         </div> -->
-            <!-- <div v-if="isShow" class="error-message">{{ title }}</div> -->
-          </div>
-          <el-button style="width: 100%" size="small">
-            {{ $t("login.download") }}
-          </el-button>
+          <!-- <div v-if="isShow" class="error-message">{{ title }}</div> -->
         </div>
       </div>
     </div>

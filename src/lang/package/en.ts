@@ -3,8 +3,8 @@ export default {
   route: {
     dashboard: "Dashboard",
     personalCenter: {
-      title: "PersonalCenter",
-      myHomepage: "MyHomepage",
+      title: "Home",
+      myHomepage: "Home Page",
       document: "Document",
       category: "Category",
       processOfCreation: "ProcessOfCreation",
@@ -51,28 +51,28 @@ export default {
     meta: {
       title: "Entity",
       metaList: "List",
-      systemDefault: "SystemDefault",
+      systemDefault: "Prefabs",
       edit: "Edit",
       scriptEditor: "Script",
       sceneEditor: "Scene",
     },
-    universe: {
+    project: {
       title: "Project",
-      selfGenerated: "SelfGenerated",
-      systemRecommendation: "SystemRecommendation",
-      shareWithFriends: "ShareWithFriends",
+      selfGenerated: "Owned",
+      systemRecommendation: "Open",
+      shareWithFriends: "Share",
       viewTitle: "【Project】",
       scriptEditor: "Script",
       sceneEditor: "Scene",
     },
     manager: {
       title: "Management",
-      userManagement: "UserManagement",
+      userManagement: "Users",
     },
     game: {
       title: "Game",
-      gameIndex: "GameSettings",
-      gameMap: "MapSettings",
+      gameIndex: "Settings",
+      gameMap: "Maps",
     },
   },
   // 登录页面国际化
@@ -82,9 +82,9 @@ export default {
     h1: "Welcome!",
     h4: "Ready to get started?",
     loginTitle: "Login Account",
-    username: "Username",
+    username: "Name",
     password: "Password",
-    login: "Login to Platform",
+    login: "Login",
     download: "Download Related Programs",
     rules: {
       username: {
@@ -106,11 +106,11 @@ export default {
     relatedDownload: "RelatedDownload",
     caseCourse: "CaseCourse",
     myCreation: {
-      title: "MyCreation",
+      title: "Creation",
       myPolygen: "Polygen",
       myPicture: "Picture",
       myVideo: "Video",
-      myUniverse: "Universe",
+      myProject: "Project",
       myPublish: "Publish",
       myLike: "Like",
       enter: "Enter",
@@ -214,7 +214,7 @@ export default {
     uploadFile: "Select a voxel (.vox file) and upload it",
     view: {
       title: "VoxelName: ",
-      titleStatement: "Create a 【Universe】 with this voxel",
+      titleStatement: "Create a 【Project】 with this voxel",
       info: {
         title: "VoxelInformation",
         label1: "Item",
@@ -232,7 +232,7 @@ export default {
       },
       update: "Waiting for update",
       prompt: {
-        message1: "Create a 【Universe】 with this voxel",
+        message1: "Create a 【Project】 with this voxel",
         message2: "Prompt",
         confirm: "Confirm",
         cancel: "Cancel",
@@ -285,7 +285,7 @@ export default {
     uploadFile: "Select a polygen (.glb file) and upload it",
     view: {
       title: "PloygenName: ",
-      titleStatement: "Create a 【Universe】 with this polygen",
+      titleStatement: "Create a 【Project】 with this polygen",
       info: {
         title: "PolygenInformation",
         label1: "Item",
@@ -301,7 +301,7 @@ export default {
         delete: "Delete",
       },
       prompt: {
-        message1: "Create a 【Universe】 with this polygen",
+        message1: "Create a 【Project】 with this polygen",
         message2: "Prompt",
         confirm: "Confirm",
         cancel: "Cancel",
@@ -590,9 +590,9 @@ export default {
   // 宇宙部分国际化
   verse: {
     page: {
-      dialogTitle: "Create!【Universe】",
+      dialogTitle: "Create!【Project】",
       dialogSubmit: "Create",
-      title: "Create【Universe】",
+      title: "Create【Project】",
       form: {
         picture: "CoverImage",
         name: "Name",
@@ -621,7 +621,7 @@ export default {
           dialogSubmit: "Confirm",
           confirm: {
             message1:
-              "This action will permanently delete the [Universe]. Do you want to continue?",
+              "This action will permanently delete the [Project]. Do you want to continue?",
             message2: "Prompt",
             confirm: "Confirm",
             cancel: "Cancel",
@@ -640,7 +640,7 @@ export default {
     },
     view: {
       header: "EditInformation",
-      title: "【Universe】Name:",
+      title: "【Project】Name:",
       form: {
         label1: "Multilingual",
         label2: "Name",
@@ -657,11 +657,11 @@ export default {
           message4: "Please enter a description",
         },
       },
-      edit: "Edit【Universe】",
-      eye: "View【Universe】",
-      info: "【Universe】Information",
-      verseOpen: "Open【Universe】",
-      verseClose: "Close【Universe】",
+      edit: "Edit【Project】",
+      eye: "View【Project】",
+      info: "【Project】Information",
+      verseOpen: "Open【Project】",
+      verseClose: "Close【Project】",
       success1: "Edit successful",
       success2: "Submission successful",
       success3: "Deletion successful",
@@ -669,7 +669,7 @@ export default {
       success5: "Sharing stopped",
       error1: "Submission failed",
       error2: "Form validation failed",
-      messageTitle: "【Universe】Name:",
+      messageTitle: "【Project】Name:",
       scene: "scene",
       share: {
         header1: "Share with Other Users",
@@ -684,8 +684,8 @@ export default {
           confirm: "Confirm",
           cancel: "Cancel",
         },
-        title1: "【Universe】Sharing",
-        title2: "ShareWithFriends",
+        title1: "【Project】Sharing",
+        title2: "Share",
         confirm: {
           message1: "Are you sure you want to stop sharing?",
           message2: "Prompt",
@@ -803,8 +803,8 @@ export default {
       delete: "Delete",
       form: {
         label1: "Order",
-        label2: "UniverseID",
-        label3: "UniverseName",
+        label2: "ProjectID",
+        label3: "ProjectName",
         label4: "Action",
         placeholder: "Please enter the order",
         confirm: {
@@ -836,8 +836,8 @@ export default {
       delete: "Delete",
       form: {
         label1: "Order",
-        label2: "UniverseID",
-        label3: "UniverseName",
+        label2: "ProjectID",
+        label3: "ProjectName",
         label4: "Action",
         placeholder: "Please enter the order",
         confirm: {
@@ -877,7 +877,7 @@ export default {
       },
     },
     verseDialog: {
-      title: "Select【Universe】",
+      title: "Select【Project】",
       select: "Select",
       create: "CreateNew",
       cancel: "Cancel",
@@ -892,9 +892,9 @@ export default {
   },
   // MrppHeader国际化
   MrppHeader: {
-    sortByName: "SortByName",
-    sortByTime: "SortByTime",
-    search: "SearchName",
+    sortByName: "Name",
+    sortByTime: "Time",
+    search: "Search",
   },
   // tags国际化
   tags: {

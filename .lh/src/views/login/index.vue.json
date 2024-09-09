@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 22,
+            "activePatchIndex": 24,
             "patches": [
                 {
                     "date": 1721119974502,
@@ -96,6 +96,14 @@
                 {
                     "date": 1725436288359,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -6,9 +6,9 @@\n import { useUserStore } from \"@/store/modules/user\";\n import { LoginData } from \"@/api/auth/model\";\n import { TOKEN_KEY } from \"@/enums/CacheEnum\";\n import AuthAPI from \"@/api/auth/index\";\n-import { initRoutes } from \"@/router\";\n+//import { initRoutes } from \"@/router\";\n import CryptoJS from \"crypto-js\";\n \n const secretKey = \"bujiaban\"; // 密钥\n \n"
+                },
+                {
+                    "date": 1725804425104,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -27,8 +27,9 @@\n         <div :class=\"['box2', { 'dark-theme': isDark }]\">\n           <h1>{{ $t(\"login.h1\") }}</h1>\n           <h4>{{ $t(\"login.h4\") }}</h4>\n           <div :class=\"['box3', { 'dark-theme': isDark }]\">\n+            11\n             <h2 class=\"login-title\">{{ $t(\"login.loginTitle\") }}</h2>\n             <el-form\n               ref=\"formRef\"\n               class=\"login-form\"\n"
+                },
+                {
+                    "date": 1725804430786,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -25,11 +25,10 @@\n     <div class=\"content\">\n       <div :class=\"['box1', { 'dark-theme': isDark }]\">\n         <div :class=\"['box2', { 'dark-theme': isDark }]\">\n           <h1>{{ $t(\"login.h1\") }}</h1>\n-          <h4>{{ $t(\"login.h4\") }}</h4>\n+          <h4>{{ $t(\"login.h4\") }}</h4>11\n           <div :class=\"['box3', { 'dark-theme': isDark }]\">\n-            11\n             <h2 class=\"login-title\">{{ $t(\"login.loginTitle\") }}</h2>\n             <el-form\n               ref=\"formRef\"\n               class=\"login-form\"\n"
                 }
             ],
             "date": 1721119974502,
