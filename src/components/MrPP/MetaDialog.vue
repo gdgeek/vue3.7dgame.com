@@ -13,7 +13,9 @@
           @search="search"
           @sort="sort"
         >
-          <el-tag><b>选择元数据</b></el-tag>
+          <el-tag
+            ><b>{{ $t("verse.view.metaDialog.title") }}</b></el-tag
+          >
         </mr-p-p-header>
         <el-divider content-position="left">
           <el-tag
@@ -55,9 +57,9 @@
               </el-card>
             </template>
             <div class="clearfix">
-              <el-button size="small" @click="selected({ data: item })"
-                >选择</el-button
-              >
+              <el-button size="small" @click="selected({ data: item })">{{
+                $t("verse.view.metaDialog.select")
+              }}</el-button>
             </div>
           </el-card>
           <br />
@@ -84,10 +86,10 @@
           <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
             <el-button-group>
               <el-button type="success" size="small" @click="create">
-                新 建
+                {{ $t("verse.view.metaDialog.create") }}
               </el-button>
               <el-button size="small" @click="dialogVisible = false">
-                取 消
+                {{ $t("verse.view.metaDialog.cancel") }}
               </el-button>
             </el-button-group>
           </el-col>
@@ -110,6 +112,7 @@ const emit = defineEmits(["selected", "cancel"]);
 const verse_id = ref(-1);
 const value = ref(null);
 const dialogVisible = ref(false);
+const { t } = useI18n();
 const active = ref({
   items: [] as metaInfo[],
   sorted: "-created_at",
@@ -169,7 +172,7 @@ const clearSearched = () => {
 
 const selected = async (data: any) => {
   if (data) {
-    const title = await input("请输入Model名称");
+    const title = await input(t("verse.view.metaDialog.input1"));
     data.title = title;
     console.log("metadata", data);
     emit("selected", data);
@@ -181,9 +184,9 @@ const selected = async (data: any) => {
 
 const input = (text: string) => {
   return new Promise<string>((resolve, reject) => {
-    ElMessageBox.prompt(text, "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    ElMessageBox.prompt(text, t("verse.view.metaDialog.prompt.message"), {
+      confirmButtonText: t("verse.view.metaDialog.prompt.confirm"),
+      cancelButtonText: t("verse.view.metaDialog.prompt.cancel"),
     })
       .then(({ value }) => {
         resolve(value);
@@ -192,14 +195,14 @@ const input = (text: string) => {
         reject();
         ElMessage({
           type: "info",
-          message: "取消输入",
+          message: t("verse.view.metaDialog.prompt.info"),
         });
       });
   });
 };
 
 const create = async () => {
-  const name = await input("请输入元数据名称");
+  const name = await input(t("verse.view.metaDialog.input2"));
   const response = await postMeta({
     title: name || "新建元数据",
     custom: 1,

@@ -16,11 +16,14 @@
             @tab-click="handleClick"
           >
             <el-tab-pane
-              label="绑定资源"
+              :label="$t('meta.ResourceDialog.label1')"
               name="binding"
               v-if="metaId != null"
             ></el-tab-pane>
-            <el-tab-pane label="我的资源" name="owner"></el-tab-pane>
+            <el-tab-pane
+              :label="$t('meta.ResourceDialog.label2')"
+              name="owner"
+            ></el-tab-pane>
           </el-tabs>
           <mr-p-p-header
             :sorted="active.sorted"
@@ -29,7 +32,7 @@
             @sort="sort"
           >
             <el-tag>
-              <b>选择资源</b>
+              <b>{{ $t("meta.ResourceDialog.title") }}</b>
             </el-tag>
           </mr-p-p-header>
           <el-divider content-position="left">
@@ -81,7 +84,7 @@
               <div class="clearfix" v-if="metaId != null">
                 <el-button-group v-if="item.id === value">
                   <el-button type="warning" size="small" @click="doEmpty">
-                    取消选择
+                    {{ $t("meta.ResourceDialog.cancelSelect") }}
                   </el-button>
                 </el-button-group>
                 <el-button-group v-else-if="isBinding(item)">
@@ -90,23 +93,23 @@
                     size="small"
                     @click="doSelect(item)"
                   >
-                    选择
+                    {{ $t("meta.ResourceDialog.select") }}
                   </el-button>
                   <el-button
                     type="primary"
                     size="small"
                     @click="doUnbind(item)"
                   >
-                    取消绑定
+                    {{ $t("meta.ResourceDialog.doUnbind") }}
                   </el-button>
                 </el-button-group>
                 <el-button v-else size="small" @click="doBinding(item)">
-                  绑定
+                  {{ $t("meta.ResourceDialog.bind") }}
                 </el-button>
               </div>
               <div class="clearfix" v-else>
                 <el-button type="primary" size="small" @click="doSelect(item)">
-                  选择
+                  {{ $t("meta.ResourceDialog.select") }}
                 </el-button>
               </div>
               <div class="bottom clearfix"></div>
@@ -136,19 +139,19 @@
                     size="small"
                     @click="doSelect(item)"
                   >
-                    选择
+                    {{ $t("meta.ResourceDialog.select") }}
                   </el-button>
                   <el-button
                     type="primary"
                     size="small"
                     @click="doUnbind(item)"
                   >
-                    取消绑定
+                    {{ $t("meta.ResourceDialog.doUnbind") }}
                   </el-button>
                 </el-button-group>
                 <el-button-group v-else>
                   <el-button type="warning" size="small" @click="doEmpty">
-                    取消选择
+                    {{ $t("meta.ResourceDialog.cancelSelect") }}
                   </el-button>
                 </el-button-group>
               </div>
@@ -177,11 +180,11 @@
             </el-col>
             <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
               <el-button-group>
-                <el-button size="small" @click="selected(null)"
-                  >清 空</el-button
-                >
+                <el-button size="small" @click="selected(null)">{{
+                  $t("meta.ResourceDialog.empty")
+                }}</el-button>
                 <el-button size="small" @click="dialogVisible = false">
-                  取 消
+                  {{ $t("meta.ResourceDialog.cancel") }}
                 </el-button>
               </el-button-group>
             </el-col>
@@ -212,6 +215,8 @@ const type = ref("polygen");
 const metaId = ref<number | null>(null);
 const value = ref<any>(null);
 const emit = defineEmits(["selected", "cancel"]);
+
+const { t } = useI18n();
 const binding = ref({
   items: [] as any[],
   sorted: "-created_at",
@@ -377,12 +382,16 @@ const refresh = async () => {
 
 const doUnbind = async (data: any) => {
   try {
-    await ElMessageBox.confirm("是否解除资源绑定?", "解除绑定", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      closeOnClickModal: false,
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("meta.ResourceDialog.confirm1.message1"),
+      t("meta.ResourceDialog.confirm1.message2"),
+      {
+        confirmButtonText: t("meta.ResourceDialog.confirm1.confirm"),
+        cancelButtonText: t("meta.ResourceDialog.confirm1.cancel"),
+        closeOnClickModal: false,
+        type: "warning",
+      }
+    );
 
     for (let i = 0; i < data.metaResources.length; ++i) {
       if (data.metaResources[i].meta_id == metaId.value) {
@@ -391,35 +400,43 @@ const doUnbind = async (data: any) => {
       }
     }
     await refresh();
-    ElMessage.success("解绑成功!");
+    ElMessage.success(t("meta.ResourceDialog.confirm1.success"));
   } catch {
-    ElMessage.info("已取消");
+    ElMessage.info(t("meta.ResourceDialog.confirm1.info"));
   }
 };
 
 const doBinding = async (data: any) => {
   try {
-    await ElMessageBox.confirm("是否将资源绑定到场景?", "绑定资源", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("meta.ResourceDialog.confirm2.message1"),
+      t("meta.ResourceDialog.confirm2.message2"),
+      {
+        confirmButtonText: t("meta.ResourceDialog.confirm2.confirm"),
+        cancelButtonText: t("meta.ResourceDialog.confirm2.cancel"),
+        type: "warning",
+      }
+    );
     const response = await postMetaResource({
       meta_id: metaId.value,
       resource_id: data.id,
     });
     await refresh();
-    ElMessage.success("绑定成功!");
+    ElMessage.success(t("meta.ResourceDialog.confirm2.success"));
 
-    await ElMessageBox.confirm("是否直接确认设置资源?", "确认资源", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("meta.ResourceDialog.confirm2.confirm2.message1"),
+      t("meta.ResourceDialog.confirm2.confirm2.message2"),
+      {
+        confirmButtonText: t("meta.ResourceDialog.confirm2.confirm2.confirm"),
+        cancelButtonText: t("meta.ResourceDialog.confirm2.confirm2.cancel"),
+        type: "warning",
+      }
+    );
     selected(data);
-    ElMessage.success("设置成功!");
+    ElMessage.success(t("meta.ResourceDialog.confirm2.confirm2.success"));
   } catch {
-    ElMessage.info("已取消");
+    ElMessage.info(t("meta.ResourceDialog.info"));
   }
 };
 

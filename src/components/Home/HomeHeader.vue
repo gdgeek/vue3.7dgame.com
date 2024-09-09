@@ -13,9 +13,7 @@
           ></el-avatar>
           <div>
             <div class="home-avatar-info">
-              <h3 class="home-avatar-name">
-                {{ name }}
-              </h3>
+              <h3 class="home-avatar-name">{{ greeting }} {{ name }}</h3>
               <small v-if="textarea != ''" style="color: #777777">
                 {{ textarea }}
               </small>
@@ -46,12 +44,26 @@ const router = useRouter();
 const settingsStore = useSettingsStore();
 
 const isDark = ref(settingsStore.theme === ThemeEnum.DARK);
+const { t } = useI18n();
 
 const name = computed(() => {
   if (userStore.userInfo.data.nickname) {
     return userStore.userInfo.data.nickname;
   } else {
     return userStore.userInfo.data.username;
+  }
+});
+
+const greeting = computed(() => {
+  const hours = new Date().getHours();
+  if (6 < hours && hours < 12) {
+    return t("homepage.greeting.morning");
+  } else if (hours < 13) {
+    return t("homepage.greeting.noon");
+  } else if (hours < 18) {
+    return t("homepage.greeting.afternoon");
+  } else {
+    return t("homepage.greeting.evening");
   }
 });
 

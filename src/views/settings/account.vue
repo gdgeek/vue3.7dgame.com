@@ -3,8 +3,8 @@
     <el-card class="box-card">
       <template #header>
         <div class="clearfix">
-          <h3>账号设置</h3>
-          <small>账号具体内容的配置和修改</small>
+          <h3>{{ $t("homepage.account.title") }}</h3>
+          <small>{{ $t("homepage.account.titleStatement") }}</small>
         </div>
       </template>
       <el-row :gutter="24">
@@ -21,13 +21,17 @@
                 userData.email === null ||
                 !userData.emailBind
               "
-              label="邮箱"
+              :label="$t('homepage.account.label1')"
               prop="email"
               :rules="[
-                { required: true, message: '请输入邮箱', trigger: 'blur' },
+                {
+                  required: true,
+                  message: $t('homepage.account.rules1.message1'),
+                  trigger: 'blur',
+                },
                 {
                   type: 'email',
-                  message: '请输入正确的邮箱地址',
+                  message: $t('homepage.account.rules1.message2'),
                   trigger: ['blur', 'change'],
                 },
               ]"
@@ -36,7 +40,7 @@
                 v-model="emailForm.email"
                 autocomplete="off"
                 type="email"
-                placeholder="绑定邮箱"
+                :placeholder="$t('homepage.account.placeholder')"
               >
                 <template #append>
                   <el-button
@@ -44,8 +48,10 @@
                     @click="postEmail"
                     :class="{ 'hover-blue': true }"
                   >
-                    <div v-if="null === userData.email">绑定</div>
-                    <div v-else>重新绑定</div>
+                    <div v-if="null === userData.email">
+                      {{ $t("homepage.account.bind") }}
+                    </div>
+                    <div v-else>{{ $t("homepage.account.rebind") }}</div>
                   </el-button>
                 </template>
               </el-input>
@@ -54,7 +60,7 @@
             <el-form-item
               v-else
               v-model="emailForm.email"
-              label="邮箱"
+              :label="$t('homepage.account.label1')"
               prop="email"
             >
               <el-tag>{{ userData.email }}</el-tag>
@@ -66,17 +72,17 @@
       <el-row :gutter="24">
         <el-col :xs="16" :sm="16" :md="10" :lg="6" :xl="6">
           <el-form label-width="100px" style="min-width: 300px">
-            <el-form-item label="账户密码">
+            <el-form-item :label="$t('homepage.account.label2')">
               <el-button-group>
                 <el-button type="warning" @click="dialogPasswordVisible = true">
-                  修改密码
+                  {{ $t("homepage.account.change") }}
                 </el-button>
                 <el-button
                   disabled
                   type="warning"
                   @click="dialogPasswordVisible = true"
                 >
-                  找回密码
+                  {{ $t("homepage.account.recover") }}
                 </el-button>
               </el-button-group>
             </el-form-item>
@@ -90,7 +96,7 @@
         style="min-width: 560px"
         @close="resetForm"
       >
-        <template #header> 修改密码 </template>
+        <template #header> $t('homepage.account.change') </template>
         <el-form
           ref="passwordFormRef"
           :model="passwordForm"
@@ -100,7 +106,7 @@
           <el-row :gutter="24">
             <el-col :xs="20" :sm="20" :md="14" :lg="14" :xl="14" :offset="4">
               <el-form-item
-                label="旧的密码"
+                :label="$t('homepage.account.label3')"
                 prop="oldPassword"
                 style="margin-bottom: 26px"
               >
@@ -112,7 +118,7 @@
               </el-form-item>
 
               <el-form-item
-                label="新的密码"
+                :label="$t('homepage.account.label4')"
                 prop="password"
                 style="margin-bottom: 26px"
               >
@@ -124,7 +130,7 @@
               </el-form-item>
 
               <el-form-item
-                label="确认密码"
+                :label="$t('homepage.account.label5')"
                 prop="checkPassword"
                 style="margin-bottom: 26px"
               >
@@ -141,7 +147,7 @@
                   type="primary"
                   @click="resetPassword"
                 >
-                  确认修改
+                  {{ $t("homepage.account.confirm") }}
                 </el-button>
               </el-form-item>
             </el-col>
@@ -161,6 +167,8 @@ import {
   resetPassword as apiResetPassword,
 } from "@/api/user/server";
 import type { FormInstance } from "element-plus";
+
+const { t } = useI18n();
 
 const userStore = useUserStore();
 
@@ -182,14 +190,22 @@ const passwordForm = ref({
 
 const passwordRules = {
   oldPassword: [
-    { required: true, message: "请输入旧密码", trigger: "blur" },
-    { min: 6, message: "密码长度应该大于6", trigger: "blur" },
+    {
+      required: true,
+      message: t("homepage.account.rules2.old.message1"),
+      trigger: "blur",
+    },
+    {
+      min: 6,
+      message: t("homepage.account.rules2.old.message2"),
+      trigger: "blur",
+    },
     {
       validator: (rule: any, value: string, callback: Function) => {
         if (value === "") {
-          callback(new Error("旧密码不能为空"));
+          callback(new Error(t("homepage.account.rules2.old.error1")));
         } else if (value === passwordForm.value.password) {
-          callback(new Error("新密码不能和旧密码一致!"));
+          callback(new Error(t("homepage.account.rules2.old.error2")));
         } else {
           callback();
         }
@@ -198,14 +214,22 @@ const passwordRules = {
     },
   ],
   password: [
-    { required: true, message: "请输入密码", trigger: "blur" },
-    { min: 6, message: "密码长度应该大于6", trigger: "blur" },
+    {
+      required: true,
+      message: t("homepage.account.rules2.new.message1"),
+      trigger: "blur",
+    },
+    {
+      min: 6,
+      message: t("homepage.account.rules2.new.message2"),
+      trigger: "blur",
+    },
     {
       validator: (rule: any, value: string, callback: Function) => {
         if (value === "") {
-          callback(new Error("请输入密码"));
+          callback(new Error(t("homepage.account.rules2.new.error1")));
         } else if (value === passwordForm.value.oldPassword) {
-          callback(new Error("新密码不能和旧密码一致!"));
+          callback(new Error(t("homepage.account.rules2.new.error2")));
         } else {
           if (passwordForm.value.checkPassword !== "") {
             // 如果 passwordForm.checkPassword 不为空，则手动触发确认密码字段的验证。
@@ -218,13 +242,17 @@ const passwordRules = {
     },
   ],
   checkPassword: [
-    { required: true, message: "请输入校验密码", trigger: "blur" },
+    {
+      required: true,
+      message: t("homepage.account.rules2.check.message1"),
+      trigger: "blur",
+    },
     {
       validator: (rule: any, value: string, callback: Function) => {
         if (value === "") {
-          callback(new Error("请再次输入密码"));
+          callback(new Error(t("homepage.account.rules2.check.error1")));
         } else if (value !== passwordForm.value.password) {
-          callback(new Error("两次输入密码不一致!"));
+          callback(new Error(t("homepage.account.rules2.check.error2")));
         } else {
           callback();
         }
@@ -249,12 +277,15 @@ const resetPassword = () => {
           passwordForm.value.oldPassword!,
           passwordForm.value.password!
         );
-        ElMessage.success("密码修改成功");
+        ElMessage.success(t("homepage.account.validate1.success"));
       } catch (error) {
-        ElMessage.error("密码修改失败");
+        ElMessage.error(t("homepage.account.validate1.error1"));
       }
     } else {
-      ElMessage({ type: "error", message: "表单校验未通过" });
+      ElMessage({
+        type: "error",
+        message: t("homepage.account.validate1.error2"),
+      });
     }
   });
 };
@@ -264,12 +295,15 @@ const postEmail = async () => {
     if (valid) {
       try {
         await bindEmail(emailForm.value.email!);
-        ElMessage.success("绑定成功");
+        ElMessage.success(t("homepage.account.validate2.success"));
       } catch (error) {
-        ElMessage.error("绑定失败");
+        ElMessage.error(t("homepage.account.validate2.error1"));
       }
     } else {
-      ElMessage({ type: "error", message: "表单校验未通过" });
+      ElMessage({
+        type: "error",
+        message: t("homepage.account.validate2.error2"),
+      });
     }
   });
 };

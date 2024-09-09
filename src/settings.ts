@@ -11,7 +11,7 @@ const defaultSettings: AppSettings = {
   title: pkg.name,
   version: pkg.version,
   showSettings: true,
-  tagsView: true,
+  tagsView: false, // 标签页
   fixedHeader: true,
   sidebarLogo: true,
   layout: LayoutEnum.LEFT,
