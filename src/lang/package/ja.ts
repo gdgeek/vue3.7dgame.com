@@ -56,7 +56,7 @@ export default {
       scriptEditor: "スクリプトエディタ",
       sceneEditor: "シーンエディタ",
     },
-    universe: {
+    project: {
       title: "宇宙",
       selfGenerated: "自作",
       systemRecommendation: "システム推薦",
