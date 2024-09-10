@@ -113,11 +113,15 @@
             <el-form-item :label="$t('homepage.edit.gender')">
               <el-radio-group v-model="infoForm.sex">
                 <el-radio-button label="man" value="man">
-                  <el-icon><Male></Male></el-icon>
+                  <el-icon>
+                    <Male></Male>
+                  </el-icon>
                   {{ $t("homepage.edit.man") }}
                 </el-radio-button>
                 <el-radio-button label="woman" value="woman">
-                  <el-icon><Female></Female></el-icon>
+                  <el-icon>
+                    <Female></Female>
+                  </el-icon>
                   {{ $t("homepage.edit.woman") }}
                 </el-radio-button>
               </el-radio-group>
@@ -136,7 +140,7 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item
+            <!-- <el-form-item
               :label="$t('homepage.edit.placeOfAbode')"
               prop="selectedOptions"
             >
@@ -147,7 +151,7 @@
                 style="width: 100%"
                 @change="handleChange"
               ></el-cascader>
-            </el-form-item>
+            </el-form-item> -->
             <el-form-item
               :label="$t('homepage.edit.individualResume')"
               prop="textarea"
@@ -197,7 +201,8 @@
               :fixed-box="option.fixedBox"
               :auto-crop-width="option.autoCropWidth"
               :auto-crop-height="option.autoCropHeight"
-            ></VueCropper>
+            >
+            </VueCropper>
           </div>
         </div>
         <template #footer>
@@ -369,36 +374,38 @@ const infoRules = ref<FormRules<InfoType>>({
   ],
 });
 
-const industryOptions = [
-  {
-    label: t("homepage.edit.rules.industry.label1"),
-    value: t("homepage.edit.rules.industry.label1"),
-  },
-  {
-    label: t("homepage.edit.rules.industry.label2"),
-    value: t("homepage.edit.rules.industry.label2"),
-  },
-  {
-    label: t("homepage.edit.rules.industry.label3"),
-    value: t("homepage.edit.rules.industry.label3"),
-  },
-  {
-    label: t("homepage.edit.rules.industry.label4"),
-    value: t("homepage.edit.rules.industry.label4"),
-  },
-  {
-    label: t("homepage.edit.rules.industry.label5"),
-    value: t("homepage.edit.rules.industry.label5"),
-  },
-  {
-    label: t("homepage.edit.rules.industry.label6"),
-    value: t("homepage.edit.rules.industry.label6"),
-  },
-  {
-    label: t("homepage.edit.rules.industry.label7"),
-    value: t("homepage.edit.rules.industry.label7"),
-  },
-];
+const industryOptions = computed(() => {
+  return [
+    {
+      label: t("homepage.edit.rules.industry.label1"),
+      value: t("homepage.edit.rules.industry.label1"),
+    },
+    {
+      label: t("homepage.edit.rules.industry.label2"),
+      value: t("homepage.edit.rules.industry.label2"),
+    },
+    {
+      label: t("homepage.edit.rules.industry.label3"),
+      value: t("homepage.edit.rules.industry.label3"),
+    },
+    {
+      label: t("homepage.edit.rules.industry.label4"),
+      value: t("homepage.edit.rules.industry.label4"),
+    },
+    {
+      label: t("homepage.edit.rules.industry.label5"),
+      value: t("homepage.edit.rules.industry.label5"),
+    },
+    {
+      label: t("homepage.edit.rules.industry.label6"),
+      value: t("homepage.edit.rules.industry.label6"),
+    },
+    {
+      label: t("homepage.edit.rules.industry.label7"),
+      value: t("homepage.edit.rules.industry.label7"),
+    },
+  ];
+});
 
 type optionType = {
   img: string | ArrayBuffer | null; // 裁剪图片的地址
@@ -631,25 +638,31 @@ onMounted(async () => {
     margin-left: 12%;
   }
 }
+
 .box-card {
   margin: 1.6% 1.6% 0.6%;
 }
+
 .box-title {
   line-height: 10px;
   padding: 2px 0;
   margin-left: 1%;
   color: #4d4f52;
 }
+
 .box-margin-bottom {
   margin-bottom: 28px;
 }
+
 .font-color {
   font-weight: 500;
 }
+
 .user-explain {
   font-size: 12px;
   line-height: 20px;
 }
+
 .cropper-content {
   .cropper {
     width: auto;
@@ -662,9 +675,11 @@ onMounted(async () => {
   position: relative;
   overflow: hidden;
 }
+
 .avatar-uploader:hover {
   border-color: #409eff;
 }
+
 .avatar-uploader-icon {
   font-size: 28px;
   color: #8c939d;
@@ -676,6 +691,7 @@ onMounted(async () => {
   margin-right: 12px;
   border-radius: 6px;
 }
+
 .avatar {
   width: 132px;
   height: 132px;

@@ -171,7 +171,7 @@ const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const route = useRoute();
 
-const isDark = ref(settingsStore.theme === ThemeEnum.DARK);
+const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
 const form = ref<LoginData>({
   username: "",
