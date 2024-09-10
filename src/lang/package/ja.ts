@@ -122,7 +122,7 @@ export default {
       myPolygen: "モデル",
       myPicture: "画像",
       myVideo: "ビデオ",
-      myUniverse: "宇宙",
+      myProject: "宇宙",
       myPublish: "公開",
       myLike: "いいね",
       enter: "入る",
