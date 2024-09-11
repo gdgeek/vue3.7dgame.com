@@ -65,10 +65,7 @@
 
           <el-descriptions-item>
             <template #label>
-              <router-link
-                class="info-content-label-link"
-                to="/meta-verse/index"
-              >
+              <router-link class="info-content-label-link" to="/verse/index">
                 <font-awesome-icon
                   class="icon"
                   icon="adjust"

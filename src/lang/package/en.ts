@@ -7,13 +7,13 @@ export default {
       myHomepage: "Home Page",
       document: "Document",
       category: "Category",
-      processOfCreation: "ProcessOfCreation",
+      processOfCreation: "Process Of Creation",
     },
     settings: {
       title: "Settings",
-      accountSetting: "AccountSetting",
-      personalData: "PersonalData",
-      userPresentation: "UserPresentation",
+      accountSetting: "Account Setting",
+      personalData: "Personal Data",
+      userPresentation: "User Presentation",
     },
     resourceManagement: {
       title: "Resource",
@@ -109,7 +109,7 @@ export default {
   homepage: {
     dashboard: "Dashboard",
     news: "News",
-    relatedDownload: "RelatedDownload",
+    relatedDownload: "Related Download",
     caseCourse: "CaseCourse",
     greeting: {
       morning: "Good morning,",
@@ -129,19 +129,19 @@ export default {
       Iliked: "I Liked",
     },
     edit: {
-      title: "EditPersonalData",
-      personalData: "PersonalData",
+      title: "Edit Personal Data",
+      personalData: "Personal Data",
       personalDataStatement:
         "Modify the user nickname, profile picture, and basic information",
       return: "Back to personal center",
-      userNickname: "UserNickname",
+      userNickname: "User Nickname",
       userNicknameStatement:
         "Make you more accessible to the rest of the MrPP community.",
       nickname: "Nickname",
       confirm: "Confirm",
       avatar: "Avatar",
       avatarStatement: "Maximum size 2 MB. JPG, GIF, PNG.",
-      basicInformation: "BasicInformation",
+      basicInformation: "Basic Information",
       basicInformationStatement:
         "Please fill in your basic information for a more fun personalized interaction and experience.",
       gender: "gender",
@@ -149,14 +149,14 @@ export default {
       woman: "Woman",
       industry: "Industry",
       industryStatement: "Please select your industry region",
-      placeOfAbode: "PlaceOfResidence",
-      individualResume: "PersonalProfile",
+      placeOfAbode: "Place Of Residence",
+      individualResume: "Personal Profile",
       individualResumeStatement: "A brief introduction of personal information",
       save: "Save",
       avatarCropping: {
-        title: "AvatarCropping",
-        leftRotation: "LeftRotation",
-        rightRotation: "RightRotation",
+        title: "Avatar Cropping",
+        leftRotation: "Left Rotate",
+        rightRotation: "Right Rotate",
         enlarge: "Enlarge",
         shrink: "Shrink",
         cancel: "Cancel",
@@ -203,9 +203,9 @@ export default {
   },
   // 体素管理国际化
   voxel: {
-    uploadVoxel: "UploadVoxel",
-    initializeVoxelData: "InitVoxelData",
-    viewVoxel: "ViewVoxel",
+    uploadVoxel: "Upload Voxel",
+    initializeVoxelData: "Init The Voxel Data",
+    viewVoxel: "View Voxel",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit voxel name",
@@ -225,20 +225,20 @@ export default {
     },
     uploadFile: "Select a voxel (.vox file) and upload it",
     view: {
-      title: "VoxelName: ",
+      title: "Voxel Name: ",
       titleStatement: "Create a 【Project】 with this voxel",
       info: {
-        title: "VoxelInformation",
+        title: "Voxel Information",
         label1: "Item",
         label2: "Content",
-        item1: "VoxelName",
+        item1: "Voxel Name",
         item2: "Creator",
-        item3: "CreationTime",
-        item4: "FileSize",
+        item3: "Creation Time",
+        item4: "File Size",
         size: "Bytes",
-        item5: "VoxelDimensions",
-        item6: "VoxelCenter",
-        item7: "VoxelCount",
+        item5: "Voxel Dimensions",
+        item6: "Voxel Center",
+        item7: "Voxel Count",
         name: "Rename",
         delete: "Delete",
       },
@@ -274,9 +274,9 @@ export default {
   },
   // 模型管理国际化
   polygen: {
-    uploadPolygen: "UploadPolygen",
-    initializePolygenData: "InitPolygenData",
-    viewPolygen: "ViewPolygen",
+    uploadPolygen: "Upload Polygen",
+    initializePolygenData: "Init The Polygen Data",
+    viewPolygen: "View Polygen",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Polygen name",
@@ -296,19 +296,19 @@ export default {
     },
     uploadFile: "Select a polygen (.glb file) and upload it",
     view: {
-      title: "PloygenName: ",
+      title: "Ploygen Name: ",
       titleStatement: "Create a 【Project】 with this polygen",
       info: {
-        title: "PolygenInformation",
+        title: "Polygen Information",
         label1: "Item",
         label2: "Content",
-        item1: "PolygenName",
+        item1: "Polygen Name",
         item2: "Creator",
-        item3: "CreationTime",
-        item4: "FileSize",
+        item3: "Creation Time",
+        item4: "File Size",
         size: "Bytes",
-        item5: "PolygenDimensions",
-        item6: "PolygenCenter",
+        item5: "Polygen Dimensions",
+        item6: "Polygen Center",
         name: "Rename",
         delete: "Delete",
       },
@@ -343,8 +343,8 @@ export default {
   },
   // 图片管理国际化
   picture: {
-    uploadPicture: "UploadPicture",
-    initializePictureData: "InitPictureData",
+    uploadPicture: "Upload Picture",
+    initializePictureData: "Init The Picture Data",
     viewPicture: "ViewPicture",
     prompt: {
       message1: "Please enter a new name",
@@ -365,18 +365,18 @@ export default {
     },
     uploadFile: "Select a picture and upload it",
     view: {
-      title: "PictureName: ",
+      title: "Picture Name: ",
       loadingText: "Preprocessing in progres",
       info: {
-        title: "PictureInformation",
+        title: "Picture Information",
         label1: "Item",
         label2: "Content",
-        item1: "PictureName",
+        item1: "Picture Name",
         item2: "Creator",
-        item3: "CreationTime",
-        item4: "FileSize",
+        item3: "Creation Time",
+        item4: "File Size",
         size: "Bytes",
-        item5: "PictureDimensions",
+        item5: "Picture Dimensions",
         name: "Rename",
         delete: "Delete",
       },
@@ -401,9 +401,9 @@ export default {
   },
   // 视频管理国际化
   video: {
-    uploadVideo: "UploadVideo",
-    initializeVideoData: "InitVideoData",
-    viewVideo: "ViewVideo",
+    uploadVideo: "Upload Video",
+    initializeVideoData: "Init The VideoData",
+    viewVideo: "View Video",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Video name",
@@ -423,17 +423,17 @@ export default {
     },
     uploadFile: "Select a video and upload it",
     view: {
-      title: "VideoName: ",
+      title: "Video Name: ",
       info: {
-        title: "VideoInformation",
+        title: "Video Information",
         label1: "Item",
         label2: "Content",
-        item1: "VideoName",
+        item1: "Video Name",
         item2: "Creator",
-        item3: "CreationTime",
-        item4: "FileSize",
+        item3: "Creation Time",
+        item4: "File Size",
         size: "Bytes",
-        item5: "VideoDimensions",
+        item5: "Video Dimensions",
         name: "Rename",
         delete: "Delete",
       },
@@ -458,9 +458,9 @@ export default {
   },
   // 音频管理国际化
   audio: {
-    uploadAudio: "UploadAudio",
-    initializeAudioData: "InitAudioData",
-    viewAudio: "ViewAudio",
+    uploadAudio: "Upload Audio",
+    initializeAudioData: "Init The Audio Data",
+    viewAudio: "View Audio",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Audio name",
@@ -480,15 +480,15 @@ export default {
     },
     uploadFile: "Select a audio and upload it",
     view: {
-      title: "AudioName: ",
+      title: "Audio Name: ",
       info: {
-        title: "AudioInformation",
+        title: "Audio Information",
         label1: "Item",
         label2: "Content",
-        item1: "AudioName",
+        item1: "Audio Name",
         item2: "Creator",
-        item3: "CreationTime",
-        item4: "FileSize",
+        item3: "Creation Time",
+        item4: "File Size",
         size: "Bytes",
         name: "Rename",
         delete: "Delete",
@@ -514,7 +514,7 @@ export default {
   },
   // 文件上传国际化
   upload: {
-    title: "SelectFile",
+    title: "Select File",
     declared: "Please select a file in the appropriate format for upload",
     item1: {
       title: "Preprocessing",
@@ -522,24 +522,24 @@ export default {
       declared: "Calculate the MD5 hash of the file",
     },
     item2: {
-      title: "UploadFile",
+      title: "Upload File",
       failed: "File upload failed",
       declared: "The file is being sent to the server",
     },
     item3: {
-      title: "SaveInformation",
+      title: "Save Information",
       failed: "Database storage failed",
       declared: "File data is stored in the database",
     },
   },
   // 元数据国际化
   meta: {
-    title: "Create【Metadata】",
+    title: "Create【Entity】",
     edit: "Edit",
     delete: "Delete",
     confirm: {
       message1:
-        "This action will permanently delete the 【Metadata】. Do you want to continue?",
+        "This action will permanently delete the 【Entity】. Do you want to continue?",
       message2: "Prompt",
       confirm: "Confirm",
       cancel: "Cancel",
@@ -547,31 +547,31 @@ export default {
       info: "Deletion canceled",
     },
     prompt: {
-      message1: "Please enter a metadata name",
+      message1: "Please enter a entity name",
       message2: "Prompt (3-20 characters)",
       confirm: "Confirm",
       cancel: "Cancel",
       inputValidator: {
-        item1: "Metadata name cannot be empty",
-        item2: "Metadata name cannot be less than 3 characters",
-        item3: "Metadata name cannot be more than 20 characters",
+        item1: "Entity name cannot be empty",
+        item2: "Entity name cannot be less than 3 characters",
+        item3: "Entity name cannot be more than 20 characters",
       },
-      success: "The metadata name is: ",
+      success: "The entity name is: ",
       info: "cancel input",
     },
     metaEdit: {
-      title: "【Metadata】Name:",
+      title: "【Entity】Name:",
       form: {
         title: "Name",
-        input: "InputEvent",
-        output: "OutputEvent",
+        input: "Input Event",
+        output: "Output Event",
         data: "Data",
         info: "Information",
       },
-      eventEdit: "EventEditing",
-      contentEdit: "ContentEditing",
-      save: "SaveInformation",
-      metaInfo: "【Metadata】Information",
+      eventEdit: "Event Editing",
+      contentEdit: "Content Editing",
+      save: "Save Information",
+      metaInfo: "【Entity】Information",
       rules: {
         message1: "Please enter a name",
         message2: "Length should be between 3 and 20 characters",
@@ -593,10 +593,44 @@ export default {
     },
     eventDialog: {
       title: "Event Management Window",
-      output: "OutputEvent",
-      input: "InputEvent",
+      output: "Output Event",
+      input: "Input Event",
       cancel: "Cancel",
       confirm: "Confirm",
+    },
+    ResourceDialog: {
+      label1: "Bind Resource",
+      label2: "My Resource",
+      title: "Select Resource",
+      cancelSelect: "Cancel Selection",
+      select: "Select",
+      doUnbind: "Unbind",
+      bind: "Bind",
+      empty: "Clear",
+      cancel: "Cancel",
+      confirm1: {
+        message1: "Unbind the resource?",
+        message2: "Unbind",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "Unbind Successful!",
+        info: "Cancelled",
+      },
+      confirm2: {
+        message1: "Bind the resource to the scene?",
+        message2: "Bind Resource",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "Bind Successful!",
+        confirm2: {
+          message1: "Directly confirm the resource settings?",
+          message2: "Confirm Resource",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          success: "Settings Successful!",
+        },
+      },
+      info: "Cancelled",
     },
   },
   // 宇宙部分国际化
@@ -606,12 +640,12 @@ export default {
       dialogSubmit: "Create",
       title: "Create【Project】",
       form: {
-        picture: "CoverImage",
+        picture: "Cover Image",
         name: "Name",
         description: "Description",
-        course: "BindCourse",
+        course: "Bind Course",
         cancel: "Cancel",
-        dialogTitle: "SelectFile",
+        dialogTitle: "Select File",
         dialogSubmit: "Confirm",
         rules: {
           message1: "Please enter an activity name",
@@ -625,11 +659,11 @@ export default {
         infoContent: {
           author: "Author",
           learn: "Learn",
-          blank: "DefaultLink",
+          blank: "Default Link",
           description: "Description",
         },
         toolbar: {
-          dialogTitle: "EditData",
+          dialogTitle: "Edit Data",
           dialogSubmit: "Confirm",
           confirm: {
             message1:
@@ -651,7 +685,7 @@ export default {
       },
     },
     view: {
-      header: "EditInformation",
+      header: "Edit Information",
       title: "【Project】Name:",
       form: {
         label1: "Multilingual",
@@ -688,8 +722,8 @@ export default {
         header2: "Edit Sharing Information",
         form: {
           label1: "Username",
-          label2: "RelatedInfo",
-          label3: "EditPerm",
+          label2: "Related Info",
+          label3: "Edit Permission",
           placeholder: "Please enter a username",
           ruleMessage: "Username cannot be empty",
           label4: "Editable",
@@ -708,10 +742,10 @@ export default {
         },
       },
       message: {
-        header: "EditContent",
+        header: "Edit Content",
         loading: "Loading...",
-        update: "UpdateContent",
-        delete: "DeletePost",
+        update: "Update Content",
+        delete: "Delete Post",
         like: "Like",
         edit: "edited on",
         message1: "Undo",
@@ -762,16 +796,42 @@ export default {
         reset: "Reset",
         success: "Post submitted successfully",
       },
+      metaDialog: {
+        title: "Select Entity",
+        select: "Select",
+        create: "Create New",
+        cancel: "Cancel",
+        input1: "Please enter Model name",
+        input2: "Please enter Entity name",
+        prompt: {
+          message: "Prompt",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          info: "Cancel Input",
+        },
+      },
+      prefabDialog: {
+        title: "Select Prefab Data",
+        select: "Select",
+        cancel: "Cancel",
+        input: "Please enter Model name",
+        prompt: {
+          message: "Prompt",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          info: "Cancel Input",
+        },
+      },
     },
   },
   // 管理部分国际化
   manager: {
-    title: "AddUser",
+    title: "Add User",
     creator: {
       form: {
         label1: "Username",
         label2: "Password",
-        label3: "ConfirmPassword",
+        label3: "Confirm Password",
         message1: "Please enter the username",
         message2: "Username must be more than 5 characters",
         message3: "Avoid using Chinese characters in the username",
@@ -790,8 +850,8 @@ export default {
       label: "Perms:",
       cancel: "Delete",
       roles: {
-        root: "RootUser",
-        admin: "SuperAdministrator",
+        root: "Root User",
+        admin: "Super Administrator",
         manager: "Administrator",
         user: "User",
       },
@@ -815,8 +875,8 @@ export default {
       delete: "Delete",
       form: {
         label1: "Order",
-        label2: "ProjectID",
-        label3: "ProjectName",
+        label2: "Project ID",
+        label3: "Project Name",
         label4: "Action",
         placeholder: "Please enter the order",
         confirm: {
@@ -842,14 +902,14 @@ export default {
     map: {
       title1: "Level ",
       title2: " Map",
-      addGuide: "AddLevel",
-      addMap: "AddMap",
+      addGuide: "Add Level",
+      addMap: "Add Map",
       removeMap: "RemoveMap",
       delete: "Delete",
       form: {
         label1: "Order",
-        label2: "ProjectID",
-        label3: "ProjectName",
+        label2: "Project ID",
+        label3: "Project Name",
         label4: "Action",
         placeholder: "Please enter the order",
         confirm: {
@@ -891,7 +951,7 @@ export default {
     verseDialog: {
       title: "Select【Project】",
       select: "Select",
-      create: "CreateNew",
+      create: "Create New",
       cancel: "Cancel",
       prompt: {
         message1: "Please enter the metadata name",
@@ -922,8 +982,8 @@ export default {
   navbar: {
     dashboard: "Dashboard",
     logout: "Logout",
-    AccountSetting: "AccountSetting",
-    personalCenter: "PersonalCenter",
+    AccountSetting: "Account Setting",
+    personalCenter: "Home Page",
     helpSupport: "Help & Support",
   },
   sizeSelect: {
