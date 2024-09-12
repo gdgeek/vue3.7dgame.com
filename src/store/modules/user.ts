@@ -1,6 +1,6 @@
 import AuthAPI from "@/api/auth";
 import UserAPI from "@/api/user";
-import { initRoutes, resetRouter } from "@/router";
+import { resetRouter } from "@/router";
 import { store } from "@/store";
 import { LoginData, LoginResult } from "@/api/auth/model";
 import { getUserInfoData, InfoType } from "@/api/user/model";

@@ -10,15 +10,18 @@ export class AbilityEditable {
   constructor(public editable: boolean) {}
 }
 
-
 export class AbilityRole {
- 
   public role: string;
   constructor(public roles: string[]) {
-    this.role = roles.includes("root") ? "root" :
-      roles.includes("admin") ? "admin" :
-        roles.includes("manager") ? "manager" :
-          roles.includes("user") ? "user" : "guest";
+    this.role = roles.includes("root")
+      ? "root"
+      : roles.includes("admin")
+        ? "admin"
+        : roles.includes("manager")
+          ? "manager"
+          : roles.includes("user")
+            ? "user"
+            : "guest";
   }
 }
 
@@ -119,7 +122,6 @@ export function UpdateAbility(
         roles.includes("manager") ||
         roles.includes("user")
       ) {
-        
         can("user", "all");
         can("editable", AbilityEditable.name);
         can("viewable", AbilityViewable.name);
@@ -128,13 +130,13 @@ export function UpdateAbility(
         can("update", AbilityMessage.name);
 
         menu = menu.concat(["/verse-share/open", /^\/trades(\/|$)/]);
-        if (roles.includes("root") ||
+        if (
+          roles.includes("root") ||
           roles.includes("admin") ||
-          roles.includes("manager")) {
+          roles.includes("manager")
+        ) {
           can("manager", "all");
-          if (roles.includes("root") ||
-            roles.includes("admin")) {
-            
+          if (roles.includes("root") || roles.includes("admin")) {
             can("admin", "all");
             can("people", AbilityRole.name, { role: "manager" });
             can("people", AbilityRole.name, { role: "user" });
