@@ -221,7 +221,9 @@ const editor = () => {
     console.log("sceneRoute", sceneRoute);
     // 如果找到了路由对象并且它有 meta.title，就进行拼接
     if (sceneRoute && sceneRoute.meta.title) {
-      const metaTitle = translateRouteTitle(sceneRoute.meta.title) as string;
+      const metaTitle = translateRouteTitle(
+        sceneRoute.meta.title
+      ).toLowerCase();
       router.push({
         path: "/meta/scene",
         query: {

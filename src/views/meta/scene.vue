@@ -29,6 +29,7 @@ import { putMeta, getMeta } from "@/api/v1/meta";
 import path from "path-browserify";
 
 import { useAppStore } from "@/store/modules/app";
+import { translateRouteTitle } from "@/utils/i18n";
 const appStore = useAppStore();
 const route = useRoute();
 const router = useRouter();
@@ -119,7 +120,9 @@ const handleMessage = async (e: MessageEvent) => {
           .find((route) => route.path === "/meta/script");
 
         if (scriptRoute && scriptRoute.meta.title) {
-          const metaTitle = scriptRoute.meta.title as string;
+          const metaTitle = translateRouteTitle(
+            scriptRoute.meta.title
+          ).toLowerCase();
 
           router.push({
             path: "/meta/script",

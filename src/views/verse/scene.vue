@@ -36,7 +36,9 @@ import { putVerse, getVerse, VerseData } from "@/api/v1/verse";
 import { getPrefab } from "@/api/v1/prefab";
 
 import { useAppStore } from "@/store/modules/app";
+import { translateRouteTitle } from "@/utils/i18n";
 const appStore = useAppStore();
+const { t } = useI18n();
 
 const route = useRoute();
 const router = useRouter();
@@ -91,7 +93,7 @@ const postMessage = (action: string, data: any) => {
     );
   } else {
     ElMessage({
-      message: "没有编辑器",
+      message: t("verse.view.sceneEditor.error1"),
       type: "error",
     });
   }
@@ -112,7 +114,7 @@ const addPrefab = () => {
   prefabDialogRef.value?.open(id.value);
   ElMessage({
     type: "info",
-    message: "添加预设",
+    message: t("verse.view.sceneEditor.info1"),
   });
 };
 
@@ -120,7 +122,7 @@ const addMeta = () => {
   metaDialogRef.value?.open(id.value);
   ElMessage({
     type: "info",
-    message: "添加模块",
+    message: t("verse.view.sceneEditor.info2"),
   });
 };
 
@@ -137,7 +139,7 @@ const saveVerse = async (data: any) => {
   if (!saveable.value) {
     ElMessage({
       type: "info",
-      message: "没有保存权限!",
+      message: t("verse.view.sceneEditor.info3"),
     });
     return;
   }
@@ -145,7 +147,7 @@ const saveVerse = async (data: any) => {
   await putVerse(id.value, { data: JSON.stringify(verse) });
   ElMessage({
     type: "success",
-    message: "场景保存成功!!!",
+    message: t("verse.view.sceneEditor.success"),
   });
 };
 
@@ -182,7 +184,9 @@ const handleMessage = async (e: MessageEvent) => {
           .getRoutes()
           .find((route) => route.path === "/verse/script");
         if (scriptRoute && scriptRoute.meta.title) {
-          const metaTitle = scriptRoute.meta.title as string;
+          const metaTitle = translateRouteTitle(
+            scriptRoute.meta.title
+          ).toLowerCase();
           router.push({
             path: "/verse/script",
             query: {

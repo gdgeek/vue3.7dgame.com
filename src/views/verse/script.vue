@@ -5,7 +5,7 @@
         <el-card :loading="loading" class="box-card">
           <template #header>
             <div v-if="verse" class="clearfix">
-              {{ verse.name }} / 【脚本】
+              {{ verse.name }} / 【{{ $t("verse.view.script.title") }}】
 
               <el-button-group style="float: right">
                 <el-button
@@ -15,7 +15,7 @@
                   @click="save"
                 >
                   <font-awesome-icon icon="save"></font-awesome-icon>
-                  保存脚本
+                  {{ $t("verse.view.script.save") }}
                 </el-button>
               </el-button-group>
             </div>
@@ -55,6 +55,8 @@ import {
 import { useAppStore } from "@/store/modules/app";
 const appStore = useAppStore();
 
+const { t } = useI18n();
+
 const loading = ref(false);
 const script = ref<Script>();
 const verse = ref<VerseData>();
@@ -78,14 +80,14 @@ watch(
 const postScript = async (message: any) => {
   if (verse.value === null) {
     ElMessage({
-      message: "没有信息",
+      message: t("verse.view.script.error1"),
       type: "error",
     });
     return;
   }
   if (!verse.value!.editable) {
     ElMessage({
-      message: "没有编辑权限",
+      message: t("verse.view.script.error2"),
       type: "error",
     });
     return;
@@ -112,7 +114,7 @@ const postScript = async (message: any) => {
   }
 
   ElMessage({
-    message: "保存成功",
+    message: t("verse.view.script.success"),
     type: "success",
   });
 };
@@ -130,7 +132,7 @@ const handleMessage = async (e: MessageEvent) => {
     await postScript(params.data);
   } else if (params.action === "post:no-change") {
     ElMessage({
-      message: "没有修改",
+      message: t("verse.view.script.info"),
       type: "info",
     });
   }
@@ -152,7 +154,7 @@ const postMessage = (action: string, data: any = {}) => {
       "*"
     );
   } else {
-    console.error("没有编辑器");
+    console.error(t("verse.view.script.error3"));
     ElMessage({
       type: "error",
     });

@@ -57,15 +57,22 @@
                     fit="contain"
                     :url="item.image.url"
                   ></LazyImg>
-                  <div style="width: 100%; text-align: center">
-                    {{ BeijingData(item.created_at) }}
+                  <div
+                    v-if="item.created_at"
+                    style="width: 100%; text-align: center"
+                  >
+                    <!-- {{ BeijingData(item.created_at) }} -->
+                    {{ item.created_at }}
                   </div>
                 </el-card>
               </template>
               <div class="clearfix">
-                <el-button size="small" @click="setup({ data: item })">{{
-                  $t("verse.view.prefabDialog.select")
-                }}</el-button>
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="setup({ data: item })"
+                  >{{ $t("verse.view.prefabDialog.select") }}</el-button
+                >
               </div>
               <div class="bottom clearfix"></div>
             </el-card>
@@ -248,7 +255,6 @@ const transformToViewCard = (items: prefabsData[]): ViewCard[] => {
       uuid: item.uuid,
       image_id: item.image_id,
       image: item.image,
-      created_at: item.created_at,
       resources: item.resources,
     };
   });

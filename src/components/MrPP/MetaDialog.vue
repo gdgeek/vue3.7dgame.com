@@ -51,15 +51,15 @@
                   fit="contain"
                   :url="item.image.url"
                 ></LazyImg>
-                <div style="width: 100%; text-align: center">
-                  {{ BeijingData(item.created_at) }}
-                </div>
               </el-card>
             </template>
             <div class="clearfix">
-              <el-button size="small" @click="selected({ data: item })">{{
-                $t("verse.view.metaDialog.select")
-              }}</el-button>
+              <el-button
+                type="primary"
+                size="small"
+                @click="selected({ data: item })"
+                >{{ $t("verse.view.metaDialog.select") }}</el-button
+              >
             </div>
           </el-card>
           <br />

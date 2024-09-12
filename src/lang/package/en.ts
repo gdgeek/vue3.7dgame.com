@@ -200,6 +200,54 @@ export default {
         error2: "Form validation failed",
       },
     },
+    account: {
+      title: "Account Settings",
+      titleStatement: "Configuration and modification of account details",
+      label1: "Email",
+      rules1: {
+        message1: "Please enter your email",
+        message2: "Please enter a valid email address",
+      },
+      placeholder: "Bind Email",
+      bind: "Bind",
+      rebind: "Rebind",
+      label2: "Account Password",
+      change: "Change Password",
+      recover: "Recover Password",
+      label3: "Old Password",
+      label4: "New Password",
+      label5: "Confirm Password",
+      confirm: "Confirm Changes",
+      rules2: {
+        old: {
+          message1: "Please enter the old password",
+          message2: "The old password must be longer than 6 characters",
+          error1: "Old password cannot be empty",
+          error2: "New password cannot be the same as the old one!",
+        },
+        new: {
+          message1: "Please enter the new password",
+          message2: "The new password must be longer than 6 characters",
+          error1: "Please enter the password",
+          error2: "New password cannot be the same as the old one!",
+        },
+        check: {
+          message: "Please enter the confirmation password",
+          error1: "Please re-enter the password",
+          error2: "The two passwords do not match",
+        },
+      },
+      validate1: {
+        success: "Password changed successfully",
+        error1: "Password change failed",
+        error2: "Form validation failed",
+      },
+      validate2: {
+        success: "Email bound successfully",
+        error1: "Email binding failed",
+        error2: "Form validation failed",
+      },
+    },
   },
   // 体素管理国际化
   voxel: {
@@ -345,7 +393,7 @@ export default {
   picture: {
     uploadPicture: "Upload Picture",
     initializePictureData: "Init The Picture Data",
-    viewPicture: "ViewPicture",
+    viewPicture: "View Picture",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Polygen name",
@@ -821,6 +869,22 @@ export default {
           cancel: "Cancel",
           info: "Cancel Input",
         },
+      },
+      sceneEditor: {
+        error1: "No editor available",
+        info1: "Add Prefab",
+        info2: "Add Entity",
+        info3: "No save permissions",
+        success: "Scene saved successfully",
+      },
+      script: {
+        title: "Script",
+        save: "Save Script",
+        error1: "No information",
+        error2: "No edit permissions",
+        error3: "No editor available",
+        success: "Saved successfully",
+        info: "No changes made",
       },
     },
   },
