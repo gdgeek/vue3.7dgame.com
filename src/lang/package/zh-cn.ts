@@ -618,6 +618,7 @@ export default {
       success: "场景保存成功~",
     },
     script: {
+      title: "脚本",
       save: "保存",
       error1: "没有元信息",
       error2: "没有编辑权限",

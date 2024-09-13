@@ -623,6 +623,7 @@ export default {
       success: "シーン保存成功~",
     },
     script: {
+      title: "スクリプト",
       save: "保存",
       error1: "メタ情報がありません",
       error2: "編集権限がありません",

@@ -632,6 +632,7 @@ export default {
       success: "Scene saved successfully~",
     },
     script: {
+      title: "Script",
       save: "Save",
       error1: "No metadata available",
       error2: "No permission to edit",

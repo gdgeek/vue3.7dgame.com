@@ -14,7 +14,10 @@
                   size="small"
                   @click="save"
                 >
-                  <font-awesome-icon icon="save"></font-awesome-icon>
+                  <font-awesome-icon
+                    class="icon"
+                    icon="save"
+                  ></font-awesome-icon>
                   {{ $t("verse.view.script.save") }}
                 </el-button>
               </el-button-group>
@@ -249,3 +252,9 @@ onMounted(async () => {
   }
 });
 </script>
+
+<style scoped>
+.icon {
+  margin-right: 5px;
+}
+</style>
