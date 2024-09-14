@@ -47,7 +47,11 @@ const prefabDialogRef = ref<InstanceType<typeof PrefabDialog>>();
 const metaDialogRef = ref<InstanceType<typeof MetaDialog>>();
 let init = false;
 const saveable = ref();
-const title = computed(() => route.query.title?.slice(2) as string);
+// const title = computed(() => route.query.title?.slice(2) as string);
+const title = computed(() => {
+  const match = (route.query.title as string)?.match(/【(.*?)】/);
+  return match ? match[0] : "";
+});
 
 const id = computed(() => parseInt(route.query.id as string));
 const src = ref(
