@@ -77,6 +77,7 @@ export default {
   },
   // 登录页面国际化
   login: {
+    appleLoginFail: "苹果登录失败",
     title: "混合现实编程平台",
     register: "平台注册/登录",
     h1: "欢迎！",

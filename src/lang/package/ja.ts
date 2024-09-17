@@ -77,6 +77,7 @@ export default {
   },
   // 登录页面国际化
   login: {
+    appleLoginFail: "Appleログインに失敗しました",
     title: "MrPP.com",
     register: "プラットフォーム登録/ログイン",
     h1: "ようこそ！",

@@ -19,7 +19,6 @@
             style="margin-left: 25px"
           ></lang-select>
         </div>
-        <el-button>{{ $t("login.register") }}</el-button>
       </div>
     </div>
     <div class="content">
@@ -208,7 +207,9 @@ const saveLoginData = () => {
   localStorage.setItem("expirationTime", expirationTime.toString());
 };
 const onFailure = async (error: any) => {
-  alert(JSON.stringify(error));
+  //"login.apple.failure"
+  ElMessage({ type: "error", message: t("verse.view.message.confirm.info") });
+  // alert(JSON.stringify(error));
   console.error(error);
   return;
 };
