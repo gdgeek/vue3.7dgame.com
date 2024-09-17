@@ -59,7 +59,19 @@
                 </el-form-item>
               </el-form>
             </el-tab-pane>
-            <el-tab-pane label="Apple ID">Config</el-tab-pane>
+            <el-tab-pane label="Apple ID">
+              <vue-apple-login
+                class="appleid_button"
+                width="100%"
+                height="100px"
+                mode="center-align"
+                type="sign in"
+                color="white"
+                state="tttt2"
+                :onSuccess="onSuccess"
+                :onFailure="onFailure"
+              />
+            </el-tab-pane>
           </el-tabs>
 
           <!-- <div class="login-link">
@@ -194,6 +206,14 @@ const saveLoginData = () => {
   localStorage.setItem("username", form.value.username);
   localStorage.setItem("password", encryptedPassword(form.value.password));
   localStorage.setItem("expirationTime", expirationTime.toString());
+};
+const onFailure = async (error: any) => {
+  console.error(error);
+  return;
+};
+const onSuccess = async (data: any) => {
+  console.error(data);
+  return;
 };
 
 const rules = computed(() => {

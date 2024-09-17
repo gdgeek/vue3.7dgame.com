@@ -14,7 +14,7 @@ import { ability } from "@/ability";
 import { abilitiesPlugin } from "@casl/vue";
 
 import highlightDirective from "./directive/highlight";
-
+import VueAppleLogin from 'vue-apple-login';
 library.add(fas);
 
 // 本地SVG图标
@@ -49,6 +49,30 @@ router.beforeEach((to) => {
 
 //UpdateAbility(ability, [], 0);
 const app = createApp(App);
+function getCurrentUrl() {
+  let currentUrl = window.location.href;
+  let index = currentUrl.indexOf('?');
+
+  // 如果找到了问号，截取问号之前的部分
+  if (index !== -1) {
+    currentUrl = currentUrl.substring(0, index);
+  }
+
+  if (currentUrl.endsWith('/')) {
+    currentUrl = currentUrl.slice(0, -1)
+  }
+  //alert(currentUrl)
+  return currentUrl
+}
+
+app.use(VueAppleLogin, {
+  clientId: 'com.mrpp.www',
+  scope: 'name email',
+  redirectURI: getCurrentUrl(),
+  state: "test",
+  usePopup: true,
+});
+
 app.use(abilitiesPlugin, ability, {
   useGlobalProperties: true,
 });

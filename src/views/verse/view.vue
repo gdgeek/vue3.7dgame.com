@@ -223,6 +223,8 @@ import { postVerseOpen, deleteVerseOpen } from "@/api/v1/verse-open";
 import { MessageType, postMessageAPI } from "@/api/v1/message";
 import { useUserStore } from "@/store/modules/user";
 import { FormInstance } from "element-plus";
+const value1 = ref(true);
+import { Hide, View } from "@element-plus/icons-vue";
 import { useAbility } from "@casl/vue";
 const ability = useAbility();
 const can = ability.can.bind(ability);
