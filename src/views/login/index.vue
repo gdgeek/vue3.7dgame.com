@@ -208,10 +208,12 @@ const saveLoginData = () => {
   localStorage.setItem("expirationTime", expirationTime.toString());
 };
 const onFailure = async (error: any) => {
+  alert(JSON.stringify(error));
   console.error(error);
   return;
 };
 const onSuccess = async (data: any) => {
+  alert(JSON.stringify(data));
   console.error(data);
   return;
 };
