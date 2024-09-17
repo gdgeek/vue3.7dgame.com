@@ -80,6 +80,7 @@ const settingStore = useSettingsStore();
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 
 const isMobile = computed(() => appStore.device === DeviceEnum.MOBILE);
 
@@ -89,9 +90,9 @@ const { isFullscreen, toggle } = useFullscreen();
  * 注销
  */
 const logout = () => {
-  ElMessageBox.confirm("确定注销并退出系统吗？", "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
+  ElMessageBox.confirm(t("login.logout.message1"), t("login.logout.message2"), {
+    confirmButtonText: t("login.logout.confirm"),
+    cancelButtonText: t("login.logout.cancel"),
     type: "warning",
     lockScroll: false,
   }).then(() => {

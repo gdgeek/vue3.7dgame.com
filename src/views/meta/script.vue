@@ -4,7 +4,7 @@
       <el-main>
         <el-card v-loading="loading" class="box-card">
           <template #header>
-            <div class="clearfix">
+            <div v-if="meta" class="clearfix">
               <!-- <router-link
                 v-if="meta"
                 :to="
@@ -18,7 +18,7 @@
                   【元：{{ title }}】
                 </el-link>
               </router-link> -->
-              / 【script】
+              {{ meta.title }} / 【{{ $t("meta.script.title") }}】
 
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="save">

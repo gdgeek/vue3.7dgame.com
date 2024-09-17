@@ -54,7 +54,7 @@ service.interceptors.response.use(
       router.push({ path: "/login" });
       return Promise.reject("");
     } else {
-      alert(error.message)
+      // alert(error.message);
       ElMessage({
         message: error.message,
         type: "error",
@@ -71,7 +71,7 @@ service.interceptors.response.use(
             message = error.response.data.message;
           }
         }
-        
+
         ElMessage.error({
           message: message,
           type: "error",

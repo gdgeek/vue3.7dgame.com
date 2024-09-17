@@ -12,7 +12,7 @@
                 ref="formRef"
                 :model="form"
                 :rules="rules"
-                label-width="0px"
+                label-width="auto"
                 class="demo-ruleForm"
               >
                 <el-form-item label="" prop="body">

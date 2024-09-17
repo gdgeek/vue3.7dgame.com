@@ -2,7 +2,7 @@
   <div>
     <el-dialog v-model="post.visible" width="30%" :close-on-click-modal="false">
       <template #header> {{ $t("verse.view.share.header1") }} </template>
-      <el-form :model="post.form" ref="postRef" label-width="80px">
+      <el-form :model="post.form" ref="postRef" label-width="auto">
         <el-form-item
           :label="$t('verse.view.share.form.label1')"
           prop="username"
@@ -54,7 +54,7 @@
 
     <el-dialog v-model="put.visible" width="30%" :close-on-click-modal="false">
       <template #header> {{ $t("verse.view.share.header1") }} </template>
-      <el-form :model="put.form" ref="putRef" label-width="80px">
+      <el-form :model="put.form" ref="putRef" label-width="auto">
         <el-form-item
           :label="$t('verse.view.share.form.label1')"
           prop="username"

@@ -27,10 +27,11 @@ import "uno.css";
 import "animate.css";
 import { useRouter } from "@/router";
 import { translateRouteTitle } from "./utils/i18n";
+import { useAppStore } from "./store";
 //import { useAbility } from "@casl/vue";
 const router = useRouter();
-// 更新页面标题
 
+// 更新页面标题
 const updateTitle = (title: string) => {
   document.title = title
     ? `${translateRouteTitle(title)} - 7D Game`
@@ -46,6 +47,19 @@ router.beforeEach((to) => {
     updateTitle("");
   }
 });
+
+const appStore = useAppStore();
+
+// 监听语言变化，自动更新页面标题
+watch(
+  () => appStore.language,
+  () => {
+    const metaTitle = router.currentRoute.value.meta.title as string;
+    if (metaTitle) {
+      updateTitle(metaTitle);
+    }
+  }
+);
 
 //UpdateAbility(ability, [], 0);
 const app = createApp(App);

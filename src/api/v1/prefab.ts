@@ -28,7 +28,7 @@ export type prefabsData = {
   author_id: number;
   info: string | null;
   data: string | null;
-  created_at?: string;
+  // created_at?: string;
   image_id: number | null;
   uuid: string;
   events: string | null;

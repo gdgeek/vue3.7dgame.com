@@ -68,8 +68,10 @@
             class="input-with-select"
             @keyup.enter="keyDown"
           >
-            <template #append>
+            <!-- <template #append> -->
+            <template #suffix>
               <el-button
+                style="margin-right: -7px"
                 icon="Search"
                 size="small"
                 class="search"
@@ -142,7 +144,7 @@ const keyDown = (e: KeyboardEvent) => {
   color: #666;
 }
 
-.search:hover {
+/* .search:hover {
   background-color: #409eff !important;
-}
+} */
 </style>

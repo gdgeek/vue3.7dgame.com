@@ -8,7 +8,7 @@
       :rules="rules"
       :model="form"
       class="signup-form"
-      label-width="80px"
+      label-width="auto"
     >
       <el-form-item
         :label="$t('manager.creator.form.label1')"

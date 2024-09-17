@@ -98,6 +98,12 @@ export default {
     },
     success: "登录成功",
     error: "表单检验未通过",
+    logout: {
+      message1: "确定注销并退出系统吗？",
+      message2: "提示",
+      confirm: "确定",
+      cancel: "取消",
+    },
   },
   // 主页国际化
   homepage: {
@@ -598,7 +604,7 @@ export default {
       },
       eventEdit: "事件编辑",
       contentEdit: "内容编辑",
-      sava: "信息保存",
+      save: "信息保存",
       metaInfo: "【元数据】信息",
       rules: {
         message1: "请输入名称",
@@ -612,6 +618,7 @@ export default {
       success: "场景保存成功~",
     },
     script: {
+      title: "脚本",
       save: "保存",
       error1: "没有元信息",
       error2: "没有编辑权限",
@@ -847,6 +854,22 @@ export default {
           cancel: "取消",
           info: "取消输入",
         },
+      },
+      sceneEditor: {
+        error1: "没有编辑器",
+        info1: "添加预设",
+        info2: "添加模块",
+        info3: "没有保存权限",
+        success: "场景保存成功",
+      },
+      script: {
+        title: "脚本",
+        save: "保存脚本",
+        error1: "没有信息",
+        error2: "没有编辑权限",
+        error3: "没有编辑器",
+        success: "保存成功",
+        info: "没有修改",
       },
     },
   },

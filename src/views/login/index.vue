@@ -28,7 +28,7 @@
           <h1>{{ $t("login.h1") }}</h1>
           <h4>{{ $t("login.h4") }}</h4>
           <br />
-          <el-tabs style="width: 100%" type="border-card">
+          <el-tabs style="width: 100%" type="border-card" stretch="true">
             <el-tab-pane label="Name & Password">
               <h2 class="login-title">{{ $t("login.loginTitle") }}</h2>
               <el-form
@@ -36,7 +36,7 @@
                 class="login-form"
                 :rules="rules"
                 :model="form"
-                label-width="75px"
+                label-width="auto"
               >
                 <el-form-item :label="$t('login.username')" prop="username">
                   <el-input
@@ -183,7 +183,7 @@ const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const route = useRoute();
 
-const isDark = ref(settingsStore.theme === ThemeEnum.DARK);
+const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
 const form = ref<LoginData>({
   username: "",
@@ -498,29 +498,6 @@ body {
         font-weight: 400;
       }
 
-      .box3 {
-        align-self: center;
-        width: 350px;
-        height: 300px;
-        margin-top: 20px;
-        margin-bottom: 20px;
-        background-color: #fff;
-        border: 1px solid #ebeefe;
-
-        transition: all 0.3s ease;
-
-        &.dark-theme {
-          background-color: rgb(41, 41, 41);
-          border-color: #1f1f1f;
-          font-style: white;
-        }
-
-        &:hover {
-          box-shadow: 0 0 10px rgb(0 0 0 / 20%);
-          transition: all 0.4s;
-        }
-      }
-
       el-button {
         align-self: center;
         margin-top: 2px;
@@ -538,7 +515,7 @@ body {
   .login-form {
     max-width: 100%;
     height: 100%;
-    padding: 10px 40px 0 10px;
+    padding: 10px 0px 10px 0px;
     margin-top: 36px;
   }
 
