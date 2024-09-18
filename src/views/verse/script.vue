@@ -8,8 +8,16 @@
               {{ verse.name }} / 【{{ $t("verse.view.script.title") }}】
 
               <el-button-group style="float: right">
-                <el-button v-if="saveable" type="primary" size="small" @click="save">
-                  <font-awesome-icon class="icon" icon="save"></font-awesome-icon>
+                <el-button
+                  v-if="saveable"
+                  type="primary"
+                  size="small"
+                  @click="save"
+                >
+                  <font-awesome-icon
+                    class="icon"
+                    icon="save"
+                  ></font-awesome-icon>
                   {{ $t("verse.view.script.save") }}
                 </el-button>
               </el-button-group>
@@ -17,15 +25,27 @@
           </template>
 
           <el-container>
-            <el-tabs v-model="activeName" type="card" @tab-click="handleClick" style="width: 100%;">
+            <el-tabs
+              v-model="activeName"
+              type="card"
+              @tab-click="handleClick"
+              style="width: 100%"
+            >
               <el-tab-pane label="逻辑编辑" name="blockly">
                 <el-main style="margin: 0; padding: 0; height: 70vh">
-                  <iframe style="margin: 0; padding: 0; height: 100%; width: 100%" id="editor" ref="editor"
-                    :src="src"></iframe>
+                  <iframe
+                    style="margin: 0; padding: 0; height: 100%; width: 100%"
+                    id="editor"
+                    ref="editor"
+                    :src="src"
+                  ></iframe>
                 </el-main>
               </el-tab-pane>
               <el-tab-pane label="代码查看" name="script">
-                <el-card v-if="activeName === 'script' && script !== undefined" class="box-card">
+                <el-card
+                  v-if="activeName === 'script' && script !== undefined"
+                  class="box-card"
+                >
                   <div v-highlight>
                     <pre>
                         <code class="lua">{{ LuaCode }}</code>
@@ -231,8 +251,9 @@ const resource = computed(() => {
 
 const handleClick = async (tab: TabsPaneContext, event: Event) => {
   if (activeName.value === "script") {
-    LuaCode.value = script.value?.script ?
-      "local meta = {}\nlocal index = ''\n" + script.value?.script : "local meta = {}\nlocal index = ''\n";
+    LuaCode.value = script.value?.script
+      ? "local meta = {}\nlocal index = ''\n" + script.value?.script
+      : "local meta = {}\nlocal index = ''\n";
     await nextTick();
   }
   console.log("luaCode", LuaCode.value);
