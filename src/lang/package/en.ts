@@ -612,6 +612,7 @@ export default {
       title: "【Entity】Name:",
       form: {
         title: "Name",
+        picture: "Picture",
         input: "Input Event",
         output: "Output Event",
         data: "Data",

@@ -603,6 +603,7 @@ export default {
       title: "【メタデータ】名：",
       form: {
         title: "名前",
+        picture: "画像",
         input: "入力イベント",
         output: "出力イベント",
         data: "データ",

@@ -598,6 +598,7 @@ export default {
       title: "【元数据】名称：",
       form: {
         title: "名称",
+        picture: "图片",
         input: "输入事件",
         output: "输出事件",
         data: "数据",

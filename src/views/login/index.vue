@@ -69,7 +69,7 @@
                 state="tttt2"
                 :onSuccess="onSuccess"
                 :onFailure="onFailure"
-              />
+              ></vue-apple-login>
             </el-tab-pane>
           </el-tabs>
 
