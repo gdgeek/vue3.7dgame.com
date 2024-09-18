@@ -14,7 +14,7 @@ import { ability } from "@/ability";
 import { abilitiesPlugin } from "@casl/vue";
 
 import highlightDirective from "./directive/highlight";
-import VueAppleLogin from 'vue-apple-login';
+import VueAppleLogin from "vue-apple-login";
 library.add(fas);
 
 // 本地SVG图标
