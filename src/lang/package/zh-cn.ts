@@ -856,6 +856,14 @@ export default {
           cancel: "取消",
           info: "取消输入",
         },
+        knight: {
+          title: "输入数据",
+          save: "保存",
+          cancel: "取消",
+          warn: "点击了取消",
+          typeTitle: "类型",
+          nameTitle: "物品名称",
+        },
       },
       sceneEditor: {
         error1: "没有编辑器",

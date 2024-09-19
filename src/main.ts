@@ -7,6 +7,9 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import VueIframe from "vue-iframes";
 import { mouseEffect, particleEffect } from "@/mouse";
+import VueForm from "@lljj/vue3-form-element";
+import ElementPlus from "element-plus";
+import "element-plus/dist/index.css"; // 导入 Element Plus 样式
 
 import { ability } from "@/ability";
 //import { UpdateAbility } from '@/utils/ability';
@@ -90,11 +93,13 @@ app.use(abilitiesPlugin, ability, {
   useGlobalProperties: true,
 });
 app.component("FontAwesomeIcon", FontAwesomeIcon);
+app.component("VueForm", VueForm);
 app.directive("highlight", highlightDirective);
 app.directive("mouse-effect", mouseEffect);
 app.directive("particle-effect", particleEffect);
 app.use(setupPlugins);
 app.use(VueIframe);
+app.use(ElementPlus);
 
 // 添加 CASL 插件
 
