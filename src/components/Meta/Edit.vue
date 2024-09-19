@@ -72,7 +72,7 @@
               $t("meta.metaEdit.form.output")
             }}</el-divider>
             <span v-for="(i, index) in events.inputs" :key="index">
-              <el-tag size="mini">
+              <el-tag size="small">
                 {{ i.title }}
               </el-tag>
               &nbsp;
