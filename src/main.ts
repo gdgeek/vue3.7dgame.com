@@ -7,15 +7,13 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import VueIframe from "vue-iframes";
 import { mouseEffect, particleEffect } from "@/mouse";
-import VueForm from "@lljj/vue3-form-element";
-import ElementPlus from "element-plus";
-import "element-plus/dist/index.css"; // 导入 Element Plus 样式
+import { VueAppleLoginConfig} from "@/utils/helper";
 
 import { ability } from "@/ability";
 //import { UpdateAbility } from '@/utils/ability';
 
 import { abilitiesPlugin } from "@casl/vue";
-
+import {GetCurrentUrl} from "@/utils/helper";
 import highlightDirective from "./directive/highlight";
 import VueAppleLogin from "vue-apple-login";
 library.add(fas);
@@ -63,44 +61,21 @@ watch(
   }
 );
 
-//UpdateAbility(ability, [], 0);
 const app = createApp(App);
-function getCurrentUrl() {
-  let currentUrl = window.location.href;
-  const index = currentUrl.indexOf("?");
 
-  // 如果找到了问号，截取问号之前的部分
-  if (index !== -1) {
-    currentUrl = currentUrl.substring(0, index);
-  }
-
-  if (currentUrl.endsWith("/")) {
-    currentUrl = currentUrl.slice(0, -1);
-  }
-  //alert(currentUrl)
-  return currentUrl;
-}
-
-app.use(VueAppleLogin, {
-  clientId: "com.mrpp.www",
-  scope: "name email",
-  redirectURI: getCurrentUrl(),
-  state: "test",
-  usePopup: true,
-});
+const time = new Date().getTime();
+app.use(VueAppleLogin, VueAppleLoginConfig);
 
 app.use(abilitiesPlugin, ability, {
   useGlobalProperties: true,
 });
 app.component("FontAwesomeIcon", FontAwesomeIcon);
-app.component("VueForm", VueForm);
 app.directive("highlight", highlightDirective);
 app.directive("mouse-effect", mouseEffect);
 app.directive("particle-effect", particleEffect);
 app.use(setupPlugins);
 app.use(VueIframe);
-app.use(ElementPlus);
 
-// 添加 CASL 插件
+
 
 app.mount("#app");

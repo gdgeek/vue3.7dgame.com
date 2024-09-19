@@ -38,6 +38,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import("@/views/login/index.vue"),
     meta: { hidden: true },
   },
+  {
+    path: "/register",
+    component: () => import("@/views/register/index.vue"),
+    meta: { hidden: true },
+  },
 
   {
     path: "/",

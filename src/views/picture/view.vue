@@ -241,8 +241,6 @@ const dealWith = async () => {
     // const image = document.getElementById("image") as HTMLImageElement;
     if (image.value) {
       const img: HTMLImageElement = image.value;
-      // alert(img.complete);
-      //alert(image.value.complete);
 
       image.value.crossOrigin = "anonymous";
 

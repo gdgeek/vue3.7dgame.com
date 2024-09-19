@@ -220,7 +220,7 @@ const setup = async (
     // blob.name = data.value.name + ".thumbnail";
     // blob.extension = ".jpg";
     const file = await thumbnail(video, size.x * 0.5, size.y * 0.5);
-    // alert(JSON.stringify(file));
+
     const md5 = await store.fileMD5(file);
 
     const handler = await store.publicHandler();
