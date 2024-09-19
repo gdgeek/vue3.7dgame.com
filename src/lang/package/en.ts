@@ -872,6 +872,14 @@ export default {
           cancel: "Cancel",
           info: "Cancel Input",
         },
+        knight: {
+          title: "Input Data",
+          save: "Save",
+          cancel: "Cancel",
+          warn: "Clicked Cancel",
+          typeTitle: "Type",
+          nameTitle: "Item Name",
+        },
       },
       sceneEditor: {
         error1: "No editor available",

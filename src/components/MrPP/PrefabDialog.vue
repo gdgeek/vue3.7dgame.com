@@ -61,7 +61,6 @@
                     v-if="item.created_at"
                     style="width: 100%; text-align: center"
                   >
-                    <!-- {{ BeijingData(item.created_at) }} -->
                     {{ item.created_at }}
                   </div>
                 </el-card>
@@ -115,7 +114,6 @@ import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
 import { getPrefabs, prefabsData } from "@/api/v1/prefab";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import { BeijingData } from "@/utils/dataChange";
 
 const emit = defineEmits(["selected", "cancel"]);
 const dialogVisible = ref(false);
@@ -154,19 +152,19 @@ const refresh = async () => {
 };
 
 const setup = ({ data }: { data: prefabsData }) => {
-  // if (data.data) {
-  //   knightData.value?.open({
-  //     schema: JSON.parse(data.data),
-  //     data: {},
-  //     callback: (setup: any) => {
-  //       selected({ data, setup });
-  //       dialogVisible.value = false;
-  //     },
-  //   });
-  // } else {
-  selected({ data, setup: {} });
-  dialogVisible.value = false;
-  // }
+  if (data.data) {
+    knightData.value?.open({
+      schema: JSON.parse(data.info!),
+      data: {},
+      callback: (setup: any) => {
+        selected({ data, setup });
+        dialogVisible.value = false;
+      },
+    });
+  } else {
+    selected({ data, setup: {} });
+    dialogVisible.value = false;
+  }
 };
 
 const selected = async (data: any = null) => {

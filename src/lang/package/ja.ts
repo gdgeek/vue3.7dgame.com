@@ -861,6 +861,12 @@ export default {
           cancel: "キャンセル",
           info: "入力がキャンセルされました",
         },
+        knight: {
+          title: "データ入力",
+          save: "保存",
+          cancel: "キャンセル",
+          warn: "キャンセルがクリックされました",
+        },
       },
       sceneEditor: {
         error1: "エディターがありません",

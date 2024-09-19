@@ -6,15 +6,18 @@
       :show-close="false"
       @close="cancel"
     >
-      <template #title> 输入数据 </template>
+      <template #title>
+        {{ $t("verse.view.prefabDialog.knight.title") }}
+      </template>
       <template #footer>
-        <el-form
+        <vue-form
           v-model="formData"
           :schema="schema"
-          @on-submit="handlerSubmit"
-          @on-cancel="handlerCancel"
-          @on-change="handlerChange"
-        ></el-form>
+          :form-footer="formFooter"
+          @submit="handlerSubmit"
+          @cancel="handlerCancel"
+          @change="handlerChange"
+        ></vue-form>
       </template>
     </el-dialog>
   </div>
@@ -22,9 +25,39 @@
 
 <script setup lang="ts">
 const formData = ref({});
-const schema = ref({});
+const schema = ref<Schema>();
 const dialogVisible = ref(false);
+const { t, locale } = useI18n();
 let callback: ((data: any) => void) | null = null;
+
+interface SchemaProperty {
+  type: string;
+  title: string;
+  default?: any;
+  value?: any;
+  "ui:hidden"?: string;
+  "ui:options"?: {
+    placeholder?: string;
+    type?: string;
+    rows?: number;
+  };
+  minLength?: number;
+}
+
+interface Schema {
+  type: string;
+  required?: string[];
+  properties: Record<string, SchemaProperty>;
+}
+
+interface FormData {
+  [key: string]: any;
+}
+
+const formFooter = computed(() => ({
+  okBtn: t("verse.view.prefabDialog.knight.save"),
+  cancelBtn: t("verse.view.prefabDialog.knight.cancel"),
+}));
 
 const handlerSubmit = async () => {
   if (callback) {
@@ -35,7 +68,7 @@ const handlerSubmit = async () => {
 
 const handlerCancel = () => {
   dialogVisible.value = false;
-  ElMessage.warning("点击了取消");
+  ElMessage.warning(t("verse.view.prefabDialog.knight.warn"));
 };
 
 const handlerChange = ({
@@ -53,13 +86,24 @@ const open = ({
   callback: newCallback,
   data,
 }: {
-  schema: any;
+  schema: Schema;
   callback: (data: any) => void;
-  data: any;
+  data: FormData;
 }) => {
+  const currentLocale = locale.value;
   schema.value = newSchema;
+  if (currentLocale === "en") {
+    newSchema.properties.name.title = "Item Name";
+  } else if (currentLocale === "ja") {
+    newSchema.properties.name.title = "アイテム名";
+  } else {
+    newSchema.properties.name.title = "物品名称";
+  }
+
   callback = newCallback;
   formData.value = data;
+  console.log("schema", schema.value);
+  console.log("formData", formData.value);
   dialogVisible.value = true;
 };
 
