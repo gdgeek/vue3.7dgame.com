@@ -27,7 +27,7 @@
           <h1>{{ $t("login.h1") }}</h1>
           <h4>{{ $t("login.h4") }}</h4>
           <br />
-          <el-tabs style="width: 100%" type="border-card" stretch="true">
+          <el-tabs style="width: 100%" type="border-card" :stretch="true">
             <el-tab-pane label="Name & Password">
               <h2 class="login-title">{{ $t("login.loginTitle") }}</h2>
               <el-form

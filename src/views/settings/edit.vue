@@ -311,7 +311,7 @@ type Rule = {
 
 type Arrayable<T> = T | T[];
 
-const nicknameRules: Partial<Record<string, Arrayable<Rule>>> = {
+const nicknameRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
   nickname: [
     {
       required: true,
