@@ -6,8 +6,6 @@ import {
   RouteRecordRaw,
 } from "vue-router";
 
-import { useI18n } from "vue-i18n";
-
 export const Layout = () => import("@/layout/index.vue");
 
 import Structure from "@/layout/structure/index.vue";
@@ -724,13 +722,13 @@ import { AbilityRouter } from "@/utils/ability";
 const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   const can = ability.can.bind(ability);
   route.forEach((route) => {
-    console.error(
-      route.path,
-      route.path,
-      can("open", new AbilityRouter(route.path))
-    );
+    // console.error(
+    //   route.path,
+    //   route.path,
+    //   can("open", new AbilityRouter(route.path))
+    // );
 
-    console.error(route.meta?.hidden);
+    // console.error(route.meta?.hidden);
     if (route.meta && !route.meta.hidden) {
       route.meta.hidden = !can("open", new AbilityRouter(route.path));
     }
