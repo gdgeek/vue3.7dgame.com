@@ -1,9 +1,25 @@
+import { token } from './tencent-cloud';
 import request from "@/utils/request";
 
 export interface AppleIdData {
-  code: string;
-  id_token: string;
-  state: string;
+  key: string;
   url: string;
-  userData: any;
+  data: any;
 }
+
+
+export interface AppleIdReturn {
+  apple_id: string;
+  email: string;
+  user: any;
+  token: string;
+}
+export const PostSiteAppleId = (data: AppleIdData) => {
+  alert(JSON.stringify(data));
+  return request({
+    url: "v1/site/apple-id",
+    method: "post",
+    data: data,
+  });
+};
+

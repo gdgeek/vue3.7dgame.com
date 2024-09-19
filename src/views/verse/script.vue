@@ -226,7 +226,6 @@ const resource = computed(() => {
 
     events.inputs.forEach((input: any) => {
       const data = map.get(meta.id.toString());
-      // alert(meta.id);
       inputs.push({
         title: `${data.title}:${input.title}`,
         index: data.uuid,
@@ -278,7 +277,6 @@ onMounted(async () => {
       const json: string = verse.value.data;
       const data = JSON.parse(json);
       data.children.modules.forEach((module: any) => {
-        // alert(module.parameters.meta_id);
         map.set(module.parameters.meta_id.toString(), {
           uuid: module.parameters.uuid,
           title: module.parameters.title,

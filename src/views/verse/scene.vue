@@ -62,8 +62,6 @@ const src = ref(
 const editor = ref<HTMLIFrameElement>();
 const cancel = () => {};
 
-//alert(appStore.language);
-
 watch(
   () => appStore.language, // 监听 language 的变化
   async (newValue, oldValue) => {
