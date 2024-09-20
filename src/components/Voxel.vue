@@ -9,11 +9,8 @@ import ElementResizeDetector from "element-resize-detector";
 
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import {
-  VOXLoader,
-  VOXMesh,
-  VOXData3DTexture,
-} from "three/examples/jsm/loaders/VOXLoader.js";
+
+import { VOXLoader, VOXMesh } from "@/assets/js/voxel/VOXLoader.js";
 import { convertToHttps } from "@/assets/js/helper";
 
 const props = defineProps({
