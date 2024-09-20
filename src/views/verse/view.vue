@@ -187,7 +187,7 @@
             @click="open()"
           >
             <font-awesome-icon icon="eye" />
-            &nbsp;开放【宇宙】
+            &nbsp;开放【工程】
           </el-button>
 
           <el-button
@@ -198,7 +198,7 @@
             @click="close()"
           >
             <font-awesome-icon icon="eye-slash" />
-            &nbsp;关闭【宇宙】
+            &nbsp;关闭【工程】
           </el-button>
         </el-card>
 -->

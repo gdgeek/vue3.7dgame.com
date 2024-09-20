@@ -40,7 +40,8 @@
 
 	<h3>[property:Material customDepthMaterial]</h3>
 	<p>Custom depth material to be used when rendering to the depth map. Can only be used in context of meshes.
-	When shadow-casting with a [page:DirectionalLight] or [page:SpotLight], if you are modifying vertex positions in the vertex shader you must specify a customDepthMaterial for proper shadows. Default is *undefined*.
+		When shadow-casting with a [page:DirectionalLight] or [page:SpotLight], if you are modifying vertex positions in the
+		vertex shader you must specify a customDepthMaterial for proper shadows. Default is *undefined*.
 	</p>
 
 	<h3>[property:Material customDistanceMaterial]</h3>
@@ -49,16 +50,18 @@
 
 	<h3>[property:Boolean frustumCulled]</h3>
 	<p>
-		When this is set, it checks every frame if the object is in the frustum of the camera before rendering the object. If set to `false` the object gets rendered every frame even if it is not in the frustum of the camera. Default is `true`.
+		When this is set, it checks every frame if the object is in the frustum of the camera before rendering the object.
+		If set to `false` the object gets rendered every frame even if it is not in the frustum of the camera. Default is
+		`true`.
 	</p>
 
 	<h3>[property:Integer id]</h3>
 	<p>只读 —— 表示该对象实例ID的唯一数字。</p>
 
-		<h3>[property:Boolean isObject3D]</h3>
-		<p>
-			Read-only flag to check if a given object is of type [name].
-		</p>
+	<h3>[property:Boolean isObject3D]</h3>
+	<p>
+		Read-only flag to check if a given object is of type [name].
+	</p>
 
 	<h3>[property:Layers layers]</h3>
 	<p>
@@ -107,9 +110,11 @@
 		使用以下参数来调用此函数：renderer，scene，camera，geometry，material，group。
 	</p>
 	<p>
-	Please notice that this callback is only executed for *renderable* 3D objects. Meaning 3D objects which define their visual
-	appearance with geometries and materials like instances of [page:Mesh], [page:Line], [page:Points] or [page:Sprite].
-	Instances of [page:Object3D], [page:Group] or [page:Bone] are not renderable and thus this callback is not executed for such objects.
+		Please notice that this callback is only executed for *renderable* 3D objects. Meaning 3D objects which define their
+		visual
+		appearance with geometries and materials like instances of [page:Mesh], [page:Line], [page:Points] or [page:Sprite].
+		Instances of [page:Object3D], [page:Group] or [page:Bone] are not renderable and thus this callback is not executed
+		for such objects.
 	</p>
 
 	<h3>[property:Function onBeforeRender]</h3>
@@ -118,9 +123,11 @@
 		使用以下参数来调用此函数：renderer，scene，camera，geometry，material，group。
 	</p>
 	<p>
-	Please notice that this callback is only executed for *renderable* 3D objects. Meaning 3D objects which define their visual
-	appearance with geometries and materials like instances of [page:Mesh], [page:Line], [page:Points] or [page:Sprite].
-	Instances of [page:Object3D], [page:Group] or [page:Bone] are not renderable and thus this callback is not executed for such objects.
+		Please notice that this callback is only executed for *renderable* 3D objects. Meaning 3D objects which define their
+		visual
+		appearance with geometries and materials like instances of [page:Mesh], [page:Line], [page:Points] or [page:Sprite].
+		Instances of [page:Object3D], [page:Group] or [page:Bone] are not renderable and thus this callback is not executed
+		for such objects.
 	</p>
 
 	<h3>[property:Object3D parent]</h3>
@@ -181,7 +188,8 @@
 	<p>
 		静态属性和方法由每个类所定义，并非由每个类的实例所定义。
 		也就是说，改变[page:Object3D.DefaultUp]或[page:Object3D.DefaultMatrixAutoUpdate]的值，
-		将改变<b>每个在此之后</b>由Object3D类（或派生类）创建的实例中的[page:.up up]和[page:.matrixAutoUpdate matrixAutoUpdate]的值。（已经创建好的Object3D不会受到影响）。
+		将改变<b>每个在此之后</b>由Object3D类（或派生类）创建的实例中的[page:.up up]和[page:.matrixAutoUpdate
+		matrixAutoUpdate]的值。（已经创建好的Object3D不会受到影响）。
 	</p>
 
 	<h3>[property:Vector3 DefaultUp]</h3>
@@ -192,7 +200,7 @@
 
 	<h3>[property:Boolean DefaultMatrixAutoUpdate]</h3>
 	<p>
-			[page:.matrixAutoUpdate matrixAutoUpdate]的默认设置，用于新创建的Object3D。<br />
+		[page:.matrixAutoUpdate matrixAutoUpdate]的默认设置，用于新创建的Object3D。<br />
 
 	</p>
 
@@ -310,7 +318,7 @@
 
 	<h3>[method:this removeFromParent]()</h3>
 	<p>
-	Removes this object from its current parent.
+		Removes this object from its current parent.
 	</p>
 
 	<h3>[method:this rotateOnAxis]( [param:Vector3 axis], [param:Float angle] )</h3>
@@ -382,8 +390,9 @@
 
 	<h3>[method:Object toJSON]( [param:Object meta] )</h3>
 	<p>
-		meta -- 包含有元数据的对象，例如该对象的材质、纹理或图片。
-		将对象转换为 three.js [link:https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4 JSON Object/Scene format]（three.js JSON 物体/场景格式）。
+		meta -- 包含有组件的对象，例如该对象的材质、纹理或图片。
+		将对象转换为 three.js [link:https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4 JSON Object/Scene
+		format]（three.js JSON 物体/场景格式）。
 	</p>
 
 	<h3>[method:this translateOnAxis]( [param:Vector3 axis], [param:Float distance] )</h3>
@@ -413,8 +422,8 @@
 
 	<h3>[method:undefined traverseVisible]( [param:Function callback] )</h3>
 	<p>
-			callback - 以一个object3D对象作为第一个参数的函数。
-			<br /><br />
+		callback - 以一个object3D对象作为第一个参数的函数。
+		<br /><br />
 
 		类似traverse函数，但在这里，回调函数仅对可见的对象执行，不可见对象的后代将不遍历。
 	</p>
@@ -450,8 +459,8 @@
 	<h2>源代码</h2>
 
 	<p>
-			[link:https://github.com/mrdoob/three.js/blob/master/src/[path].js src/[path].js]
-		</p>
+		[link:https://github.com/mrdoob/three.js/blob/master/src/[path].js src/[path].js]
+	</p>
 </body>
 
 </html>

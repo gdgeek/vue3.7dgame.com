@@ -57,11 +57,11 @@ export default {
       sceneEditor: "シーンエディタ",
     },
     project: {
-      title: "宇宙",
+      title: "工程",
       selfGenerated: "自作",
       systemRecommendation: "システム推薦",
       shareWithFriends: "友達と共有",
-      viewTitle: "【宇宙】",
+      viewTitle: "【工程】",
       scriptEditor: "スクリプトエディタ",
       sceneEditor: "シーンエディタ",
     },
@@ -123,7 +123,7 @@ export default {
       myPolygen: "モデル",
       myPicture: "画像",
       myVideo: "ビデオ",
-      myProject: "宇宙",
+      myProject: "工程",
       myPublish: "公開",
       myLike: "いいね",
       enter: "入る",
@@ -275,7 +275,7 @@ export default {
     uploadFile: "ボクセル(.voxファイル)を選択してアップロード",
     view: {
       title: "ボクセル名：",
-      titleStatement: "このボクセルで【宇宙】を作成",
+      titleStatement: "このボクセルで【工程】を作成",
       info: {
         title: "ボクセル情報",
         label1: "項目",
@@ -293,7 +293,7 @@ export default {
       },
       update: "更新待ち",
       prompt: {
-        message1: "このボクセルで【宇宙】を作成",
+        message1: "このボクセルで【工程】を作成",
         message2: "ヒント",
         confirm: "確認",
         cancel: "キャンセル",
@@ -344,7 +344,7 @@ export default {
     uploadFile: "モデル(.glbファイル)を選択してアップロード",
     view: {
       title: "モデル名：",
-      titleStatement: "このモデルで【宇宙】を作成",
+      titleStatement: "このモデルで【工程】を作成",
       info: {
         title: "モデル情報",
         label1: "項目",
@@ -360,7 +360,7 @@ export default {
         delete: "削除",
       },
       prompt: {
-        message1: "このモデルで【宇宙】を作成します",
+        message1: "このモデルで【工程】を作成します",
         message2: "ヒント",
         confirm: "確認",
         cancel: "キャンセル",
@@ -573,7 +573,7 @@ export default {
       declared: "ファイルデータをデータベースに保存",
     },
   },
-  // 元数据国际化
+  // 组件国际化
   meta: {
     title: "【メタデータ】を作成",
     edit: "編集",
@@ -675,12 +675,12 @@ export default {
       info: "キャンセルされました",
     },
   },
-  // 宇宙部分国际化
+  // 工程部分国际化
   verse: {
     page: {
-      dialogTitle: "作成！【宇宙】",
+      dialogTitle: "作成！【工程】",
       dialogSubmit: "作成",
-      title: "【宇宙】を作成",
+      title: "【工程】を作成",
       form: {
         picture: "カバー画像",
         name: "名前",
@@ -708,7 +708,7 @@ export default {
           dialogTitle: "データを変更",
           dialogSubmit: "確認",
           confirm: {
-            message1: "この操作は【宇宙】を永久に削除しますが、続行しますか？",
+            message1: "この操作は【工程】を永久に削除しますが、続行しますか？",
             message2: "ヒント",
             confirm: "確認",
             cancel: "キャンセル",
@@ -726,7 +726,7 @@ export default {
     },
     view: {
       header: "情報を変更",
-      title: "【宇宙】名：",
+      title: "【工程】名：",
       form: {
         label1: "多言語",
         label2: "名前",
@@ -743,11 +743,11 @@ export default {
           message4: "紹介を入力してください",
         },
       },
-      edit: "【宇宙】を編集",
-      eye: "【宇宙】を表示",
-      info: "【宇宙】情報",
-      verseOpen: "【宇宙】を公開",
-      verseClose: "【宇宙】を非公開",
+      edit: "【工程】を編集",
+      eye: "【工程】を表示",
+      info: "【工程】情報",
+      verseOpen: "【工程】を公開",
+      verseClose: "【工程】を非公開",
       success1: "変更成功",
       success2: "送信成功",
       success3: "削除成功",
@@ -755,7 +755,7 @@ export default {
       success5: "共有停止",
       error1: "送信失敗",
       error2: "フォーム検証に失敗しました",
-      messageTitle: "【宇宙】名：",
+      messageTitle: "【工程】名：",
       scene: "シーン",
       share: {
         header1: "他のユーザーと共有",
@@ -770,7 +770,7 @@ export default {
           confirm: "確認",
           cancel: "キャンセル",
         },
-        title1: "【宇宙】を共有",
+        title1: "【工程】を共有",
         title2: "友達と共有",
         confirm: {
           message1: "共有を停止してもよろしいですか？",
@@ -936,8 +936,8 @@ export default {
       delete: "削除",
       form: {
         label1: "順序",
-        label2: "宇宙ID",
-        label3: "宇宙名",
+        label2: "工程ID",
+        label3: "工程名",
         label4: "操作",
         placeholder: "順序を入力してください",
         confirm: {
@@ -968,8 +968,8 @@ export default {
       delete: "削除",
       form: {
         label1: "順序",
-        label2: "宇宙ID",
-        label3: "宇宙名",
+        label2: "工程ID",
+        label3: "工程名",
         label4: "操作",
         placeholder: "順序を入力してください",
         confirm: {
@@ -1008,7 +1008,7 @@ export default {
       },
     },
     verseDialog: {
-      title: "【宇宙】を選択",
+      title: "【工程】を選択",
       select: "選択",
       create: "新規作成",
       cancel: "キャンセル",
