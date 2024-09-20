@@ -4,7 +4,8 @@ import SparkMD5 from 'spark-md5';
 type FileWithExtension = File & { extension?: string };
 function fileMD5(file: File, progress: (p: number) => void = () => {}): Promise<string> {
   return new Promise((resolve, reject) => {
-    const spark =  SparkMD5.ArrayBuffer()
+   
+    const spark = new SparkMD5.ArrayBuffer()
     const reader = new FileReader()
     const blobSlice = File.prototype.slice 
     const chunkSize = 2097152

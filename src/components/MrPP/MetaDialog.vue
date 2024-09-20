@@ -204,7 +204,7 @@ const input = (text: string) => {
 const create = async () => {
   const name = await input(t("verse.view.metaDialog.input2"));
   const response = await postMeta({
-    title: name || "新建元数据",
+    title: name || "新建组件",
     custom: 1,
     uuid: uuidv4(),
   });

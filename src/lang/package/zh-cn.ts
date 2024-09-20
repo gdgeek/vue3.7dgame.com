@@ -49,19 +49,19 @@ export default {
       },
     },
     meta: {
-      title: "元数据",
-      metaList: "元数据列表",
+      title: "组件",
+      metaList: "组件列表",
       systemDefault: "系统预设",
       edit: "编辑",
       scriptEditor: "脚本编辑",
       sceneEditor: "场景编辑",
     },
     project: {
-      title: "宇宙",
+      title: "工程",
       selfGenerated: "自己创造",
       systemRecommendation: "系统推荐",
       shareWithFriends: "朋友分享",
-      viewTitle: "【宇宙】",
+      viewTitle: "【工程】",
       scriptEditor: "脚本编辑",
       sceneEditor: "场景编辑",
     },
@@ -124,7 +124,7 @@ export default {
       myPolygen: "模型",
       myPicture: "图片",
       myVideo: "视频",
-      myProject: "宇宙",
+      myProject: "工程",
       myPublish: "发布",
       myLike: "点赞",
       enter: "进入",
@@ -272,7 +272,7 @@ export default {
     uploadFile: "选择体素（.vox文件），并上传",
     view: {
       title: "体素名称：",
-      titleStatement: "用此体素创建【宇宙】",
+      titleStatement: "用此体素创建【工程】",
       info: {
         title: "体素信息",
         label1: "条目",
@@ -290,7 +290,7 @@ export default {
       },
       update: "等待更新",
       prompt: {
-        message1: "用此体素创建【宇宙】",
+        message1: "用此体素创建【工程】",
         message2: "提示",
         confirm: "确认",
         cancel: "取消",
@@ -341,7 +341,7 @@ export default {
     uploadFile: "选择模型（.glb文件），并上传",
     view: {
       title: "模型名称：",
-      titleStatement: "用此模型创建【宇宙】",
+      titleStatement: "用此模型创建【工程】",
       info: {
         title: "模型信息",
         label1: "条目",
@@ -357,7 +357,7 @@ export default {
         delete: "删除",
       },
       prompt: {
-        message1: "用此模型创建【宇宙】",
+        message1: "用此模型创建【工程】",
         message2: "提示",
         confirm: "确认",
         cancel: "取消",
@@ -569,13 +569,13 @@ export default {
       declared: "文件数据存储在数据库中",
     },
   },
-  // 元数据国际化
+  // 组件国际化
   meta: {
-    title: "创建【元数据】",
+    title: "创建【组件】",
     edit: "编辑",
     delete: "删除",
     confirm: {
-      message1: "此操作将永久删除该【元数据】, 是否继续?",
+      message1: "此操作将永久删除该【组件】, 是否继续?",
       message2: "提示",
       confirm: "确认",
       cancel: "取消",
@@ -583,20 +583,20 @@ export default {
       info: "已取消删除",
     },
     prompt: {
-      message1: "请输入元数据名称",
+      message1: "请输入组件名称",
       message2: "提示(3-20个字符)",
       confirm: "确认",
       cancel: "取消",
       inputValidator: {
-        item1: "元数据名称不能为空",
-        item2: "元数据名称不能小于3个字符",
-        item3: "元数据名称不能大于20个字符",
+        item1: "组件名称不能为空",
+        item2: "组件名称不能小于3个字符",
+        item3: "组件名称不能大于20个字符",
       },
-      success: "元数据名称是: ",
+      success: "组件名称是: ",
       info: "取消输入",
     },
     metaEdit: {
-      title: "【元数据】名称：",
+      title: "【组件】名称：",
       form: {
         title: "名称",
         picture: "图片",
@@ -608,7 +608,7 @@ export default {
       eventEdit: "事件编辑",
       contentEdit: "内容编辑",
       save: "信息保存",
-      metaInfo: "【元数据】信息",
+      metaInfo: "【组件】信息",
       rules: {
         message1: "请输入名称",
         message2: "长度在 2 到 20 个字符",
@@ -623,7 +623,7 @@ export default {
     script: {
       title: "脚本",
       save: "保存",
-      error1: "没有元信息",
+      error1: "没有组件信息",
       error2: "没有编辑权限",
       error3: "没有编辑器",
       success: "保存成功",
@@ -671,12 +671,12 @@ export default {
       info: "已取消",
     },
   },
-  // 宇宙部分国际化
+  // 工程部分国际化
   verse: {
     page: {
-      dialogTitle: "创建！【宇宙】",
+      dialogTitle: "创建！【工程】",
       dialogSubmit: "创 建",
-      title: "创建【宇宙】",
+      title: "创建【工程】",
       form: {
         picture: "封面图片",
         name: "名称",
@@ -704,7 +704,7 @@ export default {
           dialogTitle: "修改数据",
           dialogSubmit: "确定",
           confirm: {
-            message1: "此操作将永久删除该【宇宙】，是否继续?",
+            message1: "此操作将永久删除该【工程】，是否继续?",
             message2: "提示",
             confirm: "确认",
             cancel: "取消",
@@ -722,7 +722,7 @@ export default {
     },
     view: {
       header: "修改信息",
-      title: "【宇宙】名称：",
+      title: "【工程】名称：",
       form: {
         label1: "多语言",
         label2: "名字",
@@ -739,11 +739,11 @@ export default {
           message4: "请输入介绍",
         },
       },
-      edit: "编辑【宇宙】",
-      eye: "查看【宇宙】",
-      info: "【宇宙】信息",
-      verseOpen: "开放【宇宙】",
-      verseClose: "关闭【宇宙】",
+      edit: "编辑【工程】",
+      eye: "查看【工程】",
+      info: "【工程】信息",
+      verseOpen: "开放【工程】",
+      verseClose: "关闭【工程】",
       success1: "修改成功",
       success2: "提交成功",
       success3: "删除成功",
@@ -751,7 +751,7 @@ export default {
       success5: "停止共享",
       error1: "提交失败",
       error2: "表单验证失败",
-      messageTitle: "【宇宙】名称：",
+      messageTitle: "【工程】名称：",
       scene: "场景",
       share: {
         header1: "共享给其他用户",
@@ -766,7 +766,7 @@ export default {
           confirm: "确 认",
           cancel: "取 消",
         },
-        title1: "【宇宙】共享",
+        title1: "【工程】共享",
         title2: "共享给好友",
         confirm: {
           message1: "是否确认关闭共享？",
@@ -833,12 +833,12 @@ export default {
         success: "发帖成功",
       },
       metaDialog: {
-        title: "选择元数据",
+        title: "选择组件",
         select: "选择",
         create: "新 建",
         cancel: "取 消",
         input1: "请输入Model名称",
-        input2: "请输入元数据名称",
+        input2: "请输入组件名称",
         prompt: {
           message: "提示",
           confirm: "确定",
@@ -934,8 +934,8 @@ export default {
       delete: "删除",
       form: {
         label1: "顺序",
-        label2: "宇宙id",
-        label3: "宇宙名",
+        label2: "工程id",
+        label3: "工程名",
         label4: "操作",
         placeholder: "请输入排序",
         confirm: {
@@ -966,8 +966,8 @@ export default {
       delete: "删除",
       form: {
         label1: "顺序",
-        label2: "宇宙id",
-        label3: "宇宙名",
+        label2: "工程id",
+        label3: "工程名",
         label4: "操作",
         placeholder: "请输入排序",
         confirm: {
@@ -1006,12 +1006,12 @@ export default {
       },
     },
     verseDialog: {
-      title: "选择【宇宙】",
+      title: "选择【工程】",
       select: "选择",
       create: "新 建",
       cancel: "取 消",
       prompt: {
-        message1: "请输入元数据名称",
+        message1: "请输入组件名称",
         message2: "提示",
         confirm: "确认",
         cancel: "取消",

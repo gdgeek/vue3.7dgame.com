@@ -472,7 +472,7 @@ const routes: RouteRecordRaw[] = [
           // {
           //   path: "rete-meta",
           //   name: "VerseMetaEditor",
-          //   meta: { title: "【元】" },
+          //   meta: { title: "【组件】" },
           //   component: () => import("@/views/meta/rete-meta.vue"),
           // },
           {

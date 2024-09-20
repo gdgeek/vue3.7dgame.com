@@ -581,7 +581,7 @@ export default {
       declared: "File data is stored in the database",
     },
   },
-  // 元数据国际化
+  // 组件国际化
   meta: {
     title: "Create【Entity】",
     edit: "Edit",
@@ -684,7 +684,7 @@ export default {
       info: "Cancelled",
     },
   },
-  // 宇宙部分国际化
+  // 工程部分国际化
   verse: {
     page: {
       dialogTitle: "Create!【Project】",

@@ -182,7 +182,7 @@ const create = async () => {
     );
 
     const response = await postMeta({
-      title: name || "新建元数据",
+      title: name || "新建组件",
       prefab: 0,
       uuid: uuidv4(),
     });
