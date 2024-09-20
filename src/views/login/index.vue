@@ -215,20 +215,6 @@ body {
   }
 }
 
-.blog {
-  position: absolute;
-  height: 60px;
-  margin-left: 300px;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 60px;
-  color: #909399;
-
-  &:hover {
-    color: #000;
-  }
-}
-
 .header-right {
   position: absolute;
   right: 10px;
@@ -251,104 +237,5 @@ body {
   flex: 1;
   align-items: center;
   justify-content: center;
-  // width: 100%;
-  // background-image: url("/media/bg/02.jpg");
-  // background-size: 100% auto;
-
-  .box1 {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 450px;
-    height: 600px;
-    background-color: #fff;
-
-    transition: all 0.3s ease;
-
-    &.dark-theme {
-      background-color: rgb(63, 63, 63);
-      border-color: #494949;
-      color: white;
-    }
-
-    .box2 {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      width: 90%;
-      height: 90%;
-      padding: 25px;
-      border: 1px solid #ebeefe;
-      border-radius: 4px;
-
-      transition: all 0.3s ease;
-
-      &.dark-theme {
-        background-color: rgb(52, 52, 52);
-        border-color: #494949;
-        color: white;
-      }
-
-      &:hover {
-        box-shadow: 0 0 10px rgb(0 0 0 / 10%);
-        transition: all 0.4s;
-      }
-
-      h1 {
-        margin-top: 0;
-        font-family: "KaiTi", sans-serif;
-        font-size: 36px;
-        font-weight: 400;
-      }
-
-      h4 {
-        margin-top: 0;
-        font-family: "KaiTi", sans-serif;
-        font-size: 18px;
-        font-weight: 400;
-      }
-
-      el-button {
-        align-self: center;
-        margin-top: 2px;
-      }
-    }
-  }
-
-  .login-title {
-    margin: 20px 0;
-    font-family: "KaiTi", sans-serif;
-    font-weight: bold;
-    text-align: center;
-  }
-
-  .login-form {
-    max-width: 100%;
-    height: 100%;
-    padding: 10px 0px 10px 0px;
-    margin-top: 36px;
-  }
-
-  .login-button {
-    text-align: right;
-  }
-
-  .login-link {
-    padding: 0 10px;
-    margin-bottom: 20px;
-  }
-
-  .login-link a {
-    font-family: "KaiTi", sans-serif;
-    font-size: 16px;
-    color: rgb(28 160 212);
-  }
-
-  .error-message {
-    margin-top: 10px;
-    font-family: "KaiTi", sans-serif;
-    color: red;
-    text-align: center;
-  }
 }
 </style>
