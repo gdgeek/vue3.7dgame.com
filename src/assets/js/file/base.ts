@@ -5,7 +5,7 @@ type FileWithExtension = File & { extension?: string };
 function fileMD5(file: File, progress: (p: number) => void = () => {}): Promise<string> {
   return new Promise((resolve, reject) => {
    
-    const spark = new SparkMD5.ArrayBuffer()
+    const spark = new (SparkMD5 as any).ArrayBuffer();
     const reader = new FileReader()
     const blobSlice = File.prototype.slice 
     const chunkSize = 2097152

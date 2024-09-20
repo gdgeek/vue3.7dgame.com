@@ -244,7 +244,7 @@ const handleClick = async (tab: TabsPaneContext, event: Event) => {
   console.log("luaCode", LuaCode.value);
   console.log(tab, event);
 };*/
-
+//https://appleid.apple.com/auth/authorize?client_id=com.mrpp.www&redirect_uri=https%3A%2F%2Ftest.mrpp.com%3A8888%2Fhome%2Findex&response_type=code%20id_token&state=1726813929167&scope=name%20email&response_mode=web_message&frame_id=f8abd4d8-d83f-4f15-a65b-fe7e52404f84&m=12&v=1.5.5
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
 });
