@@ -27,27 +27,79 @@ import { useAbility } from "@casl/vue";
 const router = useRouter();
 import { translateRouteTitle } from "@/utils/i18n";
 const currentRoute = useRoute();
+const currentQuery = ref();
 const pathCompile = (path: string) => {
   const { params } = currentRoute;
   const toPath = compile(path);
   return toPath(params);
 };
 
+// const breadcrumbs = ref<Array<RouteLocationMatched>>([]);
 const breadcrumbs = ref<Array<RouteLocationMatched>>([]);
 
+// function getBreadcrumb() {
+//   let matched = currentRoute.matched.filter(
+//     (item) => item.meta && item.meta.title
+//   );
+//   const first = matched[0];
+//   if (!isDashboard(first)) {
+//     matched = [
+//       { path: "/home/index", meta: { title: "dashboard" } } as any,
+//     ].concat(matched);
+//   }
+//   breadcrumbs.value = matched.filter((item) => {
+//     return item.meta && item.meta.title && item.meta.breadcrumb !== false;
+//   });
+// }
+
 function getBreadcrumb() {
+  // 过滤出包含 meta 和 title 的路由
   let matched = currentRoute.matched.filter(
     (item) => item.meta && item.meta.title
   );
+  currentQuery.value = currentRoute.query;
+  console.log("currentQuery", currentQuery);
+
+  // 判断是否是进入 script 模块
+  if (currentRoute.path === "/verse/script") {
+    // 创建 sceneBreadcrumb 对象，并携带原有的路由参数
+    const sceneBreadcrumb = {
+      path: "/verse/scene",
+      meta: { title: "project.sceneEditor" },
+      enterCallbacks: currentQuery.value,
+    } as RouteLocationMatched;
+
+    // 查找 /verse/scene 在 matched 中的位置
+    const sceneIndex = matched.findIndex(
+      (item) => item.path === "/verse/scene"
+    );
+
+    // 如果没有找到 scene，插入 sceneBreadcrumb
+    if (sceneIndex === -1) {
+      const scriptIndex = matched.findIndex(
+        (item) => item.path === "/verse/script"
+      );
+
+      // 在 script 的前面插入 sceneBreadcrumb
+      if (scriptIndex !== -1) {
+        matched.splice(scriptIndex, 0, sceneBreadcrumb);
+      }
+    }
+  }
+
+  // 如果第一个面包屑不是 dashboard 则添加 dashboard
   const first = matched[0];
   if (!isDashboard(first)) {
     matched = [
       { path: "/home/index", meta: { title: "dashboard" } } as any,
     ].concat(matched);
   }
+
+  // 过滤出需要显示在面包屑中的路由项
   breadcrumbs.value = matched.filter((item) => {
     return item.meta && item.meta.title && item.meta.breadcrumb !== false;
   });
+  console.log("breadcrumbs", breadcrumbs);
 }
 
 function isDashboard(route: RouteLocationMatched) {
@@ -61,17 +113,36 @@ function isDashboard(route: RouteLocationMatched) {
   );
 }
 
+// function handleLink(item: any) {
+//   const { redirect, path } = item;
+//   if (redirect) {
+//     router.push(redirect).catch((err) => {
+//       console.warn(err);
+//     });
+//     return;
+//   }
+//   router.push(pathCompile(path)).catch((err) => {
+//     console.warn(err);
+//   });
+// }
+
 function handleLink(item: any) {
-  const { redirect, path } = item;
+  const { redirect, path, enterCallbacks } = item;
+  console.log("query", enterCallbacks); // 获取跳转路由的查询参数
+  const currentQuery = currentRoute.query; // 获取当前路由的查询参数
+
   if (redirect) {
-    router.push(redirect).catch((err) => {
+    router.push({ path: redirect, query: enterCallbacks }).catch((err) => {
       console.warn(err);
     });
     return;
   }
-  router.push(pathCompile(path)).catch((err) => {
-    console.warn(err);
-  });
+
+  router
+    .push({ path: pathCompile(path), query: enterCallbacks })
+    .catch((err) => {
+      console.warn(err);
+    });
 }
 
 watch(
