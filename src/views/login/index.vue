@@ -136,7 +136,7 @@ const login = () => {
   const { path, queryParams } = parseRedirect();
   router.push({ path: path, query: queryParams });
 };
-const registerToken = ref<string | null>("null");
+const registerToken = ref<string | null>(null);
 const register = (token: string) => {
   registerToken.value = token;
 };
