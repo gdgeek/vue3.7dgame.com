@@ -78,7 +78,6 @@ export default {
   // 登录页面国际化
   login: {
     appleLoginFail: "苹果登录失败",
-    
     title: "混合现实编程平台",
     register: "平台注册/登录",
     h1: "欢迎！",
@@ -881,6 +880,8 @@ export default {
         error3: "没有编辑器",
         success: "保存成功",
         info: "没有修改",
+        edit: "逻辑编辑",
+        code: "代码查看",
       },
     },
   },
