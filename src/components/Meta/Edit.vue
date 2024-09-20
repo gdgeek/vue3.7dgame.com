@@ -46,7 +46,11 @@
                 </div>
               </el-form-item>
               <el-form-item v-if="prefab" label="Info" prop="title">
-                <el-input v-model="item.info" @change="onSubmit"></el-input>
+                <el-input
+                  v-model="jsonInfo"
+                  type="textarea"
+                  @change="onSubmit"
+                ></el-input>
               </el-form-item>
             </el-form>
           </template>
@@ -199,6 +203,20 @@ const image = computed(() => {
   return "";
 });
 
+const jsonInfo = computed({
+  get() {
+    return JSON.stringify(item.value?.info, null, 2);
+  },
+  set(value: string) {
+    try {
+      item.value!.info = JSON.parse(value);
+    } catch (e) {
+      console.error("Invalid JSON format", e);
+    }
+  },
+});
+console.log("jsonInfo:", jsonInfo);
+
 const refresh = async () => {
   const data = await getItem(id.value, { expand: "image,author" });
   item.value = data;
@@ -303,15 +321,6 @@ const openDialog = () => {
     dialog.value.open();
   }
 };
-
-// const onSubmit = async () => {
-//   if (item.value) {
-//     // item.value.custom = custom.value ? 1 : 0;
-//     await putItem(id.value, item.value);
-//     ElMessage.success(t("meta.metaEdit.success"));
-//     await refresh();
-//   }
-// };
 
 const onSubmit = async () => {
   const valid = await itemForm.value!.validate();

@@ -55,17 +55,13 @@ export const postMeta = (data: Record<string, any>) => {
     data,
   });
 };
-export const putMetaCode = (id: number, data: MetaCode) => { 
+export const putMetaCode = (id: number, data: MetaCode) => {
   return request({
-    url: path.join(
-      "v1",
-      "metas",
-      `code${qs.stringify({ id: id }, true)}`
-    ),
+    url: path.join("v1", "metas", `code${qs.stringify({ id: id }, true)}`),
     data,
     method: "put",
-  }); 
-}
+  });
+};
 export const getMeta = (id: number, expand = "") => {
   return request<metaInfo>({
     url: path.join(
