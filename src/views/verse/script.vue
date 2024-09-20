@@ -26,7 +26,7 @@
 
           <el-container>
             <el-tabs v-model="activeName" type="card" style="width: 100%">
-              <el-tab-pane label="逻辑编辑" name="blockly">
+              <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
                 <el-main style="margin: 0; padding: 0; height: 70vh">
                   <iframe
                     style="margin: 0; padding: 0; height: 100%; width: 100%"
@@ -36,7 +36,7 @@
                   ></iframe>
                 </el-main>
               </el-tab-pane>
-              <el-tab-pane label="代码查看" name="script">
+              <el-tab-pane :label="$t('verse.view.script.code')" name="script">
                 <el-card v-if="activeName === 'script'" class="box-card">
                   <div v-highlight>
                     <pre>
