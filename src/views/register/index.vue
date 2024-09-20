@@ -28,8 +28,45 @@
           <h4>{{ $t("login.h4") }}</h4>
           <br />
           <el-tabs style="width: 100%" type="border-card" :stretch="true">
-            <el-tab-pane label="Name & Password">
-              <h2 class="login-title">{{ $t("login.loginTitle") }}</h2>
+            <el-tab-pane :label="$t('login.createAccount')">
+              <h2 class="login-title">{{ $t("login.createAccount") }}</h2>
+              <el-form
+                ref="formRef"
+                class="login-form"
+                :rules="rules"
+                :model="form"
+                label-width="auto"
+              >
+                <el-form-item :label="$t('login.username')" prop="username">
+                  <el-input
+                    v-model="form.username"
+                    suffix-icon="User"
+                  ></el-input>
+                </el-form-item>
+                <el-form-item :label="$t('login.password')" prop="password">
+                  <el-input
+                    v-model="form.password"
+                    type="password"
+                    suffix-icon="Lock"
+                  ></el-input>
+                </el-form-item>
+                <el-form-item :label="$t('login.repassword')" prop="password">
+                  <el-input
+                    v-model="form.repassword"
+                    type="password"
+                    suffix-icon="Lock"
+                  ></el-input>
+                </el-form-item>
+
+                <el-form-item class="login-button">
+                  <el-button style="width: 100%" type="primary" @click="submit">
+                    {{ $t("login.create") }}
+                  </el-button>
+                </el-form-item>
+              </el-form>
+            </el-tab-pane>
+            <el-tab-pane :label="$t('login.linkAccount')">
+              <h2 class="login-title">{{ $t("login.linkAccount") }}</h2>
               <el-form
                 ref="formRef"
                 class="login-form"
@@ -53,24 +90,10 @@
 
                 <el-form-item class="login-button">
                   <el-button style="width: 100%" type="primary" @click="submit">
-                    {{ $t("login.login") }}
+                    {{ $t("login.link") }}
                   </el-button>
                 </el-form-item>
               </el-form>
-            </el-tab-pane>
-            <el-tab-pane label="Apple ID">
-              <vue-apple-login
-                class="appleid_button"
-                width="100%"
-                height="100px"
-                :redirect-uri="'http://baidu.com'"
-                mode="center-align"
-                type="sign in"
-                color="white"
-                state="tttt2"
-                :onSuccess="onSuccess"
-                :onFailure="onFailure"
-              ></vue-apple-login>
             </el-tab-pane>
           </el-tabs>
         </div>
@@ -152,7 +175,7 @@ import { ref, computed, nextTick, onMounted } from "vue";
 import { RouterLink, useRouter, LocationQuery, useRoute } from "vue-router";
 import { FormInstance } from "element-plus";
 import { useUserStore } from "@/store/modules/user";
-import { LoginData } from "@/api/auth/model";
+import { RegisterData } from "@/api/auth/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import AuthAPI from "@/api/auth/index";
 import type { AppleIdReturn } from "@/api/v1/site";
@@ -176,9 +199,10 @@ const route = useRoute();
 
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
-const form = ref<LoginData>({
+const form = ref<RegisterData>({
   username: "",
   password: "",
+  repassword: "",
 });
 
 // 加密
@@ -198,36 +222,6 @@ const saveLoginData = () => {
   localStorage.setItem("password", encryptedPassword(form.value.password));
   localStorage.setItem("expirationTime", expirationTime.toString());
 };
-const onFailure = async (error: any) => {
-  ElMessage({ type: "error", message: t("login.appleLoginFail") });
-  console.error(error);
-  return;
-};
-const onSuccess = async (data: any) => {
-  const respose = await PostSiteAppleId({
-    key: "APPLE_MRPP_KEY_ID",
-    url: VueAppleLoginConfig.redirectURI,
-    data: data,
-  });
-  const ret: AppleIdReturn = respose.data;
-  if (ret.user === null) {
-    // 用户不存在，跳转到注册页面
-  } else {
-    // 用户存在，跳转到首页
-    await login(ret.user);
-    /*
-    await window.location.reload();
-    await succeed(ret.user);
-    const userin = await userStore.getUserInfo();
-    console.log("userin:", userin);
-    const { path, queryParams } = await parseRedirect();
-    console.log("path:", path, "queryParams:", queryParams);
-    await router.push({ path: path, query: queryParams });*/
-  }
-  alert(ret.user);
-  alert(JSON.stringify(respose.data));
-};
-
 const rules = computed(() => {
   return {
     username: [

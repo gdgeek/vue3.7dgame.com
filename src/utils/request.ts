@@ -11,7 +11,7 @@ const router = useRouter();
 // 创建 axios 实例
 const service = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_API,
-  // baseURL: "https://api.7dgame.com",
+
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
 });
@@ -20,7 +20,6 @@ const service = axios.create({
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const accessToken = localStorage.getItem(TOKEN_KEY);
-    // console.log("accessToken:", accessToken);
     if (accessToken) {
       config.headers.Authorization = accessToken;
     }

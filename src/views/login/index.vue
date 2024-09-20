@@ -21,60 +21,10 @@
         </div>
       </div>
     </div>
-    <div class="content">
-      <div :class="['box1', { 'dark-theme': isDark }]">
-        <div :class="['box2', { 'dark-theme': isDark }]">
-          <h1>{{ $t("login.h1") }}</h1>
-          <h4>{{ $t("login.h4") }}</h4>
-          <br />
-          <el-tabs style="width: 100%" type="border-card" :stretch="true">
-            <el-tab-pane label="Name & Password">
-              <h2 class="login-title">{{ $t("login.loginTitle") }}</h2>
-              <el-form
-                ref="formRef"
-                class="login-form"
-                :rules="rules"
-                :model="form"
-                label-width="auto"
-              >
-                <el-form-item :label="$t('login.username')" prop="username">
-                  <el-input
-                    v-model="form.username"
-                    suffix-icon="User"
-                  ></el-input>
-                </el-form-item>
-                <el-form-item :label="$t('login.password')" prop="password">
-                  <el-input
-                    v-model="form.password"
-                    type="password"
-                    suffix-icon="Lock"
-                  ></el-input>
-                </el-form-item>
 
-                <el-form-item class="login-button">
-                  <el-button style="width: 100%" type="primary" @click="submit">
-                    {{ $t("login.login") }}
-                  </el-button>
-                </el-form-item>
-              </el-form>
-            </el-tab-pane>
-            <el-tab-pane label="Apple ID">
-              <vue-apple-login
-                class="appleid_button"
-                width="100%"
-                height="100px"
-                :redirect-uri="'http://baidu.com'"
-                mode="center-align"
-                type="sign in"
-                color="white"
-                state="tttt2"
-                :onSuccess="onSuccess"
-                :onFailure="onFailure"
-              ></vue-apple-login>
-            </el-tab-pane>
-          </el-tabs>
-        </div>
-      </div>
+    <div class="content">
+      <login-form v-if="!registerToken" @login="login" @register="register" />
+      <register-form v-else @login="login" :token="registerToken" />
     </div>
     <el-card style="width: 100%">
       <div
@@ -148,148 +98,23 @@
 
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { ref, computed, nextTick, onMounted } from "vue";
-import { RouterLink, useRouter, LocationQuery, useRoute } from "vue-router";
-import { FormInstance } from "element-plus";
-import { useUserStore } from "@/store/modules/user";
-import { LoginData } from "@/api/auth/model";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
-import AuthAPI from "@/api/auth/index";
-import type { AppleIdReturn } from "@/api/v1/site";
-import { PostSiteAppleId } from "@/api/v1/site";
-import { GetCurrentUrl, VueAppleLoginConfig } from "@/utils/helper";
+import { ref, onMounted } from "vue";
+import { useRouter, LocationQuery, useRoute } from "vue-router";
+import LoginForm from "@/components/LoginForm.vue";
+import RegisterForm from "@/components/RegisterForm.vue";
 //import { initRoutes } from "@/router";
-import CryptoJS from "crypto-js";
-import defaultSettings from "@/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useInfomationStore } from "@/store/modules/information";
 
-const informationStore = useInfomationStore();
-const { t } = useI18n();
-
-const secretKey = "bujiaban"; // 密钥
-
-const userStore = useUserStore();
-const settingsStore = useSettingsStore();
+const router = useRouter();
 const route = useRoute();
 
+const informationStore = useInfomationStore();
+
+const settingsStore = useSettingsStore();
+
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
-
-const form = ref<LoginData>({
-  username: "",
-  password: "",
-});
-
-// 加密
-const encryptedPassword = (password: string): string => {
-  return CryptoJS.AES.encrypt(password, secretKey).toString();
-};
-// 解密
-const decryptPassword = (encryptedPassword: string): string => {
-  const bytes = CryptoJS.AES.decrypt(encryptedPassword, secretKey);
-  return bytes.toString(CryptoJS.enc.Utf8);
-};
-
-// 保存用户数据到本地
-const saveLoginData = () => {
-  const expirationTime = Date.now() + 24 * 60 * 60 * 1000; // 24小时有效
-  localStorage.setItem("username", form.value.username);
-  localStorage.setItem("password", encryptedPassword(form.value.password));
-  localStorage.setItem("expirationTime", expirationTime.toString());
-};
-const onFailure = async (error: any) => {
-  ElMessage({ type: "error", message: t("login.appleLoginFail") });
-  console.error(error);
-  return;
-};
-const onSuccess = async (data: any) => {
-  const respose = await PostSiteAppleId({
-    key: "APPLE_MRPP_KEY_ID",
-    url: VueAppleLoginConfig.redirectURI,
-    data: data,
-  });
-  const ret: AppleIdReturn = respose.data;
-  if (ret.user === null) {
-    // 用户不存在，跳转到注册页面
-  } else {
-    // 用户存在，跳转到首页
-    await login(ret.user);
-    /*
-    await window.location.reload();
-    await succeed(ret.user);
-    const userin = await userStore.getUserInfo();
-    console.log("userin:", userin);
-    const { path, queryParams } = await parseRedirect();
-    console.log("path:", path, "queryParams:", queryParams);
-    await router.push({ path: path, query: queryParams });*/
-  }
-  alert(ret.user);
-  alert(JSON.stringify(respose.data));
-};
-
-const rules = computed(() => {
-  return {
-    username: [
-      {
-        required: true,
-        message: t("login.rules.username.message1"),
-        trigger: "blur",
-      },
-      { min: 5, message: t("login.rules.username.message2"), trigger: "blur" },
-    ],
-    password: [
-      {
-        required: true,
-        message: t("login.rules.password.message1"),
-        trigger: "blur",
-      },
-      { min: 6, message: t("login.rules.password.message2"), trigger: "blur" },
-    ],
-  };
-});
-
-const router = useRouter();
-const formRef = ref<FormInstance>();
-const isShow = ref(false);
-const title = ref<string | Record<string, string>>("");
-
-/** 主题切换 */
-const toggleTheme = () => {
-  const newTheme =
-    settingsStore.theme === ThemeEnum.DARK ? ThemeEnum.LIGHT : ThemeEnum.DARK;
-  settingsStore.changeTheme(newTheme);
-};
-const login = async (data: any) => {
-  await window.location.reload();
-  await succeed(data);
-  const userin = await userStore.getUserInfo();
-  console.log("userin:", userin);
-  const { path, queryParams } = await parseRedirect();
-  console.log("path:", path, "queryParams:", queryParams);
-  await router.push({ path: path, query: queryParams });
-};
-const succeed = (data: any) => {
-  ElMessage.success(t("login.success"));
-  const token = data.auth;
-  if (token) {
-    setToken(token);
-    saveLoginData();
-    const res = localStorage.getItem(TOKEN_KEY);
-    console.log("Token set successfully", res);
-    nextTick(() => {
-      router.push("/");
-      console.log("Routing to home");
-    });
-  } else {
-    failed("The login response is missing the access_token");
-  }
-};
-
-const setToken = (token: string) => {
-  localStorage.setItem(TOKEN_KEY, "Bearer " + token);
-};
-
 function parseRedirect(): {
   path: string;
   queryParams: Record<string, string>;
@@ -307,58 +132,22 @@ function parseRedirect(): {
 
   return { path, queryParams };
 }
-
-const failed = (message: any) => {
-  error(message);
+const login = () => {
+  const { path, queryParams } = parseRedirect();
+  router.push({ path: path, query: queryParams });
+};
+const registerToken = ref<string | null>("null");
+const register = (token: string) => {
+  registerToken.value = token;
+};
+/** 主题切换 */
+const toggleTheme = () => {
+  const newTheme =
+    settingsStore.theme === ThemeEnum.DARK ? ThemeEnum.LIGHT : ThemeEnum.DARK;
+  settingsStore.changeTheme(newTheme);
 };
 
-const submit = () => {
-  formRef.value?.validate(async (valid: boolean) => {
-    if (valid) {
-      try {
-        const respose = await AuthAPI.login(form.value);
-        await login(respose.data);
-      } catch (error) {
-        failed(error);
-      }
-    } else {
-      ElMessage({ type: "error", message: t("login.error") });
-    }
-  });
-};
-
-const error = (msg: string | Record<string, string>) => {
-  title.value =
-    typeof msg === "string"
-      ? msg
-      : Object.keys(msg)
-          .map((key) => `${key} : ${msg[key]}`)
-          .join("\n");
-  isShow.value = true;
-};
-
-onMounted(() => {
-  const savedUsername = localStorage.getItem("username");
-  const savedPassword = localStorage.getItem("password");
-  const savedExpirationTime = localStorage.getItem("expirationTime");
-
-  if (savedExpirationTime) {
-    const expirationTime = parseInt(savedExpirationTime, 10);
-    if (Date.now() > expirationTime) {
-      // 密码已过期，清除保存的密码
-      // localStorage.removeItem("username");
-      localStorage.removeItem("password");
-      localStorage.removeItem("expirationTime");
-    } else {
-      if (savedUsername) {
-        form.value.username = savedUsername;
-      }
-      if (savedPassword) {
-        form.value.password = decryptPassword(savedPassword);
-      }
-    }
-  }
-});
+onMounted(() => {});
 </script>
 
 <style scoped lang="scss">
