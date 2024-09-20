@@ -5,6 +5,7 @@
       :node="JSON.parse(item.events!)"
       uuid="uuid"
       @post-event="postEvent"
+      @on-submit="onSubmit"
       ref="dialog"
     ></event-dialog>
     <resource-dialog
@@ -89,17 +90,12 @@
             <el-button @click="openDialog" icon="MagicStick">
               {{ $t("meta.metaEdit.eventEdit") }}
             </el-button>
-            <el-button
-              v-if="item.viewable"
-              type="primary"
-              @click="editor"
-              icon="Edit"
-            >
+            <el-button v-if="item.viewable" @click="editor" icon="Edit">
               {{ $t("meta.metaEdit.contentEdit") }}
             </el-button>
-            <!-- <el-button @click="onSubmit" icon="CircleCheck" type="success">
+            <el-button @click="onSubmit" icon="CircleCheck" type="success">
               {{ $t("meta.metaEdit.save") }}
-            </el-button> -->
+            </el-button>
           </el-button-group>
           <br />
           <br />

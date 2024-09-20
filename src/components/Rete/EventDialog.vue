@@ -87,7 +87,7 @@ const props = defineProps<{
   node: { inputs: any[]; outputs: any[] } | null;
 }>();
 
-const emit = defineEmits(["postEvent"]);
+const emit = defineEmits(["postEvent", "onSubmit"]);
 
 const visible = ref(false);
 const input = ref({
@@ -165,6 +165,7 @@ const enter = () => {
     outputs: output.value.list,
     uuid: props.uuid,
   });
+  emit("onSubmit");
 };
 
 const handleClose = (done: () => void) => {
