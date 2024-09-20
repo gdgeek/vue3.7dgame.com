@@ -3,17 +3,9 @@ export type MessageType = {
   data: any;
 };
 export function GetCurrentUrl() {
-  let currentUrl = window.location.href;
-  let index = currentUrl.indexOf('?');
-
-  if (index !== -1) {
-    currentUrl = currentUrl.substring(0, index);
-  }
-
-  if (currentUrl.endsWith('/')) {
-    currentUrl = currentUrl.slice(0, -1)
-  }
-  return currentUrl
+  const fullUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}`;
+  console.log(`Full URL: ${fullUrl}`);
+  return fullUrl
 }
 
 

@@ -105,7 +105,7 @@ const refresh = () => {
   // 加载
   loader.load(
     url,
-    (chunks) => {
+    (chunks: any) => {
       const chunk = chunks[0];
       console.error(chunks);
       const mesh = new VOXMesh(chunk);
@@ -133,7 +133,7 @@ const refresh = () => {
         ),
       });
     },
-    (xhr) => {
+    (xhr: any) => {
       emit("progress", parseFloat(((xhr.loaded / xhr.total) * 100).toFixed(1)));
       console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
     }

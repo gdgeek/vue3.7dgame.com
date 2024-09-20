@@ -13,10 +13,9 @@ import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 
 import { ability } from "@/ability";
-//import { UpdateAbility } from '@/utils/ability';
 
 import { abilitiesPlugin } from "@casl/vue";
-import { GetCurrentUrl } from "@/utils/helper";
+
 import highlightDirective from "./directive/highlight";
 import VueAppleLogin from "vue-apple-login";
 library.add(fas);
