@@ -40,7 +40,8 @@
             :redirect-uri="'http://baidu.com'"
             mode="center-align"
             type="sign in"
-            color="white"
+            :color="appleLoginColor"
+            :key="isDark"
             state="tttt2"
             :onSuccess="onSuccess"
             :onFailure="onFailure"
@@ -78,6 +79,7 @@ const settingsStore = useSettingsStore();
 const route = useRoute();
 
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
+const appleLoginColor = computed(() => (isDark.value ? "black" : "white"));
 
 // 加密
 const encryptedPassword = (password: string): string => {
