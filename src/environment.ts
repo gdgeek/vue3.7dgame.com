@@ -90,7 +90,7 @@ function subtitle(): string {
     case "4mr.cn":
       return "内部版本";
     case "7dgame.com":
-      return "Apple Reality Spirit";
+      return "测试版本";
     case "local":
       return "私有部署版本";
     default:

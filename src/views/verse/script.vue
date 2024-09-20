@@ -25,13 +25,8 @@
           </template>
 
           <el-container>
-            <el-tabs
-              v-model="activeName"
-              type="card"
-              @tab-click="handleClick"
-              style="width: 100%"
-            >
-              <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
+            <el-tabs v-model="activeName" type="card" style="width: 100%">
+              <el-tab-pane label="逻辑编辑" name="blockly">
                 <el-main style="margin: 0; padding: 0; height: 70vh">
                   <iframe
                     style="margin: 0; padding: 0; height: 100%; width: 100%"
@@ -41,11 +36,8 @@
                   ></iframe>
                 </el-main>
               </el-tab-pane>
-              <el-tab-pane :label="$t('verse.view.script.code')" name="script">
-                <el-card
-                  v-if="activeName === 'script' && script !== undefined"
-                  class="box-card"
-                >
+              <el-tab-pane label="代码查看" name="script">
+                <el-card v-if="activeName === 'script'" class="box-card">
                   <div v-highlight>
                     <pre>
                         <code class="lua">{{ LuaCode }}</code>
@@ -54,14 +46,6 @@
                 </el-card>
               </el-tab-pane>
             </el-tabs>
-            <!-- <el-main style="margin: 0; padding: 0; height: 70vh">
-              <iframe
-                style="margin: 0; padding: 0; height: 100%; width: 100%"
-                id="editor"
-                ref="editor"
-                :src="src"
-              ></iframe>
-            </el-main> -->
           </el-container>
         </el-card>
       </el-main>
@@ -91,7 +75,7 @@ const appStore = useAppStore();
 const { t } = useI18n();
 
 const loading = ref(false);
-const script = ref<Script>();
+//const script = ref<Script>();
 const verse = ref<VerseData>();
 const route = useRoute();
 const id = computed(() => parseInt(route.query.id as string));
@@ -102,7 +86,9 @@ const src = ref(
   import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + appStore.language
 );
 let ready: boolean = false;
-const saveable = computed(() => script.value !== null && verse.value!.editable);
+const saveable = computed(() => {
+  return verse.value!.editable;
+});
 let map = new Map<string, any>();
 
 watch(
@@ -128,13 +114,12 @@ const postScript = async (message: any) => {
     });
     return;
   }
-
-  script.value = verse.value?.script;
+  //script.value = verse.value?.script;
   await putVerseCode(verse.value!.id, {
     blockly: JSON.stringify(message.data),
     lua: message.script,
   });
-  if (!script.value) {
+  /*if (!script.value) {
     const response = await postVerseScript({
       verse_id: verse.value!.id,
       workspace: JSON.stringify(message.data),
@@ -147,7 +132,7 @@ const postScript = async (message: any) => {
       script: message.script,
     });
     verse.value!.script = response.data;
-  }
+  }*/
 
   ElMessage({
     message: t("verse.view.script.success"),
@@ -248,6 +233,7 @@ const resource = computed(() => {
   };
 });
 
+/*
 const handleClick = async (tab: TabsPaneContext, event: Event) => {
   if (activeName.value === "script") {
     LuaCode.value = script.value?.script
@@ -257,7 +243,7 @@ const handleClick = async (tab: TabsPaneContext, event: Event) => {
   }
   console.log("luaCode", LuaCode.value);
   console.log(tab, event);
-};
+};*/
 
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
@@ -269,10 +255,10 @@ onMounted(async () => {
     loading.value = true;
     const response = await getVerse(
       id.value,
-      "metas, module, share,script, verseCode"
+      "metas, module, share, verseCode"
     );
     verse.value = response.data;
-    script.value = verse.value?.script;
+    //script.value = verse.value?.script;
     if (verse.value && verse.value.data) {
       const json: string = verse.value.data;
       const data = JSON.parse(json);
