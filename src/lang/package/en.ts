@@ -896,6 +896,8 @@ export default {
         error3: "No editor available",
         success: "Saved successfully",
         info: "No changes made",
+        edit: "Logical Edit",
+        code: "Code View",
       },
     },
   },

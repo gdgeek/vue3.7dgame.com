@@ -23,8 +23,16 @@
     </div>
 
     <div class="content">
-      <login-form v-if="!registerToken" @login="login" @register="register" />
-      <register-form v-else @login="login" :token="registerToken" />
+      <login-form
+        v-if="!registerToken"
+        @login="login"
+        @register="register"
+      ></login-form>
+      <register-form
+        v-else
+        @login="login"
+        :token="registerToken"
+      ></register-form>
     </div>
     <el-card style="width: 100%">
       <div

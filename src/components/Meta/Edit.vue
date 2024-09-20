@@ -205,13 +205,15 @@ const image = computed(() => {
 
 const jsonInfo = computed({
   get() {
-    return JSON.stringify(item.value?.info, null, 2);
+    // 将 item.info 解析为对象后格式化为 JSON 字符串
+    return JSON.stringify(JSON.parse(item.value!.info!), null, 2);
   },
   set(value: string) {
     try {
-      item.value!.info = JSON.parse(value);
-    } catch (e) {
-      console.error("Invalid JSON format", e);
+      // 将输入的字符串解析为对象并赋值给 item.info
+      item.value!.info = JSON.stringify(JSON.parse(value));
+    } catch (error) {
+      console.error("Invalid JSON format", error);
     }
   },
 });

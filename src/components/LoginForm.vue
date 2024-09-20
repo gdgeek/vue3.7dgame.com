@@ -59,25 +59,41 @@ import { ElMessage } from "element-plus";
 import { useUserStore } from "@/store/modules/user";
 import { useSettingsStore } from "@/store/modules/settings";
 import { FormInstance } from "element-plus";
-
-const router = useRouter();
-const formRef = ref<FormInstance>();
-const isShow = ref(false);
-const title = ref<string | Record<string, string>>("");
-
-// 加密
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import type { AppleIdReturn } from "@/api/v1/site";
-
 import AuthAPI from "@/api/auth/index";
 import { PostSiteAppleId } from "@/api/v1/site";
 import { VueAppleLoginConfig } from "@/utils/helper";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { LoginData } from "@/api/auth/model";
+import CryptoJS from "crypto-js";
+const secretKey = "bujiaban"; // 密钥
+
+const router = useRouter();
+const formRef = ref<FormInstance>();
+const isShow = ref(false);
+const title = ref<string | Record<string, string>>("");
 const settingsStore = useSettingsStore();
 const route = useRoute();
 
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
+
+// 加密
+const encryptedPassword = (password: string): string => {
+  return CryptoJS.AES.encrypt(password, secretKey).toString();
+};
+// 解密
+const decryptPassword = (encryptedPassword: string): string => {
+  const bytes = CryptoJS.AES.decrypt(encryptedPassword, secretKey);
+  return bytes.toString(CryptoJS.enc.Utf8);
+};
+// 保存用户数据到本地
+const saveLoginData = () => {
+  const expirationTime = Date.now() + 24 * 60 * 60 * 1000; // 24小时有效
+  localStorage.setItem("username", form.value.username);
+  localStorage.setItem("password", encryptedPassword(form.value.password));
+  localStorage.setItem("expirationTime", expirationTime.toString());
+};
 
 const { t } = useI18n();
 const form = ref<LoginData>({
@@ -202,6 +218,28 @@ const onSuccess = async (data: any) => {
     await login(ret.user);
   }
 };
+
+onMounted(() => {
+  const savedUsername = localStorage.getItem("username");
+  const savedPassword = localStorage.getItem("password");
+  const savedExpirationTime = localStorage.getItem("expirationTime");
+  if (savedExpirationTime) {
+    const expirationTime = parseInt(savedExpirationTime, 10);
+    if (Date.now() > expirationTime) {
+      // 密码已过期，清除保存的密码
+      // localStorage.removeItem("username");
+      localStorage.removeItem("password");
+      localStorage.removeItem("expirationTime");
+    } else {
+      if (savedUsername) {
+        form.value.username = savedUsername;
+      }
+      if (savedPassword) {
+        form.value.password = decryptPassword(savedPassword);
+      }
+    }
+  }
+});
 </script>
 
 <style scoped lang="scss">
