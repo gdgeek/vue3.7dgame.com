@@ -1,10 +1,23 @@
 <template>
-  <div :class="['box1', { 'dark-theme': isDark }]">
+  <div v-loading="loading" :class="['box1', { 'dark-theme': isDark }]">
     <div :class="['box2', { 'dark-theme': isDark }]">
       <h1>{{ $t("login.h1") }}</h1>
       <h4>{{ $t("login.h4") }}</h4>
       <br />
       <el-tabs style="width: 100%" type="border-card" :stretch="true">
+        <el-tab-pane label="Apple ID">
+          <vue-apple-login
+            @click="loading = true"
+            class="appleid_button"
+            width="100%"
+            height="100px"
+            mode="center-align"
+            type="sign in"
+            color="white"
+            :onSuccess="onSuccess"
+            :onFailure="onFailure"
+          ></vue-apple-login>
+        </el-tab-pane>
         <el-tab-pane label="Name & Password">
           <h2 class="login-title">{{ $t("login.loginTitle") }}</h2>
           <el-form
@@ -32,20 +45,6 @@
             </el-form-item>
           </el-form>
         </el-tab-pane>
-        <el-tab-pane label="Apple ID">
-          <vue-apple-login
-            class="appleid_button"
-            width="100%"
-            height="100px"
-            :redirect-uri="'http://baidu.com'"
-            mode="center-align"
-            type="sign in"
-            color="white"
-            state="tttt2"
-            :onSuccess="onSuccess"
-            :onFailure="onFailure"
-          ></vue-apple-login>
-        </el-tab-pane>
       </el-tabs>
     </div>
   </div>
@@ -66,8 +65,6 @@ import { PostSiteAppleId } from "@/api/v1/site";
 import { VueAppleLoginConfig } from "@/utils/helper";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { LoginData } from "@/api/auth/model";
-import CryptoJS from "crypto-js";
-const secretKey = "bujiaban"; // 密钥
 
 const router = useRouter();
 const formRef = ref<FormInstance>();
@@ -78,28 +75,14 @@ const route = useRoute();
 
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
-// 加密
-const encryptedPassword = (password: string): string => {
-  return CryptoJS.AES.encrypt(password, secretKey).toString();
-};
-// 解密
-const decryptPassword = (encryptedPassword: string): string => {
-  const bytes = CryptoJS.AES.decrypt(encryptedPassword, secretKey);
-  return bytes.toString(CryptoJS.enc.Utf8);
-};
-// 保存用户数据到本地
-const saveLoginData = () => {
-  const expirationTime = Date.now() + 24 * 60 * 60 * 1000; // 24小时有效
-  localStorage.setItem("username", form.value.username);
-  localStorage.setItem("password", encryptedPassword(form.value.password));
-  localStorage.setItem("expirationTime", expirationTime.toString());
-};
+const loading = ref<boolean>(false);
 
 const { t } = useI18n();
 const form = ref<LoginData>({
   username: "",
   password: "",
 });
+
 const rules = computed(() => {
   return {
     username: [
@@ -108,7 +91,7 @@ const rules = computed(() => {
         message: t("login.rules.username.message1"),
         trigger: "blur",
       },
-      { min: 5, message: t("login.rules.username.message2"), trigger: "blur" },
+      { min: 4, message: t("login.rules.username.message2"), trigger: "blur" },
     ],
     password: [
       {
@@ -122,23 +105,6 @@ const rules = computed(() => {
 });
 const userStore = useUserStore();
 const emit = defineEmits(["login", "register"]);
-function parseRedirect(): {
-  path: string;
-  queryParams: Record<string, string>;
-} {
-  const query: LocationQuery = route.query;
-  const redirect = (query.redirect as string) ?? "/";
-
-  const url = new URL(redirect, window.location.origin);
-  const path = url.pathname;
-  const queryParams: Record<string, string> = {};
-
-  url.searchParams.forEach((value, key) => {
-    queryParams[key] = value;
-  });
-
-  return { path, queryParams };
-}
 
 const login = async (data: any) => {
   await succeed(data);
@@ -162,7 +128,7 @@ const succeed = (data: any) => {
       console.log("Routing to home");
     });
   } else {
-    failed("The login response is missing the access_token");
+    error("The login response is missing the access_token");
   }
 };
 const error = (msg: string | Record<string, string>) => {
@@ -177,24 +143,26 @@ const error = (msg: string | Record<string, string>) => {
 
 const submit = () => {
   formRef.value?.validate(async (valid: boolean) => {
+    loading.value = true;
     if (valid) {
       try {
         const respose = await AuthAPI.login(form.value);
 
         await login(respose.data);
-      } catch (error) {
-        failed(error);
+      } catch (e: any) {
+        error(e);
+        loading.value = false;
       }
     } else {
+      loading.value = false;
       ElMessage({ type: "error", message: t("login.error") });
     }
+    //loading.value = false;
   });
 };
 
-const failed = (message: any) => {
-  error(message);
-};
 const onFailure = async (error: any) => {
+  loading.value = false;
   ElMessage({ type: "error", message: t("login.appleLoginFail") });
   console.error(error);
   return;
@@ -207,39 +175,22 @@ const onSuccess = async (data: any) => {
   });
   const ret: AppleIdReturn = respose.data;
   if (ret.user === null) {
-    //alert("User does not exist, redirecting to register page");
-
-    emit("register", ret.token);
+    emit("register", {
+      apple_id: ret.apple_id,
+      token: ret.token,
+    });
     // 用户不存在，跳转到注册页面
   } else {
-    // 用户存在，跳转到首页
-    //alert("User exists, redirecting to home page");
-    emit("login", ret.user);
-    await login(ret.user);
-  }
-};
-
-onMounted(() => {
-  const savedUsername = localStorage.getItem("username");
-  const savedPassword = localStorage.getItem("password");
-  const savedExpirationTime = localStorage.getItem("expirationTime");
-  if (savedExpirationTime) {
-    const expirationTime = parseInt(savedExpirationTime, 10);
-    if (Date.now() > expirationTime) {
-      // 密码已过期，清除保存的密码
-      // localStorage.removeItem("username");
-      localStorage.removeItem("password");
-      localStorage.removeItem("expirationTime");
-    } else {
-      if (savedUsername) {
-        form.value.username = savedUsername;
-      }
-      if (savedPassword) {
-        form.value.password = decryptPassword(savedPassword);
-      }
+    try {
+      await login(ret.user);
+    } catch (e: any) {
+      error(e);
+      loading.value = false;
     }
+    // emit("login", ret.user);
   }
-});
+  //loading.value = false;
+};
 </script>
 
 <style scoped lang="scss">

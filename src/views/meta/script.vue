@@ -15,7 +15,7 @@
                 "
               >
                 <el-link v-if="meta" :underline="false">
-                  【元：{{ title }}】
+                  【组件：{{ title }}】
                 </el-link>
               </router-link> -->
               {{ meta.title }} / 【{{ $t("meta.script.title") }}】

@@ -21,17 +21,16 @@
         </div>
       </div>
     </div>
-
     <div class="content">
       <login-form
-        v-if="!registerToken"
+        v-if="!appleIdToken"
         @login="login"
         @register="register"
       ></login-form>
       <register-form
         v-else
         @login="login"
-        :token="registerToken"
+        :idToken="appleIdToken"
       ></register-form>
     </div>
     <el-card style="width: 100%">
@@ -108,6 +107,7 @@
 import "@/assets/font/font.css";
 import { ref, onMounted } from "vue";
 import { useRouter, LocationQuery, useRoute } from "vue-router";
+import { AppleIdToken } from "@/api/auth/model";
 import LoginForm from "@/components/LoginForm.vue";
 import RegisterForm from "@/components/RegisterForm.vue";
 //import { initRoutes } from "@/router";
@@ -117,7 +117,6 @@ import { useInfomationStore } from "@/store/modules/information";
 
 const router = useRouter();
 const route = useRoute();
-
 const informationStore = useInfomationStore();
 
 const settingsStore = useSettingsStore();
@@ -144,9 +143,10 @@ const login = () => {
   const { path, queryParams } = parseRedirect();
   router.push({ path: path, query: queryParams });
 };
-const registerToken = ref<string | null>(null);
-const register = (token: string) => {
-  registerToken.value = token;
+
+const appleIdToken = ref<AppleIdToken | null>(null);
+const register = (idToken: AppleIdToken) => {
+  appleIdToken.value = idToken;
 };
 /** 主题切换 */
 const toggleTheme = () => {
@@ -251,69 +251,6 @@ body {
   flex: 1;
   align-items: center;
   justify-content: center;
-  // width: 100%;
-  // background-image: url("/media/bg/02.jpg");
-  // background-size: 100% auto;
-
-  .box1 {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 450px;
-    height: 600px;
-    background-color: #fff;
-
-    transition: all 0.3s ease;
-
-    &.dark-theme {
-      background-color: rgb(63, 63, 63);
-      border-color: #494949;
-      color: white;
-    }
-
-    .box2 {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      width: 90%;
-      height: 90%;
-      padding: 25px;
-      border: 1px solid #ebeefe;
-      border-radius: 4px;
-
-      transition: all 0.3s ease;
-
-      &.dark-theme {
-        background-color: rgb(52, 52, 52);
-        border-color: #494949;
-        color: white;
-      }
-
-      &:hover {
-        box-shadow: 0 0 10px rgb(0 0 0 / 10%);
-        transition: all 0.4s;
-      }
-
-      h1 {
-        margin-top: 0;
-        font-family: "KaiTi", sans-serif;
-        font-size: 36px;
-        font-weight: 400;
-      }
-
-      h4 {
-        margin-top: 0;
-        font-family: "KaiTi", sans-serif;
-        font-size: 18px;
-        font-weight: 400;
-      }
-
-      el-button {
-        align-self: center;
-        margin-top: 2px;
-      }
-    }
-  }
 
   .login-title {
     margin: 20px 0;

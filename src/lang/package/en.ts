@@ -90,11 +90,14 @@ export default {
     rules: {
       username: {
         message1: "Please enter your username",
-        message2: "Username length should be greater than 5",
+        message2: "Greater than 4 and less than 20",
+        message3: "only letters, numbers, _, -, @, and .",
       },
       password: {
         message1: "Please enter your password",
-        message2: "Password length should be greater than 6",
+        message2: "Greater than 8 and less than 20",
+        ///^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/
+        message3: "Min 1 uppercase, 1 lowercase, 1 number, 1 special character",
       },
     },
     success: "Login Successful",

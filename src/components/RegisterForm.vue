@@ -10,16 +10,19 @@
           <el-form
             ref="formRef"
             class="login-form"
-            :rules="rules"
-            :model="form"
+            :rules="registerRules"
+            :model="registerForm"
             label-width="auto"
           >
             <el-form-item :label="$t('login.username')" prop="username">
-              <el-input v-model="form.username" suffix-icon="User"></el-input>
+              <el-input
+                v-model="registerForm.username"
+                suffix-icon="User"
+              ></el-input>
             </el-form-item>
             <el-form-item :label="$t('login.password')" prop="password">
               <el-input
-                v-model="form.password"
+                v-model="registerForm.password"
                 type="password"
                 suffix-icon="Lock"
               ></el-input>
@@ -27,14 +30,14 @@
 
             <el-form-item :label="$t('login.repassword')" prop="repassword">
               <el-input
-                v-model="form.repassword"
+                v-model="registerForm.repassword"
                 type="password"
                 suffix-icon="Lock"
               ></el-input>
             </el-form-item>
 
             <el-form-item class="login-button">
-              <el-button style="width: 100%" type="primary" @click="submit">
+              <el-button style="width: 100%" type="primary" @click="create">
                 {{ $t("login.create") }}
               </el-button>
             </el-form-item>
@@ -45,23 +48,26 @@
           <el-form
             ref="formRef"
             class="login-form"
-            :rules="rules"
-            :model="form"
+            :rules="linkRules"
+            :model="linkForm"
             label-width="auto"
           >
             <el-form-item :label="$t('login.username')" prop="username">
-              <el-input v-model="form.username" suffix-icon="User"></el-input>
+              <el-input
+                v-model="linkForm.username"
+                suffix-icon="User"
+              ></el-input>
             </el-form-item>
             <el-form-item :label="$t('login.password')" prop="password">
               <el-input
-                v-model="form.password"
+                v-model="linkForm.password"
                 type="password"
                 suffix-icon="Lock"
               ></el-input>
             </el-form-item>
 
             <el-form-item class="login-button">
-              <el-button style="width: 100%" type="primary" @click="submit">
+              <el-button style="width: 100%" type="primary" @click="link">
                 {{ $t("login.link") }}
               </el-button>
             </el-form-item>
@@ -88,34 +94,44 @@ const title = ref<string | Record<string, string>>("");
 
 // 加密
 import { ThemeEnum } from "@/enums/ThemeEnum";
-import type { AppleIdReturn } from "@/api/v1/site";
+import type { AppleIdToken } from "@/api/auth/model";
 
 import AuthAPI from "@/api/auth/index";
-import { PostSiteAppleId } from "@/api/v1/site";
-import { VueAppleLoginConfig } from "@/utils/helper";
+import type { AppleIdTokenAndUserPassData } from "@/api/auth/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
-import { RegisterData } from "@/api/auth/model";
+import { RegisterData, LinkData } from "@/api/auth/model";
 const settingsStore = useSettingsStore();
 const route = useRoute();
 
+const userStore = useUserStore();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
 const { t } = useI18n();
-const form = ref<RegisterData>({
+const registerForm = ref<RegisterData>({
   username: "",
   password: "",
   repassword: "",
 });
+
+const linkForm = ref<LinkData>({
+  username: "",
+  password: "",
+});
 const validatePass2 = (rule: any, value: any, callback: any) => {
   if (value === "") {
     callback(new Error("Please input the password again"));
-  } else if (value !== form.value.password) {
+  } else if (value !== registerForm.value.password) {
     callback(new Error("Two inputs don't match!"));
   } else {
     callback();
   }
 };
-const rules = computed(() => {
+// Props
+const props = defineProps<{
+  idToken: AppleIdToken;
+}>();
+
+const linkRules = computed(() => {
   return {
     username: [
       {
@@ -123,7 +139,7 @@ const rules = computed(() => {
         message: t("login.rules.username.message1"),
         trigger: "blur",
       },
-      { min: 5, message: t("login.rules.username.message2"), trigger: "blur" },
+      { min: 4, message: t("login.rules.username.message2"), trigger: "blur" },
     ],
     password: [
       {
@@ -133,10 +149,51 @@ const rules = computed(() => {
       },
       { min: 6, message: t("login.rules.password.message2"), trigger: "blur" },
     ],
+  };
+});
+
+const registerRules = computed(() => {
+  return {
+    username: [
+      {
+        required: true,
+        message: t("login.rules.username.message1"),
+        trigger: "blur",
+      },
+
+      {
+        pattern: /^[a-zA-Z0-9_@.-]+$/i,
+        message: "only letters, numbers, _, -, @, and .",
+        trigger: "blur",
+      },
+      {
+        min: 4,
+        max: 20,
+        message: t("login.rules.username.message2"),
+        trigger: "blur",
+      },
+    ],
+    password: [
+      {
+        required: true,
+        message: t("login.rules.password.message1"),
+        trigger: "blur",
+      },
+      {
+        min: 8,
+        max: 20,
+        message: t("login.rules.password.message2"),
+        trigger: "blur",
+      },
+      {
+        pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/i,
+        message: "only letters, numbers, _, -, @, and .",
+        trigger: "blur",
+      },
+    ],
     repassword: [{ validator: validatePass2, trigger: "blur" }],
   };
 });
-const userStore = useUserStore();
 
 function parseRedirect(): {
   path: string;
@@ -156,14 +213,12 @@ function parseRedirect(): {
   return { path, queryParams };
 }
 
+const emit = defineEmits(["login"]);
 const login = async (data: any) => {
   await succeed(data);
   const userin = await userStore.getUserInfo();
   console.log("userin:", userin);
-  const { path, queryParams } = await parseRedirect();
-  console.log("path:", path, "queryParams:", queryParams);
-
-  await router.push({ path: path, query: queryParams });
+  emit("login");
 };
 const setToken = (token: string) => {
   localStorage.setItem(TOKEN_KEY, "Bearer " + token);
@@ -181,7 +236,7 @@ const succeed = (data: any) => {
       console.log("Routing to home");
     });
   } else {
-    failed("The login response is missing the access_token");
+    error("The login response is missing the access_token");
   }
 };
 const error = (msg: string | Record<string, string>) => {
@@ -193,46 +248,47 @@ const error = (msg: string | Record<string, string>) => {
           .join("\n");
   isShow.value = true;
 };
-
-const submit = () => {
+const link = () => {
   formRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        const respose = await AuthAPI.login(form.value);
-
-        await login(respose.data);
-      } catch (error) {
-        failed(error);
+        const data: AppleIdTokenAndUserPassData = {
+          username: linkForm.value.username,
+          password: linkForm.value.password,
+          token: props.idToken.token,
+          apple_id: props.idToken.apple_id,
+        };
+        const respose = await AuthAPI.appleIdLink(data);
+        await login(respose.data.user);
+      } catch (e: any) {
+        error(e);
       }
     } else {
       ElMessage({ type: "error", message: t("login.error") });
     }
   });
 };
-
-const failed = (message: any) => {
-  error(message);
-};
-const onFailure = async (error: any) => {
-  ElMessage({ type: "error", message: t("login.appleLoginFail") });
-  console.error(error);
-  return;
-};
-const onSuccess = async (data: any) => {
-  const respose = await PostSiteAppleId({
-    key: "APPLE_MRPP_KEY_ID",
-    url: VueAppleLoginConfig.redirectURI,
-    data: data,
+const create = () => {
+  formRef.value?.validate(async (valid: boolean) => {
+    if (valid) {
+      try {
+        const data: AppleIdTokenAndUserPassData = {
+          username: registerForm.value.username,
+          password: registerForm.value.password,
+          token: props.idToken.token,
+          apple_id: props.idToken.apple_id,
+        };
+        alert(JSON.stringify(props.idToken));
+        alert(JSON.stringify(data));
+        const respose = await AuthAPI.appleIdCreate(data);
+        await login(respose.data.user);
+      } catch (e: any) {
+        error(e);
+      }
+    } else {
+      ElMessage({ type: "error", message: t("login.error") });
+    }
   });
-  const ret: AppleIdReturn = respose.data;
-  if (ret.user === null) {
-    alert("User does not exist, redirecting to register page");
-    // 用户不存在，跳转到注册页面
-  } else {
-    // 用户存在，跳转到首页
-    alert("User exists, redirecting to home page");
-    await login(ret.user);
-  }
 };
 </script>
 
@@ -354,7 +410,6 @@ body {
       flex-direction: column;
       align-items: flex-start;
       width: 90%;
-      height: 90%;
       padding: 25px;
       border: 1px solid #ebeefe;
       border-radius: 4px;

@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 2,
+            "activePatchIndex": 3,
             "patches": [
                 {
                     "date": 1723624347543,
@@ -16,6 +16,10 @@
                 {
                     "date": 1723624491928,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -58,9 +58,9 @@\n         origin: '*', // 允许任何域名\n         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // 允许任何请求方法\n         allowedHeaders: '*', // 允许任何请求头\n         credentials: true, // 如果需要支持发送凭据的跨域请求，可以设置为 true\n-      }\n+      },\n       // 允许IP访问\n       host: \"0.0.0.0\",\n       // 应用端口 (默认:3000)\n       port: Number(env.VITE_APP_PORT),\n"
+                },
+                {
+                    "date": 1726886048119,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -200,9 +200,9 @@\n       ],\n     },\n     // 构建配置\n     build: {\n-      chunkSizeWarningLimit: 2000, // 消除打包大小超过500kb警告\n+      chunkSizeWarningLimit: 4000, // 消除打包大小超过500kb警告\n       minify: \"terser\", // Vite 2.6.x 以上需要配置 minify: \"terser\", terserOptions 才能生效\n       terserOptions: {\n         compress: {\n           keep_infinity: true, // 防止 Infinity 被压缩成 1/0，这可能会导致 Chrome 上的性能问题\n"
                 }
             ],
             "date": 1723624347543,
