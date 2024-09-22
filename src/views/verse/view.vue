@@ -1,6 +1,14 @@
 <template>
   <div class="verse-view">
-    <br />
+    <el-dialog v-model="dialog" width="70%">
+      <template #header> {{ $t("verse.view.header") }} </template>
+      <MrPPMessageFrom
+        ref="editor"
+        :data="briefing!"
+        @post="postMessage"
+      ></MrPPMessageFrom>
+    </el-dialog>
+
     <el-row :gutter="20" style="margin: 28px 18px 0">
       <el-col :sm="16">
         <el-card v-if="verse" class="box-card">
@@ -111,23 +119,34 @@
           </el-button>
           <br />
         </el-card>
-        <br />
+
+        <Message
+          v-if="message"
+          ref="message"
+          :messageId="message.id!"
+          @set-message="setMessage"
+        ></Message>
+        <Reply v-if="message" :messageId="message.id!"></Reply>
       </el-col>
+
       <el-col :sm="8">
         <el-card class="box-card">
           <template #header>
             <b>{{ $t("verse.view.info") }}</b>
           </template>
           <div class="box-item">
-            userid,code,verse_id,
-            <InfoContent v-if="verse" :verse="verse"></InfoContent>
+            <InfoContent
+              v-if="verse"
+              :info="JSON.parse(verse.info!)"
+              :author="verse.author!"
+            ></InfoContent>
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right"></el-button-group>
             </aside>
           </div>
           <VerseToolbar
             v-if="verse"
-            :verse="verse"
+            :verse="verse!"
             @deleted="deleted"
             @changed="changed"
           ></VerseToolbar>
@@ -142,7 +161,7 @@
             type="primary"
             size="small"
             @click="open"
-          >
+            >11
             <font-awesome-icon icon="eye"></font-awesome-icon>
             &nbsp;{{ $t("verse.view.verseOpen") }}
           </el-button>
@@ -338,11 +357,12 @@ const saveable = computed(() => {
 });
 
 const refresh = async () => {
-  const res = await getVerse(
+  const response = await getVerse(
     id.value,
     "image,verseOpen,verseShare,author, message, languages"
   );
-  verse.value = res.data;
+  const data = response.data;
+  verse.value = data as VerseData;
 
   const selectedLanguage = verse.value?.languages!.find(
     (lang: any) => lang.language === Form.value.language

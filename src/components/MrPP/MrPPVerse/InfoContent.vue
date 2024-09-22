@@ -50,11 +50,6 @@
             共享id
           </div>
         </template>
-        {{
-          EverseAndPad(
-            String(MapNumbers(props.verse.id, 240921)).padStart(6, "0")
-          )
-        }}
       </el-descriptions-item>
     </el-descriptions>
   </div>
@@ -92,10 +87,13 @@ const props = defineProps<{
   verse: VerseData;
 }>();
 const author = computed(() => {
-  return props.verse.author;
+  return props.verse?.author;
 });
 const info = computed(() => {
-  return JSON.parse(props.verse.info!); //info;
+  if (props.verse) {
+    return JSON.parse(props.verse.info!);
+  }
+  return "";
 });
 const course = ref<Course | null>(null);
 

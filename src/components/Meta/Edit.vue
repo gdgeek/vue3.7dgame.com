@@ -110,7 +110,7 @@
               <b>{{ $t("meta.metaEdit.metaInfo") }}</b>
             </div>
           </template>
-          <div class="box-item">{{ item }}</div>
+          <div class="box-item"></div>
           <br />
         </el-card>
         <br />

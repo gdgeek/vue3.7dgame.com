@@ -39,7 +39,10 @@ export class AbilityMessage {
     public managed: number
   ) {}
 }
-
+const user = ['user', 'manager' ,'admin', 'root']
+const manager = ['manager' ,'admin', 'root']
+const admin = ['admin', 'root']
+const root = [ 'root']
 export function UpdateAbility(
   ability: any,
   roles: string[] | null,
@@ -50,6 +53,7 @@ export function UpdateAbility(
       roles = [];
     }
 
+    //alert(JSON.stringify(roles))
     let router: (string | RegExp)[] = [];
     let menu: (string | RegExp)[] = [];
 
@@ -63,26 +67,13 @@ export function UpdateAbility(
       "/404",
       "/test",
       /^\/test[\/]/,
-    ]);
+    ]);//基础权限 先给到
 
-    if (env.canWeb()) {
-      router.push(/^\/web[\/]/);
-    }
-    if (env.canBlog()) {
-      router.push(/^\/blog[\/]/);
-    }
-    if (env.canSetup()) {
-      router.push(/^\/setup[\/]/);
-    }
-    if (env.canManager()) {
-      router.push(/^\/setup[\/]/);
-    }
+    
+ 
+    if (roles.some((role) => user.includes(role))) {
 
-    if (
-      roles.includes("root") ||
-      roles.includes("manager") ||
-      roles.includes("user")
-    ) {
+      can("user", "all");
       can("editable", AbilityEditable.name, { editable: true });
       can("viewable", AbilityViewable.name, { viewable: true });
 
@@ -90,67 +81,57 @@ export function UpdateAbility(
       can("delete", AbilityMessage.name, { id: userId, managed: 0 });
       can("update", AbilityMessage.name, { id: userId });
 
+
       router = router.concat([
         "/verse/rete-verse",
         "/verse/verse-script",
         "/verse/script",
         "/meta/rete-meta",
         "/meta/script",
+        /^\/settings(\/|$)/,
       ]);
+      
       menu = menu.concat([
         "/site/logout",
         "/resource",
-        /^\/resource\/voxel(\/|$)/,
-        /^\/resource\/picture(\/|$)/,
-        /^\/resource\/video(\/|$)/,
-        /^\/resource\/audio(\/|$)/,
-        /^\/resource\/polygen(\/|$)/,
         /^\/home(\/|$)/,
         /^\/verse(\/|$)/,
         /^\/meta(\/|$)/,
-        /^\/meta-verse(\/|$)/,
-        /^\/settings(\/|$)/,
-        /^\/discovery(\/|$)/,
-        /^\/community(\/|$)/,
-        /^\/editor(\/|$)/,
-        /^\/audio(\/|$)/,
       ]);
+      menu.concat(["/verse-share/open", /^\/trades(\/|$)/]);
+    }
 
-      alert(JSON.stringify(roles));
-      if (
-        roles.includes("root") ||
-        roles.includes("admin") ||
-        roles.includes("manager") ||
-        roles.includes("user")
-      ) {
-        can("user", "all");
-        can("editable", AbilityEditable.name);
-        can("viewable", AbilityViewable.name);
-        can(["update", "delete"], AbilityWorks.name);
-        can("delete", AbilityMessage.name, { managed: 0 });
-        can("update", AbilityMessage.name);
+    if (roles.some((role) => manager.includes(role))) { 
+      can("manager", "all");
+    }
+    if (roles.includes("mrpp.com")) {
+      menu = menu.concat([/^\/resource\/polygen(\/|$)/]);
+    }
+    if (roles.includes("voxelparty.com")) {
+      menu = menu.concat([/^\/resource\/voxel(\/|$)/]);
+    }
 
-        menu = menu.concat(["/verse-share/open", /^\/trades(\/|$)/]);
-        if (
-          roles.includes("root") ||
-          roles.includes("admin") ||
-          roles.includes("manager")
-        ) {
-          can("manager", "all");
-          if (roles.includes("root") || roles.includes("admin")) {
-            can("admin", "all");
-            can("people", AbilityRole.name, { role: "manager" });
-            can("people", AbilityRole.name, { role: "user" });
-            menu = menu.concat([/^\/game(\/|$)/]);
-            menu = menu.concat([/^\/manager(\/|$)/]);
+    if (roles.some((role) => admin.includes(role))) {
+      can("admin", "all");
+      can("people", AbilityRole.name, { role: "manager" });//管理员可以管理用户
+      can("people", AbilityRole.name, { role: "user" });//管理员可以管理用户
 
-            if (roles.includes("root")) {
-              can("root", "all");
-              can("people", AbilityRole.name, { role: "admin" });
-            }
-          }
-        }
-      }
+
+      menu = menu.concat([/^\/game(\/|$)/]);
+      menu = menu.concat([/^\/manager(\/|$)/]);
+
+      menu = menu.concat([
+        /^\/resource\/voxel(\/|$)/,
+        /^\/resource\/polygen(\/|$)/,
+        /^\/resource\/picture(\/|$)/,
+        /^\/resource\/video(\/|$)/,
+        /^\/resource\/audio(\/|$)/,
+      ]);
+    }
+
+    if (roles.some((role) => root.includes(role))) {
+      can("root", "all");
+      can("people", AbilityRole.name, { role: "admin" });//超级管理员可以管理管理员
     }
 
     menu.forEach((item) => {
@@ -170,6 +151,5 @@ export function UpdateAbility(
     });
   });
 
-  // alert(111)
   ability.update(newAbility.rules);
 }
