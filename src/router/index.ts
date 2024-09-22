@@ -24,7 +24,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/redirect",
     component: Layout,
-    meta: { hidden: true },
+    meta: { hidden: true, private: true },
     children: [
       {
         path: "/redirect/:path(.*)",
@@ -36,18 +36,18 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/login",
     component: () => import("@/views/login/index.vue"),
-    meta: { hidden: true },
+    meta: { hidden: true, private: true },
   },
   {
     path: "/register",
     component: () => import("@/views/register/index.vue"),
-    meta: { hidden: true },
+    meta: { hidden: true, private: true },
   },
 
   {
     path: "/",
     name: "/",
-    meta: { hidden: false },
+    meta: { hidden: true },
     component: Layout,
     redirect: "/home/index",
     children: [
@@ -61,7 +61,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: "personalCenter.title",
           icon: "homepage",
-          hidden: false,
+          hidden: true,
         },
         children: [
           {
@@ -69,7 +69,7 @@ const routes: RouteRecordRaw[] = [
               title: "personalCenter.myHomepage",
               affix: true,
               keepAlive: true,
-              hidden: false,
+              hidden: true,
             },
             path: "/home/index",
             name: "HomeIndex",
@@ -78,7 +78,7 @@ const routes: RouteRecordRaw[] = [
           {
             meta: {
               title: "personalCenter.document",
-              hidden: false,
+              hidden: true,
             },
             path: "/home/document",
             name: "HomeDocument",
@@ -87,7 +87,7 @@ const routes: RouteRecordRaw[] = [
           {
             meta: {
               title: "personalCenter.category",
-              hidden: false,
+              hidden: true,
             },
             path: "/home/category",
             name: "HomeCategory",
@@ -100,7 +100,7 @@ const routes: RouteRecordRaw[] = [
           //   component: () => import("@/views/settings/pay.vue"),
           // },
           {
-            meta: { title: "personalCenter.processOfCreation", hidden: false },
+            meta: { title: "personalCenter.processOfCreation", hidden: true },
             path: "/home/creator",
             name: "SettingsCreator",
             component: () => import("@/views/home/creator.vue"),
@@ -114,6 +114,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: "settings.title",
           hidden: true,
+          private: true,
         },
         redirect: "/settings/account",
         component: Empty,
@@ -121,17 +122,21 @@ const routes: RouteRecordRaw[] = [
           {
             path: "/settings/account",
             name: "SettingsAccount",
-            meta: { title: "settings.accountSetting", hidden: true },
+            meta: { title: "settings.accountSetting", hidden: true, private: true },
             component: () => import("@/views/settings/account.vue"),
           },
           {
-            meta: { title: "settings.personalData", hidden: true },
+            meta: {
+              title: "settings.personalData",
+              hidden: true,
+              private: true,
+            },
             path: "/settings/edit",
             name: "SettingsEdit",
             component: () => import("@/views/settings/edit.vue"),
           },
           {
-            meta: { title: "settings.userPresentation", hidden: true },
+            meta: { title: "settings.userPresentation", hidden: true, private: true },
             path: "/settings/people",
             name: "SettingsPeople",
             component: () => import("@/views/settings/people.vue"),
@@ -147,7 +152,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: "resourceManagement.title",
           icon: "system",
-          hidden: false,
+          hidden: true,
           alwaysShow: false,
           params: null,
         },
@@ -160,7 +165,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "resourceManagement.voxelManagement.title",
               icon: "",
-              hidden: false,
+              hidden: true,
               alwaysShow: false,
               params: null,
             },
@@ -172,7 +177,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                   title: "resourceManagement.voxelManagement.voxelList",
                   icon: "el-icon-list",
-                  hidden: false,
+                  hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -184,7 +189,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                   title: "resourceManagement.voxelManagement.voxelUpload",
                   icon: "el-icon-uploadFilled",
-                  hidden: false,
+                  hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -197,6 +202,7 @@ const routes: RouteRecordRaw[] = [
                   title: "resourceManagement.voxelManagement.voxelProcessing",
                   icon: "el-icon-uploadFilled",
                   hidden: true,
+                  private: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -211,7 +217,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "resourceManagement.polygenManagement.title",
               icon: "system",
-              hidden: false,
+              hidden: true,
               alwaysShow: false,
               params: null,
             },
@@ -223,7 +229,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                   title: "resourceManagement.polygenManagement.polygenList",
                   icon: "el-icon-list",
-                  hidden: false,
+                  hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -235,7 +241,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                   title: "resourceManagement.polygenManagement.polygenUpload",
                   icon: "el-icon-uploadFilled",
-                  hidden: false,
+                  hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -249,6 +255,7 @@ const routes: RouteRecordRaw[] = [
                     "resourceManagement.polygenManagement.polygenProcessing",
                   icon: "el-icon-uploadFilled",
                   hidden: true,
+                  private: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -263,7 +270,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "resourceManagement.pictureManagement.title",
               icon: "el-icon-picture",
-              hidden: false,
+              hidden: true,
               alwaysShow: false,
               params: null,
             },
@@ -275,7 +282,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                   title: "resourceManagement.pictureManagement.pictureList",
                   icon: "el-icon-list",
-                  hidden: false,
+                  hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -287,7 +294,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                   title: "resourceManagement.pictureManagement.pictureUpload",
                   icon: "el-icon-uploadFilled",
-                  hidden: false,
+                  hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -301,6 +308,7 @@ const routes: RouteRecordRaw[] = [
                     "resourceManagement.pictureManagement.pictureProcessing",
                   icon: "el-icon-uploadFilled",
                   hidden: true,
+                  private:  true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -315,7 +323,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "resourceManagement.videoManagement.title",
               icon: "el-icon-video-camera",
-              hidden: false,
+              hidden: true,
               alwaysShow: false,
               params: null,
             },
@@ -327,7 +335,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                   title: "resourceManagement.videoManagement.videoList",
                   icon: "el-icon-list",
-                  hidden: false,
+                  hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -339,7 +347,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                   title: "resourceManagement.videoManagement.videoUpload",
                   icon: "el-icon-uploadFilled",
-                  hidden: false,
+                  hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -352,6 +360,7 @@ const routes: RouteRecordRaw[] = [
                   title: "resourceManagement.videoManagement.videoProcessing",
                   icon: "el-icon-uploadFilled",
                   hidden: true,
+                  private: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -367,7 +376,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "resourceManagement.audioManagement.title",
               icon: "el-icon-headset",
-              hidden: false,
+              hidden: true,
               alwaysShow: false,
               params: null,
             },
@@ -379,7 +388,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                   title: "resourceManagement.audioManagement.audioList",
                   icon: "el-icon-list",
-                  hidden: false,
+                  hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -391,7 +400,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                   title: "resourceManagement.audioManagement.audioUpload",
                   icon: "el-icon-uploadFilled",
-                  hidden: false,
+                  hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -404,6 +413,7 @@ const routes: RouteRecordRaw[] = [
                   title: "resourceManagement.audioManagement.audioProcessing",
                   icon: "el-icon-uploadFilled",
                   hidden: true,
+                  private: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -420,7 +430,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: "meta.title",
           icon: "el-icon-StarFilled",
-          hidden: false,
+          hidden: true,
           alwaysShow: false,
           params: null,
         },
@@ -432,7 +442,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "meta.metaList",
               icon: "cascader",
-              hidden: false,
+              hidden: true,
               keepAlive: true,
               alwaysShow: false,
               params: null,
@@ -445,7 +455,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "meta.systemDefault",
               icon: "",
-              hidden: false,
+              hidden: true,
               keepAlive: true,
               alwaysShow: false,
               params: null,
@@ -457,6 +467,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "meta.edit",
               hidden: true,
+              private: true,
             },
             component: () => import("@/views/meta/prefab-edit.vue"),
           },
@@ -466,6 +477,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "meta.edit",
               hidden: true,
+              private: true,
             },
             component: () => import("@/views/meta/meta-edit.vue"),
           },
@@ -482,6 +494,7 @@ const routes: RouteRecordRaw[] = [
               title: "meta.scriptEditor",
               keepAlive: true,
               hidden: true,
+              private: true,
             },
             component: () => import("@/views/meta/script.vue"),
           },
@@ -492,6 +505,7 @@ const routes: RouteRecordRaw[] = [
               title: "meta.sceneEditor",
               keepAlive: true,
               hidden: true,
+              private: true,
             },
             component: () => import("@/views/meta/scene.vue"),
           },
@@ -506,7 +520,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: "project.title",
           icon: "el-icon-sunrise",
-          hidden: false,
+          hidden: true,
           alwaysShow: false,
           params: null,
         },
@@ -518,7 +532,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "project.selfGenerated",
               icon: "cascader",
-              hidden: false,
+              hidden: true,
             },
           },
           {
@@ -528,7 +542,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "project.systemRecommendation",
               icon: "cascader",
-              hidden: false,
+              hidden: true,
             },
           },
           {
@@ -538,7 +552,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "project.shareWithFriends",
               icon: "cascader",
-              hidden: false,
+              hidden: true,
             },
           },
           {
@@ -547,6 +561,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "project.viewTitle",
               hidden: true,
+              private: true,
             },
             component: () => import("@/views/verse/view.vue"),
           },
@@ -557,6 +572,7 @@ const routes: RouteRecordRaw[] = [
               title: "project.scriptEditor",
               keepAlive: true,
               hidden: true,
+              private: true,
             },
             component: (): any => import("@/views/verse/script.vue"),
           },
@@ -567,6 +583,7 @@ const routes: RouteRecordRaw[] = [
               title: "project.sceneEditor",
               keepAlive: true,
               hidden: true,
+              private: true,
             },
             component: () => import("@/views/verse/scene.vue"),
           },
@@ -580,7 +597,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: "manager.title",
           icon: "el-icon-Management",
-          hidden: false,
+          hidden: true,
           alwaysShow: false,
           params: null,
         },
@@ -592,7 +609,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "manager.userManagement",
               icon: "cascader",
-              hidden: false,
+              hidden: true,
             },
           },
         ],
@@ -605,7 +622,8 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: "game.title",
           icon: "el-icon-monitor",
-          hidden: false,
+          hidden: true,
+          private: true,
           alwaysShow: false,
           params: null,
         },
@@ -617,7 +635,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "game.gameIndex",
               icon: "cascader",
-              hidden: false,
+              hidden: true,
             },
           },
           {
@@ -627,7 +645,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "game.gameMap",
               icon: "cascader",
-              hidden: false,
+              hidden: true,
             },
           },
         ],
@@ -636,12 +654,12 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/401",
         component: () => import("@/views/error-page/401.vue"),
-        meta: { hidden: true },
+        meta: { hidden: true, private: true },
       },
       {
         path: "/404",
         component: () => import("@/views/error-page/404.vue"),
-        meta: { hidden: true },
+        meta: { hidden: true, private: true },
       },
     ],
   },
@@ -727,14 +745,7 @@ import { AbilityRouter } from "@/utils/ability";
 const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   const can = ability.can.bind(ability);
   route.forEach((route) => {
-    // console.error(
-    //   route.path,
-    //   route.path,
-    //   can("open", new AbilityRouter(route.path))
-    // );
-
-    // console.error(route.meta?.hidden);
-    if (route.meta && !route.meta.hidden) {
+    if (route.meta ) {
       route.meta.hidden = !can("open", new AbilityRouter(route.path));
     }
     if (route.children) {

@@ -99,12 +99,12 @@ export function UpdateAbility(
       ]);
       menu = menu.concat([
         "/site/logout",
-        /^\/resource(\/|$)/,
-        /^\/polygen(\/|$)/,
-        /^\/voxel(\/|$)/,
-        /^\/space(\/|$)/,
-        /^\/picture(\/|$)/,
-        /^\/video(\/|$)/,
+        "/resource",
+        /^\/resource\/voxel(\/|$)/,
+        /^\/resource\/picture(\/|$)/,
+        /^\/resource\/video(\/|$)/,
+        /^\/resource\/audio(\/|$)/,
+        /^\/resource\/polygen(\/|$)/,
         /^\/home(\/|$)/,
         /^\/verse(\/|$)/,
         /^\/meta(\/|$)/,
@@ -116,6 +116,7 @@ export function UpdateAbility(
         /^\/audio(\/|$)/,
       ]);
 
+      alert(JSON.stringify(roles));
       if (
         roles.includes("root") ||
         roles.includes("admin") ||

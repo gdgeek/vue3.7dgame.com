@@ -1,6 +1,6 @@
 <template>
   <!-- 如果菜单项没有隐藏则显示 -->
-  <div v-if="!item.meta || !item.meta.hidden">
+  <div v-if="(!item.meta || !item.meta.hidden) && !item.meta.private">
     <!-- 显示只有一个子路由或没有子路由的菜单项 -->
     <template
       v-if="
@@ -106,11 +106,6 @@ function hasOneShowingChild(
       return true;
     }
   });
-
-  // 如果只有一个或没有显示的子路由
-  if (showingChildren.length === 1) {
-    return true;
-  }
 
   // 如果没有子路由，显示父级路由
   if (showingChildren.length === 0) {
