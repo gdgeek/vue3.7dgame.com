@@ -9,10 +9,11 @@
 
     <mr-p-p-verse-qrcode ref="qrcodeRef"></mr-p-p-verse-qrcode>
     <el-button-group v-if="verse" style="float: right" :inline="true">
+      <!--
       <el-button type="info" size="small" @click="qrcode">
         <font-awesome-icon icon="qrcode"></font-awesome-icon>
       </el-button>
-
+-->
       <el-button
         v-if="saveable"
         type="success"
@@ -63,9 +64,9 @@ const saveable = computed(() => {
 });
 
 const qrcode = () => {
-  if (qrcodeRef.value && props.verse) {
+  /*if (qrcodeRef.value && props.verse) {
     qrcodeRef.value.open(props.verse.id);
-  }
+  }*/
 };
 
 const deletedWindow = async () => {

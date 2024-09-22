@@ -1,14 +1,6 @@
 <template>
   <div class="verse-view">
-    <el-dialog v-model="dialog" width="70%">
-      <template #header> {{ $t("verse.view.header") }} </template>
-      <MrPPMessageFrom
-        ref="editor"
-        :data="briefing!"
-        @post="postMessage"
-      ></MrPPMessageFrom>
-    </el-dialog>
-
+    <br />
     <el-row :gutter="20" style="margin: 28px 18px 0">
       <el-col :sm="16">
         <el-card v-if="verse" class="box-card">
@@ -119,34 +111,23 @@
           </el-button>
           <br />
         </el-card>
-
-        <Message
-          v-if="message"
-          ref="message"
-          :messageId="message.id!"
-          @set-message="setMessage"
-        ></Message>
-        <Reply v-if="message" :messageId="message.id!"></Reply>
+        <br />
       </el-col>
-
       <el-col :sm="8">
         <el-card class="box-card">
           <template #header>
             <b>{{ $t("verse.view.info") }}</b>
           </template>
           <div class="box-item">
-            <InfoContent
-              v-if="verse"
-              :info="JSON.parse(verse.info!)"
-              :author="verse.author!"
-            ></InfoContent>
+            userid,code,verse_id,
+            <InfoContent v-if="verse" :verse="verse"></InfoContent>
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right"></el-button-group>
             </aside>
           </div>
           <VerseToolbar
             v-if="verse"
-            :verse="verse!"
+            :verse="verse"
             @deleted="deleted"
             @changed="changed"
           ></VerseToolbar>

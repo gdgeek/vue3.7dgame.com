@@ -38,10 +38,7 @@
                   ></LazyImg>
                 </router-link>
               </el-card>
-              <InfoContent
-                :info="JSON.parse(item.info!)"
-                :author="item.author!"
-              ></InfoContent>
+              <InfoContent v-if="item" :verse="item"></InfoContent>
             </div>
           </template>
           <div class="clearfix">

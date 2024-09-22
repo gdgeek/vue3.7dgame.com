@@ -6,6 +6,13 @@
       size="small"
       border
     >
+      <el-descriptions-item v-for="(item, index) in props.list" :key="index">
+        <template #label>
+          <font-awesome-icon class="icon" :icon="item.icon"></font-awesome-icon>
+          item.label
+        </template>
+        item.label.value
+      </el-descriptions-item>
       <el-descriptions-item v-if="author">
         <template #label>
           <font-awesome-icon class="icon" icon="user"></font-awesome-icon>
@@ -35,13 +42,32 @@
         </template>
         {{ info.description }}
       </el-descriptions-item>
+
+      <el-descriptions-item>
+        <template #label>
+          <div style="width: 75px">
+            <font-awesome-icon class="icon" icon="share"></font-awesome-icon>
+            共享id
+          </div>
+        </template>
+        {{
+          EverseAndPad(
+            String(MapNumbers(props.verse.id, 240921)).padStart(6, "0")
+          )
+        }}
+      </el-descriptions-item>
     </el-descriptions>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Post } from "@/api/home/wordpress";
-import type { Author } from "@/api/v1/verse";
+import {
+  MapNumbers,
+  EverseAndPad,
+  ReverseMap,
+  ReverseAndPad,
+} from "@/utils/helper";
+import type { Author, VerseData } from "@/api/v1/verse";
 import DOMPurify from "dompurify";
 
 interface Info {
@@ -56,12 +82,21 @@ interface Course {
     rendered: string;
   };
 }
+interface Item {
+  icon: string;
+  label: string;
+  value: string;
+}
 
 const props = defineProps<{
-  info: Info;
-  author: Author;
+  verse: VerseData;
 }>();
-
+const author = computed(() => {
+  return props.verse.author;
+});
+const info = computed(() => {
+  return JSON.parse(props.verse.info!); //info;
+});
 const course = ref<Course | null>(null);
 
 // 返回清理后的 HTML
