@@ -75,7 +75,9 @@ const refresh = () => {
       });
     },
     (xhr) => {
-      emit("progress", (xhr.loaded / xhr.total) * 100);
+      // emit("progress", (xhr.loaded / xhr.total) * 100);
+      emit("progress", parseFloat(((xhr.loaded / xhr.total) * 100).toFixed(1)));
+      console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
     }
   );
 };

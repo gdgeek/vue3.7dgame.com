@@ -80,6 +80,7 @@ import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
 import { printVector3 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
+
 const loading = ref(false);
 const polygenData = ref<any>(null);
 const expire = ref(true);

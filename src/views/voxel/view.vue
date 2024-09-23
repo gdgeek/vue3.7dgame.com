@@ -141,8 +141,8 @@ const loadVoxelData = async () => {
   }
 };
 
-const progress = (percentage: number) => {
-  percentage = percentage;
+const progress = (progress: number) => {
+  percentage.value = progress;
 };
 
 const createVerse = async () => {
