@@ -112,41 +112,11 @@ const rules = computed(() => {
     ],
   };
 });
-const userStore = useUserStore();
-const emit = defineEmits(["login", "register"]);
-
+const emit = defineEmits(["register", "enter"]);
 const login = async (data: any) => {
-  await succeed(data);
-  await userStore.getUserInfo();
-  emit("login");
-};
-const setToken = (token: string) => {
-  localStorage.setItem(TOKEN_KEY, "Bearer " + token);
-};
-
-const succeed = (data: any) => {
-  ElMessage.success(t("login.success"));
-  const token = data.auth;
-  if (token) {
-    setToken(token);
-    const res = localStorage.getItem(TOKEN_KEY);
-    console.log("Token set successfully", res);
-    nextTick(() => {
-      router.push("/");
-      console.log("Routing to home");
-    });
-  } else {
-    error("The login response is missing the access_token");
-  }
-};
-const error = (msg: string | Record<string, string>) => {
-  title.value =
-    typeof msg === "string"
-      ? msg
-      : Object.keys(msg)
-          .map((key) => `${key} : ${msg[key]}`)
-          .join("\n");
-  isShow.value = true;
+  return new Promise<void>((resolve, reject) => {
+    emit("enter", data, resolve, reject);
+  });
 };
 
 const submit = () => {
@@ -158,7 +128,7 @@ const submit = () => {
         console.log(respose.data);
         await login(respose.data);
       } catch (e: any) {
-        error(e);
+        ElMessage.error(e.message);
         loading.value = false;
       }
     } else {
@@ -192,7 +162,7 @@ const onSuccess = async (data: any) => {
     try {
       await login(ret.user);
     } catch (e: any) {
-      error(e);
+      ElMessage.error(e.message);
       loading.value = false;
     }
     // emit("login", ret.user);

@@ -213,41 +213,13 @@ function parseRedirect(): {
   return { path, queryParams };
 }
 
-const emit = defineEmits(["login"]);
+const emit = defineEmits(["enter"]);
 const login = async (data: any) => {
-  await succeed(data);
-  const userin = await userStore.getUserInfo();
-  console.log("userin:", userin);
-  emit("login");
-};
-const setToken = (token: string) => {
-  localStorage.setItem(TOKEN_KEY, "Bearer " + token);
+  return new Promise<void>((resolve, reject) => {
+    emit("enter", data, resolve, reject);
+  });
 };
 
-const succeed = (data: any) => {
-  ElMessage.success(t("login.success"));
-  const token = data.auth;
-  if (token) {
-    setToken(token);
-    const res = localStorage.getItem(TOKEN_KEY);
-    console.log("Token set successfully", res);
-    nextTick(() => {
-      router.push("/");
-      console.log("Routing to home");
-    });
-  } else {
-    error("The login response is missing the access_token");
-  }
-};
-const error = (msg: string | Record<string, string>) => {
-  title.value =
-    typeof msg === "string"
-      ? msg
-      : Object.keys(msg)
-          .map((key) => `${key} : ${msg[key]}`)
-          .join("\n");
-  isShow.value = true;
-};
 const link = () => {
   formRef.value?.validate(async (valid: boolean) => {
     if (valid) {
@@ -261,7 +233,7 @@ const link = () => {
         const respose = await AuthAPI.appleIdLink(data);
         await login(respose.data.user);
       } catch (e: any) {
-        error(e);
+        ElMessage.error(e.message);
       }
     } else {
       ElMessage({ type: "error", message: t("login.error") });
@@ -283,7 +255,7 @@ const create = () => {
         const respose = await AuthAPI.appleIdCreate(data);
         await login(respose.data.user);
       } catch (e: any) {
-        error(e);
+        ElMessage.error(e.message);
       }
     } else {
       ElMessage({ type: "error", message: t("login.error") });
