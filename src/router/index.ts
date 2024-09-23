@@ -111,12 +111,12 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/settings",
         name: "Settings",
+        redirect: "/home/index",
         meta: {
           title: "settings.title",
           hidden: true,
           private: true,
         },
-        redirect: "/settings/account",
         component: Empty,
         children: [
           {
@@ -155,7 +155,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/resource",
         component: null,
-        redirect: "/resource/voxel",
+        redirect: "/home/index",
         name: "/resource",
         meta: {
           title: "resourceManagement.title",
@@ -433,7 +433,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/meta",
         component: null,
-        redirect: "/meta/list",
+        redirect: "/home/index",
         name: "/system",
         meta: {
           title: "meta.title",
@@ -523,7 +523,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/verse",
         component: null,
-        redirect: "/verse/index",
+        redirect: "/home/index",
         name: "",
         meta: {
           title: "project.title",
@@ -600,7 +600,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/manager",
         component: null,
-        redirect: "/manager/user",
+        redirect: "/home/index",
         name: "Manager",
         meta: {
           title: "manager.title",
@@ -625,7 +625,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/game",
         component: null,
-        redirect: "/game/index",
+        redirect: "/home/index",
         name: "Game",
         meta: {
           title: "game.title",
