@@ -631,7 +631,7 @@ const routes: RouteRecordRaw[] = [
           title: "game.title",
           icon: "el-icon-monitor",
           hidden: true,
-          private: true,
+          private: false,
           alwaysShow: false,
           params: null,
         },
