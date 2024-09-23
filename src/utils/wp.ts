@@ -1,6 +1,5 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { ElMessage } from "element-plus";
-import environment from "@/environment.js";
 
 // 创建一个 axios 实例
 const service = axios.create({

@@ -52,10 +52,7 @@
 </template>
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { ref, computed, nextTick } from "vue";
-import { useI18n } from "vue-i18n";
 import { useRouter, LocationQuery, useRoute } from "vue-router";
-import { ElMessage } from "element-plus";
 import { useUserStore } from "@/store/modules/user";
 import { useSettingsStore } from "@/store/modules/settings";
 import { FormInstance } from "element-plus";
@@ -120,8 +117,7 @@ const emit = defineEmits(["login", "register"]);
 
 const login = async (data: any) => {
   await succeed(data);
-  const userin = await userStore.getUserInfo();
-  console.log("userin:", userin);
+  await userStore.getUserInfo();
   emit("login");
 };
 const setToken = (token: string) => {
@@ -159,7 +155,7 @@ const submit = () => {
     if (valid) {
       try {
         const respose = await AuthAPI.login(form.value);
-
+        console.log(respose.data);
         await login(respose.data);
       } catch (e: any) {
         error(e);

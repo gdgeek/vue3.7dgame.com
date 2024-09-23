@@ -1,14 +1,14 @@
 export type RegisterData = {
-  username: string;//用户名
-  password: string;//密码
-  repassword: string;//确认密码
-}
+  username: string; //用户名
+  password: string; //密码
+  repassword: string; //确认密码
+};
 
 export type LinkData = {
-  username: string;//用户名
-  password: string;//密码
-}
-export interface AppleIdToken { 
+  username: string; //用户名
+  password: string; //密码
+};
+export interface AppleIdToken {
   apple_id: string;
   token: string;
 }
@@ -23,19 +23,19 @@ export type AppleIdTokenAndUserPassData = {
   password: string;
   token: string;
   apple_id: string;
-}
+};
 export type UserData = {
   nickname: string;
   email: string;
   username: string;
   auth: string;
-}
+};
 export type AppleIdReturn = {
   apple_id: string;
   email: string;
   user: UserData;
   token: string;
-}
+};
 /**
  * 登录请求参数
  */
@@ -79,10 +79,18 @@ type User = {
   roles: string[];
 };
 
+// export type LoginResult = {
+//   data: any;
+//   access_token: string;
+//   user: User;
+// };
+
 export type LoginResult = {
-  data: any;
-  access_token: string;
-  user: User;
+  nickname: string;
+  email: string | null;
+  username: string;
+  roles: string[];
+  auth: string;
 };
 
 /**

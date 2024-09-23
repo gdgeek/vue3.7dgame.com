@@ -39,10 +39,10 @@ export class AbilityMessage {
     public managed: number
   ) {}
 }
-const user = ['user', 'manager' ,'admin', 'root']
-const manager = ['manager' ,'admin', 'root']
-const admin = ['admin', 'root']
-const root = [ 'root']
+const user = ["user", "manager", "admin", "root"];
+const manager = ["manager", "admin", "root"];
+const admin = ["admin", "root"];
+const root = ["root"];
 export function UpdateAbility(
   ability: any,
   roles: string[] | null,
@@ -67,12 +67,9 @@ export function UpdateAbility(
       "/404",
       "/test",
       /^\/test[\/]/,
-    ]);//基础权限 先给到
+    ]); //基础权限 先给到
 
-    
- 
     if (roles.some((role) => user.includes(role))) {
-
       can("user", "all");
       can("editable", AbilityEditable.name, { editable: true });
       can("viewable", AbilityViewable.name, { viewable: true });
@@ -80,7 +77,6 @@ export function UpdateAbility(
       can(["update", "delete"], AbilityWorks.name, { id: userId });
       can("delete", AbilityMessage.name, { id: userId, managed: 0 });
       can("update", AbilityMessage.name, { id: userId });
-
 
       router = router.concat([
         "/verse/rete-verse",
@@ -90,7 +86,7 @@ export function UpdateAbility(
         "/meta/script",
         /^\/settings(\/|$)/,
       ]);
-      
+
       menu = menu.concat([
         "/site/logout",
         "/resource",
@@ -101,7 +97,7 @@ export function UpdateAbility(
       menu.concat(["/verse-share/open", /^\/trades(\/|$)/]);
     }
 
-    if (roles.some((role) => manager.includes(role))) { 
+    if (roles.some((role) => manager.includes(role))) {
       can("manager", "all");
     }
     if (roles.includes("mrpp.com")) {
@@ -113,9 +109,8 @@ export function UpdateAbility(
 
     if (roles.some((role) => admin.includes(role))) {
       can("admin", "all");
-      can("people", AbilityRole.name, { role: "manager" });//管理员可以管理用户
-      can("people", AbilityRole.name, { role: "user" });//管理员可以管理用户
-
+      can("people", AbilityRole.name, { role: "manager" }); //管理员可以管理用户
+      can("people", AbilityRole.name, { role: "user" }); //管理员可以管理用户
 
       menu = menu.concat([/^\/game(\/|$)/]);
       menu = menu.concat([/^\/manager(\/|$)/]);
@@ -131,7 +126,7 @@ export function UpdateAbility(
 
     if (roles.some((role) => root.includes(role))) {
       can("root", "all");
-      can("people", AbilityRole.name, { role: "admin" });//超级管理员可以管理管理员
+      can("people", AbilityRole.name, { role: "admin" }); //超级管理员可以管理管理员
     }
 
     menu.forEach((item) => {

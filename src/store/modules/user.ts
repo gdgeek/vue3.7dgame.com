@@ -65,7 +65,7 @@ export const useUserStore = defineStore("user", () => {
     return new Promise<void>((resolve, reject) => {
       AuthAPI.login(loginData)
         .then((data) => {
-          const access_token = data.data.access_token;
+          const access_token = data.data.auth;
           localStorage.setItem(TOKEN_KEY, "Bearer" + " " + access_token);
           resolve();
         })
@@ -132,21 +132,6 @@ export const useUserStore = defineStore("user", () => {
     }
   };
 
-  // 用户登出
-  // function logout() {
-  //   return new Promise<void>((resolve, reject) => {
-  //     AuthAPI.logout()
-  //       .then(() => {
-  //         console.log("测试");
-  //         localStorage.setItem(TOKEN_KEY, "");
-  //         location.reload(); // 清空路由
-  //         resolve();
-  //       })
-  //       .catch((error) => {
-  //         reject(error);
-  //       });
-  //   });
-  // }
   const logout = async () => {
     await localStorage.setItem(TOKEN_KEY, "");
     location.reload(); // 清空路由

@@ -4,23 +4,23 @@ import {
   CaptchaResult,
   LoginData,
   LoginResult,
-  AppleIdReturn
+  AppleIdReturn,
 } from "./model";
 interface ApiResponse<T> {
-  status: number;      // 响应状态码
-  message: string;     // 响应消息
-  data: T;             // 实际的数据
+  status: number; // 响应状态码
+  message: string; // 响应消息
+  data: T; // 实际的数据
 }
 class AuthAPI {
-  static appleIdCreate(data: AppleIdTokenAndUserPassData) { 
+  static appleIdCreate(data: AppleIdTokenAndUserPassData) {
     alert(JSON.stringify(data));
-    return request<AppleIdTokenAndUserPassData, ApiResponse<AppleIdReturn> >({
+    return request<AppleIdTokenAndUserPassData, ApiResponse<AppleIdReturn>>({
       url: "/v1/site/apple-id-create",
       method: "post",
       data: data,
     });
   }
-  static appleIdLink(data: AppleIdTokenAndUserPassData) { 
+  static appleIdLink(data: AppleIdTokenAndUserPassData) {
     alert(JSON.stringify(data));
     return request<AppleIdTokenAndUserPassData, ApiResponse<AppleIdReturn>>({
       url: "/v1/site/apple-id-link",
@@ -28,7 +28,7 @@ class AuthAPI {
       data: data,
     });
   }
-  
+
   /**
    * 登录API
    *
@@ -39,7 +39,7 @@ class AuthAPI {
     const formData = new FormData();
     formData.append("username", data.username);
     formData.append("password", data.password);
-    return request<LoginData, LoginResult>({
+    return request<LoginResult>({
       url: "/v1/site/login",
       method: "post",
       data: formData,
@@ -49,7 +49,6 @@ class AuthAPI {
     });
   }
 
-  
   /**
    * 注销API
    */

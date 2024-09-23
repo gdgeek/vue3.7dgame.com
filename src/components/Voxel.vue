@@ -26,7 +26,14 @@ const props = defineProps({
 
 // const emit = defineEmits(["loaded", "progress"]);
 const emit = defineEmits<{
-  (e: "loaded", data: { size: THREE.Vector3; center: THREE.Vector3 }): void;
+  (
+    e: "loaded",
+    data: {
+      count: number;
+      size: THREE.Vector3;
+      center: THREE.Vector3;
+    }
+  ): void;
   (e: "progress", progress: number): void;
 }>();
 
@@ -137,9 +144,9 @@ const refresh = () => {
         ),
       });
     },
-    (xhr) => {
+    (xhr: any) => {
       emit("progress", parseFloat(((xhr.loaded / xhr.total) * 100).toFixed(1)));
-      emit("progress", (xhr.loaded / xhr.total) * 100);
+      // emit("progress", (xhr.loaded / xhr.total) * 100);
       console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
     }
   );
