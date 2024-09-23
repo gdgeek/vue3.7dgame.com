@@ -95,13 +95,21 @@ export default {
       },
       password: {
         message1: "Please enter your password",
-        message2: "Greater than 8 and less than 20",
+        message2: "Greater than 6 and less than 20",
         ///^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/
         message3: "Min 1 uppercase, 1 lowercase, 1 number, 1 special character",
+      },
+      repassword: {
+        message1: "Please enter the password again",
+        message2: "The two passwords do not match",
       },
     },
     success: "Login Successful",
     error: "Form Validation Failed",
+    createAccount: "Create Account",
+    repassword: "Confirm Password",
+    create: "Create",
+    linkAccount: "Login Account",
     logout: {
       message1: "Are you sure you want to log out and exit the system?",
       message2: "Prompt",

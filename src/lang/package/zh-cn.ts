@@ -99,9 +99,17 @@ export default {
         ///^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/
         message3: "密码必须包含大小写字母、数字、特殊字符",
       },
+      repassword: {
+        message1: "请再次输入密码",
+        message2: "两次输入的密码不一致",
+      },
     },
     success: "登录成功",
     error: "表单检验未通过",
+    createAccount: "创建账号",
+    repassword: "确认密码",
+    create: "创建",
+    linkAccount: "登录账号",
     logout: {
       message1: "确定注销并退出系统吗？",
       message2: "提示",

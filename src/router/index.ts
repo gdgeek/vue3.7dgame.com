@@ -122,7 +122,11 @@ const routes: RouteRecordRaw[] = [
           {
             path: "/settings/account",
             name: "SettingsAccount",
-            meta: { title: "settings.accountSetting", hidden: true, private: true },
+            meta: {
+              title: "settings.accountSetting",
+              hidden: true,
+              private: true,
+            },
             component: () => import("@/views/settings/account.vue"),
           },
           {
@@ -136,7 +140,11 @@ const routes: RouteRecordRaw[] = [
             component: () => import("@/views/settings/edit.vue"),
           },
           {
-            meta: { title: "settings.userPresentation", hidden: true, private: true },
+            meta: {
+              title: "settings.userPresentation",
+              hidden: true,
+              private: true,
+            },
             path: "/settings/people",
             name: "SettingsPeople",
             component: () => import("@/views/settings/people.vue"),
@@ -308,7 +316,7 @@ const routes: RouteRecordRaw[] = [
                     "resourceManagement.pictureManagement.pictureProcessing",
                   icon: "el-icon-uploadFilled",
                   hidden: true,
-                  private:  true,
+                  private: true,
                   alwaysShow: false,
                   params: null,
                 },
@@ -745,7 +753,7 @@ import { AbilityRouter } from "@/utils/ability";
 const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   const can = ability.can.bind(ability);
   route.forEach((route) => {
-    if (route.meta ) {
+    if (route.meta) {
       route.meta.hidden = !can("open", new AbilityRouter(route.path));
     }
     if (route.children) {

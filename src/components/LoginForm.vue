@@ -13,7 +13,8 @@
             height="100px"
             mode="center-align"
             type="sign in"
-            color="white"
+            :color="appleLoginColor"
+            :key="isDark"
             :onSuccess="onSuccess"
             :onFailure="onFailure"
           ></vue-apple-login>
@@ -73,7 +74,8 @@ const title = ref<string | Record<string, string>>("");
 const settingsStore = useSettingsStore();
 const route = useRoute();
 
-const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
+const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
+const appleLoginColor = computed(() => (isDark.value ? "black" : "white"));
 
 const loading = ref<boolean>(false);
 
@@ -91,7 +93,12 @@ const rules = computed(() => {
         message: t("login.rules.username.message1"),
         trigger: "blur",
       },
-      { min: 4, message: t("login.rules.username.message2"), trigger: "blur" },
+      {
+        min: 4,
+        max: 20,
+        message: t("login.rules.username.message2"),
+        trigger: "blur",
+      },
     ],
     password: [
       {
@@ -99,7 +106,12 @@ const rules = computed(() => {
         message: t("login.rules.password.message1"),
         trigger: "blur",
       },
-      { min: 6, message: t("login.rules.password.message2"), trigger: "blur" },
+      {
+        min: 6,
+        max: 20,
+        message: t("login.rules.password.message2"),
+        trigger: "blur",
+      },
     ],
   };
 });

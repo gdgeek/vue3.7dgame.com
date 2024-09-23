@@ -68,7 +68,7 @@
 
             <el-form-item class="login-button">
               <el-button style="width: 100%" type="primary" @click="link">
-                {{ $t("login.link") }}
+                {{ $t("login.login") }}
               </el-button>
             </el-form-item>
           </el-form>
@@ -119,9 +119,9 @@ const linkForm = ref<LinkData>({
 });
 const validatePass2 = (rule: any, value: any, callback: any) => {
   if (value === "") {
-    callback(new Error("Please input the password again"));
+    callback(new Error(t("login.rules.repassword.message1")));
   } else if (value !== registerForm.value.password) {
-    callback(new Error("Two inputs don't match!"));
+    callback(new Error(t("login.rules.repassword.message2")));
   } else {
     callback();
   }
@@ -180,14 +180,14 @@ const registerRules = computed(() => {
         trigger: "blur",
       },
       {
-        min: 8,
+        min: 6,
         max: 20,
         message: t("login.rules.password.message2"),
         trigger: "blur",
       },
       {
-        pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/i,
-        message: "only letters, numbers, _, -, @, and .",
+        pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/i,
+        message: t("login.rules.password.message3"),
         trigger: "blur",
       },
     ],

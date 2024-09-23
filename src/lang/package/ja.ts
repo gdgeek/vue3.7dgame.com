@@ -96,9 +96,17 @@ export default {
         message1: "パスワードを入力してください",
         message2: "パスワードは6文字以上にしてください",
       },
+      repassword: {
+        message1: "もう一度パスワードを入力してください",
+        message2: "2回入力したパスワードが一致しません",
+      },
     },
     success: "ログイン成功",
     error: "フォーム検証に失敗しました",
+    createAccount: "アカウントを作成",
+    repassword: "パスワードを確認",
+    create: "作成",
+    linkAccount: "アカウントにログイン",
     logout: {
       message1: "ログアウトしてシステムを終了しますか？",
       message2: "ヒント",
