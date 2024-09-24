@@ -134,7 +134,7 @@ export const useUserStore = defineStore("user", () => {
 
   const logout = async () => {
     await localStorage.setItem(TOKEN_KEY, "");
-    location.reload(); // 清空路由
+    // location.reload(); // 清空路由
     // 用户数据清空
     userInfo.value = {
       username: "",
@@ -159,6 +159,7 @@ export const useUserStore = defineStore("user", () => {
       roles: [],
       perms: [],
     };
+    // location.reload(); // 清空路由
   };
 
   // remove token

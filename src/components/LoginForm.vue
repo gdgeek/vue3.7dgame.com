@@ -131,10 +131,11 @@ const succeed = (data: any) => {
     setToken(token);
     const res = localStorage.getItem(TOKEN_KEY);
     console.log("Token set successfully", res);
-    nextTick(() => {
-      router.push("/");
-      console.log("Routing to home");
-    });
+    // nextTick(() => {
+    //   router.push("/");
+    //   console.log("Routing to home");
+    // });
+    nextTick();
   } else {
     error("The login response is missing the access_token");
   }

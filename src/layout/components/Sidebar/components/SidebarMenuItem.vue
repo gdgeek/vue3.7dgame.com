@@ -109,7 +109,11 @@ function hasOneShowingChild(
 
   // 如果没有子路由，显示父级路由
   if (showingChildren.length === 0) {
-    onlyOneChild.value = { ...parent, path: "", noShowingChildren: true };
+    onlyOneChild.value = {
+      ...parent,
+      path: "",
+      noShowingChildren: true,
+    };
     return true;
   }
   return false;

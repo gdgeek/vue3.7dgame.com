@@ -45,6 +45,16 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: "/logout",
+    component: () => import("@/views/login/index.vue"),
+    // redirect: "/site/logout/index",
+    meta: {
+      hidden: true,
+      private: true,
+    },
+  },
+
+  {
     path: "/",
     name: "/",
     meta: { hidden: true },
@@ -657,6 +667,22 @@ const routes: RouteRecordRaw[] = [
             },
           },
         ],
+      },
+
+      {
+        path: "/site/logout",
+        name: "LogOut",
+        component: null,
+        redirect: "/logout",
+        meta: {
+          title: "退出登录",
+          icon: "el-icon-back",
+          hidden: false,
+          private: false,
+          alwaysShow: false,
+          params: null,
+        },
+        children: [],
       },
 
       {

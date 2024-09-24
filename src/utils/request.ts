@@ -86,22 +86,26 @@ service.interceptors.request.use(
 //   }
 // );
 
-// 异常处理工具函数
-function showErrorMessage(message: string, duration = 5000) {
+// 异常处理
+function showErrorMessage(
+  message: string,
+  router: ReturnType<typeof useRouter>,
+  duration = 5000
+) {
   ElMessage({
     message,
     type: "error",
     duration,
   });
-}
-
-function handleUnauthorized(router: ReturnType<typeof useRouter>) {
-  showErrorMessage("登录过期，请重新登录");
   useUserStoreHook()
     .resetToken()
     .then(() => {
       router.push({ path: "/login" });
     });
+}
+
+function handleUnauthorized(router: ReturnType<typeof useRouter>) {
+  showErrorMessage("登录过期，请重新登录", router);
   return Promise.reject("");
 }
 
@@ -116,9 +120,9 @@ service.interceptors.response.use(
 
     if (!response) {
       if (error.message === "Network Error") {
-        showErrorMessage("网络错误，请检查您的网络连接");
+        showErrorMessage("网络错误，请检查您的网络连接", router);
       } else {
-        showErrorMessage(error.message);
+        showErrorMessage(error.message, router);
       }
       return Promise.reject(error);
     }
@@ -126,10 +130,10 @@ service.interceptors.response.use(
     if (response.status === 401) {
       return handleUnauthorized(router);
     } else if (response.status >= 500) {
-      showErrorMessage("服务器内部错误，请稍后再试");
+      showErrorMessage("服务器内部错误，请稍后再试", router);
     } else {
       const message = response.data.message || error.message;
-      showErrorMessage(message);
+      showErrorMessage(message, router);
     }
 
     return Promise.reject(response);

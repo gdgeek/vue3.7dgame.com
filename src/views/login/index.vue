@@ -21,7 +21,7 @@
         </div>
       </div>
     </div>
-    <div class="content">
+    <div v-if="route.path === '/login'" class="content">
       <login-form
         v-if="!appleIdToken"
         @login="login"
@@ -32,6 +32,19 @@
         @login="login"
         :idToken="appleIdToken"
       ></register-form>
+    </div>
+    <div v-else-if="route.path === '/logout'" class="content">
+      <div :class="['box', { 'dark-theme': isDark }]">
+        <el-card shadow="hover" :body-style="{ padding: '15px' }">
+          <div class="logout-head">
+            <h1 class="logout-welcome">正在登出</h1>
+            <p class="logout-text">向服务器注销此次登陆</p>
+            <div>
+              <p class="logout-lead"></p>
+            </div>
+          </div>
+        </el-card>
+      </div>
     </div>
     <el-card style="width: 100%">
       <div
@@ -114,9 +127,12 @@ import RegisterForm from "@/components/RegisterForm.vue";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useInfomationStore } from "@/store/modules/information";
+import { useTagsViewStore, useUserStore } from "@/store";
 
 const router = useRouter();
 const route = useRoute();
+const userStore = useUserStore();
+const tagsViewStore = useTagsViewStore();
 const informationStore = useInfomationStore();
 
 const settingsStore = useSettingsStore();
@@ -155,7 +171,18 @@ const toggleTheme = () => {
   settingsStore.changeTheme(newTheme);
 };
 
-onMounted(() => {});
+watch(
+  () => route.path,
+  async (newPath) => {
+    if (newPath === "/logout") {
+      await userStore.logout();
+      await tagsViewStore.delAllViews();
+      setTimeout(() => {
+        router.push("/login?redirect=/home/index");
+      }, 1000);
+    }
+  }
+);
 </script>
 
 <style scoped lang="scss">
@@ -287,5 +314,57 @@ body {
     color: red;
     text-align: center;
   }
+}
+
+.box {
+  position: relative;
+  height: auto;
+  width: 400px;
+  max-width: 100%;
+  padding: 10px 10px 10px 10px;
+  margin: 0 auto;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  background-color: #fff;
+  overflow: hidden;
+
+  transition: all 0.3s ease;
+
+  &.dark-theme {
+    background-color: rgb(63, 63, 63);
+    border-color: #494949;
+    color: white;
+  }
+}
+
+.logout-head {
+  padding: 10px;
+  max-width: 100%;
+}
+
+.logout-title {
+  font-size: 14px;
+  padding: 10px;
+  text-align: center;
+  color: #666;
+}
+
+.logout-welcome {
+  margin-top: 20px;
+  font-size: 36px;
+  font-weight: normal;
+  color: #666;
+}
+
+.logout-text {
+  font-size: 21px;
+  font-weight: lighter;
+  color: #666;
+}
+
+.logout-lead {
+  font-size: 21px;
+  font-weight: lighter;
+  color: #666;
 }
 </style>
