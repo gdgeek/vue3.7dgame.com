@@ -119,12 +119,6 @@ export default {
       text: "Logging out this session from the server",
     },
   },
-  // Axios拦截器国际化
-  axios: {
-    message1: "Login expired, please log in again",
-    message2: "Network error, please check your internet connection",
-    message3: "Internal server error, please try again later",
-  },
   // 主页国际化
   homepage: {
     dashboard: "Dashboard",

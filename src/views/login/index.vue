@@ -200,6 +200,7 @@ const toggleTheme = () => {
 watch(
   () => route.path,
   async (newPath) => {
+    console.log("newPath", newPath);
     if (newPath === "/logout") {
       await userStore.logout();
       await tagsViewStore.delAllViews();

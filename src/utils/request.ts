@@ -3,8 +3,46 @@ import { useUserStoreHook } from "@/store/modules/user";
 import { ResultEnum } from "@/enums/ResultEnum";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { useRouter } from "@/router";
+import i18n from "@/lang";
 
-const { t } = useI18n();
+const lang = ref(i18n.global.locale.value);
+watch(
+  () => i18n.global.locale.value,
+  (newLang) => {
+    lang.value = newLang;
+  }
+);
+
+// 动态错误消息
+const messages = {
+  en: [
+    "Login expired, please log in again",
+    "Network error, please check your internet connection",
+    "Internal server error, please try again later",
+  ],
+  ja: [
+    "ログインの有効期限が切れました。再度ログインしてください",
+    "ネットワークエラーです。ネットワーク接続を確認してください",
+    "サーバー内部エラーです。しばらくしてから再度お試しください",
+  ],
+  zh: [
+    "登录过期，请重新登录",
+    "网络错误，请检查您的网络连接",
+    "服务器内部错误，请稍后再试",
+  ],
+};
+
+const getMessageArray = () => {
+  switch (lang.value) {
+    case "en":
+      return messages.en;
+    case "ja":
+      return messages.ja;
+    case "zh-cn":
+    default:
+      return messages.zh;
+  }
+};
 
 // 创建 axios 实例
 const service = axios.create({
@@ -46,7 +84,8 @@ function showErrorMessage(
 }
 
 function handleUnauthorized(router: ReturnType<typeof useRouter>) {
-  showErrorMessage(t("axios.message1"), router);
+  const messages = getMessageArray();
+  showErrorMessage(messages[0], router);
   return Promise.reject("");
 }
 
@@ -58,10 +97,11 @@ service.interceptors.response.use(
   (error: any) => {
     const router = useRouter();
     const { response } = error;
+    const messages = getMessageArray();
 
     if (!response) {
       if (error.message === "Network Error") {
-        showErrorMessage(t("axios.message2"), router);
+        showErrorMessage(messages[1], router);
       } else {
         showErrorMessage(error.message, router);
       }
@@ -71,7 +111,7 @@ service.interceptors.response.use(
     if (response.status === 401) {
       return handleUnauthorized(router);
     } else if (response.status >= 500) {
-      showErrorMessage(t("axios.message3"), router);
+      showErrorMessage(messages[2], router);
     } else {
       const message = response.data.message || error.message;
       showErrorMessage(message, router);
