@@ -42,7 +42,6 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/logout",
     component: () => import("@/views/login/index.vue"),
-    // redirect: "/site/logout/index",
     meta: {
       hidden: true,
       private: true,
@@ -53,6 +52,7 @@ const routes: RouteRecordRaw[] = [
     path: "/",
     name: "/",
     meta: { hidden: true },
+    redirect: "/home",
     component: Layout,
     children: [
       {
