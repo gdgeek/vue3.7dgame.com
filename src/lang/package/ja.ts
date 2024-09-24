@@ -91,10 +91,14 @@ export default {
       username: {
         message1: "ユーザー名を入力してください",
         message2: "ユーザー名は5文字以上にしてください",
+        message3:
+          "ユーザー名は、アルファベット、数字、アンダースコア、@、. のみ使用できます。",
       },
       password: {
         message1: "パスワードを入力してください",
         message2: "パスワードは6文字以上にしてください",
+        message3:
+          "パスワードは大文字と小文字のアルファベット、数字、特殊文字を含む必要があります。",
       },
       repassword: {
         message1: "もう一度パスワードを入力してください",
@@ -725,7 +729,7 @@ export default {
             success: "削除成功！",
             info: "削除がキャンセルされました",
           },
-          Success: "変更成功！",
+          success: "変更成功！",
           qrcode: {
             cancel: "キャンセル",
             dialogTitle1: "デバイスでQRコードをスキャンして入ります",
@@ -876,6 +880,8 @@ export default {
           save: "保存",
           cancel: "キャンセル",
           warn: "キャンセルがクリックされました",
+          typeTitle: "タイプ",
+          nameTitle: "アイテム名",
         },
       },
       sceneEditor: {

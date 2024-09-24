@@ -723,7 +723,7 @@ export default {
             success: "删除成功！",
             info: "已取消删除",
           },
-          Success: "修改成功!",
+          success: "修改成功!",
           qrcode: {
             cancel: "取 消",
             dialogTitle1: "请用设备扫描二维码，进入",
