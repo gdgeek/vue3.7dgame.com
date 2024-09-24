@@ -24,12 +24,12 @@
     <div v-if="route.path === '/login'" class="content">
       <login-form
         v-if="!appleIdToken"
-        @login="login"
+        @enter="enter"
         @register="register"
       ></login-form>
       <register-form
         v-else
-        @login="login"
+        @enter="enter"
         :idToken="appleIdToken"
       ></register-form>
     </div>
@@ -129,6 +129,8 @@ import { useSettingsStore } from "@/store/modules/settings";
 import { useInfomationStore } from "@/store/modules/information";
 import { useTagsViewStore, useUserStore } from "@/store";
 
+import { TOKEN_KEY } from "@/enums/CacheEnum";
+import { useUserStore } from "@/store/modules/user";
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
@@ -155,9 +157,36 @@ function parseRedirect(): {
 
   return { path, queryParams };
 }
-const login = () => {
-  const { path, queryParams } = parseRedirect();
-  router.push({ path: path, query: queryParams });
+
+const { t } = useI18n();
+const userStore = useUserStore();
+
+const enter = async (
+  user: any,
+  resolve: () => void,
+  reject: (message: string) => void
+) => {
+  try {
+    ElMessage.success(t("login.success"));
+    const token = user.auth;
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, "Bearer " + token);
+      const res = localStorage.getItem(TOKEN_KEY);
+      console.log("Token set successfully", res);
+      nextTick(() => {
+        router.push("/");
+        console.log("Routing to home");
+      });
+    } else {
+      ElMessage.error("The login response is missing the access_token");
+    }
+    await userStore.getUserInfo();
+    const { path, queryParams } = parseRedirect();
+    router.push({ path: path, query: queryParams });
+    resolve();
+  } catch (e: any) {
+    reject(e.message);
+  }
 };
 
 const appleIdToken = ref<AppleIdToken | null>(null);

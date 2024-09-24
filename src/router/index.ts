@@ -38,11 +38,6 @@ const routes: RouteRecordRaw[] = [
     component: () => import("@/views/login/index.vue"),
     meta: { hidden: true, private: true },
   },
-  {
-    path: "/register",
-    component: () => import("@/views/register/index.vue"),
-    meta: { hidden: true, private: true },
-  },
 
   {
     path: "/logout",
@@ -59,7 +54,6 @@ const routes: RouteRecordRaw[] = [
     name: "/",
     meta: { hidden: true },
     component: Layout,
-    redirect: "/home/index",
     children: [
       {
         path: "/home",
@@ -126,7 +120,6 @@ const routes: RouteRecordRaw[] = [
           hidden: true,
           private: true,
         },
-        redirect: "/settings/account",
         component: Empty,
         children: [
           {
@@ -165,7 +158,6 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/resource",
         component: null,
-        redirect: "/resource/voxel",
         name: "/resource",
         meta: {
           title: "resourceManagement.title",
@@ -443,7 +435,6 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/meta",
         component: null,
-        redirect: "/meta/list",
         name: "/system",
         meta: {
           title: "meta.title",
@@ -533,7 +524,6 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/verse",
         component: null,
-        redirect: "/verse/index",
         name: "",
         meta: {
           title: "project.title",
@@ -610,7 +600,6 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/manager",
         component: null,
-        redirect: "/manager/user",
         name: "Manager",
         meta: {
           title: "manager.title",
@@ -635,7 +624,6 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/game",
         component: null,
-        redirect: "/game/index",
         name: "Game",
         meta: {
           title: "game.title",
