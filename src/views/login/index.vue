@@ -37,8 +37,8 @@
       <div :class="['box', { 'dark-theme': isDark }]">
         <el-card shadow="hover" :body-style="{ padding: '15px' }">
           <div class="logout-head">
-            <h1 class="logout-welcome">正在登出</h1>
-            <p class="logout-text">向服务器注销此次登陆</p>
+            <h1 class="logout-welcome">{{ t("login.logout.title") }}</h1>
+            <p class="logout-text">{{ t("login.logout.text") }}</p>
             <div>
               <p class="logout-lead"></p>
             </div>
@@ -118,7 +118,6 @@
 
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { ref, onMounted } from "vue";
 import { useRouter, LocationQuery, useRoute } from "vue-router";
 import { AppleIdToken } from "@/api/auth/model";
 import LoginForm from "@/components/LoginForm.vue";
@@ -130,7 +129,6 @@ import { useInfomationStore } from "@/store/modules/information";
 import { useTagsViewStore, useUserStore } from "@/store";
 
 import { TOKEN_KEY } from "@/enums/CacheEnum";
-import { useUserStore } from "@/store/modules/user";
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
@@ -138,6 +136,7 @@ const tagsViewStore = useTagsViewStore();
 const informationStore = useInfomationStore();
 
 const settingsStore = useSettingsStore();
+const { t } = useI18n();
 
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 function parseRedirect(): {
@@ -158,9 +157,6 @@ function parseRedirect(): {
   return { path, queryParams };
 }
 
-const { t } = useI18n();
-const userStore = useUserStore();
-
 const enter = async (
   user: any,
   resolve: () => void,
@@ -173,10 +169,11 @@ const enter = async (
       localStorage.setItem(TOKEN_KEY, "Bearer " + token);
       const res = localStorage.getItem(TOKEN_KEY);
       console.log("Token set successfully", res);
-      nextTick(() => {
-        router.push("/");
-        console.log("Routing to home");
-      });
+      // nextTick(() => {
+      //   router.push("/");
+      //   console.log("Routing to home");
+      // });
+      nextTick();
     } else {
       ElMessage.error("The login response is missing the access_token");
     }

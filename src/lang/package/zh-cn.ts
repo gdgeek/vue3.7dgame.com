@@ -115,7 +115,15 @@ export default {
       message2: "提示",
       confirm: "确定",
       cancel: "取消",
+      title: "正在登出",
+      text: "向服务器注销此次登录",
     },
+  },
+  // Axios拦截器国际化
+  axios: {
+    message1: "登录过期，请重新登录",
+    message2: "网络错误，请检查您的网络连接",
+    message3: "服务器内部错误，请稍后再试",
   },
   // 主页国际化
   homepage: {
