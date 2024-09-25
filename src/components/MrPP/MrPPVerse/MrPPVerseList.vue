@@ -11,23 +11,21 @@
       :backgroundColor="'rgba(255, 255, 255, .05)'"
     >
       <template #default="{ item }">
-        <VerseCard :item="item" @changed="refresh" @deleted="refresh" />
+        <VerseCard
+          :item="item"
+          @changed="refresh"
+          @deleted="refresh"
+        ></VerseCard>
       </template>
     </waterfall>
   </el-card>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
-import { useI18n } from "vue-i18n";
-import { useRouter } from "@/router";
 import { VerseData } from "@/api/v1/verse";
 import VerseCard from "@/components/VerseCard.vue"; // 新的 VerseCard 组件
-import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
-
-const router = useRouter();
-const { t } = useI18n();
 
 const props = defineProps<{ items: VerseData[] }>();
 const emit = defineEmits<{ (e: "refresh"): void }>();

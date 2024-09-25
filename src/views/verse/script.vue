@@ -55,33 +55,18 @@
 
 <script setup lang="ts">
 import { useRoute } from "vue-router";
-// import BlocklyScript from "@/components/Script.vue";
-import {
-  getVerseScript,
-  postVerseScript,
-  putVerseScript,
-} from "@/api/v1/verse-script";
-import {
-  getVerse,
-  putVerseCode,
-  postVerse,
-  Script,
-  VerseData,
-} from "@/api/v1/verse";
+import { getVerse, putVerseCode, VerseData } from "@/api/v1/verse";
 import { useAppStore } from "@/store/modules/app";
-import type { TabsPaneContext } from "element-plus";
 
 const appStore = useAppStore();
 const { t } = useI18n();
-
 const loading = ref(false);
-//const script = ref<Script>();
 const verse = ref<VerseData>();
 const route = useRoute();
 const id = computed(() => parseInt(route.query.id as string));
 const activeName = ref<string>("blockly");
-const codeName = ref<string>("lua");
 const LuaCode = ref("");
+
 const src = ref(
   import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + appStore.language
 );

@@ -6,7 +6,7 @@
       :show-close="false"
       @close="cancel"
     >
-      <template #title>
+      <template #header>
         <mr-p-p-header
           :sorted="active.sorted"
           :searched="active.searched"
@@ -105,7 +105,6 @@ import "vue-waterfall-plugin-next/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
 import { getMetas, metaInfo, postMeta } from "@/api/v1/meta";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import { BeijingData } from "@/utils/dataChange";
 
 const emit = defineEmits(["selected", "cancel"]);
 
@@ -182,23 +181,24 @@ const selected = async (data: any) => {
   dialogVisible.value = false;
 };
 
-const input = (text: string) => {
-  return new Promise<string>((resolve, reject) => {
-    ElMessageBox.prompt(text, t("verse.view.metaDialog.prompt.message"), {
-      confirmButtonText: t("verse.view.metaDialog.prompt.confirm"),
-      cancelButtonText: t("verse.view.metaDialog.prompt.cancel"),
-    })
-      .then(({ value }) => {
-        resolve(value);
-      })
-      .catch(() => {
-        reject();
-        ElMessage({
-          type: "info",
-          message: t("verse.view.metaDialog.prompt.info"),
-        });
-      });
-  });
+const input = async (text: string): Promise<string> => {
+  try {
+    const { value } = await ElMessageBox.prompt(
+      text,
+      t("verse.view.metaDialog.prompt.message"),
+      {
+        confirmButtonText: t("verse.view.metaDialog.prompt.confirm"),
+        cancelButtonText: t("verse.view.metaDialog.prompt.cancel"),
+      }
+    );
+    return value;
+  } catch {
+    ElMessage({
+      type: "info",
+      message: t("verse.view.metaDialog.prompt.info"),
+    });
+    throw new Error("User cancelled input");
+  }
 };
 
 const create = async () => {

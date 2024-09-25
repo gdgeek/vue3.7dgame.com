@@ -89,9 +89,7 @@ import { FileHandler } from "@/assets/js/file/server";
 const route = useRoute();
 const router = useRouter();
 const store = useFileStore().store;
-
 const { t } = useI18n();
-
 const audioData = ref<ResourceInfo | null>(null);
 const file = ref<string>();
 const expire = ref(true);
@@ -117,7 +115,6 @@ const tableData = computed(() => {
 });
 
 const id = computed(() => route.query.id as string);
-
 const prepare = computed(
   () => audioData.value !== null && audioData.value.info !== null
 );

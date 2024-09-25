@@ -11,7 +11,7 @@
       :show-close="false"
       @close="cancel"
     >
-      <template #title>
+      <template #header>
         <mr-p-p-header
           :sorted="active.sorted"
           :searched="active.searched"
@@ -179,21 +179,24 @@ const selected = async (data: any = null) => {
   dialogVisible.value = false;
 };
 
-const input = (text: string) => {
-  return new Promise<string>((resolve, reject) => {
-    ElMessageBox.prompt(text, t("verse.view.prefabDialog.prompt.message"), {
-      confirmButtonText: t("verse.view.prefabDialog.prompt.confirm"),
-      cancelButtonText: t("verse.view.prefabDialog.prompt.cancel"),
-    })
-      .then(({ value }) => resolve(value))
-      .catch(() => {
-        reject();
-        ElMessage({
-          type: "info",
-          message: t("verse.view.prefabDialog.prompt.info"),
-        });
-      });
-  });
+const input = async (text: string): Promise<string> => {
+  try {
+    const { value } = await ElMessageBox.prompt(
+      text,
+      t("verse.view.prefabDialog.prompt.message"),
+      {
+        confirmButtonText: t("verse.view.prefabDialog.prompt.confirm"),
+        cancelButtonText: t("verse.view.prefabDialog.prompt.cancel"),
+      }
+    );
+    return value;
+  } catch {
+    ElMessage({
+      type: "info",
+      message: t("verse.view.prefabDialog.prompt.info"),
+    });
+    throw new Error("User cancelled input");
+  }
 };
 
 const cancel = () => {

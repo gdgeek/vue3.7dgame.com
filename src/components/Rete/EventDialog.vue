@@ -81,15 +81,14 @@ import { v4 as uuidv4 } from "uuid";
 
 const saveTagOutput = ref<HTMLInputElement | null>(null);
 const saveTagInput = ref<HTMLInputElement | null>(null);
-
 const props = defineProps<{
   uuid: string;
   node: { inputs: any[]; outputs: any[] } | null;
 }>();
 
 const emit = defineEmits(["postEvent", "onSubmit"]);
-
 const visible = ref(false);
+
 const input = ref({
   visible: false,
   value: "",

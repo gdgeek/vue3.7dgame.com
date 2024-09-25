@@ -122,7 +122,6 @@ import { useRouter, LocationQuery, useRoute } from "vue-router";
 import { AppleIdToken } from "@/api/auth/model";
 import LoginForm from "@/components/LoginForm.vue";
 import RegisterForm from "@/components/RegisterForm.vue";
-//import { initRoutes } from "@/router";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useInfomationStore } from "@/store/modules/information";
@@ -167,12 +166,6 @@ const enter = async (
     const token = user.auth;
     if (token) {
       localStorage.setItem(TOKEN_KEY, "Bearer " + token);
-      const res = localStorage.getItem(TOKEN_KEY);
-      console.log("Token set successfully", res);
-      // nextTick(() => {
-      //   router.push("/");
-      //   console.log("Routing to home");
-      // });
       nextTick();
     } else {
       ElMessage.error("The login response is missing the access_token");
@@ -243,7 +236,6 @@ body {
 
   &.dark-theme {
     background-color: rgb(37, 37, 37);
-    // color: white;
   }
 }
 
@@ -266,20 +258,6 @@ body {
     &:hover {
       color: #3876c2;
     }
-  }
-}
-
-.blog {
-  position: absolute;
-  height: 60px;
-  margin-left: 300px;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 60px;
-  color: #909399;
-
-  &:hover {
-    color: #000;
   }
 }
 

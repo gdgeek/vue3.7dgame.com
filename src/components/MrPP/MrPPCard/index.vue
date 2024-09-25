@@ -30,6 +30,12 @@
 
         <el-button-group style="float: right" :inline="true">
           <el-button
+            type="success"
+            size="small"
+            icon="Edit"
+            @click="named"
+          ></el-button>
+          <el-button
             type="danger"
             size="small"
             icon="Delete"
@@ -44,8 +50,9 @@
 </template>
 
 <script setup lang="ts">
-import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import { LazyImg } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
+
 const props = defineProps({
   item: {
     type: Object as PropType<{ name: string; image: { url: string } | null }>,

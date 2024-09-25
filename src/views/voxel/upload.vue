@@ -14,18 +14,22 @@ import { postVoxel } from "@/api/resources/index";
 const fileType = ref(".vox");
 const router = useRouter();
 
-const saveVoxel = (name: string, file_id: number, callback: () => void) => {
-  postVoxel({ name, file_id })
-    .then((response) => {
-      console.log(response.data);
-      router.push({
-        path: "/resource/voxel/view",
-        query: { id: response.data.id },
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-    })
-    .finally(callback);
+const saveVoxel = async (
+  name: string,
+  file_id: number,
+  callback: () => void
+) => {
+  try {
+    const response = await postVoxel({ name, file_id });
+    console.log(response.data);
+    router.push({
+      path: "/resource/voxel/view",
+      query: { id: response.data.id },
+    });
+  } catch (err) {
+    console.log(err);
+  } finally {
+    callback();
+  }
 };
 </script>

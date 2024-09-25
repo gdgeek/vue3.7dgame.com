@@ -14,5 +14,5 @@ const remove = (id: number) => {
     url: path.join("v1", "verse-releases", id.toString()),
     method: "delete",
   });
-}
+};
 export default { post, remove };

@@ -11,9 +11,7 @@ import { useRouter } from "vue-router";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 import { postAudio } from "@/api/resources/index";
 
-// 定义允许的文件类型
 const fileType = ref("audio/mp3, audio/wav");
-
 const router = useRouter();
 
 // 音频保存

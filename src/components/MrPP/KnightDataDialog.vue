@@ -102,8 +102,6 @@ const open = ({
 
   callback = newCallback;
   formData.value = data;
-  console.log("schema", schema.value);
-  console.log("formData", formData.value);
   dialogVisible.value = true;
 };
 

@@ -5,21 +5,7 @@
         <el-card v-loading="loading" class="box-card">
           <template #header>
             <div v-if="meta" class="clearfix">
-              <!-- <router-link
-                v-if="meta"
-                :to="
-                  '/meta/rete-meta?id=' +
-                  meta.id +
-                  '&title=' +
-                  encodeURIComponent(title)
-                "
-              >
-                <el-link v-if="meta" :underline="false">
-                  【组件：{{ title }}】
-                </el-link>
-              </router-link> -->
               {{ meta.title }} / 【{{ $t("meta.script.title") }}】
-
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="save">
                   <font-awesome-icon
@@ -46,15 +32,14 @@
     </el-container>
   </div>
 </template>
-// meta cyber
+
 <script setup lang="ts">
-import { MessageType } from "@/utils/helper";
 import { useRoute } from "vue-router";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
 import { cybersType, postCyber, putCyber } from "@/api/v1/cyber";
 import { ElMessage } from "element-plus";
-
 import { useAppStore } from "@/store/modules/app";
+
 const appStore = useAppStore();
 let ready: boolean = false;
 const editor = ref<HTMLIFrameElement | null>(null);
@@ -128,14 +113,15 @@ const handleMessage = async (e: MessageEvent) => {
     return;
   }
 };
+
 const loading = ref(false);
 const meta = ref<metaInfo | null>(null);
 const route = useRoute();
-
 const id = computed(() => parseInt(route.query.id as string));
 const src = ref(
   import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + appStore.language
 );
+
 watch(
   () => appStore.language, // 监听 language 的变化
   (newValue, oldValue) => {

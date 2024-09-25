@@ -131,7 +131,6 @@ import { translateRouteTitle } from "@/utils/i18n";
 const route = useRoute();
 const router = useRouter();
 const item = ref<metaInfo | null>(null);
-
 const { t } = useI18n();
 
 const rules = {
@@ -152,8 +151,6 @@ const rules = {
 const itemForm = ref<InstanceType<typeof ElForm> | null>(null);
 const dialog = ref<InstanceType<typeof EventDialog> | null>(null);
 const resourceDialog = ref<InstanceType<typeof ResourceDialog> | null>();
-console.log("resourceDialog:", resourceDialog.value);
-
 const id = computed(() => parseInt(route.query.id as string, 10));
 const prefab = computed({
   get: () => item.value?.prefab === 1,
@@ -213,7 +210,6 @@ const jsonInfo = computed({
     }
   },
 });
-console.log("jsonInfo:", jsonInfo);
 
 const refresh = async () => {
   const data = await getItem(id.value, { expand: "image,author" });
@@ -250,7 +246,6 @@ const editor = () => {
     const sceneRoute = router
       .getRoutes()
       .find((route) => route.path === "/meta/scene");
-    console.log("sceneRoute", sceneRoute);
     // 如果找到了路由对象并且它有 meta.title，就进行拼接
     if (sceneRoute && sceneRoute.meta.title) {
       const metaTitle = translateRouteTitle(
@@ -288,7 +283,6 @@ const selectResources = async (data: ViewCard) => {
 
 const selectImage = () => {
   if (resourceDialog.value) {
-    console.log("测试");
     resourceDialog.value.openIt({
       type: "picture",
     });

@@ -47,12 +47,10 @@
 
 <script setup lang="ts">
 import MrPPCropper from "@/components/MrPP/MrPPVerse/MrPPCropper.vue";
-import env from "@/environment";
 import { useUserStore } from "@/store/modules/user";
 import { FormInstance } from "element-plus";
 
 const { t } = useI18n();
-
 const props = defineProps({
   dialogTitle: String,
   dialogSubmit: String,
@@ -111,8 +109,7 @@ watchEffect(() => {
     }
   }
 });
-// const url = computed(() => item.value.src);
-// console.log("url: ", url.value);
+
 const formRef = ref<FormInstance>();
 const submitForm = async () => {
   formRef.value?.validate((valid: boolean) => {
@@ -126,21 +123,11 @@ const submitForm = async () => {
 
 const show = (selectedItem: any) => {
   item.value = selectedItem;
-  console.log("selectedItem", selectedItem);
   if (item.value) {
     setTimeout(() => {
       const imageComponent = ref<any>(null);
       imageComponent.value = item.value.image.url;
     }, 0);
-
-    // info.value.name = item.value.name;
-
-    // const parsedInfo = JSON.parse(item.value.info);
-    // // console.log("parsedInfo: ", parsedInfo);
-    // if (parsedInfo !== null) {
-    //   info.value.description = parsedInfo.description;
-    //   info.value.course = parsedInfo.course;
-    // }
   }
   dialogVisible.value = true;
 };

@@ -29,8 +29,6 @@ import { LayoutEnum } from "@/enums/LayoutEnum";
 import { routerData } from "@/router";
 
 const routes = computed(() => routerData.value);
-console.log("routes1", routes.value);
-
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
 // const permissionStore = usePermissionStore();

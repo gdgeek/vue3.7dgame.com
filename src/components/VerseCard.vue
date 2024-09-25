@@ -19,7 +19,7 @@
               :url="item.image.url"
               style="width: 100%; height: 270px"
               fit="contain"
-            />
+            ></LazyImg>
           </router-link>
         </el-card>
         <InfoContent v-if="item" :verse="item"></InfoContent>
@@ -39,26 +39,24 @@
           @click="restrain(item)"
           size="small"
         >
-          <font-awesome-icon class="icon" icon="box-open" />
+          <font-awesome-icon class="icon" icon="box-open"></font-awesome-icon>
         </el-button>
         <el-button type="primary" v-else @click="release(item)" size="small">
-          <font-awesome-icon class="icon" icon="box" />
+          <font-awesome-icon class="icon" icon="box"></font-awesome-icon>
         </el-button>
       </el-button-group>
       <VerseToolbar
         :verse="item"
         @deleted="emit('deleted')"
         @changed="emit('changed')"
-      />
+      ></VerseToolbar>
     </div>
   </el-card>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import { ElMessage, ElMessageBox } from "element-plus";
 import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";
 import { LazyImg } from "vue-waterfall-plugin-next";

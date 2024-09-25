@@ -125,7 +125,6 @@ export const useUserStore = defineStore("user", () => {
         email: data.email,
         emailBind: data.emailBind,
       };
-      console.log("res", userInfo.value);
       return userInfo.value;
     } catch (error) {
       console.error("Error fetching user info:", error);

@@ -75,9 +75,9 @@
 import { getVideos, putVideo, deleteVideo } from "@/api/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-
-import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
+
 const items = ref<any[]>([]);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
@@ -87,7 +87,6 @@ const pagination = reactive({
   size: 20,
   total: 20,
 });
-
 const { t } = useI18n();
 
 // 处理分页

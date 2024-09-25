@@ -128,13 +128,11 @@ import { v4 as uuidv4 } from "uuid";
 import { getPrefabs, deletePrefab, postPrefab } from "@/api/v1/prefab";
 import type { prefabsData } from "@/api/v1/prefab";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import { useUserStore } from "@/store/modules/user";
 import { useAbility } from "@casl/vue";
 
 const ability = useAbility();
 const can = ability.can.bind(ability);
 const router = useRouter();
-
 const items = ref<prefabsData[]>([]);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
@@ -146,7 +144,6 @@ const pagination = ref({
 });
 
 const { t } = useI18n();
-const userStore = useUserStore();
 const isRoot = computed(() => can("root", "all"));
 
 const url = (id: number) => {
@@ -279,25 +276,6 @@ const viewCards = computed(() => {
   console.log("viewCards", cards);
   return cards;
 });
-/*
-const breakpoints = ref({
-  1600: {
-    //当屏幕宽度小于等于1600
-    rowPerView: 4, // 一行4图
-  },
-  1200: {
-    //当屏幕宽度小于等于1200
-    rowPerView: 3, // 一行3图
-  },
-  800: {
-    //当屏幕宽度小于等于800
-    rowPerView: 2, // 一行2图
-  },
-  600: {
-    //当屏幕宽度小于等于600
-    rowPerView: 1, // 一行1图
-  },
-});*/
 </script>
 
 <style scoped>

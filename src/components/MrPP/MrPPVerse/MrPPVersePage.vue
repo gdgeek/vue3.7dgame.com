@@ -79,10 +79,7 @@ const emit = defineEmits<{
 }>();
 
 const createdDialog = ref<InstanceType<typeof Create> | null>(null);
-
 const router = useRouter();
-
-const dialogVisible = ref(false);
 const items = ref<VerseData[]>([]);
 const sorted = ref("-created_at");
 const searched = ref("");

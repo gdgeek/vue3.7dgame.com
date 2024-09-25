@@ -52,8 +52,6 @@
 </template>
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { useRouter, LocationQuery, useRoute } from "vue-router";
-import { useUserStore } from "@/store/modules/user";
 import { useSettingsStore } from "@/store/modules/settings";
 import { FormInstance } from "element-plus";
 import { ThemeEnum } from "@/enums/ThemeEnum";
@@ -61,15 +59,10 @@ import type { AppleIdReturn } from "@/api/v1/site";
 import AuthAPI from "@/api/auth/index";
 import { PostSiteAppleId } from "@/api/v1/site";
 import { VueAppleLoginConfig } from "@/utils/helper";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { LoginData } from "@/api/auth/model";
 
-const router = useRouter();
 const formRef = ref<FormInstance>();
-const isShow = ref(false);
-const title = ref<string | Record<string, string>>("");
 const settingsStore = useSettingsStore();
-const route = useRoute();
 
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 const appleLoginColor = computed(() => (isDark.value ? "black" : "white"));
@@ -228,20 +221,6 @@ body {
   }
 }
 
-.blog {
-  position: absolute;
-  height: 60px;
-  margin-left: 300px;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 60px;
-  color: #909399;
-
-  &:hover {
-    color: #000;
-  }
-}
-
 .header-right {
   position: absolute;
   right: 10px;
@@ -264,9 +243,6 @@ body {
   flex: 1;
   align-items: center;
   justify-content: center;
-  // width: 100%;
-  // background-image: url("/media/bg/02.jpg");
-  // background-size: 100% auto;
 
   .box1 {
     display: flex;

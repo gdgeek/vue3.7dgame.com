@@ -79,34 +79,22 @@
 </template>
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { ref, computed, nextTick } from "vue";
-import { useI18n } from "vue-i18n";
-import { useRouter, LocationQuery, useRoute } from "vue-router";
+import { LocationQuery, useRoute } from "vue-router";
 import { ElMessage } from "element-plus";
-import { useUserStore } from "@/store/modules/user";
 import { useSettingsStore } from "@/store/modules/settings";
 import { FormInstance } from "element-plus";
-
-const router = useRouter();
-const formRef = ref<FormInstance>();
-const isShow = ref(false);
-const title = ref<string | Record<string, string>>("");
-
-// 加密
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import type { AppleIdToken } from "@/api/auth/model";
-
 import AuthAPI from "@/api/auth/index";
 import type { AppleIdTokenAndUserPassData } from "@/api/auth/model";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { RegisterData, LinkData } from "@/api/auth/model";
+
 const settingsStore = useSettingsStore();
 const route = useRoute();
-
-const userStore = useUserStore();
+const formRef = ref<FormInstance>();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
-
 const { t } = useI18n();
+
 const registerForm = ref<RegisterData>({
   username: "",
   password: "",
@@ -318,20 +306,6 @@ body {
     &:hover {
       color: #3876c2;
     }
-  }
-}
-
-.blog {
-  position: absolute;
-  height: 60px;
-  margin-left: 300px;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 60px;
-  color: #909399;
-
-  &:hover {
-    color: #000;
   }
 }
 

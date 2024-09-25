@@ -265,7 +265,6 @@
 <script setup lang="ts">
 import { useUserStore } from "@/store/modules/user";
 import { useFileStore } from "@/store/modules/config";
-import { useRoute } from "vue-router";
 import { putUserData } from "@/api/v1/user";
 import { regionData, codeToText } from "element-china-area-data";
 import { postFile } from "@/api/v1/files";
@@ -281,12 +280,9 @@ const userStore = useUserStore();
 const fileStore = useFileStore();
 const ruleFormRef = ref<FormInstance>();
 const nickNameFormRef = ref<FormInstance>();
-const route = useRoute();
-// const userData = computed(() => store.getters.userData);
 const imageUrl = computed(() => userStore.userInfo.data.avatar?.url || null);
 console.log("imageUrl", imageUrl);
 const isDisable = ref(false);
-
 const { t } = useI18n();
 
 type nickNameType = {
@@ -541,12 +537,6 @@ const changeScaleHandle = (num: number) => {
   cropperRef.value?.changeScale(num);
 };
 
-type CropperType = {
-  getCropData: () => Promise<{ img: Blob }>;
-  rotate: (degrees: number) => void;
-  changeScale: (num: number) => void;
-};
-
 // 保存头像
 const saveAvatar = async (
   md5: string,
@@ -582,8 +572,6 @@ async function finish() {
 
     const md5 = await fileStore.store.fileMD5(file);
     const handler = await fileStore.store.publicHandler();
-
-    // 确保 handler 存在
     if (!handler) {
       ElMessage.error(t("homepage.edit.avatarCropping.error4"));
       return;

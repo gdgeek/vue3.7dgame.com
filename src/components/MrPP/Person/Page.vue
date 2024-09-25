@@ -123,7 +123,6 @@ const refresh = () => {
     (val: any) => {
       if (val && val.data) {
         items.value = val.data;
-        console.log("Pageitems", items.value);
         pagination.value = val.pagination;
         setTimeout(() => window.dispatchEvent(new Event("resize")), 100);
       } else {

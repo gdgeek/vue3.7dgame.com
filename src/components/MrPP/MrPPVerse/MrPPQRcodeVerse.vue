@@ -35,9 +35,7 @@ const dialogVisible = ref(false);
 const value = ref("https://mrpp.com");
 const size = ref(400);
 const verse = ref<{ id: number; name: string } | null>(null);
-
 const { t } = useI18n();
-
 const verseId = computed(() => verse.value?.id ?? -1);
 const dialogTitle = computed(() =>
   verse.value

@@ -109,18 +109,14 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
 import { getMetas, postMeta, deleteMeta } from "@/api/v1/meta";
 import type { metaInfo } from "@/api/v1/meta";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { ViewCard } from "vue-waterfall-plugin-next/dist/types/types/waterfall";
-import { useAbility } from "@casl/vue";
 
-import { AbilityRouter } from "@/utils/ability";
-const ability = useAbility();
-const can = ability.can.bind(ability);
 const router = useRouter();
 const metaData = ref<metaInfo[]>([]);
 const sorted = ref<string>("-created_at");
@@ -227,7 +223,6 @@ const refresh = async () => {
     pagination.value.current,
     "image,author"
   );
-  console.log(response.data);
   metaData.value = response.data;
   pagination.value = {
     current: parseInt(response.headers["x-pagination-current-page"]),
