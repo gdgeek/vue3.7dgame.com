@@ -724,7 +724,8 @@ export default {
           author: "Author",
           learn: "Learn",
           blank: "Default Link",
-          description: "Description",
+          description: "Desc",
+          share: "ShareID",
         },
         toolbar: {
           dialogTitle: "Edit Data",

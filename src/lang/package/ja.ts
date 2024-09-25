@@ -717,6 +717,7 @@ export default {
           learn: "学習",
           blank: "デフォルトリンク",
           description: "説明",
+          share: "共有ID",
         },
         toolbar: {
           dialogTitle: "データを変更",
