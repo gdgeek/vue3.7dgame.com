@@ -30,6 +30,12 @@ type VerseOpen = {
   message_id: number;
 };
 
+type VerseRelease = {
+  id: number;
+  code: string;
+};
+
+
 export type VerseShare = {
   id: number;
   verse_id: number;
@@ -72,10 +78,11 @@ export type VerseData = {
   editable: boolean;
   viewable: boolean;
   verseOpen: VerseOpen | null;
+  verseRelease: VerseRelease| null;
+  verseShare?: VerseShare;
   message: MessageType | null;
   image: ImageDetails;
   author?: Author;
-  verseShare?: VerseShare;
   languages?: Languages[];
   metas?: metaInfo[];
   script?: Script;

@@ -148,9 +148,9 @@ const refresh = () => {
       searched: searched.value,
       current: pagination.value.current,
     },
-    (val: any) => {
-      items.value = val.data;
-      pagination.value = val.pagination;
+    (value: any) => {
+      items.value = value.data;
+      pagination.value = value.pagination;
     }
   );
 };

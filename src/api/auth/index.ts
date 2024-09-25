@@ -13,7 +13,7 @@ interface ApiResponse<T> {
 }
 class AuthAPI {
   static appleIdCreate(data: AppleIdTokenAndUserPassData) {
-    alert(JSON.stringify(data));
+ 
     return request<AppleIdTokenAndUserPassData, ApiResponse<AppleIdReturn>>({
       url: "/v1/site/apple-id-create",
       method: "post",
@@ -21,7 +21,7 @@ class AuthAPI {
     });
   }
   static appleIdLink(data: AppleIdTokenAndUserPassData) {
-    alert(JSON.stringify(data));
+  
     return request<AppleIdTokenAndUserPassData, ApiResponse<AppleIdReturn>>({
       url: "/v1/site/apple-id-link",
       method: "post",

@@ -14,7 +14,7 @@ const loaded = async (data: any, result: Function) => {
       data.sorted,
       data.searched,
       data.current,
-      "image,author,share"
+      "image,author,share,verseRelease"
     );
     const pagination = {
       current: parseInt(response.headers["x-pagination-current-page"]),

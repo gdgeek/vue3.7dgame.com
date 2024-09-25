@@ -357,16 +357,22 @@ const saveable = computed(() => {
 });
 
 const refresh = async () => {
-  const response = await getVerse(
-    id.value,
-    "image,verseOpen,verseShare,author, message, languages"
-  );
-  const data = response.data;
-  verse.value = data as VerseData;
+  try {
+    const response = await getVerse(
+      id.value,
+      "image,verseOpen,verseShare,author, message, languages"
+    );
+    verse.value = response.data;
+  } catch (error) {
+    console.error("Failed to fetch verse data:", error);
+    // 处理错误逻辑，如显示错误消息
+    return;
+  }
 
-  const selectedLanguage = verse.value?.languages!.find(
+  const selectedLanguage = verse.value?.languages?.find(
     (lang: any) => lang.language === Form.value.language
   );
+
   if (selectedLanguage) {
     Form.value.name = selectedLanguage.name;
     Form.value.description = selectedLanguage.description;
@@ -375,8 +381,8 @@ const refresh = async () => {
   briefing.value = message.value
     ? message.value
     : {
-        title: t("verse.view.messageTitle") + `${verse.value!.name}`,
-        body: info.value.description,
+        title: t("verse.view.messageTitle") + `${verse.value?.name || ""}`,
+        body: info.value.description || "",
       };
 };
 

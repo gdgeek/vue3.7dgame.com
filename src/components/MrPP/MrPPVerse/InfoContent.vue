@@ -15,41 +15,38 @@
       </el-descriptions-item>
       <el-descriptions-item v-if="author">
         <template #label>
-          <font-awesome-icon class="icon" icon="user"></font-awesome-icon>
-          {{ $t("verse.page.list.infoContent.author") }}
+          <el-tooltip
+            :content="$t('verse.page.list.infoContent.author')"
+            placement="top"
+            effect="light"
+          >
+            <font-awesome-icon class="icon" icon="user"></font-awesome-icon
+          ></el-tooltip>
         </template>
         {{ author.nickname || author.username }}
       </el-descriptions-item>
 
-      <el-descriptions-item v-if="course?.title">
-        <template #label>
-          <font-awesome-icon class="icon" icon="book"></font-awesome-icon>
-          {{ $t("verse.page.list.infoContent.learn") }}
-        </template>
-        <router-link target="_blank" :to="`/home/document?id=${course.id}`">
-          <el-link target="_blank" :innerHTML="sanitizedTitle">
-            {{ $t("verse.page.list.infoContent.blank") }}
-          </el-link>
-        </router-link>
-      </el-descriptions-item>
-
       <el-descriptions-item v-if="info.description">
         <template #label>
-          <div style="width: 75px">
-            <font-awesome-icon class="icon" icon="info"></font-awesome-icon>
-            {{ $t("verse.page.list.infoContent.description") }}
-          </div>
+          <el-tooltip
+            :content="$t('verse.page.list.infoContent.description')"
+            placement="top"
+            effect="light"
+          >
+            <font-awesome-icon class="icon" icon="info"></font-awesome-icon
+          ></el-tooltip>
         </template>
+
         {{ info.description }}
       </el-descriptions-item>
 
-      <el-descriptions-item>
+      <el-descriptions-item v-if="props.verse && props.verse.verseRelease">
         <template #label>
-          <div style="width: 75px">
-            <font-awesome-icon class="icon" icon="share"></font-awesome-icon>
-            共享id
-          </div>
+          <el-tooltip :content="'code'" placement="top" effect="light">
+            <font-awesome-icon class="icon" icon="box-open"></font-awesome-icon
+          ></el-tooltip>
         </template>
+        <b>{{ props.verse.verseRelease.code }}</b>
       </el-descriptions-item>
     </el-descriptions>
   </div>
