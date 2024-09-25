@@ -135,11 +135,12 @@
             <b>{{ $t("verse.view.info") }}</b>
           </template>
           <div class="box-item">
-            <InfoContent
+            <!-- <InfoContent
               v-if="verse"
               :info="JSON.parse(verse.info!)"
               :author="verse.author!"
-            ></InfoContent>
+            ></InfoContent> -->
+            <InfoContent v-if="verse" :verse="verse"></InfoContent>
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right"></el-button-group>
             </aside>
@@ -161,7 +162,7 @@
             type="primary"
             size="small"
             @click="open"
-            >11
+          >
             <font-awesome-icon icon="eye"></font-awesome-icon>
             &nbsp;{{ $t("verse.view.verseOpen") }}
           </el-button>

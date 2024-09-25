@@ -711,6 +711,7 @@ export default {
           learn: "学习",
           blank: "默认链接",
           description: "说明",
+          share: "共享ID",
         },
         toolbar: {
           dialogTitle: "修改数据",

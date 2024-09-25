@@ -14,7 +14,7 @@
       :column-count="3"
       :backgroundColor="'rgba(255, 255, 255, .05)'"
     >
-      <template #default="{ item }">
+      <template #default="{ item, index }">
         <el-card style="width: 300px" class="box-card">
           <template #header>
             <div>
@@ -38,7 +38,10 @@
                   ></LazyImg>
                 </router-link>
               </el-card>
-              <InfoContent v-if="item" :verse="item"></InfoContent>
+              <InfoContent
+                v-if="item"
+                :verse="props.items[index]"
+              ></InfoContent>
             </div>
           </template>
           <div class="clearfix">

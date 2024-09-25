@@ -35,7 +35,7 @@
 
       <el-descriptions-item v-if="info.description">
         <template #label>
-          <div style="width: 75px">
+          <div style="width: 55px">
             <font-awesome-icon class="icon" icon="info"></font-awesome-icon>
             {{ $t("verse.page.list.infoContent.description") }}
           </div>
@@ -43,13 +43,14 @@
         {{ info.description }}
       </el-descriptions-item>
 
-      <el-descriptions-item>
+      <el-descriptions-item v-if="verse.verseShare">
         <template #label>
-          <div style="width: 75px">
+          <div style="width: 55px">
             <font-awesome-icon class="icon" icon="share"></font-awesome-icon>
-            共享id
+            {{ $t("verse.page.list.infoContent.share") }}
           </div>
         </template>
+        {{ verse.verseShare?.id }}
       </el-descriptions-item>
     </el-descriptions>
   </div>
@@ -86,6 +87,7 @@ interface Item {
 const props = defineProps<{
   verse: VerseData;
 }>();
+console.log("propsverse", props.verse);
 const author = computed(() => {
   return props.verse?.author;
 });
@@ -117,7 +119,7 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .info-content-label {
-  width: 60px;
+  width: 30px;
 }
 
 .icon {
