@@ -74,6 +74,9 @@ export default {
       gameIndex: "游戏配置",
       gameMap: "地图配置",
     },
+    logout: {
+      title: "退出",
+    },
   },
   // 登录页面国际化
   login: {
