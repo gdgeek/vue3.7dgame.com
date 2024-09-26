@@ -727,7 +727,7 @@ export default {
           author: "Author",
           learn: "Learn",
           blank: "Default Link",
-          description: "Desc",
+          description: "Description",
           share: "ShareID",
         },
         releaseConfirm: {

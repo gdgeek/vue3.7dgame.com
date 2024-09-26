@@ -65,7 +65,10 @@
             :type="message.like ? 'primary' : ''"
             @click="toggleLike(message.like!)"
           >
-            <font-awesome-icon icon="fa-solid fa-thumbs-up"></font-awesome-icon>
+            <font-awesome-icon
+              icon="fa-solid fa-thumbs-up"
+              style="margin-right: 5px"
+            ></font-awesome-icon>
             {{ $t("verse.view.message.like") }}
             <span v-if="message.likesCount != 0">{{ message.likesCount }}</span>
           </el-button>

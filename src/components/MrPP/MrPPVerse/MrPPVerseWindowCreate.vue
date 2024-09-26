@@ -4,6 +4,7 @@
     append-to-body
     :close-on-click-modal="false"
     width="70%"
+    @keydown.enter="submitForm"
   >
     <template #header>
       {{ dialogTitle }}
