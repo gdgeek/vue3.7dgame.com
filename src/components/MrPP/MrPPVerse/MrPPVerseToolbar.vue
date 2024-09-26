@@ -3,6 +3,7 @@
     <!-- 修改对话框组件 -->
     <mr-p-p-verse-window-create
       ref="changedDialog"
+      :close-on-click-modal="true"
       :dialog-title="$t('verse.page.list.toolbar.dialogTitle')"
       :dialog-submit="$t('verse.page.list.toolbar.dialogSubmit')"
       @submit="submitChange"
@@ -42,7 +43,6 @@ const props = defineProps<{
 const { t } = useI18n();
 const emit = defineEmits(["deleted", "changed"]);
 
-// 引用组件
 const changedDialog = ref<InstanceType<typeof MrPPVerseWindowCreate> | null>(
   null
 );
@@ -87,17 +87,16 @@ const del = async () => {
       message: t("verse.page.list.toolbar.confirm.success"),
     });
     emit("deleted", props.verse);
-  } catch (error) {
-    console.error(error);
+  } catch {
     ElMessage({
-      type: "error",
-      message: t("verse.page.list.toolbar.confirm.error"),
+      type: "info",
+      message: t("verse.page.list.toolbar.confirm.info"),
     });
   }
 };
 
 // 提交修改
-const submitChange = async (form: any, item: any, imageId: number | null) => {
+const submitChange = async (form: any, imageId: number | null) => {
   if (!props.verse) return;
 
   const data: { name: string; info: string; image_id?: number } = {

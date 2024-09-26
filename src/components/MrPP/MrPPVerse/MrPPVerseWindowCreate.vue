@@ -12,7 +12,7 @@
       <el-form-item :label="$t('verse.page.form.picture')">
         <mr-p-p-cropper
           ref="image"
-          :image-url="info.url"
+          :image-url="info.url || null"
           :file-name="'verse.picture'"
           @save-file="saveFile"
         ></mr-p-p-cropper>
@@ -46,6 +46,7 @@
 </template>
 
 <script setup lang="ts">
+import { VerseData } from "@/api/v1/verse";
 import MrPPCropper from "@/components/MrPP/MrPPVerse/MrPPCropper.vue";
 import { useUserStore } from "@/store/modules/user";
 import { FormInstance } from "element-plus";
@@ -68,7 +69,7 @@ const emit = defineEmits(["submit"]);
 const dialogVisible = ref(false);
 // const imageUrl = ref<string | null>(null);
 const imageId = ref<number | null>(null);
-const item = ref<any>(null);
+const item = ref<VerseData>();
 
 const isManager = computed(() =>
   useUserStore().userInfo.roles.includes("manager" || "admin" || "root")
@@ -102,7 +103,7 @@ watchEffect(() => {
   if (item.value) {
     info.value.name = item.value.name;
     info.value.url = item.value.image?.url;
-    const parsedInfo = JSON.parse(item.value.info);
+    const parsedInfo = JSON.parse(item.value.info!);
     if (parsedInfo !== null) {
       info.value.description = parsedInfo.description;
       info.value.course = parsedInfo.course;
@@ -114,7 +115,7 @@ const formRef = ref<FormInstance>();
 const submitForm = async () => {
   formRef.value?.validate((valid: boolean) => {
     if (valid) {
-      emit("submit", info.value, item.value, imageId.value);
+      emit("submit", info.value, imageId.value);
     } else {
       ElMessage.error(t("verse.page.form.error"));
     }
@@ -123,10 +124,11 @@ const submitForm = async () => {
 
 const show = (selectedItem: any) => {
   item.value = selectedItem;
-  if (item.value) {
+  console.log("selectedItem", selectedItem);
+  if (item.value?.image) {
     setTimeout(() => {
       const imageComponent = ref<any>(null);
-      imageComponent.value = item.value.image.url;
+      imageComponent.value = item.value?.image.url;
     }, 0);
   }
   dialogVisible.value = true;

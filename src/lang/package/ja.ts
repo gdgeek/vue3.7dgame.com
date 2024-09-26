@@ -750,6 +750,7 @@ export default {
             info: "削除がキャンセルされました",
           },
           success: "変更成功！",
+          changeError: "変更に失敗しました！",
           qrcode: {
             cancel: "キャンセル",
             dialogTitle1: "デバイスでQRコードをスキャンして入ります",

@@ -744,6 +744,7 @@ export default {
             info: "已取消删除",
           },
           success: "修改成功!",
+          changeError: "修改失败！",
           qrcode: {
             cancel: "取 消",
             dialogTitle1: "请用设备扫描二维码，进入",

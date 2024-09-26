@@ -759,6 +759,7 @@ export default {
             info: "Deletion canceled",
           },
           success: "Modified successfully!",
+          changeError: "Modified failed!",
           qrcode: {
             cancel: "Cancel",
             dialogTitle1: "Please use a device to scan the QR code to enter",
