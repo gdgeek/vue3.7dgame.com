@@ -76,11 +76,11 @@ const goToDetail = (id: string) => {
 const release = async (item: VerseData) => {
   try {
     await ElMessageBox.confirm(
-      t("verse.page.list.releaseConfirm"),
-      t("verse.page.list.release"),
+      t("verse.page.list.releaseConfirm.message1"),
+      t("verse.page.list.releaseConfirm.message2"),
       {
-        confirmButtonText: t("Yes"),
-        cancelButtonText: t("No"),
+        confirmButtonText: t("verse.page.list.releaseConfirm.confirm"),
+        cancelButtonText: t("verse.page.list.releaseConfirm.cancel"),
         type: "warning",
       }
     );
@@ -88,10 +88,10 @@ const release = async (item: VerseData) => {
     const response = await VerseReleaseApi.post({ verse_id: item.id });
     // 处理发布成功后的逻辑
     item.verseRelease = response.data;
+    ElMessage.success(t("verse.page.list.releaseConfirm.success"));
     emit("changed");
-  } catch (error) {
-    console.error(error);
-    ElMessage.error(t("verse.page.list.releaseError"));
+  } catch {
+    ElMessage.info(t("verse.page.list.releaseConfirm.info"));
   }
 };
 
@@ -102,11 +102,11 @@ const restrain = async (item: VerseData) => {
       throw new Error("No verse release");
     }
     await ElMessageBox.confirm(
-      t("verse.page.list.restrainConfirm"),
-      t("verse.page.list.restrain"),
+      t("verse.page.list.restrainConfirm.message1"),
+      t("verse.page.list.restrainConfirm.message2"),
       {
-        confirmButtonText: t("Yes"),
-        cancelButtonText: t("No"),
+        confirmButtonText: t("verse.page.list.restrainConfirm.confirm"),
+        cancelButtonText: t("verse.page.list.restrainConfirm.cancel"),
         type: "warning",
       }
     );
@@ -114,10 +114,10 @@ const restrain = async (item: VerseData) => {
     const response = await VerseReleaseApi.remove(item.verseRelease.id);
     // 处理撤销成功后的逻辑
     item.verseRelease = null;
+    ElMessage.success(t("verse.page.list.restrainConfirm.success"));
     emit("changed");
-  } catch (error) {
-    console.error(error);
-    ElMessage.error(t("verse.page.list.restrainError"));
+  } catch {
+    ElMessage.info(t("verse.page.list.restrainConfirm.info"));
   }
 };
 </script>

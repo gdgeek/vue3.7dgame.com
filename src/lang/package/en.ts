@@ -730,6 +730,22 @@ export default {
           description: "Desc",
           share: "ShareID",
         },
+        releaseConfirm: {
+          message1: "Are you sure you want to release this project?",
+          message2: "Prompt",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          success: "Release successful",
+          info: "Cancelled",
+        },
+        restrainConfirm: {
+          message1: "Are you sure you want to take this project offline?",
+          message2: "Prompt",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          success: "Offline successful",
+          info: "Cancelled",
+        },
         toolbar: {
           dialogTitle: "Edit Data",
           dialogSubmit: "Confirm",

@@ -722,6 +722,22 @@ export default {
           description: "説明",
           share: "共有ID",
         },
+        releaseConfirm: {
+          message1: "このプロジェクトを公開しますか？",
+          message2: "お知らせ",
+          confirm: "確認",
+          cancel: "キャンセル",
+          success: "公開に成功しました",
+          info: "キャンセルされました",
+        },
+        restrainConfirm: {
+          message1: "このプロジェクトをオフラインにしますか？",
+          message2: "お知らせ",
+          confirm: "確認",
+          cancel: "キャンセル",
+          success: "オフラインに成功しました",
+          info: "キャンセルされました",
+        },
         toolbar: {
           dialogTitle: "データを変更",
           dialogSubmit: "確認",

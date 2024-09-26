@@ -716,6 +716,22 @@ export default {
           description: "说明",
           share: "共享ID",
         },
+        releaseConfirm: {
+          message1: "确定发布该工程吗？",
+          message2: "提示",
+          confirm: "确认",
+          cancel: "取消",
+          success: "发布成功",
+          info: "已取消",
+        },
+        restrainConfirm: {
+          message1: "确定下线该工程吗？",
+          message2: "提示",
+          confirm: "确认",
+          cancel: "取消",
+          success: "下线成功",
+          info: "已取消",
+        },
         toolbar: {
           dialogTitle: "修改数据",
           dialogSubmit: "确定",
