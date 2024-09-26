@@ -126,25 +126,23 @@ import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useInfomationStore } from "@/store/modules/information";
 import { useTagsViewStore, useUserStore } from "@/store";
-
 import { TOKEN_KEY } from "@/enums/CacheEnum";
+
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
 const tagsViewStore = useTagsViewStore();
 const informationStore = useInfomationStore();
-
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
-
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
-function parseRedirect(): {
+
+const parseRedirect = (): {
   path: string;
   queryParams: Record<string, string>;
-} {
+} => {
   const query: LocationQuery = route.query;
   const redirect = (query.redirect as string) ?? "/";
-
   const url = new URL(redirect, window.location.origin);
   const path = url.pathname;
   const queryParams: Record<string, string> = {};
@@ -154,7 +152,7 @@ function parseRedirect(): {
   });
 
   return { path, queryParams };
-}
+};
 
 const enter = async (
   user: any,
@@ -193,7 +191,6 @@ const toggleTheme = () => {
 watch(
   () => route.path,
   async (newPath) => {
-    console.log("newPath", newPath);
     if (newPath === "/logout") {
       await userStore.logout();
       await tagsViewStore.delAllViews();
@@ -201,7 +198,8 @@ watch(
         router.push("/login?redirect=/home/index");
       }, 1000);
     }
-  }
+  },
+  { immediate: true }
 );
 </script>
 
