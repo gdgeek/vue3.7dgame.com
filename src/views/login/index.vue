@@ -5,6 +5,25 @@
         <img src="/favicon.ico" alt="" />
         <span class="project_title">{{ $t("login.title") }}</span>
       </RouterLink>
+      <div class="link" style="margin-left: 250px">
+        <el-link
+          href="https://testflight.apple.com/join/V4XNEG6t"
+          target="_blank"
+          :underline="false"
+        >
+          <img src="/public/testflight.ico" style="width: 25px" alt="" />
+          <span style="margin-left: 5px">TestFlight</span>
+        </el-link>
+        <el-link
+          href="https://hyperhuman.deemos.com/"
+          target="_blank"
+          :underline="false"
+          style="margin-left: 30px"
+        >
+          <img src="/public/deemos.ico" style="width: 25px" alt="" />
+          <span style="margin-left: 5px">Rodin</span>
+        </el-link>
+      </div>
       <div class="header-right">
         <div class="top-bar">
           <el-switch
@@ -251,8 +270,8 @@ body {
   .project_title {
     margin-left: 10px;
     font-family: "KaiTi", sans-serif;
-    font-size: 14px;
-    font-weight: 400;
+    // font-size: 14px;
+    font-weight: 600;
     &:hover {
       color: #3876c2;
     }

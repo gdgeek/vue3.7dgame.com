@@ -39,7 +39,11 @@
           @click="restrain(item)"
           size="small"
         >
-          <font-awesome-icon class="icon" icon="box-open"></font-awesome-icon>
+          <font-awesome-icon
+            class="icon"
+            icon="box-open"
+            color="#FFA500"
+          ></font-awesome-icon>
         </el-button>
         <el-button type="primary" v-else @click="release(item)" size="small">
           <font-awesome-icon class="icon" icon="box"></font-awesome-icon>
