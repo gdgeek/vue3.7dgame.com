@@ -36,7 +36,7 @@ function mrpp(): boolean {
 
 function mrcn(): boolean {
   return (
-    import.meta.env.VITE_APP_BASE_MODE === "4mr.cn" ||
+    import.meta.env.VITE_APP_BASE_MODE === "01xr.com" ||
     import.meta.env.VITE_APP_BASE_MODE === "7dgame.com"
   );
 }
@@ -48,7 +48,7 @@ function local(): boolean {
 function canManager(): boolean {
   return (
     import.meta.env.VITE_APP_BASE_MODE === "local" ||
-    import.meta.env.VITE_APP_BASE_MODE === "4mr.cn" ||
+    import.meta.env.VITE_APP_BASE_MODE === "01xr.com" ||
     import.meta.env.VITE_APP_BASE_MODE === "7dgame.com"
   );
 }
@@ -67,7 +67,7 @@ function title(): string {
   if (hostname.includes("mrpp.com")) {
     return "不加班官方网站";
   }
-  if (hostname.includes("4mr.cn")) {
+  if (hostname.includes("01xr.com")) {
     return "不加班官方网站";
   }
   if (hostname.includes("hololens2.cn")) {
@@ -87,7 +87,7 @@ function title(): string {
 
 function subtitle(): string {
   switch (import.meta.env.VITE_APP_BASE_MODE) {
-    case "4mr.cn":
+    case "01xr.com":
       return "内部版本";
     case "7dgame.com":
       return "测试版本";
