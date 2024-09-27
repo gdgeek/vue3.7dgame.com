@@ -36,14 +36,9 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/store/modules/user";
-import { ThemeEnum } from "@/enums/ThemeEnum";
-import { useSettingsStore } from "@/store";
 
 const userStore = useUserStore();
 const router = useRouter();
-const settingsStore = useSettingsStore();
-
-const isDark = ref(settingsStore.theme === ThemeEnum.DARK);
 const { t } = useI18n();
 
 const name = computed(() => {

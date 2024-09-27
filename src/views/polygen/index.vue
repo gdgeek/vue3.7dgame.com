@@ -74,16 +74,11 @@
 </template>
 
 <script setup lang="ts">
-// import "element-plus/theme-chalk/index.css";
-import { useRouter } from "vue-router";
 import { getPolygens, putPolygen, deletePolygen } from "@/api/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-
-import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
-
-const router = useRouter();
 
 const { t } = useI18n();
 

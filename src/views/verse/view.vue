@@ -41,57 +41,6 @@
         </el-card>
         <br />
 
-        <!-- <el-card>
-          <el-form
-            :model="Form"
-            :rules="rules"
-            ref="FormRef"
-            label-width="auto"
-          >
-            <el-form-item :label="$t('verse.view.form.label1')" prop="language">
-              <el-select
-                v-model="Form.language"
-                :placeholder="$t('verse.view.form.placeholder1')"
-                style="width: 25%"
-              >
-                <el-option label="zh" value="zh"></el-option>
-                <el-option label="en" value="en"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item :label="$t('verse.view.form.label2')" prop="name">
-              <el-input
-                v-model="Form.name"
-                :placeholder="$t('verse.view.form.placeholder2')"
-              ></el-input>
-            </el-form-item>
-            <el-form-item
-              :label="$t('verse.view.form.label3')"
-              prop="description"
-            >
-              <el-input
-                v-model="Form.description"
-                type="textarea"
-                :placeholder="$t('verse.view.form.placeholder3')"
-              ></el-input>
-            </el-form-item>
-          </el-form>
-          <span>
-            <el-button
-              @click="submit"
-              size="small"
-              type="primary"
-              style="margin-left: 65px"
-            >
-              <el-icon style="margin-right: 5px"><Check></Check></el-icon
-              >{{ $t("verse.view.form.submit") }}</el-button
-            >
-            <el-button @click="del" size="small" type="danger"
-              ><el-icon style="margin-right: 5px"><Delete></Delete></el-icon
-              >{{ $t("verse.view.form.delete") }}</el-button
-            >
-          </span>
-        </el-card> -->
-
         <el-card v-if="saveable" class="box-card">
           <language
             v-if="verse"

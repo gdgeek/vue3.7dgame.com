@@ -19,7 +19,7 @@
               :url="item.image.url"
               style="width: 100%; height: 270px"
               fit="contain"
-            />
+            ></LazyImg>
           </router-link>
         </el-card>
         <InfoContent v-if="item" :verse="item"></InfoContent>
@@ -39,26 +39,28 @@
           @click="restrain(item)"
           size="small"
         >
-          <font-awesome-icon class="icon" icon="box-open" />
+          <font-awesome-icon
+            class="icon"
+            icon="box-open"
+            color="#FFA500"
+          ></font-awesome-icon>
         </el-button>
         <el-button type="primary" v-else @click="release(item)" size="small">
-          <font-awesome-icon class="icon" icon="box" />
+          <font-awesome-icon class="icon" icon="box"></font-awesome-icon>
         </el-button>
       </el-button-group>
       <VerseToolbar
         :verse="item"
         @deleted="emit('deleted')"
         @changed="emit('changed')"
-      />
+      ></VerseToolbar>
     </div>
   </el-card>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import { ElMessage, ElMessageBox } from "element-plus";
 import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";
 import { LazyImg } from "vue-waterfall-plugin-next";
@@ -78,11 +80,11 @@ const goToDetail = (id: string) => {
 const release = async (item: VerseData) => {
   try {
     await ElMessageBox.confirm(
-      t("verse.page.list.releaseConfirm"),
-      t("verse.page.list.release"),
+      t("verse.page.list.releaseConfirm.message1"),
+      t("verse.page.list.releaseConfirm.message2"),
       {
-        confirmButtonText: t("Yes"),
-        cancelButtonText: t("No"),
+        confirmButtonText: t("verse.page.list.releaseConfirm.confirm"),
+        cancelButtonText: t("verse.page.list.releaseConfirm.cancel"),
         type: "warning",
       }
     );
@@ -90,10 +92,10 @@ const release = async (item: VerseData) => {
     const response = await VerseReleaseApi.post({ verse_id: item.id });
     // 处理发布成功后的逻辑
     item.verseRelease = response.data;
+    ElMessage.success(t("verse.page.list.releaseConfirm.success"));
     emit("changed");
-  } catch (error) {
-    console.error(error);
-    ElMessage.error(t("verse.page.list.releaseError"));
+  } catch {
+    ElMessage.info(t("verse.page.list.releaseConfirm.info"));
   }
 };
 
@@ -104,11 +106,11 @@ const restrain = async (item: VerseData) => {
       throw new Error("No verse release");
     }
     await ElMessageBox.confirm(
-      t("verse.page.list.restrainConfirm"),
-      t("verse.page.list.restrain"),
+      t("verse.page.list.restrainConfirm.message1"),
+      t("verse.page.list.restrainConfirm.message2"),
       {
-        confirmButtonText: t("Yes"),
-        cancelButtonText: t("No"),
+        confirmButtonText: t("verse.page.list.restrainConfirm.confirm"),
+        cancelButtonText: t("verse.page.list.restrainConfirm.cancel"),
         type: "warning",
       }
     );
@@ -116,10 +118,10 @@ const restrain = async (item: VerseData) => {
     const response = await VerseReleaseApi.remove(item.verseRelease.id);
     // 处理撤销成功后的逻辑
     item.verseRelease = null;
+    ElMessage.success(t("verse.page.list.restrainConfirm.success"));
     emit("changed");
-  } catch (error) {
-    console.error(error);
-    ElMessage.error(t("verse.page.list.restrainError"));
+  } catch {
+    ElMessage.info(t("verse.page.list.restrainConfirm.info"));
   }
 };
 </script>

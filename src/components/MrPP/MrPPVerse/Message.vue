@@ -4,11 +4,6 @@
       v-if="tagsMap && message && message.messageTags"
       content-position="left"
     >
-      <!-- <mr-p-p-tags
-        v-if="message && tagsMap"
-        :tags-map="tagsMap"
-        :message="message"
-      ></mr-p-p-tags> -->
     </el-divider>
     <el-dialog v-model="dialog" width="70%">
       <template #header>
@@ -70,7 +65,10 @@
             :type="message.like ? 'primary' : ''"
             @click="toggleLike(message.like!)"
           >
-            <font-awesome-icon icon="fa-solid fa-thumbs-up"></font-awesome-icon>
+            <font-awesome-icon
+              icon="fa-solid fa-thumbs-up"
+              style="margin-right: 5px"
+            ></font-awesome-icon>
             {{ $t("verse.view.message.like") }}
             <span v-if="message.likesCount != 0">{{ message.likesCount }}</span>
           </el-button>
@@ -95,12 +93,8 @@ import {
   Like,
 } from "@/api/v1/message";
 import { postLike, removeLike } from "@/api/v1/like";
-import { AbilityMessage } from "@/ability/ability";
-// import MrPPTags from "@/components/MrPP/MrPPTags.vue";
 import MrPPMessageFrom from "@/components/MrPP/MrPPVerse/MrPPMessageFrom.vue";
 import { useRouter } from "@/router";
-
-const router = useRouter();
 import { useTagsStore } from "@/store/modules/tags";
 import { useUserStore } from "@/store/modules/user";
 import DOMPurify from "dompurify";
@@ -109,14 +103,12 @@ const props = defineProps<{ messageId: number }>();
 const emit = defineEmits<{
   (e: "setMessage", data: MessageType | null): void;
 }>();
-
+const router = useRouter();
 const tagsStore = useTagsStore();
 const userStore = useUserStore();
 const dialog = ref(false);
 const message = ref<MessageType>();
-
 const { t } = useI18n();
-
 const tagsMap = computed(() => tagsStore.tagsMap);
 const userInfo = computed(() => userStore.userInfo);
 

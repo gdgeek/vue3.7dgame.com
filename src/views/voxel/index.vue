@@ -73,13 +73,13 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from "vue-router";
-import { ElMessage, ElMessageBox } from "element-plus";
 import { getVoxels, putVoxel, deleteVoxel } from "@/api/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
+
+const { t } = useI18n();
 
 interface Pagination {
   current: number;
@@ -97,10 +97,6 @@ const pagination = ref<Pagination>({
   size: 20,
   total: 20,
 });
-
-const router = useRouter();
-
-const { t } = useI18n();
 
 const handleCurrentChange = (page: number) => {
   pagination.value.current = page;
@@ -148,59 +144,59 @@ const named = (id: number, newValue: string) => {
     });
 };
 
-const deletedWindow = (item: any) => {
-  ElMessageBox.confirm(
-    t("voxel.confirm.message1"),
-    t("voxel.confirm.message2"),
-    {
-      confirmButtonText: t("voxel.confirm.confirm"),
-      cancelButtonText: t("voxel.confirm.cancel"),
-      closeOnClickModal: false,
-      type: "warning",
-    }
-  )
-    .then(() => {
-      deleted(item.id);
-      ElMessage.success(t("voxel.confirm.success"));
-    })
-    .catch(() => {
-      ElMessage.info(t("voxel.confirm.info"));
-    });
+const deletedWindow = async (item: any) => {
+  try {
+    await ElMessageBox.confirm(
+      t("voxel.confirm.message1"),
+      t("voxel.confirm.message2"),
+      {
+        confirmButtonText: t("voxel.confirm.confirm"),
+        cancelButtonText: t("voxel.confirm.cancel"),
+        closeOnClickModal: false,
+        type: "warning",
+      }
+    );
+    await deleted(item.id);
+    ElMessage.success(t("voxel.confirm.success"));
+  } catch {
+    ElMessage.info(t("voxel.confirm.info"));
+  }
 };
 
-const deleted = (id: number) => {
-  deleteVoxel(id)
-    .then(() => {
-      refresh();
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+const deleted = async (id: number) => {
+  try {
+    await deleteVoxel(id);
+    await refresh();
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const succeed = (data: any[]) => {
-  console.log(data);
   items.value = data;
 };
 
-// 刷新数据
-const refresh = () => {
-  getVoxels(sorted.value, searched.value, pagination.value.current)
-    .then((response) => {
-      console.log("response.headers", response.headers);
-      pagination.value = {
-        current: parseInt(response.headers["x-pagination-current-page"]),
-        count: parseInt(response.headers["x-pagination-page-count"]),
-        size: parseInt(response.headers["x-pagination-per-page"]),
-        total: parseInt(response.headers["x-pagination-total-count"]),
-      };
-      if (response.data) {
-        succeed(response.data);
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+const refresh = async () => {
+  try {
+    const response = await getVoxels(
+      sorted.value,
+      searched.value,
+      pagination.value.current
+    );
+
+    pagination.value = {
+      current: parseInt(response.headers["x-pagination-current-page"]),
+      count: parseInt(response.headers["x-pagination-page-count"]),
+      size: parseInt(response.headers["x-pagination-per-page"]),
+      total: parseInt(response.headers["x-pagination-total-count"]),
+    };
+
+    if (response.data) {
+      succeed(response.data);
+    }
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 onMounted(() => {

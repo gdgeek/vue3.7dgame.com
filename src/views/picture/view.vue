@@ -69,18 +69,15 @@ import { postFile } from "@/api/v1/files";
 import { useFileStore } from "@/store/modules/config";
 import type { ResourceInfo } from "@/api/resources/model";
 import { FileHandler } from "@/assets/js/file/server";
-const image = ref<HTMLImageElement | null>(null);
 
+const image = ref<HTMLImageElement | null>(null);
 const route = useRoute();
 const router = useRouter();
 const store = useFileStore().store;
-
 const pictureData = ref<ResourceInfo | null>(null);
 const file = ref<string | null>(null);
 const expire = ref<boolean>(false);
-
 const id = computed(() => route.query.id as string);
-
 const { t } = useI18n();
 
 const prepare = computed(

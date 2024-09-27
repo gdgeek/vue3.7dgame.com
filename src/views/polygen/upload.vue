@@ -15,11 +15,9 @@ import { useRouter } from "vue-router";
 import { postPolygen } from "@/api/resources/index";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 
-// 定义允许的文件类型
 const fileType = ref(".glb");
 const router = useRouter();
 
-// 模型保存
 const savePolygen = async (
   name: string,
   file_id: number,
@@ -27,7 +25,6 @@ const savePolygen = async (
 ) => {
   try {
     const response = await postPolygen({ name, file_id });
-    // 跳转到图片查看页面，并传递图片 ID
     router.push({
       path: "/resource/polygen/view",
       query: { id: response.data.id },

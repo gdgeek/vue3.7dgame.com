@@ -22,17 +22,6 @@
 <script setup lang="ts">
 import MrPPUserCreater from "@/components/MrPP/MrPPUserSettings/MrPPUserCreater.vue";
 import HomeHeader from "@/components/Home/HomeHeader.vue";
-// export default {
-//   name: "User",
-//   components: {
-//     HomeHeader,
-//     MrPPUserCreater,
-//   },
-//   data() {
-//     return {};
-//   },
-//   created() {},
-// };
 </script>
 
 <style lang="scss" scoped>

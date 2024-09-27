@@ -21,26 +21,21 @@
 </template>
 
 <script setup lang="ts">
-//import { MessageType } from "@/utils/helper";
 import { useRoute, useRouter } from "vue-router";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
-import env from "@/environment";
 import { putMeta, getMeta } from "@/api/v1/meta";
-import path from "path-browserify";
-
 import { useAppStore } from "@/store/modules/app";
 import { translateRouteTitle } from "@/utils/i18n";
+
 const appStore = useAppStore();
 const route = useRoute();
 const router = useRouter();
-//const editUrl = import.meta.env.VITE_APP_EDITOR_URL;
-//const src = editUrl + "/three.js/editor/meta-editor.html?time=" + Date.now(); //path.join("", "");
-
 const src = ref(
   import.meta.env.VITE_APP_EDITOR_URL +
     "/three.js/editor/meta-editor.html?language=" +
     appStore.language
 );
+
 watch(
   () => appStore.language, // 监听 language 的变化
   async (newValue, oldValue) => {
@@ -51,7 +46,7 @@ watch(
     await refresh();
   }
 );
-// console.log("src", src);
+
 let init = false;
 const dialog = ref();
 const editor = ref<HTMLIFrameElement | null>();

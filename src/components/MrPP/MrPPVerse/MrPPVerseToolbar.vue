@@ -3,10 +3,11 @@
     <!-- 修改对话框组件 -->
     <mr-p-p-verse-window-create
       ref="changedDialog"
+      :close-on-click-modal="true"
       :dialog-title="$t('verse.page.list.toolbar.dialogTitle')"
       :dialog-submit="$t('verse.page.list.toolbar.dialogSubmit')"
       @submit="submitChange"
-    />
+    ></mr-p-p-verse-window-create>
     <!-- 按钮组 -->
     <el-button-group v-if="verse" style="float: right" :inline="true">
       <el-button
@@ -15,14 +16,14 @@
         size="small"
         icon="Edit"
         @click="changedWindow"
-      />
+      ></el-button>
       <el-button
         v-if="deleteable"
         type="danger"
         size="small"
         icon="delete"
         @click="deletedWindow"
-      />
+      ></el-button>
       &nbsp;
     </el-button-group>
   </span>
@@ -42,11 +43,10 @@ const props = defineProps<{
 const { t } = useI18n();
 const emit = defineEmits(["deleted", "changed"]);
 
-// 引用组件
 const changedDialog = ref<InstanceType<typeof MrPPVerseWindowCreate> | null>(
   null
 );
-const qrcodeRef = ref<InstanceType<typeof MrPPVerseQrcode> | null>(null);
+// const qrcodeRef = ref<InstanceType<typeof MrPPVerseQrcode> | null>(null);
 
 // 计算属性：是否可以删除
 const deleteable = computed(() => !!props.verse?.editable);
@@ -87,17 +87,16 @@ const del = async () => {
       message: t("verse.page.list.toolbar.confirm.success"),
     });
     emit("deleted", props.verse);
-  } catch (error) {
-    console.error(error);
+  } catch {
     ElMessage({
-      type: "error",
-      message: t("verse.page.list.toolbar.confirm.error"),
+      type: "info",
+      message: t("verse.page.list.toolbar.confirm.info"),
     });
   }
 };
 
 // 提交修改
-const submitChange = async (form: any, item: any, imageId: number | null) => {
+const submitChange = async (form: any, imageId: number | null) => {
   if (!props.verse) return;
 
   const data: { name: string; info: string; image_id?: number } = {

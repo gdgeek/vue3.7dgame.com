@@ -39,7 +39,6 @@ export const usePermissionStore = defineStore("permission", () => {
     const matchedItem = routerData.value.find(
       (item) => item.path === topMenuPath
     );
-    console.log("matchedItem:", matchedItem);
     if (matchedItem && matchedItem.children) {
       mixLeftMenus.value = matchedItem.children;
     }

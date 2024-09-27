@@ -82,13 +82,10 @@ const loading = ref(false);
 let voxelData = ref<any>(null);
 const percentage = ref(0);
 const expire = ref(false);
-
 const store = useFileStore().store;
 const route = useRoute();
 const router = useRouter();
-
 const id = computed(() => route.query.id as string);
-
 const { t } = useI18n();
 
 const prepare = computed(

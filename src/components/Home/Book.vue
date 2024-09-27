@@ -23,8 +23,6 @@ import DocumentList from "@/components/Home/DocumentList.vue";
 
 const { t } = useI18n();
 
-console.log("book");
-
 const props = defineProps<{
   items?: { label: string; type: string; id: number }[];
   documentPath?: string;

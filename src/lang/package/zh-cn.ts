@@ -74,6 +74,9 @@ export default {
       gameIndex: "游戏配置",
       gameMap: "地图配置",
     },
+    logout: {
+      title: "退出",
+    },
   },
   // 登录页面国际化
   login: {
@@ -713,6 +716,22 @@ export default {
           description: "说明",
           share: "共享ID",
         },
+        releaseConfirm: {
+          message1: "确定发布该工程吗？",
+          message2: "提示",
+          confirm: "确认",
+          cancel: "取消",
+          success: "发布成功",
+          info: "已取消",
+        },
+        restrainConfirm: {
+          message1: "确定下线该工程吗？",
+          message2: "提示",
+          confirm: "确认",
+          cancel: "取消",
+          success: "下线成功",
+          info: "已取消",
+        },
         toolbar: {
           dialogTitle: "修改数据",
           dialogSubmit: "确定",
@@ -725,6 +744,7 @@ export default {
             info: "已取消删除",
           },
           success: "修改成功!",
+          changeError: "修改失败！",
           qrcode: {
             cancel: "取 消",
             dialogTitle1: "请用设备扫描二维码，进入",

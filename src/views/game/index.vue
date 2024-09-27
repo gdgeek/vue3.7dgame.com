@@ -85,8 +85,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import VerseDialog from "@/components/MrPP/VerseDialog.vue";
 import {

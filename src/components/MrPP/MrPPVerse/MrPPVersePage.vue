@@ -3,7 +3,6 @@
     <Create
       v-if="props.created"
       ref="createdDialog"
-      :close-on-click-modal="false"
       :dialog-title="$t('verse.page.dialogTitle')"
       :dialog-submit="$t('verse.page.dialogSubmit')"
       @submit="submitCreate"
@@ -79,10 +78,7 @@ const emit = defineEmits<{
 }>();
 
 const createdDialog = ref<InstanceType<typeof Create> | null>(null);
-
 const router = useRouter();
-
-const dialogVisible = ref(false);
 const items = ref<VerseData[]>([]);
 const sorted = ref("-created_at");
 const searched = ref("");
@@ -105,7 +101,7 @@ const submitCreate = async (form: any, imageId: number | null) => {
     info: JSON.stringify(form),
     uuid: uuidv4(),
   };
-  if (imageId) {
+  if (imageId !== null) {
     data.image_id = imageId;
   }
   try {

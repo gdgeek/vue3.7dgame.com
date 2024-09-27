@@ -74,6 +74,9 @@ export default {
       gameIndex: "ゲーム設定",
       gameMap: "マップ設定",
     },
+    logout: {
+      title: "ログアウト",
+    },
   },
   // 登录页面国际化
   login: {
@@ -719,6 +722,22 @@ export default {
           description: "説明",
           share: "共有ID",
         },
+        releaseConfirm: {
+          message1: "このプロジェクトを公開しますか？",
+          message2: "お知らせ",
+          confirm: "確認",
+          cancel: "キャンセル",
+          success: "公開に成功しました",
+          info: "キャンセルされました",
+        },
+        restrainConfirm: {
+          message1: "このプロジェクトをオフラインにしますか？",
+          message2: "お知らせ",
+          confirm: "確認",
+          cancel: "キャンセル",
+          success: "オフラインに成功しました",
+          info: "キャンセルされました",
+        },
         toolbar: {
           dialogTitle: "データを変更",
           dialogSubmit: "確認",
@@ -731,6 +750,7 @@ export default {
             info: "削除がキャンセルされました",
           },
           success: "変更成功！",
+          changeError: "変更に失敗しました！",
           qrcode: {
             cancel: "キャンセル",
             dialogTitle1: "デバイスでQRコードをスキャンして入ります",

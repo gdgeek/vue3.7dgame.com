@@ -85,13 +85,6 @@ const rules = {
   ],
 };
 
-onMounted(() => {
-  if (props.data !== null) {
-    form.value.title = props.data.title;
-    form.value.body = props.data.body;
-  }
-});
-
 const submitForm = async () => {
   isDisabled.value = true;
   await new Promise((resolve) => setTimeout(resolve, 3000)); // 点击后等待3秒后才能再次点击
@@ -113,4 +106,11 @@ const submitForm = async () => {
 const resetForm = () => {
   formRef.value?.resetFields();
 };
+
+onMounted(() => {
+  if (props.data !== null) {
+    form.value.title = props.data.title;
+    form.value.body = props.data.body;
+  }
+});
 </script>

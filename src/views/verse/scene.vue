@@ -27,19 +27,17 @@
 </template>
 
 <script setup lang="ts">
-import { MessageType } from "@/utils/helper";
 import { useRoute, useRouter } from "vue-router";
 import PrefabDialog from "@/components/MrPP/PrefabDialog.vue";
 import MetaDialog from "@/components/MrPP/MetaDialog.vue";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
 import { putVerse, getVerse, VerseData } from "@/api/v1/verse";
 import { getPrefab } from "@/api/v1/prefab";
-
 import { useAppStore } from "@/store/modules/app";
 import { translateRouteTitle } from "@/utils/i18n";
+
 const appStore = useAppStore();
 const { t } = useI18n();
-
 const route = useRoute();
 const router = useRouter();
 const knightDataRef = ref<InstanceType<typeof KnightDataDialog>>();
@@ -47,7 +45,7 @@ const prefabDialogRef = ref<InstanceType<typeof PrefabDialog>>();
 const metaDialogRef = ref<InstanceType<typeof MetaDialog>>();
 let init = false;
 const saveable = ref();
-// const title = computed(() => route.query.title?.slice(2) as string);
+
 const title = computed(() => {
   const match = (route.query.title as string)?.match(/【(.*?)】/);
   return match ? match[0] : "";
@@ -83,7 +81,6 @@ const refresh = async () => {
   });
 };
 const postMessage = (action: string, data: any) => {
-  console.error("postMessage", action);
   if (editor.value && editor.value.contentWindow) {
     editor.value.contentWindow.postMessage(
       {
@@ -145,7 +142,6 @@ const saveVerse = async (data: any) => {
     });
     return;
   }
-  console.error("saveVerse", { data: JSON.stringify(verse) });
   await putVerse(id.value, { data: JSON.stringify(verse) });
   ElMessage({
     type: "success",
@@ -160,7 +156,6 @@ const handleMessage = async (e: MessageEvent) => {
   const action = e.data.action;
   const data = e.data.data; // ? JSON.parse(params.json) : undefined;
 
-  console.error("handleMessage", action, data);
   switch (action) {
     case "edit-meta":
       router.push({

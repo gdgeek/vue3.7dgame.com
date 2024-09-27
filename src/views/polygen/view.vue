@@ -85,11 +85,9 @@ const loading = ref(false);
 const polygenData = ref<any>(null);
 const expire = ref(true);
 const percentage = ref(0);
-
 const route = useRoute();
 const router = useRouter();
 const store = useFileStore().store;
-
 const { t } = useI18n();
 
 const three = ref<InstanceType<typeof Polygen> | null>(null);

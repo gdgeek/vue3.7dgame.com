@@ -41,7 +41,6 @@ function getBreadcrumb() {
   let matched = currentRoute.matched.filter(
     (item) => item.meta && item.meta.title
   );
-  console.log("currentQuery", currentQuery);
 
   if (
     currentRoute.path === "/verse/scene" ||
@@ -92,7 +91,6 @@ function getBreadcrumb() {
   breadcrumbs.value = matched.filter((item) => {
     return item.meta && item.meta.title && item.meta.breadcrumb !== false;
   });
-  console.log("breadcrumbs", breadcrumbs);
 }
 
 function isDashboard(route: RouteLocationMatched) {

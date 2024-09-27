@@ -85,7 +85,6 @@ interface LanguageProps {
 
 const props = defineProps<LanguageProps>();
 const { t } = useI18n();
-
 const multilanguage = ref(props.languages);
 const formRef = ref<FormInstance>();
 const form = ref<FormModel>({

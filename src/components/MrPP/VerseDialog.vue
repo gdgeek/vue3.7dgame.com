@@ -7,7 +7,7 @@
       :show-close="false"
       @close="cancel"
     >
-      <template #title>
+      <template #header>
         <mr-p-p-header
           :sorted="active.sorted"
           :searched="active.searched"
@@ -104,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
 import { getVerses } from "@/api/v1/vp-guide";
@@ -122,7 +122,6 @@ const active = ref({
 
 const emit = defineEmits(["selected", "cancel"]);
 const { t } = useI18n();
-
 const title = (item: any) => item.title || item.name || "title";
 
 const open = () => {
@@ -236,7 +235,6 @@ const transformToViewCard = (items: any[]): ViewCard[] => {
 
 const viewCards = computed(() => {
   const cards = transformToViewCard(active.value.items);
-  console.log("viewCards", cards);
   return cards;
 });
 </script>

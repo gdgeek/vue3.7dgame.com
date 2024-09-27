@@ -18,7 +18,6 @@ export function setupPermission() {
   router.beforeEach(async (to, from, next) => {
     NProgress.start();
     const hasToken = localStorage.getItem(TOKEN_KEY);
-    console.log("hasToken:", hasToken);
 
     if (hasToken) {
       if (to.path === "/login") {
@@ -29,14 +28,12 @@ export function setupPermission() {
         const userStore = useUserStore();
         const hasRoles =
           userStore.userInfo.roles && userStore.userInfo.roles.length > 0;
-        console.log("hasRoles:", hasRoles);
 
         if (hasRoles) {
           // 如果未匹配到任何路由，跳转到404页面
           if (to.matched.length === 0) {
             next(from.name ? { name: from.name } : "/404");
           } else {
-            console.log("测试1");
             // 如果路由参数中有 title，覆盖路由元信息中的 title
             const title =
               (to.params.title as string) || (to.query.title as string);
@@ -46,7 +43,6 @@ export function setupPermission() {
             next();
           }
         } else {
-          console.log("测试2");
           const permissionStore = usePermissionStore();
           try {
             await userStore.getUserInfo();

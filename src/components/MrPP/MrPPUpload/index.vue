@@ -94,26 +94,6 @@ const progress = (p: number, idx: number) => {
   data[idx].percentage = Math.round(Math.min(p, 1) * 100);
 };
 
-// 保存文件信息到数据库
-// const saveFile = async (
-//   md5: string,
-//   extension: string,
-//   file: File,
-//   handler: FileHandler
-// ) => {
-//   progress(1, 1);
-//   const response = await postFile({
-//     filename: file.name,
-//     md5,
-//     key: `${md5}${extension}`,
-//     url: fileStore.store.fileUrl(md5, extension, handler, props.dir!),
-//   });
-//   // progress(2, 1);
-//   // return response;
-//   emit("saveResource", file.name, response.data.id, () => {
-//     progress(2, 1);
-//   });
-// };
 const saveFile = async (
   md5: string,
   extension: string,
@@ -168,7 +148,6 @@ const select = async () => {
         props.dir!
       );
     }
-    console.log("图片数据", md5, file.extension, file, handler);
     await saveFile(md5, file.extension!, file, handler);
     // await saveFile(md5, file.type.split("/").pop()!, file, handler);
   } catch (error) {

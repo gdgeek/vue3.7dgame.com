@@ -74,6 +74,9 @@ export default {
       gameIndex: "Settings",
       gameMap: "Maps",
     },
+    logout: {
+      title: "Logout",
+    },
   },
   // 登录页面国际化
   login: {
@@ -724,8 +727,24 @@ export default {
           author: "Author",
           learn: "Learn",
           blank: "Default Link",
-          description: "Desc",
+          description: "Description",
           share: "ShareID",
+        },
+        releaseConfirm: {
+          message1: "Are you sure you want to release this project?",
+          message2: "Prompt",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          success: "Release successful",
+          info: "Cancelled",
+        },
+        restrainConfirm: {
+          message1: "Are you sure you want to take this project offline?",
+          message2: "Prompt",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          success: "Offline successful",
+          info: "Cancelled",
         },
         toolbar: {
           dialogTitle: "Edit Data",
@@ -740,6 +759,7 @@ export default {
             info: "Deletion canceled",
           },
           success: "Modified successfully!",
+          changeError: "Modified failed!",
           qrcode: {
             cancel: "Cancel",
             dialogTitle1: "Please use a device to scan the QR code to enter",

@@ -101,17 +101,13 @@ const props = defineProps<{
   imageUrl: string | null;
   fileName: string;
 }>();
-
 const emit = defineEmits(["saveFile"]);
-
 const cropperRef = ref<InstanceType<typeof VueCropper> | null>(null);
-
-console.log("props.imageUrl, fileName", props.imageUrl, props.fileName);
 const fileStore = useFileStore();
-
 const url = ref<string | null>(null);
 const dialogVisible = ref(false);
 const loading = ref(false);
+const { t } = useI18n();
 
 type optionType = {
   img: string | ArrayBuffer | null; // 裁剪图片的地址
@@ -155,7 +151,6 @@ const option = ref<optionType>({
 });
 
 url.value = props.imageUrl;
-console.log("url", url.value);
 
 // 上传按钮 限制图片大小和类型
 const handleChangeUpload = async (file: UploadFile) => {
@@ -170,11 +165,11 @@ const handleChangeUpload = async (file: UploadFile) => {
     const isLt2M = selectedFile.size / 1024 / 1024 < 2;
 
     if (!isJPG) {
-      ElMessage.error("上传头像图片只能是 JPG/PNG/BMP/GIF 格式!");
+      ElMessage.error(t("homepage.edit.avatarCropping.error1"));
       return false;
     }
     if (!isLt2M) {
-      ElMessage.error("上传头像图片大小不能超过 2MB!");
+      ElMessage.error(t("homepage.edit.avatarCropping.error2"));
       return false;
     }
 
@@ -183,7 +178,7 @@ const handleChangeUpload = async (file: UploadFile) => {
     loading.value = false;
     dialogVisible.value = true;
   } else {
-    ElMessage.error("请选择有效的文件！");
+    ElMessage.error(t("homepage.edit.avatarCropping.error3"));
   }
 };
 
@@ -206,7 +201,7 @@ const rotateRightHandle = () => {
 // 截图框移动回调函数
 const cropMoving = (data: any) => {
   // 截图框的左上角 x，y和右下角坐标x，y
-  // const cropAxis = [data.axis.x1, data.axis.y1, data.axis.x2, data.axis.y2]
+  // const cropAxis = [data.axis.x1, data.axis.y1, data.axis.x2, data.axis.y2];
   // console.log(cropAxis)
 };
 
@@ -222,10 +217,7 @@ const saveFile = async (
     key: md5 + extension,
     url: fileStore.store.fileUrl(md5, extension, handler, "backup"),
   };
-  console.log("测试1");
   url.value = data.url;
-  console.log("url2", url.value);
-  console.log("测试2");
 
   try {
     const response = await postFile(data);

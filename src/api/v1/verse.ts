@@ -35,7 +35,6 @@ type VerseRelease = {
   code: string;
 };
 
-
 export type VerseShare = {
   id: number;
   verse_id: number;
@@ -78,7 +77,7 @@ export type VerseData = {
   editable: boolean;
   viewable: boolean;
   verseOpen: VerseOpen | null;
-  verseRelease: VerseRelease| null;
+  verseRelease: VerseRelease | null;
   verseShare?: VerseShare;
   message: MessageType | null;
   image: ImageDetails;

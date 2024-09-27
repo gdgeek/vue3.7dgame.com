@@ -205,8 +205,6 @@ import {
   deleteMetaResource,
 } from "@/api/v1/meta-resource";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import type { metaInfo } from "@/api/v1/meta";
-import { ResourceInfo } from "@/api/resources/model";
 import { BeijingData } from "@/utils/dataChange";
 
 const dialogVisible = ref(false);
@@ -215,7 +213,6 @@ const type = ref("polygen");
 const metaId = ref<number | null>(null);
 const value = ref<any>(null);
 const emit = defineEmits(["selected", "cancel"]);
-
 const { t } = useI18n();
 const binding = ref({
   items: [] as any[],
@@ -224,7 +221,6 @@ const binding = ref({
   pagination: { current: 1, count: 1, size: 20, total: 20 },
 });
 const owner = ref({
-  // items: [] as ResourceInfo[],
   items: [] as any[],
   sorted: "-created_at",
   searched: "",

@@ -44,7 +44,6 @@ import DOMPurify from "dompurify";
 
 moment.locale("zh-cn");
 
-// 定义 Props 类型
 interface Item {
   id: number;
   name: string;
@@ -59,7 +58,6 @@ interface Data {
   };
 }
 
-// Props
 const props = defineProps<{
   postId: number;
   categoryPath?: string;
@@ -67,7 +65,6 @@ const props = defineProps<{
 }>();
 
 const data = ref<Data | null>(null);
-
 const categoryPath = computed(() => props.categoryPath ?? "/home/category");
 const category = computed(() => props.category ?? true);
 

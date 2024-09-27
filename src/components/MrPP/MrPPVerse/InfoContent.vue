@@ -6,13 +6,13 @@
       size="small"
       border
     >
-      <el-descriptions-item v-for="(item, index) in props.list" :key="index">
+      <!-- <el-descriptions-item v-for="(item, index) in props.list" :key="index">
         <template #label>
           <font-awesome-icon class="icon" :icon="item.icon"></font-awesome-icon>
           item.label
         </template>
         item.label.value
-      </el-descriptions-item>
+      </el-descriptions-item> -->
       <el-descriptions-item v-if="author">
         <template #label>
           <el-tooltip

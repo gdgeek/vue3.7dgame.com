@@ -1,18 +1,7 @@
-<!-- <template>
-  <div v-if="env.canDocument()">
-    <Book v-if="env.mrpp()" :items="mrpp"></Book>
-    <Book v-if="env.mrcn()" :items="mrcn"></Book>
-    <el-tabs v-if="env.local()" type="border-card" lazy>
-      <el-tab-pane :label="informationStore.title">
-        <LocalPage></LocalPage>
-      </el-tab-pane>
-    </el-tabs>
-  </div>
-</template> -->
 <template>
   <div>
-    <!-- <Book v-if="env.mrpp()" :items="mrpp"></Book> -->
-    <Book :items="mrcn"></Book>
+    <Book v-if="env.mrpp()" :items="mrpp"></Book>
+    <Book v-if="env.mrcn()" :items="mrcn"></Book>
     <el-tabs v-if="env.local()" type="border-card" lazy>
       <el-tab-pane :label="informationStore.title">
         <LocalPage></LocalPage>
@@ -28,10 +17,7 @@ import Book from "@/components/Home/Book.vue";
 import LocalPage from "@/components/Home/LocalPage.vue";
 
 const informationStore = useInfomationStore();
-console.log("informationStore", informationStore.description);
-
 const env = computed(() => environment);
-
 const { t } = useI18n();
 
 const mrpp = computed(() => {

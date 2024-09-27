@@ -13,12 +13,11 @@ const service = axios.create({
 // 请求拦截器
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    console.log(config);
     return config;
   },
   (error: any) => {
     // 处理请求错误
-    console.log(error); // for debug
+    // console.log(error); // for debug
     return Promise.reject(error);
   }
 );
@@ -29,7 +28,7 @@ service.interceptors.response.use(
     return response;
   },
   (error: any) => {
-    console.log("err" + error); // for debug
+    // console.log("err" + error); // for debug
     ElMessage({
       message: error.message,
       type: "error",

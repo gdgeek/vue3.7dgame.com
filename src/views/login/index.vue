@@ -5,6 +5,25 @@
         <img src="/favicon.ico" alt="" />
         <span class="project_title">{{ $t("login.title") }}</span>
       </RouterLink>
+      <div class="link" style="margin-left: 250px">
+        <el-link
+          href="https://testflight.apple.com/join/V4XNEG6t"
+          target="_blank"
+          :underline="false"
+        >
+          <img src="/testflight.ico" style="width: 25px" alt="" />
+          <span style="margin-left: 5px">TestFlight</span>
+        </el-link>
+        <el-link
+          href="https://discord.com"
+          target="_blank"
+          :underline="false"
+          style="margin-left: 30px"
+        >
+          <img src="/deemos.ico" style="width: 25px" alt="" />
+          <span style="margin-left: 5px">Discord</span>
+        </el-link>
+      </div>
       <div class="header-right">
         <div class="top-bar">
           <el-switch
@@ -122,30 +141,27 @@ import { useRouter, LocationQuery, useRoute } from "vue-router";
 import { AppleIdToken } from "@/api/auth/model";
 import LoginForm from "@/components/LoginForm.vue";
 import RegisterForm from "@/components/RegisterForm.vue";
-//import { initRoutes } from "@/router";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useInfomationStore } from "@/store/modules/information";
 import { useTagsViewStore, useUserStore } from "@/store";
-
 import { TOKEN_KEY } from "@/enums/CacheEnum";
+
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
 const tagsViewStore = useTagsViewStore();
 const informationStore = useInfomationStore();
-
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
-
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
-function parseRedirect(): {
+
+const parseRedirect = (): {
   path: string;
   queryParams: Record<string, string>;
-} {
+} => {
   const query: LocationQuery = route.query;
   const redirect = (query.redirect as string) ?? "/";
-
   const url = new URL(redirect, window.location.origin);
   const path = url.pathname;
   const queryParams: Record<string, string> = {};
@@ -155,7 +171,7 @@ function parseRedirect(): {
   });
 
   return { path, queryParams };
-}
+};
 
 const enter = async (
   user: any,
@@ -167,12 +183,6 @@ const enter = async (
     const token = user.auth;
     if (token) {
       localStorage.setItem(TOKEN_KEY, "Bearer " + token);
-      const res = localStorage.getItem(TOKEN_KEY);
-      console.log("Token set successfully", res);
-      // nextTick(() => {
-      //   router.push("/");
-      //   console.log("Routing to home");
-      // });
       nextTick();
     } else {
       ElMessage.error("The login response is missing the access_token");
@@ -200,7 +210,6 @@ const toggleTheme = () => {
 watch(
   () => route.path,
   async (newPath) => {
-    console.log("newPath", newPath);
     if (newPath === "/logout") {
       await userStore.logout();
       await tagsViewStore.delAllViews();
@@ -208,7 +217,8 @@ watch(
         router.push("/login?redirect=/home/index");
       }, 1000);
     }
-  }
+  },
+  { immediate: true }
 );
 </script>
 
@@ -243,7 +253,6 @@ body {
 
   &.dark-theme {
     background-color: rgb(37, 37, 37);
-    // color: white;
   }
 }
 
@@ -261,25 +270,11 @@ body {
   .project_title {
     margin-left: 10px;
     font-family: "KaiTi", sans-serif;
-    font-size: 14px;
-    font-weight: 400;
+    // font-size: 14px;
+    font-weight: 600;
     &:hover {
       color: #3876c2;
     }
-  }
-}
-
-.blog {
-  position: absolute;
-  height: 60px;
-  margin-left: 300px;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 60px;
-  color: #909399;
-
-  &:hover {
-    color: #000;
   }
 }
 

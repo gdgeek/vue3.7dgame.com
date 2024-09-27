@@ -663,7 +663,7 @@ const routes: RouteRecordRaw[] = [
         component: null,
         redirect: "/logout",
         meta: {
-          title: "退出登录",
+          title: "logout.title",
           icon: "el-icon-back",
           hidden: false,
           private: false,
