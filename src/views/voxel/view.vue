@@ -158,15 +158,16 @@ const createVerse = async () => {
     if (value) {
       loading.value = true;
       try {
-        const response = await createVerseFromResource(
+        const result = await createVerseFromResource(
           "Voxel",
           value,
           voxelData.value
         );
+        alert(JSON.stringify(result.verse));
         ElMessage.success(t("voxel.view.prompt.success") + value);
-        setTimeout(() => {
-          router.push("/meta-verse/index");
-        }, 300);
+        /*  setTimeout(() => {
+          router.push("/verse/view?id=" + result.verse);
+        }, 300);*/
       } catch (error) {
         ElMessage.error(t("voxel.view.prompt.error") + error);
       } finally {

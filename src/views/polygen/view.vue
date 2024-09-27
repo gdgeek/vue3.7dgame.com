@@ -148,12 +148,20 @@ const createVerse = async () => {
 
     loading.value = true;
 
-    await createVerseFromResource("Polygen", value, polygenData.value);
-
+    const result = await createVerseFromResource(
+      "Polygen",
+      value,
+      polygenData.value
+    );
+    console.error(result);
+    alert(result.verse.id);
     ElMessage.success(t("polygen.view.prompt.success") + value);
 
     setTimeout(() => {
-      router.push("/meta-verse/index");
+      router.push({
+        path: "/verse/view",
+        query: { id: result.verse.id },
+      });
     }, 300);
   } catch (error) {
     if (error !== "cancel") {
