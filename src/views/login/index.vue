@@ -11,7 +11,7 @@
           target="_blank"
           :underline="false"
         >
-          <img src="/public/testflight.ico" style="width: 25px" alt="" />
+          <img src="/testflight.ico" style="width: 25px" alt="" />
           <span style="margin-left: 5px">TestFlight</span>
         </el-link>
         <el-link
@@ -20,7 +20,7 @@
           :underline="false"
           style="margin-left: 30px"
         >
-          <img src="/public/deemos.ico" style="width: 25px" alt="" />
+          <img src="/deemos.ico" style="width: 25px" alt="" />
           <span style="margin-left: 5px">Discord</span>
         </el-link>
       </div>
