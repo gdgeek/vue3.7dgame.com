@@ -14,6 +14,7 @@
           <img src="/testflight.ico" style="width: 25px" alt="" />
           <span style="margin-left: 5px">TestFlight</span>
         </el-link>
+
         <el-link
           href="https://discord.gg/ev8kWRC8"
           target="_blank"
@@ -22,6 +23,16 @@
         >
           <img src="/deemos.ico" style="width: 25px" alt="" />
           <span style="margin-left: 5px">Discord</span>
+        </el-link>
+
+        <el-link
+          href="https://x.com/GD_Geek"
+          target="_blank"
+          :underline="false"
+          style="margin-left: 30px"
+        >
+          <img src="/x2.ico" style="width: 25px" alt="" />
+          <span style="margin-left: 5px">X.com</span>
         </el-link>
       </div>
       <div class="header-right">
