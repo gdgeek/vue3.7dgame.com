@@ -154,7 +154,6 @@ const createVerse = async () => {
       polygenData.value
     );
     console.error(result);
-    alert(result.verse.id);
     ElMessage.success(t("polygen.view.prompt.success") + value);
 
     setTimeout(() => {

@@ -163,11 +163,14 @@ const createVerse = async () => {
           value,
           voxelData.value
         );
-        alert(JSON.stringify(result.verse));
+
         ElMessage.success(t("voxel.view.prompt.success") + value);
-        /*  setTimeout(() => {
-          router.push("/verse/view?id=" + result.verse);
-        }, 300);*/
+        setTimeout(() => {
+          router.push({
+            path: "/verse/view",
+            query: { id: result.verse.id },
+          });
+        }, 300);
       } catch (error) {
         ElMessage.error(t("voxel.view.prompt.error") + error);
       } finally {

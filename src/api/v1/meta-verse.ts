@@ -81,16 +81,7 @@ const updateMeta = async (type: string, meta: Meta, resource: Resource) => {
           },
         },
       ],
-      addons: [
-        {
-          type: "Toolbar",
-          parameters: {
-            uuid: uuidv4(),
-            destroy: false,
-          },
-          children: { buttons: [] },
-        },
-      ],
+      addons: [],
     },
   };
 
@@ -107,10 +98,10 @@ const updateVerse = async (type: string, verse: Verse, meta: Meta) => {
     children: {
       modules: [
         {
-          type: "Meta",
+          type: "Module",
           parameters: {
             uuid: uuidv4(),
-            id: meta.id,
+            meta_id: meta.id,
             title: type,
             transform: {
               position: { x: 0, y: 0, z: 2 },
