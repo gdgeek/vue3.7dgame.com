@@ -15,7 +15,7 @@
           <span style="margin-left: 5px">TestFlight</span>
         </el-link>
         <el-link
-          href="https://discord.com"
+          href="https://discord.gg/ev8kWRC8"
           target="_blank"
           :underline="false"
           style="margin-left: 30px"
