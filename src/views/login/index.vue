@@ -15,13 +15,13 @@
           <span style="margin-left: 5px">TestFlight</span>
         </el-link>
         <el-link
-          href="https://hyperhuman.deemos.com/"
+          href="https://discord.com"
           target="_blank"
           :underline="false"
           style="margin-left: 30px"
         >
           <img src="/public/deemos.ico" style="width: 25px" alt="" />
-          <span style="margin-left: 5px">Rodin</span>
+          <span style="margin-left: 5px">Discord</span>
         </el-link>
       </div>
       <div class="header-right">
