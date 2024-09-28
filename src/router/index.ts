@@ -83,6 +83,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "personalCenter.document",
               hidden: true,
+              private: true,
             },
             path: "/home/document",
             name: "HomeDocument",
@@ -92,6 +93,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: "personalCenter.category",
               hidden: true,
+              private: true,
             },
             path: "/home/category",
             name: "HomeCategory",
@@ -99,7 +101,11 @@ const routes: RouteRecordRaw[] = [
           },
       
           {
-            meta: { title: "personalCenter.processOfCreation", hidden: true },
+            meta: {
+              title: "personalCenter.processOfCreation",
+              hidden: true,
+              private: true,
+            },
             path: "/home/creator",
             name: "SettingsCreator",
             component: () => import("@/views/home/creator.vue"),
@@ -705,16 +711,6 @@ export function resetRouter() {
 
 // 指定要移除的路由路径列表
 const pathsToRemove = ref([
-  "/home/document",
-  "/home/category",
-  "/home/creator",
-  "settings",
-  "view",
-  "prefab-edit",
-  "meta-edit",
-  "rete-meta",
-  "script",
-  "scene",
 ]);
 
 // 检查路径是否在移除列表中
