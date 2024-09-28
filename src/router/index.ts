@@ -97,12 +97,7 @@ const routes: RouteRecordRaw[] = [
             name: "HomeCategory",
             component: () => import("@/views/home/category.vue"),
           },
-          // {
-          //   meta: { title: "支付中心" },
-          //   path: "pay",
-          //   name: "SettingsPay",
-          //   component: () => import("@/views/settings/pay.vue"),
-          // },
+      
           {
             meta: { title: "personalCenter.processOfCreation", hidden: true },
             path: "/home/creator",
@@ -154,7 +149,6 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
-
       {
         path: "/resource",
         component: null,
@@ -711,16 +705,6 @@ export function resetRouter() {
 
 // 指定要移除的路由路径列表
 const pathsToRemove = ref([
-  "/home/document",
-  "/home/category",
-  "/home/creator",
-  "settings",
-  "view",
-  "prefab-edit",
-  "meta-edit",
-  "rete-meta",
-  "script",
-  "scene",
 ]);
 
 // 检查路径是否在移除列表中
