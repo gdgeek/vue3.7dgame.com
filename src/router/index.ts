@@ -705,6 +705,16 @@ export function resetRouter() {
 
 // 指定要移除的路由路径列表
 const pathsToRemove = ref([
+  "/home/document",
+  "/home/category",
+  "/home/creator",
+  "settings",
+  "view",
+  "prefab-edit",
+  "meta-edit",
+  "rete-meta",
+  "script",
+  "scene",
 ]);
 
 // 检查路径是否在移除列表中
