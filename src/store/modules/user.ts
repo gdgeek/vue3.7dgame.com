@@ -1,6 +1,6 @@
 import AuthAPI from "@/api/auth";
 import UserAPI from "@/api/user";
-import { resetRouter } from "@/router";
+//import { resetRouter } from "@/router";
 import { store } from "@/store";
 import { LoginData, LoginResult } from "@/api/auth/model";
 import { getUserInfoData, InfoType } from "@/api/user/model";
@@ -166,7 +166,7 @@ export const useUserStore = defineStore("user", () => {
     console.log("resetToken");
     return new Promise<void>((resolve) => {
       localStorage.setItem(TOKEN_KEY, "");
-      resetRouter();
+   //   resetRouter();
       resolve();
     });
   }
