@@ -113,7 +113,7 @@ service.interceptors.response.use(
     if (response.status === 401) {
       return handleUnauthorized(router);
     } else if (response.status >= 500) {
-      showErrorMessage(messages[2], router);
+      showErrorMessage(messages[2]);
     } else {
       const message = response.data.message || error.message;
       showErrorMessage(message);

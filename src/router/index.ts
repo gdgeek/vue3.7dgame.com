@@ -99,7 +99,7 @@ const routes: RouteRecordRaw[] = [
             name: "HomeCategory",
             component: () => import("@/views/home/category.vue"),
           },
-      
+
           {
             meta: {
               title: "personalCenter.processOfCreation",
@@ -705,23 +705,25 @@ export function setupRouter(app: App<Element>) {
 
 // 将路由转换为 RouteVO 格式的函数，只获取根路由 "/" 下的子路由数据，并且子路由路径前添加 "/"
 const convertRoutes = (routes: RouteRecordRaw[], isRoot = false): RouteVO[] => {
-  return routes
-   // .filter((route) => !isRemoveRoute(route.path))
-    .map((route) => {
-      const { path, component, redirect, name, meta, children } = route;
+  return (
+    routes
+      // .filter((route) => !isRemoveRoute(route.path))
+      .map((route) => {
+        const { path, component, redirect, name, meta, children } = route;
 
-      // 根据是否是根路径来决定是否在路径前添加 `/`
-      const formattedPath = isRoot ? `/${path}` : path;
+        // 根据是否是根路径来决定是否在路径前添加 `/`
+        const formattedPath = isRoot ? `/${path}` : path;
 
-      return {
-        path: formattedPath,
-        component: component ? (component as any).name : undefined,
-        redirect: (redirect as string) || undefined,
-        name: typeof name === "string" ? name : undefined,
-        meta: meta as Meta,
-        children: children ? convertRoutes(children) : [],
-      };
-    });
+        return {
+          path: formattedPath,
+          component: component ? (component as any).name : undefined,
+          redirect: (redirect as string) || undefined,
+          name: typeof name === "string" ? name : undefined,
+          meta: meta as Meta,
+          children: children ? convertRoutes(children) : [],
+        };
+      })
+  );
 };
 
 export const routerData = ref<RouteVO[]>([]);
