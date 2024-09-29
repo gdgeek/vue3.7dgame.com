@@ -97,11 +97,6 @@ const props = defineProps<{
 
 const emit = defineEmits(["refresh"]);
 
-// const getUrl = (item: any) => {
-//   //alert(require("@/assets/image/author-boy.png"));
-//   return item?.avatar?.url;
-// };
-
 const getAblity = (roles: string[]) => {
   if (roles.includes("root")) {
     return t("manager.list.roles.root");

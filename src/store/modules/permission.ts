@@ -21,11 +21,9 @@ export const usePermissionStore = defineStore("permission", () => {
    * 生成动态路由
    */
   function generateRoutes() {
-    // alert(1)
     return new Promise<RouteRecordRaw[]>((resolve, reject) => {
       const dynamicRoutes = transformRoutes(routerData.value);
       routes.value = constantRoutes.concat(dynamicRoutes);
-      // alert(dynamicRoutes)
       resolve(dynamicRoutes);
     });
   }
