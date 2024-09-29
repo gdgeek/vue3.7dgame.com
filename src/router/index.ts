@@ -702,23 +702,7 @@ export function setupRouter(app: App<Element>) {
   app.use(router);
 }
 
-/**
- * 重置路由
- */
-export function resetRouter() {
-  router.replace({ path: "/login" });
-}
-/*
-// 指定要移除的路由路径列表
-const pathsToRemove = ref([
-]);
 
-// 检查路径是否在移除列表中
-const isRemoveRoute = (path: string): boolean => {
-  
-  return pathsToRemove.value.includes(path);
-};
-*/
 // 将路由转换为 RouteVO 格式的函数，只获取根路由 "/" 下的子路由数据，并且子路由路径前添加 "/"
 const convertRoutes = (routes: RouteRecordRaw[], isRoot = false): RouteVO[] => {
   return (
