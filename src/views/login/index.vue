@@ -21,7 +21,7 @@
           :underline="false"
           style="margin-left: 30px"
         >
-          <img src="/deemos.ico" style="width: 25px" alt="" />
+          <img src="/discord.ico" style="width: 25px" alt="" />
           <span style="margin-left: 5px">Discord</span>
         </el-link>
 
@@ -31,7 +31,7 @@
           :underline="false"
           style="margin-left: 30px"
         >
-          <img src="/x2.ico" style="width: 25px" alt="" />
+          <img src="/x3.png" style="width: 25px; border-radius: 25%" alt="" />
           <span style="margin-left: 5px">X.com</span>
         </el-link>
       </div>
