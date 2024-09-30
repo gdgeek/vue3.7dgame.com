@@ -93,6 +93,7 @@ export function UpdateAbility(
         /^\/home(\/|$)/,
         /^\/verse(\/|$)/,
         /^\/meta(\/|$)/,
+        /^\/resource\/polygen(\/|$)/,
       ]);
       menu.concat(["/verse-share/open", /^\/trades(\/|$)/]);
     }
@@ -100,12 +101,8 @@ export function UpdateAbility(
     if (roles.some((role) => manager.includes(role))) {
       can("manager", "all");
     }
-    if (roles.includes("mrpp.com")) {
-      menu = menu.concat([/^\/resource\/polygen(\/|$)/]);
-    }
-    if (roles.includes("voxelparty.com")) {
-      menu = menu.concat([/^\/resource\/voxel(\/|$)/]);
-    }
+
+
 
     if (roles.some((role) => admin.includes(role))) {
       can("admin", "all");
@@ -117,10 +114,10 @@ export function UpdateAbility(
 
       menu = menu.concat([
         /^\/resource\/voxel(\/|$)/,
-        /^\/resource\/polygen(\/|$)/,
         /^\/resource\/picture(\/|$)/,
         /^\/resource\/video(\/|$)/,
         /^\/resource\/audio(\/|$)/,
+        /^\/ai(\/|$)/,
       ]);
     }
 

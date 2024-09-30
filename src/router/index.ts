@@ -447,7 +447,7 @@ const routes: RouteRecordRaw[] = [
           {
             path: "/meta/list",
             component: () => import("@/views/meta/list.vue"),
-            name: "List",
+            name: "MetaList",
             meta: {
               title: "meta.metaList",
               icon: "cascader",
@@ -490,12 +490,6 @@ const routes: RouteRecordRaw[] = [
             },
             component: () => import("@/views/meta/meta-edit.vue"),
           },
-          // {
-          //   path: "rete-meta",
-          //   name: "VerseMetaEditor",
-          //   meta: { title: "【组件】" },
-          //   component: () => import("@/views/meta/rete-meta.vue"),
-          // },
           {
             path: "/meta/script",
             name: "MetaScript",
@@ -522,9 +516,64 @@ const routes: RouteRecordRaw[] = [
       },
 
       {
+        path: "/ai",
+        component: null,
+        name: "AI",
+        meta: {
+          title: "ai.title",
+          icon: "el-icon-StarFilled",
+          hidden: true,
+          alwaysShow: false,
+          params: null,
+        },
+        children: [
+          {
+            path: "/ai/list",
+            component: () => import("@/views/ai/index.vue"),
+            name: "AIList",
+            meta: {
+              title: "ai.list",
+              icon: "cascader",
+              hidden: true,
+              keepAlive: true,
+              alwaysShow: false,
+              params: null,
+            },
+          },
+          {
+            path: "/ai/create",
+            component: () => import("@/views/ai/create.vue"),
+            name: "AICreate",
+            meta: {
+              title: "ai.craete",
+              icon: "cascader",
+              hidden: true,
+              keepAlive: true,
+              alwaysShow: false,
+              params: null,
+            },
+          },
+          {
+            path: "/ai/view",
+            component: () => import("@/views/ai/view.vue"),
+            name: "AIView",
+            meta: {
+              title: "ai.view",
+              icon: "cascader",
+              hidden: true,
+              keepAlive: true,
+              alwaysShow: false,
+              private:true,
+              params: null,
+            },
+          }
+        ],
+      },
+
+      {
         path: "/verse",
         component: null,
-        name: "",
+        name: "Verse",
         meta: {
           title: "project.title",
           icon: "el-icon-sunrise",

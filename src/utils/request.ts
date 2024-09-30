@@ -77,11 +77,12 @@ function showErrorMessage(
     duration,
   });
   if (router) {
+    /*
     useUserStoreHook()
       .resetToken()
       .then(() => {
         router.push({ path: "/login" });
-      });
+      });*/
   }
 }
 

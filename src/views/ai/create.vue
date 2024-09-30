@@ -1,20 +1,28 @@
 <template>
   <div>
-    <mr-p-p-upload dir="audio" :file-type="fileType" @save-resource="saveAudio">
-      <div>{{ $t("audio.uploadFile") }}</div>
-    </mr-p-p-upload>
+    <AIUpload />
+    <MrPPUpload dir="audio" :file-type="fileType" @save-resource="saveAudio">
+      <div>{{ $t("ai.uploadFile") }}</div>
+    </MrPPUpload>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
-import ai from "@/api/v1/ai-rodin";
+import AIUpload from "@/components/MrPP/AIUpload.vue";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 import { postAudio } from "@/api/resources/index";
+import AiRodin from "@/api/v1/ai-rodin";
+import { AiRodinResult } from "@/api/v1/ai-rodin";
 
 const fileType = ref("audio/mp3, audio/wav");
 const router = useRouter();
 
+onMounted(async () => {
+  //const response = await aiRodin.list();
+  //console.error(response.data);
+  //ai.getAiRodin();
+});
 // 音频保存
 const saveAudio = async (
   name: string,
