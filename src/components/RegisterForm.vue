@@ -238,8 +238,6 @@ const create = () => {
           token: props.idToken.token,
           apple_id: props.idToken.apple_id,
         };
-        alert(JSON.stringify(props.idToken));
-        alert(JSON.stringify(data));
         const respose = await AuthAPI.appleIdCreate(data);
         await login(respose.data.user);
       } catch (e: any) {
