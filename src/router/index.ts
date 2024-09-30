@@ -751,7 +751,6 @@ export function setupRouter(app: App<Element>) {
   app.use(router);
 }
 
-
 // 将路由转换为 RouteVO 格式的函数，只获取根路由 "/" 下的子路由数据，并且子路由路径前添加 "/"
 const convertRoutes = (routes: RouteRecordRaw[], isRoot = false): RouteVO[] => {
   return (
