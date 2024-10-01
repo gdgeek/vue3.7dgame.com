@@ -53,12 +53,6 @@
 </template>
 
 <script setup lang="ts">
-import {
-  MapNumbers,
-  EverseAndPad,
-  ReverseMap,
-  ReverseAndPad,
-} from "@/utils/helper";
 import type { Author, VerseData } from "@/api/v1/verse";
 import DOMPurify from "dompurify";
 

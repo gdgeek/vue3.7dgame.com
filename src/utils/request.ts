@@ -68,7 +68,7 @@ service.interceptors.request.use(
 // 异常处理
 function showErrorMessage(
   message: string,
-  router?: ReturnType<typeof useRouter>,
+  
   duration = 5000
 ) {
   ElMessage({
@@ -76,19 +76,12 @@ function showErrorMessage(
     type: "error",
     duration,
   });
-  if (router) {
-    /*
-    useUserStoreHook()
-      .resetToken()
-      .then(() => {
-        router.push({ path: "/login" });
-      });*/
-  }
+ 
 }
 
 function handleUnauthorized(router: ReturnType<typeof useRouter>) {
   const messages = getMessageArray();
-  showErrorMessage(messages[0], router);
+  showErrorMessage(messages[0]);
   return Promise.reject("");
 }
 
@@ -104,9 +97,15 @@ service.interceptors.response.use(
 
     if (!response) {
       if (error.message === "Network Error") {
-        showErrorMessage(messages[1], router);
+        
+        showErrorMessage(messages[1]);
+        useUserStoreHook()
+        .resetToken()
+        .then(() => {
+          router.push({ path: "/login" });
+        });
       } else {
-        showErrorMessage(error.message, router);
+        showErrorMessage(error.message);
       }
       return Promise.reject(error);
     }

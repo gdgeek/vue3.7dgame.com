@@ -4,12 +4,30 @@ import path from "path-browserify";
 import  { AxiosResponse } from 'axios';
 export type AiRodinResult = {
   prompt: string,
-  token: string,
   id: number,
+  image:any,
   created_at: string,
-  status: string,
+  
 };
+const schedule = (jobs: any[]) => { 
+  const length: number = jobs.length;
+  const max = length * 2;
+  let count = 0;
+  jobs.forEach(job => {
+    switch (job.status.toLowerCase()) {
+      case "generating":
+        count += 1;
+        break;
+      case "done":
+        count += 2;
+        break;
+      default:
+        break;
+    }
+  });
+  return count / max;
 
+}
 const prompt = (prompt:string) => {
   const url = import.meta.env.VITE_APP_AI_API+'/' + path.join("prompt"+ qs.stringify({prompt}, true));
 
@@ -18,42 +36,27 @@ const prompt = (prompt:string) => {
     method: "get",
   });
 }
-/*
-const index = (data: Record<string, any>) => {
+const check = (id:number) => {
+  const url = import.meta.env.VITE_APP_AI_API+'/' + path.join("check"+ qs.stringify({id:id.toString()}, true));
+
   return request({
-    url: path.join("v1", "ai-rodin"),
+    url,
     method: "get",
-    data,
   });
 }
-const get = (id:string) => {
-  return request<any, AxiosResponse<AiRodinResult[]> >({
-    url: path.join("v1", "ai-rodin") + `/${id}`,
-    method: "get"
-  });
-}
-const list = () =>  {
- 
-  return request<any, AxiosResponse<AiRodinResult[]> >({
-    url: path.join("v1", "ai-rodin"),
-    method: "get"
-  });
-}
-const put = (data: Record<string, any>) => {
+
+const download = (id:number) => {
+  const url = import.meta.env.VITE_APP_AI_API+'/' + path.join("download"+ qs.stringify({id:id.toString()}, true));
+
   return request({
-    url: path.join("v1", "ai-rodin"),
-    method: "put",
-    data,
+    url,
+    method: "get",
   });
 }
-const del = (data: Record<string, any>) => {
-  return request({
-    url: path.join("v1", "ai-rodin"),
-    method: "delete",
-    data,
-  });
-}
-*/
+
 export default {
   prompt,
+  check,
+  download,
+  schedule
 };

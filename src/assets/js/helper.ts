@@ -57,5 +57,22 @@ const convertToHttps = (url?: string): string => {
   }
   return url;
 };
+ const getCurrentUrl = () => {
+  const fullUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ""}`;
+  console.log(`Full URL: ${fullUrl}`);
+  return fullUrl;
+ }
 
-export { isHttps, convertToHttps, printVector3, printVector2, cutString };
+
+// 延迟函数
+const sleep = (seconds: number): Promise<void> => new Promise(rs => setTimeout(rs, seconds));
+
+export {
+  isHttps,
+  convertToHttps,
+  printVector3,
+  printVector2,
+  cutString,
+  getCurrentUrl,
+  sleep
+};

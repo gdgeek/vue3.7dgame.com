@@ -541,11 +541,11 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: "/ai/create",
-            component: () => import("@/views/ai/create.vue"),
-            name: "AICreate",
+            path: "/ai/generation",
+            component: () => import("@/views/ai/generation.vue"),
+            name: "AIGeneration",
             meta: {
-              title: "ai.craete",
+              title: "ai.generation",
               icon: "cascader",
               hidden: true,
               keepAlive: true,
