@@ -1,16 +1,13 @@
 <template>
   <div>
     <AIUpload />
-    <MrPPUpload dir="audio" :file-type="fileType" @save-resource="saveAudio">
-      <div>{{ $t("ai.uploadFile") }}</div>
-    </MrPPUpload>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import AIUpload from "@/components/MrPP/AIUpload.vue";
-import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
+//import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 import { postAudio } from "@/api/resources/index";
 import AiRodin from "@/api/v1/ai-rodin";
 import { AiRodinResult } from "@/api/v1/ai-rodin";
