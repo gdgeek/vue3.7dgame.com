@@ -28,7 +28,9 @@ interface ProgressCallback {
 
 // 获取公共处理程序
 const publicHandler = async (): Promise<FileHandler> => {
+ 
   const response = await cloud();
+  alert(JSON.stringify(response.data))
   return fileHandler(response.data.public.bucket, response.data.public.region);
 };
 
@@ -161,6 +163,7 @@ const fileUpload = async (
   dir = ''
 ): Promise<any> => {
   const filename = path.join(dir, md5 + extension);
+
 
   return new Promise<any>(async (resolve, reject) => {
     try {

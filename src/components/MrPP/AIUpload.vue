@@ -43,6 +43,7 @@ import AiRodin from "@/api/v1/ai-rodin";
 import { AiRodinResult } from "@/api/v1/ai-rodin";
 import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
+import FileApi from "@/api/v1/files";
 import { FileHandler } from "@/assets/js/file/server";
 import { useI18n } from "vue-i18n";
 import { sleep } from "@/assets/js/helper";
@@ -61,49 +62,34 @@ const progress = ref<ProgressType>({
   declared: "declared",
 });
 const rodin = async (prompt: string) => {
-  /*progress.value.percentage = 0;
+  progress.value.percentage = 0;
   progress.value.title = "AI Generation";
   const response = await AiRodin.prompt(prompt);
 
-  console.log(response.data);
   progress.value.percentage = 10;
   const data = response.data;
   let schedule = 0;
   do {
     await sleep(10000);
     const response2 = await AiRodin.check(data.id);
-
     console.log(response2.data.check);
     schedule = AiRodin.schedule(response2.data.check.jobs);
     progress.value.percentage = 10 + 80 * schedule;
   } while (schedule !== 1);
 
-  const response3 = await AiRodin.download(data.id);
-  console.log(response3.data.download);
-  progress.value.percentage = 100;
-  return response3.data.download;*/
+  await AiRodin.download(data.id);
+  const response4 = await AiRodin.file(data.id);
+  const fileData = {
+    filename: prompt + ".glb",
+    md5: response4.data.ETag,
+    key: response4.data.Location,
+    url: response4.data.Location,
+  };
+  FileApi.post(fileData);
+  return response4.data.file.Location;
 };
-import axios from "axios";
-const urlToFile = async (url: string) => {
-  const response = await axios.get(url, {
-    responseType: "blob", // 确保以 blob 格式下载
-  });
 
-  // 将 Blob 转换为 File
-  const file = new File([response.data], "model.glb", {
-    type: "model/gltf-binary",
-  });
-  alert(file);
-  return file;
-};
-const toMD5 = async (file: File) => {
-  const md5: string = "";
-  return md5;
-};
-const upload = async (file: File, md5: string) => {
-  return {};
-};
-const save = async (data: any) => {
+const save = async (url: string) => {
   return true;
 };
 const generation = async (formEl: FormInstance | undefined) => {
@@ -112,12 +98,8 @@ const generation = async (formEl: FormInstance | undefined) => {
     if (valid) {
       try {
         loading.value = true;
-        const url = await rodin(form.prompt); // and check
-        alert(url);
-        //const file: File = await urlToFile(url);
-        /*const md5: string = await toMD5(file);
-        const data = await upload(file, md5);
-        const result = await save(data);*/
+        const url = await rodin(form.prompt);
+        const data = await save(url);
       } catch (e: any) {
         ElMessage.error(e.message);
       }

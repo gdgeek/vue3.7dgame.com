@@ -10,3 +10,6 @@ export const postFile = (data: any) => {
     data,
   });
 };
+export default {
+  post: postFile,
+}

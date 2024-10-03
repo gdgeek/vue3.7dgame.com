@@ -131,7 +131,6 @@ const select = async () => {
     const has = await fileStore.store.fileHas(
       md5,
       file.extension!,
-      // file.type.split("/").pop()!,
       handler,
       props.dir!
     );
@@ -141,7 +140,6 @@ const select = async () => {
       await fileStore.store.fileUpload(
         md5,
         file.extension!,
-        // file.type.split("/").pop()!,
         file,
         (p: number) => progress(p, 1),
         handler,

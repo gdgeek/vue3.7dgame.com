@@ -28,6 +28,14 @@ const schedule = (jobs: any[]) => {
   return count / max;
 
 }
+const file = (id: number) => {
+  const url = import.meta.env.VITE_APP_AI_API+'/' + path.join("file"+ qs.stringify({id:id.toString()}, true));
+
+  return request({
+    url,
+    method: "get",
+  });
+}
 const prompt = (prompt:string) => {
   const url = import.meta.env.VITE_APP_AI_API+'/' + path.join("prompt"+ qs.stringify({prompt}, true));
 
@@ -58,5 +66,6 @@ export default {
   prompt,
   check,
   download,
-  schedule
+  schedule,
+  file
 };
