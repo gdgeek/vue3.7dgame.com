@@ -1,9 +1,14 @@
 <template>
   <div class="document-index">
+    <resource-dialog
+      @selected="selected"
+      @cancel="cancle"
+      ref="dialog"
+    ></resource-dialog>
     <el-card class="box-card-component" style="margin: 18px 18px 0">
       <template #header>
         <div class="box-card-header">
-          <h3>create from prompt :</h3>
+          <h3>Create Model from AI (Rodin) :</h3>
           {{ progress.declared }}
         </div>
       </template>
@@ -21,6 +26,26 @@
         :model="form"
         label-width="auto"
       >
+        <el-form-item label="Image" prop="image">
+          <el-button
+            v-if="!imageUrl"
+            style="max-width: 300px"
+            :icon="Search"
+            @click="open"
+            round
+            >Select</el-button
+          >
+          <el-image
+            v-else
+            style="max-width: 300px"
+            @click="open"
+            :src="imageUrl"
+          >
+            <template #placeholder>
+              <div class="image-slot">Loading<span class="dot">...</span></div>
+            </template>
+          </el-image>
+        </el-form-item>
         <el-form-item label="Prompt" prop="prompt">
           <el-input v-model="form.prompt" />
         </el-form-item>
@@ -40,15 +65,29 @@
 
 <script setup lang="ts">
 import AiRodin from "@/api/v1/ai-rodin";
-import { AiRodinResult } from "@/api/v1/ai-rodin";
+import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
+
 import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
 import FileApi from "@/api/v1/files";
 import { FileHandler } from "@/assets/js/file/server";
 import { useI18n } from "vue-i18n";
 import { sleep } from "@/assets/js/helper";
+
+import {
+  Check,
+  Delete,
+  Edit,
+  Message,
+  Search,
+  Star,
+} from "@element-plus/icons-vue";
 const { t } = useI18n();
 const loading = ref(false);
+const dialog = ref();
+import { useRoute, useRouter } from "vue-router";
+const route = useRoute();
+const router = useRouter();
 import type { FormInstance, FormRules } from "element-plus";
 
 export type ProgressType = {
@@ -61,10 +100,37 @@ const progress = ref<ProgressType>({
   percentage: 0,
   declared: "declared",
 });
-const rodin = async (prompt: string) => {
+const open = () => {
+  dialog.value.openIt({
+    type: "picture",
+  });
+};
+const resource: Ref<any> = ref<any>(null);
+const imageUrl = computed<string | undefined>(() => {
+  if (resource.value) {
+    return resource.value.image.url;
+  }
+  return undefined;
+});
+
+//const src: Ref<string | undefined> = ref<string | undefined>(undefined);
+const selected = (data: any) => {
+  resource.value = data;
+};
+const cancle = () => {
+  resource.value = null;
+};
+const rodin = async () => {
   progress.value.percentage = 0;
   progress.value.title = "AI Generation";
-  const response = await AiRodin.prompt(prompt);
+  const query: Record<string, string | number> = {};
+  if (form.prompt) {
+    query.prompt = form.prompt;
+  }
+  if (resource.value?.id) {
+    query.resource_id = resource.value?.id;
+  }
+  const response = await AiRodin.rodin(query);
 
   progress.value.percentage = 10;
   const data = response.data;
@@ -74,32 +140,24 @@ const rodin = async (prompt: string) => {
     const response2 = await AiRodin.check(data.id);
     console.log(response2.data.check);
     schedule = AiRodin.schedule(response2.data.check.jobs);
-    progress.value.percentage = 10 + 80 * schedule;
+    progress.value.percentage = 10 + 70 * schedule;
   } while (schedule !== 1);
 
   await AiRodin.download(data.id);
+  progress.value.percentage = 90;
   const response4 = await AiRodin.file(data.id);
-  const fileData = {
-    filename: prompt + ".glb",
-    md5: response4.data.ETag,
-    key: response4.data.Location,
-    url: response4.data.Location,
-  };
-  FileApi.post(fileData);
-  return response4.data.file.Location;
+  progress.value.percentage = 100;
+
+  return response4.data;
 };
 
-const save = async (url: string) => {
-  return true;
-};
 const generation = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       try {
         loading.value = true;
-        const url = await rodin(form.prompt);
-        const data = await save(url);
+        await rodin();
       } catch (e: any) {
         ElMessage.error(e.message);
       }
@@ -109,54 +167,29 @@ const generation = async (formEl: FormInstance | undefined) => {
     }
   });
 };
-const data = reactive({
-  process: [
-    {
-      name: "generative",
-      title: "generative",
-      failed: t("upload.item0.failed"),
-      declared: t("upload.item0.declared"),
-      percentage: 0,
-      status: "",
-    },
-    {
-      name: "md5",
-      title: t("upload.item1.title"),
-      failed: t("upload.item1.failed"),
-      declared: t("upload.item1.declared"),
-      percentage: 0,
-      status: "",
-    },
-    {
-      name: "upload",
-      title: t("upload.item2.title"),
-      failed: t("upload.item2.failed"),
-      declared: t("upload.item2.declared"),
-      percentage: 0,
-      status: "",
-    },
-    {
-      name: "save",
-      title: t("upload.item3.title"),
-      failed: t("upload.item3.failed"),
-      declared: t("upload.item3.declared"),
-      percentage: 0,
-      status: "",
-    },
-  ],
-});
 interface RuleForm {
+  image_id: number | null;
   prompt: string;
 }
 const formRef = ref<FormInstance>();
 // do not use same name with ref
 const form = reactive<RuleForm>({
+  image_id: null,
   prompt: "",
 });
-
+const validatePrompt = (rule: any, value: any, callback: any) => {
+  if (
+    (resource.value === null || resource.value === undefined) &&
+    !form.prompt
+  ) {
+    callback(new Error("Please input the prompt or select the image"));
+  } else {
+    callback();
+  }
+};
 const rules = reactive<FormRules<RuleForm>>({
   prompt: [
-    { required: true, message: "Please input Prompt name", trigger: "blur" },
+    { required: true, validator: validatePrompt, trigger: "blur" },
     { min: 4, max: 50, message: "Length should be 4 to 50", trigger: "blur" },
   ],
 });

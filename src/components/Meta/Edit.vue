@@ -9,8 +9,7 @@
       ref="dialog"
     ></event-dialog>
     <resource-dialog
-      @selected="selectResources"
-      @cancel="openResources"
+      @selected="selected"
       ref="resourceDialog"
     ></resource-dialog>
     <el-row :gutter="20" style="margin: 28px 18px 0">
@@ -272,7 +271,7 @@ const openResources = (
   // Handle resource dialog opening logic here
 };
 
-const selectResources = async (data: ViewCard) => {
+const selected = async (data: ViewCard) => {
   if (item.value) {
     item.value.image_id = data.image_id;
     await putItem(id.value, item.value);

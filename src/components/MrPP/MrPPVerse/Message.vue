@@ -99,7 +99,7 @@ import { useTagsStore } from "@/store/modules/tags";
 import { useUserStore } from "@/store/modules/user";
 import DOMPurify from "dompurify";
 
-const props = defineProps<{ messageId: number }>();
+const props = defineProps<{ messageId: number | undefined }>();
 const emit = defineEmits<{
   (e: "setMessage", data: MessageType | null): void;
 }>();
@@ -149,10 +149,10 @@ const refreshTags = async () => {
 const toggleLike = async (like: Like) => {
   try {
     if (like) {
-      await removeLike(props.messageId);
+      await removeLike(props.messageId!);
       ElMessage({ type: "success", message: t("verse.view.message.message1") });
     } else {
-      await postLike(props.messageId);
+      await postLike(props.messageId!);
       ElMessage({ type: "success", message: t("verse.view.message.message2") });
     }
   } catch (error) {

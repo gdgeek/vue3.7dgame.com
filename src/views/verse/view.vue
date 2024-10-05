@@ -72,10 +72,10 @@
         <Message
           v-if="message"
           ref="message"
-          :messageId="message.id!"
+          :messageId="message.id"
           @set-message="setMessage"
         ></Message>
-        <Reply v-if="message" :messageId="message.id!"></Reply>
+        <Reply v-if="message" :messageId="message.id"></Reply>
       </el-col>
 
       <el-col :sm="8">

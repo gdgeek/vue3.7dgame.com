@@ -1,10 +1,6 @@
 <template>
   <div class="verse-scene">
-    <resource-dialog
-      @selected="selectResources"
-      @cancel="cancel"
-      ref="dialog"
-    ></resource-dialog>
+    <resource-dialog @selected="selected" ref="dialog"></resource-dialog>
     <el-container>
       <el-main>
         <iframe
@@ -56,11 +52,7 @@ const title = computed(() => route.query.title?.slice(4) as string);
 
 const { t } = useI18n();
 
-const cancel = () => {
-  // Cancel logic
-};
-
-const selectResources = (data: any) => {
+const selected = (data: any) => {
   postMessage("load-resource", data);
 };
 

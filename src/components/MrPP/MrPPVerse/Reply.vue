@@ -117,7 +117,7 @@ import DOMPurify from "dompurify";
 
 moment.locale("zh-cn");
 
-const props = defineProps<{ messageId: number }>();
+const props = defineProps<{ messageId: number | undefined }>();
 
 const tagsStore = useTagsStore();
 const userStore = useUserStore();

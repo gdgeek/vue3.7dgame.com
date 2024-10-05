@@ -27,26 +27,55 @@
             :backgroundColor="'rgba(255, 255, 255, .05)'"
           >
             <template #default="{ item }">
-              <mr-p-p-card
-                :item="item"
-                @named="namedWindow"
-                @deleted="deletedWindow"
-              >
-                <template #enter>
-                  <router-link :to="`/resource/audio/view?id=${item.id}`">
-                    <el-button
-                      v-if="item.info === null || item.image === null"
-                      type="warning"
-                      size="small"
-                    >
-                      {{ $t("audio.initializeAudioData") }}
-                    </el-button>
-                    <el-button type="primary" size="small">{{
-                      $t("audio.viewAudio")
-                    }}</el-button>
-                  </router-link>
+              <el-card>
+                <template #header>
+                  <div class="card-header">
+                    <span>{{ item.name }}</span>
+                  </div>
                 </template>
-              </mr-p-p-card>
+                <LazyImg
+                  v-if="item.resource && item.resource.image"
+                  :url="item.resource.image.url"
+                  style="width: 100%"
+                />
+                <b> {{ item.id }}</b
+                ><br />
+                <el-rate
+                  v-model="item.step"
+                  :void-icon="CircleCloseFilled"
+                  :icons="{
+                    4: InfoFilled,
+                    5: SuccessFilled,
+                  }"
+                  :colors="{
+                    4: '#FF9900',
+                    5: '#409eff',
+                  }"
+                  disabled
+                  size="small"
+                />
+                <el-button
+                  v-if="item.step == 5"
+                  type="primary"
+                  size="small"
+                  @click="show(item.resource.id)"
+                  >show</el-button
+                >
+                <el-button
+                  @click="del(item.id)"
+                  v-else-if="item.step == 0"
+                  type="danger"
+                  size="small"
+                  >delete</el-button
+                >
+                <el-button
+                  v-else
+                  size="small"
+                  type="success"
+                  @click="generation(item.id)"
+                  >generation</el-button
+                >
+              </el-card>
             </template>
           </Waterfall>
         </el-card>
@@ -70,11 +99,21 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from "vue-router";
+const router = useRouter();
+import {
+  CircleCloseFilled,
+  WarningFilled,
+  InfoFilled,
+  SuccessFilled,
+} from "@element-plus/icons-vue";
 import { getAudios, putAudio, deleteAudio } from "@/api/resources/index";
+import aiRodin from "@/api/v1/ai-rodin";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import { Waterfall } from "vue-waterfall-plugin-next";
+import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
+import { ElDialog } from "element-plus";
 
 const items = ref<any[]>([]);
 const sorted = ref<string>("-created_at");
@@ -93,27 +132,37 @@ const handleCurrentChange = async (page: number) => {
   await refresh();
   console.log(pagination.current);
 };
-
-// 修改音频名称
-const namedWindow = async (item: any) => {
-  try {
-    const { value } = await ElMessageBox.prompt(
-      t("audio.prompt.message1"),
-      t("audio.prompt.message2"),
-      {
-        confirmButtonText: t("audio.prompt.confirm"),
-        cancelButtonText: t("audio.prompt.cancel"),
-        closeOnClickModal: false,
-        inputValue: item.name,
-      }
-    );
-    await named(item.id, value);
-    ElMessage.success(t("audio.prompt.success") + value);
-  } catch {
-    ElMessage.info(t("audio.prompt.info"));
-  }
+const generation = async (id: number) => {
+  router.push({ path: "/ai/generation", query: { id: id } });
 };
-
+const del = async (id: number) => {
+  ElMessageBox.confirm(
+    "proxy will permanently delete the file. Continue?",
+    "Warning",
+    {
+      confirmButtonText: "OK",
+      cancelButtonText: "Cancel",
+      type: "warning",
+    }
+  )
+    .then(async () => {
+      await aiRodin.del(id);
+      await refresh();
+      ElMessage({
+        type: "success",
+        message: "Delete completed",
+      });
+    })
+    .catch(() => {
+      ElMessage({
+        type: "info",
+        message: "Delete canceled",
+      });
+    });
+};
+const show = (resource_id: number) => {
+  router.push({ path: "/resource/polygen/view", query: { id: resource_id } });
+};
 // 排序
 const sort = (value: string) => {
   sorted.value = value;
@@ -125,51 +174,10 @@ const search = (value: string) => {
   searched.value = value;
   refresh();
 };
-
-// 修改音频名称 API 调用
-const named = async (id: string, newValue: string) => {
-  try {
-    await putAudio(id, { name: newValue });
-    refresh();
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-// 删除音频确认
-const deletedWindow = async (item: any) => {
-  try {
-    await ElMessageBox.confirm(
-      t("audio.confirm.message1"),
-      t("audio.confirm.message2"),
-      {
-        confirmButtonText: t("audio.confirm.confirm"),
-        cancelButtonText: t("audio.confirm.cancel"),
-        closeOnClickModal: false,
-        type: "warning",
-      }
-    );
-    await deleted(item.id);
-    ElMessage.success(t("audio.confirm.success"));
-  } catch {
-    ElMessage.info(t("audio.confirm.info"));
-  }
-};
-
-// 删除音频 API 调用
-const deleted = async (id: string) => {
-  try {
-    await deleteAudio(id);
-    refresh();
-  } catch (error) {
-    console.error(error);
-  }
-};
-
 // 刷新数据
 const refresh = async () => {
   try {
-    const response = await getAudios(
+    const response = await aiRodin.list(
       sorted.value,
       searched.value,
       pagination.current

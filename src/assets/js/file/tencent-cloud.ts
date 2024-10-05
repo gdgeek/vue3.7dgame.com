@@ -30,7 +30,7 @@ interface ProgressCallback {
 const publicHandler = async (): Promise<FileHandler> => {
  
   const response = await cloud();
-  alert(JSON.stringify(response.data))
+  //alert(JSON.stringify(response.data))
   return fileHandler(response.data.public.bucket, response.data.public.region);
 };
 

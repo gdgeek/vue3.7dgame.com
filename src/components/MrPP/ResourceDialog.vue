@@ -5,7 +5,7 @@
       width="95%"
       height="100px"
       :show-close="false"
-      @close="cancel"
+      @close="doClose"
     >
       <template #header>
         <div class="dialog-footer">
@@ -83,6 +83,7 @@
               </template>
               <div class="clearfix" v-if="metaId != null">
                 <el-button-group v-if="item.id === value">
+                  1111
                   <el-button type="warning" size="small" @click="doEmpty">
                     {{ $t("meta.ResourceDialog.cancelSelect") }}
                   </el-button>
@@ -180,9 +181,9 @@
             </el-col>
             <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
               <el-button-group>
-                <el-button size="small" @click="selected(null)">{{
-                  $t("meta.ResourceDialog.empty")
-                }}</el-button>
+                <el-button size="small" @click="doEmpty()"
+                  >!!!{{ $t("meta.ResourceDialog.empty") }}</el-button
+                >
                 <el-button size="small" @click="dialogVisible = false">
                   {{ $t("meta.ResourceDialog.cancel") }}
                 </el-button>
@@ -212,7 +213,7 @@ const activeName = ref("binding");
 const type = ref("polygen");
 const metaId = ref<number | null>(null);
 const value = ref<any>(null);
-const emit = defineEmits(["selected", "cancel"]);
+const emit = defineEmits(["selected", "cancel", "close"]);
 const { t } = useI18n();
 const binding = ref({
   items: [] as any[],
@@ -347,6 +348,7 @@ const doSelect = (data: ViewCard) => {
 const doEmpty = () => {
   value.value = null;
   emit("selected", null);
+  emit("cancel");
   dialogVisible.value = false;
 };
 
@@ -355,8 +357,8 @@ const selected = (data = null) => {
   dialogVisible.value = false;
 };
 
-const cancel = () => {
-  emit("cancel");
+const doClose = () => {
+  emit("close");
 };
 
 const handleCurrentChange = (page: number) => {

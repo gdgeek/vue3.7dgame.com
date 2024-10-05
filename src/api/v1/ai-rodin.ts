@@ -1,14 +1,7 @@
 import request from "@/utils/request";
 import qs from "querystringify";
 import path from "path-browserify";
-import  { AxiosResponse } from 'axios';
-export type AiRodinResult = {
-  prompt: string,
-  id: number,
-  image:any,
-  created_at: string,
-  
-};
+
 const schedule = (jobs: any[]) => { 
   const length: number = jobs.length;
   const max = length * 2;
@@ -36,8 +29,18 @@ const file = (id: number) => {
     method: "get",
   });
 }
-const prompt = (prompt:string) => {
-  const url = import.meta.env.VITE_APP_AI_API+'/' + path.join("prompt"+ qs.stringify({prompt}, true));
+const rodin = (query: Record<string, string | number>) => {
+  /*
+  const query: Record<string, string | number> = {
+  };
+
+  if (prompt) {
+    query["prompt"] = prompt;
+  }
+  if (resource_id) {
+    query["resource_id"] = resource_id;
+  }*/
+  const url = import.meta.env.VITE_APP_AI_API+'/' + path.join("rodin"+ qs.stringify(query, true));
 
   return request({
     url,
@@ -61,11 +64,55 @@ const download = (id:number) => {
     method: "get",
   });
 }
+const get = (id: number, expand: string = "resource,step") => { 
+  const query: Record<string, string | number> = {
+    expand
+  };
+  const queryString = qs.stringify(query, true);
+  return request({
+    url:path.join("v1", `ai-rodin/${id}${queryString}`),
+    method: "get",
+  });
+}
+const del = (id: number) => {
+  return request({
+    url:path.join("v1", `ai-rodin/${id}`),
+    method: "delete",
+  });
+}
+const list = (
+  sort: string = "-created_at",
+  search: string = "",
+  page: number = 0,
+  expand: string = "resource,step"
+) => {
 
+  const query: Record<string, string | number> = {
+    expand,
+    sort,
+  };
+
+  if (search) {
+    query["AiRodinSearch[name]"] = search;
+  }
+  if (page > 0) {
+    query["page"] = page;
+  }
+
+  const queryString = qs.stringify(query, true);
+
+  return request({
+    url:path.join("v1", `ai-rodin${queryString}`),
+    method: "get",
+  });
+}
 export default {
-  prompt,
+  rodin,
   check,
   download,
   schedule,
-  file
+  file,
+  list,
+  del,
+  get
 };

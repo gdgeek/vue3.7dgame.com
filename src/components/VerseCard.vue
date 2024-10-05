@@ -61,6 +61,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
+
 import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";
 import { LazyImg } from "vue-waterfall-plugin-next";

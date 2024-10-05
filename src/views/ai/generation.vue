@@ -1,41 +1,35 @@
 <template>
   <div>
-    <AIUpload />
+    <AIUpload v-loading="loading" v-if="!data" />
+    <AIProcess v-else v-loading="loading" :data="data" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import aiRodin from "@/api/v1/ai-rodin";
+const route = useRoute();
+
 import AIUpload from "@/components/MrPP/AIUpload.vue";
-//import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
-import { postAudio } from "@/api/resources/index";
-import AiRodin from "@/api/v1/ai-rodin";
-import { AiRodinResult } from "@/api/v1/ai-rodin";
-
-const fileType = ref("audio/mp3, audio/wav");
-const router = useRouter();
-
-onMounted(async () => {
-  //const response = await aiRodin.list();
-  //console.error(response.data);
-  //ai.getAiRodin();
+import AIProcess from "@/components/MrPP/AIProcess.vue";
+const id: Ref<number | undefined> = computed(() => {
+  const queryId = route.query.id as string | undefined;
+  return queryId ? parseInt(queryId, 10) : undefined;
 });
-// 音频保存
-const saveAudio = async (
-  name: string,
-  file_id: number,
-  callback: () => void
-) => {
-  try {
-    const response = await postAudio({ name, file_id });
-    // 跳转到音频查看页面，并传递音频 ID
-    router.push({
-      path: "/resource/audio/view",
-      query: { id: response.data.id },
-    });
-  } catch (err) {
-    console.error(err);
+const loading: Ref<boolean> = ref(false);
+//import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
+const data = ref<any>(null);
+onMounted(async () => {
+  if (id.value) {
+    try {
+      loading.value = true;
+      const response = await aiRodin.get(id.value);
+      data.value = response.data;
+    } catch (error) {
+      console.error(error);
+    } finally {
+      loading.value = false;
+    }
   }
-  callback();
-};
+});
 </script>

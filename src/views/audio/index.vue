@@ -43,7 +43,7 @@
                     >
                       {{ $t("audio.initializeAudioData") }}
                     </el-button>
-                    <el-button type="primary" size="small">{{
+                    <el-button v-else type="primary" size="small">{{
                       $t("audio.viewAudio")
                     }}</el-button>
                   </router-link>
