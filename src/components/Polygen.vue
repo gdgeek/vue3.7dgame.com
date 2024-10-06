@@ -47,8 +47,6 @@ const refresh = () => {
     return;
   }
   const gltfLoader = new GLTFLoader();
-  //gltfLoader.setDRACOLoader(dracoLoader);
-  alert(props.file.url);
   const url = convertToHttps(props.file.url);
   gltfLoader.load(
     url,
