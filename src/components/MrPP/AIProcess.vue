@@ -6,7 +6,6 @@
           <h3>Process Model from AI (Rodin) :{{ data.name }}</h3>
         </div>
       </template>
-
       <template #footer
         ><div class="progress-item">
           <el-progress :percentage="progress.percentage"></el-progress>
@@ -31,6 +30,29 @@
           prop="prompt"
         >
           {{ props.data.query.prompt }}
+        </el-form-item>
+
+        <el-form-item
+          v-if="props.data.query.quality"
+          label="Quality"
+          prop="quality"
+        >
+          <el-radio v-model="props.data.query.quality" disabled value="high">
+            High
+          </el-radio>
+          <el-radio v-model="props.data.query.quality" disabled value="medium">
+            Medium
+          </el-radio>
+          <el-radio v-model="props.data.query.quality" disabled value="low">
+            Low
+          </el-radio>
+          <el-radio
+            v-model="props.data.query.quality"
+            disabled
+            value="extra-low"
+          >
+            Extra Low</el-radio
+          >
         </el-form-item>
 
         <div>
@@ -120,6 +142,7 @@ const rodin = async (step: number) => {
     progress.value.percentage = 100;
     return response4.data;
   }
+  return props.data;
 };
 
 const process = async () => {
@@ -127,10 +150,10 @@ const process = async () => {
     loading.value = true;
     const data = await rodin(props.data.step);
 
-    if (data.resource) {
+    if (data.resource_id) {
       router.push({
-        path: "/resource/picture/view",
-        query: { id: data.resource.id },
+        path: "/resource/polygen/view",
+        query: { id: data.resource_id },
       });
     }
     //if(data.)
@@ -142,8 +165,8 @@ const process = async () => {
 onMounted(async () => {
   if (props.data.query.resource_id) {
     const response = await getPicture(props.data.query.resource_id);
-
-    // alert(1);
+    resource.value = response.data;
+    await process();
   }
 });
 // do not use same name with ref

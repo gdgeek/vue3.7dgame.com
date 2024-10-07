@@ -167,10 +167,10 @@ const generation = async (formEl: FormInstance | undefined) => {
       try {
         loading.value = true;
         const data = await rodin();
-        if (data.resource) {
+        if (data.resource_id) {
           router.push({
-            path: "/resource/picture/view",
-            query: { id: data.resource.id },
+            path: "/resource/polygen/view",
+            query: { id: data.resource_id },
           });
         }
       } catch (e: any) {
