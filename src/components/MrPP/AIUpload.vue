@@ -157,7 +157,13 @@ const generation = async (formEl: FormInstance | undefined) => {
     if (valid) {
       try {
         loading.value = true;
-        await rodin();
+        const data = await rodin();
+        if (data.resource) {
+          router.push({
+            path: "/resource/picture/view",
+            query: { id: data.resource.id },
+          });
+        }
       } catch (e: any) {
         ElMessage.error(e.message);
       }

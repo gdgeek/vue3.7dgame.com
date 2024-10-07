@@ -1,11 +1,9 @@
 <template>
   <div class="document-index">
-    {{ data }}
     <el-card class="box-card-component" style="margin: 18px 18px 0">
       <template #header>
         <div class="box-card-header">
           <h3>Process Model from AI (Rodin) :{{ data.name }}</h3>
-          {{ progress.declared }}
         </div>
       </template>
 
@@ -92,19 +90,17 @@ const imageUrl = computed<string | undefined>(() => {
 });
 
 const rodin = async (step: number) => {
-  progress.value.percentage = 0;
+  progress.value.percentage = 5;
   progress.value.title = "AI Generation";
   let data = props.data;
   if (step === 1) {
-    //const prompt: string | undefined = data.query?.prompt;
-    //const resource_id: number | undefined = data.query?.resource_id;
     const response = await AiRodin.rodin({
       id: data.id,
     });
     data = response.data;
   }
   progress.value.percentage = 10;
-  if (step <= 2) {
+  if (step <= 3) {
     let schedule = 0;
     do {
       const response2 = await AiRodin.check(data.id);
@@ -115,9 +111,7 @@ const rodin = async (step: number) => {
         await sleep(10000);
       }
     } while (schedule !== 1);
-  }
-  progress.value.percentage = 80;
-  if (step <= 3) {
+    progress.value.percentage = 80;
     await AiRodin.download(data.id);
   }
   progress.value.percentage = 90;
@@ -131,7 +125,15 @@ const rodin = async (step: number) => {
 const process = async () => {
   try {
     loading.value = true;
-    await rodin(props.data.step);
+    const data = await rodin(props.data.step);
+
+    if (data.resource) {
+      router.push({
+        path: "/resource/picture/view",
+        query: { id: data.resource.id },
+      });
+    }
+    //if(data.)
   } catch (e: any) {
     ElMessage.error(e.message);
   }
@@ -140,7 +142,7 @@ const process = async () => {
 onMounted(async () => {
   if (props.data.query.resource_id) {
     const response = await getPicture(props.data.query.resource_id);
-    resource.value = response.data;
+
     // alert(1);
   }
 });
