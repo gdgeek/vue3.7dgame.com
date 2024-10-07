@@ -49,6 +49,14 @@
         <el-form-item label="Prompt" prop="prompt">
           <el-input v-model="form.prompt" />
         </el-form-item>
+        <el-form-item label="Quality" prop="prompt">
+          <el-radio-group v-model="form.quality">
+            <el-radio :value="'high'">High</el-radio>
+            <el-radio :value="'medium'">Medium</el-radio>
+            <el-radio :value="'low'">Low</el-radio>
+            <el-radio :value="'extra-low'">Extra Low</el-radio>
+          </el-radio-group>
+        </el-form-item>
 
         <div>
           <el-button
@@ -127,6 +135,7 @@ const rodin = async () => {
   if (form.prompt) {
     query.prompt = form.prompt;
   }
+  query.quality = form.quality;
   if (resource.value?.id) {
     query.resource_id = resource.value?.id;
   }
@@ -176,12 +185,13 @@ const generation = async (formEl: FormInstance | undefined) => {
 interface RuleForm {
   image_id: number | null;
   prompt: string;
+  quality: string;
 }
 const formRef = ref<FormInstance>();
-// do not use same name with ref
 const form = reactive<RuleForm>({
   image_id: null,
   prompt: "",
+  quality: "medium",
 });
 const validatePrompt = (rule: any, value: any, callback: any) => {
   if (
