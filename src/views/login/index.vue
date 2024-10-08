@@ -16,7 +16,7 @@
         </el-link>
 
         <el-link
-          href="https://discord.gg/ev8kWRC8"
+          href="https://discord.gg/xd8yDnq8"
           target="_blank"
           :underline="false"
           style="margin-left: 30px"

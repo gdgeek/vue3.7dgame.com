@@ -521,7 +521,7 @@ const routes: RouteRecordRaw[] = [
         name: "AI",
         meta: {
           title: "ai.title",
-          icon: "el-icon-StarFilled",
+          icon: "el-icon-opportunity",
           hidden: true,
           alwaysShow: false,
           params: null,
