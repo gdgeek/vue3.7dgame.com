@@ -56,6 +56,11 @@ export default {
       scriptEditor: "スクリプトエディタ",
       sceneEditor: "シーンエディタ",
     },
+    ai: {
+      title: "AIモデル",
+      list: "リスト",
+      generation: "AI生成",
+    },
     project: {
       title: "工程",
       selfGenerated: "自作",
@@ -690,6 +695,39 @@ export default {
         },
       },
       info: "キャンセルされました",
+    },
+  },
+  // AI部分国际化
+  ai: {
+    create: "作成",
+    show: "表示",
+    delete: "削除",
+    generate: "生成",
+    confirm: {
+      message1: "この操作はファイルを永久に削除します。続けますか？",
+      message2: "警告",
+      confirm: "確認",
+      cancel: "キャンセル",
+      success: "削除に成功しました！",
+      info: "削除がキャンセルされました",
+    },
+    generation: {
+      title: "AI (Rodin) を通じてモデルを作成：",
+      form: {
+        image: "画像",
+        select: "選択",
+        prompt: "プロンプト",
+        quality: {
+          title: "品質",
+          value1: "高",
+          value2: "中",
+          value3: "低",
+          value4: "極めて低い",
+        },
+        message: "長さは4から50文字である必要があります",
+        error: "プロンプトを入力するか、画像を選択してください",
+        submit: "生成",
+      },
     },
   },
   // 工程部分国际化

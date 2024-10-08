@@ -56,6 +56,11 @@ export default {
       scriptEditor: "Script",
       sceneEditor: "Scene",
     },
+    ai: {
+      title: "AI",
+      list: "List",
+      generation: "Generation",
+    },
     project: {
       title: "Project",
       selfGenerated: "Owned",
@@ -698,6 +703,40 @@ export default {
         },
       },
       info: "Cancelled",
+    },
+  },
+  // AI部分国际化
+  ai: {
+    create: "Create",
+    show: "Show",
+    delete: "Delete",
+    generate: "Generate",
+    confirm: {
+      message1:
+        "This action will permanently delete the file. Do you want to continue?",
+      message2: "Warning",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      success: "Deleted successfully!",
+      info: "Deletion canceled",
+    },
+    generation: {
+      title: "Create Model from AI (Rodin) :",
+      form: {
+        image: "Image",
+        select: "Select",
+        prompt: "Prompt",
+        quality: {
+          title: "Quality",
+          value1: "High",
+          value2: "Medium",
+          value3: "Low",
+          value4: "Extra Low",
+        },
+        message: "Length should be between 4 and 50 characters",
+        error: "Please input the prompt or select the image",
+        submit: "Generation",
+      },
     },
   },
   // 工程部分国际化

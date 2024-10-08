@@ -37,7 +37,8 @@
                   v-if="item.resource && item.resource.image"
                   :url="item.resource.image.url"
                   style="width: 100%"
-                />
+                >
+                </LazyImg>
                 <b> {{ item.id }}</b
                 ><br />
                 <el-rate
@@ -53,27 +54,27 @@
                   }"
                   disabled
                   size="small"
-                />
+                ></el-rate>
                 <el-button
                   v-if="item.step == 5"
                   type="primary"
                   size="small"
                   @click="show(item.resource.id)"
-                  >show</el-button
+                  >{{ $t("ai.show") }}</el-button
                 >
                 <el-button
                   @click="del(item.id)"
                   v-else-if="item.step == 0"
                   type="danger"
                   size="small"
-                  >delete</el-button
+                  >{{ $t("ai.delete") }}</el-button
                 >
                 <el-button
                   v-else
                   size="small"
                   type="success"
                   @click="generation(item.id)"
-                  >generation</el-button
+                  >{{ $t("ai.generate") }}</el-button
                 >
               </el-card>
             </template>
@@ -107,13 +108,10 @@ import {
   InfoFilled,
   SuccessFilled,
 } from "@element-plus/icons-vue";
-import { getAudios, putAudio, deleteAudio } from "@/api/resources/index";
 import aiRodin from "@/api/v1/ai-rodin";
-import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
-import { ElDialog } from "element-plus";
 
 const items = ref<any[]>([]);
 const sorted = ref<string>("-created_at");
@@ -136,27 +134,23 @@ const generation = async (id: number) => {
   router.push({ path: "/ai/generation", query: { id: id } });
 };
 const del = async (id: number) => {
-  ElMessageBox.confirm(
-    "proxy will permanently delete the file. Continue?",
-    "Warning",
-    {
-      confirmButtonText: "OK",
-      cancelButtonText: "Cancel",
-      type: "warning",
-    }
-  )
+  ElMessageBox.confirm(t("ai.confirm.message1"), t("ai.confirm.message2"), {
+    confirmButtonText: t("ai.confirm.confirm"),
+    cancelButtonText: t("ai.confirm.cancel"),
+    type: "warning",
+  })
     .then(async () => {
       await aiRodin.del(id);
       await refresh();
       ElMessage({
         type: "success",
-        message: "Delete completed",
+        message: t("ai.confirm.success"),
       });
     })
     .catch(() => {
       ElMessage({
         type: "info",
-        message: "Delete canceled",
+        message: t("ai.confirm.info"),
       });
     });
 };

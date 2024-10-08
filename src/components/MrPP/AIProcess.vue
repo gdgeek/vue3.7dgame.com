@@ -3,7 +3,7 @@
     <el-card class="box-card-component" style="margin: 18px 18px 0">
       <template #header>
         <div class="box-card-header">
-          <h3>Process Model from AI (Rodin) :{{ data.name }}</h3>
+          <h3>{{ $t("ai.generation.title") }}{{ data.name }}</h3>
         </div>
       </template>
       <template #footer
@@ -17,7 +17,11 @@
         :element-loading-text="progress.title"
         label-width="auto"
       >
-        <el-form-item v-if="imageUrl" label="Image" prop="image">
+        <el-form-item
+          v-if="imageUrl"
+          :label="$t('ai.generation.form.image')"
+          prop="image"
+        >
           <el-image style="max-width: 300px" :src="imageUrl">
             <template #placeholder>
               <div class="image-slot">Loading<span class="dot">...</span></div>
@@ -26,7 +30,7 @@
         </el-form-item>
         <el-form-item
           v-if="props.data.query.prompt"
-          label="Prompt"
+          :label="$t('ai.generation.form.prompt')"
           prop="prompt"
         >
           {{ props.data.query.prompt }}
@@ -34,31 +38,31 @@
 
         <el-form-item
           v-if="props.data.query.quality"
-          label="Quality"
+          :label="$t('ai.generation.form.quality.title')"
           prop="quality"
         >
-          <el-radio v-model="props.data.query.quality" disabled value="high">
-            High
+          <el-radio v-model="localData.query.quality" disabled value="high">
+            {{ $t("ai.generation.form.quality.value1") }}
           </el-radio>
-          <el-radio v-model="props.data.query.quality" disabled value="medium">
-            Medium
+          <el-radio v-model="localData.query.quality" disabled value="medium">
+            {{ $t("ai.generation.form.quality.value2") }}
           </el-radio>
-          <el-radio v-model="props.data.query.quality" disabled value="low">
-            Low
+          <el-radio v-model="localData.query.quality" disabled value="low">
+            {{ $t("ai.generation.form.quality.value3") }}
           </el-radio>
           <el-radio
-            v-model="props.data.query.quality"
+            v-model="localData.query.quality"
             disabled
             value="extra-low"
           >
-            Extra Low</el-radio
+            {{ $t("ai.generation.form.quality.value4") }}</el-radio
           >
         </el-form-item>
 
         <div>
-          <el-button style="width: 100%" type="primary" @click="process()"
-            >Generation</el-button
-          >
+          <el-button style="width: 100%" type="primary" @click="process()">{{
+            $t("ai.generation.form.submit")
+          }}</el-button>
         </div>
       </el-form>
     </el-card>
@@ -67,31 +71,16 @@
 
 <script setup lang="ts">
 import AiRodin from "@/api/v1/ai-rodin";
-import { useFileStore } from "@/store/modules/config";
-import { postFile } from "@/api/v1/files";
-import FileApi from "@/api/v1/files";
-import { FileHandler } from "@/assets/js/file/server";
 import { useI18n } from "vue-i18n";
 import { sleep } from "@/assets/js/helper";
+import { getPicture } from "@/api/resources/index";
+import { useRouter } from "vue-router";
 
 const props = defineProps<{ data: any | undefined }>();
-
-import {
-  Check,
-  Delete,
-  Edit,
-  Message,
-  Search,
-  Star,
-} from "@element-plus/icons-vue";
+const localData = ref({ ...props.data });
 const { t } = useI18n();
 const loading = ref(false);
-const dialog = ref();
-import { useRoute, useRouter } from "vue-router";
-const route = useRoute();
 const router = useRouter();
-
-import { getPicture } from "@/api/resources/index";
 
 export type ProgressType = {
   title: string;
@@ -162,8 +151,9 @@ const process = async () => {
   }
   loading.value = false;
 };
+
 onMounted(async () => {
-  if (props.data.query.resource_id) {
+  if (localData.value.query.resource_id) {
     const response = await getPicture(props.data.query.resource_id);
     resource.value = response.data;
     await process();

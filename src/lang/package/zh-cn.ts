@@ -56,6 +56,11 @@ export default {
       scriptEditor: "脚本编辑",
       sceneEditor: "场景编辑",
     },
+    ai: {
+      title: "AI模型",
+      list: "列表",
+      generation: "AI生成",
+    },
     project: {
       title: "工程",
       selfGenerated: "自己创造",
@@ -684,6 +689,39 @@ export default {
         },
       },
       info: "已取消",
+    },
+  },
+  // AI部分国际化
+  ai: {
+    create: "创建",
+    show: "查看",
+    delete: "删除",
+    generate: "生成",
+    confirm: {
+      message1: "此操作将永久删除该文件。您想继续吗？",
+      message2: "警告",
+      confirm: "确认",
+      cancel: "取消",
+      success: "删除成功！",
+      info: "删除已取消",
+    },
+    generation: {
+      title: "通过 AI (Rodin) 创建模型：",
+      form: {
+        image: "图像",
+        select: "选择",
+        prompt: "提示",
+        quality: {
+          title: "质量",
+          value1: "高",
+          value2: "中",
+          value3: "低",
+          value4: "极低",
+        },
+        message: "长度应为 4 到 50 个字符",
+        error: "请输入提示或选择图像",
+        submit: "生成",
+      },
     },
   },
   // 工程部分国际化
