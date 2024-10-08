@@ -694,6 +694,17 @@ export default {
   // AI部分国际化
   ai: {
     create: "创建",
+    show: "查看",
+    delete: "删除",
+    generate: "生成",
+    confirm: {
+      message1: "此操作将永久删除该文件。您想继续吗？",
+      message2: "警告",
+      confirm: "确认",
+      cancel: "取消",
+      success: "删除成功！",
+      info: "删除已取消",
+    },
     generation: {
       title: "通过 AI (Rodin) 创建模型：",
       form: {

@@ -708,6 +708,18 @@ export default {
   // AI部分国际化
   ai: {
     create: "Create",
+    show: "Show",
+    delete: "Delete",
+    generate: "Generate",
+    confirm: {
+      message1:
+        "This action will permanently delete the file. Do you want to continue?",
+      message2: "Warning",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      success: "Deleted successfully!",
+      info: "Deletion canceled",
+    },
     generation: {
       title: "Create Model from AI (Rodin) :",
       form: {

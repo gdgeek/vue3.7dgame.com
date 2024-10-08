@@ -700,6 +700,17 @@ export default {
   // AI部分国际化
   ai: {
     create: "作成",
+    show: "表示",
+    delete: "削除",
+    generate: "生成",
+    confirm: {
+      message1: "この操作はファイルを永久に削除します。続けますか？",
+      message2: "警告",
+      confirm: "確認",
+      cancel: "キャンセル",
+      success: "削除に成功しました！",
+      info: "削除がキャンセルされました",
+    },
     generation: {
       title: "AI (Rodin) を通じてモデルを作成：",
       form: {
