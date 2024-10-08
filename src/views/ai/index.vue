@@ -10,7 +10,7 @@
           @sort="sort"
         >
           <el-button-group :inline="true">
-            <router-link to="/ai/create">
+            <router-link to="/ai/generation">
               <el-button size="small" type="primary" icon="uploadFilled">
                 <span class="hidden-sm-and-down">{{ $t("ai.create") }}</span>
               </el-button>
