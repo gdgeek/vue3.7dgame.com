@@ -6,6 +6,9 @@
       <br />
       <el-tabs style="width: 100%" type="border-card" :stretch="true">
         <el-tab-pane label="Apple ID">
+          <h2 class="login-title">Use Apple Account</h2>
+
+          <br />
           <vue-apple-login
             @click="loading = true"
             class="appleid_button"
@@ -18,6 +21,8 @@
             :onSuccess="onSuccess"
             :onFailure="onFailure"
           ></vue-apple-login>
+          <br />
+          <br />
         </el-tab-pane>
         <el-tab-pane label="Name & Password">
           <h2 class="login-title">{{ $t("login.loginTitle") }}</h2>

@@ -49,7 +49,7 @@
         <el-form-item label="Prompt" prop="prompt">
           <el-input v-model="form.prompt" />
         </el-form-item>
-        <el-form-item label="Quality" prop="prompt">
+        <el-form-item label="Quality" prop="quality">
           <el-radio-group v-model="form.quality">
             <el-radio :value="'high'">High</el-radio>
             <el-radio :value="'medium'">Medium</el-radio>

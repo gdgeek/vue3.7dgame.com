@@ -186,6 +186,7 @@ const confirmDeletion = async (id: number) => {
 };
 
 const changeMessage = async (data: any) => {
+  if (props.messageId === undefined) return;
   await putMessage(props.messageId, data);
   await refresh();
   dialog.value = false;

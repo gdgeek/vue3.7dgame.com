@@ -112,7 +112,7 @@ export default {
     createAccount: "创建账号",
     repassword: "确认密码",
     create: "创建",
-    linkAccount: "登录账号",
+    linkAccount: "登录账号!",
     logout: {
       message1: "确定注销并退出系统吗？",
       message2: "提示",
