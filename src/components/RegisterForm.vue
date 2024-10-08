@@ -8,7 +8,7 @@
         <el-tab-pane :label="$t('login.createAccount')">
           <h2 class="login-title">{{ $t("login.createAccount") }}</h2>
           <el-form
-            ref="formRef"
+            ref="registerFormRef"
             class="login-form"
             :rules="registerRules"
             :model="registerForm"
@@ -46,7 +46,7 @@
         <el-tab-pane :label="$t('login.linkAccount')">
           <h2 class="login-title">{{ $t("login.linkAccount") }}</h2>
           <el-form
-            ref="formRef"
+            ref="linkFormRef"
             class="login-form"
             :rules="linkRules"
             :model="linkForm"
@@ -77,6 +77,7 @@
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
 import "@/assets/font/font.css";
 import { LocationQuery, useRoute } from "vue-router";
@@ -84,16 +85,20 @@ import { ElMessage } from "element-plus";
 import { useSettingsStore } from "@/store/modules/settings";
 import { FormInstance } from "element-plus";
 import { ThemeEnum } from "@/enums/ThemeEnum";
+import { onMounted, watch, ref, computed, defineEmits, defineProps } from "vue";
+import { useI18n } from "vue-i18n"; // Ensure you have this import
 import type { AppleIdToken } from "@/api/auth/model";
 import AuthAPI from "@/api/auth/index";
 import type { AppleIdTokenAndUserPassData } from "@/api/auth/model";
 import { RegisterData, LinkData } from "@/api/auth/model";
 
+const { t } = useI18n(); // I18n for translations
+
 const settingsStore = useSettingsStore();
 const route = useRoute();
-const formRef = ref<FormInstance>();
+const registerFormRef = ref<FormInstance>(); // Separate formRef for register
+const linkFormRef = ref<FormInstance>(); // Separate formRef for link
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
-const { t } = useI18n();
 
 const registerForm = ref<RegisterData>({
   username: "",
@@ -105,6 +110,7 @@ const linkForm = ref<LinkData>({
   username: "",
   password: "",
 });
+
 const validatePass2 = (rule: any, value: any, callback: any) => {
   if (value === "") {
     callback(new Error(t("login.rules.repassword.message1")));
@@ -114,74 +120,70 @@ const validatePass2 = (rule: any, value: any, callback: any) => {
     callback();
   }
 };
+
 // Props
 const props = defineProps<{
   idToken: AppleIdToken;
 }>();
 
-const linkRules = computed(() => {
-  return {
-    username: [
-      {
-        required: true,
-        message: t("login.rules.username.message1"),
-        trigger: "blur",
-      },
-      { min: 4, message: t("login.rules.username.message2"), trigger: "blur" },
-    ],
-    password: [
-      {
-        required: true,
-        message: t("login.rules.password.message1"),
-        trigger: "blur",
-      },
-      { min: 6, message: t("login.rules.password.message2"), trigger: "blur" },
-    ],
-  };
-});
+const linkRules = {
+  username: [
+    {
+      required: true,
+      message: t("login.rules.username.message1"),
+      trigger: "blur",
+    },
+    { min: 4, message: t("login.rules.username.message2"), trigger: "blur" },
+  ],
+  password: [
+    {
+      required: true,
+      message: t("login.rules.password.message1"),
+      trigger: "blur",
+    },
+    { min: 6, message: t("login.rules.password.message2"), trigger: "blur" },
+  ],
+};
 
-const registerRules = computed(() => {
-  return {
-    username: [
-      {
-        required: true,
-        message: t("login.rules.username.message1"),
-        trigger: "blur",
-      },
-
-      {
-        pattern: /^[a-zA-Z0-9_@.-]+$/i,
-        message: "only letters, numbers, _, -, @, and .",
-        trigger: "blur",
-      },
-      {
-        min: 4,
-        max: 20,
-        message: t("login.rules.username.message2"),
-        trigger: "blur",
-      },
-    ],
-    password: [
-      {
-        required: true,
-        message: t("login.rules.password.message1"),
-        trigger: "blur",
-      },
-      {
-        min: 6,
-        max: 20,
-        message: t("login.rules.password.message2"),
-        trigger: "blur",
-      },
-      {
-        pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/i,
-        message: t("login.rules.password.message3"),
-        trigger: "blur",
-      },
-    ],
-    repassword: [{ validator: validatePass2, trigger: "blur" }],
-  };
-});
+const registerRules = {
+  username: [
+    {
+      required: true,
+      message: t("login.rules.username.message1"),
+      trigger: "blur",
+    },
+    {
+      pattern: /^[a-zA-Z0-9_@.-]+$/i,
+      message: "only letters, numbers, _, -, @, and .",
+      trigger: "blur",
+    },
+    {
+      min: 4,
+      max: 20,
+      message: t("login.rules.username.message2"),
+      trigger: "blur",
+    },
+  ],
+  password: [
+    {
+      required: true,
+      message: t("login.rules.password.message1"),
+      trigger: "blur",
+    },
+    {
+      min: 6,
+      max: 20,
+      message: t("login.rules.password.message2"),
+      trigger: "blur",
+    },
+    {
+      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/i,
+      message: t("login.rules.password.message3"),
+      trigger: "blur",
+    },
+  ],
+  repassword: [{ validator: validatePass2, trigger: "blur" }],
+};
 
 function parseRedirect(): {
   path: string;
@@ -209,7 +211,7 @@ const login = async (data: any) => {
 };
 
 const link = () => {
-  formRef.value?.validate(async (valid: boolean) => {
+  linkFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
         const data: AppleIdTokenAndUserPassData = {
@@ -218,8 +220,8 @@ const link = () => {
           token: props.idToken.token,
           apple_id: props.idToken.apple_id,
         };
-        const respose = await AuthAPI.appleIdLink(data);
-        await login(respose.data.user);
+        const response = await AuthAPI.appleIdLink(data);
+        await login(response.data.user);
       } catch (e: any) {
         ElMessage.error(e.message);
       }
@@ -228,8 +230,9 @@ const link = () => {
     }
   });
 };
+
 const create = () => {
-  formRef.value?.validate(async (valid: boolean) => {
+  registerFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
         const data: AppleIdTokenAndUserPassData = {
@@ -238,8 +241,8 @@ const create = () => {
           token: props.idToken.token,
           apple_id: props.idToken.apple_id,
         };
-        const respose = await AuthAPI.appleIdCreate(data);
-        await login(respose.data.user);
+        const response = await AuthAPI.appleIdCreate(data);
+        await login(response.data.user);
       } catch (e: any) {
         ElMessage.error(e.message);
       }
@@ -248,6 +251,16 @@ const create = () => {
     }
   });
 };
+
+// Automatically toggle dark theme on mount
+onMounted(() => {
+  document.body.classList.toggle("dark-theme", isDark.value);
+});
+
+// Watch for theme change
+watch(isDark, (newValue) => {
+  document.body.classList.toggle("dark-theme", newValue);
+});
 </script>
 
 <style scoped lang="scss">
