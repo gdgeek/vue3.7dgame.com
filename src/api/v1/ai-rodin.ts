@@ -2,11 +2,11 @@ import request from "@/utils/request";
 import qs from "querystringify";
 import path from "path-browserify";
 
-const schedule = (jobs: any[]) => { 
+const schedule = (jobs: any[]) => {
   const length: number = jobs.length;
   const max = length * 2;
   let count = 0;
-  jobs.forEach(job => {
+  jobs.forEach((job) => {
     switch (job.status.toLowerCase()) {
       case "generating":
         count += 1;
@@ -19,16 +19,18 @@ const schedule = (jobs: any[]) => {
     }
   });
   return count / max;
-
-}
+};
 const file = (id: number) => {
-  const url = import.meta.env.VITE_APP_AI_API+'/' + path.join("file"+ qs.stringify({id:id.toString()}, true));
+  const url =
+    import.meta.env.VITE_APP_AI_API +
+    "/" +
+    path.join("file" + qs.stringify({ id: id.toString() }, true));
 
   return request({
     url,
     method: "get",
   });
-}
+};
 const rodin = (query: Record<string, string | number>) => {
   /*
   const query: Record<string, string | number> = {
@@ -40,53 +42,61 @@ const rodin = (query: Record<string, string | number>) => {
   if (resource_id) {
     query["resource_id"] = resource_id;
   }*/
-  const url = import.meta.env.VITE_APP_AI_API+'/' + path.join("rodin"+ qs.stringify(query, true));
+  const url =
+    import.meta.env.VITE_APP_AI_API +
+    "/" +
+    path.join("rodin" + qs.stringify(query, true));
 
   return request({
     url,
     method: "get",
   });
-}
-const check = (id:number) => {
-  const url = import.meta.env.VITE_APP_AI_API+'/' + path.join("check"+ qs.stringify({id:id.toString()}, true));
+};
+const check = (id: number) => {
+  const url =
+    import.meta.env.VITE_APP_AI_API +
+    "/" +
+    path.join("check" + qs.stringify({ id: id.toString() }, true));
 
   return request({
     url,
     method: "get",
   });
-}
+};
 
-const download = (id:number) => {
-  const url = import.meta.env.VITE_APP_AI_API+'/' + path.join("download"+ qs.stringify({id:id.toString()}, true));
+const download = (id: number) => {
+  const url =
+    import.meta.env.VITE_APP_AI_API +
+    "/" +
+    path.join("download" + qs.stringify({ id: id.toString() }, true));
 
   return request({
     url,
     method: "get",
   });
-}
-const get = (id: number, expand: string = "resource,step") => { 
+};
+const get = (id: number, expand: string = "resource,step") => {
   const query: Record<string, string | number> = {
-    expand
+    expand,
   };
   const queryString = qs.stringify(query, true);
   return request({
-    url:path.join("v1", `ai-rodin/${id}${queryString}`),
+    url: path.join("v1", `ai-rodin/${id}${queryString}`),
     method: "get",
   });
-}
+};
 const del = (id: number) => {
   return request({
-    url:path.join("v1", `ai-rodin/${id}`),
+    url: path.join("v1", `ai-rodin/${id}`),
     method: "delete",
   });
-}
+};
 const list = (
   sort: string = "-created_at",
   search: string = "",
   page: number = 0,
   expand: string = "resource,step"
 ) => {
-
   const query: Record<string, string | number> = {
     expand,
     sort,
@@ -102,10 +112,10 @@ const list = (
   const queryString = qs.stringify(query, true);
 
   return request({
-    url:path.join("v1", `ai-rodin${queryString}`),
+    url: path.join("v1", `ai-rodin${queryString}`),
     method: "get",
   });
-}
+};
 export default {
   rodin,
   check,
@@ -114,5 +124,5 @@ export default {
   file,
   list,
   del,
-  get
+  get,
 };

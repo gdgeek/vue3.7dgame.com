@@ -37,7 +37,8 @@
                   v-if="item.resource && item.resource.image"
                   :url="item.resource.image.url"
                   style="width: 100%"
-                />
+                >
+                </LazyImg>
                 <b> {{ item.id }}</b
                 ><br />
                 <el-rate
@@ -53,7 +54,7 @@
                   }"
                   disabled
                   size="small"
-                />
+                ></el-rate>
                 <el-button
                   v-if="item.step == 5"
                   type="primary"
@@ -107,13 +108,10 @@ import {
   InfoFilled,
   SuccessFilled,
 } from "@element-plus/icons-vue";
-import { getAudios, putAudio, deleteAudio } from "@/api/resources/index";
 import aiRodin from "@/api/v1/ai-rodin";
-import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
-import { ElDialog } from "element-plus";
 
 const items = ref<any[]>([]);
 const sorted = ref<string>("-created_at");

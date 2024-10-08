@@ -8,7 +8,7 @@
     <el-card class="box-card-component" style="margin: 18px 18px 0">
       <template #header>
         <div class="box-card-header">
-          <h3>Create Model from AI (Rodin) :</h3>
+          <h3>{{ $t("ai.generation.title") }}</h3>
           {{ progress.declared }}
         </div>
       </template>
@@ -26,14 +26,14 @@
         :model="form"
         label-width="auto"
       >
-        <el-form-item label="Image" prop="image">
+        <el-form-item :label="$t('ai.generation.form.image')" prop="image">
           <el-button
             v-if="!imageUrl"
             style="max-width: 300px"
             :icon="Search"
             @click="open"
             round
-            >Select</el-button
+            >{{ $t("ai.generation.form.select") }}</el-button
           >
           <el-image
             v-else
@@ -46,15 +46,26 @@
             </template>
           </el-image>
         </el-form-item>
-        <el-form-item label="Prompt" prop="prompt">
-          <el-input v-model="form.prompt" />
+        <el-form-item :label="$t('ai.generation.form.prompt')" prop="prompt">
+          <el-input v-model="form.prompt"></el-input>
         </el-form-item>
-        <el-form-item label="Quality" prop="prompt">
+        <el-form-item
+          :label="$t('ai.generation.form.quality.title')"
+          prop="prompt"
+        >
           <el-radio-group v-model="form.quality">
-            <el-radio :value="'high'">High</el-radio>
-            <el-radio :value="'medium'">Medium</el-radio>
-            <el-radio :value="'low'">Low</el-radio>
-            <el-radio :value="'extra-low'">Extra Low</el-radio>
+            <el-radio :value="'high'">{{
+              $t("ai.generation.form.quality.value1")
+            }}</el-radio>
+            <el-radio :value="'medium'">{{
+              $t("ai.generation.form.quality.value2")
+            }}</el-radio>
+            <el-radio :value="'low'">{{
+              $t("ai.generation.form.quality.value3")
+            }}</el-radio>
+            <el-radio :value="'extra-low'">{{
+              $t("ai.generation.form.quality.value4")
+            }}</el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -63,7 +74,7 @@
             style="width: 100%"
             type="primary"
             @click="generation(formRef)"
-            >Generation</el-button
+            >{{ $t("ai.generation.form.submit") }}</el-button
           >
         </div>
       </el-form>
@@ -74,29 +85,16 @@
 <script setup lang="ts">
 import AiRodin from "@/api/v1/ai-rodin";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
-
-import { useFileStore } from "@/store/modules/config";
-import { postFile } from "@/api/v1/files";
-import FileApi from "@/api/v1/files";
-import { FileHandler } from "@/assets/js/file/server";
 import { useI18n } from "vue-i18n";
 import { sleep } from "@/assets/js/helper";
+import { Search } from "@element-plus/icons-vue";
+import type { FormInstance, FormRules } from "element-plus";
+import { useRouter } from "vue-router";
 
-import {
-  Check,
-  Delete,
-  Edit,
-  Message,
-  Search,
-  Star,
-} from "@element-plus/icons-vue";
 const { t } = useI18n();
 const loading = ref(false);
 const dialog = ref();
-import { useRoute, useRouter } from "vue-router";
-const route = useRoute();
 const router = useRouter();
-import type { FormInstance, FormRules } from "element-plus";
 
 export type ProgressType = {
   title: string;
@@ -198,7 +196,7 @@ const validatePrompt = (rule: any, value: any, callback: any) => {
     (resource.value === null || resource.value === undefined) &&
     !form.prompt
   ) {
-    callback(new Error("Please input the prompt or select the image"));
+    callback(new Error(t("ai.generation.form.error")));
   } else {
     callback();
   }
@@ -206,7 +204,12 @@ const validatePrompt = (rule: any, value: any, callback: any) => {
 const rules = reactive<FormRules<RuleForm>>({
   prompt: [
     { required: true, validator: validatePrompt, trigger: "blur" },
-    { min: 4, max: 50, message: "Length should be 4 to 50", trigger: "blur" },
+    {
+      min: 4,
+      max: 50,
+      message: t("ai.generation.form.message"),
+      trigger: "blur",
+    },
   ],
 });
 </script>

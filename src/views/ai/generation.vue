@@ -1,7 +1,7 @@
 <template>
   <div>
-    <AIUpload v-loading="loading" v-if="!data" />
-    <AIProcess v-else v-loading="loading" :data="data" />
+    <AIUpload v-loading="loading" v-if="!data"></AIUpload>
+    <AIProcess v-else v-loading="loading" :data="data"></AIProcess>
   </div>
 </template>
 

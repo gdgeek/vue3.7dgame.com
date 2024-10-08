@@ -553,20 +553,20 @@ const routes: RouteRecordRaw[] = [
               params: null,
             },
           },
-          {
-            path: "/ai/view",
-            component: () => import("@/views/ai/view.vue"),
-            name: "AIView",
-            meta: {
-              title: "ai.view",
-              icon: "cascader",
-              hidden: true,
-              keepAlive: true,
-              alwaysShow: false,
-              private:true,
-              params: null,
-            },
-          }
+          // {
+          //   path: "/ai/view",
+          //   component: () => import("@/views/ai/view.vue"),
+          //   name: "AIView",
+          //   meta: {
+          //     title: "ai.view",
+          //     icon: "cascader",
+          //     hidden: true,
+          //     keepAlive: true,
+          //     alwaysShow: false,
+          //     private: true,
+          //     params: null,
+          //   },
+          // },
         ],
       },
 
