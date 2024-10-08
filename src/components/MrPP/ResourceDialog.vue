@@ -181,9 +181,9 @@
             </el-col>
             <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
               <el-button-group>
-                <el-button size="small" @click="doEmpty()"
-                  >!!!{{ $t("meta.ResourceDialog.empty") }}</el-button
-                >
+                <el-button size="small" @click="doEmpty()">{{
+                  $t("meta.ResourceDialog.empty")
+                }}</el-button>
                 <el-button size="small" @click="dialogVisible = false">
                   {{ $t("meta.ResourceDialog.cancel") }}
                 </el-button>
