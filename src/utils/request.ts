@@ -68,7 +68,7 @@ service.interceptors.request.use(
 // 异常处理
 function showErrorMessage(
   message: string,
-  
+
   duration = 5000
 ) {
   ElMessage({
@@ -76,7 +76,6 @@ function showErrorMessage(
     type: "error",
     duration,
   });
- 
 }
 
 function handleUnauthorized(router: ReturnType<typeof useRouter>) {
@@ -97,13 +96,12 @@ service.interceptors.response.use(
 
     if (!response) {
       if (error.message === "Network Error") {
-        
         showErrorMessage(messages[1]);
         useUserStoreHook()
-        .resetToken()
-        .then(() => {
-          router.push({ path: "/login" });
-        });
+          .resetToken()
+          .then(() => {
+            router.push({ path: "/login" });
+          });
       } else {
         showErrorMessage(error.message);
       }
