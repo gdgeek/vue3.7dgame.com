@@ -25,7 +25,12 @@
           </template>
 
           <el-container>
-            <el-tabs v-model="activeName" type="card" style="width: 100%">
+            <el-tabs
+              v-model="activeName"
+              type="card"
+              style="width: 100%"
+              @tab-click="handleClick"
+            >
               <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
                 <el-main style="margin: 0; padding: 0; height: 70vh">
                   <iframe
@@ -39,9 +44,38 @@
               <el-tab-pane :label="$t('verse.view.script.code')" name="script">
                 <el-card v-if="activeName === 'script'" class="box-card">
                   <div v-highlight>
-                    <pre>
-                        <code class="lua">{{ LuaCode }}</code>
-                      </pre>
+                    <el-tabs v-model="languageName">
+                      <el-tab-pane label="Lua" name="lua">
+                        <template #label>
+                          <span style="display: flex; align-items: center">
+                            <img
+                              src="/lua.png"
+                              style="width: 30px; margin-right: 5px"
+                              alt=""
+                            />
+                            <span>Lua</span>
+                          </span>
+                        </template>
+                        <pre>
+                          <code class="lua">{{ LuaCode }}</code>
+                        </pre>
+                      </el-tab-pane>
+                      <el-tab-pane label="JavaScript" name="javascript">
+                        <template #label>
+                          <span style="display: flex; align-items: center">
+                            <img
+                              src="/javascript.png"
+                              style="width: 30px; margin-right: 5px"
+                              alt=""
+                            />
+                            <span>JavaScript</span>
+                          </span>
+                        </template>
+                        <pre>
+                          <code class="lua">{{ JavaScriptCode }}</code>
+                        </pre>
+                      </el-tab-pane>
+                    </el-tabs>
                   </div>
                 </el-card>
               </el-tab-pane>
@@ -65,7 +99,9 @@ const verse = ref<VerseData>();
 const route = useRoute();
 const id = computed(() => parseInt(route.query.id as string));
 const activeName = ref<string>("blockly");
+const languageName = ref<string>("lua");
 const LuaCode = ref("");
+const JavaScriptCode = ref("");
 
 const src = ref(
   import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + appStore.language
@@ -99,25 +135,12 @@ const postScript = async (message: any) => {
     });
     return;
   }
-  //script.value = verse.value?.script;
+
+  console.log("messageScript", message);
   await putVerseCode(verse.value!.id, {
     blockly: JSON.stringify(message.data),
     lua: message.script,
   });
-  /*if (!script.value) {
-    const response = await postVerseScript({
-      verse_id: verse.value!.id,
-      workspace: JSON.stringify(message.data),
-      script: message.script,
-    });
-    verse.value!.script = response.data;
-  } else {
-    const response = await putVerseScript(script.value.id, {
-      workspace: JSON.stringify(message.data),
-      script: message.script,
-    });
-    verse.value!.script = response.data;
-  }*/
 
   ElMessage({
     message: t("verse.view.script.success"),
@@ -136,6 +159,12 @@ const handleMessage = async (e: MessageEvent) => {
     initEditor();
   } else if (params.action === "post") {
     await postScript(params.data);
+    LuaCode.value =
+      "local meta = {}\nlocal index = ''\n" +
+      JSON.parse(params.data.script).lua;
+    JavaScriptCode.value =
+      "const meta = {}\nconst index = ''\n" +
+      JSON.parse(params.data.script).javascript;
   } else if (params.action === "post:no-change") {
     ElMessage({
       message: t("verse.view.script.info"),
@@ -218,17 +247,19 @@ const resource = computed(() => {
   };
 });
 
-/*
 const handleClick = async (tab: TabsPaneContext, event: Event) => {
   if (activeName.value === "script") {
-    LuaCode.value = script.value?.script
-      ? "local meta = {}\nlocal index = ''\n" + script.value?.script
+    LuaCode.value = LuaCode.value
+      ? LuaCode.value
       : "local meta = {}\nlocal index = ''\n";
+    JavaScriptCode.value = JavaScriptCode.value
+      ? JavaScriptCode.value
+      : "const meta = {}\nconst index = ''\n";
     await nextTick();
   }
   console.log("luaCode", LuaCode.value);
   console.log(tab, event);
-};*/
+};
 //https://appleid.apple.com/auth/authorize?client_id=com.mrpp.www&redirect_uri=https%3A%2F%2Ftest.mrpp.com%3A8888%2Fhome%2Findex&response_type=code%20id_token&state=1726813929167&scope=name%20email&response_mode=web_message&frame_id=f8abd4d8-d83f-4f15-a65b-fe7e52404f84&m=12&v=1.5.5
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
@@ -243,7 +274,6 @@ onMounted(async () => {
       "metas, module, share, verseCode"
     );
     verse.value = response.data;
-    //script.value = verse.value?.script;
     if (verse.value && verse.value.data) {
       const json: string = verse.value.data;
       const data = JSON.parse(json);
