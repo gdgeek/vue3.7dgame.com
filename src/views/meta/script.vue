@@ -17,7 +17,7 @@
               </el-button-group>
             </div>
           </template>
-          <el-container>
+          <!-- <el-container>
             <el-main style="margin: 0; padding: 0; height: 70vh">
               <iframe
                 style="margin: 0; padding: 0; height: 100%; width: 100%"
@@ -26,6 +26,63 @@
                 :src="src"
               ></iframe>
             </el-main>
+          </el-container> -->
+          <el-container>
+            <el-tabs
+              v-model="activeName"
+              type="card"
+              style="width: 100%"
+              @tab-click="handleClick"
+            >
+              <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
+                <el-main style="margin: 0; padding: 0; height: 70vh">
+                  <iframe
+                    style="margin: 0; padding: 0; height: 100%; width: 100%"
+                    id="editor"
+                    ref="editor"
+                    :src="src"
+                  ></iframe>
+                </el-main>
+              </el-tab-pane>
+              <el-tab-pane :label="$t('verse.view.script.code')" name="script">
+                <el-card v-if="activeName === 'script'" class="box-card">
+                  <div v-highlight>
+                    <el-tabs v-model="languageName">
+                      <el-tab-pane label="Lua" name="lua">
+                        <template #label>
+                          <span style="display: flex; align-items: center">
+                            <img
+                              src="/lua.png"
+                              style="width: 30px; margin-right: 5px"
+                              alt=""
+                            />
+                            <span>Lua</span>
+                          </span>
+                        </template>
+                        <pre>
+                <code class="lua">{{ LuaCode }}</code>
+              </pre>
+                      </el-tab-pane>
+                      <el-tab-pane label="JavaScript" name="javascript">
+                        <template #label>
+                          <span style="display: flex; align-items: center">
+                            <img
+                              src="/javascript.png"
+                              style="width: 30px; margin-right: 5px"
+                              alt=""
+                            />
+                            <span>JavaScript</span>
+                          </span>
+                        </template>
+                        <pre>
+                <code class="lua">{{ JavaScriptCode }}</code>
+              </pre>
+                      </el-tab-pane>
+                    </el-tabs>
+                  </div>
+                </el-card>
+              </el-tab-pane>
+            </el-tabs>
           </el-container>
         </el-card>
       </el-main>
@@ -37,13 +94,25 @@
 import { useRoute } from "vue-router";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
 import { cybersType, postCyber, putCyber } from "@/api/v1/cyber";
-import { ElMessage } from "element-plus";
+import { ElMessage, TabsPaneContext } from "element-plus";
 import { useAppStore } from "@/store/modules/app";
 
 const appStore = useAppStore();
+const loading = ref(false);
+const meta = ref<metaInfo | null>(null);
+const route = useRoute();
+const id = computed(() => parseInt(route.query.id as string));
+const src = ref(
+  import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + appStore.language
+);
 let ready: boolean = false;
 const editor = ref<HTMLIFrameElement | null>(null);
 const { t } = useI18n();
+const activeName = ref<string>("blockly");
+const languageName = ref<string>("lua");
+const LuaCode = ref("");
+const JavaScriptCode = ref("");
+
 const postScript = async (message: any) => {
   if (meta.value === null) {
     ElMessage({
@@ -67,7 +136,8 @@ const postScript = async (message: any) => {
   });
   await putMetaCode(meta.value.id, {
     blockly: JSON.stringify(message.data),
-    lua: message.script,
+    js: JSON.parse(message.script).javascript,
+    lua: JSON.parse(message.script).lua,
   });
   if (!cyber) {
     const response = await postCyber({
@@ -102,6 +172,12 @@ const handleMessage = async (e: MessageEvent) => {
       initEditor();
     } else if (params.action === "post") {
       await postScript(params.data);
+      LuaCode.value =
+        "local meta = {}\nlocal index = ''\n" +
+        JSON.parse(params.data.script).lua;
+      JavaScriptCode.value =
+        "const meta = {}\nconst index = ''\n" +
+        JSON.parse(params.data.script).javascript;
     } else if (params.action === "post:no-change") {
       ElMessage({
         message: t("meta.script.info"),
@@ -113,14 +189,6 @@ const handleMessage = async (e: MessageEvent) => {
     return;
   }
 };
-
-const loading = ref(false);
-const meta = ref<metaInfo | null>(null);
-const route = useRoute();
-const id = computed(() => parseInt(route.query.id as string));
-const src = ref(
-  import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + appStore.language
-);
 
 watch(
   () => appStore.language, // 监听 language 的变化
@@ -271,6 +339,20 @@ const getResource = (meta: metaInfo) => {
   return ret;
 };
 
+const handleClick = async (tab: TabsPaneContext, event: Event) => {
+  if (activeName.value === "script") {
+    LuaCode.value = LuaCode.value
+      ? LuaCode.value
+      : "local meta = {}\nlocal index = ''\n";
+    JavaScriptCode.value = JavaScriptCode.value
+      ? JavaScriptCode.value
+      : "const meta = {}\nconst index = ''\n";
+    await nextTick();
+  }
+  console.log("luaCode", LuaCode.value);
+  console.log(tab, event);
+};
+
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
 });
@@ -281,6 +363,7 @@ onMounted(async () => {
   const response = await getMeta(id.value, "cyber,event,share,metaCode");
   meta.value = response.data;
   console.log("meta", meta.value);
+  console.log("CYBER", meta.value!.cyber!.script);
   initEditor();
 
   loading.value = false;

@@ -42,7 +42,7 @@ export type metaInfo = {
   editable: boolean;
   viewable: boolean;
   custome?: boolean;
-  cyber?: cybersType;
+  cyber: cybersType;
   author?: Author;
   verseMetas: any[];
   metaCode?: MetaCode;
@@ -56,7 +56,7 @@ export const postMeta = (data: Record<string, any>) => {
   });
 };
 export const putMetaCode = (id: number, data: MetaCode) => {
-  return request({
+  return request<MetaCode>({
     url: path.join("v1", "metas", `code${qs.stringify({ id: id }, true)}`),
     data,
     method: "put",

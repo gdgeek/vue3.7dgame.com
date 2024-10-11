@@ -91,6 +91,7 @@
 import { useRoute } from "vue-router";
 import { getVerse, putVerseCode, VerseData } from "@/api/v1/verse";
 import { useAppStore } from "@/store/modules/app";
+import { TabsPaneContext } from "element-plus";
 
 const appStore = useAppStore();
 const { t } = useI18n();
@@ -139,7 +140,8 @@ const postScript = async (message: any) => {
   console.log("messageScript", message);
   await putVerseCode(verse.value!.id, {
     blockly: JSON.stringify(message.data),
-    lua: message.script,
+    js: JSON.parse(message.script).javascript,
+    lua: JSON.parse(message.script).lua,
   });
 
   ElMessage({
