@@ -17,23 +17,8 @@
               </el-button-group>
             </div>
           </template>
-          <!-- <el-container>
-            <el-main style="margin: 0; padding: 0; height: 70vh">
-              <iframe
-                style="margin: 0; padding: 0; height: 100%; width: 100%"
-                id="editor"
-                ref="editor"
-                :src="src"
-              ></iframe>
-            </el-main>
-          </el-container> -->
           <el-container>
-            <el-tabs
-              v-model="activeName"
-              type="card"
-              style="width: 100%"
-              @tab-click="handleClick"
-            >
+            <el-tabs v-model="activeName" type="card" style="width: 100%">
               <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
                 <el-main style="margin: 0; padding: 0; height: 70vh">
                   <iframe
@@ -60,8 +45,8 @@
                           </span>
                         </template>
                         <pre>
-                <code class="lua">{{ LuaCode }}</code>
-              </pre>
+                          <code class="lua">{{ LuaCode }}</code>
+                        </pre>
                       </el-tab-pane>
                       <el-tab-pane label="JavaScript" name="javascript">
                         <template #label>
@@ -75,8 +60,8 @@
                           </span>
                         </template>
                         <pre>
-                <code class="lua">{{ JavaScriptCode }}</code>
-              </pre>
+                          <code class="lua">{{ JavaScriptCode }}</code>
+                        </pre>
                       </el-tab-pane>
                     </el-tabs>
                   </div>
@@ -113,6 +98,14 @@ const languageName = ref<string>("lua");
 const LuaCode = ref("");
 const JavaScriptCode = ref("");
 
+watch(
+  () => appStore.language, // 监听 language 的变化
+  (newValue, oldValue) => {
+    src.value = import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + newValue;
+    initEditor();
+  }
+);
+
 const postScript = async (message: any) => {
   if (meta.value === null) {
     ElMessage({
@@ -130,10 +123,6 @@ const postScript = async (message: any) => {
   }
 
   const cyber: cybersType | undefined = meta.value.cyber;
-  console.error("code", {
-    blockly: JSON.stringify(message.data),
-    lua: message.script,
-  });
   await putMetaCode(meta.value.id, {
     blockly: JSON.stringify(message.data),
     js: JSON.parse(message.script).javascript,
@@ -190,17 +179,8 @@ const handleMessage = async (e: MessageEvent) => {
   }
 };
 
-watch(
-  () => appStore.language, // 监听 language 的变化
-  (newValue, oldValue) => {
-    src.value = import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + newValue;
-    initEditor();
-  }
-);
-
 const save = () => {
   postMessage("save");
-  return;
 };
 const postMessage = (action: string, data: any = {}) => {
   if (editor.value && editor.value.contentWindow) {
@@ -225,7 +205,6 @@ const initEditor = () => {
   const data = meta.value.metaCode?.blockly
     ? JSON.parse(meta.value.metaCode?.blockly)
     : {};
-  //const data = meta.value.cyber?.data ? JSON.parse(meta.value.cyber.data) : {};
   postMessage("init", {
     language: ["lua", "js"],
     style: ["base", "meta"],
@@ -258,7 +237,6 @@ const testPoint = (data: any, typeList: string[]) => {
 };
 const addMetaData = (data: any, ret: any) => {
   const action = testAction(data);
-  console.log("action", action);
   if (action) {
     ret.action.push(action);
   }
@@ -339,34 +317,27 @@ const getResource = (meta: metaInfo) => {
   return ret;
 };
 
-const handleClick = async (tab: TabsPaneContext, event: Event) => {
-  if (activeName.value === "script") {
-    LuaCode.value = LuaCode.value
-      ? LuaCode.value
-      : "local meta = {}\nlocal index = ''\n";
-    JavaScriptCode.value = JavaScriptCode.value
-      ? JavaScriptCode.value
-      : "const meta = {}\nconst index = ''\n";
-    await nextTick();
-  }
-  console.log("luaCode", LuaCode.value);
-  console.log(tab, event);
-};
-
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
 });
 onMounted(async () => {
   window.addEventListener("message", handleMessage);
 
-  loading.value = true;
-  const response = await getMeta(id.value, "cyber,event,share,metaCode");
-  meta.value = response.data;
-  console.log("meta", meta.value);
-  console.log("CYBER", meta.value!.cyber!.script);
-  initEditor();
-
-  loading.value = false;
+  try {
+    loading.value = true;
+    const response = await getMeta(id.value, "cyber,event,share,metaCode");
+    meta.value = response.data;
+    console.log("meta", meta.value);
+    console.log("CYBER", meta.value!.cyber!.script);
+    initEditor();
+  } catch (error: any) {
+    ElMessage({
+      message: error.message,
+      type: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
 });
 </script>
 

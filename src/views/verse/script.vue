@@ -25,12 +25,7 @@
           </template>
 
           <el-container>
-            <el-tabs
-              v-model="activeName"
-              type="card"
-              style="width: 100%"
-              @tab-click="handleClick"
-            >
+            <el-tabs v-model="activeName" type="card" style="width: 100%">
               <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
                 <el-main style="margin: 0; padding: 0; height: 70vh">
                   <iframe
@@ -137,7 +132,6 @@ const postScript = async (message: any) => {
     return;
   }
 
-  console.log("messageScript", message);
   await putVerseCode(verse.value!.id, {
     blockly: JSON.stringify(message.data),
     js: JSON.parse(message.script).javascript,
@@ -162,10 +156,10 @@ const handleMessage = async (e: MessageEvent) => {
   } else if (params.action === "post") {
     await postScript(params.data);
     LuaCode.value =
-      "local meta = {}\nlocal index = ''\n" +
+      "local verse = {}\nlocal is_playing = ''\n" +
       JSON.parse(params.data.script).lua;
     JavaScriptCode.value =
-      "const meta = {}\nconst index = ''\n" +
+      "const verse = {}\nconst is_playing = ''\n" +
       JSON.parse(params.data.script).javascript;
   } else if (params.action === "post:no-change") {
     ElMessage({
@@ -210,7 +204,6 @@ const initEditor = () => {
     data: data,
     parameters: {
       index: verse.value!.id,
-      // resource: getResource(meta.value),
       resource: resource.value,
     },
   });
@@ -249,20 +242,6 @@ const resource = computed(() => {
   };
 });
 
-const handleClick = async (tab: TabsPaneContext, event: Event) => {
-  if (activeName.value === "script") {
-    LuaCode.value = LuaCode.value
-      ? LuaCode.value
-      : "local meta = {}\nlocal index = ''\n";
-    JavaScriptCode.value = JavaScriptCode.value
-      ? JavaScriptCode.value
-      : "const meta = {}\nconst index = ''\n";
-    await nextTick();
-  }
-  console.log("luaCode", LuaCode.value);
-  console.log(tab, event);
-};
-//https://appleid.apple.com/auth/authorize?client_id=com.mrpp.www&redirect_uri=https%3A%2F%2Ftest.mrpp.com%3A8888%2Fhome%2Findex&response_type=code%20id_token&state=1726813929167&scope=name%20email&response_mode=web_message&frame_id=f8abd4d8-d83f-4f15-a65b-fe7e52404f84&m=12&v=1.5.5
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
 });
