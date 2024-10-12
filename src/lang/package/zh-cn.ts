@@ -1125,6 +1125,12 @@ export default {
       success: "切换布局大小成功！",
     },
   },
+  // 复制
+  copy: {
+    title: "复制",
+    success: "代码已复制到剪贴板",
+    error: "复制失败",
+  },
   langSelect: {
     message: {
       success: "切换语言成功！",

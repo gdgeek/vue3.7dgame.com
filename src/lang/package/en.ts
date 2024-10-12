@@ -1145,6 +1145,12 @@ export default {
       success: "Switch Layout Size Successful!",
     },
   },
+  // 复制
+  copy: {
+    title: "Copy",
+    success: "Code has been copied to clipboard",
+    error: "Copy failed",
+  },
   langSelect: {
     message: {
       success: "Switch Language Successful!",

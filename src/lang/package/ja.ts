@@ -1130,6 +1130,12 @@ export default {
       success: "レイアウトサイズの切り替えに成功しました！",
     },
   },
+  // 设置
+  copy: {
+    title: "コピー",
+    success: "コードがクリップボードにコピーされました",
+    error: "コピーに失敗しました",
+  },
   langSelect: {
     message: {
       success: "言語切り替えに成功しました！",

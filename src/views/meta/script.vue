@@ -30,7 +30,11 @@
                 </el-main>
               </el-tab-pane>
               <el-tab-pane :label="$t('verse.view.script.code')" name="script">
-                <el-card v-if="activeName === 'script'" class="box-card">
+                <el-card
+                  v-if="activeName === 'script'"
+                  class="box-card"
+                  :class="isDark ? 'dark-theme' : 'light-theme'"
+                >
                   <div v-highlight>
                     <el-tabs v-model="languageName">
                       <el-tab-pane label="Lua" name="lua">
@@ -38,30 +42,50 @@
                           <span style="display: flex; align-items: center">
                             <img
                               src="/lua.png"
-                              style="width: 30px; margin-right: 5px"
+                              style="width: 25px; margin-right: 5px"
                               alt=""
                             />
                             <span>Lua</span>
                           </span>
                         </template>
-                        <pre>
-                          <code class="lua">{{ LuaCode }}</code>
-                        </pre>
+                        <div class="code-container">
+                          <el-button
+                            class="copy-button"
+                            text
+                            @click="copyCode(LuaCode)"
+                            ><el-icon class="icon"
+                              ><CopyDocument></CopyDocument></el-icon
+                            >{{ $t("copy.title") }}</el-button
+                          >
+                          <pre>
+                            <code class="lua">{{ LuaCode }}</code>
+                          </pre>
+                        </div>
                       </el-tab-pane>
                       <el-tab-pane label="JavaScript" name="javascript">
                         <template #label>
                           <span style="display: flex; align-items: center">
                             <img
                               src="/javascript.png"
-                              style="width: 30px; margin-right: 5px"
+                              style="width: 25px; margin-right: 5px"
                               alt=""
                             />
                             <span>JavaScript</span>
                           </span>
                         </template>
-                        <pre>
-                          <code class="lua">{{ JavaScriptCode }}</code>
-                        </pre>
+                        <div class="code-container">
+                          <el-button
+                            class="copy-button"
+                            text
+                            @click="copyCode(JavaScriptCode)"
+                            ><el-icon class="icon"
+                              ><CopyDocument></CopyDocument></el-icon
+                            >{{ $t("copy.title") }}</el-button
+                          >
+                          <pre>
+                            <code class="javascript">{{ JavaScriptCode }}</code>
+                          </pre>
+                        </div>
                       </el-tab-pane>
                     </el-tabs>
                   </div>
@@ -81,6 +105,8 @@ import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
 import { cybersType, postCyber, putCyber } from "@/api/v1/cyber";
 import { ElMessage, TabsPaneContext } from "element-plus";
 import { useAppStore } from "@/store/modules/app";
+import { ThemeEnum } from "@/enums/ThemeEnum";
+import { useSettingsStore } from "@/store/modules/settings";
 
 const appStore = useAppStore();
 const loading = ref(false);
@@ -97,6 +123,48 @@ const activeName = ref<string>("blockly");
 const languageName = ref<string>("lua");
 const LuaCode = ref("");
 const JavaScriptCode = ref("");
+const settingsStore = useSettingsStore();
+const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
+
+// 动态加载代码样式
+const loadHighlightStyle = (isDark: boolean) => {
+  const existingLink = document.querySelector(
+    "#highlight-style"
+  ) as HTMLLinkElement;
+  console.log("existingLink", existingLink);
+  if (existingLink) {
+    existingLink.href = isDark
+      ? "https://cdn.jsdelivr.net/npm/highlight.js/styles/a11y-dark.css"
+      : "https://cdn.jsdelivr.net/npm/highlight.js/styles/a11y-light.css";
+  } else {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.id = "highlight-style";
+    link.href = isDark
+      ? "https://cdn.jsdelivr.net/npm/highlight.js/styles/a11y-dark.css"
+      : "https://cdn.jsdelivr.net/npm/highlight.js/styles/a11y-light.css";
+    document.head.appendChild(link);
+  }
+};
+
+watch(isDark, (newValue) => {
+  loadHighlightStyle(newValue);
+});
+
+const copyCode = async (code: string) => {
+  try {
+    await navigator.clipboard.writeText(code);
+    ElMessage({
+      message: t("copy.success"),
+      type: "success",
+    });
+  } catch (error) {
+    ElMessage({
+      message: t("copy.error"),
+      type: "error",
+    });
+  }
+};
 
 watch(
   () => appStore.language, // 监听 language 的变化
@@ -322,6 +390,7 @@ onBeforeUnmount(() => {
 });
 onMounted(async () => {
   window.addEventListener("message", handleMessage);
+  loadHighlightStyle(isDark.value);
 
   try {
     loading.value = true;
@@ -344,5 +413,24 @@ onMounted(async () => {
 <style scoped>
 .icon {
   margin-right: 5px;
+}
+
+.code-container {
+  position: relative;
+}
+
+.copy-button {
+  position: absolute;
+  top: 20px;
+  right: 0;
+  z-index: 1;
+}
+
+.dark-theme .hljs {
+  background-color: rgb(24, 24, 24) !important;
+}
+
+.light-theme .hljs {
+  background-color: #fafafa !important;
 }
 </style>
