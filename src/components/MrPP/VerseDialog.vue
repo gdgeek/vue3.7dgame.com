@@ -55,7 +55,7 @@
                   lazy
                 />
                 <div style="width: 100%; text-align: center">
-                  {{ BeijingData(item.created_at) }}
+                  {{ convertToLocalTime(item.created_at) }}
                 </div>
               </el-card>
             </template>
@@ -110,7 +110,7 @@ import { v4 as uuidv4 } from "uuid";
 import { getVerses } from "@/api/v1/vp-guide";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { postMeta } from "@/api/v1/meta";
-import { BeijingData } from "@/utils/dataChange";
+import { convertToLocalTime } from "@/utils/dataChange";
 
 const dialogVisible = ref(false);
 const active = ref({

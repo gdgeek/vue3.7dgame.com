@@ -1152,4 +1152,9 @@ export default {
     sidebarLogo: "サイドバーのロゴ",
     watermark: "透かしを有効化",
   },
+  layoutSelect: {
+    left: "左側モード",
+    top: "上部モード",
+    mix: "ミックスモード",
+  },
 };

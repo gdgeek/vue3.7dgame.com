@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-wrap justify-around w-full h-12">
-    <el-tooltip content="左侧模式" placement="bottom">
+    <el-tooltip :content="$t('layoutSelect.left')" placement="bottom">
       <div
         class="layout-item left"
         :class="{ 'is-active': modelValue === LayoutEnum.LEFT }"
@@ -11,7 +11,7 @@
       </div>
     </el-tooltip>
 
-    <el-tooltip content="顶部模式" placement="bottom">
+    <el-tooltip :content="$t('layoutSelect.top')" placement="bottom">
       <div
         class="layout-item top"
         :class="{ 'is-active': modelValue === LayoutEnum.TOP }"
@@ -22,7 +22,7 @@
       </div>
     </el-tooltip>
 
-    <el-tooltip content="混合模式" placement="bottom">
+    <el-tooltip :content="$t('layoutSelect.mix')" placement="bottom">
       <div
         class="layout-item mix"
         :class="{ 'is-active': modelValue === LayoutEnum.MIX }"

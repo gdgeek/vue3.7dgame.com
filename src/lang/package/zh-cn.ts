@@ -1147,4 +1147,9 @@ export default {
     sidebarLogo: "侧边栏 Logo",
     watermark: "开启水印",
   },
+  layoutSelect: {
+    left: "左侧模式",
+    top: "顶部模式",
+    mix: "混合模式",
+  },
 };

@@ -72,12 +72,13 @@
                     style="width: 100%; height: 180px"
                     fit="contain"
                     :url="item.image.url"
-                  ></LazyImg>
+                  >
+                  </LazyImg>
                   <div
                     v-if="item.created_at"
                     style="width: 100%; text-align: center"
                   >
-                    {{ BeijingData(item.created_at) }}
+                    {{ convertToLocalTime(item.created_at) }}
                   </div>
                 </el-card>
               </template>
@@ -206,7 +207,7 @@ import {
   deleteMetaResource,
 } from "@/api/v1/meta-resource";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import { BeijingData } from "@/utils/dataChange";
+import { convertToLocalTime } from "@/utils/dataChange";
 
 const dialogVisible = ref(false);
 const activeName = ref("binding");

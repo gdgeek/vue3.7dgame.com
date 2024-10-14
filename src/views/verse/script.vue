@@ -5,7 +5,10 @@
         <el-card :loading="loading" class="box-card">
           <template #header>
             <div v-if="verse" class="clearfix">
-              {{ verse.name }} / 【{{ $t("verse.view.script.title") }}】
+              <el-link :href="`/verse/view?id=${id}`" :underline="false">{{
+                verse.name
+              }}</el-link>
+              /【{{ $t("verse.view.script.title") }}】
 
               <el-button-group style="float: right">
                 <el-button

@@ -85,6 +85,7 @@ import type { ResourceInfo } from "@/api/resources/model";
 import { postFile } from "@/api/v1/files";
 import { useFileStore } from "@/store/modules/config";
 import { FileHandler } from "@/assets/js/file/server";
+import { convertToLocalTime } from "@/utils/dataChange";
 
 const route = useRoute();
 const router = useRouter();
@@ -104,7 +105,10 @@ const tableData = computed(() => {
         item: t("audio.view.info.item2"),
         text: audioData.value.author.nickname,
       },
-      { item: t("audio.view.info.item3"), text: audioData.value.created_at },
+      {
+        item: t("audio.view.info.item3"),
+        text: convertToLocalTime(audioData.value.created_at),
+      },
       {
         item: t("audio.view.info.item4"),
         text: `${audioData.value.file.size}` + t("audio.view.info.size"),

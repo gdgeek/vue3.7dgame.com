@@ -69,6 +69,7 @@ import { postFile } from "@/api/v1/files";
 import { printVector2 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
 import type { ResourceInfo } from "@/api/resources/model";
+import { convertToLocalTime } from "@/utils/dataChange";
 
 const route = useRoute();
 const router = useRouter();
@@ -109,7 +110,7 @@ const tableData = computed(() => {
       },
       {
         item: t("video.view.info.item3"),
-        text: videoData.value.created_at,
+        text: convertToLocalTime(videoData.value.created_at),
       },
       {
         item: t("video.view.info.item4"),

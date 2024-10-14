@@ -1167,4 +1167,9 @@ export default {
     sidebarLogo: "Sidebar Logo",
     watermark: "Watermark",
   },
+  layoutSelect: {
+    left: "Left Mode",
+    top: "Top Mode",
+    mix: "Mixed Mode",
+  },
 };

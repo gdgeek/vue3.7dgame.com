@@ -5,7 +5,10 @@
         <el-card v-loading="loading" class="box-card">
           <template #header>
             <div v-if="meta" class="clearfix">
-              {{ meta.title }} / 【{{ $t("meta.script.title") }}】
+              <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
+                meta.title
+              }}</el-link>
+              /【{{ $t("meta.script.title") }}】
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="save">
                   <font-awesome-icon

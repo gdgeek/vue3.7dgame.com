@@ -80,6 +80,7 @@ import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
 import { printVector3 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
+import { convertToLocalTime } from "@/utils/dataChange";
 
 const loading = ref(false);
 const polygenData = ref<any>(null);
@@ -109,7 +110,7 @@ const tableData = computed(() => {
       },
       {
         item: t("polygen.view.info.item3"),
-        text: polygenData.value.created_at,
+        text: convertToLocalTime(polygenData.value.created_at),
       },
       {
         item: t("polygen.view.info.item4"),

@@ -69,6 +69,7 @@ import { postFile } from "@/api/v1/files";
 import { useFileStore } from "@/store/modules/config";
 import type { ResourceInfo } from "@/api/resources/model";
 import { FileHandler } from "@/assets/js/file/server";
+import { convertToLocalTime } from "@/utils/dataChange";
 
 const image = ref<HTMLImageElement | null>(null);
 const route = useRoute();
@@ -86,21 +87,6 @@ const prepare = computed(
 
 const tableData = computed(() => {
   if (pictureData.value && prepare.value) {
-    // 将数据库存储的时间转换为 UTC 时间
-    const createdAtUtc = new Date(pictureData.value.created_at + "Z"); // 添加 'Z' 表示 UTC 时间
-
-    // 将 UTC 时间转换为北京时间
-    const options: Intl.DateTimeFormatOptions = {
-      timeZone: "Asia/Shanghai",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    };
-    const createdAtBeijing = createdAtUtc.toLocaleString("zh-CN", options);
-
     return [
       { item: t("picture.view.info.item1"), text: pictureData.value.name },
       {
@@ -109,8 +95,7 @@ const tableData = computed(() => {
       },
       {
         item: t("picture.view.info.item3"),
-        // text: pictureData.value.created_at,
-        text: createdAtBeijing,
+        text: convertToLocalTime(pictureData.value.created_at),
       },
       {
         item: t("picture.view.info.item5"),
