@@ -76,11 +76,16 @@
         </el-card>
       </div>
     </div>
-    <el-card style="width: 100%">
-      <div
-        class="background-screen-max"
-        style="display: flex; justify-content: flex-end"
-      >
+    <el-card
+      style="
+        height: 7%;
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+      "
+    >
+      <div class="background-screen-max">
         <div style="display: flex; align-items: center; gap: 10px">
           <span
             v-for="item in informationStore.companies"

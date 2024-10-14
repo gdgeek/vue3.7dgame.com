@@ -200,7 +200,6 @@ body {
 
   &.dark-theme {
     background-color: rgb(37, 37, 37);
-    // color: white;
   }
 }
 
@@ -254,7 +253,7 @@ body {
     align-items: center;
     justify-content: center;
     width: 450px;
-    height: 600px;
+    height: 95%;
     background-color: #fff;
 
     transition: all 0.3s ease;
@@ -319,7 +318,7 @@ body {
   .login-form {
     max-width: 100%;
     height: 100%;
-    padding: 10px 0px 10px 0px;
+    // padding: 10px 0px 10px 0px;
     margin-top: 36px;
   }
 
