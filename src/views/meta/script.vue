@@ -2,7 +2,6 @@
   <div class="verse-code">
     <el-container>
       <el-main>
-        {{ test }}
         <el-card v-loading="loading" class="box-card">
           <template #header>
             <div v-if="meta" class="clearfix">
@@ -158,6 +157,7 @@ watch(isDark, (newValue) => {
 const copyCode = async (code: string) => {
   try {
     await navigator.clipboard.writeText(code);
+
     ElMessage({
       message: t("copy.success"),
       type: "success",
@@ -234,9 +234,6 @@ const handleMessage = async (e: MessageEvent) => {
       initEditor();
     } else if (params.action === "post") {
       await postScript(params.data);
-      // LuaCode.value =
-      //   "local meta = {}\nlocal index = ''\n" +
-      //   JSON.parse(params.data.script).lua;
       console.log("PARAMS", params.data);
       LuaCode.value =
         "local meta = {}\nlocal index = ''\n" + JSON.parse(params.data.script);
@@ -299,7 +296,11 @@ const initEditor = () => {
   });
 };
 const testAction = (data: any) => {
-  if (data && data.parameters && typeof data.parameters !== "undefined") {
+  if (
+    data &&
+    data.parameters &&
+    typeof data.parameters.action !== "undefined"
+  ) {
     return {
       uuid: data.parameters.uuid,
       name: data.parameters.action ?? null,
@@ -406,15 +407,16 @@ onBeforeUnmount(() => {
 onMounted(async () => {
   window.addEventListener("message", handleMessage);
   loadHighlightStyle(isDark.value);
-
   try {
     loading.value = true;
     const response = await getMeta(id.value, "cyber,event,share,metaCode");
+
     meta.value = response.data;
-    console.log("meta", meta.value);
-    console.log("CYBER", meta.value!.cyber!.script);
+    console.error("meta", meta.value);
+
     initEditor();
   } catch (error: any) {
+    alert(error.message);
     ElMessage({
       message: error.message,
       type: "error",

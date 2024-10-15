@@ -37,8 +37,9 @@ const initVerse = async (type: string, name: string, resource: Resource) => {
 };
 
 const initMeta = async (type: string, verse: Verse, resource: Resource) => {
+ 
   const data = {
-    name: `${type}:${resource.name}`,
+    title: `${type}:${resource.name}`,
     verse_id: verse.id,
     image_id: resource.image_id,
   };
