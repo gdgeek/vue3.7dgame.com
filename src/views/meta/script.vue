@@ -8,21 +8,24 @@
               <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
                 meta.title
               }}</el-link>
-              /【{{ $t("meta.script.title") }}】
+              /【{{ $t("meta.script.title") || "Script Title" }}】
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="save">
                   <font-awesome-icon
                     class="icon"
                     icon="save"
                   ></font-awesome-icon>
-                  {{ $t("meta.script.save") }}
+                  {{ $t("meta.script.save") || "Save" }}
                 </el-button>
               </el-button-group>
             </div>
           </template>
           <el-container>
             <el-tabs v-model="activeName" type="card" style="width: 100%">
-              <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
+              <el-tab-pane
+                :label="$t('verse.view.script.edit') || 'Edit Script'"
+                name="blockly"
+              >
                 <el-main style="margin: 0; padding: 0; height: 70vh">
                   <iframe
                     style="margin: 0; padding: 0; height: 100%; width: 100%"
@@ -32,7 +35,10 @@
                   ></iframe>
                 </el-main>
               </el-tab-pane>
-              <el-tab-pane :label="$t('verse.view.script.code')" name="script">
+              <el-tab-pane
+                :label="$t('verse.view.script.code') || 'Script Code'"
+                name="script"
+              >
                 <el-card
                   v-if="activeName === 'script'"
                   class="box-card"
@@ -58,7 +64,7 @@
                             @click="copyCode(LuaCode)"
                             ><el-icon class="icon"
                               ><CopyDocument></CopyDocument></el-icon
-                            >{{ $t("copy.title") }}</el-button
+                            >{{ $t("copy.title") || "Copy" }}</el-button
                           >
                           <pre>
                             <code class="lua">{{ LuaCode }}</code>
@@ -106,7 +112,7 @@
 import { useRoute } from "vue-router";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
 import { cybersType, postCyber, putCyber } from "@/api/v1/cyber";
-import { ElMessage, TabsPaneContext } from "element-plus";
+import { ElMessage } from "element-plus";
 import { useAppStore } from "@/store/modules/app";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
@@ -159,12 +165,12 @@ const copyCode = async (code: string) => {
     await navigator.clipboard.writeText(code);
 
     ElMessage({
-      message: t("copy.success"),
+      message: t("copy.success") || "Copy successful",
       type: "success",
     });
   } catch (error) {
     ElMessage({
-      message: t("copy.error"),
+      message: t("copy.error") || "Copy failed",
       type: "error",
     });
   }
@@ -172,7 +178,7 @@ const copyCode = async (code: string) => {
 
 watch(
   () => appStore.language, // 监听 language 的变化
-  (newValue, oldValue) => {
+  (newValue) => {
     src.value = import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + newValue;
     initEditor();
   }
@@ -181,14 +187,14 @@ watch(
 const postScript = async (message: any) => {
   if (meta.value === null) {
     ElMessage({
-      message: t("meta.script.error1"),
+      message: t("meta.script.error1") || "Error 1",
       type: "error",
     });
     return;
   }
   if (!meta.value.editable) {
     ElMessage({
-      message: t("meta.script.error2"),
+      message: t("meta.script.error2") || "Error 2",
       type: "error",
     });
     return;
@@ -218,7 +224,7 @@ const postScript = async (message: any) => {
   }
 
   ElMessage({
-    message: t("meta.script.success"),
+    message: t("meta.script.success") || "Success",
     type: "success",
   });
 };
@@ -235,11 +241,9 @@ const handleMessage = async (e: MessageEvent) => {
     } else if (params.action === "post") {
       await postScript(params.data);
       console.log("PARAMS", params.data);
-      //  LuaCode.value =
-      //    "local meta = {}\nlocal index = ''\n" + params.data.script;
     } else if (params.action === "post:no-change") {
       ElMessage({
-        message: t("meta.script.info"),
+        message: t("meta.script.info") || "Info",
         type: "info",
       });
     } else if (params.action === "update") {
@@ -266,7 +270,7 @@ const postMessage = (action: string, data: any = {}) => {
       "*"
     );
   } else {
-    console.error(t("meta.script.error3"));
+    console.error(t("meta.script.error3") || "Error 3");
     ElMessage({
       type: "error",
     });
