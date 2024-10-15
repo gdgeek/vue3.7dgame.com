@@ -202,8 +202,8 @@ const postScript = async (message: any) => {
 
   await putVerseCode(verse.value!.id, {
     blockly: JSON.stringify(message.data),
-    js: JSON.parse(message.script).javascript,
-    lua: JSON.parse(message.script).lua,
+    js: message.js,
+    lua: message.lua,
   });
 
   ElMessage({
@@ -223,12 +223,15 @@ const handleMessage = async (e: MessageEvent) => {
       ready = true;
       initEditor();
     } else if (params.action === "post") {
+      console.log(params.data);
       await postScript(params.data);
+
       // LuaCode.value =
       //   "local verse = {}\nlocal is_playing = ''\n" +
       //   JSON.parse(params.data.script).lua;
-      LuaCode.value =
-        "local meta = {}\nlocal index = ''\n" + JSON.parse(params.data.script);
+      //   LuaCode.value =
+      //   "local verse = {}\nlocal index = ''\n" + JSON.parse(params.data.script);
+
       // JavaScriptCode.value =
       //   "const verse = {}\nconst is_playing = ''\n" +
       //   JSON.parse(params.data.script).javascript;
@@ -237,9 +240,9 @@ const handleMessage = async (e: MessageEvent) => {
         message: t("verse.view.script.info"),
         type: "info",
       });
-    } else if (params.action === "update-lua") {
-      LuaCode.value =
-        "local meta = {}\nlocal index = ''\n" + JSON.parse(params.data.script);
+    } else if (params.action === "update") {
+      LuaCode.value = "local verse = {}\nlocal index = ''\n" + params.data.lua;
+      JavaScriptCode.value = params.data.js;
     }
   } catch (error) {
     console.error(e);
@@ -247,7 +250,7 @@ const handleMessage = async (e: MessageEvent) => {
 };
 
 const save = () => {
-  postMessage("save", { language: "lua", data: {} });
+  postMessage("save", { language: ["lua", "js"], data: {} });
 };
 
 const editor = ref<HTMLIFrameElement | null>(null);
