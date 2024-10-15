@@ -247,6 +247,9 @@ const handleMessage = async (e: MessageEvent) => {
         message: t("meta.script.info"),
         type: "info",
       });
+    } else if (params.action === "update-lua") {
+      LuaCode.value =
+        "local meta = {}\nlocal index = ''\n" + JSON.parse(params.data.script);
     }
   } catch (e: any) {
     console.log("ex:" + e);
