@@ -41,14 +41,6 @@
         </el-card>
         <br />
 
-        <el-card v-if="saveable" class="box-card">
-          <language
-            v-if="verse"
-            :verseId="verse.id"
-            :languages="verse.languages!"
-          ></language>
-        </el-card>
-
         <br />
         <el-card v-if="verse" class="box-card">
           <el-button
@@ -101,6 +93,16 @@
             @changed="changed"
           ></VerseToolbar>
           <br />
+        </el-card>
+
+        <br />
+
+        <el-card v-if="saveable" class="box-card">
+          <language
+            v-if="verse"
+            :verseId="verse.id"
+            :languages="verse.languages!"
+          ></language>
         </el-card>
         <br />
 
