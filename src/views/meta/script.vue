@@ -2,6 +2,7 @@
   <div class="verse-code">
     <el-container>
       <el-main>
+        {{ test }}
         <el-card v-loading="loading" class="box-card">
           <template #header>
             <div v-if="meta" class="clearfix">
@@ -270,12 +271,16 @@ const postMessage = (action: string, data: any = {}) => {
     });
   }
 };
+const test = ref<any>();
 const initEditor = () => {
   if (!meta.value) return;
   if (!ready) return;
+
   const data = meta.value.metaCode?.blockly
     ? JSON.parse(meta.value.metaCode?.blockly)
     : {};
+
+  test.value = getResource(meta.value);
   postMessage("init", {
     language: ["lua", "js"],
     style: ["base", "meta"],
@@ -366,7 +371,7 @@ const addMetaData = (data: any, ret: any) => {
 };
 const getResource = (meta: metaInfo) => {
   const data = JSON.parse(meta.data!);
-  console.log("data", data);
+  //  console.log("data", data);
   const ret = {
     action: [],
     trigger: [],
