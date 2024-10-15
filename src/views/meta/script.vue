@@ -239,9 +239,9 @@ const handleMessage = async (e: MessageEvent) => {
       console.log("PARAMS", params.data);
       LuaCode.value =
         "local meta = {}\nlocal index = ''\n" + JSON.parse(params.data.script);
-      JavaScriptCode.value =
-        "const meta = {}\nconst index = ''\n" +
-        JSON.parse(params.data.script).javascript;
+      // JavaScriptCode.value =
+      //   "const meta = {}\nconst index = ''\n" +
+      //   JSON.parse(params.data.script).javascript;
     } else if (params.action === "post:no-change") {
       ElMessage({
         message: t("meta.script.info"),
