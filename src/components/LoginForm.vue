@@ -253,7 +253,7 @@ body {
     align-items: center;
     justify-content: center;
     width: 450px;
-    height: 95%;
+    height: 90%;
     background-color: #fff;
 
     transition: all 0.3s ease;

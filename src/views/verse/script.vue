@@ -213,27 +213,36 @@ const postScript = async (message: any) => {
 };
 
 const handleMessage = async (e: MessageEvent) => {
-  if (!e.data.action) {
-    return;
-  }
-  const params: any = e.data;
+  try {
+    if (!e.data.action) {
+      return;
+    }
+    const params: any = e.data;
 
-  if (params.action === "ready") {
-    ready = true;
-    initEditor();
-  } else if (params.action === "post") {
-    await postScript(params.data);
-    LuaCode.value =
-      "local verse = {}\nlocal is_playing = ''\n" +
-      JSON.parse(params.data.script).lua;
-    JavaScriptCode.value =
-      "const verse = {}\nconst is_playing = ''\n" +
-      JSON.parse(params.data.script).javascript;
-  } else if (params.action === "post:no-change") {
-    ElMessage({
-      message: t("verse.view.script.info"),
-      type: "info",
-    });
+    if (params.action === "ready") {
+      ready = true;
+      initEditor();
+    } else if (params.action === "post") {
+      await postScript(params.data);
+      // LuaCode.value =
+      //   "local verse = {}\nlocal is_playing = ''\n" +
+      //   JSON.parse(params.data.script).lua;
+      LuaCode.value =
+        "local meta = {}\nlocal index = ''\n" + JSON.parse(params.data.script);
+      // JavaScriptCode.value =
+      //   "const verse = {}\nconst is_playing = ''\n" +
+      //   JSON.parse(params.data.script).javascript;
+    } else if (params.action === "post:no-change") {
+      ElMessage({
+        message: t("verse.view.script.info"),
+        type: "info",
+      });
+    } else if (params.action === "update-lua") {
+      LuaCode.value =
+        "local meta = {}\nlocal index = ''\n" + JSON.parse(params.data.script);
+    }
+  } catch (error) {
+    console.error(e);
   }
 };
 

@@ -195,10 +195,11 @@ const postScript = async (message: any) => {
   }
 
   const cyber: cybersType | undefined = meta.value.cyber;
+  console.log("postScript", message);
   await putMetaCode(meta.value.id, {
     blockly: JSON.stringify(message.data),
-    js: JSON.parse(message.script).javascript,
-    lua: JSON.parse(message.script).lua,
+    // js: JSON.parse(message.script).javascript,
+    lua: JSON.parse(message.script),
   });
   if (!cyber) {
     const response = await postCyber({
@@ -233,17 +234,23 @@ const handleMessage = async (e: MessageEvent) => {
       initEditor();
     } else if (params.action === "post") {
       await postScript(params.data);
+      // LuaCode.value =
+      //   "local meta = {}\nlocal index = ''\n" +
+      //   JSON.parse(params.data.script).lua;
+      console.log("PARAMS", params.data);
       LuaCode.value =
-        "local meta = {}\nlocal index = ''\n" +
-        JSON.parse(params.data.script).lua;
-      JavaScriptCode.value =
-        "const meta = {}\nconst index = ''\n" +
-        JSON.parse(params.data.script).javascript;
+        "local meta = {}\nlocal index = ''\n" + JSON.parse(params.data.script);
+      // JavaScriptCode.value =
+      //   "const meta = {}\nconst index = ''\n" +
+      //   JSON.parse(params.data.script).javascript;
     } else if (params.action === "post:no-change") {
       ElMessage({
         message: t("meta.script.info"),
         type: "info",
       });
+    } else if (params.action === "update-lua") {
+      LuaCode.value =
+        "local meta = {}\nlocal index = ''\n" + JSON.parse(params.data.script);
     }
   } catch (e: any) {
     console.log("ex:" + e);
