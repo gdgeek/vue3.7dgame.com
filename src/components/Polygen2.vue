@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- 添加动画选择器 -->
     <div>
       <el-select
         v-model="selectedAnimationIndex"
@@ -205,11 +204,28 @@ onMounted(() => {
 
     const controls = new OrbitControls(camera, renderer.domElement);
 
+    // const light = new THREE.DirectionalLight(0xffffff, 1);
+    // light.position.set(-0.5, 0, 0.7);
+    // scene.add(light);
+    // scene.add(new THREE.PointLight(0xffffff, 3));
+    // scene.add(new THREE.AmbientLight(0xffffff, 1));
+
+    // scene.add(new THREE.PointLight(0xffffff, 0.01));
+    // scene.add(new THREE.AmbientLight(0xffffff, 0.01));
+
+    // 替换之前的光源添加部分
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(-0.5, 0, 0.7);
     scene.add(light);
-    scene.add(new THREE.PointLight(0xffffff, 3));
-    scene.add(new THREE.AmbientLight(0xffffff, 1));
+
+    // 增加点光源
+    const pointLight = new THREE.PointLight(0xffffff, 3); // 强度增加
+    pointLight.position.set(1, 1, 2); // 设置位置
+    scene.add(pointLight);
+
+    // 增加环境光
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1); // 强度提高
+    scene.add(ambientLight);
 
     const erd = new ElementResizeDetector();
     erd.listenTo(content, () => {
