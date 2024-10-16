@@ -8,14 +8,14 @@
             <span v-if="polygenData">{{ polygenData.name }}</span>
           </template>
           <div v-loading="false" class="box-item">
-            <polygen
+            <polygen2
               v-if="polygenData"
               ref="three"
               :file="polygenData.file"
               @loaded="loaded"
               @progress="progress"
             >
-            </polygen>
+            </polygen2>
           </div>
           <el-progress :percentage="percentage"></el-progress>
         </el-card>
@@ -75,6 +75,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
 import Polygen from "@/components/Polygen.vue";
+import Polygen2 from "@/components/Polygen2.vue";
 import { getPolygen, putPolygen, deletePolygen } from "@/api/resources/index";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
