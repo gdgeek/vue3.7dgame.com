@@ -8,7 +8,7 @@
               <el-link :href="`/verse/view?id=${id}`" :underline="false">{{
                 verse.name
               }}</el-link>
-              /【{{ $t("verse.view.script.title") || 'Script Title' }}】 // Added fallback text
+              /【{{ $t("verse.view.script.title") || "Script Title" }}】
 
               <el-button-group style="float: right">
                 <el-button
@@ -21,7 +21,7 @@
                     class="icon"
                     icon="save"
                   ></font-awesome-icon>
-                  {{ $t("verse.view.script.save") || 'Save' }} // Added fallback text
+                  {{ $t("verse.view.script.save") || "Save" }}
                 </el-button>
               </el-button-group>
             </div>
@@ -29,7 +29,10 @@
 
           <el-container>
             <el-tabs v-model="activeName" type="card" style="width: 100%">
-              <el-tab-pane :label="$t('verse.view.script.edit') || 'Edit'" name="blockly"> // Added fallback text
+              <el-tab-pane
+                :label="$t('verse.view.script.edit') || 'Edit'"
+                name="blockly"
+              >
                 <el-main style="margin: 0; padding: 0; height: 70vh">
                   <iframe
                     style="margin: 0; padding: 0; height: 100%; width: 100%"
@@ -39,7 +42,10 @@
                   ></iframe>
                 </el-main>
               </el-tab-pane>
-              <el-tab-pane :label="$t('verse.view.script.code') || 'Code'" name="script"> // Added fallback text
+              <el-tab-pane
+                :label="$t('verse.view.script.code') || 'Code'"
+                name="script"
+              >
                 <el-card v-if="activeName === 'script'" class="box-card">
                   <div v-highlight>
                     <el-tabs v-model="languageName">
@@ -61,7 +67,7 @@
                             @click="copyCode(LuaCode)"
                             ><el-icon class="icon"
                               ><CopyDocument></CopyDocument></el-icon
-                            >{{ $t("copy.title") || 'Copy' }}</el-button // Added fallback text
+                            >{{ $t("copy.title") || "Copy" }}</el-button
                           >
                           <pre>
                            <code class="lua">{{ LuaCode }}</code>
@@ -165,12 +171,12 @@ const copyCode = async (code: string) => {
   try {
     await navigator.clipboard.writeText(code);
     ElMessage({
-      message: t("copy.success") || 'Copy successful',
+      message: t("copy.success") || "Copy successful",
       type: "success",
     });
   } catch (error) {
     ElMessage({
-      message: t("copy.error") || 'Copy failed',
+      message: t("copy.error") || "Copy failed",
       type: "error",
     });
   }
@@ -178,7 +184,8 @@ const copyCode = async (code: string) => {
 
 watch(
   () => appStore.language, // 监听 language 的变化
-  (newValue) => { // Removed unused parameter 'oldValue'
+  (newValue) => {
+    // Removed unused parameter 'oldValue'
     src.value = import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + newValue;
     initEditor();
   }
@@ -187,14 +194,14 @@ watch(
 const postScript = async (message: any) => {
   if (verse.value === null) {
     ElMessage({
-      message: t("verse.view.script.error1") || 'Error 1',
+      message: t("verse.view.script.error1") || "Error 1",
       type: "error",
     });
     return;
   }
   if (!verse.value!.editable) {
     ElMessage({
-      message: t("verse.view.script.error2") || 'Error 2',
+      message: t("verse.view.script.error2") || "Error 2",
       type: "error",
     });
     return;
@@ -207,7 +214,7 @@ const postScript = async (message: any) => {
   });
 
   ElMessage({
-    message: t("verse.view.script.success") || 'Success',
+    message: t("verse.view.script.success") || "Success",
     type: "success",
   });
 };
@@ -237,7 +244,7 @@ const handleMessage = async (e: MessageEvent) => {
       //   JSON.parse(params.data.script).javascript;
     } else if (params.action === "post:no-change") {
       ElMessage({
-        message: t("verse.view.script.info") || 'Info',
+        message: t("verse.view.script.info") || "Info",
         type: "info",
       });
     } else if (params.action === "update") {
@@ -265,7 +272,7 @@ const postMessage = (action: string, data: any = {}) => {
       "*"
     );
   } else {
-    console.error(t("verse.view.script.error3") || 'Error 3');
+    console.error(t("verse.view.script.error3") || "Error 3");
     ElMessage({
       type: "error",
     });
