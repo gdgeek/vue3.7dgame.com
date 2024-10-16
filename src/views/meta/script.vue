@@ -200,28 +200,13 @@ const postScript = async (message: any) => {
     return;
   }
 
-  const cyber: cybersType | undefined = meta.value.cyber;
+  // const cyber: cybersType | undefined = meta.value.cyber;
   console.log("postScript", message);
   await putMetaCode(meta.value.id, {
     blockly: JSON.stringify(message.data),
     lua: message.lua,
     js: message.js,
   });
-  if (!cyber) {
-    const response = await postCyber({
-      meta_id: meta.value.id,
-      data: JSON.stringify(message.data),
-      script: message.lua,
-    });
-
-    meta.value.cyber = response.data;
-  } else {
-    const response = await putCyber(cyber.id, {
-      data: JSON.stringify(message.data),
-      script: message.script,
-    });
-    meta.value.cyber = response.data;
-  }
 
   ElMessage({
     message: t("meta.script.success") || "Success",

@@ -107,6 +107,7 @@ export const postVerse = (data: PostVerseData) => {
 };
 
 export const putVerseCode = (id: number, data: VerseCode) => {
+ 
   return request<VerseCode>({
     url: path.join("v1", "verses", `code${qs.stringify({ id: id }, true)}`),
     data,
