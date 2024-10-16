@@ -15,4 +15,3 @@ export const VueAppleLoginConfig = {
   state: Date.now().toString(),
   usePopup: true,
 };
-

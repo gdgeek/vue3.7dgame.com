@@ -9,7 +9,7 @@
           allow-create
           default-first-option
           :placeholder="$t('verse.view.form.placeholder1')"
-          style="width: 25%"
+          style="width: 120px"
         >
           <el-option
             v-for="item in options"
