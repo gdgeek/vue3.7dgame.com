@@ -87,7 +87,7 @@ const isShadowEnabled = ref(false); // 阴影开关状态
 
 // 动画切换
 const playAnimation = (index: number) => {
-  if (index === 0 && animations.value.length) return;
+  if (index === 0 && animations.value.length === 0) return;
   if (mixer && animations.value.length > 0 && isAnimationPlaying.value) {
     // 停止之前的所有动画
     mixer.stopAllAction();
