@@ -6,7 +6,16 @@
         @change="playAnimation"
         placeholder="Select Animation"
         style="width: 240px"
+        :emptyText="'No data'"
+        :disabled="animations.length === 0"
       >
+        <el-option
+          v-if="animations.length === 0"
+          :key="0"
+          :label="'No data'"
+          :value="0"
+          disabled
+        ></el-option>
         <el-option
           v-for="(animation, index) in animations"
           :key="index"
@@ -43,7 +52,6 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import ElementResizeDetector from "element-resize-detector";
 import { convertToHttps } from "@/assets/js/helper";
-import { Check, Close } from "@element-plus/icons-vue";
 
 // 将Vector3的坐标值固定到小数点后n位
 function toFixedVector3(vec: THREE.Vector3, n: number): THREE.Vector3 {
@@ -73,12 +81,13 @@ let clock = new THREE.Clock(); // 用于更新动画的时钟
 let sleep = false;
 
 const animations = ref<THREE.AnimationClip[]>([]);
-const selectedAnimationIndex = ref();
+const selectedAnimationIndex = ref<number>(0);
 const isAnimationPlaying = ref(true);
 const isShadowEnabled = ref(false); // 阴影开关状态
 
 // 动画切换
 const playAnimation = (index: number) => {
+  if (index === 0 && animations.value.length) return;
   if (mixer && animations.value.length > 0 && isAnimationPlaying.value) {
     // 停止之前的所有动画
     mixer.stopAllAction();
