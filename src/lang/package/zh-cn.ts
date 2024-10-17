@@ -946,7 +946,7 @@ export default {
       },
       script: {
         title: "脚本",
-        save: "保存脚本",
+        save: "保存",
         error1: "没有信息",
         error2: "没有编辑权限",
         error3: "没有编辑器",

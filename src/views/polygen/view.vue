@@ -34,7 +34,7 @@
         </el-card>
         <br />
 
-        <el-card>
+        <!-- <el-card>
           <div class="check-box">
             <input type="checkbox" @change="change()" checked />
             {{ autoPlay ? "Play" : "Stop" }}
@@ -58,7 +58,7 @@
               {{ process + "%" }}
             </div>
           </div>
-        </el-card>
+        </el-card> -->
       </el-col>
 
       <el-col :sm="8">
@@ -102,7 +102,6 @@
 import { useRoute, useRouter } from "vue-router";
 import Polygen from "@/components/Polygen.vue";
 import Polygen2 from "@/components/Polygen2.vue";
-import Polygen3 from "@/components/Polygen3.vue";
 import { getPolygen, putPolygen, deletePolygen } from "@/api/resources/index";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
@@ -130,34 +129,34 @@ const dataInfo = computed(() =>
 );
 
 // vue3dLoader
-const autoPlay = ref(true);
-function change() {
-  if (autoPlay.value) {
-    autoPlay.value = false;
-  } else {
-    autoPlay.value = true;
-  }
-}
-const filePath = ref();
-filePath.value = "/public/crabsquid.glb";
-const currentModelIndex = ref();
-const process = ref(0);
-function onProcess(event: any, index: number) {
-  process.value = Math.floor((event.loaded / event.total) * 100);
-  if (index != 0) {
-    currentModelIndex.value = index;
-  }
-}
+// const autoPlay = ref(true);
+// function change() {
+//   if (autoPlay.value) {
+//     autoPlay.value = false;
+//   } else {
+//     autoPlay.value = true;
+//   }
+// }
+// const filePath = ref();
+// filePath.value = "/public/crabsquid.glb";
+// const currentModelIndex = ref();
+// const process = ref(0);
+// function onProcess(event: any, index: number) {
+//   process.value = Math.floor((event.loaded / event.total) * 100);
+//   if (index != 0) {
+//     currentModelIndex.value = index;
+//   }
+// }
 
-const lights = ref();
-lights.value = [
-  {
-    type: "AmbientLight", // or pointLight
-    color: "#ffffff",
-    position: { x: 0, y: 0, z: 400 },
-    intensity: 1,
-  },
-];
+// const lights = ref();
+// lights.value = [
+//   {
+//     type: "AmbientLight", // or pointLight
+//     color: "#ffffff",
+//     position: { x: 0, y: 0, z: 400 },
+//     intensity: 1,
+//   },
+// ];
 
 const tableData = computed(() => {
   if (polygenData.value !== null && prepare.value) {

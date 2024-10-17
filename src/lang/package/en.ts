@@ -963,7 +963,7 @@ export default {
       },
       script: {
         title: "Script",
-        save: "Save Script",
+        save: "Save",
         error1: "No information",
         error2: "No edit permissions",
         error3: "No editor available",

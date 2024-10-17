@@ -10,10 +10,27 @@
         <el-option
           v-for="(animation, index) in animations"
           :key="index"
-          :label="'animation ' + (index + 1)"
+          :label="animation.name"
           :value="index"
         ></el-option>
       </el-select>
+      <el-switch
+        v-model="isAnimationPlaying"
+        @change="toggleAnimation"
+        style="margin-left: 5px"
+        inline-prompt
+        active-text="Animation On"
+        inactive-text="Animation Off"
+        :disabled="animations.length === 0"
+      ></el-switch>
+      <el-switch
+        v-model="isShadowEnabled"
+        @change="toggleShadow"
+        style="margin-left: 5px"
+        inline-prompt
+        active-text="Shadow On"
+        inactive-text="Shadow Off"
+      ></el-switch>
     </div>
     <div id="three" ref="three" style="height: 300px; width: 100%"></div>
   </div>
@@ -26,6 +43,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import ElementResizeDetector from "element-resize-detector";
 import { convertToHttps } from "@/assets/js/helper";
+import { Check, Close } from "@element-plus/icons-vue";
 
 // 将Vector3的坐标值固定到小数点后n位
 function toFixedVector3(vec: THREE.Vector3, n: number): THREE.Vector3 {
@@ -54,27 +72,52 @@ let mixer: THREE.AnimationMixer | null = null; // 添加动画混合器
 let clock = new THREE.Clock(); // 用于更新动画的时钟
 let sleep = false;
 
-// 定义动画列表和当前选择的动画索引
-let animations: THREE.AnimationClip[] = []; // 存储动画列表
-const selectedAnimationIndex = ref(0); // 当前选择的动画索引
+const animations = ref<THREE.AnimationClip[]>([]);
+const selectedAnimationIndex = ref();
+const isAnimationPlaying = ref(true);
+const isShadowEnabled = ref(false); // 阴影开关状态
 
-// 切换动画的函数
+// 动画切换
 const playAnimation = (index: number) => {
-  if (mixer && animations.length > 0) {
+  if (mixer && animations.value.length > 0 && isAnimationPlaying.value) {
     // 停止之前的所有动画
     mixer.stopAllAction();
 
     // 获取选择的动画并播放
-    const action = mixer.clipAction(animations[index]);
+    const action = mixer.clipAction(animations.value[index]);
 
     // 检查是否存在动画并播放
     if (action) {
-      action.reset(); // 重置动画时间到0
+      action.reset();
       action.setLoop(THREE.LoopRepeat, Infinity); // 设置动画循环模式
       action.fadeIn(0.5); // 平滑过渡到新动画
-      action.play(); // 播放新动画
+      action.play();
     }
   }
+};
+
+// 切换动画的播放状态
+const toggleAnimation = (value: string | number | boolean) => {
+  if (mixer) {
+    if (value) {
+      playAnimation(selectedAnimationIndex.value);
+    } else {
+      mixer.stopAllAction();
+    }
+  }
+};
+
+// 切换阴影功能
+const toggleShadow = (value: any) => {
+  scene.traverse((child) => {
+    if (child instanceof THREE.Light) {
+      child.castShadow = value; // 控制光源是否启用阴影
+    }
+    if (child instanceof THREE.Mesh) {
+      child.receiveShadow = value; // 控制物体是否接收阴影
+      child.castShadow = value; // 控制物体是否投射阴影
+    }
+  });
 };
 
 // 刷新场景并加载新模型
@@ -88,21 +131,14 @@ const refresh = () => {
     url,
     (gltf) => {
       const model = gltf.scene;
-      // const animations = gltf.animations; // 获取动画列表
       console.log("GLTF", gltf);
 
-      // 将动画列表保存到 animations 中
-      animations = gltf.animations;
+      animations.value = gltf.animations;
       console.log("GLTF Animations:", animations);
 
-      // 添加动画混合器并播放动画
-      if (animations.length > 0) {
+      if (animations.value.length > 0) {
         console.log("Animations found:");
         mixer = new THREE.AnimationMixer(model);
-        // const action = mixer.clipAction(
-        //   animations.value[selectedAnimation.value]
-        // );
-        // action.play();
         playAnimation(selectedAnimationIndex.value);
       } else {
         console.log("No animations found in this GLB file.");
@@ -121,6 +157,15 @@ const refresh = () => {
       );
       model.scale.set(scale, scale, scale);
 
+      model.traverse((child) => {
+        child.castShadow = isShadowEnabled.value;
+        if (child instanceof THREE.Mesh) {
+          child.geometry.computeVertexNormals();
+          child.material.metalness = 1;
+          child.receiveShadow = isShadowEnabled.value;
+        }
+      });
+
       scene?.add(model);
       emit("loaded", {
         size: toFixedVector3(size, 5),
@@ -133,12 +178,6 @@ const refresh = () => {
     }
   );
 };
-
-// 监听动画选择变化，自动切换动画
-// watch(selectedAnimation, () => {
-//   changeAnimation();
-//   console.log("Selected Animation:", animations.value[selectedAnimation.value]);
-// });
 
 // 截图功能
 const screenshot = (): Promise<Blob> => {
@@ -200,9 +239,14 @@ onMounted(() => {
     renderer.setViewport(0, 0, width, height);
     renderer.setSize(width, height);
     renderer.setClearColor(0xeeffff, 1);
+    renderer.shadowMap.enabled = true; // 启用阴影
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 设置阴影类型
     content.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
+
+    controls.enableDamping = true; // 启用阻尼效果，使旋转更加平滑
+    controls.dampingFactor = 0.05; // 阻尼系数
 
     // const light = new THREE.DirectionalLight(0xffffff, 1);
     // light.position.set(-0.5, 0, 0.7);
@@ -210,22 +254,13 @@ onMounted(() => {
     // scene.add(new THREE.PointLight(0xffffff, 3));
     // scene.add(new THREE.AmbientLight(0xffffff, 1));
 
-    // scene.add(new THREE.PointLight(0xffffff, 0.01));
-    // scene.add(new THREE.AmbientLight(0xffffff, 0.01));
-
-    // 替换之前的光源添加部分
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(-0.5, 0, 0.7);
-    scene.add(light);
-
-    // 增加点光源
-    const pointLight = new THREE.PointLight(0xffffff, 3); // 强度增加
-    pointLight.position.set(1, 1, 2); // 设置位置
-    scene.add(pointLight);
-
-    // 增加环境光
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1); // 强度提高
-    scene.add(ambientLight);
+    // 添加光源
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(-0.5, 0, 0.7);
+    directionalLight.castShadow = isShadowEnabled.value; // 设置光源阴影
+    scene.add(directionalLight);
+    scene.add(new THREE.PointLight(0xffffff, 3));
+    scene.add(new THREE.AmbientLight(0xffffff, 1));
 
     const erd = new ElementResizeDetector();
     erd.listenTo(content, () => {

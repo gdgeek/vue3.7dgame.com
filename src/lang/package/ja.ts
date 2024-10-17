@@ -952,7 +952,7 @@ export default {
       },
       script: {
         title: "スクリプト",
-        save: "スクリプトを保存",
+        save: "保存",
         error1: "情報がありません",
         error2: "編集権限がありません",
         error3: "エディターがありません",
