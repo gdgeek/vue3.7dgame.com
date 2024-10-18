@@ -396,7 +396,7 @@ onMounted(async () => {
     const response = await getMeta(id.value, "cyber,event,share,metaCode");
 
     meta.value = response.data;
-    console.error("meta", meta.value);
+    // console.error("meta", meta.value);
 
     initEditor();
   } catch (error: any) {
