@@ -5,15 +5,15 @@
         <el-card shadow="hover" :body-style="{ padding: '0px' }">
           <template #header>
             <span class="mrpp-title">
-              <b class="card-title" nowrap>{{ item.name }}</b>
+              <b class="card-title" nowrap>{{ item.name || item.title }}</b>
             </span>
           </template>
 
-          <LazyImg
+          <img
             v-if="!item.image"
             src="@/assets/image/none.png"
             style="width: 100%; height: 300px; object-fit: contain"
-          ></LazyImg>
+          />
           <LazyImg
             v-else
             style="width: 100%; height: 300px"
@@ -55,10 +55,16 @@ import "vue-waterfall-plugin-next/dist/style.css";
 
 const props = defineProps({
   item: {
-    type: Object as PropType<{ name: string; image: { url: string } | null }>,
+    type: Object as PropType<{
+      name?: string;
+      title?: string;
+      image: { url: string } | null;
+    }>,
     required: true,
   },
 });
+
+console.log("ITEM", props.item);
 
 const emits = defineEmits(["named", "deleted"]);
 
