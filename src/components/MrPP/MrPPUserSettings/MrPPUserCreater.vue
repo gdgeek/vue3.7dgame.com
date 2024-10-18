@@ -76,7 +76,7 @@
             {{ creation.verseCount }}
           </el-descriptions-item>
 
-          <el-descriptions-item>
+          <!-- <el-descriptions-item>
             <template #label>
               <router-link class="info-content-label-link" to="/home/creator">
                 <font-awesome-icon
@@ -100,15 +100,15 @@
               </router-link>
             </template>
             {{ creation.likeCount }}
-          </el-descriptions-item>
+          </el-descriptions-item> -->
         </el-descriptions>
 
-        <aside style="margin-top: 10px; margin-bottom: 15px; float: right">
+        <!-- <aside style="margin-top: 10px; margin-bottom: 15px; float: right">
           <el-button type="primary" plain size="small" @click="gotoCreator">
             <i class="el-icon-edit"></i>
             {{ $t("homepage.myCreation.enter") }}
           </el-button>
-        </aside>
+        </aside> -->
       </div>
     </el-card>
     <br />

@@ -79,6 +79,7 @@
     "three": "^0.167.1",
     "uuid": "^10.0.0",
     "vue": "^3.5.12",
+    "vue-3d-loader": "^2.2.4",
     "vue-apple-login": "~2.0.1",
     "vue-cropper": "^1.1.4",
     "vue-hljs": "^3.0.1",

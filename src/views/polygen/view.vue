@@ -8,14 +8,14 @@
             <span v-if="polygenData">{{ polygenData.name }}</span>
           </template>
           <div v-loading="false" class="box-item">
-            <polygen
+            <polygen2
               v-if="polygenData"
               ref="three"
               :file="polygenData.file"
               @loaded="loaded"
               @progress="progress"
             >
-            </polygen>
+            </polygen2>
           </div>
           <el-progress :percentage="percentage"></el-progress>
         </el-card>
@@ -33,6 +33,32 @@
           </el-button>
         </el-card>
         <br />
+
+        <!-- <el-card>
+          <div class="check-box">
+            <input type="checkbox" @change="change()" checked />
+            {{ autoPlay ? "Play" : "Stop" }}
+          </div>
+          <div class="content">
+            <vue3dLoader
+              filePath="/public/crabsquid.glb"
+              :cameraPosition="{ x: 0, y: 0, z: 0 }"
+              :enableDraco="true"
+              :height="350"
+              :lights="lights"
+              :auto-play="autoPlay"
+              :enableDamping="true"
+              :dampingFactor="0.05"
+              outputEncoding="sRGB"
+              backgroundColor="#F2F2F2"
+              @process="onProcess"
+            ></vue3dLoader>
+            <div class="process">
+              current model: {{ currentModelIndex }}, loadding:
+              {{ process + "%" }}
+            </div>
+          </div>
+        </el-card> -->
       </el-col>
 
       <el-col :sm="8">
@@ -75,12 +101,14 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
 import Polygen from "@/components/Polygen.vue";
+import Polygen2 from "@/components/Polygen2.vue";
 import { getPolygen, putPolygen, deletePolygen } from "@/api/resources/index";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
 import { printVector3 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
 import { convertToLocalTime } from "@/utils/dataChange";
+import { vue3dLoader } from "vue-3d-loader";
 
 const loading = ref(false);
 const polygenData = ref<any>(null);
@@ -99,6 +127,36 @@ const prepare = computed(
 const dataInfo = computed(() =>
   prepare.value ? JSON.parse(polygenData.value.info) : null
 );
+
+// vue3dLoader
+// const autoPlay = ref(true);
+// function change() {
+//   if (autoPlay.value) {
+//     autoPlay.value = false;
+//   } else {
+//     autoPlay.value = true;
+//   }
+// }
+// const filePath = ref();
+// filePath.value = "/public/crabsquid.glb";
+// const currentModelIndex = ref();
+// const process = ref(0);
+// function onProcess(event: any, index: number) {
+//   process.value = Math.floor((event.loaded / event.total) * 100);
+//   if (index != 0) {
+//     currentModelIndex.value = index;
+//   }
+// }
+
+// const lights = ref();
+// lights.value = [
+//   {
+//     type: "AmbientLight", // or pointLight
+//     color: "#ffffff",
+//     position: { x: 0, y: 0, z: 400 },
+//     intensity: 1,
+//   },
+// ];
 
 const tableData = computed(() => {
   if (polygenData.value !== null && prepare.value) {
@@ -306,4 +364,29 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 @import "@/styles/view-style.scss";
+
+.content {
+  height: 100%;
+  position: relative;
+}
+
+.check-box {
+  background-color: rgb(56, 106, 153);
+  padding: 5px 4px;
+  z-index: 100;
+  justify-content: flex-end;
+  font-size: 12px;
+  border-radius: 4px;
+  color: #fff;
+}
+
+.process {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 100%;
+  transform: translateX(-50%);
+  padding: 3px 8px;
+  background-color: rgb(64, 158, 255);
+}
 </style>
