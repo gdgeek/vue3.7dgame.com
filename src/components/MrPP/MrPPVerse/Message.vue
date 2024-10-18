@@ -75,8 +75,9 @@
         </el-col>
         <el-col :span="10" align="right">
           <small v-if="message" style="color: #8790a7">
-            {{ message.author!.nickname }} {{ $t("verse.view.message.edit") }}
-            {{ message.updated_at }}
+            {{ message.author?.nickname || message.author?.username }}
+            {{ $t("verse.view.message.edit") }}
+            {{ convertToLocalTime(message.updated_at!) }}
           </small>
         </el-col>
       </el-row>
@@ -98,6 +99,7 @@ import { useRouter } from "@/router";
 import { useTagsStore } from "@/store/modules/tags";
 import { useUserStore } from "@/store/modules/user";
 import DOMPurify from "dompurify";
+import { convertToLocalTime } from "@/utils/dataChange";
 
 const props = defineProps<{ messageId: number | undefined }>();
 const emit = defineEmits<{
