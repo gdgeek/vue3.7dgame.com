@@ -162,6 +162,7 @@ import { useSettingsStore } from "@/store/modules/settings";
 import { useInfomationStore } from "@/store/modules/information";
 import { useTagsViewStore, useUserStore } from "@/store";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
+import AuthAPI from "@/api/auth";
 
 const router = useRouter();
 const route = useRoute();
@@ -191,6 +192,7 @@ const parseRedirect = (): {
 
 const enter = async (
   user: any,
+  form: any,
   resolve: () => void,
   reject: (message: string) => void
 ) => {
@@ -204,6 +206,20 @@ const enter = async (
       ElMessage.error("The login response is missing the access_token");
     }
     await userStore.getUserInfo();
+
+    // 设置定时器，每隔一个小时刷新token并请求用户数据
+    userStore.refreshInterval = setInterval(async () => {
+      try {
+        const newTokenResponse = await AuthAPI.login(form.value); // 这里需要根据你的 API 修改
+        const newToken = newTokenResponse.data.auth; // 假设新的 token 在此
+        localStorage.setItem(TOKEN_KEY, "Bearer " + newToken); // 更新 token
+        // console.log("Token refreshed:", newToken);
+        await userStore.getUserInfo(); // 刷新用户数据
+      } catch (e) {
+        console.error("Failed to refresh user data:", e);
+      }
+    }, 3600);
+
     const { path, queryParams } = parseRedirect();
     router.push({ path: path, query: queryParams });
     resolve();
@@ -228,6 +244,9 @@ watch(
   async (newPath) => {
     if (newPath === "/logout") {
       await userStore.logout();
+      if (userStore.refreshInterval) {
+        clearInterval(userStore.refreshInterval); // 清除定时器
+      }
       await tagsViewStore.delAllViews();
       setTimeout(() => {
         router.push("/login?redirect=/home/index");

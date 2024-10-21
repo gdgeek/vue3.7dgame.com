@@ -75,6 +75,8 @@ export const useUserStore = defineStore("user", () => {
     });
   }
 
+  const refreshInterval = ref<NodeJS.Timeout | null>(null);
+
   const getUserInfo = async () => {
     try {
       const res = await UserAPI.getInfo();
@@ -159,6 +161,10 @@ export const useUserStore = defineStore("user", () => {
       perms: [],
     };
     // location.reload(); // 清空路由
+    if (refreshInterval.value) {
+      clearInterval(refreshInterval.value);
+      refreshInterval.value = null;
+    }
   };
 
   // remove token
@@ -166,7 +172,7 @@ export const useUserStore = defineStore("user", () => {
     console.log("resetToken");
     return new Promise<void>((resolve) => {
       localStorage.setItem(TOKEN_KEY, "");
-   //   resetRouter();
+      //   resetRouter();
       resolve();
     });
   }
@@ -177,6 +183,7 @@ export const useUserStore = defineStore("user", () => {
     getUserInfo,
     logout,
     resetToken,
+    refreshInterval,
   };
 });
 

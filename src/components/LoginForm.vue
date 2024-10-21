@@ -113,7 +113,7 @@ const rules = computed(() => {
 const emit = defineEmits(["register", "enter"]);
 const login = async (data: any) => {
   return new Promise<void>((resolve, reject) => {
-    emit("enter", data, resolve, reject);
+    emit("enter", data, form, resolve, reject);
   });
 };
 
