@@ -54,6 +54,7 @@
     <div v-if="route.path === '/login'" class="content">
       <login-form
         v-if="!appleIdToken"
+        ref="loginFormRef"
         @enter="enter"
         @register="register"
       ></login-form>
@@ -172,6 +173,7 @@ const informationStore = useInfomationStore();
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
+const loginFormRef = ref<InstanceType<typeof LoginForm>>();
 
 const parseRedirect = (): {
   path: string;
@@ -207,18 +209,7 @@ const enter = async (
     }
     await userStore.getUserInfo();
 
-    // 设置定时器，每隔一个小时刷新token并请求用户数据
-    userStore.refreshInterval = setInterval(async () => {
-      try {
-        const newTokenResponse = await AuthAPI.login(form.value);
-        const newToken = newTokenResponse.data.auth;
-        localStorage.setItem(TOKEN_KEY, "Bearer " + newToken); // 更新 token
-        console.log("Token refreshed:", newToken);
-        await userStore.getUserInfo(); // 刷新用户数据
-      } catch (e) {
-        console.error("Failed to refresh user data:", e);
-      }
-    }, 3600000);
+    userStore.setupRefreshInterval(form.value);
 
     const { path, queryParams } = parseRedirect();
     router.push({ path: path, query: queryParams });
@@ -244,9 +235,6 @@ watch(
   async (newPath) => {
     if (newPath === "/logout") {
       await userStore.logout();
-      if (userStore.refreshInterval) {
-        clearInterval(userStore.refreshInterval); // 清除定时器
-      }
       await tagsViewStore.delAllViews();
       setTimeout(() => {
         router.push("/login?redirect=/home/index");
@@ -307,6 +295,7 @@ body {
     font-family: "KaiTi", sans-serif;
     // font-size: 14px;
     font-weight: 600;
+
     &:hover {
       color: #3876c2;
     }

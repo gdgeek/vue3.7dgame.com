@@ -789,6 +789,7 @@ const initRoutes = async () => {
 import type { AnyAbility } from "@casl/ability";
 
 import { AbilityRouter } from "@/utils/ability";
+import { useUserStore } from "@/store";
 const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   const can = ability.can.bind(ability);
   route.forEach((route) => {

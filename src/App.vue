@@ -16,6 +16,7 @@ import { UpdateAbility } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
 import { useUserStore } from "@/store/modules/user";
 import { UpdateRoutes } from "@/router";
+import { TOKEN_KEY } from "./enums/CacheEnum";
 const userStore = useUserStore();
 
 const ability = useAbility(); // 提取到 setup 顶层
@@ -27,6 +28,12 @@ watch(
     UpdateRoutes(ability);
   }
 );
+onMounted(() => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token) {
+    userStore.setupRefreshInterval(userStore.form);
+  }
+});
 </script>
 <style scoped lang="scss">
 .fade-enter-active,

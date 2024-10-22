@@ -66,20 +66,23 @@ import { PostSiteAppleId } from "@/api/v1/site";
 import { VueAppleLoginConfig } from "@/utils/helper";
 import { LoginData } from "@/api/auth/model";
 import { useUserStore } from "@/store";
+import { TOKEN_KEY } from "@/enums/CacheEnum";
 
 const formRef = ref<FormInstance>();
 const settingsStore = useSettingsStore();
-
+const userStore = useUserStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 const appleLoginColor = computed(() => (isDark.value ? "black" : "white"));
 
 const loading = ref<boolean>(false);
 
 const { t } = useI18n();
-const form = ref<LoginData>({
-  username: "",
-  password: "",
-});
+// const form = ref<LoginData>({
+//   username: "",
+//   password: "",
+// });
+
+const { form } = storeToRefs(userStore);
 
 const rules = computed(() => {
   return {
@@ -123,9 +126,8 @@ const submit = () => {
     loading.value = true;
     if (valid) {
       try {
-        const respose = await AuthAPI.login(form.value);
-        console.log(respose.data);
-        await login(respose.data);
+        const response = await AuthAPI.login(form.value);
+        await login(response.data);
       } catch (e: any) {
         ElMessage.error(e.message);
         loading.value = false;
@@ -134,18 +136,8 @@ const submit = () => {
       loading.value = false;
       ElMessage({ type: "error", message: t("login.error") });
     }
-    //loading.value = false;
   });
 };
-
-useUserStore().refreshInterval = setInterval(() => {
-  try {
-    submit();
-    console.log("Refresh login", form.value);
-  } catch {
-    console.log("Failed to refresh login");
-  }
-}, 3600000);
 
 const onFailure = async (error: any) => {
   loading.value = false;
@@ -229,6 +221,7 @@ body {
     font-family: "KaiTi", sans-serif;
     font-size: 14px;
     font-weight: 400;
+
     &:hover {
       color: #3876c2;
     }
