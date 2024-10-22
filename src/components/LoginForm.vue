@@ -65,6 +65,7 @@ import AuthAPI from "@/api/auth/index";
 import { PostSiteAppleId } from "@/api/v1/site";
 import { VueAppleLoginConfig } from "@/utils/helper";
 import { LoginData } from "@/api/auth/model";
+import { useUserStore } from "@/store";
 
 const formRef = ref<FormInstance>();
 const settingsStore = useSettingsStore();
@@ -136,6 +137,15 @@ const submit = () => {
     //loading.value = false;
   });
 };
+
+useUserStore().refreshInterval = setInterval(() => {
+  try {
+    submit();
+    console.log("Refresh login", form.value);
+  } catch {
+    console.log("Failed to refresh login");
+  }
+}, 3600);
 
 const onFailure = async (error: any) => {
   loading.value = false;

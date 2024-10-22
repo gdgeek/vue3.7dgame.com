@@ -210,10 +210,10 @@ const enter = async (
     // 设置定时器，每隔一个小时刷新token并请求用户数据
     userStore.refreshInterval = setInterval(async () => {
       try {
-        const newTokenResponse = await AuthAPI.login(form.value); // 这里需要根据你的 API 修改
-        const newToken = newTokenResponse.data.auth; // 假设新的 token 在此
+        const newTokenResponse = await AuthAPI.login(form.value);
+        const newToken = newTokenResponse.data.auth;
         localStorage.setItem(TOKEN_KEY, "Bearer " + newToken); // 更新 token
-        // console.log("Token refreshed:", newToken);
+        console.log("Token refreshed:", newToken);
         await userStore.getUserInfo(); // 刷新用户数据
       } catch (e) {
         console.error("Failed to refresh user data:", e);
