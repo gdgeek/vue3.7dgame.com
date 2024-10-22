@@ -218,7 +218,7 @@ const enter = async (
       } catch (e) {
         console.error("Failed to refresh user data:", e);
       }
-    }, 3600);
+    }, 3600000);
 
     const { path, queryParams } = parseRedirect();
     router.push({ path: path, query: queryParams });

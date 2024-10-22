@@ -145,7 +145,7 @@ useUserStore().refreshInterval = setInterval(() => {
   } catch {
     console.log("Failed to refresh login");
   }
-}, 3600);
+}, 3600000);
 
 const onFailure = async (error: any) => {
   loading.value = false;
