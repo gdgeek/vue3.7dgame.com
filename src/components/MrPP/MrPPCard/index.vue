@@ -10,28 +10,38 @@
           </template>
 
           <!-- 图片容器 -->
-          <div class="image-container">
-            <img
-              v-if="!item.image"
-              src="@/assets/image/none.png"
-              style="width: 100%; height: auto; object-fit: contain"
-            />
-            <LazyImg
-              v-else
-              style="width: 100%; height: auto"
-              fit="contain"
-              :url="item.image.url"
-              lazy
-            ></LazyImg>
-
-            <!-- 在图片底部的 info 插槽，动态弹出 -->
-            <template v-if="$slots.audioInfo">
+          <div
+            class="image-container"
+            @mouseenter="onMouseEnter"
+            @mouseleave="onMouseLeave"
+          >
+            <!-- 如果鼠标悬停且使用info插槽，则显示info插槽，否则显示图片 -->
+            <template v-if="hovering && $slots.info">
               <div class="info-container">
+                <slot name="info"></slot>
+              </div>
+            </template>
+            <template v-else>
+              <img
+                v-if="!item.image"
+                src="@/assets/image/none.png"
+                style="width: 100%; height: auto; object-fit: contain"
+              />
+              <LazyImg
+                v-else
+                style="width: 100%; height: auto"
+                fit="contain"
+                :url="item.image.url"
+                lazy
+              ></LazyImg>
+            </template>
+
+            <!-- 在图片内底部的 音频 插槽，动态弹出 -->
+            <template v-if="$slots.audioInfo">
+              <div class="audio-container">
                 <slot name="audioInfo"></slot>
               </div>
             </template>
-
-            <slot name="info"></slot>
           </div>
         </el-card>
       </template>
@@ -75,8 +85,6 @@ const props = defineProps({
   },
 });
 
-console.log("ITEM", props.item);
-
 const emits = defineEmits(["named", "deleted"]);
 
 const named = () => {
@@ -85,6 +93,23 @@ const named = () => {
 
 const deleted = () => {
   emits("deleted", props.item);
+};
+
+const hovering = ref(false);
+let hoverTimeout: ReturnType<typeof setTimeout>;
+
+const onMouseEnter = () => {
+  hovering.value = true;
+  if (hoverTimeout) {
+    clearTimeout(hoverTimeout);
+  }
+};
+
+const onMouseLeave = () => {
+  // 鼠标离开时，延迟5秒后隐藏
+  hoverTimeout = setTimeout(() => {
+    hovering.value = false;
+  }, 5000);
 };
 </script>
 
@@ -107,20 +132,20 @@ const deleted = () => {
   height: auto;
 }
 
-/* info 插槽容器样式，默认隐藏在底部，通过鼠标移动触发动画 */
-.info-container {
+.audio-container {
   position: absolute;
-  bottom: -100%; /* 初始状态在图片下方隐藏 */
+  bottom: -100%;
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* 半透明背景色 */
-  color: white; /* 文字颜色 */
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
   text-align: center;
   padding: 10px;
-  transition: bottom 0.5s ease-in-out; /* 动画效果 */
+  transition:
+    bottom 0.5s ease-in-out,
+    z-index 0.3s ease;
 }
 
-/* 当鼠标移动到 image-container 时，info-container 弹出 */
-.image-container:hover .info-container {
+.image-container:hover .audio-container {
   bottom: 0; /* 鼠标悬停时从底部弹出 */
 }
 </style>
