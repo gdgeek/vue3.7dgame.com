@@ -33,58 +33,19 @@
             :backgroundColor="'rgba(255, 255, 255, .05)'"
           >
             <template #default="{ item }">
-              <el-card style="width: 320px" class="box-card">
-                <template #header>
-                  <div>
-                    <el-card shadow="hover" :body-style="{ padding: '0px' }">
-                      <template #header>
-                        <span class="mrpp-title">
-                          <b class="card-title" nowrap>{{ item.title }}</b>
-                        </span>
-                      </template>
-                      <router-link :to="`/meta/meta-edit?id=${item.id}`">
-                        <img
-                          v-if="!item.image"
-                          src="@/assets/image/none.png"
-                          style="
-                            width: 100%;
-                            height: 270px;
-                            object-fit: contain;
-                          "
-                        />
-                        <img
-                          v-else
-                          style="width: 100%; height: 270px"
-                          fit="contain"
-                          :src="item.image.url!"
-                          lazy
-                        />
-                      </router-link>
-                    </el-card>
-                  </div>
+              <mr-p-p-card
+                :item="item"
+                @named="namedWindow"
+                @deleted="deletedWindow"
+              >
+                <template #enter>
+                  <router-link :to="`/meta/meta-edit?id=${item.id}`">
+                    <el-button type="primary" size="small">{{
+                      $t("meta.enter")
+                    }}</el-button>
+                  </router-link>
                 </template>
-                <div class="clearfix">
-                  <el-button-group style="float: right" :inline="true">
-                    <el-button
-                      @click="editor(item.id)"
-                      type="success"
-                      size="small"
-                      icon="Edit"
-                      >{{ $t("meta.edit") }}</el-button
-                    >
-
-                    <el-button
-                      @click="del(item.id)"
-                      type="danger"
-                      size="small"
-                      icon="Delete"
-                    >
-                      {{ $t("meta.delete") }}</el-button
-                    >
-                  </el-button-group>
-                </div>
-                <div class="bottom clearfix"></div>
-              </el-card>
+              </mr-p-p-card>
             </template>
           </Waterfall>
         </el-card>
@@ -112,7 +73,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
-import { getMetas, postMeta, deleteMeta } from "@/api/v1/meta";
+import { getMetas, postMeta, deleteMeta, putMeta } from "@/api/v1/meta";
 import type { metaInfo } from "@/api/v1/meta";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { ViewCard } from "vue-waterfall-plugin-next/dist/types/types/waterfall";
@@ -130,11 +91,35 @@ const pagination = ref<{
 
 const { t } = useI18n();
 
-const editor = (id: number) => {
-  router.push({ path: "/meta/meta-edit", query: { id } });
+const namedWindow = async (item: { id: number; title: string }) => {
+  try {
+    const { value } = await ElMessageBox.prompt(
+      t("meta.prompt2.message1"),
+      t("meta.prompt2.message2"),
+      {
+        confirmButtonText: t("meta.prompt2.confirm"),
+        cancelButtonText: t("meta.prompt2.cancel"),
+        closeOnClickModal: false,
+        inputValue: item.title,
+      }
+    );
+    await named(item.id, value);
+    ElMessage.success(t("meta.prompt2.success") + value);
+  } catch {
+    ElMessage.info(t("meta.prompt2.info"));
+  }
 };
 
-const del = async (id: number) => {
+const named = async (id: number, newValue: string) => {
+  try {
+    await putMeta(id, { title: newValue });
+    refresh();
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const deletedWindow = async (item: { id: number }) => {
   try {
     await ElMessageBox.confirm(
       t("meta.confirm.message1"),
@@ -142,10 +127,11 @@ const del = async (id: number) => {
       {
         confirmButtonText: t("meta.confirm.confirm"),
         cancelButtonText: t("meta.confirm.cancel"),
+        closeOnClickModal: false,
         type: "warning",
       }
     );
-    await deleteMeta(id);
+    await deleteMeta(item.id);
     await refresh();
     ElMessage({
       type: "success",

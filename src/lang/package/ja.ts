@@ -598,7 +598,7 @@ export default {
   // 组件国际化
   meta: {
     title: "【メタデータ】を作成",
-    edit: "編集",
+    enter: "入る",
     delete: "削除",
     confirm: {
       message1: "この操作は【メタデータ】を永久に削除しますが、続行しますか？",
@@ -620,6 +620,14 @@ export default {
       },
       success: "メタデータ名は: ",
       info: "入力がキャンセルされました",
+    },
+    prompt2: {
+      message1: "新しい名前を入力してください",
+      message2: "メタデータ名を変更",
+      confirm: "確認",
+      cancel: "キャンセル",
+      success: "新しいメタデータ名は: ",
+      info: "入力をキャンセルしました",
     },
     metaEdit: {
       title: "【メタデータ】名：",

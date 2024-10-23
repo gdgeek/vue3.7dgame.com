@@ -51,6 +51,11 @@
                   <template #header>
                     <b class="card-title" nowrap>{{ title(item) }}</b>
                   </template>
+                  <img
+                    v-if="!item.image"
+                    src="@/assets/image/none.png"
+                    style="width: 100%; height: auto; object-fit: contain"
+                  />
                   <LazyImg
                     v-if="item.image"
                     style="width: 100%; height: 180px"
