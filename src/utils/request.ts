@@ -105,7 +105,7 @@ service.interceptors.response.use(
           if (accessToken) {
             // 更新请求头并重发请求
             error.config.headers.Authorization = accessToken;
-            return service(error.config); // 重新发起请求
+            return service(error.config);
           }
         } catch (loginError) {
           showErrorMessage("Automatic re-login failed");
