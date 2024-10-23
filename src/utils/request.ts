@@ -89,7 +89,7 @@ service.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
-  (error: any) => {
+  async (error: any) => {
     const router = useRouter();
     const { response } = error;
     const messages = getMessageArray();
@@ -97,6 +97,21 @@ service.interceptors.response.use(
     if (!response) {
       if (error.message === "Network Error") {
         showErrorMessage(messages[1]);
+
+        // 自动尝试重新登录
+        try {
+          await useUserStoreHook().resetToken(); // 重新获取 Token
+          const accessToken = localStorage.getItem(TOKEN_KEY);
+          if (accessToken) {
+            // 更新请求头并重发请求
+            error.config.headers.Authorization = accessToken;
+            return service(error.config); // 重新发起请求
+          }
+        } catch (loginError) {
+          showErrorMessage("Automatic re-login failed");
+          router.push({ path: "/login" });
+          return Promise.reject(loginError);
+        }
       } else {
         showErrorMessage(error.message);
       }
