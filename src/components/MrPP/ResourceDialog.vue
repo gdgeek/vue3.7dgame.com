@@ -67,16 +67,36 @@
                   <div class="mrpp-title">
                     <b class="card-title" nowrap>{{ title(item) }}</b>
                   </div>
-                  <LazyImg
-                    v-if="item.image"
-                    style="width: 100%; height: 180px"
-                    fit="contain"
-                    :url="item.image.url"
-                  >
-                  </LazyImg>
+                  <div class="image-container">
+                    <img
+                      v-if="!item.image"
+                      src="@/assets/image/none.png"
+                      style="width: 100%; height: auto; object-fit: contain"
+                    />
+                    <LazyImg
+                      v-if="item.image"
+                      style="width: 100%; height: 180px"
+                      fit="contain"
+                      :url="item.image.url"
+                    >
+                    </LazyImg>
+                    <div v-if="item.type === 'audio'" class="info-container">
+                      <audio
+                        id="audio"
+                        controls
+                        style="width: 100%; height: 30px"
+                        :src="item.file.url"
+                      ></audio>
+                    </div>
+                  </div>
                   <div
                     v-if="item.created_at"
-                    style="width: 100%; text-align: center"
+                    style="
+                      width: 100%;
+                      text-align: center;
+                      position: relative;
+                      z-index: 2;
+                    "
                   >
                     {{ convertToLocalTime(item.created_at) }}
                   </div>
@@ -484,5 +504,31 @@ const viewCards = computed(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+
+.info-container {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  text-align: center;
+  padding: 10px;
+  transform: scale(0); /* 或 translateX(-100%) 等 */
+  opacity: 0;
+  transition:
+    transform 0.5s ease,
+    opacity 0.5s ease;
+}
+
+.image-container:hover .info-container {
+  transform: scale(1);
+  opacity: 1;
 }
 </style>

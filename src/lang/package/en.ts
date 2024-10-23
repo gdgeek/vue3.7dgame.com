@@ -605,7 +605,7 @@ export default {
   // 组件国际化
   meta: {
     title: "Create【Entity】",
-    edit: "Edit",
+    enter: "Enter",
     delete: "Delete",
     confirm: {
       message1:
@@ -628,6 +628,14 @@ export default {
       },
       success: "The entity name is: ",
       info: "cancel input",
+    },
+    prompt2: {
+      message1: "Please enter a new name",
+      message2: "Edit entity name",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      success: "The new entity name is: ",
+      info: "Input canceled",
     },
     metaEdit: {
       title: "【Entity】Name:",

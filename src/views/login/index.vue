@@ -54,6 +54,7 @@
     <div v-if="route.path === '/login'" class="content">
       <login-form
         v-if="!appleIdToken"
+        ref="loginFormRef"
         @enter="enter"
         @register="register"
       ></login-form>
@@ -162,6 +163,7 @@ import { useSettingsStore } from "@/store/modules/settings";
 import { useInfomationStore } from "@/store/modules/information";
 import { useTagsViewStore, useUserStore } from "@/store";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
+import AuthAPI from "@/api/auth";
 
 const router = useRouter();
 const route = useRoute();
@@ -171,6 +173,7 @@ const informationStore = useInfomationStore();
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
+const loginFormRef = ref<InstanceType<typeof LoginForm>>();
 
 const parseRedirect = (): {
   path: string;
@@ -191,6 +194,7 @@ const parseRedirect = (): {
 
 const enter = async (
   user: any,
+  form: any,
   resolve: () => void,
   reject: (message: string) => void
 ) => {
@@ -204,6 +208,9 @@ const enter = async (
       ElMessage.error("The login response is missing the access_token");
     }
     await userStore.getUserInfo();
+
+    userStore.setupRefreshInterval(form.value);
+
     const { path, queryParams } = parseRedirect();
     router.push({ path: path, query: queryParams });
     resolve();
@@ -288,6 +295,7 @@ body {
     font-family: "KaiTi", sans-serif;
     // font-size: 14px;
     font-weight: 600;
+
     &:hover {
       color: #3876c2;
     }

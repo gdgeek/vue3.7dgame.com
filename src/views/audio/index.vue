@@ -34,6 +34,14 @@
                 @named="namedWindow"
                 @deleted="deletedWindow"
               >
+                <template #audioInfo>
+                  <audio
+                    id="audio"
+                    controls
+                    style="width: 100%; height: 30px"
+                    :src="item.file.url"
+                  ></audio>
+                </template>
                 <template #enter>
                   <router-link :to="`/resource/audio/view?id=${item.id}`">
                     <el-button

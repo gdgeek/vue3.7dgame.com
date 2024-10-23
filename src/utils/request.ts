@@ -1,9 +1,9 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { useUserStoreHook } from "@/store/modules/user";
-import { ResultEnum } from "@/enums/ResultEnum";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { useRouter } from "@/router";
 import i18n from "@/lang";
+import { ElMessage } from "element-plus";
 
 const lang = ref(i18n.global.locale.value);
 watch(
@@ -65,12 +65,7 @@ service.interceptors.request.use(
   }
 );
 
-// 异常处理
-function showErrorMessage(
-  message: string,
-
-  duration = 5000
-) {
+function showErrorMessage(message: string, duration = 5000) {
   ElMessage({
     message,
     type: "error",
@@ -81,7 +76,12 @@ function showErrorMessage(
 function handleUnauthorized(router: ReturnType<typeof useRouter>) {
   const messages = getMessageArray();
   showErrorMessage(messages[0]);
-  return Promise.reject("");
+  return useUserStoreHook()
+    .resetToken()
+    .then(() => {
+      router.push({ path: "/login" });
+      return Promise.reject("");
+    });
 }
 
 // 响应拦截器
@@ -97,11 +97,6 @@ service.interceptors.response.use(
     if (!response) {
       if (error.message === "Network Error") {
         showErrorMessage(messages[1]);
-        useUserStoreHook()
-          .resetToken()
-          .then(() => {
-            router.push({ path: "/login" });
-          });
       } else {
         showErrorMessage(error.message);
       }
@@ -109,8 +104,10 @@ service.interceptors.response.use(
     }
 
     if (response.status === 401) {
+      // 仅当身份认证失败，执行登出操作
       return handleUnauthorized(router);
     } else if (response.status >= 500) {
+      // 服务器内部错误
       showErrorMessage(messages[2]);
     } else {
       const message = response.data.message || error.message;

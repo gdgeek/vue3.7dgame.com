@@ -592,7 +592,7 @@ export default {
   // 组件国际化
   meta: {
     title: "创建【组件】",
-    edit: "编辑",
+    enter: "进入",
     delete: "删除",
     confirm: {
       message1: "此操作将永久删除该【组件】, 是否继续?",
@@ -613,6 +613,14 @@ export default {
         item3: "组件名称不能大于20个字符",
       },
       success: "组件名称是: ",
+      info: "取消输入",
+    },
+    prompt2: {
+      message1: "请输入新名称",
+      message2: "修改组件名称",
+      confirm: "确认",
+      cancel: "取消",
+      success: "新的组件名称是: ",
       info: "取消输入",
     },
     metaEdit: {
