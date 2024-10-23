@@ -34,6 +34,10 @@
                 @named="namedWindow"
                 @deleted="deletedWindow"
               >
+                <template #info>
+                  <Polygen3 :file="item.file" @progress="progress"></Polygen3>
+                  <el-progress :percentage="percentage"></el-progress>
+                </template>
                 <template #enter>
                   <router-link :to="`/resource/polygen/view?id=${item.id}`">
                     <el-button-group :inline="true">
@@ -77,6 +81,7 @@
 import { getPolygens, putPolygen, deletePolygen } from "@/api/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import Polygen3 from "@/components/Polygen3.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 
@@ -85,12 +90,17 @@ const { t } = useI18n();
 const items = ref<any[]>([]);
 const sorted = ref("-created_at");
 const searched = ref("");
+const percentage = ref(0);
 const pagination = ref({
   current: 1,
   count: 1,
   size: 20,
   total: 20,
 });
+
+const progress = (progress: number) => {
+  percentage.value = progress;
+};
 
 const refresh = async () => {
   try {
