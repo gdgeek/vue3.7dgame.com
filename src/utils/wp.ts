@@ -45,7 +45,7 @@ const getMessageArray = () => {
 // 创建一个 axios 实例
 const service = axios.create({
   baseURL: import.meta.env.VITE_APP_DOC_API,
-  timeout: 20000,
+  timeout: 50000,
 });
 
 // 请求拦截器
@@ -88,21 +88,6 @@ service.interceptors.response.use(
     if (!response) {
       if (error.message === "Network Error") {
         showErrorMessage(messages[1]);
-
-        // 自动尝试重新登录
-        try {
-          await useUserStoreHook().resetToken(); // 重新获取 Token
-          const accessToken = localStorage.getItem(TOKEN_KEY);
-          if (accessToken) {
-            // 更新请求头并重发请求
-            error.config.headers.Authorization = accessToken;
-            return service(error.config);
-          }
-        } catch (loginError) {
-          showErrorMessage("Automatic re-login failed");
-          router.push({ path: "/login" });
-          return Promise.reject(loginError);
-        }
       } else {
         showErrorMessage(error.message);
       }
