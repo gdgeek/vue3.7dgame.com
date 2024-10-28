@@ -28,8 +28,8 @@
         @change="toggleAnimation"
         style="margin-left: 5px"
         inline-prompt
-        active-text="Animation On"
-        inactive-text="Animation Off"
+        :active-text="$t('polygen.animation.animationOn')"
+        :inactive-text="$t('polygen.animation.animationOff')"
         :disabled="animations.length === 0"
       ></el-switch>
       <el-switch
@@ -37,8 +37,8 @@
         @change="toggleShadow"
         style="margin-left: 5px"
         inline-prompt
-        active-text="Shadow On"
-        inactive-text="Shadow Off"
+        :active-text="$t('polygen.animation.shadowOn')"
+        :inactive-text="$t('polygen.animation.shadowOff')"
       ></el-switch>
     </div>
     <div id="three" ref="three" style="height: 300px; width: 100%"></div>

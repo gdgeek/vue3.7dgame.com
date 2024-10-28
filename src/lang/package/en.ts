@@ -410,6 +410,12 @@ export default {
         info: "Cancel input",
       },
     },
+    animation: {
+      animationOn: "Animation On",
+      animationOff: "Animation Off",
+      shadowOn: "Shadow On",
+      shadowOff: "Shadow Off",
+    },
   },
   // 图片管理国际化
   picture: {
@@ -730,6 +736,7 @@ export default {
     },
     generation: {
       title: "Create Model from AI (Rodin) :",
+      declare: "declared *",
       form: {
         image: "Image",
         select: "Select",

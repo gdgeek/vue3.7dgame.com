@@ -40,10 +40,10 @@
       <el-switch v-model="settingsStore.sidebarLogo"></el-switch>
     </div>
 
-    <div class="settings-option">
+    <!-- <div class="settings-option">
       <span class="text-xs">{{ $t("settings.watermark") }}</span>
       <el-switch v-model="settingsStore.watermarkEnabled"></el-switch>
-    </div>
+    </div> -->
 
     <el-divider style="white-space: nowrap">{{
       $t("settings.navigation")

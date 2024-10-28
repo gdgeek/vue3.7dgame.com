@@ -9,13 +9,13 @@
       </div>
 
       <!-- 布局大小 -->
-      <el-tooltip
+      <!-- <el-tooltip
         :content="$t('sizeSelect.tooltip')"
         effect="dark"
         placement="bottom"
       >
         <size-select class="setting-item"></size-select>
-      </el-tooltip>
+      </el-tooltip> -->
 
       <!-- 语言选择 -->
       <lang-select class="setting-item"></lang-select>

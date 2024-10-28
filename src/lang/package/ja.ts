@@ -408,6 +408,12 @@ export default {
         info: "入力がキャンセルされました",
       },
     },
+    animation: {
+      animationOn: "アニメーションオン",
+      animationOff: "アニメーションオフ",
+      shadowOn: "影オン",
+      shadowOff: "影オフ",
+    },
   },
   // 图片管理国际化
   picture: {
@@ -721,6 +727,7 @@ export default {
     },
     generation: {
       title: "AI (Rodin) を通じてモデルを作成：",
+      declare: "宣言 *",
       form: {
         image: "画像",
         select: "選択",

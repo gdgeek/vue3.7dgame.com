@@ -36,7 +36,12 @@
               >
                 <template #info>
                   <Polygen3 :file="item.file" @progress="progress"></Polygen3>
-                  <el-progress :percentage="percentage"></el-progress>
+                  <el-progress
+                    v-if="percentage === 100"
+                    :percentage="100"
+                    status="success"
+                  ></el-progress>
+                  <el-progress v-else :percentage="percentage"></el-progress>
                 </template>
                 <template #enter>
                   <router-link :to="`/resource/polygen/view?id=${item.id}`">
@@ -100,6 +105,7 @@ const pagination = ref({
 
 const progress = (progress: number) => {
   percentage.value = progress;
+  console.log(percentage.value);
 };
 
 const refresh = async () => {

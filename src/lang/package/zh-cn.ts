@@ -403,6 +403,12 @@ export default {
         info: "取消输入",
       },
     },
+    animation: {
+      animationOn: "动画开启",
+      animationOff: "动画关闭",
+      shadowOn: "阴影开启",
+      shadowOff: "阴影关闭",
+    },
   },
   // 图片管理国际化
   picture: {
@@ -715,6 +721,7 @@ export default {
     },
     generation: {
       title: "通过 AI (Rodin) 创建模型：",
+      declare: "声明 *",
       form: {
         image: "图像",
         select: "选择",

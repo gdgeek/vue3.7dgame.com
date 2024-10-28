@@ -9,7 +9,9 @@
       <template #header>
         <div class="box-card-header">
           <h3>{{ $t("ai.generation.title") }}</h3>
-          {{ progress.declared }}
+          <span style="font-style: italic; color: #b0b0b0">{{
+            $t("ai.generation.declare")
+          }}</span>
         </div>
       </template>
 
