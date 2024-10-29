@@ -50,6 +50,14 @@ const service = axios.create({
   headers: { "Content-Type": "application/json;charset=utf-8" },
 });
 
+let isRefreshing = false;
+let subscribers: ((token: string) => void)[] = [];
+
+function onTokenRefreshed(newToken: string) {
+  subscribers.forEach((callback) => callback(newToken));
+  subscribers = [];
+}
+
 function isTokenExpiringSoon(token: string, bufferTime = 300): boolean {
   // 移除 Bearer 前缀
   const cleanToken = token.startsWith("Bearer ") ? token.split(" ")[1] : token;
@@ -68,14 +76,32 @@ service.interceptors.request.use(
     if (accessToken) {
       // config.headers.Authorization = accessToken;
       if (isTokenExpiringSoon(accessToken)) {
-        const res = await AuthAPI.login(useUserStoreHook().form);
-        const newToken = res.data.auth;
-        localStorage.setItem(TOKEN_KEY, "Bearer" + " " + newToken);
-        if (newToken) {
-          config.headers.Authorization = `Bearer ${newToken}`; // 更新请求头中的 Token
+        if (!isRefreshing) {
+          isRefreshing = true;
+          try {
+            const res = await AuthAPI.login(useUserStoreHook().form);
+            const newToken = res.data.auth;
+            localStorage.setItem(TOKEN_KEY, "Bearer " + newToken);
+            onTokenRefreshed(newToken);
+          } catch (error) {
+            return Promise.reject(error);
+          } finally {
+            isRefreshing = false;
+          }
         }
+        // 等待 Token 刷新后重试请求
+        return new Promise((resolve) => {
+          subscribers.push((token: string) => {
+            if (config.headers) {
+              config.headers.Authorization = `Bearer ${token}`;
+            }
+            resolve(config);
+          });
+        });
       } else {
-        config.headers.Authorization = accessToken; // 使用当前 Token
+        if (config.headers) {
+          config.headers.Authorization = accessToken; // 使用当前 Token
+        }
       }
     }
     return config;
