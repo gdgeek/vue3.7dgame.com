@@ -96,18 +96,25 @@ const deleted = () => {
 };
 
 const hovering = ref(false);
-let hoverTimeout: ReturnType<typeof setTimeout>;
+let enterTimeout: ReturnType<typeof setTimeout>;
+let leaveTimeout: ReturnType<typeof setTimeout>;
 
 const onMouseEnter = () => {
-  hovering.value = true;
-  if (hoverTimeout) {
-    clearTimeout(hoverTimeout);
+  if (leaveTimeout) {
+    clearTimeout(leaveTimeout);
   }
+  // 鼠标进入时，延迟2秒后显示
+  enterTimeout = setTimeout(() => {
+    hovering.value = true;
+  }, 2000);
 };
 
 const onMouseLeave = () => {
+  if (enterTimeout) {
+    clearTimeout(enterTimeout);
+  }
   // 鼠标离开时，延迟5秒后隐藏
-  hoverTimeout = setTimeout(() => {
+  leaveTimeout = setTimeout(() => {
     hovering.value = false;
   }, 5000);
 };

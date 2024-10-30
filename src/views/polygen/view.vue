@@ -17,7 +17,12 @@
             >
             </polygen2>
           </div>
-          <el-progress :percentage="percentage"></el-progress>
+          <el-progress
+            v-if="percentage === 100"
+            :percentage="100"
+            status="success"
+          ></el-progress>
+          <el-progress v-else :percentage="percentage"></el-progress>
         </el-card>
         <br />
 
@@ -107,7 +112,7 @@ import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
 import { printVector3 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
-import { convertToLocalTime } from "@/utils/dataChange";
+import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 import { vue3dLoader } from "vue-3d-loader";
 
 const loading = ref(false);
@@ -172,7 +177,7 @@ const tableData = computed(() => {
       },
       {
         item: t("polygen.view.info.item4"),
-        text: `${polygenData.value.file.size}` + t("polygen.view.info.size"),
+        text: formatFileSize(polygenData.value.file.size),
       },
       {
         item: t("polygen.view.info.item5"),

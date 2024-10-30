@@ -85,7 +85,7 @@ import type { ResourceInfo } from "@/api/resources/model";
 import { postFile } from "@/api/v1/files";
 import { useFileStore } from "@/store/modules/config";
 import { FileHandler } from "@/assets/js/file/server";
-import { convertToLocalTime } from "@/utils/dataChange";
+import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 
 const route = useRoute();
 const router = useRouter();
@@ -111,7 +111,7 @@ const tableData = computed(() => {
       },
       {
         item: t("audio.view.info.item4"),
-        text: `${audioData.value.file.size}` + t("audio.view.info.size"),
+        text: formatFileSize(audioData.value.file.size),
       },
     ];
   }

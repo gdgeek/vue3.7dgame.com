@@ -69,7 +69,7 @@ import { postFile } from "@/api/v1/files";
 import { useFileStore } from "@/store/modules/config";
 import type { ResourceInfo } from "@/api/resources/model";
 import { FileHandler } from "@/assets/js/file/server";
-import { convertToLocalTime } from "@/utils/dataChange";
+import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 
 const image = ref<HTMLImageElement | null>(null);
 const route = useRoute();
@@ -103,7 +103,7 @@ const tableData = computed(() => {
       },
       {
         item: t("picture.view.info.item4"),
-        text: `${pictureData.value.file.size}` + t("picture.view.info.size"),
+        text: formatFileSize(pictureData.value.file.size),
       },
     ];
   }

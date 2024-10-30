@@ -17,7 +17,12 @@
 
       <template #footer
         ><div class="progress-item">
-          <el-progress :percentage="progress.percentage"></el-progress>
+          <el-progress
+            v-if="progress.percentage === 100"
+            :percentage="100"
+            status="success"
+          ></el-progress>
+          <el-progress v-else :percentage="progress.percentage"></el-progress>
         </div>
       </template>
       <el-form

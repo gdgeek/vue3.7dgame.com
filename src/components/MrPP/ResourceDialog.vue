@@ -227,7 +227,7 @@ import {
   deleteMetaResource,
 } from "@/api/v1/meta-resource";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import { convertToLocalTime } from "@/utils/dataChange";
+import { convertToLocalTime } from "@/utils/utilityFunctions";
 
 const dialogVisible = ref(false);
 const activeName = ref("binding");
@@ -520,7 +520,8 @@ const viewCards = computed(() => {
   color: white;
   text-align: center;
   padding: 10px;
-  transform: scale(0); /* 或 translateX(-100%) 等 */
+  transform: scale(0);
+  /* 或 translateX(-100%) 等 */
   opacity: 0;
   transition:
     transform 0.5s ease,
