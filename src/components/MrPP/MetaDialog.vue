@@ -53,7 +53,7 @@
                   />
                   <LazyImg
                     v-if="item.image"
-                    style="width: 100%; height: 180px"
+                    style="width: 100%; height: auto"
                     fit="contain"
                     :url="item.image.url"
                   ></LazyImg>

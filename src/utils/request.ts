@@ -81,10 +81,9 @@ service.interceptors.request.use(
         if (!isRefreshing) {
           isRefreshing = true;
           try {
-            const res = await AuthAPI.login(useUserStoreHook().form);
-            const newToken = res.data.auth;
-            localStorage.setItem(TOKEN_KEY, "Bearer " + newToken);
-            onTokenRefreshed(newToken);
+            useUserStoreHook().setupRefreshInterval(useUserStoreHook().form);
+            const newToken = localStorage.getItem(TOKEN_KEY);
+            onTokenRefreshed(newToken!);
           } catch (error) {
             return Promise.reject(error);
           } finally {
