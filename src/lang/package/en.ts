@@ -736,7 +736,7 @@ export default {
     },
     generation: {
       title: "Create Model from AI (Rodin) :",
-      declare: "declared *",
+      declare: "declared",
       form: {
         image: "Image",
         select: "Select",
@@ -750,7 +750,7 @@ export default {
         },
         message: "Length should be between 4 and 50 characters",
         error: "Please input the prompt or select the image",
-        submit: "Generation",
+        submit: "Generate",
       },
     },
   },

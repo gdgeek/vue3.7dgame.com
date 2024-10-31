@@ -135,7 +135,7 @@ const cancle = () => {
 };
 const rodin = async () => {
   progress.value.percentage = 0;
-  progress.value.title = "AI Generation";
+  progress.value.title = "AI Generating";
   const query: Record<string, string | number> = {};
   if (form.prompt) {
     query.prompt = form.prompt;

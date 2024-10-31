@@ -727,7 +727,7 @@ export default {
     },
     generation: {
       title: "AI (Rodin) を通じてモデルを作成：",
-      declare: "宣言 *",
+      declare: "宣言",
       form: {
         image: "画像",
         select: "選択",
