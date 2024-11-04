@@ -159,6 +159,13 @@ const refresh = async () => {
     "image,verseMetas"
   );
   active.value.items = response.data;
+  console.log("active", active);
+  active.value.pagination = {
+    current: parseInt(response.headers["x-pagination-current-page"]),
+    count: parseInt(response.headers["x-pagination-page-count"]),
+    size: parseInt(response.headers["x-pagination-per-page"]),
+    total: parseInt(response.headers["x-pagination-total-count"]),
+  };
 };
 
 const sort = (value: string) => {
