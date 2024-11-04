@@ -55,13 +55,13 @@
             </el-form>
           </template>
           <div
-            v-if="events && events.outputs && events.outputs.length > 0"
+            v-if="events && events.inputs && events.inputs.length > 0"
             :label="$t('meta.metaEdit.form.input')"
           >
             <el-divider content-position="left">{{
               $t("meta.metaEdit.form.input")
             }}</el-divider>
-            <span v-for="(i, index) in events.outputs" :key="index">
+            <span v-for="(i, index) in events.inputs" :key="index">
               <el-tag size="small">
                 {{ i.title }}
               </el-tag>
@@ -69,13 +69,13 @@
             </span>
           </div>
           <div
-            v-if="events && events.inputs && events.inputs.length > 0"
+            v-if="events && events.outputs && events.outputs.length > 0"
             :label="$t('meta.metaEdit.form.output')"
           >
             <el-divider content-position="left">{{
               $t("meta.metaEdit.form.output")
             }}</el-divider>
-            <span v-for="(i, index) in events.inputs" :key="index">
+            <span v-for="(i, index) in events.outputs" :key="index">
               <el-tag size="small">
                 {{ i.title }}
               </el-tag>

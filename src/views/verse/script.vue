@@ -343,6 +343,7 @@ onMounted(async () => {
       "metas, module, share, verseCode"
     );
     verse.value = response.data;
+    console.log("Verse", verse.value);
     if (verse.value && verse.value.data) {
       const json: string = verse.value.data;
       const data = JSON.parse(json);
