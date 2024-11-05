@@ -223,7 +223,11 @@ const handleMessage = async (e: MessageEvent) => {
       initEditor();
     } else if (params.action === "post") {
       await postScript(params.data);
-      console.log("PARAMS", params.data);
+
+      if (saveResolve) {
+        saveResolve();
+        saveResolve = null;
+      }
     } else if (params.action === "post:no-change") {
       ElMessage({
         message: t("meta.script.info") || "Info",
@@ -239,9 +243,65 @@ const handleMessage = async (e: MessageEvent) => {
   }
 };
 
-const save = () => {
-  postMessage("save", { language: ["lua", "js"], data: {} });
+// 标记是否有未保存的更改
+let hasUnsavedChanges = false;
+// 保存操作的 Promise 解析函数
+let saveResolve: (() => void) | null = null;
+
+const save = (): Promise<void> => {
+  hasUnsavedChanges = false;
+  return new Promise<void>((resolve, reject) => {
+    saveResolve = resolve;
+    postMessage("save", { language: ["lua", "js"], data: {} });
+  });
 };
+
+// 页面关闭提示
+const handleBeforeUnload = (event: any) => {
+  if (hasUnsavedChanges) {
+    event.preventDefault();
+    event.returnValue = ""; // 显示默认的浏览器提示
+  }
+};
+
+// 离开时，如果有未保存的更改，则提示用户是否要保存
+onBeforeRouteLeave(async (to, from, next) => {
+  if (hasUnsavedChanges) {
+    try {
+      await ElMessageBox.confirm(
+        t("meta.script.leave.message1"),
+        t("meta.script.leave.message2"),
+        {
+          confirmButtonText: t("meta.script.leave.confirm"),
+          cancelButtonText: t("meta.script.leave.cancel"),
+          type: "warning",
+        }
+      );
+
+      // 用户选择保存，等待保存完成后再进行路由跳转
+      try {
+        await save();
+        // ElMessage.success(t("meta.script.saveSuccess") || "保存成功");
+        next();
+      } catch (error) {
+        ElMessage.error(t("meta.script.leave.error"));
+        next(false);
+      }
+    } catch {
+      // 用户选择不保存，继续路由跳转
+      hasUnsavedChanges = false;
+      ElMessage.info(t("meta.script.leave.info"));
+      next();
+    }
+  } else {
+    next();
+  }
+});
+
+watch([LuaCode, JavaScriptCode], () => {
+  hasUnsavedChanges = true;
+});
+
 const postMessage = (action: string, data: any = {}) => {
   if (editor.value && editor.value.contentWindow) {
     editor.value.contentWindow.postMessage(
@@ -253,8 +313,8 @@ const postMessage = (action: string, data: any = {}) => {
       "*"
     );
   } else {
-    console.error(t("meta.script.error3") || "Error 3");
     ElMessage({
+      message: t("meta.script.error3"),
       type: "error",
     });
   }
@@ -387,10 +447,14 @@ const getResource = (meta: metaInfo) => {
 
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
+  window.removeEventListener("beforeunload", handleBeforeUnload);
 });
 onMounted(async () => {
   window.addEventListener("message", handleMessage);
   loadHighlightStyle(isDark.value);
+
+  window.addEventListener("beforeunload", handleBeforeUnload);
+
   try {
     loading.value = true;
     const response = await getMeta(id.value, "cyber,event,share,metaCode");
