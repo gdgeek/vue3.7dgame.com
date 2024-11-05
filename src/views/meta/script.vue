@@ -135,6 +135,29 @@ const JavaScriptCode = ref("");
 const settingsStore = useSettingsStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
+// 定义单次赋值
+const defineSingleAssignment = (initialValue: any) => {
+  let value = initialValue;
+  let isAssigned = false;
+
+  return {
+    get() {
+      return value;
+    },
+    set(newValue: any) {
+      if (!isAssigned) {
+        value = newValue;
+        isAssigned = true;
+        // console.log("值已成功赋值为:", newValue);
+      } else {
+        console.log("cannot be assigned again");
+      }
+    },
+  };
+};
+// 保存编辑器初始化lua代码
+const initLuaCode = defineSingleAssignment("");
+
 // 动态加载代码样式
 const loadHighlightStyle = (isDark: boolean) => {
   const existingLink = document.querySelector(
@@ -236,6 +259,7 @@ const handleMessage = async (e: MessageEvent) => {
     } else if (params.action === "update") {
       LuaCode.value = "local meta = {}\nlocal index = ''\n" + params.data.lua;
       JavaScriptCode.value = params.data.js;
+      initLuaCode.set(LuaCode.value);
     }
   } catch (e: any) {
     console.log("ex:" + e);
@@ -244,12 +268,12 @@ const handleMessage = async (e: MessageEvent) => {
 };
 
 // 标记是否有未保存的更改
-let hasUnsavedChanges = false;
+const hasUnsavedChanges = ref<boolean>(false);
 // 保存操作的 Promise 解析函数
 let saveResolve: (() => void) | null = null;
 
 const save = (): Promise<void> => {
-  hasUnsavedChanges = false;
+  hasUnsavedChanges.value = false;
   return new Promise<void>((resolve, reject) => {
     saveResolve = resolve;
     postMessage("save", { language: ["lua", "js"], data: {} });
@@ -258,15 +282,15 @@ const save = (): Promise<void> => {
 
 // 页面关闭提示
 const handleBeforeUnload = (event: any) => {
-  if (hasUnsavedChanges) {
+  if (hasUnsavedChanges.value) {
     event.preventDefault();
-    event.returnValue = ""; // 显示默认的浏览器提示
+    event.returnValue = "";
   }
 };
 
 // 离开时，如果有未保存的更改，则提示用户是否要保存
 onBeforeRouteLeave(async (to, from, next) => {
-  if (hasUnsavedChanges) {
+  if (hasUnsavedChanges.value) {
     try {
       await ElMessageBox.confirm(
         t("meta.script.leave.message1"),
@@ -289,7 +313,7 @@ onBeforeRouteLeave(async (to, from, next) => {
       }
     } catch {
       // 用户选择不保存，继续路由跳转
-      hasUnsavedChanges = false;
+      hasUnsavedChanges.value = false;
       ElMessage.info(t("meta.script.leave.info"));
       next();
     }
@@ -298,8 +322,11 @@ onBeforeRouteLeave(async (to, from, next) => {
   }
 });
 
-watch([LuaCode, JavaScriptCode], () => {
-  hasUnsavedChanges = true;
+watch(LuaCode, (newValue, oldValue) => {
+  hasUnsavedChanges.value = false;
+  if (newValue !== initLuaCode.get()) {
+    hasUnsavedChanges.value = true;
+  }
 });
 
 const postMessage = (action: string, data: any = {}) => {
