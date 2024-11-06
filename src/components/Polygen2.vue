@@ -264,12 +264,12 @@ onMounted(() => {
     // scene.add(new THREE.AmbientLight(0xffffff, 1));
 
     // 添加光源
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // 方向光
     directionalLight.position.set(-0.5, 0, 0.7);
     directionalLight.castShadow = isShadowEnabled.value; // 设置光源阴影
     scene.add(directionalLight);
-    scene.add(new THREE.PointLight(0xffffff, 3));
-    scene.add(new THREE.AmbientLight(0xffffff, 1));
+    scene.add(new THREE.PointLight(0xffffff, 3)); // 点光源
+    scene.add(new THREE.AmbientLight(0xffffff, 1)); // 环境光
 
     const erd = new ElementResizeDetector();
     erd.listenTo(content, () => {

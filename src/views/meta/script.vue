@@ -116,7 +116,10 @@ import { ElMessage } from "element-plus";
 import { useAppStore } from "@/store/modules/app";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
+const loader = new GLTFLoader();
 const appStore = useAppStore();
 const loading = ref(false);
 const meta = ref<metaInfo | null>(null);
@@ -383,13 +386,22 @@ const testPoint = (data: any, typeList: string[]) => {
   if (!data) {
     return;
   }
-  return typeList.find((type) => data.type.toLowerCase() === type.toLowerCase())
-    ? {
-        uuid: data.parameters.uuid,
-        name: data.parameters.name ?? null,
-      }
-    : undefined;
+  const isValidType = typeList.find(
+    (type) => data.type.toLowerCase() === type.toLowerCase()
+  );
+
+  if (isValidType) {
+    const animations = data.parameters?.animations ?? null;
+    return {
+      uuid: data.parameters.uuid,
+      name: data.parameters.name ?? null,
+      ...(data.type.toLowerCase() === "polygen" ? { animations } : {}), // 如果类型为 Polygen，加入 animations 属性
+    };
+  }
+
+  return undefined;
 };
+
 const addMetaData = (data: any, ret: any) => {
   const action = testAction(data);
   if (action) {
@@ -449,8 +461,9 @@ const addMetaData = (data: any, ret: any) => {
   }
 };
 const getResource = (meta: metaInfo) => {
+  console.error("Meta", meta);
   const data = JSON.parse(meta.data!);
-  //  console.log("data", data);
+  console.error("data", data);
   const ret = {
     action: [],
     trigger: [],
@@ -487,7 +500,52 @@ onMounted(async () => {
     const response = await getMeta(id.value, "cyber,event,share,metaCode");
 
     meta.value = response.data;
-    // console.error("meta", meta.value);
+    console.error("meta", meta.value);
+    // 循环处理每个模型文件
+    response.data.resources.forEach((model, index) => {
+      if (model.type !== "polygen") {
+        return;
+      }
+
+      const modelUrl = model.file.url;
+
+      loader.load(
+        modelUrl,
+        (gltf) => {
+          // 提取动画数据
+          // const animations = gltf.animations.map((clip) => {
+          //   return {
+          //     name: clip.name,
+          //     duration: clip.duration,
+          //     tracks: clip.tracks.map((track) => ({
+          //       name: track.name,
+          //       times: Array.from(track.times),
+          //       values: Array.from(track.values),
+          //     })),
+          //   };
+          // });
+
+          const animationNames = gltf.animations.map((clip) => clip.name);
+
+          let data = JSON.parse(response.data.data!);
+
+          // console.error("animations", animationNames);
+          // 插入动画数据名称
+          data.children.entities[index].parameters.animations = animationNames;
+          console.log("Data", data);
+
+          // 更新meta数据
+          meta.value!.data = JSON.stringify(data);
+          // meta.value!.data = data;
+
+          // console.log("Model with animations:", meta.value?.resources);
+        },
+        undefined,
+        (error) => {
+          console.error("An error occurred while loading the model:", error);
+        }
+      );
+    });
 
     initEditor();
   } catch (error: any) {
