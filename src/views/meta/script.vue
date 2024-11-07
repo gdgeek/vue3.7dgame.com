@@ -357,7 +357,6 @@ const initEditor = () => {
   const data = meta.value.metaCode?.blockly
     ? JSON.parse(meta.value.metaCode?.blockly)
     : {};
-
   test.value = getResource(meta.value);
   postMessage("init", {
     language: ["lua", "js"],
@@ -461,9 +460,7 @@ const addMetaData = (data: any, ret: any) => {
   }
 };
 const getResource = (meta: metaInfo) => {
-  console.error("Meta", meta);
   const data = JSON.parse(meta.data!);
-  console.error("data", data);
   const ret = {
     action: [],
     trigger: [],
@@ -498,55 +495,45 @@ onMounted(async () => {
   try {
     loading.value = true;
     const response = await getMeta(id.value, "cyber,event,share,metaCode");
+    console.log("response数据", response);
 
-    meta.value = response.data;
-    console.error("meta", meta.value);
     // 循环处理每个模型文件
-    response.data.resources.forEach((model, index) => {
+    for (const [index, model] of response.data.resources.entries()) {
       if (model.type !== "polygen") {
-        return;
+        meta.value = response.data;
+        break;
       }
 
       const modelUrl = model.file.url;
 
-      loader.load(
-        modelUrl,
-        (gltf) => {
-          // 提取动画数据
-          // const animations = gltf.animations.map((clip) => {
-          //   return {
-          //     name: clip.name,
-          //     duration: clip.duration,
-          //     tracks: clip.tracks.map((track) => ({
-          //       name: track.name,
-          //       times: Array.from(track.times),
-          //       values: Array.from(track.values),
-          //     })),
-          //   };
-          // });
+      // 等待每个模型加载完成获取数据后再继续
+      await new Promise<void>((resolve, reject) => {
+        loader.load(
+          modelUrl,
+          (gltf) => {
+            const animationNames = gltf.animations.map((clip) => clip.name);
 
-          const animationNames = gltf.animations.map((clip) => clip.name);
+            let data = JSON.parse(response.data.data!);
 
-          let data = JSON.parse(response.data.data!);
+            data.children.entities[index].parameters.animations =
+              animationNames;
+            response.data.data = JSON.stringify(data);
 
-          // console.error("animations", animationNames);
-          // 插入动画数据名称
-          data.children.entities[index].parameters.animations = animationNames;
-          console.log("Data", data);
+            meta.value = response.data;
+            // console.log("Updated meta:", meta.value);
 
-          // 更新meta数据
-          meta.value!.data = JSON.stringify(data);
-          // meta.value!.data = data;
+            resolve(); // 结束
+          },
+          undefined,
+          (error) => {
+            console.error("An error occurred while loading the model:", error);
+            reject(error);
+          }
+        );
+      });
+    }
 
-          // console.log("Model with animations:", meta.value?.resources);
-        },
-        undefined,
-        (error) => {
-          console.error("An error occurred while loading the model:", error);
-        }
-      );
-    });
-
+    console.log("meta", meta.value);
     initEditor();
   } catch (error: any) {
     alert(error.message);
@@ -558,6 +545,82 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
+// onMounted(async () => {
+//   window.addEventListener("message", handleMessage);
+//   loadHighlightStyle(isDark.value);
+
+//   window.addEventListener("beforeunload", handleBeforeUnload);
+
+//   try {
+//     loading.value = true;
+//     const response = await getMeta(id.value, "cyber,event,share,metaCode");
+
+//     // meta.value = response.data;
+//     // console.error("meta", meta.value);
+//     // 循环处理每个模型文件
+//     response.data.resources.forEach((model, index) => {
+//       if (model.type !== "polygen") {
+//         return;
+//       }
+
+//       const modelUrl = model.file.url;
+
+//       loader.load(
+//         modelUrl,
+//         (gltf) => {
+//           // 提取动画数据
+//           // const animations = gltf.animations.map((clip) => {
+//           //   return {
+//           //     name: clip.name,
+//           //     duration: clip.duration,
+//           //     tracks: clip.tracks.map((track) => ({
+//           //       name: track.name,
+//           //       times: Array.from(track.times),
+//           //       values: Array.from(track.values),
+//           //     })),
+//           //   };
+//           // });
+
+//           const animationNames = gltf.animations.map((clip) => clip.name);
+
+//           let data = JSON.parse(response.data.data!);
+
+//           // console.error("animations", animationNames);
+//           // 插入动画数据名称
+//           data.children.entities[index].parameters.animations = animationNames;
+//           console.log("Data", data);
+
+//           response.data.data = JSON.stringify(data);
+
+//           console.error("response", response.data.data);
+//           meta.value = response.data;
+
+//           // 更新meta数据
+//           // meta.value!.data = JSON.stringify(data);
+//           // meta.value!.data = data;
+
+//           // console.log("Model with animations:", meta.value?.resources);
+//         },
+//         undefined,
+//         (error) => {
+//           console.error("An error occurred while loading the model:", error);
+//         }
+//       );
+//     });
+//     console.error("meta数据", meta.value);
+
+//     initEditor();
+//   } catch (error: any) {
+//     alert(error.message);
+//     ElMessage({
+//       message: error.message,
+//       type: "error",
+//     });
+//   } finally {
+//     loading.value = false;
+//   }
+// });
 </script>
 
 <style scoped>
