@@ -118,6 +118,7 @@ import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { convertToHttps } from "@/assets/js/helper";
 
 const loader = new GLTFLoader();
 const appStore = useAppStore();
@@ -308,7 +309,6 @@ onBeforeRouteLeave(async (to, from, next) => {
       // 用户选择保存，等待保存完成后再进行路由跳转
       try {
         await save();
-        // ElMessage.success(t("meta.script.saveSuccess") || "保存成功");
         next();
       } catch (error) {
         ElMessage.error(t("meta.script.leave.error"));
@@ -504,7 +504,7 @@ onMounted(async () => {
         break;
       }
 
-      const modelUrl = model.file.url;
+      const modelUrl = convertToHttps(model.file.url);
 
       // 等待每个模型加载完成获取数据后再继续
       await new Promise<void>((resolve, reject) => {
@@ -545,82 +545,6 @@ onMounted(async () => {
     loading.value = false;
   }
 });
-
-// onMounted(async () => {
-//   window.addEventListener("message", handleMessage);
-//   loadHighlightStyle(isDark.value);
-
-//   window.addEventListener("beforeunload", handleBeforeUnload);
-
-//   try {
-//     loading.value = true;
-//     const response = await getMeta(id.value, "cyber,event,share,metaCode");
-
-//     // meta.value = response.data;
-//     // console.error("meta", meta.value);
-//     // 循环处理每个模型文件
-//     response.data.resources.forEach((model, index) => {
-//       if (model.type !== "polygen") {
-//         return;
-//       }
-
-//       const modelUrl = model.file.url;
-
-//       loader.load(
-//         modelUrl,
-//         (gltf) => {
-//           // 提取动画数据
-//           // const animations = gltf.animations.map((clip) => {
-//           //   return {
-//           //     name: clip.name,
-//           //     duration: clip.duration,
-//           //     tracks: clip.tracks.map((track) => ({
-//           //       name: track.name,
-//           //       times: Array.from(track.times),
-//           //       values: Array.from(track.values),
-//           //     })),
-//           //   };
-//           // });
-
-//           const animationNames = gltf.animations.map((clip) => clip.name);
-
-//           let data = JSON.parse(response.data.data!);
-
-//           // console.error("animations", animationNames);
-//           // 插入动画数据名称
-//           data.children.entities[index].parameters.animations = animationNames;
-//           console.log("Data", data);
-
-//           response.data.data = JSON.stringify(data);
-
-//           console.error("response", response.data.data);
-//           meta.value = response.data;
-
-//           // 更新meta数据
-//           // meta.value!.data = JSON.stringify(data);
-//           // meta.value!.data = data;
-
-//           // console.log("Model with animations:", meta.value?.resources);
-//         },
-//         undefined,
-//         (error) => {
-//           console.error("An error occurred while loading the model:", error);
-//         }
-//       );
-//     });
-//     console.error("meta数据", meta.value);
-
-//     initEditor();
-//   } catch (error: any) {
-//     alert(error.message);
-//     ElMessage({
-//       message: error.message,
-//       type: "error",
-//     });
-//   } finally {
-//     loading.value = false;
-//   }
-// });
 </script>
 
 <style scoped>
