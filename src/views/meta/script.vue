@@ -62,13 +62,13 @@
                             class="copy-button"
                             text
                             @click="copyCode(LuaCode)"
-                            ><el-icon class="icon"
-                              ><CopyDocument></CopyDocument></el-icon
+                            ><el-icon class="icon">
+                              <CopyDocument></CopyDocument> </el-icon
                             >{{ $t("copy.title") || "Copy" }}</el-button
                           >
                           <pre>
-                            <code class="lua">{{ LuaCode }}</code>
-                          </pre>
+                  <code class="lua">{{ LuaCode }}</code>
+                </pre>
                         </div>
                       </el-tab-pane>
                       <el-tab-pane label="JavaScript" name="javascript">
@@ -87,13 +87,13 @@
                             class="copy-button"
                             text
                             @click="copyCode(JavaScriptCode)"
-                            ><el-icon class="icon"
-                              ><CopyDocument></CopyDocument></el-icon
+                            ><el-icon class="icon">
+                              <CopyDocument></CopyDocument> </el-icon
                             >{{ $t("copy.title") }}</el-button
                           >
                           <pre>
-                            <code class="javascript">{{ JavaScriptCode }}</code>
-                          </pre>
+                  <code class="javascript">{{ JavaScriptCode }}</code>
+                </pre>
                         </div>
                       </el-tab-pane>
                     </el-tabs>
@@ -461,6 +461,7 @@ const addMetaData = (data: any, ret: any) => {
 };
 const getResource = (meta: metaInfo) => {
   const data = JSON.parse(meta.data!);
+  console.log("data", data);
   const ret = {
     action: [],
     trigger: [],
@@ -505,6 +506,7 @@ onMounted(async () => {
       }
 
       const modelUrl = convertToHttps(model.file.url);
+      const modelId = model.id.toString();
 
       // 等待每个模型加载完成获取数据后再继续
       await new Promise<void>((resolve, reject) => {
@@ -515,14 +517,18 @@ onMounted(async () => {
 
             let data = JSON.parse(response.data.data!);
 
-            data.children.entities[index].parameters.animations =
-              animationNames;
+            // data.children.entities[index].parameters.animations =
+            //   animationNames;
+            data.children.entities.forEach((item: any) => {
+              if (item.parameters.resource === modelId) {
+                item.parameters.animations = animationNames;
+              }
+            });
             response.data.data = JSON.stringify(data);
 
             meta.value = response.data;
-            // console.log("Updated meta:", meta.value);
 
-            resolve(); // 结束
+            resolve();
           },
           undefined,
           (error) => {
