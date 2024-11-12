@@ -32,6 +32,12 @@ const src = ref(
     appStore.language
 );
 
+// const src = ref(
+//   import.meta.env.VITE_APP_EDITOR_URL +
+//     "/editor/meta-editor.html?language=" +
+//     appStore.language
+// );
+
 watch(
   () => appStore.language, // 监听 language 的变化
   async (newValue, oldValue) => {

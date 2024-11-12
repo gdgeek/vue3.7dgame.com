@@ -1,59 +1,128 @@
 <template>
   <body :class="{ 'dark-theme': isDark }">
     <div :class="['header', { 'dark-theme': isDark }]">
-      <RouterLink to="/" class="logo">
-        <img src="/favicon.ico" alt="" />
-        <span class="project_title">{{ $t("login.title") }}</span>
-      </RouterLink>
-      <div class="link" style="margin-left: 250px">
-        <el-link
-          href="https://testflight.apple.com/join/V4XNEG6t"
-          target="_blank"
-          :underline="false"
-        >
-          <img src="/testflight.ico" style="width: 25px" alt="" />
-          <span style="margin-left: 5px">TestFlight</span>
-        </el-link>
+      <div class="PC" v-if="!isMobile">
+        <RouterLink to="/" class="logo">
+          <img src="/favicon.ico" alt="" />
+          <span class="project_title">{{ $t("login.title") }}</span>
+        </RouterLink>
+        <div class="link" style="margin-left: 250px">
+          <el-link
+            href="https://testflight.apple.com/join/V4XNEG6t"
+            target="_blank"
+            :underline="false"
+          >
+            <img src="/testflight.ico" style="width: 25px" alt="" />
+            <span style="margin-left: 5px">TestFlight</span>
+          </el-link>
 
-        <el-link
-          href="https://discord.gg/KhkJySu7bb"
-          target="_blank"
-          :underline="false"
-          style="margin-left: 30px"
-        >
-          <img src="/discord.ico" style="width: 25px" alt="" />
-          <span style="margin-left: 5px">Discord</span>
-        </el-link>
+          <el-link
+            href="https://discord.gg/KhkJySu7bb"
+            target="_blank"
+            :underline="false"
+            style="margin-left: 30px"
+          >
+            <img src="/discord.ico" style="width: 25px" alt="" />
+            <span style="margin-left: 5px">Discord</span>
+          </el-link>
 
-        <el-link
-          href="https://x.com/GD_Geek"
-          target="_blank"
-          :underline="false"
-          style="margin-left: 30px"
-        >
-          <img src="/x3.png" style="width: 25px; border-radius: 25%" alt="" />
-          <span style="margin-left: 5px">X.com</span>
-        </el-link>
+          <el-link
+            href="https://x.com/GD_Geek"
+            target="_blank"
+            :underline="false"
+            style="margin-left: 30px"
+          >
+            <img src="/x3.png" style="width: 26px; border-radius: 25%" alt="" />
+            <span style="margin-left: 5px">X.com</span>
+          </el-link>
+        </div>
+        <div class="header-right">
+          <div class="top-bar">
+            <el-switch
+              v-model="isDark"
+              inline-prompt
+              active-icon="Moon"
+              inactive-icon="Sunny"
+              @change="toggleTheme"
+            ></el-switch>
+            <lang-select
+              class="ml-2 cursor-pointer"
+              style="margin-left: 25px"
+            ></lang-select>
+          </div>
+        </div>
       </div>
-      <div class="header-right">
-        <div class="top-bar">
-          <el-switch
-            v-model="isDark"
-            inline-prompt
-            active-icon="Moon"
-            inactive-icon="Sunny"
-            @change="toggleTheme"
-          ></el-switch>
-          <lang-select
-            class="ml-2 cursor-pointer"
-            style="margin-left: 25px"
-          ></lang-select>
+      <!-- 移动端 -->
+      <div class="mobile" v-else>
+        <el-dropdown>
+          <span class="">
+            <img
+              src="/favicon.ico"
+              alt=""
+              style="margin-left: 10px; width: auto"
+            />
+            <span class="project_title">{{ $t("login.title") }}</span>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                ><el-link
+                  href="https://testflight.apple.com/join/V4XNEG6t"
+                  target="_blank"
+                  :underline="false"
+                >
+                  <img src="/testflight.ico" style="width: 25px" alt="" />
+                  <span style="margin-left: 5px">TestFlight</span>
+                </el-link></el-dropdown-item
+              >
+              <el-dropdown-item
+                ><el-link
+                  href="https://discord.gg/KhkJySu7bb"
+                  target="_blank"
+                  :underline="false"
+                >
+                  <img src="/discord.ico" style="width: 25px" alt="" />
+                  <span style="margin-left: 5px">Discord</span>
+                </el-link></el-dropdown-item
+              >
+              <el-dropdown-item
+                ><el-link
+                  href="https://x.com/GD_Geek"
+                  target="_blank"
+                  :underline="false"
+                >
+                  <img
+                    src="/x3.png"
+                    style="width: 26px; border-radius: 25%"
+                    alt=""
+                  />
+                  <span style="margin-left: 5px">X.com</span>
+                </el-link></el-dropdown-item
+              >
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <div class="header-right">
+          <div :class="['top-bar', { mobile: isMobile }]">
+            <el-switch
+              v-model="isDark"
+              inline-prompt
+              active-icon="Moon"
+              inactive-icon="Sunny"
+              @change="toggleTheme"
+            ></el-switch>
+            <lang-select
+              class="ml-2 cursor-pointer"
+              style="margin-left: 10px"
+            ></lang-select>
+          </div>
         </div>
       </div>
     </div>
     <div v-if="route.path === '/login'" class="content">
       <login-form
         v-if="!appleIdToken"
+        :isMobile="isMobile"
         ref="loginFormRef"
         @enter="enter"
         @register="register"
@@ -243,6 +312,20 @@ watch(
   },
   { immediate: true }
 );
+
+const isMobile = ref(window.innerWidth <= 768);
+
+const handleResize = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
+
+onMounted(() => {
+  window.addEventListener("resize", handleResize);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", handleResize);
+});
 </script>
 
 <style scoped lang="scss">
@@ -266,7 +349,7 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  width: 100%;
+  width: 102%;
   height: 7%;
   margin-right: 10px;
   background-color: #f1f1f1;
@@ -286,24 +369,25 @@ body {
   img {
     width: 32px;
     height: 32px;
-    margin-left: 12px;
+    margin-left: 20px;
     vertical-align: middle;
   }
+}
 
-  .project_title {
-    margin-left: 10px;
-    font-family: "KaiTi", sans-serif;
-    // font-size: 14px;
-    font-weight: 600;
+.project_title {
+  margin-left: 10px;
+  font-family: "KaiTi", sans-serif;
+  // font-size: 14px;
+  font-weight: 600;
 
-    &:hover {
-      color: #3876c2;
-    }
+  &:hover {
+    color: #3876c2;
   }
 }
 
 .header-right {
   position: absolute;
+  top: 0px;
   right: 10px;
   display: flex;
   align-items: center;
@@ -316,6 +400,10 @@ body {
     margin-right: 20px;
     width: 100%;
     padding: 10px;
+
+    &.mobile {
+      margin-right: 0px;
+    }
   }
 }
 
