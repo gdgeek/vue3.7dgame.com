@@ -402,6 +402,7 @@ const testPoint = (data: any, typeList: string[]) => {
 };
 
 const addMetaData = (data: any, ret: any) => {
+  console.log("dataChildren", data.children);
   const action = testAction(data);
   if (action) {
     ret.action.push(action);
@@ -498,6 +499,25 @@ onMounted(async () => {
     const response = await getMeta(id.value, "cyber,event,share,metaCode");
     console.log("response数据", response);
 
+    // 用递归处理层级嵌套
+    const assignAnimations = (
+      entities: any[],
+      modelId: string,
+      animationNames: string[]
+    ) => {
+      entities.forEach((item: any) => {
+        // 如果满足条件则赋值 animations
+        if (item.parameters?.resource === modelId) {
+          item.parameters.animations = animationNames;
+        }
+
+        // 如果当前项还有 children.entities，继续递归处理
+        if (item.children?.entities) {
+          assignAnimations(item.children.entities, modelId, animationNames);
+        }
+      });
+    };
+
     // 循环处理每个模型文件
     for (const [index, model] of response.data.resources.entries()) {
       if (model.type !== "polygen") {
@@ -517,15 +537,10 @@ onMounted(async () => {
 
             let data = JSON.parse(response.data.data!);
 
-            // data.children.entities[index].parameters.animations =
-            //   animationNames;
-            data.children.entities.forEach((item: any) => {
-              if (item.parameters.resource === modelId) {
-                item.parameters.animations = animationNames;
-              }
-            });
-            response.data.data = JSON.stringify(data);
+            // 调用递归函数对所有满足条件的项赋值 animations
+            assignAnimations(data.children.entities, modelId, animationNames);
 
+            response.data.data = JSON.stringify(data);
             meta.value = response.data;
 
             resolve();
