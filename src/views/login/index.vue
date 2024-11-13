@@ -147,6 +147,7 @@
       </div>
     </div>
     <el-card
+      v-if="!isMobile"
       style="
         height: 7%;
         width: 100%;

@@ -522,10 +522,12 @@ onMounted(async () => {
     for (const [index, model] of response.data.resources.entries()) {
       if (model.type !== "polygen") {
         meta.value = response.data;
-        break;
+        continue;
       }
 
       const modelUrl = convertToHttps(model.file.url);
+      // const modelUrl = model.file.url;
+      console.error("modelUrl", modelUrl);
       const modelId = model.id.toString();
 
       // 等待每个模型加载完成获取数据后再继续
