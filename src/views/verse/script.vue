@@ -387,7 +387,7 @@ const resource = computed(() => {
     events.inputs = events.inputs || [];
     events.outputs = events.outputs || [];
 
-    events.inputs.forEach((input: any) => {
+    events.outputs.forEach((input: any) => {
       const data = map.get(meta.id.toString());
       inputs.push({
         title: `${data.title}:${input.title}`,
@@ -396,7 +396,7 @@ const resource = computed(() => {
       });
     });
 
-    events.outputs.forEach((output: any) => {
+    events.inputs.forEach((output: any) => {
       const data = map.get(meta.id.toString());
       outputs.push({
         title: `${data.title}:${output.title}`,
