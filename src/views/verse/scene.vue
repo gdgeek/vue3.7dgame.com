@@ -1,5 +1,6 @@
 <template>
   <div class="verse-scene">
+    {{ src }}
     <KnightDataDialog ref="knightDataRef"></KnightDataDialog>
     <MetaDialog
       @selected="selected"
