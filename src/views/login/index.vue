@@ -219,6 +219,74 @@
         </div>
       </div>
     </el-card>
+
+    <el-card v-if="isMobile" style="width: 100%">
+      <div class="background-screen-max">
+        <div
+          style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+        >
+          <span
+            v-for="item in informationStore.companies"
+            :key="item.name"
+            style="display: flex; align-items: center; width: 100%"
+          >
+            <el-link
+              :href="item.url"
+              target="_blank"
+              :underline="false"
+              style="display: flex; align-items: center"
+            >
+              <el-icon>
+                <HomeFilled></HomeFilled>
+              </el-icon>
+              <span class="font-text" style="margin-left: 5px">
+                {{ item.name }} ({{ informationStore.description }})
+              </span>
+            </el-link>
+          </span>
+        </div>
+        <div
+          style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+        >
+          <span
+            v-if="informationStore.beian"
+            style="display: flex; align-items: center"
+          >
+            <el-link
+              href="https://beian.miit.gov.cn/"
+              target="_blank"
+              :underline="false"
+              style="display: flex; align-items: center"
+            >
+              <el-icon>
+                <Grid></Grid>
+              </el-icon>
+              <span class="font-text" style="margin-left: 5px">
+                {{ informationStore.beian }}
+              </span>
+            </el-link>
+          </span>
+
+          <span
+            v-if="informationStore.version"
+            style="display: flex; align-items: center; margin-left: 10%"
+          >
+            <el-link
+              target="_blank"
+              :underline="false"
+              style="display: flex; align-items: center"
+            >
+              <el-icon>
+                <InfoFilled></InfoFilled>
+              </el-icon>
+              <span class="font-text" style="margin-left: 5px">
+                {{ informationStore.version }}
+              </span>
+            </el-link>
+          </span>
+        </div>
+      </div>
+    </el-card>
   </body>
 </template>
 
@@ -231,7 +299,7 @@ import RegisterForm from "@/components/RegisterForm.vue";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useInfomationStore } from "@/store/modules/information";
-import { useTagsViewStore, useUserStore } from "@/store";
+import { useTagsViewStore, useUserStore, useScreenStore } from "@/store";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import AuthAPI from "@/api/auth";
 
@@ -244,6 +312,8 @@ const settingsStore = useSettingsStore();
 const { t } = useI18n();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 const loginFormRef = ref<InstanceType<typeof LoginForm>>();
+const screenStore = useScreenStore();
+const isMobile = computed(() => screenStore.isMobile);
 
 const parseRedirect = (): {
   path: string;
@@ -313,20 +383,6 @@ watch(
   },
   { immediate: true }
 );
-
-const isMobile = ref(window.innerWidth <= 768);
-
-const handleResize = () => {
-  isMobile.value = window.innerWidth <= 768;
-};
-
-onMounted(() => {
-  window.addEventListener("resize", handleResize);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener("resize", handleResize);
-});
 </script>
 
 <style scoped lang="scss">

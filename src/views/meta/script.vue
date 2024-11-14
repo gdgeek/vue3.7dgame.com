@@ -402,7 +402,6 @@ const testPoint = (data: any, typeList: string[]) => {
 };
 
 const addMetaData = (data: any, ret: any) => {
-  console.log("dataChildren", data.children);
   const action = testAction(data);
   if (action) {
     ret.action.push(action);
