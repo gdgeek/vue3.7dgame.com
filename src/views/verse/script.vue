@@ -162,8 +162,7 @@ const src = ref(
 );
 let ready: boolean = false;
 const saveable = computed(() => {
-  return true;
-  //return verse.value!.editable;
+  return verse.value!.editable;
 });
 let map = new Map<string, any>();
 
