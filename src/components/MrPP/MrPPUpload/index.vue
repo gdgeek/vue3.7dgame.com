@@ -49,7 +49,7 @@ const props = withDefaults(
 const emit = defineEmits(["saveResource"]);
 const fileStore = useFileStore();
 
-const data = reactive([
+const data = computed(() => [
   {
     name: "md5",
     title: t("upload.item1.title"),
@@ -76,22 +76,30 @@ const data = reactive([
   },
 ]);
 
-const title = ref(t("upload.title"));
-const declared = ref(t("upload.declared"));
+// 默认
+const defaultTitle = computed(() => t("upload.title"));
+const defaultDeclared = computed(() => t("upload.declared"));
+// 自定义
+const changeTitle = ref<string | null>(null);
+const changeDeclared = ref<string | null>(null);
+
+const title = computed(() => changeTitle.value ?? defaultTitle.value);
+const declared = computed(() => changeDeclared.value ?? defaultDeclared.value);
+
 const isDisabled = ref(false);
 
 // 更新标题和声明信息
 const step = (idx: number) => {
-  const item = data[idx];
-  title.value = item.title;
-  declared.value = item.declared;
+  const item = data.value[idx];
+  changeTitle.value = item.title;
+  changeDeclared.value = item.declared;
 };
 
 // 更新进度条
 const progress = (p: number, idx: number) => {
   step(idx);
-  data[idx].status = p >= 1 ? "success" : "";
-  data[idx].percentage = Math.round(Math.min(p, 1) * 100);
+  data.value[idx].status = p >= 1 ? "success" : "";
+  data.value[idx].percentage = Math.round(Math.min(p, 1) * 100);
 };
 
 const saveFile = async (

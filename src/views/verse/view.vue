@@ -315,7 +315,7 @@ const refresh = async () => {
 };
 
 const deleted = () => {
-  router.push({ path: "/meta-verse/index" });
+  router.push({ path: "/verse/index" });
 };
 
 const changed = () => {

@@ -45,17 +45,19 @@
                 <template #header>
                   <b class="card-title" nowrap>{{ title(item) }}</b>
                 </template>
-                <img
-                  v-if="!item.image"
-                  src="@/assets/image/none.png"
-                  style="width: 100%; height: auto; object-fit: contain"
-                />
-                <LazyImg
-                  v-if="item.image"
-                  style="width: 100%; height: 180px"
-                  fit="contain"
-                  :url="item.image.url"
-                ></LazyImg>
+                <router-link :to="'/meta/meta-edit?id=' + item.id">
+                  <img
+                    v-if="!item.image"
+                    src="@/assets/image/none.png"
+                    style="width: 100%; height: auto; object-fit: contain"
+                  />
+                  <LazyImg
+                    v-if="item.image"
+                    style="width: 100%; height: auto"
+                    fit="contain"
+                    :url="item.image.url"
+                  ></LazyImg>
+                </router-link>
               </el-card>
             </template>
             <div class="clearfix">
@@ -157,6 +159,13 @@ const refresh = async () => {
     "image,verseMetas"
   );
   active.value.items = response.data;
+  console.log("active", active);
+  active.value.pagination = {
+    current: parseInt(response.headers["x-pagination-current-page"]),
+    count: parseInt(response.headers["x-pagination-page-count"]),
+    size: parseInt(response.headers["x-pagination-per-page"]),
+    total: parseInt(response.headers["x-pagination-total-count"]),
+  };
 };
 
 const sort = (value: string) => {

@@ -1,10 +1,16 @@
 import request from "@/utils/request";
-import type { userCreationData } from "@/typings/api_v1/user";
-
 import qs from "querystringify";
-
 import path from "path-browserify";
 import { getUserInfoData } from "../user/model";
+
+export type userCreationData = {
+  pictureCount: number;
+  polygenCount: number;
+  videoCount: number;
+  postCount: number;
+  likeCount: number;
+  verseCount: number;
+};
 
 export const getUserCreation = () => {
   const query = {

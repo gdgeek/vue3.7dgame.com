@@ -57,12 +57,18 @@ const src = ref(
     "/three.js/editor/verse-editor.html?language=" +
     appStore.language
 );
+// const src = ref(
+//   import.meta.env.VITE_APP_EDITOR_URL +
+//     "/editor/verse-editor.html?language=" +
+//     appStore.language
+// );
 const editor = ref<HTMLIFrameElement>();
 const cancel = () => {};
 
 watch(
   () => appStore.language, // 监听 language 的变化
   async (newValue, oldValue) => {
+    console.log("language changed", newValue);
     src.value =
       import.meta.env.VITE_APP_EDITOR_URL +
       "/three.js/editor/verse-editor.html?language=" +

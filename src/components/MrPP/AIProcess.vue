@@ -102,7 +102,7 @@ const imageUrl = computed<string | undefined>(() => {
 
 const rodin = async (step: number) => {
   progress.value.percentage = 5;
-  progress.value.title = "AI Generation";
+  progress.value.title = "AI Generating";
   let data = props.data;
   if (step === 1) {
     const response = await AiRodin.rodin({

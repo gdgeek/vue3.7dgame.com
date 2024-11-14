@@ -99,7 +99,7 @@ import { useRouter } from "@/router";
 import { useTagsStore } from "@/store/modules/tags";
 import { useUserStore } from "@/store/modules/user";
 import DOMPurify from "dompurify";
-import { convertToLocalTime } from "@/utils/dataChange";
+import { convertToLocalTime } from "@/utils/utilityFunctions";
 
 const props = defineProps<{ messageId: number | undefined }>();
 const emit = defineEmits<{

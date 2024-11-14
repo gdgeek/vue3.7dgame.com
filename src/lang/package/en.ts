@@ -410,6 +410,12 @@ export default {
         info: "Cancel input",
       },
     },
+    animation: {
+      animationOn: "Animation On",
+      animationOff: "Animation Off",
+      shadowOn: "Shadow On",
+      shadowOff: "Shadow Off",
+    },
   },
   // 图片管理国际化
   picture: {
@@ -670,6 +676,15 @@ export default {
       error3: "No editor available",
       success: "Saved successfully",
       info: "No changes made",
+      leave: {
+        message1: "Unsaved changes detected. Do you want to save?",
+        message2: "Prompt",
+        confirm: "Yes",
+        cancel: "No",
+        success: "Saved successfully",
+        error: "Save failed",
+        info: "Unsaved changes have been discarded",
+      },
     },
     eventDialog: {
       title: "Event Management Window",
@@ -730,6 +745,7 @@ export default {
     },
     generation: {
       title: "Create Model from AI (Rodin) :",
+      declare: "declared",
       form: {
         image: "Image",
         select: "Select",
@@ -743,7 +759,7 @@ export default {
         },
         message: "Length should be between 4 and 50 characters",
         error: "Please input the prompt or select the image",
-        submit: "Generation",
+        submit: "Generate",
       },
     },
   },
@@ -979,6 +995,15 @@ export default {
         info: "No changes made",
         edit: "Logical Edit",
         code: "Code View",
+        leave: {
+          message1: "Unsaved changes detected. Do you want to save?",
+          message2: "Prompt",
+          confirm: "Yes",
+          cancel: "No",
+          success: "Saved successfully",
+          error: "Save failed",
+          info: "Unsaved changes have been discarded",
+        },
       },
     },
   },

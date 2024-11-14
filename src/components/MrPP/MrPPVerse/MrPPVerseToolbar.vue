@@ -30,11 +30,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { putVerse, deleteVerse, VerseData } from "@/api/v1/verse";
 import MrPPVerseWindowCreate from "@/components/MrPP/MrPPVerse/MrPPVerseWindowCreate.vue";
+
+const router = useRouter();
 
 const props = defineProps<{
   verse: VerseData;

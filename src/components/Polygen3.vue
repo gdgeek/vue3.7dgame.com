@@ -34,8 +34,8 @@
           @click.stop
           style="margin-left: 5px"
           inline-prompt
-          active-text="Animation On"
-          inactive-text="Animation Off"
+          :active-text="$t('polygen.animation.animationOn')"
+          :inactive-text="$t('polygen.animation.animationOff')"
           :disabled="animations.length === 0"
         ></el-switch>
       </div>

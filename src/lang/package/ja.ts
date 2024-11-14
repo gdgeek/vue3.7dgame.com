@@ -408,6 +408,12 @@ export default {
         info: "入力がキャンセルされました",
       },
     },
+    animation: {
+      animationOn: "アニメーションオン",
+      animationOff: "アニメーションオフ",
+      shadowOn: "影オン",
+      shadowOff: "影オフ",
+    },
   },
   // 图片管理国际化
   picture: {
@@ -662,6 +668,15 @@ export default {
       error3: "エディターがありません",
       success: "保存成功",
       info: "変更がありません",
+      leave: {
+        message1: "保存されていない変更があります。保存しますか？",
+        message2: "ヒント",
+        confirm: "はい",
+        cancel: "いいえ",
+        success: "保存が成功しました",
+        error: "保存に失敗しました",
+        info: "保存されていない変更は破棄されました",
+      },
     },
     eventDialog: {
       title: "イベント管理ウィンドウ",
@@ -721,6 +736,7 @@ export default {
     },
     generation: {
       title: "AI (Rodin) を通じてモデルを作成：",
+      declare: "宣言",
       form: {
         image: "画像",
         select: "選択",
@@ -968,6 +984,15 @@ export default {
         info: "変更はありません",
         edit: "ロジック編集",
         code: "コードビュー",
+        leave: {
+          message1: "保存されていない変更があります。保存しますか？",
+          message2: "ヒント",
+          confirm: "はい",
+          cancel: "いいえ",
+          success: "保存が成功しました",
+          error: "保存に失敗しました",
+          info: "保存されていない変更は破棄されました",
+        },
       },
     },
   },

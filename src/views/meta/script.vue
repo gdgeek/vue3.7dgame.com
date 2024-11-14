@@ -62,13 +62,13 @@
                             class="copy-button"
                             text
                             @click="copyCode(LuaCode)"
-                            ><el-icon class="icon"
-                              ><CopyDocument></CopyDocument></el-icon
+                            ><el-icon class="icon">
+                              <CopyDocument></CopyDocument> </el-icon
                             >{{ $t("copy.title") || "Copy" }}</el-button
                           >
                           <pre>
-                            <code class="lua">{{ LuaCode }}</code>
-                          </pre>
+                  <code class="lua">{{ LuaCode }}</code>
+                </pre>
                         </div>
                       </el-tab-pane>
                       <el-tab-pane label="JavaScript" name="javascript">
@@ -87,13 +87,13 @@
                             class="copy-button"
                             text
                             @click="copyCode(JavaScriptCode)"
-                            ><el-icon class="icon"
-                              ><CopyDocument></CopyDocument></el-icon
+                            ><el-icon class="icon">
+                              <CopyDocument></CopyDocument> </el-icon
                             >{{ $t("copy.title") }}</el-button
                           >
                           <pre>
-                            <code class="javascript">{{ JavaScriptCode }}</code>
-                          </pre>
+                  <code class="javascript">{{ JavaScriptCode }}</code>
+                </pre>
                         </div>
                       </el-tab-pane>
                     </el-tabs>
@@ -116,7 +116,11 @@ import { ElMessage } from "element-plus";
 import { useAppStore } from "@/store/modules/app";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { convertToHttps } from "@/assets/js/helper";
 
+const loader = new GLTFLoader();
 const appStore = useAppStore();
 const loading = ref(false);
 const meta = ref<metaInfo | null>(null);
@@ -134,6 +138,29 @@ const LuaCode = ref("");
 const JavaScriptCode = ref("");
 const settingsStore = useSettingsStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
+
+// 定义单次赋值
+const defineSingleAssignment = (initialValue: any) => {
+  let value = initialValue;
+  let isAssigned = false;
+
+  return {
+    get() {
+      return value;
+    },
+    set(newValue: any) {
+      if (!isAssigned) {
+        value = newValue;
+        isAssigned = true;
+        // console.log("值已成功赋值为:", newValue);
+      } else {
+        console.log("cannot be assigned again");
+      }
+    },
+  };
+};
+// 保存编辑器初始化lua代码
+const initLuaCode = defineSingleAssignment("");
 
 // 动态加载代码样式
 const loadHighlightStyle = (isDark: boolean) => {
@@ -223,7 +250,11 @@ const handleMessage = async (e: MessageEvent) => {
       initEditor();
     } else if (params.action === "post") {
       await postScript(params.data);
-      console.log("PARAMS", params.data);
+
+      if (saveResolve) {
+        saveResolve();
+        saveResolve = null;
+      }
     } else if (params.action === "post:no-change") {
       ElMessage({
         message: t("meta.script.info") || "Info",
@@ -232,6 +263,7 @@ const handleMessage = async (e: MessageEvent) => {
     } else if (params.action === "update") {
       LuaCode.value = "local meta = {}\nlocal index = ''\n" + params.data.lua;
       JavaScriptCode.value = params.data.js;
+      initLuaCode.set(LuaCode.value);
     }
   } catch (e: any) {
     console.log("ex:" + e);
@@ -239,9 +271,67 @@ const handleMessage = async (e: MessageEvent) => {
   }
 };
 
-const save = () => {
-  postMessage("save", { language: ["lua", "js"], data: {} });
+// 标记是否有未保存的更改
+const hasUnsavedChanges = ref<boolean>(false);
+// 保存操作的 Promise 解析函数
+let saveResolve: (() => void) | null = null;
+
+const save = (): Promise<void> => {
+  hasUnsavedChanges.value = false;
+  return new Promise<void>((resolve, reject) => {
+    saveResolve = resolve;
+    postMessage("save", { language: ["lua", "js"], data: {} });
+  });
 };
+
+// 页面关闭提示
+const handleBeforeUnload = (event: any) => {
+  if (hasUnsavedChanges.value) {
+    event.preventDefault();
+    event.returnValue = "";
+  }
+};
+
+// 离开时，如果有未保存的更改，则提示用户是否要保存
+onBeforeRouteLeave(async (to, from, next) => {
+  if (hasUnsavedChanges.value) {
+    try {
+      await ElMessageBox.confirm(
+        t("meta.script.leave.message1"),
+        t("meta.script.leave.message2"),
+        {
+          confirmButtonText: t("meta.script.leave.confirm"),
+          cancelButtonText: t("meta.script.leave.cancel"),
+          type: "warning",
+        }
+      );
+
+      // 用户选择保存，等待保存完成后再进行路由跳转
+      try {
+        await save();
+        next();
+      } catch (error) {
+        ElMessage.error(t("meta.script.leave.error"));
+        next(false);
+      }
+    } catch {
+      // 用户选择不保存，继续路由跳转
+      hasUnsavedChanges.value = false;
+      ElMessage.info(t("meta.script.leave.info"));
+      next();
+    }
+  } else {
+    next();
+  }
+});
+
+watch(LuaCode, (newValue, oldValue) => {
+  hasUnsavedChanges.value = false;
+  if (newValue !== initLuaCode.get()) {
+    hasUnsavedChanges.value = true;
+  }
+});
+
 const postMessage = (action: string, data: any = {}) => {
   if (editor.value && editor.value.contentWindow) {
     editor.value.contentWindow.postMessage(
@@ -253,8 +343,8 @@ const postMessage = (action: string, data: any = {}) => {
       "*"
     );
   } else {
-    console.error(t("meta.script.error3") || "Error 3");
     ElMessage({
+      message: t("meta.script.error3"),
       type: "error",
     });
   }
@@ -267,7 +357,6 @@ const initEditor = () => {
   const data = meta.value.metaCode?.blockly
     ? JSON.parse(meta.value.metaCode?.blockly)
     : {};
-
   test.value = getResource(meta.value);
   postMessage("init", {
     language: ["lua", "js"],
@@ -296,14 +385,24 @@ const testPoint = (data: any, typeList: string[]) => {
   if (!data) {
     return;
   }
-  return typeList.find((type) => data.type.toLowerCase() === type.toLowerCase())
-    ? {
-        uuid: data.parameters.uuid,
-        name: data.parameters.name ?? null,
-      }
-    : undefined;
+  const isValidType = typeList.find(
+    (type) => data.type.toLowerCase() === type.toLowerCase()
+  );
+
+  if (isValidType) {
+    const animations = data.parameters?.animations ?? null;
+    return {
+      uuid: data.parameters.uuid,
+      name: data.parameters.name ?? null,
+      ...(data.type.toLowerCase() === "polygen" ? { animations } : {}), // 如果类型为 Polygen，加入 animations 属性
+    };
+  }
+
+  return undefined;
 };
+
 const addMetaData = (data: any, ret: any) => {
+  console.log("dataChildren", data.children);
   const action = testAction(data);
   if (action) {
     ret.action.push(action);
@@ -363,7 +462,7 @@ const addMetaData = (data: any, ret: any) => {
 };
 const getResource = (meta: metaInfo) => {
   const data = JSON.parse(meta.data!);
-  //  console.log("data", data);
+  console.log("data", data);
   const ret = {
     action: [],
     trigger: [],
@@ -387,17 +486,77 @@ const getResource = (meta: metaInfo) => {
 
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
+  window.removeEventListener("beforeunload", handleBeforeUnload);
 });
 onMounted(async () => {
   window.addEventListener("message", handleMessage);
   loadHighlightStyle(isDark.value);
+
+  window.addEventListener("beforeunload", handleBeforeUnload);
+
   try {
     loading.value = true;
     const response = await getMeta(id.value, "cyber,event,share,metaCode");
+    console.log("response数据", response);
 
-    meta.value = response.data;
-    // console.error("meta", meta.value);
+    // 用递归处理层级嵌套
+    const assignAnimations = (
+      entities: any[],
+      modelId: string,
+      animationNames: string[]
+    ) => {
+      entities.forEach((item: any) => {
+        // 如果满足条件则赋值 animations
+        if (item.parameters?.resource === modelId) {
+          item.parameters.animations = animationNames;
+        }
 
+        // 如果当前项还有 children.entities，继续递归处理
+        if (item.children?.entities) {
+          assignAnimations(item.children.entities, modelId, animationNames);
+        }
+      });
+    };
+
+    // 循环处理每个模型文件
+    for (const [index, model] of response.data.resources.entries()) {
+      if (model.type !== "polygen") {
+        meta.value = response.data;
+        continue;
+      }
+
+      const modelUrl = convertToHttps(model.file.url);
+      // const modelUrl = model.file.url;
+      console.error("modelUrl", modelUrl);
+      const modelId = model.id.toString();
+
+      // 等待每个模型加载完成获取数据后再继续
+      await new Promise<void>((resolve, reject) => {
+        loader.load(
+          modelUrl,
+          (gltf) => {
+            const animationNames = gltf.animations.map((clip) => clip.name);
+
+            let data = JSON.parse(response.data.data!);
+
+            // 调用递归函数对所有满足条件的项赋值 animations
+            assignAnimations(data.children.entities, modelId, animationNames);
+
+            response.data.data = JSON.stringify(data);
+            meta.value = response.data;
+
+            resolve();
+          },
+          undefined,
+          (error) => {
+            console.error("An error occurred while loading the model:", error);
+            reject(error);
+          }
+        );
+      });
+    }
+
+    console.log("meta", meta.value);
     initEditor();
   } catch (error: any) {
     alert(error.message);
