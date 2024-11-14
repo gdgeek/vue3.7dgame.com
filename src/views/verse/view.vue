@@ -129,31 +129,7 @@
           </el-button>
         </el-card>
         <br />
-        <!--
-        <el-card v-if="$can('root')">
-          <el-button
-            v-if="verseOpen === null"
-            style="width: 100%"
-            type="primary"
-            size="small"
-            @click="open()"
-          >
-            <font-awesome-icon icon="eye" />
-            &nbsp;开放【工程】
-          </el-button>
 
-          <el-button
-            v-else
-            style="width: 100%"
-            type="primary"
-            size="small"
-            @click="close()"
-          >
-            <font-awesome-icon icon="eye-slash" />
-            &nbsp;关闭【工程】
-          </el-button>
-        </el-card>
--->
         <Share v-if="saveable" :verse="verse!"></Share>
         <br />
       </el-col>
