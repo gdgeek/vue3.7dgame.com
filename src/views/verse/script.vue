@@ -34,7 +34,6 @@
                 name="blockly"
               >
                 <el-main style="margin: 0; padding: 0; height: 70vh">
-                  {{ src }}
                   <iframe
                     style="margin: 0; padding: 0; height: 100%; width: 100%"
                     id="editor"
@@ -163,7 +162,8 @@ const src = ref(
 );
 let ready: boolean = false;
 const saveable = computed(() => {
-  return verse.value!.editable;
+  return true;
+  //return verse.value!.editable;
 });
 let map = new Map<string, any>();
 
