@@ -72,8 +72,11 @@ const dialogVisible = ref(false);
 const imageId = ref<number | null>(null);
 const item = ref<VerseData>();
 
-const isManager = computed(() =>
-  useUserStore().userInfo.roles.includes("manager" || "admin" || "root")
+const isManager = computed(
+  () =>
+    useUserStore().userInfo.roles.includes("manager") ||
+    useUserStore().userInfo.roles.includes("admin") ||
+    useUserStore().userInfo.roles.includes("root")
 );
 
 const info = ref({
