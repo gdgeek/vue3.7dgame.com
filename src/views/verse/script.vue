@@ -35,8 +35,6 @@
               >
                 <el-main style="margin: 0; padding: 0; height: 70vh">
                   {{ src }}
-                  {{ import.meta.env.VITE_APP_BLOCKLY_URL }}
-                  {{ import.meta.env.VITE_APP_TEST }}
                   <iframe
                     style="margin: 0; padding: 0; height: 100%; width: 100%"
                     id="editor"
