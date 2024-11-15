@@ -21,7 +21,7 @@
         <div class="clearfix">
           <span v-if="!message">{{ $t("verse.view.message.loading") }}</span>
           <span v-else>
-            <h4 style="display: inline; color: #494949">{{ message.title }}</h4>
+            <h4 style="display: inline; color: #676767">{{ message.title }}</h4>
           </span>
 
           <el-button-group
@@ -74,7 +74,7 @@
           </el-button>
         </el-col>
         <el-col :span="10" align="right">
-          <small v-if="message" style="color: #8790a7">
+          <small v-if="message" style="color: #494949">
             {{ message.author?.nickname || message.author?.username }}
             {{ $t("verse.view.message.edit") }}
             {{ convertToLocalTime(message.updated_at!) }}
@@ -195,7 +195,14 @@ const changeMessage = async (data: any) => {
 };
 
 const sanitizedHtml = computed(() => {
-  return message.value ? DOMPurify.sanitize(message.value?.body) : "";
+  if (message.value) {
+    const updatedHtml = message.value.body.replace(
+      /color: rgb\(13, 13, 13\);/g,
+      "color: rgb(135, 144, 167);"
+    );
+    return DOMPurify.sanitize(updatedHtml);
+  }
+  return "";
 });
 
 onMounted(() => {
