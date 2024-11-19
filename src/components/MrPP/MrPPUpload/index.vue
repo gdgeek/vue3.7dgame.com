@@ -46,7 +46,11 @@ const props = withDefaults(
   }
 );
 
-const emit = defineEmits(["saveResource"]);
+const emit = defineEmits([
+  "saveResource",
+  "allFilesUploaded",
+  "singleFileUploaded",
+]);
 const fileStore = useFileStore();
 
 const data = computed(() => [
@@ -130,34 +134,54 @@ const saveFile = async (
 // 选择文件并上传
 const select = async () => {
   try {
-    const file = await fileStore.store.fileOpen(props.fileType);
-    isDisabled.value = !isDisabled.value;
-    const md5 = await fileStore.store.fileMD5(file, (p: number) =>
-      progress(p, 0)
-    );
-    const handler = await fileStore.store.publicHandler();
-    const has = await fileStore.store.fileHas(
-      md5,
-      file.extension!,
-      handler,
-      props.dir!
-    );
-    console.log("Has:", has);
+    const files = await fileStore.store.fileOpen(props.fileType, true);
+    isDisabled.value = true; // 禁用按钮
 
-    if (!has) {
-      await fileStore.store.fileUpload(
-        md5,
-        file.extension!,
-        file,
-        (p: number) => progress(p, 1),
-        handler,
-        props.dir!
-      );
+    let completedCount = 0; // 已完成文件计数
+    const totalFiles = files.length; // 总文件数
+    console.log("总文件数", totalFiles);
+
+    for (const file of files) {
+      try {
+        const md5 = await fileStore.store.fileMD5(file, (p: number) =>
+          progress(p, 0)
+        );
+        const handler = await fileStore.store.publicHandler();
+        const has = await fileStore.store.fileHas(
+          md5,
+          file.extension!,
+          handler,
+          props.dir!
+        );
+
+        if (!has) {
+          await fileStore.store.fileUpload(
+            md5,
+            file.extension!,
+            file,
+            (p: number) => progress(p, 1),
+            handler,
+            props.dir!
+          );
+        }
+
+        await saveFile(md5, file.extension!, file, handler);
+      } catch (fileError) {
+        console.error(`Error processing file ${file.name}:`, fileError);
+      } finally {
+        completedCount++;
+        console.log("已完成", completedCount, "个文件");
+        // 如果是多文件上传，且所有文件处理完成
+        if (completedCount === totalFiles) {
+          console.log("多文件上传");
+          emit("allFilesUploaded");
+          isDisabled.value = false;
+        }
+      }
     }
-    await saveFile(md5, file.extension!, file, handler);
-    // await saveFile(md5, file.type.split("/").pop()!, file, handler);
   } catch (error) {
     console.error("Error in select function:", error);
+    isDisabled.value = false;
   }
 };
 </script>

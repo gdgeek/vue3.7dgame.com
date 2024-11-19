@@ -58,6 +58,12 @@ const src = ref(
     appStore.language
 );
 
+// const src = ref(
+//   import.meta.env.VITE_APP_EDITOR_URL +
+//     "/editor/verse-editor.html?language=" +
+//     appStore.language
+// );
+
 const editor = ref<HTMLIFrameElement>();
 const cancel = () => {};
 

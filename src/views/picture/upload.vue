@@ -4,6 +4,7 @@
       dir="picture"
       :file-type="fileType"
       @save-resource="savePicture"
+      @all-files-uploaded="handleAllFilesUploaded"
     >
       <div>{{ $t("picture.uploadFile") }}</div>
     </mr-p-p-upload>
@@ -18,6 +19,9 @@ import { postPicture } from "@/api/resources/index";
 const fileType = ref("image/gif, image/jpeg, image/png");
 const router = useRouter();
 
+// 记录所有文件的上传结果
+const uploadedFileIds = ref<number[]>([]);
+
 // 图片保存
 const savePicture = async (
   name: string,
@@ -26,14 +30,26 @@ const savePicture = async (
 ) => {
   try {
     const response = await postPicture({ name, file_id });
-    // 跳转到图片查看页面，并传递图片 ID
+    // 将文件 ID 存储到数组中
+    uploadedFileIds.value.push(response.data.id);
+    console.log("uploadedFileIds.length", uploadedFileIds.value.length);
+  } catch (err) {
+    console.error("Failed to save picture:", err);
+  } finally {
+    callback();
+  }
+};
+
+// 多个文件上传后跳转到最后一个文件的查看页面
+const handleAllFilesUploaded = () => {
+  if (uploadedFileIds.value.length > 0) {
+    console.log("All files uploaded successfully.");
+    // 跳转到最后一个文件的查看页面
+    const lastFileId = uploadedFileIds.value[uploadedFileIds.value.length - 1];
     router.push({
       path: "/resource/picture/view",
-      query: { id: response.data.id },
+      query: { id: lastFileId },
     });
-  } catch (err) {
-    console.error(err);
   }
-  callback();
 };
 </script>
