@@ -4,7 +4,6 @@
       dir="video"
       :file-type="fileType"
       @save-resource="saveVideo"
-      @all-files-uploaded="handleAllFilesUploaded"
     >
       <div>{{ $t("video.uploadFile") }}</div>
     </mr-p-p-upload>
@@ -20,19 +19,23 @@ import { postVideo } from "@/api/resources/index";
 const fileType = ref("video/mp4, video/ogg");
 const router = useRouter();
 
-// 记录所有文件的上传结果
-const uploadedFileIds: number[] = [];
+let completedCount = 0;
 
 // 视频保存
 const saveVideo = async (
   name: string,
-  file_id: number,
+  file_id: number, 
+  totalFiles: number,
   callback: () => void
 ) => {
   try {
     const response = await postVideo({ name, file_id });
-    // 将文件 ID 存储到数组中
-    uploadedFileIds.push(response.data.id);
+    if (response.data.id) {
+      completedCount++;
+      if (completedCount === totalFiles) {
+        handleAllFilesUploaded(response.data.id);
+      }
+    }
   } catch (err) {
     console.error(err);
   } finally {
@@ -40,15 +43,11 @@ const saveVideo = async (
   }
 };
 
-// 监听所有文件上传完成事件
-const handleAllFilesUploaded = () => {
-  if (uploadedFileIds.length > 0) {
-    // 跳转到最后一个文件的查看页面
-    const lastFileId = uploadedFileIds[uploadedFileIds.length - 1];
-    router.push({
+// 多个文件上传后跳转到最后一个文件的查看页面
+const handleAllFilesUploaded = async (lastFileId: number) => {
+    await router.push({
       path: "/resource/video/view",
       query: { id: lastFileId },
     });
-  }
 };
 </script>

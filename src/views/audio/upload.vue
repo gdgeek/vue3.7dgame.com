@@ -4,7 +4,6 @@
       dir="audio"
       :file-type="fileType"
       @save-resource="saveAudio"
-      @all-files-uploaded="handleAllFilesUploaded"
     >
       <div>{{ $t("audio.uploadFile") }}</div>
     </mr-p-p-upload>
@@ -19,19 +18,22 @@ import { postAudio } from "@/api/resources/index";
 const fileType = ref("audio/mp3, audio/wav");
 const router = useRouter();
 
-// 记录所有文件的上传结果
-const uploadedFileIds: number[] = [];
-
+let completedCount = 0;
 // 音频保存
 const saveAudio = async (
   name: string,
   file_id: number,
+  totalFiles: number,
   callback: () => void
 ) => {
   try {
     const response = await postAudio({ name, file_id });
-    // 将文件 ID 存储到数组中
-    uploadedFileIds.push(response.data.id);
+    if (response.data.id) {
+      completedCount++;
+      if (completedCount === totalFiles) {
+        handleAllFilesUploaded(response.data.id);
+      }
+    }
   } catch (err) {
     console.error(err);
   } finally {
@@ -39,15 +41,11 @@ const saveAudio = async (
   }
 };
 
-// 监听所有文件上传完成事件
-const handleAllFilesUploaded = () => {
-  if (uploadedFileIds.length > 0) {
-    // 跳转到最后一个文件的查看页面
-    const lastFileId = uploadedFileIds[uploadedFileIds.length - 1];
-    router.push({
+// 多个文件上传后跳转到最后一个文件的查看页面
+const handleAllFilesUploaded = async (lastFileId: number) => {
+    await router.push({
       path: "/resource/audio/view",
       query: { id: lastFileId },
     });
-  }
 };
 </script>

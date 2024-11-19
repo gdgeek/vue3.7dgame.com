@@ -48,8 +48,6 @@ const props = withDefaults(
 
 const emit = defineEmits([
   "saveResource",
-  "allFilesUploaded",
-  "singleFileUploaded",
 ]);
 const fileStore = useFileStore();
 
@@ -110,7 +108,8 @@ const saveFile = async (
   md5: string,
   extension: string,
   file: File,
-  handler: FileHandler
+  handler: FileHandler,
+  totalFiles: number
 ) => {
   const data = {
     filename: file.name,
@@ -123,7 +122,7 @@ const saveFile = async (
 
   try {
     const response = await postFile(data);
-    emit("saveResource", data.filename, response.data.id, () => {
+    emit("saveResource", data.filename, response.data.id, totalFiles, () => {
       progress(2, 1);
     });
   } catch (err) {
@@ -136,10 +135,8 @@ const select = async () => {
   try {
     const files = await fileStore.store.fileOpen(props.fileType, true);
     isDisabled.value = true; // 禁用按钮
-
-    let completedCount = 0; // 已完成文件计数
+    let fileCount = 0; // 已完成文件计数
     const totalFiles = files.length; // 总文件数
-    console.log("总文件数", totalFiles);
 
     for (const file of files) {
       try {
@@ -165,16 +162,12 @@ const select = async () => {
           );
         }
 
-        await saveFile(md5, file.extension!, file, handler);
+        await saveFile(md5, file.extension!, file, handler, totalFiles);
       } catch (fileError) {
         console.error(`Error processing file ${file.name}:`, fileError);
       } finally {
-        completedCount++;
-        console.log("已完成", completedCount, "个文件");
-        // 如果是多文件上传，且所有文件处理完成
-        if (completedCount === totalFiles) {
-          console.log("多文件上传");
-          emit("allFilesUploaded");
+        fileCount++;
+        if (fileCount === totalFiles) {
           isDisabled.value = false;
         }
       }

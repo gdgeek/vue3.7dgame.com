@@ -4,7 +4,6 @@
       dir="voxel"
       :file-type="fileType"
       @save-resource="saveVoxel"
-      @all-files-uploaded="handleAllFilesUploaded"
     >
       <div>{{ $t("voxel.uploadFile") }}</div>
     </mr-p-p-upload>
@@ -19,18 +18,22 @@ import { postVoxel } from "@/api/resources/index";
 const fileType = ref(".vox");
 const router = useRouter();
 
-// 记录所有文件的上传结果
-const uploadedFileIds: number[] = [];
 
+let completedCount = 0;
 const saveVoxel = async (
   name: string,
   file_id: number,
+  totalFiles: number,
   callback: () => void
 ) => {
   try {
     const response = await postVoxel({ name, file_id });
-    // 将文件 ID 存储到数组中
-    uploadedFileIds.push(response.data.id);
+    if (response.data.id) {
+      completedCount++;
+      if (completedCount === totalFiles) {
+        handleAllFilesUploaded(response.data.id);
+      }
+    }
   } catch (err) {
     console.log(err);
   } finally {
@@ -38,15 +41,11 @@ const saveVoxel = async (
   }
 };
 
-// 监听所有文件上传完成事件
-const handleAllFilesUploaded = () => {
-  if (uploadedFileIds.length > 0) {
-    // 跳转到最后一个文件的查看页面
-    const lastFileId = uploadedFileIds[uploadedFileIds.length - 1];
-    router.push({
+// 多个文件上传后跳转到最后一个文件的查看页面
+const handleAllFilesUploaded = async (lastFileId: number) => {
+    await router.push({
       path: "/resource/voxel/view",
       query: { id: lastFileId },
     });
-  }
 };
 </script>
