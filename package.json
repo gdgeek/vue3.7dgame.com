@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc --noEmit & vite build",
+    "dev": "vite --mode development",
+    "build": "vue-tsc --noEmit & vite build --mode production",
+    "build:staging": "vue-tsc --noEmit & vite build --mode staging",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
