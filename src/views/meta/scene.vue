@@ -157,20 +157,29 @@ const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
   }
 
   console.log("metaData:", meta);
+
   // 在上传前处理 meta 数据，确保 name 唯一
   const renameEntities = (entities: any[]) => {
     const nameCount: Record<string, number> = {};
 
     entities.forEach((entity) => {
-      const name = entity.parameters.name;
+      let name = entity.parameters.name;
 
-      // 检查名称是否重复
-      if (nameCount[name]) {
-        nameCount[name] += 1;
-        entity.parameters.name = `${name} (${nameCount[name]})`;
+      // 提取基础名称和当前计数
+      const match = name.match(/^(.*?)(?: \((\d+)\))?$/);
+      let baseName = match?.[1]?.trim() || name;
+      let currentCount = match?.[2] ? parseInt(match[2], 10) : 0;
+
+      if (!nameCount[baseName]) {
+        nameCount[baseName] = currentCount > 0 ? currentCount : 1;
       } else {
-        nameCount[name] = 1; // 第一次出现
+        nameCount[baseName]++;
       }
+
+      // 生成唯一名称
+      const newCount = nameCount[baseName];
+      entity.parameters.name =
+        newCount > 1 ? `${baseName} (${newCount})` : baseName;
     });
   };
 
