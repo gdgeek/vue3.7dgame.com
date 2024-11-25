@@ -119,6 +119,7 @@ import { useSettingsStore } from "@/store/modules/settings";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { convertToHttps } from "@/assets/js/helper";
+import pako from 'pako';
 
 const loader = new GLTFLoader();
 const appStore = useAppStore();
@@ -227,8 +228,17 @@ const postScript = async (message: any) => {
     return;
   }
 
+  // 压缩 blockly 数据
+  let blocklyData = JSON.stringify(message.data);
+  if (blocklyData.length > 1024 * 2) { // 如果超过2KB就进行压缩
+    const uint8Array = pako.deflate(blocklyData);
+    // 将压缩后的数据转换为 Base64
+    const base64Str = btoa(String.fromCharCode.apply(null, uint8Array));
+    blocklyData = `compressed:${base64Str}`; // 压缩标记
+  }
+
   await putMetaCode(meta.value.id, {
-    blockly: JSON.stringify(message.data),
+    blockly: blocklyData,
     lua: message.lua,
     js: message.js,
   });
@@ -354,19 +364,34 @@ const initEditor = () => {
   if (!meta.value) return;
   if (!ready) return;
 
-  const data = meta.value.metaCode?.blockly
-    ? JSON.parse(meta.value.metaCode?.blockly)
-    : {};
-  test.value = getResource(meta.value);
-  postMessage("init", {
-    language: ["lua", "js"],
-    style: ["base", "meta"],
-    data: data,
-    parameters: {
-      index: meta.value.id,
-      resource: getResource(meta.value),
-    },
-  });
+  let blocklyData = meta.value.metaCode?.blockly || '{}';
+  try {
+    if (blocklyData.startsWith('compressed:')) {
+      // 解压缩数据
+      const base64Str = blocklyData.substring(11); // 移除 'compressed:' 前缀
+      // 将 Base64 转换回二进制数据
+      const binaryString = atob(base64Str);
+      const uint8Array = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        uint8Array[i] = binaryString.charCodeAt(i);
+      }
+      blocklyData = pako.inflate(uint8Array, { to: 'string' });
+    }
+    const data = JSON.parse(blocklyData);
+    
+    test.value = getResource(meta.value);
+    postMessage("init", {
+      language: ["lua", "js"],
+      style: ["base", "meta"],
+      data: data,
+      parameters: {
+        index: meta.value.id,
+        resource: getResource(meta.value),
+      },
+    });
+  } catch (error) {
+    console.error('Failed to decompress or parse data:', error);
+  }
 };
 const testAction = (data: any) => {
   if (

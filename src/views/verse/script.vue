@@ -120,6 +120,7 @@ import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useI18n } from "vue-i18n";
 import { ElMessageBox, ElMessage } from "element-plus";
+import pako from "pako";
 
 // 初始化状态和变量
 const appStore = useAppStore();
@@ -246,8 +247,17 @@ const postScript = async (message: any) => {
     return;
   }
 
+  // 压缩 blockly 数据
+  let blocklyData = JSON.stringify(message.data);
+  if (blocklyData.length > 1024 * 2) { // 如果超过2KB就进行压缩
+    const uint8Array = pako.deflate(blocklyData);
+    // 将压缩后的数据转换为 Base64
+    const base64Str = btoa(String.fromCharCode.apply(null, uint8Array));
+    blocklyData = `compressed:${base64Str}`; // 压缩标记
+  }
+
   await putVerseCode(verse.value!.id, {
-    blockly: JSON.stringify(message.data),
+    blockly: blocklyData,
     js: message.js,
     lua: message.lua,
   });
@@ -363,18 +373,34 @@ const postMessage = (action: string, data: any = {}) => {
 const initEditor = () => {
   if (!verse.value) return;
   if (!ready) return;
-  const data = verse.value.verseCode?.blockly
-    ? JSON.parse(verse.value.verseCode.blockly)
-    : {};
-  postMessage("init", {
-    language: ["lua", "js"],
-    style: ["base", "verse"],
-    data: data,
-    parameters: {
-      index: verse.value!.id,
-      resource: resource.value,
-    },
-  });
+
+  try {
+    let blocklyData = verse.value.verseCode?.blockly || '{}';
+    if (blocklyData.startsWith('compressed:')) {
+      // 解压缩数据
+      const base64Str = blocklyData.substring(11); // 移除 'compressed:' 前缀
+      // 将 Base64 转换回二进制数据
+      const binaryString = atob(base64Str);
+      const uint8Array = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        uint8Array[i] = binaryString.charCodeAt(i);
+      }
+      blocklyData = pako.inflate(uint8Array, { to: 'string' });
+    }
+    const data = JSON.parse(blocklyData);
+
+    postMessage("init", {
+      language: ["lua", "js"],
+      style: ["base", "verse"],
+      data: data,
+      parameters: {
+        index: verse.value!.id,
+        resource: resource.value,
+      },
+    });
+  } catch (error) {
+    console.error('Fail to decompress or parse data:', error);
+  }
 };
 
 const resource = computed(() => {
