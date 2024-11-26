@@ -249,7 +249,8 @@ const postScript = async (message: any) => {
 
   // 压缩 blockly 数据
   let blocklyData = JSON.stringify(message.data);
-  if (blocklyData.length > 1024 * 2) { // 如果超过2KB就进行压缩
+  if (blocklyData.length > 1024 * 2) {
+    // 如果超过2KB就进行压缩
     const uint8Array = pako.deflate(blocklyData);
     // 将压缩后的数据转换为 Base64
     const base64Str = btoa(String.fromCharCode.apply(null, uint8Array));
@@ -375,8 +376,8 @@ const initEditor = () => {
   if (!ready) return;
 
   try {
-    let blocklyData = verse.value.verseCode?.blockly || '{}';
-    if (blocklyData.startsWith('compressed:')) {
+    let blocklyData = verse.value.verseCode?.blockly || "{}";
+    if (blocklyData.startsWith("compressed:")) {
       // 解压缩数据
       const base64Str = blocklyData.substring(11); // 移除 'compressed:' 前缀
       // 将 Base64 转换回二进制数据
@@ -385,7 +386,7 @@ const initEditor = () => {
       for (let i = 0; i < binaryString.length; i++) {
         uint8Array[i] = binaryString.charCodeAt(i);
       }
-      blocklyData = pako.inflate(uint8Array, { to: 'string' });
+      blocklyData = pako.inflate(uint8Array, { to: "string" });
     }
     const data = JSON.parse(blocklyData);
 
@@ -399,7 +400,7 @@ const initEditor = () => {
       },
     });
   } catch (error) {
-    console.error('Fail to decompress or parse data:', error);
+    console.error("Fail to decompress or parse data:", error);
   }
 };
 

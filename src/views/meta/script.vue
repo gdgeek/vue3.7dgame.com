@@ -9,6 +9,9 @@
                 meta.title
               }}</el-link>
               /【{{ $t("meta.script.title") || "Script Title" }}】
+              <el-button type="primary" size="small" @click="run"
+                >测试按钮</el-button
+              >
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="save">
                   <font-awesome-icon
@@ -20,7 +23,7 @@
               </el-button-group>
             </div>
           </template>
-          <el-container>
+          <el-container v-if="!disabled">
             <el-tabs v-model="activeName" type="card" style="width: 100%">
               <el-tab-pane
                 :label="$t('verse.view.script.edit') || 'Edit Script'"
@@ -67,8 +70,8 @@
                             >{{ $t("copy.title") || "Copy" }}</el-button
                           >
                           <pre>
-                  <code class="lua">{{ LuaCode }}</code>
-                </pre>
+                            <code class="lua">{{ LuaCode }}</code>
+                          </pre>
                         </div>
                       </el-tab-pane>
                       <el-tab-pane label="JavaScript" name="javascript">
@@ -92,8 +95,8 @@
                             >{{ $t("copy.title") }}</el-button
                           >
                           <pre>
-                  <code class="javascript">{{ JavaScriptCode }}</code>
-                </pre>
+                            <code class="javascript">{{ JavaScriptCode }}</code>
+                          </pre>
                         </div>
                       </el-tab-pane>
                     </el-tabs>
@@ -102,6 +105,7 @@
               </el-tab-pane>
             </el-tabs>
           </el-container>
+          <el-container v-if="disabled" class="runArea"></el-container>
         </el-card>
       </el-main>
     </el-container>
@@ -119,7 +123,7 @@ import { useSettingsStore } from "@/store/modules/settings";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { convertToHttps } from "@/assets/js/helper";
-import pako from 'pako';
+import pako from "pako";
 
 const loader = new GLTFLoader();
 const appStore = useAppStore();
@@ -230,7 +234,8 @@ const postScript = async (message: any) => {
 
   // 压缩 blockly 数据
   let blocklyData = JSON.stringify(message.data);
-  if (blocklyData.length > 1024 * 2) { // 如果超过2KB就进行压缩
+  if (blocklyData.length > 1024 * 2) {
+    // 如果超过2KB就进行压缩
     const uint8Array = pako.deflate(blocklyData);
     // 将压缩后的数据转换为 Base64
     const base64Str = btoa(String.fromCharCode.apply(null, uint8Array));
@@ -364,9 +369,9 @@ const initEditor = () => {
   if (!meta.value) return;
   if (!ready) return;
 
-  let blocklyData = meta.value.metaCode?.blockly || '{}';
+  let blocklyData = meta.value.metaCode?.blockly || "{}";
   try {
-    if (blocklyData.startsWith('compressed:')) {
+    if (blocklyData.startsWith("compressed:")) {
       // 解压缩数据
       const base64Str = blocklyData.substring(11); // 移除 'compressed:' 前缀
       // 将 Base64 转换回二进制数据
@@ -375,10 +380,10 @@ const initEditor = () => {
       for (let i = 0; i < binaryString.length; i++) {
         uint8Array[i] = binaryString.charCodeAt(i);
       }
-      blocklyData = pako.inflate(uint8Array, { to: 'string' });
+      blocklyData = pako.inflate(uint8Array, { to: "string" });
     }
     const data = JSON.parse(blocklyData);
-    
+
     test.value = getResource(meta.value);
     postMessage("init", {
       language: ["lua", "js"],
@@ -390,7 +395,7 @@ const initEditor = () => {
       },
     });
   } catch (error) {
-    console.error('Failed to decompress or parse data:', error);
+    console.error("Failed to decompress or parse data:", error);
   }
 };
 const testAction = (data: any) => {
@@ -592,6 +597,11 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
+const disabled = ref<boolean>(false);
+const run = () => {
+  disabled.value = true;
+};
 </script>
 
 <style scoped>
