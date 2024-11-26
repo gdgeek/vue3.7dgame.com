@@ -10,7 +10,7 @@
               }}</el-link>
               /【{{ $t("meta.script.title") || "Script Title" }}】
               <el-button type="primary" size="small" @click="run"
-                >测试按钮</el-button
+                >测试运行</el-button
               >
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="save">
@@ -105,7 +105,9 @@
               </el-tab-pane>
             </el-tabs>
           </el-container>
-          <el-container v-if="disabled" class="runArea"></el-container>
+          <div v-if="disabled" class="runArea">
+            <ScenePlayer ref="scenePlayer" :meta="meta"></ScenePlayer>
+          </div>
         </el-card>
       </el-main>
     </el-container>
@@ -124,6 +126,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { convertToHttps } from "@/assets/js/helper";
 import pako from "pako";
+import ScenePlayer from "./ScenePlayer.vue";
 
 const loader = new GLTFLoader();
 const appStore = useAppStore();
@@ -599,8 +602,70 @@ onMounted(async () => {
 });
 
 const disabled = ref<boolean>(false);
-const run = () => {
+const scenePlayer = ref<InstanceType<typeof ScenePlayer>>();
+
+const run = async () => {
   disabled.value = true;
+
+  // 等待场景加载完成
+  await nextTick();
+
+  if (JavaScriptCode.value) {
+    const handlePolygen = (uuid: string) => {
+      // 确保 scenePlayer 已经初始化
+      if (!scenePlayer.value) {
+        console.error("ScenePlayer not initialized");
+        return null;
+      }
+
+      console.log("查找模型:", uuid, scenePlayer.value.models);
+      const model = scenePlayer.value.models.get(uuid);
+
+      if (!model) {
+        console.warn(`找不到UUID为 ${uuid} 的模型`);
+        return null;
+      }
+
+      return {
+        playAnimation: (animationName: string) => {
+          console.log("播放动画:", {
+            uuid,
+            animationName,
+            model: model,
+          });
+          scenePlayer.value?.playAnimation(uuid, animationName);
+        },
+      };
+    };
+
+    const polygen = {
+      playAnimation: (polygenInstance: any, animationName: string) => {
+        if (polygenInstance && polygenInstance.playAnimation) {
+          polygenInstance.playAnimation(animationName);
+        } else {
+          console.warn("无效的polygen实例或缺少playAnimation方法");
+        }
+      },
+    };
+
+    try {
+      const wrappedCode = `
+        return async function(handlePolygen, polygen) {
+          ${JavaScriptCode.value}
+        }
+      `;
+
+      const createFunction = new Function(wrappedCode);
+      const executableFunction = createFunction();
+      await executableFunction(handlePolygen, polygen);
+    } catch (e: any) {
+      console.error("执行代码出错:", e);
+      ElMessage({
+        message: `执行代码出错: ${e.message}`,
+        type: "error",
+      });
+    }
+  }
 };
 </script>
 
