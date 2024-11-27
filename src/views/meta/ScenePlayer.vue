@@ -306,6 +306,109 @@ const loadModel = async (resource: any, transform: any) => {
     transformUUID: transform?.uuid,
   });
 
+  // 文本类型处理
+  if (resource.type === "text") {
+    return new Promise((resolve, reject) => {
+      try {
+        // 创建文本纹理
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        if (!context) {
+          throw new Error("无法创建 2D 上下文");
+        }
+
+        // 设置文本样式
+        const fontSize = transform.fontSize || 24;
+        const fontFamily = transform.fontFamily || "Arial";
+        const textColor = transform.textColor || "gray";
+
+        context.font = `${fontSize}px ${fontFamily}`;
+        context.fillStyle = textColor;
+
+        // 获取文本内容
+        const text = resource.content || "默认文本";
+
+        // 测量文本宽度并设置画布大小
+        const metrics = context.measureText(text);
+        canvas.width = metrics.width;
+        canvas.height = fontSize * 1.2; // 添加一些额外空间
+
+        // 清除画布并重新设置样式（因为设置canvas尺寸会重置上下文）
+        context.font = `${fontSize}px ${fontFamily}`;
+        context.fillStyle = textColor;
+        context.textBaseline = "middle";
+
+        // 绘制文本
+        context.fillText(text, 0, canvas.height / 2);
+
+        // 创建纹理
+        const texture = new THREE.CanvasTexture(canvas);
+
+        // 创建平面几何体
+        const geometry = new THREE.PlaneGeometry(1, 1);
+
+        // 创建材质
+        const material = new THREE.MeshBasicMaterial({
+          map: texture,
+          transparent: true,
+          side: THREE.DoubleSide, // 使平面的两面都可见
+        });
+
+        // 创建网格
+        const mesh = new THREE.Mesh(geometry, material);
+
+        // 应用变换
+        if (transform?.transform) {
+          mesh.position.set(
+            transform.transform.position.x,
+            transform.transform.position.y,
+            transform.transform.position.z
+          );
+
+          // 缩放调整
+          const scale = transform.transform.scale;
+          const baseScale = 0.01; // 基础缩放因子，可以调整
+          mesh.scale.set(
+            scale.x * canvas.width * baseScale,
+            scale.y * canvas.height * baseScale,
+            1
+          );
+
+          // 应用旋转
+          if (transform.transform.rotate) {
+            mesh.rotation.set(
+              THREE.MathUtils.degToRad(transform.transform.rotate.x),
+              THREE.MathUtils.degToRad(transform.transform.rotate.y),
+              THREE.MathUtils.degToRad(transform.transform.rotate.z)
+            );
+          }
+        }
+
+        // 保存到模型Map中
+        const uuid = transform.uuid.toString();
+        models.set(uuid, mesh);
+        mesh.uuid = uuid;
+
+        // 添加到场景
+        threeScene.add(mesh);
+
+        console.log("文本网格创建完成:", {
+          uuid,
+          text,
+          position: mesh.position.toArray(),
+          rotation: mesh.rotation.toArray(),
+          scale: mesh.scale.toArray(),
+        });
+
+        resolve(mesh);
+      } catch (error) {
+        console.error("创建文本网格失败:", error);
+        reject(error);
+      }
+    });
+  }
+
+  // 处理voxel类型
   if (resource.type === "voxel") {
     const loader = new CustomVOXLoader();
     const url = convertToHttps(resource.file.url);
@@ -547,6 +650,25 @@ onMounted(async () => {
     for (const entity of metaData.children.entities) {
       console.log("处理实体:", entity);
 
+      // 处理文本类型实体
+      if (entity.type === "Text") {
+        try {
+          // 创建一个文本资源对象
+          const textResource = {
+            type: "text",
+            content: entity.parameters.text || "默认文本",
+            id: entity.parameters.uuid || crypto.randomUUID(),
+          };
+
+          await loadModel(textResource, entity.parameters);
+          continue; // 跳过后续处理
+        } catch (error) {
+          console.error("处理文本实体失败:", error);
+          continue;
+        }
+      }
+
+      // 处理其他类型实体
       if (!entity.parameters?.resource) {
         console.warn("实体缺少resource参数:", entity);
         continue;
