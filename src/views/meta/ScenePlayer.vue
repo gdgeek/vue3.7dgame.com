@@ -80,13 +80,20 @@ const loadModel = async (resource: any, transform: any) => {
         }
 
         // 使用transform中的UUID
-        models.set(transform.uuid, model);
-        model.uuid = transform.uuid;
+        const uuid = transform.uuid.toString();
+        models.set(uuid, model);
+        model.uuid = uuid;
+
+        // 打印当前模型Map的状态
+        console.log("当前模型Map状态:", {
+          uuid,
+          modelKeys: Array.from(models.keys()),
+          modelExists: models.has(uuid),
+        });
 
         threeScene.add(model);
         resolve(model);
       },
-      // 添加加载进度回调
       (progress) => {
         console.log(
           `模型加载进度: ${((progress.loaded / progress.total) * 100).toFixed(2)}%`
@@ -102,29 +109,35 @@ const loadModel = async (resource: any, transform: any) => {
 
 // 播放动画
 const playAnimation = (uuid: string, animationName: string) => {
+  // 确保使用字符串类型的uuid
+  const modelUuid = uuid.toString();
+
   console.log("开始播放动画:", {
-    uuid,
+    uuid: modelUuid,
     animationName,
     availableModels: Array.from(models.keys()),
-    availableMixers: Array.from(mixers.keys()),
+    modelExists: models.has(modelUuid),
   });
 
-  const model = models.get(uuid);
-  const mixer = mixers.get(uuid);
+  const model = models.get(modelUuid);
+  const mixer = mixers.get(modelUuid);
 
   if (!model) {
-    console.error(`找不到UUID为 ${uuid} 的模型`);
+    console.error(
+      `找不到UUID为 ${modelUuid} 的模型，可用模型:`,
+      Array.from(models.keys())
+    );
     return;
   }
 
   if (!mixer) {
-    console.error(`找不到UUID为 ${uuid} 的动画混合器`);
+    console.error(`找不到UUID为 ${modelUuid} 的动画混合器`);
     return;
   }
 
   const animations = model.userData?.animations;
   if (!animations || animations.length === 0) {
-    console.error(`模型 ${uuid} 没有动画数据`);
+    console.error(`模型 ${modelUuid} 没有动画数据`);
     return;
   }
 
@@ -223,7 +236,6 @@ onMounted(async () => {
   animate();
 });
 
-// 暴露方法给父组件
 defineExpose({
   models,
   playAnimation,

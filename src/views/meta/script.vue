@@ -614,11 +614,22 @@ const run = async () => {
   const waitForModels = () => {
     return new Promise((resolve) => {
       const checkModels = () => {
-        if (scenePlayer.value!.models.size > 0) {
-          console.log("模型加载完成:", scenePlayer.value!.models);
+        // 检查是否所有预期的模型都已加载
+        const metaData = JSON.parse(meta.value!.data!);
+        const expectedModels = metaData.children.entities.length;
+
+        if (scenePlayer.value?.models.size === expectedModels) {
+          console.log("所有模型加载完成:", {
+            expected: expectedModels,
+            loaded: scenePlayer.value!.models.size,
+            models: scenePlayer.value!.models,
+          });
           resolve(true);
         } else {
-          console.log("等待模型加载...");
+          console.log("等待模型加载...", {
+            expected: expectedModels,
+            current: scenePlayer.value?.models.size || 0,
+          });
           setTimeout(checkModels, 100);
         }
       };
@@ -636,22 +647,43 @@ const run = async () => {
         return null;
       }
 
-      console.log("查找模型:", uuid, scenePlayer.value.models);
-      const model = scenePlayer.value.models.get(uuid);
+      // 确保使用字符串类型的uuid
+      const modelUuid = uuid.toString();
+
+      // 添加重试机制
+      const getModel = (uuid: string, retries = 3): THREE.Object3D | null => {
+        const model = scenePlayer.value?.models.get(uuid);
+        if (model) return model;
+
+        if (retries > 0) {
+          console.log(`模型未找到，剩余重试次数: ${retries}`);
+          setTimeout(() => getModel(uuid, retries - 1), 100);
+        }
+        return null;
+      };
+
+      const model = getModel(modelUuid);
+
+      console.log("查找模型:", {
+        requestedUuid: modelUuid,
+        availableModels: Array.from(scenePlayer.value.models.keys()),
+        modelExists: scenePlayer.value.models.has(modelUuid),
+        foundModel: model,
+      });
 
       if (!model) {
-        console.error(`找不到UUID为 ${uuid} 的模型`);
+        console.error(`找不到UUID为 ${modelUuid} 的模型`);
         return null;
       }
 
       return {
         playAnimation: (animationName: string) => {
           console.log("播放动画:", {
-            uuid,
+            uuid: modelUuid,
             animationName,
             model: model,
           });
-          scenePlayer.value?.playAnimation(uuid, animationName);
+          scenePlayer.value?.playAnimation(modelUuid, animationName);
         },
       };
     };
