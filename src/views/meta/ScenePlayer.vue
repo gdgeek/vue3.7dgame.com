@@ -29,6 +29,13 @@ let clock = new THREE.Clock();
 
 // 加载模型
 const loadModel = async (resource: any, transform: any) => {
+  console.log("加载模型参数:", {
+    resource,
+    transform,
+    resourceId: resource.id,
+    transformUUID: transform?.uuid,
+  });
+
   const loader = new GLTFLoader();
   const url = convertToHttps(resource.file.url);
 
@@ -38,41 +45,57 @@ const loadModel = async (resource: any, transform: any) => {
       (gltf) => {
         const model = gltf.scene;
 
+        // 确保transform对象存在且包含必要的属性
+        if (!transform || !transform.uuid) {
+          console.error("transform对象无效:", transform);
+          return reject(new Error("Invalid transform object"));
+        }
+
         // 设置位置、旋转和缩放
         model.position.set(
-          transform.position.x,
-          transform.position.y,
-          transform.position.z
+          transform.position?.x || 0,
+          transform.position?.y || 0,
+          transform.position?.z || 0
         );
         model.rotation.set(
-          transform.rotate.x,
-          transform.rotate.y,
-          transform.rotate.z
+          transform.rotate?.x || 0,
+          transform.rotate?.y || 0,
+          transform.rotate?.z || 0
         );
         model.scale.set(
-          transform.scale.x,
-          transform.scale.y,
-          transform.scale.z
+          transform.scale?.x || 1,
+          transform.scale?.y || 1,
+          transform.scale?.z || 1
         );
 
         // 保存动画数据
         if (gltf.animations && gltf.animations.length > 0) {
           const mixer = new THREE.AnimationMixer(model);
-          mixers.set(model.uuid, mixer);
+          mixers.set(transform.uuid, mixer);
           model.userData.animations = gltf.animations;
-          console.log(`模型 ${model.uuid} 动画加载完成:`, gltf.animations);
+          console.log(`模型 ${transform.uuid} 动画加载完成:`, {
+            animations: gltf.animations,
+            animationNames: gltf.animations.map((a) => a.name),
+          });
         }
 
-        // 使用传入的 UUID 而不是自动生成的 UUID
-        const uuid = transform.uuid;
-        models.set(uuid, model);
-        model.uuid = uuid; // 设置模型的 UUID
+        // 使用transform中的UUID
+        models.set(transform.uuid, model);
+        model.uuid = transform.uuid;
 
         threeScene.add(model);
         resolve(model);
       },
-      undefined,
-      reject
+      // 添加加载进度回调
+      (progress) => {
+        console.log(
+          `模型加载进度: ${((progress.loaded / progress.total) * 100).toFixed(2)}%`
+        );
+      },
+      (error) => {
+        console.error("模型加载失败:", error);
+        reject(error);
+      }
     );
   });
 };
@@ -155,13 +178,36 @@ onMounted(async () => {
 
   // 加载所有模型
   const metaData = JSON.parse(props.meta.data);
-  for (const entity of metaData.children.entities) {
-    const resource = props.meta.resources.find(
-      (r: any) => r.id.toString() === entity.parameters.resource
-    );
-    if (resource) {
-      await loadModel(resource, entity.parameters.transform);
+  console.log("解析后的metaData:", metaData);
+
+  if (metaData.children?.entities) {
+    for (const entity of metaData.children.entities) {
+      console.log("处理实体:", entity);
+
+      if (!entity.parameters?.resource) {
+        console.warn("实体缺少resource参数:", entity);
+        continue;
+      }
+
+      const resource = props.meta.resources.find(
+        (r: any) => r.id.toString() === entity.parameters.resource.toString()
+      );
+
+      if (resource) {
+        try {
+          await loadModel(resource, entity.parameters);
+        } catch (error) {
+          console.error(
+            `加载模型失败 (resource ${entity.parameters.resource}):`,
+            error
+          );
+        }
+      } else {
+        console.warn(`未找到资源 ID ${entity.parameters.resource}`);
+      }
     }
+  } else {
+    console.error("metaData格式错误:", metaData);
   }
 
   // 动画循环
