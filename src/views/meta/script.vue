@@ -610,11 +610,29 @@ const run = async () => {
   // 等待场景加载完成
   await nextTick();
 
+  // 添加延迟等待所有模型加载完成
+  const waitForModels = () => {
+    return new Promise((resolve) => {
+      const checkModels = () => {
+        if (scenePlayer.value!.models.size > 0) {
+          console.log("模型加载完成:", scenePlayer.value!.models);
+          resolve(true);
+        } else {
+          console.log("等待模型加载...");
+          setTimeout(checkModels, 100);
+        }
+      };
+      checkModels();
+    });
+  };
+
+  await waitForModels();
+
   if (JavaScriptCode.value) {
     const handlePolygen = (uuid: string) => {
       // 确保 scenePlayer 已经初始化
       if (!scenePlayer.value) {
-        console.error("ScenePlayer not initialized");
+        console.error("ScenePlayer未初始化");
         return null;
       }
 
@@ -622,7 +640,7 @@ const run = async () => {
       const model = scenePlayer.value.models.get(uuid);
 
       if (!model) {
-        console.warn(`找不到UUID为 ${uuid} 的模型`);
+        console.error(`找不到UUID为 ${uuid} 的模型`);
         return null;
       }
 
@@ -640,11 +658,15 @@ const run = async () => {
 
     const polygen = {
       playAnimation: (polygenInstance: any, animationName: string) => {
-        if (polygenInstance && polygenInstance.playAnimation) {
-          polygenInstance.playAnimation(animationName);
-        } else {
-          console.warn("无效的polygen实例或缺少playAnimation方法");
+        if (!polygenInstance) {
+          console.error("polygen实例为空");
+          return;
         }
+        if (typeof polygenInstance.playAnimation !== "function") {
+          console.error("polygen实例缺少playAnimation方法");
+          return;
+        }
+        polygenInstance.playAnimation(animationName);
       },
     };
 

@@ -53,19 +53,19 @@ const loadModel = async (resource: any, transform: any) => {
 
         // 设置位置、旋转和缩放
         model.position.set(
-          transform.position?.x || 0,
-          transform.position?.y || 0,
-          transform.position?.z || 0
+          transform.transform.position.x,
+          transform.transform.position.y,
+          transform.transform.position.z
         );
         model.rotation.set(
-          transform.rotate?.x || 0,
-          transform.rotate?.y || 0,
-          transform.rotate?.z || 0
+          transform.transform.rotate.x,
+          transform.transform.rotate.y,
+          transform.transform.rotate.z
         );
         model.scale.set(
-          transform.scale?.x || 1,
-          transform.scale?.y || 1,
-          transform.scale?.z || 1
+          transform.transform.scale.x,
+          transform.transform.scale.y,
+          transform.transform.scale.z
         );
 
         // 保存动画数据
