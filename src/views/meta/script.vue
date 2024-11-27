@@ -12,6 +12,9 @@
               <el-button type="primary" size="small" @click="run"
                 >测试运行</el-button
               >
+              <el-button type="primary" size="small" @click="disabled = false">
+                返回
+              </el-button>
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="save">
                   <font-awesome-icon
