@@ -13,7 +13,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { VOXLoader } from "three/examples/jsm/loaders/VOXLoader";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { convertToHttps } from "@/assets/js/helper";
 
 // 将VOXMesh类移到这里
@@ -305,6 +305,138 @@ const loadModel = async (resource: any, parameters: any) => {
     resourceId: resource.id,
     parametersUUID: parameters?.uuid,
   });
+
+  // 处理视频类型
+  if (resource.type === "video" || parameters.type === "Video") {
+    return new Promise((resolve, reject) => {
+      try {
+        const video = document.createElement("video");
+        video.src = convertToHttps(resource.file.url);
+        video.crossOrigin = "anonymous";
+
+        // 设置视频属性
+        video.loop = parameters.loop || false;
+        video.muted = false;
+        video.playsInline = true;
+        video.volume = parameters.volume || 1.0;
+
+        const texture = new THREE.VideoTexture(video);
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.format = THREE.RGBAFormat;
+
+        video.addEventListener("loadedmetadata", () => {
+          const aspectRatio = video.videoWidth / video.videoHeight;
+          const width = parameters.width || 1;
+
+          const geometry = new THREE.PlaneGeometry(1, 1);
+          const material = new THREE.MeshBasicMaterial({
+            map: texture,
+            side: THREE.DoubleSide,
+            transparent: true,
+          });
+
+          const mesh = new THREE.Mesh(geometry, material);
+
+          // 应用变换
+          if (parameters?.transform) {
+            mesh.position.set(
+              parameters.transform.position.x,
+              parameters.transform.position.y,
+              parameters.transform.position.z
+            );
+
+            mesh.rotation.set(
+              THREE.MathUtils.degToRad(parameters.transform.rotate.x),
+              THREE.MathUtils.degToRad(parameters.transform.rotate.y),
+              THREE.MathUtils.degToRad(parameters.transform.rotate.z)
+            );
+
+            const baseScale = width;
+            mesh.scale.set(
+              parameters.transform.scale.x * baseScale,
+              parameters.transform.scale.y * baseScale * (1 / aspectRatio),
+              parameters.transform.scale.z * baseScale
+            );
+          }
+
+          // 添加点击事件处理
+          const raycaster = new THREE.Raycaster();
+          const mouse = new THREE.Vector2();
+
+          const handleVideoClick = (event: MouseEvent) => {
+            // 计算鼠标位置
+            const rect = renderer!.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            // 更新射线
+            raycaster.setFromCamera(mouse, camera!);
+
+            // 检查是否点击到视频平面
+            const intersects = raycaster.intersectObject(mesh);
+            if (intersects.length > 0) {
+              if (video.paused) {
+                video.play().catch((error) => {
+                  console.warn("视频播放失败:", error);
+                });
+              } else {
+                video.pause();
+              }
+            }
+          };
+
+          renderer!.domElement.addEventListener("click", handleVideoClick);
+
+          const uuid = parameters.uuid.toString();
+          sources.set(uuid, {
+            type: "video",
+            data: {
+              mesh,
+              video,
+              texture,
+              cleanup: () => {
+                renderer!.domElement.removeEventListener(
+                  "click",
+                  handleVideoClick
+                );
+              },
+            },
+          });
+
+          threeScene.add(mesh);
+
+          // 如果设置了自动播放
+          if (parameters.play) {
+            // 添加用户交互检测
+            const handleFirstInteraction = () => {
+              video.play().catch((error) => {
+                console.warn("视频播放失败:", error);
+              });
+              document.removeEventListener("click", handleFirstInteraction);
+              document.removeEventListener(
+                "touchstart",
+                handleFirstInteraction
+              );
+            };
+
+            document.addEventListener("click", handleFirstInteraction);
+            document.addEventListener("touchstart", handleFirstInteraction);
+          }
+
+          resolve(mesh);
+        });
+
+        video.addEventListener("error", (error) => {
+          console.error("视频加载失败:", error);
+          reject(error);
+        });
+      } catch (error) {
+        console.error("处理视频资源时出错:", error);
+        reject(error);
+      }
+    });
+  }
 
   // 处理图片类型
   if (resource.type === "picture" || parameters.type === "Picture") {
@@ -773,6 +905,49 @@ onMounted(async () => {
   animate();
 });
 
+// 在组件卸载时清理资源
+onUnmounted(() => {
+  sources.forEach((source) => {
+    if (source.type === "video") {
+      const video = source.data.video;
+      video.pause();
+      video.src = "";
+      video.load();
+
+      // 清理事件监听器
+      if (source.data.cleanup) {
+        source.data.cleanup();
+      }
+    } else if (source.type === "audio") {
+      // 清理音频队列
+      while (audioPlaybackQueue.length > 0) {
+        const queueItem = audioPlaybackQueue.shift();
+        if (queueItem) {
+          const audio = queueItem.audio;
+          audio.pause();
+          audio.src = "";
+          audio.load();
+          queueItem.resolve(); // 解决所有待处理的Promise
+        }
+      }
+    }
+  });
+
+  // 清理渲染器和场景
+  if (renderer) {
+    renderer.dispose();
+    renderer.forceContextLoss();
+    renderer.domElement.remove();
+  }
+
+  // 重置状态
+  isPlaying = false;
+  sources.clear();
+  mixers.clear();
+  clock = new THREE.Clock();
+});
+
+// 暴露方法
 defineExpose({
   sources,
   playAnimation,
