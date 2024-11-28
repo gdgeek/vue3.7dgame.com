@@ -655,6 +655,59 @@ const playAnimation = (uuid: string, animationName: string) => {
   action.play();
 };
 
+// 音频播放处理
+const handleAudioPlay = (audio: HTMLAudioElement) => {
+  return new Promise<void>((resolve) => {
+    // 重置音频到开始位置
+    audio.currentTime = 0;
+
+    // 当音频播放结束时调用 resolve
+    audio.onended = () => {
+      resolve();
+    };
+
+    // 处理音频播放错误
+    audio.onerror = () => {
+      console.error("音频播放出错");
+      resolve();
+    };
+
+    // 开始播放
+    audio.play().catch((error) => {
+      console.error("播放音频失败:", error);
+      resolve();
+    });
+  });
+};
+
+// 音频播放队列管理
+const audioPlaybackQueue: { audio: HTMLAudioElement; resolve: Function }[] = [];
+let isPlaying = false;
+
+// 处理音频队列
+const processAudioQueue = async () => {
+  if (isPlaying || audioPlaybackQueue.length === 0) return;
+
+  isPlaying = true;
+
+  while (audioPlaybackQueue.length > 0) {
+    const current = audioPlaybackQueue[0];
+    await handleAudioPlay(current.audio);
+    current.resolve();
+    audioPlaybackQueue.shift();
+  }
+
+  isPlaying = false;
+};
+
+// 音频播放
+const playQueuedAudio = async (audio: HTMLAudioElement) => {
+  return new Promise<void>((resolve) => {
+    audioPlaybackQueue.push({ audio, resolve });
+    processAudioQueue();
+  });
+};
+
 // 初始化场景
 onMounted(async () => {
   if (!scene.value) return;
@@ -754,5 +807,6 @@ defineExpose({
   sources,
   playAnimation,
   getAudioUrl,
+  playQueuedAudio,
 });
 </script>

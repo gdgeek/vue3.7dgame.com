@@ -73,8 +73,8 @@
                             >{{ $t("copy.title") || "Copy" }}</el-button
                           >
                           <pre>
-                            <code class="lua">{{ LuaCode }}</code>
-                          </pre>
+                  <code class="lua">{{ LuaCode }}</code>
+                </pre>
                         </div>
                       </el-tab-pane>
                       <el-tab-pane label="JavaScript" name="javascript">
@@ -98,8 +98,8 @@
                             >{{ $t("copy.title") }}</el-button
                           >
                           <pre>
-                            <code class="javascript">{{ JavaScriptCode }}</code>
-                          </pre>
+                  <code class="javascript">{{ JavaScriptCode }}</code>
+                </pre>
                         </div>
                       </el-tab-pane>
                     </el-tabs>
@@ -616,12 +616,63 @@ onMounted(async () => {
 const disabled = ref<boolean>(false);
 const scenePlayer = ref<InstanceType<typeof ScenePlayer>>();
 
-const handleSound = (uuid: string): string | undefined => {
+const handlePolygen = (uuid: string) => {
   if (!scenePlayer.value) {
     console.error("ScenePlayer未初始化");
+    return null;
+  }
+
+  const modelUuid = uuid.toString();
+
+  // 添加重试机制
+  const getModel = (uuid: string, retries = 3): THREE.Object3D | null => {
+    const source = scenePlayer.value?.sources.get(uuid);
+    if (source && source.type === "model") {
+      return source.data as THREE.Object3D;
+    }
+
+    if (retries > 0) {
+      console.log(`模型未找到，剩余重试次数: ${retries}`);
+      setTimeout(() => getModel(uuid, retries - 1), 100);
+    }
+    return null;
+  };
+
+  const model = getModel(modelUuid);
+
+  console.log("查找模型:", {
+    requestedUuid: modelUuid,
+    availableModels: Array.from(scenePlayer.value.sources.keys()),
+    modelExists: scenePlayer.value.sources.has(modelUuid),
+    foundModel: model,
+  });
+
+  if (!model) {
+    console.error(`找不到UUID为 ${modelUuid} 的模型`);
+    return null;
+  }
+
+  return {
+    playAnimation: (animationName: string) => {
+      console.log("播放动画:", {
+        uuid: modelUuid,
+        animationName,
+        model: model,
+      });
+      scenePlayer.value?.playAnimation(modelUuid, animationName);
+    },
+  };
+};
+
+const handleSound = (uuid: string): HTMLAudioElement | undefined => {
+  const audioUrl = scenePlayer.value?.getAudioUrl(uuid);
+  if (!audioUrl) {
+    console.error(`找不到UUID为 ${uuid} 的音频资源`);
     return undefined;
   }
-  return scenePlayer.value.getAudioUrl(uuid);
+
+  const audio = new Audio(audioUrl);
+  return audio;
 };
 
 const run = async () => {
@@ -659,54 +710,6 @@ const run = async () => {
   await waitForModels();
 
   if (JavaScriptCode.value) {
-    const handlePolygen = (uuid: string) => {
-      if (!scenePlayer.value) {
-        console.error("ScenePlayer未初始化");
-        return null;
-      }
-
-      const modelUuid = uuid.toString();
-
-      // 添加重试机制
-      const getModel = (uuid: string, retries = 3): THREE.Object3D | null => {
-        const source = scenePlayer.value?.sources.get(uuid);
-        if (source && source.type === "model") {
-          return source.data as THREE.Object3D;
-        }
-
-        if (retries > 0) {
-          console.log(`模型未找到，剩余重试次数: ${retries}`);
-          setTimeout(() => getModel(uuid, retries - 1), 100);
-        }
-        return null;
-      };
-
-      const model = getModel(modelUuid);
-
-      console.log("查找模型:", {
-        requestedUuid: modelUuid,
-        availableModels: Array.from(scenePlayer.value.sources.keys()),
-        modelExists: scenePlayer.value.sources.has(modelUuid),
-        foundModel: model,
-      });
-
-      if (!model) {
-        console.error(`找不到UUID为 ${modelUuid} 的模型`);
-        return null;
-      }
-
-      return {
-        playAnimation: (animationName: string) => {
-          console.log("播放动画:", {
-            uuid: modelUuid,
-            animationName,
-            model: model,
-          });
-          scenePlayer.value?.playAnimation(modelUuid, animationName);
-        },
-      };
-    };
-
     const polygen = {
       playAnimation: (polygenInstance: any, animationName: string) => {
         if (!polygenInstance) {
@@ -721,16 +724,27 @@ const run = async () => {
       },
     };
 
+    // 添加音频播放辅助函数
+    const sound = {
+      play: async (audio: HTMLAudioElement | undefined) => {
+        if (!audio) {
+          console.error("音频资源无效");
+          return;
+        }
+        await scenePlayer.value?.playQueuedAudio(audio);
+      },
+    };
+
     try {
       const wrappedCode = `
-        return async function(handlePolygen, polygen, handleSound) {
+        return async function(handlePolygen, polygen, handleSound, sound) {
           ${JavaScriptCode.value}
         }
       `;
 
       const createFunction = new Function(wrappedCode);
       const executableFunction = createFunction();
-      await executableFunction(handlePolygen, polygen, handleSound);
+      await executableFunction(handlePolygen, polygen, handleSound, sound);
     } catch (e: any) {
       console.error("执行代码出错:", e);
       ElMessage({
