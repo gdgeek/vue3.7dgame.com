@@ -297,25 +297,97 @@ class CustomVOXLoader extends VOXLoader {
   }
 }
 
-// 在script setup部分添加新的音频相关代码
-const sounds = new Map<string, string>();
-
 // 修改loadModel函数，添加音频处理逻辑
-const loadModel = async (resource: any, transform: any) => {
+const loadModel = async (resource: any, parameters: any) => {
   console.log("加载资源参数:", {
     resource,
-    transform,
+    parameters,
     resourceId: resource.id,
-    transformUUID: transform?.uuid,
+    parametersUUID: parameters?.uuid,
   });
 
+  // 处理图片类型
+  if (resource.type === "picture" || parameters.type === "Picture") {
+    return new Promise((resolve, reject) => {
+      try {
+        const textureLoader = new THREE.TextureLoader();
+        const url = convertToHttps(resource.file.url);
+
+        textureLoader.load(
+          url,
+          (texture) => {
+            const aspectRatio = texture.image.width / texture.image.height;
+            const width = parameters.width || 1;
+            const height = width / aspectRatio;
+
+            const geometry = new THREE.PlaneGeometry(1, 1);
+            const material = new THREE.MeshBasicMaterial({
+              map: texture,
+              transparent: true,
+              side: THREE.DoubleSide,
+            });
+
+            const mesh = new THREE.Mesh(geometry, material);
+
+            // 应用变换
+            if (parameters?.transform) {
+              mesh.position.set(
+                parameters.transform.position.x,
+                parameters.transform.position.y,
+                parameters.transform.position.z
+              );
+
+              mesh.rotation.set(
+                THREE.MathUtils.degToRad(parameters.transform.rotate.x),
+                THREE.MathUtils.degToRad(parameters.transform.rotate.y),
+                THREE.MathUtils.degToRad(parameters.transform.rotate.z)
+              );
+
+              const baseScale = width;
+              mesh.scale.set(
+                parameters.transform.scale.x * baseScale,
+                parameters.transform.scale.y * baseScale * (1 / aspectRatio),
+                parameters.transform.scale.z * baseScale
+              );
+            }
+
+            const uuid = parameters.uuid.toString();
+            sources.set(uuid, {
+              type: "picture",
+              data: mesh,
+            });
+
+            threeScene.add(mesh);
+
+            console.log("图片加载完成:", {
+              uuid,
+              position: mesh.position.toArray(),
+              rotation: mesh.rotation.toArray(),
+              scale: mesh.scale.toArray(),
+              dimensions: { width, height, aspectRatio },
+            });
+
+            resolve(mesh);
+          },
+          undefined,
+          (error) => {
+            console.error("图片加载失败:", error);
+            reject(error);
+          }
+        );
+      } catch (error) {
+        console.error("处理图片资源时出错:", error);
+        reject(error);
+      }
+    });
+  }
+
   // 处理音频类型
-  if (resource.type === "sound" || resource.type === "audio") {
+  if (resource.type === "audio") {
     return new Promise((resolve) => {
-      const uuid = transform.uuid.toString();
+      const uuid = parameters.uuid.toString();
       const audioUrl = convertToHttps(resource.file.url);
 
-      // 存储音频资源
       sources.set(uuid, {
         type: "audio",
         data: { url: audioUrl },
@@ -326,121 +398,27 @@ const loadModel = async (resource: any, transform: any) => {
         url: audioUrl,
       });
 
-      console.log("当前模型Map状态:", {
-        uuid,
-        modelKeys: Array.from(sources.keys()),
-        modelExists: sources.has(uuid),
-      });
-
       resolve(true);
     });
   }
 
-  // 文本类型处理
-  if (resource.type === "text") {
-    return new Promise((resolve, reject) => {
-      try {
-        // 创建文本纹理
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-        if (!context) {
-          throw new Error("无法创建 2D 上下文");
-        }
+  // 处理文本类型
+  if (parameters.type === "Text") {
+    try {
+      const textResource = {
+        type: "text",
+        content: parameters.text || "默认文本",
+        id: parameters.uuid || crypto.randomUUID(),
+      };
 
-        // 设置文本样式
-        const fontSize = transform.fontSize || 24;
-        const fontFamily = transform.fontFamily || "Arial";
-        const textColor = transform.textColor || "gray";
-
-        context.font = `${fontSize}px ${fontFamily}`;
-        context.fillStyle = textColor;
-
-        // 获取文本内容
-        const text = resource.content || "默认文本";
-
-        // 测量文本宽度并设置画布大小
-        const metrics = context.measureText(text);
-        canvas.width = metrics.width;
-        canvas.height = fontSize * 1.2; // 添加一些额外空间
-
-        // 清除画布并重新设置样式（因为设置canvas尺寸会重置上下文）
-        context.font = `${fontSize}px ${fontFamily}`;
-        context.fillStyle = textColor;
-        context.textBaseline = "middle";
-
-        // 绘制文本
-        context.fillText(text, 0, canvas.height / 2);
-
-        // 创建纹理
-        const texture = new THREE.CanvasTexture(canvas);
-
-        // 创建平面几何体
-        const geometry = new THREE.PlaneGeometry(1, 1);
-
-        // 创建材质
-        const material = new THREE.MeshBasicMaterial({
-          map: texture,
-          transparent: true,
-          side: THREE.DoubleSide, // 使平面的两面都可见
-        });
-
-        // 创建网格
-        const mesh = new THREE.Mesh(geometry, material);
-
-        // 应用变换
-        if (transform?.transform) {
-          mesh.position.set(
-            transform.transform.position.x,
-            transform.transform.position.y,
-            transform.transform.position.z
-          );
-
-          // 缩放调整
-          const scale = transform.transform.scale;
-          const baseScale = 0.01; // 基础缩放因子，可以调整
-          mesh.scale.set(
-            scale.x * canvas.width * baseScale,
-            scale.y * canvas.height * baseScale,
-            1
-          );
-
-          // 应用旋转
-          if (transform.transform.rotate) {
-            mesh.rotation.set(
-              THREE.MathUtils.degToRad(transform.transform.rotate.x),
-              THREE.MathUtils.degToRad(transform.transform.rotate.y),
-              THREE.MathUtils.degToRad(transform.transform.rotate.z)
-            );
-          }
-        }
-
-        // 保存到模型Map中
-        const uuid = transform.uuid.toString();
-        sources.set(uuid, {
-          type: "text",
-          data: mesh,
-        });
-
-        // 添加到场景
-        threeScene.add(mesh);
-
-        console.log("文本网格创建完成:", {
-          uuid,
-          text,
-          position: mesh.position.toArray(),
-          rotation: mesh.rotation.toArray(),
-          scale: mesh.scale.toArray(),
-        });
-
-        resolve(mesh);
-      } catch (error) {
-        console.error("创建文本网格失败:", error);
-        reject(error);
-      }
-    });
+      await loadModel(textResource, parameters);
+      return;
+    } catch (error) {
+      console.error("处理文本实体失败:", error);
+      return;
+    }
   }
 
-  // 处理voxel类型
   if (resource.type === "voxel") {
     const loader = new CustomVOXLoader();
     const url = convertToHttps(resource.file.url);
@@ -464,24 +442,24 @@ const loadModel = async (resource: any, transform: any) => {
             const voxMesh = new VOXMesh(chunk, 1);
 
             // 应用变换
-            if (transform?.transform) {
+            if (parameters?.transform) {
               voxMesh.position.set(
-                transform.transform.position.x,
-                transform.transform.position.y,
-                transform.transform.position.z
+                parameters.transform.position.x,
+                parameters.transform.position.y,
+                parameters.transform.position.z
               );
 
               voxMesh.rotation.set(
-                THREE.MathUtils.degToRad(transform.transform.rotate.x),
-                THREE.MathUtils.degToRad(transform.transform.rotate.y),
-                THREE.MathUtils.degToRad(transform.transform.rotate.z)
+                THREE.MathUtils.degToRad(parameters.transform.rotate.x),
+                THREE.MathUtils.degToRad(parameters.transform.rotate.y),
+                THREE.MathUtils.degToRad(parameters.transform.rotate.z)
               );
 
               const baseScale = 1;
               voxMesh.scale.set(
-                transform.transform.scale.x * baseScale,
-                transform.transform.scale.y * baseScale,
-                transform.transform.scale.z * baseScale
+                parameters.transform.scale.x * baseScale,
+                parameters.transform.scale.y * baseScale,
+                parameters.transform.scale.z * baseScale
               );
             }
 
@@ -490,11 +468,12 @@ const loadModel = async (resource: any, transform: any) => {
             voxMesh.receiveShadow = true;
 
             // 保存到模型Map中
-            const uuid = transform.uuid.toString();
+            const uuid = parameters.uuid.toString();
             sources.set(uuid, {
               type: "model",
               data: voxMesh,
             });
+            voxMesh.uuid = uuid;
 
             // 添加到场景
             threeScene.add(voxMesh);
@@ -521,7 +500,7 @@ const loadModel = async (resource: any, transform: any) => {
       );
     });
   } else {
-    // 原有的GLTF模型加载逻辑
+    // 处理其他类型（如GLTF模型）
     const loader = new GLTFLoader();
     const url = convertToHttps(resource.file.url);
 
@@ -531,52 +510,43 @@ const loadModel = async (resource: any, transform: any) => {
         (gltf) => {
           const model = gltf.scene;
 
-          // 确保transform对象存在且包含必要的属性
-          if (!transform || !transform.uuid) {
-            console.error("transform对象无效:", transform);
-            return reject(new Error("Invalid transform object"));
+          if (!parameters || !parameters.uuid) {
+            console.error("parameters对象无效:", parameters);
+            return reject(new Error("Invalid parameters object"));
           }
 
-          // 设置位置、旋转和缩放
-          model.position.set(
-            transform.transform.position.x,
-            transform.transform.position.y,
-            transform.transform.position.z
-          );
-          model.rotation.set(
-            transform.transform.rotate.x,
-            transform.transform.rotate.y,
-            transform.transform.rotate.z
-          );
-          model.scale.set(
-            transform.transform.scale.x,
-            transform.transform.scale.y,
-            transform.transform.scale.z
-          );
+          if (parameters?.transform) {
+            model.position.set(
+              parameters.transform.position.x,
+              parameters.transform.position.y,
+              parameters.transform.position.z
+            );
+            model.rotation.set(
+              parameters.transform.rotate.x,
+              parameters.transform.rotate.y,
+              parameters.transform.rotate.z
+            );
+            model.scale.set(
+              parameters.transform.scale.x,
+              parameters.transform.scale.y,
+              parameters.transform.scale.z
+            );
+          }
 
-          // 保存动画数据
           if (gltf.animations && gltf.animations.length > 0) {
             const mixer = new THREE.AnimationMixer(model);
-            mixers.set(transform.uuid, mixer);
+            mixers.set(parameters.uuid, mixer);
             model.userData.animations = gltf.animations;
-            console.log(`模型 ${transform.uuid} 动画加载完成:`, {
+            console.log(`模型 ${parameters.uuid} 动画加载完成:`, {
               animations: gltf.animations,
               animationNames: gltf.animations.map((a) => a.name),
             });
           }
 
-          // 使用transform中的UUID
-          const uuid = transform.uuid.toString();
+          const uuid = parameters.uuid.toString();
           sources.set(uuid, {
             type: "model",
             data: model,
-          });
-
-          // 打印当前模型Map的状态
-          console.log("当前模型Map状态:", {
-            uuid,
-            modelKeys: Array.from(sources.keys()),
-            modelExists: sources.has(uuid),
           });
 
           threeScene.add(model);
