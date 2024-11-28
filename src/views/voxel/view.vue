@@ -77,7 +77,7 @@ import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
 import { printVector3 } from "@/assets/js/helper";
 import Voxel from "@/components/Voxel.vue";
-import { convertToLocalTime } from "@/utils/dataChange";
+import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 
 const loading = ref(false);
 let voxelData = ref<any>(null);
@@ -109,7 +109,7 @@ const tableData = computed(() => {
       },
       {
         item: t("voxel.view.info.item4"),
-        text: voxelData.value.file.size + t("voxel.view.info.size"),
+        text: formatFileSize(voxelData.value.file.size),
       },
       { item: t("voxel.view.info.item5"), text: printVector3(info.size) },
       { item: t("voxel.view.info.item6"), text: printVector3(info.center) },

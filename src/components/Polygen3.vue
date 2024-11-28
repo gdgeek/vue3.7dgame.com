@@ -5,7 +5,7 @@
       ref="three"
       style="position: relative; height: 300px; width: 100%"
     >
-      <div class="control">
+      <div class="control" :style="controlStyle">
         <el-select
           v-model="selectedAnimationIndex"
           @change="playAnimation"
@@ -34,8 +34,8 @@
           @click.stop
           style="margin-left: 5px"
           inline-prompt
-          active-text="Animation On"
-          inactive-text="Animation Off"
+          :active-text="$t('polygen.animation.animationOn')"
+          :inactive-text="$t('polygen.animation.animationOff')"
           :disabled="animations.length === 0"
         ></el-switch>
       </div>
@@ -50,6 +50,18 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import ElementResizeDetector from "element-resize-detector";
 import { convertToHttps } from "@/assets/js/helper";
+import { useSettingsStore } from "@/store";
+import { ThemeEnum } from "@/enums/ThemeEnum";
+
+const isDark = computed<boolean>(
+  () => useSettingsStore().theme === ThemeEnum.DARK
+);
+
+const controlStyle = computed(() => ({
+  backgroundColor: isDark.value
+    ? "rgba(0, 0, 0, 0.8)"
+    : "rgba(255, 255, 255, 0.8)",
+}));
 
 // 将Vector3的坐标值固定到小数点后n位
 function toFixedVector3(vec: THREE.Vector3, n: number): THREE.Vector3 {
@@ -294,7 +306,6 @@ onMounted(() => {
     bottom: 0;
     left: 0;
     width: 100%;
-    background-color: rgba(255, 255, 255, 0.8);
     padding: 10px;
     display: flex;
     align-items: center;

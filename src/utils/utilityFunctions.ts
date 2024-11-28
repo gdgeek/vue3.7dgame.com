@@ -33,3 +33,10 @@ export const convertToLocalTime = (
 
   return utcDate.toLocaleString(undefined, options); // 转换为指定时区并格式化
 };
+
+export const formatFileSize = (size: number) => {
+  if (size < 1024) return size + " B";
+  const i = Math.floor(Math.log(size) / Math.log(1024));
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  return (size / Math.pow(1024, i)).toFixed(2) + " " + sizes[i];
+};

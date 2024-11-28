@@ -435,6 +435,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/meta",
         component: null,
+        redirect: "/meta/list",
         name: "/system",
         meta: {
           title: "meta.title",
@@ -573,6 +574,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/verse",
         component: null,
+        redirect: "/verse/index",
         name: "Verse",
         meta: {
           title: "project.title",

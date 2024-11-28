@@ -403,6 +403,12 @@ export default {
         info: "取消输入",
       },
     },
+    animation: {
+      animationOn: "动画开启",
+      animationOff: "动画关闭",
+      shadowOn: "阴影开启",
+      shadowOff: "阴影关闭",
+    },
   },
   // 图片管理国际化
   picture: {
@@ -656,6 +662,15 @@ export default {
       error3: "没有编辑器",
       success: "保存成功",
       info: "没有修改",
+      leave: {
+        message1: "发现有未保存的修改，是否保存",
+        message2: "提示",
+        confirm: "是",
+        cancel: "否",
+        success: "保存成功",
+        error: "保存失败",
+        info: "已放弃对未保存的更改",
+      },
     },
     eventDialog: {
       title: "事件管理窗口",
@@ -715,6 +730,7 @@ export default {
     },
     generation: {
       title: "通过 AI (Rodin) 创建模型：",
+      declare: "声明",
       form: {
         image: "图像",
         select: "选择",
@@ -962,6 +978,15 @@ export default {
         info: "没有修改",
         edit: "逻辑编辑",
         code: "代码查看",
+        leave: {
+          message1: "发现有未保存的修改，是否保存",
+          message2: "提示",
+          confirm: "是",
+          cancel: "否",
+          success: "保存成功",
+          error: "保存失败",
+          info: "已放弃对未保存的更改",
+        },
       },
     },
   },

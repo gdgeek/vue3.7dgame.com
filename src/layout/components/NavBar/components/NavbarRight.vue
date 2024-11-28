@@ -9,13 +9,13 @@
       </div>
 
       <!-- 布局大小 -->
-      <el-tooltip
+      <!-- <el-tooltip
         :content="$t('sizeSelect.tooltip')"
         effect="dark"
         placement="bottom"
       >
         <size-select class="setting-item"></size-select>
-      </el-tooltip>
+      </el-tooltip> -->
 
       <!-- 语言选择 -->
       <lang-select class="setting-item"></lang-select>
@@ -29,7 +29,7 @@
           :src="userStore.userInfo.data.avatar.url + '?imageView2/1/w/80/h/80'"
           class="rounded-full mr-10px w24px w24px"
         />
-        <span class="gradient-text">{{
+        <span :class="['gradient-text', { mobile: isMobile }]">{{
           userStore.userInfo.data.nickname || userStore.userInfo.data.username
         }}</span>
       </div>
@@ -152,5 +152,12 @@ onBeforeMount(() => userStore.getUserInfo());
   -webkit-background-clip: text; /* 使背景渐变应用于文字 */
   -webkit-text-fill-color: transparent; /* 使文字颜色透明以显示背景渐变 */
   text-align: center;
+  white-space: nowrap; /* 不换行 */
+  overflow: hidden; /* 隐藏超出部分 */
+  text-overflow: ellipsis; /* 超出部分显示为省略号 */
+
+  &.mobile {
+    font-size: 12px;
+  }
 }
 </style>

@@ -4,35 +4,6 @@
       <template #header> {{ $t("meta.eventDialog.title") }} </template>
       <div>
         <el-divider content-position="left">{{
-          $t("meta.eventDialog.output")
-        }}</el-divider>
-        <span v-for="(item, index) in output.list" :key="index">
-          <el-tag type="success" closable @close="deleteOutput(item)">
-            {{ item.title }}
-          </el-tag>
-          <el-divider direction="vertical"></el-divider>
-        </span>
-        <span v-if="output.list.length <= 5">
-          <el-input
-            class="input-new-tag"
-            v-if="output.visible"
-            v-model="output.value"
-            ref="saveTagOutput"
-            size="small"
-            @keyup.enter="handleOutputConfirm"
-            @blur="handleOutputConfirm"
-          ></el-input>
-          <el-button
-            v-else
-            class="button-new-tag"
-            size="small"
-            @click="showOutput"
-          >
-            + {{ $t("meta.eventDialog.output") }}
-          </el-button>
-        </span>
-
-        <el-divider content-position="left">{{
           $t("meta.eventDialog.input")
         }}</el-divider>
         <span v-for="(item, index) in input.list" :key="index">
@@ -58,6 +29,35 @@
             @click="showInput"
           >
             + {{ $t("meta.eventDialog.input") }}
+          </el-button>
+        </span>
+
+        <el-divider content-position="left">{{
+          $t("meta.eventDialog.output")
+        }}</el-divider>
+        <span v-for="(item, index) in output.list" :key="index">
+          <el-tag type="success" closable @close="deleteOutput(item)">
+            {{ item.title }}
+          </el-tag>
+          <el-divider direction="vertical"></el-divider>
+        </span>
+        <span v-if="output.list.length <= 5">
+          <el-input
+            class="input-new-tag"
+            v-if="output.visible"
+            v-model="output.value"
+            ref="saveTagOutput"
+            size="small"
+            @keyup.enter="handleOutputConfirm"
+            @blur="handleOutputConfirm"
+          ></el-input>
+          <el-button
+            v-else
+            class="button-new-tag"
+            size="small"
+            @click="showOutput"
+          >
+            + {{ $t("meta.eventDialog.output") }}
           </el-button>
         </span>
       </div>

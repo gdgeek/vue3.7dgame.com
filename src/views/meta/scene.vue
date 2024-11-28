@@ -32,6 +32,12 @@ const src = ref(
     appStore.language
 );
 
+// const src = ref(
+//   import.meta.env.VITE_APP_EDITOR_URL +
+//     "/editor/meta-editor.html?language=" +
+//     appStore.language
+// );
+
 watch(
   () => appStore.language, // 监听 language 的变化
   async (newValue, oldValue) => {
@@ -149,6 +155,42 @@ const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
     });
     return;
   }
+
+  console.log("metaData:", meta);
+
+  // 在上传前处理 meta 数据，确保 name 唯一
+  const renameEntities = (entities: any[]) => {
+    const nameCount: Record<string, number> = {};
+
+    entities.forEach((entity) => {
+      let name = entity.parameters.name;
+
+      // 提取基础名称和当前计数
+      const match = name.match(/^(.*?)(?: \((\d+)\))?$/);
+      let baseName = match?.[1]?.trim() || name;
+      let currentCount = match?.[2] ? parseInt(match[2], 10) : 0;
+
+      if (!nameCount[baseName]) {
+        nameCount[baseName] = currentCount > 0 ? currentCount : 1;
+      } else {
+        nameCount[baseName]++;
+      }
+
+      // 生成唯一名称
+      const newCount = nameCount[baseName];
+      entity.parameters.name =
+        newCount > 1 ? `${baseName} (${newCount})` : baseName;
+    });
+  };
+
+  // 调用重命名函数处理 meta.data.children.entities
+  if (meta?.children?.entities) {
+    console.log("测试1");
+    renameEntities(meta.children.entities);
+  }
+
+  console.log("metaData2:", meta);
+
   await putMeta(id.value, { data: meta, events });
   ElMessage({
     type: "success",

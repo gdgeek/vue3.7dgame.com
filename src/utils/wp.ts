@@ -1,5 +1,7 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
+import { useUserStoreHook } from "@/store/modules/user";
 import { useRouter } from "vue-router";
+import { TOKEN_KEY } from "@/enums/CacheEnum";
 import i18n from "@/lang";
 
 // 获取当前语言
@@ -17,6 +19,11 @@ const messages = {
     "Login expired, please log in again",
     "Network error, please check your internet connection",
     "Internal server error, please try again later",
+  ],
+  ja: [
+    "ログインの有効期限が切れました。再度ログインしてください",
+    "ネットワークエラーです。ネットワーク接続を確認してください",
+    "サーバー内部エラーです。しばらくしてから再度お試しください",
   ],
   zh: [
     "登录过期，请重新登录",
@@ -38,7 +45,7 @@ const getMessageArray = () => {
 // 创建一个 axios 实例
 const service = axios.create({
   baseURL: import.meta.env.VITE_APP_DOC_API,
-  timeout: 20000,
+  timeout: 50000,
 });
 
 // 请求拦截器
@@ -73,7 +80,7 @@ service.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
-  (error: any) => {
+  async (error: any) => {
     const router = useRouter();
     const { response } = error;
     const messages = getMessageArray();

@@ -57,12 +57,20 @@ const src = ref(
     "/three.js/editor/verse-editor.html?language=" +
     appStore.language
 );
+
+// const src = ref(
+//   import.meta.env.VITE_APP_EDITOR_URL +
+//     "/editor/verse-editor.html?language=" +
+//     appStore.language
+// );
+
 const editor = ref<HTMLIFrameElement>();
 const cancel = () => {};
 
 watch(
   () => appStore.language, // 监听 language 的变化
   async (newValue, oldValue) => {
+    console.log("language changed", newValue);
     src.value =
       import.meta.env.VITE_APP_EDITOR_URL +
       "/three.js/editor/verse-editor.html?language=" +
@@ -131,10 +139,13 @@ const selected = async ({ data, setup, title }: any) => {
 
 const saveVerse = async (data: any) => {
   console.error("save verse", data);
+
   if (!data.verse) {
     return;
   }
-  const verse: VerseData = data.verse;
+
+  const verse = data.verse;
+
   if (!saveable.value) {
     ElMessage({
       type: "info",
@@ -142,6 +153,38 @@ const saveVerse = async (data: any) => {
     });
     return;
   }
+
+  const retitleVerses = (verses: any[]) => {
+    const titleCount: Record<string, number> = {};
+
+    verses.forEach((verse) => {
+      let title = verse.parameters.title;
+
+      // 提取基础标题和计数
+      const match = title.match(/^(.*?)(?: \((\d+)\))?$/);
+      const baseTitle = match?.[1]?.trim() || title;
+      const currentCount = match?.[2] ? parseInt(match[2], 10) : 0;
+
+      if (!titleCount[baseTitle]) {
+        titleCount[baseTitle] = currentCount > 0 ? currentCount : 1;
+      } else {
+        titleCount[baseTitle]++;
+      }
+
+      // 生成唯一标题
+      const newCount = titleCount[baseTitle];
+      verse.parameters.title =
+        newCount > 1 ? `${baseTitle} (${newCount})` : baseTitle;
+    });
+  };
+
+  if (verse?.children?.modules) {
+    console.log("测试");
+    retitleVerses(verse.children.modules);
+  }
+
+  console.log("verse", verse);
+
   await putVerse(id.value, { data: JSON.stringify(verse) });
   ElMessage({
     type: "success",

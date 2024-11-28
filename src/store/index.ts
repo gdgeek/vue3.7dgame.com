@@ -13,6 +13,7 @@ export function setupStore(app: App<Element>) {
 export * from "./modules/app";
 export * from "./modules/config";
 export * from "./modules/permission";
+export * from "./modules/screen";
 export * from "./modules/settings";
 export * from "./modules/tagsView";
 export * from "./modules/user";

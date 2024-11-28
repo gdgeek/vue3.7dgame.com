@@ -1,6 +1,10 @@
 <template>
   <div>
-    <mr-p-p-upload dir="audio" :file-type="fileType" @save-resource="saveAudio">
+    <mr-p-p-upload
+      dir="audio"
+      :file-type="fileType"
+      @save-resource="saveAudio"
+    >
       <div>{{ $t("audio.uploadFile") }}</div>
     </mr-p-p-upload>
   </div>
@@ -8,29 +12,40 @@
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
-import ai from "@/api/v1/ai-rodin";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 import { postAudio } from "@/api/resources/index";
 
 const fileType = ref("audio/mp3, audio/wav");
 const router = useRouter();
 
+let completedCount = 0;
 // 音频保存
 const saveAudio = async (
   name: string,
   file_id: number,
+  totalFiles: number,
   callback: () => void
 ) => {
   try {
     const response = await postAudio({ name, file_id });
-    // 跳转到音频查看页面，并传递音频 ID
-    router.push({
-      path: "/resource/audio/view",
-      query: { id: response.data.id },
-    });
+    if (response.data.id) {
+      completedCount++;
+      if (completedCount === totalFiles) {
+        handleAllFilesUploaded(response.data.id);
+      }
+    }
   } catch (err) {
     console.error(err);
+  } finally {
+    callback();
   }
-  callback();
+};
+
+// 多个文件上传后跳转到最后一个文件的查看页面
+const handleAllFilesUploaded = async (lastFileId: number) => {
+    await router.push({
+      path: "/resource/audio/view",
+      query: { id: lastFileId },
+    });
 };
 </script>

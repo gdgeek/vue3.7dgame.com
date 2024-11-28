@@ -164,7 +164,8 @@ export const useUserStore = defineStore(
             const newToken = newTokenResponse.data.auth;
             localStorage.setItem(TOKEN_KEY, "Bearer " + newToken); // 更新 token
             console.log("Token refreshed:", newToken);
-            await getUserInfo(); // 刷新用户数据
+            const res = await getUserInfo(); // 刷新用户数据
+            console.log("User data refreshed:", res);
           }
         } catch (e) {
           console.error("Failed to refresh user data:", e);

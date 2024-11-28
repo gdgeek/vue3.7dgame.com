@@ -9,13 +9,20 @@
       <template #header>
         <div class="box-card-header">
           <h3>{{ $t("ai.generation.title") }}</h3>
-          {{ progress.declared }}
+          <span style="font-style: italic; color: #b0b0b0">{{
+            $t("ai.generation.declare")
+          }}</span>
         </div>
       </template>
 
       <template #footer
         ><div class="progress-item">
-          <el-progress :percentage="progress.percentage"></el-progress>
+          <el-progress
+            v-if="progress.percentage === 100"
+            :percentage="100"
+            status="success"
+          ></el-progress>
+          <el-progress v-else :percentage="progress.percentage"></el-progress>
         </div>
       </template>
       <el-form
@@ -128,7 +135,7 @@ const cancle = () => {
 };
 const rodin = async () => {
   progress.value.percentage = 0;
-  progress.value.title = "AI Generation";
+  progress.value.title = "AI Generating";
   const query: Record<string, string | number> = {};
   if (form.prompt) {
     query.prompt = form.prompt;

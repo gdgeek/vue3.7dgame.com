@@ -102,8 +102,6 @@ export function UpdateAbility(
       can("manager", "all");
     }
 
-
-
     if (roles.some((role) => admin.includes(role))) {
       can("admin", "all");
       can("people", AbilityRole.name, { role: "manager" }); //管理员可以管理用户

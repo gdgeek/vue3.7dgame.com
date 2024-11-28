@@ -1,6 +1,8 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
+import { useUserStoreHook } from "@/store/modules/user";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import i18n from "@/lang";
+import AuthAPI from "@/api/auth";
 
 // 获取当前语言
 const lang = ref(i18n.global.locale.value);
@@ -17,6 +19,11 @@ const messages = {
     "Login expired, please log in again",
     "Network error, please check your internet connection",
     "Internal server error, please try again later",
+  ],
+  ja: [
+    "ログインの有効期限が切れました。再度ログインしてください",
+    "ネットワークエラーです。ネットワーク接続を確認してください",
+    "サーバー内部エラーです。しばらくしてから再度お試しください",
   ],
   zh: [
     "登录过期，请重新登录",
@@ -43,13 +50,58 @@ const service = axios.create({
   headers: { "Content-Type": "application/json;charset=utf-8" },
 });
 
+let isRefreshing = false;
+let subscribers: ((token: string) => void)[] = [];
+
+function onTokenRefreshed(newToken: string) {
+  subscribers.forEach((callback) => callback(newToken));
+  subscribers = [];
+}
+
+function isTokenExpiringSoon(token: string, bufferTime = 300): boolean {
+  // 移除 Bearer 前缀
+  const cleanToken = token.startsWith("Bearer ") ? token.split(" ")[1] : token;
+  const payload = JSON.parse(atob(cleanToken.split(".")[1])); // 解码token
+  const currentTime = Math.floor(Date.now() / 1000); // 当前时间的 Unix 时间戳
+  const tokenExpiryTime = payload.exp; // 过期时间
+
+  // 如果当前时间 + 缓冲时间 >= token 过期时间，则表示快要过期
+  return currentTime + bufferTime >= tokenExpiryTime;
+}
+
 // 请求拦截器
 service.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  async (config: InternalAxiosRequestConfig) => {
     const accessToken = localStorage.getItem(TOKEN_KEY);
-    // console.log("accessToken:", accessToken);
     if (accessToken) {
-      config.headers.Authorization = accessToken;
+      // config.headers.Authorization = accessToken;
+      if (isTokenExpiringSoon(accessToken)) {
+        if (!isRefreshing) {
+          isRefreshing = true;
+          try {
+            useUserStoreHook().setupRefreshInterval(useUserStoreHook().form);
+            const newToken = localStorage.getItem(TOKEN_KEY);
+            onTokenRefreshed(newToken!);
+          } catch (error) {
+            return Promise.reject(error);
+          } finally {
+            isRefreshing = false;
+          }
+        }
+        // 等待 Token 刷新后重试请求
+        return new Promise((resolve) => {
+          subscribers.push((token: string) => {
+            if (config.headers) {
+              config.headers.Authorization = `Bearer ${token}`;
+            }
+            resolve(config);
+          });
+        });
+      } else {
+        if (config.headers) {
+          config.headers.Authorization = accessToken; // 使用当前 Token
+        }
+      }
     }
     return config;
   },
@@ -80,7 +132,7 @@ service.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
-  (error: any) => {
+  async (error: any) => {
     const router = useRouter();
     const { response } = error;
     const messages = getMessageArray();

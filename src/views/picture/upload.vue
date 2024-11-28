@@ -18,22 +18,34 @@ import { postPicture } from "@/api/resources/index";
 const fileType = ref("image/gif, image/jpeg, image/png");
 const router = useRouter();
 
+let completedCount = 0;
 // 图片保存
 const savePicture = async (
   name: string,
   file_id: number,
+  totalFiles: number,
   callback: () => void
 ) => {
   try {
     const response = await postPicture({ name, file_id });
-    // 跳转到图片查看页面，并传递图片 ID
-    router.push({
-      path: "/resource/picture/view",
-      query: { id: response.data.id },
-    });
+    if (response.data.id) {
+      completedCount++;
+      if (completedCount === totalFiles) {
+        handleAllFilesUploaded(response.data.id);
+      }
+    }
   } catch (err) {
-    console.error(err);
+    console.error("Failed to save picture:", err);
+  } finally {
+    callback();
   }
-  callback();
+};
+
+// 多个文件上传后跳转到最后一个文件的查看页面
+const handleAllFilesUploaded = async (lastFileId: number) => {
+    await router.push({
+      path: "/resource/picture/view",
+      query: { id: lastFileId },
+    });
 };
 </script>

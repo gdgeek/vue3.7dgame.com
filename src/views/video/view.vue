@@ -69,7 +69,7 @@ import { postFile } from "@/api/v1/files";
 import { printVector2 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
 import type { ResourceInfo } from "@/api/resources/model";
-import { convertToLocalTime } from "@/utils/dataChange";
+import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 
 const route = useRoute();
 const router = useRouter();
@@ -114,7 +114,7 @@ const tableData = computed(() => {
       },
       {
         item: t("video.view.info.item4"),
-        text: videoData.value.file.size + t("video.view.info.size"),
+        text: formatFileSize(videoData.value.file.size),
       },
       {
         item: t("video.view.info.item5"),

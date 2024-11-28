@@ -635,7 +635,10 @@ onMounted(async () => {
   line-height: 10px;
   padding: 2px 0;
   margin-left: 1%;
-  color: #4d4f52;
+  // color: #4d4f52;
+  small {
+    color: #6f6f6f;
+  }
 }
 
 .box-margin-bottom {
@@ -666,6 +669,10 @@ onMounted(async () => {
 
 .avatar-uploader:hover {
   border-color: #409eff;
+}
+
+.user-explain {
+  color: #6f6f6f;
 }
 
 .avatar-uploader-icon {

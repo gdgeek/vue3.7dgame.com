@@ -18,20 +18,33 @@ import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 const fileType = ref(".glb");
 const router = useRouter();
 
+let completedCount = 0;
 const savePolygen = async (
   name: string,
   file_id: number,
+  totalFiles: number,
   callback: () => void
 ) => {
   try {
     const response = await postPolygen({ name, file_id });
-    router.push({
-      path: "/resource/polygen/view",
-      query: { id: response.data.id },
-    });
+    if (response.data.id) {
+      completedCount++;
+      if (completedCount === totalFiles) {
+        handleAllFilesUploaded(response.data.id);
+      }
+    }
   } catch (err) {
     console.error(err);
+  } finally {
+    callback();
   }
-  callback();
+};
+
+// 多个文件上传后跳转到最后一个文件的查看页面
+const handleAllFilesUploaded = async (lastFileId: number) => {
+    await router.push({
+      path: "/resource/polygen/view",
+      query: { id: lastFileId },
+    });
 };
 </script>

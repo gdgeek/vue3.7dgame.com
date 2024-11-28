@@ -1,5 +1,8 @@
 <template>
-  <div v-loading="loading" :class="['box1', { 'dark-theme': isDark }]">
+  <div
+    v-loading="loading"
+    :class="['box1', { mobile: isMobile, 'dark-theme': isDark }]"
+  >
     <div :class="['box2', { 'dark-theme': isDark }]">
       <h1>{{ $t("login.h1") }}</h1>
       <h4>{{ $t("login.h4") }}</h4>
@@ -75,6 +78,8 @@ const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 const appleLoginColor = computed(() => (isDark.value ? "black" : "white"));
 
 const loading = ref<boolean>(false);
+
+const props = defineProps<{ isMobile: boolean }>();
 
 const { t } = useI18n();
 // const form = ref<LoginData>({
@@ -258,13 +263,17 @@ body {
     width: 450px;
     height: 90%;
     background-color: #fff;
-
     transition: all 0.3s ease;
 
     &.dark-theme {
       background-color: rgb(63, 63, 63);
       border-color: #494949;
       color: white;
+    }
+
+    &.mobile {
+      width: 430;
+      height: 100%;
     }
 
     .box2 {
@@ -276,7 +285,6 @@ body {
       padding: 25px;
       border: 1px solid #ebeefe;
       border-radius: 4px;
-
       transition: all 0.3s ease;
 
       &.dark-theme {

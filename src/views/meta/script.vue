@@ -9,6 +9,12 @@
                 meta.title
               }}</el-link>
               /【{{ $t("meta.script.title") || "Script Title" }}】
+              <el-button type="primary" size="small" @click="run"
+                >测试运行</el-button
+              >
+              <el-button type="primary" size="small" @click="disabled = false">
+                返回
+              </el-button>
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="save">
                   <font-awesome-icon
@@ -20,7 +26,7 @@
               </el-button-group>
             </div>
           </template>
-          <el-container>
+          <el-container v-if="!disabled">
             <el-tabs v-model="activeName" type="card" style="width: 100%">
               <el-tab-pane
                 :label="$t('verse.view.script.edit') || 'Edit Script'"
@@ -62,13 +68,13 @@
                             class="copy-button"
                             text
                             @click="copyCode(LuaCode)"
-                            ><el-icon class="icon"
-                              ><CopyDocument></CopyDocument></el-icon
+                            ><el-icon class="icon">
+                              <CopyDocument></CopyDocument> </el-icon
                             >{{ $t("copy.title") || "Copy" }}</el-button
                           >
                           <pre>
-                            <code class="lua">{{ LuaCode }}</code>
-                          </pre>
+                  <code class="lua">{{ LuaCode }}</code>
+                </pre>
                         </div>
                       </el-tab-pane>
                       <el-tab-pane label="JavaScript" name="javascript">
@@ -87,13 +93,13 @@
                             class="copy-button"
                             text
                             @click="copyCode(JavaScriptCode)"
-                            ><el-icon class="icon"
-                              ><CopyDocument></CopyDocument></el-icon
+                            ><el-icon class="icon">
+                              <CopyDocument></CopyDocument> </el-icon
                             >{{ $t("copy.title") }}</el-button
                           >
                           <pre>
-                            <code class="javascript">{{ JavaScriptCode }}</code>
-                          </pre>
+                  <code class="javascript">{{ JavaScriptCode }}</code>
+                </pre>
                         </div>
                       </el-tab-pane>
                     </el-tabs>
@@ -102,6 +108,9 @@
               </el-tab-pane>
             </el-tabs>
           </el-container>
+          <div v-if="disabled" class="runArea">
+            <ScenePlayer ref="scenePlayer" :meta="meta"></ScenePlayer>
+          </div>
         </el-card>
       </el-main>
     </el-container>
@@ -116,7 +125,13 @@ import { ElMessage } from "element-plus";
 import { useAppStore } from "@/store/modules/app";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { convertToHttps } from "@/assets/js/helper";
+import pako from "pako";
+import ScenePlayer from "./ScenePlayer.vue";
 
+const loader = new GLTFLoader();
 const appStore = useAppStore();
 const loading = ref(false);
 const meta = ref<metaInfo | null>(null);
@@ -134,6 +149,29 @@ const LuaCode = ref("");
 const JavaScriptCode = ref("");
 const settingsStore = useSettingsStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
+
+// 定义单次赋值
+const defineSingleAssignment = (initialValue: any) => {
+  let value = initialValue;
+  let isAssigned = false;
+
+  return {
+    get() {
+      return value;
+    },
+    set(newValue: any) {
+      if (!isAssigned) {
+        value = newValue;
+        isAssigned = true;
+        // console.log("值已成功赋值为:", newValue);
+      } else {
+        console.log("cannot be assigned again");
+      }
+    },
+  };
+};
+// 保存编辑器初始化lua代码
+const initLuaCode = defineSingleAssignment("");
 
 // 动态加载代码样式
 const loadHighlightStyle = (isDark: boolean) => {
@@ -200,8 +238,18 @@ const postScript = async (message: any) => {
     return;
   }
 
+  // 压缩 blockly 数据
+  let blocklyData = JSON.stringify(message.data);
+  if (blocklyData.length > 1024 * 2) {
+    // 如果超过2KB就进行压缩
+    const uint8Array = pako.deflate(blocklyData);
+    // 将压缩后的数据转换为 Base64
+    const base64Str = btoa(String.fromCharCode.apply(null, uint8Array));
+    blocklyData = `compressed:${base64Str}`; // 压缩标记
+  }
+
   await putMetaCode(meta.value.id, {
-    blockly: JSON.stringify(message.data),
+    blockly: blocklyData,
     lua: message.lua,
     js: message.js,
   });
@@ -223,7 +271,11 @@ const handleMessage = async (e: MessageEvent) => {
       initEditor();
     } else if (params.action === "post") {
       await postScript(params.data);
-      console.log("PARAMS", params.data);
+
+      if (saveResolve) {
+        saveResolve();
+        saveResolve = null;
+      }
     } else if (params.action === "post:no-change") {
       ElMessage({
         message: t("meta.script.info") || "Info",
@@ -232,6 +284,7 @@ const handleMessage = async (e: MessageEvent) => {
     } else if (params.action === "update") {
       LuaCode.value = "local meta = {}\nlocal index = ''\n" + params.data.lua;
       JavaScriptCode.value = params.data.js;
+      initLuaCode.set(LuaCode.value);
     }
   } catch (e: any) {
     console.log("ex:" + e);
@@ -239,9 +292,76 @@ const handleMessage = async (e: MessageEvent) => {
   }
 };
 
-const save = () => {
-  postMessage("save", { language: ["lua", "js"], data: {} });
+// 标记是否有未保存的更改
+const hasUnsavedChanges = ref<boolean>(false);
+// 保存操作的 Promise 解析函数
+let saveResolve: (() => void) | null = null;
+
+const save = (): Promise<void> => {
+  hasUnsavedChanges.value = false;
+  return new Promise<void>((resolve, reject) => {
+    saveResolve = resolve;
+    postMessage("save", { language: ["lua", "js"], data: {} });
+  });
 };
+
+// 页面关闭提示
+const handleBeforeUnload = (event: any) => {
+  if (hasUnsavedChanges.value) {
+    event.preventDefault();
+    event.returnValue = "";
+  }
+};
+
+// 离开时，如果有未保存的更改，则提示用户是否要保存
+onBeforeRouteLeave(async (to, from, next) => {
+  if (hasUnsavedChanges.value) {
+    try {
+      await ElMessageBox.confirm(
+        t("meta.script.leave.message1"),
+        t("meta.script.leave.message2"),
+        {
+          confirmButtonText: t("meta.script.leave.confirm"),
+          cancelButtonText: t("meta.script.leave.cancel"),
+          type: "warning",
+          showClose: true,
+          closeOnClickModal: false,
+          distinguishCancelAndClose: true, // 是否将取消（点击取消按钮）与关闭（点击关闭按钮或遮罩层、按下 Esc 键）进行区分
+        }
+      );
+
+      // 用户点击确认,保存并跳转
+      try {
+        await save();
+        next();
+      } catch (error) {
+        ElMessage.error(t("meta.script.leave.error"));
+        next(false);
+      }
+    } catch (action) {
+      // 区分取消（否）按钮和关闭按钮(x)的行为
+      if (action === "cancel") {
+        // 点击取消按钮,不保存直接跳转
+        hasUnsavedChanges.value = false;
+        ElMessage.info(t("meta.script.leave.info"));
+        next();
+      } else {
+        // 点击关闭按钮(x),取消跳转
+        next(false);
+      }
+    }
+  } else {
+    next();
+  }
+});
+
+watch(LuaCode, (newValue, oldValue) => {
+  hasUnsavedChanges.value = false;
+  if (newValue !== initLuaCode.get()) {
+    hasUnsavedChanges.value = true;
+  }
+});
+
 const postMessage = (action: string, data: any = {}) => {
   if (editor.value && editor.value.contentWindow) {
     editor.value.contentWindow.postMessage(
@@ -253,8 +373,8 @@ const postMessage = (action: string, data: any = {}) => {
       "*"
     );
   } else {
-    console.error(t("meta.script.error3") || "Error 3");
     ElMessage({
+      message: t("meta.script.error3"),
       type: "error",
     });
   }
@@ -264,20 +384,34 @@ const initEditor = () => {
   if (!meta.value) return;
   if (!ready) return;
 
-  const data = meta.value.metaCode?.blockly
-    ? JSON.parse(meta.value.metaCode?.blockly)
-    : {};
+  let blocklyData = meta.value.metaCode?.blockly || "{}";
+  try {
+    if (blocklyData.startsWith("compressed:")) {
+      // 解压缩数据
+      const base64Str = blocklyData.substring(11); // 移除 'compressed:' 前缀
+      // 将 Base64 转换回二进制数据
+      const binaryString = atob(base64Str);
+      const uint8Array = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        uint8Array[i] = binaryString.charCodeAt(i);
+      }
+      blocklyData = pako.inflate(uint8Array, { to: "string" });
+    }
+    const data = JSON.parse(blocklyData);
 
-  test.value = getResource(meta.value);
-  postMessage("init", {
-    language: ["lua", "js"],
-    style: ["base", "meta"],
-    data: data,
-    parameters: {
-      index: meta.value.id,
-      resource: getResource(meta.value),
-    },
-  });
+    test.value = getResource(meta.value);
+    postMessage("init", {
+      language: ["lua", "js"],
+      style: ["base", "meta"],
+      data: data,
+      parameters: {
+        index: meta.value.id,
+        resource: getResource(meta.value),
+      },
+    });
+  } catch (error) {
+    console.error("Failed to decompress or parse data:", error);
+  }
 };
 const testAction = (data: any) => {
   if (
@@ -296,13 +430,22 @@ const testPoint = (data: any, typeList: string[]) => {
   if (!data) {
     return;
   }
-  return typeList.find((type) => data.type.toLowerCase() === type.toLowerCase())
-    ? {
-        uuid: data.parameters.uuid,
-        name: data.parameters.name ?? null,
-      }
-    : undefined;
+  const isValidType = typeList.find(
+    (type) => data.type.toLowerCase() === type.toLowerCase()
+  );
+
+  if (isValidType) {
+    const animations = data.parameters?.animations ?? null;
+    return {
+      uuid: data.parameters.uuid,
+      name: data.parameters.name ?? null,
+      ...(data.type.toLowerCase() === "polygen" ? { animations } : {}), // 如果类型为 Polygen，加入 animations 属性
+    };
+  }
+
+  return undefined;
 };
+
 const addMetaData = (data: any, ret: any) => {
   const action = testAction(data);
   if (action) {
@@ -363,7 +506,7 @@ const addMetaData = (data: any, ret: any) => {
 };
 const getResource = (meta: metaInfo) => {
   const data = JSON.parse(meta.data!);
-  //  console.log("data", data);
+  console.log("data", data);
   const ret = {
     action: [],
     trigger: [],
@@ -387,17 +530,77 @@ const getResource = (meta: metaInfo) => {
 
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
+  window.removeEventListener("beforeunload", handleBeforeUnload);
 });
 onMounted(async () => {
   window.addEventListener("message", handleMessage);
   loadHighlightStyle(isDark.value);
+
+  window.addEventListener("beforeunload", handleBeforeUnload);
+
   try {
     loading.value = true;
     const response = await getMeta(id.value, "cyber,event,share,metaCode");
+    console.log("response数据", response);
 
-    meta.value = response.data;
-    // console.error("meta", meta.value);
+    // 用递归处理层级嵌套
+    const assignAnimations = (
+      entities: any[],
+      modelId: string,
+      animationNames: string[]
+    ) => {
+      entities.forEach((item: any) => {
+        // 如果满足条件则赋值 animations
+        if (item.parameters?.resource === modelId) {
+          item.parameters.animations = animationNames;
+        }
 
+        // 如果当前项还有 children.entities，继续递归处理
+        if (item.children?.entities) {
+          assignAnimations(item.children.entities, modelId, animationNames);
+        }
+      });
+    };
+
+    // 循环处理每个模型文件
+    for (const [index, model] of response.data.resources.entries()) {
+      if (model.type !== "polygen") {
+        meta.value = response.data;
+        continue;
+      }
+
+      const modelUrl = convertToHttps(model.file.url);
+      // const modelUrl = model.file.url;
+      console.error("modelUrl", modelUrl);
+      const modelId = model.id.toString();
+
+      // 等待每个模型加载完成获取数据后再继续
+      await new Promise<void>((resolve, reject) => {
+        loader.load(
+          modelUrl,
+          (gltf) => {
+            const animationNames = gltf.animations.map((clip) => clip.name);
+
+            let data = JSON.parse(response.data.data!);
+
+            // 调用递归函数对所有满足条件的项赋值 animations
+            assignAnimations(data.children.entities, modelId, animationNames);
+
+            response.data.data = JSON.stringify(data);
+            meta.value = response.data;
+
+            resolve();
+          },
+          undefined,
+          (error) => {
+            console.error("An error occurred while loading the model:", error);
+            reject(error);
+          }
+        );
+      });
+    }
+
+    console.log("meta", meta.value);
     initEditor();
   } catch (error: any) {
     alert(error.message);
@@ -409,6 +612,148 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
+const disabled = ref<boolean>(false);
+const scenePlayer = ref<InstanceType<typeof ScenePlayer>>();
+
+const handlePolygen = (uuid: string) => {
+  if (!scenePlayer.value) {
+    console.error("ScenePlayer未初始化");
+    return null;
+  }
+
+  const modelUuid = uuid.toString();
+
+  // 添加重试机制
+  const getModel = (uuid: string, retries = 3): THREE.Object3D | null => {
+    const source = scenePlayer.value?.sources.get(uuid);
+    if (source && source.type === "model") {
+      return source.data as THREE.Object3D;
+    }
+
+    if (retries > 0) {
+      console.log(`模型未找到，剩余重试次数: ${retries}`);
+      setTimeout(() => getModel(uuid, retries - 1), 100);
+    }
+    return null;
+  };
+
+  const model = getModel(modelUuid);
+
+  console.log("查找模型:", {
+    requestedUuid: modelUuid,
+    availableModels: Array.from(scenePlayer.value.sources.keys()),
+    modelExists: scenePlayer.value.sources.has(modelUuid),
+    foundModel: model,
+  });
+
+  if (!model) {
+    console.error(`找不到UUID为 ${modelUuid} 的模型`);
+    return null;
+  }
+
+  return {
+    playAnimation: (animationName: string) => {
+      console.log("播放动画:", {
+        uuid: modelUuid,
+        animationName,
+        model: model,
+      });
+      scenePlayer.value?.playAnimation(modelUuid, animationName);
+    },
+  };
+};
+
+const handleSound = (uuid: string): HTMLAudioElement | undefined => {
+  const audioUrl = scenePlayer.value?.getAudioUrl(uuid);
+  if (!audioUrl) {
+    console.error(`找不到UUID为 ${uuid} 的音频资源`);
+    return undefined;
+  }
+
+  const audio = new Audio(audioUrl);
+  return audio;
+};
+
+const run = async () => {
+  disabled.value = true;
+
+  // 等待场景加载完成
+  await nextTick();
+
+  // 添加延迟等待所有模型加载完成
+  const waitForModels = () => {
+    return new Promise((resolve) => {
+      const checkModels = () => {
+        const metaData = JSON.parse(meta.value!.data!);
+        const expectedModels = metaData.children.entities.length;
+
+        if (scenePlayer.value?.sources.size === expectedModels) {
+          console.log("所有资源加载完成:", {
+            expected: expectedModels,
+            loaded: scenePlayer.value!.sources.size,
+            sources: scenePlayer.value!.sources,
+          });
+          resolve(true);
+        } else {
+          console.log("等待资源加载...", {
+            expected: expectedModels,
+            current: scenePlayer.value?.sources.size || 0,
+          });
+          setTimeout(checkModels, 100);
+        }
+      };
+      checkModels();
+    });
+  };
+
+  await waitForModels();
+
+  if (JavaScriptCode.value) {
+    const polygen = {
+      playAnimation: (polygenInstance: any, animationName: string) => {
+        if (!polygenInstance) {
+          console.error("polygen实例为空");
+          return;
+        }
+        if (typeof polygenInstance.playAnimation !== "function") {
+          console.error("polygen实例缺少playAnimation方法");
+          return;
+        }
+        polygenInstance.playAnimation(animationName);
+      },
+    };
+
+    // 添加音频播放辅助函数
+    const sound = {
+      play: async (audio: HTMLAudioElement | undefined) => {
+        if (!audio) {
+          console.error("音频资源无效");
+          return;
+        }
+        await scenePlayer.value?.playQueuedAudio(audio);
+      },
+    };
+
+    try {
+      const wrappedCode = `
+        return async function(handlePolygen, polygen, handleSound, sound) {
+          ${JavaScriptCode.value}
+        }
+      `;
+
+      const createFunction = new Function(wrappedCode);
+      const executableFunction = createFunction();
+      await executableFunction(handlePolygen, polygen, handleSound, sound);
+    } catch (e: any) {
+      console.error("执行代码出错:", e);
+      ElMessage({
+        message: `执行代码出错: ${e.message}`,
+        type: "error",
+      });
+    }
+  }
+};
 </script>
 
 <style scoped>

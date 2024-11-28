@@ -1,4 +1,4 @@
-import { token } from './tencent-cloud';
+import { token } from "./tencent-cloud";
 import request from "@/utils/request";
 
 export interface AppleIdData {
@@ -6,7 +6,6 @@ export interface AppleIdData {
   url: string;
   data: any;
 }
-
 
 export interface AppleIdReturn {
   apple_id: string;
@@ -22,4 +21,3 @@ export const PostSiteAppleId = (data: AppleIdData) => {
     data: data,
   });
 };
-
