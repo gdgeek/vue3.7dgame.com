@@ -312,7 +312,6 @@ const handleBeforeUnload = (event: any) => {
 
 // 离开时，如果有未保存的更改，则提示用户是否要保存
 onBeforeRouteLeave(async (to, from, next) => {
-  console.log("hasUnsavedChanges", hasUnsavedChanges.value);
   if (hasUnsavedChanges.value) {
     try {
       await ElMessageBox.confirm(
@@ -322,23 +321,28 @@ onBeforeRouteLeave(async (to, from, next) => {
           confirmButtonText: t("verse.view.script.leave.confirm"),
           cancelButtonText: t("verse.view.script.leave.cancel"),
           type: "warning",
+          showClose: true,
+          closeOnClickModal: false,
+          distinguishCancelAndClose: true,
         }
       );
 
-      // 用户选择保存，等待保存完成后再进行路由跳转
+      // 用户点击确认,保存并跳转
       try {
         await save();
-        // ElMessage.success(t("verse.view.script.saveSuccess") || "保存成功");
         next();
       } catch (error) {
         ElMessage.error(t("verse.view.script.leave.error"));
         next(false);
       }
-    } catch {
-      // 用户选择不保存，继续路由跳转
-      hasUnsavedChanges.value = false;
-      ElMessage.info(t("verse.view.script.leave.info"));
-      next();
+    } catch (action) {
+      if (action === "cancel") {
+        hasUnsavedChanges.value = false;
+        ElMessage.info(t("verse.view.script.leave.info"));
+        next();
+      } else {
+        next(false);
+      }
     }
   } else {
     next();

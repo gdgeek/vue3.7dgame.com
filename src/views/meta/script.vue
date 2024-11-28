@@ -324,10 +324,13 @@ onBeforeRouteLeave(async (to, from, next) => {
           confirmButtonText: t("meta.script.leave.confirm"),
           cancelButtonText: t("meta.script.leave.cancel"),
           type: "warning",
+          showClose: true,
+          closeOnClickModal: false,
+          distinguishCancelAndClose: true, // 是否将取消（点击取消按钮）与关闭（点击关闭按钮或遮罩层、按下 Esc 键）进行区分
         }
       );
 
-      // 用户选择保存，等待保存完成后再进行路由跳转
+      // 用户点击确认,保存并跳转
       try {
         await save();
         next();
@@ -335,11 +338,17 @@ onBeforeRouteLeave(async (to, from, next) => {
         ElMessage.error(t("meta.script.leave.error"));
         next(false);
       }
-    } catch {
-      // 用户选择不保存，继续路由跳转
-      hasUnsavedChanges.value = false;
-      ElMessage.info(t("meta.script.leave.info"));
-      next();
+    } catch (action) {
+      // 区分取消（否）按钮和关闭按钮(x)的行为
+      if (action === "cancel") {
+        // 点击取消按钮,不保存直接跳转
+        hasUnsavedChanges.value = false;
+        ElMessage.info(t("meta.script.leave.info"));
+        next();
+      } else {
+        // 点击关闭按钮(x),取消跳转
+        next(false);
+      }
     }
   } else {
     next();
