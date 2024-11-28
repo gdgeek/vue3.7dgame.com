@@ -146,7 +146,7 @@ const threeScene = new THREE.Scene();
 let camera: THREE.PerspectiveCamera | null = null;
 let renderer: THREE.WebGLRenderer | null = null;
 let mixers: Map<string, THREE.AnimationMixer> = new Map();
-let models: Map<string, THREE.Object3D> = new Map();
+let sources: Map<string, any> = new Map();
 let clock = new THREE.Clock();
 
 // 自定义VOX加载器
@@ -297,14 +297,44 @@ class CustomVOXLoader extends VOXLoader {
   }
 }
 
-// 加载模型
+// 在script setup部分添加新的音频相关代码
+const sounds = new Map<string, string>();
+
+// 修改loadModel函数，添加音频处理逻辑
 const loadModel = async (resource: any, transform: any) => {
-  console.log("加载模型参数:", {
+  console.log("加载资源参数:", {
     resource,
     transform,
     resourceId: resource.id,
     transformUUID: transform?.uuid,
   });
+
+  // 处理音频类型
+  if (resource.type === "sound" || resource.type === "audio") {
+    return new Promise((resolve) => {
+      const uuid = transform.uuid.toString();
+      const audioUrl = convertToHttps(resource.file.url);
+
+      // 存储音频资源
+      sources.set(uuid, {
+        type: "audio",
+        data: { url: audioUrl },
+      });
+
+      console.log("音频资源加载完成:", {
+        uuid,
+        url: audioUrl,
+      });
+
+      console.log("当前模型Map状态:", {
+        uuid,
+        modelKeys: Array.from(sources.keys()),
+        modelExists: sources.has(uuid),
+      });
+
+      resolve(true);
+    });
+  }
 
   // 文本类型处理
   if (resource.type === "text") {
@@ -386,8 +416,10 @@ const loadModel = async (resource: any, transform: any) => {
 
         // 保存到模型Map中
         const uuid = transform.uuid.toString();
-        models.set(uuid, mesh);
-        mesh.uuid = uuid;
+        sources.set(uuid, {
+          type: "text",
+          data: mesh,
+        });
 
         // 添加到场景
         threeScene.add(mesh);
@@ -459,8 +491,10 @@ const loadModel = async (resource: any, transform: any) => {
 
             // 保存到模型Map中
             const uuid = transform.uuid.toString();
-            models.set(uuid, voxMesh);
-            voxMesh.uuid = uuid;
+            sources.set(uuid, {
+              type: "model",
+              data: voxMesh,
+            });
 
             // 添加到场景
             threeScene.add(voxMesh);
@@ -533,14 +567,16 @@ const loadModel = async (resource: any, transform: any) => {
 
           // 使用transform中的UUID
           const uuid = transform.uuid.toString();
-          models.set(uuid, model);
-          model.uuid = uuid;
+          sources.set(uuid, {
+            type: "model",
+            data: model,
+          });
 
           // 打印当前模型Map的状态
           console.log("当前模型Map状态:", {
             uuid,
-            modelKeys: Array.from(models.keys()),
-            modelExists: models.has(uuid),
+            modelKeys: Array.from(sources.keys()),
+            modelExists: sources.has(uuid),
           });
 
           threeScene.add(model);
@@ -560,37 +596,43 @@ const loadModel = async (resource: any, transform: any) => {
   }
 };
 
+// 获取音频URL
+const getAudioUrl = (uuid: string): string | undefined => {
+  const source = sources.get(uuid.toString());
+  if (!source || source.type !== "audio") {
+    console.error(`找不到UUID为 ${uuid} 的音频资源`);
+    return undefined;
+  }
+  return (source.data as { url: string }).url;
+};
+
 // 播放动画
 const playAnimation = (uuid: string, animationName: string) => {
-  // 确保使用字符串类型的uuid
-  const modelUuid = uuid.toString();
+  const source = sources.get(uuid.toString());
+  if (!source || source.type !== "model") {
+    console.error(`找不到UUID为 ${uuid} 的模型资源`);
+    return;
+  }
 
-  console.log("开始播放动画:", {
-    uuid: modelUuid,
-    animationName,
-    availableModels: Array.from(models.keys()),
-    modelExists: models.has(modelUuid),
-  });
-
-  const model = models.get(modelUuid);
-  const mixer = mixers.get(modelUuid);
+  const model = source.data as THREE.Object3D;
+  const mixer = mixers.get(uuid);
 
   if (!model) {
     console.error(
-      `找不到UUID为 ${modelUuid} 的模型，可用模型:`,
-      Array.from(models.keys())
+      `找不到UUID为 ${uuid} 的模型，可用模型:`,
+      Array.from(sources.keys())
     );
     return;
   }
 
   if (!mixer) {
-    console.error(`找不到UUID为 ${modelUuid} 的动画混合器`);
+    console.error(`找不到UUID为 ${uuid} 的动画混合器`);
     return;
   }
 
   const animations = model.userData?.animations;
   if (!animations || animations.length === 0) {
-    console.error(`模型 ${modelUuid} 没有动画数据`);
+    console.error(`模型 ${uuid} 没有动画数据`);
     return;
   }
 
@@ -709,7 +751,8 @@ onMounted(async () => {
 });
 
 defineExpose({
-  models,
+  sources,
   playAnimation,
+  getAudioUrl,
 });
 </script>

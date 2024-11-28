@@ -616,6 +616,14 @@ onMounted(async () => {
 const disabled = ref<boolean>(false);
 const scenePlayer = ref<InstanceType<typeof ScenePlayer>>();
 
+const handleSound = (uuid: string): string | undefined => {
+  if (!scenePlayer.value) {
+    console.error("ScenePlayer未初始化");
+    return undefined;
+  }
+  return scenePlayer.value.getAudioUrl(uuid);
+};
+
 const run = async () => {
   disabled.value = true;
 
@@ -626,21 +634,20 @@ const run = async () => {
   const waitForModels = () => {
     return new Promise((resolve) => {
       const checkModels = () => {
-        // 检查是否所有预期的模型都已加载
         const metaData = JSON.parse(meta.value!.data!);
         const expectedModels = metaData.children.entities.length;
 
-        if (scenePlayer.value?.models.size === expectedModels) {
-          console.log("所有模型加载完成:", {
+        if (scenePlayer.value?.sources.size === expectedModels) {
+          console.log("所有资源加载完成:", {
             expected: expectedModels,
-            loaded: scenePlayer.value!.models.size,
-            models: scenePlayer.value!.models,
+            loaded: scenePlayer.value!.sources.size,
+            sources: scenePlayer.value!.sources,
           });
           resolve(true);
         } else {
-          console.log("等待模型加载...", {
+          console.log("等待资源加载...", {
             expected: expectedModels,
-            current: scenePlayer.value?.models.size || 0,
+            current: scenePlayer.value?.sources.size || 0,
           });
           setTimeout(checkModels, 100);
         }
@@ -653,19 +660,19 @@ const run = async () => {
 
   if (JavaScriptCode.value) {
     const handlePolygen = (uuid: string) => {
-      // 确保 scenePlayer 已经初始化
       if (!scenePlayer.value) {
         console.error("ScenePlayer未初始化");
         return null;
       }
 
-      // 确保使用字符串类型的uuid
       const modelUuid = uuid.toString();
 
       // 添加重试机制
       const getModel = (uuid: string, retries = 3): THREE.Object3D | null => {
-        const model = scenePlayer.value?.models.get(uuid);
-        if (model) return model;
+        const source = scenePlayer.value?.sources.get(uuid);
+        if (source && source.type === "model") {
+          return source.data as THREE.Object3D;
+        }
 
         if (retries > 0) {
           console.log(`模型未找到，剩余重试次数: ${retries}`);
@@ -678,8 +685,8 @@ const run = async () => {
 
       console.log("查找模型:", {
         requestedUuid: modelUuid,
-        availableModels: Array.from(scenePlayer.value.models.keys()),
-        modelExists: scenePlayer.value.models.has(modelUuid),
+        availableModels: Array.from(scenePlayer.value.sources.keys()),
+        modelExists: scenePlayer.value.sources.has(modelUuid),
         foundModel: model,
       });
 
@@ -716,14 +723,14 @@ const run = async () => {
 
     try {
       const wrappedCode = `
-        return async function(handlePolygen, polygen) {
+        return async function(handlePolygen, polygen, handleSound) {
           ${JavaScriptCode.value}
         }
       `;
 
       const createFunction = new Function(wrappedCode);
       const executableFunction = createFunction();
-      await executableFunction(handlePolygen, polygen);
+      await executableFunction(handlePolygen, polygen, handleSound);
     } catch (e: any) {
       console.error("执行代码出错:", e);
       ElMessage({
