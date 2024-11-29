@@ -441,76 +441,71 @@ const loadModel = async (resource: any, parameters: any) => {
   // 处理图片类型
   if (resource.type === "picture" || parameters.type === "Picture") {
     return new Promise((resolve, reject) => {
-      try {
-        const textureLoader = new THREE.TextureLoader();
-        const url = convertToHttps(resource.file.url);
+      const textureLoader = new THREE.TextureLoader();
+      const url = convertToHttps(resource.file.url);
 
-        textureLoader.load(
-          url,
-          (texture) => {
-            const aspectRatio = texture.image.width / texture.image.height;
-            const width = parameters.width || 1;
-            const height = width / aspectRatio;
+      textureLoader.load(
+        url,
+        (texture) => {
+          // 优化纹理设置
+          texture.colorSpace = THREE.SRGBColorSpace;
+          texture.minFilter = THREE.LinearFilter;
+          texture.magFilter = THREE.LinearFilter;
+          texture.anisotropy = renderer!.capabilities.getMaxAnisotropy();
 
-            const geometry = new THREE.PlaneGeometry(1, 1);
-            const material = new THREE.MeshBasicMaterial({
-              map: texture,
-              transparent: true,
-              side: THREE.DoubleSide,
-            });
+          const aspectRatio = texture.image.width / texture.image.height;
+          const width = parameters.width || 1;
+          const height = width / aspectRatio;
 
-            const mesh = new THREE.Mesh(geometry, material);
+          const geometry = new THREE.PlaneGeometry(1, 1);
+          const material = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            side: THREE.DoubleSide,
+            // 确保图片显示清晰
+            depthWrite: true,
+            depthTest: true,
+          });
 
-            // 应用变换
-            if (parameters?.transform) {
-              mesh.position.set(
-                parameters.transform.position.x,
-                parameters.transform.position.y,
-                parameters.transform.position.z
-              );
+          const mesh = new THREE.Mesh(geometry, material);
 
-              mesh.rotation.set(
-                THREE.MathUtils.degToRad(parameters.transform.rotate.x),
-                THREE.MathUtils.degToRad(parameters.transform.rotate.y),
-                THREE.MathUtils.degToRad(parameters.transform.rotate.z)
-              );
+          // 应用变换
+          if (parameters?.transform) {
+            mesh.position.set(
+              parameters.transform.position.x,
+              parameters.transform.position.y,
+              parameters.transform.position.z
+            );
 
-              const baseScale = width;
-              mesh.scale.set(
-                parameters.transform.scale.x * baseScale,
-                parameters.transform.scale.y * baseScale * (1 / aspectRatio),
-                parameters.transform.scale.z * baseScale
-              );
-            }
+            mesh.rotation.set(
+              THREE.MathUtils.degToRad(parameters.transform.rotate.x),
+              THREE.MathUtils.degToRad(parameters.transform.rotate.y),
+              THREE.MathUtils.degToRad(parameters.transform.rotate.z)
+            );
 
-            const uuid = parameters.uuid.toString();
-            sources.set(uuid, {
-              type: "picture",
-              data: mesh,
-            });
-
-            threeScene.add(mesh);
-
-            console.log("图片加载完成:", {
-              uuid,
-              position: mesh.position.toArray(),
-              rotation: mesh.rotation.toArray(),
-              scale: mesh.scale.toArray(),
-              dimensions: { width, height, aspectRatio },
-            });
-
-            resolve(mesh);
-          },
-          undefined,
-          (error) => {
-            console.error("图片加载失败:", error);
-            reject(error);
+            const baseScale = width;
+            mesh.scale.set(
+              parameters.transform.scale.x * baseScale,
+              parameters.transform.scale.y * baseScale * (1 / aspectRatio),
+              parameters.transform.scale.z * baseScale
+            );
           }
-        );
-      } catch (error) {
-        console.error("处理图片资源时出错:", error);
-        reject(error);
-      }
+
+          // 确保图片始终清晰可见
+          mesh.renderOrder = 1;
+
+          const uuid = parameters.uuid.toString();
+          sources.set(uuid, {
+            type: "picture",
+            data: mesh,
+          });
+
+          threeScene.add(mesh);
+          resolve(mesh);
+        },
+        undefined,
+        reject
+      );
     });
   }
 
@@ -817,27 +812,43 @@ onMounted(async () => {
   const width = scene.value.clientWidth;
   const height = scene.value.clientHeight;
 
-  // 设置相机
-  camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-  camera.position.set(0, 2, 5);
-
-  // 设置渲染器
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  // 优化渲染器设置
+  renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    alpha: true,
+  });
   renderer.setSize(width, height);
-  renderer.setClearColor(0xeeeeee);
+  renderer.setClearColor(0xffffff, 1); // 使用纯白背景
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
   scene.value.appendChild(renderer.domElement);
 
-  // 添加轨道控制器
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
+  // 相机设置
+  camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+  camera.position.set(0, 2, 8); // 调整相机距离
 
-  // 添加光源
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  // 优化光照系统
+  // 主环境光
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
   threeScene.add(ambientLight);
 
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-  directionalLight.position.set(5, 5, 5);
-  threeScene.add(directionalLight);
+  // 主平行光
+  const mainLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  mainLight.position.set(5, 5, 5);
+  threeScene.add(mainLight);
+
+  // 补充光源
+  const fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
+  fillLight.position.set(-5, 3, 0);
+  threeScene.add(fillLight);
+
+  // 轨道控制器设置
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.screenSpacePanning = true;
+  controls.minDistance = 3;
+  controls.maxDistance = 15;
 
   // 加载所有模型
   const metaData = JSON.parse(props.meta.data);
