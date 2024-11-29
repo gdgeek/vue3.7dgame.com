@@ -1,6 +1,10 @@
 <template>
   <div>
-    <div id="scene" ref="scene" style="height: 600px; width: 100%; margin: 0 auto"></div>
+    <div
+      id="scene"
+      ref="scene"
+      style="height: 600px; width: 100%; margin: 0 auto"
+    ></div>
   </div>
 </template>
 
@@ -9,9 +13,13 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 // import { VOXLoader } from "three/examples/jsm/loaders/VOXLoader";
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import { convertToHttps } from "@/assets/js/helper";
 import { VOXLoader, VOXMesh } from "@/assets/js/voxel/VOXLoader.js";
+import { ThemeEnum } from "@/enums/ThemeEnum";
+import { useSettingsStore } from "@/store/modules/settings";
+
+const settingsStore = useSettingsStore();
 
 const props = defineProps<{
   meta: any;
@@ -24,6 +32,8 @@ let renderer: THREE.WebGLRenderer | null = null;
 let mixers: Map<string, THREE.AnimationMixer> = new Map();
 let sources: Map<string, any> = new Map();
 let clock = new THREE.Clock();
+
+const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
 const loadModel = async (resource: any, parameters: any) => {
   console.log("加载资源参数:", {
@@ -544,7 +554,7 @@ onMounted(async () => {
     alpha: true,
   });
   renderer.setSize(width, height);
-  renderer.setClearColor(0xffffff, 1); // 使用纯白背景
+  renderer.setClearColor(isDark.value ? 0x242424 : 0xffffff, 1);
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   scene.value.appendChild(renderer.domElement);
@@ -641,6 +651,13 @@ onMounted(async () => {
     renderer!.render(threeScene, camera!);
   };
   animate();
+});
+
+// 监听主题变化
+watch(isDark, (newValue) => {
+  if (renderer) {
+    renderer.setClearColor(newValue ? 0x242424 : 0xffffff, 1);
+  }
 });
 
 // 在组件卸载时清理资源
