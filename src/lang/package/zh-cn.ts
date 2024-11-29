@@ -113,6 +113,8 @@ export default {
       },
     },
     success: "登录成功",
+    usernameError: "用户名错误",
+    passwordError: "密码错误",
     error: "表单检验未通过",
     createAccount: "创建账号",
     repassword: "确认密码",

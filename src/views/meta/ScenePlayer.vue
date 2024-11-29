@@ -316,7 +316,7 @@ const loadModel = async (resource: any, parameters: any) => {
 
         // 设置视频属性
         video.loop = parameters.loop || false;
-        video.muted = false;
+        video.muted = parameters.muted || false; // 是否静音
         video.playsInline = true;
         video.volume = parameters.volume || 1.0;
 

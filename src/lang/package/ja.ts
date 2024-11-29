@@ -114,6 +114,8 @@ export default {
       },
     },
     success: "ログイン成功",
+    usernameError: "ユーザー名エラー",
+    passwordError: "パスワードエラー",
     error: "フォーム検証に失敗しました",
     createAccount: "アカウントを作成",
     repassword: "パスワードを確認",

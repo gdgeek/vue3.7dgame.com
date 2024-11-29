@@ -134,7 +134,24 @@ const submit = () => {
         const response = await AuthAPI.login(form.value);
         await login(response.data);
       } catch (e: any) {
-        ElMessage.error(e.message);
+        let errorMessage = "Login failed, please try again later.";
+
+        try {
+          if (e.data?.message) {
+            const errorData = JSON.parse(e.data.message);
+            if (errorData.username) {
+              errorMessage =
+                t("login.usernameError") + ": " + errorData.username;
+            } else if (errorData.password) {
+              errorMessage =
+                t("login.passwordError") + ": " + errorData.password;
+            }
+          }
+        } catch (parseError) {
+          errorMessage = e.message || "Login failed, please try again later.";
+        }
+
+        ElMessage.error(errorMessage);
         loading.value = false;
       }
     } else {

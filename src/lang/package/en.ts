@@ -113,6 +113,8 @@ export default {
       },
     },
     success: "Login Successful",
+    usernameError: "Username Error",
+    passwordError: "Password Error",
     error: "Form Validation Failed",
     createAccount: "Create Account",
     repassword: "Confirm Password",
