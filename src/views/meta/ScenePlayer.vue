@@ -825,21 +825,22 @@ onMounted(async () => {
 
   // 相机设置
   camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-  camera.position.set(0, 2, 8); // 调整相机距离
+  camera.position.set(0, 5, 15); // 调整相机距离
 
-  // 优化光照系统
   // 主环境光
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
   threeScene.add(ambientLight);
 
   // 主平行光
-  const mainLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  const mainLight = new THREE.DirectionalLight(0xffffff, 5);
+  mainLight.castShadow = true;
   mainLight.position.set(5, 5, 5);
   threeScene.add(mainLight);
 
   // 补充光源
-  const fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
-  fillLight.position.set(-5, 3, 0);
+  const fillLight = new THREE.DirectionalLight(0xffffff, 2);
+  fillLight.castShadow = true;
+  fillLight.position.set(0, -5, 0);
   threeScene.add(fillLight);
 
   // 轨道控制器设置
