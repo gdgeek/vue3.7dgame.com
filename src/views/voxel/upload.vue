@@ -1,10 +1,6 @@
 <template>
   <div>
-    <mr-p-p-upload
-      dir="voxel"
-      :file-type="fileType"
-      @save-resource="saveVoxel"
-    >
+    <mr-p-p-upload dir="voxel" :file-type="fileType" @save-resource="saveVoxel">
       <div>{{ $t("voxel.uploadFile") }}</div>
     </mr-p-p-upload>
   </div>
@@ -17,7 +13,6 @@ import { postVoxel } from "@/api/resources/index";
 
 const fileType = ref(".vox");
 const router = useRouter();
-
 
 let completedCount = 0;
 const saveVoxel = async (
@@ -43,9 +38,9 @@ const saveVoxel = async (
 
 // 多个文件上传后跳转到最后一个文件的查看页面
 const handleAllFilesUploaded = async (lastFileId: number) => {
-    await router.push({
-      path: "/resource/voxel/view",
-      query: { id: lastFileId },
-    });
+  await router.push({
+    path: "/resource/voxel/view",
+    query: { id: lastFileId },
+  });
 };
 </script>

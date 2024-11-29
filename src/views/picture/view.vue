@@ -96,6 +96,7 @@ const tableData = computed(() => {
       {
         item: t("picture.view.info.item3"),
         text: convertToLocalTime(pictureData.value.created_at),
+        // text: pictureData.value.created_at,
       },
       {
         item: t("picture.view.info.item5"),

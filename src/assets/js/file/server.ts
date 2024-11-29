@@ -22,7 +22,8 @@ type ProgressCallback = (percent: number) => void;
 
 // 生成文件 URL
 const fileUrl = (name: string, extension: string, handler: FileHandler | null = null, dir: string = ""): string => {
-  const filename = name + extension;
+  const ext = extension.startsWith('.') ? extension : `.${extension}`;
+  const filename = name + ext;
   const url = `${env.api}/${path.join('storage', handler?.bucket || '', dir, filename)}`;
   return url;
 };
