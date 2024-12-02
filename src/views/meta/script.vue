@@ -762,11 +762,166 @@ const run = async () => {
       },
     };
 
+    const helper = {
+      handler: (index: string, uuid: string) => {
+        const source = scenePlayer.value?.sources.get(uuid);
+        if (!source) {
+          console.error(`找不到UUID为 ${uuid} 的实体`);
+          return null;
+        }
+        return source.data;
+      },
+    };
+
+    // 补间动画工具类
+    const tween = {
+      to_object: (
+        fromObj: any,
+        toObj: any,
+        duration: number,
+        easing: string
+      ) => {
+        if (!fromObj || !toObj) {
+          console.error("补间动画对象无效");
+          return null;
+        }
+
+        const startPos = fromObj.position.clone();
+        const endPos = toObj.position.clone();
+
+        return {
+          type: "object",
+          fromObj,
+          startPos,
+          endPos,
+          duration,
+          easing,
+        };
+      },
+
+      to_data: (
+        obj: any,
+        transformData: any,
+        duration: number,
+        easing: string
+      ) => {
+        if (!obj) {
+          console.error("目标对象无效");
+          return null;
+        }
+
+        const startPos = obj.position.clone();
+        const endPos = transformData.position;
+
+        return {
+          type: "data",
+          obj,
+          startPos,
+          endPos,
+          startRotation: obj.rotation.clone(),
+          endRotation: transformData.rotation,
+          startScale: obj.scale.clone(),
+          endScale: transformData.scale,
+          duration,
+          easing,
+        };
+      },
+    };
+
+    // 任务执行器
+    const task = {
+      execute: async (tweenData: any) => {
+        if (!tweenData) return;
+
+        if (typeof tweenData === "function") {
+          await tweenData();
+          return;
+        }
+
+        type EasingFunction = (t: number) => number;
+        type EasingType = "LINEAR" | "BOUNCE_OUT";
+
+        const easingFunctions: Record<EasingType, EasingFunction> = {
+          LINEAR: (t: number) => t,
+          BOUNCE_OUT: (t: number) => {
+            if (t < 1 / 2.75) {
+              return 7.5625 * t * t;
+            } else if (t < 2 / 2.75) {
+              return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
+            } else if (t < 2.5 / 2.75) {
+              return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
+            } else {
+              return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
+            }
+          },
+        };
+
+        return new Promise<void>((resolve) => {
+          const startTime = Date.now();
+          const animate = () => {
+            const currentTime = Date.now();
+            const elapsed = (currentTime - startTime) / 1000;
+            const progress = Math.min(elapsed / tweenData.duration, 1);
+
+            const easing = tweenData.easing as EasingType;
+            const easeProgress = easingFunctions[easing](progress);
+
+            if (tweenData.type === "object") {
+              const newPos = tweenData.startPos
+                .clone()
+                .lerp(tweenData.endPos, easeProgress);
+              tweenData.fromObj.position.copy(newPos);
+            } else if (tweenData.type === "data") {
+              const newPos = tweenData.startPos
+                .clone()
+                .lerp(tweenData.endPos, easeProgress);
+              tweenData.obj.position.copy(newPos);
+
+              tweenData.obj.rotation.set(
+                THREE.MathUtils.lerp(
+                  tweenData.startRotation.x,
+                  tweenData.endRotation.x,
+                  easeProgress
+                ),
+                THREE.MathUtils.lerp(
+                  tweenData.startRotation.y,
+                  tweenData.endRotation.y,
+                  easeProgress
+                ),
+                THREE.MathUtils.lerp(
+                  tweenData.startRotation.z,
+                  tweenData.endRotation.z,
+                  easeProgress
+                )
+              );
+
+              const newScale = tweenData.startScale
+                .clone()
+                .lerp(tweenData.endScale, easeProgress);
+              tweenData.obj.scale.copy(newScale);
+            }
+
+            if (progress < 1) {
+              requestAnimationFrame(animate);
+            } else {
+              resolve();
+            }
+          };
+
+          animate();
+        });
+      },
+
+      sleep: (seconds: number) => {
+        return () =>
+          new Promise<void>((resolve) => setTimeout(resolve, seconds * 1000));
+      },
+    };
+
     try {
       // 添加变量和函数定义
       const wrappedCode = `
-        return async function(handlePolygen, polygen, handleSound, sound, THREE) {
-          // 添加必要的变量定义
+        return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper) {
           const meta = {};
           const index = "${meta.value?.id}";
           const Vector3 = THREE.Vector3;
@@ -776,12 +931,15 @@ const run = async () => {
             }
           };
           const transform = (position, rotation, scale) => {
-            console.log('变换:', position, rotation, scale);
+            return {
+              position: position instanceof Vector3 ? position : new Vector3(),
+              rotation: rotation instanceof Vector3 ? rotation : new Vector3(),
+              scale: scale instanceof Vector3 ? scale : new Vector3(1, 1, 1)
+            };
           };
 
           ${JavaScriptCode.value}
           
-          // 如果存在初始化函数则执行
           if (typeof meta['@init'] === 'function') {
             await meta['@init']();
           }
@@ -790,13 +948,16 @@ const run = async () => {
 
       const createFunction = new Function(wrappedCode);
       const executableFunction = createFunction();
-      // 在执行函数时传入 THREE 对象
+
       await executableFunction(
         handlePolygen,
         polygen,
         handleSound,
         sound,
-        THREE
+        THREE,
+        task,
+        tween,
+        helper
       );
     } catch (e: any) {
       console.error("执行代码出错:", e);
