@@ -763,15 +763,41 @@ const run = async () => {
     };
 
     try {
+      // 添加变量和函数定义
       const wrappedCode = `
-        return async function(handlePolygen, polygen, handleSound, sound) {
+        return async function(handlePolygen, polygen, handleSound, sound, THREE) {
+          // 添加必要的变量定义
+          const meta = {};
+          const index = "${meta.value?.id}";
+          const Vector3 = THREE.Vector3;
+          const event = {
+            trigger: (index, eventId) => {
+              console.log('触发事件:', index, eventId);
+            }
+          };
+          const transform = (position, rotation, scale) => {
+            console.log('变换:', position, rotation, scale);
+          };
+
           ${JavaScriptCode.value}
+          
+          // 如果存在初始化函数则执行
+          if (typeof meta['@init'] === 'function') {
+            await meta['@init']();
+          }
         }
       `;
 
       const createFunction = new Function(wrappedCode);
       const executableFunction = createFunction();
-      await executableFunction(handlePolygen, polygen, handleSound, sound);
+      // 在执行函数时传入 THREE 对象
+      await executableFunction(
+        handlePolygen,
+        polygen,
+        handleSound,
+        sound,
+        THREE
+      );
     } catch (e: any) {
       console.error("执行代码出错:", e);
       ElMessage({
