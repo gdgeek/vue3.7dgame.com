@@ -130,6 +130,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { convertToHttps } from "@/assets/js/helper";
 import pako from "pako";
 import ScenePlayer from "./ScenePlayer.vue";
+import jsBeautify from "js-beautify";
 
 const loader = new GLTFLoader();
 const appStore = useAppStore();
@@ -259,6 +260,31 @@ const postScript = async (message: any) => {
     type: "success",
   });
 };
+
+const formatJavaScript = (code: string) => {
+  try {
+    return jsBeautify(code, {
+      indent_size: 2,
+      indent_char: " ",
+      preserve_newlines: true,
+      max_preserve_newlines: 2,
+      space_in_empty_paren: false,
+      jslint_happy: false,
+      space_after_anon_function: true,
+      brace_style: "collapse",
+      break_chained_methods: false,
+      keep_array_indentation: false,
+      unescape_strings: false,
+      wrap_line_length: 0,
+      end_with_newline: true,
+      comma_first: false,
+    });
+  } catch (error) {
+    console.error("代码格式化失败:", error);
+    return code;
+  }
+};
+
 const handleMessage = async (e: MessageEvent) => {
   try {
     if (!e.data.action) {
@@ -283,7 +309,8 @@ const handleMessage = async (e: MessageEvent) => {
       });
     } else if (params.action === "update") {
       LuaCode.value = "local meta = {}\nlocal index = ''\n" + params.data.lua;
-      JavaScriptCode.value = params.data.js;
+      // JavaScriptCode.value = params.data.js;
+      JavaScriptCode.value = formatJavaScript(params.data.js);
       initLuaCode.set(LuaCode.value);
     }
   } catch (e: any) {

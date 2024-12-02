@@ -554,7 +554,7 @@ onMounted(async () => {
     alpha: true,
   });
   renderer.setSize(width, height);
-  renderer.setClearColor(isDark.value ? 0x242424 : 0xffffff, 1);
+  renderer.setClearColor(isDark.value ? 0x242424 : 0xeeeeee, 1);
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   scene.value.appendChild(renderer.domElement);
@@ -584,8 +584,8 @@ onMounted(async () => {
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;
   controls.screenSpacePanning = true;
-  controls.minDistance = 3;
-  controls.maxDistance = 15;
+  controls.minDistance = 1;
+  controls.maxDistance = 50;
 
   // 加载所有模型
   const metaData = JSON.parse(props.meta.data);
@@ -656,7 +656,7 @@ onMounted(async () => {
 // 监听主题变化
 watch(isDark, (newValue) => {
   if (renderer) {
-    renderer.setClearColor(newValue ? 0x242424 : 0xffffff, 1);
+    renderer.setClearColor(newValue ? 0x242424 : 0xeeeeee, 1);
   }
 });
 
