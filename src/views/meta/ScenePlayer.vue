@@ -490,24 +490,40 @@ const playAnimation = (uuid: string, animationName: string) => {
 
 // 音频播放处理
 const handleAudioPlay = (audio: HTMLAudioElement) => {
+  console.log("开始处理音频播放:", {
+    src: audio.src,
+    duration: audio.duration,
+    currentTime: audio.currentTime,
+  });
+
   return new Promise<void>((resolve) => {
     // 重置音频到开始位置
     audio.currentTime = 0;
 
     // 当音频播放结束时调用 resolve
     audio.onended = () => {
+      console.log("音频播放完成:", {
+        src: audio.src,
+        duration: audio.duration,
+      });
       resolve();
     };
 
     // 处理音频播放错误
     audio.onerror = () => {
-      console.error("音频播放出错");
+      console.error("音频播放出错:", {
+        src: audio.src,
+        error: audio.error,
+      });
       resolve();
     };
 
     // 开始播放
     audio.play().catch((error) => {
-      console.error("播放音频失败:", error);
+      console.error("播放音频失败:", {
+        src: audio.src,
+        error: error,
+      });
       resolve();
     });
   });
@@ -519,22 +535,38 @@ let isPlaying = false;
 
 // 处理音频队列
 const processAudioQueue = async () => {
+  console.log("处理音频队列:", {
+    isPlaying,
+    queueLength: audioPlaybackQueue.length,
+  });
+
   if (isPlaying || audioPlaybackQueue.length === 0) return;
 
   isPlaying = true;
 
   while (audioPlaybackQueue.length > 0) {
     const current = audioPlaybackQueue[0];
+    console.log("播放队列中的音频:", {
+      src: current.audio.src,
+      queueLength: audioPlaybackQueue.length,
+    });
+
     await handleAudioPlay(current.audio);
     current.resolve();
     audioPlaybackQueue.shift();
   }
 
   isPlaying = false;
+  console.log("音频队列处理完成");
 };
 
 // 音频播放
 const playQueuedAudio = async (audio: HTMLAudioElement) => {
+  console.log("添加音频到播放队列:", {
+    src: audio.src,
+    currentQueueLength: audioPlaybackQueue.length,
+  });
+
   return new Promise<void>((resolve) => {
     audioPlaybackQueue.push({ audio, resolve });
     processAudioQueue();

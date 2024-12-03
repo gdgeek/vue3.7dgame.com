@@ -1006,8 +1006,12 @@ const run = async () => {
             const elapsed = (currentTime - startTime) / 1000;
             const progress = Math.min(elapsed / tweenData.duration, 1);
 
-            const easing = tweenData.easing as EasingType;
-            const easeProgress = easingFunctions[easing](progress);
+            const easing = (
+              tweenData.easing || "LINEAR"
+            ).toUpperCase() as EasingType;
+            const easingFunction =
+              easingFunctions[easing] || easingFunctions.LINEAR;
+            const easeProgress = easingFunction(progress);
 
             if (tweenData.type === "object") {
               const newPos = tweenData.startPos
