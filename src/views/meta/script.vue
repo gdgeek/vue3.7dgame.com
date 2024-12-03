@@ -99,7 +99,7 @@
                             <pre>
                     <code :class="currentCodeType">{{
                       currentCode
-                      }}</code>
+                    }}</code>
                   </pre>
                           </div>
                         </div>
@@ -962,6 +962,9 @@ const run = async () => {
         if (typeof tweenData === "function") {
           await tweenData();
           return;
+        }
+        if (tweenData instanceof Promise) {
+          return await tweenData;
         }
 
         type EasingFunction = (t: number) => number;
