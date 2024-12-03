@@ -32,7 +32,26 @@
                 :label="$t('verse.view.script.edit') || 'Edit Script'"
                 name="blockly"
               >
-                <el-main style="margin: 0; padding: 0; height: 70vh">
+                <el-main
+                  style="
+                    margin: 0;
+                    padding: 0;
+                    height: 70vh;
+                    position: relative;
+                  "
+                >
+                  <el-button
+                    class="fullscreen-btn"
+                    size="small"
+                    type="primary"
+                    plain
+                    @click="toggleFullscreen"
+                  >
+                    <el-icon>
+                      <FullScreen v-if="!isFullscreen"></FullScreen>
+                      <Aim v-else></Aim>
+                    </el-icon>
+                  </el-button>
                   <iframe
                     style="margin: 0; padding: 0; height: 100%; width: 100%"
                     id="editor"
@@ -150,6 +169,25 @@ const LuaCode = ref("");
 const JavaScriptCode = ref("");
 const settingsStore = useSettingsStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
+
+// 添加全屏相关状态和方法
+const isFullscreen = ref(false);
+const editorContainer = ref<HTMLElement | null>(null);
+
+const toggleFullscreen = () => {
+  if (!document.fullscreenElement) {
+    // 进入全屏
+    const container = editor.value?.parentElement;
+    if (container) {
+      container.requestFullscreen();
+      isFullscreen.value = true;
+    }
+  } else {
+    // 退出全屏
+    document.exitFullscreen();
+    isFullscreen.value = false;
+  }
+};
 
 // 定义单次赋值
 const defineSingleAssignment = (initialValue: any) => {
@@ -558,6 +596,9 @@ const getResource = (meta: metaInfo) => {
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
   window.removeEventListener("beforeunload", handleBeforeUnload);
+  document.removeEventListener("fullscreenchange", () => {
+    isFullscreen.value = !!document.fullscreenElement;
+  });
 });
 onMounted(async () => {
   window.addEventListener("message", handleMessage);
@@ -839,10 +880,22 @@ const run = async () => {
         }
 
         type EasingFunction = (t: number) => number;
-        type EasingType = "LINEAR" | "BOUNCE_OUT";
+        type EasingType =
+          | "LINEAR"
+          | "EASE_IN"
+          | "EASE_OUT"
+          | "EASE_IN_OUT"
+          | "BOUNCE_IN"
+          | "BOUNCE_OUT"
+          | "BOUNCE_IN_OUT";
 
         const easingFunctions: Record<EasingType, EasingFunction> = {
           LINEAR: (t: number) => t,
+          EASE_IN: (t: number) => t * t,
+          EASE_OUT: (t: number) => 1 - Math.pow(1 - t, 2),
+          EASE_IN_OUT: (t: number) =>
+            t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
+          BOUNCE_IN: (t: number) => 1 - easingFunctions.BOUNCE_OUT(1 - t),
           BOUNCE_OUT: (t: number) => {
             if (t < 1 / 2.75) {
               return 7.5625 * t * t;
@@ -853,6 +906,11 @@ const run = async () => {
             } else {
               return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
             }
+          },
+          BOUNCE_IN_OUT: (t: number) => {
+            return t < 0.5
+              ? (1 - easingFunctions.BOUNCE_OUT(1 - 2 * t)) / 2
+              : (1 + easingFunctions.BOUNCE_OUT(2 * t - 1)) / 2;
           },
         };
 
@@ -992,5 +1050,22 @@ const run = async () => {
 
 .light-theme .hljs {
   background-color: #fafafa !important;
+}
+
+.fullscreen-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 100;
+}
+
+/* 全屏时的样式 */
+:fullscreen .el-main {
+  height: 100vh !important;
+  padding: 0;
+}
+
+:fullscreen iframe {
+  height: 100vh !important;
 }
 </style>
