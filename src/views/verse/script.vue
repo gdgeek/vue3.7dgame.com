@@ -33,7 +33,79 @@
                 :label="$t('verse.view.script.edit') || 'Edit'"
                 name="blockly"
               >
-                <el-main style="margin: 0; padding: 0; height: 70vh">
+                <el-main
+                  style="
+                    margin: 0;
+                    padding: 0;
+                    height: 70vh;
+                    position: relative;
+                  "
+                >
+                  <div class="fullscreen-controls">
+                    <el-button-group>
+                      <el-button
+                        class="fullscreen-btn"
+                        size="small"
+                        type="primary"
+                        plain
+                        @click="toggleFullscreen"
+                      >
+                        <el-icon>
+                          <FullScreen v-if="!isFullscreen"></FullScreen>
+                          <Aim v-else></Aim>
+                        </el-icon>
+                      </el-button>
+                      <template v-if="isFullscreen">
+                        <el-button
+                          size="small"
+                          type="primary"
+                          @click="showFullscreenCode('lua')"
+                        >
+                          Lua
+                        </el-button>
+                        <el-button
+                          size="small"
+                          color="#F7DF1E"
+                          style="margin-right: 50px"
+                          @click="showFullscreenCode('javascript')"
+                        >
+                          JavaScript
+                        </el-button>
+                      </template>
+                    </el-button-group>
+                  </div>
+
+                  <el-dialog
+                    v-model="showCodeDialog"
+                    :title="codeDialogTitle"
+                    fullscreen
+                    :show-close="true"
+                    :close-on-click-modal="false"
+                    :close-on-press-escape="true"
+                  >
+                    <div class="code-dialog-content">
+                      <el-card :class="isDark ? 'dark-theme' : 'light-theme'">
+                        <div v-highlight>
+                          <div class="code-container2">
+                            <el-button
+                              class="copy-button2"
+                              text
+                              @click="copyCode(currentCode)"
+                            >
+                              <el-icon class="icon">
+                                <CopyDocument></CopyDocument>
+                              </el-icon>
+                              {{ $t("copy.title") || "Copy" }}
+                            </el-button>
+                            <pre>
+                              <code :class="currentCodeType">{{ currentCode }}</code>
+                            </pre>
+                          </div>
+                        </div>
+                      </el-card>
+                    </div>
+                  </el-dialog>
+
                   <iframe
                     style="margin: 0; padding: 0; height: 100%; width: 100%"
                     id="editor"
@@ -121,6 +193,7 @@ import { useSettingsStore } from "@/store/modules/settings";
 import { useI18n } from "vue-i18n";
 import { ElMessageBox, ElMessage } from "element-plus";
 import pako from "pako";
+import jsBeautify from "js-beautify";
 
 // 初始化状态和变量
 const appStore = useAppStore();
@@ -269,6 +342,31 @@ const postScript = async (message: any) => {
   });
 };
 
+// 格式化JavaScript代码
+const formatJavaScript = (code: string) => {
+  try {
+    return jsBeautify(code, {
+      indent_size: 2,
+      indent_char: " ",
+      preserve_newlines: true,
+      max_preserve_newlines: 2,
+      space_in_empty_paren: false,
+      jslint_happy: false,
+      space_after_anon_function: true,
+      brace_style: "collapse",
+      break_chained_methods: false,
+      keep_array_indentation: false,
+      unescape_strings: false,
+      wrap_line_length: 0,
+      end_with_newline: true,
+      comma_first: false,
+    });
+  } catch (error) {
+    console.error("代码格式化失败:", error);
+    return code;
+  }
+};
+
 const handleMessage = async (e: MessageEvent) => {
   try {
     if (!e.data.action) {
@@ -294,7 +392,7 @@ const handleMessage = async (e: MessageEvent) => {
       });
     } else if (params.action === "update") {
       LuaCode.value = "local verse = {}\nlocal index = ''\n" + params.data.lua;
-      JavaScriptCode.value = params.data.js;
+      JavaScriptCode.value = formatJavaScript(params.data.js); // 使用格式化函数
       initLuaCode.set(LuaCode.value);
     }
   } catch (error) {
@@ -445,6 +543,14 @@ const resource = computed(() => {
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
   window.removeEventListener("beforeunload", handleBeforeUnload);
+  document.removeEventListener("keydown", (e) => {
+    if (e.key === "Escape" && showCodeDialog.value) {
+      showCodeDialog.value = false;
+    }
+  });
+  document.removeEventListener("fullscreenchange", () => {
+    isFullscreen.value = !!document.fullscreenElement;
+  });
 });
 onMounted(async () => {
   window.addEventListener("message", handleMessage);
@@ -479,7 +585,43 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && showCodeDialog.value) {
+      showCodeDialog.value = false;
+    }
+  });
+  document.addEventListener("fullscreenchange", () => {
+    isFullscreen.value = !!document.fullscreenElement;
+  });
 });
+
+const isFullscreen = ref(false);
+const showCodeDialog = ref(false);
+const currentCode = ref("");
+const currentCodeType = ref("");
+const codeDialogTitle = ref("");
+
+// 全屏切换
+const toggleFullscreen = () => {
+  if (!document.fullscreenElement) {
+    const container = editor.value?.parentElement;
+    if (container) {
+      container.requestFullscreen();
+      isFullscreen.value = true;
+    }
+  } else {
+    document.exitFullscreen();
+    isFullscreen.value = false;
+  }
+};
+
+// 全屏代码显示
+const showFullscreenCode = (type: "lua" | "javascript") => {
+  currentCodeType.value = type;
+  currentCode.value = type === "lua" ? LuaCode.value : JavaScriptCode.value;
+  codeDialogTitle.value = type === "lua" ? "Lua Code" : "JavaScript Code";
+  showCodeDialog.value = true;
+};
 </script>
 
 <style scoped>
@@ -503,6 +645,56 @@ onMounted(async () => {
 }
 
 .light-theme .hljs {
+  background-color: #fafafa !important;
+}
+
+.fullscreen-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 100;
+}
+
+/* 全屏时的样式 */
+:fullscreen .el-main {
+  height: 100vh !important;
+  padding: 0;
+}
+
+:fullscreen iframe {
+  height: 100vh !important;
+}
+
+.code-dialog-content {
+  height: 100%;
+  overflow: hidden;
+}
+
+.code-container2 {
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.copy-button2 {
+  position: absolute;
+  top: 35px;
+  right: 0;
+  z-index: 1;
+}
+
+.fullscreen-controls {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 100;
+}
+
+.dark-theme :deep(.hljs) {
+  background-color: rgb(24, 24, 24) !important;
+}
+
+.light-theme :deep(.hljs) {
   background-color: #fafafa !important;
 }
 </style>
