@@ -40,18 +40,73 @@
                     position: relative;
                   "
                 >
-                  <el-button
-                    class="fullscreen-btn"
-                    size="small"
-                    type="primary"
-                    plain
-                    @click="toggleFullscreen"
+                  <div class="fullscreen-controls">
+                    <el-button-group>
+                      <el-button
+                        class="fullscreen-btn"
+                        size="small"
+                        type="primary"
+                        plain
+                        @click="toggleFullscreen"
+                      >
+                        <el-icon>
+                          <FullScreen v-if="!isFullscreen"></FullScreen>
+                          <Aim v-else></Aim>
+                        </el-icon>
+                      </el-button>
+                      <template v-if="isFullscreen">
+                        <el-button
+                          size="small"
+                          type="primary"
+                          @click="showFullscreenCode('lua')"
+                        >
+                          Lua
+                        </el-button>
+                        <el-button
+                          size="small"
+                          color="#F7DF1E"
+                          style="margin-right: 50px"
+                          @click="showFullscreenCode('javascript')"
+                        >
+                          JavaScript
+                        </el-button>
+                      </template>
+                    </el-button-group>
+                  </div>
+
+                  <el-dialog
+                    v-model="showCodeDialog"
+                    :title="codeDialogTitle"
+                    fullscreen
+                    :show-close="true"
+                    :close-on-click-modal="false"
+                    :close-on-press-escape="true"
                   >
-                    <el-icon>
-                      <FullScreen v-if="!isFullscreen"></FullScreen>
-                      <Aim v-else></Aim>
-                    </el-icon>
-                  </el-button>
+                    <div class="code-dialog-content">
+                      <el-card :class="isDark ? 'dark-theme' : 'light-theme'">
+                        <div v-highlight>
+                          <div class="code-container2">
+                            <el-button
+                              class="copy-button2"
+                              text
+                              @click="copyCode(currentCode)"
+                            >
+                              <el-icon class="icon">
+                                <CopyDocument></CopyDocument>
+                              </el-icon>
+                              {{ $t("copy.title") || "Copy" }}
+                            </el-button>
+                            <pre>
+                    <code :class="currentCodeType">{{
+                      currentCode
+                      }}</code>
+                  </pre>
+                          </div>
+                        </div>
+                      </el-card>
+                    </div>
+                  </el-dialog>
+
                   <iframe
                     style="margin: 0; padding: 0; height: 100%; width: 100%"
                     id="editor"
@@ -188,6 +243,36 @@ const toggleFullscreen = () => {
     isFullscreen.value = false;
   }
 };
+
+const showCodeDialog = ref(false);
+const currentCode = ref("");
+const currentCodeType = ref("");
+const codeDialogTitle = ref("");
+
+// 显示全屏代码
+const showFullscreenCode = (type: "lua" | "javascript") => {
+  currentCodeType.value = type;
+  currentCode.value = type === "lua" ? LuaCode.value : JavaScriptCode.value;
+  codeDialogTitle.value = type === "lua" ? "Lua Code" : "JavaScript Code";
+  showCodeDialog.value = true;
+};
+
+// 监听 ESC 键关闭代码弹窗
+onMounted(() => {
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && showCodeDialog.value) {
+      showCodeDialog.value = false;
+    }
+  });
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("keydown", (e) => {
+    if (e.key === "Escape" && showCodeDialog.value) {
+      showCodeDialog.value = false;
+    }
+  });
+});
 
 // 定义单次赋值
 const defineSingleAssignment = (initialValue: any) => {
@@ -1067,5 +1152,38 @@ const run = async () => {
 
 :fullscreen iframe {
   height: 100vh !important;
+}
+
+.code-dialog-content {
+  height: 100%;
+  overflow: hidden; /* 确保弹窗本身不滚动 */
+}
+
+.code-container2 {
+  max-height: 80vh; /* 设置代码区域的最大高度 */
+  overflow-y: auto; /* 允许垂直滚动 */
+  position: relative;
+}
+
+.copy-button2 {
+  position: absolute;
+  top: 35px;
+  right: 0;
+  z-index: 1;
+}
+
+.fullscreen-controls {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 100;
+}
+
+.dark-theme :deep(.hljs) {
+  background-color: rgb(24, 24, 24) !important;
+}
+
+.light-theme :deep(.hljs) {
+  background-color: #fafafa !important;
 }
 </style>
