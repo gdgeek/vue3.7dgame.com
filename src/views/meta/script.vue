@@ -225,7 +225,6 @@ const JavaScriptCode = ref("");
 const settingsStore = useSettingsStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
-// 添加全屏相关状态和方法
 const isFullscreen = ref(false);
 const editorContainer = ref<HTMLElement | null>(null);
 
@@ -886,6 +885,13 @@ const run = async () => {
         }
         await scenePlayer.value?.playQueuedAudio(audio);
       },
+      playTask: async (audio: HTMLAudioElement | undefined) => {
+        if (!audio) {
+          console.error("音频资源无效");
+          return;
+        }
+        await scenePlayer.value?.playQueuedAudio(audio);
+      },
     };
 
     const helper = {
@@ -1068,10 +1074,25 @@ const run = async () => {
       },
     };
 
+    // 动画工具类
+    const animation = {
+      playTask: async (polygenInstance: any, animationName: string) => {
+        if (!polygenInstance) {
+          console.error("polygen实例为空");
+          return;
+        }
+        if (typeof polygenInstance.playAnimation !== "function") {
+          console.error("polygen实例缺少playAnimation方法");
+          return;
+        }
+        polygenInstance.playAnimation(animationName);
+      },
+    };
+
     try {
       // 添加变量和函数定义
       const wrappedCode = `
-        return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper) {
+        return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation) {
           const meta = {};
           const index = "${meta.value?.id}";
           const Vector3 = THREE.Vector3;
@@ -1107,7 +1128,8 @@ const run = async () => {
         THREE,
         task,
         tween,
-        helper
+        helper,
+        animation
       );
     } catch (e: any) {
       console.error("执行代码出错:", e);
