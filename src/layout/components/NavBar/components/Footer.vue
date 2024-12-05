@@ -26,6 +26,21 @@
             </span>
           </el-link>
         </span>
+
+        <span v-if="informationStore.privacyPolicy">
+          |
+          <el-link
+            :href="informationStore.privacyPolicy.url"
+            target="_blank"
+            :underline="false"
+          >
+            <el-icon><Briefcase></Briefcase></el-icon>
+            <span class="font-text">
+              {{ informationStore.privacyPolicy.name }}
+            </span>
+          </el-link>
+        </span>
+
         <span v-if="informationStore.version">
           |
           <el-link target="_blank" :underline="false">
@@ -88,8 +103,25 @@
         </span>
 
         <span
+          v-if="informationStore.privacyPolicy"
+          style="display: flex; align-items: center; margin-left: 9.5%"
+        >
+          <el-link
+            :href="informationStore.privacyPolicy.url"
+            target="_blank"
+            :underline="false"
+            style="display: flex; align-items: center"
+          >
+            <el-icon><Briefcase></Briefcase></el-icon>
+            <span class="font-text" style="margin-left: 5px">
+              {{ informationStore.privacyPolicy.name }}
+            </span>
+          </el-link>
+        </span>
+
+        <span
           v-if="informationStore.version"
-          style="display: flex; align-items: center; margin-left: 10%"
+          style="display: flex; align-items: center; margin-left: 9.5%"
         >
           <el-link
             target="_blank"

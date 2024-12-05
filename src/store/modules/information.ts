@@ -8,6 +8,7 @@ interface InformationState {
   description: string;
   version: string;
   beian: string;
+  privacyPolicy: { name: string; url: string };
   logo: string;
 }
 
@@ -63,8 +64,19 @@ export const useInfomationStore = defineStore("information", () => {
   const beian = computed(() => {
     if (lang.value === "zh-cn") {
       return "沪ICP备15039333号";
+    } else if (lang.value === "ja") {
+      return "沪ICP登録番号15039333号";
     } else {
       return "ICP License No.15039333";
+    }
+  });
+  const privacyPolicy = computed(() => {
+    if (lang.value === "zh-cn") {
+      return { name: "隐私政策", url: "/privacy-policy" };
+    } else if (lang.value === "ja") {
+      return { name: "プライバシーポリシー", url: "/privacy-policy" };
+    } else {
+      return { name: "Privacy Policy", url: "/privacy-policy" };
     }
   });
   const logo = ref("/media/image/logo.gif");
@@ -83,6 +95,7 @@ export const useInfomationStore = defineStore("information", () => {
     description,
     version,
     beian,
+    privacyPolicy,
     logo,
   } as unknown as InformationState;
 });

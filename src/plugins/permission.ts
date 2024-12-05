@@ -13,7 +13,14 @@ import { usePermissionStore, useUserStore } from "@/store";
 
 export function setupPermission() {
   // 白名单路由
-  const whiteList = ["/login", "/register", "/logout", "/404", "/401"];
+  const whiteList = [
+    "/login",
+    "/register",
+    "/logout",
+    "/privacy-policy",
+    "/404",
+    "/401",
+  ];
 
   router.beforeEach(async (to, from, next) => {
     NProgress.start();
