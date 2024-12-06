@@ -251,10 +251,16 @@ const policyUpdates = ref([
   margin: 0 auto;
   height: 100%;
 
+  @media screen and (max-width: 768px) {
+    padding: 10px;
+    overflow-x: hidden;
+    width: 100%;
+  }
+
   .policy-card {
     @media screen and (max-width: 768px) {
       :deep(.el-card__body) {
-        padding: 10px;
+        padding: 10px 5px;
       }
     }
 
@@ -388,18 +394,24 @@ const policyUpdates = ref([
 .cookies {
   :deep(.el-table) {
     @media screen and (max-width: 768px) {
+      width: 100% !important;
+
       .el-table__header-wrapper,
       .el-table__body-wrapper {
-        overflow-x: auto;
-      }
-
-      .el-table__body {
         width: 100%;
-        table-layout: auto;
       }
 
       .el-table-column--mini {
-        min-width: 120px;
+        min-width: auto;
+      }
+
+      .el-table__cell {
+        padding: 8px 5px;
+      }
+
+      .cell {
+        white-space: normal;
+        word-break: break-all;
       }
     }
   }
@@ -408,13 +420,27 @@ const policyUpdates = ref([
 .contact {
   :deep(.el-descriptions) {
     @media screen and (max-width: 768px) {
+      width: 100%;
+
       .el-descriptions__body {
-        padding: 8px;
+        padding: 8px 5px;
       }
 
       .el-descriptions-item__label {
-        width: 100px;
-        min-width: 100px;
+        width: auto;
+        min-width: auto;
+        padding: 8px 5px;
+      }
+
+      .el-descriptions-item__content {
+        padding: 8px 5px;
+      }
+
+      .el-tag {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
     }
   }
