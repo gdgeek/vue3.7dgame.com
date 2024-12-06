@@ -876,7 +876,7 @@ const run = async () => {
       },
     };
 
-    // 添加音频播放辅助函数
+    // 修改 sound 对象的实现
     const sound = {
       play: async (audio: HTMLAudioElement | undefined) => {
         if (!audio) {
@@ -885,12 +885,28 @@ const run = async () => {
         }
         await scenePlayer.value?.playQueuedAudio(audio);
       },
-      playTask: async (audio: HTMLAudioElement | undefined) => {
+
+      playTask: (audio: HTMLAudioElement | undefined) => {
         if (!audio) {
           console.error("音频资源无效");
           return;
         }
-        await scenePlayer.value?.playQueuedAudio(audio);
+        const taskObj = {
+          type: "audio",
+          execute: async () => {
+            await scenePlayer.value?.playQueuedAudio(audio);
+          },
+          data: audio,
+        };
+
+        // 如果是在赋值操作中，返回任务对象
+        if (new Error().stack?.includes("=")) {
+          return task;
+        }
+
+        // 直接调用时，立即执行
+        taskObj.execute();
+        return taskObj;
       },
     };
 
@@ -965,62 +981,37 @@ const run = async () => {
       circle: async (count: number, taskToRepeat: any) => {
         console.log("Executing circle task:", { count, taskToRepeat });
 
-        // 验证参数
         if (typeof count !== "number" || count < 0) {
           console.warn("循环次数必须是正数:", count);
           return;
         }
 
-        // 如果任务是 Promise，先等待它解析
+        let resolvedTask = taskToRepeat;
         if (taskToRepeat instanceof Promise) {
-          taskToRepeat = await taskToRepeat;
+          resolvedTask = await taskToRepeat;
         }
 
-        // 获取实际要执行的任务函数
-        const getExecutableTask = (task: any) => {
-          if (!task) return null;
-
-          // 如果是音频任务
-          if (task.type === "audio") {
-            return async () =>
-              await sound.play(task.data?.id || task.data?.url);
-          }
-
-          // 如果是动画任务
-          if (task.type === "animation") {
-            return async () =>
-              await animation.playTask(task.data?.id, task.data?.animationName);
-          }
-
-          // 如果任务本身就是函数
-          if (typeof task === "function") {
-            return task;
-          }
-
-          // 如果任务有 execute 方法
-          if (task.execute && typeof task.execute === "function") {
-            return task.execute;
-          }
-
-          return null;
-        };
-
-        const executableTask = getExecutableTask(taskToRepeat);
-        if (!executableTask) {
-          console.warn("无法执行的任务类型:", taskToRepeat);
-          return;
-        }
-
-        // 执行指定次数的任务
         for (let i = 0; i < count; i++) {
           console.log(`执行第 ${i + 1}/${count} 次任务`);
 
           try {
-            await executableTask();
+            if (resolvedTask) {
+              if (typeof resolvedTask === "function") {
+                await resolvedTask();
+              } else if (typeof resolvedTask.execute === "function") {
+                await resolvedTask.execute();
+              } else if (resolvedTask.type === "audio") {
+                await sound.play(resolvedTask.data);
+              } else if (resolvedTask.type === "animation") {
+                await resolvedTask.execute();
+              } else {
+                console.warn(`无法执行的任务类型:`, resolvedTask);
+                return;
+              }
+            }
 
-            // 任务间隔
             if (i < count - 1) {
-              await new Promise((resolve) => setTimeout(resolve, 100)); // 100ms 间隔
+              await new Promise((resolve) => setTimeout(resolve, 100));
             }
           } catch (error) {
             console.error(`第 ${i + 1} 次任务执行失败:`, error);
@@ -1195,7 +1186,7 @@ const run = async () => {
 
     // 动画工具类
     const animation = {
-      playTask: async (polygenInstance: any, animationName: string) => {
+      playTask: (polygenInstance: any, animationName: string) => {
         if (!polygenInstance) {
           console.error("polygen实例为空");
           return;
@@ -1204,7 +1195,26 @@ const run = async () => {
           console.error("polygen实例缺少playAnimation方法");
           return;
         }
-        polygenInstance.playAnimation(animationName);
+
+        const taskObj = {
+          type: "animation",
+          execute: async () => {
+            polygenInstance.playAnimation(animationName);
+          },
+          data: {
+            instance: polygenInstance,
+            animationName: animationName,
+          },
+        };
+
+        // 如果是在赋值操作中，返回任务对象
+        if (new Error().stack?.includes("=")) {
+          return taskObj;
+        }
+
+        // 直接调用时，立即执行
+        taskObj.execute();
+        return taskObj;
       },
     };
 
@@ -1304,12 +1314,15 @@ const run = async () => {
 
 .code-dialog-content {
   height: 100%;
-  overflow: hidden; /* 确保弹窗本身不滚动 */
+  overflow: hidden;
+  /* 确保弹窗本身不滚动 */
 }
 
 .code-container2 {
-  max-height: 80vh; /* 设置代码区域的最大高度 */
-  overflow-y: auto; /* 允许垂直滚动 */
+  max-height: 80vh;
+  /* 设置代码区域的最大高度 */
+  overflow-y: auto;
+  /* 允许垂直滚动 */
   position: relative;
 }
 
