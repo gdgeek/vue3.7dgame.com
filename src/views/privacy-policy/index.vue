@@ -252,6 +252,12 @@ const policyUpdates = ref([
   height: 100%;
 
   .policy-card {
+    @media screen and (max-width: 768px) {
+      :deep(.el-card__body) {
+        padding: 10px;
+      }
+    }
+
     .policy-content {
       padding: 20px 0;
 
@@ -343,20 +349,72 @@ const policyUpdates = ref([
     .policy-card {
       .card-header {
         h1 {
-          font-size: 24px;
+          font-size: 20px;
+        }
+
+        .header-meta {
+          flex-direction: column;
+          gap: 5px;
         }
       }
 
       .policy-content {
+        padding: 10px 0;
+
         section {
+          margin-bottom: 24px;
+          padding: 0 8px;
+
           h2 {
-            font-size: 20px;
+            font-size: 18px;
+            margin: 16px 0 12px;
           }
 
           h3 {
             font-size: 16px;
+            margin: 14px 0 10px;
+          }
+
+          p,
+          ul li {
+            font-size: 14px;
           }
         }
+      }
+    }
+  }
+}
+
+.cookies {
+  :deep(.el-table) {
+    @media screen and (max-width: 768px) {
+      .el-table__header-wrapper,
+      .el-table__body-wrapper {
+        overflow-x: auto;
+      }
+
+      .el-table__body {
+        width: 100%;
+        table-layout: auto;
+      }
+
+      .el-table-column--mini {
+        min-width: 120px;
+      }
+    }
+  }
+}
+
+.contact {
+  :deep(.el-descriptions) {
+    @media screen and (max-width: 768px) {
+      .el-descriptions__body {
+        padding: 8px;
+      }
+
+      .el-descriptions-item__label {
+        width: 100px;
+        min-width: 100px;
       }
     }
   }
