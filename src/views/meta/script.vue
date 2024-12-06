@@ -962,6 +962,125 @@ const run = async () => {
 
     // 任务执行器
     const task = {
+      circle: async (count: number, taskToRepeat: any) => {
+        console.log("Executing circle task:", { count, taskToRepeat });
+
+        // 验证参数
+        if (typeof count !== "number" || count < 0) {
+          console.warn("循环次数必须是正数:", count);
+          return;
+        }
+
+        // 如果任务是 Promise，先等待它解析
+        if (taskToRepeat instanceof Promise) {
+          taskToRepeat = await taskToRepeat;
+        }
+
+        // 获取实际要执行的任务函数
+        const getExecutableTask = (task: any) => {
+          if (!task) return null;
+
+          // 如果是音频任务
+          if (task.type === "audio") {
+            return async () =>
+              await sound.play(task.data?.id || task.data?.url);
+          }
+
+          // 如果是动画任务
+          if (task.type === "animation") {
+            return async () =>
+              await animation.playTask(task.data?.id, task.data?.animationName);
+          }
+
+          // 如果任务本身就是函数
+          if (typeof task === "function") {
+            return task;
+          }
+
+          // 如果任务有 execute 方法
+          if (task.execute && typeof task.execute === "function") {
+            return task.execute;
+          }
+
+          return null;
+        };
+
+        const executableTask = getExecutableTask(taskToRepeat);
+        if (!executableTask) {
+          console.warn("无法执行的任务类型:", taskToRepeat);
+          return;
+        }
+
+        // 执行指定次数的任务
+        for (let i = 0; i < count; i++) {
+          console.log(`执行第 ${i + 1}/${count} 次任务`);
+
+          try {
+            await executableTask();
+
+            // 任务间隔
+            if (i < count - 1) {
+              await new Promise((resolve) => setTimeout(resolve, 100)); // 100ms 间隔
+            }
+          } catch (error) {
+            console.error(`第 ${i + 1} 次任务执行失败:`, error);
+          }
+        }
+      },
+
+      array: (type: string, items: any[]) => {
+        console.log("Creating array:", { type, items });
+
+        type TaskData = {
+          type: string;
+          data: {
+            url?: string;
+            execute?: () => Promise<void>;
+          };
+        };
+
+        const processArrayItems = (items: any[]): any[] => {
+          return items.map((item) => {
+            // 如果是数组，递归处理
+            if (Array.isArray(item)) {
+              return processArrayItems(item);
+            }
+
+            // 如果是任务对象（包含 type 和 data）
+            if (item && typeof item === "object" && item.type) {
+              return item;
+            }
+
+            // 如果是音频资源 ID（通过 handleSound 返回的）
+            if (item && typeof item === "object" && item.url) {
+              return "audio"; // 或者返回 item.url
+            }
+
+            // 如果是 Promise
+            if (item instanceof Promise) {
+              return item; // 保持 Promise 不变
+            }
+
+            // 其他基本类型值直接返回
+            return item;
+          });
+        };
+
+        let result;
+        if (type === "LIST") {
+          result = processArrayItems(items);
+        } else if (type === "SET") {
+          const processed = processArrayItems(items);
+          result = Array.from(new Set(processed));
+        } else {
+          console.warn(`未知的数组类型: ${type}，默认使用 LIST 类型`);
+          result = processArrayItems(items);
+        }
+
+        console.log("Processed array result:", result);
+        return result;
+      },
+
       execute: async (tweenData: any) => {
         if (!tweenData) return;
 
