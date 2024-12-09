@@ -99,7 +99,7 @@
                             <pre>
                     <code :class="currentCodeType">{{
                       currentCode
-                    }}</code>
+                      }}</code>
                   </pre>
                           </div>
                         </div>
@@ -886,25 +886,25 @@ const run = async () => {
         await scenePlayer.value?.playQueuedAudio(audio);
       },
 
-      playTask: (audio: HTMLAudioElement | undefined) => {
+      createTask: (audio: HTMLAudioElement | undefined) => {
         if (!audio) {
           console.error("音频资源无效");
-          return;
+          return null;
         }
-        const taskObj = {
+        return {
           type: "audio",
           execute: async () => {
             await scenePlayer.value?.playQueuedAudio(audio);
           },
           data: audio,
         };
+      },
 
-        // 如果是在赋值操作中，返回任务对象
-        if (new Error().stack?.includes("=")) {
-          return task;
-        }
+      playTask: (audio: HTMLAudioElement | undefined) => {
+        const taskObj = sound.createTask(audio);
+        if (!taskObj) return null;
 
-        // 直接调用时，立即执行
+        // 立即执行
         taskObj.execute();
         return taskObj;
       },
@@ -1186,17 +1186,17 @@ const run = async () => {
 
     // 动画工具类
     const animation = {
-      playTask: (polygenInstance: any, animationName: string) => {
+      createTask: (polygenInstance: any, animationName: string) => {
         if (!polygenInstance) {
           console.error("polygen实例为空");
-          return;
+          return null;
         }
         if (typeof polygenInstance.playAnimation !== "function") {
           console.error("polygen实例缺少playAnimation方法");
-          return;
+          return null;
         }
 
-        const taskObj = {
+        return {
           type: "animation",
           execute: async () => {
             polygenInstance.playAnimation(animationName);
@@ -1206,13 +1206,13 @@ const run = async () => {
             animationName: animationName,
           },
         };
+      },
 
-        // 如果是在赋值操作中，返回任务对象
-        if (new Error().stack?.includes("=")) {
-          return taskObj;
-        }
+      playTask: (polygenInstance: any, animationName: string) => {
+        const taskObj = animation.createTask(polygenInstance, animationName);
+        if (!taskObj) return null;
 
-        // 直接调用时，立即执行
+        // 立即执行
         taskObj.execute();
         return taskObj;
       },
@@ -1315,14 +1315,11 @@ const run = async () => {
 .code-dialog-content {
   height: 100%;
   overflow: hidden;
-  /* 确保弹窗本身不滚动 */
 }
 
 .code-container2 {
   max-height: 80vh;
-  /* 设置代码区域的最大高度 */
   overflow-y: auto;
-  /* 允许垂直滚动 */
   position: relative;
 }
 

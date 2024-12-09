@@ -162,13 +162,13 @@
           <h2>6. 联系我们</h2>
           <el-descriptions :column="1" border>
             <el-descriptions-item label="邮箱地址">
-              <el-tag size="small">support@example.com</el-tag>
+              <el-tag size="small">bujiabangongzuoshi@yeah.net</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="联系电话">
-              <el-tag size="small">+86 xxx-xxxx-xxxx</el-tag>
+              <el-tag size="small">+86 150-0015-9790</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="工作时间">
-              <el-tag size="small">周一至周五 9:00-18:00</el-tag>
+              <el-tag size="small">周一至周五 10:00-18:30</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="响应时间">
               <el-tag size="small">收到请求后5个工作日内回复</el-tag>
@@ -208,7 +208,6 @@ defineOptions({
 // 用户权利展开面板
 const activeRights = ref(["1"]);
 
-// Cookie使用说明数据
 const cookieData = ref([
   {
     type: "必要Cookie",
