@@ -875,7 +875,6 @@ const run = async () => {
       },
     };
 
-    // 修改 sound 对象的实现
     const sound = {
       play: async (audio: HTMLAudioElement | undefined) => {
         if (!audio) {
@@ -933,8 +932,8 @@ const run = async () => {
           return null;
         }
 
-        const startPos = fromObj.position.clone();
-        const endPos = toObj.position.clone();
+        const startPos = fromObj.mesh.position.clone();
+        const endPos = toObj.mesh.position.clone();
 
         return {
           type: "object",
@@ -957,7 +956,7 @@ const run = async () => {
           return null;
         }
 
-        const startPos = obj.position.clone();
+        const startPos = obj.mesh.position.clone();
         const endPos = transformData.position;
 
         return {
@@ -965,9 +964,9 @@ const run = async () => {
           obj,
           startPos,
           endPos,
-          startRotation: obj.rotation.clone(),
+          startRotation: obj.mesh.rotation.clone(),
           endRotation: transformData.rotation,
-          startScale: obj.scale.clone(),
+          startScale: obj.mesh.scale.clone(),
           endScale: transformData.scale,
           duration,
           easing,
@@ -1135,14 +1134,14 @@ const run = async () => {
               const newPos = tweenData.startPos
                 .clone()
                 .lerp(tweenData.endPos, easeProgress);
-              tweenData.fromObj.position.copy(newPos);
+              tweenData.fromObj.mesh.position.copy(newPos);
             } else if (tweenData.type === "data") {
               const newPos = tweenData.startPos
                 .clone()
                 .lerp(tweenData.endPos, easeProgress);
-              tweenData.obj.position.copy(newPos);
+              tweenData.obj.mesh.position.copy(newPos);
 
-              tweenData.obj.rotation.set(
+              tweenData.obj.mesh.rotation.set(
                 THREE.MathUtils.lerp(
                   tweenData.startRotation.x,
                   tweenData.endRotation.x,
@@ -1163,7 +1162,7 @@ const run = async () => {
               const newScale = tweenData.startScale
                 .clone()
                 .lerp(tweenData.endScale, easeProgress);
-              tweenData.obj.scale.copy(newScale);
+              tweenData.obj.mesh.scale.copy(newScale);
             }
 
             if (progress < 1) {
@@ -1227,9 +1226,19 @@ const run = async () => {
       },
     };
 
+    const point = {
+      setVisual: (object: any, setVisual: boolean) => {
+        if (object && typeof object.setVisibility === "function") {
+          object.setVisibility(setVisual);
+        } else {
+          console.warn("object.setVisibility is not a function");
+        }
+      },
+    };
+
     try {
       const wrappedCode = `
-        return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, text) {
+        return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, text, point) {
           const meta = {};
           const index = "${meta.value?.id}";
           const Vector3 = THREE.Vector3;
@@ -1267,7 +1276,8 @@ const run = async () => {
         tween,
         helper,
         animation,
-        text
+        text,
+        point
       );
     } catch (e: any) {
       console.error("执行代码出错:", e);

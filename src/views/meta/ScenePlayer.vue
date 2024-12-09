@@ -138,6 +138,11 @@ const loadModel = async (resource: any, parameters: any) => {
                   handleVideoClick
                 );
               },
+              setVisibility: (isVisible: boolean) => {
+                mesh.visible =
+                  isVisible &&
+                  (parameters.active !== undefined ? parameters.active : true);
+              },
             },
           });
 
@@ -228,13 +233,20 @@ const loadModel = async (resource: any, parameters: any) => {
             );
           }
 
-          // 确保图��始终清晰可见
+          // 确保图片始终清晰可见
           mesh.renderOrder = 1;
 
           const uuid = parameters.uuid.toString();
           sources.set(uuid, {
             type: "picture",
-            data: mesh,
+            data: {
+              mesh,
+              setVisibility: (isVisible: boolean) => {
+                mesh.visible =
+                  isVisible &&
+                  (parameters.active !== undefined ? parameters.active : true);
+              },
+            },
           });
 
           threeScene.add(mesh);
@@ -340,6 +352,11 @@ const loadModel = async (resource: any, parameters: any) => {
               context.fillText(newText, canvas.width / 2, canvas.height / 2);
               texture.needsUpdate = true;
             },
+            setVisibility: (isVisible: boolean) => {
+              mesh.visible =
+                isVisible &&
+                (parameters.active !== undefined ? parameters.active : true);
+            },
           },
         });
 
@@ -352,7 +369,8 @@ const loadModel = async (resource: any, parameters: any) => {
     });
   }
 
-  if (resource.type === "voxel") {
+  // 处理体素
+  if (resource.type === "voxel" || parameters.type === "Voxel") {
     const loader = new VOXLoader();
     const url = convertToHttps(resource.file.url);
 
@@ -399,15 +417,22 @@ const loadModel = async (resource: any, parameters: any) => {
             voxMesh.castShadow = true;
             voxMesh.receiveShadow = true;
 
-            // 保存到模型Map中
             const uuid = parameters.uuid.toString();
             sources.set(uuid, {
               type: "model",
-              data: voxMesh,
+              data: {
+                mesh: voxMesh,
+                setVisibility: (isVisible: boolean) => {
+                  voxMesh.visible =
+                    isVisible &&
+                    (parameters.active !== undefined
+                      ? parameters.active
+                      : true);
+                },
+              },
             });
             voxMesh.uuid = uuid;
 
-            // 添加到场景
             threeScene.add(voxMesh);
 
             console.log("VOX模型加载完成:", {
@@ -478,7 +503,14 @@ const loadModel = async (resource: any, parameters: any) => {
           const uuid = parameters.uuid.toString();
           sources.set(uuid, {
             type: "model",
-            data: model,
+            data: {
+              mesh: model,
+              setVisibility: (isVisible: boolean) => {
+                model.visible =
+                  isVisible &&
+                  (parameters.active !== undefined ? parameters.active : true);
+              },
+            },
           });
 
           threeScene.add(model);
@@ -516,7 +548,7 @@ const playAnimation = (uuid: string, animationName: string) => {
     return;
   }
 
-  const model = source.data as THREE.Object3D;
+  const model = source.data.mesh as THREE.Object3D;
   const mixer = mixers.get(uuid);
 
   if (!model) {
