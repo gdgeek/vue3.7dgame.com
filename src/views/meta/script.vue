@@ -830,7 +830,6 @@ const handleSound = (uuid: string): HTMLAudioElement | undefined => {
 const run = async () => {
   disabled.value = true;
 
-  // 等待场景加载完成
   await nextTick();
 
   // 添加延迟等待所有模型加载完成
@@ -1218,10 +1217,19 @@ const run = async () => {
       },
     };
 
+    const text = {
+      setText: (object: any, setText: string) => {
+        if (object && typeof object.setText === "function") {
+          object.setText(setText);
+        } else {
+          console.warn("object.setText is not a function");
+        }
+      },
+    };
+
     try {
-      // 添加变量和函数定义
       const wrappedCode = `
-        return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation) {
+        return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, text) {
           const meta = {};
           const index = "${meta.value?.id}";
           const Vector3 = THREE.Vector3;
@@ -1258,7 +1266,8 @@ const run = async () => {
         task,
         tween,
         helper,
-        animation
+        animation,
+        text
       );
     } catch (e: any) {
       console.error("执行代码出错:", e);

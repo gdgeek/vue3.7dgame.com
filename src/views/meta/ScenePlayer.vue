@@ -228,7 +228,7 @@ const loadModel = async (resource: any, parameters: any) => {
             );
           }
 
-          // 确保图片始终清晰可见
+          // 确保图��始终清晰可见
           mesh.renderOrder = 1;
 
           const uuid = parameters.uuid.toString();
@@ -267,20 +267,89 @@ const loadModel = async (resource: any, parameters: any) => {
   }
 
   // 处理文本类型
-  if (parameters.type === "Text") {
-    try {
-      const textResource = {
-        type: "text",
-        content: parameters.text || "默认文本",
-        id: parameters.uuid || crypto.randomUUID(),
-      };
+  if (resource.type === "text" || parameters.type === "Text") {
+    return new Promise((resolve, reject) => {
+      try {
+        // 创建文本几何体
+        const text = parameters.text || resource.content || "默认文本";
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
 
-      await loadModel(textResource, parameters);
-      return;
-    } catch (error) {
-      console.error("处理文本实体失败:", error);
-      return;
-    }
+        if (!context) {
+          throw new Error("无法创建 2D 上下文");
+        }
+
+        // 设置画布大小和文本样式
+        canvas.width = 512;
+        canvas.height = 128;
+        context.fillStyle = parameters.color || "#000000";
+        context.font = `${parameters.fontSize || 48}px Arial`;
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+
+        // 绘制文本
+        context.fillText(text, canvas.width / 2, canvas.height / 2);
+
+        // 创建纹理
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.needsUpdate = true;
+
+        // 创建材质和平面
+        const geometry = new THREE.PlaneGeometry(1, 0.25);
+        const material = new THREE.MeshBasicMaterial({
+          map: texture,
+          transparent: true,
+          side: THREE.DoubleSide,
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+
+        // 应用变换
+        if (parameters?.transform) {
+          mesh.position.set(
+            parameters.transform.position.x,
+            parameters.transform.position.y,
+            parameters.transform.position.z
+          );
+
+          mesh.rotation.set(
+            THREE.MathUtils.degToRad(parameters.transform.rotate.x),
+            THREE.MathUtils.degToRad(parameters.transform.rotate.y),
+            THREE.MathUtils.degToRad(parameters.transform.rotate.z)
+          );
+
+          mesh.scale.set(
+            parameters.transform.scale.x,
+            parameters.transform.scale.y,
+            parameters.transform.scale.z
+          );
+        }
+
+        // 保存到sources中，包含setText方法
+        const uuid = parameters.uuid.toString();
+        sources.set(uuid, {
+          type: "text",
+          data: {
+            mesh,
+            setText: (newText: string) => {
+              context.clearRect(0, 0, canvas.width, canvas.height);
+              context.fillStyle = parameters.color || "#000000";
+              context.font = `${parameters.fontSize || 48}px Arial`;
+              context.textAlign = "center";
+              context.textBaseline = "middle";
+              context.fillText(newText, canvas.width / 2, canvas.height / 2);
+              texture.needsUpdate = true;
+            },
+          },
+        });
+
+        threeScene.add(mesh);
+        resolve(mesh);
+      } catch (error) {
+        console.error("创建文本实体失败:", error);
+        reject(error);
+      }
+    });
   }
 
   if (resource.type === "voxel") {
