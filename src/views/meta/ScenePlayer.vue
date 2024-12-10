@@ -24,6 +24,9 @@ const settingsStore = useSettingsStore();
 const props = defineProps<{
   meta: any;
 }>();
+const emit = defineEmits<{
+  (event: "collision", triggerUuid: string): void;
+}>();
 
 const scene = ref<HTMLDivElement | null>(null);
 const threeScene = new THREE.Scene();
@@ -35,16 +38,16 @@ let clock = new THREE.Clock();
 
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
-const loadModel = async (resource: any, parameters: any) => {
+const loadModel = async (resource: any, entity: any) => {
   console.log("加载资源参数:", {
     resource,
-    parameters,
+    entity,
     resourceId: resource.id,
-    parametersUUID: parameters?.uuid,
+    parametersUUID: entity.parameters?.uuid,
   });
 
   // 处理视频类型
-  if (resource.type === "video" || parameters.type === "Video") {
+  if (resource.type === "video" || entity.type === "Video") {
     return new Promise((resolve, reject) => {
       try {
         const video = document.createElement("video");
@@ -52,10 +55,10 @@ const loadModel = async (resource: any, parameters: any) => {
         video.crossOrigin = "anonymous";
 
         // 设置视频属性
-        video.loop = parameters.loop || false;
-        video.muted = parameters.muted || false; // 是否静音
+        video.loop = entity.parameters.loop || false;
+        video.muted = entity.parameters.muted || false; // 是否静音
         video.playsInline = true;
-        video.volume = parameters.volume || 1.0;
+        video.volume = entity.parameters.volume || 1.0;
 
         const texture = new THREE.VideoTexture(video);
         texture.minFilter = THREE.LinearFilter;
@@ -64,7 +67,7 @@ const loadModel = async (resource: any, parameters: any) => {
 
         video.addEventListener("loadedmetadata", () => {
           const aspectRatio = video.videoWidth / video.videoHeight;
-          const width = parameters.width || 1;
+          const width = entity.parameters.width || 1;
 
           const geometry = new THREE.PlaneGeometry(1, 1);
           const material = new THREE.MeshBasicMaterial({
@@ -76,24 +79,26 @@ const loadModel = async (resource: any, parameters: any) => {
           const mesh = new THREE.Mesh(geometry, material);
 
           // 应用变换
-          if (parameters?.transform) {
+          if (entity.parameters?.transform) {
             mesh.position.set(
-              parameters.transform.position.x,
-              parameters.transform.position.y,
-              parameters.transform.position.z
+              entity.parameters.transform.position.x,
+              entity.parameters.transform.position.y,
+              entity.parameters.transform.position.z
             );
 
             mesh.rotation.set(
-              THREE.MathUtils.degToRad(parameters.transform.rotate.x),
-              THREE.MathUtils.degToRad(parameters.transform.rotate.y),
-              THREE.MathUtils.degToRad(parameters.transform.rotate.z)
+              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
+              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
+              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
             );
 
             const baseScale = width;
             mesh.scale.set(
-              parameters.transform.scale.x * baseScale,
-              parameters.transform.scale.y * baseScale * (1 / aspectRatio),
-              parameters.transform.scale.z * baseScale
+              entity.parameters.transform.scale.x * baseScale,
+              entity.parameters.transform.scale.y *
+                baseScale *
+                (1 / aspectRatio),
+              entity.parameters.transform.scale.z * baseScale
             );
           }
 
@@ -125,7 +130,7 @@ const loadModel = async (resource: any, parameters: any) => {
 
           renderer!.domElement.addEventListener("click", handleVideoClick);
 
-          const uuid = parameters.uuid.toString();
+          const uuid = entity.parameters.uuid.toString();
           sources.set(uuid, {
             type: "video",
             data: {
@@ -141,7 +146,9 @@ const loadModel = async (resource: any, parameters: any) => {
               setVisibility: (isVisible: boolean) => {
                 mesh.visible =
                   isVisible &&
-                  (parameters.active !== undefined ? parameters.active : true);
+                  (entity.parameters.active !== undefined
+                    ? entity.parameters.active
+                    : true);
               },
             },
           });
@@ -149,7 +156,7 @@ const loadModel = async (resource: any, parameters: any) => {
           threeScene.add(mesh);
 
           // 如果设置了自动播放
-          if (parameters.play) {
+          if (entity.parameters.play) {
             // 添加用户交互检测
             const handleFirstInteraction = () => {
               video.play().catch((error) => {
@@ -181,7 +188,7 @@ const loadModel = async (resource: any, parameters: any) => {
   }
 
   // 处理图片类型
-  if (resource.type === "picture" || parameters.type === "Picture") {
+  if (resource.type === "picture" || entity.type === "Picture") {
     return new Promise((resolve, reject) => {
       const textureLoader = new THREE.TextureLoader();
       const url = convertToHttps(resource.file.url);
@@ -196,7 +203,7 @@ const loadModel = async (resource: any, parameters: any) => {
           texture.anisotropy = renderer!.capabilities.getMaxAnisotropy();
 
           const aspectRatio = texture.image.width / texture.image.height;
-          const width = parameters.width || 1;
+          const width = entity.parameters.width || 1;
           const height = width / aspectRatio;
 
           const geometry = new THREE.PlaneGeometry(1, 1);
@@ -212,31 +219,33 @@ const loadModel = async (resource: any, parameters: any) => {
           const mesh = new THREE.Mesh(geometry, material);
 
           // 应用变换
-          if (parameters?.transform) {
+          if (entity.parameters?.transform) {
             mesh.position.set(
-              parameters.transform.position.x,
-              parameters.transform.position.y,
-              parameters.transform.position.z
+              entity.parameters.transform.position.x,
+              entity.parameters.transform.position.y,
+              entity.parameters.transform.position.z
             );
 
             mesh.rotation.set(
-              THREE.MathUtils.degToRad(parameters.transform.rotate.x),
-              THREE.MathUtils.degToRad(parameters.transform.rotate.y),
-              THREE.MathUtils.degToRad(parameters.transform.rotate.z)
+              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
+              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
+              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
             );
 
             const baseScale = width;
             mesh.scale.set(
-              parameters.transform.scale.x * baseScale,
-              parameters.transform.scale.y * baseScale * (1 / aspectRatio),
-              parameters.transform.scale.z * baseScale
+              entity.parameters.transform.scale.x * baseScale,
+              entity.parameters.transform.scale.y *
+                baseScale *
+                (1 / aspectRatio),
+              entity.parameters.transform.scale.z * baseScale
             );
           }
 
           // 确保图片始终清晰可见
           mesh.renderOrder = 1;
 
-          const uuid = parameters.uuid.toString();
+          const uuid = entity.parameters.uuid.toString();
           sources.set(uuid, {
             type: "picture",
             data: {
@@ -244,7 +253,9 @@ const loadModel = async (resource: any, parameters: any) => {
               setVisibility: (isVisible: boolean) => {
                 mesh.visible =
                   isVisible &&
-                  (parameters.active !== undefined ? parameters.active : true);
+                  (entity.parameters.active !== undefined
+                    ? entity.parameters.active
+                    : true);
               },
             },
           });
@@ -259,9 +270,9 @@ const loadModel = async (resource: any, parameters: any) => {
   }
 
   // 处理音频类型
-  if (resource.type === "audio") {
+  if (resource.type === "audio" || entity.type === "Sound") {
     return new Promise((resolve) => {
-      const uuid = parameters.uuid.toString();
+      const uuid = entity.parameters.uuid.toString();
       const audioUrl = convertToHttps(resource.file.url);
 
       sources.set(uuid, {
@@ -279,11 +290,11 @@ const loadModel = async (resource: any, parameters: any) => {
   }
 
   // 处理文本类型
-  if (resource.type === "text" || parameters.type === "Text") {
+  if (resource.type === "text" || entity.type === "Text") {
     return new Promise((resolve, reject) => {
       try {
         // 创建文本几何体
-        const text = parameters.text || resource.content || "默认文本";
+        const text = entity.parameters.text || resource.content || "默认文本";
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d");
 
@@ -294,8 +305,8 @@ const loadModel = async (resource: any, parameters: any) => {
         // 设置画布大小和文本样式
         canvas.width = 512;
         canvas.height = 128;
-        context.fillStyle = parameters.color || "#000000";
-        context.font = `${parameters.fontSize || 48}px Arial`;
+        context.fillStyle = entity.parameters.color || "#000000";
+        context.font = `${entity.parameters.fontSize || 48}px Arial`;
         context.textAlign = "center";
         context.textBaseline = "middle";
 
@@ -317,36 +328,36 @@ const loadModel = async (resource: any, parameters: any) => {
         const mesh = new THREE.Mesh(geometry, material);
 
         // 应用变换
-        if (parameters?.transform) {
+        if (entity.parameters?.transform) {
           mesh.position.set(
-            parameters.transform.position.x,
-            parameters.transform.position.y,
-            parameters.transform.position.z
+            entity.parameters.transform.position.x,
+            entity.parameters.transform.position.y,
+            entity.parameters.transform.position.z
           );
 
           mesh.rotation.set(
-            THREE.MathUtils.degToRad(parameters.transform.rotate.x),
-            THREE.MathUtils.degToRad(parameters.transform.rotate.y),
-            THREE.MathUtils.degToRad(parameters.transform.rotate.z)
+            THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
+            THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
+            THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
           );
 
           mesh.scale.set(
-            parameters.transform.scale.x,
-            parameters.transform.scale.y,
-            parameters.transform.scale.z
+            entity.parameters.transform.scale.x,
+            entity.parameters.transform.scale.y,
+            entity.parameters.transform.scale.z
           );
         }
 
         // 保存到sources中，包含setText方法
-        const uuid = parameters.uuid.toString();
+        const uuid = entity.parameters.uuid.toString();
         sources.set(uuid, {
           type: "text",
           data: {
             mesh,
             setText: (newText: string) => {
               context.clearRect(0, 0, canvas.width, canvas.height);
-              context.fillStyle = parameters.color || "#000000";
-              context.font = `${parameters.fontSize || 48}px Arial`;
+              context.fillStyle = entity.parameters.color || "#000000";
+              context.font = `${entity.parameters.fontSize || 48}px Arial`;
               context.textAlign = "center";
               context.textBaseline = "middle";
               context.fillText(newText, canvas.width / 2, canvas.height / 2);
@@ -355,7 +366,9 @@ const loadModel = async (resource: any, parameters: any) => {
             setVisibility: (isVisible: boolean) => {
               mesh.visible =
                 isVisible &&
-                (parameters.active !== undefined ? parameters.active : true);
+                (entity.parameters.active !== undefined
+                  ? entity.parameters.active
+                  : true);
             },
           },
         });
@@ -370,7 +383,7 @@ const loadModel = async (resource: any, parameters: any) => {
   }
 
   // 处理体素
-  if (resource.type === "voxel" || parameters.type === "Voxel") {
+  if (resource.type === "voxel" || entity.type === "Voxel") {
     const loader = new VOXLoader();
     const url = convertToHttps(resource.file.url);
 
@@ -393,23 +406,23 @@ const loadModel = async (resource: any, parameters: any) => {
             const voxMesh = new VOXMesh(chunk, 1);
 
             // 应用变换
-            if (parameters?.transform) {
+            if (entity.parameters?.transform) {
               voxMesh.position.set(
-                parameters.transform.position.x,
-                parameters.transform.position.y,
-                parameters.transform.position.z
+                entity.parameters.transform.position.x,
+                entity.parameters.transform.position.y,
+                entity.parameters.transform.position.z
               );
 
               voxMesh.rotation.set(
-                THREE.MathUtils.degToRad(parameters.transform.rotate.x),
-                THREE.MathUtils.degToRad(parameters.transform.rotate.y),
-                THREE.MathUtils.degToRad(parameters.transform.rotate.z)
+                THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
+                THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
+                THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
               );
 
               voxMesh.scale.set(
-                parameters.transform.scale.x,
-                parameters.transform.scale.y,
-                parameters.transform.scale.z
+                entity.parameters.transform.scale.x,
+                entity.parameters.transform.scale.y,
+                entity.parameters.transform.scale.z
               );
             }
 
@@ -417,7 +430,7 @@ const loadModel = async (resource: any, parameters: any) => {
             voxMesh.castShadow = true;
             voxMesh.receiveShadow = true;
 
-            const uuid = parameters.uuid.toString();
+            const uuid = entity.parameters.uuid.toString();
             sources.set(uuid, {
               type: "model",
               data: {
@@ -425,8 +438,8 @@ const loadModel = async (resource: any, parameters: any) => {
                 setVisibility: (isVisible: boolean) => {
                   voxMesh.visible =
                     isVisible &&
-                    (parameters.active !== undefined
-                      ? parameters.active
+                    (entity.parameters.active !== undefined
+                      ? entity.parameters.active
                       : true);
                 },
               },
@@ -467,40 +480,40 @@ const loadModel = async (resource: any, parameters: any) => {
         (gltf) => {
           const model = gltf.scene;
 
-          if (!parameters || !parameters.uuid) {
-            console.error("parameters对象无效:", parameters);
-            return reject(new Error("Invalid parameters object"));
+          if (!entity.parameters || !entity.parameters.uuid) {
+            console.error("entity.parameters对象无效:", entity.parameters);
+            return reject(new Error("Invalid entity.parameters object"));
           }
 
-          if (parameters?.transform) {
+          if (entity.parameters?.transform) {
             model.position.set(
-              parameters.transform.position.x,
-              parameters.transform.position.y,
-              parameters.transform.position.z
+              entity.parameters.transform.position.x,
+              entity.parameters.transform.position.y,
+              entity.parameters.transform.position.z
             );
             model.rotation.set(
-              parameters.transform.rotate.x,
-              parameters.transform.rotate.y,
-              parameters.transform.rotate.z
+              entity.parameters.transform.rotate.x,
+              entity.parameters.transform.rotate.y,
+              entity.parameters.transform.rotate.z
             );
             model.scale.set(
-              parameters.transform.scale.x,
-              parameters.transform.scale.y,
-              parameters.transform.scale.z
+              entity.parameters.transform.scale.x,
+              entity.parameters.transform.scale.y,
+              entity.parameters.transform.scale.z
             );
           }
 
           if (gltf.animations && gltf.animations.length > 0) {
             const mixer = new THREE.AnimationMixer(model);
-            mixers.set(parameters.uuid, mixer);
+            mixers.set(entity.parameters.uuid, mixer);
             model.userData.animations = gltf.animations;
-            console.log(`模型 ${parameters.uuid} 动画加载完成:`, {
+            console.log(`模型 ${entity.parameters.uuid} 动画加载完成:`, {
               animations: gltf.animations,
               animationNames: gltf.animations.map((a) => a.name),
             });
           }
 
-          const uuid = parameters.uuid.toString();
+          const uuid = entity.parameters.uuid.toString();
           sources.set(uuid, {
             type: "model",
             data: {
@@ -508,7 +521,9 @@ const loadModel = async (resource: any, parameters: any) => {
               setVisibility: (isVisible: boolean) => {
                 model.visible =
                   isVisible &&
-                  (parameters.active !== undefined ? parameters.active : true);
+                  (entity.parameters.active !== undefined
+                    ? entity.parameters.active
+                    : true);
               },
             },
           });
@@ -738,7 +753,7 @@ onMounted(async () => {
             id: entity.parameters.uuid || crypto.randomUUID(),
           };
 
-          await loadModel(textResource, entity.parameters);
+          await loadModel(textResource, entity);
           continue; // 跳过后续处理
         } catch (error) {
           console.error("处理文本实体失败:", error);
@@ -758,7 +773,7 @@ onMounted(async () => {
 
       if (resource) {
         try {
-          await loadModel(resource, entity.parameters);
+          await loadModel(resource, entity);
         } catch (error) {
           console.error(
             `加载模型失败 (resource ${entity.parameters.resource}):`,
