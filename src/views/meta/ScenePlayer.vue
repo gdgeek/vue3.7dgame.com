@@ -1,10 +1,6 @@
 <template>
   <div>
-    <div
-      id="scene"
-      ref="scene"
-      style="height: 600px; width: 100%; margin: 0 auto"
-    ></div>
+    <div id="scene" ref="scene" style="height: 600px; width: 100%; margin: 0 auto"></div>
   </div>
 </template>
 
@@ -23,9 +19,6 @@ const settingsStore = useSettingsStore();
 
 const props = defineProps<{
   meta: any;
-}>();
-const emit = defineEmits<{
-  (event: "collision", triggerUuid: string): void;
 }>();
 
 const scene = ref<HTMLDivElement | null>(null);
@@ -102,8 +95,8 @@ const loadModel = async (resource: any, entity: any) => {
             mesh.scale.set(
               entity.parameters.transform.scale.x * baseScale,
               entity.parameters.transform.scale.y *
-                baseScale *
-                (1 / aspectRatio),
+              baseScale *
+              (1 / aspectRatio),
               entity.parameters.transform.scale.z * baseScale
             );
           }
@@ -179,23 +172,6 @@ const loadModel = async (resource: any, entity: any) => {
             document.addEventListener("touchstart", handleFirstInteraction);
           }
 
-          // 存储trigger信息
-          if (entity.children?.components) {
-            const triggerComponent = entity.children.components.find(
-              (comp: any) => comp.type === "Trigger"
-            );
-
-            if (triggerComponent) {
-              mesh.userData.trigger = {
-                uuid: triggerComponent.parameters.uuid,
-                targetUuid: triggerComponent.parameters.target,
-              };
-            }
-          }
-
-          // 添加到碰撞检测列表
-          collidableMeshes.push(mesh);
-
           resolve(mesh);
         });
 
@@ -259,8 +235,8 @@ const loadModel = async (resource: any, entity: any) => {
             mesh.scale.set(
               entity.parameters.transform.scale.x * baseScale,
               entity.parameters.transform.scale.y *
-                baseScale *
-                (1 / aspectRatio),
+              baseScale *
+              (1 / aspectRatio),
               entity.parameters.transform.scale.z * baseScale
             );
           }
@@ -284,23 +260,6 @@ const loadModel = async (resource: any, entity: any) => {
           });
 
           threeScene.add(mesh);
-
-          // 存储trigger信息
-          if (entity.children?.components) {
-            const triggerComponent = entity.children.components.find(
-              (comp: any) => comp.type === "Trigger"
-            );
-
-            if (triggerComponent) {
-              mesh.userData.trigger = {
-                uuid: triggerComponent.parameters.uuid,
-                targetUuid: triggerComponent.parameters.target,
-              };
-            }
-          }
-
-          // 添加到碰撞检测列表
-          collidableMeshes.push(mesh);
 
           resolve(mesh);
         },
@@ -389,7 +348,6 @@ const loadModel = async (resource: any, entity: any) => {
           );
         }
 
-        // 保存到sources中，包含setText方法
         const uuid = entity.parameters.uuid.toString();
         sources.set(uuid, {
           type: "text",
@@ -415,23 +373,6 @@ const loadModel = async (resource: any, entity: any) => {
         });
 
         threeScene.add(mesh);
-
-        // 存储trigger信息
-        if (entity.children?.components) {
-          const triggerComponent = entity.children.components.find(
-            (comp: any) => comp.type === "Trigger"
-          );
-
-          if (triggerComponent) {
-            mesh.userData.trigger = {
-              uuid: triggerComponent.parameters.uuid,
-              targetUuid: triggerComponent.parameters.target,
-            };
-          }
-        }
-
-        // 添加到碰撞检测列表
-        collidableMeshes.push(mesh);
 
         resolve(mesh);
       } catch (error) {
@@ -515,23 +456,6 @@ const loadModel = async (resource: any, entity: any) => {
               modelSize: chunk.size,
             });
 
-            // 存储trigger信息
-            if (entity.children?.components) {
-              const triggerComponent = entity.children.components.find(
-                (comp: any) => comp.type === "Trigger"
-              );
-
-              if (triggerComponent) {
-                voxMesh.userData.trigger = {
-                  uuid: triggerComponent.parameters.uuid,
-                  targetUuid: triggerComponent.parameters.target,
-                };
-              }
-            }
-
-            // 添加到碰撞检测列表
-            collidableMeshes.push(voxMesh);
-
             resolve(voxMesh);
           } catch (error) {
             console.error("处理VOX数据时出错:", error);
@@ -607,31 +531,6 @@ const loadModel = async (resource: any, entity: any) => {
           });
 
           threeScene.add(model);
-
-          // 存储trigger信息
-          if (entity.children?.components) {
-            const triggerComponent = entity.children.components.find(
-              (comp: any) => comp.type === "Trigger"
-            );
-
-            if (triggerComponent) {
-              console.error("设置触发器组件:", {
-                entityUUID: entity.parameters.uuid,
-                triggerUUID: triggerComponent.parameters.uuid,
-                targetUUID: triggerComponent.parameters.target,
-                modelUUID: model,
-              });
-              model.userData.trigger = {
-                uuid: triggerComponent.parameters.uuid,
-                entityUUID: entity.parameters.uuid,
-                targetUuid: triggerComponent.parameters.target,
-              };
-              console.error(model.uuid);
-            }
-          }
-
-          // 添加到碰撞检测列表
-          collidableMeshes.push(model);
 
           resolve(model);
         },
@@ -793,80 +692,6 @@ const playQueuedAudio = async (audio: HTMLAudioElement) => {
   });
 };
 
-// 添加碰撞检测相关变量和函数
-const collidableMeshes: THREE.Object3D[] = [];
-let lastCollisions = new Set<string>();
-
-const checkCollisions = () => {
-  const currentCollisions = new Set<string>();
-
-  // 遍历所有可碰撞物体
-  for (let i = 0; i < collidableMeshes.length; i++) {
-    for (let j = i + 1; j < collidableMeshes.length; j++) {
-      const mesh1 = collidableMeshes[i];
-      const mesh2 = collidableMeshes[j];
-
-      // 获取包围盒
-      const box1 = new THREE.Box3().setFromObject(mesh1);
-      const box2 = new THREE.Box3().setFromObject(mesh2);
-
-      // 检查碰撞
-      if (box1.intersectsBox(box2)) {
-        // 检查是否有触发器组件
-        if (mesh1.userData.trigger) {
-          // 检查目标UUID是否匹配
-          if (mesh1.userData.trigger.targetUuid === mesh2.uuid) {
-            const triggerUuid = mesh1.userData.trigger.uuid;
-            currentCollisions.add(triggerUuid);
-
-            // 如果这是新的碰撞，触发自定义事件
-            if (!lastCollisions.has(triggerUuid)) {
-              console.error("触发碰撞事件:", {
-                triggerUuid,
-                sourceUUID: mesh1.uuid,
-                targetUUID: mesh2.uuid,
-              });
-
-              const collisionEvent = new CustomEvent("collision", {
-                detail: triggerUuid,
-                bubbles: true,
-              });
-              scene.value?.dispatchEvent(collisionEvent);
-            }
-          }
-        }
-
-        // 检查第二个物体的触发器
-        if (mesh2.userData.trigger) {
-          // 检查目标UUID是否匹配
-          if (mesh2.userData.trigger.targetUuid === mesh1.uuid) {
-            const triggerUuid = mesh2.userData.trigger.uuid;
-            currentCollisions.add(triggerUuid);
-
-            // 如果这是新的碰撞，触发自定义事件
-            if (!lastCollisions.has(triggerUuid)) {
-              console.error("触发碰撞事件:", {
-                triggerUuid,
-                sourceUUID: mesh2.uuid,
-                targetUUID: mesh1.uuid,
-              });
-
-              const collisionEvent = new CustomEvent("collision", {
-                detail: triggerUuid,
-                bubbles: true,
-              });
-              scene.value?.dispatchEvent(collisionEvent);
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // 更新上一帧的碰撞状态
-  lastCollisions = currentCollisions;
-};
-
 // 初始化场景
 onMounted(async () => {
   if (!scene.value) return;
@@ -972,9 +797,6 @@ onMounted(async () => {
 
     const delta = clock.getDelta();
     mixers.forEach((mixer) => mixer.update(delta));
-
-    // 添加碰撞检测
-    checkCollisions();
 
     controls.update();
     renderer!.render(threeScene, camera!);

@@ -99,7 +99,7 @@
                             <pre>
                     <code :class="currentCodeType">{{
                       currentCode
-                      }}</code>
+                    }}</code>
                   </pre>
                           </div>
                         </div>
@@ -1256,10 +1256,15 @@ const run = async () => {
           };
 
           ${JavaScriptCode.value}
+
+          if (typeof meta['@c407bd1b-8113-499c-b0ff-495f65c9d470'] === 'function') {
+            await meta['@c407bd1b-8113-499c-b0ff-495f65c9d470']();
+          }
           
           if (typeof meta['@init'] === 'function') {
             await meta['@init']();
           }
+
         }
       `;
 
