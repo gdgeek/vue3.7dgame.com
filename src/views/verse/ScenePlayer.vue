@@ -21,7 +21,7 @@ import { useSettingsStore } from "@/store/modules/settings";
 const settingsStore = useSettingsStore();
 
 const props = defineProps<{
-  meta: any;
+  verse: any;
 }>();
 
 const scene = ref<HTMLDivElement | null>(null);
@@ -34,19 +34,57 @@ let clock = new THREE.Clock();
 
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
-const loadModel = async (resource: any, entity: any) => {
+// 加载模型的主要函数
+const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
   console.log("开始加载模型:", {
     entityType: entity.type,
     entityUUID: entity.parameters?.uuid,
     resourceType: resource.type,
+    moduleTransform,
   });
-
   console.log("加载资源参数:", {
     resource,
     entity,
     resourceId: resource.id,
     parametersUUID: entity.parameters?.uuid,
   });
+
+  // 合并Module和Entity的transform
+  const combinedTransform = {
+    position: {
+      x:
+        (moduleTransform?.position?.x || 0) +
+        (entity.parameters?.transform?.position?.x || 0),
+      y:
+        (moduleTransform?.position?.y || 0) +
+        (entity.parameters?.transform?.position?.y || 0),
+      z:
+        (moduleTransform?.position?.z || 0) +
+        (entity.parameters?.transform?.position?.z || 0),
+    },
+    rotate: {
+      x:
+        (moduleTransform?.rotate?.x || 0) +
+        (entity.parameters?.transform?.rotate?.x || 0),
+      y:
+        (moduleTransform?.rotate?.y || 0) +
+        (entity.parameters?.transform?.rotate?.y || 0),
+      z:
+        (moduleTransform?.rotate?.z || 0) +
+        (entity.parameters?.transform?.rotate?.z || 0),
+    },
+    scale: {
+      x:
+        (moduleTransform?.scale?.x || 1) *
+        (entity.parameters?.transform?.scale?.x || 1),
+      y:
+        (moduleTransform?.scale?.y || 1) *
+        (entity.parameters?.transform?.scale?.y || 1),
+      z:
+        (moduleTransform?.scale?.z || 1) *
+        (entity.parameters?.transform?.scale?.z || 1),
+    },
+  };
 
   // 处理视频类型
   if (resource.type === "video" || entity.type === "Video") {
@@ -83,24 +121,22 @@ const loadModel = async (resource: any, entity: any) => {
           // 应用变换
           if (entity.parameters?.transform) {
             mesh.position.set(
-              entity.parameters.transform.position.x,
-              entity.parameters.transform.position.y,
-              entity.parameters.transform.position.z
+              combinedTransform.position.x,
+              combinedTransform.position.y,
+              combinedTransform.position.z
             );
 
             mesh.rotation.set(
-              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
-              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
-              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
+              THREE.MathUtils.degToRad(combinedTransform.rotate.x),
+              THREE.MathUtils.degToRad(combinedTransform.rotate.y),
+              THREE.MathUtils.degToRad(combinedTransform.rotate.z)
             );
 
             const baseScale = width;
             mesh.scale.set(
-              entity.parameters.transform.scale.x * baseScale,
-              entity.parameters.transform.scale.y *
-                baseScale *
-                (1 / aspectRatio),
-              entity.parameters.transform.scale.z * baseScale
+              combinedTransform.scale.x * baseScale,
+              combinedTransform.scale.y * baseScale * (1 / aspectRatio),
+              combinedTransform.scale.z * baseScale
             );
           }
 
@@ -223,24 +259,22 @@ const loadModel = async (resource: any, entity: any) => {
           // 应用变换
           if (entity.parameters?.transform) {
             mesh.position.set(
-              entity.parameters.transform.position.x,
-              entity.parameters.transform.position.y,
-              entity.parameters.transform.position.z
+              combinedTransform.position.x,
+              combinedTransform.position.y,
+              combinedTransform.position.z
             );
 
             mesh.rotation.set(
-              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
-              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
-              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
+              THREE.MathUtils.degToRad(combinedTransform.rotate.x),
+              THREE.MathUtils.degToRad(combinedTransform.rotate.y),
+              THREE.MathUtils.degToRad(combinedTransform.rotate.z)
             );
 
             const baseScale = width;
             mesh.scale.set(
-              entity.parameters.transform.scale.x * baseScale,
-              entity.parameters.transform.scale.y *
-                baseScale *
-                (1 / aspectRatio),
-              entity.parameters.transform.scale.z * baseScale
+              combinedTransform.scale.x * baseScale,
+              combinedTransform.scale.y * baseScale * (1 / aspectRatio),
+              combinedTransform.scale.z * baseScale
             );
           }
 
@@ -333,21 +367,21 @@ const loadModel = async (resource: any, entity: any) => {
         // 应用变换
         if (entity.parameters?.transform) {
           mesh.position.set(
-            entity.parameters.transform.position.x,
-            entity.parameters.transform.position.y,
-            entity.parameters.transform.position.z
+            combinedTransform.position.x,
+            combinedTransform.position.y,
+            combinedTransform.position.z
           );
 
           mesh.rotation.set(
-            THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
-            THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
-            THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
+            THREE.MathUtils.degToRad(combinedTransform.rotate.x),
+            THREE.MathUtils.degToRad(combinedTransform.rotate.y),
+            THREE.MathUtils.degToRad(combinedTransform.rotate.z)
           );
 
           mesh.scale.set(
-            entity.parameters.transform.scale.x,
-            entity.parameters.transform.scale.y,
-            entity.parameters.transform.scale.z
+            combinedTransform.scale.x,
+            combinedTransform.scale.y,
+            combinedTransform.scale.z
           );
         }
 
@@ -411,21 +445,21 @@ const loadModel = async (resource: any, entity: any) => {
             // 应用变换
             if (entity.parameters?.transform) {
               voxMesh.position.set(
-                entity.parameters.transform.position.x,
-                entity.parameters.transform.position.y,
-                entity.parameters.transform.position.z
+                combinedTransform.position.x,
+                combinedTransform.position.y,
+                combinedTransform.position.z
               );
 
               voxMesh.rotation.set(
-                THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
-                THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
-                THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
+                THREE.MathUtils.degToRad(combinedTransform.rotate.x),
+                THREE.MathUtils.degToRad(combinedTransform.rotate.y),
+                THREE.MathUtils.degToRad(combinedTransform.rotate.z)
               );
 
               voxMesh.scale.set(
-                entity.parameters.transform.scale.x,
-                entity.parameters.transform.scale.y,
-                entity.parameters.transform.scale.z
+                combinedTransform.scale.x,
+                combinedTransform.scale.y,
+                combinedTransform.scale.z
               );
             }
 
@@ -492,19 +526,19 @@ const loadModel = async (resource: any, entity: any) => {
 
           if (entity.parameters?.transform) {
             model.position.set(
-              entity.parameters.transform.position.x,
-              entity.parameters.transform.position.y,
-              entity.parameters.transform.position.z
+              combinedTransform.position.x,
+              combinedTransform.position.y,
+              combinedTransform.position.z
             );
             model.rotation.set(
-              entity.parameters.transform.rotate.x,
-              entity.parameters.transform.rotate.y,
-              entity.parameters.transform.rotate.z
+              combinedTransform.rotate.x,
+              combinedTransform.rotate.y,
+              combinedTransform.rotate.z
             );
             model.scale.set(
-              entity.parameters.transform.scale.x,
-              entity.parameters.transform.scale.y,
-              entity.parameters.transform.scale.z
+              combinedTransform.scale.x,
+              combinedTransform.scale.y,
+              combinedTransform.scale.z
             );
           }
 
@@ -549,150 +583,6 @@ const loadModel = async (resource: any, entity: any) => {
       );
     });
   }
-};
-
-// 获取音频URL
-const getAudioUrl = (uuid: string): string | undefined => {
-  const source = sources.get(uuid.toString());
-  if (!source || source.type !== "audio") {
-    console.error(`找不到UUID为 ${uuid} 的音频资源`);
-    return undefined;
-  }
-  return (source.data as { url: string }).url;
-};
-
-// 播放动画
-const playAnimation = (uuid: string, animationName: string) => {
-  const source = sources.get(uuid.toString());
-  if (!source || source.type !== "model") {
-    console.error(`找不到UUID为 ${uuid} 的模型资源`);
-    return;
-  }
-
-  const model = source.data.mesh as THREE.Object3D;
-  const mixer = mixers.get(uuid);
-
-  if (!model) {
-    console.error(
-      `找不到UUID为 ${uuid} 的模型，可用模型:`,
-      Array.from(sources.keys())
-    );
-    return;
-  }
-
-  if (!mixer) {
-    console.error(`找不到UUID为 ${uuid} 的动画混合器`);
-    return;
-  }
-
-  const animations = model.userData?.animations;
-  if (!animations || animations.length === 0) {
-    console.error(`模型 ${uuid} 没有动画数据`);
-    return;
-  }
-
-  const clip = animations.find(
-    (anim: THREE.AnimationClip) => anim.name === animationName
-  );
-  if (!clip) {
-    console.error(
-      `找不到动画 "${animationName}"，可用动画:`,
-      animations.map((a: THREE.AnimationClip) => a.name)
-    );
-    return;
-  }
-
-  mixer.stopAllAction();
-  const action = mixer.clipAction(clip);
-  action.reset();
-  action.setLoop(THREE.LoopRepeat, Infinity);
-  action.fadeIn(0.5);
-  action.play();
-};
-
-// 音频播放处理
-const handleAudioPlay = (audio: HTMLAudioElement) => {
-  console.log("开始处理音频播放:", {
-    src: audio.src,
-    duration: audio.duration,
-    currentTime: audio.currentTime,
-  });
-
-  return new Promise<void>((resolve) => {
-    // 重置音频到开始位置
-    audio.currentTime = 0;
-
-    // 当音频播放结束时调用 resolve
-    audio.onended = () => {
-      console.log("音频播放完成:", {
-        src: audio.src,
-        duration: audio.duration,
-      });
-      resolve();
-    };
-
-    // 处理音频播放错误
-    audio.onerror = () => {
-      console.error("音频播放出错:", {
-        src: audio.src,
-        error: audio.error,
-      });
-      resolve();
-    };
-
-    // 开始播放
-    audio.play().catch((error) => {
-      console.error("播放音频失败:", {
-        src: audio.src,
-        error: error,
-      });
-      resolve();
-    });
-  });
-};
-
-// 音频播放队列管理
-const audioPlaybackQueue: { audio: HTMLAudioElement; resolve: Function }[] = [];
-let isPlaying = false;
-
-// 处理音频队列
-const processAudioQueue = async () => {
-  console.log("处理音频队列:", {
-    isPlaying,
-    queueLength: audioPlaybackQueue.length,
-  });
-
-  if (isPlaying || audioPlaybackQueue.length === 0) return;
-
-  isPlaying = true;
-
-  while (audioPlaybackQueue.length > 0) {
-    const current = audioPlaybackQueue[0];
-    console.log("播放队列中的音频:", {
-      src: current.audio.src,
-      queueLength: audioPlaybackQueue.length,
-    });
-
-    await handleAudioPlay(current.audio);
-    current.resolve();
-    audioPlaybackQueue.shift();
-  }
-
-  isPlaying = false;
-  console.log("音频队列处理完成");
-};
-
-// 音频播放
-const playQueuedAudio = async (audio: HTMLAudioElement) => {
-  console.log("添加音频到播放队列:", {
-    src: audio.src,
-    currentQueueLength: audioPlaybackQueue.length,
-  });
-
-  return new Promise<void>((resolve) => {
-    audioPlaybackQueue.push({ audio, resolve });
-    processAudioQueue();
-  });
 };
 
 // 初始化场景
@@ -741,66 +631,51 @@ onMounted(async () => {
   controls.minDistance = 1;
   controls.maxDistance = 50;
 
-  // 加载所有模型
-  const metaData = JSON.parse(props.meta.data);
-  console.log("解析后的metaData:", metaData);
+  // 加载verse中的模型
+  if (props.verse?.data) {
+    const verseData = JSON.parse(props.verse.data);
+    console.log("解析后的verseData:", verseData);
+    if (verseData.children?.modules) {
+      for (const module of verseData.children.modules) {
+        const metaId = module.parameters.meta_id;
+        const meta = props.verse.metas.find(
+          (m: any) => m.id.toString() === metaId.toString()
+        );
 
-  if (metaData.children?.entities) {
-    for (const entity of metaData.children.entities) {
-      console.log("处理实体:", entity);
-
-      // 处理文本类型实体
-      if (entity.type === "Text") {
-        try {
-          // 创建一个文本资源对象
-          const textResource = {
-            type: "text",
-            content: entity.parameters.text || "默认文本",
-            id: entity.parameters.uuid || crypto.randomUUID(),
-          };
-
-          await loadModel(textResource, entity);
-          continue; // 跳过后续处理
-        } catch (error) {
-          console.error("处理文本实体失败:", error);
-          continue;
+        if (meta && meta.data) {
+          const metaData = JSON.parse(meta.data);
+          console.error("解析后的metaData:", metaData);
+          if (metaData.children?.entities) {
+            for (const entity of metaData.children.entities) {
+              if (entity.parameters?.resource) {
+                const resource = meta.resources.find(
+                  (r: any) =>
+                    r.id.toString() === entity.parameters.resource.toString()
+                );
+                if (resource) {
+                  try {
+                    await loadModel(
+                      resource,
+                      entity,
+                      module.parameters.transform
+                    );
+                  } catch (error) {
+                    console.error(`加载模型失败:`, error);
+                  }
+                }
+              }
+            }
+          }
         }
-      }
-
-      // 处理其他类型实体
-      if (!entity.parameters?.resource) {
-        console.warn("实体缺少resource参数:", entity);
-        continue;
-      }
-
-      const resource = props.meta.resources.find(
-        (r: any) => r.id.toString() === entity.parameters.resource.toString()
-      );
-
-      if (resource) {
-        try {
-          await loadModel(resource, entity);
-        } catch (error) {
-          console.error(
-            `加载模型失败 (resource ${entity.parameters.resource}):`,
-            error
-          );
-        }
-      } else {
-        console.warn(`未找到资源 ID ${entity.parameters.resource}`);
       }
     }
-  } else {
-    console.error("metaData格式错误:", metaData);
   }
 
   // 动画循环
   const animate = () => {
     requestAnimationFrame(animate);
-
     const delta = clock.getDelta();
     mixers.forEach((mixer) => mixer.update(delta));
-
     controls.update();
     renderer!.render(threeScene, camera!);
   };
@@ -814,43 +689,13 @@ watch(isDark, (newValue) => {
   }
 });
 
-// 在组件卸载时清理资源
+// 清理
 onUnmounted(() => {
-  sources.forEach((source) => {
-    if (source.type === "video") {
-      const video = source.data.video;
-      video.pause();
-      video.src = "";
-      video.load();
-
-      // 清理事件监听器
-      if (source.data.cleanup) {
-        source.data.cleanup();
-      }
-    } else if (source.type === "audio") {
-      // 清理音频队列
-      while (audioPlaybackQueue.length > 0) {
-        const queueItem = audioPlaybackQueue.shift();
-        if (queueItem) {
-          const audio = queueItem.audio;
-          audio.pause();
-          audio.src = "";
-          audio.load();
-          queueItem.resolve(); // 解决所有待处理的Promise
-        }
-      }
-    }
-  });
-
-  // 清理渲染器和场景
   if (renderer) {
     renderer.dispose();
     renderer.forceContextLoss();
     renderer.domElement.remove();
   }
-
-  // 重置状态
-  isPlaying = false;
   sources.clear();
   mixers.clear();
   clock = new THREE.Clock();
@@ -859,8 +704,8 @@ onUnmounted(() => {
 // 暴露方法
 defineExpose({
   sources,
-  playAnimation,
-  getAudioUrl,
-  playQueuedAudio,
+  threeScene,
+  camera,
+  renderer,
 });
 </script>

@@ -9,7 +9,12 @@
                 verse.name
               }}</el-link>
               /【{{ $t("verse.view.script.title") || "Script Title" }}】
-
+              <el-button type="primary" size="small" @click="run"
+                >测试运行</el-button
+              >
+              <el-button type="primary" size="small" @click="disabled = false">
+                返回
+              </el-button>
               <el-button-group style="float: right">
                 <el-button
                   v-if="saveable"
@@ -27,7 +32,7 @@
             </div>
           </template>
 
-          <el-container>
+          <el-container v-if="!disabled">
             <el-tabs v-model="activeName" type="card" style="width: 100%">
               <el-tab-pane
                 :label="$t('verse.view.script.edit') || 'Edit'"
@@ -177,6 +182,9 @@
               </el-tab-pane>
             </el-tabs>
           </el-container>
+          <div v-if="disabled" class="runArea">
+            <ScenePlayer ref="scenePlayer" :verse="verse"></ScenePlayer>
+          </div>
         </el-card>
       </el-main>
     </el-container>
@@ -194,6 +202,7 @@ import { useI18n } from "vue-i18n";
 import { ElMessageBox, ElMessage } from "element-plus";
 import pako from "pako";
 import jsBeautify from "js-beautify";
+import ScenePlayer from "./ScenePlayer.vue";
 
 // 初始化状态和变量
 const appStore = useAppStore();
@@ -621,6 +630,15 @@ const showFullscreenCode = (type: "lua" | "javascript") => {
   currentCode.value = type === "lua" ? LuaCode.value : JavaScriptCode.value;
   codeDialogTitle.value = type === "lua" ? "Lua Code" : "JavaScript Code";
   showCodeDialog.value = true;
+};
+
+const disabled = ref<boolean>(false);
+const scenePlayer = ref<InstanceType<typeof ScenePlayer>>();
+
+const run = async () => {
+  disabled.value = true;
+
+  await nextTick();
 };
 </script>
 
