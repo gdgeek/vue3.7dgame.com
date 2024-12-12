@@ -755,7 +755,7 @@ onMounted(async () => {
           // 创建一个文本资源对象
           const textResource = {
             type: "text",
-            content: entity.parameters.text || "默认文本",
+            content: entity.parameters.text || "DEFAULT TEXT",
             id: entity.parameters.uuid || crypto.randomUUID(),
           };
 

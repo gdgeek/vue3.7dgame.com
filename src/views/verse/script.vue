@@ -204,7 +204,6 @@ import pako from "pako";
 import jsBeautify from "js-beautify";
 import ScenePlayer from "./ScenePlayer.vue";
 
-// 初始化状态和变量
 const appStore = useAppStore();
 const { t } = useI18n();
 const loading = ref(false);
@@ -639,6 +638,56 @@ const run = async () => {
   disabled.value = true;
 
   await nextTick();
+
+  // 添加延迟等待所有模型加载完成
+  const waitForModels = () => {
+    return new Promise((resolve) => {
+      const checkModels = () => {
+        const metasData = verse.value!.metas!;
+        let expectedModels = 0;
+        for (const meta of metasData) {
+          const metaData = JSON.parse(meta.data!);
+          expectedModels += metaData.children.entities.length;
+        }
+
+        if (scenePlayer.value?.sources.size === expectedModels) {
+          console.error("所有资源加载完成:", {
+            expected: expectedModels,
+            loaded: scenePlayer.value!.sources.size,
+            sources: scenePlayer.value!.sources,
+          });
+          resolve(true);
+        } else {
+          console.log("等待资源加载...", {
+            expected: expectedModels,
+            current: scenePlayer.value?.sources.size || 0,
+            sources: scenePlayer.value?.sources,
+          });
+          setTimeout(checkModels, 100);
+        }
+      };
+      checkModels();
+
+      if (JavaScriptCode.value) {
+        try {
+          const wrappedCode = `(
+            return async () => {
+              ${JavaScriptCode.value}
+            })()`;
+          const wrappedFunction = new Function(wrappedCode);
+          // const executableFunction = wrappedFunction();
+        } catch (e: any) {
+          console.error("执行代码出错:", e);
+          ElMessage({
+            message: `执行代码出错: ${e.message}`,
+            type: "error",
+          });
+        }
+      }
+    });
+  };
+
+  await waitForModels();
 };
 </script>
 

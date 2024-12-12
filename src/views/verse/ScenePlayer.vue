@@ -585,6 +585,150 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
   }
 };
 
+// 获取音频URL
+const getAudioUrl = (uuid: string): string | undefined => {
+  const source = sources.get(uuid.toString());
+  if (!source || source.type !== "audio") {
+    console.error(`找不到UUID为 ${uuid} 的音频资源`);
+    return undefined;
+  }
+  return (source.data as { url: string }).url;
+};
+
+// 播放动画
+const playAnimation = (uuid: string, animationName: string) => {
+  const source = sources.get(uuid.toString());
+  if (!source || source.type !== "model") {
+    console.error(`找不到UUID为 ${uuid} 的模型资源`);
+    return;
+  }
+
+  const model = source.data.mesh as THREE.Object3D;
+  const mixer = mixers.get(uuid);
+
+  if (!model) {
+    console.error(
+      `找不到UUID为 ${uuid} 的模型，可用模型:`,
+      Array.from(sources.keys())
+    );
+    return;
+  }
+
+  if (!mixer) {
+    console.error(`找不到UUID为 ${uuid} 的动画混合器`);
+    return;
+  }
+
+  const animations = model.userData?.animations;
+  if (!animations || animations.length === 0) {
+    console.error(`模型 ${uuid} 没有动画数据`);
+    return;
+  }
+
+  const clip = animations.find(
+    (anim: THREE.AnimationClip) => anim.name === animationName
+  );
+  if (!clip) {
+    console.error(
+      `找不到动画 "${animationName}"，可用动画:`,
+      animations.map((a: THREE.AnimationClip) => a.name)
+    );
+    return;
+  }
+
+  mixer.stopAllAction();
+  const action = mixer.clipAction(clip);
+  action.reset();
+  action.setLoop(THREE.LoopRepeat, Infinity);
+  action.fadeIn(0.5);
+  action.play();
+};
+
+// 音频播放处理
+const handleAudioPlay = (audio: HTMLAudioElement) => {
+  console.log("开始处理音频播放:", {
+    src: audio.src,
+    duration: audio.duration,
+    currentTime: audio.currentTime,
+  });
+
+  return new Promise<void>((resolve) => {
+    // 重置音频到开始位置
+    audio.currentTime = 0;
+
+    // 当音频播放结束时调用 resolve
+    audio.onended = () => {
+      console.log("音频播放完成:", {
+        src: audio.src,
+        duration: audio.duration,
+      });
+      resolve();
+    };
+
+    // 处理音频播放错误
+    audio.onerror = () => {
+      console.error("音频播放出错:", {
+        src: audio.src,
+        error: audio.error,
+      });
+      resolve();
+    };
+
+    // 开始播放
+    audio.play().catch((error) => {
+      console.error("播放音频失败:", {
+        src: audio.src,
+        error: error,
+      });
+      resolve();
+    });
+  });
+};
+
+// 音频播放队列管理
+const audioPlaybackQueue: { audio: HTMLAudioElement; resolve: Function }[] = [];
+let isPlaying = false;
+
+// 处理音频队列
+const processAudioQueue = async () => {
+  console.log("处理音频队列:", {
+    isPlaying,
+    queueLength: audioPlaybackQueue.length,
+  });
+
+  if (isPlaying || audioPlaybackQueue.length === 0) return;
+
+  isPlaying = true;
+
+  while (audioPlaybackQueue.length > 0) {
+    const current = audioPlaybackQueue[0];
+    console.log("播放队列中的音频:", {
+      src: current.audio.src,
+      queueLength: audioPlaybackQueue.length,
+    });
+
+    await handleAudioPlay(current.audio);
+    current.resolve();
+    audioPlaybackQueue.shift();
+  }
+
+  isPlaying = false;
+  console.log("音频队列处理完成");
+};
+
+// 音频播放
+const playQueuedAudio = async (audio: HTMLAudioElement) => {
+  console.log("添加音频到播放队列:", {
+    src: audio.src,
+    currentQueueLength: audioPlaybackQueue.length,
+  });
+
+  return new Promise<void>((resolve) => {
+    audioPlaybackQueue.push({ audio, resolve });
+    processAudioQueue();
+  });
+};
+
 // 初始化场景
 onMounted(async () => {
   if (!scene.value) return;
@@ -604,7 +748,7 @@ onMounted(async () => {
   scene.value.appendChild(renderer.domElement);
 
   // 相机设置
-  camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+  camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1800); //
   camera.position.set(0, 5, 15); // 调整相机距离
 
   // 主环境光
@@ -628,10 +772,10 @@ onMounted(async () => {
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;
   controls.screenSpacePanning = true;
-  controls.minDistance = 1;
-  controls.maxDistance = 50;
+  controls.minDistance = 1; // 最小距离
+  controls.maxDistance = 1000; // 最大距离
 
-  // 加载verse中的模型
+  // 加载verse中所有数据
   if (props.verse?.data) {
     const verseData = JSON.parse(props.verse.data);
     console.log("解析后的verseData:", verseData);
@@ -647,6 +791,27 @@ onMounted(async () => {
           console.error("解析后的metaData:", metaData);
           if (metaData.children?.entities) {
             for (const entity of metaData.children.entities) {
+              // 处理文本类型实体
+              if (entity.type === "Text") {
+                try {
+                  // 创建一个文本资源对象
+                  const textResource = {
+                    type: "text",
+                    content: entity.parameters.text || "DEFAULT TEXT",
+                    id: entity.parameters.uuid || crypto.randomUUID(),
+                  };
+
+                  await loadModel(
+                    textResource,
+                    entity,
+                    module.parameters.transform
+                  );
+                  continue; // 跳过后续处理
+                } catch (error) {
+                  console.error("处理文本实体失败:", error);
+                  continue;
+                }
+              }
               if (entity.parameters?.resource) {
                 const resource = meta.resources.find(
                   (r: any) =>
@@ -696,6 +861,33 @@ onUnmounted(() => {
     renderer.forceContextLoss();
     renderer.domElement.remove();
   }
+
+  sources.forEach((source) => {
+    if (source.type === "video") {
+      const video = source.data.video;
+      video.pause();
+      video.src = "";
+      video.load();
+
+      // 清理事件监听器
+      if (source.data.cleanup) {
+        source.data.cleanup();
+      }
+    } else if (source.type === "audio") {
+      // 清理音频队列
+      while (audioPlaybackQueue.length > 0) {
+        const queueItem = audioPlaybackQueue.shift();
+        if (queueItem) {
+          const audio = queueItem.audio;
+          audio.pause();
+          audio.src = "";
+          audio.load();
+          queueItem.resolve(); // 解决所有待处理的Promise
+        }
+      }
+    }
+  });
+
   sources.clear();
   mixers.clear();
   clock = new THREE.Clock();
@@ -704,8 +896,8 @@ onUnmounted(() => {
 // 暴露方法
 defineExpose({
   sources,
-  threeScene,
-  camera,
-  renderer,
+  playAnimation,
+  getAudioUrl,
+  playQueuedAudio,
 });
 </script>
