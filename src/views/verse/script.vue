@@ -203,6 +203,7 @@ import { ElMessageBox, ElMessage } from "element-plus";
 import pako from "pako";
 import jsBeautify from "js-beautify";
 import ScenePlayer from "./ScenePlayer.vue";
+import * as THREE from "three";
 
 const appStore = useAppStore();
 const { t } = useI18n();
@@ -667,27 +668,354 @@ const run = async () => {
         }
       };
       checkModels();
-
-      if (JavaScriptCode.value) {
-        try {
-          const wrappedCode = `(
-            return async () => {
-              ${JavaScriptCode.value}
-            })()`;
-          const wrappedFunction = new Function(wrappedCode);
-          // const executableFunction = wrappedFunction();
-        } catch (e: any) {
-          console.error("执行代码出错:", e);
-          ElMessage({
-            message: `执行代码出错: ${e.message}`,
-            type: "error",
-          });
-        }
-      }
     });
   };
 
   await waitForModels();
+
+  if (JavaScriptCode.value) {
+    const sound = {
+      play: async (audio: HTMLAudioElement | undefined) => {
+        if (!audio) {
+          console.error("音频资源无效");
+          return;
+        }
+        await scenePlayer.value?.playQueuedAudio(audio);
+      },
+
+      createTask: (audio: HTMLAudioElement | undefined) => {
+        if (!audio) {
+          console.error("音频资源无效");
+          return null;
+        }
+        return {
+          type: "audio",
+          execute: async () => {
+            await scenePlayer.value?.playQueuedAudio(audio);
+          },
+          data: audio,
+        };
+      },
+
+      playTask: (audio: HTMLAudioElement | undefined) => {
+        const taskObj = sound.createTask(audio);
+        if (!taskObj) return null;
+
+        // 立即执行
+        taskObj.execute();
+        return taskObj;
+      },
+    };
+
+    const helper = {
+      handler: (index: string, uuid: string) => {
+        const source = scenePlayer.value?.sources.get(uuid);
+        if (!source) {
+          console.error(`找不到UUID为 ${uuid} 的实体`);
+          return null;
+        }
+        return source.data;
+      },
+    };
+
+    // 补间动画工具类
+    const tween = {
+      to_object: (
+        fromObj: any,
+        toObj: any,
+        duration: number,
+        easing: string
+      ) => {
+        if (!fromObj || !toObj) {
+          console.error("补间动画对象无效");
+          return null;
+        }
+
+        const startPos = fromObj.mesh.position.clone();
+        const endPos = toObj.mesh.position.clone();
+
+        return {
+          type: "object",
+          fromObj,
+          startPos,
+          endPos,
+          duration,
+          easing,
+        };
+      },
+
+      to_data: (
+        obj: any,
+        transformData: any,
+        duration: number,
+        easing: string
+      ) => {
+        if (!obj) {
+          console.error("目标对象无效");
+          return null;
+        }
+
+        const startPos = obj.mesh.position.clone();
+        const endPos = transformData.position;
+
+        return {
+          type: "data",
+          obj,
+          startPos,
+          endPos,
+          startRotation: obj.mesh.rotation.clone(),
+          endRotation: transformData.rotation,
+          startScale: obj.mesh.scale.clone(),
+          endScale: transformData.scale,
+          duration,
+          easing,
+        };
+      },
+    };
+
+    // 任务执行器
+    const task = {
+      circle: async (count: number, taskToRepeat: any) => {
+        console.log("Executing circle task:", { count, taskToRepeat });
+
+        if (typeof count !== "number" || count < 0) {
+          console.warn("循环次数必须是正数:", count);
+          return;
+        }
+
+        let resolvedTask = taskToRepeat;
+        if (taskToRepeat instanceof Promise) {
+          resolvedTask = await taskToRepeat;
+        }
+
+        for (let i = 0; i < count; i++) {
+          console.log(`执行第 ${i + 1}/${count} 次任务`);
+
+          try {
+            if (resolvedTask) {
+              if (typeof resolvedTask === "function") {
+                await resolvedTask();
+              } else if (typeof resolvedTask.execute === "function") {
+                await resolvedTask.execute();
+              } else if (resolvedTask.type === "audio") {
+                await sound.play(resolvedTask.data);
+              } else if (resolvedTask.type === "animation") {
+                await resolvedTask.execute();
+              } else {
+                console.warn(`无法执行的任务类型:`, resolvedTask);
+                return;
+              }
+            }
+
+            if (i < count - 1) {
+              await new Promise((resolve) => setTimeout(resolve, 100));
+            }
+          } catch (error) {
+            console.error(`第 ${i + 1} 次任务执行失败:`, error);
+          }
+        }
+      },
+
+      array: (type: string, items: any[]) => {
+        console.log("Creating array:", { type, items });
+
+        const processArrayItems = (items: any[]): any[] => {
+          return items.map((item) => {
+            // 如果是数组，递归处理
+            if (Array.isArray(item)) {
+              return processArrayItems(item);
+            }
+            if (item && typeof item === "object" && item.type) {
+              return item;
+            }
+            if (item && typeof item === "object" && item.url) {
+              return "audio";
+            }
+            if (item instanceof Promise) {
+              return item;
+            }
+            return item;
+          });
+        };
+
+        let result;
+        if (type === "LIST") {
+          result = processArrayItems(items);
+        } else if (type === "SET") {
+          const processed = processArrayItems(items);
+          result = Array.from(new Set(processed));
+        } else {
+          console.warn(`未知的数组类型: ${type}，默认使用 LIST 类型`);
+          result = processArrayItems(items);
+        }
+
+        console.log("Processed array result:", result);
+        return result;
+      },
+
+      execute: async (tweenData: any) => {
+        if (!tweenData) return;
+
+        if (typeof tweenData === "function") {
+          await tweenData();
+          return;
+        }
+        if (tweenData instanceof Promise) {
+          return await tweenData;
+        }
+
+        type EasingFunction = (t: number) => number;
+        type EasingType =
+          | "LINEAR"
+          | "EASE_IN"
+          | "EASE_OUT"
+          | "EASE_IN_OUT"
+          | "BOUNCE_IN"
+          | "BOUNCE_OUT"
+          | "BOUNCE_IN_OUT";
+
+        const easingFunctions: Record<EasingType, EasingFunction> = {
+          LINEAR: (t: number) => t,
+          EASE_IN: (t: number) => t * t,
+          EASE_OUT: (t: number) => 1 - Math.pow(1 - t, 2),
+          EASE_IN_OUT: (t: number) =>
+            t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
+          BOUNCE_IN: (t: number) => 1 - easingFunctions.BOUNCE_OUT(1 - t),
+          BOUNCE_OUT: (t: number) => {
+            if (t < 1 / 2.75) {
+              return 7.5625 * t * t;
+            } else if (t < 2 / 2.75) {
+              return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
+            } else if (t < 2.5 / 2.75) {
+              return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
+            } else {
+              return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
+            }
+          },
+          BOUNCE_IN_OUT: (t: number) => {
+            return t < 0.5
+              ? (1 - easingFunctions.BOUNCE_OUT(1 - 2 * t)) / 2
+              : (1 + easingFunctions.BOUNCE_OUT(2 * t - 1)) / 2;
+          },
+        };
+
+        return new Promise<void>((resolve) => {
+          const startTime = Date.now();
+          const animate = () => {
+            const currentTime = Date.now();
+            const elapsed = (currentTime - startTime) / 1000;
+            const progress = Math.min(elapsed / tweenData.duration, 1);
+
+            const easing = (
+              tweenData.easing || "LINEAR"
+            ).toUpperCase() as EasingType;
+            const easingFunction =
+              easingFunctions[easing] || easingFunctions.LINEAR;
+            const easeProgress = easingFunction(progress);
+
+            if (tweenData.type === "object") {
+              const newPos = tweenData.startPos
+                .clone()
+                .lerp(tweenData.endPos, easeProgress);
+              tweenData.fromObj.mesh.position.copy(newPos);
+            } else if (tweenData.type === "data") {
+              const newPos = tweenData.startPos
+                .clone()
+                .lerp(tweenData.endPos, easeProgress);
+              tweenData.obj.mesh.position.copy(newPos);
+
+              tweenData.obj.mesh.rotation.set(
+                THREE.MathUtils.lerp(
+                  tweenData.startRotation.x,
+                  tweenData.endRotation.x,
+                  easeProgress
+                ),
+                THREE.MathUtils.lerp(
+                  tweenData.startRotation.y,
+                  tweenData.endRotation.y,
+                  easeProgress
+                ),
+                THREE.MathUtils.lerp(
+                  tweenData.startRotation.z,
+                  tweenData.endRotation.z,
+                  easeProgress
+                )
+              );
+
+              const newScale = tweenData.startScale
+                .clone()
+                .lerp(tweenData.endScale, easeProgress);
+              tweenData.obj.mesh.scale.copy(newScale);
+            }
+
+            if (progress < 1) {
+              requestAnimationFrame(animate);
+            } else {
+              resolve();
+            }
+          };
+
+          animate();
+        });
+      },
+
+      sleep: (seconds: number) => {
+        return () =>
+          new Promise<void>((resolve) => setTimeout(resolve, seconds * 1000));
+      },
+    };
+
+    // 动画工具类
+    const animation = {
+      createTask: (polygenInstance: any, animationName: string) => {
+        if (!polygenInstance) {
+          console.error("polygen实例为空");
+          return null;
+        }
+        if (typeof polygenInstance.playAnimation !== "function") {
+          console.error("polygen实例缺少playAnimation方法");
+          return null;
+        }
+
+        return {
+          type: "animation",
+          execute: async () => {
+            polygenInstance.playAnimation(animationName);
+          },
+          data: {
+            instance: polygenInstance,
+            animationName: animationName,
+          },
+        };
+      },
+
+      playTask: (polygenInstance: any, animationName: string) => {
+        const taskObj = animation.createTask(polygenInstance, animationName);
+        if (!taskObj) return null;
+
+        // 立即执行
+        taskObj.execute();
+        return taskObj;
+      },
+    };
+
+    try {
+      const wrappedCode = `
+            return async function(sound, THREE, task, tween, helper, animation) {
+              ${JavaScriptCode.value}
+            }`;
+      const wrappedFunction = new Function(wrappedCode);
+      const executableFunction = wrappedFunction();
+
+      await executableFunction(sound, THREE, task, tween, helper, animation);
+    } catch (e: any) {
+      console.error("执行代码出错:", e);
+      ElMessage({
+        message: `执行代码出错: ${e.message}`,
+        type: "error",
+      });
+    }
+  }
 };
 </script>
 

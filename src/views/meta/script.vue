@@ -1020,37 +1020,21 @@ const run = async () => {
       array: (type: string, items: any[]) => {
         console.log("Creating array:", { type, items });
 
-        type TaskData = {
-          type: string;
-          data: {
-            url?: string;
-            execute?: () => Promise<void>;
-          };
-        };
-
         const processArrayItems = (items: any[]): any[] => {
           return items.map((item) => {
             // 如果是数组，递归处理
             if (Array.isArray(item)) {
               return processArrayItems(item);
             }
-
-            // 如果是任务对象（包含 type 和 data）
             if (item && typeof item === "object" && item.type) {
               return item;
             }
-
-            // 如果是音频资源 ID（通过 handleSound 返回的）
             if (item && typeof item === "object" && item.url) {
-              return "audio"; // 或者返回 item.url
+              return "audio";
             }
-
-            // 如果是 Promise
             if (item instanceof Promise) {
-              return item; // 保持 Promise 不变
+              return item;
             }
-
-            // 其他基本类型值直接返回
             return item;
           });
         };
