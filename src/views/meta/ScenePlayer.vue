@@ -60,6 +60,34 @@ const rotatingObjects = ref<
   }>
 >([]);
 
+const moveableObjects = ref<
+  Array<{
+    mesh: THREE.Object3D;
+    isDragging: boolean;
+    magnetic: boolean;
+    scalable: boolean;
+    limit: {
+      x: { enable: boolean; min: number; max: number };
+      y: { enable: boolean; min: number; max: number };
+      z: { enable: boolean; min: number; max: number };
+    };
+  }>
+>([]);
+
+// 添加拖拽状态管理
+const dragState = reactive({
+  isDragging: false,
+  draggedObject: null as THREE.Object3D | null, // 拖动的对象
+  dragStartPosition: new THREE.Vector3(), // 拖动开始位置
+  dragOffset: new THREE.Vector3(), // 拖动偏移量
+  mouseStartPosition: new THREE.Vector2(), // 鼠标开始位置
+  lastIntersection: new THREE.Vector3(), // 最后一次交点
+});
+
+const controls = ref<OrbitControls | null>(null);
+const mouse = new THREE.Vector2(); // 鼠标位置
+const raycaster = new THREE.Raycaster(); // 射线投射器
+
 const loadModel = async (resource: any, entity: any) => {
   console.log("开始加载模型:", {
     entityType: entity.type,
@@ -129,10 +157,6 @@ const loadModel = async (resource: any, entity: any) => {
               entity.parameters.transform.scale.z * baseScale
             );
           }
-
-          // 添加点击事件处理
-          const raycaster = new THREE.Raycaster();
-          const mouse = new THREE.Vector2();
 
           const handleVideoClick = (event: MouseEvent) => {
             // 计算鼠标位置
@@ -551,20 +575,19 @@ const loadModel = async (resource: any, entity: any) => {
             );
             // 碰撞触发
             const triggerComponent = entity.children.components.find(
-              (comp: any) =>
-                comp.type === "Trigger" && comp.parameters.action === "碰撞触发"
+              (comp: any) => comp.type === "Trigger"
             );
             // 自旋转
             const rotateComponent = entity.children.components.find(
               (comp: any) => comp.type === "Rotate"
             );
+            // 可移动
+            const movedComponent = entity.children.components.find(
+              (comp: any) => comp.type === "Moved"
+            );
 
             if (actionComponent) {
               console.log("发现点击触发组件:", actionComponent);
-
-              // 创建射线投射器
-              const raycaster = new THREE.Raycaster();
-              const mouse = new THREE.Vector2();
 
               let isExecuting = false;
 
@@ -707,6 +730,153 @@ const loadModel = async (resource: any, entity: any) => {
                         speed: speed,
                       });
                     }
+                  },
+                },
+              };
+
+              sources.set(uuid, sourceData);
+            }
+            if (movedComponent) {
+              console.log("发现可移动组件:", movedComponent);
+
+              const moveableObject = {
+                mesh: model,
+                isDragging: false,
+                magnetic: movedComponent.parameters.magnetic,
+                scalable: movedComponent.parameters.scalable,
+                limit: movedComponent.parameters.limit,
+              };
+
+              moveableObjects.value.push(moveableObject);
+
+              // 创建平面用于拖拽
+              const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0)); // 拖动平面
+              const intersection = new THREE.Vector3(); // 拖动交点
+
+              // 添加鼠标事件处理
+              const onMouseDown = (event: MouseEvent) => {
+                event.preventDefault();
+                const rect = renderer!.domElement.getBoundingClientRect();
+                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera!);
+                const intersects = raycaster.intersectObject(model, true);
+
+                if (intersects.length > 0) {
+                  console.log("开始拖拽模型:", entity.parameters.uuid);
+                  dragState.isDragging = true;
+                  dragState.draggedObject = model;
+                  dragState.dragStartPosition.copy(model.position);
+                  dragState.mouseStartPosition.copy(mouse);
+
+                  // 计算点击点与物体中心的偏移
+                  const intersectPoint = intersects[0].point;
+                  dragState.dragOffset.copy(model.position).sub(intersectPoint);
+                  dragState.lastIntersection.copy(intersectPoint);
+
+                  controls.value!.enabled = false;
+                }
+              };
+
+              const onMouseMove = (event: MouseEvent) => {
+                if (!dragState.isDragging || !dragState.draggedObject) return;
+
+                const rect = renderer!.domElement.getBoundingClientRect();
+                const mouse = new THREE.Vector2(
+                  ((event.clientX - rect.left) / rect.width) * 2 - 1,
+                  -((event.clientY - rect.top) / rect.height) * 2 + 1
+                );
+
+                raycaster.setFromCamera(mouse, camera!);
+
+                // 创建一个与相机视角垂直的平面
+                const cameraNormal = new THREE.Vector3(0, 0, -1);
+                cameraNormal.applyQuaternion(camera!.quaternion);
+                const dragPlane = new THREE.Plane(
+                  cameraNormal,
+                  -dragState.dragStartPosition.dot(cameraNormal)
+                );
+
+                const intersection = new THREE.Vector3();
+
+                if (raycaster.ray.intersectPlane(dragPlane, intersection)) {
+                  // 应用偏移
+                  intersection.add(dragState.dragOffset);
+
+                  // 计算平滑移动
+                  const smoothFactor = 0.5; // 平滑因子
+                  const newPosition = new THREE.Vector3();
+                  newPosition.lerpVectors(
+                    dragState.draggedObject.position,
+                    intersection,
+                    smoothFactor
+                  );
+
+                  // 应用移动限制
+                  if (moveableObject.limit.x.enable) {
+                    newPosition.x = THREE.MathUtils.clamp(
+                      newPosition.x,
+                      moveableObject.limit.x.min,
+                      moveableObject.limit.x.max
+                    );
+                  }
+
+                  if (moveableObject.limit.y.enable) {
+                    newPosition.y = THREE.MathUtils.clamp(
+                      newPosition.y,
+                      moveableObject.limit.y.min,
+                      moveableObject.limit.y.max
+                    );
+                  }
+
+                  if (moveableObject.limit.z.enable) {
+                    newPosition.z = THREE.MathUtils.clamp(
+                      newPosition.z,
+                      moveableObject.limit.z.min,
+                      moveableObject.limit.z.max
+                    );
+                  }
+
+                  dragState.draggedObject.position.copy(newPosition);
+                  dragState.lastIntersection.copy(intersection);
+                  console.log("移动到位置:", newPosition);
+                }
+              };
+
+              const onMouseUp = () => {
+                if (dragState.isDragging) {
+                  console.log("结束拖拽");
+                  dragState.isDragging = false;
+                  dragState.draggedObject = null;
+                  controls.value!.enabled = true;
+                }
+              };
+
+              // 添加事件监听器
+              renderer!.domElement.addEventListener("mousedown", onMouseDown);
+              document.addEventListener("mousemove", onMouseMove);
+              document.addEventListener("mouseup", onMouseUp);
+
+              // 更新 sourceData
+              const sourceData = {
+                type: "model",
+                data: {
+                  mesh: model,
+                  setVisibility: (isVisible: boolean) => {
+                    model.visible =
+                      isVisible &&
+                      (entity.parameters.active !== undefined
+                        ? entity.parameters.active
+                        : true);
+                  },
+                  cleanup: () => {
+                    renderer!.domElement.removeEventListener(
+                      "mousedown",
+                      onMouseDown
+                    );
+                    document.removeEventListener("mousemove", onMouseMove);
+                    document.removeEventListener("mouseup", onMouseUp);
                   },
                 },
               };
@@ -944,12 +1114,12 @@ onMounted(async () => {
   threeScene.add(fillLight);
 
   // 轨道控制器设置
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.05;
-  controls.screenSpacePanning = true;
-  controls.minDistance = 1;
-  controls.maxDistance = 50;
+  controls.value = new OrbitControls(camera, renderer.domElement);
+  controls.value.enableDamping = true;
+  controls.value.dampingFactor = 0.05;
+  controls.value.screenSpacePanning = true;
+  controls.value.minDistance = 1;
+  controls.value.maxDistance = 50;
 
   // 加载所有模型
   const metaData = JSON.parse(props.meta.data);
@@ -1072,7 +1242,7 @@ onMounted(async () => {
       }
     }
 
-    controls.update();
+    controls.value!.update();
     renderer!.render(threeScene, camera!);
   };
   animate();
@@ -1128,6 +1298,14 @@ onUnmounted(() => {
 
   // 清理碰撞检测数据
   collisionObjects.value = [];
+  // 清理旋转对象
+  rotatingObjects.value = [];
+  // 清理可移动对象
+  moveableObjects.value = [];
+  // 清理拖拽状态
+  dragState.isDragging = false;
+  // 清理拖拽对象
+  dragState.draggedObject = null;
 });
 
 // 暴露方法
