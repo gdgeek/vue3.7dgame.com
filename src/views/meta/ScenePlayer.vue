@@ -53,6 +53,13 @@ const collisionObjects = ref<
   }>
 >([]);
 
+const rotatingObjects = ref<
+  Array<{
+    mesh: THREE.Object3D;
+    speed: { x: number; y: number; z: number };
+  }>
+>([]);
+
 const loadModel = async (resource: any, entity: any) => {
   console.log("开始加载模型:", {
     entityType: entity.type,
@@ -547,6 +554,10 @@ const loadModel = async (resource: any, entity: any) => {
               (comp: any) =>
                 comp.type === "Trigger" && comp.parameters.action === "碰撞触发"
             );
+            // 自旋转
+            const rotateComponent = entity.children.components.find(
+              (comp: any) => comp.type === "Rotate"
+            );
 
             if (actionComponent) {
               console.log("发现点击触发组件:", actionComponent);
@@ -651,10 +662,56 @@ const loadModel = async (resource: any, entity: any) => {
 
               // 在 sources 中保存更新函数
               const sourceData = sources.get(uuid);
-              console.error("sourceData:", sourceData);
+
               if (sourceData) {
                 sourceData.data.updateBoundingBox = updateBoundingBox;
               }
+            }
+            if (rotateComponent) {
+              console.log("发现自旋转组件:", rotateComponent);
+
+              // 将速度从度/秒转换为弧度/秒
+              const speed = {
+                x: THREE.MathUtils.degToRad(rotateComponent.parameters.speed.x),
+                y: THREE.MathUtils.degToRad(rotateComponent.parameters.speed.y),
+                z: THREE.MathUtils.degToRad(rotateComponent.parameters.speed.z),
+              };
+
+              // 添加到旋转对象列表
+              rotatingObjects.value.push({
+                mesh: model,
+                speed: speed,
+              });
+
+              // 在 sourceData 中添加控制旋转的方法
+              const sourceData = {
+                type: "model",
+                data: {
+                  mesh: model,
+                  setVisibility: (isVisible: boolean) => {
+                    model.visible =
+                      isVisible &&
+                      (entity.parameters.active !== undefined
+                        ? entity.parameters.active
+                        : true);
+                  },
+                  setRotating: (isRotating: boolean) => {
+                    const index = rotatingObjects.value.findIndex(
+                      (obj) => obj.mesh === model
+                    );
+                    if (index !== -1 && !isRotating) {
+                      rotatingObjects.value.splice(index, 1);
+                    } else if (index === -1 && isRotating) {
+                      rotatingObjects.value.push({
+                        mesh: model,
+                        speed: speed,
+                      });
+                    }
+                  },
+                },
+              };
+
+              sources.set(uuid, sourceData);
             } else {
               sources.set(uuid, {
                 type: "model",
@@ -953,6 +1010,13 @@ onMounted(async () => {
 
     const delta = clock.getDelta();
     mixers.forEach((mixer) => mixer.update(delta));
+
+    // 更新旋转
+    rotatingObjects.value.forEach((obj) => {
+      obj.mesh.rotation.x += obj.speed.x * delta;
+      obj.mesh.rotation.y += obj.speed.y * delta;
+      obj.mesh.rotation.z += obj.speed.z * delta;
+    });
 
     // 碰撞检测
     if (collisionObjects.value.length > 0) {
