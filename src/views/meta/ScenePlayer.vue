@@ -24,6 +24,14 @@ const props = defineProps<{
   meta: any;
 }>();
 
+declare global {
+  interface Window {
+    meta: {
+      [key: string]: Function;
+    };
+  }
+}
+
 const scene = ref<HTMLDivElement | null>(null);
 const threeScene = new THREE.Scene();
 let camera: THREE.PerspectiveCamera | null = null;
@@ -518,20 +526,115 @@ const loadModel = async (resource: any, entity: any) => {
             });
           }
 
-          // const uuid = entity.parameters.uuid.toString();
-          sources.set(uuid, {
-            type: "model",
-            data: {
-              mesh: model,
-              setVisibility: (isVisible: boolean) => {
-                model.visible =
-                  isVisible &&
-                  (entity.parameters.active !== undefined
-                    ? entity.parameters.active
-                    : true);
+          if (entity.children?.components) {
+            const actionComponent = entity.children.components.find(
+              (comp: any) => comp.type === "Action"
+            );
+
+            if (actionComponent) {
+              console.log("发现点击触发组件:", actionComponent);
+
+              // 创建射线投射器
+              const raycaster = new THREE.Raycaster();
+              const mouse = new THREE.Vector2();
+
+              let isExecuting = false;
+
+              // 添加点击事件处理
+              const handleClick = async (event: MouseEvent) => {
+                if (isExecuting) {
+                  console.log("事件正在执行中，请等待完成...");
+                  return;
+                }
+
+                // 计算鼠标位置
+                const rect = renderer!.domElement.getBoundingClientRect();
+                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+                // 更新射线
+                raycaster.setFromCamera(mouse, camera!);
+
+                // 检查是否点击到模型
+                const intersects = raycaster.intersectObject(model, true);
+                if (intersects.length > 0) {
+                  console.log("模型被点击:", entity.parameters.uuid);
+
+                  // 查找并执行对应的事件处理函数
+                  const eventId = actionComponent.parameters.uuid;
+                  if (
+                    window.meta &&
+                    typeof window.meta[`@${eventId}`] === "function"
+                  ) {
+                    try {
+                      isExecuting = true;
+                      await window.meta[`@${eventId}`]();
+                    } catch (error) {
+                      console.error("执行事件处理函数失败:", error);
+                    } finally {
+                      isExecuting = false;
+                    }
+                  }
+                }
+              };
+
+              // 添加点击事件监听器
+              renderer!.domElement.addEventListener("click", handleClick);
+
+              // 在sources中存储模型数据时包含cleanup函数
+              const sourceData = {
+                type: "model",
+                data: {
+                  mesh: model,
+                  setVisibility: (isVisible: boolean) => {
+                    model.visible =
+                      isVisible &&
+                      (entity.parameters.active !== undefined
+                        ? entity.parameters.active
+                        : true);
+                  },
+                  cleanup: () => {
+                    renderer!.domElement.removeEventListener(
+                      "click",
+                      handleClick
+                    );
+                  },
+                },
+              };
+
+              sources.set(uuid, sourceData);
+            } else {
+              // 如果没有点击触发组件，正常设置sources
+              sources.set(uuid, {
+                type: "model",
+                data: {
+                  mesh: model,
+                  setVisibility: (isVisible: boolean) => {
+                    model.visible =
+                      isVisible &&
+                      (entity.parameters.active !== undefined
+                        ? entity.parameters.active
+                        : true);
+                  },
+                },
+              });
+            }
+          } else {
+            // 如果没有组件，正常设置sources
+            sources.set(uuid, {
+              type: "model",
+              data: {
+                mesh: model,
+                setVisibility: (isVisible: boolean) => {
+                  model.visible =
+                    isVisible &&
+                    (entity.parameters.active !== undefined
+                      ? entity.parameters.active
+                      : true);
+                },
               },
-            },
-          });
+            });
+          }
 
           threeScene.add(model);
 

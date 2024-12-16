@@ -1002,6 +1002,7 @@ const run = async () => {
     try {
       const wrappedCode = `
             return async function(sound, THREE, task, tween, helper, animation) {
+              const verse = {};
               ${JavaScriptCode.value}
             }`;
       const wrappedFunction = new Function(wrappedCode);

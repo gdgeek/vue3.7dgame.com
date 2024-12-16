@@ -861,6 +861,7 @@ const run = async () => {
   await waitForModels();
 
   if (JavaScriptCode.value) {
+    window.meta = {};
     const polygen = {
       playAnimation: (polygenInstance: any, animationName: string) => {
         if (!polygenInstance) {
@@ -1223,7 +1224,7 @@ const run = async () => {
     try {
       const wrappedCode = `
         return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, text, point) {
-          const meta = {};
+          const meta = window.meta;
           const index = "${meta.value?.id}";
           const Vector3 = THREE.Vector3;
           const event = {
@@ -1240,10 +1241,6 @@ const run = async () => {
           };
 
           ${JavaScriptCode.value}
-
-          if (typeof meta['@c407bd1b-8113-499c-b0ff-495f65c9d470'] === 'function') {
-            await meta['@c407bd1b-8113-499c-b0ff-495f65c9d470']();
-          }
           
           if (typeof meta['@init'] === 'function') {
             await meta['@init']();
