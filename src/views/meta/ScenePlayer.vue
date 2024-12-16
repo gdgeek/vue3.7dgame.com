@@ -42,6 +42,17 @@ let clock = new THREE.Clock();
 
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
+const collisionObjects = ref<
+  Array<{
+    sourceUuid: string;
+    targetUuid: string;
+    eventUuid: string;
+    boundingBox: THREE.Box3;
+    isColliding: boolean;
+    lastPosition: THREE.Vector3;
+  }>
+>([]);
+
 const loadModel = async (resource: any, entity: any) => {
   console.log("开始加载模型:", {
     entityType: entity.type,
@@ -527,8 +538,14 @@ const loadModel = async (resource: any, entity: any) => {
           }
 
           if (entity.children?.components) {
+            // 点击触发
             const actionComponent = entity.children.components.find(
               (comp: any) => comp.type === "Action"
+            );
+            // 碰撞触发
+            const triggerComponent = entity.children.components.find(
+              (comp: any) =>
+                comp.type === "Trigger" && comp.parameters.action === "碰撞触发"
             );
 
             if (actionComponent) {
@@ -603,8 +620,42 @@ const loadModel = async (resource: any, entity: any) => {
               };
 
               sources.set(uuid, sourceData);
+            }
+            if (triggerComponent) {
+              console.log("发现碰撞触发组件:", triggerComponent);
+
+              // 创建包围盒
+              const boundingBox = new THREE.Box3();
+              boundingBox.setFromObject(model);
+
+              // 记录上一帧的位置
+              let lastPosition = model.position.clone();
+
+              // 添加到动画循环中检查的碰撞对象列表
+              const collisionData = {
+                sourceUuid: entity.parameters.uuid,
+                targetUuid: triggerComponent.parameters.target,
+                eventUuid: triggerComponent.parameters.uuid,
+                boundingBox: boundingBox,
+                isColliding: false, // 防止重复触发
+                lastPosition: lastPosition,
+              };
+
+              // 将碰撞数据添加到碰撞检测列表
+              collisionObjects.value.push(collisionData);
+
+              // 更新包围盒的函数
+              const updateBoundingBox = () => {
+                boundingBox.setFromObject(model);
+              };
+
+              // 在 sources 中保存更新函数
+              const sourceData = sources.get(uuid);
+              console.error("sourceData:", sourceData);
+              if (sourceData) {
+                sourceData.data.updateBoundingBox = updateBoundingBox;
+              }
             } else {
-              // 如果没有点击触发组件，正常设置sources
               sources.set(uuid, {
                 type: "model",
                 data: {
@@ -620,7 +671,6 @@ const loadModel = async (resource: any, entity: any) => {
               });
             }
           } else {
-            // 如果没有组件，正常设置sources
             sources.set(uuid, {
               type: "model",
               data: {
@@ -904,6 +954,60 @@ onMounted(async () => {
     const delta = clock.getDelta();
     mixers.forEach((mixer) => mixer.update(delta));
 
+    // 碰撞检测
+    if (collisionObjects.value.length > 0) {
+      for (const collisionObj of collisionObjects.value) {
+        // 更新当前物体的包围盒
+        const sourceModel = sources.get(collisionObj.sourceUuid)?.data.mesh;
+        const targetModel = sources.get(collisionObj.targetUuid)?.data.mesh;
+
+        if (sourceModel && targetModel) {
+          // 检查物体是否移动
+          if (!sourceModel.position.equals(collisionObj.lastPosition)) {
+            // 更新包围盒
+            collisionObj.boundingBox.setFromObject(sourceModel);
+
+            // 创建目标物体的包围盒
+            const targetBoundingBox = new THREE.Box3().setFromObject(
+              targetModel
+            );
+
+            // 检测碰撞
+            const isColliding =
+              collisionObj.boundingBox.intersectsBox(targetBoundingBox);
+
+            // 如果发生碰撞且之前未处于碰撞状态
+            if (isColliding && !collisionObj.isColliding) {
+              collisionObj.isColliding = true;
+              console.log("检测到碰撞:", {
+                source: collisionObj.sourceUuid,
+                target: collisionObj.targetUuid,
+              });
+
+              // 执行碰撞事件
+              if (
+                window.meta &&
+                typeof window.meta[`@${collisionObj.eventUuid}`] === "function"
+              ) {
+                try {
+                  window.meta[`@${collisionObj.eventUuid}`]();
+                } catch (error) {
+                  console.error("执行碰撞事件处理函数失败:", error);
+                }
+              }
+            }
+            // 如果不再碰撞，重置碰撞状态
+            else if (!isColliding && collisionObj.isColliding) {
+              collisionObj.isColliding = false;
+            }
+
+            // 更新上一帧位置
+            collisionObj.lastPosition.copy(sourceModel.position);
+          }
+        }
+      }
+    }
+
     controls.update();
     renderer!.render(threeScene, camera!);
   };
@@ -957,6 +1061,9 @@ onUnmounted(() => {
   sources.clear();
   mixers.clear();
   clock = new THREE.Clock();
+
+  // 清理碰撞检测数据
+  collisionObjects.value = [];
 });
 
 // 暴露方法
