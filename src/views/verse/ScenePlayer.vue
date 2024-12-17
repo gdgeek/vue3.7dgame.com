@@ -39,12 +39,29 @@ let renderer: THREE.WebGLRenderer | null = null;
 let mixers: Map<string, THREE.AnimationMixer> = new Map();
 let sources: Map<string, any> = new Map();
 let clock = new THREE.Clock();
-
+const eventContainer = ref<{ [key: string]: any }>({});
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
 const controls = ref<OrbitControls | null>(null);
 const mouse = new THREE.Vector2(); // 鼠标位置
 const raycaster = new THREE.Raycaster(); // 射线投射器
+// 初始化事件容器
+const initEventContainer = () => {
+  if (props.verse?.metas) {
+    props.verse.metas.forEach((meta: any) => {
+      if (meta.events) {
+        try {
+          const events = JSON.parse(meta.events);
+          eventContainer.value[meta.id] = events;
+          console.log(`Meta ${meta.id} 的事件已加载:`, events);
+        } catch (error) {
+          console.error(`解析Meta ${meta.id} 的事件失败:`, error);
+        }
+      }
+    });
+  }
+};
+
 // 加载模型的主要函数
 const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
   console.log("开始加载模型:", {
@@ -773,7 +790,7 @@ onMounted(async () => {
   // 加载verse中所有数据
   if (props.verse?.data) {
     const verseData = JSON.parse(props.verse.data);
-    console.log("解析后的verseData:", verseData);
+    console.log("解析后的verse全部数据:", props.verse);
     if (verseData.children?.modules) {
       for (const module of verseData.children.modules) {
         const metaId = module.parameters.meta_id;
@@ -830,6 +847,9 @@ onMounted(async () => {
       }
     }
   }
+
+  initEventContainer();
+  console.error("事件容器:", eventContainer.value);
 
   // 动画循环
   const animate = () => {
