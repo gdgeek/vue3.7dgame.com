@@ -1002,6 +1002,7 @@ const run = async () => {
     try {
       const wrappedCode = `
             return async function(sound, THREE, task, tween, helper, animation) {
+              const meta = window.verse;
               const verse = {};
               ${JavaScriptCode.value}
             }`;

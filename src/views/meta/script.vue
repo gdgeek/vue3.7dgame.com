@@ -912,6 +912,7 @@ const run = async () => {
     const helper = {
       handler: (index: string, uuid: string) => {
         const source = scenePlayer.value?.sources.get(uuid);
+        console.error("handler", source);
         if (!source) {
           console.error(`找不到UUID为 ${uuid} 的实体`);
           return null;
@@ -1213,10 +1214,11 @@ const run = async () => {
 
     const point = {
       setVisual: (object: any, setVisual: boolean) => {
+        console.error("setVisual", object, setVisual);
         if (object && typeof object.setVisibility === "function") {
           object.setVisibility(setVisual);
         } else {
-          console.warn("object.setVisibility is not a function");
+          console.error("object.setVisibility is not a function");
         }
       },
     };

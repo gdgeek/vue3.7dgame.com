@@ -93,14 +93,18 @@ const loadModel = async (resource: any, entity: any) => {
     entityType: entity.type,
     entityUUID: entity.parameters?.uuid,
     resourceType: resource.type,
+    isActive: entity.parameters.active,
   });
 
-  console.log("加载资源参数:", {
-    resource,
-    entity,
-    resourceId: resource.id,
-    parametersUUID: entity.parameters?.uuid,
-  });
+  // 初始化可见性
+  const setInitialVisibility = (mesh: THREE.Object3D) => {
+    mesh.visible =
+      entity.parameters.active !== undefined ? entity.parameters.active : true;
+    console.error(
+      `设置模型 ${entity.parameters.uuid} 的初始可见性:`,
+      mesh.visible
+    );
+  };
 
   // 处理视频类型
   if (resource.type === "video" || entity.type === "Video") {
@@ -133,6 +137,7 @@ const loadModel = async (resource: any, entity: any) => {
           });
 
           const mesh = new THREE.Mesh(geometry, material);
+          setInitialVisibility(mesh);
 
           // 应用变换
           if (entity.parameters?.transform) {
@@ -196,11 +201,7 @@ const loadModel = async (resource: any, entity: any) => {
                 );
               },
               setVisibility: (isVisible: boolean) => {
-                mesh.visible =
-                  isVisible &&
-                  (entity.parameters.active !== undefined
-                    ? entity.parameters.active
-                    : true);
+                mesh.visible = isVisible;
               },
             },
           });
@@ -269,6 +270,7 @@ const loadModel = async (resource: any, entity: any) => {
           });
 
           const mesh = new THREE.Mesh(geometry, material);
+          setInitialVisibility(mesh);
 
           // 应用变换
           if (entity.parameters?.transform) {
@@ -303,11 +305,7 @@ const loadModel = async (resource: any, entity: any) => {
             data: {
               mesh,
               setVisibility: (isVisible: boolean) => {
-                mesh.visible =
-                  isVisible &&
-                  (entity.parameters.active !== undefined
-                    ? entity.parameters.active
-                    : true);
+                mesh.visible = isVisible;
               },
             },
           });
@@ -379,6 +377,7 @@ const loadModel = async (resource: any, entity: any) => {
         });
 
         const mesh = new THREE.Mesh(geometry, material);
+        setInitialVisibility(mesh);
 
         // 应用变换
         if (entity.parameters?.transform) {
@@ -416,11 +415,7 @@ const loadModel = async (resource: any, entity: any) => {
               texture.needsUpdate = true;
             },
             setVisibility: (isVisible: boolean) => {
-              mesh.visible =
-                isVisible &&
-                (entity.parameters.active !== undefined
-                  ? entity.parameters.active
-                  : true);
+              mesh.visible = isVisible;
             },
           },
         });
@@ -457,6 +452,7 @@ const loadModel = async (resource: any, entity: any) => {
             });
 
             const voxMesh = new VOXMesh(chunk, 1);
+            setInitialVisibility(voxMesh);
 
             // 应用变换
             if (entity.parameters?.transform) {
@@ -489,11 +485,7 @@ const loadModel = async (resource: any, entity: any) => {
               data: {
                 mesh: voxMesh,
                 setVisibility: (isVisible: boolean) => {
-                  voxMesh.visible =
-                    isVisible &&
-                    (entity.parameters.active !== undefined
-                      ? entity.parameters.active
-                      : true);
+                  voxMesh.visible = isVisible;
                 },
               },
             });
@@ -523,7 +515,7 @@ const loadModel = async (resource: any, entity: any) => {
       );
     });
   } else {
-    // 处理其他类型（如GLTF模型）
+    // 处理gltf模型
     const loader = new GLTFLoader();
     const url = convertToHttps(resource.file.url);
 
@@ -532,6 +524,7 @@ const loadModel = async (resource: any, entity: any) => {
         url,
         (gltf) => {
           const model = gltf.scene;
+          setInitialVisibility(model);
           const uuid = entity.parameters.uuid.toString();
           if (!entity.parameters || !entity.parameters.uuid) {
             console.error("entity.parameters对象无效:", entity.parameters);
@@ -638,11 +631,7 @@ const loadModel = async (resource: any, entity: any) => {
                 data: {
                   mesh: model,
                   setVisibility: (isVisible: boolean) => {
-                    model.visible =
-                      isVisible &&
-                      (entity.parameters.active !== undefined
-                        ? entity.parameters.active
-                        : true);
+                    model.visible = isVisible;
                   },
                   cleanup: () => {
                     renderer!.domElement.removeEventListener(
@@ -712,11 +701,7 @@ const loadModel = async (resource: any, entity: any) => {
                 data: {
                   mesh: model,
                   setVisibility: (isVisible: boolean) => {
-                    model.visible =
-                      isVisible &&
-                      (entity.parameters.active !== undefined
-                        ? entity.parameters.active
-                        : true);
+                    model.visible = isVisible;
                   },
                   setRotating: (isRotating: boolean) => {
                     const index = rotatingObjects.value.findIndex(
@@ -871,11 +856,7 @@ const loadModel = async (resource: any, entity: any) => {
                 data: {
                   mesh: model,
                   setVisibility: (isVisible: boolean) => {
-                    model.visible =
-                      isVisible &&
-                      (entity.parameters.active !== undefined
-                        ? entity.parameters.active
-                        : true);
+                    model.visible = isVisible;
                   },
                   cleanup: () => {
                     renderer!.domElement.removeEventListener(
@@ -895,11 +876,7 @@ const loadModel = async (resource: any, entity: any) => {
                 data: {
                   mesh: model,
                   setVisibility: (isVisible: boolean) => {
-                    model.visible =
-                      isVisible &&
-                      (entity.parameters.active !== undefined
-                        ? entity.parameters.active
-                        : true);
+                    model.visible = isVisible;
                   },
                 },
               });
@@ -910,11 +887,7 @@ const loadModel = async (resource: any, entity: any) => {
               data: {
                 mesh: model,
                 setVisibility: (isVisible: boolean) => {
-                  model.visible =
-                    isVisible &&
-                    (entity.parameters.active !== undefined
-                      ? entity.parameters.active
-                      : true);
+                  model.visible = isVisible;
                 },
               },
             });
@@ -968,7 +941,7 @@ const playAnimation = (uuid: string, animationName: string) => {
   }
 
   if (!mixer) {
-    console.error(`找不到UUID为 ${uuid} 的动画混合器`);
+    console.error(`找不到UUID为 ${uuid} 的动��混合器`);
     return;
   }
 
@@ -1262,7 +1235,7 @@ watch(isDark, (newValue) => {
   }
 });
 
-// 在组件卸���时清理资源
+// 在组件卸载时清理资源
 onUnmounted(() => {
   sources.forEach((source) => {
     if (source.type === "video") {

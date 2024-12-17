@@ -24,6 +24,14 @@ const props = defineProps<{
   verse: any;
 }>();
 
+declare global {
+  interface Window {
+    verse: {
+      [key: string]: Function;
+    };
+  }
+}
+
 const scene = ref<HTMLDivElement | null>(null);
 const threeScene = new THREE.Scene();
 let camera: THREE.PerspectiveCamera | null = null;
@@ -34,20 +42,27 @@ let clock = new THREE.Clock();
 
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
+const controls = ref<OrbitControls | null>(null);
+const mouse = new THREE.Vector2(); // 鼠标位置
+const raycaster = new THREE.Raycaster(); // 射线投射器
 // 加载模型的主要函数
 const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
   console.log("开始加载模型:", {
     entityType: entity.type,
     entityUUID: entity.parameters?.uuid,
     resourceType: resource.type,
-    moduleTransform,
+    isActive: entity.parameters.active,
   });
-  console.log("加载资源参数:", {
-    resource,
-    entity,
-    resourceId: resource.id,
-    parametersUUID: entity.parameters?.uuid,
-  });
+
+  // 初始化可见性
+  const setInitialVisibility = (mesh: THREE.Object3D) => {
+    mesh.visible =
+      entity.parameters.active !== undefined ? entity.parameters.active : true;
+    console.error(
+      `设置模型 ${entity.parameters.uuid} 的初始可见性:`,
+      mesh.visible
+    );
+  };
 
   // 合并Module和Entity的transform
   const combinedTransform = {
@@ -117,6 +132,7 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
           });
 
           const mesh = new THREE.Mesh(geometry, material);
+          setInitialVisibility(mesh);
 
           // 应用变换
           if (entity.parameters?.transform) {
@@ -139,10 +155,6 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
               combinedTransform.scale.z * baseScale
             );
           }
-
-          // 添加点击事件处理
-          const raycaster = new THREE.Raycaster();
-          const mouse = new THREE.Vector2();
 
           const handleVideoClick = (event: MouseEvent) => {
             // 计算鼠标位置
@@ -182,11 +194,7 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
                 );
               },
               setVisibility: (isVisible: boolean) => {
-                mesh.visible =
-                  isVisible &&
-                  (entity.parameters.active !== undefined
-                    ? entity.parameters.active
-                    : true);
+                mesh.visible = isVisible;
               },
             },
           });
@@ -255,6 +263,7 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
           });
 
           const mesh = new THREE.Mesh(geometry, material);
+          setInitialVisibility(mesh);
 
           // 应用变换
           if (entity.parameters?.transform) {
@@ -287,11 +296,7 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
             data: {
               mesh,
               setVisibility: (isVisible: boolean) => {
-                mesh.visible =
-                  isVisible &&
-                  (entity.parameters.active !== undefined
-                    ? entity.parameters.active
-                    : true);
+                mesh.visible = isVisible;
               },
             },
           });
@@ -400,11 +405,7 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
               texture.needsUpdate = true;
             },
             setVisibility: (isVisible: boolean) => {
-              mesh.visible =
-                isVisible &&
-                (entity.parameters.active !== undefined
-                  ? entity.parameters.active
-                  : true);
+              mesh.visible = isVisible;
             },
           },
         });
@@ -441,6 +442,7 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
             });
 
             const voxMesh = new VOXMesh(chunk, 1);
+            setInitialVisibility(voxMesh);
 
             // 应用变换
             if (entity.parameters?.transform) {
@@ -473,11 +475,7 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
               data: {
                 mesh: voxMesh,
                 setVisibility: (isVisible: boolean) => {
-                  voxMesh.visible =
-                    isVisible &&
-                    (entity.parameters.active !== undefined
-                      ? entity.parameters.active
-                      : true);
+                  voxMesh.visible = isVisible;
                 },
               },
             });
@@ -507,7 +505,7 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
       );
     });
   } else {
-    // 处理其他类型（如GLTF模型）
+    // 处理gltf模型
     const loader = new GLTFLoader();
     const url = convertToHttps(resource.file.url);
 
@@ -516,6 +514,7 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
         url,
         (gltf) => {
           const model = gltf.scene;
+          setInitialVisibility(model);
           const uuid = entity.parameters.uuid.toString();
           if (!entity.parameters || !entity.parameters.uuid) {
             console.error("entity.parameters对象无效:", entity.parameters);
@@ -558,11 +557,7 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
             data: {
               mesh: model,
               setVisibility: (isVisible: boolean) => {
-                model.visible =
-                  isVisible &&
-                  (entity.parameters.active !== undefined
-                    ? entity.parameters.active
-                    : true);
+                model.visible = isVisible;
               },
             },
           });
@@ -768,12 +763,12 @@ onMounted(async () => {
   threeScene.add(fillLight);
 
   // 轨道控制器设置
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.05;
-  controls.screenSpacePanning = true;
-  controls.minDistance = 1; // 最小距离
-  controls.maxDistance = 1000; // 最大距离
+  controls.value = new OrbitControls(camera, renderer.domElement);
+  controls.value.enableDamping = true;
+  controls.value.dampingFactor = 0.05;
+  controls.value.screenSpacePanning = true;
+  controls.value.minDistance = 1; // 最小距离
+  controls.value.maxDistance = 1000; // 最大距离
 
   // 加载verse中所有数据
   if (props.verse?.data) {
@@ -841,7 +836,7 @@ onMounted(async () => {
     requestAnimationFrame(animate);
     const delta = clock.getDelta();
     mixers.forEach((mixer) => mixer.update(delta));
-    controls.update();
+    controls.value!.update();
     renderer!.render(threeScene, camera!);
   };
   animate();
