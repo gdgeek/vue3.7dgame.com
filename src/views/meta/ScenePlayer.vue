@@ -804,40 +804,47 @@ const loadModel = async (resource: any, entity: any) => {
                   // 应用偏移
                   intersection.add(dragState.dragOffset);
 
-                  // 计算平滑移动
-                  const smoothFactor = 0.5; // 平滑因子
+                  // 找到当前正在拖动的物体对应的moveableObject
+                  const moveableObject = moveableObjects.value.find(
+                    (obj) => obj.mesh === dragState.draggedObject
+                  );
+
+                  // 计算新位置
                   const newPosition = new THREE.Vector3();
                   newPosition.lerpVectors(
                     dragState.draggedObject.position,
                     intersection,
-                    smoothFactor
+                    0.5
                   );
 
-                  // 应用移动限制
-                  if (moveableObject.limit.x.enable) {
-                    newPosition.x = THREE.MathUtils.clamp(
-                      newPosition.x,
-                      moveableObject.limit.x.min,
-                      moveableObject.limit.x.max
-                    );
+                  // 只有当moveableObject存在且有限制设置时才应用限制
+                  if (moveableObject?.limit) {
+                    if (moveableObject.limit.x.enable) {
+                      newPosition.x = THREE.MathUtils.clamp(
+                        newPosition.x,
+                        moveableObject.limit.x.min,
+                        moveableObject.limit.x.max
+                      );
+                    }
+
+                    if (moveableObject.limit.y.enable) {
+                      newPosition.y = THREE.MathUtils.clamp(
+                        newPosition.y,
+                        moveableObject.limit.y.min,
+                        moveableObject.limit.y.max
+                      );
+                    }
+
+                    if (moveableObject.limit.z.enable) {
+                      newPosition.z = THREE.MathUtils.clamp(
+                        newPosition.z,
+                        moveableObject.limit.z.min,
+                        moveableObject.limit.z.max
+                      );
+                    }
                   }
 
-                  if (moveableObject.limit.y.enable) {
-                    newPosition.y = THREE.MathUtils.clamp(
-                      newPosition.y,
-                      moveableObject.limit.y.min,
-                      moveableObject.limit.y.max
-                    );
-                  }
-
-                  if (moveableObject.limit.z.enable) {
-                    newPosition.z = THREE.MathUtils.clamp(
-                      newPosition.z,
-                      moveableObject.limit.z.min,
-                      moveableObject.limit.z.max
-                    );
-                  }
-
+                  // 应用新位置
                   dragState.draggedObject.position.copy(newPosition);
                   dragState.lastIntersection.copy(intersection);
                   console.log("移动到位置:", newPosition);
@@ -1255,7 +1262,7 @@ watch(isDark, (newValue) => {
   }
 });
 
-// 在组件卸载时清理资源
+// 在组件卸���时清理资源
 onUnmounted(() => {
   sources.forEach((source) => {
     if (source.type === "video") {
