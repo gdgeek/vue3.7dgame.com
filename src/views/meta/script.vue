@@ -12,7 +12,12 @@
               <el-button type="primary" size="small" @click="run"
                 >测试运行</el-button
               >
-              <el-button type="primary" size="small" @click="disabled = false">
+              <el-button
+                v-if="disabled"
+                type="primary"
+                size="small"
+                @click="disabled = false"
+              >
                 返回
               </el-button>
               <el-button-group style="float: right">
@@ -183,7 +188,25 @@
             </el-tabs>
           </el-container>
           <div v-if="disabled" class="runArea">
-            <ScenePlayer ref="scenePlayer" :meta="meta"></ScenePlayer>
+            <div class="scene-fullscreen-controls">
+              <el-button
+                class="scene-fullscreen-btn"
+                size="small"
+                type="primary"
+                plain
+                @click="toggleSceneFullscreen"
+              >
+                <el-icon>
+                  <FullScreen v-if="!isSceneFullscreen"></FullScreen>
+                  <Aim v-else></Aim>
+                </el-icon>
+              </el-button>
+            </div>
+            <ScenePlayer
+              ref="scenePlayer"
+              :meta="meta"
+              :is-scene-fullscreen="isSceneFullscreen"
+            ></ScenePlayer>
           </div>
         </el-card>
       </el-main>
@@ -224,8 +247,14 @@ const LuaCode = ref("");
 const JavaScriptCode = ref("");
 const settingsStore = useSettingsStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
-
+const disabled = ref<boolean>(false);
+const scenePlayer = ref<InstanceType<typeof ScenePlayer>>();
+const isSceneFullscreen = ref(false);
 const isFullscreen = ref(false);
+const showCodeDialog = ref(false);
+const currentCode = ref("");
+const currentCodeType = ref("");
+const codeDialogTitle = ref("");
 const editorContainer = ref<HTMLElement | null>(null);
 
 const toggleFullscreen = () => {
@@ -243,12 +272,7 @@ const toggleFullscreen = () => {
   }
 };
 
-const showCodeDialog = ref(false);
-const currentCode = ref("");
-const currentCodeType = ref("");
-const codeDialogTitle = ref("");
-
-// 显示全屏代码
+// 全屏代码显示
 const showFullscreenCode = (type: "lua" | "javascript") => {
   currentCodeType.value = type;
   currentCode.value = type === "lua" ? LuaCode.value : JavaScriptCode.value;
@@ -256,22 +280,19 @@ const showFullscreenCode = (type: "lua" | "javascript") => {
   showCodeDialog.value = true;
 };
 
-// 监听 ESC 键关闭代码弹窗
-onMounted(() => {
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && showCodeDialog.value) {
-      showCodeDialog.value = false;
+// 场景全屏
+const toggleSceneFullscreen = () => {
+  if (!document.fullscreenElement) {
+    const container = document.querySelector(".runArea");
+    if (container) {
+      container.requestFullscreen();
+      isSceneFullscreen.value = true;
     }
-  });
-});
-
-onBeforeUnmount(() => {
-  document.removeEventListener("keydown", (e) => {
-    if (e.key === "Escape" && showCodeDialog.value) {
-      showCodeDialog.value = false;
-    }
-  });
-});
+  } else {
+    document.exitFullscreen();
+    isSceneFullscreen.value = false;
+  }
+};
 
 // 定义单次赋值
 const defineSingleAssignment = (initialValue: any) => {
@@ -680,8 +701,19 @@ const getResource = (meta: metaInfo) => {
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
   window.removeEventListener("beforeunload", handleBeforeUnload);
+  document.removeEventListener("keydown", (e) => {
+    if (e.key === "Escape" && showCodeDialog.value) {
+      showCodeDialog.value = false;
+    }
+  });
   document.removeEventListener("fullscreenchange", () => {
     isFullscreen.value = !!document.fullscreenElement;
+  });
+  document.removeEventListener("fullscreenchange", () => {
+    isFullscreen.value = !!document.fullscreenElement;
+  });
+  document.removeEventListener("fullscreenchange", () => {
+    isSceneFullscreen.value = !!document.fullscreenElement;
   });
 });
 onMounted(async () => {
@@ -763,10 +795,18 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && showCodeDialog.value) {
+      showCodeDialog.value = false;
+    }
+  });
+  document.addEventListener("fullscreenchange", () => {
+    isFullscreen.value = !!document.fullscreenElement;
+  });
+  document.addEventListener("fullscreenchange", () => {
+    isSceneFullscreen.value = !!document.fullscreenElement;
+  });
 });
-
-const disabled = ref<boolean>(false);
-const scenePlayer = ref<InstanceType<typeof ScenePlayer>>();
 
 const handlePolygen = (uuid: string) => {
   if (!scenePlayer.value) {
@@ -1386,5 +1426,32 @@ const run = async () => {
 
 .light-theme :deep(.hljs) {
   background-color: #fafafa !important;
+}
+
+.runArea {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.scene-fullscreen-controls {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 100;
+}
+
+.scene-fullscreen-btn {
+  opacity: 0.8;
+}
+
+/* 全屏时的样式 */
+:fullscreen .runArea {
+  height: 100vh !important;
+  padding: 0;
+}
+
+:fullscreen .scene-fullscreen-btn {
+  margin: 10px;
 }
 </style>

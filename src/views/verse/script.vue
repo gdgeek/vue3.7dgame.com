@@ -12,7 +12,12 @@
               <el-button type="primary" size="small" @click="run"
                 >测试运行</el-button
               >
-              <el-button type="primary" size="small" @click="disabled = false">
+              <el-button
+                v-if="disabled"
+                type="primary"
+                size="small"
+                @click="disabled = false"
+              >
                 返回
               </el-button>
               <el-button-group style="float: right">
@@ -142,13 +147,13 @@
                             class="copy-button"
                             text
                             @click="copyCode(LuaCode)"
-                            ><el-icon class="icon"
-                              ><CopyDocument></CopyDocument></el-icon
+                            ><el-icon class="icon">
+                              <CopyDocument></CopyDocument> </el-icon
                             >{{ $t("copy.title") || "Copy" }}</el-button
                           >
                           <pre>
-                           <code class="lua">{{ LuaCode }}</code>
-                          </pre>
+                  <code class="lua">{{ LuaCode }}</code>
+                </pre>
                         </div>
                       </el-tab-pane>
                       <el-tab-pane label="JavaScript" name="javascript">
@@ -167,13 +172,13 @@
                             class="copy-button"
                             text
                             @click="copyCode(JavaScriptCode)"
-                            ><el-icon class="icon"
-                              ><CopyDocument></CopyDocument></el-icon
+                            ><el-icon class="icon">
+                              <CopyDocument></CopyDocument> </el-icon
                             >{{ $t("copy.title") }}</el-button
                           >
                           <pre>
-                            <code class="javascript">{{ JavaScriptCode }}</code>
-                          </pre>
+                  <code class="javascript">{{ JavaScriptCode }}</code>
+                </pre>
                         </div>
                       </el-tab-pane>
                     </el-tabs>
@@ -183,7 +188,25 @@
             </el-tabs>
           </el-container>
           <div v-if="disabled" class="runArea">
-            <ScenePlayer ref="scenePlayer" :verse="verse"></ScenePlayer>
+            <div class="scene-fullscreen-controls">
+              <el-button
+                class="scene-fullscreen-btn"
+                size="small"
+                type="primary"
+                plain
+                @click="toggleSceneFullscreen"
+              >
+                <el-icon>
+                  <FullScreen v-if="!isSceneFullscreen"></FullScreen>
+                  <Aim v-else></Aim>
+                </el-icon>
+              </el-button>
+            </div>
+            <ScenePlayer
+              ref="scenePlayer"
+              :verse="verse"
+              :is-scene-fullscreen="isSceneFullscreen"
+            ></ScenePlayer>
           </div>
         </el-card>
       </el-main>
@@ -216,6 +239,51 @@ const activeName = ref<string>("blockly");
 const languageName = ref<string>("lua");
 const LuaCode = ref("");
 const JavaScriptCode = ref("");
+const disabled = ref<boolean>(false);
+const scenePlayer = ref<InstanceType<typeof ScenePlayer>>();
+const isSceneFullscreen = ref(false);
+const isFullscreen = ref(false);
+const showCodeDialog = ref(false);
+const currentCode = ref("");
+const currentCodeType = ref("");
+const codeDialogTitle = ref("");
+
+const toggleFullscreen = () => {
+  if (!document.fullscreenElement) {
+    // 进入全屏
+    const container = editor.value?.parentElement;
+    if (container) {
+      container.requestFullscreen();
+      isFullscreen.value = true;
+    }
+  } else {
+    // 退出全屏
+    document.exitFullscreen();
+    isFullscreen.value = false;
+  }
+};
+
+// 全屏代码显示
+const showFullscreenCode = (type: "lua" | "javascript") => {
+  currentCodeType.value = type;
+  currentCode.value = type === "lua" ? LuaCode.value : JavaScriptCode.value;
+  codeDialogTitle.value = type === "lua" ? "Lua Code" : "JavaScript Code";
+  showCodeDialog.value = true;
+};
+
+// 场景全屏
+const toggleSceneFullscreen = () => {
+  if (!document.fullscreenElement) {
+    const container = document.querySelector(".runArea");
+    if (container) {
+      container.requestFullscreen();
+      isSceneFullscreen.value = true;
+    }
+  } else {
+    document.exitFullscreen();
+    isSceneFullscreen.value = false;
+  }
+};
 
 // 定义单次赋值
 const defineSingleAssignment = (initialValue: any) => {
@@ -560,6 +628,9 @@ onBeforeUnmount(() => {
   document.removeEventListener("fullscreenchange", () => {
     isFullscreen.value = !!document.fullscreenElement;
   });
+  document.removeEventListener("fullscreenchange", () => {
+    isSceneFullscreen.value = !!document.fullscreenElement;
+  });
 });
 onMounted(async () => {
   window.addEventListener("message", handleMessage);
@@ -602,38 +673,10 @@ onMounted(async () => {
   document.addEventListener("fullscreenchange", () => {
     isFullscreen.value = !!document.fullscreenElement;
   });
+  document.addEventListener("fullscreenchange", () => {
+    isSceneFullscreen.value = !!document.fullscreenElement;
+  });
 });
-
-const isFullscreen = ref(false);
-const showCodeDialog = ref(false);
-const currentCode = ref("");
-const currentCodeType = ref("");
-const codeDialogTitle = ref("");
-
-// 全屏切换
-const toggleFullscreen = () => {
-  if (!document.fullscreenElement) {
-    const container = editor.value?.parentElement;
-    if (container) {
-      container.requestFullscreen();
-      isFullscreen.value = true;
-    }
-  } else {
-    document.exitFullscreen();
-    isFullscreen.value = false;
-  }
-};
-
-// 全屏代码显示
-const showFullscreenCode = (type: "lua" | "javascript") => {
-  currentCodeType.value = type;
-  currentCode.value = type === "lua" ? LuaCode.value : JavaScriptCode.value;
-  codeDialogTitle.value = type === "lua" ? "Lua Code" : "JavaScript Code";
-  showCodeDialog.value = true;
-};
-
-const disabled = ref<boolean>(false);
-const scenePlayer = ref<InstanceType<typeof ScenePlayer>>();
 
 const run = async () => {
   disabled.value = true;
@@ -1147,5 +1190,32 @@ const run = async () => {
 
 .light-theme :deep(.hljs) {
   background-color: #fafafa !important;
+}
+
+.runArea {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.scene-fullscreen-controls {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 100;
+}
+
+.scene-fullscreen-btn {
+  opacity: 0.8;
+}
+
+/* 全屏时的样式 */
+:fullscreen .runArea {
+  height: 100vh !important;
+  padding: 0;
+}
+
+:fullscreen .scene-fullscreen-btn {
+  margin: 10px;
 }
 </style>

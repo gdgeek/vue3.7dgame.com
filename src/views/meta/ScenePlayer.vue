@@ -3,7 +3,11 @@
     <div
       id="scene"
       ref="scene"
-      style="height: 70vh; width: 100%; margin: 0 auto"
+      :style="{
+        height: isSceneFullscreen ? '100vh' : '70vh',
+        width: '100%',
+        margin: '0 auto',
+      }"
     ></div>
   </div>
 </template>
@@ -22,6 +26,7 @@ const settingsStore = useSettingsStore();
 
 const props = defineProps<{
   meta: any;
+  isSceneFullscreen?: boolean;
 }>();
 
 declare global {
@@ -1226,6 +1231,51 @@ onMounted(async () => {
     renderer!.render(threeScene, camera!);
   };
   animate();
+
+  // 窗口大小变化监听
+  const handleResize = () => {
+    if (!scene.value || !camera || !renderer) return;
+    // 获取新的尺寸
+    const width = scene.value.clientWidth;
+    const height = scene.value.clientHeight;
+    // 更新相机
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    // 更新渲染器
+    renderer.setSize(width, height, true); // 添加 true 参数以更新像素比
+    // 强制重新渲染一帧
+    renderer.render(threeScene, camera);
+  };
+
+  // 监听容器尺寸变化
+  const resizeObserver = new ResizeObserver(() => {
+    handleResize();
+  });
+  if (scene.value) {
+    resizeObserver.observe(scene.value);
+  }
+
+  // 监听全屏状态变化
+  watch(
+    () => props.isSceneFullscreen,
+    (newValue) => {
+      // 给浏览器一点时间来完成全屏切换
+      setTimeout(() => {
+        handleResize();
+      }, 50);
+
+      // 再次延迟检查以确保尺寸正确更新
+      setTimeout(() => {
+        handleResize();
+      }, 100);
+    }
+  );
+
+  // 在组件卸载时清理
+  onUnmounted(() => {
+    resizeObserver.disconnect();
+    window.removeEventListener("resize", handleResize);
+  });
 });
 
 // 监听主题变化
@@ -1296,3 +1346,9 @@ defineExpose({
   playQueuedAudio,
 });
 </script>
+
+<style scoped>
+#scene {
+  transition: height 0.3s ease;
+}
+</style>
