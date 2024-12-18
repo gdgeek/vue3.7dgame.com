@@ -47,18 +47,32 @@ const mouse = new THREE.Vector2(); // 鼠标位置
 const raycaster = new THREE.Raycaster(); // 射线投射器
 // 初始化事件容器
 const initEventContainer = () => {
-  if (props.verse?.metas) {
-    props.verse.metas.forEach((meta: any) => {
-      if (meta.events) {
-        try {
-          const events = JSON.parse(meta.events);
-          eventContainer.value[meta.id] = events;
-          console.log(`Meta ${meta.id} 的事件已加载:`, events);
-        } catch (error) {
-          console.error(`解析Meta ${meta.id} 的事件失败:`, error);
+  if (props.verse?.data) {
+    const verseData = JSON.parse(props.verse.data);
+    if (verseData.children?.modules) {
+      verseData.children.modules.forEach((module: any) => {
+        const metaId = module.parameters.meta_id;
+        const meta = props.verse.metas.find(
+          (m: any) => m.id.toString() === metaId.toString()
+        );
+
+        if (meta?.events) {
+          try {
+            const events = JSON.parse(meta.events);
+            eventContainer.value[module.parameters.uuid] = events;
+            console.log(
+              `Module ${module.parameters.uuid} 的事件已加载:`,
+              events
+            );
+          } catch (error) {
+            console.error(
+              `解析Module ${module.parameters.uuid} 的事件失败:`,
+              error
+            );
+          }
         }
-      }
-    });
+      });
+    }
   }
 };
 

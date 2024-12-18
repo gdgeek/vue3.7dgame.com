@@ -674,6 +674,8 @@ const run = async () => {
   await waitForModels();
 
   if (JavaScriptCode.value) {
+    window.verse = {};
+    const Vector3 = THREE.Vector3;
     const sound = {
       play: async (audio: HTMLAudioElement | undefined) => {
         if (!audio) {
@@ -999,17 +1001,69 @@ const run = async () => {
       },
     };
 
+    const event = {
+      signal: (moduleUuid: string, eventUuid: string, parameter?: any) => {
+        console.log("触发事件:", moduleUuid, eventUuid, parameter);
+      },
+    };
+
+    const argument = {
+      boolean: (value: boolean) => {
+        return value;
+      },
+      number: (value: number) => {
+        return value;
+      },
+      string: (value: string) => {
+        return value;
+      },
+      idPlayer: (value: number) => {
+        return value;
+      },
+      point: (position: any) => {
+        return position instanceof Vector3 ? position : new Vector3();
+      },
+      range: (centerPoint: THREE.Vector3, radius: number) => {
+        const center =
+          centerPoint instanceof Vector3 ? centerPoint : new Vector3();
+        // 生成随机角度
+        const theta = Math.random() * Math.PI * 2; // 水平角度 (0 到 2π)
+        const phi = Math.acos(2 * Math.random() - 1); // 垂直角度 (0 到 π)
+        // 生成随机半径 (0 到指定半径)
+        const r = radius * Math.cbrt(Math.random()); // 使用立方根来确保均匀分布
+        // 计算随机点的坐标
+        const x = center.x + r * Math.sin(phi) * Math.cos(theta);
+        const y = center.y + r * Math.sin(phi) * Math.sin(theta);
+        const z = center.z + r * Math.cos(phi);
+        return new Vector3(x, y, z);
+      },
+    };
+
     try {
       const wrappedCode = `
-            return async function(sound, THREE, task, tween, helper, animation) {
-              const meta = window.verse;
-              const verse = {};
+            return async function(sound, THREE, task, tween, helper, animation, event, argument, Vector3) {
+              const verse = window.verse;
+              const index = ${verse.value?.id};
+              
               ${JavaScriptCode.value}
+              if (typeof verse['#init'] === 'function') {
+                await verse['#init']();
+              }
             }`;
       const wrappedFunction = new Function(wrappedCode);
       const executableFunction = wrappedFunction();
 
-      await executableFunction(sound, THREE, task, tween, helper, animation);
+      await executableFunction(
+        sound,
+        THREE,
+        task,
+        tween,
+        helper,
+        animation,
+        event,
+        argument,
+        Vector3
+      );
     } catch (e: any) {
       console.error("执行代码出错:", e);
       ElMessage({
