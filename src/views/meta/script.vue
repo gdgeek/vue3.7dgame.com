@@ -918,12 +918,15 @@ const run = async () => {
     };
 
     const sound = {
-      play: async (audio: HTMLAudioElement | undefined) => {
+      play: async (
+        audio: HTMLAudioElement | undefined,
+        skipQueue: boolean = false
+      ) => {
         if (!audio) {
           console.error("音频资源无效");
           return;
         }
-        await scenePlayer.value?.playQueuedAudio(audio);
+        await scenePlayer.value?.playQueuedAudio(audio, skipQueue);
       },
 
       createTask: (audio: HTMLAudioElement | undefined) => {

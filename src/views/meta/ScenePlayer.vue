@@ -946,7 +946,7 @@ const playAnimation = (uuid: string, animationName: string) => {
   }
 
   if (!mixer) {
-    console.error(`找不到UUID为 ${uuid} 的动��混合器`);
+    console.error(`找不到UUID为 ${uuid} 的动画混合器`);
     return;
   }
 
@@ -1048,12 +1048,22 @@ const processAudioQueue = async () => {
 };
 
 // 音频播放
-const playQueuedAudio = async (audio: HTMLAudioElement) => {
-  console.log("添加音频到播放队列:", {
+const playQueuedAudio = async (
+  audio: HTMLAudioElement,
+  skipQueue: boolean = false
+) => {
+  console.log("处理音频播放:", {
     src: audio.src,
+    skipQueue,
     currentQueueLength: audioPlaybackQueue.length,
   });
 
+  // 如果设置跳过队列，则直接播放
+  if (skipQueue) {
+    return handleAudioPlay(audio);
+  }
+
+  // 否则加入队列
   return new Promise<void>((resolve) => {
     audioPlaybackQueue.push({ audio, resolve });
     processAudioQueue();
