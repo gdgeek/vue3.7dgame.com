@@ -256,6 +256,11 @@ const currentCode = ref("");
 const currentCodeType = ref("");
 const codeDialogTitle = ref("");
 const editorContainer = ref<HTMLElement | null>(null);
+const unsavedBlocklyData = ref<any>(null);
+
+const handleBlocklyChange = (data: any) => {
+  unsavedBlocklyData.value = data;
+};
 
 const toggleFullscreen = () => {
   if (!document.fullscreenElement) {
@@ -455,6 +460,7 @@ const handleMessage = async (e: MessageEvent) => {
       // JavaScriptCode.value = params.data.js;
       JavaScriptCode.value = formatJavaScript(params.data.js);
       initLuaCode.set(LuaCode.value);
+      handleBlocklyChange(params.data.blocklyData);
     }
   } catch (e: any) {
     console.log("ex:" + e);
@@ -567,8 +573,7 @@ const initEditor = () => {
       }
       blocklyData = pako.inflate(uint8Array, { to: "string" });
     }
-    const data = JSON.parse(blocklyData);
-
+    const data = unsavedBlocklyData.value || JSON.parse(blocklyData);
     test.value = getResource(meta.value);
     postMessage("init", {
       language: ["lua", "js"],
