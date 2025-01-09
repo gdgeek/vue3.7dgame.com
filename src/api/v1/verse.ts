@@ -97,7 +97,7 @@ export type PostVerseData = {
   version?: number;
 };
 
-type meta = {
+export type meta = {
   id: number;
   data: string;
   uuid: string;

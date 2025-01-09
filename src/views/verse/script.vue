@@ -210,11 +210,6 @@
                 </el-icon>
               </el-button>
             </div>
-            <!-- <ScenePlayer
-              ref="scenePlayer"
-              :verse="verse"
-              :is-scene-fullscreen="isSceneFullscreen"
-            ></ScenePlayer> -->
             <ScenePlayer
               ref="scenePlayer"
               :verse="verseMetasWithJsCodeData"
@@ -234,6 +229,7 @@ import {
   getVerse,
   getVerseMetasWithJsCode,
   putVerseCode,
+  type meta,
   type VerseData,
   type VerseMetasWithJsCode,
 } from "@/api/v1/verse";
@@ -259,6 +255,7 @@ const activeName = ref<string>("blockly");
 const languageName = ref<string>("lua");
 const LuaCode = ref("");
 const JavaScriptCode = ref("");
+const metasJavaScriptCode = ref("");
 const disabled = ref<boolean>(false);
 const scenePlayer = ref<InstanceType<typeof ScenePlayer>>();
 const isSceneFullscreen = ref(false);
@@ -677,8 +674,12 @@ onMounted(async () => {
     );
     verse.value = response.data;
     verseMetasWithJsCodeData.value = response2.data;
+    metasJavaScriptCode.value = response2.data.metas
+      .map((meta: meta) => meta.script)
+      .join("\n");
     console.log("Verse", verse.value);
     console.error("Verse Metas With Js Code", verseMetasWithJsCodeData.value);
+    console.log("metasJavaScriptCode", metasJavaScriptCode.value);
     if (verse.value && verse.value.data) {
       const json: string = verse.value.data;
       const data = JSON.parse(json);
@@ -768,6 +769,7 @@ const run = async () => {
   await waitForModels();
 
   if (JavaScriptCode.value) {
+    window.meta = {};
     window.verse = {};
     const Vector3 = THREE.Vector3;
     const sound = {
@@ -1136,10 +1138,14 @@ const run = async () => {
     try {
       const wrappedCode = `
             return async function(sound, THREE, task, tween, helper, animation, event, argument, Vector3) {
+              cosnt meta = window.meta;
               const verse = window.verse;
-              const index = ${verse.value?.id};
+              const exind = ${verse.value?.id};
               
               ${JavaScriptCode.value}
+              if (typeof meta['@init'] === 'function') {
+                await meta['@init']();
+              }
               if (typeof verse['#init'] === 'function') {
                 await verse['#init']();
               }
