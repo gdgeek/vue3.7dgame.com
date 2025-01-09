@@ -210,9 +210,14 @@
                 </el-icon>
               </el-button>
             </div>
-            <ScenePlayer
+            <!-- <ScenePlayer
               ref="scenePlayer"
               :verse="verse"
+              :is-scene-fullscreen="isSceneFullscreen"
+            ></ScenePlayer> -->
+            <ScenePlayer
+              ref="scenePlayer"
+              :verse="verseMetasWithJsCodeData"
               :is-scene-fullscreen="isSceneFullscreen"
             ></ScenePlayer>
           </div>

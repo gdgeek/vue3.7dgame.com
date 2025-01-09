@@ -844,7 +844,7 @@ onMounted(async () => {
                 }
               }
               if (entity.parameters?.resource) {
-                const resource = meta.resources.find(
+                const resource = props.verse.resources.find(
                   (r: any) =>
                     r.id.toString() === entity.parameters.resource.toString()
                 );
