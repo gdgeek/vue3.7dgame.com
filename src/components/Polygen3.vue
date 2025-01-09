@@ -254,19 +254,19 @@ onMounted(() => {
     controls.enableDamping = true; // 启用阻尼效果，使旋转更加平滑
     controls.dampingFactor = 0.05; // 阻尼系数
 
-    // const light = new THREE.DirectionalLight(0xffffff, 1);
-    // light.position.set(-0.5, 0, 0.7);
-    // scene.add(light);
-    // scene.add(new THREE.PointLight(0xffffff, 3));
-    // scene.add(new THREE.AmbientLight(0xffffff, 1));
-
-    // 添加光源
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(-0.5, 0, 0.7);
-    directionalLight.castShadow = isShadowEnabled.value; // 设置光源阴影
-    scene.add(directionalLight);
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(-0.5, 0, 0.7);
+    scene.add(light);
     scene.add(new THREE.PointLight(0xffffff, 3));
     scene.add(new THREE.AmbientLight(0xffffff, 1));
+
+    // 添加光源
+    // const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    // directionalLight.position.set(-0.5, 0, 0.7);
+    // directionalLight.castShadow = isShadowEnabled.value; // 设置光源阴影
+    // scene.add(directionalLight);
+    // scene.add(new THREE.PointLight(0xffffff, 3));
+    // scene.add(new THREE.AmbientLight(0xffffff, 1));
 
     const erd = new ElementResizeDetector();
     erd.listenTo(content, () => {

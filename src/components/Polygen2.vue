@@ -32,14 +32,14 @@
         :inactive-text="$t('polygen.animation.animationOff')"
         :disabled="animations.length === 0"
       ></el-switch>
-      <el-switch
+      <!-- <el-switch
         v-model="isShadowEnabled"
         @change="toggleShadow"
         style="margin-left: 5px"
         inline-prompt
         :active-text="$t('polygen.animation.shadowOn')"
         :inactive-text="$t('polygen.animation.shadowOff')"
-      ></el-switch>
+      ></el-switch> -->
     </div>
     <div id="three" ref="three" style="height: 300px; width: 100%"></div>
   </div>
@@ -246,7 +246,7 @@ onMounted(() => {
       antialias: true,
     });
     renderer.setViewport(0, 0, width, height);
-    renderer.setSize(width, height);
+    renderer.setSize(width, height, true);
     renderer.setClearColor(0xeeffff, 1);
     renderer.shadowMap.enabled = true; // 启用阴影
     renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 设置阴影类型
@@ -257,19 +257,11 @@ onMounted(() => {
     controls.enableDamping = true; // 启用阻尼效果，使旋转更加平滑
     controls.dampingFactor = 0.05; // 阻尼系数
 
-    // const light = new THREE.DirectionalLight(0xffffff, 1);
-    // light.position.set(-0.5, 0, 0.7);
-    // scene.add(light);
-    // scene.add(new THREE.PointLight(0xffffff, 3));
-    // scene.add(new THREE.AmbientLight(0xffffff, 1));
-
-    // 添加光源
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // 方向光
-    directionalLight.position.set(-0.5, 0, 0.7);
-    directionalLight.castShadow = isShadowEnabled.value; // 设置光源阴影
-    scene.add(directionalLight);
-    scene.add(new THREE.PointLight(0xffffff, 3)); // 点光源
-    scene.add(new THREE.AmbientLight(0xffffff, 1)); // 环境光
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(-0.5, 0, 0.7);
+    scene.add(light);
+    scene.add(new THREE.PointLight(0xffffff, 3));
+    scene.add(new THREE.AmbientLight(0xffffff, 1));
 
     const erd = new ElementResizeDetector();
     erd.listenTo(content, () => {
