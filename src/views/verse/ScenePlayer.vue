@@ -47,6 +47,48 @@ let clock = new THREE.Clock();
 const eventContainer = ref<{ [key: string]: any }>({});
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
+const collisionObjects = ref<
+  Array<{
+    sourceUuid: string;
+    targetUuid: string;
+    eventUuid: string;
+    boundingBox: THREE.Box3;
+    isColliding: boolean;
+    lastPosition: THREE.Vector3;
+  }>
+>([]);
+
+const rotatingObjects = ref<
+  Array<{
+    mesh: THREE.Object3D;
+    speed: { x: number; y: number; z: number };
+  }>
+>([]);
+
+const moveableObjects = ref<
+  Array<{
+    mesh: THREE.Object3D;
+    isDragging: boolean;
+    magnetic: boolean;
+    scalable: boolean;
+    limit: {
+      x: { enable: boolean; min: number; max: number };
+      y: { enable: boolean; min: number; max: number };
+      z: { enable: boolean; min: number; max: number };
+    };
+  }>
+>([]);
+
+// 添加拖拽状态管理
+const dragState = reactive({
+  isDragging: false,
+  draggedObject: null as THREE.Object3D | null, // 拖动的对象
+  dragStartPosition: new THREE.Vector3(), // 拖动开始位置
+  dragOffset: new THREE.Vector3(), // 拖动偏移量
+  mouseStartPosition: new THREE.Vector2(), // 鼠标开始位置
+  lastIntersection: new THREE.Vector3(), // 最后一次交点
+});
+
 const controls = ref<OrbitControls | null>(null);
 const mouse = new THREE.Vector2(); // 鼠标位置
 const raycaster = new THREE.Raycaster(); // 射线投射器
@@ -404,6 +446,7 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
         });
 
         const mesh = new THREE.Mesh(geometry, material);
+        setInitialVisibility(mesh);
 
         // 应用变换
         if (entity.parameters?.transform) {
@@ -587,16 +630,337 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
             });
           }
 
-          // const uuid = entity.parameters.uuid.toString();
-          sources.set(uuid, {
-            type: "model",
-            data: {
-              mesh: model,
-              setVisibility: (isVisible: boolean) => {
-                model.visible = isVisible;
+          if (entity.children?.components) {
+            // 点击触发
+            const actionComponent = entity.children.components.find(
+              (comp: any) => comp.type === "Action"
+            );
+            // 碰撞触发
+            const triggerComponent = entity.children.components.find(
+              (comp: any) => comp.type === "Trigger"
+            );
+            // 自旋转
+            const rotateComponent = entity.children.components.find(
+              (comp: any) => comp.type === "Rotate"
+            );
+            // 可移动
+            const movedComponent = entity.children.components.find(
+              (comp: any) => comp.type === "Moved"
+            );
+
+            if (actionComponent) {
+              console.log("发现点击触发组件:", actionComponent);
+
+              let isExecuting = false;
+
+              // 添加点击事件处理
+              const handleClick = async (event: MouseEvent) => {
+                if (isExecuting) {
+                  console.log("事件正在执行中，请等待完成...");
+                  return;
+                }
+
+                // 计算鼠标位置
+                const rect = renderer!.domElement.getBoundingClientRect();
+                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+                // 更新射线
+                raycaster.setFromCamera(mouse, camera!);
+
+                // 检查是否点击到模型
+                const intersects = raycaster.intersectObject(model, true);
+                if (intersects.length > 0) {
+                  console.log("模型被点击:", entity.parameters.uuid);
+
+                  // 查找并执行对应的事件处理函数
+                  const eventId = actionComponent.parameters.uuid;
+                  if (
+                    window.meta &&
+                    typeof window.meta[`@${eventId}`] === "function"
+                  ) {
+                    try {
+                      isExecuting = true;
+                      await window.meta[`@${eventId}`]();
+                    } catch (error) {
+                      console.error("执行事件处理函数失败:", error);
+                    } finally {
+                      isExecuting = false;
+                    }
+                  }
+                }
+              };
+
+              // 添加点击事件监听器
+              renderer!.domElement.addEventListener("click", handleClick);
+
+              // 在sources中存储模型数据时包含cleanup函数
+              const sourceData = {
+                type: "model",
+                data: {
+                  mesh: model,
+                  setVisibility: (isVisible: boolean) => {
+                    model.visible = isVisible;
+                  },
+                  cleanup: () => {
+                    renderer!.domElement.removeEventListener(
+                      "click",
+                      handleClick
+                    );
+                  },
+                },
+              };
+
+              sources.set(uuid, sourceData);
+            }
+            if (triggerComponent) {
+              console.log("发现碰撞触发组件:", triggerComponent);
+
+              // 创建包围盒
+              const boundingBox = new THREE.Box3();
+              boundingBox.setFromObject(model);
+
+              // 记录上一帧的位置
+              let lastPosition = model.position.clone();
+
+              // 添加到动画循环中检查的碰撞对象列表
+              const collisionData = {
+                sourceUuid: entity.parameters.uuid,
+                targetUuid: triggerComponent.parameters.target,
+                eventUuid: triggerComponent.parameters.uuid,
+                boundingBox: boundingBox,
+                isColliding: false, // 防止重复触发
+                lastPosition: lastPosition,
+              };
+
+              // 将碰撞数据添加到碰撞检测列表
+              collisionObjects.value.push(collisionData);
+
+              // 更新包围盒的函数
+              const updateBoundingBox = () => {
+                boundingBox.setFromObject(model);
+              };
+
+              // 在 sources 中保存更新函数
+              const sourceData = sources.get(uuid);
+
+              if (sourceData) {
+                sourceData.data.updateBoundingBox = updateBoundingBox;
+              }
+            }
+            if (rotateComponent) {
+              console.log("发现自旋转组件:", rotateComponent);
+
+              // 将速度从度/秒转换为弧度/秒
+              const speed = {
+                x: THREE.MathUtils.degToRad(rotateComponent.parameters.speed.x),
+                y: THREE.MathUtils.degToRad(rotateComponent.parameters.speed.y),
+                z: THREE.MathUtils.degToRad(rotateComponent.parameters.speed.z),
+              };
+
+              // 添加到旋转对象列表
+              rotatingObjects.value.push({
+                mesh: model,
+                speed: speed,
+              });
+
+              // 在 sourceData 中添加控制旋转的方法
+              const sourceData = {
+                type: "model",
+                data: {
+                  mesh: model,
+                  setVisibility: (isVisible: boolean) => {
+                    model.visible = isVisible;
+                  },
+                  setRotating: (isRotating: boolean) => {
+                    const index = rotatingObjects.value.findIndex(
+                      (obj) => obj.mesh === model
+                    );
+                    if (index !== -1 && !isRotating) {
+                      rotatingObjects.value.splice(index, 1);
+                    } else if (index === -1 && isRotating) {
+                      rotatingObjects.value.push({
+                        mesh: model,
+                        speed: speed,
+                      });
+                    }
+                  },
+                },
+              };
+
+              sources.set(uuid, sourceData);
+            }
+            if (movedComponent) {
+              console.log("发现可移动组件:", movedComponent);
+
+              const moveableObject = {
+                mesh: model,
+                isDragging: false,
+                magnetic: movedComponent.parameters.magnetic,
+                scalable: movedComponent.parameters.scalable,
+                limit: movedComponent.parameters.limit,
+              };
+
+              moveableObjects.value.push(moveableObject);
+
+              // 创建平面用于拖拽
+              const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0)); // 拖动平面
+              const intersection = new THREE.Vector3(); // 拖动交点
+
+              // 添加鼠标事件处理
+              const onMouseDown = (event: MouseEvent) => {
+                event.preventDefault();
+                const rect = renderer!.domElement.getBoundingClientRect();
+                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera!);
+                const intersects = raycaster.intersectObject(model, true);
+
+                if (intersects.length > 0) {
+                  console.log("开始拖拽模型:", entity.parameters.uuid);
+                  dragState.isDragging = true;
+                  dragState.draggedObject = model;
+                  dragState.dragStartPosition.copy(model.position);
+                  dragState.mouseStartPosition.copy(mouse);
+
+                  // 计算点击点与物体中心的偏移
+                  const intersectPoint = intersects[0].point;
+                  dragState.dragOffset.copy(model.position).sub(intersectPoint);
+                  dragState.lastIntersection.copy(intersectPoint);
+
+                  controls.value!.enabled = false;
+                }
+              };
+
+              const onMouseMove = (event: MouseEvent) => {
+                if (!dragState.isDragging || !dragState.draggedObject) return;
+
+                const rect = renderer!.domElement.getBoundingClientRect();
+                const mouse = new THREE.Vector2(
+                  ((event.clientX - rect.left) / rect.width) * 2 - 1,
+                  -((event.clientY - rect.top) / rect.height) * 2 + 1
+                );
+
+                raycaster.setFromCamera(mouse, camera!);
+
+                // 创建一个与相机视角垂直的平面
+                const cameraNormal = new THREE.Vector3(0, 0, -1);
+                cameraNormal.applyQuaternion(camera!.quaternion);
+                const dragPlane = new THREE.Plane(
+                  cameraNormal,
+                  -dragState.dragStartPosition.dot(cameraNormal)
+                );
+
+                const intersection = new THREE.Vector3();
+
+                if (raycaster.ray.intersectPlane(dragPlane, intersection)) {
+                  // 应用偏移
+                  intersection.add(dragState.dragOffset);
+
+                  // 找到当前正在拖动的物体对应的moveableObject
+                  const moveableObject = moveableObjects.value.find(
+                    (obj) => obj.mesh === dragState.draggedObject
+                  );
+
+                  // 计算新位置
+                  const newPosition = new THREE.Vector3();
+                  newPosition.lerpVectors(
+                    dragState.draggedObject.position,
+                    intersection,
+                    0.5
+                  );
+
+                  // 只有当moveableObject存在且有限制设置时才应用限制
+                  if (moveableObject?.limit) {
+                    if (moveableObject.limit.x.enable) {
+                      newPosition.x = THREE.MathUtils.clamp(
+                        newPosition.x,
+                        moveableObject.limit.x.min,
+                        moveableObject.limit.x.max
+                      );
+                    }
+
+                    if (moveableObject.limit.y.enable) {
+                      newPosition.y = THREE.MathUtils.clamp(
+                        newPosition.y,
+                        moveableObject.limit.y.min,
+                        moveableObject.limit.y.max
+                      );
+                    }
+
+                    if (moveableObject.limit.z.enable) {
+                      newPosition.z = THREE.MathUtils.clamp(
+                        newPosition.z,
+                        moveableObject.limit.z.min,
+                        moveableObject.limit.z.max
+                      );
+                    }
+                  }
+
+                  // 应用新位置
+                  dragState.draggedObject.position.copy(newPosition);
+                  dragState.lastIntersection.copy(intersection);
+                  console.log("移动到位置:", newPosition);
+                }
+              };
+
+              const onMouseUp = () => {
+                if (dragState.isDragging) {
+                  console.log("结束拖拽");
+                  dragState.isDragging = false;
+                  dragState.draggedObject = null;
+                  controls.value!.enabled = true;
+                }
+              };
+
+              // 添加事件监听器
+              renderer!.domElement.addEventListener("mousedown", onMouseDown);
+              document.addEventListener("mousemove", onMouseMove);
+              document.addEventListener("mouseup", onMouseUp);
+
+              // 更新 sourceData
+              const sourceData = {
+                type: "model",
+                data: {
+                  mesh: model,
+                  setVisibility: (isVisible: boolean) => {
+                    model.visible = isVisible;
+                  },
+                  cleanup: () => {
+                    renderer!.domElement.removeEventListener(
+                      "mousedown",
+                      onMouseDown
+                    );
+                    document.removeEventListener("mousemove", onMouseMove);
+                    document.removeEventListener("mouseup", onMouseUp);
+                  },
+                },
+              };
+
+              sources.set(uuid, sourceData);
+            } else {
+              sources.set(uuid, {
+                type: "model",
+                data: {
+                  mesh: model,
+                  setVisibility: (isVisible: boolean) => {
+                    model.visible = isVisible;
+                  },
+                },
+              });
+            }
+          } else {
+            sources.set(uuid, {
+              type: "model",
+              data: {
+                mesh: model,
+                setVisibility: (isVisible: boolean) => {
+                  model.visible = isVisible;
+                },
               },
-            },
-          });
+            });
+          }
 
           threeScene.add(model);
 
@@ -748,12 +1112,22 @@ const processAudioQueue = async () => {
 };
 
 // 音频播放
-const playQueuedAudio = async (audio: HTMLAudioElement) => {
+const playQueuedAudio = async (
+  audio: HTMLAudioElement,
+  skipQueue: boolean = false
+) => {
   console.log("添加音频到播放队列:", {
     src: audio.src,
+    skipQueue,
     currentQueueLength: audioPlaybackQueue.length,
   });
 
+  // 如果设置跳过队列，则直接播放
+  if (skipQueue) {
+    return handleAudioPlay(audio);
+  }
+
+  // 否则加入队列
   return new Promise<void>((resolve) => {
     audioPlaybackQueue.push({ audio, resolve });
     processAudioQueue();
@@ -875,6 +1249,68 @@ onMounted(async () => {
     requestAnimationFrame(animate);
     const delta = clock.getDelta();
     mixers.forEach((mixer) => mixer.update(delta));
+
+    // 更新旋转
+    rotatingObjects.value.forEach((obj) => {
+      obj.mesh.rotation.x += obj.speed.x * delta;
+      obj.mesh.rotation.y += obj.speed.y * delta;
+      obj.mesh.rotation.z += obj.speed.z * delta;
+    });
+
+    // 碰撞检测
+    if (collisionObjects.value.length > 0) {
+      for (const collisionObj of collisionObjects.value) {
+        // 更新当前物体的包围盒
+        const sourceModel = sources.get(collisionObj.sourceUuid)?.data.mesh;
+        const targetModel = sources.get(collisionObj.targetUuid)?.data.mesh;
+
+        if (sourceModel && targetModel) {
+          // 检查物体是否移动
+          if (!sourceModel.position.equals(collisionObj.lastPosition)) {
+            // 更新包围盒
+            collisionObj.boundingBox.setFromObject(sourceModel);
+
+            // 创建目标物体的包围盒
+            const targetBoundingBox = new THREE.Box3().setFromObject(
+              targetModel
+            );
+
+            // 检测碰撞
+            const isColliding =
+              collisionObj.boundingBox.intersectsBox(targetBoundingBox);
+
+            // 如果发生碰撞且之前未处于碰撞状态
+            if (isColliding && !collisionObj.isColliding) {
+              collisionObj.isColliding = true;
+              console.log("检测到碰撞:", {
+                source: collisionObj.sourceUuid,
+                target: collisionObj.targetUuid,
+              });
+
+              // 执行碰撞事件
+              if (
+                window.meta &&
+                typeof window.meta[`@${collisionObj.eventUuid}`] === "function"
+              ) {
+                try {
+                  window.meta[`@${collisionObj.eventUuid}`]();
+                } catch (error) {
+                  console.error("执行碰撞事件处理函数失败:", error);
+                }
+              }
+            }
+            // 如果不再碰撞，重置碰撞状态
+            else if (!isColliding && collisionObj.isColliding) {
+              collisionObj.isColliding = false;
+            }
+
+            // 更新上一帧位置
+            collisionObj.lastPosition.copy(sourceModel.position);
+          }
+        }
+      }
+    }
+
     controls.value!.update();
     renderer!.render(threeScene, camera!);
   };
@@ -935,12 +1371,6 @@ watch(isDark, (newValue) => {
 
 // 清理
 onUnmounted(() => {
-  if (renderer) {
-    renderer.dispose();
-    renderer.forceContextLoss();
-    renderer.domElement.remove();
-  }
-
   sources.forEach((source) => {
     if (source.type === "video") {
       const video = source.data.video;
@@ -967,9 +1397,27 @@ onUnmounted(() => {
     }
   });
 
+  if (renderer) {
+    renderer.dispose();
+    renderer.forceContextLoss();
+    renderer.domElement.remove();
+  }
+
+  isPlaying = false;
   sources.clear();
   mixers.clear();
   clock = new THREE.Clock();
+
+  // 清理碰撞检测数据
+  collisionObjects.value = [];
+  // 清理旋转对象
+  rotatingObjects.value = [];
+  // 清理可移动对象
+  moveableObjects.value = [];
+  // 清理拖拽状态
+  dragState.isDragging = false;
+  // 清理拖拽对象
+  dragState.draggedObject = null;
 });
 
 // 暴露方法
