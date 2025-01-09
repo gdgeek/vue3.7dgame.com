@@ -76,10 +76,18 @@
                         <el-button
                           size="small"
                           color="#F7DF1E"
-                          style="margin-right: 50px"
+                          style="margin-right: 10px"
                           @click="showFullscreenCode('javascript')"
                         >
                           JavaScript
+                        </el-button>
+                        <el-button
+                          size="small"
+                          type="primary"
+                          style="margin-right: 50px"
+                          @click="run"
+                        >
+                          测试运行
                         </el-button>
                       </template>
                     </el-button-group>
@@ -685,9 +693,27 @@ onMounted(async () => {
 });
 
 const run = async () => {
+  // 保存当前的全屏状态
+  const wasFullscreen = isFullscreen.value;
+
+  // 如果当前是全屏状态，先退出编辑器的全屏
+  if (wasFullscreen) {
+    document.exitFullscreen();
+    await new Promise((resolve) => setTimeout(resolve, 100)); // 确保退出全屏后再进入全屏
+  }
+
   disabled.value = true;
 
   await nextTick();
+
+  // 如果之前是全屏状态，则将运行区域设置为全屏
+  if (wasFullscreen) {
+    const runArea = document.querySelector(".runArea");
+    if (runArea) {
+      runArea.requestFullscreen();
+      isSceneFullscreen.value = true;
+    }
+  }
 
   // 添加延迟等待所有模型加载完成
   const waitForModels = () => {
