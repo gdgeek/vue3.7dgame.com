@@ -1,10 +1,10 @@
 export type ImageDetails = {
-  id: number;
+  id?: number;
   md5: string;
   type: string;
   url: string;
-  filename: string;
-  size: number;
+  filename?: string;
+  size?: number;
   key: string;
 };
 
@@ -18,18 +18,18 @@ export type Author = {
 // 图片信息
 export type ResourceInfo = {
   id: number;
-  name: string;
+  name?: string;
   uuid: string;
   type: string;
-  image_id: number;
-  image: ImageDetails;
+  image_id?: number;
+  image?: ImageDetails;
   file: ImageDetails;
-  created_at: string;
+  created_at?: string;
   info: string;
-  author: Author;
+  author?: Author;
 };
 
-// TODO:体素信息
+// 体素信息
 export type VoxelInfo = {};
 
 export type ApiResponse<T> = {

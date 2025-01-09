@@ -225,7 +225,13 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import { useRoute, useRouter, onBeforeRouteLeave } from "vue-router";
-import { getVerse, putVerseCode, VerseData } from "@/api/v1/verse";
+import {
+  getVerse,
+  getVerseMetasWithJsCode,
+  putVerseCode,
+  type VerseData,
+  type VerseMetasWithJsCode,
+} from "@/api/v1/verse";
 import { useAppStore } from "@/store/modules/app";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
@@ -240,6 +246,7 @@ const appStore = useAppStore();
 const { t } = useI18n();
 const loading = ref(false);
 const verse = ref<VerseData>();
+const verseMetasWithJsCodeData = ref<VerseMetasWithJsCode>();
 const route = useRoute();
 const router = useRouter();
 const id = computed(() => parseInt(route.query.id as string));
@@ -658,8 +665,15 @@ onMounted(async () => {
       id.value,
       "metas, module, share, verseCode"
     );
+    const response2 = await getVerseMetasWithJsCode(
+      id.value,
+      "id,name,description,data,metas,resources,code,uuid,code",
+      "js"
+    );
     verse.value = response.data;
+    verseMetasWithJsCodeData.value = response2.data;
     console.log("Verse", verse.value);
+    console.error("Verse Metas With Js Code", verseMetasWithJsCodeData.value);
     if (verse.value && verse.value.data) {
       const json: string = verse.value.data;
       const data = JSON.parse(json);

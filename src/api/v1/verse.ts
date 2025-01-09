@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import environment from "@/environment";
 import { MessageType } from "./message";
 import { metaInfo } from "./meta";
+import { ResourceInfo } from "../resources/model";
 
 export type Author = {
   id: number;
@@ -96,6 +97,28 @@ export type PostVerseData = {
   version?: number;
 };
 
+type meta = {
+  id: number;
+  data: string;
+  uuid: string;
+  events: string;
+  title: string;
+  prefabs: number;
+  type: string;
+  script: string;
+};
+
+export type VerseMetasWithJsCode = {
+  id: number;
+  metas: meta[];
+  name: string;
+  description: string;
+  uuid: string;
+  data: string;
+  code: string;
+  resources: ResourceInfo[];
+};
+
 export const postVerse = (data: PostVerseData) => {
   data.version = environment.version;
   data.uuid = data.uuid || uuidv4();
@@ -119,6 +142,21 @@ export const getVerse = (id: number, expand = "metas,share") => {
       "v1",
       "verses",
       `${id.toString()}${qs.stringify({ expand: expand }, true)}`
+    ),
+    method: "get",
+  });
+};
+
+export const getVerseMetasWithJsCode = (
+  id: number,
+  expand = "id,name,description,data,metas,resources,code,uuid,code",
+  cl = "js"
+) => {
+  return request({
+    url: path.join(
+      "a1",
+      "verses",
+      `${id.toString()}${qs.stringify({ expand: expand, cl }, true)}`
     ),
     method: "get",
   });
