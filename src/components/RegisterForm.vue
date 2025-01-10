@@ -85,7 +85,7 @@ import { ElMessage } from "element-plus";
 import { useSettingsStore } from "@/store/modules/settings";
 import { FormInstance } from "element-plus";
 import { ThemeEnum } from "@/enums/ThemeEnum";
-import { onMounted, watch, ref, computed, defineEmits, defineProps } from "vue";
+import { onMounted, watch, ref } from "vue";
 import { useI18n } from "vue-i18n"; // Ensure you have this import
 import type { AppleIdToken } from "@/api/auth/model";
 import AuthAPI from "@/api/auth/index";

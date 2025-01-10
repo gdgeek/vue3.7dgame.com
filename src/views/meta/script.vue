@@ -1277,6 +1277,12 @@ const run = async () => {
       },
     };
 
+    const event = {
+      trigger: (index: any, eventId: string) => {
+        console.log("触发事件:", index, eventId);
+      },
+    };
+
     const text = {
       setText: (object: any, setText: string) => {
         if (object && typeof object.setText === "function") {
@@ -1340,14 +1346,9 @@ const run = async () => {
 
     try {
       const wrappedCode = `
-        return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, text, point, transform, Vector3, argument) {
+        return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument) {
           const meta = window.meta;
           const index = ${meta.value?.id};
-          const event = {
-            trigger: (index, eventId) => {
-              console.log('触发事件:', index, eventId);
-            }
-          };
 
           ${JavaScriptCode.value}
           
@@ -1371,6 +1372,7 @@ const run = async () => {
         tween,
         helper,
         animation,
+        event,
         text,
         point,
         transform,

@@ -712,6 +712,65 @@ onMounted(async () => {
   });
 });
 
+const handlePolygen = (uuid: string) => {
+  if (!scenePlayer.value) {
+    console.error("ScenePlayer未初始化");
+    return null;
+  }
+
+  const modelUuid = uuid.toString();
+
+  // 添加重试机制
+  const getModel = (uuid: string, retries = 3): THREE.Object3D | null => {
+    const source = scenePlayer.value?.sources.get(uuid);
+    if (source && source.type === "model") {
+      return source.data as THREE.Object3D;
+    }
+
+    if (retries > 0) {
+      console.log(`模型未找到，剩余重试次数: ${retries}`);
+      setTimeout(() => getModel(uuid, retries - 1), 100);
+    }
+    return null;
+  };
+
+  const model = getModel(modelUuid);
+
+  console.log("查找模型:", {
+    requestedUuid: modelUuid,
+    availableModels: Array.from(scenePlayer.value.sources.keys()),
+    modelExists: scenePlayer.value.sources.has(modelUuid),
+    foundModel: model,
+  });
+
+  if (!model) {
+    console.error(`找不到UUID为 ${modelUuid} 的模型`);
+    return null;
+  }
+
+  return {
+    playAnimation: (animationName: string) => {
+      console.log("播放动画:", {
+        uuid: modelUuid,
+        animationName,
+        model: model,
+      });
+      scenePlayer.value?.playAnimation(modelUuid, animationName);
+    },
+  };
+};
+
+const handleSound = (uuid: string): HTMLAudioElement | undefined => {
+  const audioUrl = scenePlayer.value?.getAudioUrl(uuid);
+  if (!audioUrl) {
+    console.error(`找不到UUID为 ${uuid} 的音频资源`);
+    return undefined;
+  }
+
+  const audio = new Audio(audioUrl);
+  return audio;
+};
+
 const run = async () => {
   // 保存当前的全屏状态
   const wasFullscreen = isFullscreen.value;
@@ -772,6 +831,20 @@ const run = async () => {
     window.meta = {};
     window.verse = {};
     const Vector3 = THREE.Vector3;
+    const polygen = {
+      playAnimation: (polygenInstance: any, animationName: string) => {
+        if (!polygenInstance) {
+          console.error("polygen实例为空");
+          return;
+        }
+        if (typeof polygenInstance.playAnimation !== "function") {
+          console.error("polygen实例缺少playAnimation方法");
+          return;
+        }
+        polygenInstance.playAnimation(animationName);
+      },
+    };
+
     const sound = {
       play: async (audio: HTMLAudioElement | undefined) => {
         if (!audio) {
@@ -1098,9 +1171,41 @@ const run = async () => {
     };
 
     const event = {
+      trigger: (index: any, eventId: string) => {
+        console.log("触发事件:", index, eventId);
+      },
       signal: (moduleUuid: string, eventUuid: string, parameter?: any) => {
         console.log("触发事件:", moduleUuid, eventUuid, parameter);
       },
+    };
+
+    const text = {
+      setText: (object: any, setText: string) => {
+        if (object && typeof object.setText === "function") {
+          object.setText(setText);
+        } else {
+          console.warn("object.setText is not a function");
+        }
+      },
+    };
+
+    const point = {
+      setVisual: (object: any, setVisual: boolean) => {
+        console.error("setVisual", object, setVisual);
+        if (object && typeof object.setVisibility === "function") {
+          object.setVisibility(setVisual);
+        } else {
+          console.error("object.setVisibility is not a function");
+        }
+      },
+    };
+
+    const transform = (position: any, rotation: any, scale: any) => {
+      return {
+        position: position instanceof Vector3 ? position : new Vector3(),
+        rotation: rotation instanceof Vector3 ? rotation : new Vector3(),
+        scale: scale instanceof Vector3 ? scale : new Vector3(1, 1, 1),
+      };
     };
 
     const argument = {
@@ -1137,12 +1242,14 @@ const run = async () => {
 
     try {
       const wrappedCode = `
-            return async function(sound, THREE, task, tween, helper, animation, event, argument, Vector3) {
-              cosnt meta = window.meta;
+            return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument) {
+              const meta = window.meta;
               const verse = window.verse;
-              const exind = ${verse.value?.id};
-              
+              const index = ${verse.value?.id};
+
+              ${metasJavaScriptCode.value}
               ${JavaScriptCode.value}
+
               if (typeof meta['@init'] === 'function') {
                 await meta['@init']();
               }
@@ -1154,6 +1261,9 @@ const run = async () => {
       const executableFunction = wrappedFunction();
 
       await executableFunction(
+        handlePolygen,
+        polygen,
+        handleSound,
         sound,
         THREE,
         task,
@@ -1161,8 +1271,11 @@ const run = async () => {
         helper,
         animation,
         event,
-        argument,
-        Vector3
+        text,
+        point,
+        transform,
+        Vector3,
+        argument
       );
     } catch (e: any) {
       console.error("执行代码出错:", e);
