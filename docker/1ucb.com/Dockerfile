@@ -5,7 +5,7 @@ RUN npm install pnpm -g
 RUN pnpm install vuex
 RUN pnpm install
 COPY . .
-RUN pnpm run build:7dgame_com
+RUN pnpm run build:1ucb_com
 
 # 使用 Nginx 作为生产阶段
 FROM nginx:alpine
