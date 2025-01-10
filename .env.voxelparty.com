@@ -13,22 +13,23 @@ VITE_APP_PORT = 3001
 
 
 # just a flag
-ENV = '7dgame.com'
+ENV = 'voxelparty.com'
 
 # VITE_APP_BLOCKLY_URL="http://localhost:3000"
 # VITE_APP_EDITOR_URL="http://localhost:3002"
 
-VITE_APP_BLOCKLY_URL="http://127.0.0.1:3000"
+# VITE_APP_BLOCKLY_URL="http://127.0.0.1:3000"
+VITE_APP_BLOCKLY_URL = "https://blockly.voxelparty.com"
 #VITE_APP_BLOCKLY_URL="https://blockly.01xr.com"
-VITE_APP_EDITOR_URL="https://editor.01xr.com"
+VITE_APP_EDITOR_URL = "https://editor.voxelparty.com"
 
 
 # VITE_APP_BASE_API = 'https://api.01xr.com'
-VITE_APP_BASE_API = "http://127.0.0.1:81"
-VITE_APP_AI_API="https://rodin.01xr.com"
-# VITE_APP_AI_API="http://127.0.0.1:1981"
-VITE_APP_BASE_URL = 'https://01xr.com'
+VITE_APP_BASE_API = "https://api.voxelparty.com"
+VITE_APP_AI_API = "https://ai.voxelparty.com"
+VITE_APP_BASE_URL = 'https://voxelparty.com'
  
-VITE_APP_BASE_MODE = '01xr.com'
+VITE_APP_BASE_MODE = 'voxelparty.com'
 VITE_APP_DOC_API = 'https://hololens2.cn/wp-json/wp/v2/'
+
 

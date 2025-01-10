@@ -3,6 +3,7 @@
     <div :class="['box2', { 'dark-theme': isDark }]">
       <h1>{{ $t("login.h1") }}</h1>
       <h4>{{ $t("login.h4") }}</h4>
+      1234
       <br />
       <el-tabs style="width: 100%" type="border-card" :stretch="true">
         <el-tab-pane label="Apple ID">
@@ -66,6 +67,7 @@ import { PostSiteAppleId } from "@/api/v1/site";
 import { VueAppleLoginConfig } from "@/utils/helper";
 import { LoginData } from "@/api/auth/model";
 
+alert(import.meta.env.VITE_APP_BASE_API);
 const formRef = ref<FormInstance>();
 const settingsStore = useSettingsStore();
 

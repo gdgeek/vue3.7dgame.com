@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit & vite build",
+    "build:1ucb.com": "vue-tsc --noEmit & VITE_ENV=1ucb.com vite build",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
