@@ -116,8 +116,8 @@
                               {{ $t("copy.title") || "Copy" }}
                             </el-button>
                             <pre>
-                              <code :class="currentCodeType">{{ currentCode }}</code>
-                            </pre>
+                    <code :class="currentCodeType">{{ currentCode }}</code>
+                  </pre>
                           </div>
                         </div>
                       </el-card>
@@ -214,7 +214,8 @@
               ref="scenePlayer"
               :verse="verseMetasWithJsCodeData"
               :is-scene-fullscreen="isSceneFullscreen"
-            ></ScenePlayer>
+            >
+            </ScenePlayer>
           </div>
         </el-card>
       </el-main>
@@ -491,7 +492,10 @@ const handleMessage = async (e: MessageEvent) => {
       });
     } else if (params.action === "update") {
       LuaCode.value = "local verse = {}\nlocal index = ''\n" + params.data.lua;
-      JavaScriptCode.value = formatJavaScript(params.data.js); // 使用格式化函数
+      JavaScriptCode.value = formatJavaScript(params.data.js);
+      // JavaScriptCode.value = formatJavaScript(
+      //   verseMetasWithJsCodeData.value!.code
+      // );
       initLuaCode.set(LuaCode.value);
       handleBlocklyChange(params.data.blocklyData);
     }
@@ -669,6 +673,7 @@ onMounted(async () => {
     );
     const response2 = await getVerseMetasWithJsCode(
       id.value,
+      // 573,
       "id,name,description,data,metas,resources,code,uuid,code",
       "js"
     );
@@ -798,7 +803,7 @@ const run = async () => {
   const waitForModels = () => {
     return new Promise((resolve) => {
       const checkModels = () => {
-        const metasData = verse.value!.metas!;
+        const metasData = verseMetasWithJsCodeData.value!.metas!;
         let expectedModels = 0;
         for (const meta of metasData) {
           const metaData = JSON.parse(meta.data!);
@@ -1246,7 +1251,7 @@ const run = async () => {
               const meta = window.meta;
               const verse = window.verse;
               const index = ${verse.value?.id};
-
+              
               ${metasJavaScriptCode.value}
               ${JavaScriptCode.value}
 
