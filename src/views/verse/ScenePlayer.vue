@@ -4,7 +4,7 @@
       id="scene"
       ref="scene"
       :style="{
-        height: isSceneFullscreen ? '100vh' : '70vh',
+        height: isSceneFullscreen ? '100vh' : '75vh',
         width: '100%',
         margin: '0 auto',
       }"
@@ -500,7 +500,11 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
   }
 
   // 处理体素
-  if (resource.type === "voxel" || entity.type === "Voxel") {
+  if (
+    resource.type === "voxel" ||
+    entity.type === "Voxel" ||
+    entity.type === "Entity"
+  ) {
     const loader = new VOXLoader();
     const url = convertToHttps(resource.file.url);
 
@@ -1154,7 +1158,7 @@ onMounted(async () => {
 
   // 相机设置
   camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1800); //
-  camera.position.set(0, 5, 15); // 调整相机距离
+  camera.position.set(0, 10, 30); // 调整相机距离
 
   // 主环境光
   const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);

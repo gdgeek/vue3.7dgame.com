@@ -4,7 +4,7 @@
       id="scene"
       ref="scene"
       :style="{
-        height: isSceneFullscreen ? '100vh' : '70vh',
+        height: isSceneFullscreen ? '100vh' : '75vh',
         width: '100%',
         margin: '0 auto',
       }"
@@ -1090,7 +1090,7 @@ onMounted(async () => {
 
   // 相机设置
   camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-  camera.position.set(0, 5, 15); // 调整相机距离
+  camera.position.set(0, 10, 30); // 调整相机距离
 
   // 主环境光
   const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
@@ -1114,7 +1114,7 @@ onMounted(async () => {
   controls.value.dampingFactor = 0.05;
   controls.value.screenSpacePanning = true;
   controls.value.minDistance = 1;
-  controls.value.maxDistance = 50;
+  controls.value.maxDistance = 500;
 
   // 加载所有模型
   const metaData = JSON.parse(props.meta.data);
