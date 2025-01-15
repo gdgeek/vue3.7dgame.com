@@ -1090,7 +1090,7 @@ onMounted(async () => {
 
   // 相机设置
   camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-  camera.position.set(0, 10, 30); // 调整相机距离
+  camera.position.set(0, 7, 20); // 调整相机距离
 
   // 主环境光
   const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
