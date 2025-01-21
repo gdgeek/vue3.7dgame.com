@@ -93,6 +93,78 @@ const controls = ref<OrbitControls | null>(null);
 const mouse = new THREE.Vector2(); // 鼠标位置
 const raycaster = new THREE.Raycaster(); // 射线投射器
 
+const combineTransforms = (parentTransform: any, childTransform: any) => {
+  if (!parentTransform) {
+    return (
+      childTransform || {
+        position: { x: 0, y: 0, z: 0 },
+        rotate: { x: 0, y: 0, z: 0 },
+        scale: { x: 1, y: 1, z: 1 },
+      }
+    );
+  }
+
+  if (!childTransform) {
+    return parentTransform;
+  }
+
+  // 创建父对象的旋转矩阵
+  const parentRotationMatrix = new THREE.Matrix4();
+  const parentRotationEuler = new THREE.Euler(
+    THREE.MathUtils.degToRad(parentTransform.rotate.x),
+    THREE.MathUtils.degToRad(parentTransform.rotate.y),
+    THREE.MathUtils.degToRad(parentTransform.rotate.z),
+    "XYZ"
+  );
+  parentRotationMatrix.makeRotationFromEuler(parentRotationEuler);
+
+  // 创建子对象的位置向量
+  const childPosition = new THREE.Vector3(
+    childTransform.position.x,
+    childTransform.position.y,
+    childTransform.position.z
+  );
+
+  // 应用父对象的旋转到子对象的位置
+  childPosition.applyMatrix4(parentRotationMatrix);
+
+  // 应用父对象的缩放到子对象的位置
+  childPosition.multiply(
+    new THREE.Vector3(
+      parentTransform.scale.x,
+      parentTransform.scale.y,
+      parentTransform.scale.z
+    )
+  );
+
+  // 最终位置是父对象位置加上变换后的子对象位置
+  const finalPosition = {
+    x: parentTransform.position.x + childPosition.x,
+    y: parentTransform.position.y + childPosition.y,
+    z: parentTransform.position.z + childPosition.z,
+  };
+
+  // 旋转角度简单相加
+  const finalRotation = {
+    x: parentTransform.rotate.x + childTransform.rotate.x,
+    y: parentTransform.rotate.y + childTransform.rotate.y,
+    z: parentTransform.rotate.z + childTransform.rotate.z,
+  };
+
+  // 缩放值相乘
+  const finalScale = {
+    x: parentTransform.scale.x * childTransform.scale.x,
+    y: parentTransform.scale.y * childTransform.scale.y,
+    z: parentTransform.scale.z * childTransform.scale.z,
+  };
+
+  return {
+    position: finalPosition,
+    rotate: finalRotation,
+    scale: finalScale,
+  };
+};
+
 const loadModel = async (resource: any, entity: any) => {
   console.log("开始加载模型:", {
     entityType: entity.type,
@@ -1070,6 +1142,66 @@ const playQueuedAudio = async (
   });
 };
 
+const processEntities = async (
+  entities: any[],
+  parentTransform?: any,
+  level: number = 0
+) => {
+  for (const entity of entities) {
+    const entityTransform = combineTransforms(
+      parentTransform,
+      entity.parameters?.transform
+    );
+
+    console.log(`处理实体 [Level ${level}]:`, {
+      name: entity.parameters?.name,
+      originalTransform: entity.parameters?.transform,
+      parentTransform,
+      combinedTransform: entityTransform,
+    });
+
+    // 处理当前实体
+    if (entity.type === "Text") {
+      try {
+        const textResource = {
+          type: "text",
+          content: entity.parameters.text || "DEFAULT TEXT",
+          id: entity.parameters.uuid || crypto.randomUUID(),
+        };
+        await loadModel(textResource, {
+          ...entity,
+          parameters: { ...entity.parameters, transform: entityTransform },
+        });
+      } catch (error) {
+        console.error("处理文本实体失败:", error);
+      }
+    } else if (entity.parameters?.resource) {
+      const resource = props.meta.resources.find(
+        (r: any) => r.id.toString() === entity.parameters.resource.toString()
+      );
+      if (resource) {
+        try {
+          await loadModel(resource, {
+            ...entity,
+            parameters: { ...entity.parameters, transform: entityTransform },
+          });
+        } catch (error) {
+          console.error(`加载模型失败:`, error);
+        }
+      }
+    }
+
+    // 递归处理子实体
+    if (entity.children?.entities) {
+      await processEntities(
+        entity.children.entities,
+        entityTransform,
+        level + 1
+      );
+    }
+  }
+};
+
 // 初始化场景
 onMounted(async () => {
   if (!scene.value) return;
@@ -1121,50 +1253,51 @@ onMounted(async () => {
   console.log("解析后的metaData:", metaData);
 
   if (metaData.children?.entities) {
-    for (const entity of metaData.children.entities) {
-      console.log("处理实体:", entity);
+    // for (const entity of metaData.children.entities) {
+    //   console.log("处理实体:", entity);
 
-      // 处理文本类型实体
-      if (entity.type === "Text") {
-        try {
-          // 创建一个文本资源对象
-          const textResource = {
-            type: "text",
-            content: entity.parameters.text || "DEFAULT TEXT",
-            id: entity.parameters.uuid || crypto.randomUUID(),
-          };
+    //   // 处理文本类型实体
+    //   if (entity.type === "Text") {
+    //     try {
+    //       // 创建一个文本资源对象
+    //       const textResource = {
+    //         type: "text",
+    //         content: entity.parameters.text || "DEFAULT TEXT",
+    //         id: entity.parameters.uuid || crypto.randomUUID(),
+    //       };
 
-          await loadModel(textResource, entity);
-          continue; // 跳过后续处理
-        } catch (error) {
-          console.error("处理文本实体失败:", error);
-          continue;
-        }
-      }
+    //       await loadModel(textResource, entity);
+    //       continue; // 跳过后续处理
+    //     } catch (error) {
+    //       console.error("处理文本实体失败:", error);
+    //       continue;
+    //     }
+    //   }
 
-      // 处理其他类型实体
-      if (!entity.parameters?.resource) {
-        console.warn("实体缺少resource参数:", entity);
-        continue;
-      }
+    //   // 处理其他类型实体
+    //   if (!entity.parameters?.resource) {
+    //     console.warn("实体缺少resource参数:", entity);
+    //     continue;
+    //   }
 
-      const resource = props.meta.resources.find(
-        (r: any) => r.id.toString() === entity.parameters.resource.toString()
-      );
+    //   const resource = props.meta.resources.find(
+    //     (r: any) => r.id.toString() === entity.parameters.resource.toString()
+    //   );
 
-      if (resource) {
-        try {
-          await loadModel(resource, entity);
-        } catch (error) {
-          console.error(
-            `加载模型失败 (resource ${entity.parameters.resource}):`,
-            error
-          );
-        }
-      } else {
-        console.warn(`未找到资源 ID ${entity.parameters.resource}`);
-      }
-    }
+    //   if (resource) {
+    //     try {
+    //       await loadModel(resource, entity);
+    //     } catch (error) {
+    //       console.error(
+    //         `加载模型失败 (resource ${entity.parameters.resource}):`,
+    //         error
+    //       );
+    //     }
+    //   } else {
+    //     console.warn(`未找到资源 ID ${entity.parameters.resource}`);
+    //   }
+    // }
+    await processEntities(metaData.children.entities);
   } else {
     console.error("metaData格式错误:", metaData);
   }

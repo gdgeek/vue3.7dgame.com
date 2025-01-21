@@ -673,7 +673,7 @@ onMounted(async () => {
     );
     const response2 = await getVerseMetasWithJsCode(
       id.value,
-      // 580,
+      // 584,
       "id,name,description,data,metas,resources,code,uuid,code",
       "js"
     );
@@ -805,9 +805,24 @@ const run = async () => {
       const checkModels = () => {
         const metasData = verseMetasWithJsCodeData.value!.metas!;
         let expectedModels = 0;
+
+        // 递归计算实体数量
+        const countEntities = (entities: any[]): number => {
+          let count = 0;
+          for (const entity of entities) {
+            count++;
+            // 如果存在子实体，递归计算
+            if (entity.children?.entities?.length > 0) {
+              count += countEntities(entity.children.entities);
+            }
+          }
+          return count;
+        };
+
+        // 计算所有meta中的实体总数
         for (const meta of metasData) {
           const metaData = JSON.parse(meta.data!);
-          expectedModels += metaData.children.entities.length;
+          expectedModels += countEntities(metaData.children.entities);
         }
 
         if (scenePlayer.value?.sources.size === expectedModels) {

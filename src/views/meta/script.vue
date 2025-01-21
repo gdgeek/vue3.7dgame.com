@@ -738,6 +738,7 @@ onMounted(async () => {
   try {
     loading.value = true;
     const response = await getMeta(id.value, "cyber,event,share,metaCode");
+    // const response = await getMeta(896, "cyber,event,share,metaCode");
     console.log("response数据", response);
 
     // 用递归处理层级嵌套
@@ -908,7 +909,20 @@ const run = async () => {
     return new Promise((resolve) => {
       const checkModels = () => {
         const metaData = JSON.parse(meta.value!.data!);
-        const expectedModels = metaData.children.entities.length;
+
+        // 递归计算实体数量
+        const countEntities = (entities: any[]): number => {
+          let count = 0;
+          for (const entity of entities) {
+            count++;
+            if (entity.children?.entities?.length > 0) {
+              count += countEntities(entity.children.entities);
+            }
+          }
+          return count;
+        };
+
+        const expectedModels = countEntities(metaData.children.entities);
 
         if (scenePlayer.value?.sources.size === expectedModels) {
           console.log("所有资源加载完成:", {
