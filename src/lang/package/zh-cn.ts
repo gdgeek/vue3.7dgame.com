@@ -831,9 +831,10 @@ export default {
         delete: "删除",
         rules: {
           message1: "请输入语言",
-          message2: "请输入名称",
-          message3: "长度在 2 到 50 个字符",
-          message4: "请输入介绍",
+          message2: "长度在 2 到 10 个字符",
+          message3: "请输入名称",
+          message4: "长度在 2 到 50 个字符",
+          message5: "请输入介绍",
         },
       },
       edit: "编辑【工程】",

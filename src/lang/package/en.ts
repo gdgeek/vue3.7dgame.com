@@ -848,9 +848,10 @@ export default {
         delete: "Delete",
         rules: {
           message1: "Please enter language",
-          message2: "Please enter a name",
-          message3: "Length should be between 2 and 50 characters",
-          message4: "Please enter a description",
+          message2: "Length should be between 2 and 10 characters",
+          message3: "Please enter a name",
+          message4: "Length should be between 2 and 50 characters",
+          message5: "Please enter a description",
         },
       },
       edit: "Edit【Project】",
