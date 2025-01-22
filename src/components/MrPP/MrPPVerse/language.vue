@@ -129,12 +129,12 @@ const rules = ref({
 
 const options = ref<LanguageOption[]>([]);
 
-// 添加预设的语言选项
+// 默认语言选项
 const defaultLanguageOptions = [
   { value: "zh-CN", label: "简体中文(zh-CN)" },
-  { value: "zh-TW", label: "繁體中文(zh-CN)" },
+  { value: "zh-TW", label: "繁體中文(zh-TW)" },
   { value: "en-US", label: "English(en-US)" },
-  { value: "ja-JP", label: "日本語(ja-JP) " },
+  { value: "ja-JP", label: "日本語(ja-JP)" },
   { value: "ko-KR", label: "한국어(ko-KR)" },
   { value: "fr-FR", label: "Français(fr-FR)" },
   { value: "de-DE", label: "Deutsch(de-DE)" },

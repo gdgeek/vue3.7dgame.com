@@ -673,7 +673,7 @@ onMounted(async () => {
     );
     const response2 = await getVerseMetasWithJsCode(
       id.value,
-      // 584,
+      // 889,
       "id,name,description,data,metas,resources,code,uuid,code",
       "js"
     );

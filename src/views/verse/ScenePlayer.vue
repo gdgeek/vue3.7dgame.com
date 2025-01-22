@@ -595,27 +595,293 @@ const loadModel = async (resource: any, entity: any, moduleTransform?: any) => {
             voxMesh.receiveShadow = true;
 
             const uuid = entity.parameters.uuid.toString();
-            sources.set(uuid, {
+            voxMesh.uuid = uuid;
+
+            let sourceData = {
               type: "model",
               data: {
                 mesh: voxMesh,
                 setVisibility: (isVisible: boolean) => {
                   voxMesh.visible = isVisible;
                 },
+                cleanup: undefined as (() => void) | undefined,
+                updateBoundingBox: undefined as (() => void) | undefined,
+                setRotating: undefined as
+                  | ((isRotating: boolean) => void)
+                  | undefined,
               },
-            });
-            voxMesh.uuid = uuid;
+            };
+
+            if (entity.children?.components) {
+              // 点击触发
+              const actionComponent = entity.children.components.find(
+                (comp: any) => comp.type === "Action"
+              );
+              // 碰撞触发
+              const triggerComponent = entity.children.components.find(
+                (comp: any) => comp.type === "Trigger"
+              );
+              // 自旋转
+              const rotateComponent = entity.children.components.find(
+                (comp: any) => comp.type === "Rotate"
+              );
+              // 可移动
+              const movedComponent = entity.children.components.find(
+                (comp: any) => comp.type === "Moved"
+              );
+
+              // 处理点击事件
+              if (actionComponent) {
+                console.log("发现点击触发组件:", actionComponent);
+                let isExecuting = false;
+
+                const handleClick = async (event: MouseEvent) => {
+                  if (isExecuting) {
+                    console.log("事件正在执行中，请等待完成...");
+                    return;
+                  }
+
+                  const rect = renderer!.domElement.getBoundingClientRect();
+                  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+                  raycaster.setFromCamera(mouse, camera!);
+                  const intersects = raycaster.intersectObject(voxMesh, true);
+
+                  if (intersects.length > 0) {
+                    console.log("体素模型被点击:", uuid);
+                    const eventId = actionComponent.parameters.uuid;
+                    if (
+                      window.verse &&
+                      typeof window.verse[`@${eventId}`] === "function"
+                    ) {
+                      try {
+                        isExecuting = true;
+                        await window.verse[`@${eventId}`]();
+                      } catch (error) {
+                        console.error("执行事件处理函数失败:", error);
+                      } finally {
+                        isExecuting = false;
+                      }
+                    }
+                  }
+                };
+
+                renderer!.domElement.addEventListener("click", handleClick);
+                sourceData.data.cleanup = () => {
+                  renderer!.domElement.removeEventListener(
+                    "click",
+                    handleClick
+                  );
+                };
+              }
+
+              // 处理碰撞检测
+              if (triggerComponent) {
+                console.log("发现碰撞触发组件:", triggerComponent);
+                const boundingBox = new THREE.Box3();
+                boundingBox.setFromObject(voxMesh);
+                const lastPosition = voxMesh.position.clone();
+
+                collisionObjects.value.push({
+                  sourceUuid: uuid,
+                  targetUuid: triggerComponent.parameters.target,
+                  eventUuid: triggerComponent.parameters.uuid,
+                  boundingBox: boundingBox,
+                  isColliding: false,
+                  lastPosition: lastPosition,
+                });
+
+                sourceData.data.updateBoundingBox = () => {
+                  boundingBox.setFromObject(voxMesh);
+                };
+              }
+
+              // 处理自旋转
+              if (rotateComponent) {
+                console.log("发现自旋转组件:", rotateComponent);
+                const speed = {
+                  x: THREE.MathUtils.degToRad(
+                    rotateComponent.parameters.speed.x
+                  ),
+                  y: THREE.MathUtils.degToRad(
+                    rotateComponent.parameters.speed.y
+                  ),
+                  z: THREE.MathUtils.degToRad(
+                    rotateComponent.parameters.speed.z
+                  ),
+                };
+
+                rotatingObjects.value.push({
+                  mesh: voxMesh,
+                  speed: speed,
+                });
+
+                sourceData.data.setRotating = (isRotating: boolean) => {
+                  const index = rotatingObjects.value.findIndex(
+                    (obj) => obj.mesh === voxMesh
+                  );
+                  if (index !== -1 && !isRotating) {
+                    rotatingObjects.value.splice(index, 1);
+                  } else if (index === -1 && isRotating) {
+                    rotatingObjects.value.push({
+                      mesh: voxMesh,
+                      speed: speed,
+                    });
+                  }
+                };
+              }
+
+              // 处理可移动
+              if (movedComponent) {
+                console.log("发现可移动组件:", movedComponent);
+                const moveableObject = {
+                  mesh: voxMesh,
+                  isDragging: false,
+                  magnetic: movedComponent.parameters.magnetic,
+                  scalable: movedComponent.parameters.scalable,
+                  limit: movedComponent.parameters.limit,
+                };
+
+                moveableObjects.value.push(moveableObject);
+
+                const onMouseDown = (event: MouseEvent) => {
+                  event.preventDefault();
+                  const rect = renderer!.domElement.getBoundingClientRect();
+                  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+                  raycaster.setFromCamera(mouse, camera!);
+                  const intersects = raycaster.intersectObject(voxMesh, true);
+
+                  if (intersects.length > 0) {
+                    console.log("开始拖拽体素模型:", entity.parameters.uuid);
+                    dragState.isDragging = true;
+                    dragState.draggedObject = voxMesh;
+                    dragState.dragStartPosition.copy(voxMesh.position);
+                    dragState.mouseStartPosition.copy(mouse);
+
+                    const intersectPoint = intersects[0].point;
+                    dragState.dragOffset
+                      .copy(voxMesh.position)
+                      .sub(intersectPoint);
+                    dragState.lastIntersection.copy(intersectPoint);
+
+                    controls.value!.enabled = false;
+                  }
+                };
+
+                const onMouseMove = (event: MouseEvent) => {
+                  if (!dragState.isDragging || !dragState.draggedObject) return;
+
+                  const rect = renderer!.domElement.getBoundingClientRect();
+                  const mouse = new THREE.Vector2(
+                    ((event.clientX - rect.left) / rect.width) * 2 - 1,
+                    -((event.clientY - rect.top) / rect.height) * 2 + 1
+                  );
+
+                  raycaster.setFromCamera(mouse, camera!);
+
+                  const cameraNormal = new THREE.Vector3(0, 0, -1);
+                  cameraNormal.applyQuaternion(camera!.quaternion);
+                  const dragPlane = new THREE.Plane(
+                    cameraNormal,
+                    -dragState.dragStartPosition.dot(cameraNormal)
+                  );
+
+                  const intersection = new THREE.Vector3();
+
+                  if (raycaster.ray.intersectPlane(dragPlane, intersection)) {
+                    intersection.add(dragState.dragOffset);
+
+                    const moveableObject = moveableObjects.value.find(
+                      (obj) => obj.mesh === dragState.draggedObject
+                    );
+
+                    const newPosition = new THREE.Vector3();
+                    newPosition.lerpVectors(
+                      dragState.draggedObject.position,
+                      intersection,
+                      0.5
+                    );
+
+                    if (moveableObject?.limit) {
+                      if (moveableObject.limit.x.enable) {
+                        newPosition.x = THREE.MathUtils.clamp(
+                          newPosition.x,
+                          moveableObject.limit.x.min,
+                          moveableObject.limit.x.max
+                        );
+                      }
+                      if (moveableObject.limit.y.enable) {
+                        newPosition.y = THREE.MathUtils.clamp(
+                          newPosition.y,
+                          moveableObject.limit.y.min,
+                          moveableObject.limit.y.max
+                        );
+                      }
+                      if (moveableObject.limit.z.enable) {
+                        newPosition.z = THREE.MathUtils.clamp(
+                          newPosition.z,
+                          moveableObject.limit.z.min,
+                          moveableObject.limit.z.max
+                        );
+                      }
+                    }
+
+                    dragState.draggedObject.position.copy(newPosition);
+                    dragState.lastIntersection.copy(intersection);
+                    console.log("移动体素到位置:", newPosition);
+                  }
+                };
+
+                const onMouseUp = () => {
+                  if (dragState.isDragging) {
+                    console.log("结束拖拽体素");
+                    dragState.isDragging = false;
+                    dragState.draggedObject = null;
+                    controls.value!.enabled = true;
+                  }
+                };
+
+                renderer!.domElement.addEventListener("mousedown", onMouseDown);
+                document.addEventListener("mousemove", onMouseMove);
+                document.addEventListener("mouseup", onMouseUp);
+
+                const prevCleanup = sourceData.data.cleanup;
+                sourceData.data.cleanup = () => {
+                  if (prevCleanup) prevCleanup();
+                  renderer!.domElement.removeEventListener(
+                    "mousedown",
+                    onMouseDown
+                  );
+                  document.removeEventListener("mousemove", onMouseMove);
+                  document.removeEventListener("mouseup", onMouseUp);
+                };
+              }
+
+              console.log("VOX模型加载完成:", {
+                uuid,
+                position: voxMesh.position.toArray(),
+                rotation: voxMesh.rotation.toArray(),
+                scale: voxMesh.scale.toArray(),
+                modelSize: chunk.size,
+              });
+
+              sources.set(uuid, sourceData);
+            } else {
+              sources.set(uuid, {
+                type: "model",
+                data: {
+                  mesh: voxMesh,
+                  setVisibility: (isVisible: boolean) => {
+                    voxMesh.visible = isVisible;
+                  },
+                },
+              });
+            }
 
             threeScene.add(voxMesh);
-
-            console.log("VOX模型加载完成:", {
-              uuid,
-              position: voxMesh.position.toArray(),
-              rotation: voxMesh.rotation.toArray(),
-              scale: voxMesh.scale.toArray(),
-              modelSize: chunk.size,
-            });
-
             resolve(voxMesh);
           } catch (error) {
             console.error("处理VOX数据时出错:", error);
