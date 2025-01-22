@@ -737,8 +737,8 @@ onMounted(async () => {
 
   try {
     loading.value = true;
-    // const response = await getMeta(id.value, "cyber,event,share,metaCode");
-    const response = await getMeta(889, "cyber,event,share,metaCode");
+    const response = await getMeta(id.value, "cyber,event,share,metaCode");
+    // const response = await getMeta(889, "cyber,event,share,metaCode");
     console.log("response数据", response);
 
     // 用递归处理层级嵌套
