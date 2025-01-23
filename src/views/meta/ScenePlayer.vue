@@ -168,7 +168,11 @@ const combineTransforms = (parentTransform: any, childTransform: any) => {
   };
 };
 
-const loadModel = async (resource: any, entity: any) => {
+const loadModel = async (
+  resource: any,
+  entity: any,
+  parentActive: boolean = true
+) => {
   console.log("开始加载模型:", {
     entityType: entity.type,
     entityUUID: entity.parameters?.uuid,
@@ -176,14 +180,19 @@ const loadModel = async (resource: any, entity: any) => {
     isActive: entity.parameters.active,
   });
 
-  // 初始化可见性
-  const setInitialVisibility = (mesh: THREE.Object3D) => {
-    mesh.visible =
-      entity.parameters.active !== undefined ? entity.parameters.active : true;
+  // 设置初始可见性
+  const setInitialVisibility = (
+    mesh: THREE.Object3D,
+    parentActive: boolean = true
+  ) => {
+    const isActive =
+      entity.parameters?.active !== undefined ? entity.parameters.active : true;
+    mesh.visible = parentActive && isActive;
     console.error(
       `设置模型 ${entity.parameters.uuid} 的初始可见性:`,
       mesh.visible
     );
+    return isActive;
   };
 
   // 处理视频类型
@@ -217,7 +226,7 @@ const loadModel = async (resource: any, entity: any) => {
           });
 
           const mesh = new THREE.Mesh(geometry, material);
-          setInitialVisibility(mesh);
+          setInitialVisibility(mesh, parentActive);
 
           // 应用变换
           if (entity.parameters?.transform) {
@@ -350,7 +359,7 @@ const loadModel = async (resource: any, entity: any) => {
           });
 
           const mesh = new THREE.Mesh(geometry, material);
-          setInitialVisibility(mesh);
+          setInitialVisibility(mesh, parentActive);
 
           // 应用变换
           if (entity.parameters?.transform) {
@@ -457,7 +466,7 @@ const loadModel = async (resource: any, entity: any) => {
         });
 
         const mesh = new THREE.Mesh(geometry, material);
-        setInitialVisibility(mesh);
+        setInitialVisibility(mesh, parentActive);
 
         // 应用变换
         if (entity.parameters?.transform) {
@@ -532,7 +541,7 @@ const loadModel = async (resource: any, entity: any) => {
             });
 
             const voxMesh = new VOXMesh(chunk, 1);
-            setInitialVisibility(voxMesh);
+            setInitialVisibility(voxMesh, parentActive);
 
             // 应用变换
             if (entity.parameters?.transform) {
@@ -897,7 +906,7 @@ const loadModel = async (resource: any, entity: any) => {
         url,
         (gltf) => {
           const model = gltf.scene;
-          setInitialVisibility(model);
+          setInitialVisibility(model, parentActive);
           const uuid = entity.parameters.uuid.toString();
           if (!entity.parameters || !entity.parameters.uuid) {
             console.error("entity.parameters对象无效:", entity.parameters);
@@ -1449,7 +1458,8 @@ const playQueuedAudio = async (
 const processEntities = async (
   entities: any[],
   parentTransform?: any,
-  level: number = 0
+  level: number = 0,
+  parentActive: boolean = true
 ) => {
   for (const entity of entities) {
     const entityTransform = combineTransforms(
@@ -1472,10 +1482,14 @@ const processEntities = async (
           content: entity.parameters.text || "DEFAULT TEXT",
           id: entity.parameters.uuid || crypto.randomUUID(),
         };
-        await loadModel(textResource, {
-          ...entity,
-          parameters: { ...entity.parameters, transform: entityTransform },
-        });
+        await loadModel(
+          textResource,
+          {
+            ...entity,
+            parameters: { ...entity.parameters, transform: entityTransform },
+          },
+          parentActive
+        );
       } catch (error) {
         console.error("处理文本实体失败:", error);
       }
@@ -1485,22 +1499,31 @@ const processEntities = async (
       );
       if (resource) {
         try {
-          await loadModel(resource, {
-            ...entity,
-            parameters: { ...entity.parameters, transform: entityTransform },
-          });
+          await loadModel(
+            resource,
+            {
+              ...entity,
+              parameters: { ...entity.parameters, transform: entityTransform },
+            },
+            parentActive
+          );
         } catch (error) {
           console.error(`加载模型失败:`, error);
         }
       }
     }
 
-    // 递归处理子实体
+    // 递归处理子实体，传递当前实体的可见性状态
     if (entity.children?.entities) {
+      const currentActive =
+        entity.parameters?.active !== undefined
+          ? entity.parameters.active
+          : true;
       await processEntities(
         entity.children.entities,
         entityTransform,
-        level + 1
+        level + 1,
+        parentActive && currentActive
       );
     }
   }
