@@ -55,6 +55,7 @@ const collisionObjects = ref<
     boundingBox: THREE.Box3;
     isColliding: boolean;
     lastPosition: THREE.Vector3;
+    checkVisibility: boolean;
   }>
 >([]);
 
@@ -62,6 +63,7 @@ const rotatingObjects = ref<
   Array<{
     mesh: THREE.Object3D;
     speed: { x: number; y: number; z: number };
+    checkVisibility: boolean;
   }>
 >([]);
 
@@ -76,6 +78,7 @@ const moveableObjects = ref<
       y: { enable: boolean; min: number; max: number };
       z: { enable: boolean; min: number; max: number };
     };
+    checkVisibility: boolean;
   }>
 >([]);
 
@@ -598,6 +601,11 @@ const loadModel = async (resource: any, entity: any) => {
                 let isExecuting = false;
 
                 const handleClick = async (event: MouseEvent) => {
+                  // 如果模型不可见，直接返回
+                  if (!voxMesh.visible) {
+                    return;
+                  }
+
                   if (isExecuting) {
                     console.log("事件正在执行中，请等待完成...");
                     return;
@@ -652,6 +660,7 @@ const loadModel = async (resource: any, entity: any) => {
                   boundingBox: boundingBox,
                   isColliding: false,
                   lastPosition: lastPosition,
+                  checkVisibility: true,
                 });
 
                 sourceData.data.updateBoundingBox = () => {
@@ -677,6 +686,7 @@ const loadModel = async (resource: any, entity: any) => {
                 rotatingObjects.value.push({
                   mesh: voxMesh,
                   speed: speed,
+                  checkVisibility: true,
                 });
 
                 sourceData.data.setRotating = (isRotating: boolean) => {
@@ -689,6 +699,7 @@ const loadModel = async (resource: any, entity: any) => {
                     rotatingObjects.value.push({
                       mesh: voxMesh,
                       speed: speed,
+                      checkVisibility: true,
                     });
                   }
                 };
@@ -704,6 +715,7 @@ const loadModel = async (resource: any, entity: any) => {
                   magnetic: movedComponent.parameters.magnetic,
                   scalable: movedComponent.parameters.scalable,
                   limit: movedComponent.parameters.limit,
+                  checkVisibility: true,
                 };
 
                 moveableObjects.value.push(moveableObject);
@@ -942,11 +954,15 @@ const loadModel = async (resource: any, entity: any) => {
 
             if (actionComponent) {
               console.log("发现点击触发组件:", actionComponent);
-
               let isExecuting = false;
 
               // 添加点击事件处理
               const handleClick = async (event: MouseEvent) => {
+                // 如果模型不可见，直接返回
+                if (!model.visible) {
+                  return;
+                }
+
                 if (isExecuting) {
                   console.log("事件正在执行中，请等待完成...");
                   return;
@@ -1015,14 +1031,15 @@ const loadModel = async (resource: any, entity: any) => {
               // 记录上一帧的位置
               let lastPosition = model.position.clone();
 
-              // 添加到动画循环中检查的碰撞对象列表
+              // 添加到动画循环中检查的碰撞对象列表，增加可见性检查
               const collisionData = {
                 sourceUuid: entity.parameters.uuid,
                 targetUuid: triggerComponent.parameters.target,
                 eventUuid: triggerComponent.parameters.uuid,
                 boundingBox: boundingBox,
-                isColliding: false, // 防止重复触发
+                isColliding: false,
                 lastPosition: lastPosition,
+                checkVisibility: true,
               };
 
               // 将碰撞数据添加到碰撞检测列表
@@ -1050,10 +1067,11 @@ const loadModel = async (resource: any, entity: any) => {
                 z: THREE.MathUtils.degToRad(rotateComponent.parameters.speed.z),
               };
 
-              // 添加到旋转对象列表
+              // 添加到旋转对象列表时包含可见性检查
               rotatingObjects.value.push({
                 mesh: model,
                 speed: speed,
+                checkVisibility: true,
               });
 
               // 在 sourceData 中添加控制旋转的方法
@@ -1074,6 +1092,7 @@ const loadModel = async (resource: any, entity: any) => {
                       rotatingObjects.value.push({
                         mesh: model,
                         speed: speed,
+                        checkVisibility: true,
                       });
                     }
                   },
@@ -1091,6 +1110,7 @@ const loadModel = async (resource: any, entity: any) => {
                 magnetic: movedComponent.parameters.magnetic,
                 scalable: movedComponent.parameters.scalable,
                 limit: movedComponent.parameters.limit,
+                checkVisibility: true,
               };
 
               moveableObjects.value.push(moveableObject);
@@ -1537,50 +1557,6 @@ onMounted(async () => {
   console.log("解析后的metaData:", metaData);
 
   if (metaData.children?.entities) {
-    // for (const entity of metaData.children.entities) {
-    //   console.log("处理实体:", entity);
-
-    //   // 处理文本类型实体
-    //   if (entity.type === "Text") {
-    //     try {
-    //       // 创建一个文本资源对象
-    //       const textResource = {
-    //         type: "text",
-    //         content: entity.parameters.text || "DEFAULT TEXT",
-    //         id: entity.parameters.uuid || crypto.randomUUID(),
-    //       };
-
-    //       await loadModel(textResource, entity);
-    //       continue; // 跳过后续处理
-    //     } catch (error) {
-    //       console.error("处理文本实体失败:", error);
-    //       continue;
-    //     }
-    //   }
-
-    //   // 处理其他类型实体
-    //   if (!entity.parameters?.resource) {
-    //     console.warn("实体缺少resource参数:", entity);
-    //     continue;
-    //   }
-
-    //   const resource = props.meta.resources.find(
-    //     (r: any) => r.id.toString() === entity.parameters.resource.toString()
-    //   );
-
-    //   if (resource) {
-    //     try {
-    //       await loadModel(resource, entity);
-    //     } catch (error) {
-    //       console.error(
-    //         `加载模型失败 (resource ${entity.parameters.resource}):`,
-    //         error
-    //       );
-    //     }
-    //   } else {
-    //     console.warn(`未找到资源 ID ${entity.parameters.resource}`);
-    //   }
-    // }
     await processEntities(metaData.children.entities);
   } else {
     console.error("metaData格式错误:", metaData);
@@ -1595,6 +1571,10 @@ onMounted(async () => {
 
     // 更新旋转
     rotatingObjects.value.forEach((obj) => {
+      // 检查对象是否可见
+      if (obj.checkVisibility && !obj.mesh.visible) {
+        return;
+      }
       obj.mesh.rotation.x += obj.speed.x * delta;
       obj.mesh.rotation.y += obj.speed.y * delta;
       obj.mesh.rotation.z += obj.speed.z * delta;
@@ -1603,53 +1583,56 @@ onMounted(async () => {
     // 碰撞检测
     if (collisionObjects.value.length > 0) {
       for (const collisionObj of collisionObjects.value) {
-        // 更新当前物体的包围盒
         const sourceModel = sources.get(collisionObj.sourceUuid)?.data.mesh;
         const targetModel = sources.get(collisionObj.targetUuid)?.data.mesh;
 
-        if (sourceModel && targetModel) {
-          // 检查物体是否移动
-          if (!sourceModel.position.equals(collisionObj.lastPosition)) {
-            // 更新包围盒
-            collisionObj.boundingBox.setFromObject(sourceModel);
+        // 如果任一模型不可见，跳过碰撞检测
+        if (
+          collisionObj.checkVisibility &&
+          (!sourceModel?.visible || !targetModel?.visible)
+        ) {
+          continue;
+        }
 
-            // 创建目标物体的包围盒
-            const targetBoundingBox = new THREE.Box3().setFromObject(
-              targetModel
-            );
+        // 检查物体是否移动
+        if (!sourceModel.position.equals(collisionObj.lastPosition)) {
+          // 更新包围盒
+          collisionObj.boundingBox.setFromObject(sourceModel);
 
-            // 检测碰撞
-            const isColliding =
-              collisionObj.boundingBox.intersectsBox(targetBoundingBox);
+          // 创建目标物体的包围盒
+          const targetBoundingBox = new THREE.Box3().setFromObject(targetModel);
 
-            // 如果发生碰撞且之前未处于碰撞状态
-            if (isColliding && !collisionObj.isColliding) {
-              collisionObj.isColliding = true;
-              console.log("检测到碰撞:", {
-                source: collisionObj.sourceUuid,
-                target: collisionObj.targetUuid,
-              });
+          // 检测碰撞
+          const isColliding =
+            collisionObj.boundingBox.intersectsBox(targetBoundingBox);
 
-              // 执行碰撞事件
-              if (
-                window.meta &&
-                typeof window.meta[`@${collisionObj.eventUuid}`] === "function"
-              ) {
-                try {
-                  window.meta[`@${collisionObj.eventUuid}`]();
-                } catch (error) {
-                  console.error("执行碰撞事件处理函数失败:", error);
-                }
+          // 如果发生碰撞且之前未处于碰撞状态
+          if (isColliding && !collisionObj.isColliding) {
+            collisionObj.isColliding = true;
+            console.log("检测到碰撞:", {
+              source: collisionObj.sourceUuid,
+              target: collisionObj.targetUuid,
+            });
+
+            // 执行碰撞事件
+            if (
+              window.meta &&
+              typeof window.meta[`@${collisionObj.eventUuid}`] === "function"
+            ) {
+              try {
+                window.meta[`@${collisionObj.eventUuid}`]();
+              } catch (error) {
+                console.error("执行碰撞事件处理函数失败:", error);
               }
             }
-            // 如果不再碰撞，重置碰撞状态
-            else if (!isColliding && collisionObj.isColliding) {
-              collisionObj.isColliding = false;
-            }
-
-            // 更新上一帧位置
-            collisionObj.lastPosition.copy(sourceModel.position);
           }
+          // 如果不再碰撞，重置碰撞状态
+          else if (!isColliding && collisionObj.isColliding) {
+            collisionObj.isColliding = false;
+          }
+
+          // 更新上一帧位置
+          collisionObj.lastPosition.copy(sourceModel.position);
         }
       }
     }
