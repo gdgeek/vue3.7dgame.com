@@ -738,6 +738,7 @@ onMounted(async () => {
   try {
     loading.value = true;
     const response = await getMeta(id.value, "cyber,event,share,metaCode");
+    // const response = await getMeta(894, "cyber,event,share,metaCode");
     // const response = await getMeta(889, "cyber,event,share,metaCode");
     console.log("response数据", response);
 
@@ -1001,7 +1002,7 @@ const run = async () => {
     const helper = {
       handler: (index: string, uuid: string) => {
         const source = scenePlayer.value?.sources.get(uuid);
-        console.error("handler", source);
+        console.error("当前的source", source);
         if (!source) {
           console.error(`找不到UUID为 ${uuid} 的实体`);
           return null;
@@ -1050,13 +1051,20 @@ const run = async () => {
         const startPos = obj.mesh.position.clone();
         const endPos = transformData.position;
 
+        // 将角度转换为弧度
+        const endRotationRadians = new THREE.Vector3(
+          THREE.MathUtils.degToRad(transformData.rotation.x),
+          THREE.MathUtils.degToRad(transformData.rotation.y),
+          THREE.MathUtils.degToRad(transformData.rotation.z)
+        );
+
         return {
           type: "data",
           obj,
           startPos,
           endPos,
           startRotation: obj.mesh.rotation.clone(),
-          endRotation: transformData.rotation,
+          endRotation: endRotationRadians, // 使用转换后的弧度值
           startScale: obj.mesh.scale.clone(),
           endScale: transformData.scale,
           duration,
@@ -1216,6 +1224,7 @@ const run = async () => {
                 .lerp(tweenData.endPos, easeProgress);
               tweenData.obj.mesh.position.copy(newPos);
 
+              // 使用 THREE.MathUtils.lerp 进行旋转插值
               tweenData.obj.mesh.rotation.set(
                 THREE.MathUtils.lerp(
                   tweenData.startRotation.x,

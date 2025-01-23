@@ -229,10 +229,10 @@ const loadModel = async (
   };
 
   // 合并Module和Entity的transform
-  const combinedTransform = combineTransforms(
-    moduleTransform,
-    entity.parameters?.transform
-  );
+  // const combinedTransform = combineTransforms(
+  //   moduleTransform,
+  //   entity.parameters?.transform
+  // );
 
   // 处理视频类型
   if (resource.type === "video" || entity.type === "Video") {
@@ -270,22 +270,24 @@ const loadModel = async (
           // 应用变换
           if (entity.parameters?.transform) {
             mesh.position.set(
-              combinedTransform.position.x,
-              combinedTransform.position.y,
-              combinedTransform.position.z
+              entity.parameters.transform.position.x,
+              entity.parameters.transform.position.y,
+              entity.parameters.transform.position.z
             );
 
             mesh.rotation.set(
-              THREE.MathUtils.degToRad(combinedTransform.rotate.x),
-              THREE.MathUtils.degToRad(combinedTransform.rotate.y),
-              THREE.MathUtils.degToRad(combinedTransform.rotate.z)
+              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
+              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
+              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
             );
 
             const baseScale = width;
             mesh.scale.set(
-              combinedTransform.scale.x * baseScale,
-              combinedTransform.scale.y * baseScale * (1 / aspectRatio),
-              combinedTransform.scale.z * baseScale
+              entity.parameters.transform.scale.x * baseScale,
+              entity.parameters.transform.scale.y *
+                baseScale *
+                (1 / aspectRatio),
+              entity.parameters.transform.scale.z * baseScale
             );
           }
 
@@ -401,22 +403,24 @@ const loadModel = async (
           // 应用变换
           if (entity.parameters?.transform) {
             mesh.position.set(
-              combinedTransform.position.x,
-              combinedTransform.position.y,
-              combinedTransform.position.z
+              entity.parameters.transform.position.x,
+              entity.parameters.transform.position.y,
+              entity.parameters.transform.position.z
             );
 
             mesh.rotation.set(
-              THREE.MathUtils.degToRad(combinedTransform.rotate.x),
-              THREE.MathUtils.degToRad(combinedTransform.rotate.y),
-              THREE.MathUtils.degToRad(combinedTransform.rotate.z)
+              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
+              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
+              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
             );
 
             const baseScale = width;
             mesh.scale.set(
-              combinedTransform.scale.x * baseScale,
-              combinedTransform.scale.y * baseScale * (1 / aspectRatio),
-              combinedTransform.scale.z * baseScale
+              entity.parameters.transform.scale.x * baseScale,
+              entity.parameters.transform.scale.y *
+                baseScale *
+                (1 / aspectRatio),
+              entity.parameters.transform.scale.z * baseScale
             );
           }
 
@@ -506,21 +510,21 @@ const loadModel = async (
         // 应用变换
         if (entity.parameters?.transform) {
           mesh.position.set(
-            combinedTransform.position.x,
-            combinedTransform.position.y,
-            combinedTransform.position.z
+            entity.parameters.transform.position.x,
+            entity.parameters.transform.position.y,
+            entity.parameters.transform.position.z
           );
 
           mesh.rotation.set(
-            THREE.MathUtils.degToRad(combinedTransform.rotate.x),
-            THREE.MathUtils.degToRad(combinedTransform.rotate.y),
-            THREE.MathUtils.degToRad(combinedTransform.rotate.z)
+            THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
+            THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
+            THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
           );
 
           mesh.scale.set(
-            combinedTransform.scale.x,
-            combinedTransform.scale.y,
-            combinedTransform.scale.z
+            entity.parameters.transform.scale.x,
+            entity.parameters.transform.scale.y,
+            entity.parameters.transform.scale.z
           );
         }
 
@@ -566,7 +570,7 @@ const loadModel = async (
     return new Promise((resolve, reject) => {
       loader.load(
         url,
-        (chunks: any[]) => {
+        async (chunks: any[]) => {
           try {
             const chunk = chunks[0];
             if (!chunk || !chunk.data || !chunk.size) {
@@ -585,30 +589,69 @@ const loadModel = async (
             // 应用变换
             if (entity.parameters?.transform) {
               voxMesh.position.set(
-                combinedTransform.position.x,
-                combinedTransform.position.y,
-                combinedTransform.position.z
+                entity.parameters.transform.position.x,
+                entity.parameters.transform.position.y,
+                entity.parameters.transform.position.z
               );
 
               voxMesh.rotation.set(
-                THREE.MathUtils.degToRad(combinedTransform.rotate.x),
-                THREE.MathUtils.degToRad(combinedTransform.rotate.y),
-                THREE.MathUtils.degToRad(combinedTransform.rotate.z)
+                THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
+                THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
+                THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
               );
 
               voxMesh.scale.set(
-                combinedTransform.scale.x,
-                combinedTransform.scale.y,
-                combinedTransform.scale.z
+                entity.parameters.transform.scale.x,
+                entity.parameters.transform.scale.y,
+                entity.parameters.transform.scale.z
               );
+            }
+
+            const uuid = entity.parameters.uuid.toString();
+            voxMesh.uuid = uuid;
+
+            // 处理子实体
+            if (entity.children?.entities) {
+              const childMeshes = await Promise.all(
+                entity.children.entities.map((childEntity: any) => {
+                  if (childEntity.parameters?.resource) {
+                    const childResource = props.verse.resources.find(
+                      (r: any) =>
+                        r.id.toString() ===
+                        childEntity.parameters.resource.toString()
+                    );
+                    if (childResource) {
+                      return loadModel(
+                        childResource,
+                        childEntity,
+                        parentActive && voxMesh.visible
+                      );
+                    }
+                  } else if (childEntity.type === "Text") {
+                    const textResource = {
+                      type: "text",
+                      content: childEntity.parameters.text || "DEFAULT TEXT",
+                      id: childEntity.parameters.uuid || crypto.randomUUID(),
+                    };
+                    return loadModel(
+                      textResource,
+                      childEntity,
+                      parentActive && voxMesh.visible
+                    );
+                  }
+                  return null;
+                })
+              );
+
+              // 将有效的子级mesh添加到父级mesh
+              childMeshes.filter(Boolean).forEach((childMesh) => {
+                voxMesh.add(childMesh);
+              });
             }
 
             // 启用阴影
             voxMesh.castShadow = true;
             voxMesh.receiveShadow = true;
-
-            const uuid = entity.parameters.uuid.toString();
-            voxMesh.uuid = uuid;
 
             let sourceData = {
               type: "model",
@@ -923,7 +966,7 @@ const loadModel = async (
     return new Promise((resolve, reject) => {
       loader.load(
         url,
-        (gltf) => {
+        async (gltf) => {
           const model = gltf.scene;
           setInitialVisibility(model, parentActive);
           const uuid = entity.parameters.uuid.toString();
@@ -936,19 +979,19 @@ const loadModel = async (
 
           if (entity.parameters?.transform) {
             model.position.set(
-              combinedTransform.position.x,
-              combinedTransform.position.y,
-              combinedTransform.position.z
+              entity.parameters.transform.position.x,
+              entity.parameters.transform.position.y,
+              entity.parameters.transform.position.z
             );
             model.rotation.set(
-              combinedTransform.rotate.x,
-              combinedTransform.rotate.y,
-              combinedTransform.rotate.z
+              entity.parameters.transform.rotate.x,
+              entity.parameters.transform.rotate.y,
+              entity.parameters.transform.rotate.z
             );
             model.scale.set(
-              combinedTransform.scale.x,
-              combinedTransform.scale.y,
-              combinedTransform.scale.z
+              entity.parameters.transform.scale.x,
+              entity.parameters.transform.scale.y,
+              entity.parameters.transform.scale.z
             );
           }
 
@@ -959,6 +1002,45 @@ const loadModel = async (
             console.log(`模型 ${entity.parameters.uuid} 动画加载完成:`, {
               animations: gltf.animations,
               animationNames: gltf.animations.map((a) => a.name),
+            });
+          }
+
+          // 处理子实体
+          if (entity.children?.entities) {
+            const childMeshes = await Promise.all(
+              entity.children.entities.map((childEntity: any) => {
+                if (childEntity.parameters?.resource) {
+                  const childResource = props.verse.resources.find(
+                    (r: any) =>
+                      r.id.toString() ===
+                      childEntity.parameters.resource.toString()
+                  );
+                  if (childResource) {
+                    return loadModel(
+                      childResource,
+                      childEntity,
+                      parentActive && model.visible
+                    );
+                  }
+                } else if (childEntity.type === "Text") {
+                  const textResource = {
+                    type: "text",
+                    content: childEntity.parameters.text || "DEFAULT TEXT",
+                    id: childEntity.parameters.uuid || crypto.randomUUID(),
+                  };
+                  return loadModel(
+                    textResource,
+                    childEntity,
+                    parentActive && model.visible
+                  );
+                }
+                return null;
+              })
+            );
+
+            // 将有效的子级mesh添加到父级mesh
+            childMeshes.filter(Boolean).forEach((childMesh) => {
+              model.add(childMesh);
             });
           }
 
@@ -1533,18 +1615,18 @@ const processEntities = async (
     }
 
     // 递归处理子实体，传递当前实体的可见性状态
-    if (entity.children?.entities) {
-      const currentActive =
-        entity.parameters?.active !== undefined
-          ? entity.parameters.active
-          : true;
-      await processEntities(
-        entity.children.entities,
-        entityTransform,
-        level + 1,
-        parentActive && currentActive
-      );
-    }
+    // if (entity.children?.entities) {
+    //   const currentActive =
+    //     entity.parameters?.active !== undefined
+    //       ? entity.parameters.active
+    //       : true;
+    //   await processEntities(
+    //     entity.children.entities,
+    //     entityTransform,
+    //     level + 1,
+    //     parentActive && currentActive
+    //   );
+    // }
   }
 };
 

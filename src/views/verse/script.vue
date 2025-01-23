@@ -673,7 +673,7 @@ onMounted(async () => {
     );
     const response2 = await getVerseMetasWithJsCode(
       id.value,
-      // 889,
+      // 584,
       "id,name,description,data,metas,resources,code,uuid,code",
       "js"
     );
@@ -949,13 +949,20 @@ const run = async () => {
         const startPos = obj.mesh.position.clone();
         const endPos = transformData.position;
 
+        // 将角度转换为弧度
+        const endRotationRadians = new THREE.Vector3(
+          THREE.MathUtils.degToRad(transformData.rotation.x),
+          THREE.MathUtils.degToRad(transformData.rotation.y),
+          THREE.MathUtils.degToRad(transformData.rotation.z)
+        );
+
         return {
           type: "data",
           obj,
           startPos,
           endPos,
           startRotation: obj.mesh.rotation.clone(),
-          endRotation: transformData.rotation,
+          endRotation: endRotationRadians,
           startScale: obj.mesh.scale.clone(),
           endScale: transformData.scale,
           duration,
