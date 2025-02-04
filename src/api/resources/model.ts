@@ -3,8 +3,8 @@ export type ImageDetails = {
   md5: string;
   type: string;
   url: string;
-  filename?: string;
-  size?: number;
+  filename: string;
+  size: number;
   key: string;
 };
 
@@ -24,7 +24,7 @@ export type ResourceInfo = {
   image_id?: number;
   image?: ImageDetails;
   file: ImageDetails;
-  created_at?: string;
+  created_at: string;
   info: string;
   author?: Author;
 };

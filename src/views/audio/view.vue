@@ -103,7 +103,7 @@ const tableData = computed(() => {
       { item: t("audio.view.info.item1"), text: audioData.value.name },
       {
         item: t("audio.view.info.item2"),
-        text: audioData.value.author.nickname,
+        text: audioData.value.author?.username,
       },
       {
         item: t("audio.view.info.item3"),

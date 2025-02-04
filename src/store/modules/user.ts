@@ -234,11 +234,12 @@ export const useUserStore = defineStore(
     };
   },
   {
+    /*
     persist: {
       key: "userLoginForm",
       storage: st,
       pick: ["form"],
-    },
+    },*/
   }
 );
 

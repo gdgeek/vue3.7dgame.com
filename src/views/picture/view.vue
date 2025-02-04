@@ -91,7 +91,7 @@ const tableData = computed(() => {
       { item: t("picture.view.info.item1"), text: pictureData.value.name },
       {
         item: t("picture.view.info.item2"),
-        text: pictureData.value.author.nickname,
+        text: pictureData.value.author?.username,
       },
       {
         item: t("picture.view.info.item3"),

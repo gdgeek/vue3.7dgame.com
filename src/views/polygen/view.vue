@@ -113,7 +113,7 @@ import { postFile } from "@/api/v1/files";
 import { printVector3 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
-import { vue3dLoader } from "vue-3d-loader";
+//import { vue3dLoader } from "vue-3d-loader";
 
 const loading = ref(false);
 const polygenData = ref<any>(null);
