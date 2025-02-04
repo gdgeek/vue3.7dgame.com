@@ -22,14 +22,13 @@ import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import { putMeta, getMeta } from "@/api/v1/meta";
 import { useAppStore } from "@/store/modules/app";
 import { translateRouteTitle } from "@/utils/i18n";
+import env from "@/environment"
 
 const appStore = useAppStore();
 const route = useRoute();
 const router = useRouter();
 const src = ref(
-  import.meta.env.VITE_APP_EDITOR_URL +
-    "/three.js/editor/meta-editor.html?language=" +
-    appStore.language
+  env.editor + "/three.js/editor/meta-editor.html?language=" + appStore.language
 );
 
 // const src = ref(
@@ -42,9 +41,7 @@ watch(
   () => appStore.language, // 监听 language 的变化
   async (newValue, oldValue) => {
     src.value =
-      import.meta.env.VITE_APP_EDITOR_URL +
-      "/three.js/editor/verse-editor.html?language=" +
-      newValue;
+      env.editor + "/three.js/editor/verse-editor.html?language=" + newValue;
     await refresh();
   }
 );

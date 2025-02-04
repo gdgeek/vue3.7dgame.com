@@ -243,7 +243,7 @@ import pako from "pako";
 import jsBeautify from "js-beautify";
 import ScenePlayer from "./ScenePlayer.vue";
 import * as THREE from "three";
-
+import env from "@/environment";
 const appStore = useAppStore();
 const { t } = useI18n();
 const loading = ref(false);
@@ -332,7 +332,7 @@ const defineSingleAssignment = (initialValue: any) => {
 const initLuaCode = defineSingleAssignment("");
 
 const src = ref(
-  import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + appStore.language
+  env.blockly + "?language=" + appStore.language
 );
 let ready: boolean = false;
 const saveable = computed(() => {
@@ -386,7 +386,7 @@ const copyCode = async (code: string) => {
 watch(
   () => appStore.language, // 监听 language 的变化
   (newValue) => {
-    src.value = import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + newValue;
+    src.value =env.blockly+ "?language=" + newValue;
     initEditor();
   }
 );

@@ -236,16 +236,14 @@ import { convertToHttps } from "@/assets/js/helper";
 import pako from "pako";
 import ScenePlayer from "./ScenePlayer.vue";
 import jsBeautify from "js-beautify";
-
+import env from  "@/environment";
 const loader = new GLTFLoader();
 const appStore = useAppStore();
 const loading = ref(false);
 const meta = ref<metaInfo | null>(null);
 const route = useRoute();
 const id = computed(() => parseInt(route.query.id as string));
-const src = ref(
-  import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + appStore.language
-);
+const src = ref(env.blockly + "?language=" + appStore.language);
 let ready: boolean = false;
 const editor = ref<HTMLIFrameElement | null>(null);
 const { t } = useI18n();
@@ -374,7 +372,7 @@ const copyCode = async (code: string) => {
 watch(
   () => appStore.language, // 监听 language 的变化
   (newValue) => {
-    src.value = import.meta.env.VITE_APP_BLOCKLY_URL + "?language=" + newValue;
+    src.value = env.blockly + "?language=" + newValue;
     initEditor();
   }
 );

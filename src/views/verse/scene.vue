@@ -35,7 +35,7 @@ import { putVerse, getVerse, VerseData } from "@/api/v1/verse";
 import { getPrefab } from "@/api/v1/prefab";
 import { useAppStore } from "@/store/modules/app";
 import { translateRouteTitle } from "@/utils/i18n";
-
+import env from "@/environment";
 const appStore = useAppStore();
 const { t } = useI18n();
 const route = useRoute();
@@ -53,7 +53,7 @@ const title = computed(() => {
 
 const id = computed(() => parseInt(route.query.id as string));
 const src = ref(
-  import.meta.env.VITE_APP_EDITOR_URL +
+  env.editor +
     "/three.js/editor/verse-editor.html?language=" +
     appStore.language
 );
@@ -71,10 +71,7 @@ watch(
   () => appStore.language, // 监听 language 的变化
   async (newValue, oldValue) => {
     console.log("language changed", newValue);
-    src.value =
-      import.meta.env.VITE_APP_EDITOR_URL +
-      "/three.js/editor/verse-editor.html?language=" +
-      newValue;
+    src.value = env.editor + "/three.js/editor/verse-editor.html?language=" + newValue;
     await refresh();
   }
 );

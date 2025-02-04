@@ -5,7 +5,7 @@ import { useRouter } from "@/router";
 import i18n from "@/lang";
 import { ElMessage } from "element-plus";
 import AuthAPI from "@/api/auth";
-
+import env from "@/environment";
 const lang = ref(i18n.global.locale.value);
 watch(
   () => i18n.global.locale.value,
@@ -47,7 +47,7 @@ const getMessageArray = () => {
 
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: import.meta.env.VITE_APP_BASE_API,
+  baseURL: env.api,
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
 });

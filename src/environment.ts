@@ -1,33 +1,7 @@
-function canRegister(): boolean {
-  return import.meta.env.VITE_APP_BASE_MODE === "mrpp.com";
-}
-
+import { GetIP, ReplaceIP, ReplaceURL } from "./utils/helper";
 function useCloud(): boolean {
   // alert(import.meta.env.VITE_APP_BASE_MODE);
   return import.meta.env.VITE_APP_BASE_MODE !== "local";
-}
-
-function canDocument(): boolean {
-  return import.meta.env.VITE_APP_BASE_MODE !== "local";
-}
-
-function canWeb(): boolean {
-  return import.meta.env.VITE_APP_BASE_MODE === "mrpp.com";
-}
-
-function canBlog(): boolean {
-  return import.meta.env.VITE_APP_BASE_MODE === "7dgame.com";
-}
-
-function canStory(): boolean {
-  return (
-    import.meta.env.VITE_APP_BASE_MODE === "local" ||
-    import.meta.env.VITE_APP_BASE_MODE === "7dgame.com"
-  );
-}
-
-function canSetup(): boolean {
-  return import.meta.env.VITE_APP_BASE_MODE === "local";
 }
 
 function mrpp(): boolean {
@@ -43,14 +17,6 @@ function mrcn(): boolean {
 
 function local(): boolean {
   return import.meta.env.VITE_APP_BASE_MODE === "local";
-}
-
-function canManager(): boolean {
-  return (
-    import.meta.env.VITE_APP_BASE_MODE === "local" ||
-    import.meta.env.VITE_APP_BASE_MODE === "01xr.com" ||
-    import.meta.env.VITE_APP_BASE_MODE === "7dgame.com"
-  );
 }
 
 function getIP(): string | null {
@@ -98,31 +64,22 @@ function subtitle(): string {
   }
 }
 
-function replaceIP(input: string): string {
-  return input.replace("[ip]", getIP() || "");
-}
-
 const environment = {
-  Local: !!import.meta.env.VITE_APP_LOCAL,
-  mode: import.meta.env.VITE_APP_BASE_MODE || "",
-  ip: getIP(),
-  api: import.meta.env.VITE_APP_BASE_API || "",
-  doc: import.meta.env.VITE_APP_DOC_API || "",
+  ip: GetIP(),
+  api: ReplaceURL(import.meta.env.VITE_APP_BASE_API || ""),
+  doc: ReplaceURL(import.meta.env.VITE_APP_DOC_API || ""),
+  blockly: ReplaceURL(import.meta.env.VITE_APP_BLOCKLY_URL || ""),
+  editor: ReplaceURL(import.meta.env.VITE_APP_EDITOR_URL || ""),
+  ai: ReplaceURL(import.meta.env.VIET_APP_AI_API || ""),
+  base: ReplaceURL(import.meta.env.VIET_APP_BASE_URL || ""),
   version: 3,
-  canRegister,
-  canWeb,
-  canBlog,
-  canSetup,
-  canStory,
   subtitle,
   title,
-  canManager,
   useCloud,
-  canDocument,
   mrcn,
   mrpp,
   local,
-  replaceIP,
+  replaceIP: ReplaceIP,
 };
 
 export default environment;

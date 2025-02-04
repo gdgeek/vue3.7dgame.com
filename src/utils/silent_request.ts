@@ -3,7 +3,7 @@ import { useUserStoreHook } from "@/store/modules/user";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import i18n from "@/lang";
 import AuthAPI from "@/api/auth";
-
+import env from "@/environment";
 // 获取当前语言
 const lang = ref(i18n.global.locale.value);
 watch(
@@ -44,7 +44,7 @@ const getMessageArray = () => {
 
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: import.meta.env.VITE_APP_BASE_API,
+  baseURL: env.api,
   // baseURL: "https://api.7dgame.com",
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },

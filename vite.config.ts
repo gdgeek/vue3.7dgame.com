@@ -1,7 +1,7 @@
 import vue from "@vitejs/plugin-vue";
 import vueJsx from "@vitejs/plugin-vue-jsx";
 import { UserConfig, ConfigEnv, loadEnv, defineConfig } from "vite";
-
+import { ReplaceURL } from "./src/utils/helper";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
@@ -61,12 +61,15 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       open: true,
       proxy: {
         /** 代理前缀为 /dev-api 的请求  */
-        [env.VITE_APP_BASE_API]: {
+        [ReplaceURL(env.VITE_APP_BASE_API)]: {
           changeOrigin: true,
           // 接口地址
           target: env.VITE_APP_API_URL,
           rewrite: (path) =>
-            path.replace(new RegExp("^" + env.VITE_APP_BASE_API), ""),
+            path.replace(
+              new RegExp("^" + ReplaceURL(env.VITE_APP_BASE_API)),
+              ""
+            ),
         },
       },
     },
