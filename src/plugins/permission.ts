@@ -14,6 +14,7 @@ import { usePermissionStore, useUserStore } from "@/store";
 export function setupPermission() {
   // 白名单路由
   const whiteList = [
+    "/introduce",
     "/login",
     "/register",
     "/logout",
