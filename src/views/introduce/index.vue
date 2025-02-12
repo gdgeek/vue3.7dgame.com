@@ -7,8 +7,12 @@
         <span class="company-name">上海不加班科技有限公司</span>
       </div>
       <div class="nav-right">
-        <div v-for="item in navItems" :key="item.key" :class="['nav-item', { active: currentTab === item.key }]"
-          @click="switchTab(item.key)">
+        <div
+          v-for="item in navItems"
+          :key="item.key"
+          :class="['nav-item', { active: currentTab === item.key }]"
+          @click="switchTab(item.key)"
+        >
           {{ item.label }}
         </div>
       </div>
@@ -17,24 +21,50 @@
     <!-- 内容区域 -->
     <div class="content-container">
       <div v-if="currentTab === 'about'" class="content-section">
-        <el-carousel height="800px" :autoplay="true" :interval="4000" direction="vertical" class="custom-carousel"
-          @change="handleSlideChange">
+        <el-carousel
+          ref="carousel"
+          height="900px"
+          :autoplay="true"
+          :interval="4000"
+          direction="vertical"
+          class="custom-carousel"
+          @change="handleSlideChange"
+        >
           <el-carousel-item v-for="(slide, index) in slides" :key="index">
             <div class="carousel-content">
               <img :src="slide.image" :alt="slide.title" />
-              <div class="text-overlay" :class="[
-                {
-                  'text-enter': currentSlide === index,
-                  'text-leave': currentSlide !== index,
-                },
-                getCurrentAnimation(index),
-              ]">
+              <div
+                class="text-overlay"
+                :class="[
+                  {
+                    'text-enter': currentSlide === index,
+                    'text-leave': currentSlide !== index,
+                  },
+                  getCurrentAnimation(index),
+                ]"
+              >
                 <h2>{{ slide.title }}</h2>
                 <p>{{ slide.description }}</p>
               </div>
             </div>
           </el-carousel-item>
         </el-carousel>
+        <div class="culture-section">
+          <div
+            v-for="(culture, index) in cultures"
+            :key="index"
+            class="culture-item"
+            :class="culture.position"
+          >
+            <div class="culture-content">
+              <h2>{{ culture.title }}</h2>
+              <p>{{ culture.description }}</p>
+            </div>
+            <div class="culture-image">
+              <img :src="culture.image" :alt="culture.title" />
+            </div>
+          </div>
+        </div>
       </div>
       <div v-if="currentTab === 'products'" class="content-section">
         <h1>我们的产品</h1>
@@ -49,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 
 defineOptions({
   name: "Introduce",
@@ -102,7 +132,23 @@ const handleSlideChange = (index: number) => {
     types[Math.floor(Math.random() * types.length)];
 };
 
-// 初始化时设置第一张幻灯片为当前显示并分配动画
+const carousel = ref();
+
+// 键盘事件处理函数
+const handleKeydown = (event: KeyboardEvent) => {
+  if (currentTab.value !== "about") return;
+
+  switch (event.key) {
+    case "ArrowUp":
+      carousel.value?.prev();
+      break;
+    case "ArrowDown":
+      carousel.value?.next();
+      break;
+  }
+};
+
+// 在组件挂载时添加键盘事件监听
 onMounted(() => {
   currentSlide.value = 0;
   // 初始化时为所有幻灯片分配随机动画
@@ -110,6 +156,14 @@ onMounted(() => {
     const types = Object.values(AnimationTypes);
     return types[Math.floor(Math.random() * types.length)];
   });
+
+  // 添加键盘事件监听
+  window.addEventListener("keydown", handleKeydown);
+});
+
+// 在组件卸载时移除键盘事件监听
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleKeydown);
 });
 
 // 定义动画类型枚举
@@ -138,6 +192,29 @@ const slideAnimations = ref(
 const getCurrentAnimation = (index: number) => {
   return slideAnimations.value[index];
 };
+
+// 在 script setup 中添加企业文化数据
+const cultures = [
+  {
+    title: "企业文化",
+    description:
+      "字节范是字节跳动企业文化的重要组成部分，是我们共同认可的行为准则。",
+    image: "/media/bg/05.jpg",
+    position: "right", // 图片在右
+  },
+  {
+    title: "始终创业",
+    description: "保持创业心态，始终开创而不守成，创新而非依赖资源",
+    image: "/media/bg/03.jpg",
+    position: "left", // 图片在左
+  },
+  {
+    title: "敏捷有效",
+    description: "最简化流程，避免简单事情复杂化",
+    image: "/media/bg/04.jpg",
+    position: "right",
+  },
+];
 </script>
 
 <style lang="scss" scoped>
@@ -211,6 +288,7 @@ const getCurrentAnimation = (index: number) => {
 }
 
 .content-container {
+  position: absolute;
   width: 100%;
   margin-top: 64px;
   flex: 1;
@@ -236,6 +314,7 @@ const getCurrentAnimation = (index: number) => {
 }
 
 .custom-carousel {
+  position: relative;
   .carousel-content {
     height: 100%;
     width: 100%;
@@ -264,15 +343,18 @@ const getCurrentAnimation = (index: number) => {
     // 优化淡入滑动动画
     &.fade-slide {
       &.text-enter {
-        animation: fadeSlideEnter 1s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+        animation: fadeSlideEnter 1s cubic-bezier(0.215, 0.61, 0.355, 1)
+          forwards;
 
         h2 {
-          animation: fadeSlideTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation: fadeSlideTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
+            forwards;
           animation-delay: 0.2s;
         }
 
         p {
-          animation: fadeSlideTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation: fadeSlideTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
+            forwards;
           animation-delay: 0.4s;
         }
       }
@@ -289,7 +371,8 @@ const getCurrentAnimation = (index: number) => {
 
         h2,
         p {
-          animation: scaleTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation: scaleTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
+            forwards;
         }
       }
 
@@ -305,7 +388,8 @@ const getCurrentAnimation = (index: number) => {
 
         h2,
         p {
-          animation: rotateTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation: rotateTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
+            forwards;
         }
       }
 
@@ -341,12 +425,14 @@ const getCurrentAnimation = (index: number) => {
         animation: waveEnter 0.8s forwards;
 
         h2 {
-          animation: waveTextEnter 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+          animation: waveTextEnter 0.8s cubic-bezier(0.215, 0.61, 0.355, 1)
+            forwards;
           animation-delay: 0.2s;
         }
 
         p {
-          animation: waveTextEnter 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+          animation: waveTextEnter 0.8s cubic-bezier(0.215, 0.61, 0.355, 1)
+            forwards;
           animation-delay: 0.4s;
         }
       }
@@ -383,12 +469,14 @@ const getCurrentAnimation = (index: number) => {
         animation: revealEnter 0.8s forwards;
 
         h2 {
-          animation: revealTextEnter 0.8s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+          animation: revealTextEnter 0.8s cubic-bezier(0.77, 0, 0.175, 1)
+            forwards;
           animation-delay: 0.2s;
         }
 
         p {
-          animation: revealTextEnter 0.8s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+          animation: revealTextEnter 0.8s cubic-bezier(0.77, 0, 0.175, 1)
+            forwards;
           animation-delay: 0.4s;
         }
       }
@@ -404,12 +492,14 @@ const getCurrentAnimation = (index: number) => {
         animation: floatEnter 0.8s forwards;
 
         h2 {
-          animation: floatTextEnter 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation: floatTextEnter 1s cubic-bezier(0.34, 1.56, 0.64, 1)
+            forwards;
           animation-delay: 0.2s;
         }
 
         p {
-          animation: floatTextEnter 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation: floatTextEnter 1s cubic-bezier(0.34, 1.56, 0.64, 1)
+            forwards;
           animation-delay: 0.4s;
         }
       }
@@ -819,6 +909,150 @@ const getCurrentAnimation = (index: number) => {
   .el-carousel__indicator.is-active .el-carousel__button {
     background-color: white;
     transform: scale(1.2);
+  }
+}
+
+.culture-section {
+  position: relative;
+  bottom: 100px;
+  padding: 60px 0;
+  background: #fff;
+
+  .culture-item {
+    display: flex;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    gap: 60px;
+
+    &.right {
+      flex-direction: row;
+    }
+
+    &.left {
+      flex-direction: row-reverse;
+    }
+
+    .culture-content {
+      flex: 1;
+      padding: 20px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s forwards;
+
+      h2 {
+        font-size: 36px;
+        color: #333;
+        margin-bottom: 20px;
+        position: relative;
+
+        &::after {
+          content: "";
+          position: absolute;
+          bottom: -10px;
+          left: 0;
+          width: 40px;
+          height: 3px;
+          background: #1890ff;
+        }
+      }
+
+      p {
+        font-size: 18px;
+        color: #666;
+        line-height: 1.8;
+        margin-top: 20px;
+      }
+    }
+
+    .culture-image {
+      flex: 1;
+      height: 400px;
+      overflow: hidden;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      opacity: 0;
+      transform: translateX(20px);
+      animation: fadeInSide 0.8s forwards;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+
+        &:hover {
+          transform: scale(1.05);
+        }
+      }
+    }
+
+    // 为左右布局设置不同的动画延迟
+    &.right {
+      .culture-content {
+        animation-delay: 0.2s;
+      }
+
+      .culture-image {
+        animation-delay: 0.4s;
+      }
+    }
+
+    &.left {
+      .culture-content {
+        animation-delay: 0.4s;
+      }
+
+      .culture-image {
+        transform: translateX(-20px);
+        animation-delay: 0.2s;
+      }
+    }
+  }
+}
+
+// 添加动画关键帧
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInSide {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .culture-section {
+    .culture-item {
+      flex-direction: column !important;
+      padding: 20px;
+
+      .culture-content,
+      .culture-image {
+        width: 100%;
+      }
+
+      .culture-image {
+        height: 300px;
+      }
+    }
   }
 }
 </style>

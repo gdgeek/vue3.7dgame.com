@@ -36,6 +36,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/introduce",
     component: () => import("@/views/introduce/index.vue"),
+    meta: { hidden: true, private: true },
   },
 
   {
@@ -63,7 +64,7 @@ const routes: RouteRecordRaw[] = [
     path: "/",
     name: "/",
     meta: { hidden: true },
-    redirect: "/introduce",
+    redirect: "/home",
     component: Layout,
     children: [
       {
