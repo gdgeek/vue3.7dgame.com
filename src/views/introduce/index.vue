@@ -21,34 +21,40 @@
     <!-- 内容区域 -->
     <div class="content-container">
       <div v-if="currentTab === 'about'" class="content-section">
-        <el-carousel
-          ref="carousel"
-          height="900px"
-          :autoplay="true"
-          :interval="4000"
-          direction="vertical"
-          class="custom-carousel"
-          @change="handleSlideChange"
+        <div
+          class="carousel-container"
+          @mouseenter="isCarouselHovered = true"
+          @mouseleave="isCarouselHovered = false"
         >
-          <el-carousel-item v-for="(slide, index) in slides" :key="index">
-            <div class="carousel-content">
-              <img :src="slide.image" :alt="slide.title" />
-              <div
-                class="text-overlay"
-                :class="[
-                  {
-                    'text-enter': currentSlide === index,
-                    'text-leave': currentSlide !== index,
-                  },
-                  getCurrentAnimation(index),
-                ]"
-              >
-                <h2>{{ slide.title }}</h2>
-                <p>{{ slide.description }}</p>
+          <el-carousel
+            ref="carousel"
+            height="900px"
+            :autoplay="false"
+            :interval="4000"
+            direction="vertical"
+            class="custom-carousel"
+            @change="handleSlideChange"
+          >
+            <el-carousel-item v-for="(slide, index) in slides" :key="index">
+              <div class="carousel-content">
+                <img :src="slide.image" :alt="slide.title" />
+                <div
+                  class="text-overlay"
+                  :class="[
+                    {
+                      'text-enter': currentSlide === index,
+                      'text-leave': currentSlide !== index,
+                    },
+                    getCurrentAnimation(index),
+                  ]"
+                >
+                  <h2>{{ slide.title }}</h2>
+                  <p>{{ slide.description }}</p>
+                </div>
               </div>
-            </div>
-          </el-carousel-item>
-        </el-carousel>
+            </el-carousel-item>
+          </el-carousel>
+        </div>
         <div class="culture-section">
           <div
             v-for="(culture, index) in cultures"
@@ -134,21 +140,43 @@ const handleSlideChange = (index: number) => {
 
 const carousel = ref();
 
-// 键盘事件处理函数
+// 添加轮播图悬停状态
+const isCarouselHovered = ref(false);
+
+// 添加页面滚动位置检查
+const isPageScrolled = ref(false);
+
+// 添加滚动事件处理函数
+const handleScroll = () => {
+  isPageScrolled.value = window.scrollY > 0;
+};
+
+// 修改键盘事件处理函数
 const handleKeydown = (event: KeyboardEvent) => {
-  if (currentTab.value !== "about") return;
+  if (
+    currentTab.value !== "about" ||
+    !isCarouselHovered.value ||
+    isPageScrolled.value
+  )
+    return;
 
   switch (event.key) {
     case "ArrowUp":
-      carousel.value?.prev();
+      if (currentSlide.value > 0) {
+        event.preventDefault();
+        carousel.value?.prev();
+      }
       break;
     case "ArrowDown":
-      carousel.value?.next();
+      if (currentSlide.value < slides.length - 1) {
+        event.preventDefault();
+        carousel.value?.next();
+      }
       break;
   }
 };
 
-// 在组件挂载时添加键盘事件监听
+// 在组件挂载时添加事件监听
 onMounted(() => {
   currentSlide.value = 0;
   // 初始化时为所有幻灯片分配随机动画
@@ -159,11 +187,14 @@ onMounted(() => {
 
   // 添加键盘事件监听
   window.addEventListener("keydown", handleKeydown);
+  // 添加滚动事件监听
+  window.addEventListener("scroll", handleScroll);
 });
 
-// 在组件卸载时移除键盘事件监听
+// 在组件卸载时移除事件监听
 onUnmounted(() => {
   window.removeEventListener("keydown", handleKeydown);
+  window.removeEventListener("scroll", handleScroll);
 });
 
 // 定义动画类型枚举
@@ -315,6 +346,7 @@ const cultures = [
 
 .custom-carousel {
   position: relative;
+
   .carousel-content {
     height: 100%;
     width: 100%;
@@ -879,6 +911,9 @@ const cultures = [
 
 :deep(.el-carousel__item) {
   overflow: hidden;
+  position: absolute;
+  width: 100%;
+  height: 100%;
 
   &.is-active {
     .carousel-content img {
@@ -1054,5 +1089,17 @@ const cultures = [
       }
     }
   }
+}
+
+.carousel-container {
+  width: 100%;
+  position: relative;
+  cursor: default;
+  overflow: hidden;
+  height: 900px;
+}
+
+:deep(.el-carousel__container) {
+  transition: transform 0.5s ease-in-out;
 }
 </style>
