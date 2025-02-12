@@ -273,7 +273,7 @@ const cultures = [
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1;
+  z-index: 999;
   margin: 0;
 
   .nav-left {
@@ -321,7 +321,6 @@ const cultures = [
 .content-container {
   position: absolute;
   width: 100%;
-  margin-top: 64px;
   flex: 1;
   background-color: #fff;
   box-sizing: border-box;
@@ -346,6 +345,7 @@ const cultures = [
 
 .custom-carousel {
   position: relative;
+  height: 100%;
 
   .carousel-content {
     height: 100%;
@@ -949,7 +949,7 @@ const cultures = [
 
 .culture-section {
   position: relative;
-  bottom: 100px;
+  top: 20px;
   padding: 60px 0;
   background: #fff;
 
@@ -1093,10 +1093,60 @@ const cultures = [
 
 .carousel-container {
   width: 100%;
+  height: 100%;
   position: relative;
-  cursor: default;
+  cursor: s-resize;
   overflow: hidden;
-  height: 900px;
+
+  :deep(.el-carousel__container) {
+    .el-carousel__item {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 0.8s ease-in-out;
+      transform: none !important;
+
+      &.is-active {
+        opacity: 1;
+        z-index: 2;
+      }
+    }
+  }
+}
+
+.custom-carousel {
+  .carousel-content {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    position: relative;
+    cursor: default;
+    position: relative;
+    cursor: default;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.05);
+      transition: transform 6s ease-out;
+    }
+  }
+}
+
+// 覆盖 Element Plus 的默认动画
+:deep(.el-carousel__container) {
+  .el-carousel__item--card {
+    transform: none !important;
+  }
+
+  .el-carousel__item.is-animating {
+    transition: opacity 0.1s ease-in-out !important;
+  }
 }
 
 :deep(.el-carousel__container) {
