@@ -28,6 +28,7 @@
           <br />
         </el-tab-pane>
         <el-tab-pane label="Name & Password">
+          {{ env.api }}
           <h2 class="login-title">{{ $t("login.loginTitle") }}</h2>
           <el-form
             ref="formRef"
@@ -70,7 +71,7 @@ import { VueAppleLoginConfig } from "@/utils/helper";
 import { LoginData } from "@/api/auth/model";
 import { useUserStore } from "@/store";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
-
+import env from "@/environment";
 const formRef = ref<FormInstance>();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
