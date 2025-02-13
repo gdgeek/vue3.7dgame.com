@@ -61,7 +61,7 @@
             </el-carousel-item>
           </el-carousel>
         </div>
-        <div class="BusinessList">
+        <div class="business-container">
           <div class="random-gradient"></div>
           <div
             v-for="(business, index) in BusinessList"
@@ -75,6 +75,39 @@
             </div>
             <div class="business-image">
               <img :src="business.image" :alt="business.title" />
+            </div>
+          </div>
+
+          <!-- 添加联系方式部分 -->
+          <div class="contact-section">
+            <div class="contact-header">
+              <h2 class="section-title">{{ contactInfo.title }}</h2>
+              <h3 class="section-subtitle">{{ contactInfo.subtitle }}</h3>
+            </div>
+
+            <div class="contact-content">
+              <div class="left-content">
+                <h4 class="content-title">公司简介</h4>
+                <p class="company-intro">{{ contactInfo.companyIntro }}</p>
+              </div>
+
+              <div class="right-content">
+                <h4 class="content-title">联系方式</h4>
+                <div class="contact-details">
+                  <div class="contact-item">
+                    <i class="location-icon"></i>
+                    <span>{{ contactInfo.address }}</span>
+                  </div>
+                  <div class="contact-item">
+                    <i class="phone-icon"></i>
+                    <span>{{ contactInfo.phone }}</span>
+                  </div>
+                  <div class="contact-item">
+                    <i class="email-icon"></i>
+                    <span>{{ contactInfo.email }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -138,21 +171,6 @@ const switchTab = (tab: string) => {
 
 // 轮播图数据
 const slides = [
-  // {
-  //   image: "/media/bg/05.jpg",
-  //   title: "And the technologies that",
-  //   description: "make it possible",
-  // },
-  // {
-  //   image: "/media/bg/03.jpg",
-  //   title: "Innovation drives growth",
-  //   description: "Discover our journey",
-  // },
-  // {
-  //   image: "/media/bg/04.jpg",
-  //   title: "Building the future",
-  //   description: "Together with our partners",
-  // },
   {
     url: "https://1251022382.vod2.myqcloud.com/3ebf9041vodtransgzp1251022382/cc632dca5285890802616619504/v.f20.mp4",
     // image: "/media/video/video_01.png",
@@ -339,6 +357,17 @@ const BusinessList = [
     position: "right",
   },
 ];
+
+// 添加联系方式相关数据
+const contactInfo = {
+  title: "以用户为中心",
+  subtitle: "欢迎联系我们",
+  companyIntro:
+    "上海不加班网络科技有限公司，作为国内制作元宇宙AR实景应用起步早的高新科技企业，团队项目开发经验丰富，技术方案灵活多样，与未来数字化生态相融合，不断进取。",
+  address: "湖南省长沙市长沙县和悦城S1",
+  phone: "15000159790",
+  email: "dirui@bujiaban.com",
+};
 </script>
 
 <style lang="scss" scoped>
@@ -1040,9 +1069,8 @@ const BusinessList = [
   }
 }
 
-.BusinessList {
+.business-container {
   position: relative;
-  // top: 20px;
   padding: 60px 0;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   overflow: hidden;
@@ -1206,6 +1234,129 @@ const BusinessList = [
       .business-image {
         transform: translateX(-20px);
         animation-delay: 0.2s;
+      }
+    }
+  }
+
+  // 将contact-section移到business-container内部
+  .contact-section {
+    // position: relative;
+    // z-index: 1; // 确保内容在渐变背景之上
+    // padding: 40px 8%;
+    // margin: 60px auto;
+
+    position: relative; // 确保内容在装饰背景之上
+    z-index: 1;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 40px;
+
+    .contact-header {
+      text-align: left;
+      margin-bottom: 30px;
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 400;
+        color: #333;
+        margin-bottom: 6px;
+      }
+
+      .section-subtitle {
+        font-size: 36px;
+        font-weight: 500;
+        color: rgb(0, 204, 204);
+        margin: 0;
+      }
+    }
+
+    .contact-content {
+      display: flex;
+      justify-content: space-between;
+      gap: 100px;
+
+      .left-content,
+      .right-content {
+        flex: 1;
+      }
+
+      .content-title {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 20px;
+        font-weight: 500;
+      }
+
+      .company-intro {
+        font-size: 16px;
+        line-height: 1.8;
+        color: #666;
+        margin: 0;
+        letter-spacing: 2px;
+      }
+
+      .contact-details {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+
+        .contact-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+
+          i {
+            width: 24px;
+            height: 24px;
+            background-size: contain;
+            background-repeat: no-repeat;
+          }
+
+          .location-icon {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300CCCC"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>');
+          }
+
+          .phone-icon {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300CCCC"><path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>');
+          }
+
+          .email-icon {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300CCCC"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>');
+          }
+
+          span {
+            font-size: 16px;
+            color: #666;
+          }
+        }
+      }
+    }
+
+    // 响应式设计
+    @media (max-width: 768px) {
+      padding: 40px 20px;
+
+      .contact-header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .contact-content {
+        flex-direction: column;
+        gap: 40px;
+
+        .content-title {
+          text-align: center;
+        }
+
+        .company-intro {
+          text-align: center;
+        }
+
+        .contact-details {
+          align-items: center;
+        }
       }
     }
   }
