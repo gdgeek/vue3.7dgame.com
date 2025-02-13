@@ -1,26 +1,11 @@
 <template>
   <div class="verse-scene">
     <KnightDataDialog ref="knightDataRef"></KnightDataDialog>
-    <MetaDialog
-      @selected="selected"
-      @cancel="cancel"
-      ref="metaDialogRef"
-    ></MetaDialog>
-    <PrefabDialog
-      @selected="selected"
-      @cancel="cancel"
-      ref="prefabDialogRef"
-    ></PrefabDialog>
+    <MetaDialog @selected="selected" @cancel="cancel" ref="metaDialogRef"></MetaDialog>
+    <PrefabDialog @selected="selected" @cancel="cancel" ref="prefabDialogRef"></PrefabDialog>
     <el-container>
       <el-main>
-        <iframe
-          id="editor"
-          ref="editor"
-          :src="src"
-          class="content"
-          height="100%"
-          width="100%"
-        ></iframe>
+        <iframe id="editor" ref="editor" :src="src" class="content" height="100%" width="100%"></iframe>
       </el-main>
     </el-container>
   </div>
@@ -54,18 +39,13 @@ const title = computed(() => {
 const id = computed(() => parseInt(route.query.id as string));
 const src = ref(
   env.editor +
-    "/three.js/editor/verse-editor.html?language=" +
-    appStore.language
+  "/three.js/editor/verse-editor.html?language=" +
+  appStore.language
 );
 
-// const src = ref(
-//   import.meta.env.VITE_APP_EDITOR_URL +
-//     "/editor/verse-editor.html?language=" +
-//     appStore.language
-// );
 
 const editor = ref<HTMLIFrameElement>();
-const cancel = () => {};
+const cancel = () => { };
 
 watch(
   () => appStore.language, // 监听 language 的变化

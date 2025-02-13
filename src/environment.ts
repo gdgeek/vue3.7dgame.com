@@ -70,6 +70,7 @@ const environment = {
   doc: ReplaceURL(import.meta.env.VITE_APP_DOC_API || ""),
   blockly: ReplaceURL(import.meta.env.VITE_APP_BLOCKLY_URL || ""),
   editor: ReplaceURL(import.meta.env.VITE_APP_EDITOR_URL || ""),
+  auth_api: ReplaceURL(import.meta.env.VITE_APP_AUTH_API || ""),
   ai: ReplaceURL(import.meta.env.VIET_APP_AI_API || ""),
   base: ReplaceURL(import.meta.env.VIET_APP_BASE_URL || ""),
   version: 3,

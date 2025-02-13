@@ -1,166 +1,102 @@
 <template>
-  <div
-    v-loading="loading"
-    :class="['box1', { mobile: isMobile, 'dark-theme': isDark }]"
-  >
+  <div v-loading="loading" :class="['box1', { mobile: isMobile, 'dark-theme': isDark }]">
     <div :class="['box2', { 'dark-theme': isDark }]">
       <h1>{{ $t("login.h1") }}</h1>
       <h4>{{ $t("login.h4") }}</h4>
       <br />
-      <el-tabs style="width: 100%" type="border-card" :stretch="true">
-        <el-tab-pane label="Apple ID">
-          <h2 class="login-title">Use Apple Account</h2>
+      <el-card style="width: 100%" shadow="never">
+        <span>登录账号</span>
+        <br>
+        <br>
+        <name-password />
+      </el-card>
+      <br />
+      <div style="width: 100%" shadow="never" class="apple-login-container">
 
-          <br />
-          <vue-apple-login
-            @click="loading = true"
-            class="appleid_button"
-            width="100%"
-            height="100px"
-            mode="center-align"
-            type="sign in"
-            :color="appleLoginColor"
-            :key="isDark"
-            :onSuccess="onSuccess"
-            :onFailure="onFailure"
-          ></vue-apple-login>
-          <br />
-          <br />
-        </el-tab-pane>
-        <el-tab-pane label="Name & Password">
-          {{ env.api }}
-          <h2 class="login-title">{{ $t("login.loginTitle") }}</h2>
-          <el-form
-            ref="formRef"
-            class="login-form"
-            :rules="rules"
-            :model="form"
-            label-width="auto"
-          >
-            <el-form-item :label="$t('login.username')" prop="username">
-              <el-input v-model="form.username" suffix-icon="User"></el-input>
-            </el-form-item>
-            <el-form-item :label="$t('login.password')" prop="password">
-              <el-input
-                v-model="form.password"
-                type="password"
-                suffix-icon="Lock"
-              ></el-input>
-            </el-form-item>
 
-            <el-form-item class="login-button">
-              <el-button style="width: 100%" type="primary" @click="submit">
-                {{ $t("login.login") }}
-              </el-button>
-            </el-form-item>
-          </el-form>
-        </el-tab-pane>
-      </el-tabs>
+        <wechat />
+
+
+        <vue-apple-login style="width: 100%; height: 28px; margin-top: 5px; " @click="loading = true"
+          class="appleid_button" width="100%" height="20px" mode="center-align" type="sign in" :color="appleLoginColor"
+          :key="isDark" :onSuccess="onSuccess" :onFailure="onFailure"></vue-apple-login>
+
+      </div>
+
+
+      <br>
+
+
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import "@/assets/font/font.css";
 import { useSettingsStore } from "@/store/modules/settings";
-import { FormInstance } from "element-plus";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import type { AppleIdReturn } from "@/api/v1/site";
-import AuthAPI from "@/api/auth/index";
 import { PostSiteAppleId } from "@/api/v1/site";
 import { VueAppleLoginConfig } from "@/utils/helper";
-import { LoginData } from "@/api/auth/model";
+import NamePassword from "./Account/NamePassword.vue";
+import Wechat from "./Account/Wechat.vue";
 import { useUserStore } from "@/store";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
-import env from "@/environment";
-const formRef = ref<FormInstance>();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 const appleLoginColor = computed(() => (isDark.value ? "black" : "white"));
-
+import { TOKEN_KEY } from "@/enums/CacheEnum";
 const loading = ref<boolean>(false);
 
-const props = defineProps<{ isMobile: boolean }>();
-
+import { useRouter, LocationQuery, useRoute } from "vue-router";
 const { t } = useI18n();
-// const form = ref<LoginData>({
-//   username: "",
-//   password: "",
-// });
 
+
+const router = useRouter();
+const route = useRoute();
 const { form } = storeToRefs(userStore);
 
-const rules = computed(() => {
-  return {
-    username: [
-      {
-        required: true,
-        message: t("login.rules.username.message1"),
-        trigger: "blur",
-      },
-      {
-        min: 4,
-        max: 20,
-        message: t("login.rules.username.message2"),
-        trigger: "blur",
-      },
-    ],
-    password: [
-      {
-        required: true,
-        message: t("login.rules.password.message1"),
-        trigger: "blur",
-      },
-      {
-        min: 6,
-        max: 20,
-        message: t("login.rules.password.message2"),
-        trigger: "blur",
-      },
-    ],
-  };
-});
+const parseRedirect = (): {
+  path: string;
+  queryParams: Record<string, string>;
+} => {
+  const query: LocationQuery = route.query;
+  const redirect = (query.redirect as string) ?? "/";
+  const url = new URL(redirect, window.location.origin);
+  const path = url.pathname;
+  const queryParams: Record<string, string> = {};
+
+  url.searchParams.forEach((value, key) => {
+    queryParams[key] = value;
+  });
+
+  return { path, queryParams };
+};
 const emit = defineEmits(["register", "enter"]);
-const login = async (data: any) => {
-  return new Promise<void>((resolve, reject) => {
-    emit("enter", data, form, resolve, reject);
-  });
-};
+const login = async (user: any) => {
 
-const submit = () => {
-  formRef.value?.validate(async (valid: boolean) => {
-    loading.value = true;
-    if (valid) {
-      try {
-        const response = await AuthAPI.login(form.value);
-        await login(response.data);
-      } catch (e: any) {
-        let errorMessage = "Login failed, please try again later.";
-
-        try {
-          if (e.data?.message) {
-            const errorData = JSON.parse(e.data.message);
-            if (errorData.username) {
-              errorMessage =
-                t("login.usernameError") + ": " + errorData.username;
-            } else if (errorData.password) {
-              errorMessage =
-                t("login.passwordError") + ": " + errorData.password;
-            }
-          }
-        } catch (parseError) {
-          errorMessage = e.message || "Login failed, please try again later.";
-        }
-
-        ElMessage.error(errorMessage);
-        loading.value = false;
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      ElMessage.success(t("login.success"));
+      const token = user.auth;
+      if (token) {
+        localStorage.setItem(TOKEN_KEY, token);
+        nextTick();
+      } else {
+        ElMessage.error("The login response is missing the access_token");
       }
-    } else {
-      loading.value = false;
-      ElMessage({ type: "error", message: t("login.error") });
-    }
+      await userStore.getUserInfo();
+
+      userStore.setupRefreshInterval(form.value);
+
+      const { path, queryParams } = parseRedirect();
+      router.push({ path: path, query: queryParams });
+      resolve();
+    } catch (e: any) {
+      reject(e.message);
+
+    };
   });
-};
+}
 
 const onFailure = async (error: any) => {
   loading.value = false;
@@ -188,9 +124,7 @@ const onSuccess = async (data: any) => {
       ElMessage.error(e.message);
       loading.value = false;
     }
-    // emit("login", ret.user);
   }
-  //loading.value = false;
 };
 </script>
 
@@ -203,8 +137,8 @@ body {
   margin: 0;
   background-image: url("/media/bg/02.jpg");
   background-size: 100% auto;
-  // transition:  0.3s ease;
 
+  // transition:  0.3s ease;
   &.dark-theme {
     background-image: url("/media/bg/02.jpg");
     filter: brightness(80%);
@@ -371,6 +305,11 @@ body {
     font-family: "KaiTi", sans-serif;
     color: red;
     text-align: center;
+  }
+
+  .apple-login-container {
+    justify-content: center;
+    width: 100%;
   }
 }
 </style>

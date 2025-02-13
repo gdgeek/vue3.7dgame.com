@@ -3,14 +3,7 @@
     <resource-dialog @selected="selected" ref="dialog"></resource-dialog>
     <el-container>
       <el-main>
-        <iframe
-          ref="editor"
-          id="editor"
-          :src="src"
-          class="content"
-          height="100%"
-          width="100%"
-        ></iframe>
+        <iframe ref="editor" id="editor" :src="src" class="content" height="100%" width="100%"></iframe>
       </el-main>
     </el-container>
   </div>
@@ -31,11 +24,6 @@ const src = ref(
   env.editor + "/three.js/editor/meta-editor.html?language=" + appStore.language
 );
 
-// const src = ref(
-//   import.meta.env.VITE_APP_EDITOR_URL +
-//     "/editor/meta-editor.html?language=" +
-//     appStore.language
-// );
 
 watch(
   () => appStore.language, // 监听 language 的变化

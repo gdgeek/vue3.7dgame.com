@@ -74,7 +74,6 @@ service.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     const accessToken = localStorage.getItem(TOKEN_KEY);
     if (accessToken) {
-      // config.headers.Authorization = accessToken;
       if (isTokenExpiringSoon(accessToken)) {
         if (!isRefreshing) {
           isRefreshing = true;
@@ -99,7 +98,7 @@ service.interceptors.request.use(
         });
       } else {
         if (config.headers) {
-          config.headers.Authorization = accessToken; // 使用当前 Token
+          config.headers.Authorization = `Bearer ${accessToken}`;
         }
       }
     }

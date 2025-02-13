@@ -1,7 +1,5 @@
 <template>
   <div v-loading="loading">
-    {{ env.api }}
-    <h2 class="login-title">{{ $t("login.loginTitle") }}</h2>
     <el-form ref="formRef" class="login-form" :rules="rules" :model="form" label-width="auto">
       <el-form-item :label="$t('login.username')" prop="username">
         <el-input v-model="form.username" suffix-icon="User"></el-input>
@@ -113,7 +111,6 @@ const submit = () => {
         } else {
           throw new Error("The login response is missing the access_token");
         }
-        alert(22222)
         await nextTick();
         const ret = await request<getUserInfoData>({
           url: "v1/users/get-data",
@@ -121,15 +118,12 @@ const submit = () => {
         });
         console.error(ret);
         await userStore.getUserInfo();
-        alert(11111)
-
         userStore.setupRefreshInterval(form.value);
         const { path, queryParams } = parseRedirect();
         console.error({ path: path, query: queryParams });
         router.push({ path: path, query: queryParams });
 
       } catch (e: any) {
-        alert(e.message)
         let errorMessage = "Login failed, please try again later.";
 
         try {

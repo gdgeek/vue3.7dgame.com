@@ -1,127 +1,65 @@
 <template>
   <div>
-    <el-dialog
-      v-model="dialogVisible"
-      width="95%"
-      height="100px"
-      :show-close="false"
-      @close="doClose"
-    >
+    <el-dialog v-model="dialogVisible" width="95%" height="100px" :show-close="false" @close="doClose">
       <template #header>
         <div class="dialog-footer">
-          <el-tabs
-            v-model="activeName"
-            type="card"
-            class="demo-tabs"
-            @tab-click="handleClick"
-          >
-            <el-tab-pane
-              :label="$t('meta.ResourceDialog.label1')"
-              name="binding"
-              v-if="metaId != null"
-            ></el-tab-pane>
-            <el-tab-pane
-              :label="$t('meta.ResourceDialog.label2')"
-              name="owner"
-            ></el-tab-pane>
+          <el-tabs v-model="activeName" type="card" class="demo-tabs" @tab-click="handleClick">
+            <el-tab-pane :label="$t('meta.ResourceDialog.label1')" name="binding" v-if="metaId != null"></el-tab-pane>
+            <el-tab-pane :label="$t('meta.ResourceDialog.label2')" name="owner"></el-tab-pane>
           </el-tabs>
-          <mr-p-p-header
-            :sorted="active.sorted"
-            :searched="active.searched"
-            @search="search"
-            @sort="sort"
-          >
+          <mr-p-p-header :sorted="active.sorted" :searched="active.searched" @search="search" @sort="sort">
             <el-tag>
               <b>{{ $t("meta.ResourceDialog.title") }}</b>
             </el-tag>
           </mr-p-p-header>
           <el-divider content-position="left">
-            <el-tag
-              v-if="active.searched !== ''"
-              size="small"
-              closable
-              @close="clearSearched"
-            >
+            <el-tag v-if="active.searched !== ''" size="small" closable @close="clearSearched">
               {{ active.searched }}
             </el-tag>
           </el-divider>
         </div>
       </template>
 
-      <Waterfall
-        v-if="active !== null && active.items !== null"
-        :list="viewCards"
-        :width="230"
-        :gutter="10"
-        :backgroundColor="'rgba(255, 255, 255, .05)'"
-      >
+      <Waterfall v-if="active !== null && active.items !== null" :list="viewCards" :width="230" :gutter="10"
+        :backgroundColor="'rgba(255, 255, 255, .05)'">
         <template #default="{ item }">
           <div style="width: 230px">
-            <el-card
-              v-if="activeName === 'owner'"
-              style="width: 220px"
-              class="box-card"
-            >
+            <el-card v-if="activeName === 'owner'" style="width: 220px" class="box-card">
               <template #header>
                 <el-card shadow="hover" :body-style="{ padding: '0px' }">
                   <div class="mrpp-title">
                     <b class="card-title" nowrap>{{ title(item) }}</b>
                   </div>
                   <div class="image-container">
-                    <img
-                      v-if="!item.image"
-                      src="@/assets/image/none.png"
-                      style="width: 100%; height: auto; object-fit: contain"
-                    />
-                    <LazyImg
-                      v-if="item.image"
-                      style="width: 100%; height: auto"
-                      fit="contain"
-                      :url="item.image.url"
-                    >
+                    <img v-if="!item.image" src="@/assets/image/none.png"
+                      style="width: 100%; height: auto; object-fit: contain" />
+                    <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
                     </LazyImg>
                     <div v-if="item.type === 'audio'" class="info-container">
-                      <audio
-                        id="audio"
-                        controls
-                        style="width: 100%; height: 30px"
-                        :src="item.file.url"
-                      ></audio>
+                      <audio id="audio" controls style="width: 100%; height: 30px" :src="item.file.url"></audio>
                     </div>
                   </div>
-                  <div
-                    v-if="item.created_at"
-                    style="
+                  <div v-if="item.created_at" style="
                       width: 100%;
                       text-align: center;
                       position: relative;
                       z-index: 2;
-                    "
-                  >
+                    ">
                     {{ convertToLocalTime(item.created_at) }}
                   </div>
                 </el-card>
               </template>
               <div class="clearfix" v-if="metaId != null">
                 <el-button-group v-if="item.id === value">
-                  1111
                   <el-button type="warning" size="small" @click="doEmpty">
                     {{ $t("meta.ResourceDialog.cancelSelect") }}
                   </el-button>
                 </el-button-group>
                 <el-button-group v-else-if="isBinding(item)">
-                  <el-button
-                    type="primary"
-                    size="small"
-                    @click="doSelect(item)"
-                  >
+                  <el-button type="primary" size="small" @click="doSelect(item)">
                     {{ $t("meta.ResourceDialog.select") }}
                   </el-button>
-                  <el-button
-                    type="primary"
-                    size="small"
-                    @click="doUnbind(item)"
-                  >
+                  <el-button type="primary" size="small" @click="doUnbind(item)">
                     {{ $t("meta.ResourceDialog.doUnbind") }}
                   </el-button>
                 </el-button-group>
@@ -142,13 +80,7 @@
                   <div class="mrpp-title">
                     <b class="card-title" nowrap>{{ title(item) }}</b>
                   </div>
-                  <img
-                    v-if="item.image"
-                    style="width: 100%; height: 180px"
-                    fit="contain"
-                    :src="item.image.url"
-                    lazy
-                  />
+                  <img v-if="item.image" style="width: 100%; height: 180px" fit="contain" :src="item.image.url" lazy />
                   <div style="width: 100%; text-align: center">
                     {{ item.created_at }}
                   </div>
@@ -156,18 +88,10 @@
               </template>
               <div class="clearfix">
                 <el-button-group v-if="value === null || item.id !== value">
-                  <el-button
-                    type="primary"
-                    size="small"
-                    @click="doSelect(item)"
-                  >
+                  <el-button type="primary" size="small" @click="doSelect(item)">
                     {{ $t("meta.ResourceDialog.select") }}
                   </el-button>
-                  <el-button
-                    type="primary"
-                    size="small"
-                    @click="doUnbind(item)"
-                  >
+                  <el-button type="primary" size="small" @click="doUnbind(item)">
                     {{ $t("meta.ResourceDialog.doUnbind") }}
                   </el-button>
                 </el-button-group>
@@ -190,15 +114,9 @@
         <div class="dialog-footer">
           <el-row :gutter="0">
             <el-col :xs="16" :sm="16" :md="16" :lg="16" :xl="16">
-              <el-pagination
-                :current-page="active.pagination.current"
-                :page-count="active.pagination.count"
-                :page-size="active.pagination.size"
-                :total="active.pagination.total"
-                layout="prev, pager, next, jumper"
-                background
-                @current-change="handleCurrentChange"
-              ></el-pagination>
+              <el-pagination :current-page="active.pagination.current" :page-count="active.pagination.count"
+                :page-size="active.pagination.size" :total="active.pagination.total" layout="prev, pager, next, jumper"
+                background @current-change="handleCurrentChange"></el-pagination>
             </el-col>
             <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
               <el-button-group>

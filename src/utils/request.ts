@@ -51,7 +51,7 @@ const service = axios.create({
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
 });
-
+/*
 let isRefreshing = false;
 let subscribers: ((token: string) => void)[] = [];
 
@@ -69,14 +69,14 @@ function isTokenExpiringSoon(token: string, bufferTime = 300): boolean {
 
   // 如果当前时间 + 缓冲时间 >= token 过期时间，则表示快要过期
   return currentTime + bufferTime >= tokenExpiryTime;
-}
+}*/
 
 // 请求拦截器
 service.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     const accessToken = localStorage.getItem(TOKEN_KEY);
-    if (accessToken) {
-      // config.headers.Authorization = accessToken;
+    config.headers.Authorization = `Bearer ${accessToken}`; // 使用当前 Token
+    /*if (accessToken) {
       if (isTokenExpiringSoon(accessToken)) {
         if (!isRefreshing) {
           isRefreshing = true;
@@ -101,10 +101,10 @@ service.interceptors.request.use(
         });
       } else {
         if (config.headers) {
-          config.headers.Authorization = accessToken; // 使用当前 Token
+          config.headers.Authorization = `Bearer ${accessToken}`; // 使用当前 Token
         }
       }
-    }
+    }*/
     return config;
   },
   (error: any) => {
@@ -149,7 +149,6 @@ service.interceptors.response.use(
       }
       return Promise.reject(error);
     }
-
     if (response.status === 401) {
       // 仅当身份认证失败，执行登出操作
       return handleUnauthorized(router);

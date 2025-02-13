@@ -84,7 +84,7 @@ export const useUserStore = defineStore(
         AuthAPI.login(loginData)
           .then((data) => {
             const access_token = data.data.auth;
-            localStorage.setItem(TOKEN_KEY, "Bearer" + " " + access_token);
+            localStorage.setItem(TOKEN_KEY, access_token);
             resolve();
           })
           .catch((error) => {
@@ -162,7 +162,7 @@ export const useUserStore = defineStore(
           if (token) {
             const newTokenResponse = await AuthAPI.login(form);
             const newToken = newTokenResponse.data.auth;
-            localStorage.setItem(TOKEN_KEY, "Bearer " + newToken); // 更新 token
+            localStorage.setItem(TOKEN_KEY, newToken); // 更新 token
             console.log("Token refreshed:", newToken);
             const res = await getUserInfo(); // 刷新用户数据
             console.log("User data refreshed:", res);

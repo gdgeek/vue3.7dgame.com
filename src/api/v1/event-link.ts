@@ -1,5 +1,5 @@
 import request from "@/utils/request";
-import silent from "@/utils/silent_request";
+//import silent from "@/utils/silent_request";
 import qs from "querystringify";
 import path from "path-browserify";
 
@@ -23,7 +23,7 @@ function getEventLink(id: number) {
 function headEventLink(id: number) {
   const url = path.join("v1", "event-links", id.toString());
 
-  return silent({
+  return request({
     url,
     method: "head",
   });

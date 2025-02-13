@@ -33,7 +33,9 @@
     "vite.config.ts",
     "src/assets/test/blockly/code.js",
     "src/assets/js/fontok.ts",
-    "src/assets/test/blockly/storage.js"
-, "src/utils/utilityFunctions.ts"  ],
+    "src/assets/test/blockly/storage.js",
+    "src/utils/utilityFunctions.ts",
+    "src/utils/silent_request.ts_"
+  ],
   "exclude": ["node_modules", "dist", "**/*.js"]
 }
