@@ -3,7 +3,8 @@
     <home-header></home-header>
     <el-container>
       <el-main>
-        <el-row :gutter="20">
+        <!-- 隐藏“我的创作”card,调整布局 -->
+        <!-- <el-row :gutter="20">
           <el-col :sm="16">
             <router-view></router-view>
             <br />
@@ -13,7 +14,8 @@
             <mr-p-p-user-creater></mr-p-p-user-creater>
             <br />
           </el-col>
-        </el-row>
+        </el-row> -->
+        <router-view></router-view>
       </el-main>
     </el-container>
   </div>
