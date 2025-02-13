@@ -37,7 +37,13 @@
           >
             <el-carousel-item v-for="(slide, index) in slides" :key="index">
               <div class="carousel-content">
-                <img :src="slide.image" :alt="slide.title" />
+                <video
+                  :src="slide.url"
+                  class="carousel-video"
+                  loop
+                  muted
+                  :ref="(el) => setVideoRef(el, index)"
+                ></video>
                 <div
                   class="text-overlay"
                   :class="[
@@ -55,20 +61,20 @@
             </el-carousel-item>
           </el-carousel>
         </div>
-        <div class="culture-section">
+        <div class="BusinessList">
           <div class="random-gradient"></div>
           <div
-            v-for="(culture, index) in cultures"
+            v-for="(business, index) in BusinessList"
             :key="index"
-            class="culture-item"
-            :class="culture.position"
+            class="business-item"
+            :class="business.position"
           >
-            <div class="culture-content">
-              <h2>{{ culture.title }}</h2>
-              <p>{{ culture.description }}</p>
+            <div class="business-content">
+              <h2>{{ business.title }}</h2>
+              <p>{{ business.description }}</p>
             </div>
-            <div class="culture-image">
-              <img :src="culture.image" :alt="culture.title" />
+            <div class="business-image">
+              <img :src="business.image" :alt="business.title" />
             </div>
           </div>
         </div>
@@ -86,7 +92,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import {
+  ref,
+  onMounted,
+  onUnmounted,
+  nextTick,
+  ComponentPublicInstance,
+} from "vue";
 
 defineOptions({
   name: "Introduce",
@@ -106,33 +118,105 @@ const currentTab = ref("about");
 // 切换标签方法
 const switchTab = (tab: string) => {
   currentTab.value = tab;
+
+  // 当切换到"about"标签时，播放当前视频
+  if (tab === "about") {
+    nextTick(() => {
+      if (videoRefs.value[currentSlide.value]) {
+        videoRefs.value[currentSlide.value]!.play();
+      }
+    });
+  } else {
+    // 当切换到其他标签时，暂停所有视频
+    videoRefs.value.forEach((video) => {
+      if (video) {
+        video.pause();
+      }
+    });
+  }
 };
 
 // 轮播图数据
 const slides = [
+  // {
+  //   image: "/media/bg/05.jpg",
+  //   title: "And the technologies that",
+  //   description: "make it possible",
+  // },
+  // {
+  //   image: "/media/bg/03.jpg",
+  //   title: "Innovation drives growth",
+  //   description: "Discover our journey",
+  // },
+  // {
+  //   image: "/media/bg/04.jpg",
+  //   title: "Building the future",
+  //   description: "Together with our partners",
+  // },
   {
-    image: "/media/bg/05.jpg",
-    title: "And the technologies that",
-    description: "make it possible",
+    url: "https://1251022382.vod2.myqcloud.com/3ebf9041vodtransgzp1251022382/cc632dca5285890802616619504/v.f20.mp4",
+    // image: "/media/video/video_01.png",
+    title: "第三人称视角",
+    description:
+      "可以实现多个HoloLens2和iPad设备互动和展示，也可以实现投屏功能。",
   },
   {
-    image: "/media/bg/03.jpg",
-    title: "Innovation drives growth",
-    description: "Discover our journey",
+    url: "https://1251022382.vod2.myqcloud.com/3ebf9041vodtransgzp1251022382/6487c9fd5285890809258783935/v.f30.mp4",
+    // image: "/media/video/video_02.png",
+    title: "多设备无延时互动",
+    description: "处理多人所有权的分配，让用户可以分别操作物体。",
   },
   {
-    image: "/media/bg/04.jpg",
-    title: "Building the future",
-    description: "Together with our partners",
+    url: "https://1251022382.vod2.myqcloud.com/3ebf9041vodtransgzp1251022382/664f5f755285890809258809343/v.f30.mp4",
+    // image: "/media/video/video_03.png",
+    title: "联机真实物理场景",
+    description: "让多台设备和物理空间可以联动，碰撞到墙壁和桌面进行反弹",
+  },
+  {
+    url: "https://1251022382.vod2.myqcloud.com/3ebf9041vodtransgzp1251022382/8d947abb4564972818757571628/v.f20.mp4",
+    // image: "/media/video/video_04.png",
+    title: "HoloLens电柜装配",
+    description:
+      "通过HoloLens 实现的电柜装配引导，一个比较实用的元宇宙实景程序。",
   },
 ];
 
 // 添加当前显示的幻灯片索引
 const currentSlide = ref(0);
 
-// 处理幻灯片切换事件
+// 修改视频引用数组的定义
+const videoRefs = ref<Array<HTMLVideoElement | null>>([]);
+
+// 添加一个类型安全的引用设置函数，更新参数类型
+const setVideoRef = (
+  el: Element | ComponentPublicInstance | null,
+  index: number
+) => {
+  if (el instanceof HTMLVideoElement) {
+    videoRefs.value[index] = el;
+  }
+};
+
+// 修改handleSlideChange处理视频播放
 const handleSlideChange = (index: number) => {
   currentSlide.value = index;
+
+  // 停止所有视频播放
+  videoRefs.value.forEach((video, i) => {
+    if (video) {
+      video.pause();
+      // 重置非当前视频到开始位置
+      if (i !== index) {
+        video.currentTime = 0;
+      }
+    }
+  });
+
+  // 播放当前视频
+  if (videoRefs.value[index]) {
+    videoRefs.value[index]!.play();
+  }
+
   // 为当前幻灯片随机分配一个新的动画效果
   const types = Object.values(AnimationTypes);
   slideAnimations.value[index] =
@@ -186,6 +270,13 @@ onMounted(() => {
     return types[Math.floor(Math.random() * types.length)];
   });
 
+  // 播放第一个视频
+  nextTick(() => {
+    if (videoRefs.value[0]) {
+      videoRefs.value[0].play();
+    }
+  });
+
   // 添加键盘事件监听
   window.addEventListener("keydown", handleKeydown);
   // 添加滚动事件监听
@@ -225,25 +316,26 @@ const getCurrentAnimation = (index: number) => {
   return slideAnimations.value[index];
 };
 
-// 在 script setup 中添加企业文化数据
-const cultures = [
+const BusinessList = [
   {
-    title: "企业文化",
+    title: "快速分析了解您的需求",
     description:
-      "字节范是字节跳动企业文化的重要组成部分，是我们共同认可的行为准则。",
-    image: "/media/bg/05.jpg",
-    position: "right", // 图片在右
+      "资深专业人员将对您的需求进行详细了解，发送我们的案例给您参考，为您的绝妙创意提供最适合的解决方案，并全程为项目的实现提供咨询。",
+    image: "/media/bg/business1.jpg",
+    position: "right",
   },
   {
-    title: "始终创业",
-    description: "保持创业心态，始终开创而不守成，创新而非依赖资源",
-    image: "/media/bg/03.jpg",
-    position: "left", // 图片在左
+    title: "定制开发demo，5000元直接赠送",
+    description:
+      "我们将为您选择的案例提供Demo和报价。为下一步开发打好基础。如果您对我们的demo满意，当我们达成合作进行开发，5000可抵扣工程款。",
+    image: "/media/bg/business2.jpg",
+    position: "left",
   },
   {
-    title: "敏捷有效",
-    description: "最简化流程，避免简单事情复杂化",
-    image: "/media/bg/04.jpg",
+    title: "开发完成后的技术支持",
+    description:
+      "当开发完成验收后，您有任何疑问，我们都会有专家及时帮助您，如果您有需要，我们将会派出专业人员实地提供技术指导。",
+    image: "/media/bg/business3.jpg",
     position: "right",
   },
 ];
@@ -353,7 +445,7 @@ const cultures = [
     width: 100%;
     position: relative;
 
-    img {
+    .carousel-video {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -917,7 +1009,7 @@ const cultures = [
   height: 100%;
 
   &.is-active {
-    .carousel-content img {
+    .carousel-content .carousel-video {
       transform: scale(1.05);
     }
   }
@@ -948,9 +1040,9 @@ const cultures = [
   }
 }
 
-.culture-section {
+.BusinessList {
   position: relative;
-  top: 20px;
+  // top: 20px;
   padding: 60px 0;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   overflow: hidden;
@@ -1023,7 +1115,7 @@ const cultures = [
     animation: floatGradientCenter 20s ease-in-out infinite;
   }
 
-  .culture-item {
+  .business-item {
     position: relative; // 确保内容在装饰背景之上
     z-index: 1;
     display: flex;
@@ -1041,7 +1133,7 @@ const cultures = [
       flex-direction: row-reverse;
     }
 
-    .culture-content {
+    .business-content {
       flex: 1;
       padding: 20px;
       opacity: 0;
@@ -1073,7 +1165,7 @@ const cultures = [
       }
     }
 
-    .culture-image {
+    .business-image {
       flex: 1;
       height: 400px;
       overflow: hidden;
@@ -1097,21 +1189,21 @@ const cultures = [
 
     // 为左右布局设置不同的动画延迟
     &.right {
-      .culture-content {
+      .business-content {
         animation-delay: 0.2s;
       }
 
-      .culture-image {
+      .business-image {
         animation-delay: 0.4s;
       }
     }
 
     &.left {
-      .culture-content {
+      .business-content {
         animation-delay: 0.4s;
       }
 
-      .culture-image {
+      .business-image {
         transform: translateX(-20px);
         animation-delay: 0.2s;
       }
@@ -1146,17 +1238,17 @@ const cultures = [
 
 // 响应式设计
 @media (max-width: 768px) {
-  .culture-section {
-    .culture-item {
+  .BusinessList {
+    .business-item {
       flex-direction: column !important;
       padding: 20px;
 
-      .culture-content,
-      .culture-image {
+      .business-content,
+      .business-image {
         width: 100%;
       }
 
-      .culture-image {
+      .business-image {
         height: 300px;
       }
     }
