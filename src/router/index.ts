@@ -34,6 +34,12 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: "/introduce",
+    component: () => import("@/views/introduce/index.vue"),
+    meta: { hidden: true, private: true },
+  },
+
+  {
     path: "/login",
     component: () => import("@/views/login/index.vue"),
     meta: { hidden: true, private: true },

@@ -1,18 +1,25 @@
 <template>
   <div class="app-container">
     <!-- 导航栏 -->
-    <nav class="nav-container">
+    <nav class="nav-container" :class="{
+      'nav-scrolled': isScrolled && currentTab === 'about',
+      'nav-transparent': currentTab === 'about' && !isScrolled,
+      'nav-default': currentTab !== 'about'
+    }">
       <div class="nav-left">
         <img src="/media/image/logo.gif" alt="Logo" class="logo" />
-        <span class="company-name">上海不加班科技有限公司</span>
+        <span class="company-name" :class="{ 'text-white': currentTab === 'about' && !isScrolled }">
+          上海不加班科技有限公司
+        </span>
       </div>
       <div class="nav-right">
-        <div
-          v-for="item in navItems"
-          :key="item.key"
-          :class="['nav-item', { active: currentTab === item.key }]"
-          @click="switchTab(item.key)"
-        >
+        <div v-for="item in navItems" :key="item.key" :class="[
+          'nav-item',
+          {
+            'active': currentTab === item.key,
+            'text-white': currentTab === 'about' && !isScrolled
+          }
+        ]" @click="switchTab(item.key)">
           {{ item.label }}
         </div>
       </div>
@@ -34,8 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-// import About from "./components/About.vue";
+import { ref, onMounted, onUnmounted } from "vue";
 
 defineOptions({
   name: "Introduce",
@@ -56,6 +62,24 @@ const currentTab = ref("about");
 const switchTab = (tab: string) => {
   currentTab.value = tab;
 };
+
+// 添加滚动状态控制
+const isScrolled = ref(false);
+
+// 处理滚动事件
+const handleScroll = () => {
+  isScrolled.value = window.scrollY > 500;
+};
+
+// 组件挂载时添加滚动监听
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll);
+});
+
+// 组件卸载时移除滚动监听
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
 </script>
 
 <style lang="scss" scoped>
@@ -75,8 +99,6 @@ const switchTab = (tab: string) => {
   align-items: center;
   padding: 0 60px;
   height: 64px;
-  background-color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
   box-sizing: border-box;
   position: fixed;
@@ -85,6 +107,25 @@ const switchTab = (tab: string) => {
   right: 0;
   z-index: 999;
   margin: 0;
+  transition: all 0.3s ease;
+
+  // 默认样式（非关于我们页面）
+  &.nav-default {
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  // 透明样式（关于我们页面顶部）
+  &.nav-transparent {
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  // 滚动样式（关于我们页面滚动后）
+  &.nav-scrolled {
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
 
   .nav-left {
     display: flex;
@@ -100,6 +141,11 @@ const switchTab = (tab: string) => {
       font-size: 20px;
       font-weight: bold;
       color: #333;
+      transition: color 0.3s ease;
+
+      &.text-white {
+        color: #fff;
+      }
     }
   }
 
@@ -114,6 +160,20 @@ const switchTab = (tab: string) => {
       padding: 8px 16px;
       border-radius: 4px;
       transition: all 0.3s ease;
+
+      &.text-white {
+        color: #fff;
+
+        &:hover {
+          color: #1890ff;
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        &.active {
+          color: #1890ff;
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+      }
 
       &:hover {
         color: #1890ff;

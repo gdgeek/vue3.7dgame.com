@@ -15,6 +15,7 @@ export function setupPermission() {
   // 白名单路由
   const whiteList = [
     "/login",
+    "/introduce",
     "/register",
     "/logout",
     "/privacy-policy",

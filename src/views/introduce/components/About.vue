@@ -1,38 +1,18 @@
 <template>
   <div class="content-section">
-    <div
-      class="carousel-container"
-      @mouseenter="isCarouselHovered = true"
-      @mouseleave="isCarouselHovered = false"
-    >
-      <el-carousel
-        ref="carousel"
-        height="900px"
-        :autoplay="false"
-        :interval="4000"
-        direction="vertical"
-        class="custom-carousel"
-        @change="handleSlideChange"
-      >
+    <div class="carousel-container" @mouseenter="isCarouselHovered = true" @mouseleave="isCarouselHovered = false">
+      <el-carousel ref="carousel" height="900px" :autoplay="false" :interval="4000" direction="vertical"
+        class="custom-carousel" @change="handleSlideChange">
         <el-carousel-item v-for="(slide, index) in slides" :key="index">
           <div class="carousel-content">
-            <video
-              :src="slide.url"
-              class="carousel-video"
-              loop
-              muted
-              :ref="(el) => setVideoRef(el, index)"
-            ></video>
-            <div
-              class="text-overlay"
-              :class="[
-                {
-                  'text-enter': currentSlide === index,
-                  'text-leave': currentSlide !== index,
-                },
-                getCurrentAnimation(index),
-              ]"
-            >
+            <video :src="slide.url" class="carousel-video" loop muted :ref="(el) => setVideoRef(el, index)"></video>
+            <div class="text-overlay" :class="[
+              {
+                'text-enter': currentSlide === index,
+                'text-leave': currentSlide !== index,
+              },
+              getCurrentAnimation(index),
+            ]">
               <h2>{{ slide.title }}</h2>
               <p>{{ slide.description }}</p>
             </div>
@@ -43,12 +23,7 @@
 
     <div class="business-container">
       <div class="random-gradient"></div>
-      <div
-        v-for="(business, index) in BusinessList"
-        :key="index"
-        class="business-item"
-        :class="business.position"
-      >
+      <div v-for="(business, index) in BusinessList" :key="index" class="business-item" :class="business.position">
         <div class="business-content">
           <h2>{{ business.title }}</h2>
           <p>{{ business.description }}</p>
@@ -96,14 +71,6 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  onMounted,
-  onUnmounted,
-  nextTick,
-  ComponentPublicInstance,
-} from "vue";
-
 // 轮播图数据
 const slides = [
   {
@@ -156,18 +123,16 @@ const slideAnimations = ref(
 );
 
 const setVideoRef = (
-  el: Element | ComponentPublicInstance | null,
+  el: HTMLVideoElement | null,
   index: number
 ) => {
-  if (el instanceof HTMLVideoElement) {
-    videoRefs.value[index] = el;
-  }
+  videoRefs.value[index] = el;
 };
 
 const handleSlideChange = (index: number) => {
   currentSlide.value = index;
 
-  videoRefs.value.forEach((video, i) => {
+  videoRefs.value.forEach((video: HTMLVideoElement | null, i: number) => {
     if (video) {
       video.pause();
       if (i !== index) {
@@ -308,18 +273,15 @@ onUnmounted(() => {
     // 优化淡入滑动动画
     &.fade-slide {
       &.text-enter {
-        animation: fadeSlideEnter 1s cubic-bezier(0.215, 0.61, 0.355, 1)
-          forwards;
+        animation: fadeSlideEnter 1s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
 
         h2 {
-          animation: fadeSlideTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
-            forwards;
+          animation: fadeSlideTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           animation-delay: 0.2s;
         }
 
         p {
-          animation: fadeSlideTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
-            forwards;
+          animation: fadeSlideTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           animation-delay: 0.4s;
         }
       }
@@ -336,8 +298,7 @@ onUnmounted(() => {
 
         h2,
         p {
-          animation: scaleTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
-            forwards;
+          animation: scaleTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
       }
 
@@ -353,8 +314,7 @@ onUnmounted(() => {
 
         h2,
         p {
-          animation: rotateTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
-            forwards;
+          animation: rotateTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
       }
 
@@ -390,14 +350,12 @@ onUnmounted(() => {
         animation: waveEnter 0.8s forwards;
 
         h2 {
-          animation: waveTextEnter 0.8s cubic-bezier(0.215, 0.61, 0.355, 1)
-            forwards;
+          animation: waveTextEnter 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
           animation-delay: 0.2s;
         }
 
         p {
-          animation: waveTextEnter 0.8s cubic-bezier(0.215, 0.61, 0.355, 1)
-            forwards;
+          animation: waveTextEnter 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
           animation-delay: 0.4s;
         }
       }
@@ -434,14 +392,12 @@ onUnmounted(() => {
         animation: revealEnter 0.8s forwards;
 
         h2 {
-          animation: revealTextEnter 0.8s cubic-bezier(0.77, 0, 0.175, 1)
-            forwards;
+          animation: revealTextEnter 0.8s cubic-bezier(0.77, 0, 0.175, 1) forwards;
           animation-delay: 0.2s;
         }
 
         p {
-          animation: revealTextEnter 0.8s cubic-bezier(0.77, 0, 0.175, 1)
-            forwards;
+          animation: revealTextEnter 0.8s cubic-bezier(0.77, 0, 0.175, 1) forwards;
           animation-delay: 0.4s;
         }
       }
@@ -457,14 +413,12 @@ onUnmounted(() => {
         animation: floatEnter 0.8s forwards;
 
         h2 {
-          animation: floatTextEnter 1s cubic-bezier(0.34, 1.56, 0.64, 1)
-            forwards;
+          animation: floatTextEnter 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           animation-delay: 0.2s;
         }
 
         p {
-          animation: floatTextEnter 1s cubic-bezier(0.34, 1.56, 0.64, 1)
-            forwards;
+          animation: floatTextEnter 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           animation-delay: 0.4s;
         }
       }
@@ -895,13 +849,11 @@ onUnmounted(() => {
     box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.5);
     width: 500px;
     height: 500px;
-    background: linear-gradient(
-      45deg,
-      rgba(24, 144, 255, 0.6) 0%,
-      rgba(24, 144, 255, 0.4) 33%,
-      rgba(24, 144, 255, 0.2) 67%,
-      rgba(24, 144, 255, 0.1) 100%
-    );
+    background: linear-gradient(45deg,
+        rgba(24, 144, 255, 0.6) 0%,
+        rgba(24, 144, 255, 0.4) 33%,
+        rgba(24, 144, 255, 0.2) 67%,
+        rgba(24, 144, 255, 0.1) 100%);
     top: -200px;
     left: -200px;
     backdrop-filter: blur(5px);
@@ -917,13 +869,11 @@ onUnmounted(() => {
     box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.5);
     width: 500px;
     height: 500px;
-    background: linear-gradient(
-      225deg,
-      rgba(255, 105, 20, 0.6) 0%,
-      rgba(255, 105, 20, 0.4) 33%,
-      rgba(255, 105, 20, 0.2) 67%,
-      rgba(255, 105, 20, 0.1) 100%
-    );
+    background: linear-gradient(225deg,
+        rgba(255, 105, 20, 0.6) 0%,
+        rgba(255, 105, 20, 0.4) 33%,
+        rgba(255, 105, 20, 0.2) 67%,
+        rgba(255, 105, 20, 0.1) 100%);
     bottom: -200px;
     right: -200px;
     backdrop-filter: blur(5px);
@@ -939,13 +889,11 @@ onUnmounted(() => {
     box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.5);
     width: 400px;
     height: 400px;
-    background: linear-gradient(
-      135deg,
-      rgba(82, 196, 26, 0.6) 0%,
-      rgba(82, 196, 26, 0.4) 33%,
-      rgba(82, 196, 26, 0.2) 67%,
-      rgba(82, 196, 26, 0.1) 100%
-    );
+    background: linear-gradient(135deg,
+        rgba(82, 196, 26, 0.6) 0%,
+        rgba(82, 196, 26, 0.4) 33%,
+        rgba(82, 196, 26, 0.2) 67%,
+        rgba(82, 196, 26, 0.1) 100%);
     position: absolute;
     left: var(--random-x, 50%);
     top: var(--random-y, 50%);
@@ -1345,4 +1293,4 @@ onUnmounted(() => {
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
 }
-</style>
+</style>: { pause: () => void; currentTime: number; }: number(: any)(: any): any: any
