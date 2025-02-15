@@ -8,8 +8,8 @@
           <span class="project_title">{{ $t("login.title") }}</span>
         </RouterLink>
         <div class="link" style="margin-left: 250px">
-
-          <el-link href="https://testflight.apple.com/join/V4XNEG6t" target="_blank" :underline="false">
+          <!--   
+            <el-link href="https://testflight.apple.com/join/V4XNEG6t" target="_blank" :underline="false">
             <img src="/testflight.ico" style="width: 25px" alt="" />
             <span style="margin-left: 5px">TestFlight</span>
           </el-link>
@@ -22,7 +22,7 @@
           <el-link href="https://x.com/GD_Geek" target="_blank" :underline="false" style="margin-left: 30px">
             <img src="/x3.png" style="width: 26px; border-radius: 25%" alt="" />
             <span style="margin-left: 5px">X.com</span>
-          </el-link>
+          </el-link>-->
         </div>
         <div class="header-right">
           <div class="top-bar">
@@ -66,24 +66,12 @@
         </div>
       </div>
     </div>
-    <div v-if="route.path === '/login'" class="content">
+    <div class="content">
       <login-form v-if="!appleIdToken" :isMobile="isMobile" ref="loginFormRef" @enter="enter"
         @register="register"></login-form>
       <register-form v-else @enter="enter" :idToken="appleIdToken"></register-form>
     </div>
-    <div v-else-if="route.path === '/logout'" class="content">
-      <div :class="['box', { 'dark-theme': isDark }]">
-        <el-card shadow="hover" :body-style="{ padding: '15px' }">
-          <div class="logout-head">
-            <h1 class="logout-welcome">{{ t("login.logout.title") }}</h1>
-            <p class="logout-text">{{ t("login.logout.text") }}</p>
-            <div>
-              <p class="logout-lead"></p>
-            </div>
-          </div>
-        </el-card>
-      </div>
-    </div>
+
     <el-card v-if="!isMobile" style="
         height: 7%;
         width: 100%;

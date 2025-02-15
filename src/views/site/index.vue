@@ -66,24 +66,9 @@
         </div>
       </div>
     </div>
-    <div v-if="route.path === '/login'" class="content">
-      <login-form v-if="!appleIdToken" :isMobile="isMobile" ref="loginFormRef" @enter="enter"
-        @register="register"></login-form>
-      <register-form v-else @enter="enter" :idToken="appleIdToken"></register-form>
-    </div>
-    <div v-else-if="route.path === '/logout'" class="content">
-      <div :class="['box', { 'dark-theme': isDark }]">
-        <el-card shadow="hover" :body-style="{ padding: '15px' }">
-          <div class="logout-head">
-            <h1 class="logout-welcome">{{ t("login.logout.title") }}</h1>
-            <p class="logout-text">{{ t("login.logout.text") }}</p>
-            <div>
-              <p class="logout-lead"></p>
-            </div>
-          </div>
-        </el-card>
-      </div>
-    </div>
+    <!-- 子路由内容将渲染在这里 -->
+    <router-view></router-view>
+
     <el-card v-if="!isMobile" style="
         height: 7%;
         width: 100%;
@@ -203,16 +188,13 @@
 
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { useRouter, LocationQuery, useRoute } from "vue-router";
-import { AppleIdToken } from "@/api/auth/model";
-import LoginForm from "@/components/LoginForm.vue";
-import RegisterForm from "@/components/RegisterForm.vue";
+import { useRouter, useRoute } from "vue-router";
+
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useInfomationStore } from "@/store/modules/information";
 import { useTagsViewStore, useUserStore, useScreenStore } from "@/store";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
-import AuthAPI from "@/api/auth";
+
 
 const router = useRouter();
 const route = useRoute();
@@ -220,60 +202,10 @@ const userStore = useUserStore();
 const tagsViewStore = useTagsViewStore();
 const informationStore = useInfomationStore();
 const settingsStore = useSettingsStore();
-const { t } = useI18n();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
-const loginFormRef = ref<InstanceType<typeof LoginForm>>();
 const screenStore = useScreenStore();
 const isMobile = computed(() => screenStore.isMobile);
 
-const parseRedirect = (): {
-  path: string;
-  queryParams: Record<string, string>;
-} => {
-  const query: LocationQuery = route.query;
-  const redirect = (query.redirect as string) ?? "/";
-  const url = new URL(redirect, window.location.origin);
-  const path = url.pathname;
-  const queryParams: Record<string, string> = {};
-
-  url.searchParams.forEach((value, key) => {
-    queryParams[key] = value;
-  });
-
-  return { path, queryParams };
-};
-
-const enter = async (
-  user: any,
-  form: any,
-  resolve: () => void,
-  reject: (message: string) => void
-) => {
-  try {
-    ElMessage.success(t("login.success"));
-    const token = user.auth;
-    if (token) {
-      localStorage.setItem(TOKEN_KEY, token);
-      nextTick();
-    } else {
-      ElMessage.error("The login response is missing the access_token");
-    }
-    await userStore.getUserInfo();
-
-    userStore.setupRefreshInterval(form.value);
-
-    const { path, queryParams } = parseRedirect();
-    router.push({ path: path, query: queryParams });
-    resolve();
-  } catch (e: any) {
-    reject(e.message);
-  }
-};
-
-const appleIdToken = ref<AppleIdToken | null>(null);
-const register = (idToken: AppleIdToken) => {
-  appleIdToken.value = idToken;
-};
 /** 主题切换 */
 const toggleTheme = () => {
   const newTheme =

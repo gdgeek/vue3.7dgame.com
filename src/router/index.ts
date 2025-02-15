@@ -40,18 +40,36 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
-    path: "/login",
-    component: () => import("@/views/login/index.vue"),
+    path: "/site",
+    component: () => import("@/views/site/index.vue"),
     meta: { hidden: true, private: true },
+    children: [
+      {
+        path: "/site/login",
+        component: () => import("@/views/site/login/index.vue"),
+      },
+      {
+        path: "/site/logout",
+        component: () => import("@/views/site/logout/index.vue"),
+      },
+      {
+        path: "/site/register",
+        component: () => import("@/views/site/register/index.vue"),
+      },
+    ],
+  },
+  {
+    path: "/login",
+    redirect: "/site/login",
+  },
+  {
+    path: "/logout",
+    redirect: "/site/logout",
   },
 
   {
-    path: "/logout",
-    component: () => import("@/views/login/index.vue"),
-    meta: {
-      hidden: true,
-      private: true,
-    },
+    path: "/register",
+    redirect: "/site/register",
   },
 
   {
@@ -724,7 +742,7 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
-
+      /*
       {
         path: "/site/logout",
         name: "LogOut",
@@ -740,6 +758,7 @@ const routes: RouteRecordRaw[] = [
         },
         children: [],
       },
+      */
 
       {
         path: "/401",

@@ -12,21 +12,9 @@
       </el-card>
       <br />
       <div style="width: 100%" shadow="never" class="apple-login-container">
-
-
         <wechat />
-
-
-        <vue-apple-login style="width: 100%; height: 28px; margin-top: 5px; " @click="loading = true"
-          class="appleid_button" width="100%" height="20px" mode="center-align" type="sign in" :color="appleLoginColor"
-          :key="isDark" :onSuccess="onSuccess" :onFailure="onFailure"></vue-apple-login>
-
       </div>
-
-
       <br>
-
-
     </div>
   </div>
 </template>
@@ -34,98 +22,11 @@
 import "@/assets/font/font.css";
 import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
-import type { AppleIdReturn } from "@/api/v1/site";
-import { PostSiteAppleId } from "@/api/v1/site";
-import { VueAppleLoginConfig } from "@/utils/helper";
 import NamePassword from "./Account/NamePassword.vue";
 import Wechat from "./Account/Wechat.vue";
-import { useUserStore } from "@/store";
 const settingsStore = useSettingsStore();
-const userStore = useUserStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
-const appleLoginColor = computed(() => (isDark.value ? "black" : "white"));
-import { TOKEN_KEY } from "@/enums/CacheEnum";
 const loading = ref<boolean>(false);
-
-import { useRouter, LocationQuery, useRoute } from "vue-router";
-const { t } = useI18n();
-
-
-const router = useRouter();
-const route = useRoute();
-const { form } = storeToRefs(userStore);
-
-const parseRedirect = (): {
-  path: string;
-  queryParams: Record<string, string>;
-} => {
-  const query: LocationQuery = route.query;
-  const redirect = (query.redirect as string) ?? "/";
-  const url = new URL(redirect, window.location.origin);
-  const path = url.pathname;
-  const queryParams: Record<string, string> = {};
-
-  url.searchParams.forEach((value, key) => {
-    queryParams[key] = value;
-  });
-
-  return { path, queryParams };
-};
-const emit = defineEmits(["register", "enter"]);
-const login = async (user: any) => {
-
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      ElMessage.success(t("login.success"));
-      const token = user.auth;
-      if (token) {
-        localStorage.setItem(TOKEN_KEY, token);
-        nextTick();
-      } else {
-        ElMessage.error("The login response is missing the access_token");
-      }
-      await userStore.getUserInfo();
-
-      userStore.setupRefreshInterval(form.value);
-
-      const { path, queryParams } = parseRedirect();
-      router.push({ path: path, query: queryParams });
-      resolve();
-    } catch (e: any) {
-      reject(e.message);
-
-    };
-  });
-}
-
-const onFailure = async (error: any) => {
-  loading.value = false;
-  ElMessage({ type: "error", message: t("login.appleLoginFail") });
-  console.error(error);
-  return;
-};
-const onSuccess = async (data: any) => {
-  const respose = await PostSiteAppleId({
-    key: "APPLE_MRPP_KEY_ID",
-    url: VueAppleLoginConfig.redirectURI,
-    data: data,
-  });
-  const ret: AppleIdReturn = respose.data;
-  if (ret.user === null) {
-    emit("register", {
-      apple_id: ret.apple_id,
-      token: ret.token,
-    });
-    // 用户不存在，跳转到注册页面
-  } else {
-    try {
-      await login(ret.user);
-    } catch (e: any) {
-      ElMessage.error(e.message);
-      loading.value = false;
-    }
-  }
-};
 </script>
 
 <style scoped lang="scss">
