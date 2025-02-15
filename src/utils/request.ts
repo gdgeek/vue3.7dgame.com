@@ -7,6 +7,8 @@ import { ElMessage } from "element-plus";
 import AuthAPI from "@/api/auth";
 import env from "@/environment";
 import { th } from "element-plus/es/locale";
+
+import Token from "@/store/modules/token";
 const lang = ref(i18n.global.locale.value);
 watch(
   () => i18n.global.locale.value,
@@ -75,16 +77,7 @@ function isTokenExpiringSoon(token: string, bufferTime = 300): boolean {
 // 请求拦截器
 service.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    let tokenData = localStorage.getItem(TOKEN_KEY);
-    if (tokenData !== null) {
-      try {
-        JSON.parse(tokenData);
-      } catch (e) {
-        tokenData = null;
-      }
-    }
-
-    const token = tokenData ? JSON.parse(tokenData) : null;
+    const token = Token.getToken();
     if (token != null) {
       config.headers.Authorization = `Bearer ${token.accessToken}`; // 使用当前 Token
     }

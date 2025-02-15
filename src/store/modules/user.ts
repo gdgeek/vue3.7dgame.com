@@ -9,6 +9,7 @@ import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { Avatar } from "@/api/user/model";
 import Wechat from "@/api/v1/wechat";
 import SecureLS from "secure-ls";
+import Token from "@/store/modules/token";
 
 const ls = new SecureLS({
   isCompression: false,
@@ -75,22 +76,6 @@ export const useUserStore = defineStore(
     };
     const userInfo = ref<getUserInfoData>(defaultUserInfo);
 
-    function setToken(token: any) {
-      localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
-    }
-    function getToken() {
-      const token = localStorage.getItem(TOKEN_KEY);
-
-      if (token) {
-        try {
-          return JSON.parse(token);
-        } catch (e) {
-          console.error("Failed to parse token:", e);
-          return null;
-        }
-      } else {
-      }
-    }
     async function loginByWechat(data: any) {
       const response = await Wechat.login(data);
       if (!response.data.success) {
@@ -99,7 +84,7 @@ export const useUserStore = defineStore(
       const token = response.data.token;
 
       if (token) {
-        setToken(token);
+        Token.setToken(token);
       } else {
         throw new Error("The login response is missing the access_token");
       }
@@ -119,7 +104,7 @@ export const useUserStore = defineStore(
       const token = response.data.token;
 
       if (token) {
-        setToken(token);
+        Token.setToken(token);
       } else {
         throw new Error("The login response is missing the access_token");
       }
