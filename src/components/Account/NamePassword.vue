@@ -22,10 +22,9 @@
 import request from "@/utils/request";
 import { getUserInfoData, InfoType } from "@/api/user/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
-import AuthAPI from "@/api/auth/index";
+import Auth from "@/api/v1/auth";
 import "@/assets/font/font.css";
 import { FormInstance } from "element-plus";
-import env from "@/environment";
 
 import { useRouter, LocationQuery, useRoute } from "vue-router";
 import { useUserStore } from "@/store";
@@ -38,12 +37,7 @@ const router = useRouter();
 const route = useRoute();
 const { form } = storeToRefs(userStore);
 
-const emit = defineEmits(["register", "enter"]);
-const login = async (data: any) => {
-  return new Promise<void>((resolve, reject) => {
-    emit("enter", data, form, resolve, reject);
-  });
-};
+
 
 const parseRedirect = (): {
   path: string;
@@ -99,18 +93,21 @@ const submit = () => {
     loading.value = true;
     if (valid) {
       try {
-
-        const response = await AuthAPI.login(form.value);
+        await userStore.login(form.value);
+        /*
+        const response = await Auth.login(form.value);
+        if (!response.data.success) {
+          throw new Error("Login failed, please try again later.");
+        }
         ElMessage.success(t("login.success"));
-        const user = response.data;
-        const token = user.auth;
+        const token = response.data.token;
 
 
         if (token) {
-          localStorage.setItem(TOKEN_KEY, token);
+          localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
         } else {
           throw new Error("The login response is missing the access_token");
-        }
+        }*/
         await nextTick();
         const ret = await request<getUserInfoData>({
           url: "v1/users/get-data",
@@ -124,25 +121,9 @@ const submit = () => {
         router.push({ path: path, query: queryParams });
 
       } catch (e: any) {
+
         let errorMessage = "Login failed, please try again later.";
-
-        try {
-          if (e.data?.message) {
-            const errorData = JSON.parse(e.data.message);
-            if (errorData.username) {
-              errorMessage =
-                t("login.usernameError") + ": " + errorData.username;
-            } else if (errorData.password) {
-              errorMessage =
-                t("login.passwordError") + ": " + errorData.password;
-            }
-          }
-        } catch (parseError) {
-          errorMessage = e.message || "Login failed, please try again later.";
-        }
-
-        ElMessage.error(errorMessage);
-        loading.value = false;
+        throw e;
       }
     } else {
       loading.value = false;

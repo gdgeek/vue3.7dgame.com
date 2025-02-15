@@ -1,80 +1,36 @@
 <template>
 
   <div class="content">
-    <login-form :isMobile="isMobile" ref="loginFormRef" @enter="enter"></login-form>
-
+    <div v-loading="loading" :class="['box1', { mobile: isMobile, 'dark-theme': isDark }]">
+      <div :class="['box2', { 'dark-theme': isDark }]">
+        <h1>{{ $t("login.h1") }}</h1>
+        <h4>{{ $t("login.h4") }}</h4>
+        <br />
+        <el-card style="width: 100%" shadow="never">
+          <span>登录账号</span>
+          <br>
+          <br>
+          <name-password />
+        </el-card>
+        <br />
+        <div style="width: 100%" shadow="never" class="apple-login-container">
+          <wechat />
+        </div>
+        <br>
+      </div>
+    </div>
   </div>
 
 </template>
-
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { useRouter, LocationQuery, useRoute } from "vue-router";
-import { AppleIdToken } from "@/api/auth/model";
-import LoginForm from "@/components/LoginForm.vue";
-import { useUserStore, useScreenStore } from "@/store";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
-
-
-const router = useRouter();
-const route = useRoute();
-const userStore = useUserStore();
-const { t } = useI18n();
-const loginFormRef = ref<InstanceType<typeof LoginForm>>();
-const screenStore = useScreenStore();
-const isMobile = computed(() => screenStore.isMobile);
-
-const parseRedirect = (): {
-  path: string;
-  queryParams: Record<string, string>;
-} => {
-  const query: LocationQuery = route.query;
-  const redirect = (query.redirect as string) ?? "/";
-  const url = new URL(redirect, window.location.origin);
-  const path = url.pathname;
-  const queryParams: Record<string, string> = {};
-
-  url.searchParams.forEach((value, key) => {
-    queryParams[key] = value;
-  });
-
-  return { path, queryParams };
-};
-
-const enter = async (
-  user: any,
-  form: any,
-  resolve: () => void,
-  reject: (message: string) => void
-) => {
-  try {
-    ElMessage.success(t("login.success"));
-    const token = user.auth;
-    if (token) {
-      localStorage.setItem(TOKEN_KEY, token);
-      nextTick();
-    } else {
-      ElMessage.error("The login response is missing the access_token");
-    }
-    await userStore.getUserInfo();
-
-    userStore.setupRefreshInterval(form.value);
-
-    const { path, queryParams } = parseRedirect();
-    router.push({ path: path, query: queryParams });
-    resolve();
-  } catch (e: any) {
-    reject(e.message);
-  }
-};
-
-const appleIdToken = ref<AppleIdToken | null>(null);
-const register = (idToken: AppleIdToken) => {
-  appleIdToken.value = idToken;
-};
-
-
-
+import { useSettingsStore } from "@/store/modules/settings";
+import { ThemeEnum } from "@/enums/ThemeEnum";
+import NamePassword from "@/components/Account/NamePassword.vue";
+import Wechat from "@/components/Account/Wechat.vue";
+const settingsStore = useSettingsStore();
+const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
+const loading = ref<boolean>(false);
 </script>
 
 <style scoped lang="scss">
@@ -86,8 +42,8 @@ body {
   margin: 0;
   background-image: url("/media/bg/02.jpg");
   background-size: 100% auto;
-  // transition:  0.3s ease;
 
+  // transition:  0.3s ease;
   &.dark-theme {
     background-image: url("/media/bg/02.jpg");
     filter: brightness(80%);
@@ -98,7 +54,7 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  width: 102%;
+  width: 100%;
   height: 7%;
   margin-right: 10px;
   background-color: #f1f1f1;
@@ -116,27 +72,26 @@ body {
   left: 10px;
 
   img {
-    width: 30px;
-    height: 30px;
-    margin-left: 20px;
+    width: 32px;
+    height: 32px;
+    margin-left: 12px;
     vertical-align: middle;
   }
-}
 
-.project_title {
-  margin-left: 10px;
-  font-family: "KaiTi", sans-serif;
-  // font-size: 14px;
-  font-weight: 600;
+  .project_title {
+    margin-left: 10px;
+    font-family: "KaiTi", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
 
-  &:hover {
-    color: #3876c2;
+    &:hover {
+      color: #3876c2;
+    }
   }
 }
 
 .header-right {
   position: absolute;
-  top: 0px;
   right: 10px;
   display: flex;
   align-items: center;
@@ -149,10 +104,6 @@ body {
     margin-right: 20px;
     width: 100%;
     padding: 10px;
-
-    &.mobile {
-      margin-right: 0px;
-    }
   }
 }
 
@@ -161,6 +112,69 @@ body {
   flex: 1;
   align-items: center;
   justify-content: center;
+
+  .box1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 450px;
+    height: 90%;
+    background-color: #fff;
+    transition: all 0.3s ease;
+
+    &.dark-theme {
+      background-color: rgb(63, 63, 63);
+      border-color: #494949;
+      color: white;
+    }
+
+    &.mobile {
+      width: 430;
+      height: 100%;
+    }
+
+    .box2 {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 90%;
+      height: 90%;
+      padding: 25px;
+      border: 1px solid #ebeefe;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+
+      &.dark-theme {
+        background-color: rgb(52, 52, 52);
+        border-color: #494949;
+        color: white;
+      }
+
+      &:hover {
+        box-shadow: 0 0 10px rgb(0 0 0 / 10%);
+        transition: all 0.4s;
+      }
+
+      h1 {
+        margin-top: 0;
+        font-family: "KaiTi", sans-serif;
+        font-size: 36px;
+        font-weight: 400;
+      }
+
+      h4 {
+        margin-top: 0;
+        font-family: "KaiTi", sans-serif;
+        font-size: 18px;
+        font-weight: 400;
+      }
+
+      el-button {
+        align-self: center;
+        margin-top: 2px;
+      }
+    }
+  }
 
   .login-title {
     margin: 20px 0;
@@ -172,7 +186,7 @@ body {
   .login-form {
     max-width: 100%;
     height: 100%;
-    padding: 10px 0px 10px 0px;
+    // padding: 10px 0px 10px 0px;
     margin-top: 36px;
   }
 
@@ -197,57 +211,10 @@ body {
     color: red;
     text-align: center;
   }
-}
 
-.box {
-  position: relative;
-  height: auto;
-  width: 400px;
-  max-width: 100%;
-  padding: 10px 10px 10px 10px;
-  margin: 0 auto;
-  margin-bottom: 20px;
-  border-radius: 5px;
-  background-color: #fff;
-  overflow: hidden;
-
-  transition: all 0.3s ease;
-
-  &.dark-theme {
-    background-color: rgb(63, 63, 63);
-    border-color: #494949;
-    color: white;
+  .apple-login-container {
+    justify-content: center;
+    width: 100%;
   }
-}
-
-.logout-head {
-  padding: 10px;
-  max-width: 100%;
-}
-
-.logout-title {
-  font-size: 14px;
-  padding: 10px;
-  text-align: center;
-  color: #666;
-}
-
-.logout-welcome {
-  margin-top: 20px;
-  font-size: 36px;
-  font-weight: normal;
-  color: #666;
-}
-
-.logout-text {
-  font-size: 21px;
-  font-weight: lighter;
-  color: #666;
-}
-
-.logout-lead {
-  font-size: 21px;
-  font-weight: lighter;
-  color: #666;
 }
 </style>

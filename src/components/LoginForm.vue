@@ -26,6 +26,7 @@ import NamePassword from "./Account/NamePassword.vue";
 import Wechat from "./Account/Wechat.vue";
 const settingsStore = useSettingsStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
+
 const loading = ref<boolean>(false);
 </script>
 

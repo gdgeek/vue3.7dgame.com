@@ -13,15 +13,38 @@
 </template>
 
 <script setup lang="ts">
-import Qrcode from "./Qrcode.vue";
 
-import { useRouter } from "vue-router";
-const router = useRouter();
+import { useUserStore } from "@/store";
+import Qrcode from "./Qrcode.vue";
+import wechat from "@/api/v1/wechat";
 import { getQrcode, refresh } from "@/api/auth/wechat";
 let url = ref("");
 
+import { useRouter, LocationQuery, useRoute } from "vue-router";
+const route = useRoute();
+const router = useRouter();
+const userStore = useUserStore();
 const dialogVisible = ref(false)
 let intervalId: NodeJS.Timeout | string | number | undefined = undefined;
+
+
+const parseRedirect = (): {
+  path: string;
+  queryParams: Record<string, string>;
+} => {
+  const query: LocationQuery = route.query;
+  const redirect = (query.redirect as string) ?? "/";
+  const url = new URL(redirect, window.location.origin);
+  const path = url.pathname;
+  const queryParams: Record<string, string> = {};
+
+  url.searchParams.forEach((value, key) => {
+    queryParams[key] = value;
+  });
+
+  return { path, queryParams };
+};
+
 const close = () => {
   if (intervalId) {
     clearInterval(intervalId);
@@ -32,22 +55,25 @@ const close = () => {
 };
 const fetchRefresh = async () => {
   const response = await refresh(token);
-  if (response.data.result) {
+  if (response.data.success) {
 
 
     close();
     if (response.data.message === 'signup') {
+      router.push({ path: '/site/register', query: { token: response.data.token } });
 
-      router.push({ name: "register" });
+    } else if (response.data.message === 'signin') {
+      await userStore.loginByWechat({ token: response.data.token });
+      const { path, queryParams } = parseRedirect();
+      console.error({ path: path, query: queryParams });
+      router.push({ path: path, query: queryParams });
+    }
 
-      alert('注册');
-    } else if (response.data.message === 'signin')
-      alert('登陆');
   }
   // 登陆成功
   //跳转到注册页面
 
-  console.error('扫描成功');
+  console.error(response.data);
 };
 let token: string | null = null;
 const login = async function async() {

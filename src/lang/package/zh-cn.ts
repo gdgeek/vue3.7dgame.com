@@ -116,10 +116,10 @@ export default {
     usernameError: "用户名错误",
     passwordError: "密码错误",
     error: "表单检验未通过",
-    createAccount: "创建账号",
+    createAccount: "创建新账号",
     repassword: "确认密码",
     create: "创建",
-    linkAccount: "登录账号!",
+    linkAccount: "绑定已有账号",
     logout: {
       message1: "确定注销并退出系统吗？",
       message2: "提示",

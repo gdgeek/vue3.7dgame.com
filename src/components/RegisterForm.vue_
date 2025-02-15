@@ -6,36 +6,18 @@
       <br />
       <el-tabs style="width: 100%" type="border-card" :stretch="true">
         <el-tab-pane :label="$t('login.createAccount')">
-          <h2 class="login-title">{{ $t("login.createAccount") }}</h2>
-          <el-form
-            ref="registerFormRef"
-            class="login-form"
-            :rules="registerRules"
-            :model="registerForm"
-            label-width="auto"
-          >
+          <el-form ref="registerFormRef" class="login-form" :rules="registerRules" :model="registerForm"
+            label-width="auto">
             <el-form-item :label="$t('login.username')" prop="username">
-              <el-input
-                v-model="registerForm.username"
-                suffix-icon="User"
-              ></el-input>
+              <el-input v-model="registerForm.username" suffix-icon="User"></el-input>
             </el-form-item>
             <el-form-item :label="$t('login.password')" prop="password">
-              <el-input
-                v-model="registerForm.password"
-                type="password"
-                suffix-icon="Lock"
-              ></el-input>
+              <el-input v-model="registerForm.password" type="password" suffix-icon="Lock"></el-input>
             </el-form-item>
 
             <el-form-item :label="$t('login.repassword')" prop="repassword">
-              <el-input
-                v-model="registerForm.repassword"
-                type="password"
-                suffix-icon="Lock"
-              ></el-input>
+              <el-input v-model="registerForm.repassword" type="password" suffix-icon="Lock"></el-input>
             </el-form-item>
-
             <el-form-item class="login-button">
               <el-button style="width: 100%" type="primary" @click="create">
                 {{ $t("login.create") }}
@@ -44,26 +26,12 @@
           </el-form>
         </el-tab-pane>
         <el-tab-pane :label="$t('login.linkAccount')">
-          <h2 class="login-title">{{ $t("login.linkAccount") }}</h2>
-          <el-form
-            ref="linkFormRef"
-            class="login-form"
-            :rules="linkRules"
-            :model="linkForm"
-            label-width="auto"
-          >
+          <el-form ref="linkFormRef" class="login-form" :rules="linkRules" :model="linkForm" label-width="auto">
             <el-form-item :label="$t('login.username')" prop="username">
-              <el-input
-                v-model="linkForm.username"
-                suffix-icon="User"
-              ></el-input>
+              <el-input v-model="linkForm.username" suffix-icon="User"></el-input>
             </el-form-item>
             <el-form-item :label="$t('login.password')" prop="password">
-              <el-input
-                v-model="linkForm.password"
-                type="password"
-                suffix-icon="Lock"
-              ></el-input>
+              <el-input v-model="linkForm.password" type="password" suffix-icon="Lock"></el-input>
             </el-form-item>
 
             <el-form-item class="login-button">
@@ -74,13 +42,22 @@
           </el-form>
         </el-tab-pane>
       </el-tabs>
+      <br />
+      <el-button style="width: 100%" @click="back">
+        <el-icon>
+          <Back />
+        </el-icon>
+        &nbsp;&nbsp;
+
+        返回
+      </el-button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { LocationQuery, useRoute } from "vue-router";
+import { LocationQuery, useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { useSettingsStore } from "@/store/modules/settings";
 import { FormInstance } from "element-plus";
@@ -96,10 +73,24 @@ const { t } = useI18n(); // I18n for translations
 
 const settingsStore = useSettingsStore();
 const route = useRoute();
+const router = useRouter();
 const registerFormRef = ref<FormInstance>(); // Separate formRef for register
 const linkFormRef = ref<FormInstance>(); // Separate formRef for link
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
+const back = async () => {
+  try {
+
+    await ElMessageBox.confirm('确认放弃注册？', '警告', {
+      confirmButtonText: '确认',
+      cancelButtonText: '继续注册',
+      type: 'warning',
+    });
+    router.push("/site/login");
+  } catch (e) {
+    console.error(e);
+  }
+};
 const registerForm = ref<RegisterData>({
   username: "",
   password: "",
@@ -314,6 +305,7 @@ body {
     font-family: "KaiTi", sans-serif;
     font-size: 14px;
     font-weight: 400;
+
     &:hover {
       color: #3876c2;
     }
@@ -415,8 +407,8 @@ body {
   .login-form {
     max-width: 100%;
     height: 100%;
-    padding: 10px 0px 10px 0px;
-    margin-top: 36px;
+    padding: 0px 0px 0px 0px;
+    margin-top: 10px;
   }
 
   .login-button {

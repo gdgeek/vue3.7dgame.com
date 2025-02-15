@@ -6,6 +6,7 @@ import i18n from "@/lang";
 import { ElMessage } from "element-plus";
 import AuthAPI from "@/api/auth";
 import env from "@/environment";
+import { th } from "element-plus/es/locale";
 const lang = ref(i18n.global.locale.value);
 watch(
   () => i18n.global.locale.value,
@@ -74,37 +75,20 @@ function isTokenExpiringSoon(token: string, bufferTime = 300): boolean {
 // 请求拦截器
 service.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    const accessToken = localStorage.getItem(TOKEN_KEY);
-    config.headers.Authorization = `Bearer ${accessToken}`; // 使用当前 Token
-    /*if (accessToken) {
-      if (isTokenExpiringSoon(accessToken)) {
-        if (!isRefreshing) {
-          isRefreshing = true;
-          try {
-            useUserStoreHook().setupRefreshInterval(useUserStoreHook().form);
-            const newToken = localStorage.getItem(TOKEN_KEY);
-            onTokenRefreshed(newToken!);
-          } catch (error) {
-            return Promise.reject(error);
-          } finally {
-            isRefreshing = false;
-          }
-        }
-        // 等待 Token 刷新后重试请求
-        return new Promise((resolve) => {
-          subscribers.push((token: string) => {
-            if (config.headers) {
-              config.headers.Authorization = `Bearer ${token}`;
-            }
-            resolve(config);
-          });
-        });
-      } else {
-        if (config.headers) {
-          config.headers.Authorization = `Bearer ${accessToken}`; // 使用当前 Token
-        }
+    let tokenData = localStorage.getItem(TOKEN_KEY);
+    if (tokenData !== null) {
+      try {
+        JSON.parse(tokenData);
+      } catch (e) {
+        tokenData = null;
       }
-    }*/
+    }
+
+    const token = tokenData ? JSON.parse(tokenData) : null;
+    if (token != null) {
+      config.headers.Authorization = `Bearer ${token.accessToken}`; // 使用当前 Token
+    }
+
     return config;
   },
   (error: any) => {

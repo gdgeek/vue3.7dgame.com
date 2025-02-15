@@ -1,4 +1,5 @@
-import AuthAPI from "@/api/auth";
+//import AuthAPI from "@/api/auth";
+import Auth from "@/api/v1/auth";
 import UserAPI from "@/api/user";
 //import { resetRouter } from "@/router";
 import { store } from "@/store";
@@ -6,6 +7,7 @@ import { LoginData, LoginResult } from "@/api/auth/model";
 import { getUserInfoData, InfoType } from "@/api/user/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { Avatar } from "@/api/user/model";
+import Wechat from "@/api/v1/wechat";
 import SecureLS from "secure-ls";
 
 const ls = new SecureLS({
@@ -73,28 +75,58 @@ export const useUserStore = defineStore(
     };
     const userInfo = ref<getUserInfoData>(defaultUserInfo);
 
+    function setToken(token: any) {
+      localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
+    }
+    function getToken() {
+      const token = localStorage.getItem(TOKEN_KEY);
+
+      if (token) {
+        try {
+          return JSON.parse(token);
+        } catch (e) {
+          console.error("Failed to parse token:", e);
+          return null;
+        }
+      } else {
+      }
+    }
+    async function loginByWechat(data: any) {
+      const response = await Wechat.login(data);
+      if (!response.data.success) {
+        throw new Error("Login failed, please try again later.");
+      }
+      const token = response.data.token;
+
+      if (token) {
+        setToken(token);
+      } else {
+        throw new Error("The login response is missing the access_token");
+      }
+      return true;
+    }
     /**
      * 登录
      *
      * @param {LoginData}
      * @returns
      */
-    function login(loginData: LoginData) {
-      return new Promise<void>((resolve, reject) => {
-        AuthAPI.login(loginData)
-          .then((data) => {
-            const access_token = data.data.auth;
-            localStorage.setItem(TOKEN_KEY, access_token);
-            resolve();
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      });
+    async function login(loginData: LoginData) {
+      const response = await Auth.login(loginData);
+      if (!response.data.success) {
+        throw new Error("Login failed, please try again later.");
+      }
+      const token = response.data.token;
+
+      if (token) {
+        setToken(token);
+      } else {
+        throw new Error("The login response is missing the access_token");
+      }
+      return true;
     }
 
     const refreshInterval = ref<NodeJS.Timeout | null>(null);
-
     const getUserInfo = async () => {
       try {
         const res = await UserAPI.getInfo();
@@ -152,6 +184,7 @@ export const useUserStore = defineStore(
     };
 
     const setupRefreshInterval = (form: LoginData) => {
+      /*
       if (refreshInterval.value) {
         clearInterval(refreshInterval.value); // 清除现有的定时器
       }
@@ -171,6 +204,7 @@ export const useUserStore = defineStore(
           console.error("Failed to refresh user data:", e);
         }
       }, 3600000); // 每小时刷新一次
+      */
     };
 
     const form = ref<LoginData>({
@@ -225,6 +259,7 @@ export const useUserStore = defineStore(
     return {
       userInfo,
       login,
+      loginByWechat,
       getUserInfo,
       logout,
       resetToken,

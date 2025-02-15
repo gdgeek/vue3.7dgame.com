@@ -29,8 +29,8 @@ watch(
   }
 );
 onMounted(() => {
-  const token = localStorage.getItem(TOKEN_KEY);
-  if (token) {
+  const hasToken = localStorage.getItem(TOKEN_KEY);
+  if (hasToken) {
     userStore.setupRefreshInterval(userStore.form);
   }
 });
@@ -44,7 +44,8 @@ onMounted(() => {
 .fade-enter-from,
 .fade-leave-to
 
-/* .fade-leave-active in <2.1.8 */ {
+/* .fade-leave-active in <2.1.8 */
+  {
   opacity: 0;
 }
 
@@ -52,6 +53,7 @@ canvas {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 9999; /* 确保 canvas 在最上层 */
+  z-index: 9999;
+  /* 确保 canvas 在最上层 */
 }
 </style>

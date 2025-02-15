@@ -1,34 +1,193 @@
 <template>
 
   <div class="content">
-    <register-form @enter="enter" :idToken="appleIdToken"></register-form>
+
+    <div :class="['box1', { 'dark-theme': isDark }]">
+      <div :class="['box2', { 'dark-theme': isDark }]">
+        <h1>{{ $t("login.h1") }}</h1>
+        <h4>{{ $t("login.h4") }}</h4>
+        <br />
+        <el-tabs style="width: 100%" type="border-card" :stretch="true">
+          <el-tab-pane :label="$t('login.createAccount')">
+            <el-form ref="registerFormRef" class="login-form" :rules="registerRules" :model="registerForm"
+              label-width="auto">
+              <el-form-item :label="$t('login.username')" prop="username">
+                <el-input v-model="registerForm.username" suffix-icon="User"></el-input>
+              </el-form-item>
+              <el-form-item :label="$t('login.password')" prop="password">
+                <el-input v-model="registerForm.password" type="password" suffix-icon="Lock"></el-input>
+              </el-form-item>
+
+              <el-form-item :label="$t('login.repassword')" prop="repassword">
+                <el-input v-model="registerForm.repassword" type="password" suffix-icon="Lock"></el-input>
+              </el-form-item>
+              <el-form-item class="login-button">
+                <el-button style="width: 100%" type="primary" @click="create">
+                  {{ $t("login.create") }}
+                </el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+          <el-tab-pane :label="$t('login.linkAccount')">
+            <el-form ref="linkFormRef" class="login-form" :rules="linkRules" :model="linkForm" label-width="auto">
+              <el-form-item :label="$t('login.username')" prop="username">
+                <el-input v-model="linkForm.username" suffix-icon="User"></el-input>
+              </el-form-item>
+              <el-form-item :label="$t('login.password')" prop="password">
+                <el-input v-model="linkForm.password" type="password" suffix-icon="Lock"></el-input>
+              </el-form-item>
+
+              <el-form-item class="login-button">
+                <el-button style="width: 100%" type="primary" @click="link">
+                  {{ $t("login.login") }}
+                </el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+        </el-tabs>
+        <br />
+        <el-button style="width: 100%" @click="back">
+          <el-icon>
+            <Back />
+          </el-icon>
+          &nbsp;&nbsp;
+
+          返回
+        </el-button>
+      </div>
+    </div>
   </div>
 
 </template>
 
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { useRouter, LocationQuery, useRoute } from "vue-router";
-import { AppleIdToken } from "@/api/auth/model";
-import RegisterForm from "@/components/RegisterForm.vue";
-import { useUserStore, useScreenStore } from "@/store";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
+import { LocationQuery, useRoute, useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
+import { useSettingsStore } from "@/store/modules/settings";
+import { FormInstance } from "element-plus";
+import { ThemeEnum } from "@/enums/ThemeEnum";
+import { onMounted, watch, ref } from "vue";
+import { useI18n } from "vue-i18n"; // Ensure you have this import
+import type { AppleIdToken } from "@/api/auth/model";
+import AuthAPI from "@/api/auth/index";
+import type { AppleIdTokenAndUserPassData } from "@/api/auth/model";
+import { RegisterData, LinkData } from "@/api/auth/model";
 
-
-const router = useRouter();
+const { t } = useI18n(); // I18n for translations
+const token = computed(() => route.query.token as string);
+const settingsStore = useSettingsStore();
 const route = useRoute();
-const userStore = useUserStore();
-const { t } = useI18n();
-const loginFormRef = ref<InstanceType<typeof LoginForm>>();
-const screenStore = useScreenStore();
-const isMobile = computed(() => screenStore.isMobile);
+const router = useRouter();
+const registerFormRef = ref<FormInstance>(); // Separate formRef for register
+const linkFormRef = ref<FormInstance>(); // Separate formRef for link
+const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
-const parseRedirect = (): {
+const back = async () => {
+  try {
+
+    await ElMessageBox.confirm('确认放弃注册？', '警告', {
+      confirmButtonText: '确认',
+      cancelButtonText: '继续注册',
+      type: 'warning',
+    });
+    router.push("/site/login");
+  } catch (e) {
+    console.error(e);
+  }
+};
+const registerForm = ref<RegisterData>({
+  username: "",
+  password: "",
+  repassword: "",
+});
+
+const linkForm = ref<LinkData>({
+  username: "",
+  password: "",
+});
+
+const validatePass2 = (rule: any, value: any, callback: any) => {
+  if (value === "") {
+    callback(new Error(t("login.rules.repassword.message1")));
+  } else if (value !== registerForm.value.password) {
+    callback(new Error(t("login.rules.repassword.message2")));
+  } else {
+    callback();
+  }
+};
+
+// Props
+const props = defineProps<{
+  idToken: AppleIdToken;
+}>();
+
+const linkRules = {
+  username: [
+    {
+      required: true,
+      message: t("login.rules.username.message1"),
+      trigger: "blur",
+    },
+    { min: 4, message: t("login.rules.username.message2"), trigger: "blur" },
+  ],
+  password: [
+    {
+      required: true,
+      message: t("login.rules.password.message1"),
+      trigger: "blur",
+    },
+    { min: 6, message: t("login.rules.password.message2"), trigger: "blur" },
+  ],
+};
+
+const registerRules = {
+  username: [
+    {
+      required: true,
+      message: t("login.rules.username.message1"),
+      trigger: "blur",
+    },
+    {
+      pattern: /^[a-zA-Z0-9_@.-]+$/i,
+      message: "only letters, numbers, _, -, @, and .",
+      trigger: "blur",
+    },
+    {
+      min: 4,
+      max: 20,
+      message: t("login.rules.username.message2"),
+      trigger: "blur",
+    },
+  ],
+  password: [
+    {
+      required: true,
+      message: t("login.rules.password.message1"),
+      trigger: "blur",
+    },
+    {
+      min: 6,
+      max: 20,
+      message: t("login.rules.password.message2"),
+      trigger: "blur",
+    },
+    {
+      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/i,
+      message: t("login.rules.password.message3"),
+      trigger: "blur",
+    },
+  ],
+  repassword: [{ validator: validatePass2, trigger: "blur" }],
+};
+
+function parseRedirect(): {
   path: string;
   queryParams: Record<string, string>;
-} => {
+} {
   const query: LocationQuery = route.query;
   const redirect = (query.redirect as string) ?? "/";
+
   const url = new URL(redirect, window.location.origin);
   const path = url.pathname;
   const queryParams: Record<string, string> = {};
@@ -38,42 +197,55 @@ const parseRedirect = (): {
   });
 
   return { path, queryParams };
+}
+
+const emit = defineEmits(["enter"]);
+const login = async (data: any) => {
+  return new Promise<void>((resolve, reject) => {
+    emit("enter", data, resolve, reject);
+  });
 };
 
-const enter = async (
-  user: any,
-  form: any,
-  resolve: () => void,
-  reject: (message: string) => void
-) => {
-  try {
-    ElMessage.success(t("login.success"));
-    const token = user.auth;
-    if (token) {
-      localStorage.setItem(TOKEN_KEY, token);
-      nextTick();
+const link = async () => {
+  linkFormRef.value?.validate(async (valid: boolean) => {
+    if (valid) {
+      alert(token.value);
     } else {
-      ElMessage.error("The login response is missing the access_token");
+      ElMessage({ type: "error", message: t("login.error") });
     }
-    await userStore.getUserInfo();
-
-    userStore.setupRefreshInterval(form.value);
-
-    const { path, queryParams } = parseRedirect();
-    router.push({ path: path, query: queryParams });
-    resolve();
-  } catch (e: any) {
-    reject(e.message);
-  }
+  });
 };
 
-const appleIdToken = ref<AppleIdToken | null>(null);
-const register = (idToken: AppleIdToken) => {
-  appleIdToken.value = idToken;
+const create = () => {
+  registerFormRef.value?.validate(async (valid: boolean) => {
+    if (valid) {
+      try {
+        const data: AppleIdTokenAndUserPassData = {
+          username: registerForm.value.username,
+          password: registerForm.value.password,
+          token: props.idToken.token,
+          apple_id: props.idToken.apple_id,
+        };
+        const response = await AuthAPI.appleIdCreate(data);
+        await login(response.data.user);
+      } catch (e: any) {
+        ElMessage.error(e.message);
+      }
+    } else {
+      ElMessage({ type: "error", message: t("login.error") });
+    }
+  });
 };
 
+// Automatically toggle dark theme on mount
+onMounted(() => {
+  document.body.classList.toggle("dark-theme", isDark.value);
+});
 
-
+// Watch for theme change
+watch(isDark, (newValue) => {
+  document.body.classList.toggle("dark-theme", newValue);
+});
 </script>
 
 <style scoped lang="scss">
@@ -97,7 +269,7 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  width: 102%;
+  width: 100%;
   height: 7%;
   margin-right: 10px;
   background-color: #f1f1f1;
@@ -107,6 +279,7 @@ body {
 
   &.dark-theme {
     background-color: rgb(37, 37, 37);
+    // color: white;
   }
 }
 
@@ -115,27 +288,26 @@ body {
   left: 10px;
 
   img {
-    width: 30px;
-    height: 30px;
-    margin-left: 20px;
+    width: 32px;
+    height: 32px;
+    margin-left: 12px;
     vertical-align: middle;
   }
-}
 
-.project_title {
-  margin-left: 10px;
-  font-family: "KaiTi", sans-serif;
-  // font-size: 14px;
-  font-weight: 600;
+  .project_title {
+    margin-left: 10px;
+    font-family: "KaiTi", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
 
-  &:hover {
-    color: #3876c2;
+    &:hover {
+      color: #3876c2;
+    }
   }
 }
 
 .header-right {
   position: absolute;
-  top: 0px;
   right: 10px;
   display: flex;
   align-items: center;
@@ -148,10 +320,6 @@ body {
     margin-right: 20px;
     width: 100%;
     padding: 10px;
-
-    &.mobile {
-      margin-right: 0px;
-    }
   }
 }
 
@@ -160,6 +328,68 @@ body {
   flex: 1;
   align-items: center;
   justify-content: center;
+  // width: 100%;
+  // background-image: url("/media/bg/02.jpg");
+  // background-size: 100% auto;
+
+  .box1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 450px;
+    height: 600px;
+    background-color: #fff;
+
+    transition: all 0.3s ease;
+
+    &.dark-theme {
+      background-color: rgb(63, 63, 63);
+      border-color: #494949;
+      color: white;
+    }
+
+    .box2 {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 90%;
+      padding: 25px;
+      border: 1px solid #ebeefe;
+      border-radius: 4px;
+
+      transition: all 0.3s ease;
+
+      &.dark-theme {
+        background-color: rgb(52, 52, 52);
+        border-color: #494949;
+        color: white;
+      }
+
+      &:hover {
+        box-shadow: 0 0 10px rgb(0 0 0 / 10%);
+        transition: all 0.4s;
+      }
+
+      h1 {
+        margin-top: 0;
+        font-family: "KaiTi", sans-serif;
+        font-size: 36px;
+        font-weight: 400;
+      }
+
+      h4 {
+        margin-top: 0;
+        font-family: "KaiTi", sans-serif;
+        font-size: 18px;
+        font-weight: 400;
+      }
+
+      el-button {
+        align-self: center;
+        margin-top: 2px;
+      }
+    }
+  }
 
   .login-title {
     margin: 20px 0;
@@ -171,8 +401,8 @@ body {
   .login-form {
     max-width: 100%;
     height: 100%;
-    padding: 10px 0px 10px 0px;
-    margin-top: 36px;
+    padding: 0px 0px 0px 0px;
+    margin-top: 10px;
   }
 
   .login-button {
@@ -196,57 +426,5 @@ body {
     color: red;
     text-align: center;
   }
-}
-
-.box {
-  position: relative;
-  height: auto;
-  width: 400px;
-  max-width: 100%;
-  padding: 10px 10px 10px 10px;
-  margin: 0 auto;
-  margin-bottom: 20px;
-  border-radius: 5px;
-  background-color: #fff;
-  overflow: hidden;
-
-  transition: all 0.3s ease;
-
-  &.dark-theme {
-    background-color: rgb(63, 63, 63);
-    border-color: #494949;
-    color: white;
-  }
-}
-
-.logout-head {
-  padding: 10px;
-  max-width: 100%;
-}
-
-.logout-title {
-  font-size: 14px;
-  padding: 10px;
-  text-align: center;
-  color: #666;
-}
-
-.logout-welcome {
-  margin-top: 20px;
-  font-size: 36px;
-  font-weight: normal;
-  color: #666;
-}
-
-.logout-text {
-  font-size: 21px;
-  font-weight: lighter;
-  color: #666;
-}
-
-.logout-lead {
-  font-size: 21px;
-  font-weight: lighter;
-  color: #666;
 }
 </style>
