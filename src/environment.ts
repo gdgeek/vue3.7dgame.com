@@ -40,10 +40,10 @@ function title(): string {
     return "上海不加班网络科技";
   }
   if (hostname.includes("bujiaban.com")) {
-    return "混合现实编程";
+    return "不加班AR编程";
   }
   if (hostname.includes("localhost")) {
-    return "混合现实编程";
+    return "不加班AR编程";
   }
   if (hostname.includes("7dgame.com")) {
     return "不加班官方网站";

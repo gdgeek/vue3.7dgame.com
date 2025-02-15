@@ -17,7 +17,7 @@ import Qrcode from "./Qrcode.vue";
 
 const dialogVisible = ref(false)
 import env from "@/environment";
-import { getQrcode } from "@/api/auth/wechat";
+import { getQrcode, refresh } from "@/api/auth/wechat";
 let url = ref("a");
 const login = async function async() {
 
@@ -25,8 +25,6 @@ const login = async function async() {
 
   url.value = ret.data.qrcode.url;
   dialogVisible.value = true;
-  //const ret = await getQrcode();
 
-  // url.value = ret.data.qrcode.url;
 }
 </script>

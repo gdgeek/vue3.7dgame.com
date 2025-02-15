@@ -86,7 +86,7 @@ export default {
   // 登录页面国际化
   login: {
     appleLoginFail: "Appleログインに失敗しました",
-    title: "MrPP.com",
+    title: "BuJiaBan.com",
     register: "プラットフォーム登録/ログイン",
     h1: "ようこそ！",
     h4: "準備はできましたか？",

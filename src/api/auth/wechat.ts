@@ -7,3 +7,11 @@ export const getQrcode = () => {
     method: "get",
   });
 };
+
+export const refresh = (token: string) => {
+  const url = env.auth_api + "/v1/wechat/refresh?token=" + token;
+  return request({
+    url,
+    method: "get",
+  });
+};
