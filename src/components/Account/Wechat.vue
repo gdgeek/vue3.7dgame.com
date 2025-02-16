@@ -62,6 +62,7 @@ const fetchRefresh = async () => {
       router.push({ path: '/site/register', query: { token: response.data.token } });
     } else if (response.data.message === 'signin') {
       await userStore.loginByWechat({ token: response.data.token });
+
       await userStore.getUserInfo();
 
 
