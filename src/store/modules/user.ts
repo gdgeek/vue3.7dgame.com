@@ -3,12 +3,7 @@ import Auth from "@/api/v1/auth";
 //import { resetRouter } from "@/router";
 import { store } from "@/store";
 import { LoginData, LoginResult } from "@/api/auth/model";
-import {
-  getUserInfoData,
-  InfoType,
-  UserInfoType,
-  _UserDataType,
-} from "@/api/user/model";
+import { UserInfoType, _UserDataType } from "@/api/user/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { Avatar } from "@/api/user/model";
 import Wechat from "@/api/v1/wechat";
@@ -34,6 +29,7 @@ export const useUserStore = defineStore(
   "user",
   () => {
     const defaultUserInfo: UserInfoType = {
+      id: 0,
       userData: {
         username: "",
         nickname: null,
