@@ -7,7 +7,16 @@ const login = (data: any) => {
     data,
   });
 };
+const refresh = (data: any) => {
+  const url = "/v1/auth/refresh";
+  return request({
+    url,
+    method: "post",
+    data,
+  });
+};
 
 export default {
   login,
+  refresh,
 };

@@ -1,11 +1,10 @@
 //import AuthAPI from "@/api/auth";
-import Auth from "@/api/v1/auth";
+import AuthAPI from "@/api/v1/auth";
 //import { resetRouter } from "@/router";
 import { store } from "@/store";
 import { LoginData, LoginResult } from "@/api/auth/model";
 import { UserInfoType, _UserDataType } from "@/api/user/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
-import { Avatar } from "@/api/user/model";
 import Wechat from "@/api/v1/wechat";
 import SecureLS from "secure-ls";
 import Token from "@/store/modules/token";
@@ -96,7 +95,7 @@ export const useUserStore = defineStore(
      * @returns
      */
     async function login(loginData: LoginData) {
-      const response = await Auth.login(loginData);
+      const response = await AuthAPI.login(loginData);
       if (!response.data.success) {
         throw new Error("Login failed, please try again later.");
       }
@@ -137,28 +136,29 @@ export const useUserStore = defineStore(
       }
     };
 
-    const setupRefreshInterval = (form: LoginData) => {
-      /*
+    const setupRefreshInterval = () => {
       if (refreshInterval.value) {
         clearInterval(refreshInterval.value); // 清除现有的定时器
       }
-
       refreshInterval.value = setInterval(async () => {
         try {
-          const token = localStorage.getItem(TOKEN_KEY);
+          const token = Token.getToken();
           if (token) {
-            const newTokenResponse = await AuthAPI.login(form);
-            const newToken = newTokenResponse.data.auth;
-            localStorage.setItem(TOKEN_KEY, newToken); // 更新 token
-            console.log("Token refreshed:", newToken);
+            console.error(token);
+            const newTokenResponse = await AuthAPI.refresh({
+              refreshToken: token.refreshToken,
+            });
+            const newToken = newTokenResponse.data.token;
+            Token.setToken(newToken);
+            // localStorage.setItem(TOKEN_KEY, newToken); // 更新 token
+            // console.log("Token refreshed:", newToken);
             const res = await getUserInfo(); // 刷新用户数据
             console.log("User data refreshed:", res);
           }
         } catch (e) {
           console.error("Failed to refresh user data:", e);
         }
-      }, 3600000); // 每小时刷新一次
-      */
+      }, 3600000);
     };
 
     const form = ref<LoginData>({
@@ -171,24 +171,30 @@ export const useUserStore = defineStore(
       // location.reload(); // 清空路由
       // 用户数据清空
       userInfo.value = {
-        username: "",
-        data: {
+        id: 0,
+        userData: {
           username: "",
-          id: 0,
-          nickname: "",
-          info: "",
-          avatar_id: "",
+          nickname: null,
+          emailBind: false,
+          email: null,
+        },
+        userInfo: {
+          info: {
+            sex: "",
+            industry: "",
+            selectedOptions: [],
+            textarea: "",
+          },
+          gold: 0,
+          points: 0,
           avatar: {
-            id: 0,
             md5: "",
-            type: "jpg",
+            type: "",
             url: "",
             filename: "",
             size: 0,
             key: "",
           },
-          email: "",
-          emailBind: false,
         },
         roles: [],
         perms: [],
