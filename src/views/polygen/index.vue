@@ -35,7 +35,7 @@
                 @deleted="deletedWindow"
               >
                 <template #info>
-                  <Polygen3 :file="item.file" @progress="progress"></Polygen3>
+                  <polygen-index :file="item.file" @progress="progress"/>
                   <el-progress
                     v-if="percentage === 100"
                     :percentage="100"
@@ -86,7 +86,7 @@
 import { getPolygens, putPolygen, deletePolygen } from "@/api/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import Polygen3 from "@/components/Polygen3.vue";
+import PolygenIndex from "@/components/PolygenIndex.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 

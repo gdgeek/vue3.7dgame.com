@@ -1,43 +1,16 @@
 <template>
   <div>
-    <div
-      id="three"
-      ref="three"
-      style="position: relative; height: 300px; width: 100%"
-    >
+    <div id="three" ref="three" style="position: relative; height: 300px; width: 100%">
       <div class="control" :style="controlStyle">
-        <el-select
-          v-model="selectedAnimationIndex"
-          @change="playAnimation"
-          placeholder="Select Animation"
-          style="width: 160px"
-          :emptyText="'No data'"
-          :disabled="animations.length === 0"
-        >
-          <el-option
-            v-if="animations.length === 0"
-            :key="0"
-            :label="'No data'"
-            :value="0"
-            disabled
-          ></el-option>
-          <el-option
-            v-for="(animation, index) in animations"
-            :key="index"
-            :label="animation.name"
-            :value="index"
-          ></el-option>
+        <el-select v-model="selectedAnimationIndex" @change="playAnimation" placeholder="Select Animation"
+          style="width: 160px" :emptyText="'No data'" :disabled="animations.length === 0">
+          <el-option v-if="animations.length === 0" :key="0" :label="'No data'" :value="0" disabled></el-option>
+          <el-option v-for="(animation, index) in animations" :key="index" :label="animation.name"
+            :value="index"></el-option>
         </el-select>
-        <el-switch
-          v-model="isAnimationPlaying"
-          @change="toggleAnimation"
-          @click.stop
-          style="margin-left: 5px"
-          inline-prompt
-          :active-text="$t('polygen.animation.animationOn')"
-          :inactive-text="$t('polygen.animation.animationOff')"
-          :disabled="animations.length === 0"
-        ></el-switch>
+        <el-switch v-model="isAnimationPlaying" @change="toggleAnimation" @click.stop style="margin-left: 5px"
+          inline-prompt :active-text="$t('polygen.animation.animationOn')"
+          :inactive-text="$t('polygen.animation.animationOff')" :disabled="animations.length === 0"></el-switch>
       </div>
     </div>
   </div>
@@ -132,6 +105,11 @@ const refresh = () => {
     return;
   }
   const gltfLoader = new GLTFLoader();
+
+  const dracoLoader = new DRACOLoader();
+  dracoLoader.setDecoderPath("/js/three.js/libs/draco/");
+  gltfLoader.setDRACOLoader(dracoLoader);
+
   const url = convertToHttps(props.file.url);
   gltfLoader.load(
     url,
