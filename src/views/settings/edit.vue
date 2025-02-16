@@ -1,7 +1,7 @@
 <template>
   <div>
     <br />
-    <el-card class="box-card">
+    <el-card v-loading="isLoading" class="box-card">
       <el-row>
         <el-col>
           <div class="box-title">
@@ -14,7 +14,7 @@
             <router-link to="/home/index">
               <el-button size="small">{{
                 $t("homepage.edit.return")
-                }}</el-button>
+              }}</el-button>
             </router-link>
           </span>
         </el-col>
@@ -34,7 +34,7 @@
                 autocomplete="off" @keyup.enter="submitNickname">
                 <template #suffix>
                   <el-button style="margin-right: -10px" :disabled="isDisable" @click="submitNickname">
-                    1 {{ $t("homepage.edit.confirm") }}
+                    {{ $t("homepage.edit.confirm") }}
                   </el-button>
                 </template>
               </el-input>
@@ -152,7 +152,7 @@
               <el-button size="small" @click="dialogVisible = false">
                 {{ $t("homepage.edit.avatarCropping.cancel") }}
               </el-button>
-              <el-button size="small" type="primary" :loading="loading" @click="finish">
+              <el-button size="small" type="primary" @click="finish">
                 {{ $t("homepage.edit.avatarCropping.confirm") }}
               </el-button>
             </el-button-group>
@@ -177,7 +177,7 @@ import type { FileHandler } from "@/assets/js/file/server";
 import { FormItemRule } from "element-plus";
 import type { UploadFile, UploadFiles } from "element-plus";
 
-import { FileType } from "../user/model";
+import { FileType, _InfoType } from "@/api/user/model";
 const userStore = useUserStore();
 const fileStore = useFileStore();
 const ruleFormRef = ref<FormInstance>();
@@ -194,7 +194,7 @@ type nickNameType = {
 const nicknameForm = ref<nickNameType>({
   nickname: "",
 });
-
+/*
 type Rule = {
   required?: boolean;
   message?: string;
@@ -206,7 +206,7 @@ type Rule = {
     callback: (error?: Error) => void
   ) => void;
 };
-
+*/
 type Arrayable<T> = T | T[];
 
 const nicknameRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
@@ -237,13 +237,13 @@ const nicknameRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
 };
 
 // 基本信息表单
-const infoForm = ref<InfoType>({
+const infoForm = ref<_InfoType>({
   sex: "man",
   industry: "",
   selectedOptions: [],
   textarea: "",
 });
-const infoRules = ref<FormRules<InfoType>>({
+const infoRules = ref<FormRules<_InfoType>>({
   industry: [
     {
       required: true,
@@ -326,7 +326,7 @@ type optionType = {
 
 const addressOptions = ref(regionData);
 const dialogVisible = ref(false);
-const loading = ref(false);
+const isLoading = ref(true);
 const cropperRef = ref<any>({});
 const option = ref<optionType>({
   img: "", // 裁剪图片的地址
@@ -356,7 +356,9 @@ const submitNickname = async () => {
   nickNameFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        await putUserData({ nickname: nicknameForm.value.nickname });
+        isLoading.value = true;
+        await userStore.setUserInfo({ nickname: nicknameForm.value.nickname });
+
         ElMessage.success(t("homepage.edit.rules.nickname.success"));
       } catch (error) {
         ElMessage.error(t("homepage.edit.rules.nickname.error3"));
@@ -385,7 +387,8 @@ const saveInfo = () => {
     if (valid) {
       try {
         console.log("infoForm.value", infoForm.value);
-        await putUserData({ info: infoForm.value });
+        isLoading.value = true;
+        await userStore.setUserInfo({ info: infoForm.value });
         ElMessage.success(t("homepage.edit.rules.success"));
       } catch (error) {
         ElMessage.error(t("homepage.edit.rules.error1"));
@@ -421,7 +424,7 @@ const handleChangeUpload = async (file: UploadFile, fileList: UploadFiles) => {
     const res = URL.createObjectURL(selectedFile);
     option.value.img = res;
     console.log("option.value.img", option.value.img);
-    loading.value = false;
+    // loading.value = false;
     dialogVisible.value = true;
   } else {
     ElMessage.error(t("homepage.edit.avatarCropping.error3"));
@@ -446,6 +449,9 @@ const saveAvatar = async (
   handler: FileHandler
 ) => {
   const data: FileType = {
+    id: 0,
+    type: "",
+    size: 0,
     md5,
     key: md5 + extension,
     filename: file.name,
@@ -453,15 +459,17 @@ const saveAvatar = async (
   };
 
   try {
+    isLoading.value = true;
+    dialogVisible.value = false;
     const post = await postFile(data);
-    alert(JSON.stringify(post));
-    const put = await putUserData({ avatar_id: post.data.id });
+
+    await userStore.setUserInfo({ avatar_id: post.data.id });
     ElMessage.success(t("homepage.edit.avatarCropping.success"));
   } catch (err) {
     console.error(err);
   }
 
-  loading.value = false;
+  //loading.value = false;
 };
 
 // 完成截图
@@ -505,10 +513,29 @@ async function finish() {
     );
 
     dialogVisible.value = false;
-    loading.value = true;
+    //loading.value = true;
   });
-}
+}// 观测 userStore.userInfo 的变化
 
+
+watch(() => userStore.userInfo, (newUserInfo) => {
+
+  if (newUserInfo.id !== 0) {
+
+
+    const parsedInfo = newUserInfo.userInfo?.info;
+    nicknameForm.value.nickname = newUserInfo.userData?.nickname || "";
+    if (parsedInfo) {
+      infoForm.value.sex = parsedInfo.sex || "";
+      infoForm.value.industry = parsedInfo.industry || "";
+      infoForm.value.selectedOptions = parsedInfo.selectedOptions || [];
+      infoForm.value.textarea = parsedInfo.textarea || "";
+    }
+    isLoading.value = false
+  }
+}, { deep: true, immediate: true });
+//userStore.getUserInfo();
+/*
 onMounted(async () => {
   await userStore.getUserInfo();
   const parsedInfo = userStore.userInfo.userInfo?.info;
@@ -519,7 +546,7 @@ onMounted(async () => {
     infoForm.value.selectedOptions = parsedInfo.selectedOptions || [];
     infoForm.value.textarea = parsedInfo.textarea || "";
   }
-});
+});*/
 </script>
 
 <style lang="scss" scoped>

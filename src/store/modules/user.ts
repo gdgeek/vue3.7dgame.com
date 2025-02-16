@@ -110,6 +110,32 @@ export const useUserStore = defineStore(
     }
 
     const refreshInterval = ref<NodeJS.Timeout | null>(null);
+    const setUserInfo = async (data: any) => {
+      try {
+        const response = await UserAPI.putUserData(data);
+        console.error("getUserInfo response:", response);
+        // 确保数据存在
+        if (!response.data || !response.data.success) {
+          console.error("Verification failed, please Login again.");
+          return;
+        }
+        const user = response.data.data;
+        if (!user.roles) {
+          console.error("getUserInfo: roles must be a non-null array!");
+          return;
+        }
+
+        // 更新 userInfo
+        userInfo.value.id = user.id;
+        userInfo.value.roles = user.roles;
+        userInfo.value.userInfo = user.userInfo;
+        userInfo.value.userData = user.userData;
+
+        return userInfo.value;
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    };
     const getUserInfo = async () => {
       try {
         const response = await UserAPI.info();
@@ -126,6 +152,7 @@ export const useUserStore = defineStore(
         }
 
         // 更新 userInfo
+        userInfo.value.id = user.id;
         userInfo.value.roles = user.roles;
         userInfo.value.userInfo = user.userInfo;
         userInfo.value.userData = user.userData;
@@ -221,6 +248,7 @@ export const useUserStore = defineStore(
       login,
       loginByWechat,
       getUserInfo,
+      setUserInfo,
       logout,
       resetToken,
       form,

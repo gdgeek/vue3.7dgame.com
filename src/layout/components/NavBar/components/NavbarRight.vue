@@ -27,16 +27,16 @@
           class="rounded-full mr-10px w24px w24px" />
         <span :class="['gradient-text', { mobile: isMobile }]">{{
           userStore.userInfo.userData.nickname || userStore.userInfo.userData.username
-        }}</span>
+          }}</span>
       </div>
       <template #dropdown>
         <el-dropdown-menu>
           <RouterLink to="/home/index">
             <el-dropdown-item>{{
               $t("navbar.personalCenter")
-            }}</el-dropdown-item>
+              }}</el-dropdown-item>
           </RouterLink>
-         <!-- <RouterLink to="/settings/account">
+          <!-- <RouterLink to="/settings/account">
             <el-dropdown-item>{{
               $t("navbar.AccountSetting")
             }}</el-dropdown-item>
@@ -92,7 +92,7 @@ const logout = () => {
     type: "warning",
     lockScroll: false,
   }).then(() => {
-    router.push("/logout");
+    router.push("/site/logout");
 
   });
 };
