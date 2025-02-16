@@ -97,16 +97,9 @@ const submit = () => {
     if (valid) {
       try {
         await userStore.login(form.value);
-
-        await nextTick();
-        const ret = await request<UserInfoReturnType>({
-          url: "v1/user/info",
-          method: "get",
-        });
-       // await userStore.getUserInfo();
-        userStore.setupRefreshInterval();
+ 
+        await userStore.getUserInfo();
         const { path, queryParams } = parseRedirect();
-        console.error({ path: path, query: queryParams });
         router.push({ path: path, query: queryParams });
 
       } catch (e: any) {

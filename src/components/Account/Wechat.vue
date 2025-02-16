@@ -60,12 +60,13 @@ const fetchRefresh = async () => {
     close();
     if (response.data.message === 'signup') {
       router.push({ path: '/site/register', query: { token: response.data.token } });
-
     } else if (response.data.message === 'signin') {
       await userStore.loginByWechat({ token: response.data.token });
+      await userStore.getUserInfo();
+
+
       const { path, queryParams } = parseRedirect();
       console.error({ path: path, query: queryParams });
-      // router.push("/home/index");
       router.push({ path: path, query: queryParams });
     }
 
