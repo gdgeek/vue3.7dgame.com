@@ -59,20 +59,6 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/login",
-    redirect: "/site/login",
-  },
-  {
-    path: "/logout",
-    redirect: "/site/logout",
-  },
-
-  {
-    path: "/register",
-    redirect: "/site/register",
-  },
-
-  {
     path: "/privacy-policy",
     component: () => import("@/views/privacy-policy/index.vue"),
     meta: { hidden: true, private: true },

@@ -14,7 +14,7 @@ import { usePermissionStore, useUserStore } from "@/store";
 export function setupPermission() {
   // 白名单路由
   const whiteList = [
-    "/login",
+    "/site/login",
     "/site",
     "/introduce",
     "/register",
@@ -29,7 +29,7 @@ export function setupPermission() {
     const hasToken = localStorage.getItem(TOKEN_KEY);
 
     if (hasToken) {
-      if (to.path === "/login") {
+      if (to.path === "/site/login") {
         // 如果已登录，跳转到首页
         next({ path: "/" });
         NProgress.done();
@@ -93,7 +93,7 @@ function redirectToLogin(
   const params = new URLSearchParams(to.query as Record<string, string>);
   const queryString = params.toString();
   const redirect = queryString ? `${to.path}?${queryString}` : to.path;
-  next(`/login?redirect=${encodeURIComponent(redirect)}`);
+  next(`/site/login?redirect=${encodeURIComponent(redirect)}`);
 }
 
 /** 判断是否有权限 */

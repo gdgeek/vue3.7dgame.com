@@ -284,11 +284,11 @@ const toggleTheme = () => {
 watch(
   () => route.path,
   async (newPath) => {
-    if (newPath === "/logout") {
+    if (newPath === "/site/logout") {
       await userStore.logout();
       await tagsViewStore.delAllViews();
       setTimeout(() => {
-        router.push("/login?redirect=/home/index");
+        router.push("/site/login?redirect=/home/index");
       }, 1000);
     }
   },
