@@ -16,9 +16,8 @@ import { UpdateAbility } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
 import { useUserStore } from "@/store/modules/user";
 import { UpdateRoutes } from "@/router";
-import { TOKEN_KEY } from "./enums/CacheEnum";
+import Token from "@/store/modules/token";
 const userStore = useUserStore();
-
 const ability = useAbility(); // 提取到 setup 顶层
 
 watch(
@@ -28,10 +27,12 @@ watch(
     UpdateRoutes(ability);
   }
 );
-onMounted(() => {
-  const hasToken = localStorage.getItem(TOKEN_KEY);
+onMounted(async () => {
+
+  const hasToken = Token.getToken();
   if (hasToken) {
-    userStore.setupRefreshInterval(userStore.form);
+    userStore.getUserInfo();
+    userStore.setupRefreshInterval();
   }
 });
 </script>

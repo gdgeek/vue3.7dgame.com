@@ -246,9 +246,9 @@ const enter = async (
     } else {
       ElMessage.error("The login response is missing the access_token");
     }
-    await userStore.getUserInfo();
+    // await userStore.getUserInfo();
 
-    userStore.setupRefreshInterval(form.value);
+    // userStore.setupRefreshInterval(form.value);
 
     const { path, queryParams } = parseRedirect();
     router.push({ path: path, query: queryParams });

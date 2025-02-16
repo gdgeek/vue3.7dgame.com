@@ -27,14 +27,14 @@
           class="rounded-full mr-10px w24px w24px" />
         <span :class="['gradient-text', { mobile: isMobile }]">{{
           userStore.userInfo.userData.nickname || userStore.userInfo.userData.username
-          }}</span>
+        }}</span>
       </div>
       <template #dropdown>
         <el-dropdown-menu>
           <RouterLink to="/home/index">
             <el-dropdown-item>{{
               $t("navbar.personalCenter")
-              }}</el-dropdown-item>
+            }}</el-dropdown-item>
           </RouterLink>
           <!-- <RouterLink to="/settings/account">
             <el-dropdown-item>{{
@@ -97,7 +97,7 @@ const logout = () => {
   });
 };
 
-onBeforeMount(() => userStore.getUserInfo());
+//onBeforeMount(() => userStore.getUserInfo());
 </script>
 <style lang="scss" scoped>
 .setting-item {

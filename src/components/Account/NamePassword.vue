@@ -103,7 +103,7 @@ const submit = () => {
           url: "v1/user/info",
           method: "get",
         });
-        await userStore.getUserInfo();
+       // await userStore.getUserInfo();
         userStore.setupRefreshInterval();
         const { path, queryParams } = parseRedirect();
         console.error({ path: path, query: queryParams });

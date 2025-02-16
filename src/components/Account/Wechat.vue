@@ -16,7 +16,6 @@
 
 import { useUserStore } from "@/store";
 import Qrcode from "./Qrcode.vue";
-import wechat from "@/api/v1/wechat";
 import { getQrcode, refresh } from "@/api/auth/wechat";
 let url = ref("");
 
@@ -66,6 +65,7 @@ const fetchRefresh = async () => {
       await userStore.loginByWechat({ token: response.data.token });
       const { path, queryParams } = parseRedirect();
       console.error({ path: path, query: queryParams });
+      // router.push("/home/index");
       router.push({ path: path, query: queryParams });
     }
 

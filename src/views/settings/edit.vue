@@ -357,6 +357,7 @@ const submitNickname = async () => {
     if (valid) {
       try {
         isLoading.value = true;
+
         await userStore.setUserInfo({ nickname: nicknameForm.value.nickname });
 
         ElMessage.success(t("homepage.edit.rules.nickname.success"));
