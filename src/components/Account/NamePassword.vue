@@ -20,7 +20,7 @@
 <script setup lang="ts">
 
 import request from "@/utils/request";
-import { getUserInfoData, InfoType } from "@/api/user/model";
+import { UserInfoReturnType, InfoType } from "@/api/user/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import Auth from "@/api/v1/auth";
 import "@/assets/font/font.css";
@@ -94,23 +94,10 @@ const submit = () => {
     if (valid) {
       try {
         await userStore.login(form.value);
-        /*
-        const response = await Auth.login(form.value);
-        if (!response.data.success) {
-          throw new Error("Login failed, please try again later.");
-        }
-        ElMessage.success(t("login.success"));
-        const token = response.data.token;
 
-
-        if (token) {
-          localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
-        } else {
-          throw new Error("The login response is missing the access_token");
-        }*/
         await nextTick();
-        const ret = await request<getUserInfoData>({
-          url: "v1/users/get-data",
+        const ret = await request<UserInfoReturnType>({
+          url: "v1/user/info",
           method: "get",
         });
         console.error(ret);

@@ -22,7 +22,7 @@ const userStore = useUserStore();
 const ability = useAbility(); // 提取到 setup 顶层
 
 watch(
-  () => [userStore.userInfo.roles, userStore.userInfo.data.id],
+  () => [userStore.userInfo.roles, userStore.userInfo.id],
   ([roles, id]) => {
     UpdateAbility(ability, roles, id);
     UpdateRoutes(ability);

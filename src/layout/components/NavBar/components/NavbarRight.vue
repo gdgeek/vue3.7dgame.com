@@ -22,11 +22,11 @@
     <!-- 用户头像 -->
     <el-dropdown class="setting-item" trigger="click">
       <div class="flex-center h100% p10px">
-        <img v-if="userStore.userInfo.data.avatar !== null"
-          :src="userStore.userInfo.data.avatar.url + '?imageView2/1/w/80/h/80'"
+        <img v-if="userStore.userInfo.userInfo.avatar !== null"
+          :src="userStore.userInfo.userInfo.avatar.url + '?imageView2/1/w/80/h/80'"
           class="rounded-full mr-10px w24px w24px" />
         <span :class="['gradient-text', { mobile: isMobile }]">{{
-          userStore.userInfo.data.nickname || userStore.userInfo.data.username
+          userStore.userInfo.userData.nickname || userStore.userInfo.userData.username
         }}</span>
       </div>
       <template #dropdown>

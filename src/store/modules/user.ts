@@ -1,15 +1,20 @@
 //import AuthAPI from "@/api/auth";
 import Auth from "@/api/v1/auth";
-import UserAPI from "@/api/user";
 //import { resetRouter } from "@/router";
 import { store } from "@/store";
 import { LoginData, LoginResult } from "@/api/auth/model";
-import { getUserInfoData, InfoType } from "@/api/user/model";
+import {
+  getUserInfoData,
+  InfoType,
+  UserInfoType,
+  _UserDataType,
+} from "@/api/user/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { Avatar } from "@/api/user/model";
 import Wechat from "@/api/v1/wechat";
 import SecureLS from "secure-ls";
 import Token from "@/store/modules/token";
+import UserAPI from "@/api/v1/user";
 
 const ls = new SecureLS({
   isCompression: false,
@@ -28,25 +33,23 @@ const st: Pick<Storage, "getItem" | "setItem"> = {
 export const useUserStore = defineStore(
   "user",
   () => {
-    const defaultUserInfo: getUserInfoData = {
-      username: "",
-      data: {
+    const defaultUserInfo: UserInfoType = {
+      userData: {
         username: "",
-        id: 0,
         nickname: null,
-        info: "",
-        avatar_id: null,
-        avatar: {
-          id: 0,
-          md5: "",
-          type: "jpg",
-          url: "",
-          filename: "",
-          size: 0,
-          key: "",
-        },
-        email: null,
         emailBind: false,
+        email: null,
+      },
+      userInfo: {
+        info: {
+          sex: "",
+          industry: "",
+          selectedOptions: [],
+          textarea: "",
+        },
+        gold: 0,
+        points: 0,
+        avatar: { md5: "", type: "", url: "", filename: "", size: 0, key: "" },
       },
       roles: ["user"],
       perms: [
@@ -74,7 +77,7 @@ export const useUserStore = defineStore(
         "sys:user:import",
       ],
     };
-    const userInfo = ref<getUserInfoData>(defaultUserInfo);
+    const userInfo = ref<UserInfoType>(defaultUserInfo);
 
     async function loginByWechat(data: any) {
       const response = await Wechat.login(data);
@@ -114,54 +117,24 @@ export const useUserStore = defineStore(
     const refreshInterval = ref<NodeJS.Timeout | null>(null);
     const getUserInfo = async () => {
       try {
-        const res = await UserAPI.getInfo();
-
+        const response = await UserAPI.info();
+        console.error("getUserInfo response:", response);
         // 确保数据存在
-        if (!res.data) {
+        if (!response.data || !response.data.success) {
           console.error("Verification failed, please Login again.");
           return;
         }
-        if (!res.data.roles || res.data.roles.length <= 0) {
+        const user = response.data.data;
+        if (!user.roles || user.roles.length <= 0) {
           console.error("getUserInfo: roles must be a non-null array!");
           return;
         }
 
-        // 将 info 从字符串解析为对象
-        let parsedInfo: InfoType | undefined;
-        if (res.data.data.info) {
-          try {
-            parsedInfo = JSON.parse(res.data.data.info);
-          } catch (e) {
-            console.error("Failed to parse info:", e);
-          }
-        }
-
         // 更新 userInfo
-        userInfo.value.username = res.data.username;
-        userInfo.value.roles = res.data.roles;
-        const data: any = res.data.data;
-        const avatar: Avatar | null = data.avatar
-          ? {
-              id: data.avatar.id,
-              md5: data.avatar.md5,
-              type: data.avatar.type,
-              url: data.avatar.url,
-              filename: data.avatar.filename,
-              size: data.avatar.size,
-              key: data.avatar.key,
-            }
-          : null;
-        userInfo.value.data = {
-          username: data.username,
-          id: data.id,
-          nickname: data.nickname,
-          info: data.info,
-          parsedInfo: parsedInfo, // 存储解析后的 info 对象
-          avatar_id: data.avatar_id,
-          avatar: avatar,
-          email: data.email,
-          emailBind: data.emailBind,
-        };
+        userInfo.value.roles = user.roles;
+        userInfo.value.userInfo = user.userInfo;
+        userInfo.value.userData = user.userData;
+
         return userInfo.value;
       } catch (error) {
         console.error("Error fetching user info:", error);

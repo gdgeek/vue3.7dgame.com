@@ -29,7 +29,44 @@ export type Data = {
   email: string | null;
   emailBind: boolean;
 };
-
+export type _UserDataType = {
+  nickname: string | null;
+  email: string | null;
+  username: string | null;
+  emailBind: boolean;
+};
+export type FileType = {
+  md5: string;
+  type: string;
+  url: string;
+  filename: string;
+  size: number;
+  key: string;
+};
+export type _InfoType = {
+  sex: string;
+  industry: string;
+  selectedOptions: string[];
+  textarea: string;
+};
+export type _UserInfoType = {
+  info: _InfoType;
+  gold: number;
+  points: number;
+  avatar: FileType;
+};
+export type UserInfoType = {
+  id: number;
+  userData: _UserDataType;
+  userInfo: _UserInfoType;
+  roles: string[];
+  perms?: string[];
+};
+export type UserInfoReturnType = {
+  success: boolean;
+  message: string;
+  data: UserInfoType;
+};
 // 获取用户信息数据类型
 export type getUserInfoData = {
   username: string;
