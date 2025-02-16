@@ -1,10 +1,6 @@
 <template>
   <div>
-    <mr-p-p-upload
-      dir="picture"
-      :file-type="fileType"
-      @save-resource="savePicture"
-    >
+    <mr-p-p-upload dir="picture" :file-type="fileType" @save-resource="savePicture">
       <div>{{ $t("picture.uploadFile") }}</div>
     </mr-p-p-upload>
   </div>
@@ -13,7 +9,7 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
-import { postPicture } from "@/api/resources/index";
+import { postPicture } from "@/api/v1/resources/index";
 
 const fileType = ref("image/gif, image/jpeg, image/png");
 const router = useRouter();
@@ -43,9 +39,9 @@ const savePicture = async (
 
 // 多个文件上传后跳转到最后一个文件的查看页面
 const handleAllFilesUploaded = async (lastFileId: number) => {
-    await router.push({
-      path: "/resource/picture/view",
-      query: { id: lastFileId },
-    });
+  await router.push({
+    path: "/resource/picture/view",
+    query: { id: lastFileId },
+  });
 };
 </script>

@@ -8,19 +8,10 @@
             <span v-if="videoData">{{ videoData.name }}</span>
           </template>
           <div class="box-item" style="text-align: center">
-            <video
-              id="video"
-              controls="true"
-              style="height: 300px; width: auto"
-            >
+            <video id="video" controls="true" style="height: 300px; width: auto">
               <source v-if="file !== null" id="src" :src="file" />
             </video>
-            <video
-              id="new_video"
-              style="height: 100%; width: auto"
-              hidden
-              @canplaythrough="dealWith"
-            ></video>
+            <video id="new_video" style="height: 100%; width: auto" hidden @canplaythrough="dealWith"></video>
           </div>
         </el-card>
         <br />
@@ -28,19 +19,12 @@
       <el-col :sm="8">
         <el-card class="box-card">
           <template #header>
-            <b>{{ $t("video.view.info.title") }}</b
-            >:
+            <b>{{ $t("video.view.info.title") }}</b>:
           </template>
           <div class="box-item">
             <el-table :data="tableData" stripe>
-              <el-table-column
-                prop="item"
-                :label="$t('video.view.info.label1')"
-              ></el-table-column>
-              <el-table-column
-                prop="text"
-                :label="$t('video.view.info.label2')"
-              ></el-table-column>
+              <el-table-column prop="item" :label="$t('video.view.info.label1')"></el-table-column>
+              <el-table-column prop="text" :label="$t('video.view.info.label2')"></el-table-column>
             </el-table>
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right">
@@ -64,11 +48,11 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import { getVideo, putVideo, deleteVideo } from "@/api/resources/index";
+import { getVideo, putVideo, deleteVideo } from "@/api/v1/resources/index";
 import { postFile } from "@/api/v1/files";
 import { printVector2 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
-import type { ResourceInfo } from "@/api/resources/model";
+import type { ResourceInfo } from "@/api/v1/resources/model";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 
 const route = useRoute();
@@ -236,7 +220,7 @@ const setup = async (
         md5,
         file.type.split("/").pop()!,
         file,
-        (p: any) => {},
+        (p: any) => { },
         handler,
         "screenshot/video"
       );

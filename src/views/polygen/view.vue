@@ -64,7 +64,7 @@
 import { useRoute, useRouter } from "vue-router";
 import Polygen from "@/components/Polygen.vue";
 import PolygenView from "@/components/PolygenView.vue";
-import { getPolygen, putPolygen, deletePolygen } from "@/api/resources/index";
+import { getPolygen, putPolygen, deletePolygen } from "@/api/v1/resources/index";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
 import { printVector3 } from "@/assets/js/helper";

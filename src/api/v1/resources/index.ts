@@ -47,7 +47,7 @@ export const getResources = (
   }
 
   const queryString = qs.stringify(query, true);
-  const url = `resources${queryString}`; // 拼接 URL
+  const url = `v1/resources${queryString}`; // 拼接 URL
   return request<ResourceInfo[]>({
     url,
     method: "get",
@@ -86,7 +86,7 @@ export const getAudios = (
 
 // 修改资源
 const putResources = (id: number | string, resource: ResourcePut) => {
-  const url = path.join("resources", id.toString());
+  const url = path.join("v1", "resources", id.toString());
   return request({
     url,
     method: "put",
@@ -113,7 +113,7 @@ export const putAudio = (id: number | string, audio: any) =>
 const postResources = (data: ResourceData) => {
   data.uuid = uuidv4(); // 生成 UUID
 
-  const url = path.join("resources");
+  const url = path.join("v1", "resources");
   return request({
     url,
     method: "post",
@@ -143,7 +143,7 @@ export const postAudio = (data: Omit<ResourceData, "type">) => {
 
 // 删除资源
 const deleteResources = (id: number | string) => {
-  const url = path.join("resources", id.toString());
+  const url = path.join("v1", "resources", id.toString());
   return request({
     url,
     method: "delete",
@@ -171,7 +171,7 @@ const getResource = (
     expand,
   };
   const queryString = qs.stringify(query, true);
-  const url = path.join("resources", id.toString() + queryString);
+  const url = path.join("v1", "resources", id.toString() + queryString);
   return request({
     url,
     method: "get",

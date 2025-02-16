@@ -12,28 +12,11 @@
             <section class="audio-bgc">
               <br />
               <div class="audio-box">
-                <div
-                  class="audio-record"
-                  :class="{ 'audio-record-playfast': isPlay }"
-                  @click="handlePlayAudio"
-                ></div>
-                <div
-                  class="audio-record-image"
-                  :class="{ 'audio-record-play': isPlay }"
-                  @click="handlePlayAudio"
-                ></div>
+                <div class="audio-record" :class="{ 'audio-record-playfast': isPlay }" @click="handlePlayAudio"></div>
+                <div class="audio-record-image" :class="{ 'audio-record-play': isPlay }" @click="handlePlayAudio"></div>
               </div>
-              <audio
-                id="audio"
-                controls
-                style="width: 95%; height: 84px"
-                :src="file"
-                preload="auto"
-                @play="listenPlay"
-                @pause="listenPause"
-                @ended="listenEnd"
-                @canplaythrough="dealWith"
-              ></audio>
+              <audio id="audio" controls style="width: 95%; height: 84px" :src="file" preload="auto" @play="listenPlay"
+                @pause="listenPause" @ended="listenEnd" @canplaythrough="dealWith"></audio>
             </section>
           </div>
         </el-card>
@@ -43,19 +26,12 @@
       <el-col :sm="8">
         <el-card class="box-card">
           <template #header>
-            <b>{{ $t("audio.view.info.title") }}</b
-            >:
+            <b>{{ $t("audio.view.info.title") }}</b>:
           </template>
           <div class="box-item">
             <el-table :data="tableData" stripe>
-              <el-table-column
-                prop="item"
-                :label="$t('audio.view.info.label1')"
-              ></el-table-column>
-              <el-table-column
-                prop="text"
-                :label="$t('audio.view.info.label2')"
-              ></el-table-column>
+              <el-table-column prop="item" :label="$t('audio.view.info.label1')"></el-table-column>
+              <el-table-column prop="text" :label="$t('audio.view.info.label2')"></el-table-column>
             </el-table>
 
             <aside style="margin-top: 10px; margin-bottom: 30px">
@@ -80,8 +56,8 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import { getAudio, putAudio, deleteAudio } from "@/api/resources";
-import type { ResourceInfo } from "@/api/resources/model";
+import { getAudio, putAudio, deleteAudio } from "@/api/v1/resources";
+import type { ResourceInfo } from "@/api/v1/resources/model";
 import { postFile } from "@/api/v1/files";
 import { useFileStore } from "@/store/modules/config";
 import { FileHandler } from "@/assets/js/file/server";
@@ -237,7 +213,7 @@ const setup = async (
         md5,
         file.type.split("/").pop()!,
         file,
-        () => {},
+        () => { },
         handler,
         "screenshot/audio"
       );
@@ -305,11 +281,9 @@ const named = async (id: number, name: string) => {
   width: 100%;
   height: 350px;
   background: rgb(238, 174, 202);
-  background: radial-gradient(
-    circle,
-    rgba(238, 174, 202, 1) 0%,
-    rgb(169, 196, 228) 100%
-  );
+  background: radial-gradient(circle,
+      rgba(238, 174, 202, 1) 0%,
+      rgb(169, 196, 228) 100%);
 }
 
 .audio-box {

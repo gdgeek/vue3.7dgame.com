@@ -122,7 +122,7 @@
               <el-button-group>
                 <el-button size="small" @click="doEmpty()">{{
                   $t("meta.ResourceDialog.empty")
-                }}</el-button>
+                  }}</el-button>
                 <el-button size="small" @click="dialogVisible = false">
                   {{ $t("meta.ResourceDialog.cancel") }}
                 </el-button>
@@ -138,7 +138,7 @@
 <script setup lang="ts">
 import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
-import { getResources } from "@/api/resources";
+import { getResources } from "@/api/v1/resources";
 import {
   getMetaResources,
   postMetaResource,

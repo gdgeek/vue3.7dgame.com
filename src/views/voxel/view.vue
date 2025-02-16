@@ -8,24 +8,13 @@
             <span v-if="voxelData">{{ voxelData.name }}</span>
           </template>
           <div v-loading="false" class="box-item">
-            <Voxel
-              v-if="voxelData"
-              ref="three"
-              :file="voxelData.file"
-              @loaded="loaded"
-              @progress="progress"
-            ></Voxel>
+            <Voxel v-if="voxelData" ref="three" :file="voxelData.file" @loaded="loaded" @progress="progress"></Voxel>
           </div>
           <el-progress :percentage="percentage"></el-progress>
         </el-card>
         <br />
         <el-card v-loading="false" class="box-card">
-          <el-button
-            style="width: 100%"
-            type="primary"
-            size="small"
-            @click="createVerse"
-          >
+          <el-button style="width: 100%" type="primary" size="small" @click="createVerse">
             <font-awesome-icon icon="plus"></font-awesome-icon>
             &nbsp;{{ $t("voxel.view.titleStatement") }}
           </el-button>
@@ -35,19 +24,12 @@
       <el-col :sm="8">
         <el-card class="box-card">
           <template #header>
-            <b>{{ $t("voxel.view.info.title") }}</b
-            >:
+            <b>{{ $t("voxel.view.info.title") }}</b>:
           </template>
           <div class="box-item">
             <el-table :data="tableData" stripe>
-              <el-table-column
-                prop="item"
-                :label="$t('voxel.view.info.label1')"
-              ></el-table-column>
-              <el-table-column
-                prop="text"
-                :label="$t('voxel.view.info.label2')"
-              ></el-table-column>
+              <el-table-column prop="item" :label="$t('voxel.view.info.label1')"></el-table-column>
+              <el-table-column prop="text" :label="$t('voxel.view.info.label2')"></el-table-column>
             </el-table>
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right">
@@ -72,7 +54,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
 import { useFileStore } from "@/store/modules/config";
-import { getVoxel, putVoxel, deleteVoxel } from "@/api/resources/index";
+import { getVoxel, putVoxel, deleteVoxel } from "@/api/v1/resources/index";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
 import { printVector3 } from "@/assets/js/helper";
@@ -303,7 +285,7 @@ const loaded = async (info: any) => {
         md5,
         extension,
         file,
-        () => {},
+        () => { },
         handler,
         "screenshot/voxel"
       );
