@@ -1,7 +1,7 @@
 <template>
 
   <el-card class="box-card">
-    <template #header>
+    <template #header v-if="animations.length !== 0">
 
 
       <el-select v-model="selectedAnimationIndex" @change="playAnimation" placeholder="Select Animation"
