@@ -15,6 +15,22 @@ const refresh = (data: any) => {
     data,
   });
 };
+const link = (data: any) => {
+  const url = "/v1/auth/link";
+  return request({
+    url,
+    method: "post",
+    data,
+  });
+};
+const register = (data: any) => {
+  const url = "/v1/auth/register";
+  return request({
+    url,
+    method: "post",
+    data,
+  });
+};
 
 export default {
   login,

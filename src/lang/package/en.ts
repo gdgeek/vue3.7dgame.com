@@ -91,7 +91,7 @@ export default {
     h1: "Welcome!",
     h4: "Ready to get started?",
     loginTitle: "Login Account",
-    username: "Name",
+    username: "Email",
     password: "Password",
     login: "Login",
     download: "Download Related Programs",

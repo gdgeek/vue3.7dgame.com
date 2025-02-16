@@ -15,7 +15,17 @@ const link = (data: any) => {
     data,
   });
 };
+
+const register = (data: any) => {
+  const url = "/v1/wechat/register";
+  return request({
+    url,
+    method: "post",
+    data,
+  });
+};
 export default {
   login,
   link,
+  register,
 };

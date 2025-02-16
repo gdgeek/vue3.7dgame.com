@@ -12,8 +12,9 @@
             <el-form ref="registerFormRef" class="login-form" :rules="registerRules" :model="registerForm"
               label-width="auto">
               <el-form-item :label="$t('login.username')" prop="username">
-                <el-input v-model="registerForm.username" suffix-icon="User"></el-input>
+                <el-input v-model="registerForm.username" suffix-icon="Message"></el-input>
               </el-form-item>
+
               <el-form-item :label="$t('login.password')" prop="password">
                 <el-input v-model="registerForm.password" type="password" suffix-icon="Lock"></el-input>
               </el-form-item>
@@ -21,29 +22,16 @@
               <el-form-item :label="$t('login.repassword')" prop="repassword">
                 <el-input v-model="registerForm.repassword" type="password" suffix-icon="Lock"></el-input>
               </el-form-item>
+
+
               <el-form-item class="login-button">
-                <el-button style="width: 100%" type="primary" @click="create">
+                <el-button style="width: 100%" type="primary" @click="register">
                   {{ $t("login.create") }}
                 </el-button>
               </el-form-item>
             </el-form>
           </el-tab-pane>
-          <el-tab-pane :label="$t('login.linkAccount')">
-            <el-form ref="linkFormRef" class="login-form" :rules="linkRules" :model="linkForm" label-width="auto">
-              <el-form-item :label="$t('login.username')" prop="username">
-                <el-input v-model="linkForm.username" suffix-icon="User"></el-input>
-              </el-form-item>
-              <el-form-item :label="$t('login.password')" prop="password">
-                <el-input v-model="linkForm.password" type="password" suffix-icon="Lock"></el-input>
-              </el-form-item>
 
-              <el-form-item class="login-button">
-                <el-button style="width: 100%" type="primary" @click="link">
-                  {{ $t("login.login") }}
-                </el-button>
-              </el-form-item>
-            </el-form>
-          </el-tab-pane>
         </el-tabs>
         <br />
         <el-button style="width: 100%" @click="back">
@@ -70,17 +58,16 @@ import { ThemeEnum } from "@/enums/ThemeEnum";
 import { onMounted, watch, ref } from "vue";
 import { useI18n } from "vue-i18n"; // Ensure you have this import
 import type { AppleIdToken } from "@/api/auth/model";
-import AuthAPI from "@/api/auth/index";
-import type { AppleIdTokenAndUserPassData } from "@/api/auth/model";
-import { RegisterData, LinkData } from "@/api/auth/model";
-
+import WechatApi from "@/api/v1/wechat";
+import { RegisterData, } from "@/api/auth/model";
+import Token from "@/store/modules/token";
 const { t } = useI18n(); // I18n for translations
 const token = computed(() => route.query.token as string);
 const settingsStore = useSettingsStore();
 const route = useRoute();
 const router = useRouter();
 const registerFormRef = ref<FormInstance>(); // Separate formRef for register
-const linkFormRef = ref<FormInstance>(); // Separate formRef for link
+
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
 const back = async () => {
@@ -102,11 +89,6 @@ const registerForm = ref<RegisterData>({
   repassword: "",
 });
 
-const linkForm = ref<LinkData>({
-  username: "",
-  password: "",
-});
-
 const validatePass2 = (rule: any, value: any, callback: any) => {
   if (value === "") {
     callback(new Error(t("login.rules.repassword.message1")));
@@ -117,29 +99,6 @@ const validatePass2 = (rule: any, value: any, callback: any) => {
   }
 };
 
-// Props
-const props = defineProps<{
-  idToken: AppleIdToken;
-}>();
-
-const linkRules = {
-  username: [
-    {
-      required: true,
-      message: t("login.rules.username.message1"),
-      trigger: "blur",
-    },
-    { min: 4, message: t("login.rules.username.message2"), trigger: "blur" },
-  ],
-  password: [
-    {
-      required: true,
-      message: t("login.rules.password.message1"),
-      trigger: "blur",
-    },
-    { min: 6, message: t("login.rules.password.message2"), trigger: "blur" },
-  ],
-};
 
 const registerRules = {
   username: [
@@ -149,14 +108,8 @@ const registerRules = {
       trigger: "blur",
     },
     {
-      pattern: /^[a-zA-Z0-9_@.-]+$/i,
-      message: "only letters, numbers, _, -, @, and .",
-      trigger: "blur",
-    },
-    {
-      min: 4,
-      max: 20,
-      message: t("login.rules.username.message2"),
+      type: "email",
+      message: 'need email',
       trigger: "blur",
     },
   ],
@@ -178,7 +131,13 @@ const registerRules = {
       trigger: "blur",
     },
   ],
-  repassword: [{ validator: validatePass2, trigger: "blur" }],
+  repassword: [
+    {
+      required: true,
+      message: t("login.rules.password.message1"),
+      trigger: "blur",
+    },
+    { validator: validatePass2, trigger: "blur" }],
 };
 
 function parseRedirect(): {
@@ -199,37 +158,22 @@ function parseRedirect(): {
   return { path, queryParams };
 }
 
-const emit = defineEmits(["enter"]);
-const login = async (data: any) => {
-  return new Promise<void>((resolve, reject) => {
-    emit("enter", data, resolve, reject);
-  });
-};
 
-const link = async () => {
-  linkFormRef.value?.validate(async (valid: boolean) => {
-    if (valid) {
-      alert(token.value);
-    } else {
-      ElMessage({ type: "error", message: t("login.error") });
-    }
-  });
-};
-
-const create = () => {
+const register = async () => {
   registerFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
-      try {
-        const data: AppleIdTokenAndUserPassData = {
-          username: registerForm.value.username,
-          password: registerForm.value.password,
-          token: props.idToken.token,
-          apple_id: props.idToken.apple_id,
-        };
-        const response = await AuthAPI.appleIdCreate(data);
-        await login(response.data.user);
-      } catch (e: any) {
-        ElMessage.error(e.message);
+      const response = await WechatApi.register({
+        username: registerForm.value.username,
+        password: registerForm.value.password, token: token.value
+      });
+      const data = response.data;
+      if (data.success) {
+        ElMessage({ type: "success", message: t("login.success") });
+        Token.setToken(data.token);
+        const { path, queryParams } = parseRedirect();
+        router.push({ path: path, query: queryParams });
+      } else {
+        ElMessage({ type: "error", message: t("login.error") });
       }
     } else {
       ElMessage({ type: "error", message: t("login.error") });
@@ -409,16 +353,6 @@ body {
     text-align: right;
   }
 
-  .login-link {
-    padding: 0 10px;
-    margin-bottom: 20px;
-  }
-
-  .login-link a {
-    font-family: "KaiTi", sans-serif;
-    font-size: 16px;
-    color: rgb(28 160 212);
-  }
 
   .error-message {
     margin-top: 10px;

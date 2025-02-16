@@ -91,7 +91,7 @@ export default {
     h1: "ようこそ！",
     h4: "準備はできましたか？",
     loginTitle: "アカウントにログイン",
-    username: "ユーザー名",
+    username: "email",
     password: "パスワード",
     login: "プラットフォームにログイン",
     download: "関連プログラムのダウンロード",

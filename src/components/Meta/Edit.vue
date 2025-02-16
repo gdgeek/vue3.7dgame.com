@@ -12,7 +12,8 @@
       @selected="selected"
       ref="resourceDialog"
     ></resource-dialog>
-    <el-row :gutter="20" style="margin: 28px 18px 0">
+    <br />
+    <el-row :gutter="20" style="margin: 0px 18px 0">
       <el-col :sm="16">
         <el-card v-if="item" class="box-card">
           <template #header>

@@ -2,7 +2,7 @@
   <div v-loading="loading">
     <el-form ref="formRef" class="login-form" :rules="rules" :model="form" label-width="auto">
       <el-form-item :label="$t('login.username')" prop="username">
-        <el-input v-model="form.username" suffix-icon="User"></el-input>
+        <el-input v-model="form.username" suffix-icon="Message"></el-input>
       </el-form-item>
       <el-form-item :label="$t('login.password')" prop="password">
         <el-input v-model="form.password" type="password" suffix-icon="Lock"></el-input>
@@ -16,13 +16,12 @@
     </el-form>
   </div>
 </template>
-
 <script setup lang="ts">
 
 import request from "@/utils/request";
-import { UserInfoReturnType, InfoType } from "@/api/user/model";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
-import Auth from "@/api/v1/auth";
+import { UserInfoReturnType,  } from "@/api/user/model";
+
+
 import "@/assets/font/font.css";
 import { FormInstance } from "element-plus";
 
@@ -65,9 +64,8 @@ const rules = computed(() => {
         trigger: "blur",
       },
       {
-        min: 4,
-        max: 20,
-        message: t("login.rules.username.message2"),
+        type: "email",
+        message: 'need email',
         trigger: "blur",
       },
     ],
@@ -77,12 +75,17 @@ const rules = computed(() => {
         message: t("login.rules.password.message1"),
         trigger: "blur",
       },
-      {
-        min: 6,
-        max: 20,
-        message: t("login.rules.password.message2"),
-        trigger: "blur",
-      },
+    {
+      min: 6,
+      max: 32,
+      message: t("login.rules.password.message2"),
+      trigger: "blur",
+    },
+    {
+      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/i,
+      message: t("login.rules.password.message3"),
+      trigger: "blur",
+    },
     ],
   };
 });
@@ -100,9 +103,8 @@ const submit = () => {
           url: "v1/user/info",
           method: "get",
         });
-        console.error(ret);
         await userStore.getUserInfo();
-        userStore.setupRefreshInterval(form.value);
+        userStore.setupRefreshInterval();
         const { path, queryParams } = parseRedirect();
         console.error({ path: path, query: queryParams });
         router.push({ path: path, query: queryParams });
