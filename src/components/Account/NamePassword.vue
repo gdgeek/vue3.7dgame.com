@@ -55,17 +55,14 @@ const parseRedirect = (): {
   return { path, queryParams };
 };
 
-const rules = computed(() => {
+import type { FormItemRule } from "element-plus";
+
+const rules = computed<Record<string, FormItemRule[]>>(() => {
   return {
     username: [
       {
         required: true,
         message: t("login.rules.username.message1"),
-        trigger: "blur",
-      },
-      {
-        type: "email",
-        message: 'need email',
         trigger: "blur",
       },
     ],
@@ -82,7 +79,7 @@ const rules = computed(() => {
       trigger: "blur",
     },
     {
-      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/i,
+      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/i,
       message: t("login.rules.password.message3"),
       trigger: "blur",
     },

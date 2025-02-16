@@ -281,5 +281,5 @@ const named = async (id: number, name: string) => {
 </script>
 
 <style lang="scss" scoped>
-@import "@/styles/view-style.scss";
+@use "@/styles/view-style.scss" as *;
 </style>

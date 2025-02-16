@@ -325,7 +325,8 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-@import "@/styles/view-style.scss";
+
+@use "@/styles/view-style.scss" as *;
 
 .content {
   height: 100%;

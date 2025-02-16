@@ -206,7 +206,6 @@ import "@/assets/font/font.css";
 import { useRouter, LocationQuery, useRoute } from "vue-router";
 import { AppleIdToken } from "@/api/auth/model";
 import LoginForm from "@/components/LoginForm.vue";
-import RegisterForm from "@/components/RegisterForm.vue";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useInfomationStore } from "@/store/modules/information";

@@ -2,7 +2,7 @@ import request from "@/utils/request";
 import qs from "querystringify";
 import path from "path-browserify";
 import type { metaInfo } from "./meta";
-import { ResourceInfo } from "../resources/model";
+import { ResourceInfo } from "@/api/v1/resources/model";
 import { cybersType } from "./cyber";
 
 type Author = {

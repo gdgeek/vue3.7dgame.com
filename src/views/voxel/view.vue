@@ -300,5 +300,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import "@/styles/view-style.scss";
+
+@use "@/styles/view-style.scss" as *;
 </style>

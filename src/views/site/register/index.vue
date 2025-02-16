@@ -53,7 +53,7 @@ import "@/assets/font/font.css";
 import { LocationQuery, useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { useSettingsStore } from "@/store/modules/settings";
-import { FormInstance } from "element-plus";
+import { FormInstance ,FormItemRule} from "element-plus";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { onMounted, watch, ref } from "vue";
 import { useI18n } from "vue-i18n"; // Ensure you have this import
@@ -98,9 +98,8 @@ const validatePass2 = (rule: any, value: any, callback: any) => {
     callback();
   }
 };
-
-
-const registerRules = {
+type Arrayable<T> = T | T[];
+const registerRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
   username: [
     {
       required: true,

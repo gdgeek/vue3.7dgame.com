@@ -44,7 +44,15 @@ export const useUserStore = defineStore(
         },
         gold: 0,
         points: 0,
-        avatar: { md5: "", type: "", url: "", filename: "", size: 0, key: "" },
+        avatar: {
+          id: 0,
+          md5: "",
+          type: "",
+          url: "",
+          filename: "",
+          size: 0,
+          key: "",
+        },
       },
       roles: ["user"],
       perms: [
@@ -215,6 +223,7 @@ export const useUserStore = defineStore(
           gold: 0,
           points: 0,
           avatar: {
+            id: 0,
             md5: "",
             type: "",
             url: "",

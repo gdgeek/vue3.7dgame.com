@@ -123,10 +123,10 @@ const slideAnimations = ref(
 );
 
 const setVideoRef = (
-  el: HTMLVideoElement | null,
+  el: Element | ComponentPublicInstance | null,
   index: number
 ) => {
-  videoRefs.value[index] = el;
+  videoRefs.value[index] = el as HTMLVideoElement | null;
 };
 
 const handleSlideChange = (index: number) => {

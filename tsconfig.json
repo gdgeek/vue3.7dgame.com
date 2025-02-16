@@ -35,9 +35,7 @@
     "src/assets/js/fontok.ts",
     "src/assets/test/blockly/storage.js",
     "src/utils/utilityFunctions.ts",
-    "src/utils/silent_request.ts_",
-    "src/components/LoginForm.vue_",
-    "src/components/RegisterForm.vue_"
+    "src/utils/silent_request.ts_"
   ],
   "exclude": ["node_modules", "dist", "**/*.js"]
 }
