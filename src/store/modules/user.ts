@@ -120,7 +120,7 @@ export const useUserStore = defineStore(
           return;
         }
         const user = response.data.data;
-        if (!user.roles || user.roles.length <= 0) {
+        if (!user.roles) {
           console.error("getUserInfo: roles must be a non-null array!");
           return;
         }

@@ -153,6 +153,7 @@ const routes: RouteRecordRaw[] = [
         },
         component: Empty,
         children: [
+          /*
           {
             path: "/settings/account",
             name: "SettingsAccount",
@@ -162,7 +163,7 @@ const routes: RouteRecordRaw[] = [
               private: true,
             },
             component: () => import("@/views/settings/account.vue"),
-          },
+          },*/
           {
             meta: {
               title: "settings.personalData",

@@ -36,11 +36,11 @@
               $t("navbar.personalCenter")
             }}</el-dropdown-item>
           </RouterLink>
-          <RouterLink to="/settings/account">
+         <!-- <RouterLink to="/settings/account">
             <el-dropdown-item>{{
               $t("navbar.AccountSetting")
             }}</el-dropdown-item>
-          </RouterLink>
+          </RouterLink> -->
           <RouterLink to="/">
             <el-dropdown-item>{{ $t("navbar.helpSupport") }}</el-dropdown-item>
           </RouterLink>

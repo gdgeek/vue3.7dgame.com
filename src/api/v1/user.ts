@@ -25,7 +25,8 @@ export const getUserCreation = () => {
 };
 
 export const putUserData = (data: any) => {
-  const url = path.join("v1", "user", "set-data");
+  console.error(data);
+  const url = path.join("v1", "user", "update");
   return request<UserInfoReturnType>({
     url,
     method: "put",

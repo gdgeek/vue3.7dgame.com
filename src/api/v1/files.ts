@@ -1,10 +1,10 @@
 import request from "@/utils/request";
 import path from "path-browserify";
-import { Avatar } from "../user/model";
+import { FileType } from "../user/model";
 
 export const postFile = (data: any) => {
   const url = path.join("v1", "files");
-  return request<Avatar>({
+  return request<FileType>({
     url,
     method: "post",
     data,
@@ -12,4 +12,4 @@ export const postFile = (data: any) => {
 };
 export default {
   post: postFile,
-}
+};

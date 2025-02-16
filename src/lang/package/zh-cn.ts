@@ -158,7 +158,7 @@ export default {
       personalDataStatement: "用户昵称、头像、基本信息修改",
       return: "返回个人中心",
       userNickname: "用户昵称",
-      userNicknameStatement: "让MrPP社区的其它用户更容易认识您。",
+      userNicknameStatement: "让社区的其它用户更容易认识您。",
       nickname: "昵称",
       confirm: "确认",
       avatar: "头像",

@@ -1,6 +1,5 @@
 import { GetIP, ReplaceIP, ReplaceURL } from "./utils/helper";
 function useCloud(): boolean {
-  // alert(import.meta.env.VITE_APP_BASE_MODE);
   return import.meta.env.VITE_APP_BASE_MODE !== "local";
 }
 

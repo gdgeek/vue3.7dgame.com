@@ -8,6 +8,7 @@ export type _UserDataType = {
   emailBind: boolean;
 };
 export type FileType = {
+  id: number;
   md5: string;
   type: string;
   url: string;
@@ -22,10 +23,10 @@ export type _InfoType = {
   textarea: string;
 };
 export type _UserInfoType = {
-  info: _InfoType;
+  info: _InfoType | null;
   gold: number;
   points: number;
-  avatar: FileType;
+  avatar: FileType | null;
 };
 export type UserInfoType = {
   id: number;
