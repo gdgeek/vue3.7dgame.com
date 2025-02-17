@@ -1,10 +1,6 @@
 <template>
   <div>
-    <mr-p-p-upload
-      dir="video"
-      :file-type="fileType"
-      @save-resource="saveVideo"
-    >
+    <mr-p-p-upload dir="video" :file-type="fileType" @save-resource="saveVideo">
       <div>{{ $t("video.uploadFile") }}</div>
     </mr-p-p-upload>
   </div>
@@ -13,7 +9,7 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
-import { postVideo } from "@/api/resources/index";
+import { postVideo } from "@/api/v1/resources/index";
 
 // 定义允许的文件类型
 const fileType = ref("video/mp4, video/ogg");
@@ -24,7 +20,7 @@ let completedCount = 0;
 // 视频保存
 const saveVideo = async (
   name: string,
-  file_id: number, 
+  file_id: number,
   totalFiles: number,
   callback: () => void
 ) => {
@@ -45,9 +41,9 @@ const saveVideo = async (
 
 // 多个文件上传后跳转到最后一个文件的查看页面
 const handleAllFilesUploaded = async (lastFileId: number) => {
-    await router.push({
-      path: "/resource/video/view",
-      query: { id: lastFileId },
-    });
+  await router.push({
+    path: "/resource/video/view",
+    query: { id: lastFileId },
+  });
 };
 </script>

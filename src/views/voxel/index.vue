@@ -3,18 +3,13 @@
     <br />
     <el-container>
       <el-header>
-        <MrPPHeader
-          :sorted="sorted"
-          :searched="searched"
-          @search="search"
-          @sort="sort"
-        >
+        <MrPPHeader :sorted="sorted" :searched="searched" @search="search" @sort="sort">
           <el-button-group :inline="true">
             <router-link to="/resource/voxel/upload">
               <el-button size="small" type="primary" icon="UploadFilled">
                 <span class="hidden-sm-and-down">{{
                   $t("voxel.uploadVoxel")
-                }}</span>
+                  }}</span>
               </el-button>
             </router-link>
           </el-button-group>
@@ -22,26 +17,13 @@
       </el-header>
       <el-main>
         <el-card>
-          <Waterfall
-            :list="items"
-            :width="320"
-            :gutter="10"
-            :backgroundColor="'rgba(255, 255, 255, .05)'"
-          >
+          <Waterfall :list="items" :width="320" :gutter="10" :backgroundColor="'rgba(255, 255, 255, .05)'">
             <template #default="{ item }">
-              <MrPPCard
-                :item="item"
-                @named="namedWindow"
-                @deleted="deletedWindow"
-              >
+              <MrPPCard :item="item" @named="namedWindow" @deleted="deletedWindow">
                 <template #enter>
                   <router-link :to="`/resource/voxel/view?id=${item.id}`">
                     <el-button-group :inline="true">
-                      <el-button
-                        v-if="item.info === null || item.image === null"
-                        type="warning"
-                        size="small"
-                      >
+                      <el-button v-if="item.info === null || item.image === null" type="warning" size="small">
                         {{ $t("voxel.initializeVoxelData") }}
                       </el-button>
                       <el-button v-else type="primary" size="small">
@@ -57,15 +39,9 @@
       </el-main>
       <el-footer>
         <el-card class="box-card">
-          <el-pagination
-            :current-page="pagination.current"
-            :page-count="pagination.count"
-            :page-size="pagination.size"
-            :total="pagination.total"
-            layout="prev, pager, next, jumper"
-            background
-            @current-change="handleCurrentChange"
-          ></el-pagination>
+          <el-pagination :current-page="pagination.current" :page-count="pagination.count" :page-size="pagination.size"
+            :total="pagination.total" layout="prev, pager, next, jumper" background
+            @current-change="handleCurrentChange"></el-pagination>
         </el-card>
       </el-footer>
     </el-container>
@@ -73,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { getVoxels, putVoxel, deleteVoxel } from "@/api/resources/index";
+import { getVoxels, putVoxel, deleteVoxel } from "@/api/v1/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
@@ -208,6 +184,7 @@ onMounted(() => {
 .hidden-sm-and-down {
   display: none;
 }
+
 @media (min-width: 768px) {
   .hidden-sm-and-down {
     display: inline;

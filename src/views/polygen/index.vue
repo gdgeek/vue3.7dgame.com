@@ -3,12 +3,7 @@
     <br />
     <el-container>
       <el-header>
-        <mr-p-p-header
-          :sorted="sorted"
-          :searched="searched"
-          @search="search"
-          @sort="sort"
-        >
+        <mr-p-p-header :sorted="sorted" :searched="searched" @search="search" @sort="sort">
           <el-button-group :inline="true">
             <router-link to="/resource/polygen/upload">
               <el-button size="small" type="primary" icon="uploadFilled">
@@ -22,35 +17,18 @@
       </el-header>
       <el-main>
         <el-card>
-          <Waterfall
-            :list="items"
-            :width="320"
-            :gutter="10"
-            :backgroundColor="'rgba(255, 255, 255, .05)'"
-          >
+          <Waterfall :list="items" :width="320" :gutter="10" :backgroundColor="'rgba(255, 255, 255, .05)'">
             <template #default="{ item }">
-              <mr-p-p-card
-                :item="item"
-                @named="namedWindow"
-                @deleted="deletedWindow"
-              >
+              <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
                 <template #info>
-                  <Polygen3 :file="item.file" @progress="progress"></Polygen3>
-                  <el-progress
-                    v-if="percentage === 100"
-                    :percentage="100"
-                    status="success"
-                  ></el-progress>
-                  <el-progress v-else :percentage="percentage"></el-progress>
+                  <!-- <polygen-index :file="item.file" @progress="progress" />
+                  <el-progress v-if="percentage === 100" :percentage="100" status="success"></el-progress>
+                  <el-progress v-else :percentage="percentage"></el-progress> -->
                 </template>
                 <template #enter>
                   <router-link :to="`/resource/polygen/view?id=${item.id}`">
                     <el-button-group :inline="true">
-                      <el-button
-                        v-if="item.info === null || item.image === null"
-                        type="warning"
-                        size="small"
-                      >
+                      <el-button v-if="item.info === null || item.image === null" type="warning" size="small">
                         {{ $t("polygen.initializePolygenData") }}
                       </el-button>
                       <el-button v-else type="primary" size="small">
@@ -66,15 +44,9 @@
       </el-main>
       <el-footer>
         <el-card class="box-card">
-          <el-pagination
-            :current-page="pagination.current"
-            :page-count="pagination.count"
-            :page-size="pagination.size"
-            :total="pagination.total"
-            layout="prev, pager, next, jumper"
-            background
-            @current-change="handleCurrentChange"
-          ></el-pagination>
+          <el-pagination :current-page="pagination.current" :page-count="pagination.count" :page-size="pagination.size"
+            :total="pagination.total" layout="prev, pager, next, jumper" background
+            @current-change="handleCurrentChange"></el-pagination>
         </el-card>
       </el-footer>
     </el-container>
@@ -83,10 +55,10 @@
 </template>
 
 <script setup lang="ts">
-import { getPolygens, putPolygen, deletePolygen } from "@/api/resources/index";
+import { getPolygens, putPolygen, deletePolygen } from "@/api/v1/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import Polygen3 from "@/components/Polygen3.vue";
+//import PolygenIndex from "@/components/PolygenIndex.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 

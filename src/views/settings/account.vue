@@ -9,45 +9,27 @@
       </template>
       <el-row :gutter="24">
         <el-col :xs="16" :sm="16" :md="12" :lg="10" :xl="10">
-          <el-form
-            ref="emailFormRef"
-            :model="emailForm"
-            label-width="auto"
-            style="min-width: 300px"
-          >
-            <el-form-item
-              v-if="
-                typeof userData.email === 'undefined' ||
-                userData.email === null ||
-                !userData.emailBind
-              "
-              :label="$t('homepage.account.label1')"
-              prop="email"
-              :rules="[
-                {
-                  required: true,
-                  message: $t('homepage.account.rules1.message1'),
-                  trigger: 'blur',
-                },
-                {
-                  type: 'email',
-                  message: $t('homepage.account.rules1.message2'),
-                  trigger: ['blur', 'change'],
-                },
-              ]"
-            >
-              <el-input
-                v-model="emailForm.email"
-                autocomplete="off"
-                type="email"
-                :placeholder="$t('homepage.account.placeholder')"
-              >
+          <el-form ref="emailFormRef" :model="emailForm" label-width="auto" style="min-width: 300px">
+            <el-form-item v-if="
+              typeof userData.email === 'undefined' ||
+              userData.email === null ||
+              !userData.emailBind
+            " :label="$t('homepage.account.label1')" prop="email" :rules="[
+              {
+                required: true,
+                message: $t('homepage.account.rules1.message1'),
+                trigger: 'blur',
+              },
+              {
+                type: 'email',
+                message: $t('homepage.account.rules1.message2'),
+                trigger: ['blur', 'change'],
+              },
+            ]">
+              <el-input v-model="emailForm.email" autocomplete="off" type="email"
+                :placeholder="$t('homepage.account.placeholder')">
                 <template #append>
-                  <el-button
-                    v-if="!userData.emailBind"
-                    @click="postEmail"
-                    :class="{ 'hover-blue': true }"
-                  >
+                  <el-button v-if="!userData.emailBind" @click="postEmail" :class="{ 'hover-blue': true }">
                     <div v-if="null === userData.email">
                       {{ $t("homepage.account.bind") }}
                     </div>
@@ -57,12 +39,7 @@
               </el-input>
             </el-form-item>
 
-            <el-form-item
-              v-else
-              v-model="emailForm.email"
-              :label="$t('homepage.account.label1')"
-              prop="email"
-            >
+            <el-form-item v-else v-model="emailForm.email" :label="$t('homepage.account.label1')" prop="email">
               <el-tag>{{ userData.email }}</el-tag>
             </el-form-item>
           </el-form>
@@ -77,11 +54,7 @@
                 <el-button type="warning" @click="dialogPasswordVisible = true">
                   {{ $t("homepage.account.change") }}
                 </el-button>
-                <el-button
-                  disabled
-                  type="warning"
-                  @click="dialogPasswordVisible = true"
-                >
+                <el-button disabled type="warning" @click="dialogPasswordVisible = true">
                   {{ $t("homepage.account.recover") }}
                 </el-button>
               </el-button-group>
@@ -90,63 +63,26 @@
         </el-col>
       </el-row>
       <!-- 修改密码弹窗 -->
-      <el-dialog
-        v-model="dialogPasswordVisible"
-        :close-on-click-modal="false"
-        style="min-width: 560px"
-        @close="resetForm"
-      >
+      <el-dialog v-model="dialogPasswordVisible" :close-on-click-modal="false" style="min-width: 560px"
+        @close="resetForm">
         <template #header> {{ $t("homepage.account.change") }} </template>
-        <el-form
-          ref="passwordFormRef"
-          :model="passwordForm"
-          :rules="passwordRules"
-          label-width="auto"
-        >
+        <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="auto">
           <el-row :gutter="24">
             <el-col :xs="20" :sm="20" :md="14" :lg="14" :xl="14" :offset="4">
-              <el-form-item
-                :label="$t('homepage.account.label3')"
-                prop="oldPassword"
-                style="margin-bottom: 26px"
-              >
-                <el-input
-                  v-model="passwordForm.oldPassword"
-                  type="password"
-                  autocomplete="off"
-                ></el-input>
+              <el-form-item :label="$t('homepage.account.label3')" prop="oldPassword" style="margin-bottom: 26px">
+                <el-input v-model="passwordForm.oldPassword" type="password" autocomplete="off"></el-input>
               </el-form-item>
 
-              <el-form-item
-                :label="$t('homepage.account.label4')"
-                prop="password"
-                style="margin-bottom: 26px"
-              >
-                <el-input
-                  v-model="passwordForm.password"
-                  type="password"
-                  autocomplete="off"
-                ></el-input>
+              <el-form-item :label="$t('homepage.account.label4')" prop="password" style="margin-bottom: 26px">
+                <el-input v-model="passwordForm.password" type="password" autocomplete="off"></el-input>
               </el-form-item>
 
-              <el-form-item
-                :label="$t('homepage.account.label5')"
-                prop="checkPassword"
-                style="margin-bottom: 26px"
-              >
-                <el-input
-                  v-model="passwordForm.checkPassword"
-                  type="password"
-                  autocomplete="off"
-                ></el-input>
+              <el-form-item :label="$t('homepage.account.label5')" prop="checkPassword" style="margin-bottom: 26px">
+                <el-input v-model="passwordForm.checkPassword" type="password" autocomplete="off"></el-input>
               </el-form-item>
 
               <el-form-item>
-                <el-button
-                  style="width: 100%"
-                  type="primary"
-                  @click="resetPassword"
-                >
+                <el-button style="width: 100%" type="primary" @click="resetPassword">
                   {{ $t("homepage.account.confirm") }}
                 </el-button>
               </el-form-item>
@@ -172,7 +108,7 @@ const { t } = useI18n();
 
 const userStore = useUserStore();
 
-const userData = computed(() => userStore.userInfo.data);
+const userData = computed(() => userStore.userInfo.userData);
 
 const emailForm = ref({
   email: null as string | null,

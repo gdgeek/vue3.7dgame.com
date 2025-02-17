@@ -3,14 +3,8 @@
     <el-row :gutter="10">
       <el-col :md="14" :span="24">
         <div :class="['home-avatar-container', { mobile: isMobile }]">
-          <el-avatar
-            class="home-avatar-child"
-            icon="avatar"
-            :src="avatarUrl"
-            :size="100"
-            style="float: left"
-            @click="gotoEdit()"
-          ></el-avatar>
+          <el-avatar class="home-avatar-child" icon="avatar" :src="avatarUrl" :size="100" style="float: left"
+            @click="gotoEdit()"></el-avatar>
           <div>
             <div class="home-avatar-info">
               <h3 class="home-avatar-name">{{ greeting }} {{ name }}</h3>
@@ -45,10 +39,10 @@ const screenStore = useScreenStore();
 const isMobile = computed(() => screenStore.isMobile);
 
 const name = computed(() => {
-  if (userStore.userInfo.data.nickname) {
-    return userStore.userInfo.data.nickname;
+  if (userStore.userInfo.userData.nickname) {
+    return userStore.userInfo.userData.nickname;
   } else {
-    return userStore.userInfo.data.username;
+    return userStore.userInfo.userData.username;
   }
 });
 
@@ -68,22 +62,22 @@ const greeting = computed(() => {
 // 头像
 const avatarUrl = computed(() => {
   if (
-    userStore.userInfo.data.avatar == null ||
-    typeof userStore.userInfo.data.avatar.url === "undefined" ||
+    userStore.userInfo.userInfo.avatar == null ||
+    typeof userStore.userInfo.userInfo.avatar.url === "undefined" ||
     null
   ) {
     return "";
   } else {
-    return userStore.userInfo.data.avatar.url;
+    return userStore.userInfo.userInfo.avatar.url;
   }
 });
 
 // 个人简介
 const textarea = computed(() => {
-  if (!userStore.userInfo.data.parsedInfo?.textarea) {
+  if (!userStore.userInfo.userInfo.info?.textarea) {
     return "";
   } else {
-    return userStore.userInfo.data.parsedInfo?.textarea;
+    return userStore.userInfo.userInfo.info?.textarea;
   }
 });
 
@@ -150,7 +144,8 @@ const gotoEdit = () => {
   left: 0%;
   width: 100px;
   height: 100px;
-  margin-top: -50px; /* Half this element's height */
+  margin-top: -50px;
+  /* Half this element's height */
   // margin-left: -50px; /* Half this element's height */
 }
 

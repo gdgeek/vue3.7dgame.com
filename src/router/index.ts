@@ -40,20 +40,24 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
-    path: "/login",
-    component: () => import("@/views/login/index.vue"),
+    path: "/site",
+    component: () => import("@/views/site/index.vue"),
     meta: { hidden: true, private: true },
+    children: [
+      {
+        path: "/site/login",
+        component: () => import("@/views/site/login/index.vue"),
+      },
+      {
+        path: "/site/logout",
+        component: () => import("@/views/site/logout/index.vue"),
+      },
+      {
+        path: "/site/register",
+        component: () => import("@/views/site/register/index.vue"),
+      },
+    ],
   },
-
-  {
-    path: "/logout",
-    component: () => import("@/views/login/index.vue"),
-    meta: {
-      hidden: true,
-      private: true,
-    },
-  },
-
   {
     path: "/privacy-policy",
     component: () => import("@/views/privacy-policy/index.vue"),
@@ -135,6 +139,7 @@ const routes: RouteRecordRaw[] = [
         },
         component: Empty,
         children: [
+          /*
           {
             path: "/settings/account",
             name: "SettingsAccount",
@@ -144,7 +149,7 @@ const routes: RouteRecordRaw[] = [
               private: true,
             },
             component: () => import("@/views/settings/account.vue"),
-          },
+          },*/
           {
             meta: {
               title: "settings.personalData",
@@ -724,7 +729,7 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
-
+      /*
       {
         path: "/site/logout",
         name: "LogOut",
@@ -740,6 +745,7 @@ const routes: RouteRecordRaw[] = [
         },
         children: [],
       },
+      */
 
       {
         path: "/401",

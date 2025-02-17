@@ -1,114 +1,92 @@
 <template>
-  <div :class="['box1', { 'dark-theme': isDark }]">
-    <div :class="['box2', { 'dark-theme': isDark }]">
-      <h1>{{ $t("login.h1") }}</h1>
-      <h4>{{ $t("login.h4") }}</h4>
-      <br />
-      <el-tabs style="width: 100%" type="border-card" :stretch="true">
-        <el-tab-pane :label="$t('login.createAccount')">
-          <h2 class="login-title">{{ $t("login.createAccount") }}</h2>
-          <el-form
-            ref="registerFormRef"
-            class="login-form"
-            :rules="registerRules"
-            :model="registerForm"
-            label-width="auto"
-          >
-            <el-form-item :label="$t('login.username')" prop="username">
-              <el-input
-                v-model="registerForm.username"
-                suffix-icon="User"
-              ></el-input>
-            </el-form-item>
-            <el-form-item :label="$t('login.password')" prop="password">
-              <el-input
-                v-model="registerForm.password"
-                type="password"
-                suffix-icon="Lock"
-              ></el-input>
-            </el-form-item>
 
-            <el-form-item :label="$t('login.repassword')" prop="repassword">
-              <el-input
-                v-model="registerForm.repassword"
-                type="password"
-                suffix-icon="Lock"
-              ></el-input>
-            </el-form-item>
+  <div class="content">
 
-            <el-form-item class="login-button">
-              <el-button style="width: 100%" type="primary" @click="create">
-                {{ $t("login.create") }}
-              </el-button>
-            </el-form-item>
-          </el-form>
-        </el-tab-pane>
-        <el-tab-pane :label="$t('login.linkAccount')">
-          <h2 class="login-title">{{ $t("login.linkAccount") }}</h2>
-          <el-form
-            ref="linkFormRef"
-            class="login-form"
-            :rules="linkRules"
-            :model="linkForm"
-            label-width="auto"
-          >
-            <el-form-item :label="$t('login.username')" prop="username">
-              <el-input
-                v-model="linkForm.username"
-                suffix-icon="User"
-              ></el-input>
-            </el-form-item>
-            <el-form-item :label="$t('login.password')" prop="password">
-              <el-input
-                v-model="linkForm.password"
-                type="password"
-                suffix-icon="Lock"
-              ></el-input>
-            </el-form-item>
+    <div :class="['box1', { 'dark-theme': isDark }]">
+      <div :class="['box2', { 'dark-theme': isDark }]">
+        <h1>{{ $t("login.h1") }}</h1>
+        <h4>{{ $t("login.h4") }}</h4>
+        <br />
+        <el-tabs style="width: 100%" type="border-card" :stretch="true">
+          <el-tab-pane :label="$t('login.createAccount')">
+            <el-form ref="registerFormRef" class="login-form" :rules="registerRules" :model="registerForm"
+              label-width="auto">
+              <el-form-item :label="$t('login.username')" prop="username">
+                <el-input v-model="registerForm.username" suffix-icon="Message"></el-input>
+              </el-form-item>
 
-            <el-form-item class="login-button">
-              <el-button style="width: 100%" type="primary" @click="link">
-                {{ $t("login.login") }}
-              </el-button>
-            </el-form-item>
-          </el-form>
-        </el-tab-pane>
-      </el-tabs>
+              <el-form-item :label="$t('login.password')" prop="password">
+                <el-input v-model="registerForm.password" type="password" suffix-icon="Lock"></el-input>
+              </el-form-item>
+
+              <el-form-item :label="$t('login.repassword')" prop="repassword">
+                <el-input v-model="registerForm.repassword" type="password" suffix-icon="Lock"></el-input>
+              </el-form-item>
+
+
+              <el-form-item class="login-button">
+                <el-button style="width: 100%" type="primary" @click="register">
+                  {{ $t("login.create") }}
+                </el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+        </el-tabs>
+        <br />
+        <el-button style="width: 100%" @click="back">
+          <el-icon>
+            <Back />
+          </el-icon>
+          &nbsp;&nbsp;
+
+          返回
+        </el-button>
+      </div>
     </div>
   </div>
+
 </template>
 
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { LocationQuery, useRoute } from "vue-router";
+import { LocationQuery, useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { useSettingsStore } from "@/store/modules/settings";
-import { FormInstance } from "element-plus";
+import { FormInstance ,FormItemRule} from "element-plus";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { onMounted, watch, ref } from "vue";
 import { useI18n } from "vue-i18n"; // Ensure you have this import
 import type { AppleIdToken } from "@/api/auth/model";
-import AuthAPI from "@/api/auth/index";
-import type { AppleIdTokenAndUserPassData } from "@/api/auth/model";
-import { RegisterData, LinkData } from "@/api/auth/model";
-
+import WechatApi from "@/api/v1/wechat";
+import { RegisterData, } from "@/api/auth/model";
+import Token from "@/store/modules/token";
 const { t } = useI18n(); // I18n for translations
-
+const token = computed(() => route.query.token as string);
 const settingsStore = useSettingsStore();
 const route = useRoute();
+const router = useRouter();
 const registerFormRef = ref<FormInstance>(); // Separate formRef for register
-const linkFormRef = ref<FormInstance>(); // Separate formRef for link
+
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
+const back = async () => {
+  try {
+
+    await ElMessageBox.confirm('确认放弃注册？', '警告', {
+      confirmButtonText: '确认',
+      cancelButtonText: '继续注册',
+      type: 'warning',
+    });
+    router.push("/site/login");
+  } catch (e) {
+    console.error(e);
+  }
+};
 const registerForm = ref<RegisterData>({
   username: "",
   password: "",
   repassword: "",
-});
-
-const linkForm = ref<LinkData>({
-  username: "",
-  password: "",
 });
 
 const validatePass2 = (rule: any, value: any, callback: any) => {
@@ -120,32 +98,8 @@ const validatePass2 = (rule: any, value: any, callback: any) => {
     callback();
   }
 };
-
-// Props
-const props = defineProps<{
-  idToken: AppleIdToken;
-}>();
-
-const linkRules = {
-  username: [
-    {
-      required: true,
-      message: t("login.rules.username.message1"),
-      trigger: "blur",
-    },
-    { min: 4, message: t("login.rules.username.message2"), trigger: "blur" },
-  ],
-  password: [
-    {
-      required: true,
-      message: t("login.rules.password.message1"),
-      trigger: "blur",
-    },
-    { min: 6, message: t("login.rules.password.message2"), trigger: "blur" },
-  ],
-};
-
-const registerRules = {
+type Arrayable<T> = T | T[];
+const registerRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
   username: [
     {
       required: true,
@@ -153,14 +107,8 @@ const registerRules = {
       trigger: "blur",
     },
     {
-      pattern: /^[a-zA-Z0-9_@.-]+$/i,
-      message: "only letters, numbers, _, -, @, and .",
-      trigger: "blur",
-    },
-    {
-      min: 4,
-      max: 20,
-      message: t("login.rules.username.message2"),
+      type: "email",
+      message: 'need email',
       trigger: "blur",
     },
   ],
@@ -182,7 +130,13 @@ const registerRules = {
       trigger: "blur",
     },
   ],
-  repassword: [{ validator: validatePass2, trigger: "blur" }],
+  repassword: [
+    {
+      required: true,
+      message: t("login.rules.password.message1"),
+      trigger: "blur",
+    },
+    { validator: validatePass2, trigger: "blur" }],
 };
 
 function parseRedirect(): {
@@ -203,48 +157,22 @@ function parseRedirect(): {
   return { path, queryParams };
 }
 
-const emit = defineEmits(["enter"]);
-const login = async (data: any) => {
-  return new Promise<void>((resolve, reject) => {
-    emit("enter", data, resolve, reject);
-  });
-};
 
-const link = () => {
-  linkFormRef.value?.validate(async (valid: boolean) => {
-    if (valid) {
-      try {
-        const data: AppleIdTokenAndUserPassData = {
-          username: linkForm.value.username,
-          password: linkForm.value.password,
-          token: props.idToken.token,
-          apple_id: props.idToken.apple_id,
-        };
-        const response = await AuthAPI.appleIdLink(data);
-        await login(response.data.user);
-      } catch (e: any) {
-        ElMessage.error(e.message);
-      }
-    } else {
-      ElMessage({ type: "error", message: t("login.error") });
-    }
-  });
-};
-
-const create = () => {
+const register = async () => {
   registerFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
-      try {
-        const data: AppleIdTokenAndUserPassData = {
-          username: registerForm.value.username,
-          password: registerForm.value.password,
-          token: props.idToken.token,
-          apple_id: props.idToken.apple_id,
-        };
-        const response = await AuthAPI.appleIdCreate(data);
-        await login(response.data.user);
-      } catch (e: any) {
-        ElMessage.error(e.message);
+      const response = await WechatApi.register({
+        username: registerForm.value.username,
+        password: registerForm.value.password, token: token.value
+      });
+      const data = response.data;
+      if (data.success) {
+        ElMessage({ type: "success", message: t("login.success") });
+        Token.setToken(data.token);
+        const { path, queryParams } = parseRedirect();
+        router.push({ path: path, query: queryParams });
+      } else {
+        ElMessage({ type: "error", message: t("login.error") });
       }
     } else {
       ElMessage({ type: "error", message: t("login.error") });
@@ -314,6 +242,7 @@ body {
     font-family: "KaiTi", sans-serif;
     font-size: 14px;
     font-weight: 400;
+
     &:hover {
       color: #3876c2;
     }
@@ -415,24 +344,14 @@ body {
   .login-form {
     max-width: 100%;
     height: 100%;
-    padding: 10px 0px 10px 0px;
-    margin-top: 36px;
+    padding: 0px 0px 0px 0px;
+    margin-top: 10px;
   }
 
   .login-button {
     text-align: right;
   }
 
-  .login-link {
-    padding: 0 10px;
-    margin-bottom: 20px;
-  }
-
-  .login-link a {
-    font-family: "KaiTi", sans-serif;
-    font-size: 16px;
-    color: rgb(28 160 212);
-  }
 
   .error-message {
     margin-top: 10px;

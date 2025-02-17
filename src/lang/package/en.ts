@@ -86,12 +86,12 @@ export default {
   // 登录页面国际化
   login: {
     appleLoginFail: "Apple login failed",
-    title: "MrPP.com",
+    title: "BuJiaBan.com",
     register: "Platform Register/Login",
     h1: "Welcome!",
     h4: "Ready to get started?",
     loginTitle: "Login Account",
-    username: "Name",
+    username: "Email",
     password: "Password",
     login: "Login",
     download: "Download Related Programs",

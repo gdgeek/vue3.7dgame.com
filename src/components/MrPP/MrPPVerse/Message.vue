@@ -123,7 +123,7 @@ const canDelete = (message: MessageType) => {
       return;
     }
   });
-  return message?.author_id === userInfo.value.data.id;
+  return message?.author_id === userInfo.value.id;
 };
 
 const canUpdate = (message: MessageType) => {
@@ -134,7 +134,7 @@ const canUpdate = (message: MessageType) => {
       managed |= 1;
     }
   });
-  return message?.author_id === userInfo.value.data.id;
+  return message?.author_id === userInfo.value.id;
 };
 
 const refresh = async () => {

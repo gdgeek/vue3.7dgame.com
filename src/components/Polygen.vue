@@ -47,6 +47,11 @@ const refresh = () => {
     return;
   }
   const gltfLoader = new GLTFLoader();
+
+
+  const dracoLoader = new DRACOLoader();
+  dracoLoader.setDecoderPath("/js/three.js/libs/draco/");
+  gltfLoader.setDRACOLoader(dracoLoader);
   const url = convertToHttps(props.file.url);
   gltfLoader.load(
     url,

@@ -6,41 +6,25 @@
           <h3>{{ $t("ai.generation.title") }}{{ data.name }}</h3>
         </div>
       </template>
-      <template #footer
-        ><div class="progress-item">
+      <template #footer>
+        <div class="progress-item">
           <el-progress :percentage="progress.percentage"></el-progress>
         </div>
       </template>
 
-      <el-form
-        v-loading="loading"
-        :element-loading-text="progress.title"
-        label-width="auto"
-      >
-        <el-form-item
-          v-if="imageUrl"
-          :label="$t('ai.generation.form.image')"
-          prop="image"
-        >
+      <el-form v-loading="loading" :element-loading-text="progress.title" label-width="auto">
+        <el-form-item v-if="imageUrl" :label="$t('ai.generation.form.image')" prop="image">
           <el-image style="max-width: 300px" :src="imageUrl">
             <template #placeholder>
               <div class="image-slot">Loading<span class="dot">...</span></div>
             </template>
           </el-image>
         </el-form-item>
-        <el-form-item
-          v-if="props.data.query.prompt"
-          :label="$t('ai.generation.form.prompt')"
-          prop="prompt"
-        >
+        <el-form-item v-if="props.data.query.prompt" :label="$t('ai.generation.form.prompt')" prop="prompt">
           {{ props.data.query.prompt }}
         </el-form-item>
 
-        <el-form-item
-          v-if="props.data.query.quality"
-          :label="$t('ai.generation.form.quality.title')"
-          prop="quality"
-        >
+        <el-form-item v-if="props.data.query.quality" :label="$t('ai.generation.form.quality.title')" prop="quality">
           <el-radio v-model="localData.query.quality" disabled value="high">
             {{ $t("ai.generation.form.quality.value1") }}
           </el-radio>
@@ -50,19 +34,14 @@
           <el-radio v-model="localData.query.quality" disabled value="low">
             {{ $t("ai.generation.form.quality.value3") }}
           </el-radio>
-          <el-radio
-            v-model="localData.query.quality"
-            disabled
-            value="extra-low"
-          >
-            {{ $t("ai.generation.form.quality.value4") }}</el-radio
-          >
+          <el-radio v-model="localData.query.quality" disabled value="extra-low">
+            {{ $t("ai.generation.form.quality.value4") }}</el-radio>
         </el-form-item>
 
         <div>
           <el-button style="width: 100%" type="primary" @click="process()">{{
             $t("ai.generation.form.submit")
-          }}</el-button>
+            }}</el-button>
         </div>
       </el-form>
     </el-card>
@@ -73,7 +52,7 @@
 import AiRodin from "@/api/v1/ai-rodin";
 import { useI18n } from "vue-i18n";
 import { sleep } from "@/assets/js/helper";
-import { getPicture } from "@/api/resources/index";
+import { getPicture } from "@/api/v1/resources/index";
 import { useRouter } from "vue-router";
 
 const props = defineProps<{ data: any | undefined }>();
@@ -180,6 +159,7 @@ onMounted(async () => {
 .progress-item {
   margin-bottom: 10px;
 }
+
 .el-col {
   border-radius: 4px;
 }

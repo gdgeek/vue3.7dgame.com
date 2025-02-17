@@ -1,6 +1,6 @@
 <template>
-  <div v-loading="loading" class="document-index">
-    <el-row :gutter="20" style="margin: 28px 18px 0">
+  <div v-loading="loading" class="document-index"><br>
+    <el-row :gutter="20" style="margin: 0px 18px 0">
       <el-col :sm="16">
         <el-card class="box-card">
           <template #header>
@@ -8,62 +8,25 @@
             <span v-if="polygenData">{{ polygenData.name }}</span>
           </template>
           <div v-loading="false" class="box-item">
-            <polygen2
-              v-if="polygenData"
-              ref="three"
-              :file="polygenData.file"
-              @loaded="loaded"
-              @progress="progress"
-            >
-            </polygen2>
+            <polygen-view v-if="polygenData" ref="three" :file="polygenData.file" @loaded="loaded"
+              @progress="progress" />
           </div>
-          <el-progress
-            v-if="percentage === 100"
-            :percentage="100"
-            status="success"
-          ></el-progress>
-          <el-progress v-else :percentage="percentage"></el-progress>
+          <el-progress style="width: 100%;" :stroke-width="18" v-if="percentage !== 100" :text-inside="true"
+            :percentage="percentage">
+          </el-progress>
+
         </el-card>
         <br />
 
         <el-card v-loading="expire" class="box-card">
-          <el-button
-            style="width: 100%"
-            type="primary"
-            size="small"
-            @click="createVerse"
-          >
+          <el-button style="width: 100%" type="primary" size="small" @click="createVerse">
             <font-awesome-icon icon="plus"></font-awesome-icon>
             &nbsp;{{ $t("polygen.view.titleStatement") }}
           </el-button>
         </el-card>
         <br />
 
-        <!-- <el-card>
-          <div class="check-box">
-            <input type="checkbox" @change="change()" checked />
-            {{ autoPlay ? "Play" : "Stop" }}
-          </div>
-          <div class="content">
-            <vue3dLoader
-              filePath="/public/crabsquid.glb"
-              :cameraPosition="{ x: 0, y: 0, z: 0 }"
-              :enableDraco="true"
-              :height="350"
-              :lights="lights"
-              :auto-play="autoPlay"
-              :enableDamping="true"
-              :dampingFactor="0.05"
-              outputEncoding="sRGB"
-              backgroundColor="#F2F2F2"
-              @process="onProcess"
-            ></vue3dLoader>
-            <div class="process">
-              current model: {{ currentModelIndex }}, loadding:
-              {{ process + "%" }}
-            </div>
-          </div>
-        </el-card> -->
+
       </el-col>
 
       <el-col :sm="8">
@@ -73,14 +36,8 @@
           </template>
           <div class="box-item">
             <el-table :data="tableData" stripe>
-              <el-table-column
-                prop="item"
-                :label="$t('polygen.view.info.label1')"
-              ></el-table-column>
-              <el-table-column
-                prop="text"
-                :label="$t('polygen.view.info.label2')"
-              ></el-table-column>
+              <el-table-column prop="item" :label="$t('polygen.view.info.label1')"></el-table-column>
+              <el-table-column prop="text" :label="$t('polygen.view.info.label2')"></el-table-column>
             </el-table>
 
             <aside style="margin-top: 10px; margin-bottom: 30px">
@@ -106,8 +63,8 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
 import Polygen from "@/components/Polygen.vue";
-import Polygen2 from "@/components/Polygen2.vue";
-import { getPolygen, putPolygen, deletePolygen } from "@/api/resources/index";
+import PolygenView from "@/components/PolygenView.vue";
+import { getPolygen, putPolygen, deletePolygen } from "@/api/v1/resources/index";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
 import { printVector3 } from "@/assets/js/helper";
@@ -344,7 +301,7 @@ const loaded = async (info: any) => {
           md5,
           extension,
           file,
-          () => {},
+          () => { },
           handler,
           "screenshot/polygen"
         );
@@ -368,7 +325,8 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-@import "@/styles/view-style.scss";
+
+@use "@/styles/view-style.scss" as *;
 
 .content {
   height: 100%;

@@ -3,9 +3,7 @@
     <template v-if="!isMobile">
       <!--全屏 -->
       <div class="setting-item" @click="toggle">
-        <svg-icon
-          :icon-class="isFullscreen ? 'fullscreen-exit' : 'fullscreen'"
-        ></svg-icon>
+        <svg-icon :icon-class="isFullscreen ? 'fullscreen-exit' : 'fullscreen'"></svg-icon>
       </div>
 
       <!-- 布局大小 -->
@@ -24,13 +22,11 @@
     <!-- 用户头像 -->
     <el-dropdown class="setting-item" trigger="click">
       <div class="flex-center h100% p10px">
-        <img
-          v-if="userStore.userInfo.data.avatar !== null"
-          :src="userStore.userInfo.data.avatar.url + '?imageView2/1/w/80/h/80'"
-          class="rounded-full mr-10px w24px w24px"
-        />
+        <img v-if="userStore.userInfo.userInfo.avatar !== null"
+          :src="userStore.userInfo.userInfo.avatar.url + '?imageView2/1/w/80/h/80'"
+          class="rounded-full mr-10px w24px w24px" />
         <span :class="['gradient-text', { mobile: isMobile }]">{{
-          userStore.userInfo.data.nickname || userStore.userInfo.data.username
+          userStore.userInfo.userData.nickname || userStore.userInfo.userData.username
         }}</span>
       </div>
       <template #dropdown>
@@ -40,11 +36,11 @@
               $t("navbar.personalCenter")
             }}</el-dropdown-item>
           </RouterLink>
-          <RouterLink to="/settings/account">
+          <!-- <RouterLink to="/settings/account">
             <el-dropdown-item>{{
               $t("navbar.AccountSetting")
             }}</el-dropdown-item>
-          </RouterLink>
+          </RouterLink> -->
           <RouterLink to="/">
             <el-dropdown-item>{{ $t("navbar.helpSupport") }}</el-dropdown-item>
           </RouterLink>
@@ -96,19 +92,12 @@ const logout = () => {
     type: "warning",
     lockScroll: false,
   }).then(() => {
-    router.push("/logout");
-    // userStore
-    //   .logout()
-    //   .then(() => {
-    //     tagsViewStore.delAllViews();
-    //   })
-    //   .then(() => {
-    //     router.push(`/login?redirect=${route.fullPath}`);
-    //   });
+    router.push("/site/logout");
+
   });
 };
 
-onBeforeMount(() => userStore.getUserInfo());
+//onBeforeMount(() => userStore.getUserInfo());
 </script>
 <style lang="scss" scoped>
 .setting-item {
@@ -127,6 +116,7 @@ onBeforeMount(() => userStore.getUserInfo());
 
 .layout-top,
 .layout-mix {
+
   .setting-item,
   .el-icon {
     color: var(--el-color-white);
@@ -141,20 +131,25 @@ onBeforeMount(() => userStore.getUserInfo());
   font-family: "KaiTi", "Arial", sans-serif;
   font-size: 16px;
   font-weight: bold;
-  background: linear-gradient(
-    45deg,
-    #ff6a00,
-    #7ece6c,
-    #9376df,
-    #040404
-  ); /* 渐变颜色 */
-  background-clip: text; /* 标准属性：背景裁剪到文本 */
-  -webkit-background-clip: text; /* 使背景渐变应用于文字 */
-  -webkit-text-fill-color: transparent; /* 使文字颜色透明以显示背景渐变 */
+  background: linear-gradient(45deg,
+      #ff6a00,
+      #7ece6c,
+      #9376df,
+      #040404);
+  /* 渐变颜色 */
+  background-clip: text;
+  /* 标准属性：背景裁剪到文本 */
+  -webkit-background-clip: text;
+  /* 使背景渐变应用于文字 */
+  -webkit-text-fill-color: transparent;
+  /* 使文字颜色透明以显示背景渐变 */
   text-align: center;
-  white-space: nowrap; /* 不换行 */
-  overflow: hidden; /* 隐藏超出部分 */
-  text-overflow: ellipsis; /* 超出部分显示为省略号 */
+  white-space: nowrap;
+  /* 不换行 */
+  overflow: hidden;
+  /* 隐藏超出部分 */
+  text-overflow: ellipsis;
+  /* 超出部分显示为省略号 */
 
   &.mobile {
     font-size: 12px;

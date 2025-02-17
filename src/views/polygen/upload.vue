@@ -1,10 +1,6 @@
 <template>
   <div>
-    <mr-p-p-upload
-      dir="polygen"
-      :file-type="fileType"
-      @save-resource="savePolygen"
-    >
+    <mr-p-p-upload dir="polygen" :file-type="fileType" @save-resource="savePolygen">
       <div>{{ $t("polygen.uploadFile") }}</div>
     </mr-p-p-upload>
   </div>
@@ -12,7 +8,7 @@
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
-import { postPolygen } from "@/api/resources/index";
+import { postPolygen } from "@/api/v1/resources/index";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 
 const fileType = ref(".glb");
@@ -42,9 +38,9 @@ const savePolygen = async (
 
 // 多个文件上传后跳转到最后一个文件的查看页面
 const handleAllFilesUploaded = async (lastFileId: number) => {
-    await router.push({
-      path: "/resource/polygen/view",
-      query: { id: lastFileId },
-    });
+  await router.push({
+    path: "/resource/polygen/view",
+    query: { id: lastFileId },
+  });
 };
 </script>

@@ -10,11 +10,7 @@
           </template>
 
           <!-- 图片容器 -->
-          <div
-            class="image-container"
-            @mouseenter="onMouseEnter"
-            @mouseleave="onMouseLeave"
-          >
+          <div class="image-container" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
             <!-- 如果鼠标悬停且使用info插槽，则显示info插槽，否则显示图片 -->
             <template v-if="hovering && $slots.info">
               <div class="info-container">
@@ -22,18 +18,9 @@
               </div>
             </template>
             <template v-else>
-              <img
-                v-if="!item.image"
-                src="@/assets/image/none.png"
-                style="width: 100%; height: auto; object-fit: contain"
-              />
-              <LazyImg
-                v-else
-                style="width: 100%; height: auto"
-                fit="contain"
-                :url="item.image.url"
-                lazy
-              ></LazyImg>
+              <img v-if="!item.image" src="@/assets/image/none.png"
+                style="width: 100%; height: auto; object-fit: contain" />
+              <LazyImg v-else style="width: 100%; height: auto" fit="contain" :url="item.image.url" lazy></LazyImg>
             </template>
 
             <!-- 在图片内底部的 音频 插槽，动态弹出 -->
@@ -50,18 +37,8 @@
         <slot name="enter">入口</slot>
 
         <el-button-group style="float: right" :inline="true">
-          <el-button
-            type="success"
-            size="small"
-            icon="Edit"
-            @click="named"
-          ></el-button>
-          <el-button
-            type="danger"
-            size="small"
-            icon="Delete"
-            @click="deleted"
-          ></el-button>
+          <el-button type="success" size="small" icon="Edit" @click="named"></el-button>
+          <el-button type="danger" size="small" icon="Delete" @click="deleted"></el-button>
           &nbsp;
         </el-button-group>
       </div>
@@ -125,6 +102,7 @@ const onMouseLeave = () => {
   font-size: 15px;
   padding: 0px 0px 0px 0px;
 }
+
 .card-title {
   white-space: nowrap;
   display: block;
@@ -153,6 +131,7 @@ const onMouseLeave = () => {
 }
 
 .image-container:hover .audio-container {
-  bottom: 0; /* 鼠标悬停时从底部弹出 */
+  bottom: 0;
+  /* 鼠标悬停时从底部弹出 */
 }
 </style>

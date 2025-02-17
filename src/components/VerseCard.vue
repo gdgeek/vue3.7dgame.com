@@ -9,17 +9,9 @@
             </span>
           </template>
           <router-link :to="'/verse/view?id=' + item.id">
-            <img
-              v-if="!item.image"
-              src="@/assets/image/none.png"
-              style="width: 100%; height: 270px; object-fit: contain"
-            />
-            <LazyImg
-              v-else
-              :url="item.image.url"
-              style="width: 100%; height: 270px"
-              fit="contain"
-            ></LazyImg>
+            <img v-if="!item.image" src="@/assets/image/none.png"
+              style="width: 100%; height: 270px; object-fit: contain" />
+            <LazyImg v-else :url="item.image.url" style="width: 100%; height: 270px" fit="contain"></LazyImg>
           </router-link>
         </el-card>
         <InfoContent v-if="item" :verse="item"></InfoContent>
@@ -27,33 +19,16 @@
     </template>
     <div class="clearfix">
       <el-button-group>
-        <el-button
-          type="primary"
-          @click="goToDetail(item.id.toString())"
-          size="small"
-          >{{ $t("verse.page.list.enter") }}</el-button
-        >
-        <el-button
-          type="primary"
-          v-if="item.verseRelease"
-          @click="restrain(item)"
-          size="small"
-        >
-          <font-awesome-icon
-            class="icon"
-            icon="box-open"
-            color="#FFA500"
-          ></font-awesome-icon>
+        <el-button type="primary" @click="goToDetail(item.id.toString())" size="small">{{ $t("verse.page.list.enter")
+          }}</el-button>
+        <el-button type="primary" v-if="item.verseRelease" @click="restrain(item)" size="small">
+          <font-awesome-icon class="icon" icon="box-open" color="#FFA500"></font-awesome-icon>
         </el-button>
         <el-button type="primary" v-else @click="release(item)" size="small">
           <font-awesome-icon class="icon" icon="box"></font-awesome-icon>
         </el-button>
       </el-button-group>
-      <VerseToolbar
-        :verse="item"
-        @deleted="emit('deleted')"
-        @changed="emit('changed')"
-      ></VerseToolbar>
+      <VerseToolbar :verse="item" @deleted="emit('deleted')" @changed="emit('changed')"></VerseToolbar>
     </div>
   </el-card>
 </template>

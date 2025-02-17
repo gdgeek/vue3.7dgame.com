@@ -1,12 +1,14 @@
-import AuthAPI from "@/api/auth";
-import UserAPI from "@/api/user";
+//import AuthAPI from "@/api/auth";
+import AuthAPI from "@/api/v1/auth";
 //import { resetRouter } from "@/router";
 import { store } from "@/store";
 import { LoginData, LoginResult } from "@/api/auth/model";
-import { getUserInfoData, InfoType } from "@/api/user/model";
+import { UserInfoType, _UserDataType } from "@/api/user/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
-import { Avatar } from "@/api/user/model";
+import Wechat from "@/api/v1/wechat";
 import SecureLS from "secure-ls";
+import Token from "@/store/modules/token";
+import UserAPI from "@/api/v1/user";
 
 const ls = new SecureLS({
   isCompression: false,
@@ -25,25 +27,32 @@ const st: Pick<Storage, "getItem" | "setItem"> = {
 export const useUserStore = defineStore(
   "user",
   () => {
-    const defaultUserInfo: getUserInfoData = {
-      username: "",
-      data: {
+    const defaultUserInfo: UserInfoType = {
+      id: 0,
+      userData: {
         username: "",
-        id: 0,
         nickname: null,
-        info: "",
-        avatar_id: null,
+        emailBind: false,
+        email: null,
+      },
+      userInfo: {
+        info: {
+          sex: "",
+          industry: "",
+          selectedOptions: [],
+          textarea: "",
+        },
+        gold: 0,
+        points: 0,
         avatar: {
           id: 0,
           md5: "",
-          type: "jpg",
+          type: "",
           url: "",
           filename: "",
           size: 0,
           key: "",
         },
-        email: null,
-        emailBind: false,
       },
       roles: ["user"],
       perms: [
@@ -71,106 +80,120 @@ export const useUserStore = defineStore(
         "sys:user:import",
       ],
     };
-    const userInfo = ref<getUserInfoData>(defaultUserInfo);
+    const userInfo = ref<UserInfoType>(defaultUserInfo);
 
+    async function loginByWechat(data: any) {
+      const response = await Wechat.login(data);
+      if (!response.data.success) {
+        throw new Error("Login failed, please try again later.");
+      }
+      const token = response.data.token;
+
+      if (token) {
+        Token.setToken(token);
+      } else {
+        throw new Error("The login response is missing the access_token");
+      }
+      return true;
+    }
     /**
      * 登录
      *
      * @param {LoginData}
      * @returns
      */
-    function login(loginData: LoginData) {
-      return new Promise<void>((resolve, reject) => {
-        AuthAPI.login(loginData)
-          .then((data) => {
-            const access_token = data.data.auth;
-            localStorage.setItem(TOKEN_KEY, access_token);
-            resolve();
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      });
+    async function login(loginData: LoginData) {
+      const response = await AuthAPI.login(loginData);
+      if (!response.data.success) {
+        throw new Error("Login failed, please try again later.");
+      }
+      const token = response.data.token;
+
+      if (token) {
+        Token.setToken(token);
+      } else {
+        throw new Error("The login response is missing the access_token");
+      }
+      return true;
     }
 
     const refreshInterval = ref<NodeJS.Timeout | null>(null);
-
-    const getUserInfo = async () => {
+    const setUserInfo = async (data: any) => {
       try {
-        const res = await UserAPI.getInfo();
-
+        const response = await UserAPI.putUserData(data);
+        console.error("getUserInfo response:", response);
         // 确保数据存在
-        if (!res.data) {
+        if (!response.data || !response.data.success) {
           console.error("Verification failed, please Login again.");
           return;
         }
-        if (!res.data.roles || res.data.roles.length <= 0) {
+        const user = response.data.data;
+        if (!user.roles) {
           console.error("getUserInfo: roles must be a non-null array!");
           return;
         }
 
-        // 将 info 从字符串解析为对象
-        let parsedInfo: InfoType | undefined;
-        if (res.data.data.info) {
-          try {
-            parsedInfo = JSON.parse(res.data.data.info);
-          } catch (e) {
-            console.error("Failed to parse info:", e);
-          }
+        // 更新 userInfo
+        userInfo.value.id = user.id;
+        userInfo.value.roles = user.roles;
+        userInfo.value.userInfo = user.userInfo;
+        userInfo.value.userData = user.userData;
+
+        return userInfo.value;
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    };
+    const getUserInfo = async () => {
+      try {
+        const response = await UserAPI.info();
+        console.error("getUserInfo response:", response);
+        // 确保数据存在
+        if (!response.data || !response.data.success) {
+          console.error("Verification failed, please Login again.");
+          return;
+        }
+        const user = response.data.data;
+        if (!user.roles) {
+          console.error("getUserInfo: roles must be a non-null array!");
+          return;
         }
 
         // 更新 userInfo
-        userInfo.value.username = res.data.username;
-        userInfo.value.roles = res.data.roles;
-        const data: any = res.data.data;
-        const avatar: Avatar | null = data.avatar
-          ? {
-              id: data.avatar.id,
-              md5: data.avatar.md5,
-              type: data.avatar.type,
-              url: data.avatar.url,
-              filename: data.avatar.filename,
-              size: data.avatar.size,
-              key: data.avatar.key,
-            }
-          : null;
-        userInfo.value.data = {
-          username: data.username,
-          id: data.id,
-          nickname: data.nickname,
-          info: data.info,
-          parsedInfo: parsedInfo, // 存储解析后的 info 对象
-          avatar_id: data.avatar_id,
-          avatar: avatar,
-          email: data.email,
-          emailBind: data.emailBind,
-        };
+        userInfo.value.id = user.id;
+        userInfo.value.roles = user.roles;
+        userInfo.value.userInfo = user.userInfo;
+        userInfo.value.userData = user.userData;
+
         return userInfo.value;
       } catch (error) {
         console.error("Error fetching user info:", error);
       }
     };
 
-    const setupRefreshInterval = (form: LoginData) => {
+    const setupRefreshInterval = () => {
       if (refreshInterval.value) {
         clearInterval(refreshInterval.value); // 清除现有的定时器
       }
-
       refreshInterval.value = setInterval(async () => {
         try {
-          const token = localStorage.getItem(TOKEN_KEY);
+          const token = Token.getToken();
           if (token) {
-            const newTokenResponse = await AuthAPI.login(form);
-            const newToken = newTokenResponse.data.auth;
-            localStorage.setItem(TOKEN_KEY, newToken); // 更新 token
-            console.log("Token refreshed:", newToken);
+            console.error(token);
+            const newTokenResponse = await AuthAPI.refresh({
+              refreshToken: token.refreshToken,
+            });
+            const newToken = newTokenResponse.data.token;
+            Token.setToken(newToken);
+            // localStorage.setItem(TOKEN_KEY, newToken); // 更新 token
+            // console.log("Token refreshed:", newToken);
             const res = await getUserInfo(); // 刷新用户数据
             console.log("User data refreshed:", res);
           }
         } catch (e) {
           console.error("Failed to refresh user data:", e);
         }
-      }, 3600000); // 每小时刷新一次
+      }, 3600000);
     };
 
     const form = ref<LoginData>({
@@ -183,24 +206,31 @@ export const useUserStore = defineStore(
       // location.reload(); // 清空路由
       // 用户数据清空
       userInfo.value = {
-        username: "",
-        data: {
+        id: 0,
+        userData: {
           username: "",
-          id: 0,
-          nickname: "",
-          info: "",
-          avatar_id: "",
+          nickname: null,
+          emailBind: false,
+          email: null,
+        },
+        userInfo: {
+          info: {
+            sex: "",
+            industry: "",
+            selectedOptions: [],
+            textarea: "",
+          },
+          gold: 0,
+          points: 0,
           avatar: {
             id: 0,
             md5: "",
-            type: "jpg",
+            type: "",
             url: "",
             filename: "",
             size: 0,
             key: "",
           },
-          email: "",
-          emailBind: false,
         },
         roles: [],
         perms: [],
@@ -225,7 +255,9 @@ export const useUserStore = defineStore(
     return {
       userInfo,
       login,
+      loginByWechat,
       getUserInfo,
+      setUserInfo,
       logout,
       resetToken,
       form,

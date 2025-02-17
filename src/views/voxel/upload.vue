@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
-import { postVoxel } from "@/api/resources/index";
+import { postVoxel } from "@/api/v1/resources/index";
 
 const fileType = ref(".vox");
 const router = useRouter();

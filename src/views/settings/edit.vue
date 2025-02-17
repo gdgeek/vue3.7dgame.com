@@ -1,6 +1,7 @@
 <template>
   <div>
-    <el-card class="box-card">
+    <br />
+    <el-card v-loading="isLoading" class="box-card">
       <el-row>
         <el-col>
           <div class="box-title">
@@ -22,41 +23,17 @@
       <div class="box-title box-margin-bottom">
         <h3 class="font-color">{{ $t("homepage.edit.userNickname") }}</h3>
         <small>{{ $t("homepage.edit.userNicknameStatement") }}</small>
+
       </div>
       <!-- 用户头像和昵称开始 -->
       <el-row :gutter="24">
-        <el-col
-          :xs="23"
-          :sm="16"
-          :md="14"
-          :lg="12"
-          :xl="10"
-          class="section-margin-left"
-        >
-          <el-form
-            ref="nickNameFormRef"
-            :model="nicknameForm"
-            :rules="nicknameRules"
-            label-width="auto"
-          >
-            <el-form-item
-              :label="$t('homepage.edit.nickname')"
-              prop="nickname"
-              style="margin-bottom: 26px"
-            >
-              <el-input
-                v-model="nicknameForm.nickname"
-                style="width: 100%"
-                :placeholder="$t('homepage.edit.nickname')"
-                autocomplete="off"
-                @keyup.enter="submitNickname"
-              >
+        <el-col :xs="23" :sm="16" :md="14" :lg="12" :xl="10" class="section-margin-left">
+          <el-form ref="nickNameFormRef" :model="nicknameForm" :rules="nicknameRules" label-width="auto">
+            <el-form-item :label="$t('homepage.edit.nickname')" prop="nickname" style="margin-bottom: 26px">
+              <el-input v-model="nicknameForm.nickname" style="width: 100%" :placeholder="$t('homepage.edit.nickname')"
+                autocomplete="off" @keyup.enter="submitNickname">
                 <template #suffix>
-                  <el-button
-                    style="margin-right: -10px"
-                    :disabled="isDisable"
-                    @click="submitNickname"
-                  >
+                  <el-button style="margin-right: -10px" :disabled="isDisable" @click="submitNickname">
                     {{ $t("homepage.edit.confirm") }}
                   </el-button>
                 </template>
@@ -64,15 +41,8 @@
             </el-form-item>
             <!-- 头像部分 -->
             <el-form-item :label="$t('homepage.edit.avatar')">
-              <el-upload
-                class="avatar-uploader"
-                action=""
-                :auto-upload="false"
-                :show-file-list="false"
-                :on-change="handleChangeUpload"
-                accept="image/jpeg,image/gif,image/png,image/bmp"
-                style="float: left"
-              >
+              <el-upload class="avatar-uploader" action="" :auto-upload="false" :show-file-list="false"
+                :on-change="handleChangeUpload" accept="image/jpeg,image/gif,image/png,image/bmp" style="float: left">
                 <img v-if="imageUrl" :src="imageUrl" class="avatar" />
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
               </el-upload>
@@ -96,20 +66,8 @@
       </div>
       <!-- 用户基本信息 start -->
       <el-row :gutter="24">
-        <el-col
-          :xs="23"
-          :sm="16"
-          :md="14"
-          :lg="12"
-          :xl="10"
-          class="section-margin-left box-margin-bottom"
-        >
-          <el-form
-            ref="ruleFormRef"
-            :model="infoForm"
-            :rules="infoRules"
-            label-width="auto"
-          >
+        <el-col :xs="23" :sm="16" :md="14" :lg="12" :xl="10" class="section-margin-left box-margin-bottom">
+          <el-form ref="ruleFormRef" :model="infoForm" :rules="infoRules" label-width="auto">
             <el-form-item :label="$t('homepage.edit.gender')">
               <el-radio-group v-model="infoForm.sex">
                 <el-radio-button label="man" value="man">
@@ -127,17 +85,10 @@
               </el-radio-group>
             </el-form-item>
             <el-form-item :label="$t('homepage.edit.industry')" prop="industry">
-              <el-select
-                v-model="infoForm.industry"
-                style="width: 100%"
-                :placeholder="$t('homepage.edit.industryStatement')"
-              >
-                <el-option
-                  v-for="item in industryOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
+              <el-select v-model="infoForm.industry" style="width: 100%"
+                :placeholder="$t('homepage.edit.industryStatement')">
+                <el-option v-for="item in industryOptions" :key="item.value" :label="item.label"
+                  :value="item.value"></el-option>
               </el-select>
             </el-form-item>
             <!-- <el-form-item
@@ -152,25 +103,13 @@
                 @change="handleChange"
               ></el-cascader>
             </el-form-item> -->
-            <el-form-item
-              :label="$t('homepage.edit.individualResume')"
-              prop="textarea"
-            >
-              <el-input
-                v-model="infoForm.textarea"
-                style="width: 100%"
-                type="textarea"
+            <el-form-item :label="$t('homepage.edit.individualResume')" prop="textarea">
+              <el-input v-model="infoForm.textarea" style="width: 100%" type="textarea"
                 :autosize="{ minRows: 4, maxRows: 10 }"
-                :placeholder="$t('homepage.edit.individualResumeStatement')"
-              ></el-input>
+                :placeholder="$t('homepage.edit.individualResumeStatement')"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button
-                type="primary"
-                style="width: 150px"
-                :disabled="isDisable"
-                @click="saveInfo"
-              >
+              <el-button type="primary" style="width: 150px" :disabled="isDisable" @click="saveInfo">
                 {{ $t("homepage.edit.save") }}
               </el-button>
             </el-form-item>
@@ -185,59 +124,27 @@
         </template>
         <div class="cropper-content">
           <div class="cropper" style="text-align: center">
-            <VueCropper
-              ref="cropperRef"
-              :img="option.img"
-              :output-type="option.outputType"
-              :info="true"
-              :full="option.full"
-              :can-move-box="option.canMoveBox"
-              :original="option.original"
-              :auto-crop="option.autoCrop"
-              :fixed="option.fixed"
-              :fixed-number="option.fixedNumber"
-              :center-box="option.centerBox"
-              :info-true="option.infoTrue"
-              :fixed-box="option.fixedBox"
-              :auto-crop-width="option.autoCropWidth"
-              :auto-crop-height="option.autoCropHeight"
-            >
+            <VueCropper ref="cropperRef" :img="option.img" :output-type="option.outputType" :info="true"
+              :full="option.full" :can-move-box="option.canMoveBox" :original="option.original"
+              :auto-crop="option.autoCrop" :fixed="option.fixed" :fixed-number="option.fixedNumber"
+              :center-box="option.centerBox" :info-true="option.infoTrue" :fixed-box="option.fixedBox"
+              :auto-crop-width="option.autoCropWidth" :auto-crop-height="option.autoCropHeight">
             </VueCropper>
           </div>
         </div>
         <template #footer>
           <div class="dialog-footer">
             <el-button-group style="float: left">
-              <el-button
-                size="small"
-                type="primary"
-                plain
-                @click="rotateLeftHandle"
-              >
+              <el-button size="small" type="primary" plain @click="rotateLeftHandle">
                 {{ $t("homepage.edit.avatarCropping.leftRotation") }}
               </el-button>
-              <el-button
-                size="small"
-                type="primary"
-                plain
-                @click="rotateRightHandle"
-              >
+              <el-button size="small" type="primary" plain @click="rotateRightHandle">
                 {{ $t("homepage.edit.avatarCropping.rightRotation") }}
               </el-button>
-              <el-button
-                size="small"
-                type="primary"
-                plain
-                @click="changeScaleHandle(1)"
-              >
+              <el-button size="small" type="primary" plain @click="changeScaleHandle(1)">
                 {{ $t("homepage.edit.avatarCropping.enlarge") }}
               </el-button>
-              <el-button
-                size="small"
-                type="primary"
-                plain
-                @click="changeScaleHandle(-1)"
-              >
+              <el-button size="small" type="primary" plain @click="changeScaleHandle(-1)">
                 {{ $t("homepage.edit.avatarCropping.shrink") }}
               </el-button>
             </el-button-group>
@@ -245,12 +152,7 @@
               <el-button size="small" @click="dialogVisible = false">
                 {{ $t("homepage.edit.avatarCropping.cancel") }}
               </el-button>
-              <el-button
-                size="small"
-                type="primary"
-                :loading="loading"
-                @click="finish"
-              >
+              <el-button size="small" type="primary" @click="finish">
                 {{ $t("homepage.edit.avatarCropping.confirm") }}
               </el-button>
             </el-button-group>
@@ -271,16 +173,16 @@ import { postFile } from "@/api/v1/files";
 import { ElMessage, FormInstance, FormRules } from "element-plus";
 import "vue-cropper/dist/index.css";
 import { VueCropper } from "vue-cropper";
-import type { Avatar, InfoType } from "@/api/user/model";
 import type { FileHandler } from "@/assets/js/file/server";
 import { FormItemRule } from "element-plus";
 import type { UploadFile, UploadFiles } from "element-plus";
 
+import { FileType, _InfoType } from "@/api/user/model";
 const userStore = useUserStore();
 const fileStore = useFileStore();
 const ruleFormRef = ref<FormInstance>();
 const nickNameFormRef = ref<FormInstance>();
-const imageUrl = computed(() => userStore.userInfo.data.avatar?.url || null);
+const imageUrl = computed(() => userStore.userInfo.userInfo.avatar?.url || null);
 console.log("imageUrl", imageUrl);
 const isDisable = ref(false);
 const { t } = useI18n();
@@ -292,7 +194,7 @@ type nickNameType = {
 const nicknameForm = ref<nickNameType>({
   nickname: "",
 });
-
+/*
 type Rule = {
   required?: boolean;
   message?: string;
@@ -304,7 +206,7 @@ type Rule = {
     callback: (error?: Error) => void
   ) => void;
 };
-
+*/
 type Arrayable<T> = T | T[];
 
 const nicknameRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
@@ -335,13 +237,13 @@ const nicknameRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
 };
 
 // 基本信息表单
-const infoForm = ref<InfoType>({
+const infoForm = ref<_InfoType>({
   sex: "man",
   industry: "",
   selectedOptions: [],
   textarea: "",
 });
-const infoRules = ref<FormRules<InfoType>>({
+const infoRules = ref<FormRules<_InfoType>>({
   industry: [
     {
       required: true,
@@ -424,7 +326,7 @@ type optionType = {
 
 const addressOptions = ref(regionData);
 const dialogVisible = ref(false);
-const loading = ref(false);
+const isLoading = ref(true);
 const cropperRef = ref<any>({});
 const option = ref<optionType>({
   img: "", // 裁剪图片的地址
@@ -454,7 +356,10 @@ const submitNickname = async () => {
   nickNameFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        await putUserData({ nickname: nicknameForm.value.nickname });
+        isLoading.value = true;
+
+        await userStore.setUserInfo({ nickname: nicknameForm.value.nickname });
+
         ElMessage.success(t("homepage.edit.rules.nickname.success"));
       } catch (error) {
         ElMessage.error(t("homepage.edit.rules.nickname.error3"));
@@ -482,9 +387,9 @@ const saveInfo = () => {
   ruleFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        const infoFormJS = await JSON.stringify(infoForm.value);
-        console.log("infoForm.value", infoFormJS);
-        await putUserData({ info: infoFormJS });
+        console.log("infoForm.value", infoForm.value);
+        isLoading.value = true;
+        await userStore.setUserInfo({ info: infoForm.value });
         ElMessage.success(t("homepage.edit.rules.success"));
       } catch (error) {
         ElMessage.error(t("homepage.edit.rules.error1"));
@@ -520,7 +425,7 @@ const handleChangeUpload = async (file: UploadFile, fileList: UploadFiles) => {
     const res = URL.createObjectURL(selectedFile);
     option.value.img = res;
     console.log("option.value.img", option.value.img);
-    loading.value = false;
+    // loading.value = false;
     dialogVisible.value = true;
   } else {
     ElMessage.error(t("homepage.edit.avatarCropping.error3"));
@@ -544,7 +449,10 @@ const saveAvatar = async (
   file: File,
   handler: FileHandler
 ) => {
-  const data: Avatar = {
+  const data: FileType = {
+    id: 0,
+    type: "",
+    size: 0,
     md5,
     key: md5 + extension,
     filename: file.name,
@@ -552,21 +460,24 @@ const saveAvatar = async (
   };
 
   try {
+    isLoading.value = true;
+    dialogVisible.value = false;
     const post = await postFile(data);
-    const put = await putUserData({ avatar_id: post.data.id });
+
+    await userStore.setUserInfo({ avatar_id: post.data.id });
     ElMessage.success(t("homepage.edit.avatarCropping.success"));
   } catch (err) {
     console.error(err);
   }
 
-  loading.value = false;
+  //loading.value = false;
 };
 
 // 完成截图
 async function finish() {
   cropperRef.value.getCropBlob(async (blob: Blob) => {
     // 创建 File 对象并设置 name 和 extension 属性
-    const file = new File([blob], userStore.userInfo.username + ".jpg", {
+    const file = new File([blob], userStore.userInfo.userData.username + ".jpg", {
       type: "image/jpeg",
     });
 
@@ -589,7 +500,7 @@ async function finish() {
         md5,
         file.name.split(".").pop() || "", // 获取文件扩展名
         file,
-        (p: any) => {},
+        (p: any) => { },
         handler,
         "backup"
       );
@@ -603,21 +514,40 @@ async function finish() {
     );
 
     dialogVisible.value = false;
-    loading.value = true;
+    //loading.value = true;
   });
-}
+}// 观测 userStore.userInfo 的变化
 
+
+watch(() => userStore.userInfo, (newUserInfo) => {
+
+  if (newUserInfo.id !== 0) {
+
+
+    const parsedInfo = newUserInfo.userInfo?.info;
+    nicknameForm.value.nickname = newUserInfo.userData?.nickname || "";
+    if (parsedInfo) {
+      infoForm.value.sex = parsedInfo.sex || "";
+      infoForm.value.industry = parsedInfo.industry || "";
+      infoForm.value.selectedOptions = parsedInfo.selectedOptions || [];
+      infoForm.value.textarea = parsedInfo.textarea || "";
+    }
+    isLoading.value = false
+  }
+}, { deep: true, immediate: true });
+//userStore.getUserInfo();
+/*
 onMounted(async () => {
   await userStore.getUserInfo();
-  const parsedInfo = userStore.userInfo.data?.parsedInfo;
-  nicknameForm.value.nickname = userStore.userInfo.data?.nickname || "";
+  const parsedInfo = userStore.userInfo.userInfo?.info;
+  nicknameForm.value.nickname = userStore.userInfo.userData?.nickname || "";
   if (parsedInfo) {
     infoForm.value.sex = parsedInfo.sex || "";
     infoForm.value.industry = parsedInfo.industry || "";
     infoForm.value.selectedOptions = parsedInfo.selectedOptions || [];
     infoForm.value.textarea = parsedInfo.textarea || "";
   }
-});
+});*/
 </script>
 
 <style lang="scss" scoped>
@@ -635,6 +565,7 @@ onMounted(async () => {
   line-height: 10px;
   padding: 2px 0;
   margin-left: 1%;
+
   // color: #4d4f52;
   small {
     color: #6f6f6f;

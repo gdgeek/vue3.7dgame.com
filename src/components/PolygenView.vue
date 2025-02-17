@@ -1,48 +1,25 @@
 <template>
-  <div>
-    <div>
-      <el-select
-        v-model="selectedAnimationIndex"
-        @change="playAnimation"
-        placeholder="Select Animation"
-        style="width: 240px"
-        :emptyText="'No data'"
-        :disabled="animations.length === 0"
-      >
-        <el-option
-          v-if="animations.length === 0"
-          :key="0"
-          :label="'No data'"
-          :value="0"
-          disabled
-        ></el-option>
-        <el-option
-          v-for="(animation, index) in animations"
-          :key="index"
-          :label="animation.name"
-          :value="index"
-        ></el-option>
+
+  <el-card class="box-card">
+    <template #header v-if="animations.length !== 0">
+
+
+      <el-select v-model="selectedAnimationIndex" @change="playAnimation" placeholder="Select Animation"
+        style="width: 100%" size="small" :emptyText="'No data'" :disabled="animations.length === 0">
+        <el-option v-if="animations.length === 0" :key="0" :label="'No data'" :value="0" disabled></el-option>
+        <el-option v-for="(animation, index) in animations" :key="index" :label="animation.name"
+          :value="index"></el-option>
       </el-select>
-      <el-switch
-        v-model="isAnimationPlaying"
-        @change="toggleAnimation"
-        style="margin-left: 5px"
-        inline-prompt
-        :active-text="$t('polygen.animation.animationOn')"
-        :inactive-text="$t('polygen.animation.animationOff')"
-        :disabled="animations.length === 0"
-      ></el-switch>
-      <!-- <el-switch
-        v-model="isShadowEnabled"
-        @change="toggleShadow"
-        style="margin-left: 5px"
-        inline-prompt
-        :active-text="$t('polygen.animation.shadowOn')"
-        :inactive-text="$t('polygen.animation.shadowOff')"
-      ></el-switch> -->
-    </div>
+      <!--
+      <el-switch v-model="isAnimationPlaying" @change="toggleAnimation" style="margin-left: 5px" inline-prompt
+        :active-text="$t('polygen.animation.animationOn')" :inactive-text="$t('polygen.animation.animationOff')"
+        :disabled="animations.length === 0"></el-switch>-->
+    </template>
+
     <div id="three" ref="three" style="height: 300px; width: 100%"></div>
-  </div>
+  </el-card>
+
+
 </template>
 
 <script setup lang="ts">
@@ -135,6 +112,10 @@ const refresh = () => {
     return;
   }
   const gltfLoader = new GLTFLoader();
+
+  const dracoLoader = new DRACOLoader();
+  dracoLoader.setDecoderPath("/js/three.js/libs/draco/");
+  gltfLoader.setDRACOLoader(dracoLoader);
   const url = convertToHttps(props.file.url);
   gltfLoader.load(
     url,

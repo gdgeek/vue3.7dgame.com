@@ -103,7 +103,7 @@ class MetaFactory extends Factory {
 			const loader = new GLTFLoader(THREE.DefaultLoadingManager)
 			const dracoLoader = new DRACOLoader()
 
-			dracoLoader.setDecoderPath('./draco/')
+			dracoLoader.setDecoderPath("/js/three.js/libs/draco/");
 			loader.setDRACOLoader(dracoLoader)
 
 			try {

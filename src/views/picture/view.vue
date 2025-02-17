@@ -8,17 +8,9 @@
             <span v-if="pictureData">{{ pictureData.name }}</span>
           </template>
           <div class="box-item" style="text-align: center">
-            <img
-              id="image"
-              ref="image"
-              v-loading="expire"
-              :element-loading-text="$t('picture.view.loadingText')"
-              element-loading-background="rgba(255,255, 255, 0.3)"
-              style="height: 300px; width: auto"
-              :src="picture"
-              fit="contain"
-              @load="dealWith"
-            />
+            <img id="image" ref="image" v-loading="expire" :element-loading-text="$t('picture.view.loadingText')"
+              element-loading-background="rgba(255,255, 255, 0.3)" style="height: 300px; width: auto" :src="picture"
+              fit="contain" @load="dealWith" />
           </div>
         </el-card>
         <br />
@@ -31,14 +23,8 @@
           </template>
           <div class="box-item">
             <el-table :data="tableData" stripe>
-              <el-table-column
-                prop="item"
-                :label="$t('picture.view.info.label1')"
-              ></el-table-column>
-              <el-table-column
-                prop="text"
-                :label="$t('picture.view.info.label2')"
-              ></el-table-column>
+              <el-table-column prop="item" :label="$t('picture.view.info.label1')"></el-table-column>
+              <el-table-column prop="text" :label="$t('picture.view.info.label2')"></el-table-column>
             </el-table>
 
             <aside style="margin-top: 10px; margin-bottom: 30px">
@@ -63,11 +49,11 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import { getPicture, putPicture, deletePicture } from "@/api/resources/index";
+import { getPicture, putPicture, deletePicture } from "@/api/v1/resources/index";
 import { convertToHttps, printVector2 } from "@/assets/js/helper";
 import { postFile } from "@/api/v1/files";
 import { useFileStore } from "@/store/modules/config";
-import type { ResourceInfo } from "@/api/resources/model";
+import type { ResourceInfo } from "@/api/v1/resources/model";
 import { FileHandler } from "@/assets/js/file/server";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 
@@ -211,7 +197,7 @@ const setup = async (
       md5,
       file.type.split("/").pop()!,
       file,
-      () => {},
+      () => { },
       handler,
       "screenshot/picture"
     );
@@ -295,5 +281,5 @@ const named = async (id: number, name: string) => {
 </script>
 
 <style lang="scss" scoped>
-@import "@/styles/view-style.scss";
+@use "@/styles/view-style.scss" as *;
 </style>

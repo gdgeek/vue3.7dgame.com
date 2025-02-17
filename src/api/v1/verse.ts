@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import environment from "@/environment";
 import { MessageType } from "./message";
 import { metaInfo } from "./meta";
-import { ResourceInfo } from "../resources/model";
+import { ResourceInfo } from "@/api/v1/resources/model";
 
 export type Author = {
   id: number;

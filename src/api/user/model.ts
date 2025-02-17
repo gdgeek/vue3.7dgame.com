@@ -1,41 +1,44 @@
 /**
  * 登录用户信息
  */
-export type Avatar = {
-  id?: number;
+export type _UserDataType = {
+  nickname: string | null;
+  email: string | null;
+  username: string | null;
+  emailBind: boolean;
+};
+export type FileType = {
+  id: number;
   md5: string;
-  type?: string;
+  type: string;
   url: string;
   filename: string;
-  size?: number;
+  size: number;
   key: string;
 };
-
-export type InfoType = {
+export type _InfoType = {
   sex: string;
   industry: string;
   selectedOptions: string[];
   textarea: string;
 };
-
-export type Data = {
-  username: string;
-  id: number;
-  nickname: string | null;
-  info?: string | null;
-  parsedInfo?: InfoType;
-  avatar_id: string | null;
-  avatar: Avatar | null;
-  email: string | null;
-  emailBind: boolean;
+export type _UserInfoType = {
+  info: _InfoType | null;
+  gold: number;
+  points: number;
+  avatar: FileType | null;
 };
-
-// 获取用户信息数据类型
-export type getUserInfoData = {
-  username: string;
-  data: Data;
+export type UserInfoType = {
+  id: number;
+  userData: _UserDataType;
+  userInfo: _UserInfoType;
   roles: string[];
   perms?: string[];
+};
+export type UserInfoReturnType = {
+  success: boolean;
+  message: string;
+  data: UserInfoType;
 };
 
 /**

@@ -2,12 +2,13 @@
 
   <body :class="{ 'dark-theme': isDark }">
     <div :class="['header', { 'dark-theme': isDark }]">
-      <div class="PC" v-if="!isMobile">
+      <div style="height: 30px;" v-if="!isMobile">
         <RouterLink to="/" class="logo">
           <img src="/favicon.ico" alt="" />
           <span class="project_title">{{ $t("login.title") }}</span>
         </RouterLink>
         <div class="link" style="margin-left: 250px">
+
           <el-link href="https://testflight.apple.com/join/V4XNEG6t" target="_blank" :underline="false">
             <img src="/testflight.ico" style="width: 25px" alt="" />
             <span style="margin-left: 5px">TestFlight</span>
@@ -205,7 +206,6 @@ import "@/assets/font/font.css";
 import { useRouter, LocationQuery, useRoute } from "vue-router";
 import { AppleIdToken } from "@/api/auth/model";
 import LoginForm from "@/components/LoginForm.vue";
-import RegisterForm from "@/components/RegisterForm.vue";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useInfomationStore } from "@/store/modules/information";
@@ -257,9 +257,9 @@ const enter = async (
     } else {
       ElMessage.error("The login response is missing the access_token");
     }
-    await userStore.getUserInfo();
+    //  await userStore.getUserInfo();
 
-    userStore.setupRefreshInterval(form.value);
+    // userStore.setupRefreshInterval(form.value);
 
     const { path, queryParams } = parseRedirect();
     router.push({ path: path, query: queryParams });
@@ -283,11 +283,11 @@ const toggleTheme = () => {
 watch(
   () => route.path,
   async (newPath) => {
-    if (newPath === "/logout") {
+    if (newPath === "/site/logout") {
       await userStore.logout();
       await tagsViewStore.delAllViews();
       setTimeout(() => {
-        router.push("/login?redirect=/home/index");
+        router.push("/site/login?redirect=/home/index");
       }, 1000);
     }
   },
@@ -334,8 +334,8 @@ body {
   left: 10px;
 
   img {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     margin-left: 20px;
     vertical-align: middle;
   }

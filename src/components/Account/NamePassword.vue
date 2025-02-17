@@ -2,7 +2,7 @@
   <div v-loading="loading">
     <el-form ref="formRef" class="login-form" :rules="rules" :model="form" label-width="auto">
       <el-form-item :label="$t('login.username')" prop="username">
-        <el-input v-model="form.username" suffix-icon="User"></el-input>
+        <el-input v-model="form.username" suffix-icon="Message"></el-input>
       </el-form-item>
       <el-form-item :label="$t('login.password')" prop="password">
         <el-input v-model="form.password" type="password" suffix-icon="Lock"></el-input>
@@ -16,16 +16,14 @@
     </el-form>
   </div>
 </template>
-
 <script setup lang="ts">
 
 import request from "@/utils/request";
-import { getUserInfoData, InfoType } from "@/api/user/model";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
-import AuthAPI from "@/api/auth/index";
+import { UserInfoReturnType,  } from "@/api/user/model";
+
+
 import "@/assets/font/font.css";
 import { FormInstance } from "element-plus";
-import env from "@/environment";
 
 import { useRouter, LocationQuery, useRoute } from "vue-router";
 import { useUserStore } from "@/store";
@@ -38,12 +36,7 @@ const router = useRouter();
 const route = useRoute();
 const { form } = storeToRefs(userStore);
 
-const emit = defineEmits(["register", "enter"]);
-const login = async (data: any) => {
-  return new Promise<void>((resolve, reject) => {
-    emit("enter", data, form, resolve, reject);
-  });
-};
+
 
 const parseRedirect = (): {
   path: string;
@@ -62,18 +55,14 @@ const parseRedirect = (): {
   return { path, queryParams };
 };
 
-const rules = computed(() => {
+import type { FormItemRule } from "element-plus";
+
+const rules = computed<Record<string, FormItemRule[]>>(() => {
   return {
     username: [
       {
         required: true,
         message: t("login.rules.username.message1"),
-        trigger: "blur",
-      },
-      {
-        min: 4,
-        max: 20,
-        message: t("login.rules.username.message2"),
         trigger: "blur",
       },
     ],
@@ -83,12 +72,17 @@ const rules = computed(() => {
         message: t("login.rules.password.message1"),
         trigger: "blur",
       },
-      {
-        min: 6,
-        max: 20,
-        message: t("login.rules.password.message2"),
-        trigger: "blur",
-      },
+    {
+      min: 6,
+      max: 32,
+      message: t("login.rules.password.message2"),
+      trigger: "blur",
+    },
+    {
+      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/i,
+      message: t("login.rules.password.message3"),
+      trigger: "blur",
+    },
     ],
   };
 });
@@ -99,50 +93,16 @@ const submit = () => {
     loading.value = true;
     if (valid) {
       try {
-
-        const response = await AuthAPI.login(form.value);
-        ElMessage.success(t("login.success"));
-        const user = response.data;
-        const token = user.auth;
-
-
-        if (token) {
-          localStorage.setItem(TOKEN_KEY, token);
-        } else {
-          throw new Error("The login response is missing the access_token");
-        }
-        await nextTick();
-        const ret = await request<getUserInfoData>({
-          url: "v1/users/get-data",
-          method: "get",
-        });
-        console.error(ret);
+        await userStore.login(form.value);
+ 
         await userStore.getUserInfo();
-        userStore.setupRefreshInterval(form.value);
         const { path, queryParams } = parseRedirect();
-        console.error({ path: path, query: queryParams });
         router.push({ path: path, query: queryParams });
 
       } catch (e: any) {
+
         let errorMessage = "Login failed, please try again later.";
-
-        try {
-          if (e.data?.message) {
-            const errorData = JSON.parse(e.data.message);
-            if (errorData.username) {
-              errorMessage =
-                t("login.usernameError") + ": " + errorData.username;
-            } else if (errorData.password) {
-              errorMessage =
-                t("login.passwordError") + ": " + errorData.password;
-            }
-          }
-        } catch (parseError) {
-          errorMessage = e.message || "Login failed, please try again later.";
-        }
-
-        ElMessage.error(errorMessage);
-        loading.value = false;
+        throw e;
       }
     } else {
       loading.value = false;
