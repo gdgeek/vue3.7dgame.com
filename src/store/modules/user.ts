@@ -27,60 +27,8 @@ const st: Pick<Storage, "getItem" | "setItem"> = {
 export const useUserStore = defineStore(
   "user",
   () => {
-    const defaultUserInfo: UserInfoType = {
-      id: 0,
-      userData: {
-        username: "",
-        nickname: null,
-        emailBind: false,
-        email: null,
-      },
-      userInfo: {
-        info: {
-          sex: "",
-          industry: "",
-          selectedOptions: [],
-          textarea: "",
-        },
-        gold: 0,
-        points: 0,
-        avatar: {
-          id: 0,
-          md5: "",
-          type: "",
-          url: "",
-          filename: "",
-          size: 0,
-          key: "",
-        },
-      },
-      roles: ["user"],
-      perms: [
-        "sys:menu:delete",
-        "sys:dept:edit",
-        "sys:dict_type:add",
-        "sys:dict:edit",
-        "sys:dict:delete",
-        "sys:dict_type:edit",
-        "sys:menu:add",
-        "sys:user:add",
-        "sys:role:edit",
-        "sys:dept:delete",
-        "sys:user:edit",
-        "sys:user:delete",
-        "sys:user:password:reset",
-        "sys:dept:add",
-        "sys:role:delete",
-        "sys:dict_type:delete",
-        "sys:menu:edit",
-        "sys:dict:add",
-        "sys:role:add",
-        "sys:user:query",
-        "sys:user:export",
-        "sys:user:import",
-      ],
-    };
-    const userInfo = ref<UserInfoType>(defaultUserInfo);
+    const defaultUserInfo: UserInfoType | null = null;
+    const userInfo = ref<UserInfoType | null>(defaultUserInfo);
 
     async function loginByWechat(data: any) {
       const response = await Wechat.login(data);
@@ -133,41 +81,44 @@ export const useUserStore = defineStore(
           return;
         }
 
+        userInfo.value = user;
         // 更新 userInfo
         userInfo.value.id = user.id;
         userInfo.value.roles = user.roles;
         userInfo.value.userInfo = user.userInfo;
         userInfo.value.userData = user.userData;
-        userInfo.value.perms = [
-          "sys:menu:delete",
-          "sys:dept:edit",
-          "sys:dict_type:add",
-          "sys:dict:edit",
-          "sys:dict:delete",
-          "sys:dict_type:edit",
-          "sys:menu:add",
-          "sys:user:add",
-          "sys:role:edit",
-          "sys:dept:delete",
-          "sys:user:edit",
-          "sys:user:delete",
-          "sys:user:password:reset",
-          "sys:dept:add",
-          "sys:role:delete",
-          "sys:dict_type:delete",
-          "sys:menu:edit",
-          "sys:dict:add",
-          "sys:role:add",
-          "sys:user:query",
-          "sys:user:export",
-          "sys:user:import",
-        ];
+        userInfo.value.perms = perms;
 
         return userInfo.value;
       } catch (error) {
         console.error("Error fetching user info:", error);
       }
     };
+    const perms: string[] = [
+      "sys:menu:delete",
+      "sys:dept:edit",
+      "sys:dict_type:add",
+      "sys:dict:edit",
+      "sys:dict:delete",
+      "sys:dict_type:edit",
+      "sys:menu:add",
+      "sys:user:add",
+      "sys:role:edit",
+      "sys:dept:delete",
+      "sys:user:edit",
+      "sys:user:delete",
+      "sys:user:password:reset",
+      "sys:dept:add",
+      "sys:role:delete",
+      "sys:dict_type:delete",
+      "sys:menu:edit",
+      "sys:dict:add",
+      "sys:role:add",
+      "sys:user:query",
+      "sys:user:export",
+      "sys:user:import",
+    ];
+
     const getUserInfo = async () => {
       try {
         const response = await UserAPI.info();
@@ -184,10 +135,9 @@ export const useUserStore = defineStore(
         }
 
         // 更新 userInfo
-        userInfo.value.id = user.id;
-        userInfo.value.roles = user.roles;
-        userInfo.value.userInfo = user.userInfo;
-        userInfo.value.userData = user.userData;
+        userInfo.value = user;
+
+        userInfo.value.perms = perms;
 
         return userInfo.value;
       } catch (error) {

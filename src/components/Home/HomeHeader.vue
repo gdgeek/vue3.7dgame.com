@@ -3,8 +3,8 @@
     <el-row :gutter="10">
       <el-col :md="14" :span="24">
         <div :class="['home-avatar-container', { mobile: isMobile }]">
-          <el-avatar class="home-avatar-child" icon="avatar" :src="avatarUrl" :size="100" style="float: left"
-            @click="gotoEdit()"></el-avatar>
+          <el-avatar shape="square" class="home-avatar-child" icon="avatar" :src="avatarUrl" :size="100"
+            style="float: left" @click="gotoEdit()"></el-avatar>
           <div>
             <div class="home-avatar-info">
               <h3 class="home-avatar-name">{{ greeting }} {{ name }}</h3>
@@ -39,6 +39,9 @@ const screenStore = useScreenStore();
 const isMobile = computed(() => screenStore.isMobile);
 
 const name = computed(() => {
+  if (userStore.userInfo === null || userStore.userInfo.userData === null) {
+    return "";
+  }
   if (userStore.userInfo.userData.nickname) {
     return userStore.userInfo.userData.nickname;
   } else {

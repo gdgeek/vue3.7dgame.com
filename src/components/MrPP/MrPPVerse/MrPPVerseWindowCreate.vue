@@ -1,22 +1,13 @@
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    append-to-body
-    :close-on-click-modal="false"
-    width="70%"
-    @keydown.enter="submitForm"
-  >
+  <el-dialog v-model="dialogVisible" append-to-body :close-on-click-modal="false" width="70%"
+    @keydown.enter="submitForm">
     <template #header>
       {{ dialogTitle }}
     </template>
     <el-form ref="formRef" :rules="rules" :model="info" label-width="auto">
       <el-form-item :label="$t('verse.page.form.picture')">
-        <mr-p-p-cropper
-          ref="image"
-          :image-url="info.url || null"
-          :file-name="'verse.picture'"
-          @save-file="saveFile"
-        ></mr-p-p-cropper>
+        <mr-p-p-cropper ref="image" :image-url="info.url || null" :file-name="'verse.picture'"
+          @save-file="saveFile"></mr-p-p-cropper>
       </el-form-item>
       <el-form-item prop="name" :label="$t('verse.page.form.name')">
         <el-input v-model="info.name"></el-input>
@@ -37,7 +28,7 @@
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">{{
           $t("verse.page.form.cancel")
-        }}</el-button>
+          }}</el-button>
         <el-button type="primary" @click="submitForm">
           {{ props.dialogSubmit }}
         </el-button>
@@ -73,10 +64,15 @@ const imageId = ref<number | null>(null);
 const item = ref<VerseData>();
 
 const isManager = computed(
-  () =>
-    useUserStore().userInfo.roles.includes("manager") ||
-    useUserStore().userInfo.roles.includes("admin") ||
-    useUserStore().userInfo.roles.includes("root")
+  () => {
+    const userInfo = useUserStore().userInfo;
+    if (userInfo === null || userInfo.roles === null) {
+      return false;
+    }
+    return (userInfo.roles.includes("manager") ||
+      userInfo.roles.includes("admin") ||
+      userInfo.roles.includes("root"))
+  }
 );
 
 const info = ref({

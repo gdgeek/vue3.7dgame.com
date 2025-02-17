@@ -29,11 +29,11 @@ export type _UserInfoType = {
   avatar: FileType | null;
 };
 export type UserInfoType = {
-  id: number;
-  userData: _UserDataType;
-  userInfo: _UserInfoType;
-  roles: string[];
-  perms?: string[];
+  id: number | null;
+  userData: _UserDataType | null;
+  userInfo: _UserInfoType | null;
+  roles: string[] | null;
+  perms: string[] | null;
 };
 export type UserInfoReturnType = {
   success: boolean;

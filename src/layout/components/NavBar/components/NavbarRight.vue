@@ -35,14 +35,14 @@
 
         <span :class="['gradient-text', { mobile: isMobile }]">{{
           nickname
-          }}</span>
+        }}</span>
       </div>
       <template #dropdown>
         <el-dropdown-menu>
           <RouterLink to="/settings/edit">
             <el-dropdown-item>{{
               $t("navbar.AccountSetting")
-            }}</el-dropdown-item>
+              }}</el-dropdown-item>
           </RouterLink>
           <!-- <RouterLink to="/settings/account">
             <el-dropdown-item>{{
@@ -94,7 +94,10 @@ const avatarUrl = ref<string | null>(null);
 const { isFullscreen, toggle } = useFullscreen();
 watch(() => userStore.userInfo, (newUserInfo) => {
 
-  if (newUserInfo.id !== 0) {
+  if (newUserInfo == null) {
+    return;
+  }
+  if (newUserInfo.id !== null && newUserInfo.id !== 0 && newUserInfo.userData !== null) {
     nickname.value = newUserInfo.userData.nickname ?? newUserInfo.userData.username;
 
     avatarUrl.value = newUserInfo.userInfo?.avatar?.url ?? null;

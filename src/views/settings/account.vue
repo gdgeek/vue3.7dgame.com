@@ -11,9 +11,9 @@
         <el-col :xs="16" :sm="16" :md="12" :lg="10" :xl="10">
           <el-form ref="emailFormRef" :model="emailForm" label-width="auto" style="min-width: 300px">
             <el-form-item v-if="
-              typeof userData.email === 'undefined' ||
-              userData.email === null ||
-              !userData.emailBind
+              typeof email === 'undefined' ||
+              email === null ||
+              !emailBind
             " :label="$t('homepage.account.label1')" prop="email" :rules="[
               {
                 required: true,
@@ -29,8 +29,8 @@
               <el-input v-model="emailForm.email" autocomplete="off" type="email"
                 :placeholder="$t('homepage.account.placeholder')">
                 <template #append>
-                  <el-button v-if="!userData.emailBind" @click="postEmail" :class="{ 'hover-blue': true }">
-                    <div v-if="null === userData.email">
+                  <el-button v-if="!emailBind" @click="postEmail" :class="{ 'hover-blue': true }">
+                    <div v-if="null === email">
                       {{ $t("homepage.account.bind") }}
                     </div>
                     <div v-else>{{ $t("homepage.account.rebind") }}</div>
@@ -40,7 +40,7 @@
             </el-form-item>
 
             <el-form-item v-else v-model="emailForm.email" :label="$t('homepage.account.label1')" prop="email">
-              <el-tag>{{ userData.email }}</el-tag>
+              <el-tag>{{ email }}</el-tag>
             </el-form-item>
           </el-form>
         </el-col>
@@ -107,8 +107,8 @@ import type { FormInstance } from "element-plus";
 const { t } = useI18n();
 
 const userStore = useUserStore();
-
-const userData = computed(() => userStore.userInfo.userData);
+const email = ref("email");
+const emailBind = ref(true);
 
 const emailForm = ref({
   email: null as string | null,

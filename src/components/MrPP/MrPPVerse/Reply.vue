@@ -129,6 +129,8 @@ const refresh = async () => {
 };
 
 const canDelete = (item: any) => {
+  if (userStore.userInfo === null) return false;
+
   return userStore.userInfo.id === item.author_id;
 };
 const deletedWindow = async (id: number) => {

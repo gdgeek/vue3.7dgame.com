@@ -20,13 +20,18 @@ import Token from "@/store/modules/token";
 const userStore = useUserStore();
 const ability = useAbility(); // 提取到 setup 顶层
 
-watch(
-  () => [userStore.userInfo.roles, userStore.userInfo.id],
-  ([roles, id]) => {
-    UpdateAbility(ability, roles, id);
-    UpdateRoutes(ability);
+
+watch(() => userStore.userInfo, (newUserInfo) => {
+
+  if (newUserInfo == null || newUserInfo.id === 0 || userStore.userInfo == null) {
+    return;
   }
-);
+  UpdateAbility(ability, userStore.userInfo.roles, userStore.userInfo.id);
+  UpdateRoutes(ability);
+
+}, { deep: true, immediate: true });
+
+
 onMounted(async () => {
 
   const hasToken = Token.getToken();

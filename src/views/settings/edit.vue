@@ -167,8 +167,6 @@
 <script setup lang="ts">
 import { useUserStore } from "@/store/modules/user";
 import { useFileStore } from "@/store/modules/config";
-import { putUserData } from "@/api/v1/user";
-import { regionData, codeToText } from "element-china-area-data";
 import { postFile } from "@/api/v1/files";
 import { ElMessage, FormInstance, FormRules } from "element-plus";
 import "vue-cropper/dist/index.css";
@@ -183,13 +181,12 @@ const fileStore = useFileStore();
 const ruleFormRef = ref<FormInstance>();
 const nickNameFormRef = ref<FormInstance>();
 const imageUrl = computed(() => {
-  if (!userStore.userInfo.userInfo || !userStore.userInfo.userInfo.avatar) {
+  if (userStore.userInfo == null || userStore.userInfo.userInfo == null || !userStore.userInfo.userInfo.avatar) {
     return "";
   }
 
   return userStore.userInfo.userInfo.avatar.url;
 });
-console.log("imageUrl", imageUrl);
 const isDisable = ref(false);
 const { t } = useI18n();
 
@@ -508,33 +505,24 @@ async function finish() {
 
 watch(() => userStore.userInfo, (newUserInfo) => {
 
-  if (newUserInfo.id !== 0) {
-
-
-    const parsedInfo = newUserInfo.userInfo?.info;
-    nicknameForm.value.nickname = newUserInfo.userData?.nickname || "";
-    if (parsedInfo) {
-      infoForm.value.sex = parsedInfo.sex || "";
-      infoForm.value.industry = parsedInfo.industry || "";
-      infoForm.value.selectedOptions = parsedInfo.selectedOptions || [];
-      infoForm.value.textarea = parsedInfo.textarea || "";
-    }
-    isLoading.value = false
+  if (newUserInfo == null || newUserInfo.id === 0) {
+    return;
   }
-}, { deep: true, immediate: true });
-//userStore.getUserInfo();
-/*
-onMounted(async () => {
-  await userStore.getUserInfo();
-  const parsedInfo = userStore.userInfo.userInfo?.info;
-  nicknameForm.value.nickname = userStore.userInfo.userData?.nickname || "";
+
+
+
+  const parsedInfo = newUserInfo.userInfo?.info;
+  nicknameForm.value.nickname = newUserInfo.userData?.nickname || "";
   if (parsedInfo) {
     infoForm.value.sex = parsedInfo.sex || "";
     infoForm.value.industry = parsedInfo.industry || "";
     infoForm.value.selectedOptions = parsedInfo.selectedOptions || [];
     infoForm.value.textarea = parsedInfo.textarea || "";
   }
-});*/
+  isLoading.value = false
+
+}, { deep: true, immediate: true });
+
 </script>
 
 <style lang="scss" scoped>
