@@ -138,6 +138,30 @@ export const useUserStore = defineStore(
         userInfo.value.roles = user.roles;
         userInfo.value.userInfo = user.userInfo;
         userInfo.value.userData = user.userData;
+        userInfo.value.perms = [
+          "sys:menu:delete",
+          "sys:dept:edit",
+          "sys:dict_type:add",
+          "sys:dict:edit",
+          "sys:dict:delete",
+          "sys:dict_type:edit",
+          "sys:menu:add",
+          "sys:user:add",
+          "sys:role:edit",
+          "sys:dept:delete",
+          "sys:user:edit",
+          "sys:user:delete",
+          "sys:user:password:reset",
+          "sys:dept:add",
+          "sys:role:delete",
+          "sys:dict_type:delete",
+          "sys:menu:edit",
+          "sys:dict:add",
+          "sys:role:add",
+          "sys:user:query",
+          "sys:user:export",
+          "sys:user:import",
+        ];
 
         return userInfo.value;
       } catch (error) {
