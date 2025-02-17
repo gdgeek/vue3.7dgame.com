@@ -91,6 +91,7 @@ const submit = () => {
       try {
         await userStore.login(form.value);
 
+
         await userStore.getUserInfo();
         const { path, queryParams } = parseRedirect();
         router.push({ path: path, query: queryParams });
@@ -100,7 +101,7 @@ const submit = () => {
       }
     } else {
       loading.value = false;
-      ElMessage({ type: "error", message: t("login.error") });
+      ElMessage({ type: "error", message: "Login failed, please try again later." });
     }
   });
 };

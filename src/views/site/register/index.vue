@@ -53,7 +53,7 @@ import "@/assets/font/font.css";
 import { LocationQuery, useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { useSettingsStore } from "@/store/modules/settings";
-import { FormInstance ,FormItemRule} from "element-plus";
+import { FormInstance, FormItemRule } from "element-plus";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { onMounted, watch, ref } from "vue";
 import { useI18n } from "vue-i18n"; // Ensure you have this import
@@ -125,7 +125,7 @@ const registerRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
       trigger: "blur",
     },
     {
-      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/i,
+      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/,
       message: t("login.rules.password.message3"),
       trigger: "blur",
     },

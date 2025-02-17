@@ -105,7 +105,7 @@ export default {
         message1: "Please enter your password",
         message2: "Greater than 6 and less than 20",
         ///^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/
-        message3: "Min 1 uppercase, 1 lowercase, 1 number, 1 special character",
+        message3: "Min 1 uppercase, 1 lowercase, 1 number",
       },
       repassword: {
         message1: "Please enter the password again",
