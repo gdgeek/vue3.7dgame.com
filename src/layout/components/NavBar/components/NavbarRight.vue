@@ -39,9 +39,9 @@
       </div>
       <template #dropdown>
         <el-dropdown-menu>
-          <RouterLink to="/home/index">
+          <RouterLink to="/settings/edit">
             <el-dropdown-item>{{
-              $t("navbar.personalCenter")
+              $t("navbar.AccountSetting")
             }}</el-dropdown-item>
           </RouterLink>
           <!-- <RouterLink to="/settings/account">
