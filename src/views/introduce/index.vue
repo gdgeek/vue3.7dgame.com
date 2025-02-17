@@ -4,7 +4,7 @@
     <nav class="nav-container" :class="{
       'nav-scrolled': isScrolled && currentTab === 'about',
       'nav-transparent': currentTab === 'about' && !isScrolled,
-      'nav-default': currentTab !== 'about'
+      'nav-default': currentTab !== 'about',
     }">
       <div class="nav-left">
         <img src="/media/image/logo.gif" alt="Logo" class="logo" />
@@ -16,9 +16,9 @@
         <div v-for="item in navItems" :key="item.key" :class="[
           'nav-item',
           {
-            'active': currentTab === item.key,
-            'text-white': currentTab === 'about' && !isScrolled
-          }
+            active: currentTab === item.key,
+            'text-white': currentTab === 'about' && !isScrolled,
+          },
         ]" @click="switchTab(item.key)">
           {{ item.label }}
         </div>
@@ -32,9 +32,8 @@
         <h1>我们的产品</h1>
         <p>products</p>
       </div>
-      <div v-if="currentTab === 'news'" class="content-section">
-        <h1>新闻动态</h1>
-        <p>news</p>
+      <div v-if="currentTab === 'news'">
+        <IntroduceDocument></IntroduceDocument>
       </div>
     </div>
   </div>
@@ -42,6 +41,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 defineOptions({
   name: "Introduce",
@@ -53,6 +55,7 @@ const navItems = [
   { key: "about", label: "关于我们" },
   { key: "products", label: "我们的产品" },
   { key: "news", label: "新闻动态" },
+  { key: "login", label: "登录平台" },
 ];
 
 // 当前选中的标签
@@ -60,6 +63,11 @@ const currentTab = ref("about");
 
 // 切换标签方法
 const switchTab = (tab: string) => {
+  if (tab === "login") {
+    // 使用路由导航到登录页面
+    router.push("/login");
+    return;
+  }
   currentTab.value = tab;
 };
 
@@ -73,12 +81,12 @@ const handleScroll = () => {
 
 // 组件挂载时添加滚动监听
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll);
+  window.addEventListener("scroll", handleScroll);
 });
 
 // 组件卸载时移除滚动监听
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll);
+  window.removeEventListener("scroll", handleScroll);
 });
 </script>
 

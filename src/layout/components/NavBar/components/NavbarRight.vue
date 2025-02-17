@@ -31,7 +31,8 @@
 
         </div>-->
         <span :class="['gradient-text', { mobile: isMobile }]">{{
-          userStore.userInfo.userData.nickname || userStore.userInfo.userData.username
+          userStore.userInfo.userData?.nickname ||
+          userStore.userInfo.userData?.username
         }}</span>
       </div>
       <template #dropdown>
@@ -96,9 +97,9 @@ const logout = () => {
     cancelButtonText: t("login.logout.cancel"),
     type: "warning",
     lockScroll: false,
-  }).then(() => {
+  }).then(async () => {
+    await userStore.logout();
     router.push("/site/logout");
-
   });
 };
 
@@ -136,11 +137,7 @@ const logout = () => {
   font-family: "KaiTi", "Arial", sans-serif;
   font-size: 16px;
   font-weight: bold;
-  background: linear-gradient(45deg,
-      #ff6a00,
-      #7ece6c,
-      #9376df,
-      #040404);
+  background: linear-gradient(45deg, #ff6a00, #7ece6c, #9376df, #040404);
   /* 渐变颜色 */
   background-clip: text;
   /* 标准属性：背景裁剪到文本 */
