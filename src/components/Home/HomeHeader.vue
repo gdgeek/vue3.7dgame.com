@@ -61,24 +61,18 @@ const greeting = computed(() => {
 
 // 头像
 const avatarUrl = computed(() => {
-  if (
-    userStore.userInfo.userInfo.avatar == null ||
-    typeof userStore.userInfo.userInfo.avatar.url === "undefined" ||
-    null
-  ) {
+  if (!userStore?.userInfo?.userInfo) {
     return "";
-  } else {
-    return userStore.userInfo.userInfo.avatar.url;
   }
+  return userStore.userInfo.userInfo.avatar?.url ?? "";
 });
 
 // 个人简介
 const textarea = computed(() => {
-  if (!userStore.userInfo.userInfo.info?.textarea) {
+  if (!userStore?.userInfo?.userInfo) {
     return "";
-  } else {
-    return userStore.userInfo.userInfo.info?.textarea;
   }
+  return userStore.userInfo.userInfo.info?.textarea ?? "";
 });
 
 const gotoEdit = () => {

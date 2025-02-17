@@ -22,11 +22,11 @@
     <!-- 用户头像 -->
     <el-dropdown class="setting-item" trigger="click">
       <div class="flex-center h100% p10px">
-        <img v-if="userStore.userInfo.userInfo.avatar !== null"
-          :src="userStore.userInfo.userInfo.avatar.url + '?imageView2/1/w/80/h/80'"
-          class="rounded-full mr-10px w24px w24px" />
+        <img v-if="userStore.userInfo.userInfo?.avatar?.url" :src="userStore.userInfo.userInfo.avatar.url + '?imageView2/1/w/80/h/80'
+          " class="rounded-full mr-10px w24px w24px" />
         <span :class="['gradient-text', { mobile: isMobile }]">{{
-          userStore.userInfo.userData.nickname || userStore.userInfo.userData.username
+          userStore.userInfo.userData?.nickname ||
+          userStore.userInfo.userData?.username
         }}</span>
       </div>
       <template #dropdown>
@@ -91,9 +91,9 @@ const logout = () => {
     cancelButtonText: t("login.logout.cancel"),
     type: "warning",
     lockScroll: false,
-  }).then(() => {
+  }).then(async () => {
+    await userStore.logout();
     router.push("/site/logout");
-
   });
 };
 
@@ -131,11 +131,7 @@ const logout = () => {
   font-family: "KaiTi", "Arial", sans-serif;
   font-size: 16px;
   font-weight: bold;
-  background: linear-gradient(45deg,
-      #ff6a00,
-      #7ece6c,
-      #9376df,
-      #040404);
+  background: linear-gradient(45deg, #ff6a00, #7ece6c, #9376df, #040404);
   /* 渐变颜色 */
   background-clip: text;
   /* 标准属性：背景裁剪到文本 */

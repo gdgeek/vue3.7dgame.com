@@ -33,7 +33,7 @@
         <p>products</p>
       </div>
       <div v-if="currentTab === 'news'">
-        <Document></Document>
+        <IntroduceDocument></IntroduceDocument>
       </div>
     </div>
   </div>
