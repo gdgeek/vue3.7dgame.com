@@ -82,7 +82,7 @@ const login = async function async() {
 
 
   const ret = await getQrcode();
-  console.error('!!!!', ret);
+  //console.error('!!!!', ret);
   intervalId = setInterval(fetchRefresh, 3000);// 返回什么类型
   url.value = ret.data.qrcode.url;
   token = ret.data.token;

@@ -16,6 +16,7 @@ export function setupPermission() {
   // 白名单路由
   const whiteList = [
     "/site/login",
+    "/site/register",
     "/site",
     "/introduce",
     "/introduce/about",
@@ -31,28 +32,16 @@ export function setupPermission() {
   ];
 
   router.beforeEach(async (to, from, next) => {
-    NProgress.start();
-    // alert(to.path);
+    NProgress.start(); //开始进度条
 
     // next({ path: "/404" });
     if (Token.hasToken()) {
+      // 判断是否有token
       if (to.path === "/site/login") {
         // 如果已登录，跳转到首页
-        next({ path: "/404" });
+        next({ path: "home/index" });
         NProgress.done();
       } else {
-        /*
-        const userStore = useUserStore();
-        let hasRoles: boolean = !(
-          userStore == null ||
-          userStore.userInfo == null ||
-          userStore.userInfo.roles == null ||
-          userStore.userInfo.roles.length == 0
-        );*/
-
-        // hasRoles = true;
-        //   if (hasRoles) {
-        // 如果未匹配到任何路由，跳转到404页面
         if (to.matched.length === 0) {
           next(from.name ? { name: from.name } : "/404");
         } else {
@@ -64,7 +53,6 @@ export function setupPermission() {
           }
           next();
         }
-        // }
         NProgress.done();
         /*else {
           const permissionStore = usePermissionStore();
@@ -84,7 +72,12 @@ export function setupPermission() {
           }*/
       }
     } else {
-      return;
+      if (whiteList.includes(to.path)) {
+        next();
+      } else {
+        redirectToLogin(to, next);
+      }
+      NProgress.done();
     }
   });
 

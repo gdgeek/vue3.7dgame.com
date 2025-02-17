@@ -424,7 +424,6 @@ const routes: RouteRecordRaw[] = [
             path: "/resource/audio",
             name: "Audio",
             component: Empty,
-
             redirect: "/resource/audio/index",
             meta: {
               title: "resourceManagement.audioManagement.title",
