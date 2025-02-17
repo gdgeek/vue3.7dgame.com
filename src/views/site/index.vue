@@ -220,7 +220,7 @@ watch(
       await userStore.logout();
       await tagsViewStore.delAllViews();
       setTimeout(() => {
-        router.push("/site/login?redirect=/home/index");
+        router.push("/");
       }, 1000);
     }
   },

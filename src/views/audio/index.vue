@@ -9,15 +9,15 @@
               <el-button size="small" type="primary" icon="uploadFilled">
                 <span class="hidden-sm-and-down">{{
                   $t("audio.uploadAudio")
-                  }}</span>
+                }}</span>
               </el-button>
             </router-link>
           </el-button-group>
         </mr-p-p-header>
       </el-header>
       <el-main>
-        <el-card>
-          <Waterfall :list="items" :width="320" :gutter="10" :backgroundColor="'rgba(255, 255, 255, .05)'">
+        <el-card style="width: 100%; min-height: 400px;">
+          <Waterfall v-if="items" :list="items" :width="320" :gutter="10" :backgroundColor="'rgba(255, 255, 255, .05)'">
             <template #default="{ item }">
               <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
                 <template #audioInfo>
@@ -30,12 +30,13 @@
                     </el-button>
                     <el-button v-else type="primary" size="small">{{
                       $t("audio.viewAudio")
-                      }}</el-button>
+                    }}</el-button>
                   </router-link>
                 </template>
               </mr-p-p-card>
             </template>
           </Waterfall>
+          <el-skeleton v-else :rows="8" animated />
         </el-card>
       </el-main>
       <el-footer>
@@ -57,7 +58,7 @@ import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 
-const items = ref<any[]>([]);
+const items = ref<any[] | null>(null);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
 const pagination = reactive({

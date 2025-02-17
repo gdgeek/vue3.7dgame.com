@@ -16,8 +16,8 @@
         </mr-p-p-header>
       </el-header>
       <el-main>
-        <el-card>
-          <Waterfall :list="items" :width="320" :gutter="10" :backgroundColor="'rgba(255, 255, 255, .05)'">
+        <el-card style="width: 100%; min-height: 400px;">
+          <Waterfall v-if="items" :list="items" :width="320" :gutter="10" :backgroundColor="'rgba(255, 255, 255, .05)'">
             <template #default="{ item }">
               <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
                 <template #info>
@@ -40,6 +40,7 @@
               </mr-p-p-card>
             </template>
           </Waterfall>
+          <el-skeleton v-else :rows="8" animated />
         </el-card>
       </el-main>
       <el-footer>
@@ -64,7 +65,7 @@ import "vue-waterfall-plugin-next/dist/style.css";
 
 const { t } = useI18n();
 
-const items = ref<any[]>([]);
+const items = ref<any[] | null>(null);
 const sorted = ref("-created_at");
 const searched = ref("");
 const percentage = ref(0);

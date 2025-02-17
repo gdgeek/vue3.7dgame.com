@@ -3,14 +3,8 @@
     <br />
     <el-container>
       <el-header>
-        <mr-p-p-header
-          :sorted="sorted"
-          :searched="searched"
-          sortByTime="created_at"
-          sortByName="title"
-          @search="search"
-          @sort="sort"
-        >
+        <mr-p-p-header :sorted="sorted" :searched="searched" sortByTime="created_at" sortByName="title" @search="search"
+          @sort="sort">
           <el-button-group :inline="true">
             <el-button size="small" type="primary" @click="addMeta">
               <font-awesome-icon icon="plus"></font-awesome-icon>
@@ -21,46 +15,32 @@
         </mr-p-p-header>
       </el-header>
       <el-main>
-        <el-card style="width: 100%">
-          <Waterfall
-            :list="metaData as unknown as ViewCard[]"
-            :width="320"
-            :gutter="20"
-            :hasAroundGutter="false"
-            :breakpoints="{
+        <el-card style="width: 100%; min-height: 400px;">
+
+          <Waterfall v-if="metaData" :list="metaData as unknown as ViewCard[]" :width="320" :gutter="20"
+            :hasAroundGutter="false" :breakpoints="{
               640: { rowPerView: 1 },
-            }"
-            :backgroundColor="'rgba(255, 255, 255, .05)'"
-          >
+            }" :backgroundColor="'rgba(255, 255, 255, .05)'">
             <template #default="{ item }">
-              <mr-p-p-card
-                :item="item"
-                @named="namedWindow"
-                @deleted="deletedWindow"
-              >
+              <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
                 <template #enter>
                   <router-link :to="`/meta/meta-edit?id=${item.id}`">
                     <el-button type="primary" size="small">{{
                       $t("meta.enter")
-                    }}</el-button>
+                      }}</el-button>
                   </router-link>
                 </template>
               </mr-p-p-card>
             </template>
           </Waterfall>
+          <el-skeleton v-else :rows="8" animated />
         </el-card>
       </el-main>
       <el-footer>
         <el-card class="box-card">
-          <el-pagination
-            :current-page="pagination.current"
-            :page-count="pagination.count"
-            :page-size="pagination.size"
-            :total="pagination.total"
-            layout="prev, pager, next, jumper"
-            background
-            @current-change="handleCurrentChange"
-          ></el-pagination>
+          <el-pagination :current-page="pagination.current" :page-count="pagination.count" :page-size="pagination.size"
+            :total="pagination.total" layout="prev, pager, next, jumper" background
+            @current-change="handleCurrentChange"></el-pagination>
         </el-card>
       </el-footer>
     </el-container>
@@ -79,7 +59,7 @@ import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { ViewCard } from "vue-waterfall-plugin-next/dist/types/types/waterfall";
 
 const router = useRouter();
-const metaData = ref<metaInfo[]>([]);
+const metaData = ref<metaInfo[] | null>(null);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
 const pagination = ref<{
