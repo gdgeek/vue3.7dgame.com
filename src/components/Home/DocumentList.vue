@@ -45,7 +45,7 @@
       </el-timeline-item>
     </el-timeline>
     <el-pagination
-      v-if="pagination.count! > 1"
+      v-if="pagination.count && pagination.count > 1"
       :current-page="pagination.current"
       :page-count="pagination.count ?? 0"
       :page-size="pagination.size"

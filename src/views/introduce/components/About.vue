@@ -71,6 +71,11 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
+
 // 轮播图数据
 const slides = [
   {
@@ -122,10 +127,7 @@ const slideAnimations = ref(
   })
 );
 
-const setVideoRef = (
-  el: HTMLVideoElement | null,
-  index: number
-) => {
+const setVideoRef = (el: HTMLVideoElement | null, index: number) => {
   videoRefs.value[index] = el;
 };
 
@@ -222,6 +224,19 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener("keydown", handleKeydown);
 });
+
+watch(
+  () => route.path,
+  (newPath) => {
+    if (newPath === "/introduce") {
+      nextTick(() => {
+        if (videoRefs.value[currentSlide.value]) {
+          videoRefs.value[currentSlide.value]!.play();
+        }
+      });
+    }
+  }
+);
 </script>
 
 <style lang="scss" scoped>
@@ -1293,4 +1308,4 @@ onUnmounted(() => {
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
 }
-</style>: { pause: () => void; currentTime: number; }: number(: any)(: any): any: any
+</style>
