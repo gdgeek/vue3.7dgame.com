@@ -27,23 +27,20 @@
 
     <!-- 内容区域 -->
     <div class="content-container">
-      <About v-if="currentTab === 'about'"></About>
-      <div v-if="currentTab === 'products'" class="content-section">
-        <h1>我们的产品</h1>
-        <p>products</p>
-      </div>
-      <div v-if="currentTab === 'news'">
-        <IntroduceDocument></IntroduceDocument>
-      </div>
+      <router-view v-if="currentTab !== 'about'"/>
+      <About v-else/>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted, onUnmounted, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import About from "./components/About/index.vue";
+import News from "./components/News/index.vue";
 
 const router = useRouter();
+const route = useRoute();
 
 defineOptions({
   name: "Introduce",
@@ -64,12 +61,23 @@ const currentTab = ref("about");
 // 切换标签方法
 const switchTab = (tab: string) => {
   if (tab === "login") {
-    // 使用路由导航到登录页面
-    router.push("/login");
+    router.push("/site/login");
     return;
   }
+  // 更新路由时使用相对路径
+  router.push(tab);
   currentTab.value = tab;
 };
+
+// 修改路由监听逻辑
+watch(
+  () => route.path,
+  (newPath) => {
+    const tab = newPath.split("/").pop() || "about";
+    currentTab.value = tab;
+  },
+  { immediate: true }
+);
 
 // 添加滚动状态控制
 const isScrolled = ref(false);
