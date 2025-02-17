@@ -182,7 +182,13 @@ const userStore = useUserStore();
 const fileStore = useFileStore();
 const ruleFormRef = ref<FormInstance>();
 const nickNameFormRef = ref<FormInstance>();
-const imageUrl = computed(() => userStore.userInfo.userInfo.avatar?.url || null);
+const imageUrl = computed(() => {
+  if (!userStore.userInfo.userInfo || !userStore.userInfo.userInfo.avatar) {
+    return "";
+  }
+
+  return userStore.userInfo.userInfo.avatar.url;
+});
 console.log("imageUrl", imageUrl);
 const isDisable = ref(false);
 const { t } = useI18n();
@@ -194,19 +200,6 @@ type nickNameType = {
 const nicknameForm = ref<nickNameType>({
   nickname: "",
 });
-/*
-type Rule = {
-  required?: boolean;
-  message?: string;
-  trigger?: string;
-  min?: number;
-  validator?: (
-    rule: Rule,
-    value: string,
-    callback: (error?: Error) => void
-  ) => void;
-};
-*/
 type Arrayable<T> = T | T[];
 
 const nicknameRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
@@ -324,7 +317,6 @@ type optionType = {
   infoTrue: boolean; // true 为展示真实输出图片宽高 false 展示看到的截图框宽高
 };
 
-const addressOptions = ref(regionData);
 const dialogVisible = ref(false);
 const isLoading = ref(true);
 const cropperRef = ref<any>({});
@@ -371,11 +363,6 @@ const submitNickname = async () => {
       });
     }
   });
-};
-
-// 表单切换
-const handleChange = (value: any) => {
-  infoForm.value.selectedOptions = value;
 };
 
 // 更新基本信息

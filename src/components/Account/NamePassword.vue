@@ -78,11 +78,6 @@ const rules = computed<Record<string, FormItemRule[]>>(() => {
         message: t("login.rules.password.message2"),
         trigger: "blur",
       },
-      {
-        pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/,
-        message: t("login.rules.password.message3"),
-        trigger: "blur",
-      },
     ],
   };
 });
@@ -106,7 +101,7 @@ const submit = () => {
       }
     } else {
       loading.value = false;
-      ElMessage({ type: "error", message: t("login.error") });
+      ElMessage({ type: "error", message: "Login failed, please try again later." });
     }
   });
 };

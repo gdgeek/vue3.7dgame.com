@@ -18,22 +18,24 @@
       <!-- 语言选择 -->
       <lang-select class="setting-item"></lang-select>
     </template>
+    <div>
 
+      <!-- 或者独立使用它，不从父级获取属性 -->
+
+    </div>
     <!-- 用户头像 -->
     <el-dropdown class="setting-item" trigger="click">
       <div class="flex-center h100% p10px">
-        {{ userStore.userInfo.id }}
-        <!--
-        <div v-if="userStore.userInfo.id !== 0">
-          <img v-if="userStore.userInfo.id !== 0 && userStore.userInfo.userInfo.avatar !== null"
-            :src="userStore.userInfo.userInfo.avatar.url + '?imageView2/1/w/80/h/80'"
-            class="rounded-full mr-10px w24px w24px" />
 
-        </div>-->
+        <img v-if="avatarUrl !== null" :src="avatarUrl + '?imageView2/1/w/80/h/80'"
+          class="rounded-md mr-10px w24px w24px" />
+
+        <el-avatar v-else shape="square" :size="24" class="mr-10px "
+          src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png" />
+
         <span :class="['gradient-text', { mobile: isMobile }]">{{
-          userStore.userInfo.userData?.nickname ||
-          userStore.userInfo.userData?.username
-        }}</span>
+          nickname
+          }}</span>
       </div>
       <template #dropdown>
         <el-dropdown-menu>
@@ -56,7 +58,6 @@
         </el-dropdown-menu>
       </template>
     </el-dropdown>
-
     <!-- 设置 -->
     <template v-if="defaultSettings.showSettings">
       <div class="setting-item" @click="settingStore.settingsVisible = true">
@@ -64,6 +65,7 @@
       </div>
     </template>
   </div>
+
 </template>
 <script setup lang="ts">
 import {
@@ -72,6 +74,8 @@ import {
   useUserStore,
   useSettingsStore,
 } from "@/store";
+
+
 import defaultSettings from "@/settings";
 import { DeviceEnum } from "@/enums/DeviceEnum";
 
@@ -85,22 +89,35 @@ const router = useRouter();
 const { t } = useI18n();
 
 const isMobile = computed(() => appStore.device === DeviceEnum.MOBILE);
-
+const nickname = ref<string | null>(null);
+const avatarUrl = ref<string | null>(null);
 const { isFullscreen, toggle } = useFullscreen();
+watch(() => userStore.userInfo, (newUserInfo) => {
 
+  if (newUserInfo.id !== 0) {
+    nickname.value = newUserInfo.userData.nickname ?? newUserInfo.userData.username;
+
+    avatarUrl.value = newUserInfo.userInfo?.avatar?.url ?? null;
+  }
+}, { deep: true, immediate: true });
 /**
  * 注销
  */
-const logout = () => {
-  ElMessageBox.confirm(t("login.logout.message1"), t("login.logout.message2"), {
-    confirmButtonText: t("login.logout.confirm"),
-    cancelButtonText: t("login.logout.cancel"),
-    type: "warning",
-    lockScroll: false,
-  }).then(async () => {
+const logout = async () => {
+  try {
+    await ElMessageBox.confirm(t("login.logout.message1"), t("login.logout.message2"), {
+      confirmButtonText: t("login.logout.confirm"),
+      cancelButtonText: t("login.logout.cancel"),
+      type: "warning",
+      lockScroll: false,
+    })
+
     await userStore.logout();
     router.push("/site/logout");
-  });
+  } catch (e) {
+    console.error(e);
+  }
+
 };
 
 //onBeforeMount(() => userStore.getUserInfo());
@@ -134,27 +151,8 @@ const logout = () => {
 }
 
 .gradient-text {
-  font-family: "KaiTi", "Arial", sans-serif;
-  font-size: 16px;
-  font-weight: bold;
-  background: linear-gradient(45deg, #ff6a00, #7ece6c, #9376df, #040404);
-  /* 渐变颜色 */
-  background-clip: text;
-  /* 标准属性：背景裁剪到文本 */
-  -webkit-background-clip: text;
-  /* 使背景渐变应用于文字 */
-  -webkit-text-fill-color: transparent;
-  /* 使文字颜色透明以显示背景渐变 */
-  text-align: center;
-  white-space: nowrap;
-  /* 不换行 */
-  overflow: hidden;
-  /* 隐藏超出部分 */
-  text-overflow: ellipsis;
-  /* 超出部分显示为省略号 */
 
-  &.mobile {
-    font-size: 12px;
-  }
+  font-size: 14px;
+
 }
 </style>

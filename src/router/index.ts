@@ -729,7 +729,7 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
-      /*
+
       {
         path: "/site/logout",
         name: "LogOut",
@@ -745,7 +745,7 @@ const routes: RouteRecordRaw[] = [
         },
         children: [],
       },
-      */
+      /**/
 
       {
         path: "/401",
