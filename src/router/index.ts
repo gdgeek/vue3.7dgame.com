@@ -36,7 +36,29 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/introduce",
     component: () => import("@/views/introduce/index.vue"),
+    redirect: "/introduce/about",
     meta: { hidden: true, private: true },
+    children: [
+      {
+        path: "about",
+        name: "IntroduceAbout",
+        component: () => import("@/views/introduce/components/About/index.vue"),
+        meta: { hidden: true, private: true },
+      },
+      {
+        path: "news",
+        name: "IntroduceNews",
+        component: () => import("@/views/introduce/components/News/index.vue"),
+        meta: { hidden: true, private: true },
+      },
+      {
+        path: "category",
+        name: "IntroduceCategory",
+        component: () =>
+          import("@/views/introduce/components/News/IntroduceCategory.vue"),
+        meta: { hidden: true, private: true },
+      },
+    ],
   },
 
   {
@@ -58,6 +80,7 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+
   {
     path: "/privacy-policy",
     component: () => import("@/views/privacy-policy/index.vue"),

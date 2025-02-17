@@ -17,10 +17,8 @@
   </div>
 </template>
 <script setup lang="ts">
-
 import request from "@/utils/request";
-import { UserInfoReturnType, } from "@/api/user/model";
-
+import { UserInfoReturnType } from "@/api/user/model";
 
 import "@/assets/font/font.css";
 import { FormInstance } from "element-plus";
@@ -35,8 +33,6 @@ const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const { form } = storeToRefs(userStore);
-
-
 
 const parseRedirect = (): {
   path: string;
@@ -78,6 +74,11 @@ const rules = computed<Record<string, FormItemRule[]>>(() => {
         message: t("login.rules.password.message2"),
         trigger: "blur",
       },
+      {
+        pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/i,
+        message: t("login.rules.password.message3"),
+        trigger: "blur",
+      },
     ],
   };
 });
@@ -90,12 +91,11 @@ const submit = () => {
       try {
         await userStore.login(form.value);
 
+
         await userStore.getUserInfo();
         const { path, queryParams } = parseRedirect();
         router.push({ path: path, query: queryParams });
-
       } catch (e: any) {
-
         let errorMessage = "Login failed, please try again later.";
         throw e;
       }

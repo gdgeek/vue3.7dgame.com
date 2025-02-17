@@ -1,14 +1,10 @@
 <template>
   <div class="content-section">
-    <Carousel></Carousel>
+    <!-- <Carousel></Carousel> -->
+    <Banner></Banner>
     <div class="business-container">
       <div class="random-gradient"></div>
-      <div
-        v-for="(business, index) in BusinessList"
-        :key="index"
-        class="business-item"
-        :class="business.position"
-      >
+      <div v-for="(business, index) in BusinessList" :key="index" class="business-item" :class="business.position">
         <div class="business-content">
           <h2>{{ business.title }}</h2>
           <p>{{ business.description }}</p>
@@ -57,7 +53,7 @@
 
 <script setup lang="ts">
 import { useRoute } from "vue-router";
-import Carousel from "./Carousel.vue";
+import Carousel from "../Carousel.vue";
 import Partner from "./Partner.vue";
 
 const BusinessList = [
@@ -93,6 +89,10 @@ const contactInfo = {
   phone: "15000159790",
   email: "dirui@bujiaban.com",
 };
+
+defineOptions({
+  name: "About",
+});
 </script>
 
 <style lang="scss" scoped>
@@ -127,13 +127,11 @@ const contactInfo = {
     box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.5);
     width: 500px;
     height: 500px;
-    background: linear-gradient(
-      45deg,
-      rgba(24, 144, 255, 0.6) 0%,
-      rgba(24, 144, 255, 0.4) 33%,
-      rgba(24, 144, 255, 0.2) 67%,
-      rgba(24, 144, 255, 0.1) 100%
-    );
+    background: linear-gradient(45deg,
+        rgba(24, 144, 255, 0.6) 0%,
+        rgba(24, 144, 255, 0.4) 33%,
+        rgba(24, 144, 255, 0.2) 67%,
+        rgba(24, 144, 255, 0.1) 100%);
     top: -200px;
     left: -200px;
     backdrop-filter: blur(5px);
@@ -149,13 +147,11 @@ const contactInfo = {
     box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.5);
     width: 500px;
     height: 500px;
-    background: linear-gradient(
-      225deg,
-      rgba(255, 105, 20, 0.6) 0%,
-      rgba(255, 105, 20, 0.4) 33%,
-      rgba(255, 105, 20, 0.2) 67%,
-      rgba(255, 105, 20, 0.1) 100%
-    );
+    background: linear-gradient(225deg,
+        rgba(255, 105, 20, 0.6) 0%,
+        rgba(255, 105, 20, 0.4) 33%,
+        rgba(255, 105, 20, 0.2) 67%,
+        rgba(255, 105, 20, 0.1) 100%);
     bottom: -200px;
     right: -200px;
     backdrop-filter: blur(5px);
@@ -171,13 +167,11 @@ const contactInfo = {
     box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.5);
     width: 400px;
     height: 400px;
-    background: linear-gradient(
-      135deg,
-      rgba(82, 196, 26, 0.6) 0%,
-      rgba(82, 196, 26, 0.4) 33%,
-      rgba(82, 196, 26, 0.2) 67%,
-      rgba(82, 196, 26, 0.1) 100%
-    );
+    background: linear-gradient(135deg,
+        rgba(82, 196, 26, 0.6) 0%,
+        rgba(82, 196, 26, 0.4) 33%,
+        rgba(82, 196, 26, 0.2) 67%,
+        rgba(82, 196, 26, 0.1) 100%);
     position: absolute;
     left: var(--random-x, 50%);
     top: var(--random-y, 50%);
