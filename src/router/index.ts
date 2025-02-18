@@ -50,13 +50,22 @@ const routes: RouteRecordRaw[] = [
         name: "IntroduceNews",
         component: () => import("@/views/introduce/components/News/index.vue"),
         meta: { hidden: true, private: true },
-      },
-      {
-        path: "category",
-        name: "IntroduceCategory",
-        component: () =>
-          import("@/views/introduce/components/News/IntroduceCategory.vue"),
-        meta: { hidden: true, private: true },
+        children: [
+          {
+            path: "category",
+            name: "IntroduceCategory",
+            component: () =>
+              import("@/views/introduce/components/News/IntroduceCategory.vue"),
+            meta: { hidden: true, private: true },
+          },
+          {
+            path: "document",
+            name: "IntroduceDocument",
+            component: () =>
+              import("@/views/introduce/components/News/IntroduceDocument.vue"),
+            meta: { hidden: true, private: true },
+          },
+        ],
       },
     ],
   },

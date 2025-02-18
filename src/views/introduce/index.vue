@@ -1,25 +1,36 @@
 <template>
   <div class="app-container">
     <!-- 导航栏 -->
-    <nav class="nav-container" :class="{
-      'nav-scrolled': isScrolled && currentTab === 'about',
-      'nav-transparent': currentTab === 'about' && !isScrolled,
-      'nav-default': currentTab !== 'about',
-    }">
+    <nav
+      class="nav-container"
+      :class="{
+        'nav-scrolled': isScrolled && currentTab === 'about',
+        'nav-transparent': currentTab === 'about' && !isScrolled,
+        'nav-default': currentTab !== 'about',
+      }"
+    >
       <div class="nav-left">
         <img src="/media/image/logo.gif" alt="Logo" class="logo" />
-        <span class="company-name" :class="{ 'text-white': currentTab === 'about' && !isScrolled }">
+        <span
+          class="company-name"
+          :class="{ 'text-white': currentTab === 'about' && !isScrolled }"
+        >
           上海不加班科技有限公司
         </span>
       </div>
       <div class="nav-right">
-        <div v-for="item in navItems" :key="item.key" :class="[
-          'nav-item',
-          {
-            active: currentTab === item.key,
-            'text-white': currentTab === 'about' && !isScrolled,
-          },
-        ]" @click="switchTab(item.key)">
+        <div
+          v-for="item in navItems"
+          :key="item.key"
+          :class="[
+            'nav-item',
+            {
+              active: currentTab === item.key,
+              'text-white': currentTab === 'about' && !isScrolled,
+            },
+          ]"
+          @click="switchTab(item.key)"
+        >
           {{ item.label }}
         </div>
       </div>
@@ -27,8 +38,8 @@
 
     <!-- 内容区域 -->
     <div class="content-container">
-      <router-view v-if="currentTab !== 'about'"/>
-      <About v-else/>
+      <router-view v-if="currentTab !== 'about'"></router-view>
+      <About v-else></About>
     </div>
   </div>
 </template>
@@ -69,7 +80,7 @@ const switchTab = (tab: string) => {
   currentTab.value = tab;
 };
 
-// 修改路由监听逻辑
+// 路由监听
 watch(
   () => route.path,
   (newPath) => {

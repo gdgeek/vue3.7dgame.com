@@ -2,7 +2,7 @@
   <el-card>
     <DocumentList
       :category-id="id"
-      documentPath="/introduce/news/document"
+      document-path="/introduce/news/document"
     ></DocumentList>
   </el-card>
 </template>
@@ -14,4 +14,7 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 const id = computed(() => parseInt(route.query.id as string));
+onMounted(() => {
+  console.error(id.value);
+});
 </script>
