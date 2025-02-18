@@ -9,7 +9,9 @@
         <p>
           <a ref="telPhone" :href="`tel:${item.tel}`" :style="{ color: item.color }" class="phone-boder">
             点击拨打
-            <i class="el-icon-phone-outline"></i>
+            <el-icon>
+              <Phone></Phone>
+            </el-icon>
             {{ item.tel }}
           </a>
         </p>
@@ -33,10 +35,14 @@
         </h1>
       </div>
     </el-col>
+    <!-- 3D模型展示 -->
+    <ScreenShow></ScreenShow>
   </el-row>
 </template>
 
 <script setup lang="ts">
+import ScreenShow from './ScreenShow.vue';
+
 interface ScreenItem {
   align?: string;
   color?: string;
@@ -51,23 +57,28 @@ interface Props {
 }
 
 // 使用 withDefaults 定义属性的默认值
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   item: () => ({}),
 });
 </script>
 
 <style lang="scss" scoped>
 .background-box-image {
+  position: relative;
   display: flex;
   align-items: center;
   padding: 1px 3% 20px;
   width: 100%;
   height: 40vw;
-  // height: 600px;
   max-height: 650px;
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+
+  // 添加移动端媒体查询
+  @media screen and (max-width: 768px) {
+    height: 60vw;
+  }
 }
 
 .public-phone-box {

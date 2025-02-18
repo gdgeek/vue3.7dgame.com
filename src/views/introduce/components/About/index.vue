@@ -110,6 +110,11 @@ const contactInfo = {
     color: #666;
     line-height: 1.6;
   }
+
+  // 添加移动端适配
+  @media (max-width: 768px) {
+    margin-top: 50px;
+  }
 }
 
 .business-container {
@@ -426,18 +431,35 @@ const contactInfo = {
 
 // 响应式设计
 @media (max-width: 768px) {
-  .BusinessList {
+  .business-container {
     .business-item {
       flex-direction: column !important;
       padding: 20px;
+      gap: 30px; // 调整图片和文字之间的间距
 
-      .business-content,
-      .business-image {
+      .business-content {
         width: 100%;
+        padding: 0; // 移除内边距
+        text-align: center; // 文字居中显示
+
+        h2 {
+          font-size: 28px; // 减小标题字体大小
+
+          &::after {
+            left: 50%; // 让下划线居中
+            transform: translateX(-50%);
+          }
+        }
+
+        p {
+          font-size: 16px; // 调整描述文字大小
+        }
       }
 
       .business-image {
-        height: 300px;
+        width: 100%;
+        height: 250px; // 调整图片高度
+        order: -1; // 让图片始终显示在上方
       }
     }
   }

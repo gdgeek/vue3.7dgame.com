@@ -17,9 +17,7 @@ import * as Three from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import ElementResizeDetector from "element-resize-detector";
 
-// 状态定义
 const isShow = ref(true);
-// 使用 shallowRef 来避免 Three.js 对象被深度响应式代理
 const camera = shallowRef<Three.PerspectiveCamera | null>(null);
 const scene = shallowRef<Three.Scene | null>(null);
 const renderer = shallowRef<Three.WebGLRenderer | null>(null);
@@ -70,7 +68,6 @@ const init = () => {
   });
 };
 
-// 使用 let 声明动画帧 ID，以便清理
 let animationFrameId: number;
 
 const animate = () => {
@@ -84,19 +81,16 @@ const animate = () => {
   renderer.value.render(scene.value, camera.value);
 };
 
-// 生命周期钩子
 onMounted(() => {
   init();
   animate();
 });
 
-// 清理函数
 onUnmounted(() => {
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId);
   }
 
-  // 清理 Three.js 资源
   if (mesh.value) {
     mesh.value.geometry.dispose();
     if (mesh.value.material instanceof Three.Material) {
@@ -115,14 +109,14 @@ onUnmounted(() => {
   max-width: 800px;
   max-height: 650px;
   position: absolute;
-  top: 50px;
+  top: 50%;
+  transform: translateY(-50%);
   left: calc(48% + 30px);
   width: 50%;
   height: 30vw;
-  // 半屏效果
-  // width: 50%;
-  // height: calc(30vw + 60px);
-  // line-height: 50px;
+  width: 50%;
+  height: calc(30vw + 60px);
+  line-height: 50px;
   z-index: 50;
 }
 

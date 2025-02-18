@@ -1,15 +1,17 @@
 <template>
   <div class="content-section">
     <div class="products-container">
-      <ScreenShow></ScreenShow>
       <Screen :bgUrl="imageUrl" :item="screen"></Screen>
+      <Solution></Solution>
+      <Cloud></Cloud>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import ScreenShow from "./ScreenShow.vue";
 import Screen from "./Screen.vue";
+import Solution from "./Solution.vue";
+import Cloud from "./Cloud.vue";
 import { computed } from "vue";
 
 defineOptions({
@@ -32,7 +34,15 @@ const screen = computed(() => {
 </script>
 
 <style scoped lang="scss">
-@import "@/styles/sandtable.scss";
-@import "@/styles/responsive-style.scss";
+@use "@/styles/sandtable.scss";
+@use "@/styles/responsive-style.scss";
 
+.content-section {
+  height: 100%;
+
+  // 添加移动端适配
+  @media (max-width: 768px) {
+    margin-top: 50px;
+  }
+}
 </style>

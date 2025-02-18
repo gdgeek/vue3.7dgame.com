@@ -1,42 +1,70 @@
 <template>
   <div class="app-container">
     <!-- 导航栏 -->
-    <nav
-      class="nav-container"
-      :class="{
-        'nav-scrolled':
-          isScrolled && (currentTab === 'about' || currentTab === 'products'),
-        'nav-transparent':
-          (currentTab === 'about' || currentTab === 'products') && !isScrolled,
-        'nav-default': currentTab !== 'about' && currentTab !== 'products',
-      }"
-    >
+    <nav class="nav-container" :class="{
+      'nav-scrolled':
+        isScrolled && (currentTab === 'about' || currentTab === 'products') && !isMobile,
+      'nav-transparent':
+        (currentTab === 'about' || currentTab === 'products') && !isScrolled && !isMobile,
+      'nav-default': (currentTab !== 'about' && currentTab !== 'products') || isMobile,
+    }">
       <div class="nav-left">
-        <img src="/media/image/logo.gif" alt="Logo" class="logo" />
-        <span
-          class="company-name"
-          :class="{ 'text-white': currentTab === 'about' && !isScrolled }"
-        >
-          上海不加班科技有限公司
-        </span>
+        <div class="menu-icon" @click="toggleSidebar" v-show="isMobile">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <!-- 桌面端显示 -->
+        <template v-if="!isMobile">
+          <img src="/media/image/logo.gif" alt="Logo" class="logo" />
+          <span class="company-name" :class="{
+            'text-white':
+              (currentTab === 'about') && !isScrolled,
+          }">
+            上海不加班科技有限公司
+          </span>
+        </template>
+        <!-- 移动端显示 -->
+        <template v-else>
+          <div class="mobile-breadcrumb">
+            <span class="breadcrumb-home" @click="switchTab('about')">不加班</span>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">{{
+              navItems.find((item) => item.key === currentTab)?.label
+              }}</span>
+          </div>
+        </template>
       </div>
-      <div class="nav-right">
-        <div
-          v-for="item in navItems"
-          :key="item.key"
-          :class="[
-            'nav-item',
-            {
-              active: currentTab === item.key,
-              'text-white': currentTab === 'about' && !isScrolled,
-            },
-          ]"
-          @click="switchTab(item.key)"
-        >
+      <div class="nav-right" v-show="!isMobile">
+        <div v-for="item in navItems" :key="item.key" :class="[
+          'nav-item',
+          {
+            active: currentTab === item.key,
+            'text-white':
+              (currentTab === 'about') &&
+              !isScrolled,
+          },
+        ]" @click="switchTab(item.key)">
           {{ item.label }}
         </div>
       </div>
     </nav>
+
+    <!-- 移动端侧边栏菜单 -->
+    <div class="sidebar-overlay" v-if="isMobile && sidebarVisible" @click="toggleSidebar"></div>
+    <div class="sidebar-menu" :class="{ 'sidebar-visible': sidebarVisible }" v-if="isMobile">
+      <!-- 侧边栏顶部 -->
+      <div class="sidebar-header">
+        <img src="/media/image/logo.gif" alt="Logo" class="sidebar-logo" />
+        <span class="sidebar-company-name">上海不加班科技有限公司</span>
+      </div>
+      <div class="sidebar-items">
+        <div v-for="item in navItems" :key="item.key" class="sidebar-item" :class="{ active: currentTab === item.key }"
+          @click="handleSidebarItemClick(item.key)">
+          {{ item.label }}
+        </div>
+      </div>
+    </div>
 
     <!-- 内容区域 -->
     <div class="content-container">
@@ -100,13 +128,35 @@ const handleScroll = () => {
   isScrolled.value = window.scrollY > 500;
 };
 
-// 组件挂载时添加滚动监听
+// 移动端响应式状态
+const isMobile = ref(false);
+const sidebarVisible = ref(false);
+
+// 检查是否为移动端
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
+
+// 切换侧边栏显示状态
+const toggleSidebar = () => {
+  sidebarVisible.value = !sidebarVisible.value;
+};
+
+// 处理侧边栏菜单项点击
+const handleSidebarItemClick = (tab: string) => {
+  switchTab(tab);
+  toggleSidebar();
+};
+
+// 监听窗口大小变化
 onMounted(() => {
+  checkMobile();
+  window.addEventListener("resize", checkMobile);
   window.addEventListener("scroll", handleScroll);
 });
 
-// 组件卸载时移除滚动监听
 onUnmounted(() => {
+  window.removeEventListener("resize", checkMobile);
   window.removeEventListener("scroll", handleScroll);
 });
 </script>
@@ -159,6 +209,24 @@ onUnmounted(() => {
   .nav-left {
     display: flex;
     align-items: center;
+
+    .menu-icon {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 24px;
+      height: 20px;
+      margin-right: 16px;
+      cursor: pointer;
+
+      span {
+        display: block;
+        width: 100%;
+        height: 2px;
+        background-color: currentColor;
+        transition: all 0.3s ease;
+      }
+    }
 
     .logo {
       width: 40px;
@@ -238,6 +306,119 @@ onUnmounted(() => {
       font-size: 16px;
       color: #666;
       line-height: 1.6;
+    }
+  }
+}
+
+// 侧边栏遮罩层
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+}
+
+// 侧边栏菜单
+.sidebar-menu {
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 280px;
+  height: 100vh;
+  background-color: #fff;
+  z-index: 999;
+  transition: all 0.3s ease;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+
+  &.sidebar-visible {
+    left: 0;
+  }
+
+  .sidebar-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .sidebar-logo {
+      width: 32px;
+      height: 32px;
+    }
+
+    .sidebar-company-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+    }
+  }
+
+  .sidebar-items {
+    margin-top: 0;
+    padding: 20px 0;
+
+    .sidebar-item {
+      padding: 16px 24px;
+      font-size: 16px;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        color: #1890ff;
+        background-color: rgba(24, 144, 255, 0.1);
+      }
+
+      &.active {
+        color: #1890ff;
+        background-color: rgba(24, 144, 255, 0.1);
+      }
+    }
+  }
+}
+
+// 移动端面包屑导航样式
+.mobile-breadcrumb {
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .breadcrumb-home {
+    color: #333;
+    cursor: pointer;
+
+    &:hover {
+      color: #1890ff;
+    }
+  }
+
+  .breadcrumb-separator {
+    color: #333;
+  }
+
+  .breadcrumb-current {
+    color: #333;
+    font-weight: 500;
+  }
+}
+
+// 移动端适配样式
+@media screen and (max-width: 768px) {
+  .nav-container {
+    padding: 0 16px;
+    height: 50px;
+    background-color: #fff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+
+    .nav-left {
+      .menu-icon {
+        margin-right: 12px;
+      }
     }
   }
 }
