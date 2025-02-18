@@ -46,6 +46,13 @@ const routes: RouteRecordRaw[] = [
         meta: { hidden: true, private: true },
       },
       {
+        path: "products",
+        name: "IntroduceProducts",
+        component: () =>
+          import("@/views/introduce/components/products/index.vue"),
+        meta: { hidden: true, private: true },
+      },
+      {
         path: "news",
         name: "IntroduceNews",
         component: () => import("@/views/introduce/components/News/index.vue"),

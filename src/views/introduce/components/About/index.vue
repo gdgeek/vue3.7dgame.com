@@ -56,6 +56,10 @@ import { useRoute } from "vue-router";
 import Carousel from "../Carousel.vue";
 import Partner from "./Partner.vue";
 
+defineOptions({
+  name: "About",
+});
+
 const BusinessList = [
   {
     title: "快速分析了解您的需求",
@@ -89,10 +93,6 @@ const contactInfo = {
   phone: "15000159790",
   email: "dirui@bujiaban.com",
 };
-
-defineOptions({
-  name: "About",
-});
 </script>
 
 <style lang="scss" scoped>

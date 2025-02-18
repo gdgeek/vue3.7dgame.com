@@ -1,15 +1,17 @@
 <template>
-  <div class="news-container">
-    <!-- 当路由是 /introduce/news 时显示 Book 组件 -->
-    <template v-if="route.path === '/introduce/news'">
-      <Book
-        :items="book"
-        document-path="/introduce/news/document"
-        category-path="/introduce/news/category"
-      ></Book>
-    </template>
-    <!-- 用于显示子路由内容 -->
-    <router-view v-else></router-view>
+  <div class="content-section">
+    <div class="news-container">
+      <!-- 当路由是 /introduce/news 时显示 Book 组件 -->
+      <template v-if="route.path === '/introduce/news'">
+        <Book
+          :items="book"
+          document-path="/introduce/news/document"
+          category-path="/introduce/news/category"
+        ></Book>
+      </template>
+      <!-- 用于显示子路由内容 -->
+      <router-view v-else></router-view>
+    </div>
   </div>
 </template>
 

@@ -4,9 +4,11 @@
     <nav
       class="nav-container"
       :class="{
-        'nav-scrolled': isScrolled && currentTab === 'about',
-        'nav-transparent': currentTab === 'about' && !isScrolled,
-        'nav-default': currentTab !== 'about',
+        'nav-scrolled':
+          isScrolled && (currentTab === 'about' || currentTab === 'products'),
+        'nav-transparent':
+          (currentTab === 'about' || currentTab === 'products') && !isScrolled,
+        'nav-default': currentTab !== 'about' && currentTab !== 'products',
       }"
     >
       <div class="nav-left">
@@ -61,7 +63,7 @@ defineOptions({
 // 导航项配置
 const navItems = [
   { key: "about", label: "关于我们" },
-  { key: "products", label: "我们的产品" },
+  { key: "products", label: "产品案例" },
   { key: "news", label: "新闻动态" },
   { key: "login", label: "登录平台" },
 ];
