@@ -74,6 +74,12 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+      {
+        path: "list-product",
+        name: "IntroduceListProduct",
+        component: () => import("@/views/introduce/components/ListProduct.vue"),
+        meta: { hidden: true, private: true },
+      },
     ],
   },
 

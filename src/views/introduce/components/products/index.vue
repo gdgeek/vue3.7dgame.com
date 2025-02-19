@@ -4,6 +4,8 @@
       <Screen :bgUrl="imageUrl" :item="screen"></Screen>
       <Solution></Solution>
       <Cloud></Cloud>
+      <Deploy></Deploy>
+      <SubScreen></SubScreen>
     </div>
   </div>
 </template>
@@ -12,6 +14,7 @@
 import Screen from "./Screen.vue";
 import Solution from "./Solution.vue";
 import Cloud from "./Cloud.vue";
+import Deploy from "./Deploy.vue";
 import { computed } from "vue";
 
 defineOptions({

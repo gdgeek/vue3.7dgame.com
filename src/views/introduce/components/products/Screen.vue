@@ -56,7 +56,6 @@ interface Props {
   item: ScreenItem;
 }
 
-// 使用 withDefaults 定义属性的默认值
 withDefaults(defineProps<Props>(), {
   item: () => ({}),
 });
@@ -75,7 +74,6 @@ withDefaults(defineProps<Props>(), {
   background-position: center;
   background-size: cover;
 
-  // 添加移动端媒体查询
   @media screen and (max-width: 768px) {
     height: 60vw;
   }

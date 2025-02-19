@@ -21,13 +21,13 @@
             'text-white':
               (currentTab === 'about') && !isScrolled,
           }">
-            上海不加班科技有限公司
+            不加班AR编程平台
           </span>
         </template>
         <!-- 移动端显示 -->
         <template v-else>
           <div class="mobile-breadcrumb">
-            <span class="breadcrumb-home" @click="switchTab('about')">不加班</span>
+            <span class="breadcrumb-home" @click="switchTab('about')">不加班AR编程平台</span>
             <span class="breadcrumb-separator">/</span>
             <span class="breadcrumb-current">{{
               navItems.find((item) => item.key === currentTab)?.label
@@ -68,8 +68,7 @@
 
     <!-- 内容区域 -->
     <div class="content-container">
-      <router-view v-if="currentTab !== 'about'"></router-view>
-      <About v-else></About>
+      <router-view></router-view>
     </div>
   </div>
 </template>
@@ -77,8 +76,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import About from "./components/About/index.vue";
-import News from "./components/News/index.vue";
 
 const router = useRouter();
 const route = useRoute();
