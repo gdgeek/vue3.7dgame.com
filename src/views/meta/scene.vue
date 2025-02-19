@@ -61,6 +61,7 @@ const postMessage = (action: string, data: any = {}) => {
   console.error("postMessage:!", action);
 
   if (editor.value && editor.value.contentWindow) {
+
     editor.value.contentWindow.postMessage(
       {
         from: "scene.meta.web",

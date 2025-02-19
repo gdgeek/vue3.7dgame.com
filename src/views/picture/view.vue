@@ -52,6 +52,7 @@ import { useRoute, useRouter } from "vue-router";
 import { getPicture, putPicture, deletePicture } from "@/api/v1/resources/index";
 import { convertToHttps, printVector2 } from "@/assets/js/helper";
 import { postFile } from "@/api/v1/files";
+import { UploadFileType } from "@/api/user/model";
 import { useFileStore } from "@/store/modules/config";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import { FileHandler } from "@/assets/js/file/server";
@@ -152,9 +153,11 @@ const save = async (
   file: File,
   handler: FileHandler
 ) => {
-  const data = {
+
+  extension = extension.startsWith('.') ? extension : `.${extension}`;
+  const data: UploadFileType = {
     md5,
-    key: `${md5}${extension}`,
+    key: md5 + extension,
     filename: file.name,
     url: store.fileUrl(md5, extension, handler, "screenshot/picture"),
   };
@@ -186,6 +189,7 @@ const setup = async (
   const file = await thumbnail(image, 512, size.y * (512 / size.x));
   const md5 = await store.fileMD5(file);
   const handler = await store.publicHandler();
+
   const has = await store.fileHas(
     md5,
     file.type.split("/").pop()!, //从MIME类型中提取扩展名

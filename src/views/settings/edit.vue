@@ -168,6 +168,7 @@
 import { useUserStore } from "@/store/modules/user";
 import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
+
 import { ElMessage, FormInstance, FormRules } from "element-plus";
 import "vue-cropper/dist/index.css";
 import { VueCropper } from "vue-cropper";
@@ -175,7 +176,7 @@ import type { FileHandler } from "@/assets/js/file/server";
 import { FormItemRule } from "element-plus";
 import type { UploadFile, UploadFiles } from "element-plus";
 
-import { FileType, _InfoType } from "@/api/user/model";
+import { _InfoType, UploadFileType } from "@/api/user/model";
 const userStore = useUserStore();
 const fileStore = useFileStore();
 const ruleFormRef = ref<FormInstance>();
@@ -433,10 +434,9 @@ const saveAvatar = async (
   file: File,
   handler: FileHandler
 ) => {
-  const data: FileType = {
-    id: 0,
-    type: "",
-    size: 0,
+  extension = extension.startsWith(".") ? extension : `.${extension}`;
+  const data: UploadFileType = {
+
     md5,
     key: md5 + extension,
     filename: file.name,

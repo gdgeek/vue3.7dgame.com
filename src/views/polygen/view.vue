@@ -67,6 +67,7 @@ import PolygenView from "@/components/PolygenView.vue";
 import { getPolygen, putPolygen, deletePolygen } from "@/api/v1/resources/index";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
+import { UploadFileType } from "@/api/user/model";
 import { printVector3 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
@@ -264,7 +265,7 @@ const saveFile = async (
 ) => {
   const data = {
     md5,
-    key: md5 + extension,
+    key: md5 + extension.startsWith('.') ? extension : `.${extension}`,
     filename: file.name,
     url: store.fileUrl(md5, extension, handler, "screenshot/polygen"),
   };
@@ -325,7 +326,6 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-
 @use "@/styles/view-style.scss" as *;
 
 .content {

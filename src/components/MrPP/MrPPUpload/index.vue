@@ -28,6 +28,7 @@
 
 <script setup lang="ts">
 import { useFileStore } from "@/store/modules/config";
+import { UploadFileType } from "@/api/user/model";
 import { postFile } from "@/api/v1/files";
 import { FileHandler } from "@/assets/js/file/server";
 
@@ -111,13 +112,15 @@ const saveFile = async (
   handler: FileHandler,
   totalFiles: number
 ) => {
-  const data = {
+
+  extension = extension.startsWith('.') ? extension : `.${extension}`;
+  const data: UploadFileType = {
     filename: file.name,
     md5,
     key: md5 + extension,
     url: fileStore.store.fileUrl(md5, extension, handler, props.dir || ""),
   };
-
+  //alert(JSON.stringify(data));
   progress(1, 1);
 
   try {
@@ -144,9 +147,13 @@ const select = async () => {
           progress(p, 0)
         );
         const handler = await fileStore.store.publicHandler();
+        let extension = ".bytes";
+        if (file.extension !== undefined) {
+          extension = file.extension.startsWith('.') ? file.extension : `.${file.extension}`;
+        }
         const has = await fileStore.store.fileHas(
           md5,
-          file.extension!,
+          extension,
           handler,
           props.dir!
         );
@@ -154,7 +161,7 @@ const select = async () => {
         if (!has) {
           await fileStore.store.fileUpload(
             md5,
-            file.extension!,
+            extension,
             file,
             (p: number) => progress(p, 1),
             handler,
@@ -162,7 +169,7 @@ const select = async () => {
           );
         }
 
-        await saveFile(md5, file.extension!, file, handler, totalFiles);
+        await saveFile(md5, extension, file, handler, totalFiles);
       } catch (fileError) {
         console.error(`Error processing file ${file.name}:`, fileError);
       } finally {
