@@ -10,23 +10,29 @@
           </template>
 
           <!-- 图片容器 -->
-          <div class="image-container" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
-            <!-- 如果鼠标悬停且使用info插槽，则显示info插槽，否则显示图片 -->
-            <template v-if="hovering && $slots.info">
+          <div class="image-container">
+            <img v-if="!item.image" src="@/assets/image/none.png"
+              style="width: 100%; height: auto; object-fit: contain" />
+            <LazyImg v-else style="width: 100%; height: auto" fit="contain" :url="item.image.url" lazy></LazyImg>
+
+            <!-- 如果鼠标悬停且使用info插槽，则显示info插槽，否则显示图片 
+            <template v-if="false">
               <div class="info-container">
                 <slot name="info"></slot>
               </div>
             </template>
-            <template v-else>
+
+            <template v-else>1111
               <img v-if="!item.image" src="@/assets/image/none.png"
                 style="width: 100%; height: auto; object-fit: contain" />
               <LazyImg v-else style="width: 100%; height: auto" fit="contain" :url="item.image.url" lazy></LazyImg>
             </template>
-
+-->
             <!-- 在图片内底部的 音频 插槽，动态弹出 -->
-            <template v-if="$slots.audioInfo">
+            <template v-if="$slots.bar">
+
               <div class="audio-container">
-                <slot name="audioInfo"></slot>
+                <slot name="bar"></slot>
               </div>
             </template>
           </div>
@@ -71,7 +77,7 @@ const named = () => {
 const deleted = () => {
   emits("deleted", props.item);
 };
-
+/*
 const hovering = ref(false);
 let enterTimeout: ReturnType<typeof setTimeout>;
 let leaveTimeout: ReturnType<typeof setTimeout>;
@@ -94,7 +100,7 @@ const onMouseLeave = () => {
   leaveTimeout = setTimeout(() => {
     hovering.value = false;
   }, 5000);
-};
+};*/
 </script>
 
 <style scoped>

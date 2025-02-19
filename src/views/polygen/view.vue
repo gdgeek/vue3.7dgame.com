@@ -62,7 +62,6 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import Polygen from "@/components/Polygen.vue";
 import PolygenView from "@/components/PolygenView.vue";
 import { getPolygen, putPolygen, deletePolygen } from "@/api/v1/resources/index";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
@@ -82,7 +81,7 @@ const router = useRouter();
 const store = useFileStore().store;
 const { t } = useI18n();
 
-const three = ref<InstanceType<typeof Polygen> | null>(null);
+const three = ref<InstanceType<typeof PolygenView> | null>(null);
 const id = computed(() => route.query.id as string);
 const prepare = computed(
   () => polygenData.value !== null && polygenData.value.info !== null

@@ -9,7 +9,7 @@
               <el-button size="small" type="primary" icon="uploadFilled">
                 <span class="hidden-sm-and-down">{{
                   $t("polygen.uploadPolygen")
-                }}</span>
+                  }}</span>
               </el-button>
             </router-link>
           </el-button-group>
@@ -21,9 +21,9 @@
             <template #default="{ item }">
               <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
                 <template #info>
-                  <!-- <polygen-index :file="item.file" @progress="progress" />
+                  <polygen-index :file="item.file" @progress="progress" />
                   <el-progress v-if="percentage === 100" :percentage="100" status="success"></el-progress>
-                  <el-progress v-else :percentage="percentage"></el-progress> -->
+                  <el-progress v-else :percentage="percentage"></el-progress>
                 </template>
                 <template #enter>
                   <router-link :to="`/resource/polygen/view?id=${item.id}`">
@@ -59,7 +59,6 @@
 import { getPolygens, putPolygen, deletePolygen } from "@/api/v1/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-//import PolygenIndex from "@/components/PolygenIndex.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 
