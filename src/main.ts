@@ -1,4 +1,4 @@
-// import { createApp } from "vue";
+import { createApp } from "vue";
 import App from "./App.vue";
 import setupPlugins from "@/plugins";
 import "vue-cropper/dist/index.css";
@@ -79,5 +79,6 @@ app.directive("particle-effect", particleEffect);
 app.use(setupPlugins);
 app.use(VueIframe);
 app.use(ElementPlus);
+app.use(VueWaveform);
 
 app.mount("#app");

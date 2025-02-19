@@ -145,9 +145,7 @@ const save = async (
     filename: file.name,
     url: store.fileUrl(md5, extension, handler, "screenshot/audio"),
   };
-  const k = md5 + extension.startsWith('.') ? extension : `.${extension}`;
-  console.error(k);
-  alert(JSON.stringify(data));
+
   try {
     const response1 = await postFile(data);
     const audio = { image_id: response1.data.id, info };
