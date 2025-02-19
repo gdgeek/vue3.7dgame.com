@@ -79,6 +79,5 @@ app.directive("particle-effect", particleEffect);
 app.use(setupPlugins);
 app.use(VueIframe);
 app.use(ElementPlus);
-app.use(VueWaveform);
 
 app.mount("#app");
