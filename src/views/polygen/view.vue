@@ -7,13 +7,18 @@
             <b id="title">{{ $t("polygen.view.title") }}</b>
             <span v-if="polygenData">{{ polygenData.name }}</span>
           </template>
-          <div v-loading="false" class="box-item">
-            <polygen-view v-if="polygenData" ref="three" :file="polygenData.file" @loaded="loaded"
-              @progress="progress" />
+          <div class="box-item">
+            <div v-if="polygenData">
+              <polygen-view ref="three" :file="polygenData.file" @loaded="loaded" @progress="progress" />
+              <el-progress style="width: 100%;" :stroke-width="18" v-if="percentage !== 100" :text-inside="true"
+                :percentage="percentage">
+              </el-progress>
+            </div>
+            <el-card v-else>
+              <el-skeleton :rows="7" />
+            </el-card>
           </div>
-          <el-progress style="width: 100%;" :stroke-width="18" v-if="percentage !== 100" :text-inside="true"
-            :percentage="percentage">
-          </el-progress>
+
 
         </el-card>
         <br />
