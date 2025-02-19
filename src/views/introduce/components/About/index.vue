@@ -33,21 +33,15 @@
               <h4 class="content-title">联系方式</h4>
               <div class="contact-details">
                 <div class="contact-item">
-                  <!-- <i class="location-icon"></i> -->
-                  <el-icon>
-                    <Location />
-                  </el-icon>
+                  <i class="location-icon"></i>
                   <span>{{ contactInfo.address }}</span>
                 </div>
                 <div class="contact-item">
-                  <!-- <i class="phone-icon"></i> -->
-                  <el-icon>
-                    <Phone />
-                  </el-icon>
+                  <i class="phone-icon"></i>
                   <span>{{ contactInfo.phone }}</span>
                 </div>
                 <div class="contact-item">
-                  <!-- <i class="email-icon"></i> -->
+                  <i class="email-icon"></i>
                   <span>{{ contactInfo.email }}</span>
                 </div>
               </div>
@@ -89,12 +83,12 @@ const contactInfo = {
 const loading = ref(true);
 const route = useRoute();
 
-// 创建一个Promise数组来跟踪所有需要加载的资源
+// 跟踪所有需要加载的资源
 const loadResources = () => {
   const imageUrls = [
     ...BusinessList.map(item => item.image), // 业务列表中的图片
     '/media/image/logo.gif', // Logo图片
-    // 添加其他需要预加载的图片
+    // 其他需要预加载的图片
   ];
 
   const imagePromises = imageUrls.map(url => {
@@ -117,7 +111,7 @@ onMounted(() => {
     })
     .catch((error) => {
       console.error('资源加载失败:', error);
-      loading.value = false; // 即使加载失败也要关闭骨架屏
+      loading.value = false; // 加载失败也关闭骨架屏
     });
 
   if (window.location.hash) {
@@ -349,7 +343,8 @@ watch(() => route.hash, (newHash) => {
       .section-subtitle {
         font-size: 36px;
         font-weight: 500;
-        color: rgb(0, 204, 204);
+        // color: rgb(0, 204, 204);
+        color: #1890ff;
         margin: 0;
       }
     }
@@ -397,15 +392,15 @@ watch(() => route.hash, (newHash) => {
           }
 
           .location-icon {
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300CCCC"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>');
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231890ff"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>');
           }
 
           .phone-icon {
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300CCCC"><path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>');
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231890ff"><path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>');
           }
 
           .email-icon {
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300CCCC"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>');
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231890ff"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>');
           }
 
           span {
@@ -572,7 +567,7 @@ watch(() => route.hash, (newHash) => {
   transition: transform 0.5s ease-in-out;
 }
 
-// 添加新的动画关键帧
+// 动画关键帧
 @keyframes floatGradientLeft {
   0% {
     transform: translate(0, 0) rotate(0deg) scale(1);

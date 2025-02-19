@@ -31,7 +31,7 @@
             <span class="breadcrumb-separator">/</span>
             <span class="breadcrumb-current">{{
               navItems.find((item) => item.key === currentTab)?.label
-            }}</span>
+              }}</span>
           </div>
         </template>
       </div>
@@ -56,7 +56,7 @@
       <!-- 侧边栏顶部 -->
       <div class="sidebar-header">
         <img src="/media/image/logo.gif" alt="Logo" class="sidebar-logo" />
-        <span class="sidebar-company-name">上海不加班科技有限公司</span>
+        <span class="sidebar-company-name">不加班AR编程平台</span>
       </div>
       <div class="sidebar-items">
         <div v-for="item in navItems" :key="item.key" class="sidebar-item" :class="{ active: currentTab === item.key }"

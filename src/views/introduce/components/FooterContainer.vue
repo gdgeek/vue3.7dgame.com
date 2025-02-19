@@ -75,6 +75,18 @@ import { useInfomationStore } from '@/store/modules/information'
 import { useRouter } from 'vue-router'
 import { Phone, ChatDotRound, Location, Message } from '@element-plus/icons-vue'
 
+interface LinkItem {
+  text: string
+  url: string
+  external?: boolean
+  icon?: string
+}
+
+interface LinkGroup {
+  title: string
+  links: LinkItem[]
+}
+
 const router = useRouter()
 const currentYear = computed(() => new Date().getFullYear())
 const informationStore = useInfomationStore()
@@ -100,7 +112,7 @@ const handleClick = (url: string) => {
   router.push(url)
 }
 
-const linkGroups = [
+const linkGroups: LinkGroup[] = [
   {
     title: '关于我们',
     links: [
@@ -192,8 +204,13 @@ const linkGroups = [
       font-size: 14px;
 
       .el-icon {
-        font-size: 20px;
+        font-size: 24px;
         color: #1890ff;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     }
   }
