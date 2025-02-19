@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <Book :items="list"></Book>
     <el-tabs v-if="env.local()" type="border-card" lazy>
       <el-tab-pane :label="informationStore.title">
@@ -12,7 +11,7 @@
 
 <script setup lang="ts">
 import { useInfomationStore } from "@/store/modules/information";
-import environment from "@/environment.js";
+import environment from "@/environment";
 import Book from "@/components/Home/Book.vue";
 import LocalPage from "@/components/Home/LocalPage.vue";
 

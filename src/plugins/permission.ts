@@ -24,6 +24,7 @@ export function setupPermission() {
     "/introduce/news",
     "/introduce/news/document",
     "/introduce/news/category",
+    "/introduce/list-product",
     "/site/register",
     "/site/logout",
     "/privacy-policy",

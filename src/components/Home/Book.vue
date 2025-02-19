@@ -1,18 +1,9 @@
 <template>
   <el-tabs type="border-card" lazy>
     <el-tab-pane v-for="item in items" :key="item.label" :label="item.label">
-      <Document
-        v-if="item.type === 'document'"
-        :post-id="item.id"
-        :category="category"
-        :category-path="categoryPath"
-      >
+      <Document v-if="item.type === 'document'" :post-id="item.id" :category="category" :category-path="categoryPath">
       </Document>
-      <DocumentList
-        v-if="item.type === 'category'"
-        :category-id="item.id"
-        :document-path="documentPath"
-      ></DocumentList>
+      <DocumentList v-if="item.type === 'category'" :category-id="item.id" :document-path="documentPath"></DocumentList>
     </el-tab-pane>
   </el-tabs>
 </template>

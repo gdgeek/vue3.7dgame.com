@@ -1,13 +1,11 @@
 <template>
   <div class="portal-main-background">
-    <el-carousel height="600px" :interval="5000">
+    <el-carousel :height="carouselHeight" :interval="5000">
       <el-carousel-item v-for="(image, index) in bannerImages" :key="index">
         <div class="carousel-content" :style="{ backgroundImage: `url(${image.url})` }">
           <div class="content">
             <span class="font-title">{{ image.title }}</span>
-            <br /><br />
             <b class="subtitle">{{ image.subtitle }}</b>
-            <br /><br />
             <el-button class="font-text" @click="goto('/site/index')" type="primary">
               登入平台
             </el-button>
@@ -22,7 +20,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import "@/assets/font/font.css";
 
@@ -40,7 +38,7 @@ const bannerImages = ref<BannerImage[]>([
     subtitle: "让每个人都可以快乐地创造世界",
   },
   {
-    url: "/media/bg/04.jpg",
+    url: "/media/bg/03.jpg",
     title: "沉浸式学习体验",
     subtitle: "激发创造力与学习热情",
   },
@@ -56,6 +54,28 @@ const router = useRouter();
 const goto = (path: string): void => {
   router.push(path);
 };
+
+// 响应式轮播图高度
+const carouselHeight = ref("40vw");
+
+// 更新轮播图高度
+const updateCarouselHeight = () => {
+  if (window.innerWidth <= 768) {
+    carouselHeight.value = "60vw";
+  } else {
+    carouselHeight.value = "40vw";
+  }
+};
+
+// 监听窗口大小变化
+onMounted(() => {
+  updateCarouselHeight();
+  window.addEventListener("resize", updateCarouselHeight);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", updateCarouselHeight);
+});
 </script>
 
 <style lang="scss" scoped>
@@ -75,7 +95,7 @@ const goto = (path: string): void => {
 
 .content {
   padding-left: 10%;
-  max-width: 60%;
+  // max-width: 50%;
 }
 
 .font-title {
@@ -83,7 +103,7 @@ const goto = (path: string): void => {
   color: whitesmoke;
   word-wrap: break-word;
   display: block;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .subtitle {
@@ -92,6 +112,32 @@ const goto = (path: string): void => {
   color: whitesmoke;
   word-wrap: break-word;
   display: block;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+}
+
+// 添加移动端适配
+@media screen and (max-width: 768px) {
+  .font-title {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+  }
+
+  .content {
+    padding-left: 5%;
+  }
+}
+
+// 针对更小屏幕的适配
+@media screen and (max-width: 480px) {
+  .font-title {
+    font-size: 20px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
 }
 </style>
