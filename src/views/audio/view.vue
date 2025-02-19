@@ -58,11 +58,15 @@
 import { useRoute, useRouter } from "vue-router";
 import { getAudio, putAudio, deleteAudio } from "@/api/v1/resources";
 import type { ResourceInfo } from "@/api/v1/resources/model";
+import { postFile } from "@/api/v1/files";
+import { UploadFileType } from "@/api/user/model";
+import { useFileStore } from "@/store/modules/config";
+import { FileHandler } from "@/assets/js/file/server";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 
 const route = useRoute();
 const router = useRouter();
-//const store = useFileStore().store;
+const store = useFileStore().store;
 const { t } = useI18n();
 const audioData = ref<ResourceInfo | null>(null);
 const file = ref<string>();
@@ -126,9 +130,102 @@ const listenEnd = () => {
   isPlay.value = false;
   console.log("结束播放", isPlay.value);
 };
-const dealWith = () => {
-  if (prepare.value) {
+
+const save = async (
+  md5: string,
+  extension: string,
+  info: string,
+  file: File,
+  handler: FileHandler
+) => {
+  extension = extension.startsWith(".") ? extension : `.${extension}`;
+  const data: UploadFileType = {
+    md5,
+    key: md5 + extension,
+    filename: file.name,
+    url: store.fileUrl(md5, extension, handler, "screenshot/audio"),
+  };
+  const k = md5 + extension.startsWith('.') ? extension : `.${extension}`;
+  console.error(k);
+  alert(JSON.stringify(data));
+  try {
+    const response1 = await postFile(data);
+    const audio = { image_id: response1.data.id, info };
+    const response2 = await putAudio(audioData.value!.id, audio);
+    audioData.value!.image_id = response2.data.image_id;
+    audioData.value!.info = response2.data.info;
     expire.value = false;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+const dealWith = () => {
+  if (!prepare.value) {
+    const audio = document.getElementById("audio") as HTMLAudioElement;
+    const size = { x: 800, y: 800 };
+    setup(audio, size);
+  } else {
+    expire.value = false;
+  }
+};
+
+const thumbnail = async (
+  audio: HTMLAudioElement,
+  width: number,
+  height: number
+): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    const imageType = "image/jpeg";
+    const canvas = document.createElement("canvas");
+    const bgImg = document.getElementById("imgs") as HTMLImageElement;
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.drawImage(bgImg, 0, 0, width, height);
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const file = new File([blob], "thumbnail.jpg", { type: imageType });
+          resolve(file);
+        }
+      }, imageType);
+    }
+  });
+};
+
+const setup = async (
+  audio: HTMLAudioElement,
+  size: { x: number; y: number }
+) => {
+  if (size.x !== 0) {
+    const info = JSON.stringify({ size });
+    // const blob = await thumbnail(audio, size.x * 0.5, size.y * 0.5);
+    // blob.name = `${audioData.value!.name}.thumbnail`;
+    // blob.extension = ".jpg";
+
+    const file = await thumbnail(audio, size.x * 0.5, size.y * 0.5);
+    const md5 = await store.fileMD5(file);
+    let extension = file.type.split("/").pop()!
+    extension = extension.startsWith(".") ? extension : `.${extension}`;
+    const handler = await store.publicHandler();
+    const has = await store.fileHas(
+      md5,
+      extension,
+      handler,
+      "screenshot/audio"
+    );
+    if (!has) {
+      await store.fileUpload(
+        md5,
+        extension,
+        file,
+        () => { },
+        handler,
+        "screenshot/audio"
+      );
+    }
+    await save(md5, extension, info, file, handler);
   }
 };
 

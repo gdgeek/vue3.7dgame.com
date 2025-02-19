@@ -263,9 +263,10 @@ const saveFile = async (
   file: any,
   handler: any
 ) => {
+  extension = extension.startsWith(".") ? extension : `.${extension}`;
   const data = {
     md5,
-    key: md5 + extension.startsWith('.') ? extension : `.${extension}`,
+    key: md5 + extension,
     filename: file.name,
     url: store.fileUrl(md5, extension, handler, "screenshot/polygen"),
   };
@@ -273,6 +274,7 @@ const saveFile = async (
   const response = await postFile(data);
   updatePolygen(response.data.id!, info);
 };
+
 const loaded = async (info: any) => {
   if (prepare.value) {
     expire.value = false;

@@ -247,7 +247,6 @@ const saveFile = async (
   file: File,
   handler: any
 ) => {
-
   extension = extension.startsWith(".") ? extension : `.${extension}`;
   const data: UploadFileType = {
     md5,
