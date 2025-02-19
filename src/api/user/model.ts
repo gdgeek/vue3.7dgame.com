@@ -1,3 +1,5 @@
+import exp from "constants";
+
 /**
  * 登录用户信息
  */
@@ -6,6 +8,12 @@ export type _UserDataType = {
   email: string | null;
   username: string | null;
   emailBind: boolean;
+};
+export type UploadFileType = {
+  md5: string;
+  url: string;
+  filename: string;
+  key: string;
 };
 export type FileType = {
   id: number;

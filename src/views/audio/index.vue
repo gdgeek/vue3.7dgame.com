@@ -20,7 +20,7 @@
           <Waterfall v-if="items" :list="items" :width="320" :gutter="10" :backgroundColor="'rgba(255, 255, 255, .05)'">
             <template #default="{ item }">
               <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
-                <template #audioInfo>
+                <template #bar>
                   <audio id="audio" controls style="width: 100%; height: 30px" :src="item.file.url"></audio>
                 </template>
                 <template #enter>

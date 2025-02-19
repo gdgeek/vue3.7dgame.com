@@ -66,6 +66,7 @@ const refresh = async () => {
   });
 };
 const postMessage = (action: string, data: any) => {
+
   if (editor.value && editor.value.contentWindow) {
     editor.value.contentWindow.postMessage(
       {

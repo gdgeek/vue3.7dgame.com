@@ -57,6 +57,7 @@ import { useFileStore } from "@/store/modules/config";
 import { getVoxel, putVoxel, deleteVoxel } from "@/api/v1/resources/index";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
+import { UploadFileType } from "@/api/user/model";
 import { printVector3 } from "@/assets/js/helper";
 import Voxel from "@/components/Voxel.vue";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
@@ -246,7 +247,8 @@ const saveFile = async (
   file: File,
   handler: any
 ) => {
-  const data = {
+  extension = extension.startsWith(".") ? extension : `.${extension}`;
+  const data: UploadFileType = {
     md5,
     key: md5 + extension,
     filename: file.name,
@@ -300,6 +302,5 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-
 @use "@/styles/view-style.scss" as *;
 </style>

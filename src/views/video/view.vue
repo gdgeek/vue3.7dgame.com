@@ -50,6 +50,7 @@
 import { useRoute, useRouter } from "vue-router";
 import { getVideo, putVideo, deleteVideo } from "@/api/v1/resources/index";
 import { postFile } from "@/api/v1/files";
+import { UploadFileType } from "@/api/user/model";
 import { printVector2 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
 import type { ResourceInfo } from "@/api/v1/resources/model";
@@ -135,7 +136,9 @@ const save = async (
   file: File,
   handler: any
 ) => {
-  const data = {
+
+  extension = extension.startsWith(".") ? extension : `.${extension}`;
+  const data: UploadFileType = {
     md5,
     key: md5 + extension,
     filename: file.name,
@@ -284,6 +287,5 @@ const named = async (id: number, name: string) => {
 </script>
 
 <style lang="scss" scoped>
-
 @use "@/styles/view-style.scss" as *;
 </style>

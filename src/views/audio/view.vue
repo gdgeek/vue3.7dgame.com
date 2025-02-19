@@ -59,6 +59,7 @@ import { useRoute, useRouter } from "vue-router";
 import { getAudio, putAudio, deleteAudio } from "@/api/v1/resources";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import { postFile } from "@/api/v1/files";
+import { UploadFileType } from "@/api/user/model";
 import { useFileStore } from "@/store/modules/config";
 import { FileHandler } from "@/assets/js/file/server";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
@@ -137,12 +138,14 @@ const save = async (
   file: File,
   handler: FileHandler
 ) => {
-  const data = {
+  extension = extension.startsWith(".") ? extension : `.${extension}`;
+  const data: UploadFileType = {
     md5,
-    key: `${md5}${extension}`,
+    key: md5 + extension,
     filename: file.name,
     url: store.fileUrl(md5, extension, handler, "screenshot/audio"),
   };
+
   try {
     const response1 = await postFile(data);
     const audio = { image_id: response1.data.id, info };
@@ -201,24 +204,26 @@ const setup = async (
 
     const file = await thumbnail(audio, size.x * 0.5, size.y * 0.5);
     const md5 = await store.fileMD5(file);
+    let extension = file.type.split("/").pop()!
+    extension = extension.startsWith(".") ? extension : `.${extension}`;
     const handler = await store.publicHandler();
     const has = await store.fileHas(
       md5,
-      file.type.split("/").pop()!,
+      extension,
       handler,
       "screenshot/audio"
     );
     if (!has) {
       await store.fileUpload(
         md5,
-        file.type.split("/").pop()!,
+        extension,
         file,
         () => { },
         handler,
         "screenshot/audio"
       );
     }
-    await save(md5, file.type.split("/").pop()!, info, file, handler);
+    await save(md5, extension, info, file, handler);
   }
 };
 

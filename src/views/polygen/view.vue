@@ -7,13 +7,18 @@
             <b id="title">{{ $t("polygen.view.title") }}</b>
             <span v-if="polygenData">{{ polygenData.name }}</span>
           </template>
-          <div v-loading="false" class="box-item">
-            <polygen-view v-if="polygenData" ref="three" :file="polygenData.file" @loaded="loaded"
-              @progress="progress" />
+          <div class="box-item">
+            <div v-if="polygenData">
+              <polygen-view ref="three" :file="polygenData.file" @loaded="loaded" @progress="progress" />
+              <el-progress style="width: 100%;" :stroke-width="18" v-if="percentage !== 100" :text-inside="true"
+                :percentage="percentage">
+              </el-progress>
+            </div>
+            <el-card v-else>
+              <el-skeleton :rows="7" />
+            </el-card>
           </div>
-          <el-progress style="width: 100%;" :stroke-width="18" v-if="percentage !== 100" :text-inside="true"
-            :percentage="percentage">
-          </el-progress>
+
 
         </el-card>
         <br />
@@ -62,11 +67,11 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import Polygen from "@/components/Polygen.vue";
 import PolygenView from "@/components/PolygenView.vue";
 import { getPolygen, putPolygen, deletePolygen } from "@/api/v1/resources/index";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
+import { UploadFileType } from "@/api/user/model";
 import { printVector3 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
@@ -81,7 +86,7 @@ const router = useRouter();
 const store = useFileStore().store;
 const { t } = useI18n();
 
-const three = ref<InstanceType<typeof Polygen> | null>(null);
+const three = ref<InstanceType<typeof PolygenView> | null>(null);
 const id = computed(() => route.query.id as string);
 const prepare = computed(
   () => polygenData.value !== null && polygenData.value.info !== null
@@ -262,6 +267,7 @@ const saveFile = async (
   file: any,
   handler: any
 ) => {
+  extension = extension.startsWith(".") ? extension : `.${extension}`;
   const data = {
     md5,
     key: md5 + extension,
@@ -272,6 +278,7 @@ const saveFile = async (
   const response = await postFile(data);
   updatePolygen(response.data.id!, info);
 };
+
 const loaded = async (info: any) => {
   if (prepare.value) {
     expire.value = false;
@@ -325,7 +332,6 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-
 @use "@/styles/view-style.scss" as *;
 
 .content {
