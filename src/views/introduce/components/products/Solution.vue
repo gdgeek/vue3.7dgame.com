@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- 震撼沙盘板块 -->
-    <section class="sandtable-section section-bgc-gray">
+    <section class="sandtable-section">
       <br />
       <div align="center">
         <h1 class="section-title-size section-title-dark title-lighter">

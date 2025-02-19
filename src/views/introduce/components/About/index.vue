@@ -1,88 +1,80 @@
 <template>
   <div class="content-section">
-    <!-- <Carousel></Carousel> -->
-    <Banner></Banner>
-    <div class="business-container">
-      <div class="random-gradient"></div>
-      <div v-for="(business, index) in BusinessList" :key="index" class="business-item" :class="business.position">
-        <div class="business-content">
-          <h2>{{ business.title }}</h2>
-          <p>{{ business.description }}</p>
-        </div>
-        <div class="business-image">
-          <img :src="business.image" :alt="business.title" />
-        </div>
-      </div>
-
-      <div class="contact-section">
-        <div class="contact-header">
-          <h2 class="section-title">{{ contactInfo.title }}</h2>
-          <h3 class="section-subtitle">{{ contactInfo.subtitle }}</h3>
+    <template v-if="loading">
+      <SkeletonLoader />
+    </template>
+    <template v-else>
+      <Banner></Banner>
+      <div id="business" class="business-container">
+        <div class="random-gradient"></div>
+        <div v-for="(business, index) in BusinessList" :key="index" class="business-item" :class="business.position">
+          <div class="business-content">
+            <h2>{{ business.title }}</h2>
+            <p>{{ business.description }}</p>
+          </div>
+          <div class="business-image">
+            <img :src="business.image" :alt="business.title" />
+          </div>
         </div>
 
-        <div class="contact-content">
-          <div class="left-content">
-            <h4 class="content-title">公司简介</h4>
-            <p class="company-intro">{{ contactInfo.companyIntro }}</p>
+        <div id="contact" class="contact-section">
+          <div class="contact-header">
+            <h2 class="section-title">{{ contactInfo.title }}</h2>
+            <h3 class="section-subtitle">{{ contactInfo.subtitle }}</h3>
           </div>
 
-          <div class="right-content">
-            <h4 class="content-title">联系方式</h4>
-            <div class="contact-details">
-              <div class="contact-item">
-                <i class="location-icon"></i>
-                <span>{{ contactInfo.address }}</span>
-              </div>
-              <div class="contact-item">
-                <i class="phone-icon"></i>
-                <span>{{ contactInfo.phone }}</span>
-              </div>
-              <div class="contact-item">
-                <i class="email-icon"></i>
-                <span>{{ contactInfo.email }}</span>
+          <div class="contact-content">
+            <div class="left-content">
+              <h4 class="content-title">公司简介</h4>
+              <p class="company-intro">{{ contactInfo.companyIntro }}</p>
+            </div>
+
+            <div class="right-content">
+              <h4 class="content-title">联系方式</h4>
+              <div class="contact-details">
+                <div class="contact-item">
+                  <!-- <i class="location-icon"></i> -->
+                  <el-icon>
+                    <Location />
+                  </el-icon>
+                  <span>{{ contactInfo.address }}</span>
+                </div>
+                <div class="contact-item">
+                  <!-- <i class="phone-icon"></i> -->
+                  <el-icon>
+                    <Phone />
+                  </el-icon>
+                  <span>{{ contactInfo.phone }}</span>
+                </div>
+                <div class="contact-item">
+                  <!-- <i class="email-icon"></i> -->
+                  <span>{{ contactInfo.email }}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <Partner></Partner>
-    </div>
+        <div id="partner">
+          <Partner></Partner>
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
-import Carousel from "../Carousel.vue";
+// import Carousel from "../Carousel.vue";
 import Partner from "./Partner.vue";
+import { BusinessList } from "@/views/introduce/data/businessList";
+import Banner from "./Banner.vue";
+import SkeletonLoader from './AboutSkeletonLoader.vue';
 
 defineOptions({
   name: "About",
 });
-
-const BusinessList = [
-  {
-    title: "快速分析了解您的需求",
-    description:
-      "资深专业人员将对您的需求进行详细了解，发送我们的案例给您参考，为您的绝妙创意提供最适合的解决方案，并全程为项目的实现提供咨询。",
-    image: "/media/bg/business1.jpg",
-    position: "right",
-  },
-  {
-    title: "定制开发demo，5000元直接赠送",
-    description:
-      "我们将为您选择的案例提供Demo和报价。为下一步开发打好基础。如果您对我们的demo满意，当我们达成合作进行开发，5000可抵扣工程款。",
-    image: "/media/bg/business2.jpg",
-    position: "left",
-  },
-  {
-    title: "开发完成后的技术支持",
-    description:
-      "当开发完成验收后，您有任何疑问，我们都会有专家及时帮助您，如果您有需要，我们将会派出专业人员实地提供技术指导。",
-    image: "/media/bg/business3.jpg",
-    position: "right",
-  },
-];
 
 const contactInfo = {
   title: "以用户为中心",
@@ -93,6 +85,62 @@ const contactInfo = {
   phone: "15000159790",
   email: "dirui@bujiaban.com",
 };
+
+const loading = ref(true);
+const route = useRoute();
+
+// 创建一个Promise数组来跟踪所有需要加载的资源
+const loadResources = () => {
+  const imageUrls = [
+    ...BusinessList.map(item => item.image), // 业务列表中的图片
+    '/media/image/logo.gif', // Logo图片
+    // 添加其他需要预加载的图片
+  ];
+
+  const imagePromises = imageUrls.map(url => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(url);
+      img.onerror = () => reject(url);
+      img.src = url;
+    });
+  });
+
+  return Promise.all(imagePromises);
+};
+
+onMounted(() => {
+  // 等待资源加载完成
+  loadResources()
+    .then(() => {
+      loading.value = false;
+    })
+    .catch((error) => {
+      console.error('资源加载失败:', error);
+      loading.value = false; // 即使加载失败也要关闭骨架屏
+    });
+
+  if (window.location.hash) {
+    setTimeout(() => {
+      const element = document.querySelector(window.location.hash);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+  }
+});
+
+// 监听路由变化，处理锚点跳转
+watch(() => route.hash, (newHash) => {
+  if (newHash) {
+    setTimeout(() => {
+      const element = document.querySelector(newHash);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+  }
+});
 </script>
 
 <style lang="scss" scoped>
@@ -111,7 +159,6 @@ const contactInfo = {
     line-height: 1.6;
   }
 
-  // 添加移动端适配
   @media (max-width: 768px) {
     margin-top: 50px;
   }
@@ -163,7 +210,7 @@ const contactInfo = {
     animation: floatGradientRight 20s ease-in-out infinite;
   }
 
-  // 添加随机位置的绿色渐变圆形
+  // 随机位置的绿色渐变圆形
   .random-gradient {
     content: "";
     position: absolute;
@@ -186,7 +233,7 @@ const contactInfo = {
   }
 
   .business-item {
-    position: relative; // 确保内容在装饰背景之上
+    position: relative;
     z-index: 1;
     display: flex;
     align-items: center;
@@ -281,7 +328,7 @@ const contactInfo = {
   }
 
   .contact-section {
-    position: relative; // 确保内容在装饰背景之上
+    position: relative;
     z-index: 1;
     align-items: center;
     max-width: 1400px;
@@ -369,7 +416,6 @@ const contactInfo = {
       }
     }
 
-    // 响应式设计
     @media (max-width: 768px) {
       padding: 40px 20px;
 
@@ -404,7 +450,7 @@ const contactInfo = {
   }
 }
 
-// 添加动画关键帧
+// 动画关键帧
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -429,37 +475,36 @@ const contactInfo = {
   }
 }
 
-// 响应式设计
 @media (max-width: 768px) {
   .business-container {
     .business-item {
       flex-direction: column !important;
       padding: 20px;
-      gap: 30px; // 调整图片和文字之间的间距
+      gap: 30px;
 
       .business-content {
         width: 100%;
-        padding: 0; // 移除内边距
-        text-align: center; // 文字居中显示
+        padding: 0;
+        text-align: center;
 
         h2 {
-          font-size: 28px; // 减小标题字体大小
+          font-size: 28px;
 
           &::after {
-            left: 50%; // 让下划线居中
+            left: 50%;
             transform: translateX(-50%);
           }
         }
 
         p {
-          font-size: 16px; // 调整描述文字大小
+          font-size: 16px;
         }
       }
 
       .business-image {
         width: 100%;
-        height: 250px; // 调整图片高度
-        order: -1; // 让图片始终显示在上方
+        height: 250px;
+        order: -1;
       }
     }
   }
@@ -592,5 +637,12 @@ const contactInfo = {
   100% {
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
+}
+
+// 添加锚点偏移，防止被固定导航栏遮挡
+#business,
+#contact,
+#partner {
+  scroll-margin-top: 64px; // 根据你的导航栏高度调整
 }
 </style>

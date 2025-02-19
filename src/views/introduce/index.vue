@@ -31,7 +31,7 @@
             <span class="breadcrumb-separator">/</span>
             <span class="breadcrumb-current">{{
               navItems.find((item) => item.key === currentTab)?.label
-              }}</span>
+            }}</span>
           </div>
         </template>
       </div>
@@ -66,9 +66,10 @@
       </div>
     </div>
 
-    <!-- 内容区域 -->
+    <!-- 主体内容区域 -->
     <div class="content-container">
       <router-view></router-view>
+      <FooterContainer />
     </div>
   </div>
 </template>
@@ -76,6 +77,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import FooterContainer from "./components/FooterContainer.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -85,7 +87,6 @@ defineOptions({
   inheritAttrs: false,
 });
 
-// 导航项配置
 const navItems = [
   { key: "about", label: "关于我们" },
   { key: "products", label: "产品案例" },
@@ -93,7 +94,6 @@ const navItems = [
   { key: "login", label: "登录平台" },
 ];
 
-// 当前选中的标签
 const currentTab = ref("about");
 
 // 切换标签方法
@@ -107,7 +107,6 @@ const switchTab = (tab: string) => {
   currentTab.value = tab;
 };
 
-// 路由监听
 watch(
   () => route.path,
   (newPath) => {
@@ -117,29 +116,24 @@ watch(
   { immediate: true }
 );
 
-// 添加滚动状态控制
 const isScrolled = ref(false);
 
-// 处理滚动事件
 const handleScroll = () => {
-  isScrolled.value = window.scrollY > 500;
+  isScrolled.value = window.scrollY > 250;
 };
 
-// 移动端响应式状态
 const isMobile = ref(false);
 const sidebarVisible = ref(false);
 
-// 检查是否为移动端
 const checkMobile = () => {
   isMobile.value = window.innerWidth <= 768;
 };
 
-// 切换侧边栏显示状态
+// 切换侧边栏显
 const toggleSidebar = () => {
   sidebarVisible.value = !sidebarVisible.value;
 };
 
-// 处理侧边栏菜单项点击
 const handleSidebarItemClick = (tab: string) => {
   switchTab(tab);
   toggleSidebar();
@@ -160,6 +154,7 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .app-container {
+  position: relative;
   min-height: 100vh;
   background-color: #f5f5f5;
   width: 100%;
@@ -285,6 +280,9 @@ onUnmounted(() => {
 .content-container {
   position: absolute;
   width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   flex: 1;
   background-color: #fff;
   box-sizing: border-box;
