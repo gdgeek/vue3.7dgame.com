@@ -48,7 +48,7 @@
                     {{ $t("verse.view.reply.publish") }}
                     <time class="time">{{ reply.updated_at }}</time>
                     &nbsp; &nbsp;
-                    <el-button v-if="canDelete(reply)" size="small" type="text"
+                    <el-button v-if="canDelete(reply)" size="small" link 
                       @click="deletedWindow(reply.id)"><el-icon>
                         <Delete></Delete>
                       </el-icon></el-button>

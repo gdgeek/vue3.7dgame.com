@@ -33,7 +33,7 @@
               v-if="canUpdate(message)"
               size=""
               style="padding: 0 0 0 10px; color: #2190ac"
-              type="text"
+              link
               @click="dialog = true"
             >
               {{ $t("verse.view.message.update") }}
@@ -42,7 +42,7 @@
               v-if="canDelete(message)"
               size=""
               style="padding: 0 0 0 10px; color: #2190ac"
-              type="text"
+              link
               @click="confirmDeletion(message.id!)"
             >
               {{ $t("verse.view.message.delete") }}
