@@ -81,11 +81,11 @@
         </span>
       </div>
       <div
-        style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+        style="display: flex; justify-content: space-between; margin-top: 10px"
       >
         <span
           v-if="informationStore.beian"
-          style="display: flex; align-items: center"
+          style="display: flex; align-items: center; flex: 2"
         >
           <el-link
             href="https://beian.miit.gov.cn/"
@@ -104,7 +104,12 @@
 
         <span
           v-if="informationStore.privacyPolicy"
-          style="display: flex; align-items: center; margin-left: 9.5%"
+          style="
+            display: flex;
+            align-items: center;
+            flex: 1;
+            justify-content: center;
+          "
         >
           <el-link
             :href="informationStore.privacyPolicy.url"
@@ -112,7 +117,9 @@
             :underline="false"
             style="display: flex; align-items: center"
           >
-            <el-icon><Briefcase></Briefcase></el-icon>
+            <el-icon>
+              <Briefcase></Briefcase>
+            </el-icon>
             <span class="font-text" style="margin-left: 5px">
               {{ informationStore.privacyPolicy.name }}
             </span>
@@ -121,7 +128,12 @@
 
         <span
           v-if="informationStore.version"
-          style="display: flex; align-items: center; margin-left: 9.5%"
+          style="
+            display: flex;
+            align-items: center;
+            flex: 1;
+            justify-content: flex-end;
+          "
         >
           <el-link
             target="_blank"

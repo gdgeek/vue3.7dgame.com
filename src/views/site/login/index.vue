@@ -1,5 +1,4 @@
 <template>
-
   <div class="content">
     <div v-loading="loading" :class="['box1', { 'dark-theme': isDark }]">
       <div :class="['box2', { 'dark-theme': isDark }]">
@@ -8,19 +7,18 @@
         <br />
         <el-card style="width: 100%" shadow="never">
           <span>登录账号</span>
-          <br>
-          <br>
+          <br />
+          <br />
           <name-password />
         </el-card>
         <br />
         <div style="width: 100%" shadow="never" class="apple-login-container">
           <wechat />
         </div>
-        <br>
+        <br />
       </div>
     </div>
   </div>
-
 </template>
 <script setup lang="ts">
 import "@/assets/font/font.css";
@@ -157,14 +155,14 @@ body {
 
       h1 {
         margin-top: 0;
-        font-family: "KaiTi", sans-serif;
+        font-family: "KaiTi", "STKaiti", "华文楷体", "楷体", serif;
         font-size: 36px;
-        font-weight: 400;
+        font-weight: 500;
       }
 
       h4 {
         margin-top: 0;
-        font-family: "KaiTi", sans-serif;
+        font-family: "KaiTi", "STKaiti", "华文楷体", "楷体", serif;
         font-size: 18px;
         font-weight: 400;
       }

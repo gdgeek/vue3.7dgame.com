@@ -38,13 +38,26 @@
 
         <!-- 导航链接组 -->
         <div class="footer-links">
-          <div class="link-group" v-for="group in linkGroups" :key="group.title">
+          <div
+            class="link-group"
+            v-for="group in linkGroups"
+            :key="group.title"
+          >
             <h3>{{ group.title }}</h3>
             <ul>
               <li v-for="link in group.links" :key="link.text">
-                <a :href="link.external ? link.url : 'javascript:void(0)'" :target="link.external ? '_blank' : '_self'"
-                  @click="!link.external && handleClick(link.url)" :class="{ 'external-link': link.external }">
-                  <img v-if="link.icon" :src="link.icon" :alt="link.text" class="link-icon">
+                <a
+                  :href="link.external ? link.url : 'javascript:void(0)'"
+                  :target="link.external ? '_blank' : '_self'"
+                  @click="!link.external && handleClick(link.url)"
+                  :class="{ 'external-link': link.external }"
+                >
+                  <img
+                    v-if="link.icon"
+                    :src="link.icon"
+                    :alt="link.text"
+                    class="link-icon"
+                  />
                   {{ link.text }}
                   <el-icon v-if="link.external" class="external-icon">
                     <ArrowRight />
@@ -70,80 +83,100 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useInfomationStore } from '@/store/modules/information'
-import { useRouter } from 'vue-router'
-import { Phone, ChatDotRound, Location, Message } from '@element-plus/icons-vue'
+import { ref, computed } from "vue";
+import { useInfomationStore } from "@/store/modules/information";
+import { useRouter } from "vue-router";
+import {
+  Phone,
+  ChatDotRound,
+  Location,
+  Message,
+} from "@element-plus/icons-vue";
 
 interface LinkItem {
-  text: string
-  url: string
-  external?: boolean
-  icon?: string
+  text: string;
+  url: string;
+  external?: boolean;
+  icon?: string;
 }
 
 interface LinkGroup {
-  title: string
-  links: LinkItem[]
+  title: string;
+  links: LinkItem[];
 }
 
-const router = useRouter()
-const currentYear = computed(() => new Date().getFullYear())
-const informationStore = useInfomationStore()
+const router = useRouter();
+const currentYear = computed(() => new Date().getFullYear());
+const informationStore = useInfomationStore();
 
 // 处理链接点击
 const handleClick = (url: string) => {
-  if (url.startsWith('#')) {
-    return
+  if (url.startsWith("#")) {
+    return;
   }
 
-  const [path, hash] = url.split('#')
+  const [path, hash] = url.split("#");
 
   // 如果当前路径与目标路径相同，直接滚动到目标元素
   if (router.currentRoute.value.path === path && hash) {
-    const element = document.querySelector(`#${hash}`)
+    const element = document.querySelector(`#${hash}`);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
+      element.scrollIntoView({ behavior: "smooth" });
     }
-    return
+    return;
   }
 
   // 否则进行路由跳转
-  router.push(url)
-}
+  router.push(url);
+};
 
 const linkGroups: LinkGroup[] = [
   {
-    title: '关于我们',
+    title: "关于我们",
     links: [
-      { text: '公司业务', url: '/introduce/about#business' },
-      { text: '公司简介', url: '/introduce/about#contact' },
-      { text: '合作伙伴', url: '/introduce/about#partner' },
-    ]
+      { text: "公司业务", url: "/introduce/about#business" },
+      { text: "公司简介", url: "/introduce/about#contact" },
+      { text: "合作伙伴", url: "/introduce/about#partner" },
+    ],
   },
   {
-    title: '产品案例',
+    title: "产品案例",
     links: [
-      { text: '应用场景', url: '/introduce/products#solution' },
-      { text: '产品中心', url: '/introduce/products#cloud' }
-    ]
+      { text: "应用场景", url: "/introduce/products#solution" },
+      { text: "产品中心", url: "/introduce/products#cloud" },
+    ],
   },
   {
-    title: '新闻动态',
+    title: "新闻动态",
     links: [
-      { text: '新闻', url: '/introduce/news?tab=news' },
-      { text: '案例教程', url: '/introduce/news?tab=tutorial' }
-    ]
+      { text: "新闻", url: "/introduce/news?tab=news" },
+      { text: "案例教程", url: "/introduce/news?tab=tutorial" },
+    ],
   },
   {
-    title: '关注我们',
+    title: "关注我们",
     links: [
-      { text: 'TestFlight', url: 'https://testflight.apple.com/join/V4XNEG6t', external: true, icon: '/testflight.ico' },
-      { text: 'Discord', url: 'https://discord.gg/KhkJySu7bb', external: true, icon: '/discord.ico' },
-      { text: 'X.com', url: 'https://x.com/GD_Geek', external: true, icon: '/x3.png' }
-    ]
-  }
-]
+      {
+        text: "TestFlight",
+        url: "https://testflight.apple.com/join/V4XNEG6t",
+        external: true,
+        icon: "/testflight.ico",
+      },
+      {
+        text: "Discord",
+        url: "https://discord.gg/KhkJySu7bb",
+        external: true,
+        icon: "/discord.ico",
+      },
+      {
+        text: "X.com",
+        url: "https://x.com/GD_Geek",
+        external: true,
+        icon: "/x3.png",
+      },
+    ],
+  },
+];
 </script>
 
 <style lang="scss" scoped>
@@ -152,25 +185,29 @@ const linkGroups: LinkGroup[] = [
   bottom: 0;
   width: 100%;
   margin-top: auto;
-  background: linear-gradient(135deg,
-      rgba(255, 240, 245, 0.9) 0%,
-      rgba(240, 248, 255, 0.9) 50%,
-      rgba(230, 230, 250, 0.9) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 240, 245, 0.9) 0%,
+    rgba(240, 248, 255, 0.9) 50%,
+    rgba(230, 230, 250, 0.9) 100%
+  );
   backdrop-filter: blur(10px);
   z-index: 10;
   padding: 48px 0 0;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 30% 30%,
-        rgba(255, 182, 193, 0.1) 0%,
-        rgba(173, 216, 230, 0.1) 50%,
-        rgba(221, 160, 221, 0.1) 100%);
+    background: radial-gradient(
+      circle at 30% 30%,
+      rgba(255, 182, 193, 0.1) 0%,
+      rgba(173, 216, 230, 0.1) 50%,
+      rgba(221, 160, 221, 0.1) 100%
+    );
     pointer-events: none;
   }
 }

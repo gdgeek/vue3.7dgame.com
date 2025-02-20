@@ -2,16 +2,23 @@
   <div class="portal-main-background">
     <el-carousel :height="carouselHeight" :interval="5000">
       <el-carousel-item v-for="(image, index) in bannerImages" :key="index">
-        <div class="carousel-content" :style="{ backgroundImage: `url(${image.url})` }">
+        <div
+          class="carousel-content"
+          :style="{ backgroundImage: `url(${image.url})` }"
+        >
           <div class="content">
             <span class="font-title">{{ image.title }}</span>
             <b class="subtitle">{{ image.subtitle }}</b>
-            <el-button class="font-text" @click="goto('/site/index')" type="primary">
+            <el-button
+              class="font-text"
+              @click="goto('/site/index')"
+              type="primary"
+            >
               登入平台
             </el-button>
-            <el-button class="font-text" @click="goto('/site/download')">
+            <!-- <el-button class="font-text" @click="goto('/site/download')">
               相关下载
-            </el-button>
+            </el-button> -->
           </div>
         </div>
       </el-carousel-item>
@@ -34,18 +41,18 @@ interface BannerImage {
 const bannerImages = ref<BannerImage[]>([
   {
     url: "/media/bg/hololens.jpg",
-    title: "元宇宙实景编程平台",
-    subtitle: "让每个人都可以快乐地创造世界",
+    title: "AR混合现实编程平台",
+    subtitle: "让每个人都能轻松创造混合现实世界",
   },
   {
     url: "/media/bg/03.jpg",
-    title: "沉浸式学习体验",
-    subtitle: "激发创造力与学习热情",
+    title: "沉浸式多人协作体验",
+    subtitle: "多设备实时互动,激发创造力",
   },
   {
     url: "/media/bg/05.jpg",
-    title: "互动编程环境",
-    subtitle: "边学边做，快乐编程",
+    title: "可视化编程环境",
+    subtitle: "零门槛入门,快速实现创意",
   },
 ]);
 
