@@ -48,7 +48,7 @@ const screen = computed(() => {
   };
 });
 
-// 创建一个Promise数组来跟踪所有需要加载的资源
+// 跟踪所有需要加载的资源
 const loadResources = () => {
   const imageUrls = [
     '/media/bg/education.jpg',

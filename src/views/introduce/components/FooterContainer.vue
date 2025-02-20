@@ -152,12 +152,31 @@ const linkGroups: LinkGroup[] = [
   bottom: 0;
   width: 100%;
   margin-top: auto;
-  background-color: #f8f8f8;
+  background: linear-gradient(135deg,
+      rgba(255, 240, 245, 0.9) 0%,
+      rgba(240, 248, 255, 0.9) 50%,
+      rgba(230, 230, 250, 0.9) 100%);
+  backdrop-filter: blur(10px);
   z-index: 10;
   padding: 48px 0 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 30%,
+        rgba(255, 182, 193, 0.1) 0%,
+        rgba(173, 216, 230, 0.1) 50%,
+        rgba(221, 160, 221, 0.1) 100%);
+    pointer-events: none;
+  }
 }
 
 .footer-content {
+  position: relative;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
@@ -261,7 +280,7 @@ const linkGroups: LinkGroup[] = [
 }
 
 .footer-bottom {
-  border-top: 1px solid #e5e6eb;
+  border-top: 1px solid rgba(229, 230, 235, 0.5);
   padding: 16px 0;
   display: flex;
   justify-content: space-between;

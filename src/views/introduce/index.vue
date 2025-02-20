@@ -102,8 +102,8 @@ const switchTab = (tab: string) => {
     router.push("/site/login");
     return;
   }
-  // 更新路由时使用相对路径
-  router.push(tab);
+  // router.push(tab);
+  router.push(`/introduce/${tab}`);
   currentTab.value = tab;
 };
 
