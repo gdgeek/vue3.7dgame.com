@@ -1,5 +1,4 @@
 <template>
-
   <div class="content">
     <div :class="['box', { 'dark-theme': isDark }]">
       <el-card shadow="hover" :body-style="{ padding: '15px' }">
@@ -13,7 +12,6 @@
       </el-card>
     </div>
   </div>
-
 </template>
 
 <script setup lang="ts">
@@ -21,8 +19,6 @@ import "@/assets/font/font.css";
 import { useRouter } from "vue-router";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
-
-
 
 const router = useRouter();
 const settingsStore = useSettingsStore();
@@ -34,7 +30,6 @@ onMounted(() => {
     router.push("/site/login?redirect=/home/index");
   }, 1000);
 });
-
 </script>
 
 <style scoped lang="scss">

@@ -652,7 +652,7 @@ export default {
       success: "保存成功",
     },
     scene: {
-      error: "没有编辑器",
+      error: "没有场景编辑器",
       info: "没有保存权限！",
       success: "场景保存成功~",
     },
@@ -661,7 +661,7 @@ export default {
       save: "保存",
       error1: "没有组件信息",
       error2: "没有编辑权限",
-      error3: "没有编辑器",
+      error3: "没有脚本编辑器",
       success: "保存成功",
       info: "没有修改",
       leave: {
@@ -965,7 +965,7 @@ export default {
         },
       },
       sceneEditor: {
-        error1: "没有编辑器",
+        error1: "没有场景编辑器",
         info1: "添加预设",
         info2: "添加模块",
         info3: "没有保存权限",
@@ -976,7 +976,7 @@ export default {
         save: "保存",
         error1: "没有信息",
         error2: "没有编辑权限",
-        error3: "没有编辑器",
+        error3: "没有脚本编辑器",
         success: "保存成功",
         info: "没有修改",
         edit: "逻辑编辑",

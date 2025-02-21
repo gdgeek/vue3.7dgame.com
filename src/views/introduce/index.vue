@@ -1,13 +1,21 @@
 <template>
   <div class="app-container">
     <!-- 导航栏 -->
-    <nav class="nav-container" :class="{
-      'nav-scrolled':
-        isScrolled && (currentTab === 'about' || currentTab === 'products') && !isMobile,
-      'nav-transparent':
-        (currentTab === 'about' || currentTab === 'products') && !isScrolled && !isMobile,
-      'nav-default': (currentTab !== 'about' && currentTab !== 'products') || isMobile,
-    }">
+    <nav
+      class="nav-container"
+      :class="{
+        'nav-scrolled':
+          isScrolled &&
+          (currentTab === 'about' || currentTab === 'products') &&
+          !isMobile,
+        'nav-transparent':
+          (currentTab === 'about' || currentTab === 'products') &&
+          !isScrolled &&
+          !isMobile,
+        'nav-default':
+          (currentTab !== 'about' && currentTab !== 'products') || isMobile,
+      }"
+    >
       <div class="nav-left">
         <div class="menu-icon" @click="toggleSidebar" v-show="isMobile">
           <span></span>
@@ -17,58 +25,79 @@
         <!-- 桌面端显示 -->
         <template v-if="!isMobile">
           <img src="/media/image/logo.gif" alt="Logo" class="logo" />
-          <span class="company-name" :class="{
-            'text-white':
-              (currentTab === 'about') && !isScrolled,
-          }">
+          <span
+            class="company-name"
+            :class="{
+              'text-white': currentTab === 'about' && !isScrolled,
+            }"
+          >
             不加班AR编程平台
           </span>
         </template>
         <!-- 移动端显示 -->
         <template v-else>
           <div class="mobile-breadcrumb">
-            <span class="breadcrumb-home" @click="switchTab('about')">不加班AR编程平台</span>
+            <span class="breadcrumb-home" @click="switchTab('about')"
+              >不加班AR编程平台</span
+            >
             <span class="breadcrumb-separator">/</span>
             <span class="breadcrumb-current">{{
               navItems.find((item) => item.key === currentTab)?.label
-              }}</span>
+            }}</span>
           </div>
         </template>
       </div>
       <div class="nav-right" v-show="!isMobile">
-        <div v-for="item in navItems" :key="item.key" :class="[
-          'nav-item',
-          {
-            active: currentTab === item.key,
-            'text-white':
-              (currentTab === 'about') &&
-              !isScrolled,
-          },
-        ]" @click="switchTab(item.key)">
+        <div
+          v-for="item in navItems"
+          :key="item.key"
+          :class="[
+            'nav-item',
+            {
+              active: currentTab === item.key,
+              'text-white': currentTab === 'about' && !isScrolled,
+            },
+          ]"
+          @click="switchTab(item.key)"
+        >
           {{ item.label }}
         </div>
       </div>
     </nav>
 
     <!-- 移动端侧边栏菜单 -->
-    <div class="sidebar-overlay" v-if="isMobile && sidebarVisible" @click="toggleSidebar"></div>
-    <div class="sidebar-menu" :class="{ 'sidebar-visible': sidebarVisible }" v-if="isMobile">
+    <div
+      class="sidebar-overlay"
+      v-if="isMobile && sidebarVisible"
+      @click="toggleSidebar"
+    ></div>
+    <div
+      class="sidebar-menu"
+      :class="{ 'sidebar-visible': sidebarVisible }"
+      v-if="isMobile"
+    >
       <!-- 侧边栏顶部 -->
       <div class="sidebar-header">
         <img src="/media/image/logo.gif" alt="Logo" class="sidebar-logo" />
-        <span class="sidebar-company-name">上海不加班科技有限公司</span>
+        <span class="sidebar-company-name">不加班AR编程平台</span>
       </div>
       <div class="sidebar-items">
-        <div v-for="item in navItems" :key="item.key" class="sidebar-item" :class="{ active: currentTab === item.key }"
-          @click="handleSidebarItemClick(item.key)">
+        <div
+          v-for="item in navItems"
+          :key="item.key"
+          class="sidebar-item"
+          :class="{ active: currentTab === item.key }"
+          @click="handleSidebarItemClick(item.key)"
+        >
           {{ item.label }}
         </div>
       </div>
     </div>
 
-    <!-- 内容区域 -->
+    <!-- 主体内容区域 -->
     <div class="content-container">
       <router-view></router-view>
+      <FooterContainer />
     </div>
   </div>
 </template>
@@ -76,6 +105,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import FooterContainer from "./components/FooterContainer.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -85,7 +115,6 @@ defineOptions({
   inheritAttrs: false,
 });
 
-// 导航项配置
 const navItems = [
   { key: "about", label: "关于我们" },
   { key: "products", label: "产品案例" },
@@ -93,7 +122,6 @@ const navItems = [
   { key: "login", label: "登录平台" },
 ];
 
-// 当前选中的标签
 const currentTab = ref("about");
 
 // 切换标签方法
@@ -102,12 +130,11 @@ const switchTab = (tab: string) => {
     router.push("/site/login");
     return;
   }
-  // 更新路由时使用相对路径
-  router.push(tab);
+  // router.push(tab);
+  router.push(`/introduce/${tab}`);
   currentTab.value = tab;
 };
 
-// 路由监听
 watch(
   () => route.path,
   (newPath) => {
@@ -117,29 +144,24 @@ watch(
   { immediate: true }
 );
 
-// 添加滚动状态控制
 const isScrolled = ref(false);
 
-// 处理滚动事件
 const handleScroll = () => {
-  isScrolled.value = window.scrollY > 500;
+  isScrolled.value = window.scrollY > 250;
 };
 
-// 移动端响应式状态
 const isMobile = ref(false);
 const sidebarVisible = ref(false);
 
-// 检查是否为移动端
 const checkMobile = () => {
   isMobile.value = window.innerWidth <= 768;
 };
 
-// 切换侧边栏显示状态
+// 切换侧边栏显
 const toggleSidebar = () => {
   sidebarVisible.value = !sidebarVisible.value;
 };
 
-// 处理侧边栏菜单项点击
 const handleSidebarItemClick = (tab: string) => {
   switchTab(tab);
   toggleSidebar();
@@ -160,6 +182,7 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .app-container {
+  position: relative;
   min-height: 100vh;
   background-color: #f5f5f5;
   width: 100%;
@@ -285,6 +308,9 @@ onUnmounted(() => {
 .content-container {
   position: absolute;
   width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   flex: 1;
   background-color: #fff;
   box-sizing: border-box;
@@ -332,6 +358,19 @@ onUnmounted(() => {
 
   &.sidebar-visible {
     left: 0;
+
+    // 侧边栏显示时的logo和名称动画
+    .sidebar-header {
+      .sidebar-logo {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      .sidebar-company-name {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
   }
 
   .sidebar-header {
@@ -344,12 +383,20 @@ onUnmounted(() => {
     .sidebar-logo {
       width: 32px;
       height: 32px;
+      transform: scale(0.8);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition-delay: 0.1s;
     }
 
     .sidebar-company-name {
       font-size: 16px;
       font-weight: bold;
       color: #333;
+      transform: translateX(-20px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition-delay: 0.2s;
     }
   }
 

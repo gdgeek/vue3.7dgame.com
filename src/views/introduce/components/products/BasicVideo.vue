@@ -2,10 +2,18 @@
   <!-- 多卡片列表视频播放，公用组件 -->
   <div>
     <!-- 卡片部分 -->
-    <el-card shadow="hover" style="width: 94%" :body-style="{ padding: videoPadding + 'px' }">
+    <el-card
+      shadow="hover"
+      style="width: 94%"
+      :body-style="{ padding: videoPadding + 'px' }"
+    >
       <div>
-        <img :src="item.image" class="image" style="width: 100%; position: relative; z-index: 0"
-          @click="onSelected(item)" />
+        <img
+          :src="item.image"
+          class="image"
+          style="width: 100%; position: relative; z-index: 0"
+          @click="onSelected(item)"
+        />
       </div>
       <div style="padding: 14px">
         <div style="height: 60px; text-align: left">
@@ -16,7 +24,7 @@
           </div>
         </div>
         <br />
-        <el-button type="text" class="button" @click="onSelected(item)">
+        <el-button link type="primary" class="button" @click="onSelected(item)">
           播放视频
         </el-button>
         <br />
@@ -25,9 +33,20 @@
     <br />
 
     <!-- 弹出视频页 -->
-    <el-dialog v-model="dialogVisible" :width="width + '%'" :before-close="handleClose" :title="video?.title">
+    <el-dialog
+      v-model="dialogVisible"
+      :width="width + '%'"
+      :before-close="handleClose"
+      :title="video?.title"
+    >
       <el-card class="box-card" style="text-align: center">
-        <video ref="videoRef" :src="video?.url" controls style="width: 100%" @play="onPlayerPlay"></video>
+        <video
+          ref="videoRef"
+          :src="video?.url"
+          controls
+          style="width: 100%"
+          @play="onPlayerPlay"
+        ></video>
       </el-card>
     </el-dialog>
   </div>
@@ -42,7 +61,6 @@ interface VideoItem {
   title: string;
   describe?: string;
 }
-
 
 defineProps({
   item: {

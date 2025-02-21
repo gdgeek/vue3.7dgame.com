@@ -1,7 +1,5 @@
 <template>
-
   <div class="content">
-
     <div :class="['box1', { 'dark-theme': isDark }]">
       <div :class="['box2', { 'dark-theme': isDark }]">
         <h1>{{ $t("login.h1") }}</h1>
@@ -9,20 +7,35 @@
         <br />
         <el-tabs style="width: 100%" type="border-card" :stretch="true">
           <el-tab-pane :label="$t('login.createAccount')">
-            <el-form ref="registerFormRef" class="login-form" :rules="registerRules" :model="registerForm"
-              label-width="auto">
+            <el-form
+              ref="registerFormRef"
+              class="login-form"
+              :rules="registerRules"
+              :model="registerForm"
+              label-width="auto"
+            >
               <el-form-item :label="$t('login.username')" prop="username">
-                <el-input v-model="registerForm.username" suffix-icon="Message"></el-input>
+                <el-input
+                  v-model="registerForm.username"
+                  suffix-icon="Message"
+                ></el-input>
               </el-form-item>
 
               <el-form-item :label="$t('login.password')" prop="password">
-                <el-input v-model="registerForm.password" type="password" suffix-icon="Lock"></el-input>
+                <el-input
+                  v-model="registerForm.password"
+                  type="password"
+                  suffix-icon="Lock"
+                ></el-input>
               </el-form-item>
 
               <el-form-item :label="$t('login.repassword')" prop="repassword">
-                <el-input v-model="registerForm.repassword" type="password" suffix-icon="Lock"></el-input>
+                <el-input
+                  v-model="registerForm.repassword"
+                  type="password"
+                  suffix-icon="Lock"
+                ></el-input>
               </el-form-item>
-
 
               <el-form-item class="login-button">
                 <el-button style="width: 100%" type="primary" @click="register">
@@ -31,21 +44,17 @@
               </el-form-item>
             </el-form>
           </el-tab-pane>
-
         </el-tabs>
         <br />
         <el-button style="width: 100%" @click="back">
           <el-icon>
             <Back />
           </el-icon>
-          &nbsp;&nbsp;
-
-          返回
+          &nbsp;&nbsp; 返回
         </el-button>
       </div>
     </div>
   </div>
-
 </template>
 
 <script setup lang="ts">
@@ -59,7 +68,7 @@ import { onMounted, watch, ref } from "vue";
 import { useI18n } from "vue-i18n"; // Ensure you have this import
 import type { AppleIdToken } from "@/api/auth/model";
 import WechatApi from "@/api/v1/wechat";
-import { RegisterData, } from "@/api/auth/model";
+import { RegisterData } from "@/api/auth/model";
 import Token from "@/store/modules/token";
 const { t } = useI18n(); // I18n for translations
 const token = computed(() => route.query.token as string);
@@ -72,11 +81,10 @@ const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
 const back = async () => {
   try {
-
-    await ElMessageBox.confirm('确认放弃注册？', '警告', {
-      confirmButtonText: '确认',
-      cancelButtonText: '继续注册',
-      type: 'warning',
+    await ElMessageBox.confirm("确认放弃注册？", "警告", {
+      confirmButtonText: "确认",
+      cancelButtonText: "继续注册",
+      type: "warning",
     });
     router.push("/site/login");
   } catch (e) {
@@ -108,7 +116,7 @@ const registerRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
     },
     {
       type: "email",
-      message: 'need email',
+      message: "need email",
       trigger: "blur",
     },
   ],
@@ -136,7 +144,8 @@ const registerRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
       message: t("login.rules.password.message1"),
       trigger: "blur",
     },
-    { validator: validatePass2, trigger: "blur" }],
+    { validator: validatePass2, trigger: "blur" },
+  ],
 };
 
 function parseRedirect(): {
@@ -157,13 +166,13 @@ function parseRedirect(): {
   return { path, queryParams };
 }
 
-
 const register = async () => {
   registerFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       const response = await WechatApi.register({
         username: registerForm.value.username,
-        password: registerForm.value.password, token: token.value
+        password: registerForm.value.password,
+        token: token.value,
       });
       const data = response.data;
       if (data.success) {
@@ -351,7 +360,6 @@ body {
   .login-button {
     text-align: right;
   }
-
 
   .error-message {
     margin-top: 10px;
