@@ -217,72 +217,11 @@ body {
   }
 }
 
-.header {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 7%;
-  margin-right: 10px;
-  background-color: #f1f1f1;
-
-  transition: background-color 0.3s ease;
-  padding: 10px;
-
-  &.dark-theme {
-    background-color: rgb(37, 37, 37);
-    // color: white;
-  }
-}
-
-.logo {
-  position: absolute;
-  left: 10px;
-
-  img {
-    width: 32px;
-    height: 32px;
-    margin-left: 12px;
-    vertical-align: middle;
-  }
-
-  .project_title {
-    margin-left: 10px;
-    font-family: "KaiTi", sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-
-    &:hover {
-      color: #3876c2;
-    }
-  }
-}
-
-.header-right {
-  position: absolute;
-  right: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  .top-bar {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    margin-right: 20px;
-    width: 100%;
-    padding: 10px;
-  }
-}
-
 .content {
   display: flex;
   flex: 1;
   align-items: center;
   justify-content: center;
-  // width: 100%;
-  // background-image: url("/media/bg/02.jpg");
-  // background-size: 100% auto;
 
   .box1 {
     display: flex;
