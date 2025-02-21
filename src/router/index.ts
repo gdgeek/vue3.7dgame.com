@@ -102,7 +102,7 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
-
+  { path: "/login", redirect: "/site/login" },
   {
     path: "/privacy-policy",
     component: () => import("@/views/privacy-policy/index.vue"),

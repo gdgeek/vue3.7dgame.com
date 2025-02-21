@@ -40,10 +40,11 @@ export function setupPermission() {
       // 判断是否有token
       if (to.path === "/site/login") {
         // 如果已登录，跳转到首页
-        next({ path: "home/index" });
+        next({ path: "/home/index" });
         NProgress.done();
       } else {
         if (to.matched.length === 0) {
+          //   alert(JSON.stringify(to));
           next(from.name ? { name: from.name } : "/404");
         } else {
           // 如果路由参数中有 title，覆盖路由元信息中的 title
