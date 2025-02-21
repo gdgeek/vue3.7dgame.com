@@ -51,16 +51,7 @@ function title(): string {
 }
 
 function subtitle(): string {
-  switch (import.meta.env.VITE_APP_BASE_MODE) {
-    case "01xr.com":
-      return "内部版本";
-    case "7dgame.com":
-      return "测试版本";
-    case "local":
-      return "私有部署版本";
-    default:
-      return "公测版本";
-  }
+  return "支持Rokid设备";
 }
 
 const environment = {
