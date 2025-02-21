@@ -5,14 +5,30 @@
     <!-- 右下角渐变圆形 -->
     <div class="gradient-circle gradient-circle-right"></div>
     <!-- 随机位置的绿色渐变圆形 -->
-    <div class="gradient-circle gradient-circle-random"></div>
+    <div class="gradient-circle gradient-circle-random" :style="{ left: randomPosition.left, top: randomPosition.top }">
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
+
 defineOptions({
   name: 'DecorativeBackground'
 })
+
+//随机位置
+const getRandomPosition = () => {
+  // 在30%-70%的范围内生成随机位置，避免靠近边缘
+  const randomLeft = 30 + Math.random() * 40
+  const randomTop = 30 + Math.random() * 40
+  return {
+    left: `${randomLeft}%`,
+    top: `${randomTop}%`
+  }
+}
+
+const randomPosition = ref(getRandomPosition())
 </script>
 
 <style lang="scss" scoped>
@@ -67,76 +83,89 @@ defineOptions({
         rgba(82, 196, 26, 0.4) 33%,
         rgba(82, 196, 26, 0.2) 67%,
         rgba(82, 196, 26, 0.1) 100%);
-    left: 50%;
-    top: 50%;
     transform: translate(-50%, -50%);
-    animation: floatGradientCenter 20s ease-in-out infinite;
+    animation: floatGradientRandom 20s ease-in-out infinite;
   }
 }
 
-@keyframes floatGradientLeft {
+@keyframes floatGradientLeft { 
   0% {
     transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
   }
 
   25% {
     transform: translate(30px, 20px) rotate(5deg) scale(1.05);
+    opacity: 0.75;
   }
 
   50% {
     transform: translate(-10px, 40px) rotate(-2deg) scale(0.95);
+    opacity: 0.5;
   }
 
   75% {
     transform: translate(-20px, 10px) rotate(3deg) scale(1.02);
+    opacity: 0.25;
   }
 
   100% {
     transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
   }
 }
 
 @keyframes floatGradientRight {
   0% {
     transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
   }
 
   25% {
     transform: translate(-40px, -30px) rotate(-3deg) scale(0.98);
+    opacity: 0.75;
   }
 
   50% {
     transform: translate(20px, -50px) rotate(4deg) scale(1.03);
+    opacity: 0.5;
   }
 
   75% {
     transform: translate(30px, -20px) rotate(-2deg) scale(0.97);
+    opacity: 0.25;
   }
 
   100% {
     transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
   }
 }
 
-@keyframes floatGradientCenter {
+@keyframes floatGradientRandom {
   0% {
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    opacity: 1;
   }
 
   25% {
     transform: translate(-50%, -50%) rotate(-5deg) scale(1.08);
+    opacity: 0.75;
   }
 
   50% {
     transform: translate(-50%, -50%) rotate(3deg) scale(0.92);
+    opacity: 0.5;
   }
 
   75% {
     transform: translate(-50%, -50%) rotate(-2deg) scale(1.05);
+    opacity: 0.25;
   }
 
   100% {
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    opacity: 1;
   }
 }
 </style>
