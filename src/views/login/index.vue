@@ -66,7 +66,7 @@
         </div>
       </div>
     </div>
-    <div v-if="route.path === '/login'" class="content">
+    <div v-if="route.path === '/site/login'" class="content">
       <login-form v-if="!appleIdToken" :isMobile="isMobile" ref="loginFormRef" @enter="enter"
         @register="register"></login-form>
       <register-form v-else @enter="enter" :idToken="appleIdToken"></register-form>
