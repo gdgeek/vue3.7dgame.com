@@ -30,10 +30,7 @@ const mrpp = computed(() => {
 
 const list = computed(() => {
   return [
-    { label: t("homepage.dashboard"), type: "document", id: 1343 },
-    { label: t("homepage.news"), type: "category", id: 74 },
-    { label: t("homepage.relatedDownload"), type: "category", id: 84 },
-    { label: t("homepage.caseCourse"), type: "category", id: 79 },
+    { label: t("homepage.dashboard"), type: "document", id: 1455 },
   ];
 });
 </script>
