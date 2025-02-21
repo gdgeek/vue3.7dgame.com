@@ -2,7 +2,7 @@
   <body :class="{ 'dark-theme': isDark }">
     <div :class="['header', { 'dark-theme': isDark }]">
       <div style="height: 30px" v-if="!isMobile">
-        <RouterLink to="/" class="logo">
+        <RouterLink to="/introduce" class="logo">
           <img src="/favicon.ico" alt="" />
           <span class="project_title">{{ $t("login.title") }}</span>
         </RouterLink>
@@ -356,10 +356,8 @@ body {
   margin: 0;
   background-image: url("/media/bg/02.jpg");
   background-size: 100% auto;
-  // transition:  0.3s ease;
 
   &.dark-theme {
-    background-image: url("/media/bg/02.jpg");
     filter: brightness(80%);
   }
 }
@@ -372,7 +370,6 @@ body {
   height: 7%;
   margin-right: 10px;
   background-color: #f1f1f1;
-
   transition: background-color 0.3s ease;
   padding: 10px;
 
@@ -424,100 +421,5 @@ body {
       margin-right: 0px;
     }
   }
-}
-
-.content {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-
-  .login-title {
-    margin: 20px 0;
-    font-family: "KaiTi", sans-serif;
-    font-weight: bold;
-    text-align: center;
-  }
-
-  .login-form {
-    max-width: 100%;
-    height: 100%;
-    padding: 10px 0px 10px 0px;
-    margin-top: 36px;
-  }
-
-  .login-button {
-    text-align: right;
-  }
-
-  .login-link {
-    padding: 0 10px;
-    margin-bottom: 20px;
-  }
-
-  .login-link a {
-    font-family: "KaiTi", sans-serif;
-    font-size: 16px;
-    color: rgb(28 160 212);
-  }
-
-  .error-message {
-    margin-top: 10px;
-    font-family: "KaiTi", sans-serif;
-    color: red;
-    text-align: center;
-  }
-}
-
-.box {
-  position: relative;
-  height: auto;
-  width: 400px;
-  max-width: 100%;
-  padding: 10px 10px 10px 10px;
-  margin: 0 auto;
-  margin-bottom: 20px;
-  border-radius: 5px;
-  background-color: #fff;
-  overflow: hidden;
-
-  transition: all 0.3s ease;
-
-  &.dark-theme {
-    background-color: rgb(63, 63, 63);
-    border-color: #494949;
-    color: white;
-  }
-}
-
-.logout-head {
-  padding: 10px;
-  max-width: 100%;
-}
-
-.logout-title {
-  font-size: 14px;
-  padding: 10px;
-  text-align: center;
-  color: #666;
-}
-
-.logout-welcome {
-  margin-top: 20px;
-  font-size: 36px;
-  font-weight: normal;
-  color: #666;
-}
-
-.logout-text {
-  font-size: 21px;
-  font-weight: lighter;
-  color: #666;
-}
-
-.logout-lead {
-  font-size: 21px;
-  font-weight: lighter;
-  color: #666;
 }
 </style>

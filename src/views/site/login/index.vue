@@ -48,63 +48,6 @@ body {
   }
 }
 
-.header {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 7%;
-  margin-right: 10px;
-  background-color: #f1f1f1;
-
-  transition: background-color 0.3s ease;
-  padding: 10px;
-
-  &.dark-theme {
-    background-color: rgb(37, 37, 37);
-  }
-}
-
-.logo {
-  position: absolute;
-  left: 10px;
-
-  img {
-    width: 32px;
-    height: 32px;
-    margin-left: 12px;
-    vertical-align: middle;
-  }
-
-  .project_title {
-    margin-left: 10px;
-    font-family: "KaiTi", sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-
-    &:hover {
-      color: #3876c2;
-    }
-  }
-}
-
-.header-right {
-  position: absolute;
-  right: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  .top-bar {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    margin-right: 20px;
-    width: 100%;
-    padding: 10px;
-  }
-}
-
 .content {
   display: flex;
   flex: 1;
@@ -172,42 +115,6 @@ body {
         margin-top: 2px;
       }
     }
-  }
-
-  .login-title {
-    margin: 20px 0;
-    font-family: "KaiTi", sans-serif;
-    font-weight: bold;
-    text-align: center;
-  }
-
-  .login-form {
-    max-width: 100%;
-    height: 100%;
-    // padding: 10px 0px 10px 0px;
-    margin-top: 36px;
-  }
-
-  .login-button {
-    text-align: right;
-  }
-
-  .login-link {
-    padding: 0 10px;
-    margin-bottom: 20px;
-  }
-
-  .login-link a {
-    font-family: "KaiTi", sans-serif;
-    font-size: 16px;
-    color: rgb(28 160 212);
-  }
-
-  .error-message {
-    margin-top: 10px;
-    font-family: "KaiTi", sans-serif;
-    color: red;
-    text-align: center;
   }
 
   .apple-login-container {

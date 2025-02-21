@@ -75,7 +75,27 @@
           <span>© {{ currentYear }} {{ informationStore.title }}</span>
         </div>
         <div class="right">
-          <a href="#" target="_blank">{{ informationStore.beian }}</a>
+          <el-link
+              :href="informationStore.privacyPolicy.url"
+              target="_blank"
+              :underline="false"
+              style="display: flex; align-items: center"
+            >
+              <el-icon>
+                <Briefcase></Briefcase>
+              </el-icon>
+              <span class="font-text" style="margin-left: 5px">
+                {{ informationStore.privacyPolicy.name }}
+              </span>
+            </el-link>
+          <el-link
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            :underline="false"
+          >
+            <el-icon><Grid /></el-icon>
+            {{ informationStore.beian }}
+          </el-link>
         </div>
       </div>
     </div>

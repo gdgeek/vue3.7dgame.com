@@ -105,7 +105,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import FooterContainer from "./components/FooterContainer.vue";
+import FooterContainer from "./components/common/FooterContainer.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -256,7 +256,8 @@ onUnmounted(() => {
 
     .company-name {
       font-size: 20px;
-      font-weight: bold;
+      font-family: "KaiTi", "STKaiti", "华文楷体", "楷体", serif;
+      font-weight: 600;
       color: #333;
       transition: color 0.3s ease;
 
