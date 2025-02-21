@@ -1,19 +1,25 @@
 <template>
   <div class="content-section">
-    <div v-if="loading">
+    <template v-if="loading">
       <ProductsSkeletonLoader />
-    </div>
-    <div v-else class="products-container">
+    </template>
+    <template v-else>
       <Screen :bgUrl="imageUrl" :item="screen"></Screen>
-      <div id="solution">
-        <Solution></Solution>
+      <div class="products-container">
+        <DecorativeBackground />
+        <div class="products-content">
+          <div id="solution">
+            <Solution></Solution>
+          </div>
+          <div id="cloud">
+            <Cloud></Cloud>
+          </div>
+          <Deploy></Deploy>
+
+        </div>
       </div>
-      <div id="cloud">
-        <Cloud></Cloud>
-      </div>
-      <Deploy></Deploy>
       <SubScreen></SubScreen>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -26,6 +32,7 @@ import Cloud from "./Cloud.vue";
 import Deploy from "./Deploy.vue";
 import SubScreen from "./SubScreen.vue";
 import ProductsSkeletonLoader from './ProductsSkeletonLoader.vue';
+import DecorativeBackground from '../common/DecorativeBackground.vue';
 
 defineOptions({
   name: "Products",
@@ -111,6 +118,17 @@ watch(() => route.hash, (newHash) => {
   @media (max-width: 768px) {
     margin-top: 50px;
   }
+}
+
+.products-container {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.products-content {
+  position: relative;
+  z-index: 1;
 }
 
 // 添加锚点偏移，防止被固定导航栏遮挡

@@ -78,4 +78,7 @@
     "src/lang"
   ],
   "liveServer.settings.port": 5501,
+  "[vue]": {
+    "editor.defaultFormatter": "Vue.volar"
+  },
 }
