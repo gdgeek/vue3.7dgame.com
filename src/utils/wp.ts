@@ -71,7 +71,7 @@ function showErrorMessage(message: string, duration = 5000) {
 function handleUnauthorized(router: ReturnType<typeof useRouter>) {
   const messages = getMessageArray();
   showErrorMessage(messages[0]);
-  router.push({ path: "/login" });
+  router.push({ path: "/site/login" });
   return Promise.reject("");
 }
 
