@@ -38,26 +38,13 @@
 
         <!-- 导航链接组 -->
         <div class="footer-links">
-          <div
-            class="link-group"
-            v-for="group in linkGroups"
-            :key="group.title"
-          >
+          <div class="link-group" v-for="group in linkGroups" :key="group.title">
             <h3>{{ group.title }}</h3>
             <ul>
               <li v-for="link in group.links" :key="link.text">
-                <a
-                  :href="link.external ? link.url : 'javascript:void(0)'"
-                  :target="link.external ? '_blank' : '_self'"
-                  @click="!link.external && handleClick(link.url)"
-                  :class="{ 'external-link': link.external }"
-                >
-                  <img
-                    v-if="link.icon"
-                    :src="link.icon"
-                    :alt="link.text"
-                    class="link-icon"
-                  />
+                <a :href="link.external ? link.url : 'javascript:void(0)'" :target="link.external ? '_blank' : '_self'"
+                  @click="!link.external && handleClick(link.url)" :class="{ 'external-link': link.external }">
+                  <img v-if="link.icon" :src="link.icon" :alt="link.text" class="link-icon" />
                   {{ link.text }}
                   <el-icon v-if="link.external" class="external-icon">
                     <ArrowRight />
@@ -75,25 +62,19 @@
           <span>© {{ currentYear }} {{ informationStore.title }}</span>
         </div>
         <div class="right">
-          <el-link
-              :href="informationStore.privacyPolicy.url"
-              target="_blank"
-              :underline="false"
-              style="display: flex; align-items: center"
-            >
-              <el-icon>
-                <Briefcase></Briefcase>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ informationStore.privacyPolicy.name }}
-              </span>
-            </el-link>
-          <el-link
-            href="https://beian.miit.gov.cn/"
-            target="_blank"
-            :underline="false"
-          >
-            <el-icon><Grid /></el-icon>
+          <el-link :href="informationStore.privacyPolicy.url" target="_blank" :underline="false"
+            style="display: flex; align-items: center">
+            <el-icon>
+              <Briefcase></Briefcase>
+            </el-icon>
+            <span class="font-text" style="margin-left: 5px">
+              {{ informationStore.privacyPolicy.name }}
+            </span>
+          </el-link>
+          <el-link href="https://beian.miit.gov.cn/" target="_blank" :underline="false">
+            <el-icon>
+              <Grid />
+            </el-icon>
             {{ informationStore.beian }}
           </el-link>
         </div>
@@ -205,12 +186,10 @@ const linkGroups: LinkGroup[] = [
   bottom: 0;
   width: 100%;
   margin-top: auto;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 240, 245, 0.9) 0%,
-    rgba(240, 248, 255, 0.9) 50%,
-    rgba(230, 230, 250, 0.9) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(255, 240, 245, 0.9) 0%,
+      rgba(240, 248, 255, 0.9) 50%,
+      rgba(230, 230, 250, 0.9) 100%);
   backdrop-filter: blur(10px);
   z-index: 10;
   padding: 48px 0 0;
@@ -222,12 +201,10 @@ const linkGroups: LinkGroup[] = [
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(
-      circle at 30% 30%,
-      rgba(255, 182, 193, 0.1) 0%,
-      rgba(173, 216, 230, 0.1) 50%,
-      rgba(221, 160, 221, 0.1) 100%
-    );
+    background: radial-gradient(circle at 30% 30%,
+        rgba(255, 182, 193, 0.1) 0%,
+        rgba(173, 216, 230, 0.1) 50%,
+        rgba(221, 160, 221, 0.1) 100%);
     pointer-events: none;
   }
 }

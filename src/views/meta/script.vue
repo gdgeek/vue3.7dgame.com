@@ -607,6 +607,22 @@ const testAction = (data: any) => {
     };
   }
 };
+
+const testConmand = (data: any) => {
+  console.log("command: ", data);
+  if (
+    data &&
+    data.parameters &&
+    typeof data.parameters.voice !== "undefined"
+  ) {
+    return {
+      uuid: data.parameters.uuid,
+      name: data.parameters.voice ?? null,
+      parameter: data.parameters.parameter ?? null,
+    };
+  }
+}
+
 const testPoint = (data: any, typeList: string[]) => {
   if (!data) {
     return;
@@ -629,9 +645,14 @@ const testPoint = (data: any, typeList: string[]) => {
 
 const addMetaData = (data: any, ret: any) => {
   const action = testAction(data);
+  const command = testConmand(data);
   if (action) {
     ret.action.push(action);
   }
+
+  if (command) {
+    ret.command.push(command);
+ }
 
   const entity = testPoint(data, [
     "polygen",
@@ -690,6 +711,7 @@ const getResource = (meta: metaInfo) => {
   console.log("data", data);
   const ret = {
     action: [],
+    command: [],
     trigger: [],
     polygen: [],
     picture: [],
