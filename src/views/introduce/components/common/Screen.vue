@@ -36,12 +36,14 @@
       </div>
     </el-col>
     <!-- 3D模型展示 -->
-    <ScreenShow></ScreenShow>
+    <ScreenShow v-if="item.screenShow === 1"></ScreenShow>
+    <ScreenShow2 v-if="item.screenShow === 2"></ScreenShow2>
   </el-row>
 </template>
 
 <script setup lang="ts">
 import ScreenShow from './ScreenShow.vue';
+import ScreenShow2 from './ScreenShow2.vue';
 
 interface ScreenItem {
   align?: string;
@@ -49,6 +51,7 @@ interface ScreenItem {
   title?: string;
   title2?: string;
   tel?: string;
+  screenShow?: number;
 }
 
 interface Props {

@@ -93,7 +93,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import '@/assets/font/font.css'
-import SubScreen from './products/SubScreen.vue'
+import SubScreen from './common/SubScreen.vue'
 
 interface ProductExplain {
   title: string

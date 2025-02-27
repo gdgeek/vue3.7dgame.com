@@ -21,6 +21,7 @@ export function setupPermission() {
     "/introduce",
     "/introduce/about",
     "/introduce/products",
+    "/introduce/develop",
     "/introduce/news",
     "/introduce/news/document",
     "/introduce/news/category",

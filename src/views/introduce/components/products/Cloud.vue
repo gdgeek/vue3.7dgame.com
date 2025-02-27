@@ -3,13 +3,14 @@
   <section class="sandtable-section">
     <br />
     <div align="center">
-      <h1 class="font-text section-title-size section-title-dark title-lighter">
+      <h1 class="font-text section-title-size section-title-dark title-lighter" style="color: #4183ea">
         产品中心
       </h1>
       <p class="font-text f-text-color">
         提供demo展示、私有云部署等产品，更方便，更安全
       </p>
-      <p class="section-underline-blue" />
+      <!-- <p class="section-underline-blue" /> -->
+        <p class="section-underline-style" /> 
     </div>
     <div style="padding: 10px 1% 20px">
       <el-row :gutter="40">

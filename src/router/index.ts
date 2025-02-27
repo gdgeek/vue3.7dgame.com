@@ -80,6 +80,13 @@ const routes: RouteRecordRaw[] = [
         component: () => import("@/views/introduce/components/ListProduct.vue"),
         meta: { hidden: true, private: true },
       },
+      {
+        path: "develop",
+        name: "IntroduceDevelop",
+        component: () => 
+          import("@/views/introduce/components/develop/index.vue"),
+        meta: { hidden: true, private: true },
+      }
     ],
   },
 
@@ -859,6 +866,7 @@ import type { AnyAbility } from "@casl/ability";
 
 import { AbilityRouter } from "@/utils/ability";
 import { useUserStore } from "@/store";
+import { tr } from "element-plus/es/locale";
 const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   const can = ability.can.bind(ability);
   route.forEach((route) => {

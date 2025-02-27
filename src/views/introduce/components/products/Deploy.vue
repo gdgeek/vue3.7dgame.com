@@ -4,11 +4,12 @@
     <section class="sandtable-section">
       <br />
       <div align="center">
-        <h1 class="section-title-size section-title-dark title-lighter">
+        <h1 class="section-title-size section-title-dark title-lighter" style="color: #4183ea">
           创新优势
         </h1>
         <p class="f-text-color">多种先进科技交互体验，精彩纷呈</p>
-        <p class="section-underline-blue" />
+        <!-- <p class="section-underline-blue" /> -->
+        <p class="section-underline-style" />
       </div>
       <!-- 技术种类 -->
       <div class="deploy-flex-box">
