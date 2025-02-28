@@ -148,6 +148,13 @@ const linkGroups: LinkGroup[] = [
     ],
   },
   {
+    title: "项目开发",
+    links: [
+      { text: "项目介绍", url: "/introduce/develop#introduce" },
+      { text: "开发流程", url: "/introduce/develop#flow" },
+    ],
+  },
+  {
     title: "新闻动态",
     links: [
       { text: "新闻", url: "/introduce/news?tab=news" },
