@@ -12,10 +12,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, shallowRef } from "vue";
+import { ref, onMounted, shallowRef, onUnmounted } from "vue";
 import * as Three from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import ElementResizeDetector from "element-resize-detector";
+
+interface Props {
+  type?: number;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  type: 1
+});
+
+defineOptions({
+  name: 'ScreenShow'
+});
 
 const isShow = ref(true);
 const camera = shallowRef<Three.PerspectiveCamera | null>(null);
@@ -60,7 +72,14 @@ const init = () => {
 
   // 创建几何体
   const radius = 0.2;
-  const geometry = new Three.IcosahedronGeometry(radius);
+  let geometry;
+
+  // 根据类型创建不同的几何体
+  if (props.type === 2) {
+    geometry = new Three.DodecahedronGeometry(radius);
+  } else {
+    geometry = new Three.IcosahedronGeometry(radius);
+  }
   const material = new Three.MeshNormalMaterial();
 
   mesh.value = new Three.Mesh(geometry, material);
