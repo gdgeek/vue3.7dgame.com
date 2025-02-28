@@ -379,7 +379,7 @@ const linkGroups: LinkGroup[] = [
     text-align: center;
 
     .right {
-      flex-direction: column;
+      // flex-direction: column
       align-items: center;
     }
   }
