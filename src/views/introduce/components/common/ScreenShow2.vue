@@ -22,6 +22,7 @@ const camera = shallowRef<Three.PerspectiveCamera | null>(null);
 const scene = shallowRef<Three.Scene | null>(null);
 const renderer = shallowRef<Three.WebGLRenderer | null>(null);
 const mesh = shallowRef<Three.Mesh | null>(null);
+const controls = shallowRef<OrbitControls | null>(null);
 
 const init = () => {
   const container = document.getElementById("container");
@@ -55,6 +56,16 @@ const init = () => {
   mesh.value = new Three.Mesh(geometry, material);
   scene.value.add(mesh.value);
 
+  // 添加轨道控制器
+  controls.value = new OrbitControls(camera.value, renderer.value.domElement);
+  controls.value.enableDamping = true; // 添加阻尼效果
+  controls.value.dampingFactor = 0.05; // 阻尼系数
+  controls.value.enableZoom = false; // 禁用缩放
+  controls.value.enablePan = false;  // 禁用平移
+  controls.value.rotateSpeed = 0.5; // 调整旋转速度
+  controls.value.minPolarAngle = Math.PI / 4; // 限制垂直向上旋转角度
+  controls.value.maxPolarAngle = Math.PI / 4 * 3; // 限制垂直向下旋转角度
+
   // 监听容器大小变化
   const erd = new ElementResizeDetector();
   erd.listenTo(container, () => {
@@ -73,7 +84,10 @@ let animationFrameId: number;
 const animate = () => {
   animationFrameId = requestAnimationFrame(animate);
 
-  if (!mesh.value || !renderer.value || !scene.value || !camera.value) return;
+  if (!mesh.value || !renderer.value || !scene.value || !camera.value || !controls.value) return;
+
+  // 更新控制器
+  controls.value.update();
 
   mesh.value.rotation.x += 0.002;
   mesh.value.rotation.y += 0.006;
@@ -89,6 +103,11 @@ onMounted(() => {
 onUnmounted(() => {
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId);
+  }
+
+  // 清理控制器
+  if (controls.value) {
+    controls.value.dispose();
   }
 
   if (mesh.value) {

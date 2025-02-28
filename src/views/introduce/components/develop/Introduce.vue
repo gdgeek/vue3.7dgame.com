@@ -76,8 +76,8 @@ const gridItems = [
   display: grid;
   margin-top: 50px;
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 20px;
+  grid-template-rows: repeat(2, 1fr); 
+  gap: 20px; 
 }
 
 .grid-item {
