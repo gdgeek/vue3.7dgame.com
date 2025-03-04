@@ -119,21 +119,23 @@ const goto = (path: string): void => {
 
 .img-wrapper {
   overflow: hidden;
-  border-radius: 4px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   height: 370px;
 }
 
 // img特效及过滤效果
 .img-wrapper img {
-  height: 370px;
-  -webkit-transition: 0.3s linear;
-  transition: 0.3s linear;
+  height: 100%;
+  object-fit: cover;
+  -webkit-transition: 0.6s linear;
+  transition: 0.6s linear; 
 }
 
 .img-wrapper img:hover {
   -webkit-filter: sepia(30%);
   filter: sepia(30%);
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .img-wrapper-cloud {

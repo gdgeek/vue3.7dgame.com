@@ -13,7 +13,7 @@
           !isScrolled &&
           !isMobile,
         'nav-default':
-          (currentTab !== 'about' && currentTab !== 'products' && currentTab === 'develop') || isMobile,
+          (currentTab === 'news') || isMobile,
       }"
     >
       <div class="nav-left">
@@ -209,19 +209,19 @@ onUnmounted(() => {
   margin: 0;
   transition: all 0.3s ease;
 
-  // 默认样式（非关于我们页面）
+  // 默认样式
   &.nav-default {
     background-color: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
-  // 透明样式（关于我们页面顶部）
+  // 透明样式
   &.nav-transparent {
     background-color: transparent;
     box-shadow: none;
   }
 
-  // 滚动样式（关于我们页面滚动后）
+  // 滚动样式
   &.nav-scrolled {
     background-color: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);

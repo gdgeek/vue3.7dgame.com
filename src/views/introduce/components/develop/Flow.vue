@@ -12,7 +12,9 @@
         <!-- 开发流程图 -->
         <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
           <div style="background-color: #f8f8f8; padding: 30px" class="section-radius">
-            <img src="/media/bg/business3.jpg" style="width: 100%" />
+            <div class="image-wrapper">
+              <img src="/media/bg/business3.jpg" style="width: 100%" />
+            </div>
             <h4 style="padding-top: 20px">{{ description }}</h4>
           </div>
           <br />
@@ -77,5 +79,23 @@ const timelineItems = ref<TimelineItem[]>([
 .timeline-content {
   background-color: #f8f8f8;
   padding: 20px 20px 10px;
+}
+
+.image-wrapper {
+  height: 400px;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
 }
 </style>

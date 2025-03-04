@@ -227,10 +227,10 @@ watch(() => route.hash, (newHash) => {
     flex: 1;
     height: 400px;
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateX(20px); 
     animation: fadeInSide 0.8s forwards;
 
     img {
