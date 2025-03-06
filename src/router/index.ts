@@ -34,6 +34,41 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: "/tts",
+    component: null,
+    meta: { hidden: true, private: true},
+    redirect: "/tts/index",
+    children: [
+      {
+        path: "index",
+        name: "",
+        component: () => import("@/views/TTS/index.vue"),
+        meta: { hidden: true, private: true },
+      },
+      {
+        path: "audioToWord",
+        name: "",
+        component: () => import("@/views/TTS/AudioToWord.vue"),
+        meta: { hidden: true, private: true },
+      },
+      {
+        path: "wordToAudio",
+        name: "",
+        component: () =>
+          import("@/views/TTS/WordToAudio.vue"),
+        meta: { hidden: true, private: true },
+      },
+      {
+        path: "wordToAudioV2",
+        name: "",
+        component: () =>
+          import("@/views/TTS/WordToAudioV2.vue"),
+        meta: { hidden: true, private: true },
+      },
+    ]
+  },
+
+  {
     path: "/introduce",
     component: () => import("@/views/introduce/index.vue"),
     redirect: "/introduce/about",
