@@ -5,8 +5,14 @@
     </div>
 
     <div class="main-content">
+      <div class="voice-select-section">
+        <el-select v-model="selectedVoice" placeholder="请选择音色" class="voice-select">
+          <el-option v-for="voice in availableVoices" :key="voice.name" :label="voice.name" :value="voice" />
+        </el-select>
+      </div>
+
       <div class="input-section">
-        <el-input id="word" type="textarea" placeholder="请输入要转换的文本内容..." v-model="word" maxlength="4000" ref="input"
+        <el-input id="word" type="textarea" placeholder="请输入要转换的文本内容..." v-model="word" maxlength="2000" ref="input"
           @input="inputWord" :readonly="inputReadonly" show-word-limit :rows="6" />
       </div>
 
@@ -44,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, onMounted, nextTick, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { Ref } from 'vue'
@@ -59,12 +65,79 @@ const isLeaving = ref(false)
 const isEntering = ref(true)
 const router = useRouter()
 const previewContentRef = ref<HTMLElement | null>(null)
+const isManualScrolling = ref(false) // 是否正在手动滚动
+const isMouseHovering = ref(false) // 是否鼠标悬停在预览区域
+let scrollTimeout: number | null = null // 滚动超时定时器
+let hoverTimeout: number | null = null // 鼠标移出超时定时器
+
+interface Voice extends SpeechSynthesisVoice {
+  name: string;
+}
+
+const selectedVoice = ref<Voice | undefined>(undefined)
+const availableVoices = ref<Voice[]>([])
+
+// 获取可用的语音列表
+const loadVoices = () => {
+  const voices = window.speechSynthesis.getVoices()
+  availableVoices.value = voices.filter(voice => voice.lang.includes('zh')) as Voice[]
+  if (availableVoices.value.length > 0) {
+    selectedVoice.value = availableVoices.value[0]
+  }
+}
 
 // 页面加载完成后
 onMounted(() => {
   setTimeout(() => {
     isEntering.value = false
   }, 300)
+
+  // 加载语音列表
+  loadVoices()
+
+  // 监听voiceschanged事件，因为语音列表可能会延迟加载
+  window.speechSynthesis.onvoiceschanged = loadVoices
+
+  // 添加滚动事件监听
+  if (previewContentRef.value) {
+    // 滚动事件处理
+    previewContentRef.value.addEventListener('scroll', () => {
+      // 清除之前的定时器
+      if (scrollTimeout) {
+        window.clearTimeout(scrollTimeout)
+      }
+
+      // 设置手动滚动状态
+      isManualScrolling.value = true
+
+      // 2秒后恢复自动滚动
+      scrollTimeout = window.setTimeout(() => {
+        isManualScrolling.value = false
+      }, 1000)
+    })
+
+    // 鼠标进入事件
+    previewContentRef.value.addEventListener('mouseenter', () => {
+      isMouseHovering.value = true
+      // 清除之前的hover定时器
+      if (hoverTimeout) {
+        window.clearTimeout(hoverTimeout)
+      }
+    })
+
+    // 鼠标离开事件
+    previewContentRef.value.addEventListener('mouseleave', () => {
+      // 清除之前的hover定时器
+      if (hoverTimeout) {
+        window.clearTimeout(hoverTimeout)
+      }
+
+      // 2秒后恢复自动滚动
+      hoverTimeout = window.setTimeout(() => {
+        isMouseHovering.value = false
+      }, 1000)
+    })
+  }
 })
 
 // 监听朗读进度
@@ -108,15 +181,13 @@ const changeToAudio = () => {
     const speech = new window.SpeechSynthesisUtterance()
     speech.text = word.value // 内容
     speech.lang = "zh-CN" // 语言
-    speech.volume = 0.7 // 声音的音量区间范围是0到1，默认是1
+    speech.volume = 1 // 声音的音量区间范围是0到1，默认是1
     speech.rate = 1 // 语速，范围是0.1到10，默认值是1
     speech.pitch = 1 // 音高，范围从0（最小）到2（最大），默认值为1
 
-    // 获取中文语音
-    const voices = window.speechSynthesis.getVoices()
-    const chineseVoice = voices.find(voice => voice.lang.includes('zh-CN'))
-    if (chineseVoice) {
-      speech.voice = chineseVoice
+    // 设置选择的语音
+    if (selectedVoice.value !== undefined) {
+      speech.voice = selectedVoice.value
     }
 
     // 设置不可输入
@@ -190,7 +261,8 @@ const changeTextColorV2 = (index: number) => {
       const container = previewContentRef.value
       const highlightedElement = container.querySelector('.highlighted-text')
 
-      if (highlightedElement) {
+      // 只有在非手动滚动、非鼠标悬停且非暂停状态下才执行自动滚动
+      if (highlightedElement && !isManualScrolling.value && !isMouseHovering.value && !isPaused.value) {
         // 计算需要滚动的位置
         const containerRect = container.getBoundingClientRect()
         const highlightedRect = highlightedElement.getBoundingClientRect()
@@ -222,6 +294,23 @@ const goBack = () => {
     router.push({ path: "/tts" })
   }, 300)
 }
+
+// 在组件卸载时清理事件监听和定时器
+onUnmounted(() => {
+  if (scrollTimeout) {
+    window.clearTimeout(scrollTimeout)
+  }
+
+  if (hoverTimeout) {
+    window.clearTimeout(hoverTimeout)
+  }
+
+  if (previewContentRef.value) {
+    previewContentRef.value.removeEventListener('scroll', () => { })
+    previewContentRef.value.removeEventListener('mouseenter', () => { })
+    previewContentRef.value.removeEventListener('mouseleave', () => { })
+  }
+})
 </script>
 
 <style scoped lang="scss">
@@ -276,6 +365,29 @@ const goBack = () => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
+.voice-select-section {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.voice-select {
+  width: 100%;
+
+  :deep(.el-input__wrapper) {
+    border-radius: 12px;
+    padding: 0.5rem;
+
+    &:hover {
+      border-color: #409eff;
+    }
+
+    &.is-focus {
+      border-color: #409eff;
+      box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
+    }
+  }
+}
+
 .input-section {
   width: 100%;
 
@@ -283,7 +395,7 @@ const goBack = () => {
     border-radius: 12px;
     padding: 1rem;
     font-size: 1rem;
-    border: 1px solid #e0e0e0;
+    border: 1px solid #dcdfe6;
     transition: all 0.3s ease;
 
     &:focus {
@@ -303,12 +415,24 @@ const goBack = () => {
     overflow-y: auto;
     padding: 1rem;
     border-radius: 12px;
-    background-color: #f9f9f9;
-    border: 1px solid #e0e0e0;
+    background-color: #fff;
+    border: 1px solid #dcdfe6;
     font-size: 1rem;
-    line-height: 1.8;
+    line-height: 1.5;
     scroll-behavior: smooth;
     position: relative;
+    font-family: inherit;
+    text-align: left;
+    white-space: pre-wrap;
+    word-break: break-word;
+    transition: all 0.3s ease;
+    color: #606266;
+    box-sizing: border-box;
+    box-shadow: 0 0 0 1px transparent; //
+
+    &:hover {
+      border-color: #c0c4cc;
+    }
 
     /* 自定义滚动条样式 */
     &::-webkit-scrollbar {
@@ -336,13 +460,13 @@ const goBack = () => {
     }
 
     .highlighted-text {
-      color: #409eff;
+      color: #FF6700;
       font-weight: 500;
       transition: color 0.3s ease;
     }
 
     .normal-text {
-      color: #333;
+      color: #606266;
     }
   }
 }

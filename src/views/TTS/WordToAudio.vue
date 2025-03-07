@@ -5,8 +5,14 @@
     </div>
 
     <div class="main-content">
+      <div class="voice-select-section">
+        <el-select v-model="selectedVoice" placeholder="请选择音色" class="voice-select">
+          <el-option v-for="voice in availableVoices" :key="voice.name" :label="voice.name" :value="voice" />
+        </el-select>
+      </div>
+
       <div class="input-section">
-        <el-input id="word" type="textarea" placeholder="请输入要转换的文本内容..." v-model="word" maxlength="300" show-word-limit
+        <el-input id="word" type="textarea" placeholder="请输入要转换的文本内容..." v-model="word" maxlength="2000" show-word-limit
           :rows="6" />
       </div>
 
@@ -45,11 +51,34 @@ const isLeaving = ref(false)
 const isEntering = ref(true)
 const router = useRouter()
 
+interface Voice extends SpeechSynthesisVoice {
+  name: string;
+}
+
+// 将 null 改为 undefined，并设置初始值为 undefined
+const selectedVoice = ref<Voice | undefined>(undefined)
+const availableVoices = ref<Voice[]>([])
+
+// 获取可用的语音列表
+const loadVoices = () => {
+  const voices = window.speechSynthesis.getVoices()
+  availableVoices.value = voices.filter(voice => voice.lang.includes('zh')) as Voice[]
+  if (availableVoices.value.length > 0) {
+    selectedVoice.value = availableVoices.value[0]
+  }
+}
+
 // 页面加载完成后
 onMounted(() => {
   setTimeout(() => {
     isEntering.value = false
   }, 300)
+
+  // 加载语音列表
+  loadVoices()
+
+  // 监听voiceschanged事件，因为语音列表可能会延迟加载
+  window.speechSynthesis.onvoiceschanged = loadVoices
 })
 
 // 文字转语音
@@ -79,25 +108,23 @@ const changeToAudio = () => {
     speech.rate = 1 // 语速，范围是0.1到10，默认值是1
     speech.pitch = 1 // 音高，范围从0（最小）到2（最大），默认值为1
 
-    // 获取中文语音
-    const voices = window.speechSynthesis.getVoices()
-    const chineseVoice = voices.find(voice => voice.lang.includes('zh-CN'))
-    if (chineseVoice) {
-      speech.voice = chineseVoice
+    // 设置选择的语音
+    if (selectedVoice.value !== undefined) {
+      speech.voice = selectedVoice.value
     }
 
     // 开始播放
     window.speechSynthesis.speak(speech)
 
-    // 高亮显示文本（可选功能）
-    const textArea = document.getElementById('word')
-    if (textArea) {
-      const range = document.createRange()
-      range.selectNodeContents(textArea)
-      const highlight = document.createElement('span')
-      highlight.style.backgroundColor = 'red'
-      range.surroundContents(highlight)
-    }
+    // 高亮显示文本
+    // const textArea = document.getElementById('word')
+    // if (textArea) {
+    //   const range = document.createRange()
+    //   range.selectNodeContents(textArea)
+    //   const highlight = document.createElement('span')
+    //   highlight.style.backgroundColor = 'red'
+    //   range.surroundContents(highlight)
+    // }
   } catch (error) {
     ElMessage.error('语音合成失败，请检查浏览器支持情况')
     console.error(error)
@@ -189,6 +216,29 @@ const goBack = () => {
   border-radius: 16px;
   padding: 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.voice-select-section {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.voice-select {
+  width: 100%;
+
+  :deep(.el-input__wrapper) {
+    border-radius: 12px;
+    padding: 0.5rem;
+
+    &:hover {
+      border-color: #409eff;
+    }
+
+    &.is-focus {
+      border-color: #409eff;
+      box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
+    }
+  }
 }
 
 .input-section {

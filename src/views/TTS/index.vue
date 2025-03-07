@@ -7,7 +7,11 @@
     </div>
 
     <div class="tts-content">
-      <h1 class="tts-title">Text To Speech - 文字转语音</h1>
+      <h1 class="tts-title">
+        <span class="tts-title-en">Text To Speech</span>
+        <span class="tts-title-divider">-</span>
+        <span class="tts-title-zh">文字转语音</span>
+      </h1>
 
       <div class="tts-buttons">
         <el-button type="primary" size="large" @click="navigateTo('wordToAudio')"
@@ -155,14 +159,43 @@ const navigateTo = (route: string) => {
 }
 
 .tts-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 3rem;
   text-align: center;
-  background: linear-gradient(45deg, #4a6cf7, #e950d1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.tts-title-en {
+  font-family: 'Montserrat', 'Arial', sans-serif;
+  background: linear-gradient(45deg, #4a6cf7, #9f6cf7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.5px;
+}
+
+.tts-title-zh {
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'SimHei', sans-serif;
+  background: linear-gradient(45deg, #9f6cf7, #e950d1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+}
+
+.tts-title-divider {
+  opacity: 0.4;
+  font-weight: 600;
+  background: linear-gradient(45deg, #9f6cf7, #9f6cf7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0.3rem;
 }
 
 .tts-buttons {
@@ -197,6 +230,12 @@ const navigateTo = (route: string) => {
 @media (max-width: 768px) {
   .tts-title {
     font-size: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .tts-title-en,
+  .tts-title-zh {
+    font-size: 1.8rem;
   }
 }
 </style>
