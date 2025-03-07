@@ -23,6 +23,7 @@ export function setupPermission() {
     "/tts/audioToWord",
     "/tts/wordToAudio",
     "/tts/wordToAudioV2",
+    "/tts/tencentTTS",
     "/introduce",
     "/introduce/about",
     "/introduce/products",

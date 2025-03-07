@@ -65,6 +65,13 @@ const routes: RouteRecordRaw[] = [
           import("@/views/TTS/WordToAudioV2.vue"),
         meta: { hidden: true, private: true },
       },
+      {
+        path: "tencentTTS",
+        name: "",
+        component: () =>
+          import("@/views/TTS/TencentTTS.vue"),
+        meta: { hidden: true, private: true },
+      },
     ]
   },
 

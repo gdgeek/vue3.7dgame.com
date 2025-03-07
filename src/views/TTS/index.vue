@@ -28,6 +28,11 @@
           :class="['tts-button', activeButton === 'wordToAudioV2' ? 'active' : '']">
           文字转语音(文本跟随朗读变色)
         </el-button>
+
+        <el-button type="danger" size="large" @click="navigateTo('tencentTTS')"
+          :class="['tts-button', activeButton === 'tencentTTS' ? 'active' : '']">
+          腾讯云语音合成
+        </el-button>
       </div>
     </div>
   </div>
