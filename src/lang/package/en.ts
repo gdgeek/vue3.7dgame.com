@@ -45,6 +45,7 @@ export default {
         title: "Audio",
         audioList: "List",
         audioUpload: "Upload",
+        audioTTS: "Text To Speech",
         audioProcessing: "Processing",
       },
     },

@@ -529,6 +529,18 @@ const routes: RouteRecordRaw[] = [
                 },
               },
               {
+                path: "/resource/audio/tts",
+                name: "",
+                component: () => import("@/views/audio/tts.vue"),
+                meta: {
+                  title: "resourceManagement.audioManagement.audioTTS",
+                  icon: "el-icon-helpFilled",
+                  hidden: true,
+                  alwaysShow: false,
+                  params: null,
+                },
+              },
+              {
                 path: "/resource/audio/view",
                 name: "",
                 component: () => import("@/views/audio/view.vue"),

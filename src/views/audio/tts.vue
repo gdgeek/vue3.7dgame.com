@@ -1,14 +1,84 @@
 <template>
   <div class="tencent-tts" :class="{ 'leaving': isLeaving, 'entering': isEntering }">
-    <div class="page-header">
+    <!-- <div class="page-header">
       <el-page-header @back="goBack" content="腾讯云语音合成" />
-    </div>
+    </div> -->
 
     <div class="main-content">
       <div class="voice-select-section">
-        <el-select v-model="selectedVoiceType" placeholder="请选择音色" class="voice-select">
-          <el-option v-for="voice in availableVoices" :key="voice.value" :label="voice.label" :value="voice.value" />
-        </el-select>
+        <div class="voice-filters">
+          <div class="filter-item">
+            <span class="param-label">音色类型</span>
+            <el-select v-model="voiceType" placeholder="请选择音色类型">
+              <el-option label="全部" value="" />
+              <el-option label="精品音色" value="精品音色" />
+              <el-option label="标准音色" value="标准音色" />
+            </el-select>
+          </div>
+          <div class="filter-item">
+            <span class="param-label">场景</span>
+            <el-select v-model="voiceScene" placeholder="请选择场景">
+              <el-option label="全部" value="" />
+              <el-option v-for="scene in availableScenes" :key="scene" :label="scene" :value="scene" />
+            </el-select>
+          </div>
+          <div class="filter-item">
+            <span class="param-label">语言</span>
+            <el-select v-model="voiceLanguage" placeholder="请选择语言">
+              <el-option label="全部" value="" />
+              <el-option label="中文" value="中文" />
+              <el-option label="英文" value="英文" />
+              <el-option label="日文" value="日文" />
+            </el-select>
+          </div>
+        </div>
+        <div class="voice-type">
+          <span class="param-label">音色</span>
+          <el-select v-model="selectedVoiceType" placeholder="请选择音色" class="voice-select">
+            <el-option-group v-for="group in groupedVoices" :key="group.type" :label="group.type">
+              <el-option v-for="voice in group.voices" :key="voice.value" :label="voice.label" :value="voice.value">
+                <div class="voice-option">
+                  <span>{{ voice.label }}</span>
+                  <div class="voice-tags">
+                    <el-tag size="small"
+                      :type="voice.scene.includes('男') ? 'primary' : voice.scene.includes('女') ? 'danger' : 'info'">
+                      {{ voice.scene }}
+                    </el-tag>
+                    <el-tag size="small"
+                      :type="voice.language === '中文' ? 'danger' : voice.language === '日文' ? 'success' : 'primary'"
+                      effect="dark">
+                      {{ voice.language }}
+                    </el-tag>
+                    <el-tag v-if="voice.emotions.length > 1" size="small" type="warning" effect="plain"
+                      @click="showEmotions(voice)">
+                      {{ voice.emotions.length }}种情感
+                    </el-tag>
+                  </div>
+                </div>
+              </el-option>
+            </el-option-group>
+          </el-select>
+        </div>
+
+        <div class="param-item emotion-params">
+          <div class="emotion-controls">
+            <div class="emotion-row">
+              <div class="emotion-type">
+                <span class="param-label">情感类型</span>
+                <el-select v-model="emotionCategory" placeholder="请选择情感类型" class="emotion-select"
+                  :disabled="availableEmotions.length <= 1">
+                  <el-option label="默认" value="" />
+                  <el-option v-for="emotion in filteredEmotions" :key="emotion" :label="emotion" :value="emotion" />
+                </el-select>
+              </div>
+              <div class="emotion-intensity" v-if="emotionCategory">
+                <span class="param-label">情感强度 ({{ emotionIntensity }})</span>
+                <el-slider v-model="emotionIntensity" :min="50" :max="200" :step="10" show-stops
+                  class="intensity-slider" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="params-section">
@@ -36,21 +106,8 @@
             <el-radio-group v-model="sampleRate">
               <el-radio :label="8000">8k</el-radio>
               <el-radio :label="16000">16k</el-radio>
+              <el-radio v-if="supportHighSampleRate" :label="24000">24k</el-radio>
             </el-radio-group>
-          </div>
-        </div>
-        <div class="param-row">
-          <div class="param-item">
-            <span class="param-label">情感类型</span>
-            <el-select v-model="emotionCategory" placeholder="请选择情感类型" class="emotion-select"
-              :disabled="availableEmotions.length <= 1">
-              <el-option label="默认" value="" />
-              <el-option v-for="emotion in filteredEmotions" :key="emotion" :label="emotion" :value="emotion" />
-            </el-select>
-          </div>
-          <div class="param-item" v-if="emotionCategory">
-            <span class="param-label">情感强度 ({{ emotionIntensity }})</span>
-            <el-slider v-model="emotionIntensity" :min="50" :max="200" :step="10" show-stops />
           </div>
         </div>
       </div>
@@ -83,14 +140,30 @@
           :closable="false" show-icon class="tips-alert" />
       </div>
     </div>
+
+    <!-- 情感列表对话框 -->
+    <el-dialog title="选择情感类型" v-model="emotionsDialogVisible" width="30%" :close-on-click-modal="true"
+      :close-on-press-escape="true">
+      <div class="emotions-list">
+        <el-tag v-for="emotion in selectedVoiceEmotions" :key="emotion" class="emotion-tag"
+          :type="emotion === emotionCategory ? 'primary' : 'info'" @click="selectEmotion(emotion)"
+          :effect="emotion === emotionCategory ? 'light' : 'plain'">
+          {{ emotion }}
+        </el-tag>
+      </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="emotionsDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmEmotionSelection">确定</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import CryptoJS from 'crypto-js'
 import axios from 'axios'
 import { availableVoices as voicesList, emotionMap, VoiceType } from '@/store/modules/availableVoices'
 
@@ -99,7 +172,6 @@ const text = ref('')
 const isLoading = ref(false)
 const isLeaving = ref(false)
 const isEntering = ref(true)
-const router = useRouter()
 const audioUrl = ref('')
 
 // 文本高亮相关变量
@@ -230,7 +302,8 @@ const synthesizeSpeech = async () => {
       VoiceType: selectedVoiceType.value,
       Codec: codec.value,
       SampleRate: sampleRate.value,
-      PrimaryLanguage: 1, // 中文
+      PrimaryLanguage: voiceLanguage.value === '中文' ? 1 : voiceLanguage.value === '英文' ? 2 : 3,
+      ModelType: voiceType.value === '精品音色' ? 1 : 0,
     }
 
     // 添加情感参数（如果有选择情感类型）
@@ -356,20 +429,6 @@ const updateHighlight = () => {
   })
 }
 
-// 返回方法
-const goBack = () => {
-  isLeaving.value = true
-
-  // 如果有正在播放的音频，停止它
-  if (audioPlayerRef.value) {
-    audioPlayerRef.value.pause()
-  }
-
-  setTimeout(() => {
-    router.push({ path: "/tts" })
-  }, 300)
-}
-
 // 组件卸载时清理资源
 onUnmounted(() => {
   if (audioPlayerRef.value) {
@@ -397,6 +456,79 @@ onUnmounted(() => {
     textContainerRef.value.removeEventListener('mouseleave', () => { })
   }
 })
+
+// 音色筛选相关状态
+const voiceType = ref('')
+const voiceScene = ref('')
+const voiceLanguage = ref('')
+const emotionsDialogVisible = ref(false)
+const selectedVoiceEmotions = ref<string[]>([])
+
+// 获取所有可用场景
+const availableScenes = computed(() => {
+  const scenes = new Set<string>()
+  voicesList.forEach(voice => scenes.add(voice.scene))
+  return Array.from(scenes) 
+})
+
+// 根据筛选条件过滤音色
+const filteredVoices = computed(() => {
+  return voicesList.filter(voice => {
+    if (voiceType.value && voice.type !== voiceType.value) return false
+    if (voiceScene.value && voice.scene !== voiceScene.value) return false
+    if (voiceLanguage.value && voice.language !== voiceLanguage.value) return false
+    return true
+  })
+})
+
+// 按类型分组音色
+const groupedVoices = computed(() => {
+  const groups: { type: string; voices: VoiceType[] }[] = []
+  const typeMap = new Map<string, VoiceType[]>()
+
+  filteredVoices.value.forEach(voice => {
+    if (!typeMap.has(voice.type)) {
+      typeMap.set(voice.type, [])
+    }
+    typeMap.get(voice.type)?.push(voice)
+  })
+
+  typeMap.forEach((voices, type) => {
+    groups.push({ type, voices })
+  })
+
+  return groups
+})
+
+// 显示情感列表对话框
+const showEmotions = (voice: VoiceType) => {
+  selectedVoiceEmotions.value = voice.emotions
+  emotionsDialogVisible.value = true
+}
+
+// 检查是否支持24k采样率
+const supportHighSampleRate = computed(() => {
+  const selectedVoice = voicesList.find(voice => voice.value === selectedVoiceType.value)
+  return selectedVoice?.sampleRate.includes('24k') || false
+})
+
+// 监听采样率变化
+watch(selectedVoiceType, () => {
+  // 如果当前选择的采样率不在新音色支持的范围内，则重置为16k
+  if (!supportHighSampleRate.value && sampleRate.value === 24000) {
+    sampleRate.value = 16000
+  }
+})
+
+// 选择情感类型
+const selectEmotion = (emotion: string) => {
+  emotionCategory.value = emotion
+}
+
+// 确认情感选择
+const confirmEmotionSelection = () => {
+  emotionsDialogVisible.value = false
+}
 </script>
 
 <style scoped lang="scss">
@@ -407,7 +539,7 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   padding: 2rem;
-  background-color: #f9fafc;
+  // background-color: #f9fafc;
   transition: all 0.3s ease;
   opacity: 1;
   transform: translateX(0);
@@ -440,7 +572,7 @@ onUnmounted(() => {
 }
 
 .main-content {
-  width: 60%;
+  width: 90%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -454,6 +586,41 @@ onUnmounted(() => {
 .voice-select-section {
   width: 100%;
   margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.voice-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  .filter-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .param-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #606266;
+    }
+  }
+}
+
+.voice-type {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  .param-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #606266;
+  }
 }
 
 .voice-select {
@@ -630,6 +797,41 @@ onUnmounted(() => {
   }
 }
 
+.emotion-params {
+  width: 100%;
+
+  .emotion-controls {
+    .emotion-row {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+
+      .emotion-type,
+      .emotion-intensity {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .param-label {
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: #606266;
+        }
+      }
+
+      .emotion-select {
+        width: 100%;
+      }
+
+      .intensity-slider {
+        width: 100%;
+        margin-top: 0.2rem;
+      }
+    }
+  }
+}
+
 .emotion-select {
   width: 100%;
 
@@ -644,6 +846,55 @@ onUnmounted(() => {
     &.is-focus {
       border-color: #409eff;
       box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
+    }
+  }
+}
+
+.voice-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  .voice-tags {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
+.emotions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  padding: 1rem;
+
+  .emotion-tag {
+    margin: 0.25rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+.dialog-footer {
+  text-align: right;
+  margin-top: 1rem;
+}
+
+:deep(.el-select-dropdown__item) {
+  padding: 0 12px;
+}
+
+.voice-tags {
+  .el-tag {
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.8;
     }
   }
 }
