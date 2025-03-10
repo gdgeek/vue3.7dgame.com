@@ -295,6 +295,15 @@ watch(selectedVoiceType, () => {
   }
 })
 
+// 监听筛选条件变化
+watch([voiceType, voiceScene, voiceLanguage], () => {
+  // 获取筛选后的第一个音色
+  const firstVoice = filteredVoices.value[0]
+  if (firstVoice) {
+    selectedVoiceType.value = firstVoice.value
+  }
+})
+
 // 文本输入处理
 const onTextInput = () => {
   highlightedText.value = ''
