@@ -110,7 +110,7 @@ onMounted(() => {
       // 设置手动滚动状态
       isManualScrolling.value = true
 
-      // 2秒后恢复自动滚动
+      // 1秒后恢复自动滚动
       scrollTimeout = window.setTimeout(() => {
         isManualScrolling.value = false
       }, 1000)

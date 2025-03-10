@@ -10,7 +10,7 @@
       <h1 class="tts-title">
         <span class="tts-title-en">Text To Speech</span>
         <span class="tts-title-divider">-</span>
-        <span class="tts-title-zh">文字转语音</span>
+        <span class="tts-title-zh">语音合成</span>
       </h1>
 
       <div class="tts-buttons">
