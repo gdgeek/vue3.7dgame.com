@@ -170,8 +170,9 @@ import { postFile } from "@/api/v1/files"
 import { postAudio } from "@/api/v1/resources/index"
 import { useFileStore } from "@/store/modules/config"
 import { useRouter } from "vue-router"
-import { useI18n } from 'vue-i18n'
 import type { UploadFileType } from "@/api/user/model"
+import { useSettingsStore } from '@/store'
+import { ThemeEnum } from '@/enums/ThemeEnum'
 
 interface VoiceOption {
   value: number
@@ -182,6 +183,9 @@ interface VoiceOption {
   emotions: string[]
   sampleRate: string[]
 }
+
+const settingsStore = useSettingsStore()
+const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
 const text = ref('')
 const isLoading = ref(false)
@@ -421,7 +425,7 @@ const uploadAudio = async () => {
     const fileName = `tts_${Date.now()}.${codec.value}`
     const file = new File([currentAudioBlob.value], fileName, { type: `audio/${codec.value}` })
 
-    // 使用 fileStore 直接上传文件
+    // 上传文件
     const handler = await fileStore.store.publicHandler()
     const md5 = await fileStore.store.fileMD5(file, (p: number) => {
       console.log('MD5计算进度:', p)
@@ -446,7 +450,6 @@ const uploadAudio = async () => {
     const fileResponse = await postFile(data)
 
     if (fileResponse.data?.id) {
-      // 保存音频信息到数据库
       const audioResponse = await postAudio({
         name: audioName,
         file_id: fileResponse.data.id
@@ -454,7 +457,6 @@ const uploadAudio = async () => {
 
       if (audioResponse.data?.id) {
         ElMessage.success('音频上传成功')
-        // 跳转到音频查看页面
         await router.push({
           path: '/resource/audio/view',
           query: { id: audioResponse.data.id }
@@ -634,10 +636,12 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
-  background-color: #fff;
+  background-color: v-bind('isDark ? "#1e1e1e" : "#fff"');
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: v-bind('isDark ? "0 4px 20px rgba(0, 0, 0, 0.2)" : "0 4px 20px rgba(0, 0, 0, 0.05)"');
+  color: v-bind('isDark ? "#e0e0e0" : "inherit"');
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
 // 音色选择区域
@@ -751,8 +755,8 @@ onUnmounted(() => {
     overflow-y: auto;
     padding: 1rem;
     border-radius: 12px;
-    background-color: #fff;
-    border: 1px solid #dcdfe6;
+    background-color: v-bind('isDark ? "#2c2c2c" : "#fff"');
+    border: 1px solid v-bind('isDark ? "#444" : "#dcdfe6"');
     font-size: 1rem;
     line-height: 1.5;
     scroll-behavior: smooth;
@@ -762,41 +766,41 @@ onUnmounted(() => {
     white-space: pre-wrap;
     word-break: break-word;
     transition: all 0.3s ease;
-    color: #606266;
+    color: v-bind('isDark ? "#e0e0e0" : "#606266"');
     box-sizing: border-box;
 
     &::-webkit-scrollbar {
       width: 8px;
 
       &-track {
-        background: #f1f1f1;
+        background: v-bind('isDark ? "#333" : "#f1f1f1"');
         border-radius: 4px;
       }
 
       &-thumb {
-        background: #c1c1c1;
+        background: v-bind('isDark ? "#555" : "#c1c1c1"');
         border-radius: 4px;
 
         &:hover {
-          background: #a8a8a8;
+          background: v-bind('isDark ? "#666" : "#a8a8a8"');
         }
       }
     }
 
     .empty-text {
-      color: #999;
+      color: v-bind('isDark ? "#777" : "#999"');
       text-align: center;
       padding: 2rem 0;
     }
 
     .highlighted-text {
-      color: #FF6700;
+      color: v-bind('isDark ? "#ff8c38" : "#FF6700"');
       font-weight: 500;
       transition: color 0.3s ease;
     }
 
     .normal-text {
-      color: #606266;
+      color: v-bind('isDark ? "#e0e0e0" : "#606266"');
     }
   }
 
@@ -910,7 +914,7 @@ onUnmounted(() => {
 .param-label {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #606266;
+  color: v-bind('isDark ? "#e0e0e0" : "#606266"');
 }
 
 .voice-option {
