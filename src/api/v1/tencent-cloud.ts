@@ -3,7 +3,6 @@ import qs from "querystringify";
 import path from "path-browserify";
 
 export const token = (bucket: string, region: string = "ap-nanjing") => {
-
   const url = path.join(
     "v1",
     "tencent-clouds",

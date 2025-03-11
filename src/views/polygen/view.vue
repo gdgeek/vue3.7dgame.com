@@ -18,8 +18,6 @@
               <el-skeleton :rows="7" />
             </el-card>
           </div>
-
-
         </el-card>
         <br />
 
@@ -34,7 +32,7 @@
 
       </el-col>
 
-      <el-col :sm="8">
+      <el-col :smvue="8">
         <el-card class="box-card">
           <template #header>
             <b>{{ $t("polygen.view.info.title") }}</b> :
@@ -75,7 +73,6 @@ import { UploadFileType } from "@/api/user/model";
 import { printVector3 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
-//import { vue3dLoader } from "vue-3d-loader";
 
 const loading = ref(false);
 const polygenData = ref<any>(null);
@@ -95,35 +92,7 @@ const dataInfo = computed(() =>
   prepare.value ? JSON.parse(polygenData.value.info) : null
 );
 
-// vue3dLoader
-// const autoPlay = ref(true);
-// function change() {
-//   if (autoPlay.value) {
-//     autoPlay.value = false;
-//   } else {
-//     autoPlay.value = true;
-//   }
-// }
-// const filePath = ref();
-// filePath.value = "/public/crabsquid.glb";
-// const currentModelIndex = ref();
-// const process = ref(0);
-// function onProcess(event: any, index: number) {
-//   process.value = Math.floor((event.loaded / event.total) * 100);
-//   if (index != 0) {
-//     currentModelIndex.value = index;
-//   }
-// }
 
-// const lights = ref();
-// lights.value = [
-//   {
-//     type: "AmbientLight", // or pointLight
-//     color: "#ffffff",
-//     position: { x: 0, y: 0, z: 400 },
-//     intensity: 1,
-//   },
-// ];
 
 const tableData = computed(() => {
   if (polygenData.value !== null && prepare.value) {
@@ -319,14 +288,15 @@ const loaded = async (info: any) => {
     console.error(error);
   }
 };
-
+/*
 const screenshot = () => {
   return three.value!.screenshot();
 };
-
+*/
 onMounted(async () => {
   expire.value = true;
   const response = await getPolygen(id.value);
+  console.error((response as any).data);
   polygenData.value = (response as any).data;
 });
 </script>
