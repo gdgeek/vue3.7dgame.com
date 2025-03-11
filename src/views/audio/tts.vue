@@ -21,14 +21,14 @@
           <div class="filter-item">
             <span class="param-label">语言</span>
             <div class="language-control">
-              <el-select v-model="voiceLanguage" placeholder="请选择语言" :disabled="autoDetectLanguage">
+              <el-select v-model="voiceLanguage" placeholder="请选择语言" :disabled="autoSwitchLanguage">
                 <el-option label="全部" value="" />
                 <el-option label="中文" value="中文" />
                 <el-option label="英文" value="英文" />
                 <el-option label="日文" value="日文" />
               </el-select>
-              <el-tooltip content="开启后将自动检测输入文本的语言类型" placement="top" :effect="isDark ? 'light' : 'dark'">
-                <el-switch v-model="autoDetectLanguage" inline-prompt active-text="自动检测" inactive-text="开启自动检测"
+              <el-tooltip content="开启后将自动根据输入文本切换语言类型" placement="top" :effect="isDark ? 'light' : 'dark'">
+                <el-switch v-model="autoSwitchLanguage" inline-prompt active-text="自动切换" inactive-text="开启自动切换"
                   class="auto-detect-switch" />
               </el-tooltip>
             </div>
@@ -115,12 +115,25 @@
       </div>
 
       <div class="input-section">
-        <div class="language-tag" v-if="voiceLanguage">
-          <el-tag :type="voiceLanguage === '中文' ? 'danger' : voiceLanguage === '日文' ? 'success' : 'primary'"
-            effect="dark">
-            {{ voiceLanguage || '请选择语言' }}
-          </el-tag>
-          <span class="limit-info">{{ getLanguageLimitText }}</span>
+        <div class="language-tag" v-if="voiceLanguage || (!autoSwitchLanguage && languageAnalysis.suggestion)">
+          <template v-if="voiceLanguage">
+            <el-tag :type="voiceLanguage === '中文' ? 'danger' : voiceLanguage === '日文' ? 'success' : 'primary'"
+              effect="dark">
+              {{ voiceLanguage }}
+            </el-tag>
+            <span class="limit-info">
+              {{ getLanguageLimitText }}
+              <template v-if="!autoSwitchLanguage && languageAnalysis.suggestion && !voiceLanguage">
+                ({{ languageAnalysis.suggestion }})
+              </template>
+              <template v-if="text.length > 0">
+                - 总字数：{{ languageAnalysis.totalChars }}
+              </template>
+            </span>
+          </template>
+          <template v-else>
+            <span class="limit-info">{{ languageAnalysis.suggestion }}</span>
+          </template>
         </div>
 
         <!-- 语言分析组件 -->
@@ -129,31 +142,18 @@
             <span class="analysis-title">语言分析</span>
             <el-button type="text" size="small" @click="showLanguageAnalysis = false">关闭</el-button>
           </div>
-          <div class="language-bars">
-            <div class="language-bar-item">
-              <div class="bar-label">中文 ({{ languageAnalysis.chinesePercentage }}%)</div>
-              <div class="progress-bar">
-                <div class="progress-fill chinese" :style="{ width: languageAnalysis.chinesePercentage + '%' }"></div>
+          <div class="language-analysis-content">
+            <div class="language-bars">
+              <div class="language-bar-item" v-for="[type, item] in languageItems" :key="type">
+                <div class="bar-label" :class="type">
+                  {{ item.label }} ({{ Math.round(animatedPercentages[type] || 0) }}% - {{ item.count }}字)
+                </div>
+                <el-progress :percentage="animatedPercentages[type] || 0" :color="getProgressColor(type)"
+                  :show-text="false" :stroke-width="8" :track-color="isDark ? '#444' : '#e4e7ed'"
+                  class="language-progress" />
               </div>
             </div>
-            <div class="language-bar-item">
-              <div class="bar-label">日文 ({{ languageAnalysis.japanesePercentage }}%)</div>
-              <div class="progress-bar">
-                <div class="progress-fill japanese" :style="{ width: languageAnalysis.japanesePercentage + '%' }"></div>
-              </div>
-            </div>
-            <div class="language-bar-item">
-              <div class="bar-label">英文 ({{ languageAnalysis.englishPercentage }}%)</div>
-              <div class="progress-bar">
-                <div class="progress-fill english" :style="{ width: languageAnalysis.englishPercentage + '%' }"></div>
-              </div>
-            </div>
-            <div class="language-bar-item">
-              <div class="bar-label">其他 ({{ languageAnalysis.otherPercentage }}%)</div>
-              <div class="progress-bar">
-                <div class="progress-fill other" :style="{ width: languageAnalysis.otherPercentage + '%' }"></div>
-              </div>
-            </div>
+            <div class="language-chart" ref="languageChartRef"></div>
           </div>
           <div class="analysis-suggestion" v-if="languageAnalysis.suggestion">
             <el-alert :title="languageAnalysis.suggestion" type="info" :closable="false" />
@@ -236,6 +236,22 @@ import { useRouter } from "vue-router"
 import type { UploadFileType } from "@/api/user/model"
 import { useSettingsStore } from '@/store'
 import { ThemeEnum } from '@/enums/ThemeEnum'
+import * as echarts from 'echarts/core'
+import { PieChart } from 'echarts/charts'
+import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components'
+import { LabelLayout } from 'echarts/features'
+import { CanvasRenderer } from 'echarts/renderers'
+
+
+// 注册ECharts组件
+echarts.use([
+  PieChart,
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  LabelLayout,
+  CanvasRenderer
+])
 
 interface VoiceOption {
   value: number
@@ -247,8 +263,119 @@ interface VoiceOption {
   sampleRate: string[]
 }
 
+// 语言分析接口
+interface LanguageAnalysis {
+  chinesePercentage: number
+  japanesePercentage: number
+  englishPercentage: number
+  otherPercentage: number
+  chineseCount: number
+  japaneseCount: number
+  englishCount: number
+  otherCount: number
+  totalChars: number
+  suggestion: string
+}
+
 const settingsStore = useSettingsStore()
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
+
+// 动画相关的状态
+const animatedPercentages = ref<Record<string, number>>({})
+
+// 进度条颜色
+const getProgressColor = (type: string): string => {
+  const colorMap: Record<string, string> = {
+    chinese: '#f56c6c',
+    japanese: '#67c23a',
+    english: '#409eff',
+    other: '#909399'
+  }
+  return colorMap[type] || '#909399'
+}
+
+// 监听主题变化，更新图表
+watch(isDark, () => {
+  if (showLanguageAnalysis.value) {
+    // 重新初始化图表
+    if (languageChart) {
+      const oldChart = languageChart
+      nextTick(() => {
+        oldChart.dispose()
+        languageChart = null
+        updateLanguageChart()
+      })
+    }
+
+    // 重新播放进度条动画
+    const currentPercentages = { ...animatedPercentages.value }
+    animatedPercentages.value = {}
+    nextTick(() => {
+      // 先将所有值设为0
+      Object.keys(currentPercentages).forEach(key => {
+        animatedPercentages.value[key] = 0
+      })
+      // 延迟一帧后开始动画
+      requestAnimationFrame(() => {
+        updateAnimatedPercentages()
+      })
+    })
+
+    // 重新播放组件动画
+    const bars = document.querySelectorAll('.language-bar-item')
+    bars.forEach((bar) => {
+      const element = bar as HTMLElement
+      element.style.animation = 'none'
+      void element.offsetWidth // 触发重排，重置动画
+      element.style.animation = ''
+    })
+  }
+})
+
+// 更新动画百分比
+const updateAnimatedPercentages = () => {
+  const targetPercentages: Record<string, number> = {}
+  languageItems.value.forEach(([type, item]) => {
+    targetPercentages[type] = item.percentage
+  })
+
+  // 重置所有百分比为0
+  Object.keys(targetPercentages).forEach(type => {
+    if (!(type in animatedPercentages.value)) {
+      animatedPercentages.value[type] = 0
+    }
+  })
+
+  // 使用requestAnimationFrame实现平滑动画
+  const animate = (timestamp: number) => {
+    if (!animationStartTime) {
+      animationStartTime = timestamp
+    }
+
+    const progress = Math.min((timestamp - animationStartTime) / animationDuration, 1)
+    const easeProgress = easeOutCubic(progress)
+
+    Object.keys(targetPercentages).forEach(type => {
+      const target = targetPercentages[type]
+      const start = animatedPercentages.value[type] || 0
+      animatedPercentages.value[type] = start + (target - start) * easeProgress
+    })
+
+    if (progress < 1) {
+      requestAnimationFrame(animate)
+    }
+  }
+
+  let animationStartTime: number | null = null
+  const animationDuration = 1500 // 动画持续时间（毫秒）
+
+  requestAnimationFrame(animate)
+}
+
+// 缓动函数
+const easeOutCubic = (x: number): number => {
+  return 1 - Math.pow(1 - x, 3)
+}
 
 const text = ref('')
 const isLoading = ref(false)
@@ -272,6 +399,10 @@ let languageDetectionTimer: number | null = null
 // DOM引用
 const textContainerRef = ref<HTMLElement | null>(null)
 const audioPlayerRef = ref<HTMLAudioElement | null>(null)
+const languageChartRef = ref<HTMLElement | null>(null)
+
+// 图表实例
+let languageChart: echarts.ECharts | null = null
 
 // TTS参数
 const selectedVoiceType = ref(101002) // 默认音色：智聆
@@ -282,11 +413,16 @@ const sampleRate = ref(16000)
 const emotionCategory = ref('')
 const emotionIntensity = ref(100)
 const showLanguageAnalysis = ref(false) // 是否显示语言分析
-const languageAnalysis = ref({
+const languageAnalysis = ref<LanguageAnalysis>({
   chinesePercentage: 0,
   japanesePercentage: 0,
   englishPercentage: 0,
   otherPercentage: 0,
+  chineseCount: 0,
+  japaneseCount: 0,
+  englishCount: 0,
+  otherCount: 0,
+  totalChars: 0,
   suggestion: ''
 })
 
@@ -296,7 +432,7 @@ const voiceScene = ref('')
 const voiceLanguage = ref('')
 const emotionsDialogVisible = ref(false)
 const selectedVoiceEmotions = ref<string[]>([])
-const autoDetectLanguage = ref(true) // 添加自动语言检测开关状态
+const autoSwitchLanguage = ref(true) // 添加自动语言切换开关状态
 
 const router = useRouter()
 const fileStore = useFileStore()
@@ -419,9 +555,17 @@ const onTextInput = () => {
   checkTextLanguage()
 }
 
+// 添加watch监听autoSwitchLanguage的变化
+watch(autoSwitchLanguage, (newValue) => {
+  if (newValue && text.value) {
+    // 如果开启自动切换且有文本，立即进行检测和切换
+    checkTextLanguage()
+  }
+})
+
 // 检查文本语言类型
 const checkTextLanguage = () => {
-  if (!text.value || !autoDetectLanguage.value) return
+  if (!text.value) return
 
   const chineseRegex = /[\u4e00-\u9fa5]/g // 匹配中文字符
   const japaneseRegex = /[\u3040-\u309F\u30A0-\u30FF]/g // 匹配日文假名
@@ -429,11 +573,12 @@ const checkTextLanguage = () => {
   const englishRegex = /[a-zA-Z]/g // 匹配英文字符
 
   // 计算各种语言字符的数量
-  const chineseCount = (text.value.match(chineseRegex) || []).length 
-  const japaneseKanaCount = (text.value.match(japaneseRegex) || []).length 
+  const chineseCount = (text.value.match(chineseRegex) || []).length
+  const japaneseKanaCount = (text.value.match(japaneseRegex) || []).length
   const japaneseKanjiCount = (text.value.match(japaneseKanjiRegex) || []).length - chineseCount // 减去中文字符，避免重复计算
-  const japaneseCount = japaneseKanaCount + Math.max(0, japaneseKanjiCount) 
+  const japaneseCount = japaneseKanaCount + Math.max(0, japaneseKanjiCount)
   const englishCount = (text.value.match(englishRegex) || []).length
+  const otherCount = text.value.length - (chineseCount + japaneseCount + englishCount)
 
   // 计算总字符数和各语言占比
   const totalChars = text.value.length
@@ -448,33 +593,42 @@ const checkTextLanguage = () => {
     japanesePercentage: Math.round(japanesePercentage),
     englishPercentage: Math.round(englishPercentage),
     otherPercentage: Math.round(otherPercentage),
+    chineseCount,
+    japaneseCount,
+    englishCount,
+    otherCount,
+    totalChars,
     suggestion: ''
   }
+
+  // 更新饼图
+  nextTick(() => {
+    updateLanguageChart()
+  })
 
   // 确定主要语言类型
   let detectedLanguage = ''
   let isMultiLanguage = false
   const maxCount = Math.max(chineseCount, japaneseCount, englishCount)
-  const threshold = 0.7 // 70%的阈值来确定主要语言
+  // const threshold = 0.7 // 70%的阈值来确定主要语言
 
+  // 只要存在多种语言就标记为混合语言
   if (maxCount > 0) {
-    if (chineseCount === maxCount && chinesePercentage > threshold * 100) {
-      detectedLanguage = '中文'
-    } else if (japaneseCount === maxCount && japanesePercentage > threshold * 100) {
-      detectedLanguage = '日文'
-    } else if (englishCount === maxCount && englishPercentage > threshold * 100) {
-      detectedLanguage = '英文'
-    } else {
-      // 混合语言情况
+    if (chineseCount > 0 && (japaneseCount > 0 || englishCount > 0)) {
       isMultiLanguage = true
-      // 选择占比最高的语言
-      if (chineseCount >= japaneseCount && chineseCount >= englishCount) {
-        detectedLanguage = '中文'
-      } else if (japaneseCount >= chineseCount && japaneseCount >= englishCount) {
-        detectedLanguage = '日文'
-      } else {
-        detectedLanguage = '英文'
-      }
+    } else if (japaneseCount > 0 && (chineseCount > 0 || englishCount > 0)) {
+      isMultiLanguage = true
+    } else if (englishCount > 0 && (chineseCount > 0 || japaneseCount > 0)) {
+      isMultiLanguage = true
+    }
+
+    // 主要语言（数量最多的）
+    if (chineseCount >= japaneseCount && chineseCount >= englishCount) {
+      detectedLanguage = '中文'
+    } else if (japaneseCount >= chineseCount && japaneseCount >= englishCount) {
+      detectedLanguage = '日文'
+    } else {
+      detectedLanguage = '英文'
     }
   }
 
@@ -498,28 +652,31 @@ const checkTextLanguage = () => {
 
     languageDetectionTimer = window.setTimeout(() => {
       ElMessage({
-        message: `${languageInfo}，已自动选择主要语言：${detectedLanguage}`,
+        message: `${languageInfo}，${autoSwitchLanguage.value ? '已自动切换' : '建议选择'}主要语言：${detectedLanguage}`,
         type: 'warning',
         duration: 5000
       })
     }, 3000) // 3秒后显示提示
   }
 
-  // 如果检测到的语言与当前选择的语言不匹配
-  if (detectedLanguage && voiceLanguage.value && detectedLanguage !== voiceLanguage.value) {
-    // 自动切换语言
-    const oldLanguage = voiceLanguage.value
-    voiceLanguage.value = detectedLanguage
-    if (!isMultiLanguage) {
-      ElMessage.success(`检测到文本语言为${detectedLanguage}，已自动从${oldLanguage}切换为${detectedLanguage}`)
+  // 只有在自动切换开启时才执行语言切换
+  if (autoSwitchLanguage.value) {
+    // 如果检测到的语言与当前选择的语言不匹配
+    if (detectedLanguage && voiceLanguage.value && detectedLanguage !== voiceLanguage.value) {
+      // 自动切换语言
+      const oldLanguage = voiceLanguage.value
+      voiceLanguage.value = detectedLanguage
+      if (!isMultiLanguage) {
+        ElMessage.success(`检测到文本语言为${detectedLanguage}，已自动从${oldLanguage}切换为${detectedLanguage}`)
+      }
     }
-  }
 
-  // 如果未选择语言但检测到了语言，自动设置语言
-  if (detectedLanguage && !voiceLanguage.value) {
-    voiceLanguage.value = detectedLanguage
-    if (!isMultiLanguage) {
-      ElMessage.success(`已自动检测并设置语言为：${detectedLanguage}`)
+    // 如果未选择语言但检测到了语言，自动设置语言
+    if (detectedLanguage && !voiceLanguage.value) {
+      voiceLanguage.value = detectedLanguage
+      if (!isMultiLanguage) {
+        ElMessage.success(`已自动检测并设置语言为：${detectedLanguage}`)
+      }
     }
   }
 
@@ -534,6 +691,167 @@ const checkTextLanguage = () => {
     }
   }
 }
+
+// 监听语言分析显示状态变化
+watch(showLanguageAnalysis, (newVal) => {
+  if (newVal) {
+    nextTick(() => {
+      // 确保DOM元素已经渲染
+      setTimeout(() => {
+        // 如果图表实例存在，先销毁它
+        if (languageChart) {
+          languageChart.dispose()
+          languageChart = null
+        }
+        // 重新创建图表
+        updateLanguageChart()
+        // 重置动画状态并重新开始
+        animatedPercentages.value = {}
+        updateAnimatedPercentages()
+      }, 100)
+    })
+  }
+})
+
+// 更新语言分析饼图
+const updateLanguageChart = () => {
+  if (!languageChartRef.value) return
+
+  // 如果图表实例不存在，则创建新实例
+  if (!languageChart) {
+    languageChart = echarts.init(languageChartRef.value)
+  } else {
+    // 如果图表实例已存在，先调整大小以适应容器
+    languageChart.resize()
+  }
+
+  //颜色映射
+  const colorMap = {
+    '中文': '#f56c6c',
+    '日文': '#67c23a',
+    '英文': '#409eff',
+    '其他': '#909399'
+  }
+
+  // 图表数据
+  const chartData = [
+    {
+      value: languageAnalysis.value.chinesePercentage,
+      name: '中文',
+      itemStyle: { color: colorMap['中文'] },
+      count: languageAnalysis.value.chineseCount
+    },
+    {
+      value: languageAnalysis.value.japanesePercentage,
+      name: '日文',
+      itemStyle: { color: colorMap['日文'] },
+      count: languageAnalysis.value.japaneseCount
+    },
+    {
+      value: languageAnalysis.value.englishPercentage,
+      name: '英文',
+      itemStyle: { color: colorMap['英文'] },
+      count: languageAnalysis.value.englishCount
+    },
+    {
+      value: languageAnalysis.value.otherPercentage,
+      name: '其他',
+      itemStyle: { color: colorMap['其他'] },
+      count: languageAnalysis.value.otherCount
+    }
+  ].filter(item => item.value > 0)
+
+  // 设置图表选项
+  const option = {
+    tooltip: {
+      trigger: 'item',
+      formatter: function (params: any) {
+        return `语言占比<br/>
+               ${params.name}: ${params.percent}%<br/>
+               字符数: ${params.data.count}字<br/>
+              `
+      },
+      textStyle: {
+        color: isDark.value ? '#fff' : '#333'
+      },
+      backgroundColor: isDark.value ? '#1e1e1e' : '#fff',
+      borderColor: isDark.value ? '#444' : '#ddd'
+    },
+    legend: {
+      orient: 'vertical',
+      left: 'left',
+      textStyle: {
+        color: isDark.value ? '#e0e0e0' : '#606266'
+      }
+    },
+    series: [
+      {
+        name: '语言占比',
+        type: 'pie',
+        radius: ['40%', '95%'],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 8,
+          borderColor: isDark.value ? '#1e1e1e' : '#fff',
+          borderWidth: 2
+        },
+        label: {
+          show: false,
+          position: 'center',
+          color: isDark.value ? '#e0e0e0' : '#606266'
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: '20',
+            fontWeight: 'bold',
+            color: isDark.value ? '#e0e0e0' : '#606266'
+          }
+        },
+        labelLine: {
+          show: false
+        },
+        data: chartData
+      }
+    ]
+  }
+
+  // 应用图表选项
+  languageChart.setOption(option)
+}
+
+// 将 languageItems 移到 setup 作用域内
+const languageItems = computed(() => {
+  return Object.entries({
+    chinese: {
+      label: '中文',
+      percentage: languageAnalysis.value.chinesePercentage,
+      count: languageAnalysis.value.chineseCount
+    },
+    japanese: {
+      label: '日文',
+      percentage: languageAnalysis.value.japanesePercentage,
+      count: languageAnalysis.value.japaneseCount
+    },
+    english: {
+      label: '英文',
+      percentage: languageAnalysis.value.englishPercentage,
+      count: languageAnalysis.value.englishCount
+    },
+    other: {
+      label: '其他',
+      percentage: languageAnalysis.value.otherPercentage,
+      count: languageAnalysis.value.otherCount
+    }
+  }).filter(([_, item]) => item.percentage > 0)
+})
+
+// 监听语言分析数据变化
+watch(() => languageAnalysis.value, () => {
+  // 重置动画状态并重新开始
+  animatedPercentages.value = {}
+  updateAnimatedPercentages()
+}, { deep: true })
 
 // 语音合成
 const synthesizeSpeech = async () => {
@@ -768,14 +1086,6 @@ const getLanguageLimitText = computed(() => {
   }
 })
 
-// 添加watch监听autoDetectLanguage的变化
-watch(autoDetectLanguage, (newValue) => {
-  if (newValue && text.value) {
-    // 如果开启自动检测且有文本，立即进行检测
-    checkTextLanguage()
-  }
-})
-
 onMounted(() => {
   // 初始化动画
   setTimeout(() => {
@@ -813,7 +1123,25 @@ onMounted(() => {
       }, 1000)
     })
   }
+
+  // 初始化语言分析图表和动画
+  nextTick(() => {
+    if (showLanguageAnalysis.value && text.value.length > 5) {
+      updateLanguageChart()
+      updateAnimatedPercentages()
+    }
+  })
+
+  // 添加窗口大小变化监听器
+  window.addEventListener('resize', handleResize)
 })
+
+// 处理窗口大小变化
+const handleResize = () => {
+  if (languageChart) {
+    languageChart.resize()
+  }
+}
 
 onUnmounted(() => {
   // 清理音频相关资源
@@ -846,6 +1174,15 @@ onUnmounted(() => {
     textContainerRef.value.removeEventListener('mouseenter', () => { })
     textContainerRef.value.removeEventListener('mouseleave', () => { })
   }
+
+  // 销毁图表实例
+  if (languageChart) {
+    languageChart.dispose()
+    languageChart = null
+  }
+
+  // 移除窗口大小变化监听器
+  window.removeEventListener('resize', handleResize)
 })
 </script>
 
@@ -1015,63 +1352,141 @@ onUnmounted(() => {
     border-radius: 8px;
     background-color: v-bind('isDark ? "#2a2a2a" : "#f5f7fa"');
     border: 1px solid v-bind('isDark ? "#444" : "#e4e7ed"');
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
     .analysis-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 0.8rem;
+      opacity: 0;
+      animation: fadeIn 0.5s ease 0.2s forwards;
 
       .analysis-title {
         font-weight: 600;
         font-size: 0.9rem;
         color: v-bind('isDark ? "#e0e0e0" : "#606266"');
+        position: relative;
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -4px;
+          left: 0;
+          width: 0;
+          height: 2px;
+          background: #409eff;
+          animation: lineGrow 0.6s ease-out 0.5s forwards;
+        }
       }
     }
 
-    .language-bars {
+    .language-analysis-content {
       display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fadeIn 0.5s ease 0.3s forwards;
+
+      .language-bars {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+
+      .language-chart {
+        flex: 1;
+        height: 200px;
+        border-radius: 8px;
+        overflow: hidden;
+        opacity: 0;
+        animation: fadeIn 0.5s ease 0.4s forwards;
+        box-shadow: v-bind('isDark ? "0 4px 12px rgba(0, 0, 0, 0.2)" : "0 4px 12px rgba(0, 0, 0, 0.05)"');
+      }
     }
 
     .language-bar-item {
       display: flex;
       flex-direction: column;
       gap: 0.3rem;
+      opacity: 0;
+      animation: slideInRight 0.5s ease forwards;
+
+      @for $i from 1 through 4 {
+        &:nth-child(#{$i}) {
+          animation-delay: #{0.2 + $i * 0.1}s;
+        }
+      }
+
+      &.animate-in {
+        animation: slideInRight 0.5s ease forwards;
+      }
 
       .bar-label {
         font-size: 0.8rem;
         color: v-bind('isDark ? "#bbb" : "#606266"');
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        &.chinese {
+          color: #f56c6c;
+        }
+
+        &.japanese {
+          color: #67c23a;
+        }
+
+        &.english {
+          color: #409eff;
+        }
+
+        &.other {
+          color: #909399;
+        }
       }
 
-      .progress-bar {
-        height: 8px;
-        width: 100%;
-        background-color: v-bind('isDark ? "#444" : "#e4e7ed"');
-        border-radius: 4px;
-        overflow: hidden;
-
-        .progress-fill {
-          height: 100%;
+      .language-progress {
+        :deep(.el-progress-bar__outer) {
+          background-color: v-bind('isDark ? "#444" : "#e4e7ed"');
           border-radius: 4px;
-          transition: width 0.5s ease;
+        }
 
-          &.chinese {
-            background-color: #f56c6c;
-          }
+        :deep(.el-progress-bar__inner) {
+          border-radius: 4px;
+          transition: width 0.3s ease-out;
+          position: relative;
+          overflow: hidden;
 
-          &.japanese {
-            background-color: #67c23a;
-          }
-
-          &.english {
-            background-color: #409eff;
-          }
-
-          &.other {
-            background-color: #909399;
+          &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0) 100%);
+            transform: translateX(-100%);
+            animation: shimmer 2s infinite;
           }
         }
       }
@@ -1079,6 +1494,46 @@ onUnmounted(() => {
 
     .analysis-suggestion {
       margin-top: 1rem;
+      opacity: 0;
+      animation: fadeIn 0.5s ease 0.6s forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes lineGrow {
+      from {
+        width: 0;
+      }
+
+      to {
+        width: 100%;
+      }
+    }
+
+    @keyframes shimmer {
+      100% {
+        transform: translateX(100%);
+      }
     }
   }
 
@@ -1300,12 +1755,38 @@ onUnmounted(() => {
       gap: 1rem;
     }
   }
+
+  .language-analysis {
+    .language-analysis-content {
+      flex-direction: column;
+      gap: 2rem;
+
+      .language-bars {
+        width: 100%;
+      }
+
+      .language-chart {
+        width: 100%;
+        min-height: 300px;
+      }
+    }
+  }
 }
 
 @media (max-width: 768px) {
   .tencent-tts {
     width: 100%;
     padding: 0;
+  }
+
+  .language-analysis {
+    .language-analysis-content {
+      flex-direction: column;
+
+      .language-chart {
+        min-height: 250px;
+      }
+    }
   }
 }
 
