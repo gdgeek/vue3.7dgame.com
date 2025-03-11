@@ -96,14 +96,14 @@
         </el-card>
 
         <br />
-
+<!--
         <el-card v-if="saveable" class="box-card">
           <language
             v-if="verse"
             :verseId="verse.id"
             :languages="verse.languages!"
           ></language>
-        </el-card>
+        </el-card>-->
         <br />
 
         <el-card v-if="can('admin', 'all')">
@@ -145,7 +145,7 @@ import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
 import Message from "@/components/MrPP/MrPPVerse/Message.vue";
 import Share from "@/components/MrPP/MrPPVerse/Share.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";
-import Language from "@/components/MrPP/MrPPVerse/language.vue";
+//import Language from "@/components/MrPP/MrPPVerse/language.vue";
 import { getVerse, VerseData } from "@/api/v1/verse";
 import { postVerseOpen, deleteVerseOpen } from "@/api/v1/verse-open";
 import { MessageType, postMessageAPI } from "@/api/v1/message";
@@ -156,13 +156,14 @@ import { Hide, View } from "@element-plus/icons-vue";
 import { useAbility } from "@casl/vue";
 const ability = useAbility();
 const can = ability.can.bind(ability);
+/*
 import {
   dellanguages,
   getlanguages,
   postlanguages,
   putlanguages,
 } from "@/api/v1/multilanguage-verses";
-
+*/
 const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
@@ -174,7 +175,7 @@ const briefing = ref<MessageType>();
 const id = computed(() => parseInt(route.query.id as string));
 const message = computed(() => verse.value?.message ?? null);
 const verseOpen = computed(() => verse.value?.verseOpen ?? null);
-
+/*
 const Form = ref({
   language: "",
   name: "",
@@ -182,9 +183,9 @@ const Form = ref({
 });
 
 const FormRef = ref<FormInstance>();
-
+*/
 const { t } = useI18n();
-
+/*
 const rules = {
   language: [
     {
@@ -274,7 +275,7 @@ const del = async () => {
   await refresh();
   ElMessage.success(t("verse.view.success3"));
 };
-
+*/
 const info = computed(() =>
   verse.value?.info ? JSON.parse(verse.value.info) : null
 );
@@ -288,7 +289,7 @@ const refresh = async () => {
   try {
     const response = await getVerse(
       id.value,
-      "image,verseOpen,verseShare,author, message, languages"
+      "image,verseOpen,verseShare,author, message"
     );
     verse.value = response.data;
   } catch (error) {
@@ -296,7 +297,7 @@ const refresh = async () => {
     // 处理错误逻辑，如显示错误消息
     return;
   }
-
+/*
   const selectedLanguage = verse.value?.languages?.find(
     (lang: any) => lang.language === Form.value.language
   );
@@ -305,7 +306,7 @@ const refresh = async () => {
     Form.value.name = selectedLanguage.name;
     Form.value.description = selectedLanguage.description;
   }
-
+*/
   briefing.value = message.value
     ? message.value
     : {
@@ -363,7 +364,7 @@ const comeIn = () => {
 };
 
 onMounted(() => {
-  Form.value.language = "zh"; // 默认中文zh
+  //Form.value.language = "zh"; // 默认中文zh
   refresh();
 });
 </script>

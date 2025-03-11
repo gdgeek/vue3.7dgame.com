@@ -196,6 +196,12 @@ const handleMessage = async (e: MessageEvent) => {
     case "save-verse":
       saveVerse(data);
       break;
+    case "save-verse-none":
+      ElMessage({
+        type: "warning",
+        message: "项目没有改变",
+      });
+      break;
     case "goto":
       if (data.target === "blockly.js") {
         const scriptRoute = router

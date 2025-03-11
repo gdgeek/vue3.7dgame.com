@@ -19,8 +19,6 @@ function VerseLoader(editor) {
 		self.save()
 	})
 	const factory = new MetaFactory();
-	//const metaFactory = new MetaFactory();
-	//const builder = new SceneBuilder(editor)
 
 
 
