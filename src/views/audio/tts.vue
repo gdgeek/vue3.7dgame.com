@@ -348,7 +348,7 @@ const synthesizeSpeech = async () => {
 
     // 调用云函数API
     const response = await axios.post(
-      'https://game-9ghhigyq57e00dc3-1251022382.ap-shanghai.app.tcloudbase.com/TencentTTS',
+      'https://sound.bujiaban.com/tencentTTS',
       params,
       { headers: { 'Content-Type': 'application/json' } }
     )
