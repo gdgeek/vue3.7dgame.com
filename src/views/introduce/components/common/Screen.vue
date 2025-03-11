@@ -36,7 +36,7 @@
       </div>
     </el-col>
     <!-- 3D模型展示 -->
-    <ScreenShow></ScreenShow>
+    <ScreenShow v-if="item.screenShow" :type="item.screenShow"></ScreenShow>
   </el-row>
 </template>
 
@@ -49,6 +49,7 @@ interface ScreenItem {
   title?: string;
   title2?: string;
   tel?: string;
+  screenShow?: number;
 }
 
 interface Props {

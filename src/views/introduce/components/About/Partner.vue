@@ -1,10 +1,12 @@
 <template>
   <div class="partner-background">
     <div align="center" class="partner-title">
-      <h1 class="font-text" style="font-weight: 400">我们的合作伙伴</h1>
+      <h1 class="font-text" style="font-weight: 400; color: #4183ea">我们的合作伙伴</h1>
       <p class="font-text">
         我们服务过全球超过百家知名企业，与其达成了长期合作的信赖关系。
       </p>
+      <!-- <p class="section-underline-blue" /> -->
+      <p class="section-underline-style" />
     </div>
     <div class="partner-img">
       <div class="logo-container">
@@ -72,6 +74,9 @@ defineOptions({
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/responsive-style.scss';
+@use '@/styles/sandtable.scss';
+
 .partner-background {
   width: 100%;
   padding: 20px 10px 40px;

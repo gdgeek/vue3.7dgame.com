@@ -1,5 +1,56 @@
 <template>
   <footer class="footer">
+    <css-doodle class="footer-bg">
+      :doodle {
+      @grid: 1x6 / 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      }
+      @place-cell: center;
+      --hue: calc(220 + 2.5 * @index() * 40);
+      background: @pick(
+      linear-gradient(120deg, hsl(var(--hue), 80%, 80%), hsl(calc(var(--hue) + 60), 85%, 75%)),
+      linear-gradient(-60deg, hsl(calc(var(--hue) + 30), 90%, 70%), hsl(calc(var(--hue) + 90), 85%, 75%)),
+      linear-gradient(45deg, hsl(calc(var(--hue) - 30), 85%, 70%), hsl(calc(var(--hue) + 120), 90%, 75%))
+      );
+      width: @rand(20vmin, 50vmin);
+      height: @rand(20vmin, 50vmin);
+      transform:
+      translate(@rand(-150%, 150%), @rand(-50%, 50%))
+      scale(@rand(.9, 1.6))
+      rotate(@rand(360deg));
+      clip-path: polygon(
+      @rand(0, 30%) @rand(0, 30%),
+      @rand(30%, 60%) @rand(0, 30%),
+      @rand(60%, 100%) @rand(0, 50%),
+      @rand(60%, 100%) @rand(50%, 100%),
+      @rand(30%, 60%) @rand(60%, 100%),
+      @rand(0, 30%) @rand(60%, 100%)
+      );
+      opacity: @rand(.3, .7);
+      animation:
+      transform-move @rand(25s, 45s) infinite @rand(0s, -5s) linear alternate,
+      hue-rotate @rand(15s, 25s) infinite @rand(0s, -5s) linear;
+
+      @keyframes transform-move {
+      100% {
+      transform:
+      translate(@rand(-150%, 150%), @rand(-50%, 50%))
+      scale(@rand(.9, 1.6))
+      rotate(@rand(360deg));
+      }
+      }
+
+      @keyframes hue-rotate {
+      100% {
+      filter: hue-rotate(360deg) saturate(1.2);
+      }
+      }
+    </css-doodle>
+    <div class="footer-mask"></div>
     <div class="footer-content">
       <div class="footer-main">
         <!-- Logo 部分 -->
@@ -38,26 +89,13 @@
 
         <!-- 导航链接组 -->
         <div class="footer-links">
-          <div
-            class="link-group"
-            v-for="group in linkGroups"
-            :key="group.title"
-          >
+          <div class="link-group" v-for="group in linkGroups" :key="group.title">
             <h3>{{ group.title }}</h3>
             <ul>
               <li v-for="link in group.links" :key="link.text">
-                <a
-                  :href="link.external ? link.url : 'javascript:void(0)'"
-                  :target="link.external ? '_blank' : '_self'"
-                  @click="!link.external && handleClick(link.url)"
-                  :class="{ 'external-link': link.external }"
-                >
-                  <img
-                    v-if="link.icon"
-                    :src="link.icon"
-                    :alt="link.text"
-                    class="link-icon"
-                  />
+                <a :href="link.external ? link.url : 'javascript:void(0)'" :target="link.external ? '_blank' : '_self'"
+                  @click="!link.external && handleClick(link.url)" :class="{ 'external-link': link.external }">
+                  <img v-if="link.icon" :src="link.icon" :alt="link.text" class="link-icon" />
                   {{ link.text }}
                   <el-icon v-if="link.external" class="external-icon">
                     <ArrowRight />
@@ -75,25 +113,19 @@
           <span>© {{ currentYear }} {{ informationStore.title }}</span>
         </div>
         <div class="right">
-          <el-link
-              :href="informationStore.privacyPolicy.url"
-              target="_blank"
-              :underline="false"
-              style="display: flex; align-items: center"
-            >
-              <el-icon>
-                <Briefcase></Briefcase>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ informationStore.privacyPolicy.name }}
-              </span>
-            </el-link>
-          <el-link
-            href="https://beian.miit.gov.cn/"
-            target="_blank"
-            :underline="false"
-          >
-            <el-icon><Grid /></el-icon>
+          <el-link :href="informationStore.privacyPolicy.url" target="_blank" :underline="false"
+            style="display: flex; align-items: center">
+            <el-icon>
+              <Briefcase></Briefcase>
+            </el-icon>
+            <span class="font-text" style="margin-left: 5px">
+              {{ informationStore.privacyPolicy.name }}
+            </span>
+          </el-link>
+          <el-link href="https://beian.miit.gov.cn/" target="_blank" :underline="false">
+            <el-icon>
+              <Grid />
+            </el-icon>
             {{ informationStore.beian }}
           </el-link>
         </div>
@@ -112,6 +144,7 @@ import {
   Location,
   Message,
 } from "@element-plus/icons-vue";
+import 'css-doodle';
 
 interface LinkItem {
   text: string;
@@ -167,6 +200,13 @@ const linkGroups: LinkGroup[] = [
     ],
   },
   {
+    title: "项目开发",
+    links: [
+      { text: "项目介绍", url: "/introduce/develop#introduce" },
+      { text: "开发流程", url: "/introduce/develop#flow" },
+    ],
+  },
+  {
     title: "新闻动态",
     links: [
       { text: "新闻", url: "/introduce/news?tab=news" },
@@ -205,31 +245,31 @@ const linkGroups: LinkGroup[] = [
   bottom: 0;
   width: 100%;
   margin-top: auto;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 240, 245, 0.9) 0%,
-    rgba(240, 248, 255, 0.9) 50%,
-    rgba(230, 230, 250, 0.9) 100%
-  );
-  backdrop-filter: blur(10px);
   z-index: 10;
   padding: 48px 0 0;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+}
 
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(
-      circle at 30% 30%,
-      rgba(255, 182, 193, 0.1) 0%,
-      rgba(173, 216, 230, 0.1) 50%,
-      rgba(221, 160, 221, 0.1) 100%
-    );
-    pointer-events: none;
-  }
+.footer-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+}
+
+.footer-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  backdrop-filter: blur(100px);
+  background: rgba(255, 255, 255, 0.3);
+  z-index: 0;
 }
 
 .footer-content {
@@ -342,7 +382,7 @@ const linkGroups: LinkGroup[] = [
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: 14px;
   color: #86909c;
 
   .left {
@@ -395,7 +435,7 @@ const linkGroups: LinkGroup[] = [
     text-align: center;
 
     .right {
-      flex-direction: column;
+      // flex-direction: column
       align-items: center;
     }
   }

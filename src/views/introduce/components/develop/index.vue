@@ -1,25 +1,17 @@
 <template>
   <div class="content-section">
-    <template v-if="loading">
-      <ProductsSkeletonLoader />
-    </template>
-    <template v-else>
       <Screen :bgUrl="imageUrl" :item="screen"></Screen>
       <div class="products-container">
         <DecorativeBackground />
         <div class="products-content">
-          <div id="solution">
-            <Solution></Solution>
+          <div id="introduce">
+            <Introduce></Introduce>
           </div>
-          <div id="cloud">
-            <Cloud></Cloud>
+          <div id="flow">
+            <Flow></Flow>
           </div>
-          <Deploy></Deploy>
-
         </div>
       </div>
-      <SubScreen></SubScreen>
-    </template>
   </div>
 </template>
 
@@ -27,15 +19,12 @@
 import { computed, onMounted, watch, ref } from "vue";
 import { useRoute } from "vue-router";
 import Screen from "../common/Screen.vue";
-import Solution from "./Solution.vue";
-import Cloud from "./Cloud.vue";
-import Deploy from "./Deploy.vue";
-import SubScreen from "../common/SubScreen.vue";
-import ProductsSkeletonLoader from './ProductsSkeletonLoader.vue';
 import DecorativeBackground from '../common/DecorativeBackground.vue';
+import Introduce from './Introduce.vue';
+import Flow from './Flow.vue';
 
 defineOptions({
-  name: "Products",
+  name: "Develop",
 });
 
 const route = useRoute();
@@ -52,7 +41,7 @@ const screen = computed(() => {
     color: "#1d1d1f",
     tel: "15000159790",
     align: "left",
-    screenShow: 1,
+    screenShow: 2,
   };
 });
 

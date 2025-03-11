@@ -34,6 +34,48 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: "/tts",
+    component: null,
+    meta: { hidden: true, private: true},
+    redirect: "/tts/index",
+    children: [
+      {
+        path: "index",
+        name: "",
+        component: () => import("@/views/TTS/index.vue"),
+        meta: { hidden: true, private: true },
+      },
+      {
+        path: "audioToWord",
+        name: "",
+        component: () => import("@/views/TTS/AudioToWord.vue"),
+        meta: { hidden: true, private: true },
+      },
+      {
+        path: "wordToAudio",
+        name: "",
+        component: () =>
+          import("@/views/TTS/WordToAudio.vue"),
+        meta: { hidden: true, private: true },
+      },
+      {
+        path: "wordToAudioV2",
+        name: "",
+        component: () =>
+          import("@/views/TTS/WordToAudioV2.vue"),
+        meta: { hidden: true, private: true },
+      },
+      {
+        path: "tencentTTS",
+        name: "",
+        component: () =>
+          import("@/views/TTS/TencentTTS.vue"),
+        meta: { hidden: true, private: true },
+      },
+    ]
+  },
+
+  {
     path: "/introduce",
     component: () => import("@/views/introduce/index.vue"),
     redirect: "/introduce/about",
@@ -80,6 +122,13 @@ const routes: RouteRecordRaw[] = [
         component: () => import("@/views/introduce/components/ListProduct.vue"),
         meta: { hidden: true, private: true },
       },
+      {
+        path: "develop",
+        name: "IntroduceDevelop",
+        component: () => 
+          import("@/views/introduce/components/develop/index.vue"),
+        meta: { hidden: true, private: true },
+      }
     ],
   },
 
@@ -480,6 +529,18 @@ const routes: RouteRecordRaw[] = [
                 },
               },
               {
+                path: "/resource/audio/tts",
+                name: "",
+                component: () => import("@/views/audio/tts.vue"),
+                meta: {
+                  title: "resourceManagement.audioManagement.audioTTS",
+                  icon: "el-icon-helpFilled",
+                  hidden: true,
+                  alwaysShow: false,
+                  params: null,
+                },
+              },
+              {
                 path: "/resource/audio/view",
                 name: "",
                 component: () => import("@/views/audio/view.vue"),
@@ -859,6 +920,7 @@ import type { AnyAbility } from "@casl/ability";
 
 import { AbilityRouter } from "@/utils/ability";
 import { useUserStore } from "@/store";
+import { tr } from "element-plus/es/locale";
 const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   const can = ability.can.bind(ability);
   route.forEach((route) => {

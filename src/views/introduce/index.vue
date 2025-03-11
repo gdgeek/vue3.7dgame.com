@@ -6,14 +6,14 @@
       :class="{
         'nav-scrolled':
           isScrolled &&
-          (currentTab === 'about' || currentTab === 'products') &&
+          (currentTab === 'about' || currentTab === 'products' || currentTab === 'develop') &&
           !isMobile,
         'nav-transparent':
-          (currentTab === 'about' || currentTab === 'products') &&
+          (currentTab === 'about' || currentTab === 'products' || currentTab === 'develop') &&
           !isScrolled &&
           !isMobile,
         'nav-default':
-          (currentTab !== 'about' && currentTab !== 'products') || isMobile,
+          (currentTab === 'news') || isMobile,
       }"
     >
       <div class="nav-left">
@@ -118,6 +118,7 @@ defineOptions({
 const navItems = [
   { key: "about", label: "关于我们" },
   { key: "products", label: "产品案例" },
+  { key: "develop", label: "项目开发" },
   { key: "news", label: "新闻动态" },
   { key: "login", label: "登录平台" },
 ];
@@ -208,19 +209,19 @@ onUnmounted(() => {
   margin: 0;
   transition: all 0.3s ease;
 
-  // 默认样式（非关于我们页面）
+  // 默认样式
   &.nav-default {
     background-color: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
-  // 透明样式（关于我们页面顶部）
+  // 透明样式
   &.nav-transparent {
     background-color: transparent;
     box-shadow: none;
   }
 
-  // 滚动样式（关于我们页面滚动后）
+  // 滚动样式
   &.nav-scrolled {
     background-color: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);

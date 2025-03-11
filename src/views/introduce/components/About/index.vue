@@ -5,52 +5,54 @@
     </template>
     <template v-else>
       <Banner></Banner>
-      <div id="business" class="business-container">
-        <div class="random-gradient"></div>
-        <div v-for="(business, index) in BusinessList" :key="index" class="business-item" :class="business.position">
-          <div class="business-content">
-            <h2>{{ business.title }}</h2>
-            <p>{{ business.description }}</p>
-          </div>
-          <div class="business-image">
-            <img :src="business.image" :alt="business.title" />
-          </div>
-        </div>
-
-        <div id="contact" class="contact-section">
-          <div class="contact-header">
-            <h2 class="section-title">{{ contactInfo.title }}</h2>
-            <h3 class="section-subtitle">{{ contactInfo.subtitle }}</h3>
+      <div class="business-container">
+        <DecorativeBackground />
+        <div class="business-content">
+          <div v-for="(business, index) in BusinessList" :key="index" class="business-item" :class="business.position">
+            <div class="business-content">
+              <h2>{{ business.title }}</h2>
+              <p>{{ business.description }}</p>
+            </div>
+            <div class="business-image">
+              <img :src="business.image" :alt="business.title" />
+            </div>
           </div>
 
-          <div class="contact-content">
-            <div class="left-content">
-              <h4 class="content-title">公司简介</h4>
-              <p class="company-intro">{{ contactInfo.companyIntro }}</p>
+          <div id="contact" class="contact-section">
+            <div class="contact-header">
+              <h2 class="section-title">{{ contactInfo.title }}</h2>
+              <h3 class="section-subtitle">{{ contactInfo.subtitle }}</h3>
             </div>
 
-            <div class="right-content">
-              <h4 class="content-title">联系方式</h4>
-              <div class="contact-details">
-                <div class="contact-item">
-                  <i class="location-icon"></i>
-                  <span>{{ contactInfo.address }}</span>
-                </div>
-                <div class="contact-item">
-                  <i class="phone-icon"></i>
-                  <span>{{ contactInfo.phone }}</span>
-                </div>
-                <div class="contact-item">
-                  <i class="email-icon"></i>
-                  <span>{{ contactInfo.email }}</span>
+            <div class="contact-content">
+              <div class="left-content">
+                <h4 class="content-title">公司简介</h4>
+                <p class="company-intro">{{ contactInfo.companyIntro }}</p>
+              </div>
+
+              <div class="right-content">
+                <h4 class="content-title">联系方式</h4>
+                <div class="contact-details">
+                  <div class="contact-item">
+                    <i class="location-icon"></i>
+                    <span>{{ contactInfo.address }}</span>
+                  </div>
+                  <div class="contact-item">
+                    <i class="phone-icon"></i>
+                    <span>{{ contactInfo.phone }}</span>
+                  </div>
+                  <div class="contact-item">
+                    <i class="email-icon"></i>
+                    <span>{{ contactInfo.email }}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div id="partner">
-          <Partner></Partner>
+          <div id="partner">
+            <Partner></Partner>
+          </div>
         </div>
       </div>
     </template>
@@ -65,6 +67,7 @@ import Partner from "./Partner.vue";
 import { BusinessList } from "@/views/introduce/data/businessList";
 import Banner from "./Banner.vue";
 import SkeletonLoader from './AboutSkeletonLoader.vue';
+import DecorativeBackground from '../common/DecorativeBackground.vue';
 
 defineOptions({
   name: "About",
@@ -160,288 +163,225 @@ watch(() => route.hash, (newHash) => {
 
 .business-container {
   position: relative;
-  padding: 60px 0;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   overflow: hidden;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
 
-  // 左上角渐变圆形
-  &::before {
-    content: "";
-    position: absolute;
-    z-index: 0;
-    border-radius: 50%;
-    box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.5);
-    width: 500px;
-    height: 500px;
-    background: linear-gradient(45deg,
-        rgba(24, 144, 255, 0.6) 0%,
-        rgba(24, 144, 255, 0.4) 33%,
-        rgba(24, 144, 255, 0.2) 67%,
-        rgba(24, 144, 255, 0.1) 100%);
-    top: -200px;
-    left: -200px;
-    backdrop-filter: blur(5px);
-    animation: floatGradientLeft 20s ease-in-out infinite;
+.business-content {
+  position: relative;
+  z-index: 1;
+  padding: 60px 0;
+}
+
+.business-item {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  gap: 60px;
+
+  &.right {
+    flex-direction: row;
   }
 
-  // 右下角渐变圆形
-  &::after {
-    content: "";
-    position: absolute;
-    z-index: 0;
-    border-radius: 50%;
-    box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.5);
-    width: 500px;
-    height: 500px;
-    background: linear-gradient(225deg,
-        rgba(255, 105, 20, 0.6) 0%,
-        rgba(255, 105, 20, 0.4) 33%,
-        rgba(255, 105, 20, 0.2) 67%,
-        rgba(255, 105, 20, 0.1) 100%);
-    bottom: -200px;
-    right: -200px;
-    backdrop-filter: blur(5px);
-    animation: floatGradientRight 20s ease-in-out infinite;
+  &.left {
+    flex-direction: row-reverse;
   }
 
-  // 随机位置的绿色渐变圆形
-  .random-gradient {
-    content: "";
-    position: absolute;
-    z-index: 0;
-    border-radius: 50%;
-    box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.5);
-    width: 400px;
+  .business-content {
+    flex: 1;
+    padding: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s forwards;
+
+    h2 {
+      font-size: 36px;
+      color: #333;
+      margin-bottom: 20px;
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 40px;
+        height: 3px;
+        background: #1890ff;
+      }
+    }
+
+    p {
+      font-size: 18px;
+      color: #666;
+      line-height: 1.8;
+      margin-top: 20px;
+    }
+  }
+
+  .business-image {
+    flex: 1;
     height: 400px;
-    background: linear-gradient(135deg,
-        rgba(82, 196, 26, 0.6) 0%,
-        rgba(82, 196, 26, 0.4) 33%,
-        rgba(82, 196, 26, 0.2) 67%,
-        rgba(82, 196, 26, 0.1) 100%);
-    position: absolute;
-    left: var(--random-x, 50%);
-    top: var(--random-y, 50%);
-    transform: translate(-50%, -50%);
-    backdrop-filter: blur(5px);
-    animation: floatGradientCenter 20s ease-in-out infinite;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    transform: translateX(20px); 
+    animation: fadeInSide 0.8s forwards;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
   }
 
-  .business-item {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 40px 20px;
-    gap: 60px;
-
-    &.right {
-      flex-direction: row;
-    }
-
-    &.left {
-      flex-direction: row-reverse;
-    }
-
+  // 为左右布局设置不同的动画延迟
+  &.right {
     .business-content {
-      flex: 1;
-      padding: 20px;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeInUp 0.8s forwards;
-
-      h2 {
-        font-size: 36px;
-        color: #333;
-        margin-bottom: 20px;
-        position: relative;
-
-        &::after {
-          content: "";
-          position: absolute;
-          bottom: -10px;
-          left: 0;
-          width: 40px;
-          height: 3px;
-          background: #1890ff;
-        }
-      }
-
-      p {
-        font-size: 18px;
-        color: #666;
-        line-height: 1.8;
-        margin-top: 20px;
-      }
+      animation-delay: 0.2s;
     }
 
     .business-image {
+      animation-delay: 0.4s;
+    }
+  }
+
+  &.left {
+    .business-content {
+      animation-delay: 0.4s;
+    }
+
+    .business-image {
+      transform: translateX(-20px);
+      animation-delay: 0.2s;
+    }
+  }
+}
+
+.contact-section {
+  position: relative;
+  z-index: 1;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 40px;
+
+  .contact-header {
+    text-align: left;
+    margin-bottom: 30px;
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 400;
+      color: #333;
+      margin-bottom: 6px;
+    }
+
+    .section-subtitle {
+      font-size: 36px;
+      font-weight: 500;
+      // color: rgb(0, 204, 204);
+      color: #1890ff;
+      margin: 0;
+    }
+  }
+
+  .contact-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 100px;
+
+    .left-content,
+    .right-content {
       flex: 1;
-      height: 400px;
-      overflow: hidden;
-      border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-      opacity: 0;
-      transform: translateX(20px);
-      animation: fadeInSide 0.8s forwards;
+    }
 
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.6s ease;
+    .content-title {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
 
-        &:hover {
-          transform: scale(1.05);
+    .company-intro {
+      font-size: 16px;
+      line-height: 1.8;
+      color: #666;
+      margin: 0;
+      letter-spacing: 2px;
+    }
+
+    .contact-details {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+
+      .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        i {
+          width: 24px;
+          height: 24px;
+          background-size: contain;
+          background-repeat: no-repeat;
         }
-      }
-    }
 
-    // 为左右布局设置不同的动画延迟
-    &.right {
-      .business-content {
-        animation-delay: 0.2s;
-      }
+        .location-icon {
+          background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231890ff"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>');
+        }
 
-      .business-image {
-        animation-delay: 0.4s;
-      }
-    }
+        .phone-icon {
+          background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231890ff"><path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>');
+        }
 
-    &.left {
-      .business-content {
-        animation-delay: 0.4s;
-      }
+        .email-icon {
+          background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231890ff"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>');
+        }
 
-      .business-image {
-        transform: translateX(-20px);
-        animation-delay: 0.2s;
+        span {
+          font-size: 16px;
+          color: #666;
+        }
       }
     }
   }
 
-  .contact-section {
-    position: relative;
-    z-index: 1;
-    align-items: center;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 40px 40px;
+  @media (max-width: 768px) {
+    padding: 40px 20px;
 
     .contact-header {
-      text-align: left;
-      margin-bottom: 30px;
-
-      .section-title {
-        font-size: 18px;
-        font-weight: 400;
-        color: #333;
-        margin-bottom: 6px;
-      }
-
-      .section-subtitle {
-        font-size: 36px;
-        font-weight: 500;
-        // color: rgb(0, 204, 204);
-        color: #1890ff;
-        margin: 0;
-      }
+      text-align: center;
+      margin-bottom: 40px;
     }
 
     .contact-content {
-      display: flex;
-      justify-content: space-between;
-      gap: 100px;
-
-      .left-content,
-      .right-content {
-        flex: 1;
-      }
+      flex-direction: column;
+      gap: 40px;
 
       .content-title {
-        font-size: 24px;
-        color: #333;
-        margin-bottom: 20px;
-        font-weight: 500;
+        text-align: center;
       }
 
       .company-intro {
-        font-size: 16px;
-        line-height: 1.8;
-        color: #666;
-        margin: 0;
-        letter-spacing: 2px;
+        text-align: center;
       }
 
       .contact-details {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-
-        .contact-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-
-          i {
-            width: 24px;
-            height: 24px;
-            background-size: contain;
-            background-repeat: no-repeat;
-          }
-
-          .location-icon {
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231890ff"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>');
-          }
-
-          .phone-icon {
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231890ff"><path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>');
-          }
-
-          .email-icon {
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231890ff"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>');
-          }
-
-          span {
-            font-size: 16px;
-            color: #666;
-          }
-        }
+        align-items: center;
       }
     }
-
-    @media (max-width: 768px) {
-      padding: 40px 20px;
-
-      .contact-header {
-        text-align: center;
-        margin-bottom: 40px;
-      }
-
-      .contact-content {
-        flex-direction: column;
-        gap: 40px;
-
-        .content-title {
-          text-align: center;
-        }
-
-        .company-intro {
-          text-align: center;
-        }
-
-        .contact-details {
-          align-items: center;
-        }
-      }
-    }
-  }
-
-  // 确保Partner组件在装饰背景之上
-  :deep(.partner-background) {
-    position: relative;
-    z-index: 1;
   }
 }
 
@@ -567,77 +507,10 @@ watch(() => route.hash, (newHash) => {
   transition: transform 0.5s ease-in-out;
 }
 
-// 动画关键帧
-@keyframes floatGradientLeft {
-  0% {
-    transform: translate(0, 0) rotate(0deg) scale(1);
-  }
-
-  25% {
-    transform: translate(30px, 20px) rotate(5deg) scale(1.05);
-  }
-
-  50% {
-    transform: translate(-10px, 40px) rotate(-2deg) scale(0.95);
-  }
-
-  75% {
-    transform: translate(-20px, 10px) rotate(3deg) scale(1.02);
-  }
-
-  100% {
-    transform: translate(0, 0) rotate(0deg) scale(1);
-  }
-}
-
-@keyframes floatGradientRight {
-  0% {
-    transform: translate(0, 0) rotate(0deg) scale(1);
-  }
-
-  25% {
-    transform: translate(-40px, -30px) rotate(-3deg) scale(0.98);
-  }
-
-  50% {
-    transform: translate(20px, -50px) rotate(4deg) scale(1.03);
-  }
-
-  75% {
-    transform: translate(30px, -20px) rotate(-2deg) scale(0.97);
-  }
-
-  100% {
-    transform: translate(0, 0) rotate(0deg) scale(1);
-  }
-}
-
-@keyframes floatGradientCenter {
-  0% {
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
-  }
-
-  25% {
-    transform: translate(-50%, -50%) rotate(-5deg) scale(1.08);
-  }
-
-  50% {
-    transform: translate(-50%, -50%) rotate(3deg) scale(0.92);
-  }
-
-  75% {
-    transform: translate(-50%, -50%) rotate(-2deg) scale(1.05);
-  }
-
-  100% {
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
-  }
-}
-
 // 添加锚点偏移，防止被固定导航栏遮挡
 #business,
 #contact,
 #partner {
-  scroll-margin-top: 64px; // 根据你的导航栏高度调整
+  scroll-margin-top: 64px;
 }
 </style>

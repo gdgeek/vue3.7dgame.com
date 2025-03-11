@@ -45,6 +45,7 @@ export default {
         title: "音声",
         audioList: "リスト",
         audioUpload: "アップロード",
+        audioTTS: "テキストから音声",
         audioProcessing: "処理",
       },
     },

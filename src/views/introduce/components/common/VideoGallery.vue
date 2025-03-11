@@ -3,11 +3,12 @@
     <section class="gallery-section">
       <br />
       <div align="center">
-        <h1 class="section-title-size section-title-dark title-lighter">
+        <h1 class="section-title-size section-title-dark title-lighter" style="color: #4183ea">
           {{ title }}
         </h1>
         <h4>{{ subtitle }}</h4>
-        <p class="section-underline-blue"></p>
+        <!-- <p class="section-underline-blue"></p> -->
+        <p class="section-underline-style" />
       </div>
       <el-row :gutter="30" class="section-card-padding">
         <el-col

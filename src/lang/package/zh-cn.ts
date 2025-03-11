@@ -45,6 +45,7 @@ export default {
         title: "音频管理",
         audioList: "音频列表",
         audioUpload: "音频上传",
+        audioTTS: "语音合成",
         audioProcessing: "音频处理",
       },
     },

@@ -3,11 +3,16 @@
   <!-- <RouterView></RouterView> -->
 
   <!-- <router-view v-slot="{ Component }" v-mouse-effect v-particle-effect> -->
-  <router-view v-slot="{ Component }">
-    <transition name="fade">
+  <!-- <router-view v-slot="{ Component }">
+    <transition name="page" mode="out-in">
       <keep-alive>
         <component :is="Component"></component>
       </keep-alive>
+    </transition>
+  </router-view> -->
+  <router-view v-slot="{ Component, route }">
+    <transition name="page" mode="out-in" :key="route.fullPath">
+      <component :is="Component"></component>
     </transition>
   </router-view>
 </template>
@@ -53,6 +58,22 @@ onMounted(async () => {
 /* .fade-leave-active in <2.1.8 */
   {
   opacity: 0;
+}
+
+/* 新增页面过渡效果 */
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.4s cubic-bezier(0.55, 0, 0.1, 1);
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-30px);
 }
 
 canvas {

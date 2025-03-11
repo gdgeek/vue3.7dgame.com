@@ -12,16 +12,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, shallowRef } from "vue";
+import { ref, onMounted, shallowRef, onUnmounted } from "vue";
 import * as Three from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import ElementResizeDetector from "element-resize-detector";
+
+interface Props {
+  type?: number;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  type: 1
+});
+
+defineOptions({
+  name: 'ScreenShow'
+});
 
 const isShow = ref(true);
 const camera = shallowRef<Three.PerspectiveCamera | null>(null);
 const scene = shallowRef<Three.Scene | null>(null);
 const renderer = shallowRef<Three.WebGLRenderer | null>(null);
 const mesh = shallowRef<Three.Mesh | null>(null);
+const controls = shallowRef<OrbitControls | null>(null);
 
 const init = () => {
   const container = document.getElementById("container");
@@ -47,9 +60,26 @@ const init = () => {
   renderer.value.setSize(container.clientWidth, container.clientHeight);
   container.appendChild(renderer.value.domElement);
 
+  // 添加轨道控制器
+  controls.value = new OrbitControls(camera.value, renderer.value.domElement);
+  controls.value.enableDamping = true; // 添加阻尼效果
+  controls.value.dampingFactor = 0.05; // 阻尼系数
+  controls.value.enableZoom = false; // 禁用缩放
+  controls.value.enablePan = false;  // 禁用平移
+  controls.value.rotateSpeed = 0.5; // 调整旋转速度
+  controls.value.minPolarAngle = Math.PI / 4; // 限制垂直向上旋转角度
+  controls.value.maxPolarAngle = Math.PI / 4 * 3; // 限制垂直向下旋转角度
+
   // 创建几何体
   const radius = 0.2;
-  const geometry = new Three.IcosahedronGeometry(radius);
+  let geometry;
+
+  // 根据类型创建不同的几何体
+  if (props.type === 2) {
+    geometry = new Three.DodecahedronGeometry(radius);
+  } else {
+    geometry = new Three.IcosahedronGeometry(radius);
+  }
   const material = new Three.MeshNormalMaterial();
 
   mesh.value = new Three.Mesh(geometry, material);
@@ -73,7 +103,10 @@ let animationFrameId: number;
 const animate = () => {
   animationFrameId = requestAnimationFrame(animate);
 
-  if (!mesh.value || !renderer.value || !scene.value || !camera.value) return;
+  if (!mesh.value || !renderer.value || !scene.value || !camera.value || !controls.value) return;
+
+  // 更新控制器
+  controls.value.update();
 
   mesh.value.rotation.x += 0.002;
   mesh.value.rotation.y += 0.006;
@@ -89,6 +122,11 @@ onMounted(() => {
 onUnmounted(() => {
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId);
+  }
+
+  // 清理控制器
+  if (controls.value) {
+    controls.value.dispose();
   }
 
   if (mesh.value) {

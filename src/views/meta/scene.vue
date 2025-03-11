@@ -29,7 +29,7 @@ watch(
   () => appStore.language, // 监听 language 的变化
   async (newValue, oldValue) => {
     src.value =
-      env.editor + "/three.js/editor/verse-editor.html?language=" + newValue;
+      env.editor + "/three.js/editor/meta-editor.html?language=" + newValue;
     await refresh();
   }
 );
