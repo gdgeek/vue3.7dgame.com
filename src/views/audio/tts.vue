@@ -4,39 +4,39 @@
       <div class="voice-select-section">
         <div class="voice-filters">
           <div class="filter-item">
-            <span class="param-label">音色类型</span>
-            <el-select v-model="voiceType" placeholder="请选择音色类型">
-              <el-option label="全部" value="" />
-              <el-option label="精品音色" value="精品音色" />
-              <el-option label="标准音色" value="标准音色" />
+            <span class="param-label">{{ t('tts.voiceType') }}</span>
+            <el-select v-model="voiceType" :placeholder="t('tts.voiceType')">
+              <el-option :label="t('tts.all')" value="" />
+              <el-option :label="t('tts.premiumVoice')" value="精品音色" />
+              <el-option :label="t('tts.standardVoice')" value="标准音色" />
             </el-select>
           </div>
           <div class="filter-item">
-            <span class="param-label">场景</span>
-            <el-select v-model="voiceScene" placeholder="请选择场景">
-              <el-option label="全部" value="" />
+            <span class="param-label">{{ t('tts.voiceScene') }}</span>
+            <el-select v-model="voiceScene" :placeholder="t('tts.voiceScene')">
+              <el-option :label="t('tts.all')" value="" />
               <el-option v-for="scene in availableScenes" :key="scene" :label="scene" :value="scene" />
             </el-select>
           </div>
           <div class="filter-item">
-            <span class="param-label">语言</span>
+            <span class="param-label">{{ t('tts.voiceLanguage') }}</span>
             <div class="language-control">
-              <el-select v-model="voiceLanguage" placeholder="请选择语言" :disabled="autoSwitchLanguage">
-                <el-option label="全部" value="" />
-                <el-option label="中文" value="中文" />
-                <el-option label="英文" value="英文" />
-                <el-option label="日文" value="日文" />
+              <el-select v-model="voiceLanguage" :placeholder="t('tts.voiceLanguage')" :disabled="autoSwitchLanguage">
+                <el-option :label="t('tts.all')" value="" />
+                <el-option :label="t('tts.chinese')" value="中文" />
+                <el-option :label="t('tts.english')" value="英文" />
+                <el-option :label="t('tts.japanese')" value="日文" />
               </el-select>
-              <el-tooltip content="开启后将自动根据输入文本切换语言类型" placement="top" :effect="isDark ? 'light' : 'dark'">
-                <el-switch v-model="autoSwitchLanguage" inline-prompt active-text="自动切换" inactive-text="开启自动切换"
-                  class="auto-detect-switch" />
+              <el-tooltip :content="t('tts.openAutoSwitch')" placement="top" :effect="isDark ? 'light' : 'dark'">
+                <el-switch v-model="autoSwitchLanguage" inline-prompt :active-text="t('tts.autoSwitch')"
+                  :inactive-text="t('tts.openAutoSwitch')" class="auto-detect-switch" />
               </el-tooltip>
             </div>
           </div>
         </div>
         <div class="voice-type">
-          <span class="param-label">音色</span>
-          <el-select v-model="selectedVoiceType" placeholder="请选择音色" class="voice-select">
+          <span class="param-label">{{ t('tts.voice') }}</span>
+          <el-select v-model="selectedVoiceType" :placeholder="t('tts.voice')" class="voice-select">
             <el-option-group v-for="group in groupedVoices" :key="group.type" :label="group.type">
               <el-option v-for="voice in group.voices" :key="voice.value" :label="voice.label" :value="voice.value">
                 <div class="voice-option">
@@ -49,11 +49,12 @@
                     <el-tag size="small"
                       :type="voice.language === '中文' ? 'danger' : voice.language === '日文' ? 'success' : 'primary'"
                       effect="dark">
-                      {{ voice.language }}
+                      {{ voice.language === '中文' ? t('tts.chinese') : voice.language === '英文' ? t('tts.english') :
+                        voice.language === '日文' ? t('tts.japanese') : voice.language }}
                     </el-tag>
                     <el-tag v-if="voice.emotions.length > 1" size="small" type="warning" effect="plain"
                       @click="showEmotions(voice)">
-                      {{ voice.emotions.length }}种情感
+                      {{ voice.emotions.length }}{{ t('tts.emotionCount') }}
                     </el-tag>
                   </div>
                 </div>
@@ -66,15 +67,15 @@
           <div class="emotion-controls">
             <div class="emotion-row">
               <div class="emotion-type">
-                <span class="param-label">情感类型</span>
-                <el-select v-model="emotionCategory" placeholder="请选择情感类型" class="emotion-select"
+                <span class="param-label">{{ t('tts.emotionType') }}</span>
+                <el-select v-model="emotionCategory" :placeholder="t('tts.emotionType')" class="emotion-select"
                   :disabled="availableEmotions.length <= 1">
-                  <el-option label="默认" value="" />
+                  <el-option :label="t('tts.default')" value="" />
                   <el-option v-for="emotion in filteredEmotions" :key="emotion" :label="emotion" :value="emotion" />
                 </el-select>
               </div>
               <div class="emotion-intensity" v-if="emotionCategory">
-                <span class="param-label">情感强度 ({{ emotionIntensity }})</span>
+                <span class="param-label">{{ t('tts.emotionIntensity') }} ({{ emotionIntensity }})</span>
                 <el-slider v-model="emotionIntensity" :min="50" :max="200" :step="10" show-stops
                   class="intensity-slider" />
               </div>
@@ -86,17 +87,17 @@
       <div class="params-section">
         <div class="param-row">
           <div class="param-item">
-            <span class="param-label">音量</span>
+            <span class="param-label">{{ t('tts.volume') }}</span>
             <el-slider v-model="volume" :min="-10" :max="10" :step="1" show-stops />
           </div>
           <div class="param-item">
-            <span class="param-label">语速</span>
+            <span class="param-label">{{ t('tts.speed') }}</span>
             <el-slider v-model="speed" :min="-2" :max="6" :step="0.5" show-stops />
           </div>
         </div>
         <div class="param-row">
           <div class="param-item">
-            <span class="param-label">音频格式</span>
+            <span class="param-label">{{ t('tts.audioFormat') }}</span>
             <el-radio-group v-model="codec">
               <el-radio label="wav">WAV</el-radio>
               <el-radio label="mp3">MP3</el-radio>
@@ -104,7 +105,7 @@
             </el-radio-group>
           </div>
           <div class="param-item">
-            <span class="param-label">采样率</span>
+            <span class="param-label">{{ t('tts.sampleRate') }}</span>
             <el-radio-group v-model="sampleRate">
               <el-radio :label="8000">8k</el-radio>
               <el-radio :label="16000">16k</el-radio>
@@ -119,7 +120,8 @@
           <template v-if="voiceLanguage">
             <el-tag :type="voiceLanguage === '中文' ? 'danger' : voiceLanguage === '日文' ? 'success' : 'primary'"
               effect="dark">
-              {{ voiceLanguage }}
+              {{ voiceLanguage === '中文' ? t('tts.chinese') : voiceLanguage === '英文' ? t('tts.english') : voiceLanguage
+                === '日文' ? t('tts.japanese') : voiceLanguage }}
             </el-tag>
             <span class="limit-info">
               {{ getLanguageLimitText }}
@@ -127,7 +129,7 @@
                 ({{ languageAnalysis.suggestion }})
               </template>
               <template v-if="text.length > 0">
-                - 总字数：{{ languageAnalysis.totalChars }}
+                - {{ t('tts.totalChars') }}：{{ languageAnalysis.totalChars }}
               </template>
             </span>
           </template>
@@ -139,14 +141,16 @@
         <!-- 语言分析组件 -->
         <div class="language-analysis" v-if="showLanguageAnalysis && text.length > 5">
           <div class="analysis-header">
-            <span class="analysis-title">语言分析</span>
-            <el-button type="text" size="small" @click="showLanguageAnalysis = false">关闭</el-button>
+            <span class="analysis-title">{{ t('tts.languageAnalysis') }}</span>
+            <el-button type="text" size="small" @click="showLanguageAnalysis = false">{{ t('tts.close') }}</el-button>
           </div>
           <div class="language-analysis-content">
             <div class="language-bars">
               <div class="language-bar-item" v-for="[type, item] in languageItems" :key="type">
                 <div class="bar-label" :class="type">
-                  {{ item.label }} ({{ Math.round(animatedPercentages[type] || 0) }}% - {{ item.count }}字)
+                  {{ item.label }} ({{ Math.round(animatedPercentages[type] || 0) }}% - {{ item.count }}{{
+                    t('tts.totalChars')
+                  }})
                 </div>
                 <el-progress :percentage="animatedPercentages[type] || 0" :color="getProgressColor(type)"
                   :show-text="false" :stroke-width="8" :track-color="isDark ? '#444' : '#e4e7ed'"
@@ -161,7 +165,7 @@
         </div>
 
         <div class="text-container" ref="textContainerRef" v-show="isPlaying">
-          <div v-if="!text" class="empty-text">请输入要转换的文本内容...</div>
+          <div v-if="!text" class="empty-text">{{ t('tts.inputPlaceholder') }}</div>
           <template v-else>
             <span class="highlighted-text">{{ highlightedText }}</span>
             <span class="normal-text">{{ normalText }}</span>
@@ -169,11 +173,11 @@
         </div>
         <div class="text-actions" v-if="text.length > 5">
           <el-button type="text" size="small" @click="showLanguageAnalysis = !showLanguageAnalysis">
-            {{ showLanguageAnalysis ? '隐藏语言分析' : '显示语言分析' }}
+            {{ showLanguageAnalysis ? t('tts.hideLanguageAnalysis') : t('tts.showLanguageAnalysis') }}
           </el-button>
         </div>
         <el-input id="word" type="textarea"
-          :placeholder="voiceLanguage === '中文' ? '请输入中文内容...' : voiceLanguage === '英文' ? 'Please input English text...' : voiceLanguage === '日文' ? '日本語を入力してください...' : '请输入要转换的文本内容...'"
+          :placeholder="voiceLanguage === '中文' ? t('tts.inputChinesePlaceholder') : voiceLanguage === '英文' ? t('tts.inputEnglishPlaceholder') : voiceLanguage === '日文' ? t('tts.inputJapanesePlaceholder') : t('tts.inputPlaceholder')"
           v-model="text" :maxlength="voiceLanguage === '英文' ? 500 : 150" :rows="4" show-word-limit :disabled="isLoading"
           @input="onTextInput" v-show="!isPlaying" />
       </div>
@@ -185,27 +189,22 @@
 
       <div class="action-section">
         <el-button type="primary" size="large" @click="synthesizeSpeech" :loading="isLoading" class="action-button">
-          {{ isLoading ? '合成中...' : '合成语音' }}
+          {{ isLoading ? t('tts.synthesizing') : t('tts.synthesize') }}
         </el-button>
         <el-button type="success" size="large" @click="uploadAudio" :loading="isUploading" :disabled="!currentAudioBlob"
           class="action-button upload-button">
-          {{ isUploading ? '上传中...' : '上传音频' }}
+          {{ isUploading ? t('tts.uploading') : t('tts.upload') }}
         </el-button>
       </div>
 
       <div class="tips-section">
-        <el-alert title="使用提示" type="info" :description="`不同语言的文本限制：
-          • 中文：最多支持150个汉字（全角标点符号算一个汉字）
-          • 英文：最多支持500个字母（半角标点符号算一个字母）
-          • 日文：最多支持150个字符（全角标点符号算一个字符）
-          
-          请尽量确保转换的文本内容与所选语言类型一致，否则可能导致发音不准确甚至无法转换。`
-          " :closable="false" show-icon class="tips-alert" />
+        <el-alert :title="t('tts.tips')" type="info" :description="t('tts.tipsContent')" :closable="false" show-icon
+          class="tips-alert" />
       </div>
     </div>
 
     <!-- 情感列表对话框 -->
-    <el-dialog title="选择情感类型" v-model="emotionsDialogVisible" width="30%" :close-on-click-modal="true"
+    <el-dialog :title="t('tts.selectEmotion')" v-model="emotionsDialogVisible" width="30%" :close-on-click-modal="true"
       :close-on-press-escape="true">
       <div class="emotions-list">
         <el-tag v-for="emotion in selectedVoiceEmotions" :key="emotion" class="emotion-tag"
@@ -216,8 +215,8 @@
       </div>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="emotionsDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="confirmEmotionSelection">确定</el-button>
+          <el-button @click="emotionsDialogVisible = false">{{ t('tts.cancel') }}</el-button>
+          <el-button type="primary" @click="confirmEmotionSelection">{{ t('tts.confirm') }}</el-button>
         </span>
       </template>
     </el-dialog>
@@ -241,6 +240,7 @@ import { PieChart } from 'echarts/charts'
 import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components'
 import { LabelLayout } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
+import { useI18n } from 'vue-i18n'
 
 
 // 注册ECharts组件
@@ -276,6 +276,8 @@ interface LanguageAnalysis {
   totalChars: number
   suggestion: string
 }
+
+const { t } = useI18n();
 
 const settingsStore = useSettingsStore()
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
@@ -526,16 +528,20 @@ watch(voiceLanguage, (newLanguage, oldLanguage) => {
 
     // 根据语言类型自动调整文本输入框的最大长度
     if (newLanguage === '英文') {
-      ElMessage.success('英文模式下最多可输入500个字符')
+      ElMessage.success(t('tts.englishLimit'))
       if (text.value && text.value.length > 500) {
         text.value = text.value.substring(0, 500)
-        ElMessage.warning('英文模式下最多支持500个字符，已自动截断')
+        ElMessage.warning(t('tts.textLimitWarning', [t('tts.english'), 500, text.value.length]))
       }
     } else if (newLanguage === '中文' || newLanguage === '日文') {
-      ElMessage.success(`${newLanguage}模式下最多可输入150个字符`)
+      ElMessage.success(newLanguage === '中文' ? t('tts.chineseLimit') : t('tts.japaneseLimit'))
       if (text.value && text.value.length > 150) {
         text.value = text.value.substring(0, 150)
-        ElMessage.warning(`${newLanguage}模式下最多支持150个字符，已自动截断`)
+        ElMessage.warning(t('tts.textLimitWarning', [
+          newLanguage === '中文' ? t('tts.chinese') : t('tts.japanese'),
+          150,
+          text.value.length
+        ]))
       }
     }
   }
@@ -634,16 +640,26 @@ const checkTextLanguage = () => {
 
   // 设置语言分析建议
   if (isMultiLanguage) {
-    languageAnalysis.value.suggestion = `检测到混合语言文本，建议选择${detectedLanguage}作为主要语言`
+    const detectedLanguageText = detectedLanguage === '中文' ? t('tts.chinese') :
+      detectedLanguage === '英文' ? t('tts.english') :
+        detectedLanguage === '日文' ? t('tts.japanese') : detectedLanguage
+    languageAnalysis.value.suggestion = t('tts.mixedLanguageDetected', [detectedLanguageText])
     // 自动显示语言分析
     // showLanguageAnalysis.value = true
   } else if (detectedLanguage) {
-    languageAnalysis.value.suggestion = `检测到文本主要语言为${detectedLanguage}`
+    const detectedLanguageText = detectedLanguage === '中文' ? t('tts.chinese') :
+      detectedLanguage === '英文' ? t('tts.english') :
+        detectedLanguage === '日文' ? t('tts.japanese') : detectedLanguage
+    languageAnalysis.value.suggestion = t('tts.mainLanguageDetected', [detectedLanguageText])
   }
 
   // 如果是混合语言，给出更详细的提示
   if (isMultiLanguage && text.value.length > 10) {
-    const languageInfo = `检测到混合语言文本：中文约${Math.round(chinesePercentage)}%，日文约${Math.round(japanesePercentage)}%，英文约${Math.round(englishPercentage)}%`
+    const languageInfo = t('tts.languagePercentage', [
+      Math.round(chinesePercentage),
+      Math.round(japanesePercentage),
+      Math.round(englishPercentage)
+    ])
 
     // 使用防抖定时器显示消息
     if (languageDetectionTimer) {
@@ -651,8 +667,11 @@ const checkTextLanguage = () => {
     }
 
     languageDetectionTimer = window.setTimeout(() => {
+      const detectedLanguageText = detectedLanguage === '中文' ? t('tts.chinese') :
+        detectedLanguage === '英文' ? t('tts.english') :
+          detectedLanguage === '日文' ? t('tts.japanese') : detectedLanguage
       ElMessage({
-        message: `${languageInfo}，${autoSwitchLanguage.value ? '已自动切换' : '建议选择'}主要语言：${detectedLanguage}`,
+        message: `${languageInfo}，${autoSwitchLanguage.value ? t('tts.autoSwitched', [detectedLanguageText]) : t('tts.mixedLanguageDetected', [detectedLanguageText])}`,
         type: 'warning',
         duration: 5000
       })
@@ -665,17 +684,26 @@ const checkTextLanguage = () => {
     if (detectedLanguage && voiceLanguage.value && detectedLanguage !== voiceLanguage.value) {
       // 自动切换语言
       const oldLanguage = voiceLanguage.value
+      const oldLanguageText = oldLanguage === '中文' ? t('tts.chinese') :
+        oldLanguage === '英文' ? t('tts.english') :
+          oldLanguage === '日文' ? t('tts.japanese') : oldLanguage
       voiceLanguage.value = detectedLanguage
+      const newLanguageText = detectedLanguage === '中文' ? t('tts.chinese') :
+        detectedLanguage === '英文' ? t('tts.english') :
+          detectedLanguage === '日文' ? t('tts.japanese') : detectedLanguage
       if (!isMultiLanguage) {
-        ElMessage.success(`检测到文本语言为${detectedLanguage}，已自动从${oldLanguage}切换为${detectedLanguage}`)
+        ElMessage.success(t('tts.autoSwitchedLanguage', [oldLanguageText, newLanguageText]))
       }
     }
 
     // 如果未选择语言但检测到了语言，自动设置语言
     if (detectedLanguage && !voiceLanguage.value) {
       voiceLanguage.value = detectedLanguage
+      const detectedLanguageText = detectedLanguage === '中文' ? t('tts.chinese') :
+        detectedLanguage === '英文' ? t('tts.english') :
+          detectedLanguage === '日文' ? t('tts.japanese') : detectedLanguage
       if (!isMultiLanguage) {
-        ElMessage.success(`已自动检测并设置语言为：${detectedLanguage}`)
+        ElMessage.success(t('tts.autoDetectedLanguage', [detectedLanguageText]))
       }
     }
   }
@@ -683,11 +711,12 @@ const checkTextLanguage = () => {
   // 根据检测到的语言类型，提供文本长度限制提示
   if (detectedLanguage === '中文' || detectedLanguage === '日文') {
     if (text.value.length > 150) {
-      ElMessage.warning(`${detectedLanguage}文本超过150字符限制，已检测到${text.value.length}字符，可能会被截断`)
+      const detectedLanguageText = detectedLanguage === '中文' ? t('tts.chinese') : t('tts.japanese')
+      ElMessage.warning(t('tts.textLimitWarning', [detectedLanguageText, 150, text.value.length]))
     }
   } else if (detectedLanguage === '英文') {
     if (text.value.length > 500) {
-      ElMessage.warning(`英文文本超过500字符限制，已检测到${text.value.length}字符，可能会被截断`)
+      ElMessage.warning(t('tts.textLimitWarning', [t('tts.english'), 500, text.value.length]))
     }
   }
 }
@@ -737,25 +766,25 @@ const updateLanguageChart = () => {
   const chartData = [
     {
       value: languageAnalysis.value.chinesePercentage,
-      name: '中文',
+      name: t('tts.chinese'),
       itemStyle: { color: colorMap['中文'] },
       count: languageAnalysis.value.chineseCount
     },
     {
       value: languageAnalysis.value.japanesePercentage,
-      name: '日文',
+      name: t('tts.japanese'),
       itemStyle: { color: colorMap['日文'] },
       count: languageAnalysis.value.japaneseCount
     },
     {
       value: languageAnalysis.value.englishPercentage,
-      name: '英文',
+      name: t('tts.english'),
       itemStyle: { color: colorMap['英文'] },
       count: languageAnalysis.value.englishCount
     },
     {
       value: languageAnalysis.value.otherPercentage,
-      name: '其他',
+      name: t('tts.other'),
       itemStyle: { color: colorMap['其他'] },
       count: languageAnalysis.value.otherCount
     }
@@ -766,9 +795,9 @@ const updateLanguageChart = () => {
     tooltip: {
       trigger: 'item',
       formatter: function (params: any) {
-        return `语言占比<br/>
+        return `${t('tts.languageAnalysis')}<br/>
                ${params.name}: ${params.percent}%<br/>
-               字符数: ${params.data.count}字<br/>
+               ${t('tts.totalChars')}: ${params.data.count}<br/>
               `
       },
       textStyle: {
@@ -786,7 +815,7 @@ const updateLanguageChart = () => {
     },
     series: [
       {
-        name: '语言占比',
+        name: t('tts.languageAnalysis'),
         type: 'pie',
         radius: ['40%', '95%'],
         avoidLabelOverlap: false,
@@ -820,26 +849,26 @@ const updateLanguageChart = () => {
   languageChart.setOption(option)
 }
 
-// 将 languageItems 移到 setup 作用域内
+// 语言分析项
 const languageItems = computed(() => {
   return Object.entries({
     chinese: {
-      label: '中文',
+      label: t('tts.chinese'),
       percentage: languageAnalysis.value.chinesePercentage,
       count: languageAnalysis.value.chineseCount
     },
     japanese: {
-      label: '日文',
+      label: t('tts.japanese'),
       percentage: languageAnalysis.value.japanesePercentage,
       count: languageAnalysis.value.japaneseCount
     },
     english: {
-      label: '英文',
+      label: t('tts.english'),
       percentage: languageAnalysis.value.englishPercentage,
       count: languageAnalysis.value.englishCount
     },
     other: {
-      label: '其他',
+      label: t('tts.other'),
       percentage: languageAnalysis.value.otherPercentage,
       count: languageAnalysis.value.otherCount
     }
@@ -856,7 +885,7 @@ watch(() => languageAnalysis.value, () => {
 // 语音合成
 const synthesizeSpeech = async () => {
   if (!text.value) {
-    ElMessage.warning("请输入文本")
+    ElMessage.warning(t('tts.noText'))
     return
   }
 
@@ -920,13 +949,13 @@ const synthesizeSpeech = async () => {
         audioPlayerRef.value.play()
       }
 
-      ElMessage.success('语音合成成功')
+      ElMessage.success(t('tts.synthesisSuccess'))
     } else {
-      throw new Error('语音合成失败，未返回音频数据')
+      throw new Error(t('tts.synthesisError'))
     }
   } catch (error) {
     console.error('语音合成错误:', error)
-    ElMessage.error('语音合成失败，请稍后重试')
+    ElMessage.error(t('tts.synthesisError'))
   } finally {
     isLoading.value = false
   }
@@ -935,20 +964,20 @@ const synthesizeSpeech = async () => {
 // 上传音频文件
 const uploadAudio = async () => {
   if (!currentAudioBlob.value) {
-    ElMessage.warning('请先合成语音')
+    ElMessage.warning(t('tts.noAudio'))
     return
   }
 
   try {
     // 弹出输入框让用户输入音频名称
     const { value: audioName } = await ElMessageBox.prompt(
-      '请输入音频名称',
-      '上传音频',
+      t('tts.enterAudioName'),
+      t('tts.uploadAudio'),
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: t('tts.confirm'),
+        cancelButtonText: t('tts.cancel'),
         inputPattern: /.+/,
-        inputErrorMessage: '名称不能为空',
+        inputErrorMessage: t('tts.nameRequired'),
         inputValue: text.value.slice(0, 20) + '...',
       }
     )
@@ -990,24 +1019,24 @@ const uploadAudio = async () => {
       })
 
       if (audioResponse.data?.id) {
-        ElMessage.success('音频上传成功')
+        ElMessage.success(t('tts.uploadSuccess'))
         await router.push({
           path: '/resource/audio/view',
           query: { id: audioResponse.data.id }
         })
       } else {
-        throw new Error('保存音频信息失败')
+        throw new Error(t('tts.uploadError'))
       }
     } else {
-      throw new Error('保存文件信息失败')
+      throw new Error(t('tts.uploadError'))
     }
   } catch (error) {
     if (error === 'cancel') {
-      ElMessage.info('已取消上传')
+      ElMessage.info(t('tts.uploadCanceled'))
       return
     }
     console.error('上传错误:', error)
-    ElMessage.error('音频上传失败，请稍后重试')
+    ElMessage.error(t('tts.uploadError'))
   } finally {
     isUploading.value = false
   }
@@ -1076,13 +1105,13 @@ const confirmEmotionSelection = () => {
 const getLanguageLimitText = computed(() => {
   switch (voiceLanguage.value) {
     case '中文':
-      return '中文最多支持150个汉字（全角标点符号算一个汉字）'
+      return t('tts.chineseLimit')
     case '英文':
-      return '英文最多支持500个字母（半角标点符号算一个字母）'
+      return t('tts.englishLimit')
     case '日文':
-      return '日文最多支持150个字符'
+      return t('tts.japaneseLimit')
     default:
-      return '请先选择语言类型'
+      return t('tts.selectLanguageFirst')
   }
 })
 
