@@ -21,18 +21,12 @@
 
 <script setup lang="ts">
 import { RouteLocationMatched } from "vue-router";
-import { compile } from "path-to-regexp";
 import { useRouter } from "@/router";
 const router = useRouter();
 import { translateRouteTitle } from "@/utils/i18n";
 const currentRoute = useRoute();
 const currentQuery = ref();
 const fullRouter = ref();
-const pathCompile = (path: string) => {
-  const { params } = currentRoute;
-  const toPath = compile(path);
-  return toPath(params);
-};
 
 const breadcrumbs = ref<Array<RouteLocationMatched>>([]);
 
@@ -55,14 +49,21 @@ function getBreadcrumb() {
     currentRoute.path === "/verse/script" ||
     currentRoute.path === "/meta/script"
   ) {
+    // 确定基础路径
+    const basePath = currentRoute.path.includes('/verse/') ? '/verse/scene' : '/meta/scene';
+    
     // 创建 sceneBreadcrumb 对象，并携带原有的路由参数
     const sceneBreadcrumb = {
-      path: fullRouter.value,
+      path: basePath,
       meta: { title: "project.sceneEditor" },
-      enterCallbacks: currentQuery.value,
-    } as RouteLocationMatched;
+      query: {
+        id: currentRoute.query.id,
+        title: currentRoute.query.title
+      },
+      
+    } as unknown as RouteLocationMatched;
 
-    // 查找 /verse/scene 在 matched 中的位置
+    // 查找 scene 在 matched 中的位置
     const sceneIndex = matched.findIndex(
       (item) => item.path === "/verse/scene" || item.path === "/meta/scene"
     );
@@ -105,17 +106,37 @@ function isDashboard(route: RouteLocationMatched) {
 }
 
 function handleLink(item: any) {
-  const { redirect, path, enterCallbacks } = item;
-
-  if (redirect) {
-    router.push({ path: redirect, query: enterCallbacks }).catch((err) => {
-      console.warn(err);
-    });
+  if (!item) return;
+  
+  // 构建完整的路由参数
+  const routeParams: any = {};
+  
+  // 处理路径
+  if (item.redirect) {
+    routeParams.path = item.redirect;
+  } else if (item.path) {
+    routeParams.path = item.path;
+  } else {
+    console.warn('无效的路由路径:', item);
     return;
   }
 
-  router.push({ path: path, query: enterCallbacks }).catch((err) => {
-    console.warn(err);
+  // 处理查询参数
+  if (item.query) {
+    routeParams.query = item.query;
+  } else if (item.enterCallbacks) {
+    routeParams.query = item.enterCallbacks;
+  } else if (typeof routeParams.path === 'string' && routeParams.path.includes('/scene')) {
+    routeParams.query = {
+      id: currentRoute.query.id,
+      title: currentRoute.query.title
+    };
+  }
+
+  console.log('路由跳转参数:', routeParams);
+  
+  router.push(routeParams).catch((err) => {
+    console.warn('路由跳转失败:', err);
   });
 }
 

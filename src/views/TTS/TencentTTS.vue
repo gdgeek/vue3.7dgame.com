@@ -26,16 +26,16 @@
           <div class="param-item">
             <span class="param-label">音频格式</span>
             <el-radio-group v-model="codec">
-              <el-radio label="wav">WAV</el-radio>
-              <el-radio label="mp3">MP3</el-radio>
-              <el-radio label="pcm">PCM</el-radio>
+              <el-radio :value="'wav'">WAV</el-radio>
+              <el-radio :value="'mp3'">MP3</el-radio>
+              <el-radio :value="'pcm'">PCM</el-radio>
             </el-radio-group>
           </div>
           <div class="param-item">
             <span class="param-label">采样率</span>
             <el-radio-group v-model="sampleRate">
-              <el-radio :label="8000">8k</el-radio>
-              <el-radio :label="16000">16k</el-radio>
+              <el-radio :value="8000">8k</el-radio>
+              <el-radio :value="16000">16k</el-radio>
             </el-radio-group>
           </div>
         </div>
@@ -241,7 +241,7 @@ const synthesizeSpeech = async () => {
     }
 
     // 调用云函数API
-    const response = await axios.post('https://game-9ghhigyq57e00dc3-1251022382.ap-shanghai.app.tcloudbase.com/TencentTTS', params, {
+    const response = await axios.post('https://sound.bujiaban.com/tencentTTS', params, {
       headers: {
         'Content-Type': 'application/json',
       }

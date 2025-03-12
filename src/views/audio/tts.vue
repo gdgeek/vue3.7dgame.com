@@ -99,17 +99,17 @@
           <div class="param-item">
             <span class="param-label">{{ t('tts.audioFormat') }}</span>
             <el-radio-group v-model="codec">
-              <el-radio label="wav">WAV</el-radio>
-              <el-radio label="mp3">MP3</el-radio>
-              <el-radio label="pcm">PCM</el-radio>
+              <el-radio :value="'wav'">WAV</el-radio>
+              <el-radio :value="'mp3'">MP3</el-radio>
+              <el-radio :value="'pcm'">PCM</el-radio>
             </el-radio-group>
           </div>
           <div class="param-item">
             <span class="param-label">{{ t('tts.sampleRate') }}</span>
             <el-radio-group v-model="sampleRate">
-              <el-radio :label="8000">8k</el-radio>
-              <el-radio :label="16000">16k</el-radio>
-              <el-radio v-if="supportHighSampleRate" :label="24000">24k</el-radio>
+              <el-radio :value="8000">8k</el-radio>
+              <el-radio :value="16000">16k</el-radio>
+              <el-radio v-if="supportHighSampleRate" :value="24000">24k</el-radio>
             </el-radio-group>
           </div>
         </div>
