@@ -698,6 +698,26 @@ export default {
       bind: "バインド",
       empty: "空にする",
       cancel: "キャンセル",
+      enterMultiSelect: "バッチ選択",
+      exitMultiSelect: "バッチ選択を終了",
+      batchBind: "バッチバインド",
+      deselect: "選択をキャンセル",
+      noItemSelected: "少なくとも1つのリソースを選択してください",
+      batchConfirm: {
+        message1: "選択した {count} 個のリソースをシーンにバインドしますか？",
+        message2: "バッチバインドリソース",
+        confirm: "確認",
+        cancel: "キャンセル",
+        success: "バッチバインド成功！",
+        selectOne: {
+          message1:
+            "バッチバインドリソースに成功しました。リソースの設定を直接確認しますか？",
+          message2: "リソース確認",
+          confirm: "確認",
+          cancel: "キャンセル",
+          success: "設定成功！",
+        },
+      },
       confirm1: {
         message1: "リソースのバインドを解除しますか？",
         message2: "バインド解除",

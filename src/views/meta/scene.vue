@@ -86,7 +86,7 @@ const handleMessage = async (e: MessageEvent) => {
   const action = e.data.action;
   const data = e.data.data;
   switch (action) {
-    case "save":
+    case "save-meta":
       saveMeta(data);
       break;
     case "load-resource":

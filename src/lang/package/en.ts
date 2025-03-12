@@ -697,8 +697,8 @@ export default {
       confirm: "Confirm",
     },
     ResourceDialog: {
-      label1: "Bind Resource",
-      label2: "My Resource",
+      label1: "Binding Resources",
+      label2: "My Resources",
       title: "Select Resource",
       cancelSelect: "Cancel Selection",
       select: "Select",
@@ -706,12 +706,33 @@ export default {
       bind: "Bind",
       empty: "Clear",
       cancel: "Cancel",
+      enterMultiSelect: "Enter Multi-Select",
+      exitMultiSelect: "Exit Multi-Select",
+      batchBind: "Batch Bind",
+      deselect: "Deselect",
+      noItemSelected: "Please select at least one resource",
+      batchConfirm: {
+        message1:
+          "Do you want to batch bind {count} selected resources to the scene?",
+        message2: "Batch Bind Resources",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "Batch binding successful!",
+        selectOne: {
+          message1:
+            "You have successfully batch bound resources. Directly confirm the resource settings?",
+          message2: "Confirm Resource",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          success: "Selected successfully!",
+        },
+      },
       confirm1: {
-        message1: "Unbind the resource?",
+        message1: "Do you want to unbind the resource?",
         message2: "Unbind",
         confirm: "Confirm",
         cancel: "Cancel",
-        success: "Unbind Successful!",
+        success: "Unbinding successful!",
         info: "Cancelled",
       },
       confirm2: {
@@ -729,6 +750,8 @@ export default {
         },
       },
       info: "Cancelled",
+      selectAll: "Select All",
+      deselectAll: "Deselect All",
     },
   },
   // AI部分国际化

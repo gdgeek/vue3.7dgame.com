@@ -692,6 +692,26 @@ export default {
       bind: "绑定",
       empty: "清 空",
       cancel: "取 消",
+      enterMultiSelect: "批量选择",
+      exitMultiSelect: "退出批量选择",
+      batchBind: "批量绑定",
+      deselect: "取消选择",
+      noItemSelected: "请至少选择一个资源",
+      batchConfirm: {
+        message1: "是否将选中的 {count} 个资源批量绑定到场景?",
+        message2: "批量绑定资源",
+        confirm: "确认",
+        cancel: "取消",
+        success: "批量绑定成功！",
+        selectOne: {
+          message1:
+            "您已成功批量绑定资源，是否直接确认设置资源？",
+          message2: "确认资源",
+          confirm: "确认",
+          cancel: "取消",
+          success: "设置成功！",
+        },
+      },
       confirm1: {
         message1: "是否解除资源绑定?",
         message2: "解除绑定",
