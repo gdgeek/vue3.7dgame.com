@@ -9,23 +9,13 @@
                 meta.title
               }}</el-link>
               /【{{ $t("meta.script.title") || "Script Title" }}】
-              <el-button type="primary" size="small" @click="run"
-                >测试运行</el-button
-              >
-              <el-button
-                v-if="disabled"
-                type="primary"
-                size="small"
-                @click="disabled = false"
-              >
+              <el-button type="primary" size="small" @click="run">测试运行</el-button>
+              <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
                 返回
               </el-button>
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="save">
-                  <font-awesome-icon
-                    class="icon"
-                    icon="save"
-                  ></font-awesome-icon>
+                  <font-awesome-icon class="icon" icon="save"></font-awesome-icon>
                   {{ $t("meta.script.save") || "Save" }}
                 </el-button>
               </el-button-group>
@@ -33,77 +23,43 @@
           </template>
           <el-container v-if="!disabled">
             <el-tabs v-model="activeName" type="card" style="width: 100%">
-              <el-tab-pane
-                :label="$t('verse.view.script.edit') || 'Edit Script'"
-                name="blockly"
-              >
-                <el-main
-                  style="
+              <el-tab-pane :label="$t('verse.view.script.edit') || 'Edit Script'" name="blockly">
+                <el-main style="
                     margin: 0;
                     padding: 0;
                     height: 70vh;
                     position: relative;
-                  "
-                >
+                  ">
                   <div class="fullscreen-controls">
                     <el-button-group>
-                      <el-button
-                        class="fullscreen-btn"
-                        size="small"
-                        type="primary"
-                        plain
-                        @click="toggleFullscreen"
-                      >
+                      <el-button class="fullscreen-btn" size="small" type="primary" plain @click="toggleFullscreen">
                         <el-icon>
                           <FullScreen v-if="!isFullscreen"></FullScreen>
                           <Aim v-else></Aim>
                         </el-icon>
                       </el-button>
                       <template v-if="isFullscreen">
-                        <el-button
-                          size="small"
-                          type="primary"
-                          @click="showFullscreenCode('lua')"
-                        >
+                        <el-button size="small" type="primary" @click="showFullscreenCode('lua')">
                           Lua
                         </el-button>
-                        <el-button
-                          size="small"
-                          color="#F7DF1E"
-                          style="margin-right: 10px"
-                          @click="showFullscreenCode('javascript')"
-                        >
+                        <el-button size="small" color="#F7DF1E" style="margin-right: 10px"
+                          @click="showFullscreenCode('javascript')">
                           JavaScript
                         </el-button>
-                        <el-button
-                          size="small"
-                          type="primary"
-                          style="margin-right: 50px"
-                          @click="run"
-                        >
+                        <el-button size="small" type="primary" style="margin-right: 50px" @click="run">
                           测试运行
                         </el-button>
                       </template>
                     </el-button-group>
                   </div>
 
-                  <el-dialog
-                    v-model="showCodeDialog"
-                    :title="codeDialogTitle"
-                    fullscreen
-                    :show-close="true"
-                    :close-on-click-modal="false"
-                    :close-on-press-escape="true"
-                  >
+                  <el-dialog v-model="showCodeDialog" :title="codeDialogTitle" fullscreen :show-close="true"
+                    :close-on-click-modal="false" :close-on-press-escape="true">
                     <div class="code-dialog-content">
                       <el-card :class="isDark ? 'dark-theme' : 'light-theme'">
                         <div v-highlight>
                           <div class="code-container2">
-                            <el-button
-                              class="copy-button2"
-                              text
-                              @click="copyCode(currentCode)"
-                            >
+                            <el-button class="copy-button2" text @click="copyCode(currentCode)">
                               <el-icon class="icon">
                                 <CopyDocument></CopyDocument>
                               </el-icon>
@@ -120,45 +76,25 @@
                     </div>
                   </el-dialog>
 
-                  <iframe
-                    style="margin: 0; padding: 0; height: 100%; width: 100%"
-                    id="editor"
-                    ref="editor"
-                    :src="src"
-                  ></iframe>
+                  <iframe style="margin: 0; padding: 0; height: 100%; width: 100%" id="editor" ref="editor"
+                    :src="src"></iframe>
                 </el-main>
               </el-tab-pane>
-              <el-tab-pane
-                :label="$t('verse.view.script.code') || 'Script Code'"
-                name="script"
-              >
-                <el-card
-                  v-if="activeName === 'script'"
-                  class="box-card"
-                  :class="isDark ? 'dark-theme' : 'light-theme'"
-                >
+              <el-tab-pane :label="$t('verse.view.script.code') || 'Script Code'" name="script">
+                <el-card v-if="activeName === 'script'" class="box-card" :class="isDark ? 'dark-theme' : 'light-theme'">
                   <div v-highlight>
                     <el-tabs v-model="languageName">
                       <el-tab-pane label="Lua" name="lua">
                         <template #label>
                           <span style="display: flex; align-items: center">
-                            <img
-                              src="/lua.png"
-                              style="width: 25px; margin-right: 5px"
-                              alt=""
-                            />
+                            <img src="/lua.png" style="width: 25px; margin-right: 5px" alt="" />
                             <span>Lua</span>
                           </span>
                         </template>
                         <div class="code-container">
-                          <el-button
-                            class="copy-button"
-                            text
-                            @click="copyCode(LuaCode)"
-                            ><el-icon class="icon">
-                              <CopyDocument></CopyDocument> </el-icon
-                            >{{ $t("copy.title") || "Copy" }}</el-button
-                          >
+                          <el-button class="copy-button" text @click="copyCode(LuaCode)"><el-icon class="icon">
+                              <CopyDocument></CopyDocument>
+                            </el-icon>{{ $t("copy.title") || "Copy" }}</el-button>
                           <pre>
                   <code class="lua">{{ LuaCode }}</code>
                 </pre>
@@ -167,23 +103,14 @@
                       <el-tab-pane label="JavaScript" name="javascript">
                         <template #label>
                           <span style="display: flex; align-items: center">
-                            <img
-                              src="/javascript.png"
-                              style="width: 25px; margin-right: 5px"
-                              alt=""
-                            />
+                            <img src="/javascript.png" style="width: 25px; margin-right: 5px" alt="" />
                             <span>JavaScript</span>
                           </span>
                         </template>
                         <div class="code-container">
-                          <el-button
-                            class="copy-button"
-                            text
-                            @click="copyCode(JavaScriptCode)"
-                            ><el-icon class="icon">
-                              <CopyDocument></CopyDocument> </el-icon
-                            >{{ $t("copy.title") }}</el-button
-                          >
+                          <el-button class="copy-button" text @click="copyCode(JavaScriptCode)"><el-icon class="icon">
+                              <CopyDocument></CopyDocument>
+                            </el-icon>{{ $t("copy.title") }}</el-button>
                           <pre>
                   <code class="javascript">{{ JavaScriptCode }}</code>
                 </pre>
@@ -197,24 +124,14 @@
           </el-container>
           <div v-if="disabled" class="runArea">
             <div class="scene-fullscreen-controls">
-              <el-button
-                class="scene-fullscreen-btn"
-                size="small"
-                type="primary"
-                plain
-                @click="toggleSceneFullscreen"
-              >
+              <el-button class="scene-fullscreen-btn" size="small" type="primary" plain @click="toggleSceneFullscreen">
                 <el-icon>
                   <FullScreen v-if="!isSceneFullscreen"></FullScreen>
                   <Aim v-else></Aim>
                 </el-icon>
               </el-button>
             </div>
-            <ScenePlayer
-              ref="scenePlayer"
-              :meta="meta"
-              :is-scene-fullscreen="isSceneFullscreen"
-            ></ScenePlayer>
+            <ScenePlayer ref="scenePlayer" :meta="meta" :is-scene-fullscreen="isSceneFullscreen"></ScenePlayer>
           </div>
         </el-card>
       </el-main>
@@ -236,7 +153,7 @@ import { convertToHttps } from "@/assets/js/helper";
 import pako from "pako";
 import ScenePlayer from "./ScenePlayer.vue";
 import jsBeautify from "js-beautify";
-import env from  "@/environment";
+import env from "@/environment";
 const loader = new GLTFLoader();
 const appStore = useAppStore();
 const loading = ref(false);
@@ -652,7 +569,7 @@ const addMetaData = (data: any, ret: any) => {
 
   if (command) {
     ret.command.push(command);
- }
+  }
 
   const entity = testPoint(data, [
     "polygen",
@@ -731,9 +648,18 @@ const getResource = (meta: metaInfo) => {
   return ret;
 };
 
+const handleKeyDown = (e: KeyboardEvent) => {
+  // 检测Ctrl+S或Command+S (Mac)
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault(); // 阻止浏览器默认的保存行为
+    save();
+  }
+};
+
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
   window.removeEventListener("beforeunload", handleBeforeUnload);
+  window.removeEventListener("keydown", handleKeyDown);
   document.removeEventListener("keydown", (e) => {
     if (e.key === "Escape" && showCodeDialog.value) {
       showCodeDialog.value = false;
@@ -751,6 +677,7 @@ onBeforeUnmount(() => {
 });
 onMounted(async () => {
   window.addEventListener("message", handleMessage);
+  window.addEventListener("keydown", handleKeyDown); // 添加键盘事件监听
   loadHighlightStyle(isDark.value);
 
   window.addEventListener("beforeunload", handleBeforeUnload);
