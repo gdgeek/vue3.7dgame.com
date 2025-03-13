@@ -13,6 +13,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
+import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 import PrefabDialog from "@/components/MrPP/PrefabDialog.vue";
 import MetaDialog from "@/components/MrPP/MetaDialog.vue";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
@@ -37,11 +38,19 @@ const title = computed(() => {
 });
 
 const id = computed(() => parseInt(route.query.id as string));
+const src = computed(() => {
+  return env.editor +
+    "/three.js/editor/verse-editor.html?language=" +
+    appStore.language + "&timestamp=" + Date.now();
+});
+alert(src.value);
+/*
 const src = ref(
   env.editor +
   "/three.js/editor/verse-editor.html?language=" +
   appStore.language + "&timestamp=" + Date.now()
 );
+*/
 
 
 const editor = ref<HTMLIFrameElement>();
@@ -50,7 +59,8 @@ const cancel = () => { };
 watch(
   () => appStore.language, // 监听 language 的变化
   async (newValue, oldValue) => {
-    src.value = env.editor + "/three.js/editor/verse-editor.html?language=" + newValue + "&timestamp=" + Date.now();
+
+    //src.value = env.editor + "/three.js/editor/verse-editor.html?language=" + newValue + "&timestamp=" + Date.now();
     await refresh();
   }
 );
