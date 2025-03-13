@@ -43,7 +43,7 @@ const src = computed(() => {
     "/three.js/editor/verse-editor.html?language=" +
     appStore.language + "&timestamp=" + Date.now();
 });
-alert(src.value);
+//alert(src.value);
 /*
 const src = ref(
   env.editor +
@@ -59,7 +59,6 @@ const cancel = () => { };
 watch(
   () => appStore.language, // 监听 language 的变化
   async (newValue, oldValue) => {
-
     //src.value = env.editor + "/three.js/editor/verse-editor.html?language=" + newValue + "&timestamp=" + Date.now();
     await refresh();
   }
