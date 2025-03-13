@@ -40,7 +40,7 @@ const id = computed(() => parseInt(route.query.id as string));
 const src = ref(
   env.editor +
   "/three.js/editor/verse-editor.html?language=" +
-  appStore.language + "&refresh=" + Date.now()
+  appStore.language + "&timestamp=" + Date.now()
 );
 
 
@@ -50,8 +50,7 @@ const cancel = () => { };
 watch(
   () => appStore.language, // 监听 language 的变化
   async (newValue, oldValue) => {
-    console.log("language changed", newValue);
-    src.value = env.editor + "/three.js/editor/verse-editor.html?language=" + newValue + "&refresh=" + Date.now();
+    src.value = env.editor + "/three.js/editor/verse-editor.html?language=" + newValue + "&timestamp=" + Date.now();
     await refresh();
   }
 );
