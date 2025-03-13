@@ -20,16 +20,24 @@ import env from "@/environment"
 const appStore = useAppStore();
 const route = useRoute();
 const router = useRouter();
+
+const src = computed(() => {
+  return env.editor +
+    "/three.js/editor/meta-editor.html?language=" +
+    appStore.language + "&timestamp=" + Date.now();
+});
+
+/*
 const src = ref(
   env.editor + "/three.js/editor/meta-editor.html?language=" + appStore.language + "&timestamp=" + Date.now()
 );
-
+*/
 
 watch(
   () => appStore.language, // 监听 language 的变化
   async (newValue, oldValue) => {
-    src.value =
-      env.editor + "/three.js/editor/meta-editor.html?language=" + newValue + "&timestamp=" + Date.now();
+    // src.value =
+    //  env.editor + "/three.js/editor/meta-editor.html?language=" + newValue + "&timestamp=" + Date.now();
     await refresh();
   }
 );
