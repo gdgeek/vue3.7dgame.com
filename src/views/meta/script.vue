@@ -400,7 +400,7 @@ const save = (): Promise<void> => {
   hasUnsavedChanges.value = false;
   return new Promise<void>((resolve, reject) => {
     saveResolve = resolve;
-    postMessage("save-meta", { language: ["lua", "js"], data: {} });
+    postMessage("save", { language: ["lua", "js"], data: {} });
   });
 };
 
