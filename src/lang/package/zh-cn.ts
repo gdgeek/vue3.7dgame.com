@@ -651,6 +651,15 @@ export default {
         message2: "长度在 2 到 20 个字符",
       },
       success: "保存成功",
+      selectImageMethod: "选择图片方式",
+      selectFromResource: "从资源库选择",
+      uploadLocal: "本地上传",
+      uploadError: "上传失败：未找到文件",
+      invalidImageType: "请上传JPG/PNG/BMP/GIF格式的图片",
+      imageTooLarge: "图片大小不能超过2MB",
+      handlerError: "获取文件处理器失败",
+      uploadFailed: "上传图片失败",
+      saveFailed: "保存图片信息失败",
     },
     scene: {
       error: "没有场景编辑器",
@@ -704,8 +713,7 @@ export default {
         cancel: "取消",
         success: "批量绑定成功！",
         selectOne: {
-          message1:
-            "您已成功批量绑定资源，是否直接确认设置资源？",
+          message1: "您已成功批量绑定资源，是否直接确认设置资源？",
           message2: "确认资源",
           confirm: "确认",
           cancel: "取消",

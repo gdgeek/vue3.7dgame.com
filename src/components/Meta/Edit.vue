@@ -19,7 +19,7 @@
                 <el-input v-model="item.title" @change="onSubmit"></el-input>
               </el-form-item>
               <el-form-item :label="$t('meta.metaEdit.form.picture')" prop="title">
-                <div class="box-item" @click="selectImage" style="width: 100%; text-align: center">
+                <div class="box-item" style="width: 100%; text-align: center" @click="showImageSelectDialog">
                   <el-image fit="contain" style="width: 100%; height: 300px" :src="image"></el-image>
                 </div>
               </el-form-item>
@@ -34,10 +34,10 @@
         <el-card v-if="item !== null" class="box-card">
           <!-- <el-button-group style="float: right; padding: 3px 0"> -->
 
-            <el-button v-if="item.viewable" @click="editor" icon="Edit" type="primary" size="small" style="width: 100%">
-              {{ $t("meta.metaEdit.contentEdit") }}
-            </el-button>
-            <!-- <el-button @click="onSubmit" icon="CircleCheck" type="success">
+          <el-button v-if="item.viewable" @click="editor" icon="Edit" type="primary" size="small" style="width: 100%">
+            {{ $t("meta.metaEdit.contentEdit") }}
+          </el-button>
+          <!-- <el-button @click="onSubmit" icon="CircleCheck" type="success">
               {{ $t("meta.metaEdit.save") }}
             </el-button>-->
           <!-- </el-button-group> -->
@@ -52,7 +52,7 @@
             <div v-if="events && events.inputs && events.inputs.length > 0" :label="$t('meta.metaEdit.form.input')">
               <el-divider content-position="left">{{
                 $t("meta.metaEdit.form.input")
-                }}</el-divider>
+              }}</el-divider>
               <span v-for="(i, index) in events.inputs" :key="index">
                 <el-tag size="small">
                   {{ i.title }}
@@ -63,7 +63,7 @@
             <div v-if="events && events.outputs && events.outputs.length > 0" :label="$t('meta.metaEdit.form.output')">
               <el-divider content-position="left">{{
                 $t("meta.metaEdit.form.output")
-                }}</el-divider>
+              }}</el-divider>
               <span v-for="(i, index) in events.outputs" :key="index">
                 <el-tag size="small">
                   {{ i.title }}
@@ -82,6 +82,22 @@
         <br />
       </el-col>
     </el-row>
+
+    <!-- 选择图片方式的对话框 -->
+    <el-dialog v-model="imageSelectDialogVisible" :title="$t('meta.metaEdit.selectImageMethod')" width="30%"
+      align-center>
+      <div style="display: flex; justify-content: space-around; margin: 20px 0;">
+        <el-button type="primary" @click="openResourceDialog">
+          {{ $t("meta.metaEdit.selectFromResource") }}
+        </el-button>
+        <el-upload action="" :auto-upload="false" :show-file-list="false" :on-change="handleLocalUpload"
+          accept="image/jpeg,image/gif,image/png,image/bmp">
+          <el-button type="success">
+            {{ $t("meta.metaEdit.uploadLocal") }}
+          </el-button>
+        </el-upload>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -92,11 +108,16 @@ import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import type { metaInfo } from "@/api/v1/meta";
 import { ViewCard } from "vue-waterfall-plugin-next/dist/types/types/waterfall";
 import { translateRouteTitle } from "@/utils/i18n";
+import { useFileStore } from "@/store/modules/config";
+import { postFile } from "@/api/v1/files";
+import type { UploadFile, UploadFiles } from "element-plus";
 
 const route = useRoute();
 const router = useRouter();
+const fileStore = useFileStore();
 const item = ref<metaInfo | null>(null);
 const { t } = useI18n();
+const imageSelectDialogVisible = ref(false);
 
 const rules = {
   title: [
@@ -227,14 +248,111 @@ const editor = () => {
   }
 };
 
-const openResources = (
-  options: { value: any; callback: any; type: any } = {
-    value: null,
-    callback: null,
-    type: null,
+const showImageSelectDialog = () => {
+  imageSelectDialogVisible.value = true;
+};
+
+const openResourceDialog = () => {
+  if (resourceDialog.value) {
+    imageSelectDialogVisible.value = false;
+    resourceDialog.value.openIt({
+      type: "picture",
+    });
   }
+};
+
+const handleLocalUpload = async (file: UploadFile, fileList: UploadFiles) => {
+  imageSelectDialogVisible.value = false;
+
+  const selectedFile = file.raw;
+  if (!selectedFile) {
+    ElMessage.error(t("meta.metaEdit.uploadError"));
+    return;
+  }
+
+  const isValidImage = [
+    "image/jpeg",
+    "image/png",
+    "image/bmp",
+    "image/gif",
+  ].includes(selectedFile.type);
+  const isLt2M = selectedFile.size / 1024 / 1024 < 2;
+
+  if (!isValidImage) {
+    ElMessage.error(t("meta.metaEdit.invalidImageType"));
+    return;
+  }
+  if (!isLt2M) {
+    ElMessage.error(t("meta.metaEdit.imageTooLarge"));
+    return;
+  }
+
+  try {
+    // 获取文件MD5和处理器
+    const md5 = await fileStore.store.fileMD5(selectedFile);
+    const handler = await fileStore.store.publicHandler();
+
+    if (!handler) {
+      ElMessage.error(t("meta.metaEdit.handlerError"));
+      return;
+    }
+
+    // 检查文件是否已存在
+    const extension = selectedFile.name.split(".").pop() || "";
+    const has = await fileStore.store.fileHas(
+      md5,
+      extension,
+      handler,
+      "backup"
+    );
+
+    // 如果文件不存在，上传文件
+    if (!has) {
+      await fileStore.store.fileUpload(
+        md5,
+        extension,
+        selectedFile,
+        (p: any) => { },
+        handler,
+        "backup"
+      );
+    }
+
+    // 保存图片信息
+    await saveLocalImage(md5, extension, selectedFile, handler);
+  } catch (error) {
+    console.error("上传图片失败:", error);
+    ElMessage.error(t("meta.metaEdit.uploadFailed"));
+  }
+};
+
+const saveLocalImage = async (
+  md5: string,
+  extension: string,
+  file: File,
+  handler: any
 ) => {
-  // Handle resource dialog opening logic here
+  extension = extension.startsWith(".") ? extension : `.${extension}`;
+  const data = {
+    md5,
+    key: md5 + extension,
+    filename: file.name,
+    url: fileStore.store.fileUrl(md5, extension, handler, "backup"),
+  };
+
+  try {
+    const post = await postFile(data);
+
+    if (item.value) {
+      item.value.image_id = post.data.id;
+      await putItem(id.value, item.value);
+      ElMessage.success(t("meta.metaEdit.success"));
+      await refresh();
+    }
+  } catch (err) {
+    console.error("保存图片信息失败:", err);
+    ElMessage.error(t("meta.metaEdit.saveFailed"));
+  }
 };
 
 const selected = async (data: ViewCard) => {
@@ -245,40 +363,6 @@ const selected = async (data: ViewCard) => {
     await refresh();
   }
 };
-
-const selectImage = () => {
-  if (resourceDialog.value) {
-    resourceDialog.value.openIt({
-      type: "picture",
-    });
-  }
-};
-/*
-const postEvent = async ({
-  uuid,
-  node,
-  inputs,
-  outputs,
-}: {
-  uuid: string;
-  node: any;
-  inputs: Event[];
-  outputs: Event[];
-}) => {
-  if (item.value) {
-    item.value.events = JSON.stringify({ inputs, outputs });
-  }
-  if (dialog.value) {
-    dialog.value.close();
-  }
-};
-
-const openDialog = () => {
-  if (dialog.value) {
-    dialog.value.open();
-  }
-};
-*/
 
 const onSubmit = async () => {
   const valid = await itemForm.value!.validate();
