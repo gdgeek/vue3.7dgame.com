@@ -28,11 +28,11 @@
             </el-table>
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right">
-                <el-button type="primary" size="small" @click="namedWindow">
+                <el-button type="success" size="small" @click="namedWindow">
                   <i class="el-icon-edit"></i>
                   {{ $t("video.view.info.name") }}
                 </el-button>
-                <el-button type="primary" size="small" @click="deleteWindow">
+                <el-button type="danger" size="small" @click="deleteWindow">
                   <i class="el-icon-delete"></i>
                   {{ $t("video.view.info.delete") }}
                 </el-button>

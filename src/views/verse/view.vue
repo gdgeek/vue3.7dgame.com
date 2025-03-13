@@ -39,7 +39,6 @@
             ></el-image>
           </div>
         </el-card>
-        <br />
 
         <br />
         <el-card v-if="verse" class="box-card">

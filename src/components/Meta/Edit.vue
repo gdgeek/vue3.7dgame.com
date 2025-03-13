@@ -32,16 +32,15 @@
         </el-card>
         <br />
         <el-card v-if="item !== null" class="box-card">
-          <el-button-group style="float: right; padding: 3px 0">
+          <!-- <el-button-group style="float: right; padding: 3px 0"> -->
 
-            <el-button v-if="item.viewable" @click="editor" icon="Edit" type="success">
+            <el-button v-if="item.viewable" @click="editor" icon="Edit" type="primary" size="small" style="width: 100%">
               {{ $t("meta.metaEdit.contentEdit") }}
             </el-button>
             <!-- <el-button @click="onSubmit" icon="CircleCheck" type="success">
               {{ $t("meta.metaEdit.save") }}
             </el-button>-->
-          </el-button-group>
-          <br />
+          <!-- </el-button-group> -->
           <br />
         </el-card>
         <br />

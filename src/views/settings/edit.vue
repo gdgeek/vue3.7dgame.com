@@ -44,7 +44,9 @@
               <el-upload class="avatar-uploader" action="" :auto-upload="false" :show-file-list="false"
                 :on-change="handleChangeUpload" accept="image/jpeg,image/gif,image/png,image/bmp" style="float: left">
                 <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                <div v-else class="avatar-uploader-icon">
+                  <font-awesome-icon icon="plus" />
+                </div>
               </el-upload>
               <div style="float: left">
                 <p class="user-explain">
@@ -458,10 +460,10 @@ const saveAvatar = async (
 };
 
 // 完成截图
-async function finish() {
+const finish = async () => {
   cropperRef.value.getCropBlob(async (blob: Blob) => {
     // 创建 File 对象并设置 name 和 extension 属性
-    const file = new File([blob], userStore.userInfo.userData.username + ".jpg", {
+    const file = new File([blob], userStore.userInfo?.userData?.username + ".jpg", {
       type: "image/jpeg",
     });
 

@@ -32,7 +32,7 @@
 
       </el-col>
 
-      <el-col :smvue="8">
+      <el-col :sm="8">
         <el-card class="box-card">
           <template #header>
             <b>{{ $t("polygen.view.info.title") }}</b> :
@@ -45,11 +45,11 @@
 
             <aside style="margin-top: 10px; margin-bottom: 30px">
               <el-button-group style="float: right">
-                <el-button type="primary" size="small" @click="namedWindow">
+                <el-button type="success" size="small" @click="namedWindow">
                   <i class="el-icon-edit"></i>
                   {{ $t("polygen.view.info.name") }}
                 </el-button>
-                <el-button type="primary" size="small" @click="deleteWindow">
+                <el-button type="danger" size="small" @click="deleteWindow">
                   <i class="el-icon-delete"></i>
                   {{ $t("polygen.view.info.delete") }}
                 </el-button>
