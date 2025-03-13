@@ -21,7 +21,7 @@ const appStore = useAppStore();
 const route = useRoute();
 const router = useRouter();
 const src = ref(
-  env.editor + "/three.js/editor/meta-editor.html?language=" + appStore.language
+  env.editor + "/three.js/editor/meta-editor.html?language=" + appStore.language + "&refresh=" + Date.now()
 );
 
 
@@ -29,7 +29,7 @@ watch(
   () => appStore.language, // 监听 language 的变化
   async (newValue, oldValue) => {
     src.value =
-      env.editor + "/three.js/editor/meta-editor.html?language=" + newValue;
+      env.editor + "/three.js/editor/meta-editor.html?language=" + newValue + "&refresh=" + Date.now();
     await refresh();
   }
 );
