@@ -7,16 +7,28 @@
             <el-tab-pane :label="$t('meta.ResourceDialog.label1')" name="binding" v-if="metaId != null"></el-tab-pane>
             <el-tab-pane :label="$t('meta.ResourceDialog.label2')" name="owner"></el-tab-pane>
           </el-tabs>
-          <mr-p-p-header :sorted="active.sorted" :searched="active.searched" @search="search" @sort="sort">
+          <MrPPHeader :sorted="active.sorted" :searched="active.searched" @search="search" @sort="sort">
             <el-tag>
               <b>{{ $t("meta.ResourceDialog.title") }}</b>
             </el-tag>
-          </mr-p-p-header>
+          </MrPPHeader>
           <el-divider content-position="left">
             <el-tag v-if="active.searched !== ''" size="small" closable @close="clearSearched">
               {{ active.searched }}
             </el-tag>
           </el-divider>
+          <div class="batch-actions" v-if="activeName === 'owner' && metaId != null">
+            <el-button-group>
+              <el-button size="small" type="primary" @click="toggleMultiSelectMode">
+                {{ isMultiSelectMode ? $t("meta.ResourceDialog.exitMultiSelect") :
+                  $t("meta.ResourceDialog.enterMultiSelect") }}
+              </el-button>
+              <el-button v-if="isMultiSelectMode" size="small" type="success" @click="doBatchBinding"
+                :disabled="selectedItems.length === 0">
+                {{ $t("meta.ResourceDialog.batchBind") }} ({{ selectedItems.length }})
+              </el-button>
+            </el-button-group>
+          </div>
         </div>
       </template>
 
@@ -24,7 +36,8 @@
         :backgroundColor="'rgba(255, 255, 255, .05)'">
         <template #default="{ item }">
           <div style="width: 230px">
-            <el-card v-if="activeName === 'owner'" style="width: 220px" class="box-card">
+            <el-card v-if="activeName === 'owner'" style="width: 220px" class="box-card"
+              :class="{ 'selected-card': isMultiSelectMode && isSelected(item) }">
               <template #header>
                 <el-card shadow="hover" :body-style="{ padding: '0px' }">
                   <div class="mrpp-title">
@@ -50,22 +63,33 @@
                 </el-card>
               </template>
               <div class="clearfix" v-if="metaId != null">
-                <el-button-group v-if="item.id === value">
-                  <el-button type="warning" size="small" @click="doEmpty">
-                    {{ $t("meta.ResourceDialog.cancelSelect") }}
+                <!-- 多选模式下显示选择按钮 -->
+                <el-button-group v-if="isMultiSelectMode">
+                  <el-button v-if="isSelected(item)" type="success" size="small" @click="toggleSelect(item)">
+                    {{ $t("meta.ResourceDialog.deselect") }}
                   </el-button>
-                </el-button-group>
-                <el-button-group v-else-if="isBinding(item)">
-                  <el-button type="primary" size="small" @click="doSelect(item)">
+                  <el-button v-else type="primary" size="small" @click="toggleSelect(item)">
                     {{ $t("meta.ResourceDialog.select") }}
                   </el-button>
-                  <el-button type="primary" size="small" @click="doUnbind(item)">
-                    {{ $t("meta.ResourceDialog.doUnbind") }}
-                  </el-button>
                 </el-button-group>
-                <el-button v-else size="small" @click="doBinding(item)">
-                  {{ $t("meta.ResourceDialog.bind") }}
-                </el-button>
+                <template v-else>
+                  <el-button-group v-if="item.id === value">
+                    <el-button type="warning" size="small" @click="doEmpty">
+                      {{ $t("meta.ResourceDialog.cancelSelect") }}
+                    </el-button>
+                  </el-button-group>
+                  <el-button-group v-else-if="isBinding(item)">
+                    <el-button type="primary" size="small" @click="doSelect(item)">
+                      {{ $t("meta.ResourceDialog.select") }}
+                    </el-button>
+                    <el-button type="primary" size="small" @click="doUnbind(item)">
+                      {{ $t("meta.ResourceDialog.doUnbind") }}
+                    </el-button>
+                  </el-button-group>
+                  <el-button v-else size="small" @click="doBinding(item)">
+                    {{ $t("meta.ResourceDialog.bind") }}
+                  </el-button>
+                </template>
               </div>
               <div class="clearfix" v-else>
                 <el-button type="primary" size="small" @click="doSelect(item)">
@@ -166,10 +190,90 @@ const owner = ref({
   searched: "",
   pagination: { current: 1, count: 1, size: 20, total: 20 },
 });
+const selectedItems = ref<any[]>([]);
+const isMultiSelectMode = ref(false);
 
 const active = computed(() => {
   return activeName.value === "binding" ? binding.value : owner.value;
 });
+
+const isSelected = (item: any) => {
+  return selectedItems.value.some((selected) => selected.id === item.id);
+};
+
+const toggleSelect = (item: any) => {
+  if (isSelected(item)) {
+    selectedItems.value = selectedItems.value.filter((selected) => selected.id !== item.id);
+  } else {
+    selectedItems.value.push(item);
+  }
+};
+
+const toggleMultiSelectMode = () => {
+  isMultiSelectMode.value = !isMultiSelectMode.value;
+  if (!isMultiSelectMode.value) {
+    selectedItems.value = [];
+  }
+};
+
+const doBatchBinding = async () => {
+  if (selectedItems.value.length === 0) {
+    ElMessage.warning(t("meta.ResourceDialog.noItemSelected"));
+    return;
+  }
+
+  try {
+    await ElMessageBox.confirm(
+      t("meta.ResourceDialog.batchConfirm.message1", { count: selectedItems.value.length }),
+      t("meta.ResourceDialog.batchConfirm.message2"),
+      {
+        confirmButtonText: t("meta.ResourceDialog.batchConfirm.confirm"),
+        cancelButtonText: t("meta.ResourceDialog.batchConfirm.cancel"),
+        type: "warning",
+      }
+    );
+
+    const promises = selectedItems.value.map(item =>
+      postMetaResource({
+        meta_id: metaId.value,
+        resource_id: item.id,
+      })
+    );
+
+    await Promise.all(promises);
+    await refresh();
+    ElMessage.success(t("meta.ResourceDialog.batchConfirm.success"));
+
+    try {
+      await ElMessageBox.confirm(
+        t("meta.ResourceDialog.batchConfirm.selectOne.message1"),
+        t("meta.ResourceDialog.batchConfirm.selectOne.message2"),
+        {
+          confirmButtonText: t("meta.ResourceDialog.batchConfirm.selectOne.confirm"),
+          cancelButtonText: t("meta.ResourceDialog.batchConfirm.selectOne.cancel"),
+          type: "warning",
+        }
+      );
+
+      await selectedItems.value.map(item => {
+        selected(item);
+      });
+
+      ElMessage.success(t("meta.ResourceDialog.batchConfirm.selectOne.success"));
+
+    } catch {
+      // 如果用户取消确认，清空选择状态
+      selectedItems.value = [];
+      isMultiSelectMode.value = false;
+    }
+  } catch {
+    ElMessage.info(t("meta.ResourceDialog.info"));
+  }
+
+  // 清空选择状态
+  selectedItems.value = [];
+  isMultiSelectMode.value = false;
+};
 
 const isBinding = (item: any) => {
   for (let i = 0; i < item.metaResources.length; ++i) {
@@ -213,6 +317,10 @@ const open = async (
   type.value = newType;
   metaId.value = meta_id;
   value.value = newValue;
+
+  // 重置状态
+  selectedItems.value = [];
+  isMultiSelectMode.value = false;
 
   await refreshOwner();
   await refreshBinding();
@@ -297,6 +405,9 @@ const selected = (data = null) => {
 };
 
 const doClose = () => {
+  // 重置状态
+  selectedItems.value = [];
+  isMultiSelectMode.value = false;
   emit("close");
 };
 
@@ -439,7 +550,6 @@ const viewCards = computed(() => {
   text-align: center;
   padding: 10px;
   transform: scale(0);
-  /* 或 translateX(-100%) 等 */
   opacity: 0;
   transition:
     transform 0.5s ease,
@@ -449,5 +559,22 @@ const viewCards = computed(() => {
 .image-container:hover .info-container {
   transform: scale(1);
   opacity: 1;
+}
+
+/* 批量操作相关样式 */
+.batch-actions {
+  margin: 10px 0;
+}
+
+.selected-card {
+  border: 1px solid #67c23a !important;
+  box-shadow: 0 0 10px rgba(103, 194, 58, 0.5) !important;
+  transform: scale(1.02);
+  transition: all 0.3s ease;
+}
+
+/* 选择资源提示样式 */
+.select-resource-tip {
+  margin: 10px 0;
 }
 </style>
