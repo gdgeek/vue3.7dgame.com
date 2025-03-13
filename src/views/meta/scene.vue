@@ -86,8 +86,14 @@ const handleMessage = async (e: MessageEvent) => {
   const action = e.data.action;
   const data = e.data.data;
   switch (action) {
-    case "save":
+    case "save-meta":
       saveMeta(data);
+      break;
+    case "save-meta-none":
+      ElMessage({
+        type: "warning",
+        message: "项目没有改变",
+      });
       break;
     case "load-resource":
       loadResource(data);

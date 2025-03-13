@@ -1,101 +1,45 @@
 <template>
   <div class="verse-view">
-    <event-dialog
+    <!-- <event-dialog
       v-if="item"
       :node="JSON.parse(item.events!)"
       uuid="uuid"
       @post-event="postEvent"
       @on-submit="onSubmit"
       ref="dialog"
-    ></event-dialog>
-    <resource-dialog
-      @selected="selected"
-      ref="resourceDialog"
-    ></resource-dialog>
+    ></event-dialog>-->
+    <resource-dialog @selected="selected" ref="resourceDialog"></resource-dialog>
     <br />
     <el-row :gutter="20" style="margin: 0px 18px 0">
       <el-col :sm="16">
         <el-card v-if="item" class="box-card">
           <template #header>
-            <el-form
-              ref="itemForm"
-              :rules="rules"
-              v-if="item"
-              :model="item"
-              label-width="80px"
-            >
-              <el-form-item
-                :label="$t('meta.metaEdit.form.title')"
-                prop="title"
-              >
+            <el-form ref="itemForm" :rules="rules" v-if="item" :model="item" label-width="80px">
+              <el-form-item :label="$t('meta.metaEdit.form.title')" prop="title">
                 <el-input v-model="item.title" @change="onSubmit"></el-input>
               </el-form-item>
-              <el-form-item
-                :label="$t('meta.metaEdit.form.picture')"
-                prop="title"
-              >
-                <div
-                  class="box-item"
-                  @click="selectImage"
-                  style="width: 100%; text-align: center"
-                >
-                  <el-image
-                    fit="contain"
-                    style="width: 100%; height: 300px"
-                    :src="image"
-                  ></el-image>
+              <el-form-item :label="$t('meta.metaEdit.form.picture')" prop="title">
+                <div class="box-item" @click="selectImage" style="width: 100%; text-align: center">
+                  <el-image fit="contain" style="width: 100%; height: 300px" :src="image"></el-image>
                 </div>
               </el-form-item>
               <el-form-item v-if="prefab" label="Info" prop="title">
-                <el-input
-                  v-model="jsonInfo"
-                  type="textarea"
-                  @change="onSubmit"
-                ></el-input>
+                <el-input v-model="jsonInfo" type="textarea" @change="onSubmit"></el-input>
               </el-form-item>
             </el-form>
           </template>
-          <div
-            v-if="events && events.inputs && events.inputs.length > 0"
-            :label="$t('meta.metaEdit.form.input')"
-          >
-            <el-divider content-position="left">{{
-              $t("meta.metaEdit.form.input")
-            }}</el-divider>
-            <span v-for="(i, index) in events.inputs" :key="index">
-              <el-tag size="small">
-                {{ i.title }}
-              </el-tag>
-              &nbsp;
-            </span>
-          </div>
-          <div
-            v-if="events && events.outputs && events.outputs.length > 0"
-            :label="$t('meta.metaEdit.form.output')"
-          >
-            <el-divider content-position="left">{{
-              $t("meta.metaEdit.form.output")
-            }}</el-divider>
-            <span v-for="(i, index) in events.outputs" :key="index">
-              <el-tag size="small">
-                {{ i.title }}
-              </el-tag>
-              &nbsp;
-            </span>
-          </div>
+
         </el-card>
         <br />
         <el-card v-if="item !== null" class="box-card">
           <el-button-group style="float: right; padding: 3px 0">
-            <el-button @click="openDialog" icon="MagicStick">
-              {{ $t("meta.metaEdit.eventEdit") }}
-            </el-button>
-            <el-button v-if="item.viewable" @click="editor" icon="Edit">
+
+            <el-button v-if="item.viewable" @click="editor" icon="Edit" type="success">
               {{ $t("meta.metaEdit.contentEdit") }}
             </el-button>
-            <el-button @click="onSubmit" icon="CircleCheck" type="success">
+            <!-- <el-button @click="onSubmit" icon="CircleCheck" type="success">
               {{ $t("meta.metaEdit.save") }}
-            </el-button>
+            </el-button>-->
           </el-button-group>
           <br />
           <br />
@@ -105,14 +49,36 @@
 
       <el-col :sm="8">
         <el-card class="box-card">
-          <template #header>
-            <div>
-              <b>{{ $t("meta.metaEdit.metaInfo") }}</b>
+          <div class="box-item">
+            <div v-if="events && events.inputs && events.inputs.length > 0" :label="$t('meta.metaEdit.form.input')">
+              <el-divider content-position="left">{{
+                $t("meta.metaEdit.form.input")
+                }}</el-divider>
+              <span v-for="(i, index) in events.inputs" :key="index">
+                <el-tag size="small">
+                  {{ i.title }}
+                </el-tag>
+                &nbsp;
+              </span>
             </div>
-          </template>
-          <div class="box-item"></div>
+            <div v-if="events && events.outputs && events.outputs.length > 0" :label="$t('meta.metaEdit.form.output')">
+              <el-divider content-position="left">{{
+                $t("meta.metaEdit.form.output")
+                }}</el-divider>
+              <span v-for="(i, index) in events.outputs" :key="index">
+                <el-tag size="small">
+                  {{ i.title }}
+                </el-tag>
+                &nbsp;
+              </span>
+            </div>
+
+
+          </div>
           <br />
         </el-card>
+        <br />
+        <br />
         <br />
         <br />
       </el-col>
@@ -122,7 +88,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import EventDialog from "@/components/Rete/EventDialog.vue";
+//import EventDialog from "@/components/Rete/EventDialog.vue";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import type { metaInfo } from "@/api/v1/meta";
 import { ViewCard } from "vue-waterfall-plugin-next/dist/types/types/waterfall";
@@ -149,7 +115,7 @@ const rules = {
   ],
 };
 const itemForm = ref<InstanceType<typeof ElForm> | null>(null);
-const dialog = ref<InstanceType<typeof EventDialog> | null>(null);
+//const dialog = ref<InstanceType<typeof EventDialog> | null>(null);
 const resourceDialog = ref<InstanceType<typeof ResourceDialog> | null>();
 const id = computed(() => parseInt(route.query.id as string, 10));
 const prefab = computed({
@@ -288,7 +254,7 @@ const selectImage = () => {
     });
   }
 };
-
+/*
 const postEvent = async ({
   uuid,
   node,
@@ -313,6 +279,7 @@ const openDialog = () => {
     dialog.value.open();
   }
 };
+*/
 
 const onSubmit = async () => {
   const valid = await itemForm.value!.validate();
