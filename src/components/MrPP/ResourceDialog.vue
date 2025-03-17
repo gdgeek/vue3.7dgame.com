@@ -17,17 +17,38 @@
               {{ active.searched }}
             </el-tag>
           </el-divider>
-          <div class="batch-actions" v-if="activeName === 'owner' && metaId != null">
+          <div class="batch-actions" v-if="metaId != null">
             <el-button-group>
               <el-button size="small" type="primary" @click="toggleMultiSelectMode">
                 {{ isMultiSelectMode ? $t("meta.ResourceDialog.exitMultiSelect") :
                   $t("meta.ResourceDialog.enterMultiSelect") }}
               </el-button>
-              <el-button v-if="isMultiSelectMode" size="small" type="success" @click="doBatchBinding"
-                :disabled="selectedItems.length === 0">
-                {{ $t("meta.ResourceDialog.batchBind") }} ({{ selectedItems.length }})
+              <el-button v-if="isMultiSelectMode && activeName === 'owner'" size="small" type="success"
+                @click="doBatchBinding" :disabled="selectedItems.length === 0">
+                {{ $t("meta.ResourceDialog.batchBind") }}
+                ({{ selectedItems.length }})
+              </el-button>
+              <el-button v-if="isMultiSelectMode && activeName === 'binding'" size="small" type="success"
+                @click="doBatchBinding" :disabled="selectedItems.length === 0">
+                {{ $t("meta.ResourceDialog.batchDeploy") }}
+                ({{ selectedItems.length }})
+              </el-button>
+              <el-button v-if="isMultiSelectMode && activeName === 'binding'" size="small" type="warning"
+                @click="doBatchUnbind" :disabled="selectedItems.length === 0">
+                {{ $t("meta.ResourceDialog.batchUnbind") }}
+                ({{ selectedItems.length }})
               </el-button>
             </el-button-group>
+            <div v-if="isMultiSelectMode && activeName === 'owner'" class="select-resource-tip">
+              <el-tag type="info" size="small">
+                {{ $t("meta.ResourceDialog.availableForBinding", { count: unboundItemsCount }) }}
+              </el-tag>
+            </div>
+            <div v-if="isMultiSelectMode && activeName === 'binding'" class="select-resource-tip">
+              <el-tag type="info" size="small">
+                {{ $t("meta.ResourceDialog.availableForDeployment", { count: deployableItemsCount }) }}
+              </el-tag>
+            </div>
           </div>
         </div>
       </template>
@@ -82,7 +103,7 @@
                     <el-button type="primary" size="small" @click="doSelect(item)">
                       {{ $t("meta.ResourceDialog.select") }}
                     </el-button>
-                    <el-button type="primary" size="small" @click="doUnbind(item)">
+                    <el-button type="warning" size="small" @click="doUnbind(item)">
                       {{ $t("meta.ResourceDialog.doUnbind") }}
                     </el-button>
                   </el-button-group>
@@ -98,7 +119,8 @@
               </div>
               <div class="bottom clearfix"></div>
             </el-card>
-            <el-card v-else style="width: 220px" class="box-card">
+            <el-card v-else style="width: 220px" class="box-card"
+              :class="{ 'selected-card': isMultiSelectMode && isSelected(item) }">
               <template #header>
                 <el-card shadow="hover" :body-style="{ padding: '0px' }">
                   <div class="mrpp-title">
@@ -111,19 +133,29 @@
                 </el-card>
               </template>
               <div class="clearfix">
-                <el-button-group v-if="value === null || item.id !== value">
-                  <el-button type="primary" size="small" @click="doSelect(item)">
+                <el-button-group v-if="isMultiSelectMode">
+                  <el-button v-if="isSelected(item)" type="success" size="small" @click="toggleSelect(item)">
+                    {{ $t("meta.ResourceDialog.deselect") }}
+                  </el-button>
+                  <el-button v-else type="primary" size="small" @click="toggleSelect(item)">
                     {{ $t("meta.ResourceDialog.select") }}
                   </el-button>
-                  <el-button type="primary" size="small" @click="doUnbind(item)">
-                    {{ $t("meta.ResourceDialog.doUnbind") }}
-                  </el-button>
                 </el-button-group>
-                <el-button-group v-else>
-                  <el-button type="warning" size="small" @click="doEmpty">
-                    {{ $t("meta.ResourceDialog.cancelSelect") }}
-                  </el-button>
-                </el-button-group>
+                <template v-else>
+                  <el-button-group v-if="value === null || item.id !== value">
+                    <el-button type="primary" size="small" @click="doSelect(item)">
+                      {{ $t("meta.ResourceDialog.select") }}
+                    </el-button>
+                    <el-button type="warning" size="small" @click="doUnbind(item)">
+                      {{ $t("meta.ResourceDialog.doUnbind") }}
+                    </el-button>
+                  </el-button-group>
+                  <el-button-group v-else>
+                    <el-button type="warning" size="small" @click="doEmpty">
+                      {{ $t("meta.ResourceDialog.cancelSelect") }}
+                    </el-button>
+                  </el-button-group>
+                </template>
               </div>
               <div class="bottom clearfix"></div>
             </el-card>
@@ -146,7 +178,7 @@
               <el-button-group>
                 <el-button size="small" @click="doEmpty()">{{
                   $t("meta.ResourceDialog.empty")
-                  }}</el-button>
+                }}</el-button>
                 <el-button size="small" @click="dialogVisible = false">
                   {{ $t("meta.ResourceDialog.cancel") }}
                 </el-button>
@@ -183,18 +215,32 @@ const binding = ref({
   sorted: "-created_at",
   searched: "",
   pagination: { current: 1, count: 1, size: 20, total: 20 },
+  isMultiSelectMode: false,
+  selectedItems: [] as any[]
 });
 const owner = ref({
   items: [] as any[],
   sorted: "-created_at",
   searched: "",
   pagination: { current: 1, count: 1, size: 20, total: 20 },
+  isMultiSelectMode: false,
+  selectedItems: [] as any[]
 });
-const selectedItems = ref<any[]>([]);
-const isMultiSelectMode = ref(false);
 
 const active = computed(() => {
   return activeName.value === "binding" ? binding.value : owner.value;
+});
+
+const isMultiSelectMode = computed(() => {
+  return activeName.value === "binding"
+    ? binding.value.isMultiSelectMode
+    : owner.value.isMultiSelectMode;
+});
+
+const selectedItems = computed(() => {
+  return activeName.value === "binding"
+    ? binding.value.selectedItems
+    : owner.value.selectedItems;
 });
 
 const isSelected = (item: any) => {
@@ -202,86 +248,114 @@ const isSelected = (item: any) => {
 };
 
 const toggleSelect = (item: any) => {
+  const currentTab = activeName.value === "binding" ? binding.value : owner.value;
+
   if (isSelected(item)) {
-    selectedItems.value = selectedItems.value.filter((selected) => selected.id !== item.id);
+    currentTab.selectedItems = currentTab.selectedItems.filter((selected) => selected.id !== item.id);
   } else {
-    selectedItems.value.push(item);
+    currentTab.selectedItems.push(item);
   }
 };
 
 const toggleMultiSelectMode = () => {
-  isMultiSelectMode.value = !isMultiSelectMode.value;
-  if (!isMultiSelectMode.value) {
-    selectedItems.value = [];
+  const currentTab = activeName.value === "binding" ? binding.value : owner.value;
+  currentTab.isMultiSelectMode = !currentTab.isMultiSelectMode;
+
+  if (!currentTab.isMultiSelectMode) {
+    currentTab.selectedItems = [];
   }
 };
 
 const doBatchBinding = async () => {
-  if (selectedItems.value.length === 0) {
+  const currentTab = activeName.value === "binding" ? binding.value : owner.value;
+
+  if (currentTab.selectedItems.length === 0) {
     ElMessage.warning(t("meta.ResourceDialog.noItemSelected"));
     return;
   }
 
   try {
-    await ElMessageBox.confirm(
-      t("meta.ResourceDialog.batchConfirm.message1", { count: selectedItems.value.length }),
-      t("meta.ResourceDialog.batchConfirm.message2"),
-      {
-        confirmButtonText: t("meta.ResourceDialog.batchConfirm.confirm"),
-        cancelButtonText: t("meta.ResourceDialog.batchConfirm.cancel"),
-        type: "warning",
-      }
-    );
-
-    const promises = selectedItems.value.map(item =>
-      postMetaResource({
-        meta_id: metaId.value,
-        resource_id: item.id,
-      })
-    );
-
-    await Promise.all(promises);
-    await refresh();
-    ElMessage.success(t("meta.ResourceDialog.batchConfirm.success"));
-
-    try {
+    if (activeName.value === 'owner') {
       await ElMessageBox.confirm(
-        t("meta.ResourceDialog.batchConfirm.selectOne.message1"),
-        t("meta.ResourceDialog.batchConfirm.selectOne.message2"),
+        t("meta.ResourceDialog.batchConfirm.message1", { count: currentTab.selectedItems.length }),
+        t("meta.ResourceDialog.batchConfirm.message2"),
         {
-          confirmButtonText: t("meta.ResourceDialog.batchConfirm.selectOne.confirm"),
-          cancelButtonText: t("meta.ResourceDialog.batchConfirm.selectOne.cancel"),
+          confirmButtonText: t("meta.ResourceDialog.batchConfirm.confirm"),
+          cancelButtonText: t("meta.ResourceDialog.batchConfirm.cancel"),
           type: "warning",
         }
       );
 
-      await selectedItems.value.map(item => {
-        selected(item);
-      });
+      const promises = currentTab.selectedItems.map(item =>
+        postMetaResource({
+          meta_id: metaId.value,
+          resource_id: item.id,
+        })
+      );
 
-      ElMessage.success(t("meta.ResourceDialog.batchConfirm.selectOne.success"));
+      await Promise.all(promises);
+      await refresh();
+      ElMessage.success(t("meta.ResourceDialog.batchConfirm.success"));
 
-    } catch {
-      // 如果用户取消确认，清空选择状态
-      selectedItems.value = [];
-      isMultiSelectMode.value = false;
+      try {
+        await ElMessageBox.confirm(
+          t("meta.ResourceDialog.batchConfirm.selectOne.message1"),
+          t("meta.ResourceDialog.batchConfirm.selectOne.message2"),
+          {
+            confirmButtonText: t("meta.ResourceDialog.batchConfirm.selectOne.confirm"),
+            cancelButtonText: t("meta.ResourceDialog.batchConfirm.selectOne.cancel"),
+            type: "warning",
+          }
+        );
+
+        await currentTab.selectedItems.map(item => {
+          selected(item);
+        });
+
+        ElMessage.success(t("meta.ResourceDialog.batchConfirm.selectOne.success"));
+
+      } catch {
+        // 如果用户取消确认，清空选择状态
+        currentTab.selectedItems = [];
+        currentTab.isMultiSelectMode = false;
+        ElMessage.info(t("meta.ResourceDialog.batchConfirm.selectOne.info"));
+      }
+    } else {
+      try {
+        await ElMessageBox.confirm(
+          t("meta.ResourceDialog.batchConfirm2.message1", { count: currentTab.selectedItems.length }),
+          t("meta.ResourceDialog.batchConfirm2.message2"),
+          {
+            confirmButtonText: t("meta.ResourceDialog.batchConfirm2.confirm"),
+            cancelButtonText: t("meta.ResourceDialog.batchConfirm2.cancel"),
+            type: "warning",
+          }
+        );
+        await currentTab.selectedItems.map(item => {
+          selected(item);
+        });
+
+        ElMessage.success(t("meta.ResourceDialog.batchConfirm.selectOne.success"));
+      } catch {
+        // 如果用户取消确认，清空选择状态
+        currentTab.selectedItems = [];
+        currentTab.isMultiSelectMode = false;
+        ElMessage.info(t("meta.ResourceDialog.batchConfirm2.info"));
+      }
     }
-  } catch {
-    ElMessage.info(t("meta.ResourceDialog.info"));
+  } catch (error) {
+    console.log(error);
+    ElMessage.error(t("meta.ResourceDialog.batchConfirm.info"));
   }
 
   // 清空选择状态
-  selectedItems.value = [];
-  isMultiSelectMode.value = false;
+  currentTab.selectedItems = [];
+  currentTab.isMultiSelectMode = false;
 };
 
 const isBinding = (item: any) => {
-  for (let i = 0; i < item.metaResources.length; ++i) {
-    if (item.metaResources[i].meta_id === metaId.value) {
-      return true;
-    }
-  }
-  return false;
+  if (!item.metaResources || !metaId.value) return false;
+  return item.metaResources.some((resource: any) => resource.meta_id === metaId.value);
 };
 
 const handleClick = (tab: any, event: any) => {
@@ -306,21 +380,21 @@ const open = async (
     sorted: "-created_at",
     searched: "",
     pagination: { current: 1, count: 1, size: 20, total: 20 },
+    isMultiSelectMode: false,
+    selectedItems: []
   };
   owner.value = {
     items: [],
     sorted: "-created_at",
     searched: "",
     pagination: { current: 1, count: 1, size: 20, total: 20 },
+    isMultiSelectMode: false,
+    selectedItems: []
   };
 
   type.value = newType;
   metaId.value = meta_id;
   value.value = newValue;
-
-  // 重置状态
-  selectedItems.value = [];
-  isMultiSelectMode.value = false;
 
   await refreshOwner();
   await refreshBinding();
@@ -406,8 +480,10 @@ const selected = (data = null) => {
 
 const doClose = () => {
   // 重置状态
-  selectedItems.value = [];
-  isMultiSelectMode.value = false;
+  binding.value.selectedItems = [];
+  binding.value.isMultiSelectMode = false;
+  owner.value.selectedItems = [];
+  owner.value.isMultiSelectMode = false;
   emit("close");
 };
 
@@ -428,7 +504,7 @@ const refresh = async () => {
   }
 };
 
-const doUnbind = async (data: any) => {
+const doUnbind = async (item: any) => {
   try {
     await ElMessageBox.confirm(
       t("meta.ResourceDialog.confirm1.message1"),
@@ -441,12 +517,11 @@ const doUnbind = async (data: any) => {
       }
     );
 
-    for (let i = 0; i < data.metaResources.length; ++i) {
-      if (data.metaResources[i].meta_id == metaId.value) {
-        await deleteMetaResource(data.metaResources[i].id);
-        break;
-      }
+    const resourceToDelete = item.metaResources.find((resource: any) => resource.meta_id === metaId.value);
+    if (resourceToDelete) {
+      await deleteMetaResource(resourceToDelete.id);
     }
+
     await refresh();
     ElMessage.success(t("meta.ResourceDialog.confirm1.success"));
   } catch {
@@ -488,6 +563,43 @@ const doBinding = async (data: any) => {
   }
 };
 
+const doBatchUnbind = async () => {
+  const currentTab = activeName.value === "binding" ? binding.value : owner.value;
+
+  if (currentTab.selectedItems.length === 0) {
+    ElMessage.warning(t("meta.ResourceDialog.noItemSelected"));
+    return;
+  }
+
+  try {
+    await ElMessageBox.confirm(
+      t("meta.ResourceDialog.batchUnbindConfirm.message1", { count: currentTab.selectedItems.length }),
+      t("meta.ResourceDialog.batchUnbindConfirm.message2"),
+      {
+        confirmButtonText: t("meta.ResourceDialog.batchUnbindConfirm.confirm"),
+        cancelButtonText: t("meta.ResourceDialog.batchUnbindConfirm.cancel"),
+        type: "warning",
+      }
+    );
+
+    // 执行批量解绑操作
+    const promises = currentTab.selectedItems.map(item => {
+      const resourceToDelete = item.metaResources.find((resource: any) => resource.meta_id === metaId.value);
+      return resourceToDelete ? deleteMetaResource(resourceToDelete.id) : Promise.resolve();
+    });
+
+    await Promise.all(promises);
+    await refresh();
+    ElMessage.success(t("meta.ResourceDialog.batchUnbindConfirm.success"));
+
+    // 清空选择状态
+    currentTab.selectedItems = [];
+    currentTab.isMultiSelectMode = false;
+  } catch {
+    ElMessage.info(t("meta.ResourceDialog.info"));
+  }
+};
+
 defineExpose({
   openIt,
   open,
@@ -522,9 +634,25 @@ const transformToViewCard = (items: any[]): ViewCard[] => {
 };
 
 const viewCards = computed(() => {
-  const cards = transformToViewCard(active.value.items);
+  let cards = transformToViewCard(active.value.items);
+  // 只在 owner 标签页时过滤已绑定资源
+  if (isMultiSelectMode.value && activeName.value === 'owner') {
+    cards = cards.filter(item => !isBinding(item));
+  }
   console.log("viewCards", cards);
   return cards;
+});
+
+// 未绑定资源的数量
+const unboundItemsCount = computed(() => {
+  if (!isMultiSelectMode.value || activeName.value !== 'owner') return 0;
+  return active.value.items.filter(item => !isBinding(item)).length;
+});
+
+// 可部署资源数量
+const deployableItemsCount = computed(() => {
+  if (!isMultiSelectMode.value || activeName.value !== 'binding') return 0;
+  return binding.value.items.length;
 });
 </script>
 
@@ -561,9 +689,16 @@ const viewCards = computed(() => {
   opacity: 1;
 }
 
-/* 批量操作相关样式 */
+.select-resource-tip {
+  margin-top: 10px;
+  text-align: left;
+}
+
 .batch-actions {
   margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .selected-card {
@@ -571,10 +706,5 @@ const viewCards = computed(() => {
   box-shadow: 0 0 10px rgba(103, 194, 58, 0.5) !important;
   transform: scale(1.02);
   transition: all 0.3s ease;
-}
-
-/* 选择资源提示样式 */
-.select-resource-tip {
-  margin: 10px 0;
 }
 </style>
