@@ -676,9 +676,13 @@ export default {
       saveFailed: "Failed to save image information",
     },
     scene: {
-      error: "No editor available",
-      info: "No permission to save!",
+      error: "No scene editor",
+      info: "No save permission!",
       success: "Scene saved successfully~",
+      coverUploadError: "Cover upload error: Image data not found",
+      handlerError: "Failed to get file handler",
+      coverUploadSuccess: "Cover image uploaded successfully",
+      coverUploadFailed: "Failed to upload cover image",
     },
     script: {
       title: "Script",
@@ -742,7 +746,8 @@ export default {
         },
       },
       batchConfirm2: {
-        message1: "Do you want to batch deploy {count} selected resources to the scene?",
+        message1:
+          "Do you want to batch deploy {count} selected resources to the scene?",
         message2: "Batch Deploy Resources",
         confirm: "Confirm",
         cancel: "Cancel",
@@ -1041,6 +1046,10 @@ export default {
         info2: "Add Entity",
         info3: "No save permissions",
         success: "Scene saved successfully",
+        coverUploadError: "Cover upload error: Image data not found",
+        handlerError: "Failed to get file handler",
+        coverUploadSuccess: "Cover image uploaded successfully",
+        coverUploadFailed: "Failed to upload cover image",
       },
       script: {
         title: "Script",

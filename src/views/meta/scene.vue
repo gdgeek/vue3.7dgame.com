@@ -16,10 +16,13 @@ import { putMeta, getMeta } from "@/api/v1/meta";
 import { useAppStore } from "@/store/modules/app";
 import { translateRouteTitle } from "@/utils/i18n";
 import env from "@/environment"
+import { useFileStore } from "@/store/modules/config";
+import { postFile } from "@/api/v1/files";
 
 const appStore = useAppStore();
 const route = useRoute();
 const router = useRouter();
+const fileStore = useFileStore();
 
 const src = computed(() => {
   return env.editor +
@@ -138,8 +141,92 @@ const handleMessage = async (e: MessageEvent) => {
         refresh();
       }
       break;
+    // 图片上传封面
+    case "upload-cover":
+      handleUploadCover(data);
+      break;
   }
 };
+
+// 处理上传封面图片
+const handleUploadCover = async (data: any) => {
+  try {
+    if (!data || !data.imageData) {
+      ElMessage.error(t("meta.scene.coverUploadError"));
+      return;
+    }
+
+    // 将base64图片数据转换为Blob对象
+    const imageData = data.imageData;
+    const byteString = atob(imageData.split(',')[1]);
+    const mimeType = imageData.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+
+    const blob = new Blob([ab], { type: mimeType });
+    const extension = mimeType.split('/')[1];
+    const fileName = `cover_${id.value}_${Date.now()}.${extension}`;
+    const file = new File([blob], fileName, { type: mimeType });
+
+    // 获取文件MD5和处理器
+    const md5 = await fileStore.store.fileMD5(file);
+    const handler = await fileStore.store.publicHandler();
+
+    if (!handler) {
+      ElMessage.error(t("meta.scene.handlerError"));
+      return;
+    }
+
+    // 检查文件是否已存在
+    const has = await fileStore.store.fileHas(
+      md5,
+      extension,
+      handler,
+      "backup"
+    );
+
+    // 如果文件不存在，上传文件
+    if (!has) {
+      await fileStore.store.fileUpload(
+        md5,
+        extension,
+        file,
+        (p: any) => { },
+        handler,
+        "backup"
+      );
+    }
+
+    // 保存图片信息到服务器
+    const fileData = {
+      md5,
+      key: md5 + `.${extension}`,
+      filename: fileName,
+      url: fileStore.store.fileUrl(md5, extension, handler, "backup"),
+    };
+
+    const response = await postFile(fileData);
+
+    if (response && response.data) {
+      // 更新Meta的image_id
+      const meta = await getMeta(id.value);
+      if (meta && meta.data) {
+        meta.data.image_id = response.data.id;
+        await putMeta(id.value, meta.data);
+        ElMessage.success(t("meta.scene.coverUploadSuccess"));
+        await refresh();
+      }
+    }
+  } catch (error) {
+    console.error("上传封面图片失败:", error);
+    ElMessage.error(t("meta.scene.coverUploadFailed"));
+  }
+};
+
 const refresh = async () => {
   const meta = await getMeta(id.value);
   // const meta = await getMeta(894);

@@ -665,6 +665,10 @@ export default {
       error: "没有场景编辑器",
       info: "没有保存权限！",
       success: "场景保存成功~",
+      coverUploadError: "上传封面图片错误：未找到图片数据",
+      handlerError: "获取文件处理器失败",
+      coverUploadSuccess: "封面图片上传成功",
+      coverUploadFailed: "封面图片上传失败",
     },
     script: {
       title: "脚本",
@@ -1020,6 +1024,10 @@ export default {
         info2: "添加模块",
         info3: "没有保存权限",
         success: "场景保存成功",
+        coverUploadError: "上传封面图片错误：未找到图片数据",
+        handlerError: "获取文件处理器失败",
+        coverUploadSuccess: "封面图片上传成功",
+        coverUploadFailed: "封面图片上传失败",
       },
       script: {
         title: "脚本",

@@ -22,6 +22,8 @@ import { getPrefab } from "@/api/v1/prefab";
 import { useAppStore } from "@/store/modules/app";
 import { translateRouteTitle } from "@/utils/i18n";
 import env from "@/environment";
+import { useFileStore } from "@/store/modules/config";
+
 const appStore = useAppStore();
 const { t } = useI18n();
 const route = useRoute();
@@ -235,6 +237,92 @@ const handleMessage = async (e: MessageEvent) => {
         refresh();
       }
       break;
+    case "upload-cover":
+      handleUploadCover(data);
+      break;
+  }
+};
+
+// 处理上传封面图片
+const handleUploadCover = async (data: any) => {
+  try {
+    if (!data || !data.imageData) {
+      ElMessage.error(t("verse.view.sceneEditor.coverUploadError"));
+      return;
+    }
+
+    // 将base64图片数据转换为Blob对象
+    const imageData = data.imageData;
+    const byteString = atob(imageData.split(',')[1]);
+    const mimeType = imageData.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+
+    const blob = new Blob([ab], { type: mimeType });
+    const extension = mimeType.split('/')[1];
+    const fileName = `cover_verse_${id.value}_${Date.now()}.${extension}`;
+    const file = new File([blob], fileName, { type: mimeType });
+
+    // 导入文件处理相关模块
+    const fileStore = useFileStore();
+    const { postFile } = await import("@/api/v1/files");
+
+    // 获取文件MD5和处理器
+    const md5 = await fileStore.store.fileMD5(file);
+    const handler = await fileStore.store.publicHandler();
+
+    if (!handler) {
+      ElMessage.error(t("verse.view.sceneEditor.handlerError"));
+      return;
+    }
+
+    // 检查文件是否已存在
+    const has = await fileStore.store.fileHas(
+      md5,
+      extension,
+      handler,
+      "backup"
+    );
+
+    // 如果文件不存在，上传文件
+    if (!has) {
+      await fileStore.store.fileUpload(
+        md5,
+        extension,
+        file,
+        (p: any) => { },
+        handler,
+        "backup"
+      );
+    }
+
+    // 保存图片信息到服务器
+    const fileData = {
+      md5,
+      key: md5 + `.${extension}`,
+      filename: fileName,
+      url: fileStore.store.fileUrl(md5, extension, handler, "backup"),
+    };
+
+    const response = await postFile(fileData);
+
+    if (response && response.data) {
+      // 更新Verse的image_id
+      const verse = await getVerse(id.value);
+      if (verse && verse.data) {
+        verse.data.image_id = response.data.id;
+        await putVerse(id.value, verse.data);
+        ElMessage.success(t("verse.view.sceneEditor.coverUploadSuccess"));
+        await refresh();
+      }
+    }
+  } catch (error) {
+    console.error("上传封面图片失败:", error);
+    ElMessage.error(t("verse.view.sceneEditor.coverUploadFailed"));
   }
 };
 

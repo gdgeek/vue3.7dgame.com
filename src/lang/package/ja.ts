@@ -671,6 +671,10 @@ export default {
       error: "エディターがありません",
       info: "保存権限がありません！",
       success: "シーン保存成功~",
+      coverUploadError: "カバー画像アップロードエラー：画像データが見つかりません",
+      handlerError: "ファイルハンドラの取得に失敗しました",
+      coverUploadSuccess: "カバー画像アップロード成功",
+      coverUploadFailed: "カバー画像アップロードに失敗しました",
     },
     script: {
       title: "スクリプト",
@@ -1027,6 +1031,10 @@ export default {
         info2: "エンティティを追加",
         info3: "保存権限がありません",
         success: "シーンが正常に保存されました",
+        coverUploadError: "カバー画像アップロードエラー：画像データが見つかりません",
+        handlerError: "ファイルハンドラの取得に失敗しました",
+        coverUploadSuccess: "カバー画像アップロード成功",
+        coverUploadFailed: "カバー画像アップロードに失敗しました",
       },
       script: {
         title: "スクリプト",
