@@ -8,7 +8,7 @@
               <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
                 meta.title
               }}</el-link>
-              /【{{ $t("meta.script.title") || "Script Title" }}】
+              /【{{ $t("meta.script.title") }}】
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
               <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
                 返回
@@ -16,14 +16,14 @@
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="save">
                   <font-awesome-icon class="icon" icon="save"></font-awesome-icon>
-                  {{ $t("meta.script.save") || "Save" }}
+                  {{ $t("meta.script.save") }}
                 </el-button>
               </el-button-group>
             </div>
           </template>
           <el-container v-if="!disabled">
             <el-tabs v-model="activeName" type="card" style="width: 100%">
-              <el-tab-pane :label="$t('verse.view.script.edit') || 'Edit Script'" name="blockly">
+              <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
                 <el-main style="
                     margin: 0;
                     padding: 0;
@@ -46,8 +46,12 @@
                           @click="showFullscreenCode('javascript')">
                           JavaScript
                         </el-button>
-                        <el-button size="small" type="primary" style="margin-right: 50px" @click="run">
+                        <el-button size="small" type="primary" style="margin-right: 10px" @click="run">
                           测试运行
+                        </el-button>
+                        <el-button size="small" type="primary" style="margin-right: 50px" @click="save">
+                          <font-awesome-icon class="icon" icon="save"></font-awesome-icon>
+                          {{ $t("meta.script.save") }}
                         </el-button>
                       </template>
                     </el-button-group>
@@ -63,7 +67,7 @@
                               <el-icon class="icon">
                                 <CopyDocument></CopyDocument>
                               </el-icon>
-                              {{ $t("copy.title") || "Copy" }}
+                              {{ $t("copy.title") }}
                             </el-button>
                             <pre>
                     <code :class="currentCodeType">{{
@@ -275,12 +279,12 @@ const copyCode = async (code: string) => {
     await navigator.clipboard.writeText(code);
 
     ElMessage({
-      message: t("copy.success") || "Copy successful",
+      message: t("copy.success"),
       type: "success",
     });
   } catch (error) {
     ElMessage({
-      message: t("copy.error") || "Copy failed",
+      message: t("copy.error"),
       type: "error",
     });
   }
@@ -297,14 +301,14 @@ watch(
 const postScript = async (message: any) => {
   if (meta.value === null) {
     ElMessage({
-      message: t("meta.script.error1") || "Error 1",
+      message: t("meta.script.error1"),
       type: "error",
     });
     return;
   }
   if (!meta.value.editable) {
     ElMessage({
-      message: t("meta.script.error2") || "Error 2",
+      message: t("meta.script.error2"),
       type: "error",
     });
     return;
@@ -327,7 +331,7 @@ const postScript = async (message: any) => {
   });
 
   ElMessage({
-    message: t("meta.script.success") || "Success",
+    message: t("meta.script.success"),
     type: "success",
   });
 };
@@ -375,7 +379,7 @@ const handleMessage = async (e: MessageEvent) => {
       }
     } else if (params.action === "post:no-change") {
       ElMessage({
-        message: t("meta.script.info") || "Info",
+        message: t("meta.script.info"),
         type: "info",
       });
     } else if (params.action === "update") {
@@ -1428,6 +1432,7 @@ const run = async () => {
   top: 2px;
   right: 2px;
   z-index: 100;
+  padding-right: 10px;
 }
 
 .dark-theme :deep(.hljs) {
