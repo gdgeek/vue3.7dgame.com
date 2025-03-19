@@ -708,42 +708,46 @@ onMounted(async () => {
       });
     };
 
-    // 循环处理每个模型文件
-    for (const [index, model] of response.data.resources.entries()) {
-      if (model.type !== "polygen") {
-        meta.value = response.data;
-        continue;
+    if (response.data.resources.length > 0) {
+      // 循环处理每个模型文件
+      for (const [index, model] of response.data.resources.entries()) {
+        if (model.type !== "polygen") {
+          meta.value = response.data;
+          continue;
+        }
+
+        const modelUrl = convertToHttps(model.file.url);
+        // const modelUrl = model.file.url;
+        console.error("modelUrl", modelUrl);
+        const modelId = model.id.toString();
+
+        // 等待每个模型加载完成获取数据后再继续
+        await new Promise<void>((resolve, reject) => {
+          loader.load(
+            modelUrl,
+            (gltf) => {
+              const animationNames = gltf.animations.map((clip) => clip.name);
+
+              let data = JSON.parse(response.data.data!);
+
+              // 调用递归函数对所有满足条件的项赋值 animations
+              assignAnimations(data.children.entities, modelId, animationNames);
+
+              response.data.data = JSON.stringify(data);
+              meta.value = response.data;
+
+              resolve();
+            },
+            undefined,
+            (error) => {
+              console.error("An error occurred while loading the model:", error);
+              reject(error);
+            }
+          );
+        });
       }
-
-      const modelUrl = convertToHttps(model.file.url);
-      // const modelUrl = model.file.url;
-      console.error("modelUrl", modelUrl);
-      const modelId = model.id.toString();
-
-      // 等待每个模型加载完成获取数据后再继续
-      await new Promise<void>((resolve, reject) => {
-        loader.load(
-          modelUrl,
-          (gltf) => {
-            const animationNames = gltf.animations.map((clip) => clip.name);
-
-            let data = JSON.parse(response.data.data!);
-
-            // 调用递归函数对所有满足条件的项赋值 animations
-            assignAnimations(data.children.entities, modelId, animationNames);
-
-            response.data.data = JSON.stringify(data);
-            meta.value = response.data;
-
-            resolve();
-          },
-          undefined,
-          (error) => {
-            console.error("An error occurred while loading the model:", error);
-            reject(error);
-          }
-        );
-      });
+    } else {
+      meta.value = response.data;
     }
 
     console.log("meta", meta.value);
