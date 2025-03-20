@@ -1,15 +1,18 @@
 <template>
-  <div>
-    <mr-p-p-upload dir="video" :file-type="fileType" @save-resource="saveVideo">
-      <div>{{ $t("video.uploadFile") }}</div>
-    </mr-p-p-upload>
-  </div>
+  <TransitionWrapper>
+    <div>
+      <mr-p-p-upload dir="video" :file-type="fileType" @save-resource="saveVideo">
+        <div>{{ $t("video.uploadFile") }}</div>
+      </mr-p-p-upload>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 import { postVideo } from "@/api/v1/resources/index";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 // 定义允许的文件类型
 const fileType = ref("video/mp4, video/ogg");

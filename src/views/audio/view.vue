@@ -1,57 +1,60 @@
 <template>
-  <div class="document-index">
-    <el-row :gutter="20" style="margin: 28px 18px 0">
-      <el-col :sm="16">
-        <el-card class="box-card">
-          <template #header>
-            <b id="title">{{ $t("audio.view.title") }}</b>
-            <span v-if="audioData">{{ audioData.name }}</span>
-          </template>
-          <img id="imgs" :src="imgSrc" style="display: none" />
-          <div class="box-item" style="text-align: center">
-            <section class="audio-bgc">
-              <br />
-              <div class="audio-box">
-                <div class="audio-record" :class="{ 'audio-record-playfast': isPlay }" @click="handlePlayAudio"></div>
-                <div class="audio-record-image" :class="{ 'audio-record-play': isPlay }" @click="handlePlayAudio"></div>
-              </div>
-              <audio id="audio" controls style="width: 95%; height: 84px" :src="file" preload="auto" @play="listenPlay"
-                @pause="listenPause" @ended="listenEnd" @canplaythrough="dealWith"></audio>
-            </section>
-          </div>
-        </el-card>
-        <br />
-      </el-col>
+  <TransitionWrapper>
+    <div class="document-index">
+      <el-row :gutter="20" style="margin: 28px 18px 0">
+        <el-col :sm="16">
+          <el-card class="box-card">
+            <template #header>
+              <b id="title">{{ $t("audio.view.title") }}</b>
+              <span v-if="audioData">{{ audioData.name }}</span>
+            </template>
+            <img id="imgs" :src="imgSrc" style="display: none" />
+            <div class="box-item" style="text-align: center">
+              <section class="audio-bgc">
+                <br />
+                <div class="audio-box">
+                  <div class="audio-record" :class="{ 'audio-record-playfast': isPlay }" @click="handlePlayAudio"></div>
+                  <div class="audio-record-image" :class="{ 'audio-record-play': isPlay }" @click="handlePlayAudio">
+                  </div>
+                </div>
+                <audio id="audio" controls style="width: 95%; height: 84px" :src="file" preload="auto"
+                  @play="listenPlay" @pause="listenPause" @ended="listenEnd" @canplaythrough="dealWith"></audio>
+              </section>
+            </div>
+          </el-card>
+          <br />
+        </el-col>
 
-      <el-col :sm="8">
-        <el-card class="box-card">
-          <template #header>
-            <b>{{ $t("audio.view.info.title") }}</b>:
-          </template>
-          <div class="box-item">
-            <el-table :data="tableData" stripe>
-              <el-table-column prop="item" :label="$t('audio.view.info.label1')"></el-table-column>
-              <el-table-column prop="text" :label="$t('audio.view.info.label2')"></el-table-column>
-            </el-table>
+        <el-col :sm="8">
+          <el-card class="box-card">
+            <template #header>
+              <b>{{ $t("audio.view.info.title") }}</b>:
+            </template>
+            <div class="box-item">
+              <el-table :data="tableData" stripe>
+                <el-table-column prop="item" :label="$t('audio.view.info.label1')"></el-table-column>
+                <el-table-column prop="text" :label="$t('audio.view.info.label2')"></el-table-column>
+              </el-table>
 
-            <aside style="margin-top: 10px; margin-bottom: 30px">
-              <el-button-group style="float: right">
-                <el-button type="success" size="small" @click="namedWindow">
-                  <i class="el-icon-edit"></i>
-                  {{ $t("audio.view.info.name") }}
-                </el-button>
-                <el-button type="danger" size="small" @click="deleteWindow">
-                  <i class="el-icon-delete"></i>
-                  {{ $t("audio.view.info.delete") }}
-                </el-button>
-              </el-button-group>
-            </aside>
-          </div>
-        </el-card>
-        <br />
-      </el-col>
-    </el-row>
-  </div>
+              <aside style="margin-top: 10px; margin-bottom: 30px">
+                <el-button-group style="float: right">
+                  <el-button type="success" size="small" @click="namedWindow">
+                    <i class="el-icon-edit"></i>
+                    {{ $t("audio.view.info.name") }}
+                  </el-button>
+                  <el-button type="danger" size="small" @click="deleteWindow">
+                    <i class="el-icon-delete"></i>
+                    {{ $t("audio.view.info.delete") }}
+                  </el-button>
+                </el-button-group>
+              </aside>
+            </div>
+          </el-card>
+          <br />
+        </el-col>
+      </el-row>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
@@ -63,6 +66,7 @@ import { UploadFileType } from "@/api/user/model";
 import { useFileStore } from "@/store/modules/config";
 import { FileHandler } from "@/assets/js/file/server";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const route = useRoute();
 const router = useRouter();

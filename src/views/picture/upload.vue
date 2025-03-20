@@ -1,15 +1,18 @@
 <template>
-  <div>
-    <mr-p-p-upload dir="picture" :file-type="fileType" @save-resource="savePicture">
-      <div>{{ $t("picture.uploadFile") }}</div>
-    </mr-p-p-upload>
-  </div>
+  <TransitionWrapper>
+    <div>
+      <mr-p-p-upload dir="picture" :file-type="fileType" @save-resource="savePicture">
+        <div>{{ $t("picture.uploadFile") }}</div>
+      </mr-p-p-upload>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 import { postPicture } from "@/api/v1/resources/index";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const fileType = ref("image/gif, image/jpeg, image/png");
 const router = useRouter();

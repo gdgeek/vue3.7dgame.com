@@ -1,12 +1,14 @@
 <template>
-  <div>
-    <Book :items="list"></Book>
-    <el-tabs v-if="env.local()" type="border-card" lazy>
-      <el-tab-pane :label="informationStore.title">
-        <LocalPage></LocalPage>
-      </el-tab-pane>
-    </el-tabs>
-  </div>
+  <TransitionWrapper>
+    <div>
+      <Book :items="list"></Book>
+      <el-tabs v-if="env.local()" type="border-card" lazy>
+        <el-tab-pane :label="informationStore.title">
+          <LocalPage></LocalPage>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
@@ -14,6 +16,9 @@ import { useInfomationStore } from "@/store/modules/information";
 import environment from "@/environment";
 import Book from "@/components/Home/Book.vue";
 import LocalPage from "@/components/Home/LocalPage.vue";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const informationStore = useInfomationStore();
 const env = computed(() => environment);

@@ -1,11 +1,12 @@
 <template>
-  <div class="verse-view">
-    <el-dialog v-model="dialog" width="70%">
-      <template #header> {{ $t("verse.view.header") }} </template>
-      <MrPPMessageFrom
-        ref="editor"
-        :data="briefing!"
-        @post="postMessage"
+  <TransitionWrapper>
+    <div class="verse-view">
+      <el-dialog v-model="dialog" width="70%">
+        <template #header> {{ $t("verse.view.header") }} </template>
+        <MrPPMessageFrom
+          ref="editor"
+          :data="briefing!"
+          @post="postMessage"
       ></MrPPMessageFrom>
     </el-dialog>
 
@@ -132,8 +133,9 @@
         <Share v-if="saveable" :verse="verse!"></Share>
         <br />
       </el-col>
-    </el-row>
-  </div>
+      </el-row>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
@@ -149,7 +151,8 @@ import { getVerse, VerseData } from "@/api/v1/verse";
 import { postVerseOpen, deleteVerseOpen } from "@/api/v1/verse-open";
 import { MessageType, postMessageAPI } from "@/api/v1/message";
 import { useUserStore } from "@/store/modules/user";
-import { FormInstance } from "element-plus";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
+
 const value1 = ref(true);
 import { Hide, View } from "@element-plus/icons-vue";
 import { useAbility } from "@casl/vue";

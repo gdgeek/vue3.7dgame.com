@@ -1,52 +1,55 @@
 <template>
-  <div class="project-index">
-    <br />
-    <el-container>
-      <el-header>
-        <mr-p-p-header :sorted="sorted" :searched="searched" @search="search" @sort="sort">
-          <el-button-group :inline="true">
-            <router-link to="/resource/picture/upload">
-              <el-button size="small" type="primary" icon="uploadFilled">
-                <span class="hidden-sm-and-down">{{
-                  $t("picture.uploadPicture")
-                }}</span>
-              </el-button>
-            </router-link>
-          </el-button-group>
-        </mr-p-p-header>
-      </el-header>
-      <el-main>
-        <el-card style="width: 100%; min-height: 400px;">
-          <Waterfall v-if="items" :list="items" :width="320" :gutter="10" :backgroundColor="'rgba(255, 255, 255, .05)'">
-            <template #default="{ item }">
-              <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
-                <template #enter>
-                  <router-link :to="`/resource/picture/view?id=${item.id}`">
-                    <el-button v-if="item.info === null || item.image === null" type="warning" size="small">
-                      {{ $t("picture.initializePictureData") }}
-                    </el-button>
-                    <el-button v-else type="primary" size="small">
-                      {{ $t("picture.viewPicture") }}
-                    </el-button>
-                  </router-link>
-                </template>
-              </mr-p-p-card>
-            </template>
-          </Waterfall>
+  <TransitionWrapper>
+    <div class="project-index">
+      <br />
+      <el-container>
+        <el-header>
+          <mr-p-p-header :sorted="sorted" :searched="searched" @search="search" @sort="sort">
+            <el-button-group :inline="true">
+              <router-link to="/resource/picture/upload">
+                <el-button size="small" type="primary" icon="uploadFilled">
+                  <span class="hidden-sm-and-down">{{
+                    $t("picture.uploadPicture")
+                    }}</span>
+                </el-button>
+              </router-link>
+            </el-button-group>
+          </mr-p-p-header>
+        </el-header>
+        <el-main>
+          <el-card style="width: 100%; min-height: 400px;">
+            <Waterfall v-if="items" :list="items" :width="320" :gutter="10"
+              :backgroundColor="'rgba(255, 255, 255, .05)'">
+              <template #default="{ item }">
+                <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
+                  <template #enter>
+                    <router-link :to="`/resource/picture/view?id=${item.id}`">
+                      <el-button v-if="item.info === null || item.image === null" type="warning" size="small">
+                        {{ $t("picture.initializePictureData") }}
+                      </el-button>
+                      <el-button v-else type="primary" size="small">
+                        {{ $t("picture.viewPicture") }}
+                      </el-button>
+                    </router-link>
+                  </template>
+                </mr-p-p-card>
+              </template>
+            </Waterfall>
 
-          <el-skeleton v-else :rows="8" animated />
-        </el-card>
-      </el-main>
-      <el-footer>
-        <el-card class="box-card">
-          <el-pagination :current-page="pagination.current" :page-count="pagination.count" :page-size="pagination.size"
-            :total="pagination.total" layout="prev, pager, next, jumper" background
-            @current-change="handleCurrentChange"></el-pagination>
-        </el-card>
-      </el-footer>
-    </el-container>
-    <br />
-  </div>
+            <el-skeleton v-else :rows="8" animated />
+          </el-card>
+        </el-main>
+        <el-footer>
+          <el-card class="box-card">
+            <el-pagination :current-page="pagination.current" :page-count="pagination.count"
+              :page-size="pagination.size" :total="pagination.total" layout="prev, pager, next, jumper" background
+              @current-change="handleCurrentChange"></el-pagination>
+          </el-card>
+        </el-footer>
+      </el-container>
+      <br />
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
@@ -55,6 +58,7 @@ import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const items = ref<any[] | null>(null);
 const sorted = ref<string>("-created_at");

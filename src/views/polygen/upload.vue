@@ -1,15 +1,18 @@
 <template>
-  <div>
-    <mr-p-p-upload dir="polygen" :file-type="fileType" @save-resource="savePolygen">
-      <div>{{ $t("polygen.uploadFile") }}</div>
-    </mr-p-p-upload>
-  </div>
+  <TransitionWrapper>
+    <div>
+      <mr-p-p-upload dir="polygen" :file-type="fileType" @save-resource="savePolygen">
+        <div>{{ $t("polygen.uploadFile") }}</div>
+      </mr-p-p-upload>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { postPolygen } from "@/api/v1/resources/index";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const fileType = ref(".glb");
 const router = useRouter();

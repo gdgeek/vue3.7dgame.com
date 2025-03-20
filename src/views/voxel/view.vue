@@ -1,54 +1,56 @@
 <template>
-  <div v-loading="loading" class="document-index">
-    <el-row :gutter="20" style="margin: 28px 18px 0">
-      <el-col :sm="16">
-        <el-card class="box-card">
-          <template #header>
-            <b id="title">{{ $t("voxel.view.title") }}</b>
-            <span v-if="voxelData">{{ voxelData.name }}</span>
-          </template>
-          <div v-loading="false" class="box-item">
-            <Voxel v-if="voxelData" ref="three" :file="voxelData.file" @loaded="loaded" @progress="progress"></Voxel>
-          </div>
-          <el-progress :percentage="percentage"></el-progress>
-        </el-card>
-        <br />
-        <el-card v-loading="false" class="box-card">
-          <el-button style="width: 100%" type="primary" size="small" @click="createVerse">
-            <font-awesome-icon icon="plus"></font-awesome-icon>
-            &nbsp;{{ $t("voxel.view.titleStatement") }}
-          </el-button>
-        </el-card>
-        <br />
-      </el-col>
-      <el-col :sm="8">
-        <el-card class="box-card">
-          <template #header>
-            <b>{{ $t("voxel.view.info.title") }}</b>:
-          </template>
-          <div class="box-item">
-            <el-table :data="tableData" stripe>
-              <el-table-column prop="item" :label="$t('voxel.view.info.label1')"></el-table-column>
-              <el-table-column prop="text" :label="$t('voxel.view.info.label2')"></el-table-column>
-            </el-table>
-            <aside style="margin-top: 10px; margin-bottom: 30px">
-              <el-button-group style="float: right">
-                <el-button type="success" size="small" @click="namedWindow">
-                  <i class="el-icon-edit"></i>
-                  {{ $t("voxel.view.info.name") }}
-                </el-button>
-                <el-button type="danger" size="small" @click="deleteWindow">
-                  <i class="el-icon-delete"></i>
-                  {{ $t("voxel.view.info.delete") }}
-                </el-button>
-              </el-button-group>
-            </aside>
-          </div>
-        </el-card>
-        <br />
-      </el-col>
-    </el-row>
-  </div>
+  <TransitionWrapper>
+    <div v-loading="loading" class="document-index">
+      <el-row :gutter="20" style="margin: 28px 18px 0">
+        <el-col :sm="16">
+          <el-card class="box-card">
+            <template #header>
+              <b id="title">{{ $t("voxel.view.title") }}</b>
+              <span v-if="voxelData">{{ voxelData.name }}</span>
+            </template>
+            <div v-loading="false" class="box-item">
+              <Voxel v-if="voxelData" ref="three" :file="voxelData.file" @loaded="loaded" @progress="progress"></Voxel>
+            </div>
+            <el-progress :percentage="percentage"></el-progress>
+          </el-card>
+          <br />
+          <el-card v-loading="false" class="box-card">
+            <el-button style="width: 100%" type="primary" size="small" @click="createVerse">
+              <font-awesome-icon icon="plus"></font-awesome-icon>
+              &nbsp;{{ $t("voxel.view.titleStatement") }}
+            </el-button>
+          </el-card>
+          <br />
+        </el-col>
+        <el-col :sm="8">
+          <el-card class="box-card">
+            <template #header>
+              <b>{{ $t("voxel.view.info.title") }}</b>:
+            </template>
+            <div class="box-item">
+              <el-table :data="tableData" stripe>
+                <el-table-column prop="item" :label="$t('voxel.view.info.label1')"></el-table-column>
+                <el-table-column prop="text" :label="$t('voxel.view.info.label2')"></el-table-column>
+              </el-table>
+              <aside style="margin-top: 10px; margin-bottom: 30px">
+                <el-button-group style="float: right">
+                  <el-button type="success" size="small" @click="namedWindow">
+                    <i class="el-icon-edit"></i>
+                    {{ $t("voxel.view.info.name") }}
+                  </el-button>
+                  <el-button type="danger" size="small" @click="deleteWindow">
+                    <i class="el-icon-delete"></i>
+                    {{ $t("voxel.view.info.delete") }}
+                  </el-button>
+                </el-button-group>
+              </aside>
+            </div>
+          </el-card>
+          <br />
+        </el-col>
+      </el-row>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
@@ -61,7 +63,7 @@ import { UploadFileType } from "@/api/user/model";
 import { printVector3 } from "@/assets/js/helper";
 import Voxel from "@/components/Voxel.vue";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
-
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
 const loading = ref(false);
 let voxelData = ref<any>(null);
 const percentage = ref(0);

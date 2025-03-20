@@ -1,12 +1,16 @@
 <template>
-  <div class="meta-edit">
-    <edit @get-item="getPrefabData" @put-item="putPrefabData"></edit>
-  </div>
+  <TransitionWrapper>
+    <div class="prefab-edit">
+      <edit @get-item="getPrefabData" @put-item="putPrefabData"></edit>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
 import Edit from "@/components/Meta/Edit.vue";
 import { getPrefab, putPrefab } from "@/api/v1/prefab";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
+
 const getPrefabData = async (
   id: number,
   expand: string,
