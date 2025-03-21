@@ -611,7 +611,7 @@ export default {
       declared: "File data is stored in the database",
     },
   },
-  // 组件国际化
+  // 实体国际化
   meta: {
     title: "Create【Entity】",
     enter: "Enter",

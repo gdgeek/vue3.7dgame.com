@@ -50,8 +50,8 @@ export default {
       },
     },
     meta: {
-      title: "组件",
-      metaList: "组件列表",
+      title: "实体",
+      metaList: "实体列表",
       systemDefault: "系统预设",
       edit: "编辑",
       scriptEditor: "脚本编辑",
@@ -598,13 +598,13 @@ export default {
       declared: "文件数据存储在数据库中",
     },
   },
-  // 组件国际化
+  // 实体国际化
   meta: {
-    title: "创建【组件】",
+    title: "创建【实体】",
     enter: "进入",
     delete: "删除",
     confirm: {
-      message1: "此操作将永久删除该【组件】, 是否继续?",
+      message1: "此操作将永久删除该【实体】, 是否继续?",
       message2: "提示",
       confirm: "确认",
       cancel: "取消",
@@ -612,28 +612,28 @@ export default {
       info: "已取消删除",
     },
     prompt: {
-      message1: "请输入组件名称",
+      message1: "请输入实体名称",
       message2: "提示(3-20个字符)",
       confirm: "确认",
       cancel: "取消",
       inputValidator: {
-        item1: "组件名称不能为空",
-        item2: "组件名称不能小于3个字符",
-        item3: "组件名称不能大于20个字符",
+        item1: "实体名称不能为空",
+        item2: "实体名称不能小于3个字符",
+        item3: "实体名称不能大于20个字符",
       },
-      success: "组件名称是: ",
+      success: "实体名称是: ",
       info: "取消输入",
     },
     prompt2: {
       message1: "请输入新名称",
-      message2: "修改组件名称",
+      message2: "修改实体名称",
       confirm: "确认",
       cancel: "取消",
-      success: "新的组件名称是: ",
+      success: "新的实体名称是: ",
       info: "取消输入",
     },
     metaEdit: {
-      title: "【组件】名称：",
+      title: "【实体】名称：",
       form: {
         title: "名称",
         picture: "图片",
@@ -645,7 +645,7 @@ export default {
       eventEdit: "事件编辑",
       contentEdit: "内容编辑",
       save: "信息保存",
-      metaInfo: "【组件】信息",
+      metaInfo: "【实体】信息",
       rules: {
         message1: "请输入名称",
         message2: "长度在 2 到 20 个字符",
@@ -673,7 +673,7 @@ export default {
     script: {
       title: "脚本",
       save: "保存",
-      error1: "没有组件信息",
+      error1: "没有实体信息",
       error2: "没有编辑权限",
       error3: "没有脚本编辑器",
       success: "保存成功",
@@ -985,12 +985,12 @@ export default {
         success: "发帖成功",
       },
       metaDialog: {
-        title: "选择组件",
+        title: "选择实体",
         select: "选择",
         create: "新 建",
         cancel: "取 消",
         input1: "请输入Model名称",
-        input2: "请输入组件名称",
+        input2: "请输入实体名称",
         prompt: {
           message: "提示",
           confirm: "确定",
@@ -1178,7 +1178,7 @@ export default {
       create: "新 建",
       cancel: "取 消",
       prompt: {
-        message1: "请输入组件名称",
+        message1: "请输入实体名称",
         message2: "提示",
         confirm: "确认",
         cancel: "取消",
