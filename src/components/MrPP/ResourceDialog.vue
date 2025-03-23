@@ -47,7 +47,7 @@
                   </el-card>
                 </template>
 
-                <div class="clearfix" v-if="metaId != null">
+                <div class="clearfix">
                   <div class="demo-button-style">
                     <el-checkbox-group v-model="selectedIds" size="small">
                       <el-checkbox-button :value="item.id">
@@ -59,11 +59,7 @@
                     </el-checkbox-group>
                   </div>
                 </div>
-                <div class="clearfix" v-else>
-                  <el-button type="primary" size="small" @click="doSelect(item)">
-                    {{ $t("meta.ResourceDialog.select") }}
-                  </el-button>
-                </div>
+
                 <div class="bottom clearfix"></div>
               </el-card>
               <br />
