@@ -3,10 +3,6 @@
     <el-dialog v-model="dialogVisible" width="95%" height="100px" :show-close="false" @close="doClose">
       <template #header>
         <div class="dialog-footer">
-          <el-tabs v-model="activeName" type="card" class="demo-tabs" @tab-click="handleClick">
-            <el-tab-pane :label="$t('meta.ResourceDialog.label1')" name="binding" v-if="metaId != null"></el-tab-pane>
-            <el-tab-pane :label="$t('meta.ResourceDialog.label2')" name="owner"></el-tab-pane>
-          </el-tabs>
           <MrPPHeader :sorted="active.sorted" :searched="active.searched" @search="search" @sort="sort">
             <el-tag>
               <b>{{ $t("meta.ResourceDialog.title") }}</b>
@@ -17,123 +13,68 @@
               {{ active.searched }}
             </el-tag>
           </el-divider>
-          <div class="batch-actions" v-if="activeName === 'owner' && metaId != null">
-            <el-button-group>
-              <el-button size="small" type="primary" @click="toggleMultiSelectMode">
-                {{ isMultiSelectMode ? $t("meta.ResourceDialog.exitMultiSelect") :
-                  $t("meta.ResourceDialog.enterMultiSelect") }}
-              </el-button>
-              <el-button v-if="isMultiSelectMode" size="small" type="success" @click="doBatchBinding"
-                :disabled="selectedItems.length === 0">
-                {{ $t("meta.ResourceDialog.batchBind") }} ({{ selectedItems.length }})
-              </el-button>
-            </el-button-group>
-          </div>
         </div>
       </template>
 
-      <Waterfall v-if="active !== null && active.items !== null" :list="viewCards" :width="230" :gutter="10"
-        :backgroundColor="'rgba(255, 255, 255, .05)'">
-        <template #default="{ item }">
-          <div style="width: 230px">
-            <el-card v-if="activeName === 'owner'" style="width: 220px" class="box-card"
-              :class="{ 'selected-card': isMultiSelectMode && isSelected(item) }">
-              <template #header>
-                <el-card shadow="hover" :body-style="{ padding: '0px' }">
-                  <div class="mrpp-title">
-                    <b class="card-title" nowrap>{{ title(item) }}</b>
-                  </div>
-                  <div class="image-container">
-                    <img v-if="!item.image" src="@/assets/image/none.png"
-                      style="width: 100%; height: auto; object-fit: contain" />
-                    <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
-                    </LazyImg>
-                    <div v-if="item.type === 'audio'" class="info-container">
-                      <audio id="audio" controls style="width: 100%; height: 30px" :src="item.file.url"></audio>
+      <el-card shadow="hover" :body-style="{ padding: '0px' }">
+        <Waterfall v-if="active.items?.length" :list="viewCards" :width="230" :gutter="10"
+          :backgroundColor="'rgba(255, 255, 255, .05)'">
+          <template #default="{ item }">
+            <div style="width: 230px">
+              <el-card style="width: 220px" class="box-card" :class="{ 'selected-card': isSelected(item) }">
+                <template #header>
+                  <el-card shadow="hover" :body-style="{ padding: '0px' }">
+                    <div class="mrpp-title">
+                      <b class="card-title" nowrap>{{ getItemTitle(item) }}</b>
                     </div>
-                  </div>
-                  <div v-if="item.created_at" style="
+                    <div class="image-container">
+                      <img v-if="!item.image" src="@/assets/image/none.png"
+                        style="width: 100%; height: auto; object-fit: contain" />
+                      <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
+                      </LazyImg>
+                      <div v-if="item.type === 'audio'" class="info-container">
+                        <audio id="audio" controls style="width: 100%; height: 30px" :src="item.file.url"></audio>
+                      </div>
+                    </div>
+                    <div v-if="item.created_at" style="
                       width: 100%;
                       text-align: center;
                       position: relative;
                       z-index: 2;
                     ">
-                    {{ convertToLocalTime(item.created_at) }}
-                  </div>
-                </el-card>
-              </template>
-              <div class="clearfix" v-if="metaId != null">
-                <!-- 多选模式下显示选择按钮 -->
-                <el-button-group v-if="isMultiSelectMode">
-                  <el-button v-if="isSelected(item)" type="success" size="small" @click="toggleSelect(item)">
-                    {{ $t("meta.ResourceDialog.deselect") }}
-                  </el-button>
-                  <el-button v-else type="primary" size="small" @click="toggleSelect(item)">
-                    {{ $t("meta.ResourceDialog.select") }}
-                  </el-button>
-                </el-button-group>
-                <template v-else>
-                  <el-button-group v-if="item.id === value">
-                    <el-button type="warning" size="small" @click="doEmpty">
-                      {{ $t("meta.ResourceDialog.cancelSelect") }}
-                    </el-button>
-                  </el-button-group>
-                  <el-button-group v-else-if="isBinding(item)">
-                    <el-button type="primary" size="small" @click="doSelect(item)">
-                      {{ $t("meta.ResourceDialog.select") }}
-                    </el-button>
-                    <el-button type="primary" size="small" @click="doUnbind(item)">
-                      {{ $t("meta.ResourceDialog.doUnbind") }}
-                    </el-button>
-                  </el-button-group>
-                  <el-button v-else size="small" @click="doBinding(item)">
-                    {{ $t("meta.ResourceDialog.bind") }}
-                  </el-button>
+                      {{ convertToLocalTime(item.created_at) }}
+                    </div>
+                  </el-card>
                 </template>
-              </div>
-              <div class="clearfix" v-else>
-                <el-button type="primary" size="small" @click="doSelect(item)">
-                  {{ $t("meta.ResourceDialog.select") }}
-                </el-button>
-              </div>
-              <div class="bottom clearfix"></div>
-            </el-card>
-            <el-card v-else style="width: 220px" class="box-card">
-              <template #header>
-                <el-card shadow="hover" :body-style="{ padding: '0px' }">
-                  <div class="mrpp-title">
-                    <b class="card-title" nowrap>{{ title(item) }}</b>
+
+                <div class="clearfix" v-if="metaId != null">
+                  <div class="demo-button-style">
+                    <el-checkbox-group v-model="selectedIds" size="small">
+                      <el-checkbox-button :value="item.id">
+                        {{ $t("meta.ResourceDialog.select") }}
+                      </el-checkbox-button>
+                      <el-checkbox-button @click="doSelect(item)">
+                        放入
+                      </el-checkbox-button>
+                    </el-checkbox-group>
                   </div>
-                  <img v-if="item.image" style="width: 100%; height: 180px" fit="contain" :src="item.image.url" lazy />
-                  <div style="width: 100%; text-align: center">
-                    {{ item.created_at }}
-                  </div>
-                </el-card>
-              </template>
-              <div class="clearfix">
-                <el-button-group v-if="value === null || item.id !== value">
+                </div>
+                <div class="clearfix" v-else>
                   <el-button type="primary" size="small" @click="doSelect(item)">
                     {{ $t("meta.ResourceDialog.select") }}
                   </el-button>
-                  <el-button type="primary" size="small" @click="doUnbind(item)">
-                    {{ $t("meta.ResourceDialog.doUnbind") }}
-                  </el-button>
-                </el-button-group>
-                <el-button-group v-else>
-                  <el-button type="warning" size="small" @click="doEmpty">
-                    {{ $t("meta.ResourceDialog.cancelSelect") }}
-                  </el-button>
-                </el-button-group>
-              </div>
-              <div class="bottom clearfix"></div>
-            </el-card>
-            <br />
-          </div>
+                </div>
+                <div class="bottom clearfix"></div>
+              </el-card>
+              <br />
+            </div>
+          </template>
+        </Waterfall>
+        <template v-else>
+          <el-skeleton></el-skeleton>
         </template>
-      </Waterfall>
-      <template v-else>
-        <el-skeleton></el-skeleton>
-      </template>
+      </el-card>
+
       <template #footer>
         <div class="dialog-footer">
           <el-row :gutter="0">
@@ -144,9 +85,9 @@
             </el-col>
             <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
               <el-button-group>
-                <el-button size="small" @click="doEmpty()">{{
-                  $t("meta.ResourceDialog.empty")
-                  }}</el-button>
+                <el-button size="small" :disabled="selectedIds.length == 0" @click="doBatchSelect()">放入全部选择</el-button>
+                <el-button size="small" :disabled="selectedIds.length == 0" @click="doEmpty()">{{
+                  $t("meta.ResourceDialog.empty") }}</el-button>
                 <el-button size="small" @click="dialogVisible = false">
                   {{ $t("meta.ResourceDialog.cancel") }}
                 </el-button>
@@ -160,154 +101,71 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, defineEmits, defineExpose } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { getResources } from "@/api/v1/resources";
-import {
-  getMetaResources,
-  postMetaResource,
-  deleteMetaResource,
-} from "@/api/v1/meta-resource";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
 
+// 类型定义
+type ViewCard = {
+  src: string;
+  id?: string;
+  name?: string;
+  star?: boolean;
+  backgroundColor?: string;
+  [attr: string]: any;
+};
+
+type ActiveState = {
+  items: any[];
+  sorted: string;
+  searched: string;
+  pagination: {
+    current: number;
+    count: number;
+    size: number;
+    total: number;
+  };
+};
+
+// 响应式状态
+const selectedIds = ref<any[]>([]);
 const dialogVisible = ref(false);
-const activeName = ref("binding");
 const type = ref("polygen");
 const metaId = ref<number | null>(null);
 const value = ref<any>(null);
+
+const active = ref<ActiveState>({
+  items: [],
+  sorted: "-created_at",
+  searched: "",
+  pagination: { current: 1, count: 1, size: 20, total: 20 },
+});
+
+// 事件和国际化
 const emit = defineEmits(["selected", "cancel", "close"]);
 const { t } = useI18n();
-const binding = ref({
-  items: [] as any[],
-  sorted: "-created_at",
-  searched: "",
-  pagination: { current: 1, count: 1, size: 20, total: 20 },
-});
-const owner = ref({
-  items: [] as any[],
-  sorted: "-created_at",
-  searched: "",
-  pagination: { current: 1, count: 1, size: 20, total: 20 },
-});
-const selectedItems = ref<any[]>([]);
-const isMultiSelectMode = ref(false);
 
-const active = computed(() => {
-  return activeName.value === "binding" ? binding.value : owner.value;
+// 计算属性
+const viewCards = computed(() => {
+  return transformToViewCard(active.value.items);
 });
 
-const isSelected = (item: any) => {
-  return selectedItems.value.some((selected) => selected.id === item.id);
-};
+// 方法
+function isSelected(item: any): boolean {
+  return selectedIds.value.some((id) => id === item.id);
+}
 
-const toggleSelect = (item: any) => {
-  if (isSelected(item)) {
-    selectedItems.value = selectedItems.value.filter((selected) => selected.id !== item.id);
-  } else {
-    selectedItems.value.push(item);
-  }
-};
-
-const toggleMultiSelectMode = () => {
-  isMultiSelectMode.value = !isMultiSelectMode.value;
-  if (!isMultiSelectMode.value) {
-    selectedItems.value = [];
-  }
-};
-
-const doBatchBinding = async () => {
-  if (selectedItems.value.length === 0) {
-    ElMessage.warning(t("meta.ResourceDialog.noItemSelected"));
-    return;
-  }
-
-  try {
-    await ElMessageBox.confirm(
-      t("meta.ResourceDialog.batchConfirm.message1", { count: selectedItems.value.length }),
-      t("meta.ResourceDialog.batchConfirm.message2"),
-      {
-        confirmButtonText: t("meta.ResourceDialog.batchConfirm.confirm"),
-        cancelButtonText: t("meta.ResourceDialog.batchConfirm.cancel"),
-        type: "warning",
-      }
-    );
-
-    const promises = selectedItems.value.map(item =>
-      postMetaResource({
-        meta_id: metaId.value,
-        resource_id: item.id,
-      })
-    );
-
-    await Promise.all(promises);
-    await refresh();
-    ElMessage.success(t("meta.ResourceDialog.batchConfirm.success"));
-
-    try {
-      await ElMessageBox.confirm(
-        t("meta.ResourceDialog.batchConfirm.selectOne.message1"),
-        t("meta.ResourceDialog.batchConfirm.selectOne.message2"),
-        {
-          confirmButtonText: t("meta.ResourceDialog.batchConfirm.selectOne.confirm"),
-          cancelButtonText: t("meta.ResourceDialog.batchConfirm.selectOne.cancel"),
-          type: "warning",
-        }
-      );
-
-      await selectedItems.value.map(item => {
-        selected(item);
-      });
-
-      ElMessage.success(t("meta.ResourceDialog.batchConfirm.selectOne.success"));
-
-    } catch {
-      // 如果用户取消确认，清空选择状态
-      selectedItems.value = [];
-      isMultiSelectMode.value = false;
-    }
-  } catch {
-    ElMessage.info(t("meta.ResourceDialog.info"));
-  }
-
-  // 清空选择状态
-  selectedItems.value = [];
-  isMultiSelectMode.value = false;
-};
-
-const isBinding = (item: any) => {
-  for (let i = 0; i < item.metaResources.length; ++i) {
-    if (item.metaResources[i].meta_id === metaId.value) {
-      return true;
-    }
-  }
-  return false;
-};
-
-const handleClick = (tab: any, event: any) => {
-  refresh();
-};
-
-const title = (item: any) => {
+function getItemTitle(item: any): string {
   return item.title ?? item.name ?? "title";
-};
+}
 
-const openIt = async ({ selected = null, binding = null, type }: any) => {
-  await open(selected, binding, type);
-};
-
-const open = async (
-  newValue: any,
-  meta_id: any = null,
-  newType: any = null
-) => {
-  binding.value = {
-    items: [],
-    sorted: "-created_at",
-    searched: "",
-    pagination: { current: 1, count: 1, size: 20, total: 20 },
-  };
-  owner.value = {
+async function open(newValue: any, meta_id: any = null, newType: any = null) {
+  active.value = {
     items: [],
     sorted: "-created_at",
     searched: "",
@@ -318,213 +176,127 @@ const open = async (
   metaId.value = meta_id;
   value.value = newValue;
 
-  // 重置状态
-  selectedItems.value = [];
-  isMultiSelectMode.value = false;
-
-  await refreshOwner();
-  await refreshBinding();
-  if (binding.value.items !== null && binding.value.items.length !== 0) {
-    activeName.value = "binding";
-  } else {
-    activeName.value = "owner";
-  }
+  selectedIds.value = [];
+  await refresh();
   dialogVisible.value = true;
-};
+}
 
-const refreshOwner = async () => {
+async function openIt({ selected = null, binding = null, type }: any) {
+  await open(selected, binding, type);
+}
+
+async function refresh() {
   const response = await getResources(
     type.value,
-    owner.value.sorted,
-    owner.value.searched,
-    owner.value.pagination.current,
+    active.value.sorted,
+    active.value.searched,
+    active.value.pagination.current,
     "image, metaResources"
   );
-  owner.value.items = response.data;
 
-  owner.value.pagination = {
+  active.value.items = response.data;
+  active.value.pagination = {
     current: parseInt(response.headers["x-pagination-current-page"]),
     count: parseInt(response.headers["x-pagination-page-count"]),
     size: parseInt(response.headers["x-pagination-per-page"]),
     total: parseInt(response.headers["x-pagination-total-count"]),
   };
-};
+}
 
-const refreshBinding = async () => {
-  const response = await getMetaResources(
-    metaId.value!,
-    type.value,
-    binding.value.sorted,
-    binding.value.searched,
-    binding.value.pagination.current,
-    "image,author,metaResources"
-  );
-  binding.value.pagination = {
-    current: parseInt(response.headers["x-pagination-current-page"]),
-    count: parseInt(response.headers["x-pagination-page-count"]),
-    size: parseInt(response.headers["x-pagination-per-page"]),
-    total: parseInt(response.headers["x-pagination-total-count"]),
-  };
-  binding.value.items = response.data;
-};
-
-const close = () => {
-  dialogVisible.value = false;
-};
-
-const sort = (value: string) => {
+// 排序和搜索
+function sort(value: string) {
   active.value.sorted = value;
   refresh();
-};
+}
 
-const search = (value: string) => {
+function search(value: string) {
   active.value.searched = value;
   refresh();
-};
+}
 
-const clearSearched = () => {
+function clearSearched() {
   active.value.searched = "";
   refresh();
-};
+}
 
-const doSelect = (data: ViewCard) => {
+// 选择和取消操作
+function doSelect(data: ViewCard) {
   emit("selected", data);
   dialogVisible.value = false;
-};
+}
 
-const doEmpty = () => {
+function selected(data = null) {
+  emit("selected", data);
+  dialogVisible.value = false;
+}
+
+function doEmpty() {
   value.value = null;
-  emit("selected", null);
-  emit("cancel");
-  dialogVisible.value = false;
-};
+  selectedIds.value = [];
+}
 
-const selected = (data = null) => {
-  emit("selected", data);
-  dialogVisible.value = false;
-};
-
-const doClose = () => {
-  // 重置状态
-  selectedItems.value = [];
-  isMultiSelectMode.value = false;
+function doClose() {
+  selectedIds.value = [];
   emit("close");
-};
+}
 
-const handleCurrentChange = (page: number) => {
+async function doBatchSelect() {
+  if (selectedIds.value.length === 0) {
+    ElMessage.warning(t("meta.ResourceDialog.noItemSelected"));
+    return;
+  }
+
+  try {
+    await ElMessageBox.confirm(
+      t("meta.ResourceDialog.batchConfirm.selectOne.message1"),
+      t("meta.ResourceDialog.batchConfirm.selectOne.message2"),
+      {
+        confirmButtonText: t("meta.ResourceDialog.batchConfirm.selectOne.confirm"),
+        cancelButtonText: t("meta.ResourceDialog.batchConfirm.selectOne.cancel"),
+        type: "warning",
+      }
+    );
+
+    for (const id of selectedIds.value) {
+      const obj = active.value.items.find((item) => item.id == id);
+      if (obj) {
+        selected(obj);
+      }
+    }
+
+    ElMessage.success(t("meta.ResourceDialog.batchConfirm.selectOne.success"));
+    dialogVisible.value = false;
+  } catch {
+    selectedIds.value = [];
+  }
+}
+
+function handleCurrentChange(page: number) {
   active.value.pagination.current = page;
   refresh();
-};
+}
 
-const refresh = async () => {
-  if (activeName.value === "binding") {
-    await refreshBinding();
-    if (binding.value.items === null || binding.value.items.length === 0) {
-      await refreshOwner();
-      activeName.value = "owner";
-    }
-  } else {
-    await refreshOwner();
-  }
-};
+// 辅助函数
+function transformToViewCard(items: any[]): ViewCard[] {
+  return items.map((item) => ({
+    src: item.file.url,
+    id: item.id ? item.id.toString() : undefined,
+    name: item.name,
+    info: item.info,
+    uuid: item.uuid,
+    type: item.type,
+    image_id: item.image_id,
+    image: item.image,
+    created_at: item.created_at,
+    file: item.file,
+    metaResources: item.metaResources,
+  }));
+}
 
-const doUnbind = async (data: any) => {
-  try {
-    await ElMessageBox.confirm(
-      t("meta.ResourceDialog.confirm1.message1"),
-      t("meta.ResourceDialog.confirm1.message2"),
-      {
-        confirmButtonText: t("meta.ResourceDialog.confirm1.confirm"),
-        cancelButtonText: t("meta.ResourceDialog.confirm1.cancel"),
-        closeOnClickModal: false,
-        type: "warning",
-      }
-    );
-
-    for (let i = 0; i < data.metaResources.length; ++i) {
-      if (data.metaResources[i].meta_id == metaId.value) {
-        await deleteMetaResource(data.metaResources[i].id);
-        break;
-      }
-    }
-    await refresh();
-    ElMessage.success(t("meta.ResourceDialog.confirm1.success"));
-  } catch {
-    ElMessage.info(t("meta.ResourceDialog.confirm1.info"));
-  }
-};
-
-const doBinding = async (data: any) => {
-  try {
-    await ElMessageBox.confirm(
-      t("meta.ResourceDialog.confirm2.message1"),
-      t("meta.ResourceDialog.confirm2.message2"),
-      {
-        confirmButtonText: t("meta.ResourceDialog.confirm2.confirm"),
-        cancelButtonText: t("meta.ResourceDialog.confirm2.cancel"),
-        type: "warning",
-      }
-    );
-    const response = await postMetaResource({
-      meta_id: metaId.value,
-      resource_id: data.id,
-    });
-    await refresh();
-    ElMessage.success(t("meta.ResourceDialog.confirm2.success"));
-
-    await ElMessageBox.confirm(
-      t("meta.ResourceDialog.confirm2.confirm2.message1"),
-      t("meta.ResourceDialog.confirm2.confirm2.message2"),
-      {
-        confirmButtonText: t("meta.ResourceDialog.confirm2.confirm2.confirm"),
-        cancelButtonText: t("meta.ResourceDialog.confirm2.confirm2.cancel"),
-        type: "warning",
-      }
-    );
-    selected(data);
-    ElMessage.success(t("meta.ResourceDialog.confirm2.confirm2.success"));
-  } catch {
-    ElMessage.info(t("meta.ResourceDialog.info"));
-  }
-};
-
+// 对外暴露的方法
 defineExpose({
   openIt,
   open,
-});
-
-type ViewCard = {
-  src: string;
-  id?: string;
-  name?: string;
-  star?: boolean;
-  backgroundColor?: string;
-  [attr: string]: any;
-};
-
-// 瀑布流数据类型转换
-const transformToViewCard = (items: any[]): ViewCard[] => {
-  return items.map((item) => {
-    return {
-      src: item.file.url,
-      id: item.id ? item.id.toString() : undefined,
-      name: item.name,
-      info: item.info,
-      uuid: item.uuid,
-      type: item.type,
-      image_id: item.image_id,
-      image: item.image,
-      created_at: item.created_at,
-      file: item.file,
-      metaResources: item.metaResources,
-    };
-  });
-};
-
-const viewCards = computed(() => {
-  const cards = transformToViewCard(active.value.items);
-  console.log("viewCards", cards);
-  return cards;
 });
 </script>
 
@@ -561,20 +333,10 @@ const viewCards = computed(() => {
   opacity: 1;
 }
 
-/* 批量操作相关样式 */
-.batch-actions {
-  margin: 10px 0;
-}
-
 .selected-card {
   border: 1px solid #67c23a !important;
   box-shadow: 0 0 10px rgba(103, 194, 58, 0.5) !important;
   transform: scale(1.02);
   transition: all 0.3s ease;
-}
-
-/* 选择资源提示样式 */
-.select-resource-tip {
-  margin: 10px 0;
 }
 </style>
