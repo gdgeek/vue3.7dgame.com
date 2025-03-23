@@ -25,7 +25,7 @@ export type MetaCode = {
   lua?: string;
   js?: string;
 };
-// 组件类型
+// 实体类型
 export type metaInfo = {
   id: number;
   author_id: number;

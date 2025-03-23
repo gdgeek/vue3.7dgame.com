@@ -604,7 +604,7 @@ export default {
       declared: "ファイルデータをデータベースに保存",
     },
   },
-  // 组件国际化
+  // 实体国际化
   meta: {
     title: "【メタデータ】を作成",
     enter: "入る",
@@ -671,6 +671,11 @@ export default {
       error: "エディターがありません",
       info: "保存権限がありません！",
       success: "シーン保存成功~",
+      coverUploadError:
+        "カバー画像アップロードエラー：画像データが見つかりません",
+      handlerError: "ファイルハンドラの取得に失敗しました",
+      coverUploadSuccess: "カバー画像アップロード成功",
+      coverUploadFailed: "カバー画像アップロードに失敗しました",
     },
     script: {
       title: "スクリプト",
@@ -710,8 +715,12 @@ export default {
       enterMultiSelect: "バッチ選択",
       exitMultiSelect: "バッチ選択を終了",
       batchBind: "バッチバインド",
+      batchDeploy: "バッチ部署",
+      batchUnbind: "バッチバインド解除",
       deselect: "選択をキャンセル",
       noItemSelected: "少なくとも1つのリソースを選択してください",
+      availableForBinding: "バインド可能なリソース数：{count}",
+      availableForDeployment: "デプロイ可能なリソース数：{count}",
       batchConfirm: {
         message1: "選択した {count} 個のリソースをシーンにバインドしますか？",
         message2: "バッチバインドリソース",
@@ -720,12 +729,29 @@ export default {
         success: "バッチバインド成功！",
         selectOne: {
           message1:
-            "バッチバインドリソースに成功しました。リソースの設定を直接確認しますか？",
-          message2: "リソース確認",
+            "リソースの一括バインドに成功しました。これらのリソースを直接デプロイしますか？",
+          message2: "リソースをデプロイ",
           confirm: "確認",
           cancel: "キャンセル",
-          success: "設定成功！",
+          success: "デプロイ成功！",
+          info: "キャンセルされました",
         },
+      },
+      batchConfirm2: {
+        message1: "選択した {count} 個のリソースをシーンにデプロイしますか？",
+        message2: "バッチデプロイリソース",
+        confirm: "確認",
+        cancel: "キャンセル",
+        success: "バッチデプロイ成功！",
+        info: "キャンセルされました",
+      },
+      batchUnbindConfirm: {
+        message1: "選択した {count} 個のリソースを解绑しますか？",
+        message2: "バッチ解绑リソース",
+        confirm: "確認",
+        cancel: "キャンセル",
+        success: "バッチ解绑成功！",
+        info: "キャンセルされました",
       },
       confirm1: {
         message1: "リソースのバインドを解除しますか？",
@@ -742,11 +768,11 @@ export default {
         cancel: "キャンセル",
         success: "バインド成功！",
         confirm2: {
-          message1: "リソースを設定して確認しますか？",
-          message2: "リソース確認",
+          message1: "リソースをデプロイしますか？",
+          message2: "リソースデプロイ",
           confirm: "確認",
           cancel: "キャンセル",
-          success: "設定成功！",
+          success: "デプロイ成功！",
         },
       },
       info: "キャンセルされました",
@@ -1006,6 +1032,11 @@ export default {
         info2: "エンティティを追加",
         info3: "保存権限がありません",
         success: "シーンが正常に保存されました",
+        coverUploadError:
+          "カバー画像アップロードエラー：画像データが見つかりません",
+        handlerError: "ファイルハンドラの取得に失敗しました",
+        coverUploadSuccess: "カバー画像アップロード成功",
+        coverUploadFailed: "カバー画像アップロードに失敗しました",
       },
       script: {
         title: "スクリプト",

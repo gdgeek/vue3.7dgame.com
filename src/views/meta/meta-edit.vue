@@ -1,12 +1,15 @@
 <template>
-  <div class="meta-edit">
-    <Edit @get-item="getMetaData" @put-item="putMetaData"></Edit>
-  </div>
+  <TransitionWrapper>
+    <div class="meta-edit">
+      <Edit @get-item="getMetaData" @put-item="putMetaData"></Edit>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
 import Edit from "@/components/Meta/Edit.vue";
 import { getMeta, putMeta } from "@/api/v1/meta";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const getMetaData = async (
   id: number,

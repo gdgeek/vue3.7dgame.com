@@ -611,7 +611,7 @@ export default {
       declared: "File data is stored in the database",
     },
   },
-  // 组件国际化
+  // 实体国际化
   meta: {
     title: "Create【Entity】",
     enter: "Enter",
@@ -676,9 +676,13 @@ export default {
       saveFailed: "Failed to save image information",
     },
     scene: {
-      error: "No editor available",
-      info: "No permission to save!",
+      error: "No scene editor",
+      info: "No save permission!",
       success: "Scene saved successfully~",
+      coverUploadError: "Cover upload error: Image data not found",
+      handlerError: "Failed to get file handler",
+      coverUploadSuccess: "Cover image uploaded successfully",
+      coverUploadFailed: "Failed to upload cover image",
     },
     script: {
       title: "Script",
@@ -718,8 +722,12 @@ export default {
       enterMultiSelect: "Enter Multi-Select",
       exitMultiSelect: "Exit Multi-Select",
       batchBind: "Batch Bind",
+      batchDeploy: "Batch Deploy",
+      batchUnbind: "Batch Unbind",
       deselect: "Deselect",
       noItemSelected: "Please select at least one resource",
+      availableForBinding: "Available for binding: {count}",
+      availableForDeployment: "Available for deployment: {count}",
       batchConfirm: {
         message1:
           "Do you want to batch bind {count} selected resources to the scene?",
@@ -729,12 +737,30 @@ export default {
         success: "Batch binding successful!",
         selectOne: {
           message1:
-            "You have successfully batch bound resources. Directly confirm the resource settings?",
-          message2: "Confirm Resource",
+            "You have successfully bound the resources in bulk. Do you want to confirm the deployment of these resources directly?",
+          message2: "Deploy Resource",
           confirm: "Confirm",
           cancel: "Cancel",
-          success: "Selected successfully!",
+          success: "Deployed successfully!",
+          info: "Cancelled",
         },
+      },
+      batchConfirm2: {
+        message1:
+          "Do you want to batch deploy {count} selected resources to the scene?",
+        message2: "Batch Deploy Resources",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "Batch deployment successful!",
+        info: "Cancelled",
+      },
+      batchUnbindConfirm: {
+        message1: "Do you want to batch unbind {count} selected resources?",
+        message2: "Batch Unbind Resources",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "Batch unbinding successful!",
+        info: "Cancelled",
       },
       confirm1: {
         message1: "Do you want to unbind the resource?",
@@ -751,11 +777,11 @@ export default {
         cancel: "Cancel",
         success: "Bind Successful!",
         confirm2: {
-          message1: "Directly confirm the resource settings?",
-          message2: "Confirm Resource",
+          message1: "Directly confirm the resource deployment?",
+          message2: "Deploy Resource",
           confirm: "Confirm",
           cancel: "Cancel",
-          success: "Settings Successful!",
+          success: "Deployed successfully!",
         },
       },
       info: "Cancelled",
@@ -1020,6 +1046,10 @@ export default {
         info2: "Add Entity",
         info3: "No save permissions",
         success: "Scene saved successfully",
+        coverUploadError: "Cover upload error: Image data not found",
+        handlerError: "Failed to get file handler",
+        coverUploadSuccess: "Cover image uploaded successfully",
+        coverUploadFailed: "Failed to upload cover image",
       },
       script: {
         title: "Script",

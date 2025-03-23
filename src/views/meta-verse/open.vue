@@ -1,12 +1,15 @@
 <template>
-  <div class="verse-index">
-    <mr-p-p-verse-page @loaded="loaded" :created="false"></mr-p-p-verse-page>
-  </div>
+  <TransitionWrapper>
+    <div class="verse-index">
+      <mr-p-p-verse-page @loaded="loaded" :created="false"></mr-p-p-verse-page>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
 import MrPPVersePage from "@/components/MrPP/MrPPVerse/MrPPVersePage.vue";
 import { getVerseOpenVerses } from "@/api/v1/verse-open";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const loaded = async (data: any, result: Function) => {
   try {

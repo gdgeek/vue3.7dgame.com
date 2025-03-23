@@ -1,66 +1,68 @@
 <template>
-  <div v-loading="loading" class="document-index"><br>
-    <el-row :gutter="20" style="margin: 0px 18px 0">
-      <el-col :sm="16">
-        <el-card class="box-card">
-          <template #header>
-            <b id="title">{{ $t("polygen.view.title") }}</b>
-            <span v-if="polygenData">{{ polygenData.name }}</span>
-          </template>
-          <div class="box-item">
-            <div v-if="polygenData">
-              <polygen-view ref="three" :file="polygenData.file" @loaded="loaded" @progress="progress" />
-              <el-progress style="width: 100%;" :stroke-width="18" v-if="percentage !== 100" :text-inside="true"
-                :percentage="percentage">
-              </el-progress>
+  <TransitionWrapper>
+    <div v-loading="loading" class="document-index"><br>
+      <el-row :gutter="20" style="margin: 0px 18px 0">
+        <el-col :sm="16">
+          <el-card class="box-card">
+            <template #header>
+              <b id="title">{{ $t("polygen.view.title") }}</b>
+              <span v-if="polygenData">{{ polygenData.name }}</span>
+            </template>
+            <div class="box-item">
+              <div v-if="polygenData">
+                <polygen-view ref="three" :file="polygenData.file" @loaded="loaded" @progress="progress" />
+                <el-progress style="width: 100%;" :stroke-width="18" v-if="percentage !== 100" :text-inside="true"
+                  :percentage="percentage">
+                </el-progress>
+              </div>
+              <el-card v-else>
+                <el-skeleton :rows="7" />
+              </el-card>
             </div>
-            <el-card v-else>
-              <el-skeleton :rows="7" />
-            </el-card>
-          </div>
-        </el-card>
-        <br />
+          </el-card>
+          <br />
 
-        <el-card v-loading="expire" class="box-card">
-          <el-button style="width: 100%" type="primary" size="small" @click="createVerse">
-            <font-awesome-icon icon="plus"></font-awesome-icon>
-            &nbsp;{{ $t("polygen.view.titleStatement") }}
-          </el-button>
-        </el-card>
-        <br />
+          <el-card v-loading="expire" class="box-card">
+            <el-button style="width: 100%" type="primary" size="small" @click="createVerse">
+              <font-awesome-icon icon="plus"></font-awesome-icon>
+              &nbsp;{{ $t("polygen.view.titleStatement") }}
+            </el-button>
+          </el-card>
+          <br />
 
 
-      </el-col>
+        </el-col>
 
-      <el-col :sm="8">
-        <el-card class="box-card">
-          <template #header>
-            <b>{{ $t("polygen.view.info.title") }}</b> :
-          </template>
-          <div class="box-item">
-            <el-table :data="tableData" stripe>
-              <el-table-column prop="item" :label="$t('polygen.view.info.label1')"></el-table-column>
-              <el-table-column prop="text" :label="$t('polygen.view.info.label2')"></el-table-column>
-            </el-table>
+        <el-col :sm="8">
+          <el-card class="box-card">
+            <template #header>
+              <b>{{ $t("polygen.view.info.title") }}</b> :
+            </template>
+            <div class="box-item">
+              <el-table :data="tableData" stripe>
+                <el-table-column prop="item" :label="$t('polygen.view.info.label1')"></el-table-column>
+                <el-table-column prop="text" :label="$t('polygen.view.info.label2')"></el-table-column>
+              </el-table>
 
-            <aside style="margin-top: 10px; margin-bottom: 30px">
-              <el-button-group style="float: right">
-                <el-button type="success" size="small" @click="namedWindow">
-                  <i class="el-icon-edit"></i>
-                  {{ $t("polygen.view.info.name") }}
-                </el-button>
-                <el-button type="danger" size="small" @click="deleteWindow">
-                  <i class="el-icon-delete"></i>
-                  {{ $t("polygen.view.info.delete") }}
-                </el-button>
-              </el-button-group>
-            </aside>
-          </div>
-        </el-card>
-        <br />
-      </el-col>
-    </el-row>
-  </div>
+              <aside style="margin-top: 10px; margin-bottom: 30px">
+                <el-button-group style="float: right">
+                  <el-button type="success" size="small" @click="namedWindow">
+                    <i class="el-icon-edit"></i>
+                    {{ $t("polygen.view.info.name") }}
+                  </el-button>
+                  <el-button type="danger" size="small" @click="deleteWindow">
+                    <i class="el-icon-delete"></i>
+                    {{ $t("polygen.view.info.delete") }}
+                  </el-button>
+                </el-button-group>
+              </aside>
+            </div>
+          </el-card>
+          <br />
+        </el-col>
+      </el-row>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
@@ -73,6 +75,7 @@ import { UploadFileType } from "@/api/user/model";
 import { printVector3 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const loading = ref(false);
 const polygenData = ref<any>(null);

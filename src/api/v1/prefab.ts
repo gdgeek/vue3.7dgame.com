@@ -22,7 +22,7 @@ type ImageDetails = {
   key: string;
 };
 
-// 组件类型
+// 实体类型
 export type prefabsData = {
   id: number;
   author_id: number;

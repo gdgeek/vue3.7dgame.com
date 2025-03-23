@@ -1,122 +1,77 @@
 <template>
-  <div>
-    <br />
-    <el-container>
-      <el-header>
-        <mr-p-p-header
-          :sorted="sorted"
-          :searched="searched"
-          sortByTime="created_at"
-          sortByName="title"
-          @search="search"
-          @sort="sort"
-        >
-          <el-button-group :inline="true">
-            <el-button
-              v-if="isRoot"
-              size="small"
-              type="primary"
-              @click="addPrefab"
-            >
-              <font-awesome-icon icon="plus"></font-awesome-icon>
+  <TransitionWrapper>
+    <div class="root">
+      <div>
+        <br />
+        <el-container>
+          <el-header>
+            <mr-p-p-header :sorted="sorted" :searched="searched" sortByTime="created_at" sortByName="title"
+              @search="search" @sort="sort">
+              <el-button-group :inline="true">
+                <el-button v-if="isRoot" size="small" type="primary" @click="addPrefab">
+                  <font-awesome-icon icon="plus"></font-awesome-icon>
 
-              <span class="hidden-sm-and-down">{{ $t("meta.title") }}</span>
-            </el-button>
-          </el-button-group>
-        </mr-p-p-header>
-      </el-header>
-      <el-main>
-        <el-card style="width: 100%">
-          <waterfall
-            v-if="viewCards.length > 0"
-            :lazyload="false"
-            :width="320"
-            :gutter="8"
-            :list="viewCards"
-            :column-count="3"
-            :backgroundColor="'rgba(255, 255, 255, .05)'"
-          >
-            <template #default="{ item }">
-              <el-card style="width: 320px" class="box-card">
-                <template #header>
-                  <div>
-                    <el-card shadow="hover" :body-style="{ padding: '0px' }">
-                      <template #header>
-                        <span class="mrpp-title">
-                          <b class="card-title" nowrap>{{ item.name }}</b>
-                        </span>
-                      </template>
-                      <router-link :to="url(item.id)">
-                        <LazyImg
-                          v-if="item.image === null"
-                          url="/src/assets/image/none.png"
-                          style="
-                            width: 100%;
-                            height: 270px;
-                            object-fit: contain;
-                          "
-                        ></LazyImg>
-                        <LazyImg
-                          v-else
-                          style="width: 100%; height: 270px"
-                          fit="contain"
-                          :url="item.image.url"
-                        >
-                        </LazyImg>
-                      </router-link>
-                    </el-card>
-                  </div>
+                  <span class="hidden-sm-and-down">{{ $t("meta.title") }}</span>
+                </el-button>
+              </el-button-group>
+            </mr-p-p-header>
+          </el-header>
+          <el-main>
+            <el-card style="width: 100%">
+              <waterfall v-if="viewCards.length > 0" :lazyload="false" :width="320" :gutter="8" :list="viewCards"
+                :column-count="3" :backgroundColor="'rgba(255, 255, 255, .05)'">
+                <template #default="{ item }">
+                  <el-card style="width: 320px" class="box-card">
+                    <template #header>
+                      <div>
+                        <el-card shadow="hover" :body-style="{ padding: '0px' }">
+                          <template #header>
+                            <span class="mrpp-title">
+                              <b class="card-title" nowrap>{{ item.name }}</b>
+                            </span>
+                          </template>
+                          <router-link :to="url(item.id)">
+                            <LazyImg v-if="item.image === null" url="/src/assets/image/none.png" style="
+                                width: 100%;
+                                height: 270px;
+                                object-fit: contain;
+                              "></LazyImg>
+                            <LazyImg v-else style="width: 100%; height: 270px" fit="contain" :url="item.image.url">
+                            </LazyImg>
+                          </router-link>
+                        </el-card>
+                      </div>
+                    </template>
+                    <div class="clearfix">
+                      <el-button-group v-if="isRoot" style="float: right" :inline="true">
+                        <el-button @click="editor(item.id)" size="small" type="success" icon="Edit">
+                          {{ $t("meta.edit") }}</el-button>
+
+                        <el-button @click="del(item.id)" size="small" type="danger" icon="Delete">
+                          {{ $t("meta.delete") }}</el-button>
+                      </el-button-group>
+                    </div>
+                    <div class="bottom clearfix"></div>
+                  </el-card>
+                  <br />
                 </template>
-                <div class="clearfix">
-                  <el-button-group
-                    v-if="isRoot"
-                    style="float: right"
-                    :inline="true"
-                  >
-                    <el-button
-                      @click="editor(item.id)"
-                      size="small"
-                      type="success"
-                      icon="Edit"
-                    >
-                      {{ $t("meta.edit") }}</el-button
-                    >
-
-                    <el-button
-                      @click="del(item.id)"
-                      size="small"
-                      type="danger"
-                      icon="Delete"
-                    >
-                      {{ $t("meta.delete") }}</el-button
-                    >
-                  </el-button-group>
-                </div>
-                <div class="bottom clearfix"></div>
-              </el-card>
-              <br />
-            </template>
-          </waterfall>
-          <template v-else>
-            <el-skeleton></el-skeleton>
-          </template>
-        </el-card>
-      </el-main>
-      <el-footer>
-        <el-card class="box-card">
-          <el-pagination
-            :current-page="pagination.current"
-            :page-count="pagination.count"
-            :page-size="pagination.size"
-            :total="pagination.total"
-            layout="prev, pager, next, jumper"
-            background
-            @current-change="handleCurrentChange"
-          ></el-pagination>
-        </el-card>
-      </el-footer>
-    </el-container>
-  </div>
+              </waterfall>
+              <template v-else>
+                <el-skeleton></el-skeleton>
+              </template>
+            </el-card>
+          </el-main>
+          <el-footer>
+            <el-card class="box-card">
+              <el-pagination :current-page="pagination.current" :page-count="pagination.count"
+                :page-size="pagination.size" :total="pagination.total" layout="prev, pager, next, jumper" background
+                @current-change="handleCurrentChange"></el-pagination>
+            </el-card>
+          </el-footer>
+        </el-container>
+      </div>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
@@ -129,6 +84,7 @@ import { getPrefabs, deletePrefab, postPrefab } from "@/api/v1/prefab";
 import type { prefabsData } from "@/api/v1/prefab";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { useAbility } from "@casl/vue";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const ability = useAbility();
 const can = ability.can.bind(ability);
