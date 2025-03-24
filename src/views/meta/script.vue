@@ -516,6 +516,7 @@ const initEditor = () => {
   }
 };
 const testAction = (data: any) => {
+  console.log("action: ", data);
   if (
     data &&
     data.parameters &&
@@ -525,6 +526,7 @@ const testAction = (data: any) => {
       uuid: data.parameters.uuid,
       name: data.parameters.action ?? null,
       parameter: data.parameters.parameter ?? null,
+      type: data.type ?? null,
     };
   }
 };
@@ -540,6 +542,7 @@ const testConmand = (data: any) => {
       uuid: data.parameters.uuid,
       name: data.parameters.voice ?? null,
       parameter: data.parameters.parameter ?? null,
+      type: data.type ?? null,
     };
   }
 }
@@ -577,7 +580,7 @@ const addMetaData = (data: any, ret: any) => {
 
   const entity = testPoint(data, [
     "polygen",
-    "entity",
+    "point",
     "voxel",
     "video",
     "picture",
