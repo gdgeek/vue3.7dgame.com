@@ -1,55 +1,6 @@
 <template>
   <footer class="footer">
-    <css-doodle class="footer-bg">
-      :doodle {
-      @grid: 1x6 / 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      }
-      @place-cell: center;
-      --hue: calc(220 + 2.5 * @index() * 40);
-      background: @pick(
-      linear-gradient(120deg, hsl(var(--hue), 80%, 80%), hsl(calc(var(--hue) + 60), 85%, 75%)),
-      linear-gradient(-60deg, hsl(calc(var(--hue) + 30), 90%, 70%), hsl(calc(var(--hue) + 90), 85%, 75%)),
-      linear-gradient(45deg, hsl(calc(var(--hue) - 30), 85%, 70%), hsl(calc(var(--hue) + 120), 90%, 75%))
-      );
-      width: @rand(20vmin, 50vmin);
-      height: @rand(20vmin, 50vmin);
-      transform:
-      translate(@rand(-150%, 150%), @rand(-50%, 50%))
-      scale(@rand(.9, 1.6))
-      rotate(@rand(360deg));
-      clip-path: polygon(
-      @rand(0, 30%) @rand(0, 30%),
-      @rand(30%, 60%) @rand(0, 30%),
-      @rand(60%, 100%) @rand(0, 50%),
-      @rand(60%, 100%) @rand(50%, 100%),
-      @rand(30%, 60%) @rand(60%, 100%),
-      @rand(0, 30%) @rand(60%, 100%)
-      );
-      opacity: @rand(.3, .7);
-      animation:
-      transform-move @rand(25s, 45s) infinite @rand(0s, -5s) linear alternate,
-      hue-rotate @rand(15s, 25s) infinite @rand(0s, -5s) linear;
-
-      @keyframes transform-move {
-      100% {
-      transform:
-      translate(@rand(-150%, 150%), @rand(-50%, 50%))
-      scale(@rand(.9, 1.6))
-      rotate(@rand(360deg));
-      }
-      }
-
-      @keyframes hue-rotate {
-      100% {
-      filter: hue-rotate(360deg) saturate(1.2);
-      }
-      }
-    </css-doodle>
+    <div class="footer-bg"></div>
     <div class="footer-mask"></div>
     <div class="footer-content">
       <div class="footer-main">
@@ -249,7 +200,7 @@ const linkGroups: LinkGroup[] = [
   padding: 48px 0 0;
   position: relative;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.1);
+  background: transparent;
 }
 
 .footer-bg {
@@ -258,6 +209,20 @@ const linkGroups: LinkGroup[] = [
   left: 0;
   right: 0;
   bottom: 0;
+  background: linear-gradient(135deg,
+      rgba(230, 240, 255, 0.8) 0%,
+      /* 淡蓝色 */
+      rgba(235, 235, 255, 0.8) 20%,
+      /* 淡紫蓝色 */
+      rgba(240, 235, 255, 0.8) 40%,
+      /* 淡紫色 */
+      rgba(245, 235, 250, 0.8) 60%,
+      /* 浅紫色 */
+      rgba(250, 235, 245, 0.8) 80%,
+      /* 淡紫粉色 */
+      rgba(255, 240, 245, 0.8) 100%
+      /* 淡粉色 */
+    );
   z-index: -1;
 }
 
@@ -267,8 +232,8 @@ const linkGroups: LinkGroup[] = [
   left: 0;
   right: 0;
   bottom: 0;
-  backdrop-filter: blur(100px);
-  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(15px);
+  background: rgba(255, 255, 255, 0.05);
   z-index: 0;
 }
 

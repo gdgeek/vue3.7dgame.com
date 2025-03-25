@@ -330,8 +330,8 @@ defineExpose({
 }
 
 .selected-card {
-  border: 1px solid #67c23a !important;
-  box-shadow: 0 0 10px rgba(103, 194, 58, 0.5) !important;
+  border: 1px solid #3894ff !important;
+  box-shadow: 0 0 10px rgba(56, 148, 255, 0.5) !important;
   transform: scale(1.02);
   transition: all 0.3s ease;
 }

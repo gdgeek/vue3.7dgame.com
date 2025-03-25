@@ -501,6 +501,7 @@ const initEditor = () => {
       blocklyData = pako.inflate(uint8Array, { to: "string" });
     }
     const data = unsavedBlocklyData.value || JSON.parse(blocklyData);
+    // console.warn("blocklydata: " + JSON.stringify(data));
     test.value = getResource(meta.value);
     postMessage("init", {
       language: ["lua", "js"],
@@ -516,6 +517,7 @@ const initEditor = () => {
   }
 };
 const testAction = (data: any) => {
+  // console.log("action: ", data);
   if (
     data &&
     data.parameters &&
@@ -525,12 +527,13 @@ const testAction = (data: any) => {
       uuid: data.parameters.uuid,
       name: data.parameters.action ?? null,
       parameter: data.parameters.parameter ?? null,
+      type: data.type ?? null,
     };
   }
 };
 
 const testConmand = (data: any) => {
-  console.log("command: ", data);
+  // console.log("command: ", data);
   if (
     data &&
     data.parameters &&
@@ -540,6 +543,7 @@ const testConmand = (data: any) => {
       uuid: data.parameters.uuid,
       name: data.parameters.voice ?? null,
       parameter: data.parameters.parameter ?? null,
+      type: data.type ?? null,
     };
   }
 }
