@@ -42,7 +42,7 @@ onMounted(async () => {
   const hasToken = Token.getToken();
   if (hasToken) {
     userStore.getUserInfo();
-    userStore.setupRefreshInterval();
+    //  userStore.setupRefreshInterval();
   }
 });
 </script>

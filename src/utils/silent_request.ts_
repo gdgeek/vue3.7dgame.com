@@ -2,7 +2,7 @@ import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { useUserStoreHook } from "@/store/modules/user";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import i18n from "@/lang";
-import AuthAPI from "@/api/auth";
+import AuthAPI from "@/api/v1/auth";
 import env from "@/environment";
 // 获取当前语言
 const lang = ref(i18n.global.locale.value);
@@ -78,7 +78,7 @@ service.interceptors.request.use(
         if (!isRefreshing) {
           isRefreshing = true;
           try {
-            useUserStoreHook().setupRefreshInterval(useUserStoreHook().form);
+         //   useUserStoreHook().setupRefreshInterval(useUserStoreHook().form);
             const newToken = localStorage.getItem(TOKEN_KEY);
             onTokenRefreshed(newToken!);
           } catch (error) {

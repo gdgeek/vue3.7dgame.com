@@ -199,7 +199,7 @@ import { useSettingsStore } from "@/store/modules/settings";
 import { useInfomationStore } from "@/store/modules/information";
 import { useTagsViewStore, useUserStore, useScreenStore } from "@/store";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
-import AuthAPI from "@/api/auth";
+
 
 const router = useRouter();
 const route = useRoute();

@@ -220,12 +220,12 @@ function doSelect(data: ViewCard) {
   emit("selected", data);
   dialogVisible.value = false;
 }
-
+/*
 function selected(data = null) {
   emit("selected", data);
   dialogVisible.value = false;
 }
-
+*/
 function doEmpty() {
   value.value = null;
   selectedIds.value = [];
@@ -256,7 +256,7 @@ async function doBatchSelect() {
     for (const id of selectedIds.value) {
       const obj = active.value.items.find((item) => item.id == id);
       if (obj) {
-        selected(obj);
+        doSelect(obj);
       }
     }
 

@@ -4,11 +4,11 @@ import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { useRouter } from "@/router";
 import i18n from "@/lang";
 import { ElMessage } from "element-plus";
-import AuthAPI from "@/api/auth";
+import AuthAPI from "@/api/v1/auth";
 import env from "@/environment";
-import { th } from "element-plus/es/locale";
-
+import { ref, watch } from "vue";
 import Token from "@/store/modules/token";
+
 const lang = ref(i18n.global.locale.value);
 watch(
   () => i18n.global.locale.value,
@@ -48,38 +48,110 @@ const getMessageArray = () => {
   }
 };
 
+// 用于标记正在刷新token的状态
+let isRefreshing = false;
+// 存储待重发的请求
+let requestsQueue: Array<{
+  config: InternalAxiosRequestConfig;
+  resolve: Function;
+  reject: Function;
+}> = [];
+
+// 刷新token的API白名单
+const refreshTokenWhitelist = [
+  "/v1/auth/refresh", // 刷新token的接口
+  "/v1/auth/login", // 登录接口
+  "/v1/auth/logout", // 登出接口
+];
+
+// 判断token是否即将过期（例如，提前5分钟刷新）
+const isTokenExpiringSoon = (token: any): boolean => {
+  if (!token || !token.expires) return false;
+
+  // 转换为毫秒时间戳
+  const expiryTime = new Date(token.expires).getTime();
+  const currentTime = new Date().getTime();
+
+  // 如果token在5分钟内过期，返回true
+  const fiveMinutesMs = 5 * 60 * 1000;
+  return expiryTime - currentTime < fiveMinutesMs;
+};
+
 // 创建 axios 实例
 const service = axios.create({
   baseURL: env.api,
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
 });
-/*
-let isRefreshing = false;
-let subscribers: ((token: string) => void)[] = [];
 
-function onTokenRefreshed(newToken: string) {
-  subscribers.forEach((callback) => callback(newToken));
-  subscribers = [];
-}
+// 刷新token的函数
+const refreshToken = async () => {
+  //alert("refresh");
+  try {
+    isRefreshing = true;
+    const token = Token.getToken();
 
-function isTokenExpiringSoon(token: string, bufferTime = 300): boolean {
-  // 移除 Bearer 前缀
-  const cleanToken = token.startsWith("Bearer ") ? token.split(" ")[1] : token;
-  const payload = JSON.parse(atob(cleanToken.split(".")[1])); // 解码token
-  const currentTime = Math.floor(Date.now() / 1000); // 当前时间的 Unix 时间戳
-  const tokenExpiryTime = payload.exp; // 过期时间
+    if (!token || !token.refreshToken) {
+      throw new Error("No refresh token available");
+    }
 
-  // 如果当前时间 + 缓冲时间 >= token 过期时间，则表示快要过期
-  return currentTime + bufferTime >= tokenExpiryTime;
-}*/
+    const response = await AuthAPI.refresh(token.refreshToken);
+    //alert(JSON.stringify(response));
+    // 更新token存储
+    if (response.data) {
+      Token.setToken(response.data.token);
+    }
+
+    // 执行队列中的请求
+    requestsQueue.forEach(({ config, resolve }) => {
+      resolve(service(config));
+    });
+
+    // 清空队列
+    requestsQueue = [];
+
+    return response.data;
+  } catch (error) {
+    // 刷新失败，可能需要重新登录
+    const router = useRouter();
+    return handleUnauthorized(router);
+  } finally {
+    isRefreshing = false;
+  }
+};
 
 // 请求拦截器
 service.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     const token = Token.getToken();
+
+    // 设置token
     if (token != null) {
-      config.headers.Authorization = `Bearer ${token.accessToken}`; // 使用当前 Token
+      config.headers.Authorization = `Bearer ${token.accessToken}`;
+
+      // 检查请求URL是否在白名单中
+      const isWhitelisted = refreshTokenWhitelist.some((url) =>
+        config.url?.includes(url)
+      );
+
+      if (!isWhitelisted && isTokenExpiringSoon(token)) {
+        // 如果token即将过期且不在白名单中
+        if (!isRefreshing) {
+          // 如果没有正在刷新，开始刷新
+          await refreshToken();
+
+          // 使用新token
+          const newToken = Token.getToken();
+          if (newToken) {
+            config.headers.Authorization = `Bearer ${newToken.accessToken}`;
+          }
+        } else {
+          // 如果正在刷新，将请求加入队列
+          return new Promise((resolve, reject) => {
+            requestsQueue.push({ config, resolve, reject });
+          });
+        }
+      }
     }
 
     return config;

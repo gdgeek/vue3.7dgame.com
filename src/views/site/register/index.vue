@@ -7,34 +7,18 @@
         <br />
         <el-tabs style="width: 100%" type="border-card" :stretch="true">
           <el-tab-pane :label="$t('login.createAccount')">
-            <el-form
-              ref="registerFormRef"
-              class="login-form"
-              :rules="registerRules"
-              :model="registerForm"
-              label-width="auto"
-            >
+            <el-form ref="registerFormRef" class="login-form" :rules="registerRules" :model="registerForm"
+              label-width="auto">
               <el-form-item :label="$t('login.username')" prop="username">
-                <el-input
-                  v-model="registerForm.username"
-                  suffix-icon="Message"
-                ></el-input>
+                <el-input v-model="registerForm.username" suffix-icon="Message"></el-input>
               </el-form-item>
 
               <el-form-item :label="$t('login.password')" prop="password">
-                <el-input
-                  v-model="registerForm.password"
-                  type="password"
-                  suffix-icon="Lock"
-                ></el-input>
+                <el-input v-model="registerForm.password" type="password" suffix-icon="Lock"></el-input>
               </el-form-item>
 
               <el-form-item :label="$t('login.repassword')" prop="repassword">
-                <el-input
-                  v-model="registerForm.repassword"
-                  type="password"
-                  suffix-icon="Lock"
-                ></el-input>
+                <el-input v-model="registerForm.repassword" type="password" suffix-icon="Lock"></el-input>
               </el-form-item>
 
               <el-form-item class="login-button">
@@ -66,7 +50,7 @@ import { FormInstance, FormItemRule } from "element-plus";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { onMounted, watch, ref } from "vue";
 import { useI18n } from "vue-i18n"; // Ensure you have this import
-import type { AppleIdToken } from "@/api/auth/model";
+
 import WechatApi from "@/api/v1/wechat";
 import { RegisterData } from "@/api/auth/model";
 import Token from "@/store/modules/token";

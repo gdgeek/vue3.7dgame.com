@@ -7,12 +7,12 @@ const login = (data: any) => {
     data,
   });
 };
-const refresh = (data: any) => {
+const refresh = (refreshToken: string) => {
   const url = "/v1/auth/refresh";
   return request({
     url,
     method: "post",
-    data,
+    data: { refreshToken },
   });
 };
 const link = (data: any) => {

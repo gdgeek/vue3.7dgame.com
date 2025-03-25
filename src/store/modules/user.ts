@@ -144,8 +144,9 @@ export const useUserStore = defineStore(
         console.error("Error fetching user info:", error);
       }
     };
-
+    /*
     const setupRefreshInterval = () => {
+      //  alert(2);
       if (refreshInterval.value) {
         clearInterval(refreshInterval.value); // 清除现有的定时器
       }
@@ -169,7 +170,7 @@ export const useUserStore = defineStore(
         }
       }, 3600000);
     };
-
+*/
     const form = ref<LoginData>({
       username: "",
       password: "",
@@ -236,7 +237,7 @@ export const useUserStore = defineStore(
       resetToken,
       form,
       refreshInterval,
-      setupRefreshInterval,
+      //  setupRefreshInterval,
     };
   },
   {
