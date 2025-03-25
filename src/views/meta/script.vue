@@ -581,7 +581,7 @@ const addMetaData = (data: any, ret: any) => {
 
   const entity = testPoint(data, [
     "polygen",
-    "point",
+    "entity",
     "voxel",
     "video",
     "picture",
