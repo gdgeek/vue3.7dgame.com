@@ -1,6 +1,6 @@
 <template>
   <div class="verse-scene">
-    <resource-dialog @selected="selected" ref="dialog"></resource-dialog>
+    <resource-dialog @selected="selected" @replaced="replaced" ref="dialog"></resource-dialog>
     <el-container>
       <el-main>
         <iframe ref="editor" id="editor" :src="src" class="content" height="100%" width="100%"></iframe>
@@ -58,14 +58,23 @@ const selected = (data: any) => {
   postMessage("load-resource", data);
 };
 
+const replaced = (data: any) => {
+  postMessage("replace-resource", data);
+};
+
 const saveable = (data: any) => {
   if (data === null) {
     return false;
   }
   return data.editable;
 };
+
 const loadResource = (data: any) => {
   dialog.value.open(null, id.value, data.type);
+};
+
+const replaceResource = (data: any) => {
+  dialog.value.open(null, id.value, data.type, 'replace');
 };
 
 const postMessage = (action: string, data: any = {}) => {
@@ -108,6 +117,9 @@ const handleMessage = async (e: MessageEvent) => {
       break;
     case "load-resource":
       loadResource(data);
+      break;
+    case "replace-resource":
+      replaceResource(data);
       break;
     case "goto":
       if (data.target === "blockly.js") {

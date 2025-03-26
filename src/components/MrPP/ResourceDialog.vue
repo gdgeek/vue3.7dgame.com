@@ -5,7 +5,7 @@
         <div class="dialog-footer">
           <MrPPHeader :sorted="active.sorted" :searched="active.searched" @search="search" @sort="sort">
             <el-tag>
-              <b>{{ $t("meta.ResourceDialog.title") }}</b>
+              <b>{{ $t(mode === 'replace' ? "meta.ResourceDialog.replaceTitle" : "meta.ResourceDialog.title") }}</b>
             </el-tag>
           </MrPPHeader>
           <el-divider content-position="left">
@@ -49,14 +49,17 @@
 
                 <div class="clearfix">
                   <div class="demo-button-style">
-                    <el-checkbox-group v-model="selectedIds" size="small">
+                    <el-checkbox-group v-if="mode !== 'replace'" v-model="selectedIds" size="small">
                       <el-checkbox-button :value="item.id">
                         {{ $t("meta.ResourceDialog.select") }}
                       </el-checkbox-button>
                       <el-checkbox-button @click="doSelect(item)">
-                        放入
+                        {{ $t("meta.ResourceDialog.putIn") }}
                       </el-checkbox-button>
                     </el-checkbox-group>
+                    <el-button v-else size="small" @click="doReplace(item)">
+                      {{ $t("meta.ResourceDialog.replace") }}
+                    </el-button>
                   </div>
                 </div>
 
@@ -81,9 +84,12 @@
             </el-col>
             <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
               <el-button-group>
-                <el-button size="small" :disabled="selectedIds.length == 0" @click="doBatchSelect()">放入全部选择</el-button>
-                <el-button size="small" :disabled="selectedIds.length == 0" @click="doEmpty()">{{
-                  $t("meta.ResourceDialog.empty") }}</el-button>
+                <template v-if="mode !== 'replace'">
+                  <el-button size="small" :disabled="selectedIds.length == 0"
+                    @click="doBatchSelect()">{{ $t("meta.ResourceDialog.putAllIn") }}</el-button>
+                  <el-button size="small" :disabled="selectedIds.length == 0" @click="doEmpty()">{{
+                    $t("meta.ResourceDialog.empty") }}</el-button>
+                </template>
                 <el-button size="small" @click="dialogVisible = false">
                   {{ $t("meta.ResourceDialog.cancel") }}
                 </el-button>
@@ -130,10 +136,12 @@ type ActiveState = {
 
 // 响应式状态
 const selectedIds = ref<any[]>([]);
+const singleSelectedId = ref<number>();
 const dialogVisible = ref(false);
 const type = ref("polygen");
 const metaId = ref<number | null>(null);
 const value = ref<any>(null);
+const mode = ref<'normal' | 'replace'>('normal');
 
 const active = ref<ActiveState>({
   items: [],
@@ -143,7 +151,7 @@ const active = ref<ActiveState>({
 });
 
 // 事件和国际化
-const emit = defineEmits(["selected", "cancel", "close"]);
+const emit = defineEmits(["selected", "replaced", "cancel", "close"]);
 const { t } = useI18n();
 
 // 计算属性
@@ -152,15 +160,18 @@ const viewCards = computed(() => {
 });
 
 // 方法
-function isSelected(item: any): boolean {
+const isSelected = (item: any): boolean => {
+  if (mode.value === 'replace') {
+    return singleSelectedId.value === item.id;
+  }
   return selectedIds.value.some((id) => id === item.id);
 }
 
-function getItemTitle(item: any): string {
+const getItemTitle = (item: any): string => {
   return item.title ?? item.name ?? "title";
 }
 
-async function open(newValue: any, meta_id: any = null, newType: any = null) {
+const open = async (newValue: any, meta_id: any = null, newType: any = null, openMode: 'normal' | 'replace' = 'normal') => {
   active.value = {
     items: [],
     sorted: "-created_at",
@@ -171,14 +182,24 @@ async function open(newValue: any, meta_id: any = null, newType: any = null) {
   type.value = newType;
   metaId.value = meta_id;
   value.value = newValue;
+  mode.value = openMode; // 设置打开模式
 
+  // 重置选择状态
   selectedIds.value = [];
+  singleSelectedId.value = undefined;
+
   await refresh();
   dialogVisible.value = true;
 }
 
-async function openIt({ selected = null, binding = null, type }: any) {
-  await open(selected, binding, type);
+const openIt = async ({ selected = null, binding = null, type }: any, openMode: 'normal' | 'replace' = 'normal') => {
+  await open(selected, binding, type, openMode);
+}
+
+// 替换模式下的选择处理
+const doReplace = (data: ViewCard) => {
+  emit("replaced", data);
+  dialogVisible.value = false;
 }
 
 async function refresh() {
@@ -231,8 +252,9 @@ function doEmpty() {
   selectedIds.value = [];
 }
 
-function doClose() {
+const doClose = () => {
   selectedIds.value = [];
+  singleSelectedId.value = undefined;
   emit("close");
 }
 
