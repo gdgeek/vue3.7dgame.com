@@ -603,6 +603,7 @@ export default {
     title: "创建【实体】",
     enter: "进入",
     delete: "删除",
+    copy: "副本",
     confirm: {
       message1: "此操作将永久删除该【实体】, 是否继续?",
       message2: "提示",
@@ -631,6 +632,14 @@ export default {
       cancel: "取消",
       success: "新的实体名称是: ",
       info: "取消输入",
+    },
+    prompt3: {
+      message1: "请输入复制后的实体名称",
+      message2: "复制实体",
+      confirm: "确认",
+      cancel: "取消",
+      success: "复制成功! 新实体名称: ",
+      info: "取消复制",
     },
     metaEdit: {
       title: "【实体】名称：",

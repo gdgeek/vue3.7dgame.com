@@ -1,29 +1,13 @@
 <template>
   <span>
     <!-- 修改对话框组件 -->
-    <mr-p-p-verse-window-create
-      ref="changedDialog"
-      :close-on-click-modal="true"
+    <mr-p-p-verse-window-create ref="changedDialog" :close-on-click-modal="true"
       :dialog-title="$t('verse.page.list.toolbar.dialogTitle')"
-      :dialog-submit="$t('verse.page.list.toolbar.dialogSubmit')"
-      @submit="submitChange"
-    ></mr-p-p-verse-window-create>
+      :dialog-submit="$t('verse.page.list.toolbar.dialogSubmit')" @submit="submitChange"></mr-p-p-verse-window-create>
     <!-- 按钮组 -->
     <el-button-group v-if="verse" style="float: right" :inline="true">
-      <el-button
-        v-if="saveable"
-        type="success"
-        size="small"
-        icon="Edit"
-        @click="changedWindow"
-      ></el-button>
-      <el-button
-        v-if="deleteable"
-        type="danger"
-        size="small"
-        icon="delete"
-        @click="deletedWindow"
-      ></el-button>
+      <el-button v-if="saveable" type="success" size="small" icon="Edit" @click="changedWindow"></el-button>
+      <el-button v-if="deleteable" type="danger" size="small" icon="delete" @click="deletedWindow"></el-button>
       &nbsp;
     </el-button-group>
   </span>

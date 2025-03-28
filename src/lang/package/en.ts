@@ -616,6 +616,7 @@ export default {
     title: "Create【Entity】",
     enter: "Enter",
     delete: "Delete",
+    copy: "Copy",
     confirm: {
       message1:
         "This action will permanently delete the 【Entity】. Do you want to continue?",
@@ -645,6 +646,14 @@ export default {
       cancel: "Cancel",
       success: "The new entity name is: ",
       info: "Input canceled",
+    },
+    prompt3: {
+      message1: "Please enter the name for the copied entity",
+      message2: "Copy Entity",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      success: "Copy successful! New entity name: ",
+      info: "Copy cancelled",
     },
     metaEdit: {
       title: "【Entity】Name:",

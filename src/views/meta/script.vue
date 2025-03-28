@@ -158,6 +158,7 @@ import pako from "pako";
 import ScenePlayer from "./ScenePlayer.vue";
 import jsBeautify from "js-beautify";
 import env from "@/environment";
+
 const loader = new GLTFLoader();
 const appStore = useAppStore();
 const loading = ref(false);
