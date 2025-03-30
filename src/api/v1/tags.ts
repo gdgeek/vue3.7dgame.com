@@ -1,12 +1,20 @@
 import request from "@/utils/request";
 
+import qs from "querystringify";
+import path from "path-browserify";
+
 export const getTags = () => {
+  const query: Record<string, any> = [];
+
+  query["TagsSearch[type]"] = "Classify";
+
   return request({
-    url: "v1/tags",
+    url: path.join("v1", "tags" + qs.stringify(query, true)),
+
     method: "get",
   });
 };
-
+/*
 export const getMessageTag = (tag_id: number, page = 0) => {
   return request({
     url:
@@ -33,4 +41,4 @@ export function addMessageTag(message_id: number, tag_id: number) {
     method: "post",
     data,
   });
-}
+}*/
