@@ -73,7 +73,7 @@ const tags = computed(() => {
 const handleChange = (val: any) => {
 
   console.log('选择完毕，选中的标签:', val)
-  emit('selected', val)
+  emit('add', val)
 
   value.value = null;
   //emit('tagsChange', val)
