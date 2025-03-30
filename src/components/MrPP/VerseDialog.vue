@@ -104,10 +104,12 @@ const open = () => {
 
 const refresh = async () => {
   const response = await getVerses(
-    active.value.sorted,
-    active.value.searched,
-    active.value.pagination.current,
-    "image"
+    {
+      sort: active.value.sorted,
+      search: active.value.searched,
+      page: active.value.pagination.current,
+      expand: "image",
+    }
   );
   active.value.items = response.data;
 };

@@ -1,29 +1,15 @@
 <template>
   <div class="verse-index">
-    <Create
-      v-if="props.created"
-      ref="createdDialog"
-      :dialog-title="$t('verse.page.dialogTitle')"
-      :dialog-submit="$t('verse.page.dialogSubmit')"
-      @submit="submitCreate"
-    ></Create>
+
+    <Create v-if="props.created" ref="createdDialog" :dialog-title="$t('verse.page.dialogTitle')"
+      :dialog-submit="$t('verse.page.dialogSubmit')" @submit="submitCreate"></Create>
 
     <br />
     <el-container>
       <el-header>
-        <MrPPHeader
-          :sorted="sorted"
-          :searched="searched"
-          @search="search"
-          @sort="sort"
-        >
+        <MrPPHeader :has-tags="true" @tags="tags" :sorted="sorted" :searched="searched" @search="search" @sort="sort">
           <el-button-group :inline="true">
-            <el-button
-              v-if="created"
-              size="small"
-              type="primary"
-              @click="createWindow"
-            >
+            <el-button v-if="created" size="small" type="primary" @click="createWindow">
               <font-awesome-icon icon="plus"></font-awesome-icon>
               &nbsp;
               <span class="hidden-sm-and-down">{{
@@ -40,15 +26,9 @@
       </el-main>
       <el-footer>
         <el-card class="box-card">
-          <el-pagination
-            :current-page="pagination.current"
-            :page-count="pagination.count"
-            :page-size="pagination.size"
-            :total="pagination.total"
-            layout="prev, pager, next, jumper"
-            background
-            @current-change="handleCurrentChange"
-          ></el-pagination>
+          <el-pagination :current-page="pagination.current" :page-count="pagination.count" :page-size="pagination.size"
+            :total="pagination.total" layout="prev, pager, next, jumper" background
+            @current-change="handleCurrentChange"></el-pagination>
         </el-card>
       </el-footer>
     </el-container>
@@ -80,8 +60,10 @@ const emit = defineEmits<{
 const createdDialog = ref<InstanceType<typeof Create> | null>(null);
 const router = useRouter();
 const items = ref<VerseData[]>([]);
+
 const sorted = ref("-created_at");
 const searched = ref("");
+const tagList = ref<number[]>([]);
 const pagination = ref<Pagination>({
   current: 1,
   count: 1,
@@ -122,6 +104,10 @@ const sort = (value: string) => {
   refresh();
 };
 
+const tags = (value: number[]) => {
+  tagList.value = value;
+  refresh();
+};
 const search = (value: string) => {
   searched.value = value;
   refresh();
@@ -143,6 +129,7 @@ const refresh = () => {
       sorted: sorted.value,
       searched: searched.value,
       current: pagination.value.current,
+      tags: tagList.value,
     },
     (value: any) => {
       items.value = value.data;

@@ -20,13 +20,14 @@
     <div class="clearfix">
       <el-button-group>
         <el-button type="primary" @click="goToDetail(item.id.toString())" size="small">{{ $t("verse.page.list.enter")
-        }}</el-button>
+          }}</el-button>
         <el-button type="primary" v-if="item.verseRelease" @click="restrain(item)" size="small">
           <font-awesome-icon class="icon" icon="box-open" color="#FFA500"></font-awesome-icon>
         </el-button>
+        <!--
         <el-button type="primary" v-else @click="release(item)" size="small">
           <font-awesome-icon class="icon" icon="box"></font-awesome-icon>
-        </el-button>
+        </el-button>-->
       </el-button-group>
       <VerseToolbar :verse="item" @deleted="emit('deleted')" @changed="emit('changed')"></VerseToolbar>
     </div>

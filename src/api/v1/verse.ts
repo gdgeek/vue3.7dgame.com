@@ -87,6 +87,7 @@ export type VerseData = {
   metas?: metaInfo[];
   script?: Script;
   verseCode?: any;
+  verseTags?: [];
 };
 
 export type PostVerseData = {
@@ -161,22 +162,33 @@ export const getVerseMetasWithJsCode = (
     method: "get",
   });
 };
+export interface VersesParams {
+  sort?: string;
+  search?: string;
+  page?: number;
+  expand?: string;
+  tags?: number[]; // 假设tags是数字ID数组，如果是其他类型可以相应调整
+}
 
-const createQueryParams = (
-  sort: string,
-  search: string,
-  page: number,
-  expand: string
-): Record<string, any> => {
+const createQueryParams = ({
+  sort,
+  search,
+  page,
+  expand,
+  tags,
+}: VersesParams): Record<string, any> => {
   const query: Record<string, any> = [];
   query["expand"] = expand;
   query["sort"] = sort;
-
-  if (search !== "") {
+  if (search && search !== "") {
     query["VerseSearch[name]"] = search;
   }
-  if (page > 1) {
+
+  if (page && page > 1) {
     query["page"] = page;
+  }
+  if (tags && tags.length > 0) {
+    query["tags"] = tags;
   }
   return query;
 };
@@ -187,7 +199,7 @@ export const getVersesWithShare = (
   page = 0,
   expand = "image,author"
 ) => {
-  const query = createQueryParams(sort, search, page, expand);
+  const query = createQueryParams({ sort, search, page, expand });
   return request({
     url: path.join("v1", "verses", "share" + qs.stringify(query, true)),
     method: "get",
@@ -200,20 +212,15 @@ export const getVersesWithOpen = (
   page = 0,
   expand = "image,author"
 ) => {
-  const query = createQueryParams(sort, search, page, expand);
+  const query = createQueryParams({ sort, search, page, expand });
   return request({
     url: path.join("v1", "verses", "open" + qs.stringify(query, true)),
     method: "get",
   });
 };
 
-export const getVerses = (
-  sort = "-created_at",
-  search = "",
-  page = 0,
-  expand = "image,author,share"
-) => {
-  const query = createQueryParams(sort, search, page, expand);
+export const getVerses = (params: VersesParams) => {
+  const query = createQueryParams(params);
   return request({
     url: path.join("v1", "verses" + qs.stringify(query, true)),
     method: "get",

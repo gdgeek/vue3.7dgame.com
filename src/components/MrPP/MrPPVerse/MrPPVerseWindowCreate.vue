@@ -16,11 +16,11 @@
       <el-form-item :label="$t('verse.page.form.description')">
         <el-input v-model="info.description" type="textarea"></el-input>
       </el-form-item>
-
+      <!--
       <el-form-item v-if="isManager" :label="$t('verse.page.form.course')">
         <el-input v-model="info.course" type="number"></el-input>
       </el-form-item>
-
+      -->
       <!-- 载入截图组件 -->
     </el-form>
 

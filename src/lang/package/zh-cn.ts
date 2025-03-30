@@ -63,11 +63,11 @@ export default {
       generation: "AI生成",
     },
     project: {
-      title: "工程",
+      title: "场景",
       selfGenerated: "自己创造",
       systemRecommendation: "系统推荐",
       shareWithFriends: "朋友分享",
-      viewTitle: "【工程】",
+      viewTitle: "【场景】",
       scriptEditor: "脚本编辑",
       sceneEditor: "场景编辑",
     },
@@ -147,7 +147,7 @@ export default {
       myPolygen: "模型",
       myPicture: "图片",
       myVideo: "视频",
-      myProject: "工程",
+      myProject: "场景",
       myPublish: "发布",
       myLike: "点赞",
       enter: "进入",
@@ -295,7 +295,7 @@ export default {
     uploadFile: "选择体素（.vox文件），并上传",
     view: {
       title: "体素名称：",
-      titleStatement: "用此体素创建【工程】",
+      titleStatement: "用此体素创建【场景】",
       info: {
         title: "体素信息",
         label1: "条目",
@@ -313,7 +313,7 @@ export default {
       },
       update: "等待更新",
       prompt: {
-        message1: "用此体素创建【工程】",
+        message1: "用此体素创建【场景】",
         message2: "提示",
         confirm: "确认",
         cancel: "取消",
@@ -364,7 +364,7 @@ export default {
     uploadFile: "选择模型（.glb文件），并上传",
     view: {
       title: "模型名称：",
-      titleStatement: "用此模型创建【工程】",
+      titleStatement: "用此模型创建【场景】",
       info: {
         title: "模型信息",
         label1: "条目",
@@ -380,7 +380,7 @@ export default {
         delete: "删除",
       },
       prompt: {
-        message1: "用此模型创建【工程】",
+        message1: "用此模型创建【场景】",
         message2: "提示",
         confirm: "确认",
         cancel: "取消",
@@ -817,12 +817,12 @@ export default {
       },
     },
   },
-  // 工程部分国际化
+  // 场景部分国际化
   verse: {
     page: {
-      dialogTitle: "创建！【工程】",
+      dialogTitle: "创建！【场景】",
       dialogSubmit: "创 建",
-      title: "创建【工程】",
+      title: "创建【场景】",
       form: {
         picture: "封面图片",
         name: "名称",
@@ -848,7 +848,7 @@ export default {
           share: "共享ID",
         },
         releaseConfirm: {
-          message1: "确定发布该工程吗？",
+          message1: "确定发布该场景吗？",
           message2: "提示",
           confirm: "确认",
           cancel: "取消",
@@ -856,7 +856,7 @@ export default {
           info: "已取消",
         },
         restrainConfirm: {
-          message1: "确定下线该工程吗？",
+          message1: "确定下线该场景吗？",
           message2: "提示",
           confirm: "确认",
           cancel: "取消",
@@ -867,7 +867,7 @@ export default {
           dialogTitle: "修改数据",
           dialogSubmit: "确定",
           confirm: {
-            message1: "此操作将永久删除该【工程】，是否继续?",
+            message1: "此操作将永久删除该【场景】，是否继续?",
             message2: "提示",
             confirm: "确认",
             cancel: "取消",
@@ -886,7 +886,7 @@ export default {
     },
     view: {
       header: "修改信息",
-      title: "【工程】名称：",
+      title: "【场景】名称：",
       form: {
         label1: "多语言",
         label2: "名字",
@@ -904,11 +904,11 @@ export default {
           message5: "请输入介绍",
         },
       },
-      edit: "编辑【工程】",
-      eye: "查看【工程】",
-      info: "【工程】信息",
-      verseOpen: "开放【工程】",
-      verseClose: "关闭【工程】",
+      edit: "编辑【场景】",
+      eye: "查看【场景】",
+      info: "【场景】信息",
+      verseOpen: "开放【场景】",
+      verseClose: "关闭【场景】",
       success1: "修改成功",
       success2: "提交成功",
       success3: "删除成功",
@@ -916,7 +916,7 @@ export default {
       success5: "停止共享",
       error1: "提交失败",
       error2: "表单验证失败",
-      messageTitle: "【工程】名称：",
+      messageTitle: "【场景】名称：",
       scene: "场景",
       share: {
         header1: "共享给其他用户",
@@ -931,7 +931,7 @@ export default {
           confirm: "确 认",
           cancel: "取 消",
         },
-        title1: "【工程】共享",
+        title1: "【场景】共享",
         title2: "共享给好友",
         confirm: {
           message1: "是否确认关闭共享？",
@@ -1114,8 +1114,8 @@ export default {
       delete: "删除",
       form: {
         label1: "顺序",
-        label2: "工程id",
-        label3: "工程名",
+        label2: "场景id",
+        label3: "场景名",
         label4: "操作",
         placeholder: "请输入排序",
         confirm: {
@@ -1146,8 +1146,8 @@ export default {
       delete: "删除",
       form: {
         label1: "顺序",
-        label2: "工程id",
-        label3: "工程名",
+        label2: "场景id",
+        label3: "场景名",
         label4: "操作",
         placeholder: "请输入排序",
         confirm: {
@@ -1186,7 +1186,7 @@ export default {
       },
     },
     verseDialog: {
-      title: "选择【工程】",
+      title: "选择【场景】",
       select: "选择",
       create: "新 建",
       cancel: "取 消",

@@ -32,7 +32,7 @@
             <div class="clearfix">
               <el-button type="primary" size="small" @click="selected({ data: item })">{{
                 $t("verse.view.metaDialog.select")
-                }}</el-button>
+              }}</el-button>
             </div>
           </el-card>
           <br />
