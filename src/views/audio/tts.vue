@@ -272,6 +272,8 @@ interface LanguageAnalysis {
   otherCount: number
   totalChars: number
   suggestion: string
+  isMultiLanguage: boolean
+  detectedLanguage: string
 }
 
 // 注册ECharts组件
@@ -284,7 +286,7 @@ echarts.use([
   CanvasRenderer
 ])
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const fileStore = useFileStore()
 const settingsStore = useSettingsStore()
@@ -353,7 +355,9 @@ const languageAnalysis = ref<LanguageAnalysis>({
   englishCount: 0,
   otherCount: 0,
   totalChars: 0,
-  suggestion: ''
+  suggestion: '',
+  isMultiLanguage: false,
+  detectedLanguage: ''
 })
 
 // 情感选择相关
@@ -667,7 +671,9 @@ const checkTextLanguage = () => {
     englishCount,
     otherCount,
     totalChars,
-    suggestion: ''
+    suggestion: '',
+    isMultiLanguage: false,
+    detectedLanguage: ''
   }
 
   nextTick(() => {
@@ -696,17 +702,12 @@ const checkTextLanguage = () => {
     }
   }
 
-  if (isMultiLanguage) {
-    const detectedLanguageText = detectedLanguage === '中文' ? t('tts.chinese') :
-      detectedLanguage === '英文' ? t('tts.english') :
-        detectedLanguage === '日文' ? t('tts.japanese') : detectedLanguage
-    languageAnalysis.value.suggestion = t('tts.mixedLanguageDetected', [detectedLanguageText])
-  } else if (detectedLanguage) {
-    const detectedLanguageText = detectedLanguage === '中文' ? t('tts.chinese') :
-      detectedLanguage === '英文' ? t('tts.english') :
-        detectedLanguage === '日文' ? t('tts.japanese') : detectedLanguage
-    languageAnalysis.value.suggestion = t('tts.mainLanguageDetected', [detectedLanguageText])
-  }
+  // 将检测结果保存到更新建议的函数中使用
+  languageAnalysis.value.isMultiLanguage = isMultiLanguage
+  languageAnalysis.value.detectedLanguage = detectedLanguage
+
+  // 更新建议
+  updateLanguageSuggestion()
 
   if (isMultiLanguage && text.value.length > 10) {
     const languageInfo = t('tts.languagePercentage', [
@@ -766,6 +767,25 @@ const checkTextLanguage = () => {
     if (text.value.length > 500) {
       ElMessage.warning(t('tts.textLimitWarning', [t('tts.english'), 500, text.value.length]))
     }
+  }
+}
+
+// 更新语言分析建议的函数
+const updateLanguageSuggestion = () => {
+  const { isMultiLanguage, detectedLanguage } = languageAnalysis.value
+
+  if (!detectedLanguage) return
+
+  if (isMultiLanguage) {
+    const detectedLanguageText = detectedLanguage === '中文' ? t('tts.chinese') :
+      detectedLanguage === '英文' ? t('tts.english') :
+        detectedLanguage === '日文' ? t('tts.japanese') : detectedLanguage
+    languageAnalysis.value.suggestion = t('tts.mixedLanguageDetected', [detectedLanguageText])
+  } else {
+    const detectedLanguageText = detectedLanguage === '中文' ? t('tts.chinese') :
+      detectedLanguage === '英文' ? t('tts.english') :
+        detectedLanguage === '日文' ? t('tts.japanese') : detectedLanguage
+    languageAnalysis.value.suggestion = t('tts.mainLanguageDetected', [detectedLanguageText])
   }
 }
 
@@ -1047,6 +1067,13 @@ watch(voiceLanguage, (newLanguage, oldLanguage) => {
         ]))
       }
     }
+
+    // 更新图表以反映语言变化
+    if (showLanguageAnalysis.value && languageChart) {
+      nextTick(() => {
+        updateLanguageChart()
+      })
+    }
   }
 })
 
@@ -1079,6 +1106,20 @@ watch(() => languageAnalysis.value, () => {
   animatedPercentages.value = {}
   updateAnimatedPercentages()
 }, { deep: true })
+
+// 监听i18n语言变化
+watch(() => locale.value, () => {
+  if (showLanguageAnalysis.value && languageChart) {
+    nextTick(() => {
+      updateLanguageChart()
+    })
+  }
+
+  // 更新语言分析建议文本
+  if (text.value && languageAnalysis.value.totalChars > 0) {
+    updateLanguageSuggestion()
+  }
+}, { immediate: true })
 
 onMounted(() => {
   if (textContainerRef.value) {
@@ -1329,6 +1370,7 @@ onUnmounted(() => {
     transform: translateY(-10px);
     animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     z-index: 10;
+    box-shadow: none;
 
     @keyframes slideIn {
       from {
@@ -1390,7 +1432,8 @@ onUnmounted(() => {
         overflow: hidden;
         opacity: 0;
         animation: fadeIn 0.5s ease 0.4s forwards;
-        box-shadow: v-bind('isDark ? "0 4px 12px rgba(0, 0, 0, 0.2)" : "0 4px 12px rgba(0, 0, 0, 0.05)"');
+        box-shadow: none;
+        border: 1px solid v-bind('isDark ? "#444" : "#e4e7ed"');
       }
     }
 
@@ -1469,6 +1512,11 @@ onUnmounted(() => {
       margin-top: 1rem;
       opacity: 0;
       animation: fadeIn 0.5s ease 0.6s forwards;
+
+      :deep(.el-alert) {
+        box-shadow: none;
+        border: 1px solid v-bind('isDark ? "#444" : "#e4e7ed"');
+      }
     }
 
     @keyframes fadeIn {
@@ -1513,7 +1561,7 @@ onUnmounted(() => {
   .text-area-container {
     position: relative;
     width: 100%;
-    height: 150px; 
+    height: 150px;
   }
 
   .text-container {
