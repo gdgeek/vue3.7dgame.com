@@ -918,6 +918,24 @@ export default {
       error2: "表单验证失败",
       messageTitle: "【场景】名称：",
       scene: "场景",
+      tags: {
+        confirmRemove: {
+          message: "确认删除标签?",
+          title: "给场景删除标签",
+          confirm: "确认",
+          cancel: "取消",
+          success: "删除标签成功",
+          error: "取消删除标签",
+        },
+        confirmAdd: {
+          message: "确认增加标签?",
+          title: "给场景增加标签",
+          confirm: "确认",
+          cancel: "取消",
+          success: "增加标签成功",
+          error: "取消增加标签",
+        },
+      },
       share: {
         header1: "共享给其他用户",
         header2: "修改共享信息",

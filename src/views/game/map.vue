@@ -74,6 +74,7 @@ import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { getVpMaps, postVpMap, deleteVpMap } from "@/api/v1/vp-map";
 import { putVpGuide, postVpGuide, deleteVpGuide } from "@/api/v1/vp-guide";
 import TransitionWrapper from '@/components/TransitionWrapper.vue';
+
 const data = ref<any>(null);
 const dialogRef = ref<InstanceType<typeof VerseDialog> | null>(null);
 const sorted = ref<string>("-created_at");
@@ -87,14 +88,20 @@ const pagination = ref({
 });
 
 const refresh = async () => {
-  const response = await getVpMaps(pagination.value.current);
-  data.value = response.data[0];
-  pagination.value = {
-    current: parseInt(response.headers["x-pagination-current-page"]),
-    count: parseInt(response.headers["x-pagination-page-count"]),
-    size: parseInt(response.headers["x-pagination-per-page"]),
-    total: parseInt(response.headers["x-pagination-total-count"]),
-  };
+  try {
+    const response = await getVpMaps(pagination.value.current);
+    data.value = response.data[0];
+
+    // 更新分页信息
+    pagination.value = {
+      current: parseInt(response.headers["x-pagination-current-page"]),
+      count: parseInt(response.headers["x-pagination-page-count"]),
+      size: parseInt(response.headers["x-pagination-per-page"]),
+      total: parseInt(response.headers["x-pagination-total-count"]),
+    };
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 const onchange = async (id: number, val: number) => {
@@ -118,9 +125,13 @@ const onchange = async (id: number, val: number) => {
 };
 
 const selected = async (item: any) => {
-  await postVpGuide({ level_id: item.data.id, map_id: data.value.id });
-  ElMessage.success(t("game.map.success"));
-  refresh();
+  try {
+    await postVpGuide({ level_id: item.data.id, map_id: data.value.id });
+    ElMessage.success(t("game.map.success"));
+    await refresh();
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 const addMap = async () => {
@@ -138,7 +149,7 @@ const addMap = async () => {
     pagination.value.count++;
     pagination.value.current = pagination.value.count;
     ElMessage.success(t("game.map.confirm1.success"));
-    refresh();
+    await refresh();
   } catch (e) {
     console.error(e);
     ElMessage.info(t("game.map.confirm1.info"));
@@ -159,7 +170,7 @@ const removeMap = async () => {
     await deleteVpMap(data.value.id);
     pagination.value.current = pagination.value.count;
     ElMessage.success(t("game.map.confirm2.success"));
-    refresh();
+    await refresh();
   } catch (e) {
     console.error(e);
     ElMessage.info(t("game.map.confirm2.info"));
@@ -182,7 +193,7 @@ const del = async (id: number) => {
       }
     );
     await deleteVpGuide(id);
-    refresh();
+    await refresh();
     ElMessage.success(t("game.map.confirm3.success"));
   } catch (e) {
     console.error(e);

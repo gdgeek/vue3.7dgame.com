@@ -60,9 +60,13 @@ import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
+// 组件状态
 const items = ref<any[] | null>(null);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
+const { t } = useI18n();
+
+// 分页配置
 const pagination = ref({
   current: 1,
   count: 1,
@@ -70,16 +74,51 @@ const pagination = ref({
   total: 20,
 });
 
-const { t } = useI18n();
+// 数据加载与刷新
+const refresh = async () => {
+  try {
+    const response = await getPictures(
+      sorted.value,
+      searched.value,
+      pagination.value.current
+    );
+    const headers = response.headers;
 
-// 处理分页
+    // 更新分页信息
+    pagination.value = {
+      current: parseInt(headers["x-pagination-current-page"]),
+      count: parseInt(headers["x-pagination-page-count"]),
+      size: parseInt(headers["x-pagination-per-page"]),
+      total: parseInt(headers["x-pagination-total-count"]),
+    };
+
+    if (response.data) {
+      items.value = response.data;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// 分页处理
 const handleCurrentChange = (page: number) => {
   pagination.value.current = page;
   refresh();
-  console.log(pagination.value.current);
 };
 
-// 修改图片名称
+// 排序处理
+const sort = (value: string) => {
+  sorted.value = value;
+  refresh();
+};
+
+// 搜索处理
+const search = (value: string) => {
+  searched.value = value;
+  refresh();
+};
+
+// 重命名处理
 const namedWindow = async (item: { id: string; name: string }) => {
   try {
     const { value } = await ElMessageBox.prompt(
@@ -99,19 +138,7 @@ const namedWindow = async (item: { id: string; name: string }) => {
   }
 };
 
-// 排序
-const sort = (value: string) => {
-  sorted.value = value;
-  refresh();
-};
-
-// 搜索
-const search = (value: string) => {
-  searched.value = value;
-  refresh();
-};
-
-// 修改图片名称 API 调用
+// 修改图片名称API调用
 const named = async (id: string, newValue: string) => {
   try {
     await putPicture(id, { name: newValue });
@@ -121,6 +148,7 @@ const named = async (id: string, newValue: string) => {
   }
 };
 
+// 删除确认
 const deletedWindow = async (item: { id: string }) => {
   try {
     await ElMessageBox.confirm(
@@ -140,6 +168,7 @@ const deletedWindow = async (item: { id: string }) => {
   }
 };
 
+// 删除图片API调用
 const deleted = async (id: string) => {
   try {
     await deletePicture(id);
@@ -149,28 +178,6 @@ const deleted = async (id: string) => {
   }
 };
 
-// 刷新数据
-const refresh = async () => {
-  try {
-    const response = await getPictures(
-      sorted.value,
-      searched.value,
-      pagination.value.current
-    );
-    const headers = response.headers;
-    pagination.value = {
-      current: parseInt(headers["x-pagination-current-page"]),
-      count: parseInt(headers["x-pagination-page-count"]),
-      size: parseInt(headers["x-pagination-per-page"]),
-      total: parseInt(headers["x-pagination-total-count"]),
-    };
-    if (response.data) {
-      items.value = response.data;
-    }
-  } catch (error) {
-    console.error(error);
-  }
-};
-
+// 生命周期钩子
 onMounted(() => refresh());
 </script>
