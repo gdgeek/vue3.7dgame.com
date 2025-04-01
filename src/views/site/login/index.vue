@@ -2,7 +2,7 @@
   <div class="content">
     <div v-loading="loading" :class="['box1', { 'dark-theme': isDark }]">
       <div :class="['box2', { 'dark-theme': isDark }]">
-        <h1>{{ $t("login.h1") }}</h1>
+        <h1>{{ $t("login.h1") }}~</h1>
 
         <h4>{{ $t("login.h4") }}</h4>
         <br />
@@ -31,8 +31,7 @@ import Wechat from "@/components/Account/Wechat.vue";
 const settingsStore = useSettingsStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 const loading = ref<boolean>(false);
-//输出
-console.error(environment.api);
+alert(environment.api);
 </script>
 
 <style scoped lang="scss">
