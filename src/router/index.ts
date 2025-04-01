@@ -528,6 +528,7 @@ const routes: RouteRecordRaw[] = [
                   params: null,
                 },
               },
+              /*
               {
                 path: "/resource/audio/tts",
                 name: "",
@@ -539,7 +540,7 @@ const routes: RouteRecordRaw[] = [
                   alwaysShow: false,
                   params: null,
                 },
-              },
+              },*/
               {
                 path: "/resource/audio/view",
                 name: "",

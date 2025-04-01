@@ -12,6 +12,7 @@
 </template>
 
 <script setup lang="ts">
+import { takePhoto } from '@/api/v1/snapshot'
 import { useRoute, useRouter } from "vue-router";
 import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 import PrefabDialog from "@/components/MrPP/PrefabDialog.vue";
@@ -145,6 +146,7 @@ const saveVerse = async (data: any) => {
 
   // 处理重复标题，确保标题唯一
   const retitleVerses = (verses: any[]) => {
+
     const titleCount: Record<string, number> = {};
 
     verses.forEach((verse) => {
@@ -171,12 +173,30 @@ const saveVerse = async (data: any) => {
   if (verse?.children?.modules) {
     retitleVerses(verse.children.modules);
   }
-
   await putVerse(id.value, { data: JSON.stringify(verse) });
-  ElMessage({
-    type: "success",
-    message: t("verse.view.sceneEditor.success"),
-  });
+
+  ElMessageBox.confirm(
+    '保存成功，是否发布？',
+    '发布场景',
+    {
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+    }
+  )
+    .then(async () => {
+      await takePhoto(id.value)
+      ElMessage({
+        type: 'success',
+        message: '发布成功',
+      })
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '取消发布',
+      })
+    })
 };
 
 // 处理来自编辑器的消息

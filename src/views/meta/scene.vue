@@ -148,7 +148,6 @@ const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
       message: t("meta.scene.success"),
     });
   } catch (error) {
-    console.error(error);
     ElMessage({
       type: "error",
       message: t("meta.scene.saveError"),
