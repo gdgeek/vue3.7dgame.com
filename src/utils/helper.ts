@@ -25,12 +25,12 @@ export function GetDomain(): string {
       return hostname;
     }
 
-    // 提取最后一个一级二级域名
     const domainParts = hostname.split(".");
-    if (domainParts.length > 2) {
-      return domainParts.slice(-2).join(".");
+    // 如果第一部分是www，则移除它
+    if (domainParts[0] === "www") {
+      domainParts.shift();
     }
-    return hostname;
+    return domainParts.join(".");
   }
 }
 

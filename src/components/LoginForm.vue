@@ -1,6 +1,7 @@
 <template>
-  <div v-loading="loading" :class="['box1', {'dark-theme': isDark }]">
+  <div v-loading="loading" :class="['box1', { 'dark-theme': isDark }]">
     <div :class="['box2', { 'dark-theme': isDark }]">
+
       <h1>{{ $t("login.h1") }}</h1>
       <h4>{{ $t("login.h4") }}</h4>
       <br />
