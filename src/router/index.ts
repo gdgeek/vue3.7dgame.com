@@ -731,6 +731,7 @@ const routes: RouteRecordRaw[] = [
               hidden: true,
             },
           },
+          /*
           {
             path: "/verse/share",
             component: () => import("@/views/meta-verse/share.vue"),
@@ -740,7 +741,7 @@ const routes: RouteRecordRaw[] = [
               icon: "cascader",
               hidden: true,
             },
-          },
+          },*/
           {
             path: "/verse/view",
             name: "VerseView",

@@ -1,34 +1,45 @@
 <template>
   <TransitionWrapper>
     <div class="verse-index">
-      <mr-p-p-verse-page @loaded="loaded" :created="false"></mr-p-p-verse-page>
+      <Page @loaded="loaded" :created="true"></Page>
     </div>
   </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
-import MrPPVersePage from "@/components/MrPP/MrPPVerse/MrPPVersePage.vue";
-import { getVerseOpenVerses } from "@/api/v1/verse-open";
+import Page from "@/components/MrPP/MrPPVerse/MrPPVersePage.vue";
+import { getPublic } from "@/api/v1/verse";
+import { getTags } from "@/api/v1/tags";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const loaded = async (data: any, result: Function) => {
-  try {
-    const response = await getVerseOpenVerses(
-      data.sorted,
-      data.searched,
-      data.current,
-      "image,author,share"
-    );
 
+  try {
+    const tags = await getTags('Status');
+   
+    const pub = tags.data.filter((tag: any) => {
+      if (tag.key == 'public') {
+         return tag;
+      }
+    }).map((tag: any) => {
+      return tag.id;
+    });
+  
+    const response = await getPublic({
+      sort: data.sorted,
+      search: data.searched,
+      page: data.current,
+      expand: "image,author,share,verseRelease",
+      tags: data.tags,
+    });
+    //console.error(response.data)
     const pagination = {
       current: parseInt(response.headers["x-pagination-current-page"]),
       count: parseInt(response.headers["x-pagination-page-count"]),
       size: parseInt(response.headers["x-pagination-per-page"]),
       total: parseInt(response.headers["x-pagination-total-count"]),
     };
-    const items = response.data;
-
-    result({ data: items, pagination: pagination });
+    result({ data: response.data, pagination: pagination });
   } catch (error) {
     console.error(error);
   }

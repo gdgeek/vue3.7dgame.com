@@ -4,7 +4,7 @@
     <div class="verse-view">
       <el-dialog v-model="dialog" width="70%">
         <template #header>{{ $t("verse.view.header") }}</template>
-        <MrPPMessageFrom ref="editor" :data="briefing" @post="postMessage"></MrPPMessageFrom>
+        <!--<MrPPMessageFrom ref="editor" :data="briefing" @post="postMessage"></MrPPMessageFrom>-->
       </el-dialog>
 
       <el-row :gutter="20" style="margin: 28px 18px 0">
@@ -26,7 +26,8 @@
             </template>
 
             <template #footer>
-              <tags v-if="verse && verse.verseTags" @add="addTags" @remove="removeTags" :verseTags="verse.verseTags" />
+              <tags v-if="verse && verse.verseTags" :editable="verse.editable" @add="addTags" @remove="removeTags"
+                :verseTags="verse.verseTags" />
             </template>
 
             <div class="box-item">
@@ -52,11 +53,12 @@
           </el-card>
 
           <br />
-
+          <!--
           <Message v-if="message" ref="message" :messageId="message.id" @set-message="setMessage"></Message>
           <Reply v-if="message" :messageId="message.id"></Reply>
 
           <br />
+          -->
         </el-col>
 
         <el-col :sm="8">
@@ -71,11 +73,12 @@
               </aside>
             </div>
             <VerseToolbar v-if="verse" :verse="verse" @deleted="deleted" @changed="changed"></VerseToolbar>
+            <br />
           </el-card>
 
           <br />
 
-          <!-- 管理员操作区域 -->
+          <!-- 管理员操作区域 
           <el-card v-if="can('admin', 'all')">
             <el-button style="width: 100%" type="primary" size="small" @click="verseOpen ? close : open">
               <font-awesome-icon :icon="verseOpen ? 'eye-slash' : 'eye'" />
@@ -86,7 +89,7 @@
           <br />
 
           <Share v-if="saveable && verse" :verse="verse" />
-
+-->
           <br />
         </el-col>
       </el-row>
@@ -97,16 +100,16 @@
 <script setup lang="ts">
 // 组件导入
 import Tags from "@/components/Tags.vue";
-import MrPPMessageFrom from "@/components/MrPP/MrPPVerse/MrPPMessageFrom.vue";
+//import MrPPMessageFrom from "@/components/MrPP/MrPPVerse/MrPPMessageFrom.vue";
 import Reply from "@/components/MrPP/MrPPVerse/Reply.vue";
 import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
-import Message from "@/components/MrPP/MrPPVerse/Message.vue";
-import Share from "@/components/MrPP/MrPPVerse/Share.vue";
+//import Message from "@/components/MrPP/MrPPVerse/Message.vue";
+//import Share from "@/components/MrPP/MrPPVerse/Share.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { getVerse, VerseData } from "@/api/v1/verse";
-import { postVerseOpen, deleteVerseOpen } from "@/api/v1/verse-open";
-import { MessageType, postMessageAPI } from "@/api/v1/message";
+//import { postVerseOpen, deleteVerseOpen } from "@/api/v1/verse-open";
+//import { MessageType, postMessageAPI } from "@/api/v1/message";
 import { postVerseTags, removeVerseTags } from "@/api/v1/verse-tags";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/store/modules/user";
@@ -121,13 +124,13 @@ const can = ability.can.bind(ability);
 const { t } = useI18n();
 
 
-const dialog = ref(false);
+//const dialog = ref(false);
 const verse = ref<VerseData | null>(null);
-const briefing = ref<MessageType | null>(null);
+//const briefing = ref<MessageType | null>(null);
 
 const id = computed(() => parseInt(route.query.id as string));
-const message = computed(() => verse.value?.message ?? null);
-const verseOpen = computed(() => verse.value?.verseOpen ?? null);
+//const message = computed(() => verse.value?.message ?? null);
+//const verseOpen = computed(() => verse.value?.verseOpen ?? null);
 const info = computed(() => verse.value?.info ? JSON.parse(verse.value.info) : null);
 const saveable = computed(() => verse.value ? verse.value.editable : false);
 
@@ -135,20 +138,20 @@ const refresh = async () => {
   try {
     const response = await getVerse(
       id.value,
-      "image,verseOpen,verseShare,author,message,verseTags"
+      "image,author,verseTags"
     );
     verse.value = response.data;
   } catch (error) {
     console.error("Failed to fetch verse data:", error);
     return;
   }
-
-  briefing.value = message.value
-    ? message.value
-    : {
-      title: t("verse.view.messageTitle") + `${verse.value?.name || ""}`,
-      body: info.value?.description || "",
-    };
+  /*
+    briefing.value = message.value
+      ? message.value
+      : {
+        title: t("verse.view.messageTitle") + `${verse.value?.name || ""}`,
+        body: info.value?.description || "",
+      };*/
 };
 
 const deleted = () => {
@@ -158,13 +161,13 @@ const deleted = () => {
 const changed = () => {
   refresh();
 };
-
+/*
 const setMessage = (message: any) => {
   if (verse.value) {
     verse.value.message = message;
   }
 };
-
+*/
 const removeTags = async (tags: number) => {
   try {
     await ElMessageBox.confirm(
@@ -202,7 +205,7 @@ const addTags = async (tags: number) => {
     ElMessage.info(t("verse.view.tags.confirmAdd.error"));
   }
 };
-
+/*
 const postMessage = async (data: any) => {
   const info = { target: { type: "verse", id: id.value } };
   data.info = JSON.stringify(info);
@@ -227,15 +230,15 @@ const open = () => {
 
 const close = async () => {
   if (verseOpen.value) {
-    await deleteVerseOpen(verseOpen.value.id);
+    // await deleteVerseOpen(verseOpen.value.id);
     if (verse.value) {
-      verse.value.verseOpen = null;
-      verse.value.message = null;
+      //   verse.value.verseOpen = null;
+      // verse.value.message = null;
       ElMessage.success(t("verse.view.success5"));
     }
   }
 };
-
+*/
 const comeIn = () => {
   router.push({
     path: "/verse/scene",

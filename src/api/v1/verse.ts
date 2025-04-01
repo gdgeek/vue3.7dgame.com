@@ -219,6 +219,14 @@ export const getVersesWithOpen = (
   });
 };
 
+
+export const getPublic= (params: VersesParams) => {
+  const query = createQueryParams(params);
+  return request({
+    url: path.join("v1", "verses", "public" + qs.stringify(query, true)),
+    method: "get",
+  });
+};
 export const getVerses = (params: VersesParams) => {
   const query = createQueryParams(params);
   return request({

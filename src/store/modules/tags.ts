@@ -16,9 +16,10 @@ export const useTagsStore = defineStore("tags", () => {
   // 刷新标签
   const refreshTags = async () => {
     try {
-      const response = await getTags();
+      const classify = await getTags("Classify");
+
       const map = new Map<number, TagInfo>();
-      response.data.forEach((item: any) => {
+      classify.data.forEach((item: any) => {
         const obj: TagInfo = {
           name: item.name,
           color: "#000000",

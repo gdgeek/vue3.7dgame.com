@@ -32,6 +32,8 @@ export const getVerses = ({
     method: "get",
   });
 };
+
+
 export const getVpGuide = (id: number) => {
   return request({
     url: "v1/vp-guides/" + id,
