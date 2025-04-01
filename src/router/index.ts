@@ -537,6 +537,7 @@ const routes: RouteRecordRaw[] = [
                   title: "resourceManagement.audioManagement.audioTTS",
                   icon: "el-icon-helpFilled",
                   hidden: true,
+                  private: true,
                   alwaysShow: false,
                   params: null,
                 },
