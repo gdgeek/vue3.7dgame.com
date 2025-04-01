@@ -927,6 +927,24 @@ export default {
       error2: "フォーム検証に失敗しました",
       messageTitle: "【场景】名：",
       scene: "シーン",
+      tags: {
+        confirmRemove: {
+          message: "タグを削除しますか？",
+          title: "シーンからタグを削除",
+          confirm: "確認",
+          cancel: "キャンセル",
+          success: "タグが正常に削除されました",
+          error: "タグの削除がキャンセルされました",
+        },
+        confirmAdd: {
+          message: "タグを追加しますか？",
+          title: "シーンにタグを追加",
+          confirm: "確認",
+          cancel: "キャンセル",
+          success: "タグが正常に追加されました",
+          error: "タグの追加がキャンセルされました",
+        },
+      },
       share: {
         header1: "他のユーザーと共有",
         header2: "共有情報を変更",

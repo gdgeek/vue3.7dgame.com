@@ -655,6 +655,32 @@ export default {
       success: "Copy successful! New entity name: ",
       info: "Copy cancelled",
     },
+    prompt4: {
+      message1: "Please enter the tag name",
+      message2: "Prompt (3-20 characters)",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      inputValidator: {
+        item1: "Tag name cannot be empty",
+        item2: "Tag name cannot be less than 3 characters",
+        item3: "Tag name cannot be more than 20 characters",
+      },
+      success: "The tag name is: ",
+      info: "cancel input",
+    },
+    prompt5: {
+      message1: "Please enter the tag description",
+      message2: "Prompt (3-200 characters)",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      inputValidator: {
+        item1: "Tag description cannot be empty",
+        item2: "Tag description cannot be less than 3 characters",
+        item3: "Tag description cannot be more than 200 characters",
+      },
+      success: "The tag description is: ",
+      info: "cancel input",
+    },
     metaEdit: {
       title: "【Entity】Name:",
       form: {
@@ -940,6 +966,24 @@ export default {
       error2: "Form validation failed",
       messageTitle: "【Project】Name:",
       scene: "scene",
+      tags: {
+        confirmRemove: {
+          message: "Confirm delete tag?",
+          title: "Delete tag from scene",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          success: "Tag deleted successfully",
+          error: "Tag deletion cancelled",
+        },
+        confirmAdd: {
+          message: "Confirm add tag?",
+          title: "Add tag to scene",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          success: "Tag added successfully",
+          error: "Tag addition cancelled",
+        },
+      },
       share: {
         header1: "Share with Other Users",
         header2: "Edit Sharing Information",

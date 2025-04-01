@@ -24,64 +24,62 @@ import { translateRouteTitle } from "@/utils/i18n";
 import env from "@/environment";
 import { useFileStore } from "@/store/modules/config";
 
+// 组件状态
 const appStore = useAppStore();
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+const editor = ref<HTMLIFrameElement>();
+let init = false;
+const saveable = ref(false);
+
+// 对话框引用
 const knightDataRef = ref<InstanceType<typeof KnightDataDialog>>();
 const prefabDialogRef = ref<InstanceType<typeof PrefabDialog>>();
 const metaDialogRef = ref<InstanceType<typeof MetaDialog>>();
-let init = false;
-const saveable = ref();
 
+// 计算属性
 const title = computed(() => {
   const match = (route.query.title as string)?.match(/【(.*?)】/);
   return match ? match[0] : "";
 });
 
 const id = computed(() => parseInt(route.query.id as string));
+
 const src = computed(() => {
-  return env.editor +
-    "/three.js/editor/verse-editor.html?language=" +
-    appStore.language + "&timestamp=" + Date.now();
+  return `${env.editor}/three.js/editor/verse-editor.html?language=${appStore.language}&timestamp=${Date.now()}`;
 });
-//alert(src.value);
-/*
-const src = ref(
-  env.editor +
-  "/three.js/editor/verse-editor.html?language=" +
-  appStore.language + "&timestamp=" + Date.now()
-);
-*/
 
-
-const editor = ref<HTMLIFrameElement>();
 const cancel = () => { };
 
+// 监听语言变化
 watch(
-  () => appStore.language, // 监听 language 的变化
-  async (newValue, oldValue) => {
-    //src.value = env.editor + "/three.js/editor/verse-editor.html?language=" + newValue + "&timestamp=" + Date.now();
+  () => appStore.language,
+  async () => {
     await refresh();
   }
 );
+
+// 刷新场景数据
 const refresh = async () => {
   const response = await getVerse(id.value, "metas, resources");
   const verse = response.data;
   saveable.value = verse ? verse.editable : false;
+
   postMessage("load", {
     id: id.value,
     data: verse,
     saveable: saveable.value,
   });
 };
-const postMessage = (action: string, data: any) => {
 
+// 向编辑器发送消息
+const postMessage = (action: string, data: any) => {
   if (editor.value && editor.value.contentWindow) {
     editor.value.contentWindow.postMessage(
       {
         from: "scene.verse.web",
-        action: action,
+        action,
         data: JSON.parse(JSON.stringify(data)),
       },
       "*"
@@ -94,6 +92,7 @@ const postMessage = (action: string, data: any) => {
   }
 };
 
+// 设置预制件属性
 const setupPrefab = async ({ meta_id, data, uuid }: any) => {
   const response = await getPrefab(meta_id);
   knightDataRef.value?.open({
@@ -105,6 +104,7 @@ const setupPrefab = async ({ meta_id, data, uuid }: any) => {
   });
 };
 
+// 添加预制件
 const addPrefab = () => {
   prefabDialogRef.value?.open(id.value);
   ElMessage({
@@ -113,6 +113,7 @@ const addPrefab = () => {
   });
 };
 
+// 添加实体
 const addMeta = () => {
   metaDialogRef.value?.open(id.value);
   ElMessage({
@@ -121,13 +122,13 @@ const addMeta = () => {
   });
 };
 
+// 选择元素后的回调
 const selected = async ({ data, setup, title }: any) => {
   postMessage("add-module", { data, setup, title });
 };
 
+// 保存场景数据
 const saveVerse = async (data: any) => {
-  console.error("save verse", data);
-
   if (!data.verse) {
     return;
   }
@@ -142,6 +143,7 @@ const saveVerse = async (data: any) => {
     return;
   }
 
+  // 处理重复标题，确保标题唯一
   const retitleVerses = (verses: any[]) => {
     const titleCount: Record<string, number> = {};
 
@@ -167,11 +169,8 @@ const saveVerse = async (data: any) => {
   };
 
   if (verse?.children?.modules) {
-    console.log("测试");
     retitleVerses(verse.children.modules);
   }
-
-  console.log("verse", verse);
 
   await putVerse(id.value, { data: JSON.stringify(verse) });
   ElMessage({
@@ -180,12 +179,12 @@ const saveVerse = async (data: any) => {
   });
 };
 
+// 处理来自编辑器的消息
 const handleMessage = async (e: MessageEvent) => {
-  if (!e.data || !e.data.action) {
-    return;
-  }
+  if (!e.data || !e.data.action) return;
+
   const action = e.data.action;
-  const data = e.data.data; // ? JSON.parse(params.json) : undefined;
+  const data = e.data.data;
 
   switch (action) {
     case "edit-meta":
@@ -194,33 +193,41 @@ const handleMessage = async (e: MessageEvent) => {
         query: { id: data.meta_id },
       });
       break;
+
     case "setup-prefab":
       setupPrefab(data);
       break;
+
     case "add-meta":
       addMeta();
       break;
+
     case "add-prefab":
       addPrefab();
       break;
+
     case "save-verse":
       saveVerse(data);
       break;
+
     case "save-verse-none":
       ElMessage({
         type: "warning",
         message: "项目没有改变",
       });
       break;
+
     case "goto":
       if (data.target === "blockly.js") {
         const scriptRoute = router
           .getRoutes()
           .find((route) => route.path === "/verse/script");
+
         if (scriptRoute && scriptRoute.meta.title) {
           const metaTitle = translateRouteTitle(
             scriptRoute.meta.title
           ).toLowerCase();
+
           router.push({
             path: "/verse/script",
             query: {
@@ -231,12 +238,14 @@ const handleMessage = async (e: MessageEvent) => {
         }
       }
       break;
+
     case "ready":
       if (!init) {
         init = true;
         refresh();
       }
       break;
+
     case "upload-cover":
       handleUploadCover(data);
       break;
@@ -267,7 +276,7 @@ const handleUploadCover = async (data: any) => {
     const fileName = `cover_verse_${id.value}_${Date.now()}.${extension}`;
     const file = new File([blob], fileName, { type: mimeType });
 
-    // 导入文件处理相关模块
+    // 处理文件上传
     const fileStore = useFileStore();
     const { postFile } = await import("@/api/v1/files");
 
@@ -281,12 +290,7 @@ const handleUploadCover = async (data: any) => {
     }
 
     // 检查文件是否已存在
-    const has = await fileStore.store.fileHas(
-      md5,
-      extension,
-      handler,
-      "backup"
-    );
+    const has = await fileStore.store.fileHas(md5, extension, handler, "backup");
 
     // 如果文件不存在，上传文件
     if (!has) {
@@ -326,6 +330,7 @@ const handleUploadCover = async (data: any) => {
   }
 };
 
+// 生命周期钩子
 onMounted(() => {
   window.addEventListener("message", handleMessage);
 });

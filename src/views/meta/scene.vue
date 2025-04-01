@@ -19,54 +19,38 @@ import env from "@/environment"
 import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
 
+// 组件状态
 const appStore = useAppStore();
 const route = useRoute();
 const router = useRouter();
 const fileStore = useFileStore();
+const { t } = useI18n();
+const dialog = ref();
+const editor = ref<HTMLIFrameElement | null>();
+let init = false;
 
+// 计算属性
+const id = computed(() => parseInt(route.query.id as string));
+const title = computed(() => route.query.title?.slice(4) as string);
 const src = computed(() => {
-  return env.editor +
-    "/three.js/editor/meta-editor.html?language=" +
-    appStore.language + "&timestamp=" + Date.now();
+  return `${env.editor}/three.js/editor/meta-editor.html?language=${appStore.language}&timestamp=${Date.now()}`;
 });
 
-/*
-const src = ref(
-  env.editor + "/three.js/editor/meta-editor.html?language=" + appStore.language + "&timestamp=" + Date.now()
-);
-*/
-
+// 监听语言变化
 watch(
-  () => appStore.language, // 监听 language 的变化
-  async (newValue, oldValue) => {
-    // src.value =
-    //  env.editor + "/three.js/editor/meta-editor.html?language=" + newValue + "&timestamp=" + Date.now();
+  () => appStore.language,
+  async () => {
     await refresh();
   }
 );
 
-let init = false;
-const dialog = ref();
-const editor = ref<HTMLIFrameElement | null>();
-
-const id = computed(() => parseInt(route.query.id as string));
-const title = computed(() => route.query.title?.slice(4) as string);
-
-const { t } = useI18n();
-
+// 资源操作相关函数
 const selected = (data: any) => {
   postMessage("load-resource", data);
 };
 
 const replaced = (data: any) => {
   postMessage("replace-resource", data);
-};
-
-const saveable = (data: any) => {
-  if (data === null) {
-    return false;
-  }
-  return data.editable;
 };
 
 const loadResource = (data: any) => {
@@ -77,15 +61,21 @@ const replaceResource = (data: any) => {
   dialog.value.open(null, id.value, data.type, 'replace');
 };
 
+// 权限检查
+const saveable = (data: any) => {
+  if (data === null) {
+    return false;
+  }
+  return data.editable;
+};
+
+// 向编辑器发送消息
 const postMessage = (action: string, data: any = {}) => {
-  console.error("postMessage:!", action);
-
   if (editor.value && editor.value.contentWindow) {
-
     editor.value.contentWindow.postMessage(
       {
         from: "scene.meta.web",
-        action: action,
+        action,
         data: JSON.parse(JSON.stringify(data)),
       },
       "*"
@@ -98,65 +88,71 @@ const postMessage = (action: string, data: any = {}) => {
   }
 };
 
-const handleMessage = async (e: MessageEvent) => {
-  if (!e.data || !e.data.action) {
+// 刷新元数据
+const refresh = async () => {
+  try {
+    const meta = await getMeta(id.value);
+    postMessage("load", {
+      data: meta.data,
+      saveable: saveable(meta.data),
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// 保存元数据
+const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
+  if (!saveable) {
+    ElMessage({
+      type: "info",
+      message: t("meta.scene.info"),
+    });
     return;
   }
 
-  const action = e.data.action;
-  const data = e.data.data;
-  switch (action) {
-    case "save-meta":
-      saveMeta(data);
-      break;
-    case "save-meta-none":
-      ElMessage({
-        type: "warning",
-        message: "项目没有改变",
-      });
-      break;
-    case "load-resource":
-      loadResource(data);
-      break;
-    case "replace-resource":
-      replaceResource(data);
-      break;
-    case "goto":
-      if (data.target === "blockly.js") {
-        const scriptRoute = router
-          .getRoutes()
-          .find((route) => route.path === "/meta/script");
+  // 在上传前处理 meta 数据，确保 name 唯一
+  const renameEntities = (entities: any[]) => {
+    const nameCount: Record<string, number> = {};
 
-        if (scriptRoute && scriptRoute.meta.title) {
-          const metaTitle = translateRouteTitle(
-            scriptRoute.meta.title
-          ).toLowerCase();
+    entities.forEach((entity) => {
+      let name = entity.parameters.name;
 
-          router.push({
-            path: "/meta/script",
-            query: {
-              id: id.value,
-              title: metaTitle + title.value,
-            },
-          });
-        }
-      } else if (data.data === "rete.js") {
-        router.push({
-          path: "/meta/rete-meta",
-          query: { id: id.value, title: title.value },
-        });
+      // 提取基础名称和当前计数
+      const match = name.match(/^(.*?)(?: \((\d+)\))?$/);
+      let baseName = match?.[1]?.trim() || name;
+      let currentCount = match?.[2] ? parseInt(match[2], 10) : 0;
+
+      if (!nameCount[baseName]) {
+        nameCount[baseName] = currentCount > 0 ? currentCount : 1;
+      } else {
+        nameCount[baseName]++;
       }
-      break;
-    case "ready":
-      if (!init) {
-        init = true;
-        refresh();
-      }
-      break;
-    // 图片上传封面
-    case "upload-cover":
-      handleUploadCover(data);
-      break;
+
+      // 生成唯一名称
+      const newCount = nameCount[baseName];
+      entity.parameters.name =
+        newCount > 1 ? `${baseName} (${newCount})` : baseName;
+    });
+  };
+
+  // 调用重命名函数处理 meta.data.children.entities
+  if (meta?.children?.entities) {
+    renameEntities(meta.children.entities);
+  }
+
+  try {
+    await putMeta(id.value, { data: meta, events });
+    ElMessage({
+      type: "success",
+      message: t("meta.scene.success"),
+    });
+  } catch (error) {
+    console.error(error);
+    ElMessage({
+      type: "error",
+      message: t("meta.scene.saveError"),
+    });
   }
 };
 
@@ -194,12 +190,7 @@ const handleUploadCover = async (data: any) => {
     }
 
     // 检查文件是否已存在
-    const has = await fileStore.store.fileHas(
-      md5,
-      extension,
-      handler,
-      "backup"
-    );
+    const has = await fileStore.store.fileHas(md5, extension, handler, "backup");
 
     // 如果文件不存在，上传文件
     if (!has) {
@@ -239,72 +230,76 @@ const handleUploadCover = async (data: any) => {
   }
 };
 
-const refresh = async () => {
-  const meta = await getMeta(id.value);
-  // const meta = await getMeta(894);
-  postMessage("load", {
-    data: meta.data,
-    saveable: saveable(meta.data),
-  });
-};
-const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
-  if (!saveable) {
-    ElMessage({
-      type: "info",
-      message: t("meta.scene.info"),
-    });
+// 处理编辑器发来的消息
+const handleMessage = async (e: MessageEvent) => {
+  if (!e.data || !e.data.action) {
     return;
   }
 
-  console.log("metaData:", meta);
+  const action = e.data.action;
+  const data = e.data.data;
 
-  // 在上传前处理 meta 数据，确保 name 唯一
-  const renameEntities = (entities: any[]) => {
-    const nameCount: Record<string, number> = {};
+  switch (action) {
+    case "save-meta":
+      saveMeta(data);
+      break;
 
-    entities.forEach((entity) => {
-      let name = entity.parameters.name;
+    case "save-meta-none":
+      ElMessage({
+        type: "warning",
+        message: "项目没有改变",
+      });
+      break;
 
-      // 提取基础名称和当前计数
-      const match = name.match(/^(.*?)(?: \((\d+)\))?$/);
-      let baseName = match?.[1]?.trim() || name;
-      let currentCount = match?.[2] ? parseInt(match[2], 10) : 0;
+    case "load-resource":
+      loadResource(data);
+      break;
 
-      if (!nameCount[baseName]) {
-        nameCount[baseName] = currentCount > 0 ? currentCount : 1;
-      } else {
-        nameCount[baseName]++;
+    case "replace-resource":
+      replaceResource(data);
+      break;
+
+    case "goto":
+      if (data.target === "blockly.js") {
+        const scriptRoute = router
+          .getRoutes()
+          .find((route) => route.path === "/meta/script");
+
+        if (scriptRoute && scriptRoute.meta.title) {
+          const metaTitle = translateRouteTitle(
+            scriptRoute.meta.title
+          ).toLowerCase();
+
+          router.push({
+            path: "/meta/script",
+            query: {
+              id: id.value,
+              title: metaTitle + title.value,
+            },
+          });
+        }
+      } else if (data.data === "rete.js") {
+        router.push({
+          path: "/meta/rete-meta",
+          query: { id: id.value, title: title.value },
+        });
       }
+      break;
 
-      // 生成唯一名称
-      const newCount = nameCount[baseName];
-      entity.parameters.name =
-        newCount > 1 ? `${baseName} (${newCount})` : baseName;
-    });
-  };
+    case "ready":
+      if (!init) {
+        init = true;
+        refresh();
+      }
+      break;
 
-  // 调用重命名函数处理 meta.data.children.entities
-  if (meta?.children?.entities) {
-    console.log("测试1");
-    renameEntities(meta.children.entities);
+    case "upload-cover":
+      handleUploadCover(data);
+      break;
   }
-
-  console.log("metaData2:", meta);
-
-  await putMeta(id.value, { data: meta, events });
-
-
-  await ElMessageBox.confirm(
-    '是否发布快照',
-    t("meta.scene.success"),
-    {
-      confirmButtonText: 'OK',
-      cancelButtonText: 'Cancel',
-      type: 'success',
-    }
-  )
 };
 
+// 生命周期钩子
 onMounted(() => {
   window.addEventListener("message", handleMessage);
 });

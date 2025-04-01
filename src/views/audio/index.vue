@@ -62,25 +62,39 @@ import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
+// 组件状态
+const { t } = useI18n();
 const items = ref<any[] | null>(null);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
+
+// 分页配置
 const pagination = reactive({
   current: 1,
   count: 1,
   size: 20,
   total: 20,
 });
-const { t } = useI18n();
 
-// 处理分页
+// 处理分页变化
 const handleCurrentChange = async (page: number) => {
   pagination.current = page;
   await refresh();
-  console.log(pagination.current);
 };
 
-// 修改音频名称
+// 排序处理
+const sort = (value: string) => {
+  sorted.value = value;
+  refresh();
+};
+
+// 搜索处理
+const search = (value: string) => {
+  searched.value = value;
+  refresh();
+};
+
+// 修改音频名称对话框
 const namedWindow = async (item: any) => {
   try {
     const { value } = await ElMessageBox.prompt(
@@ -100,18 +114,6 @@ const namedWindow = async (item: any) => {
   }
 };
 
-// 排序
-const sort = (value: string) => {
-  sorted.value = value;
-  refresh();
-};
-
-// 搜索
-const search = (value: string) => {
-  searched.value = value;
-  refresh();
-};
-
 // 修改音频名称 API 调用
 const named = async (id: string, newValue: string) => {
   try {
@@ -122,7 +124,7 @@ const named = async (id: string, newValue: string) => {
   }
 };
 
-// 删除音频确认
+// 删除音频确认对话框
 const deletedWindow = async (item: any) => {
   try {
     await ElMessageBox.confirm(
@@ -160,12 +162,15 @@ const refresh = async () => {
       searched.value,
       pagination.current
     );
+
+    // 更新分页信息
     pagination.current = parseInt(
       response.headers["x-pagination-current-page"]
     );
     pagination.count = parseInt(response.headers["x-pagination-page-count"]);
     pagination.size = parseInt(response.headers["x-pagination-per-page"]);
     pagination.total = parseInt(response.headers["x-pagination-total-count"]);
+
     if (response.data) {
       items.value = response.data;
     }
@@ -174,5 +179,6 @@ const refresh = async () => {
   }
 };
 
+// 生命周期钩子
 onMounted(() => refresh());
 </script>

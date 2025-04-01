@@ -66,12 +66,14 @@ import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
+// 组件状态
 const { t } = useI18n();
-
 const items = ref<any[] | null>(null);
 const sorted = ref("-created_at");
 const searched = ref("");
 const percentage = ref(0);
+
+// 分页配置
 const pagination = ref({
   current: 1,
   count: 1,
@@ -79,11 +81,12 @@ const pagination = ref({
   total: 20,
 });
 
+// 进度更新
 const progress = (progress: number) => {
   percentage.value = progress;
-  console.log(percentage.value);
 };
 
+// 数据加载与刷新
 const refresh = async () => {
   try {
     const response = await getPolygens(
@@ -92,12 +95,15 @@ const refresh = async () => {
       pagination.value.current
     );
     const headers = response.headers;
+
+    // 更新分页信息
     pagination.value = {
       current: parseInt(headers["x-pagination-current-page"]),
       count: parseInt(headers["x-pagination-page-count"]),
       size: parseInt(headers["x-pagination-per-page"]),
       total: parseInt(headers["x-pagination-total-count"]),
     };
+
     if (response.data) {
       items.value = response.data;
     }
@@ -106,11 +112,25 @@ const refresh = async () => {
   }
 };
 
+// 分页处理
 const handleCurrentChange = (page: number) => {
   pagination.value.current = page;
   refresh();
 };
 
+// 搜索处理
+const search = (value: string) => {
+  searched.value = value;
+  refresh();
+};
+
+// 排序处理
+const sort = (value: string) => {
+  sorted.value = value;
+  refresh();
+};
+
+// 重命名处理
 const namedWindow = async (item: { id: number; name: string }) => {
   try {
     const { value } = await ElMessageBox.prompt(
@@ -130,6 +150,7 @@ const namedWindow = async (item: { id: number; name: string }) => {
   }
 };
 
+// 修改模型名称API调用
 const named = async (id: number, newValue: string) => {
   try {
     await putPolygen(id, { name: newValue });
@@ -139,6 +160,7 @@ const named = async (id: number, newValue: string) => {
   }
 };
 
+// 删除确认
 const deletedWindow = async (item: { id: string }) => {
   try {
     await ElMessageBox.confirm(
@@ -158,6 +180,7 @@ const deletedWindow = async (item: { id: string }) => {
   }
 };
 
+// 删除模型API调用
 const deleted = async (id: string) => {
   try {
     await deletePolygen(id);
@@ -167,16 +190,7 @@ const deleted = async (id: string) => {
   }
 };
 
-const search = (value: string) => {
-  searched.value = value;
-  refresh();
-};
-
-const sort = (value: string) => {
-  sorted.value = value;
-  refresh();
-};
-
+// 生命周期钩子
 onMounted(() => {
   refresh();
 });

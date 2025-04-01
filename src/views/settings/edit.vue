@@ -3,6 +3,7 @@
     <div>
       <br />
       <el-card v-loading="isLoading" class="box-card">
+        <!-- 个人资料标题和返回按钮 -->
         <el-row>
           <el-col>
             <div class="box-title">
@@ -13,23 +14,24 @@
           <el-col align="right">
             <span>
               <router-link to="/home/index">
-                <el-button size="small">{{
-                  $t("homepage.edit.return")
-                  }}</el-button>
+                <el-button size="small">{{ $t("homepage.edit.return") }}</el-button>
               </router-link>
             </span>
           </el-col>
         </el-row>
+
         <el-divider></el-divider>
+
+        <!-- 用户昵称和头像部分 -->
         <div class="box-title box-margin-bottom">
           <h3 class="font-color">{{ $t("homepage.edit.userNickname") }}</h3>
           <small>{{ $t("homepage.edit.userNicknameStatement") }}</small>
-
         </div>
-        <!-- 用户头像和昵称开始 -->
+
         <el-row :gutter="24">
           <el-col :xs="23" :sm="16" :md="14" :lg="12" :xl="10" class="section-margin-left">
             <el-form ref="nickNameFormRef" :model="nicknameForm" :rules="nicknameRules" label-width="auto">
+              <!-- 昵称输入框 -->
               <el-form-item :label="$t('homepage.edit.nickname')" prop="nickname" style="margin-bottom: 26px">
                 <el-input v-model="nicknameForm.nickname" style="width: 100%"
                   :placeholder="$t('homepage.edit.nickname')" autocomplete="off" @keyup.enter="submitNickname">
@@ -40,7 +42,8 @@
                   </template>
                 </el-input>
               </el-form-item>
-              <!-- 头像部分 -->
+
+              <!-- 头像上传 -->
               <el-form-item :label="$t('homepage.edit.avatar')">
                 <el-upload class="avatar-uploader" action="" :auto-upload="false" :show-file-list="false"
                   :on-change="handleChangeUpload" accept="image/jpeg,image/gif,image/png,image/bmp" style="float: left">
@@ -55,22 +58,24 @@
                   </p>
                 </div>
               </el-form-item>
-              <!-- 头像部分 end -->
             </el-form>
           </el-col>
         </el-row>
-        <!-- 用户头像和昵称 end -->
+
         <el-divider></el-divider>
+
+        <!-- 用户基本信息部分 -->
         <div class="box-title box-margin-bottom">
           <h3 class="font-color">{{ $t("homepage.edit.basicInformation") }}</h3>
           <small style="line-height: 16px">
             {{ $t("homepage.edit.basicInformationStatement") }}
           </small>
         </div>
-        <!-- 用户基本信息 start -->
+
         <el-row :gutter="24">
           <el-col :xs="23" :sm="16" :md="14" :lg="12" :xl="10" class="section-margin-left box-margin-bottom">
             <el-form ref="ruleFormRef" :model="infoForm" :rules="infoRules" label-width="auto">
+              <!-- 性别选择 -->
               <el-form-item :label="$t('homepage.edit.gender')">
                 <el-radio-group v-model="infoForm.sex">
                   <el-radio-button label="man" value="man">
@@ -87,6 +92,8 @@
                   </el-radio-button>
                 </el-radio-group>
               </el-form-item>
+
+              <!-- 行业选择 -->
               <el-form-item :label="$t('homepage.edit.industry')" prop="industry">
                 <el-select v-model="infoForm.industry" style="width: 100%"
                   :placeholder="$t('homepage.edit.industryStatement')">
@@ -106,11 +113,15 @@
                 @change="handleChange"
               ></el-cascader>
             </el-form-item> -->
+
+              <!-- 个人简介 -->
               <el-form-item :label="$t('homepage.edit.individualResume')" prop="textarea">
                 <el-input v-model="infoForm.textarea" style="width: 100%" type="textarea"
                   :autosize="{ minRows: 4, maxRows: 10 }"
                   :placeholder="$t('homepage.edit.individualResumeStatement')"></el-input>
               </el-form-item>
+
+              <!-- 保存按钮 -->
               <el-form-item>
                 <el-button type="primary" style="width: 150px" :disabled="isDisable" @click="saveInfo">
                   {{ $t("homepage.edit.save") }}
@@ -119,8 +130,8 @@
             </el-form>
           </el-col>
         </el-row>
-        <!-- 用户基本信息 end -->
-        <!-- vueCropper 剪裁图片dialog实现 -->
+
+        <!-- 图片裁剪对话框 -->
         <el-dialog v-model="dialogVisible" class="crop-dialog" append-to-body>
           <template #header>
             {{ $t("homepage.edit.avatarCropping.title") }}
@@ -162,7 +173,6 @@
             </div>
           </template>
         </el-dialog>
-        <!-- vueCropper 剪裁图片dialog end -->
       </el-card>
     </div>
   </TransitionWrapper>
@@ -173,29 +183,34 @@ import { useUserStore } from "@/store/modules/user";
 import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
-
 import { ElMessage, FormInstance, FormRules } from "element-plus";
 import "vue-cropper/dist/index.css";
 import { VueCropper } from "vue-cropper";
 import type { FileHandler } from "@/assets/js/file/server";
 import { FormItemRule } from "element-plus";
 import type { UploadFile, UploadFiles } from "element-plus";
-
 import { _InfoType, UploadFileType } from "@/api/user/model";
+
+// 初始化store和ref
 const userStore = useUserStore();
 const fileStore = useFileStore();
 const ruleFormRef = ref<FormInstance>();
 const nickNameFormRef = ref<FormInstance>();
+const { t } = useI18n();
+const isDisable = ref(false);
+const isLoading = ref(true);
+const dialogVisible = ref(false);
+const cropperRef = ref<any>({});
+
+// 计算用户头像URL
 const imageUrl = computed(() => {
   if (userStore.userInfo == null || userStore.userInfo.userInfo == null || !userStore.userInfo.userInfo.avatar) {
     return "";
   }
-
   return userStore.userInfo.userInfo.avatar.url;
 });
-const isDisable = ref(false);
-const { t } = useI18n();
 
+// 昵称表单相关定义
 type nickNameType = {
   nickname: string;
 };
@@ -203,8 +218,9 @@ type nickNameType = {
 const nicknameForm = ref<nickNameType>({
   nickname: "",
 });
-type Arrayable<T> = T | T[];
 
+// 昵称验证规则
+type Arrayable<T> = T | T[];
 const nicknameRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
   nickname: [
     {
@@ -239,6 +255,8 @@ const infoForm = ref<_InfoType>({
   selectedOptions: [],
   textarea: "",
 });
+
+// 基本信息验证规则
 const infoRules = ref<FormRules<_InfoType>>({
   industry: [
     {
@@ -268,6 +286,7 @@ const infoRules = ref<FormRules<_InfoType>>({
   ],
 });
 
+// 行业选项
 const industryOptions = computed(() => {
   return [
     {
@@ -301,28 +320,26 @@ const industryOptions = computed(() => {
   ];
 });
 
+// 图片裁剪选项配置
 type optionType = {
-  img: string | ArrayBuffer | null; // 裁剪图片的地址
-  info: true; // 裁剪框的大小信息
-  outputSize: number; // 裁剪生成图片的质量 [1至0.1]
-  outputType: "jpeg"; // 裁剪生成图片的格式
-  canScale: boolean; // 图片是否允许滚轮缩放
-  autoCrop: boolean; // 是否默认生成截图框
-  autoCropWidth: number; // 默认生成截图框宽度
-  autoCropHeight: number; // 默认生成截图框高度
-  fixedBox: boolean; // 固定截图框大小 不允许改变
-  fixed: boolean; // 是否开启截图框宽高固定比例
-  fixedNumber: Array<number>; // 截图框的宽高比例  需要配合centerBox一起使用才能生效
-  full: boolean; // 是否输出原图比例的截图
-  canMoveBox: boolean; // 截图框能否拖动
-  original: boolean; // 上传图片按照原始比例渲染
-  centerBox: boolean; // 截图框是否被限制在图片里面
-  infoTrue: boolean; // true 为展示真实输出图片宽高 false 展示看到的截图框宽高
+  img: string | ArrayBuffer | null;
+  info: true;
+  outputSize: number;
+  outputType: "jpeg";
+  canScale: boolean;
+  autoCrop: boolean;
+  autoCropWidth: number;
+  autoCropHeight: number;
+  fixedBox: boolean;
+  fixed: boolean;
+  fixedNumber: Array<number>;
+  full: boolean;
+  canMoveBox: boolean;
+  original: boolean;
+  centerBox: boolean;
+  infoTrue: boolean;
 };
 
-const dialogVisible = ref(false);
-const isLoading = ref(true);
-const cropperRef = ref<any>({});
 const option = ref<optionType>({
   img: "", // 裁剪图片的地址
   info: true, // 裁剪框的大小信息
@@ -342,19 +359,18 @@ const option = ref<optionType>({
   infoTrue: true, // true 为展示真实输出图片宽高 false 展示看到的截图框宽高
 });
 
-// 更新昵称
+// 更新用户昵称
 const submitNickname = async () => {
   isDisable.value = true;
   setTimeout(() => {
     isDisable.value = false; // 防重复提交，两秒后才能再次点击
   }, 2000);
+
   nickNameFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
         isLoading.value = true;
-
         await userStore.setUserInfo({ nickname: nicknameForm.value.nickname });
-
         ElMessage.success(t("homepage.edit.rules.nickname.success"));
       } catch (error) {
         ElMessage.error(t("homepage.edit.rules.nickname.error3"));
@@ -368,16 +384,16 @@ const submitNickname = async () => {
   });
 };
 
-// 更新基本信息
+// 更新用户基本信息
 const saveInfo = () => {
   isDisable.value = true;
   setTimeout(() => {
     isDisable.value = false; // 防重复提交，两秒后才能再次点击
   }, 2000);
+
   ruleFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        console.log("infoForm.value", infoForm.value);
         isLoading.value = true;
         await userStore.setUserInfo({ info: infoForm.value });
         ElMessage.success(t("homepage.edit.rules.success"));
@@ -390,15 +406,12 @@ const saveInfo = () => {
   });
 };
 
+// 处理图片上传并打开裁剪对话框
 const handleChangeUpload = async (file: UploadFile, fileList: UploadFiles) => {
   const selectedFile = file.raw;
   if (selectedFile) {
-    const isJPG = [
-      "image/jpeg",
-      "image/png",
-      "image/bmp",
-      "image/gif",
-    ].includes(selectedFile.type);
+    // 验证图片格式和大小
+    const isJPG = ["image/jpeg", "image/png", "image/bmp", "image/gif"].includes(selectedFile.type);
     const isLt2M = selectedFile.size / 1024 / 1024 < 2;
 
     if (!isJPG) {
@@ -414,25 +427,21 @@ const handleChangeUpload = async (file: UploadFile, fileList: UploadFiles) => {
     await nextTick();
     const res = URL.createObjectURL(selectedFile);
     option.value.img = res;
-    console.log("option.value.img", option.value.img);
-    // loading.value = false;
     dialogVisible.value = true;
   } else {
     ElMessage.error(t("homepage.edit.avatarCropping.error3"));
   }
 };
 
-// 左旋转
+// 裁剪框操作方法
 const rotateLeftHandle = () => cropperRef.value?.rotateLeft();
-// 右旋转
 const rotateRightHandle = () => cropperRef.value?.rotateRight();
-// 放大/缩小
 const changeScaleHandle = (num: number) => {
   num = num || 1;
   cropperRef.value?.changeScale(num);
 };
 
-// 保存头像
+// 保存用户头像
 const saveAvatar = async (
   md5: string,
   extension: string,
@@ -441,7 +450,6 @@ const saveAvatar = async (
 ) => {
   extension = extension.startsWith(".") ? extension : `.${extension}`;
   const data: UploadFileType = {
-
     md5,
     key: md5 + extension,
     filename: file.name,
@@ -452,20 +460,17 @@ const saveAvatar = async (
     isLoading.value = true;
     dialogVisible.value = false;
     const post = await postFile(data);
-
     await userStore.setUserInfo({ avatar_id: post.data.id });
     ElMessage.success(t("homepage.edit.avatarCropping.success"));
   } catch (err) {
     console.error(err);
   }
-
-  //loading.value = false;
 };
 
-// 完成截图
+// 完成头像裁剪并上传
 const finish = async () => {
   cropperRef.value.getCropBlob(async (blob: Blob) => {
-    // 创建 File 对象并设置 name 和 extension 属性
+    // 创建File对象
     const file = new File([blob], userStore.userInfo?.userData?.username + ".jpg", {
       type: "image/jpeg",
     });
@@ -477,9 +482,10 @@ const finish = async () => {
       return;
     }
 
+    // 检查文件是否已存在
     const has = await fileStore.store.fileHas(
       md5,
-      file.name.split(".").pop() || "", // 获取文件扩展名
+      file.name.split(".").pop() || "",
       handler,
       "backup"
     );
@@ -487,7 +493,7 @@ const finish = async () => {
     if (!has) {
       await fileStore.store.fileUpload(
         md5,
-        file.name.split(".").pop() || "", // 获取文件扩展名
+        file.name.split(".").pop() || "",
         file,
         (p: any) => { },
         handler,
@@ -495,6 +501,7 @@ const finish = async () => {
       );
     }
 
+    // 保存头像
     await saveAvatar(
       md5,
       "." + (file.name.split(".").pop() || ""),
@@ -503,50 +510,48 @@ const finish = async () => {
     );
 
     dialogVisible.value = false;
-    //loading.value = true;
   });
-}// 观测 userStore.userInfo 的变化
+};
 
-
+// 监听用户信息变化，更新表单数据
 watch(() => userStore.userInfo, (newUserInfo) => {
-
   if (newUserInfo == null || newUserInfo.id === 0) {
     return;
   }
 
-
-
   const parsedInfo = newUserInfo.userInfo?.info;
   nicknameForm.value.nickname = newUserInfo.userData?.nickname || "";
+
   if (parsedInfo) {
     infoForm.value.sex = parsedInfo.sex || "";
     infoForm.value.industry = parsedInfo.industry || "";
     infoForm.value.selectedOptions = parsedInfo.selectedOptions || [];
     infoForm.value.textarea = parsedInfo.textarea || "";
   }
-  isLoading.value = false
 
+  isLoading.value = false;
 }, { deep: true, immediate: true });
-
 </script>
 
 <style lang="scss" scoped>
+/* 响应式布局样式 */
 @media screen and (min-width: 900px) {
   .section-margin-left {
     margin-left: 12%;
   }
 }
 
+/* 卡片样式 */
 .box-card {
   margin: 1.6% 1.6% 0.6%;
 }
 
+/* 标题区块样式 */
 .box-title {
   line-height: 10px;
   padding: 2px 0;
   margin-left: 1%;
 
-  // color: #4d4f52;
   small {
     color: #6f6f6f;
   }
@@ -560,11 +565,14 @@ watch(() => userStore.userInfo, (newUserInfo) => {
   font-weight: 500;
 }
 
+/* 用户说明文字样式 */
 .user-explain {
   font-size: 12px;
   line-height: 20px;
+  color: #6f6f6f;
 }
 
+/* 裁剪框样式 */
 .cropper-content {
   .cropper {
     width: auto;
@@ -572,18 +580,15 @@ watch(() => userStore.userInfo, (newUserInfo) => {
   }
 }
 
+/* 头像上传样式 */
 .avatar-uploader {
   cursor: pointer;
   position: relative;
   overflow: hidden;
-}
 
-.avatar-uploader:hover {
-  border-color: #409eff;
-}
-
-.user-explain {
-  color: #6f6f6f;
+  &:hover {
+    border-color: #409eff;
+  }
 }
 
 .avatar-uploader-icon {

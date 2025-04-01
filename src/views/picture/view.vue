@@ -86,7 +86,6 @@ const tableData = computed(() => {
       {
         item: t("picture.view.info.item3"),
         text: convertToLocalTime(pictureData.value.created_at),
-        // text: pictureData.value.created_at,
       },
       {
         item: t("picture.view.info.item5"),
@@ -104,14 +103,13 @@ const tableData = computed(() => {
 const picture = computed(() => convertToHttps(file.value!));
 
 onMounted(async () => {
-  console.error(image.value);
   try {
     expire.value = true;
     const response = await getPicture(id.value);
     pictureData.value = response.data;
     file.value = response.data.file.url;
   } catch (err) {
-    alert(err);
+    ElMessage.error(String(err));
   }
 });
 
@@ -194,7 +192,7 @@ const setup = async (
 
   const has = await store.fileHas(
     md5,
-    file.type.split("/").pop()!, //从MIME类型中提取扩展名
+    file.type.split("/").pop()!,
     handler,
     "screenshot/picture"
   );
@@ -213,7 +211,6 @@ const setup = async (
 
 const dealWith = async () => {
   if (!prepare.value) {
-    // const image = document.getElementById("image") as HTMLImageElement;
     if (image.value) {
       const img: HTMLImageElement = image.value;
 
@@ -221,7 +218,6 @@ const dealWith = async () => {
 
       if (image.value.complete) {
         const size = await getImageSize(image.value);
-        console.log(size);
         await setup(size, image.value);
       }
     }
@@ -265,23 +261,14 @@ const namedWindow = async () => {
     );
 
     if (value) {
-      await named(pictureData.value!.id, value);
+      const response = await putPicture(pictureData.value!.id, { name: value });
+      pictureData.value!.name = response.data.name;
       ElMessage.success(t("picture.view.namePrompt.success") + value);
     } else {
       ElMessage.info(t("picture.view.namePrompt.info"));
     }
   } catch {
     ElMessage.info(t("picture.view.namePrompt.info"));
-  }
-};
-
-const named = async (id: number, name: string) => {
-  const picture = { name };
-  try {
-    const response = await putPicture(id, picture);
-    pictureData.value!.name = response.data.name;
-  } catch (err) {
-    console.error(err);
   }
 };
 </script>

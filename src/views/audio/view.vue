@@ -24,7 +24,6 @@
           </el-card>
           <br />
         </el-col>
-
         <el-col :sm="8">
           <el-card class="box-card">
             <template #header>
@@ -68,6 +67,7 @@ import { FileHandler } from "@/assets/js/file/server";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
+// 基础状态和引用
 const route = useRoute();
 const router = useRouter();
 const store = useFileStore().store;
@@ -78,6 +78,13 @@ const expire = ref(true);
 const isPlay = ref(false);
 const imgSrc = "/media/bg/audio-cover.jpg";
 
+// 计算属性
+const id = computed(() => route.query.id as string);
+const prepare = computed(
+  () => audioData.value !== null && audioData.value.info !== null
+);
+
+// 表格数据计算属性
 const tableData = computed(() => {
   if (audioData.value) {
     return [
@@ -99,17 +106,7 @@ const tableData = computed(() => {
   return [];
 });
 
-const id = computed(() => route.query.id as string);
-const prepare = computed(
-  () => audioData.value !== null && audioData.value.info !== null
-);
-
-onMounted(async () => {
-  const response = await getAudio(id.value);
-  audioData.value = response.data;
-  file.value = response.data.file.url;
-});
-
+// 音频播放控制函数
 const handlePlayAudio = () => {
   const audio = document.getElementById("audio") as HTMLAudioElement;
   if (!isPlay.value) {
@@ -120,48 +117,20 @@ const handlePlayAudio = () => {
   isPlay.value = !isPlay.value;
 };
 
+// 音频事件监听函数
 const listenPlay = () => {
   isPlay.value = true;
-  console.log("开始播放", isPlay.value);
 };
 
 const listenPause = () => {
   isPlay.value = false;
-  console.log("暂停播放", isPlay.value);
 };
 
 const listenEnd = () => {
   isPlay.value = false;
-  console.log("结束播放", isPlay.value);
 };
 
-const save = async (
-  md5: string,
-  extension: string,
-  info: string,
-  file: File,
-  handler: FileHandler
-) => {
-  extension = extension.startsWith(".") ? extension : `.${extension}`;
-  const data: UploadFileType = {
-    md5,
-    key: md5 + extension,
-    filename: file.name,
-    url: store.fileUrl(md5, extension, handler, "screenshot/audio"),
-  };
-
-  try {
-    const response1 = await postFile(data);
-    const audio = { image_id: response1.data.id, info };
-    const response2 = await putAudio(audioData.value!.id, audio);
-    audioData.value!.image_id = response2.data.image_id;
-    audioData.value!.info = response2.data.info;
-    expire.value = false;
-  } catch (e) {
-    console.error(e);
-  }
-};
-
+// 处理音频加载完成
 const dealWith = () => {
   if (!prepare.value) {
     const audio = document.getElementById("audio") as HTMLAudioElement;
@@ -172,6 +141,7 @@ const dealWith = () => {
   }
 };
 
+// 生成音频缩略图
 const thumbnail = async (
   audio: HTMLAudioElement,
   width: number,
@@ -196,20 +166,21 @@ const thumbnail = async (
   });
 };
 
+// 设置音频信息和缩略图
 const setup = async (
   audio: HTMLAudioElement,
   size: { x: number; y: number }
 ) => {
   if (size.x !== 0) {
     const info = JSON.stringify({ size });
-    // const blob = await thumbnail(audio, size.x * 0.5, size.y * 0.5);
-    // blob.name = `${audioData.value!.name}.thumbnail`;
-    // blob.extension = ".jpg";
 
+    // 创建缩略图
     const file = await thumbnail(audio, size.x * 0.5, size.y * 0.5);
     const md5 = await store.fileMD5(file);
     let extension = file.type.split("/").pop()!
     extension = extension.startsWith(".") ? extension : `.${extension}`;
+
+    // 处理文件上传
     const handler = await store.publicHandler();
     const has = await store.fileHas(
       md5,
@@ -217,6 +188,8 @@ const setup = async (
       handler,
       "screenshot/audio"
     );
+
+    // 如果文件不存在则上传
     if (!has) {
       await store.fileUpload(
         md5,
@@ -227,10 +200,44 @@ const setup = async (
         "screenshot/audio"
       );
     }
+
+    // 保存文件信息
     await save(md5, extension, info, file, handler);
   }
 };
 
+// 保存文件数据到服务器
+const save = async (
+  md5: string,
+  extension: string,
+  info: string,
+  file: File,
+  handler: FileHandler
+) => {
+  extension = extension.startsWith(".") ? extension : `.${extension}`;
+  const data: UploadFileType = {
+    md5,
+    key: md5 + extension,
+    filename: file.name,
+    url: store.fileUrl(md5, extension, handler, "screenshot/audio"),
+  };
+
+  try {
+    // 上传文件信息
+    const response1 = await postFile(data);
+    const audio = { image_id: response1.data.id, info };
+
+    // 更新音频信息
+    const response2 = await putAudio(audioData.value!.id, audio);
+    audioData.value!.image_id = response2.data.image_id;
+    audioData.value!.info = response2.data.info;
+    expire.value = false;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+// 删除音频确认对话框
 const deleteWindow = async () => {
   try {
     await ElMessageBox.confirm(
@@ -250,6 +257,7 @@ const deleteWindow = async () => {
   }
 };
 
+// 重命名音频对话框
 const namedWindow = async () => {
   try {
     const { value } = await ElMessageBox.prompt(
@@ -274,6 +282,7 @@ const namedWindow = async () => {
   }
 };
 
+// 重命名音频API调用
 const named = async (id: number, name: string) => {
   try {
     const response = await putAudio(id, { name });
@@ -282,6 +291,13 @@ const named = async (id: number, name: string) => {
     console.error(err);
   }
 };
+
+// 生命周期钩子 - 组件挂载时加载音频数据
+onMounted(async () => {
+  const response = await getAudio(id.value);
+  audioData.value = response.data;
+  file.value = response.data.file.url;
+});
 </script>
 
 <style lang="scss" scoped>
