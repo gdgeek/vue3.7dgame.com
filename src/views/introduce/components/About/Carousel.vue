@@ -1,37 +1,17 @@
 <template>
-  <div
-    class="carousel-container"
-    @mouseenter="isCarouselHovered = true"
-    @mouseleave="isCarouselHovered = false"
-  >
-    <el-carousel
-      ref="carousel"
-      height="900px"
-      :autoplay="false"
-      :interval="4000"
-      direction="vertical"
-      class="custom-carousel"
-      @change="handleSlideChange"
-    >
+  <div class="carousel-container" @mouseenter="isCarouselHovered = true" @mouseleave="isCarouselHovered = false">
+    <el-carousel ref="carousel" height="900px" :autoplay="false" :interval="4000" direction="vertical"
+      class="custom-carousel" @change="handleSlideChange">
       <el-carousel-item v-for="(slide, index) in slides" :key="index">
         <div class="carousel-content">
-          <video
-            :src="slide.url"
-            class="carousel-video"
-            loop
-            muted
-            :ref="(el) => setVideoRef(el, index)"
-          ></video>
-          <div
-            class="text-overlay"
-            :class="[
-              {
-                'text-enter': currentSlide === index,
-                'text-leave': currentSlide !== index,
-              },
-              getCurrentAnimation(index),
-            ]"
-          >
+          <video :src="slide.url" class="carousel-video" loop muted :ref="(el) => setVideoRef(el, index)"></video>
+          <div class="text-overlay" :class="[
+            {
+              'text-enter': currentSlide === index,
+              'text-leave': currentSlide !== index,
+            },
+            getCurrentAnimation(index),
+          ]">
             <h2>{{ slide.title }}</h2>
             <p>{{ slide.description }}</p>
           </div>
@@ -95,8 +75,13 @@ const slideAnimations = ref(
   })
 );
 
-const setVideoRef = (el: HTMLVideoElement | null, index: number) => {
-  videoRefs.value[index] = el;
+const setVideoRef = (el: Element | ComponentPublicInstance | null, index: number) => {
+  // 检查el是否为HTMLVideoElement类型
+  if (el instanceof HTMLVideoElement) {
+    videoRefs.value[index] = el;
+  } else {
+    videoRefs.value[index] = null;
+  }
 };
 
 const handleSlideChange = (index: number) => {
@@ -220,18 +205,15 @@ onUnmounted(() => {
     // 优化淡入滑动动画
     &.fade-slide {
       &.text-enter {
-        animation: fadeSlideEnter 1s cubic-bezier(0.215, 0.61, 0.355, 1)
-          forwards;
+        animation: fadeSlideEnter 1s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
 
         h2 {
-          animation: fadeSlideTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
-            forwards;
+          animation: fadeSlideTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           animation-delay: 0.2s;
         }
 
         p {
-          animation: fadeSlideTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
-            forwards;
+          animation: fadeSlideTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           animation-delay: 0.4s;
         }
       }
@@ -248,8 +230,7 @@ onUnmounted(() => {
 
         h2,
         p {
-          animation: scaleTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
-            forwards;
+          animation: scaleTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
       }
 
@@ -265,8 +246,7 @@ onUnmounted(() => {
 
         h2,
         p {
-          animation: rotateTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
-            forwards;
+          animation: rotateTextEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
       }
 
@@ -302,14 +282,12 @@ onUnmounted(() => {
         animation: waveEnter 0.8s forwards;
 
         h2 {
-          animation: waveTextEnter 0.8s cubic-bezier(0.215, 0.61, 0.355, 1)
-            forwards;
+          animation: waveTextEnter 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
           animation-delay: 0.2s;
         }
 
         p {
-          animation: waveTextEnter 0.8s cubic-bezier(0.215, 0.61, 0.355, 1)
-            forwards;
+          animation: waveTextEnter 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
           animation-delay: 0.4s;
         }
       }
@@ -346,14 +324,12 @@ onUnmounted(() => {
         animation: revealEnter 0.8s forwards;
 
         h2 {
-          animation: revealTextEnter 0.8s cubic-bezier(0.77, 0, 0.175, 1)
-            forwards;
+          animation: revealTextEnter 0.8s cubic-bezier(0.77, 0, 0.175, 1) forwards;
           animation-delay: 0.2s;
         }
 
         p {
-          animation: revealTextEnter 0.8s cubic-bezier(0.77, 0, 0.175, 1)
-            forwards;
+          animation: revealTextEnter 0.8s cubic-bezier(0.77, 0, 0.175, 1) forwards;
           animation-delay: 0.4s;
         }
       }
@@ -369,14 +345,12 @@ onUnmounted(() => {
         animation: floatEnter 0.8s forwards;
 
         h2 {
-          animation: floatTextEnter 1s cubic-bezier(0.34, 1.56, 0.64, 1)
-            forwards;
+          animation: floatTextEnter 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           animation-delay: 0.2s;
         }
 
         p {
-          animation: floatTextEnter 1s cubic-bezier(0.34, 1.56, 0.64, 1)
-            forwards;
+          animation: floatTextEnter 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           animation-delay: 0.4s;
         }
       }

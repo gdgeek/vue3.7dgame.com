@@ -74,11 +74,12 @@ const rules = computed<Record<string, FormItemRule[]>>(() => {
         message: t("login.rules.password.message2"),
         trigger: "blur",
       },
+      /*
       {
         pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/i,
         message: t("login.rules.password.message3"),
         trigger: "blur",
-      },
+      },*/
     ],
   };
 });

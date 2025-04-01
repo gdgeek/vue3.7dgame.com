@@ -1,5 +1,6 @@
 <template>
   <TransitionWrapper>
+    <br>
     <div class="verse-view">
       <el-dialog v-model="dialog" width="70%">
         <template #header>{{ $t("verse.view.header") }}</template>
@@ -84,7 +85,7 @@
 
           <br />
 
-          <Share v-if="saveable" :verse="verse" />
+          <Share v-if="saveable && verse" :verse="verse" />
 
           <br />
         </el-col>
