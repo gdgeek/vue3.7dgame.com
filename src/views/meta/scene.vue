@@ -292,10 +292,17 @@ const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
   console.log("metaData2:", meta);
 
   await putMeta(id.value, { data: meta, events });
-  ElMessage({
-    type: "success",
-    message: t("meta.scene.success"),
-  });
+
+
+  await ElMessageBox.confirm(
+    '是否发布快照',
+    t("meta.scene.success"),
+    {
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Cancel',
+      type: 'success',
+    }
+  )
 };
 
 onMounted(() => {
