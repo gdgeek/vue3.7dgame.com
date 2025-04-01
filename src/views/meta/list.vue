@@ -29,21 +29,20 @@
                       <el-button-group>
                         <el-button type="primary" size="small" @click="edit(item.id)">{{
                           $t("meta.enter")
-                          }}</el-button>
-                        <el-button type="primary" :loading="copyLoading" size="small" icon="CopyDocument" @click="copyWindow(item)"> 
+                        }}</el-button>
+                        <el-button type="primary" :loading="copyLoadingMap.get(item.id)" size="small"
+                          icon="CopyDocument" @click="copyWindow(item)">
                           <template #loading>
                             <div class="custom-loading">
                               <svg class="circular" viewBox="-10, -10, 50, 50">
-                                <path class="path" 
-                                  d="
+                                <path class="path" d="
                                   M 30 15
                                   L 28 17
                                   M 25.61 25.61
                                   A 15 15, 0, 0, 1, 15 30
                                   A 15 15, 0, 1, 1, 27.99 7.5
                                   L 15 15
-                                " 
-                                style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)" />
+                                " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)" />
                               </svg>
                             </div>
                           </template>
@@ -93,7 +92,7 @@ const pagination = ref<{
 
 const { t } = useI18n();
 
-const copyLoading = ref<boolean>(false);
+const copyLoadingMap = ref<Map<number, boolean>>(new Map());
 
 const namedWindow = async (item: { id: number; title: string }) => {
   try {
@@ -124,7 +123,7 @@ const named = async (id: number, newValue: string) => {
 };
 
 const copyWindow = async (item: metaInfo) => {
-  copyLoading.value = true;
+  copyLoadingMap.value.set(item.id, true);
   try {
     const { value } = await ElMessageBox.prompt(
       t("meta.prompt3.message1"),
@@ -170,13 +169,14 @@ const copyWindow = async (item: metaInfo) => {
     await putMetaCode(newMeta.data.id, {
       blockly: originalMeta.metaCode?.blockly || "",
     });
-    copyLoading.value = false;
+
+    copyLoadingMap.value.set(item.id, false);
 
     await refresh();
     ElMessage.success(t("meta.prompt3.success") + value);
   } catch (error) {
     console.error(error);
-    copyLoading.value = false;
+    copyLoadingMap.value.set(item.id, false);
     ElMessage.info(t("meta.prompt3.info"));
   }
 };
@@ -272,6 +272,18 @@ const refresh = async () => {
     "image,author"
   );
   metaData.value = response.data;
+
+  // if (metaData.value) {
+  //   const newMap = new Map<number, boolean>();
+
+  //   metaData.value.forEach(item => {
+  //     const isLoading = copyLoadingMap.value.get(item.id) || false;
+  //     newMap.set(item.id, isLoading);
+  //   });
+
+  //   copyLoadingMap.value = newMap;
+  // }
+
   pagination.value = {
     current: parseInt(response.headers["x-pagination-current-page"]),
     count: parseInt(response.headers["x-pagination-page-count"]),
@@ -309,6 +321,7 @@ onMounted(() => {
   height: 18px;
   animation: loading-rotate 2s linear infinite;
 }
+
 .el-button .custom-loading .circular .path {
   animation: loading-dash 1.5s ease-in-out infinite;
   stroke-dasharray: 90, 150;

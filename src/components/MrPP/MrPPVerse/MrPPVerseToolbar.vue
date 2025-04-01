@@ -7,7 +7,8 @@
     <!-- 按钮组 -->
     <el-button-group v-if="verse" style="float: right" :inline="true">
       <el-button v-if="saveable" type="success" size="small" icon="Edit" @click="changedWindow"></el-button>
-      <el-button v-if="deleteable" type="danger" size="small" icon="delete" @click="deletedWindow"></el-button>
+      <el-button v-if="deleteable" type="danger" size="small" icon="delete" loading-icon="Eleme" :loading="deleteLoading"
+        @click="deletedWindow"></el-button>
       &nbsp;
     </el-button-group>
   </span>
@@ -21,6 +22,8 @@ import { putVerse, deleteVerse, VerseData } from "@/api/v1/verse";
 import MrPPVerseWindowCreate from "@/components/MrPP/MrPPVerse/MrPPVerseWindowCreate.vue";
 
 const router = useRouter();
+
+const deleteLoading = ref(false);
 
 const props = defineProps<{
   verse: VerseData;
@@ -42,6 +45,7 @@ const saveable = computed(() => !!props.verse?.editable);
 
 // 删除确认窗口
 const deletedWindow = async () => {
+  deleteLoading.value = true;
   try {
     await ElMessageBox.confirm(
       t("verse.page.list.toolbar.confirm.message1"),
@@ -54,7 +58,9 @@ const deletedWindow = async () => {
       }
     );
     await del();
+    deleteLoading.value = false;
   } catch {
+    deleteLoading.value = false;
     ElMessage({
       type: "info",
       message: t("verse.page.list.toolbar.confirm.info"),

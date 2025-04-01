@@ -44,7 +44,8 @@
 
         <el-button-group style="float: right" :inline="true">
           <el-button type="success" size="small" icon="Edit" @click="named"></el-button>
-          <el-button type="danger" size="small" icon="Delete" @click="deleted"></el-button>
+          <el-button type="danger" size="small" icon="Delete" loading-icon="Eleme" :loading="deleteLoading"
+            @click="deleted"></el-button>
           &nbsp;
         </el-button-group>
       </div>
@@ -68,6 +69,8 @@ const props = defineProps({
   },
 });
 
+const deleteLoading = ref(false);
+
 const emits = defineEmits(["named", "deleted"]);
 
 const named = () => {
@@ -75,6 +78,7 @@ const named = () => {
 };
 
 const deleted = () => {
+  deleteLoading.value = true;
   emits("deleted", props.item);
 };
 /*

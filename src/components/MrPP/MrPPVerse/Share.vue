@@ -178,7 +178,7 @@ const ability = useAbility();
 const can = ability.can.bind(ability);
 
 const props = defineProps<{
-  verse: VerseData;
+  verse: VerseData | null;
 }>();
 
 const items = ref<any[]>([]);
