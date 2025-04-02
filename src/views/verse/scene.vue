@@ -173,7 +173,7 @@ const saveVerse = async (data: any) => {
   if (verse?.children?.modules) {
     retitleVerses(verse.children.modules);
   }
-  await putVerse(id.value, { data: JSON.stringify(verse) });
+  await putVerse(id.value, { data: verse});
 
   ElMessageBox.confirm(
     '保存成功，是否发布？',

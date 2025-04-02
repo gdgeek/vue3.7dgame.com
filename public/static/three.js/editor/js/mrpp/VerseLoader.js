@@ -130,8 +130,8 @@ function VerseLoader(editor) {
 		const data = {}
 		data.type = "Verse"
 		data.parameters = { "uuid": root.uuid }
-		data.parameters.space = { "id": -1, "occlusion": false }
-		data.parameters.story = "{\"sorted\":[110],\"contactor\":false}"
+		//data.parameters.space = { "id": -1, "occlusion": false }
+		//data.parameters.story = "{\"sorted\":[110],\"contactor\":false}"
 
 		const modules = []
 
@@ -147,7 +147,6 @@ function VerseLoader(editor) {
 
 		})
 		data.children = { modules }
-		console.error(data)
 		return data;
 	}
 
