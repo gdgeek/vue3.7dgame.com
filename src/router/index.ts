@@ -280,7 +280,7 @@ const routes: RouteRecordRaw[] = [
         children: [
           {
             path: "/resource/voxel",
-            name: "",
+            name: "Voxel",
             component: Empty,
             redirect: "/resource/voxel/index",
             meta: {
@@ -340,6 +340,7 @@ const routes: RouteRecordRaw[] = [
               title: "resourceManagement.polygenManagement.title",
               icon: "system",
               hidden: true,
+              // private: true,
               alwaysShow: false,
               params: null,
             },
@@ -386,7 +387,7 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: "/resource/picture",
-            name: "",
+            name: "Picture",
             component: Empty,
             redirect: "/resource/picture/index",
             meta: {
