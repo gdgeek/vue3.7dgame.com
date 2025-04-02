@@ -18,7 +18,7 @@
           <el-input type="textarea" v-model="post.form.content"></el-input>
         </el-form-item>
         <el-form-item :label="$t('verse.view.share.form.label3')" prop="editable">
-          <el-checkbox v-model="post.form.editable" :label="$t('verse.view.share.form.label4')" border></el-checkbox>
+          <el-checkbox v-model="post.form.editable" :value="$t('verse.view.share.form.label4')" border></el-checkbox>
         </el-form-item>
         <el-form-item>
           <el-button-group :inline="true">
@@ -51,7 +51,7 @@
           <el-input type="textarea" v-model="put.form.content"></el-input>
         </el-form-item>
         <el-form-item :label="$t('verse.view.share.form.label3')" prop="editable">
-          <el-checkbox v-model="put.form.editable" :label="$t('verse.view.share.form.label4')" border></el-checkbox>
+          <el-checkbox v-model="put.form.editable" :value="$t('verse.view.share.form.label4')" border></el-checkbox>
         </el-form-item>
         <el-form-item>
           <el-button-group :inline="true">
