@@ -165,7 +165,7 @@ type Event = {
 
 const events = computed(() => {
   if (item.value) {
-    return JSON.parse(item.value.events!) as {
+    return item.value.events! as {
       inputs: Event[];
       outputs: Event[];
     };

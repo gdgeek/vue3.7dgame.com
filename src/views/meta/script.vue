@@ -737,12 +737,12 @@ onMounted(async () => {
             (gltf) => {
               const animationNames = gltf.animations.map((clip) => clip.name);
 
-              let data = JSON.parse(response.data.data!);
+              let data = response.data.data!;
 
               // 调用递归函数对所有满足条件的项赋值 animations
               assignAnimations(data.children.entities, modelId, animationNames);
 
-              response.data.data = JSON.stringify(data);
+              response.data.data = data;
               meta.value = response.data;
 
               resolve();
