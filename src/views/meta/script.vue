@@ -7,7 +7,7 @@
             <div v-if="meta" class="clearfix">
               <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
                 meta.title
-              }}</el-link>
+                }}</el-link>
               /【{{ $t("meta.script.title") }}】
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
               <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
@@ -72,7 +72,7 @@
                             <pre>
                     <code :class="currentCodeType">{{
                       currentCode
-                      }}</code>
+                    }}</code>
                   </pre>
                           </div>
                         </div>
@@ -633,7 +633,7 @@ const addMetaData = (data: any, ret: any) => {
   }
 };
 const getResource = (meta: metaInfo) => {
-  const data = JSON.parse(meta.data!);
+  const data = meta.data!;
   console.log("data", data);
   const ret = {
     action: [],
@@ -651,7 +651,7 @@ const getResource = (meta: metaInfo) => {
       outputs: [],
     },
   };
-  ret.events = JSON.parse(meta.events!) || { inputs: [], outputs: [] };
+  ret.events = meta.events! || { inputs: [], outputs: [] };
 
   if (data) addMetaData(data, ret);
   return ret;
@@ -869,7 +869,7 @@ const run = async () => {
   const waitForModels = () => {
     return new Promise((resolve) => {
       const checkModels = () => {
-        const metaData = JSON.parse(meta.value!.data!);
+        const metaData = meta.value!.data!;
 
         // 递归计算实体数量
         const countEntities = (entities: any[]): number => {

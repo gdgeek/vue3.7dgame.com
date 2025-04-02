@@ -7,7 +7,7 @@
             <div v-if="verse" class="clearfix">
               <el-link :href="`/verse/view?id=${id}`" :underline="false">{{
                 verse.name
-              }}</el-link>
+                }}</el-link>
               /【{{ $t("verse.view.script.title") }}】
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
               <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
@@ -535,7 +535,7 @@ const resource = computed(() => {
   const outputs: any[] = [];
 
   verse.value!.metas!.forEach((meta: any) => {
-    let events = JSON.parse(meta.events || "{}");
+    let events = meta.events;
     events.inputs = events.inputs || [];
     events.outputs = events.outputs || [];
 
@@ -606,8 +606,8 @@ onMounted(async () => {
     console.error("Verse Metas With Js Code", verseMetasWithJsCodeData.value);
     console.log("metasJavaScriptCode", metasJavaScriptCode.value);
     if (verse.value && verse.value.data) {
-      const json: string = verse.value.data;
-      const data = JSON.parse(json);
+      // const json: string = ;
+      const data = verse.value.data
       data.children.modules.forEach((module: any) => {
         map.set(module.parameters.meta_id.toString(), {
           uuid: module.parameters.uuid,
@@ -741,7 +741,7 @@ const run = async () => {
 
         // 计算所有meta中的实体总数
         for (const meta of metasData) {
-          const metaData = JSON.parse(meta.data!);
+          const metaData = meta.data!;
           expectedModels += countEntities(metaData.children.entities);
         }
 
