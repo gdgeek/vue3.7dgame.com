@@ -82,7 +82,7 @@ const author = computed(() => {
 });
 const info = computed(() => {
   if (props.verse) {
-    return JSON.parse(props.verse.info!);
+    return props.verse.info!;
   }
   return "";
 });
