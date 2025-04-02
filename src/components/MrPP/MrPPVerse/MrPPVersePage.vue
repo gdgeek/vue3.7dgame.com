@@ -80,7 +80,7 @@ const createWindow = () => {
 const submitCreate = async (form: any, imageId: number | null) => {
   const data: PostVerseData = {
     name: form.name,
-    info: JSON.stringify(form),
+    description: form.description,
     uuid: uuidv4(),
   };
   if (imageId !== null) {

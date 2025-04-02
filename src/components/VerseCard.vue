@@ -3,6 +3,7 @@
     <template #header>
       <div>
         <el-card shadow="hover" :body-style="{ padding: '0px' }">
+       
           <template #header>
             <span class="mrpp-title">
               <b class="card-title" nowrap>{{ item.name }}</b>

@@ -72,6 +72,7 @@ export type VerseData = {
   created_at?: string;
   name: string;
   info: string | null;
+  description: string |null;
   data: string | null;
   version: number;
   uuid: string;
@@ -92,7 +93,7 @@ export type VerseData = {
 
 export type PostVerseData = {
   image_id?: number;
-  info: string;
+  description: string;
   name: string;
   uuid: string;
   version?: number;

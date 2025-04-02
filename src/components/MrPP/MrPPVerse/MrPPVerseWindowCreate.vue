@@ -4,17 +4,17 @@
     <template #header>
       {{ dialogTitle }}
     </template>
-    <el-form ref="formRef" :rules="rules" :model="info" label-width="auto">
+    <el-form ref="formRef" :rules="rules" :model="item" label-width="auto">
       <el-form-item :label="$t('verse.page.form.picture')">
-        <mr-p-p-cropper ref="image" :image-url="info.url || null" :file-name="'verse.picture'"
+        <mr-p-p-cropper ref="image" :image-url="item.image?.url || null" :file-name="'verse.picture'"
           @save-file="saveFile"></mr-p-p-cropper>
       </el-form-item>
       <el-form-item prop="name" :label="$t('verse.page.form.name')">
-        <el-input v-model="info.name"></el-input>
+        <el-input v-model="item.name"></el-input>
       </el-form-item>
 
       <el-form-item :label="$t('verse.page.form.description')">
-        <el-input v-model="info.description" type="textarea"></el-input>
+        <el-input v-model="item.description" type="textarea"></el-input>
       </el-form-item>
       <!--
       <el-form-item v-if="isManager" :label="$t('verse.page.form.course')">
@@ -75,12 +75,7 @@ const isManager = computed(
   }
 );
 
-const info = ref({
-  url: "",
-  name: "",
-  description: "",
-  course: -1,
-});
+
 
 const rules = {
   name: [
@@ -97,25 +92,25 @@ const rules = {
     },
   ],
 };
-
+/*
 // 监听item变化，更新info
 watchEffect(() => {
   if (item.value) {
-    info.value.name = item.value.name;
-    info.value.url = item.value.image?.url;
-    const parsedInfo = JSON.parse(item.value.info!);
+    //info.value.name = item.value.name;
+    //info.value.url = item.value.image?.url;
+    const parsedInfo = item.value.info!;
     if (parsedInfo !== null) {
       info.value.description = parsedInfo.description;
       info.value.course = parsedInfo.course;
     }
   }
 });
-
+*/
 const formRef = ref<FormInstance>();
 const submitForm = async () => {
   formRef.value?.validate((valid: boolean) => {
     if (valid) {
-      emit("submit", info.value, imageId.value);
+      emit("submit", item.value, imageId.value);
     } else {
       ElMessage.error(t("verse.page.form.error"));
     }
