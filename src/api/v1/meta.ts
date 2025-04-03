@@ -57,7 +57,7 @@ export const postMeta = (data: Record<string, any>) => {
 };
 export const putMetaCode = (id: number, data: MetaCode) => {
   return request<MetaCode>({
-    url: path.join("v1", "metas", `code${qs.stringify({ id: id }, true)}`),
+    url: path.join("v1", "system", `meta-code${qs.stringify({ meta_id: id }, true)}`),
     data,
     method: "put",
   });

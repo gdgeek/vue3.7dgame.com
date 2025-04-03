@@ -72,7 +72,7 @@ export type VerseData = {
   created_at?: string;
   name: string;
   info: string | null;
-  description: string |null;
+  description: string | null;
   data: string | null;
   version: number;
   uuid: string;
@@ -132,11 +132,18 @@ export const postVerse = (data: PostVerseData) => {
 };
 
 export const putVerseCode = (id: number, data: VerseCode) => {
+
+  return request<VerseCode>({
+    url: path.join("v1", "system", `verse-code${qs.stringify({ verse_id: id }, true)}`),
+    data,
+    method: "put",
+  });
+  /*
   return request<VerseCode>({
     url: path.join("v1", "verses", `code${qs.stringify({ id: id }, true)}`),
     data,
     method: "put",
-  });
+  });*/
 };
 export const getVerse = (id: number, expand = "metas,share") => {
   return request({
@@ -156,9 +163,9 @@ export const getVerseMetasWithJsCode = (
 ) => {
   return request({
     url: path.join(
-      "a1",
-      "verses",
-      `${id.toString()}${qs.stringify({ expand: expand, cl }, true)}`
+      "v1",
+      "system",
+      `verse${qs.stringify({ verse_id: id, expand: expand, cl }, true)}`
     ),
     method: "get",
   });
@@ -222,10 +229,7 @@ export const getVersesWithOpen = (
 };
 */
 
-
-
-
-export const getPublic= (params: VersesParams) => {
+export const getPublic = (params: VersesParams) => {
   const query = createQueryParams(params);
   return request({
     url: path.join("v1", "verses", "public" + qs.stringify(query, true)),
