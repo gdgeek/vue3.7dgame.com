@@ -32,7 +32,7 @@
             <div class="clearfix">
               <el-button type="primary" size="small" @click="selected({ data: item })">{{
                 $t("verse.view.metaDialog.select")
-              }}</el-button>
+                }}</el-button>
             </div>
           </el-card>
           <br />
@@ -116,7 +116,7 @@ const refresh = async () => {
     active.value.sorted,
     active.value.searched,
     active.value.pagination.current,
-    "image,verseMetas"
+    "image"
   );
   active.value.items = response.data;
   console.log("active", active);
