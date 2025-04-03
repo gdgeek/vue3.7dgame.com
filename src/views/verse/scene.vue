@@ -117,10 +117,7 @@ const addPrefab = () => {
 // 添加实体
 const addMeta = () => {
   metaDialogRef.value?.open(id.value);
-  ElMessage({
-    type: "info",
-    message: t("verse.view.sceneEditor.info2"),
-  });
+
 };
 
 // 选择元素后的回调
@@ -173,7 +170,7 @@ const saveVerse = async (data: any) => {
   if (verse?.children?.modules) {
     retitleVerses(verse.children.modules);
   }
-  await putVerse(id.value, { data: verse});
+  await putVerse(id.value, { data: verse });
 
   ElMessageBox.confirm(
     '保存成功，是否发布？',
