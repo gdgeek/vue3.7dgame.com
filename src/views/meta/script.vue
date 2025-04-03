@@ -533,22 +533,6 @@ const testAction = (data: any) => {
   }
 };
 
-const testConmand = (data: any) => {
-  // console.log("command: ", data);
-  if (
-    data &&
-    data.parameters &&
-    typeof data.parameters.voice !== "undefined"
-  ) {
-    return {
-      uuid: data.parameters.uuid,
-      name: data.parameters.voice ?? null,
-      parameter: data.parameters.parameter ?? null,
-      type: data.type ?? null,
-    };
-  }
-}
-
 const testPoint = (data: any, typeList: string[]) => {
   if (!data) {
     return;
@@ -571,13 +555,8 @@ const testPoint = (data: any, typeList: string[]) => {
 
 const addMetaData = (data: any, ret: any) => {
   const action = testAction(data);
-  const command = testConmand(data);
   if (action) {
     ret.action.push(action);
-  }
-
-  if (command) {
-    ret.command.push(command);
   }
 
   const entity = testPoint(data, [
@@ -633,11 +612,11 @@ const addMetaData = (data: any, ret: any) => {
   }
 };
 const getResource = (meta: metaInfo) => {
-  const data = meta.data!;
+  // const data = meta.data!
+  const data = JSON.parse(meta.data!);
   console.log("data", data);
   const ret = {
     action: [],
-    command: [],
     trigger: [],
     polygen: [],
     picture: [],
@@ -651,7 +630,8 @@ const getResource = (meta: metaInfo) => {
       outputs: [],
     },
   };
-  ret.events = meta.events! || { inputs: [], outputs: [] };
+  // ret.events = meta.events! || { inputs: [], outputs: [] };
+  ret.events = JSON.parse(meta.events!) || { inputs: [], outputs: [] };
 
   if (data) addMetaData(data, ret);
   return ret;
@@ -737,12 +717,14 @@ onMounted(async () => {
             (gltf) => {
               const animationNames = gltf.animations.map((clip) => clip.name);
 
-              let data = response.data.data!;
+              // let data = response.data.data!;
+              let data = JSON.parse(response.data.data!);
 
               // 调用递归函数对所有满足条件的项赋值 animations
               assignAnimations(data.children.entities, modelId, animationNames);
 
-              response.data.data = data;
+              // response.data.data = data;
+              response.data.data = JSON.stringify(data);
               meta.value = response.data;
 
               resolve();
@@ -869,7 +851,7 @@ const run = async () => {
   const waitForModels = () => {
     return new Promise((resolve) => {
       const checkModels = () => {
-        const metaData = meta.value!.data!;
+        const metaData = JSON.parse(meta.value!.data!);
 
         // 递归计算实体数量
         const countEntities = (entities: any[]): number => {
