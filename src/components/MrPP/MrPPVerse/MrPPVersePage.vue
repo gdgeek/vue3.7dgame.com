@@ -1,7 +1,7 @@
 <template>
   <div class="verse-index">
 
-    <Create v-if="props.created" ref="createdDialog" :dialog-title="$t('verse.page.dialogTitle')"
+    <create v-if="props.created" ref="createdDialog" :dialog-title="$t('verse.page.dialogTitle')"
       :dialog-submit="$t('verse.page.dialogSubmit')" @submit="submitCreate"></Create>
 
     <br />
@@ -73,7 +73,7 @@ const pagination = ref<Pagination>({
 
 const createWindow = () => {
   if (createdDialog.value) {
-    createdDialog.value.show("");
+    createdDialog.value.show();
   }
 };
 

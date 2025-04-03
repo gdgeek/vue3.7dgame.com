@@ -7,7 +7,7 @@
             <div v-if="verse" class="clearfix">
               <el-link :href="`/verse/view?id=${id}`" :underline="false">{{
                 verse.name
-                }}</el-link>
+              }}</el-link>
               /【{{ $t("verse.view.script.title") }}】
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
               <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">

@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="dialogVisible" append-to-body :close-on-click-modal="false" width="70%"
+  <el-dialog v-model="dialogVisible" append-to-body :close-on-click-modal="closeOnClickModal" width="70%"
     @keydown.enter="submitForm">
     <template #header>
       {{ dialogTitle }}
@@ -16,12 +16,7 @@
       <el-form-item :label="$t('verse.page.form.description')">
         <el-input v-model="item.description" type="textarea"></el-input>
       </el-form-item>
-      <!--
-      <el-form-item v-if="isManager" :label="$t('verse.page.form.course')">
-        <el-input v-model="info.course" type="number"></el-input>
-      </el-form-item>
-      -->
-      <!-- 载入截图组件 -->
+
     </el-form>
 
     <template #footer>
@@ -30,7 +25,7 @@
           $t("verse.page.form.cancel")
           }}</el-button>
         <el-button type="primary" @click="submitForm">
-          {{ props.dialogSubmit }}
+          {{ dialogSubmit }}
         </el-button>
       </span>
     </template>
@@ -42,11 +37,17 @@ import { VerseData } from "@/api/v1/verse";
 import MrPPCropper from "@/components/MrPP/MrPPVerse/MrPPCropper.vue";
 import { useUserStore } from "@/store/modules/user";
 import { FormInstance } from "element-plus";
+import { ref, computed, defineProps, defineEmits } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 const props = defineProps({
   dialogTitle: String,
   dialogSubmit: String,
+  closeOnClickModal: {
+    type: Boolean,
+    default: false
+  }
 });
 
 const dialogTitle = computed(
@@ -59,23 +60,8 @@ const dialogSubmit = computed(
 const emit = defineEmits(["submit"]);
 
 const dialogVisible = ref(false);
-// const imageUrl = ref<string | null>(null);
 const imageId = ref<number | null>(null);
-const item = ref<VerseData>();
-
-const isManager = computed(
-  () => {
-    const userInfo = useUserStore().userInfo;
-    if (userInfo === null || userInfo.roles === null) {
-      return false;
-    }
-    return (userInfo.roles.includes("manager") ||
-      userInfo.roles.includes("admin") ||
-      userInfo.roles.includes("root"))
-  }
-);
-
-
+const item = ref<VerseData | null>({} as VerseData);
 
 const rules = {
   name: [
@@ -92,21 +78,9 @@ const rules = {
     },
   ],
 };
-/*
-// 监听item变化，更新info
-watchEffect(() => {
-  if (item.value) {
-    //info.value.name = item.value.name;
-    //info.value.url = item.value.image?.url;
-    const parsedInfo = item.value.info!;
-    if (parsedInfo !== null) {
-      info.value.description = parsedInfo.description;
-      info.value.course = parsedInfo.course;
-    }
-  }
-});
-*/
+
 const formRef = ref<FormInstance>();
+
 const submitForm = async () => {
   formRef.value?.validate((valid: boolean) => {
     if (valid) {
@@ -117,14 +91,15 @@ const submitForm = async () => {
   });
 };
 
-const show = (selectedItem: any) => {
-  item.value = selectedItem;
-  console.log("selectedItem", selectedItem);
-  if (item.value?.image) {
-    setTimeout(() => {
-      const imageComponent = ref<any>(null);
-      imageComponent.value = item.value?.image.url;
-    }, 0);
+const show = (selected: VerseData | null = null) => {
+  if (selected) {
+    item.value = selected;
+    if (item.value?.image) {
+      setTimeout(() => {
+        const imageComponent = ref<any>(null);
+        imageComponent.value = item.value?.image.url;
+      }, 0);
+    }
   }
   dialogVisible.value = true;
 };
