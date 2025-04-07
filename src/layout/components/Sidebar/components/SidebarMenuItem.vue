@@ -20,7 +20,7 @@
 
     <!-- 显示具有多个子路由的父菜单项 -->
     <el-sub-menu v-else :index="resolvePath(item.path)" teleported>
-      <template #header>
+      <template #title>
         <SidebarMenuItemTitle v-if="item.meta" :icon="item.meta && item.meta.icon" :title="item.meta.title">
         </SidebarMenuItemTitle>
       </template>

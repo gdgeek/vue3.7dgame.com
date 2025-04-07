@@ -5,7 +5,7 @@
       :text-color="variables['menu-text']" :active-text-color="variables['menu-active-text']"
       @select="handleMenuSelect">
       <el-menu-item v-for="route in mixTopMenus" :key="route.path" :index="route.path">
-        <template #header>
+        <template #title>
           <svg-icon v-if="route.meta && route.meta.icon" :icon-class="route.meta.icon"></svg-icon>
           <span v-if="route.path === '/'">首页</span>
           <template v-else>
