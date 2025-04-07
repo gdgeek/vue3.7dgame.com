@@ -612,8 +612,8 @@ const addMetaData = (data: any, ret: any) => {
   }
 };
 const getResource = (meta: metaInfo) => {
-  // const data = meta.data!
-  const data = JSON.parse(meta.data!);
+  const data = meta.data!
+  // const data = JSON.parse(meta.data!);
   console.log("data", data);
   const ret = {
     action: [],
@@ -626,12 +626,12 @@ const getResource = (meta: metaInfo) => {
     sound: [],
     entity: [],
     events: {
-      inputs: [],
-      outputs: [],
+      inputs: [] as string[],
+      outputs: [] as string[],
     },
   };
-  // ret.events = meta.events! || { inputs: [], outputs: [] };
-  ret.events = JSON.parse(meta.events!) || { inputs: [], outputs: [] };
+  ret.events = meta.events! || { inputs: [], outputs: [] };
+  // ret.events = JSON.parse(meta.events!) || { inputs: [], outputs: [] };
 
   if (data) addMetaData(data, ret);
   return ret;
@@ -717,14 +717,14 @@ onMounted(async () => {
             (gltf) => {
               const animationNames = gltf.animations.map((clip) => clip.name);
 
-              // let data = response.data.data!;
-              let data = JSON.parse(response.data.data!);
+              let data = response.data.data!;
+              // let data = JSON.parse(response.data.data!);
 
               // 调用递归函数对所有满足条件的项赋值 animations
               assignAnimations(data.children.entities, modelId, animationNames);
 
-              // response.data.data = data;
-              response.data.data = JSON.stringify(data);
+              response.data.data = data;
+              // response.data.data = JSON.stringify(data);
               meta.value = response.data;
 
               resolve();
@@ -851,8 +851,8 @@ const run = async () => {
   const waitForModels = () => {
     return new Promise((resolve) => {
       const checkModels = () => {
-        const metaData = JSON.parse(meta.value!.data!);
-
+        // const metaData = JSON.parse(meta.value!.data!);
+        const metaData = meta.value!.data!;
         // 递归计算实体数量
         const countEntities = (entities: any[]): number => {
           let count = 0;

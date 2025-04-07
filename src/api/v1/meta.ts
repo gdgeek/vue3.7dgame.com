@@ -25,16 +25,20 @@ export type MetaCode = {
   lua?: string;
   js?: string;
 };
+export type Events = {
+  inputs: string[];
+  outputs: string[];
+};
 // 实体类型
 export type metaInfo = {
   id: number;
   author_id: number;
   info: string | null;
-  data: string | null;
+  data: any | null;
   created_at?: string;
   image_id: number | null;
   uuid: string;
-  events: string | null;
+  events: Events | null;
   title: string;
   prefab: number;
   image: ImageDetails;
@@ -57,7 +61,11 @@ export const postMeta = (data: Record<string, any>) => {
 };
 export const putMetaCode = (id: number, data: MetaCode) => {
   return request<MetaCode>({
-    url: path.join("v1", "system", `meta-code${qs.stringify({ meta_id: id }, true)}`),
+    url: path.join(
+      "v1",
+      "system",
+      `meta-code${qs.stringify({ meta_id: id }, true)}`
+    ),
     data,
     method: "put",
   });
