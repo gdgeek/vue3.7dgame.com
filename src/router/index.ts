@@ -133,6 +133,37 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: "/web",
+    component: () => import("@/views/web/index.vue"),
+    redirect: "/web/news",
+    meta: { hidden: true, private: true },
+    children: [
+      {
+        path: "news",
+        name: "WebebNews",
+        component: () => import("@/views/web/components/News/index.vue"),
+        meta: { hidden: true, private: true },
+        children: [
+          {
+            path: "category",
+            name: "WebCategory",
+            component: () =>
+              import("@/views/web/components/News/IntroduceCategory.vue"),
+            meta: { hidden: true, private: true },
+        },
+        {
+          path: "document",
+          name: "WebDocument",
+            component: () =>
+              import("@/views/web/components/News/IntroduceDocument.vue"),
+            meta: { hidden: true, private: true },
+          },
+        ],
+      },
+    ],
+  },
+
+  {
     path: "/site",
     component: () => import("@/views/site/index.vue"),
     meta: { hidden: true, private: true },

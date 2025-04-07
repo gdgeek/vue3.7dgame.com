@@ -85,6 +85,8 @@ const rules = computed<Record<string, FormItemRule[]>>(() => {
 });
 const loading = ref<boolean>(false);
 
+const emit = defineEmits(['login-success']);
+
 const submit = () => {
   formRef.value?.validate(async (valid: boolean) => {
     loading.value = true;
@@ -95,6 +97,7 @@ const submit = () => {
 
         await userStore.getUserInfo();
         const { path, queryParams } = parseRedirect();
+        emit('login-success');
         router.push({ path: path, query: queryParams });
       } catch (e: any) {
         let errorMessage = "Login failed, please try again later.";
