@@ -1,14 +1,10 @@
 <template>
   <div>
-    <div
-      id="scene"
-      ref="scene"
-      :style="{
-        height: isSceneFullscreen ? '100vh' : '75vh',
-        width: '100%',
-        margin: '0 auto',
-      }"
-    ></div>
+    <div id="scene" ref="scene" :style="{
+      height: isSceneFullscreen ? '100vh' : '75vh',
+      width: '100%',
+      margin: '0 auto',
+    }"></div>
   </div>
 </template>
 
@@ -178,21 +174,22 @@ const loadModel = async (
     entityUUID: entity.parameters?.uuid,
     resourceType: resource.type,
     isActive: entity.parameters.active,
+    parentActive
   });
 
-  // 设置初始可见性
-  const setInitialVisibility = (
-    mesh: THREE.Object3D,
-    parentActive: boolean = true
-  ) => {
-    const isActive =
-      entity.parameters?.active !== undefined ? entity.parameters.active : true;
-    mesh.visible = parentActive && isActive;
+  // 计算当前实体的可见性状态，需要考虑父级的可见性
+  const currentActive =
+    (entity.parameters?.active !== undefined ? entity.parameters.active : true) && parentActive;
+
+  // 初始化可见性
+  const setInitialVisibility = (mesh: THREE.Object3D) => {
+    mesh.visible = currentActive;
     console.error(
       `设置模型 ${entity.parameters.uuid} 的初始可见性:`,
-      mesh.visible
+      mesh.visible,
+      `(parentActive: ${parentActive}, entityActive: ${entity.parameters.active})`
     );
-    return isActive;
+    return currentActive;
   };
 
   // 处理视频类型
@@ -226,7 +223,7 @@ const loadModel = async (
           });
 
           const mesh = new THREE.Mesh(geometry, material);
-          setInitialVisibility(mesh, parentActive);
+          setInitialVisibility(mesh);
 
           // 应用变换
           if (entity.parameters?.transform) {
@@ -246,8 +243,8 @@ const loadModel = async (
             mesh.scale.set(
               entity.parameters.transform.scale.x * baseScale,
               entity.parameters.transform.scale.y *
-                baseScale *
-                (1 / aspectRatio),
+              baseScale *
+              (1 / aspectRatio),
               entity.parameters.transform.scale.z * baseScale
             );
           }
@@ -359,7 +356,7 @@ const loadModel = async (
           });
 
           const mesh = new THREE.Mesh(geometry, material);
-          setInitialVisibility(mesh, parentActive);
+          setInitialVisibility(mesh);
 
           // 应用变换
           if (entity.parameters?.transform) {
@@ -379,8 +376,8 @@ const loadModel = async (
             mesh.scale.set(
               entity.parameters.transform.scale.x * baseScale,
               entity.parameters.transform.scale.y *
-                baseScale *
-                (1 / aspectRatio),
+              baseScale *
+              (1 / aspectRatio),
               entity.parameters.transform.scale.z * baseScale
             );
           }
@@ -466,7 +463,7 @@ const loadModel = async (
         });
 
         const mesh = new THREE.Mesh(geometry, material);
-        setInitialVisibility(mesh, parentActive);
+        setInitialVisibility(mesh);
 
         // 应用变换
         if (entity.parameters?.transform) {
@@ -541,7 +538,7 @@ const loadModel = async (
             });
 
             const voxMesh = new VOXMesh(chunk, 1);
-            setInitialVisibility(voxMesh, parentActive);
+            setInitialVisibility(voxMesh);
 
             // 应用变换
             if (entity.parameters?.transform) {
@@ -581,7 +578,7 @@ const loadModel = async (
                       return loadModel(
                         childResource,
                         childEntity,
-                        parentActive && voxMesh.visible
+                        currentActive && voxMesh.visible
                       );
                     }
                   } else if (childEntity.type === "Text") {
@@ -593,7 +590,7 @@ const loadModel = async (
                     return loadModel(
                       textResource,
                       childEntity,
-                      parentActive && voxMesh.visible
+                      currentActive && voxMesh.visible
                     );
                   }
                   return null;
@@ -945,7 +942,7 @@ const loadModel = async (
         url,
         async (gltf) => {
           const model = gltf.scene;
-          setInitialVisibility(model, parentActive);
+          setInitialVisibility(model);
           const uuid = entity.parameters.uuid.toString();
           if (!entity.parameters || !entity.parameters.uuid) {
             console.error("entity.parameters对象无效:", entity.parameters);
@@ -996,7 +993,7 @@ const loadModel = async (
                     return loadModel(
                       childResource,
                       childEntity,
-                      parentActive && model.visible
+                      currentActive && model.visible
                     );
                   }
                 } else if (childEntity.type === "Text") {
@@ -1008,7 +1005,7 @@ const loadModel = async (
                   return loadModel(
                     textResource,
                     childEntity,
-                    parentActive && model.visible
+                    currentActive && model.visible
                   );
                 }
                 return null;
@@ -1545,11 +1542,19 @@ const processEntities = async (
       entity.parameters?.transform
     );
 
+    // 计算当前实体的可见性状态，需要考虑父级的可见性
+    const currentActive =
+      (entity.parameters?.active !== undefined ? entity.parameters.active : true) && parentActive;
+
     console.log(`处理实体 [Level ${level}]:`, {
+      type: entity.type,
       name: entity.parameters?.name,
+      uuid: entity.parameters?.uuid,
       originalTransform: entity.parameters?.transform,
       parentTransform,
       combinedTransform: entityTransform,
+      isActive: currentActive,
+      parentActive
     });
 
     // 处理当前实体
@@ -1564,13 +1569,31 @@ const processEntities = async (
           textResource,
           {
             ...entity,
-            parameters: { ...entity.parameters, transform: entityTransform },
+            parameters: {
+              ...entity.parameters,
+              transform: entityTransform,
+              active: currentActive // 传递计算后的可见性状态
+            },
           },
-          parentActive
+          currentActive // 使用计算后的可见性状态
         );
       } catch (error) {
         console.error("处理文本实体失败:", error);
       }
+    } else if (entity.type === "Entity") {
+      // 处理Entity类型
+      console.log("处理Entity类型容器:", entity.parameters.uuid);
+      const entityData = {
+        type: "entity",
+        data: {
+          transform: entityTransform,
+          setVisibility: () => {
+            // Entity本身没有可见性，需要通过子实体控制
+            console.log("Entity不支持直接设置可见性");
+          },
+        },
+      };
+      sources.set(entity.parameters.uuid, entityData);
     } else if (entity.parameters?.resource) {
       const resource = props.meta.resources.find(
         (r: any) => r.id.toString() === entity.parameters.resource.toString()
@@ -1581,9 +1604,13 @@ const processEntities = async (
             resource,
             {
               ...entity,
-              parameters: { ...entity.parameters, transform: entityTransform },
+              parameters: {
+                ...entity.parameters,
+                transform: entityTransform,
+                active: currentActive // 传递计算后的可见性状态
+              },
             },
-            parentActive
+            currentActive // 使用计算后的可见性状态
           );
         } catch (error) {
           console.error(`加载模型失败:`, error);
@@ -1592,18 +1619,14 @@ const processEntities = async (
     }
 
     // 递归处理子实体，传递当前实体的可见性状态
-    // if (entity.children?.entities) {
-    //   const currentActive =
-    //     entity.parameters?.active !== undefined
-    //       ? entity.parameters.active
-    //       : true;
-    //   await processEntities(
-    //     entity.children.entities,
-    //     entityTransform,
-    //     level + 1,
-    //     parentActive && currentActive
-    //   );
-    // }
+    if (entity.children?.entities) {
+      await processEntities(
+        entity.children.entities,
+        entityTransform,
+        level + 1,
+        currentActive // 传递计算后的可见性状态给子实体
+      );
+    }
   }
 };
 
@@ -1654,7 +1677,8 @@ onMounted(async () => {
   controls.value.maxDistance = 500;
 
   // 加载所有模型
-  const metaData = JSON.parse(props.meta.data);
+  // const metaData = JSON.parse(props.meta.data);
+  const metaData = props.meta.data;
   console.log("解析后的metaData:", metaData);
 
   if (metaData.children?.entities) {

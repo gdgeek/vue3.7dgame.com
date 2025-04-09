@@ -164,6 +164,7 @@ import jsBeautify from "js-beautify";
 import ScenePlayer from "./ScenePlayer.vue";
 import * as THREE from "three";
 import env from "@/environment";
+
 const appStore = useAppStore();
 const { t } = useI18n();
 const loading = ref(false);
@@ -747,7 +748,7 @@ const run = async () => {
           const metaData = meta.data!;
           // const metaData = JSON.parse(meta.data!);
 
-          expectedModels += countEntities(metaData.children.entities);
+          expectedModels += countEntities(metaData.children.entities); 
         }
 
         if (scenePlayer.value?.sources.size === expectedModels) {

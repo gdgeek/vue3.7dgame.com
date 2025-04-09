@@ -73,7 +73,7 @@ export type VerseData = {
   name: string;
   info: string | null;
   description: string | null;
-  data: string | null;
+  data: any;
   version: number;
   uuid: string;
   editable: boolean;
@@ -101,7 +101,7 @@ export type PostVerseData = {
 
 export type meta = {
   id: number;
-  data: string;
+  data: any;
   uuid: string;
   events: string;
   title: string;

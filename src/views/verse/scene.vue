@@ -23,7 +23,7 @@ import { getPrefab } from "@/api/v1/prefab";
 import { useAppStore } from "@/store/modules/app";
 import { translateRouteTitle } from "@/utils/i18n";
 import env from "@/environment";
-import { useFileStore } from "@/store/modules/config";
+import { useFileStore } from "@/store/modules/config"
 
 // 组件状态
 const appStore = useAppStore();
@@ -172,29 +172,64 @@ const saveVerse = async (data: any) => {
   }
   await putVerse(id.value, { data: verse });
 
-  ElMessageBox.confirm(
-    '保存成功，是否发布？',
-    '发布场景',
-    {
-      confirmButtonText: 'OK',
-      cancelButtonText: 'Cancel',
-      type: 'warning',
-    }
-  )
-    .then(async () => {
-      await takePhoto(id.value)
-      ElMessage({
-        type: 'success',
-        message: '发布成功',
-      })
-    })
-    .catch(() => {
-      ElMessage({
-        type: 'info',
-        message: '取消发布',
-      })
-    })
+  // ElMessageBox.confirm(
+  //   '保存成功，是否发布？',
+  //   '发布场景',
+  //   {
+  //     confirmButtonText: 'OK',
+  //     cancelButtonText: 'Cancel',
+  //     type: 'warning',
+  //   }
+  // )
+  //   .then(async () => {
+  //     await takePhoto(id.value)
+  //     ElMessage({
+  //       type: 'success',
+  //       message: '发布成功',
+  //     })
+  //   })
+  //   .catch(() => {
+  //     ElMessage({
+  //       type: 'info',
+  //       message: '取消发布',
+  //     })
+  //   })
 };
+
+//发布场景
+const releaseVerse = async (data: any) => {
+  if (!data.verse) {
+    return;
+  }
+  console.warn(data.verse);
+  const verse = data.verse;
+
+  if (!saveable.value) {
+    ElMessage({
+      type: "info",
+      message: "没有发布权限",
+    });
+    return;
+  }
+
+  try {
+    await ElMessageBox.confirm(
+      t("verse.page.list.releaseConfirm.message1"),
+      t("verse.page.list.releaseConfirm.message2"),
+      {
+        confirmButtonText: t("verse.page.list.releaseConfirm.confirm"),
+        cancelButtonText: t("verse.page.list.releaseConfirm.cancel"),
+        type: "warning",
+      }
+    );
+
+    await takePhoto(id.value);
+  
+    ElMessage.success(t("verse.page.list.releaseConfirm.success"));
+  } catch {
+    ElMessage.info(t("verse.page.list.releaseConfirm.info"));
+  }
+}
 
 // 处理来自编辑器的消息
 const handleMessage = async (e: MessageEvent) => {
@@ -225,6 +260,10 @@ const handleMessage = async (e: MessageEvent) => {
 
     case "save-verse":
       saveVerse(data);
+      break;
+    
+    case "release-verse":
+      releaseVerse(data);
       break;
 
     case "save-verse-none":
