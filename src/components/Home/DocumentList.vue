@@ -1,33 +1,15 @@
 <template>
   <div>
-    <el-tooltip
-      v-if="category"
-      :content="category.description"
-      placement="top"
-      effect="light"
-    >
+    <el-tooltip v-if="category" :content="category.description" placement="top" effect="light">
       <el-tag size="small" style="margin-left: 68px; margin-bottom: 15px">
         {{ category.name }}
       </el-tag>
     </el-tooltip>
     <el-timeline v-if="data" :reverse="reverse">
-      <el-timeline-item
-        v-for="(item, index) in data"
-        :key="index"
-        :timestamp="dateTime(new Date(item.date))"
-      >
-        <el-card
-          :body-style="{ padding: '0px' }"
-          shadow="hover"
-          class="document-box-card"
-        >
+      <el-timeline-item v-for="(item, index) in data" :key="index" :timestamp="dateTime(new Date(item.date))">
+        <el-card :body-style="{ padding: '0px' }" shadow="hover" class="document-box-card">
           <div style="padding: -10px" @click="select(item.id)">
-            <img
-              align="left"
-              class="document-list-img"
-              :src="item.jetpack_featured_media_url"
-              fit="cover"
-            />
+            <img align="left" class="document-list-img" :src="item.jetpack_featured_media_url" fit="cover" />
             <div class="document-list-text">
               <h3 :innerHTML="sanitizedTitle(item)"></h3>
               <div :innerHTML="sanitizedExcerpt(item)"></div>
@@ -44,16 +26,9 @@
         <el-skeleton :rows="3"></el-skeleton>
       </el-timeline-item>
     </el-timeline>
-    <el-pagination
-      v-if="pagination.count && pagination.count > 1"
-      :current-page="pagination.current"
-      :page-count="pagination.count ?? 0"
-      :page-size="pagination.size"
-      :total="pagination.total ?? 0"
-      layout="prev, pager, next, jumper"
-      background
-      @current-change="handleCurrentChange"
-    ></el-pagination>
+    <el-pagination v-if="pagination.count && pagination.count > 1" :current-page="pagination.current"
+      :page-count="pagination.count ?? 0" :page-size="pagination.size" :total="pagination.total ?? 0"
+      layout="prev, pager, next, jumper" background @current-change="handleCurrentChange"></el-pagination>
   </div>
 </template>
 

@@ -1,13 +1,22 @@
 <template>
-  <div class="app-container">
+  <div class="app-container" :class="{ 'dark-theme': isDark }">
     <!-- 导航栏 -->
-    <nav class="nav-container" :class="{ 'nav-scrolled': isScrolled }">
+    <nav class="nav-container" :class="{ 'nav-scrolled': isScrolled, 'dark-theme': isDark }">
       <div class="nav-left">
         <img src="/media/image/logo.gif" alt="Logo" class="logo" />
-        <span class="company-name">不加班AR编程平台</span>
+        <!-- <span class="company-name">不加班AR编程平台</span> -->
+        <RadiantText
+          class="inline-flex items-center justify-center pl-0 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400"
+          :duration="5" :fontSize="isMobile ? 16 : 20" :textColor="getTextColor()">
+          <span class="font-bold">不加班AR编程平台</span>
+        </RadiantText>
       </div>
       <div class="nav-right">
-        <div class="nav-item" @click="openLoginDialog">
+        <div class="theme-switch" v-if="!isMobile">
+          <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
+            @change="toggleTheme"></el-switch>
+        </div>
+        <div class="nav-item" @click="openLoginDialog" :class="{ 'mobile-nav-item': isMobile }">
           登录平台
         </div>
       </div>
@@ -15,13 +24,17 @@
 
     <!-- 移动端侧边栏菜单 -->
     <div class="sidebar-overlay" v-if="isMobile && sidebarVisible" @click="toggleSidebar"></div>
-    <div class="sidebar-menu" :class="{ 'sidebar-visible': sidebarVisible }" v-if="isMobile">
+    <div class="sidebar-menu" :class="{ 'sidebar-visible': sidebarVisible, 'dark-theme': isDark }" v-if="isMobile">
       <!-- 侧边栏顶部 -->
       <div class="sidebar-header">
         <img src="/media/image/logo.gif" alt="Logo" class="sidebar-logo" />
         <span class="sidebar-company-name">不加班AR编程平台</span>
       </div>
       <div class="sidebar-items">
+        <div class="theme-switch-mobile">
+          <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
+            @change="toggleTheme"></el-switch>
+        </div>
         <div v-for="item in navItems" :key="item.key" class="sidebar-item" :class="{ active: currentTab === item.key }"
           @click="handleSidebarItemClick(item.key)">
           {{ item.label }}
@@ -30,7 +43,7 @@
     </div>
 
     <!-- 主体内容区域 -->
-    <div class="content-container" ref="contentRef">
+    <div class="content-container" ref="contentRef" :class="{ 'dark-theme': isDark }">
 
       <Banner />
 
@@ -50,10 +63,14 @@ import { useRouter, useRoute } from "vue-router";
 import Banner from "./components/Banner.vue";
 import Footer from "@/layout/components/NavBar/components/Footer.vue";
 import LoginDialog from "@/components/Account/LoginDialog.vue";
+import { ThemeEnum } from "@/enums/ThemeEnum";
+import { useSettingsStore } from "@/store/modules/settings";
 
 const router = useRouter();
 const route = useRoute();
 const contentRef = ref<HTMLElement | null>(null);
+const settingsStore = useSettingsStore();
+const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
 defineOptions({
   name: "Introduce",
@@ -66,9 +83,22 @@ const navItems = [
 
 const currentTab = ref("login");
 
-
 const loginDialogRef = ref<any>(null);
 
+/** 主题切换 */
+const toggleTheme = () => {
+  const newTheme = isDark.value ? ThemeEnum.DARK : ThemeEnum.LIGHT;
+  settingsStore.changeTheme(newTheme);
+};
+
+// 根据主题和滚动状态获取文本颜色
+const getTextColor = () => {
+  if (isDark.value) {
+    return '#fff';
+  } else {
+    return isScrolled.value ? '#333' : '#fff';
+  }
+};
 
 const openLoginDialog = () => {
   if (loginDialogRef.value) {
@@ -198,6 +228,11 @@ onUnmounted(() => {
   padding: 0;
   display: flex;
   flex-direction: column;
+
+  &.dark-theme {
+    background-color: #1e1e1e;
+    color: #fff;
+  }
 }
 
 .nav-container {
@@ -222,6 +257,13 @@ onUnmounted(() => {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
+  &.dark-theme {
+    &.nav-scrolled {
+      background-color: #252525;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+  }
+
   .nav-left {
     display: flex;
     align-items: center;
@@ -242,6 +284,11 @@ onUnmounted(() => {
 
   .nav-right {
     display: flex;
+    align-items: center;
+
+    .theme-switch {
+      margin-right: 20px;
+    }
 
     .nav-item {
       font-size: 16px;
@@ -250,6 +297,11 @@ onUnmounted(() => {
       padding: 8px 16px;
       border-radius: 4px;
       transition: all 0.3s ease;
+
+      &.mobile-nav-item {
+        font-size: 14px;
+        padding: 6px 12px;
+      }
 
       &:hover {
         color: #1890ff;
@@ -264,6 +316,18 @@ onUnmounted(() => {
     .nav-right .nav-item {
       color: #333;
     }
+
+    &.dark-theme {
+
+      .nav-left .company-name,
+      .nav-right .nav-item {
+        color: #fff;
+      }
+
+      .nav-right .nav-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+    }
   }
 }
 
@@ -277,6 +341,20 @@ onUnmounted(() => {
   background-color: #fff;
   box-sizing: border-box;
   overflow: hidden;
+
+  &.dark-theme {
+    background-color: #1e1e1e;
+
+    .content-section {
+      h1 {
+        color: #f0f0f0;
+      }
+
+      p {
+        color: #d0d0d0;
+      }
+    }
+  }
 
   .content-section {
     height: 100%;
@@ -317,6 +395,34 @@ onUnmounted(() => {
   z-index: 999;
   transition: all 0.3s ease;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+
+  &.dark-theme {
+    background-color: #252525;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+
+    .sidebar-header {
+      border-bottom: 1px solid #333;
+
+      .sidebar-company-name {
+        color: #f0f0f0;
+      }
+    }
+
+    .sidebar-items {
+      .sidebar-item {
+        color: #d0d0d0;
+
+        &:hover {
+          background-color: rgba(24, 144, 255, 0.2);
+        }
+
+        &.active {
+          color: #1890ff;
+          background-color: rgba(24, 144, 255, 0.2);
+        }
+      }
+    }
+  }
 
   &.sidebar-visible {
     left: 0;
@@ -365,6 +471,14 @@ onUnmounted(() => {
   .sidebar-items {
     margin-top: 0;
     padding: 20px 0;
+
+    .theme-switch-mobile {
+      padding: 0 24px 16px;
+      display: flex;
+      justify-content: flex-start;
+      border-bottom: 1px solid #f0f0f0;
+      margin-bottom: 10px;
+    }
 
     .sidebar-item {
       padding: 16px 24px;
@@ -422,6 +536,10 @@ onUnmounted(() => {
 
   .content-container {
     min-height: calc(100vh - 50px);
+  }
+
+  .sidebar-items .theme-switch-mobile {
+    border-bottom-color: #333;
   }
 }
 </style>

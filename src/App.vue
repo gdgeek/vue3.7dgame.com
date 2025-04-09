@@ -1,4 +1,7 @@
 <template>
+  <!-- 主题背景组件 -->
+  <ThemeBackground />
+
   <!-- 一级路由出口组件 -->
   <!-- <RouterView></RouterView> -->
 
@@ -22,6 +25,8 @@ import { useAbility } from "@casl/vue";
 import { useUserStore } from "@/store/modules/user";
 import { UpdateRoutes } from "@/router";
 import Token from "@/store/modules/token";
+import ThemeBackground from "@/components/ThemeBackground.vue";
+
 const userStore = useUserStore();
 const ability = useAbility(); // 提取到 setup 顶层
 

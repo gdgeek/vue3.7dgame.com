@@ -172,9 +172,19 @@ defineOptions({
 <style lang="scss" scoped>
 .news-container {
   padding: 20px;
+  margin: 0 auto;
 }
 
 #news-container {
   scroll-margin-top: 64px;
+}
+
+// 移动端适配
+@media screen and (max-width: 768px) {
+  .news-container {
+    padding: 10px;
+    max-width: 100%;
+    width: 100%;
+  }
 }
 </style>
