@@ -23,14 +23,14 @@ type ImageDetails = {
   size: number;
   key: string;
 };
-
+/*
 type VerseOpen = {
   id: number;
   verse_id: number;
   user_id: number;
   message_id: number;
 };
-
+*/
 type VerseRelease = {
   id: number;
   code: string;
@@ -78,7 +78,7 @@ export type VerseData = {
   uuid: string;
   editable: boolean;
   viewable: boolean;
-  verseOpen: VerseOpen | null;
+  //verseOpen: VerseOpen | null;
   verseRelease: VerseRelease | null;
   verseShare?: VerseShare;
   message: MessageType | null;
@@ -132,9 +132,12 @@ export const postVerse = (data: PostVerseData) => {
 };
 
 export const putVerseCode = (id: number, data: VerseCode) => {
-
   return request<VerseCode>({
-    url: path.join("v1", "system", `verse-code${qs.stringify({ verse_id: id }, true)}`),
+    url: path.join(
+      "v1",
+      "system",
+      `verse-code${qs.stringify({ verse_id: id }, true)}`
+    ),
     data,
     method: "put",
   });

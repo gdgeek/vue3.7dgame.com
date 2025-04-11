@@ -3,7 +3,7 @@
     <template #header>
       <div>
         <el-card shadow="hover" :body-style="{ padding: '0px' }">
-       
+
           <template #header>
             <span class="mrpp-title">
               <b class="card-title" nowrap>{{ item.name }}</b>
@@ -21,7 +21,7 @@
     <div class="clearfix">
       <el-button-group>
         <el-button type="primary" @click="goToDetail(item.id.toString())" size="small">{{ $t("verse.page.list.enter")
-          }}</el-button>
+        }}</el-button>
         <el-button type="primary" v-if="item.verseRelease" @click="restrain(item)" size="small">
           <font-awesome-icon class="icon" icon="box-open" color="#FFA500"></font-awesome-icon>
         </el-button>

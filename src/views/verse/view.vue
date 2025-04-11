@@ -77,18 +77,7 @@
 
           <br />
 
-          <!-- 管理员操作区域 
-          <el-card v-if="can('admin', 'all')">
-            <el-button style="width: 100%" type="primary" size="small" @click="verseOpen ? close : open">
-              <font-awesome-icon :icon="verseOpen ? 'eye-slash' : 'eye'" />
-              &nbsp;{{ $t(verseOpen ? "verse.view.verseClose" : "verse.view.verseOpen") }}
-            </el-button>
-          </el-card>
 
-          <br />
-
-          <Share v-if="saveable && verse" :verse="verse" />
--->
           <br />
         </el-col>
       </el-row>

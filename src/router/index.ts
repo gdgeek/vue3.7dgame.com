@@ -36,7 +36,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/tts",
     component: null,
-    meta: { hidden: true, private: true},
+    meta: { hidden: true, private: true },
     redirect: "/tts/index",
     children: [
       {
@@ -54,25 +54,22 @@ const routes: RouteRecordRaw[] = [
       {
         path: "wordToAudio",
         name: "",
-        component: () =>
-          import("@/views/TTS/WordToAudio.vue"),
+        component: () => import("@/views/TTS/WordToAudio.vue"),
         meta: { hidden: true, private: true },
       },
       {
         path: "wordToAudioV2",
         name: "",
-        component: () =>
-          import("@/views/TTS/WordToAudioV2.vue"),
+        component: () => import("@/views/TTS/WordToAudioV2.vue"),
         meta: { hidden: true, private: true },
       },
       {
         path: "tencentTTS",
         name: "",
-        component: () =>
-          import("@/views/TTS/TencentTTS.vue"),
+        component: () => import("@/views/TTS/TencentTTS.vue"),
         meta: { hidden: true, private: true },
       },
-    ]
+    ],
   },
 
   {
@@ -125,10 +122,10 @@ const routes: RouteRecordRaw[] = [
       {
         path: "develop",
         name: "IntroduceDevelop",
-        component: () => 
+        component: () =>
           import("@/views/introduce/components/develop/index.vue"),
         meta: { hidden: true, private: true },
-      }
+      },
     ],
   },
 
@@ -731,26 +728,16 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: "/verse/open",
-            component: () => import("@/views/meta-verse/open.vue"),
-            name: "VerseOpen",
+            path: "/verse/public",
+            component: () => import("@/views/meta-verse/public.vue"),
+            name: "VersePublic",
             meta: {
               title: "project.systemRecommendation",
               icon: "cascader",
               hidden: true,
             },
           },
-          /*
-          {
-            path: "/verse/share",
-            component: () => import("@/views/meta-verse/share.vue"),
-            name: "VerseShare",
-            meta: {
-              title: "project.shareWithFriends",
-              icon: "cascader",
-              hidden: true,
-            },
-          },*/
+
           {
             path: "/verse/view",
             name: "VerseView",
