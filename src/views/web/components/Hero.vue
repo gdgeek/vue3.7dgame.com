@@ -14,14 +14,17 @@
         </h1>
         <p class="hero-subtitle">让创意在混合现实中绽放，无需编程经验</p>
         <div class="hero-cta">
-          <el-button type="primary" class="hero-button primary-button" @click="$emit('openLogin')">
+          <el-button type="primary" size="large" class="cta-button cta-button-primary" @click="openLoginDialog">
             开始创建
             <el-icon class="el-icon--right">
               <ArrowRight />
             </el-icon>
           </el-button>
-          <el-button type="default" size="large" class="cta-button-secondary" @click="scrollToFeatures">
+          <el-button type="default" size="large" class="cta-button cta-button-secondary" @click="scrollToFeatures">
             了解更多
+            <el-icon class="el-icon--right">
+              <ArrowDown />
+            </el-icon>
           </el-button>
         </div>
       </div>
@@ -240,11 +243,18 @@ onUnmounted(() => {
       padding: 12px 32px;
       font-weight: 600;
       border-radius: 50px;
+      background: linear-gradient(90deg, #00dbde 0%, #fc00ff 100%);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
 
       &:hover {
-        transform: translateY(-3px);
+        transform: translateY(-1px);
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+    }
+
+    .cta-button-primary {
+      &:hover {
+        background: linear-gradient(90deg, #fc00ff 0%, #00dbde 100%);
       }
     }
 

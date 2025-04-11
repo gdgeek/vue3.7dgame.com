@@ -63,6 +63,9 @@
       <!-- Stats Section -->
       <Stats />
 
+      <!-- 新闻动态 -->
+      <News />
+
       <!-- CTA Section -->
       <Cta @openLogin="openLoginDialog" />
 
@@ -82,6 +85,7 @@ import { useRouter, useRoute } from "vue-router";
 import Hero from "./components/Hero.vue";
 import Features from "./components/Features.vue";
 import Stats from "./components/Stats.vue";
+import News from "./components/News/index.vue";
 import Cta from "./components/Cta.vue";
 import WebFooter from "./components/WebFooter.vue";
 import LoginDialog from "@/components/Account/LoginDialog.vue";
@@ -106,7 +110,7 @@ defineOptions({
 const navMenuItems = [
   { key: "features", label: "平台特色" },
   { key: "cases", label: "成功案例" },
-  { key: "news", label: "新闻资讯" },
+  { key: "news", label: "新闻动态" },
 ];
 
 const loginDialogRef = ref<any>(null);
@@ -353,12 +357,14 @@ onUnmounted(() => {
       font-size: 15px;
       font-weight: 500;
       border-radius: 50px;
-      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      // background: linear-gradient(90deg, #00dbde, #fc00ff);
+      background: linear-gradient(90deg, #00dbde 0%, #fc00ff 100%);
       border: none;
       transition: all 0.3s ease;
 
       &:hover {
-        transform: translateY(-2px);
+        transform: translateY(-1px);
+        background: linear-gradient(90deg, #fc00ff 0%, #00dbde 100%);
         box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
       }
 

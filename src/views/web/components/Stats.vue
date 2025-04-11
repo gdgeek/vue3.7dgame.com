@@ -41,7 +41,9 @@
           <div class="case-content">
             <h3 class="case-title">{{ caseItem.title }}</h3>
             <p class="case-description">{{ caseItem.description }}</p>
-            <el-button class="case-button" type="text">查看详情 →</el-button>
+            <el-button class="case-button" type="text">查看详情<el-icon>
+                            <ArrowRight />
+                          </el-icon></el-button>
           </div>
         </div>
       </div>
@@ -238,10 +240,12 @@ onUnmounted(() => {
   overflow: hidden;
 
   &:not(.dark-theme) {
-
-    .section-title,
-    .section-subtitle {
+    .section-title {
       color: #252b3a;
+    }
+
+    .section-subtitle {
+      color: #677288;
     }
 
     .stat-number {
@@ -264,10 +268,12 @@ onUnmounted(() => {
   }
 
   &.dark-theme {
-
-    .section-title,
-    .section-subtitle {
+    .section-title {
       color: #fff;
+    }
+
+    .section-subtitle {
+      color: #a0a0a0;
     }
 
     .stat-number {
@@ -357,6 +363,20 @@ onUnmounted(() => {
     font-weight: 700;
     margin-bottom: 16px;
     color: #fff;
+    position: relative;
+    display: inline-block;
+
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, #7367f0, #00cfe8);
+      border-radius: 2px;
+    }
   }
 
   .section-subtitle {
@@ -507,16 +527,6 @@ onUnmounted(() => {
       line-height: 1.6;
       margin-bottom: 16px;
     }
-
-    .case-button {
-      padding: 0;
-      font-weight: 600;
-      color: #3b82f6;
-
-      &:hover {
-        color: #2563eb;
-      }
-    }
   }
 }
 
@@ -634,6 +644,10 @@ onUnmounted(() => {
 
     .section-title {
       font-size: 2rem;
+    }
+
+    .section-subtitle {
+      font-size: 1rem;
     }
   }
 

@@ -173,7 +173,7 @@ const openLoginDialog = () => {
     transition: all 0.3s ease;
 
     &:hover {
-      transform: translateY(-3px);
+      transform: translateY(-1px);
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
       background-color: white;
       color: #4f46e5;
@@ -190,7 +190,7 @@ const openLoginDialog = () => {
     transition: all 0.3s ease;
 
     &:hover {
-      transform: translateY(-3px);
+      transform: translateY(-1px);
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
       border-color: rgba(255, 255, 255, 0.6);
     }
