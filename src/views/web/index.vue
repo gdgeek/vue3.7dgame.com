@@ -9,7 +9,8 @@
         </RadiantText>
       </div>
       <div class="nav-middle" v-if="!isMobile">
-        <div class="nav-menu-item" v-for="(item, index) in navMenuItems" :key="index">
+        <div class="nav-menu-item" v-for="(item, index) in navMenuItems" :key="index"
+          @click="scrollToSection(item.key)">
           <div class="menu-text">{{ item.label }}</div>
           <div class="menu-line"></div>
         </div>
@@ -43,7 +44,8 @@
           <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
             @change="toggleTheme"></el-switch>
         </div>
-        <div v-for="item in navMenuItems" :key="item.key" class="sidebar-item">
+        <div v-for="item in navMenuItems" :key="item.key" class="sidebar-item"
+          @click="scrollToSection(item.key); toggleSidebar()">
           {{ item.label }}
         </div>
         <div class="sidebar-item" @click="openLoginDialog">
@@ -58,13 +60,19 @@
       <Hero @openLogin="openLoginDialog" />
 
       <!-- Features Section -->
-      <Features />
+      <section id="features" ref="featuresRef">
+        <Features />
+      </section>
 
       <!-- Stats Section -->
-      <Stats />
+      <section id="cases" ref="casesRef">
+        <Stats />
+      </section>
 
       <!-- 新闻动态 -->
-      <News />
+      <section id="news" ref="newsRef">
+        <News />
+      </section>
 
       <!-- CTA Section -->
       <Cta @openLogin="openLoginDialog" />
@@ -201,6 +209,33 @@ const checkMobile = () => {
 // 切换侧边栏显
 const toggleSidebar = () => {
   sidebarVisible.value = !sidebarVisible.value;
+};
+
+// 创建各部分的引用
+const featuresRef = ref<HTMLElement | null>(null);
+const casesRef = ref<HTMLElement | null>(null);
+const newsRef = ref<HTMLElement | null>(null);
+
+// 滚动到指定部分的函数
+const scrollToSection = (sectionId: string) => {
+  // 计算导航栏高度（加点额外的间距）
+  const navHeight = 80;
+
+  // 根据传入的ID获取对应的元素
+  const element = document.getElementById(sectionId);
+
+  if (element) {
+    // 获取元素相对于视口的位置
+    const elementPosition = element.getBoundingClientRect().top;
+    // 获取当前滚动位置
+    const offsetPosition = elementPosition + window.scrollY - navHeight;
+
+    // 平滑滚动到指定位置
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
+  }
 };
 
 // 监听窗口大小变化和滚动事件
