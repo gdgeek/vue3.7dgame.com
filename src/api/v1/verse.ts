@@ -234,6 +234,8 @@ export const getVersesWithOpen = (
 
 export const getPublic = (params: VersesParams) => {
   const query = createQueryParams(params);
+
+  //expand = "id,name,description,data,metas,resources,code,uuid,code",
   return request({
     url: path.join("v1", "verses", "public" + qs.stringify(query, true)),
     method: "get",

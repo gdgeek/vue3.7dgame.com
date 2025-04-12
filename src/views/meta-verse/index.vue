@@ -18,7 +18,7 @@ const loaded = async (data: any, result: Function) => {
       sort: data.sorted,
       search: data.searched,
       page: data.current,
-      expand: "image,author,share,verseRelease",
+      expand: "image,author",
       tags: data.tags,
     });
 

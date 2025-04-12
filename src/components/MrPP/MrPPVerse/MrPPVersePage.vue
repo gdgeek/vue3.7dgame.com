@@ -14,15 +14,13 @@
               &nbsp;
               <span class="hidden-sm-and-down">{{
                 $t("verse.page.title")
-              }}</span>
+                }}</span>
             </el-button>
           </el-button-group>
         </MrPPHeader>
       </el-header>
       <el-main>
-        <el-row>
-          <VerseList :items="items" @refresh="refresh"></VerseList>
-        </el-row>
+        <VerseList :items="items" @refresh="refresh"></VerseList>
       </el-main>
       <el-footer>
         <el-card class="box-card">
@@ -59,7 +57,7 @@ const emit = defineEmits<{
 
 const createdDialog = ref<InstanceType<typeof Create> | null>(null);
 const router = useRouter();
-const items = ref<VerseData[]>([]);
+const items = ref<VerseData[] | null>(null);
 
 const sorted = ref("-created_at");
 const searched = ref("");

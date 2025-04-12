@@ -15,24 +15,24 @@ import TransitionWrapper from "@/components/TransitionWrapper.vue";
 const loaded = async (data: any, result: Function) => {
 
   try {
-    const tags = await getTags('Status');
-   
-    const pub = tags.data.filter((tag: any) => {
-      if (tag.key == 'public') {
-         return tag;
-      }
-    }).map((tag: any) => {
-      return tag.id;
-    });
-  
+    //const tags = await getTags('Status');
+    /*
+        const pub = tags.data.filter((tag: any) => {
+          if (tag.key == 'public') {
+            return tag;
+          }
+        }).map((tag: any) => {
+          return tag.id;
+        });
+    */
     const response = await getPublic({
       sort: data.sorted,
       search: data.searched,
       page: data.current,
-      expand: "image,author,share,verseRelease",
+      expand: "image,author,tags",
       tags: data.tags,
     });
-    //console.error(response.data)
+    console.error(response.data)
     const pagination = {
       current: parseInt(response.headers["x-pagination-current-page"]),
       count: parseInt(response.headers["x-pagination-page-count"]),

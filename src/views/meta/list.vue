@@ -29,7 +29,7 @@
                       <el-button-group>
                         <el-button type="primary" size="small" @click="edit(item.id)">{{
                           $t("meta.enter")
-                        }}</el-button>
+                          }}</el-button>
                         <el-button type="primary" :loading="copyLoadingMap.get(item.id)" size="small"
                           icon="CopyDocument" @click="copyWindow(item)">
                           <template #loading>

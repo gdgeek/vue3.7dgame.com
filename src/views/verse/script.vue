@@ -9,10 +9,11 @@
                 verse.name
               }}</el-link>
               /【{{ $t("verse.view.script.title") }}】
-              <el-button type="primary" size="small" @click="run">测试运行</el-button>
+
+              <!--<el-button type="primary" size="small" @click="run">测试运行</el-button>
               <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
                 返回
-              </el-button>
+              </el-button>-->
               <el-button-group style="float: right">
                 <el-button v-if="saveable" type="primary" size="small" @click="save">
                   <font-awesome-icon class="icon" icon="save"></font-awesome-icon>
@@ -748,7 +749,7 @@ const run = async () => {
           const metaData = meta.data!;
           // const metaData = JSON.parse(meta.data!);
 
-          expectedModels += countEntities(metaData.children.entities); 
+          expectedModels += countEntities(metaData.children.entities);
         }
 
         if (scenePlayer.value?.sources.size === expectedModels) {
