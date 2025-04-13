@@ -23,7 +23,7 @@ import QrcodeVue from "qrcode.vue";
 import environment from "@/environment";
 
 const value = ref<string>(
-  JSON.stringify({ veri: "BuJiaBan.com", api: environment.api })
+  JSON.stringify({ veri: "bujiaban.com", api: environment.api })
 );
 const size = ref<number>(400);
 

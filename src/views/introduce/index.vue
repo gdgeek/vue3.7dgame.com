@@ -1,21 +1,18 @@
 <template>
   <div class="app-container">
     <!-- 导航栏 -->
-    <nav
-      class="nav-container"
-      :class="{
-        'nav-scrolled':
-          isScrolled &&
-          (currentTab === 'about' || currentTab === 'products' || currentTab === 'develop') &&
-          !isMobile,
-        'nav-transparent':
-          (currentTab === 'about' || currentTab === 'products' || currentTab === 'develop') &&
-          !isScrolled &&
-          !isMobile,
-        'nav-default':
-          (currentTab === 'news') || isMobile,
-      }"
-    >
+    <nav class="nav-container" :class="{
+      'nav-scrolled':
+        isScrolled &&
+        (currentTab === 'about' || currentTab === 'products' || currentTab === 'develop') &&
+        !isMobile,
+      'nav-transparent':
+        (currentTab === 'about' || currentTab === 'products' || currentTab === 'develop') &&
+        !isScrolled &&
+        !isMobile,
+      'nav-default':
+        (currentTab === 'news') || isMobile,
+    }">
       <div class="nav-left">
         <div class="menu-icon" @click="toggleSidebar" v-show="isMobile">
           <span></span>
@@ -25,70 +22,47 @@
         <!-- 桌面端显示 -->
         <template v-if="!isMobile">
           <img src="/media/image/logo.gif" alt="Logo" class="logo" />
-          <span
-            class="company-name"
-            :class="{
-              'text-white': currentTab === 'about' && !isScrolled,
-            }"
-          >
+          <span class="company-name" :class="{
+            'text-white': currentTab === 'about' && !isScrolled,
+          }">
             不加班AR编程平台
           </span>
         </template>
         <!-- 移动端显示 -->
         <template v-else>
           <div class="mobile-breadcrumb">
-            <span class="breadcrumb-home" @click="switchTab('about')"
-              >不加班AR编程平台</span
-            >
+            <span class="breadcrumb-home" @click="switchTab('about')">不加班AR编程平台</span>
             <span class="breadcrumb-separator">/</span>
             <span class="breadcrumb-current">{{
               navItems.find((item) => item.key === currentTab)?.label
-            }}</span>
+              }}</span>
           </div>
         </template>
       </div>
       <div class="nav-right" v-show="!isMobile">
-        <div
-          v-for="item in navItems"
-          :key="item.key"
-          :class="[
-            'nav-item',
-            {
-              active: currentTab === item.key,
-              'text-white': currentTab === 'about' && !isScrolled,
-            },
-          ]"
-          @click="switchTab(item.key)"
-        >
+        <div v-for="item in navItems" :key="item.key" :class="[
+          'nav-item',
+          {
+            active: currentTab === item.key,
+            'text-white': currentTab === 'about' && !isScrolled,
+          },
+        ]" @click="switchTab(item.key)">
           {{ item.label }}
         </div>
       </div>
     </nav>
 
     <!-- 移动端侧边栏菜单 -->
-    <div
-      class="sidebar-overlay"
-      v-if="isMobile && sidebarVisible"
-      @click="toggleSidebar"
-    ></div>
-    <div
-      class="sidebar-menu"
-      :class="{ 'sidebar-visible': sidebarVisible }"
-      v-if="isMobile"
-    >
+    <div class="sidebar-overlay" v-if="isMobile && sidebarVisible" @click="toggleSidebar"></div>
+    <div class="sidebar-menu" :class="{ 'sidebar-visible': sidebarVisible }" v-if="isMobile">
       <!-- 侧边栏顶部 -->
       <div class="sidebar-header">
         <img src="/media/image/logo.gif" alt="Logo" class="sidebar-logo" />
         <span class="sidebar-company-name">不加班AR编程平台</span>
       </div>
       <div class="sidebar-items">
-        <div
-          v-for="item in navItems"
-          :key="item.key"
-          class="sidebar-item"
-          :class="{ active: currentTab === item.key }"
-          @click="handleSidebarItemClick(item.key)"
-        >
+        <div v-for="item in navItems" :key="item.key" class="sidebar-item" :class="{ active: currentTab === item.key }"
+          @click="handleSidebarItemClick(item.key)">
           {{ item.label }}
         </div>
       </div>

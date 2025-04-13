@@ -8,21 +8,7 @@
           <span class="project_title">{{ $t("login.title") }}</span>
         </RouterLink>
         <div class="link" style="margin-left: 250px">
-          <!--
-          <el-link href="https://testflight.apple.com/join/V4XNEG6t" target="_blank" :underline="false">
-            <img src="/testflight.ico" style="width: 25px" alt="" />
-            <span style="margin-left: 5px">TestFlight</span>
-          </el-link>
 
-          <el-link href="https://discord.gg/KhkJySu7bb" target="_blank" :underline="false" style="margin-left: 30px">
-            <img src="/discord.ico" style="width: 25px" alt="" />
-            <span style="margin-left: 5px">Discord</span>
-          </el-link>
-
-          <el-link href="https://x.com/GD_Geek" target="_blank" :underline="false" style="margin-left: 30px">
-            <img src="/x3.png" style="width: 26px; border-radius: 25%" alt="" />
-            <span style="margin-left: 5px">X.com</span>
-          </el-link>-->
         </div>
         <div class="header-right">
           <div class="top-bar">

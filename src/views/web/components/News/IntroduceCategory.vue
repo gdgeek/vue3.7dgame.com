@@ -1,9 +1,6 @@
 <template>
   <el-card>
-    <DocumentList
-      :category-id="id"
-      document-path="/web/news/document"
-    ></DocumentList>
+    <DocumentList :category-id="id" document-path="/web/news/document"></DocumentList>
   </el-card>
 </template>
 

@@ -36,8 +36,8 @@ const router = useRouter();
 // 更新页面标题
 const updateTitle = (title: string) => {
   document.title = title
-    ? `${translateRouteTitle(title)} - BuJiaBan.com`
-    : "BuJiaBan.com";
+    ? `${translateRouteTitle(title)} - bujiaban.com`
+    : "bujiaban.com";
 };
 
 // 监听路由变化更新页面标题

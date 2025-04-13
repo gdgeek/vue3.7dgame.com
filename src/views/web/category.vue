@@ -1,79 +1,20 @@
 <template>
-  <div class="app-container" :class="{ 'dark-theme': isDark }">
-    <!-- 导航栏 -->
-    <nav class="nav-container" :class="{ 'nav-scrolled': scrolled, 'dark-theme': isDark }">
-      <div class="nav-left">
-        <img src="/media/image/logo.gif" alt="Logo" class="logo" />
-        <RadiantText class="company-name" :duration="5" :fontSize="isMobile ? 16 : 20" :textColor="textColor">
-          <span class="font-bold">BuJiaBan.com</span>
-        </RadiantText>
-      </div>
-      <div class="nav-middle" v-if="!isMobile">
-        <div class="nav-menu-item" v-for="(item, index) in navMenuItems" :key="index" @click="select(item)">
-          <div class="menu-text">{{ item.label }}</div>
-          <div class="menu-line"></div>
-        </div>
-      </div>
-      <div class="nav-right">
-        <div class="theme-switch" v-if="!isMobile">
-          <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
-            @change="toggleTheme"></el-switch>
-        </div>
-        <el-button type="primary" class="login-button" @click="openLoginDialog" :class="{ 'mobile-button': isMobile }">
-          登录平台
-        </el-button>
-        <div class="hamburger-menu" v-if="isMobile" @click="toggleSidebar">
-          <el-icon>
-            <component :is="sidebarVisible ? 'Close' : 'Fold'" />
-          </el-icon>
-        </div>
-      </div>
-    </nav>
+  <!-- 新闻动态 -->
+  <section id="news" ref="newsRef">
+    <News :activeTabName="section" />
+  </section>
 
-    <!-- 移动端侧边栏菜单 -->
-    <div class="sidebar-overlay" v-if="isMobile && sidebarVisible" @click="toggleSidebar"></div>
-    <div class="sidebar-menu" :class="{ 'sidebar-visible': sidebarVisible, 'dark-theme': isDark }" v-if="isMobile">
-      <!-- 侧边栏顶部 -->
-      <div class="sidebar-header">
-        <img src="/media/image/logo.gif" alt="Logo" class="sidebar-logo" />
-        <span class="sidebar-company-name">不加班AR编程平台</span>
-      </div>
-      <div class="sidebar-items">
-        <div class="theme-switch-mobile">
-          <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
-            @change="toggleTheme"></el-switch>
-        </div>
-        <div v-for="item in navMenuItems" :key="item.key" class="sidebar-item"
-          @click="scrollToSection(item.key); toggleSidebar()">
-          {{ item.label }}
-        </div>
-        <div class="sidebar-item" @click="openLoginDialog">
-          登录平台
-        </div>
-      </div>
-    </div>
 
-    <!-- 主体内容区域 -->
-    <div class="content-container" ref="contentRef" :class="{ 'dark-theme': isDark }">
-
-      <Hero v-if="isIndex" @openLogin="openLoginDialog" />
-      <router-view></router-view>
-      <Footer />
-    </div>
-    <!-- 登录对话框 -->
-    <LoginDialog ref="loginDialogRef" />
-  </div>
 </template>
 
 <script setup lang="ts">
 import "@/assets/font/font.css";
 import { useRouter, useRoute } from "vue-router";
-import LoginDialog from "@/components/Account/LoginDialog.vue";
+import News from "./components/News/index.vue";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-
 
 const router = useRouter();
 const route = useRoute();
@@ -86,47 +27,27 @@ defineOptions({
   inheritAttrs: false,
 });
 
-// 导航菜单项
-const navMenuItems = [
-  { key: "news", label: "首页", path: "/web/index" },
-  { key: "tutorial", label: "案例教程", path: "/web/category" },
-  { key: "bbs", label: "社区论坛", path: "/web/bbs" },
-];
+const section = computed(() => {
+  return route.query.section ? route.query.section as string : "news";
+});
 const loginDialogRef = ref<any>(null);
 
-/** 主题切换 */
-const toggleTheme = () => {
-  const newTheme = isDark.value ? ThemeEnum.DARK : ThemeEnum.LIGHT;
-  settingsStore.changeTheme(newTheme);
-};
 
-const textColor = computed(() => {
+
+// 根据主题和滚动状态获取文本颜色
+const getTextColor = () => {
   if (isDark.value) {
     return '#fff';
   } else {
-    return scrolled.value ? '#333' : '#fff';
+    return isScrolled.value ? '#333' : '#fff';
   }
-})
-const isIndex = computed(() => {
-  if (route.path == "/web/index") {
-    return true;
-  }
-  return false;
-})
-const scrolled = computed(() => {
-  if (!isIndex.value) {
-    return true;
-  }
-  return isScrolled.value;
-})
-
+};
 
 const openLoginDialog = () => {
   if (loginDialogRef.value) {
     loginDialogRef.value.openDialog();
   }
 };
-
 
 const isScrolled = ref(false);
 
@@ -195,13 +116,16 @@ const toggleSidebar = () => {
   sidebarVisible.value = !sidebarVisible.value;
 };
 
-
+// 创建各部分的引用
+const featuresRef = ref<HTMLElement | null>(null);
+const casesRef = ref<HTMLElement | null>(null);
+const newsRef = ref<HTMLElement | null>(null);
 const select = (item: any) => {
   //本网页的path
   // const currentPath = route.path;
   //alert(item.path)
   //跳转到另外一个path
-  router.push(item.path);
+  router.push(route.path + "?section=" + item.section);
   //关闭侧边栏
   // sidebarVisible.value = false;
 

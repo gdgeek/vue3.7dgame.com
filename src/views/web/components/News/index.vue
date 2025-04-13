@@ -2,13 +2,15 @@
   <div class="news-section" :class="{ 'dark-theme': isDark }">
     <div class="container">
       <div class="section-header" data-aos="fade-up">
-        <h2 class="section-title">新闻动态</h2>
-        <p class="section-subtitle">了解我们最新的动态与技术教程</p>
+        <h2 class="section-title">{{ item?.label }}</h2>
+        <p class="section-subtitle">{{ item?.describe }}</p>
       </div>
 
       <div class="news-tabs-wrapper" data-aos="fade-up">
         <el-tabs v-model="activeTabName" class="news-tabs" @tab-click="handleTabClick">
-          <el-tab-pane v-for="(item, index) in items" :key="index" :label="item.label" :name="String(index)">
+
+          <el-tab-pane v-for="(item, index) in items" :key="index" :label="item.label" :name="item.key">
+
             <div v-if="loading" class="news-loading">
               <el-skeleton :rows="3" animated />
               <el-skeleton :rows="3" animated style="margin-top: 20px" />
@@ -28,7 +30,7 @@
                     <div class="card-content" :class="{ 'with-image': article.jetpack_featured_media_url }">
                       <div class="article-meta">
                         <el-tag size="small" effect="plain" class="category-tag">
-                          {{ getCategoryName(activeTabName) }}
+                          {{ item?.label }}
                         </el-tag>
                         <span class="article-date">{{ formatRelativeTime(article.date) }}</span>
                         <el-tag v-if="isNewest(article.date, aIndex)" size="small" type="success" effect="plain"
@@ -59,7 +61,7 @@
 
               <div class="news-more" v-if="newsData.length > 2 && !showAllNews" data-aos="fade-up">
                 <el-button type="primary" @click="showAllContent" class="expand-button" round>
-                  展开全部{{ getCategoryName(activeTabName) }}
+                  展开全部{{ item?.label }}
                   <el-icon class="el-icon--right">
                     <ArrowDown />
                   </el-icon>
@@ -68,7 +70,7 @@
 
               <div class="news-more" v-if="showAllNews" data-aos="fade-up">
                 <el-button type="primary" @click="hideAllContent" class="expand-button" round>
-                  收起{{ getCategoryName(activeTabName) }}
+                  收起{{ item?.label }}
                   <el-icon class="el-icon--right">
                     <ArrowUp />
                   </el-icon>
@@ -135,13 +137,25 @@ const router = useRouter();
 
 // 分类标签
 const items = [
-  { label: "新闻动态", type: "category", id: 74 },
-  { label: "案例教程", type: "category", id: 79 },
+  { label: "新闻动态", type: "category", id: 74, key: "news", describe: "相关内容" },
+  { label: "案例教程", type: "category", id: 79, key: "tutorial", describe: "视频教程内容" },
 ];
 
-// 激活的标签
-const activeTabName = ref('0');
 
+//activeTabName属性，默认为news
+const props = defineProps({
+  activeTabName: {
+    type: String,
+    default: "news"
+  }
+});
+// 激活的标签
+const activeTabName = ref(props.activeTabName);
+
+
+const item = computed(() => {
+  return items.find(item => item.key === activeTabName.value);
+})
 // 新闻数据
 const newsData = ref<any[]>([]);
 const loading = ref(false);
@@ -164,7 +178,7 @@ const pagination = ref({
 });
 
 // 是否显示全部内容
-const showAllNews = ref(false);
+const showAllNews = ref(true);
 
 // 用于显示的新闻数据
 const displayNewsData = computed(() => {
@@ -184,11 +198,12 @@ onMounted(() => {
     once: false
   });
 
+  /*
   // 从URL查询参数中确定活跃标签
   const tabParam = route.query.tab;
   if (tabParam === 'tutorial') {
     activeTabName.value = '1';
-  }
+  }*/
 
   // 加载初始数据
   loadNewsData();
@@ -213,11 +228,6 @@ const sanitizeText = (html: string) => {
   return temp.textContent || temp.innerText || '';
 };
 
-// 根据tab获取分类名称
-const getCategoryName = (tabIndex: string) => {
-  const index = parseInt(tabIndex);
-  return items[index]?.label || '';
-};
 
 // 加载新闻数据
 const loadNewsData = async () => {
@@ -225,9 +235,8 @@ const loadNewsData = async () => {
   error.value = false;
 
   try {
-    const index = parseInt(activeTabName.value);
-    const categoryId = items[index].id;
 
+    const categoryId = item.value!.id;
     const response = await Posts(
       categoryId,
       pagination.value.size,
@@ -253,8 +262,11 @@ const loadNewsData = async () => {
 
 // 处理标签点击
 const handleTabClick = () => {
+
+  //alert(JSON.stringify(activeTabName.value))
   // 标签切换时重置分页
   pagination.value.current = 1;
+
 };
 
 // 处理页码变化
@@ -330,6 +342,12 @@ const getTimelineColor = (dateString: string) => {
 
 // 打开文章详情弹窗
 const openArticleDetails = async (article: any) => {
+  // 如果文章已经被选中，则直接打开弹窗
+
+  router.push("/web/document?id=" + article.id);
+
+  return;
+  /*
   selectedArticle.value = article;
   dialogVisible.value = true;
   articleLoading.value = true;
@@ -351,7 +369,7 @@ const openArticleDetails = async (article: any) => {
     articleError.value = true;
   } finally {
     articleLoading.value = false;
-  }
+  }*/
 };
 
 // 分享文章
@@ -439,7 +457,7 @@ defineOptions({
       color: #f3f4f6;
 
       &:after {
-        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        background: linear-gradient(90deg, #00dbde, #9e9e9e);
       }
     }
 
@@ -477,7 +495,7 @@ defineOptions({
         background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
 
         &:before {
-          background: linear-gradient(90deg, #00dbde, #fc00ff);
+          background: linear-gradient(90deg, #00dbde, #b2b2b2);
         }
       }
 
@@ -522,7 +540,7 @@ defineOptions({
       transform: translateX(-50%);
       width: 80px;
       height: 4px;
-      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      background: linear-gradient(90deg, #00dbde, #adadad);
       border-radius: 2px;
     }
   }
@@ -562,7 +580,7 @@ defineOptions({
   :deep(.el-tabs__active-bar) {
     height: 3px;
     border-radius: 3px;
-    background: linear-gradient(90deg, #00dbde, #fc00ff);
+    background: linear-gradient(90deg, #00dbde, #bebebe);
   }
 }
 

@@ -63,7 +63,7 @@ const onresize = () => {
 };
 
 const open = async (id: number) => {
-  const data = { projectId: id, veri: "BuJiaBan.com" };
+  const data = { projectId: id, veri: "bujiaban.com" };
   value.value = JSON.stringify(data);
   dialogVisible.value = true;
   const r = await getVerse(id);

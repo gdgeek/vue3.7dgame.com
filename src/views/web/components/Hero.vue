@@ -14,18 +14,13 @@
         </h1>
         <p class="hero-subtitle">让创意在混合现实中绽放，无需编程经验</p>
         <div class="hero-cta">
-          <el-button type="primary" size="large" class="cta-button cta-button-primary" @click="openLoginDialog">
+          <el-button type="primary" style="width:300px" size="large" @click="openLoginDialog">
             开始创建
             <el-icon class="el-icon--right">
               <ArrowRight />
             </el-icon>
           </el-button>
-          <el-button type="default" size="large" class="cta-button cta-button-secondary" @click="scrollToFeatures">
-            了解更多
-            <el-icon class="el-icon--right">
-              <ArrowDown />
-            </el-icon>
-          </el-button>
+
         </div>
       </div>
 
@@ -37,7 +32,7 @@
             <img src="/media/bg/m2-screen.jpg" alt="功能展示" class="floating-image float-2" />
             <div class="stats-card float-3">
               <div class="stats-item">
-                <span class="stats-number count-up">500+</span>
+                <span class="stats-number count-up">三方视角</span>
                 <span class="stats-label">AR应用</span>
               </div>
             </div>
@@ -107,9 +102,9 @@ const openLoginDialog = () => {
 };
 
 const scrollToFeatures = () => {
-  const featuresSection = document.querySelector('.features-section');
-  if (featuresSection) {
-    featuresSection.scrollIntoView({ behavior: 'smooth' });
+  const newsSection = document.querySelector('.news-section');
+  if (newsSection) {
+    newsSection.scrollIntoView({ behavior: 'smooth' });
   }
 };
 
@@ -222,7 +217,7 @@ onUnmounted(() => {
   }
 
   .gradient-text {
-    background: linear-gradient(90deg, #00dbde 0%, #fc00ff 100%);
+    background: linear-gradient(90deg, #ffffff 0%, #8e8e8e 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -236,14 +231,14 @@ onUnmounted(() => {
   }
 
   .hero-cta {
-    display: flex;
+    // display: flex;
     gap: 16px;
 
     .cta-button {
       padding: 12px 32px;
       font-weight: 600;
       border-radius: 50px;
-      background: linear-gradient(90deg, #00dbde 0%, #fc00ff 100%);
+      background: linear-gradient(90deg, #00dbde 0%, #b2b2b2 100%);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
 
       &:hover {
@@ -254,7 +249,7 @@ onUnmounted(() => {
 
     .cta-button-primary {
       &:hover {
-        background: linear-gradient(90deg, #fc00ff 0%, #00dbde 100%);
+        background: linear-gradient(90deg, #b2b2b2 0%, #00dbde 100%);
       }
     }
 
@@ -280,7 +275,7 @@ onUnmounted(() => {
   .image-container {
     position: relative;
     width: 100%;
-    max-width: 560px;
+    max-width: 660px;
   }
 
   .primary-image {
