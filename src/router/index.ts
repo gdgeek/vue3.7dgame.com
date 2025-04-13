@@ -152,6 +152,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import("@/views/web/category.vue"),
       },
       {
+        path: "/web/buy",
+        name: "WebBuy",
+        component: () => import("@/views/web/buy.vue"),
+      },
+      {
         path: "/web/document",
         name: "WebDocument",
         component: () => import("@/views/web/document.vue"),

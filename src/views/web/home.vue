@@ -4,10 +4,16 @@
     <News :activeTabName="section" />
   </section>
 
+  <section id="status" ref="statusRef">
+    <Buy />
+  </section>
+
+
 </template>
 
 <script setup lang="ts">
 import "@/assets/font/font.css";
+import Buy from "./components/Buy.vue";
 import { useRouter, useRoute } from "vue-router";
 import News from "./components/News/index.vue";
 import AOS from 'aos';

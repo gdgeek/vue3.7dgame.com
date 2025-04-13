@@ -178,7 +178,7 @@ const pagination = ref({
 });
 
 // 是否显示全部内容
-const showAllNews = ref(true);
+const showAllNews = ref(false);
 
 // 用于显示的新闻数据
 const displayNewsData = computed(() => {

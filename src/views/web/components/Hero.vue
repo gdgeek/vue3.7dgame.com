@@ -6,18 +6,28 @@
       </div>
       <div class="overlay"></div>
     </div>
-
+    <!-- 
+    <div class="video-container">
+    嵌入 B 站视频的 iframe
+      <iframe :src="videoUrl" frameborder="0" allowfullscreen width="640" height="360"></iframe>
+    </div> -->
     <div class="hero-content">
       <div class="hero-text" data-aos="fade-up" data-aos-delay="200">
         <h1 class="hero-title">
-          <span class="gradient-text">AR混合现实编程平台</span>
+          <span class="gradient-text">不加班AR创作平台</span>
         </h1>
-        <p class="hero-subtitle">让创意在混合现实中绽放，无需编程经验</p>
+        <p class="hero-subtitle">让创意在AR设备中绽放，无需加班即可完成！</p>
         <div class="hero-cta">
-          <el-button type="primary" style="width:300px" size="large" @click="openLoginDialog">
+          <el-button type="primary" style="width:250px" size="large" @click="openLoginDialog">
             开始创建
             <el-icon class="el-icon--right">
               <ArrowRight />
+            </el-icon>
+          </el-button>
+          <el-button style="width:100px" size="large">
+            免费授权
+            <el-icon class="el-icon--right">
+              <ArrowDown />
             </el-icon>
           </el-button>
 
@@ -25,14 +35,20 @@
       </div>
 
       <div class="hero-image" data-aos="fade-left" data-aos-delay="400">
+
+
         <div class="image-container">
-          <img src="/media/bg/hololens.jpg" alt="AR编程平台" class="primary-image" />
+
+          <img src="/media/bg/bujiaban.png" @click="openLoginDialog" alt="不加班AR创作平台" class="primary-image" />
           <div class="floating-elements">
-            <img src="/media/bg/sand-screen.jpg" alt="功能展示" class="floating-image float-1" />
-            <img src="/media/bg/m2-screen.jpg" alt="功能展示" class="floating-image float-2" />
+            <el-link class="floating-link" href="https://www.rokid.com/" target="_blank">
+              <img src="/media/bg/rokid.webp" alt="功能展示" class="floating-image float-1" />
+
+            </el-link>
+            <img src="/media/bg/rokid-lite.webp" alt="功能展示" class="floating-image float-2" />
             <div class="stats-card float-3">
               <div class="stats-item">
-                <span class="stats-number count-up">三方视角</span>
+                <span class="stats-number count-up">可视化编程</span>
                 <span class="stats-label">AR应用</span>
               </div>
             </div>
@@ -69,6 +85,8 @@ const emit = defineEmits(['openLogin']);
 const mouseX = ref(0);
 const mouseY = ref(0);
 
+// 这里需要替换为你要播放的 B 站视频的嵌入链接
+const videoUrl = ref('https://player.bilibili.com/player.html?bvid=BV1j2dPYWEh1&page=1');
 // 生成粒子样式
 const getParticleStyle = (n: number) => {
   const size = Math.floor(Math.random() * 10) + 3;

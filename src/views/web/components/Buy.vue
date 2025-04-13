@@ -7,8 +7,8 @@
 
     <div class="container">
       <div class="section-header" data-aos="fade-up">
-        <h2 class="section-title">成功案例与数据</h2>
-        <p class="section-subtitle">不断成长的AR混合现实编程平台</p>
+        <h2 class="section-title">如何获得平台授权</h2>
+        <p class="section-subtitle">只需从本渠道购买相应设备，即可终生使用平台。</p>
       </div>
 
       <div class="stats-grid">
@@ -18,59 +18,60 @@
             <component :is="stat.icon" />
           </div>
           <div class="stat-number">
-            <span class="counter">{{ stat.value }}</span>
-            <span class="unit">{{ stat.unit }}</span>
+
+            <span class="unit">{{ stat.label }}</span>
           </div>
-          <div class="stat-label">{{ stat.label }}</div>
+          <div class="stat-label">{{ stat.message }}</div>
         </div>
       </div>
 
       <div class="cases-grid" data-aos="fade-up">
-        <div class="case-card" v-for="(caseItem, index) in cases" :key="index" data-aos="fade-up"
+        <div @click="buy(item)" class="case-card" v-for="(item, index) in cases" :key="index" data-aos="fade-up"
           :data-aos-delay="index * 100">
           <div class="case-image">
-            <img :src="caseItem.image" :alt="caseItem.title" />
+            <img :src="item.image" :alt="item.title" />
             <div class="case-overlay">
               <div class="case-tags">
-                <span class="case-tag" v-for="(tag, tagIndex) in caseItem.tags" :key="tagIndex">
+                <span class="case-tag" v-for="(tag, tagIndex) in item.tags" :key="tagIndex">
                   {{ tag }}
                 </span>
               </div>
             </div>
           </div>
           <div class="case-content">
-            <h3 class="case-title">{{ caseItem.title }}</h3>
-            <p class="case-description">{{ caseItem.description }}</p>
-            <el-button class="case-button" type="text">查看详情<el-icon>
-                <ArrowRight />
-              </el-icon></el-button>
+            <h3 class="case-title">{{ item.title }} </h3>
+            <p class="stat-number">{{ item.price }}</p>
+            <p class="stat-label">{{ item.description }}</p>
+            <p class="case-description">{{ item.annotate }}</p>
+
           </div>
         </div>
       </div>
 
-      <div class="testimonials" data-aos="fade-up">
-        <el-carousel :interval="5000" type="card" height="300px">
-          <el-carousel-item v-for="(testimonial, index) in testimonials" :key="index">
-            <div class="testimonial-card">
-              <div class="testimonial-content">
-                <el-icon class="testimonial-quote">
-                  <ChatDotSquare />
-                </el-icon>
-                <p class="testimonial-text">{{ testimonial.text }}</p>
-                <div class="testimonial-author">
-                  <img :src="testimonial.avatar" :alt="testimonial.name" class="testimonial-avatar" />
-                  <div class="testimonial-info">
-                    <h4 class="testimonial-name">{{ testimonial.name }}</h4>
-                    <p class="testimonial-position">{{ testimonial.position }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </el-carousel-item>
-        </el-carousel>
-      </div>
+
     </div>
   </div>
+  <el-dialog v-if="buyItem" v-model="dialogVisible" :title="'微信扫描购买'" width="300">
+
+    <ElCard class="buy-card">
+      <div class="card-content">
+
+        <el-image style="width: 100%; height: 100%" :src="buyItem.qrcode" fit="cover" />
+
+        <div class="card-details">
+          <h3><b>{{ buyItem.title }}</b></h3>
+          <p>{{ buyItem.annotate }}</p>
+          <p class="price">{{ buyItem.price }}</p>
+        </div>
+      </div>
+      <div class="card-footer">
+        <el-button type="primary">立即购买</el-button>
+        <el-button @click="dialogVisible = false">取消</el-button>
+      </div>
+    </ElCard>
+
+
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
@@ -79,6 +80,15 @@ import { useSettingsStore } from '@/store/modules/settings';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { DataAnalysis, User, Cellphone, Star, ChatDotSquare } from '@element-plus/icons-vue';
+
+const dialogVisible = ref(false)
+
+const buyItem = ref<any>(null);
+const buy = (item: any) => {
+  buyItem.value = item;
+  dialogVisible.value = true;
+
+}
 
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.theme === 'dark');
@@ -106,25 +116,29 @@ const stats = [
   {
     value: '500',
     unit: '+',
-    label: '成功案例',
+    label: '免费版本',
+    message: '无需任何费用，即可使用！',
     icon: DataAnalysis
   },
   {
     value: '20,000',
     unit: '+',
-    label: '活跃用户',
+    label: '设备绑定',
+    message: '从本站渠道采购硬件设备，完全授权，去除水印',
     icon: User
   },
   {
     value: '10',
-    unit: '万+',
-    label: 'AR应用开发',
+    unit: '免费解锁十台设备',
+    label: '定制开发',
+    message: '定制开发项目，可免费解锁十台设备',
     icon: Cellphone
   },
   {
     value: '98',
     unit: '%',
-    label: '用户满意度',
+    label: '设备解锁',
+    message: '可以单独购买设备解锁码，解锁设备',
     icon: Star
   }
 ];
@@ -172,23 +186,23 @@ const observeStats = () => {
 // 案例数据
 const cases = [
   {
-    image: '/media/bg/education.jpg',
-    title: '教育行业 AR 应用',
-    description: '通过 AR 技术让抽象概念变得直观易懂，提升学生学习兴趣与效率',
-    tags: ['教育', 'AR学习']
+    image: '/media/bg/rokid/studio.png',
+    qrcode: '/media/bg/rokid/qr_studio.png',
+    title: 'Rokid AR Studio',
+    description: '6Dof 设备，完整AR体验，适合所有场景，可以完整使用三方视角。商业项目请优先选择这个。',
+    price: '￥8,300 + ￥8,500',
+    annotate: '注：完整体验需要购买Max Pro 眼镜和  Station Pro 计算单元。',
+    tags: ['6Dof 设备', '手势识别', '语音控制', '图片追踪']
   },
   {
-    image: '/media/bg/business2.jpg',
-    title: '企业协作解决方案',
-    description: '远程团队协作系统，打破地域限制，实现实时空间共享与交流',
-    tags: ['企业', '协作']
+    image: '/media/bg/rokid/lite.png',
+    qrcode: '/media/bg/rokid/qr_lite.png',
+    title: 'Rokid AR Lite',
+    description: '3Dof设备，简单灵活，适合简单的AR体验，适合教育和轻量级商业项目。',
+    annotate: '注：Lite设备没有空间定位能力，无法完整实现三方视角，但可以实现多设备互动，购买前请确认是否适合您的项目。',
+    price: '￥4,499',
+    tags: ['Rokid AR Lite', '3Dof 设备']
   },
-  {
-    image: '/media/bg/exhibition1.jpg',
-    title: '展览展示互动体验',
-    description: '为博物馆与展览提供沉浸式 AR 导览与互动体验',
-    tags: ['展览', '文化']
-  }
 ];
 
 // 用户评价
@@ -297,6 +311,10 @@ onUnmounted(() => {
       color: #fff;
     }
 
+    .case-price {
+      color: #fff;
+    }
+
     .case-description {
       color: #a0a0a0;
     }
@@ -396,6 +414,8 @@ onUnmounted(() => {
 }
 
 .stat-item {
+  cursor: pointer;
+  /* 添加手型光标 */
   text-align: center;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
@@ -452,8 +472,10 @@ onUnmounted(() => {
 
 // 案例样式
 .cases-grid {
+  cursor: pointer;
+  /* 添加手型光标 */
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 30px;
   margin-bottom: 80px;
 }
@@ -476,7 +498,7 @@ onUnmounted(() => {
 
   .case-image {
     position: relative;
-    height: 200px;
+
     overflow: hidden;
 
     img {
