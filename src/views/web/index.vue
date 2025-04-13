@@ -43,8 +43,7 @@
           <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
             @change="toggleTheme"></el-switch>
         </div>
-        <div v-for="item in navMenuItems" :key="item.key" class="sidebar-item"
-          @click="scrollToSection(item.key); toggleSidebar()">
+        <div v-for="item in navMenuItems" :key="item.key" class="sidebar-item" @click="select(item); toggleSidebar()">
           {{ item.label }}
         </div>
         <div class="sidebar-item" @click="openLoginDialog">

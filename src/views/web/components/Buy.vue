@@ -125,29 +125,21 @@ const handleMouseMove = (e: MouseEvent) => {
 // 统计数据
 const stats = [
   {
-    value: '500',
-    unit: '+',
     label: '免费版本',
     message: '无需任何费用，即可使用！',
     icon: DataAnalysis
   },
   {
-    value: '20,000',
-    unit: '+',
     label: '设备解锁',
     message: '从本站渠道采购硬件设备，获得完全授权去除水印。',
     icon: User
   },
   {
-    value: '10',
-    unit: '免费解锁十台设备',
     label: '定制开发',
     message: '定制开发项目，可免费解锁十台设备',
     icon: Cellphone
   },
   {
-    value: '98',
-    unit: '%',
     label: '设备解锁',
     message: '可以单独购买设备解锁码，解锁设备',
     icon: Star
@@ -432,6 +424,7 @@ onUnmounted(() => {
   backdrop-filter: blur(10px);
   border-radius: 16px;
   padding: 30px 20px;
+  width: 100%;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 
@@ -483,7 +476,6 @@ onUnmounted(() => {
 
 // 案例样式
 .cases-grid {
-  cursor: pointer;
   /* 添加手型光标 */
   display: grid;
   grid-template-columns: repeat(2, 1fr);

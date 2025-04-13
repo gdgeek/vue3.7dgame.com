@@ -18,7 +18,7 @@
         </h1>
         <p class="hero-subtitle">让创意在AR设备中绽放，无需加班即可完成！</p>
         <div class="hero-cta">
-          <el-button type="primary" style="width:250px" size="large" @click="openLoginDialog">
+          <el-button type="primary" style="width:150px" size="large" @click="openLoginDialog">
             开始创建
             <el-icon class="el-icon--right">
               <ArrowRight />
