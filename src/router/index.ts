@@ -171,7 +171,8 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: "/site/login",
-        component: () => import("@/views/site/login/index.vue"),
+        redirect: "/web/index",
+        // component: () => import("@/views/site/login/index.vue"),
       },
       {
         path: "/site/logout",
@@ -183,7 +184,7 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
-  { path: "/login", redirect: "/site/login" },
+  { path: "/login", redirect: "/web/index" },
   {
     path: "/privacy-policy",
     component: () => import("@/views/privacy-policy/index.vue"),
