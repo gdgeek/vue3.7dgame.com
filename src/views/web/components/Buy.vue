@@ -62,6 +62,7 @@
           <h3><b>{{ buyItem.title }}</b></h3>
           <p>{{ buyItem.annotate }}</p>
           <p class="price">{{ buyItem.price }}</p>
+          <p>购买完成后请联系解锁设备</p>
         </div>
       </div>
       <div class="card-footer">
@@ -133,7 +134,7 @@ const stats = [
   {
     value: '20,000',
     unit: '+',
-    label: '设备绑定',
+    label: '设备解锁',
     message: '从本站渠道采购硬件设备，获得完全授权去除水印。',
     icon: User
   },
