@@ -115,7 +115,7 @@ function redirectToLogin(
   const params = new URLSearchParams(to.query as Record<string, string>);
   const queryString = params.toString();
   const redirect = queryString ? `${to.path}?${queryString}` : to.path;
-  next(`/site/login?redirect=${encodeURIComponent(redirect)}`);
+  next(`/web/index?redirect=${encodeURIComponent(redirect)}`);
 }
 
 /** 判断是否有权限 */

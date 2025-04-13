@@ -287,7 +287,7 @@ watch(
       await userStore.logout();
       await tagsViewStore.delAllViews();
       setTimeout(() => {
-        router.push("/site/login?redirect=/home/index");
+        router.push("/web/index?redirect=/home/index");
       }, 1000);
     }
   },

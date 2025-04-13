@@ -2,18 +2,11 @@
   <div class="portal-main-background">
     <el-carousel :height="carouselHeight" :interval="5000">
       <el-carousel-item v-for="(image, index) in bannerImages" :key="index">
-        <div
-          class="carousel-content"
-          :style="{ backgroundImage: `url(${image.url})` }"
-        >
+        <div class="carousel-content" :style="{ backgroundImage: `url(${image.url})` }">
           <div class="content">
             <span class="font-title">{{ image.title }}</span>
             <b class="subtitle">{{ image.subtitle }}</b>
-            <el-button
-              class="font-text"
-              @click="goto('/site/index')"
-              type="primary"
-            >
+            <el-button class="font-text" @click="goto('/web/index')" type="primary">
               登入平台
             </el-button>
             <!-- <el-button class="font-text" @click="goto('/site/download')">

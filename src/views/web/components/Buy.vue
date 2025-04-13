@@ -65,7 +65,7 @@
         </div>
       </div>
       <div class="card-footer">
-        <el-button type="primary">立即购买</el-button>
+        <el-button type="primary" @click="open">立即购买</el-button>
         <el-button @click="dialogVisible = false">取消</el-button>
       </div>
     </ElCard>
@@ -80,9 +80,19 @@ import { useSettingsStore } from '@/store/modules/settings';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { DataAnalysis, User, Cellphone, Star, ChatDotSquare } from '@element-plus/icons-vue';
-
+import { ElMessage, ElMessageBox } from 'element-plus'
+import type { Action } from 'element-plus'
 const dialogVisible = ref(false)
+const open = () => {
+  ElMessageBox.alert('请扫小程序码进入商城', '购买', {
+    // if you want to disable its autofocus
+    // autofocus: false,
+    confirmButtonText: '确认',
+    callback: (action: Action) => {
 
+    },
+  })
+}
 const buyItem = ref<any>(null);
 const buy = (item: any) => {
   buyItem.value = item;
