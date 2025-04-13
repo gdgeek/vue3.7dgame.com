@@ -3,10 +3,13 @@
 
 
   </div>
-  <el-card id="news-detail-content">
+  <el-card shadow="never" class="back-button-container">
+
+    <el-card id="news-detail-content">
 
 
-    <Document :post-id="id" :category="true" category-path="/web/news/category"></Document>
+      <Document :post-id="id" :category="true" category-path="/web/news/category"></Document>
+    </el-card>
   </el-card>
 </template>
 
