@@ -25,7 +25,7 @@
             </el-icon>
           </el-button>
           <el-button style="width:100px" size="large">
-            免费授权
+            授权
             <el-icon class="el-icon--right">
               <ArrowDown />
             </el-icon>

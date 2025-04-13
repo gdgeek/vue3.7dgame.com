@@ -134,7 +134,7 @@ const stats = [
     value: '20,000',
     unit: '+',
     label: '设备绑定',
-    message: '从本站渠道采购硬件设备，完全授权，去除水印',
+    message: '从本站渠道采购硬件设备，获得完全授权去除水印。',
     icon: User
   },
   {
