@@ -6,8 +6,8 @@
       </div>
       <div class="overlay"></div>
     </div>
-    <!-- 
-    <div class="video-container">
+
+    <!-- <div class="video-container">
     嵌入 B 站视频的 iframe
       <iframe :src="videoUrl" frameborder="0" allowfullscreen width="640" height="360"></iframe>
     </div> -->
@@ -39,11 +39,10 @@
 
         <div class="image-container">
 
-          <img src="/media/bg/bujiaban.png" @click="openLoginDialog" alt="不加班AR创作平台" class="primary-image" />
+          <img src="/media/bg/bujiaban.png" @click="openVideoDialog" alt="不加班AR创作平台" class="primary-image" />
           <div class="floating-elements">
             <el-link class="floating-link" href="https://www.rokid.com/" target="_blank">
               <img src="/media/bg/rokid.webp" alt="功能展示" class="floating-image float-1" />
-
             </el-link>
             <img src="/media/bg/rokid-lite.webp" alt="功能展示" class="floating-image float-2" />
             <div class="stats-card float-3">
@@ -52,6 +51,12 @@
                 <span class="stats-label">AR应用</span>
               </div>
             </div>
+          </div>
+          <!-- 添加播放按钮提示 -->
+          <div class="play-button-overlay" @click="openVideoDialog">
+            <el-icon class="play-icon">
+              <VideoPlay />
+            </el-icon>
           </div>
         </div>
       </div>
@@ -66,6 +71,12 @@
       </div>
     </div>
   </div>
+
+  <!-- 视频弹窗 -->
+  <el-dialog v-model="videoDialogVisible" title="不加班AR创作平台介绍视频" width="70%" :before-close="handleCloseVideo"
+    destroy-on-close>
+    <Bilibili :bvid="bilibiliVideoId" :height="500" :autoplay="true" />
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
@@ -73,7 +84,8 @@ import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useSettingsStore } from '@/store/modules/settings';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import { ArrowRight, ArrowDown } from '@element-plus/icons-vue';
+import { ArrowRight, ArrowDown, VideoPlay } from '@element-plus/icons-vue';
+import Bilibili from './Bilibili.vue';
 
 // 获取主题设置
 const settingsStore = useSettingsStore();
@@ -81,12 +93,28 @@ const isDark = computed(() => settingsStore.theme === 'dark');
 
 const emit = defineEmits(['openLogin']);
 
+// 视频弹窗控制
+const videoDialogVisible = ref(false);
+
+// B站视频ID
+const bilibiliVideoId = ref('BV1j2dPYWEh1');
+
 // 视差效果状态
 const mouseX = ref(0);
 const mouseY = ref(0);
 
 // 这里需要替换为你要播放的 B 站视频的嵌入链接
-const videoUrl = ref('https://player.bilibili.com/player.html?bvid=BV1j2dPYWEh1&page=1');
+// const videoUrl = ref('https://player.bilibili.com/player.html?bvid=BV1j2dPYWEh1&page=1');
+// 打开视频对话框
+const openVideoDialog = () => {
+  videoDialogVisible.value = true;
+};
+
+// 关闭视频对话框
+const handleCloseVideo = () => {
+  videoDialogVisible.value = false;
+};
+
 // 生成粒子样式
 const getParticleStyle = (n: number) => {
   const size = Math.floor(Math.random() * 10) + 3;
@@ -294,6 +322,11 @@ onUnmounted(() => {
     position: relative;
     width: 100%;
     max-width: 660px;
+    cursor: pointer;
+
+    &:hover .play-button-overlay {
+      opacity: 1;
+    }
   }
 
   .primary-image {
@@ -359,6 +392,28 @@ onUnmounted(() => {
         font-size: 14px;
         color: #666;
       }
+    }
+  }
+
+  // 添加播放按钮样式
+  .play-button-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    // background-color: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 16px;
+
+    .play-icon {
+      font-size: 64px;
+      color: #fff;
+      filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.5));
     }
   }
 }

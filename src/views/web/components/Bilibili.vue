@@ -5,7 +5,7 @@
         <template #template>
           <div class="player-placeholder">
             <div class="logo">
-              <img src="/media/icons/bilibili-logo.svg" alt="Bilibili Logo" />
+              <img src="/media/icon/bilibili-logo.svg" alt="Bilibili Logo" />
             </div>
             <el-skeleton-item variant="rect" style="width: 100%; height: 100%" />
           </div>
