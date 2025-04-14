@@ -18,7 +18,6 @@
             <component :is="stat.icon" />
           </div>
           <div class="stat-number">
-
             <span class="unit">{{ stat.label }}</span>
           </div>
           <div class="stat-label">{{ stat.message }}</div>
@@ -43,21 +42,15 @@
             <p class="stat-number">{{ item.price }}</p>
             <p class="stat-label">{{ item.description }}</p>
             <p class="case-description">{{ item.annotate }}</p>
-
           </div>
         </div>
       </div>
-
-
     </div>
   </div>
   <el-dialog v-if="buyItem" v-model="dialogVisible" :title="'微信扫描购买'" width="300">
-
     <ElCard class="buy-card">
       <div class="card-content">
-
         <el-image style="width: 100%; height: 100%" :src="buyItem.qrcode" fit="cover" />
-
         <div class="card-details">
           <h3><b>{{ buyItem.title }}</b></h3>
           <p>{{ buyItem.annotate }}</p>
@@ -70,8 +63,6 @@
         <el-button @click="dialogVisible = false">取消</el-button>
       </div>
     </ElCard>
-
-
   </el-dialog>
 </template>
 
@@ -80,26 +71,23 @@ import { ref, onMounted, computed, onUnmounted } from 'vue';
 import { useSettingsStore } from '@/store/modules/settings';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import { DataAnalysis, User, Cellphone, Star, ChatDotSquare } from '@element-plus/icons-vue';
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { DataAnalysis, User, Cellphone, Star } from '@element-plus/icons-vue';
+import { ElMessageBox } from 'element-plus'
 import type { Action } from 'element-plus'
-const dialogVisible = ref(false)
+
+const dialogVisible = ref(false);
 const open = () => {
   ElMessageBox.alert('请扫小程序码进入商城', '购买', {
-    // if you want to disable its autofocus
-    // autofocus: false,
     confirmButtonText: '确认',
-    callback: (action: Action) => {
+    callback: (action: Action) => { }
+  });
+};
 
-    },
-  })
-}
 const buyItem = ref<any>(null);
 const buy = (item: any) => {
   buyItem.value = item;
   dialogVisible.value = true;
-
-}
+};
 
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.theme === 'dark');
@@ -146,46 +134,6 @@ const stats = [
   }
 ];
 
-// 启动数字递增动画
-const animateCounters = () => {
-  const counters = document.querySelectorAll('.counter');
-  counters.forEach(counter => {
-    const target = Number(counter.textContent?.replace(/,/g, '') || '0');
-    const increment = target / 50;
-    let count = 0;
-
-    const updateCount = () => {
-      if (count < target) {
-        count += increment;
-        if (count > target) count = target;
-        counter.textContent = Math.floor(count).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        requestAnimationFrame(updateCount);
-      }
-    };
-
-    updateCount();
-  });
-};
-
-// 监听元素进入视口
-const observeStats = () => {
-  const statsSection = document.querySelector('.stats-grid');
-  if (!statsSection) return;
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        animateCounters();
-        observer.unobserve(entry.target);
-      }
-    });
-  }, {
-    threshold: 0.3
-  });
-
-  observer.observe(statsSection);
-};
-
 // 案例数据
 const cases = [
   {
@@ -208,28 +156,6 @@ const cases = [
   },
 ];
 
-// 用户评价
-const testimonials = [
-  {
-    text: '不加班AR编程平台彻底改变了我们的工作方式。团队成员可以同时在虚拟环境中协作，无论身处何地。这大大提高了我们的工作效率和创意表达能力。',
-    name: '张经理',
-    position: '某科技公司产品总监',
-    avatar: '/media/icon/avatar1.jpg'
-  },
-  {
-    text: '作为一名教师，这个平台让我能够创建生动的教学内容，学生们对这种互动式学习方式非常投入。最重要的是，我不需要任何编程知识就能轻松使用。',
-    name: '李老师',
-    position: '高中物理教师',
-    avatar: '/media/icon/avatar2.jpg'
-  },
-  {
-    text: '我们博物馆使用这个平台开发了AR导览系统，访客反馈非常积极。数据显示我们的停留时间和参与度都有显著提升，这是传统展示方式无法比拟的。',
-    name: '王馆长',
-    position: '某科技博物馆馆长',
-    avatar: '/media/icon/avatar3.jpg'
-  }
-];
-
 onMounted(() => {
   // 初始化AOS动画
   AOS.init({
@@ -239,9 +165,6 @@ onMounted(() => {
 
   // 添加鼠标移动监听
   window.addEventListener('mousemove', handleMouseMove);
-
-  // 设置观察者监听统计区域出现在视口
-  observeStats();
 });
 
 onUnmounted(() => {
@@ -282,6 +205,14 @@ onUnmounted(() => {
     .stats-background .overlay {
       background: linear-gradient(to right, rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.9));
     }
+
+    .case-title {
+      color: #252b3a;
+    }
+
+    .case-description {
+      color: #677288;
+    }
   }
 
   &.dark-theme {
@@ -294,7 +225,8 @@ onUnmounted(() => {
     }
 
     .stat-number {
-      color: #fff;
+      color: #3b82f6;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
 
     .stat-label {
@@ -314,25 +246,8 @@ onUnmounted(() => {
       color: #fff;
     }
 
-    .case-price {
-      color: #fff;
-    }
-
     .case-description {
-      color: #a0a0a0;
-    }
-
-    .testimonial-card {
-      background-color: #1e1e1e;
-
-      .testimonial-text,
-      .testimonial-name {
-        color: #fff;
-      }
-
-      .testimonial-position {
-        color: #a0a0a0;
-      }
+      color: #fff;
     }
   }
 }
@@ -418,7 +333,6 @@ onUnmounted(() => {
 
 .stat-item {
   cursor: pointer;
-  /* 添加手型光标 */
   text-align: center;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
@@ -476,7 +390,6 @@ onUnmounted(() => {
 
 // 案例样式
 .cases-grid {
-  /* 添加手型光标 */
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 30px;
@@ -489,6 +402,7 @@ onUnmounted(() => {
   overflow: hidden;
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  cursor: pointer;
 
   &:hover {
     transform: translateY(-10px);
@@ -501,7 +415,6 @@ onUnmounted(() => {
 
   .case-image {
     position: relative;
-
     overflow: hidden;
 
     img {
@@ -543,7 +456,6 @@ onUnmounted(() => {
       font-size: 1.25rem;
       font-weight: 600;
       margin-bottom: 12px;
-      color: #252b3a;
     }
 
     .case-description {
@@ -555,69 +467,11 @@ onUnmounted(() => {
   }
 }
 
-// 用户评价样式
-.testimonials {
-  padding: 40px 0;
-
-  .el-carousel__item {
-    border-radius: 12px;
-  }
-}
-
-.testimonial-card {
-  height: 100%;
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 40px;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-
-  .testimonial-content {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-
-    .testimonial-quote {
-      font-size: 2rem;
-      color: #3b82f6;
-      margin-bottom: 16px;
-    }
-
-    .testimonial-text {
-      font-size: 1.1rem;
-      color: #4b5563;
-      line-height: 1.6;
-      flex-grow: 1;
-      margin-bottom: 24px;
-    }
-
-    .testimonial-author {
-      display: flex;
-      align-items: center;
-
-      .testimonial-avatar {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        object-fit: cover;
-        margin-right: 16px;
-        border: 2px solid #3b82f6;
-      }
-
-      .testimonial-info {
-        .testimonial-name {
-          font-size: 1rem;
-          font-weight: 600;
-          margin-bottom: 4px;
-          color: #111827;
-        }
-
-        .testimonial-position {
-          font-size: 0.9rem;
-          color: #6b7280;
-        }
-      }
-    }
-  }
+.price {
+  color: #3b82f6;
+  font-size: 1rem;
+  margin: 10px 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 // 响应式调整
@@ -710,14 +564,6 @@ onUnmounted(() => {
 
   .cases-grid {
     grid-template-columns: 1fr;
-  }
-
-  .testimonial-card {
-    padding: 24px;
-
-    .testimonial-text {
-      font-size: 1rem;
-    }
   }
 }
 
