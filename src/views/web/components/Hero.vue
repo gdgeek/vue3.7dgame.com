@@ -35,28 +35,59 @@
       </div>
 
       <div class="hero-image" data-aos="fade-left" data-aos-delay="400">
-
-
-        <div class="image-container">
-
+        <!-- 3D展示区域 -->
+        <div class="showcase-container">
+          <!-- 主图片区域 -->
           <img src="/media/bg/bujiaban.png" @click="openVideoDialog" alt="不加班AR创作平台" class="primary-image" />
+
+          <!-- 悬浮元素容器 -->
           <div class="floating-elements">
-            <el-link class="floating-link" href="https://www.rokid.com/" target="_blank">
-              <img src="/media/bg/rokid.webp" alt="功能展示" class="floating-image float-1" />
+            <!-- 产品合作伙伴 - Rokid -->
+            <el-link class="floating-element partner-card" href="https://www.rokid.com/" target="_blank">
+              <img src="/media/bg/rokid.webp" alt="Rokid合作伙伴" class="partner-logo" />
+              <div class="partner-info">
+                <span class="partner-name">Rokid</span>
+                <div class="partner-badge">官方合作伙伴</div>
+              </div>
             </el-link>
-            <img src="/media/bg/rokid-lite.webp" alt="功能展示" class="floating-image float-2" />
-            <div class="stats-card float-3">
-              <div class="stats-item">
-                <span class="stats-number count-up">可视化编程</span>
-                <span class="stats-label">AR应用</span>
+
+            <!-- 设备展示卡片 -->
+            <div class="floating-element device-card">
+              <img src="/media/bg/rokid-lite.webp" alt="Rokid AR眼镜" class="device-image" />
+              <div class="device-info">
+                <span class="device-name">Rokid AR</span>
+                <div class="device-badge">推荐设备</div>
+              </div>
+            </div>
+
+            <!-- 功能亮点卡片 -->
+            <div class="floating-element feature-card">
+              <div class="feature-icon">
+                <img src="/media/icon/blockly_logo_only.png" alt="可视化编程" class="feature-img" />
+              </div>
+              <div class="feature-info">
+                <span class="feature-title">可视化编程</span>
+                <span class="feature-desc">快速构建AR应用</span>
               </div>
             </div>
           </div>
-          <!-- 添加播放按钮提示 -->
-          <div class="play-button-overlay" @click="openVideoDialog">
-            <el-icon class="play-icon">
-              <VideoPlay />
-            </el-icon>
+
+          <!-- 视频播放按钮 -->
+          <div class="play-button-container" @click="openVideoDialog">
+            <div class="play-button">
+              <el-icon class="play-icon">
+                <VideoPlay />
+              </el-icon>
+            </div>
+            <div class="play-label">观看演示</div>
+          </div>
+
+          <!-- 3D效果装饰 -->
+          <div class="decoration-elements">
+            <div class="deco-circle circle-1"></div>
+            <div class="deco-circle circle-2"></div>
+            <div class="deco-line line-1"></div>
+            <div class="deco-line line-2"></div>
           </div>
         </div>
       </div>
@@ -84,8 +115,6 @@ import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useSettingsStore } from '@/store/modules/settings';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import { ArrowRight, ArrowDown, VideoPlay } from '@element-plus/icons-vue';
-import Bilibili from './Bilibili.vue';
 
 // 获取主题设置
 const settingsStore = useSettingsStore();
@@ -277,38 +306,7 @@ onUnmounted(() => {
   }
 
   .hero-cta {
-    // display: flex;
     gap: 16px;
-
-    .cta-button {
-      padding: 12px 32px;
-      font-weight: 600;
-      border-radius: 50px;
-      background: linear-gradient(90deg, #00dbde 0%, #b2b2b2 100%);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-      &:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-      }
-    }
-
-    .cta-button-primary {
-      &:hover {
-        background: linear-gradient(90deg, #b2b2b2 0%, #00dbde 100%);
-      }
-    }
-
-    .cta-button-secondary {
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(10px);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.25);
-      }
-    }
   }
 }
 
@@ -317,24 +315,41 @@ onUnmounted(() => {
   position: relative;
   display: flex;
   justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 660px;
+  perspective: 1000px;
+  z-index: 2;
 
-  .image-container {
+  .showcase-container {
     position: relative;
     width: 100%;
-    max-width: 660px;
-    cursor: pointer;
+    transform-style: preserve-3d;
+    transform: rotateY(calc(var(--mouse-x, 0) * 5deg)) rotateX(calc(var(--mouse-y, 0) * -5deg));
+    transition: transform 0.1s ease-out;
 
-    &:hover .play-button-overlay {
-      opacity: 1;
+    &:hover {
+      .play-button-container {
+        opacity: 1;
+        visibility: visible;
+      }
     }
   }
 
   .primary-image {
     width: 100%;
     height: auto;
-    border-radius: 16px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    transition: transform 0.5s ease-out;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    object-fit: contain;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+    z-index: 1;
+
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+    }
   }
 
   .floating-elements {
@@ -344,81 +359,287 @@ onUnmounted(() => {
     width: 100%;
     height: 100%;
     pointer-events: none;
+    z-index: 2;
   }
 
-  .floating-image {
+  .floating-element {
     position: absolute;
-    border-radius: 12px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15), 0 3px 10px rgba(0, 0, 0, 0.1);
+    padding: 12px;
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+
+    &:hover {
+      transform: translateY(-5px) translateZ(20px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 50%);
+      z-index: -1;
+    }
   }
 
-  .float-1 {
-    width: 140px;
-    top: -20px;
-    left: -40px;
-    animation: float-animation-1 6s ease-in-out infinite;
-  }
+  /* 合作伙伴卡片 */
+  .partner-card {
+    top: -35px;
+    right: -50px;
+    pointer-events: auto;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    animation: float-card 8s ease-in-out infinite;
+    transform: rotate(-5deg);
+    z-index: 5;
 
-  .float-2 {
-    width: 160px;
-    bottom: -30px;
-    right: -30px;
-    animation: float-animation-2 8s ease-in-out infinite;
-  }
+    .partner-logo {
+      width: 80px;
+      height: auto;
+      border-radius: 8px;
+      object-fit: contain;
+    }
 
-  .stats-card {
-    position: absolute;
-    bottom: 30%;
-    left: -50px;
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    animation: float-animation-3 7s ease-in-out infinite;
-
-    .stats-item {
+    .partner-info {
       display: flex;
       flex-direction: column;
+      gap: 4px;
+    }
+
+    .partner-name {
+      font-weight: 700;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .partner-badge {
+      background: linear-gradient(90deg, #00dbde 0%, #1a2980 100%);
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 8px;
+      display: inline-block;
+    }
+  }
+
+  /* 设备展示卡片 */
+  .device-card {
+    bottom: -35px;
+    right: -50px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    animation: float-card 8s ease-in-out infinite;
+    transform: rotate(-5deg);
+    z-index: 4;
+
+    .device-image {
+      width: 80px;
+      height: auto;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+
+    .device-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .device-name {
+      font-weight: 700;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .device-badge {
+      background: linear-gradient(90deg, #00dbde 0%, #1a2980 100%);
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 8px;
+      display: inline-block;
+    }
+  }
+
+  /* 功能亮点卡片 */
+  .feature-card {
+    top: 40%;
+    left: -70px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    animation: float-card 7s ease-in-out infinite 0.5s;
+    transform: rotate(-3deg);
+    z-index: 3;
+
+    .feature-icon {
+      display: flex;
       align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      overflow: hidden;
 
-      .stats-number {
-        font-size: 28px;
-        font-weight: 700;
-        color: #1a2980;
+      .feature-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
       }
+    }
 
-      .stats-label {
-        font-size: 14px;
-        color: #666;
+    .feature-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feature-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .feature-desc {
+      font-size: 12px;
+      color: #666;
+    }
+  }
+
+  /* 播放按钮样式 */
+  .play-button-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    z-index: 10;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+
+    &:hover {
+      transform: translate(-50%, -50%) scale(1.1);
+
+      .play-icon {
+        color: rgba(255, 255, 255, 1);
       }
     }
   }
 
-  // 添加播放按钮样式
-  .play-button-overlay {
+  .play-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      z-index: -1;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+      animation: pulse-ring 2s infinite;
+    }
+
+    .play-icon {
+      font-size: 48px;
+      color: rgba(255, 255, 255, 0.9);
+      transition: color 0.3s ease;
+      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
+    }
+  }
+
+  .play-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 6px 16px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  /* 装饰元素 */
+  .decoration-elements {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    // background-color: rgba(0, 0, 0, 0.4);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    border-radius: 16px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-    .play-icon {
-      font-size: 64px;
-      color: #fff;
-      filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.5));
-    }
+  .deco-circle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.1;
+  }
+
+  .circle-1 {
+    width: 300px;
+    height: 300px;
+    top: -100px;
+    right: -100px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%);
+    animation: pulse-slow 10s infinite;
+  }
+
+  .circle-2 {
+    width: 200px;
+    height: 200px;
+    bottom: -50px;
+    left: -70px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%);
+    animation: pulse-slow 8s infinite 1s;
+  }
+
+  .deco-line {
+    position: absolute;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
+    height: 1px;
+    width: 100%;
+    opacity: 0.5;
+  }
+
+  .line-1 {
+    top: 30%;
+    transform: rotate(-30deg);
+    animation: line-move 15s infinite linear;
+  }
+
+  .line-2 {
+    bottom: 40%;
+    transform: rotate(20deg);
+    animation: line-move 20s infinite linear reverse;
   }
 }
 
-@keyframes float-animation-1 {
+@keyframes float-card {
 
   0%,
   100% {
@@ -430,27 +651,44 @@ onUnmounted(() => {
   }
 }
 
-@keyframes float-animation-2 {
-
-  0%,
-  100% {
-    transform: translateY(0) rotate(2deg);
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
   }
 
-  50% {
-    transform: translateY(-20px) rotate(-2deg);
+  70% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
   }
 }
 
-@keyframes float-animation-3 {
+@keyframes pulse-slow {
 
   0%,
   100% {
-    transform: translateY(0) rotate(-3deg);
+    transform: scale(1);
+    opacity: 0.1;
   }
 
   50% {
-    transform: translateY(-25px) rotate(3deg);
+    transform: scale(1.2);
+    opacity: 0.2;
+  }
+}
+
+@keyframes line-move {
+  0% {
+    background-position: -100% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
   }
 }
 
@@ -514,25 +752,6 @@ onUnmounted(() => {
   }
 }
 
-@keyframes bounce {
-
-  0%,
-  20%,
-  50%,
-  80%,
-  100% {
-    transform: translateY(0) translateX(-50%);
-  }
-
-  40% {
-    transform: translateY(-10px) translateX(-50%);
-  }
-
-  60% {
-    transform: translateY(-5px) translateX(-50%);
-  }
-}
-
 // 移动端适配
 @media screen and (max-width: 1024px) {
   .hero-content {
@@ -543,7 +762,7 @@ onUnmounted(() => {
   }
 
   .hero-text {
-    margin-bottom: 60px;
+    margin-bottom: 40px;
 
     .hero-title {
       font-size: 2.5rem;
@@ -560,16 +779,40 @@ onUnmounted(() => {
 
   .hero-image {
     width: 100%;
+    max-width: 500px;
+    margin-bottom: 40px;
 
-    .image-container {
-      max-width: 400px;
+    .partner-card {
+      top: -25px;
+      right: -20px;
+
+      .partner-logo {
+        width: 60px;
+      }
     }
+
+    .device-card {
+      bottom: -25px;
+      right: -20px;
+
+      .device-image {
+        width: 60px;
+      }
+    }
+
+    .feature-card {
+      left: -30px;
+    }
+  }
+
+  .scroll-indicator {
+    bottom: 20px;
   }
 }
 
 @media screen and (max-width: 768px) {
   .hero-content {
-    padding: 100px 20px 40px;
+    padding: 100px 15px 40px;
   }
 
   .hero-text {
@@ -585,34 +828,144 @@ onUnmounted(() => {
     .hero-cta {
       flex-direction: column;
       gap: 12px;
-
-      .cta-button,
-      .cta-button-secondary {
-        width: 100%;
-      }
     }
   }
 
   .hero-image {
-    .image-container {
-      max-width: 280px;
+    width: 100%;
+    max-width: 350px;
+    margin-bottom: 60px;
+
+    .showcase-container {
+      transform: none !important;
     }
 
-    .float-1,
-    .float-2 {
-      width: 100px;
-    }
+    .partner-card {
+      top: -15px;
+      right: -10px;
+      transform: scale(0.8) rotate(-5deg);
+      padding: 8px 12px;
 
-    .stats-card {
-      padding: 10px;
-      left: -20px;
-
-      .stats-number {
-        font-size: 20px;
+      .partner-logo {
+        width: 50px;
       }
 
-      .stats-label {
+      .partner-name {
+        font-size: 14px;
+      }
+
+      .partner-badge {
+        font-size: 9px;
+      }
+    }
+
+    .device-card {
+      bottom: -15px;
+      right: -10px;
+      transform: scale(0.8) rotate(5deg);
+      padding: 8px 12px;
+
+      .device-image {
+        width: 50px;
+      }
+
+      .device-name {
+        font-size: 14px;
+      }
+
+      .device-badge {
+        font-size: 9px;
+      }
+    }
+
+    .feature-card {
+      left: -15px;
+      transform: scale(0.8) rotate(-3deg);
+      padding: 10px;
+
+      .feature-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+      }
+
+      .feature-title {
+        font-size: 14px;
+      }
+
+      .feature-desc {
+        font-size: 10px;
+      }
+    }
+
+    .play-button-container {
+      .play-button {
+        width: 60px;
+        height: 60px;
+
+        .play-icon {
+          font-size: 24px;
+        }
+      }
+
+      .play-label {
         font-size: 12px;
+        padding: 4px 12px;
+      }
+    }
+  }
+
+  .scroll-indicator {
+    bottom: 15px;
+
+    .scroll-text {
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .scroll-icon {
+      width: 30px;
+      height: 30px;
+
+      .scroll-arrow {
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .hero-image {
+    max-width: 280px;
+
+    .primary-image {
+      border-radius: 20px;
+    }
+
+    .partner-card,
+    .device-card,
+    .feature-card {
+      transform: scale(0.7);
+    }
+
+    .partner-card {
+      top: -10px;
+      right: -5px;
+    }
+
+    .device-card {
+      bottom: -10px;
+      right: -5px;
+    }
+
+    .play-button-container {
+      .play-button {
+        width: 50px;
+        height: 50px;
+
+        .play-icon {
+          font-size: 20px;
+        }
       }
     }
   }
