@@ -12,7 +12,7 @@ import { useSettingsStore } from "@/store/modules/settings";
 import 'aos/dist/aos.css';
 
 const settingsStore = useSettingsStore();
-const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
+const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
 
 </script>
 

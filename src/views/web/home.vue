@@ -1,27 +1,39 @@
 <template>
-  <!-- 新闻动态 -->
-  <section id="news" ref="newsRef">
-    <News :activeTabName="section" />
-  </section>
+  <div :class="{ 'dark-theme': isDark }">
+    <!-- 新闻动态 -->
+    <section id="news" ref="newsRef">
+      <News.default :activeTabName="section" />
+    </section>
 
-  <section id="status" ref="statusRef">
-    <Buy />
-  </section>
+    <section id="status" ref="statusRef">
+      <Buy.default />
+    </section>
 
-
+    <!-- 联系我们 -->
+    <section id="contact" ref="contactRef">
+      <Contact.default />
+    </section>
+  </div>
 </template>
 
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import Buy from "./components/Buy.vue";
+import * as Buy from "./components/Buy.vue";
 import { useRouter, useRoute } from "vue-router";
-import News from "./components/News/index.vue";
+import * as News from "./components/News/index.vue";
+import * as Contact from "./components/Contact.vue";
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import { useSettingsStore } from "@/store/modules/settings";
+import { ThemeEnum } from "@/enums/ThemeEnum";
 
 const router = useRouter();
 const route = useRoute();
 const contentRef = ref<HTMLElement | null>(null);
+
+// 获取主题设置
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
 
 defineOptions({
   name: "WebHome",
@@ -32,9 +44,6 @@ const section = computed(() => {
   return route.query.section ? route.query.section as string : "news";
 });
 const loginDialogRef = ref<any>(null);
-
-
-
 
 const isScrolled = ref(false);
 
@@ -80,9 +89,6 @@ const debounce = (fn: Function, delay: number) => {
     }, delay);
   };
 };
-
-
-
 
 const isMobile = ref(false);
 
@@ -167,6 +173,11 @@ onUnmounted(() => {
     background-color: #121212;
     color: #fff;
   }
+}
+
+.dark-theme {
+  background-color: #121212;
+  color: #f0f0f0;
 }
 
 .nav-container {
@@ -457,7 +468,7 @@ onUnmounted(() => {
   }
 }
 
-// 移动端适配样式
+// 媒体查询适配
 @media screen and (max-width: 992px) {
   .nav-container {
     padding: 0 30px;
