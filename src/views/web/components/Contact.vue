@@ -126,6 +126,7 @@ const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
   padding: 120px 0;
   color: #fff;
   overflow: hidden;
+  background-color: #f9fafb;
 
   &:not(.dark-theme) {
     .section-title {
@@ -169,6 +170,8 @@ const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
   }
 
   &.dark-theme {
+    background-color: #121212;
+
     .section-title {
       color: #fff;
     }

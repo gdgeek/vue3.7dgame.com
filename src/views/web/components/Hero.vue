@@ -24,7 +24,7 @@
               <ArrowRight />
             </el-icon>
           </el-button>
-          <el-button style="width:100px" size="large">
+          <el-button style="width:100px" size="large" @click="scrollToAuthorization">
             授权
             <el-icon class="el-icon--right">
               <ArrowDown />
@@ -180,6 +180,14 @@ const scrollToFeatures = () => {
   const newsSection = document.querySelector('.news-section');
   if (newsSection) {
     newsSection.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
+// 滚动到授权部分
+const scrollToAuthorization = () => {
+  const statsSection = document.querySelector('.stats-section');
+  if (statsSection) {
+    statsSection.scrollIntoView({ behavior: 'smooth' });
   }
 };
 
