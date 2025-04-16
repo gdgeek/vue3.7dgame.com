@@ -194,7 +194,10 @@ const routes: RouteRecordRaw[] = [
     path: "/privacy-policy",
     component: () => import("@/views/privacy-policy/index.vue"),
     meta: { hidden: true, private: true },
+    name: "PrivacyPolicy",
   },
+  { path: "/terms", redirect: "/privacy-policy?tab=terms" },
+  { path: "/privacy", redirect: "/privacy-policy?tab=privacy" },
 
   {
     path: "/",

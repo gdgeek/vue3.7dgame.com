@@ -540,7 +540,8 @@ defineOptions({
       transform: translateX(-50%);
       width: 80px;
       height: 4px;
-      background: linear-gradient(90deg, #00dbde, #adadad);
+      //background: linear-gradient(90deg, #00dbde, #adadad);
+      background: linear-gradient(90deg, #7367f0, #00cfe8);
       border-radius: 2px;
     }
   }
@@ -580,7 +581,8 @@ defineOptions({
   :deep(.el-tabs__active-bar) {
     height: 3px;
     border-radius: 3px;
-    background: linear-gradient(90deg, #00dbde, #bebebe);
+    //background: linear-gradient(90deg, #00dbde, #bebebe);
+    background: linear-gradient(90deg, #7367f0, #00cfe8);
   }
 }
 
