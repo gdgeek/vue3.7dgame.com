@@ -34,102 +34,6 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
-    path: "/tts",
-    component: null,
-    meta: { hidden: true, private: true },
-    redirect: "/tts/index",
-    children: [
-      {
-        path: "index",
-        name: "",
-        component: () => import("@/views/TTS/index.vue"),
-        meta: { hidden: true, private: true },
-      },
-      {
-        path: "audioToWord",
-        name: "",
-        component: () => import("@/views/TTS/AudioToWord.vue"),
-        meta: { hidden: true, private: true },
-      },
-      {
-        path: "wordToAudio",
-        name: "",
-        component: () => import("@/views/TTS/WordToAudio.vue"),
-        meta: { hidden: true, private: true },
-      },
-      {
-        path: "wordToAudioV2",
-        name: "",
-        component: () => import("@/views/TTS/WordToAudioV2.vue"),
-        meta: { hidden: true, private: true },
-      },
-      {
-        path: "tencentTTS",
-        name: "",
-        component: () => import("@/views/TTS/TencentTTS.vue"),
-        meta: { hidden: true, private: true },
-      },
-    ],
-  },
-
-  {
-    path: "/introduce",
-    component: () => import("@/views/introduce/index.vue"),
-    redirect: "/introduce/about",
-    meta: { hidden: true, private: true },
-    children: [
-      {
-        path: "about",
-        name: "IntroduceAbout",
-        component: () => import("@/views/introduce/components/About/index.vue"),
-        meta: { hidden: true, private: true },
-      },
-      {
-        path: "products",
-        name: "IntroduceProducts",
-        component: () =>
-          import("@/views/introduce/components/products/index.vue"),
-        meta: { hidden: true, private: true },
-      },
-      {
-        path: "news",
-        name: "IntroduceNews",
-        component: () => import("@/views/introduce/components/News/index.vue"),
-        meta: { hidden: true, private: true },
-        children: [
-          {
-            path: "category",
-            name: "IntroduceCategory",
-            component: () =>
-              import("@/views/introduce/components/News/IntroduceCategory.vue"),
-            meta: { hidden: true, private: true },
-          },
-          {
-            path: "document",
-            name: "IntroduceDocument",
-            component: () =>
-              import("@/views/introduce/components/News/IntroduceDocument.vue"),
-            meta: { hidden: true, private: true },
-          },
-        ],
-      },
-      {
-        path: "list-product",
-        name: "IntroduceListProduct",
-        component: () => import("@/views/introduce/components/ListProduct.vue"),
-        meta: { hidden: true, private: true },
-      },
-      {
-        path: "develop",
-        name: "IntroduceDevelop",
-        component: () =>
-          import("@/views/introduce/components/develop/index.vue"),
-        meta: { hidden: true, private: true },
-      },
-    ],
-  },
-
-  {
     path: "/web",
     meta: { hidden: true, private: true },
 
@@ -169,27 +73,29 @@ const routes: RouteRecordRaw[] = [
     ],
   },
 
-  {
-    path: "/site",
-    component: () => import("@/views/site/index.vue"),
-    meta: { hidden: true, private: true },
-    children: [
-      {
-        path: "/site/login",
-        redirect: "/web/index",
-        // component: () => import("@/views/site/login/index.vue"),
-      },
-      {
-        path: "/site/logout",
-        component: () => import("@/views/site/logout/index.vue"),
-      },
-      {
-        path: "/site/register",
-        component: () => import("@/views/site/register/index.vue"),
-      },
-    ],
-  },
-  { path: "/login", redirect: "/web/index" },
+  // {
+  //   path: "/site",
+  //   component: () => import("@/views/site/index.vue"),
+  //   meta: { hidden: true, private: true },
+  //   children: [
+  //     {
+  //       path: "/site/login",
+  //       redirect: "/web/index",
+  //       // component: () => import("@/views/site/login/index.vue"),
+  //     },
+  //     {
+  //       path: "/site/logout",
+  //       component: () => import("@/views/site/logout/index.vue"),
+  //     },
+  //     {
+  //       path: "/site/register",
+  //       component: () => import("@/views/site/register/index.vue"),
+  //     },
+  //   ],
+  // },
+
+  // { path: "/login", redirect: "/web/index" },
+
   {
     path: "/privacy-policy",
     component: () => import("@/views/privacy-policy/index.vue"),

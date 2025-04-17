@@ -6,7 +6,6 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import VueIframe from "vue-iframes";
-import { mouseEffect, particleEffect } from "@/mouse";
 import { VueAppleLoginConfig } from "@/utils/helper";
 import VueForm from "@lljj/vue3-form-element";
 import ElementPlus from "element-plus";
@@ -74,8 +73,6 @@ app.use(abilitiesPlugin, ability, {
 app.component("FontAwesomeIcon", FontAwesomeIcon);
 app.component("VueForm", VueForm);
 app.directive("highlight", highlightDirective);
-app.directive("mouse-effect", mouseEffect);
-app.directive("particle-effect", particleEffect);
 app.use(setupPlugins);
 app.use(VueIframe);
 app.use(ElementPlus);

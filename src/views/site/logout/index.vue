@@ -27,7 +27,8 @@ const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
 onMounted(() => {
   setTimeout(() => {
-    router.push("/site/login?redirect=/home/index");
+    // router.push("/site/login?redirect=/home/index");
+    router.push("/web/index");
   }, 1000);
 });
 </script>
