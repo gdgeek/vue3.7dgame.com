@@ -178,7 +178,7 @@ const register = async () => {
         loading.value = false;
       }
     } else {
-      ElMessage({ type: "warning", message: t("login.invalid") });
+      ElMessage({ type: "warning", message: t("login.error") });
     }
   });
 };

@@ -25,7 +25,7 @@
           </el-link>
         </span>
 
-        <span>
+        <!-- <span>
           |
           <el-link @click="goToContact" :underline="false">
             <el-icon>
@@ -35,7 +35,7 @@
               联系我们
             </span>
           </el-link>
-        </span>
+        </span> -->
 
         <span v-if="informationStore.privacyPolicy">
           |
@@ -91,7 +91,7 @@
           </el-link>
         </span>
 
-        <span style="
+        <!-- <span style="
             display: flex;
             align-items: center;
             flex: 1;
@@ -105,7 +105,7 @@
               联系我们
             </span>
           </el-link>
-        </span>
+        </span> -->
 
         <span v-if="informationStore.privacyPolicy" style="
             display: flex;

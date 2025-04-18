@@ -75,8 +75,8 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: "/site/login",
-        redirect: "/web/index",
-        // component: () => import("@/views/site/login/index.vue"),
+        // redirect: "/web/index",
+        component: () => import("@/views/site/login/index.vue"),
       },
       {
         path: "/site/logout",
