@@ -90,7 +90,7 @@ const navMenuItems = [
   { key: "news", label: "首页", path: "/web/index" },
   { key: "tutorial", label: "案例教程", path: "/web/category?section=tutorial" },
   { key: "buy", label: "平台授权", path: "/web/buy" },
-  { key: "bbs", label: "社区论坛", path: "/web/bbs" }
+  { key: "bbs", label: "Rokid 论坛", path: "https://forum.rokid.com/index" }
 ];
 const loginDialogRef = ref<any>(null);
 
@@ -197,13 +197,15 @@ const toggleSidebar = () => {
 
 
 const select = (item: any) => {
-  //本网页的path
-  // const currentPath = route.path;
-  //alert(item.path)
-  //跳转到另外一个path
-  router.push(item.path);
-  //关闭侧边栏
-  // sidebarVisible.value = false;
+
+  if (item.path && (item.path.startsWith('http://') || item.path.startsWith('https://'))) {
+    // 使用 window.open 在新窗口/标签页中打开外部链接
+    window.open(item.path, '_blank');
+  } else {
+    // 内部路由跳转
+    router.push(item.path);
+  }
+
 
 }
 // 滚动到指定部分的函数
