@@ -247,18 +247,18 @@ const routes: RouteRecordRaw[] = [
                   params: null,
                 },
               },
-              {
-                path: "/resource/voxel/upload",
-                name: "VoxelUpload",
-                component: () => import("@/views/voxel/upload.vue"),
-                meta: {
-                  title: "resourceManagement.voxelManagement.voxelUpload",
-                  icon: "el-icon-uploadFilled",
-                  hidden: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
+              // {
+              //   path: "/resource/voxel/upload",
+              //   name: "VoxelUpload",
+              //   component: () => import("@/views/voxel/upload.vue"),
+              //   meta: {
+              //     title: "resourceManagement.voxelManagement.voxelUpload",
+              //     icon: "el-icon-uploadFilled",
+              //     hidden: true,
+              //     alwaysShow: false,
+              //     params: null,
+              //   },
+              // },
               {
                 path: "/resource/voxel/view",
                 name: "VoxelView",
@@ -300,18 +300,18 @@ const routes: RouteRecordRaw[] = [
                   params: null,
                 },
               },
-              {
-                path: "/resource/polygen/upload",
-                name: "",
-                component: () => import("@/views/polygen/upload.vue"),
-                meta: {
-                  title: "resourceManagement.polygenManagement.polygenUpload",
-                  icon: "el-icon-uploadFilled",
-                  hidden: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
+              // {
+              //   path: "/resource/polygen/upload",
+              //   name: "",
+              //   component: () => import("@/views/polygen/upload.vue"),
+              //   meta: {
+              //     title: "resourceManagement.polygenManagement.polygenUpload",
+              //     icon: "el-icon-uploadFilled",
+              //     hidden: true,
+              //     alwaysShow: false,
+              //     params: null,
+              //   },
+              // },
               {
                 path: "/resource/polygen/view",
                 name: "",
@@ -354,18 +354,18 @@ const routes: RouteRecordRaw[] = [
                   params: null,
                 },
               },
-              {
-                path: "/resource/picture/upload",
-                name: "",
-                component: () => import("@/views/picture/upload.vue"),
-                meta: {
-                  title: "resourceManagement.pictureManagement.pictureUpload",
-                  icon: "el-icon-uploadFilled",
-                  hidden: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
+              // {
+              //   path: "/resource/picture/upload",
+              //   name: "",
+              //   component: () => import("@/views/picture/upload.vue"),
+              //   meta: {
+              //     title: "resourceManagement.pictureManagement.pictureUpload",
+              //     icon: "el-icon-uploadFilled",
+              //     hidden: true,
+              //     alwaysShow: false,
+              //     params: null,
+              //   },
+              // },
               {
                 path: "/resource/picture/view",
                 name: "",
@@ -408,18 +408,18 @@ const routes: RouteRecordRaw[] = [
                   params: null,
                 },
               },
-              {
-                path: "/resource/video/upload",
-                name: "",
-                component: () => import("@/views/video/upload.vue"),
-                meta: {
-                  title: "resourceManagement.videoManagement.videoUpload",
-                  icon: "el-icon-uploadFilled",
-                  hidden: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
+              // {
+              //   path: "/resource/video/upload",
+              //   name: "",
+              //   component: () => import("@/views/video/upload.vue"),
+              //   meta: {
+              //     title: "resourceManagement.videoManagement.videoUpload",
+              //     icon: "el-icon-uploadFilled",
+              //     hidden: true,
+              //     alwaysShow: false,
+              //     params: null,
+              //   },
+              // },
               {
                 path: "/resource/video/view",
                 name: "",
@@ -460,18 +460,18 @@ const routes: RouteRecordRaw[] = [
                   params: null,
                 },
               },
-              {
-                path: "/resource/audio/upload",
-                name: "",
-                component: () => import("@/views/audio/upload.vue"),
-                meta: {
-                  title: "resourceManagement.audioManagement.audioUpload",
-                  icon: "el-icon-uploadFilled",
-                  hidden: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
+              // {
+              //   path: "/resource/audio/upload",
+              //   name: "",
+              //   component: () => import("@/views/audio/upload.vue"),
+              //   meta: {
+              //     title: "resourceManagement.audioManagement.audioUpload",
+              //     icon: "el-icon-uploadFilled",
+              //     hidden: true,
+              //     alwaysShow: false,
+              //     params: null,
+              //   },
+              // },
               /*
               {
                 path: "/resource/audio/tts",

@@ -6,6 +6,7 @@
         <el-header>
           <mr-p-p-header :sorted="sorted" :searched="searched" @search="search" @sort="sort">
             <el-button-group :inline="true">
+              <!-- 原上传路由按钮注释
               <router-link to="/resource/video/upload">
                 <el-button size="small" type="primary" icon="uploadFilled">
                   <span class="hidden-sm-and-down">{{
@@ -13,6 +14,10 @@
                   }}</span>
                 </el-button>
               </router-link>
+              -->
+              <el-button size="small" type="primary" icon="uploadFilled" @click="openUploadDialog">
+                <span class="hidden-sm-and-down">{{ $t("video.uploadVideo") }}</span>
+              </el-button>
             </el-button-group>
           </mr-p-p-header>
         </el-header>
@@ -28,7 +33,7 @@
                       </el-button>
                       <el-button v-else type="primary" size="small">{{
                         $t("video.viewVideo")
-                      }}</el-button>
+                        }}</el-button>
                     </router-link>
                   </template>
                 </mr-p-p-card>
@@ -45,17 +50,25 @@
         </el-footer>
       </el-container>
       <br />
+
+      <!-- 新增上传弹窗组件 -->
+      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="video" :file-type="fileType" @save-resource="saveVideo"
+        @success="handleUploadSuccess">
+        {{ $t("video.uploadFile") }}
+      </mr-p-p-upload-dialog>
     </div>
   </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
-import { getVideos, putVideo, deleteVideo } from "@/api/v1/resources/index";
+import { getVideos, putVideo, deleteVideo, postVideo } from "@/api/v1/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import MrPPUploadDialog from "@/components/MrPP/MrPPUploadDialog/index.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import { useRouter } from "vue-router";
 
 const items = ref<any[]>([]);
 const sorted = ref<string>("-created_at");
@@ -67,6 +80,43 @@ const pagination = reactive({
   total: 20,
 });
 const { t } = useI18n();
+const router = useRouter();
+
+// 上传弹窗相关
+const uploadDialogVisible = ref(false);
+const fileType = ref("video/mp4, video/ogg");
+
+// 打开上传弹窗
+const openUploadDialog = () => {
+  uploadDialogVisible.value = true;
+};
+
+// 上传成功后处理
+const handleUploadSuccess = (lastFileId: number) => {
+  uploadDialogVisible.value = false;
+  router.push({
+    path: "/resource/video/view",
+    query: { id: lastFileId },
+  });
+};
+
+// 保存视频
+const saveVideo = async (
+  name: string,
+  file_id: number,
+  totalFiles: number,
+  callback: (id: number) => void
+) => {
+  try {
+    const response = await postVideo({ name, file_id });
+    if (response.data.id) {
+      callback(response.data.id);
+    }
+  } catch (err) {
+    console.error("Failed to save video:", err);
+    callback(-1);
+  }
+};
 
 // 处理分页
 const handleCurrentChange = async (page: number) => {
@@ -75,7 +125,7 @@ const handleCurrentChange = async (page: number) => {
   console.log(pagination.current);
 };
 
-// 修改音频名称
+// 修改视频名称
 const namedWindow = async (item: any) => {
   try {
     const { value } = await ElMessageBox.prompt(
@@ -107,7 +157,7 @@ const search = (value: string) => {
   refresh();
 };
 
-// 修改音频名称 API 调用
+// 修改视频名称 API 调用
 const named = async (id: string, newValue: string) => {
   try {
     await putVideo(id, { name: newValue });
@@ -117,7 +167,7 @@ const named = async (id: string, newValue: string) => {
   }
 };
 
-// 删除音频确认
+// 删除视频确认
 const deletedWindow = async (item: any) => {
   try {
     await ElMessageBox.confirm(
@@ -137,7 +187,7 @@ const deletedWindow = async (item: any) => {
   }
 };
 
-// 删除音频 API 调用
+// 删除视频 API 调用
 const deleted = async (id: string) => {
   try {
     await deleteVideo(id);

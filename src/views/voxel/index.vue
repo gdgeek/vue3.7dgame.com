@@ -6,6 +6,7 @@
         <el-header>
           <MrPPHeader :sorted="sorted" :searched="searched" @search="search" @sort="sort">
             <el-button-group :inline="true">
+              <!-- 原上传路由按钮注释
               <router-link to="/resource/voxel/upload">
                 <el-button size="small" type="primary" icon="UploadFilled">
                   <span class="hidden-sm-and-down">{{
@@ -13,6 +14,10 @@
                   }}</span>
                 </el-button>
               </router-link>
+              -->
+              <el-button size="small" type="primary" icon="UploadFilled" @click="openUploadDialog">
+                <span class="hidden-sm-and-down">{{ $t("voxel.uploadVoxel") }}</span>
+              </el-button>
             </el-button-group>
           </MrPPHeader>
         </el-header>
@@ -46,19 +51,33 @@
           </el-card>
         </el-footer>
       </el-container>
+      <br />
+
+      <!-- 新增上传弹窗组件 -->
+      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="voxel" :file-type="fileType" @save-resource="saveVoxel"
+        @success="handleUploadSuccess">
+        {{ $t("voxel.uploadFile") }}
+      </mr-p-p-upload-dialog>
     </div>
   </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
-import { getVoxels, putVoxel, deleteVoxel } from "@/api/v1/resources/index";
+import { getVoxels, putVoxel, deleteVoxel, postVoxel } from "@/api/v1/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import MrPPUploadDialog from "@/components/MrPP/MrPPUploadDialog/index.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import { useRouter } from "vue-router";
 
 const { t } = useI18n();
+const router = useRouter();
+
+// 上传弹窗相关
+const uploadDialogVisible = ref(false);
+const fileType = ref(".vox, application/octet-stream"); // vox文件类型
 
 interface Pagination {
   current: number;
@@ -76,6 +95,38 @@ const pagination = ref<Pagination>({
   size: 20,
   total: 20,
 });
+
+// 打开上传弹窗
+const openUploadDialog = () => {
+  uploadDialogVisible.value = true;
+};
+
+// 上传成功后处理
+const handleUploadSuccess = (lastFileId: number) => {
+  uploadDialogVisible.value = false;
+  router.push({
+    path: "/resource/voxel/view",
+    query: { id: lastFileId },
+  });
+};
+
+// 保存体素模型
+const saveVoxel = async (
+  name: string,
+  file_id: number,
+  totalFiles: number,
+  callback: (id: number) => void
+) => {
+  try {
+    const response = await postVoxel({ name, file_id });
+    if (response.data.id) {
+      callback(response.data.id);
+    }
+  } catch (err) {
+    console.error("Failed to save voxel:", err);
+    callback(-1);
+  }
+};
 
 const handleCurrentChange = (page: number) => {
   pagination.value.current = page;
