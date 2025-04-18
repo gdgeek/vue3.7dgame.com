@@ -1,18 +1,10 @@
 <template>
   <div class="bilibili-player-container">
-    <div v-if="loading" class="loading-container">
-      <el-skeleton animated>
-        <template #template>
-          <div class="player-placeholder">
-            <div class="logo">
-              <img src="/media/icon/bilibili-logo.svg" alt="Bilibili Logo" />
-            </div>
-            <el-skeleton-item variant="rect" style="width: 100%; height: 100%" />
-          </div>
-        </template>
-      </el-skeleton>
-    </div>
 
+    <el-card v-if="loading" :style="{ height: `${height}px` }">
+      <el-card v-loading="true" class="loading-container">
+      </el-card>
+    </el-card>
     <iframe v-show="!loading" ref="playerRef" class="bilibili-player" :src="embedUrl" :style="{ height: `${height}px` }"
       frameborder="0" allowfullscreen scrolling="no" @load="handleIframeLoaded"></iframe>
   </div>
@@ -123,6 +115,7 @@ watch(
 
 .loading-container {
   width: 100%;
+  background: #000;
   height: 100%;
   position: absolute;
   top: 0;
