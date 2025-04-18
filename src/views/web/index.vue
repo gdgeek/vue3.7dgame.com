@@ -57,7 +57,7 @@
 
       <Hero v-if="isIndex" @openLogin="openLoginDialog" />
       <router-view></router-view>
-      <Footer />
+      <Footer :maxwidth="true" />
     </div>
     <!-- 登录对话框 -->
     <LoginDialog ref="loginDialogRef" />

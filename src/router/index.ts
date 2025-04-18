@@ -68,28 +68,28 @@ const routes: RouteRecordRaw[] = [
     ],
   },
 
-  // {
-  //   path: "/site",
-  //   component: () => import("@/views/site/index.vue"),
-  //   meta: { hidden: true, private: true },
-  //   children: [
-  //     {
-  //       path: "/site/login",
-  //       redirect: "/web/index",
-  //       // component: () => import("@/views/site/login/index.vue"),
-  //     },
-  //     {
-  //       path: "/site/logout",
-  //       component: () => import("@/views/site/logout/index.vue"),
-  //     },
-  //     {
-  //       path: "/site/register",
-  //       component: () => import("@/views/site/register/index.vue"),
-  //     },
-  //   ],
-  // },
+  {
+    path: "/site",
+    // component: () => import("@/views/site/index.vue"),
+    meta: { hidden: true, private: true },
+    children: [
+      {
+        path: "/site/login",
+        redirect: "/web/index",
+        // component: () => import("@/views/site/login/index.vue"),
+      },
+      {
+        path: "/site/logout",
+        component: () => import("@/views/site/logout/index.vue"),
+      },
+      {
+        path: "/site/register",
+        component: () => import("@/views/site/register/index.vue"),
+      },
+    ],
+  },
 
-  // { path: "/login", redirect: "/web/index" },
+  { path: "/login", redirect: "/web/index" },
 
   {
     path: "/privacy-policy",

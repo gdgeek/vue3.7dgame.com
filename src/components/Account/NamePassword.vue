@@ -34,10 +34,10 @@
       </el-form-item>
 
       <!-- 注册新账号 -->
-      <!-- <div class="register-link">
+      <div class="register-link">
         <span>还没有账号?</span>
-        <a href="#" @click.prevent="handleRegister">立即注册</a>
-      </div> -->
+        <a href="#" @click.prevent="switchToRegister">立即注册</a>
+      </div>
     </el-form>
   </div>
 </template>
@@ -110,7 +110,7 @@ const rules = computed<Record<string, FormItemRule[]>>(() => {
 
 const loading = ref<boolean>(false);
 
-const emit = defineEmits(['login-success']);
+const emit = defineEmits(['login-success', 'switch-to-register']);
 
 const submit = () => {
   formRef.value?.validate(async (valid: boolean) => {
@@ -143,6 +143,11 @@ const handleForgotPassword = () => {
 // 处理注册新账号
 const handleRegister = () => {
   router.push('/signup');
+};
+
+// 切换到注册选项卡
+const switchToRegister = () => {
+  emit('switch-to-register');
 };
 </script>
 

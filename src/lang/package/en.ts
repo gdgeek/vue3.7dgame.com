@@ -101,6 +101,7 @@ export default {
         message1: "Please enter your username",
         message2: "Greater than 4 and less than 20",
         message3: "only letters, numbers, _, -, @, and .",
+        email: "Please enter a valid email address",
       },
       password: {
         message1: "Please enter your password",
