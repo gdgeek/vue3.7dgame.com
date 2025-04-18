@@ -8,11 +8,6 @@
     <section id="status" ref="statusRef">
       <Buy.default />
     </section>
-
-    <!-- 联系我们 -->
-    <section id="contact" ref="contactRef">
-      <Contact.default />
-    </section>
   </div>
 </template>
 
@@ -21,7 +16,7 @@ import "@/assets/font/font.css";
 import * as Buy from "./components/Buy.vue";
 import { useRouter, useRoute } from "vue-router";
 import * as News from "./components/News/index.vue";
-import * as Contact from "./components/Contact.vue";
+
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { useSettingsStore } from "@/store/modules/settings";

@@ -90,8 +90,7 @@ const navMenuItems = [
   { key: "news", label: "首页", path: "/web/index" },
   { key: "tutorial", label: "案例教程", path: "/web/category?section=tutorial" },
   { key: "buy", label: "设备采购", path: "/web/buy" },
-  { key: "bbs", label: "社区论坛", path: "/web/bbs" },
-  { key: "contact", label: "联系我们", path: "/web/contact" },
+  { key: "bbs", label: "社区论坛", path: "/web/bbs" }
 ];
 const loginDialogRef = ref<any>(null);
 
