@@ -9,26 +9,38 @@
       </div>
 
       <!-- 登录表单 -->
-      <div class="login-tabs">
-        <div class="tab-item" :class="{ 'active': activeTab === 'account' }" @click="activeTab = 'account'">
-          <el-icon>
-            <UserFilled />
-          </el-icon>
-          <span>账号登录</span>
-        </div>
-        <div class="tab-item" :class="{ 'active': activeTab === 'wechat' }" @click="activeTab = 'wechat'">
-          <el-icon>
-            <ChatRound />
-          </el-icon>
-          <span>微信登录</span>
-        </div>
-      </div>
+      <el-tabs v-model="activeTab" class="login-tabs" @tab-click="handleTabClick">
+        <el-tab-pane name="account-register" class="tab-item">
+          <template #label>
+            <div class="tab-label">
+              <el-icon>
+                <UserFilled v-if="!isRegisterMode" />
+                <EditPen v-else />
+              </el-icon>
+              <span>{{ isRegisterMode ? '账号注册' : '账号登录' }}</span>
+            </div>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane name="wechat" class="tab-item">
+          <template #label>
+            <div class="tab-label">
+              <el-icon>
+                <ChatRound />
+              </el-icon>
+              <span>微信登录</span>
+            </div>
+          </template>
+        </el-tab-pane>
+      </el-tabs>
 
       <!-- 内容区域 -->
       <div class="login-content">
         <transition name="fade" mode="out-in">
-          <div v-if="activeTab === 'account'" class="account-login">
-            <NamePassword @login-success="handleLoginSuccess" />
+          <div v-if="activeTab === 'account-register' && !isRegisterMode" class="account-login">
+            <NamePassword @login-success="handleLoginSuccess" @switch-to-register="toggleRegisterMode" />
+          </div>
+          <div v-else-if="activeTab === 'account-register' && isRegisterMode" class="account-register">
+            <RegisterForm @register-success="handleLoginSuccess" @back-to-login="toggleRegisterMode" />
           </div>
           <div v-else class="wechat-login">
             <Wechat />
@@ -55,6 +67,7 @@
 
 <script setup lang="ts">
 import NamePassword from './NamePassword.vue';
+import RegisterForm from './RegisterForm.vue';
 import Wechat from './Wechat.vue';
 import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
@@ -62,7 +75,7 @@ import { ThemeEnum } from "@/enums/ThemeEnum";
 const props = defineProps({
   title: {
     type: String,
-    default: '用户登录'
+    default: '用户登录/注册'
   }
 });
 
@@ -70,7 +83,21 @@ const emit = defineEmits(['dialog-closed']);
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
 const dialogVisible = ref(false);
-const activeTab = ref('account');
+const activeTab = ref('account-register');
+const isRegisterMode = ref(false);
+
+// 切换账号登录和注册模式
+const toggleRegisterMode = () => {
+  isRegisterMode.value = !isRegisterMode.value;
+};
+
+// 处理tab点击事件
+const handleTabClick = () => {
+  // 当点击微信登录tab时，重置注册模式
+  if (activeTab.value === 'wechat') {
+    isRegisterMode.value = false;
+  }
+};
 
 const openDialog = () => {
   dialogVisible.value = true;
@@ -88,7 +115,8 @@ const handleLoginSuccess = () => {
 const handleDialogClosed = () => {
   emit('dialog-closed');
   // 重置状态
-  activeTab.value = 'account';
+  activeTab.value = 'account-register';
+  isRegisterMode.value = false;
 };
 
 const openAgreement = (type: 'terms' | 'privacy') => {
@@ -172,47 +200,66 @@ defineExpose({
 }
 
 .login-tabs {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
   margin-bottom: 8px;
 
-  .tab-item {
+  :deep(.el-tabs__header) {
+    margin-bottom: 0;
+  }
+
+  :deep(.el-tabs__nav-wrap::after) {
+    display: none;
+  }
+
+  :deep(.el-tabs__nav) {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  :deep(.el-tabs__item) {
+    flex: 1;
+    text-align: center;
+    padding: 6px 0;
     font-size: 15px;
     font-weight: 500;
     color: #666;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
+    height: auto;
     transition: all 0.3s ease;
 
-    .el-icon {
-      font-size: 18px;
+    &.is-active {
+      color: #00a8ab;
     }
 
     &:hover {
       color: #00a8ab;
     }
 
-    &.active {
-      color: #00a8ab;
-      border-bottom-color: #00a8ab;
-    }
-
     .dark-theme & {
       color: #aaa;
 
-      &:hover,
-      &.active {
+      &.is-active,
+      &:hover {
         color: #00dbde;
       }
+    }
+  }
 
-      &.active {
-        border-bottom-color: #00dbde;
-      }
+  :deep(.el-tabs__active-bar) {
+    background-color: #00a8ab;
+
+    .dark-theme & {
+      background-color: #00dbde;
+    }
+  }
+
+  .tab-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    .el-icon {
+      font-size: 18px;
     }
   }
 }

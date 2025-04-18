@@ -35,14 +35,14 @@
 
         <span :class="['gradient-text', { mobile: isMobile }]">{{
           nickname
-        }}</span>
+          }}</span>
       </div>
       <template #dropdown>
         <el-dropdown-menu>
           <RouterLink to="/settings/edit">
             <el-dropdown-item>{{
               $t("navbar.AccountSetting")
-              }}</el-dropdown-item>
+            }}</el-dropdown-item>
           </RouterLink>
           <!-- <RouterLink to="/settings/account">
             <el-dropdown-item>{{

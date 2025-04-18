@@ -101,6 +101,7 @@ export default {
         message1: "请输入用户名",
         message2: "用户名称长度应大于4小于20",
         message3: "用户名仅支持字母、数字、下划线、@、.",
+        email: "请输入有效的电子邮箱地址",
       },
       password: {
         message1: "请输入密码",
