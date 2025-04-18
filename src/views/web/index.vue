@@ -89,7 +89,7 @@ defineOptions({
 const navMenuItems = [
   { key: "news", label: "首页", path: "/web/index" },
   { key: "tutorial", label: "案例教程", path: "/web/category?section=tutorial" },
-  { key: "buy", label: "设备采购", path: "/web/buy" },
+  { key: "buy", label: "平台授权", path: "/web/buy" },
   { key: "bbs", label: "社区论坛", path: "/web/bbs" }
 ];
 const loginDialogRef = ref<any>(null);

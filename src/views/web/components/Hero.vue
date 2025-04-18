@@ -43,7 +43,7 @@
           <!-- 悬浮元素容器 -->
           <div class="floating-elements">
             <!-- 产品合作伙伴 - Rokid -->
-            <el-link class="floating-element partner-card" href="https://www.rokid.com/" target="_blank">
+            <el-link class="floating-element partner-card" href="/web/buy">
               <img src="/media/bg/rokid.webp" alt="Rokid合作伙伴" class="partner-logo" />
               <div class="partner-info">
                 <span class="partner-name">Rokid</span>
@@ -51,17 +51,18 @@
               </div>
             </el-link>
 
-            <!-- 设备展示卡片 -->
-            <div class="floating-element device-card">
+            <el-link class="floating-element device-card" href="/web/buy">
+
               <img src="/media/bg/rokid-lite.webp" alt="Rokid AR眼镜" class="device-image" />
               <div class="device-info">
                 <span class="device-name">Rokid AR</span>
                 <div class="device-badge">推荐设备</div>
               </div>
-            </div>
 
+            </el-link>
+            <!-- 设备展示卡片 -->
             <!-- 功能亮点卡片 -->
-            <div class="floating-element feature-card">
+            <div class="floating-element feature-card" @click="test">
               <div class="feature-icon">
                 <img src="/media/icon/blockly_logo_only.png" alt="可视化编程" class="feature-img" />
               </div>
@@ -121,7 +122,9 @@ const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.theme === 'dark');
 
 const emit = defineEmits(['openLogin']);
-
+const test = () => {
+  alert("test");
+}
 // 视频弹窗控制
 const videoDialogVisible = ref(false);
 
