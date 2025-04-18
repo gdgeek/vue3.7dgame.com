@@ -25,14 +25,14 @@ defineOptions({
 });
 
 const open = () => {
-  ElMessageBox.alert('链接至Rokid论坛，如有问题请加入标签', '论坛求助', {
+  /*ElMessageBox.alert('链接至Rokid论坛，如有问题请加入标签', '论坛求助', {
     // if you want to disable its autofocus
     // autofocus: false,
     confirmButtonText: '确认',
     callback: (action: Action) => {
 
     },
-  })
+  })*/
 }
 
 const loginDialogRef = ref<any>(null);
