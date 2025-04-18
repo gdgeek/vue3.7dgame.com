@@ -6,6 +6,7 @@
         <el-header>
           <mr-p-p-header :sorted="sorted" :searched="searched" @search="search" @sort="sort">
             <el-button-group :inline="true">
+              <!-- 原上传路由按钮注释
               <router-link to="/resource/polygen/upload">
                 <el-button size="small" type="primary" icon="uploadFilled">
                   <span class="hidden-sm-and-down">{{
@@ -13,6 +14,10 @@
                   }}</span>
                 </el-button>
               </router-link>
+              -->
+              <el-button size="small" type="primary" icon="uploadFilled" @click="openUploadDialog">
+                <span class="hidden-sm-and-down">{{ $t("polygen.uploadPolygen") }}</span>
+              </el-button>
             </el-button-group>
           </mr-p-p-header>
         </el-header>
@@ -54,17 +59,25 @@
         </el-footer>
       </el-container>
       <br />
+
+      <!-- 新增上传弹窗组件 -->
+      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="polygen" :file-type="fileType"
+        @save-resource="savePolygen" @success="handleUploadSuccess">
+        {{ $t("polygen.uploadFile") }}
+      </mr-p-p-upload-dialog>
     </div>
   </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
-import { getPolygens, putPolygen, deletePolygen } from "@/api/v1/resources/index";
+import { getPolygens, putPolygen, deletePolygen, postPolygen } from "@/api/v1/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import MrPPUploadDialog from "@/components/MrPP/MrPPUploadDialog/index.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import { useRouter } from "vue-router";
 
 // 组件状态
 const { t } = useI18n();
@@ -72,6 +85,11 @@ const items = ref<any[] | null>(null);
 const sorted = ref("-created_at");
 const searched = ref("");
 const percentage = ref(0);
+const router = useRouter();
+
+// 上传弹窗相关
+const uploadDialogVisible = ref(false);
+const fileType = ref(".glb");
 
 // 分页配置
 const pagination = ref({
@@ -80,6 +98,38 @@ const pagination = ref({
   size: 20,
   total: 20,
 });
+
+// 打开上传弹窗
+const openUploadDialog = () => {
+  uploadDialogVisible.value = true;
+};
+
+// 上传成功后处理
+const handleUploadSuccess = (lastFileId: number) => {
+  uploadDialogVisible.value = false;
+  router.push({
+    path: "/resource/polygen/view",
+    query: { id: lastFileId },
+  });
+};
+
+// 保存模型
+const savePolygen = async (
+  name: string,
+  file_id: number,
+  totalFiles: number,
+  callback: (id: number) => void
+) => {
+  try {
+    const response = await postPolygen({ name, file_id });
+    if (response.data.id) {
+      callback(response.data.id);
+    }
+  } catch (err) {
+    console.error("Failed to save polygen:", err);
+    callback(-1);
+  }
+};
 
 // 进度更新
 const progress = (progress: number) => {
