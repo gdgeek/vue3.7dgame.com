@@ -175,7 +175,7 @@ function handleUnauthorized(router: ReturnType<typeof useRouter>) {
   return useUserStoreHook()
     .resetToken()
     .then(() => {
-      router.push({ path: "/site/login" });
+      router.push({ path: "/web/index" });
       return Promise.reject("");
     });
 }
