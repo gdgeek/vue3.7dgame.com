@@ -61,7 +61,7 @@ const emit = defineEmits(["submit"]);
 
 const dialogVisible = ref(false);
 const imageId = ref<number | null>(null);
-const item = ref<VerseData | null>({} as VerseData);
+const item = ref<VerseData>({} as VerseData);
 
 const rules = {
   name: [

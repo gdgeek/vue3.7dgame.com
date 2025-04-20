@@ -1,13 +1,13 @@
 <template>
 
- 
+
   <div v-if="classify" class="flex gap-2">
-    <el-tag v-for="tag in tags" :type="tag.type === 'Classify' ? 'primary' : 'success'" :key="tag.name" :closable="props.editable"
-      @close="close(tag.id)">
+    <el-tag v-for="tag in tags" :type="tag.type === 'Classify' ? 'primary' : 'success'" :key="tag.name"
+      :closable="props.editable" @close="close(tag.id)">
       {{ tag.name }}
     </el-tag>
-    <el-select-v2 v-if="props.editable" @change="handleChange" v-model="value" size="small" :options="options" placeholder="添加标签"
-      style="width:100px" />
+    <el-select-v2 v-if="props.editable" @change="handleChange" v-model="value" size="small" :options="options"
+      placeholder="添加标签" style="width:100px" />
 
 
   </div>
@@ -90,7 +90,7 @@ const handleChange = (val: any) => {
   //emit('tagsChange', val)
 }
 onMounted(() => {
-  getTags(null).then(res => {
+  getTags().then(res => {
     classify.value = res.data
   })
 

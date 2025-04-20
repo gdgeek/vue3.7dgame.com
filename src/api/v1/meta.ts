@@ -26,8 +26,8 @@ export type MetaCode = {
   js?: string;
 };
 export type Events = {
-  inputs: string[];
-  outputs: string[];
+  inputs: any[];
+  outputs: any[];
 };
 // 实体类型
 export type metaInfo = {

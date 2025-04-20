@@ -52,7 +52,7 @@
             <div v-if="events && events.inputs && events.inputs.length > 0" :label="$t('meta.metaEdit.form.input')">
               <el-divider content-position="left">{{
                 $t("meta.metaEdit.form.input")
-              }}</el-divider>
+                }}</el-divider>
               <span v-for="(i, index) in events.inputs" :key="index">
                 <el-tag size="small">
                   {{ i.title }}
@@ -63,7 +63,7 @@
             <div v-if="events && events.outputs && events.outputs.length > 0" :label="$t('meta.metaEdit.form.output')">
               <el-divider content-position="left">{{
                 $t("meta.metaEdit.form.output")
-              }}</el-divider>
+                }}</el-divider>
               <span v-for="(i, index) in events.outputs" :key="index">
                 <el-tag size="small">
                   {{ i.title }}
@@ -165,10 +165,7 @@ type Event = {
 
 const events = computed(() => {
   if (item.value) {
-    return item.value.events! as {
-      inputs: Event[];
-      outputs: Event[];
-    };
+    return item.value.events!;
   }
   return { inputs: [], outputs: [] };
 });
