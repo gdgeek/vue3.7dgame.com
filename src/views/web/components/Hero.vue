@@ -14,7 +14,7 @@
     <div class="hero-content">
       <div class="hero-text" data-aos="fade-up" data-aos-delay="200">
         <h1 class="hero-title">
-          <span class="gradient-text">不加班AR创作平台</span>
+          <span class="gradient-text">不加班AR创造平台</span>
         </h1>
         <p class="hero-subtitle">让创意在AR设备中绽放，无需加班即可完成！</p>
         <div class="hero-cta">
@@ -38,7 +38,7 @@
         <!-- 3D展示区域 -->
         <div class="showcase-container">
           <!-- 主图片区域 -->
-          <img src="/media/bg/bujiaban.png" @click="openVideoDialog" alt="不加班AR创作平台" class="primary-image" />
+          <img src="/media/bg/bujiaban.png" @click="openVideoDialog" alt="不加班AR创造平台" class="primary-image" />
 
           <!-- 悬浮元素容器 -->
           <div class="floating-elements">
@@ -105,7 +105,7 @@
   </div>
 
   <!-- 视频弹窗 -->
-  <el-dialog v-model="videoDialogVisible" title="不加班AR创作平台介绍视频" width="70%" :before-close="handleCloseVideo"
+  <el-dialog v-model="videoDialogVisible" title="不加班AR创造平台介绍视频" width="70%" :before-close="handleCloseVideo"
     destroy-on-close>
     <Bilibili :bvid="bilibiliVideoId" :height="500" :autoplay="true" />
   </el-dialog>
