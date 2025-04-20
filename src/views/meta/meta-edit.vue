@@ -2,6 +2,7 @@
   <TransitionWrapper>
     <div class="meta-edit">
       <Edit @get-item="getMetaData" @put-item="putMetaData"></Edit>
+
     </div>
   </TransitionWrapper>
 </template>
@@ -13,11 +14,12 @@ import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const getMetaData = async (
   id: number,
-  expand: string,
+  params: any,
   callback: (data: any) => void
 ) => {
   try {
-    const response = await getMeta(id, expand);
+
+    const response = await getMeta(id, params);
     console.log("response:", response);
     callback(response.data);
   } catch (error) {

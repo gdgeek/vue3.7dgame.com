@@ -70,12 +70,12 @@ export const putMetaCode = (id: number, data: MetaCode) => {
     method: "put",
   });
 };
-export const getMeta = (id: number, expand = "") => {
+export const getMeta = (id: number, params = {}) => {
   return request<metaInfo>({
     url: path.join(
       "v1",
       "metas",
-      `${id.toString()}${qs.stringify({ expand: expand }, true)}`
+      `${id.toString()}${qs.stringify(params, true)}`
     ),
     method: "get",
   });

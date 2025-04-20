@@ -1,5 +1,6 @@
 <template>
   <div class="verse-view">
+
     <!-- <event-dialog
       v-if="item"
       :node="JSON.parse(item.events!)"
@@ -8,7 +9,7 @@
       @on-submit="onSubmit"
       ref="dialog"
     ></event-dialog>-->
-    <resource-dialog @selected="selected" ref="resourceDialog"></resource-dialog>
+    <resource-dialog :multiple="false" @selected="selected" ref="resourceDialog"></resource-dialog>
     <br />
     <el-row :gutter="20" style="margin: 0px 18px 0">
       <el-col :sm="16">
@@ -84,16 +85,21 @@
     <!-- 选择图片方式的对话框 -->
     <el-dialog v-model="imageSelectDialogVisible" :title="$t('meta.metaEdit.selectImageMethod')" width="30%"
       align-center>
-      <div style="display: flex; justify-content: space-around; margin: 20px 0;">
-        <el-button type="primary" @click="openResourceDialog">
-          {{ $t("meta.metaEdit.selectFromResource") }}
-        </el-button>
-        <el-upload action="" :auto-upload="false" :show-file-list="false" :on-change="handleLocalUpload"
-          accept="image/jpeg,image/gif,image/png,image/bmp">
-          <el-button type="success">
-            {{ $t("meta.metaEdit.uploadLocal") }}
+      <div style="display: flex; justify-content: space-around; margin: 10px 0;">
+        <el-button-group>
+          <el-button type="primary" @click="openResourceDialog">
+            {{ $t("meta.metaEdit.selectFromResource") }}
           </el-button>
-        </el-upload>
+          <el-button type="success">
+            <el-upload action="" :auto-upload="false" :show-file-list="false" :on-change="handleLocalUpload"
+              accept="image/jpeg,image/gif,image/png,image/bmp">
+
+              {{ $t("meta.metaEdit.uploadLocal") }}
+
+            </el-upload>
+          </el-button>
+        </el-button-group>
+
       </div>
     </el-dialog>
   </div>
@@ -197,10 +203,11 @@ const refresh = async () => {
   item.value = data;
 };
 
-const getItem = async (id: number, expand: any) => {
+const getItem = async (id: number, params: any) => {
+
   return new Promise<metaInfo>((resolve, reject) => {
     try {
-      emit("getItem", id, expand, (data: metaInfo) => {
+      emit("getItem", id, params, (data: metaInfo) => {
         resolve(data);
       });
     } catch (e) {

@@ -50,7 +50,7 @@
                 <div class="clearfix">
                   <div class="demo-button-style">
                     <el-checkbox-group v-if="mode !== 'replace'" v-model="selectedIds" size="small">
-                      <el-checkbox-button :value="item.id">
+                      <el-checkbox-button :value="item.id" v-if="multiple">
                         {{ $t("meta.ResourceDialog.select") }}
                       </el-checkbox-button>
                       <el-checkbox-button @click="doSelect(item)">
@@ -85,8 +85,8 @@
             <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
               <el-button-group>
                 <template v-if="mode !== 'replace'">
-                  <el-button size="small" :disabled="selectedIds.length == 0"
-                    @click="doBatchSelect()">{{ $t("meta.ResourceDialog.putAllIn") }}</el-button>
+                  <el-button size="small" :disabled="selectedIds.length == 0" @click="doBatchSelect()">{{
+                    $t("meta.ResourceDialog.putAllIn") }}</el-button>
                   <el-button size="small" :disabled="selectedIds.length == 0" @click="doEmpty()">{{
                     $t("meta.ResourceDialog.empty") }}</el-button>
                 </template>
@@ -122,6 +122,15 @@ type ViewCard = {
   [attr: string]: any;
 };
 
+
+const props = defineProps({
+
+  multiple: {
+    type: Boolean,
+    default: true,
+  },
+
+});
 type ActiveState = {
   items: any[];
   sorted: string;

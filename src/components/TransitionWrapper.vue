@@ -1,10 +1,15 @@
 <template>
-  <div class="transition-wrapper" :class="{ 'leaving': isLeaving, 'entering': isEntering }">
+  <div>
     <slot></slot>
   </div>
+  <!--
+  <div class="transition-wrapper" :class="{ 'leaving': isLeaving, 'entering': isEntering }">
+    <slot></slot>
+  </div>-->
 </template>
 
 <script setup lang="ts">
+/*
 import { ref, onMounted } from 'vue';
 
 const props = defineProps({
@@ -27,6 +32,7 @@ defineExpose({
   isLeaving,
   isEntering
 });
+*/
 </script>
 
 <style scoped lang="scss">
