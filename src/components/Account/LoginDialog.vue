@@ -1,55 +1,28 @@
 <template>
-  <el-dialog v-model="dialogVisible" :title="title" width="420px" destroy-on-close center @closed="handleDialogClosed"
+  <el-dialog v-model="dialogVisible" width="420px" destroy-on-close center @closed="handleDialogClosed"
     class="login-dialog" :class="{ 'dark-theme': isDark }">
     <div class="login-container">
       <!-- 顶部标题与图标 -->
       <div class="login-header">
         <img src="/media/image/logo.gif" alt="Logo" class="login-logo" />
-        <h2 class="login-title">不加班AR编程平台</h2>
+        <h2 class="login-title">不加班AR创造平台</h2>
       </div>
 
-      <!-- 登录表单 -->
-      <el-tabs v-model="activeTab" class="login-tabs" @tab-click="handleTabClick">
-        <el-tab-pane name="account-register" class="tab-item">
-          <template #label>
-            <div class="tab-label">
-              <el-icon>
-                <UserFilled v-if="!isRegisterMode" />
-                <EditPen v-else />
-              </el-icon>
-              <span>{{ isRegisterMode ? '账号注册' : '账号登录' }}</span>
-            </div>
-          </template>
-        </el-tab-pane>
-        <el-tab-pane name="wechat" class="tab-item">
-          <template #label>
-            <div class="tab-label">
-              <el-icon>
-                <ChatRound />
-              </el-icon>
-              <span>微信登录</span>
-            </div>
-          </template>
-        </el-tab-pane>
-      </el-tabs>
+
 
       <!-- 内容区域 -->
       <div class="login-content">
         <transition name="fade" mode="out-in">
-          <div v-if="activeTab === 'account-register' && !isRegisterMode" class="account-login">
+          <div>
             <NamePassword @login-success="handleLoginSuccess" @switch-to-register="toggleRegisterMode" />
-          </div>
-          <div v-else-if="activeTab === 'account-register' && isRegisterMode" class="account-register">
-            <RegisterForm @register-success="handleLoginSuccess" @back-to-login="toggleRegisterMode" />
-          </div>
-          <div v-else class="wechat-login">
+            <br />
             <Wechat />
-            <div class="wechat-tips">
-              <p>扫码后自动注册并登录</p>
-              <p>便捷、安全的登录方式</p>
-            </div>
+
           </div>
+
         </transition>
+
+
       </div>
 
       <!-- 底部协议 -->

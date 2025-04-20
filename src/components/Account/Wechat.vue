@@ -4,10 +4,10 @@
       <el-icon class="wechat-icon">
         <ChatRound />
       </el-icon>
-      <span>微信扫码登录</span>
+      <span>微信扫码注册/登录</span>
     </el-button>
 
-    <el-dialog v-model="dialogVisible" title="微信扫码登录" width="340px" class="qrcode-dialog"
+    <el-dialog v-model="dialogVisible" title="微信扫码注册/登录" width="340px" class="qrcode-dialog"
       :class="{ 'dark-theme': isDark }" :show-close="true" align-center @close="close">
       <div class="qrcode-container">
         <div class="qrcode-wrapper">
@@ -20,8 +20,8 @@
         </div>
 
         <div class="qrcode-tips">
-          <p class="main-tip">打开微信，扫一扫登录</p>
-          <p class="sub-tip">扫码后自动注册并登录</p>
+          <p class="main-tip">打开微信，扫一扫注册/登录</p>
+          <p class="sub-tip">扫码后自动注册或者登录</p>
         </div>
 
         <div class="loading-status" v-if="isScanning">

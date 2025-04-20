@@ -36,7 +36,7 @@
       <!-- 侧边栏顶部 -->
       <div class="sidebar-header">
         <img src="/media/image/logo.gif" alt="Logo" class="sidebar-logo" />
-        <span class="sidebar-company-name">不加班AR编程平台</span>
+        <span class="sidebar-company-name">不加班AR创造平台</span>
       </div>
       <div class="sidebar-items">
         <div class="theme-switch-mobile">
@@ -200,6 +200,7 @@ const select = (item: any) => {
 
   if (item.path && (item.path.startsWith('http://') || item.path.startsWith('https://'))) {
     // 使用 window.open 在新窗口/标签页中打开外部链接
+    el - mesl - mes
     window.open(item.path, '_blank');
   } else {
     // 内部路由跳转

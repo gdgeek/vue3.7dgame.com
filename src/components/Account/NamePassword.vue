@@ -1,44 +1,44 @@
 <template>
   <div class="name-password-form" :class="{ 'dark-theme': isDark }" v-loading="loading">
-    <el-form ref="formRef" class="login-form" :rules="rules" :model="form" label-position="top">
-      <el-form-item :label="$t('login.username')" prop="username" class="form-item">
-        <el-input v-model="form.username" placeholder="请输入用户名/邮箱" class="custom-input">
-          <template #prefix>
-            <el-icon class="input-icon">
-              <UserFilled />
-            </el-icon>
-          </template>
-        </el-input>
-      </el-form-item>
+    <el-card class="login-card" :body-style="{ padding: '20px' }">
 
-      <el-form-item :label="$t('login.password')" prop="password" class="form-item">
-        <el-input v-model="form.password" type="password" placeholder="请输入密码" class="custom-input" show-password>
-          <template #prefix>
-            <el-icon class="input-icon">
-              <Lock />
-            </el-icon>
-          </template>
-        </el-input>
-      </el-form-item>
+      <el-form ref="formRef" class="login-form" :rules="rules" :model="form" label-position="top">
+        <el-form-item :label="''" prop="username" class="form-item">
+          <el-input v-model="form.username" placeholder="请输入用户名/邮箱" class="custom-input">
+            <template #prefix>
+              <el-icon class="input-icon">
+                <UserFilled />
+              </el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
 
-      <!-- 记住我和忘记密码 -->
-      <div class="login-options">
-        <el-checkbox v-model="rememberMe" label="记住我" class="remember-me" />
-        <a class="forgot-password" href="#" @click.prevent="handleForgotPassword">忘记密码?</a>
-      </div>
+        <el-form-item :label="''" prop="password" class="form-item">
+          <el-input v-model="form.password" type="password" placeholder="请输入密码" class="custom-input" show-password>
+            <template #prefix>
+              <el-icon class="input-icon">
+                <Lock />
+              </el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
 
-      <el-form-item class="login-button-item">
-        <el-button class="login-button" type="primary" @click="submit" :loading="loading">
-          {{ $t("login.login") }}
-        </el-button>
-      </el-form-item>
+        <!-- 记住我和忘记密码
+        <div class="login-options">
+          <el-checkbox v-model="rememberMe" label="记住我" class="remember-me" />
+          <a class="forgot-password" href="#" @click.prevent="handleForgotPassword">忘记密码?</a>
+  </div>
+  -->
 
-      <!-- 注册新账号 -->
-      <div class="register-link">
-        <span>还没有账号?</span>
-        <a href="#" @click.prevent="switchToRegister">立即注册</a>
-      </div>
-    </el-form>
+        <el-form-item class="login-button-item">
+          <el-button class="login-button" type="primary" @click="submit" :loading="loading">
+            {{ $t("login.login") }}
+          </el-button>
+        </el-form-item>
+
+
+      </el-form>
+    </el-card>
   </div>
 </template>
 

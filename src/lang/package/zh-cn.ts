@@ -87,7 +87,7 @@ export default {
   // 登录页面国际化
   login: {
     appleLoginFail: "苹果登录失败",
-    title: "不加班AR编程平台",
+    title: "不加班AR创造平台",
     register: "平台注册/登录",
     h1: "欢迎！",
     h4: "准备好出发了么？",
