@@ -200,7 +200,7 @@ const select = (item: any) => {
 
   if (item.path && (item.path.startsWith('http://') || item.path.startsWith('https://'))) {
     // 使用 window.open 在新窗口/标签页中打开外部链接
-    el - mesl - mes
+
     window.open(item.path, '_blank');
   } else {
     // 内部路由跳转
