@@ -16,13 +16,13 @@
             <el-progress :percentage="percentage"></el-progress>
           </el-card>
           <br />
-          <!-- 创建虚拟世界按钮 -->
+          <!-- 创建虚拟世界按钮
           <el-card v-loading="false" class="box-card">
             <el-button style="width: 100%" type="primary" size="small" @click="createVerse">
               <font-awesome-icon icon="plus"></font-awesome-icon>
               &nbsp;{{ $t("voxel.view.titleStatement") }}
             </el-button>
-          </el-card>
+          </el-card> -->
           <br />
         </el-col>
 

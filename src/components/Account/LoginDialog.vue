@@ -28,7 +28,7 @@
       <!-- 底部协议 -->
       <div class="login-footer">
         <p class="agreement-text">
-          登录即表示您同意
+          注册或登录即表示您同意
           <a href="#" @click.prevent="openAgreement('terms')">服务条款</a>
           和
           <a href="#" @click.prevent="openAgreement('privacy')">隐私政策</a>

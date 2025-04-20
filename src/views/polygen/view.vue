@@ -21,13 +21,14 @@
             </div>
           </el-card>
           <br />
-
+          <!--
           <el-card v-loading="expire" class="box-card">
             <el-button style="width: 100%" type="primary" size="small" @click="createVerse">
               <font-awesome-icon icon="plus"></font-awesome-icon>
               &nbsp;{{ $t("polygen.view.titleStatement") }}
             </el-button>
           </el-card>
+          -->
           <br />
 
 
