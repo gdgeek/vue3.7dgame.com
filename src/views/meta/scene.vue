@@ -282,6 +282,10 @@ const handleMessage = async (e: MessageEvent) => {
   switch (action) {
     case "save-meta":
       saveMeta(data);
+      ElMessage({
+        type: "success",
+        message: "储存完成",
+      });
       break;
 
     case "save-meta-none":

@@ -224,7 +224,7 @@ const releaseVerse = async (data: any) => {
     );
 
     await takePhoto(id.value);
-  
+
     ElMessage.success(t("verse.page.list.releaseConfirm.success"));
   } catch {
     ElMessage.info(t("verse.page.list.releaseConfirm.info"));
@@ -259,9 +259,14 @@ const handleMessage = async (e: MessageEvent) => {
       break;
 
     case "save-verse":
+
+      ElMessage({
+        type: "success",
+        message: "储存完成",
+      });
       saveVerse(data);
       break;
-    
+
     case "release-verse":
       releaseVerse(data);
       break;
