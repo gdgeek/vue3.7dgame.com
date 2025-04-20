@@ -7,7 +7,7 @@
         </el-icon>
       </el-button>
     </div>
-    <Document :post-id="id" :category="true" category-path="/web/news/category"></Document>
+    <Document :post-id="id" :category="true" category-path="/web/category"></Document>
   </el-card>
 </template>
 

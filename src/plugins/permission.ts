@@ -27,6 +27,7 @@ export function setupPermission() {
     "/web/news/category",
     "/web/bbs",
     "/web/docment",
+    "/web/category",
     "/web/home",
     "/web/rokid",
     "/web/index",

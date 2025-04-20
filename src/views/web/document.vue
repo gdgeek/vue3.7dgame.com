@@ -8,7 +8,7 @@
     <el-card id="news-detail-content">
 
 
-      <Document :post-id="id" :category="true" category-path="/web/news/category"></Document>
+      <Document :post-id="id" :category="true" category-path="/web/category"></Document>
     </el-card>
   </el-card>
 </template>
