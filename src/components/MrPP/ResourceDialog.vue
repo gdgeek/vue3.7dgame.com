@@ -85,9 +85,10 @@
             <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
               <el-button-group>
                 <template v-if="mode !== 'replace'">
-                  <el-button size="small" :disabled="selectedIds.length == 0" @click="doBatchSelect()">{{
-                    $t("meta.ResourceDialog.putAllIn") }}</el-button>
-                  <el-button size="small" :disabled="selectedIds.length == 0" @click="doEmpty()">{{
+                  <el-button v-if="multiple" size="small" :disabled="selectedIds.length == 0"
+                    @click="doBatchSelect()">{{
+                      $t("meta.ResourceDialog.putAllIn") }}</el-button>
+                  <el-button v-if="multiple" size="small" :disabled="selectedIds.length == 0" @click="doEmpty()">{{
                     $t("meta.ResourceDialog.empty") }}</el-button>
                 </template>
                 <el-button size="small" @click="dialogVisible = false">
