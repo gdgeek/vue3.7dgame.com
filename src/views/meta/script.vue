@@ -7,7 +7,7 @@
             <div v-if="meta" class="clearfix">
               <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
                 meta.title
-                }}</el-link>
+              }}</el-link>
               /【{{ $t("meta.script.title") }}】
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
               <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
@@ -72,7 +72,7 @@
                             <pre>
                     <code :class="currentCodeType">{{
                       currentCode
-                    }}</code>
+                      }}</code>
                   </pre>
                           </div>
                         </div>
@@ -673,9 +673,9 @@ onMounted(async () => {
 
   try {
     loading.value = true;
-    const response = await getMeta(id.value, "cyber,event,share,metaCode");
-    // const response = await getMeta(894, "cyber,event,share,metaCode");
-    // const response = await getMeta(889, "cyber,event,share,metaCode");
+    const response = await getMeta(id.value, { expand: "cyber,event,share,metaCode" });
+    // const response = await getMeta(894, { expand: "cyber,event,share,metaCode" });
+    // const response = await getMeta(889, { expand: "cyber,event,share,metaCode" });
     console.log("response数据", response);
 
     // 用递归处理层级嵌套
