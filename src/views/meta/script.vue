@@ -543,10 +543,24 @@ const testPoint = (data: any, typeList: string[]) => {
 
   if (isValidType) {
     const animations = data.parameters?.animations ?? null;
+    
+    const isPolygen = data.type.toLowerCase() === "polygen";
+
+    // 给Polygen，传递moved属性
+    let hasMoved = false;
+    if (isPolygen && data.children && data.children.components) {
+      hasMoved = data.children.components.some(
+        (component: any) => component.type === "Moved"
+      );
+    }
+
     return {
       uuid: data.parameters.uuid,
       name: data.parameters.name ?? null,
-      ...(data.type.toLowerCase() === "polygen" ? { animations } : {}), // 如果类型为 Polygen，加入 animations 属性
+      ...(isPolygen ? {
+        animations, // 给Polygen，传递animations属性
+        moved: hasMoved 
+      } : {}),
     };
   }
 
