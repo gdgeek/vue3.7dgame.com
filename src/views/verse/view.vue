@@ -30,8 +30,8 @@
             </template>
 
             <div class="box-item">
-              <el-image fit="contain" style="width: 100%; height: 300px"
-                :src="verse.image ? verse.image.url : ''"></el-image>
+              <ImageSelector :imageUrl="verse.image ? verse.image.url : ''" :itemId="verse.id"
+                @image-selected="handleImageSelected" @image-upload-success="handleImageUploadSuccess" />
             </div>
           </el-card>
 
@@ -87,19 +87,20 @@
 
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'; // 确保引入 ref
-// 组件导入
+import { ref, computed } from 'vue';
 import Tags from "@/components/Tags.vue";
 import Reply from "@/components/MrPP/MrPPVerse/Reply.vue";
 import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
-import { getVerse, VerseData } from "@/api/v1/verse";
+import { getVerse, putVerse, VerseData } from "@/api/v1/verse";
 import { postVerseTags, removeVerseTags } from "@/api/v1/verse-tags";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/store/modules/user";
 import { useAbility } from "@casl/vue";
 import { useI18n } from "vue-i18n";
+import ImageSelector from "@/components/MrPP/ImageSelector.vue";
+
 
 const route = useRoute();
 const router = useRouter();
@@ -107,7 +108,6 @@ const userStore = useUserStore();
 const ability = useAbility();
 const can = ability.can.bind(ability);
 const { t } = useI18n();
-
 
 const dialog = ref(false);
 const verse = ref<VerseData | null>(null);
@@ -127,7 +127,6 @@ const refresh = async () => {
     console.error("Failed to fetch verse data:", error);
     return;
   }
-
 };
 
 const deleted = () => {
@@ -136,6 +135,57 @@ const deleted = () => {
 
 const changed = () => {
   refresh();
+};
+
+// 处理从资源库选择的图片
+interface ImageUpdateEvent {
+  imageId: number;
+  itemId: number;
+}
+
+const handleImageSelected = async (event: ImageUpdateEvent) => {
+  if (verse.value && verse.value.id === event.itemId) {
+    try {
+      // 创建更新对象，只包含需要更新的字段
+      const updateData = {
+        id: verse.value.id,
+        name: verse.value.name,
+        description: verse.value.description,
+        uuid: verse.value.uuid,
+        image_id: event.imageId
+      };
+
+      await putVerse(verse.value.id, updateData);
+      ElMessage.success(t('verse.view.image.updateSuccess'));
+      await refresh();
+    } catch (error) {
+      console.error("Failed to update verse image:", error);
+      ElMessage.error(t('verse.view.image.updateError'));
+    }
+  }
+};
+
+// 处理本地上传的图片
+const handleImageUploadSuccess = async (event: ImageUpdateEvent) => {
+  if (verse.value && verse.value.id === event.itemId) {
+    try {
+      // 创建更新对象，只包含需要更新的字段
+      const updateData = {
+        id: verse.value.id,
+        name: verse.value.name,
+        description: verse.value.description,
+        uuid: verse.value.uuid,
+        image_id: event.imageId
+      };
+
+      await putVerse(verse.value.id, updateData);
+      ElMessage.success(t('verse.view.image.updateSuccess'));
+      await refresh();
+    } catch (error) {
+      console.error("Failed to update verse image:", error);
+      ElMessage.error(t('verse.view.image.updateError'));
+    }
+  }
 };
 
 const removeTags = async (tags: number) => {

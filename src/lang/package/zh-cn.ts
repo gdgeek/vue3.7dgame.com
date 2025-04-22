@@ -670,6 +670,10 @@ export default {
       handlerError: "获取文件处理器失败",
       uploadFailed: "上传图片失败",
       saveFailed: "保存图片信息失败",
+      image: {
+        updateSuccess: "图片更新成功",
+        updateError: "图片更新失败",
+      },
     },
     scene: {
       error: "没有场景编辑器",
@@ -1081,6 +1085,10 @@ export default {
           info: "已放弃对未保存的更改",
         },
       },
+      image: {
+        updateSuccess: "图片更新成功",
+        updateError: "图片更新失败",
+      },
     },
   },
   // 管理部分国际化
@@ -1343,5 +1351,17 @@ export default {
     nameRequired: "名称不能为空",
     noText: "请输入文本",
     noAudio: "请先合成语音",
+  },
+  // 图片选择器组件
+  imageSelector: {
+    selectImageMethod: "选择图片方式",
+    selectFromResource: "从资源库选择",
+    uploadLocal: "本地上传",
+    uploadError: "上传文件出错",
+    invalidImageType: "上传图片只能是 JPG/PNG/BMP/GIF 格式!",
+    imageTooLarge: "上传图片大小不能超过 2MB!",
+    handlerError: "获取文件处理器失败",
+    uploadFailed: "上传失败",
+    saveFailed: "保存图片信息失败",
   },
 };
