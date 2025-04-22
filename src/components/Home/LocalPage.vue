@@ -31,7 +31,7 @@ const ip = computed(() => environment.ip);
 
 // Define onResize function at the top level
 const onResize = () => {
-  size.value = Math.min(500, window.innerWidth * 0.8 - 100);
+  size.value = window.innerWidth * 0.5 - 100;
 };
 
 onMounted(() => {

@@ -13,7 +13,7 @@
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">{{
           $t("verse.page.list.toolbar.qrcode.cancel")
-          }}</el-button>
+        }}</el-button>
       </span>
     </template>
   </el-dialog>

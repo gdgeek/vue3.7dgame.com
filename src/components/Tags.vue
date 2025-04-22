@@ -10,6 +10,8 @@
       placeholder="添加标签" style="width:100px" />
 
 
+    <el-select-v2 v-if="props.editable" @change="handleChange" v-model="value" size="small" :options="options"
+      placeholder="设置" style="width:100px" />
   </div>
 
 
@@ -24,6 +26,7 @@ import type { TagProps } from 'element-plus'
 import { id } from 'element-plus/es/locale'
 
 const classify: Ref<null | []> = ref(null)
+const status: Ref<null | []> = ref(null)
 const props = defineProps({
   verseTags: {
     type: Array,
@@ -37,7 +40,6 @@ const props = defineProps({
 
 const emit = defineEmits(['add', 'remove'])
 const value = ref()
-const status = ref()
 interface TagsItem {
   name: string
   type: TagProps['type']
@@ -93,6 +95,8 @@ onMounted(() => {
   getTags().then(res => {
     classify.value = res.data
   })
-
+  getTags('Status').then(res => {
+    status.value = res.data
+  })
 })
 </script>

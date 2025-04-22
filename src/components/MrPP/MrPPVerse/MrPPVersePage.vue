@@ -14,7 +14,7 @@
               &nbsp;
               <span class="hidden-sm-and-down">{{
                 $t("verse.page.title")
-                }}</span>
+              }}</span>
             </el-button>
           </el-button-group>
         </MrPPHeader>
@@ -86,7 +86,7 @@ const submitCreate = async (form: any, imageId: number | null) => {
   }
   try {
     const response = await postVerse(data);
-    router.push({ path: "/verse/scene", query: { id: response.data.id } });
+    router.push({ path: "/verse/view", query: { id: response.data.id } });
   } catch (error) {
     console.error(error);
   }

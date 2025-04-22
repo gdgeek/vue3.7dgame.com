@@ -16,7 +16,7 @@
         <h1 class="hero-title">
           <span class="gradient-text">不加班AR创造平台</span>
         </h1>
-        <p class="hero-subtitle">让创意在AR设备中绽放，无需加班即可完成！</p>
+        <p class="hero-subtitle">让每个人都可以快乐的创造世界！</p>
         <div class="hero-cta">
           <el-button type="primary" style="width:150px" size="large" @click="openLoginDialog">
             开始创建
