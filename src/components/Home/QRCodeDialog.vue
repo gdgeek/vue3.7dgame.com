@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-dialog v-model="dialogVisible" title="登陆码" width="50%" align-center>
-      {{ value }}
+
       <div class="qrcode-container">
         <qrcode-vue :value="value" :size="size" level="H"></qrcode-vue>
         <p class="qrcode-tip">请使用手机扫描二维码登录</p>
@@ -14,7 +14,7 @@
 
 import Token from "@/store/modules/token";
 import QrcodeVue from "qrcode.vue";
-const dialogVisible = ref(true);
+const dialogVisible = ref(false);
 const size = ref<number>(400);
 
 const openDialog = () => {

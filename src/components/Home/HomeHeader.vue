@@ -20,7 +20,7 @@
         <div :class="['home-header-button', { mobile: isMobile }]">
           <el-button size="small" type="primary" @click="gotoEdit">{{
             $t("homepage.edit.title")
-            }}</el-button>
+          }}</el-button>
         </div>
       </el-col>
     </el-row>
