@@ -677,6 +677,10 @@ export default {
       handlerError: "ファイルハンドラの取得に失敗しました",
       uploadFailed: "画像のアップロードに失敗しました",
       saveFailed: "画像情報の保存に失敗しました",
+      image: {
+        updateSuccess: "画像更新成功",
+        updateError: "画像更新に失敗しました",
+      },
     },
     scene: {
       error: "エディターがありません",
@@ -1091,6 +1095,10 @@ export default {
           info: "保存されていない変更は破棄されました",
         },
       },
+      image: {
+        updateSuccess: "画像が正常に更新されました",
+        updateError: "画像の更新に失敗しました",
+      },
     },
   },
   // 管理部分国际化
@@ -1356,5 +1364,17 @@ export default {
     nameRequired: "名前を空にすることはできません",
     noText: "テキストを入力してください",
     noAudio: "まず音声を合成してください",
+  },
+  // イメージセレクターコンポーネント
+  imageSelector: {
+    selectImageMethod: "画像選択方法",
+    selectFromResource: "リソースから選択",
+    uploadLocal: "ローカルからアップロード",
+    uploadError: "ファイルアップロードエラー",
+    invalidImageType: "アップロード画像はJPG/PNG/BMP/GIF形式のみ可能です！",
+    imageTooLarge: "アップロード画像サイズは2MBを超えることはできません！",
+    handlerError: "ファイルハンドラーの取得に失敗しました",
+    uploadFailed: "アップロードに失敗しました",
+    saveFailed: "画像情報の保存に失敗しました",
   },
 };

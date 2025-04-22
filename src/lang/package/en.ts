@@ -710,6 +710,10 @@ export default {
       handlerError: "Failed to get file handler",
       uploadFailed: "Failed to upload image",
       saveFailed: "Failed to save image information",
+      image: {
+        updateSuccess: "Image updated successfully",
+        updateError: "Failed to update image",
+      },
     },
     scene: {
       error: "No scene editor",
@@ -1129,6 +1133,10 @@ export default {
           info: "Unsaved changes have been discarded",
         },
       },
+      image: {
+        updateSuccess: "Image updated successfully",
+        updateError: "Failed to update image",
+      },
     },
   },
   // 管理部分国际化
@@ -1398,5 +1406,17 @@ export default {
     nameRequired: "Name cannot be empty",
     noText: "Please enter text",
     noAudio: "Please synthesize speech first",
+  },
+  // Image Selector Component
+  imageSelector: {
+    selectImageMethod: "Select Image Method",
+    selectFromResource: "Select from Resource",
+    uploadLocal: "Upload Local",
+    uploadError: "Upload file error",
+    invalidImageType: "Upload image can only be JPG/PNG/BMP/GIF format!",
+    imageTooLarge: "Upload image size cannot exceed 2MB!",
+    handlerError: "Failed to get file handler",
+    uploadFailed: "Upload failed",
+    saveFailed: "Failed to save image information",
   },
 };
