@@ -30,6 +30,12 @@ export function setupPermission() {
     "/web/home",
     "/web/rokid",
     "/web/index",
+    "/medical",
+    "/medical/index",
+    
+    "/medical/solutions",
+    "/medical/cases",
+    "/medical/about",
     "/site/register",
     "/site/logout",
     "/privacy-policy",

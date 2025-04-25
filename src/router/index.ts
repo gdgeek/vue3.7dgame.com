@@ -69,6 +69,35 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: "/medical",
+    component: () => import("@/views/medical/index.vue"),
+    redirect: "/medical/index",
+    meta: { hidden: true, private: true },
+    children: [
+      {
+        path: "/medical/index",
+        name: "MedicalIndex",
+        component: () => import("@/views/medical/home.vue"),
+      },
+      {
+        path: "/medical/ar-solutions",
+        name: "ARSolutions",
+        component: () => import("@/views/medical/components/ARSolutions.vue"),
+      },
+      {
+        path: "/medical/dental-cases",
+        name: "DentalCases",
+        component: () => import("@/views/medical/components/DentalCases.vue"),
+      },
+      {
+        path: "/medical/about",
+        name: "MedicalAbout",
+        component: () => import("@/views/medical/components/About.vue"),
+      },
+    ],
+  },
+
+  {
     path: "/site",
     // component: () => import("@/views/site/index.vue"),
     meta: { hidden: true, private: true },
