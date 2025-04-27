@@ -3,14 +3,8 @@
     <el-row :gutter="10">
       <el-col :md="14" :span="24">
         <div class="home-avatar-container">
-          <el-avatar
-            class="home-avatar-child"
-            icon="avatar"
-            :src="avatarUrl"
-            :size="100"
-            style="float: left"
-            @click="gotoEdit()"
-          ></el-avatar>
+          <el-avatar class="home-avatar-child" icon="avatar" :src="avatarUrl" :size="100" style="float: left"
+            @click="gotoEdit()"></el-avatar>
           <div>
             <div class="home-avatar-info">
               <h3 class="home-avatar-name">{{ greeting }} {{ name }}</h3>
@@ -26,7 +20,7 @@
         <div class="home-header-button">
           <el-button size="small" type="primary" @click="gotoEdit">{{
             $t("homepage.edit.title")
-          }}</el-button>
+            }}</el-button>
         </div>
       </el-col>
     </el-row>
@@ -36,6 +30,7 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/store/modules/user";
+
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -139,7 +134,8 @@ const gotoEdit = () => {
   left: 0%;
   width: 100px;
   height: 100px;
-  margin-top: -50px; /* Half this element's height */
+  margin-top: -50px;
+  /* Half this element's height */
   // margin-left: -50px; /* Half this element's height */
 }
 
