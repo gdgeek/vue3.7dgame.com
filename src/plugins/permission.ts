@@ -32,10 +32,8 @@ export function setupPermission() {
     "/web/index",
     "/medical",
     "/medical/index",
-    
-    "/medical/solutions",
-    "/medical/cases",
-    "/medical/about",
+    "/medical/ar-solutions",
+    "/medical/dental-cases",
     "/site/register",
     "/site/logout",
     "/privacy-policy",

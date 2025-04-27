@@ -89,11 +89,6 @@ const routes: RouteRecordRaw[] = [
         name: "DentalCases",
         component: () => import("@/views/medical/components/DentalCases.vue"),
       },
-      {
-        path: "/medical/about",
-        name: "MedicalAbout",
-        component: () => import("@/views/medical/components/About.vue"),
-      },
     ],
   },
 

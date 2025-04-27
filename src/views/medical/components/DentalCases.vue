@@ -1,117 +1,112 @@
 <template>
   <div class="dental-cases-section" :class="{ 'dark-theme': isDark }">
-    <div class="section-header" data-aos="fade-up">
-      <h2 class="section-title">AR牙科典型案例</h2>
-      <p class="section-subtitle">探索增强现实如何彻底改变传统牙科治疗体验</p>
-      <div class="section-divider"></div>
-    </div>
-
-    <!-- 核心价值展示 -->
-    <div class="value-proposition" data-aos="fade-up">
-      <div class="value-content">
-        <h3>为什么选择AR牙科技术？</h3>
-        <p>增强现实技术正在彻底改变牙科行业，通过直观可视化、精确定位和实时数据分析，为医生和患者创造前所未有的诊疗体验。</p>
-
-        <div class="value-metrics">
-          <div class="metric">
-            <div class="metric-value">98%</div>
-            <div class="metric-label">患者满意度</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value">40%</div>
-            <div class="metric-label">治疗时间缩短</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value">99.5%</div>
-            <div class="metric-label">治疗成功率</div>
-          </div>
-        </div>
+    <div class="section-container">
+      <!-- 标题区域 -->
+      <div class="section-header" data-aos="fade-up">
+        <h2 class="section-title">AR牙科应用</h2>
+        <div class="section-divider"></div>
+        <p class="section-subtitle">探索增强现实如何重塑现代牙科诊疗体验</p>
       </div>
 
-      <div class="value-image" data-aos="fade-left">
-        <img src="https://img.freepik.com/free-photo/dentist-explaining-dental-implant-patient_107420-65863.jpg"
-          alt="AR牙科技术" />
-        <div class="image-overlay">
-          <div class="play-button" @click="openVideoDialog">
-            <el-icon class="play-icon">
-              <VideoPlay />
-            </el-icon>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 案例展示 -->
-    <div class="cases-container">
-      <div class="case-tabs">
-        <el-tabs v-model="activeTab" class="demo-tabs" @tab-click="handleTabClick">
-          <el-tab-pane v-for="tab in caseTabs" :key="tab.name" :label="tab.label" :name="tab.name">
-            <div class="case-content" data-aos="fade-up">
-              <div class="case-image" :style="{ backgroundImage: `url(${tab.image})` }">
-                <div class="case-badge">{{ tab.badge }}</div>
-              </div>
-              <div class="case-details">
-                <h3 class="case-title">{{ tab.title }}</h3>
-                <p class="case-description">{{ tab.description }}</p>
-
-                <div class="case-highlights">
-                  <div v-for="(highlight, index) in tab.highlights" :key="index" class="highlight-item">
-                    <div class="highlight-icon">
-                      <el-icon>
-                        <component :is="highlight.icon" />
-                      </el-icon>
-                    </div>
-                    <div class="highlight-content">
-                      <h4>{{ highlight.title }}</h4>
-                      <p>{{ highlight.description }}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="case-testimonial" v-if="tab.testimonial">
-                  <div class="quote-icon">
-                    <el-icon>
-                      <ChatDotRound />
-                    </el-icon>
-                  </div>
-                  <blockquote>{{ tab.testimonial.content }}</blockquote>
-                  <div class="testimonial-author">
-                    <img :src="tab.testimonial.avatar" alt="作者头像" class="author-avatar" />
-                    <div class="author-info">
-                      <div class="author-name">{{ tab.testimonial.name }}</div>
-                      <div class="author-title">{{ tab.testimonial.title }}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <el-button type="primary" plain>查看详细案例</el-button>
-              </div>
+      <!-- 优势概览 -->
+      <div class="benefits-overview" data-aos="fade-up">
+        <div class="overview-image">
+          <img
+            src="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+            alt="AR牙科应用" />
+          <div class="image-overlay">
+            <div class="play-button" @click="openVideoDialog">
+              <el-icon>
+                <VideoPlay />
+              </el-icon>
             </div>
-          </el-tab-pane>
-        </el-tabs>
-      </div>
-    </div>
+          </div>
+        </div>
+        <div class="overview-content">
+          <h3>数字化牙科的未来</h3>
+          <p>增强现实技术正在彻底改变牙科行业，从精确诊断到治疗规划，从患者教育到手术导航，AR技术为牙科医生和患者带来前所未有的体验。</p>
 
-    <!-- 合作医院/诊所 -->
-    <div class="partners-section" data-aos="fade-up">
-      <h3 class="partners-title">合作伙伴与医疗机构</h3>
-      <p class="partners-subtitle">全国领先的牙科诊所和医院都在使用我们的AR技术</p>
-
-      <div class="partners-logos">
-        <div v-for="(partner, index) in partners" :key="index" class="partner-logo" data-aos="zoom-in"
-          :data-aos-delay="index * 100">
-          <img :src="partner.logo" :alt="partner.name" />
-          <div class="partner-name">{{ partner.name }}</div>
+          <div class="key-metrics">
+            <div class="metric">
+              <div class="metric-value">99.7%</div>
+              <div class="metric-label">植入精度</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">40%</div>
+              <div class="metric-label">时间节省</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">95%</div>
+              <div class="metric-label">患者满意度</div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- CTA区域 -->
-    <div class="cta-section" data-aos="fade-up">
-      <div class="cta-content">
+      <!-- 应用展示 -->
+      <div class="applications-section" data-aos="fade-up">
+        <h3 class="applications-title">主要应用场景</h3>
+
+        <div class="tabs-container">
+          <el-tabs v-model="activeTab" class="custom-tabs">
+            <el-tab-pane v-for="tab in caseTabs" :key="tab.name" :label="tab.label" :name="tab.name">
+              <div class="tab-content">
+                <div class="tab-image">
+                  <img :src="tab.image" :alt="tab.title" />
+                  <div class="tab-badge">{{ tab.badge }}</div>
+                </div>
+                <div class="tab-details">
+                  <h3>{{ tab.title }}</h3>
+                  <p>{{ tab.description }}</p>
+
+                  <div class="features-list">
+                    <div v-for="(highlight, index) in tab.highlights" :key="index" class="feature-item">
+                      <div class="feature-icon">
+                        <el-icon>
+                          <component :is="highlight.icon" />
+                        </el-icon>
+                      </div>
+                      <div>
+                        <h4>{{ highlight.title }}</h4>
+                        <p>{{ highlight.description }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="testimonial" v-if="tab.testimonial">
+                    <blockquote>{{ tab.testimonial.content }}</blockquote>
+                    <div class="testimonial-author">
+                      <img :src="tab.testimonial.avatar" alt="医生头像" />
+                      <div>
+                        <div class="author-name">{{ tab.testimonial.name }}</div>
+                        <div class="author-title">{{ tab.testimonial.title }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </el-tab-pane>
+          </el-tabs>
+        </div>
+      </div>
+
+      <!-- 合作伙伴 -->
+      <div class="partners-section" data-aos="fade-up">
+        <h3>合作伙伴</h3>
+        <div class="partners-grid">
+          <div v-for="(partner, index) in partners" :key="index" class="partner-item" data-aos="zoom-in"
+            :data-aos-delay="index * 50">
+            <img :src="partner.logo" :alt="partner.name" />
+            <span>{{ partner.name }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 咨询区域 -->
+      <div class="contact-section" data-aos="fade-up">
         <h3>想了解AR技术如何应用到您的牙科诊所？</h3>
-        <p>与我们联系，获取专业咨询和演示</p>
-        <el-button type="primary" size="large" @click="openLoginDialog">免费咨询</el-button>
+        <p>预约演示，探索AR技术如何提升您的诊疗效果</p>
+        <el-button type="primary" size="large" @click="openLoginDialog">预约咨询</el-button>
       </div>
     </div>
 
@@ -119,7 +114,7 @@
     <el-dialog v-model="videoDialogVisible" title="AR牙科技术演示" width="70%" :before-close="handleCloseVideo"
       destroy-on-close>
       <div class="video-container">
-        <iframe width="100%" height="500" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="AR牙科技术演示"
+        <iframe width="100%" height="500" src="https://www.bilibili.com/video/BV1Q5411K75v" title="AR牙科技术演示"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen>
@@ -140,9 +135,7 @@ import {
   TrendCharts,
   Timer,
   SetUp,
-  UserFilled,
-  Operation,
-  Notebook
+  Operation
 } from '@element-plus/icons-vue';
 
 // 获取主题设置
@@ -166,19 +159,16 @@ const handleCloseVideo = () => {
 
 // 案例选项卡
 const activeTab = ref('implant');
-const handleTabClick = (tab: any) => {
-  console.log('Tab clicked:', tab.props.name);
-};
 
 // 案例数据
 const caseTabs = [
   {
     name: 'implant',
-    label: '种植牙精准定位',
-    badge: '临床案例',
-    title: 'AR辅助种植牙手术精准定位系统',
-    description: '通过增强现实技术实现种植牙的高精度定位和实时手术导航，大幅提高种植成功率和患者满意度。',
-    image: 'https://img.freepik.com/free-photo/dentist-showing-patient-his-dental-prosthesis_1150-21581.jpg',
+    label: '种植牙导航',
+    badge: '精准医疗',
+    title: 'AR辅助种植牙精准定位系统',
+    description: '通过增强现实技术实现种植牙的高精度定位和实时手术导航，大幅提高种植成功率。',
+    image: 'https://images.unsplash.com/photo-1609840114035-3c981b782dfe?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
     highlights: [
       {
         icon: 'Aim',
@@ -197,72 +187,72 @@ const caseTabs = [
       }
     ],
     testimonial: {
-      content: '采用AR技术后，种植牙手术的精确度和效率有了质的飞跃。患者恢复时间缩短，术后并发症显著减少，临床效果非常理想。',
+      content: '采用AR技术后，种植牙手术的精确度和效率有了质的飞跃。患者恢复时间缩短，术后并发症显著减少。',
       name: '王医生',
-      title: '北京口腔医院种植科主任',
-      avatar: 'https://img.freepik.com/free-photo/portrait-smiling-handsome-male-doctor-man_171337-5055.jpg'
+      title: '口腔医院种植科主任',
+      avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-1.2.1&auto=format&fit=crop&w=90&q=80'
     }
   },
   {
     name: 'orthodontics',
-    label: '正畸治疗规划',
-    badge: '技术创新',
-    title: 'AR正畸治疗虚拟规划系统',
+    label: '正畸治疗',
+    badge: '个性化医疗',
+    title: 'AR正畸虚拟规划系统',
     description: '结合3D口腔扫描和AR可视化技术，为患者提供个性化正畸治疗方案，实时预览治疗效果。',
-    image: 'https://img.freepik.com/free-photo/dentist-showing-model-teeth-dental-braces_1150-19415.jpg',
+    image: 'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
     highlights: [
       {
-        icon: 'Notebook',
+        icon: 'TrendCharts',
         title: '个性化治疗规划',
         description: '基于患者口腔的精确3D模型，制定最佳个性化治疗方案。'
       },
       {
-        icon: 'UserFilled',
+        icon: 'SetUp',
         title: '虚拟效果预览',
         description: '通过AR技术，患者可以在治疗前预览整个治疗过程和最终效果。'
       },
       {
-        icon: 'TrendCharts',
-        title: '治疗进度实时监控',
+        icon: 'Trophy',
+        title: '治疗进度监控',
         description: '医生可以随时比对实际治疗进展与预期计划，及时调整治疗方案。'
       }
     ],
     testimonial: {
-      content: 'AR正畸技术让我的患者能清晰看到治疗前后的对比，大大提高了治疗接受度。同时实时监控功能也让我能更精确地掌控治疗进程。',
+      content: 'AR正畸技术让我的患者能清晰看到治疗前后的对比，大大提高了治疗接受度和满意度。',
       name: '张医生',
-      title: '上海市第九人民医院正畸科',
-      avatar: 'https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg'
+      title: '正畸科专家',
+      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-1.2.1&auto=format&fit=crop&w=90&q=80'
     }
   },
   {
-    name: 'patient-education',
-    label: '患者教育系统',
-    badge: '用户体验',
-    title: 'AR牙科患者教育交互系统',
+    name: 'education',
+    label: '患者教育',
+    badge: '交互体验',
+    title: 'AR牙科患者教育系统',
     description: '通过AR技术为患者提供直观、互动的口腔健康教育，增强患者理解和治疗依从性。',
-    image: 'https://img.freepik.com/free-photo/dentist-explaining-teeth-treatment-girl-dental-office_1303-21211.jpg',
+    image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
     highlights: [
       {
         icon: 'SetUp',
-        title: '互动式口腔结构展示',
+        title: '互动式口腔展示',
         description: '患者可以通过AR设备直观了解自己的口腔状况和治疗方案。'
+      },
+      {
+        icon: 'ChatDotRound',
+        title: '增强医患沟通',
+        description: '形象直观的AR展示大幅提高医患沟通效率和患者满意度。'
       },
       {
         icon: 'Trophy',
         title: '个性化护理指导',
         description: '根据患者具体情况，提供量身定制的口腔护理建议和演示。'
-      },
-      {
-        icon: 'ChatDotRound',
-        title: '提升医患沟通效率',
-        description: '形象直观的AR展示大幅提高医患沟通效率和患者满意度。'
       }
     ],
     testimonial: {
-      content: 'AR教育系统帮助我更有效地向患者解释复杂的治疗方案，患者能直观理解自己的口腔问题和解决方案，接受度明显提高。',
+      content: 'AR教育系统帮助我更有效地向患者解释复杂的治疗方案，患者能直观理解自己的口腔问题和解决方案。',
       name: '李医生',
-      title: '广州阳光口腔诊所院长',
-      avatar: 'https://img.freepik.com/free-photo/woman-doctor-with-co-workers-background_1301-2105.jpg'
+      title: '口腔诊所院长',
+      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?ixlib=rb-1.2.1&auto=format&fit=crop&w=90&q=80'
     }
   }
 ];
@@ -271,34 +261,26 @@ const caseTabs = [
 const partners = [
   {
     name: '北京口腔医院',
-    logo: 'https://img.freepik.com/free-vector/blue-medical-symbol-design_1017-30713.jpg'
+    logo: 'https://via.placeholder.com/100x60?text=北京口腔医院'
   },
   {
-    name: '上海交通大学附属第九人民医院',
-    logo: 'https://img.freepik.com/free-vector/hospital-logo-design-vector-medical-cross_53876-136743.jpg'
+    name: '上海九院',
+    logo: 'https://via.placeholder.com/100x60?text=上海九院'
   },
   {
     name: '广州中山大学附属口腔医院',
-    logo: 'https://img.freepik.com/free-vector/medical-center-hospital-sign-isolated-white-background-logo-clinic_93083-835.jpg'
+    logo: 'https://via.placeholder.com/100x60?text=中山口腔'
   },
   {
     name: '深圳爱康健口腔',
-    logo: 'https://img.freepik.com/free-vector/flat-design-dental-logo-template_23-2149720856.jpg'
-  },
-  {
-    name: '佳美口腔连锁',
-    logo: 'https://img.freepik.com/free-vector/hand-drawn-dental-logo-template_23-2149196284.jpg'
-  },
-  {
-    name: '瑞尔齿科',
-    logo: 'https://img.freepik.com/free-vector/flat-dental-care-logo-template_23-2149517943.jpg'
+    logo: 'https://via.placeholder.com/100x60?text=爱康健'
   }
 ];
 </script>
 
 <style scoped>
 .dental-cases-section {
-  padding: 100px 0;
+  padding: 90px 0;
   background-color: var(--el-bg-color);
   color: var(--el-text-color-primary);
 }
@@ -307,104 +289,69 @@ const partners = [
   background-color: var(--el-bg-color-darker, #1e1e24);
 }
 
+.section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* 标题样式 */
 .section-header {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 70px;
 }
 
 .section-title {
-  font-size: 2.8rem;
+  font-size: 3rem;
   font-weight: 700;
-  margin-bottom: 15px;
-  background: linear-gradient(90deg, #36d1dc, #5b86e5);
+  margin-bottom: 20px;
+  background: linear-gradient(90deg, #3a7bd5, #00d2ff);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
 }
 
-.section-subtitle {
-  font-size: 1.2rem;
-  color: var(--el-text-color-secondary);
-  max-width: 700px;
-  margin: 0 auto 20px;
-}
-
 .section-divider {
-  width: 80px;
+  width: 60px;
   height: 4px;
-  background: linear-gradient(90deg, #36d1dc, #5b86e5);
-  margin: 0 auto;
+  background: linear-gradient(90deg, #3a7bd5, #00d2ff);
+  margin: 0 auto 20px;
   border-radius: 2px;
 }
 
-/* 价值主张区域 */
-.value-proposition {
-  max-width: 1200px;
-  margin: 0 auto 80px;
-  padding: 0 20px;
+.section-subtitle {
+  font-size: 1.2rem;
+  color: var(--el-text-color-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* 优势概览样式 */
+.benefits-overview {
   display: flex;
+  gap: 60px;
+  margin-bottom: 80px;
   align-items: center;
-  gap: 50px;
 }
 
-.value-content {
-  flex: 1;
-}
-
-.value-content h3 {
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin-bottom: 20px;
-  color: var(--el-text-color-primary);
-}
-
-.value-content p {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: var(--el-text-color-secondary);
-  margin-bottom: 30px;
-}
-
-.value-metrics {
-  display: flex;
-  gap: 30px;
-}
-
-.metric {
-  text-align: center;
-}
-
-.metric-value {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--el-color-primary);
-  margin-bottom: 5px;
-}
-
-.metric-label {
-  font-size: 0.9rem;
-  color: var(--el-text-color-secondary);
-}
-
-.value-image {
+.overview-image {
   flex: 1;
   position: relative;
-  height: 400px;
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
-.value-image img {
+.overview-image img {
   width: 100%;
-  height: 100%;
+  height: 400px;
   object-fit: cover;
   display: block;
   transition: transform 0.5s ease;
 }
 
-.value-image:hover img {
+.overview-image:hover img {
   transform: scale(1.05);
 }
 
@@ -422,7 +369,7 @@ const partners = [
   transition: opacity 0.3s ease;
 }
 
-.value-image:hover .image-overlay {
+.overview-image:hover .image-overlay {
   opacity: 1;
 }
 
@@ -430,7 +377,7 @@ const partners = [
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background-color: rgba(var(--el-color-primary-rgb), 0.9);
+  background: rgba(var(--el-color-primary-rgb), 0.9);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -443,39 +390,97 @@ const partners = [
   transform: scale(1.1);
 }
 
-.play-icon {
+.play-button .el-icon {
   color: white;
   font-size: 30px;
 }
 
-/* 案例展示区域 */
-.cases-container {
-  max-width: 1200px;
-  margin: 0 auto 80px;
-  padding: 0 20px;
+.overview-content {
+  flex: 1;
 }
 
-.case-content {
+.overview-content h3 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--el-text-color-primary);
+}
+
+.overview-content p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--el-text-color-secondary);
+  margin-bottom: 30px;
+}
+
+.key-metrics {
+  display: flex;
+  gap: 40px;
+}
+
+.metric {
+  flex: 1;
+}
+
+.metric-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--el-color-primary);
+  margin-bottom: 5px;
+}
+
+.metric-label {
+  font-size: 0.9rem;
+  color: var(--el-text-color-secondary);
+  font-weight: 500;
+}
+
+/* 应用展示样式 */
+.applications-section {
+  margin-bottom: 80px;
+}
+
+.applications-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 40px;
+  text-align: center;
+  color: var(--el-text-color-primary);
+}
+
+.tabs-container {
+  background-color: var(--el-bg-color-overlay);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.tab-content {
   display: flex;
   gap: 40px;
   margin-top: 30px;
 }
 
-.case-image {
+.tab-image {
   flex: 1;
-  height: 450px;
-  border-radius: 16px;
-  background-size: cover;
-  background-position: center;
   position: relative;
+  border-radius: 16px;
+  overflow: hidden;
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
 
-.case-badge {
+.tab-image img {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  display: block;
+}
+
+.tab-badge {
   position: absolute;
   top: 20px;
   left: 20px;
-  background-color: var(--el-color-primary);
+  background: var(--el-color-primary);
   color: white;
   padding: 8px 16px;
   border-radius: 30px;
@@ -483,87 +488,71 @@ const partners = [
   font-weight: 600;
 }
 
-.case-details {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+.tab-details {
+  flex: 1.2;
 }
 
-.case-title {
+.tab-details h3 {
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 15px;
   color: var(--el-text-color-primary);
 }
 
-.case-description {
+.tab-details>p {
   font-size: 1.1rem;
   line-height: 1.6;
   color: var(--el-text-color-secondary);
-  margin-bottom: 25px;
-}
-
-.case-highlights {
   margin-bottom: 30px;
 }
 
-.highlight-item {
-  display: flex;
-  margin-bottom: 20px;
+.features-list {
+  margin-bottom: 30px;
 }
 
-.highlight-icon {
+.feature-item {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.feature-icon {
   width: 50px;
   height: 50px;
   border-radius: 12px;
-  background-color: var(--el-color-primary-light-9);
+  background: var(--el-color-primary-light-9);
   color: var(--el-color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  margin-right: 20px;
   flex-shrink: 0;
 }
 
-.highlight-content h4 {
-  font-size: 1.2rem;
+.feature-item h4 {
+  font-size: 1.1rem;
   font-weight: 600;
   margin: 0 0 5px;
   color: var(--el-text-color-primary);
 }
 
-.highlight-content p {
+.feature-item p {
   font-size: 0.95rem;
   line-height: 1.5;
   color: var(--el-text-color-secondary);
   margin: 0;
 }
 
-.case-testimonial {
-  background-color: var(--el-bg-color-overlay);
-  border-radius: 12px;
+.testimonial {
+  background: var(--el-bg-color);
+  border-radius: 16px;
   padding: 25px;
-  margin-bottom: 30px;
   position: relative;
+  margin-top: 40px;
+  border-left: 4px solid var(--el-color-primary);
 }
 
-.quote-icon {
-  position: absolute;
-  top: -15px;
-  left: 25px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: var(--el-color-success-light-8);
-  color: var(--el-color-success);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-}
-
-.case-testimonial blockquote {
+.testimonial blockquote {
   font-size: 1rem;
   line-height: 1.6;
   font-style: italic;
@@ -574,14 +563,14 @@ const partners = [
 .testimonial-author {
   display: flex;
   align-items: center;
+  gap: 15px;
 }
 
-.author-avatar {
+.testimonial-author img {
   width: 50px;
   height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 15px;
 }
 
 .author-name {
@@ -595,94 +584,74 @@ const partners = [
   color: var(--el-text-color-secondary);
 }
 
-/* 合作伙伴区域 */
+/* 合作伙伴样式 */
 .partners-section {
-  max-width: 1200px;
-  margin: 0 auto 80px;
-  padding: 50px 20px;
-  background-color: var(--el-bg-color-overlay);
-  border-radius: 20px;
+  margin-bottom: 80px;
   text-align: center;
 }
 
-.partners-title {
+.partners-section h3 {
   font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 10px;
-  color: var(--el-text-color-primary);
-}
-
-.partners-subtitle {
-  font-size: 1.1rem;
-  color: var(--el-text-color-secondary);
   margin-bottom: 40px;
 }
 
-.partners-logos {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+.partners-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 30px;
 }
 
-.partner-logo {
+.partner-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  gap: 10px;
   transition: transform 0.3s ease;
 }
 
-.partner-logo:hover {
+.partner-item:hover {
   transform: translateY(-10px);
 }
 
-.partner-logo img {
-  width: 100px;
-  height: 100px;
+.partner-item img {
+  height: 60px;
+  width: auto;
   object-fit: contain;
-  margin-bottom: 15px;
 }
 
-.partner-name {
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-  text-align: center;
+.partner-item span {
+  font-size: 0.9rem;
+  color: var(--el-text-color-secondary);
 }
 
-/* CTA区域 */
-.cta-section {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 60px 40px;
-  background: linear-gradient(135deg, var(--el-color-primary-light-8), var(--el-color-primary-light-7));
+/* 咨询区域样式 */
+.contact-section {
+  background: linear-gradient(135deg, #3a7bd5, #00d2ff);
   border-radius: 20px;
+  padding: 60px;
   text-align: center;
-}
-
-.dark-theme .cta-section {
-  background: linear-gradient(135deg, #1a2980, #26d0ce);
-}
-
-.cta-content h3 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 15px;
-  color: var(--el-text-color-primary);
-}
-
-.dark-theme .cta-content h3 {
   color: white;
 }
 
-.cta-content p {
-  font-size: 1.1rem;
-  color: var(--el-text-color-secondary);
-  margin-bottom: 30px;
+.dark-theme .contact-section {
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
 }
 
-.dark-theme .cta-content p {
-  color: rgba(255, 255, 255, 0.8);
+.contact-section h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.contact-section p {
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+  opacity: 0.9;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* 视频容器样式 */
@@ -690,7 +659,7 @@ const partners = [
   width: 100%;
   position: relative;
   padding-bottom: 56.25%;
-  /* 16:9比例 */
+  /* 16:9 */
 }
 
 .video-container iframe {
@@ -701,100 +670,68 @@ const partners = [
   height: 100%;
 }
 
-/* 响应式样式 */
+/* 响应式调整 */
 @media (max-width: 992px) {
-  .value-proposition {
+  .benefits-overview {
     flex-direction: column;
     gap: 40px;
   }
 
-  .value-content h3 {
-    font-size: 1.8rem;
-  }
-
-  .value-image {
-    width: 100%;
-    height: 350px;
-  }
-
-  .case-content {
+  .tab-content {
     flex-direction: column;
   }
 
-  .case-image {
-    width: 100%;
-    height: 350px;
+  .section-title {
+    font-size: 2.5rem;
   }
 
-  .partners-logos {
-    grid-template-columns: repeat(2, 1fr);
+  .overview-content h3 {
+    font-size: 2rem;
+  }
+
+  .contact-section {
+    padding: 40px 30px;
   }
 }
 
 @media (max-width: 768px) {
   .dental-cases-section {
-    padding: 70px 0;
+    padding: 60px 0;
   }
 
   .section-title {
     font-size: 2.2rem;
   }
 
-  .section-subtitle {
-    font-size: 1rem;
+  .overview-content h3 {
+    font-size: 1.8rem;
   }
 
-  .value-metrics {
+  .tab-details h3 {
+    font-size: 1.6rem;
+  }
+
+  .key-metrics {
     flex-direction: column;
     gap: 20px;
   }
 
-  .metric-value {
-    font-size: 2rem;
-  }
-
-  .case-title {
-    font-size: 1.5rem;
-  }
-
-  .case-description {
-    font-size: 1rem;
-  }
-
-  .highlight-item {
-    align-items: flex-start;
-  }
-
-  .cta-content h3 {
+  .contact-section h3 {
     font-size: 1.7rem;
-  }
-
-  .cta-content p {
-    font-size: 1rem;
   }
 }
 
 @media (max-width: 576px) {
-  .partners-logos {
-    grid-template-columns: 1fr;
+  .metric-value {
+    font-size: 2rem;
   }
 
-  .value-image {
-    height: 300px;
+  .tab-details>p {
+    font-size: 1rem;
   }
 
-  .case-image {
-    height: 300px;
-  }
-
-  .highlight-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-  }
-
-  .highlight-content h4 {
-    font-size: 1.1rem;
+  .partners-grid {
+    gap: 20px;
   }
 }
 </style>

@@ -9,9 +9,6 @@
       <DentalCases.default />
     </section>
 
-    <section id="status" ref="statusRef">
-      <About.default />
-    </section>
   </div>
 </template>
 
@@ -20,7 +17,6 @@ import "@/assets/font/font.css";
 import * as DentalCases from "./components/DentalCases.vue";
 import { useRouter, useRoute } from "vue-router";
 import * as ARSolutions from "./components/ARSolutions.vue";
-import * as About from "./components/About.vue";
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { useSettingsStore } from "@/store/modules/settings";

@@ -36,7 +36,7 @@
       <!-- 侧边栏顶部 -->
       <div class="sidebar-header">
         <img src="/media/image/logo.gif" alt="Logo" class="sidebar-logo" />
-        <span class="sidebar-company-name">不加班AR编程平台</span>
+        <span class="sidebar-company-name">不加班AR医疗平台</span>
       </div>
       <div class="sidebar-items">
         <div class="theme-switch-mobile">
@@ -83,9 +83,8 @@ const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 // 导航菜单项
 const navMenuItems = [
   { key: "home", label: "首页", path: "/medical/index" },
-  { key: "ar-solutions", label: "AR解决方案", path: "/medical/ar-solutions" },
-  { key: "dental-cases", label: "牙科案例", path: "/medical/dental-cases" },
-  { key: "about", label: "关于我们", path: "/medical/about" }
+  { key: "ar-solutions", label: "AR医疗创新", path: "/medical/ar-solutions" },
+  { key: "dental-cases", label: "AR牙科应用", path: "/medical/dental-cases" },
 ];
 const loginDialogRef = ref<any>(null);
 
