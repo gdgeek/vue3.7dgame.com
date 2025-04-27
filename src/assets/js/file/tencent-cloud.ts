@@ -132,7 +132,8 @@ const fileDownload = async (
   handler: FileHandler,
   dir = ''
 ): Promise<any> => {
-  const filename = path.join(dir, name + extension);
+  const ext = extension.startsWith('.') ? extension : `.${extension}`;
+  const filename = path.join(dir, name + ext);
 
   return new Promise<any>(async (resolve, reject) => {
     try {
@@ -161,7 +162,8 @@ const fileUpload = async (
   handler: FileHandler,
   dir = ''
 ): Promise<any> => {
-  const filename = path.join(dir, md5 + extension);
+  const ext = extension.startsWith('.') ? extension : `.${extension}`;
+  const filename = path.join(dir, md5 + ext);
 
 
   return new Promise<any>(async (resolve, reject) => {
@@ -189,11 +191,12 @@ const fileUpload = async (
 
 // 获取文件 URL
 const getUrl = (info: FileInfo, file: { md5: string; ext: string }, handler: FileHandler): string => {
+  const ext = file.ext.startsWith('.') ? file.ext : `.${file.ext}`;
   return handler.cos.getObjectUrl(
     {
       Bucket: info.bucket.bucket,
       Region: info.bucket.region,
-      Key: path.join(info.path, info.root, file.md5 + file.ext),
+      Key: path.join(info.path, info.root, file.md5 + ext),
       Expires: 60,
       Sign: true,
     },
@@ -205,7 +208,8 @@ const getUrl = (info: FileInfo, file: { md5: string; ext: string }, handler: Fil
 
 // 文件 URL
 const fileUrl = (md5: string, extension: string, handler: FileHandler, dir = ''): string => {
-  const filename = path.join(dir, md5 + extension);
+  const ext = extension.startsWith('.') ? extension : `.${extension}`;
+  const filename = path.join(dir, md5 + ext);
 
   return handler.cos.getObjectUrl(
     {
@@ -223,7 +227,8 @@ const fileUrl = (md5: string, extension: string, handler: FileHandler, dir = '')
 
 // 检查文件是否存在
 const fileHas = async (md5: string, extension: string, handler: FileHandler, dir = ''): Promise<boolean> => {
-  const filename = path.join(dir, md5 + extension);
+  const ext = extension.startsWith('.') ? extension : `.${extension}`;
+  const filename = path.join(dir, md5 + ext);
 
   return new Promise<boolean>(async (resolve, reject) => {
     try {

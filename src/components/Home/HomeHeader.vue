@@ -1,10 +1,14 @@
 <template>
   <div class="home-header">
+
+
     <el-row :gutter="10">
       <el-col :md="14" :span="24">
-        <div class="home-avatar-container">
-          <el-avatar class="home-avatar-child" icon="avatar" :src="avatarUrl" :size="100" style="float: left"
-            @click="gotoEdit()"></el-avatar>
+
+        <div :class="['home-avatar-container', { mobile: isMobile }]">
+          <el-avatar shape="square" class="home-avatar-child" icon="avatar" :src="avatarUrl" :size="100"
+            style="float: left" @click="showQRCode()"></el-avatar>
+
           <div>
             <div class="home-avatar-info">
               <h3 class="home-avatar-name">{{ greeting }} {{ name }}</h3>
@@ -17,7 +21,7 @@
       </el-col>
       <el-col :md="10" :span="24">
         <div class="hidden-sm-and-down hidden-box"></div>
-        <div class="home-header-button">
+        <div :class="['home-header-button', { mobile: isMobile }]">
           <el-button size="small" type="primary" @click="gotoEdit">{{
             $t("homepage.edit.title")
             }}</el-button>
@@ -25,22 +29,36 @@
       </el-col>
     </el-row>
   </div>
+
+  <QRCodeDialog ref="codeDialog" />
+
 </template>
 
 <script setup lang="ts">
+import QRCodeDialog from "./QRCodeDialog.vue";
+import LocalPage from "@/components/Home/LocalPage.vue";
+import QrcodeVue from "qrcode.vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/store/modules/user";
+import { useScreenStore } from "@/store";
 
+
+const codeDialog = ref<any>(null);
 
 const userStore = useUserStore();
 const router = useRouter();
 const { t } = useI18n();
+const screenStore = useScreenStore();
+const isMobile = computed(() => screenStore.isMobile);
 
 const name = computed(() => {
-  if (userStore.userInfo.data.nickname) {
-    return userStore.userInfo.data.nickname;
+  if (userStore.userInfo === null || userStore.userInfo.userData === null) {
+    return "";
+  }
+  if (userStore.userInfo.userData.nickname) {
+    return userStore.userInfo.userData.nickname;
   } else {
-    return userStore.userInfo.data.username;
+    return userStore.userInfo.userData.username;
   }
 });
 
@@ -59,26 +77,22 @@ const greeting = computed(() => {
 
 // 头像
 const avatarUrl = computed(() => {
-  if (
-    userStore.userInfo.data.avatar == null ||
-    typeof userStore.userInfo.data.avatar.url === "undefined" ||
-    null
-  ) {
+  if (!userStore?.userInfo?.userInfo) {
     return "";
-  } else {
-    return userStore.userInfo.data.avatar.url;
   }
+  return userStore.userInfo.userInfo.avatar?.url ?? "";
 });
 
 // 个人简介
 const textarea = computed(() => {
-  if (!userStore.userInfo.data.parsedInfo?.textarea) {
+  if (!userStore?.userInfo?.userInfo) {
     return "";
-  } else {
-    return userStore.userInfo.data.parsedInfo?.textarea;
   }
+  return userStore.userInfo.userInfo.info?.textarea ?? "";
 });
-
+const showQRCode = () => {
+  codeDialog.value.openDialog();
+}
 const gotoEdit = () => {
   router.push("/settings/edit");
 };
@@ -109,6 +123,10 @@ const gotoEdit = () => {
 .home-header-button {
   float: right;
   margin: 22px 50px 18px 0;
+
+  &.mobile {
+    margin: 20px 15px 18px 0;
+  }
 }
 
 .home-avatar-container {
@@ -120,6 +138,10 @@ const gotoEdit = () => {
   margin-top: 25px;
   margin-right: 50px;
   margin-left: 50px;
+
+  &.mobile {
+    margin-left: 15px;
+  }
 }
 
 .home-avatar-info {

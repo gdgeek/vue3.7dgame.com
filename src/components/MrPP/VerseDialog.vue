@@ -1,43 +1,19 @@
 <template>
   <div>
-    <el-dialog
-      v-model="dialogVisible"
-      width="95%"
-      height="95px"
-      :show-close="false"
-      @close="cancel"
-    >
+    <el-dialog v-model="dialogVisible" width="95%" height="95px" :show-close="false" @close="cancel">
       <template #header>
-        <mr-p-p-header
-          :sorted="active.sorted"
-          :searched="active.searched"
-          @search="search"
-          @sort="sort"
-        >
-          <el-tag
-            ><b>{{ $t("game.verseDialog.title") }}</b></el-tag
-          >
+        <mr-p-p-header :sorted="active.sorted" :searched="active.searched" @search="search" @sort="sort">
+          <el-tag><b>{{ $t("game.verseDialog.title") }}</b></el-tag>
         </mr-p-p-header>
         <el-divider content-position="left">
-          <el-tag
-            v-if="active.searched !== ''"
-            size="small"
-            closable
-            @close="clearSearched"
-          >
+          <el-tag v-if="active.searched !== ''" size="small" closable @close="clearSearched">
             {{ active.searched }}
           </el-tag>
         </el-divider>
       </template>
 
-      <waterfall
-        v-if="viewCards.length > 0"
-        :lazyload="true"
-        :width="230"
-        :list="viewCards"
-        :gutter="10"
-        :backgroundColor="'rgba(255, 255, 255, .05)'"
-      >
+      <waterfall v-if="viewCards.length > 0" :lazyload="true" :width="230" :list="viewCards" :gutter="10"
+        :backgroundColor="'rgba(255, 255, 255, .05)'">
         <template #default="{ item }">
           <el-card style="width: 220px" class="box-card">
             <template #header>
@@ -47,13 +23,10 @@
                     {{ title(item) }}
                   </b>
                 </span>
-                <img
-                  v-if="item.image"
-                  style="width: 100%; height: 180px"
-                  fit="contain"
-                  :src="item.image.url"
-                  lazy
-                />
+                <img v-if="!item.image" src="@/assets/image/none.png"
+                  style="width: 100%; height: auto; object-fit: contain" />
+                <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
+                </LazyImg>
                 <div style="width: 100%; text-align: center">
                   {{ convertToLocalTime(item.created_at) }}
                 </div>
@@ -77,15 +50,9 @@
       <template #footer>
         <el-row :gutter="0">
           <el-col :xs="16" :sm="16" :md="16" :lg="16" :xl="16">
-            <el-pagination
-              :current-page="active.pagination.current"
-              :page-count="active.pagination.count"
-              :page-size="active.pagination.size"
-              :total="active.pagination.total"
-              layout="prev, pager, next, jumper"
-              background
-              @current-change="handleCurrentChange"
-            ></el-pagination>
+            <el-pagination :current-page="active.pagination.current" :page-count="active.pagination.count"
+              :page-size="active.pagination.size" :total="active.pagination.total" layout="prev, pager, next, jumper"
+              background @current-change="handleCurrentChange"></el-pagination>
           </el-col>
           <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
             <el-button-group>
@@ -104,13 +71,13 @@
 </template>
 
 <script setup lang="ts">
-import { Waterfall } from "vue-waterfall-plugin-next";
+import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
 import { getVerses } from "@/api/v1/vp-guide";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { postMeta } from "@/api/v1/meta";
-import { convertToLocalTime } from "@/utils/dataChange";
+import { convertToLocalTime } from "@/utils/utilityFunctions";
 
 const dialogVisible = ref(false);
 const active = ref({
@@ -137,10 +104,12 @@ const open = () => {
 
 const refresh = async () => {
   const response = await getVerses(
-    active.value.sorted,
-    active.value.searched,
-    active.value.pagination.current,
-    "image"
+    {
+      sort: active.value.sorted,
+      search: active.value.searched,
+      page: active.value.pagination.current,
+      expand: "image",
+    }
   );
   active.value.items = response.data;
 };
@@ -181,7 +150,7 @@ const create = async () => {
     );
 
     const response = await postMeta({
-      title: name || "新建组件",
+      title: name || "新建实体",
       prefab: 0,
       uuid: uuidv4(),
     });

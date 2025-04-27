@@ -6,8 +6,6 @@
           @change="handleChange"
           v-model="form.language"
           filterable
-          allow-create
-          default-first-option
           :placeholder="$t('verse.view.form.placeholder1')"
           style="width: 120px"
         >
@@ -40,11 +38,11 @@
       <el-form-item>
         <el-button-group>
           <el-button size="small" type="primary" @click="submitForm"
-            ><el-icon style="margin-right: 5px"><Check></Check></el-icon
+            ><el-icon style="margin-right: 5px"> <Check></Check> </el-icon
             >{{ $t("verse.view.form.submit") }}</el-button
           >
           <el-button size="small" type="danger" @click="remove"
-            ><el-icon style="margin-right: 5px"><Delete></Delete></el-icon
+            ><el-icon style="margin-right: 5px"> <Delete></Delete> </el-icon
             >{{ $t("verse.view.form.delete") }}</el-button
           >
         </el-button-group>
@@ -100,31 +98,47 @@ const rules = ref({
       message: t("verse.view.form.rules.message1"),
       trigger: "blur",
     },
-    { min: 2, max: 10, message: "长度在 2 到 10 个字符", trigger: "blur" },
+    {
+      min: 2,
+      max: 10,
+      message: t("verse.view.form.rules.message2"),
+      trigger: "blur",
+    },
   ],
   name: [
     {
       required: true,
-      message: t("verse.view.form.rules.message2"),
+      message: t("verse.view.form.rules.message3"),
       trigger: "blur",
     },
     {
       min: 2,
       max: 50,
-      message: t("verse.view.form.rules.message3"),
+      message: t("verse.view.form.rules.message4"),
       trigger: "blur",
     },
   ],
   description: [
     {
       required: false,
-      message: t("verse.view.form.rules.message4"),
+      message: t("verse.view.form.rules.message5"),
       trigger: "blur",
     },
   ],
 });
 
 const options = ref<LanguageOption[]>([]);
+
+// 默认语言选项
+const defaultLanguageOptions = [
+  { value: "zh-CN", label: "简体中文(zh-CN)" },
+  { value: "zh-TW", label: "繁體中文(zh-TW)" },
+  { value: "en-US", label: "English(en-US)" },
+  { value: "ja-JP", label: "日本語(ja-JP)" },
+  { value: "ko-KR", label: "한국어(ko-KR)" },
+  { value: "fr-FR", label: "Français(fr-FR)" },
+  { value: "de-DE", label: "Deutsch(de-DE)" },
+];
 
 const refresh = async () => {
   const res = await getVerse(props.verseId, "languages");
@@ -133,11 +147,22 @@ const refresh = async () => {
 };
 
 const reload = () => {
+  // 合并已有的语言选项和默认语言选项
+  const existingLanguages = multilanguage.value.map((item) => item.language);
+  options.value = defaultLanguageOptions.filter(
+    (option) => !existingLanguages.includes(option.value)
+  );
+
   if (multilanguage.value.length !== 0) {
-    options.value = multilanguage.value.map((item) => ({
-      value: item.language,
-      label: item.language,
-    }));
+    options.value = [
+      ...multilanguage.value.map((item) => ({
+        value: item.language,
+        label:
+          defaultLanguageOptions.find((opt) => opt.value === item.language)
+            ?.label || item.language,
+      })),
+      ...options.value,
+    ];
 
     if (
       !form.value.language ||

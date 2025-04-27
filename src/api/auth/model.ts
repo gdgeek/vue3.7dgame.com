@@ -1,5 +1,6 @@
 export type RegisterData = {
   username: string; //用户名
+
   password: string; //密码
   repassword: string; //确认密码
 };

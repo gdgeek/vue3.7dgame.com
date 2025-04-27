@@ -23,7 +23,7 @@ import QrcodeVue from "qrcode.vue";
 import environment from "@/environment";
 
 const value = ref<string>(
-  JSON.stringify({ veri: "MrPP.com", api: environment.api })
+  JSON.stringify({ veri: "bujiaban.com", api: environment.api })
 );
 const size = ref<number>(400);
 
@@ -31,7 +31,7 @@ const ip = computed(() => environment.ip);
 
 // Define onResize function at the top level
 const onResize = () => {
-  size.value = Math.min(500, window.innerWidth * 0.8 - 100);
+  size.value = window.innerWidth * 0.5 - 100;
 };
 
 onMounted(() => {

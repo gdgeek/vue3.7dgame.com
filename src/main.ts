@@ -1,4 +1,4 @@
-// import { createApp } from "vue";
+import { createApp } from "vue";
 import App from "./App.vue";
 import setupPlugins from "@/plugins";
 import "vue-cropper/dist/index.css";
@@ -6,7 +6,6 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import VueIframe from "vue-iframes";
-import { mouseEffect, particleEffect } from "@/mouse";
 import { VueAppleLoginConfig } from "@/utils/helper";
 import VueForm from "@lljj/vue3-form-element";
 import ElementPlus from "element-plus";
@@ -36,8 +35,8 @@ const router = useRouter();
 // 更新页面标题
 const updateTitle = (title: string) => {
   document.title = title
-    ? `${translateRouteTitle(title)} - MrPP.com`
-    : "MrPP.com";
+    ? `${translateRouteTitle(title)} - bujiaban.com`
+    : "bujiaban.com";
 };
 
 // 监听路由变化更新页面标题
@@ -74,8 +73,6 @@ app.use(abilitiesPlugin, ability, {
 app.component("FontAwesomeIcon", FontAwesomeIcon);
 app.component("VueForm", VueForm);
 app.directive("highlight", highlightDirective);
-app.directive("mouse-effect", mouseEffect);
-app.directive("particle-effect", particleEffect);
 app.use(setupPlugins);
 app.use(VueIframe);
 app.use(ElementPlus);

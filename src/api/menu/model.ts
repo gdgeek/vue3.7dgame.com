@@ -7,7 +7,7 @@ export interface RouteVO {
    */
   children?: RouteVO[];
   /**
-   * 组件路径
+   * 实体路径
    */
   component?: string;
   meta?: Meta;

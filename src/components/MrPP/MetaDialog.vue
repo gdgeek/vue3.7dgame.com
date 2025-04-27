@@ -1,43 +1,19 @@
 <template>
   <div>
-    <el-dialog
-      v-model="dialogVisible"
-      width="95%"
-      :show-close="false"
-      @close="cancel"
-    >
+    <el-dialog v-model="dialogVisible" width="95%" :show-close="false" @close="cancel">
       <template #header>
-        <mr-p-p-header
-          :sorted="active.sorted"
-          :searched="active.searched"
-          @search="search"
-          @sort="sort"
-        >
-          <el-tag
-            ><b>{{ $t("verse.view.metaDialog.title") }}</b></el-tag
-          >
+        <mr-p-p-header :sorted="active.sorted" :searched="active.searched" @search="search" @sort="sort">
+          <el-tag><b>{{ $t("verse.view.metaDialog.title") }}</b></el-tag>
         </mr-p-p-header>
         <el-divider content-position="left">
-          <el-tag
-            v-if="active.searched !== ''"
-            size="small"
-            closable
-            @close="clearSearched"
-          >
+          <el-tag v-if="active.searched !== ''" size="small" closable @close="clearSearched">
             {{ active.searched }}
           </el-tag>
         </el-divider>
       </template>
 
-      <waterfall
-        v-if="active !== null && active.items !== null"
-        :lazyload="true"
-        :breakpoints="breakpoints"
-        :gutter="8"
-        :list="viewCards"
-        :column-count="3"
-        :backgroundColor="'rgba(255, 255, 255, .05)'"
-      >
+      <waterfall v-if="active !== null && active.items !== null" :lazyload="true" :breakpoints="breakpoints" :gutter="8"
+        :list="viewCards" :column-count="3" :backgroundColor="'rgba(255, 255, 255, .05)'">
         <template #default="{ item }">
           <el-card style="width: 220px" class="box-card">
             <template #header>
@@ -45,21 +21,18 @@
                 <template #header>
                   <b class="card-title" nowrap>{{ title(item) }}</b>
                 </template>
-                <LazyImg
-                  v-if="item.image"
-                  style="width: 100%; height: 180px"
-                  fit="contain"
-                  :url="item.image.url"
-                ></LazyImg>
+                <router-link :to="'/meta/meta-edit?id=' + item.id">
+                  <img v-if="!item.image" src="@/assets/image/none.png"
+                    style="width: 100%; height: auto; object-fit: contain" />
+                  <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
+                  </LazyImg>
+                </router-link>
               </el-card>
             </template>
             <div class="clearfix">
-              <el-button
-                type="primary"
-                size="small"
-                @click="selected({ data: item })"
-                >{{ $t("verse.view.metaDialog.select") }}</el-button
-              >
+              <el-button type="primary" size="small" @click="selected({ data: item })">{{
+                $t("verse.view.metaDialog.select")
+                }}</el-button>
             </div>
           </el-card>
           <br />
@@ -73,15 +46,9 @@
       <template #footer>
         <el-row :gutter="0">
           <el-col :xs="16" :sm="16" :md="16" :lg="16" :xl="16">
-            <el-pagination
-              :current-page="active.pagination.current"
-              :page-count="active.pagination.count"
-              :page-size="active.pagination.size"
-              :total="active.pagination.total"
-              layout="prev, pager, next, jumper"
-              background
-              @current-change="handleCurrentChange"
-            ></el-pagination>
+            <el-pagination :current-page="active.pagination.current" :page-count="active.pagination.count"
+              :page-size="active.pagination.size" :total="active.pagination.total" layout="prev, pager, next, jumper"
+              background @current-change="handleCurrentChange"></el-pagination>
           </el-col>
           <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
             <el-button-group>
@@ -149,9 +116,16 @@ const refresh = async () => {
     active.value.sorted,
     active.value.searched,
     active.value.pagination.current,
-    "image,verseMetas"
+    "image"
   );
   active.value.items = response.data;
+  console.log("active", active);
+  active.value.pagination = {
+    current: parseInt(response.headers["x-pagination-current-page"]),
+    count: parseInt(response.headers["x-pagination-page-count"]),
+    size: parseInt(response.headers["x-pagination-per-page"]),
+    total: parseInt(response.headers["x-pagination-total-count"]),
+  };
 };
 
 const sort = (value: string) => {
@@ -204,7 +178,7 @@ const input = async (text: string): Promise<string> => {
 const create = async () => {
   const name = await input(t("verse.view.metaDialog.input2"));
   const response = await postMeta({
-    title: name || "新建组件",
+    title: name || "新建实体",
     custom: 1,
     uuid: uuidv4(),
   });

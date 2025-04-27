@@ -1,75 +1,63 @@
 <template>
-  <div class="document-index">
-    <el-row :gutter="20" style="margin: 28px 18px 0">
-      <el-col :sm="16">
-        <el-card class="box-card">
-          <template #header>
-            <b id="title">{{ t("video.view.title") }}</b>
-            <span v-if="videoData">{{ videoData.name }}</span>
-          </template>
-          <div class="box-item" style="text-align: center">
-            <video
-              id="video"
-              controls="true"
-              style="height: 300px; width: auto"
-            >
-              <source v-if="file !== null" id="src" :src="file" />
-            </video>
-            <video
-              id="new_video"
-              style="height: 100%; width: auto"
-              hidden
-              @canplaythrough="dealWith"
-            ></video>
-          </div>
-        </el-card>
-        <br />
-      </el-col>
-      <el-col :sm="8">
-        <el-card class="box-card">
-          <template #header>
-            <b>{{ $t("video.view.info.title") }}</b
-            >:
-          </template>
-          <div class="box-item">
-            <el-table :data="tableData" stripe>
-              <el-table-column
-                prop="item"
-                :label="$t('video.view.info.label1')"
-              ></el-table-column>
-              <el-table-column
-                prop="text"
-                :label="$t('video.view.info.label2')"
-              ></el-table-column>
-            </el-table>
-            <aside style="margin-top: 10px; margin-bottom: 30px">
-              <el-button-group style="float: right">
-                <el-button type="primary" size="small" @click="namedWindow">
-                  <i class="el-icon-edit"></i>
-                  {{ $t("video.view.info.name") }}
-                </el-button>
-                <el-button type="primary" size="small" @click="deleteWindow">
-                  <i class="el-icon-delete"></i>
-                  {{ $t("video.view.info.delete") }}
-                </el-button>
-              </el-button-group>
-            </aside>
-          </div>
-        </el-card>
-        <br />
-      </el-col>
-    </el-row>
-  </div>
+  <TransitionWrapper>
+    <div class="document-index">
+      <el-row :gutter="20" style="margin: 28px 18px 0">
+        <el-col :sm="16">
+          <el-card class="box-card">
+            <template #header>
+              <b id="title">{{ t("video.view.title") }}</b>
+              <span v-if="videoData">{{ videoData.name }}</span>
+            </template>
+            <div class="box-item" style="text-align: center">
+              <video id="video" controls="true" style="height: 300px; width: auto">
+                <source v-if="file !== null" id="src" :src="file" />
+              </video>
+              <video id="new_video" style="height: 100%; width: auto" hidden @canplaythrough="dealWith"></video>
+            </div>
+          </el-card>
+          <br />
+        </el-col>
+        <el-col :sm="8">
+          <el-card class="box-card">
+            <template #header>
+              <b>{{ $t("video.view.info.title") }}</b>:
+            </template>
+            <div class="box-item">
+              <el-table :data="tableData" stripe>
+                <el-table-column prop="item" :label="$t('video.view.info.label1')"></el-table-column>
+                <el-table-column prop="text" :label="$t('video.view.info.label2')"></el-table-column>
+              </el-table>
+              <aside style="margin-top: 10px; margin-bottom: 30px">
+                <el-button-group style="float: right">
+                  <el-button type="success" size="small" @click="namedWindow">
+                    <i class="el-icon-edit"></i>
+                    {{ $t("video.view.info.name") }}
+                  </el-button>
+                  <el-button type="danger" size="small" @click="deleteWindow">
+                    <i class="el-icon-delete"></i>
+                    {{ $t("video.view.info.delete") }}
+                  </el-button>
+                </el-button-group>
+              </aside>
+            </div>
+          </el-card>
+          <br />
+        </el-col>
+      </el-row>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import { getVideo, putVideo, deleteVideo } from "@/api/resources/index";
+import { getVideo, putVideo, deleteVideo } from "@/api/v1/resources/index";
 import { postFile } from "@/api/v1/files";
+import { UploadFileType } from "@/api/user/model";
 import { printVector2 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
-import type { ResourceInfo } from "@/api/resources/model";
-import { convertToLocalTime } from "@/utils/dataChange";
+import type { ResourceInfo } from "@/api/v1/resources/model";
+import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -106,7 +94,7 @@ const tableData = computed(() => {
       },
       {
         item: t("video.view.info.item2"),
-        text: videoData.value.author.nickname,
+        text: videoData.value.author?.username,
       },
       {
         item: t("video.view.info.item3"),
@@ -114,7 +102,7 @@ const tableData = computed(() => {
       },
       {
         item: t("video.view.info.item4"),
-        text: videoData.value.file.size + t("video.view.info.size"),
+        text: formatFileSize(videoData.value.file.size),
       },
       {
         item: t("video.view.info.item5"),
@@ -151,7 +139,9 @@ const save = async (
   file: File,
   handler: any
 ) => {
-  const data = {
+
+  extension = extension.startsWith(".") ? extension : `.${extension}`;
+  const data: UploadFileType = {
     md5,
     key: md5 + extension,
     filename: file.name,
@@ -236,7 +226,7 @@ const setup = async (
         md5,
         file.type.split("/").pop()!,
         file,
-        (p: any) => {},
+        (p: any) => { },
         handler,
         "screenshot/video"
       );
@@ -300,5 +290,5 @@ const named = async (id: number, name: string) => {
 </script>
 
 <style lang="scss" scoped>
-@import "@/styles/view-style.scss";
+@use "@/styles/view-style.scss" as *;
 </style>

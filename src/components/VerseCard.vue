@@ -1,60 +1,44 @@
 <template>
   <el-card style="width: 300px" class="box-card">
+
+
+    <!--
+
     <template #header>
-      <div>
-        <el-card shadow="hover" :body-style="{ padding: '0px' }">
-          <template #header>
-            <span class="mrpp-title">
-              <b class="card-title" nowrap>{{ item.name }}</b>
-            </span>
-          </template>
-          <router-link :to="'/verse/view?id=' + item.id">
-            <img
-              v-if="!item.image"
-              src="@/assets/image/none.png"
-              style="width: 100%; height: 270px; object-fit: contain"
-            />
-            <LazyImg
-              v-else
-              :url="item.image.url"
-              style="width: 100%; height: 270px"
-              fit="contain"
-            ></LazyImg>
-          </router-link>
-        </el-card>
-        <InfoContent v-if="item" :verse="item"></InfoContent>
-      </div>
-    </template>
-    <div class="clearfix">
-      <el-button-group>
-        <el-button
-          type="primary"
-          @click="goToDetail(item.id.toString())"
-          size="small"
-          >{{ $t("verse.page.list.enter") }}</el-button
-        >
-        <el-button
-          type="primary"
-          v-if="item.verseRelease"
-          @click="restrain(item)"
-          size="small"
-        >
-          <font-awesome-icon
-            class="icon"
-            icon="box-open"
-            color="#FFA500"
-          ></font-awesome-icon>
-        </el-button>
+      <elTag></elTag>{{ item.tags }}
+    </template>-->
+    <template #footer>
+      <div class="clearfix">
+        <el-button-group>
+          <el-button type="primary" @click="goToDetail(item.id.toString())" size="small">{{ $t("verse.page.list.enter")
+          }}</el-button>
+          <el-button type="primary" v-if="item.verseRelease" @click="restrain(item)" size="small">
+            <font-awesome-icon class="icon" icon="box-open" color="#FFA500"></font-awesome-icon>
+          </el-button>
+          <!--
         <el-button type="primary" v-else @click="release(item)" size="small">
           <font-awesome-icon class="icon" icon="box"></font-awesome-icon>
-        </el-button>
-      </el-button-group>
-      <VerseToolbar
-        :verse="item"
-        @deleted="emit('deleted')"
-        @changed="emit('changed')"
-      ></VerseToolbar>
+        </el-button>-->
+        </el-button-group>
+        <VerseToolbar :verse="item" @deleted="emit('deleted')" @changed="emit('changed')"></VerseToolbar>
+      </div>
+    </template>
+    <div>
+      <el-card shadow="hover" :body-style="{ padding: '0px' }">
+        <template #header>
+          <span class="mrpp-title">
+            <b class="card-title" nowrap>{{ item.name }}</b>
+          </span>
+        </template>
+        <router-link :to="'/verse/view?id=' + item.id">
+          <img v-if="!item.image" src="@/assets/image/none.png"
+            style="width: 100%; height: 270px; object-fit: contain" />
+          <LazyImg v-else :url="item.image.url" style="width: 100%; height: 270px" fit="contain"></LazyImg>
+        </router-link>
+      </el-card>
+      <InfoContent v-if="item" :verse="item"></InfoContent>
     </div>
+
   </el-card>
 </template>
 

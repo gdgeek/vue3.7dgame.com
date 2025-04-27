@@ -56,6 +56,5 @@ declare module "vue-router" {
      * @example ['admin', 'editor']
      */
     roles?: string[];
-    
   }
 }

@@ -27,6 +27,7 @@ const initVerse = async (type: string, name: string, resource: Resource) => {
 
   const data = {
     name,
+    description: json.description,
     info: JSON.stringify(json),
     image_id: resource.image_id,
     uuid: uuidv4(),
@@ -37,7 +38,6 @@ const initVerse = async (type: string, name: string, resource: Resource) => {
 };
 
 const initMeta = async (type: string, verse: Verse, resource: Resource) => {
- 
   const data = {
     title: `${type}:${resource.name}`,
     verse_id: verse.id,

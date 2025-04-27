@@ -1,67 +1,75 @@
 <template>
+
   <body :class="{ 'dark-theme': isDark }">
     <div :class="['header', { 'dark-theme': isDark }]">
-      <RouterLink to="/" class="logo">
-        <img src="/favicon.ico" alt="" />
-        <span class="project_title">{{ $t("login.title") }}</span>
-      </RouterLink>
-      <div class="link" style="margin-left: 250px">
-        <el-link
-          href="https://testflight.apple.com/join/V4XNEG6t"
-          target="_blank"
-          :underline="false"
-        >
-          <img src="/testflight.ico" style="width: 25px" alt="" />
-          <span style="margin-left: 5px">TestFlight</span>
-        </el-link>
+      <div style="height: 30px;" v-if="!isMobile">
+        <RouterLink to="/" class="logo">
+          <img src="/favicon.ico" alt="" />
+          <span class="project_title">2{{ $t("login.title") }}</span>
+        </RouterLink>
+        <div class="link" style="margin-left: 250px">
+          <!--
+          <el-link href="https://testflight.apple.com/join/V4XNEG6t" target="_blank" :underline="false">
+            <img src="/testflight.ico" style="width: 25px" alt="" />
+            <span style="margin-left: 5px">TestFlight</span>
+          </el-link>
 
-        <el-link
-          href="https://discord.gg/KhkJySu7bb"
-          target="_blank"
-          :underline="false"
-          style="margin-left: 30px"
-        >
-          <img src="/discord.ico" style="width: 25px" alt="" />
-          <span style="margin-left: 5px">Discord</span>
-        </el-link>
+          <el-link href="https://discord.gg/KhkJySu7bb" target="_blank" :underline="false" style="margin-left: 30px">
+            <img src="/discord.ico" style="width: 25px" alt="" />
+            <span style="margin-left: 5px">Discord</span>
+          </el-link>
 
-        <el-link
-          href="https://x.com/GD_Geek"
-          target="_blank"
-          :underline="false"
-          style="margin-left: 30px"
-        >
-          <img src="/x3.png" style="width: 25px; border-radius: 25%" alt="" />
-          <span style="margin-left: 5px">X.com</span>
-        </el-link>
+          <el-link href="https://x.com/GD_Geek" target="_blank" :underline="false" style="margin-left: 30px">
+            <img src="/x3.png" style="width: 26px; border-radius: 25%" alt="" />
+            <span style="margin-left: 5px">X.com</span>
+          </el-link>-->
+        </div>
+        <div class="header-right">
+          <div class="top-bar">
+            <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
+              @change="toggleTheme"></el-switch>
+            <lang-select class="ml-2 cursor-pointer" style="margin-left: 25px"></lang-select>
+          </div>
+        </div>
       </div>
-      <div class="header-right">
-        <div class="top-bar">
-          <el-switch
-            v-model="isDark"
-            inline-prompt
-            active-icon="Moon"
-            inactive-icon="Sunny"
-            @change="toggleTheme"
-          ></el-switch>
-          <lang-select
-            class="ml-2 cursor-pointer"
-            style="margin-left: 25px"
-          ></lang-select>
+      <!-- 移动端 -->
+      <div class="mobile" v-else>
+        <el-dropdown>
+          <span class="">
+            <img src="/favicon.ico" alt="" style="margin-left: 10px; width: auto" />
+            <span class="project_title">{{ $t("login.title") }}</span>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item><el-link href="https://testflight.apple.com/join/V4XNEG6t" target="_blank"
+                  :underline="false">
+                  <img src="/testflight.ico" style="width: 25px" alt="" />
+                  <span style="margin-left: 5px">TestFlight</span>
+                </el-link></el-dropdown-item>
+              <el-dropdown-item><el-link href="https://discord.gg/KhkJySu7bb" target="_blank" :underline="false">
+                  <img src="/discord.ico" style="width: 25px" alt="" />
+                  <span style="margin-left: 5px">Discord</span>
+                </el-link></el-dropdown-item>
+              <el-dropdown-item><el-link href="https://x.com/GD_Geek" target="_blank" :underline="false">
+                  <img src="/x3.png" style="width: 26px; border-radius: 25%" alt="" />
+                  <span style="margin-left: 5px">X.com</span>
+                </el-link></el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <div class="header-right">
+          <div :class="['top-bar', { mobile: isMobile }]">
+            <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
+              @change="toggleTheme"></el-switch>
+            <lang-select class="ml-2 cursor-pointer" style="margin-left: 10px"></lang-select>
+          </div>
         </div>
       </div>
     </div>
-    <div v-if="route.path === '/login'" class="content">
-      <login-form
-        v-if="!appleIdToken"
-        @enter="enter"
-        @register="register"
-      ></login-form>
-      <register-form
-        v-else
-        @enter="enter"
-        :idToken="appleIdToken"
-      ></register-form>
+    <div v-if="route.path === '/site/login'" class="content">
+      <login-form v-if="!appleIdToken" :isMobile="isMobile" ref="loginFormRef" @enter="enter"
+        @register="register"></login-form>
+      <register-form v-else @enter="enter" :idToken="appleIdToken"></register-form>
     </div>
     <div v-else-if="route.path === '/logout'" class="content">
       <div :class="['box', { 'dark-theme': isDark }]">
@@ -76,28 +84,17 @@
         </el-card>
       </div>
     </div>
-    <el-card
-      style="
+    <el-card v-if="!isMobile" style="
         height: 7%;
         width: 100%;
         display: flex;
         justify-content: flex-end;
         align-items: center;
-      "
-    >
+      ">
       <div class="background-screen-max">
         <div style="display: flex; align-items: center; gap: 10px">
-          <span
-            v-for="item in informationStore.companies"
-            :key="item.name"
-            style="display: flex; align-items: center"
-          >
-            <el-link
-              :href="item.url"
-              target="_blank"
-              :underline="false"
-              style="display: flex; align-items: center"
-            >
+          <span v-for="item in informationStore.companies" :key="item.name" style="display: flex; align-items: center">
+            <el-link :href="item.url" target="_blank" :underline="false" style="display: flex; align-items: center">
               <el-icon>
                 <HomeFilled></HomeFilled>
               </el-icon>
@@ -107,17 +104,10 @@
             </el-link>
           </span>
 
-          <span
-            v-if="informationStore.beian"
-            style="display: flex; align-items: center"
-          >
+          <span v-if="informationStore.beian" style="display: flex; align-items: center">
             |
-            <el-link
-              href="https://beian.miit.gov.cn/"
-              target="_blank"
-              :underline="false"
-              style="display: flex; align-items: center; margin-left: 10px"
-            >
+            <el-link href="https://beian.miit.gov.cn/" target="_blank" :underline="false"
+              style="display: flex; align-items: center; margin-left: 10px">
               <el-icon>
                 <Grid></Grid>
               </el-icon>
@@ -127,16 +117,76 @@
             </el-link>
           </span>
 
-          <span
-            v-if="informationStore.version"
-            style="display: flex; align-items: center"
-          >
+          <span v-if="informationStore.privacyPolicy" style="display: flex; align-items: center">
             |
-            <el-link
-              target="_blank"
-              :underline="false"
-              style="display: flex; align-items: center; margin-left: 10px"
-            >
+            <el-link :href="informationStore.privacyPolicy.url" target="_blank" :underline="false"
+              style="display: flex; align-items: center; margin-left: 10px">
+              <el-icon>
+                <Briefcase></Briefcase>
+              </el-icon>
+              <span class="font-text" style="margin-left: 5px">
+                {{ informationStore.privacyPolicy.name }}
+              </span>
+            </el-link>
+          </span>
+
+          <span v-if="informationStore.version" style="display: flex; align-items: center">
+            |
+            <el-link target="_blank" :underline="false" style="display: flex; align-items: center; margin-left: 10px">
+              <el-icon>
+                <InfoFilled></InfoFilled>
+              </el-icon>
+              <span class="font-text" style="margin-left: 5px">
+                {{ informationStore.version }}
+              </span>
+            </el-link>
+          </span>
+        </div>
+      </div>
+    </el-card>
+
+    <el-card v-if="isMobile" style="width: 100%">
+      <div class="background-screen-max">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+          <span v-for="item in informationStore.companies" :key="item.name"
+            style="display: flex; align-items: center; width: 100%">
+            <el-link :href="item.url" target="_blank" :underline="false" style="display: flex; align-items: center">
+              <el-icon>
+                <HomeFilled></HomeFilled>
+              </el-icon>
+              <span class="font-text" style="margin-left: 5px">
+                {{ item.name }} ({{ informationStore.description }})
+              </span>
+            </el-link>
+          </span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+          <span v-if="informationStore.beian" style="display: flex; align-items: center">
+            <el-link href="https://beian.miit.gov.cn/" target="_blank" :underline="false"
+              style="display: flex; align-items: center">
+              <el-icon>
+                <Grid></Grid>
+              </el-icon>
+              <span class="font-text" style="margin-left: 5px">
+                {{ informationStore.beian }}
+              </span>
+            </el-link>
+          </span>
+
+          <span v-if="informationStore.privacyPolicy" style="display: flex; align-items: center; margin-left: 9.5%">
+            <el-link :href="informationStore.privacyPolicy.url" target="_blank" :underline="false"
+              style="display: flex; align-items: center">
+              <el-icon>
+                <Briefcase></Briefcase>
+              </el-icon>
+              <span class="font-text" style="margin-left: 5px">
+                {{ informationStore.privacyPolicy.name }}
+              </span>
+            </el-link>
+          </span>
+
+          <span v-if="informationStore.version" style="display: flex; align-items: center; margin-left: 9.5%">
+            <el-link target="_blank" :underline="false" style="display: flex; align-items: center">
               <el-icon>
                 <InfoFilled></InfoFilled>
               </el-icon>
@@ -156,12 +206,12 @@ import "@/assets/font/font.css";
 import { useRouter, LocationQuery, useRoute } from "vue-router";
 import { AppleIdToken } from "@/api/auth/model";
 import LoginForm from "@/components/LoginForm.vue";
-import RegisterForm from "@/components/RegisterForm.vue";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useInfomationStore } from "@/store/modules/information";
-import { useTagsViewStore, useUserStore } from "@/store";
+import { useTagsViewStore, useUserStore, useScreenStore } from "@/store";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
+import AuthAPI from "@/api/v1/auth";
 
 const router = useRouter();
 const route = useRoute();
@@ -171,6 +221,9 @@ const informationStore = useInfomationStore();
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
+const loginFormRef = ref<InstanceType<typeof LoginForm>>();
+const screenStore = useScreenStore();
+const isMobile = computed(() => screenStore.isMobile);
 
 const parseRedirect = (): {
   path: string;
@@ -191,6 +244,7 @@ const parseRedirect = (): {
 
 const enter = async (
   user: any,
+  form: any,
   resolve: () => void,
   reject: (message: string) => void
 ) => {
@@ -198,12 +252,15 @@ const enter = async (
     ElMessage.success(t("login.success"));
     const token = user.auth;
     if (token) {
-      localStorage.setItem(TOKEN_KEY, "Bearer " + token);
+      localStorage.setItem(TOKEN_KEY, token);
       nextTick();
     } else {
       ElMessage.error("The login response is missing the access_token");
     }
-    await userStore.getUserInfo();
+    //  await userStore.getUserInfo();
+
+    // userStore.setupRefreshInterval(form.value);
+
     const { path, queryParams } = parseRedirect();
     router.push({ path: path, query: queryParams });
     resolve();
@@ -226,11 +283,11 @@ const toggleTheme = () => {
 watch(
   () => route.path,
   async (newPath) => {
-    if (newPath === "/logout") {
+    if (newPath === "/site/logout") {
       await userStore.logout();
       await tagsViewStore.delAllViews();
       setTimeout(() => {
-        router.push("/login?redirect=/home/index");
+        router.push("/web/index?redirect=/home/index");
       }, 1000);
     }
   },
@@ -259,7 +316,7 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  width: 100%;
+  width: 102%;
   height: 7%;
   margin-right: 10px;
   background-color: #f1f1f1;
@@ -277,25 +334,27 @@ body {
   left: 10px;
 
   img {
-    width: 32px;
-    height: 32px;
-    margin-left: 12px;
+    width: 30px;
+    height: 30px;
+    margin-left: 20px;
     vertical-align: middle;
   }
+}
 
-  .project_title {
-    margin-left: 10px;
-    font-family: "KaiTi", sans-serif;
-    // font-size: 14px;
-    font-weight: 600;
-    &:hover {
-      color: #3876c2;
-    }
+.project_title {
+  margin-left: 10px;
+  font-family: "KaiTi", sans-serif;
+  // font-size: 14px;
+  font-weight: 600;
+
+  &:hover {
+    color: #3876c2;
   }
 }
 
 .header-right {
   position: absolute;
+  top: 0px;
   right: 10px;
   display: flex;
   align-items: center;
@@ -308,6 +367,10 @@ body {
     margin-right: 20px;
     width: 100%;
     padding: 10px;
+
+    &.mobile {
+      margin-right: 0px;
+    }
   }
 }
 

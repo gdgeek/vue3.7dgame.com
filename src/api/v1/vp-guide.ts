@@ -10,12 +10,12 @@ export const postVpGuide = (data: any) => {
   });
 };
 
-export const getVerses = (
+export const getVerses = ({
   sort = "-created_at",
   search = "",
   page = 0,
-  expand = "image,author,share"
-) => {
+  expand = "image,author,share",
+}) => {
   const query: Record<string, any> = [];
   query["expand"] = expand;
   query["sort"] = sort;
@@ -32,6 +32,8 @@ export const getVerses = (
     method: "get",
   });
 };
+
+
 export const getVpGuide = (id: number) => {
   return request({
     url: "v1/vp-guides/" + id,

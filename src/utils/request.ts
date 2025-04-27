@@ -1,9 +1,13 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { useUserStoreHook } from "@/store/modules/user";
-import { ResultEnum } from "@/enums/ResultEnum";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { useRouter } from "@/router";
 import i18n from "@/lang";
+import { ElMessage } from "element-plus";
+import AuthAPI from "@/api/v1/auth";
+import env from "@/environment";
+import { ref, watch } from "vue";
+import Token from "@/store/modules/token";
 
 const lang = ref(i18n.global.locale.value);
 watch(
@@ -44,20 +48,112 @@ const getMessageArray = () => {
   }
 };
 
+// 用于标记正在刷新token的状态
+let isRefreshing = false;
+// 存储待重发的请求
+let requestsQueue: Array<{
+  config: InternalAxiosRequestConfig;
+  resolve: Function;
+  reject: Function;
+}> = [];
+
+// 刷新token的API白名单
+const refreshTokenWhitelist = [
+  "/v1/auth/refresh", // 刷新token的接口
+  "/v1/auth/login", // 登录接口
+  "/v1/auth/logout", // 登出接口
+];
+
+// 判断token是否即将过期（例如，提前5分钟刷新）
+const isTokenExpiringSoon = (token: any): boolean => {
+  if (!token || !token.expires) return false;
+
+  // 转换为毫秒时间戳
+  const expiryTime = new Date(token.expires).getTime();
+  const currentTime = new Date().getTime();
+
+  // 如果token在5分钟内过期，返回true
+  const fiveMinutesMs = 5 * 60 * 1000;
+  return expiryTime - currentTime < fiveMinutesMs;
+};
+
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: import.meta.env.VITE_APP_BASE_API,
+  baseURL: env.api,
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
 });
 
+// 刷新token的函数
+const refreshToken = async () => {
+  //alert("refresh");
+  try {
+    isRefreshing = true;
+    const token = Token.getToken();
+
+    if (!token || !token.refreshToken) {
+      throw new Error("No refresh token available");
+    }
+
+    const response = await AuthAPI.refresh(token.refreshToken);
+    //alert(JSON.stringify(response));
+    // 更新token存储
+    if (response.data) {
+      Token.setToken(response.data.token);
+    }
+
+    // 执行队列中的请求
+    requestsQueue.forEach(({ config, resolve }) => {
+      resolve(service(config));
+    });
+
+    // 清空队列
+    requestsQueue = [];
+
+    return response.data;
+  } catch (error) {
+    // 刷新失败，可能需要重新登录
+    const router = useRouter();
+    return handleUnauthorized(router);
+  } finally {
+    isRefreshing = false;
+  }
+};
+
 // 请求拦截器
 service.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const accessToken = localStorage.getItem(TOKEN_KEY);
-    if (accessToken) {
-      config.headers.Authorization = accessToken;
+  async (config: InternalAxiosRequestConfig) => {
+    const token = Token.getToken();
+
+    // 设置token
+    if (token != null) {
+      config.headers.Authorization = `Bearer ${token.accessToken}`;
+
+      // 检查请求URL是否在白名单中
+      const isWhitelisted = refreshTokenWhitelist.some((url) =>
+        config.url?.includes(url)
+      );
+
+      if (!isWhitelisted && isTokenExpiringSoon(token)) {
+        // 如果token即将过期且不在白名单中
+        if (!isRefreshing) {
+          // 如果没有正在刷新，开始刷新
+          await refreshToken();
+
+          // 使用新token
+          const newToken = Token.getToken();
+          if (newToken) {
+            config.headers.Authorization = `Bearer ${newToken.accessToken}`;
+          }
+        } else {
+          // 如果正在刷新，将请求加入队列
+          return new Promise((resolve, reject) => {
+            requestsQueue.push({ config, resolve, reject });
+          });
+        }
+      }
     }
+
     return config;
   },
   (error: any) => {
@@ -65,12 +161,7 @@ service.interceptors.request.use(
   }
 );
 
-// 异常处理
-function showErrorMessage(
-  message: string,
-
-  duration = 5000
-) {
+function showErrorMessage(message: string, duration = 5000) {
   ElMessage({
     message,
     type: "error",
@@ -81,7 +172,12 @@ function showErrorMessage(
 function handleUnauthorized(router: ReturnType<typeof useRouter>) {
   const messages = getMessageArray();
   showErrorMessage(messages[0]);
-  return Promise.reject("");
+  return useUserStoreHook()
+    .resetToken()
+    .then(() => {
+      router.push({ path: "/web/index" });
+      return Promise.reject("");
+    });
 }
 
 // 响应拦截器
@@ -89,7 +185,7 @@ service.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
-  (error: any) => {
+  async (error: any) => {
     const router = useRouter();
     const { response } = error;
     const messages = getMessageArray();
@@ -97,20 +193,16 @@ service.interceptors.response.use(
     if (!response) {
       if (error.message === "Network Error") {
         showErrorMessage(messages[1]);
-        useUserStoreHook()
-          .resetToken()
-          .then(() => {
-            router.push({ path: "/login" });
-          });
       } else {
         showErrorMessage(error.message);
       }
       return Promise.reject(error);
     }
-
     if (response.status === 401) {
+      // 仅当身份认证失败，执行登出操作
       return handleUnauthorized(router);
     } else if (response.status >= 500) {
+      // 服务器内部错误
       showErrorMessage(messages[2]);
     } else {
       const message = response.data.message || error.message;

@@ -1,0 +1,34 @@
+.background-screen-max {
+  max-width:1600px;
+  margin: 0 auto;
+}
+.section-card-padding {
+  padding: 4%;
+}
+@media screen and (min-width: 1600px) {
+  .background-screen-border{
+  border: 1px double #eceef5;
+  border-width:0 1px 0px 1px;
+   box-shadow: #f4f4f4 0px 0px 2px 1px;
+  }
+}
+
+// 手机端
+@media screen and (max-width: 700px) {
+  // section标题大小
+  .section-title-size {
+    font-size: 22px;
+  }
+  .title-ph-l {
+    font-size: 24px !important;
+  }
+  .title-ph-m {
+    font-size: 22px !important;
+  }
+  .title-ph-s {
+  font-size: 18px !important;
+  }
+  .section-card-padding {
+  padding: 1%;
+  }
+}

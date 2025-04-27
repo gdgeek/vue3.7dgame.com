@@ -26,7 +26,7 @@
         {{ author.nickname || author.username }}
       </el-descriptions-item>
 
-      <el-descriptions-item v-if="info.description">
+      <el-descriptions-item v-if="verse.description">
         <template #label>
           <el-tooltip
             :content="$t('verse.page.list.infoContent.description')"
@@ -37,7 +37,7 @@
           ></el-tooltip>
         </template>
 
-        {{ info.description }}
+        {{ verse.description }}
       </el-descriptions-item>
 
       <el-descriptions-item v-if="props.verse && props.verse.verseRelease">
@@ -56,11 +56,6 @@
 import type { Author, VerseData } from "@/api/v1/verse";
 import DOMPurify from "dompurify";
 
-interface Info {
-  name: string;
-  course?: number;
-  description?: string;
-}
 
 interface Course {
   id: number;
@@ -80,12 +75,7 @@ const props = defineProps<{
 const author = computed(() => {
   return props.verse?.author;
 });
-const info = computed(() => {
-  if (props.verse) {
-    return JSON.parse(props.verse.info!);
-  }
-  return "";
-});
+
 const course = ref<Course | null>(null);
 
 // 返回清理后的 HTML

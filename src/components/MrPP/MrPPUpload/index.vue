@@ -28,6 +28,7 @@
 
 <script setup lang="ts">
 import { useFileStore } from "@/store/modules/config";
+import { UploadFileType } from "@/api/user/model";
 import { postFile } from "@/api/v1/files";
 import { FileHandler } from "@/assets/js/file/server";
 
@@ -46,10 +47,12 @@ const props = withDefaults(
   }
 );
 
-const emit = defineEmits(["saveResource"]);
+const emit = defineEmits([
+  "saveResource",
+]);
 const fileStore = useFileStore();
 
-const data = reactive([
+const data = computed(() => [
   {
     name: "md5",
     title: t("upload.item1.title"),
@@ -76,42 +79,53 @@ const data = reactive([
   },
 ]);
 
-const title = ref(t("upload.title"));
-const declared = ref(t("upload.declared"));
+// 默认
+const defaultTitle = computed(() => t("upload.title"));
+const defaultDeclared = computed(() => t("upload.declared"));
+// 自定义
+const changeTitle = ref<string | null>(null);
+const changeDeclared = ref<string | null>(null);
+
+const title = computed(() => changeTitle.value ?? defaultTitle.value);
+const declared = computed(() => changeDeclared.value ?? defaultDeclared.value);
+
 const isDisabled = ref(false);
 
 // 更新标题和声明信息
 const step = (idx: number) => {
-  const item = data[idx];
-  title.value = item.title;
-  declared.value = item.declared;
+  const item = data.value[idx];
+  changeTitle.value = item.title;
+  changeDeclared.value = item.declared;
 };
 
 // 更新进度条
 const progress = (p: number, idx: number) => {
   step(idx);
-  data[idx].status = p >= 1 ? "success" : "";
-  data[idx].percentage = Math.round(Math.min(p, 1) * 100);
+  data.value[idx].status = p >= 1 ? "success" : "";
+  data.value[idx].percentage = Math.round(Math.min(p, 1) * 100);
 };
 
 const saveFile = async (
   md5: string,
   extension: string,
   file: File,
-  handler: FileHandler
+  handler: FileHandler,
+  totalFiles: number
 ) => {
-  const data = {
+
+  extension = extension.startsWith('.') ? extension : `.${extension}`;
+  const data: UploadFileType = {
     filename: file.name,
     md5,
     key: md5 + extension,
     url: fileStore.store.fileUrl(md5, extension, handler, props.dir || ""),
   };
-
+  //alert(JSON.stringify(data));
   progress(1, 1);
 
   try {
     const response = await postFile(data);
-    emit("saveResource", data.filename, response.data.id, () => {
+    emit("saveResource", data.filename, response.data.id, totalFiles, () => {
       progress(2, 1);
     });
   } catch (err) {
@@ -122,34 +136,52 @@ const saveFile = async (
 // 选择文件并上传
 const select = async () => {
   try {
-    const file = await fileStore.store.fileOpen(props.fileType);
-    isDisabled.value = !isDisabled.value;
-    const md5 = await fileStore.store.fileMD5(file, (p: number) =>
-      progress(p, 0)
-    );
-    const handler = await fileStore.store.publicHandler();
-    const has = await fileStore.store.fileHas(
-      md5,
-      file.extension!,
-      handler,
-      props.dir!
-    );
-    console.log("Has:", has);
+    const files = await fileStore.store.fileOpen(props.fileType, true);
+    isDisabled.value = true; // 禁用按钮
+    let fileCount = 0; // 已完成文件计数
+    const totalFiles = files.length; // 总文件数
 
-    if (!has) {
-      await fileStore.store.fileUpload(
-        md5,
-        file.extension!,
-        file,
-        (p: number) => progress(p, 1),
-        handler,
-        props.dir!
-      );
+    for (const file of files) {
+      try {
+        const md5 = await fileStore.store.fileMD5(file, (p: number) =>
+          progress(p, 0)
+        );
+        const handler = await fileStore.store.publicHandler();
+        let extension = ".bytes";
+        if (file.extension !== undefined) {
+          extension = file.extension.startsWith('.') ? file.extension : `.${file.extension}`;
+        }
+        const has = await fileStore.store.fileHas(
+          md5,
+          extension,
+          handler,
+          props.dir!
+        );
+
+        if (!has) {
+          await fileStore.store.fileUpload(
+            md5,
+            extension,
+            file,
+            (p: number) => progress(p, 1),
+            handler,
+            props.dir!
+          );
+        }
+
+        await saveFile(md5, extension, file, handler, totalFiles);
+      } catch (fileError) {
+        console.error(`Error processing file ${file.name}:`, fileError);
+      } finally {
+        fileCount++;
+        if (fileCount === totalFiles) {
+          isDisabled.value = false;
+        }
+      }
     }
-    await saveFile(md5, file.extension!, file, handler);
-    // await saveFile(md5, file.type.split("/").pop()!, file, handler);
   } catch (error) {
     console.error("Error in select function:", error);
+    isDisabled.value = false;
   }
 };
 </script>

@@ -7,8 +7,8 @@ import path from 'path-browserify';
 // 文件处理程序类型
 export type FileHandler = {
   bucket: string;
-  region?: string; // 如果需要 region 属性
-  cos?: any; // 如果需要 cos 属性
+  region?: string; 
+  cos?: any;
 };
 
 
@@ -22,7 +22,8 @@ type ProgressCallback = (percent: number) => void;
 
 // 生成文件 URL
 const fileUrl = (name: string, extension: string, handler: FileHandler | null = null, dir: string = ""): string => {
-  const filename = name + extension;
+  const ext = extension.startsWith('.') ? extension : `.${extension}`;
+  const filename = name + ext;
   const url = `${env.api}/${path.join('storage', handler?.bucket || '', dir, filename)}`;
   return url;
 };
@@ -55,6 +56,7 @@ const fileUpdateImpl = async (
   dir: string,
   skip: number
 ): Promise<any> => {
+  
   const filename = md5 + extension;
   const data = new FormData();
   const blockSize = 1048576; // 每块大小
@@ -95,9 +97,9 @@ const fileUpload = (
   dir: string = ''
 ): Promise<any> => fileUpdateImpl(md5, extension, file, progress, handler, dir, 0);
 
-// 获取文件 URL (示例方法，没有实际实现)
+
 const getUrl = (info: FileInfo, file: { md5: string; ext: string }, handler: FileHandler): string => {
-  return ''; // 需要实现 URL 生成逻辑
+  return '';
 };
 
 // 文件下载

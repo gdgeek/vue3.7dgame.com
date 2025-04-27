@@ -1,92 +1,73 @@
 <template>
-  <div class="document-index">
-    <el-row :gutter="20" style="margin: 28px 18px 0">
-      <el-col :sm="16">
-        <el-card class="box-card">
-          <template #header>
-            <b id="title">{{ $t("audio.view.title") }}</b>
-            <span v-if="audioData">{{ audioData.name }}</span>
-          </template>
-          <img id="imgs" :src="imgSrc" style="display: none" />
-          <div class="box-item" style="text-align: center">
-            <section class="audio-bgc">
-              <br />
-              <div class="audio-box">
-                <div
-                  class="audio-record"
-                  :class="{ 'audio-record-playfast': isPlay }"
-                  @click="handlePlayAudio"
-                ></div>
-                <div
-                  class="audio-record-image"
-                  :class="{ 'audio-record-play': isPlay }"
-                  @click="handlePlayAudio"
-                ></div>
-              </div>
-              <audio
-                id="audio"
-                controls
-                style="width: 95%; height: 84px"
-                :src="file"
-                preload="auto"
-                @play="listenPlay"
-                @pause="listenPause"
-                @ended="listenEnd"
-                @canplaythrough="dealWith"
-              ></audio>
-            </section>
-          </div>
-        </el-card>
-        <br />
-      </el-col>
+  <TransitionWrapper>
+    <div class="document-index">
+      <el-row :gutter="20" style="margin: 28px 18px 0">
+        <el-col :sm="16">
+          <el-card class="box-card">
+            <template #header>
+              <b id="title">{{ $t("audio.view.title") }}</b>
+              <span v-if="audioData">{{ audioData.name }}</span>
+            </template>
+            <img id="imgs" :src="imgSrc" style="display: none" />
+            <div class="box-item" style="text-align: center">
+              <section class="audio-bgc">
+                <br />
+                <div class="audio-box">
+                  <div class="audio-record" :class="{ 'audio-record-playfast': isPlay }" @click="handlePlayAudio"></div>
+                  <div class="audio-record-image" :class="{ 'audio-record-play': isPlay }" @click="handlePlayAudio">
+                  </div>
+                </div>
+                <audio id="audio" controls style="width: 95%; height: 84px" :src="file" preload="auto"
+                  @play="listenPlay" @pause="listenPause" @ended="listenEnd" @canplaythrough="dealWith"></audio>
+              </section>
+            </div>
+          </el-card>
+          <br />
+        </el-col>
+        <el-col :sm="8">
+          <el-card class="box-card">
+            <template #header>
+              <b>{{ $t("audio.view.info.title") }}</b>:
+            </template>
+            <div class="box-item">
+              <el-table :data="tableData" stripe>
+                <el-table-column prop="item" :label="$t('audio.view.info.label1')"></el-table-column>
+                <el-table-column prop="text" :label="$t('audio.view.info.label2')"></el-table-column>
+              </el-table>
 
-      <el-col :sm="8">
-        <el-card class="box-card">
-          <template #header>
-            <b>{{ $t("audio.view.info.title") }}</b
-            >:
-          </template>
-          <div class="box-item">
-            <el-table :data="tableData" stripe>
-              <el-table-column
-                prop="item"
-                :label="$t('audio.view.info.label1')"
-              ></el-table-column>
-              <el-table-column
-                prop="text"
-                :label="$t('audio.view.info.label2')"
-              ></el-table-column>
-            </el-table>
-
-            <aside style="margin-top: 10px; margin-bottom: 30px">
-              <el-button-group style="float: right">
-                <el-button type="primary" size="small" @click="namedWindow">
-                  <i class="el-icon-edit"></i>
-                  {{ $t("audio.view.info.name") }}
-                </el-button>
-                <el-button type="primary" size="small" @click="deleteWindow">
-                  <i class="el-icon-delete"></i>
-                  {{ $t("audio.view.info.delete") }}
-                </el-button>
-              </el-button-group>
-            </aside>
-          </div>
-        </el-card>
-        <br />
-      </el-col>
-    </el-row>
-  </div>
+              <aside style="margin-top: 10px; margin-bottom: 30px">
+                <el-button-group style="float: right">
+                  <el-button type="success" size="small" @click="namedWindow">
+                    <i class="el-icon-edit"></i>
+                    {{ $t("audio.view.info.name") }}
+                  </el-button>
+                  <el-button type="danger" size="small" @click="deleteWindow">
+                    <i class="el-icon-delete"></i>
+                    {{ $t("audio.view.info.delete") }}
+                  </el-button>
+                </el-button-group>
+              </aside>
+            </div>
+          </el-card>
+          <br />
+        </el-col>
+      </el-row>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import { getAudio, putAudio, deleteAudio } from "@/api/resources";
-import type { ResourceInfo } from "@/api/resources/model";
+import { getAudio, putAudio, deleteAudio } from "@/api/v1/resources";
+import type { ResourceInfo } from "@/api/v1/resources/model";
 import { postFile } from "@/api/v1/files";
+import { UploadFileType } from "@/api/user/model";
 import { useFileStore } from "@/store/modules/config";
 import { FileHandler } from "@/assets/js/file/server";
-import { convertToLocalTime } from "@/utils/dataChange";
+import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
+// 基础状态和引用
 const route = useRoute();
 const router = useRouter();
 const store = useFileStore().store;
@@ -97,13 +78,20 @@ const expire = ref(true);
 const isPlay = ref(false);
 const imgSrc = "/media/bg/audio-cover.jpg";
 
+// 计算属性
+const id = computed(() => route.query.id as string);
+const prepare = computed(
+  () => audioData.value !== null && audioData.value.info !== null
+);
+
+// 表格数据计算属性
 const tableData = computed(() => {
   if (audioData.value) {
     return [
       { item: t("audio.view.info.item1"), text: audioData.value.name },
       {
         item: t("audio.view.info.item2"),
-        text: audioData.value.author.nickname,
+        text: audioData.value.author?.username,
       },
       {
         item: t("audio.view.info.item3"),
@@ -111,24 +99,14 @@ const tableData = computed(() => {
       },
       {
         item: t("audio.view.info.item4"),
-        text: `${audioData.value.file.size}` + t("audio.view.info.size"),
+        text: formatFileSize(audioData.value.file.size),
       },
     ];
   }
   return [];
 });
 
-const id = computed(() => route.query.id as string);
-const prepare = computed(
-  () => audioData.value !== null && audioData.value.info !== null
-);
-
-onMounted(async () => {
-  const response = await getAudio(id.value);
-  audioData.value = response.data;
-  file.value = response.data.file.url;
-});
-
+// 音频播放控制函数
 const handlePlayAudio = () => {
   const audio = document.getElementById("audio") as HTMLAudioElement;
   if (!isPlay.value) {
@@ -139,46 +117,20 @@ const handlePlayAudio = () => {
   isPlay.value = !isPlay.value;
 };
 
+// 音频事件监听函数
 const listenPlay = () => {
   isPlay.value = true;
-  console.log("开始播放", isPlay.value);
 };
 
 const listenPause = () => {
   isPlay.value = false;
-  console.log("暂停播放", isPlay.value);
 };
 
 const listenEnd = () => {
   isPlay.value = false;
-  console.log("结束播放", isPlay.value);
 };
 
-const save = async (
-  md5: string,
-  extension: string,
-  info: string,
-  file: File,
-  handler: FileHandler
-) => {
-  const data = {
-    md5,
-    key: `${md5}${extension}`,
-    filename: file.name,
-    url: store.fileUrl(md5, extension, handler, "screenshot/audio"),
-  };
-  try {
-    const response1 = await postFile(data);
-    const audio = { image_id: response1.data.id, info };
-    const response2 = await putAudio(audioData.value!.id, audio);
-    audioData.value!.image_id = response2.data.image_id;
-    audioData.value!.info = response2.data.info;
-    expire.value = false;
-  } catch (e) {
-    console.error(e);
-  }
-};
-
+// 处理音频加载完成
 const dealWith = () => {
   if (!prepare.value) {
     const audio = document.getElementById("audio") as HTMLAudioElement;
@@ -189,6 +141,7 @@ const dealWith = () => {
   }
 };
 
+// 生成音频缩略图
 const thumbnail = async (
   audio: HTMLAudioElement,
   width: number,
@@ -213,39 +166,78 @@ const thumbnail = async (
   });
 };
 
+// 设置音频信息和缩略图
 const setup = async (
   audio: HTMLAudioElement,
   size: { x: number; y: number }
 ) => {
   if (size.x !== 0) {
     const info = JSON.stringify({ size });
-    // const blob = await thumbnail(audio, size.x * 0.5, size.y * 0.5);
-    // blob.name = `${audioData.value!.name}.thumbnail`;
-    // blob.extension = ".jpg";
 
+    // 创建缩略图
     const file = await thumbnail(audio, size.x * 0.5, size.y * 0.5);
     const md5 = await store.fileMD5(file);
+    let extension = file.type.split("/").pop()!
+    extension = extension.startsWith(".") ? extension : `.${extension}`;
+
+    // 处理文件上传
     const handler = await store.publicHandler();
     const has = await store.fileHas(
       md5,
-      file.type.split("/").pop()!,
+      extension,
       handler,
       "screenshot/audio"
     );
+
+    // 如果文件不存在则上传
     if (!has) {
       await store.fileUpload(
         md5,
-        file.type.split("/").pop()!,
+        extension,
         file,
-        () => {},
+        () => { },
         handler,
         "screenshot/audio"
       );
     }
-    await save(md5, file.type.split("/").pop()!, info, file, handler);
+
+    // 保存文件信息
+    await save(md5, extension, info, file, handler);
   }
 };
 
+// 保存文件数据到服务器
+const save = async (
+  md5: string,
+  extension: string,
+  info: string,
+  file: File,
+  handler: FileHandler
+) => {
+  extension = extension.startsWith(".") ? extension : `.${extension}`;
+  const data: UploadFileType = {
+    md5,
+    key: md5 + extension,
+    filename: file.name,
+    url: store.fileUrl(md5, extension, handler, "screenshot/audio"),
+  };
+
+  try {
+    // 上传文件信息
+    const response1 = await postFile(data);
+    const audio = { image_id: response1.data.id, info };
+
+    // 更新音频信息
+    const response2 = await putAudio(audioData.value!.id, audio);
+    audioData.value!.image_id = response2.data.image_id;
+    audioData.value!.info = response2.data.info;
+    expire.value = false;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+// 删除音频确认对话框
 const deleteWindow = async () => {
   try {
     await ElMessageBox.confirm(
@@ -265,6 +257,7 @@ const deleteWindow = async () => {
   }
 };
 
+// 重命名音频对话框
 const namedWindow = async () => {
   try {
     const { value } = await ElMessageBox.prompt(
@@ -289,6 +282,7 @@ const namedWindow = async () => {
   }
 };
 
+// 重命名音频API调用
 const named = async (id: number, name: string) => {
   try {
     const response = await putAudio(id, { name });
@@ -297,6 +291,13 @@ const named = async (id: number, name: string) => {
     console.error(err);
   }
 };
+
+// 生命周期钩子 - 组件挂载时加载音频数据
+onMounted(async () => {
+  const response = await getAudio(id.value);
+  audioData.value = response.data;
+  file.value = response.data.file.url;
+});
 </script>
 
 <style lang="scss" scoped>
@@ -305,11 +306,9 @@ const named = async (id: number, name: string) => {
   width: 100%;
   height: 350px;
   background: rgb(238, 174, 202);
-  background: radial-gradient(
-    circle,
-    rgba(238, 174, 202, 1) 0%,
-    rgb(169, 196, 228) 100%
-  );
+  background: radial-gradient(circle,
+      rgba(238, 174, 202, 1) 0%,
+      rgb(169, 196, 228) 100%);
 }
 
 .audio-box {

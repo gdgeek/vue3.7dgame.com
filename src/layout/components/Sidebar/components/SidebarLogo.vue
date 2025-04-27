@@ -44,10 +44,11 @@ const logo = ref(
   }
 
   .logo-title {
-    flex-shrink: 0; /* 防止容器在空间不足时缩小 */
+    flex-shrink: 0;
+    /* 防止容器在空间不足时缩小 */
     margin-left: 10px;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 400;
     color: white;
   }
 }

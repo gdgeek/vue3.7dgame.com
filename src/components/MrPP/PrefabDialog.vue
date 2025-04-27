@@ -51,9 +51,14 @@
                   <template #header>
                     <b class="card-title" nowrap>{{ title(item) }}</b>
                   </template>
+                  <img
+                    v-if="!item.image"
+                    src="@/assets/image/none.png"
+                    style="width: 100%; height: auto; object-fit: contain"
+                  />
                   <LazyImg
                     v-if="item.image"
-                    style="width: 100%; height: 180px"
+                    style="width: 100%; height: auto"
                     fit="contain"
                     :url="item.image.url"
                   ></LazyImg>
@@ -149,6 +154,12 @@ const refresh = async () => {
     "image"
   );
   active.value.items = response.data;
+  active.value.pagination = {
+    current: parseInt(response.headers["x-pagination-current-page"]),
+    count: parseInt(response.headers["x-pagination-page-count"]),
+    size: parseInt(response.headers["x-pagination-per-page"]),
+    total: parseInt(response.headers["x-pagination-total-count"]),
+  };
 };
 
 const setup = ({ data }: { data: prefabsData }) => {

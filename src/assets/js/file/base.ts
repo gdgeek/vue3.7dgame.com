@@ -41,31 +41,36 @@ function fileMD5(file: File, progress: (p: number) => void = () => {}): Promise<
 }
 
 // 打开文件选择对话框并返回选择的文件
-const fileOpen = (accept: string): Promise<FileWithExtension> =>
+const fileOpen = (accept: string, multiple = false): Promise<FileWithExtension[]> =>
   new Promise((resolve, reject) => {
     try {
-      const input = document.createElement('input');
-      input.type = 'file';
+      const input = document.createElement("input");
+      input.type = "file";
       input.accept = accept;
+      input.multiple = multiple; // 启用多文件选择
 
       input.onchange = (e: Event) => {
-        const file = (e.target as HTMLInputElement).files?.[0];
-        if (file) {
-          const patternFileExtension = /\.([0-9a-z]+)(?:[\\?#]|$)/i;
-          const extensionMatch = file.name.match(patternFileExtension);
-          if (extensionMatch) {
-            (file as FileWithExtension).extension = extensionMatch[0];
-          }
-          resolve(file as FileWithExtension);
+        const files = Array.from((e.target as HTMLInputElement).files || []);
+        if (files.length > 0) {
+          // 为每个文件添加扩展名
+          const processedFiles = files.map((file) => {
+            const patternFileExtension = /\.([0-9a-z]+)(?:[\\?#]|$)/i;
+            const extensionMatch = file.name.match(patternFileExtension);
+            if (extensionMatch) {
+              (file as FileWithExtension).extension = extensionMatch[1]; // 提取扩展名部分
+            }
+            return file as FileWithExtension;
+          });
+          resolve(processedFiles);
         } else {
-          reject(new Error('No file selected')); 
+          reject(new Error("No files selected"));
         }
       };
 
       input.click();
     } catch (err) {
-      alert(err);
-      reject(err); 
+      console.error(err);
+      reject(err);
     }
   });
 

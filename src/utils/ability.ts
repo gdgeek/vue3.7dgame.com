@@ -1,6 +1,5 @@
 // src/utils/ability.ts
 import { defineAbility } from "@casl/ability";
-import env from "@/environment";
 
 export class AbilityRouter {
   constructor(public path: string) {}
@@ -94,6 +93,8 @@ export function UpdateAbility(
         /^\/verse(\/|$)/,
         /^\/meta(\/|$)/,
         /^\/resource\/polygen(\/|$)/,
+        /^\/resource\/audio(\/|$)/,
+        /^\/resource\/picture(\/|$)/,
       ]);
       menu.concat(["/verse-share/open", /^\/trades(\/|$)/]);
     }
@@ -101,8 +102,6 @@ export function UpdateAbility(
     if (roles.some((role) => manager.includes(role))) {
       can("manager", "all");
     }
-
-
 
     if (roles.some((role) => admin.includes(role))) {
       can("admin", "all");
@@ -116,7 +115,6 @@ export function UpdateAbility(
         /^\/resource\/voxel(\/|$)/,
         /^\/resource\/picture(\/|$)/,
         /^\/resource\/video(\/|$)/,
-        /^\/resource\/audio(\/|$)/,
         /^\/ai(\/|$)/,
       ]);
     }
