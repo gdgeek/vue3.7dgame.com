@@ -2,7 +2,7 @@
   <div class="hero-section" :class="{ 'dark-theme': isDark }">
     <!-- 背景效果 -->
     <div class="hero-background">
-      <Meteors v-if="isDark" :count="20" :speed="5" color="#64748b" />
+      <Meteors v-if="isDark" :count="30" :speed="5" color="#64748b" />
       <div class="overlay"></div>
     </div>
 
