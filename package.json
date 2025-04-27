@@ -13,6 +13,7 @@
     "build:7dgame_com": "vue-tsc --noEmit & vite build --mode 7dgame_com",
     "build:1ucb_com": "vue-tsc --noEmit & vite build --mode 1ucb_com",
     "build:voxelparty_com": "vue-tsc --noEmit & vite build --mode voxelparty_com",
+
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",

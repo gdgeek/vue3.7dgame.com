@@ -4,9 +4,11 @@
 
     <el-row :gutter="10">
       <el-col :md="14" :span="24">
+
         <div :class="['home-avatar-container', { mobile: isMobile }]">
           <el-avatar shape="square" class="home-avatar-child" icon="avatar" :src="avatarUrl" :size="100"
             style="float: left" @click="showQRCode()"></el-avatar>
+
           <div>
             <div class="home-avatar-info">
               <h3 class="home-avatar-name">{{ greeting }} {{ name }}</h3>
@@ -22,7 +24,7 @@
         <div :class="['home-header-button', { mobile: isMobile }]">
           <el-button size="small" type="primary" @click="gotoEdit">{{
             $t("homepage.edit.title")
-          }}</el-button>
+            }}</el-button>
         </div>
       </el-col>
     </el-row>
@@ -40,7 +42,9 @@ import { useRouter } from "vue-router";
 import { useUserStore } from "@/store/modules/user";
 import { useScreenStore } from "@/store";
 
+
 const codeDialog = ref<any>(null);
+
 const userStore = useUserStore();
 const router = useRouter();
 const { t } = useI18n();

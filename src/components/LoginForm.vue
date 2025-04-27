@@ -4,6 +4,7 @@
 
       <h1>{{ $t("login.h1") }}</h1>
       <h4>{{ $t("login.h4") }}</h4>
+      1234
       <br />
       <el-card style="width: 100%" shadow="never">
         <span>登录账号</span>
@@ -23,8 +24,16 @@
 import "@/assets/font/font.css";
 import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
-import NamePassword from "./Account/NamePassword.vue";
-import Wechat from "./Account/Wechat.vue";
+
+import type { AppleIdReturn } from "@/api/v1/site";
+import AuthAPI from "@/api/auth/index";
+import { PostSiteAppleId } from "@/api/v1/site";
+import { VueAppleLoginConfig } from "@/utils/helper";
+import { LoginData } from "@/api/auth/model";
+
+alert(import.meta.env.VITE_APP_BASE_API);
+const formRef = ref<FormInstance>();
+
 const settingsStore = useSettingsStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
