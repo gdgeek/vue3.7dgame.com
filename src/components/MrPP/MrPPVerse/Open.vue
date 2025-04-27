@@ -3,7 +3,7 @@
     <el-card>
       <template #header>
         <div class="clearfix">
-          <b>开放工程给项目（管理员专用）</b>
+          <b>开放场景给项目（管理员专用）</b>
         </div>
       </template>
       <el-button v-if="true" style="width: 100%" type="primary" size="small">

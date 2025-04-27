@@ -3,40 +3,22 @@
     <el-dialog v-model="post.visible" width="30%" :close-on-click-modal="false">
       <template #header> {{ $t("verse.view.share.header1") }} </template>
       <el-form :model="post.form" ref="postRef" label-width="auto">
-        <el-form-item
-          :label="$t('verse.view.share.form.label1')"
-          prop="username"
-          :rules="[
-            {
-              required: true,
-              message: $t('verse.view.share.form.ruleMessage'),
-              trigger: 'blur',
-            },
-          ]"
-        >
-          <el-input
-            type="text"
-            v-model="post.form.username"
-            :placeholder="$t('verse.view.share.form.placeholder')"
-            autocomplete="off"
-          ></el-input>
+        <el-form-item :label="$t('verse.view.share.form.label1')" prop="username" :rules="[
+          {
+            required: true,
+            message: $t('verse.view.share.form.ruleMessage'),
+            trigger: 'blur',
+          },
+        ]">
+          <el-input type="text" v-model="post.form.username" :placeholder="$t('verse.view.share.form.placeholder')"
+            autocomplete="off"></el-input>
         </el-form-item>
 
-        <el-form-item
-          :label="$t('verse.view.share.form.label2')"
-          prop="content"
-        >
+        <el-form-item :label="$t('verse.view.share.form.label2')" prop="content">
           <el-input type="textarea" v-model="post.form.content"></el-input>
         </el-form-item>
-        <el-form-item
-          :label="$t('verse.view.share.form.label3')"
-          prop="editable"
-        >
-          <el-checkbox
-            v-model="post.form.editable"
-            :label="$t('verse.view.share.form.label4')"
-            border
-          ></el-checkbox>
+        <el-form-item :label="$t('verse.view.share.form.label3')" prop="editable">
+          <el-checkbox v-model="post.form.editable" :value="$t('verse.view.share.form.label4')" border></el-checkbox>
         </el-form-item>
         <el-form-item>
           <el-button-group :inline="true">
@@ -55,35 +37,21 @@
     <el-dialog v-model="put.visible" width="30%" :close-on-click-modal="false">
       <template #header> {{ $t("verse.view.share.header1") }} </template>
       <el-form :model="put.form" ref="putRef" label-width="auto">
-        <el-form-item
-          :label="$t('verse.view.share.form.label1')"
-          prop="username"
-          :rules="[
-            {
-              required: true,
-              message: $t('verse.view.share.form.ruleMessage'),
-              trigger: 'blur',
-            },
-          ]"
-        >
+        <el-form-item :label="$t('verse.view.share.form.label1')" prop="username" :rules="[
+          {
+            required: true,
+            message: $t('verse.view.share.form.ruleMessage'),
+            trigger: 'blur',
+          },
+        ]">
           {{ put.form.username }}
         </el-form-item>
 
-        <el-form-item
-          :label="$t('verse.view.share.form.label2')"
-          prop="content"
-        >
+        <el-form-item :label="$t('verse.view.share.form.label2')" prop="content">
           <el-input type="textarea" v-model="put.form.content"></el-input>
         </el-form-item>
-        <el-form-item
-          :label="$t('verse.view.share.form.label3')"
-          prop="editable"
-        >
-          <el-checkbox
-            v-model="put.form.editable"
-            :label="$t('verse.view.share.form.label4')"
-            border
-          ></el-checkbox>
+        <el-form-item :label="$t('verse.view.share.form.label3')" prop="editable">
+          <el-checkbox v-model="put.form.editable" :value="$t('verse.view.share.form.label4')" border></el-checkbox>
         </el-form-item>
         <el-form-item>
           <el-button-group :inline="true">
@@ -108,15 +76,8 @@
       <el-collapse v-if="items != null && items.length !== 0" accordion>
         <el-collapse-item v-for="item in items" :key="item.id">
           <template #title>
-            <el-tooltip
-              class="item"
-              effect="light"
-              :content="item.user.username"
-              placement="top"
-            >
-              <div
-                v-if="item.user.nickname !== '' && item.user.nickname !== null"
-              >
+            <el-tooltip class="item" effect="light" :content="item.user.username" placement="top">
+              <div v-if="item.user.nickname !== '' && item.user.nickname !== null">
                 <i class="el-icon-edit" v-if="item.editable === 1"></i>
                 <i class="el-icon-view" v-else></i>
 
@@ -135,10 +96,14 @@
             <el-divider size="small" content-position="right">
               <el-button-group size="small" v-if="saveable">
                 <el-button size="small" @click="_setup(item)">
-                  <el-icon><EditPen></EditPen></el-icon>
+                  <el-icon>
+                    <EditPen></EditPen>
+                  </el-icon>
                 </el-button>
                 <el-button size="small" @click="del(item.id)">
-                  <el-icon><Close></Close></el-icon>
+                  <el-icon>
+                    <Close></Close>
+                  </el-icon>
                 </el-button>
               </el-button-group>
             </el-divider>
@@ -147,13 +112,7 @@
       </el-collapse>
 
       <br />
-      <el-button
-        v-if="saveable"
-        style="width: 100%"
-        @click="open"
-        type="primary"
-        size="small"
-      >
+      <el-button v-if="saveable" style="width: 100%" @click="open" type="primary" size="small">
         <font-awesome-icon icon="handshake"></font-awesome-icon>
         &nbsp;{{ $t("verse.view.share.title2") }}
       </el-button>
@@ -178,7 +137,7 @@ const ability = useAbility();
 const can = ability.can.bind(ability);
 
 const props = defineProps<{
-  verse: VerseData;
+  verse: VerseData | null;
 }>();
 
 const items = ref<any[]>([]);
@@ -207,7 +166,7 @@ const put = reactive({
 const postRef = ref<FormInstance>();
 const putRef = ref<FormInstance>();
 
-const verseId = computed(() => props.verse.id);
+const verseId = computed(() => props.verse?.id);
 
 const saveable = computed(() => {
   return props.verse && props.verse.editable;
@@ -215,6 +174,12 @@ const saveable = computed(() => {
 
 const refresh = async () => {
   try {
+    // 添加检查确保verseId.value存在
+    if (verseId.value === undefined) {
+      console.warn('无法刷新分享列表：verse ID 未定义');
+      return;
+    }
+
     const r = await getVerseShares(verseId.value);
     items.value = r.data;
   } catch (e: any) {

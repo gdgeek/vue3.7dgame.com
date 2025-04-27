@@ -59,7 +59,7 @@ export const useInfomationStore = defineStore("information", () => {
   const title = ref(env.title());
   const description = ref(env.subtitle());
   // const version = ref("20230412.1");
-  const version = ref("202408");
+  const version = ref("2025");
   // const beian = ref("沪ICP备15039333号");
   const beian = computed(() => {
     if (lang.value === "zh-cn") {

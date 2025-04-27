@@ -1,0 +1,34 @@
+@media screen and (min-width: 1600px) {
+  .background-screen-border{
+  border: 1px double #eceef5;
+  border-width:0 1px 0px 1px;
+   box-shadow: #f4f4f4 0px 0px 2px 1px;
+  }
+}
+@media screen and (min-width: 700px) {
+  .p-pc-pfr {
+    padding-left: 4%;
+    padding-right: 4%;
+  }
+}
+// 手机端
+@media screen and (max-width: 700px) {
+  .p-ph-top {
+    padding-top: 20px;
+  }
+  .p-title-l {
+    font-size: 24px !important;
+  }
+  .p-title-m {
+    font-size: 22px !important;
+  }
+  .p-title-s {
+  font-size: 18px !important;
+  }
+  .p-title-ss {
+    font-size: 16px !important;
+  }
+  .rsph-body-width {
+    padding: 0 3% !important;
+  }
+}

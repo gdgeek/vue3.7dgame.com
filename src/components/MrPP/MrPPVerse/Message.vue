@@ -1,19 +1,12 @@
 <template>
   <div id="Message">
-    <el-divider
-      v-if="tagsMap && message && message.messageTags"
-      content-position="left"
-    >
+    <el-divider v-if="tagsMap && message && message.messageTags" content-position="left">
     </el-divider>
     <el-dialog v-model="dialog" width="70%">
       <template #header>
         <span>{{ $t("verse.view.message.header") }}</span>
       </template>
-      <mr-p-p-message-from
-        ref="editor"
-        :data="message!"
-        @post="changeMessage"
-      ></mr-p-p-message-from>
+      <mr-p-p-message-from ref="editor" :data="message!" @post="changeMessage"></mr-p-p-message-from>
     </el-dialog>
     <br />
     <el-card>
@@ -24,27 +17,13 @@
             <h4 style="display: inline; color: #676767">{{ message.title }}</h4>
           </span>
 
-          <el-button-group
-            v-if="message && tagsMap"
-            style="float: right"
-            :inline="true"
-          >
-            <el-button
-              v-if="canUpdate(message)"
-              size=""
-              style="padding: 0 0 0 10px; color: #2190ac"
-              type="text"
-              @click="dialog = true"
-            >
+          <el-button-group v-if="message && tagsMap" style="float: right" :inline="true">
+            <el-button v-if="canUpdate(message)" size="" style="padding: 0 0 0 10px; color: #2190ac" link
+              @click="dialog = true">
               {{ $t("verse.view.message.update") }}
             </el-button>
-            <el-button
-              v-if="canDelete(message)"
-              size=""
-              style="padding: 0 0 0 10px; color: #2190ac"
-              type="text"
-              @click="confirmDeletion(message.id!)"
-            >
+            <el-button v-if="canDelete(message)" size="" style="padding: 0 0 0 10px; color: #2190ac" link
+              @click="confirmDeletion(message.id!)">
               {{ $t("verse.view.message.delete") }}
             </el-button>
           </el-button-group>
@@ -52,23 +31,12 @@
       </template>
 
       <el-skeleton v-if="!message" :rows="6" animated></el-skeleton>
-      <div
-        v-else
-        style="min-height: 100px; font-size: 15px; margin-bottom: 30px"
-        :innerHTML="sanitizedHtml"
-      ></div>
+      <div v-else style="min-height: 100px; font-size: 15px; margin-bottom: 30px" :innerHTML="sanitizedHtml"></div>
       <el-row>
         <el-col :span="14">
-          <el-button
-            v-if="message"
-            size="small"
-            :type="message.like ? 'primary' : ''"
-            @click="toggleLike(message.like!)"
-          >
-            <font-awesome-icon
-              icon="fa-solid fa-thumbs-up"
-              style="margin-right: 5px"
-            ></font-awesome-icon>
+          <el-button v-if="message" size="small" :type="message.like ? 'primary' : ''"
+            @click="toggleLike(message.like!)">
+            <font-awesome-icon icon="fa-solid fa-thumbs-up" style="margin-right: 5px"></font-awesome-icon>
             {{ $t("verse.view.message.like") }}
             <span v-if="message.likesCount != 0">{{ message.likesCount }}</span>
           </el-button>
@@ -123,7 +91,7 @@ const canDelete = (message: MessageType) => {
       return;
     }
   });
-  return message?.author_id === userInfo.value.data.id;
+  return message?.author_id === userInfo.value?.id;
 };
 
 const canUpdate = (message: MessageType) => {
@@ -134,7 +102,7 @@ const canUpdate = (message: MessageType) => {
       managed |= 1;
     }
   });
-  return message?.author_id === userInfo.value.data.id;
+  return message?.author_id === userInfo.value?.id;
 };
 
 const refresh = async () => {

@@ -11,15 +11,15 @@ export type TagInfo = {
 };
 
 export const useTagsStore = defineStore("tags", () => {
-  // 使用 ref 定义状态
   const tagsMap = ref<Map<number, TagInfo> | null>(null);
 
-  // 定义刷新标签的方法
+  // 刷新标签
   const refreshTags = async () => {
     try {
-      const response = await getTags();
+      const classify = await getTags("Classify");
+
       const map = new Map<number, TagInfo>();
-      response.data.forEach((item: any) => {
+      classify.data.forEach((item: any) => {
         const obj: TagInfo = {
           name: item.name,
           color: "#000000",

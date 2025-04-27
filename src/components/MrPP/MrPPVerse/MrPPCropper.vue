@@ -1,14 +1,7 @@
 <template>
   <div>
-    <el-upload
-      class="file-uploader"
-      action=""
-      :auto-upload="false"
-      :show-file-list="false"
-      :on-change="handleChangeUpload"
-      accept="image/jpeg,image/gif,image/png,image/bmp"
-      style="float: left"
-    >
+    <el-upload class="file-uploader" action="" :auto-upload="false" :show-file-list="false"
+      :on-change="handleChangeUpload" accept="image/jpeg,image/gif,image/png,image/bmp" style="float: left">
       <img v-if="url" :src="url" class="file" />
       <i v-else class="el-icon-plus file-uploader-icon"></i>
     </el-upload>
@@ -19,68 +12,35 @@
       </template>
       <div class="cropper-content">
         <div class="cropper" style="text-align: center">
-          <vueCropper
-            ref="cropperRef"
-            :img="option.img"
-            :output-size="option.outputSize"
-            :output-type="option.outputType"
-            :info="true"
-            :full="option.full"
-            :can-move="option.canMove"
-            :can-move-box="option.canMoveBox"
-            :original="option.original"
-            :auto-crop="option.autoCrop"
-            :fixed="option.fixed"
-            :fixed-number="option.fixedNumber"
-            :center-box="option.centerBox"
-            :info-true="option.infoTrue"
-            :fixed-box="option.fixedBox"
-            :auto-crop-width="option.autoCropWidth"
-            :auto-crop-height="option.autoCropHeight"
-            @crop-moving="cropMoving"
-          ></vueCropper>
+          <vueCropper ref="cropperRef" :img="option.img" :output-size="option.outputSize"
+            :output-type="option.outputType" :info="true" :full="option.full" :can-move="option.canMove"
+            :can-move-box="option.canMoveBox" :original="option.original" :auto-crop="option.autoCrop"
+            :fixed="option.fixed" :fixed-number="option.fixedNumber" :center-box="option.centerBox"
+            :info-true="option.infoTrue" :fixed-box="option.fixedBox" :auto-crop-width="option.autoCropWidth"
+            :auto-crop-height="option.autoCropHeight" @crop-moving="cropMoving">
+          </vueCropper>
         </div>
       </div>
 
       <template #footer>
         <el-button-group style="float: left">
-          <el-button
-            size="small"
-            type="primary"
-            plain
-            @click="rotateLeftHandle"
-          >
+          <el-button size="small" type="primary" plain @click="rotateLeftHandle">
             {{ $t("homepage.edit.avatarCropping.leftRotation") }}
           </el-button>
-          <el-button
-            size="small"
-            type="primary"
-            plain
-            @click="rotateRightHandle"
-          >
+          <el-button size="small" type="primary" plain @click="rotateRightHandle">
             {{ $t("homepage.edit.avatarCropping.rightRotation") }}
           </el-button>
-          <el-button
-            size="small"
-            type="primary"
-            plain
-            @click="changeScaleHandle(1)"
-          >
+          <el-button size="small" type="primary" plain @click="changeScaleHandle(1)">
             {{ $t("homepage.edit.avatarCropping.enlarge") }}
           </el-button>
-          <el-button
-            size="small"
-            type="primary"
-            plain
-            @click="changeScaleHandle(-1)"
-          >
+          <el-button size="small" type="primary" plain @click="changeScaleHandle(-1)">
             {{ $t("homepage.edit.avatarCropping.shrink") }}
           </el-button>
         </el-button-group>
         <el-button-group>
           <el-button @click="dialogVisible = false">{{
             $t("homepage.edit.avatarCropping.cancel")
-          }}</el-button>
+            }}</el-button>
           <el-button type="primary" :loading="loading" @click="finish">
             {{ $t("homepage.edit.avatarCropping.confirm") }}
           </el-button>
@@ -94,6 +54,7 @@
 import "vue-cropper/dist/index.css";
 import { VueCropper } from "vue-cropper";
 import { postFile } from "@/api/v1/files";
+import { UploadFileType } from "@/api/user/model";
 import { useFileStore } from "@/store/modules/config";
 import { UploadFile } from "element-plus";
 
@@ -211,7 +172,8 @@ const saveFile = async (
   file: File,
   handler: any
 ) => {
-  const data = {
+  extension = extension.startsWith('.') ? extension : `.${extension}`;
+  const data: UploadFileType = {
     filename: file.name,
     md5,
     key: md5 + extension,
@@ -253,7 +215,7 @@ const finish = async () => {
         md5,
         file.extension,
         file,
-        (p: any) => {},
+        (p: any) => { },
         handler,
         "backup"
       );

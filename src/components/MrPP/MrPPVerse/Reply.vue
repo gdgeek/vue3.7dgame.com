@@ -4,35 +4,15 @@
       <el-main style="padding-left: 40px">
         <div class="block">
           <el-timeline>
-            <el-timeline-item
-              :timestamp="$t('verse.view.reply.timestamp')"
-              placement="top"
-            >
-              <el-form
-                ref="formRef"
-                :model="form"
-                :rules="rules"
-                label-width="auto"
-                class="demo-ruleForm"
-              >
+            <el-timeline-item :timestamp="$t('verse.view.reply.timestamp')" placement="top">
+              <el-form ref="formRef" :model="form" :rules="rules" label-width="auto" class="demo-ruleForm">
                 <el-form-item label="" prop="body">
-                  <vue-editor
-                    id="reply-editor"
-                    v-model="form.body"
-                    :editor-toolbar="customToolbar"
-                    style="width: 100%"
-                  ></vue-editor>
+                  <vue-editor id="reply-editor" v-model="form.body" :editor-toolbar="customToolbar"
+                    style="width: 100%"></vue-editor>
                 </el-form-item>
                 <el-form-item style="float: right; margin-right: 10px">
-                  <el-button
-                    style="padding: 5px 10px"
-                    :disabled="isDisabled"
-                    @click="submitForm"
-                  >
-                    <font-awesome-icon
-                      icon="edit"
-                      style="margin-right: 5px"
-                    ></font-awesome-icon>
+                  <el-button style="padding: 5px 10px" :disabled="isDisabled" @click="submitForm">
+                    <font-awesome-icon icon="edit" style="margin-right: 5px"></font-awesome-icon>
                     {{ $t("verse.view.reply.title") }}
                   </el-button>
                 </el-form-item>
@@ -47,11 +27,7 @@
             </div>
 
             <div v-else>
-              <el-timeline-item
-                v-for="reply in replies"
-                :key="reply.id"
-                placement="top"
-              >
+              <el-timeline-item v-for="reply in replies" :key="reply.id" placement="top">
                 <div class="replytitle">
                   <div class="replyicon">
                     <img src="" alt="" />
@@ -62,43 +38,28 @@
                   <div class="replynickname">{{ reply.author.nickname }}</div>
                 </div>
                 <el-card :body-style="{ padding: '15px 10px 0px 20px' }">
-                  <div
-                    style="min-height: 80px"
-                    :innerHTML="sanitizedHtml(reply)"
-                  ></div>
-                  <div
-                    style="
+                  <div style="min-height: 80px" :innerHTML="sanitizedHtml(reply)"></div>
+                  <div style="
                       float: right;
                       padding: 5px 10px 12px 0;
                       color: #8790a7;
-                    "
-                    class="bottom clearfix"
-                  >
+                    " class="bottom clearfix">
                     <span></span>
                     {{ $t("verse.view.reply.publish") }}
                     <time class="time">{{ reply.updated_at }}</time>
                     &nbsp; &nbsp;
-                    <el-button
-                      v-if="canDelete(reply)"
-                      size="small"
-                      type="text"
-                      @click="deletedWindow(reply.id)"
-                      ><el-icon> <Delete></Delete> </el-icon
-                    ></el-button>
+                    <el-button v-if="canDelete(reply)" size="small" link 
+                      @click="deletedWindow(reply.id)"><el-icon>
+                        <Delete></Delete>
+                      </el-icon></el-button>
                   </div>
                 </el-card>
               </el-timeline-item>
             </div>
 
-            <el-pagination
-              :current-page="pagination.current"
-              :page-count="pagination.count"
-              :page-size="pagination.size"
-              :total="pagination.total"
-              layout="prev, pager, next, jumper"
-              background
-              @current-change="handleCurrentChange"
-            ></el-pagination>
+            <el-pagination :current-page="pagination.current" :page-count="pagination.count"
+              :page-size="pagination.size" :total="pagination.total" layout="prev, pager, next, jumper" background
+              @current-change="handleCurrentChange"></el-pagination>
           </el-timeline>
         </div>
       </el-main>
@@ -168,7 +129,9 @@ const refresh = async () => {
 };
 
 const canDelete = (item: any) => {
-  return userStore.userInfo.data.id === item.author_id;
+  if (userStore.userInfo === null) return false;
+
+  return userStore.userInfo.id === item.author_id;
 };
 const deletedWindow = async (id: number) => {
   try {

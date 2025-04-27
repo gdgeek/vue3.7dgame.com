@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 import qs from "querystringify";
 import path from "path-browserify";
-import { getUserInfoData } from "../user/model";
+import { UserInfoReturnType } from "../user/model";
 
 export type userCreationData = {
   pictureCount: number;
@@ -17,7 +17,7 @@ export const getUserCreation = () => {
     expand:
       "pictureCount,videoCount,polygenCount,postCount,likeCount, verseCount",
   };
-  const url = path.join("v1", "users", "creation" + qs.stringify(query, true));
+  const url = path.join("v1", "user", "creation" + qs.stringify(query, true));
   return request<userCreationData>({
     url,
     method: "get",
@@ -25,10 +25,25 @@ export const getUserCreation = () => {
 };
 
 export const putUserData = (data: any) => {
-  const url = path.join("v1", "users", "set-data");
-  return request<getUserInfoData>({
+  console.error(data);
+  const url = path.join("v1", "user", "update");
+  return request<UserInfoReturnType>({
     url,
     method: "put",
     data,
   });
+};
+
+export const info = () => {
+  const url = path.join("v1", "user", "info");
+  return request<UserInfoReturnType>({
+    url,
+    method: "get",
+  });
+};
+
+export default {
+  getUserCreation,
+  putUserData,
+  info,
 };

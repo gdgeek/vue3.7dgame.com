@@ -1,6 +1,5 @@
 // src/utils/ability.ts
 import { defineAbility } from "@casl/ability";
-import env from "@/environment";
 
 export class AbilityRouter {
   constructor(public path: string) {}
@@ -94,6 +93,8 @@ export function UpdateAbility(
         /^\/verse(\/|$)/,
         /^\/meta(\/|$)/,
         /^\/resource\/polygen(\/|$)/,
+        /^\/resource\/audio(\/|$)/,
+        /^\/resource\/picture(\/|$)/,
       ]);
       menu.concat(["/verse-share/open", /^\/trades(\/|$)/]);
     }
@@ -114,7 +115,6 @@ export function UpdateAbility(
         /^\/resource\/voxel(\/|$)/,
         /^\/resource\/picture(\/|$)/,
         /^\/resource\/video(\/|$)/,
-        /^\/resource\/audio(\/|$)/,
         /^\/ai(\/|$)/,
       ]);
     }

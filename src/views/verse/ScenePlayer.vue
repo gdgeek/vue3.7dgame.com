@@ -1,14 +1,10 @@
 <template>
   <div>
-    <div
-      id="scene"
-      ref="scene"
-      :style="{
-        height: isSceneFullscreen ? '100vh' : '75vh',
-        width: '100%',
-        margin: '0 auto',
-      }"
-    ></div>
+    <div id="scene" ref="scene" :style="{
+      height: isSceneFullscreen ? '100vh' : '75vh',
+      width: '100%',
+      margin: '0 auto',
+    }"></div>
   </div>
 </template>
 
@@ -98,7 +94,8 @@ const raycaster = new THREE.Raycaster(); // 射线投射器
 // 初始化事件容器
 const initEventContainer = () => {
   if (props.verse?.data) {
-    const verseData = JSON.parse(props.verse.data);
+    // const verseData = JSON.parse(props.verse.data);
+    const verseData = props.verse.data;
     if (verseData.children?.modules) {
       verseData.children.modules.forEach((module: any) => {
         const metaId = module.parameters.meta_id;
@@ -108,7 +105,8 @@ const initEventContainer = () => {
 
         if (meta?.events) {
           try {
-            const events = JSON.parse(meta.events);
+            // const events = JSON.parse(meta.events);
+            const events = meta.events;
             eventContainer.value[module.parameters.uuid] = events;
             console.log(
               `Module ${module.parameters.uuid} 的事件已加载:`,
@@ -285,8 +283,8 @@ const loadModel = async (
             mesh.scale.set(
               entity.parameters.transform.scale.x * baseScale,
               entity.parameters.transform.scale.y *
-                baseScale *
-                (1 / aspectRatio),
+              baseScale *
+              (1 / aspectRatio),
               entity.parameters.transform.scale.z * baseScale
             );
           }
@@ -418,8 +416,8 @@ const loadModel = async (
             mesh.scale.set(
               entity.parameters.transform.scale.x * baseScale,
               entity.parameters.transform.scale.y *
-                baseScale *
-                (1 / aspectRatio),
+              baseScale *
+              (1 / aspectRatio),
               entity.parameters.transform.scale.z * baseScale
             );
           }
@@ -1568,11 +1566,19 @@ const processEntities = async (
       entity.parameters?.transform
     );
 
+    // 计算当前实体的可见性状态，需要考虑父级的可见性
+    const currentActive =
+      (entity.parameters?.active !== undefined ? entity.parameters.active : true) && parentActive;
+
     console.log(`处理实体 [Level ${level}]:`, {
+      type: entity.type,
       name: entity.parameters?.name,
+      uuid: entity.parameters?.uuid,
       originalTransform: entity.parameters?.transform,
       parentTransform,
       combinedTransform: entityTransform,
+      isActive: currentActive,
+      parentActive
     });
 
     // 处理当前实体
@@ -1587,13 +1593,31 @@ const processEntities = async (
           textResource,
           {
             ...entity,
-            parameters: { ...entity.parameters, transform: entityTransform },
+            parameters: {
+              ...entity.parameters,
+              transform: entityTransform,
+              active: currentActive // 传递计算后的可见性状态
+            },
           },
-          parentActive
+          currentActive // 使用计算后的可见性状态
         );
       } catch (error) {
         console.error("处理文本实体失败:", error);
       }
+    } else if (entity.type === "Entity") {
+      // 处理Entity类型
+      console.log("处理Entity类型容器:", entity.parameters.uuid);
+      const entityData = {
+        type: "entity",
+        data: {
+          transform: entityTransform,
+          setVisibility: () => {
+            // Entity本身没有可见性，需要通过子实体控制
+            console.log("Entity不支持直接设置可见性");
+          },
+        },
+      };
+      sources.set(entity.parameters.uuid, entityData);
     } else if (entity.parameters?.resource) {
       const resource = props.verse.resources.find(
         (r: any) => r.id.toString() === entity.parameters.resource.toString()
@@ -1604,9 +1628,13 @@ const processEntities = async (
             resource,
             {
               ...entity,
-              parameters: { ...entity.parameters, transform: entityTransform },
+              parameters: {
+                ...entity.parameters,
+                transform: entityTransform,
+                active: currentActive // 传递计算后的可见性状态
+              },
             },
-            parentActive
+            currentActive // 使用计算后的可见性状态
           );
         } catch (error) {
           console.error(`加载模型失败:`, error);
@@ -1615,18 +1643,14 @@ const processEntities = async (
     }
 
     // 递归处理子实体，传递当前实体的可见性状态
-    // if (entity.children?.entities) {
-    //   const currentActive =
-    //     entity.parameters?.active !== undefined
-    //       ? entity.parameters.active
-    //       : true;
-    //   await processEntities(
-    //     entity.children.entities,
-    //     entityTransform,
-    //     level + 1,
-    //     parentActive && currentActive
-    //   );
-    // }
+    if (entity.children?.entities) {
+      await processEntities(
+        entity.children.entities,
+        entityTransform,
+        level + 1,
+        currentActive // 传递计算后的可见性状态给子实体
+      );
+    }
   }
 };
 
@@ -1678,7 +1702,8 @@ onMounted(async () => {
 
   // 加载verse中所有数据
   if (props.verse?.data) {
-    const verseData = JSON.parse(props.verse.data);
+    // const verseData = JSON.parse(props.verse.data);
+    const verseData = props.verse.data;
     console.log("解析后的verse全部数据:", props.verse);
     if (verseData.children?.modules) {
       for (const module of verseData.children.modules) {
@@ -1688,7 +1713,8 @@ onMounted(async () => {
         );
 
         if (meta && meta.data) {
-          const metaData = JSON.parse(meta.data);
+          // const metaData = JSON.parse(meta.data);
+          const metaData = meta.data;
           console.log("解析后的metaData:", metaData);
           if (metaData.children?.entities) {
             // 使用递归处理可能存在的多级嵌套

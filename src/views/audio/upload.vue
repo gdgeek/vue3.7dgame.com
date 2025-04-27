@@ -1,19 +1,18 @@
 <template>
-  <div>
-    <mr-p-p-upload
-      dir="audio"
-      :file-type="fileType"
-      @save-resource="saveAudio"
-    >
-      <div>{{ $t("audio.uploadFile") }}</div>
-    </mr-p-p-upload>
-  </div>
+  <TransitionWrapper>
+    <div>
+      <mr-p-p-upload dir="audio" :file-type="fileType" @save-resource="saveAudio">
+        <div>{{ $t("audio.uploadFile") }}</div>
+      </mr-p-p-upload>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
-import { postAudio } from "@/api/resources/index";
+import { postAudio } from "@/api/v1/resources/index";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const fileType = ref("audio/mp3, audio/wav");
 const router = useRouter();
@@ -43,9 +42,9 @@ const saveAudio = async (
 
 // 多个文件上传后跳转到最后一个文件的查看页面
 const handleAllFilesUploaded = async (lastFileId: number) => {
-    await router.push({
-      path: "/resource/audio/view",
-      query: { id: lastFileId },
-    });
+  await router.push({
+    path: "/resource/audio/view",
+    query: { id: lastFileId },
+  });
 };
 </script>

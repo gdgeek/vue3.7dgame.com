@@ -1,197 +1,34 @@
 <template>
-  <div
-    v-loading="loading"
-    :class="['box1', { mobile: isMobile, 'dark-theme': isDark }]"
-  >
+  <div v-loading="loading" :class="['box1', { 'dark-theme': isDark }]">
     <div :class="['box2', { 'dark-theme': isDark }]">
+
       <h1>{{ $t("login.h1") }}</h1>
       <h4>{{ $t("login.h4") }}</h4>
       <br />
-      <el-tabs style="width: 100%" type="border-card" :stretch="true">
-        <el-tab-pane label="Apple ID">
-          <h2 class="login-title">Use Apple Account</h2>
-
-          <br />
-          <vue-apple-login
-            @click="loading = true"
-            class="appleid_button"
-            width="100%"
-            height="100px"
-            mode="center-align"
-            type="sign in"
-            :color="appleLoginColor"
-            :key="isDark"
-            :onSuccess="onSuccess"
-            :onFailure="onFailure"
-          ></vue-apple-login>
-          <br />
-          <br />
-        </el-tab-pane>
-        <el-tab-pane label="Name & Password">
-          {{ env.api }}
-          <h2 class="login-title">{{ $t("login.loginTitle") }}</h2>
-          <el-form
-            ref="formRef"
-            class="login-form"
-            :rules="rules"
-            :model="form"
-            label-width="auto"
-          >
-            <el-form-item :label="$t('login.username')" prop="username">
-              <el-input v-model="form.username" suffix-icon="User"></el-input>
-            </el-form-item>
-            <el-form-item :label="$t('login.password')" prop="password">
-              <el-input
-                v-model="form.password"
-                type="password"
-                suffix-icon="Lock"
-              ></el-input>
-            </el-form-item>
-
-            <el-form-item class="login-button">
-              <el-button style="width: 100%" type="primary" @click="submit">
-                {{ $t("login.login") }}
-              </el-button>
-            </el-form-item>
-          </el-form>
-        </el-tab-pane>
-      </el-tabs>
+      <el-card style="width: 100%" shadow="never">
+        <span>登录账号</span>
+        <br>
+        <br>
+        <name-password />
+      </el-card>
+      <br />
+      <div style="width: 100%" shadow="never" class="apple-login-container">
+        <wechat />
+      </div>
+      <br>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import "@/assets/font/font.css";
 import { useSettingsStore } from "@/store/modules/settings";
-import { FormInstance } from "element-plus";
 import { ThemeEnum } from "@/enums/ThemeEnum";
-import type { AppleIdReturn } from "@/api/v1/site";
-import AuthAPI from "@/api/auth/index";
-import { PostSiteAppleId } from "@/api/v1/site";
-import { VueAppleLoginConfig } from "@/utils/helper";
-import { LoginData } from "@/api/auth/model";
-import { useUserStore } from "@/store";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
-import env from "@/environment";
-const formRef = ref<FormInstance>();
+import NamePassword from "./Account/NamePassword.vue";
+import Wechat from "./Account/Wechat.vue";
 const settingsStore = useSettingsStore();
-const userStore = useUserStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
-const appleLoginColor = computed(() => (isDark.value ? "black" : "white"));
 
 const loading = ref<boolean>(false);
-
-const props = defineProps<{ isMobile: boolean }>();
-
-const { t } = useI18n();
-// const form = ref<LoginData>({
-//   username: "",
-//   password: "",
-// });
-
-const { form } = storeToRefs(userStore);
-
-const rules = computed(() => {
-  return {
-    username: [
-      {
-        required: true,
-        message: t("login.rules.username.message1"),
-        trigger: "blur",
-      },
-      {
-        min: 4,
-        max: 20,
-        message: t("login.rules.username.message2"),
-        trigger: "blur",
-      },
-    ],
-    password: [
-      {
-        required: true,
-        message: t("login.rules.password.message1"),
-        trigger: "blur",
-      },
-      {
-        min: 6,
-        max: 20,
-        message: t("login.rules.password.message2"),
-        trigger: "blur",
-      },
-    ],
-  };
-});
-const emit = defineEmits(["register", "enter"]);
-const login = async (data: any) => {
-  return new Promise<void>((resolve, reject) => {
-    emit("enter", data, form, resolve, reject);
-  });
-};
-
-const submit = () => {
-  formRef.value?.validate(async (valid: boolean) => {
-    loading.value = true;
-    if (valid) {
-      try {
-        const response = await AuthAPI.login(form.value);
-        await login(response.data);
-      } catch (e: any) {
-        let errorMessage = "Login failed, please try again later.";
-
-        try {
-          if (e.data?.message) {
-            const errorData = JSON.parse(e.data.message);
-            if (errorData.username) {
-              errorMessage =
-                t("login.usernameError") + ": " + errorData.username;
-            } else if (errorData.password) {
-              errorMessage =
-                t("login.passwordError") + ": " + errorData.password;
-            }
-          }
-        } catch (parseError) {
-          errorMessage = e.message || "Login failed, please try again later.";
-        }
-
-        ElMessage.error(errorMessage);
-        loading.value = false;
-      }
-    } else {
-      loading.value = false;
-      ElMessage({ type: "error", message: t("login.error") });
-    }
-  });
-};
-
-const onFailure = async (error: any) => {
-  loading.value = false;
-  ElMessage({ type: "error", message: t("login.appleLoginFail") });
-  console.error(error);
-  return;
-};
-const onSuccess = async (data: any) => {
-  const respose = await PostSiteAppleId({
-    key: "APPLE_MRPP_KEY_ID",
-    url: VueAppleLoginConfig.redirectURI,
-    data: data,
-  });
-  const ret: AppleIdReturn = respose.data;
-  if (ret.user === null) {
-    emit("register", {
-      apple_id: ret.apple_id,
-      token: ret.token,
-    });
-    // 用户不存在，跳转到注册页面
-  } else {
-    try {
-      await login(ret.user);
-    } catch (e: any) {
-      ElMessage.error(e.message);
-      loading.value = false;
-    }
-    // emit("login", ret.user);
-  }
-  //loading.value = false;
-};
 </script>
 
 <style scoped lang="scss">
@@ -203,8 +40,8 @@ body {
   margin: 0;
   background-image: url("/media/bg/02.jpg");
   background-size: 100% auto;
-  // transition:  0.3s ease;
 
+  // transition:  0.3s ease;
   &.dark-theme {
     background-image: url("/media/bg/02.jpg");
     filter: brightness(80%);
@@ -371,6 +208,11 @@ body {
     font-family: "KaiTi", sans-serif;
     color: red;
     text-align: center;
+  }
+
+  .apple-login-container {
+    justify-content: center;
+    width: 100%;
   }
 }
 </style>

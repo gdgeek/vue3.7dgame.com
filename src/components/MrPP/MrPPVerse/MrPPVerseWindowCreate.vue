@@ -1,45 +1,31 @@
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    append-to-body
-    :close-on-click-modal="false"
-    width="70%"
-    @keydown.enter="submitForm"
-  >
+  <el-dialog v-model="dialogVisible" append-to-body :close-on-click-modal="closeOnClickModal" width="70%"
+    @keydown.enter="submitForm">
     <template #header>
       {{ dialogTitle }}
     </template>
-    <el-form ref="formRef" :rules="rules" :model="info" label-width="auto">
+    <el-form ref="formRef" :rules="rules" :model="item" label-width="auto">
       <el-form-item :label="$t('verse.page.form.picture')">
-        <mr-p-p-cropper
-          ref="image"
-          :image-url="info.url || null"
-          :file-name="'verse.picture'"
-          @save-file="saveFile"
-        ></mr-p-p-cropper>
+        <mr-p-p-cropper ref="image" :image-url="item.image?.url || null" :file-name="'verse.picture'"
+          @save-file="saveFile"></mr-p-p-cropper>
       </el-form-item>
       <el-form-item prop="name" :label="$t('verse.page.form.name')">
-        <el-input v-model="info.name"></el-input>
+        <el-input v-model="item.name"></el-input>
       </el-form-item>
 
       <el-form-item :label="$t('verse.page.form.description')">
-        <el-input v-model="info.description" type="textarea"></el-input>
+        <el-input v-model="item.description" type="textarea"></el-input>
       </el-form-item>
 
-      <el-form-item v-if="isManager" :label="$t('verse.page.form.course')">
-        <el-input v-model="info.course" type="number"></el-input>
-      </el-form-item>
-
-      <!-- 载入截图组件 -->
     </el-form>
 
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">{{
           $t("verse.page.form.cancel")
-        }}</el-button>
+          }}</el-button>
         <el-button type="primary" @click="submitForm">
-          {{ props.dialogSubmit }}
+          {{ dialogSubmit }}
         </el-button>
       </span>
     </template>
@@ -51,11 +37,17 @@ import { VerseData } from "@/api/v1/verse";
 import MrPPCropper from "@/components/MrPP/MrPPVerse/MrPPCropper.vue";
 import { useUserStore } from "@/store/modules/user";
 import { FormInstance } from "element-plus";
+import { ref, computed, defineProps, defineEmits } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 const props = defineProps({
   dialogTitle: String,
   dialogSubmit: String,
+  closeOnClickModal: {
+    type: Boolean,
+    default: false
+  }
 });
 
 const dialogTitle = computed(
@@ -68,23 +60,8 @@ const dialogSubmit = computed(
 const emit = defineEmits(["submit"]);
 
 const dialogVisible = ref(false);
-// const imageUrl = ref<string | null>(null);
 const imageId = ref<number | null>(null);
-const item = ref<VerseData>();
-
-const isManager = computed(
-  () =>
-    useUserStore().userInfo.roles.includes("manager") ||
-    useUserStore().userInfo.roles.includes("admin") ||
-    useUserStore().userInfo.roles.includes("root")
-);
-
-const info = ref({
-  url: "",
-  name: "",
-  description: "",
-  course: -1,
-});
+const item = ref<VerseData>({} as VerseData);
 
 const rules = {
   name: [
@@ -102,38 +79,27 @@ const rules = {
   ],
 };
 
-// 监听item变化，更新info
-watchEffect(() => {
-  if (item.value) {
-    info.value.name = item.value.name;
-    info.value.url = item.value.image?.url;
-    const parsedInfo = JSON.parse(item.value.info!);
-    if (parsedInfo !== null) {
-      info.value.description = parsedInfo.description;
-      info.value.course = parsedInfo.course;
-    }
-  }
-});
-
 const formRef = ref<FormInstance>();
+
 const submitForm = async () => {
   formRef.value?.validate((valid: boolean) => {
     if (valid) {
-      emit("submit", info.value, imageId.value);
+      emit("submit", item.value, imageId.value);
     } else {
       ElMessage.error(t("verse.page.form.error"));
     }
   });
 };
 
-const show = (selectedItem: any) => {
-  item.value = selectedItem;
-  console.log("selectedItem", selectedItem);
-  if (item.value?.image) {
-    setTimeout(() => {
-      const imageComponent = ref<any>(null);
-      imageComponent.value = item.value?.image.url;
-    }, 0);
+const show = (selected: VerseData | null = null) => {
+  if (selected) {
+    item.value = selected;
+    if (item.value?.image) {
+      setTimeout(() => {
+        const imageComponent = ref<any>(null);
+        imageComponent.value = item.value?.image.url;
+      }, 0);
+    }
   }
   dialogVisible.value = true;
 };

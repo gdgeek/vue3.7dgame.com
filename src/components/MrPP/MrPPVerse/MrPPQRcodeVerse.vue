@@ -1,18 +1,10 @@
 <template>
-  <el-dialog
-    append-to-body
-    v-model="dialogVisible"
-    width="80%"
-    :close-on-click-modal="false"
-  >
+  <el-dialog append-to-body v-model="dialogVisible" width="80%" :close-on-click-modal="false">
     <template #header>
       {{ dialogTitle }}
     </template>
     <el-card class="box-card" style="text-align: center">
-      <div
-        v-if="verseId !== -1"
-        style="margin-bottom: 20px; font-size: 20px; font-weight: 700"
-      >
+      <div v-if="verseId !== -1" style="margin-bottom: 20px; font-size: 20px; font-weight: 700">
         {{ encode(verseId) }}
       </div>
       <qrcode-vue :value="encode(verseId)" :size="size" level="H"></qrcode-vue>
@@ -40,7 +32,7 @@ const verseId = computed(() => verse.value?.id ?? -1);
 const dialogTitle = computed(() =>
   verse.value
     ? t("verse.page.list.toolbar.qrcode.dialogTitle1") +
-      `【${verse.value.name}】。`
+    `【${verse.value.name}】。`
     : t("verse.page.list.toolbar.qrcode.dialogTitle2")
 );
 
@@ -71,7 +63,7 @@ const onresize = () => {
 };
 
 const open = async (id: number) => {
-  const data = { projectId: id, veri: "MrPP.com" };
+  const data = { projectId: id, veri: "bujiaban.com" };
   value.value = JSON.stringify(data);
   dialogVisible.value = true;
   const r = await getVerse(id);

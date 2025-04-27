@@ -1,6 +1,5 @@
 import { GetIP, ReplaceIP, ReplaceURL } from "./utils/helper";
 function useCloud(): boolean {
-  // alert(import.meta.env.VITE_APP_BASE_MODE);
   return import.meta.env.VITE_APP_BASE_MODE !== "local";
 }
 
@@ -40,10 +39,10 @@ function title(): string {
     return "上海不加班网络科技";
   }
   if (hostname.includes("bujiaban.com")) {
-    return "混合现实编程";
+    return "不加班AR编程";
   }
   if (hostname.includes("localhost")) {
-    return "混合现实编程";
+    return "不加班AR编程";
   }
   if (hostname.includes("7dgame.com")) {
     return "不加班官方网站";
@@ -52,16 +51,7 @@ function title(): string {
 }
 
 function subtitle(): string {
-  switch (import.meta.env.VITE_APP_BASE_MODE) {
-    case "01xr.com":
-      return "内部版本";
-    case "7dgame.com":
-      return "测试版本";
-    case "local":
-      return "私有部署版本";
-    default:
-      return "公测版本";
-  }
+  return "支持Rokid设备";
 }
 
 const environment = {
@@ -70,6 +60,7 @@ const environment = {
   doc: ReplaceURL(import.meta.env.VITE_APP_DOC_API || ""),
   blockly: ReplaceURL(import.meta.env.VITE_APP_BLOCKLY_URL || ""),
   editor: ReplaceURL(import.meta.env.VITE_APP_EDITOR_URL || ""),
+  auth_api: ReplaceURL(import.meta.env.VITE_APP_AUTH_API || ""),
   ai: ReplaceURL(import.meta.env.VIET_APP_AI_API || ""),
   base: ReplaceURL(import.meta.env.VIET_APP_BASE_URL || ""),
   version: 3,

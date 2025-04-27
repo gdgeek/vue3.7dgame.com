@@ -1,12 +1,15 @@
 <template>
-  <div class="verse-index">
-    <page @loaded="loaded" :created="true"></page>
-  </div>
+  <TransitionWrapper>
+    <div class="verse-index">
+      <page @loaded="loaded" :created="true"></page>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
 import Page from "@/components/MrPP/Person/Page.vue";
 import { getPerson } from "@/api/v1/person";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const loaded = async (data: any, result: Function) => {
   try {

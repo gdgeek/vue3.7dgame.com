@@ -8,106 +8,66 @@
               <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
                 meta.title
               }}</el-link>
-              /【{{ $t("meta.script.title") || "Script Title" }}】
-              <el-button type="primary" size="small" @click="run"
-                >测试运行</el-button
-              >
-              <el-button
-                v-if="disabled"
-                type="primary"
-                size="small"
-                @click="disabled = false"
-              >
+              /【{{ $t("meta.script.title") }}】
+              <el-button type="primary" size="small" @click="run">测试运行</el-button>
+              <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
                 返回
               </el-button>
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="save">
-                  <font-awesome-icon
-                    class="icon"
-                    icon="save"
-                  ></font-awesome-icon>
-                  {{ $t("meta.script.save") || "Save" }}
+                  <font-awesome-icon class="icon" icon="save"></font-awesome-icon>
+                  {{ $t("meta.script.save") }}
                 </el-button>
               </el-button-group>
             </div>
           </template>
           <el-container v-if="!disabled">
             <el-tabs v-model="activeName" type="card" style="width: 100%">
-              <el-tab-pane
-                :label="$t('verse.view.script.edit') || 'Edit Script'"
-                name="blockly"
-              >
-                <el-main
-                  style="
+              <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
+                <el-main style="
                     margin: 0;
                     padding: 0;
                     height: 70vh;
                     position: relative;
-                  "
-                >
+                  ">
                   <div class="fullscreen-controls">
                     <el-button-group>
-                      <el-button
-                        class="fullscreen-btn"
-                        size="small"
-                        type="primary"
-                        plain
-                        @click="toggleFullscreen"
-                      >
+                      <el-button class="fullscreen-btn" size="small" type="primary" plain @click="toggleFullscreen">
                         <el-icon>
                           <FullScreen v-if="!isFullscreen"></FullScreen>
                           <Aim v-else></Aim>
                         </el-icon>
                       </el-button>
                       <template v-if="isFullscreen">
-                        <el-button
-                          size="small"
-                          type="primary"
-                          @click="showFullscreenCode('lua')"
-                        >
+                        <el-button size="small" type="primary" @click="showFullscreenCode('lua')">
                           Lua
                         </el-button>
-                        <el-button
-                          size="small"
-                          color="#F7DF1E"
-                          style="margin-right: 10px"
-                          @click="showFullscreenCode('javascript')"
-                        >
+                        <el-button size="small" color="#F7DF1E" style="margin-right: 10px"
+                          @click="showFullscreenCode('javascript')">
                           JavaScript
                         </el-button>
-                        <el-button
-                          size="small"
-                          type="primary"
-                          style="margin-right: 50px"
-                          @click="run"
-                        >
+                        <el-button size="small" type="primary" style="margin-right: 10px" @click="run">
                           测试运行
+                        </el-button>
+                        <el-button size="small" type="primary" style="margin-right: 50px" @click="save">
+                          <font-awesome-icon class="icon" icon="save"></font-awesome-icon>
+                          {{ $t("meta.script.save") }}
                         </el-button>
                       </template>
                     </el-button-group>
                   </div>
 
-                  <el-dialog
-                    v-model="showCodeDialog"
-                    :title="codeDialogTitle"
-                    fullscreen
-                    :show-close="true"
-                    :close-on-click-modal="false"
-                    :close-on-press-escape="true"
-                  >
+                  <el-dialog v-model="showCodeDialog" :title="codeDialogTitle" fullscreen :show-close="true"
+                    :close-on-click-modal="false" :close-on-press-escape="true">
                     <div class="code-dialog-content">
                       <el-card :class="isDark ? 'dark-theme' : 'light-theme'">
                         <div v-highlight>
                           <div class="code-container2">
-                            <el-button
-                              class="copy-button2"
-                              text
-                              @click="copyCode(currentCode)"
-                            >
+                            <el-button class="copy-button2" text @click="copyCode(currentCode)">
                               <el-icon class="icon">
                                 <CopyDocument></CopyDocument>
                               </el-icon>
-                              {{ $t("copy.title") || "Copy" }}
+                              {{ $t("copy.title") }}
                             </el-button>
                             <pre>
                     <code :class="currentCodeType">{{
@@ -120,45 +80,25 @@
                     </div>
                   </el-dialog>
 
-                  <iframe
-                    style="margin: 0; padding: 0; height: 100%; width: 100%"
-                    id="editor"
-                    ref="editor"
-                    :src="src"
-                  ></iframe>
+                  <iframe style="margin: 0; padding: 0; height: 100%; width: 100%" id="editor" ref="editor"
+                    :src="src"></iframe>
                 </el-main>
               </el-tab-pane>
-              <el-tab-pane
-                :label="$t('verse.view.script.code') || 'Script Code'"
-                name="script"
-              >
-                <el-card
-                  v-if="activeName === 'script'"
-                  class="box-card"
-                  :class="isDark ? 'dark-theme' : 'light-theme'"
-                >
+              <el-tab-pane :label="$t('verse.view.script.code') || 'Script Code'" name="script">
+                <el-card v-if="activeName === 'script'" class="box-card" :class="isDark ? 'dark-theme' : 'light-theme'">
                   <div v-highlight>
                     <el-tabs v-model="languageName">
                       <el-tab-pane label="Lua" name="lua">
                         <template #label>
                           <span style="display: flex; align-items: center">
-                            <img
-                              src="/lua.png"
-                              style="width: 25px; margin-right: 5px"
-                              alt=""
-                            />
+                            <img src="/lua.png" style="width: 25px; margin-right: 5px" alt="" />
                             <span>Lua</span>
                           </span>
                         </template>
                         <div class="code-container">
-                          <el-button
-                            class="copy-button"
-                            text
-                            @click="copyCode(LuaCode)"
-                            ><el-icon class="icon">
-                              <CopyDocument></CopyDocument> </el-icon
-                            >{{ $t("copy.title") || "Copy" }}</el-button
-                          >
+                          <el-button class="copy-button" text @click="copyCode(LuaCode)"><el-icon class="icon">
+                              <CopyDocument></CopyDocument>
+                            </el-icon>{{ $t("copy.title") || "Copy" }}</el-button>
                           <pre>
                   <code class="lua">{{ LuaCode }}</code>
                 </pre>
@@ -167,23 +107,14 @@
                       <el-tab-pane label="JavaScript" name="javascript">
                         <template #label>
                           <span style="display: flex; align-items: center">
-                            <img
-                              src="/javascript.png"
-                              style="width: 25px; margin-right: 5px"
-                              alt=""
-                            />
+                            <img src="/javascript.png" style="width: 25px; margin-right: 5px" alt="" />
                             <span>JavaScript</span>
                           </span>
                         </template>
                         <div class="code-container">
-                          <el-button
-                            class="copy-button"
-                            text
-                            @click="copyCode(JavaScriptCode)"
-                            ><el-icon class="icon">
-                              <CopyDocument></CopyDocument> </el-icon
-                            >{{ $t("copy.title") }}</el-button
-                          >
+                          <el-button class="copy-button" text @click="copyCode(JavaScriptCode)"><el-icon class="icon">
+                              <CopyDocument></CopyDocument>
+                            </el-icon>{{ $t("copy.title") }}</el-button>
                           <pre>
                   <code class="javascript">{{ JavaScriptCode }}</code>
                 </pre>
@@ -197,24 +128,14 @@
           </el-container>
           <div v-if="disabled" class="runArea">
             <div class="scene-fullscreen-controls">
-              <el-button
-                class="scene-fullscreen-btn"
-                size="small"
-                type="primary"
-                plain
-                @click="toggleSceneFullscreen"
-              >
+              <el-button class="scene-fullscreen-btn" size="small" type="primary" plain @click="toggleSceneFullscreen">
                 <el-icon>
                   <FullScreen v-if="!isSceneFullscreen"></FullScreen>
                   <Aim v-else></Aim>
                 </el-icon>
               </el-button>
             </div>
-            <ScenePlayer
-              ref="scenePlayer"
-              :meta="meta"
-              :is-scene-fullscreen="isSceneFullscreen"
-            ></ScenePlayer>
+            <ScenePlayer ref="scenePlayer" :meta="meta" :is-scene-fullscreen="isSceneFullscreen"></ScenePlayer>
           </div>
         </el-card>
       </el-main>
@@ -236,7 +157,8 @@ import { convertToHttps } from "@/assets/js/helper";
 import pako from "pako";
 import ScenePlayer from "./ScenePlayer.vue";
 import jsBeautify from "js-beautify";
-import env from  "@/environment";
+import env from "@/environment";
+
 const loader = new GLTFLoader();
 const appStore = useAppStore();
 const loading = ref(false);
@@ -358,12 +280,12 @@ const copyCode = async (code: string) => {
     await navigator.clipboard.writeText(code);
 
     ElMessage({
-      message: t("copy.success") || "Copy successful",
+      message: t("copy.success"),
       type: "success",
     });
   } catch (error) {
     ElMessage({
-      message: t("copy.error") || "Copy failed",
+      message: t("copy.error"),
       type: "error",
     });
   }
@@ -380,14 +302,14 @@ watch(
 const postScript = async (message: any) => {
   if (meta.value === null) {
     ElMessage({
-      message: t("meta.script.error1") || "Error 1",
+      message: t("meta.script.error1"),
       type: "error",
     });
     return;
   }
   if (!meta.value.editable) {
     ElMessage({
-      message: t("meta.script.error2") || "Error 2",
+      message: t("meta.script.error2"),
       type: "error",
     });
     return;
@@ -410,7 +332,7 @@ const postScript = async (message: any) => {
   });
 
   ElMessage({
-    message: t("meta.script.success") || "Success",
+    message: t("meta.script.success"),
     type: "success",
   });
 };
@@ -458,7 +380,7 @@ const handleMessage = async (e: MessageEvent) => {
       }
     } else if (params.action === "post:no-change") {
       ElMessage({
-        message: t("meta.script.info") || "Info",
+        message: t("meta.script.info"),
         type: "info",
       });
     } else if (params.action === "update") {
@@ -580,6 +502,7 @@ const initEditor = () => {
       blocklyData = pako.inflate(uint8Array, { to: "string" });
     }
     const data = unsavedBlocklyData.value || JSON.parse(blocklyData);
+    // console.warn("blocklydata: " + JSON.stringify(data));
     test.value = getResource(meta.value);
     postMessage("init", {
       language: ["lua", "js"],
@@ -595,6 +518,7 @@ const initEditor = () => {
   }
 };
 const testAction = (data: any) => {
+  // console.log("action: ", data);
   if (
     data &&
     data.parameters &&
@@ -604,9 +528,11 @@ const testAction = (data: any) => {
       uuid: data.parameters.uuid,
       name: data.parameters.action ?? null,
       parameter: data.parameters.parameter ?? null,
+      type: data.type ?? null,
     };
   }
 };
+
 const testPoint = (data: any, typeList: string[]) => {
   if (!data) {
     return;
@@ -617,10 +543,24 @@ const testPoint = (data: any, typeList: string[]) => {
 
   if (isValidType) {
     const animations = data.parameters?.animations ?? null;
+    
+    const isPolygen = data.type.toLowerCase() === "polygen";
+
+    // 给Polygen，传递moved属性
+    let hasMoved = false;
+    if (isPolygen && data.children && data.children.components) {
+      hasMoved = data.children.components.some(
+        (component: any) => component.type === "Moved"
+      );
+    }
+
     return {
       uuid: data.parameters.uuid,
       name: data.parameters.name ?? null,
-      ...(data.type.toLowerCase() === "polygen" ? { animations } : {}), // 如果类型为 Polygen，加入 animations 属性
+      ...(isPolygen ? {
+        animations, // 给Polygen，传递animations属性
+        moved: hasMoved 
+      } : {}),
     };
   }
 
@@ -686,7 +626,8 @@ const addMetaData = (data: any, ret: any) => {
   }
 };
 const getResource = (meta: metaInfo) => {
-  const data = JSON.parse(meta.data!);
+  const data = meta.data!
+  // const data = JSON.parse(meta.data!);
   console.log("data", data);
   const ret = {
     action: [],
@@ -699,19 +640,29 @@ const getResource = (meta: metaInfo) => {
     sound: [],
     entity: [],
     events: {
-      inputs: [],
-      outputs: [],
+      inputs: [] as string[],
+      outputs: [] as string[],
     },
   };
-  ret.events = JSON.parse(meta.events!) || { inputs: [], outputs: [] };
+  ret.events = meta.events! || { inputs: [], outputs: [] };
+  // ret.events = JSON.parse(meta.events!) || { inputs: [], outputs: [] };
 
   if (data) addMetaData(data, ret);
   return ret;
 };
 
+const handleKeyDown = (e: KeyboardEvent) => {
+  // 检测Ctrl+S或Command+S (Mac)
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault(); // 阻止浏览器默认的保存行为
+    save();
+  }
+};
+
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
   window.removeEventListener("beforeunload", handleBeforeUnload);
+  window.removeEventListener("keydown", handleKeyDown);
   document.removeEventListener("keydown", (e) => {
     if (e.key === "Escape" && showCodeDialog.value) {
       showCodeDialog.value = false;
@@ -729,15 +680,16 @@ onBeforeUnmount(() => {
 });
 onMounted(async () => {
   window.addEventListener("message", handleMessage);
+  window.addEventListener("keydown", handleKeyDown); // 添加键盘事件监听
   loadHighlightStyle(isDark.value);
 
   window.addEventListener("beforeunload", handleBeforeUnload);
 
   try {
     loading.value = true;
-    const response = await getMeta(id.value, "cyber,event,share,metaCode");
-    // const response = await getMeta(894, "cyber,event,share,metaCode");
-    // const response = await getMeta(889, "cyber,event,share,metaCode");
+    const response = await getMeta(id.value, { expand: "cyber,event,share,metaCode" });
+    // const response = await getMeta(894, { expand: "cyber,event,share,metaCode" });
+    // const response = await getMeta(889, { expand: "cyber,event,share,metaCode" });
     console.log("response数据", response);
 
     // 用递归处理层级嵌套
@@ -759,42 +711,48 @@ onMounted(async () => {
       });
     };
 
-    // 循环处理每个模型文件
-    for (const [index, model] of response.data.resources.entries()) {
-      if (model.type !== "polygen") {
-        meta.value = response.data;
-        continue;
+    if (response.data.resources.length > 0) {
+      // 循环处理每个模型文件
+      for (const [index, model] of response.data.resources.entries()) {
+        if (model.type !== "polygen") {
+          meta.value = response.data;
+          continue;
+        }
+
+        const modelUrl = convertToHttps(model.file.url);
+        // const modelUrl = model.file.url;
+        console.error("modelUrl", modelUrl);
+        const modelId = model.id.toString();
+
+        // 等待每个模型加载完成获取数据后再继续
+        await new Promise<void>((resolve, reject) => {
+          loader.load(
+            modelUrl,
+            (gltf) => {
+              const animationNames = gltf.animations.map((clip) => clip.name);
+
+              let data = response.data.data!;
+              // let data = JSON.parse(response.data.data!);
+
+              // 调用递归函数对所有满足条件的项赋值 animations
+              assignAnimations(data.children.entities, modelId, animationNames);
+
+              response.data.data = data;
+              // response.data.data = JSON.stringify(data);
+              meta.value = response.data;
+
+              resolve();
+            },
+            undefined,
+            (error) => {
+              console.error("An error occurred while loading the model:", error);
+              reject(error);
+            }
+          );
+        });
       }
-
-      const modelUrl = convertToHttps(model.file.url);
-      // const modelUrl = model.file.url;
-      console.error("modelUrl", modelUrl);
-      const modelId = model.id.toString();
-
-      // 等待每个模型加载完成获取数据后再继续
-      await new Promise<void>((resolve, reject) => {
-        loader.load(
-          modelUrl,
-          (gltf) => {
-            const animationNames = gltf.animations.map((clip) => clip.name);
-
-            let data = JSON.parse(response.data.data!);
-
-            // 调用递归函数对所有满足条件的项赋值 animations
-            assignAnimations(data.children.entities, modelId, animationNames);
-
-            response.data.data = JSON.stringify(data);
-            meta.value = response.data;
-
-            resolve();
-          },
-          undefined,
-          (error) => {
-            console.error("An error occurred while loading the model:", error);
-            reject(error);
-          }
-        );
-      });
+    } else {
+      meta.value = response.data;
     }
 
     console.log("meta", meta.value);
@@ -907,8 +865,8 @@ const run = async () => {
   const waitForModels = () => {
     return new Promise((resolve) => {
       const checkModels = () => {
-        const metaData = JSON.parse(meta.value!.data!);
-
+        // const metaData = JSON.parse(meta.value!.data!);
+        const metaData = meta.value!.data!;
         // 递归计算实体数量
         const countEntities = (entities: any[]): number => {
           let count = 0;
@@ -1475,6 +1433,7 @@ const run = async () => {
   top: 2px;
   right: 2px;
   z-index: 100;
+  padding-right: 10px;
 }
 
 .dark-theme :deep(.hljs) {

@@ -1,41 +1,52 @@
+import exp from "constants";
+
 /**
  * 登录用户信息
  */
-export type Avatar = {
-  id?: number;
+export type _UserDataType = {
+  nickname: string | null;
+  email: string | null;
+  username: string | null;
+  emailBind: boolean;
+};
+export type UploadFileType = {
   md5: string;
-  type?: string;
   url: string;
   filename: string;
-  size?: number;
   key: string;
 };
-
-export type InfoType = {
+export type FileType = {
+  id: number;
+  md5: string;
+  type: string;
+  url: string;
+  filename: string;
+  size: number;
+  key: string;
+};
+export type _InfoType = {
   sex: string;
   industry: string;
   selectedOptions: string[];
   textarea: string;
 };
-
-export type Data = {
-  username: string;
-  id: number;
-  nickname: string | null;
-  info?: string | null;
-  parsedInfo?: InfoType;
-  avatar_id: string | null;
-  avatar: Avatar | null;
-  email: string | null;
-  emailBind: boolean;
+export type _UserInfoType = {
+  info: _InfoType | null;
+  gold: number;
+  points: number;
+  avatar: FileType | null;
 };
-
-// 获取用户信息数据类型
-export type getUserInfoData = {
-  username: string;
-  data: Data;
-  roles: string[];
-  perms?: string[];
+export type UserInfoType = {
+  id: number | null;
+  userData: _UserDataType | null;
+  userInfo: _UserInfoType | null;
+  roles: string[] | null;
+  perms: string[] | null;
+};
+export type UserInfoReturnType = {
+  success: boolean;
+  message: string;
+  data: UserInfoType;
 };
 
 /**

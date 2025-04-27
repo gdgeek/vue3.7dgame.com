@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import environment from "@/environment";
 import { MessageType } from "./message";
 import { metaInfo } from "./meta";
-import { ResourceInfo } from "../resources/model";
+import { ResourceInfo } from "@/api/v1/resources/model";
 
 export type Author = {
   id: number;
@@ -23,14 +23,14 @@ type ImageDetails = {
   size: number;
   key: string;
 };
-
+/*
 type VerseOpen = {
   id: number;
   verse_id: number;
   user_id: number;
   message_id: number;
 };
-
+*/
 type VerseRelease = {
   id: number;
   code: string;
@@ -72,12 +72,13 @@ export type VerseData = {
   created_at?: string;
   name: string;
   info: string | null;
-  data: string | null;
+  description: string | null;
+  data: any;
   version: number;
   uuid: string;
   editable: boolean;
   viewable: boolean;
-  verseOpen: VerseOpen | null;
+  //verseOpen: VerseOpen | null;
   verseRelease: VerseRelease | null;
   verseShare?: VerseShare;
   message: MessageType | null;
@@ -87,11 +88,12 @@ export type VerseData = {
   metas?: metaInfo[];
   script?: Script;
   verseCode?: any;
+  verseTags?: [];
 };
 
 export type PostVerseData = {
   image_id?: number;
-  info: string;
+  description: string;
   name: string;
   uuid: string;
   version?: number;
@@ -99,7 +101,7 @@ export type PostVerseData = {
 
 export type meta = {
   id: number;
-  data: string;
+  data: any;
   uuid: string;
   events: string;
   title: string;
@@ -131,10 +133,20 @@ export const postVerse = (data: PostVerseData) => {
 
 export const putVerseCode = (id: number, data: VerseCode) => {
   return request<VerseCode>({
-    url: path.join("v1", "verses", `code${qs.stringify({ id: id }, true)}`),
+    url: path.join(
+      "v1",
+      "system",
+      `verse-code${qs.stringify({ verse_id: id }, true)}`
+    ),
     data,
     method: "put",
   });
+  /*
+  return request<VerseCode>({
+    url: path.join("v1", "verses", `code${qs.stringify({ id: id }, true)}`),
+    data,
+    method: "put",
+  });*/
 };
 export const getVerse = (id: number, expand = "metas,share") => {
   return request({
@@ -154,66 +166,83 @@ export const getVerseMetasWithJsCode = (
 ) => {
   return request({
     url: path.join(
-      "a1",
-      "verses",
-      `${id.toString()}${qs.stringify({ expand: expand, cl }, true)}`
+      "v1",
+      "system",
+      `verse${qs.stringify({ verse_id: id, expand: expand, cl }, true)}`
     ),
     method: "get",
   });
 };
+export interface VersesParams {
+  sort?: string;
+  search?: string;
+  page?: number;
+  expand?: string;
+  tags?: number[]; // 假设tags是数字ID数组，如果是其他类型可以相应调整
+}
 
-const createQueryParams = (
-  sort: string,
-  search: string,
-  page: number,
-  expand: string
-): Record<string, any> => {
+const createQueryParams = ({
+  sort,
+  search,
+  page,
+  expand,
+  tags,
+}: VersesParams): Record<string, any> => {
   const query: Record<string, any> = [];
   query["expand"] = expand;
   query["sort"] = sort;
-
-  if (search !== "") {
+  if (search && search !== "") {
     query["VerseSearch[name]"] = search;
   }
-  if (page > 1) {
+
+  if (page && page > 1) {
     query["page"] = page;
+  }
+  if (tags && tags.length > 0) {
+    query["tags"] = tags;
   }
   return query;
 };
-
+/*
 export const getVersesWithShare = (
   sort = "-created_at",
   search = "",
   page = 0,
   expand = "image,author"
 ) => {
-  const query = createQueryParams(sort, search, page, expand);
+  const query = createQueryParams({ sort, search, page, expand });
   return request({
     url: path.join("v1", "verses", "share" + qs.stringify(query, true)),
     method: "get",
   });
 };
-
+*/
+/*
 export const getVersesWithOpen = (
   sort = "-created_at",
   search = "",
   page = 0,
   expand = "image,author"
 ) => {
-  const query = createQueryParams(sort, search, page, expand);
+  const query = createQueryParams({ sort, search, page, expand });
   return request({
     url: path.join("v1", "verses", "open" + qs.stringify(query, true)),
     method: "get",
   });
 };
+*/
 
-export const getVerses = (
-  sort = "-created_at",
-  search = "",
-  page = 0,
-  expand = "image,author,share"
-) => {
-  const query = createQueryParams(sort, search, page, expand);
+export const getPublic = (params: VersesParams) => {
+  const query = createQueryParams(params);
+
+  //expand = "id,name,description,data,metas,resources,code,uuid,code",
+  return request({
+    url: path.join("v1", "verses", "public" + qs.stringify(query, true)),
+    method: "get",
+  });
+};
+export const getVerses = (params: VersesParams) => {
+  const query = createQueryParams(params);
   return request({
     url: path.join("v1", "verses" + qs.stringify(query, true)),
     method: "get",

@@ -1,119 +1,82 @@
 <template>
-  <div v-loading="loading" class="document-index">
-    <el-row :gutter="20" style="margin: 28px 18px 0">
-      <el-col :sm="16">
-        <el-card class="box-card">
-          <template #header>
-            <b id="title">{{ $t("polygen.view.title") }}</b>
-            <span v-if="polygenData">{{ polygenData.name }}</span>
-          </template>
-          <div v-loading="false" class="box-item">
-            <polygen2
-              v-if="polygenData"
-              ref="three"
-              :file="polygenData.file"
-              @loaded="loaded"
-              @progress="progress"
-            >
-            </polygen2>
-          </div>
-          <el-progress
-            v-if="percentage === 100"
-            :percentage="100"
-            status="success"
-          ></el-progress>
-          <el-progress v-else :percentage="percentage"></el-progress>
-        </el-card>
-        <br />
-
-        <el-card v-loading="expire" class="box-card">
-          <el-button
-            style="width: 100%"
-            type="primary"
-            size="small"
-            @click="createVerse"
-          >
-            <font-awesome-icon icon="plus"></font-awesome-icon>
-            &nbsp;{{ $t("polygen.view.titleStatement") }}
-          </el-button>
-        </el-card>
-        <br />
-
-        <!-- <el-card>
-          <div class="check-box">
-            <input type="checkbox" @change="change()" checked />
-            {{ autoPlay ? "Play" : "Stop" }}
-          </div>
-          <div class="content">
-            <vue3dLoader
-              filePath="/public/crabsquid.glb"
-              :cameraPosition="{ x: 0, y: 0, z: 0 }"
-              :enableDraco="true"
-              :height="350"
-              :lights="lights"
-              :auto-play="autoPlay"
-              :enableDamping="true"
-              :dampingFactor="0.05"
-              outputEncoding="sRGB"
-              backgroundColor="#F2F2F2"
-              @process="onProcess"
-            ></vue3dLoader>
-            <div class="process">
-              current model: {{ currentModelIndex }}, loadding:
-              {{ process + "%" }}
+  <TransitionWrapper>
+    <div v-loading="loading" class="document-index"><br>
+      <el-row :gutter="20" style="margin: 0px 18px 0">
+        <el-col :sm="16">
+          <el-card class="box-card">
+            <template #header>
+              <b id="title">{{ $t("polygen.view.title") }}</b>
+              <span v-if="polygenData">{{ polygenData.name }}</span>
+            </template>
+            <div class="box-item">
+              <div v-if="polygenData">
+                <polygen-view ref="three" :file="polygenData.file" @loaded="loaded" @progress="progress" />
+                <el-progress style="width: 100%;" :stroke-width="18" v-if="percentage !== 100" :text-inside="true"
+                  :percentage="percentage">
+                </el-progress>
+              </div>
+              <el-card v-else>
+                <el-skeleton :rows="7" />
+              </el-card>
             </div>
-          </div>
-        </el-card> -->
-      </el-col>
+          </el-card>
+          <br />
+          <!--
+          <el-card v-loading="expire" class="box-card">
+            <el-button style="width: 100%" type="primary" size="small" @click="createVerse">
+              <font-awesome-icon icon="plus"></font-awesome-icon>
+              &nbsp;{{ $t("polygen.view.titleStatement") }}
+            </el-button>
+          </el-card>
+          -->
+          <br />
 
-      <el-col :sm="8">
-        <el-card class="box-card">
-          <template #header>
-            <b>{{ $t("polygen.view.info.title") }}</b> :
-          </template>
-          <div class="box-item">
-            <el-table :data="tableData" stripe>
-              <el-table-column
-                prop="item"
-                :label="$t('polygen.view.info.label1')"
-              ></el-table-column>
-              <el-table-column
-                prop="text"
-                :label="$t('polygen.view.info.label2')"
-              ></el-table-column>
-            </el-table>
 
-            <aside style="margin-top: 10px; margin-bottom: 30px">
-              <el-button-group style="float: right">
-                <el-button type="primary" size="small" @click="namedWindow">
-                  <i class="el-icon-edit"></i>
-                  {{ $t("polygen.view.info.name") }}
-                </el-button>
-                <el-button type="primary" size="small" @click="deleteWindow">
-                  <i class="el-icon-delete"></i>
-                  {{ $t("polygen.view.info.delete") }}
-                </el-button>
-              </el-button-group>
-            </aside>
-          </div>
-        </el-card>
-        <br />
-      </el-col>
-    </el-row>
-  </div>
+        </el-col>
+
+        <el-col :sm="8">
+          <el-card class="box-card">
+            <template #header>
+              <b>{{ $t("polygen.view.info.title") }}</b> :
+            </template>
+            <div class="box-item">
+              <el-table :data="tableData" stripe>
+                <el-table-column prop="item" :label="$t('polygen.view.info.label1')"></el-table-column>
+                <el-table-column prop="text" :label="$t('polygen.view.info.label2')"></el-table-column>
+              </el-table>
+
+              <aside style="margin-top: 10px; margin-bottom: 30px">
+                <el-button-group style="float: right">
+                  <el-button type="success" size="small" @click="namedWindow">
+                    <i class="el-icon-edit"></i>
+                    {{ $t("polygen.view.info.name") }}
+                  </el-button>
+                  <el-button type="danger" size="small" @click="deleteWindow">
+                    <i class="el-icon-delete"></i>
+                    {{ $t("polygen.view.info.delete") }}
+                  </el-button>
+                </el-button-group>
+              </aside>
+            </div>
+          </el-card>
+          <br />
+        </el-col>
+      </el-row>
+    </div>
+  </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import Polygen from "@/components/Polygen.vue";
-import Polygen2 from "@/components/Polygen2.vue";
-import { getPolygen, putPolygen, deletePolygen } from "@/api/resources/index";
+import PolygenView from "@/components/PolygenView.vue";
+import { getPolygen, putPolygen, deletePolygen } from "@/api/v1/resources/index";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
+import { UploadFileType } from "@/api/user/model";
 import { printVector3 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
-//import { vue3dLoader } from "vue-3d-loader";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const loading = ref(false);
 const polygenData = ref<any>(null);
@@ -124,7 +87,7 @@ const router = useRouter();
 const store = useFileStore().store;
 const { t } = useI18n();
 
-const three = ref<InstanceType<typeof Polygen> | null>(null);
+const three = ref<InstanceType<typeof PolygenView> | null>(null);
 const id = computed(() => route.query.id as string);
 const prepare = computed(
   () => polygenData.value !== null && polygenData.value.info !== null
@@ -133,35 +96,7 @@ const dataInfo = computed(() =>
   prepare.value ? JSON.parse(polygenData.value.info) : null
 );
 
-// vue3dLoader
-// const autoPlay = ref(true);
-// function change() {
-//   if (autoPlay.value) {
-//     autoPlay.value = false;
-//   } else {
-//     autoPlay.value = true;
-//   }
-// }
-// const filePath = ref();
-// filePath.value = "/public/crabsquid.glb";
-// const currentModelIndex = ref();
-// const process = ref(0);
-// function onProcess(event: any, index: number) {
-//   process.value = Math.floor((event.loaded / event.total) * 100);
-//   if (index != 0) {
-//     currentModelIndex.value = index;
-//   }
-// }
 
-// const lights = ref();
-// lights.value = [
-//   {
-//     type: "AmbientLight", // or pointLight
-//     color: "#ffffff",
-//     position: { x: 0, y: 0, z: 400 },
-//     intensity: 1,
-//   },
-// ];
 
 const tableData = computed(() => {
   if (polygenData.value !== null && prepare.value) {
@@ -305,6 +240,7 @@ const saveFile = async (
   file: any,
   handler: any
 ) => {
+  extension = extension.startsWith(".") ? extension : `.${extension}`;
   const data = {
     md5,
     key: md5 + extension,
@@ -315,6 +251,7 @@ const saveFile = async (
   const response = await postFile(data);
   updatePolygen(response.data.id!, info);
 };
+
 const loaded = async (info: any) => {
   if (prepare.value) {
     expire.value = false;
@@ -344,7 +281,7 @@ const loaded = async (info: any) => {
           md5,
           extension,
           file,
-          () => {},
+          () => { },
           handler,
           "screenshot/polygen"
         );
@@ -355,20 +292,21 @@ const loaded = async (info: any) => {
     console.error(error);
   }
 };
-
+/*
 const screenshot = () => {
   return three.value!.screenshot();
 };
-
+*/
 onMounted(async () => {
   expire.value = true;
   const response = await getPolygen(id.value);
+  console.error((response as any).data);
   polygenData.value = (response as any).data;
 });
 </script>
 
 <style lang="scss" scoped>
-@import "@/styles/view-style.scss";
+@use "@/styles/view-style.scss" as *;
 
 .content {
   height: 100%;

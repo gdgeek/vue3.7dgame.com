@@ -56,6 +56,7 @@ const fileUpdateImpl = async (
   dir: string,
   skip: number
 ): Promise<any> => {
+  
   const filename = md5 + extension;
   const data = new FormData();
   const blockSize = 1048576; // 每块大小
