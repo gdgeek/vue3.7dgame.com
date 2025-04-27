@@ -36,6 +36,8 @@ const mrpp = computed(() => {
 const list = computed(() => {
   return [
     { label: t("homepage.dashboard"), type: "document", id: 1455 },
+
+    { label: t("homepage.news"), type: "category", id: 74 },
   ];
 });
 </script>
