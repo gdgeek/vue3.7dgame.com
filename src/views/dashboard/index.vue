@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <h1>Vue3-Element-Admin-Thin</h1>
+    <h1>Mixed Reality Programming Platform</h1>
   </div>
 </template>
 

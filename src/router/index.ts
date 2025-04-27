@@ -35,6 +35,7 @@ const routes: RouteRecordRaw[] = [
 
   {
     path: "/web",
+
     meta: { hidden: true, private: true },
 
     component: () => import("@/views/web/index.vue"),

@@ -33,6 +33,7 @@ export function setupPermission() {
     "/web/index",
     "/site/register",
     "/site/logout",
+
     "/privacy-policy",
     "/404",
     "/401",
