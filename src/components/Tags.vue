@@ -9,7 +9,7 @@
     <el-select-v2 v-if="props.editable" @change="handleChange" v-model="value" size="small" :options="options"
       placeholder="添加标签" style="width:100px" />
 
-
+    {{ userStore }}
     <el-select-v2 v-if="props.editable" @change="handleChange" v-model="value" size="small" :options="options"
       placeholder="设置" style="width:100px" />
   </div>
@@ -19,9 +19,9 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-
+import { useUserStore } from "@/store/modules/user";
 import { getTags } from '@/api/v1/tags'
-
+const userStore = useUserStore();
 import type { TagProps } from 'element-plus'
 import { id } from 'element-plus/es/locale'
 
