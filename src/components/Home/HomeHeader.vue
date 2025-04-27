@@ -1,5 +1,7 @@
 <template>
   <div class="home-header">
+
+
     <el-row :gutter="10">
       <el-col :md="14" :span="24">
         <div :class="['home-avatar-container', { mobile: isMobile }]">
