@@ -8,9 +8,8 @@
     <el-select-v2 v-if="props.editable" @change="handleChange" v-model="value" size="small" :options="classify"
       placeholder="添加标签" style="width:100px" />
 
-    <el-switch v-if="props.editable && userStore.isUserPermissionGreater('admin')" size="small"
-      v-model="isPublic as boolean" :loading="loading" :before-change="beforeChange" active-text="公开" inline-prompt
-      inactive-text="私有" />
+    <el-switch v-if="props.editable && userStore.isUserPermissionGreater('admin')" size="small" v-model="public_"
+      :loading="loading" :before-change="beforeChange" active-text="公开" inline-prompt inactive-text="私有" />
 
   </div>
 
@@ -28,22 +27,21 @@ const userStore = useUserStore();
 import type { TagProps } from 'element-plus'
 
 const loading = ref(false)
-
+const public_ = ref(false)
 
 const beforeChange = (): Promise<boolean> => {
   loading.value = true
-  return new Promise(async (resolve) => {
-
-    if (!isPublic.value) {
-
-      emit('add', _public.value?.id)
+  return new Promise(async (resolve, reject) => {
+    loading.value = false
+    if (!public_.value) {
+      emit('add', _public.value?.id, () => {
+        resolve(true);
+      }, reject)
     } else {
-      emit('remove', _public.value?.id)
+      emit('remove', _public.value?.id, () => {
+        resolve(true);
+      }, reject)
     }
-    setTimeout(() => {
-      loading.value = false
-      return resolve(true)
-    }, 1000)
   })
 }
 
@@ -77,29 +75,6 @@ const data = computed(() => {
 });
 
 
-const isPublic = computed<boolean>(() => {
-  const result = data.value.find((item: any) => {
-    return item === _public.value?.id
-  })
-  if (!result) {
-    return false
-  }
-  console.error(result)
-  return true;
-
-});
-const status = computed(() => {
-  if (list.value === null) return []
-  return list.value
-    .filter((item: any) => { return !data.value.includes(item.id) && (item.type === 'Status'); })
-    .map((item: any) => {
-      return {
-        label: item.name,
-        value: item.id,
-        key: item.key,
-      }
-    })
-})
 const _public = computed<TagsItem | null>(() => {
   if (list.value === null) return null;
 
@@ -148,9 +123,7 @@ const handleChange = (val: any) => {
 
   console.log('选择完毕，选中的标签:', val)
   emit('add', val)
-
   value.value = null;
-  //emit('tagsChange', val)
 }
 
 
@@ -158,7 +131,13 @@ const list: Ref<null | []> = ref(null)
 onMounted(async () => {
   const res = await getTags();
   list.value = res.data;
-
-
+  const result = data.value.find((item: any) => {
+    return item === _public.value?.id
+  })
+  if (result) {
+    public_.value = true
+  } else {
+    public_.value = false
+  }
 })
 </script>
