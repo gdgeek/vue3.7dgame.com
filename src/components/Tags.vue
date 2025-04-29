@@ -44,7 +44,6 @@ const beforeChange = (): Promise<boolean> => {
     }
   })
 }
-
 const props = defineProps({
   verseTags: {
     type: Array,
