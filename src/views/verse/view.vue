@@ -188,7 +188,7 @@ const handleImageUploadSuccess = async (event: ImageUpdateEvent) => {
   }
 };
 
-const removeTags = async (tags: number) => {
+const removeTags = async (tags: number, resolve: () => void = () => { }, reject: () => void = () => { }) => {
   try {
     await ElMessageBox.confirm(
       t("verse.view.tags.confirmRemove.message"),
@@ -201,13 +201,15 @@ const removeTags = async (tags: number) => {
     );
     await removeVerseTags(verse.value!.id, tags);
     await refresh();
+    resolve();
     ElMessage.success(t("verse.view.tags.confirmRemove.success"));
   } catch (e) {
+    reject();
     ElMessage.error(t("verse.view.tags.confirmRemove.error"));
   }
 };
 
-const addTags = async (tags: number) => {
+const addTags = async (tags: number, resolve: () => void = () => { }, reject: () => void = () => { }) => {
   try {
     await ElMessageBox.confirm(
       t("verse.view.tags.confirmAdd.message"),
@@ -220,11 +222,14 @@ const addTags = async (tags: number) => {
     );
     await postVerseTags(verse.value!.id, tags);
     await refresh();
+    resolve();
     ElMessage.success(t("verse.view.tags.confirmAdd.success"));
   } catch (e) {
-    ElMessage.info(t("verse.view.tags.confirmAdd.error"));
+    reject();
+    ElMessage.error(t("verse.view.tags.confirmAdd.error"));
   }
 };
+
 
 const comeIn = () => {
   router.push({
