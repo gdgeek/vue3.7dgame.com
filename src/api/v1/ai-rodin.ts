@@ -32,16 +32,6 @@ const file = (id: number) => {
   });
 };
 const rodin = (query: Record<string, string | number>) => {
-  /*
-  const query: Record<string, string | number> = {
-  };
-
-  if (prompt) {
-    query["prompt"] = prompt;
-  }
-  if (resource_id) {
-    query["resource_id"] = resource_id;
-  }*/
   const url =
     import.meta.env.VITE_APP_AI_API +
     "/" +

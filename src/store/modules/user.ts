@@ -44,6 +44,55 @@ export const useUserStore = defineStore(
       }
       return true;
     }
+    const RoleEnum = {
+      Root: "root",
+      Admin: "admin",
+      Manager: "manager",
+      User: "user",
+      None: null,
+    };
+    function getRoleLevel(role: string | null) {
+      switch (role) {
+        case RoleEnum.Root:
+          return 4;
+        case RoleEnum.Admin:
+          return 3;
+        case RoleEnum.Manager:
+          return 2;
+        case RoleEnum.User:
+          return 1;
+        default:
+          return 0;
+      }
+    }
+    function isUserPermissionGreater(role: string) {
+      const currentRole = getRole();
+
+      const currentLevel = getRoleLevel(currentRole);
+      const targetLevel = getRoleLevel(role);
+      return currentLevel >= targetLevel;
+    }
+
+    function getRole() {
+      const roles = userInfo.value?.roles;
+      if (roles && roles.length > 0) {
+        if (roles.find((element) => element === RoleEnum.Root) != undefined) {
+          return RoleEnum.Root;
+        }
+        if (roles.find((element) => element === RoleEnum.Admin) != undefined) {
+          return RoleEnum.Admin;
+        }
+        if (
+          roles.find((element) => element === RoleEnum.Manager) != undefined
+        ) {
+          return RoleEnum.Manager;
+        }
+        if (roles.find((element) => element === RoleEnum.User) != undefined) {
+          return RoleEnum.User;
+        }
+      }
+      return RoleEnum.None;
+    }
     /**
      * 登录
      *
@@ -136,7 +185,6 @@ export const useUserStore = defineStore(
 
         // 更新 userInfo
         userInfo.value = user;
-
         userInfo.value.perms = perms;
 
         return userInfo.value;
@@ -144,33 +192,7 @@ export const useUserStore = defineStore(
         console.error("Error fetching user info:", error);
       }
     };
-    /*
-    const setupRefreshInterval = () => {
-      //  alert(2);
-      if (refreshInterval.value) {
-        clearInterval(refreshInterval.value); // 清除现有的定时器
-      }
-      refreshInterval.value = setInterval(async () => {
-        try {
-          const token = Token.getToken();
-          if (token) {
-            console.error(token);
-            const newTokenResponse = await AuthAPI.refresh({
-              refreshToken: token.refreshToken,
-            });
-            const newToken = newTokenResponse.data.token;
-            Token.setToken(newToken);
-            // localStorage.setItem(TOKEN_KEY, newToken); // 更新 token
-            // console.log("Token refreshed:", newToken);
-            const res = await getUserInfo(); // 刷新用户数据
-            console.log("User data refreshed:", res);
-          }
-        } catch (e) {
-          console.error("Failed to refresh user data:", e);
-        }
-      }, 3600000);
-    };
-*/
+
     const form = ref<LoginData>({
       username: "",
       password: "",
@@ -236,8 +258,10 @@ export const useUserStore = defineStore(
       logout,
       resetToken,
       form,
+      getRole,
+      isUserPermissionGreater,
+      RoleEnum,
       refreshInterval,
-      //  setupRefreshInterval,
     };
   },
   {

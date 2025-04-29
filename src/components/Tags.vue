@@ -1,17 +1,17 @@
 <template>
-
-
   <div v-if="classify" class="flex gap-2">
+
     <el-tag v-for="tag in tags" :type="tag.type === 'Classify' ? 'primary' : 'success'" :key="tag.name"
       :closable="props.editable" @close="close(tag.id)">
       {{ tag.name }}
     </el-tag>
-    <el-select-v2 v-if="props.editable" @change="handleChange" v-model="value" size="small" :options="options"
+    <el-select-v2 v-if="props.editable" @change="handleChange" v-model="value" size="small" :options="classify"
       placeholder="添加标签" style="width:100px" />
 
-    {{ userStore }}
-    <el-select-v2 v-if="props.editable" @change="handleChange" v-model="value" size="small" :options="options"
-      placeholder="设置" style="width:100px" />
+    <el-switch v-if="props.editable && userStore.isUserPermissionGreater('admin')" size="small"
+      v-model="isPublic as boolean" :loading="loading" :before-change="beforeChange" active-text="公开" inline-prompt
+      inactive-text="私有" />
+
   </div>
 
 
@@ -22,11 +22,29 @@ import { ref } from 'vue'
 import { useUserStore } from "@/store/modules/user";
 import { getTags } from '@/api/v1/tags'
 const userStore = useUserStore();
-import type { TagProps } from 'element-plus'
-import { id } from 'element-plus/es/locale'
 
-const classify: Ref<null | []> = ref(null)
-const status: Ref<null | []> = ref(null)
+import type { TagProps } from 'element-plus'
+
+const loading = ref(false)
+
+
+const beforeChange = (): Promise<boolean> => {
+  loading.value = true
+  return new Promise(async (resolve) => {
+
+    if (!isPublic.value) {
+
+      emit('add', _public.value?.id)
+    } else {
+      emit('remove', _public.value?.id)
+    }
+    setTimeout(() => {
+      loading.value = false
+      return resolve(true)
+    }, 1000)
+  })
+}
+
 const props = defineProps({
   verseTags: {
     type: Array,
@@ -41,8 +59,9 @@ const props = defineProps({
 const emit = defineEmits(['add', 'remove'])
 const value = ref()
 interface TagsItem {
+  id: number
   name: string
-  type: TagProps['type']
+  type: string
 }
 const close = (id: number) => {
   console.log('删除标签:', id)
@@ -50,29 +69,69 @@ const close = (id: number) => {
 }
 const data = computed(() => {
   return props.verseTags.map((item: any) => {
-
     return item.tags_id;
   })
 
 });
 
-const options = computed(() => {
-  // 筛选出id在props.data中的数据项
-  if (classify.value === null) return []
-  return classify.value
-    .filter((item: any) => { return !data.value.includes(item.id) && (item.type === 'Classify' || item.type === 'Status'); })
+
+const isPublic = computed<boolean>(() => {
+  const result = data.value.find((item: any) => {
+    return item === _public.value?.id
+  })
+  if (!result) {
+    return false
+  }
+  console.error(result)
+  return true;
+
+});
+const status = computed(() => {
+  if (list.value === null) return []
+  return list.value
+    .filter((item: any) => { return !data.value.includes(item.id) && (item.type === 'Status'); })
     .map((item: any) => {
       return {
         label: item.name,
-        value: item.id
+        value: item.id,
+        key: item.key,
+      }
+    })
+})
+const _public = computed<TagsItem | null>(() => {
+  if (list.value === null) return null;
+
+  const filtered = list.value
+    .filter((item: any) => { return (item.key === 'public'); })
+    .map((item: any) => {
+      return {
+        name: item.name,
+        id: item.id,
+        type: item.type,
+        key: item.key
+      } as TagsItem
+    });
+
+  // 返回第一个元素，如果没有找到则返回 null
+  return filtered.length > 0 ? filtered[0] : null;
+});
+const classify = computed(() => {
+  if (list.value === null) return []
+  return list.value
+    .filter((item: any) => { return !data.value.includes(item.id) && (item.type === 'Classify'); })
+    .map((item: any) => {
+      return {
+        label: item.name,
+        value: item.id,
+        key: item.key
       }
     })
 })
 const tags = computed(() => {
-  if (classify.value === null) return []
-  // 首先筛选出id在props.data中的数据项
-  return classify.value
-    .filter((item: any) => { return data.value.includes(item.id) && (item.type === 'Classify' || item.type === 'Status'); })
+  if (list.value === null) return []
+
+  return list.value
+    .filter((item: any) => { return data.value.includes(item.id) && (item.type === 'Classify'); })
     .map((item: any) => {
       return {
         name: item.name,
@@ -91,12 +150,13 @@ const handleChange = (val: any) => {
   value.value = null;
   //emit('tagsChange', val)
 }
-onMounted(() => {
-  getTags().then(res => {
-    classify.value = res.data
-  })
-  getTags('Status').then(res => {
-    status.value = res.data
-  })
+
+
+const list: Ref<null | []> = ref(null)
+onMounted(async () => {
+  const res = await getTags();
+  list.value = res.data;
+
+
 })
 </script>
