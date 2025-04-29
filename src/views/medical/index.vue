@@ -357,13 +357,13 @@ onUnmounted(() => {
         bottom: -6px;
         height: 2px;
         width: 0;
-        background: linear-gradient(90deg, #00dbde, #afafaf);
+        background: linear-gradient(90deg, #3498db, #00d2ff);
         transition: all 0.3s ease;
       }
 
       &:hover {
         .menu-text {
-          color: #00dbde;
+          color: #3498db;
         }
 
         .menu-line {

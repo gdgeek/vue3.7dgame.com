@@ -72,17 +72,6 @@
                       </div>
                     </div>
                   </div>
-
-                  <div class="testimonial" v-if="tab.testimonial">
-                    <blockquote>{{ tab.testimonial.content }}</blockquote>
-                    <div class="testimonial-author">
-                      <img :src="tab.testimonial.avatar" alt="医生头像" />
-                      <div>
-                        <div class="author-name">{{ tab.testimonial.name }}</div>
-                        <div class="author-title">{{ tab.testimonial.title }}</div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </el-tab-pane>
@@ -90,23 +79,38 @@
         </div>
       </div>
 
-      <!-- 合作伙伴 -->
-      <div class="partners-section" data-aos="fade-up">
-        <h3>合作伙伴</h3>
-        <div class="partners-grid">
-          <div v-for="(partner, index) in partners" :key="index" class="partner-item" data-aos="zoom-in"
-            :data-aos-delay="index * 50">
-            <img :src="partner.logo" :alt="partner.name" />
-            <span>{{ partner.name }}</span>
+      <!-- AR技术优势展示 -->
+      <div class="technology-advantages" data-aos="fade-up">
+        <div class="advantages-header">
+          <h3>AR技术优势</h3>
+          <div class="section-divider advantages-divider"></div>
+          <p>增强现实技术为牙科医疗带来的革命性变革与潜力</p>
+        </div>
+
+        <div class="advantages-grid">
+          <div v-for="(advantage, index) in arAdvantages" :key="index" class="advantage-card" data-aos="zoom-in"
+            :data-aos-delay="index * 100">
+            <div class="advantage-icon">
+              <el-icon>
+                <component :is="advantage.icon" />
+              </el-icon>
+            </div>
+            <h4 class="advantage-title">{{ advantage.title }}</h4>
+            <p class="advantage-description">{{ advantage.description }}</p>
           </div>
         </div>
       </div>
 
       <!-- 咨询区域 -->
       <div class="contact-section" data-aos="fade-up">
-        <h3>想了解AR技术如何应用到您的牙科诊所？</h3>
-        <p>预约演示，探索AR技术如何提升您的诊疗效果</p>
-        <el-button type="primary" size="large" @click="openLoginDialog">预约咨询</el-button>
+        <div class="contact-content">
+          <h3>想了解AR技术如何应用到您的牙科诊所？</h3>
+          <p>预约演示，探索AR技术如何提升您的诊疗效果</p>
+          <el-button type="primary" size="large" @click="openLoginDialog" class="contact-button">预约咨询</el-button>
+        </div>
+        <div class="contact-particles">
+          <div v-for="n in 6" :key="n" class="particle" :class="`particle-${n}`"></div>
+        </div>
       </div>
     </div>
 
@@ -185,13 +189,7 @@ const caseTabs = [
         title: '手术时间缩短40%',
         description: '预设手术路径和实时反馈大幅缩短手术时间，减轻患者痛苦。'
       }
-    ],
-    testimonial: {
-      content: '采用AR技术后，种植牙手术的精确度和效率有了质的飞跃。患者恢复时间缩短，术后并发症显著减少。',
-      name: '王医生',
-      title: '口腔医院种植科主任',
-      avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-1.2.1&auto=format&fit=crop&w=90&q=80'
-    }
+    ]
   },
   {
     name: 'orthodontics',
@@ -216,13 +214,7 @@ const caseTabs = [
         title: '治疗进度监控',
         description: '医生可以随时比对实际治疗进展与预期计划，及时调整治疗方案。'
       }
-    ],
-    testimonial: {
-      content: 'AR正畸技术让我的患者能清晰看到治疗前后的对比，大大提高了治疗接受度和满意度。',
-      name: '张医生',
-      title: '正畸科专家',
-      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-1.2.1&auto=format&fit=crop&w=90&q=80'
-    }
+    ]
   },
   {
     name: 'education',
@@ -247,33 +239,31 @@ const caseTabs = [
         title: '个性化护理指导',
         description: '根据患者具体情况，提供量身定制的口腔护理建议和演示。'
       }
-    ],
-    testimonial: {
-      content: 'AR教育系统帮助我更有效地向患者解释复杂的治疗方案，患者能直观理解自己的口腔问题和解决方案。',
-      name: '李医生',
-      title: '口腔诊所院长',
-      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?ixlib=rb-1.2.1&auto=format&fit=crop&w=90&q=80'
-    }
+    ]
   }
 ];
 
-// 合作伙伴
-const partners = [
+// AR技术优势
+const arAdvantages = [
   {
-    name: '北京口腔医院',
-    logo: 'https://via.placeholder.com/100x60?text=北京口腔医院'
+    icon: 'Aim',
+    title: '极高精度',
+    description: 'AR技术能够提供亚毫米级别的精确定位，为牙科手术和种植提供前所未有的精确度'
   },
   {
-    name: '上海九院',
-    logo: 'https://via.placeholder.com/100x60?text=上海九院'
+    icon: 'Timer',
+    title: '提高效率',
+    description: '通过直观的可视化指导和实时反馈，AR技术能够显著减少手术时间和治疗周期'
   },
   {
-    name: '广州中山大学附属口腔医院',
-    logo: 'https://via.placeholder.com/100x60?text=中山口腔'
+    icon: 'Trophy',
+    title: '提升体验',
+    description: '为患者提供更加舒适和透明的治疗过程，增强患者对治疗方案的理解和接受度'
   },
   {
-    name: '深圳爱康健口腔',
-    logo: 'https://via.placeholder.com/100x60?text=爱康健'
+    icon: 'TrendCharts',
+    title: '行业前沿',
+    description: '作为牙科医疗领域的前沿技术，AR代表着数字化牙科的未来发展方向'
   }
 ];
 </script>
@@ -543,115 +533,206 @@ const partners = [
   margin: 0;
 }
 
-.testimonial {
-  background: var(--el-bg-color);
-  border-radius: 16px;
-  padding: 25px;
-  position: relative;
-  margin-top: 40px;
-  border-left: 4px solid var(--el-color-primary);
-}
-
-.testimonial blockquote {
-  font-size: 1rem;
-  line-height: 1.6;
-  font-style: italic;
-  color: var(--el-text-color-primary);
-  margin: 0 0 20px;
-}
-
-.testimonial-author {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.testimonial-author img {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.author-name {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--el-text-color-primary);
-}
-
-.author-title {
-  font-size: 0.85rem;
-  color: var(--el-text-color-secondary);
-}
-
-/* 合作伙伴样式 */
-.partners-section {
+/* AR技术优势展示区域 */
+.technology-advantages {
   margin-bottom: 80px;
+}
+
+.advantages-header {
   text-align: center;
+  margin-bottom: 50px;
 }
 
-.partners-section h3 {
-  font-size: 2rem;
+.advantages-header h3 {
+  font-size: 2.2rem;
   font-weight: 700;
-  margin-bottom: 40px;
+  margin-bottom: 15px;
+  color: var(--el-text-color-primary);
 }
 
-.partners-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+.advantages-header p {
+  font-size: 1.1rem;
+  color: var(--el-text-color-secondary);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.advantages-divider {
+  margin-bottom: 15px;
+}
+
+.advantages-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 30px;
 }
 
-.partner-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  transition: transform 0.3s ease;
+.advantage-card {
+  background-color: var(--el-bg-color-overlay);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
 }
 
-.partner-item:hover {
+.advantage-card:hover {
   transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
 }
 
-.partner-item img {
+.advantage-icon {
+  width: 60px;
   height: 60px;
-  width: auto;
-  object-fit: contain;
+  margin: 0 auto 20px;
+  background: linear-gradient(135deg, var(--el-color-primary-light-7), var(--el-color-primary));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 28px;
 }
 
-.partner-item span {
-  font-size: 0.9rem;
+.advantage-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  margin-bottom: 15px;
+}
+
+.advantage-description {
+  font-size: 0.95rem;
   color: var(--el-text-color-secondary);
+  line-height: 1.6;
 }
 
 /* 咨询区域样式 */
 .contact-section {
   background: linear-gradient(135deg, #3a7bd5, #00d2ff);
-  border-radius: 20px;
-  padding: 60px;
+  border-radius: 30px;
+  padding: 80px 60px;
   text-align: center;
   color: white;
+  position: relative;
+  overflow: hidden;
 }
 
 .dark-theme .contact-section {
   background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
 }
 
+.contact-content {
+  position: relative;
+  z-index: 2;
+}
+
 .contact-section h3 {
-  font-size: 2rem;
+  font-size: 2.3rem;
   font-weight: 700;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .contact-section p {
   font-size: 1.1rem;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
   opacity: 0.9;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+}
+
+.contact-button {
+  padding: 15px 40px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  background: white;
+  color: var(--el-color-primary);
+  border: none;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.contact-button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* 粒子动画效果 */
+.contact-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.particle-1 {
+  width: 150px;
+  height: 150px;
+  top: -50px;
+  left: 10%;
+  animation: float 8s infinite ease-in-out;
+}
+
+.particle-2 {
+  width: 80px;
+  height: 80px;
+  bottom: 20px;
+  right: 20%;
+  animation: float 6s infinite ease-in-out 1s;
+}
+
+.particle-3 {
+  width: 200px;
+  height: 200px;
+  bottom: -80px;
+  left: 30%;
+  animation: float 10s infinite ease-in-out 2s;
+}
+
+.particle-4 {
+  width: 120px;
+  height: 120px;
+  top: 40px;
+  right: 10%;
+  animation: float 7s infinite ease-in-out 1.5s;
+}
+
+.particle-5 {
+  width: 100px;
+  height: 100px;
+  top: 50%;
+  left: 5%;
+  animation: float 9s infinite ease-in-out 0.5s;
+}
+
+.particle-6 {
+  width: 170px;
+  height: 170px;
+  bottom: 10%;
+  right: 5%;
+  animation: float 8s infinite ease-in-out 2.5s;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
 }
 
 /* 视频容器样式 */
@@ -671,6 +752,12 @@ const partners = [
 }
 
 /* 响应式调整 */
+@media (max-width: 1100px) {
+  .advantages-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 992px) {
   .benefits-overview {
     flex-direction: column;
@@ -716,8 +803,16 @@ const partners = [
     gap: 20px;
   }
 
+  .advantages-grid {
+    grid-template-columns: 1fr;
+  }
+
   .contact-section h3 {
     font-size: 1.7rem;
+  }
+
+  .contact-section {
+    padding: 50px 30px;
   }
 }
 
@@ -728,10 +823,6 @@ const partners = [
 
   .tab-details>p {
     font-size: 1rem;
-  }
-
-  .partners-grid {
-    gap: 20px;
   }
 }
 </style>
