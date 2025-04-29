@@ -3,9 +3,9 @@
     <div class="section-container">
       <!-- 标题区域 -->
       <div class="section-header" data-aos="fade-up">
-        <h2 class="section-title">AR牙科应用</h2>
+        <h2 class="section-title">3D牙科应用</h2>
         <div class="section-divider"></div>
-        <p class="section-subtitle">探索增强现实如何重塑现代牙科诊疗体验</p>
+        <p class="section-subtitle">探索拓展现实如何重塑现代牙科诊疗与教学体验</p>
       </div>
 
       <!-- 优势概览 -->
@@ -13,7 +13,7 @@
         <div class="overview-image">
           <img
             src="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-            alt="AR牙科应用" />
+            alt="3D牙科应用" />
           <div class="image-overlay">
             <div class="play-button" @click="openVideoDialog">
               <el-icon>
@@ -24,19 +24,19 @@
         </div>
         <div class="overview-content">
           <h3>数字化牙科的未来</h3>
-          <p>增强现实技术正在彻底改变牙科行业，从精确诊断到治疗规划，从患者教育到手术导航，AR技术为牙科医生和患者带来前所未有的体验。</p>
+          <p>拓展现实技术正在彻底改变牙科行业，从精确建模到方案规划，从患者教育到实时引导，XR技术为牙科医生和患者带来前所未有的数字化诊疗体验。</p>
 
           <div class="key-metrics">
             <div class="metric">
-              <div class="metric-value">99.7%</div>
-              <div class="metric-label">植入精度</div>
+              <div class="metric-value">99.9%</div>
+              <div class="metric-label">模型精度</div>
             </div>
             <div class="metric">
-              <div class="metric-value">40%</div>
+              <div class="metric-value">45%</div>
               <div class="metric-label">时间节省</div>
             </div>
             <div class="metric">
-              <div class="metric-value">95%</div>
+              <div class="metric-value">98%</div>
               <div class="metric-label">患者满意度</div>
             </div>
           </div>
@@ -79,12 +79,12 @@
         </div>
       </div>
 
-      <!-- AR技术优势展示 -->
+      <!-- XR技术优势展示 -->
       <div class="technology-advantages" data-aos="fade-up">
         <div class="advantages-header">
-          <h3>AR技术优势</h3>
+          <h3>XR技术优势</h3>
           <div class="section-divider advantages-divider"></div>
-          <p>增强现实技术为牙科医疗带来的革命性变革与潜力</p>
+          <p>拓展现实技术为牙科诊疗带来的革命性变革与潜力</p>
         </div>
 
         <div class="advantages-grid">
@@ -104,8 +104,8 @@
       <!-- 咨询区域 -->
       <div class="contact-section" data-aos="fade-up">
         <div class="contact-content">
-          <h3>想了解AR技术如何应用到您的牙科诊所？</h3>
-          <p>预约演示，探索AR技术如何提升您的诊疗效果</p>
+          <h3>想了解XR技术如何应用到您的牙科诊所？</h3>
+          <p>预约演示，探索XR技术如何提升您的诊疗效果和患者体验</p>
           <el-button type="primary" size="large" @click="openLoginDialog" class="contact-button">预约咨询</el-button>
         </div>
         <div class="contact-particles">
@@ -115,10 +115,10 @@
     </div>
 
     <!-- 视频弹窗 -->
-    <el-dialog v-model="videoDialogVisible" title="AR牙科技术演示" width="70%" :before-close="handleCloseVideo"
+    <el-dialog v-model="videoDialogVisible" title="3D牙科技术演示" width="70%" :before-close="handleCloseVideo"
       destroy-on-close>
       <div class="video-container">
-        <iframe width="100%" height="500" src="https://www.bilibili.com/video/BV1Q5411K75v" title="AR牙科技术演示"
+        <iframe width="100%" height="500" src="https://www.bilibili.com/video/BV1Q5411K75v" title="3D牙科技术演示"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen>
@@ -169,70 +169,70 @@ const caseTabs = [
   {
     name: 'implant',
     label: '种植牙导航',
-    badge: '精准医疗',
-    title: 'AR辅助种植牙精准定位系统',
-    description: '通过增强现实技术实现种植牙的高精度定位和实时手术导航，大幅提高种植成功率。',
+    badge: '精准引导',
+    title: 'XR辅助种植牙精准定位系统',
+    description: '通过拓展现实技术实现种植牙的高精度定位和实时引导导航，大幅提高种植成功率和效率。',
     image: 'https://images.unsplash.com/photo-1609840114035-3c981b782dfe?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
     highlights: [
       {
         icon: 'Aim',
-        title: '亚毫米精度定位',
-        description: '采用光学追踪和三维重建技术，实现种植体亚毫米级精确定位。'
+        title: '微米级精度定位',
+        description: '采用光学追踪和三维重建技术，实现种植体微米级精确定位。'
       },
       {
         icon: 'Operation',
-        title: '实时手术导航',
-        description: 'AR眼镜投射虚拟导航路径，实时指导医生完成最佳角度的植入。'
+        title: '实时种植引导',
+        description: 'XR眼镜投射虚拟导航路径，实时指导医生完成最佳角度的植入。'
       },
       {
         icon: 'Timer',
-        title: '手术时间缩短40%',
-        description: '预设手术路径和实时反馈大幅缩短手术时间，减轻患者痛苦。'
+        title: '治疗时间缩短45%',
+        description: '预设种植路径和实时反馈大幅缩短治疗时间，提升诊所效率。'
       }
     ]
   },
   {
     name: 'orthodontics',
-    label: '正畸治疗',
-    badge: '个性化医疗',
-    title: 'AR正畸虚拟规划系统',
-    description: '结合3D口腔扫描和AR可视化技术，为患者提供个性化正畸治疗方案，实时预览治疗效果。',
+    label: '正畸矫治',
+    badge: '个性化方案',
+    title: 'XR正畸虚拟规划系统',
+    description: '结合3D口腔扫描和XR可视化技术，为患者提供个性化正畸治疗方案，实时预览矫正效果。',
     image: 'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
     highlights: [
       {
         icon: 'TrendCharts',
-        title: '个性化治疗规划',
-        description: '基于患者口腔的精确3D模型，制定最佳个性化治疗方案。'
+        title: '个性化矫正规划',
+        description: '基于患者口腔的精确3D模型，制定最佳个性化矫正方案。'
       },
       {
         icon: 'SetUp',
         title: '虚拟效果预览',
-        description: '通过AR技术，患者可以在治疗前预览整个治疗过程和最终效果。'
+        description: '通过XR技术，患者可以在治疗前预览整个矫正过程和最终效果。'
       },
       {
         icon: 'Trophy',
-        title: '治疗进度监控',
-        description: '医生可以随时比对实际治疗进展与预期计划，及时调整治疗方案。'
+        title: '矫正进度监控',
+        description: '医生可以随时比对实际矫正进展与预期计划，及时调整治疗方案。'
       }
     ]
   },
   {
     name: 'education',
     label: '患者教育',
-    badge: '交互体验',
-    title: 'AR牙科患者教育系统',
-    description: '通过AR技术为患者提供直观、互动的口腔健康教育，增强患者理解和治疗依从性。',
+    badge: '互动体验',
+    title: 'XR牙科患者教育系统',
+    description: '通过XR技术为患者提供直观、互动的口腔健康教育，增强患者理解和治疗配合度。',
     image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
     highlights: [
       {
         icon: 'SetUp',
         title: '互动式口腔展示',
-        description: '患者可以通过AR设备直观了解自己的口腔状况和治疗方案。'
+        description: '患者可以通过XR设备直观了解自己的口腔状况和治疗方案。'
       },
       {
         icon: 'ChatDotRound',
         title: '增强医患沟通',
-        description: '形象直观的AR展示大幅提高医患沟通效率和患者满意度。'
+        description: '形象直观的XR展示大幅提高医患沟通效率和患者满意度。'
       },
       {
         icon: 'Trophy',
@@ -243,27 +243,37 @@ const caseTabs = [
   }
 ];
 
-// AR技术优势
+// XR技术优势
 const arAdvantages = [
   {
     icon: 'Aim',
-    title: '极高精度',
-    description: 'AR技术能够提供亚毫米级别的精确定位，为牙科手术和种植提供前所未有的精确度'
+    title: '超高精度',
+    description: 'XR技术支持微米级精确3D建模，确保牙科治疗的极高精准度和成功率。'
   },
   {
     icon: 'Timer',
-    title: '提高效率',
-    description: '通过直观的可视化指导和实时反馈，AR技术能够显著减少手术时间和治疗周期'
+    title: '高效诊疗',
+    description: '3D可视化和实时引导显著缩短治疗时间，提高诊所工作效率。'
+  },
+  {
+    icon: 'SetUp',
+    title: '直观交互',
+    description: '患者可以直观理解治疗计划和预期效果，减轻焦虑，提高治疗接受度。'
   },
   {
     icon: 'Trophy',
-    title: '提升体验',
-    description: '为患者提供更加舒适和透明的治疗过程，增强患者对治疗方案的理解和接受度'
+    title: '教学优化',
+    description: 'XR技术为牙科教育提供沉浸式学习环境，加速技能掌握和知识传递。'
   },
   {
-    icon: 'TrendCharts',
-    title: '行业前沿',
-    description: '作为牙科医疗领域的前沿技术，AR代表着数字化牙科的未来发展方向'
+    icon: 'Operation',
+    title: '远程协作',
+    description: '支持专家远程实时指导，实现全球牙科资源的高效共享与协作。'
+  },
+  {
+    icon: 'ChatDotRound',
+    title: '患者体验',
+    description: '通过数字化体验提升患者满意度和舒适感，建立信任的医患关系。'
   }
 ];
 </script>
@@ -533,7 +543,7 @@ const arAdvantages = [
   margin: 0;
 }
 
-/* AR技术优势展示区域 */
+/* XR技术优势展示区域 */
 .technology-advantages {
   margin-bottom: 80px;
 }

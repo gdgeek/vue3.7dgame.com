@@ -11,10 +11,10 @@
       <!-- 文字内容 -->
       <div class="hero-text" data-aos="fade-up">
         <h1 class="hero-title">
-          <span>智能医疗</span>
-          <span class="gradient-text">AR平台</span>
+          <span>3D牙科</span>
+          <span class="gradient-text">XR平台</span>
         </h1>
-        <p class="hero-subtitle">融合增强现实与医学专业知识，引领医疗科技创新</p>
+        <p class="hero-subtitle">融合拓展现实与数字牙科技术，引领牙科数字化体验新时代</p>
 
         <!-- 特点标签 -->
         <div class="hero-features">
@@ -22,19 +22,19 @@
             <el-icon>
               <Aim />
             </el-icon>
-            <span>亚毫米级精度</span>
+            <span>微米级精度</span>
           </div>
           <div class="feature-item">
             <el-icon>
               <Operation />
             </el-icon>
-            <span>实时手术导航</span>
+            <span>3D视觉导航</span>
           </div>
           <div class="feature-item">
             <el-icon>
               <DataAnalysis />
             </el-icon>
-            <span>智能数据分析</span>
+            <span>智能诊疗分析</span>
           </div>
         </div>
 
@@ -52,10 +52,10 @@
       <!-- 保持原有的hero-image区域 -->
       <div class="hero-image" data-aos="fade-left" data-aos-delay="400">
         <div class="showcase-container">
-          <img src="/media/image/ar_medical.png" @click="openVideoDialog" alt="医疗AR智能平台" class="primary-image" />
+          <img src="/media/image/ar_medical.png" @click="openVideoDialog" alt="牙科XR智能平台" class="primary-image" />
 
           <div class="floating-elements">
-            <!-- 医疗认证卡片 -->
+            <!-- 认证卡片 -->
             <div class="floating-element certification-card">
               <div class="certification-icon">
                 <el-icon>
@@ -63,8 +63,8 @@
                 </el-icon>
               </div>
               <div class="certification-info">
-                <span class="certification-title">医疗器械认证</span>
-                <div class="certification-badge">国际认证</div>
+                <span class="certification-title">技术认证</span>
+                <div class="certification-badge">国际标准</div>
               </div>
             </div>
 
@@ -77,7 +77,7 @@
               </div>
               <div class="accuracy-info">
                 <span class="accuracy-value">99.9%</span>
-                <span class="accuracy-label">定位精度</span>
+                <span class="accuracy-label">模型精度</span>
               </div>
             </div>
 
@@ -89,8 +89,8 @@
                 </el-icon>
               </div>
               <div class="feature-info">
-                <span class="feature-title">实时3D成像</span>
-                <span class="feature-desc">亚毫米级精度</span>
+                <span class="feature-title">实时3D建模</span>
+                <span class="feature-desc">微米级精度</span>
               </div>
             </div>
           </div>
@@ -116,8 +116,8 @@
       </div>
     </div>
 
-    <!-- 保持原有的scroll-indicator区域 -->
-    <div class="scroll-indicator" @click="scrollToSolutions">
+    <!-- scroll-indicator -->
+    <div class="scroll-indicator" @click="scrollToSolutions" :style="scrollIndicatorStyle">
       <div class="scroll-text">向下滚动了解更多</div>
       <div class="scroll-icon">
         <el-icon class="scroll-arrow">
@@ -128,7 +128,7 @@
   </div>
 
   <!-- 视频弹窗 -->
-  <el-dialog v-model="videoDialogVisible" title="医疗AR智能平台演示" width="70%" :before-close="handleCloseVideo"
+  <el-dialog v-model="videoDialogVisible" title="牙科XR智能平台演示" width="70%" :before-close="handleCloseVideo"
     destroy-on-close>
     <Bilibili :bvid="bilibiliVideoId" :height="500" :autoplay="true" />
   </el-dialog>
@@ -167,6 +167,26 @@ const bilibiliVideoId = ref('BV1j2dPYWEh1');
 const mouseX = ref(0);
 const mouseY = ref(0);
 
+// 滚动指示器控制
+const scrollProgress = ref(0);
+const scrollIndicatorStyle = computed(() => {
+  const opacity = Math.max(0, 1 - scrollProgress.value * 2);
+  const translateY = scrollProgress.value * 20;
+  return {
+    opacity: opacity,
+    transform: `translateX(-50%) translateY(${translateY}px)`,
+    visibility: (opacity > 0 ? 'visible' : 'hidden') as 'visible' | 'hidden' | 'collapse'
+  };
+});
+
+// 监听滚动事件
+const handleScroll = () => {
+  const scrollPosition = window.scrollY;
+  const windowHeight = window.innerHeight;
+  // 计算滚动进度 (0-1范围)
+  scrollProgress.value = Math.min(1, scrollPosition / (windowHeight * 0.4));
+};
+
 // 打开视频对话框
 const openVideoDialog = () => {
   videoDialogVisible.value = true;
@@ -201,6 +221,7 @@ const scrollToSolutions = () => {
 
 onMounted(() => {
   window.addEventListener('mousemove', handleMouseMove);
+  window.addEventListener('scroll', handleScroll);
   AOS.init({
     duration: 1000,
     once: false,
@@ -210,6 +231,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('mousemove', handleMouseMove);
+  window.removeEventListener('scroll', handleScroll);
 });
 </script>
 
@@ -731,7 +753,7 @@ onUnmounted(() => {
   }
 }
 
-/* 保留原来的scroll-indicator样式，调整颜色 */
+/* 滚动指示器样式 */
 .scroll-indicator {
   position: absolute;
   bottom: 40px;
@@ -742,6 +764,7 @@ onUnmounted(() => {
   align-items: center;
   cursor: pointer;
   z-index: 10;
+  transition: all 0.4s ease-out;
 }
 
 .scroll-text {
@@ -751,6 +774,7 @@ onUnmounted(() => {
   margin-bottom: 10px;
   letter-spacing: 1px;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+  transition: opacity 0.3s ease;
 }
 
 .dark-theme .scroll-text {

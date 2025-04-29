@@ -3,9 +3,9 @@
     <div class="section-container">
       <!-- 标题区域 - 使用更现代的设计 -->
       <div class="section-header" data-aos="fade-up">
-        <h2 class="section-title">AR医疗创新</h2>
+        <h2 class="section-title">XR牙科创新</h2>
         <div class="section-divider"></div>
-        <p class="section-subtitle">突破传统医疗边界，构建智能医疗新体验</p>
+        <p class="section-subtitle">突破传统牙科边界，构建数字化牙科新体验</p>
       </div>
 
       <!-- 解决方案展示区 -->
@@ -30,7 +30,7 @@
         <div class="showcase-header">
           <h3>前沿科技应用</h3>
           <div class="section-divider showcase-divider"></div>
-          <p>探索AR医疗技术如何改变医疗行业的未来</p>
+          <p>探索XR技术如何改变牙科行业的未来</p>
         </div>
 
         <div class="technology-cards">
@@ -58,12 +58,12 @@
           <div class="stats-visual">
             <img
               src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-              alt="AR医疗数据可视化" class="stats-image">
+              alt="XR牙科数据可视化" class="stats-image">
             <div class="stats-overlay"></div>
           </div>
           <div class="stats-content">
-            <h3>数据驱动的医疗革新</h3>
-            <p>通过AR技术实现精确医疗决策，从数据中获取关键洞察</p>
+            <h3>数据驱动的牙科创新</h3>
+            <p>通过XR技术实现精确牙科诊疗决策，从三维数据中获取诊断洞察</p>
 
             <div class="stats-grid">
               <div v-for="(stat, index) in techStats" :key="index" class="stat-item" data-aos="zoom-in"
@@ -79,8 +79,8 @@
       <!-- 未来愿景区域 - 替代案例研究区 -->
       <div class="vision-section" data-aos="fade-up">
         <div class="vision-content">
-          <h3>医疗科技的未来愿景</h3>
-          <p>我们致力于通过增强现实技术，突破传统医疗的限制，开创全新的医患互动模式和治疗方案</p>
+          <h3>牙科科技的未来愿景</h3>
+          <p>我们致力于通过拓展现实技术，突破传统牙科的限制，开创全新的数字化牙科体验和诊疗方案</p>
 
           <div class="vision-pillars">
             <div class="vision-pillar" v-for="(pillar, index) in visionPillars" :key="index">
@@ -101,15 +101,15 @@
         <div class="vision-image" data-aos="fade-left">
           <img
             src="https://images.unsplash.com/photo-1551076805-e1869033e561?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-            alt="医疗科技未来愿景">
+            alt="牙科科技未来愿景">
         </div>
       </div>
 
-      <!-- 合作咨询区域 - 改进版 -->
+      <!-- 合作咨询区域 -->
       <div class="cta-section" data-aos="fade-up">
         <div class="cta-content">
-          <h3>体验AR医疗技术的未来</h3>
-          <p>联系我们获取专业咨询与演示，开启医疗科技创新之旅</p>
+          <h3>体验XR牙科技术的未来</h3>
+          <p>联系我们获取专业咨询与演示，开启牙科科技创新之旅</p>
           <el-button type="primary" size="large" @click="openLoginDialog" class="cta-button">预约演示</el-button>
         </div>
         <div class="cta-particles">
@@ -150,50 +150,50 @@ const openLoginDialog = () => {
   emit('openLogin');
 };
 
-// AR医疗解决方案
+// XR牙科解决方案
 const arSolutions = [
   {
     id: 1,
-    title: '手术导航',
-    description: '为外科医生提供实时手术指导和三维可视化，精确定位手术部位，减少手术风险。',
+    title: '3D牙齿导航',
+    description: '为牙科医生提供实时治疗指导和三维可视化，精确定位口腔治疗位置，提高诊疗精度。',
     icon: 'FirstAidKit',
     features: [
-      '亚毫米级精度定位',
-      '实时手术路径导航',
-      '三维解剖结构可视化'
+      '微米级精度定位',
+      '实时牙齿导航定位',
+      '三维口腔结构可视化'
     ]
   },
   {
     id: 2,
-    title: '智能牙科',
-    description: '结合3D口腔扫描与AR技术，实现精确诊断和治疗方案，提升患者体验。',
+    title: '数字化种植牙',
+    description: '结合3D口腔扫描与XR技术，实现精确种植牙定位和治疗方案，提升患者舒适度体验。',
     icon: 'User',
     features: [
       '牙齿精确三维建模',
-      '治疗方案虚拟预览',
-      '植牙精确定位辅助'
+      '种植牙方案虚拟预览',
+      '种植位置精确定位辅助'
     ]
   },
   {
     id: 3,
-    title: '医学教育',
-    description: '提供互动式医学教育平台，通过AR技术让学习者深入理解人体结构。',
+    title: '牙科教育培训',
+    description: '提供互动式牙科教育平台，通过XR技术让学习者深入理解口腔结构和治疗流程。',
     icon: 'EditPen',
     features: [
-      '虚拟人体解剖学习',
-      '手术流程虚拟演练',
+      '虚拟口腔解剖学习',
+      '治疗流程虚拟演练',
       '远程协作指导培训'
     ]
   },
   {
     id: 4,
-    title: '康复训练',
-    description: '康复训练系统结合AR技术，为患者提供互动式康复指导和实时反馈。',
+    title: '正畸方案设计',
+    description: '正畸治疗系统结合XR技术，为患者提供个性化矫正方案和治疗进展可视化。',
     icon: 'Monitor',
     features: [
-      '康复动作实时指导',
-      '训练数据可视化',
-      '远程医师监督指导'
+      '实时矫正过程预览',
+      '治疗数据可视化追踪',
+      '远程专家咨询方案'
     ]
   }
 ];
@@ -201,40 +201,40 @@ const arSolutions = [
 // 技术统计数据
 const techStats = [
   {
-    value: '99.7%',
-    label: '定位精确度'
+    value: '99.9%',
+    label: '模型精确度'
   },
   {
-    value: '40%',
-    label: '手术时间缩短'
+    value: '45%',
+    label: '治疗时间缩短'
   },
   {
-    value: '30%',
+    value: '50%',
     label: '学习效率提升'
   },
   {
-    value: '95%',
+    value: '98%',
     label: '用户满意度'
   }
 ];
 
-// 新增：AR技术展示区
+// 新增：XR技术展示区
 const arTechnologies = [
   {
-    title: '3D解剖建模',
-    description: '通过高精度扫描与AI技术，构建精确的人体组织三维模型，支持互动式浏览与分析',
+    title: '3D口腔建模',
+    description: '通过高精度扫描与AI技术，构建精确的口腔三维模型，支持互动式浏览与分析',
     image: 'https://images.unsplash.com/photo-1583911860205-72f8ac8ddcbe?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
     icon: 'DataAnalysis'
   },
   {
-    title: '实时手术投影',
-    description: '将关键医疗信息实时投影到患者身体表面，为医生提供直观的手术辅助',
+    title: '实时治疗指导',
+    description: '将关键治疗信息实时投影到患者口腔，为牙医提供直观的治疗辅助工具',
     image: 'https://images.unsplash.com/photo-1579154204835-44e505281a38?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
     icon: 'Connection'
   },
   {
-    title: '远程协作平台',
-    description: '通过云端AR技术，实现全球医疗专家的远程协作诊断与手术指导',
+    title: '远程协作诊疗',
+    description: '通过云端XR技术，实现全球牙科专家的远程协作诊断与治疗指导',
     image: 'https://images.unsplash.com/photo-1530026186672-2cd00ffc50fe?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
     icon: 'Cpu'
   }
@@ -243,19 +243,19 @@ const arTechnologies = [
 // 新增：愿景支柱
 const visionPillars = [
   {
-    title: '精准医疗',
-    description: '通过AR技术实现微创手术的精确引导，降低手术风险，提高成功率',
+    title: '精准牙科',
+    description: '通过XR技术实现精确诊疗引导，提高治疗成功率，降低患者不适感',
     icon: 'Aim'
   },
   {
-    title: '医学培训革新',
-    description: '建立沉浸式医学教育体系，提供真实手术场景模拟，加速医学人才培养',
-    icon: 'Guide'
+    title: '智能诊断',
+    description: '人工智能结合XR技术，提供智能化口腔健康评估和诊断辅助',
+    icon: 'TrendCharts'
   },
   {
-    title: '远程医疗普及',
-    description: '突破地域限制，让优质医疗资源覆盖更广阔地区，惠及更多患者',
-    icon: 'Connection'
+    title: '无界教育',
+    description: '突破空间限制，让牙科知识和技能培训触达全球每个角落',
+    icon: 'MagicStick'
   }
 ];
 </script>
