@@ -25,7 +25,7 @@
         </div>
       </div>
 
-      <!-- 创新科技展示区 - 替代案例研究区 -->
+      <!-- 创新科技展示区 -->
       <div class="innovation-showcase" data-aos="fade-up">
         <div class="showcase-header">
           <h3>前沿科技应用</h3>
@@ -123,22 +123,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useSettingsStore } from '@/store/modules/settings';
-import {
-  FirstAidKit,
-  User,
-  EditPen,
-  Monitor,
-  TrendCharts,
-  CreditCard,
-  MagicStick,
-  Clock,
-  Connection,
-  DataAnalysis,
-  Cpu,
-  Discount,
-  Aim,
-  Guide
-} from '@element-plus/icons-vue';
 
 // 获取主题设置
 const settingsStore = useSettingsStore();
@@ -218,7 +202,7 @@ const techStats = [
   }
 ];
 
-// 新增：XR技术展示区
+// 技术展示区
 const arTechnologies = [
   {
     title: '3D口腔建模',
@@ -240,7 +224,7 @@ const arTechnologies = [
   }
 ];
 
-// 新增：愿景支柱
+
 const visionPillars = [
   {
     title: '精准牙科',
