@@ -11,8 +11,12 @@
       <!-- 文字内容 -->
       <div class="hero-text" data-aos="fade-up">
         <h1 class="hero-title">
-          <span>3D牙科</span>
-          <span class="gradient-text">XR平台</span>
+          <span class="gradient-text">
+            <span class="corner-decoration top-left"></span>
+            齿维空间
+            <span class="corner-decoration bottom-right"></span>
+          </span>
+          <span>XR平台</span>
         </h1>
         <p class="hero-subtitle">融合拓展现实与数字牙科技术，引领牙科数字化体验新时代</p>
 
@@ -297,6 +301,7 @@ onUnmounted(() => {
   margin-bottom: 20px;
   line-height: 1.1;
   color: #2c3e50;
+  position: relative;
 }
 
 .dark-theme .hero-title {
@@ -309,6 +314,53 @@ onUnmounted(() => {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
+  position: relative;
+  cursor: pointer;
+  margin-right: 15px;
+}
+
+/* 角落装饰元素 */
+.corner-decoration {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  display: block;
+  transition: all 0.3s ease;
+}
+
+.corner-decoration.top-left {
+  top: -6px;
+  left: -6px;
+  border-top: 3px solid #3498db;
+  border-left: 3px solid #3498db;
+}
+
+.corner-decoration.bottom-right {
+  bottom: -6px;
+  right: -6px;
+  border-bottom: 3px solid #00d2ff;
+  border-right: 3px solid #00d2ff;
+}
+
+/* 鼠标悬停时的延展效果 */
+.gradient-text:hover .corner-decoration.top-left {
+  width: 30px;
+  height: 30px;
+}
+
+.gradient-text:hover .corner-decoration.bottom-right {
+  width: 30px;
+  height: 30px;
+}
+
+.dark-theme .corner-decoration.top-left {
+  border-top: 3px solid #00d2ff;
+  border-left: 3px solid #00d2ff;
+}
+
+.dark-theme .corner-decoration.bottom-right {
+  border-bottom: 3px solid #3498db;
+  border-right: 3px solid #3498db;
 }
 
 .hero-subtitle {
@@ -871,6 +923,17 @@ onUnmounted(() => {
 
   .scroll-indicator {
     bottom: 20px;
+  }
+
+  .corner-decoration {
+    width: 16px;
+    height: 16px;
+  }
+
+  .gradient-text:hover .corner-decoration.top-left,
+  .gradient-text:hover .corner-decoration.bottom-right {
+    width: 24px;
+    height: 24px;
   }
 }
 

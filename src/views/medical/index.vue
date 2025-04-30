@@ -36,7 +36,7 @@
       <!-- 侧边栏顶部 -->
       <div class="sidebar-header">
         <img src="/media/image/logo.gif" alt="Logo" class="sidebar-logo" />
-        <span class="sidebar-company-name">不加班XR牙科平台</span>
+        <span class="sidebar-company-name">BuJiaBan.com</span>
       </div>
       <div class="sidebar-items">
         <div class="theme-switch-mobile">

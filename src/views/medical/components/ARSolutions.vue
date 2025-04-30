@@ -521,7 +521,7 @@ const visionPillars = [
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+  background: transparent;
 }
 
 .stats-content {
