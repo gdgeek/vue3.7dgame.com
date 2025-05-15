@@ -93,6 +93,32 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: "/education",
+    component: () => import("@/views/education/index.vue"),
+    redirect: "/education/index",
+    meta: { hidden: true, private: true },
+    children: [
+      {
+        path: "/education/index",
+        name: "EducationIndex",
+        component: () => import("@/views/education/home.vue"),
+      },
+      {
+        path: "/education/solutions",
+        name: "EducationSolutions",
+        component: () =>
+          import("@/views/education/components/AREducationSolutions.vue"),
+      },
+      {
+        path: "/education/scenes",
+        name: "EducationScenes",
+        component: () =>
+          import("@/views/education/components/AREducationScenes.vue"),
+      },
+    ],
+  },
+
+  {
     path: "/site",
     // component: () => import("@/views/site/index.vue"),
     meta: { hidden: true, private: true },
