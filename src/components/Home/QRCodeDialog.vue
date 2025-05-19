@@ -26,7 +26,7 @@ const value = computed(() => {
 });
 
 const onResize = () => {
-  size.value = window.innerWidth * 0.45;
+  size.value = window.innerWidth * 0.4;
 };
 
 onMounted(() => {
