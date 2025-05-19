@@ -148,9 +148,9 @@ const copyWindow = async (item: metaInfo) => {
       }
     );
 
-    const response = await getMeta(item.id, "cyber,event,share,metaCode");
+    const response = await getMeta(item.id, { expand: "cyber,event,share,metaCode" });
     const originalMeta = response.data;//获取原始meta数据
-
+    console.log("originalMeta", originalMeta);
 
     // 创建新的meta数据
     const newMetaData = {
