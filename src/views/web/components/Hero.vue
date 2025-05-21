@@ -51,16 +51,15 @@
               </div>
             </el-link>
 
+            <!-- 设备展示卡片 -->
             <el-link class="floating-element device-card" href="/web/buy">
-
               <img src="/media/bg/rokid-lite.webp" alt="Rokid AR眼镜" class="device-image" />
               <div class="device-info">
                 <span class="device-name">Rokid AR</span>
                 <div class="device-badge">推荐设备</div>
               </div>
-
             </el-link>
-            <!-- 设备展示卡片 -->
+            
             <!-- 功能亮点卡片 -->
             <div class="floating-element feature-card" @click="test">
               <div class="feature-icon">

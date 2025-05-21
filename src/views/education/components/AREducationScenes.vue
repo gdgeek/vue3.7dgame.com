@@ -114,8 +114,8 @@ const caseStudies = [
 }
 
 .section-title {
-  font-size: 2.5rem;
-  font-weight: 800;
+  font-size: 3rem;
+  font-weight: 700;
   margin-bottom: 16px;
   color: var(--el-text-color-primary);
 }

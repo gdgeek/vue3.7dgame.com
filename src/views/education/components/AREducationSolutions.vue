@@ -281,12 +281,12 @@ const educationStats = [
 .section-title {
   font-size: 3rem;
   font-weight: 700;
-  margin-bottom: 20px;
-  background: linear-gradient(90deg, #3498db, #00d2ff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-block;
+  margin-bottom: 16px;
+  color: var(--el-text-color-primary);
+}
+
+.dark-theme .section-title {
+  color: var(--el-text-color-primary);
 }
 
 .section-divider {
