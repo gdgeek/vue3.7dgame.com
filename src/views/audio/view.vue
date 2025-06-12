@@ -1,7 +1,8 @@
 <template>
   <TransitionWrapper>
     <div class="document-index">
-      <el-row :gutter="20" style="margin: 28px 18px 0">
+      <br />
+      <el-row :gutter="20" style="margin: 0px 18px 0">
         <el-col :sm="16">
           <el-card class="box-card">
             <template #header>
@@ -91,7 +92,7 @@ const tableData = computed(() => {
       { item: t("audio.view.info.item1"), text: audioData.value.name },
       {
         item: t("audio.view.info.item2"),
-        text: audioData.value.author?.username,
+        text: audioData.value.author?.username || audioData.value.author?.nickname,
       },
       {
         item: t("audio.view.info.item3"),
@@ -172,7 +173,9 @@ const setup = async (
   size: { x: number; y: number }
 ) => {
   if (size.x !== 0) {
-    const info = JSON.stringify({ size });
+    // 获取音频时长（秒）
+    const length = audio.duration;
+    const info = JSON.stringify({ size, length });
 
     // 创建缩略图
     const file = await thumbnail(audio, size.x * 0.5, size.y * 0.5);

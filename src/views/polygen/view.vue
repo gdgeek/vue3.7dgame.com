@@ -1,6 +1,7 @@
 <template>
   <TransitionWrapper>
-    <div v-loading="loading" class="document-index"><br>
+    <div v-loading="loading" class="document-index">
+      <br>
       <el-row :gutter="20" style="margin: 0px 18px 0">
         <el-col :sm="16">
           <el-card class="box-card">
@@ -103,7 +104,7 @@ const tableData = computed(() => {
       { item: t("polygen.view.info.item1"), text: polygenData.value.name },
       {
         item: t("polygen.view.info.item2"),
-        text: polygenData.value.author.nickname,
+        text: polygenData.value.author.nickname || polygenData.value.author.username,
       },
       {
         item: t("polygen.view.info.item3"),
@@ -252,6 +253,9 @@ const saveFile = async (
 };
 
 const loaded = async (info: any) => {
+  // 保存动画信息到info对象
+  console.log("模型信息:", info);
+
   if (prepare.value) {
     expire.value = false;
     return;
@@ -306,29 +310,4 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 @use "@/styles/view-style.scss" as *;
-
-.content {
-  height: 100%;
-  position: relative;
-}
-
-.check-box {
-  background-color: rgb(56, 106, 153);
-  padding: 5px 4px;
-  z-index: 100;
-  justify-content: flex-end;
-  font-size: 12px;
-  border-radius: 4px;
-  color: #fff;
-}
-
-.process {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 100%;
-  transform: translateX(-50%);
-  padding: 3px 8px;
-  background-color: rgb(64, 158, 255);
-}
 </style>
