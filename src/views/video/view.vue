@@ -94,7 +94,7 @@ const tableData = computed(() => {
       },
       {
         item: t("video.view.info.item2"),
-        text: videoData.value.author?.username,
+        text: videoData.value.author?.username || videoData.value.author?.nickname,
       },
       {
         item: t("video.view.info.item3"),

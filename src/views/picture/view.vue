@@ -1,7 +1,8 @@
 <template>
   <TransitionWrapper>
     <div class="document-index">
-      <el-row :gutter="20" style="margin: 28px 18px 0">
+      <br />
+      <el-row :gutter="20" style="margin: 0px 18px 0">
         <el-col :sm="16">
           <el-card class="box-card">
             <template #header>
@@ -81,7 +82,7 @@ const tableData = computed(() => {
       { item: t("picture.view.info.item1"), text: pictureData.value.name },
       {
         item: t("picture.view.info.item2"),
-        text: pictureData.value.author?.username,
+        text: pictureData.value.author?.username || pictureData.value.author?.nickname,
       },
       {
         item: t("picture.view.info.item3"),
