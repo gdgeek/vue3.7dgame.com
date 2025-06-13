@@ -20,8 +20,8 @@
 
     <!--动画时间进度条 -->
     <div v-if="animations.length > 0" class="animation-progress">
-      <el-slider v-model="animationProgress" :disabled="!isAnimationPlaying || animations.length === 0" :min="0"
-        :max="100" :step="0.1" @change="seekAnimation" size="small" :show-tooltip="true"
+      <el-slider v-model="animationProgress" :disabled="animations.length === 0" :min="0" :max="100" :step="0.1"
+        @input="previewAnimation" @change="seekAnimation" size="small" :show-tooltip="true"
         :format-tooltip="value => `${value.toFixed(1)}%`" />
       <div class="animation-controls">
         <div class="animation-button" @click="animations.length > 0 && toggleAnimation(!isAnimationPlaying)"
@@ -94,6 +94,35 @@ const formatTime = (seconds: number) => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
+// 在拖动进度条时实时预览动画状态
+const previewAnimation = (progress: number | number[]) => {
+  if (mixer && currentAction && animations.value.length > 0) {
+    const selectedAnimation = animations.value[selectedAnimationIndex.value];
+    // 确保progress是数字类型
+    const progressValue = Array.isArray(progress) ? progress[0] : progress;
+    const targetTime = (progressValue / 100) * selectedAnimation.duration;
+
+    // 更新当前时间显示
+    currentAnimationTime.value = targetTime;
+
+    // 根据动画状态处理
+    if (currentAction.paused) {
+      // 如果是暂停状态，我们需要先激活动作再设置时间
+      currentAction.paused = false;
+      mixer.setTime(targetTime);
+      currentAction.paused = true;
+    } else {
+      // 如果是播放状态，直接设置时间
+      mixer.setTime(targetTime);
+    }
+
+    // 确保视图立即更新，不管是否在播放
+    if (renderer && camera) {
+      renderer.render(scene, camera);
+    }
+  }
+};
+
 // 动画切换
 const playAnimation = (index: number) => {
   if (index === 0 && animations.value.length === 0) return;
@@ -119,17 +148,37 @@ const playAnimation = (index: number) => {
   }
 };
 
-// 通过进度条控制动画播放位置
+// 通过进度条控制动画播放位置（释放进度条时触发）
 const seekAnimation = (progress: number | number[]) => {
   if (mixer && currentAction && animations.value.length > 0) {
     const selectedAnimation = animations.value[selectedAnimationIndex.value];
     // 确保progress是数字类型
     const progressValue = Array.isArray(progress) ? progress[0] : progress;
     const targetTime = (progressValue / 100) * selectedAnimation.duration;
+
+    // 更新当前时间
     currentAnimationTime.value = targetTime;
 
-    // 设置动画时间
-    mixer.setTime(targetTime);
+    // 确保动画动作处于激活状态
+    if (currentAction.paused) {
+      // 如果是暂停状态，我们需要先激活动作再设置时间
+      currentAction.paused = false;
+      mixer.setTime(targetTime);
+      currentAction.paused = true;
+    } else {
+      // 如果是播放状态，直接设置时间
+      mixer.setTime(targetTime);
+    }
+
+    // 确保在任何状态下都渲染一帧，以便显示当前位置的动画帧
+    if (renderer && camera) {
+      renderer.render(scene, camera);
+    }
+
+    // 如果动画是在播放状态，重置时钟以避免大的时间跳跃
+    if (isAnimationPlaying.value) {
+      clock.getDelta();
+    }
   }
 };
 
@@ -139,9 +188,13 @@ const toggleAnimation = (value: string | number | boolean) => {
 
   if (mixer && currentAction) {
     if (isAnimationPlaying.value) {
-      // 设置paused为false而不是调用play()
+      // 从当前位置继续播放，不需要额外设置时间
+      // 直接取消暂停状态
       currentAction.paused = false;
+      // 确保时钟重置，避免暂停后第一帧出现跳跃
+      clock.getDelta();
     } else {
+      // 暂停动画
       currentAction.paused = true;
     }
   }
@@ -334,17 +387,21 @@ onMounted(() => {
       }
       const delta = clock.getDelta();
       if (mixer) {
-        mixer.update(delta); // 更新动画
+        // 只有在播放状态才更新动画
+        if (isAnimationPlaying.value) {
+          mixer.update(delta); // 更新动画
 
-        // 更新动画进度
-        if (animations.value.length > 0 && isAnimationPlaying.value) {
-          const selectedAnimation = animations.value[selectedAnimationIndex.value];
-          if (selectedAnimation) {
-            currentAnimationTime.value += delta;
-            if (currentAnimationTime.value > selectedAnimation.duration) {
-              currentAnimationTime.value = currentAnimationTime.value % selectedAnimation.duration;
+          // 更新动画进度
+          if (animations.value.length > 0) {
+            const selectedAnimation = animations.value[selectedAnimationIndex.value];
+            if (selectedAnimation) {
+              currentAnimationTime.value += delta;
+              if (currentAnimationTime.value > selectedAnimation.duration) {
+                currentAnimationTime.value = currentAnimationTime.value % selectedAnimation.duration;
+              }
+              // 平滑更新进度条，避免拖动操作时的冲突
+              animationProgress.value = (currentAnimationTime.value / selectedAnimation.duration) * 100;
             }
-            animationProgress.value = (currentAnimationTime.value / selectedAnimation.duration) * 100;
           }
         }
       }
