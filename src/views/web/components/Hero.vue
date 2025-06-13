@@ -93,7 +93,7 @@
       </div>
     </div>
 
-    <div class="scroll-indicator" @click="scrollToFeatures" :style="scrollIndicatorStyle">
+    <div class="scroll-indicator" @click="scrollToFeatures">
       <div class="scroll-text">向下滚动了解更多</div>
       <div class="scroll-icon">
         <el-icon class="scroll-arrow">
@@ -134,26 +134,6 @@ const bilibiliVideoId = ref('BV1j2dPYWEh1');
 // 视差效果状态
 const mouseX = ref(0);
 const mouseY = ref(0);
-
-// 滚动指示器控制
-const scrollProgress = ref(0);
-const scrollIndicatorStyle = computed(() => {
-  const opacity = Math.max(0, 1 - scrollProgress.value * 2);
-  const translateY = scrollProgress.value * 20;
-  return {
-    opacity: opacity,
-    transform: `translateX(-50%) translateY(${translateY}px)`,
-    visibility: (opacity > 0 ? 'visible' : 'hidden') as 'visible' | 'hidden' | 'collapse'
-  };
-});
-
-// 监听滚动事件
-const handleScroll = () => {
-  const scrollPosition = window.scrollY;
-  const windowHeight = window.innerHeight;
-  // 计算滚动进度 (0-1范围)
-  scrollProgress.value = Math.min(1, scrollPosition / (windowHeight * 0.4));
-};
 
 // 这里需要替换为你要播放的 B 站视频的嵌入链接
 // const videoUrl = ref('https://player.bilibili.com/player.html?bvid=BV1j2dPYWEh1&page=1');
@@ -216,7 +196,6 @@ const scrollToAuthorization = () => {
 
 onMounted(() => {
   window.addEventListener('mousemove', handleMouseMove);
-  window.addEventListener('scroll', handleScroll);
 
   // 初始化AOS动画库
   AOS.init({
@@ -228,7 +207,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('mousemove', handleMouseMove);
-  window.removeEventListener('scroll', handleScroll);
 });
 </script>
 
@@ -735,7 +713,6 @@ onUnmounted(() => {
   align-items: center;
   cursor: pointer;
   z-index: 10;
-  transition: all 0.4s ease-out;
 
   .scroll-text {
     color: rgba(255, 255, 255, 0.9);
