@@ -6,7 +6,7 @@
       {{ tag.name }}
     </el-tag>
     <el-select-v2 v-if="props.editable" @change="handleChange" v-model="value" size="small" :options="classify"
-      placeholder="添加标签" style="width:100px" />
+      placeholder="添加标签" style="width:108px" />
 
     <el-switch v-if="props.editable && userStore.isUserPermissionGreater('admin')" size="small" v-model="public_"
       :loading="loading" :before-change="beforeChange" active-text="公开" inline-prompt inactive-text="私有" />
