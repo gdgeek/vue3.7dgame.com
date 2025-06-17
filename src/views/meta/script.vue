@@ -517,19 +517,21 @@ const initEditor = () => {
     console.error("Failed to decompress or parse data:", error);
   }
 };
-const testAction = (data: any) => {
+const testAction = (data: any, parentUuid?: string) => {
   // console.log("action: ", data);
   if (
     data &&
     data.parameters &&
     typeof data.parameters.action !== "undefined"
   ) {
-    return {
+    const result = {
       uuid: data.parameters.uuid,
       name: data.parameters.action ?? null,
       parameter: data.parameters.parameter ?? null,
       type: data.type ?? null,
+      ...(data.type === "Tooltip" ? { parentUuid: parentUuid ?? null } : {})
     };
+    return result;
   }
 };
 
@@ -603,11 +605,27 @@ const addMetaData = (data: any, ret: any) => {
     ret.voxel.push(voxel);
   }
 
+  // 处理子元素，并传递当前元素的UUID作为父级UUID
   if (data.children) {
-    Object.keys(data.children).forEach((key) => {
-      data.children[key].forEach((item: any) => {
-        addMetaData(item, ret);
+    const parentUuid = data.parameters?.uuid;
+
+    if (data.children.components) {
+      data.children.components.forEach((item: any) => {
+        // 处理带有action的组件，并传递父级UUID
+        const componentAction = testAction(item, parentUuid);
+        if (componentAction) {
+          ret.action.push(componentAction);
+        }
       });
+    }
+
+    // 处理其他子元素
+    Object.keys(data.children).forEach((key) => {
+      if (key !== "components") { // 跳过已处理的组件
+        data.children[key].forEach((item: any) => {
+          addMetaData(item, ret);
+        });
+      }
     });
   }
 };
@@ -634,6 +652,10 @@ const getResource = (meta: metaInfo) => {
   // ret.events = JSON.parse(meta.events!) || { inputs: [], outputs: [] };
 
   if (data) addMetaData(data, ret);
+
+  // 打印处理后的action数据，展示带有父级UUID的action
+  console.log("最终处理的action结果:", ret.action);
+
   return ret;
 };
 
