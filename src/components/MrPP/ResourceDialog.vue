@@ -166,6 +166,7 @@ const { t } = useI18n();
 
 // 计算属性
 const viewCards = computed(() => {
+  console.log("viewCards", transformToViewCard(active.value.items));
   return transformToViewCard(active.value.items);
 });
 
@@ -269,6 +270,7 @@ const doClose = () => {
 }
 
 async function doBatchSelect() {
+  console.log("doBatchSelect", selectedIds.value);
   if (selectedIds.value.length === 0) {
     ElMessage.warning(t("meta.ResourceDialog.noItemSelected"));
     return;
@@ -287,8 +289,12 @@ async function doBatchSelect() {
 
     for (const id of selectedIds.value) {
       const obj = active.value.items.find((item) => item.id == id);
+      console.log("doBatchSelectobj", obj);
       if (obj) {
-        doSelect(obj);
+        // 转换为ViewCard确保所有属性都被包含
+        const viewCardObj = transformToViewCard([obj])[0];
+        console.log("doBatchSelectviewCardObj", viewCardObj);
+        doSelect(viewCardObj);
       }
     }
 
@@ -317,7 +323,7 @@ function transformToViewCard(items: any[]): ViewCard[] {
     image: item.image,
     created_at: item.created_at,
     file: item.file,
-    metaResources: item.metaResources,
+    // metaResources: item.metaResources,
   }));
 }
 
