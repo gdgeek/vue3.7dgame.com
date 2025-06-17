@@ -93,7 +93,7 @@ export default {
     h4: "准备好出发了么？",
     loginTitle: "登录账号",
     username: "电子信箱",
-    password: "密码",
+    password: "设置密码",
     login: "登录平台",
     download: "下载相关程序",
     rules: {
