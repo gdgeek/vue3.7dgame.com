@@ -55,7 +55,7 @@ export default {
       systemDefault: "系统预设",
       edit: "编辑",
       scriptEditor: "脚本编辑",
-      sceneEditor: "场景编辑",
+      sceneEditor: "实体编辑",
     },
     ai: {
       title: "AI模型",
