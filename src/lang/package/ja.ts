@@ -67,7 +67,7 @@ export default {
       selfGenerated: "自作",
       systemRecommendation: "システム推薦",
       shareWithFriends: "友達と共有",
-      viewTitle: "【场景】",
+      viewTitle: "編集",
       scriptEditor: "スクリプトエディタ",
       sceneEditor: "シーンエディタ",
     },
