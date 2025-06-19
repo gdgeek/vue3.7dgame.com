@@ -67,7 +67,7 @@ export default {
       selfGenerated: "自己创造",
       systemRecommendation: "系统推荐",
       shareWithFriends: "朋友分享",
-      viewTitle: "【场景】",
+      viewTitle: "编辑",
       scriptEditor: "脚本编辑",
       sceneEditor: "场景编辑",
     },

@@ -67,7 +67,7 @@ export default {
       selfGenerated: "Owned",
       systemRecommendation: "Open",
       shareWithFriends: "Share",
-      viewTitle: "【Project】",
+      viewTitle: "Edit",
       scriptEditor: "Script",
       sceneEditor: "Scene",
     },

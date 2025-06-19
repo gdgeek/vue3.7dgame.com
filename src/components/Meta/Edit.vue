@@ -165,7 +165,7 @@ type Event = {
 
 const events = computed(() => {
   if (item.value) {
-    return item.value.events! as {
+    return item.value.events! as unknown as {
       inputs: Event[];
       outputs: Event[];
     };
