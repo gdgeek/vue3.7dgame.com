@@ -1,5 +1,6 @@
 <template>
-  <el-dialog v-model="dialogVisible" :title="title" width="600px" center destroy-on-close @closed="handleDialogClose">
+  <el-dialog v-model="dialogVisible" :title="title" width="600px" center destroy-on-close @closed="handleDialogClose"
+    class="upload-dialog" append-to-body>
     <div class="document-index">
       <el-card class="box-card-component">
         <template #header>
@@ -12,12 +13,46 @@
           <div v-for="item in data" :key="item.name">
             <div class="progress-item">
               <span>{{ item.title }}</span>
-              <el-progress :percentage="item.percentage"></el-progress>
+              <el-progress :percentage="item.percentage"
+                :status="item.status === 'success' ? 'success' : ''"></el-progress>
             </div>
           </div>
 
+          <!-- 添加批量上传进度条 -->
+          <div v-if="totalFilesCount > 1 && uploadedCount > 0" class="batch-progress">
+            <span>{{ $t('upload.batchProgress', { current: uploadedCount, total: totalFilesCount }) }}</span>
+            <el-progress :percentage="Math.round((uploadedCount / totalFilesCount) * 100)"
+              :status="uploadedCount === totalFilesCount ? 'success' : ''"></el-progress>
+          </div>
+
+          <!-- 文件预览区域 -->
+          <div v-if="selectedFiles.length > 0" class="selected-files">
+            <div class="files-header">
+              <span>{{ $t('upload.selectedFiles', { count: selectedFiles.length }) }}</span>
+              <el-tooltip :content="$t('upload.clearFiles')" placement="top" effect="light">
+                <el-button type="text" @click="clearFiles" :disabled="isDisabled">
+                  <el-icon>
+                    <Delete />
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
+            </div>
+            <el-scrollbar max-height="120px">
+              <div v-for="(file, index) in selectedFiles" :key="index" class="file-item">
+                <el-icon>
+                  <Document />
+                </el-icon>
+                <span class="file-name">{{ file.name }}</span>
+                <span class="file-size">{{ formatFileSize(file.size) }}</span>
+              </div>
+            </el-scrollbar>
+          </div>
+
           <el-divider></el-divider>
-          <el-button type="primary" :disabled="isDisabled" @click="select">
+          <el-button type="primary" :disabled="isDisabled" @click="select" :loading="isDisabled">
+            <el-icon v-if="!isDisabled" style="margin-right: 5px;">
+              <UploadFilled />
+            </el-icon>
             <slot>{{ $t("upload.button") }}</slot>
           </el-button>
         </div>
@@ -31,6 +66,7 @@ import { useFileStore } from "@/store/modules/config";
 import { UploadFileType } from "@/api/user/model";
 import { postFile } from "@/api/v1/files";
 import { FileHandler } from "@/assets/js/file/server";
+import { Delete, Document, Upload } from '@element-plus/icons-vue';
 
 const { t } = useI18n();
 
@@ -61,6 +97,7 @@ const dialogVisible = computed({
 });
 
 const fileStore = useFileStore();
+const selectedFiles = ref<File[]>([]);
 
 const data = computed(() => [
   {
@@ -103,6 +140,27 @@ const isDisabled = ref(false);
 const lastUploadedId = ref<number | null>(null);
 let uploadedCount = ref(0);
 let totalFilesCount = ref(0);
+// 用于记录本次上传的所有模型ID
+const uploadedIds = ref<number[]>([]);
+
+// 获取本次上传的所有模型ID的方法
+const getUploadedIds = () => {
+  return uploadedIds.value;
+};
+
+// 格式化文件大小显示
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 B';
+
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+// 清除已选择的文件
+const clearFiles = () => {
+  selectedFiles.value = [];
+};
 
 // 更新标题和声明信息
 const step = (idx: number) => {
@@ -114,7 +172,7 @@ const step = (idx: number) => {
 // 更新进度条
 const progress = (p: number, idx: number) => {
   step(idx);
-  data.value[idx].status = p >= 1 ? "success" : "";
+  data.value[idx].status = p >= 1 ? "success" as const : "" as const;
   data.value[idx].percentage = Math.round(Math.min(p, 1) * 100);
 };
 
@@ -133,18 +191,28 @@ const saveFile = async (
     url: fileStore.store.fileUrl(md5, extension, handler, props.dir),
   };
 
+  // 更新上传进度完成
   progress(1, 1);
+
+  // 开始保存信息的进度
+  progress(0.3, 2);
 
   try {
     const response = await postFile(data);
+
+    // 文件信息已保存到服务器，更新进度
+    progress(0.6, 2);
+
     emit("saveResource", data.filename, response.data.id, totalFiles, (id: number) => {
-      progress(2, 1);
+      // 资源保存完成，更新最终进度
+      progress(1, 2);
       uploadedCount.value++;
       lastUploadedId.value = id;
+      uploadedIds.value.push(id);
 
       // 如果所有文件都已上传，触发成功事件
       if (uploadedCount.value === totalFilesCount.value) {
-        emit("success", lastUploadedId.value);
+        emit("success", uploadedIds.value);
       }
     });
   } catch (err) {
@@ -156,9 +224,13 @@ const saveFile = async (
 const select = async () => {
   try {
     const files = await fileStore.store.fileOpen(props.fileType, true);
+    if (files.length === 0) return;
+
+    selectedFiles.value = files;
     isDisabled.value = true; // 禁用按钮
     uploadedCount.value = 0; // 重置已完成文件计数
     totalFilesCount.value = files.length; // 总文件数
+    uploadedIds.value = []; // 重置上传ID列表
 
     for (const file of files) {
       try {
@@ -212,7 +284,14 @@ const handleDialogClose = () => {
   });
   changeTitle.value = null;
   changeDeclared.value = null;
+  uploadedIds.value = [];
+  selectedFiles.value = [];
 };
+
+// 暴露方法给父组件
+defineExpose({
+  getUploadedIds
+});
 </script>
 
 <style scoped>
@@ -232,5 +311,73 @@ const handleDialogClose = () => {
 
 .progress-item {
   margin-bottom: 10px;
+}
+
+.batch-progress {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px dashed #eee;
+}
+
+.selected-files {
+  margin-top: 15px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  padding: 10px;
+  transition: all 0.3s ease;
+}
+
+.files-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+  animation: fadeIn 0.3s ease;
+}
+
+.file-item:last-child {
+  border-bottom: none;
+}
+
+.file-name {
+  flex: 1;
+  margin: 0 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-size {
+  color: #909399;
+  font-size: 12px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.upload-dialog :deep(.el-dialog__header) {
+  border-bottom: 1px solid #ebeef5;
+  padding-bottom: 15px;
+}
+
+.upload-dialog :deep(.el-dialog__body) {
+  padding-top: 20px;
 }
 </style>

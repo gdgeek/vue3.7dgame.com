@@ -345,6 +345,19 @@ export default {
   polygen: {
     uploadPolygen: "上传模型",
     initializePolygenData: "初始化模型数据",
+    initializeAll: "批量初始化模型",
+    initializingModels: "正在初始化模型...",
+    initializingModelProgress:
+      "正在初始化模型 {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "成功初始化 {count} 个模型",
+    partialInitializeSuccess:
+      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
+    retryInitializeFailed: "是否重试初始化失败的 {count} 个模型?",
+    retryTitle: "重试初始化",
+    retryConfirm: "重试",
+    retryCancel: "跳过",
+    initializeSuccess: "模型初始化成功",
+    initializeError: "模型初始化失败",
     viewPolygen: "查看模型",
     prompt: {
       message1: "请输入新名称",
@@ -581,8 +594,12 @@ export default {
   },
   // 文件上传国际化
   upload: {
-    title: "选择文件",
-    declared: "请选择对应格式的文件进行上传操作",
+    title: "上传文件",
+    button: "上传",
+    declared: "选择文件，并上传",
+    batchProgress: "批量进度： {current}/{total}",
+    selectedFiles: "已选择 {count} 个文件",
+    clearFiles: "清除所有文件",
     item1: {
       title: "预先处理",
       failed: "md5计算失败",
