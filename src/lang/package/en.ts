@@ -609,7 +609,7 @@ export default {
   upload: {
     title: "Upload File",
     button: "Upload",
-    declared: "Select files and upload",
+    declared: "Please select the corresponding format of the file for the upload operation",
     batchProgress: "Batch Progress: {current}/{total}",
     selectedFiles: "Selected {count} files",
     clearFiles: "Clear all files",
