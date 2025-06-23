@@ -599,8 +599,7 @@ export default {
   upload: {
     title: "ファイルを選択",
     button: "アップロード",
-    declared:
-      "対応する形式のファイルを選択してアップロード操作を行ってください",
+    declared: "アップロード操作を行うために、対応する形式のファイルを選択してください",
     batchProgress: "バッチ進行： {current}/{total}",
     selectedFiles: "選択された {count} 個のファイル",
     clearFiles: "すべてのファイルをクリア",

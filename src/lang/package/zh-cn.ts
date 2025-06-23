@@ -596,7 +596,7 @@ export default {
   upload: {
     title: "上传文件",
     button: "上传",
-    declared: "选择文件，并上传",
+    declared: "请选择对应格式的文件进行上传操作",
     batchProgress: "批量进度： {current}/{total}",
     selectedFiles: "已选择 {count} 个文件",
     clearFiles: "清除所有文件",
