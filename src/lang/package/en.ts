@@ -350,6 +350,19 @@ export default {
   polygen: {
     uploadPolygen: "Upload Polygen",
     initializePolygenData: "Init The Polygen Data",
+    initializeAll: "Batch Initialize Models",
+    initializingModels: "Initializing models...",
+    initializingModelProgress:
+      "Initializing model {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "Successfully initialized {count} models",
+    partialInitializeSuccess:
+      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
+    retryInitializeFailed: "Retry initializing {count} failed models?",
+    retryTitle: "Retry Initialization",
+    retryConfirm: "Retry",
+    retryCancel: "Skip",
+    initializeSuccess: "Models initialized successfully",
+    initializeError: "Failed to initialize models",
     viewPolygen: "View Polygen",
     prompt: {
       message1: "Please enter a new name",
@@ -594,8 +607,12 @@ export default {
   },
   // 文件上传国际化
   upload: {
-    title: "Select File",
-    declared: "Please select a file in the appropriate format for upload",
+    title: "Upload File",
+    button: "Upload",
+    declared: "Select files and upload",
+    batchProgress: "Batch Progress: {current}/{total}",
+    selectedFiles: "Selected {count} files",
+    clearFiles: "Clear all files",
     item1: {
       title: "Preprocessing",
       failed: "MD5 calculation failed",

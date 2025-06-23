@@ -78,6 +78,7 @@ import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { useRouter } from "vue-router";
+import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
 
 // 组件状态
 const { t } = useI18n();
@@ -105,8 +106,97 @@ const openUploadDialog = () => {
 };
 
 // 上传成功后处理
-const handleUploadSuccess = (lastFileId: number) => {
+const handleUploadSuccess = async (uploadedIds: number | number[]) => {
   uploadDialogVisible.value = false;
+
+  // 确保uploadedIds是数组
+  const modelIds = Array.isArray(uploadedIds) ? uploadedIds : [uploadedIds];
+  const lastFileId = modelIds[modelIds.length - 1];
+
+  if (modelIds.length > 0) {
+    const loadingInstance = ElLoading.service({
+      text: t("polygen.initializingModels"),
+      background: 'rgba(0, 0, 0, 0.7)'
+    });
+
+    // 记录初始化失败的模型ID
+    const failedModelIds = [];
+
+    try {
+      for (let i = 0; i < modelIds.length; i++) {
+        loadingInstance.setText(t("polygen.initializingModelProgress", {
+          current: i + 1,
+          total: modelIds.length,
+          percentage: Math.round(((i + 1) / modelIds.length) * 100)
+        }));
+
+        try {
+          // 跳转到模型详情页触发初始化
+          await router.push({
+            path: "/resource/polygen/view",
+            query: { id: modelIds[i] },
+          });
+
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        } catch (modelError) {
+          console.error(`初始化模型 ${modelIds[i]} 失败:`, modelError);
+          failedModelIds.push(modelIds[i]);
+        }
+      }
+
+      if (failedModelIds.length > 0) {
+        ElMessage({
+          message: t("polygen.partialInitializeSuccess", {
+            success: modelIds.length - failedModelIds.length,
+            failed: failedModelIds.length,
+            total: modelIds.length
+          }),
+          type: "warning",
+          duration: 5000
+        });
+
+        if (failedModelIds.length > 0) {
+          const shouldRetry = await ElMessageBox.confirm(
+            t("polygen.retryInitializeFailed", { count: failedModelIds.length }),
+            t("polygen.retryTitle"),
+            {
+              confirmButtonText: t("polygen.retryConfirm"),
+              cancelButtonText: t("polygen.retryCancel"),
+              type: "warning"
+            }
+          ).catch(() => false);
+
+          if (shouldRetry === true) {
+            await handleUploadSuccess(failedModelIds);
+            return;
+          }
+          else {
+            router.push({
+              path: "/resource/polygen/view",
+              query: { id: lastFileId },
+            });
+            return;
+          }
+        }
+      } else {
+        ElMessage({
+          message: t("polygen.batchInitializeSuccess", { count: modelIds.length }),
+          type: "success",
+          duration: 3000
+        });
+      }
+
+      await refresh();
+
+    } catch (error) {
+      console.error("初始化模型时出错:", error);
+      ElMessage.error(t("polygen.initializeError"));
+    } finally {
+      loadingInstance.close();
+    }
+  }
+
+  // 最后跳转到最后上传的模型详情页
   router.push({
     path: "/resource/polygen/view",
     query: { id: lastFileId },
@@ -245,3 +335,37 @@ onMounted(() => {
   refresh();
 });
 </script>
+
+<style scoped>
+/* 添加响应式样式 */
+@media screen and (max-width: 768px) {
+
+  /* 移动端适配 */
+  :deep(.el-card) {
+    margin-bottom: 1rem;
+  }
+
+  :deep(.el-pagination) {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+/* 添加列表项目动画 */
+:deep(.waterfall-item) {
+  transition: all 0.3s ease-in-out;
+  animation: fadeInUp 0.5s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>

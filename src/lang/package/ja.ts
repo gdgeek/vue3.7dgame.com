@@ -350,6 +350,17 @@ export default {
   polygen: {
     uploadPolygen: "モデルをアップロード",
     initializePolygenData: "モデルデータを初期化",
+    initializeAll: "モデルを一括初期化",
+    initializingModels: "モデルを初期化中...",
+    initializingModelProgress: "モデル {current}/{total} ({percentage}%) を初期化中...",
+    batchInitializeSuccess: "{count} 個のモデルを初期化に成功しました",
+    partialInitializeSuccess: "初期化結果: {success} 個成功, {failed} 個失敗 (合計 {total} 個)",
+    retryInitializeFailed: "{count} 個のモデルを再初期化しますか？",
+    retryTitle: "再初期化",
+    retryConfirm: "再初期化",
+    retryCancel: "スキップ",
+    initializeSuccess: "モデルの初期化に成功しました",
+    initializeError: "モデルの初期化に失敗しました",
     viewPolygen: "モデルを表示",
     prompt: {
       message1: "新しい名前を入力してください",
@@ -587,8 +598,12 @@ export default {
   // 文件上传国际化
   upload: {
     title: "ファイルを選択",
+    button: "アップロード",
     declared:
       "対応する形式のファイルを選択してアップロード操作を行ってください",
+    batchProgress: "バッチ進行： {current}/{total}",
+    selectedFiles: "選択された {count} 個のファイル",
+    clearFiles: "すべてのファイルをクリア",
     item1: {
       title: "事前処理",
       failed: "md5の計算に失敗しました",
