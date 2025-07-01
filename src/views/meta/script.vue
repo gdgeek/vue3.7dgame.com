@@ -548,11 +548,15 @@ const testPoint = (data: any, typeList: string[]) => {
     
     const isPolygen = data.type.toLowerCase() === "polygen";
 
-    // 给Polygen，传递moved属性
+    // 给Polygen，传递moved属性，tooltips属性
     let hasMoved = false;
+    let hasTooltips = false;
     if (isPolygen && data.children && data.children.components) {
       hasMoved = data.children.components.some(
         (component: any) => component.type === "Moved"
+      );
+      hasTooltips = data.children.components.some(
+        (component: any) => component.type === "Tooltip"
       );
     }
 
@@ -561,7 +565,8 @@ const testPoint = (data: any, typeList: string[]) => {
       name: data.parameters.name ?? null,
       ...(isPolygen ? {
         animations, // 给Polygen，传递animations属性
-        moved: hasMoved 
+        moved: hasMoved,
+        hasTooltips: hasTooltips
       } : {}),
     };
   }
