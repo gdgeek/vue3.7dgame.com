@@ -1175,10 +1175,6 @@ export default {
           info: "Unsaved changes have been discarded",
         },
       },
-      download: {
-        success: "Download successful",
-        error: "Download failed: ",
-      },
     },
   },
   // 管理部分国际化
