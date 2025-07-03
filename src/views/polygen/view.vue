@@ -35,30 +35,11 @@
         </el-col>
 
         <el-col :sm="8">
-          <el-card class="box-card">
-            <template #header>
-              <b>{{ $t("polygen.view.info.title") }}</b> :
-            </template>
-            <div class="box-item">
-              <el-table :data="tableData" stripe>
-                <el-table-column prop="item" :label="$t('polygen.view.info.label1')"></el-table-column>
-                <el-table-column prop="text" :label="$t('polygen.view.info.label2')"></el-table-column>
-              </el-table>
-
-              <aside style="margin-top: 10px; margin-bottom: 30px">
-                <el-button-group style="float: right">
-                  <el-button type="success" size="small" @click="namedWindow">
-                    <i class="el-icon-edit"></i>
-                    {{ $t("polygen.view.info.name") }}
-                  </el-button>
-                  <el-button type="danger" size="small" @click="deleteWindow">
-                    <i class="el-icon-delete"></i>
-                    {{ $t("polygen.view.info.delete") }}
-                  </el-button>
-                </el-button-group>
-              </aside>
-            </div>
-          </el-card>
+          <MrppInfo v-if="polygenData" :title="$t('polygen.view.info.title')" titleSuffix=" :" :tableData="tableData"
+            :itemLabel="$t('polygen.view.info.label1')" :textLabel="$t('polygen.view.info.label2')"
+            :downloadText="$t('polygen.view.info.download')" :renameText="$t('polygen.view.info.name')"
+            :deleteText="$t('polygen.view.info.delete')" @download="downloadModel" @rename="namedWindow"
+            @delete="deleteWindow" />
           <br />
         </el-col>
       </el-row>
@@ -77,6 +58,8 @@ import { printVector3 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import MrppInfo from "@/components/MrPP/MrppInfo/index.vue";
+import { downloadResource } from "@/utils/downloadHelper";
 
 const loading = ref(false);
 const polygenData = ref<any>(null);
@@ -215,6 +198,15 @@ const namedWindow = async () => {
   } catch {
     ElMessage.info(t("polygen.view.namePrompt.info"));
   }
+};
+
+const downloadModel = async () => {
+  await downloadResource(
+    polygenData.value,
+    '.glb',
+    t,
+    'polygen.view.download'
+  );
 };
 
 const updatePolygen = async (imageId: number, info: any) => {

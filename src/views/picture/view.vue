@@ -19,30 +19,11 @@
         </el-col>
 
         <el-col :sm="8">
-          <el-card class="box-card">
-            <template #header>
-              <b>{{ $t("picture.view.info.title") }}</b> :
-            </template>
-            <div class="box-item">
-              <el-table :data="tableData" stripe>
-                <el-table-column prop="item" :label="$t('picture.view.info.label1')"></el-table-column>
-                <el-table-column prop="text" :label="$t('picture.view.info.label2')"></el-table-column>
-              </el-table>
-
-              <aside style="margin-top: 10px; margin-bottom: 30px">
-                <el-button-group style="float: right">
-                  <el-button type="success" size="small" @click="namedWindow">
-                    <i class="el-icon-edit"></i>
-                    {{ $t("picture.view.info.name") }}
-                  </el-button>
-                  <el-button type="danger" size="small" @click="deleteWindow">
-                    <i class="el-icon-delete"></i>
-                    {{ $t("picture.view.info.delete") }}
-                  </el-button>
-                </el-button-group>
-              </aside>
-            </div>
-          </el-card>
+          <MrppInfo v-if="pictureData" :title="$t('picture.view.info.title')" titleSuffix=" :" :tableData="tableData"
+            :itemLabel="$t('picture.view.info.label1')" :textLabel="$t('picture.view.info.label2')"
+            :downloadText="$t('picture.view.info.download')" :renameText="$t('picture.view.info.name')"
+            :deleteText="$t('picture.view.info.delete')" @download="downloadPicture" @rename="namedWindow"
+            @delete="deleteWindow" />
           <br />
         </el-col>
       </el-row>
@@ -61,6 +42,8 @@ import type { ResourceInfo } from "@/api/v1/resources/model";
 import { FileHandler } from "@/assets/js/file/server";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import MrppInfo from "@/components/MrPP/MrppInfo/index.vue";
+import { downloadResource } from "@/utils/downloadHelper";
 
 const image = ref<HTMLImageElement | null>(null);
 const route = useRoute();
@@ -102,6 +85,23 @@ const tableData = computed(() => {
 });
 
 const picture = computed(() => convertToHttps(file.value!));
+
+const downloadPicture = async () => {
+  // 通过文件扩展名判断图片类型
+  if (!pictureData.value) return;
+
+  const fileName = pictureData.value.file.filename || '';
+  const fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase() || '.jpg';
+  await downloadResource(
+    {
+      name: pictureData.value.name || 'image',
+      file: pictureData.value.file
+    },
+    fileExt,
+    t,
+    'picture.view.download'
+  );
+};
 
 onMounted(async () => {
   try {
