@@ -28,31 +28,11 @@
 
         <!-- 体素模型信息和操作区域 -->
         <el-col :sm="8">
-          <el-card class="box-card">
-            <template #header>
-              <b>{{ $t("voxel.view.info.title") }}</b>:
-            </template>
-            <div class="box-item">
-              <!-- 体素信息表格 -->
-              <el-table :data="tableData" stripe>
-                <el-table-column prop="item" :label="$t('voxel.view.info.label1')"></el-table-column>
-                <el-table-column prop="text" :label="$t('voxel.view.info.label2')"></el-table-column>
-              </el-table>
-              <!-- 操作按钮 -->
-              <aside style="margin-top: 10px; margin-bottom: 30px">
-                <el-button-group style="float: right">
-                  <el-button type="success" size="small" @click="namedWindow">
-                    <i class="el-icon-edit"></i>
-                    {{ $t("voxel.view.info.name") }}
-                  </el-button>
-                  <el-button type="danger" size="small" @click="deleteWindow">
-                    <i class="el-icon-delete"></i>
-                    {{ $t("voxel.view.info.delete") }}
-                  </el-button>
-                </el-button-group>
-              </aside>
-            </div>
-          </el-card>
+          <MrppInfo v-if="voxelData" :title="$t('voxel.view.info.title')" titleSuffix=" :" :tableData="tableData"
+            :itemLabel="$t('voxel.view.info.label1')" :textLabel="$t('voxel.view.info.label2')"
+            :downloadText="$t('voxel.view.info.download')" :renameText="$t('voxel.view.info.name')"
+            :deleteText="$t('voxel.view.info.delete')" @download="downloadVoxel" @rename="namedWindow"
+            @delete="deleteWindow" />
           <br />
         </el-col>
       </el-row>
@@ -71,6 +51,8 @@ import { printVector3 } from "@/assets/js/helper";
 import Voxel from "@/components/Voxel.vue";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import MrppInfo from "@/components/MrPP/MrppInfo/index.vue";
+import { downloadResource } from "@/utils/downloadHelper";
 
 // 基本状态管理
 const loading = ref(false);
@@ -137,6 +119,22 @@ const tableData = computed(() => {
     return [];
   }
 });
+
+// 体素下载功能
+const downloadVoxel = async () => {
+  if (!voxelData.value) return;
+
+  // 确保下载文件的扩展名为.vox
+  await downloadResource(
+    {
+      name: voxelData.value.name || 'voxel',
+      file: voxelData.value.file
+    },
+    '.vox',
+    t,
+    'voxel.view.download'
+  );
+};
 
 // 加载体素数据
 const loadVoxelData = async () => {

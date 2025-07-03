@@ -311,6 +311,7 @@ export default {
         item7: "体素数量",
         name: "改名",
         delete: "删除",
+        download: "下载",
       },
       update: "等待更新",
       prompt: {
@@ -338,6 +339,10 @@ export default {
         cancel: "取消",
         success: "新的体素名称: ",
         info: "取消输入",
+      },
+      download: {
+        success: "下载成功",
+        error: "下载失败: ",
       },
     },
   },
@@ -392,6 +397,7 @@ export default {
         item6: "模型中心",
         name: "改名",
         delete: "删除",
+        download: "下载",
       },
       prompt: {
         message1: "用此模型创建【场景】",
@@ -418,6 +424,10 @@ export default {
         cancel: "取消",
         success: "新的模型名称: ",
         info: "取消输入",
+      },
+      download: {
+        success: "下载成功",
+        error: "下载失败: ",
       },
     },
     animation: {
@@ -464,6 +474,7 @@ export default {
         item5: "图片尺寸",
         name: "改名",
         delete: "删除",
+        download: "下载",
       },
       confirm: {
         message1: "此操作将永久删除该文件, 是否继续?",
@@ -480,6 +491,10 @@ export default {
         cancel: "取消",
         success: "新的图片名称: ",
         info: "取消输入",
+      },
+      download: {
+        success: "下载成功",
+        error: "下载失败: ",
       },
     },
   },
@@ -519,6 +534,7 @@ export default {
         item5: "视频尺寸",
         name: "改名",
         delete: "删除",
+        download: "下载",
       },
       confirm: {
         message1: "此操作将永久删除该文件, 是否继续?",
@@ -535,6 +551,10 @@ export default {
         cancel: "取消",
         success: "新的视频名称: ",
         info: "取消输入",
+      },
+      download: {
+        success: "下载成功",
+        error: "下载失败: ",
       },
     },
   },
@@ -573,6 +593,7 @@ export default {
         size: "字节",
         name: "改名",
         delete: "删除",
+        download: "下载",
       },
       confirm: {
         message1: "此操作将永久删除该文件, 是否继续?",
@@ -589,6 +610,10 @@ export default {
         cancel: "取消",
         success: "新的音频名称: ",
         info: "取消输入",
+      },
+      download: {
+        success: "下载成功",
+        error: "下载失败: ",
       },
     },
   },

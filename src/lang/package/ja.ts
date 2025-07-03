@@ -316,6 +316,7 @@ export default {
         item7: "ボクセル数",
         name: "名前を変更",
         delete: "削除",
+        download: "ダウンロード",
       },
       update: "更新待ち",
       prompt: {
@@ -344,6 +345,10 @@ export default {
         success: "新しいボクセル名: ",
         info: "入力がキャンセルされました",
       },
+      download: {
+        success: "ダウンロード成功",
+        error: "ダウンロード失敗: ",
+      },
     },
   },
   // 模型管理国际化
@@ -352,9 +357,11 @@ export default {
     initializePolygenData: "モデルデータを初期化",
     initializeAll: "モデルを一括初期化",
     initializingModels: "モデルを初期化中...",
-    initializingModelProgress: "モデル {current}/{total} ({percentage}%) を初期化中...",
+    initializingModelProgress:
+      "モデル {current}/{total} ({percentage}%) を初期化中...",
     batchInitializeSuccess: "{count} 個のモデルを初期化に成功しました",
-    partialInitializeSuccess: "初期化結果: {success} 個成功, {failed} 個失敗 (合計 {total} 個)",
+    partialInitializeSuccess:
+      "初期化結果: {success} 個成功, {failed} 個失敗 (合計 {total} 個)",
     retryInitializeFailed: "{count} 個のモデルを再初期化しますか？",
     retryTitle: "再初期化",
     retryConfirm: "再初期化",
@@ -395,6 +402,7 @@ export default {
         item6: "モデルの中心",
         name: "名前を変更",
         delete: "削除",
+        download: "ダウンロード",
       },
       prompt: {
         message1: "このモデルで【场景】を作成します",
@@ -421,6 +429,10 @@ export default {
         cancel: "キャンセル",
         success: "新しいモデル名: ",
         info: "入力がキャンセルされました",
+      },
+      download: {
+        success: "ダウンロード成功",
+        error: "ダウンロード失敗: ",
       },
     },
     animation: {
@@ -467,6 +479,7 @@ export default {
         item5: "画像サイズ",
         name: "名前を変更",
         delete: "削除",
+        download: "ダウンロード",
       },
       confirm: {
         message1: "この操作でファイルが永久に削除されます。続行しますか？",
@@ -484,6 +497,10 @@ export default {
         success: "新しい画像名: ",
         info: "入力がキャンセルされました",
       },
+    },
+    download: {
+      success: "ダウンロード成功",
+      error: "ダウンロード失敗: ",
     },
   },
   // 视频管理国际化
@@ -522,6 +539,7 @@ export default {
         item5: "ビデオサイズ",
         name: "名前を変更",
         delete: "削除",
+        download: "ダウンロード",
       },
       confirm: {
         message1: "この操作でファイルが永久に削除されます。続行しますか？",
@@ -539,6 +557,10 @@ export default {
         success: "新しい動画名: ",
         info: "入力がキャンセルされました",
       },
+    },
+    download: {
+      success: "ダウンロード成功",
+      error: "ダウンロード失敗: ",
     },
   },
   // 音频管理国际化
@@ -576,6 +598,7 @@ export default {
         size: "バイト",
         name: "名前を変更",
         delete: "削除",
+        download: "ダウンロード",
       },
       confirm: {
         message1: "この操作でファイルが永久に削除されます。続行しますか？",
@@ -594,12 +617,17 @@ export default {
         info: "入力がキャンセルされました",
       },
     },
+    download: {
+      success: "ダウンロード成功",
+      error: "ダウンロード失敗: ",
+    },
   },
   // 文件上传国际化
   upload: {
     title: "ファイルを選択",
     button: "アップロード",
-    declared: "アップロード操作を行うために、対応する形式のファイルを選択してください",
+    declared:
+      "アップロード操作を行うために、対応する形式のファイルを選択してください",
     batchProgress: "バッチ進行： {current}/{total}",
     selectedFiles: "選択された {count} 個のファイル",
     clearFiles: "すべてのファイルをクリア",

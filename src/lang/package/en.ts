@@ -315,6 +315,7 @@ export default {
         item7: "Voxel Count",
         name: "Rename",
         delete: "Delete",
+        download: "Download",
       },
       update: "Waiting for update",
       prompt: {
@@ -343,6 +344,10 @@ export default {
         cancel: "Cancel",
         success: "New voxel name: ",
         info: "Cancel input",
+      },
+      download: {
+        success: "Download successful",
+        error: "Download failed: ",
       },
     },
   },
@@ -398,6 +403,7 @@ export default {
         item6: "Polygen Center",
         name: "Rename",
         delete: "Delete",
+        download: "Download",
       },
       prompt: {
         message1: "Create a 【Project】 with this polygen",
@@ -425,6 +431,10 @@ export default {
         cancel: "Cancel",
         success: "New polygen name: ",
         info: "Cancel input",
+      },
+      download: {
+        success: "Download successful",
+        error: "Download failed: ",
       },
     },
     animation: {
@@ -472,6 +482,7 @@ export default {
         item5: "Picture Dimensions",
         name: "Rename",
         delete: "Delete",
+        download: "Download",
       },
       confirm: {
         message1:
@@ -490,6 +501,10 @@ export default {
         success: "New picture name: ",
         info: "Cancel input",
       },
+    },
+    download: {
+      success: "Download successful",
+      error: "Download failed: ",
     },
   },
   // 视频管理国际化
@@ -529,6 +544,7 @@ export default {
         item5: "Video Dimensions",
         name: "Rename",
         delete: "Delete",
+        download: "Download",
       },
       confirm: {
         message1:
@@ -547,6 +563,10 @@ export default {
         success: "New Video name: ",
         info: "Cancel input",
       },
+    },
+    download: {
+      success: "Download successful",
+      error: "Download failed: ",
     },
   },
   // 音频管理国际化
@@ -585,6 +605,7 @@ export default {
         size: "Bytes",
         name: "Rename",
         delete: "Delete",
+        download: "Download",
       },
       confirm: {
         message1:
@@ -604,12 +625,17 @@ export default {
         info: "Cancel input",
       },
     },
+    download: {
+      success: "Download successful",
+      error: "Download failed: ",
+    },
   },
   // 文件上传国际化
   upload: {
     title: "Upload File",
     button: "Upload",
-    declared: "Please select the corresponding format of the file for the upload operation",
+    declared:
+      "Please select the corresponding format of the file for the upload operation",
     batchProgress: "Batch Progress: {current}/{total}",
     selectedFiles: "Selected {count} files",
     clearFiles: "Clear all files",
@@ -976,7 +1002,10 @@ export default {
       },
       edit: "Edit【Project】",
       eye: "View【Project】",
-      info: "【Project】Information",
+      info: {
+        title: "Scene Information",
+        download: "Download",
+      },
       verseOpen: "Open【Project】",
       verseClose: "Close【Project】",
       success1: "Edit successful",
