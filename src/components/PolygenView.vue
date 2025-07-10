@@ -395,12 +395,24 @@ onMounted(() => {
           if (animations.value.length > 0) {
             const selectedAnimation = animations.value[selectedAnimationIndex.value];
             if (selectedAnimation) {
+              // 判断是否是短动画（小于0.1秒）
+              const isShortAnimation = selectedAnimation.duration < 0.1;
+
+              // 更新当前动画时间
               currentAnimationTime.value += delta;
-              if (currentAnimationTime.value > selectedAnimation.duration) {
-                currentAnimationTime.value = currentAnimationTime.value % selectedAnimation.duration;
+
+              // 对于短动画，一旦达到100%就保持不变
+              if (isShortAnimation && currentAnimationTime.value >= selectedAnimation.duration) {
+                currentAnimationTime.value = selectedAnimation.duration;
+                animationProgress.value = 100;
+              } else {
+                // 正常动画循环逻辑
+                if (currentAnimationTime.value > selectedAnimation.duration) {
+                  currentAnimationTime.value = currentAnimationTime.value % selectedAnimation.duration;
+                }
+                // 计算进度百分比
+                animationProgress.value = (currentAnimationTime.value / selectedAnimation.duration) * 100;
               }
-              // 平滑更新进度条，避免拖动操作时的冲突
-              animationProgress.value = (currentAnimationTime.value / selectedAnimation.duration) * 100;
             }
           }
         }
