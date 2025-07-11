@@ -442,6 +442,18 @@ export default {
     uploadPicture: "上传图片",
     initializePictureData: "初始化图片数据",
     viewPicture: "查看图片",
+    initializingModels: "正在初始化图片...",
+    initializingModelProgress:
+      "正在初始化图片 {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "成功初始化 {count} 个图片",
+    partialInitializeSuccess:
+      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
+    retryInitializeFailed: "是否重试初始化失败的 {count} 个图片?",
+    retryTitle: "重试初始化",
+    retryConfirm: "重试",
+    retryCancel: "跳过",
+    initializeSuccess: "图片初始化成功",
+    initializeError: "图片初始化失败",
     prompt: {
       message1: "请输入新名称",
       message2: "修改图片名称",
@@ -563,6 +575,18 @@ export default {
     uploadAudio: "上传音频",
     initializeAudioData: "初始化音频数据",
     viewAudio: "查看音频",
+    initializingModels: "正在初始化音频...",
+    initializingModelProgress:
+      "正在初始化音频 {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "成功初始化 {count} 个音频",
+    partialInitializeSuccess:
+      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
+    retryInitializeFailed: "是否重试初始化失败的 {count} 个音频?",
+    retryTitle: "重试初始化",
+    retryConfirm: "重试",
+    retryCancel: "跳过",
+    initializeSuccess: "音频初始化成功",
+    initializeError: "音频初始化失败",
     prompt: {
       message1: "请输入新名称",
       message2: "修改音频名称",

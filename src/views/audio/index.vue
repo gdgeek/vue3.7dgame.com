@@ -75,6 +75,7 @@ import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { useRouter } from "vue-router";
+import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
 
 // 组件状态
 const { t } = useI18n();
@@ -113,8 +114,95 @@ const openUploadDialog = () => {
 };
 
 // 上传成功后处理
-const handleUploadSuccess = (lastFileId: number) => {
+const handleUploadSuccess = async (uploadedIds: number | number[]) => {
   uploadDialogVisible.value = false;
+
+  // 确保uploadedIds是数组
+  const modelIds = Array.isArray(uploadedIds) ? uploadedIds : [uploadedIds];
+  const lastFileId = modelIds[modelIds.length - 1];
+
+  if (modelIds.length > 0) {
+    const loadingInstance = ElLoading.service({
+      text: t("audio.initializingModels"),
+      background: 'rgba(0, 0, 0, 0.7)'
+    });
+
+    // 记录初始化失败的模型ID
+    const failedModelIds = [];
+
+    try {
+      for (let i = 0; i < modelIds.length; i++) {
+        loadingInstance.setText(t("audio.initializingModelProgress", {
+          current: i + 1,
+          total: modelIds.length,
+          percentage: Math.round(((i + 1) / modelIds.length) * 100)
+        }));
+
+        try {
+          // 跳转到模型详情页触发初始化
+          await router.push({
+            path: "/resource/audio/view",
+            query: { id: modelIds[i] },
+          });
+
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        } catch (modelError) {
+          console.error(`初始化音频 ${modelIds[i]} 失败:`, modelError);
+          failedModelIds.push(modelIds[i]);
+        }
+      }
+
+      if (failedModelIds.length > 0) {
+        ElMessage.warning({
+          message: t("audio.partialInitializeSuccess", {
+            success: modelIds.length - failedModelIds.length,
+            failed: failedModelIds.length,
+            total: modelIds.length
+          }),
+          duration: 5000
+        });
+
+        if (failedModelIds.length > 0) {
+          const shouldRetry = await ElMessageBox.confirm(
+            t("audio.retryInitializeFailed", { count: failedModelIds.length }),
+            t("audio.retryTitle"),
+            {
+              confirmButtonText: t("audio.retryConfirm"),
+              cancelButtonText: t("audio.retryCancel"),
+              type: "warning"
+            }
+          ).catch(() => false);
+
+          if (shouldRetry === true) {
+            await handleUploadSuccess(failedModelIds);
+            return;
+          }
+          else {
+            router.push({
+              path: "/resource/audio/view",
+              query: { id: lastFileId },
+            });
+            return;
+          }
+        }
+      } else {
+        ElMessage.success({
+          message: t("audio.batchInitializeSuccess", { count: modelIds.length }),
+          duration: 3000
+        });
+      }
+
+      await refresh();
+
+    } catch (error) {
+      console.error("初始化音频时出错:", error);
+      ElMessage.error(t("audio.initializeError"));
+    } finally {
+      loadingInstance.close();
+    }
+  }
+
+  // 最后跳转到最后上传的模型详情页
   router.push({
     path: "/resource/audio/view",
     query: { id: lastFileId },

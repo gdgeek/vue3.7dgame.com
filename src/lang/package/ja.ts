@@ -447,6 +447,18 @@ export default {
     uploadPicture: "画像をアップロード",
     initializePictureData: "画像データを初期化",
     viewPicture: "画像を表示",
+    initializingModels: "画像を初期化中...",
+    initializingModelProgress:
+      "画像 {current}/{total} ({percentage}%) を初期化中...",
+    batchInitializeSuccess: "{count} 個の画像を初期化に成功しました",
+    partialInitializeSuccess:
+      "初期化結果: {success} 個成功, {failed} 個失敗 (合計 {total} 個)",
+    retryInitializeFailed: "{count} 個の画像を再初期化しますか？",
+    retryTitle: "再初期化",
+    retryConfirm: "再初期化",
+    retryCancel: "スキップ",
+    initializeSuccess: "画像の初期化に成功しました",
+    initializeError: "画像の初期化に失敗しました",
     prompt: {
       message1: "新しい名前を入力してください",
       message2: "画像名を変更",
@@ -568,6 +580,18 @@ export default {
     uploadAudio: "音声をアップロード",
     initializeAudioData: "音声データを初期化",
     viewAudio: "音声を表示",
+    initializingModels: "音声を初期化中...",
+    initializingModelProgress:
+      "音声 {current}/{total} ({percentage}%) を初期化中...",
+    batchInitializeSuccess: "{count} 個の音声を初期化に成功しました",
+    partialInitializeSuccess:
+      "初期化結果: {success} 個成功, {failed} 個失敗 (合計 {total} 個)",
+    retryInitializeFailed: "{count} 個の音声を再初期化しますか？",
+    retryTitle: "再初期化",
+    retryConfirm: "再初期化",
+    retryCancel: "スキップ",
+    initializeSuccess: "音声の初期化に成功しました",
+    initializeError: "音声の初期化に失敗しました",
     prompt: {
       message1: "新しい名前を入力してください",
       message2: "音声名を変更",

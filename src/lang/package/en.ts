@@ -449,6 +449,18 @@ export default {
     uploadPicture: "Upload Picture",
     initializePictureData: "Init The Picture Data",
     viewPicture: "View Picture",
+    initializingModels: "Initializing pictures...",
+    initializingModelProgress:
+      "Initializing picture {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "Successfully initialized {count} pictures",
+    partialInitializeSuccess:
+      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
+    retryInitializeFailed: "Retry initializing {count} failed pictures?",
+    retryTitle: "Retry Initialization",
+    retryConfirm: "Retry",
+    retryCancel: "Skip",
+    initializeSuccess: "Pictures initialized successfully",
+    initializeError: "Failed to initialize pictures",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Polygen name",
@@ -574,6 +586,18 @@ export default {
     uploadAudio: "Upload Audio",
     initializeAudioData: "Init The Audio Data",
     viewAudio: "View Audio",
+    initializingModels: "Initializing audios...",
+    initializingModelProgress:
+      "Initializing audio {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "Successfully initialized {count} audios",
+    partialInitializeSuccess:
+      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
+    retryInitializeFailed: "Retry initializing {count} failed audios?",
+    retryTitle: "Retry Initialization",
+    retryConfirm: "Retry",
+    retryCancel: "Skip",
+    initializeSuccess: "Audios initialized successfully",
+    initializeError: "Failed to initialize audios",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Audio name",
