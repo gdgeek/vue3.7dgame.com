@@ -282,6 +282,18 @@ export default {
     uploadVoxel: "ボクセルをアップロード",
     initializeVoxelData: "ボクセルデータを初期化",
     viewVoxel: "ボクセルを表示",
+    initializingModels: "ボクセルを初期化中...",
+    initializingModelProgress:
+      "ボクセル {current}/{total} ({percentage}%) を初期化中...",
+    batchInitializeSuccess: "{count} 個のボクセルを初期化に成功しました",
+    partialInitializeSuccess:
+      "初期化結果: {success} 個成功, {failed} 個失敗 (合計 {total} 個)",
+    retryInitializeFailed: "{count} 個のボクセルを再初期化しますか？",
+    retryTitle: "再初期化",
+    retryConfirm: "再初期化",
+    retryCancel: "スキップ",
+    initializeSuccess: "ボクセルの初期化に成功しました",
+    initializeError: "ボクセルの初期化に失敗しました",
     prompt: {
       message1: "新しい名前を入力してください",
       message2: "ボクセルの名前を変更",
@@ -520,6 +532,18 @@ export default {
     uploadVideo: "ビデオをアップロード",
     initializeVideoData: "ビデオデータを初期化",
     viewVideo: "ビデオを表示",
+    initializingModels: "ビデオを初期化中...",
+    initializingModelProgress:
+      "ビデオ {current}/{total} ({percentage}%) を初期化中...",
+    batchInitializeSuccess: "{count} 個のビデオを初期化に成功しました",
+    partialInitializeSuccess:
+      "初期化結果: {success} 個成功, {failed} 個失敗 (合計 {total} 個)",
+    retryInitializeFailed: "{count} 個のビデオを再初期化しますか？",
+    retryTitle: "再初期化",
+    retryConfirm: "再初期化",
+    retryCancel: "スキップ",
+    initializeSuccess: "ビデオの初期化に成功しました",
+    initializeError: "ビデオの初期化に失敗しました",
     prompt: {
       message1: "新しい名前を入力してください",
       message2: "ビデオ名を変更",

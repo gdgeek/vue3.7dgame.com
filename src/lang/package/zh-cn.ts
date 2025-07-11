@@ -277,6 +277,18 @@ export default {
     uploadVoxel: "上传体素",
     initializeVoxelData: "初始化体素数据",
     viewVoxel: "查看体素",
+    initializingModels: "正在初始化体素...",
+    initializingModelProgress:
+      "正在初始化体素 {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "成功初始化 {count} 个体素",
+    partialInitializeSuccess:
+      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
+    retryInitializeFailed: "是否重试初始化失败的 {count} 个体素?",
+    retryTitle: "重试初始化",
+    retryConfirm: "重试",
+    retryCancel: "跳过",
+    initializeSuccess: "体素初始化成功",
+    initializeError: "体素初始化失败",
     prompt: {
       message1: "请输入新名称",
       message2: "修改体素名称",
@@ -515,6 +527,18 @@ export default {
     uploadVideo: "上传视频",
     initializeVideoData: "初始化视频数据",
     viewVideo: "查看视频",
+    initializingModels: "正在初始化视频...",
+    initializingModelProgress:
+      "正在初始化视频 {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "成功初始化 {count} 个视频",
+    partialInitializeSuccess:
+      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
+    retryInitializeFailed: "是否重试初始化失败的 {count} 个视频?",
+    retryTitle: "重试初始化",
+    retryConfirm: "重试",
+    retryCancel: "跳过",
+    initializeSuccess: "视频初始化成功",
+    initializeError: "视频初始化失败",
     prompt: {
       message1: "请输入新名称",
       message2: "修改视频名称",

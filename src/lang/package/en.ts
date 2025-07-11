@@ -280,6 +280,18 @@ export default {
     uploadVoxel: "Upload Voxel",
     initializeVoxelData: "Init The Voxel Data",
     viewVoxel: "View Voxel",
+    initializingModels: "Initializing voxels...",
+    initializingModelProgress:
+      "Initializing voxel {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "Successfully initialized {count} voxels",
+    partialInitializeSuccess:
+      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
+    retryInitializeFailed: "Retry initializing {count} failed voxels?",
+    retryTitle: "Retry Initialization",
+    retryConfirm: "Retry",
+    retryCancel: "Skip",
+    initializeSuccess: "Voxels initialized successfully",
+    initializeError: "Failed to initialize voxels",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit voxel name",
@@ -524,6 +536,18 @@ export default {
     uploadVideo: "Upload Video",
     initializeVideoData: "Init The VideoData",
     viewVideo: "View Video",
+    initializingModels: "Initializing videos...",
+    initializingModelProgress:
+      "Initializing video {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "Successfully initialized {count} videos",
+    partialInitializeSuccess:
+      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
+    retryInitializeFailed: "Retry initializing {count} failed videos?",
+    retryTitle: "Retry Initialization",
+    retryConfirm: "Retry",
+    retryCancel: "Skip",
+    initializeSuccess: "Videos initialized successfully",
+    initializeError: "Failed to initialize videos",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Video name",
