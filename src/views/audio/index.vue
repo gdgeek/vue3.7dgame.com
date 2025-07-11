@@ -28,7 +28,8 @@
               <template #default="{ item }">
                 <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
                   <template #bar>
-                    <audio id="audio" controls style="width: 100%; height: 30px" :src="item.file.url"></audio>
+                    <audio class="audio-player" controls style="width: 100%; height: 30px" :src="item.file.url"
+                      @play="handleAudioPlay"></audio>
                   </template>
                   <template #enter>
                     <router-link :to="`/resource/audio/view?id=${item.id}`">
@@ -37,7 +38,7 @@
                       </el-button>
                       <el-button v-else type="primary" size="small">{{
                         $t("audio.viewAudio")
-                        }}</el-button>
+                      }}</el-button>
                     </router-link>
                   </template>
                 </mr-p-p-card>
@@ -81,6 +82,18 @@ const items = ref<any[] | null>(null);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
 const router = useRouter();
+
+const currentPlayingAudio = ref<HTMLAudioElement | null>(null);
+
+//
+const handleAudioPlay = (event: Event) => {
+  const audioElement = event.target as HTMLAudioElement;
+
+  if (currentPlayingAudio.value && currentPlayingAudio.value !== audioElement) {
+    currentPlayingAudio.value.pause();
+  }
+  currentPlayingAudio.value = audioElement;
+};
 
 // 上传弹窗相关
 const uploadDialogVisible = ref(false);

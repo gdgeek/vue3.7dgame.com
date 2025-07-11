@@ -321,7 +321,6 @@ defineExpose({
 
 .selected-files {
   margin-top: 15px;
-  background-color: #f9f9f9;
   border-radius: 4px;
   padding: 10px;
   transition: all 0.3s ease;
