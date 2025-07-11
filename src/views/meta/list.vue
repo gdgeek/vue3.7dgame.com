@@ -180,7 +180,7 @@ const copyWindow = async (item: metaInfo) => {
   }
 };
 
-const deletedWindow = async (item: { id: number }) => {
+const deletedWindow = async (item: { id: string }, resetLoading: () => void) => {
   try {
     await ElMessageBox.confirm(
       t("meta.confirm.message1"),
@@ -194,16 +194,11 @@ const deletedWindow = async (item: { id: number }) => {
     );
     await deleteMeta(item.id);
     await refresh();
-    ElMessage({
-      type: "success",
-      message: t("meta.confirm.success"),
-    });
+    ElMessage.success(t("meta.confirm.success"));
   } catch (e) {
     console.error(e);
-    ElMessage({
-      type: "info",
-      message: t("meta.confirm.info"),
-    });
+    ElMessage.info(t("meta.confirm.info"));
+    resetLoading(); // 操作取消后重置loading状态
   }
 };
 

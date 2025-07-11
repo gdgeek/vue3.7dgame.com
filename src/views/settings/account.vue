@@ -228,10 +228,7 @@ const resetPassword = () => {
         ElMessage.error(t("homepage.account.validate1.error1"));
       }
     } else {
-      ElMessage({
-        type: "error",
-        message: t("homepage.account.validate1.error2"),
-      });
+      ElMessage.error(t("homepage.account.validate1.error2"));
     }
   });
 };
@@ -250,10 +247,7 @@ const postEmail = async () => {
         ElMessage.error(t("homepage.account.validate2.error1"));
       }
     } else {
-      ElMessage({
-        type: "error",
-        message: t("homepage.account.validate2.error2"),
-      });
+      ElMessage.error(t("homepage.account.validate2.error2"));
     }
   });
 };

@@ -84,10 +84,7 @@ const postMessage = (action: string, data: any = {}) => {
       "*"
     );
   } else {
-    ElMessage({
-      message: t("meta.scene.error"),
-      type: "error",
-    });
+    ElMessage.error(t("meta.scene.error"));
   }
 };
 
@@ -145,10 +142,7 @@ const refresh = async () => {
 // 保存元数据
 const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
   if (!saveable) {
-    ElMessage({
-      type: "info",
-      message: t("meta.scene.info"),
-    });
+    ElMessage.info(t("meta.scene.info"));
     return;
   }
 
@@ -184,15 +178,9 @@ const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
 
   try {
     await putMeta(id.value, { data: meta, events });
-    ElMessage({
-      type: "success",
-      message: t("meta.scene.success"),
-    });
+    ElMessage.success(t("meta.scene.success"));
   } catch (error) {
-    ElMessage({
-      type: "error",
-      message: t("meta.scene.saveError"),
-    });
+    ElMessage.error(t("meta.scene.saveError"));
   }
 };
 
@@ -282,17 +270,11 @@ const handleMessage = async (e: MessageEvent) => {
   switch (action) {
     case "save-meta":
       saveMeta(data);
-      ElMessage({
-        type: "success",
-        message: "储存完成",
-      });
+      ElMessage.success("储存完成");
       break;
 
     case "save-meta-none":
-      ElMessage({
-        type: "warning",
-        message: "项目没有改变",
-      });
+      ElMessage.warning("项目没有改变");
       break;
 
     case "load-resource":

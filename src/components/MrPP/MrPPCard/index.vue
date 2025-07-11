@@ -79,7 +79,9 @@ const named = () => {
 
 const deleted = () => {
   deleteLoading.value = true;
-  emits("deleted", props.item);
+  emits("deleted", props.item, () => {
+    deleteLoading.value = false; // 用于重置loading状态
+  });
 };
 /*
 const hovering = ref(false);

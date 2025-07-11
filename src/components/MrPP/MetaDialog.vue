@@ -167,10 +167,7 @@ const input = async (text: string): Promise<string> => {
     );
     return value;
   } catch {
-    ElMessage({
-      type: "info",
-      message: t("verse.view.metaDialog.prompt.info"),
-    });
+    ElMessage.info(t("verse.view.metaDialog.prompt.info"));
     throw new Error("User cancelled input");
   }
 };

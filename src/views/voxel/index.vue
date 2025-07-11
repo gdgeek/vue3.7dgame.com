@@ -174,7 +174,7 @@ const named = (id: number, newValue: string) => {
     });
 };
 
-const deletedWindow = async (item: any) => {
+const deletedWindow = async (item: { id: string }, resetLoading: () => void) => {
   try {
     await ElMessageBox.confirm(
       t("voxel.confirm.message1"),
@@ -190,10 +190,11 @@ const deletedWindow = async (item: any) => {
     ElMessage.success(t("voxel.confirm.success"));
   } catch {
     ElMessage.info(t("voxel.confirm.info"));
+    resetLoading(); // 操作取消后重置loading状态
   }
 };
 
-const deleted = async (id: number) => {
+const deleted = async (id: number | string) => {
   try {
     await deleteVoxel(id);
     await refresh();

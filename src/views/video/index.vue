@@ -168,7 +168,7 @@ const named = async (id: string, newValue: string) => {
 };
 
 // 删除视频确认
-const deletedWindow = async (item: any) => {
+const deletedWindow = async (item: { id: string }, resetLoading: () => void) => {
   try {
     await ElMessageBox.confirm(
       t("video.confirm.message1"),
@@ -184,6 +184,7 @@ const deletedWindow = async (item: any) => {
     ElMessage.success(t("video.confirm.success"));
   } catch {
     ElMessage.info(t("video.confirm.info"));
+    resetLoading(); // 操作取消后重置loading状态
   }
 };
 

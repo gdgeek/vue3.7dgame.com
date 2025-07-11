@@ -33,7 +33,8 @@
                       <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
                       </LazyImg>
                       <div v-if="item.type === 'audio'" class="info-container">
-                        <audio id="audio" controls style="width: 100%; height: 30px" :src="item.file.url"></audio>
+                        <audio id="audio" controls style="width: 100%; height: 30px" :src="item.file.url"
+                          @play="handleAudioPlay"></audio>
                       </div>
                     </div>
                     <div v-if="item.created_at" style="
@@ -152,6 +153,16 @@ const type = ref("polygen");
 const metaId = ref<number | null>(null);
 const value = ref<any>(null);
 const mode = ref<'normal' | 'replace'>('normal');
+
+const currentPlayingAudio = ref<HTMLAudioElement | null>(null);
+
+const handleAudioPlay = (event: Event) => {
+  const audioElement = event.target as HTMLAudioElement;
+  if (currentPlayingAudio.value && currentPlayingAudio.value !== audioElement) {
+    currentPlayingAudio.value.pause();
+  }
+  currentPlayingAudio.value = audioElement;
+};
 
 const active = ref<ActiveState>({
   items: [],

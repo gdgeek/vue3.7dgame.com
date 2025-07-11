@@ -38,7 +38,7 @@
                       </el-button>
                       <el-button v-else type="primary" size="small">{{
                         $t("audio.viewAudio")
-                      }}</el-button>
+                        }}</el-button>
                     </router-link>
                   </template>
                 </mr-p-p-card>
@@ -188,7 +188,7 @@ const named = async (id: string, newValue: string) => {
 };
 
 // 删除音频确认对话框
-const deletedWindow = async (item: any) => {
+const deletedWindow = async (item: { id: string }, resetLoading: () => void) => {
   try {
     await ElMessageBox.confirm(
       t("audio.confirm.message1"),
@@ -204,6 +204,7 @@ const deletedWindow = async (item: any) => {
     ElMessage.success(t("audio.confirm.success"));
   } catch {
     ElMessage.info(t("audio.confirm.info"));
+    resetLoading(); // 操作取消后重置loading状态
   }
 };
 

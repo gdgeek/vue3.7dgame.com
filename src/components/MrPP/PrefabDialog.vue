@@ -202,10 +202,7 @@ const input = async (text: string): Promise<string> => {
     );
     return value;
   } catch {
-    ElMessage({
-      type: "info",
-      message: t("verse.view.prefabDialog.prompt.info"),
-    });
+    ElMessage.info(t("verse.view.prefabDialog.prompt.info"));
     throw new Error("User cancelled input");
   }
 };

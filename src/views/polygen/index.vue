@@ -145,13 +145,12 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
       }
 
       if (failedModelIds.length > 0) {
-        ElMessage({
+        ElMessage.warning({
           message: t("polygen.partialInitializeSuccess", {
             success: modelIds.length - failedModelIds.length,
             failed: failedModelIds.length,
             total: modelIds.length
           }),
-          type: "warning",
           duration: 5000
         });
 
@@ -179,9 +178,8 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
           }
         }
       } else {
-        ElMessage({
+        ElMessage.success({
           message: t("polygen.batchInitializeSuccess", { count: modelIds.length }),
-          type: "success",
           duration: 3000
         });
       }
@@ -301,7 +299,7 @@ const named = async (id: number, newValue: string) => {
 };
 
 // 删除确认
-const deletedWindow = async (item: { id: string }) => {
+const deletedWindow = async (item: { id: string }, resetLoading: () => void) => {
   try {
     await ElMessageBox.confirm(
       t("polygen.confirm.message1"),
@@ -317,6 +315,7 @@ const deletedWindow = async (item: { id: string }) => {
     ElMessage.success(t("polygen.confirm.success"));
   } catch {
     ElMessage.info(t("polygen.confirm.info"));
+    resetLoading(); // 操作取消后重置loading状态
   }
 };
 

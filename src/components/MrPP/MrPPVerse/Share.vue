@@ -212,15 +212,9 @@ const del = async (id: number) => {
     );
     await deleteVerseShare(id);
     await refresh();
-    ElMessage({
-      type: "success",
-      message: t("verse.view.share.confirm.success"),
-    });
+    ElMessage.success(t("verse.view.share.confirm.success"));
   } catch (e) {
-    ElMessage({
-      type: "info",
-      message: t("verse.view.share.confirm.info"),
-    });
+    ElMessage.info(t("verse.view.share.confirm.info"));
   }
 };
 

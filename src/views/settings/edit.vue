@@ -376,10 +376,7 @@ const submitNickname = async () => {
         ElMessage.error(t("homepage.edit.rules.nickname.error3"));
       }
     } else {
-      ElMessage({
-        type: "error",
-        message: t("homepage.edit.rules.nickname.error4"),
-      });
+      ElMessage.error(t("homepage.edit.rules.nickname.error4"));
     }
   });
 };
@@ -401,7 +398,7 @@ const saveInfo = () => {
         ElMessage.error(t("homepage.edit.rules.error1"));
       }
     } else {
-      ElMessage({ type: "error", message: t("homepage.edit.rules.error2") });
+      ElMessage.error(t("homepage.edit.rules.error2"));
     }
   });
 };

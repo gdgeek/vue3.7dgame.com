@@ -60,11 +60,7 @@ service.interceptors.request.use(
 
 // 显示错误消息
 function showErrorMessage(message: string, duration = 5000) {
-  ElMessage({
-    message,
-    type: "error",
-    duration,
-  });
+  ElMessage.error({message, duration});
 }
 
 // 处理身份认证失败

@@ -86,10 +86,7 @@ const postMessage = (action: string, data: any) => {
       "*"
     );
   } else {
-    ElMessage({
-      message: t("verse.view.sceneEditor.error1"),
-      type: "error",
-    });
+    ElMessage.error(t("verse.view.sceneEditor.error1"));
   }
 };
 
@@ -108,10 +105,7 @@ const setupPrefab = async ({ meta_id, data, uuid }: any) => {
 // 添加预制件
 const addPrefab = () => {
   prefabDialogRef.value?.open(id.value);
-  ElMessage({
-    type: "info",
-    message: t("verse.view.sceneEditor.info1"),
-  });
+  ElMessage.info(t("verse.view.sceneEditor.info1"));
 };
 
 // 添加实体
@@ -134,10 +128,7 @@ const saveVerse = async (data: any) => {
   const verse = data.verse;
 
   if (!saveable.value) {
-    ElMessage({
-      type: "info",
-      message: t("verse.view.sceneEditor.info3"),
-    });
+    ElMessage.info(t("verse.view.sceneEditor.info3"));
     return;
   }
 
@@ -205,10 +196,7 @@ const releaseVerse = async (data: any) => {
   const verse = data.verse;
 
   if (!saveable.value) {
-    ElMessage({
-      type: "info",
-      message: "没有发布权限",
-    });
+    ElMessage.info("没有发布权限");
     return;
   }
 
@@ -260,10 +248,7 @@ const handleMessage = async (e: MessageEvent) => {
 
     case "save-verse":
 
-      ElMessage({
-        type: "success",
-        message: "储存完成",
-      });
+      ElMessage.success("储存完成");
       saveVerse(data);
       break;
 
@@ -272,10 +257,7 @@ const handleMessage = async (e: MessageEvent) => {
       break;
 
     case "save-verse-none":
-      ElMessage({
-        type: "warning",
-        message: "项目没有改变",
-      });
+      ElMessage.warning("项目没有改变");
       break;
 
     case "goto":

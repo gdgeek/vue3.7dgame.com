@@ -200,7 +200,7 @@ const named = async (id: string, newValue: string) => {
 };
 
 // 删除确认
-const deletedWindow = async (item: { id: string }) => {
+const deletedWindow = async (item: { id: string }, resetLoading: () => void) => {
   try {
     await ElMessageBox.confirm(
       t("picture.confirm.message1"),
@@ -216,6 +216,7 @@ const deletedWindow = async (item: { id: string }) => {
     ElMessage.success(t("picture.confirm.success"));
   } catch {
     ElMessage.info(t("picture.confirm.info"));
+    resetLoading(); // 操作取消后重置loading状态
   }
 };
 

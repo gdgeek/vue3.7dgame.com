@@ -92,10 +92,7 @@ const submitForm = async () => {
   formRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       emit("post", form.value);
-      ElMessage({
-        message: t("verse.view.messageForm.success"),
-        type: "success",
-      });
+      ElMessage.success(t("verse.view.messageForm.success"));
     } else {
       console.log("error submit!!");
     }

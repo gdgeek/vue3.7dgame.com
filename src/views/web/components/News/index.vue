@@ -376,10 +376,7 @@ const openArticleDetails = async (article: any) => {
 const shareArticle = () => {
   if (selectedArticle.value) {
     // 这里可以实现社交媒体分享功能
-    ElMessage({
-      message: '分享功能开发中...',
-      type: 'info'
-    });
+    ElMessage.info('分享功能开发中...');
   }
 };
 

@@ -142,16 +142,10 @@ const del = async (id: number) => {
     .then(async () => {
       await aiRodin.del(id);
       await refresh();
-      ElMessage({
-        type: "success",
-        message: t("ai.confirm.success"),
-      });
+      ElMessage.success(t("ai.confirm.success"));
     })
     .catch(() => {
-      ElMessage({
-        type: "info",
-        message: t("ai.confirm.info"),
-      });
+      ElMessage.info(t("ai.confirm.info"));
     });
 };
 const show = (resource_id: number) => {

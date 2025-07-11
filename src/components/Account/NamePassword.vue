@@ -125,10 +125,10 @@ const submit = () => {
       } catch (e: any) {
         loading.value = false;
         let errorMessage = "登录失败，请稍后再试";
-        ElMessage({ type: "error", message: errorMessage });
+        ElMessage.error(errorMessage);
       }
     } else {
-      ElMessage({ type: "warning", message: "请输入正确的登录信息" });
+      ElMessage.warning("请输入正确的登录信息");
     }
   });
 };
