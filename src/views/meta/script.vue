@@ -7,7 +7,7 @@
             <div v-if="meta" class="clearfix">
               <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
                 meta.title
-              }}</el-link>
+                }}</el-link>
               /【{{ $t("meta.script.title") }}】
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
               <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
@@ -72,7 +72,7 @@
                             <pre>
                     <code :class="currentCodeType">{{
                       currentCode
-                      }}</code>
+                    }}</code>
                   </pre>
                           </div>
                         </div>
@@ -524,7 +524,7 @@ const testPoint = (data: any, typeList: string[]) => {
 
   if (isValidType) {
     const animations = data.parameters?.animations ?? null;
-    
+
     const isPolygen = data.type.toLowerCase() === "polygen";
 
     // 给Polygen，传递moved属性，tooltips属性
@@ -970,6 +970,26 @@ const run = async () => {
       },
     };
 
+    // 处理文本实体
+    const handleText = (uuid: string) => {
+      const source = scenePlayer.value?.sources.get(uuid);
+      if (!source) {
+        console.error(`找不到UUID为 ${uuid} 的文本实体`);
+        return null;
+      }
+      return source.data;
+    };
+
+    // 处理所有类型的实体(polygen模型、voxel体素、picture图片、text文本、video视频等)
+    const handleEntity = (uuid: string) => {
+      const source = scenePlayer.value?.sources.get(uuid);
+      if (!source) {
+        console.error(`找不到UUID为 ${uuid} 的实体`);
+        return null;
+      }
+      return source.data;
+    };
+
     // 补间动画工具类
     const tween = {
       to_object: (
@@ -1328,7 +1348,7 @@ const run = async () => {
 
     try {
       const wrappedCode = `
-        return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument) {
+        return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument, handleText, handleEntity) {
           const meta = window.meta;
           const index = ${meta.value?.id};
 
@@ -1359,7 +1379,9 @@ const run = async () => {
         point,
         transform,
         Vector3,
-        argument
+        argument,
+        handleText,
+        handleEntity
       );
     } catch (e: any) {
       console.error("执行代码出错:", e);
