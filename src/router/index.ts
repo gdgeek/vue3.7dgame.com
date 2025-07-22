@@ -391,7 +391,7 @@ const routes: RouteRecordRaw[] = [
               title: "resourceManagement.videoManagement.title",
               icon: "el-icon-video-camera",
               hidden: true,
-              private: true,
+              // private: true,
               alwaysShow: false,
               params: null,
             },

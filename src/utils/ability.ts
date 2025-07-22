@@ -95,6 +95,7 @@ export function UpdateAbility(
         /^\/resource\/polygen(\/|$)/,
         /^\/resource\/audio(\/|$)/,
         /^\/resource\/picture(\/|$)/,
+        /^\/resource\/video(\/|$)/,
       ]);
       menu.concat(["/verse-share/open", /^\/trades(\/|$)/]);
     }
