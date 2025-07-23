@@ -204,7 +204,8 @@ const setup = async (
   size: { x: number; y: number }
 ) => {
   if (size.x !== 0) {
-    const info = JSON.stringify({ size });
+    const length = video.duration;
+    const info = JSON.stringify({ size, length });
 
     // const blob = await thumbnail(video, size.x * 0.5, size.y * 0.5);
     // blob.name = data.value.name + ".thumbnail";
