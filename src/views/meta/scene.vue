@@ -20,6 +20,7 @@ import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
 import { AbilityRouter } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
+import { useUserStore } from "@/store/modules/user"; // 导入用户store
 
 // 组件状态
 const appStore = useAppStore();
@@ -31,6 +32,7 @@ const dialog = ref();
 const editor = ref<HTMLIFrameElement | null>();
 let init = false;
 const ability = useAbility();
+const userStore = useUserStore(); // 获取用户store
 
 // 计算属性
 const id = computed(() => parseInt(route.query.id as string));
@@ -45,6 +47,20 @@ watch(
   async () => {
     await refresh();
   }
+);
+
+// 监听用户信息变化
+watch(
+  () => userStore.userInfo,
+  () => {
+    // 用户信息变化时，向编辑器发送最新用户信息
+    postMessage("user-info", {
+      id: userStore.userInfo?.id || null,
+      roles: userStore.userInfo?.roles || [],
+      role: userStore.getRole()
+    });
+  },
+  { deep: true }
 );
 
 // 资源操作相关函数
@@ -132,7 +148,12 @@ const refresh = async () => {
     postMessage("load", {
       data: meta.data,
       saveable: saveable(meta.data),
-      availableResourceTypes: availableTypes
+      availableResourceTypes: availableTypes,
+      user: {
+        id: userStore.userInfo?.id || null,
+        roles: userStore.userInfo?.roles || [],
+        role: userStore.getRole() // 获取用户角色
+      }
     });
   } catch (error) {
     console.error(error);
@@ -322,6 +343,12 @@ const handleMessage = async (e: MessageEvent) => {
       if (!init) {
         init = true;
         refresh();
+      } else {
+        postMessage("user-info", {
+          id: userStore.userInfo?.id || null,
+          roles: userStore.userInfo?.roles || [],
+          role: userStore.getRole()
+        });
       }
       break;
 
