@@ -7,6 +7,3 @@ export function setupElIcons(app: App<Element>) {
     app.component(key, component);
   }
 }
-
-// FontAwesome相关版本信息
-export const FONTAWESOME_VERSION = "6.7.2";

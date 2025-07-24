@@ -555,7 +555,7 @@ export default {
       success: "删除成功！",
       info: "已取消删除",
     },
-    uploadFile: "选择视频，并上传",
+    uploadFile: "选择视频（.mp4/.mov/.avi），并上传",
     view: {
       title: "视频名称：",
       info: {
@@ -627,7 +627,7 @@ export default {
       success: "删除成功！",
       info: "已取消删除",
     },
-    uploadFile: "选择音频，并上传",
+    uploadFile: "选择音频（.mp3/.wav），并上传",
     view: {
       title: "音频名称：",
       info: {

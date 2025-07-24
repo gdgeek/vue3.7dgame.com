@@ -560,7 +560,7 @@ export default {
       success: "削除成功！",
       info: "削除がキャンセルされました",
     },
-    uploadFile: "ビデオを選択してアップロード",
+    uploadFile: "ビデオ(.mp4/.mov/.avi)を選択してアップロード",
     view: {
       title: "ビデオ名：",
       info: {
@@ -632,7 +632,7 @@ export default {
       success: "削除成功！",
       info: "削除がキャンセルされました",
     },
-    uploadFile: "音声を選択してアップロード",
+    uploadFile: "音声(.mp3/.wav)を選択してアップロード",
     view: {
       title: "音声名：",
       info: {

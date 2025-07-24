@@ -565,7 +565,7 @@ export default {
       success: "Deleted successfully!",
       info: "Deletion canceled",
     },
-    uploadFile: "Select a video and upload it",
+    uploadFile: "Select a video (.mp4/.mov/.avi) and upload it",
     view: {
       title: "Video Name: ",
       info: {
@@ -639,7 +639,7 @@ export default {
       success: "Deleted successfully!",
       info: "Deletion canceled",
     },
-    uploadFile: "Select a audio and upload it",
+    uploadFile: "Select a audio (.mp3/.wav) and upload it",
     view: {
       title: "Audio Name: ",
       info: {
