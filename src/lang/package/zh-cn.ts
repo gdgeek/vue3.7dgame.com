@@ -709,6 +709,7 @@ export default {
     uploadFile: "选择特效（支持图片，视频，音频），并上传",
     view: {
       title: "特效名称：",
+      loadingText: "正在预处理",
       info: {
         title: "粒子信息",
         label1: "条目",

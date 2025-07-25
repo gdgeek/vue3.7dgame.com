@@ -724,6 +724,7 @@ export default {
     uploadFile: "Select a particle effect (supports images, videos, and audio) and upload it",
     view: {
       title: "Particle Effect Name: ",
+      loadingText: "Processing...",
       info: {
         title: "Particle Effect Information",
         label1: "Item",

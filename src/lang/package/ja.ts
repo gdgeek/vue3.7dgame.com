@@ -714,6 +714,7 @@ export default {
     uploadFile: "特效（画像、ビデオ、オーディオをサポート）を選択してアップロード",
     view: {
       title: "特效名：",
+      loadingText: "前処理中",
       info: {
         title: "特效情報",
         label1: "項目",
