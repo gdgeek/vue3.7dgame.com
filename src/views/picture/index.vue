@@ -84,7 +84,7 @@ const router = useRouter();
 
 // 上传弹窗相关
 const uploadDialogVisible = ref(false);
-const fileType = ref("image/gif, image/jpeg, image/png");
+const fileType = ref("image/gif, image/jpeg, image/png, image/webp");
 
 // 分页配置
 const pagination = ref({

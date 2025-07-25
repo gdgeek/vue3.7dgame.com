@@ -71,7 +71,7 @@ onMounted(async () => {
 
 const tableData = computed(() => {
   if (videoData.value && prepare.value) {
-    return [
+    const base = [
       {
         item: t("video.view.info.item1"),
         text: videoData.value.name,
@@ -93,6 +93,12 @@ const tableData = computed(() => {
         text: printVector2(JSON.parse(videoData.value.info).size),
       },
     ];
+    let info: any = {};
+    try { info = JSON.parse(videoData.value.info || '{}'); } catch {}
+    if (info.length) {
+      base.push({ item: t("video.view.info.item6"), text: info.length.toFixed(2) + 's' });
+    }
+    return base;
   } else {
     return [];
   }

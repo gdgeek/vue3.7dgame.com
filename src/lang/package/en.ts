@@ -48,6 +48,12 @@ export default {
         audioTTS: "Text To Speech",
         audioProcessing: "Processing",
       },
+      particleManagement: {
+        title: "Particle",
+        particleList: "List",
+        particleUpload: "Upload",
+        particleProcessing: "Processing",
+      },
     },
     meta: {
       title: "Entity",
@@ -578,6 +584,7 @@ export default {
         item4: "File Size",
         size: "Bytes",
         item5: "Video Dimensions",
+        item6: "Duration",
         name: "Rename",
         delete: "Delete",
         download: "Download",
@@ -650,6 +657,7 @@ export default {
         item2: "Creator",
         item3: "Creation Time",
         item4: "File Size",
+        item5: "Duration",
         size: "Bytes",
         name: "Rename",
         delete: "Delete",
@@ -676,6 +684,82 @@ export default {
     download: {
       success: "Download successful",
       error: "Download failed: ",
+    },
+  },
+  // 特效管理国际化
+  particle: {
+    uploadParticle: "Upload Particle Effect",
+    initializeParticleData: "Init The Particle Effect Data",
+    viewParticle: "View Particle Effect",
+    initializingModels: "Initializing particle effects...",
+    initializingModelProgress:
+      "Initializing particle effect {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "Successfully initialized {count} particle effects",
+    partialInitializeSuccess:
+      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
+    retryInitializeFailed:
+      "Retry initializing {count} failed particle effects?",
+    retryTitle: "Retry Initialization",
+    retryConfirm: "Retry",
+    retryCancel: "Skip",
+    initializeSuccess: "Particle effects initialized successfully",
+    initializeError: "Failed to initialize particle effects",
+    prompt: {
+      message1: "Please enter a new name",
+      message2: "Edit Particle Effect name",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      success: "New Particle Effect name: ",
+      info: "Cancel input",
+    },
+    confirm: {
+      message1:
+        "This action will permanently delete the file. Do you want to continue?",
+      message2: "Prompt",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      success: "Deleted successfully!",
+      info: "Deletion canceled",
+    },
+    uploadFile: "Select a particle effect (supports images, videos, and audio) and upload it",
+    view: {
+      title: "Particle Effect Name: ",
+      info: {
+        title: "Particle Effect Information",
+        label1: "Item",
+        label2: "Content",
+        item1: "Particle Effect Name",
+        item2: "Creator",
+        item3: "Creation Time",
+        item4: "File Size",
+        size: "Bytes",
+        item5: "Particle Effect Dimensions",
+        item6: "Duration",
+        name: "Rename",
+        delete: "Delete",
+        download: "Download",
+      },
+      confirm: {
+        message1:
+          "This action will permanently delete the file. Do you want to continue?",
+        message2: "Prompt",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "Deleted successfully!",
+        info: "Deletion canceled",
+      },
+      namePrompt: {
+        message1: "Please enter a new name",
+        message2: "Edit Particle Effect name",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "New Particle Effect name: ",
+        info: "Cancel input",
+      },
+      download: {
+        success: "Download successful",
+        error: "Download failed: ",
+      },
     },
   },
   // 文件上传国际化

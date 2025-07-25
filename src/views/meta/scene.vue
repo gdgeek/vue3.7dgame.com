@@ -106,7 +106,7 @@ const postMessage = (action: string, data: any = {}) => {
 
 // 获取可用的资源类型
 const getAvailableResourceTypes = () => {
-  const resourceTypes = ['polygen', 'picture', 'video', 'voxel', 'audio']; // 所有资源类型
+  const resourceTypes = ['polygen', 'picture', 'video', 'voxel', 'audio', 'particle']; // 所有资源类型
   const availableTypes: string[] = [];
 
   const routes = router.getRoutes();
