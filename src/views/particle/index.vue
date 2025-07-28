@@ -27,7 +27,7 @@
               <template #default="{ item }">
                 <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
                   <template #enter>
-                    <router-link :to="`/resource/Particle/view?id=${item.id}`">
+                    <router-link :to="`/resource/particle/view?id=${item.id}`">
                       <el-button v-if="item.info === null || item.image === null" type="warning" size="small">
                         {{ $t("particle.initializeParticleData") }}
                       </el-button>
@@ -52,8 +52,8 @@
       <br />
 
       <!-- 新增上传弹窗组件 -->
-      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="particle" :file-type="fileType" @save-resource="saveParticle"
-        @success="handleUploadSuccess">
+      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="particle" :file-type="fileType" 
+        :show-effect-type-select="true" @save-resource="saveParticle" @success="handleUploadSuccess">
         {{ $t("particle.uploadFile") }}
       </mr-p-p-upload-dialog>
     </div>
@@ -120,7 +120,7 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
         try {
           // 跳转到模型详情页触发初始化
           await router.push({
-            path: "/resource/Particle/view",
+            path: "/resource/particle/view",
             query: { id: modelIds[i] },
           });
 
@@ -158,7 +158,7 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
           }
           else {
             router.push({
-              path: "/resource/Particle/view",
+              path: "/resourceparticle/view",
               query: { id: lastFileId },
             });
             return;
@@ -183,7 +183,7 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
 
   // 最后跳转到最后上传的模型详情页
   router.push({
-    path: "/resource/Particle/view",
+    path: "/resource/particle/view",
     query: { id: lastFileId },
   });
 };
@@ -193,10 +193,12 @@ const saveParticle = async (
   name: string,
   file_id: number,
   totalFiles: number,
-  callback: (id: number) => void
+  callback: (id: number) => void,
+  effectType?: string
 ) => {
   try {
-    const response = await postParticle({ name, file_id });
+    // 使用 effect_type 而不是 type 字段
+    const response = await postParticle({ name, file_id, effect_type: effectType });
     if (response.data.id) {
       callback(response.data.id);
     }

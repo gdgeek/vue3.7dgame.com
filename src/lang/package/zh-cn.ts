@@ -755,6 +755,7 @@ export default {
     batchProgress: "批量进度： {current}/{total}",
     selectedFiles: "已选择 {count} 个文件",
     clearFiles: "清除所有文件",
+    effectType: "特效类型", // 添加特效类型翻译
     item1: {
       title: "预先处理",
       failed: "md5计算失败",

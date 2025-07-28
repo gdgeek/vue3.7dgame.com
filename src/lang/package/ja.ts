@@ -711,7 +711,8 @@ export default {
       success: "削除に成功しました！",
       info: "削除がキャンセルされました",
     },
-    uploadFile: "特效（画像、ビデオ、オーディオをサポート）を選択してアップロード",
+    uploadFile:
+      "特效（画像、ビデオ、オーディオをサポート）を選択してアップロード",
     view: {
       title: "特效名：",
       loadingText: "前処理中",
@@ -761,6 +762,7 @@ export default {
     batchProgress: "バッチ進行： {current}/{total}",
     selectedFiles: "選択された {count} 個のファイル",
     clearFiles: "すべてのファイルをクリア",
+    effectType: "エフェクトタイプ", // 添加特效类型翻译
     item1: {
       title: "事前処理",
       failed: "md5の計算に失敗しました",

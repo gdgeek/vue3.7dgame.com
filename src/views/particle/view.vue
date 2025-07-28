@@ -11,8 +11,9 @@
             <div class="box-item" style="text-align: center">
               <template v-if="isVideo">
                 <video id="particle" controls style="height: 300px; width: auto">
-                  <source v-if="file !== null" :src="file || ''" />
+                  <source v-if="file !== null" id="src" :src="file" />
                 </video>
+                <video id="new_particle" style="height: 100%; width: auto" hidden @canplaythrough="dealWith"></video>
               </template>
               <template v-else-if="isAudio">
                 <section class="audio-bgc">
@@ -181,7 +182,7 @@ const thumbnailVideo = (
       ctx.drawImage(video, 0, 0, width, height);
       canvas.toBlob((blob) => {
         if (blob) {
-          const file = new File([blob], "thumbnail.jpg", { type: imageType });
+          const file = new File([blob], "thumbnail.jpg", { type: imageType, lastModified: new Date().getTime() });
           resolve(file);
         } else {
           reject("Failed to create blob");
@@ -238,14 +239,14 @@ const thumbnailAudio = (
   });
 };
 
-// 修正 dealWith
 const dealWith = async () => {
   if (!prepare.value) {
     if (isVideo.value) {
       const particle = document.getElementById("particle") as HTMLVideoElement;
+      const new_particle = document.getElementById("new_particle") as HTMLVideoElement;
       if (particle) {
         const size = { x: particle.videoWidth, y: particle.videoHeight };
-        await setupVideo(particle, size);
+        await setupVideo(new_particle, size);
       }
     } else if (isImage.value) {
       const img = document.getElementById("image") as HTMLImageElement;

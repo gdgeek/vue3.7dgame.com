@@ -721,7 +721,8 @@ export default {
       success: "Deleted successfully!",
       info: "Deletion canceled",
     },
-    uploadFile: "Select a particle effect (supports images, videos, and audio) and upload it",
+    uploadFile:
+      "Select a particle effect (supports images, videos, and audio) and upload it",
     view: {
       title: "Particle Effect Name: ",
       loadingText: "Processing...",
@@ -772,6 +773,7 @@ export default {
     batchProgress: "Batch Progress: {current}/{total}",
     selectedFiles: "Selected {count} files",
     clearFiles: "Clear all files",
+    effectType: "Effect Type", // 添加特效类型翻译
     item1: {
       title: "Preprocessing",
       failed: "MD5 calculation failed",
