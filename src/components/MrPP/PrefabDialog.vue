@@ -37,14 +37,13 @@
       <template v-if="active && active.items">
         <waterfall
           v-if="active !== null && active.items !== null"
-          :lazyload="false"
-          :breakpoints="breakpoints"
-          :gutter="8"
+          :width="230"
+          :gutter="10"
           :list="viewCards"
-          :column-count="3"
           :backgroundColor="'rgba(255, 255, 255, .05)'"
         >
           <template #default="{ item }">
+            <div style="width: 230px">
             <el-card style="width: 220px" class="box-card">
               <template #header>
                 <el-card shadow="hover" :body-style="{ padding: '0px' }">
@@ -80,7 +79,7 @@
               </div>
               <div class="bottom clearfix"></div>
             </el-card>
-            <br />
+            </div>
           </template>
         </waterfall>
       </template>
