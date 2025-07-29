@@ -510,7 +510,7 @@ const routes: RouteRecordRaw[] = [
               title: "resourceManagement.particleManagement.title",
               icon: "el-icon-SetUp",
               hidden: true,
-              // private: true,
+              private: true,
               alwaysShow: false,
               params: null,
             },
