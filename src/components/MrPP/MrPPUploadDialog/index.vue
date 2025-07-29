@@ -10,6 +10,14 @@
           </div>
         </template>
         <div style="position: relative">
+          <div v-if="showEffectTypeSelect" class="effect-type-selector">
+            <span>{{ $t('upload.effectType') }}:</span>
+            <el-select v-model="selectedEffectType" :disabled="isDisabled" style="width: 120px; margin-left: 10px;">
+              <el-option label="Glow" value="glow"></el-option>
+              <el-option label="Wave" value="wave"></el-option>
+            </el-select>
+          </div>
+
           <div v-for="item in data" :key="item.name">
             <div class="progress-item">
               <span>{{ item.title }}</span>
@@ -76,12 +84,14 @@ const props = withDefaults(
     dir: string;
     advanced?: boolean;
     modelValue: boolean;
+    showEffectTypeSelect?: boolean;
   }>(),
   {
     fileType: "*",
     dir: "",
     advanced: false,
     modelValue: false,
+    showEffectTypeSelect: false,
   }
 );
 
@@ -90,6 +100,9 @@ const emit = defineEmits([
   "update:modelValue",
   "success"
 ]);
+
+// 特效类型的选择
+const selectedEffectType = ref<string>("glow");
 
 const dialogVisible = computed({
   get: () => props.modelValue,
@@ -189,6 +202,7 @@ const saveFile = async (
     md5,
     key: md5 + extension,
     url: fileStore.store.fileUrl(md5, extension, handler, props.dir),
+    particleType: props.showEffectTypeSelect ? selectedEffectType.value : undefined,
   };
 
   // 更新上传进度完成
@@ -214,7 +228,7 @@ const saveFile = async (
       if (uploadedCount.value === totalFilesCount.value) {
         emit("success", uploadedIds.value);
       }
-    });
+    }, selectedEffectType.value);
   } catch (err) {
     console.error(err);
   }
@@ -311,6 +325,14 @@ defineExpose({
 
 .progress-item {
   margin-bottom: 10px;
+}
+
+.effect-type-selector {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #eee;
 }
 
 .batch-progress {

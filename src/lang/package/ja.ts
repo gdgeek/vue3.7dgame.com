@@ -48,6 +48,12 @@ export default {
         audioTTS: "テキストから音声",
         audioProcessing: "処理",
       },
+      particleManagement: {
+        title: "パーティクル",
+        particleList: "リスト",
+        particleUpload: "アップロード",
+        particleProcessing: "処理",
+      },
     },
     meta: {
       title: "メタデータ",
@@ -560,7 +566,7 @@ export default {
       success: "削除成功！",
       info: "削除がキャンセルされました",
     },
-    uploadFile: "ビデオを選択してアップロード",
+    uploadFile: "ビデオ(.mp4/.mov/.avi)を選択してアップロード",
     view: {
       title: "ビデオ名：",
       info: {
@@ -573,6 +579,7 @@ export default {
         item4: "ファイルサイズ",
         size: "バイト",
         item5: "ビデオサイズ",
+        item6: "時間",
         name: "名前を変更",
         delete: "削除",
         download: "ダウンロード",
@@ -632,7 +639,7 @@ export default {
       success: "削除成功！",
       info: "削除がキャンセルされました",
     },
-    uploadFile: "音声を選択してアップロード",
+    uploadFile: "音声(.mp3/.wav)を選択してアップロード",
     view: {
       title: "音声名：",
       info: {
@@ -643,6 +650,7 @@ export default {
         item2: "作成者",
         item3: "作成日",
         item4: "ファイルサイズ",
+        item5: "時間",
         size: "バイト",
         name: "名前を変更",
         delete: "削除",
@@ -670,6 +678,81 @@ export default {
       error: "ダウンロード失敗: ",
     },
   },
+  // 特效管理国际化
+  particle: {
+    uploadParticle: "特效をアップロード",
+    initializeParticleData: "特效データを初期化",
+    viewParticle: "特效を表示",
+    initializingModels: "特效を初期化中...",
+    initializingModelProgress:
+      "特效 {current}/{total} ({percentage}%) を初期化中...",
+    batchInitializeSuccess: "{count} 個の特效を初期化に成功しました",
+    partialInitializeSuccess:
+      "初期化結果: {success} 個成功, {failed} 個失敗 (合計 {total} 個)",
+    retryInitializeFailed: "{count} 個の特效を再初期化しますか？",
+    retryTitle: "再初期化",
+    retryConfirm: "再初期化",
+    retryCancel: "スキップ",
+    initializeSuccess: "特效の初期化に成功しました",
+    initializeError: "特效の初期化に失敗しました",
+    prompt: {
+      message1: "新しい名前を入力してください",
+      message2: "特效名を変更",
+      confirm: "確認",
+      cancel: "キャンセル",
+      success: "新しい特效名: ",
+      info: "入力がキャンセルされました",
+    },
+    confirm: {
+      message1: "この操作はファイルを永久に削除しますが、続行しますか？",
+      message2: "ヒント",
+      confirm: "確認",
+      cancel: "キャンセル",
+      success: "削除に成功しました！",
+      info: "削除がキャンセルされました",
+    },
+    uploadFile:
+      "特效（画像、ビデオ、オーディオをサポート）を選択してアップロード",
+    view: {
+      title: "特效名：",
+      loadingText: "前処理中",
+      info: {
+        title: "特效情報",
+        label1: "項目",
+        label2: "内容",
+        item1: "特效名",
+        item2: "作成者",
+        item3: "作成日",
+        item4: "ファイルサイズ",
+        size: "バイト",
+        item5: "特效サイズ",
+        item6: "時間",
+        name: "名前を変更",
+        delete: "削除",
+        download: "ダウンロード",
+      },
+      confirm: {
+        message1: "この操作はファイルを永久に削除しますが、続行しますか？",
+        message2: "ヒント",
+        confirm: "確認",
+        cancel: "キャンセル",
+        success: "削除に成功しました！",
+        info: "削除がキャンセルされました",
+      },
+      namePrompt: {
+        message1: "新しい名前を入力してください",
+        message2: "特效名を変更",
+        confirm: "確認",
+        cancel: "キャンセル",
+        success: "新しい特效名: ",
+        info: "入力がキャンセルされました",
+      },
+      download: {
+        success: "ダウンロードに成功しました",
+        error: "ダウンロードに失敗しました: ",
+      },
+    },
+  },
   // 文件上传国际化
   upload: {
     title: "ファイルを選択",
@@ -679,6 +762,7 @@ export default {
     batchProgress: "バッチ進行： {current}/{total}",
     selectedFiles: "選択された {count} 個のファイル",
     clearFiles: "すべてのファイルをクリア",
+    effectType: "エフェクトタイプ", // 添加特效类型翻译
     item1: {
       title: "事前処理",
       failed: "md5の計算に失敗しました",

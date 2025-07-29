@@ -7,16 +7,16 @@
           <mr-p-p-header :sorted="sorted" :searched="searched" @search="search" @sort="sort">
             <el-button-group :inline="true">
               <!-- 原上传路由按钮注释
-              <router-link to="/resource/video/upload">
+              <router-link to="/resource/particle/upload">
                 <el-button size="small" type="primary" icon="uploadFilled">
                   <span class="hidden-sm-and-down">{{
-                    $t("video.uploadVideo")
+                    $t("particle.uploadParticle")
                   }}</span>
                 </el-button>
               </router-link>
               -->
               <el-button size="small" type="primary" icon="uploadFilled" @click="openUploadDialog">
-                <span class="hidden-sm-and-down">{{ $t("video.uploadVideo") }}</span>
+                <span class="hidden-sm-and-down">{{ $t("particle.uploadParticle") }}</span>
               </el-button>
             </el-button-group>
           </mr-p-p-header>
@@ -27,12 +27,12 @@
               <template #default="{ item }">
                 <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
                   <template #enter>
-                    <router-link :to="`/resource/video/view?id=${item.id}`">
+                    <router-link :to="`/resource/particle/view?id=${item.id}`">
                       <el-button v-if="item.info === null || item.image === null" type="warning" size="small">
-                        {{ $t("video.initializeVideoData") }}
+                        {{ $t("particle.initializeParticleData") }}
                       </el-button>
                       <el-button v-else type="primary" size="small">{{
-                        $t("video.viewVideo")
+                        $t("particle.viewParticle")
                         }}</el-button>
                     </router-link>
                   </template>
@@ -52,16 +52,16 @@
       <br />
 
       <!-- 新增上传弹窗组件 -->
-      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="video" :file-type="fileType" @save-resource="saveVideo"
-        @success="handleUploadSuccess">
-        {{ $t("video.uploadFile") }}
+      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="particle" :file-type="fileType" 
+        :show-effect-type-select="true" @save-resource="saveParticle" @success="handleUploadSuccess">
+        {{ $t("particle.uploadFile") }}
       </mr-p-p-upload-dialog>
     </div>
   </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
-import { getVideos, putVideo, deleteVideo, postVideo } from "@/api/v1/resources/index";
+import { getParticles, putParticle, deleteParticle, postParticle } from "@/api/v1/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import MrPPUploadDialog from "@/components/MrPP/MrPPUploadDialog/index.vue";
@@ -85,7 +85,7 @@ const router = useRouter();
 
 // 上传弹窗相关
 const uploadDialogVisible = ref(false);
-const fileType = ref("video/mp4, video/mov, video/avi");
+const fileType = ref("video/mp4, video/mov, video/avi, image/gif, image/jpeg, image/png, image/webp, audio/mp3, audio/wav");
 
 // 打开上传弹窗
 const openUploadDialog = () => {
@@ -102,7 +102,7 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
 
   if (modelIds.length > 0) {
     const loadingInstance = ElLoading.service({
-      text: t("video.initializingModels"),
+      text: t("particle.initializingModels"),
       background: 'rgba(0, 0, 0, 0.7)'
     });
 
@@ -111,7 +111,7 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
 
     try {
       for (let i = 0; i < modelIds.length; i++) {
-        loadingInstance.setText(t("video.initializingModelProgress", {
+        loadingInstance.setText(t("particle.initializingModelProgress", {
           current: i + 1,
           total: modelIds.length,
           percentage: Math.round(((i + 1) / modelIds.length) * 100)
@@ -120,20 +120,20 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
         try {
           // 跳转到模型详情页触发初始化
           await router.push({
-            path: "/resource/video/view",
+            path: "/resource/particle/view",
             query: { id: modelIds[i] },
           });
 
           await new Promise(resolve => setTimeout(resolve, 2000));
         } catch (modelError) {
-          console.error(`初始化视频 ${modelIds[i]} 失败:`, modelError);
+          console.error(`初始化特效 ${modelIds[i]} 失败:`, modelError);
           failedModelIds.push(modelIds[i]);
         }
       }
 
       if (failedModelIds.length > 0) {
         ElMessage.warning({
-          message: t("video.partialInitializeSuccess", {
+          message: t("particle.partialInitializeSuccess", {
             success: modelIds.length - failedModelIds.length,
             failed: failedModelIds.length,
             total: modelIds.length
@@ -143,11 +143,11 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
 
         if (failedModelIds.length > 0) {
           const shouldRetry = await ElMessageBox.confirm(
-            t("video.retryInitializeFailed", { count: failedModelIds.length }),
-            t("video.retryTitle"),
+            t("particle.retryInitializeFailed", { count: failedModelIds.length }),
+            t("particle.retryTitle"),
             {
-              confirmButtonText: t("video.retryConfirm"),
-              cancelButtonText: t("video.retryCancel"),
+              confirmButtonText: t("particle.retryConfirm"),
+              cancelButtonText: t("particle.retryCancel"),
               type: "warning"
             }
           ).catch(() => false);
@@ -158,7 +158,7 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
           }
           else {
             router.push({
-              path: "/resource/video/view",
+              path: "/resourceparticle/view",
               query: { id: lastFileId },
             });
             return;
@@ -166,7 +166,7 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
         }
       } else {
         ElMessage.success({
-          message: t("video.batchInitializeSuccess", { count: modelIds.length }),
+          message: t("particle.batchInitializeSuccess", { count: modelIds.length }),
           duration: 3000
         });
       }
@@ -174,8 +174,8 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
       await refresh();
 
     } catch (error) {
-      console.error("初始化视频时出错:", error);
-      ElMessage.error(t("video.initializeError"));
+      console.error("初始化特效时出错:", error);
+      ElMessage.error(t("particle.initializeError"));
     } finally {
       loadingInstance.close();
     }
@@ -183,25 +183,27 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
 
   // 最后跳转到最后上传的模型详情页
   router.push({
-    path: "/resource/video/view",
+    path: "/resource/particle/view",
     query: { id: lastFileId },
   });
 };
 
 // 保存视频
-const saveVideo = async (
+const saveParticle = async (
   name: string,
   file_id: number,
   totalFiles: number,
-  callback: (id: number) => void
+  callback: (id: number) => void,
+  effectType?: string
 ) => {
   try {
-    const response = await postVideo({ name, file_id });
+    // 使用 effect_type 而不是 type 字段
+    const response = await postParticle({ name, file_id, effect_type: effectType });
     if (response.data.id) {
       callback(response.data.id);
     }
   } catch (err) {
-    console.error("Failed to save video:", err);
+    console.error("Failed to save Particle:", err);
     callback(-1);
   }
 };
@@ -217,19 +219,19 @@ const handleCurrentChange = async (page: number) => {
 const namedWindow = async (item: any) => {
   try {
     const { value } = await ElMessageBox.prompt(
-      t("video.prompt.message1"),
-      t("video.prompt.message2"),
+      t("particle.prompt.message1"),
+      t("particle.prompt.message2"),
       {
-        confirmButtonText: t("video.prompt.confirm"),
-        cancelButtonText: t("video.prompt.cancel"),
+        confirmButtonText: t("particle.prompt.confirm"),
+        cancelButtonText: t("particle.prompt.cancel"),
         closeOnClickModal: false,
         inputValue: item.name,
       }
     );
     await named(item.id, value);
-    ElMessage.success(t("video.prompt.success") + value);
+    ElMessage.success(t("particle.prompt.success") + value);
   } catch {
-    ElMessage.info(t("video.prompt.info"));
+    ElMessage.info(t("particle.prompt.info"));
   }
 };
 
@@ -248,7 +250,7 @@ const search = (value: string) => {
 // 修改视频名称 API 调用
 const named = async (id: string, newValue: string) => {
   try {
-    await putVideo(id, { name: newValue });
+    await putParticle(id, { name: newValue });
     refresh();
   } catch (error) {
     console.error(error);
@@ -259,19 +261,19 @@ const named = async (id: string, newValue: string) => {
 const deletedWindow = async (item: { id: string }, resetLoading: () => void) => {
   try {
     await ElMessageBox.confirm(
-      t("video.confirm.message1"),
-      t("video.confirm.message2"),
+      t("particle.confirm.message1"),
+      t("particle.confirm.message2"),
       {
-        confirmButtonText: t("video.confirm.confirm"),
-        cancelButtonText: t("video.confirm.cancel"),
+        confirmButtonText: t("particle.confirm.confirm"),
+        cancelButtonText: t("particle.confirm.cancel"),
         closeOnClickModal: false,
         type: "warning",
       }
     );
     await deleted(item.id);
-    ElMessage.success(t("video.confirm.success"));
+    ElMessage.success(t("particle.confirm.success"));
   } catch {
-    ElMessage.info(t("video.confirm.info"));
+    ElMessage.info(t("particle.confirm.info"));
     resetLoading(); // 操作取消后重置loading状态
   }
 };
@@ -279,7 +281,7 @@ const deletedWindow = async (item: { id: string }, resetLoading: () => void) => 
 // 删除视频 API 调用
 const deleted = async (id: string) => {
   try {
-    await deleteVideo(id);
+    await deleteParticle(id);
     refresh();
   } catch (error) {
     console.error(error);
@@ -289,7 +291,7 @@ const deleted = async (id: string) => {
 // 刷新数据
 const refresh = async () => {
   try {
-    const response = await getVideos(
+    const response = await getParticles(
       sorted.value,
       searched.value,
       pagination.current

@@ -70,8 +70,8 @@ const prepare = computed(
 
 // 表格数据计算属性
 const tableData = computed(() => {
-  if (audioData.value) {
-    return [
+  if (audioData.value && prepare.value) {
+    const base = [
       { item: t("audio.view.info.item1"), text: audioData.value.name },
       {
         item: t("audio.view.info.item2"),
@@ -86,6 +86,12 @@ const tableData = computed(() => {
         text: formatFileSize(audioData.value.file.size),
       },
     ];
+    let info: any = {};
+    try { info = JSON.parse(audioData.value.info || '{}'); } catch {}
+    if (info.length) {
+      base.push({ item: t("audio.view.info.item5"), text: info.length.toFixed(2) + 's' });
+    }
+    return base;
   }
   return [];
 });

@@ -197,6 +197,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         "element-plus/es/components/drawer/style/css",
         "element-plus/es/components/color-picker/style/css",
         "element-plus/es/components/backtop/style/css",
+        "@fortawesome/fontawesome-svg-core",
       ],
     },
     // 构建配置
@@ -212,6 +213,10 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         format: {
           comments: false, // 删除注释
         },
+      },
+      commonjsOptions: {
+        include: [/node_modules/],
+        transformMixedEsModules: true,
       },
       rollupOptions: {
         output: {

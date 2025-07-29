@@ -7,7 +7,7 @@
             <div v-if="meta" class="clearfix">
               <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
                 meta.title
-                }}</el-link>
+              }}</el-link>
               /【{{ $t("meta.script.title") }}】
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
               <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
@@ -72,7 +72,7 @@
                             <pre>
                     <code :class="currentCodeType">{{
                       currentCode
-                    }}</code>
+                      }}</code>
                   </pre>
                           </div>
                         </div>
@@ -527,12 +527,16 @@ const testPoint = (data: any, typeList: string[]) => {
 
     const isPolygen = data.type.toLowerCase() === "polygen";
 
-    // 给Polygen，传递moved属性，tooltips属性
+    // 给Polygen，传递moved属性，tooltips属性，rotate属性
     let hasMoved = false;
+    let hasRotate = false;
     let hasTooltips = false;
     if (isPolygen && data.children && data.children.components) {
       hasMoved = data.children.components.some(
         (component: any) => component.type === "Moved"
+      );
+      hasRotate = data.children.components.some(
+        (component: any) => component.type === "Rotate"
       );
       hasTooltips = data.children.components.some(
         (component: any) => component.type === "Tooltip"
@@ -545,6 +549,7 @@ const testPoint = (data: any, typeList: string[]) => {
       ...(isPolygen ? {
         animations, // 给Polygen，传递animations属性
         moved: hasMoved,
+        rotate: hasRotate,
         hasTooltips: hasTooltips
       } : {}),
     };
@@ -1353,7 +1358,7 @@ const run = async () => {
           const index = ${meta.value?.id};
 
           ${JavaScriptCode.value}
-          
+
           if (typeof meta['@init'] === 'function') {
             await meta['@init']();
           }
