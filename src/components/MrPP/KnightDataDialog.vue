@@ -81,6 +81,7 @@ const open = ({
 }) => {
   const currentLocale = locale.value;
   schema.value = newSchema;
+  /*
   if (currentLocale === "en") {
     newSchema.properties.name.title = "Item Name";
   } else if (currentLocale === "ja") {
@@ -88,7 +89,7 @@ const open = ({
   } else {
     newSchema.properties.name.title = "物品名称";
   }
-
+*/
   callback = newCallback;
   formData.value = data;
   dialogVisible.value = true;
