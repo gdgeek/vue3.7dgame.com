@@ -5,11 +5,18 @@
       <el-col :sm="16">
         <el-card class="box-card">
           <template #header>
-            <b id="title">{{ $t("polygen.view.title") }}</b>
-            <span v-if="polygenData">{{ polygenData.name }}</span>
+            <b id="title">json格式</b>
           </template>
 
           <json-schema-editor class="schema" :value="tree" disabledType lang="zh_CN" custom :extra="extraSetting" />
+
+        </el-card><br />
+        <el-card class="box-card">
+
+          <el-button icon="Edit" type="primary" size="small" style="width: 100%">
+            保存
+          </el-button>
+
 
         </el-card>
         <br />
@@ -22,7 +29,7 @@
       <el-col :sm="8">
 
         <el-card class="box-card" style="min-height: 500px">
-          <codemirror v-model="importJson" :readOnly="false" />
+          <codemirror v-model="jsonStr" :readOnly="false" />
         </el-card>
 
       </el-col>
@@ -34,75 +41,38 @@
 
 </template>
 
-<script>
+<script setup lang="ts">
 
 import Codemirror from "@/components/Codemirror.vue";
 import GenerateSchema from "generate-schema";
-export default {
-  name: "App",
-  components: { Codemirror },
-  computed: {
-    jsonStr: {
-      get: function () {
-        return JSON.stringify(this.tree, null, 2);
-      },
-      set: function (newVal) {
-        this.tree = JSON.parse(newVal);
-      },
+const tree = ref({
+  root: {
+    type: "object",
+    title: "条件",
+  },
+});
+
+const jsonStr = computed({
+  get: () => JSON.stringify(tree.value, null, 2),
+  set: (newVal) => {
+    try {
+      tree.value = JSON.parse(newVal);
+    } catch (e) {
+      console.error("Invalid JSON format", e);
+    }
+  },
+});
+const extraSetting = {
+  integer: {
+    default: {
+      name: "默认值",
+      type: "integer",
     },
   },
-
-  data() {
-    return {
-      importJson: "aaa",
-      visible: false,
-      extraSetting: {
-        integer: {
-          default: {
-            name: "默认值",
-            type: "integer",
-          },
-        },
-        string: {
-          default: {
-            name: "默认值",
-            type: "integer",
-          },
-        },
-      },
-      tree: {
-        root: {
-          type: "object",
-          title: "条件",
-          properties: {
-            name: {
-              type: "string",
-              title: "名称",
-              maxLength: 10,
-              minLength: 2,
-            },
-            appId: {
-              type: "integer",
-              title: "应用ID",
-              default: 3,
-            },
-            credate: {
-              type: "string",
-              title: "创建日期",
-              format: "date",
-            },
-          },
-          required: ["name", "appId", "credate"],
-        },
-      },
-    };
-  },
-  methods: {
-    handleImportJson() {
-      const t = GenerateSchema.json(JSON.parse(this.importJson));
-      delete t.$schema;
-      this.tree.root = t;
-      this.visible = false;
+  string: {
+    default: {
+      name: "默认值",
+      type: "integer",
     },
   },
 };
