@@ -15,12 +15,12 @@ export class AbilityRole {
     this.role = roles.includes("root")
       ? "root"
       : roles.includes("admin")
-        ? "admin"
-        : roles.includes("manager")
-          ? "manager"
-          : roles.includes("user")
-            ? "user"
-            : "guest";
+      ? "admin"
+      : roles.includes("manager")
+      ? "manager"
+      : roles.includes("user")
+      ? "user"
+      : "guest";
   }
 }
 
@@ -33,10 +33,7 @@ export class AbilityWorks {
 }
 
 export class AbilityMessage {
-  constructor(
-    public id: number,
-    public managed: number
-  ) {}
+  constructor(public id: number, public managed: number) {}
 }
 const user = ["user", "manager", "admin", "root"];
 const manager = ["manager", "admin", "root"];
@@ -72,8 +69,8 @@ export function UpdateAbility(
       can("user", "all");
       can("editable", AbilityEditable.name, { editable: true });
       can("viewable", AbilityViewable.name, { viewable: true });
-
       can(["update", "delete"], AbilityWorks.name, { id: userId });
+
       can("delete", AbilityMessage.name, { id: userId, managed: 0 });
       can("update", AbilityMessage.name, { id: userId });
 
@@ -96,13 +93,12 @@ export function UpdateAbility(
         /^\/resource\/audio(\/|$)/,
         /^\/resource\/picture(\/|$)/,
         /^\/resource\/video(\/|$)/,
-        // /^\/resource\/particle(\/|$)/,
       ]);
+
       menu.concat(["/verse-share/open", /^\/trades(\/|$)/]);
     }
 
     if (roles.some((role) => manager.includes(role))) {
-      can("manager", "all");
       can("phototype", "all");
       menu = menu.concat([/^\/phototype(\/|$)/]);
     }
@@ -111,16 +107,9 @@ export function UpdateAbility(
       can("admin", "all");
       can("people", AbilityRole.name, { role: "manager" }); //管理员可以管理用户
       can("people", AbilityRole.name, { role: "user" }); //管理员可以管理用户
-
-      menu = menu.concat([/^\/game(\/|$)/]);
+      can("manager", "all");
       menu = menu.concat([/^\/manager(\/|$)/]);
-
-      menu = menu.concat([
-        /^\/resource\/voxel(\/|$)/,
-        /^\/resource\/picture(\/|$)/,
-        /^\/resource\/video(\/|$)/,
-        /^\/ai(\/|$)/,
-      ]);
+      menu = menu.concat([/^\/ai(\/|$)/]);
     }
 
     if (roles.some((role) => root.includes(role))) {

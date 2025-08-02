@@ -118,16 +118,19 @@ const getAvailableResourceTypes = () => {
       const typeName = child.path.split('/').pop();
 
       if (typeName && resourceTypes.includes(typeName)) {
+
         // 检查该路由是否被禁用 (private: true)
         const isPrivate = child.meta?.private === true;
 
         // 使用 ability 检查用户是否有权限访问该资源类型
         // 使用 AbilityRouter 来检查用户是否有权限打开该资源类型对应的路由
         const resourcePath = `/resource/${typeName}`;
+        // alert(resourcePath);
         const hasPermission = ability.can('open', new AbilityRouter(resourcePath));
 
         // 只有当资源类型不是私有的且用户有权限时才添加到可用类型列表
         if (!isPrivate && hasPermission) {
+
           availableTypes.push(typeName);
         }
       }
@@ -334,8 +337,10 @@ const handleMessage = async (e: MessageEvent) => {
       break;
 
     case "get-available-resource-types":
+
       // 如果编辑器明确请求可用资源类型，就发送它们
       const availableTypes = getAvailableResourceTypes();
+      console.error(availableTypes);
       postMessage("available-resource-types", availableTypes);
       break;
 
