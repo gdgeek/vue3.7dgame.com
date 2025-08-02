@@ -1,21 +1,88 @@
 <template>
-  <!-- 显示 input 值 -->
-  [{{ input }}]
+  <div id="app">
 
-  <div class="container">
-    <!-- 使用大写组件名并绑定 v-model:value -->
-    <Codemirror class="code" v-model:value="importJson" :readOnly="false" />
+
+    <div class="container">
+      <codemirror class="code" v-model="importJson" :readOnly="false" />
+      <json-schema-editor class="schema" :value="tree" disabledType lang="zh_CN" custom :extra="extraSetting" />
+    </div>
+
   </div>
+  {{ importJson }}
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue';
-import Codemirror from '@/components/Codemirror.vue';
+<script>
 
-// 测试变量
-const input = ref('ssdsa');
-// 文本内容
-const importJson = ref<string>('aaa');
+import Codemirror from "@/components/Codemirror.vue";
+import GenerateSchema from "generate-schema";
+export default {
+  name: "App",
+  components: { Codemirror },
+  computed: {
+    jsonStr: {
+      get: function () {
+        return JSON.stringify(this.tree, null, 2);
+      },
+      set: function (newVal) {
+        this.tree = JSON.parse(newVal);
+      },
+    },
+  },
+
+  data() {
+    return {
+      importJson: "aaa",
+      visible: false,
+      extraSetting: {
+        integer: {
+          default: {
+            name: "默认值",
+            type: "integer",
+          },
+        },
+        string: {
+          default: {
+            name: "默认值",
+            type: "integer",
+          },
+        },
+      },
+      tree: {
+        root: {
+          type: "object",
+          title: "条件",
+          properties: {
+            name: {
+              type: "string",
+              title: "名称",
+              maxLength: 10,
+              minLength: 2,
+            },
+            appId: {
+              type: "integer",
+              title: "应用ID",
+              default: 3,
+            },
+            credate: {
+              type: "string",
+              title: "创建日期",
+              format: "date",
+            },
+          },
+          required: ["name", "appId", "credate"],
+        },
+      },
+    };
+  },
+  methods: {
+    handleImportJson() {
+      const t = GenerateSchema.json(JSON.parse(this.importJson));
+      delete t.$schema;
+      this.tree.root = t;
+      this.visible = false;
+    },
+  },
+};
 </script>
 <style>
 * {

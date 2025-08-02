@@ -1,58 +1,48 @@
 <template>
-  <codemirror v-model="content" :options="cmOptions" />
+  {{ code }}
+  <codemirror v-model="code" placeholder="Code goes here..." :style="{ height: '400px' }" :autofocus="true"
+    :indent-with-tab="true" :tab-size="2" :extensions="extensions" @ready="handleReady" @change="log('change', $event)"
+    @focus="log('focus', $event)" @blur="log('blur', $event)" />
 </template>
 <script>
-import { codemirror } from 'vue-codemirror'
-import 'codemirror/lib/codemirror.css'
-import 'codemirror/theme/idea.css'
-import 'codemirror/theme/duotone-light.css'
-import 'codemirror/mode/javascript/javascript.js'
-import 'codemirror/mode/sql/sql.js'
-export default {
-  components: { codemirror },
-  props: {
-    readOnly: {
-      type: Boolean,
-      default: true
-    },
-    mode: {
-      type: String,
-      default: 'text/javascript'
-    },
-    value: {
-      type: String,
-      required: true
-    },
-    theme: {
-      type: String,
-      default: 'idea'
-    },
-    lineNumbers: {
-      type: Boolean,
-      default: true
-    }
+import { defineComponent, ref, shallowRef } from 'vue'
+import { Codemirror } from 'vue-codemirror'
+import { javascript } from '@codemirror/lang-javascript'
+import { oneDark } from '@codemirror/theme-one-dark'
+
+export default defineComponent({
+  components: {
+    Codemirror
   },
-  watch: {
-    value: {
-      handler: function (newVal) {
-        this.content = newVal
-      }
-    },
-    content: function (newVal) {
-      this.$emit('input', newVal)
+  setup() {
+    const code = ref(`console.log('Hello, world!')`)
+    const extensions = [javascript()]
+
+    // Codemirror EditorView instance ref
+    const view = shallowRef()
+    const handleReady = (payload) => {
+
+      view.value = payload.view
     }
-  },
-  data() {
+
+    // Status is available at all times via Codemirror EditorView
+    const getCodemirrorStates = () => {
+      const state = view.value.state
+      const ranges = state.selection.ranges
+      const selected = ranges.reduce((r, range) => r + range.to - range.from, 0)
+      const cursor = ranges[0].anchor
+      const length = state.doc.length
+      const lines = state.doc.lines
+      // more state info ...
+      // return ...
+    }
+
     return {
-      content: this.value,
-      cmOptions: {
-        tabSize: 2,
-        mode: this.mode,
-        theme: this.theme,
-        lineNumbers: this.lineNumbers,
-        readOnly: this.readOnly
-      }
+      code,
+      extensions,
+      handleReady,
+      log: console.log
     }
   }
-}
+})
 </script>
