@@ -20,7 +20,7 @@ import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
 import { AbilityRouter } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
-import { useUserStore } from "@/store/modules/user"; // 导入用户store
+import { useUserStore } from "@/store/modules/user";
 
 // 组件状态
 const appStore = useAppStore();
@@ -32,7 +32,7 @@ const dialog = ref();
 const editor = ref<HTMLIFrameElement | null>();
 let init = false;
 const ability = useAbility();
-const userStore = useUserStore(); // 获取用户store
+const userStore = useUserStore();
 
 // 计算属性
 const id = computed(() => parseInt(route.query.id as string));

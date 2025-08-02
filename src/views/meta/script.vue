@@ -151,6 +151,7 @@ import { ElMessage } from "element-plus";
 import { useAppStore } from "@/store/modules/app";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
+import { useUserStore } from "@/store/modules/user";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { convertToHttps } from "@/assets/js/helper";
@@ -174,6 +175,7 @@ const languageName = ref<string>("lua");
 const LuaCode = ref("");
 const JavaScriptCode = ref("");
 const settingsStore = useSettingsStore();
+const userStore = useUserStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 const disabled = ref<boolean>(false);
 const scenePlayer = ref<InstanceType<typeof ScenePlayer>>();
@@ -185,6 +187,20 @@ const currentCodeType = ref("");
 const codeDialogTitle = ref("");
 const editorContainer = ref<HTMLElement | null>(null);
 const unsavedBlocklyData = ref<any>(null);
+
+// 监听用户信息变化
+watch(
+  () => userStore.userInfo,
+  () => {
+    // 用户信息变化时，向编辑器发送最新用户信息
+    postMessage("user-info", {
+      id: userStore.userInfo?.id || null,
+      roles: userStore.userInfo?.roles || [],
+      role: userStore.getRole()
+    });
+  },
+  { deep: true }
+);
 
 const handleBlocklyChange = (data: any) => {
   unsavedBlocklyData.value = data;
@@ -356,6 +372,13 @@ const handleMessage = async (e: MessageEvent) => {
     if (params.action === "ready") {
       ready = true;
       initEditor();
+      
+      // 发送用户信息
+      postMessage("user-info", {
+        id: userStore.userInfo?.id || null,
+        roles: userStore.userInfo?.roles || [],
+        role: userStore.getRole()
+      });
     } else if (params.action === "post") {
       await postScript(params.data);
 
@@ -526,12 +549,13 @@ const testPoint = (data: any, typeList: string[]) => {
     const animations = data.parameters?.animations ?? null;
 
     const isPolygen = data.type.toLowerCase() === "polygen";
+    const isPicture = data.type.toLowerCase() === "picture";
 
-    // 给Polygen，传递moved属性，tooltips属性，rotate属性
+    // 给Polygen和Picture，传递moved属性，tooltips属性，rotate属性
     let hasMoved = false;
     let hasRotate = false;
     let hasTooltips = false;
-    if (isPolygen && data.children && data.children.components) {
+    if ((isPolygen || isPicture) && data.children && data.children.components) {
       hasMoved = data.children.components.some(
         (component: any) => component.type === "Moved"
       );
@@ -548,6 +572,11 @@ const testPoint = (data: any, typeList: string[]) => {
       name: data.parameters.name ?? null,
       ...(isPolygen ? {
         animations, // 给Polygen，传递animations属性
+        moved: hasMoved,
+        rotate: hasRotate,
+        hasTooltips: hasTooltips
+      } : {}),
+      ...(isPicture ? {
         moved: hasMoved,
         rotate: hasRotate,
         hasTooltips: hasTooltips
