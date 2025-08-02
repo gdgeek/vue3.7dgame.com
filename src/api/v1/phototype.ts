@@ -6,8 +6,8 @@ export type PhototypeType = {
   id?: number;
   title?: string;
   uuid?: string | null;
-  data?: string | null;
-  style?: string | null;
+  data?: any | null;
+  schema?: any | null;
   created_at?: string;
   updated_at?: string;
   image_id?: number | null;

@@ -13,10 +13,9 @@
         </el-card><br />
         <el-card class="box-card">
 
-          <el-button icon="Edit" type="primary" size="small" style="width: 100%">
+          <el-button icon="Edit" @click="saveChanges" type="primary" size="small" style="width: 100%">
             保存
           </el-button>
-
 
         </el-card>
         <br />
@@ -42,15 +41,30 @@
 </template>
 
 <script setup lang="ts">
-
+import { getPhototype, putPhototype } from "@/api/v1/phototype";
 import Codemirror from "@/components/Codemirror.vue";
 import GenerateSchema from "generate-schema";
+
+import { useRoute } from "vue-router";
+const route = useRoute();
+const id = computed(() => route.query.id as string);
 const tree = ref({
   root: {
     type: "object",
     title: "条件",
   },
 });
+
+const saveChanges = async () => {
+  try {
+    await putPhototype(id.value, {
+      schema: tree.value,
+    });
+    ElMessage.success("保存成功");
+  } catch (error) {
+    console.error("Failed to save phototype", error);
+  }
+};
 
 const jsonStr = computed({
   get: () => JSON.stringify(tree.value, null, 2),
@@ -61,6 +75,31 @@ const jsonStr = computed({
       console.error("Invalid JSON format", e);
     }
   },
+});
+const phtototype = ref<any>(null);
+const refresh = async () => {
+  try {
+    const response = await getPhototype(id.value);
+    phtototype.value = response.data;
+
+    if (phtototype.value && phtototype.value.schema) {
+      tree.value = phtototype.value.schema;
+    } else {
+      tree.value = {
+        root: {
+          type: "object",
+          title: "条件",
+        },
+      };
+    }
+    // tree.value = JSON.parse(phtototype.value.schema);
+  } catch (error) {
+    console.error("Failed to fetch phototype", error);
+  }
+};
+onMounted(() => {
+  refresh();
+  //alert(1)
 });
 const extraSetting = {
   integer: {
