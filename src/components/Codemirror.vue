@@ -1,48 +1,30 @@
 <template>
-  {{ code }}
-  <codemirror v-model="code" placeholder="Code goes here..." :style="{ height: '400px' }" :autofocus="true"
+  <codemirror placeholder="Code goes here..." :style="{ width: '100%', height: '100%' }" :autofocus="true"
     :indent-with-tab="true" :tab-size="2" :extensions="extensions" @ready="handleReady" @change="log('change', $event)"
     @focus="log('focus', $event)" @blur="log('blur', $event)" />
+
 </template>
-<script>
-import { defineComponent, ref, shallowRef } from 'vue'
+<script setup lang="ts">
+import { ref, shallowRef } from 'vue'
+import { linter } from '@codemirror/lint'
 import { Codemirror } from 'vue-codemirror'
-import { javascript } from '@codemirror/lang-javascript'
+import { json } from '@codemirror/lang-json'
 import { oneDark } from '@codemirror/theme-one-dark'
 
-export default defineComponent({
-  components: {
-    Codemirror
-  },
-  setup() {
-    const code = ref(`console.log('Hello, world!')`)
-    const extensions = [javascript()]
 
-    // Codemirror EditorView instance ref
-    const view = shallowRef()
-    const handleReady = (payload) => {
+// Codemirror 扩展
+const extensions = [json()]
 
-      view.value = payload.view
-    }
+// Codemirror EditorView 实例
+const view = shallowRef<any>(null)
 
-    // Status is available at all times via Codemirror EditorView
-    const getCodemirrorStates = () => {
-      const state = view.value.state
-      const ranges = state.selection.ranges
-      const selected = ranges.reduce((r, range) => r + range.to - range.from, 0)
-      const cursor = ranges[0].anchor
-      const length = state.doc.length
-      const lines = state.doc.lines
-      // more state info ...
-      // return ...
-    }
+// 编辑器就绪回调
+function handleReady(payload: { view: any }) {
+  view.value = payload.view
+}
 
-    return {
-      code,
-      extensions,
-      handleReady,
-      log: console.log
-    }
-  }
-})
+// 事件日志
+function log(event: string, eventObj: any) {
+  console.log(event, eventObj)
+}
 </script>

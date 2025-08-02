@@ -1,14 +1,37 @@
 <template>
-  <div id="app">
+  <div>
+    <br>
+    <el-row :gutter="20" style="margin: 0px 18px 0">
+      <el-col :sm="16">
+        <el-card class="box-card">
+          <template #header>
+            <b id="title">{{ $t("polygen.view.title") }}</b>
+            <span v-if="polygenData">{{ polygenData.name }}</span>
+          </template>
+
+          <json-schema-editor class="schema" :value="tree" disabledType lang="zh_CN" custom :extra="extraSetting" />
+
+        </el-card>
+        <br />
+
+        <br />
 
 
-    <div class="container">
-      <codemirror class="code" v-model="importJson" :readOnly="false" />
-      <json-schema-editor class="schema" :value="tree" disabledType lang="zh_CN" custom :extra="extraSetting" />
-    </div>
+      </el-col>
 
+      <el-col :sm="8">
+
+        <el-card class="box-card" style="min-height: 500px">
+          <codemirror v-model="importJson" :readOnly="false" />
+        </el-card>
+
+      </el-col>
+    </el-row>
   </div>
-  {{ importJson }}
+
+
+
+
 </template>
 
 <script>
@@ -128,9 +151,10 @@ export default {
 }
 
 .schema {
-  margin-left: 20px;
-  width: 50%;
-  height: 100%;
+  margin-left: 0px;
+  margin-right: 10px;
+  width: 100%;
+  height: 400px;
   overflow-y: auto;
   overflow-x: hidden;
   border: 1px solid rgba(0, 0, 0, 0.1);
