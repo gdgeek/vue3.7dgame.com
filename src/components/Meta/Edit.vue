@@ -41,11 +41,12 @@
   </div>
 </template>
 
+
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from "vue-router";
 import type { metaInfo } from "@/api/v1/meta";
-import { translateRouteTitle } from "@/utils/i18n";  
+import { translateRouteTitle } from "@/utils/i18n";
 import { useI18n } from "vue-i18n"
 
 const route = useRoute();

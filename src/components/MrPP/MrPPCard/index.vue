@@ -8,12 +8,10 @@
               <b class="card-title" nowrap>{{ item.name || item.title }}</b>
             </span>
           </template>
-
           <!-- 图片容器 -->
           <div class="image-container">
-            <img v-if="!item.image" src="@/assets/image/none.png"
-              style="width: 100%; height: auto; object-fit: contain" />
-            <LazyImg v-else style="width: 100%; height: auto" fit="contain" :url="item.image.url" lazy></LazyImg>
+            <Id2Image :image="item.image ? item.image.url : null" :id="item.id"> 444</Id2Image>
+
 
             <!-- 如果鼠标悬停且使用info插槽，则显示info插槽，否则显示图片 
             <template v-if="false">
@@ -23,7 +21,7 @@
             </template>
 
             <template v-else>1111
-              <img v-if="!item.image" src="@/assets/image/none.png"
+              <img v-if="!item.image" src="@/assets/images/items/1.webp"
                 style="width: 100%; height: auto; object-fit: contain" />
               <LazyImg v-else style="width: 100%; height: auto" fit="contain" :url="item.image.url" lazy></LazyImg>
             </template>
@@ -43,7 +41,7 @@
         <slot name="enter">入口</slot>
 
         <el-button-group style="float: right" :inline="true">
-          <!--   <el-button type="success" size="small" icon="Edit" @click="named"></el-button>-->
+          <el-button type="success" size="small" icon="Edit" @click="named"></el-button>
           <el-button type="danger" size="small" icon="Delete" loading-icon="Eleme" :loading="deleteLoading"
             @click="deleted"></el-button>
           &nbsp;
@@ -56,11 +54,13 @@
 
 <script setup lang="ts">
 import { LazyImg } from "vue-waterfall-plugin-next";
+import Id2Image from "@/components/Id2Image.vue";
 import "vue-waterfall-plugin-next/dist/style.css";
 
 const props = defineProps({
   item: {
     type: Object as PropType<{
+      id: number;
       name?: string;
       title?: string;
       image: { url: string } | null;

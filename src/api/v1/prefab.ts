@@ -44,7 +44,6 @@ export type prefabsData = {
 };
 
 // export type prefabsData = metaInfo;
-
 export const deletePrefab = (id: number) => {
   return request({
     url: path.join("v1", "prefabs", id.toString()),

@@ -1,42 +1,20 @@
 <template>
   <div>
-    <el-dialog
-      v-model="dialogVisible"
-      width="95%"
-      :show-close="false"
-      @close="cancel"
-    >
+    <el-dialog v-model="dialogVisible" width="95%" :show-close="false" @close="cancel">
       <template #header>
-        <mr-p-p-header
-          :sorted="active.sorted"
-          :searched="active.searched"
-          @search="search"
-          @sort="sort"
-        >
-          <el-tag
-            ><b>{{ $t("verse.view.metaDialog.title") }}</b></el-tag
-          >
+        <mr-p-p-header :sorted="active.sorted" :searched="active.searched" @search="search" @sort="sort">
+          <el-tag><b>{{ $t("verse.view.metaDialog.title") }}</b></el-tag>
         </mr-p-p-header>
         <el-divider content-position="left">
-          <el-tag
-            v-if="active.searched !== ''"
-            size="small"
-            closable
-            @close="clearSearched"
-          >
+          <el-tag v-if="active.searched !== ''" size="small" closable @close="clearSearched">
             {{ active.searched }}
           </el-tag>
         </el-divider>
       </template>
 
       <template v-if="active && active.items">
-        <waterfall
-          v-if="active !== null && active.items !== null"
-          :width="230"
-          :gutter="10"
-          :list="viewCards"
-          :backgroundColor="'rgba(255, 255, 255, .05)'"
-        >
+        <waterfall v-if="active !== null && active.items !== null" :width="230" :gutter="10" :list="viewCards"
+          :backgroundColor="'rgba(255, 255, 255, .05)'">
           <template #default="{ item }">
             <div style="width: 230px">
               <el-card style="width: 220px" class="box-card">
@@ -45,29 +23,19 @@
                     <template #header>
                       <b class="card-title" nowrap>{{ title(item) }}</b>
                     </template>
-                    <router-link :to="'/meta/meta-edit?id=' + item.id">
-                      <img
-                        v-if="!item.image"
-                        src="@/assets/image/none.png"
-                        style="width: 100%; height: auto; object-fit: contain"
-                      />
-                      <LazyImg
-                        v-if="item.image"
-                        style="width: 100%; height: auto"
-                        fit="contain"
-                        :url="item.image.url"
-                      >
-                      </LazyImg>
+                    <router-link :to="'/meta/meta-edit?id=' + item.id">111
+                      <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
+                      <!-- <img v-if="!item.image" src="@/assets/images/items/1.webp"
+                        style="width: 100%; height: auto; object-fit: contain" />
+                      <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
+                      </LazyImg>-->
                     </router-link>
                   </el-card>
                 </template>
                 <div class="clearfix">
-                  <el-button
-                    type="primary"
-                    size="small"
-                    @click="selected({ data: item })"
-                    >{{ $t("verse.view.metaDialog.select") }}</el-button
-                  >
+                  <el-button type="primary" size="small" @click="selected({ data: item })">{{
+                    $t("verse.view.metaDialog.select")
+                    }}</el-button>
                 </div>
               </el-card>
             </div>
@@ -82,15 +50,9 @@
       <template #footer>
         <el-row :gutter="0">
           <el-col :xs="16" :sm="16" :md="16" :lg="16" :xl="16">
-            <el-pagination
-              :current-page="active.pagination.current"
-              :page-count="active.pagination.count"
-              :page-size="active.pagination.size"
-              :total="active.pagination.total"
-              layout="prev, pager, next, jumper"
-              background
-              @current-change="handleCurrentChange"
-            ></el-pagination>
+            <el-pagination :current-page="active.pagination.current" :page-count="active.pagination.count"
+              :page-size="active.pagination.size" :total="active.pagination.total" layout="prev, pager, next, jumper"
+              background @current-change="handleCurrentChange"></el-pagination>
           </el-col>
           <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
             <el-button-group>
@@ -109,6 +71,7 @@
 </template>
 
 <script setup lang="ts">
+import Id2Image from "../Id2Image.vue";
 import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { v4 as uuidv4 } from "uuid";

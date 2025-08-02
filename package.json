@@ -64,6 +64,8 @@
     "animate.css": "^4.1.1",
     "aos": "^2.3.4",
     "axios": "^1.7.9",
+    "codemirror": "^5.65.19",
+    "codemirror-editor-vue3": "^2.8.0",
     "color": "^4.2.3",
     "cos-js-sdk-v5": "^1.8.7",
     "crypto-js": "^4.2.0",
@@ -74,9 +76,11 @@
     "element-plus": "^2.9.4",
     "element-resize-detector": "^1.2.4",
     "express": "^4.21.2",
+    "generate-schema": "^2.6.0",
     "highlight.js": "^10.7.3",
     "howler": "^2.2.4",
     "https-localhost": "^4.7.1",
+    "json-schema-editor-vue3": "^1.2.0",
     "moment": "^2.30.1",
     "nprogress": "^0.2.0",
     "pako": "^2.1.0",
@@ -95,6 +99,7 @@
     "vue": "^3.5.13",
     "vue-3d-loader": "^2.2.4",
     "vue-apple-login": "~2.0.1",
+    "vue-codemirror": "^6.1.1",
     "vue-cropper": "^1.1.4",
     "vue-hljs": "^3.0.1",
     "vue-i18n": "9.9.1",
@@ -109,6 +114,7 @@
     "@iconify-json/ep": "^1.2.2",
     "@inspira-ui/plugins": "^0.0.1",
     "@types/aos": "^3.0.7",
+    "@types/codemirror": "^5.60.16",
     "@types/color": "^3.0.6",
     "@types/element-resize-detector": "^1.1.6",
     "@types/js-beautify": "^1.14.3",
@@ -169,5 +175,5 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "packageManager": "pnpm@10.13.1"
+  "packageManager": "pnpm@10.14.0"
 }

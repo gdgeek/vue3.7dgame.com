@@ -26,10 +26,11 @@
                   <template #header>
                     <b class="card-title" nowrap>{{ title(item) }}</b>
                   </template>
-                  <img v-if="!item.image" src="@/assets/image/none.png"
+                  <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
+                  <!-- <img v-if="!item.image" src="@/assets/images/items/1.webp"
                     style="width: 100%; height: auto; object-fit: contain" />
                   <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
-                  </LazyImg>
+                  </LazyImg>-->
                   <div v-if="item.created_at" style="width: 100%; text-align: center">
                     {{ item.created_at }}
                   </div>
@@ -38,7 +39,7 @@
               <div class="clearfix">
                 <el-button type="primary" size="small" @click="setup({ data: item })">{{
                   $t("verse.view.prefabDialog.select")
-                }}</el-button>
+                  }}</el-button>
               </div>
               <div class="bottom clearfix"></div>
             </el-card>
@@ -61,7 +62,7 @@
             <el-button-group>
               <el-button size="small" @click="dialogVisible = false">{{
                 $t("verse.view.prefabDialog.cancel")
-              }}</el-button>
+                }}</el-button>
             </el-button-group>
           </el-col>
         </el-row>
@@ -74,6 +75,7 @@
 import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
 import { getPrefabs, prefabsData } from "@/api/v1/prefab";
+import Id2Image from "../Id2Image.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 
 const emit = defineEmits(["selected", "cancel"]);

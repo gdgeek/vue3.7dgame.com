@@ -36,8 +36,6 @@ import { postFile } from "@/api/v1/files";
 import { ElMessage, ElMessageBox } from 'element-plus';
 import type { UploadFile, UploadFiles } from "element-plus";
 import type { ViewCard } from "vue-waterfall-plugin-next/dist/types/types/waterfall"
-import defaultImage from '@/assets/image/none2.png';
-
 const props = defineProps({
   imageUrl: {
     type: String,
@@ -49,7 +47,15 @@ const props = defineProps({
 });
 
 const displayImageUrl = computed(() => {
-  return props.imageUrl || defaultImage;
+
+  const id = props.itemId % 100;
+  //alert(id)
+  // const url 
+  // 计算默认图片地址，相对于本文件需两级上级
+  const url = new URL(`../../assets/images/items/${id}.webp`, import.meta.url).href;
+  //alert(url)
+  //alert(`../assets/images/items/${id}.webp`)
+  return props.imageUrl || url;
 });
 
 const emit = defineEmits(['image-selected', 'image-upload-success']);

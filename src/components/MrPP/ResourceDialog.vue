@@ -28,10 +28,11 @@
                       <b class="card-title" nowrap>{{ getItemTitle(item) }}</b>
                     </div>
                     <div class="image-container">
-                      <img v-if="!item.image" src="@/assets/image/none.png"
+                      <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
+                      <!--   <img v-if="!item.image" src="@/assets/images/items/1.webp"
                         style="width: 100%; height: auto; object-fit: contain" />
                       <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
-                      </LazyImg>
+                      </LazyImg>-->
                       <div v-if="item.type === 'audio'" class="info-container">
                         <audio id="audio" controls style="width: 100%; height: 30px" :src="item.file.url"
                           @play="handleAudioPlay"></audio>
@@ -113,7 +114,7 @@ import "vue-waterfall-plugin-next/dist/style.css";
 import { getResources } from "@/api/v1/resources";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
-
+import Id2Image from '../Id2Image.vue';
 // 类型定义
 type ViewCard = {
   src: string;

@@ -5,7 +5,7 @@
     <template #default="{ item }">
       <el-card style="width: 200px" :body-style="{ padding: '0px' }">
         <LazyImg v-if="item.avatar == null" style="width: 100%; height: auto" fit="contain"
-          url="/src/assets/image/author-boy.png"></LazyImg>
+          url="/src/assets/images/author/author-boy.png"></LazyImg>
         <LazyImg v-if="item.avatar" style="width: 100%; height: auto" fit="contain" :url="item.avatar.url"></LazyImg>
         <div style="padding: 14px">
           <span>{{ item.username }}</span>

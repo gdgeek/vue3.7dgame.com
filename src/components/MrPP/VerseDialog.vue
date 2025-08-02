@@ -23,10 +23,11 @@
                     {{ title(item) }}
                   </b>
                 </span>
-                <img v-if="!item.image" src="@/assets/image/none.png"
+                <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
+                <!-- <img v-if="!item.image" src="@/assets/images/items/1.webp"
                   style="width: 100%; height: auto; object-fit: contain" />
                 <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
-                </LazyImg>
+                </LazyImg>-->
                 <div style="width: 100%; text-align: center">
                   {{ convertToLocalTime(item.created_at) }}
                 </div>
@@ -78,7 +79,7 @@ import { getVerses } from "@/api/v1/vp-guide";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { postMeta } from "@/api/v1/meta";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
-
+import Id2Image from "@/components/Id2Image.vue";
 const dialogVisible = ref(false);
 const active = ref({
   items: [] as any[],

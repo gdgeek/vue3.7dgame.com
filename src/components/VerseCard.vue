@@ -11,7 +11,7 @@
       <div class="clearfix">
         <el-button-group>
           <el-button type="primary" @click="goToDetail(item.id.toString())" size="small">{{ $t("verse.page.list.enter")
-          }}</el-button>
+            }}</el-button>
           <el-button type="primary" v-if="item.verseRelease" @click="restrain(item)" size="small">
             <font-awesome-icon class="icon" icon="box-open" color="#FFA500"></font-awesome-icon>
           </el-button>
@@ -31,9 +31,8 @@
           </span>
         </template>
         <router-link :to="'/verse/view?id=' + item.id">
-          <img v-if="!item.image" src="@/assets/image/none.png"
-            style="width: 100%; height: 270px; object-fit: contain" />
-          <LazyImg v-else :url="item.image.url" style="width: 100%; height: 270px" fit="contain"></LazyImg>
+          <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
+
         </router-link>
       </el-card>
       <InfoContent v-if="item" :verse="item"></InfoContent>
@@ -45,7 +44,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-
+import Id2Image from "./Id2Image.vue";
 import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";
 import { LazyImg } from "vue-waterfall-plugin-next";

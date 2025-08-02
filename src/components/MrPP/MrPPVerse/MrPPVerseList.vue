@@ -6,7 +6,9 @@
     <Waterfall v-if="items" :list="items" :width="320" :gutter="20" :hasAroundGutter="false" :breakpoints="{
       640: { rowPerView: 1 },
     }" :backgroundColor="'rgba(255, 255, 255, .05)'">
+
       <template #default="{ item }">
+
         <VerseCard :item="item" @changed="refresh" @deleted="refresh"></VerseCard>
       </template>
     </Waterfall>
