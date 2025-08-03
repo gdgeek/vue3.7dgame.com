@@ -5,6 +5,10 @@ export class AbilityRouter {
   constructor(public path: string) {}
 }
 
+export class AbilityEdit {
+  constructor(public type: string) {}
+}
+
 export class AbilityEditable {
   constructor(public editable: boolean) {}
 }
@@ -52,6 +56,7 @@ export function UpdateAbility(
     //alert(JSON.stringify(roles))
     let router: (string | RegExp)[] = [];
     let menu: (string | RegExp)[] = [];
+    let edit: (string | RegExp)[] = [];
 
     router = router.concat([
       "/site",
@@ -82,6 +87,8 @@ export function UpdateAbility(
         "/meta/script",
         /^\/settings(\/|$)/,
       ]);
+
+      edit = edit.concat(["polygen", "audio", "picture", "video", "phototype"]);
 
       menu = menu.concat([
         "/site/logout",
@@ -124,7 +131,13 @@ export function UpdateAbility(
         can(["open", "goto"], AbilityRouter.name, { path: { $regex: item } });
       }
     });
-
+    edit.forEach((item) => {
+      if (typeof item === "string") {
+        can("edit", AbilityEdit.name, { type: item });
+      } else {
+        can("edit", AbilityEdit.name, { type: { $regex: item } });
+      }
+    });
     router.forEach((item) => {
       if (typeof item === "string") {
         can("goto", AbilityRouter.name, { path: item });

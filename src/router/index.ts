@@ -791,7 +791,6 @@ const initRoutes = async () => {
 };
 
 import type { AnyAbility } from "@casl/ability";
-
 import { AbilityRouter } from "@/utils/ability";
 import { useUserStore } from "@/store";
 import { tr } from "element-plus/es/locale";
