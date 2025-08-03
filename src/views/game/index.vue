@@ -14,7 +14,7 @@
                   &nbsp;
                   <span class="hidden-sm-and-down">{{
                     $t("game.index.title")
-                  }}</span>
+                    }}</span>
                 </el-button>
               </el-button-group>
             </mr-p-p-header>

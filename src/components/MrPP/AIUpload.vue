@@ -1,53 +1,28 @@
 <template>
   <div class="document-index">
-    <resource-dialog
-      @selected="selected"
-      @cancel="cancle"
-      ref="dialog"
-    ></resource-dialog>
+    <resource-dialog @selected="selected" @cancel="cancel" ref="dialog"></resource-dialog>
     <el-card class="box-card-component" style="margin: 18px 18px 0">
       <template #header>
         <div class="box-card-header">
           <h3>{{ $t("ai.generation.title") }}</h3>
           <span style="font-style: italic; color: #b0b0b0">{{
             $t("ai.generation.declare")
-          }}</span>
+            }}</span>
         </div>
       </template>
 
-      <template #footer
-        ><div class="progress-item">
-          <el-progress
-            v-if="progress.percentage === 100"
-            :percentage="100"
-            status="success"
-          ></el-progress>
+      <template #footer>
+        <div class="progress-item">
+          <el-progress v-if="progress.percentage === 100" :percentage="100" status="success"></el-progress>
           <el-progress v-else :percentage="progress.percentage"></el-progress>
         </div>
       </template>
-      <el-form
-        v-loading="loading"
-        :element-loading-text="progress.title"
-        ref="formRef"
-        :rules="rules"
-        :model="form"
-        label-width="auto"
-      >
+      <el-form v-loading="loading" :element-loading-text="progress.title" ref="formRef" :rules="rules" :model="form"
+        label-width="auto">
         <el-form-item :label="$t('ai.generation.form.image')" prop="image">
-          <el-button
-            v-if="!imageUrl"
-            style="max-width: 300px"
-            :icon="Search"
-            @click="open"
-            round
-            >{{ $t("ai.generation.form.select") }}</el-button
-          >
-          <el-image
-            v-else
-            style="max-width: 300px"
-            @click="open"
-            :src="imageUrl"
-          >
+          <el-button v-if="!imageUrl" style="max-width: 300px" :icon="Search" @click="open" round>{{
+            $t("ai.generation.form.select") }}</el-button>
+          <el-image v-else style="max-width: 300px" @click="open" :src="imageUrl">
             <template #placeholder>
               <div class="image-slot">Loading<span class="dot">...</span></div>
             </template>
@@ -56,33 +31,26 @@
         <el-form-item :label="$t('ai.generation.form.prompt')" prop="prompt">
           <el-input v-model="form.prompt"></el-input>
         </el-form-item>
-        <el-form-item
-          :label="$t('ai.generation.form.quality.title')"
-          prop="prompt"
-        >
+        <el-form-item :label="$t('ai.generation.form.quality.title')" prop="prompt">
           <el-radio-group v-model="form.quality">
             <el-radio :value="'high'">{{
               $t("ai.generation.form.quality.value1")
-            }}</el-radio>
+              }}</el-radio>
             <el-radio :value="'medium'">{{
               $t("ai.generation.form.quality.value2")
-            }}</el-radio>
+              }}</el-radio>
             <el-radio :value="'low'">{{
               $t("ai.generation.form.quality.value3")
-            }}</el-radio>
+              }}</el-radio>
             <el-radio :value="'extra-low'">{{
               $t("ai.generation.form.quality.value4")
-            }}</el-radio>
+              }}</el-radio>
           </el-radio-group>
         </el-form-item>
 
         <div>
-          <el-button
-            style="width: 100%"
-            type="primary"
-            @click="generation(formRef)"
-            >{{ $t("ai.generation.form.submit") }}</el-button
-          >
+          <el-button style="width: 100%" type="primary" @click="generation(formRef)">{{ $t("ai.generation.form.submit")
+            }}</el-button>
         </div>
       </el-form>
     </el-card>
@@ -130,7 +98,7 @@ const imageUrl = computed<string | undefined>(() => {
 const selected = (data: any) => {
   resource.value = data;
 };
-const cancle = () => {
+const cancel = () => {
   resource.value = null;
 };
 const rodin = async () => {
@@ -239,6 +207,7 @@ const rules = reactive<FormRules<RuleForm>>({
 .progress-item {
   margin-bottom: 10px;
 }
+
 .el-col {
   border-radius: 4px;
 }

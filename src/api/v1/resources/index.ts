@@ -4,6 +4,7 @@ import { convertToHttps } from "@/assets/js/helper";
 import qs from "querystringify";
 import path from "path-browserify";
 import type { ApiResponse, ResourceInfo } from "./model";
+import { AxiosResponse } from "axios";
 
 type ResourceType =
   | "voxel"
@@ -34,7 +35,7 @@ export const getResources = (
   search: string = "",
   page: number = 0,
   expand: string = "image,author"
-) => {
+): Promise<AxiosResponse<ResourceInfo[]>> => {
   const query: Record<string, string | number> = {
     type,
     expand,

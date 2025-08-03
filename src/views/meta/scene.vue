@@ -46,7 +46,7 @@ const src = computed(() => {
 watch(
   () => appStore.language,
   async () => {
-    // await refresh();
+    await refresh();
   }
 );
 
@@ -232,7 +232,7 @@ const handleUploadCover = async (data: any) => {
         meta.data.image_id = response.data.id;
         await putMeta(id.value, meta.data);
         ElMessage.success(t("meta.scene.coverUploadSuccess"));
-        //  await refresh();
+        await refresh();
       }
     }
   } catch (error) {
@@ -310,7 +310,7 @@ const handleMessage = async (e: MessageEvent) => {
     case "ready":
       if (!init) {
         init = true;
-        // await refresh();
+        await refresh();
       } else {
         postMessage("user-info", {
           id: userStore.userInfo?.id || null,
@@ -326,7 +326,28 @@ const handleMessage = async (e: MessageEvent) => {
   }
 };
 
+// 刷新元数据
+const refresh = async () => {
+  try {
+    const meta = await getMeta(id.value);
+    const availableTypes = getAvailableResourceTypes();
+    console.log(availableTypes);
 
+    // 发送元数据和可用资源类型到编辑器
+    postMessage("load", {
+      data: meta.data,
+      saveable: saveable(meta.data),
+      availableResourceTypes: availableTypes,
+      user: {
+        id: userStore.userInfo?.id || null,
+        roles: userStore.userInfo?.roles || [],
+        role: userStore.getRole() // 获取用户角色
+      }
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
 // 生命周期钩子
 onMounted(() => {
   window.addEventListener("message", handleMessage);

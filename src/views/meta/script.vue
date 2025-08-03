@@ -7,7 +7,7 @@
             <div v-if="meta" class="clearfix">
               <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
                 meta.title
-              }}</el-link>
+                }}</el-link>
               /【{{ $t("meta.script.title") }}】
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
               <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
@@ -72,7 +72,7 @@
                             <pre>
                     <code :class="currentCodeType">{{
                       currentCode
-                      }}</code>
+                    }}</code>
                   </pre>
                           </div>
                         </div>
@@ -372,7 +372,7 @@ const handleMessage = async (e: MessageEvent) => {
     if (params.action === "ready") {
       ready = true;
       initEditor();
-      
+
       // 发送用户信息
       postMessage("user-info", {
         id: userStore.userInfo?.id || null,
@@ -601,6 +601,8 @@ const addMetaData = (data: any, ret: any) => {
     "picture",
     "text",
     "voxel",
+    "phototype",
+    "sound",
   ]);
 
   if (entity) {
@@ -637,6 +639,10 @@ const addMetaData = (data: any, ret: any) => {
     ret.voxel.push(voxel);
   }
 
+  const phototype = testPoint(data, ["phototype"]);
+  if (phototype) {
+    ret.phototype.push(phototype);
+  }
   // 处理子元素，并传递当前元素的UUID作为父级UUID
   if (data.children) {
     const parentUuid = data.parameters?.uuid;
@@ -672,6 +678,7 @@ const getResource = (meta: metaInfo) => {
     picture: [],
     video: [],
     voxel: [],
+    phototype: [],
     text: [],
     sound: [],
     entity: [],

@@ -1,7 +1,7 @@
 <template>
   <div class="image-selector">
     <!-- 资源对话框组件 -->
-    <ResourceDialog :multiple="false" @selected="onResourceSelected" ref="resourceDialog"></ResourceDialog>
+    <resource-dialog :multiple="false" @selected="onResourceSelected" ref="resourceDialog"></resource-dialog>
 
     <!-- 图片显示区域 -->
     <div class="image-display" style="width: 100%; text-align: center; cursor: pointer;" @click="showImageSelectDialog">
@@ -80,12 +80,13 @@ const openResourceDialog = () => {
 };
 
 // 处理从资源库选择的图片
-const onResourceSelected = (data: ViewCard) => {
+const onResourceSelected = (data: any) => {
   imageSelectDialogVisible.value = false;
   emit('image-selected', {
     imageId: data.image_id,
     itemId: props.itemId
   });
+
 };
 
 // 处理本地上传的图片

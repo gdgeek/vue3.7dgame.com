@@ -8,7 +8,7 @@
           <mr-p-p-header :sorted="sorted" :searched="searched" sortByTime="created_at" sortByName="title"
             @search="search" @sort="sort" :hasSearch="false">
             <el-tag type="success" v-if="data">{{ $t("game.map.title1") }} {{ data.page + 1
-              }}{{ $t("game.map.title2") }}</el-tag>
+            }}{{ $t("game.map.title2") }}</el-tag>
             &nbsp;
             <el-button-group :inline="true">
               <el-button size="small" type="primary" @click="addGuide">
@@ -16,21 +16,21 @@
                 &nbsp;
                 <span class="hidden-sm-and-down">{{
                   $t("game.map.addGuide")
-                  }}</span>
+                }}</span>
               </el-button>
               <el-button size="small" type="primary" @click="addMap">
                 <font-awesome-icon icon="plus"></font-awesome-icon>
                 &nbsp;
                 <span class="hidden-sm-and-down">{{
                   $t("game.map.addMap")
-                  }}</span>
+                }}</span>
               </el-button>
               <el-button size="small" v-if="pagination.current === pagination.count" type="primary" @click="removeMap">
                 <font-awesome-icon icon="trash"></font-awesome-icon>
                 &nbsp;
                 <span class="hidden-sm-and-down">{{
                   $t("game.map.removeMap")
-                  }}</span>
+                }}</span>
               </el-button>
             </el-button-group>
           </mr-p-p-header>

@@ -1,6 +1,5 @@
 <template>
   <TransitionWrapper>
-    <ResourceDialog @selected="edit" @created="refresh" @deleted="refresh" />
     <div class="root">
       <div>
         <br />

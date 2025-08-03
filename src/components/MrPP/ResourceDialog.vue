@@ -3,24 +3,25 @@
     <el-dialog v-model="dialogVisible" width="95%" height="100px" :show-close="false" @close="doClose">
       <template #header>
         <div class="dialog-footer">
-          <MrPPHeader :sorted="active.sorted" :searched="active.searched" @search="search" @sort="sort">
+          <MrPPHeader :sorted="sorted" :searched="searched" @search="search" @sort="sort">
             <el-tag>
               <b>{{ $t(mode === 'replace' ? "meta.ResourceDialog.replaceTitle" : "meta.ResourceDialog.title") }}</b>
             </el-tag>
           </MrPPHeader>
           <el-divider content-position="left">
-            <el-tag v-if="active.searched !== ''" size="small" closable @close="clearSearched">
-              {{ active.searched }}
+            <el-tag v-if="searched !== ''" size="small" closable @close="clearSearched">
+              {{ searched }}
             </el-tag>
           </el-divider>
         </div>
       </template>
-
       <el-card shadow="hover" :body-style="{ padding: '0px' }">
-        <Waterfall v-if="active.items?.length" :list="viewCards" :width="230" :gutter="10"
+        <Waterfall v-if="active.items?.length" :list="active.items" :width="230" :gutter="10"
           :backgroundColor="'rgba(255, 255, 255, .05)'">
+
           <template #default="{ item }">
-            <div style="width: 230px">
+
+            <div style="width: 230px" v-loading="!item.enabled">
               <el-card style="width: 220px" class="box-card" :class="{ 'selected-card': isSelected(item) }">
                 <template #header>
                   <el-card shadow="hover" :body-style="{ padding: '0px' }">
@@ -29,14 +30,7 @@
                     </div>
                     <div class="image-container">
                       <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
-                      <!--   <img v-if="!item.image" src="@/assets/images/items/1.webp"
-                        style="width: 100%; height: auto; object-fit: contain" />
-                      <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
-                      </LazyImg>-->
-                      <div v-if="item.type === 'audio'" class="info-container">
-                        <audio id="audio" controls style="width: 100%; height: 30px" :src="item.file.url"
-                          @play="handleAudioPlay"></audio>
-                      </div>
+                      <slot name="bar" :item="item"></slot>
                     </div>
                     <div v-if="item.created_at" style="
                       width: 100%;
@@ -106,45 +100,29 @@
 </template>
 
 <script setup lang="ts">
+import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
 import { ref, computed, defineEmits, defineExpose } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { getResources } from "@/api/v1/resources";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
 import Id2Image from '../Id2Image.vue';
-// 类型定义
-type ViewCard = {
-  src: string;
-  id?: string;
-  name?: string;
-  star?: boolean;
-  backgroundColor?: string;
-  [attr: string]: any;
-};
 
 
-const props = defineProps({
 
-  multiple: {
-    type: Boolean,
-    default: true,
-  },
 
+const props = withDefaults(defineProps<{
+  multiple?: boolean;
+  onGetDatas?: (input: DataInput) => Promise<DataOutput>
+}>(), {
+  multiple: true
 });
-type ActiveState = {
-  items: any[];
-  sorted: string;
-  searched: string;
-  pagination: {
-    current: number;
-    count: number;
-    size: number;
-    total: number;
-  };
-};
+const sorted = ref("-created_at");
+const searched = ref("");
+
 
 // 响应式状态
 const selectedIds = ref<any[]>([]);
@@ -155,32 +133,27 @@ const metaId = ref<number | null>(null);
 const value = ref<any>(null);
 const mode = ref<'normal' | 'replace'>('normal');
 
-const currentPlayingAudio = ref<HTMLAudioElement | null>(null);
 
-const handleAudioPlay = (event: Event) => {
-  const audioElement = event.target as HTMLAudioElement;
-  if (currentPlayingAudio.value && currentPlayingAudio.value !== audioElement) {
-    currentPlayingAudio.value.pause();
-  }
-  currentPlayingAudio.value = audioElement;
-};
 
-const active = ref<ActiveState>({
+const active = ref<DataOutput>({
   items: [],
-  sorted: "-created_at",
-  searched: "",
   pagination: { current: 1, count: 1, size: 20, total: 20 },
 });
 
+const emit = defineEmits<{
+  (e: 'selected', data: any): void
+  (e: 'replaced', data: any): void
+  (e: 'cancel'): void
+  (e: 'close'): void
+  // (e: 'getDatas', input: DataInput): void
+}>()
+
 // 事件和国际化
-const emit = defineEmits(["selected", "replaced", "cancel", "close"]);
+//const emit = defineEmits(["selected", "replaced", "cancel", "close"]);
+
 const { t } = useI18n();
 
-// 计算属性
-const viewCards = computed(() => {
-  console.log("viewCards", transformToViewCard(active.value.items));
-  return transformToViewCard(active.value.items);
-});
+
 
 // 方法
 const isSelected = (item: any): boolean => {
@@ -197,8 +170,8 @@ const getItemTitle = (item: any): string => {
 const open = async (newValue: any, meta_id: any = null, newType: any = null, openMode: 'normal' | 'replace' = 'normal') => {
   active.value = {
     items: [],
-    sorted: "-created_at",
-    searched: "",
+    // sorted: "-created_at",
+    // searched: "",
     pagination: { current: 1, count: 1, size: 20, total: 20 },
   };
 
@@ -220,56 +193,88 @@ const openIt = async ({ selected = null, binding = null, type }: any, openMode: 
 }
 
 // 替换模式下的选择处理
-const doReplace = (data: ViewCard) => {
-  emit("replaced", data);
+const doReplace = (data: CardInfo) => {
+  emit("replaced", data.context);
   dialogVisible.value = false;
+}
+async function getDatas(input: DataInput): Promise<DataOutput> {
+  if (props.onGetDatas) {
+    return props.onGetDatas(input);
+  }
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await getResources(
+        input.type,
+        sorted.value,
+        searched.value,
+        input.current,
+        "image"
+      );
+
+      const items = response.data.filter((item: any) => {
+        // 过滤掉没有图片的资源
+        return item.image && item.image.url;
+      }).map((item: any) => ({
+        id: item.id,
+        image: { url: item.image.url },
+        context: item,
+        type: item.type,
+        created_at: item.created_at,
+        name: item.name ? item.name : item.title, // 使用name或title
+        enabled: true,
+      } as CardInfo));
+
+      const pagination = {
+        current: parseInt(response.headers["x-pagination-current-page"]),
+        count: parseInt(response.headers["x-pagination-page-count"]),
+        size: parseInt(response.headers["x-pagination-per-page"]),
+        total: parseInt(response.headers["x-pagination-total-count"]),
+      };
+      resolve({ items, pagination });
+    } catch (error) {
+      console.error("获取数据失败", error);
+      reject(error);
+    }
+
+  });
 }
 
 async function refresh() {
-  const response = await getResources(
-    type.value,
-    active.value.sorted,
-    active.value.searched,
-    active.value.pagination.current,
-    "image, metaResources"
-  );
 
-  active.value.items = response.data;
-  active.value.pagination = {
-    current: parseInt(response.headers["x-pagination-current-page"]),
-    count: parseInt(response.headers["x-pagination-page-count"]),
-    size: parseInt(response.headers["x-pagination-per-page"]),
-    total: parseInt(response.headers["x-pagination-total-count"]),
-  };
+  active.value = await getDatas({
+    type: type.value,
+    sorted: sorted.value,
+    searched: searched.value,
+    current: active.value.pagination.current,
+  });
+  // active.value = output;
+  //active.value.pagination = output.pagination;
+
 }
 
 // 排序和搜索
 function sort(value: string) {
-  active.value.sorted = value;
+  sorted.value = value;
   refresh();
 }
 
 function search(value: string) {
-  active.value.searched = value;
+  searched.value = value;
   refresh();
 }
 
 function clearSearched() {
-  active.value.searched = "";
+  searched.value = "";
   refresh();
 }
 
 // 选择和取消操作
-function doSelect(data: ViewCard) {
-  emit("selected", data);
+function doSelect(data: CardInfo) {
+  emit("selected", data.context);
   dialogVisible.value = false;
 }
-/*
-function selected(data = null) {
-  emit("selected", data);
-  dialogVisible.value = false;
-}
-*/
+
 function doEmpty() {
   value.value = null;
   selectedIds.value = [];
@@ -304,9 +309,9 @@ async function doBatchSelect() {
       console.log("doBatchSelectobj", obj);
       if (obj) {
         // 转换为ViewCard确保所有属性都被包含
-        const viewCardObj = transformToViewCard([obj])[0];
-        console.log("doBatchSelectviewCardObj", viewCardObj);
-        doSelect(viewCardObj);
+        //  const viewCardObj = [obj][0];
+        console.log("doBatchSelectviewCardObj", obj);
+        doSelect(obj);
       }
     }
 
@@ -322,22 +327,7 @@ function handleCurrentChange(page: number) {
   refresh();
 }
 
-// 辅助函数
-function transformToViewCard(items: any[]): ViewCard[] {
-  return items.map((item) => ({
-    src: item.file.url,
-    id: item.id ? item.id.toString() : undefined,
-    name: item.name,
-    info: item.info,
-    uuid: item.uuid,
-    type: item.type,
-    image_id: item.image_id,
-    image: item.image,
-    created_at: item.created_at,
-    file: item.file,
-    // metaResources: item.metaResources,
-  }));
-}
+
 
 // 对外暴露的方法
 defineExpose({

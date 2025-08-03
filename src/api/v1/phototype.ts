@@ -2,6 +2,7 @@ import request from "@/utils/request";
 import qs from "querystringify";
 import path from "path-browserify";
 
+import { AxiosResponse } from "axios";
 export type PhototypeType = {
   id?: number;
   title?: string;
@@ -54,7 +55,7 @@ export const getPhototypes = (
   search = "",
   page = 0,
   expand = "image,author"
-) => {
+) : Promise<AxiosResponse<PhototypeType[]>>=> {
   const query: Record<string, any> = {};
   if (sort === "title") {
     sort = "title";
