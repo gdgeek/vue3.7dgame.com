@@ -113,15 +113,9 @@ const getAvailableResourceTypes = () => {
 
 
   const resourceTypes = ['polygen', 'picture', 'video', 'voxel', 'audio', 'particle', 'phototype']; // 所有资源类型
-  const availableTypes: string[] = [];
 
-  resourceTypes.forEach((type) => {
-    if (ability.can('edit', new AbilityEdit(type))) {
-      availableTypes.push(type);
-    }
-  });
 
-  return availableTypes;
+  return resourceTypes.filter((type) => ability.can('edit', new AbilityEdit(type)));
 };
 
 
