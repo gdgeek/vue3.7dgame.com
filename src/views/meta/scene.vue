@@ -1,6 +1,14 @@
 <template>
   <div class="verse-scene">
-    <resource-dialog @selected="selected" @replaced="replaced" ref="dialog"></resource-dialog>
+    <resource-dialog @selected="selected" :on-get-datas="getDatas" @replaced="replaced" ref="dialog">
+
+      <template #bar="{ item }">
+        <div v-if="item.type === 'audio'" class="info-container">
+          <audio id="audio" controls style="width: 100%; height: 30px" :src="item.context.file.url"
+            @play="handleAudioPlay"></audio>
+        </div>
+      </template>
+    </resource-dialog>
     <el-container>
       <el-main>
         <iframe ref="editor" id="editor" :src="src" class="content" height="100%" width="100%"></iframe>
@@ -10,6 +18,67 @@
 </template>
 
 <script setup lang="ts">
+
+import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
+import { getResources } from "@/api/v1/resources";
+
+const currentPlayingAudio = ref<HTMLAudioElement | null>(null);
+
+const handleAudioPlay = (event: Event) => {
+  const audioElement = event.target as HTMLAudioElement;
+  if (currentPlayingAudio.value && currentPlayingAudio.value !== audioElement) {
+    currentPlayingAudio.value.pause();
+  }
+  currentPlayingAudio.value = audioElement;
+};
+
+
+const getDatas = (input: DataInput): Promise<DataOutput> => {
+
+  return new Promise(async (resolve, reject) => {
+    try {
+
+      const response = await getResources(
+        input.type,
+        input.sorted,
+        input.searched,
+        input.current,
+        "image"
+      );
+
+
+      const items = response.data.map((item: any) => {
+
+        let enabled: boolean = true;
+        if (item.type === "polygen" && !item.image) {
+          enabled = false;
+        }
+        return ({
+          id: item.id,
+          context: item,
+          type: item.type,
+          created_at: item.created_at,
+          name: item.name ? item.name : item.title, // 使用name或title
+          image: item.image ? { "url": item.image.url } : null,
+          enabled,
+
+        } as CardInfo);
+      });
+
+      const pagination = {
+        current: parseInt(response.headers["x-pagination-current-page"]),
+        count: parseInt(response.headers["x-pagination-page-count"]),
+        size: parseInt(response.headers["x-pagination-per-page"]),
+        total: parseInt(response.headers["x-pagination-total-count"]),
+      };
+      resolve({ items, pagination });
+    } catch (error) {
+      console.error("获取数据失败", error);
+      reject(error);
+    }
+
+  });
+};
 import { useRoute, useRouter } from "vue-router";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import { putMeta, getMeta } from "@/api/v1/meta";

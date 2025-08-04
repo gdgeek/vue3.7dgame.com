@@ -29,6 +29,7 @@
                       <b class="card-title" nowrap>{{ getItemTitle(item) }}</b>
                     </div>
                     <div class="image-container">
+
                       <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
                       <slot name="bar" :item="item"></slot>
                     </div>
@@ -211,18 +212,16 @@ async function getDatas(input: DataInput): Promise<DataOutput> {
         input.current,
         "image"
       );
-
-      const items = response.data.filter((item: any) => {
-        // 过滤掉没有图片的资源
-        return item.image && item.image.url;
-      }).map((item: any) => ({
+      console.log("获取数据", response.data);
+      const items = response.data.map((item: any) => ({
         id: item.id,
-        image: { url: item.image.url },
         context: item,
         type: item.type,
         created_at: item.created_at,
         name: item.name ? item.name : item.title, // 使用name或title
+        image: item.image ? { "url": item.image.url } : null,
         enabled: true,
+
       } as CardInfo));
 
       const pagination = {
