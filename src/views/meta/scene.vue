@@ -39,9 +39,9 @@ const userStore = useUserStore();
 const id = computed(() => parseInt(route.query.id as string));
 const title = computed(() => route.query.title?.slice(4) as string);
 const src = computed(() => {
-  return `${env.editor}/three.js/editor/meta-editor.html?language=${appStore.language}&timestamp=${Date.now()}`;
+  return new URL(`${env.editor}three.js/editor/meta-editor.html`).href;
 });
-
+alert(src.value);
 // 监听语言变化
 watch(
   () => appStore.language,
