@@ -21,6 +21,7 @@
 
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
 import { getResources } from "@/api/v1/resources";
+import { getPhototypes } from "@/api/v1/phototype";
 
 const currentPlayingAudio = ref<HTMLAudioElement | null>(null);
 
@@ -38,40 +39,75 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
   return new Promise(async (resolve, reject) => {
     try {
 
-      const response = await getResources(
-        input.type,
-        input.sorted,
-        input.searched,
-        input.current,
-        "image"
-      );
+
+      if (input.type === 'phototype') {
+
+        const response = await getPhototypes(
+          input.sorted,
+          input.searched,
+          input.current
+        );
+
+        const items = response.data.map((item: any) => {
+
+          let enabled: boolean = true;
+
+          return ({
+            id: item.id,
+            context: item,
+            type: 'phototype',
+            created_at: item.created_at,
+            name: item.name ? item.name : item.title, // 使用name或title
+            image: item.image ? { "url": item.image.url } : null,
+            enabled: true,
+          } as CardInfo);
+        });
+
+        const pagination = {
+          current: parseInt(response.headers["x-pagination-current-page"]),
+          count: parseInt(response.headers["x-pagination-page-count"]),
+          size: parseInt(response.headers["x-pagination-per-page"]),
+          total: parseInt(response.headers["x-pagination-total-count"]),
+        };
+        resolve({ items, pagination });
+      } else {
+        const response = await getResources(
+          input.type,
+          input.sorted,
+          input.searched,
+          input.current,
+          "image"
+        );
 
 
-      const items = response.data.map((item: any) => {
+        const items = response.data.map((item: any) => {
 
-        let enabled: boolean = true;
-        if (item.type === "polygen" && !item.image) {
-          enabled = false;
-        }
-        return ({
-          id: item.id,
-          context: item,
-          type: item.type,
-          created_at: item.created_at,
-          name: item.name ? item.name : item.title, // 使用name或title
-          image: item.image ? { "url": item.image.url } : null,
-          enabled,
+          let enabled: boolean = true;
+          if (item.type === "polygen" && !item.image) {
+            enabled = false;
+          }
+          return ({
+            id: item.id,
+            context: item,
+            type: item.type,
+            created_at: item.created_at,
+            name: item.name ? item.name : item.title, // 使用name或title
+            image: item.image ? { "url": item.image.url } : null,
+            enabled,
 
-        } as CardInfo);
-      });
+          } as CardInfo);
+        });
 
-      const pagination = {
-        current: parseInt(response.headers["x-pagination-current-page"]),
-        count: parseInt(response.headers["x-pagination-page-count"]),
-        size: parseInt(response.headers["x-pagination-per-page"]),
-        total: parseInt(response.headers["x-pagination-total-count"]),
-      };
-      resolve({ items, pagination });
+        const pagination = {
+          current: parseInt(response.headers["x-pagination-current-page"]),
+          count: parseInt(response.headers["x-pagination-page-count"]),
+          size: parseInt(response.headers["x-pagination-per-page"]),
+          total: parseInt(response.headers["x-pagination-total-count"]),
+        };
+        resolve({ items, pagination });
+      }
+
+
     } catch (error) {
       console.error("获取数据失败", error);
       reject(error);
