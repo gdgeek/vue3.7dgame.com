@@ -1,49 +1,24 @@
 <template>
   <div>
-    <KnightDataDialog
-      ref="knightData"
-      @submit="knightDataSubmit"
-    ></KnightDataDialog>
+    <KnightDataDialog ref="knightData" @submit="knightDataSubmit"></KnightDataDialog>
 
-    <el-dialog
-      v-model="dialogVisible"
-      width="95%"
-      :show-close="false"
-      @close="cancel"
-    >
+    <el-dialog v-model="dialogVisible" width="95%" :show-close="false" @close="cancel">
       <template #header>
-        <mr-p-p-header
-          :sorted="active.sorted"
-          :searched="active.searched"
-          @search="search"
-          @sort="sort"
-        >
+        <mr-p-p-header :sorted="active.sorted" :searched="active.searched" @search="search" @sort="sort">
           <el-tag>
             <b>{{ $t("verse.view.prefabDialog.title") }}</b>
           </el-tag>
         </mr-p-p-header>
         <el-divider content-position="left">
-          <el-tag
-            v-if="active.searched !== ''"
-            size="small"
-            closable
-            @close="clearSearched"
-          >
+          <el-tag v-if="active.searched !== ''" size="small" closable @close="clearSearched">
             {{ active.searched }}
           </el-tag>
         </el-divider>
       </template>
 
       <template v-if="active && active.items">
-        <waterfall
-          v-if="active !== null && active.items !== null"
-          :lazyload="false"
-          :breakpoints="breakpoints"
-          :gutter="8"
-          :list="viewCards"
-          :column-count="3"
-          :backgroundColor="'rgba(255, 255, 255, .05)'"
-        >
+        <waterfall v-if="active !== null && active.items !== null" :lazyload="false" :breakpoints="breakpoints"
+          :gutter="8" :list="viewCards" :column-count="3" :backgroundColor="'rgba(255, 255, 255, .05)'">
           <template #default="{ item }">
             <el-card style="width: 220px" class="box-card">
               <template #header>
@@ -51,32 +26,20 @@
                   <template #header>
                     <b class="card-title" nowrap>{{ title(item) }}</b>
                   </template>
-                  <img
-                    v-if="!item.image"
-                    src="@/assets/image/none.png"
-                    style="width: 100%; height: auto; object-fit: contain"
-                  />
-                  <LazyImg
-                    v-if="item.image"
-                    style="width: 100%; height: auto"
-                    fit="contain"
-                    :url="item.image.url"
-                  ></LazyImg>
-                  <div
-                    v-if="item.created_at"
-                    style="width: 100%; text-align: center"
-                  >
+                  <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
+                  <!-- <img v-if="!item.image" src="@/assets/images/items/1.webp"
+                    style="width: 100%; height: auto; object-fit: contain" />
+                  <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
+                  </LazyImg>-->
+                  <div v-if="item.created_at" style="width: 100%; text-align: center">
                     {{ item.created_at }}
                   </div>
                 </el-card>
               </template>
               <div class="clearfix">
-                <el-button
-                  type="primary"
-                  size="small"
-                  @click="setup({ data: item })"
-                  >{{ $t("verse.view.prefabDialog.select") }}</el-button
-                >
+                <el-button type="primary" size="small" @click="setup({ data: item })">{{
+                  $t("verse.view.prefabDialog.select")
+                  }}</el-button>
               </div>
               <div class="bottom clearfix"></div>
             </el-card>
@@ -91,21 +54,15 @@
       <template #footer>
         <el-row :gutter="0">
           <el-col :xs="16" :sm="16" :md="16" :lg="16" :xl="16">
-            <el-pagination
-              :current-page="active.pagination.current"
-              :page-count="active.pagination.count"
-              :page-size="active.pagination.size"
-              :total="active.pagination.total"
-              layout="prev, pager, next, jumper"
-              background
-              @current-change="handleCurrentChange"
-            ></el-pagination>
+            <el-pagination :current-page="active.pagination.current" :page-count="active.pagination.count"
+              :page-size="active.pagination.size" :total="active.pagination.total" layout="prev, pager, next, jumper"
+              background @current-change="handleCurrentChange"></el-pagination>
           </el-col>
           <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
             <el-button-group>
               <el-button size="small" @click="dialogVisible = false">{{
                 $t("verse.view.prefabDialog.cancel")
-              }}</el-button>
+                }}</el-button>
             </el-button-group>
           </el-col>
         </el-row>
@@ -118,6 +75,7 @@
 import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
 import { getPrefabs, prefabsData } from "@/api/v1/prefab";
+import Id2Image from "../Id2Image.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 
 const emit = defineEmits(["selected", "cancel"]);
@@ -162,10 +120,29 @@ const refresh = async () => {
   };
 };
 
+interface SchemaProperty {
+  type: string;
+  title: string;
+  default?: any;
+  value?: any;
+  "ui:hidden"?: string;
+  "ui:options"?: {
+    placeholder?: string;
+    type?: string;
+    rows?: number;
+  };
+  minLength?: number;
+}
+interface Schema {
+  type: string;
+  required?: string[];
+  properties: Record<string, SchemaProperty>;
+}
 const setup = ({ data }: { data: prefabsData }) => {
+  console.error("setup", data);
   if (data.data) {
     knightData.value?.open({
-      schema: JSON.parse(data.info!),
+      schema: data.info as Schema,
       data: {},
       callback: (setup: any) => {
         selected({ data, setup });
@@ -202,10 +179,7 @@ const input = async (text: string): Promise<string> => {
     );
     return value;
   } catch {
-    ElMessage({
-      type: "info",
-      message: t("verse.view.prefabDialog.prompt.info"),
-    });
+    ElMessage.info(t("verse.view.prefabDialog.prompt.info"));
     throw new Error("User cancelled input");
   }
 };

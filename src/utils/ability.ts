@@ -5,6 +5,10 @@ export class AbilityRouter {
   constructor(public path: string) {}
 }
 
+export class AbilityEdit {
+  constructor(public type: string) {}
+}
+
 export class AbilityEditable {
   constructor(public editable: boolean) {}
 }
@@ -15,12 +19,12 @@ export class AbilityRole {
     this.role = roles.includes("root")
       ? "root"
       : roles.includes("admin")
-        ? "admin"
-        : roles.includes("manager")
-          ? "manager"
-          : roles.includes("user")
-            ? "user"
-            : "guest";
+      ? "admin"
+      : roles.includes("manager")
+      ? "manager"
+      : roles.includes("user")
+      ? "user"
+      : "guest";
   }
 }
 
@@ -33,10 +37,7 @@ export class AbilityWorks {
 }
 
 export class AbilityMessage {
-  constructor(
-    public id: number,
-    public managed: number
-  ) {}
+  constructor(public id: number, public managed: number) {}
 }
 const user = ["user", "manager", "admin", "root"];
 const manager = ["manager", "admin", "root"];
@@ -55,6 +56,7 @@ export function UpdateAbility(
     //alert(JSON.stringify(roles))
     let router: (string | RegExp)[] = [];
     let menu: (string | RegExp)[] = [];
+    let edit: (string | RegExp)[] = [];
 
     router = router.concat([
       "/site",
@@ -72,8 +74,8 @@ export function UpdateAbility(
       can("user", "all");
       can("editable", AbilityEditable.name, { editable: true });
       can("viewable", AbilityViewable.name, { viewable: true });
-
       can(["update", "delete"], AbilityWorks.name, { id: userId });
+
       can("delete", AbilityMessage.name, { id: userId, managed: 0 });
       can("update", AbilityMessage.name, { id: userId });
 
@@ -86,6 +88,8 @@ export function UpdateAbility(
         /^\/settings(\/|$)/,
       ]);
 
+      edit = edit.concat(["polygen", "audio", "picture", "video", "phototype"]);
+
       menu = menu.concat([
         "/site/logout",
         "/resource",
@@ -95,28 +99,24 @@ export function UpdateAbility(
         /^\/resource\/polygen(\/|$)/,
         /^\/resource\/audio(\/|$)/,
         /^\/resource\/picture(\/|$)/,
+        /^\/resource\/video(\/|$)/,
       ]);
+
       menu.concat(["/verse-share/open", /^\/trades(\/|$)/]);
     }
 
     if (roles.some((role) => manager.includes(role))) {
-      can("manager", "all");
+      can("phototype", "all");
+      menu = menu.concat([/^\/phototype(\/|$)/]);
     }
 
     if (roles.some((role) => admin.includes(role))) {
       can("admin", "all");
       can("people", AbilityRole.name, { role: "manager" }); //管理员可以管理用户
       can("people", AbilityRole.name, { role: "user" }); //管理员可以管理用户
-
-      menu = menu.concat([/^\/game(\/|$)/]);
+      can("manager", "all");
       menu = menu.concat([/^\/manager(\/|$)/]);
-
-      menu = menu.concat([
-        /^\/resource\/voxel(\/|$)/,
-        /^\/resource\/picture(\/|$)/,
-        /^\/resource\/video(\/|$)/,
-        /^\/ai(\/|$)/,
-      ]);
+      menu = menu.concat([/^\/ai(\/|$)/]);
     }
 
     if (roles.some((role) => root.includes(role))) {
@@ -131,7 +131,13 @@ export function UpdateAbility(
         can(["open", "goto"], AbilityRouter.name, { path: { $regex: item } });
       }
     });
-
+    edit.forEach((item) => {
+      if (typeof item === "string") {
+        can("edit", AbilityEdit.name, { type: item });
+      } else {
+        can("edit", AbilityEdit.name, { type: { $regex: item } });
+      }
+    });
     router.forEach((item) => {
       if (typeof item === "string") {
         can("goto", AbilityRouter.name, { path: item });

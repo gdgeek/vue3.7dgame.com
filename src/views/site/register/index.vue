@@ -160,15 +160,15 @@ const register = async () => {
       });
       const data = response.data;
       if (data.success) {
-        ElMessage({ type: "success", message: t("login.success") });
+        ElMessage.success(t("login.success"));
         Token.setToken(data.token);
         const { path, queryParams } = parseRedirect();
         router.push({ path: path, query: queryParams });
       } else {
-        ElMessage({ type: "error", message: t("login.error") });
+        ElMessage.error(t("login.error"));
       }
     } else {
-      ElMessage({ type: "error", message: t("login.error") });
+      ElMessage.error(t("login.error"));
     }
   });
 };

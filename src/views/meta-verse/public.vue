@@ -15,16 +15,6 @@ import TransitionWrapper from "@/components/TransitionWrapper.vue";
 const loaded = async (data: any, result: Function) => {
 
   try {
-    //const tags = await getTags('Status');
-    /*
-        const pub = tags.data.filter((tag: any) => {
-          if (tag.key == 'public') {
-            return tag;
-          }
-        }).map((tag: any) => {
-          return tag.id;
-        });
-    */
     const response = await getPublic({
       sort: data.sorted,
       search: data.searched,

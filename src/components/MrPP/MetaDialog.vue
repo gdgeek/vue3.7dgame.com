@@ -12,32 +12,36 @@
         </el-divider>
       </template>
 
-      <waterfall v-if="active !== null && active.items !== null" :lazyload="true" :breakpoints="breakpoints" :gutter="8"
-        :list="viewCards" :column-count="3" :backgroundColor="'rgba(255, 255, 255, .05)'">
-        <template #default="{ item }">
-          <el-card style="width: 220px" class="box-card">
-            <template #header>
-              <el-card shadow="hover" :body-style="{ padding: '0px' }">
+      <template v-if="active && active.items">
+        <waterfall v-if="active !== null && active.items !== null" :width="230" :gutter="10" :list="viewCards"
+          :backgroundColor="'rgba(255, 255, 255, .05)'">
+          <template #default="{ item }">
+            <div style="width: 230px">
+              <el-card style="width: 220px" class="box-card">
                 <template #header>
-                  <b class="card-title" nowrap>{{ title(item) }}</b>
+                  <el-card shadow="hover" :body-style="{ padding: '0px' }">
+                    <template #header>
+                      <b class="card-title" nowrap>{{ title(item) }}</b>
+                    </template>
+                    <router-link :to="'/meta/meta-edit?id=' + item.id">111
+                      <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
+                      <!-- <img v-if="!item.image" src="@/assets/images/items/1.webp"
+                        style="width: 100%; height: auto; object-fit: contain" />
+                      <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
+                      </LazyImg>-->
+                    </router-link>
+                  </el-card>
                 </template>
-                <router-link :to="'/meta/meta-edit?id=' + item.id">
-                  <img v-if="!item.image" src="@/assets/image/none.png"
-                    style="width: 100%; height: auto; object-fit: contain" />
-                  <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
-                  </LazyImg>
-                </router-link>
+                <div class="clearfix">
+                  <el-button type="primary" size="small" @click="selected({ data: item })">{{
+                    $t("verse.view.metaDialog.select")
+                    }}</el-button>
+                </div>
               </el-card>
-            </template>
-            <div class="clearfix">
-              <el-button type="primary" size="small" @click="selected({ data: item })">{{
-                $t("verse.view.metaDialog.select")
-                }}</el-button>
             </div>
-          </el-card>
-          <br />
-        </template>
-      </waterfall>
+          </template>
+        </waterfall>
+      </template>
 
       <template v-else>
         <el-skeleton></el-skeleton>
@@ -67,6 +71,7 @@
 </template>
 
 <script setup lang="ts">
+import Id2Image from "../Id2Image.vue";
 import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
@@ -167,10 +172,7 @@ const input = async (text: string): Promise<string> => {
     );
     return value;
   } catch {
-    ElMessage({
-      type: "info",
-      message: t("verse.view.metaDialog.prompt.info"),
-    });
+    ElMessage.info(t("verse.view.metaDialog.prompt.info"));
     throw new Error("User cancelled input");
   }
 };

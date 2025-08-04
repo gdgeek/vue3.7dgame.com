@@ -148,9 +148,8 @@ const copyWindow = async (item: metaInfo) => {
       }
     );
 
-    const response = await getMeta(item.id, "cyber,event,share,metaCode");
+    const response = await getMeta(item.id, { expand: "cyber,event,share,metaCode" });
     const originalMeta = response.data;//获取原始meta数据
-
 
     // 创建新的meta数据
     const newMetaData = {
@@ -181,7 +180,7 @@ const copyWindow = async (item: metaInfo) => {
   }
 };
 
-const deletedWindow = async (item: { id: number }) => {
+const deletedWindow = async (item: { id: string }, resetLoading: () => void) => {
   try {
     await ElMessageBox.confirm(
       t("meta.confirm.message1"),
@@ -195,16 +194,11 @@ const deletedWindow = async (item: { id: number }) => {
     );
     await deleteMeta(item.id);
     await refresh();
-    ElMessage({
-      type: "success",
-      message: t("meta.confirm.success"),
-    });
+    ElMessage.success(t("meta.confirm.success"));
   } catch (e) {
     console.error(e);
-    ElMessage({
-      type: "info",
-      message: t("meta.confirm.info"),
-    });
+    ElMessage.info(t("meta.confirm.info"));
+    resetLoading(); // 操作取消后重置loading状态
   }
 };
 

@@ -48,6 +48,12 @@ export default {
         audioTTS: "语音合成",
         audioProcessing: "音频处理",
       },
+      particleManagement: {
+        title: "特效管理",
+        particleList: "特效列表",
+        particleUpload: "特效上传",
+        particleProcessing: "特效处理",
+      },
     },
     meta: {
       title: "实体",
@@ -55,7 +61,7 @@ export default {
       systemDefault: "系统预设",
       edit: "编辑",
       scriptEditor: "脚本编辑",
-      sceneEditor: "场景编辑",
+      sceneEditor: "实体编辑",
     },
     ai: {
       title: "AI模型",
@@ -67,7 +73,7 @@ export default {
       selfGenerated: "自己创造",
       systemRecommendation: "系统推荐",
       shareWithFriends: "朋友分享",
-      viewTitle: "【场景】",
+      viewTitle: "编辑",
       scriptEditor: "脚本编辑",
       sceneEditor: "场景编辑",
     },
@@ -93,7 +99,7 @@ export default {
     h4: "准备好出发了么？",
     loginTitle: "登录账号",
     username: "电子信箱",
-    password: "密码",
+    password: "设置密码",
     login: "登录平台",
     download: "下载相关程序",
     rules: {
@@ -277,6 +283,18 @@ export default {
     uploadVoxel: "上传体素",
     initializeVoxelData: "初始化体素数据",
     viewVoxel: "查看体素",
+    initializingModels: "正在初始化体素...",
+    initializingModelProgress:
+      "正在初始化体素 {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "成功初始化 {count} 个体素",
+    partialInitializeSuccess:
+      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
+    retryInitializeFailed: "是否重试初始化失败的 {count} 个体素?",
+    retryTitle: "重试初始化",
+    retryConfirm: "重试",
+    retryCancel: "跳过",
+    initializeSuccess: "体素初始化成功",
+    initializeError: "体素初始化失败",
     prompt: {
       message1: "请输入新名称",
       message2: "修改体素名称",
@@ -311,6 +329,7 @@ export default {
         item7: "体素数量",
         name: "改名",
         delete: "删除",
+        download: "下载",
       },
       update: "等待更新",
       prompt: {
@@ -339,12 +358,29 @@ export default {
         success: "新的体素名称: ",
         info: "取消输入",
       },
+      download: {
+        success: "下载成功",
+        error: "下载失败: ",
+      },
     },
   },
   // 模型管理国际化
   polygen: {
     uploadPolygen: "上传模型",
     initializePolygenData: "初始化模型数据",
+    initializeAll: "批量初始化模型",
+    initializingModels: "正在初始化模型...",
+    initializingModelProgress:
+      "正在初始化模型 {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "成功初始化 {count} 个模型",
+    partialInitializeSuccess:
+      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
+    retryInitializeFailed: "是否重试初始化失败的 {count} 个模型?",
+    retryTitle: "重试初始化",
+    retryConfirm: "重试",
+    retryCancel: "跳过",
+    initializeSuccess: "模型初始化成功",
+    initializeError: "模型初始化失败",
     viewPolygen: "查看模型",
     prompt: {
       message1: "请输入新名称",
@@ -379,6 +415,7 @@ export default {
         item6: "模型中心",
         name: "改名",
         delete: "删除",
+        download: "下载",
       },
       prompt: {
         message1: "用此模型创建【场景】",
@@ -406,6 +443,10 @@ export default {
         success: "新的模型名称: ",
         info: "取消输入",
       },
+      download: {
+        success: "下载成功",
+        error: "下载失败: ",
+      },
     },
     animation: {
       animationOn: "动画开启",
@@ -419,6 +460,18 @@ export default {
     uploadPicture: "上传图片",
     initializePictureData: "初始化图片数据",
     viewPicture: "查看图片",
+    initializingModels: "正在初始化图片...",
+    initializingModelProgress:
+      "正在初始化图片 {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "成功初始化 {count} 个图片",
+    partialInitializeSuccess:
+      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
+    retryInitializeFailed: "是否重试初始化失败的 {count} 个图片?",
+    retryTitle: "重试初始化",
+    retryConfirm: "重试",
+    retryCancel: "跳过",
+    initializeSuccess: "图片初始化成功",
+    initializeError: "图片初始化失败",
     prompt: {
       message1: "请输入新名称",
       message2: "修改图片名称",
@@ -451,6 +504,7 @@ export default {
         item5: "图片尺寸",
         name: "改名",
         delete: "删除",
+        download: "下载",
       },
       confirm: {
         message1: "此操作将永久删除该文件, 是否继续?",
@@ -468,6 +522,10 @@ export default {
         success: "新的图片名称: ",
         info: "取消输入",
       },
+      download: {
+        success: "下载成功",
+        error: "下载失败: ",
+      },
     },
   },
   // 视频管理国际化
@@ -475,6 +533,18 @@ export default {
     uploadVideo: "上传视频",
     initializeVideoData: "初始化视频数据",
     viewVideo: "查看视频",
+    initializingModels: "正在初始化视频...",
+    initializingModelProgress:
+      "正在初始化视频 {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "成功初始化 {count} 个视频",
+    partialInitializeSuccess:
+      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
+    retryInitializeFailed: "是否重试初始化失败的 {count} 个视频?",
+    retryTitle: "重试初始化",
+    retryConfirm: "重试",
+    retryCancel: "跳过",
+    initializeSuccess: "视频初始化成功",
+    initializeError: "视频初始化失败",
     prompt: {
       message1: "请输入新名称",
       message2: "修改视频名称",
@@ -491,7 +561,7 @@ export default {
       success: "删除成功！",
       info: "已取消删除",
     },
-    uploadFile: "选择视频，并上传",
+    uploadFile: "选择视频（.mp4/.mov/.avi），并上传",
     view: {
       title: "视频名称：",
       info: {
@@ -504,8 +574,10 @@ export default {
         item4: "文件大小",
         size: "字节",
         item5: "视频尺寸",
+        item6: "时长",
         name: "改名",
         delete: "删除",
+        download: "下载",
       },
       confirm: {
         message1: "此操作将永久删除该文件, 是否继续?",
@@ -523,6 +595,10 @@ export default {
         success: "新的视频名称: ",
         info: "取消输入",
       },
+      download: {
+        success: "下载成功",
+        error: "下载失败: ",
+      },
     },
   },
   // 音频管理国际化
@@ -530,6 +606,18 @@ export default {
     uploadAudio: "上传音频",
     initializeAudioData: "初始化音频数据",
     viewAudio: "查看音频",
+    initializingModels: "正在初始化音频...",
+    initializingModelProgress:
+      "正在初始化音频 {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "成功初始化 {count} 个音频",
+    partialInitializeSuccess:
+      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
+    retryInitializeFailed: "是否重试初始化失败的 {count} 个音频?",
+    retryTitle: "重试初始化",
+    retryConfirm: "重试",
+    retryCancel: "跳过",
+    initializeSuccess: "音频初始化成功",
+    initializeError: "音频初始化失败",
     prompt: {
       message1: "请输入新名称",
       message2: "修改音频名称",
@@ -546,7 +634,7 @@ export default {
       success: "删除成功！",
       info: "已取消删除",
     },
-    uploadFile: "选择音频，并上传",
+    uploadFile: "选择音频（.mp3/.wav），并上传",
     view: {
       title: "音频名称：",
       info: {
@@ -557,9 +645,11 @@ export default {
         item2: "创建者",
         item3: "创建时间",
         item4: "文件大小",
+        item5: "时长",
         size: "字节",
         name: "改名",
         delete: "删除",
+        download: "下载",
       },
       confirm: {
         message1: "此操作将永久删除该文件, 是否继续?",
@@ -577,12 +667,95 @@ export default {
         success: "新的音频名称: ",
         info: "取消输入",
       },
+      download: {
+        success: "下载成功",
+        error: "下载失败: ",
+      },
+    },
+  },
+  // 特效管理国际化
+  particle: {
+    uploadParticle: "上传特效",
+    initializeParticleData: "初始化特效数据",
+    viewParticle: "查看特效",
+    initializingModels: "正在初始化特效...",
+    initializingModelProgress:
+      "正在初始化特效 {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "成功初始化 {count} 个特效",
+    partialInitializeSuccess:
+      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
+    retryInitializeFailed: "是否重试初始化失败的 {count} 个特效?",
+    retryTitle: "重试初始化",
+    retryConfirm: "重试",
+    retryCancel: "跳过",
+    initializeSuccess: "特效初始化成功",
+    initializeError: "特效初始化失败",
+    prompt: {
+      message1: "请输入新名称",
+      message2: "修改特效名称",
+      confirm: "确认",
+      cancel: "取消",
+      success: "新的特效名称: ",
+      info: "取消输入",
+    },
+    confirm: {
+      message1: "此操作将永久删除该文件, 是否继续?",
+      message2: "提示",
+      confirm: "确认",
+      cancel: "取消",
+      success: "删除成功！",
+      info: "已取消删除",
+    },
+    uploadFile: "选择特效（支持图片，视频，音频），并上传",
+    view: {
+      title: "特效名称：",
+      loadingText: "正在预处理",
+      info: {
+        title: "粒子信息",
+        label1: "条目",
+        label2: "内容",
+        item1: "特效名称",
+        item2: "创建者",
+        item3: "创建时间",
+        item4: "文件大小",
+        size: "字节",
+        item5: "特效尺寸",
+        item6: "时长",
+        name: "改名",
+        delete: "删除",
+        download: "下载",
+      },
+      confirm: {
+        message1: "此操作将永久删除该文件, 是否继续?",
+        message2: "提示",
+        confirm: "确认",
+        cancel: "取消",
+        success: "删除成功！",
+        info: "已取消删除",
+      },
+      namePrompt: {
+        message1: "请输入新名称",
+        message2: "修改特效名称",
+        confirm: "确认",
+        cancel: "取消",
+        success: "新的特效名称: ",
+        info: "取消输入",
+      },
+      download: {
+        success: "下载成功",
+        error: "下载失败: ",
+      },
     },
   },
   // 文件上传国际化
   upload: {
-    title: "选择文件",
+    title: "上传文件",
+    button: "上传",
     declared: "请选择对应格式的文件进行上传操作",
+    batchProgress: "批量进度： {current}/{total}",
+    selectedFiles: "已选择 {count} 个文件",
+    clearFiles: "清除所有文件",
+    effectType: "特效类型", // 添加特效类型翻译
     item1: {
       title: "预先处理",
       failed: "md5计算失败",

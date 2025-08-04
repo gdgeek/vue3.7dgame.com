@@ -1,21 +1,11 @@
 <!-- 左侧边菜单：包括左侧布局(left)、顶部布局(all)、混合布局(left) -->
 <template>
-  <el-menu
-    :default-active="currentRoute.path"
-    :collapse="!appStore.sidebar.opened"
-    :background-color="variables['menu-background']"
-    :text-color="variables['menu-text']"
-    :active-text-color="variables['menu-active-text']"
-    :unique-opened="false"
-    :collapse-transition="false"
-    :mode="mode"
-  >
-    <SidebarMenuItem
-      v-for="route in menuList"
-      :key="route.path"
-      :item="route"
-      :base-path="resolvePath(route.path)"
-    ></SidebarMenuItem>
+  <el-menu :default-active="currentRoute.path" :collapse="!appStore.sidebar.opened"
+    :background-color="variables['menu-background']" :text-color="variables['menu-text']"
+    :active-text-color="variables['menu-active-text']" :unique-opened="false" :collapse-transition="false" :mode="mode">
+    <SidebarMenuItem v-for="route in menuList" :key="route.path" :item="route" :base-path="resolvePath(route.path)">
+    </SidebarMenuItem>
+
   </el-menu>
 </template>
 
@@ -52,6 +42,7 @@ const mode = computed(() => {
  * @param routePath 路由路径 /user
  */
 function resolvePath(routePath: string) {
+
   if (isExternal(routePath)) {
     return routePath;
   }

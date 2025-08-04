@@ -6,6 +6,7 @@
         <el-header>
           <MrPPHeader :sorted="sorted" :searched="searched" @search="search" @sort="sort">
             <el-button-group :inline="true">
+              <!-- 原上传路由按钮注释
               <router-link to="/resource/voxel/upload">
                 <el-button size="small" type="primary" icon="UploadFilled">
                   <span class="hidden-sm-and-down">{{
@@ -13,6 +14,10 @@
                   }}</span>
                 </el-button>
               </router-link>
+              -->
+              <el-button size="small" type="primary" icon="UploadFilled" @click="openUploadDialog">
+                <span class="hidden-sm-and-down">{{ $t("voxel.uploadVoxel") }}</span>
+              </el-button>
             </el-button-group>
           </MrPPHeader>
         </el-header>
@@ -46,19 +51,34 @@
           </el-card>
         </el-footer>
       </el-container>
+      <br />
+
+      <!-- 新增上传弹窗组件 -->
+      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="voxel" :file-type="fileType" @save-resource="saveVoxel"
+        @success="handleUploadSuccess">
+        {{ $t("voxel.uploadFile") }}
+      </mr-p-p-upload-dialog>
     </div>
   </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
-import { getVoxels, putVoxel, deleteVoxel } from "@/api/v1/resources/index";
+import { getVoxels, putVoxel, deleteVoxel, postVoxel } from "@/api/v1/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import MrPPUploadDialog from "@/components/MrPP/MrPPUploadDialog/index.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import { useRouter } from "vue-router";
+import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
 
 const { t } = useI18n();
+const router = useRouter();
+
+// 上传弹窗相关
+const uploadDialogVisible = ref(false);
+const fileType = ref(".vox, application/octet-stream"); // vox文件类型
 
 interface Pagination {
   current: number;
@@ -76,6 +96,125 @@ const pagination = ref<Pagination>({
   size: 20,
   total: 20,
 });
+
+// 打开上传弹窗
+const openUploadDialog = () => {
+  uploadDialogVisible.value = true;
+};
+
+// 上传成功后处理
+const handleUploadSuccess = async (uploadedIds: number | number[]) => {
+  uploadDialogVisible.value = false;
+
+  // 确保uploadedIds是数组
+  const modelIds = Array.isArray(uploadedIds) ? uploadedIds : [uploadedIds];
+  const lastFileId = modelIds[modelIds.length - 1];
+
+  if (modelIds.length > 0) {
+    const loadingInstance = ElLoading.service({
+      text: t("voxel.initializingModels"),
+      background: 'rgba(0, 0, 0, 0.7)'
+    });
+
+    // 记录初始化失败的模型ID
+    const failedModelIds = [];
+
+    try {
+      for (let i = 0; i < modelIds.length; i++) {
+        loadingInstance.setText(t("voxel.initializingModelProgress", {
+          current: i + 1,
+          total: modelIds.length,
+          percentage: Math.round(((i + 1) / modelIds.length) * 100)
+        }));
+
+        try {
+          // 跳转到模型详情页触发初始化
+          await router.push({
+            path: "/resource/voxel/view",
+            query: { id: modelIds[i] },
+          });
+
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        } catch (modelError) {
+          console.error(`初始化体素 ${modelIds[i]} 失败:`, modelError);
+          failedModelIds.push(modelIds[i]);
+        }
+      }
+
+      if (failedModelIds.length > 0) {
+        ElMessage.warning({
+          message: t("voxel.partialInitializeSuccess", {
+            success: modelIds.length - failedModelIds.length,
+            failed: failedModelIds.length,
+            total: modelIds.length
+          }),
+          duration: 5000
+        });
+
+        if (failedModelIds.length > 0) {
+          const shouldRetry = await ElMessageBox.confirm(
+            t("voxel.retryInitializeFailed", { count: failedModelIds.length }),
+            t("voxel.retryTitle"),
+            {
+              confirmButtonText: t("voxel.retryConfirm"),
+              cancelButtonText: t("voxel.retryCancel"),
+              type: "warning"
+            }
+          ).catch(() => false);
+
+          if (shouldRetry === true) {
+            await handleUploadSuccess(failedModelIds);
+            return;
+          }
+          else {
+            router.push({
+              path: "/resource/voxel/view",
+              query: { id: lastFileId },
+            });
+            return;
+          }
+        }
+      } else {
+        ElMessage.success({
+          message: t("voxel.batchInitializeSuccess", { count: modelIds.length }),
+          duration: 3000
+        });
+      }
+
+      await refresh();
+
+    } catch (error) {
+      console.error("初始化体素时出错:", error);
+      ElMessage.error(t("voxel.initializeError"));
+    } finally {
+      loadingInstance.close();
+    }
+  }
+
+  // 最后跳转到最后上传的模型详情页
+  router.push({
+    path: "/resource/voxel/view",
+    query: { id: lastFileId },
+  });
+};
+
+// 保存体素模型
+const saveVoxel = async (
+  name: string,
+  file_id: number,
+  totalFiles: number,
+  callback: (id: number) => void
+) => {
+  try {
+    const response = await postVoxel({ name, file_id });
+    if (response.data.id) {
+      callback(response.data.id);
+    }
+  } catch (err) {
+    console.error("Failed to save voxel:", err);
+    callback(-1);
+  }
+};
 
 const handleCurrentChange = (page: number) => {
   pagination.value.current = page;
@@ -123,7 +262,7 @@ const named = (id: number, newValue: string) => {
     });
 };
 
-const deletedWindow = async (item: any) => {
+const deletedWindow = async (item: { id: string }, resetLoading: () => void) => {
   try {
     await ElMessageBox.confirm(
       t("voxel.confirm.message1"),
@@ -139,10 +278,11 @@ const deletedWindow = async (item: any) => {
     ElMessage.success(t("voxel.confirm.success"));
   } catch {
     ElMessage.info(t("voxel.confirm.info"));
+    resetLoading(); // 操作取消后重置loading状态
   }
 };
 
-const deleted = async (id: number) => {
+const deleted = async (id: number | string) => {
   try {
     await deleteVoxel(id);
     await refresh();

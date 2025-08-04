@@ -1,11 +1,11 @@
 <template>
   <div class="image-selector">
     <!-- 资源对话框组件 -->
-    <ResourceDialog :multiple="false" @selected="onResourceSelected" ref="resourceDialog"></ResourceDialog>
+    <resource-dialog :multiple="false" @selected="onResourceSelected" ref="resourceDialog"></resource-dialog>
 
     <!-- 图片显示区域 -->
     <div class="image-display" style="width: 100%; text-align: center; cursor: pointer;" @click="showImageSelectDialog">
-      <el-image fit="contain" style="width: 100%; height: 300px" :src="imageUrl"></el-image>
+      <el-image fit="contain" style="width: 100%; height: 300px" :src="displayImageUrl"></el-image>
     </div>
 
     <!-- 选择图片方式的对话框 -->
@@ -29,23 +29,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits } from 'vue';
+import { ref, defineProps, defineEmits, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
 import { ElMessage, ElMessageBox } from 'element-plus';
 import type { UploadFile, UploadFiles } from "element-plus";
-import type { ViewCard } from "vue-waterfall-plugin-next/dist/types/types/waterfall";
-
+import type { ViewCard } from "vue-waterfall-plugin-next/dist/types/types/waterfall"
 const props = defineProps({
   imageUrl: {
     type: String,
-    default: ''
   },
   itemId: {
     type: Number,
     required: true
   }
+});
+
+const displayImageUrl = computed(() => {
+
+  const id = props.itemId % 100;
+  //alert(id)
+  // const url 
+  // 计算默认图片地址，相对于本文件需两级上级
+  const url = new URL(`../../assets/images/items/${id}.webp`, import.meta.url).href;
+  //alert(url)
+  //alert(`../assets/images/items/${id}.webp`)
+  return props.imageUrl || url;
 });
 
 const emit = defineEmits(['image-selected', 'image-upload-success']);
@@ -70,12 +80,13 @@ const openResourceDialog = () => {
 };
 
 // 处理从资源库选择的图片
-const onResourceSelected = (data: ViewCard) => {
+const onResourceSelected = (data: any) => {
   imageSelectDialogVisible.value = false;
   emit('image-selected', {
     imageId: data.image_id,
     itemId: props.itemId
   });
+
 };
 
 // 处理本地上传的图片

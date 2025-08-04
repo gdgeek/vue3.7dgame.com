@@ -11,6 +11,8 @@ import VueForm from "@lljj/vue3-form-element";
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 
+import JsonSchemaEditor from "json-schema-editor-vue3";
+import "json-schema-editor-vue3/lib/json-schema-editor-vue3.css";
 import { ability } from "@/ability";
 
 import { abilitiesPlugin } from "@casl/vue";
@@ -64,7 +66,7 @@ watch(
 
 const app = createApp(App);
 
-const time = new Date().getTime();
+//const time = new Date().getTime();
 app.use(VueAppleLogin, VueAppleLoginConfig);
 
 app.use(abilitiesPlugin, ability, {
@@ -76,5 +78,6 @@ app.directive("highlight", highlightDirective);
 app.use(setupPlugins);
 app.use(VueIframe);
 app.use(ElementPlus);
+app.use(JsonSchemaEditor);
 
 app.mount("#app");

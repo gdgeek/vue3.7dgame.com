@@ -11,6 +11,7 @@ export type _UserDataType = {
 };
 export type UploadFileType = {
   md5: string;
+  particleType?: string;
   url: string;
   filename: string;
   key: string;

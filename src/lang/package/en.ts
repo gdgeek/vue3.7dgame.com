@@ -48,6 +48,12 @@ export default {
         audioTTS: "Text To Speech",
         audioProcessing: "Processing",
       },
+      particleManagement: {
+        title: "Particle",
+        particleList: "List",
+        particleUpload: "Upload",
+        particleProcessing: "Processing",
+      },
     },
     meta: {
       title: "Entity",
@@ -67,7 +73,7 @@ export default {
       selfGenerated: "Owned",
       systemRecommendation: "Open",
       shareWithFriends: "Share",
-      viewTitle: "【Project】",
+      viewTitle: "Edit",
       scriptEditor: "Script",
       sceneEditor: "Scene",
     },
@@ -280,6 +286,18 @@ export default {
     uploadVoxel: "Upload Voxel",
     initializeVoxelData: "Init The Voxel Data",
     viewVoxel: "View Voxel",
+    initializingModels: "Initializing voxels...",
+    initializingModelProgress:
+      "Initializing voxel {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "Successfully initialized {count} voxels",
+    partialInitializeSuccess:
+      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
+    retryInitializeFailed: "Retry initializing {count} failed voxels?",
+    retryTitle: "Retry Initialization",
+    retryConfirm: "Retry",
+    retryCancel: "Skip",
+    initializeSuccess: "Voxels initialized successfully",
+    initializeError: "Failed to initialize voxels",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit voxel name",
@@ -315,6 +333,7 @@ export default {
         item7: "Voxel Count",
         name: "Rename",
         delete: "Delete",
+        download: "Download",
       },
       update: "Waiting for update",
       prompt: {
@@ -344,12 +363,29 @@ export default {
         success: "New voxel name: ",
         info: "Cancel input",
       },
+      download: {
+        success: "Download successful",
+        error: "Download failed: ",
+      },
     },
   },
   // 模型管理国际化
   polygen: {
     uploadPolygen: "Upload Polygen",
     initializePolygenData: "Init The Polygen Data",
+    initializeAll: "Batch Initialize Models",
+    initializingModels: "Initializing models...",
+    initializingModelProgress:
+      "Initializing model {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "Successfully initialized {count} models",
+    partialInitializeSuccess:
+      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
+    retryInitializeFailed: "Retry initializing {count} failed models?",
+    retryTitle: "Retry Initialization",
+    retryConfirm: "Retry",
+    retryCancel: "Skip",
+    initializeSuccess: "Models initialized successfully",
+    initializeError: "Failed to initialize models",
     viewPolygen: "View Polygen",
     prompt: {
       message1: "Please enter a new name",
@@ -385,6 +421,7 @@ export default {
         item6: "Polygen Center",
         name: "Rename",
         delete: "Delete",
+        download: "Download",
       },
       prompt: {
         message1: "Create a 【Project】 with this polygen",
@@ -413,6 +450,10 @@ export default {
         success: "New polygen name: ",
         info: "Cancel input",
       },
+      download: {
+        success: "Download successful",
+        error: "Download failed: ",
+      },
     },
     animation: {
       animationOn: "Animation On",
@@ -426,6 +467,18 @@ export default {
     uploadPicture: "Upload Picture",
     initializePictureData: "Init The Picture Data",
     viewPicture: "View Picture",
+    initializingModels: "Initializing pictures...",
+    initializingModelProgress:
+      "Initializing picture {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "Successfully initialized {count} pictures",
+    partialInitializeSuccess:
+      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
+    retryInitializeFailed: "Retry initializing {count} failed pictures?",
+    retryTitle: "Retry Initialization",
+    retryConfirm: "Retry",
+    retryCancel: "Skip",
+    initializeSuccess: "Pictures initialized successfully",
+    initializeError: "Failed to initialize pictures",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Polygen name",
@@ -459,6 +512,7 @@ export default {
         item5: "Picture Dimensions",
         name: "Rename",
         delete: "Delete",
+        download: "Download",
       },
       confirm: {
         message1:
@@ -478,12 +532,28 @@ export default {
         info: "Cancel input",
       },
     },
+    download: {
+      success: "Download successful",
+      error: "Download failed: ",
+    },
   },
   // 视频管理国际化
   video: {
     uploadVideo: "Upload Video",
     initializeVideoData: "Init The VideoData",
     viewVideo: "View Video",
+    initializingModels: "Initializing videos...",
+    initializingModelProgress:
+      "Initializing video {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "Successfully initialized {count} videos",
+    partialInitializeSuccess:
+      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
+    retryInitializeFailed: "Retry initializing {count} failed videos?",
+    retryTitle: "Retry Initialization",
+    retryConfirm: "Retry",
+    retryCancel: "Skip",
+    initializeSuccess: "Videos initialized successfully",
+    initializeError: "Failed to initialize videos",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Video name",
@@ -501,7 +571,7 @@ export default {
       success: "Deleted successfully!",
       info: "Deletion canceled",
     },
-    uploadFile: "Select a video and upload it",
+    uploadFile: "Select a video (.mp4/.mov/.avi) and upload it",
     view: {
       title: "Video Name: ",
       info: {
@@ -514,8 +584,10 @@ export default {
         item4: "File Size",
         size: "Bytes",
         item5: "Video Dimensions",
+        item6: "Duration",
         name: "Rename",
         delete: "Delete",
+        download: "Download",
       },
       confirm: {
         message1:
@@ -535,12 +607,28 @@ export default {
         info: "Cancel input",
       },
     },
+    download: {
+      success: "Download successful",
+      error: "Download failed: ",
+    },
   },
   // 音频管理国际化
   audio: {
     uploadAudio: "Upload Audio",
     initializeAudioData: "Init The Audio Data",
     viewAudio: "View Audio",
+    initializingModels: "Initializing audios...",
+    initializingModelProgress:
+      "Initializing audio {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "Successfully initialized {count} audios",
+    partialInitializeSuccess:
+      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
+    retryInitializeFailed: "Retry initializing {count} failed audios?",
+    retryTitle: "Retry Initialization",
+    retryConfirm: "Retry",
+    retryCancel: "Skip",
+    initializeSuccess: "Audios initialized successfully",
+    initializeError: "Failed to initialize audios",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Audio name",
@@ -558,7 +646,7 @@ export default {
       success: "Deleted successfully!",
       info: "Deletion canceled",
     },
-    uploadFile: "Select a audio and upload it",
+    uploadFile: "Select a audio (.mp3/.wav) and upload it",
     view: {
       title: "Audio Name: ",
       info: {
@@ -569,9 +657,11 @@ export default {
         item2: "Creator",
         item3: "Creation Time",
         item4: "File Size",
+        item5: "Duration",
         size: "Bytes",
         name: "Rename",
         delete: "Delete",
+        download: "Download",
       },
       confirm: {
         message1:
@@ -591,11 +681,99 @@ export default {
         info: "Cancel input",
       },
     },
+    download: {
+      success: "Download successful",
+      error: "Download failed: ",
+    },
+  },
+  // 特效管理国际化
+  particle: {
+    uploadParticle: "Upload Particle Effect",
+    initializeParticleData: "Init The Particle Effect Data",
+    viewParticle: "View Particle Effect",
+    initializingModels: "Initializing particle effects...",
+    initializingModelProgress:
+      "Initializing particle effect {current}/{total} ({percentage}%)",
+    batchInitializeSuccess: "Successfully initialized {count} particle effects",
+    partialInitializeSuccess:
+      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
+    retryInitializeFailed:
+      "Retry initializing {count} failed particle effects?",
+    retryTitle: "Retry Initialization",
+    retryConfirm: "Retry",
+    retryCancel: "Skip",
+    initializeSuccess: "Particle effects initialized successfully",
+    initializeError: "Failed to initialize particle effects",
+    prompt: {
+      message1: "Please enter a new name",
+      message2: "Edit Particle Effect name",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      success: "New Particle Effect name: ",
+      info: "Cancel input",
+    },
+    confirm: {
+      message1:
+        "This action will permanently delete the file. Do you want to continue?",
+      message2: "Prompt",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      success: "Deleted successfully!",
+      info: "Deletion canceled",
+    },
+    uploadFile:
+      "Select a particle effect (supports images, videos, and audio) and upload it",
+    view: {
+      title: "Particle Effect Name: ",
+      loadingText: "Processing...",
+      info: {
+        title: "Particle Effect Information",
+        label1: "Item",
+        label2: "Content",
+        item1: "Particle Effect Name",
+        item2: "Creator",
+        item3: "Creation Time",
+        item4: "File Size",
+        size: "Bytes",
+        item5: "Particle Effect Dimensions",
+        item6: "Duration",
+        name: "Rename",
+        delete: "Delete",
+        download: "Download",
+      },
+      confirm: {
+        message1:
+          "This action will permanently delete the file. Do you want to continue?",
+        message2: "Prompt",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "Deleted successfully!",
+        info: "Deletion canceled",
+      },
+      namePrompt: {
+        message1: "Please enter a new name",
+        message2: "Edit Particle Effect name",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        success: "New Particle Effect name: ",
+        info: "Cancel input",
+      },
+      download: {
+        success: "Download successful",
+        error: "Download failed: ",
+      },
+    },
   },
   // 文件上传国际化
   upload: {
-    title: "Select File",
-    declared: "Please select a file in the appropriate format for upload",
+    title: "Upload File",
+    button: "Upload",
+    declared:
+      "Please select the corresponding format of the file for the upload operation",
+    batchProgress: "Batch Progress: {current}/{total}",
+    selectedFiles: "Selected {count} files",
+    clearFiles: "Clear all files",
+    effectType: "Effect Type", // 添加特效类型翻译
     item1: {
       title: "Preprocessing",
       failed: "MD5 calculation failed",
@@ -959,7 +1137,10 @@ export default {
       },
       edit: "Edit【Project】",
       eye: "View【Project】",
-      info: "【Project】Information",
+      info: {
+        title: "Scene Information",
+        download: "Download",
+      },
       verseOpen: "Open【Project】",
       verseClose: "Close【Project】",
       success1: "Edit successful",

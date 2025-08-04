@@ -26,7 +26,7 @@ type ImageDetails = {
 export type prefabsData = {
   id: number;
   author_id: number;
-  info: string | null;
+  info: object | null;
   data: string | null;
   // created_at?: string;
   image_id: number | null;
@@ -44,7 +44,6 @@ export type prefabsData = {
 };
 
 // export type prefabsData = metaInfo;
-
 export const deletePrefab = (id: number) => {
   return request({
     url: path.join("v1", "prefabs", id.toString()),

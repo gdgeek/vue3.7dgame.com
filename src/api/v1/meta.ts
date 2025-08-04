@@ -59,7 +59,7 @@ export const postMeta = (data: Record<string, any>) => {
     data,
   });
 };
-export const putMetaCode = (id: number, data: MetaCode) => {
+export const putMetaCode = (id: string | number, data: MetaCode) => {
   return request<MetaCode>({
     url: path.join(
       "v1",
@@ -70,7 +70,7 @@ export const putMetaCode = (id: number, data: MetaCode) => {
     method: "put",
   });
 };
-export const getMeta = (id: number, params = {}) => {
+export const getMeta = (id: string | number, params = {}) => {
   return request<metaInfo>({
     url: path.join(
       "v1",
@@ -109,7 +109,7 @@ export const getMetas = (
   });
 };
 
-export const putMeta = (id: number, data: Record<string, any>) => {
+export const putMeta = (id: string | number, data: Record<string, any>) => {
   return request({
     url: path.join("v1", "metas", id.toString()),
     method: "put",
@@ -117,7 +117,7 @@ export const putMeta = (id: number, data: Record<string, any>) => {
   });
 };
 
-export const deleteMeta = (id: number) => {
+export const deleteMeta = (id: string | number) => {
   return request({
     url: path.join("v1", "metas", id.toString()),
     method: "delete",

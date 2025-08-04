@@ -1,6 +1,7 @@
 <template>
   <TransitionWrapper>
-    <div v-loading="loading" class="document-index"><br>
+    <div v-loading="loading" class="document-index">
+      <br>
       <el-row :gutter="20" style="margin: 0px 18px 0">
         <el-col :sm="16">
           <el-card class="box-card">
@@ -21,44 +22,18 @@
             </div>
           </el-card>
           <br />
-          <!--
-          <el-card v-loading="expire" class="box-card">
-            <el-button style="width: 100%" type="primary" size="small" @click="createVerse">
-              <font-awesome-icon icon="plus"></font-awesome-icon>
-              &nbsp;{{ $t("polygen.view.titleStatement") }}
-            </el-button>
-          </el-card>
-          -->
+
           <br />
 
 
         </el-col>
 
         <el-col :sm="8">
-          <el-card class="box-card">
-            <template #header>
-              <b>{{ $t("polygen.view.info.title") }}</b> :
-            </template>
-            <div class="box-item">
-              <el-table :data="tableData" stripe>
-                <el-table-column prop="item" :label="$t('polygen.view.info.label1')"></el-table-column>
-                <el-table-column prop="text" :label="$t('polygen.view.info.label2')"></el-table-column>
-              </el-table>
-
-              <aside style="margin-top: 10px; margin-bottom: 30px">
-                <el-button-group style="float: right">
-                  <el-button type="success" size="small" @click="namedWindow">
-                    <i class="el-icon-edit"></i>
-                    {{ $t("polygen.view.info.name") }}
-                  </el-button>
-                  <el-button type="danger" size="small" @click="deleteWindow">
-                    <i class="el-icon-delete"></i>
-                    {{ $t("polygen.view.info.delete") }}
-                  </el-button>
-                </el-button-group>
-              </aside>
-            </div>
-          </el-card>
+          <MrppInfo v-if="polygenData" :title="$t('polygen.view.info.title')" titleSuffix=" :" :tableData="tableData"
+            :itemLabel="$t('polygen.view.info.label1')" :textLabel="$t('polygen.view.info.label2')"
+            :downloadText="$t('polygen.view.info.download')" :renameText="$t('polygen.view.info.name')"
+            :deleteText="$t('polygen.view.info.delete')" @download="downloadModel" @rename="namedWindow"
+            @delete="deleteWindow" />
           <br />
         </el-col>
       </el-row>
@@ -77,6 +52,8 @@ import { printVector3 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import MrppInfo from "@/components/MrPP/MrppInfo/index.vue";
+import { downloadResource } from "@/utils/downloadHelper";
 
 const loading = ref(false);
 const polygenData = ref<any>(null);
@@ -104,7 +81,7 @@ const tableData = computed(() => {
       { item: t("polygen.view.info.item1"), text: polygenData.value.name },
       {
         item: t("polygen.view.info.item2"),
-        text: polygenData.value.author.nickname,
+        text: polygenData.value.author.nickname || polygenData.value.author.username,
       },
       {
         item: t("polygen.view.info.item3"),
@@ -217,6 +194,15 @@ const namedWindow = async () => {
   }
 };
 
+const downloadModel = async () => {
+  await downloadResource(
+    polygenData.value,
+    '.glb',
+    t,
+    'polygen.view.download'
+  );
+};
+
 const updatePolygen = async (imageId: number, info: any) => {
   try {
     const response = await putPolygen(polygenData.value.id, {
@@ -253,6 +239,9 @@ const saveFile = async (
 };
 
 const loaded = async (info: any) => {
+  // 保存动画信息到info对象
+  console.log("模型信息:", info);
+
   if (prepare.value) {
     expire.value = false;
     return;
@@ -307,29 +296,4 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 @use "@/styles/view-style.scss" as *;
-
-.content {
-  height: 100%;
-  position: relative;
-}
-
-.check-box {
-  background-color: rgb(56, 106, 153);
-  padding: 5px 4px;
-  z-index: 100;
-  justify-content: flex-end;
-  font-size: 12px;
-  border-radius: 4px;
-  color: #fff;
-}
-
-.process {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 100%;
-  transform: translateX(-50%);
-  padding: 3px 8px;
-  background-color: rgb(64, 158, 255);
-}
 </style>

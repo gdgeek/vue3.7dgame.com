@@ -18,29 +18,11 @@
           <br />
         </el-col>
         <el-col :sm="8">
-          <el-card class="box-card">
-            <template #header>
-              <b>{{ $t("video.view.info.title") }}</b>:
-            </template>
-            <div class="box-item">
-              <el-table :data="tableData" stripe>
-                <el-table-column prop="item" :label="$t('video.view.info.label1')"></el-table-column>
-                <el-table-column prop="text" :label="$t('video.view.info.label2')"></el-table-column>
-              </el-table>
-              <aside style="margin-top: 10px; margin-bottom: 30px">
-                <el-button-group style="float: right">
-                  <el-button type="success" size="small" @click="namedWindow">
-                    <i class="el-icon-edit"></i>
-                    {{ $t("video.view.info.name") }}
-                  </el-button>
-                  <el-button type="danger" size="small" @click="deleteWindow">
-                    <i class="el-icon-delete"></i>
-                    {{ $t("video.view.info.delete") }}
-                  </el-button>
-                </el-button-group>
-              </aside>
-            </div>
-          </el-card>
+          <MrppInfo v-if="videoData" :title="$t('video.view.info.title')" titleSuffix=" :" :tableData="tableData"
+            :itemLabel="$t('video.view.info.label1')" :textLabel="$t('video.view.info.label2')"
+            :downloadText="$t('video.view.info.download')" :renameText="$t('video.view.info.name')"
+            :deleteText="$t('video.view.info.delete')" @download="downloadVideo" @rename="namedWindow"
+            @delete="deleteWindow" />
           <br />
         </el-col>
       </el-row>
@@ -58,6 +40,8 @@ import { useFileStore } from "@/store/modules/config";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import MrppInfo from "@/components/MrPP/MrppInfo/index.vue";
+import { downloadResource } from "@/utils/downloadHelper";
 
 const route = useRoute();
 const router = useRouter();
@@ -87,14 +71,14 @@ onMounted(async () => {
 
 const tableData = computed(() => {
   if (videoData.value && prepare.value) {
-    return [
+    const base = [
       {
         item: t("video.view.info.item1"),
         text: videoData.value.name,
       },
       {
         item: t("video.view.info.item2"),
-        text: videoData.value.author?.username,
+        text: videoData.value.author?.username || videoData.value.author?.nickname,
       },
       {
         item: t("video.view.info.item3"),
@@ -109,11 +93,32 @@ const tableData = computed(() => {
         text: printVector2(JSON.parse(videoData.value.info).size),
       },
     ];
+    let info: any = {};
+    try { info = JSON.parse(videoData.value.info || '{}'); } catch {}
+    if (info.length) {
+      base.push({ item: t("video.view.info.item6"), text: info.length.toFixed(2) + 's' });
+    }
+    return base;
   } else {
     return [];
   }
 });
-console.log("tableData", tableData);
+
+const downloadVideo = async () => {
+  if (!videoData.value) return;
+
+  const fileName = videoData.value.file.filename || '';
+  const fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase() || '.mp4';
+  await downloadResource(
+    {
+      name: videoData.value.name || 'video',
+      file: videoData.value.file
+    },
+    fileExt,
+    t,
+    'video.view.download'
+  );
+};
 
 const init = () => {
   const video = document.getElementById("video") as HTMLVideoElement;
@@ -205,7 +210,8 @@ const setup = async (
   size: { x: number; y: number }
 ) => {
   if (size.x !== 0) {
-    const info = JSON.stringify({ size });
+    const length = video.duration;
+    const info = JSON.stringify({ size, length });
 
     // const blob = await thumbnail(video, size.x * 0.5, size.y * 0.5);
     // blob.name = data.value.name + ".thumbnail";

@@ -4,6 +4,7 @@ import { convertToHttps } from "@/assets/js/helper";
 import qs from "querystringify";
 import path from "path-browserify";
 import type { ApiResponse, ResourceInfo } from "./model";
+import { AxiosResponse } from "axios";
 
 type ResourceType =
   | "voxel"
@@ -11,6 +12,7 @@ type ResourceType =
   | "picture"
   | "video"
   | "audio"
+  | "particle"
   | string;
 
 // 上传资源类型
@@ -19,6 +21,7 @@ type ResourceData = {
   name: string;
   type?: ResourceType;
   uuid?: string;
+  effect_type?: string; // 添加 effect_type 字段
 };
 
 type ResourcePut = {
@@ -32,7 +35,7 @@ export const getResources = (
   search: string = "",
   page: number = 0,
   expand: string = "image,author"
-) => {
+): Promise<AxiosResponse<ResourceInfo[]>> => {
   const query: Record<string, string | number> = {
     type,
     expand,
@@ -84,6 +87,12 @@ export const getAudios = (
   page: number = 0
 ) => getResources("audio", sort, search, page);
 
+export const getParticles = (
+  sort: string = "-created_at",
+  search: string = "",
+  page: number = 0
+) => getResources("particle", sort, search, page);
+
 // 修改资源
 const putResources = (id: number | string, resource: ResourcePut) => {
   const url = path.join("v1", "resources", id.toString());
@@ -108,6 +117,9 @@ export const putVideo = (id: number | string, video: any) =>
 
 export const putAudio = (id: number | string, audio: any) =>
   putResources(id, audio);
+
+export const putParticle = (id: number | string, particle: any) =>
+  putResources(id, particle);
 
 // 上传资源
 const postResources = (data: ResourceData) => {
@@ -141,6 +153,9 @@ export const postAudio = (data: Omit<ResourceData, "type">) => {
   return postResources({ ...data, type: "audio" });
 };
 
+export const postParticle = (data: Omit<ResourceData, "type">) =>
+  postResources({ ...data, type: "particle" });
+
 // 删除资源
 const deleteResources = (id: number | string) => {
   const url = path.join("v1", "resources", id.toString());
@@ -159,6 +174,8 @@ export const deletePicture = (id: number | string) => deleteResources(id);
 export const deleteVideo = (id: number | string) => deleteResources(id);
 
 export const deleteAudio = (id: number | string) => deleteResources(id);
+
+export const deleteParticle = (id: number | string) => deleteResources(id);
 
 // 获取特定资源
 const getResource = (
@@ -238,6 +255,24 @@ export const getVideo = (
 ): Promise<ApiResponse<ResourceInfo>> => {
   return new Promise((resolve, reject) => {
     getResource("video", id, expand)
+      .then((response) => {
+        if (response.data.file && response.data.file.url) {
+          response.data.file.url = convertToHttps(response.data.file.url);
+        }
+        resolve(response);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
+export const getParticle = (
+  id: number | string,
+  expand: string = "image,file,author"
+): Promise<ApiResponse<ResourceInfo>> => {
+  return new Promise((resolve, reject) => {
+    getResource("particle", id, expand)
       .then((response) => {
         if (response.data.file && response.data.file.url) {
           response.data.file.url = convertToHttps(response.data.file.url);

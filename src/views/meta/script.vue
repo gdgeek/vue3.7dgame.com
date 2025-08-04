@@ -7,7 +7,7 @@
             <div v-if="meta" class="clearfix">
               <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
                 meta.title
-              }}</el-link>
+                }}</el-link>
               /【{{ $t("meta.script.title") }}】
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
               <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
@@ -72,7 +72,7 @@
                             <pre>
                     <code :class="currentCodeType">{{
                       currentCode
-                      }}</code>
+                    }}</code>
                   </pre>
                           </div>
                         </div>
@@ -151,6 +151,7 @@ import { ElMessage } from "element-plus";
 import { useAppStore } from "@/store/modules/app";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
+import { useUserStore } from "@/store/modules/user";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { convertToHttps } from "@/assets/js/helper";
@@ -174,6 +175,7 @@ const languageName = ref<string>("lua");
 const LuaCode = ref("");
 const JavaScriptCode = ref("");
 const settingsStore = useSettingsStore();
+const userStore = useUserStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 const disabled = ref<boolean>(false);
 const scenePlayer = ref<InstanceType<typeof ScenePlayer>>();
@@ -185,6 +187,20 @@ const currentCodeType = ref("");
 const codeDialogTitle = ref("");
 const editorContainer = ref<HTMLElement | null>(null);
 const unsavedBlocklyData = ref<any>(null);
+
+// 监听用户信息变化
+watch(
+  () => userStore.userInfo,
+  () => {
+    // 用户信息变化时，向编辑器发送最新用户信息
+    postMessage("user-info", {
+      id: userStore.userInfo?.id || null,
+      roles: userStore.userInfo?.roles || [],
+      role: userStore.getRole()
+    });
+  },
+  { deep: true }
+);
 
 const handleBlocklyChange = (data: any) => {
   unsavedBlocklyData.value = data;
@@ -279,15 +295,9 @@ const copyCode = async (code: string) => {
   try {
     await navigator.clipboard.writeText(code);
 
-    ElMessage({
-      message: t("copy.success"),
-      type: "success",
-    });
+    ElMessage.success(t("copy.success"));
   } catch (error) {
-    ElMessage({
-      message: t("copy.error"),
-      type: "error",
-    });
+    ElMessage.error(t("copy.error"));
   }
 };
 
@@ -301,17 +311,11 @@ watch(
 
 const postScript = async (message: any) => {
   if (meta.value === null) {
-    ElMessage({
-      message: t("meta.script.error1"),
-      type: "error",
-    });
+    ElMessage.error(t("meta.script.error1"));
     return;
   }
   if (!meta.value.editable) {
-    ElMessage({
-      message: t("meta.script.error2"),
-      type: "error",
-    });
+    ElMessage.error(t("meta.script.error2"));
     return;
   }
 
@@ -331,10 +335,7 @@ const postScript = async (message: any) => {
     js: message.js,
   });
 
-  ElMessage({
-    message: t("meta.script.success"),
-    type: "success",
-  });
+  ElMessage.success(t("meta.script.success"));
 };
 
 const formatJavaScript = (code: string) => {
@@ -371,6 +372,13 @@ const handleMessage = async (e: MessageEvent) => {
     if (params.action === "ready") {
       ready = true;
       initEditor();
+
+      // 发送用户信息
+      postMessage("user-info", {
+        id: userStore.userInfo?.id || null,
+        roles: userStore.userInfo?.roles || [],
+        role: userStore.getRole()
+      });
     } else if (params.action === "post") {
       await postScript(params.data);
 
@@ -379,10 +387,7 @@ const handleMessage = async (e: MessageEvent) => {
         saveResolve = null;
       }
     } else if (params.action === "post:no-change") {
-      ElMessage({
-        message: t("meta.script.info"),
-        type: "info",
-      });
+      ElMessage.info(t("meta.script.info"));
     } else if (params.action === "update") {
       LuaCode.value = "local meta = {}\nlocal index = ''\n" + params.data.lua;
       // JavaScriptCode.value = params.data.js;
@@ -477,10 +482,7 @@ const postMessage = (action: string, data: any = {}) => {
       "*"
     );
   } else {
-    ElMessage({
-      message: t("meta.script.error3"),
-      type: "error",
-    });
+    ElMessage.error(t("meta.script.error3"));
   }
 };
 const test = ref<any>();
@@ -517,19 +519,21 @@ const initEditor = () => {
     console.error("Failed to decompress or parse data:", error);
   }
 };
-const testAction = (data: any) => {
+const testAction = (data: any, parentUuid?: string) => {
   // console.log("action: ", data);
   if (
     data &&
     data.parameters &&
     typeof data.parameters.action !== "undefined"
   ) {
-    return {
+    const result = {
       uuid: data.parameters.uuid,
       name: data.parameters.action ?? null,
       parameter: data.parameters.parameter ?? null,
       type: data.type ?? null,
+      ...(data.type === "Tooltip" ? { parentUuid: parentUuid ?? null } : {})
     };
+    return result;
   }
 };
 
@@ -543,14 +547,23 @@ const testPoint = (data: any, typeList: string[]) => {
 
   if (isValidType) {
     const animations = data.parameters?.animations ?? null;
-    
-    const isPolygen = data.type.toLowerCase() === "polygen";
 
-    // 给Polygen，传递moved属性
+    const isPolygen = data.type.toLowerCase() === "polygen";
+    const isPicture = data.type.toLowerCase() === "picture";
+
+    // 给Polygen和Picture，传递moved属性，tooltips属性，rotate属性
     let hasMoved = false;
-    if (isPolygen && data.children && data.children.components) {
+    let hasRotate = false;
+    let hasTooltips = false;
+    if ((isPolygen || isPicture) && data.children && data.children.components) {
       hasMoved = data.children.components.some(
         (component: any) => component.type === "Moved"
+      );
+      hasRotate = data.children.components.some(
+        (component: any) => component.type === "Rotate"
+      );
+      hasTooltips = data.children.components.some(
+        (component: any) => component.type === "Tooltip"
       );
     }
 
@@ -559,7 +572,14 @@ const testPoint = (data: any, typeList: string[]) => {
       name: data.parameters.name ?? null,
       ...(isPolygen ? {
         animations, // 给Polygen，传递animations属性
-        moved: hasMoved 
+        moved: hasMoved,
+        rotate: hasRotate,
+        hasTooltips: hasTooltips
+      } : {}),
+      ...(isPicture ? {
+        moved: hasMoved,
+        rotate: hasRotate,
+        hasTooltips: hasTooltips
       } : {}),
     };
   }
@@ -581,6 +601,8 @@ const addMetaData = (data: any, ret: any) => {
     "picture",
     "text",
     "voxel",
+    "phototype",
+    "sound",
   ]);
 
   if (entity) {
@@ -617,11 +639,31 @@ const addMetaData = (data: any, ret: any) => {
     ret.voxel.push(voxel);
   }
 
+  const phototype = testPoint(data, ["phototype"]);
+  if (phototype) {
+    ret.phototype.push(phototype);
+  }
+  // 处理子元素，并传递当前元素的UUID作为父级UUID
   if (data.children) {
-    Object.keys(data.children).forEach((key) => {
-      data.children[key].forEach((item: any) => {
-        addMetaData(item, ret);
+    const parentUuid = data.parameters?.uuid;
+
+    if (data.children.components) {
+      data.children.components.forEach((item: any) => {
+        // 处理带有action的组件，并传递父级UUID
+        const componentAction = testAction(item, parentUuid);
+        if (componentAction) {
+          ret.action.push(componentAction);
+        }
       });
+    }
+
+    // 处理其他子元素
+    Object.keys(data.children).forEach((key) => {
+      if (key !== "components") { // 跳过已处理的组件
+        data.children[key].forEach((item: any) => {
+          addMetaData(item, ret);
+        });
+      }
     });
   }
 };
@@ -636,6 +678,7 @@ const getResource = (meta: metaInfo) => {
     picture: [],
     video: [],
     voxel: [],
+    phototype: [],
     text: [],
     sound: [],
     entity: [],
@@ -648,6 +691,10 @@ const getResource = (meta: metaInfo) => {
   // ret.events = JSON.parse(meta.events!) || { inputs: [], outputs: [] };
 
   if (data) addMetaData(data, ret);
+
+  // 打印处理后的action数据，展示带有父级UUID的action
+  console.log("最终处理的action结果:", ret.action);
+
   return ret;
 };
 
@@ -759,10 +806,7 @@ onMounted(async () => {
     initEditor();
   } catch (error: any) {
     alert(error.message);
-    ElMessage({
-      message: error.message,
-      type: "error",
-    });
+    ElMessage.error(error.message);
   } finally {
     loading.value = false;
   }
@@ -965,6 +1009,26 @@ const run = async () => {
         }
         return source.data;
       },
+    };
+
+    // 处理文本实体
+    const handleText = (uuid: string) => {
+      const source = scenePlayer.value?.sources.get(uuid);
+      if (!source) {
+        console.error(`找不到UUID为 ${uuid} 的文本实体`);
+        return null;
+      }
+      return source.data;
+    };
+
+    // 处理所有类型的实体(polygen模型、voxel体素、picture图片、text文本、video视频等)
+    const handleEntity = (uuid: string) => {
+      const source = scenePlayer.value?.sources.get(uuid);
+      if (!source) {
+        console.error(`找不到UUID为 ${uuid} 的实体`);
+        return null;
+      }
+      return source.data;
     };
 
     // 补间动画工具类
@@ -1325,12 +1389,12 @@ const run = async () => {
 
     try {
       const wrappedCode = `
-        return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument) {
+        return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument, handleText, handleEntity) {
           const meta = window.meta;
           const index = ${meta.value?.id};
 
           ${JavaScriptCode.value}
-          
+
           if (typeof meta['@init'] === 'function') {
             await meta['@init']();
           }
@@ -1356,14 +1420,13 @@ const run = async () => {
         point,
         transform,
         Vector3,
-        argument
+        argument,
+        handleText,
+        handleEntity
       );
     } catch (e: any) {
       console.error("执行代码出错:", e);
-      ElMessage({
-        message: `执行代码出错: ${e.message}`,
-        type: "error",
-      });
+      ElMessage.error(`执行代码出错: ${e.message}`);
     }
   }
 };

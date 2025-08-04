@@ -147,15 +147,9 @@ const deletedWindow = async (id: number) => {
     );
     await deleteReply(id);
     replies.value = replies.value.filter((reply: any) => reply.id !== id);
-    ElMessage({
-      type: "success",
-      message: t("verse.view.reply.confirm.success"),
-    });
+    ElMessage.success(t("verse.view.reply.confirm.success"));
   } catch (e) {
-    ElMessage({
-      type: "info",
-      message: t("verse.view.reply.confirm.info"),
-    });
+    ElMessage.info(t("verse.view.reply.confirm.info"));
   }
 };
 
@@ -181,10 +175,7 @@ const submitForm = async () => {
     if (!replies.value) replies.value = [];
     replies.value.unshift(response.data);
 
-    ElMessage({
-      message: t("verse.view.reply.success"),
-      type: "success",
-    });
+    ElMessage.success(t("verse.view.reply.success"));
   } else {
     console.log("error submit!!");
   }

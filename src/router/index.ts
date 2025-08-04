@@ -1,10 +1,5 @@
 import type { App } from "vue";
-import {
-  createRouter,
-  createWebHashHistory,
-  createWebHistory,
-  RouteRecordRaw,
-} from "vue-router";
+import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 
 export const Layout = () => import("@/layout/index.vue");
 
@@ -176,17 +171,6 @@ const routes: RouteRecordRaw[] = [
         },
         component: Empty,
         children: [
-          /*
-          {
-            path: "/settings/account",
-            name: "SettingsAccount",
-            meta: {
-              title: "settings.accountSetting",
-              hidden: true,
-              private: true,
-            },
-            component: () => import("@/views/settings/account.vue"),
-          },*/
           {
             meta: {
               title: "settings.personalData",
@@ -247,18 +231,7 @@ const routes: RouteRecordRaw[] = [
                   params: null,
                 },
               },
-              {
-                path: "/resource/voxel/upload",
-                name: "VoxelUpload",
-                component: () => import("@/views/voxel/upload.vue"),
-                meta: {
-                  title: "resourceManagement.voxelManagement.voxelUpload",
-                  icon: "el-icon-uploadFilled",
-                  hidden: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
+
               {
                 path: "/resource/voxel/view",
                 name: "VoxelView",
@@ -275,171 +248,84 @@ const routes: RouteRecordRaw[] = [
             ],
           },
           {
-            path: "/resource/polygen",
-            name: "Polygen",
-            redirect: "/resource/polygen/index",
-            component: Empty,
+            path: "/resource/polygen/index",
+            name: "PolygenIndex",
+            component: () => import("@/views/polygen/index.vue"),
             meta: {
               title: "resourceManagement.polygenManagement.title",
-              icon: "system",
+              icon: "el-icon-pear",
               hidden: true,
-              // private: true,
               alwaysShow: false,
               params: null,
             },
-            children: [
-              {
-                path: "/resource/polygen/index",
-                name: "PolygenIndex",
-                component: () => import("@/views/polygen/index.vue"),
-                meta: {
-                  title: "resourceManagement.polygenManagement.polygenList",
-                  icon: "el-icon-list",
-                  hidden: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
-              {
-                path: "/resource/polygen/upload",
-                name: "",
-                component: () => import("@/views/polygen/upload.vue"),
-                meta: {
-                  title: "resourceManagement.polygenManagement.polygenUpload",
-                  icon: "el-icon-uploadFilled",
-                  hidden: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
-              {
-                path: "/resource/polygen/view",
-                name: "",
-                component: () => import("@/views/polygen/view.vue"),
-                meta: {
-                  title:
-                    "resourceManagement.polygenManagement.polygenProcessing",
-                  icon: "el-icon-uploadFilled",
-                  hidden: true,
-                  private: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
-            ],
           },
           {
-            path: "/resource/picture",
-            name: "Picture",
-            component: Empty,
-            redirect: "/resource/picture/index",
+            path: "/resource/polygen/view",
+            name: "",
+            component: () => import("@/views/polygen/view.vue"),
             meta: {
-              title: "resourceManagement.pictureManagement.title",
-              icon: "el-icon-picture",
-              hidden: true,
-              // private: true,
-              alwaysShow: false,
-              params: null,
-            },
-            children: [
-              {
-                path: "/resource/picture/index",
-                name: "",
-                component: () => import("@/views/picture/index.vue"),
-                meta: {
-                  title: "resourceManagement.pictureManagement.pictureList",
-                  icon: "el-icon-list",
-                  hidden: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
-              {
-                path: "/resource/picture/upload",
-                name: "",
-                component: () => import("@/views/picture/upload.vue"),
-                meta: {
-                  title: "resourceManagement.pictureManagement.pictureUpload",
-                  icon: "el-icon-uploadFilled",
-                  hidden: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
-              {
-                path: "/resource/picture/view",
-                name: "",
-                component: () => import("@/views/picture/view.vue"),
-                meta: {
-                  title:
-                    "resourceManagement.pictureManagement.pictureProcessing",
-                  icon: "el-icon-uploadFilled",
-                  hidden: true,
-                  private: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
-            ],
-          },
-          {
-            path: "/resource/video",
-            name: "Video",
-            redirect: "/resource/video/index",
-            component: Empty,
-            meta: {
-              title: "resourceManagement.videoManagement.title",
-              icon: "el-icon-video-camera",
+              title: "resourceManagement.polygenManagement.polygenProcessing",
+              icon: "el-icon-uploadFilled",
               hidden: true,
               private: true,
               alwaysShow: false,
               params: null,
             },
-            children: [
-              {
-                path: "/resource/video/index",
-                name: "VideoIndex",
-                component: () => import("@/views/video/index.vue"),
-                meta: {
-                  title: "resourceManagement.videoManagement.videoList",
-                  icon: "el-icon-list",
-                  hidden: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
-              {
-                path: "/resource/video/upload",
-                name: "",
-                component: () => import("@/views/video/upload.vue"),
-                meta: {
-                  title: "resourceManagement.videoManagement.videoUpload",
-                  icon: "el-icon-uploadFilled",
-                  hidden: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
-              {
-                path: "/resource/video/view",
-                name: "",
-                component: () => import("@/views/video/view.vue"),
-                meta: {
-                  title: "resourceManagement.videoManagement.videoProcessing",
-                  icon: "el-icon-uploadFilled",
-                  hidden: true,
-                  private: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
-            ],
           },
           {
-            path: "/resource/audio",
-            name: "Audio",
-            component: Empty,
-            redirect: "/resource/audio/index",
+            path: "/resource/picture/index",
+            name: "",
+            component: () => import("@/views/picture/index.vue"),
+            meta: {
+              title: "resourceManagement.pictureManagement.title",
+              icon: "el-icon-picture",
+              hidden: true,
+              alwaysShow: false,
+              params: null,
+            },
+          },
+          {
+            path: "/resource/picture/view",
+            name: "",
+            component: () => import("@/views/picture/view.vue"),
+            meta: {
+              title: "resourceManagement.pictureManagement.pictureProcessing",
+              icon: "el-icon-uploadFilled",
+              hidden: true,
+              private: true,
+              alwaysShow: false,
+              params: null,
+            },
+          },
+          {
+            path: "/resource/video/index",
+            name: "VideoIndex",
+            component: () => import("@/views/video/index.vue"),
+            meta: {
+              title: "resourceManagement.videoManagement.title",
+              icon: "el-icon-video-camera",
+              hidden: true,
+              alwaysShow: false,
+              params: null,
+            },
+          },
+          {
+            path: "/resource/video/view",
+            name: "",
+            component: () => import("@/views/video/view.vue"),
+            meta: {
+              title: "resourceManagement.videoManagement.videoProcessing",
+              icon: "el-icon-uploadFilled",
+              hidden: true,
+              private: true,
+              alwaysShow: false,
+              params: null,
+            },
+          },
+          {
+            path: "/resource/audio/index",
+            name: "",
+            component: () => import("@/views/audio/index.vue"),
             meta: {
               title: "resourceManagement.audioManagement.title",
               icon: "el-icon-headset",
@@ -447,51 +333,66 @@ const routes: RouteRecordRaw[] = [
               alwaysShow: false,
               params: null,
             },
+          },
+          {
+            path: "/resource/audio/view",
+            name: "",
+            component: () => import("@/views/audio/view.vue"),
+            meta: {
+              title: "resourceManagement.audioManagement.audioProcessing",
+              icon: "el-icon-uploadFilled",
+              hidden: true,
+              private: true,
+              alwaysShow: false,
+              params: null,
+            },
+          },
+
+          {
+            path: "/resource/particle",
+            name: "Particle",
+            redirect: "/resource/particle/index",
+            component: Empty,
+            meta: {
+              title: "resourceManagement.particleManagement.title",
+              icon: "el-icon-SetUp",
+              hidden: true,
+              private: true,
+              alwaysShow: false,
+              params: null,
+            },
             children: [
               {
-                path: "/resource/audio/index",
-                name: "",
-                component: () => import("@/views/audio/index.vue"),
+                path: "/resource/particle/index",
+                name: "ParticleIndex",
+                component: () => import("@/views/particle/index.vue"),
                 meta: {
-                  title: "resourceManagement.audioManagement.audioList",
+                  title: "resourceManagement.particleManagement.particleList",
                   icon: "el-icon-list",
                   hidden: true,
                   alwaysShow: false,
                   params: null,
                 },
               },
+              // {
+              //   path: "/resource/video/upload",
+              //   name: "",
+              //   component: () => import("@/views/video/upload.vue"),
+              //   meta: {
+              //     title: "resourceManagement.videoManagement.videoUpload",
+              //     icon: "el-icon-uploadFilled",
+              //     hidden: true,
+              //     alwaysShow: false,
+              //     params: null,
+              //   },
+              // },
               {
-                path: "/resource/audio/upload",
+                path: "/resource/particle/view",
                 name: "",
-                component: () => import("@/views/audio/upload.vue"),
+                component: () => import("@/views/particle/view.vue"),
                 meta: {
-                  title: "resourceManagement.audioManagement.audioUpload",
-                  icon: "el-icon-uploadFilled",
-                  hidden: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },
-              /*
-              {
-                path: "/resource/audio/tts",
-                name: "",
-                component: () => import("@/views/audio/tts.vue"),
-                meta: {
-                  title: "resourceManagement.audioManagement.audioTTS",
-                  icon: "el-icon-helpFilled",
-                  hidden: true,
-                  private: true,
-                  alwaysShow: false,
-                  params: null,
-                },
-              },*/
-              {
-                path: "/resource/audio/view",
-                name: "",
-                component: () => import("@/views/audio/view.vue"),
-                meta: {
-                  title: "resourceManagement.audioManagement.audioProcessing",
+                  title:
+                    "resourceManagement.particleManagement.particleProcessing",
                   icon: "el-icon-uploadFilled",
                   hidden: true,
                   private: true,
@@ -712,6 +613,7 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+
       {
         path: "/manager",
         component: null,
@@ -733,6 +635,41 @@ const routes: RouteRecordRaw[] = [
               icon: "cascader",
               hidden: true,
             },
+          },
+        ],
+      },
+      {
+        path: "/phototype",
+        component: null,
+        redirect: "/phototype/list",
+        name: "Phototype",
+        meta: {
+          title: "Phototype",
+          icon: "el-icon-Management",
+          hidden: true,
+          alwaysShow: false,
+          params: null,
+        },
+        children: [
+          {
+            path: "/phototype/list",
+            component: () => import("@/views/phototype/list.vue"),
+            name: "PhototypeList",
+            meta: {
+              title: "List",
+              icon: "cascader",
+              hidden: true,
+            },
+          },
+          {
+            path: "/phototype/edit",
+            name: "PhototypeEdit",
+            meta: {
+              title: "meta.edit",
+              hidden: true,
+              private: true,
+            },
+            component: () => import("@/views/phototype/edit.vue"),
           },
         ],
       },
@@ -854,7 +791,6 @@ const initRoutes = async () => {
 };
 
 import type { AnyAbility } from "@casl/ability";
-
 import { AbilityRouter } from "@/utils/ability";
 import { useUserStore } from "@/store";
 import { tr } from "element-plus/es/locale";

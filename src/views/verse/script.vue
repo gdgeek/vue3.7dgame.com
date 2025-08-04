@@ -7,7 +7,7 @@
             <div v-if="verse" class="clearfix">
               <el-link :href="`/verse/view?id=${id}`" :underline="false">{{
                 verse.name
-              }}</el-link>
+                }}</el-link>
               /【{{ $t("verse.view.script.title") }}】
 
               <!--<el-button type="primary" size="small" @click="run">测试运行</el-button>
@@ -293,15 +293,9 @@ watch(isDark, (newValue) => {
 const copyCode = async (code: string) => {
   try {
     await navigator.clipboard.writeText(code);
-    ElMessage({
-      message: t("copy.success"),
-      type: "success",
-    });
+    ElMessage.success(t("copy.success"));
   } catch (error) {
-    ElMessage({
-      message: t("copy.error"),
-      type: "error",
-    });
+    ElMessage.error(t("copy.error"));
   }
 };
 
@@ -328,17 +322,11 @@ const save = (): Promise<void> => {
 
 const postScript = async (message: any) => {
   if (verse.value === null) {
-    ElMessage({
-      message: t("verse.view.script.error1"),
-      type: "error",
-    });
+    ElMessage.error(t("verse.view.script.error1"));
     return;
   }
   if (!verse.value!.editable) {
-    ElMessage({
-      message: t("verse.view.script.error2"),
-      type: "error",
-    });
+    ElMessage.error(t("verse.view.script.error2"));
     return;
   }
 
@@ -358,10 +346,7 @@ const postScript = async (message: any) => {
     lua: message.lua,
   });
 
-  ElMessage({
-    message: t("verse.view.script.success"),
-    type: "success",
-  });
+  ElMessage.success(t("verse.view.script.success"));
 };
 
 // 格式化JavaScript代码
@@ -408,10 +393,7 @@ const handleMessage = async (e: MessageEvent) => {
         saveResolve = null;
       }
     } else if (params.action === "post:no-change") {
-      ElMessage({
-        message: t("verse.view.script.info"),
-        type: "info",
-      });
+      ElMessage.info(t("verse.view.script.info"));
     } else if (params.action === "update") {
       LuaCode.value = "local verse = {}\nlocal index = ''\n" + params.data.lua;
       JavaScriptCode.value = formatJavaScript(params.data.js);
@@ -492,10 +474,7 @@ const postMessage = (action: string, data: any = {}) => {
       "*"
     );
   } else {
-    ElMessage({
-      message: t("verse.view.script.error3"),
-      type: "error",
-    });
+    ElMessage.error(t("verse.view.script.error3"));
   }
 };
 
@@ -622,10 +601,7 @@ onMounted(async () => {
     }
     initEditor();
   } catch (error: any) {
-    ElMessage({
-      message: error.message,
-      type: "error",
-    });
+    ElMessage.error(error.message);
   } finally {
     loading.value = false;
   }
@@ -834,6 +810,26 @@ const run = async () => {
         }
         return source.data;
       },
+    };
+
+    // 处理文本实体
+    const handleText = (uuid: string) => {
+      const source = scenePlayer.value?.sources.get(uuid);
+      if (!source) {
+        console.error(`找不到UUID为 ${uuid} 的文本实体`);
+        return null;
+      }
+      return source.data;
+    };
+
+    // 处理所有类型的实体(polygen模型、voxel体素、picture图片、text文本、video视频等)
+    const handleEntity = (uuid: string) => {
+      const source = scenePlayer.value?.sources.get(uuid);
+      if (!source) {
+        console.error(`找不到UUID为 ${uuid} 的实体`);
+        return null;
+      }
+      return source.data;
     };
 
     // 补间动画工具类
@@ -1196,7 +1192,7 @@ const run = async () => {
 
     try {
       const wrappedCode = `
-            return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument) {
+            return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument, handleText, handleEntity) {
               const meta = window.meta;
               const verse = window.verse;
               const index = ${verse.value?.id};
@@ -1229,14 +1225,13 @@ const run = async () => {
         point,
         transform,
         Vector3,
-        argument
+        argument,
+        handleText,
+        handleEntity
       );
     } catch (e: any) {
       console.error("执行代码出错:", e);
-      ElMessage({
-        message: `执行代码出错: ${e.message}`,
-        type: "error",
-      });
+      ElMessage.error(`执行代码出错: ${e.message}`);
     }
   }
 };

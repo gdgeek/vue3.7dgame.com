@@ -6,6 +6,7 @@
         <el-header>
           <mr-p-p-header :sorted="sorted" :searched="searched" @search="search" @sort="sort">
             <el-button-group :inline="true">
+              <!-- 原上传路由按钮注释
               <router-link to="/resource/picture/upload">
                 <el-button size="small" type="primary" icon="uploadFilled">
                   <span class="hidden-sm-and-down">{{
@@ -13,6 +14,10 @@
                     }}</span>
                 </el-button>
               </router-link>
+              -->
+              <el-button size="small" type="primary" icon="uploadFilled" @click="openUploadDialog">
+                <span class="hidden-sm-and-down">{{ $t("picture.uploadPicture") }}</span>
+              </el-button>
             </el-button-group>
           </mr-p-p-header>
         </el-header>
@@ -48,23 +53,38 @@
         </el-footer>
       </el-container>
       <br />
+
+      <!-- 新增上传弹窗组件 -->
+      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="picture" :file-type="fileType"
+        @save-resource="savePicture" @success="handleUploadSuccess">
+        {{ $t("picture.uploadFile") }}
+      </mr-p-p-upload-dialog>
+
     </div>
   </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
-import { getPictures, putPicture, deletePicture } from "@/api/v1/resources/index";
+import { getPictures, putPicture, deletePicture, postPicture } from "@/api/v1/resources/index";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import MrPPUploadDialog from "@/components/MrPP/MrPPUploadDialog/index.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import { useRouter } from "vue-router";
+import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
 
 // 组件状态
 const items = ref<any[] | null>(null);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
 const { t } = useI18n();
+const router = useRouter();
+
+// 上传弹窗相关
+const uploadDialogVisible = ref(false);
+const fileType = ref("image/gif, image/jpeg, image/png, image/webp");
 
 // 分页配置
 const pagination = ref({
@@ -97,6 +117,125 @@ const refresh = async () => {
     }
   } catch (error) {
     console.error(error);
+  }
+};
+
+// 打开上传弹窗
+const openUploadDialog = () => {
+  uploadDialogVisible.value = true;
+};
+
+// 上传成功后处理
+const handleUploadSuccess = async (uploadedIds: number | number[]) => {
+  uploadDialogVisible.value = false;
+
+  // 确保uploadedIds是数组
+  const modelIds = Array.isArray(uploadedIds) ? uploadedIds : [uploadedIds];
+  const lastFileId = modelIds[modelIds.length - 1];
+
+  if (modelIds.length > 0) {
+    const loadingInstance = ElLoading.service({
+      text: t("picture.initializingModels"),
+      background: 'rgba(0, 0, 0, 0.7)'
+    });
+
+    // 记录初始化失败的模型ID
+    const failedModelIds = [];
+
+    try {
+      for (let i = 0; i < modelIds.length; i++) {
+        loadingInstance.setText(t("picture.initializingModelProgress", {
+          current: i + 1,
+          total: modelIds.length,
+          percentage: Math.round(((i + 1) / modelIds.length) * 100)
+        }));
+
+        try {
+          // 跳转到模型详情页触发初始化
+          await router.push({
+            path: "/resource/picture/view",
+            query: { id: modelIds[i] },
+          });
+
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        } catch (modelError) {
+          console.error(`初始化图片 ${modelIds[i]} 失败:`, modelError);
+          failedModelIds.push(modelIds[i]);
+        }
+      }
+
+      if (failedModelIds.length > 0) {
+        ElMessage.warning({
+          message: t("picture.partialInitializeSuccess", {
+            success: modelIds.length - failedModelIds.length,
+            failed: failedModelIds.length,
+            total: modelIds.length
+          }),
+          duration: 5000
+        });
+
+        if (failedModelIds.length > 0) {
+          const shouldRetry = await ElMessageBox.confirm(
+            t("picture.retryInitializeFailed", { count: failedModelIds.length }),
+            t("picture.retryTitle"),
+            {
+              confirmButtonText: t("picture.retryConfirm"),
+              cancelButtonText: t("picture.retryCancel"),
+              type: "warning"
+            }
+          ).catch(() => false);
+
+          if (shouldRetry === true) {
+            await handleUploadSuccess(failedModelIds);
+            return;
+          }
+          else {
+            router.push({
+              path: "/resource/picture/view",
+              query: { id: lastFileId },
+            });
+            return;
+          }
+        }
+      } else {
+        ElMessage.success({
+          message: t("picture.batchInitializeSuccess", { count: modelIds.length }),
+          duration: 3000
+        });
+      }
+
+      await refresh();
+
+    } catch (error) {
+      console.error("初始化图片时出错:", error);
+      ElMessage.error(t("picture.initializeError"));
+    } finally {
+      loadingInstance.close();
+    }
+  }
+
+  // 最后跳转到最后上传的模型详情页
+  router.push({
+    path: "/resource/picture/view",
+    query: { id: lastFileId },
+  });
+};
+
+// 保存图片
+const savePicture = async (
+  name: string,
+  file_id: number,
+  totalFiles: number,
+  callback: (id: number) => void
+) => {
+  try {
+    const response = await postPicture({ name, file_id });
+    if (response.data.id) {
+      callback(response.data.id);
+    }
+  } catch (err) {
+    console.error("Failed to save picture:", err);
+    callback(-1);
   }
 };
 
@@ -149,7 +288,7 @@ const named = async (id: string, newValue: string) => {
 };
 
 // 删除确认
-const deletedWindow = async (item: { id: string }) => {
+const deletedWindow = async (item: { id: string }, resetLoading: () => void) => {
   try {
     await ElMessageBox.confirm(
       t("picture.confirm.message1"),
@@ -165,6 +304,7 @@ const deletedWindow = async (item: { id: string }) => {
     ElMessage.success(t("picture.confirm.success"));
   } catch {
     ElMessage.info(t("picture.confirm.info"));
+    resetLoading(); // 操作取消后重置loading状态
   }
 };
 

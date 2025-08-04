@@ -18,8 +18,10 @@ import { translateRouteTitle } from "@/utils/i18n";
 import env from "@/environment"
 import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
-import { AbilityRouter } from "@/utils/ability";
+import { AbilityEdit } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
+import { useUserStore } from "@/store/modules/user";
+import { until } from '@vueuse/core'
 
 // 组件状态
 const appStore = useAppStore();
@@ -31,6 +33,7 @@ const dialog = ref();
 const editor = ref<HTMLIFrameElement | null>();
 let init = false;
 const ability = useAbility();
+const userStore = useUserStore();
 
 // 计算属性
 const id = computed(() => parseInt(route.query.id as string));
@@ -45,6 +48,20 @@ watch(
   async () => {
     await refresh();
   }
+);
+
+// 监听用户信息变化
+watch(
+  () => userStore.userInfo,
+  () => {
+    // 用户信息变化时，向编辑器发送最新用户信息
+    postMessage("user-info", {
+      id: userStore.userInfo?.id || null,
+      roles: userStore.userInfo?.roles || [],
+      role: userStore.getRole()
+    });
+  },
+  { deep: true }
 );
 
 // 资源操作相关函数
@@ -84,71 +101,31 @@ const postMessage = (action: string, data: any = {}) => {
       "*"
     );
   } else {
-    ElMessage({
-      message: t("meta.scene.error"),
-      type: "error",
-    });
+    ElMessage.error(t("meta.scene.error"));
   }
 };
 
 // 获取可用的资源类型
 const getAvailableResourceTypes = () => {
-  const resourceTypes = ['polygen', 'picture', 'video', 'voxel', 'audio']; // 所有资源类型
+
+
+  const resourceTypes = ['polygen', 'picture', 'video', 'voxel', 'audio', 'particle', 'phototype']; // 所有资源类型
   const availableTypes: string[] = [];
 
-  const routes = router.getRoutes();
-  const resourceRoute = routes.find((r) => r.path === '/resource');
-
-  if (resourceRoute && resourceRoute.children) {
-    resourceRoute.children.forEach((child) => {
-      // 从路径中提取资源类型名称
-      const typeName = child.path.split('/').pop();
-
-      if (typeName && resourceTypes.includes(typeName)) {
-        // 检查该路由是否被禁用 (private: true)
-        const isPrivate = child.meta?.private === true;
-
-        // 使用 ability 检查用户是否有权限访问该资源类型
-        // 使用 AbilityRouter 来检查用户是否有权限打开该资源类型对应的路由
-        const resourcePath = `/resource/${typeName}`;
-        const hasPermission = ability.can('open', new AbilityRouter(resourcePath));
-
-        // 只有当资源类型不是私有的且用户有权限时才添加到可用类型列表
-        if (!isPrivate && hasPermission) {
-          availableTypes.push(typeName);
-        }
-      }
-    });
-  }
+  resourceTypes.forEach((type) => {
+    if (ability.can('edit', new AbilityEdit(type))) {
+      availableTypes.push(type);
+    }
+  });
 
   return availableTypes;
 };
 
-// 刷新元数据
-const refresh = async () => {
-  try {
-    const meta = await getMeta(id.value);
-    const availableTypes = getAvailableResourceTypes();
-    console.log(availableTypes);
-
-    // 发送元数据和可用资源类型到编辑器
-    postMessage("load", {
-      data: meta.data,
-      saveable: saveable(meta.data),
-      availableResourceTypes: availableTypes
-    });
-  } catch (error) {
-    console.error(error);
-  }
-};
 
 // 保存元数据
 const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
   if (!saveable) {
-    ElMessage({
-      type: "info",
-      message: t("meta.scene.info"),
-    });
+    ElMessage.info(t("meta.scene.info"));
     return;
   }
 
@@ -184,15 +161,9 @@ const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
 
   try {
     await putMeta(id.value, { data: meta, events });
-    ElMessage({
-      type: "success",
-      message: t("meta.scene.success"),
-    });
+    ElMessage.success(t("meta.scene.success"));
   } catch (error) {
-    ElMessage({
-      type: "error",
-      message: t("meta.scene.saveError"),
-    });
+    ElMessage.error(t("meta.scene.saveError"));
   }
 };
 
@@ -282,17 +253,11 @@ const handleMessage = async (e: MessageEvent) => {
   switch (action) {
     case "save-meta":
       saveMeta(data);
-      ElMessage({
-        type: "success",
-        message: "储存完成",
-      });
+      ElMessage.success("储存完成");
       break;
 
     case "save-meta-none":
-      ElMessage({
-        type: "warning",
-        message: "项目没有改变",
-      });
+      ElMessage.warning("项目没有改变");
       break;
 
     case "load-resource":
@@ -331,15 +296,27 @@ const handleMessage = async (e: MessageEvent) => {
       break;
 
     case "get-available-resource-types":
+
       // 如果编辑器明确请求可用资源类型，就发送它们
+
+      await until(
+        () => userStore.userInfo != null
+      ).toBeTruthy()
       const availableTypes = getAvailableResourceTypes();
+
       postMessage("available-resource-types", availableTypes);
       break;
 
     case "ready":
       if (!init) {
         init = true;
-        refresh();
+        await refresh();
+      } else {
+        postMessage("user-info", {
+          id: userStore.userInfo?.id || null,
+          roles: userStore.userInfo?.roles || [],
+          role: userStore.getRole()
+        });
       }
       break;
 
@@ -349,6 +326,28 @@ const handleMessage = async (e: MessageEvent) => {
   }
 };
 
+// 刷新元数据
+const refresh = async () => {
+  try {
+    const meta = await getMeta(id.value);
+    const availableTypes = getAvailableResourceTypes();
+    console.log(availableTypes);
+
+    // 发送元数据和可用资源类型到编辑器
+    postMessage("load", {
+      data: meta.data,
+      saveable: saveable(meta.data),
+      availableResourceTypes: availableTypes,
+      user: {
+        id: userStore.userInfo?.id || null,
+        roles: userStore.userInfo?.roles || [],
+        role: userStore.getRole() // 获取用户角色
+      }
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
 // 生命周期钩子
 onMounted(() => {
   window.addEventListener("message", handleMessage);

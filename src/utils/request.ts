@@ -162,11 +162,7 @@ service.interceptors.request.use(
 );
 
 function showErrorMessage(message: string, duration = 5000) {
-  ElMessage({
-    message,
-    type: "error",
-    duration,
-  });
+  ElMessage.error({ message, duration });
 }
 
 function handleUnauthorized(router: ReturnType<typeof useRouter>) {

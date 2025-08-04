@@ -72,8 +72,17 @@ function getBreadcrumb() {
     currentRoute.path === "/verse/script" ||
     currentRoute.path === "/meta/script"
   ) {
-    // 确定基础路径
-    const basePath = currentRoute.path.includes('/verse/') ? '/verse/scene' : '/meta/scene';
+    // 确定基础路径和标题key
+    let basePath, titleKey;
+
+    if (currentRoute.path.includes('/verse/')) {
+      basePath = '/verse/scene';
+      titleKey = 'project.sceneEditor';
+    } else {
+      // 从meta实体编辑进入脚本编辑
+      basePath = '/meta/scene';
+      titleKey = 'meta.sceneEditor';
+    }
 
     // 获取保存的场景编辑器的查询参数，如果没有则使用当前的
     const savedSceneQuery = routeQueryMap.value.get(basePath) || {
@@ -86,7 +95,7 @@ function getBreadcrumb() {
     // 创建 sceneBreadcrumb 对象，并携带保存的路由参数
     const sceneBreadcrumb = {
       path: basePath,
-      meta: { title: "project.sceneEditor" },
+      meta: { title: titleKey },
       query: savedSceneQuery,
     } as unknown as RouteLocationMatched;
 

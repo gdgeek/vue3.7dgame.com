@@ -120,10 +120,10 @@ const toggleLike = async (like: Like) => {
   try {
     if (like) {
       await removeLike(props.messageId!);
-      ElMessage({ type: "success", message: t("verse.view.message.message1") });
+      ElMessage.success(t("verse.view.message.message1"));
     } else {
       await postLike(props.messageId!);
-      ElMessage({ type: "success", message: t("verse.view.message.message2") });
+      ElMessage.success(t("verse.view.message.message2"));
     }
   } catch (error) {
     console.error(error);
@@ -144,14 +144,11 @@ const confirmDeletion = async (id: number) => {
       }
     );
     await deleteMessage(id);
-    ElMessage({
-      type: "success",
-      message: t("verse.view.message.confirm.success"),
-    });
+    ElMessage.success(t("verse.view.message.confirm.success"));
     message.value = null;
     router.push({ path: "/community/index" });
   } catch {
-    ElMessage({ type: "info", message: t("verse.view.message.confirm.info") });
+    ElMessage.info(t("verse.view.message.confirm.info"));
   }
 };
 

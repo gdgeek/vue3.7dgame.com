@@ -31,13 +31,16 @@
                             </span>
                           </template>
                           <router-link :to="url(item.id)">
-                            <LazyImg v-if="item.image === null" url="/src/assets/image/none.png" style="
+                            <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
+                            <!--
+                            <LazyImg v-if="item.image === null" url="@/assets/images/items/1.webp" style="
                                 width: 100%;
                                 height: 270px;
                                 object-fit: contain;
                               "></LazyImg>
                             <LazyImg v-else style="width: 100%; height: 270px" fit="contain" :url="item.image.url">
                             </LazyImg>
+                            -->
                           </router-link>
                         </el-card>
                       </div>
@@ -75,6 +78,7 @@
 </template>
 
 <script setup lang="ts">
+import Id2Image from "@/components/Id2Image.vue";
 import { useRouter } from "vue-router";
 import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";

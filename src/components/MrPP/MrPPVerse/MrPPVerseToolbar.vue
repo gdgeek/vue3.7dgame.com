@@ -59,13 +59,9 @@ const deletedWindow = async () => {
       }
     );
     await del();
-    deleteLoading.value = false;
   } catch {
     deleteLoading.value = false;
-    ElMessage({
-      type: "info",
-      message: t("verse.page.list.toolbar.confirm.info"),
-    });
+    ElMessage.info(t("verse.page.list.toolbar.confirm.info"));
   }
 };
 
@@ -75,16 +71,10 @@ const del = async () => {
 
   try {
     await deleteVerse(props.verse.id);
-    ElMessage({
-      type: "success",
-      message: t("verse.page.list.toolbar.confirm.success"),
-    });
+    ElMessage.success(t("verse.page.list.toolbar.confirm.success"));
     emit("deleted", props.verse);
   } catch {
-    ElMessage({
-      type: "info",
-      message: t("verse.page.list.toolbar.confirm.info"),
-    });
+    ElMessage.info(t("verse.page.list.toolbar.confirm.info"));
   }
 };
 
@@ -104,18 +94,12 @@ const submitChange = async (form: any, imageId: number | null) => {
 
   try {
     const response = await putVerse(props.verse.id, data);
-    ElMessage({
-      type: "success",
-      message: t("verse.page.list.toolbar.success"),
-    });
+    ElMessage.success(t("verse.page.list.toolbar.success"));
     changedDialog.value?.hide();
     emit("changed", response.data);
   } catch (error) {
     console.error(error);
-    ElMessage({
-      type: "error",
-      message: t("verse.page.list.toolbar.changeError"),
-    });
+    ElMessage.error(t("verse.page.list.toolbar.changeError"));
   }
 };
 

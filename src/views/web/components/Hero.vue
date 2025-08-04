@@ -58,9 +58,8 @@
                 <span class="device-name">Rokid AR</span>
                 <div class="device-badge">推荐设备</div>
               </div>
-
             </el-link>
-            <!-- 设备展示卡片 -->
+
             <!-- 功能亮点卡片 -->
             <div class="floating-element feature-card" @click="test">
               <div class="feature-icon">
@@ -116,6 +115,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useSettingsStore } from '@/store/modules/settings';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import { VideoPlay, ArrowDown, ArrowRight } from '@element-plus/icons-vue';
 
 // 获取主题设置
 const settingsStore = useSettingsStore();

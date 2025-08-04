@@ -14,7 +14,7 @@
                   &nbsp;
                   <span class="hidden-sm-and-down">{{
                     $t("game.index.title")
-                  }}</span>
+                    }}</span>
                 </el-button>
               </el-button-group>
             </mr-p-p-header>
@@ -105,26 +105,17 @@ const onchange = async (id: number, val: number) => {
     );
     await putVpGuide(id, { order: val });
     await refresh();
-    ElMessage({
-      type: "success",
-      message: t("game.index.form.confirm.success"),
-    });
+    ElMessage.success(t("game.index.form.confirm.success"));
   } catch (e) {
     console.error(e);
-    ElMessage({
-      type: "info",
-      message: t("game.index.form.confirm.info"),
-    });
+    ElMessage.info(t("game.index.form.confirm.info"));
   }
 };
 
 const selected = async (item: any) => {
   try {
     await postVpGuide({ level_id: item.data.id });
-    ElMessage({
-      type: "success",
-      message: t("game.index.success"),
-    });
+    ElMessage.success(t("game.index.success"));
     await refresh();
   } catch (e) {
     console.error(e);
@@ -148,16 +139,10 @@ const del = async (id: number) => {
     );
     await deleteVpGuide(id);
     await refresh();
-    ElMessage({
-      type: "success",
-      message: t("game.index.confirm.success"),
-    });
+    ElMessage.success(t("game.index.confirm.success"));
   } catch (e) {
     console.error(e);
-    ElMessage({
-      type: "info",
-      message: t("game.index.confirm.info"),
-    });
+    ElMessage.info(t("game.index.confirm.info"));
   }
 };
 
