@@ -45,7 +45,6 @@ const src = computed(() => {
 
 
 });
-alert(src.value);
 // 监听语言变化
 watch(
   () => appStore.language,
