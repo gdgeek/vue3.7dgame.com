@@ -179,12 +179,10 @@ const selectedPhototype = async (phototype: PhototypeType, replace: boolean = fa
   phototypeDialogRef.value?.open(phototype.schema.root, (data: any) => {
 
 
-    const { type, ...context } = data;
+    // const { type, ...context } = data;
+    data.context = JSON.stringify(data);
     postMessage("load-phototype", {
-      data: {
-        type,
-        context: JSON.stringify(context)
-      },
+      data,
       type: 'phototype',
       title: phototype.title,
     });
