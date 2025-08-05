@@ -23,7 +23,7 @@
                     <template #header>
                       <b class="card-title" nowrap>{{ title(item) }}</b>
                     </template>
-                    <router-link :to="'/meta/meta-edit?id=' + item.id">111
+                    <router-link :to="'/meta/meta-edit?id=' + item.id">
                       <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
                       <!-- <img v-if="!item.image" src="@/assets/images/items/1.webp"
                         style="width: 100%; height: auto; object-fit: contain" />

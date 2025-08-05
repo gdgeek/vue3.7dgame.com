@@ -7,7 +7,7 @@
           <h3>{{ $t("ai.generation.title") }}</h3>
           <span style="font-style: italic; color: #b0b0b0">{{
             $t("ai.generation.declare")
-            }}</span>
+          }}</span>
         </div>
       </template>
 
@@ -35,22 +35,22 @@
           <el-radio-group v-model="form.quality">
             <el-radio :value="'high'">{{
               $t("ai.generation.form.quality.value1")
-              }}</el-radio>
+            }}</el-radio>
             <el-radio :value="'medium'">{{
               $t("ai.generation.form.quality.value2")
-              }}</el-radio>
+            }}</el-radio>
             <el-radio :value="'low'">{{
               $t("ai.generation.form.quality.value3")
-              }}</el-radio>
+            }}</el-radio>
             <el-radio :value="'extra-low'">{{
               $t("ai.generation.form.quality.value4")
-              }}</el-radio>
+            }}</el-radio>
           </el-radio-group>
         </el-form-item>
 
         <div>
           <el-button style="width: 100%" type="primary" @click="generation(formRef)">{{ $t("ai.generation.form.submit")
-            }}</el-button>
+          }}</el-button>
         </div>
       </el-form>
     </el-card>
@@ -66,6 +66,7 @@ import { Search } from "@element-plus/icons-vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { useRouter } from "vue-router";
 
+import type { CardInfo } from "@/utils/types";
 const { t } = useI18n();
 const loading = ref(false);
 const dialog = ref();
@@ -95,8 +96,8 @@ const imageUrl = computed<string | undefined>(() => {
 });
 
 //const src: Ref<string | undefined> = ref<string | undefined>(undefined);
-const selected = (data: any) => {
-  resource.value = data;
+const selected = (data: CardInfo) => {
+  resource.value = data.context;
 };
 const cancel = () => {
   resource.value = null;

@@ -1,7 +1,7 @@
 <template>
   <div class="verse-scene">
-    <resource-dialog @selected="selected" :on-get-datas="getDatas" @replaced="replaced" ref="dialog">
-
+    <phototype-dialog @selected="selectedPhototype" ref="phototypeDialogRef"></phototype-dialog>
+    <resource-dialog @selected="selected" :on-get-datas="getDatas" ref="dialog">
       <template #bar="{ item }">
         <div v-if="item.type === 'audio'" class="info-container">
           <audio id="audio" controls style="width: 100%; height: 30px" :src="item.context.file.url"
@@ -21,7 +21,7 @@
 
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
 import { getResources } from "@/api/v1/resources";
-import { getPhototypes } from "@/api/v1/phototype";
+import { getPhototypes, PhototypeType } from "@/api/v1/phototype";
 
 const currentPlayingAudio = ref<HTMLAudioElement | null>(null);
 
@@ -48,10 +48,9 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
           input.current
         );
 
+        console.error(response.data);
+        // 处理响应数据，转换为 CardInfo 数组
         const items = response.data.map((item: any) => {
-
-          let enabled: boolean = true;
-
           return ({
             id: item.id,
             context: item,
@@ -117,6 +116,7 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
 };
 import { useRoute, useRouter } from "vue-router";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
+import PhototypeDialog from "@/components/MrPP/PhototypeDialog.vue";
 import { putMeta, getMeta } from "@/api/v1/meta";
 import { useAppStore } from "@/store/modules/app";
 import { translateRouteTitle } from "@/utils/i18n";
@@ -128,6 +128,7 @@ import { useAbility } from "@casl/vue";
 import { useUserStore } from "@/store/modules/user";
 import { until } from '@vueuse/core'
 
+
 // 组件状态
 const appStore = useAppStore();
 const route = useRoute();
@@ -135,6 +136,7 @@ const router = useRouter();
 const fileStore = useFileStore();
 const { t } = useI18n();
 const dialog = ref();
+const phototypeDialogRef = ref<InstanceType<typeof PhototypeDialog>>();
 const editor = ref<HTMLIFrameElement | null>();
 let init = false;
 const ability = useAbility();
@@ -172,14 +174,32 @@ watch(
   { deep: true }
 );
 
+const selectedPhototype = async (phototype: PhototypeType, replace: boolean = false) => {
+  console.error(phototype.schema.root);
+  phototypeDialogRef.value?.open(phototype.schema.root, (iData: any) => {
+    console.error("Phototype selected:", iData);
+    console.error("Phototype phototype:", phototype);
+    postMessage("load-phototype", {
+      data: JSON.stringify(iData),
+      type: 'phototype',
+    });
+  });
+};
 // 资源操作相关函数
-const selected = (data: any) => {
-  postMessage("load-resource", data);
+const selected = async (info: CardInfo, replace: boolean = false) => {
+  if (info.type === 'phototype') {
+    selectedPhototype(info.context as PhototypeType, replace);
+
+    return;
+  }
+  if (replace) {
+    postMessage("replace-resource", info.context);
+  } else {
+    postMessage("load-resource", info.context);
+  }
 };
 
-const replaced = (data: any) => {
-  postMessage("replace-resource", data);
-};
+
 
 const loadResource = (data: any) => {
   dialog.value.open(null, id.value, data.type);
@@ -453,6 +473,7 @@ const refresh = async () => {
 // 生命周期钩子
 onMounted(() => {
   window.addEventListener("message", handleMessage);
+
 });
 
 onBeforeUnmount(() => {

@@ -1,7 +1,7 @@
 <template>
   <div class="image-selector">
     <!-- 1. 资源对话框 -->
-    <ResourceDialog :multiple="false" @selected="onResourceSelected" ref="resourceDialog" />
+    <resource-dialog :multiple="false" @selected="onResourceSelected" ref="resourceDialog" />
 
     <!-- 2. 图片展示区域 -->
     <div class="image-display" @click="showImageSelectDialog">
@@ -36,6 +36,7 @@ import { useFileStore } from '@/store/modules/config'
 import { postFile } from '@/api/v1/files'
 import { ElMessage } from 'element-plus'
 import type { UploadFile, UploadFiles } from 'element-plus'
+import { CardInfo } from '@/utils/types'
 
 const props = withDefaults(defineProps<{
   imageUrl?: string
@@ -79,9 +80,9 @@ const openResourceDialog = () => {
   resourceDialog.value?.openIt({ type: 'picture' })
 }
 
-const onResourceSelected = (data: any) => {
+const onResourceSelected = (data: CardInfo) => {
   emit('image-selected', {
-    imageId: data.image_id,
+    imageId: data.context.image_id,
     itemId: props.itemId
   })
 }

@@ -142,10 +142,10 @@ const active = ref<DataOutput>({
 });
 
 const emit = defineEmits<{
-  (e: 'selected', data: any): void
-  (e: 'replaced', data: any): void
+  (e: 'selected', data: CardInfo, replace: boolean): void
+  // (e: 'replaced', data: CardInfo): void
   (e: 'cancel'): void
-  (e: 'close'): void
+  //(e: 'close'): void
   // (e: 'getDatas', input: DataInput): void
 }>()
 
@@ -181,7 +181,6 @@ const open = async (newValue: any, meta_id: any = null, newType: any = null, ope
   value.value = newValue;
   mode.value = openMode; // 设置打开模式
 
-  // 重置选择状态
   selectedIds.value = [];
   singleSelectedId.value = undefined;
 
@@ -195,7 +194,7 @@ const openIt = async ({ selected = null, binding = null, type }: any, openMode: 
 
 // 替换模式下的选择处理
 const doReplace = (data: CardInfo) => {
-  emit("replaced", data.context);
+  emit("selected", data, true);
   dialogVisible.value = false;
 }
 async function getDatas(input: DataInput): Promise<DataOutput> {
@@ -270,7 +269,7 @@ function clearSearched() {
 
 // 选择和取消操作
 function doSelect(data: CardInfo) {
-  emit("selected", data.context);
+  emit("selected", data, false);
   dialogVisible.value = false;
 }
 
@@ -282,7 +281,8 @@ function doEmpty() {
 const doClose = () => {
   selectedIds.value = [];
   singleSelectedId.value = undefined;
-  emit("close");
+  dialogVisible.value = false;
+  //emit("close");
 }
 
 async function doBatchSelect() {

@@ -32,6 +32,12 @@ interface SchemaProperty {
   };
   minLength?: number;
 }
+/*
+{"type":"object","required":["type","style"],"properties":{"type":{"type":"string","title":"类型","default":"candy","value":"candy","ui:hidden":"true"},"uuid":{"type":"string","title":"唯一id","default":"fadb7153-92ab-01b8-d186-95be849bef5f"}}}
+
+{"type":"object","required":["type","name"],"properties":{"type":{"type":"string","title":"类型","default":"star","value":"star","ui:hidden":"true"},"name":{"type":"string","title":"物品名称","default":"normal"}}}
+
+*/
 
 interface Schema {
   type: string;
