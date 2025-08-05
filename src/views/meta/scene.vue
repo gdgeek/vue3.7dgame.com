@@ -176,11 +176,11 @@ watch(
 
 const selectedPhototype = async (phototype: PhototypeType, replace: boolean = false) => {
   console.error(phototype.schema.root);
-  phototypeDialogRef.value?.open(phototype.schema.root, (iData: any) => {
-    console.error("Phototype selected:", iData);
+  phototypeDialogRef.value?.open(phototype.schema.root, (data: any) => {
+    console.error("Phototype selected:", data);
     console.error("Phototype phototype:", phototype);
     postMessage("load-phototype", {
-      data: JSON.stringify(iData),
+      data,
       type: 'phototype',
     });
   });
