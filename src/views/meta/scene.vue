@@ -182,6 +182,7 @@ const selectedPhototype = async (phototype: PhototypeType, replace: boolean = fa
     postMessage("load-phototype", {
       data,
       type: 'phototype',
+      title: phototype.title,
     });
   });
 };
