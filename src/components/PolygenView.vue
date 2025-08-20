@@ -44,6 +44,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
+import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader.js"; // ★ 新增
 import ElementResizeDetector from "element-resize-detector";
 import { convertToHttps } from "@/assets/js/helper";
 
@@ -213,6 +214,8 @@ const toggleShadow = (value: any) => {
   });
 };
 
+let ktx2Loader: KTX2Loader | null = null; // ★ 新增
+
 // 刷新场景并加载新模型
 const refresh = () => {
   if (!props.file || !props.file.url) {
@@ -223,6 +226,19 @@ const refresh = () => {
   const dracoLoader = new DRACOLoader();
   dracoLoader.setDecoderPath("/js/three.js/libs/draco/");
   gltfLoader.setDRACOLoader(dracoLoader);
+
+
+  // ★ KTX2
+  if (renderer && !ktx2Loader) {
+    ktx2Loader = new KTX2Loader()
+      .setTranscoderPath("/js/three.js/libs/basis/") // 放 basis_transcoder.* 的目录
+      .detectSupport(renderer);                     // 侦测 GPU 支持
+  }
+  if (ktx2Loader) {
+    gltfLoader.setKTX2Loader(ktx2Loader);
+  }
+
+
   const url = convertToHttps(props.file.url);
   gltfLoader.load(
     url,
