@@ -22,6 +22,7 @@ import { useAbility } from "@casl/vue";
 import { useUserStore } from "@/store/modules/user";
 import { UpdateRoutes } from "@/router";
 import Token from "@/store/modules/token";
+import { disposeKTX2Loader } from "@/lib/three/loaders";
 
 const userStore = useUserStore();
 const ability = useAbility(); // 提取到 setup 顶层
@@ -45,6 +46,11 @@ onMounted(async () => {
     userStore.getUserInfo();
     //  userStore.setupRefreshInterval();
   }
+});
+
+// 可选：应用销毁时释放共享 KTX2 Loader 资源（减少热重载显存/内存占用）
+onUnmounted(() => {
+  disposeKTX2Loader();
 });
 </script>
 <style scoped lang="scss">

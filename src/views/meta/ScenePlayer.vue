@@ -11,7 +11,7 @@
 <script setup lang="ts">
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { getConfiguredGLTFLoader } from "@/lib/three/loaders";
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import { convertToHttps } from "@/assets/js/helper";
 import { VOXLoader, VOXMesh } from "@/assets/js/voxel/VOXLoader.js";
@@ -934,7 +934,7 @@ const loadModel = async (
     });
   } else {
     // 处理gltf模型
-    const loader = new GLTFLoader();
+  const loader = getConfiguredGLTFLoader();
     const url = convertToHttps(resource.file.url);
 
     return new Promise((resolve, reject) => {
