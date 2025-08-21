@@ -7,7 +7,7 @@
             <div v-if="meta" class="clearfix">
               <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
                 meta.title
-                }}</el-link>
+              }}</el-link>
               /【{{ $t("meta.script.title") }}】
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
               <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
@@ -72,7 +72,7 @@
                             <pre>
                     <code :class="currentCodeType">{{
                       currentCode
-                    }}</code>
+                      }}</code>
                   </pre>
                           </div>
                         </div>
@@ -159,9 +159,6 @@ import pako from "pako";
 import ScenePlayer from "./ScenePlayer.vue";
 import jsBeautify from "js-beautify";
 import env from "@/environment";
-import { useUnsavedChanges } from "@/composables/meta/useUnsavedChanges";
-import { useFullscreen } from "@/composables/meta/useFullscreen";
-import { buildMetaResourceIndex } from "@/composables/meta/useMetaResourceParser";
 
 // 统一配置 GLTFLoader（DRACO + KTX2）
 const loader = getConfiguredGLTFLoader();
@@ -183,20 +180,14 @@ const userStore = useUserStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 const disabled = ref<boolean>(false);
 const scenePlayer = ref<InstanceType<typeof ScenePlayer>>();
-const { isFullscreen, isSceneFullscreen, toggleEditor, toggleScene } = useFullscreen();
+const isSceneFullscreen = ref(false);
+const isFullscreen = ref(false);
 const showCodeDialog = ref(false);
 const currentCode = ref("");
 const currentCodeType = ref("");
 const codeDialogTitle = ref("");
 const editorContainer = ref<HTMLElement | null>(null);
 const unsavedBlocklyData = ref<any>(null);
-
-// 资源索引构建（抽取后的解析器）
-const getResource = (m: metaInfo) => {
-  const index = buildMetaResourceIndex(m);
-  console.log("最终处理的action结果:", index.action);
-  return index;
-};
 
 // 监听用户信息变化
 watch(
@@ -217,7 +208,18 @@ const handleBlocklyChange = (data: any) => {
 };
 
 const toggleFullscreen = () => {
-  toggleEditor(editor.value?.parentElement || null);
+  if (!document.fullscreenElement) {
+    // 进入全屏
+    const container = editor.value?.parentElement;
+    if (container) {
+      container.requestFullscreen();
+      isFullscreen.value = true;
+    }
+  } else {
+    // 退出全屏
+    document.exitFullscreen();
+    isFullscreen.value = false;
+  }
 };
 
 // 全屏代码显示
@@ -230,8 +232,16 @@ const showFullscreenCode = (type: "lua" | "javascript") => {
 
 // 场景全屏
 const toggleSceneFullscreen = () => {
-  const container = document.querySelector('.runArea') as HTMLElement | null;
-  toggleScene(container);
+  if (!document.fullscreenElement) {
+    const container = document.querySelector(".runArea");
+    if (container) {
+      container.requestFullscreen();
+      isSceneFullscreen.value = true;
+    }
+  } else {
+    document.exitFullscreen();
+    isSceneFullscreen.value = false;
+  }
 };
 
 // 定义单次赋值
@@ -393,13 +403,13 @@ const handleMessage = async (e: MessageEvent) => {
 };
 
 // 标记是否有未保存的更改
-// 未保存变更跟踪（基于 LuaCode 与初始值）
-const { hasUnsavedChanges, markSaved } = useUnsavedChanges(LuaCode, () => initLuaCode.get());
-let saveResolve: (() => void) | null = null; // 保存 Promise 解析
+const hasUnsavedChanges = ref<boolean>(false);
+// 保存操作的 Promise 解析函数
+let saveResolve: (() => void) | null = null;
 
 const save = (): Promise<void> => {
-  markSaved();
-  return new Promise<void>((resolve) => {
+  hasUnsavedChanges.value = false;
+  return new Promise<void>((resolve, reject) => {
     saveResolve = resolve;
     postMessage("save", { language: ["lua", "js"], data: {} });
   });
@@ -455,7 +465,12 @@ onBeforeRouteLeave(async (to, from, next) => {
   }
 });
 
-// 变更监听逻辑已在 useUnsavedChanges 内部完成
+watch(LuaCode, (newValue, oldValue) => {
+  hasUnsavedChanges.value = false;
+  if (newValue !== initLuaCode.get()) {
+    hasUnsavedChanges.value = true;
+  }
+});
 
 const postMessage = (action: string, data: any = {}) => {
   if (editor.value && editor.value.contentWindow) {
@@ -505,8 +520,310 @@ const initEditor = () => {
     console.error("Failed to decompress or parse data:", error);
   }
 };
+const testAction = (data: any, parentUuid?: string) => {
+  // console.log("action: ", data);
+  if (
+    data &&
+    data.parameters &&
+    typeof data.parameters.action !== "undefined"
+  ) {
+    const result = {
+      uuid: data.parameters.uuid,
+      name: data.parameters.action ?? null,
+      parameter: data.parameters.parameter ?? null,
+      type: data.type ?? null,
+      ...(data.type === "Tooltip" ? { parentUuid: parentUuid ?? null } : {})
+    };
+    return result;
+  }
+};
 
-// Polygen 模型处理 (从场景中按 uuid 获取并提供动画播放)
+const testPoint = (data: any, typeList: string[]) => {
+  if (!data) {
+    return;
+  }
+  const isValidType = typeList.find(
+    (type) => data.type.toLowerCase() === type.toLowerCase()
+  );
+
+  if (isValidType) {
+    const animations = data.parameters?.animations ?? null;
+
+    const isPolygen = data.type.toLowerCase() === "polygen";
+    const isPicture = data.type.toLowerCase() === "picture";
+
+    // 给Polygen和Picture，传递moved属性，tooltips属性，rotate属性
+    let hasMoved = false;
+    let hasRotate = false;
+    let hasTooltips = false;
+    if ((isPolygen || isPicture) && data.children && data.children.components) {
+      hasMoved = data.children.components.some(
+        (component: any) => component.type === "Moved"
+      );
+      hasRotate = data.children.components.some(
+        (component: any) => component.type === "Rotate"
+      );
+      hasTooltips = data.children.components.some(
+        (component: any) => component.type === "Tooltip"
+      );
+    }
+
+    return {
+      uuid: data.parameters.uuid,
+      name: data.parameters.name ?? null,
+      ...(isPolygen ? {
+        animations, // 给Polygen，传递animations属性
+        moved: hasMoved,
+        rotate: hasRotate,
+        hasTooltips: hasTooltips
+      } : {}),
+      ...(isPicture ? {
+        moved: hasMoved,
+        rotate: hasRotate,
+        hasTooltips: hasTooltips
+      } : {}),
+    };
+  }
+
+  return undefined;
+};
+
+const addMetaData = (data: any, ret: any) => {
+  const action = testAction(data);
+  if (action) {
+    ret.action.push(action);
+  }
+
+  const entity = testPoint(data, [
+    "polygen",
+    "entity",
+    "voxel",
+    "video",
+    "picture",
+    "text",
+    "voxel",
+    "phototype",
+    "sound",
+  ]);
+
+  if (entity) {
+    ret.entity.push(entity);
+  }
+
+  const polygen = testPoint(data, ["polygen"]);
+  if (polygen) {
+    ret.polygen.push(polygen);
+  }
+
+  const video = testPoint(data, ["video"]);
+  if (video) {
+    ret.video.push(video);
+  }
+
+  const picture = testPoint(data, ["picture"]);
+  if (picture) {
+    ret.picture.push(picture);
+  }
+
+  const sound = testPoint(data, ["sound"]);
+  if (sound) {
+    ret.sound.push(sound);
+  }
+
+  const text = testPoint(data, ["text"]);
+  if (text) {
+    ret.text.push(text);
+  }
+
+  const voxel = testPoint(data, ["voxel"]);
+  if (voxel) {
+    ret.voxel.push(voxel);
+  }
+
+  const phototype = testPoint(data, ["phototype"]);
+  if (phototype) {
+    ret.phototype.push(phototype);
+  }
+  // 处理子元素，并传递当前元素的UUID作为父级UUID
+  if (data.children) {
+    const parentUuid = data.parameters?.uuid;
+
+    if (data.children.components) {
+      data.children.components.forEach((item: any) => {
+        // 处理带有action的组件，并传递父级UUID
+        const componentAction = testAction(item, parentUuid);
+        if (componentAction) {
+          ret.action.push(componentAction);
+        }
+      });
+    }
+
+    // 处理其他子元素
+    Object.keys(data.children).forEach((key) => {
+      if (key !== "components") { // 跳过已处理的组件
+        data.children[key].forEach((item: any) => {
+          addMetaData(item, ret);
+        });
+      }
+    });
+  }
+};
+const getResource = (meta: metaInfo) => {
+  const data = meta.data!
+  // const data = JSON.parse(meta.data!);
+  console.log("data", data);
+  const ret = {
+    action: [],
+    trigger: [],
+    polygen: [],
+    picture: [],
+    video: [],
+    voxel: [],
+    phototype: [],
+    text: [],
+    sound: [],
+    entity: [],
+    events: {
+      inputs: [] as string[],
+      outputs: [] as string[],
+    },
+  };
+  ret.events = meta.events! || { inputs: [], outputs: [] };
+  // ret.events = JSON.parse(meta.events!) || { inputs: [], outputs: [] };
+
+  if (data) addMetaData(data, ret);
+
+  // 打印处理后的action数据，展示带有父级UUID的action
+  console.log("最终处理的action结果:", ret.action);
+
+  return ret;
+};
+
+const handleKeyDown = (e: KeyboardEvent) => {
+  // 检测Ctrl+S或Command+S (Mac)
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault(); // 阻止浏览器默认的保存行为
+    save();
+  }
+};
+
+onBeforeUnmount(() => {
+  window.removeEventListener("message", handleMessage);
+  window.removeEventListener("beforeunload", handleBeforeUnload);
+  window.removeEventListener("keydown", handleKeyDown);
+  document.removeEventListener("keydown", (e) => {
+    if (e.key === "Escape" && showCodeDialog.value) {
+      showCodeDialog.value = false;
+    }
+  });
+  document.removeEventListener("fullscreenchange", () => {
+    isFullscreen.value = !!document.fullscreenElement;
+  });
+  document.removeEventListener("fullscreenchange", () => {
+    isFullscreen.value = !!document.fullscreenElement;
+  });
+  document.removeEventListener("fullscreenchange", () => {
+    isSceneFullscreen.value = !!document.fullscreenElement;
+  });
+});
+onMounted(async () => {
+  window.addEventListener("message", handleMessage);
+  window.addEventListener("keydown", handleKeyDown); // 添加键盘事件监听
+  loadHighlightStyle(isDark.value);
+
+  window.addEventListener("beforeunload", handleBeforeUnload);
+
+  try {
+    loading.value = true;
+    const response = await getMeta(id.value, { expand: "cyber,event,share,metaCode" });
+    // const response = await getMeta(894, { expand: "cyber,event,share,metaCode" });
+    // const response = await getMeta(889, { expand: "cyber,event,share,metaCode" });
+    console.log("response数据", response);
+
+    // 用递归处理层级嵌套
+    const assignAnimations = (
+      entities: any[],
+      modelId: string,
+      animationNames: string[]
+    ) => {
+      entities.forEach((item: any) => {
+        // 如果满足条件则赋值 animations
+        if (item.parameters?.resource === modelId) {
+          item.parameters.animations = animationNames;
+        }
+
+        // 如果当前项还有 children.entities，继续递归处理
+        if (item.children?.entities) {
+          assignAnimations(item.children.entities, modelId, animationNames);
+        }
+      });
+    };
+
+    if (response.data.resources.length > 0) {
+      // 循环处理每个模型文件
+      for (const [index, model] of response.data.resources.entries()) {
+        if (model.type !== "polygen") {
+          meta.value = response.data;
+          continue;
+        }
+
+        const modelUrl = convertToHttps(model.file.url);
+        // const modelUrl = model.file.url;
+        console.error("modelUrl", modelUrl);
+        const modelId = model.id.toString();
+
+        // 等待每个模型加载完成获取数据后再继续
+        await new Promise<void>((resolve, reject) => {
+          loader.load(
+            modelUrl,
+            (gltf) => {
+              const animationNames = gltf.animations.map((clip) => clip.name);
+
+              let data = response.data.data!;
+              // let data = JSON.parse(response.data.data!);
+
+              // 调用递归函数对所有满足条件的项赋值 animations
+              assignAnimations(data.children.entities, modelId, animationNames);
+
+              response.data.data = data;
+              // response.data.data = JSON.stringify(data);
+              meta.value = response.data;
+
+              resolve();
+            },
+            undefined,
+            (error) => {
+              console.error("An error occurred while loading the model:", error);
+              reject(error);
+            }
+          );
+        });
+      }
+    } else {
+      meta.value = response.data;
+    }
+
+    console.log("meta", meta.value);
+    initEditor();
+  } catch (error: any) {
+    alert(error.message);
+    ElMessage.error(error.message);
+  } finally {
+    loading.value = false;
+  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && showCodeDialog.value) {
+      showCodeDialog.value = false;
+    }
+  });
+  document.addEventListener("fullscreenchange", () => {
+    isFullscreen.value = !!document.fullscreenElement;
+  });
+  document.addEventListener("fullscreenchange", () => {
+    isSceneFullscreen.value = !!document.fullscreenElement;
+  });
+});
+
 const handlePolygen = (uuid: string) => {
   if (!scenePlayer.value) {
     console.error("ScenePlayer未初始化");
@@ -515,34 +832,57 @@ const handlePolygen = (uuid: string) => {
 
   const modelUuid = uuid.toString();
 
-  const getModel = (id: string, retries = 3): THREE.Object3D | null => {
-    const source = scenePlayer.value?.sources.get(id);
-    if (source && source.type === "model") return source.data as THREE.Object3D;
-    if (retries > 0) setTimeout(() => getModel(id, retries - 1), 100);
+  // 添加重试机制
+  const getModel = (uuid: string, retries = 3): THREE.Object3D | null => {
+    const source = scenePlayer.value?.sources.get(uuid);
+    if (source && source.type === "model") {
+      return source.data as THREE.Object3D;
+    }
+
+    if (retries > 0) {
+      console.log(`模型未找到，剩余重试次数: ${retries}`);
+      setTimeout(() => getModel(uuid, retries - 1), 100);
+    }
     return null;
   };
 
   const model = getModel(modelUuid);
+
+  console.log("查找模型:", {
+    requestedUuid: modelUuid,
+    availableModels: Array.from(scenePlayer.value.sources.keys()),
+    modelExists: scenePlayer.value.sources.has(modelUuid),
+    foundModel: model,
+  });
+
   if (!model) {
     console.error(`找不到UUID为 ${modelUuid} 的模型`);
     return null;
   }
+
   return {
     playAnimation: (animationName: string) => {
+      console.log("播放动画:", {
+        uuid: modelUuid,
+        animationName,
+        model: model,
+      });
       scenePlayer.value?.playAnimation(modelUuid, animationName);
     },
   };
 };
 
-// 声音处理
 const handleSound = (uuid: string): HTMLAudioElement | undefined => {
   const audioUrl = scenePlayer.value?.getAudioUrl(uuid);
   if (!audioUrl) {
     console.error(`找不到UUID为 ${uuid} 的音频资源`);
     return undefined;
   }
-  return new Audio(audioUrl);
+
+  const audio = new Audio(audioUrl);
+  return audio;
 };
+
 const run = async () => {
   // 保存当前的全屏状态
   const wasFullscreen = isFullscreen.value;
