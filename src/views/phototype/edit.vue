@@ -3,16 +3,24 @@
     <br>
     <el-row :gutter="20" style="margin: 0px 18px 0">
       <el-col :sm="16">
+
         <el-card class="box-card">
+
           <template #header>
             <b id="title">json格式</b>
           </template>
+          <el-card class="box-card" style="margin-bottom: 10px">
+
+            <el-input v-if="phtototype" v-model="phtototype.type" style="width: 240px" placeholder="Please input" />
+
+          </el-card>
 
           <json-schema-editor class="schema" :value="tree" disabledType lang="zh_CN" custom :extra="extraSetting" />
-
-        </el-card><br />
-        <el-card class="box-card">
-
+          <br />
+          <el-card class="box-card" style="min-height: 500px">
+            <codemirror v-model="jsonStr" :readOnly="false" />
+          </el-card>
+          <br />
           <el-button icon="Edit" @click="saveChanges" type="primary" size="small" style="width: 100%">
             保存
           </el-button>
@@ -26,10 +34,15 @@
       </el-col>
 
       <el-col :sm="8">
+        <div v-if="phtototype">
 
-        <el-card class="box-card" style="min-height: 500px">
-          <codemirror v-model="jsonStr" :readOnly="false" />
-        </el-card>
+          <Resource v-if="phtototype" @selected="handleSelected" :resource="phtototype.resource"></Resource>
+
+        </div>
+        <br />
+
+        <br />
+
 
       </el-col>
     </el-row>
@@ -44,8 +57,21 @@
 import { getPhototype, putPhototype } from "@/api/v1/phototype";
 import Codemirror from "@/components/Codemirror.vue";
 import GenerateSchema from "generate-schema";
+import Resource from "@/components/Resource.vue";
 
 import { useRoute } from "vue-router";
+const handleSelected = async (data: any) => {
+  if (!phtototype.value) {
+    return;
+  }
+  if (phtototype.value.resource_id == data.id) {
+    return;
+  }
+  const response = await putPhototype(id.value, {
+    resource_id: data.id,
+  });
+  phtototype.value = response.data;
+};
 const route = useRoute();
 const id = computed(() => route.query.id as string);
 const tree = ref({
@@ -58,6 +84,7 @@ const tree = ref({
 const saveChanges = async () => {
   try {
     await putPhototype(id.value, {
+      type: phtototype.value.type,
       schema: tree.value,
     });
     ElMessage.success("保存成功");
@@ -99,7 +126,6 @@ const refresh = async () => {
 };
 onMounted(() => {
   refresh();
-  //alert(1)
 });
 const extraSetting = {
   integer: {

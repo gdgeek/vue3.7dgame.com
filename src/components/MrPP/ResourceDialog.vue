@@ -143,10 +143,7 @@ const active = ref<DataOutput>({
 
 const emit = defineEmits<{
   (e: 'selected', data: CardInfo, replace: boolean): void
-  // (e: 'replaced', data: CardInfo): void
   (e: 'cancel'): void
-  //(e: 'close'): void
-  // (e: 'getDatas', input: DataInput): void
 }>()
 
 // 事件和国际化

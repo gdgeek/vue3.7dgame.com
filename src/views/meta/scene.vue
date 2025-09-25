@@ -127,6 +127,7 @@ import { AbilityEdit } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
 import { useUserStore } from "@/store/modules/user";
 import { until } from '@vueuse/core'
+import { da } from "element-plus/es/locale";
 
 
 // 组件状态
@@ -175,14 +176,15 @@ watch(
 );
 
 const selectedPhototype = async (phototype: PhototypeType, replace: boolean = false) => {
-  //console.error(phototype.schema.root);
+
+  console.error(phototype.resource);
   phototypeDialogRef.value?.open(phototype.schema.root, (data: any) => {
-
-
-    // const { type, ...context } = data;
-    data.context = JSON.stringify(data);
+    // const d = { ...data, id: phototype.id };
     postMessage("load-phototype", {
-      data,
+      data: {
+        type: phototype.type,
+        context: JSON.stringify(data)
+      },
       type: 'phototype',
       title: phototype.title,
     });
@@ -191,8 +193,8 @@ const selectedPhototype = async (phototype: PhototypeType, replace: boolean = fa
 // 资源操作相关函数
 const selected = async (info: CardInfo, replace: boolean = false) => {
   if (info.type === 'phototype') {
+    console.error(info.context);
     selectedPhototype(info.context as PhototypeType, replace);
-
     return;
   }
   if (replace) {
@@ -378,7 +380,7 @@ const handleMessage = async (e: MessageEvent) => {
   switch (action) {
     case "save-meta":
       saveMeta(data);
-      ElMessage.success("储存完成");
+      // ElMessage.success("储存完成");
       break;
 
     case "save-meta-none":

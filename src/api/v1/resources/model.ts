@@ -1,12 +1,5 @@
-export type ImageDetails = {
-  id?: number;
-  md5: string;
-  type: string;
-  url: string;
-  filename: string;
-  size: number;
-  key: string;
-};
+
+import { FileType } from  "../../user/model";
 
 export type Author = {
   id: number;
@@ -22,8 +15,8 @@ export type ResourceInfo = {
   uuid: string;
   type: string;
   image_id?: number;
-  image?: ImageDetails;
-  file: ImageDetails;
+  image?: FileType;
+  file: FileType;
   created_at: string;
   info: string;
   author?: Author;
