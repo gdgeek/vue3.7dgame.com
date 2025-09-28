@@ -84,7 +84,7 @@ export const getPhototypes = (
     query["page"] = page;
   }
   const url = path.join("v1", "phototypes") + qs.stringify(query, true);
-  //alert(url);
+
   return request<PhototypeType[]>({
     url,
     method: "get",

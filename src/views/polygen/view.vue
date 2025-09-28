@@ -11,7 +11,7 @@
             </template>
             <div class="box-item">
               <div v-if="polygenData">
-                {{ polygenData.file }}
+
                 <polygen-view ref="three" :file="polygenData.file" @loaded="loaded" @progress="progress" />
                 <el-progress style="width: 100%;" :stroke-width="18" v-if="percentage !== 100" :text-inside="true"
                   :percentage="percentage">

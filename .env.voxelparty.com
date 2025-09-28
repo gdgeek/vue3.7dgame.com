@@ -27,6 +27,7 @@ VITE_APP_EDITOR_URL = "https://editor.voxelparty.com"
 # VITE_APP_BASE_API = 'https://api.01xr.com'
 VITE_APP_BASE_API = "https://api.voxelparty.com"
 VITE_APP_AI_API = "https://ai.voxelparty.com"
+VITE_APP_A1_API = "https://a1.voxelparty.com"
 VITE_APP_BASE_URL = 'https://voxelparty.com'
  
 VITE_APP_BASE_MODE = 'voxelparty.com'

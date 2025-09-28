@@ -3,7 +3,6 @@
     <br>
     <el-row :gutter="20" style="margin: 0px 18px 0">
       <el-col :sm="16">
-
         <el-card class="box-card">
 
           <template #header>
@@ -11,7 +10,7 @@
           </template>
           <el-card class="box-card" style="margin-bottom: 10px">
 
-            <el-input v-if="phtototype" v-model="phtototype.type" style="width: 240px" placeholder="Please input" />
+            <el-input v-if="phototype" v-model="phototype.type" style="width: 240px" placeholder="Please input" />
 
           </el-card>
 
@@ -34,10 +33,12 @@
       </el-col>
 
       <el-col :sm="8">
-        <div v-if="phtototype">
+        <div v-if="phototype">
 
-          <Resource v-if="phtototype" @selected="handleSelected" :resource="phtototype.resource"></Resource>
-
+          <Resource v-if="phototype" @selected="handleSelected" :resource="phototype.resource"></Resource>
+          <br />
+          <Transform v-if="phototype && phototype.data && phototype.data.transform" :data="phototype.data.transform"
+            @save="handleTransformSave" />
         </div>
         <br />
 
@@ -58,19 +59,28 @@ import { getPhototype, putPhototype } from "@/api/v1/phototype";
 import Codemirror from "@/components/Codemirror.vue";
 import GenerateSchema from "generate-schema";
 import Resource from "@/components/Resource.vue";
-
+import Transform from "@/components/Transform.vue";
 import { useRoute } from "vue-router";
+
+const handleTransformSave = async (transform: any) => {
+
+  const response = await putPhototype(id.value, {
+    data: { ...phototype.value.data, transform }
+  });
+  ElMessage.success("保存成功");
+  phototype.value = response.data;
+};
 const handleSelected = async (data: any) => {
-  if (!phtototype.value) {
+  if (!phototype.value) {
     return;
   }
-  if (phtototype.value.resource_id == data.id) {
+  if (phototype.value.resource_id == data.id) {
     return;
   }
   const response = await putPhototype(id.value, {
     resource_id: data.id,
   });
-  phtototype.value = response.data;
+  phototype.value = response.data;
 };
 const route = useRoute();
 const id = computed(() => route.query.id as string);
@@ -84,7 +94,7 @@ const tree = ref({
 const saveChanges = async () => {
   try {
     await putPhototype(id.value, {
-      type: phtototype.value.type,
+      type: phototype.value.type,
       schema: tree.value,
     });
     ElMessage.success("保存成功");
@@ -103,14 +113,26 @@ const jsonStr = computed({
     }
   },
 });
-const phtototype = ref<any>(null);
+const phototype = ref<any>(null);
 const refresh = async () => {
   try {
     const response = await getPhototype(id.value);
-    phtototype.value = response.data;
+    phototype.value = response.data;
+    if (phototype.value) {
+      if (!phototype.value.data) {
+        phototype.value.data = {}
+      }
+      if (!phototype.value.data.transform) {
+        phototype.value.data.transform = {
+          scale: { x: 1, y: 1, z: 1 },
+          rotate: { x: 0, y: 0, z: 0 },
+          position: { x: 0, y: 0, z: 0 },
+        }
+      }
 
-    if (phtototype.value && phtototype.value.schema) {
-      tree.value = phtototype.value.schema;
+    }
+    if (phototype.value && phototype.value.schema) {
+      tree.value = phototype.value.schema;
     } else {
       tree.value = {
         root: {

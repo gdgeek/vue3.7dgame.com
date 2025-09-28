@@ -1,8 +1,8 @@
 <template>
   <div class="verse-scene">
     <KnightDataDialog ref="knightDataRef"></KnightDataDialog>
-    <MetaDialog @selected="selected" @cancel="cancel" ref="metaDialogRef"></MetaDialog>
-    <PrefabDialog @selected="selected" @cancel="cancel" ref="prefabDialogRef"></PrefabDialog>
+    <MetaDialog @selected="selected" ref="metaDialogRef"></MetaDialog>
+    <!--<PrefabDialog @selected="selected" ref="prefabDialogRef"></PrefabDialog>-->
     <el-container>
       <el-main>
         <iframe id="editor" ref="editor" :src="src" class="content" height="100%" width="100%"></iframe>
@@ -15,7 +15,7 @@
 import { takePhoto } from '@/api/v1/snapshot'
 import { useRoute, useRouter } from "vue-router";
 import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
-import PrefabDialog from "@/components/MrPP/PrefabDialog.vue";
+//import PrefabDialog from "@/components/MrPP/PrefabDialog.vue";
 import MetaDialog from "@/components/MrPP/MetaDialog.vue";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
 import { putVerse, getVerse, VerseData } from "@/api/v1/verse";
@@ -31,12 +31,13 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const editor = ref<HTMLIFrameElement>();
+import qs from "querystringify";
 let init = false;
 const saveable = ref(false);
 
 // 对话框引用
 const knightDataRef = ref<InstanceType<typeof KnightDataDialog>>();
-const prefabDialogRef = ref<InstanceType<typeof PrefabDialog>>();
+//const prefabDialogRef = ref<InstanceType<typeof PrefabDialog>>();
 const metaDialogRef = ref<InstanceType<typeof MetaDialog>>();
 
 // 计算属性
@@ -48,10 +49,17 @@ const title = computed(() => {
 const id = computed(() => parseInt(route.query.id as string));
 
 const src = computed(() => {
-  return `${env.editor}/three.js/editor/verse-editor.html?language=${appStore.language}&timestamp=${Date.now()}`;
+  const query: Record<string, any> = {
+    language: appStore.language,
+    timestamp: Date.now(),
+    a1_api: env.a1
+  };
+
+  const url = `${env.editor}three.js/editor/verse-editor.html` + qs.stringify(query, true);
+
+  return url;
 });
 
-const cancel = () => { };
 
 // 监听语言变化
 watch(
@@ -103,10 +111,10 @@ const setupPrefab = async ({ meta_id, data, uuid }: any) => {
 };
 
 // 添加预制件
-const addPrefab = () => {
-  prefabDialogRef.value?.open(id.value);
-  ElMessage.info(t("verse.view.sceneEditor.info1"));
-};
+//const addPrefab = () => {
+//  prefabDialogRef.value?.open(id.value);
+//  ElMessage.info(t("verse.view.sceneEditor.info1"));
+//};
 
 // 添加实体
 const addMeta = () => {
@@ -163,37 +171,37 @@ const saveVerse = async (data: any) => {
   }
   await putVerse(id.value, { data: verse });
 
-  // ElMessageBox.confirm(
-  //   '保存成功，是否发布？',
-  //   '发布场景',
-  //   {
-  //     confirmButtonText: 'OK',
-  //     cancelButtonText: 'Cancel',
-  //     type: 'warning',
-  //   }
-  // )
-  //   .then(async () => {
-  //     await takePhoto(id.value)
-  //     ElMessage({
-  //       type: 'success',
-  //       message: '发布成功',
-  //     })
-  //   })
-  //   .catch(() => {
-  //     ElMessage({
-  //       type: 'info',
-  //       message: '取消发布',
-  //     })
-  //   })
+  ElMessageBox.confirm(
+    '保存成功，是否发布？',
+    '发布场景',
+    {
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+    }
+  )
+    .then(async () => {
+      await takePhoto(id.value)
+      ElMessage({
+        type: 'success',
+        message: '发布成功',
+      })
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '取消发布',
+      })
+    })
 };
 
 //发布场景
 const releaseVerse = async (data: any) => {
   if (!data.verse) {
+
+    ElMessage.error("没有可发布的项目");
     return;
   }
-  console.warn(data.verse);
-  const verse = data.verse;
 
   if (!saveable.value) {
     ElMessage.info("没有发布权限");
@@ -242,14 +250,15 @@ const handleMessage = async (e: MessageEvent) => {
       addMeta();
       break;
 
-    case "add-prefab":
-      addPrefab();
-      break;
+    //  case "add-prefab":
+    //    addPrefab();
+    //    break;
 
     case "save-verse":
 
-      ElMessage.success("储存完成");
       saveVerse(data);
+      ElMessage.success("储存完成");
+
       break;
 
     case "release-verse":

@@ -27,6 +27,7 @@ VITE_APP_EDITOR_URL = "https://editor.1ucb.com"
 # VITE_APP_BASE_API = 'https://api.01xr.com'
 VITE_APP_BASE_API = "https://api.1ucb.com"
 VITE_APP_AI_API = "https://ai.1ucb.com"
+VITE_APP_A1_API = "https://a1.1ucb.com"
 VITE_APP_BASE_URL = 'https://1ucb.com'
  
 VITE_APP_BASE_MODE = '1ucb.com'

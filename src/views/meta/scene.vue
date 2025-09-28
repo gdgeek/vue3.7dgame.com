@@ -129,6 +129,7 @@ import { useUserStore } from "@/store/modules/user";
 import { until } from '@vueuse/core'
 import { da } from "element-plus/es/locale";
 
+import qs from "querystringify";
 
 // 组件状态
 const appStore = useAppStore();
@@ -148,7 +149,17 @@ const id = computed(() => parseInt(route.query.id as string));
 const title = computed(() => route.query.title?.slice(4) as string);
 const src = computed(() => {
 
-  return `${env.editor}/three.js/editor/meta-editor.html?language=${appStore.language}&timestamp=${Date.now()}`;
+
+  const query: Record<string, any> = {
+    language: appStore.language,
+    timestamp: Date.now(),
+    a1_api: env.a1
+  };
+
+  const url = `${env.editor}three.js/editor/meta-editor.html` + qs.stringify(query, true);
+
+  return url;
+  //return `${env.editor}/three.js/editor/meta-editor.html?language=${appStore.language}&timestamp=${Date.now()}`;
 
 
 
@@ -469,6 +480,9 @@ const refresh = async () => {
         id: userStore.userInfo?.id || null,
         roles: userStore.userInfo?.roles || [],
         role: userStore.getRole() // 获取用户角色
+      },
+      system: {
+        a1: import.meta.env.VITE_APP_A1_API
       }
     });
   } catch (error) {

@@ -13,6 +13,7 @@ VITE_APP_BASE_URL = 'https://7dgame.com'
 
 
 VITE_APP_AI_API="https://rodin.7dgame.com"
+VITE_APP_A1_API="https://a1.7dgame.com"
 
 VITE_APP_BASE_MODE = '7dgame.com'
 

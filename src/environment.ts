@@ -53,7 +53,6 @@ function title(): string {
 function subtitle(): string {
   return "支持Rokid设备";
 }
-
 const environment = {
   ip: GetIP(),
   api: ReplaceURL(import.meta.env.VITE_APP_BASE_API || ""),
@@ -61,8 +60,9 @@ const environment = {
   blockly: ReplaceURL(import.meta.env.VITE_APP_BLOCKLY_URL || ""),
   editor: ReplaceURL(import.meta.env.VITE_APP_EDITOR_URL || ""),
   auth_api: ReplaceURL(import.meta.env.VITE_APP_AUTH_API || ""),
-  ai: ReplaceURL(import.meta.env.VIET_APP_AI_API || ""),
-  base: ReplaceURL(import.meta.env.VIET_APP_BASE_URL || ""),
+  ai: ReplaceURL(import.meta.env.VITE_APP_AI_API || ""),
+  base: ReplaceURL(import.meta.env.VITE_APP_BASE_URL || ""),
+  a1: ReplaceURL(import.meta.env.VITE_APP_A1_API || ""),
   version: 3,
   subtitle,
   title,
