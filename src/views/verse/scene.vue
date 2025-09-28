@@ -55,7 +55,7 @@ const src = computed(() => {
     a1_api: env.a1
   };
 
-  const url = `${env.editor}three.js/editor/verse-editor.html` + qs.stringify(query, true);
+  const url = `${env.editor}/three.js/editor/verse-editor.html` + qs.stringify(query, true);
 
   return url;
 });
