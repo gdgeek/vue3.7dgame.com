@@ -647,6 +647,7 @@ const routes: RouteRecordRaw[] = [
           title: "Phototype",
           icon: "el-icon-Management",
           hidden: true,
+          private: true,
           alwaysShow: false,
           params: null,
         },
