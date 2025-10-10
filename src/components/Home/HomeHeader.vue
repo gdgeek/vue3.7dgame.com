@@ -22,6 +22,11 @@
       <el-col :md="10" :span="24">
         <div class="hidden-sm-and-down hidden-box"></div>
         <div :class="['home-header-button', { mobile: isMobile }]">
+
+          <!--一个二维码icon按钮 -->
+          <el-button size="small" type="primary" :icon="Menu" @click="showQRCode()">
+         登录码
+           </el-button>
           <el-button size="small" type="primary" @click="gotoEdit">{{
             $t("homepage.edit.title")
             }}</el-button>
@@ -43,6 +48,7 @@ import { useUserStore } from "@/store/modules/user";
 import { useScreenStore } from "@/store";
 
 
+import { Menu } from "@element-plus/icons-vue";
 const codeDialog = ref<any>(null);
 
 const userStore = useUserStore();

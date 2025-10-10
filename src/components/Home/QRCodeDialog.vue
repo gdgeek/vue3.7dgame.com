@@ -3,8 +3,9 @@
     <el-dialog v-model="dialogVisible" title="登陆码" width="50%" align-center>
 
       <div class="qrcode-container">
-        <div :class="['qrcode-bg', { 'dark-theme': isDark }]">
-          <qrcode-vue :value="value" :size="size" level="H"></qrcode-vue>
+       
+        <div v-loading="code === ''" :class="['qrcode-bg', { 'dark-theme': isDark }]">
+          <qrcode-vue v-if="code !== ''" :value="code" :size="size" level="H"></qrcode-vue>
         </div>
         <p class="qrcode-tip">请使用手机扫描二维码登录</p>
       </div>
@@ -13,38 +14,62 @@
 </template>
 
 <script setup lang="ts">
-
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import Token from "@/store/modules/token";
 import QrcodeVue from "qrcode.vue";
 import { useSettingsStore } from '@/store/modules/settings';
 import { ThemeEnum } from '@/enums/ThemeEnum';
+import { getUserLinked } from '@/api/v1/tools';
 const dialogVisible = ref(false);
-const size = ref<number>(400); // 二维码尺寸，初始为400px
+const size = ref<number>(400);
+const code = ref<string>("");
 
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
 
 const openDialog = () => {
   dialogVisible.value = true;
-};
-const value = computed(() => {
-  const token = Token.getToken();
-  return 'web_' + token.refreshToken;
-});
+}
 
-// 优化二维码自适应缩放逻辑
+// 防抖优化 resize 事件
+let resizeTimer: NodeJS.Timeout | null = null;
 const onResize = () => {
-  // 取窗口宽高的40%，并限制最小180px，最大400px
-  const maxSize = Math.min(window.innerWidth, window.innerHeight) * 0.4;
-  size.value = Math.max(180, Math.min(400, Math.floor(maxSize)));
+  if (resizeTimer) {
+    clearTimeout(resizeTimer);
+  }
+  
+  resizeTimer = setTimeout(() => {
+    try {
+      const maxSize = Math.min(window.innerWidth, window.innerHeight) * 0.4;
+      size.value = Math.max(180, Math.min(400, Math.floor(maxSize)));
+    } catch (error) {
+      console.warn('Failed to calculate QR code size:', error);
+      size.value = 300; // 默认尺寸
+    }
+  }, 100);
 };
 
-onMounted(() => {
-  onResize(); // Initialize size
-  window.addEventListener("resize", onResize);
+onMounted(async () => {
+  try {
+    onResize();
+    window.addEventListener("resize", onResize);
+    const userLinked = await getUserLinked();
+    if (userLinked?.data.key) {
+      code.value = 'web_' + userLinked.data.key;
+    } else {
+      console.error('No refresh token available');
+      code.value = ''; // 保持 loading 状态
+    }
+  } catch (error) {
+    console.error('Failed to initialize QR code:', error);
+    code.value = '';
+  }
 });
 
 onUnmounted(() => {
+  if (resizeTimer) {
+    clearTimeout(resizeTimer);
+  }
   window.removeEventListener("resize", onResize);
 });
 

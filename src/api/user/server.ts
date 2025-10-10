@@ -17,3 +17,4 @@ export const resetPassword = (oldPassword: string, password: string) => {
     data: { oldPassword, password },
   });
 };
+
