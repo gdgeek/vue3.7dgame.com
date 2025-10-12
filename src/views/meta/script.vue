@@ -144,9 +144,9 @@
 </template>
 
 <script setup lang="ts">
+
 import { useRoute } from "vue-router";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
-import { cybersType, postCyber, putCyber } from "@/api/v1/cyber";
 import { ElMessage } from "element-plus";
 import { useAppStore } from "@/store/modules/app";
 import { ThemeEnum } from "@/enums/ThemeEnum";
@@ -611,6 +611,7 @@ const addMetaData = (data: any, ret: any) => {
   }
 
   const polygen = testPoint(data, ["polygen"]);
+
   if (polygen) {
     ret.polygen.push(polygen);
   }
@@ -743,12 +744,13 @@ onMounted(async () => {
     // 用递归处理层级嵌套
     const assignAnimations = (
       entities: any[],
-      modelId: string,
+      modelId: number,
       animationNames: string[]
     ) => {
       entities.forEach((item: any) => {
         // 如果满足条件则赋值 animations
-        if (item.parameters?.resource === modelId) {
+        if (item.parameters?.resource.toString() === modelId.toString()) {
+
           item.parameters.animations = animationNames;
         }
 
@@ -770,7 +772,7 @@ onMounted(async () => {
         const modelUrl = convertToHttps(model.file.url);
         // const modelUrl = model.file.url;
         console.error("modelUrl", modelUrl);
-        const modelId = model.id.toString();
+        const modelId = model.id;
 
         // 等待每个模型加载完成获取数据后再继续
         await new Promise<void>((resolve, reject) => {
