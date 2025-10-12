@@ -16,6 +16,7 @@
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
+    "test": "vitest",
     "lint:eslint": "eslint  --fix --ext .ts,.js,.vue ./src ",
     "lint:prettier": "prettier --write \"**/*.{js,cjs,ts,json,tsx,css,less,scss,vue,html,md}\"",
     "lint:stylelint": "stylelint  \"**/*.{css,scss,vue}\" --fix",
@@ -169,7 +170,8 @@
     "vite-plugin-mock-dev-server": "^1.8.4",
     "vite-plugin-svg-icons": "^2.0.1",
     "vite-plugin-vue-devtools": "^7.7.2",
-    "vue-tsc": "^2.2.0"
+    "vue-tsc": "^2.2.0",
+    "vitest": "^1.1.5"
   },
   "repository": "https://gitee.com/youlaiorg/vue3-element-admin.git",
   "author": "",

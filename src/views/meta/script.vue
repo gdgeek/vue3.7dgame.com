@@ -7,7 +7,7 @@
             <div v-if="meta" class="clearfix">
               <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
                 meta.title
-              }}</el-link>
+                }}</el-link>
               /【{{ $t("meta.script.title") }}】
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
               <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
@@ -72,7 +72,7 @@
                             <pre>
                     <code :class="currentCodeType">{{
                       currentCode
-                      }}</code>
+                    }}</code>
                   </pre>
                           </div>
                         </div>
@@ -156,6 +156,7 @@ import * as THREE from "three";
 import { getConfiguredGLTFLoader } from "@/lib/three/loaders";
 import { convertToHttps } from "@/assets/js/helper";
 import pako from "pako";
+import { buildMetaResourceIndex } from "@/components/Meta/useMetaResourceParser";
 import ScenePlayer from "./ScenePlayer.vue";
 import jsBeautify from "js-beautify";
 import env from "@/environment";
@@ -487,6 +488,17 @@ const postMessage = (action: string, data: any = {}) => {
   }
 };
 const test = ref<any>();
+// wrapper for extracted resource parser
+const getResource = (m: metaInfo) => {
+  try {
+    return buildMetaResourceIndex(m);
+  } catch (e) {
+    console.error('buildMetaResourceIndex error', e);
+    return {
+      action: [], trigger: [], polygen: [], picture: [], video: [], voxel: [], phototype: [], text: [], sound: [], entity: [], events: { inputs: [], outputs: [] }
+    };
+  }
+};
 const initEditor = () => {
   if (!meta.value) return;
   if (!ready) return;
@@ -520,185 +532,7 @@ const initEditor = () => {
     console.error("Failed to decompress or parse data:", error);
   }
 };
-const testAction = (data: any, parentUuid?: string) => {
-  // console.log("action: ", data);
-  if (
-    data &&
-    data.parameters &&
-    typeof data.parameters.action !== "undefined"
-  ) {
-    const result = {
-      uuid: data.parameters.uuid,
-      name: data.parameters.action ?? null,
-      parameter: data.parameters.parameter ?? null,
-      type: data.type ?? null,
-      ...(data.type === "Tooltip" ? { parentUuid: parentUuid ?? null } : {})
-    };
-    return result;
-  }
-};
-
-const testPoint = (data: any, typeList: string[]) => {
-  if (!data) {
-    return;
-  }
-  const isValidType = typeList.find(
-    (type) => data.type.toLowerCase() === type.toLowerCase()
-  );
-
-  if (isValidType) {
-    const animations = data.parameters?.animations ?? null;
-
-    const isPolygen = data.type.toLowerCase() === "polygen";
-    const isPicture = data.type.toLowerCase() === "picture";
-
-    // 给Polygen和Picture，传递moved属性，tooltips属性，rotate属性
-    let hasMoved = false;
-    let hasRotate = false;
-    let hasTooltips = false;
-    if ((isPolygen || isPicture) && data.children && data.children.components) {
-      hasMoved = data.children.components.some(
-        (component: any) => component.type === "Moved"
-      );
-      hasRotate = data.children.components.some(
-        (component: any) => component.type === "Rotate"
-      );
-      hasTooltips = data.children.components.some(
-        (component: any) => component.type === "Tooltip"
-      );
-    }
-
-    return {
-      uuid: data.parameters.uuid,
-      name: data.parameters.name ?? null,
-      ...(isPolygen ? {
-        animations, // 给Polygen，传递animations属性
-        moved: hasMoved,
-        rotate: hasRotate,
-        hasTooltips: hasTooltips
-      } : {}),
-      ...(isPicture ? {
-        moved: hasMoved,
-        rotate: hasRotate,
-        hasTooltips: hasTooltips
-      } : {}),
-    };
-  }
-
-  return undefined;
-};
-
-const addMetaData = (data: any, ret: any) => {
-  const action = testAction(data);
-  if (action) {
-    ret.action.push(action);
-  }
-
-  const entity = testPoint(data, [
-    "polygen",
-    "entity",
-    "voxel",
-    "video",
-    "picture",
-    "text",
-    "voxel",
-    "phototype",
-    "sound",
-  ]);
-
-  if (entity) {
-    ret.entity.push(entity);
-  }
-
-  const polygen = testPoint(data, ["polygen"]);
-
-  if (polygen) {
-    ret.polygen.push(polygen);
-  }
-
-  const video = testPoint(data, ["video"]);
-  if (video) {
-    ret.video.push(video);
-  }
-
-  const picture = testPoint(data, ["picture"]);
-  if (picture) {
-    ret.picture.push(picture);
-  }
-
-  const sound = testPoint(data, ["sound"]);
-  if (sound) {
-    ret.sound.push(sound);
-  }
-
-  const text = testPoint(data, ["text"]);
-  if (text) {
-    ret.text.push(text);
-  }
-
-  const voxel = testPoint(data, ["voxel"]);
-  if (voxel) {
-    ret.voxel.push(voxel);
-  }
-
-  const phototype = testPoint(data, ["phototype"]);
-  if (phototype) {
-    ret.phototype.push(phototype);
-  }
-  // 处理子元素，并传递当前元素的UUID作为父级UUID
-  if (data.children) {
-    const parentUuid = data.parameters?.uuid;
-
-    if (data.children.components) {
-      data.children.components.forEach((item: any) => {
-        // 处理带有action的组件，并传递父级UUID
-        const componentAction = testAction(item, parentUuid);
-        if (componentAction) {
-          ret.action.push(componentAction);
-        }
-      });
-    }
-
-    // 处理其他子元素
-    Object.keys(data.children).forEach((key) => {
-      if (key !== "components") { // 跳过已处理的组件
-        data.children[key].forEach((item: any) => {
-          addMetaData(item, ret);
-        });
-      }
-    });
-  }
-};
-const getResource = (meta: metaInfo) => {
-  const data = meta.data!
-  // const data = JSON.parse(meta.data!);
-  console.log("data", data);
-  const ret = {
-    action: [],
-    trigger: [],
-    polygen: [],
-    picture: [],
-    video: [],
-    voxel: [],
-    phototype: [],
-    text: [],
-    sound: [],
-    entity: [],
-    events: {
-      inputs: [] as string[],
-      outputs: [] as string[],
-    },
-  };
-  ret.events = meta.events! || { inputs: [], outputs: [] };
-  // ret.events = JSON.parse(meta.events!) || { inputs: [], outputs: [] };
-
-  if (data) addMetaData(data, ret);
-
-  // 打印处理后的action数据，展示带有父级UUID的action
-  console.log("最终处理的action结果:", ret.action);
-
-  return ret;
-};
+// 资源解析已提取到 src/composables/meta/useMetaResourceParser.ts -> buildMetaResourceIndex
 
 const handleKeyDown = (e: KeyboardEvent) => {
   // 检测Ctrl+S或Command+S (Mac)
