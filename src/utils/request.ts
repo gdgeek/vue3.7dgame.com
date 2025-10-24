@@ -47,7 +47,7 @@ const getMessageArray = () => {
       return messages.zh;
   }
 };
-
+/*
 // 用于标记正在刷新token的状态
 let isRefreshing = false;
 // 存储待重发的请求
@@ -56,6 +56,8 @@ let requestsQueue: Array<{
   resolve: Function;
   reject: Function;
 }> = [];
+*/
+let refreshPromise: Promise<any> | null = null;
 
 // 刷新token的API白名单
 const refreshTokenWhitelist = [
@@ -84,42 +86,17 @@ const service = axios.create({
   headers: { "Content-Type": "application/json;charset=utf-8" },
 });
 
-// 刷新token的函数
 const refreshToken = async () => {
-  //alert("refresh");
-  try {
-    isRefreshing = true;
-    const token = Token.getToken();
-
-    if (!token || !token.refreshToken) {
-      throw new Error("No refresh token available");
-    }
-
-    const response = await AuthAPI.refresh(token.refreshToken);
-    //alert(JSON.stringify(response));
-    // 更新token存储
-    if (response.data) {
-      Token.setToken(response.data.token);
-    }
-
-    // 执行队列中的请求
-    requestsQueue.forEach(({ config, resolve }) => {
-      resolve(service(config));
-    });
-
-    // 清空队列
-    requestsQueue = [];
-
-    return response.data;
-  } catch (error) {
-    // 刷新失败，可能需要重新登录
-    const router = useRouter();
-    return handleUnauthorized(router);
-  } finally {
-    isRefreshing = false;
+  const token = Token.getToken();
+  if (!token || !token.refreshToken) {
+    throw new Error("No refresh token available");
   }
+  const response = await AuthAPI.refresh(token.refreshToken);
+  if (response.data) {
+    Token.setToken(response.data.token);
+  }
+  return response.data;
 };
-
 // 请求拦截器
 service.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
@@ -133,23 +110,24 @@ service.interceptors.request.use(
       const isWhitelisted = refreshTokenWhitelist.some((url) =>
         config.url?.includes(url)
       );
-
+      //   alert(config.url);
       if (!isWhitelisted && isTokenExpiringSoon(token)) {
-        // 如果token即将过期且不在白名单中
-        if (!isRefreshing) {
-          // 如果没有正在刷新，开始刷新
-          await refreshToken();
-
-          // 使用新token
+        try {
+          if (!refreshPromise) {
+            // 开始刷新并保存 Promise，其他请求可以 await 它
+            refreshPromise = refreshToken();
+          }
+          await refreshPromise;
           const newToken = Token.getToken();
           if (newToken) {
             config.headers.Authorization = `Bearer ${newToken.accessToken}`;
           }
-        } else {
-          // 如果正在刷新，将请求加入队列
-          return new Promise((resolve, reject) => {
-            requestsQueue.push({ config, resolve, reject });
-          });
+        } catch (err) {
+          // 刷新失败 -> 跳转登录
+          const router = useRouter();
+          return handleUnauthorized(router);
+        } finally {
+          refreshPromise = null;
         }
       }
     }
@@ -167,6 +145,7 @@ function showErrorMessage(message: string, duration = 5000) {
 
 function handleUnauthorized(router: ReturnType<typeof useRouter>) {
   const messages = getMessageArray();
+
   showErrorMessage(messages[0]);
   return useUserStoreHook()
     .resetToken()
@@ -181,6 +160,7 @@ service.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
+  //
   async (error: any) => {
     const router = useRouter();
     const { response } = error;
@@ -190,6 +170,8 @@ service.interceptors.response.use(
       if (error.message === "Network Error") {
         showErrorMessage(messages[1]);
       } else {
+        console.error("未知错误", error.message);
+
         showErrorMessage(error.message);
       }
       return Promise.reject(error);

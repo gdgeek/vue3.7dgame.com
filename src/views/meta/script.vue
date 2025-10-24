@@ -1,6 +1,7 @@
 <template>
   <div class="verse-code">
     <el-container>
+
       <el-main>
         <el-card v-loading="loading" class="box-card">
           <template #header>
@@ -209,6 +210,7 @@ const handleBlocklyChange = (data: any) => {
 };
 
 const toggleFullscreen = () => {
+
   if (!document.fullscreenElement) {
     // 进入全屏
     const container = editor.value?.parentElement;
@@ -554,14 +556,13 @@ onBeforeUnmount(() => {
   document.removeEventListener("fullscreenchange", () => {
     isFullscreen.value = !!document.fullscreenElement;
   });
-  document.removeEventListener("fullscreenchange", () => {
-    isFullscreen.value = !!document.fullscreenElement;
-  });
+
   document.removeEventListener("fullscreenchange", () => {
     isSceneFullscreen.value = !!document.fullscreenElement;
   });
 });
 onMounted(async () => {
+
   window.addEventListener("message", handleMessage);
   window.addEventListener("keydown", handleKeyDown); // 添加键盘事件监听
   loadHighlightStyle(isDark.value);
@@ -573,6 +574,7 @@ onMounted(async () => {
     const response = await getMeta(id.value, { expand: "cyber,event,share,metaCode" });
     // const response = await getMeta(894, { expand: "cyber,event,share,metaCode" });
     // const response = await getMeta(889, { expand: "cyber,event,share,metaCode" });
+
     console.log("response数据", response);
 
     // 用递归处理层级嵌套
@@ -605,7 +607,7 @@ onMounted(async () => {
 
         const modelUrl = convertToHttps(model.file.url);
         // const modelUrl = model.file.url;
-        console.error("modelUrl", modelUrl);
+        //  console.error("modelUrl", modelUrl);
         const modelId = model.id;
 
         // 等待每个模型加载完成获取数据后再继续
@@ -624,7 +626,6 @@ onMounted(async () => {
               response.data.data = data;
               // response.data.data = JSON.stringify(data);
               meta.value = response.data;
-
               resolve();
             },
             undefined,

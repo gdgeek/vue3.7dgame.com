@@ -934,7 +934,7 @@ const loadModel = async (
     });
   } else {
     // 处理gltf模型
-  const loader = getConfiguredGLTFLoader();
+    const loader = getConfiguredGLTFLoader();
     const url = convertToHttps(resource.file.url);
 
     return new Promise((resolve, reject) => {
