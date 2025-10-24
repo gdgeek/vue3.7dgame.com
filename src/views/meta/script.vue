@@ -8,7 +8,7 @@
             <div v-if="meta" class="clearfix">
               <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
                 meta.title
-              }}</el-link>
+                }}</el-link>
               /【{{ $t("meta.script.title") }}】
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
               <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
@@ -73,7 +73,7 @@
                             <pre>
                     <code :class="currentCodeType">{{
                       currentCode
-                      }}</code>
+                    }}</code>
                   </pre>
                           </div>
                         </div>
@@ -585,7 +585,8 @@ onMounted(async () => {
     ) => {
       entities.forEach((item: any) => {
         // 如果满足条件则赋值 animations
-        if (item.parameters?.resource.toString() === modelId.toString()) {
+
+        if (item.parameters?.resource != null && item.parameters?.resource.toString() === modelId.toString()) {
 
           item.parameters.animations = animationNames;
         }
