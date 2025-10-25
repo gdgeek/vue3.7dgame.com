@@ -872,7 +872,7 @@ export default {
       error1: "メタ情報がありません",
       error2: "編集権限がありません",
       error3: "エディターがありません",
-      success: "保存成功",
+      success: "保存成功?",
       info: "変更がありません",
       leave: {
         message1: "保存されていない変更があります。保存しますか？",

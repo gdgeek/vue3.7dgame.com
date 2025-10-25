@@ -67,7 +67,7 @@ const handleTransformSave = async (transform: any) => {
   const response = await putPhototype(id.value, {
     data: { ...phototype.value.data, transform }
   });
-  ElMessage.success("保存成功");
+  ElMessage.success("保存成功a");
   phototype.value = response.data;
 };
 const handleSelected = async (data: any) => {
@@ -97,7 +97,7 @@ const saveChanges = async () => {
       type: phototype.value.type,
       schema: tree.value,
     });
-    ElMessage.success("保存成功");
+    ElMessage.success("保存成功b");
   } catch (error) {
     console.error("Failed to save phototype", error);
   }

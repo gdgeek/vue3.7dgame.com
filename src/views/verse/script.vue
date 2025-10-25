@@ -160,6 +160,8 @@ import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useI18n } from "vue-i18n";
 import { ElMessageBox, ElMessage } from "element-plus";
+
+import { takePhoto } from '@/api/v1/snapshot'
 import pako from "pako";
 import jsBeautify from "js-beautify";
 import ScenePlayer from "./ScenePlayer.vue";
@@ -347,6 +349,31 @@ const postScript = async (message: any) => {
   });
 
   ElMessage.success(t("verse.view.script.success"));
+  ElMessageBox.confirm(
+    '保存成功，是否发布？',
+    '发布场景',
+    {
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+    }
+  )
+    .then(async () => {
+      await takePhoto(id.value)
+      ElMessage({
+        type: 'success',
+        message: '发布成功',
+      })
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '取消发布',
+      })
+    });
+
+  //提示发布
+
 };
 
 // 格式化JavaScript代码

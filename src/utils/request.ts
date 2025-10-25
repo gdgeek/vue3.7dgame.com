@@ -47,16 +47,7 @@ const getMessageArray = () => {
       return messages.zh;
   }
 };
-/*
-// 用于标记正在刷新token的状态
-let isRefreshing = false;
-// 存储待重发的请求
-let requestsQueue: Array<{
-  config: InternalAxiosRequestConfig;
-  resolve: Function;
-  reject: Function;
-}> = [];
-*/
+
 let refreshPromise: Promise<any> | null = null;
 
 // 刷新token的API白名单

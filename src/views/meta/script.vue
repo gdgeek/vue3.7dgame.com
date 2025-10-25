@@ -545,9 +545,9 @@ const handleKeyDown = (e: KeyboardEvent) => {
 };
 
 onBeforeUnmount(() => {
-  window.removeEventListener("message", handleMessage);
-  window.removeEventListener("beforeunload", handleBeforeUnload);
-  window.removeEventListener("keydown", handleKeyDown);
+  window.removeEventListener("message", handleMessage);//注销
+  window.removeEventListener("beforeunload", handleBeforeUnload);//注销2
+  window.removeEventListener("keydown", handleKeyDown);//注销3
   document.removeEventListener("keydown", (e) => {
     if (e.key === "Escape" && showCodeDialog.value) {
       showCodeDialog.value = false;
@@ -563,17 +563,14 @@ onBeforeUnmount(() => {
 });
 onMounted(async () => {
 
-  window.addEventListener("message", handleMessage);
+  window.addEventListener("message", handleMessage); // 增加事件舰艇
   window.addEventListener("keydown", handleKeyDown); // 添加键盘事件监听
-  loadHighlightStyle(isDark.value);
-
-  window.addEventListener("beforeunload", handleBeforeUnload);
+  loadHighlightStyle(isDark.value);//载入高光
+  window.addEventListener("beforeunload", handleBeforeUnload);//在卸载之前执行
 
   try {
     loading.value = true;
     const response = await getMeta(id.value, { expand: "cyber,event,share,metaCode" });
-    // const response = await getMeta(894, { expand: "cyber,event,share,metaCode" });
-    // const response = await getMeta(889, { expand: "cyber,event,share,metaCode" });
 
     console.log("response数据", response);
 
@@ -599,52 +596,53 @@ onMounted(async () => {
     };
 
     if (response.data.resources.length > 0) {
-      // 循环处理每个模型文件
-      for (const [index, model] of response.data.resources.entries()) {
-        if (model.type !== "polygen") {
-          meta.value = response.data;
-          continue;
+      try {
+        // 循环处理每个模型文件
+        for (const [index, model] of response.data.resources.entries()) {
+          if (model.type !== "polygen") {
+            meta.value = response.data;
+            continue;
+          }
+
+          const modelUrl = convertToHttps(model.file.url);
+          // const modelUrl = model.file.url;
+          //  console.error("modelUrl", modelUrl);
+          const modelId = model.id;
+
+          // 等待每个模型加载完成获取数据后再继续
+          await new Promise<void>((resolve, reject) => {
+            loader.load(
+              modelUrl,
+              (gltf) => {
+                const animationNames = gltf.animations.map((clip) => clip.name);
+
+                let data = response.data.data!;
+
+                assignAnimations(data.children.entities, modelId, animationNames);
+
+                response.data.data = data;
+                meta.value = response.data;
+                resolve();
+              },
+              undefined,
+              (error) => {
+                console.error("An error occurred while loading the model:", error);
+                reject(error);
+              }
+            );
+          });
         }
+      } catch (error: any) {
+        meta.value = response.data;
 
-        const modelUrl = convertToHttps(model.file.url);
-        // const modelUrl = model.file.url;
-        //  console.error("modelUrl", modelUrl);
-        const modelId = model.id;
-
-        // 等待每个模型加载完成获取数据后再继续
-        await new Promise<void>((resolve, reject) => {
-          loader.load(
-            modelUrl,
-            (gltf) => {
-              const animationNames = gltf.animations.map((clip) => clip.name);
-
-              let data = response.data.data!;
-              // let data = JSON.parse(response.data.data!);
-
-              // 调用递归函数对所有满足条件的项赋值 animations
-              assignAnimations(data.children.entities, modelId, animationNames);
-
-              response.data.data = data;
-              // response.data.data = JSON.stringify(data);
-              meta.value = response.data;
-              resolve();
-            },
-            undefined,
-            (error) => {
-              console.error("An error occurred while loading the model:", error);
-              reject(error);
-            }
-          );
-        });
       }
     } else {
       meta.value = response.data;
     }
 
-    console.log("meta", meta.value);
     initEditor();
   } catch (error: any) {
-    alert(error.message);
+    //alert(error.message);
     ElMessage.error(error.message);
   } finally {
     loading.value = false;
