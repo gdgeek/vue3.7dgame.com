@@ -262,7 +262,8 @@ let ready: boolean = false;
 const saveable = computed(() => {
   return verse.value!.editable;
 });
-let map = new Map<string, any>();
+// map 用于记录每个 meta_id 在场景中对应的实体列表
+let map = new Map<string, Array<{ uuid: string; title: string }>>();
 
 const settingsStore = useSettingsStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
@@ -543,26 +544,32 @@ const resource = computed(() => {
   const outputs: any[] = [];
 
   verse.value!.metas!.forEach((meta: any) => {
-    let events = meta.events;
-    // let events = JSON.parse(meta.events || "{}");
+    const events = meta.events || {};
     events.inputs = events.inputs || [];
     events.outputs = events.outputs || [];
 
-    events.outputs.forEach((input: any) => {
-      const data = map.get(meta.id.toString());
-      inputs.push({
-        title: `${data.title}:${input.title}`,
-        index: data.uuid,
-        uuid: input.uuid,
-      });
-    });
+    // 获取该 meta 在场景中所有实体
+    const instances: Array<{ uuid: string; title: string }> = map.get(
+      meta.id.toString()
+    ) || [];
 
-    events.inputs.forEach((output: any) => {
-      const data = map.get(meta.id.toString());
-      outputs.push({
-        title: `${data.title}:${output.title}`,
-        index: data.uuid,
-        uuid: output.uuid,
+    const effectiveInstances = instances.length ? instances : [{ uuid: meta.id?.toString() || "", title: meta.name || meta.title || "meta" }];
+
+    effectiveInstances.forEach((instance) => {
+      events.outputs.forEach((input: any) => {
+        inputs.push({
+          title: `${instance.title}:${input.title}`,
+          index: instance.uuid,
+          uuid: input.uuid,
+        });
+      });
+
+      events.inputs.forEach((output: any) => {
+        outputs.push({
+          title: `${instance.title}:${output.title}`,
+          index: instance.uuid,
+          uuid: output.uuid,
+        });
       });
     });
   });
@@ -619,11 +626,16 @@ onMounted(async () => {
       // const json: string = verse.value.data;
       // const data = JSON.parse(json);
 
+      // 构建 map： meta_id -> [{uuid, title}, ...]
       data.children.modules.forEach((module: any) => {
-        map.set(module.parameters.meta_id.toString(), {
+        const key = module.parameters.meta_id.toString();
+        const entry = {
           uuid: module.parameters.uuid,
           title: module.parameters.title,
-        });
+        };
+        const arr = map.get(key) || [];
+        arr.push(entry);
+        map.set(key, arr);
       });
     }
     initEditor();
