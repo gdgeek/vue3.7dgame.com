@@ -8,9 +8,11 @@
             <div v-if="meta" class="clearfix">
               <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
                 meta.title
-                }}</el-link>
+              }}</el-link>
               /【{{ $t("meta.script.title") }}】
+              <!--
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
+              -->
               <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
                 返回
               </el-button>
@@ -47,9 +49,11 @@
                           @click="showFullscreenCode('javascript')">
                           JavaScript
                         </el-button>
+                        <!--
                         <el-button size="small" type="primary" style="margin-right: 10px" @click="run">
                           测试运行
                         </el-button>
+                        -->
                         <el-button size="small" type="primary" style="margin-right: 50px" @click="save">
                           <font-awesome-icon class="icon" icon="save"></font-awesome-icon>
                           {{ $t("meta.script.save") }}
@@ -73,7 +77,7 @@
                             <pre>
                     <code :class="currentCodeType">{{
                       currentCode
-                    }}</code>
+                      }}</code>
                   </pre>
                           </div>
                         </div>
