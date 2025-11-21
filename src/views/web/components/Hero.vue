@@ -14,7 +14,7 @@
     <div class="hero-content">
       <div class="hero-text" data-aos="fade-up" data-aos-delay="200">
         <h1 class="hero-title">
-          <span class="gradient-text">不加班AR创造平台</span>
+          <span class="gradient-text">不加班AR创造平台!</span>
         </h1>
         <p class="hero-subtitle">让每个人都可以快乐的创造世界！</p>
         <div class="hero-cta">

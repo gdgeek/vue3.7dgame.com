@@ -31,7 +31,7 @@ import "uno.css";
 import "animate.css";
 import { useRouter } from "@/router";
 import { translateRouteTitle } from "./utils/i18n";
-import { useAppStore } from "./store";
+import { useAppStore, store } from "./store";
 const router = useRouter();
 
 // 更新页面标题
@@ -51,7 +51,7 @@ router.beforeEach((to) => {
   }
 });
 
-const appStore = useAppStore();
+const appStore = useAppStore(store);
 
 // 监听语言变化，自动更新页面标题
 watch(
@@ -77,7 +77,7 @@ app.component("VueForm", VueForm);
 app.directive("highlight", highlightDirective);
 app.use(setupPlugins);
 app.use(VueIframe);
-app.use(ElementPlus);
+//app.use(ElementPlus);
 app.use(JsonSchemaEditor);
 
 app.mount("#app");

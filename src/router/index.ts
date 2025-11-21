@@ -8,10 +8,10 @@ import Empty from "@/layout/empty/index.vue";
 import { Meta, RouteVO } from "@/api/menu/model";
 
 //import { useUserStore } from "@/store/modules/user";
-import { createPinia, setActivePinia } from "pinia";
+// import { createPinia, setActivePinia } from "pinia";
 
-const pinia = createPinia();
-setActivePinia(pinia);
+// const pinia = createPinia();
+// setActivePinia(pinia);
 //const userStore = useUserStore();
 
 // 静态路由
@@ -792,7 +792,7 @@ const initRoutes = async () => {
 
 import type { AnyAbility } from "@casl/ability";
 import { AbilityRouter } from "@/utils/ability";
-import { useUserStore } from "@/store";
+// import { useUserStore } from "@/store";
 import { tr } from "element-plus/es/locale";
 const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   const can = ability.can.bind(ability);

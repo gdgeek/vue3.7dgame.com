@@ -132,7 +132,6 @@
     "@typescript-eslint/parser": "^8.24.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vitejs/plugin-vue-jsx": "^3.1.0",
-    "autoprefixer": "^10.4.21",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "commitizen": "^4.3.1",
@@ -158,9 +157,6 @@
     "stylelint-config-recommended-vue": "^1.6.0",
     "stylelint-config-standard": "^36.0.1",
     "tailwind-merge": "^3.2.0",
-    "tailwindcss": "3",
-    "tailwindcss-animate": "^1.0.7",
-    "terser": "^5.39.0",
     "typescript": "^5.7.3",
     "unocss": "^0.58.9",
     "unplugin-auto-import": "^0.17.8",
@@ -170,8 +166,8 @@
     "vite-plugin-mock-dev-server": "^1.8.4",
     "vite-plugin-svg-icons": "^2.0.1",
     "vite-plugin-vue-devtools": "^7.7.2",
-    "vue-tsc": "^2.2.0",
-    "vitest": "^1.1.5"
+    "vitest": "^1.1.5",
+    "vue-tsc": "^2.2.0"
   },
   "repository": "https://gitee.com/youlaiorg/vue3-element-admin.git",
   "author": "",
