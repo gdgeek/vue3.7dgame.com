@@ -85,6 +85,12 @@ const routes: RouteRecordRaw[] = [
     ],
   },
 
+  {
+    path: "/sso",
+    component: () => import("@/views/sso/index.vue"),
+    meta: { hidden: true, private: true },
+  },
+
   { path: "/login", redirect: "/web/index" },
 
   {

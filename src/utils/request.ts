@@ -101,6 +101,7 @@ service.interceptors.request.use(
       const isWhitelisted = refreshTokenWhitelist.some((url) =>
         config.url?.includes(url)
       );
+      // alert(isWhitelisted);
       //   alert(config.url);
       if (!isWhitelisted && isTokenExpiringSoon(token)) {
         try {
@@ -122,7 +123,7 @@ service.interceptors.request.use(
         }
       }
     }
-
+    //alert(2222);
     return config;
   },
   (error: any) => {
@@ -168,6 +169,7 @@ service.interceptors.response.use(
       return Promise.reject(error);
     }
     if (response.status === 401) {
+      // alert(1234);
       // 仅当身份认证失败，执行登出操作
       return handleUnauthorized(router);
     } else if (response.status >= 500) {
