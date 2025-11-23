@@ -18,9 +18,8 @@ const appStore = useAppStore();
 
 onMounted(async () => {
   const { refreshToken, lang, redirect } = route.query;
-
+  alert("sso")
   if (refreshToken) {
-
 
     const response = await AuthAPI.refresh(refreshToken as string);
     Token.setToken(response.data.token);
@@ -32,7 +31,6 @@ onMounted(async () => {
   }
 
   if (lang) {
-    // Set language
     appStore.changeLanguage(lang as string);
   }
 
