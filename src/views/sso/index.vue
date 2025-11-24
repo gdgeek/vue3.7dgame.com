@@ -11,23 +11,30 @@ import { useAppStore } from '@/store/modules/app';
 
 import AuthAPI from "@/api/v1/auth";
 import Token from '@/store/modules/token';
+import { useUserStore } from '@/store/modules/user';
 
 const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
+const userStore = useUserStore();
 
 onMounted(async () => {
   const { refreshToken, lang, redirect } = route.query;
-  alert("sso")
-  if (refreshToken) {
 
-    const response = await AuthAPI.refresh(refreshToken as string);
-    Token.setToken(response.data.token);
-    //
-    //alert(JSON.stringify(response.data.token))
-    // Set token
-    //alert(JSON.stringify(response))
-    // Token.setToken(token);
+  if (refreshToken) {
+    try {
+      const response = await AuthAPI.refresh(refreshToken as string);
+      Token.setToken(response.data.token);
+
+      // 拉取并设置用户信息（使用 store 提供的方法）
+      try {
+        await userStore.getUserInfo();
+      } catch (err) {
+        console.error('Failed to fetch user info after refresh:', err);
+      }
+    } catch (err) {
+      console.error('Refresh token failed in SSO callback:', err);
+    }
   }
 
   if (lang) {
