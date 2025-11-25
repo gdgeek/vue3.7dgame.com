@@ -80,6 +80,12 @@ export default {
     manager: {
       title: "管理",
       userManagement: "用戶管理",
+      schoolManagement: "校園管理",
+      createSchool: "創建學校",
+      school: {
+        principal: "校長",
+        address: "地址",
+      },
     },
     game: {
       title: "遊戲",

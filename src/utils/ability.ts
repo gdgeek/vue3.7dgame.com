@@ -19,12 +19,12 @@ export class AbilityRole {
     this.role = roles.includes("root")
       ? "root"
       : roles.includes("admin")
-      ? "admin"
-      : roles.includes("manager")
-      ? "manager"
-      : roles.includes("user")
-      ? "user"
-      : "guest";
+        ? "admin"
+        : roles.includes("manager")
+          ? "manager"
+          : roles.includes("user")
+            ? "user"
+            : "guest";
   }
 }
 
@@ -37,7 +37,10 @@ export class AbilityWorks {
 }
 
 export class AbilityMessage {
-  constructor(public id: number, public managed: number) {}
+  constructor(
+    public id: number,
+    public managed: number
+  ) {}
 }
 const user = ["user", "manager", "admin", "root"];
 const manager = ["manager", "admin", "root"];
@@ -106,8 +109,8 @@ export function UpdateAbility(
     }
 
     if (roles.some((role) => manager.includes(role))) {
-      can("phototype", "all");
-      menu = menu.concat([/^\/phototype(\/|$)/]);
+      // can("phototype", "all");
+      // menu = menu.concat([/^\/phototype(\/|$)/]);
     }
 
     if (roles.some((role) => admin.includes(role))) {
@@ -122,6 +125,8 @@ export function UpdateAbility(
     if (roles.some((role) => root.includes(role))) {
       can("root", "all");
       can("people", AbilityRole.name, { role: "admin" }); //超级管理员可以管理管理员
+      can("phototype", "all");
+      menu = menu.concat([/^\/phototype(\/|$)/]);
     }
 
     menu.forEach((item) => {

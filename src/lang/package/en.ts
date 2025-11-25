@@ -79,7 +79,13 @@ export default {
     },
     manager: {
       title: "Management",
-      userManagement: "Users",
+      userManagement: "User Management",
+      schoolManagement: "School Management",
+      createSchool: "Create School",
+      school: {
+        principal: "Principal",
+        address: "Address",
+      },
     },
     game: {
       title: "Game",
