@@ -16,4 +16,14 @@ export const enum LanguageEnum {
    * 日文
    */
   JA = "ja",
+
+  /**
+   * 泰文
+   */
+  TH = "th",
+
+  /**
+   * 繁体中文
+   */
+  ZH_TW = "zh-tw",
 }

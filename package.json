@@ -146,6 +146,7 @@
     "js-beautify": "^1.15.3",
     "lint-staged": "^15.4.3",
     "motion-v": "1.0.0-beta.1",
+    "opencc-js": "^1.0.5",
     "postcss": "^8.5.3",
     "postcss-html": "^1.8.0",
     "postcss-scss": "^4.0.9",

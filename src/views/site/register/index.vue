@@ -34,7 +34,7 @@
           <el-icon>
             <Back />
           </el-icon>
-          &nbsp;&nbsp; 返回
+          &nbsp;&nbsp; {{ $t("login.back") }}
         </el-button>
       </div>
     </div>

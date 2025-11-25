@@ -5,6 +5,8 @@ import { useAppStoreHook } from "@/store/modules/app";
 import enLocale from "./package/en";
 import zhCnLocale from "./package/zh-cn";
 import jaLocale from "./package/ja";
+import thLocale from "./package/th";
+import zhTwLocale from "./package/zh-tw";
 
 const appStore = useAppStoreHook();
 
@@ -17,6 +19,12 @@ const messages = {
   },
   ja: {
     ...jaLocale,
+  },
+  th: {
+    ...thLocale,
+  },
+  "zh-tw": {
+    ...zhTwLocale,
   },
 };
 

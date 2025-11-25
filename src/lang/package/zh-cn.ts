@@ -89,6 +89,10 @@ export default {
     logout: {
       title: "退出",
     },
+    phototype: {
+      title: "原型",
+      list: "列表",
+    },
   },
   // 登录页面国际化
   login: {
@@ -136,6 +140,8 @@ export default {
       title: "正在登出",
       text: "向服务器注销此次登录",
     },
+    back: "返回",
+    loginResponseMissingToken: "登录响应缺少 access_token",
   },
   // 主页国际化
   homepage: {
@@ -1536,5 +1542,18 @@ export default {
     handlerError: "获取文件处理器失败",
     uploadFailed: "上传失败",
     saveFailed: "保存图片信息失败",
+  },
+  phototype: {
+    title: "原型",
+    list: "列表",
+    create: "创建原型",
+    fromModel: "从模型",
+    prompt: {
+      message1: "请输入原型名称",
+      error1: "原型名称不能为空",
+      error2: "原型名称长度不能少于3个字符",
+      error3: "原型名称长度不能超过20个字符",
+      success: "原型名称是",
+    },
   },
 };

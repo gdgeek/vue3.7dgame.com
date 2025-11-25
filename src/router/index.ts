@@ -650,7 +650,7 @@ const routes: RouteRecordRaw[] = [
         redirect: "/phototype/list",
         name: "Phototype",
         meta: {
-          title: "Phototype",
+          title: "phototype.title",
           icon: "el-icon-Management",
           hidden: true,
           alwaysShow: false,
@@ -662,7 +662,7 @@ const routes: RouteRecordRaw[] = [
             component: () => import("@/views/phototype/list.vue"),
             name: "PhototypeList",
             meta: {
-              title: "List",
+              title: "phototype.list",
               icon: "cascader",
               hidden: true,
             },

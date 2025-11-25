@@ -5,12 +5,8 @@
     </div>
     <template #dropdown>
       <el-dropdown-menu>
-        <el-dropdown-item
-          v-for="item in langOptions"
-          :key="item.value"
-          :disabled="appStore.language === item.value"
-          :command="item.value"
-        >
+        <el-dropdown-item v-for="item in langOptions" :key="item.value" :disabled="appStore.language === item.value"
+          :command="item.value">
           {{ item.label }}
         </el-dropdown-item>
       </el-dropdown-menu>
@@ -34,6 +30,8 @@ const langOptions = [
   { label: "中文", value: LanguageEnum.ZH_CN },
   { label: "English", value: LanguageEnum.EN },
   { label: "日本語", value: LanguageEnum.JA },
+  { label: "繁體中文", value: LanguageEnum.ZH_TW },
+  { label: "ไทย", value: LanguageEnum.TH },
 ];
 
 const appStore = useAppStore();

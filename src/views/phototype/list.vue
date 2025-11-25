@@ -11,12 +11,12 @@
                 <el-button size="small" type="primary" @click="addPrefab">
                   <font-awesome-icon icon="plus"></font-awesome-icon>
                   &nbsp;
-                  <span class="hidden-sm-and-down">创建原型</span>
+                  <span class="hidden-sm-and-down">{{ $t("phototype.create") }}</span>
                 </el-button>
                 <el-button size="small" type="primary" @click="addPrefabFromPolygen">
                   <font-awesome-icon icon="apple-alt"></font-awesome-icon>
                   &nbsp;
-                  <span class="hidden-sm-and-down">从模型</span>
+                  <span class="hidden-sm-and-down">{{ $t("phototype.fromModel") }}</span>
                 </el-button>
               </el-button-group>
             </mr-p-p-header>
@@ -34,7 +34,7 @@
                       <el-button-group>
                         <el-button type="primary" size="small" @click="edit(item.id)">{{
                           $t("meta.enter")
-                        }}</el-button>
+                          }}</el-button>
 
                       </el-button-group>
                     </template>
@@ -154,21 +154,21 @@ const search = async (value: string) => {
 const addPrefabFromPolygen = async () => {
   try {
     const { value: name } = await ElMessageBox.prompt(
-      "请输入原型名称",
+      t("phototype.prompt.message1"),
       t("meta.prompt.message2"),
       {
         confirmButtonText: t("meta.prompt.confirm"),
         cancelButtonText: t("meta.prompt.cancel"),
         inputValidator: (value: string) => {
-          if (!value) return "原型名称不能为空";
-          if (value.length < 3) return "原型名称长度不能少于3个字符";
-          if (value.length > 20) return "原型名称长度不能超过20个字符";
+          if (!value) return t("phototype.prompt.error1");
+          if (value.length < 3) return t("phototype.prompt.error2");
+          if (value.length > 20) return t("phototype.prompt.error3");
           return true;
         },
       }
     );
 
-    ElMessage.success(t("meta.prompt.success") + name);
+    ElMessage.success(t("phototype.prompt.success") + name);
     /*    const data = {
           title: name,
           custom: 1,
@@ -184,21 +184,21 @@ const addPrefabFromPolygen = async () => {
 const addPrefab = async () => {
   try {
     const { value: name } = await ElMessageBox.prompt(
-      "请输入原型名称",
+      t("phototype.prompt.message1"),
       t("meta.prompt.message2"),
       {
         confirmButtonText: t("meta.prompt.confirm"),
         cancelButtonText: t("meta.prompt.cancel"),
         inputValidator: (value: string) => {
-          if (!value) return "原型名称不能为空";
-          if (value.length < 3) return "原型名称长度不能少于3个字符";
-          if (value.length > 20) return "原型名称长度不能超过20个字符";
+          if (!value) return t("phototype.prompt.error1");
+          if (value.length < 3) return t("phototype.prompt.error2");
+          if (value.length > 20) return t("phototype.prompt.error3");
           return true;
         },
       }
     );
 
-    ElMessage.success("原型名称是" + name);
+    ElMessage.success(t("phototype.prompt.success") + name);
     const data = {
       title: name,
       custom: 1,

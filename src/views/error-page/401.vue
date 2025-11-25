@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { reactive, toRefs } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 import { defineComponent } from "vue";
 
 defineComponent({
   name: "Page401",
 });
+
+const { t } = useI18n();
 
 const state = reactive({
   errGif: new URL(`../../assets/images/401.gif`, import.meta.url).href,
@@ -28,38 +31,34 @@ function back() {
 <template>
   <div class="errPage-container">
     <el-button icon="el-icon-arrow-left" class="pan-back-btn" @click="back">
-      返回
+      {{ t("errorPage.back") }}
     </el-button>
     <el-row>
       <el-col :span="12">
         <h1 class="text-jumbo text-ginormous">Oops!</h1>
-        gif来源<a href="https://zh.airbnb.com/" target="_blank">airbnb</a> 页面
-        <h2>你没有权限去该页面</h2>
-        <h6>如有不满请联系你领导</h6>
+        {{ t("errorPage.gifSource") }}<a href="https://zh.airbnb.com/" target="_blank">airbnb</a> {{ t("errorPage.page")
+        }}
+        <h2>{{ t("errorPage.noPermission") }}</h2>
+        <h6>{{ t("errorPage.contactLeader") }}</h6>
         <ul class="list-unstyled">
-          <li>或者你可以去:</li>
+          <li>{{ t("errorPage.orGoTo") }}</li>
           <li class="link-type">
-            <router-link to="/home"> 回首页 </router-link>
+            <router-link to="/home"> {{ t("errorPage.backHome") }} </router-link>
           </li>
           <li class="link-type">
-            <a href="https://www.bujiaban.com/">随便看看</a>
+            <a href="https://www.bujiaban.com/">{{ t("errorPage.justLook") }}</a>
           </li>
           <li>
-            <a href="#" @click.prevent="dialogVisible = true">点我看图</a>
+            <a href="#" @click.prevent="dialogVisible = true">{{ t("errorPage.clickToSee") }}</a>
           </li>
         </ul>
       </el-col>
       <el-col :span="12">
-        <img
-          :src="errGif"
-          width="313"
-          height="428"
-          alt="Girl has dropped her ice cream."
-        />
+        <img :src="errGif" width="313" height="428" alt="Girl has dropped her ice cream." />
       </el-col>
     </el-row>
     <el-dialog v-model="dialogVisible">
-      <template #header> 随便看 </template>
+      <template #header> {{ t("errorPage.justLookTitle") }} </template>
       <img :src="ewizardClap" class="pan-img" />
     </el-dialog>
   </div>

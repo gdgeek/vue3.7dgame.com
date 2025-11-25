@@ -89,6 +89,10 @@ export default {
     logout: {
       title: "Logout",
     },
+    phototype: {
+      title: "Phototype",
+      list: "List",
+    },
   },
   // 登录页面国际化
   login: {
@@ -136,6 +140,8 @@ export default {
       title: "Logging out",
       text: "Logging out this session from the server",
     },
+    back: "Back",
+    loginResponseMissingToken: "The login response is missing the access_token",
   },
   // 主页国际化
   homepage: {
@@ -806,17 +812,17 @@ export default {
       info: "Deletion canceled",
     },
     prompt: {
-      message1: "Please enter a entity name",
+      message1: "Please enter entity name",
       message2: "Prompt (3-20 characters)",
       confirm: "Confirm",
       cancel: "Cancel",
       inputValidator: {
         item1: "Entity name cannot be empty",
         item2: "Entity name cannot be less than 3 characters",
-        item3: "Entity name cannot be more than 20 characters",
+        item3: "Entity name cannot be greater than 20 characters",
       },
-      success: "The entity name is: ",
-      info: "cancel input",
+      success: "Entity name is: ",
+      info: "Cancel input",
     },
     prompt2: {
       message1: "Please enter a new name",
@@ -1599,5 +1605,18 @@ export default {
     handlerError: "Failed to get file handler",
     uploadFailed: "Upload failed",
     saveFailed: "Failed to save image information",
+  },
+  phototype: {
+    title: "Phototype",
+    list: "List",
+    create: "Create Phototype",
+    fromModel: "From Model",
+    prompt: {
+      message1: "Please enter phototype name",
+      error1: "Phototype name cannot be empty",
+      error2: "Phototype name length cannot be less than 3 characters",
+      error3: "Phototype name length cannot exceed 20 characters",
+      success: "Phototype name is ",
+    },
   },
 };

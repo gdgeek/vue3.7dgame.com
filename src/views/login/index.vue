@@ -5,7 +5,7 @@
       <div style="height: 30px;" v-if="!isMobile">
         <RouterLink to="/" class="logo">
           <img src="/favicon.ico" alt="" />
-          <span class="project_title">2{{ $t("login.title") }}</span>
+          <span class="project_title">{{ $t("login.title") }}</span>
         </RouterLink>
         <div class="link" style="margin-left: 250px">
           <!--
@@ -255,7 +255,7 @@ const enter = async (
       localStorage.setItem(TOKEN_KEY, token);
       nextTick();
     } else {
-      ElMessage.error("The login response is missing the access_token");
+      ElMessage.error(t("login.loginResponseMissingToken"));
     }
     //  await userStore.getUserInfo();
 

@@ -89,6 +89,10 @@ export default {
     logout: {
       title: "ログアウト",
     },
+    phototype: {
+      title: "プロトタイプ",
+      list: "リスト",
+    },
   },
   // 登录页面国际化
   login: {
@@ -137,8 +141,10 @@ export default {
       title: "ログアウト中",
       text: "サーバーからこのセッションをログアウトしています",
     },
+    back: "戻る",
+    loginResponseMissingToken: "ログインレスポンスに access_token がありません",
   },
-  // 主页国际化
+  // 主页国際化
   homepage: {
     dashboard: "ダッシュボード",
     news: "ニュース",
@@ -1550,5 +1556,30 @@ export default {
     handlerError: "ファイルハンドラーの取得に失敗しました",
     uploadFailed: "アップロードに失敗しました",
     saveFailed: "画像情報の保存に失敗しました",
+  },
+  errorPage: {
+    back: "戻る",
+    gifSource: "GIFソース",
+    page: "ページ",
+    noPermission: "このページにアクセスする権限がありません",
+    contactLeader: "不満がある場合はリーダーに連絡してください",
+    orGoTo: "または、次へ:",
+    backHome: "ホームに戻る",
+    justLook: "ちょっと見てみる",
+    clickToSee: "クリックして画像を見る",
+    justLookTitle: "ちょっと見て",
+  },
+  phototype: {
+    title: "プロトタイプ",
+    list: "リスト",
+    create: "プロトタイプ作成",
+    fromModel: "モデルから",
+    prompt: {
+      message1: "プロトタイプ名を入力してください",
+      error1: "プロトタイプ名は空にできません",
+      error2: "プロトタイプ名の長さは3文字以上である必要があります",
+      error3: "プロトタイプ名の長さは20文字を超えることはできません",
+      success: "プロトタイプ名は",
+    },
   },
 };
