@@ -82,9 +82,27 @@ export default {
       userManagement: "用户管理",
       schoolManagement: "校园管理",
       createSchool: "创建学校",
+      classManagement: "班级管理",
+      createClass: "创建班级",
+      teacherManagement: "教师管理",
+      createTeacher: "创建教师",
+      studentManagement: "学生管理",
+      createStudent: "创建学生",
       school: {
         principal: "校长",
         address: "地址",
+      },
+      class: {
+        grade: "年级",
+        teacher: "班主任",
+      },
+      teacher: {
+        subject: "科目",
+        phone: "电话",
+      },
+      student: {
+        grade: "年级",
+        class: "班级",
       },
     },
     game: {

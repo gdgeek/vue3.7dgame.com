@@ -82,9 +82,27 @@ export default {
       userManagement: "User Management",
       schoolManagement: "School Management",
       createSchool: "Create School",
+      classManagement: "Class Management",
+      createClass: "Create Class",
+      teacherManagement: "Teacher Management",
+      createTeacher: "Create Teacher",
+      studentManagement: "Student Management",
+      createStudent: "Create Student",
       school: {
         principal: "Principal",
         address: "Address",
+      },
+      class: {
+        grade: "Grade",
+        teacher: "Teacher",
+      },
+      teacher: {
+        subject: "Subject",
+        phone: "Phone",
+      },
+      student: {
+        grade: "Grade",
+        class: "Class",
       },
     },
     game: {

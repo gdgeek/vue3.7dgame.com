@@ -82,9 +82,27 @@ export default {
       userManagement: "การจัดการผู้ใช้",
       schoolManagement: "การจัดการโรงเรียน",
       createSchool: "สร้างโรงเรียน",
+      classManagement: "การจัดการชั้นเรียน",
+      createClass: "สร้างชั้นเรียน",
+      teacherManagement: "การจัดการครู",
+      createTeacher: "สร้างครู",
+      studentManagement: "การจัดการนักเรียน",
+      createStudent: "สร้างนักเรียน",
       school: {
         principal: "ครูใหญ่",
         address: "ที่อยู่",
+      },
+      class: {
+        grade: "ระดับชั้น",
+        teacher: "ครูประจำชั้น",
+      },
+      teacher: {
+        subject: "วิชา",
+        phone: "โทรศัพท์",
+      },
+      student: {
+        grade: "ระดับชั้น",
+        class: "ชั้นเรียน",
       },
     },
     game: {

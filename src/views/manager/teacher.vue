@@ -1,5 +1,5 @@
 <template>
-  <div class="school-management">
+  <div class="teacher-management">
     <el-container>
       <el-header>
         <MrPPHeader :sorted="sorted" :searched="searched" @search="handleSearch" @sort="handleSort">
@@ -7,40 +7,40 @@
             <el-button size="small" type="primary" @click="handleCreate">
               <font-awesome-icon icon="plus"></font-awesome-icon>
               &nbsp;
-              <span class="hidden-sm-and-down">{{ $t("manager.createSchool") }}</span>
+              <span class="hidden-sm-and-down">{{ $t("manager.createTeacher") }}</span>
             </el-button>
           </el-button-group>
         </MrPPHeader>
       </el-header>
       <el-main>
         <el-row :gutter="20" v-loading="loading">
-          <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="4" v-for="school in schools" :key="school.id">
-            <el-card class="school-card" :body-style="{ padding: '0px' }">
+          <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="4" v-for="item in teachers" :key="item.id">
+            <el-card class="teacher-card" :body-style="{ padding: '0px' }">
               <div class="image-container">
-                <img :src="school.image?.url || '/src/assets/images/author/author-boy.png'" class="image" />
+                <img :src="item.avatar || '/src/assets/images/author/author-boy.png'" class="image" />
               </div>
               <div style="padding: 14px">
-                <span class="school-name" :title="school.name">{{ school.name }}</span>
+                <span class="teacher-name" :title="item.name">{{ item.name }}</span>
                 <div class="bottom clearfix">
-                  <el-descriptions :column="1" size="small" class="school-info">
-                    <el-descriptions-item :label="$t('manager.school.principal')">
-                      {{ school.principal0?.nickname || school.principal0?.username || '-' }}
+                  <el-descriptions :column="1" size="small" class="teacher-info">
+                    <el-descriptions-item :label="$t('manager.teacher.subject')">
+                      {{ item.subject || '-' }}
                     </el-descriptions-item>
-                    <el-descriptions-item :label="$t('manager.school.address')">
-                      {{ school.info?.address || '-' }}
+                    <el-descriptions-item :label="$t('manager.teacher.phone')">
+                      {{ item.phone || '-' }}
                     </el-descriptions-item>
                   </el-descriptions>
                   <div class="actions">
-                    <el-button type="primary" size="small" link @click="handleEdit(school)">{{ $t('meta.edit')
+                    <el-button type="primary" size="small" link @click="handleEdit(item)">{{ $t('meta.edit')
                       }}</el-button>
-                    <el-button type="danger" size="small" link @click="handleDelete(school)">{{
-                      $t('manager.list.cancel') }}</el-button>
+                    <el-button type="danger" size="small" link @click="handleDelete(item)">{{ $t('manager.list.cancel')
+                      }}</el-button>
                   </div>
                 </div>
               </div>
             </el-card>
           </el-col>
-          <el-empty v-if="!loading && schools.length === 0" description="No Data"></el-empty>
+          <el-empty v-if="!loading && teachers.length === 0" description="No Data"></el-empty>
         </el-row>
       </el-main>
       <el-footer>
@@ -56,13 +56,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import { getSchools, deleteSchool, School } from "@/api/v1/edu-school";
+import { getTeachers, deleteTeacher, Teacher } from "@/api/v1/edu-teacher";
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
-const schools = ref<School[]>([]);
+const teachers = ref<Teacher[]>([]);
 const loading = ref(false);
 const sorted = ref("-created_at");
 const searched = ref("");
@@ -75,22 +75,14 @@ const pagination = ref({
 const fetchData = async () => {
   loading.value = true;
   try {
-    const response = await getSchools(
+    const response = await getTeachers(
       sorted.value,
       searched.value,
-      pagination.value.current,
-      "image,principal0"
+      pagination.value.current
     );
 
-    // Assuming the response structure matches the one in person.ts (with headers for pagination)
-    // If the API returns a different structure, this needs adjustment.
-    // Based on getPerson in person.ts, it returns response.data directly as array if typed as request<userData[]>
-    // But usually pagination info is in headers or a wrapper object.
-    // Let's assume standard response handling or adjust based on actual API behavior.
-    // Since I don't see the backend, I'll assume standard headers pagination like in user.vue
-
     if (response.data) {
-      schools.value = response.data;
+      teachers.value = response.data;
 
       if (response.headers) {
         pagination.value.current = parseInt(response.headers["x-pagination-current-page"] || "1");
@@ -101,7 +93,7 @@ const fetchData = async () => {
 
   } catch (error) {
     console.error(error);
-    ElMessage.error('Failed to fetch schools');
+    ElMessage.error('Failed to fetch teachers');
   } finally {
     loading.value = false;
   }
@@ -127,22 +119,22 @@ const handleCreate = () => {
   ElMessage.info('Create functionality to be implemented');
 };
 
-const handleEdit = (school: School) => {
-  ElMessage.info(`Edit school: ${school.name}`);
+const handleEdit = (item: Teacher) => {
+  ElMessage.info(`Edit teacher: ${item.name}`);
 };
 
-const handleDelete = async (school: School) => {
+const handleDelete = async (item: Teacher) => {
   try {
     await ElMessageBox.confirm(
-      t("manager.list.confirm.message1"), // "Are you sure to delete?"
-      t("manager.list.confirm.message2"), // "Warning"
+      t("manager.list.confirm.message1"),
+      t("manager.list.confirm.message2"),
       {
         confirmButtonText: t("manager.list.confirm.confirm"),
         cancelButtonText: t("manager.list.confirm.cancel"),
         type: "warning",
       }
     );
-    await deleteSchool(school.id);
+    await deleteTeacher(item.id);
     ElMessage.success(t("manager.list.confirm.success"));
     fetchData();
   } catch {
@@ -156,11 +148,11 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.school-management {
+.teacher-management {
   padding: 20px;
 }
 
-.school-card {
+.teacher-card {
   margin-bottom: 20px;
   transition: all 0.3s;
 
@@ -186,7 +178,7 @@ onMounted(() => {
   object-fit: cover;
 }
 
-.school-name {
+.teacher-name {
   font-size: 16px;
   font-weight: bold;
   display: block;
@@ -196,7 +188,7 @@ onMounted(() => {
   text-overflow: ellipsis;
 }
 
-.school-info {
+.teacher-info {
   margin-bottom: 10px;
 }
 
