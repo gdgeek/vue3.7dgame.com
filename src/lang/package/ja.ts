@@ -104,6 +104,16 @@ export default {
         grade: "学年",
         class: "クラス",
       },
+      list: {
+        cancel: "削除",
+        confirm: {
+          message1: "この操作は学校を永久に削除します。続行しますか？",
+          message2: "警告",
+          confirm: "確認",
+          cancel: "キャンセル",
+          success: "削除に成功しました！",
+        },
+      },
     },
     game: {
       title: "ゲーム",
@@ -1308,6 +1318,54 @@ export default {
   // 管理部分国际化
   manager: {
     title: "ユーザーを追加",
+    createSchool: "学校を作成",
+    school: {
+      principal: "校長",
+      address: "住所",
+    },
+    principal: {
+      assign: "校長を割り当てる",
+      selectUser: "ユーザーを選択",
+      select: "選択",
+      assignSuccess: "校長の割り当てに成功しました",
+      assignFailed: "校長の割り当てに失敗しました",
+      username: "ユーザー名",
+      nickname: "ニックネーム",
+    },
+    errors: {
+      fetchFailed: "学校リストの取得に失敗しました",
+      noData: "データがありません",
+      createPending: "作成機能は開発中です",
+      editPending: "学校を編集: {name}",
+    },
+    dialog: {
+      createTitle: "学校を作成",
+      editTitle: "学校を編集",
+    },
+    form: {
+      name: "学校名",
+      namePlaceholder: "学校名を入力してください",
+      address: "学校住所",
+      addressPlaceholder: "学校住所を入力してください",
+      principal: "校長",
+      principalPlaceholder: "校長を選択してください",
+      edit: "編集",
+      cancel: "キャンセル",
+      submit: "送信",
+      submitting: "送信中...",
+    },
+    validation: {
+      nameRequired: "学校名を入力してください",
+      nameLength: "学校名は2〜50文字である必要があります",
+    },
+    messages: {
+      createConfirm: "新しい学校を作成しますか？",
+      createSuccess: "学校の作成に成功しました",
+      createFailed: "学校の作成に失敗しました",
+      updateSuccess: "学校の更新に成功しました",
+      updateFailed: "学校の更新に失敗しました",
+      deleteFailed: "学校の削除に失敗しました",
+    },
     creator: {
       form: {
         label1: "ユーザー名",

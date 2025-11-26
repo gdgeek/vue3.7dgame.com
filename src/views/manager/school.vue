@@ -24,15 +24,19 @@
                 <div class="bottom clearfix">
                   <el-descriptions :column="1" size="small" class="school-info">
                     <el-descriptions-item :label="$t('manager.school.principal')">
-                      {{ school.principal0?.nickname || school.principal0?.username || '-' }}
+                      <span v-if="school.principal">
+                        {{ school.principal.nickname || school.principal.username || '-' }}
+                      </span>
+                      <el-button v-else type="primary" size="small" :icon="Plus" circle
+                        @click="handleAssignPrincipal(school)" />
                     </el-descriptions-item>
                     <el-descriptions-item :label="$t('manager.school.address')">
                       {{ school.info?.address || '-' }}
                     </el-descriptions-item>
                   </el-descriptions>
                   <div class="actions">
-                    <el-button type="primary" size="small" link @click="handleEdit(school)">{{ $t('meta.edit')
-                      }}</el-button>
+                    <el-button type="primary" size="small" link @click="handleEdit(school)">{{ $t('manager.form.edit')
+                    }}</el-button>
                     <el-button type="danger" size="small" link @click="handleDelete(school)">{{
                       $t('manager.list.cancel') }}</el-button>
                   </div>
@@ -40,7 +44,7 @@
               </div>
             </el-card>
           </el-col>
-          <el-empty v-if="!loading && schools.length === 0" description="No Data"></el-empty>
+          <el-empty v-if="!loading && schools.length === 0" :description="$t('manager.errors.noData')"></el-empty>
         </el-row>
       </el-main>
       <el-footer>
@@ -50,23 +54,56 @@
         </el-card>
       </el-footer>
     </el-container>
+
+    <!-- User Selection Dialog -->
+    <el-dialog v-model="userDialogVisible" :title="$t('manager.principal.selectUser')" width="700px"
+      :close-on-click-modal="false">
+      <el-table :data="users" v-loading="userLoading" max-height="400px">
+        <el-table-column prop="username" :label="$t('manager.principal.username')" width="180" />
+        <el-table-column prop="nickname" :label="$t('manager.principal.nickname')" width="180" />
+        <el-table-column :label="$t('manager.principal.select')" width="100">
+          <template #default="{ row }">
+            <el-button type="primary" size="small" @click="handleSelectUser(row)">
+              {{ $t('manager.principal.select') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination v-if="userPagination.total > 0" :current-page="userPagination.current"
+        :page-size="userPagination.size" :total="userPagination.total" layout="prev, pager, next"
+        @current-change="handleUserPageChange" style="margin-top: 20px; text-align: center" />
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { Plus } from '@element-plus/icons-vue';
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import { getSchools, deleteSchool, School } from "@/api/v1/edu-school";
+import type { EduSchool } from '@/api/v1/types/edu-school';
+import { getSchools, deleteSchool, createSchool, updateSchool } from "@/api/v1/edu-school";
+import { getPerson } from "@/api/v1/person";
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
-const schools = ref<School[]>([]);
+const schools = ref<EduSchool[]>([]);
 const loading = ref(false);
 const sorted = ref("-created_at");
 const searched = ref("");
 const pagination = ref({
+  current: 1,
+  size: 20,
+  total: 0,
+});
+
+// User selection dialog state
+const userDialogVisible = ref(false);
+const selectedSchool = ref<EduSchool | null>(null);
+const users = ref<any[]>([]);
+const userLoading = ref(false);
+const userPagination = ref({
   current: 1,
   size: 20,
   total: 0,
@@ -101,7 +138,7 @@ const fetchData = async () => {
 
   } catch (error) {
     console.error(error);
-    ElMessage.error('Failed to fetch schools');
+    ElMessage.error(t('manager.errors.fetchFailed'));
   } finally {
     loading.value = false;
   }
@@ -123,31 +160,160 @@ const handleCurrentChange = (page: number) => {
   fetchData();
 };
 
-const handleCreate = () => {
-  ElMessage.info('Create functionality to be implemented');
+const handleCreate = async () => {
+  try {
+    // Ask for confirmation first
+    await ElMessageBox.confirm(
+      t('manager.messages.createConfirm'),
+      t('manager.dialog.createTitle'),
+      {
+        confirmButtonText: t('manager.form.submit'),
+        cancelButtonText: t('manager.form.cancel'),
+        type: 'info',
+      }
+    );
+
+    // Generate a default name with timestamp
+    const timestamp = new Date().toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }).replace(/\//g, '-').replace(/:/g, '-').replace(/ /g, '_');
+
+    const defaultName = `新学校_${timestamp}`;
+
+    await createSchool({
+      name: defaultName,
+    });
+
+    ElMessage.success(t('manager.messages.createSuccess'));
+    fetchData(); // Refresh the list
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(error);
+      ElMessage.error(t('manager.messages.createFailed'));
+    }
+  }
 };
 
-const handleEdit = (school: School) => {
-  ElMessage.info(`Edit school: ${school.name}`);
+const handleEdit = async (school: EduSchool) => {
+  try {
+    const { value: newName } = await ElMessageBox.prompt(
+      t('manager.form.namePlaceholder'),
+      t('manager.dialog.editTitle'),
+      {
+        confirmButtonText: t('manager.form.submit'),
+        cancelButtonText: t('manager.form.cancel'),
+        inputValue: school.name,
+        inputValidator: (value) => {
+          if (!value) {
+            return t('manager.validation.nameRequired');
+          }
+          if (value.length < 2 || value.length > 50) {
+            return t('manager.validation.nameLength');
+          }
+          return true;
+        },
+      }
+    );
+
+    if (newName) {
+      await updateSchool(school.id, {
+        name: newName,
+      });
+      ElMessage.success(t('manager.messages.updateSuccess'));
+      fetchData(); // Refresh the list
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(error);
+      ElMessage.error(t('manager.messages.updateFailed'));
+    }
+  }
 };
 
-const handleDelete = async (school: School) => {
+const handleDelete = async (school: EduSchool) => {
   try {
     await ElMessageBox.confirm(
-      t("manager.list.confirm.message1"), // "Are you sure to delete?"
-      t("manager.list.confirm.message2"), // "Warning"
+      t("manager.list.confirm.message1"),
+      t("manager.list.confirm.message2"),
       {
         confirmButtonText: t("manager.list.confirm.confirm"),
         cancelButtonText: t("manager.list.confirm.cancel"),
         type: "warning",
       }
     );
+
     await deleteSchool(school.id);
     ElMessage.success(t("manager.list.confirm.success"));
-    fetchData();
-  } catch {
-    // Cancelled
+    fetchData(); // Refresh the list
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(error);
+      ElMessage.error(t('manager.messages.deleteFailed'));
+    }
   }
+};
+
+// Fetch users for principal assignment
+const fetchUsers = async () => {
+  userLoading.value = true;
+  try {
+    const response = await getPerson(
+      "-created_at",
+      "",
+      userPagination.value.current,
+      "avatar"
+    );
+
+    if (response.data) {
+      users.value = response.data;
+
+      if (response.headers) {
+        userPagination.value.current = parseInt(response.headers["x-pagination-current-page"] || "1");
+        userPagination.value.size = parseInt(response.headers["x-pagination-per-page"] || "20");
+        userPagination.value.total = parseInt(response.headers["x-pagination-total-count"] || "0");
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    ElMessage.error(t('manager.errors.fetchFailed'));
+  } finally {
+    userLoading.value = false;
+  }
+};
+
+const handleAssignPrincipal = (school: EduSchool) => {
+  selectedSchool.value = school;
+  userPagination.value.current = 1;
+  userDialogVisible.value = true;
+  fetchUsers();
+};
+
+const handleSelectUser = async (user: any) => {
+  if (!selectedSchool.value) return;
+
+  try {
+    await updateSchool(selectedSchool.value.id, {
+      principal: user.id,
+    });
+
+    ElMessage.success(t('manager.principal.assignSuccess'));
+    userDialogVisible.value = false;
+    fetchData(); // Refresh school list
+  } catch (error) {
+    console.error(error);
+    ElMessage.error(t('manager.principal.assignFailed'));
+  }
+};
+
+const handleUserPageChange = (page: number) => {
+  userPagination.value.current = page;
+  fetchUsers();
 };
 
 onMounted(() => {

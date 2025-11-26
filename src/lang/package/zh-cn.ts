@@ -104,6 +104,16 @@ export default {
         grade: "年级",
         class: "班级",
       },
+      list: {
+        cancel: "删除",
+        confirm: {
+          message1: "此操作将永久删除该学校, 是否继续?",
+          message2: "提示",
+          confirm: "确定",
+          cancel: "取消",
+          success: "删除成功!",
+        },
+      },
     },
     game: {
       title: "游戏",
@@ -1297,6 +1307,54 @@ export default {
   // 管理部分国际化
   manager: {
     title: "添加用户",
+    createSchool: "创建学校",
+    school: {
+      principal: "校长",
+      address: "地址",
+    },
+    principal: {
+      assign: "分配校长",
+      selectUser: "选择用户",
+      select: "选择",
+      assignSuccess: "校长分配成功",
+      assignFailed: "校长分配失败",
+      username: "用户名",
+      nickname: "昵称",
+    },
+    errors: {
+      fetchFailed: "获取学校列表失败",
+      noData: "暂无数据",
+      createPending: "创建功能开发中",
+      editPending: "编辑学校: {name}",
+    },
+    dialog: {
+      createTitle: "创建学校",
+      editTitle: "编辑学校",
+    },
+    form: {
+      name: "学校名称",
+      namePlaceholder: "请输入学校名称",
+      address: "学校地址",
+      addressPlaceholder: "请输入学校地址",
+      principal: "校长",
+      principalPlaceholder: "请选择校长",
+      edit: "编辑",
+      cancel: "取消",
+      submit: "提交",
+      submitting: "提交中...",
+    },
+    validation: {
+      nameRequired: "请输入学校名称",
+      nameLength: "学校名称长度应在2-50个字符之间",
+    },
+    messages: {
+      createConfirm: "确认创建新学校吗？",
+      createSuccess: "学校创建成功",
+      createFailed: "学校创建失败",
+      updateSuccess: "学校更新成功",
+      updateFailed: "学校更新失败",
+      deleteFailed: "学校删除失败",
+    },
     creator: {
       form: {
         label1: "用户名",

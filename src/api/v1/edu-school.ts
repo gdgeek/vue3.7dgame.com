@@ -32,14 +32,14 @@ export const getSchools = (
 
 export const getSchool = (id: number) => {
   return request<EduSchool>({
-    url: `v1/edu-school/view?id=${id}`,
+    url: `v1/edu-school/${id}`,
     method: "get",
   });
 };
 
 export const createSchool = (data: any) => {
   return request({
-    url: "v1/edu-school/create",
+    url: "v1/edu-school",
     method: "post",
     data,
   });
@@ -47,7 +47,7 @@ export const createSchool = (data: any) => {
 
 export const updateSchool = (id: number, data: any) => {
   return request({
-    url: `v1/edu-school/update?id=${id}`,
+    url: `v1/edu-school/${id}`,
     method: "put",
     data,
   });
@@ -55,7 +55,7 @@ export const updateSchool = (id: number, data: any) => {
 
 export const deleteSchool = (id: number) => {
   return request({
-    url: `v1/edu-school/delete?id=${id}`,
+    url: `v1/edu-school/${id}`,
     method: "delete",
   });
 };

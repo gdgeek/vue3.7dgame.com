@@ -104,6 +104,17 @@ export default {
         grade: "Grade",
         class: "Class",
       },
+      list: {
+        cancel: "Delete",
+        confirm: {
+          message1:
+            "This action will permanently delete the school. Do you want to continue?",
+          message2: "Warning",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          success: "Deleted successfully!",
+        },
+      },
     },
     game: {
       title: "Game",
@@ -1353,6 +1364,54 @@ export default {
   // 管理部分国际化
   manager: {
     title: "Add User",
+    createSchool: "Create School",
+    school: {
+      principal: "Principal",
+      address: "Address",
+    },
+    principal: {
+      assign: "Assign Principal",
+      selectUser: "Select User",
+      select: "Select",
+      assignSuccess: "Principal assigned successfully",
+      assignFailed: "Failed to assign principal",
+      username: "Username",
+      nickname: "Nickname",
+    },
+    errors: {
+      fetchFailed: "Failed to fetch schools",
+      noData: "No Data",
+      createPending: "Create functionality to be implemented",
+      editPending: "Edit school: {name}",
+    },
+    dialog: {
+      createTitle: "Create School",
+      editTitle: "Edit School",
+    },
+    form: {
+      name: "School Name",
+      namePlaceholder: "Please enter school name",
+      address: "School Address",
+      addressPlaceholder: "Please enter school address",
+      principal: "Principal",
+      principalPlaceholder: "Please select principal",
+      edit: "Edit",
+      cancel: "Cancel",
+      submit: "Submit",
+      submitting: "Submitting...",
+    },
+    validation: {
+      nameRequired: "Please enter school name",
+      nameLength: "School name length should be between 2-50 characters",
+    },
+    messages: {
+      createConfirm: "Confirm to create a new school?",
+      createSuccess: "School created successfully",
+      createFailed: "Failed to create school",
+      updateSuccess: "School updated successfully",
+      updateFailed: "Failed to update school",
+      deleteFailed: "Failed to delete school",
+    },
     creator: {
       form: {
         label1: "Username",

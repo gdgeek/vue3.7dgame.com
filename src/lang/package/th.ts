@@ -104,6 +104,17 @@ export default {
         grade: "ระดับชั้น",
         class: "ชั้นเรียน",
       },
+      list: {
+        cancel: "ลบ",
+        confirm: {
+          message1:
+            "การดำเนินการนี้จะลบโรงเรียนอย่างถาวร ต้องการดำเนินการต่อหรือไม่?",
+          message2: "คำเตือน",
+          confirm: "ยืนยัน",
+          cancel: "ยกเลิก",
+          success: "ลบสำเร็จ!",
+        },
+      },
     },
     game: {
       title: "เกม",
@@ -1314,6 +1325,54 @@ export default {
   // 管理部分国际化
   manager: {
     title: "เพิ่มผู้ใช้",
+    createSchool: "สร้างโรงเรียน",
+    school: {
+      principal: "ครูใหญ่",
+      address: "ที่อยู่",
+    },
+    principal: {
+      assign: "มอบหมายครูใหญ่",
+      selectUser: "เลือกผู้ใช้",
+      select: "เลือก",
+      assignSuccess: "มอบหมายครูใหญ่สำเร็จ",
+      assignFailed: "การมอบหมายครูใหญ่ล้มเหลว",
+      username: "ชื่อผู้ใช้",
+      nickname: "ชื่อเล่น",
+    },
+    errors: {
+      fetchFailed: "ไม่สามารถดึงรายการโรงเรียนได้",
+      noData: "ไม่มีข้อมูล",
+      createPending: "ฟังก์ชันการสร้างกำลังพัฒนา",
+      editPending: "แก้ไขโรงเรียน: {name}",
+    },
+    dialog: {
+      createTitle: "สร้างโรงเรียน",
+      editTitle: "แก้ไขโรงเรียน",
+    },
+    form: {
+      name: "ชื่อโรงเรียน",
+      namePlaceholder: "กรุณากรอกชื่อโรงเรียน",
+      address: "ที่อยู่โรงเรียน",
+      addressPlaceholder: "กรุณากรอกที่อยู่โรงเรียน",
+      principal: "ครูใหญ่",
+      principalPlaceholder: "กรุณาเลือกครูใหญ่",
+      edit: "แก้ไข",
+      cancel: "ยกเลิก",
+      submit: "ส่ง",
+      submitting: "กำลังส่ง...",
+    },
+    validation: {
+      nameRequired: "กรุณากรอกชื่อโรงเรียน",
+      nameLength: "ความยาวชื่อโรงเรียนควรอยู่ระหว่าง 2-50 ตัวอักษร",
+    },
+    messages: {
+      createConfirm: "ยืนยันการสร้างโรงเรียนใหม่หรือไม่?",
+      createSuccess: "สร้างโรงเรียนสำเร็จ",
+      createFailed: "การสร้างโรงเรียนล้มเหลว",
+      updateSuccess: "อัปเดตโรงเรียนสำเร็จ",
+      updateFailed: "การอัปเดตโรงเรียนล้มเหลว",
+      deleteFailed: "การลบโรงเรียนล้มเหลว",
+    },
     creator: {
       form: {
         label1: "ชื่อผู้ใช้",
