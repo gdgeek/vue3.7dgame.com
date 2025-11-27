@@ -13,6 +13,7 @@
         </MrPPHeader>
       </el-header>
       <el-main>
+        {{ schools }}
         <el-row :gutter="20" v-loading="loading">
           <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="4" v-for="school in schools" :key="school.id">
             <el-card class="school-card" :body-style="{ padding: '0px' }">
@@ -36,7 +37,7 @@
                   </el-descriptions>
                   <div class="actions">
                     <el-button type="primary" size="small" link @click="handleEdit(school)">{{ $t('manager.form.edit')
-                    }}</el-button>
+                      }}</el-button>
                     <el-button type="danger" size="small" link @click="handleDelete(school)">{{
                       $t('manager.list.cancel') }}</el-button>
                   </div>
@@ -55,24 +56,27 @@
       </el-footer>
     </el-container>
 
-    <!-- User Selection Dialog -->
-    <el-dialog v-model="userDialogVisible" :title="$t('manager.principal.selectUser')" width="700px"
+    <!-- Edit School Dialog -->
+    <el-dialog v-model="editDialogVisible" :title="$t('manager.dialog.editTitle')" width="500px"
       :close-on-click-modal="false">
-      <el-table :data="users" v-loading="userLoading" max-height="400px">
-        <el-table-column prop="username" :label="$t('manager.principal.username')" width="180" />
-        <el-table-column prop="nickname" :label="$t('manager.principal.nickname')" width="180" />
-        <el-table-column :label="$t('manager.principal.select')" width="100">
-          <template #default="{ row }">
-            <el-button type="primary" size="small" @click="handleSelectUser(row)">
-              {{ $t('manager.principal.select') }}
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-pagination v-if="userPagination.total > 0" :current-page="userPagination.current"
-        :page-size="userPagination.size" :total="userPagination.total" layout="prev, pager, next"
-        @current-change="handleUserPageChange" style="margin-top: 20px; text-align: center" />
+      <el-form :model="editForm" label-width="120px">
+        <el-form-item :label="$t('manager.form.name')">
+          <el-input v-model="editForm.name" :placeholder="$t('manager.form.namePlaceholder')" />
+        </el-form-item>
+        <el-form-item :label="$t('manager.form.principal')">
+          <el-button @click="openPrincipalSelector">
+            {{ editForm.principalName || $t('manager.form.principalPlaceholder') }}
+          </el-button>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editDialogVisible = false">{{ $t('manager.form.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSaveEdit">{{ $t('manager.form.submit') }}</el-button>
+      </template>
     </el-dialog>
+
+    <!-- User Selection Dialog -->
+    <UserSelector v-model="userDialogVisible" :title="$t('common.selectUser')" @select="handleSelectUser" />
   </div>
 </template>
 
@@ -80,9 +84,9 @@
 import { ref, onMounted } from 'vue';
 import { Plus } from '@element-plus/icons-vue';
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import UserSelector from "@/components/UserSelector/index.vue";
 import type { EduSchool } from '@/api/v1/types/edu-school';
 import { getSchools, deleteSchool, createSchool, updateSchool } from "@/api/v1/edu-school";
-import { getPerson } from "@/api/v1/person";
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 
@@ -101,12 +105,14 @@ const pagination = ref({
 // User selection dialog state
 const userDialogVisible = ref(false);
 const selectedSchool = ref<EduSchool | null>(null);
-const users = ref<any[]>([]);
-const userLoading = ref(false);
-const userPagination = ref({
-  current: 1,
-  size: 20,
-  total: 0,
+
+// Edit dialog state
+const editDialogVisible = ref(false);
+const editForm = ref({
+  id: 0,
+  name: '',
+  principal_id: null as number | null,
+  principalName: '',
 });
 
 const fetchData = async () => {
@@ -116,7 +122,7 @@ const fetchData = async () => {
       sorted.value,
       searched.value,
       pagination.value.current,
-      "image,principal0"
+      "image,principal"
     );
 
     // Assuming the response structure matches the one in person.ts (with headers for pagination)
@@ -201,38 +207,31 @@ const handleCreate = async () => {
 };
 
 const handleEdit = async (school: EduSchool) => {
-  try {
-    const { value: newName } = await ElMessageBox.prompt(
-      t('manager.form.namePlaceholder'),
-      t('manager.dialog.editTitle'),
-      {
-        confirmButtonText: t('manager.form.submit'),
-        cancelButtonText: t('manager.form.cancel'),
-        inputValue: school.name,
-        inputValidator: (value) => {
-          if (!value) {
-            return t('manager.validation.nameRequired');
-          }
-          if (value.length < 2 || value.length > 50) {
-            return t('manager.validation.nameLength');
-          }
-          return true;
-        },
-      }
-    );
+  editForm.value = {
+    id: school.id,
+    name: school.name,
+    principal_id: school.principal ? (school.principal as any).id : null,
+    principalName: school.principal ? ((school.principal as any).nickname || (school.principal as any).username) : '',
+  };
+  editDialogVisible.value = true;
+};
 
-    if (newName) {
-      await updateSchool(school.id, {
-        name: newName,
-      });
-      ElMessage.success(t('manager.messages.updateSuccess'));
-      fetchData(); // Refresh the list
-    }
+const openPrincipalSelector = () => {
+  userDialogVisible.value = true;
+};
+
+const handleSaveEdit = async () => {
+  try {
+    await updateSchool(editForm.value.id, {
+      name: editForm.value.name,
+      principal_id: editForm.value.principal_id,
+    });
+    ElMessage.success(t('manager.messages.updateSuccess'));
+    editDialogVisible.value = false;
+    fetchData();
   } catch (error) {
-    if (error !== 'cancel') {
-      console.error(error);
-      ElMessage.error(t('manager.messages.updateFailed'));
-    }
+    console.error(error);
+    ElMessage.error(t('manager.messages.updateFailed'));
   }
 };
 
@@ -259,47 +258,26 @@ const handleDelete = async (school: EduSchool) => {
   }
 };
 
-// Fetch users for principal assignment
-const fetchUsers = async () => {
-  userLoading.value = true;
-  try {
-    const response = await getPerson(
-      "-created_at",
-      "",
-      userPagination.value.current,
-      "avatar"
-    );
-
-    if (response.data) {
-      users.value = response.data;
-
-      if (response.headers) {
-        userPagination.value.current = parseInt(response.headers["x-pagination-current-page"] || "1");
-        userPagination.value.size = parseInt(response.headers["x-pagination-per-page"] || "20");
-        userPagination.value.total = parseInt(response.headers["x-pagination-total-count"] || "0");
-      }
-    }
-  } catch (error) {
-    console.error(error);
-    ElMessage.error(t('manager.errors.fetchFailed'));
-  } finally {
-    userLoading.value = false;
-  }
-};
-
 const handleAssignPrincipal = (school: EduSchool) => {
   selectedSchool.value = school;
-  userPagination.value.current = 1;
   userDialogVisible.value = true;
-  fetchUsers();
 };
 
 const handleSelectUser = async (user: any) => {
+  // If editing, update the edit form
+  if (editDialogVisible.value) {
+    editForm.value.principal_id = user.id;
+    editForm.value.principalName = user.nickname || user.username;
+    userDialogVisible.value = false;
+    return;
+  }
+
+  // If assigning principal directly
   if (!selectedSchool.value) return;
 
   try {
     await updateSchool(selectedSchool.value.id, {
-      principal: user.id,
+      principal_id: user.id,
     });
 
     ElMessage.success(t('manager.principal.assignSuccess'));
@@ -311,10 +289,7 @@ const handleSelectUser = async (user: any) => {
   }
 };
 
-const handleUserPageChange = (page: number) => {
-  userPagination.value.current = page;
-  fetchUsers();
-};
+
 
 onMounted(() => {
   fetchData();

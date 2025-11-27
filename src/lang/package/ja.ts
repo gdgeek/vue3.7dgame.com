@@ -1,4 +1,14 @@
 export default {
+  // 共通翻訳
+  common: {
+    confirm: "確認",
+    cancel: "キャンセル",
+    selectUser: "ユーザーを選択",
+    username: "ユーザー名",
+    nickname: "ニックネーム",
+    select: "選択",
+    noUsers: "ユーザーが見つかりません",
+  },
   // 路由国际化
   route: {
     dashboard: "ダッシュボード",
@@ -1320,15 +1330,15 @@ export default {
     title: "ユーザーを追加",
     createSchool: "学校を作成",
     school: {
-      principal: "校長",
+      principal: "学校管理者",
       address: "住所",
     },
     principal: {
-      assign: "校長を割り当てる",
+      assign: "学校管理者を割り当てる",
       selectUser: "ユーザーを選択",
       select: "選択",
-      assignSuccess: "校長の割り当てに成功しました",
-      assignFailed: "校長の割り当てに失敗しました",
+      assignSuccess: "学校管理者の割り当てに成功しました",
+      assignFailed: "学校管理者の割り当てに失敗しました",
       username: "ユーザー名",
       nickname: "ニックネーム",
     },
@@ -1347,8 +1357,8 @@ export default {
       namePlaceholder: "学校名を入力してください",
       address: "学校住所",
       addressPlaceholder: "学校住所を入力してください",
-      principal: "校長",
-      principalPlaceholder: "校長を選択してください",
+      principal: "学校管理者",
+      principalPlaceholder: "学校管理者を選択してください",
       edit: "編集",
       cancel: "キャンセル",
       submit: "送信",

@@ -1,4 +1,14 @@
-export default {
+  export default {
+  // 通用翻译
+  common: {
+    confirm: "确认",
+    cancel: "取消",
+    selectUser: "选择用户",
+    username: "用户名",
+    nickname: "昵称",
+    select: "选择",
+    noUsers: "未找到用户",
+  },
   // 路由国际化
   route: {
     dashboard: "首页",
@@ -1309,15 +1319,15 @@ export default {
     title: "添加用户",
     createSchool: "创建学校",
     school: {
-      principal: "校长",
+      principal: "学校管理员",
       address: "地址",
     },
     principal: {
-      assign: "分配校长",
+      assign: "分配学校管理员",
       selectUser: "选择用户",
       select: "选择",
-      assignSuccess: "校长分配成功",
-      assignFailed: "校长分配失败",
+      assignSuccess: "学校管理员分配成功",
+      assignFailed: "学校管理员分配失败",
       username: "用户名",
       nickname: "昵称",
     },
@@ -1336,8 +1346,8 @@ export default {
       namePlaceholder: "请输入学校名称",
       address: "学校地址",
       addressPlaceholder: "请输入学校地址",
-      principal: "校长",
-      principalPlaceholder: "请选择校长",
+      principal: "学校管理员",
+      principalPlaceholder: "请选择学校管理员",
       edit: "编辑",
       cancel: "取消",
       submit: "提交",

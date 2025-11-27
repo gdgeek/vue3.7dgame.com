@@ -1,4 +1,14 @@
 export default {
+  // Common translations
+  common: {
+    confirm: "Confirm",
+    cancel: "Cancel",
+    selectUser: "Select User",
+    username: "Username",
+    nickname: "Nickname",
+    select: "Select",
+    noUsers: "No users found",
+  },
   // 路由国际化
   route: {
     dashboard: "Dashboard",
@@ -1366,15 +1376,15 @@ export default {
     title: "Add User",
     createSchool: "Create School",
     school: {
-      principal: "Principal",
+      principal: "School Administrator",
       address: "Address",
     },
     principal: {
-      assign: "Assign Principal",
+      assign: "Assign School Administrator",
       selectUser: "Select User",
       select: "Select",
-      assignSuccess: "Principal assigned successfully",
-      assignFailed: "Failed to assign principal",
+      assignSuccess: "School administrator assigned successfully",
+      assignFailed: "Failed to assign school administrator",
       username: "Username",
       nickname: "Nickname",
     },
@@ -1393,8 +1403,8 @@ export default {
       namePlaceholder: "Please enter school name",
       address: "School Address",
       addressPlaceholder: "Please enter school address",
-      principal: "Principal",
-      principalPlaceholder: "Please select principal",
+      principal: "School Administrator",
+      principalPlaceholder: "Please select school administrator",
       edit: "Edit",
       cancel: "Cancel",
       submit: "Submit",

@@ -1,30 +1,15 @@
 <template>
+  {{ searched }}
   <div class="verse-index">
-    <PersonCreator
-      v-if="props.created"
-      ref="createdDialogRef"
-      :close-on-click-modal="false"
-      :dialog-title="$t('manager.title')"
-      @refresh="refresh"
-      :dialog-submit="$t('manager.title')"
-    ></PersonCreator>
+    <PersonCreator v-if="props.created" ref="createdDialogRef" :close-on-click-modal="false"
+      :dialog-title="$t('manager.title')" @refresh="refresh" :dialog-submit="$t('manager.title')"></PersonCreator>
 
     <br />
     <el-container>
       <el-header>
-        <MrPPHeader
-          :sorted="sorted"
-          :searched="searched"
-          @search="search"
-          @sort="sort"
-        >
+        <MrPPHeader :sorted="sorted" :searched="searched" @search="search" @sort="sort">
           <el-button-group :inline="true">
-            <el-button
-              v-if="props.created"
-              size="small"
-              type="primary"
-              @click="createWindow"
-            >
+            <el-button v-if="props.created" size="small" type="primary" @click="createWindow">
               <font-awesome-icon icon="plus"></font-awesome-icon>
               &nbsp;
               <span class="hidden-sm-and-down">{{ $t("manager.title") }}</span>
@@ -34,24 +19,14 @@
       </el-header>
       <el-main>
         <el-row>
-          <List
-            v-if="items && items.length > 0"
-            :items="items!"
-            @refresh="refresh"
-          ></List>
+          <List v-if="items && items.length > 0" :items="items!" @refresh="refresh"></List>
         </el-row>
       </el-main>
       <el-footer>
         <el-card class="box-card">
-          <el-pagination
-            :current-page="pagination.current"
-            :page-count="pagination.count"
-            :page-size="pagination.size"
-            :total="pagination.total"
-            layout="prev, pager, next, jumper"
-            background
-            @current-change="handleCurrentChange"
-          ></el-pagination>
+          <el-pagination :current-page="pagination.current" :page-count="pagination.count" :page-size="pagination.size"
+            :total="pagination.total" layout="prev, pager, next, jumper" background
+            @current-change="handleCurrentChange"></el-pagination>
         </el-card>
       </el-footer>
     </el-container>
@@ -108,6 +83,7 @@ const sort = async (value: string) => {
 };
 
 const search = async (value: string) => {
+
   searched.value = value;
   await refresh();
 };

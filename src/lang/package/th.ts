@@ -1,4 +1,14 @@
-export default {
+ export default { 
+  // คำแปลทั่วไป
+  common: {
+    confirm: "ยืนยัน",
+    cancel: "ยกเลิก",
+    selectUser: "เลือกผู้ใช้",
+    username: "ชื่อผู้ใช้",
+    nickname: "ชื่อเล่น",
+    select: "เลือก",
+    noUsers: "ไม่พบผู้ใช้",
+  },
   // 路由国际化
   route: {
     dashboard: "หน้าหลัก",
@@ -1327,15 +1337,15 @@ export default {
     title: "เพิ่มผู้ใช้",
     createSchool: "สร้างโรงเรียน",
     school: {
-      principal: "ครูใหญ่",
+      principal: "ผู้ดูแลโรงเรียน",
       address: "ที่อยู่",
     },
     principal: {
-      assign: "มอบหมายครูใหญ่",
+      assign: "มอบหมายผู้ดูแลโรงเรียน",
       selectUser: "เลือกผู้ใช้",
       select: "เลือก",
-      assignSuccess: "มอบหมายครูใหญ่สำเร็จ",
-      assignFailed: "การมอบหมายครูใหญ่ล้มเหลว",
+      assignSuccess: "มอบหมายผู้ดูแลโรงเรียนสำเร็จ",
+      assignFailed: "การมอบหมายผู้ดูแลโรงเรียนล้มเหลว",
       username: "ชื่อผู้ใช้",
       nickname: "ชื่อเล่น",
     },
@@ -1354,8 +1364,8 @@ export default {
       namePlaceholder: "กรุณากรอกชื่อโรงเรียน",
       address: "ที่อยู่โรงเรียน",
       addressPlaceholder: "กรุณากรอกที่อยู่โรงเรียน",
-      principal: "ครูใหญ่",
-      principalPlaceholder: "กรุณาเลือกครูใหญ่",
+      principal: "ผู้ดูแลโรงเรียน",
+      principalPlaceholder: "กรุณาเลือกผู้ดูแลโรงเรียน",
       edit: "แก้ไข",
       cancel: "ยกเลิก",
       submit: "ส่ง",

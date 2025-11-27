@@ -12,20 +12,21 @@ export const getSchools = (
   sort = "-created_at",
   search = "",
   page = 1,
-  expand = ""
+  expand = "image,principal"
 ) => {
   const query: Record<string, any> = [];
   query["expand"] = expand;
   query["sort"] = sort;
 
-  if (search !== "") {
-    query["SchoolSearch[name]"] = search;
+  if (search) {
+    query["search"] = search;
   }
   if (page > 1) {
     query["page"] = page;
   }
+
   return request<EduSchool[]>({
-    url: path.join("v1", "edu-school" + qs.stringify(query, true)),
+    url: path.join("v1", "edu-school" + qs.stringify(query, true)), //path.join("v1", "edu-school" + qs.stringify(query, true)),
     method: "get",
   });
 };

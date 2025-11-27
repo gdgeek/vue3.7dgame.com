@@ -46,9 +46,8 @@ export const getPerson = (
   const query: Record<string, any> = [];
   query["expand"] = expand;
   query["sort"] = sort;
-
   if (search !== "") {
-    query["UserSearch[username]"] = search;
+    query["PersonSearch[username]"] = search;
   }
   if (page > 1) {
     query["page"] = page;
