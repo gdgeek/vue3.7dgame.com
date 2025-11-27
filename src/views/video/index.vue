@@ -35,6 +35,13 @@
                       {{ $t("video.viewVideo") }}
                     </el-button>
                   </template>
+                  <template #overlay>
+                    <el-button type="primary" circle size="large" @click.stop="openViewDialog(item.id, true)">
+                      <el-icon :size="30">
+                        <VideoPlay />
+                      </el-icon>
+                    </el-button>
+                  </template>
                 </mr-p-p-card>
               </template>
             </Waterfall>
@@ -57,7 +64,8 @@
       </mr-p-p-upload-dialog>
 
       <!-- 视频查看弹窗 -->
-      <VideoDialog v-model="viewDialogVisible" :id="currentVideoId" @refresh="refresh" @deleted="refresh" />
+      <VideoDialog v-model="viewDialogVisible" :id="currentVideoId" :auto-play="autoPlay" @refresh="refresh"
+        @deleted="refresh" />
     </div>
   </TransitionWrapper>
 </template>
@@ -73,6 +81,7 @@ import "vue-waterfall-plugin-next/dist/style.css";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
+import { VideoPlay } from "@element-plus/icons-vue";
 
 const items = ref<any[]>([]);
 const sorted = ref<string>("-created_at");
@@ -93,9 +102,11 @@ const fileType = ref("video/mp4, video/mov, video/avi");
 // 查看弹窗相关
 const viewDialogVisible = ref(false);
 const currentVideoId = ref<number | null>(null);
+const autoPlay = ref(false);
 
-const openViewDialog = (id: number) => {
+const openViewDialog = (id: number, play: boolean = false) => {
   currentVideoId.value = id;
+  autoPlay.value = play;
   viewDialogVisible.value = true;
 };
 

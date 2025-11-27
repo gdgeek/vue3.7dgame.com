@@ -33,6 +33,11 @@
                 <slot name="bar"></slot>
               </div>
             </template>
+
+            <!-- 覆盖层插槽 -->
+            <div class="overlay-container" v-if="$slots.overlay">
+              <slot name="overlay"></slot>
+            </div>
           </div>
         </el-card>
       </template>
@@ -145,5 +150,23 @@ const onMouseLeave = () => {
 .image-container:hover .audio-container {
   bottom: 0;
   /* 鼠标悬停时从底部弹出 */
+}
+
+.overlay-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.image-container:hover .overlay-container {
+  opacity: 1;
 }
 </style>

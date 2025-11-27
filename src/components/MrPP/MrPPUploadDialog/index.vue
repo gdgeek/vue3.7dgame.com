@@ -197,6 +197,25 @@ const getVideoInfo = (file: File): Promise<{ size: { x: number; y: number }; len
   });
 };
 
+// 获取音频信息
+const getAudioInfo = (file: File): Promise<{ length: number }> => {
+  return new Promise((resolve) => {
+    const audio = document.createElement('audio');
+    audio.preload = 'metadata';
+    audio.src = URL.createObjectURL(file);
+    audio.onloadedmetadata = () => {
+      URL.revokeObjectURL(audio.src);
+      resolve({
+        length: audio.duration
+      });
+    };
+    audio.onerror = () => {
+      URL.revokeObjectURL(audio.src);
+      resolve({ length: 0 });
+    };
+  });
+};
+
 // 格式化文件大小显示
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 B';
@@ -334,6 +353,15 @@ const select = async () => {
           const videoInfo = await getVideoInfo(file);
           if (videoInfo.size.x > 0) {
             info = JSON.stringify(videoInfo);
+          }
+        }
+
+        // 如果是音频，获取时长信息
+        if (props.dir === 'audio' && file.type.startsWith('audio/')) {
+          const audioInfo = await getAudioInfo(file);
+          if (audioInfo.length > 0) {
+            const size = { x: 800, y: 800 };
+            info = JSON.stringify({ size, length: audioInfo.length });
           }
         }
 

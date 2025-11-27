@@ -43,6 +43,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 const props = defineProps<{
   modelValue: boolean;
   id: number | null;
+  autoPlay?: boolean;
 }>();
 
 const emit = defineEmits(["update:modelValue", "refresh", "deleted"]);
@@ -173,6 +174,12 @@ const loadData = async () => {
     file.value = response.data.file.url;
     setTimeout(() => {
       init();
+      if (props.autoPlay) {
+        const video = document.getElementById("video") as HTMLVideoElement;
+        if (video) {
+          video.play().catch(e => console.error("Auto-play failed:", e));
+        }
+      }
     }, 0);
   } catch (err) {
     ElMessage.error(String(err));
