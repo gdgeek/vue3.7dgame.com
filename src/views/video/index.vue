@@ -27,14 +27,13 @@
               <template #default="{ item }">
                 <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
                   <template #enter>
-                    <router-link :to="`/resource/video/view?id=${item.id}`">
-                      <el-button v-if="item.info === null || item.image === null" type="warning" size="small">
-                        {{ $t("video.initializeVideoData") }}
-                      </el-button>
-                      <el-button v-else type="primary" size="small">{{
-                        $t("video.viewVideo")
-                        }}</el-button>
-                    </router-link>
+                    <el-button v-if="item.info === null || item.image === null" type="warning" size="small"
+                      @click="openViewDialog(item.id)">
+                      {{ $t("video.initializeVideoData") }}
+                    </el-button>
+                    <el-button v-else type="primary" size="small" @click="openViewDialog(item.id)">
+                      {{ $t("video.viewVideo") }}
+                    </el-button>
                   </template>
                 </mr-p-p-card>
               </template>
@@ -56,6 +55,9 @@
         @success="handleUploadSuccess">
         {{ $t("video.uploadFile") }}
       </mr-p-p-upload-dialog>
+
+      <!-- 视频查看弹窗 -->
+      <VideoDialog v-model="viewDialogVisible" :id="currentVideoId" @refresh="refresh" @deleted="refresh" />
     </div>
   </TransitionWrapper>
 </template>
@@ -65,6 +67,7 @@ import { getVideos, putVideo, deleteVideo, postVideo } from "@/api/v1/resources/
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import MrPPUploadDialog from "@/components/MrPP/MrPPUploadDialog/index.vue";
+import VideoDialog from "@/components/MrPP/VideoDialog.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
@@ -87,6 +90,15 @@ const router = useRouter();
 const uploadDialogVisible = ref(false);
 const fileType = ref("video/mp4, video/mov, video/avi");
 
+// 查看弹窗相关
+const viewDialogVisible = ref(false);
+const currentVideoId = ref<number | null>(null);
+
+const openViewDialog = (id: number) => {
+  currentVideoId.value = id;
+  viewDialogVisible.value = true;
+};
+
 // 打开上传弹窗
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;
@@ -100,92 +112,9 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
   const modelIds = Array.isArray(uploadedIds) ? uploadedIds : [uploadedIds];
   const lastFileId = modelIds[modelIds.length - 1];
 
-  if (modelIds.length > 0) {
-    const loadingInstance = ElLoading.service({
-      text: t("video.initializingModels"),
-      background: 'rgba(0, 0, 0, 0.7)'
-    });
+  // 刷新列表
+  await refresh();
 
-    // 记录初始化失败的模型ID
-    const failedModelIds = [];
-
-    try {
-      for (let i = 0; i < modelIds.length; i++) {
-        loadingInstance.setText(t("video.initializingModelProgress", {
-          current: i + 1,
-          total: modelIds.length,
-          percentage: Math.round(((i + 1) / modelIds.length) * 100)
-        }));
-
-        try {
-          // 跳转到模型详情页触发初始化
-          await router.push({
-            path: "/resource/video/view",
-            query: { id: modelIds[i] },
-          });
-
-          await new Promise(resolve => setTimeout(resolve, 2000));
-        } catch (modelError) {
-          console.error(`初始化视频 ${modelIds[i]} 失败:`, modelError);
-          failedModelIds.push(modelIds[i]);
-        }
-      }
-
-      if (failedModelIds.length > 0) {
-        ElMessage.warning({
-          message: t("video.partialInitializeSuccess", {
-            success: modelIds.length - failedModelIds.length,
-            failed: failedModelIds.length,
-            total: modelIds.length
-          }),
-          duration: 5000
-        });
-
-        if (failedModelIds.length > 0) {
-          const shouldRetry = await ElMessageBox.confirm(
-            t("video.retryInitializeFailed", { count: failedModelIds.length }),
-            t("video.retryTitle"),
-            {
-              confirmButtonText: t("video.retryConfirm"),
-              cancelButtonText: t("video.retryCancel"),
-              type: "warning"
-            }
-          ).catch(() => false);
-
-          if (shouldRetry === true) {
-            await handleUploadSuccess(failedModelIds);
-            return;
-          }
-          else {
-            router.push({
-              path: "/resource/video/view",
-              query: { id: lastFileId },
-            });
-            return;
-          }
-        }
-      } else {
-        ElMessage.success({
-          message: t("video.batchInitializeSuccess", { count: modelIds.length }),
-          duration: 3000
-        });
-      }
-
-      await refresh();
-
-    } catch (error) {
-      console.error("初始化视频时出错:", error);
-      ElMessage.error(t("video.initializeError"));
-    } finally {
-      loadingInstance.close();
-    }
-  }
-
-  // 最后跳转到最后上传的模型详情页
-  router.push({
-    path: "/resource/video/view",
-    query: { id: lastFileId },
-  });
 };
 
 // 保存视频
@@ -193,10 +122,19 @@ const saveVideo = async (
   name: string,
   file_id: number,
   totalFiles: number,
-  callback: (id: number) => void
+  callback: (id: number) => void,
+  effectType?: string,
+  info?: string,
+  image_id?: number
 ) => {
   try {
-    const response = await postVideo({ name, file_id });
+    // 如果传入了 info，说明是视频且已获取到信息，直接使用 file_id 作为 image_id
+    const data: any = { name, file_id };
+    if (info) {
+      data.info = info;
+      data.image_id = file_id; // 视频直接使用原文件ID
+    }
+    const response = await postVideo(data);
     if (response.data.id) {
       callback(response.data.id);
     }

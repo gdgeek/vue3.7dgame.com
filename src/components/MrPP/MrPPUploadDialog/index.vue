@@ -177,6 +177,26 @@ const getImageSize = (file: File): Promise<{ x: number; y: number }> => {
   });
 };
 
+// 获取视频信息
+const getVideoInfo = (file: File): Promise<{ size: { x: number; y: number }; length: number }> => {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.src = URL.createObjectURL(file);
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(video.src);
+      resolve({
+        size: { x: video.videoWidth, y: video.videoHeight },
+        length: video.duration
+      });
+    };
+    video.onerror = () => {
+      URL.revokeObjectURL(video.src);
+      resolve({ size: { x: 0, y: 0 }, length: 0 });
+    };
+  });
+};
+
 // 格式化文件大小显示
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 B';
@@ -306,6 +326,14 @@ const select = async () => {
             // 然后我们在 saveResource 回调中创建资源。
             // 这里的 image_id 参数其实是多余的，因为 saveFile 内部获得了文件ID。
             // 我们只需要传递 info 即可，image_id 将在 savePicture (父组件) 中被设置为 file_id。
+          }
+        }
+
+        // 如果是视频，获取时长和尺寸信息
+        if (props.dir === 'video' && file.type.startsWith('video/')) {
+          const videoInfo = await getVideoInfo(file);
+          if (videoInfo.size.x > 0) {
+            info = JSON.stringify(videoInfo);
           }
         }
 

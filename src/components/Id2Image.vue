@@ -30,10 +30,19 @@ const url = computed(() => {
     imageUrl = new URL(`../assets/images/items/${props.id % 100}.webp`, import.meta.url).href;
   }
 
-  // Check if it's a Tencent Cloud COS URL and append thumbnail parameter if needed
-  if (imageUrl && imageUrl.includes('myqcloud.com') && !imageUrl.includes('imageMogr2') && !imageUrl.includes('imageView2')) {
-    const separator = imageUrl.includes('?') ? '&' : '?';
-    imageUrl += `${separator}imageMogr2/thumbnail/512x/format/webp`;
+  // Check if it's a Tencent Cloud COS URL
+  if (imageUrl && imageUrl.includes('myqcloud.com')) {
+    const isVideo = /\.(mp4|mov|avi)$/i.test(imageUrl.split('?')[0]);
+
+    if (isVideo) {
+      if (!imageUrl.includes('ci-process=snapshot')) {
+        const separator = imageUrl.includes('?') ? '&' : '?';
+        imageUrl += `${separator}ci-process=snapshot&time=0.1&format=jpg&width=256`;
+      }
+    } else if (!imageUrl.includes('imageMogr2') && !imageUrl.includes('imageView2')) {
+      const separator = imageUrl.includes('?') ? '&' : '?';
+      imageUrl += `${separator}imageMogr2/thumbnail/256x/format/webp`;
+    }
   }
 
   return imageUrl;

@@ -1,22 +1,23 @@
 <template>
-  <TransitionWrapper>
-    <div class="document-index">
-      <el-row :gutter="20" style="margin: 28px 18px 0">
+  <el-dialog v-model="visible" :title="$t('video.view.title')" width="80%" append-to-body destroy-on-close
+    @closed="handleClose">
+    <div class="document-index" v-loading="loading">
+      <el-row :gutter="20">
         <el-col :sm="16">
           <el-card class="box-card">
             <template #header>
-              <b id="title">{{ t("video.view.title") }}</b>
               <span v-if="videoData">{{ videoData.name }}</span>
             </template>
             <div class="box-item" style="text-align: center">
-              <video id="video" controls="true" style="height: 300px; width: auto">
-                <source v-if="file !== null" id="src" :src="file" />
+              <video id="video" controls="true" style="height: 300px; width: auto" v-if="file">
+                <source :src="file" />
               </video>
               <video id="new_video" style="height: 100%; width: auto" hidden @canplaythrough="dealWith"></video>
             </div>
           </el-card>
           <br />
         </el-col>
+
         <el-col :sm="8">
           <MrppInfo v-if="videoData" :title="$t('video.view.info.title')" titleSuffix=" :" :tableData="tableData"
             :itemLabel="$t('video.view.info.label1')" :textLabel="$t('video.view.info.label2')"
@@ -27,43 +28,39 @@
         </el-col>
       </el-row>
     </div>
-  </TransitionWrapper>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from "vue-router";
 import { getVideo, putVideo, deleteVideo } from "@/api/v1/resources/index";
 import { printVector2 } from "@/assets/js/helper";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
-import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import MrppInfo from "@/components/MrPP/MrppInfo/index.vue";
 import { downloadResource } from "@/utils/downloadHelper";
+import { ElMessage, ElMessageBox } from "element-plus";
 
-const route = useRoute();
-const router = useRouter();
+const props = defineProps<{
+  modelValue: boolean;
+  id: number | null;
+}>();
 
-const videoData = ref<ResourceInfo | null>(null);
-const file = ref<string | null>(null);
-const expire = ref(true);
+const emit = defineEmits(["update:modelValue", "refresh", "deleted"]);
 
 const { t } = useI18n();
+const videoData = ref<ResourceInfo | null>(null);
+const file = ref<string | null>(null);
+const loading = ref(false);
+const expire = ref(true);
 
-const id = computed(() => route.query.id as string);
+const visible = computed({
+  get: () => props.modelValue,
+  set: (value) => emit("update:modelValue", value),
+});
+
 const prepare = computed(
   () => videoData.value !== null && videoData.value.info !== null
 );
-
-onMounted(async () => {
-  expire.value = true;
-  const response = await getVideo(id.value);
-  console.log("video:", response.data);
-  videoData.value = response.data;
-  file.value = response.data.file.url;
-  setTimeout(() => {
-    init();
-  }, 0);
-});
 
 const tableData = computed(() => {
   if (videoData.value && prepare.value) {
@@ -118,17 +115,20 @@ const downloadVideo = async () => {
 
 const init = () => {
   const video = document.getElementById("video") as HTMLVideoElement;
-  const source = document.getElementById("src") as HTMLSourceElement;
+  const source = video?.querySelector("source") as HTMLSourceElement;
 
-  const new_video = document.getElementById("new_video") as HTMLVideoElement;
-  new_video.src = source.src + "?t=" + new Date();
-  new_video.crossOrigin = "anonymous";
-  new_video.currentTime = 0.000001;
+  if (video && source) {
+    const new_video = document.getElementById("new_video") as HTMLVideoElement;
+    if (new_video) {
+      new_video.src = source.src + "?t=" + new Date();
+      new_video.crossOrigin = "anonymous";
+      new_video.currentTime = 0.000001;
+    }
+  }
 };
 
 const dealWith = () => {
   if (!prepare.value) {
-    const video = document.getElementById("video") as HTMLVideoElement;
     const new_video = document.getElementById("new_video") as HTMLVideoElement;
     // Wait for metadata to be loaded to ensure duration is available
     if (new_video.readyState >= 1) {
@@ -163,6 +163,35 @@ const setup = async (
   }
 };
 
+const loadData = async () => {
+  if (!props.id) return;
+  loading.value = true;
+  expire.value = true;
+  try {
+    const response = await getVideo(props.id);
+    videoData.value = response.data;
+    file.value = response.data.file.url;
+    setTimeout(() => {
+      init();
+    }, 0);
+  } catch (err) {
+    ElMessage.error(String(err));
+  } finally {
+    loading.value = false;
+  }
+};
+
+watch(() => props.modelValue, (val) => {
+  if (val) {
+    loadData();
+  }
+});
+
+const handleClose = () => {
+  videoData.value = null;
+  file.value = null;
+};
+
 const deleteWindow = async () => {
   try {
     await ElMessageBox.confirm(
@@ -174,9 +203,12 @@ const deleteWindow = async () => {
         type: "warning",
       }
     );
-    await deleteVideo(videoData.value!.id);
-    ElMessage.success(t("video.view.confirm.success"));
-    router.push({ path: "/resource/video/index" });
+    if (videoData.value) {
+      await deleteVideo(videoData.value.id);
+      ElMessage.success(t("video.view.confirm.success"));
+      emit("deleted");
+      emit("update:modelValue", false);
+    }
   } catch {
     ElMessage.info(t("video.view.confirm.info"));
   }
@@ -198,6 +230,7 @@ const namedWindow = async () => {
     if (value) {
       await named(videoData.value!.id, value);
       ElMessage.success(t("video.view.namePrompt.success") + value);
+      emit("refresh");
     } else {
       ElMessage.info(t("video.view.namePrompt.info"));
     }
@@ -209,7 +242,9 @@ const namedWindow = async () => {
 const named = async (id: number, name: string) => {
   try {
     const response = await putVideo(id, { name });
-    videoData.value!.name = response.data.name;
+    if (videoData.value) {
+      videoData.value.name = response.data.name;
+    }
   } catch (err) {
     console.error(err);
   }
