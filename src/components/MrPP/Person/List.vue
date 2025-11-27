@@ -1,9 +1,10 @@
 <template>
   <!-- <div> -->
-  <waterfall v-if="viewCards.length > 0" :lazyload="true" :list="viewCards" :gutter="10"
-    :backgroundColor="'rgba(255, 255, 255, .05)'">
+  <waterfall v-if="viewCards.length > 0" :lazyload="true" :list="viewCards" :gutter="10" :width="240" :breakpoints="{
+    640: { rowPerView: 1 },
+  }" :backgroundColor="'rgba(255, 255, 255, .05)'">
     <template #default="{ item }">
-      <el-card style="width: 200px" :body-style="{ padding: '0px' }">
+      <el-card style="width: 100%" :body-style="{ padding: '0px' }">
         <LazyImg v-if="item.avatar == null" style="width: 100%; height: auto" fit="contain"
           url="/src/assets/images/author/author-boy.png"></LazyImg>
         <LazyImg v-if="item.avatar" style="width: 100%; height: auto" fit="contain" :url="item.avatar.url"></LazyImg>
