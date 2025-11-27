@@ -75,6 +75,7 @@ import { UploadFileType } from "@/api/user/model";
 import { postFile } from "@/api/v1/files";
 import { FileHandler } from "@/assets/js/file/server";
 import { Delete, Document, Upload } from '@element-plus/icons-vue';
+import { processModel } from "@/utils/modelProcessor";
 
 const { t } = useI18n();
 
@@ -365,7 +366,54 @@ const select = async () => {
           }
         }
 
-        await saveFile(md5, extension, file, handler, totalFilesCount.value, info);
+        // 如果是模型，处理模型信息并生成截图
+        if (props.dir === 'polygen' && file.name.toLowerCase().endsWith('.glb')) {
+          try {
+            const processed = await processModel(file);
+            info = processed.info;
+
+            // 上传生成的截图
+            const imageFile = processed.image;
+            const imageMd5 = await fileStore.store.fileMD5(imageFile);
+            const imageHandler = await fileStore.store.publicHandler();
+            const imageExtension = ".jpg";
+
+            const imageHas = await fileStore.store.fileHas(
+              imageMd5,
+              imageExtension,
+              imageHandler,
+              "screenshot/polygen"
+            );
+
+            if (!imageHas) {
+              await fileStore.store.fileUpload(
+                imageMd5,
+                imageExtension,
+                imageFile,
+                () => { },
+                imageHandler,
+                "screenshot/polygen"
+              );
+            }
+
+            // 保存图片文件记录以获取ID
+            const imageData: UploadFileType = {
+              filename: imageFile.name,
+              md5: imageMd5,
+              key: imageMd5 + imageExtension,
+              url: fileStore.store.fileUrl(imageMd5, imageExtension, imageHandler, "screenshot/polygen"),
+            };
+
+            const imageResponse = await postFile(imageData);
+            image_id = imageResponse.data.id;
+
+          } catch (e) {
+            console.error("Failed to process model:", e);
+            ElMessage.warning(t("upload.modelProcessFailed", { name: file.name }));
+          }
+        }
+
+        await saveFile(md5, extension, file, handler, totalFilesCount.value, info, image_id);
       } catch (fileError) {
         console.error(`Error processing file ${file.name}:`, fileError);
       } finally {

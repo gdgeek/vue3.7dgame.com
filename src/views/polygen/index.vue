@@ -33,16 +33,14 @@
                     <el-progress v-else :percentage="percentage"></el-progress>
                   </template>
                   <template #enter>
-                    <router-link :to="`/resource/polygen/view?id=${item.id}`">
-                      <el-button-group :inline="true">
-                        <el-button v-if="item.info === null || item.image === null" type="warning" size="small">
-                          {{ $t("polygen.initializePolygenData") }}
-                        </el-button>
-                        <el-button v-else type="primary" size="small">
-                          {{ $t("polygen.viewPolygen") }}
-                        </el-button>
-                      </el-button-group>
-                    </router-link>
+                    <el-button-group :inline="true">
+                      <el-button v-if="item.info === null" type="warning" size="small" @click="openViewDialog(item.id)">
+                        {{ $t("polygen.initializePolygenData") }}
+                      </el-button>
+                      <el-button v-else type="primary" size="small" @click="openViewDialog(item.id)">
+                        {{ $t("polygen.viewPolygen") }}
+                      </el-button>
+                    </el-button-group>
                   </template>
                 </mr-p-p-card>
               </template>
@@ -65,6 +63,9 @@
         @save-resource="savePolygen" @success="handleUploadSuccess">
         {{ $t("polygen.uploadFile") }}
       </mr-p-p-upload-dialog>
+
+      <!-- 模型查看弹窗 -->
+      <PolygenDialog v-model="viewDialogVisible" :id="currentPolygenId" @refresh="refresh" @deleted="refresh" />
     </div>
   </TransitionWrapper>
 </template>
@@ -74,6 +75,7 @@ import { getPolygens, putPolygen, deletePolygen, postPolygen } from "@/api/v1/re
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import MrPPUploadDialog from "@/components/MrPP/MrPPUploadDialog/index.vue";
+import PolygenDialog from "@/components/MrPP/PolygenDialog.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
@@ -100,6 +102,15 @@ const pagination = ref({
   total: 20,
 });
 
+// 查看弹窗相关
+const viewDialogVisible = ref(false);
+const currentPolygenId = ref<number | null>(null);
+
+const openViewDialog = (id: number) => {
+  currentPolygenId.value = id;
+  viewDialogVisible.value = true;
+};
+
 // 打开上传弹窗
 const openUploadDialog = () => {
   uploadDialogVisible.value = true;
@@ -109,107 +120,32 @@ const openUploadDialog = () => {
 const handleUploadSuccess = async (uploadedIds: number | number[]) => {
   uploadDialogVisible.value = false;
 
-  // 确保uploadedIds是数组
-  const modelIds = Array.isArray(uploadedIds) ? uploadedIds : [uploadedIds];
-  const lastFileId = modelIds[modelIds.length - 1];
+  // 刷新列表
+  await refresh();
 
-  if (modelIds.length > 0) {
-    const loadingInstance = ElLoading.service({
-      text: t("polygen.initializingModels"),
-      background: 'rgba(0, 0, 0, 0.7)'
-    });
-
-    // 记录初始化失败的模型ID
-    const failedModelIds = [];
-
-    try {
-      for (let i = 0; i < modelIds.length; i++) {
-        loadingInstance.setText(t("polygen.initializingModelProgress", {
-          current: i + 1,
-          total: modelIds.length,
-          percentage: Math.round(((i + 1) / modelIds.length) * 100)
-        }));
-
-        try {
-          // 跳转到模型详情页触发初始化
-          await router.push({
-            path: "/resource/polygen/view",
-            query: { id: modelIds[i] },
-          });
-
-          await new Promise(resolve => setTimeout(resolve, 2000));
-        } catch (modelError) {
-          console.error(`初始化模型 ${modelIds[i]} 失败:`, modelError);
-          failedModelIds.push(modelIds[i]);
-        }
-      }
-
-      if (failedModelIds.length > 0) {
-        ElMessage.warning({
-          message: t("polygen.partialInitializeSuccess", {
-            success: modelIds.length - failedModelIds.length,
-            failed: failedModelIds.length,
-            total: modelIds.length
-          }),
-          duration: 5000
-        });
-
-        if (failedModelIds.length > 0) {
-          const shouldRetry = await ElMessageBox.confirm(
-            t("polygen.retryInitializeFailed", { count: failedModelIds.length }),
-            t("polygen.retryTitle"),
-            {
-              confirmButtonText: t("polygen.retryConfirm"),
-              cancelButtonText: t("polygen.retryCancel"),
-              type: "warning"
-            }
-          ).catch(() => false);
-
-          if (shouldRetry === true) {
-            await handleUploadSuccess(failedModelIds);
-            return;
-          }
-          else {
-            router.push({
-              path: "/resource/polygen/view",
-              query: { id: lastFileId },
-            });
-            return;
-          }
-        }
-      } else {
-        ElMessage.success({
-          message: t("polygen.batchInitializeSuccess", { count: modelIds.length }),
-          duration: 3000
-        });
-      }
-
-      await refresh();
-
-    } catch (error) {
-      console.error("初始化模型时出错:", error);
-      ElMessage.error(t("polygen.initializeError"));
-    } finally {
-      loadingInstance.close();
-    }
-  }
-
-  // 最后跳转到最后上传的模型详情页
-  router.push({
-    path: "/resource/polygen/view",
-    query: { id: lastFileId },
-  });
+  ElMessage.success(t("polygen.uploadSuccess"));
 };
 
+// 保存模型
 // 保存模型
 const savePolygen = async (
   name: string,
   file_id: number,
   totalFiles: number,
-  callback: (id: number) => void
+  callback: (id: number) => void,
+  effectType?: string,
+  info?: string,
+  image_id?: number
 ) => {
   try {
-    const response = await postPolygen({ name, file_id });
+    const data: any = { name, file_id };
+    if (info) {
+      data.info = info;
+    }
+    if (image_id) {
+      data.image_id = image_id;
+    }
+    const response = await postPolygen(data);
     if (response.data.id) {
       callback(response.data.id);
     }

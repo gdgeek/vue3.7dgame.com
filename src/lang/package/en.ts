@@ -804,7 +804,8 @@ export default {
     item3: {
       title: "Save Information",
       failed: "Database storage failed",
-      declared: "File data is stored in the database",
+      declared: "The file data is stored in the database",
+      modelProcessFailed: "Failed to process model {name}",
     },
   },
   // 实体国际化

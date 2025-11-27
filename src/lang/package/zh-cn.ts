@@ -791,6 +791,7 @@ export default {
       title: "保存信息",
       failed: "数据库储存失败",
       declared: "文件数据存储在数据库中",
+      modelProcessFailed: "模型 {name} 预处理失败",
     },
   },
   // 实体国际化
