@@ -35,11 +35,8 @@
 import { useRoute, useRouter } from "vue-router";
 import { getPicture, putPicture, deletePicture } from "@/api/v1/resources/index";
 import { convertToHttps, printVector2 } from "@/assets/js/helper";
-import { postFile } from "@/api/v1/files";
-import { UploadFileType } from "@/api/user/model";
-import { useFileStore } from "@/store/modules/config";
 import type { ResourceInfo } from "@/api/v1/resources/model";
-import { FileHandler } from "@/assets/js/file/server";
+
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import MrppInfo from "@/components/MrPP/MrppInfo/index.vue";
@@ -47,8 +44,8 @@ import { downloadResource } from "@/utils/downloadHelper";
 
 const image = ref<HTMLImageElement | null>(null);
 const route = useRoute();
+
 const router = useRouter();
-const store = useFileStore().store;
 const pictureData = ref<ResourceInfo | null>(null);
 const file = ref<string | null>(null);
 const expire = ref<boolean>(false);
@@ -125,89 +122,17 @@ const getImageSize = (
   });
 };
 
-const thumbnail = (
-  image: HTMLImageElement,
-  width: number,
-  height: number
-): Promise<File> => {
-  return new Promise((resolve) => {
-    const imageType = "image/jpeg";
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.drawImage(image, 0, 0, width, height);
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const file = new File([blob], "thumbnail.jpg", { type: imageType });
-          resolve(file);
-        }
-      }, imageType);
-    }
-  });
-};
-
-const save = async (
-  md5: string,
-  extension: string,
-  info: string,
-  file: File,
-  handler: FileHandler
-) => {
-  extension = extension.startsWith('.') ? extension : `.${extension}`;
-  const data: UploadFileType = {
-    md5,
-    key: md5 + extension,
-    filename: file.name,
-    url: store.fileUrl(md5, extension, handler, "screenshot/picture"),
-  };
-  try {
-    const response1 = await postFile(data);
-    const picture = { image_id: response1.data.id, info };
-    const response2 = await putPicture(pictureData.value!.id, picture);
-    pictureData.value!.image_id = response2.data.image_id;
-    pictureData.value!.info = response2.data.info;
-    expire.value = false;
-  } catch (e) {
-    console.error(e);
-  }
-};
-
 const setup = async (
   size: { x: number; y: number },
   image: HTMLImageElement
 ) => {
   const info = JSON.stringify({ size });
-  if (size.x <= 1024) {
-    const picture = { image_id: pictureData.value!.file.id, info };
-    const response = await putPicture(pictureData.value!.id, picture);
-    pictureData.value!.image_id = response.data.image_id;
-    pictureData.value!.info = response.data.info;
-    expire.value = false;
-    return;
-  }
-  const file = await thumbnail(image, 512, size.y * (512 / size.x));
-  const md5 = await store.fileMD5(file);
-  const handler = await store.publicHandler();
-
-  const has = await store.fileHas(
-    md5,
-    file.type.split("/").pop()!,
-    handler,
-    "screenshot/picture"
-  );
-  if (!has) {
-    await store.fileUpload(
-      md5,
-      file.type.split("/").pop()!,
-      file,
-      () => { },
-      handler,
-      "screenshot/picture"
-    );
-  }
-  await save(md5, file.type.split("/").pop()!, info, file, handler);
+  // Update info and use original file ID as image_id (using COS thumbnail instead of separate file)
+  const picture = { image_id: pictureData.value!.file.id, info };
+  const response = await putPicture(pictureData.value!.id, picture);
+  pictureData.value!.image_id = response.data.image_id;
+  pictureData.value!.info = response.data.info;
+  expire.value = false;
 };
 
 const dealWith = async () => {

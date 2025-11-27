@@ -20,10 +20,18 @@ const props = withDefaults(
 
 
 const url = computed(() => {
-  if (props.image != null) {
-    return props.image;
-  }
   // 使用 Vite 的 new URL 方式解析静态资源路径
-  return new URL(`../assets/images/items/${props.id % 100}.webp`, import.meta.url).href;
+  let imageUrl = props.image;
+  if (!imageUrl) {
+    imageUrl = new URL(`../assets/images/items/${props.id % 100}.webp`, import.meta.url).href;
+  }
+
+  // Check if it's a Tencent Cloud COS URL and append thumbnail parameter if needed
+  if (imageUrl && imageUrl.includes('myqcloud.com') && !imageUrl.includes('imageMogr2') && !imageUrl.includes('imageView2')) {
+    const separator = imageUrl.includes('?') ? '&' : '?';
+    imageUrl += `${separator}imageMogr2/thumbnail/512x/format/webp`;
+  }
+
+  return imageUrl;
 });
 </script>

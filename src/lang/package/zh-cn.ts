@@ -1,4 +1,4 @@
-  export default {
+export default {
   // 通用翻译
   common: {
     confirm: "确认",
@@ -9,6 +9,7 @@
     select: "选择",
     noUsers: "未找到用户",
   },
+
   // 路由国际化
   route: {
     dashboard: "首页",
@@ -91,39 +92,9 @@
       title: "管理",
       userManagement: "用户管理",
       schoolManagement: "校园管理",
-      createSchool: "创建学校",
       classManagement: "班级管理",
-      createClass: "创建班级",
       teacherManagement: "教师管理",
-      createTeacher: "创建教师",
       studentManagement: "学生管理",
-      createStudent: "创建学生",
-      school: {
-        principal: "校长",
-        address: "地址",
-      },
-      class: {
-        grade: "年级",
-        teacher: "班主任",
-      },
-      teacher: {
-        subject: "科目",
-        phone: "电话",
-      },
-      student: {
-        grade: "年级",
-        class: "班级",
-      },
-      list: {
-        cancel: "删除",
-        confirm: {
-          message1: "此操作将永久删除该学校, 是否继续?",
-          message2: "提示",
-          confirm: "确定",
-          cancel: "取消",
-          success: "删除成功!",
-        },
-      },
     },
     game: {
       title: "游戏",
@@ -1318,9 +1289,24 @@
   manager: {
     title: "添加用户",
     createSchool: "创建学校",
+    createClass: "创建班级",
+    createTeacher: "创建教师",
+    createStudent: "创建学生",
     school: {
-      principal: "学校管理员",
+      principal: "校长",
       address: "地址",
+    },
+    class: {
+      grade: "年级",
+      teacher: "班主任",
+    },
+    teacher: {
+      subject: "科目",
+      phone: "电话",
+    },
+    student: {
+      grade: "年级",
+      class: "班级",
     },
     principal: {
       assign: "分配学校管理员",
@@ -1346,8 +1332,9 @@
       namePlaceholder: "请输入学校名称",
       address: "学校地址",
       addressPlaceholder: "请输入学校地址",
-      principal: "学校管理员",
-      principalPlaceholder: "请选择学校管理员",
+      principal: "校长",
+      principalPlaceholder: "请选择校长",
+      image: "学校图片",
       edit: "编辑",
       cancel: "取消",
       submit: "提交",
@@ -1394,11 +1381,11 @@
         user: "用户",
       },
       confirm: {
-        message1: "此操作将永久删除该用户, 是否继续?",
+        message1: "此操作将永久删除该学校, 是否继续?",
         message2: "提示",
         confirm: "确认",
         cancel: "取消",
-        success: "删除成功！",
+        success: "删除成功!",
         info: "已取消删除",
       },
       success: "权限更新成功！",
@@ -1577,14 +1564,14 @@
     upload: "上传音频",
     uploading: "上传中...",
     inputPlaceholder: "请输入要转换的文本内容...",
-    inputChinesePlaceholder: "请输入中文内容...",
+    inputChinesePlaceholder: "请输入简体中文内容...",
     inputEnglishPlaceholder: "请输入英文内容...",
     inputJapanesePlaceholder: "请输入日文内容...",
     showLanguageAnalysis: "显示语言分析",
     hideLanguageAnalysis: "隐藏语言分析",
     languageAnalysis: "语言分析",
     close: "关闭",
-    chinese: "中文",
+    chinese: "简体中文",
     english: "英文",
     japanese: "日文",
     other: "其他",

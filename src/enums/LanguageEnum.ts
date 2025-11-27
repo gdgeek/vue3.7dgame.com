@@ -3,7 +3,7 @@
  */
 export const enum LanguageEnum {
   /**
-   * 中文
+   * 简体中文
    */
   ZH_CN = "zh-cn",
 

@@ -91,39 +91,6 @@ export default {
       title: "管理",
       userManagement: "ユーザー管理",
       schoolManagement: "学校管理",
-      createSchool: "学校を作成",
-      classManagement: "クラス管理",
-      createClass: "クラスを作成",
-      teacherManagement: "教師管理",
-      createTeacher: "教師を作成",
-      studentManagement: "学生管理",
-      createStudent: "学生を作成",
-      school: {
-        principal: "校長",
-        address: "住所",
-      },
-      class: {
-        grade: "学年",
-        teacher: "担任",
-      },
-      teacher: {
-        subject: "科目",
-        phone: "電話",
-      },
-      student: {
-        grade: "学年",
-        class: "クラス",
-      },
-      list: {
-        cancel: "削除",
-        confirm: {
-          message1: "この操作は学校を永久に削除します。続行しますか？",
-          message2: "警告",
-          confirm: "確認",
-          cancel: "キャンセル",
-          success: "削除に成功しました！",
-        },
-      },
     },
     game: {
       title: "ゲーム",
@@ -1329,9 +1296,24 @@ export default {
   manager: {
     title: "ユーザーを追加",
     createSchool: "学校を作成",
+    createClass: "クラスを作成",
+    createTeacher: "教師を作成",
+    createStudent: "学生を作成",
     school: {
-      principal: "学校管理者",
+      principal: "校長",
       address: "住所",
+    },
+    class: {
+      grade: "学年",
+      teacher: "担任",
+    },
+    teacher: {
+      subject: "科目",
+      phone: "電話",
+    },
+    student: {
+      grade: "学年",
+      class: "クラス",
     },
     principal: {
       assign: "学校管理者を割り当てる",
@@ -1357,8 +1339,9 @@ export default {
       namePlaceholder: "学校名を入力してください",
       address: "学校住所",
       addressPlaceholder: "学校住所を入力してください",
-      principal: "学校管理者",
-      principalPlaceholder: "学校管理者を選択してください",
+      principal: "校長",
+      principalPlaceholder: "校長を選択してください",
+      image: "学校の画像",
       edit: "編集",
       cancel: "キャンセル",
       submit: "送信",
@@ -1405,7 +1388,7 @@ export default {
         user: "ユーザー",
       },
       confirm: {
-        message1: "この操作はユーザーを永久に削除しますが、続行しますか？",
+        message1: "この操作は学校を永久に削除します。続行しますか？",
         message2: "ヒント",
         confirm: "確認",
         cancel: "キャンセル",

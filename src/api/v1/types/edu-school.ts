@@ -7,7 +7,7 @@ export interface EduSchool {
   created_at: string;
   updated_at: string;
   image?: FileType;
-  principal?: number;
+  principal?: number | UserType;
   info: {
     [key: string]: any;
   };

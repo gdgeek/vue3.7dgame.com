@@ -91,39 +91,6 @@ export default {
       title: "管理",
       userManagement: "用戶管理",
       schoolManagement: "校園管理",
-      createSchool: "創建學校",
-      classManagement: "班級管理",
-      createClass: "創建班級",
-      teacherManagement: "教師管理",
-      createTeacher: "創建教師",
-      studentManagement: "學生管理",
-      createStudent: "創建學生",
-      school: {
-        principal: "校長",
-        address: "地址",
-      },
-      class: {
-        grade: "年級",
-        teacher: "班主任",
-      },
-      teacher: {
-        subject: "科目",
-        phone: "電話",
-      },
-      student: {
-        grade: "年級",
-        class: "班級",
-      },
-      list: {
-        cancel: "刪除",
-        confirm: {
-          message1: "此操作將永久刪除該學校, 是否繼續?",
-          message2: "提示",
-          confirm: "確定",
-          cancel: "取消",
-          success: "刪除成功!",
-        },
-      },
     },
     game: {
       title: "遊戲",
@@ -1318,9 +1285,24 @@ export default {
   manager: {
     title: "添加用戶",
     createSchool: "創建學校",
+    createClass: "創建班級",
+    createTeacher: "創建教師",
+    createStudent: "創建學生",
     school: {
-      principal: "學校管理員",
+      principal: "校長",
       address: "地址",
+    },
+    class: {
+      grade: "年級",
+      teacher: "班主任",
+    },
+    teacher: {
+      subject: "科目",
+      phone: "電話",
+    },
+    student: {
+      grade: "年級",
+      class: "班級",
     },
     principal: {
       assign: "分配學校管理員",
@@ -1346,8 +1328,9 @@ export default {
       namePlaceholder: "請輸入學校名稱",
       address: "學校地址",
       addressPlaceholder: "請輸入學校地址",
-      principal: "學校管理員",
-      principalPlaceholder: "請選擇學校管理員",
+      principal: "校長",
+      principalPlaceholder: "請選擇校長",
+      image: "學校圖片",
       edit: "編輯",
       cancel: "取消",
       submit: "提交",
@@ -1394,11 +1377,11 @@ export default {
         user: "用戶",
       },
       confirm: {
-        message1: "此操作將永久刪除該用戶, 是否繼續?",
+        message1: "此操作將永久刪除該學校, 是否繼續?",
         message2: "提示",
         confirm: "確認",
         cancel: "取消",
-        success: "刪除成功！",
+        success: "刪除成功!",
         info: "已取消刪除",
       },
       success: "權限更新成功！",

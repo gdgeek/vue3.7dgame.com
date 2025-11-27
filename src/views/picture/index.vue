@@ -133,92 +133,9 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
   const modelIds = Array.isArray(uploadedIds) ? uploadedIds : [uploadedIds];
   const lastFileId = modelIds[modelIds.length - 1];
 
-  if (modelIds.length > 0) {
-    const loadingInstance = ElLoading.service({
-      text: t("picture.initializingModels"),
-      background: 'rgba(0, 0, 0, 0.7)'
-    });
+  // 刷新列表
+  await refresh();
 
-    // 记录初始化失败的模型ID
-    const failedModelIds = [];
-
-    try {
-      for (let i = 0; i < modelIds.length; i++) {
-        loadingInstance.setText(t("picture.initializingModelProgress", {
-          current: i + 1,
-          total: modelIds.length,
-          percentage: Math.round(((i + 1) / modelIds.length) * 100)
-        }));
-
-        try {
-          // 跳转到模型详情页触发初始化
-          await router.push({
-            path: "/resource/picture/view",
-            query: { id: modelIds[i] },
-          });
-
-          await new Promise(resolve => setTimeout(resolve, 2000));
-        } catch (modelError) {
-          console.error(`初始化图片 ${modelIds[i]} 失败:`, modelError);
-          failedModelIds.push(modelIds[i]);
-        }
-      }
-
-      if (failedModelIds.length > 0) {
-        ElMessage.warning({
-          message: t("picture.partialInitializeSuccess", {
-            success: modelIds.length - failedModelIds.length,
-            failed: failedModelIds.length,
-            total: modelIds.length
-          }),
-          duration: 5000
-        });
-
-        if (failedModelIds.length > 0) {
-          const shouldRetry = await ElMessageBox.confirm(
-            t("picture.retryInitializeFailed", { count: failedModelIds.length }),
-            t("picture.retryTitle"),
-            {
-              confirmButtonText: t("picture.retryConfirm"),
-              cancelButtonText: t("picture.retryCancel"),
-              type: "warning"
-            }
-          ).catch(() => false);
-
-          if (shouldRetry === true) {
-            await handleUploadSuccess(failedModelIds);
-            return;
-          }
-          else {
-            router.push({
-              path: "/resource/picture/view",
-              query: { id: lastFileId },
-            });
-            return;
-          }
-        }
-      } else {
-        ElMessage.success({
-          message: t("picture.batchInitializeSuccess", { count: modelIds.length }),
-          duration: 3000
-        });
-      }
-
-      await refresh();
-
-    } catch (error) {
-      console.error("初始化图片时出错:", error);
-      ElMessage.error(t("picture.initializeError"));
-    } finally {
-      loadingInstance.close();
-    }
-  }
-
-  // 最后跳转到最后上传的模型详情页
-  router.push({
-    path: "/resource/picture/view",
-    query: { id: lastFileId },
-  });
 };
 
 // 保存图片
@@ -226,10 +143,19 @@ const savePicture = async (
   name: string,
   file_id: number,
   totalFiles: number,
-  callback: (id: number) => void
+  callback: (id: number) => void,
+  effectType?: string,
+  info?: string,
+  image_id?: number
 ) => {
   try {
-    const response = await postPicture({ name, file_id });
+    // 如果传入了 info，说明是图片且已获取到尺寸，直接使用 file_id 作为 image_id
+    const data: any = { name, file_id };
+    if (info) {
+      data.info = info;
+      data.image_id = file_id; // 图片直接使用原文件ID
+    }
+    const response = await postPicture(data);
     if (response.data.id) {
       callback(response.data.id);
     }

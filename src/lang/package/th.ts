@@ -1,4 +1,4 @@
- export default { 
+export default {
   // คำแปลทั่วไป
   common: {
     confirm: "ยืนยัน",
@@ -91,40 +91,6 @@
       title: "การจัดการ",
       userManagement: "การจัดการผู้ใช้",
       schoolManagement: "การจัดการโรงเรียน",
-      createSchool: "สร้างโรงเรียน",
-      classManagement: "การจัดการชั้นเรียน",
-      createClass: "สร้างชั้นเรียน",
-      teacherManagement: "การจัดการครู",
-      createTeacher: "สร้างครู",
-      studentManagement: "การจัดการนักเรียน",
-      createStudent: "สร้างนักเรียน",
-      school: {
-        principal: "ครูใหญ่",
-        address: "ที่อยู่",
-      },
-      class: {
-        grade: "ระดับชั้น",
-        teacher: "ครูประจำชั้น",
-      },
-      teacher: {
-        subject: "วิชา",
-        phone: "โทรศัพท์",
-      },
-      student: {
-        grade: "ระดับชั้น",
-        class: "ชั้นเรียน",
-      },
-      list: {
-        cancel: "ลบ",
-        confirm: {
-          message1:
-            "การดำเนินการนี้จะลบโรงเรียนอย่างถาวร ต้องการดำเนินการต่อหรือไม่?",
-          message2: "คำเตือน",
-          confirm: "ยืนยัน",
-          cancel: "ยกเลิก",
-          success: "ลบสำเร็จ!",
-        },
-      },
     },
     game: {
       title: "เกม",
@@ -1336,9 +1302,24 @@
   manager: {
     title: "เพิ่มผู้ใช้",
     createSchool: "สร้างโรงเรียน",
+    createClass: "สร้างชั้นเรียน",
+    createTeacher: "สร้างครู",
+    createStudent: "สร้างนักเรียน",
     school: {
-      principal: "ผู้ดูแลโรงเรียน",
+      principal: "ครูใหญ่",
       address: "ที่อยู่",
+    },
+    class: {
+      grade: "ระดับชั้น",
+      teacher: "ครูประจำชั้น",
+    },
+    teacher: {
+      subject: "วิชา",
+      phone: "โทรศัพท์",
+    },
+    student: {
+      grade: "ระดับชั้น",
+      class: "ชั้นเรียน",
     },
     principal: {
       assign: "มอบหมายผู้ดูแลโรงเรียน",
@@ -1364,8 +1345,9 @@
       namePlaceholder: "กรุณากรอกชื่อโรงเรียน",
       address: "ที่อยู่โรงเรียน",
       addressPlaceholder: "กรุณากรอกที่อยู่โรงเรียน",
-      principal: "ผู้ดูแลโรงเรียน",
-      principalPlaceholder: "กรุณาเลือกผู้ดูแลโรงเรียน",
+      principal: "ครูใหญ่",
+      principalPlaceholder: "กรุณาเลือกอาจารย์ใหญ่",
+      image: "รูปภาพโรงเรียน",
       edit: "แก้ไข",
       cancel: "ยกเลิก",
       submit: "ส่ง",
@@ -1413,7 +1395,7 @@
       },
       confirm: {
         message1:
-          "การดำเนินการนี้จะลบผู้ใช้นี้อย่างถาวร ต้องการดำเนินการต่อหรือไม่?",
+          "การดำเนินการนี้จะลบโรงเรียนอย่างถาวร ต้องการดำเนินการต่อหรือไม่?",
         message2: "แจ้งเตือน",
         confirm: "ยืนยัน",
         cancel: "ยกเลิก",

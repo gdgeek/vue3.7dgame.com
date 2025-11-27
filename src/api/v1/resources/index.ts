@@ -22,6 +22,8 @@ type ResourceData = {
   type?: ResourceType;
   uuid?: string;
   effect_type?: string; // 添加 effect_type 字段
+  info?: string;
+  image_id?: number;
 };
 
 type ResourcePut = {

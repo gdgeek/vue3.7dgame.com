@@ -161,6 +161,22 @@ const getUploadedIds = () => {
   return uploadedIds.value;
 };
 
+// 获取图片尺寸
+const getImageSize = (file: File): Promise<{ x: number; y: number }> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    img.onload = () => {
+      resolve({ x: img.width, y: img.height });
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = () => {
+      resolve({ x: 0, y: 0 });
+      URL.revokeObjectURL(img.src);
+    };
+  });
+};
+
 // 格式化文件大小显示
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 B';
@@ -194,7 +210,9 @@ const saveFile = async (
   extension: string,
   file: File,
   handler: FileHandler,
-  totalFiles: number
+  totalFiles: number,
+  info?: string,
+  image_id?: number
 ) => {
   extension = extension.startsWith('.') ? extension : `.${extension}`;
   const data: UploadFileType = {
@@ -228,7 +246,7 @@ const saveFile = async (
       if (uploadedCount.value === totalFilesCount.value) {
         emit("success", uploadedIds.value);
       }
-    }, selectedEffectType.value);
+    }, selectedEffectType.value, info, image_id);
   } catch (err) {
     console.error(err);
   }
@@ -274,7 +292,24 @@ const select = async () => {
           );
         }
 
-        await saveFile(md5, extension, file, handler, totalFilesCount.value);
+        let info: string | undefined;
+        let image_id: number | undefined;
+
+        // 如果是图片，获取尺寸信息
+        if (props.dir === 'picture' && file.type.startsWith('image/')) {
+          const size = await getImageSize(file);
+          if (size.x > 0 && size.y > 0) {
+            info = JSON.stringify({ size });
+            // 图片上传时，image_id 暂时未知（需要文件上传后获得文件ID），
+            // 但在这里我们还不知道文件ID。
+            // 实际上 saveFile 会先上传文件获得文件ID (response.data.id)，
+            // 然后我们在 saveResource 回调中创建资源。
+            // 这里的 image_id 参数其实是多余的，因为 saveFile 内部获得了文件ID。
+            // 我们只需要传递 info 即可，image_id 将在 savePicture (父组件) 中被设置为 file_id。
+          }
+        }
+
+        await saveFile(md5, extension, file, handler, totalFilesCount.value, info);
       } catch (fileError) {
         console.error(`Error processing file ${file.name}:`, fileError);
       } finally {

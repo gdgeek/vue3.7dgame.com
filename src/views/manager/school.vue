@@ -13,12 +13,11 @@
         </MrPPHeader>
       </el-header>
       <el-main>
-        {{ schools }}
         <el-row :gutter="20" v-loading="loading">
           <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="4" v-for="school in schools" :key="school.id">
             <el-card class="school-card" :body-style="{ padding: '0px' }">
               <div class="image-container">
-                <img :src="school.image?.url || '/src/assets/images/author/author-boy.png'" class="image" />
+                <img :src="school.image?.url || getDefaultImage(school.id)" class="image" />
               </div>
               <div style="padding: 14px">
                 <span class="school-name" :title="school.name">{{ school.name }}</span>
@@ -26,7 +25,7 @@
                   <el-descriptions :column="1" size="small" class="school-info">
                     <el-descriptions-item :label="$t('manager.school.principal')">
                       <span v-if="school.principal">
-                        {{ school.principal.nickname || school.principal.username || '-' }}
+                        {{ (school.principal as any).nickname || (school.principal as any).username || '-' }}
                       </span>
                       <el-button v-else type="primary" size="small" :icon="Plus" circle
                         @click="handleAssignPrincipal(school)" />
@@ -37,7 +36,7 @@
                   </el-descriptions>
                   <div class="actions">
                     <el-button type="primary" size="small" link @click="handleEdit(school)">{{ $t('manager.form.edit')
-                      }}</el-button>
+                    }}</el-button>
                     <el-button type="danger" size="small" link @click="handleDelete(school)">{{
                       $t('manager.list.cancel') }}</el-button>
                   </div>
@@ -63,6 +62,10 @@
         <el-form-item :label="$t('manager.form.name')">
           <el-input v-model="editForm.name" :placeholder="$t('manager.form.namePlaceholder')" />
         </el-form-item>
+        <el-form-item :label="$t('manager.form.image')">
+          <ImageSelector :item-id="editForm.id" :image-url="editForm.imageUrl" @image-selected="handleImageSelected"
+            @image-upload-success="handleImageSelected" />
+        </el-form-item>
         <el-form-item :label="$t('manager.form.principal')">
           <el-button @click="openPrincipalSelector">
             {{ editForm.principalName || $t('manager.form.principalPlaceholder') }}
@@ -85,6 +88,7 @@ import { ref, onMounted } from 'vue';
 import { Plus } from '@element-plus/icons-vue';
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import UserSelector from "@/components/UserSelector/index.vue";
+import ImageSelector from "@/components/MrPP/ImageSelector.vue";
 import type { EduSchool } from '@/api/v1/types/edu-school';
 import { getSchools, deleteSchool, createSchool, updateSchool } from "@/api/v1/edu-school";
 import { ElMessage, ElMessageBox } from 'element-plus';
@@ -113,6 +117,8 @@ const editForm = ref({
   name: '',
   principal_id: null as number | null,
   principalName: '',
+  image_id: null as number | null,
+  imageUrl: '',
 });
 
 const fetchData = async () => {
@@ -212,6 +218,8 @@ const handleEdit = async (school: EduSchool) => {
     name: school.name,
     principal_id: school.principal ? (school.principal as any).id : null,
     principalName: school.principal ? ((school.principal as any).nickname || (school.principal as any).username) : '',
+    image_id: school.image ? school.image.id : null,
+    imageUrl: school.image ? school.image.url : '',
   };
   editDialogVisible.value = true;
 };
@@ -220,11 +228,19 @@ const openPrincipalSelector = () => {
   userDialogVisible.value = true;
 };
 
+const handleImageSelected = (data: { imageId: number; itemId: number; imageUrl?: string }) => {
+  editForm.value.image_id = data.imageId;
+  if (data.imageUrl) {
+    editForm.value.imageUrl = data.imageUrl;
+  }
+};
+
 const handleSaveEdit = async () => {
   try {
     await updateSchool(editForm.value.id, {
       name: editForm.value.name,
       principal_id: editForm.value.principal_id,
+      image_id: editForm.value.image_id,
     });
     ElMessage.success(t('manager.messages.updateSuccess'));
     editDialogVisible.value = false;
@@ -290,6 +306,11 @@ const handleSelectUser = async (user: any) => {
 };
 
 
+
+const getDefaultImage = (id: number) => {
+  const index = id % 100;
+  return new URL(`../../assets/images/items/${index}.webp`, import.meta.url).href;
+};
 
 onMounted(() => {
   fetchData();

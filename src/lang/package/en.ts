@@ -91,40 +91,6 @@ export default {
       title: "Management",
       userManagement: "User Management",
       schoolManagement: "School Management",
-      createSchool: "Create School",
-      classManagement: "Class Management",
-      createClass: "Create Class",
-      teacherManagement: "Teacher Management",
-      createTeacher: "Create Teacher",
-      studentManagement: "Student Management",
-      createStudent: "Create Student",
-      school: {
-        principal: "Principal",
-        address: "Address",
-      },
-      class: {
-        grade: "Grade",
-        teacher: "Teacher",
-      },
-      teacher: {
-        subject: "Subject",
-        phone: "Phone",
-      },
-      student: {
-        grade: "Grade",
-        class: "Class",
-      },
-      list: {
-        cancel: "Delete",
-        confirm: {
-          message1:
-            "This action will permanently delete the school. Do you want to continue?",
-          message2: "Warning",
-          confirm: "Confirm",
-          cancel: "Cancel",
-          success: "Deleted successfully!",
-        },
-      },
     },
     game: {
       title: "Game",
@@ -1375,9 +1341,24 @@ export default {
   manager: {
     title: "Add User",
     createSchool: "Create School",
+    createClass: "Create Class",
+    createTeacher: "Create Teacher",
+    createStudent: "Create Student",
     school: {
-      principal: "School Administrator",
+      principal: "Principal",
       address: "Address",
+    },
+    class: {
+      grade: "Grade",
+      teacher: "Teacher",
+    },
+    teacher: {
+      subject: "Subject",
+      phone: "Phone",
+    },
+    student: {
+      grade: "Grade",
+      class: "Class",
     },
     principal: {
       assign: "Assign School Administrator",
@@ -1403,8 +1384,9 @@ export default {
       namePlaceholder: "Please enter school name",
       address: "School Address",
       addressPlaceholder: "Please enter school address",
-      principal: "School Administrator",
-      principalPlaceholder: "Please select school administrator",
+      principal: "Principal",
+      principalPlaceholder: "Select Principal",
+      image: "School Image",
       edit: "Edit",
       cancel: "Cancel",
       submit: "Submit",
@@ -1452,8 +1434,8 @@ export default {
       },
       confirm: {
         message1:
-          "This action will permanently delete the user. Do you want to continue?",
-        message2: "Prompt",
+          "This action will permanently delete the school. Do you want to continue?",
+        message2: "Warning",
         confirm: "Confirm",
         cancel: "Cancel",
         success: "Deleted successfully!",

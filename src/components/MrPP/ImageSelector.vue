@@ -46,8 +46,8 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  (e: 'image-selected', data: { imageId: number; itemId: number }): void
-  (e: 'image-upload-success', data: { imageId: number; itemId: number }): void
+  (e: 'image-selected', data: { imageId: number; itemId: number; imageUrl?: string }): void
+  (e: 'image-upload-success', data: { imageId: number; itemId: number; imageUrl?: string }): void
 }>()
 
 const { t } = useI18n()
@@ -64,9 +64,9 @@ const defaultUrl = () => {
 
 // 同步 props.imageUrl 到 internalUrl
 watch(
-  () => props.imageUrl,
-  v => {
-    internalUrl.value = v || defaultUrl()
+  [() => props.imageUrl, () => props.itemId],
+  ([newUrl]) => {
+    internalUrl.value = newUrl || defaultUrl()
   },
   { immediate: true }
 )
@@ -83,7 +83,8 @@ const openResourceDialog = () => {
 const onResourceSelected = (data: CardInfo) => {
   emit('image-selected', {
     imageId: data.context.image_id,
-    itemId: props.itemId
+    itemId: props.itemId,
+    imageUrl: data.image?.url
   })
 }
 
@@ -93,10 +94,19 @@ const handleLocalUpload = async (file: UploadFile) => {
   const md5 = await fileStore.store.fileMD5(file.raw as File)
   const handler = await fileStore.store.publicHandler()
   // ... 上传完成后：
-  const post = await postFile({ /* ... */ })
+  const extension = file.name.substring(file.name.lastIndexOf('.'));
+  const key = md5 + extension;
+  const post = await postFile({
+    md5,
+    filename: file.name,
+    size: file.size,
+    type: file.raw?.type,
+    key: key,
+  })
   emit('image-upload-success', {
     imageId: post.data.id,
-    itemId: props.itemId
+    itemId: props.itemId,
+    imageUrl: post.data.url
   })
 }
 </script>
