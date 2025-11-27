@@ -28,14 +28,13 @@
               <template #default="{ item }">
                 <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
                   <template #enter>
-                    <router-link :to="`/resource/picture/view?id=${item.id}`">
-                      <el-button v-if="item.info === null || item.image === null" type="warning" size="small">
-                        {{ $t("picture.initializePictureData") }}
-                      </el-button>
-                      <el-button v-else type="primary" size="small">
-                        {{ $t("picture.viewPicture") }}
-                      </el-button>
-                    </router-link>
+                    <el-button v-if="item.info === null || item.image === null" type="warning" size="small"
+                      @click="openViewDialog(item.id)">
+                      {{ $t("picture.initializePictureData") }}
+                    </el-button>
+                    <el-button v-else type="primary" size="small" @click="openViewDialog(item.id)">
+                      {{ $t("picture.viewPicture") }}
+                    </el-button>
                   </template>
                 </mr-p-p-card>
               </template>
@@ -60,6 +59,9 @@
         {{ $t("picture.uploadFile") }}
       </mr-p-p-upload-dialog>
 
+      <!-- 图片查看弹窗 -->
+      <PictureDialog v-model="viewDialogVisible" :id="currentPictureId" @refresh="refresh" @deleted="refresh" />
+
     </div>
   </TransitionWrapper>
 </template>
@@ -69,6 +71,7 @@ import { getPictures, putPicture, deletePicture, postPicture } from "@/api/v1/re
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import MrPPUploadDialog from "@/components/MrPP/MrPPUploadDialog/index.vue";
+import PictureDialog from "@/components/MrPP/PictureDialog.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
@@ -85,6 +88,15 @@ const router = useRouter();
 // 上传弹窗相关
 const uploadDialogVisible = ref(false);
 const fileType = ref("image/gif, image/jpeg, image/png, image/webp");
+
+// 查看弹窗相关
+const viewDialogVisible = ref(false);
+const currentPictureId = ref<number | null>(null);
+
+const openViewDialog = (id: number) => {
+  currentPictureId.value = id;
+  viewDialogVisible.value = true;
+};
 
 // 分页配置
 const pagination = ref({

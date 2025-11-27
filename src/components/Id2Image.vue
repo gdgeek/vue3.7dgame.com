@@ -1,8 +1,11 @@
 <template>
-  <LazyImg :url="url" style="width: 100%; height: auto" fit="contain" />
+  <div v-loading="loading" class="image-wrapper">
+    <LazyImg :url="url" style="width: 100%; height: auto" fit="contain" @success="loading = false"
+      @error="loading = false" />
+  </div>
 </template>
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { LazyImg } from "vue-waterfall-plugin-next";
 
 
@@ -18,6 +21,7 @@ const props = withDefaults(
   }
 );
 
+const loading = ref(true);
 
 const url = computed(() => {
   // 使用 Vite 的 new URL 方式解析静态资源路径
@@ -35,3 +39,13 @@ const url = computed(() => {
   return imageUrl;
 });
 </script>
+
+<style scoped>
+.image-wrapper {
+  min-height: 100px;
+  /* Give it some height so the spinner is visible */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+</style>
