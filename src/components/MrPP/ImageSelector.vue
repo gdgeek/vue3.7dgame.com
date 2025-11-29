@@ -9,33 +9,47 @@
     </div>
 
     <!-- 3. 选择方式弹窗 -->
-    <el-dialog v-model="imageSelectDialogVisible" :title="$t('imageSelector.selectImageMethod')" width="30%"
-      align-center>
-      <div style="display:flex;justify-content:space-around;margin:10px 0">
-        <el-button-group>
-          <el-button type="primary" @click="openResourceDialog">
-            {{ $t('imageSelector.selectFromResource') }}
-          </el-button>
-          <el-button type="success">
-            <el-upload action="" :auto-upload="false" :show-file-list="false" :on-change="handleLocalUpload"
-              accept="image/jpeg,image/gif,image/png,image/bmp">
-              {{ $t('imageSelector.uploadLocal') }}
-            </el-upload>
-          </el-button>
-        </el-button-group>
+    <el-dialog v-model="imageSelectDialogVisible" :title="$t('imageSelector.selectImageMethod')" width="500px"
+      align-center :close-on-click-modal="false">
+      <div class="selection-container">
+        <div class="selection-card" @click="openResourceDialog">
+          <div class="card-icon">
+            <el-icon :size="32">
+              <FolderOpened />
+            </el-icon>
+          </div>
+          <div class="card-title">{{ $t('imageSelector.selectFromResource') }}</div>
+          <div class="card-description">{{ $t('imageSelector.selectFromResourceDesc') }}</div>
+        </div>
+
+        <div class="selection-card" @click="openUploadDialog">
+          <div class="card-icon">
+            <el-icon :size="32">
+              <Upload />
+            </el-icon>
+          </div>
+          <div class="card-title">{{ $t('imageSelector.uploadLocal') }}</div>
+          <div class="card-description">{{ $t('imageSelector.uploadLocalDesc') }}</div>
+        </div>
       </div>
     </el-dialog>
+
+    <!-- 4. 上传对话框 -->
+    <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="picture" :file-type="fileType" :multiple="false"
+      @save-resource="savePicture" @success="handleUploadSuccess">
+      {{ $t('imageSelector.uploadFile') }}
+    </mr-p-p-upload-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, withDefaults, defineProps, defineEmits, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { FolderOpened, Upload } from '@element-plus/icons-vue'
 import ResourceDialog from './ResourceDialog.vue'
-import { useFileStore } from '@/store/modules/config'
-import { postFile } from '@/api/v1/files'
+import MrPPUploadDialog from './MrPPUploadDialog/index.vue'
+import { postPicture, getPicture } from '@/api/v1/resources/index'
 import { ElMessage } from 'element-plus'
-import type { UploadFile, UploadFiles } from 'element-plus'
 import { CardInfo } from '@/utils/types'
 
 const props = withDefaults(defineProps<{
@@ -51,9 +65,10 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const fileStore = useFileStore()
 const resourceDialog = ref<InstanceType<typeof ResourceDialog> | null>(null)
 const imageSelectDialogVisible = ref(false)
+const uploadDialogVisible = ref(false)
+const fileType = ref("image/jpeg,image/gif,image/png,image/bmp")
 
 // 内部 URL，避免直接改写 props 引发循环更新
 const internalUrl = ref('')
@@ -62,11 +77,19 @@ const defaultUrl = () => {
   return new URL(`../../assets/images/items/${id}.webp`, import.meta.url).href
 }
 
-// 同步 props.imageUrl 到 internalUrl
+// 同步 props.imageUrl 到 internalUrl，并添加缩略图参数
 watch(
   [() => props.imageUrl, () => props.itemId],
   ([newUrl]) => {
-    internalUrl.value = newUrl || defaultUrl()
+    let url = newUrl || defaultUrl()
+
+    // 如果是有效的图片 URL 且不包含图片处理参数，添加 512px 缩略图参数
+    if (url && !url.includes('imageMogr2') && !url.includes('imageView2')) {
+      const separator = url.includes('?') ? '&' : '?'
+      url += `${separator}imageMogr2/thumbnail/512x/format/webp`
+    }
+
+    internalUrl.value = url
   },
   { immediate: true }
 )
@@ -88,26 +111,78 @@ const onResourceSelected = (data: CardInfo) => {
   })
 }
 
-const handleLocalUpload = async (file: UploadFile) => {
+const openUploadDialog = () => {
   imageSelectDialogVisible.value = false
-  // ... 校验 & 上传逻辑 ...
-  const md5 = await fileStore.store.fileMD5(file.raw as File)
-  const handler = await fileStore.store.publicHandler()
-  // ... 上传完成后：
-  const extension = file.name.substring(file.name.lastIndexOf('.'));
-  const key = md5 + extension;
-  const post = await postFile({
-    md5,
-    filename: file.name,
-    size: file.size,
-    type: file.raw?.type,
-    key: key,
-  })
-  emit('image-upload-success', {
-    imageId: post.data.id,
-    itemId: props.itemId,
-    imageUrl: post.data.url
-  })
+  uploadDialogVisible.value = true
+}
+
+const savePicture = async (
+  name: string,
+  file_id: number,
+  totalFiles: number,
+  callback: (id: number) => void,
+  effectType?: string,
+  info?: string,
+  image_id?: number
+) => {
+  try {
+    const data: any = { name, file_id }
+    if (info) {
+      data.info = info
+      data.image_id = file_id
+    }
+    const response = await postPicture(data)
+    if (response.data.id) {
+      callback(response.data.id)
+    }
+  } catch (err) {
+    console.error("Failed to save picture:", err)
+    callback(-1)
+  }
+}
+
+const handleUploadSuccess = async (uploadedIds: number | number[]) => {
+  uploadDialogVisible.value = false
+  const ids = Array.isArray(uploadedIds) ? uploadedIds : [uploadedIds]
+  const pictureResourceId = ids[0]
+
+  console.log('ImageSelector: Upload success, picture resource ID:', pictureResourceId)
+
+  try {
+    // Fetch the picture resource to get its image_id (file ID)
+    const response = await getPicture(pictureResourceId)
+    console.log('ImageSelector: Fetched picture resource:', response.data)
+
+    const imageId = response.data.image_id
+    const imageUrl = response.data.image?.url
+
+    if (imageId) {
+      console.log('ImageSelector: Emitting image-upload-success with imageId:', imageId)
+
+      // Update internal URL to show the newly uploaded image
+      if (imageUrl) {
+        let url = imageUrl
+        // Add thumbnail parameter if not already present
+        if (!url.includes('imageMogr2') && !url.includes('imageView2')) {
+          const separator = url.includes('?') ? '&' : '?'
+          url += `${separator}imageMogr2/thumbnail/512x/format/webp`
+        }
+        internalUrl.value = url
+      }
+
+      emit('image-upload-success', {
+        imageId: imageId,
+        itemId: props.itemId,
+        imageUrl: imageUrl
+      })
+    } else {
+      console.error('ImageSelector: No image_id in response:', response.data)
+      ElMessage.error('Failed to get image ID from uploaded picture')
+    }
+  } catch (error) {
+    console.error('ImageSelector: Failed to fetch uploaded picture:', error)
+    ElMessage.error('Failed to update image')
+  }
 }
 </script>
 
@@ -120,5 +195,52 @@ const handleLocalUpload = async (file: UploadFile) => {
 
 .image-display:hover {
   opacity: .8;
+}
+
+.selection-container {
+  display: flex;
+  gap: 15px;
+  padding: 5px;
+}
+
+.selection-card {
+  flex: 1;
+  padding: 20px 15px;
+  border: 2px solid #e4e7ed;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+}
+
+.selection-card:hover {
+  border-color: #409eff;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(64, 158, 255, 0.2);
+  background: linear-gradient(135deg, #ecf5ff 0%, #ffffff 100%);
+}
+
+.card-icon {
+  color: #409eff;
+  margin-bottom: 15px;
+  transition: transform 0.3s ease;
+}
+
+.selection-card:hover .card-icon {
+  transform: scale(1.1);
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 8px;
+}
+
+.card-description {
+  font-size: 13px;
+  color: #909399;
+  line-height: 1.5;
 }
 </style>

@@ -66,6 +66,7 @@ import { v4 as uuidv4 } from "uuid";
 import { getPhototypes, postPhototype, deletePhototype, putPhototype, getPhototype } from "@/api/v1/phototype";
 import type { PhototypeType } from "@/api/v1/phototype";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";

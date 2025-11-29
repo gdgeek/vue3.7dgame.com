@@ -1289,12 +1289,28 @@ export default {
     createTeacher: "創建教師",
     createStudent: "創建學生",
     school: {
-      principal: "校長",
+      principal: "學校管理員",
       address: "地址",
     },
     class: {
       grade: "年級",
       teacher: "班主任",
+      dialog: {
+        createTitle: "創建班級",
+        editTitle: "編輯班級",
+      },
+      form: {
+        name: "班級名稱",
+        namePlaceholder: "請輸入班級名稱",
+        image: "班級圖片",
+      },
+      messages: {
+        createConfirm: "確認創建新班級嗎？",
+        createSuccess: "班級創建成功",
+        createFailed: "班級創建失敗",
+        updateSuccess: "班級更新成功",
+        updateFailed: "班級更新失敗",
+      },
     },
     teacher: {
       subject: "科目",
@@ -1328,8 +1344,8 @@ export default {
       namePlaceholder: "請輸入學校名稱",
       address: "學校地址",
       addressPlaceholder: "請輸入學校地址",
-      principal: "校長",
-      principalPlaceholder: "請選擇校長",
+      principal: "學校管理員",
+      principalPlaceholder: "請選擇學校管理員",
       image: "學校圖片",
       edit: "編輯",
       cancel: "取消",
@@ -1347,6 +1363,7 @@ export default {
       updateSuccess: "學校更新成功",
       updateFailed: "學校更新失敗",
       deleteFailed: "學校刪除失敗",
+      clearPrincipalConfirm: "確認要清空學校管理員嗎？",
     },
     creator: {
       form: {
@@ -1370,6 +1387,7 @@ export default {
     list: {
       label: "權限:",
       cancel: "刪除",
+      manage: "管理",
       roles: {
         root: "根用戶",
         admin: "超級管理員",
@@ -1610,7 +1628,10 @@ export default {
   imageSelector: {
     selectImageMethod: "選擇圖片方式",
     selectFromResource: "從資源庫選擇",
+    selectFromResourceDesc: "從已上傳的圖片資源中選擇",
     uploadLocal: "本地上傳",
+    uploadLocalDesc: "從本地設備上傳新圖片",
+    uploadFile: "選擇圖片並上傳",
     uploadError: "上傳文件出錯",
     invalidImageType: "上傳圖片只能是 JPG/PNG/BMP/GIF 格式!",
     imageTooLarge: "上傳圖片大小不能超過 2MB!",

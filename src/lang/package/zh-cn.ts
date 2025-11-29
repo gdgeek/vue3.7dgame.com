@@ -791,8 +791,12 @@ export default {
       title: "保存信息",
       failed: "数据库储存失败",
       declared: "文件数据存储在数据库中",
-      modelProcessFailed: "模型 {name} 预处理失败",
     },
+    modelProcessFailed: "模型处理失败，请重试",
+    ready: "准备上传...",
+    stage1: "预处理中...",
+    stage2: "上传中...",
+    stage3: "保存中...",
   },
   // 实体国际化
   meta: {
@@ -1294,12 +1298,28 @@ export default {
     createTeacher: "创建教师",
     createStudent: "创建学生",
     school: {
-      principal: "校长",
+      principal: "学校管理员",
       address: "地址",
     },
     class: {
       grade: "年级",
       teacher: "班主任",
+      dialog: {
+        createTitle: "创建班级",
+        editTitle: "编辑班级",
+      },
+      form: {
+        name: "班级名称",
+        namePlaceholder: "请输入班级名称",
+        image: "班级图片",
+      },
+      messages: {
+        createConfirm: "确认创建新班级吗？",
+        createSuccess: "班级创建成功",
+        createFailed: "班级创建失败",
+        updateSuccess: "班级更新成功",
+        updateFailed: "班级更新失败",
+      },
     },
     teacher: {
       subject: "科目",
@@ -1333,8 +1353,8 @@ export default {
       namePlaceholder: "请输入学校名称",
       address: "学校地址",
       addressPlaceholder: "请输入学校地址",
-      principal: "校长",
-      principalPlaceholder: "请选择校长",
+      principal: "学校管理员",
+      principalPlaceholder: "请选择学校管理员",
       image: "学校图片",
       edit: "编辑",
       cancel: "取消",
@@ -1352,6 +1372,7 @@ export default {
       updateSuccess: "学校更新成功",
       updateFailed: "学校更新失败",
       deleteFailed: "学校删除失败",
+      clearPrincipalConfirm: "确认要清空学校管理员吗？",
     },
     creator: {
       form: {
@@ -1375,6 +1396,7 @@ export default {
     list: {
       label: "权限:",
       cancel: "删除",
+      manage: "管理",
       roles: {
         root: "根用户",
         admin: "超级管理员",
@@ -1615,7 +1637,10 @@ export default {
   imageSelector: {
     selectImageMethod: "选择图片方式",
     selectFromResource: "从资源库选择",
+    selectFromResourceDesc: "从已上传的图片资源中选择",
     uploadLocal: "本地上传",
+    uploadLocalDesc: "从本地设备上传新图片",
+    uploadFile: "选择图片并上传",
     uploadError: "上传文件出错",
     invalidImageType: "上传图片只能是 JPG/PNG/BMP/GIF 格式!",
     imageTooLarge: "上传图片大小不能超过 2MB!",

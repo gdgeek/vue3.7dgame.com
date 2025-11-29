@@ -36,7 +36,9 @@
                   </el-descriptions>
                   <div class="actions">
                     <el-button type="primary" size="small" link @click="handleEdit(school)">{{ $t('manager.form.edit')
-                    }}</el-button>
+                      }}</el-button>
+                    <el-button type="primary" size="small" link @click="handleManage(school)">{{
+                      $t('manager.list.manage') }}</el-button>
                     <el-button type="danger" size="small" link @click="handleDelete(school)">{{
                       $t('manager.list.cancel') }}</el-button>
                   </div>
@@ -70,6 +72,8 @@
           <el-button @click="openPrincipalSelector">
             {{ editForm.principalName || $t('manager.form.principalPlaceholder') }}
           </el-button>
+          <el-button v-if="editForm.principal_id || editForm.principalName" type="danger" :icon="Delete" circle
+            size="small" style="margin-left: 10px;" @click="handleClearPrincipal" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -85,7 +89,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { Plus } from '@element-plus/icons-vue';
+import { Plus, Delete } from '@element-plus/icons-vue';
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import UserSelector from "@/components/UserSelector/index.vue";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";
@@ -213,19 +217,54 @@ const handleCreate = async () => {
 };
 
 const handleEdit = async (school: EduSchool) => {
+  console.log('handleEdit school:', school);
+  console.log('handleEdit principal:', school.principal);
+
+  const principal = school.principal as any;
+  const principalId = principal ? (typeof principal === 'object' ? (principal.id || principal.userId || principal.user_id) : principal) : null;
+
   editForm.value = {
     id: school.id,
     name: school.name,
-    principal_id: school.principal ? (school.principal as any).id : null,
-    principalName: school.principal ? ((school.principal as any).nickname || (school.principal as any).username) : '',
+    principal_id: principalId,
+    principalName: principal && typeof principal === 'object' ? (principal.nickname || principal.username) : '',
     image_id: school.image ? school.image.id : null,
     imageUrl: school.image ? school.image.url : '',
   };
   editDialogVisible.value = true;
 };
 
+const handleManage = (school: EduSchool) => {
+  // Navigate to class management page with school_id
+  // Assuming the route is /manager/class based on typical pattern, though I need to add it to router first if not exists
+  // The user request implies "Class Management Page" exists or should be linked.
+  // I will use router push.
+  import('@/router').then(({ useRouter }) => {
+    const router = useRouter();
+    router.push({ path: '/manager/class', query: { school_id: school.id } });
+  });
+};
+
 const openPrincipalSelector = () => {
   userDialogVisible.value = true;
+};
+
+const handleClearPrincipal = async () => {
+  try {
+    await ElMessageBox.confirm(
+      t('manager.messages.clearPrincipalConfirm'),
+      t('manager.dialog.editTitle'),
+      {
+        confirmButtonText: t('manager.form.submit'),
+        cancelButtonText: t('manager.form.cancel'),
+        type: 'warning',
+      }
+    );
+    editForm.value.principal_id = null;
+    editForm.value.principalName = '';
+  } catch (error) {
+    // Cancelled
+  }
 };
 
 const handleImageSelected = (data: { imageId: number; itemId: number; imageUrl?: string }) => {

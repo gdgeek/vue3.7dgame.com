@@ -1306,12 +1306,28 @@ export default {
     createTeacher: "สร้างครู",
     createStudent: "สร้างนักเรียน",
     school: {
-      principal: "ครูใหญ่",
+      principal: "ผู้ดูแลโรงเรียน",
       address: "ที่อยู่",
     },
     class: {
       grade: "ระดับชั้น",
       teacher: "ครูประจำชั้น",
+      dialog: {
+        createTitle: "สร้างชั้นเรียน",
+        editTitle: "แก้ไขชั้นเรียน",
+      },
+      form: {
+        name: "ชื่อชั้นเรียน",
+        namePlaceholder: "กรุณากรอกชื่อชั้นเรียน",
+        image: "รูปภาพชั้นเรียน",
+      },
+      messages: {
+        createConfirm: "ยืนยันการสร้างชั้นเรียนใหม่?",
+        createSuccess: "สร้างชั้นเรียนสำเร็จ",
+        createFailed: "การสร้างชั้นเรียนล้มเหลว",
+        updateSuccess: "อัปเดตชั้นเรียนสำเร็จ",
+        updateFailed: "การอัปเดตชั้นเรียนล้มเหลว",
+      },
     },
     teacher: {
       subject: "วิชา",
@@ -1345,8 +1361,8 @@ export default {
       namePlaceholder: "กรุณากรอกชื่อโรงเรียน",
       address: "ที่อยู่โรงเรียน",
       addressPlaceholder: "กรุณากรอกที่อยู่โรงเรียน",
-      principal: "ครูใหญ่",
-      principalPlaceholder: "กรุณาเลือกอาจารย์ใหญ่",
+      principal: "ผู้ดูแลโรงเรียน",
+      principalPlaceholder: "โปรดเลือกผู้ดูแลโรงเรียน",
       image: "รูปภาพโรงเรียน",
       edit: "แก้ไข",
       cancel: "ยกเลิก",
@@ -1364,6 +1380,7 @@ export default {
       updateSuccess: "อัปเดตโรงเรียนสำเร็จ",
       updateFailed: "การอัปเดตโรงเรียนล้มเหลว",
       deleteFailed: "การลบโรงเรียนล้มเหลว",
+      clearPrincipalConfirm: "คุณแน่ใจหรือไม่ว่าต้องการล้างผู้ดูแลโรงเรียน?",
     },
     creator: {
       form: {
@@ -1387,6 +1404,7 @@ export default {
     list: {
       label: "สิทธิ์:",
       cancel: "ลบ",
+      manage: "จัดการ",
       roles: {
         root: "ผู้ใช้ Root",
         admin: "ผู้ดูแลระบบสูงสุด",
@@ -1634,7 +1652,10 @@ export default {
   imageSelector: {
     selectImageMethod: "เลือกวิธีรูปภาพ",
     selectFromResource: "เลือกจากคลังทรัพยากร",
+    selectFromResourceDesc: "เลือกจากรูปภาพที่อัปโหลดแล้ว",
     uploadLocal: "อัปโหลดจากเครื่อง",
+    uploadLocalDesc: "อัปโหลดรูปภาพใหม่จากอุปกรณ์ของคุณ",
+    uploadFile: "เลือกและอัปโหลดรูปภาพ",
     uploadError: "เกิดข้อผิดพลาดในการอัปโหลดไฟล์",
     invalidImageType:
       "รูปภาพที่อัปโหลดต้องเป็นรูปแบบ JPG/PNG/BMP/GIF เท่านั้น!",

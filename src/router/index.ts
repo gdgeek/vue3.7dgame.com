@@ -638,6 +638,17 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: "/manager/class",
+            component: () => import("@/views/manager/class.vue"),
+            name: "ManagerClass",
+            meta: {
+              title: "manager.classManagement",
+              icon: "cascader",
+              hidden: true,
+              private: true,
+            },
+          },
+          {
             path: "/phototype/list",
             component: () => import("@/views/phototype/list.vue"),
             name: "PhototypeList",

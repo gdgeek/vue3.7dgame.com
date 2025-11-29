@@ -58,9 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import { LazyImg } from "vue-waterfall-plugin-next";
 import Id2Image from "@/components/Id2Image.vue";
-import "vue-waterfall-plugin-next/dist/style.css";
 
 const props = defineProps({
   item: {
@@ -68,7 +66,7 @@ const props = defineProps({
       id: number;
       name?: string;
       title?: string;
-      image: { url: string } | null;
+      image?: { url: string;[key: string]: any } | null;
     }>,
     required: true,
   },

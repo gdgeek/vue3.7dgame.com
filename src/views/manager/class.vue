@@ -17,17 +17,17 @@
           <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="4" v-for="item in classes" :key="item.id">
             <el-card class="class-card" :body-style="{ padding: '0px' }">
               <div class="image-container">
-                <img :src="item.avatar || '/src/assets/images/author/author-boy.png'" class="image" />
+                <img :src="item.image?.url || getDefaultImage(item.id)" class="image" />
               </div>
               <div style="padding: 14px">
                 <span class="class-name" :title="item.name">{{ item.name }}</span>
                 <div class="bottom clearfix">
                   <el-descriptions :column="1" size="small" class="class-info">
                     <el-descriptions-item :label="$t('manager.class.grade')">
-                      {{ item.grade || '-' }}
+                      {{ item.info?.grade || '-' }}
                     </el-descriptions-item>
                     <el-descriptions-item :label="$t('manager.class.teacher')">
-                      {{ item.teacher || '-' }}
+                      {{ item.info?.teacher || '-' }}
                     </el-descriptions-item>
                   </el-descriptions>
                   <div class="actions">
@@ -50,19 +50,39 @@
         </el-card>
       </el-footer>
     </el-container>
+
+    <!-- Edit Class Dialog -->
+    <el-dialog v-model="editDialogVisible" :title="$t('manager.class.dialog.editTitle')" width="500px"
+      :close-on-click-modal="false">
+      <el-form :model="editForm" label-width="120px">
+        <el-form-item :label="$t('manager.class.form.name')">
+          <el-input v-model="editForm.name" :placeholder="$t('manager.class.form.namePlaceholder')" />
+        </el-form-item>
+        <el-form-item :label="$t('manager.class.form.image')">
+          <ImageSelector :item-id="editForm.id" :image-url="editForm.imageUrl" @image-selected="handleImageSelected"
+            @image-upload-success="handleImageSelected" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editDialogVisible = false">{{ $t('manager.form.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSaveEdit">{{ $t('manager.form.submit') }}</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import { getClasses, deleteClass, Class } from "@/api/v1/edu-class";
+import ImageSelector from "@/components/MrPP/ImageSelector.vue";
+import { getClasses, deleteClass, createClass, updateClass } from "@/api/v1/edu-class";
+import type { EduClass } from "@/api/v1/types/edu-class";
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
-const classes = ref<Class[]>([]);
+const classes = ref<EduClass[]>([]);
 const loading = ref(false);
 const sorted = ref("-created_at");
 const searched = ref("");
@@ -70,6 +90,15 @@ const pagination = ref({
   current: 1,
   size: 20,
   total: 0,
+});
+
+// Edit dialog state
+const editDialogVisible = ref(false);
+const editForm = ref({
+  id: 0,
+  name: '',
+  image_id: null as number | null,
+  imageUrl: '',
 });
 
 const fetchData = async () => {
@@ -115,15 +144,77 @@ const handleCurrentChange = (page: number) => {
   fetchData();
 };
 
-const handleCreate = () => {
-  ElMessage.info('Create functionality to be implemented');
+const handleCreate = async () => {
+  try {
+    await ElMessageBox.confirm(
+      t('manager.class.messages.createConfirm'),
+      t('manager.class.dialog.createTitle'),
+      {
+        confirmButtonText: t('manager.form.submit'),
+        cancelButtonText: t('manager.form.cancel'),
+        type: 'info',
+      }
+    );
+
+    const timestamp = new Date().toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }).replace(/\//g, '-').replace(/:/g, '-').replace(/ /g, '_');
+
+    const defaultName = `新班级_${timestamp}`;
+
+    await createClass({
+      name: defaultName,
+    });
+
+    ElMessage.success(t('manager.class.messages.createSuccess'));
+    fetchData();
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(error);
+      ElMessage.error(t('manager.class.messages.createFailed'));
+    }
+  }
 };
 
-const handleEdit = (item: Class) => {
-  ElMessage.info(`Edit class: ${item.name}`);
+const handleEdit = (item: EduClass) => {
+  editForm.value = {
+    id: item.id,
+    name: item.name,
+    image_id: item.image ? item.image.id : null,
+    imageUrl: item.image ? item.image.url : '',
+  };
+  editDialogVisible.value = true;
 };
 
-const handleDelete = async (item: Class) => {
+const handleImageSelected = (data: { imageId: number; itemId: number; imageUrl?: string }) => {
+  editForm.value.image_id = data.imageId;
+  if (data.imageUrl) {
+    editForm.value.imageUrl = data.imageUrl;
+  }
+};
+
+const handleSaveEdit = async () => {
+  try {
+    await updateClass(editForm.value.id, {
+      name: editForm.value.name,
+      image_id: editForm.value.image_id,
+    });
+    ElMessage.success(t('manager.class.messages.updateSuccess'));
+    editDialogVisible.value = false;
+    fetchData();
+  } catch (error) {
+    console.error(error);
+    ElMessage.error(t('manager.class.messages.updateFailed'));
+  }
+};
+
+const handleDelete = async (item: EduClass) => {
   try {
     await ElMessageBox.confirm(
       t("manager.list.confirm.message1"),
@@ -140,6 +231,11 @@ const handleDelete = async (item: Class) => {
   } catch {
     // Cancelled
   }
+};
+
+const getDefaultImage = (id: number) => {
+  const index = id % 100;
+  return new URL(`../../assets/images/items/${index}.webp`, import.meta.url).href;
 };
 
 onMounted(() => {

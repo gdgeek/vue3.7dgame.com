@@ -18,12 +18,13 @@
             </el-select>
           </div>
 
-          <div v-for="item in data" :key="item.name">
-            <div class="progress-item">
-              <span>{{ item.title }}</span>
-              <el-progress :percentage="item.percentage"
-                :status="item.status === 'success' ? 'success' : ''"></el-progress>
+          <!-- 统一进度条 -->
+          <div class="unified-progress">
+            <div class="stage-info">
+              <span class="stage-text">{{ currentStageText || $t('upload.ready') }}</span>
+              <span class="stage-number" v-if="currentStage > 0">{{ currentStage }}/3</span>
             </div>
+            <el-progress :percentage="unifiedProgress" :color="currentStageColor" :stroke-width="20" />
           </div>
 
           <!-- 添加批量上传进度条 -->
@@ -86,6 +87,7 @@ const props = withDefaults(
     advanced?: boolean;
     modelValue: boolean;
     showEffectTypeSelect?: boolean;
+    multiple?: boolean;
   }>(),
   {
     fileType: "*",
@@ -93,6 +95,7 @@ const props = withDefaults(
     advanced: false,
     modelValue: false,
     showEffectTypeSelect: false,
+    multiple: true,
   }
 );
 
@@ -156,6 +159,35 @@ let uploadedCount = ref(0);
 let totalFilesCount = ref(0);
 // 用于记录本次上传的所有模型ID
 const uploadedIds = ref<number[]>([]);
+
+// 统一进度条相关状态
+const currentStage = ref(0); // 0: 未开始, 1: 预处理, 2: 上传, 3: 保存
+const stageProgress = ref([0, 0, 0]); // 每个阶段的进度 0-100
+
+// 计算统一进度
+const unifiedProgress = computed(() => {
+  if (currentStage.value === 0) return 0;
+  const completedStages = currentStage.value - 1;
+  const currentProgress = stageProgress.value[currentStage.value - 1];
+  return Math.round((completedStages * 100 + currentProgress) / 3);
+});
+
+// 当前阶段颜色
+const currentStageColor = computed(() => {
+  if (currentStage.value === 0) return '#909399'; // 灰色 - 准备中
+  const colors = ['#409eff', '#e6a23c', '#67c23a']; // 蓝色、橙色、绿色
+  return colors[currentStage.value - 1] || '#409eff';
+});
+
+// 当前阶段文本
+const currentStageText = computed(() => {
+  const stages = [
+    t('upload.stage1'),
+    t('upload.stage2'),
+    t('upload.stage3')
+  ];
+  return stages[currentStage.value - 1] || '';
+});
 
 // 获取本次上传的所有模型ID的方法
 const getUploadedIds = () => {
@@ -240,6 +272,13 @@ const step = (idx: number) => {
 
 // 更新进度条
 const progress = (p: number, idx: number) => {
+  // 更新当前阶段
+  currentStage.value = idx + 1;
+
+  // 更新阶段进度
+  stageProgress.value[idx] = Math.round(Math.min(p, 1) * 100);
+
+  // 更新标题和声明（保留原有逻辑）
   step(idx);
   data.value[idx].status = p >= 1 ? "success" as const : "" as const;
   data.value[idx].percentage = Math.round(Math.min(p, 1) * 100);
@@ -295,7 +334,7 @@ const saveFile = async (
 // 选择文件并上传
 const select = async () => {
   try {
-    const files = await fileStore.store.fileOpen(props.fileType, true);
+    const files = await fileStore.store.fileOpen(props.fileType, props.multiple);
     if (files.length === 0) return;
 
     selectedFiles.value = files;
@@ -303,6 +342,10 @@ const select = async () => {
     uploadedCount.value = 0; // 重置已完成文件计数
     totalFilesCount.value = files.length; // 总文件数
     uploadedIds.value = []; // 重置上传ID列表
+
+    // 初始化进度条为 0%，显示灰色进度条
+    currentStage.value = 0;
+    stageProgress.value = [0, 0, 0];
 
     for (const file of files) {
       try {
@@ -431,14 +474,22 @@ const select = async () => {
 // 关闭对话框时重置状态
 const handleDialogClose = () => {
   isDisabled.value = false;
+  selectedFiles.value = [];
+  uploadedCount.value = 0;
+  totalFilesCount.value = 0;
+  uploadedIds.value = [];
+
+  // 重置统一进度条状态
+  currentStage.value = 0;
+  stageProgress.value = [0, 0, 0];
+
+  // 重置原有进度条状态
   data.value.forEach(item => {
     item.percentage = 0;
     item.status = "";
   });
   changeTitle.value = null;
   changeDeclared.value = null;
-  uploadedIds.value = [];
-  selectedFiles.value = [];
 };
 
 // 暴露方法给父组件
@@ -478,6 +529,31 @@ defineExpose({
   margin-top: 15px;
   padding-top: 10px;
   border-top: 1px dashed #eee;
+}
+
+.unified-progress {
+  margin-bottom: 20px;
+}
+
+.stage-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.stage-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #606266;
+}
+
+.stage-number {
+  font-size: 12px;
+  color: #909399;
+  background: #f4f4f5;
+  padding: 2px 8px;
+  border-radius: 10px;
 }
 
 .selected-files {

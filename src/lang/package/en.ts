@@ -804,9 +804,13 @@ export default {
     item3: {
       title: "Save Information",
       failed: "Database storage failed",
-      declared: "The file data is stored in the database",
-      modelProcessFailed: "Failed to process model {name}",
+      declared: "File data is stored in the database",
     },
+    modelProcessFailed: "Model processing failed, please try again",
+    ready: "Ready to upload...",
+    stage1: "Preprocessing...",
+    stage2: "Uploading...",
+    stage3: "Saving...",
   },
   // 实体国际化
   meta: {
@@ -1346,12 +1350,28 @@ export default {
     createTeacher: "Create Teacher",
     createStudent: "Create Student",
     school: {
-      principal: "Principal",
+      principal: "School Administrator",
       address: "Address",
     },
     class: {
       grade: "Grade",
       teacher: "Teacher",
+      dialog: {
+        createTitle: "Create Class",
+        editTitle: "Edit Class",
+      },
+      form: {
+        name: "Class Name",
+        namePlaceholder: "Please enter class name",
+        image: "Class Image",
+      },
+      messages: {
+        createConfirm: "Confirm to create a new class?",
+        createSuccess: "Class created successfully",
+        createFailed: "Failed to create class",
+        updateSuccess: "Class updated successfully",
+        updateFailed: "Failed to update class",
+      },
     },
     teacher: {
       subject: "Subject",
@@ -1385,8 +1405,8 @@ export default {
       namePlaceholder: "Please enter school name",
       address: "School Address",
       addressPlaceholder: "Please enter school address",
-      principal: "Principal",
-      principalPlaceholder: "Select Principal",
+      principal: "School Administrator",
+      principalPlaceholder: "Select School Administrator",
       image: "School Image",
       edit: "Edit",
       cancel: "Cancel",
@@ -1404,6 +1424,8 @@ export default {
       updateSuccess: "School updated successfully",
       updateFailed: "Failed to update school",
       deleteFailed: "Failed to delete school",
+      clearPrincipalConfirm:
+        "Are you sure you want to clear the school administrator?",
     },
     creator: {
       form: {
@@ -1427,6 +1449,7 @@ export default {
     list: {
       label: "Perms:",
       cancel: "Delete",
+      manage: "Manage",
       roles: {
         root: "Root User",
         admin: "Super Administrator",
@@ -1674,7 +1697,10 @@ export default {
   imageSelector: {
     selectImageMethod: "Select Image Method",
     selectFromResource: "Select from Resource",
+    selectFromResourceDesc: "Choose from uploaded images",
     uploadLocal: "Upload Local",
+    uploadLocalDesc: "Upload a new image from your device",
+    uploadFile: "Select and upload image",
     uploadError: "Upload file error",
     invalidImageType: "Upload image can only be JPG/PNG/BMP/GIF format!",
     imageTooLarge: "Upload image size cannot exceed 2MB!",

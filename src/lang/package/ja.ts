@@ -859,15 +859,20 @@ export default {
         message2: "長さは2〜20文字である必要があります",
       },
       success: "保存成功",
-      selectImageMethod: "画像選択方法",
-      selectFromResource: "リソースライブラリから選択",
-      uploadLocal: "ローカルからアップロード",
-      uploadError: "アップロード失敗：ファイルが見つかりません",
-      invalidImageType: "JPG/PNG/BMP/GIF形式の画像をアップロードしてください",
-      imageTooLarge: "画像サイズは2MBを超えることはできません",
-      handlerError: "ファイルハンドラの取得に失敗しました",
-      uploadFailed: "画像のアップロードに失敗しました",
-      saveFailed: "画像情報の保存に失敗しました",
+      imageSelector: {
+        selectImageMethod: "画像選択方法",
+        selectFromResource: "リソースライブラリから選択",
+        selectFromResourceDesc: "アップロード済みの画像から選択",
+        uploadLocal: "ローカルからアップロード",
+        uploadLocalDesc: "デバイスから新しい画像をアップロード",
+        uploadFile: "画像を選択してアップロード",
+        uploadError: "アップロード失敗：ファイルが見つかりません",
+        invalidImageType: "JPG/PNG/BMP/GIF形式の画像をアップロードしてください",
+        imageTooLarge: "画像サイズは2MBを超えることはできません",
+        handlerError: "ファイルハンドラの取得に失敗しました",
+        uploadFailed: "画像のアップロードに失敗しました",
+        saveFailed: "画像情報の保存に失敗しました",
+      },
       image: {
         updateSuccess: "画像更新成功",
         updateError: "画像更新に失敗しました",
@@ -1300,12 +1305,28 @@ export default {
     createTeacher: "教師を作成",
     createStudent: "学生を作成",
     school: {
-      principal: "校長",
+      principal: "学校管理者",
       address: "住所",
     },
     class: {
       grade: "学年",
       teacher: "担任",
+      dialog: {
+        createTitle: "クラスを作成",
+        editTitle: "クラスを編集",
+      },
+      form: {
+        name: "クラス名",
+        namePlaceholder: "クラス名を入力してください",
+        image: "クラス画像",
+      },
+      messages: {
+        createConfirm: "新しいクラスを作成しますか？",
+        createSuccess: "クラスの作成に成功しました",
+        createFailed: "クラスの作成に失敗しました",
+        updateSuccess: "クラスの更新に成功しました",
+        updateFailed: "クラスの更新に失敗しました",
+      },
     },
     teacher: {
       subject: "科目",
@@ -1339,8 +1360,8 @@ export default {
       namePlaceholder: "学校名を入力してください",
       address: "学校住所",
       addressPlaceholder: "学校住所を入力してください",
-      principal: "校長",
-      principalPlaceholder: "校長を選択してください",
+      principal: "学校管理者",
+      principalPlaceholder: "学校管理者を選択してください",
       image: "学校の画像",
       edit: "編集",
       cancel: "キャンセル",
@@ -1358,6 +1379,7 @@ export default {
       updateSuccess: "学校の更新に成功しました",
       updateFailed: "学校の更新に失敗しました",
       deleteFailed: "学校の削除に失敗しました",
+      clearPrincipalConfirm: "学校管理者をクリアしてもよろしいですか？",
     },
     creator: {
       form: {
@@ -1381,6 +1403,7 @@ export default {
     list: {
       label: "権限:",
       cancel: "削除",
+      manage: "管理",
       roles: {
         root: "ルートユーザー",
         admin: "スーパー管理者",
