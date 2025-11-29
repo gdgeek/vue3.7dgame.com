@@ -1356,6 +1356,11 @@ export default {
     class: {
       grade: "Grade",
       teacher: "Teacher",
+      student: "Student",
+      teacherList: "Teacher List",
+      studentList: "Student List",
+      assignTeacher: "Assign Teacher",
+      assignStudent: "Assign Student",
       dialog: {
         createTitle: "Create Class",
         editTitle: "Edit Class",
@@ -1371,6 +1376,16 @@ export default {
         createFailed: "Failed to create class",
         updateSuccess: "Class updated successfully",
         updateFailed: "Failed to update class",
+        assignTeacherSuccess: "Teacher assigned successfully",
+        assignTeacherFailed: "Failed to assign teacher",
+        assignStudentSuccess: "Student assigned successfully",
+        assignStudentFailed: "Failed to assign student",
+        removeTeacherConfirm: "Confirm to remove this teacher?",
+        removeTeacherSuccess: "Teacher removed successfully",
+        removeTeacherFailed: "Failed to remove teacher",
+        removeStudentConfirm: "Confirm to remove this student?",
+        removeStudentSuccess: "Student removed successfully",
+        removeStudentFailed: "Failed to remove student",
       },
     },
     teacher: {
@@ -1450,6 +1465,7 @@ export default {
       label: "Perms:",
       cancel: "Delete",
       manage: "Manage",
+      remove: "Remove",
       roles: {
         root: "Root User",
         admin: "Super Administrator",

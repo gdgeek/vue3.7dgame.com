@@ -13,41 +13,35 @@
         </MrPPHeader>
       </el-header>
       <el-main>
-        <el-row :gutter="20" v-loading="loading">
-          <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="4" v-for="school in schools" :key="school.id">
-            <el-card class="school-card" :body-style="{ padding: '0px' }">
-              <div class="image-container">
-                <img :src="school.image?.url || getDefaultImage(school.id)" class="image" />
-              </div>
-              <div style="padding: 14px">
-                <span class="school-name" :title="school.name">{{ school.name }}</span>
-                <div class="bottom clearfix">
-                  <el-descriptions :column="1" size="small" class="school-info">
-                    <el-descriptions-item :label="$t('manager.school.principal')">
-                      <span v-if="school.principal">
-                        {{ (school.principal as any).nickname || (school.principal as any).username || '-' }}
-                      </span>
-                      <el-button v-else type="primary" size="small" :icon="Plus" circle
-                        @click="handleAssignPrincipal(school)" />
-                    </el-descriptions-item>
-                    <el-descriptions-item :label="$t('manager.school.address')">
-                      {{ school.info?.address || '-' }}
-                    </el-descriptions-item>
-                  </el-descriptions>
-                  <div class="actions">
-                    <el-button type="primary" size="small" link @click="handleEdit(school)">{{ $t('manager.form.edit')
-                      }}</el-button>
-                    <el-button type="primary" size="small" link @click="handleManage(school)">{{
-                      $t('manager.list.manage') }}</el-button>
-                    <el-button type="danger" size="small" link @click="handleDelete(school)">{{
-                      $t('manager.list.cancel') }}</el-button>
-                  </div>
-                </div>
-              </div>
-            </el-card>
-          </el-col>
-          <el-empty v-if="!loading && schools.length === 0" :description="$t('manager.errors.noData')"></el-empty>
-        </el-row>
+        <el-main>
+          <el-card style="width: 100%; min-height: 400px;">
+            <Waterfall v-if="schools.length > 0" :list="schools" :width="320" :gutter="20"
+              :backgroundColor="'rgba(255, 255, 255, .05)'">
+              <template #default="{ item }">
+                <MrPPCard :item="item" @named="handleEdit" @deleted="handleDeleteWithCallback">
+                  <template #enter>
+                    <el-descriptions :column="1" size="small" class="school-info">
+                      <el-descriptions-item :label="$t('manager.school.principal')">
+                        <span v-if="item.principal">
+                          {{ (item.principal as any).nickname || (item.principal as any).username || '-' }}
+                        </span>
+                        <el-button v-else type="primary" size="small" :icon="Plus" circle
+                          @click="handleAssignPrincipal(item)" />
+                      </el-descriptions-item>
+                      <el-descriptions-item :label="$t('manager.school.address')">
+                        {{ item.info?.address || '-' }}
+                      </el-descriptions-item>
+                    </el-descriptions>
+                    <el-button type="primary" size="small" @click="handleOpenClasses(item)">{{
+                      $t('common.open') }}</el-button>
+                  </template>
+                </MrPPCard>
+              </template>
+            </Waterfall>
+            <el-empty v-else-if="!loading" :description="$t('manager.errors.noData')"></el-empty>
+            <el-skeleton v-else :rows="8" animated />
+          </el-card>
+        </el-main>
       </el-main>
       <el-footer>
         <el-card class="box-card">
@@ -84,6 +78,70 @@
 
     <!-- User Selection Dialog -->
     <UserSelector v-model="userDialogVisible" :title="$t('common.selectUser')" @select="handleSelectUser" />
+
+    <!-- Class List Dialog -->
+    <el-dialog v-model="classDialogVisible" :title="$t('manager.school.classList')" width="80%" append-to-body>
+      <el-card style="width: 100%; min-height: 400px;">
+        <Waterfall v-if="schoolClasses.length > 0" :list="schoolClasses" :width="320" :gutter="20"
+          :backgroundColor="'rgba(255, 255, 255, .05)'">
+          <template #default="{ item }">
+            <MrPPCard :item="item" @named="handleEditClass" @deleted="handleDeleteClassWithCallback">
+              <template #enter>
+                <el-button-group>
+                  <el-button type="primary" size="small" @click="handleViewTeachers(item)">
+                    {{ $t('manager.class.teacher') }}
+                  </el-button>
+                  <el-button type="success" size="small" @click="handleViewStudents(item)">
+                    {{ $t('manager.class.student') }}
+                  </el-button>
+                </el-button-group>
+              </template>
+            </MrPPCard>
+          </template>
+        </Waterfall>
+        <el-empty v-else-if="!classesLoading" description="No Classes"></el-empty>
+        <el-skeleton v-else :rows="8" animated />
+      </el-card>
+      <template #footer>
+        <el-button @click="classDialogVisible = false">{{ $t('manager.form.cancel') }}</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Teacher List Dialog -->
+    <el-dialog v-model="teacherDialogVisible" :title="$t('manager.class.teacherList')" width="600px" append-to-body>
+      <el-table :data="teachers" v-loading="teachersLoading">
+        <el-table-column prop="username" :label="$t('common.username')" />
+        <el-table-column prop="nickname" :label="$t('common.nickname')" />
+        <el-table-column :label="$t('meta.actions')" width="100">
+          <template #default="{ row }">
+            <el-button type="danger" size="small" link @click="handleRemoveTeacher(row)">
+              {{ $t('manager.list.remove') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <template #footer>
+        <el-button @click="teacherDialogVisible = false">{{ $t('manager.form.cancel') }}</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Student List Dialog -->
+    <el-dialog v-model="studentDialogVisible" :title="$t('manager.class.studentList')" width="600px" append-to-body>
+      <el-table :data="students" v-loading="studentsLoading">
+        <el-table-column prop="username" :label="$t('common.username')" />
+        <el-table-column prop="nickname" :label="$t('common.nickname')" />
+        <el-table-column :label="$t('meta.actions')" width="100">
+          <template #default="{ row }">
+            <el-button type="danger" size="small" link @click="handleRemoveStudent(row)">
+              {{ $t('manager.list.remove') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <template #footer>
+        <el-button @click="studentDialogVisible = false">{{ $t('manager.form.cancel') }}</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -91,12 +149,15 @@
 import { ref, onMounted } from 'vue';
 import { Plus, Delete } from '@element-plus/icons-vue';
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import UserSelector from "@/components/UserSelector/index.vue";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";
 import type { EduSchool } from '@/api/v1/types/edu-school';
 import { getSchools, deleteSchool, createSchool, updateSchool } from "@/api/v1/edu-school";
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
+import { Waterfall } from "vue-waterfall-plugin-next";
+import "vue-waterfall-plugin-next/dist/style.css";
 
 const { t } = useI18n();
 
@@ -310,6 +371,14 @@ const handleDelete = async (school: EduSchool) => {
       console.error(error);
       ElMessage.error(t('manager.messages.deleteFailed'));
     }
+  }
+};
+
+const handleDeleteWithCallback = async (school: EduSchool, callback: () => void) => {
+  try {
+    await handleDelete(school);
+  } finally {
+    callback();
   }
 };
 

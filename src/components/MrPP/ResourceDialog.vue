@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-dialog v-model="dialogVisible" width="95%" height="100px" :show-close="false" @close="doClose">
+    <el-dialog v-model="dialogVisible" width="95%" height="100px" :show-close="false" @close="doClose" append-to-body>
       <template #header>
         <div class="dialog-footer">
           <MrPPHeader :sorted="sorted" :searched="searched" @search="search" @sort="sort">

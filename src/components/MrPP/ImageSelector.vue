@@ -10,7 +10,7 @@
 
     <!-- 3. 选择方式弹窗 -->
     <el-dialog v-model="imageSelectDialogVisible" :title="$t('imageSelector.selectImageMethod')" width="500px"
-      align-center :close-on-click-modal="false">
+      align-center :close-on-click-modal="false" append-to-body>
       <div class="selection-container">
         <div class="selection-card" @click="openResourceDialog">
           <div class="card-icon">
@@ -36,7 +36,7 @@
 
     <!-- 4. 上传对话框 -->
     <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="picture" :file-type="fileType" :multiple="false"
-      @save-resource="savePicture" @success="handleUploadSuccess">
+      @save-resource="savePicture" @success="handleUploadSuccess" append-to-body>
       {{ $t('imageSelector.uploadFile') }}
     </mr-p-p-upload-dialog>
   </div>

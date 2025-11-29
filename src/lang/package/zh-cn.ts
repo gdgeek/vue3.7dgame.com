@@ -8,6 +8,7 @@ export default {
     nickname: "昵称",
     select: "选择",
     noUsers: "未找到用户",
+    enter: "进入",
   },
 
   // 路由国际化
@@ -1303,7 +1304,12 @@ export default {
     },
     class: {
       grade: "年级",
-      teacher: "班主任",
+      teacher: "老师",
+      student: "学生",
+      teacherList: "老师列表",
+      studentList: "学生列表",
+      assignTeacher: "分配老师",
+      assignStudent: "分配学生",
       dialog: {
         createTitle: "创建班级",
         editTitle: "编辑班级",
@@ -1319,6 +1325,16 @@ export default {
         createFailed: "班级创建失败",
         updateSuccess: "班级更新成功",
         updateFailed: "班级更新失败",
+        assignTeacherSuccess: "老师分配成功",
+        assignTeacherFailed: "老师分配失败",
+        assignStudentSuccess: "学生分配成功",
+        assignStudentFailed: "学生分配失败",
+        removeTeacherConfirm: "确认移除该老师？",
+        removeTeacherSuccess: "老师移除成功",
+        removeTeacherFailed: "老师移除失败",
+        removeStudentConfirm: "确认移除该学生？",
+        removeStudentSuccess: "学生移除成功",
+        removeStudentFailed: "学生移除失败",
       },
     },
     teacher: {
@@ -1397,6 +1413,7 @@ export default {
       label: "权限:",
       cancel: "删除",
       manage: "管理",
+      remove: "移除",
       roles: {
         root: "根用户",
         admin: "超级管理员",

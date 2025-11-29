@@ -13,35 +13,29 @@
         </MrPPHeader>
       </el-header>
       <el-main>
-        <el-row :gutter="20" v-loading="loading">
-          <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="4" v-for="item in classes" :key="item.id">
-            <el-card class="class-card" :body-style="{ padding: '0px' }">
-              <div class="image-container">
-                <img :src="item.image?.url || getDefaultImage(item.id)" class="image" />
-              </div>
-              <div style="padding: 14px">
-                <span class="class-name" :title="item.name">{{ item.name }}</span>
-                <div class="bottom clearfix">
-                  <el-descriptions :column="1" size="small" class="class-info">
-                    <el-descriptions-item :label="$t('manager.class.grade')">
-                      {{ item.info?.grade || '-' }}
-                    </el-descriptions-item>
-                    <el-descriptions-item :label="$t('manager.class.teacher')">
-                      {{ item.info?.teacher || '-' }}
-                    </el-descriptions-item>
-                  </el-descriptions>
-                  <div class="actions">
-                    <el-button type="primary" size="small" link @click="handleEdit(item)">{{ $t('meta.edit')
-                      }}</el-button>
-                    <el-button type="danger" size="small" link @click="handleDelete(item)">{{ $t('manager.list.cancel')
-                      }}</el-button>
-                  </div>
-                </div>
-              </div>
-            </el-card>
-          </el-col>
-          <el-empty v-if="!loading && classes.length === 0" description="No Data"></el-empty>
-        </el-row>
+        <el-main>
+          <el-card style="width: 100%; min-height: 400px;">
+            <Waterfall v-if="classes.length > 0" :list="classes" :width="320" :gutter="20"
+              :backgroundColor="'rgba(255, 255, 255, .05)'">
+              <template #default="{ item }">
+                <MrPPCard :item="item" @named="handleEdit" @deleted="handleDeleteWithCallback">
+                  <template #enter>
+                    <el-button-group>
+                      <el-button type="primary" size="small" @click="handleViewTeachers(item)">
+                        {{ $t('manager.class.teacher') }}
+                      </el-button>
+                      <el-button type="success" size="small" @click="handleViewStudents(item)">
+                        {{ $t('manager.class.student') }}
+                      </el-button>
+                    </el-button-group>
+                  </template>
+                </MrPPCard>
+              </template>
+            </Waterfall>
+            <el-empty v-else-if="!loading" description="No Data"></el-empty>
+            <el-skeleton v-else :rows="8" animated />
+          </el-card>
+        </el-main>
       </el-main>
       <el-footer>
         <el-card class="box-card">
@@ -68,17 +62,56 @@
         <el-button type="primary" @click="handleSaveEdit">{{ $t('manager.form.submit') }}</el-button>
       </template>
     </el-dialog>
+
+    <!-- Teacher List Dialog -->
+    <el-dialog v-model="teacherDialogVisible" :title="$t('manager.class.teacherList')" width="600px" append-to-body>
+      <el-table :data="teachers" v-loading="teachersLoading">
+        <el-table-column prop="username" :label="$t('common.username')" />
+        <el-table-column prop="nickname" :label="$t('common.nickname')" />
+        <el-table-column :label="$t('meta.actions')" width="100">
+          <template #default="{ row }">
+            <el-button type="danger" size="small" link @click="handleRemoveTeacher(row)">
+              {{ $t('manager.list.remove') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <template #footer>
+        <el-button @click="teacherDialogVisible = false">{{ $t('manager.form.cancel') }}</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Student List Dialog -->
+    <el-dialog v-model="studentDialogVisible" :title="$t('manager.class.studentList')" width="600px" append-to-body>
+      <el-table :data="students" v-loading="studentsLoading">
+        <el-table-column prop="username" :label="$t('common.username')" />
+        <el-table-column prop="nickname" :label="$t('common.nickname')" />
+        <el-table-column :label="$t('meta.actions')" width="100">
+          <template #default="{ row }">
+            <el-button type="danger" size="small" link @click="handleRemoveStudent(row)">
+              {{ $t('manager.list.remove') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <template #footer>
+        <el-button @click="studentDialogVisible = false">{{ $t('manager.form.cancel') }}</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";
 import { getClasses, deleteClass, createClass, updateClass } from "@/api/v1/edu-class";
 import type { EduClass } from "@/api/v1/types/edu-class";
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
+import { Waterfall } from "vue-waterfall-plugin-next";
+import "vue-waterfall-plugin-next/dist/style.css";
 
 const { t } = useI18n();
 
@@ -100,6 +133,15 @@ const editForm = ref({
   image_id: null as number | null,
   imageUrl: '',
 });
+
+// Teacher and Student dialog state
+const teacherDialogVisible = ref(false);
+const studentDialogVisible = ref(false);
+const selectedClass = ref<EduClass | null>(null);
+const teachers = ref<any[]>([]);
+const students = ref<any[]>([]);
+const teachersLoading = ref(false);
+const studentsLoading = ref(false);
 
 const fetchData = async () => {
   loading.value = true;
@@ -230,6 +272,100 @@ const handleDelete = async (item: EduClass) => {
     fetchData();
   } catch {
     // Cancelled
+  }
+};
+
+const handleDeleteWithCallback = async (item: EduClass, callback: () => void) => {
+  try {
+    await handleDelete(item);
+  } finally {
+    callback();
+  }
+};
+
+const handleViewTeachers = async (item: EduClass) => {
+  selectedClass.value = item;
+  teacherDialogVisible.value = true;
+  teachersLoading.value = true;
+
+  try {
+    // TODO: Replace with actual API call to fetch teachers for this class
+    // For now, using mock data
+    teachers.value = [
+      { id: 1, username: 'teacher1', nickname: '张老师' },
+      { id: 2, username: 'teacher2', nickname: '李老师' },
+    ];
+  } catch (error) {
+    console.error(error);
+    ElMessage.error(t('manager.errors.fetchFailed'));
+  } finally {
+    teachersLoading.value = false;
+  }
+};
+
+const handleViewStudents = async (item: EduClass) => {
+  selectedClass.value = item;
+  studentDialogVisible.value = true;
+  studentsLoading.value = true;
+
+  try {
+    // TODO: Replace with actual API call to fetch students for this class
+    // For now, using mock data
+    students.value = [
+      { id: 1, username: 'student1', nickname: '王同学' },
+      { id: 2, username: 'student2', nickname: '赵同学' },
+    ];
+  } catch (error) {
+    console.error(error);
+    ElMessage.error(t('manager.errors.fetchFailed'));
+  } finally {
+    studentsLoading.value = false;
+  }
+};
+
+const handleRemoveTeacher = async (teacher: any) => {
+  try {
+    await ElMessageBox.confirm(
+      t('manager.class.messages.removeTeacherConfirm'),
+      t('manager.dialog.editTitle'),
+      {
+        confirmButtonText: t('manager.form.submit'),
+        cancelButtonText: t('manager.form.cancel'),
+        type: 'warning',
+      }
+    );
+
+    // TODO: Implement API call to remove teacher from class
+    ElMessage.success(t('manager.class.messages.removeTeacherSuccess'));
+    handleViewTeachers(selectedClass.value!);
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(error);
+      ElMessage.error(t('manager.class.messages.removeTeacherFailed'));
+    }
+  }
+};
+
+const handleRemoveStudent = async (student: any) => {
+  try {
+    await ElMessageBox.confirm(
+      t('manager.class.messages.removeStudentConfirm'),
+      t('manager.dialog.editTitle'),
+      {
+        confirmButtonText: t('manager.form.submit'),
+        cancelButtonText: t('manager.form.cancel'),
+        type: 'warning',
+      }
+    );
+
+    // TODO: Implement API call to remove student from class
+    ElMessage.success(t('manager.class.messages.removeStudentSuccess'));
+    handleViewStudents(selectedClass.value!);
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(error);
+      ElMessage.error(t('manager.class.messages.removeStudentFailed'));
+    }
   }
 };
 
