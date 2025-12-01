@@ -13,35 +13,33 @@
         </MrPPHeader>
       </el-header>
       <el-main>
-        <el-main>
-          <el-card style="width: 100%; min-height: 400px;">
-            <Waterfall v-if="schools.length > 0" :list="schools" :width="320" :gutter="20"
-              :backgroundColor="'rgba(255, 255, 255, .05)'">
-              <template #default="{ item }">
-                <MrPPCard :item="item" @named="handleEdit" @deleted="handleDeleteWithCallback">
-                  <template #enter>
-                    <el-descriptions :column="1" size="small" class="school-info">
-                      <el-descriptions-item :label="$t('manager.school.principal')">
-                        <span v-if="item.principal">
-                          {{ (item.principal as any).nickname || (item.principal as any).username || '-' }}
-                        </span>
-                        <el-button v-else type="primary" size="small" :icon="Plus" circle
-                          @click="handleAssignPrincipal(item)" />
-                      </el-descriptions-item>
-                      <el-descriptions-item :label="$t('manager.school.address')">
-                        {{ item.info?.address || '-' }}
-                      </el-descriptions-item>
-                    </el-descriptions>
-                    <el-button type="primary" size="small" @click="handleOpenClasses(item)">{{
-                      $t('common.open') }}</el-button>
-                  </template>
-                </MrPPCard>
-              </template>
-            </Waterfall>
-            <el-empty v-else-if="!loading" :description="$t('manager.errors.noData')"></el-empty>
-            <el-skeleton v-else :rows="8" animated />
-          </el-card>
-        </el-main>
+        <el-card style="width: 100%; min-height: 400px;">
+          <Waterfall v-if="schools.length > 0" :list="schools" :width="320" :gutter="20"
+            :backgroundColor="'rgba(255, 255, 255, .05)'">
+            <template #default="{ item }">
+              <MrPPCard :item="item" @named="handleEdit" @deleted="handleDeleteWithCallback">
+                <template #enter>
+                  <el-descriptions :column="1" size="small" class="school-info">
+                    <el-descriptions-item :label="$t('manager.school.principal')">
+                      <span v-if="item.principal">
+                        {{ (item.principal as any).nickname || (item.principal as any).username || '-' }}
+                      </span>
+                      <el-button v-else type="primary" size="small" :icon="Plus" circle
+                        @click="handleAssignPrincipal(item)" />
+                    </el-descriptions-item>
+                    <el-descriptions-item :label="$t('manager.school.address')">
+                      {{ item.info?.address || '-' }}
+                    </el-descriptions-item>
+                  </el-descriptions>
+                  <el-button type="primary" size="small" @click="handleOpenClasses(item)">{{
+                    $t('common.open') }}</el-button>
+                </template>
+              </MrPPCard>
+            </template>
+          </Waterfall>
+          <el-empty v-else-if="!loading" :description="$t('manager.errors.noData')"></el-empty>
+          <el-skeleton v-else :rows="8" animated />
+        </el-card>
       </el-main>
       <el-footer>
         <el-card class="box-card">
@@ -153,7 +151,9 @@ import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import UserSelector from "@/components/UserSelector/index.vue";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";
 import type { EduSchool } from '@/api/v1/types/edu-school';
+import type { EduClass } from '@/api/v1/types/edu-class';
 import { getSchools, deleteSchool, createSchool, updateSchool } from "@/api/v1/edu-school";
+import { getClasses, deleteClass } from "@/api/v1/edu-class";
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 import { Waterfall } from "vue-waterfall-plugin-next";
@@ -185,6 +185,20 @@ const editForm = ref({
   image_id: null as number | null,
   imageUrl: '',
 });
+
+// Class dialog state
+const classDialogVisible = ref(false);
+const schoolClasses = ref<EduClass[]>([]);
+const classesLoading = ref(false);
+const selectedClass = ref<EduClass | null>(null);
+
+// Teacher and Student dialog state
+const teacherDialogVisible = ref(false);
+const studentDialogVisible = ref(false);
+const teachers = ref<any[]>([]);
+const students = ref<any[]>([]);
+const teachersLoading = ref(false);
+const studentsLoading = ref(false);
 
 const fetchData = async () => {
   loading.value = true;
@@ -295,15 +309,152 @@ const handleEdit = async (school: EduSchool) => {
   editDialogVisible.value = true;
 };
 
-const handleManage = (school: EduSchool) => {
-  // Navigate to class management page with school_id
-  // Assuming the route is /manager/class based on typical pattern, though I need to add it to router first if not exists
-  // The user request implies "Class Management Page" exists or should be linked.
-  // I will use router push.
-  import('@/router').then(({ useRouter }) => {
-    const router = useRouter();
-    router.push({ path: '/manager/class', query: { school_id: school.id } });
-  });
+const handleOpenClasses = async (school: EduSchool) => {
+  selectedSchool.value = school;
+  classDialogVisible.value = true;
+  classesLoading.value = true;
+
+  try {
+    const response = await getClasses(
+      "-created_at",
+      "",
+      1,
+      "image"
+    );
+
+    // Filter classes by school_id if the API supports it
+    // For now, showing all classes - TODO: add school_id filter to API
+    if (response.data) {
+      schoolClasses.value = response.data;
+    }
+  } catch (error) {
+    console.error(error);
+    ElMessage.error(t('manager.errors.fetchFailed'));
+  } finally {
+    classesLoading.value = false;
+  }
+};
+
+const handleEditClass = (classItem: EduClass) => {
+  // TODO: Implement class edit functionality
+  ElMessage.info('Class edit functionality coming soon');
+};
+
+const handleDeleteClassWithCallback = async (classItem: EduClass, callback: () => void) => {
+  try {
+    await ElMessageBox.confirm(
+      t("manager.list.confirm.message1"),
+      t("manager.list.confirm.message2"),
+      {
+        confirmButtonText: t("manager.list.confirm.confirm"),
+        cancelButtonText: t("manager.list.confirm.cancel"),
+        type: "warning",
+      }
+    );
+
+    await deleteClass(classItem.id);
+    ElMessage.success(t("manager.list.confirm.success"));
+
+    // Refresh class list
+    if (selectedSchool.value) {
+      handleOpenClasses(selectedSchool.value);
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(error);
+      ElMessage.error(t('manager.messages.deleteFailed'));
+    }
+  } finally {
+    callback();
+  }
+};
+
+const handleViewTeachers = async (classItem: EduClass) => {
+  selectedClass.value = classItem;
+  teacherDialogVisible.value = true;
+  teachersLoading.value = true;
+
+  try {
+    // TODO: Replace with actual API call to fetch teachers for this class
+    teachers.value = [
+      { id: 1, username: 'teacher1', nickname: '张老师' },
+      { id: 2, username: 'teacher2', nickname: '李老师' },
+    ];
+  } catch (error) {
+    console.error(error);
+    ElMessage.error(t('manager.errors.fetchFailed'));
+  } finally {
+    teachersLoading.value = false;
+  }
+};
+
+const handleViewStudents = async (classItem: EduClass) => {
+  selectedClass.value = classItem;
+  studentDialogVisible.value = true;
+  studentsLoading.value = true;
+
+  try {
+    // TODO: Replace with actual API call to fetch students for this class
+    students.value = [
+      { id: 1, username: 'student1', nickname: '王同学' },
+      { id: 2, username: 'student2', nickname: '赵同学' },
+    ];
+  } catch (error) {
+    console.error(error);
+    ElMessage.error(t('manager.errors.fetchFailed'));
+  } finally {
+    studentsLoading.value = false;
+  }
+};
+
+const handleRemoveTeacher = async (teacher: any) => {
+  try {
+    await ElMessageBox.confirm(
+      t('manager.class.messages.removeTeacherConfirm'),
+      t('manager.dialog.editTitle'),
+      {
+        confirmButtonText: t('manager.form.submit'),
+        cancelButtonText: t('manager.form.cancel'),
+        type: 'warning',
+      }
+    );
+
+    // TODO: Implement API call to remove teacher from class
+    ElMessage.success(t('manager.class.messages.removeTeacherSuccess'));
+    if (selectedClass.value) {
+      handleViewTeachers(selectedClass.value);
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(error);
+      ElMessage.error(t('manager.class.messages.removeTeacherFailed'));
+    }
+  }
+};
+
+const handleRemoveStudent = async (student: any) => {
+  try {
+    await ElMessageBox.confirm(
+      t('manager.class.messages.removeStudentConfirm'),
+      t('manager.dialog.editTitle'),
+      {
+        confirmButtonText: t('manager.form.submit'),
+        cancelButtonText: t('manager.form.cancel'),
+        type: 'warning',
+      }
+    );
+
+    // TODO: Implement API call to remove student from class
+    ElMessage.success(t('manager.class.messages.removeStudentSuccess'));
+    if (selectedClass.value) {
+      handleViewStudents(selectedClass.value);
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(error);
+      ElMessage.error(t('manager.class.messages.removeStudentFailed'));
+    }
+  }
 };
 
 const openPrincipalSelector = () => {

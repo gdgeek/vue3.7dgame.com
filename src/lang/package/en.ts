@@ -8,6 +8,8 @@ export default {
     nickname: "Nickname",
     select: "Select",
     noUsers: "No users found",
+    open: "Open",
+    classList: "Class List",
   },
   // 路由国际化
   route: {
@@ -1352,6 +1354,7 @@ export default {
     school: {
       principal: "School Administrator",
       address: "Address",
+      classList: "Class List",
     },
     class: {
       grade: "Grade",

@@ -9,6 +9,7 @@ export default {
     select: "选择",
     noUsers: "未找到用户",
     enter: "进入",
+    open: "打开",
   },
 
   // 路由国际化
@@ -1299,8 +1300,9 @@ export default {
     createTeacher: "创建教师",
     createStudent: "创建学生",
     school: {
-      principal: "学校管理员",
+      principal: "校长",
       address: "地址",
+      classList: "班级列表",
     },
     class: {
       grade: "年级",

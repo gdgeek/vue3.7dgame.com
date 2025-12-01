@@ -16,7 +16,7 @@
               &nbsp;
               <span class="hidden-sm-and-down">{{
                 $t("verse.page.title")
-              }}</span>
+                }}</span>
             </el-button>
           </el-button-group>
         </MrPPHeader>

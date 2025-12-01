@@ -1,48 +1,23 @@
 <template>
   <div>
-    <el-card class="box-card">
+    <el-card class="box-card" :body-style="{ padding: '0px' }">
       <template #header>
-        <el-card shadow="hover" :body-style="{ padding: '0px' }">
-          <template #header>
-            <span class="mrpp-title">
-              <b class="card-title" nowrap>{{ item.name || item.title }}</b>
-            </span>
-          </template>
-          <!-- 图片容器 -->
-          <div class="image-container">
-            <Id2Image :image="item.image ? item.image.url : null" :id="item.id"> 444</Id2Image>
 
-
-            <!-- 如果鼠标悬停且使用info插槽，则显示info插槽，否则显示图片 
-            <template v-if="false">
-              <div class="info-container">
-                <slot name="info"></slot>
-              </div>
-            </template>
-
-            <template v-else>1111
-              <img v-if="!item.image" src="@/assets/images/items/1.webp"
-                style="width: 100%; height: auto; object-fit: contain" />
-              <LazyImg v-else style="width: 100%; height: auto" fit="contain" :url="item.image.url" lazy></LazyImg>
-            </template>
--->
-            <!-- 在图片内底部的 音频 插槽，动态弹出 -->
-            <template v-if="$slots.bar">
-
-              <div class="audio-container">
-                <slot name="bar"></slot>
-              </div>
-            </template>
-
-            <!-- 覆盖层插槽 -->
-            <div class="overlay-container" v-if="$slots.overlay">
-              <slot name="overlay"></slot>
-            </div>
-          </div>
-        </el-card>
+        <span class="mrpp-title">
+          <b class="card-title" nowrap>{{ item.name || item.title }}</b>
+        </span>
       </template>
 
-      <div class="clearfix">
+      <div class="image-container">
+        <Id2Image :image="item.image ? item.image.url : null" :id="item.id"> 444</Id2Image>
+
+        <!-- 覆盖层插槽 -->
+        <div class="overlay-container" v-if="$slots.overlay">
+          <slot name="overlay"></slot>
+        </div>
+      </div>
+
+      <template #footer>
         <slot name="enter">入口</slot>
 
         <el-button-group style="float: right" :inline="true">
@@ -51,8 +26,7 @@
             @click="deleted"></el-button>
           &nbsp;
         </el-button-group>
-      </div>
-      <div class="bottom clearfix"></div>
+      </template>
     </el-card>
   </div>
 </template>
