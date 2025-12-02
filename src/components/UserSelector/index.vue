@@ -1,6 +1,6 @@
 <template>
   <el-dialog :model-value="modelValue" :title="title || $t('common.selectUser')" width="900px"
-    :close-on-click-modal="false" @update:model-value="$emit('update:modelValue', $event)">
+    :close-on-click-modal="false" append-to-body @update:model-value="$emit('update:modelValue', $event)">
 
     <div class="user-selector-header">
       <MrPPHeader :sorted="sorted" :searched="searched" @search="handleSearch" @sort="handleSort" :hasTags="false">
@@ -22,7 +22,7 @@
             </div>
             <div style="padding: 14px">
               <span class="user-name" :title="user.nickname || user.username">{{ user.nickname || user.username
-                }}</span>
+              }}</span>
               <div class="bottom clearfix">
                 <span class="user-username">{{ user.username }}</span>
                 <el-button type="primary" size="small" class="button" @click.stop="handleSelect(user)">

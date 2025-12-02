@@ -30,9 +30,13 @@ export const getClasses = (
   });
 };
 
-export const getClass = (id: number) => {
+export const getClass = (id: number, expand = "") => {
+  const query: Record<string, any> = {};
+  if (expand) {
+    query["expand"] = expand;
+  }
   return request<EduClass>({
-    url: `v1/edu-class/${id}`,
+    url: path.join(`v1/edu-class/${id}` + qs.stringify(query, true)),
     method: "get",
   });
 };

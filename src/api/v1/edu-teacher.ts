@@ -40,7 +40,11 @@ export const getTeacher = (id: number) => {
   });
 };
 
-export const createTeacher = (data: { user_id: number; class_id: number }) => {
+export const createTeacher = (data: {
+  user_id: number;
+  class_id: number;
+  school_id: number;
+}) => {
   return request({
     url: "v1/edu-teacher",
     method: "post",

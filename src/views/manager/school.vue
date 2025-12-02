@@ -60,6 +60,10 @@
 
       <!-- User Selection Dialog -->
       <UserSelector v-model="userDialogVisible" :title="$t('common.selectUser')" @select="handleSelectUser" />
+
+      <!-- Class Management Dialog -->
+      <ClassManagementDialog v-model="classDialogVisible" :school-id="selectedSchool?.id || 0" :school="selectedSchool"
+        @refresh="refreshList" />
     </template>
   </CardListPage>
 </template>
@@ -74,6 +78,7 @@ import CardListPage from '@/components/MrPP/CardListPage/index.vue';
 import MrPPCard from '@/components/MrPP/MrPPCard/index.vue';
 import UserSelector from '@/components/UserSelector/index.vue';
 import ImageSelector from '@/components/MrPP/ImageSelector.vue';
+import ClassManagementDialog from '@/components/MrPP/ClassManagementDialog.vue';
 import type { EduSchool } from '@/api/v1/types/edu-school';
 import { getSchools, deleteSchool, createSchool, updateSchool } from '@/api/v1/edu-school';
 import type { FetchParams, FetchResponse } from '@/components/MrPP/CardListPage/types';
@@ -84,6 +89,8 @@ const cardListPageRef = ref<InstanceType<typeof CardListPage> | null>(null);
 
 const editDialogVisible = ref(false);
 const userDialogVisible = ref(false);
+const classDialogVisible = ref(false);
+const selectedSchool = ref<EduSchool | null>(null);
 const editForm = ref({
   id: null as number | null,
   name: '',
@@ -209,9 +216,8 @@ const handleAssignPrincipal = (item: EduSchool) => {
 };
 
 const handleOpenClasses = (item: EduSchool) => {
-  console.log('handleOpenClasses called with item:', item);
-  console.log('Navigating to /manager/class with school_id:', item.id);
-  router.push({ path: '/manager/class', query: { school_id: item.id.toString() } });
+  selectedSchool.value = item;
+  classDialogVisible.value = true;
 };
 </script>
 
