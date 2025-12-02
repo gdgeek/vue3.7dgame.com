@@ -1351,9 +1351,13 @@ export default {
     createClass: "Create Class",
     createTeacher: "Create Teacher",
     createStudent: "Create Student",
+    filteringBySchool: "Filtering by School ID",
+    backToAll: "Back to All Classes",
+
     school: {
       principal: "School Administrator",
       address: "Address",
+      description: "Description",
       classList: "Class List",
     },
     class: {
@@ -1374,21 +1378,22 @@ export default {
         image: "Class Image",
       },
       messages: {
-        createConfirm: "Confirm to create a new class?",
+        createConfirm: "Are you sure you want to create a new class?",
         createSuccess: "Class created successfully",
         createFailed: "Failed to create class",
         updateSuccess: "Class updated successfully",
         updateFailed: "Failed to update class",
-        assignTeacherSuccess: "Teacher assigned successfully",
-        assignTeacherFailed: "Failed to assign teacher",
-        assignStudentSuccess: "Student assigned successfully",
-        assignStudentFailed: "Failed to assign student",
-        removeTeacherConfirm: "Confirm to remove this teacher?",
+        deleteFailed: "Failed to delete class",
+        removeTeacherConfirm: "Are you sure you want to remove this teacher?",
         removeTeacherSuccess: "Teacher removed successfully",
         removeTeacherFailed: "Failed to remove teacher",
-        removeStudentConfirm: "Confirm to remove this student?",
+        removeStudentConfirm: "Are you sure you want to remove this student?",
         removeStudentSuccess: "Student removed successfully",
         removeStudentFailed: "Failed to remove student",
+        selectSchoolFirst:
+          "Please select a school first before creating a class",
+        assignTeacherSuccess: "Teacher assigned successfully",
+        assignStudentSuccess: "Student assigned successfully",
       },
     },
     teacher: {
@@ -1413,6 +1418,7 @@ export default {
       noData: "No Data",
       createPending: "Create functionality to be implemented",
       editPending: "Edit school: {name}",
+      operationFailed: "Operation failed",
     },
     dialog: {
       createTitle: "Create School",

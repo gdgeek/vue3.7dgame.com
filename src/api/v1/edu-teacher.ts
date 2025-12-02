@@ -35,30 +35,22 @@ export const getTeachers = (
 
 export const getTeacher = (id: number) => {
   return request<Teacher>({
-    url: `v1/edu-teacher/view?id=${id}`,
+    url: `v1/edu-teacher/${id}`,
     method: "get",
   });
 };
 
-export const createTeacher = (data: any) => {
+export const createTeacher = (data: { user_id: number; class_id: number }) => {
   return request({
-    url: "v1/edu-teacher/create",
+    url: "v1/edu-teacher",
     method: "post",
-    data,
-  });
-};
-
-export const updateTeacher = (id: number, data: any) => {
-  return request({
-    url: `v1/edu-teacher/update?id=${id}`,
-    method: "put",
     data,
   });
 };
 
 export const deleteTeacher = (id: number) => {
   return request({
-    url: `v1/edu-teacher/delete?id=${id}`,
+    url: `v1/edu-teacher/${id}`,
     method: "delete",
   });
 };

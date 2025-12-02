@@ -7,8 +7,8 @@ export interface EduClass {
   created_at: string;
   updated_at: string;
   image?: FileType;
-  students?: UserType[];
-  techers?: UserType[];
+  eduStudents?: { id: number; user: UserType }[];
+  eduTeachers?: { id: number; user: UserType }[];
   info: {
     [key: string]: any;
   };

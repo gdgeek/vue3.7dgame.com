@@ -1299,9 +1299,12 @@ export default {
     createClass: "创建班级",
     createTeacher: "创建教师",
     createStudent: "创建学生",
+    filteringBySchool: "当前筛选学校ID",
+    backToAll: "返回所有班级",
     school: {
-      principal: "校长",
+      principal: "学校管理员",
       address: "地址",
+      description: "描述",
       classList: "班级列表",
     },
     class: {
@@ -1335,6 +1338,8 @@ export default {
         removeStudentSuccess: "学生移除成功",
         removeStudentFailed: "学生移除失败",
         selectSchoolFirst: "请先选择学校，再创建班级",
+        assignTeacherSuccess: "分配教师成功",
+        assignStudentSuccess: "分配学生成功",
       },
     },
     teacher: {
@@ -1359,6 +1364,7 @@ export default {
       noData: "暂无数据",
       createPending: "创建功能开发中",
       editPending: "编辑学校: {name}",
+      operationFailed: "操作失败",
     },
     dialog: {
       createTitle: "创建学校",

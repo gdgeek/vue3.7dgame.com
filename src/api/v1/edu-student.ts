@@ -42,25 +42,16 @@ export const getStudent = (id: number) => {
   });
 };
 
-export const createStudent = (data: any) => {
+export const createStudent = (data: { user_id: number; class_id: number }) => {
   return request({
-    url: "v1/edu-student/create",
+    url: "v1/edu-student",
     method: "post",
     data,
   });
 };
-
-export const updateStudent = (id: number, data: any) => {
-  return request({
-    url: `v1/edu-student/update?id=${id}`,
-    method: "put",
-    data,
-  });
-};
-
 export const deleteStudent = (id: number) => {
   return request({
-    url: `v1/edu-student/delete?id=${id}`,
+    url: `v1/edu-student/${id}`,
     method: "delete",
   });
 };

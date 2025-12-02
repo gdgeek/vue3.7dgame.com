@@ -1305,9 +1305,13 @@ export default {
     createClass: "สร้างชั้นเรียน",
     createTeacher: "สร้างครู",
     createStudent: "สร้างนักเรียน",
+    filteringBySchool: "กรองตามรหัสโรงเรียนปัจจุบัน",
+    backToAll: "กลับไปที่ชั้นเรียนทั้งหมด",
     school: {
       principal: "ผู้ดูแลโรงเรียน",
       address: "ที่อยู่",
+      description: "คำอธิบาย",
+      classList: "รายชื่อชั้นเรียน",
     },
     class: {
       grade: "ระดับชั้น",
@@ -1327,6 +1331,7 @@ export default {
         createFailed: "การสร้างชั้นเรียนล้มเหลว",
         updateSuccess: "อัปเดตชั้นเรียนสำเร็จ",
         updateFailed: "การอัปเดตชั้นเรียนล้มเหลว",
+        selectSchoolFirst: "กรุณาเลือกโรงเรียนก่อนสร้างชั้นเรียน",
       },
     },
     teacher: {

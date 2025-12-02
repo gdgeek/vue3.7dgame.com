@@ -1288,9 +1288,13 @@ export default {
     createClass: "創建班級",
     createTeacher: "創建教師",
     createStudent: "創建學生",
+    filteringBySchool: "當前篩選學校ID",
+    backToAll: "返回所有班級",
     school: {
       principal: "學校管理員",
       address: "地址",
+      description: "描述",
+      classList: "班級列表",
     },
     class: {
       grade: "年級",
@@ -1310,6 +1314,7 @@ export default {
         createFailed: "班級創建失敗",
         updateSuccess: "班級更新成功",
         updateFailed: "班級更新失敗",
+        selectSchoolFirst: "請先選擇學校，再創建班級",
       },
     },
     teacher: {

@@ -1304,9 +1304,13 @@ export default {
     createClass: "クラスを作成",
     createTeacher: "教師を作成",
     createStudent: "学生を作成",
+    filteringBySchool: "現在の学校IDでフィルタリング",
+    backToAll: "すべてのクラスに戻る",
     school: {
       principal: "学校管理者",
       address: "住所",
+      description: "説明",
+      classList: "クラスリスト",
     },
     class: {
       grade: "学年",
@@ -1326,6 +1330,7 @@ export default {
         createFailed: "クラスの作成に失敗しました",
         updateSuccess: "クラスの更新に成功しました",
         updateFailed: "クラスの更新に失敗しました",
+        selectSchoolFirst: "クラスを作成する前に学校を選択してください",
       },
     },
     teacher: {

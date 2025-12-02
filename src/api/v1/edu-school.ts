@@ -31,9 +31,13 @@ export const getSchools = (
   });
 };
 
-export const getSchool = (id: number) => {
+export const getSchool = (id: number, expand = "image,principal") => {
+  const query: Record<string, any> = {};
+  if (expand) {
+    query["expand"] = expand;
+  }
   return request<EduSchool>({
-    url: `v1/edu-school/${id}`,
+    url: `v1/edu-school/${id}${qs.stringify(query, true)}`,
     method: "get",
   });
 };

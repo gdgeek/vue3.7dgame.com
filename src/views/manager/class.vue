@@ -2,6 +2,7 @@
   <div class="class-management">
     <el-container>
       <el-header>
+
         <MrPPHeader :sorted="sorted" :searched="searched" @search="handleSearch" @sort="handleSort">
           <el-button-group :inline="true">
             <el-button size="small" type="primary" @click="handleCreate">
@@ -13,35 +14,67 @@
         </MrPPHeader>
       </el-header>
       <el-main>
-        <el-main>
-          <el-card style="width: 100%; min-height: 400px;">
-            <div v-if="schoolId" style="margin-bottom: 20px;">
-              <el-tag closable @close="clearSchoolFilter">
-                {{ $t('manager.class.filteringBySchool') }}: {{ schoolId }}
-              </el-tag>
-            </div>
-            <Waterfall v-if="classes.length > 0" :list="classes" :width="320" :gutter="20"
-              :backgroundColor="'rgba(255, 255, 255, .05)'">
-              <template #default="{ item }">
-                <MrPPCard :item="item" @named="handleEdit" @deleted="handleDeleteWithCallback">
-                  <template #enter>
-                    <el-button-group>
-                      <el-button type="primary" size="small" @click="handleViewTeachers(item)">
-                        {{ $t('manager.class.teacher') }}
-                      </el-button>
-                      <el-button type="success" size="small" @click="handleViewStudents(item)">
-                        {{ $t('manager.class.student') }}
-                      </el-button>
-                    </el-button-group>
-                  </template>
-                </MrPPCard>
-              </template>
-            </Waterfall>
-            <el-empty v-else-if="!loading" description="No Data"></el-empty>
-            <el-skeleton v-else :rows="8" animated />
-          </el-card>
-        </el-main>
+        <el-card style="width: 100%; min-height: 400px;">
+          <div v-if="schoolId && currentSchool" style="margin-bottom: 20px;">
+            <el-card shadow="hover" :body-style="{ padding: '20px', display: 'flex', alignItems: 'center' }">
+              <div style="width: 100px; height: 100px; margin-right: 20px; flex-shrink: 0;">
+                <img :src="currentSchool.image?.url || getDefaultImage(currentSchool.id)" class="image" />
+              </div>
+              <div style="flex-grow: 1;">
+                <h2 style="margin: 0 0 10px 0;">{{ currentSchool.name }}</h2>
+                <p style="margin: 0; color: #666;">
+                  <span style="margin-right: 20px;">
+                    <strong>{{ $t('manager.school.principal') }}:</strong>
+                    {{ (currentSchool.principal as any)?.nickname || (currentSchool.principal as any)?.username || '-'
+                    }}
+                  </span>
+                  <span>
+                    <strong>{{ $t('manager.school.address') }}:</strong>
+                    {{ currentSchool.info?.address || '-' }}
+                  </span>
+                </p>
+                <p style="margin: 10px 0 0 0; color: #999; font-size: 14px;">
+                  {{ currentSchool.info?.description || '-' }}
+                </p>
+              </div>
+
+            </el-card>
+          </div>
+          <div v-else-if="schoolId" style="margin-bottom: 20px;">
+            <el-tag closable @close="clearSchoolFilter">
+              {{ $t('manager.class.filteringBySchool') }}: {{ schoolId }}
+            </el-tag>
+          </div>
+
+          <Waterfall v-if="classes.length > 0" :list="classes" :width="320" :gutter="20"
+            :backgroundColor="'rgba(255, 255, 255, .05)'">
+            <template #default="{ item }">
+              <MrPPCard :item="item" @named="handleEdit" @deleted="handleDeleteWithCallback">
+                <div style="padding: 10px; font-size: 12px; color: #666;">
+                  <div v-for="teacher in (item.eduTeachers || []).slice(0, 3)" :key="teacher.id"
+                    style="margin-bottom: 2px;">
+                    {{ teacher.user.nickname || teacher.user.username }}
+                  </div>
+                  <div v-if="(item.eduTeachers || []).length > 3" style="color: #999;">...</div>
+                </div>
+                <template #enter>
+                  <el-button-group>
+                    <el-button type="primary" size="small" @click="handleViewTeachers(item)">
+                      {{ $t('manager.class.teacher') }}
+                    </el-button>
+                    <el-button type="success" size="small" @click="handleViewStudents(item)">
+                      {{ $t('manager.class.student') }}
+                    </el-button>
+                  </el-button-group>
+                </template>
+              </MrPPCard>
+            </template>
+          </Waterfall>
+          <el-empty v-else-if="!loading" description="No Data"></el-empty>
+          <el-skeleton v-else :rows="8" animated />
+        </el-card>
       </el-main>
+
       <el-footer>
         <el-card class="box-card">
           <el-pagination :current-page="pagination.current" :page-size="pagination.size" :total="pagination.total"
@@ -70,11 +103,19 @@
 
     <!-- Teacher List Dialog -->
     <el-dialog v-model="teacherDialogVisible" :title="$t('manager.class.teacherList')" width="600px" append-to-body>
+      <div style="margin-bottom: 10px;">
+        <el-button type="primary" size="small" @click="handleAddTeacher">
+          <el-icon>
+            <Plus />
+          </el-icon> {{ $t('common.add') }}
+        </el-button>
+      </div>
       <el-table :data="teachers" v-loading="teachersLoading">
-        <el-table-column prop="username" :label="$t('common.username')" />
-        <el-table-column prop="nickname" :label="$t('common.nickname')" />
+        <el-table-column prop="user.username" :label="$t('common.username')" />
+        <el-table-column prop="user.nickname" :label="$t('common.nickname')" />
         <el-table-column :label="$t('meta.actions')" width="100">
           <template #default="{ row }">
+
             <el-button type="danger" size="small" link @click="handleRemoveTeacher(row)">
               {{ $t('manager.list.remove') }}
             </el-button>
@@ -88,9 +129,16 @@
 
     <!-- Student List Dialog -->
     <el-dialog v-model="studentDialogVisible" :title="$t('manager.class.studentList')" width="600px" append-to-body>
+      <div style="margin-bottom: 10px;">
+        <el-button type="primary" size="small" @click="handleAddStudent">
+          <el-icon>
+            <Plus />
+          </el-icon> {{ $t('common.add') }}
+        </el-button>
+      </div>
       <el-table :data="students" v-loading="studentsLoading">
-        <el-table-column prop="username" :label="$t('common.username')" />
-        <el-table-column prop="nickname" :label="$t('common.nickname')" />
+        <el-table-column prop="user.username" :label="$t('common.username')" />
+        <el-table-column prop="user.nickname" :label="$t('common.nickname')" />
         <el-table-column :label="$t('meta.actions')" width="100">
           <template #default="{ row }">
             <el-button type="danger" size="small" link @click="handleRemoveStudent(row)">
@@ -103,17 +151,27 @@
         <el-button @click="studentDialogVisible = false">{{ $t('manager.form.cancel') }}</el-button>
       </template>
     </el-dialog>
+
+    <!-- User Selection Dialog -->
+    <UserSelector v-model="userDialogVisible" :title="$t('common.selectUser')" @select="handleUserSelected" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { Plus, Delete } from '@element-plus/icons-vue';
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
+import Id2Image from "@/components/Id2Image.vue";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";
+import UserSelector from "@/components/UserSelector/index.vue";
 import { getClasses, deleteClass, createClass, updateClass } from "@/api/v1/edu-class";
+import { getSchool } from "@/api/v1/edu-school";
+import { createTeacher, deleteTeacher } from "@/api/v1/edu-teacher";
+import { createStudent, deleteStudent } from "@/api/v1/edu-student";
 import type { EduClass } from "@/api/v1/types/edu-class";
+import type { EduSchool } from "@/api/v1/types/edu-school";
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 import { Waterfall } from "vue-waterfall-plugin-next";
@@ -138,6 +196,8 @@ const schoolId = computed(() => {
   return id ? parseInt(id as string) : null;
 });
 
+const currentSchool = ref<EduSchool | null>(null);
+
 // Edit dialog state
 const editDialogVisible = ref(false);
 const editForm = ref({
@@ -156,6 +216,25 @@ const students = ref<any[]>([]);
 const teachersLoading = ref(false);
 const studentsLoading = ref(false);
 
+// User selection state
+const userDialogVisible = ref(false);
+const userSelectType = ref<'teacher' | 'student'>('teacher');
+
+const fetchSchoolInfo = async () => {
+  if (!schoolId.value) {
+    currentSchool.value = null;
+    return;
+  }
+  try {
+    const response = await getSchool(schoolId.value);
+    if (response.data) {
+      currentSchool.value = response.data;
+    }
+  } catch (error) {
+    console.error("Failed to fetch school info", error);
+  }
+};
+
 const fetchData = async () => {
   loading.value = true;
   try {
@@ -163,13 +242,12 @@ const fetchData = async () => {
       sorted.value,
       searched.value,
       pagination.value.current,
-      "image",
+      "image,eduTeachers,eduStudents",
       schoolId.value
     );
 
     if (response.data) {
       classes.value = response.data;
-
       if (response.headers) {
         pagination.value.current = parseInt(response.headers["x-pagination-current-page"] || "1");
         pagination.value.size = parseInt(response.headers["x-pagination-per-page"] || "20");
@@ -191,6 +269,7 @@ const clearSchoolFilter = () => {
 
 watch(() => route.query.school_id, () => {
   pagination.value.current = 1;
+  fetchSchoolInfo();
   fetchData();
 });
 
@@ -211,6 +290,11 @@ const handleCurrentChange = (page: number) => {
 };
 
 const handleCreate = async () => {
+  if (!schoolId.value) {
+    ElMessage.warning(t('manager.class.messages.selectSchoolFirst'));
+    return;
+  }
+
   try {
     await ElMessageBox.confirm(
       t('manager.class.messages.createConfirm'),
@@ -311,42 +395,84 @@ const handleDeleteWithCallback = async (item: EduClass, callback: () => void) =>
 const handleViewTeachers = async (item: EduClass) => {
   selectedClass.value = item;
   teacherDialogVisible.value = true;
-  teachersLoading.value = true;
-
-  try {
-    // TODO: Replace with actual API call to fetch teachers for this class
-    // For now, using mock data
-    teachers.value = [
-      { id: 1, username: 'teacher1', nickname: '张老师' },
-      { id: 2, username: 'teacher2', nickname: '李老师' },
-    ];
-  } catch (error) {
-    console.error(error);
-    ElMessage.error(t('manager.errors.fetchFailed'));
-  } finally {
-    teachersLoading.value = false;
-  }
+  teachers.value = item.eduTeachers || [];
 };
 
 const handleViewStudents = async (item: EduClass) => {
   selectedClass.value = item;
   studentDialogVisible.value = true;
-  studentsLoading.value = true;
+  students.value = item.eduStudents || [];
+};
+
+const handleAddTeacher = () => {
+  userSelectType.value = 'teacher';
+  userDialogVisible.value = true;
+};
+
+const handleAddStudent = () => {
+  userSelectType.value = 'student';
+  userDialogVisible.value = true;
+};
+
+const handleUserSelected = async (user: any) => {
+  if (!selectedClass.value) return;
 
   try {
-    // TODO: Replace with actual API call to fetch students for this class
-    // For now, using mock data
-    students.value = [
-      { id: 1, username: 'student1', nickname: '王同学' },
-      { id: 2, username: 'student2', nickname: '赵同学' },
-    ];
-  } catch (error) {
+    if (userSelectType.value === 'teacher') {
+      await createTeacher({
+        user_id: user.id,
+        class_id: selectedClass.value.id
+      });
+      ElMessage.success(t('manager.class.messages.assignTeacherSuccess') || 'Teacher assigned successfully');
+    } else {
+      await createStudent({
+        user_id: user.id,
+        class_id: selectedClass.value.id
+      });
+      ElMessage.success(t('manager.class.messages.assignStudentSuccess') || 'Student assigned successfully');
+    }
+    userDialogVisible.value = false;
+    fetchData(); // Refresh to update lists
+    // Also update the local list if possible, but fetchData refreshes everything which is safer
+    // We might need to close and reopen dialog or just refresh data.
+    // Since dialog uses `teachers` ref which is set from `item.teachers` in `handleViewTeachers`,
+    // we need to update `teachers` or `students` ref as well, or re-fetch the specific class.
+    // But `fetchData` updates `classes` list. We need to find the updated class and update `teachers`/`students`.
+    // Let's just re-fetch data and update the local ref.
+
+    // Wait for fetchData to complete? fetchData is async.
+    // Better approach:
+    // After fetchData, we need to update the currently open dialog's list.
+    // But fetchData updates `classes` array. `teachers` ref is a separate copy? 
+    // No, `teachers.value = item.teachers`. If `item` is from `classes`, and `classes` is replaced, `item` is stale.
+    // So we need to re-find the class in the new `classes` list.
+
+  } catch (error: any) {
     console.error(error);
-    ElMessage.error(t('manager.errors.fetchFailed'));
-  } finally {
-    studentsLoading.value = false;
+    if (error.response && error.response.status === 422 && Array.isArray(error.response.data) && error.response.data.length > 0) {
+      const msg = error.response.data[0].message;
+      ElMessage.error(msg);
+    } else {
+      ElMessage.error(t('manager.errors.operationFailed') || 'Operation failed');
+    }
   }
 };
+
+// Watch classes to update selectedClass and lists if data refreshes
+watch(classes, (newClasses) => {
+  if (selectedClass.value) {
+    const updatedClass = newClasses.find(c => c.id === selectedClass.value?.id);
+    if (updatedClass) {
+      selectedClass.value = updatedClass;
+      if (teacherDialogVisible.value) {
+        teachers.value = updatedClass.eduTeachers || [];
+      }
+      if (studentDialogVisible.value) {
+        students.value = updatedClass.eduStudents || [];
+      }
+    }
+  }
+});
 
 const handleRemoveTeacher = async (teacher: any) => {
   try {
@@ -360,13 +486,19 @@ const handleRemoveTeacher = async (teacher: any) => {
       }
     );
 
-    // TODO: Implement API call to remove teacher from class
+    await deleteTeacher(teacher.id);
     ElMessage.success(t('manager.class.messages.removeTeacherSuccess'));
-    handleViewTeachers(selectedClass.value!);
-  } catch (error) {
+    // Refresh data
+    fetchData();
+  } catch (error: any) {
     if (error !== 'cancel') {
       console.error(error);
-      ElMessage.error(t('manager.class.messages.removeTeacherFailed'));
+      if (error.response && error.response.status === 422 && Array.isArray(error.response.data) && error.response.data.length > 0) {
+        const msg = error.response.data[0].message;
+        ElMessage.error(msg);
+      } else {
+        ElMessage.error(t('manager.class.messages.removeTeacherFailed'));
+      }
     }
   }
 };
@@ -383,13 +515,19 @@ const handleRemoveStudent = async (student: any) => {
       }
     );
 
-    // TODO: Implement API call to remove student from class
+    await deleteStudent(student.id);
     ElMessage.success(t('manager.class.messages.removeStudentSuccess'));
-    handleViewStudents(selectedClass.value!);
-  } catch (error) {
+    // Refresh data
+    fetchData();
+  } catch (error: any) {
     if (error !== 'cancel') {
       console.error(error);
-      ElMessage.error(t('manager.class.messages.removeStudentFailed'));
+      if (error.response && error.response.status === 422 && Array.isArray(error.response.data) && error.response.data.length > 0) {
+        const msg = error.response.data[0].message;
+        ElMessage.error(msg);
+      } else {
+        ElMessage.error(t('manager.class.messages.removeStudentFailed'));
+      }
     }
   }
 };
@@ -400,6 +538,7 @@ const getDefaultImage = (id: number) => {
 };
 
 onMounted(() => {
+  fetchSchoolInfo();
   fetchData();
 });
 </script>
