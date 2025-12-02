@@ -17,10 +17,13 @@
         </div>
       </div>
 
+      <!-- 内容插槽 -->
+      <slot></slot>
+
       <template #footer>
         <slot name="enter">入口</slot>
 
-        <el-button-group style="float: right" :inline="true">
+        <el-button-group v-if="showActions" style="float: right" :inline="true">
           <el-button type="success" size="small" icon="Edit" @click="named"></el-button>
           <el-button type="danger" size="small" icon="Delete" loading-icon="Eleme" :loading="deleteLoading"
             @click="deleted"></el-button>
@@ -43,6 +46,10 @@ const props = defineProps({
       image?: { url: string;[key: string]: any } | null;
     }>,
     required: true,
+  },
+  showActions: {
+    type: Boolean,
+    default: true,
   },
 });
 

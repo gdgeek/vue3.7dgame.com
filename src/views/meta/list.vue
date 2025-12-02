@@ -27,9 +27,9 @@
                   <mr-p-p-card :item="item" :isMeta="true" @named="namedWindow" @deleted="deletedWindow">
                     <template #enter>
                       <el-button-group>
-                        <el-button type="primary" size="small" @click="edit(item.id)">{{
-                          $t("meta.enter")
-                          }}</el-button>
+                        <el-button type="primary" size="small" @click="openDetail(item.id)">{{
+                          $t("common.open")
+                        }}</el-button>
                         <el-button type="primary" :loading="copyLoadingMap.get(item.id)" size="small"
                           icon="CopyDocument" @click="copyWindow(item)">
                           <template #loading>
@@ -65,6 +65,10 @@
         </el-container>
       </div>
     </div>
+
+    <el-dialog v-model="detailVisible" :title="$t('meta.edit')" width="80%" append-to-body destroy-on-close>
+      <MetaDetail :metaId="currentMetaId" @changed="refresh" />
+    </el-dialog>
   </TransitionWrapper>
 </template>
 
@@ -78,6 +82,7 @@ import { getMetas, postMeta, deleteMeta, putMeta, getMeta, putMetaCode } from "@
 import type { metaInfo } from "@/api/v1/meta";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import MetaDetail from "@/components/Meta/MetaDetail.vue";
 
 const router = useRouter();
 const metaData = ref<metaInfo[] | null>(null);
@@ -93,6 +98,14 @@ const pagination = ref<{
 const { t } = useI18n();
 
 const copyLoadingMap = ref<Map<number, boolean>>(new Map());
+
+const detailVisible = ref(false);
+const currentMetaId = ref<number>(0);
+
+const openDetail = (id: number) => {
+  currentMetaId.value = id;
+  detailVisible.value = true;
+};
 
 const namedWindow = async (item: { id: number; title: string }) => {
   try {
@@ -242,7 +255,7 @@ const addMeta = async () => {
       uuid: uuidv4(),
     };
     const response = await postMeta(data);
-    await edit(response.data.id);
+    openDetail(response.data.id);
   } catch (e) {
     console.error();
     ElMessage.info(t("meta.prompt.info"));

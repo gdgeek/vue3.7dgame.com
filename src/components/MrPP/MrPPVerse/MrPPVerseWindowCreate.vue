@@ -6,8 +6,8 @@
     </template>
     <el-form ref="formRef" :rules="rules" :model="item" label-width="auto">
       <el-form-item :label="$t('verse.page.form.picture')">
-        <mr-p-p-cropper ref="image" :image-url="item.image?.url || null" :file-name="'verse.picture'"
-          @save-file="saveFile"></mr-p-p-cropper>
+        <ImageSelector :item-id="item.id" :image-url="item.image?.url" @image-selected="handleImageSelected"
+          @image-upload-success="handleImageSelected" />
       </el-form-item>
       <el-form-item prop="name" :label="$t('verse.page.form.name')">
         <el-input v-model="item.name"></el-input>
@@ -23,7 +23,7 @@
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">{{
           $t("verse.page.form.cancel")
-          }}</el-button>
+        }}</el-button>
         <el-button type="primary" @click="submitForm">
           {{ dialogSubmit }}
         </el-button>
@@ -34,9 +34,9 @@
 
 <script setup lang="ts">
 import { VerseData } from "@/api/v1/verse";
-import MrPPCropper from "@/components/MrPP/MrPPVerse/MrPPCropper.vue";
+import ImageSelector from "@/components/MrPP/ImageSelector.vue";
 import { useUserStore } from "@/store/modules/user";
-import { FormInstance } from "element-plus";
+import { FormInstance, ElMessage } from "element-plus";
 import { ref, computed, defineProps, defineEmits } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -96,12 +96,8 @@ const submitForm = async () => {
 const show = (selected: VerseData | null = null) => {
   if (selected) {
     item.value = selected;
-    if (item.value?.image) {
-      setTimeout(() => {
-        const imageComponent = ref<any>(null);
-        imageComponent.value = item.value?.image.url;
-      }, 0);
-    }
+    // Reset imageId when opening dialog
+    imageId.value = null;
   }
   dialogVisible.value = true;
 };
@@ -110,8 +106,20 @@ const hide = () => {
   dialogVisible.value = false;
 };
 
-const saveFile = (newImageId: number) => {
-  imageId.value = newImageId;
+const handleImageSelected = (data: { imageId: number; itemId: number; imageUrl?: string }) => {
+  imageId.value = data.imageId;
+  // Optionally update item.image.url for immediate feedback if needed, 
+  // but ImageSelector handles its own display.
+  // Updating item.image ensures consistency if the dialog is reopened without saving? 
+  // Actually show() resets item from props, so this local update is just for current session.
+  if (item.value && data.imageUrl) {
+    if (!item.value.image) {
+      item.value.image = { url: data.imageUrl, id: data.imageId } as any;
+    } else {
+      item.value.image.url = data.imageUrl;
+      item.value.image.id = data.imageId;
+    }
+  }
 };
 
 defineExpose({

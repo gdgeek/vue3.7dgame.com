@@ -15,6 +15,11 @@
       <el-main>
         <el-main>
           <el-card style="width: 100%; min-height: 400px;">
+            <div v-if="schoolId" style="margin-bottom: 20px;">
+              <el-tag closable @close="clearSchoolFilter">
+                {{ $t('manager.class.filteringBySchool') }}: {{ schoolId }}
+              </el-tag>
+            </div>
             <Waterfall v-if="classes.length > 0" :list="classes" :width="320" :gutter="20"
               :backgroundColor="'rgba(255, 255, 255, .05)'">
               <template #default="{ item }">
@@ -102,7 +107,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";
@@ -114,6 +120,8 @@ import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 
 const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 
 const classes = ref<EduClass[]>([]);
 const loading = ref(false);
@@ -123,6 +131,11 @@ const pagination = ref({
   current: 1,
   size: 20,
   total: 0,
+});
+
+const schoolId = computed(() => {
+  const id = route.query.school_id;
+  return id ? parseInt(id as string) : null;
 });
 
 // Edit dialog state
@@ -149,7 +162,9 @@ const fetchData = async () => {
     const response = await getClasses(
       sorted.value,
       searched.value,
-      pagination.value.current
+      pagination.value.current,
+      "image",
+      schoolId.value
     );
 
     if (response.data) {
@@ -169,6 +184,15 @@ const fetchData = async () => {
     loading.value = false;
   }
 };
+
+const clearSchoolFilter = () => {
+  router.push({ path: '/manager/class' });
+};
+
+watch(() => route.query.school_id, () => {
+  pagination.value.current = 1;
+  fetchData();
+});
 
 const handleSearch = (value: string) => {
   searched.value = value;
@@ -212,6 +236,7 @@ const handleCreate = async () => {
 
     await createClass({
       name: defaultName,
+      school_id: schoolId.value // If creating under a school context
     });
 
     ElMessage.success(t('manager.class.messages.createSuccess'));

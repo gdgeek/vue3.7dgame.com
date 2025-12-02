@@ -8,7 +8,8 @@ export const getClasses = (
   sort = "-created_at",
   search = "",
   page = 1,
-  expand = "image"
+  expand = "image",
+  school_id: number | null = null
 ) => {
   const query: Record<string, any> = [];
   query["expand"] = expand;
@@ -16,6 +17,9 @@ export const getClasses = (
 
   if (search !== "") {
     query["ClassSearch[name]"] = search;
+  }
+  if (school_id !== null) {
+    query["ClassSearch[school_id]"] = school_id;
   }
   if (page > 1) {
     query["page"] = page;
