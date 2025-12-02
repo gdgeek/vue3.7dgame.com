@@ -1,105 +1,84 @@
 <template>
   <TransitionWrapper>
-    <div class="audio-index">
-      <el-container>
-        <el-header>
-          <mr-p-p-header :sorted="sorted" :searched="searched" @search="search" @sort="sort">
-            <el-button-group :inline="true">
-              <!-- 原上传路由按钮注释
-              <router-link to="/resource/audio/upload">
-                <el-button size="small" type="primary" icon="uploadFilled">
-                  <span class="hidden-sm-and-down">{{
-                    $t("audio.uploadAudio")
-                  }}</span>
-                </el-button>
-              </router-link>
-              -->
-              <el-button size="small" type="primary" icon="uploadFilled" @click="openUploadDialog">
-                <span class="hidden-sm-and-down">{{ $t("audio.uploadAudio") }}</span>
-              </el-button>
-            </el-button-group>
-          </mr-p-p-header>
-        </el-header>
-        <el-main>
-          <el-card style="width: 100%; min-height: 400px;">
-            <Waterfall v-if="items" :list="items" :width="320" :gutter="20"
-              :backgroundColor="'rgba(255, 255, 255, .05)'">
-              <template #default="{ item }">
-                <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
+    <CardListPage ref="cardListPageRef" :fetch-data="fetchAudios" wrapper-class="audio-index" @refresh="handleRefresh">
+      <template #header-actions>
+        <el-button-group :inline="true">
+          <el-button size="small" type="primary" icon="uploadFilled" @click="openUploadDialog">
+            <span class="hidden-sm-and-down">{{ $t("audio.uploadAudio") }}</span>
+          </el-button>
+        </el-button-group>
+      </template>
 
-                  <template #enter>
-                    <el-button v-if="item.info === null" type="warning" size="small" @click="handleViewAudio(item.id)">
-                      {{ $t("audio.initializeAudioData") }}
-                    </el-button>
-                    <el-button v-else type="primary" size="small" @click="handleViewAudio(item.id)">{{
-                      $t("audio.viewAudio")
-                    }}</el-button>
-                  </template>
-                  <template #overlay>
-                    <el-button type="primary" circle size="large" @click.stop="handleViewAudio(item.id, true)">
-                      <el-icon :size="30">
-                        <VideoPlay />
-                      </el-icon>
-                    </el-button>
-                  </template>
-                </mr-p-p-card>
-              </template>
-            </Waterfall>
-            <el-skeleton v-else :rows="8" animated />
-          </el-card>
-        </el-main>
-        <el-footer>
-          <el-card class="box-card">
-            <el-pagination :current-page="pagination.current" :page-count="pagination.count"
-              :page-size="pagination.size" :total="pagination.total" layout="prev, pager, next, jumper" background
-              @current-change="handleCurrentChange"></el-pagination>
-          </el-card>
-        </el-footer>
-      </el-container>
-    </div>
+      <template #card="{ item }">
+        <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
+          <template #enter>
+            <el-button v-if="item.info === null" type="warning" size="small" @click="handleViewAudio(item.id)">
+              {{ $t("audio.initializeAudioData") }}
+            </el-button>
+            <el-button v-else type="primary" size="small" @click="handleViewAudio(item.id)">
+              {{ $t("audio.viewAudio") }}
+            </el-button>
+          </template>
+          <template #overlay>
+            <el-button type="primary" circle size="large" @click.stop="handleViewAudio(item.id, true)">
+              <el-icon :size="30">
+                <VideoPlay />
+              </el-icon>
+            </el-button>
+          </template>
+        </mr-p-p-card>
+      </template>
 
-    <!-- 新增上传弹窗组件 -->
-    <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="audio" :file-type="fileType" @save-resource="saveAudio"
-      @success="handleUploadSuccess">
-      {{ $t("audio.uploadFile") }}
-    </mr-p-p-upload-dialog>
+      <template #dialogs>
+        <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="audio" :file-type="fileType" @save-resource="saveAudio"
+          @success="handleUploadSuccess">
+          {{ $t("audio.uploadFile") }}
+        </mr-p-p-upload-dialog>
 
-    <!-- 音频查看弹窗 -->
-    <audio-dialog v-model="viewDialogVisible" :audio-id="currentAudioId" :auto-play="autoPlay" @deleted="handleDeleted"
-      @renamed="handleRenamed" />
+        <audio-dialog v-model="viewDialogVisible" :audio-id="currentAudioId" :auto-play="autoPlay"
+          @deleted="handleDeleted" @renamed="handleRenamed" />
+      </template>
+    </CardListPage>
   </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
-import { getAudios, putAudio, deleteAudio, postAudio } from "@/api/v1/resources/index";
-import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
-import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import MrPPUploadDialog from "@/components/MrPP/MrPPUploadDialog/index.vue";
-import AudioDialog from "@/components/MrPP/AudioDialog/index.vue";
-import { Waterfall } from "vue-waterfall-plugin-next";
-import "vue-waterfall-plugin-next/dist/style.css";
-import TransitionWrapper from "@/components/TransitionWrapper.vue";
-import { useRouter } from "vue-router";
-import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
-import { VideoPlay } from "@element-plus/icons-vue";
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { VideoPlay } from '@element-plus/icons-vue';
+import CardListPage from '@/components/MrPP/CardListPage/index.vue';
+import MrPPCard from '@/components/MrPP/MrPPCard/index.vue';
+import MrPPUploadDialog from '@/components/MrPP/MrPPUploadDialog/index.vue';
+import AudioDialog from '@/components/MrPP/AudioDialog/index.vue';
+import TransitionWrapper from '@/components/TransitionWrapper.vue';
+import { getAudios, putAudio, deleteAudio, postAudio } from '@/api/v1/resources/index';
+import type { FetchParams, FetchResponse } from '@/components/MrPP/CardListPage/types';
 
-// 组件状态
 const { t } = useI18n();
-const items = ref<any[] | null>(null);
-const sorted = ref<string>("-created_at");
-const searched = ref<string>("");
-const router = useRouter();
+const cardListPageRef = ref<InstanceType<typeof CardListPage> | null>(null);
 
-
-
-// 上传弹窗相关
 const uploadDialogVisible = ref(false);
-const fileType = ref("audio/mp3, audio/wav");
-
-// 查看弹窗相关
+const fileType = ref('audio/mp3, audio/wav');
 const viewDialogVisible = ref(false);
 const currentAudioId = ref<number | null>(null);
 const autoPlay = ref(false);
+
+const fetchAudios = async (params: FetchParams): Promise<FetchResponse> => {
+  return await getAudios(params.sort, params.search, params.page);
+};
+
+const handleRefresh = (data: any[]) => {
+  // Custom logic if needed
+};
+
+const refreshList = () => {
+  cardListPageRef.value?.refresh();
+};
+
+const openUploadDialog = () => {
+  uploadDialogVisible.value = true;
+};
 
 const handleViewAudio = (id: number, play: boolean = false) => {
   currentAudioId.value = id;
@@ -107,38 +86,11 @@ const handleViewAudio = (id: number, play: boolean = false) => {
   viewDialogVisible.value = true;
 };
 
-const handleDeleted = () => {
-  refresh();
-};
-
-const handleRenamed = () => {
-  refresh();
-};
-
-// 分页配置
-const pagination = reactive({
-  current: 1,
-  count: 1,
-  size: 20,
-  total: 20,
-});
-
-// 打开上传弹窗
-const openUploadDialog = () => {
-  uploadDialogVisible.value = true;
-};
-
-// 上传成功后处理
 const handleUploadSuccess = async (uploadedIds: number | number[]) => {
   uploadDialogVisible.value = false;
-
-  // 刷新列表显示新上传的音频
-  await refresh();
-
-  ElMessage.success(t("audio.uploadSuccess"));
+  refreshList();
 };
 
-// 保存音频
 const saveAudio = async (
   name: string,
   file_id: number,
@@ -149,122 +101,71 @@ const saveAudio = async (
   image_id?: number
 ) => {
   try {
-    const response = await postAudio({ name, file_id, info, image_id });
+    const data: any = { name, file_id };
+    if (info) {
+      data.info = info;
+    }
+    if (image_id) {
+      data.image_id = image_id;
+    }
+    const response = await postAudio(data);
     if (response.data.id) {
       callback(response.data.id);
     }
   } catch (err) {
-    console.error("Failed to save audio:", err);
+    console.error('Failed to save audio:', err);
     callback(-1);
   }
 };
 
-// 处理分页变化
-const handleCurrentChange = async (page: number) => {
-  pagination.current = page;
-  await refresh();
-};
-
-// 排序处理
-const sort = (value: string) => {
-  sorted.value = value;
-  refresh();
-};
-
-// 搜索处理
-const search = (value: string) => {
-  searched.value = value;
-  refresh();
-};
-
-// 修改音频名称对话框
-const namedWindow = async (item: any) => {
+const namedWindow = async (item: { id: string; name: string }) => {
   try {
     const { value } = await ElMessageBox.prompt(
-      t("audio.prompt.message1"),
-      t("audio.prompt.message2"),
+      t('audio.prompt.message1'),
+      t('audio.prompt.message2'),
       {
-        confirmButtonText: t("audio.prompt.confirm"),
-        cancelButtonText: t("audio.prompt.cancel"),
+        confirmButtonText: t('audio.prompt.confirm'),
+        cancelButtonText: t('audio.prompt.cancel'),
         closeOnClickModal: false,
         inputValue: item.name,
       }
     );
-    await named(item.id, value);
-    ElMessage.success(t("audio.prompt.success") + value);
+    await putAudio(item.id, { name: value });
+    refreshList();
+    ElMessage.success(t('audio.prompt.success') + value);
   } catch {
-    ElMessage.info(t("audio.prompt.info"));
+    ElMessage.info(t('audio.prompt.info'));
   }
 };
 
-// 修改音频名称 API 调用
-const named = async (id: string, newValue: string) => {
-  try {
-    await putAudio(id, { name: newValue });
-    refresh();
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-// 删除音频确认对话框
 const deletedWindow = async (item: { id: string }, resetLoading: () => void) => {
   try {
     await ElMessageBox.confirm(
-      t("audio.confirm.message1"),
-      t("audio.confirm.message2"),
+      t('audio.confirm.message1'),
+      t('audio.confirm.message2'),
       {
-        confirmButtonText: t("audio.confirm.confirm"),
-        cancelButtonText: t("audio.confirm.cancel"),
+        confirmButtonText: t('audio.confirm.confirm'),
+        cancelButtonText: t('audio.confirm.cancel'),
         closeOnClickModal: false,
-        type: "warning",
+        type: 'warning',
       }
     );
-    await deleted(item.id);
-    ElMessage.success(t("audio.confirm.success"));
+    await deleteAudio(item.id);
+    refreshList();
+    ElMessage.success(t('audio.confirm.success'));
   } catch {
-    ElMessage.info(t("audio.confirm.info"));
-    resetLoading(); // 操作取消后重置loading状态
+    ElMessage.info(t('audio.confirm.info'));
+    resetLoading();
   }
 };
 
-// 删除音频 API 调用
-const deleted = async (id: string) => {
-  try {
-    await deleteAudio(id);
-    refresh();
-  } catch (error) {
-    console.error(error);
-  }
+const handleDeleted = () => {
+  refreshList();
 };
 
-// 刷新数据
-const refresh = async () => {
-  try {
-    const response = await getAudios(
-      sorted.value,
-      searched.value,
-      pagination.current
-    );
-
-    // 更新分页信息
-    pagination.current = parseInt(
-      response.headers["x-pagination-current-page"]
-    );
-    pagination.count = parseInt(response.headers["x-pagination-page-count"]);
-    pagination.size = parseInt(response.headers["x-pagination-per-page"]);
-    pagination.total = parseInt(response.headers["x-pagination-total-count"]);
-
-    if (response.data) {
-      items.value = response.data;
-    }
-  } catch (error) {
-    console.error(error);
-  }
+const handleRenamed = () => {
+  refreshList();
 };
-
-// 生命周期钩子
-onMounted(() => refresh());
 </script>
 
 <style scoped>
