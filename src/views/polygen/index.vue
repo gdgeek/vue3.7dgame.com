@@ -1,7 +1,6 @@
 <template>
   <TransitionWrapper>
-    <div class="project-index">
-      <br />
+    <div class="polygen-index">
       <el-container>
         <el-header>
           <mr-p-p-header :sorted="sorted" :searched="searched" @search="search" @sort="sort">
@@ -23,7 +22,7 @@
         </el-header>
         <el-main>
           <el-card style="width: 100%; min-height: 400px;">
-            <Waterfall v-if="items" :list="items" :width="320" :gutter="10"
+            <Waterfall v-if="items" :list="items" :width="320" :gutter="20"
               :backgroundColor="'rgba(255, 255, 255, .05)'">
               <template #default="{ item }">
                 <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
@@ -56,17 +55,16 @@
           </el-card>
         </el-footer>
       </el-container>
-      <br />
-
-      <!-- 新增上传弹窗组件 -->
-      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="polygen" :file-type="fileType"
-        @save-resource="savePolygen" @success="handleUploadSuccess">
-        {{ $t("polygen.uploadFile") }}
-      </mr-p-p-upload-dialog>
-
-      <!-- 模型查看弹窗 -->
-      <PolygenDialog v-model="viewDialogVisible" :id="currentPolygenId" @refresh="refresh" @deleted="refresh" />
     </div>
+
+    <!-- 新增上传弹窗组件 -->
+    <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="polygen" :file-type="fileType" @save-resource="savePolygen"
+      @success="handleUploadSuccess">
+      {{ $t("polygen.uploadFile") }}
+    </mr-p-p-upload-dialog>
+
+    <!-- 模型查看弹窗 -->
+    <PolygenDialog v-model="viewDialogVisible" :id="currentPolygenId" @refresh="refresh" @deleted="refresh" />
   </TransitionWrapper>
 </template>
 
@@ -302,5 +300,11 @@ onMounted(() => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+</style>
+
+<style scoped>
+.polygen-index {
+  padding: 20px;
 }
 </style>

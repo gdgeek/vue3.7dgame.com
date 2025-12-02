@@ -1,7 +1,6 @@
 <template>
   <TransitionWrapper>
-    <div class="project-index">
-      <br />
+    <div class="picture-index">
       <el-container>
         <el-header>
           <mr-p-p-header :sorted="sorted" :searched="searched" @search="search" @sort="sort">
@@ -23,7 +22,7 @@
         </el-header>
         <el-main>
           <el-card style="width: 100%; min-height: 400px;">
-            <Waterfall v-if="items" :list="items" :width="320" :gutter="10"
+            <Waterfall v-if="items" :list="items" :width="320" :gutter="20"
               :backgroundColor="'rgba(255, 255, 255, .05)'">
               <template #default="{ item }">
                 <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
@@ -51,18 +50,16 @@
           </el-card>
         </el-footer>
       </el-container>
-      <br />
-
-      <!-- 新增上传弹窗组件 -->
-      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="picture" :file-type="fileType"
-        @save-resource="savePicture" @success="handleUploadSuccess">
-        {{ $t("picture.uploadFile") }}
-      </mr-p-p-upload-dialog>
-
-      <!-- 图片查看弹窗 -->
-      <PictureDialog v-model="viewDialogVisible" :id="currentPictureId" @refresh="refresh" @deleted="refresh" />
-
     </div>
+
+    <!-- 新增上传弹窗组件 -->
+    <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="picture" :file-type="fileType" @save-resource="savePicture"
+      @success="handleUploadSuccess">
+      {{ $t("picture.uploadFile") }}
+    </mr-p-p-upload-dialog>
+
+    <!-- 图片查看弹窗 -->
+    <PictureDialog v-model="viewDialogVisible" :id="currentPictureId" @refresh="refresh" @deleted="refresh" />
   </TransitionWrapper>
 </template>
 
@@ -259,3 +256,9 @@ const deleted = async (id: string) => {
 // 生命周期钩子
 onMounted(() => refresh());
 </script>
+
+<style scoped>
+.picture-index {
+  padding: 20px;
+}
+</style>

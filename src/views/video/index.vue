@@ -1,7 +1,6 @@
 <template>
   <TransitionWrapper>
-    <div class="project-index">
-      <br />
+    <div class="video-index">
       <el-container>
         <el-header>
           <mr-p-p-header :sorted="sorted" :searched="searched" @search="search" @sort="sort">
@@ -22,8 +21,8 @@
           </mr-p-p-header>
         </el-header>
         <el-main>
-          <el-card>
-            <Waterfall :list="items" :width="320" :gutter="10" :backgroundColor="'rgba(255, 255, 255, .05)'">
+          <el-card style="width: 100%; min-height: 400px;">
+            <Waterfall :list="items" :width="320" :gutter="20" :backgroundColor="'rgba(255, 255, 255, .05)'">
               <template #default="{ item }">
                 <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
                   <template #enter>
@@ -55,18 +54,17 @@
           </el-card>
         </el-footer>
       </el-container>
-      <br />
-
-      <!-- 新增上传弹窗组件 -->
-      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="video" :file-type="fileType" @save-resource="saveVideo"
-        @success="handleUploadSuccess">
-        {{ $t("video.uploadFile") }}
-      </mr-p-p-upload-dialog>
-
-      <!-- 视频查看弹窗 -->
-      <VideoDialog v-model="viewDialogVisible" :id="currentVideoId" :auto-play="autoPlay" @refresh="refresh"
-        @deleted="refresh" />
     </div>
+
+    <!-- 新增上传弹窗组件 -->
+    <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="video" :file-type="fileType" @save-resource="saveVideo"
+      @success="handleUploadSuccess">
+      {{ $t("video.uploadFile") }}
+    </mr-p-p-upload-dialog>
+
+    <!-- 视频查看弹窗 -->
+    <VideoDialog v-model="viewDialogVisible" :id="currentVideoId" :auto-play="autoPlay" @refresh="refresh"
+      @deleted="refresh" />
   </TransitionWrapper>
 </template>
 
@@ -259,3 +257,9 @@ const refresh = async () => {
 
 onMounted(() => refresh());
 </script>
+
+<style scoped>
+.video-index {
+  padding: 20px;
+}
+</style>

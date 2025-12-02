@@ -35,3 +35,9 @@ const loaded = async (data: any, result: Function) => {
   }
 };
 </script>
+
+<style scoped>
+.verse-index {
+  padding: 20px;
+}
+</style>

@@ -1,7 +1,6 @@
 <template>
   <TransitionWrapper>
-    <div class="project-index">
-      <br />
+    <div class="audio-index">
       <el-container>
         <el-header>
           <mr-p-p-header :sorted="sorted" :searched="searched" @search="search" @sort="sort">
@@ -23,7 +22,7 @@
         </el-header>
         <el-main>
           <el-card style="width: 100%; min-height: 400px;">
-            <Waterfall v-if="items" :list="items" :width="320" :gutter="10"
+            <Waterfall v-if="items" :list="items" :width="320" :gutter="20"
               :backgroundColor="'rgba(255, 255, 255, .05)'">
               <template #default="{ item }">
                 <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
@@ -57,18 +56,17 @@
           </el-card>
         </el-footer>
       </el-container>
-      <br />
-
-      <!-- 新增上传弹窗组件 -->
-      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="audio" :file-type="fileType" @save-resource="saveAudio"
-        @success="handleUploadSuccess">
-        {{ $t("audio.uploadFile") }}
-      </mr-p-p-upload-dialog>
-
-      <!-- 音频查看弹窗 -->
-      <audio-dialog v-model="viewDialogVisible" :audio-id="currentAudioId" :auto-play="autoPlay"
-        @deleted="handleDeleted" @renamed="handleRenamed" />
     </div>
+
+    <!-- 新增上传弹窗组件 -->
+    <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="audio" :file-type="fileType" @save-resource="saveAudio"
+      @success="handleUploadSuccess">
+      {{ $t("audio.uploadFile") }}
+    </mr-p-p-upload-dialog>
+
+    <!-- 音频查看弹窗 -->
+    <audio-dialog v-model="viewDialogVisible" :audio-id="currentAudioId" :auto-play="autoPlay" @deleted="handleDeleted"
+      @renamed="handleRenamed" />
   </TransitionWrapper>
 </template>
 
@@ -268,3 +266,9 @@ const refresh = async () => {
 // 生命周期钩子
 onMounted(() => refresh());
 </script>
+
+<style scoped>
+.audio-index {
+  padding: 20px;
+}
+</style>

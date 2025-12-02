@@ -1,41 +1,36 @@
 <template>
-  <div class="verse-index">
+  <create v-if="props.created" ref="createdDialog" :dialog-title="$t('verse.page.dialogTitle')"
+    :dialog-submit="$t('verse.page.dialogSubmit')" @submit="submitCreate"></Create>
 
-    <create v-if="props.created" ref="createdDialog" :dialog-title="$t('verse.page.dialogTitle')"
-      :dialog-submit="$t('verse.page.dialogSubmit')" @submit="submitCreate"></Create>
+  <el-container>
+    <el-header>
+      <MrPPHeader :has-tags="true" @tags="tags" :sorted="sorted" :searched="searched" @search="search" @sort="sort">
 
-    <br />
-    <el-container>
-      <el-header>
-        <MrPPHeader :has-tags="true" @tags="tags" :sorted="sorted" :searched="searched" @search="search" @sort="sort">
+        <el-button-group :inline="true">
 
-          <el-button-group :inline="true">
+          <el-button v-if="created" size="small" type="primary" @click="createWindow">
+            <font-awesome-icon icon="plus"></font-awesome-icon>
+            &nbsp;
+            <span class="hidden-sm-and-down">{{
+              $t("verse.page.title")
+            }}</span>
+          </el-button>
+        </el-button-group>
+      </MrPPHeader>
+    </el-header>
+    <el-main>
 
-            <el-button v-if="created" size="small" type="primary" @click="createWindow">
-              <font-awesome-icon icon="plus"></font-awesome-icon>
-              &nbsp;
-              <span class="hidden-sm-and-down">{{
-                $t("verse.page.title")
-                }}</span>
-            </el-button>
-          </el-button-group>
-        </MrPPHeader>
-      </el-header>
-      <el-main>
+      <VerseList :items="items" @refresh="refresh"></VerseList>
+    </el-main>
+    <el-footer>
+      <el-card class="box-card">
 
-        <VerseList :items="items" @refresh="refresh"></VerseList>
-      </el-main>
-      <el-footer>
-        <el-card class="box-card">
-
-          <el-pagination :current-page="pagination.current" :page-count="pagination.count" :page-size="pagination.size"
-            :total="pagination.total" layout="prev, pager, next, jumper" background
-            @current-change="handleCurrentChange"></el-pagination>
-        </el-card>
-      </el-footer>
-    </el-container>
-    <br />
-  </div>
+        <el-pagination :current-page="pagination.current" :page-count="pagination.count" :page-size="pagination.size"
+          :total="pagination.total" layout="prev, pager, next, jumper" background
+          @current-change="handleCurrentChange"></el-pagination>
+      </el-card>
+    </el-footer>
+  </el-container>
 </template>
 
 <script setup lang="ts">

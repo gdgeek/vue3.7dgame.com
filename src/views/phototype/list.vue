@@ -1,58 +1,53 @@
 <template>
   <TransitionWrapper>
-    <div class="root">
-      <div>
-        <br />
-        <el-container>
-          <el-header>
-            <mr-p-p-header :sorted="sorted" :searched="searched" sortByTime="created_at" sortByName="title"
-              @search="search" @sort="sort">
-              <el-button-group :inline="true">
-                <el-button size="small" type="primary" @click="addPrefab">
-                  <font-awesome-icon icon="plus"></font-awesome-icon>
-                  &nbsp;
-                  <span class="hidden-sm-and-down">{{ $t("phototype.create") }}</span>
-                </el-button>
-                <el-button size="small" type="primary" @click="addPrefabFromPolygen">
-                  <font-awesome-icon icon="apple-alt"></font-awesome-icon>
-                  &nbsp;
-                  <span class="hidden-sm-and-down">{{ $t("phototype.fromModel") }}</span>
-                </el-button>
-              </el-button-group>
-            </mr-p-p-header>
-          </el-header>
-          <el-main>
-            <el-card style="width: 100%; min-height: 400px;">
+    <div class="phototype-list">
+      <el-container>
+        <el-header>
+          <mr-p-p-header :sorted="sorted" :searched="searched" sortByTime="created_at" sortByName="title"
+            @search="search" @sort="sort">
+            <el-button-group :inline="true">
+              <el-button size="small" type="primary" @click="addPrefab">
+                <font-awesome-icon icon="plus"></font-awesome-icon>
+                &nbsp;
+                <span class="hidden-sm-and-down">{{ $t("phototype.create") }}</span>
+              </el-button>
+              <el-button size="small" type="primary" @click="addPrefabFromPolygen">
+                <font-awesome-icon icon="apple-alt"></font-awesome-icon>
+                &nbsp;
+                <span class="hidden-sm-and-down">{{ $t("phototype.fromModel") }}</span>
+              </el-button>
+            </el-button-group>
+          </mr-p-p-header>
+        </el-header>
+        <el-main>
+          <el-card style="width: 100%; min-height: 400px;">
 
-              <Waterfall v-if="list" :list="list" :width="320" :gutter="20" :hasAroundGutter="false" :breakpoints="{
-                640: { rowPerView: 1 },
-              }" :backgroundColor="'rgba(255, 255, 255, .05)'">
-                <template #default="{ item }">
+            <Waterfall v-if="list" :list="list" :width="320" :gutter="20" :backgroundColor="'rgba(255, 255, 255, .05)'">
+              <template #default="{ item }">
 
-                  <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
-                    <template #enter>
-                      <el-button-group>
-                        <el-button type="primary" size="small" @click="edit(item.id)">{{
-                          $t("meta.enter")
-                          }}</el-button>
+                <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
+                  <template #enter>
+                    <el-button-group>
+                      <el-button type="primary" size="small" @click="edit(item.id)">{{
+                        $t("meta.enter")
+                        }}</el-button>
 
-                      </el-button-group>
-                    </template>
-                  </mr-p-p-card>
-                </template>
-              </Waterfall>
-              <el-skeleton v-else :rows="8" animated />
-            </el-card>
-          </el-main>
-          <el-footer>
-            <el-card class="box-card">
-              <el-pagination :current-page="pagination.current" :page-count="pagination.count"
-                :page-size="pagination.size" :total="pagination.total" layout="prev, pager, next, jumper" background
-                @current-change="handleCurrentChange"></el-pagination>
-            </el-card>
-          </el-footer>
-        </el-container>
-      </div>
+                    </el-button-group>
+                  </template>
+                </mr-p-p-card>
+              </template>
+            </Waterfall>
+            <el-skeleton v-else :rows="8" animated />
+          </el-card>
+        </el-main>
+        <el-footer>
+          <el-card class="box-card">
+            <el-pagination :current-page="pagination.current" :page-count="pagination.count"
+              :page-size="pagination.size" :total="pagination.total" layout="prev, pager, next, jumper" background
+              @current-change="handleCurrentChange"></el-pagination>
+          </el-card>
+        </el-footer>
+      </el-container>
     </div>
   </TransitionWrapper>
 </template>
@@ -247,6 +242,10 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.phototype-list {
+  padding: 20px;
+}
+
 .mrpp-title {
   font-size: 15px;
   padding: 0px 0px 0px 0px;

@@ -1,7 +1,6 @@
 <template>
   <TransitionWrapper>
-    <div class="project-index">
-      <br />
+    <div class="voxel-index">
       <el-container>
         <el-header>
           <MrPPHeader :sorted="sorted" :searched="searched" @search="search" @sort="sort">
@@ -22,8 +21,8 @@
           </MrPPHeader>
         </el-header>
         <el-main>
-          <el-card>
-            <Waterfall :list="items" :width="320" :gutter="10" :backgroundColor="'rgba(255, 255, 255, .05)'">
+          <el-card style="width: 100%; min-height: 400px;">
+            <Waterfall :list="items" :width="320" :gutter="20" :backgroundColor="'rgba(255, 255, 255, .05)'">
               <template #default="{ item }">
                 <MrPPCard :item="item" @named="namedWindow" @deleted="deletedWindow">
                   <template #enter>
@@ -51,14 +50,13 @@
           </el-card>
         </el-footer>
       </el-container>
-      <br />
-
-      <!-- 新增上传弹窗组件 -->
-      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="voxel" :file-type="fileType" @save-resource="saveVoxel"
-        @success="handleUploadSuccess">
-        {{ $t("voxel.uploadFile") }}
-      </mr-p-p-upload-dialog>
     </div>
+
+    <!-- 新增上传弹窗组件 -->
+    <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="voxel" :file-type="fileType" @save-resource="saveVoxel"
+      @success="handleUploadSuccess">
+      {{ $t("voxel.uploadFile") }}
+    </mr-p-p-upload-dialog>
   </TransitionWrapper>
 </template>
 
@@ -332,5 +330,11 @@ onMounted(() => {
   .hidden-sm-and-down {
     display: inline;
   }
+}
+</style>
+
+<style scoped>
+.voxel-index {
+  padding: 20px;
 }
 </style>

@@ -1,69 +1,64 @@
 <template>
   <TransitionWrapper>
     <div class="root">
-      <div>
-        <br />
-        <el-container>
-          <el-header>
-            <mr-p-p-header :sorted="sorted" :searched="searched" sortByTime="created_at" sortByName="title"
-              @search="search" @sort="sort">
-              <el-button-group :inline="true">
-                <el-button size="small" type="primary" @click="addMeta">
-                  <font-awesome-icon icon="plus"></font-awesome-icon>
-                  &nbsp;
-                  <span class="hidden-sm-and-down">{{ $t("meta.title") }}</span>
-                </el-button>
-              </el-button-group>
-            </mr-p-p-header>
-          </el-header>
-          <el-main>
-            <el-card style="width: 100%; min-height: 400px;">
+      <el-container>
+        <el-header>
+          <mr-p-p-header :sorted="sorted" :searched="searched" sortByTime="created_at" sortByName="title"
+            @search="search" @sort="sort">
+            <el-button-group :inline="true">
+              <el-button size="small" type="primary" @click="addMeta">
+                <font-awesome-icon icon="plus"></font-awesome-icon>
+                &nbsp;
+                <span class="hidden-sm-and-down">{{ $t("meta.title") }}</span>
+              </el-button>
+            </el-button-group>
+          </mr-p-p-header>
+        </el-header>
+        <el-main>
+          <el-card style="width: 100%; min-height: 400px;">
 
-              <Waterfall v-if="metaData" :list="metaData" :width="320" :gutter="20" :hasAroundGutter="false"
-                :breakpoints="{
-                  640: { rowPerView: 1 },
-                }" :backgroundColor="'rgba(255, 255, 255, .05)'">
-                <template #default="{ item }">
-                  <mr-p-p-card :item="item" :isMeta="true" @named="namedWindow" @deleted="deletedWindow">
-                    <template #enter>
-                      <el-button-group>
-                        <el-button type="primary" size="small" @click="openDetail(item.id)">{{
-                          $t("common.open")
+            <Waterfall v-if="metaData" :list="metaData" :width="320" :gutter="20"
+              :backgroundColor="'rgba(255, 255, 255, .05)'">
+              <template #default="{ item }">
+                <mr-p-p-card :item="item" :isMeta="true" @named="namedWindow" @deleted="deletedWindow">
+                  <template #enter>
+                    <el-button-group>
+                      <el-button type="primary" size="small" @click="openDetail(item.id)">{{
+                        $t("common.open")
                         }}</el-button>
-                        <el-button type="primary" :loading="copyLoadingMap.get(item.id)" size="small"
-                          icon="CopyDocument" @click="copyWindow(item)">
-                          <template #loading>
-                            <div class="custom-loading">
-                              <svg class="circular" viewBox="-10, -10, 50, 50">
-                                <path class="path" d="
-                                  M 30 15
-                                  L 28 17
-                                  M 25.61 25.61
-                                  A 15 15, 0, 0, 1, 15 30
-                                  A 15 15, 0, 1, 1, 27.99 7.5
-                                  L 15 15
-                                " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)" />
-                              </svg>
-                            </div>
-                          </template>
-                        </el-button>
-                      </el-button-group>
-                    </template>
-                  </mr-p-p-card>
-                </template>
-              </Waterfall>
-              <el-skeleton v-else :rows="8" animated />
-            </el-card>
-          </el-main>
-          <el-footer>
-            <el-card class="box-card">
-              <el-pagination :current-page="pagination.current" :page-count="pagination.count"
-                :page-size="pagination.size" :total="pagination.total" layout="prev, pager, next, jumper" background
-                @current-change="handleCurrentChange"></el-pagination>
-            </el-card>
-          </el-footer>
-        </el-container>
-      </div>
+                      <el-button type="primary" :loading="copyLoadingMap.get(item.id)" size="small" icon="CopyDocument"
+                        @click="copyWindow(item)">
+                        <template #loading>
+                          <div class="custom-loading">
+                            <svg class="circular" viewBox="-10, -10, 50, 50">
+                              <path class="path" d="
+                                M 30 15
+                                L 28 17
+                                M 25.61 25.61
+                                A 15 15, 0, 0, 1, 15 30
+                                A 15 15, 0, 1, 1, 27.99 7.5
+                                L 15 15
+                              " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)" />
+                            </svg>
+                          </div>
+                        </template>
+                      </el-button>
+                    </el-button-group>
+                  </template>
+                </mr-p-p-card>
+              </template>
+            </Waterfall>
+            <el-skeleton v-else :rows="8" animated />
+          </el-card>
+        </el-main>
+        <el-footer>
+          <el-card class="box-card">
+            <el-pagination :current-page="pagination.current" :page-count="pagination.count"
+              :page-size="pagination.size" :total="pagination.total" layout="prev, pager, next, jumper" background
+              @current-change="handleCurrentChange"></el-pagination>
+          </el-card>
+        </el-footer>
+      </el-container>
     </div>
 
     <el-dialog v-model="detailVisible" :title="$t('meta.edit')" width="80%" append-to-body destroy-on-close>
@@ -305,6 +300,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.root {
+  padding: 20px;
+}
+
 .mrpp-title {
   font-size: 15px;
   padding: 0px 0px 0px 0px;
