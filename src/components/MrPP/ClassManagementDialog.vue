@@ -18,7 +18,7 @@
         <div v-if="school" style="margin-bottom: 20px;">
           <el-card shadow="hover" :body-style="{ padding: '20px', display: 'flex', alignItems: 'center' }">
             <div style="width: 100px; height: 100px; margin-right: 20px; flex-shrink: 0;">
-              <img :src="school.image?.url || getDefaultImage(school.id)" class="image" />
+              <Id2Image :id="school.id" :image="school.image?.url || null" :lazy="false" />
             </div>
             <div style="flex-grow: 1;">
               <h2 style="margin: 0 0 10px 0;">{{ school.name }}</h2>
@@ -144,6 +144,7 @@ import { useI18n } from 'vue-i18n';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import CardListPage from '@/components/MrPP/CardListPage/index.vue';
 import MrPPCard from '@/components/MrPP/MrPPCard/index.vue';
+import Id2Image from '@/components/Id2Image.vue';
 import UserSelector from '@/components/UserSelector/index.vue';
 import ImageSelector from '@/components/MrPP/ImageSelector.vue';
 import type { EduClass } from '@/api/v1/types/edu-class';
@@ -219,9 +220,7 @@ const refreshList = () => {
   emit('refresh');
 };
 
-const getDefaultImage = (id: number) => {
-  return `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`;
-};
+
 
 const generateDefaultName = (prefix: string) => {
   const now = new Date();

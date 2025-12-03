@@ -5,7 +5,7 @@
 
     <!-- 2. 图片展示区域 -->
     <div class="image-display" @click="showImageSelectDialog">
-      <el-image fit="contain" style="width:100%;height:300px" :src="internalUrl" />
+      <Id2Image :id="props.itemId" :image="displayImageUrl" :lazy="false" style="width:100%;height:300px" />
     </div>
 
     <!-- 3. 选择方式弹窗 -->
@@ -48,6 +48,7 @@ import { useI18n } from 'vue-i18n'
 import { FolderOpened, Upload } from '@element-plus/icons-vue'
 import ResourceDialog from './ResourceDialog.vue'
 import MrPPUploadDialog from './MrPPUploadDialog/index.vue'
+import Id2Image from '@/components/Id2Image.vue'
 import { postPicture, getPicture } from '@/api/v1/resources/index'
 import { ElMessage } from 'element-plus'
 import { CardInfo } from '@/utils/types'
@@ -70,25 +71,14 @@ const imageSelectDialogVisible = ref(false)
 const uploadDialogVisible = ref(false)
 const fileType = ref("image/jpeg,image/gif,image/png,image/bmp")
 
-// 内部 URL，避免直接改写 props 引发循环更新
-const internalUrl = ref('')
-const defaultUrl = () => {
-  return `https://api.dicebear.com/7.x/shapes/svg?seed=${props.itemId}`
-}
+// 显示的图片 URL，传递给 Id2Image 组件
+const displayImageUrl = ref<string | null>(null)
 
-// 同步 props.imageUrl 到 internalUrl，并添加缩略图参数
+// 同步 props.imageUrl 到 displayImageUrl
 watch(
   [() => props.imageUrl, () => props.itemId],
   ([newUrl]) => {
-    let url = newUrl || defaultUrl()
-
-    // 如果是有效的图片 URL 且不包含图片处理参数，添加 512px 缩略图参数
-    if (url && !url.includes('imageMogr2') && !url.includes('imageView2')) {
-      const separator = url.includes('?') ? '&' : '?'
-      url += `${separator}imageMogr2/thumbnail/512x/format/webp`
-    }
-
-    internalUrl.value = url
+    displayImageUrl.value = newUrl || null
   },
   { immediate: true }
 )
@@ -158,15 +148,9 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
     if (imageId) {
       console.log('ImageSelector: Emitting image-upload-success with imageId:', imageId)
 
-      // Update internal URL to show the newly uploaded image
+      // Update display URL to show the newly uploaded image
       if (imageUrl) {
-        let url = imageUrl
-        // Add thumbnail parameter if not already present
-        if (!url.includes('imageMogr2') && !url.includes('imageView2')) {
-          const separator = url.includes('?') ? '&' : '?'
-          url += `${separator}imageMogr2/thumbnail/512x/format/webp`
-        }
-        internalUrl.value = url
+        displayImageUrl.value = imageUrl
       }
 
       emit('image-upload-success', {
