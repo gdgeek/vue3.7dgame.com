@@ -73,8 +73,7 @@ const fileType = ref("image/jpeg,image/gif,image/png,image/bmp")
 // 内部 URL，避免直接改写 props 引发循环更新
 const internalUrl = ref('')
 const defaultUrl = () => {
-  const id = props.itemId % 100
-  return new URL(`../../assets/images/items/${id}.webp`, import.meta.url).href
+  return `https://api.dicebear.com/7.x/shapes/svg?seed=${props.itemId}`
 }
 
 // 同步 props.imageUrl 到 internalUrl，并添加缩略图参数

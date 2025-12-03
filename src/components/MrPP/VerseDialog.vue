@@ -24,10 +24,6 @@
                   </b>
                 </span>
                 <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
-                <!-- <img v-if="!item.image" src="@/assets/images/items/1.webp"
-                  style="width: 100%; height: auto; object-fit: contain" />
-                <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
-                </LazyImg>-->
                 <div style="width: 100%; text-align: center">
                   {{ convertToLocalTime(item.created_at) }}
                 </div>

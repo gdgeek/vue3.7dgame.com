@@ -27,10 +27,6 @@
                     <b class="card-title" nowrap>{{ title(item) }}</b>
                   </template>
                   <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
-                  <!-- <img v-if="!item.image" src="@/assets/images/items/1.webp"
-                    style="width: 100%; height: auto; object-fit: contain" />
-                  <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
-                  </LazyImg>-->
                   <div v-if="item.created_at" style="width: 100%; text-align: center">
                     {{ item.created_at }}
                   </div>
@@ -39,7 +35,7 @@
               <div class="clearfix">
                 <el-button type="primary" size="small" @click="setup({ data: item })">{{
                   $t("verse.view.prefabDialog.select")
-                  }}</el-button>
+                }}</el-button>
               </div>
               <div class="bottom clearfix"></div>
             </el-card>
@@ -62,7 +58,7 @@
             <el-button-group>
               <el-button size="small" @click="dialogVisible = false">{{
                 $t("verse.view.prefabDialog.cancel")
-                }}</el-button>
+              }}</el-button>
             </el-button-group>
           </el-col>
         </el-row>

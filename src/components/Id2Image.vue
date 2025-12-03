@@ -27,7 +27,7 @@ const url = computed(() => {
   // 使用 Vite 的 new URL 方式解析静态资源路径
   let imageUrl = props.image;
   if (!imageUrl) {
-    imageUrl = new URL(`../assets/images/items/${props.id % 100}.webp`, import.meta.url).href;
+    imageUrl = `https://api.dicebear.com/7.x/shapes/svg?seed=${props.id}`;
   }
 
   // Check if it's a Tencent Cloud COS URL

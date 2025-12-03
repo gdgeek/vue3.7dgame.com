@@ -25,17 +25,13 @@
                     </template>
                     <router-link :to="'/meta/meta-edit?id=' + item.id">
                       <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
-                      <!-- <img v-if="!item.image" src="@/assets/images/items/1.webp"
-                        style="width: 100%; height: auto; object-fit: contain" />
-                      <LazyImg v-if="item.image" style="width: 100%; height: auto" fit="contain" :url="item.image.url">
-                      </LazyImg>-->
                     </router-link>
                   </el-card>
                 </template>
                 <div class="clearfix">
                   <el-button type="primary" size="small" @click="selected({ data: item })">{{
                     $t("verse.view.metaDialog.select")
-                    }}</el-button>
+                  }}</el-button>
                 </div>
               </el-card>
             </div>
