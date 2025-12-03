@@ -168,7 +168,9 @@ const { t } = useI18n();
 const cardListPageRef = ref<InstanceType<typeof CardListPage> | null>(null);
 
 const dialogTitle = computed(() => {
-  return props.school ? `${props.school.name} - ${t('manager.class.title')}` : t('manager.class.title');
+  return props.school
+    ? t('manager.class.schoolTitle', { school: props.school.name })
+    : t('manager.class.title');
 });
 
 const editDialogVisible = ref(false);

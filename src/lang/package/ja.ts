@@ -105,6 +105,7 @@ export default {
       },
       class: {
         title: "クラス管理",
+        schoolTitle: "{school} - クラス管理",
         teacher: "教師",
         student: "生徒",
         teacherList: "教師リスト",

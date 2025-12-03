@@ -106,6 +106,7 @@ export default {
       },
       class: {
         title: "Class Management",
+        schoolTitle: "{school} - Class Management",
         teacher: "Teacher",
         student: "Student",
         teacherList: "Teacher List",

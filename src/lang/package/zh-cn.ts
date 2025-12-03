@@ -106,6 +106,7 @@ export default {
       },
       class: {
         title: "班级管理",
+        schoolTitle: "{school} - 班级管理",
         teacher: "教师",
         student: "学生",
         teacherList: "教师列表",
@@ -1395,6 +1396,8 @@ export default {
       classList: "班级列表",
     },
     class: {
+      title: "班级管理",
+      schoolTitle: "{school} - 班级管理",
       grade: "年级",
       teacher: "老师",
       student: "学生",

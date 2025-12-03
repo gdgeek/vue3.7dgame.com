@@ -6,7 +6,9 @@ export interface EduSchool {
   name: string;
   created_at: string;
   updated_at: string;
+  image_id?: number;
   image?: FileType;
+  principal_id?: number;
   principal?: number | UserType;
   info: {
     [key: string]: any;
