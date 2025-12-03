@@ -13,7 +13,7 @@
       <template #card="{ item }">
         <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
           <template #info>
-            <polygen-index :file="item.file" @progress="progress" />
+            <PolygenView :file="item.file" @progress="progress" />
             <el-progress v-if="percentage === 100" :percentage="100" status="success"></el-progress>
             <el-progress v-else :percentage="percentage"></el-progress>
           </template>
@@ -51,7 +51,7 @@ import CardListPage from '@/components/MrPP/CardListPage/index.vue';
 import MrPPCard from '@/components/MrPP/MrPPCard/index.vue';
 import MrPPUploadDialog from '@/components/MrPP/MrPPUploadDialog/index.vue';
 import PolygenDialog from '@/components/MrPP/PolygenDialog.vue';
-import PolygenIndex from '@/components/PolygenIndex.vue';
+import PolygenView from '@/components/PolygenView.vue';
 import TransitionWrapper from '@/components/TransitionWrapper.vue';
 import { getPolygens, putPolygen, deletePolygen, postPolygen } from '@/api/v1/resources/index';
 import type { FetchParams, FetchResponse } from '@/components/MrPP/CardListPage/types';
