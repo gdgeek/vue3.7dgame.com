@@ -22,6 +22,7 @@ export default {
       document: "正文",
       category: "分类",
       processOfCreation: "创作历程",
+      campus: "校园",
     },
     settings: {
       title: "设置",

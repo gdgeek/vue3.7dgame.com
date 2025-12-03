@@ -21,6 +21,7 @@ export default {
       document: "正文",
       category: "分類",
       processOfCreation: "創作歷程",
+      campus: "校園",
     },
     settings: {
       title: "設置",

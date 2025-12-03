@@ -119,7 +119,8 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: "personalCenter.title",
           icon: "homepage",
-          hidden: true,
+          hidden: false,
+          alwaysShow: true,
         },
         children: [
           {
@@ -163,6 +164,16 @@ const routes: RouteRecordRaw[] = [
             path: "/home/creator",
             name: "SettingsCreator",
             component: () => import("@/views/home/creator.vue"),
+          },
+          {
+            meta: {
+              title: "personalCenter.campus",
+              hidden: false,
+              icon: "el-icon-school",
+            },
+            path: "/home/campus",
+            name: "HomeCampus",
+            component: () => import("@/views/home/campus.vue"),
           },
         ],
       },

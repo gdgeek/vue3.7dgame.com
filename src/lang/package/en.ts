@@ -17,11 +17,12 @@ export default {
   route: {
     dashboard: "Dashboard",
     personalCenter: {
-      title: "Home",
-      myHomepage: "Home Page",
+      title: "Personal Center",
+      myHomepage: "My Homepage",
       document: "Document",
       category: "Category",
-      processOfCreation: "Process Of Creation",
+      processOfCreation: "Process of Creation",
+      campus: "Campus",
     },
     settings: {
       title: "Settings",

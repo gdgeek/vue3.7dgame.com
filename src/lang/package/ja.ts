@@ -21,6 +21,7 @@ export default {
       document: "本文",
       category: "カテゴリ",
       processOfCreation: "作成過程",
+      campus: "キャンパス",
     },
     settings: {
       title: "設定",

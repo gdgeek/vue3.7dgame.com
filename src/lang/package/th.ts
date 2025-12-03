@@ -21,6 +21,7 @@ export default {
       document: "เอกสาร",
       category: "หมวดหมู่",
       processOfCreation: "กระบวนการสร้างสรรค์",
+      campus: "วิทยาเขต",
     },
     settings: {
       title: "การตั้งค่า",
