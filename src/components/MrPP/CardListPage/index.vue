@@ -11,8 +11,16 @@
           <!-- Slot for content before cards (e.g., school info) -->
           <slot name="before-cards"></slot>
 
-          <Waterfall v-if="items && items.length > 0" :list="items" :width="cardWidth" :gutter="cardGutter"
-            :backgroundColor="'rgba(255, 255, 255, .05)'">
+          <!-- 自适应填充模式 - 使用 Waterfall 配合 breakpoints 实现响应式 -->
+          <Waterfall v-if="autoFill && items && items.length > 0" :list="items" :breakpoints="breakpoints"
+            :gutter="cardGutter" :backgroundColor="'rgba(255, 255, 255, .05)'">
+            <template #default="{ item }">
+              <slot name="card" :item="item"></slot>
+            </template>
+          </Waterfall>
+          <!-- 固定宽度模式 - 使用 Waterfall -->
+          <Waterfall v-else-if="!autoFill && items && items.length > 0" :list="items" :width="cardWidth"
+            :gutter="cardGutter" :align="align" :backgroundColor="'rgba(255, 255, 255, .05)'">
             <template #default="{ item }">
               <slot name="card" :item="item"></slot>
             </template>
@@ -36,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import MrPPHeader from '@/components/MrPP/MrPPHeader/index.vue';
 import { Waterfall } from 'vue-waterfall-plugin-next';
 import 'vue-waterfall-plugin-next/dist/style.css';
@@ -47,6 +55,9 @@ const props = withDefaults(defineProps<CardListPageProps>(), {
   pageSize: 20,
   cardWidth: 320,
   cardGutter: 20,
+  align: 'left',
+  autoFill: false,
+  minCardWidth: 280,
   showSkeleton: true,
   showEmpty: true,
   emptyText: '',
@@ -66,6 +77,15 @@ const pagination = reactive<Pagination>({
   size: props.pageSize,
   total: 0,
 });
+
+// 响应式断点配置 - 根据容器宽度自动调整列数
+// rowPerView 表示每行显示的卡片数量
+const breakpoints = computed(() => ({
+  1600: { rowPerView: 4 },  // >= 1600px: 4列
+  1200: { rowPerView: 3 },  // >= 1200px: 3列
+  800: { rowPerView: 2 },   // >= 800px: 2列
+  400: { rowPerView: 1 },   // >= 400px: 1列
+}));
 
 // Methods
 const handleSearch = (value: string) => {

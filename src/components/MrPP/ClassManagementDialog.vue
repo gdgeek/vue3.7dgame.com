@@ -2,7 +2,7 @@
   <el-dialog :model-value="modelValue" :title="dialogTitle" width="90%" append-to-body destroy-on-close
     @update:model-value="$emit('update:modelValue', $event)">
     <CardListPage ref="cardListPageRef" :fetch-data="fetchClasses" wrapper-class="class-management-dialog"
-      :show-empty="true" @refresh="handleRefresh">
+      :show-empty="true" :auto-fill="true" :min-card-width="280" @refresh="handleRefresh">
       <template #header-actions>
         <el-button-group :inline="true">
           <el-button size="small" type="primary" @click="handleCreate">
@@ -481,6 +481,26 @@ watch(() => props.modelValue, (newVal) => {
 .class-management-dialog {
   :deep(.el-card) {
     margin-bottom: 0;
+  }
+
+  :deep(.vue-waterfall) {
+    min-height: 300px;
+  }
+
+  /* 保持与外部卡片一致的hover效果 */
+  :deep(.vue-waterfall-item) {
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  /* 确保卡片样式与外部一致 */
+  :deep(.box-card) {
+    border-radius: 4px;
+    overflow: hidden;
   }
 }
 

@@ -1406,8 +1406,17 @@ export default {
       classList: "クラスリスト",
     },
     class: {
+      title: "クラス管理",
+      schoolTitle: "{school} - クラス管理",
       grade: "学年",
-      teacher: "担任",
+      teacher: "教師",
+      student: "生徒",
+      teacherList: "教師リスト",
+      studentList: "生徒リスト",
+      selectTeacher: "教師を選択",
+      selectStudent: "生徒を選択",
+      assignTeacher: "教師を割り当て",
+      assignStudent: "生徒を割り当て",
       dialog: {
         createTitle: "クラスを作成",
         editTitle: "クラスを編集",
@@ -1751,18 +1760,6 @@ export default {
     nameRequired: "名前を空にすることはできません",
     noText: "テキストを入力してください",
     noAudio: "まず音声を合成してください",
-  },
-  // イメージセレクターコンポーネント
-  imageSelector: {
-    selectImageMethod: "画像選択方法",
-    selectFromResource: "リソースから選択",
-    uploadLocal: "ローカルからアップロード",
-    uploadError: "ファイルアップロードエラー",
-    invalidImageType: "アップロード画像はJPG/PNG/BMP/GIF形式のみ可能です！",
-    imageTooLarge: "アップロード画像サイズは2MBを超えることはできません！",
-    handlerError: "ファイルハンドラーの取得に失敗しました",
-    uploadFailed: "アップロードに失敗しました",
-    saveFailed: "画像情報の保存に失敗しました",
   },
   errorPage: {
     back: "戻る",

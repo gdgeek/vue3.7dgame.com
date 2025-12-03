@@ -1408,8 +1408,17 @@ export default {
       classList: "รายชื่อชั้นเรียน",
     },
     class: {
+      title: "การจัดการชั้นเรียน",
+      schoolTitle: "{school} - การจัดการชั้นเรียน",
       grade: "ระดับชั้น",
-      teacher: "ครูประจำชั้น",
+      teacher: "ครู",
+      student: "นักเรียน",
+      teacherList: "รายชื่อครู",
+      studentList: "รายชื่อนักเรียน",
+      selectTeacher: "เลือกครู",
+      selectStudent: "เลือกนักเรียน",
+      assignTeacher: "มอบหมายครู",
+      assignStudent: "มอบหมายนักเรียน",
       dialog: {
         createTitle: "สร้างชั้นเรียน",
         editTitle: "แก้ไขชั้นเรียน",
@@ -1758,22 +1767,6 @@ export default {
     nameRequired: "ชื่อต้องไม่ว่างเปล่า",
     noText: "กรุณากรอกข้อความ",
     noAudio: "กรุณาสังเคราะห์เสียงก่อน",
-  },
-  // 图片选择器组件
-  imageSelector: {
-    selectImageMethod: "เลือกวิธีรูปภาพ",
-    selectFromResource: "เลือกจากคลังทรัพยากร",
-    selectFromResourceDesc: "เลือกจากรูปภาพที่อัปโหลดแล้ว",
-    uploadLocal: "อัปโหลดจากเครื่อง",
-    uploadLocalDesc: "อัปโหลดรูปภาพใหม่จากอุปกรณ์ของคุณ",
-    uploadFile: "เลือกและอัปโหลดรูปภาพ",
-    uploadError: "เกิดข้อผิดพลาดในการอัปโหลดไฟล์",
-    invalidImageType:
-      "รูปภาพที่อัปโหลดต้องเป็นรูปแบบ JPG/PNG/BMP/GIF เท่านั้น!",
-    imageTooLarge: "ขนาดรูปภาพที่อัปโหลดต้องไม่เกิน 2MB!",
-    handlerError: "รับตัวจัดการไฟล์ล้มเหลว",
-    uploadFailed: "อัปโหลดล้มเหลว",
-    saveFailed: "บันทึกข้อมูลรูปภาพล้มเหลว",
   },
   errorPage: {
     back: "กลับ",

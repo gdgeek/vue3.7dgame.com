@@ -1757,21 +1757,6 @@ export default {
     noText: "请输入文本",
     noAudio: "请先合成语音",
   },
-  // 图片选择器组件
-  imageSelector: {
-    selectImageMethod: "选择图片方式",
-    selectFromResource: "从资源库选择",
-    selectFromResourceDesc: "从已上传的图片资源中选择",
-    uploadLocal: "本地上传",
-    uploadLocalDesc: "从本地设备上传新图片",
-    uploadFile: "选择图片并上传",
-    uploadError: "上传文件出错",
-    invalidImageType: "上传图片只能是 JPG/PNG/BMP/GIF 格式!",
-    imageTooLarge: "上传图片大小不能超过 2MB!",
-    handlerError: "获取文件处理器失败",
-    uploadFailed: "上传失败",
-    saveFailed: "保存图片信息失败",
-  },
   phototype: {
     title: "原型",
     list: "列表",

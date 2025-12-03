@@ -1,6 +1,8 @@
 <template>
   <div v-loading="loading" class="image-wrapper">
-    <LazyImg :url="url" style="width: 100%; height: auto" fit="contain" @success="loading = false"
+    <LazyImg v-if="lazy" :url="url" style="width: 100%; height: auto" fit="contain" @success="loading = false"
+      @error="loading = false" />
+    <img v-else :src="url" style="width: 100%; height: auto; object-fit: contain;" @load="loading = false"
       @error="loading = false" />
   </div>
 </template>
@@ -13,11 +15,13 @@ const props = withDefaults(
   defineProps<{
     id: number;
     image: string | null;
+    lazy?: boolean; // 是否启用懒加载
 
   }>(),
   {
     id: 0,
     image: null,
+    lazy: true, // 默认启用懒加载
   }
 );
 

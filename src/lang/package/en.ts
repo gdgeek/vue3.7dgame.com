@@ -1459,11 +1459,14 @@ export default {
     },
     class: {
       title: "Class Management",
+      schoolTitle: "{school} - Class Management",
       grade: "Grade",
       teacher: "Teacher",
       student: "Student",
       teacherList: "Teacher List",
       studentList: "Student List",
+      selectTeacher: "Select Teacher",
+      selectStudent: "Select Student",
       assignTeacher: "Assign Teacher",
       assignStudent: "Assign Student",
       dialog: {
@@ -1827,21 +1830,6 @@ export default {
     nameRequired: "Name cannot be empty",
     noText: "Please enter text",
     noAudio: "Please synthesize speech first",
-  },
-  // Image Selector Component
-  imageSelector: {
-    selectImageMethod: "Select Image Method",
-    selectFromResource: "Select from Resource",
-    selectFromResourceDesc: "Choose from uploaded images",
-    uploadLocal: "Upload Local",
-    uploadLocalDesc: "Upload a new image from your device",
-    uploadFile: "Select and upload image",
-    uploadError: "Upload file error",
-    invalidImageType: "Upload image can only be JPG/PNG/BMP/GIF format!",
-    imageTooLarge: "Upload image size cannot exceed 2MB!",
-    handlerError: "Failed to get file handler",
-    uploadFailed: "Upload failed",
-    saveFailed: "Failed to save image information",
   },
   phototype: {
     title: "Phototype",

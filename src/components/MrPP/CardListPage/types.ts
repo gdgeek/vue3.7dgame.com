@@ -26,6 +26,9 @@ export interface CardListPageProps {
   pageSize?: number;
   cardWidth?: number;
   cardGutter?: number;
+  align?: "left" | "center" | "right";
+  autoFill?: boolean; // 卡片自适应填充模式
+  minCardWidth?: number; // 自适应模式下的最小卡片宽度
 
   // Feature flags
   showSkeleton?: boolean;
