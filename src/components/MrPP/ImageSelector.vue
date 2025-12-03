@@ -5,7 +5,8 @@
 
     <!-- 2. 图片展示区域 -->
     <div class="image-display" @click="showImageSelectDialog">
-      <Id2Image :id="props.itemId" :image="displayImageUrl" :lazy="false" style="width:100%;height:300px" />
+      <Id2Image :id="props.itemId" :image="displayImageUrl" :lazy="false" style="width:100%;height:250px"
+        thumbnailSize="512x" fit="cover" />
     </div>
 
     <!-- 3. 选择方式弹窗 -->
