@@ -23,7 +23,7 @@
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">{{
           $t("verse.page.form.cancel")
-        }}</el-button>
+          }}</el-button>
         <el-button type="primary" @click="submitForm">
           {{ dialogSubmit }}
         </el-button>
@@ -83,6 +83,13 @@ const rules = {
 
 const formRef = ref<FormInstance>();
 
+const generateDefaultName = () => {
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10);
+  const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '-');
+  return `${t('verse.create.defaultName')}_${dateStr}_${timeStr}`;
+};
+
 const submitForm = async () => {
   formRef.value?.validate((valid: boolean) => {
     if (valid) {
@@ -97,6 +104,13 @@ const show = (selected: VerseData | null = null) => {
   if (selected) {
     item.value = selected;
     // Reset imageId when opening dialog
+    imageId.value = null;
+  } else {
+    // Creating new verse, set default name
+    item.value = {
+      name: generateDefaultName(),
+      description: '',
+    } as VerseData;
     imageId.value = null;
   }
   dialogVisible.value = true;

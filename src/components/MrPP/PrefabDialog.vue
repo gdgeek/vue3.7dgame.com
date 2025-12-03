@@ -35,7 +35,7 @@
               <div class="clearfix">
                 <el-button type="primary" size="small" @click="setup({ data: item })">{{
                   $t("verse.view.prefabDialog.select")
-                }}</el-button>
+                  }}</el-button>
               </div>
               <div class="bottom clearfix"></div>
             </el-card>
@@ -58,7 +58,7 @@
             <el-button-group>
               <el-button size="small" @click="dialogVisible = false">{{
                 $t("verse.view.prefabDialog.cancel")
-              }}</el-button>
+                }}</el-button>
             </el-button-group>
           </el-col>
         </el-row>

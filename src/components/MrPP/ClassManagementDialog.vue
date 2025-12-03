@@ -221,10 +221,17 @@ const getDefaultImage = (id: number) => {
   return `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`;
 };
 
+const generateDefaultName = (prefix: string) => {
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10); // 2025-12-03
+  const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '-'); // 10-39-05
+  return `${prefix}_${dateStr}_${timeStr}`;
+};
+
 const handleCreate = () => {
   editForm.value = {
     id: null,
-    name: '',
+    name: generateDefaultName(t('manager.defaultClassName')),
     imageUrl: '',
     image_id: null,
   };
@@ -242,9 +249,14 @@ const handleEdit = async (item: EduClass) => {
 };
 
 const handleSaveEdit = async () => {
+  if (!editForm.value.name.trim()) {
+    ElMessage.warning(t('manager.class.validation.nameRequired'));
+    return;
+  }
+
   try {
     const data: any = {
-      name: editForm.value.name,
+      name: editForm.value.name.trim(),
       image_id: editForm.value.image_id,
     };
 

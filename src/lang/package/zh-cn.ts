@@ -10,6 +10,7 @@ export default {
     noUsers: "未找到用户",
     enter: "进入",
     open: "打开",
+    add: "添加",
   },
 
   // 路由国际化
@@ -97,6 +98,72 @@ export default {
       classManagement: "班级管理",
       teacherManagement: "教师管理",
       studentManagement: "学生管理",
+      createSchool: "创建学校",
+      createClass: "创建班级",
+      school: {
+        principal: "校长",
+        address: "地址",
+      },
+      class: {
+        title: "班级管理",
+        teacher: "教师",
+        student: "学生",
+        teacherList: "教师列表",
+        studentList: "学生列表",
+        selectTeacher: "选择教师",
+        selectStudent: "选择学生",
+        filteringBySchool: "正在筛选学校",
+        dialog: {
+          editTitle: "编辑班级",
+        },
+        form: {
+          name: "班级名称",
+          namePlaceholder: "请输入班级名称",
+          image: "班级封面",
+        },
+        errors: {
+          selectSchoolFirst: "请先选择学校",
+          schoolIdRequired: "学校ID不能为空",
+        },
+      },
+      dialog: {
+        editTitle: "编辑学校",
+      },
+      form: {
+        name: "学校名称",
+        namePlaceholder: "请输入学校名称",
+        image: "学校封面",
+        principal: "校长",
+        principalPlaceholder: "选择校长",
+        cancel: "取消",
+        submit: "提交",
+      },
+      list: {
+        remove: "移除",
+      },
+      messages: {
+        updateSuccess: "更新成功",
+        createSuccess: "创建成功",
+        deleteSuccess: "删除成功",
+        addSuccess: "添加成功",
+        removeSuccess: "移除成功",
+      },
+      errors: {
+        validationFailed: "验证失败",
+        saveFailed: "保存失败",
+        deleteFailed: "删除失败",
+        addFailed: "添加失败",
+        removeFailed: "移除失败",
+        alreadyInClass: "该用户已在班级中",
+      },
+      confirm: {
+        deleteTitle: "确认删除",
+        deleteMessage: "确定要删除吗？此操作不可恢复。",
+        removeMemberTitle: "确认移除",
+        removeMemberMessage: "确定要移除该成员吗？",
+        confirm: "确认",
+        cancel: "取消",
+      },
     },
     game: {
       title: "游戏",
@@ -110,6 +177,14 @@ export default {
       title: "原型",
       list: "列表",
     },
+  },
+  imageSelector: {
+    selectImageMethod: "选择图片方式",
+    selectFromResource: "从资源库选择",
+    selectFromResourceDesc: "从已上传的图片资源中选择",
+    uploadLocal: "上传本地图片",
+    uploadLocalDesc: "上传新的图片文件",
+    uploadFile: "上传文件",
   },
   // 登录页面国际化
   login: {
@@ -806,6 +881,13 @@ export default {
     enter: "进入",
     delete: "删除",
     copy: "副本",
+    create: {
+      title: "创建实体",
+      defaultName: "新实体",
+      namePlaceholder: "请输入实体名称",
+      nameRequired: "实体名称不能为空",
+      success: "实体创建成功",
+    },
     confirm: {
       message1: "此操作将永久删除该【实体】, 是否继续?",
       message2: "提示",
@@ -1025,6 +1107,9 @@ export default {
   },
   // 场景部分国际化
   verse: {
+    create: {
+      defaultName: "新场景",
+    },
     page: {
       dialogTitle: "创建！【场景】",
       dialogSubmit: "创 建",
@@ -1299,6 +1384,8 @@ export default {
     createClass: "创建班级",
     createTeacher: "创建教师",
     createStudent: "创建学生",
+    defaultSchoolName: "新学校",
+    defaultClassName: "新班级",
     filteringBySchool: "当前筛选学校ID",
     backToAll: "返回所有班级",
     school: {
@@ -1340,6 +1427,9 @@ export default {
         selectSchoolFirst: "请先选择学校，再创建班级",
         assignTeacherSuccess: "分配教师成功",
         assignStudentSuccess: "分配学生成功",
+      },
+      validation: {
+        nameRequired: "请输入班级名称",
       },
     },
     teacher: {
@@ -1436,6 +1526,14 @@ export default {
       },
       success: "权限更新成功！",
       error: "权限更新失败！",
+    },
+    confirm: {
+      deleteTitle: "确认删除",
+      deleteMessage: "确定要删除吗？此操作不可恢复。",
+      removeMemberTitle: "确认移除",
+      removeMemberMessage: "确定要移除该成员吗？",
+      confirm: "确认",
+      cancel: "取消",
     },
   },
   // 游戏部分国际化

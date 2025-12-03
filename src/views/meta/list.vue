@@ -86,8 +86,43 @@ const openDetail = (id: number) => {
   detailVisible.value = true;
 };
 
-const addMeta = () => {
-  router.push('/meta/edit');
+const generateDefaultName = (prefix: string) => {
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10);
+  const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '-');
+  return `${prefix}_${dateStr}_${timeStr}`;
+};
+
+const addMeta = async () => {
+  try {
+    const { value } = await ElMessageBox.prompt(
+      t('meta.create.namePlaceholder'),
+      t('meta.create.title'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        closeOnClickModal: false,
+        inputValue: generateDefaultName(t('meta.create.defaultName')),
+        inputValidator: (val) => {
+          if (!val || !val.trim()) {
+            return t('meta.create.nameRequired');
+          }
+          return true;
+        },
+      }
+    );
+
+    const newMeta = {
+      title: value.trim(),
+      uuid: uuidv4(),
+    };
+
+    await postMeta(newMeta);
+    refreshList();
+    ElMessage.success(t('meta.create.success'));
+  } catch {
+    // User cancelled
+  }
 };
 
 const copyWindow = async (item: metaInfo) => {

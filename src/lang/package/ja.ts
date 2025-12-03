@@ -8,6 +8,9 @@ export default {
     nickname: "ニックネーム",
     select: "選択",
     noUsers: "ユーザーが見つかりません",
+    enter: "入る",
+    open: "開く",
+    add: "追加",
   },
   // 路由国际化
   route: {
@@ -91,6 +94,75 @@ export default {
       title: "管理",
       userManagement: "ユーザー管理",
       schoolManagement: "学校管理",
+      classManagement: "クラス管理",
+      teacherManagement: "教師管理",
+      studentManagement: "生徒管理",
+      createSchool: "学校を作成",
+      createClass: "クラスを作成",
+      school: {
+        principal: "校長",
+        address: "住所",
+      },
+      class: {
+        title: "クラス管理",
+        teacher: "教師",
+        student: "生徒",
+        teacherList: "教師リスト",
+        studentList: "生徒リスト",
+        selectTeacher: "教師を選択",
+        selectStudent: "生徒を選択",
+        filteringBySchool: "学校でフィルタリング中",
+        dialog: {
+          editTitle: "クラスを編集",
+        },
+        form: {
+          name: "クラス名",
+          namePlaceholder: "クラス名を入力してください",
+          image: "クラスカバー",
+        },
+        errors: {
+          selectSchoolFirst: "まず学校を選択してください",
+          schoolIdRequired: "学校IDは必須です",
+        },
+      },
+      dialog: {
+        editTitle: "学校を編集",
+      },
+      form: {
+        name: "学校名",
+        namePlaceholder: "学校名を入力してください",
+        image: "学校カバー",
+        principal: "校長",
+        principalPlaceholder: "校長を選択",
+        cancel: "キャンセル",
+        submit: "送信",
+      },
+      list: {
+        remove: "削除",
+      },
+      messages: {
+        updateSuccess: "更新成功",
+        createSuccess: "作成成功",
+        deleteSuccess: "削除成功",
+        addSuccess: "追加成功",
+        removeSuccess: "削除成功",
+      },
+      errors: {
+        validationFailed: "検証に失敗しました",
+        saveFailed: "保存に失敗しました",
+        deleteFailed: "削除に失敗しました",
+        addFailed: "追加に失敗しました",
+        removeFailed: "削除に失敗しました",
+        alreadyInClass: "このユーザーは既にクラスにいます",
+      },
+      confirm: {
+        deleteTitle: "削除の確認",
+        deleteMessage: "削除してもよろしいですか？この操作は元に戻せません。",
+        removeMemberTitle: "メンバー削除の確認",
+        removeMemberMessage: "このメンバーを削除してもよろしいですか？",
+        confirm: "確認",
+        cancel: "キャンセル",
+      },
     },
     game: {
       title: "ゲーム",
@@ -104,6 +176,14 @@ export default {
       title: "プロトタイプ",
       list: "リスト",
     },
+  },
+  imageSelector: {
+    selectImageMethod: "画像選択方法",
+    selectFromResource: "リソースから選択",
+    selectFromResourceDesc: "アップロード済みの画像リソースから選択",
+    uploadLocal: "ローカル画像をアップロード",
+    uploadLocalDesc: "新しい画像ファイルをアップロード",
+    uploadFile: "ファイルをアップロード",
   },
   // 登录页面国际化
   login: {
@@ -802,6 +882,13 @@ export default {
     enter: "入る",
     delete: "削除",
     copy: "コピー",
+    create: {
+      title: "エンティティを作成",
+      defaultName: "新しいエンティティ",
+      namePlaceholder: "エンティティ名を入力してください",
+      nameRequired: "エンティティ名は空にできません",
+      success: "エンティティの作成に成功しました",
+    },
     confirm: {
       message1:
         "このオペレーションは【エンティティ】を永久に削除します。続行しますか？",
@@ -1029,6 +1116,9 @@ export default {
   },
   // 场景部分国际化
   verse: {
+    create: {
+      defaultName: "新しいシーン",
+    },
     page: {
       dialogTitle: "作成！【场景】",
       dialogSubmit: "作成",
@@ -1304,6 +1394,8 @@ export default {
     createClass: "クラスを作成",
     createTeacher: "教師を作成",
     createStudent: "学生を作成",
+    defaultSchoolName: "新しい学校",
+    defaultClassName: "新しいクラス",
     filteringBySchool: "現在の学校IDでフィルタリング",
     backToAll: "すべてのクラスに戻る",
     school: {
@@ -1331,6 +1423,9 @@ export default {
         updateSuccess: "クラスの更新に成功しました",
         updateFailed: "クラスの更新に失敗しました",
         selectSchoolFirst: "クラスを作成する前に学校を選択してください",
+      },
+      validation: {
+        nameRequired: "クラス名を入力してください",
       },
     },
     teacher: {
@@ -1425,6 +1520,14 @@ export default {
       },
       success: "権限の更新に成功しました！",
       error: "権限の更新に失敗しました！",
+    },
+    confirm: {
+      deleteTitle: "削除の確認",
+      deleteMessage: "削除してもよろしいですか？この操作は元に戻せません。",
+      removeMemberTitle: "メンバー削除の確認",
+      removeMemberMessage: "このメンバーを削除してもよろしいですか？",
+      confirm: "確認",
+      cancel: "キャンセル",
     },
   },
   // 游戏部分国际化

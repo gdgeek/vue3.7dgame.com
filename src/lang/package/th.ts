@@ -8,6 +8,9 @@ export default {
     nickname: "ชื่อเล่น",
     select: "เลือก",
     noUsers: "ไม่พบผู้ใช้",
+    enter: "เข้าสู่",
+    open: "เปิด",
+    add: "เพิ่ม",
   },
   // 路由国际化
   route: {
@@ -91,6 +94,76 @@ export default {
       title: "การจัดการ",
       userManagement: "การจัดการผู้ใช้",
       schoolManagement: "การจัดการโรงเรียน",
+      classManagement: "การจัดการชั้นเรียน",
+      teacherManagement: "การจัดการครู",
+      studentManagement: "การจัดการนักเรียน",
+      createSchool: "สร้างโรงเรียน",
+      createClass: "สร้างชั้นเรียน",
+      school: {
+        principal: "ผู้อำนวยการ",
+        address: "ที่อยู่",
+      },
+      class: {
+        title: "การจัดการชั้นเรียน",
+        teacher: "ครู",
+        student: "นักเรียน",
+        teacherList: "รายชื่อครู",
+        studentList: "รายชื่อนักเรียน",
+        selectTeacher: "เลือกครู",
+        selectStudent: "เลือกนักเรียน",
+        filteringBySchool: "กำลังกรองโรงเรียน",
+        dialog: {
+          editTitle: "แก้ไขชั้นเรียน",
+        },
+        form: {
+          name: "ชื่อชั้นเรียน",
+          namePlaceholder: "กรุณากรอกชื่อชั้นเรียน",
+          image: "รูปปกชั้นเรียน",
+        },
+        errors: {
+          selectSchoolFirst: "กรุณาเลือกโรงเรียนก่อน",
+          schoolIdRequired: "ต้องระบุ ID โรงเรียน",
+        },
+      },
+      dialog: {
+        editTitle: "แก้ไขโรงเรียน",
+      },
+      form: {
+        name: "ชื่อโรงเรียน",
+        namePlaceholder: "กรุณากรอกชื่อโรงเรียน",
+        image: "รูปปกโรงเรียน",
+        principal: "ผู้อำนวยการ",
+        principalPlaceholder: "เลือกผู้อำนวยการ",
+        cancel: "ยกเลิก",
+        submit: "ส่ง",
+      },
+      list: {
+        remove: "ลบออก",
+      },
+      messages: {
+        updateSuccess: "อัปเดตสำเร็จ",
+        createSuccess: "สร้างสำเร็จ",
+        deleteSuccess: "ลบสำเร็จ",
+        addSuccess: "เพิ่มสำเร็จ",
+        removeSuccess: "ลบออกสำเร็จ",
+      },
+      errors: {
+        validationFailed: "การตรวจสอบล้มเหลว",
+        saveFailed: "บันทึกล้มเหลว",
+        deleteFailed: "ลบล้มเหลว",
+        addFailed: "เพิ่มล้มเหลว",
+        removeFailed: "ลบออกล้มเหลว",
+        alreadyInClass: "ผู้ใช้นี้อยู่ในชั้นเรียนแล้ว",
+      },
+      confirm: {
+        deleteTitle: "ยืนยันการลบ",
+        deleteMessage:
+          "คุณแน่ใจหรือไม่ว่าต้องการลบ? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
+        removeMemberTitle: "ยืนยันการลบออก",
+        removeMemberMessage: "คุณแน่ใจหรือไม่ว่าต้องการลบสมาชิกนี้ออก?",
+        confirm: "ยืนยัน",
+        cancel: "ยกเลิก",
+      },
     },
     game: {
       title: "เกม",
@@ -104,6 +177,14 @@ export default {
       title: "ต้นแบบ",
       list: "รายการ",
     },
+  },
+  imageSelector: {
+    selectImageMethod: "เลือกวิธีการเลือกรูปภาพ",
+    selectFromResource: "เลือกจากคลังทรัพยากร",
+    selectFromResourceDesc: "เลือกจากทรัพยากรรูปภาพที่อัปโหลดแล้ว",
+    uploadLocal: "อัปโหลดรูปภาพจากเครื่อง",
+    uploadLocalDesc: "อัปโหลดไฟล์รูปภาพใหม่",
+    uploadFile: "อัปโหลดไฟล์",
   },
   // 登录页面国际化
   login: {
@@ -807,6 +888,13 @@ export default {
     enter: "เข้าสู่",
     delete: "ลบ",
     copy: "สำเนา",
+    create: {
+      title: "สร้างเอนทิตี",
+      defaultName: "เอนทิตีใหม่",
+      namePlaceholder: "กรุณากรอกชื่อเอนทิตี",
+      nameRequired: "ชื่อเอนทิตีต้องไม่ว่างเปล่า",
+      success: "สร้างเอนทิตีสำเร็จ",
+    },
     confirm: {
       message1:
         "การดำเนินการนี้จะลบ【เอนทิตี】อย่างถาวร ต้องการดำเนินการต่อหรือไม่?",
@@ -1030,6 +1118,9 @@ export default {
   },
   // 场景部分国际化
   verse: {
+    create: {
+      defaultName: "ฉากใหม่",
+    },
     page: {
       dialogTitle: "สร้าง!【ฉาก】",
       dialogSubmit: "สร้าง",
@@ -1305,6 +1396,8 @@ export default {
     createClass: "สร้างชั้นเรียน",
     createTeacher: "สร้างครู",
     createStudent: "สร้างนักเรียน",
+    defaultSchoolName: "โรงเรียนใหม่",
+    defaultClassName: "ชั้นเรียนใหม่",
     filteringBySchool: "กรองตามรหัสโรงเรียนปัจจุบัน",
     backToAll: "กลับไปที่ชั้นเรียนทั้งหมด",
     school: {
@@ -1332,6 +1425,9 @@ export default {
         updateSuccess: "อัปเดตชั้นเรียนสำเร็จ",
         updateFailed: "การอัปเดตชั้นเรียนล้มเหลว",
         selectSchoolFirst: "กรุณาเลือกโรงเรียนก่อนสร้างชั้นเรียน",
+      },
+      validation: {
+        nameRequired: "กรุณากรอกชื่อชั้นเรียน",
       },
     },
     teacher: {
@@ -1427,6 +1523,15 @@ export default {
       },
       success: "อัปเดตสิทธิ์สำเร็จ!",
       error: "อัปเดตสิทธิ์ล้มเหลว!",
+    },
+    confirm: {
+      deleteTitle: "ยืนยันการลบ",
+      deleteMessage:
+        "คุณแน่ใจหรือไม่ว่าต้องการลบ? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
+      removeMemberTitle: "ยืนยันการลบออก",
+      removeMemberMessage: "คุณแน่ใจหรือไม่ว่าต้องการลบสมาชิกนี้ออก?",
+      confirm: "ยืนยัน",
+      cancel: "ยกเลิก",
     },
   },
   // 游戏部分国际化

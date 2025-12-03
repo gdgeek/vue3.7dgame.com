@@ -116,10 +116,17 @@ const refreshList = () => {
   cardListPageRef.value?.refresh();
 };
 
+const generateDefaultName = (prefix: string) => {
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10); // 2025-12-03
+  const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '-'); // 10-39-05
+  return `${prefix}_${dateStr}_${timeStr}`;
+};
+
 const handleCreate = () => {
   editForm.value = {
     id: null,
-    name: '',
+    name: generateDefaultName(t('manager.defaultSchoolName')),
     imageUrl: '',
     image_id: null,
     principal_id: null,
@@ -141,9 +148,14 @@ const handleEdit = async (item: EduSchool) => {
 };
 
 const handleSaveEdit = async () => {
+  if (!editForm.value.name.trim()) {
+    ElMessage.warning(t('manager.validation.nameRequired'));
+    return;
+  }
+
   try {
     const data: any = {
-      name: editForm.value.name,
+      name: editForm.value.name.trim(),
       image_id: editForm.value.image_id,
       principal_id: editForm.value.principal_id,
     };

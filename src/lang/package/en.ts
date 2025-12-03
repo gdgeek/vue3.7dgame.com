@@ -8,8 +8,10 @@ export default {
     nickname: "Nickname",
     select: "Select",
     noUsers: "No users found",
+    enter: "Enter",
     open: "Open",
     classList: "Class List",
+    add: "Add",
   },
   // 路由国际化
   route: {
@@ -93,6 +95,76 @@ export default {
       title: "Management",
       userManagement: "User Management",
       schoolManagement: "School Management",
+      classManagement: "Class Management",
+      teacherManagement: "Teacher Management",
+      studentManagement: "Student Management",
+      createSchool: "Create School",
+      createClass: "Create Class",
+      school: {
+        principal: "Principal",
+        address: "Address",
+      },
+      class: {
+        title: "Class Management",
+        teacher: "Teacher",
+        student: "Student",
+        teacherList: "Teacher List",
+        studentList: "Student List",
+        selectTeacher: "Select Teacher",
+        selectStudent: "Select Student",
+        filteringBySchool: "Filtering by school",
+        dialog: {
+          editTitle: "Edit Class",
+        },
+        form: {
+          name: "Class Name",
+          namePlaceholder: "Please enter class name",
+          image: "Class Cover",
+        },
+        errors: {
+          selectSchoolFirst: "Please select a school first",
+          schoolIdRequired: "School ID is required",
+        },
+      },
+      dialog: {
+        editTitle: "Edit School",
+      },
+      form: {
+        name: "School Name",
+        namePlaceholder: "Please enter school name",
+        image: "School Cover",
+        principal: "Principal",
+        principalPlaceholder: "Select Principal",
+        cancel: "Cancel",
+        submit: "Submit",
+      },
+      list: {
+        remove: "Remove",
+      },
+      messages: {
+        updateSuccess: "Updated successfully",
+        createSuccess: "Created successfully",
+        deleteSuccess: "Deleted successfully",
+        addSuccess: "Added successfully",
+        removeSuccess: "Removed successfully",
+      },
+      errors: {
+        validationFailed: "Validation failed",
+        saveFailed: "Save failed",
+        deleteFailed: "Delete failed",
+        addFailed: "Add failed",
+        removeFailed: "Remove failed",
+        alreadyInClass: "This user is already in the class",
+      },
+      confirm: {
+        deleteTitle: "Confirm Delete",
+        deleteMessage:
+          "Are you sure you want to delete? This action cannot be undone.",
+        removeMemberTitle: "Confirm Remove",
+        removeMemberMessage: "Are you sure you want to remove this member?",
+        confirm: "Confirm",
+        cancel: "Cancel",
+      },
     },
     game: {
       title: "Game",
@@ -106,6 +178,14 @@ export default {
       title: "Phototype",
       list: "List",
     },
+  },
+  imageSelector: {
+    selectImageMethod: "Select Image Method",
+    selectFromResource: "Select from Resources",
+    selectFromResourceDesc: "Select from uploaded image resources",
+    uploadLocal: "Upload Local Image",
+    uploadLocalDesc: "Upload a new image file",
+    uploadFile: "Upload File",
   },
   // 登录页面国际化
   login: {
@@ -820,6 +900,13 @@ export default {
     enter: "Enter",
     delete: "Delete",
     copy: "Copy",
+    create: {
+      title: "Create Entity",
+      defaultName: "New Entity",
+      namePlaceholder: "Please enter entity name",
+      nameRequired: "Entity name cannot be empty",
+      success: "Entity created successfully",
+    },
     confirm: {
       message1:
         "This action will permanently delete the 【Entity】. Do you want to continue?",
@@ -1072,6 +1159,9 @@ export default {
   },
   // 工程部分国际化
   verse: {
+    create: {
+      defaultName: "New Scene",
+    },
     page: {
       dialogTitle: "Create!【Project】",
       dialogSubmit: "Create",
@@ -1351,6 +1441,12 @@ export default {
     createClass: "Create Class",
     createTeacher: "Create Teacher",
     createStudent: "Create Student",
+    defaultSchoolName: "New School",
+    defaultClassName: "New Class",
+    schoolManagement: "School Management",
+    classManagement: "Class Management",
+    teacherManagement: "Teacher Management",
+    studentManagement: "Student Management",
     filteringBySchool: "Filtering by School ID",
     backToAll: "Back to All Classes",
 
@@ -1361,6 +1457,7 @@ export default {
       classList: "Class List",
     },
     class: {
+      title: "Class Management",
       grade: "Grade",
       teacher: "Teacher",
       student: "Student",
@@ -1394,6 +1491,9 @@ export default {
           "Please select a school first before creating a class",
         assignTeacherSuccess: "Teacher assigned successfully",
         assignStudentSuccess: "Student assigned successfully",
+      },
+      validation: {
+        nameRequired: "Please enter class name",
       },
     },
     teacher: {
@@ -1492,6 +1592,15 @@ export default {
       },
       success: "Permissions updated successfully!",
       error: "Permissions update failed!",
+    },
+    confirm: {
+      deleteTitle: "Confirm Delete",
+      deleteMessage:
+        "Are you sure you want to delete? This action cannot be undone.",
+      removeMemberTitle: "Confirm Remove",
+      removeMemberMessage: "Are you sure you want to remove this member?",
+      confirm: "Confirm",
+      cancel: "Cancel",
     },
   },
   // 游戏部分国际化

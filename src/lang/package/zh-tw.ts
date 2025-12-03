@@ -8,6 +8,9 @@ export default {
     nickname: "暱稱",
     select: "選擇",
     noUsers: "未找到用戶",
+    enter: "進入",
+    open: "打開",
+    add: "添加",
   },
   // 路由國際化
   route: {
@@ -91,6 +94,75 @@ export default {
       title: "管理",
       userManagement: "用戶管理",
       schoolManagement: "校園管理",
+      classManagement: "班級管理",
+      teacherManagement: "教師管理",
+      studentManagement: "學生管理",
+      createSchool: "建立學校",
+      createClass: "建立班級",
+      school: {
+        principal: "校長",
+        address: "地址",
+      },
+      class: {
+        title: "班級管理",
+        teacher: "教師",
+        student: "學生",
+        teacherList: "教師列表",
+        studentList: "學生列表",
+        selectTeacher: "選擇教師",
+        selectStudent: "選擇學生",
+        filteringBySchool: "正在篩選學校",
+        dialog: {
+          editTitle: "編輯班級",
+        },
+        form: {
+          name: "班級名稱",
+          namePlaceholder: "請輸入班級名稱",
+          image: "班級封面",
+        },
+        errors: {
+          selectSchoolFirst: "請先選擇學校",
+          schoolIdRequired: "學校ID不能為空",
+        },
+      },
+      dialog: {
+        editTitle: "編輯學校",
+      },
+      form: {
+        name: "學校名稱",
+        namePlaceholder: "請輸入學校名稱",
+        image: "學校封面",
+        principal: "校長",
+        principalPlaceholder: "選擇校長",
+        cancel: "取消",
+        submit: "提交",
+      },
+      list: {
+        remove: "移除",
+      },
+      messages: {
+        updateSuccess: "更新成功",
+        createSuccess: "建立成功",
+        deleteSuccess: "刪除成功",
+        addSuccess: "新增成功",
+        removeSuccess: "移除成功",
+      },
+      errors: {
+        validationFailed: "驗證失敗",
+        saveFailed: "儲存失敗",
+        deleteFailed: "刪除失敗",
+        addFailed: "新增失敗",
+        removeFailed: "移除失敗",
+        alreadyInClass: "該用戶已在班級中",
+      },
+      confirm: {
+        deleteTitle: "確認刪除",
+        deleteMessage: "確定要刪除嗎？此操作不可恢復。",
+        removeMemberTitle: "確認移除",
+        removeMemberMessage: "確定要移除該成員嗎？",
+        confirm: "確認",
+        cancel: "取消",
+      },
     },
     game: {
       title: "遊戲",
@@ -104,6 +176,14 @@ export default {
       title: "原型",
       list: "列表",
     },
+  },
+  imageSelector: {
+    selectImageMethod: "選擇圖片方式",
+    selectFromResource: "從資源庫選擇",
+    selectFromResourceDesc: "從已上傳的圖片資源中選擇",
+    uploadLocal: "上傳本地圖片",
+    uploadLocalDesc: "上傳新的圖片檔案",
+    uploadFile: "上傳檔案",
   },
   // 登錄頁面國際化
   login: {
@@ -795,6 +875,13 @@ export default {
     enter: "進入",
     delete: "刪除",
     copy: "副本",
+    create: {
+      title: "創建實體",
+      defaultName: "新實體",
+      namePlaceholder: "請輸入實體名稱",
+      nameRequired: "實體名稱不能為空",
+      success: "實體創建成功",
+    },
     confirm: {
       message1: "此操作將永久刪除該【實體】, 是否繼續?",
       message2: "提示",
@@ -1014,6 +1101,9 @@ export default {
   },
   // 場景部分國際化
   verse: {
+    create: {
+      defaultName: "新場景",
+    },
     page: {
       dialogTitle: "創建！【場景】",
       dialogSubmit: "創 建",
@@ -1288,6 +1378,8 @@ export default {
     createClass: "創建班級",
     createTeacher: "創建教師",
     createStudent: "創建學生",
+    defaultSchoolName: "新學校",
+    defaultClassName: "新班級",
     filteringBySchool: "當前篩選學校ID",
     backToAll: "返回所有班級",
     school: {
@@ -1315,6 +1407,9 @@ export default {
         updateSuccess: "班級更新成功",
         updateFailed: "班級更新失敗",
         selectSchoolFirst: "請先選擇學校，再創建班級",
+      },
+      validation: {
+        nameRequired: "請輸入班級名稱",
       },
     },
     teacher: {
@@ -1409,6 +1504,14 @@ export default {
       },
       success: "權限更新成功！",
       error: "權限更新失敗！",
+    },
+    confirm: {
+      deleteTitle: "確認刪除",
+      deleteMessage: "確定要刪除嗎？此操作不可恢復。",
+      removeMemberTitle: "確認移除",
+      removeMemberMessage: "確定要移除該成員嗎？",
+      confirm: "確認",
+      cancel: "取消",
     },
   },
   // 遊戲部分國際化
