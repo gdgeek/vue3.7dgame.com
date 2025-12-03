@@ -879,6 +879,7 @@ export default {
   // 实体国际化
   meta: {
     title: "创建【实体】",
+    edit: "修改实体信息",
     enter: "进入",
     delete: "删除",
     copy: "副本",

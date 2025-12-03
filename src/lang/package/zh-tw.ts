@@ -872,6 +872,7 @@ export default {
   // 實體國際化
   meta: {
     title: "創建【實體】",
+    edit: "修改實體信息",
     enter: "進入",
     delete: "刪除",
     copy: "副本",

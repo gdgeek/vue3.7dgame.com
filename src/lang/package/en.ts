@@ -898,6 +898,7 @@ export default {
   // 实体国际化
   meta: {
     title: "Create【Entity】",
+    edit: "Edit Entity Info",
     enter: "Enter",
     delete: "Delete",
     copy: "Copy",

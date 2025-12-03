@@ -880,6 +880,7 @@ export default {
   // 实体国际化
   meta: {
     title: "【エンティティ】を作成する",
+    edit: "エンティティ情報を編集",
     enter: "入る",
     delete: "削除",
     copy: "コピー",

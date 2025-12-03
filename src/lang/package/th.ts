@@ -886,6 +886,7 @@ export default {
   // 实体国际化
   meta: {
     title: "สร้าง【เอนทิตี】",
+    edit: "แก้ไขข้อมูลเอนทิตี",
     enter: "เข้าสู่",
     delete: "ลบ",
     copy: "สำเนา",
