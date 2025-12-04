@@ -23,7 +23,7 @@
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">{{
           $t("verse.page.form.cancel")
-          }}</el-button>
+        }}</el-button>
         <el-button type="primary" @click="submitForm">
           {{ dialogSubmit }}
         </el-button>
@@ -120,7 +120,7 @@ const hide = () => {
   dialogVisible.value = false;
 };
 
-const handleImageSelected = (data: { imageId: number; itemId: number; imageUrl?: string }) => {
+const handleImageSelected = (data: { imageId: number; itemId: number | null; imageUrl?: string }) => {
   imageId.value = data.imageId;
   // Optionally update item.image.url for immediate feedback if needed, 
   // but ImageSelector handles its own display.

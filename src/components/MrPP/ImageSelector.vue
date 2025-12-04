@@ -5,7 +5,7 @@
 
     <!-- 2. 图片展示区域 -->
     <div class="image-display" @click="showImageSelectDialog">
-      <Id2Image :id="props.itemId" :image="displayImageUrl" :lazy="false" style="width:100%;height:250px"
+      <Id2Image :id="props.itemId ?? undefined" :image="displayImageUrl" :lazy="false" style="width:100%;height:250px"
         thumbnailSize="512x" fit="cover" />
     </div>
 
@@ -56,14 +56,15 @@ import { CardInfo } from '@/utils/types'
 
 const props = withDefaults(defineProps<{
   imageUrl?: string
-  itemId: number
+  itemId?: number | null
 }>(), {
-  imageUrl: ''
+  imageUrl: '',
+  itemId: null
 })
 
 const emit = defineEmits<{
-  (e: 'image-selected', data: { imageId: number; itemId: number; imageUrl?: string }): void
-  (e: 'image-upload-success', data: { imageId: number; itemId: number; imageUrl?: string }): void
+  (e: 'image-selected', data: { imageId: number; itemId: number | null; imageUrl?: string }): void
+  (e: 'image-upload-success', data: { imageId: number; itemId: number | null; imageUrl?: string }): void
 }>()
 
 const { t } = useI18n()

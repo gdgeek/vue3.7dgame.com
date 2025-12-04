@@ -312,7 +312,7 @@ const handleDeleteWithCallback = async (item: EduClass, resetLoading: () => void
   }
 };
 
-const handleImageSelected = (data: { imageId: number; itemId: number; imageUrl?: string }) => {
+const handleImageSelected = (data: { imageId: number; itemId: number | null; imageUrl?: string }) => {
   editForm.value.image_id = data.imageId;
   editForm.value.imageUrl = data.imageUrl || '';
 };

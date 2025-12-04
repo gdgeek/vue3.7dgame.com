@@ -160,8 +160,8 @@ const copy = async (id: number, newTitle: string) => {
     const newMetaId = createResponse.data.id;
 
     await putMetaCode(newMetaId, {
-      lua: meta.lua,
-      blockly: meta.blockly,
+      lua: meta.metaCode?.lua,
+      blockly: meta.metaCode?.blockly || '',
     });
 
     refreshList();

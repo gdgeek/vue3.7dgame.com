@@ -53,7 +53,7 @@ import CardListPage from '@/components/MrPP/CardListPage/index.vue';
 import Id2Image from '@/components/Id2Image.vue';
 import TransitionWrapper from '@/components/TransitionWrapper.vue';
 import { getPrefabs, deletePrefab } from '@/api/v1/prefab';
-import { useUserStore } from '@/store/user';
+import { useUserStore } from '@/store/modules/user';
 import type { FetchParams, FetchResponse } from '@/components/MrPP/CardListPage/types';
 
 const { t } = useI18n();
@@ -61,7 +61,7 @@ const router = useRouter();
 const userStore = useUserStore();
 const cardListPageRef = ref<InstanceType<typeof CardListPage> | null>(null);
 
-const isRoot = computed(() => userStore.user?.role === 1);
+const isRoot = computed(() => userStore.getRole() === userStore.RoleEnum.Root);
 
 const fetchPrefabs = async (params: FetchParams): Promise<FetchResponse> => {
   return await getPrefabs(params.sort, params.search, params.page);

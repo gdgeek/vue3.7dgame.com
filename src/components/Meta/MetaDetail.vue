@@ -152,7 +152,7 @@ const editor = () => {
 // 处理从资源库选择的图片
 interface ImageUpdateEvent {
   imageId: number;
-  itemId: number;
+  itemId: number | null;
 }
 
 const handleImageSelected = async (event: ImageUpdateEvent) => {
