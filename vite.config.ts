@@ -60,16 +60,18 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       port: Number(env.VITE_APP_PORT),
       // 运行是否自动打开浏览器
       open: true,
-      proxy: {
-        /** 代理前缀为 /dev-api 的请求  */
-        [env.VITE_APP_BASE_API]: {
-          changeOrigin: true,
-          // 接口地址
-          target: env.VITE_APP_API_URL,
-          rewrite: (path) =>
-            path.replace(new RegExp("^" + env.VITE_APP_BASE_API), ""),
-        },
-      },
+      proxy: env.VITE_APP_BASE_API
+        ? {
+            /** 代理前缀为 /dev-api 的请求  */
+            [env.VITE_APP_BASE_API]: {
+              changeOrigin: true,
+              // 接口地址
+              target: env.VITE_APP_API_URL,
+              rewrite: (path) =>
+                path.replace(new RegExp("^" + env.VITE_APP_BASE_API), ""),
+            },
+          }
+        : undefined,
     },
     plugins: [
       vue(),

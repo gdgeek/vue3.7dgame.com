@@ -61,7 +61,9 @@ const environment = {
   editor: ReplaceURL(import.meta.env.VITE_APP_EDITOR_URL || ""),
   auth_api: ReplaceURL(import.meta.env.VITE_APP_AUTH_API || ""),
   ai: ReplaceURL(import.meta.env.VITE_APP_AI_API || ""),
-  base: ReplaceURL(import.meta.env.VITE_APP_BASE_URL || ""),
+  baseURL:
+    ReplaceURL(import.meta.env.VITE_APP_BASE_URL || "") +
+    ReplaceURL(import.meta.env.VITE_APP_BASE_API || ""),
   a1: ReplaceURL(import.meta.env.VITE_APP_A1_API || ""),
   version: 3,
   subtitle,

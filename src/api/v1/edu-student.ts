@@ -1,6 +1,5 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import path from "path-browserify";
 import { FileType } from "./types/file";
 
 export interface Student {
@@ -30,28 +29,28 @@ export const getStudents = (
     query["page"] = page;
   }
   return request<Student[]>({
-    url: path.join("v1", "edu-student" + qs.stringify(query, true)),
+    url: `/edu-student${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const getStudent = (id: number) => {
   return request<Student>({
-    url: `v1/edu-student/view?id=${id}`,
+    url: `/edu-student/view?id=${id}`,
     method: "get",
   });
 };
 
 export const createStudent = (data: { user_id: number; class_id: number }) => {
   return request({
-    url: "v1/edu-student",
+    url: `/edu-student`,
     method: "post",
     data,
   });
 };
 export const deleteStudent = (id: number) => {
   return request({
-    url: `v1/edu-student/${id}`,
+    url: `/edu-student/${id}`,
     method: "delete",
   });
 };

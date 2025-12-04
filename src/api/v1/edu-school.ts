@@ -1,6 +1,5 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import path from "path-browserify";
 import { EduSchool } from "./types/edu-school";
 export interface UserType {
   id: number;
@@ -26,7 +25,7 @@ export const getSchools = (
   }
 
   return request<EduSchool[]>({
-    url: path.join("v1", "edu-school" + qs.stringify(query, true)), //path.join("v1", "edu-school" + qs.stringify(query, true)),
+    url: `/edu-school${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -37,14 +36,14 @@ export const getSchool = (id: number, expand = "image,principal") => {
     query["expand"] = expand;
   }
   return request<EduSchool>({
-    url: `v1/edu-school/${id}${qs.stringify(query, true)}`,
+    url: `/edu-school/${id}${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const createSchool = (data: any) => {
   return request({
-    url: "v1/edu-school",
+    url: `/edu-school`,
     method: "post",
     data,
   });
@@ -52,7 +51,7 @@ export const createSchool = (data: any) => {
 
 export const updateSchool = (id: number, data: any) => {
   return request({
-    url: `v1/edu-school/${id}`,
+    url: `/edu-school/${id}`,
     method: "put",
     data,
   });
@@ -60,7 +59,7 @@ export const updateSchool = (id: number, data: any) => {
 
 export const deleteSchool = (id: number) => {
   return request({
-    url: `v1/edu-school/${id}`,
+    url: `/edu-school/${id}`,
     method: "delete",
   });
 };

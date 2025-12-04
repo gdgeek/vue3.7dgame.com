@@ -15,7 +15,7 @@ export type ReplyType = {
 
 export const postReply = (data: any) => {
   return request({
-    url: "v1/replies",
+    url: `/replies`,
     method: "post",
     data: data,
   });
@@ -23,18 +23,18 @@ export const postReply = (data: any) => {
 
 export const getReply = (id: number) => {
   return request<ReplyType>({
-    url: "v1/replies/" + id + "?expand=message",
+    url: `/replies/${id}?expand=message`,
     method: "get",
   });
 };
 
 export const getReplies = (message_id = -1, sort = "created_at", page = 0) => {
-  let url = "v1/replies?expand=author&sort=" + sort;
+  let url = `/replies?expand=author&sort=${sort}`;
   if (message_id !== -1) {
-    url += "&ReplySearch[message_id]=" + message_id;
+    url += `&ReplySearch[message_id]=${message_id}`;
   }
   if (page > 1) {
-    url += "&page=" + page;
+    url += `&page=${page}`;
   }
   return request<ReplyType[]>({
     url,
@@ -44,7 +44,7 @@ export const getReplies = (message_id = -1, sort = "created_at", page = 0) => {
 
 export const putReply = (id: number, data: any) => {
   return request({
-    url: "v1/replies/" + id,
+    url: `/replies/${id}`,
     method: "put",
     data: data,
   });
@@ -52,7 +52,7 @@ export const putReply = (id: number, data: any) => {
 
 export const deleteReply = (id: number) => {
   return request({
-    url: "v1/replies/" + id,
+    url: `/replies/${id}`,
     method: "delete",
   });
 };

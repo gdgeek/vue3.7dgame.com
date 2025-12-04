@@ -14,7 +14,7 @@ interface postData {
 
 export function postMultilanguageVerse(data: postData) {
   return request({
-    url: "v1/multilanguage-verses",
+    url: `/multilanguage-verses`,
     method: "post",
     data: data,
   });
@@ -22,21 +22,21 @@ export function postMultilanguageVerse(data: postData) {
 
 export function getMultilanguageVerse(id: number) {
   return request({
-    url: "v1/multilanguage-verses/" + id,
+    url: `/multilanguage-verses/${id}`,
     method: "get",
   });
 }
 
 export function putMultilanguageVerse(id: number, data: putData) {
   return request({
-    url: "v1/multilanguage-verses/" + id,
+    url: `/multilanguage-verses/${id}`,
     method: "put",
     data,
   });
 }
 export function deleteMultilanguageVerse(id: number) {
   return request({
-    url: "v1/multilanguage-verses/" + id,
+    url: `/multilanguage-verses/${id}`,
     method: "delete",
   });
 }

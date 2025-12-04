@@ -1,6 +1,5 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import path from "path-browserify";
 import { v4 as uuidv4 } from "uuid";
 import environment from "@/environment";
 import { MessageType } from "./message";
@@ -125,7 +124,7 @@ export const postVerse = (data: PostVerseData) => {
   data.version = environment.version;
   data.uuid = data.uuid || uuidv4();
   return request({
-    url: path.join("v1", "verses"),
+    url: `/verses`,
     method: "post",
     data,
   });
@@ -133,28 +132,14 @@ export const postVerse = (data: PostVerseData) => {
 
 export const putVerseCode = (id: number, data: VerseCode) => {
   return request<VerseCode>({
-    url: path.join(
-      "v1",
-      "system",
-      `verse-code${qs.stringify({ verse_id: id }, true)}`
-    ),
+    url: `/system/verse-code${qs.stringify({ verse_id: id }, true)}`,
     data,
     method: "put",
   });
-  /*
-  return request<VerseCode>({
-    url: path.join("v1", "verses", `code${qs.stringify({ id: id }, true)}`),
-    data,
-    method: "put",
-  });*/
 };
 export const getVerse = (id: number, expand = "metas,share") => {
   return request({
-    url: path.join(
-      "v1",
-      "verses",
-      `${id.toString()}${qs.stringify({ expand: expand }, true)}`
-    ),
+    url: `/verses/${id}${qs.stringify({ expand: expand }, true)}`,
     method: "get",
   });
 };
@@ -165,11 +150,10 @@ export const getVerseMetasWithJsCode = (
   cl = "js"
 ) => {
   return request({
-    url: path.join(
-      "v1",
-      "system",
-      `verse${qs.stringify({ verse_id: id, expand: expand, cl }, true)}`
-    ),
+    url: `/system/verse${qs.stringify(
+      { verse_id: id, expand: expand, cl },
+      true
+    )}`,
     method: "get",
   });
 };
@@ -203,48 +187,20 @@ const createQueryParams = ({
   }
   return query;
 };
-/*
-export const getVersesWithShare = (
-  sort = "-created_at",
-  search = "",
-  page = 0,
-  expand = "image,author"
-) => {
-  const query = createQueryParams({ sort, search, page, expand });
-  return request({
-    url: path.join("v1", "verses", "share" + qs.stringify(query, true)),
-    method: "get",
-  });
-};
-*/
-/*
-export const getVersesWithOpen = (
-  sort = "-created_at",
-  search = "",
-  page = 0,
-  expand = "image,author"
-) => {
-  const query = createQueryParams({ sort, search, page, expand });
-  return request({
-    url: path.join("v1", "verses", "open" + qs.stringify(query, true)),
-    method: "get",
-  });
-};
-*/
 
 export const getPublic = (params: VersesParams) => {
   const query = createQueryParams(params);
 
   //expand = "id,name,description,data,metas,resources,code,uuid,code",
   return request({
-    url: path.join("v1", "verses", "public" + qs.stringify(query, true)),
+    url: `/verses/public${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 export const getVerses = (params: VersesParams) => {
   const query = createQueryParams(params);
   return request({
-    url: path.join("v1", "verses" + qs.stringify(query, true)),
+    url: `/verses${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -252,7 +208,7 @@ export const getVerses = (params: VersesParams) => {
 export const putVerse = (id: number, data: any) => {
   data.version = environment.version;
   return request({
-    url: path.join("v1", "verses", id.toString()),
+    url: `/verses/${id}`,
     method: "put",
     data,
   });
@@ -260,7 +216,7 @@ export const putVerse = (id: number, data: any) => {
 
 export const deleteVerse = (id: number | string) => {
   return request({
-    url: path.join("v1", "verses", id.toString()),
+    url: `/verses/${id}`,
     method: "delete",
   });
 };

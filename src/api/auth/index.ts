@@ -14,14 +14,14 @@ interface ApiResponse<T> {
 class AuthAPI {
   static appleIdCreate(data: AppleIdTokenAndUserPassData) {
     return request<AppleIdTokenAndUserPassData, ApiResponse<AppleIdReturn>>({
-      url: "/v1/site/apple-id-create",
+      url: `/site/apple-id-create`,
       method: "post",
       data: data,
     });
   }
   static appleIdLink(data: AppleIdTokenAndUserPassData) {
     return request<AppleIdTokenAndUserPassData, ApiResponse<AppleIdReturn>>({
-      url: "/v1/site/apple-id-link",
+      url: `/site/apple-id-link`,
       method: "post",
       data: data,
     });
@@ -38,7 +38,7 @@ class AuthAPI {
     formData.append("username", data.username);
     formData.append("password", data.password);
     return request<LoginResult>({
-      url: "/v1/site/login",
+      url: `/site/login`,
       method: "post",
       data: formData,
       headers: {
@@ -52,7 +52,7 @@ class AuthAPI {
    */
   static logout() {
     return request({
-      url: "/api/v1/auth/logout",
+      url: `/auth/logout`,
       method: "delete",
     });
   }
@@ -62,7 +62,7 @@ class AuthAPI {
    */
   static getCaptcha(): Promise<CaptchaResult> {
     return request<any, CaptchaResult>({
-      url: "/api/v1/auth/captcha",
+      url: `/auth/captcha`,
       method: "get",
     });
   }

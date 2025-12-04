@@ -13,7 +13,7 @@ export type postLike = {
 export const postLike = (message_id: number) => {
   const data = { message_id };
   return request({
-    url: "v1/likes",
+    url: `/likes`,
     method: "post",
     data: data,
   });
@@ -21,7 +21,7 @@ export const postLike = (message_id: number) => {
 
 export const removeLike = (message_id: number) => {
   return request({
-    url: "v1/likes/remove?message_id=" + message_id,
+    url: `/likes/remove?message_id=${message_id}`,
     method: "post",
   });
 };
@@ -29,11 +29,7 @@ export const removeLike = (message_id: number) => {
 export const isLike = (user_id: number, message_id: number) => {
   // 我是否like
   return request({
-    url:
-      "v1/likes?LikeSearch[message_id]=" +
-      message_id +
-      "&LikeSearch[user_id]=" +
-      user_id,
+    url: `/likes?LikeSearch[message_id]=${message_id}&LikeSearch[user_id]=${user_id}`,
     method: "get",
   });
 };
@@ -44,15 +40,15 @@ export const getMessagesWithLiker = (
   search = null,
   page = 0
 ) => {
-  let url = "v1/messages?expand=author,messageTags&sort=" + sorted;
+  let url = `/messages?expand=author,messageTags&sort=${sorted}`;
   if (!isNaN(liker)) {
-    url += "&liker=" + liker;
+    url += `&liker=${liker}`;
   }
   if (search) {
-    url += "&MessageSearch[title]=" + search;
+    url += `&MessageSearch[title]=${search}`;
   }
   if (page > 1) {
-    url += "&page=" + page;
+    url += `&page=${page}`;
   }
 
   return request({

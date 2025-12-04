@@ -1,12 +1,10 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import path from "path-browserify";
 import { metaInfo } from "./meta";
 
 export const postMetaResource = (data: Record<string, any>) => {
-  const url = path.join("v1", "meta-resources");
   return request({
-    url,
+    url: `/meta-resources`,
     method: "post",
     data,
   });
@@ -34,11 +32,7 @@ export const getMetaResources = (
     query["page"] = page;
   }
 
-  const url = path.join(
-    "v1",
-    "meta-resources",
-    "resources" + qs.stringify(query, true)
-  );
+  const url = `/meta-resources/resources${qs.stringify(query, true)}`;
   return request<metaInfo[]>({
     url,
     method: "get",
@@ -49,7 +43,7 @@ export const putMetaResource = (
   id: number | string,
   data: Record<string, any>
 ) => {
-  const url = path.join("v1", "meta-resources", id.toString());
+  const url = `/meta-resources/${id}`;
   return request({
     url,
     method: "put",
@@ -58,7 +52,7 @@ export const putMetaResource = (
 };
 
 export const deleteMetaResource = (id: number | string) => {
-  const url = path.join("v1", "meta-resources", id.toString());
+  const url = `/meta-resources/${id}`;
   return request({
     url,
     method: "delete",

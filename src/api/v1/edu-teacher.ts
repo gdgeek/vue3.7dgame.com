@@ -1,6 +1,5 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import path from "path-browserify";
 
 export interface Teacher {
   id: number;
@@ -28,14 +27,14 @@ export const getTeachers = (
     query["page"] = page;
   }
   return request<Teacher[]>({
-    url: path.join("v1", "edu-teacher" + qs.stringify(query, true)),
+    url: `/edu-teacher${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const getTeacher = (id: number) => {
   return request<Teacher>({
-    url: `v1/edu-teacher/${id}`,
+    url: `/edu-teacher/${id}`,
     method: "get",
   });
 };
@@ -46,7 +45,7 @@ export const createTeacher = (data: {
   school_id: number;
 }) => {
   return request({
-    url: "v1/edu-teacher",
+    url: `/edu-teacher`,
     method: "post",
     data,
   });
@@ -54,7 +53,7 @@ export const createTeacher = (data: {
 
 export const deleteTeacher = (id: number) => {
   return request({
-    url: `v1/edu-teacher/${id}`,
+    url: `/edu-teacher/${id}`,
     method: "delete",
   });
 };

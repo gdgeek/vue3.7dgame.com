@@ -1,22 +1,18 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import path from "path-browserify";
 import type { VerseShare } from "@/api/v1/verse";
 
 export const putVerseShare = (id: number, data: any) => {
-  const url = path.join("v1", "verse-shares", id.toString());
-
   return request({
-    url,
+    url: `/verse-shares/${id}`,
     method: "put",
     data,
   });
 };
 
 export const postVerseShare = (data: any) => {
-  const url = path.join("v1", "verse-shares");
   return request({
-    url,
+    url: `/verse-shares`,
     method: "post",
     data,
   });
@@ -40,7 +36,7 @@ export const getVerseShareVerses = (
   }
 
   return request({
-    url: path.join("v1", "verse-shares", "verses" + qs.stringify(query, true)),
+    url: `/verse-shares/verses${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -48,7 +44,7 @@ export const getVerseShareVerses = (
 export const getVerseShares = (verseId: number) => {
   const query: Record<string, any> = [];
   query["verse_id"] = verseId;
-  const url = path.join("v1", "verse-shares" + qs.stringify(query, true));
+  const url = `/verse-shares${qs.stringify(query, true)}`;
   return request<VerseShare[]>({
     url,
     method: "get",
@@ -56,7 +52,7 @@ export const getVerseShares = (verseId: number) => {
 };
 export const deleteVerseShare = (id: number) => {
   return request({
-    url: "v1/verse-shares/" + id,
+    url: `/verse-shares/${id}`,
     method: "delete",
   });
 };

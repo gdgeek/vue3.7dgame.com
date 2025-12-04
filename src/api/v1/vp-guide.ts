@@ -1,10 +1,9 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import path from "path-browserify";
 
 export const postVpGuide = (data: any) => {
   return request({
-    url: "v1/vp-guides",
+    url: `/vp-guides`,
     method: "post",
     data: data,
   });
@@ -28,15 +27,14 @@ export const getVerses = ({
   }
 
   return request({
-    url: path.join("v1", "vp-guides", "verses" + qs.stringify(query, true)),
+    url: `/vp-guides/verses${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
-
 export const getVpGuide = (id: number) => {
   return request({
-    url: "v1/vp-guides/" + id,
+    url: `/vp-guides/${id}`,
     method: "get",
   });
 };
@@ -49,21 +47,21 @@ export const getVpGuides = (page = 0) => {
   }
 
   return request({
-    url: path.join("v1", "vp-guides" + qs.stringify(query, true)),
+    url: `/vp-guides${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const putVpGuide = (id: number, data: any) => {
   return request({
-    url: "v1/vp-guides/" + id,
+    url: `/vp-guides/${id}`,
     method: "put",
     data,
   });
 };
 export const deleteVpGuide = (id: number) => {
   return request({
-    url: "v1/vp-guides/" + id,
+    url: `/vp-guides/${id}`,
     method: "delete",
   });
 };

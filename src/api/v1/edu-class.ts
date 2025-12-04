@@ -1,6 +1,5 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import path from "path-browserify";
 
 import { EduClass } from "./types/edu-class";
 
@@ -25,7 +24,7 @@ export const getClasses = (
     query["page"] = page;
   }
   return request<EduClass[]>({
-    url: path.join("v1", "edu-class" + qs.stringify(query, true)),
+    url: `/edu-class${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -36,14 +35,14 @@ export const getClass = (id: number, expand = "") => {
     query["expand"] = expand;
   }
   return request<EduClass>({
-    url: path.join(`v1/edu-class/${id}` + qs.stringify(query, true)),
+    url: `/edu-class/${id}${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const createClass = (data: any) => {
   return request({
-    url: "v1/edu-class",
+    url: `/edu-class`,
     method: "post",
     data,
   });
@@ -51,7 +50,7 @@ export const createClass = (data: any) => {
 
 export const updateClass = (id: number, data: any) => {
   return request({
-    url: `v1/edu-class/${id}`,
+    url: `/edu-class/${id}`,
     method: "put",
     data,
   });
@@ -59,7 +58,7 @@ export const updateClass = (id: number, data: any) => {
 
 export const deleteClass = (id: number) => {
   return request({
-    url: `v1/edu-class/${id}`,
+    url: `/edu-class/${id}`,
     method: "delete",
   });
 };

@@ -1,17 +1,15 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import path from "path-browserify";
 
 export const postVerseScript = (data: any) => {
-  const url = path.join("v1", "verse-scripts");
   return request({
-    url,
+    url: `/verse-scripts`,
     method: "post",
     data: data,
   });
 };
 export const putVerseScript = (id: number, data: any) => {
-  const url = path.join("v1", "verse-scripts", id.toString());
+  const url = `/verse-scripts/${id}`;
   return request({
     url,
     method: "put",
@@ -22,11 +20,7 @@ export const getVerseScript = (id: number, expand = "") => {
   const query: Record<string, any> = [];
 
   query["expand"] = expand;
-  const url = path.join(
-    "v1",
-    "verse-scripts",
-    id.toString() + qs.stringify(query, true)
-  );
+  const url = `/verse-scripts/${id}${qs.stringify(query, true)}`;
 
   return request({
     url,
@@ -40,7 +34,7 @@ export const getVerseScripts = (verse_id: number, expand = "") => {
   //query['sort'] = sort
   query["expand"] = expand;
 
-  const url = path.join("v1", "verse-scripts" + qs.stringify(query, true));
+  const url = `/verse-scripts${qs.stringify(query, true)}`;
 
   return request({
     url,
@@ -49,7 +43,7 @@ export const getVerseScripts = (verse_id: number, expand = "") => {
 };
 
 export const delVerseScripts = (id: number) => {
-  const url = path.join("v1", "verse-scripts", id.toString());
+  const url = `/verse-scripts/${id}`;
   return request({
     url,
     method: "delete",

@@ -1,6 +1,5 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import path from "path-browserify";
 
 import { AxiosResponse } from "axios";
 import { ResourceInfo } from "./resources/model";
@@ -37,7 +36,7 @@ export type PhototypeType = {
 
 export const postPhototype = (data: PhototypeType) => {
   return request<PhototypeType>({
-    url: path.join("v1", "phototypes"),
+    url: `/phototypes`,
     method: "post",
     data,
   });
@@ -51,11 +50,7 @@ export const getPhototype = (
   if (expand) {
     query["expand"] = expand;
   }
-  const url = path.join(
-    "v1",
-    "phototypes",
-    `${id.toString()}${qs.stringify(query, true)}`
-  );
+  const url = `/phototypes/${id}${qs.stringify(query, true)}`;
   return request<PhototypeType>({
     url,
     method: "get",
@@ -83,7 +78,7 @@ export const getPhototypes = (
   if (page > 1) {
     query["page"] = page;
   }
-  const url = path.join("v1", "phototypes") + qs.stringify(query, true);
+  const url = `/phototypes${qs.stringify(query, true)}`;
 
   return request<PhototypeType[]>({
     url,
@@ -100,11 +95,7 @@ export const putPhototype = (
   if (expand) {
     query["expand"] = expand;
   }
-  const url = path.join(
-    "v1",
-    "phototypes",
-    `${id.toString()}${qs.stringify(query, true)}`
-  );
+  const url = `/phototypes/${id}${qs.stringify(query, true)}`;
   return request<PhototypeType>({
     url,
     method: "put",
@@ -114,7 +105,7 @@ export const putPhototype = (
 
 export const deletePhototype = (id: string | number) => {
   return request({
-    url: path.join("v1", "phototypes", id.toString()),
+    url: `/phototypes/${id}`,
     method: "delete",
   });
 };
