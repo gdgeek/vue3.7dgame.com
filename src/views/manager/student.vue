@@ -17,7 +17,8 @@
           <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="4" v-for="item in students" :key="item.id">
             <el-card class="student-card" :body-style="{ padding: '0px' }">
               <div class="image-container">
-                <img :src="(item.avatar as any)?.url || '/src/assets/images/author/author-boy.png'" class="image" />
+                <img :src="(item.avatar as any)?.url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.name}`"
+                  class="image" />
               </div>
               <div style="padding: 14px">
                 <span class="student-name" :title="item.name">{{ item.name }}</span>
@@ -32,9 +33,9 @@
                   </el-descriptions>
                   <div class="actions">
                     <el-button type="primary" size="small" link @click="handleEdit(item)">{{ $t('meta.edit')
-                    }}</el-button>
+                      }}</el-button>
                     <el-button type="danger" size="small" link @click="handleDelete(item)">{{ $t('manager.list.cancel')
-                    }}</el-button>
+                      }}</el-button>
                   </div>
                 </div>
               </div>

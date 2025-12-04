@@ -12,17 +12,18 @@
         <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="user in users" :key="user.id">
           <el-card class="user-card" :body-style="{ padding: '0px' }" @click="handleSelect(user)">
             <div class="image-container">
-              <el-image :src="user.avatar?.url || '/src/assets/images/author/author-boy.png'" fit="cover" class="image">
+              <el-image :src="user.avatar?.url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`"
+                fit="cover" class="image">
                 <template #error>
                   <div class="image-slot">
-                    <img src="/src/assets/images/author/author-boy.png" class="image" />
+                    <img :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`" class="image" />
                   </div>
                 </template>
               </el-image>
             </div>
             <div style="padding: 14px">
               <span class="user-name" :title="user.nickname || user.username">{{ user.nickname || user.username
-              }}</span>
+                }}</span>
               <div class="bottom clearfix">
                 <span class="user-username">{{ user.username }}</span>
                 <el-button type="primary" size="small" class="button" @click.stop="handleSelect(user)">
