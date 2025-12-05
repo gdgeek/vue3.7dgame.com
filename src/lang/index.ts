@@ -2,28 +2,28 @@ import type { App } from "vue";
 import { createI18n } from "vue-i18n";
 import { useAppStoreHook } from "@/store/modules/app";
 // 本地语言包
-import enLocale from "./package/en";
-import zhCnLocale from "./package/zh-cn";
-import jaLocale from "./package/ja";
-import thLocale from "./package/th";
-import zhTwLocale from "./package/zh-tw";
+import enLocale from "./package/en-US";
+import zhCnLocale from "./package/zh-CN";
+import jaLocale from "./package/ja-JP";
+import thLocale from "./package/th-TH";
+import zhTwLocale from "./package/zh-TW";
 
 const appStore = useAppStoreHook();
 
 const messages = {
-  "zh-cn": {
+  "zh-CN": {
     ...zhCnLocale,
   },
-  en: {
+  "en-US": {
     ...enLocale,
   },
-  ja: {
+  "ja-JP": {
     ...jaLocale,
   },
-  th: {
+  "th-TH": {
     ...thLocale,
   },
-  "zh-tw": {
+  "zh-TW": {
     ...zhTwLocale,
   },
 };

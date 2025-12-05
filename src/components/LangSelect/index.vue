@@ -40,7 +40,6 @@ const { locale, t } = useI18n();
 function handleLanguageChange(lang: string) {
   locale.value = lang;
   appStore.changeLanguage(lang);
-
   ElMessage.success(t("langSelect.message.success"));
 }
 </script>

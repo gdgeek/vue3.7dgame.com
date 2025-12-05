@@ -12,6 +12,11 @@ export default {
     open: "打开",
     add: "添加",
   },
+  request: {
+    loginExpired: "登录过期，请重新登录",
+    networkError: "网络错误，请检查您的网络连接",
+    serverError: "服务器内部错误，请稍后再试",
+  },
 
   // 路由国际化
   route: {

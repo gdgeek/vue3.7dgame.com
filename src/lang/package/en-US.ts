@@ -13,6 +13,11 @@ export default {
     classList: "Class List",
     add: "Add",
   },
+  request: {
+    loginExpired: "Login expired, please log in again",
+    networkError: "Network error, please check your internet connection",
+    serverError: "Internal server error, please try again later",
+  },
   // 路由国际化
   route: {
     dashboard: "Dashboard",

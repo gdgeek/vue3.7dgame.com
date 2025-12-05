@@ -25,9 +25,9 @@ export const useAppStore = defineStore("app", () => {
    * 根据语言标识读取对应的语言包
    */
   const locale = computed(() => {
-    if (language?.value == "en") {
+    if (language?.value == "en-US") {
       return en;
-    } else if (language?.value == "ja") {
+    } else if (language?.value == "ja-JP") {
       return ja;
     } else {
       return zhCn;

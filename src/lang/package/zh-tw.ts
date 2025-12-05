@@ -12,6 +12,11 @@ export default {
     open: "打開",
     add: "添加",
   },
+  request: {
+    loginExpired: "登錄過期，請重新登錄",
+    networkError: "網絡錯誤，請檢查您的網絡連接",
+    serverError: "服務器內部錯誤，請稍後再試",
+  },
   // 路由國際化
   route: {
     dashboard: "首頁",

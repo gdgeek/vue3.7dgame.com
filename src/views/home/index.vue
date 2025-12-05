@@ -1,6 +1,6 @@
 <template>
   <TransitionWrapper>
-    <div>
+    <div>1112
       <Book :items="list"></Book>
       <el-tabs v-if="env.local()" type="border-card" lazy>
         <el-tab-pane :label="informationStore.title">
@@ -19,10 +19,12 @@ import LocalPage from "@/components/Home/LocalPage.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { getDomainInfo } from "@/api/v1/domain";
 
 const informationStore = useInfomationStore();
 const env = computed(() => environment);
 const { t } = useI18n();
+
 /*
 const mrpp = computed(() => {
   return [

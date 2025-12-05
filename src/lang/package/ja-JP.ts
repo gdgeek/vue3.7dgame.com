@@ -12,6 +12,11 @@ export default {
     open: "開く",
     add: "追加",
   },
+  request: {
+    loginExpired: "ログインの有効期限が切れました。再度ログインしてください",
+    networkError: "ネットワークエラーです。ネットワーク接続を確認してください",
+    serverError: "サーバー内部エラーです。しばらくしてから再度お試しください",
+  },
   // 路由国际化
   route: {
     dashboard: "ダッシュボード",

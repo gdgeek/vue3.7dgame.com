@@ -5,25 +5,25 @@ export const enum LanguageEnum {
   /**
    * 简体中文
    */
-  ZH_CN = "zh-cn",
+  ZH_CN = "zh-CN",
 
   /**
    * 英文
    */
-  EN = "en",
+  EN = "en-US",
 
   /**
    * 日文
    */
-  JA = "ja",
+  JA = "ja-JP",
 
   /**
    * 泰文
    */
-  TH = "th",
+  TH = "th-TH",
 
   /**
    * 繁体中文
    */
-  ZH_TW = "zh-tw",
+  ZH_TW = "zh-TW",
 }
