@@ -1,8 +1,8 @@
 import type { App } from "vue";
 import { createI18n } from "vue-i18n";
 import { useAppStoreHook } from "@/store/modules/app";
-// 本地语言包
-import zhCnLocale from "./package/zh-CN";
+// 本地语言包（模块化结构）
+import zhCnLocale from "./zh-CN";
 
 const appStore = useAppStoreHook();
 
@@ -41,20 +41,20 @@ export const loadLanguageAsync = async (locale: string) => {
     return Promise.resolve();
   }
 
-  // 动态加载语言包（排除已静态导入的 zh-CN）
-  const modules = import.meta.glob(["./package/*.ts", "!./package/zh-CN.ts"]);
+  // 动态加载语言包（使用模块化目录结构，排除已静态导入的 zh-CN）
+  const modules = import.meta.glob(["./**/index.ts", "!./zh-CN/index.ts"]);
 
-  // 查找匹配的路径
+  // 查找匹配的语言目录
   const targetPath = Object.keys(modules).find((path) => {
-    const fileName = path.split("/").pop()?.replace(".ts", "");
-    return fileName?.toLowerCase() === locale.toLowerCase();
+    // 路径格式: ./en-US/index.ts -> en-US
+    const langDir = path.split("/")[1];
+    return langDir?.toLowerCase() === locale.toLowerCase();
   });
 
   if (targetPath && modules[targetPath]) {
     return (modules[targetPath]() as Promise<any>).then(async (messages) => {
-      // 使用正确的文件名作为 locale
-      const correctLocale =
-        targetPath.split("/").pop()?.replace(".ts", "") || locale;
+      // 从路径 ./en-US/index.ts 提取 locale 名称 en-US
+      const correctLocale = targetPath.split("/")[1] || locale;
 
       i18n.global.setLocaleMessage(correctLocale, messages.default);
       (i18n.global.locale as any).value = correctLocale;

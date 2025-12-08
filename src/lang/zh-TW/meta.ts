@@ -1,0 +1,232 @@
+// meta translations for zh-TW
+export default {
+  "meta": {
+    "title": "創建【實體】",
+    "edit": "修改實體信息",
+    "enter": "進入",
+    "delete": "刪除",
+    "copy": "副本",
+    "create": {
+      "title": "創建實體",
+      "defaultName": "新實體",
+      "namePlaceholder": "請輸入實體名稱",
+      "nameRequired": "實體名稱不能為空",
+      "success": "實體創建成功"
+    },
+    "confirm": {
+      "message1": "此操作將永久刪除該【實體】, 是否繼續?",
+      "message2": "提示",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "刪除成功！",
+      "info": "已取消刪除"
+    },
+    "prompt": {
+      "message1": "請輸入實體名稱",
+      "message2": "提示(3-20個字符)",
+      "confirm": "確認",
+      "cancel": "取消",
+      "inputValidator": {
+        "item1": "實體名稱不能為空",
+        "item2": "實體名稱不能小於3個字符",
+        "item3": "實體名稱不能大於20個字符"
+      },
+      "success": "實體名稱是: ",
+      "info": "取消輸入"
+    },
+    "prompt2": {
+      "message1": "請輸入新名稱",
+      "message2": "修改實體名稱",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "新的實體名稱是: ",
+      "info": "取消輸入"
+    },
+    "prompt3": {
+      "message1": "請輸入複製後的實體名稱",
+      "message2": "複製實體",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "複製成功! 新實體名稱: ",
+      "info": "取消複製"
+    },
+    "metaEdit": {
+      "title": "【實體】名稱：",
+      "form": {
+        "title": "名稱",
+        "picture": "圖片",
+        "input": "輸入事件",
+        "output": "輸出事件",
+        "data": "數據",
+        "info": "信息"
+      },
+      "eventEdit": "事件編輯",
+      "contentEdit": "內容編輯",
+      "save": "信息保存",
+      "metaInfo": "【實體】信息",
+      "rules": {
+        "message1": "請輸入名稱",
+        "message2": "長度在 2 到 20 個字符"
+      },
+      "success": "保存成功e",
+      "selectImageMethod": "選擇圖片方式",
+      "selectFromResource": "從資源庫選擇",
+      "uploadLocal": "本地上傳",
+      "uploadError": "上傳失敗：未找到文件",
+      "invalidImageType": "請上傳JPG/PNG/BMP/GIF格式的圖片",
+      "imageTooLarge": "圖片大小不能超過2MB",
+      "handlerError": "獲取文件處理器失敗",
+      "uploadFailed": "上傳圖片失敗",
+      "saveFailed": "保存圖片信息失敗",
+      "image": {
+        "updateSuccess": "圖片更新成功",
+        "updateError": "圖片更新失敗"
+      }
+    },
+    "scene": {
+      "error": "沒有場景編輯器",
+      "info": "沒有保存權限！",
+      "success": "實體保存成功",
+      "coverUploadError": "上傳封面圖片錯誤：未找到圖片數據",
+      "handlerError": "獲取文件處理器失敗",
+      "coverUploadSuccess": "封面圖片上傳成功",
+      "coverUploadFailed": "封面圖片上傳失敗"
+    },
+    "script": {
+      "title": "腳本",
+      "save": "保存",
+      "error1": "沒有實體信息",
+      "error2": "沒有編輯權限",
+      "error3": "沒有腳本編輯器",
+      "success": "腳本保存成功",
+      "info": "沒有修改",
+      "leave": {
+        "message1": "發現有未保存的修改，是否保存",
+        "message2": "提示",
+        "confirm": "是",
+        "cancel": "否",
+        "success": "保存成功～",
+        "error": "保存失敗",
+        "info": "已放棄對未保存的更改"
+      }
+    },
+    "eventDialog": {
+      "title": "事件管理窗口",
+      "output": "輸出事件",
+      "input": "輸入事件",
+      "cancel": "取 消",
+      "confirm": "確 定"
+    },
+    "ResourceDialog": {
+      "label1": "綁定資源",
+      "label2": "我的資源",
+      "title": "選擇資源",
+      "replaceTitle": "替換資源",
+      "cancelSelect": "取消選擇",
+      "select": "選擇",
+      "putIn": "放入",
+      "replace": "替換",
+      "doUnbind": "解綁",
+      "bind": "綁定",
+      "putAllIn": "全部放入",
+      "empty": "清 空",
+      "cancel": "取 消",
+      "enterMultiSelect": "批量選擇",
+      "exitMultiSelect": "退出批量選擇",
+      "batchBind": "批量綁定",
+      "batchDeploy": "批量部署",
+      "batchUnbind": "批量解綁",
+      "deselect": "取消選擇",
+      "noItemSelected": "請至少選擇一個資源",
+      "availableForBinding": "可綁定資源數量：{count}",
+      "availableForDeployment": "可部署資源數量：{count}",
+      "batchConfirm": {
+        "message1": "是否將選中的 {count} 個資源批量綁定到場景?",
+        "message2": "批量綁定資源",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "批量綁定成功！",
+        "selectOne": {
+          "message1": "您已成功批量綁定資源，是否直接確認部署這些資源？",
+          "message2": "部署資源",
+          "confirm": "確認",
+          "cancel": "取消",
+          "success": "部署成功！",
+          "info": "已取消"
+        }
+      },
+      "batchConfirm2": {
+        "message1": "是否將選中的 {count} 個資源批量部署到場景?",
+        "message2": "批量部署資源",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "批量部署成功！",
+        "info": "已取消"
+      },
+      "batchUnbindConfirm": {
+        "message1": "是否要解綁選中的 {count} 個資源?",
+        "message2": "批量解綁",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "批量解綁成功！",
+        "info": "已取消"
+      },
+      "confirm1": {
+        "message1": "是否解除資源綁定?",
+        "message2": "解除綁定",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "解綁成功！",
+        "info": "已取消"
+      },
+      "confirm2": {
+        "message1": "是否將資源綁定到場景?",
+        "message2": "綁定資源",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "綁定成功！",
+        "confirm2": {
+          "message1": "是否直接確認部署資源?",
+          "message2": "部署資源",
+          "confirm": "確認",
+          "cancel": "取消",
+          "success": "部署成功！"
+        }
+      },
+      "info": "已取消"
+    }
+  },
+  "ai": {
+    "create": "創建",
+    "show": "查看",
+    "delete": "刪除",
+    "generate": "生成",
+    "confirm": {
+      "message1": "此操作將永久刪除該文件。您想繼續嗎？",
+      "message2": "警告",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "刪除成功！",
+      "info": "刪除已取消"
+    },
+    "generation": {
+      "title": "通過 AI (Rodin) 創建模型：",
+      "declare": "聲明",
+      "form": {
+        "image": "圖像",
+        "select": "選擇",
+        "prompt": "提示",
+        "quality": {
+          "title": "質量",
+          "value1": "高",
+          "value2": "中",
+          "value3": "低",
+          "value4": "極低"
+        },
+        "message": "長度應為 4 到 50 個字符",
+        "error": "請輸入提示或選擇圖像",
+        "submit": "生成"
+      }
+    }
+  }
+};

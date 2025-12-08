@@ -1,0 +1,169 @@
+// route translations for ja-JP
+export default {
+  "route": {
+    "dashboard": "ダッシュボード",
+    "personalCenter": {
+      "title": "個人センター",
+      "myHomepage": "私のホームページ",
+      "document": "本文",
+      "category": "カテゴリ",
+      "processOfCreation": "作成過程",
+      "campus": "キャンパス"
+    },
+    "settings": {
+      "title": "設定",
+      "accountSetting": "アカウント設定",
+      "personalData": "個人データ",
+      "userPresentation": "ユーザープレゼンテーション"
+    },
+    "resourceManagement": {
+      "title": "リソース管理",
+      "voxelManagement": {
+        "title": "ボクセル",
+        "voxelList": "リスト",
+        "voxelUpload": "アップロード",
+        "voxelProcessing": "処理"
+      },
+      "polygenManagement": {
+        "title": "モデル",
+        "polygenList": "リスト",
+        "polygenUpload": "アップロード",
+        "polygenProcessing": "処理"
+      },
+      "pictureManagement": {
+        "title": "画像",
+        "pictureList": "リスト",
+        "pictureUpload": "アップロード",
+        "pictureProcessing": "処理"
+      },
+      "videoManagement": {
+        "title": "ビデオ",
+        "videoList": "リスト",
+        "videoUpload": "アップロード",
+        "videoProcessing": "処理"
+      },
+      "audioManagement": {
+        "title": "音声",
+        "audioList": "リスト",
+        "audioUpload": "アップロード",
+        "audioTTS": "テキストから音声",
+        "audioProcessing": "処理"
+      },
+      "particleManagement": {
+        "title": "パーティクル",
+        "particleList": "リスト",
+        "particleUpload": "アップロード",
+        "particleProcessing": "処理"
+      }
+    },
+    "meta": {
+      "title": "メタデータ",
+      "metaList": "リスト",
+      "systemDefault": "システムデフォルト",
+      "edit": "編集",
+      "scriptEditor": "スクリプトエディタ",
+      "sceneEditor": "シーンエディタ"
+    },
+    "ai": {
+      "title": "AIモデル",
+      "list": "リスト",
+      "generation": "AI生成"
+    },
+    "project": {
+      "title": "场景",
+      "selfGenerated": "自作",
+      "systemRecommendation": "システム推薦",
+      "shareWithFriends": "友達と共有",
+      "viewTitle": "編集",
+      "scriptEditor": "スクリプトエディタ",
+      "sceneEditor": "シーンエディタ"
+    },
+    "manager": {
+      "title": "管理",
+      "userManagement": "ユーザー管理",
+      "schoolManagement": "学校管理",
+      "classManagement": "クラス管理",
+      "teacherManagement": "教師管理",
+      "studentManagement": "生徒管理",
+      "createSchool": "学校を作成",
+      "createClass": "クラスを作成",
+      "school": {
+        "principal": "校長",
+        "address": "住所"
+      },
+      "class": {
+        "title": "クラス管理",
+        "schoolTitle": "{school} - クラス管理",
+        "teacher": "教師",
+        "student": "生徒",
+        "teacherList": "教師リスト",
+        "studentList": "生徒リスト",
+        "selectTeacher": "教師を選択",
+        "selectStudent": "生徒を選択",
+        "filteringBySchool": "学校でフィルタリング中",
+        "dialog": {
+          "editTitle": "クラスを編集"
+        },
+        "form": {
+          "name": "クラス名",
+          "namePlaceholder": "クラス名を入力してください",
+          "image": "クラスカバー"
+        },
+        "errors": {
+          "selectSchoolFirst": "まず学校を選択してください",
+          "schoolIdRequired": "学校IDは必須です"
+        }
+      },
+      "dialog": {
+        "editTitle": "学校を編集"
+      },
+      "form": {
+        "name": "学校名",
+        "namePlaceholder": "学校名を入力してください",
+        "image": "学校カバー",
+        "principal": "校長",
+        "principalPlaceholder": "校長を選択",
+        "cancel": "キャンセル",
+        "submit": "送信"
+      },
+      "list": {
+        "remove": "削除"
+      },
+      "messages": {
+        "updateSuccess": "更新成功",
+        "createSuccess": "作成成功",
+        "deleteSuccess": "削除成功",
+        "addSuccess": "追加成功",
+        "removeSuccess": "削除成功"
+      },
+      "errors": {
+        "validationFailed": "検証に失敗しました",
+        "saveFailed": "保存に失敗しました",
+        "deleteFailed": "削除に失敗しました",
+        "addFailed": "追加に失敗しました",
+        "removeFailed": "削除に失敗しました",
+        "alreadyInClass": "このユーザーは既にクラスにいます"
+      },
+      "confirm": {
+        "deleteTitle": "削除の確認",
+        "deleteMessage": "削除してもよろしいですか？この操作は元に戻せません。",
+        "removeMemberTitle": "メンバー削除の確認",
+        "removeMemberMessage": "このメンバーを削除してもよろしいですか？",
+        "confirm": "確認",
+        "cancel": "キャンセル"
+      }
+    },
+    "game": {
+      "title": "ゲーム",
+      "gameIndex": "ゲーム設定",
+      "gameMap": "マップ設定"
+    },
+    "logout": {
+      "title": "ログアウト"
+    },
+    "phototype": {
+      "title": "プロトタイプ",
+      "list": "リスト"
+    }
+  }
+};

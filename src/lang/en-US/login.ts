@@ -1,0 +1,60 @@
+// login translations for en-US
+export default {
+  "login": {
+    "appleLoginFail": "Apple login failed",
+    "title": "BuJiaBan.com",
+    "register": "Platform Register/Login",
+    "h1": "Welcome!",
+    "h4": "Ready to get started?",
+    "loginTitle": "Login Account",
+    "username": "Email",
+    "password": "Password",
+    "login": "Login",
+    "loginCode": "Login Code",
+    "scanTip": "Please scan the QR code with your phone to log in",
+    "download": "Download Related Programs",
+    "rules": {
+      "username": {
+        "message1": "Please enter your username",
+        "message2": "Greater than 4 and less than 20",
+        "message3": "only letters, numbers, _, -, @, and .",
+        "email": "Please enter a valid email address"
+      },
+      "password": {
+        "message1": "Please enter your password",
+        "message2": "Greater than 6 and less than 20",
+        "message3": "Min 1 uppercase, 1 lowercase, 1 number"
+      },
+      "repassword": {
+        "message1": "Please enter the password again",
+        "message2": "The two passwords do not match"
+      }
+    },
+    "success": "Login Successful",
+    "usernameError": "Username Error",
+    "passwordError": "Password Error",
+    "error": "Form Validation Failed",
+    "createAccount": "Create Account",
+    "repassword": "Confirm Password",
+    "create": "Create",
+    "linkAccount": "Login Account",
+    "logout": {
+      "message1": "Are you sure you want to log out and exit the system?",
+      "message2": "Prompt",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "title": "Logging out",
+      "text": "Logging out this session from the server"
+    },
+    "back": "Back",
+    "loginResponseMissingToken": "The login response is missing the access_token"
+  },
+  "imageSelector": {
+    "selectImageMethod": "Select Image Method",
+    "selectFromResource": "Select from Resources",
+    "selectFromResourceDesc": "Select from uploaded image resources",
+    "uploadLocal": "Upload Local Image",
+    "uploadLocalDesc": "Upload a new image file",
+    "uploadFile": "Upload File"
+  }
+};

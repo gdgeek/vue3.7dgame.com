@@ -1,0 +1,391 @@
+// manager translations for en-US
+export default {
+  "manager": {
+    "title": "Add User",
+    "createSchool": "Create School",
+    "createClass": "Create Class",
+    "createTeacher": "Create Teacher",
+    "createStudent": "Create Student",
+    "defaultSchoolName": "New School",
+    "defaultClassName": "New Class",
+    "schoolManagement": "School Management",
+    "classManagement": "Class Management",
+    "teacherManagement": "Teacher Management",
+    "studentManagement": "Student Management",
+    "filteringBySchool": "Filtering by School ID",
+    "backToAll": "Back to All Classes",
+    "school": {
+      "principal": "School Administrator",
+      "address": "Address",
+      "description": "Description",
+      "classList": "Class List"
+    },
+    "class": {
+      "title": "Class Management",
+      "schoolTitle": "{school} - Class Management",
+      "grade": "Grade",
+      "teacher": "Teacher",
+      "student": "Student",
+      "teacherList": "Teacher List",
+      "studentList": "Student List",
+      "selectTeacher": "Select Teacher",
+      "selectStudent": "Select Student",
+      "assignTeacher": "Assign Teacher",
+      "assignStudent": "Assign Student",
+      "dialog": {
+        "createTitle": "Create Class",
+        "editTitle": "Edit Class"
+      },
+      "form": {
+        "name": "Class Name",
+        "namePlaceholder": "Please enter class name",
+        "image": "Class Image"
+      },
+      "messages": {
+        "createConfirm": "Are you sure you want to create a new class?",
+        "createSuccess": "Class created successfully",
+        "createFailed": "Failed to create class",
+        "updateSuccess": "Class updated successfully",
+        "updateFailed": "Failed to update class",
+        "deleteFailed": "Failed to delete class",
+        "removeTeacherConfirm": "Are you sure you want to remove this teacher?",
+        "removeTeacherSuccess": "Teacher removed successfully",
+        "removeTeacherFailed": "Failed to remove teacher",
+        "removeStudentConfirm": "Are you sure you want to remove this student?",
+        "removeStudentSuccess": "Student removed successfully",
+        "removeStudentFailed": "Failed to remove student",
+        "selectSchoolFirst": "Please select a school first before creating a class",
+        "assignTeacherSuccess": "Teacher assigned successfully",
+        "assignStudentSuccess": "Student assigned successfully"
+      },
+      "validation": {
+        "nameRequired": "Please enter class name"
+      }
+    },
+    "teacher": {
+      "subject": "Subject",
+      "phone": "Phone"
+    },
+    "student": {
+      "grade": "Grade",
+      "class": "Class"
+    },
+    "principal": {
+      "assign": "Assign School Administrator",
+      "selectUser": "Select User",
+      "select": "Select",
+      "assignSuccess": "School administrator assigned successfully",
+      "assignFailed": "Failed to assign school administrator",
+      "username": "Username",
+      "nickname": "Nickname"
+    },
+    "errors": {
+      "fetchFailed": "Failed to fetch schools",
+      "noData": "No Data",
+      "createPending": "Create functionality to be implemented",
+      "editPending": "Edit school: {name}",
+      "operationFailed": "Operation failed"
+    },
+    "dialog": {
+      "createTitle": "Create School",
+      "editTitle": "Edit School"
+    },
+    "form": {
+      "name": "School Name",
+      "namePlaceholder": "Please enter school name",
+      "address": "School Address",
+      "addressPlaceholder": "Please enter school address",
+      "principal": "School Administrator",
+      "principalPlaceholder": "Select School Administrator",
+      "image": "School Image",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "submit": "Submit",
+      "submitting": "Submitting..."
+    },
+    "validation": {
+      "nameRequired": "Please enter school name",
+      "nameLength": "School name length should be between 2-50 characters"
+    },
+    "messages": {
+      "createConfirm": "Confirm to create a new school?",
+      "createSuccess": "School created successfully",
+      "createFailed": "Failed to create school",
+      "updateSuccess": "School updated successfully",
+      "updateFailed": "Failed to update school",
+      "deleteFailed": "Failed to delete school",
+      "clearPrincipalConfirm": "Are you sure you want to clear the school administrator?"
+    },
+    "creator": {
+      "form": {
+        "label1": "Username",
+        "label2": "Password",
+        "label3": "Confirm Password",
+        "message1": "Please enter the username",
+        "message2": "Username must be more than 5 characters",
+        "message3": "Avoid using Chinese characters in the username",
+        "message4": "Please enter the password",
+        "message5": "Password must be more than 6 characters",
+        "message6": "Please enter the confirmation password",
+        "error1": "Please enter the password",
+        "error2": "Please enter the password again",
+        "error3": "The passwords do not match",
+        "error4": "Form validation failed",
+        "cancel": "Cancel",
+        "submit": "RegisterAccount"
+      }
+    },
+    "list": {
+      "label": "Perms:",
+      "cancel": "Delete",
+      "manage": "Manage",
+      "remove": "Remove",
+      "roles": {
+        "root": "Root User",
+        "admin": "Super Administrator",
+        "manager": "Administrator",
+        "user": "User"
+      },
+      "confirm": {
+        "message1": "This action will permanently delete the school. Do you want to continue?",
+        "message2": "Warning",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "success": "Deleted successfully!",
+        "info": "Deletion canceled"
+      },
+      "success": "Permissions updated successfully!",
+      "error": "Permissions update failed!"
+    },
+    "confirm": {
+      "deleteTitle": "Confirm Delete",
+      "deleteMessage": "Are you sure you want to delete? This action cannot be undone.",
+      "removeMemberTitle": "Confirm Remove",
+      "removeMemberMessage": "Are you sure you want to remove this member?",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    }
+  },
+  "game": {
+    "index": {
+      "title": "Create【Level】",
+      "delete": "Delete",
+      "form": {
+        "label1": "Order",
+        "label2": "Project ID",
+        "label3": "Project Name",
+        "label4": "Action",
+        "placeholder": "Please enter the order",
+        "confirm": {
+          "message1": "Change the order?",
+          "message2": "Prompt",
+          "confirm": "Confirm",
+          "cancel": "Cancel",
+          "success": "Deleted successfully",
+          "info": "Order change canceled"
+        }
+      },
+      "success": "Added successfully",
+      "confirm": {
+        "message1": "This action will permanently delete this 【Level】. Do you want to continue?",
+        "message2": "Prompt",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "success": "Deleted successfully",
+        "info": "Deletion canceled"
+      }
+    },
+    "map": {
+      "title1": "Level ",
+      "title2": " Map",
+      "addGuide": "Add Level",
+      "addMap": "Add Map",
+      "removeMap": "RemoveMap",
+      "delete": "Delete",
+      "form": {
+        "label1": "Order",
+        "label2": "Project ID",
+        "label3": "Project Name",
+        "label4": "Action",
+        "placeholder": "Please enter the order",
+        "confirm": {
+          "message1": "Change the order?",
+          "message2": "Prompt",
+          "confirm": "Confirm",
+          "cancel": "Cancel",
+          "success": "Deleted successfully",
+          "info": "Order change canceled"
+        }
+      },
+      "success": "Added successfully",
+      "confirm1": {
+        "message1": "Create Map",
+        "message2": "Prompt",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "success": "Created successfully",
+        "info": "Creation canceled"
+      },
+      "confirm2": {
+        "message1": "Delete Map",
+        "message2": "Prompt",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "success": "Deleted successfully",
+        "info": "Deletion canceled"
+      },
+      "confirm3": {
+        "message1": "This action will permanently delete this 【Level】. Do you want to continue?",
+        "message2": "Prompt",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "success": "Deleted successfully",
+        "info": "Deletion canceled"
+      }
+    },
+    "verseDialog": {
+      "title": "Select【Project】",
+      "select": "Select",
+      "create": "Create New",
+      "cancel": "Cancel",
+      "prompt": {
+        "message1": "Please enter the metadata name",
+        "message2": "Prompt",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "info": "Cancel input"
+      }
+    }
+  },
+  "MrppHeader": {
+    "sortByName": "Name",
+    "sortByTime": "Time",
+    "search": "Search"
+  },
+  "tags": {
+    "refresh": "Refresh",
+    "close": "Close",
+    "closeOthers": "CloseOthers",
+    "closeLeft": "CloseLeft",
+    "closeRight": "CloseRight",
+    "closeAll": "CloseAll"
+  },
+  "navbar": {
+    "dashboard": "Dashboard",
+    "logout": "Logout",
+    "AccountSetting": "Account Setting",
+    "personalCenter": "Home Page",
+    "helpSupport": "Help & Support"
+  },
+  "sizeSelect": {
+    "tooltip": "Layout Size",
+    "default": "Default",
+    "large": "Large",
+    "small": "Small",
+    "message": {
+      "success": "Switch Layout Size Successful!"
+    }
+  },
+  "copy": {
+    "title": "Copy",
+    "success": "Code has been copied to clipboard",
+    "error": "Copy failed"
+  },
+  "langSelect": {
+    "message": {
+      "success": "Switch Language Successful!"
+    }
+  },
+  "settings": {
+    "project": "Project Settings",
+    "theme": "Theme",
+    "interface": "Interface",
+    "navigation": "Navigation",
+    "themeColor": "Theme Color",
+    "tagsView": "Tags View",
+    "fixedHeader": "Fixed Header",
+    "sidebarLogo": "Sidebar Logo",
+    "watermark": "Watermark"
+  },
+  "layoutSelect": {
+    "left": "Left Mode",
+    "top": "Top Mode",
+    "mix": "Mixed Mode"
+  },
+  "tts": {
+    "title": "Tencent Text-to-Speech",
+    "voiceType": "Voice Type",
+    "voiceScene": "Scene",
+    "voiceLanguage": "Language",
+    "autoSwitch": "Auto Switch",
+    "openAutoSwitch": "Enable Auto Switch",
+    "voice": "Voice",
+    "emotionType": "Emotion Type",
+    "emotionIntensity": "Emotion Intensity",
+    "volume": "Volume",
+    "speed": "Speed",
+    "audioFormat": "Audio Format",
+    "sampleRate": "Sample Rate",
+    "synthesize": "Synthesize",
+    "synthesizing": "Synthesizing...",
+    "upload": "Upload Audio",
+    "uploading": "Uploading...",
+    "inputPlaceholder": "Please enter the text to convert...",
+    "inputChinesePlaceholder": "Please enter Chinese text...",
+    "inputEnglishPlaceholder": "Please enter English text...",
+    "inputJapanesePlaceholder": "Please enter Japanese text...",
+    "showLanguageAnalysis": "Show Language Analysis",
+    "hideLanguageAnalysis": "Hide Language Analysis",
+    "languageAnalysis": "Language Analysis",
+    "close": "Close",
+    "chinese": "Chinese",
+    "english": "English",
+    "japanese": "Japanese",
+    "other": "Other",
+    "all": "All",
+    "default": "Default",
+    "premiumVoice": "Premium Voice",
+    "standardVoice": "Standard Voice",
+    "emotionCount": "emotions",
+    "selectEmotion": "Select Emotion Type",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "tips": "Tips",
+    "tipsContent": "Text limits for different languages:\n• Chinese: Maximum 150 characters (full-width punctuation counts as one character)\n• English: Maximum 500 letters (half-width punctuation counts as one letter)\n• Japanese: Maximum 150 characters (full-width punctuation counts as one character)\n\nPlease ensure the text content matches the selected language type, otherwise it may result in inaccurate pronunciation or conversion failure.",
+    "chineseLimit": "Chinese supports up to 150 characters (full-width punctuation counts as one character)",
+    "englishLimit": "English supports up to 500 letters (half-width punctuation counts as one letter)",
+    "japaneseLimit": "Japanese supports up to 150 characters",
+    "selectLanguageFirst": "Please select a language type first",
+    "totalChars": "Total characters",
+    "autoSwitched": "Automatically switched to {0}",
+    "mixedLanguageDetected": "Mixed language text detected, recommend selecting {0} as the primary language",
+    "mainLanguageDetected": "Detected main language: {0}",
+    "languagePercentage": "Mixed language detected: Chinese ~{0}%, Japanese ~{1}%, English ~{2}%",
+    "autoSwitchedLanguage": "Automatically switched from {0} to {1}",
+    "autoDetectedLanguage": "Automatically detected and set language to: {0}",
+    "textLimitWarning": "{0} text exceeds {1} character limit, detected {2} characters, may be truncated",
+    "synthesisSuccess": "Speech synthesis successful",
+    "synthesisError": "Speech synthesis failed, please try again later",
+    "uploadSuccess": "Audio upload successful",
+    "uploadError": "Audio upload failed, please try again later",
+    "uploadCanceled": "Upload canceled",
+    "enterAudioName": "Please enter audio name",
+    "uploadAudio": "Upload Audio",
+    "nameRequired": "Name cannot be empty",
+    "noText": "Please enter text",
+    "noAudio": "Please synthesize speech first"
+  },
+  "phototype": {
+    "title": "Phototype",
+    "list": "List",
+    "create": "Create Phototype",
+    "fromModel": "From Model",
+    "prompt": {
+      "message1": "Please enter phototype name",
+      "error1": "Phototype name cannot be empty",
+      "error2": "Phototype name length cannot be less than 3 characters",
+      "error3": "Phototype name length cannot exceed 20 characters",
+      "success": "Phototype name is "
+    }
+  }
+};

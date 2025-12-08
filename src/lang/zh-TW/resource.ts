@@ -1,0 +1,478 @@
+// resource translations for zh-TW
+export default {
+  "voxel": {
+    "uploadVoxel": "上傳體素",
+    "initializeVoxelData": "初始化體素數據",
+    "viewVoxel": "查看體素",
+    "initializingModels": "正在初始化體素...",
+    "initializingModelProgress": "正在初始化體素 {current}/{total} ({percentage}%)",
+    "batchInitializeSuccess": "成功初始化 {count} 個體素",
+    "partialInitializeSuccess": "初始化結果: {success}個成功, {failed}個失敗 (共{total}個)",
+    "retryInitializeFailed": "是否重試初始化失敗的 {count} 個體素?",
+    "retryTitle": "重試初始化",
+    "retryConfirm": "重試",
+    "retryCancel": "跳過",
+    "initializeSuccess": "體素初始化成功",
+    "initializeError": "體素初始化失敗",
+    "prompt": {
+      "message1": "請輸入新名稱",
+      "message2": "修改體素名稱",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "新的體素名稱: ",
+      "info": "取消輸入"
+    },
+    "confirm": {
+      "message1": "此操作將永久刪除該文件, 是否繼續?",
+      "message2": "提示",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "刪除成功！",
+      "info": "已取消刪除"
+    },
+    "uploadFile": "選擇體素（.vox文件），並上傳",
+    "view": {
+      "title": "體素名稱：",
+      "titleStatement": "用此體素創建【場景】",
+      "info": {
+        "title": "體素信息",
+        "label1": "條目",
+        "label2": "內容",
+        "item1": "體素名稱",
+        "item2": "創建者",
+        "item3": "創建時間",
+        "item4": "文件大小",
+        "size": "字節",
+        "item5": "模型尺寸",
+        "item6": "模型中心點",
+        "item7": "體素數量",
+        "name": "改名",
+        "delete": "刪除",
+        "download": "下載"
+      },
+      "update": "等待更新",
+      "prompt": {
+        "message1": "用此體素創建【場景】",
+        "message2": "提示",
+        "confirm": "確認",
+        "cancel": "取消",
+        "inputError": "請填寫相應名稱",
+        "success": "你創建了新的場景: ",
+        "error": "創建失敗: ",
+        "info": "取消輸入"
+      },
+      "confirm": {
+        "message1": "此操作將永久刪除該文件, 是否繼續?",
+        "message2": "提示",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "刪除成功！",
+        "info": "已取消刪除"
+      },
+      "namePrompt": {
+        "message1": "請輸入新名稱",
+        "message2": "修改體素名稱",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "新的體素名稱: ",
+        "info": "取消輸入"
+      },
+      "download": {
+        "success": "下載成功",
+        "error": "下載失敗: "
+      }
+    }
+  },
+  "polygen": {
+    "uploadPolygen": "上傳模型",
+    "initializePolygenData": "初始化模型數據",
+    "initializeAll": "批量初始化模型",
+    "initializingModels": "正在初始化模型...",
+    "initializingModelProgress": "正在初始化模型 {current}/{total} ({percentage}%)",
+    "batchInitializeSuccess": "成功初始化 {count} 個模型",
+    "partialInitializeSuccess": "初始化結果: {success}個成功, {failed}個失敗 (共{total}個)",
+    "retryInitializeFailed": "是否重試初始化失敗的 {count} 個模型?",
+    "retryTitle": "重試初始化",
+    "retryConfirm": "重試",
+    "retryCancel": "跳過",
+    "initializeSuccess": "模型初始化成功",
+    "initializeError": "模型初始化失敗",
+    "viewPolygen": "查看模型",
+    "prompt": {
+      "message1": "請輸入新名稱",
+      "message2": "修改模型名稱",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "新的模型名稱: ",
+      "info": "取消輸入"
+    },
+    "confirm": {
+      "message1": "此操作將永久刪除該文件, 是否繼續?",
+      "message2": "提示",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "刪除成功！",
+      "info": "已取消刪除"
+    },
+    "uploadFile": "選擇模型（.glb文件），並上傳",
+    "view": {
+      "title": "模型名稱：",
+      "titleStatement": "用此模型創建【場景】",
+      "info": {
+        "title": "模型信息",
+        "label1": "條目",
+        "label2": "內容",
+        "item1": "模型名稱",
+        "item2": "創建者",
+        "item3": "創建時間",
+        "item4": "文件大小",
+        "size": "字節",
+        "item5": "模型尺寸",
+        "item6": "模型中心",
+        "name": "改名",
+        "delete": "刪除",
+        "download": "下載"
+      },
+      "prompt": {
+        "message1": "用此模型創建【場景】",
+        "message2": "提示",
+        "confirm": "確認",
+        "cancel": "取消",
+        "inputError": "請填寫相應名稱",
+        "success": "你創建了新的場景: ",
+        "error": "創建失敗: ",
+        "info": "取消輸入"
+      },
+      "confirm": {
+        "message1": "此操作將永久刪除該文件, 是否繼續?",
+        "message2": "提示",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "刪除成功！",
+        "info": "已取消刪除"
+      },
+      "namePrompt": {
+        "message1": "請輸入新名稱",
+        "message2": "修改模型名稱",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "新的模型名稱: ",
+        "info": "取消輸入"
+      },
+      "download": {
+        "success": "下載成功",
+        "error": "下載失敗: "
+      }
+    },
+    "animation": {
+      "animationOn": "動畫開啟",
+      "animationOff": "動畫關閉",
+      "shadowOn": "陰影開啟",
+      "shadowOff": "陰影關閉"
+    }
+  },
+  "picture": {
+    "uploadPicture": "上傳圖片",
+    "initializePictureData": "初始化圖片數據",
+    "viewPicture": "查看圖片",
+    "initializingModels": "正在初始化圖片...",
+    "initializingModelProgress": "正在初始化圖片 {current}/{total} ({percentage}%)",
+    "batchInitializeSuccess": "成功初始化 {count} 個圖片",
+    "partialInitializeSuccess": "初始化結果: {success}個成功, {failed}個失敗 (共{total}個)",
+    "retryInitializeFailed": "是否重試初始化失敗的 {count} 個圖片?",
+    "retryTitle": "重試初始化",
+    "retryConfirm": "重試",
+    "retryCancel": "跳過",
+    "initializeSuccess": "圖片初始化成功",
+    "initializeError": "圖片初始化失敗",
+    "prompt": {
+      "message1": "請輸入新名稱",
+      "message2": "修改圖片名稱",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "新的圖片名稱: ",
+      "info": "取消輸入"
+    },
+    "confirm": {
+      "message1": "此操作將永久刪除該文件, 是否繼續?",
+      "message2": "提示",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "刪除成功！",
+      "info": "已取消刪除"
+    },
+    "uploadFile": "選擇圖片並上傳",
+    "view": {
+      "title": "圖片名稱：",
+      "loadingText": "正在預處理",
+      "info": {
+        "title": "圖片信息",
+        "label1": "條目",
+        "label2": "內容",
+        "item1": "圖片名稱",
+        "item2": "創建者",
+        "item3": "創建時間",
+        "item4": "文件大小",
+        "size": "字節",
+        "item5": "圖片尺寸",
+        "name": "改名",
+        "delete": "刪除",
+        "download": "下載"
+      },
+      "confirm": {
+        "message1": "此操作將永久刪除該文件, 是否繼續?",
+        "message2": "提示",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "刪除成功！",
+        "info": "已取消刪除"
+      },
+      "namePrompt": {
+        "message1": "請輸入新名稱",
+        "message2": "修改圖片名稱",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "新的圖片名稱: ",
+        "info": "取消輸入"
+      },
+      "download": {
+        "success": "下載成功",
+        "error": "下載失敗: "
+      }
+    }
+  },
+  "video": {
+    "uploadVideo": "上傳視頻",
+    "initializeVideoData": "初始化視頻數據",
+    "viewVideo": "查看視頻",
+    "initializingModels": "正在初始化視頻...",
+    "initializingModelProgress": "正在初始化視頻 {current}/{total} ({percentage}%)",
+    "batchInitializeSuccess": "成功初始化 {count} 個視頻",
+    "partialInitializeSuccess": "初始化結果: {success}個成功, {failed}個失敗 (共{total}個)",
+    "retryInitializeFailed": "是否重試初始化失敗的 {count} 個視頻?",
+    "retryTitle": "重試初始化",
+    "retryConfirm": "重試",
+    "retryCancel": "跳過",
+    "initializeSuccess": "視頻初始化成功",
+    "initializeError": "視頻初始化失敗",
+    "prompt": {
+      "message1": "請輸入新名稱",
+      "message2": "修改視頻名稱",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "新的視頻名稱: ",
+      "info": "取消輸入"
+    },
+    "confirm": {
+      "message1": "此操作將永久刪除該文件, 是否繼續?",
+      "message2": "提示",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "刪除成功！",
+      "info": "已取消刪除"
+    },
+    "uploadFile": "選擇視頻（.mp4/.mov/.avi），並上傳",
+    "view": {
+      "title": "視頻名稱：",
+      "info": {
+        "title": "視頻信息",
+        "label1": "條目",
+        "label2": "內容",
+        "item1": "視頻名稱",
+        "item2": "創建者",
+        "item3": "創建時間",
+        "item4": "文件大小",
+        "size": "字節",
+        "item5": "視頻尺寸",
+        "item6": "時長",
+        "name": "改名",
+        "delete": "刪除",
+        "download": "下載"
+      },
+      "confirm": {
+        "message1": "此操作將永久刪除該文件, 是否繼續?",
+        "message2": "提示",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "刪除成功！",
+        "info": "已取消刪除"
+      },
+      "namePrompt": {
+        "message1": "請輸入新名稱",
+        "message2": "修改視頻名稱",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "新的視頻名稱: ",
+        "info": "取消輸入"
+      },
+      "download": {
+        "success": "下載成功",
+        "error": "下載失敗: "
+      }
+    }
+  },
+  "audio": {
+    "uploadAudio": "上傳音頻",
+    "initializeAudioData": "初始化音頻數據",
+    "viewAudio": "查看音頻",
+    "initializingModels": "正在初始化音頻...",
+    "initializingModelProgress": "正在初始化音頻 {current}/{total} ({percentage}%)",
+    "batchInitializeSuccess": "成功初始化 {count} 個音頻",
+    "partialInitializeSuccess": "初始化結果: {success}個成功, {failed}個失敗 (共{total}個)",
+    "retryInitializeFailed": "是否重試初始化失敗的 {count} 個音頻?",
+    "retryTitle": "重試初始化",
+    "retryConfirm": "重試",
+    "retryCancel": "跳過",
+    "initializeSuccess": "音頻初始化成功",
+    "initializeError": "音頻初始化失敗",
+    "prompt": {
+      "message1": "請輸入新名稱",
+      "message2": "修改音頻名稱",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "新的音頻名稱: ",
+      "info": "取消輸入"
+    },
+    "confirm": {
+      "message1": "此操作將永久刪除該文件, 是否繼續?",
+      "message2": "提示",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "刪除成功！",
+      "info": "已取消刪除"
+    },
+    "uploadFile": "選擇音頻（.mp3/.wav），並上傳",
+    "view": {
+      "title": "音頻名稱：",
+      "info": {
+        "title": "音頻信息",
+        "label1": "條目",
+        "label2": "內容",
+        "item1": "音頻名稱",
+        "item2": "創建者",
+        "item3": "創建時間",
+        "item4": "文件大小",
+        "item5": "時長",
+        "size": "字節",
+        "name": "改名",
+        "delete": "刪除",
+        "download": "下載"
+      },
+      "confirm": {
+        "message1": "此操作將永久刪除該文件, 是否繼續?",
+        "message2": "提示",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "刪除成功！",
+        "info": "已取消刪除"
+      },
+      "namePrompt": {
+        "message1": "請輸入新名稱",
+        "message2": "修改音頻名稱",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "新的音頻名稱: ",
+        "info": "取消輸入"
+      },
+      "download": {
+        "success": "下載成功",
+        "error": "下載失敗: "
+      }
+    }
+  },
+  "particle": {
+    "uploadParticle": "上傳特效",
+    "initializeParticleData": "初始化特效數據",
+    "viewParticle": "查看特效",
+    "initializingModels": "正在初始化特效...",
+    "initializingModelProgress": "正在初始化特效 {current}/{total} ({percentage}%)",
+    "batchInitializeSuccess": "成功初始化 {count} 個特效",
+    "partialInitializeSuccess": "初始化結果: {success}個成功, {failed}個失敗 (共{total}個)",
+    "retryInitializeFailed": "是否重試初始化失敗的 {count} 個特效?",
+    "retryTitle": "重試初始化",
+    "retryConfirm": "重試",
+    "retryCancel": "跳過",
+    "initializeSuccess": "特效初始化成功",
+    "initializeError": "特效初始化失敗",
+    "prompt": {
+      "message1": "請輸入新名稱",
+      "message2": "修改特效名稱",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "新的特效名稱: ",
+      "info": "取消輸入"
+    },
+    "confirm": {
+      "message1": "此操作將永久刪除該文件, 是否繼續?",
+      "message2": "提示",
+      "confirm": "確認",
+      "cancel": "取消",
+      "success": "刪除成功！",
+      "info": "已取消刪除"
+    },
+    "uploadFile": "選擇特效（支持圖片，視頻，音頻），並上傳",
+    "view": {
+      "title": "特效名稱：",
+      "loadingText": "正在預處理",
+      "info": {
+        "title": "粒子信息",
+        "label1": "條目",
+        "label2": "內容",
+        "item1": "特效名稱",
+        "item2": "創建者",
+        "item3": "創建時間",
+        "item4": "文件大小",
+        "size": "字節",
+        "item5": "特效尺寸",
+        "item6": "時長",
+        "name": "改名",
+        "delete": "刪除",
+        "download": "下載"
+      },
+      "confirm": {
+        "message1": "此操作將永久刪除該文件, 是否繼續?",
+        "message2": "提示",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "刪除成功！",
+        "info": "已取消刪除"
+      },
+      "namePrompt": {
+        "message1": "請輸入新名稱",
+        "message2": "修改特效名稱",
+        "confirm": "確認",
+        "cancel": "取消",
+        "success": "新的特效名稱: ",
+        "info": "取消輸入"
+      },
+      "download": {
+        "success": "下載成功",
+        "error": "下載失敗: "
+      }
+    }
+  },
+  "upload": {
+    "title": "上傳文件",
+    "button": "上傳",
+    "declared": "請選擇對應格式的文件進行上傳操作",
+    "batchProgress": "批量進度： {current}/{total}",
+    "selectedFiles": "已選擇 {count} 個文件",
+    "clearFiles": "清除所有文件",
+    "effectType": "特效類型",
+    "item1": {
+      "title": "預先處理",
+      "failed": "md5計算失敗",
+      "declared": "通過計算得到文件的 md5 編碼"
+    },
+    "item2": {
+      "title": "上傳文件",
+      "failed": "文件上傳失敗",
+      "declared": "文件正在發送至服務器"
+    },
+    "item3": {
+      "title": "保存信息",
+      "failed": "數據庫儲存失敗",
+      "declared": "文件數據存儲在數據庫中"
+    }
+  }
+};
