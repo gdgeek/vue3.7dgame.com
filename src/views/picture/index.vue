@@ -26,7 +26,7 @@
 
       <template #dialogs>
         <!-- 新增上传弹窗组件 -->
-        <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="picture" :file-type="fileType"
+        <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="picture" :file-type="fileType" :max-size="5"
           @save-resource="savePicture" @success="handleUploadSuccess">
           {{ $t("picture.uploadFile") }}
         </mr-p-p-upload-dialog>

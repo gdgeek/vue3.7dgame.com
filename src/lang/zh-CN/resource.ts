@@ -498,5 +498,7 @@ export default {
     stage1: "预处理中...",
     stage2: "上传中...",
     stage3: "保存中...",
+    maxSizeLimit: "单个文件最大 {size}MB",
+    fileTooLarge: "文件超过 {size}MB 限制",
   },
 };

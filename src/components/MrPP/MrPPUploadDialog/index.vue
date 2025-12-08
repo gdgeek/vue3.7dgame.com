@@ -5,8 +5,13 @@
       <el-card class="box-card-component">
         <template #header>
           <div class="box-card-header">
-            <h3>{{ title }}:</h3>
-            {{ declared }}
+            <div>
+              <h3>{{ title }}:</h3>
+              <span class="header-declared">{{ declared }}</span>
+            </div>
+            <div v-if="maxSize > 0" class="size-limit-badge">
+              {{ $t('upload.maxSizeLimit', { size: maxSize }) }}
+            </div>
           </div>
         </template>
         <div style="position: relative">
@@ -88,6 +93,7 @@ const props = withDefaults(
     modelValue: boolean;
     showEffectTypeSelect?: boolean;
     multiple?: boolean;
+    maxSize?: number; // 最大文件大小限制 (MB)
   }>(),
   {
     fileType: "*",
@@ -96,6 +102,7 @@ const props = withDefaults(
     modelValue: false,
     showEffectTypeSelect: false,
     multiple: true,
+    maxSize: 0, // 0 表示不限制
   }
 );
 
@@ -334,8 +341,22 @@ const saveFile = async (
 // 选择文件并上传
 const select = async () => {
   try {
-    const files = await fileStore.store.fileOpen(props.fileType, props.multiple);
+    let files = await fileStore.store.fileOpen(props.fileType, props.multiple);
     if (files.length === 0) return;
+
+    // 文件大小检查
+    if (props.maxSize > 0) {
+      const maxBytes = props.maxSize * 1024 * 1024;
+      const oversizedFiles = files.filter((f: File) => f.size > maxBytes);
+      if (oversizedFiles.length > 0) {
+        const names = oversizedFiles.map((f: File) => f.name).join(', ');
+        ElMessage.error(t('upload.fileTooLarge', { size: props.maxSize }) + ': ' + names);
+        files = files.filter((f: File) => f.size <= maxBytes);
+        if (files.length === 0) {
+          return;
+        }
+      }
+    }
 
     selectedFiles.value = files;
     isDisabled.value = true; // 禁用按钮
@@ -509,8 +530,26 @@ defineExpose({
 
 .box-card-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+}
+
+.box-card-header h3 {
+  margin: 0 0 4px 0;
+}
+
+.header-declared {
+  color: #909399;
+  font-size: 13px;
+}
+
+.size-limit-badge {
+  background-color: #409eff;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .progress-item {

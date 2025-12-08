@@ -30,8 +30,8 @@
       </template>
 
       <template #dialogs>
-        <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="audio" :file-type="fileType" @save-resource="saveAudio"
-          @success="handleUploadSuccess">
+        <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="audio" :file-type="fileType" :max-size="5"
+          @save-resource="saveAudio" @success="handleUploadSuccess">
           {{ $t("audio.uploadFile") }}
         </mr-p-p-upload-dialog>
 

@@ -31,8 +31,8 @@
       </template>
 
       <template #dialogs>
-        <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="video" :file-type="fileType" @save-resource="saveVideo"
-          @success="handleUploadSuccess">
+        <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="video" :file-type="fileType" :max-size="50"
+          @save-resource="saveVideo" @success="handleUploadSuccess">
           {{ $t("video.uploadFile") }}
         </mr-p-p-upload-dialog>
 

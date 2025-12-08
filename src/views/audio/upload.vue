@@ -1,7 +1,7 @@
 <template>
   <TransitionWrapper>
     <div>
-      <mr-p-p-upload dir="audio" :file-type="fileType" @save-resource="saveAudio">
+      <mr-p-p-upload dir="audio" :file-type="fileType" :max-size="5" @save-resource="saveAudio">
         <div>{{ $t("audio.uploadFile") }}</div>
       </mr-p-p-upload>
     </div>

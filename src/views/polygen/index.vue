@@ -31,7 +31,7 @@
       </template>
 
       <template #dialogs>
-        <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="polygen" :file-type="fileType"
+        <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="polygen" :file-type="fileType" :max-size="20"
           @save-resource="savePolygen" @success="handleUploadSuccess">
           {{ $t("polygen.uploadFile") }}
         </mr-p-p-upload-dialog>
