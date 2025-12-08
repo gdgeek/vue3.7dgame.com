@@ -44,7 +44,7 @@ export const loadLanguageAsync = async (locale: string) => {
   // 动态加载语言包（排除已静态导入的 zh-CN）
   const modules = import.meta.glob(["./package/*.ts", "!./package/zh-CN.ts"]);
 
-  // 查找匹配的路径（忽略大小写）
+  // 查找匹配的路径
   const targetPath = Object.keys(modules).find((path) => {
     const fileName = path.split("/").pop()?.replace(".ts", "");
     return fileName?.toLowerCase() === locale.toLowerCase();
@@ -62,8 +62,15 @@ export const loadLanguageAsync = async (locale: string) => {
       return Promise.resolve();
     });
   } else {
-    console.error(`Language file not found for locale: ${locale}`);
-    return Promise.reject(`Language file not found for locale: ${locale}`);
+    // 回退到简体中文
+    console.warn(
+      `Language file not found for locale: ${locale}, falling back to zh-CN`
+    );
+    if (i18n.global.locale.value !== "zh-CN") {
+      (i18n.global.locale as any).value = "zh-CN";
+      await appStore.changeLanguage("zh-CN");
+    }
+    return Promise.resolve();
   }
 };
 
