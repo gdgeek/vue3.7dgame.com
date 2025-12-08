@@ -41,8 +41,8 @@ export const loadLanguageAsync = async (locale: string) => {
     return Promise.resolve();
   }
 
-  // 动态加载语言包
-  const modules = import.meta.glob("./package/*.ts");
+  // 动态加载语言包（排除已静态导入的 zh-CN）
+  const modules = import.meta.glob(["./package/*.ts", "!./package/zh-CN.ts"]);
 
   // 查找匹配的路径（忽略大小写）
   const targetPath = Object.keys(modules).find((path) => {

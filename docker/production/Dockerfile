@@ -2,11 +2,11 @@ FROM node:20-alpine AS build
 WORKDIR /app
 
 # 复制依赖文件
-COPY package.json pnpm-lock.yaml ./
+COPY package.json ./
 
 # 安装 pnpm 并安装依赖
 RUN npm install pnpm -g
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 # 复制源代码
 COPY . .
