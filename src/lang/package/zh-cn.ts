@@ -203,7 +203,10 @@ export default {
     loginTitle: "登录账号",
     username: "电子信箱",
     password: "设置密码",
-    login: "登录平台",
+    login: "登录",
+    loginCode: "登录码",
+    scanTip: "请使用手机扫描二维码登录",
+    code: "验证码",
     download: "下载相关程序",
     rules: {
       username: {

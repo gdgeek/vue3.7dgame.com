@@ -1,6 +1,6 @@
 <template>
   <TransitionWrapper>
-    <div>1112
+    <div>
       <Book :items="list"></Book>
       <el-tabs v-if="env.local()" type="border-card" lazy>
         <el-tab-pane :label="informationStore.title">

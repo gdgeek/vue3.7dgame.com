@@ -1,13 +1,13 @@
 <template>
   <div>
-    <el-dialog v-model="dialogVisible" title="登陆码" width="50%" align-center>
+    <el-dialog v-model="dialogVisible" :title="t('login.loginCode')" width="50%" align-center>
 
       <div class="qrcode-container">
-       
+
         <div v-loading="code === ''" :class="['qrcode-bg', { 'dark-theme': isDark }]">
           <qrcode-vue v-if="code !== ''" :value="code" :size="size" level="H"></qrcode-vue>
         </div>
-        <p class="qrcode-tip">请使用手机扫描二维码登录</p>
+        <p class="qrcode-tip">{{ t('login.scanTip') }}</p>
       </div>
     </el-dialog>
   </div>
@@ -20,6 +20,9 @@ import QrcodeVue from "qrcode.vue";
 import { useSettingsStore } from '@/store/modules/settings';
 import { ThemeEnum } from '@/enums/ThemeEnum';
 import { getUserLinked } from '@/api/v1/tools';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 const dialogVisible = ref(false);
 const size = ref<number>(400);
 const code = ref<string>("");
@@ -37,7 +40,7 @@ const onResize = () => {
   if (resizeTimer) {
     clearTimeout(resizeTimer);
   }
-  
+
   resizeTimer = setTimeout(() => {
     try {
       const maxSize = Math.min(window.innerWidth, window.innerHeight) * 0.4;

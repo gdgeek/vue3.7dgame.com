@@ -202,7 +202,9 @@ export default {
     loginTitle: "アカウントにログイン",
     username: "email",
     password: "パスワード",
-    login: "プラットフォームにログイン",
+    login: "ログイン",
+    loginCode: "ログインコード",
+    scanTip: "携帯電話でQRコードをスキャンしてログインしてください",
     download: "関連プログラムのダウンロード",
     rules: {
       username: {

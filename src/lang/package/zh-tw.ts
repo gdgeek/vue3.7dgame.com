@@ -200,8 +200,10 @@ export default {
     h4: "準備好出發了么？",
     loginTitle: "登錄賬號",
     username: "電子信箱",
-    password: "設置密碼",
-    login: "登錄平台",
+    password: "密碼",
+    login: "登錄",
+    loginCode: "登錄碼",
+    scanTip: "請使用手機掃描二維碼登錄",
     download: "下載相關程序",
     rules: {
       username: {

@@ -205,6 +205,8 @@ export default {
     username: "Email",
     password: "Password",
     login: "Login",
+    loginCode: "Login Code",
+    scanTip: "Please scan the QR code with your phone to log in",
     download: "Download Related Programs",
     rules: {
       username: {

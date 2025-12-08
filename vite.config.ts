@@ -160,9 +160,32 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       },
       rollupOptions: {
         output: {
-          // manualChunks: {
-          //   "vue-i18n": ["vue-i18n"],
-          // },
+          // 手动分割第三方库到独立 chunk
+          manualChunks: {
+            // Vue 核心
+            "vue-core": ["vue", "vue-router", "pinia", "vue-i18n"],
+            // Element Plus 组件库
+            "element-plus": ["element-plus", "@element-plus/icons-vue"],
+            // 3D 相关
+            three: ["three"],
+            // 图表
+            echarts: ["echarts"],
+            // 代码编辑器
+            codemirror: [
+              "codemirror",
+              "@codemirror/lang-javascript",
+              "@codemirror/lang-json",
+              "@codemirror/lint",
+              "@codemirror/theme-one-dark",
+              "vue-codemirror",
+            ],
+            // FontAwesome 图标
+            fontawesome: [
+              "@fortawesome/fontawesome-svg-core",
+              "@fortawesome/free-solid-svg-icons",
+              "@fortawesome/vue-fontawesome",
+            ],
+          },
           // 用于从入口点创建的块的打包输出格式[name]表示文件名,[hash]表示该文件内容hash值
           entryFileNames: "js/[name].[hash].js",
           // 用于命名代码拆分时创建的共享块的输出命名

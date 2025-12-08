@@ -18,6 +18,7 @@
 import { useI18n } from "vue-i18n";
 import { useAppStore } from "@/store/modules/app";
 import { LanguageEnum } from "@/enums/LanguageEnum";
+import { loadLanguageAsync } from "@/lang/index";
 
 defineProps({
   size: {
@@ -38,8 +39,8 @@ const appStore = useAppStore();
 const { locale, t } = useI18n();
 
 function handleLanguageChange(lang: string) {
-  locale.value = lang;
-  appStore.changeLanguage(lang);
-  ElMessage.success(t("langSelect.message.success"));
+  loadLanguageAsync(lang).then(() => {
+    ElMessage.success(t("langSelect.message.success"));
+  });
 }
 </script>

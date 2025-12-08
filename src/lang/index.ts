@@ -2,11 +2,7 @@ import type { App } from "vue";
 import { createI18n } from "vue-i18n";
 import { useAppStoreHook } from "@/store/modules/app";
 // 本地语言包
-import enLocale from "./package/en-US";
 import zhCnLocale from "./package/zh-CN";
-import jaLocale from "./package/ja-JP";
-import thLocale from "./package/th-TH";
-import zhTwLocale from "./package/zh-TW";
 
 const appStore = useAppStoreHook();
 
@@ -14,23 +10,11 @@ const messages = {
   "zh-CN": {
     ...zhCnLocale,
   },
-  "en-US": {
-    ...enLocale,
-  },
-  "ja-JP": {
-    ...jaLocale,
-  },
-  "th-TH": {
-    ...thLocale,
-  },
-  "zh-TW": {
-    ...zhTwLocale,
-  },
 };
 
 const i18n = createI18n({
   legacy: false,
-  locale: appStore.language,
+  locale: appStore.language as string,
   messages: messages,
   globalInjection: true,
 });
@@ -39,5 +23,48 @@ const i18n = createI18n({
 export function setupI18n(app: App<Element>) {
   app.use(i18n);
 }
+
+/**
+ * 异步加载语言包
+ * @param locale 语言标识
+ */
+export const loadLanguageAsync = async (locale: string) => {
+  // 检查语言是否已经加载（不仅在 availableLocales 中，还要有实际的消息内容）
+  const messages = i18n.global.getLocaleMessage(locale);
+  const hasMessages = messages && Object.keys(messages).length > 0;
+
+  if (hasMessages) {
+    if (i18n.global.locale.value !== locale) {
+      (i18n.global.locale as any).value = locale;
+      await appStore.changeLanguage(locale);
+    }
+    return Promise.resolve();
+  }
+
+  // 动态加载语言包
+  const modules = import.meta.glob("./package/*.ts");
+
+  // 查找匹配的路径（忽略大小写）
+  const targetPath = Object.keys(modules).find((path) => {
+    const fileName = path.split("/").pop()?.replace(".ts", "");
+    return fileName?.toLowerCase() === locale.toLowerCase();
+  });
+
+  if (targetPath && modules[targetPath]) {
+    return (modules[targetPath]() as Promise<any>).then(async (messages) => {
+      // 使用正确的文件名作为 locale
+      const correctLocale =
+        targetPath.split("/").pop()?.replace(".ts", "") || locale;
+
+      i18n.global.setLocaleMessage(correctLocale, messages.default);
+      (i18n.global.locale as any).value = correctLocale;
+      await appStore.changeLanguage(correctLocale);
+      return Promise.resolve();
+    });
+  } else {
+    console.error(`Language file not found for locale: ${locale}`);
+    return Promise.reject(`Language file not found for locale: ${locale}`);
+  }
+};
 
 export default i18n;
