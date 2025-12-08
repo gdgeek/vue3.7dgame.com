@@ -1,10 +1,17 @@
 FROM node:20-alpine AS build
 WORKDIR /app
-COPY package.json ./
+
+# 复制依赖文件
+COPY package.json pnpm-lock.yaml ./
+
+# 安装 pnpm 并安装依赖
 RUN npm install pnpm -g
-RUN pnpm install vuex
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
+
+# 复制源代码
 COPY . .
+
+# 构建
 RUN pnpm run build
 
 # 使用 Nginx 作为生产阶段

@@ -3,8 +3,9 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 
 export const Layout = () => import("@/layout/index.vue");
 
-import Structure from "@/layout/structure/index.vue";
-import Empty from "@/layout/empty/index.vue";
+// 布局组件懒加载，减少首屏加载体积
+const Structure = () => import("@/layout/structure/index.vue");
+const Empty = () => import("@/layout/empty/index.vue");
 import { Meta, RouteVO } from "@/api/menu/model";
 
 //import { useUserStore } from "@/store/modules/user";
