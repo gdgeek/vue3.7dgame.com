@@ -11,6 +11,9 @@ export default {
     enter: "进入",
     open: "打开",
     add: "添加",
+    newest: "最新",
+    oldest: "最早",
+    name: "名称",
   },
   request: {
     loginExpired: "登录过期，请重新登录",

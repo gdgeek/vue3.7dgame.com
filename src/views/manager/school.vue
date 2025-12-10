@@ -16,10 +16,7 @@
         <template #enter>
           <el-descriptions :column="1" size="small" class="school-info">
             <el-descriptions-item :label="$t('manager.school.principal')">
-              <span v-if="item.principal">
-                {{ (item.principal as any).nickname || (item.principal as any).username || '-' }}
-              </span>
-              <el-button v-else type="primary" size="small" :icon="Plus" circle @click="handleAssignPrincipal(item)" />
+              {{ item.principal ? ((item.principal as any).nickname || (item.principal as any).username || '-') : '-' }}
             </el-descriptions-item>
             <el-descriptions-item :label="$t('manager.school.address')">
               {{ item.info?.address || '-' }}

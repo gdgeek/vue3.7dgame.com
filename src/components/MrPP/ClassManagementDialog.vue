@@ -49,14 +49,9 @@
             <div v-if="(item.eduTeachers || []).length > 3" style="color: #999;">...</div>
           </div>
           <template #enter>
-            <el-button-group>
-              <el-button type="primary" size="small" @click="handleViewTeachers(item)">
-                {{ $t('manager.class.teacher') }}
-              </el-button>
-              <el-button type="success" size="small" @click="handleViewStudents(item)">
-                {{ $t('manager.class.student') }}
-              </el-button>
-            </el-button-group>
+            <el-button type="primary" size="small" @click="handleViewTeachers(item)">
+              {{ $t('manager.class.teacher') }}
+            </el-button>
           </template>
         </MrPPCard>
       </template>
@@ -188,6 +183,12 @@ const editForm = ref({
   image_id: null as number | null,
 });
 
+// Store original values for comparison
+const originalForm = ref({
+  name: '',
+  image_id: null as number | null,
+});
+
 const currentClass = ref<EduClass | null>(null);
 const teachers = ref<any[]>([]);
 const students = ref<any[]>([]);
@@ -240,11 +241,17 @@ const handleCreate = () => {
 };
 
 const handleEdit = async (item: EduClass) => {
+  const imageId = item.image?.id || null;
   editForm.value = {
     id: item.id,
     name: item.name,
     imageUrl: item.image?.url || '',
-    image_id: (item as any).image_id || null,
+    image_id: imageId,
+  };
+  // Store original values for comparison
+  originalForm.value = {
+    name: item.name,
+    image_id: imageId,
   };
   editDialogVisible.value = true;
 };
@@ -255,17 +262,36 @@ const handleSaveEdit = async () => {
     return;
   }
 
+  const trimmedName = editForm.value.name.trim();
+
+  // Check if anything changed (for update mode)
+  if (editForm.value.id) {
+    const nameChanged = trimmedName !== originalForm.value.name;
+    const imageChanged = editForm.value.image_id !== originalForm.value.image_id;
+
+    if (!nameChanged && !imageChanged) {
+      // No changes, just close the dialog
+      editDialogVisible.value = false;
+      return;
+    }
+  }
+
   try {
     const data: any = {
-      name: editForm.value.name.trim(),
-      image_id: editForm.value.image_id,
+      name: trimmedName,
     };
+
+    // Only include image_id if it was changed or for new class
+    if (!editForm.value.id || editForm.value.image_id !== originalForm.value.image_id) {
+      data.image_id = editForm.value.image_id;
+    }
 
     if (editForm.value.id) {
       await updateClass(editForm.value.id, data);
       ElMessage.success(t('manager.messages.updateSuccess'));
     } else {
       data.school_id = props.schoolId;
+      data.image_id = editForm.value.image_id;
       await createClass(data);
       ElMessage.success(t('manager.messages.createSuccess'));
     }

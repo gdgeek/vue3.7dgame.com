@@ -41,7 +41,7 @@ export const getStudent = (id: number) => {
   });
 };
 
-export const createStudent = (data: { user_id: number; class_id: number }) => {
+export const createStudent = (data: { user_id?: number; class_id: number }) => {
   return request({
     url: `/edu-student`,
     method: "post",
@@ -52,5 +52,46 @@ export const deleteStudent = (id: number) => {
   return request({
     url: `/edu-student/${id}`,
     method: "delete",
+  });
+};
+
+export const updateStudent = (id: number, data: Partial<Student>) => {
+  return request({
+    url: `/edu-student/${id}`,
+    method: "put",
+    data,
+  });
+};
+
+// Get current user's student records (classes the user has joined as a student)
+export const getMyStudentRecords = (
+  sort = "-created_at",
+  page = 1,
+  expand = "image,school"
+) => {
+  const query: Record<string, any> = {};
+  query["expand"] = expand;
+  query["sort"] = sort;
+  if (page > 1) {
+    query["page"] = page;
+  }
+  return request<{ id: number; eduClass: any }[]>({
+    url: `/edu-student${qs.stringify(query, true)}`,
+    method: "get",
+  });
+};
+
+export const getStudentMe = () => {
+  return request<Student[]>({
+    url: `/edu-student/me?expand=class`,
+    method: "get",
+  });
+};
+
+export const joinClass = (data: { class_id: number }) => {
+  return request({
+    url: `/edu-student/join`,
+    method: "post",
+    data,
   });
 };

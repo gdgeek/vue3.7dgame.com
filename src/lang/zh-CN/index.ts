@@ -8,6 +8,8 @@ import meta from "./meta";
 import verse from "./verse";
 import manager from "./manager";
 
+import campus from "./campus";
+
 export default {
   ...common,
   ...route,
@@ -17,4 +19,5 @@ export default {
   ...meta,
   ...verse,
   ...manager,
+  ...campus,
 };

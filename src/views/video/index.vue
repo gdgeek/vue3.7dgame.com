@@ -106,6 +106,8 @@ const saveVideo = async (
     }
     if (image_id) {
       data.image_id = image_id;
+    } else {
+      data.image_id = file_id;
     }
     const response = await postVideo(data);
     if (response.data.id) {

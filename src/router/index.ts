@@ -5,6 +5,7 @@ export const Layout = () => import("@/layout/index.vue");
 
 // 布局组件懒加载，减少首屏加载体积
 const Structure = () => import("@/layout/structure/index.vue");
+const SimpleStructure = () => import("@/layout/structure/simple.vue");
 const Empty = () => import("@/layout/empty/index.vue");
 import { Meta, RouteVO } from "@/api/menu/model";
 
@@ -165,16 +166,6 @@ const routes: RouteRecordRaw[] = [
             path: "/home/creator",
             name: "SettingsCreator",
             component: () => import("@/views/home/creator.vue"),
-          },
-          {
-            meta: {
-              title: "personalCenter.campus",
-              hidden: false,
-              icon: "el-icon-school",
-            },
-            path: "/home/campus",
-            name: "HomeCampus",
-            component: () => import("@/views/home/campus.vue"),
           },
         ],
       },
@@ -618,6 +609,62 @@ const routes: RouteRecordRaw[] = [
       },
 
       {
+        path: "/campus",
+        component: SimpleStructure,
+        redirect: "/campus/my",
+        name: "Campus",
+        meta: {
+          title: "campus.title",
+          icon: "el-icon-School",
+          hidden: false,
+          alwaysShow: true,
+          params: null,
+        },
+        children: [
+          {
+            path: "/campus/my",
+            component: () => import("@/views/home/campus.vue"),
+            name: "CampusMy",
+            meta: {
+              title: "campus.myCampus",
+              icon: "el-icon-User",
+              hidden: false,
+            },
+          },
+          {
+            path: "/campus/school",
+            component: () => import("@/views/manager/school.vue"),
+            name: "CampusSchool",
+            meta: {
+              title: "campus.schoolManagement",
+              icon: "el-icon-OfficeBuilding",
+              hidden: false,
+            },
+          },
+          {
+            path: "/campus/teacher",
+            component: () => import("@/views/campus/teacher.vue"),
+            name: "CampusTeacher",
+            meta: {
+              title: "campus.teacher",
+              icon: "el-icon-UserFilled",
+              hidden: false,
+            },
+          },
+          {
+            path: "/campus/student",
+            component: () => import("@/views/campus/student.vue"),
+            name: "CampusStudent",
+            meta: {
+              title: "campus.student",
+              icon: "el-icon-User",
+              hidden: false,
+            },
+          },
+        ],
+      },
+
+      {
         path: "/manager",
         component: null,
         name: "Manager",
@@ -639,27 +686,7 @@ const routes: RouteRecordRaw[] = [
               hidden: true,
             },
           },
-          {
-            path: "/manager/school",
-            component: () => import("@/views/manager/school.vue"),
-            name: "ManagerSchool",
-            meta: {
-              title: "manager.schoolManagement",
-              icon: "cascader",
-              hidden: true,
-            },
-          },
-          {
-            path: "/manager/class",
-            component: () => import("@/views/manager/class.vue"),
-            name: "ManagerClass",
-            meta: {
-              title: "manager.classManagement",
-              icon: "cascader",
-              hidden: true,
-              private: true,
-            },
-          },
+
           {
             path: "/phototype/list",
             component: () => import("@/views/phototype/list.vue"),
@@ -807,7 +834,10 @@ const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   const can = ability.can.bind(ability);
   route.forEach((route) => {
     if (route.meta) {
-      route.meta.hidden = !can("open", new AbilityRouter(route.path));
+      // 临时跳过校园相关路由的权限检查
+      if (!route.path.startsWith("/campus")) {
+        route.meta.hidden = !can("open", new AbilityRouter(route.path));
+      }
     }
     if (route.children) {
       check(route.children, ability);

@@ -1,169 +1,195 @@
 // route translations for th-TH
 export default {
-  "route": {
-    "dashboard": "หน้าหลัก",
-    "personalCenter": {
-      "title": "ศูนย์ส่วนบุคคล",
-      "myHomepage": "หน้าแรกของฉัน",
-      "document": "เอกสาร",
-      "category": "หมวดหมู่",
-      "processOfCreation": "กระบวนการสร้างสรรค์",
-      "campus": "วิทยาเขต"
+  route: {
+    dashboard: "หน้าหลัก",
+    campus: {
+      title: "วิทยาเขต",
+      myCampus: "วิทยาเขตของฉัน",
+      schoolManagement: "การจัดการโรงเรียน",
+      teacher: "ครู",
+      student: "นักเรียน",
     },
-    "settings": {
-      "title": "การตั้งค่า",
-      "accountSetting": "ตั้งค่าบัญชี",
-      "personalData": "ข้อมูลส่วนตัว",
-      "userPresentation": "การนำเสนอผู้ใช้"
+    personalCenter: {
+      title: "ศูนย์ส่วนบุคคล",
+      myHomepage: "หน้าแรกของฉัน",
+      document: "เอกสาร",
+      category: "หมวดหมู่",
+      processOfCreation: "กระบวนการสร้างสรรค์",
+      campus: {
+        title: "วิทยาเขต",
+        teacherTab: "ในฐานะครู",
+        studentTab: "ในฐานะนักเรียน",
+        noClasses: "ไม่พบชั้นเรียน",
+        schoolName: "โรงเรียน",
+        applyClass: "สมัครชั้นเรียน",
+        applySuccess: "สมัครสำเร็จ",
+        applyFailed: "สมัครล้มเหลว",
+        search: "ค้นหา",
+        searchPlaceholder: "ป้อนชื่อชั้นเรียนเพื่อค้นหา",
+        apply: "สมัคร",
+        selectClass: "เลือกชั้นเรียน",
+        alreadyJoined: "เข้าร่วมแล้ว",
+        leaveClass: "ออกจากชั้นเรียน",
+        leaveSuccess: "ออกสำเร็จ",
+        leaveFailed: "ออกล้มเหลว",
+        confirmLeave: "คุณแน่ใจหรือไม่ว่าต้องการออกจากชั้นเรียนนี้?",
+      },
     },
-    "resourceManagement": {
-      "title": "การจัดการทรัพยากร",
-      "voxelManagement": {
-        "title": "การจัดการวอกเซล",
-        "voxelList": "รายการวอกเซล",
-        "voxelUpload": "อัปโหลดวอกเซล",
-        "voxelProcessing": "การประมวลผลวอกเซล"
-      },
-      "polygenManagement": {
-        "title": "การจัดการโมเดล",
-        "polygenList": "รายการโมเดล",
-        "polygenUpload": "อัปโหลดโมเดล",
-        "polygenProcessing": "การประมวลผลโมเดล"
-      },
-      "pictureManagement": {
-        "title": "การจัดการรูปภาพ",
-        "pictureList": "รายการรูปภาพ",
-        "pictureUpload": "อัปโหลดรูปภาพ",
-        "pictureProcessing": "การประมวลผลรูปภาพ"
-      },
-      "videoManagement": {
-        "title": "การจัดการวิดีโอ",
-        "videoList": "รายการวิดีโอ",
-        "videoUpload": "อัปโหลดวิดีโอ",
-        "videoProcessing": "การประมวลผลวิดีโอ"
-      },
-      "audioManagement": {
-        "title": "การจัดการเสียง",
-        "audioList": "รายการเสียง",
-        "audioUpload": "อัปโหลดเสียง",
-        "audioTTS": "สังเคราะห์เสียง",
-        "audioProcessing": "การประมวลผลเสียง"
-      },
-      "particleManagement": {
-        "title": "การจัดการเอฟเฟกต์",
-        "particleList": "รายการเอฟเฟกต์",
-        "particleUpload": "อัปโหลดเอฟเฟกต์",
-        "particleProcessing": "การประมวลผลเอฟเฟกต์"
-      }
+    settings: {
+      title: "การตั้งค่า",
+      accountSetting: "ตั้งค่าบัญชี",
+      personalData: "ข้อมูลส่วนตัว",
+      userPresentation: "การนำเสนอผู้ใช้",
     },
-    "meta": {
-      "title": "เอนทิตี",
-      "metaList": "รายการเอนทิตี",
-      "systemDefault": "ค่าเริ่มต้นระบบ",
-      "edit": "แก้ไข",
-      "scriptEditor": "แก้ไขสคริปต์",
-      "sceneEditor": "แก้ไขเอนทิตี"
-    },
-    "ai": {
-      "title": "โมเดล AI",
-      "list": "รายการ",
-      "generation": "สร้างด้วย AI"
-    },
-    "project": {
-      "title": "ฉาก",
-      "selfGenerated": "สร้างเอง",
-      "systemRecommendation": "แนะนำโดยระบบ",
-      "shareWithFriends": "แบ่งปันกับเพื่อน",
-      "viewTitle": "แก้ไข",
-      "scriptEditor": "แก้ไขสคริปต์",
-      "sceneEditor": "แก้ไขฉาก"
-    },
-    "manager": {
-      "title": "การจัดการ",
-      "userManagement": "การจัดการผู้ใช้",
-      "schoolManagement": "การจัดการโรงเรียน",
-      "classManagement": "การจัดการชั้นเรียน",
-      "teacherManagement": "การจัดการครู",
-      "studentManagement": "การจัดการนักเรียน",
-      "createSchool": "สร้างโรงเรียน",
-      "createClass": "สร้างชั้นเรียน",
-      "school": {
-        "principal": "ผู้อำนวยการ",
-        "address": "ที่อยู่"
+    resourceManagement: {
+      title: "การจัดการทรัพยากร",
+      voxelManagement: {
+        title: "การจัดการวอกเซล",
+        voxelList: "รายการวอกเซล",
+        voxelUpload: "อัปโหลดวอกเซล",
+        voxelProcessing: "การประมวลผลวอกเซล",
       },
-      "class": {
-        "title": "การจัดการชั้นเรียน",
-        "schoolTitle": "{school} - การจัดการชั้นเรียน",
-        "teacher": "ครู",
-        "student": "นักเรียน",
-        "teacherList": "รายชื่อครู",
-        "studentList": "รายชื่อนักเรียน",
-        "selectTeacher": "เลือกครู",
-        "selectStudent": "เลือกนักเรียน",
-        "filteringBySchool": "กำลังกรองโรงเรียน",
-        "dialog": {
-          "editTitle": "แก้ไขชั้นเรียน"
+      polygenManagement: {
+        title: "การจัดการโมเดล",
+        polygenList: "รายการโมเดล",
+        polygenUpload: "อัปโหลดโมเดล",
+        polygenProcessing: "การประมวลผลโมเดล",
+      },
+      pictureManagement: {
+        title: "การจัดการรูปภาพ",
+        pictureList: "รายการรูปภาพ",
+        pictureUpload: "อัปโหลดรูปภาพ",
+        pictureProcessing: "การประมวลผลรูปภาพ",
+      },
+      videoManagement: {
+        title: "การจัดการวิดีโอ",
+        videoList: "รายการวิดีโอ",
+        videoUpload: "อัปโหลดวิดีโอ",
+        videoProcessing: "การประมวลผลวิดีโอ",
+      },
+      audioManagement: {
+        title: "การจัดการเสียง",
+        audioList: "รายการเสียง",
+        audioUpload: "อัปโหลดเสียง",
+        audioTTS: "สังเคราะห์เสียง",
+        audioProcessing: "การประมวลผลเสียง",
+      },
+      particleManagement: {
+        title: "การจัดการเอฟเฟกต์",
+        particleList: "รายการเอฟเฟกต์",
+        particleUpload: "อัปโหลดเอฟเฟกต์",
+        particleProcessing: "การประมวลผลเอฟเฟกต์",
+      },
+    },
+    meta: {
+      title: "เอนทิตี",
+      metaList: "รายการเอนทิตี",
+      systemDefault: "ค่าเริ่มต้นระบบ",
+      edit: "แก้ไข",
+      scriptEditor: "แก้ไขสคริปต์",
+      sceneEditor: "แก้ไขเอนทิตี",
+    },
+    ai: {
+      title: "โมเดล AI",
+      list: "รายการ",
+      generation: "สร้างด้วย AI",
+    },
+    project: {
+      title: "ฉาก",
+      selfGenerated: "สร้างเอง",
+      systemRecommendation: "แนะนำโดยระบบ",
+      shareWithFriends: "แบ่งปันกับเพื่อน",
+      viewTitle: "แก้ไข",
+      scriptEditor: "แก้ไขสคริปต์",
+      sceneEditor: "แก้ไขฉาก",
+    },
+    manager: {
+      title: "การจัดการ",
+      userManagement: "การจัดการผู้ใช้",
+      schoolManagement: "การจัดการโรงเรียน",
+      classManagement: "การจัดการชั้นเรียน",
+      teacherManagement: "การจัดการครู",
+      studentManagement: "การจัดการนักเรียน",
+      createSchool: "สร้างโรงเรียน",
+      createClass: "สร้างชั้นเรียน",
+      school: {
+        principal: "ผู้อำนวยการ",
+        address: "ที่อยู่",
+      },
+      class: {
+        title: "การจัดการชั้นเรียน",
+        schoolTitle: "{school} - การจัดการชั้นเรียน",
+        teacher: "ครู",
+        student: "นักเรียน",
+        teacherList: "รายชื่อครู",
+        studentList: "รายชื่อนักเรียน",
+        selectTeacher: "เลือกครู",
+        selectStudent: "เลือกนักเรียน",
+        filteringBySchool: "กำลังกรองโรงเรียน",
+        dialog: {
+          editTitle: "แก้ไขชั้นเรียน",
         },
-        "form": {
-          "name": "ชื่อชั้นเรียน",
-          "namePlaceholder": "กรุณากรอกชื่อชั้นเรียน",
-          "image": "รูปปกชั้นเรียน"
+        form: {
+          name: "ชื่อชั้นเรียน",
+          namePlaceholder: "กรุณากรอกชื่อชั้นเรียน",
+          image: "รูปปกชั้นเรียน",
         },
-        "errors": {
-          "selectSchoolFirst": "กรุณาเลือกโรงเรียนก่อน",
-          "schoolIdRequired": "ต้องระบุ ID โรงเรียน"
-        }
+        errors: {
+          selectSchoolFirst: "กรุณาเลือกโรงเรียนก่อน",
+          schoolIdRequired: "ต้องระบุ ID โรงเรียน",
+        },
       },
-      "dialog": {
-        "editTitle": "แก้ไขโรงเรียน"
+      dialog: {
+        editTitle: "แก้ไขโรงเรียน",
       },
-      "form": {
-        "name": "ชื่อโรงเรียน",
-        "namePlaceholder": "กรุณากรอกชื่อโรงเรียน",
-        "image": "รูปปกโรงเรียน",
-        "principal": "ผู้อำนวยการ",
-        "principalPlaceholder": "เลือกผู้อำนวยการ",
-        "cancel": "ยกเลิก",
-        "submit": "ส่ง"
+      form: {
+        name: "ชื่อโรงเรียน",
+        namePlaceholder: "กรุณากรอกชื่อโรงเรียน",
+        image: "รูปปกโรงเรียน",
+        principal: "ผู้อำนวยการ",
+        principalPlaceholder: "เลือกผู้อำนวยการ",
+        cancel: "ยกเลิก",
+        submit: "ส่ง",
       },
-      "list": {
-        "remove": "ลบออก"
+      list: {
+        remove: "ลบออก",
       },
-      "messages": {
-        "updateSuccess": "อัปเดตสำเร็จ",
-        "createSuccess": "สร้างสำเร็จ",
-        "deleteSuccess": "ลบสำเร็จ",
-        "addSuccess": "เพิ่มสำเร็จ",
-        "removeSuccess": "ลบออกสำเร็จ"
+      messages: {
+        updateSuccess: "อัปเดตสำเร็จ",
+        createSuccess: "สร้างสำเร็จ",
+        deleteSuccess: "ลบสำเร็จ",
+        addSuccess: "เพิ่มสำเร็จ",
+        removeSuccess: "ลบออกสำเร็จ",
       },
-      "errors": {
-        "validationFailed": "การตรวจสอบล้มเหลว",
-        "saveFailed": "บันทึกล้มเหลว",
-        "deleteFailed": "ลบล้มเหลว",
-        "addFailed": "เพิ่มล้มเหลว",
-        "removeFailed": "ลบออกล้มเหลว",
-        "alreadyInClass": "ผู้ใช้นี้อยู่ในชั้นเรียนแล้ว"
+      errors: {
+        validationFailed: "การตรวจสอบล้มเหลว",
+        saveFailed: "บันทึกล้มเหลว",
+        deleteFailed: "ลบล้มเหลว",
+        addFailed: "เพิ่มล้มเหลว",
+        removeFailed: "ลบออกล้มเหลว",
+        alreadyInClass: "ผู้ใช้นี้อยู่ในชั้นเรียนแล้ว",
       },
-      "confirm": {
-        "deleteTitle": "ยืนยันการลบ",
-        "deleteMessage": "คุณแน่ใจหรือไม่ว่าต้องการลบ? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
-        "removeMemberTitle": "ยืนยันการลบออก",
-        "removeMemberMessage": "คุณแน่ใจหรือไม่ว่าต้องการลบสมาชิกนี้ออก?",
-        "confirm": "ยืนยัน",
-        "cancel": "ยกเลิก"
-      }
+      confirm: {
+        deleteTitle: "ยืนยันการลบ",
+        deleteMessage:
+          "คุณแน่ใจหรือไม่ว่าต้องการลบ? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
+        removeMemberTitle: "ยืนยันการลบออก",
+        removeMemberMessage: "คุณแน่ใจหรือไม่ว่าต้องการลบสมาชิกนี้ออก?",
+        confirm: "ยืนยัน",
+        cancel: "ยกเลิก",
+      },
     },
-    "game": {
-      "title": "เกม",
-      "gameIndex": "ตั้งค่าเกม",
-      "gameMap": "ตั้งค่าแผนที่"
+    game: {
+      title: "เกม",
+      gameIndex: "ตั้งค่าเกม",
+      gameMap: "ตั้งค่าแผนที่",
     },
-    "logout": {
-      "title": "ออกจากระบบ"
+    logout: {
+      title: "ออกจากระบบ",
     },
-    "phototype": {
-      "title": "ต้นแบบ",
-      "list": "รายการ"
-    }
-  }
+    phototype: {
+      title: "ต้นแบบ",
+      list: "รายการ",
+    },
+  },
 };

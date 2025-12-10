@@ -37,7 +37,7 @@ const url = computed(() => {
 
   // Check if it's a Tencent Cloud COS URL
   if (imageUrl && imageUrl.includes('myqcloud.com')) {
-    const isVideo = /\.(mp4|mov|avi)$/i.test(imageUrl.split('?')[0]);
+    const isVideo = /\.(mp4|mov|avi|webm)$/i.test(imageUrl.split('?')[0]);
 
     if (isVideo) {
       if (!imageUrl.includes('ci-process=snapshot')) {

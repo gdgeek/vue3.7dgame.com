@@ -1,20 +1,23 @@
 // common translations for zh-TW
 export default {
-  "common": {
-    "confirm": "確認",
-    "cancel": "取消",
-    "selectUser": "選擇用戶",
-    "username": "用戶名",
-    "nickname": "暱稱",
-    "select": "選擇",
-    "noUsers": "未找到用戶",
-    "enter": "進入",
-    "open": "打開",
-    "add": "添加"
+  common: {
+    confirm: "確認",
+    cancel: "取消",
+    selectUser: "選擇用戶",
+    username: "用戶名",
+    nickname: "暱稱",
+    select: "選擇",
+    noUsers: "未找到用戶",
+    enter: "進入",
+    open: "打開",
+    add: "添加",
+    newest: "最新",
+    oldest: "最早",
+    name: "名稱",
   },
-  "request": {
-    "loginExpired": "登錄過期，請重新登錄",
-    "networkError": "網絡錯誤，請檢查您的網絡連接",
-    "serverError": "服務器內部錯誤，請稍後再試"
-  }
+  request: {
+    loginExpired: "登錄過期，請重新登錄",
+    networkError: "網絡錯誤，請檢查您的網絡連接",
+    serverError: "服務器內部錯誤，請稍後再試",
+  },
 };

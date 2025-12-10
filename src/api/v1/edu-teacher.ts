@@ -57,3 +57,11 @@ export const deleteTeacher = (id: number) => {
     method: "delete",
   });
 };
+
+export const updateTeacher = (id: number, data: Partial<Teacher>) => {
+  return request({
+    url: `/edu-teacher/${id}`,
+    method: "put",
+    data,
+  });
+};
