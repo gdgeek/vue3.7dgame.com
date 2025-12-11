@@ -20,14 +20,16 @@
 /* My-SourceHanSansCN for Content 思源黑*/
 @font-face {
   font-family: "SourceHanSansSC-VF";
-  src: url("./My-font/SourceHanSansSC-VF.ttf.woff2");
+  src: url("./My-font/SourceHanSansSC-VF.otf.woff2") format("woff2"),
+       url("./My-font/SourceHanSansCN.ttf") format("truetype");
   font-display: swap;
 }
 
 
 @font-face {
   font-family: "SmileySans-Oblique";
-  src: url("./My-font/SmileySans-Oblique.ttf.woff2");
+  src: url("./My-font/SmileySans-Oblique.ttf.woff2") format("woff2"),
+       url("./My-font/SmileySans-Oblique.otf") format("opentype");
   font-display: swap;
 }
 
