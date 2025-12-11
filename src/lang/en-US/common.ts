@@ -8,6 +8,7 @@ export default {
     nickname: "Nickname",
     select: "Select",
     noUsers: "No users found",
+    noData: "No Data",
     enter: "Enter",
     open: "Open",
     classList: "Class List",
