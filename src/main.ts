@@ -5,7 +5,7 @@ import "vue-cropper/dist/index.css";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 // 按需导入图标，而不是全量导入 fas（可减少约 750KB）
-import { faThumbsUp, faSave } from "@fortawesome/free-solid-svg-icons";
+import { faThumbsUp, faSave, faPlus } from "@fortawesome/free-solid-svg-icons";
 import VueIframe from "vue-iframes";
 import { VueAppleLoginConfig } from "@/utils/helper";
 import ElementPlus from "element-plus";
@@ -17,7 +17,7 @@ import { abilitiesPlugin } from "@casl/vue";
 import highlightDirective from "./directive/highlight";
 import VueAppleLogin from "vue-apple-login";
 // 只注册实际使用的图标
-library.add(faThumbsUp, faSave);
+library.add(faThumbsUp, faSave, faPlus);
 
 // 本地SVG图标
 import "virtual:svg-icons-register";
