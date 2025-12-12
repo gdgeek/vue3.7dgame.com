@@ -15,6 +15,11 @@ export default {
     newest: "Newest",
     oldest: "Oldest",
     name: "Name",
+    edit: "Edit",
+    submit: "Submit",
+    updateSuccess: "Update successful",
+    createSuccess: "Create successful",
+    operationFailed: "Operation failed",
   },
   request: {
     loginExpired: "Login expired, please log in again",

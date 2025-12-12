@@ -14,6 +14,11 @@ export default {
     newest: "最新",
     oldest: "最早",
     name: "名称",
+    edit: "编辑",
+    submit: "提交",
+    updateSuccess: "更新成功",
+    createSuccess: "创建成功",
+    operationFailed: "操作失败",
   },
   request: {
     loginExpired: "登录过期，请重新登录",

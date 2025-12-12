@@ -118,7 +118,7 @@ export const useUserStore = defineStore(
     const setUserInfo = async (data: any) => {
       try {
         const response = await UserAPI.putUserData(data);
-        console.error("getUserInfo response:", response);
+        //  console.error("getUserInfo response:", response);
         // 确保数据存在
         if (!response.data || !response.data.success) {
           console.error("Verification failed, please Login again.");

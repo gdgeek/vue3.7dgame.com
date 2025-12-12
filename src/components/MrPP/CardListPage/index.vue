@@ -1,7 +1,7 @@
 <template>
   <div :class="wrapperClass || 'card-list-page'">
     <el-container>
-      <el-header>
+      <el-header v-if="showHeader">
         <MrPPHeader :sorted="sorted" :searched="searched" @search="handleSearch" @sort="handleSort">
           <slot name="header-actions"></slot>
         </MrPPHeader>
@@ -25,7 +25,11 @@
               <slot name="card" :item="item"></slot>
             </template>
           </Waterfall>
-          <el-empty v-else-if="!loading && showEmpty" :description="emptyText || $t('common.noData')"></el-empty>
+          <div v-else-if="!loading && showEmpty">
+            <slot name="empty">
+              <el-empty :description="emptyText || $t('common.noData')"></el-empty>
+            </slot>
+          </div>
           <el-skeleton v-else-if="loading && showSkeleton" :rows="8" animated />
         </el-card>
       </el-main>
@@ -60,6 +64,7 @@ const props = withDefaults(defineProps<CardListPageProps>(), {
   minCardWidth: 280,
   showSkeleton: true,
   showEmpty: true,
+  showHeader: true, // Default to true
   emptyText: '',
   wrapperClass: 'card-list-page',
 });

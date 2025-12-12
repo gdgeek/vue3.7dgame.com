@@ -6,8 +6,8 @@ export default {
       title: "キャンパス",
       myCampus: "マイキャンパス",
       schoolManagement: "学校管理",
-      teacher: "教師",
-      student: "学生",
+      teacher: "私は教師です",
+      student: "私は学生です",
     },
     personalCenter: {
       title: "個人センター",

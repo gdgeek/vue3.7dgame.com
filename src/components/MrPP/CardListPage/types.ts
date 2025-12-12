@@ -33,6 +33,7 @@ export interface CardListPageProps {
   // Feature flags
   showSkeleton?: boolean;
   showEmpty?: boolean;
+  showHeader?: boolean; // New prop to control header visibility
   emptyText?: string;
 
   // Styling

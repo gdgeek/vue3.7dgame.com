@@ -14,6 +14,11 @@ export default {
     newest: "ล่าสุด",
     oldest: "เก่าสุด",
     name: "ชื่อ",
+    edit: "แก้ไข",
+    submit: "ส่ง",
+    updateSuccess: "อัปเดตสำเร็จ",
+    createSuccess: "สร้างสำเร็จ",
+    operationFailed: "การดำเนินงานล้มเหลว",
   },
   request: {
     loginExpired: "Login expired, please log in again",

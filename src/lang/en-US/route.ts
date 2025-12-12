@@ -6,8 +6,8 @@ export default {
       title: "Campus",
       myCampus: "My Campus",
       schoolManagement: "School Management",
-      teacher: "Teacher",
-      student: "Student",
+      teacher: "I am a Teacher",
+      student: "I am a Student",
     },
     personalCenter: {
       title: "Personal Center",

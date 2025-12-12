@@ -14,6 +14,11 @@ export default {
     newest: "最新",
     oldest: "最古",
     name: "名前",
+    edit: "編集",
+    submit: "送信",
+    updateSuccess: "更新成功",
+    createSuccess: "作成成功",
+    operationFailed: "操作失敗",
   },
   request: {
     loginExpired: "ログインの有効期限が切れました。再度ログインしてください",

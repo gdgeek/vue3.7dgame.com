@@ -14,6 +14,11 @@ export default {
     newest: "最新",
     oldest: "最早",
     name: "名稱",
+    edit: "編輯",
+    submit: "提交",
+    updateSuccess: "更新成功",
+    createSuccess: "創建成功",
+    operationFailed: "操作失敗",
   },
   request: {
     loginExpired: "登錄過期，請重新登錄",

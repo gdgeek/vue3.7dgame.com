@@ -9,7 +9,7 @@
       </template>
 
       <div class="image-container">
-        <Id2Image :image="item.image ? item.image.url : null" :id="item.id"> 444</Id2Image>
+        <Id2Image :image="item.image ? item.image.url : null" :id="item.id" :lazy="lazy"> 444</Id2Image>
 
         <!-- 覆盖层插槽 -->
         <div class="overlay-container" v-if="$slots.overlay">
@@ -48,6 +48,10 @@ const props = defineProps({
     required: true,
   },
   showActions: {
+    type: Boolean,
+    default: true,
+  },
+  lazy: {
     type: Boolean,
     default: true,
   },

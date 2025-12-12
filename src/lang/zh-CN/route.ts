@@ -6,8 +6,8 @@ export default {
       title: "校园相关",
       myCampus: "我的校园",
       schoolManagement: "学校管理",
-      teacher: "教师",
-      student: "学生",
+      teacher: "我是教师",
+      student: "我是学生",
     },
     personalCenter: {
       title: "个人中心",

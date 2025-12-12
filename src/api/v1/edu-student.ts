@@ -81,9 +81,24 @@ export const getMyStudentRecords = (
   });
 };
 
-export const getStudentMe = () => {
+export const getStudentMe = (
+  sort = "-created_at",
+  search = "",
+  page = 1,
+  expand = "class,school"
+) => {
+  const query: Record<string, any> = {};
+  query["expand"] = expand;
+  query["sort"] = sort;
+  if (search !== "") {
+    // Assuming search is for class name or similar generic search on the student record context
+    query["StudentSearch[name]"] = search;
+  }
+  if (page > 1) {
+    query["page"] = page;
+  }
   return request<Student[]>({
-    url: `/edu-student/me?expand=class`,
+    url: `/edu-student/me${qs.stringify(query, true)}`,
     method: "get",
   });
 };

@@ -6,8 +6,8 @@ export default {
       title: "วิทยาเขต",
       myCampus: "วิทยาเขตของฉัน",
       schoolManagement: "การจัดการโรงเรียน",
-      teacher: "ครู",
-      student: "นักเรียน",
+      teacher: "ฉันเป็นครู",
+      student: "ฉันเป็นนักเรียน",
     },
     personalCenter: {
       title: "ศูนย์ส่วนบุคคล",

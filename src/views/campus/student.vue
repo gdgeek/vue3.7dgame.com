@@ -1,53 +1,46 @@
 <template>
   <div class="student-container">
     <div v-loading="loading">
-      <!-- Empty State: Show Join Button -->
-      <div v-if="!loading && studentRecords.length === 0" class="empty-state">
-        <el-empty :description="$t('route.personalCenter.campus.noClasses')">
-          <el-button type="primary" size="large" @click="showApplyDialog">
-            <el-icon>
-              <Plus />
-            </el-icon>
-            {{ $t('route.personalCenter.campus.applyClass') }}
-          </el-button>
-        </el-empty>
-      </div>
-
-      <!-- Has Records: Show List -->
-      <div v-else class="records-container">
-        <!-- Optional: Add Join Class button at top too if list is not empty? User didn't ask, but good UX. -->
-
-
-        <div class="class-grid">
-          <el-card v-for="item in studentRecords" :key="item.id" class="class-card" shadow="hover">
-            <div class="class-image">
-              <Id2Image :id="item.class?.id || item.eduClass?.id || item.id"
-                :image="item.class?.image?.url || item.eduClass?.image?.url || null" :lazy="false" fit="cover" />
-            </div>
-            <div class="class-info">
-              <h4>{{ item.class?.name || item.eduClass?.name || '-' }}</h4>
-              <p class="school-name">
-                <el-icon>
-                  <OfficeBuilding />
-                </el-icon>
-                {{ item.class?.school?.name || item.eduClass?.school?.name || '-' }}
-              </p>
-            </div>
-            <div class="class-actions">
-              <el-button type="danger" size="small" :loading="leavingRecordId === item.id"
-                @click="handleLeaveClass(item)">
+      <!-- Has Classes: Show Class Cards -->
+      <div v-if="!loading && studentRecords.length > 0" class="class-grid">
+        <MrPPCard v-for="record in studentRecords" :key="record.id" :item="{
+          ...record,
+          name: record.class?.name || 'No Class Name',
+          image: record.class?.image
+        }" :show-actions="false" :lazy="false">
+          <div class="class-info">
+            <p class="school-name">
+              <el-icon>
+                <OfficeBuilding />
+              </el-icon>
+              {{ record.school?.name || record.class?.school?.name || '-' }}
+            </p>
+          </div>
+          <template #enter>
+            <div class="card-actions">
+              <el-button type="danger" size="small" :loading="leavingRecordId === record.id"
+                @click="handleLeaveClass(record)">
                 {{ $t('route.personalCenter.campus.leaveClass') }}
               </el-button>
             </div>
-          </el-card>
-        </div>
+          </template>
+        </MrPPCard>
       </div>
+
+      <!-- No Classes: Show Apply Button -->
+      <el-empty v-else-if="!loading" :description="$t('route.personalCenter.campus.noClasses')">
+        <el-button type="primary" size="large" @click="showApplyDialog">
+          <el-icon>
+            <Plus />
+          </el-icon>
+          {{ $t('route.personalCenter.campus.applyClass') }}
+        </el-button>
+      </el-empty>
     </div>
 
     <!-- Apply Class Dialog -->
     <el-dialog v-model="applyDialogVisible" :title="$t('route.personalCenter.campus.selectClass')" width="700px"
       :close-on-click-modal="false">
-      <!-- Search and Sort Controls -->
       <div class="dialog-controls">
         <el-input v-model="searchKeyword" :placeholder="$t('route.personalCenter.campus.searchPlaceholder')"
           @keyup.enter="handleSearch" clearable class="search-input" @clear="handleSearch">
@@ -55,14 +48,8 @@
             <el-button :icon="Search" @click="handleSearch" />
           </template>
         </el-input>
-        <el-select v-model="sortOrder" class="sort-select" @change="handleSortChange">
-          <el-option :label="$t('common.newest')" value="-created_at" />
-          <el-option :label="$t('common.oldest')" value="created_at" />
-          <el-option :label="$t('common.name')" value="name" />
-        </el-select>
       </div>
 
-      <!-- Class List -->
       <div v-loading="searchLoading" class="class-list">
         <el-empty v-if="!searchLoading && searchResults.length === 0"
           :description="$t('route.personalCenter.campus.noClasses')" />
@@ -86,12 +73,6 @@
         </div>
       </div>
 
-      <!-- Pagination -->
-      <div v-if="totalClasses > pageSize" class="pagination-container">
-        <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="totalClasses"
-          layout="prev, pager, next" @current-change="handlePageChange" />
-      </div>
-
       <template #footer>
         <el-button @click="applyDialogVisible = false">{{ $t('common.cancel') }}</el-button>
       </template>
@@ -100,13 +81,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { OfficeBuilding, Plus, Search } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
+import MrPPCard from '@/components/MrPP/MrPPCard/index.vue';
 import Id2Image from "@/components/Id2Image.vue";
 import { getClasses } from '@/api/v1/edu-class';
-import { createStudent, deleteStudent, getStudentMe, joinClass } from '@/api/v1/edu-student';
+import { deleteStudent, getStudentMe, joinClass } from '@/api/v1/edu-student';
 import type { EduClass } from '@/api/v1/types/edu-class';
 
 const { t } = useI18n();
@@ -119,31 +101,29 @@ interface StudentRecord {
   id: number;
   eduClass?: ClassWithSchool;
   class?: ClassWithSchool;
+  school?: { id: number; name: string };
+  [key: string]: any;
 }
 
 const loading = ref(false);
 const studentRecords = ref<StudentRecord[]>([]);
+const leavingRecordId = ref<number | null>(null);
 
 // Apply dialog state
 const applyDialogVisible = ref(false);
 const searchKeyword = ref('');
-const sortOrder = ref('-created_at');
 const searchLoading = ref(false);
 const searchResults = ref<ClassWithSchool[]>([]);
 const applyingClassId = ref<number | null>(null);
-const leavingRecordId = ref<number | null>(null);
-const currentPage = ref(1);
-const pageSize = ref(10);
-const totalClasses = ref(0);
 
-// Get set of joined class IDs for quick lookup
-const joinedClassIds = computed(() => new Set(studentRecords.value.map(r => r.eduClass?.id).filter(Boolean)));
+// Get set of joined class IDs
+const joinedClassIds = computed(() => new Set(studentRecords.value.map(r => r.eduClass?.id || r.class?.id).filter(Boolean)));
 const isJoined = (classId: number) => joinedClassIds.value.has(classId);
 
 const fetchStudentRecords = async () => {
   loading.value = true;
   try {
-    const response = await getStudentMe();
+    const response = await getStudentMe('-created_at', '', 1, 'class,school');
     const data = response.data;
     studentRecords.value = (Array.isArray(data) ? data : (data ? [data] : [])) as unknown as StudentRecord[];
   } catch (error) {
@@ -157,43 +137,23 @@ const fetchStudentRecords = async () => {
 const showApplyDialog = async () => {
   applyDialogVisible.value = true;
   searchKeyword.value = '';
-  sortOrder.value = '-created_at';
-  currentPage.value = 1;
   await fetchAllClasses();
 };
 
 const fetchAllClasses = async () => {
   searchLoading.value = true;
   try {
-    const response = await getClasses(
-      sortOrder.value,
-      searchKeyword.value.trim(),
-      currentPage.value,
-      'image,school'
-    );
+    const response = await getClasses('-created_at', searchKeyword.value.trim(), 1, 'image,school');
     searchResults.value = response.data || [];
-    const total = response.headers?.['x-pagination-total-count'];
-    totalClasses.value = total ? parseInt(total) : searchResults.value.length;
   } catch (error) {
     console.error('Failed to fetch classes:', error);
     searchResults.value = [];
-    totalClasses.value = 0;
   } finally {
     searchLoading.value = false;
   }
 };
 
 const handleSearch = async () => {
-  currentPage.value = 1;
-  await fetchAllClasses();
-};
-
-const handleSortChange = async () => {
-  currentPage.value = 1;
-  await fetchAllClasses();
-};
-
-const handlePageChange = async () => {
   await fetchAllClasses();
 };
 
@@ -202,9 +162,8 @@ const handleApply = async (classItem: ClassWithSchool) => {
   try {
     await joinClass({ class_id: classItem.id });
     ElMessage.success(t('route.personalCenter.campus.applySuccess'));
-    // Refresh student records list
-    await fetchStudentRecords();
     applyDialogVisible.value = false;
+    await fetchStudentRecords();
   } catch (error: any) {
     console.error('Failed to apply to class:', error);
     const errorMsg = error.response?.data?.message || t('route.personalCenter.campus.applyFailed');
@@ -229,7 +188,6 @@ const handleLeaveClass = async (record: StudentRecord) => {
     leavingRecordId.value = record.id;
     await deleteStudent(record.id);
     ElMessage.success(t('route.personalCenter.campus.leaveSuccess'));
-    // Refresh student records list
     await fetchStudentRecords();
   } catch (error: any) {
     if (error !== 'cancel') {
@@ -253,58 +211,14 @@ onMounted(() => {
   min-height: 400px;
 }
 
-.empty-state {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-}
-
-
-
-
-
 .class-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
 }
 
-.class-card {
-  transition: transform 0.2s ease;
-
-  &:hover {
-    transform: translateY(-4px);
-  }
-
-  :deep(.el-card__body) {
-    padding: 0;
-  }
-}
-
-.class-image {
-  height: 160px;
-  width: 100%;
-  overflow: hidden;
-  background-color: #f5f7fa;
-
-  :deep(.image-wrapper) {
-    width: 100%;
-    height: 100%;
-  }
-}
-
 .class-info {
-  padding: 16px;
-
-  h4 {
-    margin: 0 0 8px;
-    font-size: 16px;
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+  padding: 10px;
 
   .school-name {
     margin: 0;
@@ -313,32 +227,21 @@ onMounted(() => {
     display: flex;
     align-items: center;
     gap: 4px;
-
-    .el-icon {
-      font-size: 14px;
-    }
   }
 }
 
-.class-actions {
-  padding: 0 16px 16px;
+.card-actions {
   display: flex;
   justify-content: flex-end;
+  width: 100%;
 }
 
-// Dialog styles
 .dialog-controls {
-  display: flex;
-  gap: 12px;
   margin-bottom: 16px;
 }
 
 .search-input {
-  flex: 1;
-}
-
-.sort-select {
-  width: 130px;
+  width: 100%;
 }
 
 .class-list {
@@ -372,11 +275,6 @@ onMounted(() => {
   border-radius: 6px;
   overflow: hidden;
   flex-shrink: 0;
-
-  :deep(.image-wrapper) {
-    width: 100%;
-    height: 100%;
-  }
 }
 
 .class-list-info {
@@ -397,13 +295,5 @@ onMounted(() => {
     font-size: 13px;
     color: var(--el-text-color-secondary);
   }
-}
-
-.pagination-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--el-border-color);
 }
 </style>
