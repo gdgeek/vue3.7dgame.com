@@ -5,7 +5,7 @@
       <!-- 顶部标题与图标 -->
       <div class="login-header">
         <img src="/media/image/logo.gif" alt="Logo" class="login-logo" />
-        <h2 class="login-title">不加班AR创造平台</h2>
+        <h2 class="login-title">{{ domainStore.title }}</h2>
       </div>
 
 
@@ -43,6 +43,7 @@ import NamePassword from './NamePassword.vue';
 import RegisterForm from './RegisterForm.vue';
 import Wechat from './Wechat.vue';
 import { useSettingsStore } from "@/store/modules/settings";
+import { useDomainStore } from "@/store/modules/domain";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 
 const props = defineProps({
@@ -54,6 +55,7 @@ const props = defineProps({
 
 const emit = defineEmits(['dialog-closed']);
 const settingsStore = useSettingsStore();
+const domainStore = useDomainStore();
 const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
 const dialogVisible = ref(false);
 const activeTab = ref('account-register');

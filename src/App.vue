@@ -20,11 +20,13 @@
 import { UpdateAbility } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
 import { useUserStore } from "@/store/modules/user";
+import { useDomainStore } from "@/store/modules/domain";
 import { UpdateRoutes } from "@/router";
 import Token from "@/store/modules/token";
 import { disposeKTX2Loader } from "@/lib/three/loaders";
 
 const userStore = useUserStore();
+const domainStore = useDomainStore();
 const ability = useAbility(); // 提取到 setup 顶层
 
 
@@ -40,6 +42,12 @@ watch(() => userStore.userInfo, (newUserInfo) => {
 
 
 onMounted(async () => {
+  // Fetch domain SEO info on app startup
+  await domainStore.fetchDomainInfo();
+
+  // Debug logs (remove after testing)
+  console.error(domainStore)
+  console.log("Domain Info:", domainStore.title, domainStore.description, domainStore.keywords, domainStore.author, domainStore.links);
 
   const hasToken = Token.getToken();
   if (hasToken) {

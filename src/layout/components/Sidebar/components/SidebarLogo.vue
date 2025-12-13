@@ -8,7 +8,7 @@
       <router-link v-else class="wh-full flex-center" to="/">
         <img v-if="settingsStore.sidebarLogo" :src="logo" class="logo-image" />
         <!-- <span class="logo-title"> {{ defaultSettings.title }}</span> -->
-        <span class="logo-title"> {{ $t("login.title") }}</span>
+        <span class="logo-title"> {{ domainStore.title }}</span>
       </router-link>
     </transition>
   </div>
@@ -17,8 +17,10 @@
 <script lang="ts" setup>
 import defaultSettings from "@/settings";
 import { useSettingsStore } from "@/store";
+import { useDomainStore } from "@/store/modules/domain";
 
 const settingsStore = useSettingsStore();
+const domainStore = useDomainStore();
 
 defineProps({
   collapse: {

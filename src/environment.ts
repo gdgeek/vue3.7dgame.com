@@ -26,7 +26,7 @@ function getIP(): string | null {
   }
   return null;
 }
-
+/*
 function title(): string {
   const hostname = window.location.hostname.toLowerCase();
   if (hostname.includes("mrpp.com")) {
@@ -47,9 +47,9 @@ function title(): string {
   if (hostname.includes("7dgame.com")) {
     return "不加班官方网站";
   }
-  return "上海不加班网络科技有限公司";
+  return ""; // Fallback to domainStore.author
 }
-
+*/
 function subtitle(): string {
   return "支持Rokid设备";
 }
@@ -67,7 +67,7 @@ const environment = {
   a1: ReplaceURL(import.meta.env.VITE_APP_A1_API || ""),
   version: 3,
   subtitle,
-  title,
+  //title,
   useCloud,
   mrcn,
   mrpp,

@@ -14,9 +14,9 @@
     <div class="hero-content">
       <div class="hero-text" data-aos="fade-up" data-aos-delay="200">
         <h1 class="hero-title">
-          <span class="gradient-text">不加班AR创造平台!</span>
+          <span class="gradient-text">{{ domainStore.title }}!</span>
         </h1>
-        <p class="hero-subtitle">让每个人都可以快乐的创造世界！</p>
+        <p class="hero-subtitle">{{ domainStore.description }}</p>
         <div class="hero-cta">
           <el-button type="primary" style="width:150px" size="large" @click="openLoginDialog">
             开始创建
@@ -38,7 +38,7 @@
         <!-- 3D展示区域 -->
         <div class="showcase-container">
           <!-- 主图片区域 -->
-          <img src="/media/bg/bujiaban.png" @click="openVideoDialog" alt="不加班AR创造平台" class="primary-image" />
+          <img src="/media/bg/bujiaban.png" @click="openVideoDialog" :alt="domainStore.title" class="primary-image" />
 
           <!-- 悬浮元素容器 -->
           <div class="floating-elements">
@@ -104,8 +104,8 @@
   </div>
 
   <!-- 视频弹窗 -->
-  <el-dialog v-model="videoDialogVisible" title="不加班AR创造平台介绍视频" width="70%" :before-close="handleCloseVideo"
-    destroy-on-close>
+  <el-dialog v-model="videoDialogVisible" :title="domainStore.title + '介绍视频'" width="70%"
+    :before-close="handleCloseVideo" destroy-on-close>
     <Bilibili :bvid="bilibiliVideoId" :height="500" :autoplay="true" />
   </el-dialog>
 </template>
@@ -113,12 +113,14 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useSettingsStore } from '@/store/modules/settings';
+import { useDomainStore } from '@/store/modules/domain';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { VideoPlay, ArrowDown, ArrowRight } from '@element-plus/icons-vue';
 
 // 获取主题设置
 const settingsStore = useSettingsStore();
+const domainStore = useDomainStore();
 const isDark = computed(() => settingsStore.theme === 'dark');
 
 const emit = defineEmits(['openLogin']);

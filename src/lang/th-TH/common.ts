@@ -19,6 +19,7 @@ export default {
     updateSuccess: "อัปเดตสำเร็จ",
     createSuccess: "สร้างสำเร็จ",
     operationFailed: "การดำเนินงานล้มเหลว",
+    noData: "ไม่มีข้อมูล",
   },
   request: {
     loginExpired: "Login expired, please log in again",

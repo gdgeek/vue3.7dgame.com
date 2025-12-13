@@ -19,6 +19,7 @@ export default {
     updateSuccess: "更新成功",
     createSuccess: "创建成功",
     operationFailed: "操作失败",
+    noData: "暂无数据",
   },
   request: {
     loginExpired: "登录过期，请重新登录",

@@ -19,6 +19,7 @@ export default {
     updateSuccess: "更新成功",
     createSuccess: "作成成功",
     operationFailed: "操作失敗",
+    noData: "データがありません",
   },
   request: {
     loginExpired: "ログインの有効期限が切れました。再度ログインしてください",

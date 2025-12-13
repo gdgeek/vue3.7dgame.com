@@ -20,6 +20,7 @@ export default {
     updateSuccess: "Update successful",
     createSuccess: "Create successful",
     operationFailed: "Operation failed",
+    noData: "No data",
   },
   request: {
     loginExpired: "Login expired, please log in again",

@@ -36,7 +36,7 @@
       <!-- 侧边栏顶部 -->
       <div class="sidebar-header">
         <img src="/media/image/logo.gif" alt="Logo" class="sidebar-logo" />
-        <span class="sidebar-company-name">不加班AR创造平台</span>
+        <span class="sidebar-company-name">{{ domainStore.title }}</span>
       </div>
       <div class="sidebar-items">
         <div class="theme-switch-mobile">
@@ -70,6 +70,7 @@ import { useRouter, useRoute } from "vue-router";
 import LoginDialog from "@/components/Account/LoginDialog.vue";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
+import { useDomainStore } from "@/store/modules/domain";
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
@@ -78,6 +79,7 @@ const router = useRouter();
 const route = useRoute();
 const contentRef = ref<HTMLElement | null>(null);
 const settingsStore = useSettingsStore();
+const domainStore = useDomainStore();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
 defineOptions({

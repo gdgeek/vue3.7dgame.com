@@ -5,7 +5,7 @@
       <div style="height: 30px" v-if="!isMobile">
         <RouterLink to="/introduce" class="logo">
           <img src="/favicon.ico" alt="" />
-          <span class="project_title">{{ $t("login.title") }}</span>
+          <span class="project_title">{{ domainStore.title }}</span>
         </RouterLink>
         <div class="link" style="margin-left: 250px">
 
@@ -23,7 +23,7 @@
         <el-dropdown>
           <span class="">
             <img src="/favicon.ico" alt="" style="margin-left: 10px; width: auto" />
-            <span class="project_title">{{ $t("login.title") }}</span>
+            <span class="project_title">{{ domainStore.title }}</span>
           </span>
           <template #dropdown>
             <el-dropdown-menu>
@@ -64,54 +64,11 @@
       ">
       <div class="background-screen-max">
         <div style="display: flex; align-items: center; gap: 10px">
-          <span v-for="item in informationStore.companies" :key="item.name" style="display: flex; align-items: center">
-            <el-link :href="item.url" target="_blank" :underline="false" style="display: flex; align-items: center">
-              <el-icon>
-                <HomeFilled></HomeFilled>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ item.name }} ({{ informationStore.description }})
-              </span>
-            </el-link>
-          </span>
 
-          <span v-if="informationStore.beian" style="display: flex; align-items: center">
-            |
-            <el-link href="https://beian.miit.gov.cn/" target="_blank" :underline="false"
-              style="display: flex; align-items: center; margin-left: 10px">
-              <el-icon>
-                <Grid></Grid>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ informationStore.beian }}
-              </span>
-            </el-link>
-          </span>
 
-          <span v-if="informationStore.privacyPolicy" style="display: flex; align-items: center">
-            |
-            <el-link :href="informationStore.privacyPolicy.url" target="_blank" :underline="false"
-              style="display: flex; align-items: center; margin-left: 10px">
-              <el-icon>
-                <Briefcase></Briefcase>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ informationStore.privacyPolicy.name }}
-              </span>
-            </el-link>
-          </span>
 
-          <span v-if="informationStore.version" style="display: flex; align-items: center">
-            |
-            <el-link target="_blank" :underline="false" style="display: flex; align-items: center; margin-left: 10px">
-              <el-icon>
-                <InfoFilled></InfoFilled>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ informationStore.version }}
-              </span>
-            </el-link>
-          </span>
+
+
         </div>
       </div>
     </el-card>
@@ -119,67 +76,17 @@
     <el-card v-if="isMobile" style="width: 100%">
       <div class="background-screen-max">
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
-          <span v-for="item in informationStore.companies" :key="item.name"
-            style="display: flex; align-items: center; width: 100%">
-            <el-link :href="item.url" target="_blank" :underline="false" style="display: flex; align-items: center">
-              <el-icon>
-                <HomeFilled></HomeFilled>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ item.name }} ({{ informationStore.description }})
-              </span>
-            </el-link>
-          </span>
+
         </div>
         <div style="
             display: flex;
             justify-content: space-between;
             margin-top: 10px;
           ">
-          <span v-if="informationStore.beian" style="display: flex; align-items: center; flex: 2">
-            <el-link href="https://beian.miit.gov.cn/" target="_blank" :underline="false"
-              style="display: flex; align-items: center">
-              <el-icon>
-                <Grid></Grid>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ informationStore.beian }}
-              </span>
-            </el-link>
-          </span>
 
-          <span v-if="informationStore.privacyPolicy" style="
-              display: flex;
-              align-items: center;
-              flex: 1;
-              justify-content: center;
-            ">
-            <el-link :href="informationStore.privacyPolicy.url" target="_blank" :underline="false"
-              style="display: flex; align-items: center">
-              <el-icon>
-                <Briefcase></Briefcase>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ informationStore.privacyPolicy.name }}
-              </span>
-            </el-link>
-          </span>
 
-          <span v-if="informationStore.version" style="
-              display: flex;
-              align-items: center;
-              flex: 1;
-              justify-content: flex-end;
-            ">
-            <el-link target="_blank" :underline="false" style="display: flex; align-items: center">
-              <el-icon>
-                <InfoFilled></InfoFilled>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ informationStore.version }}
-              </span>
-            </el-link>
-          </span>
+
+
         </div>
       </div>
     </el-card>
@@ -192,14 +99,16 @@ import { useRouter, useRoute } from "vue-router";
 
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
-import { useInfomationStore } from "@/store/modules/information";
+//import { useInfomationStore } from "@/store/modules/information";
+import { useDomainStore } from "@/store/modules/domain";
 import { useTagsViewStore, useUserStore, useScreenStore } from "@/store";
 
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
 const tagsViewStore = useTagsViewStore();
-const informationStore = useInfomationStore();
+//const informationStore = useInfomationStore();
+const domainStore = useDomainStore();
 const settingsStore = useSettingsStore();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 const screenStore = useScreenStore();
