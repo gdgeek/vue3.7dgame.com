@@ -8,6 +8,7 @@ export default {
     nickname: "昵称",
     select: "选择",
     noUsers: "未找到用户",
+    noData: "暂无数据",
     enter: "进入",
     open: "打开",
     add: "添加",

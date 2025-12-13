@@ -8,6 +8,7 @@ export default {
     nickname: "ชื่อเล่น",
     select: "เลือก",
     noUsers: "ไม่พบผู้ใช้",
+    noData: "ไม่มีข้อมูล",
     enter: "เข้าสู่",
     open: "เปิด",
     add: "เพิ่ม",
