@@ -33,10 +33,19 @@ export const loadLanguageAsync = async (locale: string) => {
   const messages = i18n.global.getLocaleMessage(locale);
   const hasMessages = messages && Object.keys(messages).length > 0;
 
+  // Helper function to refresh domain info after language change
+  const refreshDomainInfo = async () => {
+    const { useDomainStore } = await import("@/store/modules/domain");
+    const domainStore = useDomainStore();
+    await domainStore.refreshFromAPI();
+  };
+
   if (hasMessages) {
     if (i18n.global.locale.value !== locale) {
       (i18n.global.locale as any).value = locale;
       await appStore.changeLanguage(locale);
+      // Refresh domain info with new language
+      await refreshDomainInfo();
     }
     return Promise.resolve();
   }
@@ -59,6 +68,8 @@ export const loadLanguageAsync = async (locale: string) => {
       i18n.global.setLocaleMessage(correctLocale, messages.default);
       (i18n.global.locale as any).value = correctLocale;
       await appStore.changeLanguage(correctLocale);
+      // Refresh domain info with new language
+      await refreshDomainInfo();
       return Promise.resolve();
     });
   } else {
@@ -69,6 +80,8 @@ export const loadLanguageAsync = async (locale: string) => {
     if (i18n.global.locale.value !== "zh-CN") {
       (i18n.global.locale as any).value = "zh-CN";
       await appStore.changeLanguage("zh-CN");
+      // Refresh domain info with new language
+      await refreshDomainInfo();
     }
     return Promise.resolve();
   }

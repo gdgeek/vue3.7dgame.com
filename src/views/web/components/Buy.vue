@@ -7,8 +7,8 @@
 
     <div class="container">
       <div class="section-header" data-aos="fade-up">
-        <h2 class="section-title">如何获得平台授权</h2>
-        <p class="section-subtitle">只需从本渠道购买相应设备，即可终生使用平台。</p>
+        <h2 class="section-title">{{ $t('web.buy.title') }}</h2>
+        <p class="section-subtitle">{{ $t('web.buy.subtitle') }}</p>
       </div>
 
       <div class="stats-grid">
@@ -47,7 +47,7 @@
       </div>
     </div>
   </div>
-  <el-dialog v-if="buyItem" v-model="dialogVisible" :title="'微信扫描购买'" width="300">
+  <el-dialog v-if="buyItem" v-model="dialogVisible" :title="$t('web.buy.scanToBuy')" width="300">
     <ElCard class="buy-card">
       <div class="card-content">
         <el-image style="width: 100%; height: 100%" :src="buyItem.qrcode" fit="cover" />
@@ -55,12 +55,12 @@
           <h3><b>{{ buyItem.title }}</b></h3>
           <p>{{ buyItem.annotate }}</p>
           <p class="price">{{ buyItem.price }}</p>
-          <p>购买完成后请联系解锁设备</p>
+          <p>{{ $t('web.buy.contactUnlock') }}</p>
         </div>
       </div>
       <div class="card-footer">
-        <el-button type="primary" @click="open">立即购买</el-button>
-        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="open">{{ $t('web.buy.buyNow') }}</el-button>
+        <el-button @click="dialogVisible = false">{{ $t('web.buy.cancel') }}</el-button>
       </div>
     </ElCard>
   </el-dialog>
@@ -68,6 +68,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/store/modules/settings';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -75,10 +76,12 @@ import { DataAnalysis, User, Cellphone, Star } from '@element-plus/icons-vue';
 import { ElMessageBox } from 'element-plus'
 import type { Action } from 'element-plus'
 
+const { t } = useI18n();
+
 const dialogVisible = ref(false);
 const open = () => {
-  ElMessageBox.alert('请扫小程序码进入商城', '购买', {
-    confirmButtonText: '确认',
+  ElMessageBox.alert(t('web.buy.scanQrCode'), t('web.buy.purchase'), {
+    confirmButtonText: t('web.buy.confirm'),
     callback: (action: Action) => { }
   });
 };
@@ -111,28 +114,28 @@ const handleMouseMove = (e: MouseEvent) => {
 };
 
 // 统计数据
-const stats = [
+const stats = computed(() => [
   {
-    label: '免费版本',
-    message: '无需任何费用，即可使用！',
+    label: t('web.buy.freeVersion'),
+    message: t('web.buy.freeVersionDesc'),
     icon: DataAnalysis
   },
   {
-    label: '设备解锁',
-    message: '从本站渠道采购硬件设备，获得完全授权去除水印。',
+    label: t('web.buy.deviceUnlock'),
+    message: t('web.buy.deviceUnlockDesc'),
     icon: User
   },
   {
-    label: '定制开发',
-    message: '定制开发项目，可免费解锁十台设备',
+    label: t('web.buy.customDev'),
+    message: t('web.buy.customDevDesc'),
     icon: Cellphone
   },
   {
-    label: '设备解锁',
-    message: '可以单独购买设备解锁码，解锁设备',
+    label: t('web.buy.unlockCode'),
+    message: t('web.buy.unlockCodeDesc'),
     icon: Star
   }
-];
+]);
 
 // 案例数据
 const cases = [

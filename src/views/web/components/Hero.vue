@@ -14,18 +14,18 @@
     <div class="hero-content">
       <div class="hero-text" data-aos="fade-up" data-aos-delay="200">
         <h1 class="hero-title">
-          <span class="gradient-text">{{ domainStore.title }}!</span>
+          <span class="gradient-text">{{ domainStore.title || $t('web.hero.loading') }}</span>
         </h1>
         <p class="hero-subtitle">{{ domainStore.description }}</p>
         <div class="hero-cta">
           <el-button type="primary" style="width:150px" size="large" @click="openLoginDialog">
-            开始创建
+            {{ $t('web.hero.startCreating') }}
             <el-icon class="el-icon--right">
               <ArrowRight />
             </el-icon>
           </el-button>
           <el-button style="width:100px" size="large" @click="scrollToAuthorization">
-            授权
+            {{ $t('web.hero.authorize') }}
             <el-icon class="el-icon--right">
               <ArrowDown />
             </el-icon>
@@ -47,7 +47,7 @@
               <img src="/media/bg/rokid.webp" alt="Rokid合作伙伴" class="partner-logo" />
               <div class="partner-info">
                 <span class="partner-name">Rokid</span>
-                <div class="partner-badge">官方合作伙伴</div>
+                <div class="partner-badge">{{ $t('web.hero.officialPartner') }}</div>
               </div>
             </el-link>
 
@@ -56,7 +56,7 @@
               <img src="/media/bg/rokid-lite.webp" alt="Rokid AR眼镜" class="device-image" />
               <div class="device-info">
                 <span class="device-name">Rokid AR</span>
-                <div class="device-badge">推荐设备</div>
+                <div class="device-badge">{{ $t('web.hero.recommendedDevice') }}</div>
               </div>
             </el-link>
 
@@ -66,8 +66,8 @@
                 <img src="/media/icon/blockly_logo_only.png" alt="可视化编程" class="feature-img" />
               </div>
               <div class="feature-info">
-                <span class="feature-title">可视化编程</span>
-                <span class="feature-desc">快速构建AR应用</span>
+                <span class="feature-title">{{ $t('web.hero.visualProgramming') }}</span>
+                <span class="feature-desc">{{ $t('web.hero.buildArApps') }}</span>
               </div>
             </div>
           </div>
@@ -79,7 +79,7 @@
                 <VideoPlay />
               </el-icon>
             </div>
-            <div class="play-label">观看演示</div>
+            <div class="play-label">{{ $t('web.hero.watchDemo') }}</div>
           </div>
 
           <!-- 3D效果装饰 -->
@@ -94,7 +94,7 @@
     </div>
 
     <div class="scroll-indicator" @click="scrollToFeatures">
-      <div class="scroll-text">向下滚动了解更多</div>
+      <div class="scroll-text">{{ $t('web.hero.scrollDown') }}</div>
       <div class="scroll-icon">
         <el-icon class="scroll-arrow">
           <ArrowDown />
@@ -104,7 +104,7 @@
   </div>
 
   <!-- 视频弹窗 -->
-  <el-dialog v-model="videoDialogVisible" :title="domainStore.title + '介绍视频'" width="70%"
+  <el-dialog v-model="videoDialogVisible" :title="domainStore.title + ' ' + $t('web.hero.introVideo')" width="70%"
     :before-close="handleCloseVideo" destroy-on-close>
     <Bilibili :bvid="bilibiliVideoId" :height="500" :autoplay="true" />
   </el-dialog>
@@ -112,11 +112,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/store/modules/settings';
 import { useDomainStore } from '@/store/modules/domain';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { VideoPlay, ArrowDown, ArrowRight } from '@element-plus/icons-vue';
+
+const { t } = useI18n();
 
 // 获取主题设置
 const settingsStore = useSettingsStore();

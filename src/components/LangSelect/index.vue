@@ -1,7 +1,8 @@
 <template>
   <el-dropdown trigger="click" @command="handleLanguageChange">
-    <div>
+    <div class="lang-trigger">
       <svg-icon icon-class="language" :size="size"></svg-icon>
+      <span class="lang-text">{{ currentLangLabel }}</span>
     </div>
     <template #dropdown>
       <el-dropdown-menu>
@@ -28,15 +29,20 @@ defineProps({
 });
 
 const langOptions = [
-  { label: "简体中文", value: LanguageEnum.ZH_CN },
-  { label: "English", value: LanguageEnum.EN },
-  { label: "日本語", value: LanguageEnum.JA },
-  { label: "繁體中文", value: LanguageEnum.ZH_TW },
-  { label: "ไทย", value: LanguageEnum.TH },
+  { label: "简体中文", value: LanguageEnum.ZH_CN, abbr: "中文" },
+  { label: "English", value: LanguageEnum.EN, abbr: "EN" },
+  { label: "日本語", value: LanguageEnum.JA, abbr: "日本語" },
+  { label: "繁體中文", value: LanguageEnum.ZH_TW, abbr: "繁體" },
+  { label: "ไทย", value: LanguageEnum.TH, abbr: "ไทย" },
 ];
 
 const appStore = useAppStore();
 const { locale, t } = useI18n();
+
+const currentLangLabel = computed(() => {
+  const currentLang = langOptions.find(item => item.value === appStore.language);
+  return currentLang ? currentLang.abbr : "中文";
+});
 
 function handleLanguageChange(lang: string) {
   loadLanguageAsync(lang).then(() => {
@@ -44,3 +50,19 @@ function handleLanguageChange(lang: string) {
   });
 }
 </script>
+
+<style scoped>
+.lang-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: inherit;
+}
+
+.lang-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: inherit;
+}
+</style>

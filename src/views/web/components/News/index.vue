@@ -17,7 +17,7 @@
               <el-skeleton :rows="3" animated style="margin-top: 20px" />
             </div>
             <div v-else-if="error" class="news-error">
-              <el-empty description="加载失败，请稍后再试" />
+              <el-empty :description="$t('web.news.loadFailed')" />
             </div>
             <div v-else class="news-timeline">
               <el-timeline>
@@ -35,14 +35,14 @@
                         <span class="article-date">{{ formatRelativeTime(article.date) }}</span>
                         <el-tag v-if="isNewest(article.date, aIndex)" size="small" type="success" effect="plain"
                           class="newest-tag" style="margin-left: 12px;">
-                          最新
+                          {{ $t('web.news.newest') }}
                         </el-tag>
                       </div>
                       <h3 class="article-title" :innerHTML="sanitizeHtml(article.title.rendered)"></h3>
                       <div class="article-excerpt" :innerHTML="sanitizeHtml(article.excerpt.rendered)"></div>
 
                       <div class="article-actions">
-                        <span class="read-more">查看详细 <el-icon>
+                        <span class="read-more">{{ $t('web.news.readMore') }} <el-icon>
                             <ArrowRight />
                           </el-icon></span>
                       </div>
@@ -61,7 +61,7 @@
 
               <div class="news-more" v-if="newsData.length > 2 && !showAllNews" data-aos="fade-up">
                 <el-button type="primary" @click="showAllContent" class="expand-button" round>
-                  展开全部{{ item?.label }}
+                  {{ $t('web.news.expandAll') }}{{ item?.label }}
                   <el-icon class="el-icon--right">
                     <ArrowDown />
                   </el-icon>
@@ -70,7 +70,7 @@
 
               <div class="news-more" v-if="showAllNews" data-aos="fade-up">
                 <el-button type="primary" @click="hideAllContent" class="expand-button" round>
-                  收起{{ item?.label }}
+                  {{ $t('web.news.collapseAll') }}{{ item?.label }}
                   <el-icon class="el-icon--right">
                     <ArrowUp />
                   </el-icon>
@@ -84,13 +84,14 @@
 
     <!-- 文章详情弹窗 -->
     <el-dialog v-model="dialogVisible"
-      :title="selectedArticle?.title?.rendered ? sanitizeText(selectedArticle.title.rendered) : '文章详情'" width="800px"
-      top="50px" destroy-on-close fullscreen :class="{ 'dark-theme': isDark }">
+      :title="selectedArticle?.title?.rendered ? sanitizeText(selectedArticle.title.rendered) : $t('web.news.articleDetail')"
+      width="800px" top="50px" destroy-on-close fullscreen :class="{ 'dark-theme': isDark }">
       <div v-if="articleLoading" class="article-loading">
         <el-skeleton :rows="10" animated />
       </div>
       <div v-else-if="articleError" class="article-error">
-        <el-result icon="error" title="加载失败" sub-title="无法加载文章内容，请稍后再试。"></el-result>
+        <el-result icon="error" :title="$t('web.news.loadArticleFailed')"
+          :sub-title="$t('web.news.loadArticleFailedDesc')"></el-result>
       </div>
       <div v-else-if="articleContent" class="article-detail">
         <div class="article-meta-detail">
@@ -109,8 +110,8 @@
 
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="dialogVisible = false">关闭</el-button>
-          <el-button v-if="articleContent" type="primary" @click="shareArticle">分享</el-button>
+          <el-button @click="dialogVisible = false">{{ $t('web.news.close') }}</el-button>
+          <el-button v-if="articleContent" type="primary" @click="shareArticle">{{ $t('web.news.share') }}</el-button>
         </div>
       </template>
     </el-dialog>
@@ -120,6 +121,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useSettingsStore } from "@/store/modules/settings";
 import { Posts, Article, getCategory } from "@/api/home/wordpress";
 import DOMPurify from "dompurify";
@@ -127,6 +129,8 @@ import moment from "moment";
 import { ElMessage } from 'element-plus';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+
+const { t } = useI18n();
 
 // 获取主题设置
 const settingsStore = useSettingsStore();
@@ -136,10 +140,10 @@ const route = useRoute();
 const router = useRouter();
 
 // 分类标签
-const items = [
-  { label: "新闻动态", type: "category", id: 74, key: "news", describe: "相关内容" },
-  { label: "案例教程", type: "category", id: 79, key: "tutorial", describe: "视频教程内容" },
-];
+const items = computed(() => [
+  { label: t('web.news.newsCategory'), type: "category", id: 74, key: "news", describe: t('web.news.relatedContent') },
+  { label: t('web.news.tutorialCategory'), type: "category", id: 79, key: "tutorial", describe: t('web.news.videoTutorial') },
+]);
 
 
 //activeTabName属性，默认为news
@@ -154,7 +158,7 @@ const activeTabName = ref(props.activeTabName);
 
 
 const item = computed(() => {
-  return items.find(item => item.key === activeTabName.value);
+  return items.value.find(item => item.key === activeTabName.value);
 })
 // 新闻数据
 const newsData = ref<any[]>([]);
@@ -293,13 +297,13 @@ const formatRelativeTime = (dateString: string) => {
   const diffDays = now.diff(date, 'days');
 
   if (diffDays < 1) {
-    return '今天';
+    return t('web.news.today');
   } else if (diffDays < 2) {
-    return '昨天';
+    return t('web.news.yesterday');
   } else if (diffDays < 7) {
-    return `${diffDays}天前`;
+    return t('web.news.daysAgo', { n: diffDays });
   } else if (diffDays < 30) {
-    return `${Math.floor(diffDays / 7)}周前`;
+    return t('web.news.weeksAgo', { n: Math.floor(diffDays / 7) });
   } else {
     return date.format('YYYY-MM-DD');
   }
@@ -376,7 +380,7 @@ const openArticleDetails = async (article: any) => {
 const shareArticle = () => {
   if (selectedArticle.value) {
     // 分享功能
-    ElMessage.info('分享功能开发中...');
+    ElMessage.info(t('web.news.shareInProgress'));
   }
 };
 
@@ -386,8 +390,7 @@ const showAllContent = async () => {
   if (newsData.value.length < pagination.value.total) {
     loading.value = true;
     try {
-      const index = parseInt(activeTabName.value);
-      const categoryId = items[index].id;
+      const categoryId = item.value!.id;
 
       // 加载全部数据
       const response = await Posts(

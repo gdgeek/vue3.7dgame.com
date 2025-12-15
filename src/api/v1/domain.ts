@@ -13,12 +13,19 @@ export interface DomainInfo {
   }[];
 }
 
-export const getDomainInfo = (url: string = "https://xingkou.net") => {
-  url = "https://xingkou.net";
+export const getDomainInfo = (
+  url: string = "https://xingkou.net",
+  lang: string = "en-US"
+) => {
+  // alert(url);
+  //url = "https://xingkou.net";
   const query = {
     url,
+    lang,
   };
+
   //alert(`/domain/info${qs.stringify(query, true)}`);
+
   return request<DomainInfo>({
     url: `/domain/info${qs.stringify(query, true)}`,
     method: "get",

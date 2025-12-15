@@ -36,13 +36,14 @@ import "animate.css";
 import { useRouter } from "@/router";
 import { translateRouteTitle } from "./utils/i18n";
 import { useAppStore, store } from "./store";
+import { useDomainStore } from "./store/modules/domain";
 const router = useRouter();
+const domainStore = useDomainStore(store);
 
 // 更新页面标题
 const updateTitle = (title: string) => {
-  document.title = title
-    ? `${translateRouteTitle(title)} - bujiaban.com`
-    : "bujiaban.com";
+  const domain = domainStore.domain || window.location.hostname;
+  document.title = title ? `${translateRouteTitle(title)} - ${domain}` : domain;
 };
 
 // 监听路由变化更新页面标题

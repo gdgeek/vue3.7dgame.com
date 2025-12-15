@@ -5,7 +5,7 @@
       <div class="nav-left">
         <img src="/media/image/logo.gif" alt="Logo" class="logo" />
         <RadiantText class="company-name" :duration="5" :fontSize="isMobile ? 16 : 20" :textColor="textColor">
-          <span class="font-bold">BuJiaBan.com</span>
+          <span class="font-bold">{{ domainStore.domain || 'Loading...' }}</span>
         </RadiantText>
       </div>
       <div class="nav-middle" v-if="!isMobile">
@@ -19,8 +19,11 @@
           <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
             @change="toggleTheme"></el-switch>
         </div>
+        <div class="lang-select" v-if="!isMobile">
+          <LangSelect />
+        </div>
         <el-button type="primary" class="login-button" @click="openLoginDialog" :class="{ 'mobile-button': isMobile }">
-          登录平台
+          {{ $t('web.login') }}
         </el-button>
         <div class="hamburger-menu" v-if="isMobile" @click="toggleSidebar">
           <el-icon>
@@ -43,11 +46,14 @@
           <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
             @change="toggleTheme"></el-switch>
         </div>
+        <div class="lang-select-mobile">
+          <LangSelect />
+        </div>
         <div v-for="item in navMenuItems" :key="item.key" class="sidebar-item" @click="select(item); toggleSidebar()">
           {{ item.label }}
         </div>
         <div class="sidebar-item" @click="openLoginDialog">
-          登录平台
+          {{ $t('web.login') }}
         </div>
       </div>
     </div>
@@ -67,7 +73,9 @@
 <script setup lang="ts">
 import "@/assets/font/font.css";
 import { useRouter, useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import LoginDialog from "@/components/Account/LoginDialog.vue";
+import LangSelect from "@/components/LangSelect/index.vue";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useDomainStore } from "@/store/modules/domain";
@@ -88,12 +96,13 @@ defineOptions({
 });
 
 // 导航菜单项
-const navMenuItems = [
-  { key: "news", label: "首页", path: "/web/index" },
-  { key: "tutorial", label: "案例教程", path: "/web/category?section=tutorial" },
-  { key: "buy", label: "平台授权", path: "/web/buy" },
-  { key: "bbs", label: "Rokid 论坛", path: "https://forum.rokid.com/index" }
-];
+const { t } = useI18n();
+const navMenuItems = computed(() => [
+  { key: "news", label: t('web.nav.home'), path: "/web/index" },
+  { key: "tutorial", label: t('web.nav.tutorial'), path: "/web/category?section=tutorial" },
+  { key: "buy", label: t('web.nav.authorization'), path: "/web/buy" },
+  { key: "bbs", label: t('web.nav.forum'), path: "https://forum.rokid.com/index" }
+]);
 const loginDialogRef = ref<any>(null);
 
 /** 主题切换 */
@@ -390,6 +399,32 @@ onUnmounted(() => {
       margin-right: 24px;
     }
 
+    .lang-select {
+      margin-right: 24px;
+      cursor: pointer;
+      color: #fff;
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+      font-size: 18px;
+
+      :deep(.lang-trigger),
+      :deep(.lang-text),
+      :deep(.svg-icon) {
+        color: #fff !important;
+        fill: #fff !important;
+      }
+
+      &:hover {
+        border-color: #00dbde;
+        background-color: rgba(0, 219, 222, 0.1);
+        transform: translateY(-1px);
+      }
+    }
+
     .login-button {
       padding: 8px 20px;
       font-size: 15px;
@@ -429,16 +464,40 @@ onUnmounted(() => {
 
     .nav-left .company-name,
     .nav-middle .nav-menu-item .menu-text,
-    .nav-right .hamburger-menu {
+    .nav-right .hamburger-menu,
+    .nav-right .lang-select {
       color: #333;
+    }
+
+    .nav-right .lang-select {
+      border-color: rgba(51, 51, 51, 0.5);
+
+      :deep(.lang-trigger),
+      :deep(.lang-text),
+      :deep(.svg-icon) {
+        color: #333 !important;
+        fill: #333 !important;
+      }
     }
 
     &.dark-theme {
 
       .nav-left .company-name,
       .nav-middle .nav-menu-item .menu-text,
-      .nav-right .hamburger-menu {
+      .nav-right .hamburger-menu,
+      .nav-right .lang-select {
         color: #fff;
+      }
+
+      .nav-right .lang-select {
+        border-color: rgba(255, 255, 255, 0.5);
+
+        :deep(.lang-trigger),
+        :deep(.lang-text),
+        :deep(.svg-icon) {
+          color: #fff !important;
+          fill: #fff !important;
+        }
       }
     }
   }
@@ -561,6 +620,14 @@ onUnmounted(() => {
       display: flex;
       justify-content: flex-start;
       border-bottom: 1px solid #f0f0f0;
+    }
+
+    .lang-select-mobile {
+      padding: 16px 24px;
+      display: flex;
+      justify-content: flex-start;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
     }
 
     .sidebar-item {
