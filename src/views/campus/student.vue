@@ -22,23 +22,21 @@
               </div>
             </div>
             <div class="class-header-right">
-              <el-button type="primary" link @click="goToGroupPage(record)">
-                <el-icon class="mr-1">
-                  <Connection />
-                </el-icon>
-                {{ $t('route.personalCenter.campus.groupList') }}
-                <span v-if="record.groups && record.groups.length" class="group-count">({{ record.groups.length
-                }})</span>
-              </el-button>
-              <el-divider direction="vertical" />
               <el-button type="danger" link :loading="leavingRecordId === record.id" @click="handleLeaveClass(record)">
                 {{ $t('route.personalCenter.campus.leaveClass') }}
               </el-button>
             </div>
           </div>
 
-          <!-- Removed Group Section from here -->
-
+          <!-- Group List Section - Embedded under class header -->
+          <div class="group-section">
+            <ClassGroupList :ref="el => setGroupListRef(record.class?.id || record.eduClass?.id, el)"
+              :class-id="record.class?.id || record.eduClass?.id || 0" :my-groups="record.groups || []"
+              :joining-group-id="joiningGroupId" @join-group="(group) => handleJoinGroup(group, record)"
+              @create-group="() => openGroupDialog(record)" @edit-group="(group) => openGroupDialog(record, group)"
+              @delete-group="(group) => handleDeleteGroup(group, record)" />
+          </div>
+          <br />
         </div>
       </div>
 
@@ -93,25 +91,50 @@
         <el-button @click="applyDialogVisible = false">{{ $t('common.cancel') }}</el-button>
       </template>
     </el-dialog>
-    <!-- Removed Create/Edit Group Dialog from here -->
+
+    <!-- Create/Edit Group Dialog -->
+    <el-dialog v-model="groupDialogVisible"
+      :title="groupForm.id ? $t('common.edit') : $t('route.personalCenter.campus.createGroup')" width="500px">
+      <el-form :model="groupForm" label-width="100px">
+        <el-form-item :label="$t('common.name')" required>
+          <el-input v-model="groupForm.name" :placeholder="$t('route.personalCenter.campus.groupNamePlaceholder')" />
+        </el-form-item>
+        <el-form-item :label="$t('common.description')">
+          <el-input v-model="groupForm.description" type="textarea"
+            :placeholder="$t('route.personalCenter.campus.groupDescPlaceholder')" />
+        </el-form-item>
+        <el-form-item :label="$t('route.personalCenter.campus.groupImage')">
+          <ImageSelector :item-id="groupForm.id || undefined" :image-url="groupForm.imageUrl"
+            @image-selected="handleGroupImageSelected" @image-upload-success="handleGroupImageSelected" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="groupDialogVisible = false">{{ $t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="savingGroup" @click="handleSaveGroup">
+          {{ $t('common.confirm') }}
+        </el-button>
+      </template>
+    </el-dialog>
 
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { OfficeBuilding, Plus, Search, Connection } from '@element-plus/icons-vue';
+import { OfficeBuilding, Plus, Search } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import { useUserStoreHook } from "@/store/modules/user";
 import Id2Image from "@/components/Id2Image.vue";
-import { getClasses, getClassGroups } from '@/api/v1/edu-class';
+import ClassGroupList from './components/ClassGroupList.vue';
+import ImageSelector from '@/components/MrPP/ImageSelector.vue';
+import { getClasses, getClassGroups, createClassGroup } from '@/api/v1/edu-class';
 import { deleteStudent, getStudentMe, joinClass } from '@/api/v1/edu-student';
+import { deleteGroup, joinGroup, updateGroup } from '@/api/v1/group';
 import type { EduClass } from '@/api/v1/types/edu-class';
 import type { Group } from '@/api/v1/types/group';
 
 const { t } = useI18n();
-const router = useRouter();
 
 interface ClassWithSchool extends EduClass {
   school?: { id: number; name: string };
@@ -137,6 +160,28 @@ const searchLoading = ref(false);
 const searchResults = ref<ClassWithSchool[]>([]);
 const applyingClassId = ref<number | null>(null);
 
+// Group dialog state
+const groupDialogVisible = ref(false);
+const savingGroup = ref(false);
+const joiningGroupId = ref<number | null>(null);
+const currentEditingRecord = ref<StudentRecord | null>(null);
+const groupForm = ref({
+  id: null as number | null,
+  name: '',
+  description: '',
+  image_id: null as number | null,
+  imageUrl: ''
+});
+
+// Store refs for each ClassGroupList by classId
+const groupListRefs = ref<Map<number, InstanceType<typeof ClassGroupList> | null>>(new Map());
+
+const setGroupListRef = (classId: number | undefined, el: any) => {
+  if (classId) {
+    groupListRefs.value.set(classId, el);
+  }
+};
+
 // Get set of joined class IDs
 const joinedClassIds = computed(() => new Set(studentRecords.value.map(r => r.eduClass?.id || r.class?.id).filter(Boolean)));
 const isJoined = (classId: number) => joinedClassIds.value.has(classId);
@@ -148,9 +193,7 @@ const fetchStudentRecords = async () => {
     const data = response.data;
     const records = (Array.isArray(data) ? data : (data ? [data] : [])) as unknown as StudentRecord[];
 
-    // Fetch groups for each class record (just to show count or summary if needed, optional now)
-    // We can keep it to show "Joined Groups: 2" or something, but for now just fetching logic is preserved
-    // to not break StudentRecord interface if used elsewhere, but we won't display full list.
+    // Fetch groups for each class record
     await Promise.all(records.map(async (record) => {
       const classId = record.class?.id || record.eduClass?.id;
       if (classId) {
@@ -178,17 +221,7 @@ const fetchStudentRecords = async () => {
   }
 };
 
-const goToGroupPage = (record: StudentRecord) => {
-  const classId = record.class?.id || record.eduClass?.id;
-  if (classId) {
-    router.push({
-      path: '/campus/group',
-      query: { class_id: classId }
-    });
-  }
-};
-
-// ... Apply dialog logic ...
+// Apply dialog logic
 const showApplyDialog = async () => {
   applyDialogVisible.value = true;
   searchKeyword.value = '';
@@ -252,6 +285,148 @@ const handleLeaveClass = async (record: StudentRecord) => {
     }
   } finally {
     leavingRecordId.value = null;
+  }
+};
+
+// Group dialog logic
+const openGroupDialog = (record: StudentRecord, group?: Group) => {
+  currentEditingRecord.value = record;
+  if (group) {
+    // Edit mode
+    groupForm.value = {
+      id: group.id,
+      name: group.name,
+      description: group.description || '',
+      image_id: (group as any).image_id || null,
+      imageUrl: group.image?.url || ''
+    };
+    if (!groupForm.value.image_id && group.image) {
+      groupForm.value.image_id = group.image.id;
+    }
+  } else {
+    // Create mode
+    const userStore = useUserStoreHook();
+    const userName = userStore.userInfo?.userData?.nickname || userStore.userInfo?.userData?.username || userStore.userInfo?.userData?.email;
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const defaultName = `${t('route.personalCenter.campus.defaultGroupName', { name: userName })} ${dateStr}`;
+    groupForm.value = { id: null, name: defaultName, description: '', image_id: null, imageUrl: '' };
+  }
+  groupDialogVisible.value = true;
+};
+
+const handleGroupImageSelected = (data: { imageId: number; itemId: number | null; imageUrl?: string }) => {
+  groupForm.value.image_id = data.imageId;
+  groupForm.value.imageUrl = data.imageUrl || '';
+};
+
+const handleSaveGroup = async () => {
+  if (!groupForm.value.name.trim()) {
+    ElMessage.warning(t('route.personalCenter.campus.groupNameRequired'));
+    return;
+  }
+
+  const record = currentEditingRecord.value;
+  if (!record) return;
+
+  const classId = record.class?.id || record.eduClass?.id;
+  if (!classId) return;
+
+  savingGroup.value = true;
+  try {
+    if (groupForm.value.id) {
+      // Edit
+      await updateGroup(groupForm.value.id, {
+        name: groupForm.value.name,
+        description: groupForm.value.description,
+        image_id: groupForm.value.image_id ?? undefined
+      });
+      ElMessage.success(t('common.updateSuccess'));
+    } else {
+      // Create
+      await createClassGroup(classId, {
+        name: groupForm.value.name,
+        description: groupForm.value.description,
+        image_id: groupForm.value.image_id ?? undefined
+      });
+      ElMessage.success(t('common.createSuccess'));
+    }
+    groupDialogVisible.value = false;
+    // Refresh groups for this record
+    await refreshRecordGroups(record);
+    // Refresh the ClassGroupList component
+    const listRef = groupListRefs.value.get(classId);
+    listRef?.refresh();
+  } catch (error: any) {
+    console.error('Failed to save group:', error);
+    const errorMsg = error.response?.data?.message || (groupForm.value.id ? t('common.operationFailed') : t('common.createFailed'));
+    ElMessage.error(errorMsg);
+  } finally {
+    savingGroup.value = false;
+  }
+};
+
+const handleJoinGroup = async (group: Group, record: StudentRecord) => {
+  joiningGroupId.value = group.id;
+  const classId = record.class?.id || record.eduClass?.id;
+  try {
+    await joinGroup(group.id);
+    ElMessage.success(t('route.personalCenter.campus.joinSuccess'));
+    await refreshRecordGroups(record);
+    if (classId) {
+      const listRef = groupListRefs.value.get(classId);
+      listRef?.refresh();
+    }
+  } catch (error: any) {
+    console.error('Failed to join group:', error);
+    const errorMsg = error.response?.data?.message || t('route.personalCenter.campus.joinFailed');
+    ElMessage.error(errorMsg);
+  } finally {
+    joiningGroupId.value = null;
+  }
+};
+
+const handleDeleteGroup = async (group: Group, record: StudentRecord) => {
+  const classId = record.class?.id || record.eduClass?.id;
+  try {
+    await ElMessageBox.confirm(
+      t('route.personalCenter.campus.confirmDeleteGroup'),
+      t('common.confirm'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning',
+      }
+    );
+    await deleteGroup(group.id);
+    ElMessage.success(t('common.deleteSuccess'));
+    await refreshRecordGroups(record);
+    if (classId) {
+      const listRef = groupListRefs.value.get(classId);
+      listRef?.refresh();
+    }
+  } catch (error: any) {
+    if (error !== 'cancel') {
+      console.error('Failed to delete group:', error);
+      const errorMsg = error.response?.data?.message || t('common.deleteFailed');
+      ElMessage.error(errorMsg);
+    }
+  }
+};
+
+const refreshRecordGroups = async (record: StudentRecord) => {
+  const classId = record.class?.id || record.eduClass?.id;
+  if (!classId) return;
+  try {
+    const myGroupRes = await getClassGroups(classId, '-created_at', '', 1, 'image,user');
+    const groupData = myGroupRes.data;
+    if (Array.isArray(groupData)) {
+      record.groups = groupData;
+    } else {
+      record.groups = groupData ? [groupData] : [];
+    }
+  } catch (e) {
+    console.error(`Failed to refresh groups for class ${classId}`, e);
   }
 };
 
@@ -338,23 +513,8 @@ onMounted(() => {
   margin-left: 20px;
 }
 
-.group-count {
-  margin-left: 4px;
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-
-.card-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  width: 100%;
-  gap: 8px;
-  padding: 8px;
-}
-
-.my-group-tag {
-  margin-right: auto;
+.group-section {
+  padding: 16px 20px;
 }
 
 .dialog-controls {
