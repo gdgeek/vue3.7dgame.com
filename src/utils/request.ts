@@ -170,6 +170,8 @@ service.interceptors.response.use(
       // alert(1234);
       // 仅当身份认证失败，执行登出操作
       return handleUnauthorized(router);
+    } else if (response.status === 404) {
+      showErrorMessage(i18n.global.t("request.error404"));
     } else if (response.status >= 500) {
       console.error("服务器内部错误", response);
       // 服务器内部错误

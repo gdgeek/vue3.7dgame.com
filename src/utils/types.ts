@@ -1,6 +1,9 @@
 export type CardInfo = {
   id: number;
-  image: { url: string } | null;
+  image: {
+    id?: number;
+    url: string;
+  } | null;
   type: string;
   created_at: string;
   name: string;

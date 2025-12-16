@@ -5,8 +5,15 @@
 
     <!-- 2. 图片展示区域 -->
     <div class="image-display" @click="showImageSelectDialog">
-      <Id2Image :id="props.itemId ?? undefined" :image="displayImageUrl" :lazy="false" style="width:100%;height:250px"
-        thumbnailSize="512x" fit="cover" />
+      <div v-if="!displayImageUrl && !props.itemId" class="upload-placeholder">
+        <el-icon :size="28">
+          <Plus />
+        </el-icon>
+        <div class="placeholder-text">{{ $t('common.select') }}</div>
+      </div>
+      <Id2Image v-else :id="props.itemId ?? undefined" :image="displayImageUrl" :lazy="false"
+        style="width:140px;height:140px;border-radius: 6px;overflow:hidden;border: 1px solid var(--el-border-color);"
+        thumbnailSize="256x" fit="cover" />
     </div>
 
     <!-- 3. 选择方式弹窗 -->
@@ -44,9 +51,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, withDefaults, defineProps, defineEmits, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { FolderOpened, Upload } from '@element-plus/icons-vue'
+import { FolderOpened, Upload, Plus } from '@element-plus/icons-vue'
 import ResourceDialog from './ResourceDialog.vue'
 import MrPPUploadDialog from './MrPPUploadDialog/index.vue'
 import Id2Image from '@/components/Id2Image.vue'
@@ -96,7 +103,7 @@ const openResourceDialog = () => {
 
 const onResourceSelected = (data: CardInfo) => {
   emit('image-selected', {
-    imageId: data.context.image_id,
+    imageId: data.context.image_id || data.image?.id || 0, // Fallback to image.id
     itemId: props.itemId,
     imageUrl: data.image?.url
   })
@@ -144,8 +151,12 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
     const response = await getPicture(pictureResourceId)
     console.log('ImageSelector: Fetched picture resource:', response.data)
 
-    const imageId = response.data.image_id
-    const imageUrl = response.data.image?.url
+    // For picture resources, strictly speaking the 'file' IS the image.
+    // Sometimes 'image_id' (thumbnail) might not be generated or linked yet, 
+    // but 'file' is definitely there for a picture resource.
+    // So we prefer image_id, but fall back to file.id if necessary.
+    const imageId = response.data.image_id || response.data.file?.id
+    const imageUrl = response.data.image?.url || response.data.file?.url
 
     if (imageId) {
       console.log('ImageSelector: Emitting image-upload-success with imageId:', imageId)
@@ -227,5 +238,35 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
   font-size: 13px;
   color: #909399;
   line-height: 1.5;
+}
+
+.image-display {
+  display: flex;
+  justify-content: center;
+}
+
+.upload-placeholder {
+  width: 140px;
+  height: 140px;
+  background-color: #f5f7fa;
+  border: 2px dashed #dcdfe6;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #909399;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.upload-placeholder:hover {
+  border-color: #409eff;
+  color: #409eff;
+}
+
+.placeholder-text {
+  margin-top: 10px;
+  font-size: 14px;
 }
 </style>

@@ -1,29 +1,44 @@
 <template>
+
   <div class="student-container">
     <div v-loading="loading">
       <!-- Has Classes: Show Class Headers -->
       <div v-if="!loading && studentRecords.length > 0" class="class-list">
-        <div v-for="record in studentRecords" :key="record.id" class="class-header">
-          <div class="class-header-left">
-            <div class="class-image">
-              <Id2Image :id="record.class?.id || record.id" :image="record.class?.image?.url || null" :lazy="false"
-                fit="cover" />
+        <div v-for="record in studentRecords" :key="record.id" class="class-wrapper">
+          <div class="class-header">
+            <div class="class-header-left">
+              <div class="class-image">
+                <Id2Image :id="record.class?.id || record.id" :image="record.class?.image?.url || null" :lazy="false"
+                  fit="cover" />
+              </div>
+              <div class="class-info">
+                <h3 class="class-name">{{ record.class?.name || 'No Class Name' }}</h3>
+                <p class="school-name">
+                  <el-icon>
+                    <OfficeBuilding />
+                  </el-icon>
+                  {{ record.school?.name || record.class?.school?.name || '-' }}
+                </p>
+              </div>
             </div>
-            <div class="class-info">
-              <h3 class="class-name">{{ record.class?.name || 'No Class Name' }}</h3>
-              <p class="school-name">
-                <el-icon>
-                  <OfficeBuilding />
+            <div class="class-header-right">
+              <el-button type="primary" link @click="goToGroupPage(record)">
+                <el-icon class="mr-1">
+                  <Connection />
                 </el-icon>
-                {{ record.school?.name || record.class?.school?.name || '-' }}
-              </p>
+                {{ $t('route.personalCenter.campus.groupList') }}
+                <span v-if="record.groups && record.groups.length" class="group-count">({{ record.groups.length
+                }})</span>
+              </el-button>
+              <el-divider direction="vertical" />
+              <el-button type="danger" link :loading="leavingRecordId === record.id" @click="handleLeaveClass(record)">
+                {{ $t('route.personalCenter.campus.leaveClass') }}
+              </el-button>
             </div>
           </div>
-          <div class="class-header-right">
-            <el-button type="danger" :loading="leavingRecordId === record.id" @click="handleLeaveClass(record)">
-              {{ $t('route.personalCenter.campus.leaveClass') }}
-            </el-button>
-          </div>
+
+          <!-- Removed Group Section from here -->
+
         </div>
       </div>
 
@@ -36,6 +51,7 @@
           {{ $t('route.personalCenter.campus.applyClass') }}
         </el-button>
       </el-empty>
+
     </div>
 
     <!-- Apply Class Dialog -->
@@ -77,20 +93,25 @@
         <el-button @click="applyDialogVisible = false">{{ $t('common.cancel') }}</el-button>
       </template>
     </el-dialog>
+    <!-- Removed Create/Edit Group Dialog from here -->
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { OfficeBuilding, Plus, Search } from '@element-plus/icons-vue';
+import { OfficeBuilding, Plus, Search, Connection } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import Id2Image from "@/components/Id2Image.vue";
-import { getClasses } from '@/api/v1/edu-class';
+import { getClasses, getClassGroups } from '@/api/v1/edu-class';
 import { deleteStudent, getStudentMe, joinClass } from '@/api/v1/edu-student';
 import type { EduClass } from '@/api/v1/types/edu-class';
+import type { Group } from '@/api/v1/types/group';
 
 const { t } = useI18n();
+const router = useRouter();
 
 interface ClassWithSchool extends EduClass {
   school?: { id: number; name: string };
@@ -101,6 +122,7 @@ interface StudentRecord {
   eduClass?: ClassWithSchool;
   class?: ClassWithSchool;
   school?: { id: number; name: string };
+  groups?: Group[];
   [key: string]: any;
 }
 
@@ -124,7 +146,30 @@ const fetchStudentRecords = async () => {
   try {
     const response = await getStudentMe('-created_at', '', 1, 'class,school');
     const data = response.data;
-    studentRecords.value = (Array.isArray(data) ? data : (data ? [data] : [])) as unknown as StudentRecord[];
+    const records = (Array.isArray(data) ? data : (data ? [data] : [])) as unknown as StudentRecord[];
+
+    // Fetch groups for each class record (just to show count or summary if needed, optional now)
+    // We can keep it to show "Joined Groups: 2" or something, but for now just fetching logic is preserved
+    // to not break StudentRecord interface if used elsewhere, but we won't display full list.
+    await Promise.all(records.map(async (record) => {
+      const classId = record.class?.id || record.eduClass?.id;
+      if (classId) {
+        try {
+          const myGroupRes = await getClassGroups(classId, 'image,user');
+          const groupData = myGroupRes.data;
+          if (Array.isArray(groupData)) {
+            record.groups = groupData;
+          } else {
+            record.groups = groupData ? [groupData] : [];
+          }
+        } catch (e) {
+          console.error(`Failed to fetch groups for class ${classId}`, e);
+          record.groups = [];
+        }
+      }
+    }));
+
+    studentRecords.value = records;
   } catch (error) {
     console.error('Failed to fetch student records:', error);
     studentRecords.value = [];
@@ -133,6 +178,17 @@ const fetchStudentRecords = async () => {
   }
 };
 
+const goToGroupPage = (record: StudentRecord) => {
+  const classId = record.class?.id || record.eduClass?.id;
+  if (classId) {
+    router.push({
+      path: '/campus/group',
+      query: { class_id: classId }
+    });
+  }
+};
+
+// ... Apply dialog logic ...
 const showApplyDialog = async () => {
   applyDialogVisible.value = true;
   searchKeyword.value = '';
@@ -213,7 +269,19 @@ onMounted(() => {
 .class-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
+}
+
+.class-wrapper {
+  border: 1px solid var(--el-border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--el-bg-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .class-header {
@@ -221,15 +289,8 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: var(--el-bg-color);
-  border: 1px solid var(--el-border-color);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
+  background: var(--el-fill-color-light);
+  border-bottom: 1px solid var(--el-border-color);
 }
 
 .class-header-left {
@@ -277,18 +338,31 @@ onMounted(() => {
   margin-left: 20px;
 }
 
+.group-count {
+  margin-left: 4px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+  padding: 8px;
+}
+
+.my-group-tag {
+  margin-right: auto;
+}
+
 .dialog-controls {
   margin-bottom: 16px;
 }
 
 .search-input {
   width: 100%;
-}
-
-.class-list {
-  min-height: 200px;
-  max-height: 400px;
-  overflow-y: auto;
 }
 
 .class-list-items {

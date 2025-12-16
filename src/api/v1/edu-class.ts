@@ -137,3 +137,27 @@ export const searchClasses = (
     method: "get",
   });
 };
+
+// Get group for a class
+export const getClassGroups = (classId: number, expand = "") => {
+  const query: Record<string, any> = {};
+  if (expand) {
+    query["expand"] = expand;
+  }
+  return request({
+    url: `/edu-class/${classId}/groups${qs.stringify(query, true)}`,
+    method: "get",
+  });
+};
+
+// Create group from a class
+export const createClassGroup = (
+  classId: number,
+  data: { name?: string; description?: string; image_id?: number | null } = {}
+) => {
+  return request({
+    url: `/edu-class/${classId}/group`,
+    method: "post",
+    data,
+  });
+};
