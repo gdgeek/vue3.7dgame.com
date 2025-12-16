@@ -86,6 +86,7 @@ export default {
       createPending: "Create functionality to be implemented",
       editPending: "Edit school: {name}",
       operationFailed: "Operation failed",
+      addFailed: "Failed to add",
     },
     dialog: {
       createTitle: "Create School",
@@ -110,6 +111,7 @@ export default {
     },
     messages: {
       addSuccess: "Added successfully",
+      removeSuccess: "Removed successfully",
       createConfirm: "Confirm to create a new school?",
       createSuccess: "School created successfully",
       createFailed: "Failed to create school",

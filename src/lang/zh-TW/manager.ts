@@ -71,6 +71,8 @@ export default {
       noData: "暫無數據",
       createPending: "創建功能開發中",
       editPending: "編輯學校: {name}",
+      operationFailed: "操作失敗",
+      addFailed: "添加失敗",
     },
     dialog: {
       createTitle: "創建學校",
@@ -95,6 +97,7 @@ export default {
     },
     messages: {
       addSuccess: "添加成功",
+      removeSuccess: "移除成功",
       createConfirm: "確認創建新學校嗎？",
       createSuccess: "學校創建成功",
       createFailed: "學校創建失敗",

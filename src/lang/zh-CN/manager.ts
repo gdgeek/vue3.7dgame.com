@@ -25,6 +25,8 @@ export default {
       student: "学生",
       teacherList: "老师列表",
       studentList: "学生列表",
+      selectTeacher: "选择教师",
+      selectStudent: "选择学生",
       assignTeacher: "分配老师",
       assignStudent: "分配学生",
       dialog: { createTitle: "创建班级", editTitle: "编辑班级" },
@@ -69,6 +71,7 @@ export default {
       createPending: "创建功能开发中",
       editPending: "编辑学校: {name}",
       operationFailed: "操作失败",
+      addFailed: "添加失败",
     },
     dialog: { createTitle: "创建学校", editTitle: "编辑学校" },
     form: {
@@ -90,6 +93,7 @@ export default {
     },
     messages: {
       addSuccess: "添加成功",
+      removeSuccess: "移除成功",
       createConfirm: "确认创建新学校吗？",
       createSuccess: "学校创建成功",
       createFailed: "学校创建失败",

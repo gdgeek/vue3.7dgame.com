@@ -71,6 +71,8 @@ export default {
       noData: "データがありません",
       createPending: "作成機能は開発中です",
       editPending: "学校を編集: {name}",
+      operationFailed: "操作に失敗しました",
+      addFailed: "追加に失敗しました",
     },
     dialog: {
       createTitle: "学校を作成",
@@ -95,6 +97,7 @@ export default {
     },
     messages: {
       addSuccess: "追加に成功しました",
+      removeSuccess: "削除に成功しました",
       createConfirm: "新しい学校を作成しますか？",
       createSuccess: "学校の作成に成功しました",
       createFailed: "学校の作成に失敗しました",

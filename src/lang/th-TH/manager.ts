@@ -71,6 +71,8 @@ export default {
       noData: "ไม่มีข้อมูล",
       createPending: "ฟังก์ชันการสร้างกำลังพัฒนา",
       editPending: "แก้ไขโรงเรียน: {name}",
+      operationFailed: "การดำเนินการล้มเหลว",
+      addFailed: "เพิ่มล้มเหลว",
     },
     dialog: {
       createTitle: "สร้างโรงเรียน",
@@ -95,6 +97,7 @@ export default {
     },
     messages: {
       addSuccess: "เพิ่มสำเร็จ",
+      removeSuccess: "ลบสำเร็จ",
       createConfirm: "ยืนยันการสร้างโรงเรียนใหม่หรือไม่?",
       createSuccess: "สร้างโรงเรียนสำเร็จ",
       createFailed: "การสร้างโรงเรียนล้มเหลว",
