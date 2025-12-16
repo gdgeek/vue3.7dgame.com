@@ -89,6 +89,7 @@ export default {
       nameLength: "学校名称长度应在2-50个字符之间",
     },
     messages: {
+      addSuccess: "添加成功",
       createConfirm: "确认创建新学校吗？",
       createSuccess: "学校创建成功",
       createFailed: "学校创建失败",

@@ -1,376 +1,379 @@
 // manager translations for zh-TW
 export default {
-  "manager": {
-    "title": "添加用戶",
-    "createSchool": "創建學校",
-    "createClass": "創建班級",
-    "createTeacher": "創建教師",
-    "createStudent": "創建學生",
-    "defaultSchoolName": "新學校",
-    "defaultClassName": "新班級",
-    "filteringBySchool": "當前篩選學校ID",
-    "backToAll": "返回所有班級",
-    "school": {
-      "principal": "學校管理員",
-      "address": "地址",
-      "description": "描述",
-      "classList": "班級列表"
+  manager: {
+    title: "添加用戶",
+    createSchool: "創建學校",
+    createClass: "創建班級",
+    createTeacher: "創建教師",
+    createStudent: "創建學生",
+    defaultSchoolName: "新學校",
+    defaultClassName: "新班級",
+    filteringBySchool: "當前篩選學校ID",
+    backToAll: "返回所有班級",
+    school: {
+      principal: "學校管理員",
+      address: "地址",
+      description: "描述",
+      classList: "班級列表",
     },
-    "class": {
-      "title": "班級管理",
-      "schoolTitle": "{school} - 班級管理",
-      "grade": "年級",
-      "teacher": "教師",
-      "student": "學生",
-      "teacherList": "教師列表",
-      "studentList": "學生列表",
-      "selectTeacher": "選擇教師",
-      "selectStudent": "選擇學生",
-      "assignTeacher": "分配教師",
-      "assignStudent": "分配學生",
-      "dialog": {
-        "createTitle": "創建班級",
-        "editTitle": "編輯班級"
+    class: {
+      title: "班級管理",
+      schoolTitle: "{school} - 班級管理",
+      grade: "年級",
+      teacher: "教師",
+      student: "學生",
+      teacherList: "教師列表",
+      studentList: "學生列表",
+      selectTeacher: "選擇教師",
+      selectStudent: "選擇學生",
+      assignTeacher: "分配教師",
+      assignStudent: "分配學生",
+      dialog: {
+        createTitle: "創建班級",
+        editTitle: "編輯班級",
       },
-      "form": {
-        "name": "班級名稱",
-        "namePlaceholder": "請輸入班級名稱",
-        "image": "班級圖片"
+      form: {
+        name: "班級名稱",
+        namePlaceholder: "請輸入班級名稱",
+        image: "班級圖片",
       },
-      "messages": {
-        "createConfirm": "確認創建新班級嗎？",
-        "createSuccess": "班級創建成功",
-        "createFailed": "班級創建失敗",
-        "updateSuccess": "班級更新成功",
-        "updateFailed": "班級更新失敗",
-        "selectSchoolFirst": "請先選擇學校，再創建班級"
+      messages: {
+        createConfirm: "確認創建新班級嗎？",
+        createSuccess: "班級創建成功",
+        createFailed: "班級創建失敗",
+        updateSuccess: "班級更新成功",
+        updateFailed: "班級更新失敗",
+        selectSchoolFirst: "請先選擇學校，再創建班級",
       },
-      "validation": {
-        "nameRequired": "請輸入班級名稱"
-      }
-    },
-    "teacher": {
-      "subject": "科目",
-      "phone": "電話"
-    },
-    "student": {
-      "grade": "年級",
-      "class": "班級"
-    },
-    "principal": {
-      "assign": "分配學校管理員",
-      "selectUser": "選擇用戶",
-      "select": "選擇",
-      "assignSuccess": "學校管理員分配成功",
-      "assignFailed": "學校管理員分配失敗",
-      "username": "用戶名",
-      "nickname": "暱稱"
-    },
-    "errors": {
-      "fetchFailed": "獲取學校列表失敗",
-      "noData": "暫無數據",
-      "createPending": "創建功能開發中",
-      "editPending": "編輯學校: {name}"
-    },
-    "dialog": {
-      "createTitle": "創建學校",
-      "editTitle": "編輯學校"
-    },
-    "form": {
-      "name": "學校名稱",
-      "namePlaceholder": "請輸入學校名稱",
-      "address": "學校地址",
-      "addressPlaceholder": "請輸入學校地址",
-      "principal": "學校管理員",
-      "principalPlaceholder": "請選擇學校管理員",
-      "image": "學校圖片",
-      "edit": "編輯",
-      "cancel": "取消",
-      "submit": "提交",
-      "submitting": "提交中..."
-    },
-    "validation": {
-      "nameRequired": "請輸入學校名稱",
-      "nameLength": "學校名稱長度應在2-50個字符之間"
-    },
-    "messages": {
-      "createConfirm": "確認創建新學校嗎？",
-      "createSuccess": "學校創建成功",
-      "createFailed": "學校創建失敗",
-      "updateSuccess": "學校更新成功",
-      "updateFailed": "學校更新失敗",
-      "deleteFailed": "學校刪除失敗",
-      "clearPrincipalConfirm": "確認要清空學校管理員嗎？"
-    },
-    "creator": {
-      "form": {
-        "label1": "用戶名",
-        "label2": "密碼",
-        "label3": "確認密碼",
-        "message1": "請輸入用戶名稱",
-        "message2": "用戶名稱長度應該大於5",
-        "message3": "用戶名請避免使用中文",
-        "message4": "請輸入密碼",
-        "message5": "密碼長度應該大於6",
-        "message6": "請輸入校驗密碼",
-        "error1": "請輸入密碼",
-        "error2": "請再次輸入密碼",
-        "error3": "兩次輸入的密碼不一致",
-        "error4": "表單校驗失敗",
-        "cancel": "取 消",
-        "submit": "註冊賬號"
-      }
-    },
-    "list": {
-      "label": "權限:",
-      "cancel": "刪除",
-      "manage": "管理",
-      "roles": {
-        "root": "根用戶",
-        "admin": "超級管理員",
-        "manager": "管理員",
-        "user": "用戶"
+      validation: {
+        nameRequired: "請輸入班級名稱",
       },
-      "confirm": {
-        "message1": "此操作將永久刪除該學校, 是否繼續?",
-        "message2": "提示",
-        "confirm": "確認",
-        "cancel": "取消",
-        "success": "刪除成功!",
-        "info": "已取消刪除"
-      },
-      "success": "權限更新成功！",
-      "error": "權限更新失敗！"
     },
-    "confirm": {
-      "deleteTitle": "確認刪除",
-      "deleteMessage": "確定要刪除嗎？此操作不可恢復。",
-      "removeMemberTitle": "確認移除",
-      "removeMemberMessage": "確定要移除該成員嗎？",
-      "confirm": "確認",
-      "cancel": "取消"
-    }
-  },
-  "game": {
-    "index": {
-      "title": "創建【關卡】",
-      "delete": "刪除",
-      "form": {
-        "label1": "順序",
-        "label2": "場景id",
-        "label3": "場景名",
-        "label4": "操作",
-        "placeholder": "請輸入排序",
-        "confirm": {
-          "message1": "修改排序？",
-          "message2": "提示",
-          "confirm": "確認",
-          "cancel": "取消",
-          "success": "刪除成功",
-          "info": "已取消修改"
-        }
-      },
-      "success": "添加成功",
-      "confirm": {
-        "message1": "此操作將永久刪除該【關卡】, 是否繼續?",
-        "message2": "提示",
-        "confirm": "確認",
-        "cancel": "取消",
-        "success": "刪除成功",
-        "info": "已取消刪除"
-      }
+    teacher: {
+      subject: "科目",
+      phone: "電話",
     },
-    "map": {
-      "title1": "第",
-      "title2": " 地圖",
-      "addGuide": "增加關卡",
-      "addMap": "增加地圖",
-      "removeMap": "減少地圖",
-      "delete": "刪除",
-      "form": {
-        "label1": "順序",
-        "label2": "場景id",
-        "label3": "場景名",
-        "label4": "操作",
-        "placeholder": "請輸入排序",
-        "confirm": {
-          "message1": "修改排序？",
-          "message2": "提示",
-          "confirm": "確認",
-          "cancel": "取消",
-          "success": "刪除成功",
-          "info": "已取消修改"
-        }
-      },
-      "success": "添加成功",
-      "confirm1": {
-        "message1": "創建地圖",
-        "message2": "提示",
-        "confirm": "確認",
-        "cancel": "取消",
-        "success": "創建成功",
-        "info": "已取消創建"
-      },
-      "confirm2": {
-        "message1": "刪除地圖",
-        "message2": "提示",
-        "confirm": "確認",
-        "cancel": "取消",
-        "success": "刪除成功",
-        "info": "已取消刪除"
-      },
-      "confirm3": {
-        "message1": "此操作將永久刪除該【關卡】, 是否繼續?",
-        "message2": "提示",
-        "confirm": "確認",
-        "cancel": "取消",
-        "success": "刪除成功",
-        "info": "已取消刪除"
-      }
+    student: {
+      grade: "年級",
+      class: "班級",
     },
-    "verseDialog": {
-      "title": "選擇【場景】",
-      "select": "選擇",
-      "create": "新 建",
-      "cancel": "取 消",
-      "prompt": {
-        "message1": "請輸入實體名稱",
-        "message2": "提示",
-        "confirm": "確認",
-        "cancel": "取消",
-        "info": "取消輸入"
-      }
-    }
+    principal: {
+      assign: "分配學校管理員",
+      selectUser: "選擇用戶",
+      select: "選擇",
+      assignSuccess: "學校管理員分配成功",
+      assignFailed: "學校管理員分配失敗",
+      username: "用戶名",
+      nickname: "暱稱",
+    },
+    errors: {
+      fetchFailed: "獲取學校列表失敗",
+      noData: "暫無數據",
+      createPending: "創建功能開發中",
+      editPending: "編輯學校: {name}",
+    },
+    dialog: {
+      createTitle: "創建學校",
+      editTitle: "編輯學校",
+    },
+    form: {
+      name: "學校名稱",
+      namePlaceholder: "請輸入學校名稱",
+      address: "學校地址",
+      addressPlaceholder: "請輸入學校地址",
+      principal: "學校管理員",
+      principalPlaceholder: "請選擇學校管理員",
+      image: "學校圖片",
+      edit: "編輯",
+      cancel: "取消",
+      submit: "提交",
+      submitting: "提交中...",
+    },
+    validation: {
+      nameRequired: "請輸入學校名稱",
+      nameLength: "學校名稱長度應在2-50個字符之間",
+    },
+    messages: {
+      addSuccess: "添加成功",
+      createConfirm: "確認創建新學校嗎？",
+      createSuccess: "學校創建成功",
+      createFailed: "學校創建失敗",
+      updateSuccess: "學校更新成功",
+      updateFailed: "學校更新失敗",
+      deleteFailed: "學校刪除失敗",
+      clearPrincipalConfirm: "確認要清空學校管理員嗎？",
+    },
+    creator: {
+      form: {
+        label1: "用戶名",
+        label2: "密碼",
+        label3: "確認密碼",
+        message1: "請輸入用戶名稱",
+        message2: "用戶名稱長度應該大於5",
+        message3: "用戶名請避免使用中文",
+        message4: "請輸入密碼",
+        message5: "密碼長度應該大於6",
+        message6: "請輸入校驗密碼",
+        error1: "請輸入密碼",
+        error2: "請再次輸入密碼",
+        error3: "兩次輸入的密碼不一致",
+        error4: "表單校驗失敗",
+        cancel: "取 消",
+        submit: "註冊賬號",
+      },
+    },
+    list: {
+      label: "權限:",
+      cancel: "刪除",
+      manage: "管理",
+      roles: {
+        root: "根用戶",
+        admin: "超級管理員",
+        manager: "管理員",
+        user: "用戶",
+      },
+      confirm: {
+        message1: "此操作將永久刪除該學校, 是否繼續?",
+        message2: "提示",
+        confirm: "確認",
+        cancel: "取消",
+        success: "刪除成功!",
+        info: "已取消刪除",
+      },
+      success: "權限更新成功！",
+      error: "權限更新失敗！",
+    },
+    confirm: {
+      deleteTitle: "確認刪除",
+      deleteMessage: "確定要刪除嗎？此操作不可恢復。",
+      removeMemberTitle: "確認移除",
+      removeMemberMessage: "確定要移除該成員嗎？",
+      confirm: "確認",
+      cancel: "取消",
+    },
   },
-  "MrppHeader": {
-    "sortByName": "名稱排序",
-    "sortByTime": "時間排序",
-    "search": "搜索名稱"
+  game: {
+    index: {
+      title: "創建【關卡】",
+      delete: "刪除",
+      form: {
+        label1: "順序",
+        label2: "場景id",
+        label3: "場景名",
+        label4: "操作",
+        placeholder: "請輸入排序",
+        confirm: {
+          message1: "修改排序？",
+          message2: "提示",
+          confirm: "確認",
+          cancel: "取消",
+          success: "刪除成功",
+          info: "已取消修改",
+        },
+      },
+      success: "添加成功",
+      confirm: {
+        message1: "此操作將永久刪除該【關卡】, 是否繼續?",
+        message2: "提示",
+        confirm: "確認",
+        cancel: "取消",
+        success: "刪除成功",
+        info: "已取消刪除",
+      },
+    },
+    map: {
+      title1: "第",
+      title2: " 地圖",
+      addGuide: "增加關卡",
+      addMap: "增加地圖",
+      removeMap: "減少地圖",
+      delete: "刪除",
+      form: {
+        label1: "順序",
+        label2: "場景id",
+        label3: "場景名",
+        label4: "操作",
+        placeholder: "請輸入排序",
+        confirm: {
+          message1: "修改排序？",
+          message2: "提示",
+          confirm: "確認",
+          cancel: "取消",
+          success: "刪除成功",
+          info: "已取消修改",
+        },
+      },
+      success: "添加成功",
+      confirm1: {
+        message1: "創建地圖",
+        message2: "提示",
+        confirm: "確認",
+        cancel: "取消",
+        success: "創建成功",
+        info: "已取消創建",
+      },
+      confirm2: {
+        message1: "刪除地圖",
+        message2: "提示",
+        confirm: "確認",
+        cancel: "取消",
+        success: "刪除成功",
+        info: "已取消刪除",
+      },
+      confirm3: {
+        message1: "此操作將永久刪除該【關卡】, 是否繼續?",
+        message2: "提示",
+        confirm: "確認",
+        cancel: "取消",
+        success: "刪除成功",
+        info: "已取消刪除",
+      },
+    },
+    verseDialog: {
+      title: "選擇【場景】",
+      select: "選擇",
+      create: "新 建",
+      cancel: "取 消",
+      prompt: {
+        message1: "請輸入實體名稱",
+        message2: "提示",
+        confirm: "確認",
+        cancel: "取消",
+        info: "取消輸入",
+      },
+    },
   },
-  "tags": {
-    "refresh": "刷新",
-    "close": "關閉",
-    "closeOthers": "關閉其他",
-    "closeLeft": "關閉左側",
-    "closeRight": "關閉右側",
-    "closeAll": "關閉全部"
+  MrppHeader: {
+    sortByName: "名稱排序",
+    sortByTime: "時間排序",
+    search: "搜索名稱",
   },
-  "navbar": {
-    "dashboard": "首頁",
-    "logout": "註銷登出",
-    "AccountSetting": "賬號設置",
-    "personalCenter": "個人中心",
-    "helpSupport": "幫助支持"
+  tags: {
+    refresh: "刷新",
+    close: "關閉",
+    closeOthers: "關閉其他",
+    closeLeft: "關閉左側",
+    closeRight: "關閉右側",
+    closeAll: "關閉全部",
   },
-  "sizeSelect": {
-    "tooltip": "布局大小",
-    "default": "默認",
-    "large": "大型",
-    "small": "小型",
-    "message": {
-      "success": "切換布局大小成功！"
-    }
+  navbar: {
+    dashboard: "首頁",
+    logout: "註銷登出",
+    AccountSetting: "賬號設置",
+    personalCenter: "個人中心",
+    helpSupport: "幫助支持",
   },
-  "copy": {
-    "title": "複製",
-    "success": "代碼已複製到剪貼板",
-    "error": "複製失敗"
+  sizeSelect: {
+    tooltip: "布局大小",
+    default: "默認",
+    large: "大型",
+    small: "小型",
+    message: {
+      success: "切換布局大小成功！",
+    },
   },
-  "langSelect": {
-    "message": {
-      "success": "切換語言成功！"
-    }
+  copy: {
+    title: "複製",
+    success: "代碼已複製到剪貼板",
+    error: "複製失敗",
   },
-  "settings": {
-    "project": "項目配置",
-    "theme": "主題設置",
-    "interface": "界面設置",
-    "navigation": "導航設置",
-    "themeColor": "主題顏色",
-    "tagsView": "開啟 Tags-View",
-    "fixedHeader": "固定 Header",
-    "sidebarLogo": "側邊欄 Logo",
-    "watermark": "開啟水印"
+  langSelect: {
+    message: {
+      success: "切換語言成功！",
+    },
   },
-  "layoutSelect": {
-    "left": "左側模式",
-    "top": "頂部模式",
-    "mix": "混合模式"
+  settings: {
+    project: "項目配置",
+    theme: "主題設置",
+    interface: "界面設置",
+    navigation: "導航設置",
+    themeColor: "主題顏色",
+    tagsView: "開啟 Tags-View",
+    fixedHeader: "固定 Header",
+    sidebarLogo: "側邊欄 Logo",
+    watermark: "開啟水印",
   },
-  "tts": {
-    "title": "騰訊語音合成",
-    "voiceType": "音色類型",
-    "voiceScene": "場景",
-    "voiceLanguage": "語言",
-    "autoSwitch": "自動切換",
-    "openAutoSwitch": "開啟自動切換",
-    "voice": "音色",
-    "emotionType": "情感類型",
-    "emotionIntensity": "情感強度",
-    "volume": "音量",
-    "speed": "語速",
-    "audioFormat": "音頻格式",
-    "sampleRate": "採樣率",
-    "synthesize": "合成語音",
-    "synthesizing": "合成中...",
-    "upload": "上傳音頻",
-    "uploading": "上傳中...",
-    "inputPlaceholder": "請輸入要轉換的文本內容...",
-    "inputChinesePlaceholder": "請輸入中文內容...",
-    "inputEnglishPlaceholder": "請輸入英文內容...",
-    "inputJapanesePlaceholder": "請輸入日文內容...",
-    "showLanguageAnalysis": "顯示語言分析",
-    "hideLanguageAnalysis": "隱藏語言分析",
-    "languageAnalysis": "語言分析",
-    "close": "關閉",
-    "chinese": "中文",
-    "english": "英文",
-    "japanese": "日文",
-    "other": "其他",
-    "all": "全部",
-    "default": "默認",
-    "premiumVoice": "精品音色",
-    "standardVoice": "標準音色",
-    "emotionCount": "種情感",
-    "selectEmotion": "選擇情感類型",
-    "confirm": "確定",
-    "cancel": "取消",
-    "tips": "使用提示",
-    "tipsContent": "不同語言的文本限制：\n• 中文：最多支持150個漢字（全角標點符號算一個漢字）\n• 英文：最多支持500個字母（半角標點符號算一個字母）\n• 日文：最多支持150個字符（全角標點符號算一個字符）\n\n請盡量確保轉換的文本內容與所選語言類型一致，否則可能導致發音不準確甚至無法轉換。",
-    "chineseLimit": "中文最多支持150個漢字（全角標點符號算一個漢字）",
-    "englishLimit": "英文最多支持500個字母（半角標點符號算一個字母）",
-    "japaneseLimit": "日文最多支持150個字符",
-    "selectLanguageFirst": "請先選擇語言類型",
-    "totalChars": "總字數",
-    "autoSwitched": "已自動切換為{0}",
-    "mixedLanguageDetected": "檢測到混合語言文本，建議選擇{0}作為主要語言",
-    "mainLanguageDetected": "檢測到文本主要語言為{0}",
-    "languagePercentage": "檢測到混合語言文本：中文約{0}%，日文約{1}%，英文約{2}%",
-    "autoSwitchedLanguage": "已自動從{0}切換為{1}",
-    "autoDetectedLanguage": "已自動檢測並設置語言為：{0}",
-    "textLimitWarning": "{0}文本超過{1}字符限制，已檢測到{2}字符，可能會被截斷",
-    "synthesisSuccess": "語音合成成功",
-    "synthesisError": "語音合成失敗，請稍後重試",
-    "uploadSuccess": "音頻上傳成功",
-    "uploadError": "音頻上傳失敗，請稍後重試",
-    "uploadCanceled": "已取消上傳",
-    "enterAudioName": "請輸入音頻名稱",
-    "uploadAudio": "上傳音頻",
-    "nameRequired": "名稱不能為空",
-    "noText": "請輸入文本",
-    "noAudio": "請先合成語音"
+  layoutSelect: {
+    left: "左側模式",
+    top: "頂部模式",
+    mix: "混合模式",
   },
-  "phototype": {
-    "title": "原型",
-    "list": "列表",
-    "create": "創建原型",
-    "fromModel": "從模型",
-    "prompt": {
-      "message1": "請輸入原型名稱",
-      "error1": "原型名稱不能為空",
-      "error2": "原型名稱長度不能少於3個字符",
-      "error3": "原型名稱長度不能超過20個字符",
-      "success": "原型名稱是"
-    }
-  }
+  tts: {
+    title: "騰訊語音合成",
+    voiceType: "音色類型",
+    voiceScene: "場景",
+    voiceLanguage: "語言",
+    autoSwitch: "自動切換",
+    openAutoSwitch: "開啟自動切換",
+    voice: "音色",
+    emotionType: "情感類型",
+    emotionIntensity: "情感強度",
+    volume: "音量",
+    speed: "語速",
+    audioFormat: "音頻格式",
+    sampleRate: "採樣率",
+    synthesize: "合成語音",
+    synthesizing: "合成中...",
+    upload: "上傳音頻",
+    uploading: "上傳中...",
+    inputPlaceholder: "請輸入要轉換的文本內容...",
+    inputChinesePlaceholder: "請輸入中文內容...",
+    inputEnglishPlaceholder: "請輸入英文內容...",
+    inputJapanesePlaceholder: "請輸入日文內容...",
+    showLanguageAnalysis: "顯示語言分析",
+    hideLanguageAnalysis: "隱藏語言分析",
+    languageAnalysis: "語言分析",
+    close: "關閉",
+    chinese: "中文",
+    english: "英文",
+    japanese: "日文",
+    other: "其他",
+    all: "全部",
+    default: "默認",
+    premiumVoice: "精品音色",
+    standardVoice: "標準音色",
+    emotionCount: "種情感",
+    selectEmotion: "選擇情感類型",
+    confirm: "確定",
+    cancel: "取消",
+    tips: "使用提示",
+    tipsContent:
+      "不同語言的文本限制：\n• 中文：最多支持150個漢字（全角標點符號算一個漢字）\n• 英文：最多支持500個字母（半角標點符號算一個字母）\n• 日文：最多支持150個字符（全角標點符號算一個字符）\n\n請盡量確保轉換的文本內容與所選語言類型一致，否則可能導致發音不準確甚至無法轉換。",
+    chineseLimit: "中文最多支持150個漢字（全角標點符號算一個漢字）",
+    englishLimit: "英文最多支持500個字母（半角標點符號算一個字母）",
+    japaneseLimit: "日文最多支持150個字符",
+    selectLanguageFirst: "請先選擇語言類型",
+    totalChars: "總字數",
+    autoSwitched: "已自動切換為{0}",
+    mixedLanguageDetected: "檢測到混合語言文本，建議選擇{0}作為主要語言",
+    mainLanguageDetected: "檢測到文本主要語言為{0}",
+    languagePercentage:
+      "檢測到混合語言文本：中文約{0}%，日文約{1}%，英文約{2}%",
+    autoSwitchedLanguage: "已自動從{0}切換為{1}",
+    autoDetectedLanguage: "已自動檢測並設置語言為：{0}",
+    textLimitWarning: "{0}文本超過{1}字符限制，已檢測到{2}字符，可能會被截斷",
+    synthesisSuccess: "語音合成成功",
+    synthesisError: "語音合成失敗，請稍後重試",
+    uploadSuccess: "音頻上傳成功",
+    uploadError: "音頻上傳失敗，請稍後重試",
+    uploadCanceled: "已取消上傳",
+    enterAudioName: "請輸入音頻名稱",
+    uploadAudio: "上傳音頻",
+    nameRequired: "名稱不能為空",
+    noText: "請輸入文本",
+    noAudio: "請先合成語音",
+  },
+  phototype: {
+    title: "原型",
+    list: "列表",
+    create: "創建原型",
+    fromModel: "從模型",
+    prompt: {
+      message1: "請輸入原型名稱",
+      error1: "原型名稱不能為空",
+      error2: "原型名稱長度不能少於3個字符",
+      error3: "原型名稱長度不能超過20個字符",
+      success: "原型名稱是",
+    },
+  },
 };

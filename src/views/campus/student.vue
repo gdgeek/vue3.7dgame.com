@@ -1,30 +1,30 @@
 <template>
   <div class="student-container">
     <div v-loading="loading">
-      <!-- Has Classes: Show Class Cards -->
-      <div v-if="!loading && studentRecords.length > 0" class="class-grid">
-        <MrPPCard v-for="record in studentRecords" :key="record.id" :item="{
-          ...record,
-          name: record.class?.name || 'No Class Name',
-          image: record.class?.image
-        }" :show-actions="false" :lazy="false">
-          <div class="class-info">
-            <p class="school-name">
-              <el-icon>
-                <OfficeBuilding />
-              </el-icon>
-              {{ record.school?.name || record.class?.school?.name || '-' }}
-            </p>
-          </div>
-          <template #enter>
-            <div class="card-actions">
-              <el-button type="danger" size="small" :loading="leavingRecordId === record.id"
-                @click="handleLeaveClass(record)">
-                {{ $t('route.personalCenter.campus.leaveClass') }}
-              </el-button>
+      <!-- Has Classes: Show Class Headers -->
+      <div v-if="!loading && studentRecords.length > 0" class="class-list">
+        <div v-for="record in studentRecords" :key="record.id" class="class-header">
+          <div class="class-header-left">
+            <div class="class-image">
+              <Id2Image :id="record.class?.id || record.id" :image="record.class?.image?.url || null" :lazy="false"
+                fit="cover" />
             </div>
-          </template>
-        </MrPPCard>
+            <div class="class-info">
+              <h3 class="class-name">{{ record.class?.name || 'No Class Name' }}</h3>
+              <p class="school-name">
+                <el-icon>
+                  <OfficeBuilding />
+                </el-icon>
+                {{ record.school?.name || record.class?.school?.name || '-' }}
+              </p>
+            </div>
+          </div>
+          <div class="class-header-right">
+            <el-button type="danger" :loading="leavingRecordId === record.id" @click="handleLeaveClass(record)">
+              {{ $t('route.personalCenter.campus.leaveClass') }}
+            </el-button>
+          </div>
+        </div>
       </div>
 
       <!-- No Classes: Show Apply Button -->
@@ -85,7 +85,6 @@ import { ref, computed, onMounted } from 'vue';
 import { OfficeBuilding, Plus, Search } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
-import MrPPCard from '@/components/MrPP/MrPPCard/index.vue';
 import Id2Image from "@/components/Id2Image.vue";
 import { getClasses } from '@/api/v1/edu-class';
 import { deleteStudent, getStudentMe, joinClass } from '@/api/v1/edu-student';
@@ -211,18 +210,61 @@ onMounted(() => {
   min-height: 400px;
 }
 
-.class-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+.class-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.class-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--el-bg-color);
+  border: 1px solid var(--el-border-color);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.class-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+.class-image {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .class-info {
-  padding: 10px;
+  flex: 1;
+  min-width: 0;
+
+  .class-name {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--el-text-color-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
   .school-name {
     margin: 0;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--el-text-color-secondary);
     display: flex;
     align-items: center;
@@ -230,10 +272,9 @@ onMounted(() => {
   }
 }
 
-.card-actions {
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
+.class-header-right {
+  flex-shrink: 0;
+  margin-left: 20px;
 }
 
 .dialog-controls {

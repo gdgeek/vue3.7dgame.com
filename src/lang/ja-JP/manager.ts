@@ -1,376 +1,383 @@
 // manager translations for ja-JP
 export default {
-  "manager": {
-    "title": "ユーザーを追加",
-    "createSchool": "学校を作成",
-    "createClass": "クラスを作成",
-    "createTeacher": "教師を作成",
-    "createStudent": "学生を作成",
-    "defaultSchoolName": "新しい学校",
-    "defaultClassName": "新しいクラス",
-    "filteringBySchool": "現在の学校IDでフィルタリング",
-    "backToAll": "すべてのクラスに戻る",
-    "school": {
-      "principal": "学校管理者",
-      "address": "住所",
-      "description": "説明",
-      "classList": "クラスリスト"
+  manager: {
+    title: "ユーザーを追加",
+    createSchool: "学校を作成",
+    createClass: "クラスを作成",
+    createTeacher: "教師を作成",
+    createStudent: "学生を作成",
+    defaultSchoolName: "新しい学校",
+    defaultClassName: "新しいクラス",
+    filteringBySchool: "現在の学校IDでフィルタリング",
+    backToAll: "すべてのクラスに戻る",
+    school: {
+      principal: "学校管理者",
+      address: "住所",
+      description: "説明",
+      classList: "クラスリスト",
     },
-    "class": {
-      "title": "クラス管理",
-      "schoolTitle": "{school} - クラス管理",
-      "grade": "学年",
-      "teacher": "教師",
-      "student": "生徒",
-      "teacherList": "教師リスト",
-      "studentList": "生徒リスト",
-      "selectTeacher": "教師を選択",
-      "selectStudent": "生徒を選択",
-      "assignTeacher": "教師を割り当て",
-      "assignStudent": "生徒を割り当て",
-      "dialog": {
-        "createTitle": "クラスを作成",
-        "editTitle": "クラスを編集"
+    class: {
+      title: "クラス管理",
+      schoolTitle: "{school} - クラス管理",
+      grade: "学年",
+      teacher: "教師",
+      student: "生徒",
+      teacherList: "教師リスト",
+      studentList: "生徒リスト",
+      selectTeacher: "教師を選択",
+      selectStudent: "生徒を選択",
+      assignTeacher: "教師を割り当て",
+      assignStudent: "生徒を割り当て",
+      dialog: {
+        createTitle: "クラスを作成",
+        editTitle: "クラスを編集",
       },
-      "form": {
-        "name": "クラス名",
-        "namePlaceholder": "クラス名を入力してください",
-        "image": "クラス画像"
+      form: {
+        name: "クラス名",
+        namePlaceholder: "クラス名を入力してください",
+        image: "クラス画像",
       },
-      "messages": {
-        "createConfirm": "新しいクラスを作成しますか？",
-        "createSuccess": "クラスの作成に成功しました",
-        "createFailed": "クラスの作成に失敗しました",
-        "updateSuccess": "クラスの更新に成功しました",
-        "updateFailed": "クラスの更新に失敗しました",
-        "selectSchoolFirst": "クラスを作成する前に学校を選択してください"
+      messages: {
+        createConfirm: "新しいクラスを作成しますか？",
+        createSuccess: "クラスの作成に成功しました",
+        createFailed: "クラスの作成に失敗しました",
+        updateSuccess: "クラスの更新に成功しました",
+        updateFailed: "クラスの更新に失敗しました",
+        selectSchoolFirst: "クラスを作成する前に学校を選択してください",
       },
-      "validation": {
-        "nameRequired": "クラス名を入力してください"
-      }
-    },
-    "teacher": {
-      "subject": "科目",
-      "phone": "電話"
-    },
-    "student": {
-      "grade": "学年",
-      "class": "クラス"
-    },
-    "principal": {
-      "assign": "学校管理者を割り当てる",
-      "selectUser": "ユーザーを選択",
-      "select": "選択",
-      "assignSuccess": "学校管理者の割り当てに成功しました",
-      "assignFailed": "学校管理者の割り当てに失敗しました",
-      "username": "ユーザー名",
-      "nickname": "ニックネーム"
-    },
-    "errors": {
-      "fetchFailed": "学校リストの取得に失敗しました",
-      "noData": "データがありません",
-      "createPending": "作成機能は開発中です",
-      "editPending": "学校を編集: {name}"
-    },
-    "dialog": {
-      "createTitle": "学校を作成",
-      "editTitle": "学校を編集"
-    },
-    "form": {
-      "name": "学校名",
-      "namePlaceholder": "学校名を入力してください",
-      "address": "学校住所",
-      "addressPlaceholder": "学校住所を入力してください",
-      "principal": "学校管理者",
-      "principalPlaceholder": "学校管理者を選択してください",
-      "image": "学校の画像",
-      "edit": "編集",
-      "cancel": "キャンセル",
-      "submit": "送信",
-      "submitting": "送信中..."
-    },
-    "validation": {
-      "nameRequired": "学校名を入力してください",
-      "nameLength": "学校名は2〜50文字である必要があります"
-    },
-    "messages": {
-      "createConfirm": "新しい学校を作成しますか？",
-      "createSuccess": "学校の作成に成功しました",
-      "createFailed": "学校の作成に失敗しました",
-      "updateSuccess": "学校の更新に成功しました",
-      "updateFailed": "学校の更新に失敗しました",
-      "deleteFailed": "学校の削除に失敗しました",
-      "clearPrincipalConfirm": "学校管理者をクリアしてもよろしいですか？"
-    },
-    "creator": {
-      "form": {
-        "label1": "ユーザー名",
-        "label2": "パスワード",
-        "label3": "パスワード確認",
-        "message1": "ユーザー名を入力してください",
-        "message2": "ユーザー名は5文字以上にしてください",
-        "message3": "ユーザー名には中国語を使用しないでください",
-        "message4": "パスワードを入力してください",
-        "message5": "パスワードは6文字以上にしてください",
-        "message6": "確認用パスワードを入力してください",
-        "error1": "パスワードを入力してください",
-        "error2": "もう一度パスワードを入力してください",
-        "error3": "2回入力されたパスワードが一致しません",
-        "error4": "フォーム検証に失敗しました",
-        "cancel": "キャンセル",
-        "submit": "アカウントを登録"
-      }
-    },
-    "list": {
-      "label": "権限:",
-      "cancel": "削除",
-      "manage": "管理",
-      "roles": {
-        "root": "ルートユーザー",
-        "admin": "スーパー管理者",
-        "manager": "管理者",
-        "user": "ユーザー"
+      validation: {
+        nameRequired: "クラス名を入力してください",
       },
-      "confirm": {
-        "message1": "この操作は学校を永久に削除します。続行しますか？",
-        "message2": "ヒント",
-        "confirm": "確認",
-        "cancel": "キャンセル",
-        "success": "削除成功！",
-        "info": "削除がキャンセルされました"
-      },
-      "success": "権限の更新に成功しました！",
-      "error": "権限の更新に失敗しました！"
     },
-    "confirm": {
-      "deleteTitle": "削除の確認",
-      "deleteMessage": "削除してもよろしいですか？この操作は元に戻せません。",
-      "removeMemberTitle": "メンバー削除の確認",
-      "removeMemberMessage": "このメンバーを削除してもよろしいですか？",
-      "confirm": "確認",
-      "cancel": "キャンセル"
-    }
-  },
-  "game": {
-    "index": {
-      "title": "【レベル】を作成",
-      "delete": "削除",
-      "form": {
-        "label1": "順序",
-        "label2": "场景ID",
-        "label3": "场景名",
-        "label4": "操作",
-        "placeholder": "順序を入力してください",
-        "confirm": {
-          "message1": "順序を変更しますか？",
-          "message2": "ヒント",
-          "confirm": "確認",
-          "cancel": "キャンセル",
-          "success": "削除成功",
-          "info": "変更がキャンセルされました"
-        }
-      },
-      "success": "追加成功",
-      "confirm": {
-        "message1": "この操作は【レベル】を永久に削除しますが、続行しますか？",
-        "message2": "ヒント",
-        "confirm": "確認",
-        "cancel": "キャンセル",
-        "success": "削除成功",
-        "info": "削除がキャンセルされました"
-      }
+    teacher: {
+      subject: "科目",
+      phone: "電話",
     },
-    "map": {
-      "title1": "第",
-      "title2": " マップ",
-      "addGuide": "レベルを追加",
-      "addMap": "マップを追加",
-      "removeMap": "マップを削除",
-      "delete": "削除",
-      "form": {
-        "label1": "順序",
-        "label2": "场景ID",
-        "label3": "场景名",
-        "label4": "操作",
-        "placeholder": "順序を入力してください",
-        "confirm": {
-          "message1": "順序を変更しますか？",
-          "message2": "ヒント",
-          "confirm": "確認",
-          "cancel": "キャンセル",
-          "success": "削除成功",
-          "info": "変更がキャンセルされました"
-        }
-      },
-      "success": "追加成功",
-      "confirm1": {
-        "message1": "マップを作成",
-        "message2": "ヒント",
-        "confirm": "確認",
-        "cancel": "キャンセル",
-        "success": "作成成功",
-        "info": "作成がキャンセルされました"
-      },
-      "confirm2": {
-        "message1": "マップを削除しますか？",
-        "message2": "ヒント",
-        "confirm": "確認",
-        "cancel": "キャンセル",
-        "success": "削除成功",
-        "info": "削除がキャンセルされました"
-      },
-      "confirm3": {
-        "message1": "この操作は【レベル】を永久に削除しますが、続行しますか？",
-        "message2": "ヒント",
-        "confirm": "確認",
-        "cancel": "キャンセル",
-        "success": "削除成功",
-        "info": "削除がキャンセルされました"
-      }
+    student: {
+      grade: "学年",
+      class: "クラス",
     },
-    "verseDialog": {
-      "title": "【场景】を選択",
-      "select": "選択",
-      "create": "新規作成",
-      "cancel": "キャンセル",
-      "prompt": {
-        "message1": "メタデータ名を入力してください",
-        "message2": "ヒント",
-        "confirm": "確認",
-        "cancel": "キャンセル",
-        "info": "入力がキャンセルされました"
-      }
-    }
+    principal: {
+      assign: "学校管理者を割り当てる",
+      selectUser: "ユーザーを選択",
+      select: "選択",
+      assignSuccess: "学校管理者の割り当てに成功しました",
+      assignFailed: "学校管理者の割り当てに失敗しました",
+      username: "ユーザー名",
+      nickname: "ニックネーム",
+    },
+    errors: {
+      fetchFailed: "学校リストの取得に失敗しました",
+      noData: "データがありません",
+      createPending: "作成機能は開発中です",
+      editPending: "学校を編集: {name}",
+    },
+    dialog: {
+      createTitle: "学校を作成",
+      editTitle: "学校を編集",
+    },
+    form: {
+      name: "学校名",
+      namePlaceholder: "学校名を入力してください",
+      address: "学校住所",
+      addressPlaceholder: "学校住所を入力してください",
+      principal: "学校管理者",
+      principalPlaceholder: "学校管理者を選択してください",
+      image: "学校の画像",
+      edit: "編集",
+      cancel: "キャンセル",
+      submit: "送信",
+      submitting: "送信中...",
+    },
+    validation: {
+      nameRequired: "学校名を入力してください",
+      nameLength: "学校名は2〜50文字である必要があります",
+    },
+    messages: {
+      addSuccess: "追加に成功しました",
+      createConfirm: "新しい学校を作成しますか？",
+      createSuccess: "学校の作成に成功しました",
+      createFailed: "学校の作成に失敗しました",
+      updateSuccess: "学校の更新に成功しました",
+      updateFailed: "学校の更新に失敗しました",
+      deleteFailed: "学校の削除に失敗しました",
+      clearPrincipalConfirm: "学校管理者をクリアしてもよろしいですか？",
+    },
+    creator: {
+      form: {
+        label1: "ユーザー名",
+        label2: "パスワード",
+        label3: "パスワード確認",
+        message1: "ユーザー名を入力してください",
+        message2: "ユーザー名は5文字以上にしてください",
+        message3: "ユーザー名には中国語を使用しないでください",
+        message4: "パスワードを入力してください",
+        message5: "パスワードは6文字以上にしてください",
+        message6: "確認用パスワードを入力してください",
+        error1: "パスワードを入力してください",
+        error2: "もう一度パスワードを入力してください",
+        error3: "2回入力されたパスワードが一致しません",
+        error4: "フォーム検証に失敗しました",
+        cancel: "キャンセル",
+        submit: "アカウントを登録",
+      },
+    },
+    list: {
+      label: "権限:",
+      cancel: "削除",
+      manage: "管理",
+      roles: {
+        root: "ルートユーザー",
+        admin: "スーパー管理者",
+        manager: "管理者",
+        user: "ユーザー",
+      },
+      confirm: {
+        message1: "この操作は学校を永久に削除します。続行しますか？",
+        message2: "ヒント",
+        confirm: "確認",
+        cancel: "キャンセル",
+        success: "削除成功！",
+        info: "削除がキャンセルされました",
+      },
+      success: "権限の更新に成功しました！",
+      error: "権限の更新に失敗しました！",
+    },
+    confirm: {
+      deleteTitle: "削除の確認",
+      deleteMessage: "削除してもよろしいですか？この操作は元に戻せません。",
+      removeMemberTitle: "メンバー削除の確認",
+      removeMemberMessage: "このメンバーを削除してもよろしいですか？",
+      confirm: "確認",
+      cancel: "キャンセル",
+    },
   },
-  "MrppHeader": {
-    "sortByName": "名前で並び替え",
-    "sortByTime": "時間で並び替え",
-    "search": "名前を検索"
+  game: {
+    index: {
+      title: "【レベル】を作成",
+      delete: "削除",
+      form: {
+        label1: "順序",
+        label2: "场景ID",
+        label3: "场景名",
+        label4: "操作",
+        placeholder: "順序を入力してください",
+        confirm: {
+          message1: "順序を変更しますか？",
+          message2: "ヒント",
+          confirm: "確認",
+          cancel: "キャンセル",
+          success: "削除成功",
+          info: "変更がキャンセルされました",
+        },
+      },
+      success: "追加成功",
+      confirm: {
+        message1: "この操作は【レベル】を永久に削除しますが、続行しますか？",
+        message2: "ヒント",
+        confirm: "確認",
+        cancel: "キャンセル",
+        success: "削除成功",
+        info: "削除がキャンセルされました",
+      },
+    },
+    map: {
+      title1: "第",
+      title2: " マップ",
+      addGuide: "レベルを追加",
+      addMap: "マップを追加",
+      removeMap: "マップを削除",
+      delete: "削除",
+      form: {
+        label1: "順序",
+        label2: "场景ID",
+        label3: "场景名",
+        label4: "操作",
+        placeholder: "順序を入力してください",
+        confirm: {
+          message1: "順序を変更しますか？",
+          message2: "ヒント",
+          confirm: "確認",
+          cancel: "キャンセル",
+          success: "削除成功",
+          info: "変更がキャンセルされました",
+        },
+      },
+      success: "追加成功",
+      confirm1: {
+        message1: "マップを作成",
+        message2: "ヒント",
+        confirm: "確認",
+        cancel: "キャンセル",
+        success: "作成成功",
+        info: "作成がキャンセルされました",
+      },
+      confirm2: {
+        message1: "マップを削除しますか？",
+        message2: "ヒント",
+        confirm: "確認",
+        cancel: "キャンセル",
+        success: "削除成功",
+        info: "削除がキャンセルされました",
+      },
+      confirm3: {
+        message1: "この操作は【レベル】を永久に削除しますが、続行しますか？",
+        message2: "ヒント",
+        confirm: "確認",
+        cancel: "キャンセル",
+        success: "削除成功",
+        info: "削除がキャンセルされました",
+      },
+    },
+    verseDialog: {
+      title: "【场景】を選択",
+      select: "選択",
+      create: "新規作成",
+      cancel: "キャンセル",
+      prompt: {
+        message1: "メタデータ名を入力してください",
+        message2: "ヒント",
+        confirm: "確認",
+        cancel: "キャンセル",
+        info: "入力がキャンセルされました",
+      },
+    },
   },
-  "tags": {
-    "refresh": "更新",
-    "close": "閉じる",
-    "closeOthers": "他を閉じる",
-    "closeLeft": "左側を閉じる",
-    "closeRight": "右側を閉じる",
-    "closeAll": "すべて閉じる"
+  MrppHeader: {
+    sortByName: "名前で並び替え",
+    sortByTime: "時間で並び替え",
+    search: "名前を検索",
   },
-  "navbar": {
-    "dashboard": "ダッシュボード",
-    "logout": "ログアウト",
-    "AccountSetting": "アカウント設定",
-    "personalCenter": "個人センター",
-    "helpSupport": "サポート"
+  tags: {
+    refresh: "更新",
+    close: "閉じる",
+    closeOthers: "他を閉じる",
+    closeLeft: "左側を閉じる",
+    closeRight: "右側を閉じる",
+    closeAll: "すべて閉じる",
   },
-  "sizeSelect": {
-    "tooltip": "レイアウトサイズ",
-    "default": "デフォルト",
-    "large": "大",
-    "small": "小",
-    "message": {
-      "success": "レイアウトサイズの切り替えに成功しました！"
-    }
+  navbar: {
+    dashboard: "ダッシュボード",
+    logout: "ログアウト",
+    AccountSetting: "アカウント設定",
+    personalCenter: "個人センター",
+    helpSupport: "サポート",
   },
-  "copy": {
-    "title": "コピー",
-    "success": "コードがクリップボードにコピーされました",
-    "error": "コピーに失敗しました"
+  sizeSelect: {
+    tooltip: "レイアウトサイズ",
+    default: "デフォルト",
+    large: "大",
+    small: "小",
+    message: {
+      success: "レイアウトサイズの切り替えに成功しました！",
+    },
   },
-  "langSelect": {
-    "message": {
-      "success": "言語切り替えに成功しました！"
-    }
+  copy: {
+    title: "コピー",
+    success: "コードがクリップボードにコピーされました",
+    error: "コピーに失敗しました",
   },
-  "settings": {
-    "project": "プロジェクト設定",
-    "theme": "テーマ設定",
-    "interface": "インターフェース設定",
-    "navigation": "ナビゲーション設定",
-    "themeColor": "テーマカラー",
-    "tagsView": "Tags-Viewを有効化",
-    "fixedHeader": "固定ヘッダー",
-    "sidebarLogo": "サイドバーのロゴ",
-    "watermark": "透かしを有効化"
+  langSelect: {
+    message: {
+      success: "言語切り替えに成功しました！",
+    },
   },
-  "layoutSelect": {
-    "left": "左側モード",
-    "top": "上部モード",
-    "mix": "ミックスモード"
+  settings: {
+    project: "プロジェクト設定",
+    theme: "テーマ設定",
+    interface: "インターフェース設定",
+    navigation: "ナビゲーション設定",
+    themeColor: "テーマカラー",
+    tagsView: "Tags-Viewを有効化",
+    fixedHeader: "固定ヘッダー",
+    sidebarLogo: "サイドバーのロゴ",
+    watermark: "透かしを有効化",
   },
-  "tts": {
-    "title": "テンセント音声合成",
-    "voiceType": "音声タイプ",
-    "voiceScene": "シーン",
-    "voiceLanguage": "言語",
-    "autoSwitch": "自動切替",
-    "openAutoSwitch": "自動切替を有効にする",
-    "voice": "音声",
-    "emotionType": "感情タイプ",
-    "emotionIntensity": "感情の強さ",
-    "volume": "音量",
-    "speed": "速度",
-    "audioFormat": "音声フォーマット",
-    "sampleRate": "サンプルレート",
-    "synthesize": "音声合成",
-    "synthesizing": "合成中...",
-    "upload": "音声をアップロード",
-    "uploading": "アップロード中...",
-    "inputPlaceholder": "変換するテキストを入力してください...",
-    "inputChinesePlaceholder": "中国語のテキストを入力してください...",
-    "inputEnglishPlaceholder": "英語のテキストを入力してください...",
-    "inputJapanesePlaceholder": "日本語のテキストを入力してください...",
-    "showLanguageAnalysis": "言語分析を表示",
-    "hideLanguageAnalysis": "言語分析を非表示",
-    "languageAnalysis": "言語分析",
-    "close": "閉じる",
-    "chinese": "中国語",
-    "english": "英語",
-    "japanese": "日本語",
-    "other": "その他",
-    "all": "すべて",
-    "default": "デフォルト",
-    "premiumVoice": "プレミアム音声",
-    "standardVoice": "標準音声",
-    "emotionCount": "種類の感情",
-    "selectEmotion": "感情タイプを選択",
-    "confirm": "確認",
-    "cancel": "キャンセル",
-    "tips": "ヒント",
-    "tipsContent": "異なる言語のテキスト制限：\n• 中国語：最大150文字（全角句読点は1文字としてカウント）\n• 英語：最大500文字（半角句読点は1文字としてカウント）\n• 日本語：最大150文字（全角句読点は1文字としてカウント）\n\n変換するテキストの内容が選択した言語タイプと一致していることを確認してください。一致していない場合、発音が不正確になったり、変換に失敗したりする可能性があります。",
-    "chineseLimit": "中国語は最大150文字まで対応（全角句読点は1文字としてカウント）",
-    "englishLimit": "英語は最大500文字まで対応（半角句読点は1文字としてカウント）",
-    "japaneseLimit": "日本語は最大150文字まで対応",
-    "selectLanguageFirst": "まず言語タイプを選択してください",
-    "totalChars": "合計文字数",
-    "autoSwitched": "自動的に{0}に切り替えられました",
-    "mixedLanguageDetected": "混合言語テキストが検出されました。{0}を主要言語として選択することをお勧めします",
-    "mainLanguageDetected": "検出された主要言語：{0}",
-    "languagePercentage": "混合言語が検出されました：中国語約{0}％、日本語約{1}％、英語約{2}％",
-    "autoSwitchedLanguage": "{0}から{1}に自動的に切り替えられました",
-    "autoDetectedLanguage": "自動的に言語を検出し、{0}に設定しました",
-    "textLimitWarning": "{0}テキストが{1}文字の制限を超えています。{2}文字が検出され、切り捨てられる可能性があります",
-    "synthesisSuccess": "音声合成が成功しました",
-    "synthesisError": "音声合成に失敗しました。後でもう一度お試しください",
-    "uploadSuccess": "音声のアップロードに成功しました",
-    "uploadError": "音声のアップロードに失敗しました。後でもう一度お試しください",
-    "uploadCanceled": "アップロードがキャンセルされました",
-    "enterAudioName": "音声名を入力してください",
-    "uploadAudio": "音声をアップロード",
-    "nameRequired": "名前を空にすることはできません",
-    "noText": "テキストを入力してください",
-    "noAudio": "まず音声を合成してください"
+  layoutSelect: {
+    left: "左側モード",
+    top: "上部モード",
+    mix: "ミックスモード",
   },
-  "phototype": {
-    "title": "プロトタイプ",
-    "list": "リスト",
-    "create": "プロトタイプ作成",
-    "fromModel": "モデルから",
-    "prompt": {
-      "message1": "プロトタイプ名を入力してください",
-      "error1": "プロトタイプ名は空にできません",
-      "error2": "プロトタイプ名の長さは3文字以上である必要があります",
-      "error3": "プロトタイプ名の長さは20文字を超えることはできません",
-      "success": "プロトタイプ名は"
-    }
-  }
+  tts: {
+    title: "テンセント音声合成",
+    voiceType: "音声タイプ",
+    voiceScene: "シーン",
+    voiceLanguage: "言語",
+    autoSwitch: "自動切替",
+    openAutoSwitch: "自動切替を有効にする",
+    voice: "音声",
+    emotionType: "感情タイプ",
+    emotionIntensity: "感情の強さ",
+    volume: "音量",
+    speed: "速度",
+    audioFormat: "音声フォーマット",
+    sampleRate: "サンプルレート",
+    synthesize: "音声合成",
+    synthesizing: "合成中...",
+    upload: "音声をアップロード",
+    uploading: "アップロード中...",
+    inputPlaceholder: "変換するテキストを入力してください...",
+    inputChinesePlaceholder: "中国語のテキストを入力してください...",
+    inputEnglishPlaceholder: "英語のテキストを入力してください...",
+    inputJapanesePlaceholder: "日本語のテキストを入力してください...",
+    showLanguageAnalysis: "言語分析を表示",
+    hideLanguageAnalysis: "言語分析を非表示",
+    languageAnalysis: "言語分析",
+    close: "閉じる",
+    chinese: "中国語",
+    english: "英語",
+    japanese: "日本語",
+    other: "その他",
+    all: "すべて",
+    default: "デフォルト",
+    premiumVoice: "プレミアム音声",
+    standardVoice: "標準音声",
+    emotionCount: "種類の感情",
+    selectEmotion: "感情タイプを選択",
+    confirm: "確認",
+    cancel: "キャンセル",
+    tips: "ヒント",
+    tipsContent:
+      "異なる言語のテキスト制限：\n• 中国語：最大150文字（全角句読点は1文字としてカウント）\n• 英語：最大500文字（半角句読点は1文字としてカウント）\n• 日本語：最大150文字（全角句読点は1文字としてカウント）\n\n変換するテキストの内容が選択した言語タイプと一致していることを確認してください。一致していない場合、発音が不正確になったり、変換に失敗したりする可能性があります。",
+    chineseLimit:
+      "中国語は最大150文字まで対応（全角句読点は1文字としてカウント）",
+    englishLimit:
+      "英語は最大500文字まで対応（半角句読点は1文字としてカウント）",
+    japaneseLimit: "日本語は最大150文字まで対応",
+    selectLanguageFirst: "まず言語タイプを選択してください",
+    totalChars: "合計文字数",
+    autoSwitched: "自動的に{0}に切り替えられました",
+    mixedLanguageDetected:
+      "混合言語テキストが検出されました。{0}を主要言語として選択することをお勧めします",
+    mainLanguageDetected: "検出された主要言語：{0}",
+    languagePercentage:
+      "混合言語が検出されました：中国語約{0}％、日本語約{1}％、英語約{2}％",
+    autoSwitchedLanguage: "{0}から{1}に自動的に切り替えられました",
+    autoDetectedLanguage: "自動的に言語を検出し、{0}に設定しました",
+    textLimitWarning:
+      "{0}テキストが{1}文字の制限を超えています。{2}文字が検出され、切り捨てられる可能性があります",
+    synthesisSuccess: "音声合成が成功しました",
+    synthesisError: "音声合成に失敗しました。後でもう一度お試しください",
+    uploadSuccess: "音声のアップロードに成功しました",
+    uploadError: "音声のアップロードに失敗しました。後でもう一度お試しください",
+    uploadCanceled: "アップロードがキャンセルされました",
+    enterAudioName: "音声名を入力してください",
+    uploadAudio: "音声をアップロード",
+    nameRequired: "名前を空にすることはできません",
+    noText: "テキストを入力してください",
+    noAudio: "まず音声を合成してください",
+  },
+  phototype: {
+    title: "プロトタイプ",
+    list: "リスト",
+    create: "プロトタイプ作成",
+    fromModel: "モデルから",
+    prompt: {
+      message1: "プロトタイプ名を入力してください",
+      error1: "プロトタイプ名は空にできません",
+      error2: "プロトタイプ名の長さは3文字以上である必要があります",
+      error3: "プロトタイプ名の長さは20文字を超えることはできません",
+      success: "プロトタイプ名は",
+    },
+  },
 };

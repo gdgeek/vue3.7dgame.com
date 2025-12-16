@@ -1,237 +1,241 @@
 // meta translations for ja-JP
 export default {
-  "meta": {
-    "title": "【エンティティ】を作成する",
-    "edit": "エンティティ情報を編集",
-    "enter": "入る",
-    "delete": "削除",
-    "copy": "コピー",
-    "create": {
-      "title": "エンティティを作成",
-      "defaultName": "新しいエンティティ",
-      "namePlaceholder": "エンティティ名を入力してください",
-      "nameRequired": "エンティティ名は空にできません",
-      "success": "エンティティの作成に成功しました"
+  meta: {
+    title: "【エンティティ】を作成する",
+    edit: "エンティティ情報を編集",
+    enter: "入る",
+    delete: "削除",
+    actions: "操作",
+    copy: "コピー",
+    create: {
+      title: "エンティティを作成",
+      defaultName: "新しいエンティティ",
+      namePlaceholder: "エンティティ名を入力してください",
+      nameRequired: "エンティティ名は空にできません",
+      success: "エンティティの作成に成功しました",
     },
-    "confirm": {
-      "message1": "このオペレーションは【エンティティ】を永久に削除します。続行しますか？",
-      "message2": "ヒント",
-      "confirm": "確認",
-      "cancel": "キャンセル",
-      "success": "削除に成功しました！",
-      "info": "削除をキャンセルしました"
+    confirm: {
+      message1:
+        "このオペレーションは【エンティティ】を永久に削除します。続行しますか？",
+      message2: "ヒント",
+      confirm: "確認",
+      cancel: "キャンセル",
+      success: "削除に成功しました！",
+      info: "削除をキャンセルしました",
     },
-    "prompt": {
-      "message1": "エンティティ名を入力してください",
-      "message2": "ヒント（3〜20文字）",
-      "confirm": "確認",
-      "cancel": "キャンセル",
-      "inputValidator": {
-        "item1": "エンティティ名は空にできません",
-        "item2": "エンティティ名は3文字以上である必要があります",
-        "item3": "エンティティ名は20文字以下である必要があります"
+    prompt: {
+      message1: "エンティティ名を入力してください",
+      message2: "ヒント（3〜20文字）",
+      confirm: "確認",
+      cancel: "キャンセル",
+      inputValidator: {
+        item1: "エンティティ名は空にできません",
+        item2: "エンティティ名は3文字以上である必要があります",
+        item3: "エンティティ名は20文字以下である必要があります",
       },
-      "success": "エンティティ名は：",
-      "info": "入力をキャンセルしました"
+      success: "エンティティ名は：",
+      info: "入力をキャンセルしました",
     },
-    "prompt2": {
-      "message1": "新しい名前を入力してください",
-      "message2": "エンティティ名を変更する",
-      "confirm": "確認",
-      "cancel": "キャンセル",
-      "success": "新しいエンティティ名は：",
-      "info": "入力をキャンセルしました"
+    prompt2: {
+      message1: "新しい名前を入力してください",
+      message2: "エンティティ名を変更する",
+      confirm: "確認",
+      cancel: "キャンセル",
+      success: "新しいエンティティ名は：",
+      info: "入力をキャンセルしました",
     },
-    "prompt3": {
-      "message1": "コピーされたエンティティの名前を入力してください",
-      "message2": "エンティティをコピーする",
-      "confirm": "確認",
-      "cancel": "キャンセル",
-      "success": "コピー成功！新しいエンティティ名：",
-      "info": "コピーをキャンセルしました"
+    prompt3: {
+      message1: "コピーされたエンティティの名前を入力してください",
+      message2: "エンティティをコピーする",
+      confirm: "確認",
+      cancel: "キャンセル",
+      success: "コピー成功！新しいエンティティ名：",
+      info: "コピーをキャンセルしました",
     },
-    "metaEdit": {
-      "title": "【メタデータ】名：",
-      "form": {
-        "title": "名前",
-        "picture": "画像",
-        "input": "入力イベント",
-        "output": "出力イベント",
-        "data": "データ",
-        "info": "情報"
+    metaEdit: {
+      title: "【メタデータ】名：",
+      form: {
+        title: "名前",
+        picture: "画像",
+        input: "入力イベント",
+        output: "出力イベント",
+        data: "データ",
+        info: "情報",
       },
-      "eventEdit": "イベント編集",
-      "contentEdit": "内容編集",
-      "save": "情報保存",
-      "metaInfo": "【メタデータ】情報",
-      "rules": {
-        "message1": "名前を入力してください",
-        "message2": "長さは2〜20文字である必要があります"
+      eventEdit: "イベント編集",
+      contentEdit: "内容編集",
+      save: "情報保存",
+      metaInfo: "【メタデータ】情報",
+      rules: {
+        message1: "名前を入力してください",
+        message2: "長さは2〜20文字である必要があります",
       },
-      "success": "保存成功",
-      "imageSelector": {
-        "selectImageMethod": "画像選択方法",
-        "selectFromResource": "リソースライブラリから選択",
-        "selectFromResourceDesc": "アップロード済みの画像から選択",
-        "uploadLocal": "ローカルからアップロード",
-        "uploadLocalDesc": "デバイスから新しい画像をアップロード",
-        "uploadFile": "画像を選択してアップロード",
-        "uploadError": "アップロード失敗：ファイルが見つかりません",
-        "invalidImageType": "JPG/PNG/BMP/GIF形式の画像をアップロードしてください",
-        "imageTooLarge": "画像サイズは2MBを超えることはできません",
-        "handlerError": "ファイルハンドラの取得に失敗しました",
-        "uploadFailed": "画像のアップロードに失敗しました",
-        "saveFailed": "画像情報の保存に失敗しました"
+      success: "保存成功",
+      imageSelector: {
+        selectImageMethod: "画像選択方法",
+        selectFromResource: "リソースライブラリから選択",
+        selectFromResourceDesc: "アップロード済みの画像から選択",
+        uploadLocal: "ローカルからアップロード",
+        uploadLocalDesc: "デバイスから新しい画像をアップロード",
+        uploadFile: "画像を選択してアップロード",
+        uploadError: "アップロード失敗：ファイルが見つかりません",
+        invalidImageType: "JPG/PNG/BMP/GIF形式の画像をアップロードしてください",
+        imageTooLarge: "画像サイズは2MBを超えることはできません",
+        handlerError: "ファイルハンドラの取得に失敗しました",
+        uploadFailed: "画像のアップロードに失敗しました",
+        saveFailed: "画像情報の保存に失敗しました",
       },
-      "image": {
-        "updateSuccess": "画像更新成功",
-        "updateError": "画像更新に失敗しました"
-      }
+      image: {
+        updateSuccess: "画像更新成功",
+        updateError: "画像更新に失敗しました",
+      },
     },
-    "scene": {
-      "error": "エディターがありません",
-      "info": "保存権限がありません！",
-      "success": "シーン保存成功~",
-      "coverUploadError": "カバー画像アップロードエラー：画像データが見つかりません",
-      "handlerError": "ファイルハンドラの取得に失敗しました",
-      "coverUploadSuccess": "カバー画像アップロード成功",
-      "coverUploadFailed": "カバー画像アップロードに失敗しました"
+    scene: {
+      error: "エディターがありません",
+      info: "保存権限がありません！",
+      success: "シーン保存成功~",
+      coverUploadError:
+        "カバー画像アップロードエラー：画像データが見つかりません",
+      handlerError: "ファイルハンドラの取得に失敗しました",
+      coverUploadSuccess: "カバー画像アップロード成功",
+      coverUploadFailed: "カバー画像アップロードに失敗しました",
     },
-    "script": {
-      "title": "スクリプト",
-      "save": "保存",
-      "error1": "メタ情報がありません",
-      "error2": "編集権限がありません",
-      "error3": "エディターがありません",
-      "success": "保存成功?",
-      "info": "変更がありません",
-      "leave": {
-        "message1": "保存されていない変更があります。保存しますか？",
-        "message2": "ヒント",
-        "confirm": "はい",
-        "cancel": "いいえ",
-        "success": "保存が成功しました",
-        "error": "保存に失敗しました",
-        "info": "保存されていない変更は破棄されました"
-      }
+    script: {
+      title: "スクリプト",
+      save: "保存",
+      error1: "メタ情報がありません",
+      error2: "編集権限がありません",
+      error3: "エディターがありません",
+      success: "保存成功?",
+      info: "変更がありません",
+      leave: {
+        message1: "保存されていない変更があります。保存しますか？",
+        message2: "ヒント",
+        confirm: "はい",
+        cancel: "いいえ",
+        success: "保存が成功しました",
+        error: "保存に失敗しました",
+        info: "保存されていない変更は破棄されました",
+      },
     },
-    "eventDialog": {
-      "title": "イベント管理ウィンドウ",
-      "output": "出力イベント",
-      "input": "入力イベント",
-      "cancel": "キャンセル",
-      "confirm": "確認"
+    eventDialog: {
+      title: "イベント管理ウィンドウ",
+      output: "出力イベント",
+      input: "入力イベント",
+      cancel: "キャンセル",
+      confirm: "確認",
     },
-    "ResourceDialog": {
-      "label1": "リソースをバインド",
-      "label2": "私のリソース",
-      "title": "リソースを選択",
-      "replaceTitle": "リソースを置き換える",
-      "cancelSelect": "選択をキャンセル",
-      "select": "選択",
-      "putIn": "入れる",
-      "replace": "置き換え",
-      "doUnbind": "バインド解除",
-      "bind": "バインド",
-      "putAllIn": "すべて入れる",
-      "empty": "空にする",
-      "cancel": "キャンセル",
-      "enterMultiSelect": "バッチ選択",
-      "exitMultiSelect": "バッチ選択を終了",
-      "batchBind": "バッチバインド",
-      "batchDeploy": "バッチ部署",
-      "batchUnbind": "バッチバインド解除",
-      "deselect": "選択をキャンセル",
-      "noItemSelected": "少なくとも1つのリソースを選択してください",
-      "availableForBinding": "バインド可能なリソース数：{count}",
-      "availableForDeployment": "デプロイ可能なリソース数：{count}",
-      "batchConfirm": {
-        "message1": "選択した {count} 個のリソースをシーンにバインドしますか？",
-        "message2": "バッチバインドリソース",
-        "confirm": "確認",
-        "cancel": "キャンセル",
-        "success": "バッチバインド成功！",
-        "selectOne": {
-          "message1": "リソースの一括バインドに成功しました。これらのリソースを直接デプロイしますか？",
-          "message2": "リソースをデプロイ",
-          "confirm": "確認",
-          "cancel": "キャンセル",
-          "success": "デプロイ成功！",
-          "info": "キャンセルされました"
-        }
-      },
-      "batchConfirm2": {
-        "message1": "選択した {count} 個のリソースをシーンにデプロイしますか？",
-        "message2": "バッチデプロイリソース",
-        "confirm": "確認",
-        "cancel": "キャンセル",
-        "success": "バッチデプロイ成功！",
-        "info": "キャンセルされました"
-      },
-      "batchUnbindConfirm": {
-        "message1": "選択した {count} 個のリソースを解绑しますか？",
-        "message2": "バッチ解绑リソース",
-        "confirm": "確認",
-        "cancel": "キャンセル",
-        "success": "バッチ解绑成功！",
-        "info": "キャンセルされました"
-      },
-      "confirm1": {
-        "message1": "リソースのバインドを解除しますか？",
-        "message2": "バインド解除",
-        "confirm": "確認",
-        "cancel": "キャンセル",
-        "success": "バインド解除成功！",
-        "info": "キャンセルされました"
-      },
-      "confirm2": {
-        "message1": "リソースをシーンにバインドしますか？",
-        "message2": "リソースバインド",
-        "confirm": "確認",
-        "cancel": "キャンセル",
-        "success": "バインド成功！",
-        "confirm2": {
-          "message1": "リソースをデプロイしますか？",
-          "message2": "リソースデプロイ",
-          "confirm": "確認",
-          "cancel": "キャンセル",
-          "success": "デプロイ成功！"
-        }
-      },
-      "info": "キャンセルされました"
-    }
-  },
-  "ai": {
-    "create": "作成",
-    "show": "表示",
-    "delete": "削除",
-    "generate": "生成",
-    "confirm": {
-      "message1": "この操作はファイルを永久に削除します。続けますか？",
-      "message2": "警告",
-      "confirm": "確認",
-      "cancel": "キャンセル",
-      "success": "削除に成功しました！",
-      "info": "削除がキャンセルされました"
-    },
-    "generation": {
-      "title": "AI (Rodin) を通じてモデルを作成：",
-      "declare": "宣言",
-      "form": {
-        "image": "画像",
-        "select": "選択",
-        "prompt": "プロンプト",
-        "quality": {
-          "title": "品質",
-          "value1": "高",
-          "value2": "中",
-          "value3": "低",
-          "value4": "極めて低い"
+    ResourceDialog: {
+      label1: "リソースをバインド",
+      label2: "私のリソース",
+      title: "リソースを選択",
+      replaceTitle: "リソースを置き換える",
+      cancelSelect: "選択をキャンセル",
+      select: "選択",
+      putIn: "入れる",
+      replace: "置き換え",
+      doUnbind: "バインド解除",
+      bind: "バインド",
+      putAllIn: "すべて入れる",
+      empty: "空にする",
+      cancel: "キャンセル",
+      enterMultiSelect: "バッチ選択",
+      exitMultiSelect: "バッチ選択を終了",
+      batchBind: "バッチバインド",
+      batchDeploy: "バッチ部署",
+      batchUnbind: "バッチバインド解除",
+      deselect: "選択をキャンセル",
+      noItemSelected: "少なくとも1つのリソースを選択してください",
+      availableForBinding: "バインド可能なリソース数：{count}",
+      availableForDeployment: "デプロイ可能なリソース数：{count}",
+      batchConfirm: {
+        message1: "選択した {count} 個のリソースをシーンにバインドしますか？",
+        message2: "バッチバインドリソース",
+        confirm: "確認",
+        cancel: "キャンセル",
+        success: "バッチバインド成功！",
+        selectOne: {
+          message1:
+            "リソースの一括バインドに成功しました。これらのリソースを直接デプロイしますか？",
+          message2: "リソースをデプロイ",
+          confirm: "確認",
+          cancel: "キャンセル",
+          success: "デプロイ成功！",
+          info: "キャンセルされました",
         },
-        "message": "長さは4から50文字である必要があります",
-        "error": "プロンプトを入力するか、画像を選択してください",
-        "submit": "生成"
-      }
-    }
-  }
+      },
+      batchConfirm2: {
+        message1: "選択した {count} 個のリソースをシーンにデプロイしますか？",
+        message2: "バッチデプロイリソース",
+        confirm: "確認",
+        cancel: "キャンセル",
+        success: "バッチデプロイ成功！",
+        info: "キャンセルされました",
+      },
+      batchUnbindConfirm: {
+        message1: "選択した {count} 個のリソースを解绑しますか？",
+        message2: "バッチ解绑リソース",
+        confirm: "確認",
+        cancel: "キャンセル",
+        success: "バッチ解绑成功！",
+        info: "キャンセルされました",
+      },
+      confirm1: {
+        message1: "リソースのバインドを解除しますか？",
+        message2: "バインド解除",
+        confirm: "確認",
+        cancel: "キャンセル",
+        success: "バインド解除成功！",
+        info: "キャンセルされました",
+      },
+      confirm2: {
+        message1: "リソースをシーンにバインドしますか？",
+        message2: "リソースバインド",
+        confirm: "確認",
+        cancel: "キャンセル",
+        success: "バインド成功！",
+        confirm2: {
+          message1: "リソースをデプロイしますか？",
+          message2: "リソースデプロイ",
+          confirm: "確認",
+          cancel: "キャンセル",
+          success: "デプロイ成功！",
+        },
+      },
+      info: "キャンセルされました",
+    },
+  },
+  ai: {
+    create: "作成",
+    show: "表示",
+    delete: "削除",
+    generate: "生成",
+    confirm: {
+      message1: "この操作はファイルを永久に削除します。続けますか？",
+      message2: "警告",
+      confirm: "確認",
+      cancel: "キャンセル",
+      success: "削除に成功しました！",
+      info: "削除がキャンセルされました",
+    },
+    generation: {
+      title: "AI (Rodin) を通じてモデルを作成：",
+      declare: "宣言",
+      form: {
+        image: "画像",
+        select: "選択",
+        prompt: "プロンプト",
+        quality: {
+          title: "品質",
+          value1: "高",
+          value2: "中",
+          value3: "低",
+          value4: "極めて低い",
+        },
+        message: "長さは4から50文字である必要があります",
+        error: "プロンプトを入力するか、画像を選択してください",
+        submit: "生成",
+      },
+    },
+  },
 };

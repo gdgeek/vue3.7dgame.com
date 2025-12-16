@@ -113,7 +113,16 @@ function showErrorMessage(message: string, duration = 5000) {
   ElMessage.error({ message, duration });
 }
 
+// Flag to prevent multiple unauthorized handlers from executing
+let isHandlingUnauthorized = false;
+
 function handleUnauthorized(router: ReturnType<typeof useRouter>) {
+  // If already handling unauthorized, just reject silently
+  if (isHandlingUnauthorized) {
+    return Promise.reject("");
+  }
+
+  isHandlingUnauthorized = true;
   const messages = getMessageArray();
 
   showErrorMessage(messages[0]);
@@ -121,6 +130,17 @@ function handleUnauthorized(router: ReturnType<typeof useRouter>) {
     .resetToken()
     .then(() => {
       router.push({ path: "/web/index" });
+      // Reset the flag after a short delay to allow future handling
+      setTimeout(() => {
+        isHandlingUnauthorized = false;
+      }, 1000);
+      return Promise.reject("");
+    })
+    .catch(() => {
+      // Reset the flag even if navigation fails
+      setTimeout(() => {
+        isHandlingUnauthorized = false;
+      }, 1000);
       return Promise.reject("");
     });
 }

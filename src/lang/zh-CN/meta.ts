@@ -6,6 +6,7 @@ export default {
     edit: "修改实体信息",
     enter: "进入",
     delete: "删除",
+    actions: "操作",
     copy: "副本",
     create: {
       title: "创建实体",
