@@ -18,6 +18,7 @@ export default {
     name: "Name",
     description: "Description",
     edit: "Edit",
+    enter: "Enter",
     submit: "Submit",
     updateSuccess: "Update successful",
     createSuccess: "Create successful",

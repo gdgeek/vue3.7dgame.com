@@ -17,6 +17,7 @@ export default {
     name: "名稱",
     description: "描述",
     edit: "編輯",
+    enter: "進入",
     submit: "提交",
     updateSuccess: "更新成功",
     createSuccess: "創建成功",

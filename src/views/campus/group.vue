@@ -1,222 +1,170 @@
 <template>
+  <div class="group-detail-container">
+    <!-- Group Header -->
+    <div v-loading="loading" class="group-header">
+      <div v-if="group" class="group-info">
+        <div class="group-image">
+          <Id2Image :id="group.id" :image="group.image?.url || null" :lazy="false" fit="cover" />
+        </div>
+        <div class="group-details">
+          <h2 class="group-name">{{ group.name }}</h2>
+          <p v-if="group.description" class="group-description">{{ group.description }}</p>
+          <div class="group-meta">
+            <el-tag v-if="isMyGroup" type="success" size="small">
+              {{ $t('route.personalCenter.campus.myGroup') }}
+            </el-tag>
+            <span v-if="group.user" class="group-creator">
+              <el-icon>
+                <User />
+              </el-icon>
+              {{ group.user.nickname || group.user.username }}
+            </span>
+          </div>
+        </div>
+        <div class="group-actions">
+          <el-button @click="goBack">
+            <el-icon>
+              <ArrowLeft />
+            </el-icon>
+            {{ $t('common.back') }}
+          </el-button>
+        </div>
+      </div>
+      <el-empty v-else-if="!loading" :description="$t('route.personalCenter.campus.noGroup')" />
+    </div>
 
-  <div class="group-list-content">
-    <ClassGroupList v-if="classId" ref="groupListRef" :class-id="classId" :my-groups="myGroups"
-      :joining-group-id="joiningGroupId" @join-group="handleJoinGroup" @create-group="openGroupDialog()"
-      @edit-group="openGroupDialog" @delete-group="handleDeleteGroup" />
+    <!-- Group Content Area - Left empty for future content -->
+    <div class="group-content">
+      <el-empty :description="$t('common.comingSoon') || '敬请期待'" />
+    </div>
   </div>
-
-  <!-- Create/Edit Group Dialog -->
-  <el-dialog v-model="groupDialogVisible"
-    :title="groupForm.id ? $t('common.edit') : $t('route.personalCenter.campus.createGroup')" width="500px">
-    <el-form :model="groupForm" label-width="100px">
-      <el-form-item :label="$t('common.name')" required>
-        <el-input v-model="groupForm.name" :placeholder="$t('route.personalCenter.campus.groupNamePlaceholder')" />
-      </el-form-item>
-      <el-form-item :label="$t('common.description')">
-        <el-input v-model="groupForm.description" type="textarea"
-          :placeholder="$t('route.personalCenter.campus.groupDescPlaceholder')" />
-      </el-form-item>
-      <el-form-item :label="$t('route.personalCenter.campus.groupImage')">
-        <ImageSelector :item-id="groupForm.id || undefined" :image-url="groupForm.imageUrl"
-          @image-selected="handleGroupImageSelected" @image-upload-success="handleGroupImageSelected" />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <el-button @click="groupDialogVisible = false">{{ $t('common.cancel') }}</el-button>
-      <el-button type="primary" :loading="savingGroup" @click="handleSaveGroup">
-        {{ $t('common.confirm') }}
-      </el-button>
-    </template>
-  </el-dialog>
-
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage } from 'element-plus';
+import { User, ArrowLeft } from '@element-plus/icons-vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStoreHook } from "@/store/modules/user";
-import ClassGroupList from './components/ClassGroupList.vue';
-import ImageSelector from '@/components/MrPP/ImageSelector.vue';
-import { getClassGroups, createClassGroup } from '@/api/v1/edu-class';
-import { deleteGroup, joinGroup, updateGroup } from '@/api/v1/group';
+import Id2Image from "@/components/Id2Image.vue";
+import { getGroup } from '@/api/v1/group';
 import type { Group } from '@/api/v1/types/group';
-// Removed EduClass import
 
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
+const userStore = useUserStoreHook();
 
-const classId = computed(() => Number(route.query.class_id));
+const groupId = computed(() => Number(route.query.group_id));
 const loading = ref(false);
-const myGroups = ref<Group[]>([]);
-const joiningGroupId = ref<number | null>(null);
-const groupListRef = ref<InstanceType<typeof ClassGroupList> | null>(null);
+const group = ref<Group | null>(null);
 
-// Group Dialog State
-const groupDialogVisible = ref(false);
-const savingGroup = ref(false);
-const groupForm = ref({
-  id: null as number | null,
-  name: '',
-  description: '',
-  image_id: null as number | null,
-  imageUrl: ''
+const isMyGroup = computed(() => {
+  if (!group.value || !userStore.userInfo?.userData?.id) return false;
+  return group.value.user?.id === userStore.userInfo.userData.id;
 });
 
 const goBack = () => {
-  router.push('/campus/student');
+  router.back();
 };
 
-const fetchData = async () => {
-  if (!classId.value) return;
+const fetchGroup = async () => {
+  if (!groupId.value) {
+    ElMessage.warning(t('route.personalCenter.campus.noGroup'));
+    return;
+  }
   loading.value = true;
   try {
-    // Fetch my groups in this class
-    const myGroupRes = await getClassGroups(classId.value, '-created_at', '', 1, 'image,user');
-    const groupData = myGroupRes.data;
-    if (Array.isArray(groupData)) {
-      myGroups.value = groupData;
-    } else {
-      myGroups.value = groupData ? [groupData] : [];
-    }
+    const response = await getGroup(groupId.value, 'image,user');
+    group.value = response.data;
   } catch (error) {
-    console.error('Failed to fetch data:', error);
+    console.error('Failed to fetch group:', error);
     ElMessage.error(t('common.networkError'));
   } finally {
     loading.value = false;
   }
 };
 
-// Actions
-const openGroupDialog = (group?: Group) => {
-  if (group) {
-    // Edit mode
-    groupForm.value = {
-      id: group.id,
-      name: group.name,
-      description: group.description || '',
-      image_id: (group as any).image_id || null,
-      imageUrl: group.image?.url || ''
-    };
-    if (!groupForm.value.image_id && group.image) {
-      groupForm.value.image_id = group.image.id;
-    }
-  } else {
-    // Create mode
-    const userStore = useUserStoreHook();
-    const userName = userStore.userInfo?.userData?.nickname || userStore.userInfo?.userData?.username || userStore.userInfo?.userData?.email;
-    const now = new Date();
-    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const defaultName = `${t('route.personalCenter.campus.defaultGroupName', { name: userName })} ${dateStr}`;
-    groupForm.value = { id: null, name: defaultName, description: '', image_id: null, imageUrl: '' };
-  }
-  groupDialogVisible.value = true;
-};
-
-const handleGroupImageSelected = (data: { imageId: number; itemId: number | null; imageUrl?: string }) => {
-  groupForm.value.image_id = data.imageId;
-  groupForm.value.imageUrl = data.imageUrl || '';
-};
-
-const handleSaveGroup = async () => {
-  if (!groupForm.value.name.trim()) {
-    ElMessage.warning(t('route.personalCenter.campus.groupNameRequired'));
-    return;
-  }
-
-  savingGroup.value = true;
-  try {
-    if (groupForm.value.id) {
-      // Edit
-      await updateGroup(groupForm.value.id, {
-        name: groupForm.value.name,
-        description: groupForm.value.description,
-        image_id: groupForm.value.image_id ?? undefined
-      });
-      ElMessage.success(t('common.updateSuccess'));
-    } else {
-      // Create
-      await createClassGroup(classId.value, {
-        name: groupForm.value.name,
-        description: groupForm.value.description,
-        image_id: groupForm.value.image_id ?? undefined
-      });
-      ElMessage.success(t('common.createSuccess'));
-    }
-    groupDialogVisible.value = false;
-    await fetchData(); // Refresh my groups
-    groupListRef.value?.refresh(); // Refresh list
-  } catch (error: any) {
-    console.error('Failed to save group:', error);
-    const errorMsg = error.response?.data?.message || (groupForm.value.id ? t('common.operationFailed') : t('common.createFailed'));
-    ElMessage.error(errorMsg);
-  } finally {
-    savingGroup.value = false;
-  }
-};
-
-const handleJoinGroup = async (group: Group) => {
-  joiningGroupId.value = group.id;
-  try {
-    await joinGroup(group.id);
-    ElMessage.success(t('route.personalCenter.campus.joinSuccess'));
-    await fetchData();
-    groupListRef.value?.refresh();
-  } catch (error: any) {
-    console.error('Failed to join group:', error);
-    const errorMsg = error.response?.data?.message || t('route.personalCenter.campus.joinFailed');
-    ElMessage.error(errorMsg);
-  } finally {
-    joiningGroupId.value = null;
-  }
-};
-
-const handleDeleteGroup = async (group: Group) => {
-  try {
-    await ElMessageBox.confirm(
-      t('route.personalCenter.campus.confirmDeleteGroup'),
-      t('common.confirm'),
-      {
-        confirmButtonText: t('common.confirm'),
-        cancelButtonText: t('common.cancel'),
-        type: 'warning',
-      }
-    );
-    await deleteGroup(group.id);
-    ElMessage.success(t('common.deleteSuccess'));
-    await fetchData();
-    groupListRef.value?.refresh();
-  } catch (error: any) {
-    if (error !== 'cancel') {
-      console.error('Failed to delete group:', error);
-      const errorMsg = error.response?.data?.message || t('common.deleteFailed');
-      ElMessage.error(errorMsg);
-    }
-  }
-};
-
 onMounted(() => {
-  fetchData();
+  fetchGroup();
 });
 </script>
 
 <style scoped lang="scss">
-.group-page-container {
+.group-detail-container {
   padding: 20px;
-  background-color: var(--el-bg-color);
   min-height: 100vh;
+  background: var(--el-bg-color-page);
 }
 
-.page-header {
+.group-header {
+  background: var(--el-bg-color);
+  border-radius: 12px;
+  padding: 24px;
   margin-bottom: 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--el-border-color-light);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
-.group-list-content {
-  margin-top: 20px;
+.group-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.group-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.group-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.group-name {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.group-description {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--el-text-color-secondary);
+  line-height: 1.5;
+}
+
+.group-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.group-creator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--el-text-color-secondary);
+}
+
+.group-actions {
+  flex-shrink: 0;
+}
+
+.group-content {
+  background: var(--el-bg-color);
+  border-radius: 12px;
+  padding: 40px;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 </style>

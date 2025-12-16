@@ -34,7 +34,8 @@
               :class-id="record.class?.id || record.eduClass?.id || 0" :my-groups="record.groups || []"
               :joining-group-id="joiningGroupId" @join-group="(group) => handleJoinGroup(group, record)"
               @create-group="() => openGroupDialog(record)" @edit-group="(group) => openGroupDialog(record, group)"
-              @delete-group="(group) => handleDeleteGroup(group, record)" />
+              @delete-group="(group) => handleDeleteGroup(group, record)"
+              @enter-group="(group) => handleEnterGroup(group)" />
           </div>
           <br />
         </div>
@@ -412,6 +413,14 @@ const handleDeleteGroup = async (group: Group, record: StudentRecord) => {
       ElMessage.error(errorMsg);
     }
   }
+};
+
+const handleEnterGroup = (group: Group) => {
+  // Navigate to group page or open group details
+  // For now, we'll navigate to the group page with group_id
+  ElMessage.info(t('route.personalCenter.campus.enteringGroup') || `进入小组: ${group.name}`);
+  // TODO: Implement actual navigation when group detail page is ready
+  // router.push({ path: '/campus/group/detail', query: { group_id: group.id } });
 };
 
 const refreshRecordGroups = async (record: StudentRecord) => {

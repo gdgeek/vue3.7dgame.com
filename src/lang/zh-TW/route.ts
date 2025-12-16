@@ -50,6 +50,7 @@ export default {
         join: "加入",
         joinSuccess: "加入成功",
         joinFailed: "加入失敗",
+        enteringGroup: "正在進入小組",
       },
     },
     settings: {

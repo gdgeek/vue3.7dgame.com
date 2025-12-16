@@ -22,9 +22,12 @@
           <template #enter>
             <div class="card-actions">
               <!-- If this is one of my groups -->
-              <div v-if="isMyGroup(item.id)">
+              <div v-if="isMyGroup(item.id)" class="my-group-actions">
                 <el-tag type="success" size="small" class="my-group-tag">{{
                   $t('route.personalCenter.campus.myGroup') }}</el-tag>
+                <el-button type="success" size="small" @click="$emit('enter-group', item)">
+                  {{ $t('common.enter') }}
+                </el-button>
                 <el-button type="primary" size="small" link @click="$emit('edit-group', item)">
                   {{ $t('common.edit') }}
                 </el-button>
@@ -68,6 +71,7 @@ const emit = defineEmits<{
   (e: 'edit-group', group: Group): void;
   (e: 'delete-group', group: Group): void;
   (e: 'join-group', group: Group): void;
+  (e: 'enter-group', group: Group): void;
 }>();
 
 const isMyGroup = (groupId: number) => {

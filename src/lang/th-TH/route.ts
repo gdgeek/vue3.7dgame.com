@@ -50,6 +50,7 @@ export default {
         join: "เข้าร่วม",
         joinSuccess: "เข้าร่วมสำเร็จ",
         joinFailed: "เข้าร่วมล้มเหลว",
+        enteringGroup: "กำลังเข้าสู่กลุ่ม",
       },
     },
     settings: {

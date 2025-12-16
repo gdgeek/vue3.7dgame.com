@@ -17,6 +17,7 @@ export default {
     name: "ชื่อ",
     description: "คำอธิบาย",
     edit: "แก้ไข",
+    enter: "เข้า",
     submit: "ส่ง",
     updateSuccess: "อัปเดตสำเร็จ",
     createSuccess: "สร้างสำเร็จ",

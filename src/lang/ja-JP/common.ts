@@ -17,6 +17,7 @@ export default {
     name: "名前",
     description: "説明",
     edit: "編集",
+    enter: "入る",
     submit: "送信",
     updateSuccess: "更新成功",
     createSuccess: "作成成功",

@@ -50,6 +50,7 @@ export default {
         join: "Join",
         joinSuccess: "Joined successfully",
         joinFailed: "Failed to join",
+        enteringGroup: "Entering group",
       },
     },
     settings: {
