@@ -12,7 +12,7 @@
               @click="sort(sortByName)">
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByName")
-              }}</span>
+                }}</span>
               <el-icon v-if="sorted_up">
                 <ArrowUp></ArrowUp>
               </el-icon>
@@ -23,13 +23,13 @@
             <el-button v-else size="small" type="info" label="名称排序" icon="ChatDotSquare" @click="sort(sortByName)">
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByName")
-              }}</span>
+                }}</span>
             </el-button>
             <el-button v-if="sorted_created_at" size="small" type="success" icon="Clock" label="时间排序"
               @click="sort(sortByTime)">
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByTime")
-              }}</span>
+                }}</span>
               <el-icon v-if="sorted_up">
                 <ArrowUp></ArrowUp>
               </el-icon>
@@ -40,7 +40,7 @@
             <el-button v-else size="small" type="info" label="时间排序" icon="Clock" @click="sort(sortByTime)">
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByTime")
-              }}</span>
+                }}</span>
             </el-button>
 
           </el-button-group>
@@ -119,6 +119,7 @@ const sorted_name = computed(() => props.sorted.includes(props.sortByName));
 const sorted_up = computed(() => !props.sorted.startsWith("-"));
 
 const search = () => {
+  console.log('MrPPHeader: search triggered', input.value);
   emits("search", input.value);
 };
 

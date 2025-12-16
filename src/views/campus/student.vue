@@ -155,7 +155,7 @@ const fetchStudentRecords = async () => {
       const classId = record.class?.id || record.eduClass?.id;
       if (classId) {
         try {
-          const myGroupRes = await getClassGroups(classId, 'image,user');
+          const myGroupRes = await getClassGroups(classId, '-created_at', '', 1, 'image,user');
           const groupData = myGroupRes.data;
           if (Array.isArray(groupData)) {
             record.groups = groupData;

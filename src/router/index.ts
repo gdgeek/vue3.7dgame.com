@@ -666,7 +666,7 @@ const routes: RouteRecordRaw[] = [
             component: () => import("@/views/campus/group.vue"),
             name: "CampusGroup",
             meta: {
-              title: "route.personalCenter.campus.groupList", // You might need to add this key or reuse an existing one like 'campus.group'
+              title: "personalCenter.campus.groupList", // You might need to add this key or reuse an existing one like 'campus.group'
               icon: "el-icon-User",
               hidden: true, // Hidden from menu, accessed via Student page
             },

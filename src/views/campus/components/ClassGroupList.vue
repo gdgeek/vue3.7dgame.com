@@ -18,7 +18,7 @@
       </template>
 
       <template #card="{ item }">
-        <MrPPCard :item="item" :show-actions="false" :lazy="false">
+        <MrPPCard :item="item" :show-actions="false">
           <template #enter>
             <div class="card-actions">
               <!-- If this is one of my groups -->
@@ -77,13 +77,13 @@ const isMyGroup = (groupId: number) => {
 const cardListPageRef = ref<InstanceType<typeof CardListPage> | null>(null);
 
 const fetchGroups = async (params: FetchParams): Promise<FetchResponse> => {
+  console.log('ClassGroupList: fetchGroups called with', params);
   const response = await getClassGroups(
     props.classId,
-    'image,user',
     params.sort,
     params.search,
     params.page,
-    props.pageSize || 12
+    'image,user'
   );
   return response;
 };

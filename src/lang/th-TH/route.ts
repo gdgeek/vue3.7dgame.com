@@ -43,6 +43,7 @@ export default {
         groupNameRequired: "จำเป็นต้องระบุชื่อกลุ่ม",
         confirmDeleteGroup: "คุณแน่ใจหรือไม่ว่าต้องการลบกลุ่มนี้?",
         selectGroup: "เลือกกลุ่ม",
+        groupList: "รายชื่อกลุ่ม",
         classGroups: "กลุ่มในชั้นเรียน",
         noGroups: "ไม่พบกลุ่ม",
         joinGroup: "เข้าร่วมกลุ่ม",

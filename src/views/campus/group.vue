@@ -75,7 +75,7 @@ const fetchData = async () => {
   loading.value = true;
   try {
     // Fetch my groups in this class
-    const myGroupRes = await getClassGroups(classId.value, 'image,user');
+    const myGroupRes = await getClassGroups(classId.value, '-created_at', '', 1, 'image,user');
     const groupData = myGroupRes.data;
     if (Array.isArray(groupData)) {
       myGroups.value = groupData;
@@ -134,7 +134,7 @@ const handleSaveGroup = async () => {
       await updateGroup(groupForm.value.id, {
         name: groupForm.value.name,
         description: groupForm.value.description,
-        image_id: groupForm.value.image_id
+        image_id: groupForm.value.image_id ?? undefined
       });
       ElMessage.success(t('common.updateSuccess'));
     } else {
@@ -142,7 +142,7 @@ const handleSaveGroup = async () => {
       await createClassGroup(classId.value, {
         name: groupForm.value.name,
         description: groupForm.value.description,
-        image_id: groupForm.value.image_id
+        image_id: groupForm.value.image_id ?? undefined
       });
       ElMessage.success(t('common.createSuccess'));
     }

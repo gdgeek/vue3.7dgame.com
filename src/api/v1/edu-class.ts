@@ -120,12 +120,14 @@ export const leaveClass = (class_id: number) => {
 
 // Search for classes to apply
 export const searchClasses = (
+  sort = "-created_at",
   search = "",
   page = 1,
   expand = "image,school"
 ) => {
   const query: Record<string, any> = {};
   query["expand"] = expand;
+  query["sort"] = sort;
   if (search !== "") {
     query["ClassSearch[name]"] = search;
   }
@@ -139,10 +141,25 @@ export const searchClasses = (
 };
 
 // Get group for a class
-export const getClassGroups = (classId: number, expand = "") => {
+export const getClassGroups = (
+  classId: number,
+  sort = "-created_at",
+  search = "",
+  page = 1,
+  expand = ""
+) => {
   const query: Record<string, any> = {};
   if (expand) {
     query["expand"] = expand;
+  }
+
+  query["sort"] = sort;
+
+  if (search !== "") {
+    query["GroupSearch[name]"] = search;
+  }
+  if (page > 1) {
+    query["page"] = page;
   }
   return request({
     url: `/edu-class/${classId}/groups${qs.stringify(query, true)}`,
