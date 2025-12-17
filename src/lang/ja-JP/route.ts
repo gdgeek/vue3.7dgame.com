@@ -4,7 +4,7 @@ export default {
     dashboard: "ダッシュボード",
     campus: {
       title: "キャンパス",
-      myCampus: "マイキャンパス",
+
       schoolManagement: "学校管理",
       teacher: "私は教師です",
       student: "私は学生です",
@@ -51,6 +51,13 @@ export default {
         joinSuccess: "参加成功",
         joinFailed: "参加失敗",
         enteringGroup: "グループに入る",
+        groupVerses: "グループシーン",
+        noVerses: "シーンがありません",
+        createVerse: "シーンを作成",
+        verseNamePlaceholder: "シーン名を入力",
+        verseDescPlaceholder: "シーンの説明を入力",
+        verseNameRequired: "シーン名は必須です",
+        confirmRemoveVerse: "このシーンを削除してもよろしいですか？",
       },
     },
     settings: {

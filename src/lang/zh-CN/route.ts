@@ -4,7 +4,7 @@ export default {
     dashboard: "首页",
     campus: {
       title: "校园相关",
-      myCampus: "我的校园",
+
       schoolManagement: "学校管理",
       teacher: "我是教师",
       student: "我是学生",
@@ -51,6 +51,13 @@ export default {
         joinSuccess: "加入成功",
         joinFailed: "加入失败",
         enteringGroup: "正在进入小组",
+        groupVerses: "小组场景",
+        noVerses: "暂无场景",
+        createVerse: "创建场景",
+        verseNamePlaceholder: "请输入场景名称",
+        verseDescPlaceholder: "请输入场景描述",
+        verseNameRequired: "场景名称不能为空",
+        confirmRemoveVerse: "确定要移除该场景吗？",
       },
     },
     settings: {

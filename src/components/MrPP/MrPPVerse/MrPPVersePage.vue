@@ -7,14 +7,16 @@
       <MrPPHeader :has-tags="true" @tags="tags" :sorted="sorted" :searched="searched" @search="search" @sort="sort">
 
         <el-button-group :inline="true">
-
+          <!-- Default create button when created=true -->
           <el-button v-if="created" size="small" type="primary" @click="createWindow">
             <font-awesome-icon icon="plus"></font-awesome-icon>
             &nbsp;
             <span class="hidden-sm-and-down">{{
               $t("verse.page.title")
-            }}</span>
+              }}</span>
           </el-button>
+          <!-- Slot for custom header actions -->
+          <slot name="header-actions"></slot>
         </el-button-group>
       </MrPPHeader>
     </el-header>

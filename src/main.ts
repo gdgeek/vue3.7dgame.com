@@ -11,6 +11,8 @@ import {
   faPlus,
   faInfo,
   faBoxOpen,
+  faEdit,
+  faEye,
 } from "@fortawesome/free-solid-svg-icons";
 import VueIframe from "vue-iframes";
 import { VueAppleLoginConfig } from "@/utils/helper";
@@ -23,7 +25,7 @@ import { abilitiesPlugin } from "@casl/vue";
 import highlightDirective from "./directive/highlight";
 import VueAppleLogin from "vue-apple-login";
 // 只注册实际使用的图标
-library.add(faThumbsUp, faUser, faPlus, faInfo, faBoxOpen);
+library.add(faThumbsUp, faUser, faPlus, faInfo, faBoxOpen, faEdit, faEye);
 
 // 本地SVG图标
 import "virtual:svg-icons-register";

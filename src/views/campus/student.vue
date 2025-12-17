@@ -125,6 +125,7 @@ import { ref, computed, onMounted } from 'vue';
 import { OfficeBuilding, Plus, Search } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import { useUserStoreHook } from "@/store/modules/user";
 import Id2Image from "@/components/Id2Image.vue";
 import ClassGroupList from './components/ClassGroupList.vue';
@@ -136,6 +137,7 @@ import type { EduClass } from '@/api/v1/types/edu-class';
 import type { Group } from '@/api/v1/types/group';
 
 const { t } = useI18n();
+const router = useRouter();
 
 interface ClassWithSchool extends EduClass {
   school?: { id: number; name: string };
@@ -416,11 +418,11 @@ const handleDeleteGroup = async (group: Group, record: StudentRecord) => {
 };
 
 const handleEnterGroup = (group: Group) => {
-  // Navigate to group page or open group details
-  // For now, we'll navigate to the group page with group_id
-  ElMessage.info(t('route.personalCenter.campus.enteringGroup') || `进入小组: ${group.name}`);
-  // TODO: Implement actual navigation when group detail page is ready
-  // router.push({ path: '/campus/group/detail', query: { group_id: group.id } });
+  // Navigate to group detail page with group_id
+  router.push({
+    path: '/campus/group',
+    query: { group_id: group.id }
+  });
 };
 
 const refreshRecordGroups = async (record: StudentRecord) => {

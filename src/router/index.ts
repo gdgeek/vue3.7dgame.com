@@ -611,7 +611,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/campus",
         component: SimpleStructure,
-        redirect: "/campus/my",
+        redirect: "/campus/school",
         name: "Campus",
         meta: {
           title: "campus.title",
@@ -621,16 +621,6 @@ const routes: RouteRecordRaw[] = [
           params: null,
         },
         children: [
-          {
-            path: "/campus/my",
-            component: () => import("@/views/home/campus.vue"),
-            name: "CampusMy",
-            meta: {
-              title: "campus.myCampus",
-              icon: "el-icon-User",
-              hidden: false,
-            },
-          },
           {
             path: "/campus/school",
             component: () => import("@/views/manager/school.vue"),

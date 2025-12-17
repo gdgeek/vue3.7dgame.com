@@ -4,7 +4,7 @@ export default {
     dashboard: "首頁",
     campus: {
       title: "校園相關",
-      myCampus: "我的校園",
+
       schoolManagement: "學校管理",
       teacher: "我是教師",
       student: "我是學生",
@@ -51,6 +51,13 @@ export default {
         joinSuccess: "加入成功",
         joinFailed: "加入失敗",
         enteringGroup: "正在進入小組",
+        groupVerses: "小組場景",
+        noVerses: "暫無場景",
+        createVerse: "創建場景",
+        verseNamePlaceholder: "請輸入場景名稱",
+        verseDescPlaceholder: "請輸入場景描述",
+        verseNameRequired: "場景名稱不能為空",
+        confirmRemoveVerse: "確定要移除該場景嗎？",
       },
     },
     settings: {

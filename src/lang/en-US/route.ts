@@ -4,7 +4,7 @@ export default {
     dashboard: "Dashboard",
     campus: {
       title: "Campus",
-      myCampus: "My Campus",
+
       schoolManagement: "School Management",
       teacher: "I am a Teacher",
       student: "I am a Student",
@@ -51,6 +51,13 @@ export default {
         joinSuccess: "Joined successfully",
         joinFailed: "Failed to join",
         enteringGroup: "Entering group",
+        groupVerses: "Group Scenes",
+        noVerses: "No scenes found",
+        createVerse: "Create Scene",
+        verseNamePlaceholder: "Enter scene name",
+        verseDescPlaceholder: "Enter scene description",
+        verseNameRequired: "Scene name is required",
+        confirmRemoveVerse: "Are you sure you want to remove this scene?",
       },
     },
     settings: {

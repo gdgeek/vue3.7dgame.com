@@ -133,6 +133,92 @@ export const joinGroup = (id: number) => {
   });
 };
 
+/**
+ * Create a verse under a group
+ * POST /v1/group/{id}/verse
+ * @param groupId - Group ID
+ * @param data - Verse creation data
+ */
+export const createGroupVerse = (
+  groupId: number,
+  data: {
+    name: string;
+    description?: string;
+    image_id?: number;
+  }
+) => {
+  return request<any>({
+    url: `/group/${groupId}/verse`,
+    method: "post",
+    data,
+  });
+};
+
+/**
+ * GroupVerse type definition
+ */
+export interface GroupVerse {
+  id: number;
+  group_id: number;
+  verse_id: number;
+  created_at?: string;
+  updated_at?: string;
+  group?: any;
+  verse?: any;
+}
+
+/**
+ * Get verses under a group
+ * GET /v1/group/{id}/verses
+ * @param groupId - Group ID
+ * @param sort - Sort field (e.g., "-created_at")
+ * @param page - Page number (default 1)
+ * @param perPage - Items per page (default 20)
+ * @param expand - Expand related data (e.g., "verse.image")
+ * @param search - Search keyword
+ */
+export const getGroupVerses = (
+  groupId: number,
+  sort = "-created_at",
+  page = 1,
+  perPage = 20,
+  expand = "verse.image,verse.author",
+  search = ""
+) => {
+  const query: Record<string, any> = {
+    sort,
+    expand,
+  };
+
+  if (page > 1) {
+    query["page"] = page;
+  }
+  if (perPage !== 20) {
+    query["per-page"] = perPage;
+  }
+  if (search) {
+    query["search"] = search;
+  }
+
+  return request<GroupVerse[]>({
+    url: `/group/${groupId}/verses${qs.stringify(query, true)}`,
+    method: "get",
+  });
+};
+
+/**
+ * Delete a verse from a group
+ * DELETE /v1/group/{id}/verse/{verseId}
+ * @param groupId - Group ID
+ * @param verseId - Verse ID
+ */
+export const deleteGroupVerse = (groupId: number, verseId: number) => {
+  return request<void>({
+    url: `/group/${groupId}/verse/${verseId}`,
+    method: "delete",
+  });
+};
+
 export default {
   getGroups,
   getGroup,
@@ -142,4 +228,7 @@ export default {
   deleteGroup,
   getGroupOptions,
   joinGroup,
+  createGroupVerse,
+  getGroupVerses,
+  deleteGroupVerse,
 };

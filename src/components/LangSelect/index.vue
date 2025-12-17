@@ -18,6 +18,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { useAppStore } from "@/store/modules/app";
+import { useDomainStore } from "@/store/modules/domain";
 import { LanguageEnum } from "@/enums/LanguageEnum";
 import { loadLanguageAsync } from "@/lang/index";
 
@@ -37,6 +38,7 @@ const langOptions = [
 ];
 
 const appStore = useAppStore();
+const domainStore = useDomainStore();
 const { locale, t } = useI18n();
 
 const currentLangLabel = computed(() => {
@@ -44,10 +46,11 @@ const currentLangLabel = computed(() => {
   return currentLang ? currentLang.abbr : "中文";
 });
 
-function handleLanguageChange(lang: string) {
-  loadLanguageAsync(lang).then(() => {
-    ElMessage.success(t("langSelect.message.success"));
-  });
+async function handleLanguageChange(lang: string) {
+  await loadLanguageAsync(lang);
+  // Refresh domain data for new language
+  await domainStore.refreshFromAPI();
+  ElMessage.success(t("langSelect.message.success"));
 }
 </script>
 

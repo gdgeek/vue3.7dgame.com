@@ -4,7 +4,7 @@ export default {
     dashboard: "หน้าหลัก",
     campus: {
       title: "วิทยาเขต",
-      myCampus: "วิทยาเขตของฉัน",
+
       schoolManagement: "การจัดการโรงเรียน",
       teacher: "ฉันเป็นครู",
       student: "ฉันเป็นนักเรียน",
@@ -51,6 +51,13 @@ export default {
         joinSuccess: "เข้าร่วมสำเร็จ",
         joinFailed: "เข้าร่วมล้มเหลว",
         enteringGroup: "กำลังเข้าสู่กลุ่ม",
+        groupVerses: "ฉากในกลุ่ม",
+        noVerses: "ไม่พบฉาก",
+        createVerse: "สร้างฉาก",
+        verseNamePlaceholder: "ป้อนชื่อฉาก",
+        verseDescPlaceholder: "ป้อนคำอธิบายฉาก",
+        verseNameRequired: "จำเป็นต้องระบุชื่อฉาก",
+        confirmRemoveVerse: "คุณแน่ใจหรือไม่ว่าต้องการลบฉากนี้?",
       },
     },
     settings: {
