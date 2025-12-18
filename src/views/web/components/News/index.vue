@@ -267,7 +267,6 @@ const loadNewsData = async () => {
 // 处理标签点击
 const handleTabClick = () => {
 
-  //alert(JSON.stringify(activeTabName.value))
   // 标签切换时重置分页
   pagination.value.current = 1;
 

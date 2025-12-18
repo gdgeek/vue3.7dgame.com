@@ -144,7 +144,7 @@ import UserSelector from '@/components/UserSelector/index.vue';
 import ImageSelector from '@/components/MrPP/ImageSelector.vue';
 import type { EduClass } from '@/api/v1/types/edu-class';
 import type { EduSchool } from '@/api/v1/types/edu-school';
-import { getClasses, getClass, deleteClass, createClass, updateClass } from '@/api/v1/edu-class';
+import { getClasses, getClass, deleteClass, createClass, updateClass, addTeacherToClass } from '@/api/v1/edu-class';
 import { createTeacher, deleteTeacher } from '@/api/v1/edu-teacher';
 import { createStudent, deleteStudent } from '@/api/v1/edu-student';
 import type { FetchParams, FetchResponse } from '@/components/MrPP/CardListPage/types';
@@ -368,11 +368,7 @@ const handleSelectUser = async (user: any) => {
   try {
     if (userSelectionMode.value === 'teacher') {
       teachersLoading.value = true;
-      await createTeacher({
-        user_id: user.id,
-        class_id: currentClass.value.id,
-        school_id: props.schoolId
-      });
+      await addTeacherToClass(currentClass.value.id, user.id);
       ElMessage.success(t('manager.messages.addSuccess'));
       await refreshTeachers();
     } else {

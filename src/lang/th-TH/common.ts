@@ -17,7 +17,6 @@ export default {
     name: "ชื่อ",
     description: "คำอธิบาย",
     edit: "แก้ไข",
-    enter: "เข้า",
     back: "กลับ",
     comingSoon: "เร็วๆ นี้",
     submit: "ส่ง",
@@ -28,6 +27,7 @@ export default {
     deleteSuccess: "ลบสำเร็จ",
     deleteFailed: "ลบล้มเหลว",
     operationFailed: "การดำเนินงานล้มเหลว",
+    networkError: "Network error, please check your internet connection",
   },
   request: {
     loginExpired: "Login expired, please log in again",

@@ -13,7 +13,7 @@
             &nbsp;
             <span class="hidden-sm-and-down">{{
               $t("verse.page.title")
-              }}</span>
+            }}</span>
           </el-button>
           <!-- Slot for custom header actions -->
           <slot name="header-actions"></slot>
@@ -136,6 +136,10 @@ const refresh = () => {
     }
   );
 };
+
+defineExpose({
+  refresh,
+});
 
 onMounted(refresh);
 </script>

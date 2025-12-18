@@ -58,6 +58,7 @@ export default {
           "Please select a school first before creating a class",
         assignTeacherSuccess: "Teacher assigned successfully",
         assignStudentSuccess: "Student assigned successfully",
+        teacherAlreadyInClass: "This teacher is already in this class",
       },
       validation: {
         nameRequired: "Please enter class name",
@@ -87,6 +88,7 @@ export default {
       editPending: "Edit school: {name}",
       operationFailed: "Operation failed",
       addFailed: "Failed to add",
+      saveFailed: "Failed to save",
     },
     dialog: {
       createTitle: "Create School",

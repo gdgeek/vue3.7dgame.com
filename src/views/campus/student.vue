@@ -1,6 +1,8 @@
 <template>
 
   <div class="student-container">
+
+
     <div v-loading="loading">
       <!-- Has Classes: Show Class Headers -->
       <div v-if="!loading && studentRecords.length > 0" class="class-list">
@@ -35,6 +37,7 @@
               :joining-group-id="joiningGroupId" @join-group="(group) => handleJoinGroup(group, record)"
               @create-group="() => openGroupDialog(record)" @edit-group="(group) => openGroupDialog(record, group)"
               @delete-group="(group) => handleDeleteGroup(group, record)"
+              @leave-group="(group) => handleLeaveGroup(group, record)"
               @enter-group="(group) => handleEnterGroup(group)" />
           </div>
           <br />
@@ -132,7 +135,7 @@ import ClassGroupList from './components/ClassGroupList.vue';
 import ImageSelector from '@/components/MrPP/ImageSelector.vue';
 import { getClasses, getClassGroups, createClassGroup } from '@/api/v1/edu-class';
 import { deleteStudent, getStudentMe, joinClass } from '@/api/v1/edu-student';
-import { deleteGroup, joinGroup, updateGroup } from '@/api/v1/group';
+import { deleteGroup, joinGroup, leaveGroup, updateGroup } from '@/api/v1/group';
 import type { EduClass } from '@/api/v1/types/edu-class';
 import type { Group } from '@/api/v1/types/group';
 
@@ -201,7 +204,7 @@ const fetchStudentRecords = async () => {
       const classId = record.class?.id || record.eduClass?.id;
       if (classId) {
         try {
-          const myGroupRes = await getClassGroups(classId, '-created_at', '', 1, 'image,user');
+          const myGroupRes = await getClassGroups(classId, '-created_at', '', 1, 'image,user,joined');
           const groupData = myGroupRes.data;
           if (Array.isArray(groupData)) {
             record.groups = groupData;
@@ -309,7 +312,11 @@ const openGroupDialog = (record: StudentRecord, group?: Group) => {
   } else {
     // Create mode
     const userStore = useUserStoreHook();
-    const userName = userStore.userInfo?.userData?.nickname || userStore.userInfo?.userData?.username || userStore.userInfo?.userData?.email;
+    const user = userStore.userInfo;
+    console.log('User Info Debug:', user);
+    console.log('User Data Debug:', user?.userData);
+    const userName = user?.userData?.nickname || user?.userData?.username || user?.userData?.email || 'User';
+    console.log('Generated UserName:', userName);
     const now = new Date();
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     const defaultName = `${t('route.personalCenter.campus.defaultGroupName', { name: userName })} ${dateStr}`;
@@ -373,6 +380,15 @@ const handleJoinGroup = async (group: Group, record: StudentRecord) => {
   joiningGroupId.value = group.id;
   const classId = record.class?.id || record.eduClass?.id;
   try {
+    await ElMessageBox.confirm(
+      t('route.personalCenter.campus.confirmJoinGroup'),
+      t('route.personalCenter.campus.joinGroup'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'info',
+      }
+    );
     await joinGroup(group.id);
     ElMessage.success(t('route.personalCenter.campus.joinSuccess'));
     await refreshRecordGroups(record);
@@ -381,9 +397,46 @@ const handleJoinGroup = async (group: Group, record: StudentRecord) => {
       listRef?.refresh();
     }
   } catch (error: any) {
-    console.error('Failed to join group:', error);
-    const errorMsg = error.response?.data?.message || t('route.personalCenter.campus.joinFailed');
-    ElMessage.error(errorMsg);
+    if (error !== 'cancel') {
+      console.error('Failed to join group:', error);
+      const backendMsg = error.response?.data?.message || '';
+      let errorMsg = t('route.personalCenter.campus.joinFailed');
+      if (backendMsg.includes('already joined')) {
+        errorMsg = t('route.personalCenter.campus.alreadyJoinedGroup');
+      }
+      ElMessage.error(errorMsg);
+    }
+  } finally {
+    joiningGroupId.value = null;
+  }
+};
+
+const handleLeaveGroup = async (group: Group, record: StudentRecord) => {
+  joiningGroupId.value = group.id;
+  const classId = record.class?.id || record.eduClass?.id;
+  try {
+    await ElMessageBox.confirm(
+      t('route.personalCenter.campus.confirmLeave'), // Reusing confirmLeave message, or add specific one if needed?
+      t('route.personalCenter.campus.leaveGroup'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning',
+      }
+    );
+    await leaveGroup(group.id);
+    ElMessage.success(t('route.personalCenter.campus.leaveSuccess'));
+    await refreshRecordGroups(record);
+    if (classId) {
+      const listRef = groupListRefs.value.get(classId);
+      listRef?.refresh();
+    }
+  } catch (error: any) {
+    if (error !== 'cancel') {
+      console.error('Failed to leave group:', error);
+      const errorMsg = error.response?.data?.message || t('common.operationFailed');
+      ElMessage.error(errorMsg);
+    }
   } finally {
     joiningGroupId.value = null;
   }
@@ -429,7 +482,7 @@ const refreshRecordGroups = async (record: StudentRecord) => {
   const classId = record.class?.id || record.eduClass?.id;
   if (!classId) return;
   try {
-    const myGroupRes = await getClassGroups(classId, '-created_at', '', 1, 'image,user');
+    const myGroupRes = await getClassGroups(classId, '-created_at', '', 1, 'image,user,joined');
     const groupData = myGroupRes.data;
     if (Array.isArray(groupData)) {
       record.groups = groupData;

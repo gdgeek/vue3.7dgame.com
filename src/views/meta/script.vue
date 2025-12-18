@@ -8,7 +8,7 @@
             <div v-if="meta" class="clearfix">
               <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
                 meta.title
-              }}</el-link>
+                }}</el-link>
               /【{{ $t("meta.script.title") }}】
               <!--
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
@@ -77,7 +77,7 @@
                             <pre>
                     <code :class="currentCodeType">{{
                       currentCode
-                      }}</code>
+                    }}</code>
                   </pre>
                           </div>
                         </div>
@@ -646,7 +646,6 @@ onMounted(async () => {
 
     initEditor();
   } catch (error: any) {
-    //alert(error.message);
     ElMessage.error(error.message);
   } finally {
     loading.value = false;

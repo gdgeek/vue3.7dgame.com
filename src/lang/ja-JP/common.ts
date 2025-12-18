@@ -28,6 +28,7 @@ export default {
     deleteSuccess: "削除成功",
     deleteFailed: "削除に失敗しました",
     operationFailed: "操作失敗",
+    networkError: "ネットワークエラーです。ネットワーク接続を確認してください",
     noData: "データがありません",
   },
   request: {

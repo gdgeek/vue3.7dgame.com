@@ -57,6 +57,7 @@ export const getGroup = (id: number, expand = "image,user") => {
   if (expand) {
     query["expand"] = expand;
   }
+  //alert(`/group/${id}${qs.stringify(query, true)}`);
   return request<Group>({
     url: `/group/${id}${qs.stringify(query, true)}`,
     method: "get",
@@ -129,6 +130,17 @@ export const getGroupOptions = () => {
 export const joinGroup = (id: number) => {
   return request({
     url: `/group/${id}/join`,
+    method: "post",
+  });
+};
+
+/**
+ * Leave a group
+ * @param id - Group ID
+ */
+export const leaveGroup = (id: number) => {
+  return request({
+    url: `/group/${id}/leave`,
     method: "post",
   });
 };
@@ -228,6 +240,7 @@ export default {
   deleteGroup,
   getGroupOptions,
   joinGroup,
+  leaveGroup,
   createGroupVerse,
   getGroupVerses,
   deleteGroupVerse,

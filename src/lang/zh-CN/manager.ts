@@ -51,6 +51,7 @@ export default {
         selectSchoolFirst: "请先选择学校，再创建班级",
         assignTeacherSuccess: "分配教师成功",
         assignStudentSuccess: "分配学生成功",
+        teacherAlreadyInClass: "该教师已在此班级中",
       },
       validation: { nameRequired: "请输入班级名称" },
     },
@@ -72,6 +73,7 @@ export default {
       editPending: "编辑学校: {name}",
       operationFailed: "操作失败",
       addFailed: "添加失败",
+      saveFailed: "保存失败",
     },
     dialog: { createTitle: "创建学校", editTitle: "编辑学校" },
     form: {

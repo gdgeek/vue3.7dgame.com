@@ -35,7 +35,7 @@
 
     <!-- Group Verses List - Using MrPPVersePage pattern -->
     <div class="group-content" v-if="group">
-      <Page @loaded="handleLoaded" :created="false">
+      <Page ref="pageRef" @loaded="handleLoaded" :created="false">
         <template #header-actions>
           <el-button size="small" type="primary" @click="openCreateDialog">
             <font-awesome-icon icon="plus" />
@@ -74,6 +74,7 @@ const groupId = computed(() => Number(route.query.group_id));
 const loading = ref(false);
 const group = ref<Group | null>(null);
 const createDialogRef = ref<InstanceType<typeof MrPPVerseWindowCreate> | null>(null);
+const pageRef = ref<InstanceType<typeof Page> | null>(null);
 
 const isMyGroup = computed(() => {
   if (!group.value || !group.value.user) return false;
@@ -86,6 +87,7 @@ const goBack = () => {
 };
 
 const fetchGroup = async () => {
+
   if (!groupId.value) {
     ElMessage.warning(t('route.personalCenter.campus.noGroup'));
     return;
@@ -148,8 +150,8 @@ const handleCreateVerse = async (form: any, imageId: number | null) => {
 
     ElMessage.success(t('common.createSuccess'));
     createDialogRef.value?.hide();
-    // Refresh the page to show new verse
-    window.location.reload();
+    // Refresh the list to show new verse
+    pageRef.value?.refresh();
   } catch (error: any) {
     console.error('Failed to create verse:', error);
     const errorMsg = error.response?.data?.message || t('common.createFailed');

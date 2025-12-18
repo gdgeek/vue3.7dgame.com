@@ -27,6 +27,7 @@ export default {
     deleteSuccess: "删除成功",
     deleteFailed: "删除失败",
     operationFailed: "操作失败",
+    networkError: "网络错误，请检查您的网络连接",
   },
   request: {
     loginExpired: "登录过期，请重新登录",

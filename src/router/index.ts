@@ -623,7 +623,7 @@ const routes: RouteRecordRaw[] = [
         children: [
           {
             path: "/campus/school",
-            component: () => import("@/views/manager/school.vue"),
+            component: () => import("@/views/campus/school.vue"),
             name: "CampusSchool",
             meta: {
               title: "campus.schoolManagement",
@@ -659,6 +659,16 @@ const routes: RouteRecordRaw[] = [
               title: "personalCenter.campus.groupList", // You might need to add this key or reuse an existing one like 'campus.group'
               icon: "el-icon-User",
               hidden: true, // Hidden from menu, accessed via Student page
+            },
+          },
+          {
+            path: "/campus/class",
+            component: () => import("@/views/campus/class.vue"),
+            name: "CampusClass",
+            meta: {
+              title: "campus.classDetail",
+              icon: "el-icon-Collection",
+              hidden: true,
             },
           },
         ],

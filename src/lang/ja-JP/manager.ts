@@ -44,6 +44,7 @@ export default {
         updateSuccess: "クラスの更新に成功しました",
         updateFailed: "クラスの更新に失敗しました",
         selectSchoolFirst: "クラスを作成する前に学校を選択してください",
+        teacherAlreadyInClass: "この教師はすでにこのクラスに所属しています",
       },
       validation: {
         nameRequired: "クラス名を入力してください",
@@ -73,6 +74,7 @@ export default {
       editPending: "学校を編集: {name}",
       operationFailed: "操作に失敗しました",
       addFailed: "追加に失敗しました",
+      saveFailed: "保存に失敗しました",
     },
     dialog: {
       createTitle: "学校を作成",
@@ -129,6 +131,7 @@ export default {
       label: "権限:",
       cancel: "削除",
       manage: "管理",
+      remove: "削除",
       roles: {
         root: "ルートユーザー",
         admin: "スーパー管理者",

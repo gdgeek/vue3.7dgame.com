@@ -22,21 +22,42 @@
           <template #enter>
             <div class="card-actions">
               <!-- If this is one of my groups -->
-              <div v-if="isMyGroup(item.id)" class="my-group-actions">
+              <template v-if="isMyGroup(item)">
                 <el-tag type="success" size="small" class="my-group-tag">{{
                   $t('route.personalCenter.campus.myGroup') }}</el-tag>
-                <el-button type="success" size="small" @click="$emit('enter-group', item)">
-                  {{ $t('common.enter') }}
-                </el-button>
-                <el-button type="primary" size="small" link @click="$emit('edit-group', item)">
-                  {{ $t('common.edit') }}
-                </el-button>
-                <el-button type="danger" size="small" link @click="$emit('delete-group', item)">
-                  {{ $t('common.delete') }}
-                </el-button>
-              </div>
+                <div class="action-buttons">
+                  <el-button-group>
+                    <el-button type="success" size="small" @click="$emit('enter-group', item)">
+                      {{ $t('common.enter') }}
+                    </el-button>
+                    <el-button type="primary" size="small" @click="$emit('edit-group', item)">
+                      {{ $t('common.edit') }}
+                    </el-button>
+                    <el-button type="danger" size="small" @click="$emit('delete-group', item)">
+                      {{ $t('common.delete') }}
+                    </el-button>
+                  </el-button-group>
+                </div>
+              </template>
+
+              <!-- If I have joined this group -->
+              <template v-else-if="item.joined">
+                <div class="spacer"></div>
+                <div class="action-buttons">
+                  <el-button-group>
+                    <el-button type="success" size="small" @click="$emit('enter-group', item)">
+                      {{ $t('common.enter') }}
+                    </el-button>
+                    <el-button type="danger" size="small" :loading="joiningGroupId === item.id"
+                      @click="$emit('leave-group', item)">
+                      {{ $t('route.personalCenter.campus.leaveGroup') }}
+                    </el-button>
+                  </el-button-group>
+                </div>
+              </template>
+
               <!-- If I am not in this group, show Join -->
-              <div v-else>
+              <div v-else class="action-buttons join-action">
                 <el-button type="primary" size="small" :loading="joiningGroupId === item.id"
                   @click="$emit('join-group', item)">
                   {{ $t('route.personalCenter.campus.join') }}
@@ -51,7 +72,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useUserStoreHook } from "@/store/modules/user";
 import { Plus } from '@element-plus/icons-vue';
 import CardListPage from '@/components/MrPP/CardListPage/index.vue';
 import MrPPCard from '@/components/MrPP/MrPPCard/index.vue';
@@ -71,11 +93,16 @@ const emit = defineEmits<{
   (e: 'edit-group', group: Group): void;
   (e: 'delete-group', group: Group): void;
   (e: 'join-group', group: Group): void;
+  (e: 'leave-group', group: Group): void;
   (e: 'enter-group', group: Group): void;
 }>();
 
-const isMyGroup = (groupId: number) => {
-  return props.myGroups.some(g => g.id === groupId);
+const userStore = useUserStoreHook();
+const currentUserId = computed(() => userStore.userInfo?.id);
+
+
+const isMyGroup = (group: Group) => {
+  return group.user_id === currentUserId.value;
 };
 
 const cardListPageRef = ref<InstanceType<typeof CardListPage> | null>(null);
@@ -87,7 +114,7 @@ const fetchGroups = async (params: FetchParams): Promise<FetchResponse> => {
     params.sort,
     params.search,
     params.page,
-    'image,user'
+    'image,user,joined'
   );
   return response;
 };
@@ -136,14 +163,31 @@ defineExpose({
 
 .card-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between; // Changed from flex-end to space-between
   align-items: center;
   width: 100%;
   gap: 8px;
   padding: 8px;
 }
 
-.my-group-tag {
-  margin-right: auto;
+
+
+.spacer {
+  flex-grow: 1;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  // Ensure buttons stay to the right if only buttons exist
+  margin-left: auto;
+}
+
+// Special case for join button to be centered or right aligned?
+// Original was right aligned. margin-left: auto handles it.
+.join-action {
+  width: 100%;
+  justify-content: flex-end;
 }
 </style>

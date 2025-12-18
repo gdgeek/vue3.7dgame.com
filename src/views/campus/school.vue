@@ -2,7 +2,7 @@
   <CardListPage ref="cardListPageRef" :fetch-data="fetchSchools" wrapper-class="school-management" :show-empty="true"
     @refresh="handleRefresh">
     <template #header-actions>
-      <el-button-group :inline="true">
+      <el-button-group :inline="true" v-if="isRoot">
         <el-button size="small" type="primary" @click="handleCreate">
           <font-awesome-icon icon="plus"></font-awesome-icon>
           &nbsp;
@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { Plus, Delete } from '@element-plus/icons-vue';
 import { useI18n } from 'vue-i18n';
@@ -77,12 +77,37 @@ import UserSelector from '@/components/UserSelector/index.vue';
 import ImageSelector from '@/components/MrPP/ImageSelector.vue';
 import ClassManagementDialog from '@/components/MrPP/ClassManagementDialog.vue';
 import type { EduSchool } from '@/api/v1/types/edu-school';
-import { getSchools, deleteSchool, createSchool, updateSchool } from '@/api/v1/edu-school';
+import { getSchools, deleteSchool, createSchool, updateSchool, getPrincipalSchools } from '@/api/v1/edu-school';
 import type { FetchParams, FetchResponse } from '@/components/MrPP/CardListPage/types';
+import { useUserStoreHook } from "@/store/modules/user";
 
 const { t } = useI18n();
 const router = useRouter();
+const userStore = useUserStoreHook();
 const cardListPageRef = ref<InstanceType<typeof CardListPage> | null>(null);
+
+// Check if user is root
+const isRoot = computed(() => {
+  return userStore.getRole() === userStore.RoleEnum.Root;
+});
+
+// Track previous role to detect changes
+const previousRole = ref<string | null>(null);
+
+// Watch for user info changes - refresh list when role is loaded/changed
+watch(() => userStore.userInfo, (newUserInfo) => {
+  if (!newUserInfo || newUserInfo.id === 0) {
+    return;
+  }
+
+  const currentRole = userStore.getRole();
+  // Only refresh if role has changed (including initial load)
+  if (previousRole.value !== currentRole) {
+    previousRole.value = currentRole;
+    // Refresh the list with correct API based on role
+    cardListPageRef.value?.refresh();
+  }
+}, { deep: true, immediate: true });
 
 const editDialogVisible = ref(false);
 const userDialogVisible = ref(false);
@@ -98,13 +123,21 @@ const editForm = ref({
 });
 
 const fetchSchools = async (params: FetchParams): Promise<FetchResponse> => {
-  const response = await getSchools(
-    params.sort,
-    params.search,
-    params.page,
-    'image,principal'
-  );
-  return response;
+  if (isRoot.value) {
+    return await getSchools(
+      params.sort,
+      params.search,
+      params.page,
+      'image,principal'
+    );
+  } else {
+    return await getPrincipalSchools(
+      params.sort,
+      params.search,
+      params.page,
+      'image,principal'
+    );
+  }
 };
 
 const handleRefresh = (data: any[]) => { };

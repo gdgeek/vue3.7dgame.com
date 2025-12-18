@@ -44,6 +44,7 @@ export default {
         updateSuccess: "班級更新成功",
         updateFailed: "班級更新失敗",
         selectSchoolFirst: "請先選擇學校，再創建班級",
+        teacherAlreadyInClass: "該教師已在此班級中",
       },
       validation: {
         nameRequired: "請輸入班級名稱",
@@ -73,6 +74,7 @@ export default {
       editPending: "編輯學校: {name}",
       operationFailed: "操作失敗",
       addFailed: "添加失敗",
+      saveFailed: "保存失敗",
     },
     dialog: {
       createTitle: "創建學校",
@@ -129,6 +131,7 @@ export default {
       label: "權限:",
       cancel: "刪除",
       manage: "管理",
+      remove: "移除",
       roles: {
         root: "根用戶",
         admin: "超級管理員",

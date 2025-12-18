@@ -29,6 +29,7 @@ export default {
     deleteSuccess: "Deleted successfully",
     deleteFailed: "Delete failed",
     operationFailed: "Operation failed",
+    networkError: "Network error, please check your internet connection",
   },
   request: {
     loginExpired: "Login expired, please log in again",

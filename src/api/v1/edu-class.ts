@@ -67,7 +67,7 @@ export const deleteClass = (id: number) => {
 export const getMyTeacherClasses = (
   sort = "-created_at",
   page = 1,
-  expand = "image,school"
+  expand = "image"
 ) => {
   const query: Record<string, any> = {};
   query["expand"] = expand;
@@ -76,7 +76,7 @@ export const getMyTeacherClasses = (
     query["page"] = page;
   }
   return request<EduClass[]>({
-    url: `/edu-class/by-teacher${qs.stringify(query, true)}`,
+    url: `/edu-class/teacher-me${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -176,5 +176,42 @@ export const createClassGroup = (
     url: `/edu-class/${classId}/group`,
     method: "post",
     data,
+  });
+};
+
+export const addTeacherToClass = (classId: number, teacherId: number) => {
+  return request({
+    url: `/edu-class/${classId}/teacher`,
+    method: "post",
+    data: { user_id: teacherId },
+  });
+};
+
+// Remove a teacher from a class
+export const removeTeacherFromClass = (classId: number, teacherId: number) => {
+  return request({
+    url: `/edu-class/${classId}/teacher`,
+    method: "delete",
+    data: { user_id: teacherId },
+  });
+};
+
+// Get classes by a specific teacher ID
+export const getClassesByTeacher = (
+  teacherId: number,
+  sort = "-created_at",
+  page = 1,
+  expand = "image"
+) => {
+  const query: Record<string, any> = {};
+  query["expand"] = expand;
+  query["sort"] = sort;
+  query["user_id"] = teacherId;
+  if (page > 1) {
+    query["page"] = page;
+  }
+  return request<EduClass[]>({
+    url: `/edu-class/by-teacher${qs.stringify(query, true)}`,
+    method: "get",
   });
 };

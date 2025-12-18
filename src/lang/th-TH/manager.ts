@@ -44,6 +44,7 @@ export default {
         updateSuccess: "อัปเดตชั้นเรียนสำเร็จ",
         updateFailed: "การอัปเดตชั้นเรียนล้มเหลว",
         selectSchoolFirst: "กรุณาเลือกโรงเรียนก่อนสร้างชั้นเรียน",
+        teacherAlreadyInClass: "ครูคนนี้อยู่ในชั้นเรียนนี้แล้ว",
       },
       validation: {
         nameRequired: "กรุณากรอกชื่อชั้นเรียน",
@@ -72,7 +73,8 @@ export default {
       createPending: "ฟังก์ชันการสร้างกำลังพัฒนา",
       editPending: "แก้ไขโรงเรียน: {name}",
       operationFailed: "การดำเนินการล้มเหลว",
-      addFailed: "เพิ่มล้มเหลว",
+      addFailed: "เพิ่มไม่สำเร็จ",
+      saveFailed: "บันทึกไม่สำเร็จ",
     },
     dialog: {
       createTitle: "สร้างโรงเรียน",
@@ -129,6 +131,7 @@ export default {
       label: "สิทธิ์:",
       cancel: "ลบ",
       manage: "จัดการ",
+      remove: "นำออก",
       roles: {
         root: "ผู้ใช้ Root",
         admin: "ผู้ดูแลระบบสูงสุด",

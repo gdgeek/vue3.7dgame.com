@@ -28,6 +28,7 @@ export default {
     deleteSuccess: "刪除成功",
     deleteFailed: "刪除失敗",
     operationFailed: "操作失敗",
+    networkError: "網絡錯誤，請檢查您的網絡連接",
   },
   request: {
     loginExpired: "登錄過期，請重新登錄",
