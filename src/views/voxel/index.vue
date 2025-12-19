@@ -10,7 +10,7 @@
       </template>
 
       <template #card="{ item }">
-        <MrPPCard :item="item" @named="namedWindow" @deleted="deletedWindow">
+        <MrPPCard :item="item" type="体素" color="#9b59b6" @named="namedWindow" @deleted="deletedWindow">
           <template #enter>
             <router-link :to="`/resource/voxel/view?id=${item.id}`">
               <el-button-group :inline="true">

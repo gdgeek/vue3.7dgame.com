@@ -4,7 +4,10 @@
       <template #header>
         <div class="card-header">
           <span class="mrpp-title">
-            <b class="card-title" nowrap>{{ item.name || item.title }}</b>
+            <span class="card-title" nowrap>
+              <b v-if="type" class="type-prefix" :style="typeStyle">{{ type }}:</b><span class="title-text">{{ item.name
+                || item.title }}</span>
+            </span>
           </span>
           <span v-if="color" class="color-indicator" :style="{ backgroundColor: color }"></span>
         </div>
@@ -61,6 +64,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  type: {
+    type: String,
+    default: '',
+  },
 });
 
 // 计算卡片边框样式
@@ -68,6 +75,14 @@ const cardStyle = computed(() => {
   if (!props.color) return {};
   return {
     borderLeft: `4px solid ${props.color}`,
+  };
+});
+
+// 计算类型前缀样式 - 配合卡片主色
+const typeStyle = computed(() => {
+  if (!props.color) return {};
+  return {
+    color: props.color,
   };
 });
 
@@ -124,7 +139,16 @@ const deleted = () => {
   display: block;
   text-overflow: ellipsis;
   overflow: hidden;
-  font-weight: 600;
+}
+
+.type-prefix {
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.title-text {
+  font-weight: 400;
+  color: #333;
 }
 
 .color-indicator {

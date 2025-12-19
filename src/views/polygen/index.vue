@@ -11,7 +11,7 @@
       </template>
 
       <template #card="{ item }">
-        <mr-p-p-card :item="item" color="#2ecc71" @named="namedWindow" @deleted="deletedWindow">
+        <mr-p-p-card :item="item" type="模型" color="#2ecc71" @named="namedWindow" @deleted="deletedWindow">
           <template #info>
             <PolygenView :file="item.file" @progress="progress" />
             <el-progress v-if="percentage === 100" :percentage="100" status="success"></el-progress>

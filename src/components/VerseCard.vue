@@ -1,5 +1,5 @@
 <template>
-  <MrPPCard :item="item" color="#2980b9" :showActions="false">
+  <MrPPCard :item="item" type="场景" color="#2980b9" :showActions="false">
     <InfoContent v-if="item" :verse="item"></InfoContent>
     <template #enter>
       <el-button-group>

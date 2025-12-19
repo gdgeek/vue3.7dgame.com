@@ -10,7 +10,7 @@
       </template>
 
       <template #card="{ item }">
-        <mr-p-p-card :item="item" color="#16a085" @named="namedWindow" @deleted="deletedWindow">
+        <mr-p-p-card :item="item" type="音频" color="#16a085" @named="namedWindow" @deleted="deletedWindow">
           <template #enter>
             <el-button v-if="item.info === null" type="warning" size="small" @click="handleViewAudio(item.id)">
               {{ $t("audio.initializeAudioData") }}

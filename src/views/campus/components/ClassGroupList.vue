@@ -18,7 +18,7 @@
       </template>
 
       <template #card="{ item }">
-        <MrPPCard :item="item" color="#d35400" :show-actions="false">
+        <MrPPCard :item="item" type="小组" color="#d35400" :show-actions="false">
           <template #enter>
             <div class="card-actions">
               <!-- If this is one of my groups -->

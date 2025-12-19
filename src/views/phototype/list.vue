@@ -18,7 +18,7 @@
       </template>
 
       <template #card="{ item }">
-        <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
+        <mr-p-p-card :item="item" type="预制体" color="#8e44ad" @named="namedWindow" @deleted="deletedWindow">
           <template #enter>
             <el-button-group>
               <el-button type="primary" size="small" @click="edit(item.id)">

@@ -11,7 +11,7 @@
       </template>
 
       <template #card="{ item }">
-        <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
+        <mr-p-p-card :item="item" type="粒子" color="#e67e22" @named="namedWindow" @deleted="deletedWindow">
           <template #enter>
             <router-link :to="`/resource/particle/view?id=${item.id}`">
               <el-button v-if="item.info === null || item.image === null" type="warning" size="small">
