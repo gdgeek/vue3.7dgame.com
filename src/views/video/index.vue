@@ -10,7 +10,7 @@
       </template>
 
       <template #card="{ item }">
-        <mr-p-p-card :item="item" @named="namedWindow" @deleted="deletedWindow">
+        <mr-p-p-card :item="item" color="#1abc9c" @named="namedWindow" @deleted="deletedWindow">
           <template #enter>
             <el-button v-if="item.info === null || item.image === null" type="warning" size="small"
               @click="openViewDialog(item.id)">

@@ -12,7 +12,7 @@
     </template>
 
     <template #card="{ item }">
-      <MrPPCard :item="item" @named="handleEdit" @deleted="handleDeleteWithCallback">
+      <MrPPCard :item="item" color="#e74c3c" @named="handleEdit" @deleted="handleDeleteWithCallback">
         <template #enter>
           <el-descriptions :column="1" size="small" class="school-info">
             <el-descriptions-item :label="$t('manager.school.principal')">

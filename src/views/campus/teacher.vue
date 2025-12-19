@@ -7,7 +7,7 @@
         name: item.name,
         image: item.image,
         ...item
-      }" :show-actions="false">
+      }" color="#e67e22" :show-actions="false">
         <div class="class-info">
           <p class="school-name" v-if="item.school">
             <el-icon>

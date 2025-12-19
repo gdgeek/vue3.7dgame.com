@@ -1,11 +1,13 @@
 <template>
-  <div>
-    <el-card class="box-card" :body-style="{ padding: '0px' }">
+  <div class="mrpp-card-wrapper">
+    <el-card class="box-card" :body-style="{ padding: '0px' }" :style="cardStyle">
       <template #header>
-
-        <span class="mrpp-title">
-          <b class="card-title" nowrap>{{ item.name || item.title }}</b>
-        </span>
+        <div class="card-header">
+          <span class="mrpp-title">
+            <b class="card-title" nowrap>{{ item.name || item.title }}</b>
+          </span>
+          <span v-if="color" class="color-indicator" :style="{ backgroundColor: color }"></span>
+        </div>
       </template>
 
       <div class="image-container">
@@ -55,6 +57,18 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  color: {
+    type: String,
+    default: '',
+  },
+});
+
+// 计算卡片边框样式
+const cardStyle = computed(() => {
+  if (!props.color) return {};
+  return {
+    borderLeft: `4px solid ${props.color}`,
+  };
 });
 
 const deleteLoading = ref(false);
@@ -68,39 +82,41 @@ const named = () => {
 const deleted = () => {
   deleteLoading.value = true;
   emits("deleted", props.item, () => {
-    deleteLoading.value = false; // 用于重置loading状态
+    deleteLoading.value = false;
   });
 };
-/*
-const hovering = ref(false);
-let enterTimeout: ReturnType<typeof setTimeout>;
-let leaveTimeout: ReturnType<typeof setTimeout>;
-
-const onMouseEnter = () => {
-  if (leaveTimeout) {
-    clearTimeout(leaveTimeout);
-  }
-  // 鼠标进入时，延迟2秒后显示
-  enterTimeout = setTimeout(() => {
-    hovering.value = true;
-  }, 2000);
-};
-
-const onMouseLeave = () => {
-  if (enterTimeout) {
-    clearTimeout(enterTimeout);
-  }
-  // 鼠标离开时，延迟5秒后隐藏
-  leaveTimeout = setTimeout(() => {
-    hovering.value = false;
-  }, 5000);
-};*/
 </script>
 
 <style scoped>
+.mrpp-card-wrapper {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mrpp-card-wrapper:hover {
+  transform: translateY(-4px);
+}
+
+.mrpp-card-wrapper:hover .box-card {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.box-card {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .mrpp-title {
   font-size: 15px;
-  padding: 0px 0px 0px 0px;
+  padding: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .card-title {
@@ -108,6 +124,16 @@ const onMouseLeave = () => {
   display: block;
   text-overflow: ellipsis;
   overflow: hidden;
+  font-weight: 600;
+}
+
+.color-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-left: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* 图片容器样式 */
@@ -115,6 +141,15 @@ const onMouseLeave = () => {
   position: relative;
   width: 100%;
   height: auto;
+  overflow: hidden;
+}
+
+.image-container :deep(img) {
+  transition: transform 0.4s ease;
+}
+
+.mrpp-card-wrapper:hover .image-container :deep(img) {
+  transform: scale(1.05);
 }
 
 .audio-container {
@@ -125,14 +160,11 @@ const onMouseLeave = () => {
   color: white;
   text-align: center;
   padding: 10px;
-  transition:
-    bottom 0.5s ease-in-out,
-    z-index 0.3s ease;
+  transition: bottom 0.5s ease-in-out, z-index 0.3s ease;
 }
 
 .image-container:hover .audio-container {
   bottom: 0;
-  /* 鼠标悬停时从底部弹出 */
 }
 
 .overlay-container {
@@ -141,12 +173,13 @@ const onMouseLeave = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%);
   display: flex;
   justify-content: center;
   align-items: center;
   opacity: 0;
   transition: opacity 0.3s ease;
+  backdrop-filter: blur(2px);
 }
 
 .image-container:hover .overlay-container {

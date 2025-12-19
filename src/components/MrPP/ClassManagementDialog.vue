@@ -41,7 +41,7 @@
       </template>
 
       <template #card="{ item }">
-        <MrPPCard :item="item" @named="handleEdit" @deleted="handleDeleteWithCallback">
+        <MrPPCard :item="item" color="#f39c12" @named="handleEdit" @deleted="handleDeleteWithCallback">
           <div style="padding: 10px; font-size: 12px; color: #666;">
             <div v-for="teacher in (item.eduTeachers || []).slice(0, 3)" :key="teacher.id" style="margin-bottom: 2px;">
               {{ teacher.user.nickname || teacher.user.username }}

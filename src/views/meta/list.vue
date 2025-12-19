@@ -12,7 +12,7 @@
       </template>
 
       <template #card="{ item }">
-        <mr-p-p-card :item="item" :isMeta="true" @named="namedWindow" @deleted="deletedWindow">
+        <mr-p-p-card :item="item" color="#3498db" :isMeta="true" @named="namedWindow" @deleted="deletedWindow">
           <template #enter>
             <el-button-group>
               <el-button type="primary" size="small" @click="openDetail(item.id)">
