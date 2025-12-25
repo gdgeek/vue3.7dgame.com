@@ -72,6 +72,7 @@ export type VerseData = {
   name: string;
   info: string | null;
   description: string | null;
+  public?: boolean;
   data: any;
   version: number;
   uuid: string;
@@ -132,7 +133,7 @@ export const postVerse = (data: PostVerseData) => {
 
 export const putVerseCode = (id: number, data: VerseCode) => {
   return request<VerseCode>({
-    url: `/system/verse-code${qs.stringify({ verse_id: id }, true)}`,
+    url: `/verses/${id}/code`,
     data,
     method: "put",
   });
@@ -217,6 +218,50 @@ export const putVerse = (id: number, data: any) => {
 export const deleteVerse = (id: number | string) => {
   return request({
     url: `/verses/${id}`,
+    method: "delete",
+  });
+};
+
+/**
+ * 将 verse 设为公开
+ * POST /v1/verse/{id}/public
+ */
+export const addPublic = (id: number | string) => {
+  return request({
+    url: `/verses/${id}/public`,
+    method: "post",
+  });
+};
+
+/**
+ * 取消 verse 公开状态
+ * DELETE /v1/verse/{id}/public
+ */
+export const removePublic = (id: number | string) => {
+  return request({
+    url: `/verses/${id}/public`,
+    method: "delete",
+  });
+};
+
+/**
+ * 为 verse 添加标签
+ * POST /v1/verses/{id}/tag?tags_id={tags_id}
+ */
+export const addTag = (id: number | string, tagsId: number | string) => {
+  return request({
+    url: `/verses/${id}/tag${qs.stringify({ tags_id: tagsId }, true)}`,
+    method: "post",
+  });
+};
+
+/**
+ * 移除 verse 的标签
+ * DELETE /v1/verses/{id}/tag?tags_id={tags_id}
+ */
+export const removeTag = (id: number | string, tagsId: number | string) => {
+  return request({
+    url: `/verses/${id}/tag${qs.stringify({ tags_id: tagsId }, true)}`,
     method: "delete",
   });
 };

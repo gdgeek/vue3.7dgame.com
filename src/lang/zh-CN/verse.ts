@@ -257,6 +257,13 @@ export default {
           info: "已放弃对未保存的更改",
         },
       },
+      public: {
+        open: "公开",
+        private: "私有",
+        addSuccess: "已设为公开",
+        removeSuccess: "已设为私有",
+        error: "操作失败",
+      },
       image: { updateSuccess: "图片更新成功", updateError: "图片更新失败" },
     },
   },

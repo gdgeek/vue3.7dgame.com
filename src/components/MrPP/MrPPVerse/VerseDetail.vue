@@ -19,8 +19,12 @@
           </template>
 
           <template #footer>
-            <tags v-if="verse && verse.verseTags" :editable="verse.editable" @add="addTags" @remove="removeTags"
-              :verseTags="verse.verseTags" />
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <tags v-if="verse && verse.verseTags" :editable="verse.editable" @add="addTags" @remove="removeTags"
+                :verseTags="verse.verseTags" />
+              <el-switch v-if="verse && isAdmin" v-model="verse.public" :active-text="$t('verse.view.public.open')"
+                :inactive-text="$t('verse.view.public.private')" @change="handlePublicChange" />
+            </div>
           </template>
 
           <div class="box-item">
@@ -75,8 +79,8 @@ import { ref, computed, onMounted, watch } from 'vue';
 import Tags from "@/components/Tags.vue";
 import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";
-import { getVerse, putVerse, VerseData } from "@/api/v1/verse";
-import { postVerseTags, removeVerseTags } from "@/api/v1/verse-tags";
+import { getVerse, putVerse, VerseData, addTag, removeTag, addPublic, removePublic } from "@/api/v1/verse";
+import { useUserStore } from '@/store/modules/user';
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";
@@ -94,6 +98,14 @@ const { t } = useI18n();
 
 const verse = ref<VerseData | null>(null);
 
+const userStore = useUserStore();
+const isAdmin = computed(() => {
+  // 显式引用 userInfo 以确保响应式更新
+  const _ = userStore.userInfo;
+  const role = userStore.getRole();
+  return role === userStore.RoleEnum.Root || role === userStore.RoleEnum.Admin;
+});
+
 const saveable = computed(() => verse.value ? verse.value.editable : false);
 
 const refresh = async () => {
@@ -101,7 +113,7 @@ const refresh = async () => {
   try {
     const response = await getVerse(
       props.verseId,
-      "image,author,verseTags"
+      "image,author,verseTags,public"
     );
     verse.value = response.data;
   } catch (error) {
@@ -173,7 +185,7 @@ const handleImageUploadSuccess = async (event: ImageUpdateEvent) => {
   }
 };
 
-const removeTags = async (tags: number, resolve: () => void = () => { }, reject: () => void = () => { }) => {
+const removeTags = async (tagId: number, resolve: () => void = () => { }, reject: () => void = () => { }) => {
   try {
     await ElMessageBox.confirm(
       t("verse.view.tags.confirmRemove.message"),
@@ -184,7 +196,7 @@ const removeTags = async (tags: number, resolve: () => void = () => { }, reject:
         type: "warning",
       }
     );
-    await removeVerseTags(verse.value!.id, tags);
+    await removeTag(verse.value!.id, tagId);
     await refresh();
     resolve();
     ElMessage.success(t("verse.view.tags.confirmRemove.success"));
@@ -194,7 +206,7 @@ const removeTags = async (tags: number, resolve: () => void = () => { }, reject:
   }
 };
 
-const addTags = async (tags: number, resolve: () => void = () => { }, reject: () => void = () => { }) => {
+const addTags = async (tagId: number, resolve: () => void = () => { }, reject: () => void = () => { }) => {
   try {
     await ElMessageBox.confirm(
       t("verse.view.tags.confirmAdd.message"),
@@ -205,13 +217,32 @@ const addTags = async (tags: number, resolve: () => void = () => { }, reject: ()
         type: "warning",
       }
     );
-    await postVerseTags(verse.value!.id, tags);
+    await addTag(verse.value!.id, tagId);
     await refresh();
     resolve();
     ElMessage.success(t("verse.view.tags.confirmAdd.success"));
   } catch (e) {
     reject();
     ElMessage.error(t("verse.view.tags.confirmAdd.error"));
+  }
+};
+
+const handlePublicChange = async (value: string | number | boolean) => {
+  if (!verse.value) return;
+  const isPublic = Boolean(value);
+  try {
+    if (isPublic) {
+      await addPublic(verse.value.id);
+      ElMessage.success(t('verse.view.public.addSuccess'));
+    } else {
+      await removePublic(verse.value.id);
+      ElMessage.success(t('verse.view.public.removeSuccess'));
+    }
+    emit('changed');
+  } catch (error) {
+    // 恢复原值
+    verse.value.public = !isPublic;
+    ElMessage.error(t('verse.view.public.error'));
   }
 };
 

@@ -8,9 +8,6 @@
     <el-select-v2 v-if="props.editable" @change="handleChange" v-model="value" size="small" :options="classify"
       placeholder="添加标签" style="width:108px" />
 
-    <el-switch v-if="props.editable && userStore.isUserPermissionGreater('admin')" size="small" v-model="public_"
-      :loading="loading" :before-change="beforeChange" active-text="公开" inline-prompt inactive-text="私有" />
-
   </div>
 
 
@@ -18,32 +15,11 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { useUserStore } from "@/store/modules/user";
 import { getTags } from '@/api/v1/tags'
-const userStore = useUserStore();
 
 
 
 import type { TagProps } from 'element-plus'
-
-const loading = ref(false)
-const public_ = ref(false)
-
-const beforeChange = (): Promise<boolean> => {
-  loading.value = true
-  return new Promise(async (resolve, reject) => {
-    loading.value = false
-    if (!public_.value) {
-      emit('add', _public.value?.id, () => {
-        resolve(true);
-      }, reject)
-    } else {
-      emit('remove', _public.value?.id, () => {
-        resolve(true);
-      }, reject)
-    }
-  })
-}
 const props = defineProps({
   verseTags: {
     type: Array,
@@ -74,23 +50,7 @@ const data = computed(() => {
 });
 
 
-const _public = computed<TagsItem | null>(() => {
-  if (list.value === null) return null;
 
-  const filtered = list.value
-    .filter((item: any) => { return (item.key === 'public'); })
-    .map((item: any) => {
-      return {
-        name: item.name,
-        id: item.id,
-        type: item.type,
-        key: item.key
-      } as TagsItem
-    });
-
-  // 返回第一个元素，如果没有找到则返回 null
-  return filtered.length > 0 ? filtered[0] : null;
-});
 const classify = computed(() => {
   if (list.value === null) return []
   return list.value
@@ -130,13 +90,5 @@ const list: Ref<null | []> = ref(null)
 onMounted(async () => {
   const res = await getTags();
   list.value = res.data;
-  const result = data.value.find((item: any) => {
-    return item === _public.value?.id
-  })
-  if (result) {
-    public_.value = true
-  } else {
-    public_.value = false
-  }
 })
 </script>
