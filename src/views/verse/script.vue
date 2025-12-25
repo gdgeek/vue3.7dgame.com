@@ -149,7 +149,7 @@ import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import { useRoute, useRouter, onBeforeRouteLeave } from "vue-router";
 import {
   getVerse,
-  getVerseMetasWithJsCode,
+  // getVerseMetasWithJsCode,
   putVerseCode,
   type meta,
   type VerseData,
@@ -161,7 +161,7 @@ import { useSettingsStore } from "@/store/modules/settings";
 import { useI18n } from "vue-i18n";
 import { ElMessageBox, ElMessage } from "element-plus";
 
-import { takePhoto } from '@/api/v1/snapshot'
+import { takePhoto } from '@/api/v1/verse'
 import pako from "pako";
 import jsBeautify from "js-beautify";
 import ScenePlayer from "./ScenePlayer.vue";
@@ -607,9 +607,9 @@ onMounted(async () => {
       id.value,
       "metas, module, share, verseCode"
     );
-    const response2 = await getVerseMetasWithJsCode(
+    const response2 = await getVerse(
       id.value,
-      // 584,
+
       "id,name,description,data,metas,resources,code,uuid,code",
       "js"
     );
@@ -619,7 +619,7 @@ onMounted(async () => {
       .map((meta: meta) => meta.script)
       .join("\n");
     console.log("Verse", verse.value);
-    console.error("Verse Metas With Js Code", verseMetasWithJsCodeData.value);
+    //console.error("Verse Metas With Js Code", verseMetasWithJsCodeData.value);
     console.log("metasJavaScriptCode", metasJavaScriptCode.value);
     if (verse.value && verse.value.data) {
       const data = verse.value.data

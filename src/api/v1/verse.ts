@@ -138,13 +138,13 @@ export const putVerseCode = (id: number, data: VerseCode) => {
     method: "put",
   });
 };
-export const getVerse = (id: number, expand = "metas,share") => {
+export const getVerse = (id: number, expand = "metas,share", cl = "lua") => {
   return request({
-    url: `/verses/${id}${qs.stringify({ expand: expand }, true)}`,
+    url: `/verses/${id}${qs.stringify({ expand: expand, cl }, true)}`,
     method: "get",
   });
 };
-
+/*
 export const getVerseMetasWithJsCode = (
   id: number,
   expand = "id,name,description,data,metas,resources,code,uuid,code",
@@ -157,7 +157,7 @@ export const getVerseMetasWithJsCode = (
     )}`,
     method: "get",
   });
-};
+};*/
 export interface VersesParams {
   sort?: string;
   search?: string;
@@ -263,5 +263,16 @@ export const removeTag = (id: number | string, tagsId: number | string) => {
   return request({
     url: `/verses/${id}/tag${qs.stringify({ tags_id: tagsId }, true)}`,
     method: "delete",
+  });
+};
+
+/**
+ * 为 verse 拍照生成快照
+ * POST /v1/verses/{id}/take-photo
+ */
+export const takePhoto = (verseId: number) => {
+  return request({
+    url: `/verses/${verseId}/take-photo`,
+    method: "post",
   });
 };

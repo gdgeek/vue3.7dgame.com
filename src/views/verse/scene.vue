@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { takePhoto } from '@/api/v1/snapshot'
+import { takePhoto } from '@/api/v1/verse'
 import { useRoute, useRouter } from "vue-router";
 import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 //import PrefabDialog from "@/components/MrPP/PrefabDialog.vue";
