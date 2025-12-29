@@ -21,11 +21,13 @@ import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
 import { putVerse, getVerse, VerseData } from "@/api/v1/verse";
 import { getPrefab } from "@/api/v1/prefab";
 import { useAppStore } from "@/store/modules/app";
+import { useUserStore } from "@/store/modules/user";
 import { translateRouteTitle } from "@/utils/i18n";
 import env from "@/environment";
 import { useFileStore } from "@/store/modules/config"
 
 // 组件状态
+const userStore = useUserStore();
 const appStore = useAppStore();
 const { t } = useI18n();
 const route = useRoute();
@@ -68,7 +70,19 @@ watch(
     await refresh();
   }
 );
-
+// 监听用户信息变化
+watch(
+  () => userStore.userInfo,
+  () => {
+    // 用户信息变化时，向编辑器发送最新用户信息
+    postMessage("user-info", {
+      id: userStore.userInfo?.id || null,
+      //roles: userStore.userInfo?.roles || [],
+      role: userStore.getRole()
+    });
+  },
+  { deep: true }
+);
 // 刷新场景数据
 const refresh = async () => {
   const response = await getVerse(id.value, "metas, resources");
@@ -79,6 +93,11 @@ const refresh = async () => {
     id: id.value,
     data: verse,
     saveable: saveable.value,
+    user: {
+      id: userStore.userInfo?.id || null,
+      //roles: userStore.userInfo?.roles || [],
+      role: userStore.getRole()
+    },
   });
 };
 
@@ -295,6 +314,13 @@ const handleMessage = async (e: MessageEvent) => {
       if (!init) {
         init = true;
         refresh();
+      }
+      else {
+        postMessage("user-info", {
+          id: userStore.userInfo?.id || null,
+          //roles: userStore.userInfo?.roles || [],
+          role: userStore.getRole()
+        });
       }
       break;
 

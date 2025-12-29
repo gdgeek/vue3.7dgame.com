@@ -158,6 +158,7 @@ import {
 import { useAppStore } from "@/store/modules/app";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
+import { useUserStore } from "@/store/modules/user";
 import { useI18n } from "vue-i18n";
 import { ElMessageBox, ElMessage } from "element-plus";
 
@@ -168,6 +169,7 @@ import ScenePlayer from "./ScenePlayer.vue";
 import * as THREE from "three";
 import env from "@/environment";
 
+const userStore = useUserStore();
 const appStore = useAppStore();
 const { t } = useI18n();
 const loading = ref(false);
@@ -190,6 +192,20 @@ const currentCode = ref("");
 const currentCodeType = ref("");
 const codeDialogTitle = ref("");
 const unsavedBlocklyData = ref<any>(null);
+
+// 监听用户信息变化
+watch(
+  () => userStore.userInfo,
+  () => {
+    // 用户信息变化时，向编辑器发送最新用户信息
+    postMessage("user-info", {
+      id: userStore.userInfo?.id || null,
+      //roles: userStore.userInfo?.roles || [],
+      role: userStore.getRole()
+    });
+  },
+  { deep: true }
+);
 
 const handleBlocklyChange = (data: any) => {
   unsavedBlocklyData.value = data;
@@ -412,6 +428,11 @@ const handleMessage = async (e: MessageEvent) => {
     if (params.action === "ready") {
       ready = true;
       initEditor();
+      postMessage("user-info", {
+        id: userStore.userInfo?.id || null,
+        //roles: userStore.userInfo?.roles || [],
+        role: userStore.getRole()
+      });
     } else if (params.action === "post") {
       console.log(params.data);
       await postScript(params.data);

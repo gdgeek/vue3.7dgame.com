@@ -179,7 +179,7 @@ watch(
     // 用户信息变化时，向编辑器发送最新用户信息
     postMessage("user-info", {
       id: userStore.userInfo?.id || null,
-      roles: userStore.userInfo?.roles || [],
+      //roles: userStore.userInfo?.roles || [],
       role: userStore.getRole()
     });
   },
@@ -450,9 +450,10 @@ const handleMessage = async (e: MessageEvent) => {
         init = true;
         await refresh();
       } else {
+        console.log("post user info to editor");
         postMessage("user-info", {
           id: userStore.userInfo?.id || null,
-          roles: userStore.userInfo?.roles || [],
+          //roles: userStore.userInfo?.roles || [],
           role: userStore.getRole()
         });
       }
@@ -478,7 +479,7 @@ const refresh = async () => {
       availableResourceTypes: availableTypes,
       user: {
         id: userStore.userInfo?.id || null,
-        roles: userStore.userInfo?.roles || [],
+        //roles: userStore.userInfo?.roles || [],
         role: userStore.getRole() // 获取用户角色
       },
       system: {
