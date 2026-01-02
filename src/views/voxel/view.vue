@@ -47,7 +47,8 @@
             @download="downloadVoxel"
             @rename="namedWindow"
             @delete="deleteWindow"
-          ></MrppInfo>
+          >
+          </MrppInfo>
           <br />
         </el-col>
       </el-row>
@@ -71,7 +72,39 @@ import { downloadResource } from "@/utils/downloadHelper";
 
 // 基本状态管理
 const loading = ref(false);
-const voxelData = ref<any>(null);
+
+interface Vector3 {
+  x: number;
+  y: number;
+  z: number;
+}
+
+interface VoxelInfo {
+  size: Vector3;
+  center: Vector3;
+  count: number;
+}
+
+interface ResourceFile {
+  url: string;
+  size: number;
+}
+
+interface ResourceAuthor {
+  nickname: string;
+}
+
+interface VoxelData {
+  id: string | number;
+  name: string;
+  info: string;
+  file: ResourceFile;
+  author: ResourceAuthor;
+  created_at: string;
+  image_id?: number;
+}
+
+const voxelData = ref<VoxelData | null>(null);
 const percentage = ref(0);
 const expire = ref(false);
 
@@ -94,7 +127,7 @@ const three = ref<InstanceType<typeof Voxel> | null>(null);
 
 // 获取体素信息数据
 const dataInfo = computed(() =>
-  prepare.value ? JSON.parse(voxelData.value.info) : null
+  voxelData.value && prepare.value ? JSON.parse(voxelData.value.info) : null
 );
 
 // 计算体素网格尺寸
@@ -156,6 +189,7 @@ const loadVoxelData = async () => {
   expire.value = true;
   try {
     const response = await getVoxel(id.value);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     voxelData.value = (response as any).data;
   } catch (error) {
     console.error(error);
@@ -238,6 +272,7 @@ const deleteWindow = async () => {
 
 // 重命名体素对话框
 const namedWindow = async () => {
+  if (!voxelData.value) return;
   try {
     const { value } = await ElMessageBox.prompt(
       t("voxel.view.namePrompt.message1"),
@@ -262,18 +297,21 @@ const namedWindow = async () => {
 };
 
 // 更新体素名称
-const named = async (id: string, name: string) => {
+const named = async (id: string | number, name: string) => {
   const voxel = { name };
   try {
-    const response = await putVoxel(id, voxel);
-    voxelData.value.name = response.data.name;
+    if (voxelData.value) {
+      const response = await putVoxel(id, voxel);
+      voxelData.value.name = response.data.name;
+    }
   } catch (error) {
     console.error(error);
   }
 };
 
 // 更新体素信息和缩略图
-const updateVoxel = async (imageId: number, info: any) => {
+const updateVoxel = async (imageId: number, info: VoxelInfo) => {
+  if (!voxelData.value) return;
   const voxel = { image_id: imageId, info: JSON.stringify(info) };
   try {
     const response = await putVoxel(voxelData.value.id, voxel);
@@ -289,16 +327,17 @@ const updateVoxel = async (imageId: number, info: any) => {
 const saveFile = async (
   md5: string,
   extension: string,
-  info: any,
+  info: VoxelInfo,
   file: File,
-  handler: any
+  handler: unknown
 ) => {
   extension = extension.startsWith(".") ? extension : `.${extension}`;
   const data: UploadFileType = {
     md5,
     key: md5 + extension,
     filename: file.name,
-    url: store.fileUrl(md5, extension, handler, "screenshot/voxel"),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    url: store.fileUrl(md5, extension, handler as any, "screenshot/voxel"),
   };
 
   // 保存缩略图并更新体素信息
@@ -307,11 +346,13 @@ const saveFile = async (
 };
 
 // 处理体素加载完成，生成缩略图
-const loaded = async (info: any) => {
+const loaded = async (info: VoxelInfo) => {
   if (prepare.value) {
     expire.value = false;
     return;
   }
+
+  if (!voxelData.value) return;
 
   // 获取体素渲染的截图
   const blob: Blob | undefined = await three.value?.screenshot();

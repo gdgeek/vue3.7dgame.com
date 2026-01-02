@@ -54,9 +54,9 @@ const threeScene = new THREE.Scene();
 const camera = ref<THREE.PerspectiveCamera | null>(null);
 const renderer = ref<THREE.WebGLRenderer | null>(null);
 let mixers: Map<string, THREE.AnimationMixer> = new Map();
-let sources: Map<string, any> = new Map();
+let sources: Map<string, SourceItem> = new Map();
 let clock = new THREE.Clock();
-const eventContainer = ref<{ [key: string]: any }>({});
+const eventContainer = ref<Record<string, unknown>>({});
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
 const collisionObjects = ref<CollisionObject[]>([]);

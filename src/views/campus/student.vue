@@ -3,20 +3,12 @@
     <div v-loading="loading">
       <!-- Has Classes: Show Class Headers -->
       <div v-if="!loading && studentRecords.length > 0" class="class-list">
-        <div
-          v-for="record in studentRecords"
-          :key="record.id"
-          class="class-wrapper"
-        >
+        <div v-for="record in studentRecords" :key="record.id" class="class-wrapper">
           <div class="class-header">
             <div class="class-header-left">
               <div class="class-image">
-                <Id2Image
-                  :id="record.class?.id || record.id"
-                  :image="record.class?.image?.url || null"
-                  :lazy="false"
-                  fit="cover"
-                ></Id2Image>
+                <Id2Image :id="record.class?.id || record.id" :image="record.class?.image?.url || null" :lazy="false"
+                  fit="cover"></Id2Image>
               </div>
               <div class="class-info">
                 <h3 class="class-name">
@@ -31,12 +23,7 @@
               </div>
             </div>
             <div class="class-header-right">
-              <el-button
-                type="danger"
-                link
-                :loading="leavingRecordId === record.id"
-                @click="handleLeaveClass(record)"
-              >
+              <el-button type="danger" link :loading="leavingRecordId === record.id" @click="handleLeaveClass(record)">
                 {{ $t("route.personalCenter.campus.leaveClass") }}
               </el-button>
             </div>
@@ -44,31 +31,21 @@
 
           <!-- Group List Section - Embedded under class header -->
           <div class="group-section">
-            <ClassGroupList
-              :ref="
-                (el) =>
-                  setGroupListRef(record.class?.id || record.eduClass?.id, el)
-              "
-              :class-id="record.class?.id || record.eduClass?.id || 0"
-              :my-groups="record.groups || []"
-              :joining-group-id="joiningGroupId"
-              @join-group="(group) => handleJoinGroup(group, record)"
-              @create-group="() => openGroupDialog(record)"
-              @edit-group="(group) => openGroupDialog(record, group)"
+            <ClassGroupList :ref="(el) =>
+                setGroupListRef(record.class?.id || record.eduClass?.id, el)
+              " :class-id="record.class?.id || record.eduClass?.id || 0" :my-groups="record.groups || []"
+              :joining-group-id="joiningGroupId" @join-group="(group) => handleJoinGroup(group, record)"
+              @create-group="() => openGroupDialog(record)" @edit-group="(group) => openGroupDialog(record, group)"
               @delete-group="(group) => handleDeleteGroup(group, record)"
               @leave-group="(group) => handleLeaveGroup(group, record)"
-              @enter-group="(group) => handleEnterGroup(group)"
-            ></ClassGroupList>
+              @enter-group="(group) => handleEnterGroup(group)"></ClassGroupList>
           </div>
           <br />
         </div>
       </div>
 
       <!-- No Classes: Show Apply Button -->
-      <el-empty
-        v-else-if="!loading"
-        :description="$t('route.personalCenter.campus.noClasses')"
-      >
+      <el-empty v-else-if="!loading" :description="$t('route.personalCenter.campus.noClasses')">
         <el-button type="primary" size="large" @click="showApplyDialog">
           <el-icon>
             <Plus></Plus>
@@ -79,21 +56,11 @@
     </div>
 
     <!-- Apply Class Dialog -->
-    <el-dialog
-      v-model="applyDialogVisible"
-      :title="$t('route.personalCenter.campus.selectClass')"
-      width="700px"
-      :close-on-click-modal="false"
-    >
+    <el-dialog v-model="applyDialogVisible" :title="$t('route.personalCenter.campus.selectClass')" width="700px"
+      :close-on-click-modal="false">
       <div class="dialog-controls">
-        <el-input
-          v-model="searchKeyword"
-          :placeholder="$t('route.personalCenter.campus.searchPlaceholder')"
-          @keyup.enter="handleSearch"
-          clearable
-          class="search-input"
-          @clear="handleSearch"
-        >
+        <el-input v-model="searchKeyword" :placeholder="$t('route.personalCenter.campus.searchPlaceholder')"
+          @keyup.enter="handleSearch" clearable class="search-input" @clear="handleSearch">
           <template #append>
             <el-button :icon="Search" @click="handleSearch"></el-button>
           </template>
@@ -101,43 +68,22 @@
       </div>
 
       <div v-loading="searchLoading" class="class-list">
-        <el-empty
-          v-if="!searchLoading && searchResults.length === 0"
-          :description="$t('route.personalCenter.campus.noClasses')"
-        ></el-empty>
+        <el-empty v-if="!searchLoading && searchResults.length === 0"
+          :description="$t('route.personalCenter.campus.noClasses')"></el-empty>
         <div v-else class="class-list-items">
-          <div
-            v-for="item in searchResults"
-            :key="item.id"
-            class="class-list-item"
-          >
+          <div v-for="item in searchResults" :key="item.id" class="class-list-item">
             <div class="class-list-image">
-              <Id2Image
-                :id="item.id"
-                :image="item.image?.url || null"
-                :lazy="false"
-                fit="cover"
-              ></Id2Image>
+              <Id2Image :id="item.id" :image="item.image?.url || null" :lazy="false" fit="cover"></Id2Image>
             </div>
             <div class="class-list-info">
               <h4>{{ item.name }}</h4>
               <p>{{ item.school?.name || "-" }}</p>
             </div>
-            <el-button
-              v-if="isJoined(item.id)"
-              type="info"
-              size="small"
-              disabled
-            >
+            <el-button v-if="isJoined(item.id)" type="info" size="small" disabled>
               {{ $t("route.personalCenter.campus.alreadyJoined") }}
             </el-button>
-            <el-button
-              v-else
-              type="primary"
-              size="small"
-              :loading="applyingClassId === item.id"
-              @click="handleApply(item)"
-            >
+            <el-button v-else type="primary" size="small" :loading="applyingClassId === item.id"
+              @click="handleApply(item)">
               {{ $t("route.personalCenter.campus.apply") }}
             </el-button>
           </div>
@@ -147,56 +93,34 @@
       <template #footer>
         <el-button @click="applyDialogVisible = false">{{
           $t("common.cancel")
-        }}</el-button>
+          }}</el-button>
       </template>
     </el-dialog>
 
     <!-- Create/Edit Group Dialog -->
-    <el-dialog
-      v-model="groupDialogVisible"
-      :title="
-        groupForm.id
-          ? $t('common.edit')
-          : $t('route.personalCenter.campus.createGroup')
-      "
-      width="500px"
-    >
+    <el-dialog v-model="groupDialogVisible" :title="groupForm.id
+        ? $t('common.edit')
+        : $t('route.personalCenter.campus.createGroup')
+      " width="500px">
       <el-form :model="groupForm" label-width="100px">
         <el-form-item :label="$t('common.name')" required>
-          <el-input
-            v-model="groupForm.name"
-            :placeholder="
-              $t('route.personalCenter.campus.groupNamePlaceholder')
-            "
-          ></el-input>
+          <el-input v-model="groupForm.name" :placeholder="$t('route.personalCenter.campus.groupNamePlaceholder')
+            "></el-input>
         </el-form-item>
         <el-form-item :label="$t('common.description')">
-          <el-input
-            v-model="groupForm.description"
-            type="textarea"
-            :placeholder="
-              $t('route.personalCenter.campus.groupDescPlaceholder')
-            "
-          ></el-input>
+          <el-input v-model="groupForm.description" type="textarea" :placeholder="$t('route.personalCenter.campus.groupDescPlaceholder')
+            "></el-input>
         </el-form-item>
         <el-form-item :label="$t('route.personalCenter.campus.groupImage')">
-          <ImageSelector
-            :item-id="groupForm.id || undefined"
-            :image-url="groupForm.imageUrl"
-            @image-selected="handleGroupImageSelected"
-            @image-upload-success="handleGroupImageSelected"
-          ></ImageSelector>
+          <ImageSelector :item-id="groupForm.id || undefined" :image-url="groupForm.imageUrl"
+            @image-selected="handleGroupImageSelected" @image-upload-success="handleGroupImageSelected"></ImageSelector>
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="groupDialogVisible = false">{{
           $t("common.cancel")
-        }}</el-button>
-        <el-button
-          type="primary"
-          :loading="savingGroup"
-          @click="handleSaveGroup"
-        >
+          }}</el-button>
+        <el-button type="primary" :loading="savingGroup" @click="handleSaveGroup">
           {{ $t("common.confirm") }}
         </el-button>
       </template>
@@ -242,7 +166,6 @@ interface StudentRecord {
   class?: ClassWithSchool;
   school?: { id: number; name: string };
   groups?: Group[];
-  [key: string]: any;
 }
 
 const loading = ref(false);
@@ -274,6 +197,7 @@ const groupListRefs = ref<
   Map<number, InstanceType<typeof ClassGroupList> | null>
 >(new Map());
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const setGroupListRef = (classId: number | undefined, el: any) => {
   if (classId) {
     groupListRefs.value.set(classId, el);
@@ -295,7 +219,8 @@ const fetchStudentRecords = async () => {
   loading.value = true;
   try {
     const response = await getStudentMe("-created_at", "", 1, "class,school");
-    const data = response.data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = (response as any).data;
     const records = (Array.isArray(data)
       ? data
       : data
@@ -315,7 +240,8 @@ const fetchStudentRecords = async () => {
               1,
               "image,user,joined"
             );
-            const groupData = myGroupRes.data;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const groupData = (myGroupRes as any).data;
             if (Array.isArray(groupData)) {
               record.groups = groupData;
             } else {
@@ -374,10 +300,11 @@ const handleApply = async (classItem: ClassWithSchool) => {
     ElMessage.success(t("route.personalCenter.campus.applySuccess"));
     applyDialogVisible.value = false;
     await fetchStudentRecords();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to apply to class:", error);
     const errorMsg =
-      error.response?.data?.message ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (error as any).response?.data?.message ||
       t("route.personalCenter.campus.applyFailed");
     ElMessage.error(errorMsg);
   } finally {
@@ -401,11 +328,12 @@ const handleLeaveClass = async (record: StudentRecord) => {
     await deleteStudent(record.id);
     ElMessage.success(t("route.personalCenter.campus.leaveSuccess"));
     await fetchStudentRecords();
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== "cancel") {
       console.error("Failed to leave class:", error);
       const errorMsg =
-        error.response?.data?.message ||
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error as any).response?.data?.message ||
         t("route.personalCenter.campus.leaveFailed");
       ElMessage.error(errorMsg);
     }
@@ -423,7 +351,7 @@ const openGroupDialog = (record: StudentRecord, group?: Group) => {
       id: group.id,
       name: group.name,
       description: group.description || "",
-      image_id: (group as any).image_id || null,
+      image_id: group.image_id || null,
       imageUrl: group.image?.url || "",
     };
     if (!groupForm.value.image_id && group.image) {
@@ -501,10 +429,11 @@ const handleSaveGroup = async () => {
     // Refresh the ClassGroupList component
     const listRef = groupListRefs.value.get(classId);
     listRef?.refresh();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to save group:", error);
     const errorMsg =
-      error.response?.data?.message ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (error as any).response?.data?.message ||
       (groupForm.value.id
         ? t("common.operationFailed")
         : t("common.createFailed"));
@@ -534,10 +463,11 @@ const handleJoinGroup = async (group: Group, record: StudentRecord) => {
       const listRef = groupListRefs.value.get(classId);
       listRef?.refresh();
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== "cancel") {
       console.error("Failed to join group:", error);
-      const backendMsg = error.response?.data?.message || "";
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const backendMsg = (error as any).response?.data?.message || "";
       let errorMsg = t("route.personalCenter.campus.joinFailed");
       if (backendMsg.includes("already joined")) {
         errorMsg = t("route.personalCenter.campus.alreadyJoinedGroup");
@@ -569,11 +499,12 @@ const handleLeaveGroup = async (group: Group, record: StudentRecord) => {
       const listRef = groupListRefs.value.get(classId);
       listRef?.refresh();
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== "cancel") {
       console.error("Failed to leave group:", error);
       const errorMsg =
-        error.response?.data?.message || t("common.operationFailed");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error as any).response?.data?.message || t("common.operationFailed");
       ElMessage.error(errorMsg);
     }
   } finally {
@@ -600,11 +531,12 @@ const handleDeleteGroup = async (group: Group, record: StudentRecord) => {
       const listRef = groupListRefs.value.get(classId);
       listRef?.refresh();
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== "cancel") {
       console.error("Failed to delete group:", error);
       const errorMsg =
-        error.response?.data?.message || t("common.deleteFailed");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error as any).response?.data?.message || t("common.deleteFailed");
       ElMessage.error(errorMsg);
     }
   }

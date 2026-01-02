@@ -427,6 +427,7 @@ export function useModelLoader(context: ModelLoaderContext) {
       return new Promise((resolve, reject) => {
         loader.load(
           url,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           async (chunks: any[]) => {
             try {
               const chunk = chunks[0];
@@ -526,16 +527,16 @@ export function useModelLoader(context: ModelLoaderContext) {
 
               if (entity.children?.components) {
                 const actionComponent = entity.children.components.find(
-                  (comp: any) => comp.type === "Action"
+                  (comp) => comp.type === "Action"
                 );
                 const triggerComponent = entity.children.components.find(
-                  (comp: any) => comp.type === "Trigger"
+                  (comp) => comp.type === "Trigger"
                 );
                 const rotateComponent = entity.children.components.find(
-                  (comp: any) => comp.type === "Rotate"
+                  (comp) => comp.type === "Rotate"
                 );
                 const movedComponent = entity.children.components.find(
-                  (comp: any) => comp.type === "Moved"
+                  (comp) => comp.type === "Moved"
                 );
 
                 if (actionComponent) {

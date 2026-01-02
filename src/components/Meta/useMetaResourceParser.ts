@@ -1,20 +1,58 @@
 import type { metaInfo } from "@/api/v1/meta";
 
+export interface ActionInfo {
+  uuid: string;
+  name: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  parameter: any | null;
+  type: string | null;
+  parentUuid?: string | null;
+}
+
+export interface EntityInfo {
+  uuid: string;
+  name: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  animations?: any | null;
+  moved?: boolean;
+  rotate?: boolean;
+  hasTooltips?: boolean;
+}
+
 export interface MetaResourceIndex {
-  action: any[];
+  action: ActionInfo[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trigger: any[];
-  polygen: any[];
-  picture: any[];
-  video: any[];
-  voxel: any[];
-  phototype: any[];
-  text: any[];
-  sound: any[];
-  entity: any[];
+  polygen: EntityInfo[];
+  picture: EntityInfo[];
+  video: EntityInfo[];
+  voxel: EntityInfo[];
+  phototype: EntityInfo[];
+  text: EntityInfo[];
+  sound: EntityInfo[];
+  entity: EntityInfo[];
   events: { inputs: string[]; outputs: string[] };
 }
 
-function parseAction(node: any, parentUuid?: string) {
+interface Node {
+  type: string;
+  parameters?: {
+    uuid: string;
+    action?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    parameter?: any;
+    name?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    animations?: any;
+  };
+  children?: {
+    components?: Node[];
+    [key: string]: Node[] | undefined;
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function parseAction(node: any, parentUuid?: string): ActionInfo | null {
   if (
     !node ||
     !node.parameters ||
@@ -30,7 +68,8 @@ function parseAction(node: any, parentUuid?: string) {
   };
 }
 
-function parsePoint(node: any, typeList: string[]) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function parsePoint(node: any, typeList: string[]): EntityInfo | undefined {
   if (!node) return undefined;
   const match = typeList.find(
     (t) => node.type?.toLowerCase() === t.toLowerCase()
@@ -46,8 +85,11 @@ function parsePoint(node: any, typeList: string[]) {
   let hasTooltips = false;
   if ((isPolygen || isPicture) && node.children?.components) {
     const comps = node.children.components;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     hasMoved = comps.some((c: any) => c.type === "Moved");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     hasRotate = comps.some((c: any) => c.type === "Rotate");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     hasTooltips = comps.some((c: any) => c.type === "Tooltip");
   }
 
@@ -61,6 +103,7 @@ function parsePoint(node: any, typeList: string[]) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function walk(node: any, acc: MetaResourceIndex) {
   if (!node) return;
   const action = parseAction(node);
@@ -97,6 +140,7 @@ function walk(node: any, acc: MetaResourceIndex) {
   if (node.children) {
     const parentUuid = node.parameters?.uuid;
     if (node.children.components) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       node.children.components.forEach((comp: any) => {
         const compAction = parseAction(comp, parentUuid);
         if (compAction) acc.action.push(compAction);
@@ -111,6 +155,7 @@ function walk(node: any, acc: MetaResourceIndex) {
 }
 
 export function buildMetaResourceIndex(meta: metaInfo): MetaResourceIndex {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: any = meta.data!;
   const index: MetaResourceIndex = {
     action: [],

@@ -1,0 +1,1116 @@
+
+> Mixed Reality Programming Platform@2.11.3 lint:eslint /Users/dirui/Projects/web/frontend/vue3.7dgame.com
+> eslint  --fix --ext .ts,.js,.vue ./src 
+
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/ability.ts
+  4:37  warning  'cannot' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/auth/index.ts
+  64:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/auth/model.ts
+  19:9  warning  Unexpected any. Specify a different type                                @typescript-eslint/no-explicit-any
+  77:6  warning  'User' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/menu/index.ts
+  1:8   warning  'request' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  2:10  warning  'RouteVO' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/user/model.ts
+  1:8  warning  'exp' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/user/server.ts
+  2:8  warning  'qs' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  3:8  warning  'path' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/ai-rodin.ts
+  4:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/auth.ts
+   2:22  warning  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+  16:7   warning  'link' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  16:21  warning  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+  23:7   warning  'register' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  23:25  warning  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/cyber.ts
+   9:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  17:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/edu-class.ts
+   13:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   33:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   43:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   51:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   72:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   91:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  128:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  151:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  206:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/edu-school.ts
+  16:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  34:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  44:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  52:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  73:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/edu-student.ts
+  12:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  72:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  78:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  90:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/edu-teacher.ts
+  10:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  19:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  48:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/files.ts
+  4:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/group.ts
+   20:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   22:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   56:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  162:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  178:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  179:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  200:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/message.ts
+  34:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  96:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/meta-resource.ts
+   5:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  44:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/meta.ts
+   28:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   29:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   36:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   50:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   54:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   81:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  103:67  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/person.ts
+  11:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  13:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  16:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  45:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/phototype.ts
+  11:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  12:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  49:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  66:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  94:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/prefab.ts
+   3:15  warning  'metaInfo' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  52:49  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  72:31  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/reply.ts
+  16:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  45:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/resources/index.ts
+  105:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  108:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  111:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  114:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  117:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  120:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/site.ts
+   1:10  warning  'token' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   7:9   warning  Unexpected any. Specify a different type                                 @typescript-eslint/no-explicit-any
+  13:9   warning  Unexpected any. Specify a different type                                 @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/tags.ts
+  6:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/types/edu-class.ts
+  14:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/types/edu-school.ts
+  14:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/upload.ts
+  3:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/user.ts
+  25:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/verse.ts
+   76:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   90:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  104:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  175:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  176:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  209:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/vp-guide.ts
+   4:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  18:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  42:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  55:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/vp-map.ts
+   4:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  18:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/api/v1/wechat.ts
+   2:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   9:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  17:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/Account/LoginDialog.vue
+  45:8  warning  'RegisterForm' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  51:7  warning  'props' is assigned a value but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  72:7  warning  'handleTabClick' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/Account/NamePassword.vue
+   68:8   warning  'request' is defined but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+   69:10  warning  'UserInfoReturnType' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+   81:7   warning  'rememberMe' is assigned a value but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  147:19  warning  Unexpected any. Specify a different type                                                         @typescript-eslint/no-explicit-any
+  159:7   warning  'handleForgotPassword' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  166:7   warning  'handleRegister' is assigned a value but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  171:7   warning  'switchToRegister' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/Account/RegisterForm.vue
+  121:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  213:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/AppLink/index.vue
+  28:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/Breadcrumb/index.vue
+   30:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  130:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  150:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  154:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/Codemirror.vue
+  16:10  warning  'ref' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  17:10  warning  'linter' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  20:10  warning  'oneDark' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  26:25  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  29:39  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  34:39  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/Home/Book.vue
+  31:20  warning  'ref' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  31:25  warning  'watch' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  52:30  warning  Unexpected any. Specify a different type                                 @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/Home/HomeHeader.vue
+  51:8   warning  'LocalPage' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  52:8   warning  'QrcodeVue' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  58:24  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/Home/QRCodeDialog.vue
+  29:8  warning  'Token' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/LangSelect/index.vue
+  46:9  warning  'locale' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/LoginForm.vue
+  28:15  warning  'AppleIdReturn' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  29:8   warning  'AuthAPI' is defined but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+  30:10  warning  'PostSiteAppleId' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  31:10  warning  'VueAppleLoginConfig' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  32:10  warning  'LoginData' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  35:7   warning  'formRef' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/Meta/Edit.vue
+  139:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/Meta/MetaDetail.vue
+  72:25  warning  'onMounted' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/Meta/useMetaResourceParser.ts
+    4:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+    5:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+    6:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+    7:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+    8:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+    9:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   10:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   11:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   12:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   13:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   17:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   33:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   49:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   50:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   51:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   64:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  100:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  114:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/AIProcess.vue
+   79:35  warning  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+   81:9   warning  't' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   95:21  warning  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+   95:32  warning  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+  149:15  warning  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/AIUpload.vue
+  122:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  122:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  182:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  202:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  202:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  202:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/AudioDialog/index.vue
+   73:10  warning  'postFile' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+   74:10  warning  'UploadFileType' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   76:10  warning  'FileHandler' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+   90:7   warning  'store' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  126:15  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/CardListPage/index.vue
+  108:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/CardListPage/types.ts
+   5:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   9:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  10:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  44:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  45:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/ClassManagementDialog.vue
+  266:10  warning  'createTeacher' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+  314:22  warning  Unexpected any. Specify a different type                                                       @typescript-eslint/no-explicit-any
+  315:22  warning  Unexpected any. Specify a different type                                                       @typescript-eslint/no-explicit-any
+  320:22  warning  Unexpected any. Specify a different type                                                       @typescript-eslint/no-explicit-any
+  338:24  warning  'data' is defined but never used. Allowed unused args must match /^_/u                         @typescript-eslint/no-unused-vars
+  338:30  warning  Unexpected any. Specify a different type                                                       @typescript-eslint/no-explicit-any
+  400:17  warning  Unexpected any. Specify a different type                                                       @typescript-eslint/no-explicit-any
+  424:19  warning  Unexpected any. Specify a different type                                                       @typescript-eslint/no-explicit-any
+  454:19  warning  Unexpected any. Specify a different type                                                       @typescript-eslint/no-explicit-any
+  478:7   warning  'handleViewStudents' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  496:39  warning  Unexpected any. Specify a different type                                                       @typescript-eslint/no-explicit-any
+  516:19  warning  Unexpected any. Specify a different type                                                       @typescript-eslint/no-explicit-any
+  531:45  warning  Unexpected any. Specify a different type                                                       @typescript-eslint/no-explicit-any
+  550:19  warning  Unexpected any. Specify a different type                                                       @typescript-eslint/no-explicit-any
+  566:45  warning  Unexpected any. Specify a different type                                                       @typescript-eslint/no-explicit-any
+  585:19  warning  Unexpected any. Specify a different type                                                       @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/ImageSelector.vue
+  121:9   warning  't' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  168:3   warning  'image_id' is defined but never used. Allowed unused args must match /^_/u    @typescript-eslint/no-unused-vars
+  171:17  warning  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/KnightDataDialog.vue
+  31:23  warning  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  36:13  warning  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  37:11  warning  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  60:18  warning  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  81:3   warning  'oldValue' is defined but never used. Allowed unused args must match /^_/u                @typescript-eslint/no-unused-vars
+  82:3   warning  'newValue' is defined but never used. Allowed unused args must match /^_/u                @typescript-eslint/no-unused-vars
+  84:13  warning  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  85:13  warning  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  96:20  warning  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  99:9   warning  'currentLocale' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/MetaDialog.vue
+  105:10  warning  'LazyImg' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+  124:7   warning  'isBinding' is assigned a value but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  124:26  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  125:38  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  128:22  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  132:32  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  181:31  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  239:19  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  272:7   warning  'breakpoints' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/MrPPCard/index.vue
+  77:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/MrPPUploadDialog/index.vue
+  132:28  warning  'Upload' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/MrPPUserSettings/MrPPUserCreater.vue
+  135:7  warning  'gotoCreator' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/MrPPVerse/InfoContent.vue
+  56:15  warning  'Author' is defined but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+  65:11  warning  'Item' is defined but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+  81:7   warning  'sanitizedTitle' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/MrPPVerse/Message.vue
+  105:7   warning  'emit' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  118:7   warning  'managed' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  130:7   warning  'managed' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  187:36  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/MrPPVerse/MrPPCropper.vue
+  204:21  warning  'data' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  204:27  warning  Unexpected any. Specify a different type                                @typescript-eslint/no-explicit-any
+  214:12  warning  Unexpected any. Specify a different type                                @typescript-eslint/no-explicit-any
+  259:10  warning  'p' is defined but never used. Allowed unused args must match /^_/u     @typescript-eslint/no-unused-vars
+  259:13  warning  Unexpected any. Specify a different type                                @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/MrPPVerse/MrPPVerseList.vue
+  28:7  warning  'props' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/MrPPVerse/MrPPVersePage.vue
+   74:25  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+   74:46  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+   97:35  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+  133:7   warning  'named' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  151:13  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue
+  42:7   warning  'router' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  99:35  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/MrPPVerse/MrPPVerseWindowCreate.vue
+   46:10  warning  'useUserStore' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  142:70  warning  Unexpected any. Specify a different type                                        @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/MrPPVerse/Open.vue
+  35:7  warning  'can' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/MrPPVerse/Reply.vue
+  119:7   warning  'tagsStore' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  167:26  warning  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+  185:50  warning  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/MrPPVerse/VerseDetail.vue
+  102:25  warning  'onMounted' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/Person/Creator.vue
+   83:30  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   83:60  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   88:33  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   88:63  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   99:30  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   99:60  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+  161:7   warning  'hide' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/Person/List.vue
+  117:23  warning  'roles' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  183:30  warning  Unexpected any. Specify a different type                                 @typescript-eslint/no-explicit-any
+  243:19  warning  Unexpected any. Specify a different type                                 @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/Person/Page.vue
+   73:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   73:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  124:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/PhototypeDialog.vue
+  29:20  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  31:12  warning  'locale' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  32:23  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  34:11  warning  'FormData' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  35:18  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  56:10  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  56:16  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  61:12  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  61:18  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  71:3   warning  'oldValue' is defined but never used. Allowed unused args must match /^_/u         @typescript-eslint/no-unused-vars
+  74:13  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  75:13  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  77:66  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  94:24  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  94:47  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/PolygenDialog.vue
+   86:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  139:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  151:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/PrefabDialog.vue
+  111:10  warning  'LazyImg' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  130:22  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  132:27  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  162:13  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  163:11  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  183:25  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  194:31  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  247:33  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  265:19  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/ResourceDialog.vue
+  159:15  warning  'computed' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  182:25  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  187:19  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  206:27  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  213:29  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  218:13  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  219:12  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  220:12  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  243:46  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  270:16  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/VerseDialog.vue
+  104:10  warning  'LazyImg' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  114:16  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+  122:22  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+  145:7   warning  'close' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  164:31  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+  213:19  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+  217:37  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/MrPP/VideoDialog.vue
+  116:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/PolygenView.vue
+  240:7   warning  'toggleShadow' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  240:30  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  328:11  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  375:7   warning  'parseNode' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  375:32  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/Resource.vue
+  47:13  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  49:31  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  49:36  warning  'replace' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  54:25  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/Tags.vue
+  28:15  warning  'TagProps' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  42:11  warning  'TagsItem' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  52:37  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  60:20  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  63:17  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  75:20  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  78:17  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  87:28  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/TagsSelect.vue
+  36:28  warning  Unexpected any. Specify a different type                                                        @typescript-eslint/no-explicit-any
+  42:7   warning  'handleVisibleChange' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  57:41  warning  Unexpected any. Specify a different type                                                        @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/UserSelector/index.vue
+  100:9   warning  't' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  115:18  warning  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+  118:19  warning  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+  149:14  warning  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+  159:29  warning  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/VerseCard.vue
+  44:7  warning  'props' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  46:9  warning  't' is assigned a value but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  47:7  warning  'router' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/components/Voxel.vue
+   56:7   warning  'parseNode' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   56:32  warning  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+  119:14  warning  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+  147:11  warning  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/environment.ts
+  21:10  warning  'getIP' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/lang/index.ts
+  45:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  64:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  69:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  81:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/layout/components/NavBar/components/Footer.vue
+  64:7  warning  'goToContact' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/layout/components/NavBar/components/NavbarRight.vue
+  88:7  warning  'tagsViewStore' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  92:7  warning  'route' is assigned a value but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/layout/components/Settings/components/LayoutSelect.vue
+  41:7  warning  'props' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/layout/components/Settings/index.vue
+   89:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  113:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  114:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  116:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  116:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/layout/components/Sidebar/components/SidebarLogo.vue
+  24:8  warning  'defaultSettings' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/layout/components/Sidebar/components/SidebarMenu.vue
+  39:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/layout/components/Sidebar/components/SidebarMixTopMenu.vue
+  38:10  warning  'RouteRecordRaw' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/layout/components/Sidebar/index.vue
+  27:28  warning  'usePermissionStore' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/layout/components/TagsView/index.vue
+  112:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  251:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  259:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  260:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  266:61  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  267:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  281:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  328:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  329:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  331:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  331:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  366:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/layout/structure/index.vue
+  25:8  warning  'MrPPUserCreater' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/lib/three/loaders.ts
+  32:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  33:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/main.ts
+  19:8  warning  'ElementPlus' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/plugins/permission.ts
+   4:3   warning  'RouteRecordRaw' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+   8:10  warning  'TOKEN_KEY' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  11:10  warning  'UserInfoType' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  13:10  warning  'usePermissionStore' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/router/index.ts
+  123:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/router/modules/verse.ts
+  58:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/store/modules/app.ts
+  16:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/store/modules/domain.ts
+  130:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/store/modules/information.ts
+  17:9  warning  'companies' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/store/modules/permission.ts
+  24:52  warning  'reject' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/store/modules/tags.ts
+  22:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/store/modules/token.ts
+  1:10  warning  'store' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  4:26  warning  Unexpected any. Specify a different type                                 @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/store/modules/user.ts
+    5:21  warning  'LoginResult' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   18:7   warning  'st' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   33:40  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+  118:38  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/stories/Header.stories.ts
+  14:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/stories/Page.stories.ts
+  27:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/types/verse.ts
+   39:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   43:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   46:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  102:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/typings/generate-schema.d.ts
+  3:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  3:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  5:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  5:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/typings/global.d.ts
+   5:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  48:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/typings/vue-hljs.d.ts
+  2:12  warning  'Plugin' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  6:18  warning  Unexpected any. Specify a different type                                  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/utils/ability.ts
+  50:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/utils/helper.ts
+  3:9  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/utils/i18n.ts
+  4:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/utils/request.ts
+    3:10  warning  'TOKEN_KEY' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   29:29  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+   39:37  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  107:11  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  154:17  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/utils/types.ts
+  10:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/utils/wp.ts
+   2:10  warning  'useUserStoreHook' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   4:10  warning  'TOKEN_KEY' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  36:11  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  59:17  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/ai/generation.vue
+   9:20  warning  'useRouter' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  21:18  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/ai/index.vue
+  105:3   warning  'WarningFilled' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  114:19  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/audio/composables/__tests__/useTTS.spec.ts
+   3:15  warning  'nextTick' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  95:20  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/audio/index.vue
+  123:24  warning  'data' is defined but never used. Allowed unused args must match /^_/u         @typescript-eslint/no-unused-vars
+  123:30  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+  141:36  warning  'uploadedIds' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  156:17  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/audio/tts.vue
+  269:14  warning  'voiceTypeRef' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/audio/view.vue
+  115:15  warning  Unexpected any. Specify a different type                                  @typescript-eslint/no-explicit-any
+  188:32  warning  'reject' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/campus/components/ClassDetail.vue
+  106:22  warning  'onMounted' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  197:27  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  258:19  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  284:19  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  314:19  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  340:19  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/campus/components/ClassGroupList.vue
+  130:7  warning  'emit' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/campus/group.vue
+  125:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  164:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  176:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/campus/school.vue
+  127:10  warning  'Plus' is defined but never used. Allowed unused vars must match /^_/u                            @typescript-eslint/no-unused-vars
+  150:7   warning  'router' is assigned a value but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+  212:24  warning  'data' is defined but never used. Allowed unused args must match /^_/u                            @typescript-eslint/no-unused-vars
+  212:30  warning  Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  245:26  warning  Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  246:26  warning  Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  259:17  warning  Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  299:19  warning  Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  321:33  warning  Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  332:7   warning  'handleAssignPrincipal' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/campus/student.vue
+  245:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  277:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  377:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  404:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  426:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  504:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  537:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  572:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  603:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/game/index.vue
+  103:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  149:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/game/map.vue
+  119:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  168:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/home/creator.vue
+  17:10  warning  'getMessagesWithLiker' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  18:10  warning  'getMessagesWithAuthor' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  22:7   warning  'userData' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/login/index.vue
+  175:8   warning  'AuthAPI' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  208:9   warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  209:9   warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  229:15  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/manager/user.vue
+  14:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/meta-verse/index.vue
+  14:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/meta-verse/public.vue
+  12:10  warning  'getTags' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  14:7   warning  'data' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  15:29  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/meta/ScenePlayer.vue
+    28:9   warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+    45:26  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+    99:45  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+    99:66  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   172:13  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   173:11  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   352:17  warning  'height' is assigned a value but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+   533:24  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   576:60  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   579:27  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   619:24  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   623:24  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   627:24  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   631:24  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   775:23  warning  'dragPlane' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+   776:23  warning  'intersection' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   935:17  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   991:58  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   994:25  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  1030:22  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  1034:22  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  1038:22  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  1042:22  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  1209:21  warning  'dragPlane' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  1210:21  warning  'intersection' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  1540:13  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  1541:21  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  1607:13  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  1804:6   warning  'newValue' is defined but never used. Allowed unused args must match /^_/u               @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/meta/list.vue
+  111:7   warning  'router' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  122:24  warning  'data' is defined but never used. Allowed unused args must match /^_/u             @typescript-eslint/no-unused-vars
+  122:30  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/meta/meta-edit.vue
+  16:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  17:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  31:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/meta/prefab-edit.vue
+  17:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  31:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/meta/prefabs.vue
+  96:24  warning  'data' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  96:30  warning  Unexpected any. Specify a different type                                @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/meta/scene.vue
+   62:48  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+   90:48  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  133:10  warning  'da' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+  154:31  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  191:3   warning  'replace' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  194:64  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  220:29  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  224:32  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  229:25  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  237:44  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  270:51  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  270:64  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  277:37  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  315:40  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  361:10  warning  'p' is defined but never used. Allowed unused args must match /^_/u                 @typescript-eslint/no-unused-vars
+  361:13  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/meta/script.vue
+   274:7   warning  'editorContainer' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   275:32  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   291:36  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   333:47  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   341:19  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   398:36  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   456:19  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   484:15  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   497:38  warning  'reject' is defined but never used. Allowed unused args must match /^_/u                    @typescript-eslint/no-unused-vars
+   504:36  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   553:27  warning  'oldValue' is defined but never used. Allowed unused args must match /^_/u                  @typescript-eslint/no-unused-vars
+   560:44  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   574:18  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   672:17  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   676:31  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   696:21  warning  'index' is assigned a value but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+   737:23  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   745:19  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   822:7   warning  'run' is assigned a value but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+   852:42  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   890:40  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   974:18  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   975:16  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   998:14  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   999:24  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1035:51  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1076:36  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1079:43  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1079:51  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1113:34  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1228:37  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1250:35  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1261:24  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1267:25  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1277:27  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1287:34  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1287:49  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1287:61  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1308:25  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1364:17  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/particle/index.vue
+   94:24  warning  'data' is defined but never used. Allowed unused args must match /^_/u         @typescript-eslint/no-unused-vars
+   94:30  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+  104:36  warning  'uploadedIds' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  119:17  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/particle/view.vue
+  385:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  457:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/phototype/edit.vue
+   72:8   warning  'GenerateSchema' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   77:47  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+   84:37  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+  127:23  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/phototype/list.vue
+  52:16  warning  'uuidv4' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  58:3   warning  'postPhototype' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  62:15  warning  'PhototypeType' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  76:24  warning  'data' is defined but never used. Allowed unused args must match /^_/u           @typescript-eslint/no-unused-vars
+  76:30  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/picture/index.vue
+  117:24  warning  'data' is defined but never used. Allowed unused args must match /^_/u         @typescript-eslint/no-unused-vars
+  117:30  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+  138:36  warning  'uploadedIds' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  151:3   warning  'image_id' is defined but never used. Allowed unused args must match /^_/u     @typescript-eslint/no-unused-vars
+  154:17  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/picture/view.vue
+  151:3   warning  'image' is defined but never used. Allowed unused args must match /^_/u         @typescript-eslint/no-unused-vars
+  165:13  warning  'img' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/polygen/index.vue
+  121:24  warning  'data' is defined but never used. Allowed unused args must match /^_/u         @typescript-eslint/no-unused-vars
+  121:30  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+  136:36  warning  'uploadedIds' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  155:17  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/polygen/view.vue
+   71:10  warning  'UploadFileType' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+   80:25  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  133:7   warning  'createVerse' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  222:53  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  241:9   warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  242:9   warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  243:12  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  257:29  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  308:30  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  309:36  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/register/index.vue
+  195:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  196:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  216:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/settings/account.vue
+  162:15  warning  'computed' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  172:7   warning  'userStore' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  207:25  warning  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+  232:25  warning  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+  256:25  warning  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/settings/edit.vue
+  303:24  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  511:53  warning  'fileList' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  608:10  warning  'p' is defined but never used. Allowed unused args must match /^_/u         @typescript-eslint/no-unused-vars
+  608:13  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/site/login/index.vue
+  25:8  warning  'environment' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/site/register/index.vue
+  100:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  100:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  100:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/verse/ScenePlayer.vue
+   90:51  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+   93:15  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  118:45  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  118:66  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  525:15  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  664:6   warning  'newValue' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/verse/composables/__tests__/useModelLoader.spec.ts
+  26:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  47:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  57:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  86:70  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  88:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  88:70  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  94:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/verse/composables/useModelLoader.ts
+   24:18  warning  Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+   31:18  warning  Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+   36:18  warning  Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+   45:27  warning  Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+   70:5   warning  'collisionObjects' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   71:5   warning  'rotatingObjects' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+   72:5   warning  'moveableObjects' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+   73:5   warning  'dragState' is assigned a value but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+   74:5   warning  'controls' is assigned a value but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+  532:23  warning  'triggerComponent' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  535:23  warning  'rotateComponent' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  538:23  warning  'movedComponent' is assigned a value but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/verse/scene.vue
+   28:30  warning  'VerseData' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   61:31  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  113:44  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  129:53  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  134:23  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  152:49  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  157:32  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  170:34  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  220:35  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  333:40  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  383:10  warning  'p' is defined but never used. Allowed unused args must match /^_/u          @typescript-eslint/no-unused-vars
+  383:13  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/verse/script.vue
+   260:7   warning  'router' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   275:32  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   291:36  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   333:47  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   341:19  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   415:38  warning  'reject' is defined but never used. Allowed unused args must match /^_/u           @typescript-eslint/no-unused-vars
+   421:36  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   500:19  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   535:36  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   581:27  warning  'oldValue' is defined but never used. Allowed unused args must match /^_/u         @typescript-eslint/no-unused-vars
+   589:44  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   638:17  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   639:18  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   641:38  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   660:38  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   668:38  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   731:46  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   743:19  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   851:42  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   898:40  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   978:18  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   979:16  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1002:14  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1003:24  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1039:51  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1080:36  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1083:43  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1083:51  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1117:34  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1231:37  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1253:35  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1264:24  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1267:67  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1273:25  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1283:27  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1293:34  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1293:49  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1293:61  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1314:25  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  1372:17  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/video/index.vue
+  123:24  warning  'data' is defined but never used. Allowed unused args must match /^_/u         @typescript-eslint/no-unused-vars
+  123:30  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+  139:36  warning  'uploadedIds' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  154:17  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/video/view.vue
+  111:15  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+  145:9   warning  'video' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  156:11  warning  'video' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/voxel/index.vue
+   95:24  warning  'data' is defined but never used. Allowed unused args must match /^_/u         @typescript-eslint/no-unused-vars
+   95:30  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+  105:36  warning  'uploadedIds' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  120:17  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/voxel/view.vue
+  134:7  warning  'meshSize' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  139:7  warning  'meshCenter' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  205:7  warning  'createVerse' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/web/bbs.vue
+   19:10  warning  'ElMessage' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+   40:18  warning  'action' is defined but never used. Allowed unused args must match /^_/u                   @typescript-eslint/no-unused-vars
+   45:7   warning  'loginDialogRef' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   45:28  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+   82:20  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  101:7   warning  'sidebarVisible' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/web/category.vue
+   33:7  warning  'getTextColor' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  104:7  warning  'toggleSidebar' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  109:7  warning  'featuresRef' is assigned a value but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  110:7  warning  'casesRef' is assigned a value but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/web/components/Bilibili.vue
+  21:25  warning  'onMounted' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/web/components/Buy.vue
+  115:16  warning  'action' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  119:21  warning  Unexpected any. Specify a different type                                  @typescript-eslint/no-explicit-any
+  120:20  warning  Unexpected any. Specify a different type                                  @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/web/components/Hero.vue
+  166:9   warning  't' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  200:27  warning  'n' is defined but never used. Allowed unused args must match /^_/u           @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/web/components/News/IntroduceDocument.vue
+  22:10  warning  'ArrowLeft' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/web/components/News/index.vue
+   16:21  warning  Variable 'item' is already declared in the upper scope                            vue/no-template-shadow
+  236:17  warning  'Article' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  236:26  warning  'getCategory' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  249:7   warning  'route' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  284:22  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+  290:29  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+  291:28  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+  292:26  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+  466:44  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/web/document.vue
+  20:7  warning  'router' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/web/home.vue
+  41:7   warning  'loginDialogRef' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  41:28  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  43:7   warning  'isScrolled' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  78:7   warning  'debounce' is assigned a value but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  80:20  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+/Users/dirui/Projects/web/frontend/vue3.7dgame.com/src/views/web/index.vue
+  162:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  233:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  263:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 753 problems (0 errors, 753 warnings)
+
