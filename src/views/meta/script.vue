@@ -202,7 +202,7 @@ watch(
     // 用户信息变化时，向编辑器发送最新用户信息
     postMessage("user-info", {
       id: userStore.userInfo?.id || null,
-      roles: userStore.userInfo?.roles || [],
+      //roles: userStore.userInfo?.roles || [],
       role: userStore.getRole()
     });
   },
@@ -384,7 +384,7 @@ const handleMessage = async (e: MessageEvent) => {
       // 发送用户信息
       postMessage("user-info", {
         id: userStore.userInfo?.id || null,
-        roles: userStore.userInfo?.roles || [],
+        //roles: userStore.userInfo?.roles || [],
         role: userStore.getRole()
       });
     } else if (params.action === "post") {
