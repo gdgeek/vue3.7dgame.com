@@ -10,20 +10,37 @@
               <span v-if="pictureData">{{ pictureData.name }}</span>
             </template>
             <div class="box-item" style="text-align: center">
-              <img id="image" ref="image" v-loading="expire" :element-loading-text="$t('picture.view.loadingText')"
-                element-loading-background="rgba(255,255, 255, 0.3)" style="height: 300px; width: auto" :src="picture"
-                fit="contain" @load="dealWith" />
+              <img
+                id="image"
+                ref="image"
+                v-loading="expire"
+                :element-loading-text="$t('picture.view.loadingText')"
+                element-loading-background="rgba(255,255, 255, 0.3)"
+                style="height: 300px; width: auto"
+                :src="picture"
+                fit="contain"
+                @load="dealWith"
+              />
             </div>
           </el-card>
           <br />
         </el-col>
 
         <el-col :sm="8">
-          <MrppInfo v-if="pictureData" :title="$t('picture.view.info.title')" titleSuffix=" :" :tableData="tableData"
-            :itemLabel="$t('picture.view.info.label1')" :textLabel="$t('picture.view.info.label2')"
-            :downloadText="$t('picture.view.info.download')" :renameText="$t('picture.view.info.name')"
-            :deleteText="$t('picture.view.info.delete')" @download="downloadPicture" @rename="namedWindow"
-            @delete="deleteWindow" />
+          <MrppInfo
+            v-if="pictureData"
+            :title="$t('picture.view.info.title')"
+            titleSuffix=" :"
+            :tableData="tableData"
+            :itemLabel="$t('picture.view.info.label1')"
+            :textLabel="$t('picture.view.info.label2')"
+            :downloadText="$t('picture.view.info.download')"
+            :renameText="$t('picture.view.info.name')"
+            :deleteText="$t('picture.view.info.delete')"
+            @download="downloadPicture"
+            @rename="namedWindow"
+            @delete="deleteWindow"
+          ></MrppInfo>
           <br />
         </el-col>
       </el-row>
@@ -33,7 +50,11 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import { getPicture, putPicture, deletePicture } from "@/api/v1/resources/index";
+import {
+  getPicture,
+  putPicture,
+  deletePicture,
+} from "@/api/v1/resources/index";
 import { convertToHttps, printVector2 } from "@/assets/js/helper";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 
@@ -62,7 +83,9 @@ const tableData = computed(() => {
       { item: t("picture.view.info.item1"), text: pictureData.value.name },
       {
         item: t("picture.view.info.item2"),
-        text: pictureData.value.author?.username || pictureData.value.author?.nickname,
+        text:
+          pictureData.value.author?.username ||
+          pictureData.value.author?.nickname,
       },
       {
         item: t("picture.view.info.item3"),
@@ -87,16 +110,17 @@ const downloadPicture = async () => {
   // 通过文件扩展名判断图片类型
   if (!pictureData.value) return;
 
-  const fileName = pictureData.value.file.filename || '';
-  const fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase() || '.jpg';
+  const fileName = pictureData.value.file.filename || "";
+  const fileExt =
+    fileName.substring(fileName.lastIndexOf(".")).toLowerCase() || ".jpg";
   await downloadResource(
     {
-      name: pictureData.value.name || 'image',
-      file: pictureData.value.file
+      name: pictureData.value.name || "image",
+      file: pictureData.value.file,
     },
     fileExt,
     t,
-    'picture.view.download'
+    "picture.view.download"
   );
 };
 

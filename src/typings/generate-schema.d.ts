@@ -1,4 +1,4 @@
-declare module 'generate-schema' {
+declare module "generate-schema" {
   /** 将任意对象转换为 JSON Schema */
   export function json(obj: any): any;
   /** 将任意对象转换为 YAML Schema（如有需要） */

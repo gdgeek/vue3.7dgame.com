@@ -6,12 +6,12 @@
           <template #header>
             <i v-if="saveable">
               <el-icon>
-                <EditPen />
+                <EditPen></EditPen>
               </el-icon>
             </i>
             <i v-else>
               <el-icon>
-                <View />
+                <View></View>
               </el-icon>
             </i>
             <b id="title">{{ $t("verse.view.title") }}</b>
@@ -19,17 +19,31 @@
           </template>
 
           <template #footer>
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <tags v-if="verse && verse.verseTags" :editable="verse.editable" @add="addTags" @remove="removeTags"
-                :verseTags="verse.verseTags" />
-              <el-switch v-if="verse && isAdmin" v-model="verse.public" :active-text="$t('verse.view.public.open')"
-                :inactive-text="$t('verse.view.public.private')" @change="handlePublicChange" />
+            <div style="display: flex; align-items: center; gap: 12px">
+              <tags
+                v-if="verse && verse.verseTags"
+                :editable="verse.editable"
+                @add="addTags"
+                @remove="removeTags"
+                :verseTags="verse.verseTags"
+              ></tags>
+              <el-switch
+                v-if="verse && isAdmin"
+                v-model="verse.public"
+                :active-text="$t('verse.view.public.open')"
+                :inactive-text="$t('verse.view.public.private')"
+                @change="handlePublicChange"
+              ></el-switch>
             </div>
           </template>
 
           <div class="box-item">
-            <ImageSelector :imageUrl="verse.image ? verse.image.url : ''" :itemId="verse.id"
-              @image-selected="handleImageSelected" @image-upload-success="handleImageUploadSuccess" />
+            <ImageSelector
+              :imageUrl="verse.image ? verse.image.url : ''"
+              :itemId="verse.id"
+              @image-selected="handleImageSelected"
+              @image-upload-success="handleImageUploadSuccess"
+            ></ImageSelector>
           </div>
         </el-card>
 
@@ -37,13 +51,18 @@
 
         <!-- 操作按钮卡片 -->
         <el-card v-if="verse" class="box-card">
-          <el-button style="width: 100%" type="primary" size="small" @click="comeIn">
+          <el-button
+            style="width: 100%"
+            type="primary"
+            size="small"
+            @click="comeIn"
+          >
             <div v-if="saveable">
-              <font-awesome-icon icon="edit" />
+              <font-awesome-icon icon="edit"></font-awesome-icon>
               &nbsp;{{ $t("verse.view.edit") }}
             </div>
             <div v-else>
-              <font-awesome-icon icon="eye" />
+              <font-awesome-icon icon="eye"></font-awesome-icon>
               &nbsp;{{ $t("verse.view.eye") }}
             </div>
           </el-button>
@@ -63,7 +82,12 @@
               <el-button-group style="float: right"></el-button-group>
             </aside>
           </div>
-          <VerseToolbar v-if="verse" :verse="verse" @deleted="deleted" @changed="changed"></VerseToolbar>
+          <VerseToolbar
+            v-if="verse"
+            :verse="verse"
+            @deleted="deleted"
+            @changed="changed"
+          ></VerseToolbar>
           <br />
         </el-card>
 
@@ -75,23 +99,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from "vue";
 import Tags from "@/components/Tags.vue";
 import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";
-import { getVerse, putVerse, VerseData, addTag, removeTag, addPublic, removePublic } from "@/api/v1/verse";
-import { useUserStore } from '@/store/modules/user';
+import {
+  getVerse,
+  putVerse,
+  VerseData,
+  addTag,
+  removeTag,
+  addPublic,
+  removePublic,
+} from "@/api/v1/verse";
+import { useUserStore } from "@/store/modules/user";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";
-import { EditPen, View } from '@element-plus/icons-vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { EditPen, View } from "@element-plus/icons-vue";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 const props = defineProps<{
   verseId: number;
 }>();
 
-const emit = defineEmits(['deleted', 'changed']);
+const emit = defineEmits(["deleted", "changed"]);
 
 const router = useRouter();
 const { t } = useI18n();
@@ -106,7 +138,7 @@ const isAdmin = computed(() => {
   return role === userStore.RoleEnum.Root || role === userStore.RoleEnum.Admin;
 });
 
-const saveable = computed(() => verse.value ? verse.value.editable : false);
+const saveable = computed(() => (verse.value ? verse.value.editable : false));
 
 const refresh = async () => {
   if (!props.verseId) return;
@@ -122,17 +154,21 @@ const refresh = async () => {
   }
 };
 
-watch(() => props.verseId, () => {
-  refresh();
-}, { immediate: true });
+watch(
+  () => props.verseId,
+  () => {
+    refresh();
+  },
+  { immediate: true }
+);
 
 const deleted = () => {
-  emit('deleted');
+  emit("deleted");
 };
 
 const changed = () => {
   refresh();
-  emit('changed');
+  emit("changed");
 };
 
 // 处理从资源库选择的图片
@@ -149,16 +185,16 @@ const handleImageSelected = async (event: ImageUpdateEvent) => {
         name: verse.value.name,
         description: verse.value.description,
         uuid: verse.value.uuid,
-        image_id: event.imageId
+        image_id: event.imageId,
       };
 
       await putVerse(verse.value.id, updateData);
-      ElMessage.success(t('verse.view.image.updateSuccess'));
+      ElMessage.success(t("verse.view.image.updateSuccess"));
       await refresh();
-      emit('changed');
+      emit("changed");
     } catch (error) {
       console.error("Failed to update verse image:", error);
-      ElMessage.error(t('verse.view.image.updateError'));
+      ElMessage.error(t("verse.view.image.updateError"));
     }
   }
 };
@@ -171,21 +207,25 @@ const handleImageUploadSuccess = async (event: ImageUpdateEvent) => {
         name: verse.value.name,
         description: verse.value.description,
         uuid: verse.value.uuid,
-        image_id: event.imageId
+        image_id: event.imageId,
       };
 
       await putVerse(verse.value.id, updateData);
-      ElMessage.success(t('verse.view.image.updateSuccess'));
+      ElMessage.success(t("verse.view.image.updateSuccess"));
       await refresh();
-      emit('changed');
+      emit("changed");
     } catch (error) {
       console.error("Failed to update verse image:", error);
-      ElMessage.error(t('verse.view.image.updateError'));
+      ElMessage.error(t("verse.view.image.updateError"));
     }
   }
 };
 
-const removeTags = async (tagId: number, resolve: () => void = () => { }, reject: () => void = () => { }) => {
+const removeTags = async (
+  tagId: number,
+  resolve: () => void = () => {},
+  reject: () => void = () => {}
+) => {
   try {
     await ElMessageBox.confirm(
       t("verse.view.tags.confirmRemove.message"),
@@ -206,7 +246,11 @@ const removeTags = async (tagId: number, resolve: () => void = () => { }, reject
   }
 };
 
-const addTags = async (tagId: number, resolve: () => void = () => { }, reject: () => void = () => { }) => {
+const addTags = async (
+  tagId: number,
+  resolve: () => void = () => {},
+  reject: () => void = () => {}
+) => {
   try {
     await ElMessageBox.confirm(
       t("verse.view.tags.confirmAdd.message"),
@@ -233,16 +277,16 @@ const handlePublicChange = async (value: string | number | boolean) => {
   try {
     if (isPublic) {
       await addPublic(verse.value.id);
-      ElMessage.success(t('verse.view.public.addSuccess'));
+      ElMessage.success(t("verse.view.public.addSuccess"));
     } else {
       await removePublic(verse.value.id);
-      ElMessage.success(t('verse.view.public.removeSuccess'));
+      ElMessage.success(t("verse.view.public.removeSuccess"));
     }
-    emit('changed');
+    emit("changed");
   } catch (error) {
     // 恢复原值
     verse.value.public = !isPublic;
-    ElMessage.error(t('verse.view.public.error'));
+    ElMessage.error(t("verse.view.public.error"));
   }
 };
 

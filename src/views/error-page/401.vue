@@ -36,25 +36,37 @@ function back() {
     <el-row>
       <el-col :span="12">
         <h1 class="text-jumbo text-ginormous">Oops!</h1>
-        {{ t("errorPage.gifSource") }}<a href="https://zh.airbnb.com/" target="_blank">airbnb</a> {{ t("errorPage.page")
-        }}
+        {{ t("errorPage.gifSource")
+        }}<a href="https://zh.airbnb.com/" target="_blank">airbnb</a>
+        {{ t("errorPage.page") }}
         <h2>{{ t("errorPage.noPermission") }}</h2>
         <h6>{{ t("errorPage.contactLeader") }}</h6>
         <ul class="list-unstyled">
           <li>{{ t("errorPage.orGoTo") }}</li>
           <li class="link-type">
-            <router-link to="/home"> {{ t("errorPage.backHome") }} </router-link>
+            <router-link to="/home">
+              {{ t("errorPage.backHome") }}
+            </router-link>
           </li>
           <li class="link-type">
-            <a href="https://www.bujiaban.com/">{{ t("errorPage.justLook") }}</a>
+            <a href="https://www.bujiaban.com/">{{
+              t("errorPage.justLook")
+            }}</a>
           </li>
           <li>
-            <a href="#" @click.prevent="dialogVisible = true">{{ t("errorPage.clickToSee") }}</a>
+            <a href="#" @click.prevent="dialogVisible = true">{{
+              t("errorPage.clickToSee")
+            }}</a>
           </li>
         </ul>
       </el-col>
       <el-col :span="12">
-        <img :src="errGif" width="313" height="428" alt="Girl has dropped her ice cream." />
+        <img
+          :src="errGif"
+          width="313"
+          height="428"
+          alt="Girl has dropped her ice cream."
+        />
       </el-col>
     </el-row>
     <el-dialog v-model="dialogVisible">

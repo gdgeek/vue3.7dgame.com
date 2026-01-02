@@ -1,7 +1,12 @@
 <template>
   <TransitionWrapper>
     <div>
-      <mr-p-p-upload dir="video" :file-type="fileType" :max-size="80" @save-resource="saveVideo">
+      <mr-p-p-upload
+        dir="video"
+        :file-type="fileType"
+        :max-size="80"
+        @save-resource="saveVideo"
+      >
         <div>{{ $t("video.uploadFile") }}</div>
       </mr-p-p-upload>
     </div>

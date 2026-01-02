@@ -3,19 +3,23 @@
     <div class="back-button-container">
       <el-button type="primary" text @click="goBack">
         <el-icon>
-          <Back />
+          <Back></Back>
         </el-icon>
       </el-button>
     </div>
-    <Document :post-id="id" :category="true" category-path="/web/category"></Document>
+    <Document
+      :post-id="id"
+      :category="true"
+      category-path="/web/category"
+    ></Document>
   </el-card>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Document from "@/components/Home/Document.vue";
-import { ArrowLeft } from '@element-plus/icons-vue'
+import { ArrowLeft } from "@element-plus/icons-vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -30,17 +34,18 @@ onMounted(() => {
 
   // 自动滚动到内容区域
   setTimeout(() => {
-    const element = document.getElementById('news-detail-content');
+    const element = document.getElementById("news-detail-content");
     if (element) {
       // 计算滚动位置
       const navbarHeight = 64;
-      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      const elementPosition =
+        element.getBoundingClientRect().top + window.scrollY;
       const offsetPosition = elementPosition - navbarHeight;
 
       // 滚动到指定位置
       window.scrollTo({
         top: offsetPosition,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     }
   }, 300);

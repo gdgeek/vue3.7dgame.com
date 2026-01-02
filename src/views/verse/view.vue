@@ -1,15 +1,19 @@
 <template>
   <TransitionWrapper>
-    <br>
+    <br />
     <div class="verse-view">
-      <VerseDetail v-if="id" :verseId="id" @deleted="deleted" @changed="changed" />
+      <VerseDetail
+        v-if="id"
+        :verseId="id"
+        @deleted="deleted"
+        @changed="changed"
+      ></VerseDetail>
     </div>
   </TransitionWrapper>
 </template>
 
-
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed } from "vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { useRoute, useRouter } from "vue-router";
 import VerseDetail from "@/components/MrPP/MrPPVerse/VerseDetail.vue";

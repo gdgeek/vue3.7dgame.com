@@ -1,7 +1,11 @@
 <template>
   <TransitionWrapper>
     <div>
-      <mr-p-p-upload dir="particle" :file-type="fileType" @save-resource="saveParticle">
+      <mr-p-p-upload
+        dir="particle"
+        :file-type="fileType"
+        @save-resource="saveParticle"
+      >
         <div>{{ $t("particle.uploadFile") }}</div>
       </mr-p-p-upload>
     </div>
@@ -15,7 +19,9 @@ import { postParticle } from "@/api/v1/resources/index";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 // 定义允许的文件类型
-const fileType = ref("video/mp4, video/mov, video/avi, image/gif, image/jpeg, image/png, image/webp, audio/mp3, audio/wav");
+const fileType = ref(
+  "video/mp4, video/mov, video/avi, image/gif, image/jpeg, image/png, image/webp, audio/mp3, audio/wav"
+);
 const router = useRouter();
 
 let completedCount = 0;

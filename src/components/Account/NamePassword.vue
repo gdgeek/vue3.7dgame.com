@@ -1,23 +1,42 @@
 <template>
-  <div class="name-password-form" :class="{ 'dark-theme': isDark }" v-loading="loading">
+  <div
+    class="name-password-form"
+    :class="{ 'dark-theme': isDark }"
+    v-loading="loading"
+  >
     <el-card class="login-card" :body-style="{ padding: '20px' }">
-
-      <el-form ref="formRef" class="login-form" :rules="rules" :model="form" label-position="top">
+      <el-form
+        ref="formRef"
+        class="login-form"
+        :rules="rules"
+        :model="form"
+        label-position="top"
+      >
         <el-form-item :label="''" prop="username" class="form-item">
-          <el-input v-model="form.username" placeholder="请输入用户名/邮箱" class="custom-input">
+          <el-input
+            v-model="form.username"
+            placeholder="请输入用户名/邮箱"
+            class="custom-input"
+          >
             <template #prefix>
               <el-icon class="input-icon">
-                <UserFilled />
+                <UserFilled></UserFilled>
               </el-icon>
             </template>
           </el-input>
         </el-form-item>
 
         <el-form-item :label="''" prop="password" class="form-item">
-          <el-input v-model="form.password" type="password" placeholder="请输入密码" class="custom-input" show-password>
+          <el-input
+            v-model="form.password"
+            type="password"
+            placeholder="请输入密码"
+            class="custom-input"
+            show-password
+          >
             <template #prefix>
               <el-icon class="input-icon">
-                <Lock />
+                <Lock></Lock>
               </el-icon>
             </template>
           </el-input>
@@ -31,12 +50,15 @@
   -->
 
         <el-form-item class="login-button-item">
-          <el-button class="login-button" type="primary" @click="submit" :loading="loading">
+          <el-button
+            class="login-button"
+            type="primary"
+            @click="submit"
+            :loading="loading"
+          >
             {{ $t("login.login") }}
           </el-button>
         </el-form-item>
-
-
       </el-form>
     </el-card>
   </div>
@@ -110,7 +132,7 @@ const rules = computed<Record<string, FormItemRule[]>>(() => {
 
 const loading = ref<boolean>(false);
 
-const emit = defineEmits(['login-success', 'switch-to-register']);
+const emit = defineEmits(["login-success", "switch-to-register"]);
 
 const submit = () => {
   formRef.value?.validate(async (valid: boolean) => {
@@ -120,7 +142,7 @@ const submit = () => {
         await userStore.login(form.value);
         await userStore.getUserInfo();
         const { path, queryParams } = parseRedirect();
-        emit('login-success');
+        emit("login-success");
         router.push({ path: path, query: queryParams });
       } catch (e: any) {
         loading.value = false;
@@ -135,19 +157,19 @@ const submit = () => {
 
 // 处理忘记密码
 const handleForgotPassword = () => {
-  ElMessage.info('请联系管理员重置密码');
+  ElMessage.info("请联系管理员重置密码");
   // 或者可以跳转到密码重置页面
   // router.push('/reset-password');
 };
 
 // 处理注册新账号
 const handleRegister = () => {
-  router.push('/signup');
+  router.push("/signup");
 };
 
 // 切换到注册选项卡
 const switchToRegister = () => {
-  emit('switch-to-register');
+  emit("switch-to-register");
 };
 </script>
 

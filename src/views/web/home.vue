@@ -2,11 +2,11 @@
   <div :class="{ 'dark-theme': isDark }">
     <!-- 新闻动态 -->
     <section id="news" ref="newsRef">
-      <News.default :activeTabName="section" />
+      <News.default :activeTabName="section"></News.default>
     </section>
 
     <section id="status" ref="statusRef">
-      <Buy.default />
+      <Buy.default></Buy.default>
     </section>
   </div>
 </template>
@@ -17,8 +17,8 @@ import * as Buy from "./components/Buy.vue";
 import { useRouter, useRoute } from "vue-router";
 import * as News from "./components/News/index.vue";
 
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import AOS from "aos";
+import "aos/dist/aos.css";
 import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 
@@ -36,14 +36,14 @@ defineOptions({
 });
 
 const section = computed(() => {
-  return route.query.section ? route.query.section as string : "news";
+  return route.query.section ? (route.query.section as string) : "news";
 });
 const loginDialogRef = ref<any>(null);
 
 const isScrolled = ref(false);
 
 // 自动滚动
-const SCROLL_POSITION_KEY = 'web_scroll_position';
+const SCROLL_POSITION_KEY = "web_scroll_position";
 
 // 保存滚动位置
 const saveScrollPosition = () => {
@@ -52,7 +52,7 @@ const saveScrollPosition = () => {
     try {
       sessionStorage.setItem(SCROLL_POSITION_KEY, scrollTop.toString());
     } catch (e) {
-      console.error('保存滚动位置失败:', e);
+      console.error("保存滚动位置失败:", e);
     }
   }
 };
@@ -65,12 +65,12 @@ const restoreScrollPosition = () => {
       nextTick(() => {
         window.scrollTo({
           top: parseInt(savedPosition),
-          behavior: 'auto'
+          behavior: "auto",
         });
       });
     }
   } catch (e) {
-    console.error('恢复滚动位置失败:', e);
+    console.error("恢复滚动位置失败:", e);
   }
 };
 
@@ -109,7 +109,7 @@ const scrollToSection = (sectionId: string) => {
     // 平滑滚动到指定位置
     window.scrollTo({
       top: offsetPosition,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   }
 };
@@ -119,7 +119,6 @@ onMounted(() => {
   //滚到news上
   const section = route.query.section;
   if (section) {
-
     setTimeout(() => {
       scrollToSection("news");
     }, 100);
@@ -131,7 +130,7 @@ onMounted(() => {
   AOS.init({
     duration: 1000,
     once: false,
-    mirror: true
+    mirror: true,
   });
 
   // 恢复滚动位置
@@ -139,7 +138,7 @@ onMounted(() => {
 
   // 监听路由变化，在路由变化后保存滚动位置
   router.beforeEach((to, from) => {
-    if (from.path.startsWith('/web')) {
+    if (from.path.startsWith("/web")) {
       saveScrollPosition();
     }
     return true;
@@ -310,7 +309,6 @@ onUnmounted(() => {
   }
 
   &.nav-scrolled {
-
     .nav-left .company-name,
     .nav-middle .nav-menu-item .menu-text,
     .nav-right .hamburger-menu {
@@ -318,7 +316,6 @@ onUnmounted(() => {
     }
 
     &.dark-theme {
-
       .nav-left .company-name,
       .nav-middle .nav-menu-item .menu-text,
       .nav-right .hamburger-menu {

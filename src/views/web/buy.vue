@@ -1,6 +1,6 @@
 <template>
   <div class="app-container" :class="{ 'dark-theme': isDark }">
-    <Buy />
+    <Buy></Buy>
   </div>
 </template>
 
@@ -9,11 +9,10 @@ import "@/assets/font/font.css";
 import Buy from "./components/Buy.vue";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
-import 'aos/dist/aos.css';
+import "aos/dist/aos.css";
 
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
-
 </script>
 
 <style lang="scss" scoped>

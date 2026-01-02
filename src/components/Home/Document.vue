@@ -4,16 +4,24 @@
       <template #header>
         <h2 id="title" :innerHTML="sanitizedTitle"></h2>
         <span v-if="category">
-          <router-link v-for="(item, index) in data._embedded['wp:term'][0]" :key="index"
-            :to="`${categoryPath}?id=${item.id}`" style="margin-right: 10px">
+          <router-link
+            v-for="(item, index) in data._embedded['wp:term'][0]"
+            :key="index"
+            :to="`${categoryPath}?id=${item.id}`"
+            style="margin-right: 10px"
+          >
             <el-tag size="small">{{ item.name }}</el-tag>
           </router-link>
         </span>
       </template>
       <div>
         <main style="margin-top: 15px">
-          <p id="content" class="text-muted well well-sm no-shadow" style="margin: 20px" :innerHTML="sanitizedContent">
-          </p>
+          <p
+            id="content"
+            class="text-muted well well-sm no-shadow"
+            style="margin: 20px"
+            :innerHTML="sanitizedContent"
+          ></p>
         </main>
       </div>
       <br />

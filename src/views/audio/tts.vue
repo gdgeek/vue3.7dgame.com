@@ -3,103 +3,221 @@
     <div class="tencent-tts">
       <div class="main-content">
         <!-- 语音选择器组件 -->
-        <VoiceSelector v-model:selected-voice="selectedVoiceType" v-model:voice-type="voiceType"
-          v-model:voice-scene="voiceScene" v-model:voice-language="voiceLanguage"
-          v-model:auto-switch-language="autoSwitchLanguage" v-model:emotion-category="emotionCategory"
-          v-model:emotion-intensity="emotionIntensity" :available-scenes="availableScenes"
-          :grouped-voices="groupedVoices" :available-emotions="availableEmotions" :filtered-emotions="filteredEmotions"
-          :is-dark="isDark" @show-emotions="showEmotions" />
+        <VoiceSelector
+          v-model:selected-voice="selectedVoiceType"
+          v-model:voice-type="voiceType"
+          v-model:voice-scene="voiceScene"
+          v-model:voice-language="voiceLanguage"
+          v-model:auto-switch-language="autoSwitchLanguage"
+          v-model:emotion-category="emotionCategory"
+          v-model:emotion-intensity="emotionIntensity"
+          :available-scenes="availableScenes"
+          :grouped-voices="groupedVoices"
+          :available-emotions="availableEmotions"
+          :filtered-emotions="filteredEmotions"
+          :is-dark="isDark"
+          @show-emotions="showEmotions"
+        ></VoiceSelector>
 
         <!-- TTS 参数控制组件 -->
-        <TTSParams v-model:volume="volume" v-model:speed="speed" v-model:codec="codec" v-model:sample-rate="sampleRate"
-          :support-high-sample-rate="supportHighSampleRate" />
+        <TTSParams
+          v-model:volume="volume"
+          v-model:speed="speed"
+          v-model:codec="codec"
+          v-model:sample-rate="sampleRate"
+          :support-high-sample-rate="supportHighSampleRate"
+        ></TTSParams>
 
         <div class="input-section">
           <div class="tag-actions-container">
-            <div class="language-tag" v-if="voiceLanguage || (!autoSwitchLanguage && languageAnalysis.suggestion)">
+            <div
+              class="language-tag"
+              v-if="
+                voiceLanguage ||
+                (!autoSwitchLanguage && languageAnalysis.suggestion)
+              "
+            >
               <template v-if="voiceLanguage">
-                <el-tag :type="voiceLanguage === '中文' ? 'danger' : voiceLanguage === '日文' ? 'success' : 'primary'"
-                  effect="dark">
-                  {{ voiceLanguage === '中文' ? t('tts.chinese') : voiceLanguage === '英文' ? t('tts.english') :
-                    voiceLanguage
-                      === '日文' ? t('tts.japanese') : voiceLanguage }}
+                <el-tag
+                  :type="
+                    voiceLanguage === '中文'
+                      ? 'danger'
+                      : voiceLanguage === '日文'
+                        ? 'success'
+                        : 'primary'
+                  "
+                  effect="dark"
+                >
+                  {{
+                    voiceLanguage === "中文"
+                      ? t("tts.chinese")
+                      : voiceLanguage === "英文"
+                        ? t("tts.english")
+                        : voiceLanguage === "日文"
+                          ? t("tts.japanese")
+                          : voiceLanguage
+                  }}
                 </el-tag>
                 <span class="limit-info">
                   {{ getLanguageLimitText }}
-                  <template v-if="!autoSwitchLanguage && languageAnalysis.suggestion && !voiceLanguage">
+                  <template
+                    v-if="
+                      !autoSwitchLanguage &&
+                      languageAnalysis.suggestion &&
+                      !voiceLanguage
+                    "
+                  >
                     ({{ languageAnalysis.suggestion }})
                   </template>
                   <template v-if="text.length > 0">
-                    - {{ t('tts.totalChars') }}：{{ languageAnalysis.totalChars }}
+                    - {{ t("tts.totalChars") }}：{{
+                      languageAnalysis.totalChars
+                    }}
                   </template>
                 </span>
               </template>
               <template v-else>
-                <span class="limit-info">{{ languageAnalysis.suggestion }}</span>
+                <span class="limit-info">{{
+                  languageAnalysis.suggestion
+                }}</span>
               </template>
             </div>
 
             <div class="text-actions" v-if="text.length > 0">
-              <el-button type="text" size="small" @click="showLanguageAnalysis = !showLanguageAnalysis">
-                {{ showLanguageAnalysis ? t('tts.hideLanguageAnalysis') : t('tts.showLanguageAnalysis') }}
+              <el-button
+                type="text"
+                size="small"
+                @click="showLanguageAnalysis = !showLanguageAnalysis"
+              >
+                {{
+                  showLanguageAnalysis
+                    ? t("tts.hideLanguageAnalysis")
+                    : t("tts.showLanguageAnalysis")
+                }}
               </el-button>
             </div>
           </div>
 
           <!-- 语言分析组件 -->
-          <LanguageAnalysis :visible="showLanguageAnalysis" :text="text" :analysis="languageAnalysis" :is-dark="isDark"
-            @close="showLanguageAnalysis = false" />
+          <LanguageAnalysis
+            :visible="showLanguageAnalysis"
+            :text="text"
+            :analysis="languageAnalysis"
+            :is-dark="isDark"
+            @close="showLanguageAnalysis = false"
+          ></LanguageAnalysis>
 
           <div class="text-area-container">
-            <div class="text-container" ref="textContainerRef" v-show="isPlaying">
-              <div v-if="!text" class="empty-text">{{ t('tts.inputPlaceholder') }}</div>
+            <div
+              class="text-container"
+              ref="textContainerRef"
+              v-show="isPlaying"
+            >
+              <div v-if="!text" class="empty-text">
+                {{ t("tts.inputPlaceholder") }}
+              </div>
               <template v-else>
                 <span class="highlighted-text">{{ highlightedText }}</span>
                 <span class="normal-text">{{ normalText }}</span>
               </template>
             </div>
-            <el-input id="word" type="textarea"
-              :placeholder="voiceLanguage === '中文' ? t('tts.inputChinesePlaceholder') : voiceLanguage === '英文' ? t('tts.inputEnglishPlaceholder') : voiceLanguage === '日文' ? t('tts.inputJapanesePlaceholder') : t('tts.inputPlaceholder')"
-              v-model="text" :maxlength="voiceLanguage === '英文' ? 500 : 150" :rows="4" show-word-limit
-              :disabled="isLoading" @input="onTextInput" v-show="!isPlaying" />
+            <el-input
+              id="word"
+              type="textarea"
+              :placeholder="
+                voiceLanguage === '中文'
+                  ? t('tts.inputChinesePlaceholder')
+                  : voiceLanguage === '英文'
+                    ? t('tts.inputEnglishPlaceholder')
+                    : voiceLanguage === '日文'
+                      ? t('tts.inputJapanesePlaceholder')
+                      : t('tts.inputPlaceholder')
+              "
+              v-model="text"
+              :maxlength="voiceLanguage === '英文' ? 500 : 150"
+              :rows="4"
+              show-word-limit
+              :disabled="isLoading"
+              @input="onTextInput"
+              v-show="!isPlaying"
+            ></el-input>
           </div>
         </div>
 
         <div class="preview-section" v-if="audioUrl">
-          <audio :src="audioUrl" controls class="audio-player" ref="audioPlayerRef" @play="onAudioPlayerPlay"
-            @pause="onAudioPlayerPause" @ended="onAudioPlayerEnded"></audio>
+          <audio
+            :src="audioUrl"
+            controls
+            class="audio-player"
+            ref="audioPlayerRef"
+            @play="onAudioPlayerPlay"
+            @pause="onAudioPlayerPause"
+            @ended="onAudioPlayerEnded"
+          ></audio>
         </div>
 
         <div class="action-section">
-          <el-button type="primary" size="large" @click="synthesizeSpeech" :loading="isLoading" class="action-button">
-            {{ isLoading ? t('tts.synthesizing') : t('tts.synthesize') }}
+          <el-button
+            type="primary"
+            size="large"
+            @click="synthesizeSpeech"
+            :loading="isLoading"
+            class="action-button"
+          >
+            {{ isLoading ? t("tts.synthesizing") : t("tts.synthesize") }}
           </el-button>
-          <el-button type="success" size="large" @click="uploadAudio" :loading="isUploading"
-            :disabled="!currentAudioBlob" class="action-button upload-button">
-            {{ isUploading ? t('tts.uploading') : t('tts.upload') }}
+          <el-button
+            type="success"
+            size="large"
+            @click="uploadAudio"
+            :loading="isUploading"
+            :disabled="!currentAudioBlob"
+            class="action-button upload-button"
+          >
+            {{ isUploading ? t("tts.uploading") : t("tts.upload") }}
           </el-button>
         </div>
 
         <div class="tips-section">
-          <el-alert :title="t('tts.tips')" type="info" :description="t('tts.tipsContent')" :closable="false" show-icon
-            class="tips-alert" />
+          <el-alert
+            :title="t('tts.tips')"
+            type="info"
+            :description="t('tts.tipsContent')"
+            :closable="false"
+            show-icon
+            class="tips-alert"
+          ></el-alert>
         </div>
       </div>
 
       <!-- 情感列表对话框 -->
-      <el-dialog :title="t('tts.selectEmotion')" v-model="emotionsDialogVisible" width="30%"
-        :close-on-click-modal="true" :close-on-press-escape="true">
+      <el-dialog
+        :title="t('tts.selectEmotion')"
+        v-model="emotionsDialogVisible"
+        width="30%"
+        :close-on-click-modal="true"
+        :close-on-press-escape="true"
+      >
         <div class="emotions-list">
-          <el-tag v-for="emotion in selectedVoiceEmotions" :key="emotion" class="emotion-tag"
-            :type="emotion === emotionCategory ? 'primary' : 'info'" @click="selectEmotion(emotion)"
-            :effect="emotion === emotionCategory ? 'light' : 'plain'">
+          <el-tag
+            v-for="emotion in selectedVoiceEmotions"
+            :key="emotion"
+            class="emotion-tag"
+            :type="emotion === emotionCategory ? 'primary' : 'info'"
+            @click="selectEmotion(emotion)"
+            :effect="emotion === emotionCategory ? 'light' : 'plain'"
+          >
             {{ emotion }}
           </el-tag>
         </div>
         <template #footer>
           <span class="dialog-footer">
-            <el-button @click="emotionsDialogVisible = false">{{ t('tts.cancel') }}</el-button>
-            <el-button type="primary" @click="confirmEmotionSelection">{{ t('tts.confirm') }}</el-button>
+            <el-button @click="emotionsDialogVisible = false">{{
+              t("tts.cancel")
+            }}</el-button>
+            <el-button type="primary" @click="confirmEmotionSelection">{{
+              t("tts.confirm")
+            }}</el-button>
           </span>
         </template>
       </el-dialog>
@@ -108,28 +226,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
 
-import { useSettingsStore } from '@/store'
-import { ThemeEnum } from '@/enums/ThemeEnum'
-import TransitionWrapper from '@/components/TransitionWrapper.vue'
-import VoiceSelector from './components/VoiceSelector.vue'
-import TTSParams from './components/TTSParams.vue'
-import LanguageAnalysis from './components/LanguageAnalysis.vue'
+import { useSettingsStore } from "@/store";
+import { ThemeEnum } from "@/enums/ThemeEnum";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import VoiceSelector from "./components/VoiceSelector.vue";
+import TTSParams from "./components/TTSParams.vue";
+import LanguageAnalysis from "./components/LanguageAnalysis.vue";
 
-import { useVoiceSelection, VoiceOption } from './composables/useVoiceSelection'
-import { useLanguageAnalysis } from './composables/useLanguageAnalysis'
-import { useTTS } from './composables/useTTS'
+import {
+  useVoiceSelection,
+  VoiceOption,
+} from "./composables/useVoiceSelection";
+import { useLanguageAnalysis } from "./composables/useLanguageAnalysis";
+import { useTTS } from "./composables/useTTS";
 
-const { t } = useI18n()
-const settingsStore = useSettingsStore()
+const { t } = useI18n();
+const settingsStore = useSettingsStore();
 
-const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK)
+const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
 // Text State
-const text = ref('')
-const showLanguageAnalysis = ref(false)
+const text = ref("");
+const showLanguageAnalysis = ref(false);
 
 // Composables
 const {
@@ -146,18 +267,15 @@ const {
   filteredEmotions,
   supportHighSampleRate,
   voiceType: voiceTypeRef, // Alias if needed, or use struct desc
-} = useVoiceSelection()
+} = useVoiceSelection();
 
-const {
-  languageAnalysis,
-  checkTextLanguage
-} = useLanguageAnalysis()
+const { languageAnalysis, checkTextLanguage } = useLanguageAnalysis();
 
 // Initialize useTTS with refs from other composables
-const volume = ref(0)
-const speed = ref(0)
-const codec = ref('mp3')
-const sampleRate = ref(16000)
+const volume = ref(0);
+const speed = ref(0);
+const codec = ref("mp3");
+const sampleRate = ref(16000);
 
 const {
   isLoading,
@@ -174,7 +292,7 @@ const {
   onTextInput: handleTextInput, // Rename to avoid conflict if any
   onAudioPlayerPlay,
   onAudioPlayerPause,
-  onAudioPlayerEnded
+  onAudioPlayerEnded,
 } = useTTS({
   text,
   volume,
@@ -186,48 +304,47 @@ const {
   voiceType,
   emotionCategory,
   emotionIntensity,
-  checkTextLanguage: () => checkTextLanguage(text.value, voiceLanguage, autoSwitchLanguage)
-})
+  checkTextLanguage: () =>
+    checkTextLanguage(text.value, voiceLanguage, autoSwitchLanguage),
+});
 
 // Dialog State (UI concern)
-const emotionsDialogVisible = ref(false)
-const selectedVoiceEmotions = ref<string[]>([])
+const emotionsDialogVisible = ref(false);
+const selectedVoiceEmotions = ref<string[]>([]);
 
 // UI Methods
 const showEmotions = (voice: VoiceOption) => {
-  selectedVoiceEmotions.value = voice.emotions
-  emotionsDialogVisible.value = true
-}
+  selectedVoiceEmotions.value = voice.emotions;
+  emotionsDialogVisible.value = true;
+};
 
 const selectEmotion = (emotion: string) => {
-  emotionCategory.value = emotion
-}
+  emotionCategory.value = emotion;
+};
 
 const confirmEmotionSelection = () => {
-  emotionsDialogVisible.value = false
-}
+  emotionsDialogVisible.value = false;
+};
 
 // Handler wrapper to update local state logic if needed
 const onTextInput = () => {
-  handleTextInput()
-}
+  handleTextInput();
+};
 
 // Derived UI Computeds
 const getLanguageLimitText = computed(() => {
   switch (voiceLanguage.value) {
-    case '中文':
-      return t('tts.chineseLimit')
-    case '英文':
-      return t('tts.englishLimit')
-    case '日文':
-      return t('tts.japaneseLimit')
+    case "中文":
+      return t("tts.chineseLimit");
+    case "英文":
+      return t("tts.englishLimit");
+    case "日文":
+      return t("tts.japaneseLimit");
     default:
-      return t('tts.selectLanguageFirst')
+      return t("tts.selectLanguageFirst");
   }
-})
+});
 </script>
-
-
 
 <style scoped lang="scss">
 .tencent-tts {
@@ -251,9 +368,14 @@ const getLanguageLimitText = computed(() => {
   background-color: v-bind('isDark ? "#1e1e1e" : "#fff"');
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: v-bind('isDark ? "0 4px 20px rgba(0, 0, 0, 0.2)" : "0 4px 20px rgba(0, 0, 0, 0.05)"');
+  box-shadow: v-bind(
+    'isDark ? "0 4px 20px rgba(0, 0, 0, 0.2)" : "0 4px 20px rgba(0, 0, 0, 0.05)"'
+  );
   color: v-bind('isDark ? "#e0e0e0" : "inherit"');
-  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 // 音色选择区域
@@ -431,7 +553,7 @@ const getLanguageLimitText = computed(() => {
         position: relative;
 
         &::after {
-          content: '';
+          content: "";
           position: absolute;
           bottom: -4px;
           left: 0;
@@ -523,16 +645,18 @@ const getLanguageLimitText = computed(() => {
           overflow: hidden;
 
           &::after {
-            content: '';
+            content: "";
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(90deg,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 255, 255, 0.1) 50%,
-                rgba(255, 255, 255, 0) 100%);
+            background: linear-gradient(
+              90deg,
+              rgba(255, 255, 255, 0) 0%,
+              rgba(255, 255, 255, 0.1) 50%,
+              rgba(255, 255, 255, 0) 100%
+            );
             transform: translateX(-100%);
             animation: shimmer 2s infinite;
           }

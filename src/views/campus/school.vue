@@ -1,29 +1,52 @@
 <template>
-  <CardListPage ref="cardListPageRef" :fetch-data="fetchSchools" wrapper-class="school-management" :show-empty="true"
-    @refresh="handleRefresh">
+  <CardListPage
+    ref="cardListPageRef"
+    :fetch-data="fetchSchools"
+    wrapper-class="school-management"
+    :show-empty="true"
+    @refresh="handleRefresh"
+  >
     <template #header-actions>
       <el-button-group :inline="true" v-if="isRoot">
         <el-button size="small" type="primary" @click="handleCreate">
           <font-awesome-icon icon="plus"></font-awesome-icon>
           &nbsp;
-          <span class="hidden-sm-and-down">{{ $t("manager.createSchool") }}</span>
+          <span class="hidden-sm-and-down">{{
+            $t("manager.createSchool")
+          }}</span>
         </el-button>
       </el-button-group>
     </template>
 
     <template #card="{ item }">
-      <MrPPCard :item="item" type="学校" color="#e74c3c" @named="handleEdit" @deleted="handleDeleteWithCallback">
+      <MrPPCard
+        :item="item"
+        type="学校"
+        color="#e74c3c"
+        @named="handleEdit"
+        @deleted="handleDeleteWithCallback"
+      >
         <template #enter>
           <el-descriptions :column="1" size="small" class="school-info">
             <el-descriptions-item :label="$t('manager.school.principal')">
-              {{ item.principal ? ((item.principal as any).nickname || (item.principal as any).username || '-') : '-' }}
+              {{
+                item.principal
+                  ? (item.principal as any).nickname ||
+                    (item.principal as any).username ||
+                    "-"
+                  : "-"
+              }}
             </el-descriptions-item>
             <el-descriptions-item :label="$t('manager.school.address')">
-              {{ item.info?.address || '-' }}
+              {{ item.info?.address || "-" }}
             </el-descriptions-item>
           </el-descriptions>
-          <el-button type="primary" size="small" @click="handleOpenClasses(item)">
-            {{ $t('common.open') }}
+          <el-button
+            type="primary"
+            size="small"
+            @click="handleOpenClasses(item)"
+          >
+            {{ $t("common.open") }}
           </el-button>
         </template>
       </MrPPCard>
@@ -31,54 +54,96 @@
 
     <template #dialogs>
       <!-- Edit School Dialog -->
-      <el-dialog v-model="editDialogVisible" :title="$t('manager.dialog.editTitle')" width="500px"
-        :close-on-click-modal="false">
+      <el-dialog
+        v-model="editDialogVisible"
+        :title="$t('manager.dialog.editTitle')"
+        width="500px"
+        :close-on-click-modal="false"
+      >
         <el-form :model="editForm" label-width="120px">
           <el-form-item :label="$t('manager.form.name')">
-            <el-input v-model="editForm.name" :placeholder="$t('manager.form.namePlaceholder')" />
+            <el-input
+              v-model="editForm.name"
+              :placeholder="$t('manager.form.namePlaceholder')"
+            ></el-input>
           </el-form-item>
           <el-form-item :label="$t('manager.form.image')">
-            <ImageSelector :item-id="editForm.id" :image-url="editForm.imageUrl" @image-selected="handleImageSelected"
-              @image-upload-success="handleImageSelected" />
+            <ImageSelector
+              :item-id="editForm.id"
+              :image-url="editForm.imageUrl"
+              @image-selected="handleImageSelected"
+              @image-upload-success="handleImageSelected"
+            ></ImageSelector>
           </el-form-item>
           <el-form-item :label="$t('manager.form.principal')">
             <el-button @click="openPrincipalSelector">
-              {{ editForm.principalName || $t('manager.form.principalPlaceholder') }}
+              {{
+                editForm.principalName ||
+                $t("manager.form.principalPlaceholder")
+              }}
             </el-button>
-            <el-button v-if="editForm.principal_id || editForm.principalName" type="danger" :icon="Delete" circle
-              size="small" style="margin-left: 10px;" @click="handleClearPrincipal" />
+            <el-button
+              v-if="editForm.principal_id || editForm.principalName"
+              type="danger"
+              :icon="Delete"
+              circle
+              size="small"
+              style="margin-left: 10px"
+              @click="handleClearPrincipal"
+            ></el-button>
           </el-form-item>
         </el-form>
         <template #footer>
-          <el-button @click="editDialogVisible = false">{{ $t('manager.form.cancel') }}</el-button>
-          <el-button type="primary" @click="handleSaveEdit">{{ $t('manager.form.submit') }}</el-button>
+          <el-button @click="editDialogVisible = false">{{
+            $t("manager.form.cancel")
+          }}</el-button>
+          <el-button type="primary" @click="handleSaveEdit">{{
+            $t("manager.form.submit")
+          }}</el-button>
         </template>
       </el-dialog>
 
       <!-- User Selection Dialog -->
-      <UserSelector v-model="userDialogVisible" :title="$t('common.selectUser')" @select="handleSelectUser" />
+      <UserSelector
+        v-model="userDialogVisible"
+        :title="$t('common.selectUser')"
+        @select="handleSelectUser"
+      ></UserSelector>
 
       <!-- Class Management Dialog -->
-      <ClassManagementDialog v-model="classDialogVisible" :school-id="selectedSchool?.id || 0" :school="selectedSchool"
-        @refresh="refreshList" />
+      <ClassManagementDialog
+        v-model="classDialogVisible"
+        :school-id="selectedSchool?.id || 0"
+        :school="selectedSchool"
+        @refresh="refreshList"
+      ></ClassManagementDialog>
     </template>
   </CardListPage>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { Plus, Delete } from '@element-plus/icons-vue';
-import { useI18n } from 'vue-i18n';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import CardListPage from '@/components/MrPP/CardListPage/index.vue';
-import MrPPCard from '@/components/MrPP/MrPPCard/index.vue';
-import UserSelector from '@/components/UserSelector/index.vue';
-import ImageSelector from '@/components/MrPP/ImageSelector.vue';
-import ClassManagementDialog from '@/components/MrPP/ClassManagementDialog.vue';
-import type { EduSchool } from '@/api/v1/types/edu-school';
-import { getSchools, deleteSchool, createSchool, updateSchool, getPrincipalSchools } from '@/api/v1/edu-school';
-import type { FetchParams, FetchResponse } from '@/components/MrPP/CardListPage/types';
+import { ref, computed, watch } from "vue";
+import { useRouter } from "vue-router";
+import { Plus, Delete } from "@element-plus/icons-vue";
+import { useI18n } from "vue-i18n";
+import { ElMessage, ElMessageBox } from "element-plus";
+import CardListPage from "@/components/MrPP/CardListPage/index.vue";
+import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
+import UserSelector from "@/components/UserSelector/index.vue";
+import ImageSelector from "@/components/MrPP/ImageSelector.vue";
+import ClassManagementDialog from "@/components/MrPP/ClassManagementDialog.vue";
+import type { EduSchool } from "@/api/v1/types/edu-school";
+import {
+  getSchools,
+  deleteSchool,
+  createSchool,
+  updateSchool,
+  getPrincipalSchools,
+} from "@/api/v1/edu-school";
+import type {
+  FetchParams,
+  FetchResponse,
+} from "@/components/MrPP/CardListPage/types";
 import { useUserStoreHook } from "@/store/modules/user";
 
 const { t } = useI18n();
@@ -95,19 +160,23 @@ const isRoot = computed(() => {
 const previousRole = ref<string | null>(null);
 
 // Watch for user info changes - refresh list when role is loaded/changed
-watch(() => userStore.userInfo, (newUserInfo) => {
-  if (!newUserInfo || newUserInfo.id === 0) {
-    return;
-  }
+watch(
+  () => userStore.userInfo,
+  (newUserInfo) => {
+    if (!newUserInfo || newUserInfo.id === 0) {
+      return;
+    }
 
-  const currentRole = userStore.getRole();
-  // Only refresh if role has changed (including initial load)
-  if (previousRole.value !== currentRole) {
-    previousRole.value = currentRole;
-    // Refresh the list with correct API based on role
-    cardListPageRef.value?.refresh();
-  }
-}, { deep: true, immediate: true });
+    const currentRole = userStore.getRole();
+    // Only refresh if role has changed (including initial load)
+    if (previousRole.value !== currentRole) {
+      previousRole.value = currentRole;
+      // Refresh the list with correct API based on role
+      cardListPageRef.value?.refresh();
+    }
+  },
+  { deep: true, immediate: true }
+);
 
 const editDialogVisible = ref(false);
 const userDialogVisible = ref(false);
@@ -115,11 +184,11 @@ const classDialogVisible = ref(false);
 const selectedSchool = ref<EduSchool | null>(null);
 const editForm = ref({
   id: null as number | null,
-  name: '',
-  imageUrl: '',
+  name: "",
+  imageUrl: "",
   image_id: null as number | null,
   principal_id: null as number | null,
-  principalName: '',
+  principalName: "",
 });
 
 const fetchSchools = async (params: FetchParams): Promise<FetchResponse> => {
@@ -128,19 +197,19 @@ const fetchSchools = async (params: FetchParams): Promise<FetchResponse> => {
       params.sort,
       params.search,
       params.page,
-      'image,principal'
+      "image,principal"
     );
   } else {
     return await getPrincipalSchools(
       params.sort,
       params.search,
       params.page,
-      'image,principal'
+      "image,principal"
     );
   }
 };
 
-const handleRefresh = (data: any[]) => { };
+const handleRefresh = (data: any[]) => {};
 
 const refreshList = () => {
   cardListPageRef.value?.refresh();
@@ -149,18 +218,18 @@ const refreshList = () => {
 const generateDefaultName = (prefix: string) => {
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10); // 2025-12-03
-  const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '-'); // 10-39-05
+  const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, "-"); // 10-39-05
   return `${prefix}_${dateStr}_${timeStr}`;
 };
 
 const handleCreate = () => {
   editForm.value = {
     id: null,
-    name: generateDefaultName(t('manager.defaultSchoolName')),
-    imageUrl: '',
+    name: generateDefaultName(t("manager.defaultSchoolName")),
+    imageUrl: "",
     image_id: null,
     principal_id: null,
-    principalName: '',
+    principalName: "",
   };
   editDialogVisible.value = true;
 };
@@ -169,17 +238,20 @@ const handleEdit = async (item: EduSchool) => {
   editForm.value = {
     id: item.id,
     name: item.name,
-    imageUrl: item.image?.url || '',
+    imageUrl: item.image?.url || "",
     image_id: item.image_id || null,
     principal_id: item.principal_id || null,
-    principalName: (item.principal as any)?.nickname || (item.principal as any)?.username || '',
+    principalName:
+      (item.principal as any)?.nickname ||
+      (item.principal as any)?.username ||
+      "",
   };
   editDialogVisible.value = true;
 };
 
 const handleSaveEdit = async () => {
   if (!editForm.value.name.trim()) {
-    ElMessage.warning(t('manager.validation.nameRequired'));
+    ElMessage.warning(t("manager.validation.nameRequired"));
     return;
   }
 
@@ -192,47 +264,54 @@ const handleSaveEdit = async () => {
 
     if (editForm.value.id) {
       await updateSchool(editForm.value.id, data);
-      ElMessage.success(t('manager.messages.updateSuccess'));
+      ElMessage.success(t("manager.messages.updateSuccess"));
     } else {
       await createSchool(data);
-      ElMessage.success(t('manager.messages.createSuccess'));
+      ElMessage.success(t("manager.messages.createSuccess"));
     }
 
     editDialogVisible.value = false;
     refreshList();
   } catch (error) {
-    console.error('Failed to save school:', error);
-    ElMessage.error(t('manager.errors.saveFailed'));
+    console.error("Failed to save school:", error);
+    ElMessage.error(t("manager.errors.saveFailed"));
   }
 };
 
-const handleDeleteWithCallback = async (item: EduSchool, resetLoading: () => void) => {
+const handleDeleteWithCallback = async (
+  item: EduSchool,
+  resetLoading: () => void
+) => {
   try {
     await ElMessageBox.confirm(
-      t('manager.confirm.deleteMessage'),
-      t('manager.confirm.deleteTitle'),
+      t("manager.confirm.deleteMessage"),
+      t("manager.confirm.deleteTitle"),
       {
-        confirmButtonText: t('manager.confirm.confirm'),
-        cancelButtonText: t('manager.confirm.cancel'),
-        type: 'warning',
+        confirmButtonText: t("manager.confirm.confirm"),
+        cancelButtonText: t("manager.confirm.cancel"),
+        type: "warning",
       }
     );
 
     await deleteSchool(item.id);
-    ElMessage.success(t('manager.messages.deleteSuccess'));
+    ElMessage.success(t("manager.messages.deleteSuccess"));
     refreshList();
   } catch (error: any) {
-    if (error !== 'cancel') {
-      console.error('Failed to delete school:', error);
-      ElMessage.error(t('manager.errors.deleteFailed'));
+    if (error !== "cancel") {
+      console.error("Failed to delete school:", error);
+      ElMessage.error(t("manager.errors.deleteFailed"));
     }
     resetLoading();
   }
 };
 
-const handleImageSelected = (data: { imageId: number; itemId: number | null; imageUrl?: string }) => {
+const handleImageSelected = (data: {
+  imageId: number;
+  itemId: number | null;
+  imageUrl?: string;
+}) => {
   editForm.value.image_id = data.imageId;
-  editForm.value.imageUrl = data.imageUrl || '';
+  editForm.value.imageUrl = data.imageUrl || "";
 };
 
 const openPrincipalSelector = () => {
@@ -247,7 +326,7 @@ const handleSelectUser = (user: any) => {
 
 const handleClearPrincipal = () => {
   editForm.value.principal_id = null;
-  editForm.value.principalName = '';
+  editForm.value.principalName = "";
 };
 
 const handleAssignPrincipal = (item: EduSchool) => {

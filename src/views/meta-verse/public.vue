@@ -1,7 +1,6 @@
 <template>
   <TransitionWrapper>
     <div class="verse-index">
-
       <Page @loaded="loaded" :created="true"></Page>
     </div>
   </TransitionWrapper>
@@ -14,7 +13,6 @@ import { getTags } from "@/api/v1/tags";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 const data = ref(null);
 const loaded = async (data: any, result: Function) => {
-
   try {
     const response = await getPublic({
       sort: data.sorted,
@@ -23,7 +21,7 @@ const loaded = async (data: any, result: Function) => {
       expand: "image,author,tags,public",
       tags: data.tags,
     });
-    console.error(response.data)
+    console.error(response.data);
     const pagination = {
       current: parseInt(response.headers["x-pagination-current-page"]),
       count: parseInt(response.headers["x-pagination-page-count"]),

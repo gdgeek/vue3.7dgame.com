@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/vue3";
+import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import VoiceSelector from "./VoiceSelector.vue";
 import { ref } from "vue";
 
@@ -81,6 +81,6 @@ export const Default: Story = {
     availableScenes: ["通用女声", "英文男声"],
     availableEmotions: ["中性", "高兴", "悲伤"],
     filteredEmotions: ["高兴", "悲伤"],
-    supportHighSampleRate: true,
+    isDark: false,
   },
 };

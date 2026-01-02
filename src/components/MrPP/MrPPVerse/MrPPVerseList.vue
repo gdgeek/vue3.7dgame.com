@@ -1,11 +1,21 @@
 <template>
-  <el-card style="width: 100%; min-height: 400px;">
-    <Waterfall v-if="items" :list="items" :width="320" :gutter="20" :backgroundColor="'rgba(255, 255, 255, .05)'">
+  <el-card style="width: 100%; min-height: 400px">
+    <Waterfall
+      v-if="items"
+      :list="items"
+      :width="320"
+      :gutter="20"
+      :backgroundColor="'rgba(255, 255, 255, .05)'"
+    >
       <template #default="{ item }">
-        <VerseCard :item="item" @changed="refresh" @deleted="refresh"></VerseCard>
+        <VerseCard
+          :item="item"
+          @changed="refresh"
+          @deleted="refresh"
+        ></VerseCard>
       </template>
     </Waterfall>
-    <el-skeleton v-else :rows="8" animated />
+    <el-skeleton v-else :rows="8" animated></el-skeleton>
   </el-card>
 </template>
 

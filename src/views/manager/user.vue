@@ -12,7 +12,6 @@ import { getPerson } from "@/api/v1/person";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const loaded = async (data: any, result: Function) => {
-
   try {
     const response = await getPerson(
       data.sorted,

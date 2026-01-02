@@ -1,44 +1,79 @@
 <template>
   <div>
-    <el-dialog v-model="dialogVisible" width="95%" height="100px" :show-close="false" @close="doClose" append-to-body>
+    <el-dialog
+      v-model="dialogVisible"
+      width="95%"
+      height="100px"
+      :show-close="false"
+      @close="doClose"
+      append-to-body
+    >
       <template #header>
         <div class="dialog-footer">
-          <MrPPHeader :sorted="sorted" :searched="searched" @search="search" @sort="sort">
+          <MrPPHeader
+            :sorted="sorted"
+            :searched="searched"
+            @search="search"
+            @sort="sort"
+          >
             <el-tag>
-              <b>{{ $t(mode === 'replace' ? "meta.ResourceDialog.replaceTitle" : "meta.ResourceDialog.title") }}</b>
+              <b>{{
+                $t(
+                  mode === "replace"
+                    ? "meta.ResourceDialog.replaceTitle"
+                    : "meta.ResourceDialog.title"
+                )
+              }}</b>
             </el-tag>
           </MrPPHeader>
           <el-divider content-position="left">
-            <el-tag v-if="searched !== ''" size="small" closable @close="clearSearched">
+            <el-tag
+              v-if="searched !== ''"
+              size="small"
+              closable
+              @close="clearSearched"
+            >
               {{ searched }}
             </el-tag>
           </el-divider>
         </div>
       </template>
       <el-card shadow="hover" :body-style="{ padding: '0px' }">
-        <Waterfall v-if="active.items?.length" :list="active.items" :width="230" :gutter="10"
-          :backgroundColor="'rgba(255, 255, 255, .05)'">
-
+        <Waterfall
+          v-if="active.items?.length"
+          :list="active.items"
+          :width="230"
+          :gutter="10"
+          :backgroundColor="'rgba(255, 255, 255, .05)'"
+        >
           <template #default="{ item }">
-
             <div style="width: 230px" v-loading="!item.enabled">
-              <el-card style="width: 220px" class="box-card" :class="{ 'selected-card': isSelected(item) }">
+              <el-card
+                style="width: 220px"
+                class="box-card"
+                :class="{ 'selected-card': isSelected(item) }"
+              >
                 <template #header>
                   <el-card shadow="hover" :body-style="{ padding: '0px' }">
                     <div class="mrpp-title">
                       <b class="card-title" nowrap>{{ getItemTitle(item) }}</b>
                     </div>
                     <div class="image-container">
-
-                      <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
+                      <Id2Image
+                        :image="item.image ? item.image.url : null"
+                        :id="item.id"
+                      ></Id2Image>
                       <slot name="bar" :item="item"></slot>
                     </div>
-                    <div v-if="item.created_at" style="
-                      width: 100%;
-                      text-align: center;
-                      position: relative;
-                      z-index: 2;
-                    ">
+                    <div
+                      v-if="item.created_at"
+                      style="
+                        width: 100%;
+                        text-align: center;
+                        position: relative;
+                        z-index: 2;
+                      "
+                    >
                       {{ convertToLocalTime(item.created_at) }}
                     </div>
                   </el-card>
@@ -46,7 +81,11 @@
 
                 <div class="clearfix">
                   <div class="demo-button-style">
-                    <el-checkbox-group v-if="mode !== 'replace'" v-model="selectedIds" size="small">
+                    <el-checkbox-group
+                      v-if="mode !== 'replace'"
+                      v-model="selectedIds"
+                      size="small"
+                    >
                       <el-checkbox-button :value="item.id" v-if="multiple">
                         {{ $t("meta.ResourceDialog.select") }}
                       </el-checkbox-button>
@@ -75,18 +114,33 @@
         <div class="dialog-footer">
           <el-row :gutter="0">
             <el-col :xs="16" :sm="16" :md="16" :lg="16" :xl="16">
-              <el-pagination :current-page="active.pagination.current" :page-count="active.pagination.count"
-                :page-size="active.pagination.size" :total="active.pagination.total" layout="prev, pager, next, jumper"
-                background @current-change="handleCurrentChange"></el-pagination>
+              <el-pagination
+                :current-page="active.pagination.current"
+                :page-count="active.pagination.count"
+                :page-size="active.pagination.size"
+                :total="active.pagination.total"
+                layout="prev, pager, next, jumper"
+                background
+                @current-change="handleCurrentChange"
+              ></el-pagination>
             </el-col>
             <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
               <el-button-group>
                 <template v-if="mode !== 'replace'">
-                  <el-button v-if="multiple" size="small" :disabled="selectedIds.length == 0"
-                    @click="doBatchSelect()">{{
-                      $t("meta.ResourceDialog.putAllIn") }}</el-button>
-                  <el-button v-if="multiple" size="small" :disabled="selectedIds.length == 0" @click="doEmpty()">{{
-                    $t("meta.ResourceDialog.empty") }}</el-button>
+                  <el-button
+                    v-if="multiple"
+                    size="small"
+                    :disabled="selectedIds.length == 0"
+                    @click="doBatchSelect()"
+                    >{{ $t("meta.ResourceDialog.putAllIn") }}</el-button
+                  >
+                  <el-button
+                    v-if="multiple"
+                    size="small"
+                    :disabled="selectedIds.length == 0"
+                    @click="doEmpty()"
+                    >{{ $t("meta.ResourceDialog.empty") }}</el-button
+                  >
                 </template>
                 <el-button size="small" @click="dialogVisible = false">
                   {{ $t("meta.ResourceDialog.cancel") }}
@@ -102,28 +156,27 @@
 
 <script setup lang="ts">
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
-import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { getResources } from "@/api/v1/resources";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
-import Id2Image from '../Id2Image.vue';
+import Id2Image from "../Id2Image.vue";
 
-
-
-
-const props = withDefaults(defineProps<{
-  multiple?: boolean;
-  onGetDatas?: (input: DataInput) => Promise<DataOutput>
-}>(), {
-  multiple: true
-});
+const props = withDefaults(
+  defineProps<{
+    multiple?: boolean;
+    onGetDatas?: (input: DataInput) => Promise<DataOutput>;
+  }>(),
+  {
+    multiple: true,
+  }
+);
 const sorted = ref("-created_at");
 const searched = ref("");
-
 
 // 响应式状态
 const selectedIds = ref<any[]>([]);
@@ -132,9 +185,7 @@ const dialogVisible = ref(false);
 const type = ref("polygen");
 const metaId = ref<number | null>(null);
 const value = ref<any>(null);
-const mode = ref<'normal' | 'replace'>('normal');
-
-
+const mode = ref<"normal" | "replace">("normal");
 
 const active = ref<DataOutput>({
   items: [],
@@ -142,30 +193,33 @@ const active = ref<DataOutput>({
 });
 
 const emit = defineEmits<{
-  (e: 'selected', data: CardInfo, replace: boolean): void
-  (e: 'cancel'): void
-}>()
+  (e: "selected", data: CardInfo, replace: boolean): void;
+  (e: "cancel"): void;
+}>();
 
 // 事件和国际化
 //const emit = defineEmits(["selected", "replaced", "cancel", "close"]);
 
 const { t } = useI18n();
 
-
-
 // 方法
 const isSelected = (item: any): boolean => {
-  if (mode.value === 'replace') {
+  if (mode.value === "replace") {
     return singleSelectedId.value === item.id;
   }
   return selectedIds.value.some((id) => id === item.id);
-}
+};
 
 const getItemTitle = (item: any): string => {
   return item.title ?? item.name ?? "title";
-}
+};
 
-const open = async (newValue: any, meta_id: any = null, newType: any = null, openMode: 'normal' | 'replace' = 'normal') => {
+const open = async (
+  newValue: any,
+  meta_id: any = null,
+  newType: any = null,
+  openMode: "normal" | "replace" = "normal"
+) => {
   active.value = {
     items: [],
     // sorted: "-created_at",
@@ -183,17 +237,20 @@ const open = async (newValue: any, meta_id: any = null, newType: any = null, ope
 
   await refresh();
   dialogVisible.value = true;
-}
+};
 
-const openIt = async ({ selected = null, binding = null, type }: any, openMode: 'normal' | 'replace' = 'normal') => {
+const openIt = async (
+  { selected = null, binding = null, type }: any,
+  openMode: "normal" | "replace" = "normal"
+) => {
   await open(selected, binding, type, openMode);
-}
+};
 
 // 替换模式下的选择处理
 const doReplace = (data: CardInfo) => {
   emit("selected", data, true);
   dialogVisible.value = false;
-}
+};
 async function getDatas(input: DataInput): Promise<DataOutput> {
   if (props.onGetDatas) {
     return props.onGetDatas(input);
@@ -209,16 +266,18 @@ async function getDatas(input: DataInput): Promise<DataOutput> {
         "image"
       );
       console.log("获取数据", response.data);
-      const items = response.data.map((item: any) => ({
-        id: item.id,
-        context: item,
-        type: item.type,
-        created_at: item.created_at,
-        name: item.name ? item.name : item.title, // 使用name或title
-        image: item.image ? { "url": item.image.url } : null,
-        enabled: true,
-
-      } as CardInfo));
+      const items = response.data.map(
+        (item: any) =>
+          ({
+            id: item.id,
+            context: item,
+            type: item.type,
+            created_at: item.created_at,
+            name: item.name ? item.name : item.title, // 使用name或title
+            image: item.image ? { url: item.image.url } : null,
+            enabled: true,
+          }) as CardInfo
+      );
 
       const pagination = {
         current: parseInt(response.headers["x-pagination-current-page"]),
@@ -231,12 +290,10 @@ async function getDatas(input: DataInput): Promise<DataOutput> {
       console.error("获取数据失败", error);
       reject(error);
     }
-
   });
 }
 
 async function refresh() {
-
   active.value = await getDatas({
     type: type.value,
     sorted: sorted.value,
@@ -245,7 +302,6 @@ async function refresh() {
   });
   // active.value = output;
   //active.value.pagination = output.pagination;
-
 }
 
 // 排序和搜索
@@ -280,7 +336,7 @@ const doClose = () => {
   singleSelectedId.value = undefined;
   dialogVisible.value = false;
   //emit("close");
-}
+};
 
 async function doBatchSelect() {
   console.log("doBatchSelect", selectedIds.value);
@@ -294,8 +350,12 @@ async function doBatchSelect() {
       t("meta.ResourceDialog.batchConfirm.selectOne.message1"),
       t("meta.ResourceDialog.batchConfirm.selectOne.message2"),
       {
-        confirmButtonText: t("meta.ResourceDialog.batchConfirm.selectOne.confirm"),
-        cancelButtonText: t("meta.ResourceDialog.batchConfirm.selectOne.cancel"),
+        confirmButtonText: t(
+          "meta.ResourceDialog.batchConfirm.selectOne.confirm"
+        ),
+        cancelButtonText: t(
+          "meta.ResourceDialog.batchConfirm.selectOne.cancel"
+        ),
         type: "warning",
       }
     );
@@ -322,8 +382,6 @@ function handleCurrentChange(page: number) {
   active.value.pagination.current = page;
   refresh();
 }
-
-
 
 // 对外暴露的方法
 defineExpose({

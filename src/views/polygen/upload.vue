@@ -1,7 +1,12 @@
 <template>
   <TransitionWrapper>
     <div>
-      <mr-p-p-upload dir="polygen" :file-type="fileType" :max-size="30" @save-resource="savePolygen">
+      <mr-p-p-upload
+        dir="polygen"
+        :file-type="fileType"
+        :max-size="30"
+        @save-resource="savePolygen"
+      >
         <div>{{ $t("polygen.uploadFile") }}</div>
       </mr-p-p-upload>
     </div>

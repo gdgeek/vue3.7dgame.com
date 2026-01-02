@@ -1,6 +1,13 @@
 <template>
-  <el-dialog v-model="dialogVisible" :title="$t('audio.view.title')" width="800px" center destroy-on-close
-    append-to-body @closed="handleClose">
+  <el-dialog
+    v-model="dialogVisible"
+    :title="$t('audio.view.title')"
+    width="800px"
+    center
+    destroy-on-close
+    append-to-body
+    @closed="handleClose"
+  >
     <div class="document-index" v-loading="loading">
       <el-row :gutter="20">
         <el-col :sm="16">
@@ -13,23 +20,47 @@
             <div class="box-item" style="text-align: center">
               <section class="audio-bgc">
                 <div class="audio-box">
-                  <div class="audio-record" :class="{ 'audio-record-playfast': isPlay }" @click="handlePlayAudio"></div>
-                  <div class="audio-record-image" :class="{ 'audio-record-play': isPlay }" @click="handlePlayAudio">
-                  </div>
+                  <div
+                    class="audio-record"
+                    :class="{ 'audio-record-playfast': isPlay }"
+                    @click="handlePlayAudio"
+                  ></div>
+                  <div
+                    class="audio-record-image"
+                    :class="{ 'audio-record-play': isPlay }"
+                    @click="handlePlayAudio"
+                  ></div>
                 </div>
-                <audio id="audio-dialog-player" controls style="width: 95%; height: 50px; margin-top: 20px;" :src="file"
-                  preload="auto" @play="listenPlay" @pause="listenPause" @ended="listenEnd"
-                  @canplaythrough="dealWith"></audio>
+                <audio
+                  id="audio-dialog-player"
+                  controls
+                  style="width: 95%; height: 50px; margin-top: 20px"
+                  :src="file"
+                  preload="auto"
+                  @play="listenPlay"
+                  @pause="listenPause"
+                  @ended="listenEnd"
+                  @canplaythrough="dealWith"
+                ></audio>
               </section>
             </div>
           </el-card>
         </el-col>
         <el-col :sm="8">
-          <MrppInfo v-if="audioData" :title="$t('audio.view.info.title')" titleSuffix=" :" :tableData="tableData"
-            :itemLabel="$t('audio.view.info.label1')" :textLabel="$t('audio.view.info.label2')"
-            :downloadText="$t('audio.view.info.download')" :renameText="$t('audio.view.info.name')"
-            :deleteText="$t('audio.view.info.delete')" @download="downloadAudio" @rename="namedWindow"
-            @delete="deleteWindow" />
+          <MrppInfo
+            v-if="audioData"
+            :title="$t('audio.view.info.title')"
+            titleSuffix=" :"
+            :tableData="tableData"
+            :itemLabel="$t('audio.view.info.label1')"
+            :textLabel="$t('audio.view.info.label2')"
+            :downloadText="$t('audio.view.info.download')"
+            :renameText="$t('audio.view.info.name')"
+            :deleteText="$t('audio.view.info.delete')"
+            @download="downloadAudio"
+            @rename="namedWindow"
+            @delete="deleteWindow"
+          ></MrppInfo>
         </el-col>
       </el-row>
     </div>
@@ -80,7 +111,8 @@ const tableData = computed(() => {
       { item: t("audio.view.info.item1"), text: audioData.value.name },
       {
         item: t("audio.view.info.item2"),
-        text: audioData.value.author?.username || audioData.value.author?.nickname,
+        text:
+          audioData.value.author?.username || audioData.value.author?.nickname,
       },
       {
         item: t("audio.view.info.item3"),
@@ -92,9 +124,14 @@ const tableData = computed(() => {
       },
     ];
     let info: any = {};
-    try { info = JSON.parse(audioData.value.info || '{}'); } catch { }
+    try {
+      info = JSON.parse(audioData.value.info || "{}");
+    } catch {}
     if (info.length) {
-      base.push({ item: t("audio.view.info.item5"), text: info.length.toFixed(2) + 's' });
+      base.push({
+        item: t("audio.view.info.item5"),
+        text: info.length.toFixed(2) + "s",
+      });
     }
     return base;
   }
@@ -104,22 +141,25 @@ const tableData = computed(() => {
 const downloadAudio = async () => {
   if (!audioData.value) return;
 
-  const fileName = audioData.value.file.filename || '';
-  const fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase() || '.mp3';
+  const fileName = audioData.value.file.filename || "";
+  const fileExt =
+    fileName.substring(fileName.lastIndexOf(".")).toLowerCase() || ".mp3";
   await downloadResource(
     {
-      name: audioData.value.name || 'audio',
-      file: audioData.value.file
+      name: audioData.value.name || "audio",
+      file: audioData.value.file,
     },
     fileExt,
     t,
-    'audio.view.download'
+    "audio.view.download"
   );
 };
 
 // 音频播放控制函数
 const handlePlayAudio = () => {
-  const audio = document.getElementById("audio-dialog-player") as HTMLAudioElement;
+  const audio = document.getElementById(
+    "audio-dialog-player"
+  ) as HTMLAudioElement;
   if (!audio) return;
 
   if (!isPlay.value) {
@@ -146,7 +186,9 @@ const listenEnd = () => {
 // 处理音频加载完成
 const dealWith = () => {
   if (!prepare.value) {
-    const audio = document.getElementById("audio-dialog-player") as HTMLAudioElement;
+    const audio = document.getElementById(
+      "audio-dialog-player"
+    ) as HTMLAudioElement;
     if (audio) {
       setup(audio);
     }
@@ -237,9 +279,11 @@ const fetchData = async () => {
 
     if (props.autoPlay) {
       nextTick(() => {
-        const audio = document.getElementById("audio-dialog-player") as HTMLAudioElement;
+        const audio = document.getElementById(
+          "audio-dialog-player"
+        ) as HTMLAudioElement;
         if (audio) {
-          audio.play().catch(e => console.error("Auto-play failed:", e));
+          audio.play().catch((e) => console.error("Auto-play failed:", e));
           isPlay.value = true;
         }
       });
@@ -258,18 +302,23 @@ const handleClose = () => {
   file.value = undefined;
 };
 
-watch(() => props.audioId, (newId) => {
-  if (newId && props.modelValue) {
-    fetchData();
+watch(
+  () => props.audioId,
+  (newId) => {
+    if (newId && props.modelValue) {
+      fetchData();
+    }
   }
-});
+);
 
-watch(() => props.modelValue, (val) => {
-  if (val && props.audioId) {
-    fetchData();
+watch(
+  () => props.modelValue,
+  (val) => {
+    if (val && props.audioId) {
+      fetchData();
+    }
   }
-});
-
+);
 </script>
 
 <style lang="scss" scoped>
@@ -278,9 +327,11 @@ watch(() => props.modelValue, (val) => {
   width: 100%;
   height: 300px;
   background: rgb(238, 174, 202);
-  background: radial-gradient(circle,
-      rgba(238, 174, 202, 1) 0%,
-      rgb(169, 196, 228) 100%);
+  background: radial-gradient(
+    circle,
+    rgba(238, 174, 202, 1) 0%,
+    rgb(169, 196, 228) 100%
+  );
   border-radius: 8px;
   display: flex;
   flex-direction: column;

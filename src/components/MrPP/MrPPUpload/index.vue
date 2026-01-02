@@ -9,7 +9,7 @@
               <span class="header-declared">{{ declared }}</span>
             </div>
             <div v-if="maxSize > 0" class="size-limit-badge">
-              {{ $t('upload.maxSizeLimit', { size: maxSize }) }}
+              {{ $t("upload.maxSizeLimit", { size: maxSize }) }}
             </div>
           </div>
         </template>
@@ -54,9 +54,7 @@ const props = withDefaults(
   }
 );
 
-const emit = defineEmits([
-  "saveResource",
-]);
+const emit = defineEmits(["saveResource"]);
 const fileStore = useFileStore();
 
 const data = computed(() => [
@@ -119,8 +117,7 @@ const saveFile = async (
   handler: FileHandler,
   totalFiles: number
 ) => {
-
-  extension = extension.startsWith('.') ? extension : `.${extension}`;
+  extension = extension.startsWith(".") ? extension : `.${extension}`;
   const data: UploadFileType = {
     filename: file.name,
     md5,
@@ -150,7 +147,7 @@ const select = async () => {
       const maxBytes = props.maxSize * 1024 * 1024;
       const oversizedFiles = files.filter((f: File) => f.size > maxBytes);
       if (oversizedFiles.length > 0) {
-        const names = oversizedFiles.map((f: File) => f.name).join(', ');
+        const names = oversizedFiles.map((f: File) => f.name).join(", ");
         ElMessage.error(`文件超过 ${props.maxSize}MB 限制: ${names}`);
         // 过滤掉超大文件
         const validFiles = files.filter((f: File) => f.size <= maxBytes);
@@ -174,7 +171,9 @@ const select = async () => {
         const handler = await fileStore.store.publicHandler();
         let extension = ".bytes";
         if (file.extension !== undefined) {
-          extension = file.extension.startsWith('.') ? file.extension : `.${file.extension}`;
+          extension = file.extension.startsWith(".")
+            ? file.extension
+            : `.${file.extension}`;
         }
         const has = await fileStore.store.fileHas(
           md5,

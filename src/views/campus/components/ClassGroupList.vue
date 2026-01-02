@@ -1,40 +1,64 @@
 <template>
   <div class="class-group-list-wrapper">
-
-    <CardListPage ref="cardListPageRef" :fetch-data="fetchGroups" :page-size="pageSize" :card-width="250"
-      :show-header="true" :auto-fill="true" :min-card-width="240" wrapper-class="group-list-wrapper"
-      @refresh="handleRefresh">
-
+    <CardListPage
+      ref="cardListPageRef"
+      :fetch-data="fetchGroups"
+      :page-size="pageSize"
+      :card-width="250"
+      :show-header="true"
+      :auto-fill="true"
+      :min-card-width="240"
+      wrapper-class="group-list-wrapper"
+      @refresh="handleRefresh"
+    >
       <template #header-actions>
         <slot name="header-actions">
           <!-- Always allow create, or controlled by parent -->
           <el-button type="primary" size="small" @click="$emit('create-group')">
             <el-icon>
-              <Plus />
+              <Plus></Plus>
             </el-icon>
-            {{ $t('route.personalCenter.campus.createGroup') }}
+            {{ $t("route.personalCenter.campus.createGroup") }}
           </el-button>
         </slot>
       </template>
 
       <template #card="{ item }">
-        <MrPPCard :item="item" type="小组" color="#d35400" :show-actions="false">
+        <MrPPCard
+          :item="item"
+          type="小组"
+          color="#d35400"
+          :show-actions="false"
+        >
           <template #enter>
             <div class="card-actions">
               <!-- If this is one of my groups -->
               <template v-if="isMyGroup(item)">
                 <el-tag type="success" size="small" class="my-group-tag">{{
-                  $t('route.personalCenter.campus.myGroup') }}</el-tag>
+                  $t("route.personalCenter.campus.myGroup")
+                }}</el-tag>
                 <div class="action-buttons">
                   <el-button-group>
-                    <el-button type="success" size="small" @click="$emit('enter-group', item)">
-                      {{ $t('common.enter') }}
+                    <el-button
+                      type="success"
+                      size="small"
+                      @click="$emit('enter-group', item)"
+                    >
+                      {{ $t("common.enter") }}
                     </el-button>
-                    <el-button type="primary" size="small" @click="$emit('edit-group', item)">
-                      {{ $t('common.edit') }}
+                    <el-button
+                      type="primary"
+                      size="small"
+                      @click="$emit('edit-group', item)"
+                    >
+                      {{ $t("common.edit") }}
                     </el-button>
-                    <el-button type="danger" size="small" @click="$emit('delete-group', item)">
-                      {{ $t('common.delete') }}
+                    <el-button
+                      type="danger"
+                      size="small"
+                      @click="$emit('delete-group', item)"
+                    >
+                      {{ $t("common.delete") }}
                     </el-button>
                   </el-button-group>
                 </div>
@@ -45,12 +69,20 @@
                 <div class="spacer"></div>
                 <div class="action-buttons">
                   <el-button-group>
-                    <el-button type="success" size="small" @click="$emit('enter-group', item)">
-                      {{ $t('common.enter') }}
+                    <el-button
+                      type="success"
+                      size="small"
+                      @click="$emit('enter-group', item)"
+                    >
+                      {{ $t("common.enter") }}
                     </el-button>
-                    <el-button type="danger" size="small" :loading="joiningGroupId === item.id"
-                      @click="$emit('leave-group', item)">
-                      {{ $t('route.personalCenter.campus.leaveGroup') }}
+                    <el-button
+                      type="danger"
+                      size="small"
+                      :loading="joiningGroupId === item.id"
+                      @click="$emit('leave-group', item)"
+                    >
+                      {{ $t("route.personalCenter.campus.leaveGroup") }}
                     </el-button>
                   </el-button-group>
                 </div>
@@ -58,9 +90,13 @@
 
               <!-- If I am not in this group, show Join -->
               <div v-else class="action-buttons join-action">
-                <el-button type="primary" size="small" :loading="joiningGroupId === item.id"
-                  @click="$emit('join-group', item)">
-                  {{ $t('route.personalCenter.campus.join') }}
+                <el-button
+                  type="primary"
+                  size="small"
+                  :loading="joiningGroupId === item.id"
+                  @click="$emit('join-group', item)"
+                >
+                  {{ $t("route.personalCenter.campus.join") }}
                 </el-button>
               </div>
             </div>
@@ -72,14 +108,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed } from "vue";
 import { useUserStoreHook } from "@/store/modules/user";
-import { Plus } from '@element-plus/icons-vue';
-import CardListPage from '@/components/MrPP/CardListPage/index.vue';
-import MrPPCard from '@/components/MrPP/MrPPCard/index.vue';
-import { getClassGroups } from '@/api/v1/edu-class';
-import type { Group } from '@/api/v1/types/group';
-import type { FetchParams, FetchResponse } from '@/components/MrPP/CardListPage/types';
+import { Plus } from "@element-plus/icons-vue";
+import CardListPage from "@/components/MrPP/CardListPage/index.vue";
+import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
+import { getClassGroups } from "@/api/v1/edu-class";
+import type { Group } from "@/api/v1/types/group";
+import type {
+  FetchParams,
+  FetchResponse,
+} from "@/components/MrPP/CardListPage/types";
 
 const props = defineProps<{
   classId: number;
@@ -89,17 +128,16 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'create-group'): void;
-  (e: 'edit-group', group: Group): void;
-  (e: 'delete-group', group: Group): void;
-  (e: 'join-group', group: Group): void;
-  (e: 'leave-group', group: Group): void;
-  (e: 'enter-group', group: Group): void;
+  (e: "create-group"): void;
+  (e: "edit-group", group: Group): void;
+  (e: "delete-group", group: Group): void;
+  (e: "join-group", group: Group): void;
+  (e: "leave-group", group: Group): void;
+  (e: "enter-group", group: Group): void;
 }>();
 
 const userStore = useUserStoreHook();
 const currentUserId = computed(() => userStore.userInfo?.id);
-
 
 const isMyGroup = (group: Group) => {
   return group.user_id === currentUserId.value;
@@ -108,13 +146,13 @@ const isMyGroup = (group: Group) => {
 const cardListPageRef = ref<InstanceType<typeof CardListPage> | null>(null);
 
 const fetchGroups = async (params: FetchParams): Promise<FetchResponse> => {
-  console.log('ClassGroupList: fetchGroups called with', params);
+  console.log("ClassGroupList: fetchGroups called with", params);
   const response = await getClassGroups(
     props.classId,
     params.sort,
     params.search,
     params.page,
-    'image,user,joined'
+    "image,user,joined"
   );
   return response;
 };
@@ -129,7 +167,7 @@ const refresh = () => {
 };
 
 defineExpose({
-  refresh
+  refresh,
 });
 </script>
 
@@ -144,7 +182,7 @@ defineExpose({
     border: none;
     box-shadow: none;
 
-    >.el-card__body {
+    > .el-card__body {
       padding: 0;
     }
   }
@@ -169,8 +207,6 @@ defineExpose({
   gap: 8px;
   padding: 8px;
 }
-
-
 
 .spacer {
   flex-grow: 1;

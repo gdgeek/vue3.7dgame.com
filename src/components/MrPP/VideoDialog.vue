@@ -1,6 +1,12 @@
 <template>
-  <el-dialog v-model="visible" :title="$t('video.view.title')" width="80%" append-to-body destroy-on-close
-    @closed="handleClose">
+  <el-dialog
+    v-model="visible"
+    :title="$t('video.view.title')"
+    width="80%"
+    append-to-body
+    destroy-on-close
+    @closed="handleClose"
+  >
     <div class="document-index" v-loading="loading">
       <el-row :gutter="20">
         <el-col :sm="16">
@@ -9,21 +15,40 @@
               <span v-if="videoData">{{ videoData.name }}</span>
             </template>
             <div class="box-item" style="text-align: center">
-              <video id="video" controls="true" style="height: 300px; width: auto" v-if="file">
+              <video
+                id="video"
+                controls="true"
+                style="height: 300px; width: auto"
+                v-if="file"
+              >
                 <source :src="file" />
               </video>
-              <video id="new_video" style="height: 100%; width: auto" hidden @canplaythrough="dealWith"></video>
+              <video
+                id="new_video"
+                style="height: 100%; width: auto"
+                hidden
+                @canplaythrough="dealWith"
+              ></video>
             </div>
           </el-card>
           <br />
         </el-col>
 
         <el-col :sm="8">
-          <MrppInfo v-if="videoData" :title="$t('video.view.info.title')" titleSuffix=" :" :tableData="tableData"
-            :itemLabel="$t('video.view.info.label1')" :textLabel="$t('video.view.info.label2')"
-            :downloadText="$t('video.view.info.download')" :renameText="$t('video.view.info.name')"
-            :deleteText="$t('video.view.info.delete')" @download="downloadVideo" @rename="namedWindow"
-            @delete="deleteWindow" />
+          <MrppInfo
+            v-if="videoData"
+            :title="$t('video.view.info.title')"
+            titleSuffix=" :"
+            :tableData="tableData"
+            :itemLabel="$t('video.view.info.label1')"
+            :textLabel="$t('video.view.info.label2')"
+            :downloadText="$t('video.view.info.download')"
+            :renameText="$t('video.view.info.name')"
+            :deleteText="$t('video.view.info.delete')"
+            @download="downloadVideo"
+            @rename="namedWindow"
+            @delete="deleteWindow"
+          ></MrppInfo>
           <br />
         </el-col>
       </el-row>
@@ -72,7 +97,8 @@ const tableData = computed(() => {
       },
       {
         item: t("video.view.info.item2"),
-        text: videoData.value.author?.username || videoData.value.author?.nickname,
+        text:
+          videoData.value.author?.username || videoData.value.author?.nickname,
       },
       {
         item: t("video.view.info.item3"),
@@ -88,9 +114,14 @@ const tableData = computed(() => {
       },
     ];
     let info: any = {};
-    try { info = JSON.parse(videoData.value.info || '{}'); } catch { }
+    try {
+      info = JSON.parse(videoData.value.info || "{}");
+    } catch {}
     if (info.length) {
-      base.push({ item: t("video.view.info.item6"), text: info.length.toFixed(2) + 's' });
+      base.push({
+        item: t("video.view.info.item6"),
+        text: info.length.toFixed(2) + "s",
+      });
     }
     return base;
   } else {
@@ -101,16 +132,17 @@ const tableData = computed(() => {
 const downloadVideo = async () => {
   if (!videoData.value) return;
 
-  const fileName = videoData.value.file.filename || '';
-  const fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase() || '.mp4';
+  const fileName = videoData.value.file.filename || "";
+  const fileExt =
+    fileName.substring(fileName.lastIndexOf(".")).toLowerCase() || ".mp4";
   await downloadResource(
     {
-      name: videoData.value.name || 'video',
-      file: videoData.value.file
+      name: videoData.value.name || "video",
+      file: videoData.value.file,
     },
     fileExt,
     t,
-    'video.view.download'
+    "video.view.download"
   );
 };
 
@@ -177,7 +209,7 @@ const loadData = async () => {
       if (props.autoPlay) {
         const video = document.getElementById("video") as HTMLVideoElement;
         if (video) {
-          video.play().catch(e => console.error("Auto-play failed:", e));
+          video.play().catch((e) => console.error("Auto-play failed:", e));
         }
       }
     }, 0);
@@ -188,11 +220,14 @@ const loadData = async () => {
   }
 };
 
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    loadData();
+watch(
+  () => props.modelValue,
+  (val) => {
+    if (val) {
+      loadData();
+    }
   }
-});
+);
 
 const handleClose = () => {
   videoData.value = null;

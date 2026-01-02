@@ -10,11 +10,11 @@
           <span>登录账号</span>
           <br />
           <br />
-          <name-password />
+          <name-password></name-password>
         </el-card>
         <br />
         <div style="width: 100%" shadow="never" class="apple-login-container">
-          <wechat />
+          <wechat></wechat>
         </div>
         <br />
       </div>
@@ -31,7 +31,6 @@ import Wechat from "@/components/Account/Wechat.vue";
 const settingsStore = useSettingsStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 const loading = ref<boolean>(false);
-
 </script>
 
 <style scoped lang="scss">

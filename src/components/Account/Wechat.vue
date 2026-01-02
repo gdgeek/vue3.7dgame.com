@@ -2,17 +2,25 @@
   <div class="wechat-container" :class="{ 'dark-theme': isDark }">
     <el-button class="wechat-login-button" @click="login">
       <el-icon class="wechat-icon">
-        <ChatRound />
+        <ChatRound></ChatRound>
       </el-icon>
       <span>微信扫码注册/登录</span>
     </el-button>
 
-    <el-dialog v-model="dialogVisible" title="微信扫码注册/登录" width="340px" class="qrcode-dialog"
-      :class="{ 'dark-theme': isDark }" :show-close="true" align-center @close="close">
+    <el-dialog
+      v-model="dialogVisible"
+      title="微信扫码注册/登录"
+      width="340px"
+      class="qrcode-dialog"
+      :class="{ 'dark-theme': isDark }"
+      :show-close="true"
+      align-center
+      @close="close"
+    >
       <div class="qrcode-container">
         <div class="qrcode-wrapper">
           <div class="qrcode-box">
-            <Qrcode :text="url" :options="qrOptions" />
+            <Qrcode :text="url" :options="qrOptions"></Qrcode>
           </div>
           <div class="qrcode-logo">
             <img src="/media/image/logo.gif" alt="Logo" />
@@ -25,7 +33,12 @@
         </div>
 
         <div class="loading-status" v-if="isScanning">
-          <el-progress type="circle" :percentage="scanProgress" :width="36" :stroke-width="4" />
+          <el-progress
+            type="circle"
+            :percentage="scanProgress"
+            :width="36"
+            :stroke-width="4"
+          ></el-progress>
           <span class="scanning-text">扫码中，请稍候...</span>
         </div>
       </div>
@@ -58,9 +71,9 @@ const qrOptions = computed(() => ({
   width: 200,
   margin: 2,
   color: {
-    dark: isDark.value ? '#ffffff' : '#000000',
-    light: '#ffffff00'  // 透明背景
-  }
+    dark: isDark.value ? "#ffffff" : "#000000",
+    light: "#ffffff00", // 透明背景
+  },
 }));
 
 const parseRedirect = (): {
@@ -106,9 +119,12 @@ const fetchRefresh = async () => {
       scanProgress.value = Math.min(scanProgress.value + 20, 90);
 
       close();
-      if (response.data.message === 'signup') {
-        router.push({ path: '/site/register', query: { token: response.data.token } });
-      } else if (response.data.message === 'signin') {
+      if (response.data.message === "signup") {
+        router.push({
+          path: "/site/register",
+          query: { token: response.data.token },
+        });
+      } else if (response.data.message === "signin") {
         await userStore.loginByWechat({ token: response.data.token });
         await userStore.getUserInfo();
 
@@ -117,7 +133,7 @@ const fetchRefresh = async () => {
       }
     }
   } catch (error) {
-    console.error('微信登录刷新错误:', error);
+    console.error("微信登录刷新错误:", error);
   }
 };
 
@@ -144,8 +160,8 @@ const login = async function () {
     // 启动轮询检查登录状态
     intervalId = setInterval(fetchRefresh, 3000);
   } catch (error) {
-    console.error('获取微信二维码失败:', error);
-    ElMessage.error('获取微信二维码失败，请稍后再试');
+    console.error("获取微信二维码失败:", error);
+    ElMessage.error("获取微信二维码失败，请稍后再试");
   }
 };
 </script>

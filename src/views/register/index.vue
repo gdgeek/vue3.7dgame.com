@@ -1,8 +1,7 @@
 <template>
-
   <body :class="{ 'dark-theme': isDark }">
     <div :class="['header', { 'dark-theme': isDark }]">
-      <div style="height: 30px;" v-if="!isMobile">
+      <div style="height: 30px" v-if="!isMobile">
         <RouterLink to="/" class="logo">
           <img src="/favicon.ico" alt="" />
           <span class="project_title">{{ domainStore.title }}</span>
@@ -26,9 +25,17 @@
         </div>
         <div class="header-right">
           <div class="top-bar">
-            <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
-              @change="toggleTheme"></el-switch>
-            <lang-select class="ml-2 cursor-pointer" style="margin-left: 25px"></lang-select>
+            <el-switch
+              v-model="isDark"
+              inline-prompt
+              active-icon="Moon"
+              inactive-icon="Sunny"
+              @change="toggleTheme"
+            ></el-switch>
+            <lang-select
+              class="ml-2 cursor-pointer"
+              style="margin-left: 25px"
+            ></lang-select>
           </div>
         </div>
       </div>
@@ -36,71 +43,107 @@
       <div class="mobile" v-else>
         <el-dropdown>
           <span class="">
-            <img src="/favicon.ico" alt="" style="margin-left: 10px; width: auto" />
+            <img
+              src="/favicon.ico"
+              alt=""
+              style="margin-left: 10px; width: auto"
+            />
             <span class="project_title">{{ domainStore.title }}</span>
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item><el-link href="https://testflight.apple.com/join/V4XNEG6t" target="_blank"
-                  :underline="false">
+              <el-dropdown-item
+                ><el-link
+                  href="https://testflight.apple.com/join/V4XNEG6t"
+                  target="_blank"
+                  :underline="false"
+                >
                   <img src="/testflight.ico" style="width: 25px" alt="" />
                   <span style="margin-left: 5px">TestFlight</span>
-                </el-link></el-dropdown-item>
-              <el-dropdown-item><el-link href="https://discord.gg/KhkJySu7bb" target="_blank" :underline="false">
+                </el-link></el-dropdown-item
+              >
+              <el-dropdown-item
+                ><el-link
+                  href="https://discord.gg/KhkJySu7bb"
+                  target="_blank"
+                  :underline="false"
+                >
                   <img src="/discord.ico" style="width: 25px" alt="" />
                   <span style="margin-left: 5px">Discord</span>
-                </el-link></el-dropdown-item>
-              <el-dropdown-item><el-link href="https://x.com/GD_Geek" target="_blank" :underline="false">
-                  <img src="/x3.png" style="width: 26px; border-radius: 25%" alt="" />
+                </el-link></el-dropdown-item
+              >
+              <el-dropdown-item
+                ><el-link
+                  href="https://x.com/GD_Geek"
+                  target="_blank"
+                  :underline="false"
+                >
+                  <img
+                    src="/x3.png"
+                    style="width: 26px; border-radius: 25%"
+                    alt=""
+                  />
                   <span style="margin-left: 5px">X.com</span>
-                </el-link></el-dropdown-item>
+                </el-link></el-dropdown-item
+              >
             </el-dropdown-menu>
           </template>
         </el-dropdown>
         <div class="header-right">
           <div :class="['top-bar', { mobile: isMobile }]">
-            <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
-              @change="toggleTheme"></el-switch>
-            <lang-select class="ml-2 cursor-pointer" style="margin-left: 10px"></lang-select>
+            <el-switch
+              v-model="isDark"
+              inline-prompt
+              active-icon="Moon"
+              inactive-icon="Sunny"
+              @change="toggleTheme"
+            ></el-switch>
+            <lang-select
+              class="ml-2 cursor-pointer"
+              style="margin-left: 10px"
+            ></lang-select>
           </div>
         </div>
       </div>
     </div>
     <div class="content">
-      <login-form v-if="!appleIdToken" :isMobile="isMobile" ref="loginFormRef" @enter="enter"
-        @register="register"></login-form>
-      <register-form v-else @enter="enter" :idToken="appleIdToken"></register-form>
+      <login-form
+        v-if="!appleIdToken"
+        :isMobile="isMobile"
+        ref="loginFormRef"
+        @enter="enter"
+        @register="register"
+      ></login-form>
+      <register-form
+        v-else
+        @enter="enter"
+        :idToken="appleIdToken"
+      ></register-form>
     </div>
 
-    <el-card v-if="!isMobile" style="
+    <el-card
+      v-if="!isMobile"
+      style="
         height: 7%;
         width: 100%;
         display: flex;
         justify-content: flex-end;
         align-items: center;
-      ">
+      "
+    >
       <div class="background-screen-max">
-        <div style="display: flex; align-items: center; gap: 10px">
-
-
-
-
-
-        </div>
+        <div style="display: flex; align-items: center; gap: 10px"></div>
       </div>
     </el-card>
 
     <el-card v-if="isMobile" style="width: 100%">
       <div class="background-screen-max">
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
-
-        </div>
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
-
-
-
-
-        </div>
+        <div
+          style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+        ></div>
+        <div
+          style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+        ></div>
       </div>
     </el-card>
   </body>
@@ -117,7 +160,6 @@ import { useSettingsStore } from "@/store/modules/settings";
 import { useDomainStore } from "@/store/modules/domain";
 import { useTagsViewStore, useUserStore, useScreenStore } from "@/store";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
-
 
 const router = useRouter();
 const route = useRoute();

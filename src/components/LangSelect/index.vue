@@ -6,8 +6,12 @@
     </div>
     <template #dropdown>
       <el-dropdown-menu>
-        <el-dropdown-item v-for="item in langOptions" :key="item.value" :disabled="appStore.language === item.value"
-          :command="item.value">
+        <el-dropdown-item
+          v-for="item in langOptions"
+          :key="item.value"
+          :disabled="appStore.language === item.value"
+          :command="item.value"
+        >
           {{ item.label }}
         </el-dropdown-item>
       </el-dropdown-menu>
@@ -42,7 +46,9 @@ const domainStore = useDomainStore();
 const { locale, t } = useI18n();
 
 const currentLangLabel = computed(() => {
-  const currentLang = langOptions.find(item => item.value === appStore.language);
+  const currentLang = langOptions.find(
+    (item) => item.value === appStore.language
+  );
   return currentLang ? currentLang.abbr : "中文";
 });
 

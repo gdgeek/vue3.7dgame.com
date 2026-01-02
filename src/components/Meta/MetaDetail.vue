@@ -5,25 +5,52 @@
       <el-col :sm="16">
         <el-card v-if="item" class="box-card">
           <template #header>
-            <el-form ref="itemForm" :rules="rules" v-if="item" :model="item" label-width="80px">
-              <el-form-item :label="$t('meta.metaEdit.form.title')" prop="title">
+            <el-form
+              ref="itemForm"
+              :rules="rules"
+              v-if="item"
+              :model="item"
+              label-width="80px"
+            >
+              <el-form-item
+                :label="$t('meta.metaEdit.form.title')"
+                prop="title"
+              >
                 <el-input v-model="item.title" @change="onSubmit"></el-input>
               </el-form-item>
-              <el-form-item :label="$t('meta.metaEdit.form.picture')" prop="title">
+              <el-form-item
+                :label="$t('meta.metaEdit.form.picture')"
+                prop="title"
+              >
                 <div class="box-item" style="width: 100%; text-align: center">
-                  <ImageSelector :imageUrl="image" :itemId="item.id" @image-selected="handleImageSelected"
-                    @image-upload-success="handleImageUploadSuccess" />
+                  <ImageSelector
+                    :imageUrl="image"
+                    :itemId="item.id"
+                    @image-selected="handleImageSelected"
+                    @image-upload-success="handleImageUploadSuccess"
+                  ></ImageSelector>
                 </div>
               </el-form-item>
               <el-form-item v-if="prefab" label="Info" prop="title">
-                <el-input v-model="jsonInfo" type="textarea" @change="onSubmit"></el-input>
+                <el-input
+                  v-model="jsonInfo"
+                  type="textarea"
+                  @change="onSubmit"
+                ></el-input>
               </el-form-item>
             </el-form>
           </template>
         </el-card>
         <br />
         <el-card v-if="item !== null" class="box-card">
-          <el-button v-if="item.viewable" @click="editor" icon="Edit" type="primary" size="small" style="width: 100%">
+          <el-button
+            v-if="item.viewable"
+            @click="editor"
+            icon="Edit"
+            type="primary"
+            size="small"
+            style="width: 100%"
+          >
             {{ $t("meta.metaEdit.contentEdit") }}
           </el-button>
           <br />
@@ -41,9 +68,8 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { getMeta, putMeta, metaInfo } from "@/api/v1/meta";
 import { translateRouteTitle } from "@/utils/i18n";
@@ -55,7 +81,7 @@ const props = defineProps<{
   metaId: number;
 }>();
 
-const emit = defineEmits(['changed']);
+const emit = defineEmits(["changed"]);
 
 const router = useRouter();
 const item = ref<metaInfo | null>(null);
@@ -125,9 +151,13 @@ const refresh = async () => {
   }
 };
 
-watch(() => props.metaId, () => {
-  refresh();
-}, { immediate: true });
+watch(
+  () => props.metaId,
+  () => {
+    refresh();
+  },
+  { immediate: true }
+);
 
 const editor = () => {
   if (item.value) {
@@ -162,7 +192,7 @@ const handleImageSelected = async (event: ImageUpdateEvent) => {
       await putMeta(item.value.id, item.value);
       ElMessage.success(t("meta.metaEdit.image.updateSuccess"));
       await refresh();
-      emit('changed');
+      emit("changed");
     } catch (error) {
       console.error("Failed to update meta image:", error);
       ElMessage.error(t("meta.metaEdit.image.updateError"));
@@ -178,7 +208,7 @@ const handleImageUploadSuccess = async (event: ImageUpdateEvent) => {
       await putMeta(item.value.id, item.value);
       ElMessage.success(t("meta.metaEdit.image.updateSuccess"));
       await refresh();
-      emit('changed');
+      emit("changed");
     } catch (error) {
       console.error("Failed to update meta image:", error);
       ElMessage.error(t("meta.metaEdit.image.updateError"));
@@ -194,7 +224,7 @@ const onSubmit = async () => {
     await putMeta(item.value.id, item.value);
     ElMessage.success(t("meta.metaEdit.success"));
     await refresh();
-    emit('changed');
+    emit("changed");
   } else {
     console.error("error submit!!");
     ElMessage.error(t("verse.view.error2"));

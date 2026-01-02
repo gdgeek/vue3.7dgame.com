@@ -29,17 +29,21 @@ const userStore = useUserStore();
 const domainStore = useDomainStore();
 const ability = useAbility(); // 提取到 setup 顶层
 
-
-watch(() => userStore.userInfo, (newUserInfo) => {
-
-  if (newUserInfo == null || newUserInfo.id === 0 || userStore.userInfo == null) {
-    return;
-  }
-  UpdateAbility(ability, userStore.userInfo.roles, userStore.userInfo.id);
-  UpdateRoutes(ability);
-
-}, { deep: true, immediate: true });
-
+watch(
+  () => userStore.userInfo,
+  (newUserInfo) => {
+    if (
+      newUserInfo == null ||
+      newUserInfo.id === 0 ||
+      userStore.userInfo == null
+    ) {
+      return;
+    }
+    UpdateAbility(ability, userStore.userInfo.roles, userStore.userInfo.id);
+    UpdateRoutes(ability);
+  },
+  { deep: true, immediate: true }
+);
 
 onMounted(async () => {
   // Fetch domain SEO info on app startup
@@ -65,8 +69,7 @@ onUnmounted(() => {
 .fade-enter-from,
 .fade-leave-to
 
-/* .fade-leave-active in <2.1.8 */
-  {
+/* .fade-leave-active in <2.1.8 */ {
   opacity: 0;
 }
 

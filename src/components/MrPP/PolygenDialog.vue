@@ -1,6 +1,12 @@
 <template>
-  <el-dialog v-model="visible" :title="$t('polygen.view.title')" width="80%" append-to-body destroy-on-close
-    @closed="handleClose">
+  <el-dialog
+    v-model="visible"
+    :title="$t('polygen.view.title')"
+    width="80%"
+    append-to-body
+    destroy-on-close
+    @closed="handleClose"
+  >
     <div class="document-index" v-loading="loading">
       <el-row :gutter="20">
         <el-col :sm="16">
@@ -10,13 +16,23 @@
             </template>
             <div class="box-item">
               <div v-if="polygenData">
-                <polygen-view ref="three" :file="polygenData.file" @loaded="loaded" @progress="progress" />
-                <el-progress style="width: 100%;" :stroke-width="18" v-if="percentage !== 100" :text-inside="true"
-                  :percentage="percentage">
+                <polygen-view
+                  ref="three"
+                  :file="polygenData.file"
+                  @loaded="loaded"
+                  @progress="progress"
+                ></polygen-view>
+                <el-progress
+                  style="width: 100%"
+                  :stroke-width="18"
+                  v-if="percentage !== 100"
+                  :text-inside="true"
+                  :percentage="percentage"
+                >
                 </el-progress>
               </div>
               <el-card v-else>
-                <el-skeleton :rows="7" />
+                <el-skeleton :rows="7"></el-skeleton>
               </el-card>
             </div>
           </el-card>
@@ -24,11 +40,20 @@
         </el-col>
 
         <el-col :sm="8">
-          <MrppInfo v-if="polygenData" :title="$t('polygen.view.info.title')" titleSuffix=" :" :tableData="tableData"
-            :itemLabel="$t('polygen.view.info.label1')" :textLabel="$t('polygen.view.info.label2')"
-            :downloadText="$t('polygen.view.info.download')" :renameText="$t('polygen.view.info.name')"
-            :deleteText="$t('polygen.view.info.delete')" @download="downloadModel" @rename="namedWindow"
-            @delete="deleteWindow" />
+          <MrppInfo
+            v-if="polygenData"
+            :title="$t('polygen.view.info.title')"
+            titleSuffix=" :"
+            :tableData="tableData"
+            :itemLabel="$t('polygen.view.info.label1')"
+            :textLabel="$t('polygen.view.info.label2')"
+            :downloadText="$t('polygen.view.info.download')"
+            :renameText="$t('polygen.view.info.name')"
+            :deleteText="$t('polygen.view.info.delete')"
+            @download="downloadModel"
+            @rename="namedWindow"
+            @delete="deleteWindow"
+          ></MrppInfo>
           <br />
         </el-col>
       </el-row>
@@ -38,7 +63,11 @@
 
 <script setup lang="ts">
 import PolygenView from "@/components/PolygenView.vue";
-import { getPolygen, putPolygen, deletePolygen } from "@/api/v1/resources/index";
+import {
+  getPolygen,
+  putPolygen,
+  deletePolygen,
+} from "@/api/v1/resources/index";
 import { printVector3 } from "@/assets/js/helper";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 import MrppInfo from "@/components/MrPP/MrppInfo/index.vue";
@@ -77,7 +106,9 @@ const tableData = computed(() => {
       { item: t("polygen.view.info.item1"), text: polygenData.value.name },
       {
         item: t("polygen.view.info.item2"),
-        text: polygenData.value.author.nickname || polygenData.value.author.username,
+        text:
+          polygenData.value.author.nickname ||
+          polygenData.value.author.username,
       },
       {
         item: t("polygen.view.info.item3"),
@@ -125,11 +156,14 @@ const loadData = async () => {
   }
 };
 
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    loadData();
+watch(
+  () => props.modelValue,
+  (val) => {
+    if (val) {
+      loadData();
+    }
   }
-});
+);
 
 const handleClose = () => {
   polygenData.value = null;
@@ -188,9 +222,9 @@ const downloadModel = async () => {
   if (polygenData.value) {
     await downloadResource(
       polygenData.value,
-      '.glb',
+      ".glb",
       t,
-      'polygen.view.download'
+      "polygen.view.download"
     );
   }
 };

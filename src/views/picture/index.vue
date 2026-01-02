@@ -1,23 +1,49 @@
 <template>
   <TransitionWrapper>
-    <CardListPage ref="cardListPageRef" :fetch-data="fetchPictures" wrapper-class="picture-index"
-      @refresh="handleRefresh">
+    <CardListPage
+      ref="cardListPageRef"
+      :fetch-data="fetchPictures"
+      wrapper-class="picture-index"
+      @refresh="handleRefresh"
+    >
       <template #header-actions>
         <el-button-group :inline="true">
-          <el-button size="small" type="primary" icon="uploadFilled" @click="openUploadDialog">
-            <span class="hidden-sm-and-down">{{ $t("picture.uploadPicture") }}</span>
+          <el-button
+            size="small"
+            type="primary"
+            icon="uploadFilled"
+            @click="openUploadDialog"
+          >
+            <span class="hidden-sm-and-down">{{
+              $t("picture.uploadPicture")
+            }}</span>
           </el-button>
         </el-button-group>
       </template>
 
       <template #card="{ item }">
-        <mr-p-p-card :item="item" type="图片" color="#27ae60" @named="namedWindow" @deleted="deletedWindow">
+        <mr-p-p-card
+          :item="item"
+          type="图片"
+          color="#27ae60"
+          @named="namedWindow"
+          @deleted="deletedWindow"
+        >
           <template #enter>
-            <el-button v-if="item.info === null || item.image === null" type="warning" size="small"
-              @click="openViewDialog(item.id)">
+            <el-button
+              v-if="item.info === null || item.image === null"
+              type="warning"
+              size="small"
+              @click="openViewDialog(item.id)"
+            >
               {{ $t("picture.initializePictureData") }}
             </el-button>
-            <el-button v-else type="primary" size="small" @click="openViewDialog(item.id)">
+            <el-button
+              v-else
+              type="primary"
+              size="small"
+              @click="openViewDialog(item.id)"
+            >
               {{ $t("picture.viewPicture") }}
             </el-button>
           </template>
@@ -26,30 +52,48 @@
 
       <template #dialogs>
         <!-- 新增上传弹窗组件 -->
-        <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="picture" :file-type="fileType" :max-size="5"
-          @save-resource="savePicture" @success="handleUploadSuccess">
+        <mr-p-p-upload-dialog
+          v-model="uploadDialogVisible"
+          dir="picture"
+          :file-type="fileType"
+          :max-size="5"
+          @save-resource="savePicture"
+          @success="handleUploadSuccess"
+        >
           {{ $t("picture.uploadFile") }}
         </mr-p-p-upload-dialog>
 
         <!-- 图片查看弹窗 -->
-        <PictureDialog v-model="viewDialogVisible" :id="currentPictureId" @refresh="refreshList"
-          @deleted="refreshList" />
+        <PictureDialog
+          v-model="viewDialogVisible"
+          :id="currentPictureId"
+          @refresh="refreshList"
+          @deleted="refreshList"
+        ></PictureDialog>
       </template>
     </CardListPage>
   </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import CardListPage from '@/components/MrPP/CardListPage/index.vue';
-import MrPPCard from '@/components/MrPP/MrPPCard/index.vue';
-import MrPPUploadDialog from '@/components/MrPP/MrPPUploadDialog/index.vue';
-import PictureDialog from '@/components/MrPP/PictureDialog.vue';
-import TransitionWrapper from '@/components/TransitionWrapper.vue';
-import { getPictures, putPicture, deletePicture, postPicture } from '@/api/v1/resources/index';
-import type { FetchParams, FetchResponse } from '@/components/MrPP/CardListPage/types';
+import { ref } from "vue";
+import { useI18n } from "vue-i18n";
+import { ElMessage, ElMessageBox } from "element-plus";
+import CardListPage from "@/components/MrPP/CardListPage/index.vue";
+import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
+import MrPPUploadDialog from "@/components/MrPP/MrPPUploadDialog/index.vue";
+import PictureDialog from "@/components/MrPP/PictureDialog.vue";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import {
+  getPictures,
+  putPicture,
+  deletePicture,
+  postPicture,
+} from "@/api/v1/resources/index";
+import type {
+  FetchParams,
+  FetchResponse,
+} from "@/components/MrPP/CardListPage/types";
 
 const { t } = useI18n();
 
@@ -58,7 +102,7 @@ const cardListPageRef = ref<InstanceType<typeof CardListPage> | null>(null);
 
 // 上传弹窗相关
 const uploadDialogVisible = ref(false);
-const fileType = ref('image/gif, image/jpeg, image/png, image/webp');
+const fileType = ref("image/gif, image/jpeg, image/png, image/webp");
 
 // 查看弹窗相关
 const viewDialogVisible = ref(false);
@@ -117,7 +161,7 @@ const savePicture = async (
       callback(response.data.id);
     }
   } catch (err) {
-    console.error('Failed to save picture:', err);
+    console.error("Failed to save picture:", err);
     callback(-1);
   }
 };
@@ -126,41 +170,44 @@ const savePicture = async (
 const namedWindow = async (item: { id: string; name: string }) => {
   try {
     const { value } = await ElMessageBox.prompt(
-      t('picture.prompt.message1'),
-      t('picture.prompt.message2'),
+      t("picture.prompt.message1"),
+      t("picture.prompt.message2"),
       {
-        confirmButtonText: t('picture.prompt.confirm'),
-        cancelButtonText: t('picture.prompt.cancel'),
+        confirmButtonText: t("picture.prompt.confirm"),
+        cancelButtonText: t("picture.prompt.cancel"),
         closeOnClickModal: false,
         inputValue: item.name,
       }
     );
     await putPicture(item.id, { name: value });
     refreshList();
-    ElMessage.success(t('picture.prompt.success') + value);
+    ElMessage.success(t("picture.prompt.success") + value);
   } catch {
-    ElMessage.info(t('picture.prompt.info'));
+    ElMessage.info(t("picture.prompt.info"));
   }
 };
 
 // 删除确认
-const deletedWindow = async (item: { id: string }, resetLoading: () => void) => {
+const deletedWindow = async (
+  item: { id: string },
+  resetLoading: () => void
+) => {
   try {
     await ElMessageBox.confirm(
-      t('picture.confirm.message1'),
-      t('picture.confirm.message2'),
+      t("picture.confirm.message1"),
+      t("picture.confirm.message2"),
       {
-        confirmButtonText: t('picture.confirm.confirm'),
-        cancelButtonText: t('picture.confirm.cancel'),
+        confirmButtonText: t("picture.confirm.confirm"),
+        cancelButtonText: t("picture.confirm.cancel"),
         closeOnClickModal: false,
-        type: 'warning',
+        type: "warning",
       }
     );
     await deletePicture(item.id);
     refreshList();
-    ElMessage.success(t('picture.confirm.success'));
+    ElMessage.success(t("picture.confirm.success"));
   } catch {
-    ElMessage.info(t('picture.confirm.info'));
+    ElMessage.info(t("picture.confirm.info"));
     resetLoading();
   }
 };

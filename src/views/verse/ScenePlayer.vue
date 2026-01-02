@@ -1,18 +1,22 @@
 <template>
   <div>
-    <div id="scene" ref="scene" :style="{
-      height: isSceneFullscreen ? '100vh' : '75vh',
-      width: '100%',
-      margin: '0 auto',
-      position: 'relative',
-    }"></div>
+    <div
+      id="scene"
+      ref="scene"
+      :style="{
+        height: isSceneFullscreen ? '100vh' : '75vh',
+        width: '100%',
+        margin: '0 auto',
+        position: 'relative',
+      }"
+    ></div>
   </div>
 </template>
 
 <script setup lang="ts">
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import Stats from 'stats.js';
+import Stats from "stats.js";
 
 import { ref, onMounted, onUnmounted, watch } from "vue";
 
@@ -27,7 +31,7 @@ import {
   RotatingObject,
   MoveableObject,
   DragState,
-  Transform
+  Transform,
 } from "@/types/verse";
 
 const settingsStore = useSettingsStore();
@@ -78,7 +82,10 @@ const raycaster = new THREE.Raycaster(); // 射线投射器
 // 初始化事件容器
 const initEventContainer = () => {
   if (props.verse?.data) {
-    const verseData = typeof props.verse.data === 'string' ? JSON.parse(props.verse.data) : props.verse.data;
+    const verseData =
+      typeof props.verse.data === "string"
+        ? JSON.parse(props.verse.data)
+        : props.verse.data;
     if (verseData.children?.modules) {
       verseData.children.modules.forEach((module: any) => {
         const metaId = module.parameters.meta_id;
@@ -366,7 +373,9 @@ const processEntities = async (
 
     // 计算当前实体的可见性状态，需要考虑父级的可见性
     const currentActive =
-      (entity.parameters?.active !== undefined ? entity.parameters.active : true) && parentActive;
+      (entity.parameters?.active !== undefined
+        ? entity.parameters.active
+        : true) && parentActive;
 
     console.log(`处理实体 [Level ${level}]:`, {
       type: entity.type,
@@ -376,7 +385,7 @@ const processEntities = async (
       parentTransform,
       combinedTransform: entityTransform,
       isActive: currentActive,
-      parentActive
+      parentActive,
     });
 
     // 处理当前实体
@@ -386,7 +395,7 @@ const processEntities = async (
           type: "text",
           content: entity.parameters.text || "DEFAULT TEXT",
           id: entity.parameters.uuid || crypto.randomUUID(),
-          file: { url: "" }
+          file: { url: "" },
         };
         await loadModel(
           textResource,
@@ -395,7 +404,7 @@ const processEntities = async (
             parameters: {
               ...entity.parameters,
               transform: entityTransform,
-              active: currentActive // 传递计算后的可见性状态
+              active: currentActive, // 传递计算后的可见性状态
             },
           },
           undefined,
@@ -420,7 +429,8 @@ const processEntities = async (
       sources.set(entity.parameters.uuid, entityData);
     } else if (entity.parameters?.resource) {
       const resource = props.verse.resources.find(
-        (r: Resource) => r.id?.toString() === entity.parameters.resource?.toString()
+        (r: Resource) =>
+          r.id?.toString() === entity.parameters.resource?.toString()
       );
       if (resource) {
         try {
@@ -431,7 +441,7 @@ const processEntities = async (
               parameters: {
                 ...entity.parameters,
                 transform: entityTransform,
-                active: currentActive // 传递计算后的可见性状态
+                active: currentActive, // 传递计算后的可见性状态
               },
             },
             undefined,
@@ -503,7 +513,10 @@ onMounted(async () => {
 
   // 加载verse中所有数据
   if (props.verse?.data) {
-    const verseData = typeof props.verse.data === 'string' ? JSON.parse(props.verse.data) : props.verse.data;
+    const verseData =
+      typeof props.verse.data === "string"
+        ? JSON.parse(props.verse.data)
+        : props.verse.data;
     console.log("解析后的verse全部数据:", props.verse);
     if (verseData.children?.modules) {
       for (const module of verseData.children.modules) {
@@ -534,9 +547,9 @@ onMounted(async () => {
   // 初始化性能监控
   const stats = new Stats();
   stats.showPanel(0); // 0: fps, 1: ms, 2: mb
-  stats.dom.style.position = 'absolute';
-  stats.dom.style.top = '0px';
-  stats.dom.style.left = '0px';
+  stats.dom.style.position = "absolute";
+  stats.dom.style.top = "0px";
+  stats.dom.style.left = "0px";
   if (scene.value) {
     scene.value.appendChild(stats.dom);
   }

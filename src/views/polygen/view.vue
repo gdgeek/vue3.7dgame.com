@@ -1,7 +1,7 @@
 <template>
   <TransitionWrapper>
     <div v-loading="loading" class="document-index">
-      <br>
+      <br />
       <el-row :gutter="20" style="margin: 0px 18px 0">
         <el-col :sm="16">
           <el-card class="box-card">
@@ -11,30 +11,46 @@
             </template>
             <div class="box-item">
               <div v-if="polygenData">
-
-                <polygen-view ref="three" :file="polygenData.file" @loaded="loaded" @progress="progress" />
-                <el-progress style="width: 100%;" :stroke-width="18" v-if="percentage !== 100" :text-inside="true"
-                  :percentage="percentage">
+                <polygen-view
+                  ref="three"
+                  :file="polygenData.file"
+                  @loaded="loaded"
+                  @progress="progress"
+                ></polygen-view>
+                <el-progress
+                  style="width: 100%"
+                  :stroke-width="18"
+                  v-if="percentage !== 100"
+                  :text-inside="true"
+                  :percentage="percentage"
+                >
                 </el-progress>
               </div>
               <el-card v-else>
-                <el-skeleton :rows="7" />
+                <el-skeleton :rows="7"></el-skeleton>
               </el-card>
             </div>
           </el-card>
           <br />
 
           <br />
-
-
         </el-col>
 
         <el-col :sm="8">
-          <MrppInfo v-if="polygenData" :title="$t('polygen.view.info.title')" titleSuffix=" :" :tableData="tableData"
-            :itemLabel="$t('polygen.view.info.label1')" :textLabel="$t('polygen.view.info.label2')"
-            :downloadText="$t('polygen.view.info.download')" :renameText="$t('polygen.view.info.name')"
-            :deleteText="$t('polygen.view.info.delete')" @download="downloadModel" @rename="namedWindow"
-            @delete="deleteWindow" />
+          <MrppInfo
+            v-if="polygenData"
+            :title="$t('polygen.view.info.title')"
+            titleSuffix=" :"
+            :tableData="tableData"
+            :itemLabel="$t('polygen.view.info.label1')"
+            :textLabel="$t('polygen.view.info.label2')"
+            :downloadText="$t('polygen.view.info.download')"
+            :renameText="$t('polygen.view.info.name')"
+            :deleteText="$t('polygen.view.info.delete')"
+            @download="downloadModel"
+            @rename="namedWindow"
+            @delete="deleteWindow"
+          ></MrppInfo>
           <br />
         </el-col>
       </el-row>
@@ -45,7 +61,11 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
 import PolygenView from "@/components/PolygenView.vue";
-import { getPolygen, putPolygen, deletePolygen } from "@/api/v1/resources/index";
+import {
+  getPolygen,
+  putPolygen,
+  deletePolygen,
+} from "@/api/v1/resources/index";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
 import { UploadFileType } from "@/api/user/model";
@@ -74,15 +94,15 @@ const dataInfo = computed(() =>
   prepare.value ? JSON.parse(polygenData.value.info) : null
 );
 
-
-
 const tableData = computed(() => {
   if (polygenData.value !== null && prepare.value) {
     return [
       { item: t("polygen.view.info.item1"), text: polygenData.value.name },
       {
         item: t("polygen.view.info.item2"),
-        text: polygenData.value.author.nickname || polygenData.value.author.username,
+        text:
+          polygenData.value.author.nickname ||
+          polygenData.value.author.username,
       },
       {
         item: t("polygen.view.info.item3"),
@@ -196,12 +216,7 @@ const namedWindow = async () => {
 };
 
 const downloadModel = async () => {
-  await downloadResource(
-    polygenData.value,
-    '.glb',
-    t,
-    'polygen.view.download'
-  );
+  await downloadResource(polygenData.value, ".glb", t, "polygen.view.download");
 };
 
 const updatePolygen = async (imageId: number, info: any) => {
@@ -271,7 +286,7 @@ const loaded = async (info: any) => {
           md5,
           extension,
           file,
-          () => { },
+          () => {},
           handler,
           "screenshot/polygen"
         );

@@ -480,7 +480,7 @@ export function useModelLoader(context: ModelLoaderContext) {
               voxMesh.castShadow = true;
               voxMesh.receiveShadow = true;
 
-              let sourceData = {
+              const sourceData = {
                 type: "model",
                 data: {
                   mesh: voxMesh,

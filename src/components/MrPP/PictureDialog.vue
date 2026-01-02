@@ -1,6 +1,12 @@
 <template>
-  <el-dialog v-model="visible" :title="$t('picture.view.title')" width="80%" append-to-body destroy-on-close
-    @closed="handleClose">
+  <el-dialog
+    v-model="visible"
+    :title="$t('picture.view.title')"
+    width="80%"
+    append-to-body
+    destroy-on-close
+    @closed="handleClose"
+  >
     <div class="document-index" v-loading="loading">
       <el-row :gutter="20">
         <el-col :sm="16">
@@ -8,22 +14,47 @@
             <template #header>
               <span v-if="pictureData">{{ pictureData.name }}</span>
             </template>
-            <div class="box-item"
-              style="text-align: center; min-height: 300px; display: flex; align-items: center; justify-content: center;"
-              v-loading="imageLoading">
-              <img v-show="!imageLoading" id="image" ref="image" style="height: 300px; width: auto" :src="picture"
-                fit="contain" @load="onImageLoad" @error="onImageError" />
+            <div
+              class="box-item"
+              style="
+                text-align: center;
+                min-height: 300px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+              v-loading="imageLoading"
+            >
+              <img
+                v-show="!imageLoading"
+                id="image"
+                ref="image"
+                style="height: 300px; width: auto"
+                :src="picture"
+                fit="contain"
+                @load="onImageLoad"
+                @error="onImageError"
+              />
             </div>
           </el-card>
           <br />
         </el-col>
 
         <el-col :sm="8">
-          <MrppInfo v-if="pictureData" :title="$t('picture.view.info.title')" titleSuffix=" :" :tableData="tableData"
-            :itemLabel="$t('picture.view.info.label1')" :textLabel="$t('picture.view.info.label2')"
-            :downloadText="$t('picture.view.info.download')" :renameText="$t('picture.view.info.name')"
-            :deleteText="$t('picture.view.info.delete')" @download="downloadPicture" @rename="namedWindow"
-            @delete="deleteWindow" />
+          <MrppInfo
+            v-if="pictureData"
+            :title="$t('picture.view.info.title')"
+            titleSuffix=" :"
+            :tableData="tableData"
+            :itemLabel="$t('picture.view.info.label1')"
+            :textLabel="$t('picture.view.info.label2')"
+            :downloadText="$t('picture.view.info.download')"
+            :renameText="$t('picture.view.info.name')"
+            :deleteText="$t('picture.view.info.delete')"
+            @download="downloadPicture"
+            @rename="namedWindow"
+            @delete="deleteWindow"
+          ></MrppInfo>
           <br />
         </el-col>
       </el-row>
@@ -32,7 +63,11 @@
 </template>
 
 <script setup lang="ts">
-import { getPicture, putPicture, deletePicture } from "@/api/v1/resources/index";
+import {
+  getPicture,
+  putPicture,
+  deletePicture,
+} from "@/api/v1/resources/index";
 import { convertToHttps, printVector2 } from "@/assets/js/helper";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
@@ -68,7 +103,9 @@ const tableData = computed(() => {
       { item: t("picture.view.info.item1"), text: pictureData.value.name },
       {
         item: t("picture.view.info.item2"),
-        text: pictureData.value.author?.username || pictureData.value.author?.nickname,
+        text:
+          pictureData.value.author?.username ||
+          pictureData.value.author?.nickname,
       },
       {
         item: t("picture.view.info.item3"),
@@ -100,16 +137,17 @@ const onImageError = () => {
 const downloadPicture = async () => {
   if (!pictureData.value) return;
 
-  const fileName = pictureData.value.file.filename || '';
-  const fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase() || '.jpg';
+  const fileName = pictureData.value.file.filename || "";
+  const fileExt =
+    fileName.substring(fileName.lastIndexOf(".")).toLowerCase() || ".jpg";
   await downloadResource(
     {
-      name: pictureData.value.name || 'image',
-      file: pictureData.value.file
+      name: pictureData.value.name || "image",
+      file: pictureData.value.file,
     },
     fileExt,
     t,
-    'picture.view.download'
+    "picture.view.download"
   );
 };
 

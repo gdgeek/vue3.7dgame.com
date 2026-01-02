@@ -2,7 +2,12 @@
   <div class="ai-index">
     <el-container>
       <el-header>
-        <mr-p-p-header :sorted="sorted" :searched="searched" @search="search" @sort="sort">
+        <mr-p-p-header
+          :sorted="sorted"
+          :searched="searched"
+          @search="search"
+          @sort="sort"
+        >
           <el-button-group :inline="true">
             <router-link to="/ai/generation">
               <el-button size="small" type="primary" icon="uploadFilled">
@@ -13,8 +18,13 @@
         </mr-p-p-header>
       </el-header>
       <el-main>
-        <el-card style="width: 100%; min-height: 400px;">
-          <Waterfall :list="items" :width="320" :gutter="20" :backgroundColor="'rgba(255, 255, 255, .05)'">
+        <el-card style="width: 100%; min-height: 400px">
+          <Waterfall
+            :list="items"
+            :width="320"
+            :gutter="20"
+            :backgroundColor="'rgba(255, 255, 255, .05)'"
+          >
             <template #default="{ item }">
               <el-card>
                 <template #header>
@@ -22,24 +32,49 @@
                     <span>{{ item.name }}</span>
                   </div>
                 </template>
-                <LazyImg v-if="item.resource && item.resource.image" :url="item.resource.image.url" style="width: 100%">
+                <LazyImg
+                  v-if="item.resource && item.resource.image"
+                  :url="item.resource.image.url"
+                  style="width: 100%"
+                >
                 </LazyImg>
-                <b> {{ item.id }}</b><br />
-                <el-rate v-model="item.step" :void-icon="CircleCloseFilled" :icons="{
-                  4: InfoFilled,
-                  5: SuccessFilled,
-                }" :colors="{
-                  4: '#FF9900',
-                  5: '#409eff',
-                }" disabled size="small"></el-rate>
-                <el-button v-if="item.step == 5" type="primary" size="small" @click="show(item.resource.id)">{{
-                  $t("ai.show")
-                }}</el-button>
-                <el-button @click="del(item.id)" v-else-if="item.step == 0" type="danger" size="small">{{
-                  $t("ai.delete")
-                }}</el-button>
-                <el-button v-else size="small" type="success" @click="generation(item.id)">{{ $t("ai.generate")
-                }}</el-button>
+                <b> {{ item.id }}</b
+                ><br />
+                <el-rate
+                  v-model="item.step"
+                  :void-icon="CircleCloseFilled"
+                  :icons="{
+                    4: InfoFilled,
+                    5: SuccessFilled,
+                  }"
+                  :colors="{
+                    4: '#FF9900',
+                    5: '#409eff',
+                  }"
+                  disabled
+                  size="small"
+                ></el-rate>
+                <el-button
+                  v-if="item.step == 5"
+                  type="primary"
+                  size="small"
+                  @click="show(item.resource.id)"
+                  >{{ $t("ai.show") }}</el-button
+                >
+                <el-button
+                  @click="del(item.id)"
+                  v-else-if="item.step == 0"
+                  type="danger"
+                  size="small"
+                  >{{ $t("ai.delete") }}</el-button
+                >
+                <el-button
+                  v-else
+                  size="small"
+                  type="success"
+                  @click="generation(item.id)"
+                  >{{ $t("ai.generate") }}</el-button
+                >
               </el-card>
             </template>
           </Waterfall>
@@ -47,9 +82,15 @@
       </el-main>
       <el-footer>
         <el-card class="box-card">
-          <el-pagination :current-page="pagination.current" :page-count="pagination.count" :page-size="pagination.size"
-            :total="pagination.total" layout="prev, pager, next, jumper" background
-            @current-change="handleCurrentChange"></el-pagination>
+          <el-pagination
+            :current-page="pagination.current"
+            :page-count="pagination.count"
+            :page-size="pagination.size"
+            :total="pagination.total"
+            layout="prev, pager, next, jumper"
+            background
+            @current-change="handleCurrentChange"
+          ></el-pagination>
         </el-card>
       </el-footer>
     </el-container>

@@ -1,9 +1,19 @@
 <template>
   <TransitionWrapper>
-    <CardListPage ref="cardListPageRef" :fetch-data="fetchPrefabs" wrapper-class="root" @refresh="handleRefresh">
+    <CardListPage
+      ref="cardListPageRef"
+      :fetch-data="fetchPrefabs"
+      wrapper-class="root"
+      @refresh="handleRefresh"
+    >
       <template #header-actions>
         <el-button-group :inline="true">
-          <el-button v-if="isRoot" size="small" type="primary" @click="addPrefab">
+          <el-button
+            v-if="isRoot"
+            size="small"
+            type="primary"
+            @click="addPrefab"
+          >
             <font-awesome-icon icon="plus"></font-awesome-icon>
             <span class="hidden-sm-and-down">{{ $t("meta.title") }}</span>
           </el-button>
@@ -21,17 +31,30 @@
                   </span>
                 </template>
                 <router-link :to="url(item.id)">
-                  <Id2Image :image="item.image ? item.image.url : null" :id="item.id" />
+                  <Id2Image
+                    :image="item.image ? item.image.url : null"
+                    :id="item.id"
+                  ></Id2Image>
                 </router-link>
               </el-card>
             </div>
           </template>
           <div class="clearfix">
             <el-button-group v-if="isRoot" style="float: right" :inline="true">
-              <el-button @click="editor(item.id)" size="small" type="success" icon="Edit">
+              <el-button
+                @click="editor(item.id)"
+                size="small"
+                type="success"
+                icon="Edit"
+              >
                 {{ $t("meta.edit") }}
               </el-button>
-              <el-button @click="del(item.id)" size="small" type="danger" icon="Delete">
+              <el-button
+                @click="del(item.id)"
+                size="small"
+                type="danger"
+                icon="Delete"
+              >
                 {{ $t("meta.delete") }}
               </el-button>
             </el-button-group>
@@ -45,16 +68,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import CardListPage from '@/components/MrPP/CardListPage/index.vue';
-import Id2Image from '@/components/Id2Image.vue';
-import TransitionWrapper from '@/components/TransitionWrapper.vue';
-import { getPrefabs, deletePrefab } from '@/api/v1/prefab';
-import { useUserStore } from '@/store/modules/user';
-import type { FetchParams, FetchResponse } from '@/components/MrPP/CardListPage/types';
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+import { ElMessage, ElMessageBox } from "element-plus";
+import CardListPage from "@/components/MrPP/CardListPage/index.vue";
+import Id2Image from "@/components/Id2Image.vue";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import { getPrefabs, deletePrefab } from "@/api/v1/prefab";
+import { useUserStore } from "@/store/modules/user";
+import type {
+  FetchParams,
+  FetchResponse,
+} from "@/components/MrPP/CardListPage/types";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -67,7 +93,7 @@ const fetchPrefabs = async (params: FetchParams): Promise<FetchResponse> => {
   return await getPrefabs(params.sort, params.search, params.page);
 };
 
-const handleRefresh = (data: any[]) => { };
+const handleRefresh = (data: any[]) => {};
 
 const refreshList = () => {
   cardListPageRef.value?.refresh();
@@ -78,30 +104,30 @@ const url = (id: number) => {
 };
 
 const addPrefab = () => {
-  router.push('/meta-verse/prefab');
+  router.push("/meta-verse/prefab");
 };
 
 const editor = (id: number) => {
-  router.push({ path: '/meta-verse/prefab', query: { id } });
+  router.push({ path: "/meta-verse/prefab", query: { id } });
 };
 
 const del = async (id: number) => {
   try {
     await ElMessageBox.confirm(
-      t('meta.confirm.message1'),
-      t('meta.confirm.message2'),
+      t("meta.confirm.message1"),
+      t("meta.confirm.message2"),
       {
-        confirmButtonText: t('meta.confirm.confirm'),
-        cancelButtonText: t('meta.confirm.cancel'),
+        confirmButtonText: t("meta.confirm.confirm"),
+        cancelButtonText: t("meta.confirm.cancel"),
         closeOnClickModal: false,
-        type: 'warning',
+        type: "warning",
       }
     );
     await deletePrefab(id);
     refreshList();
-    ElMessage.success(t('meta.confirm.success'));
+    ElMessage.success(t("meta.confirm.success"));
   } catch {
-    ElMessage.info(t('meta.confirm.info'));
+    ElMessage.info(t("meta.confirm.info"));
   }
 };
 </script>

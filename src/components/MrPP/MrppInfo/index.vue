@@ -1,7 +1,8 @@
 <template>
   <el-card class="box-card">
     <template #header>
-      <b>{{ title }}</b>{{ titleSuffix }}
+      <b>{{ title }}</b
+      >{{ titleSuffix }}
     </template>
     <div class="box-item">
       <el-table :data="tableData" stripe>
@@ -12,7 +13,12 @@
       <aside style="margin-top: 10px; margin-bottom: 30px">
         <el-button-group style="float: right">
           <!-- 下载按钮 -->
-          <el-button v-if="showDownload" type="primary" size="small" @click="downloadAction">
+          <el-button
+            v-if="showDownload"
+            type="primary"
+            size="small"
+            @click="downloadAction"
+          >
             <i class="el-icon-download"></i>
             {{ downloadText }}
           </el-button>
@@ -41,54 +47,54 @@
 defineProps({
   title: {
     type: String,
-    required: true
+    required: true,
   },
   titleSuffix: {
     type: String,
-    default: ''
+    default: "",
   },
   tableData: {
     type: Array,
-    required: true
+    required: true,
   },
   itemLabel: {
     type: String,
-    required: true
+    required: true,
   },
   textLabel: {
     type: String,
-    required: true
+    required: true,
   },
   showDownload: {
     type: Boolean,
-    default: true
+    default: true,
   },
   downloadText: {
     type: String,
-    required: true
+    required: true,
   },
   renameText: {
     type: String,
-    required: true
+    required: true,
   },
   deleteText: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
-const emit = defineEmits(['download', 'rename', 'delete']);
+const emit = defineEmits(["download", "rename", "delete"]);
 
 const downloadAction = () => {
-  emit('download');
+  emit("download");
 };
 
 const renameAction = () => {
-  emit('rename');
+  emit("rename");
 };
 
 const deleteAction = () => {
-  emit('delete');
+  emit("delete");
 };
 </script>
 

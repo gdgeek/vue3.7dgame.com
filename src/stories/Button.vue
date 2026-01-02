@@ -1,11 +1,13 @@
 <template>
-  <button type="button" :class="classes" @click="onClick" :style="style">{{ label }}</button>
+  <button type="button" :class="classes" @click="onClick" :style="style">
+    {{ label }}
+  </button>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed } from "vue";
 
-import './button.css';
+import "./button.css";
 
 const props = withDefaults(
   defineProps<{
@@ -20,7 +22,7 @@ const props = withDefaults(
     /**
      * size of the button
      */
-    size?: 'small' | 'medium' | 'large';
+    size?: "small" | "medium" | "large";
     /**
      * background color of the button
      */
@@ -30,14 +32,14 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'click', id: number): void;
+  (e: "click", id: number): void;
 }>();
 
 const classes = computed(() => ({
-  'storybook-button': true,
-  'storybook-button--primary': props.primary,
-  'storybook-button--secondary': !props.primary,
-  [`storybook-button--${props.size || 'medium'}`]: true,
+  "storybook-button": true,
+  "storybook-button--primary": props.primary,
+  "storybook-button--secondary": !props.primary,
+  [`storybook-button--${props.size || "medium"}`]: true,
 }));
 
 const style = computed(() => ({
@@ -45,6 +47,6 @@ const style = computed(() => ({
 }));
 
 const onClick = () => {
-  emit('click', 1);
+  emit("click", 1);
 };
 </script>

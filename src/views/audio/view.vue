@@ -14,23 +14,48 @@
               <section class="audio-bgc">
                 <br />
                 <div class="audio-box">
-                  <div class="audio-record" :class="{ 'audio-record-playfast': isPlay }" @click="handlePlayAudio"></div>
-                  <div class="audio-record-image" :class="{ 'audio-record-play': isPlay }" @click="handlePlayAudio">
-                  </div>
+                  <div
+                    class="audio-record"
+                    :class="{ 'audio-record-playfast': isPlay }"
+                    @click="handlePlayAudio"
+                  ></div>
+                  <div
+                    class="audio-record-image"
+                    :class="{ 'audio-record-play': isPlay }"
+                    @click="handlePlayAudio"
+                  ></div>
                 </div>
-                <audio id="audio" controls style="width: 95%; height: 84px" :src="file" preload="auto"
-                  @play="listenPlay" @pause="listenPause" @ended="listenEnd" @canplaythrough="dealWith"></audio>
+                <audio
+                  id="audio"
+                  controls
+                  style="width: 95%; height: 84px"
+                  :src="file"
+                  preload="auto"
+                  @play="listenPlay"
+                  @pause="listenPause"
+                  @ended="listenEnd"
+                  @canplaythrough="dealWith"
+                ></audio>
               </section>
             </div>
           </el-card>
           <br />
         </el-col>
         <el-col :sm="8">
-          <MrppInfo v-if="audioData" :title="$t('audio.view.info.title')" titleSuffix=" :" :tableData="tableData"
-            :itemLabel="$t('audio.view.info.label1')" :textLabel="$t('audio.view.info.label2')"
-            :downloadText="$t('audio.view.info.download')" :renameText="$t('audio.view.info.name')"
-            :deleteText="$t('audio.view.info.delete')" @download="downloadAudio" @rename="namedWindow"
-            @delete="deleteWindow" />
+          <MrppInfo
+            v-if="audioData"
+            :title="$t('audio.view.info.title')"
+            titleSuffix=" :"
+            :tableData="tableData"
+            :itemLabel="$t('audio.view.info.label1')"
+            :textLabel="$t('audio.view.info.label2')"
+            :downloadText="$t('audio.view.info.download')"
+            :renameText="$t('audio.view.info.name')"
+            :deleteText="$t('audio.view.info.delete')"
+            @download="downloadAudio"
+            @rename="namedWindow"
+            @delete="deleteWindow"
+          ></MrppInfo>
           <br />
         </el-col>
       </el-row>
@@ -75,7 +100,8 @@ const tableData = computed(() => {
       { item: t("audio.view.info.item1"), text: audioData.value.name },
       {
         item: t("audio.view.info.item2"),
-        text: audioData.value.author?.username || audioData.value.author?.nickname,
+        text:
+          audioData.value.author?.username || audioData.value.author?.nickname,
       },
       {
         item: t("audio.view.info.item3"),
@@ -87,9 +113,14 @@ const tableData = computed(() => {
       },
     ];
     let info: any = {};
-    try { info = JSON.parse(audioData.value.info || '{}'); } catch {}
+    try {
+      info = JSON.parse(audioData.value.info || "{}");
+    } catch {}
     if (info.length) {
-      base.push({ item: t("audio.view.info.item5"), text: info.length.toFixed(2) + 's' });
+      base.push({
+        item: t("audio.view.info.item5"),
+        text: info.length.toFixed(2) + "s",
+      });
     }
     return base;
   }
@@ -99,16 +130,17 @@ const tableData = computed(() => {
 const downloadAudio = async () => {
   if (!audioData.value) return;
 
-  const fileName = audioData.value.file.filename || '';
-  const fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase() || '.mp3';
+  const fileName = audioData.value.file.filename || "";
+  const fileExt =
+    fileName.substring(fileName.lastIndexOf(".")).toLowerCase() || ".mp3";
   await downloadResource(
     {
-      name: audioData.value.name || 'audio',
-      file: audioData.value.file
+      name: audioData.value.name || "audio",
+      file: audioData.value.file,
     },
     fileExt,
     t,
-    'audio.view.download'
+    "audio.view.download"
   );
 };
 
@@ -185,7 +217,7 @@ const setup = async (
     // 创建缩略图
     const file = await thumbnail(audio, size.x * 0.5, size.y * 0.5);
     const md5 = await store.fileMD5(file);
-    let extension = file.type.split("/").pop()!
+    let extension = file.type.split("/").pop()!;
     extension = extension.startsWith(".") ? extension : `.${extension}`;
 
     // 处理文件上传
@@ -203,7 +235,7 @@ const setup = async (
         md5,
         extension,
         file,
-        () => { },
+        () => {},
         handler,
         "screenshot/audio"
       );
@@ -314,9 +346,11 @@ onMounted(async () => {
   width: 100%;
   height: 350px;
   background: rgb(238, 174, 202);
-  background: radial-gradient(circle,
-      rgba(238, 174, 202, 1) 0%,
-      rgb(169, 196, 228) 100%);
+  background: radial-gradient(
+    circle,
+    rgba(238, 174, 202, 1) 0%,
+    rgb(169, 196, 228) 100%
+  );
 }
 
 .audio-box {

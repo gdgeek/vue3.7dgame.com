@@ -1,142 +1,146 @@
 // homepage translations for en-US
 export default {
-  "homepage": {
-    "dashboard": "Dashboard",
-    "news": "News",
-    "relatedDownload": "Related Download",
-    "caseCourse": "CaseCourse",
-    "greeting": {
-      "morning": "Good morning,",
-      "noon": "Good noon,",
-      "afternoon": "Good afternoon,",
-      "evening": "Good evening,"
+  homepage: {
+    dashboard: "Dashboard",
+    news: "News",
+    relatedDownload: "Related Download",
+    caseCourse: "CaseCourse",
+    greeting: {
+      morning: "Good morning,",
+      noon: "Good noon,",
+      afternoon: "Good afternoon,",
+      evening: "Good evening,",
     },
-    "myCreation": {
-      "title": "Creation",
-      "myPolygen": "Polygen",
-      "myPicture": "Picture",
-      "myVideo": "Video",
-      "myProject": "Project",
-      "myPublish": "Publish",
-      "myLike": "Like",
-      "enter": "Enter",
-      "Iliked": "I Liked"
+    myCreation: {
+      title: "Creation",
+      myPolygen: "Polygen",
+      myPicture: "Picture",
+      myVideo: "Video",
+      myProject: "Project",
+      myPublish: "Publish",
+      myLike: "Like",
+      enter: "Enter",
+      Iliked: "I Liked",
     },
-    "edit": {
-      "title": "Edit Personal Data",
-      "personalData": "Personal Data",
-      "personalDataStatement": "Modify the user nickname, profile picture, and basic information",
-      "return": "Back to personal center",
-      "userNickname": "User Nickname",
-      "userNicknameStatement": "Make you more accessible to the rest of the MrPP community.",
-      "nickname": "Nickname",
-      "confirm": "Confirm",
-      "avatar": "Avatar",
-      "avatarStatement": "Maximum size 2 MB. JPG, GIF, PNG.",
-      "basicInformation": "Basic Information",
-      "basicInformationStatement": "Please fill in your basic information for a more fun personalized interaction and experience.",
-      "gender": "gender",
-      "man": "Man",
-      "woman": "Woman",
-      "industry": "Industry",
-      "industryStatement": "Please select your industry region",
-      "placeOfAbode": "Place Of Residence",
-      "individualResume": "Personal Profile",
-      "individualResumeStatement": "A brief introduction of personal information",
-      "save": "Save",
-      "avatarCropping": {
-        "title": "Avatar Cropping",
-        "leftRotation": "Left Rotate",
-        "rightRotation": "Right Rotate",
-        "enlarge": "Enlarge",
-        "shrink": "Shrink",
-        "cancel": "Cancel",
-        "confirm": "Confirm",
-        "error1": "Avatar images can only be in JPG/PNG/BMP/GIF format!",
-        "error2": "Avatar image size cannot exceed 2MB!",
-        "error3": "Please select a valid file!",
-        "error4": "Error processing the file",
-        "success": "Avatar updated successfully"
+    edit: {
+      title: "Edit Personal Data",
+      personalData: "Personal Data",
+      personalDataStatement:
+        "Modify the user nickname, profile picture, and basic information",
+      return: "Back to personal center",
+      userNickname: "User Nickname",
+      userNicknameStatement:
+        "Make you more accessible to the rest of the MrPP community.",
+      nickname: "Nickname",
+      confirm: "Confirm",
+      avatar: "Avatar",
+      avatarStatement: "Maximum size 2 MB. JPG, GIF, PNG.",
+      basicInformation: "Basic Information",
+      basicInformationStatement:
+        "Please fill in your basic information for a more fun personalized interaction and experience.",
+      gender: "gender",
+      man: "Man",
+      woman: "Woman",
+      industry: "Industry",
+      industryStatement: "Please select your industry region",
+      placeOfAbode: "Place Of Residence",
+      individualResume: "Personal Profile",
+      individualResumeStatement: "A brief introduction of personal information",
+      save: "Save",
+      avatarCropping: {
+        title: "Avatar Cropping",
+        leftRotation: "Left Rotate",
+        rightRotation: "Right Rotate",
+        enlarge: "Enlarge",
+        shrink: "Shrink",
+        cancel: "Cancel",
+        confirm: "Confirm",
+        error1: "Avatar images can only be in JPG/PNG/BMP/GIF format!",
+        error2: "Avatar image size cannot exceed 2MB!",
+        error3: "Please select a valid file!",
+        error4: "Error processing the file",
+        success: "Avatar updated successfully",
       },
-      "rules": {
-        "nickname": {
-          "message1": "Please enter a user nickname",
-          "message2": "The nickname length should be greater than 2 characters",
-          "error1": "The nickname cannot be empty",
-          "error2": "The nickname only supports Chinese characters, letters, numbers, and underscores",
-          "error3": "Nickname update failed",
-          "error4": "Form validation failed",
-          "success": "Nickname updated successfully"
+      rules: {
+        nickname: {
+          message1: "Please enter a user nickname",
+          message2: "The nickname length should be greater than 2 characters",
+          error1: "The nickname cannot be empty",
+          error2:
+            "The nickname only supports Chinese characters, letters, numbers, and underscores",
+          error3: "Nickname update failed",
+          error4: "Form validation failed",
+          success: "Nickname updated successfully",
         },
-        "industry": {
-          "message": "Please select an industry",
-          "label1": "Technology, Information Technology",
-          "label2": "Economics, Finance",
-          "label3": "Education, Healthcare",
-          "label4": "Energy, Manufacturing",
-          "label5": "Agriculture, Forestry, Fishing, Animal Husbandry",
-          "label6": "Services industry",
-          "label7": "Other industries"
+        industry: {
+          message: "Please select an industry",
+          label1: "Technology, Information Technology",
+          label2: "Economics, Finance",
+          label3: "Education, Healthcare",
+          label4: "Energy, Manufacturing",
+          label5: "Agriculture, Forestry, Fishing, Animal Husbandry",
+          label6: "Services industry",
+          label7: "Other industries",
         },
-        "selectedOptions": {
-          "message": "Please select a place of residence"
+        selectedOptions: {
+          message: "Please select a place of residence",
         },
-        "textarea": {
-          "message1": "Please enter a personal profile",
-          "message2": "The personal profile should be more than 10 characters"
+        textarea: {
+          message1: "Please enter a personal profile",
+          message2: "The personal profile should be more than 10 characters",
         },
-        "success": "Information updated successfully",
-        "error1": "Information update failed",
-        "error2": "Form validation failed"
-      }
+        success: "Information updated successfully",
+        error1: "Information update failed",
+        error2: "Form validation failed",
+      },
     },
-    "account": {
-      "title": "Account Settings",
-      "titleStatement": "Configuration and modification of account details",
-      "label1": "Email",
-      "rules1": {
-        "message1": "Please enter your email",
-        "message2": "Please enter a valid email address"
+    account: {
+      title: "Account Settings",
+      titleStatement: "Configuration and modification of account details",
+      label1: "Email",
+      rules1: {
+        message1: "Please enter your email",
+        message2: "Please enter a valid email address",
       },
-      "placeholder": "Bind Email",
-      "bind": "Bind",
-      "rebind": "Rebind",
-      "label2": "Account Password",
-      "change": "Change Password",
-      "recover": "Recover Password",
-      "label3": "Old Password",
-      "label4": "New Password",
-      "label5": "Confirm Password",
-      "confirm": "Confirm Changes",
-      "rules2": {
-        "old": {
-          "message1": "Please enter the old password",
-          "message2": "The old password must be longer than 6 characters",
-          "error1": "Old password cannot be empty",
-          "error2": "New password cannot be the same as the old one!"
+      placeholder: "Bind Email",
+      bind: "Bind",
+      rebind: "Rebind",
+      label2: "Account Password",
+      change: "Change Password",
+      recover: "Recover Password",
+      label3: "Old Password",
+      label4: "New Password",
+      label5: "Confirm Password",
+      confirm: "Confirm Changes",
+      rules2: {
+        old: {
+          message1: "Please enter the old password",
+          message2: "The old password must be longer than 6 characters",
+          error1: "Old password cannot be empty",
+          error2: "New password cannot be the same as the old one!",
         },
-        "new": {
-          "message1": "Please enter the new password",
-          "message2": "The new password must be longer than 6 characters",
-          "error1": "Please enter the password",
-          "error2": "New password cannot be the same as the old one!"
+        new: {
+          message1: "Please enter the new password",
+          message2: "The new password must be longer than 6 characters",
+          error1: "Please enter the password",
+          error2: "New password cannot be the same as the old one!",
         },
-        "check": {
-          "message": "Please enter the confirmation password",
-          "error1": "Please re-enter the password",
-          "error2": "The two passwords do not match"
-        }
+        check: {
+          message: "Please enter the confirmation password",
+          error1: "Please re-enter the password",
+          error2: "The two passwords do not match",
+        },
       },
-      "validate1": {
-        "success": "Password changed successfully",
-        "error1": "Password change failed",
-        "error2": "Form validation failed"
+      validate1: {
+        success: "Password changed successfully",
+        error1: "Password change failed",
+        error2: "Form validation failed",
       },
-      "validate2": {
-        "success": "Email bound successfully",
-        "error1": "Email binding failed",
-        "error2": "Form validation failed"
-      }
-    }
-  }
+      validate2: {
+        success: "Email bound successfully",
+        error1: "Email binding failed",
+        error2: "Form validation failed",
+      },
+    },
+  },
 };

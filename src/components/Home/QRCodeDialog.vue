@@ -1,26 +1,37 @@
 <template>
   <div>
-    <el-dialog v-model="dialogVisible" :title="t('login.loginCode')" width="50%" align-center>
-
+    <el-dialog
+      v-model="dialogVisible"
+      :title="t('login.loginCode')"
+      width="50%"
+      align-center
+    >
       <div class="qrcode-container">
-
-        <div v-loading="code === ''" :class="['qrcode-bg', { 'dark-theme': isDark }]">
-          <qrcode-vue v-if="code !== ''" :value="code" :size="size" level="H"></qrcode-vue>
+        <div
+          v-loading="code === ''"
+          :class="['qrcode-bg', { 'dark-theme': isDark }]"
+        >
+          <qrcode-vue
+            v-if="code !== ''"
+            :value="code"
+            :size="size"
+            level="H"
+          ></qrcode-vue>
         </div>
-        <p class="qrcode-tip">{{ t('login.scanTip') }}</p>
+        <p class="qrcode-tip">{{ t("login.scanTip") }}</p>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import Token from "@/store/modules/token";
 import QrcodeVue from "qrcode.vue";
-import { useSettingsStore } from '@/store/modules/settings';
-import { ThemeEnum } from '@/enums/ThemeEnum';
-import { getUserLinked } from '@/api/v1/tools';
-import { useI18n } from 'vue-i18n';
+import { useSettingsStore } from "@/store/modules/settings";
+import { ThemeEnum } from "@/enums/ThemeEnum";
+import { getUserLinked } from "@/api/v1/tools";
+import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const dialogVisible = ref(false);
@@ -32,7 +43,7 @@ const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
 
 const openDialog = () => {
   dialogVisible.value = true;
-}
+};
 
 // 防抖优化 resize 事件
 let resizeTimer: NodeJS.Timeout | null = null;
@@ -46,7 +57,7 @@ const onResize = () => {
       const maxSize = Math.min(window.innerWidth, window.innerHeight) * 0.4;
       size.value = Math.max(180, Math.min(400, Math.floor(maxSize)));
     } catch (error) {
-      console.warn('Failed to calculate QR code size:', error);
+      console.warn("Failed to calculate QR code size:", error);
       size.value = 300; // 默认尺寸
     }
   }, 100);
@@ -58,14 +69,14 @@ onMounted(async () => {
     window.addEventListener("resize", onResize);
     const userLinked = await getUserLinked();
     if (userLinked?.data.key) {
-      code.value = 'web_' + userLinked.data.key;
+      code.value = "web_" + userLinked.data.key;
     } else {
-      console.error('No refresh token available');
-      code.value = ''; // 保持 loading 状态
+      console.error("No refresh token available");
+      code.value = ""; // 保持 loading 状态
     }
   } catch (error) {
-    console.error('Failed to initialize QR code:', error);
-    code.value = '';
+    console.error("Failed to initialize QR code:", error);
+    code.value = "";
   }
 });
 
@@ -77,7 +88,7 @@ onUnmounted(() => {
 });
 
 defineExpose({
-  openDialog
+  openDialog,
 });
 </script>
 

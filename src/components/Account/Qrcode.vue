@@ -6,14 +6,14 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
-import QRCode from 'qrcode';
+import { onMounted, ref, watch } from "vue";
+import QRCode from "qrcode";
 
 // 定义 props
 const props = defineProps({
   text: {
     type: String,
-    required: true
+    required: true,
   },
   options: {
     type: Object,
@@ -21,11 +21,11 @@ const props = defineProps({
       width: 400,
       margin: 4,
       color: {
-        dark: '#000000',
-        light: '#ffffff'
-      }
-    })
-  }
+        dark: "#000000",
+        light: "#ffffff",
+      },
+    }),
+  },
 });
 
 // 引用 canvas 元素
@@ -38,16 +38,17 @@ const generateQRCode = async (text) => {
     // 合并默认选项和传入的自定义选项
     const qrOptions = {
       width: props.options.width || 400,
-      margin: typeof props.options.margin !== 'undefined' ? props.options.margin : 4,
+      margin:
+        typeof props.options.margin !== "undefined" ? props.options.margin : 4,
       color: {
-        dark: props.options.color?.dark || '#000000',
-        light: props.options.color?.light || '#ffffff'
-      }
+        dark: props.options.color?.dark || "#000000",
+        light: props.options.color?.light || "#ffffff",
+      },
     };
 
     await QRCode.toCanvas(qrcodeCanvas.value, text, qrOptions);
   } catch (error) {
-    console.error('生成二维码时出错:', error);
+    console.error("生成二维码时出错:", error);
   }
 };
 
@@ -56,11 +57,22 @@ onMounted(() => {
 });
 
 // 监听 props.text 和 options 的变化
-watch([() => props.text, () => props.options], () => {
-  generateQRCode(props.text);
-}, { deep: true });
+watch(
+  [() => props.text, () => props.options],
+  () => {
+    generateQRCode(props.text);
+  },
+  { deep: true }
+);
 </script>
 
+<script>
+export default {
+  name: "Qrcode",
+};
+</script>
+
+<!-- 添加默认导出以解决导入问题 -->
 <style scoped>
 .qrcode-container {
   width: 100%;
@@ -75,10 +87,3 @@ watch([() => props.text, () => props.options], () => {
   height: auto;
 }
 </style>
-
-<!-- 添加默认导出以解决导入问题 -->
-<script>
-export default {
-  name: 'Qrcode'
-}
-</script>

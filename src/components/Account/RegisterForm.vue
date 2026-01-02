@@ -1,40 +1,81 @@
 <template>
-  <div class="register-form" :class="{ 'dark-theme': isDark }" v-loading="loading">
-    <el-form ref="registerFormRef" class="login-form" :rules="registerRules" :model="registerForm" label-position="top">
-      <el-form-item :label="$t('login.username')" prop="username" class="form-item">
-        <el-input v-model="registerForm.username" placeholder="请输入邮箱" class="custom-input">
+  <div
+    class="register-form"
+    :class="{ 'dark-theme': isDark }"
+    v-loading="loading"
+  >
+    <el-form
+      ref="registerFormRef"
+      class="login-form"
+      :rules="registerRules"
+      :model="registerForm"
+      label-position="top"
+    >
+      <el-form-item
+        :label="$t('login.username')"
+        prop="username"
+        class="form-item"
+      >
+        <el-input
+          v-model="registerForm.username"
+          placeholder="请输入邮箱"
+          class="custom-input"
+        >
           <template #prefix>
             <el-icon class="input-icon">
-              <UserFilled />
+              <UserFilled></UserFilled>
             </el-icon>
           </template>
         </el-input>
       </el-form-item>
 
-      <el-form-item :label="$t('login.password')" prop="password" class="form-item">
-        <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" class="custom-input"
-          show-password>
+      <el-form-item
+        :label="$t('login.password')"
+        prop="password"
+        class="form-item"
+      >
+        <el-input
+          v-model="registerForm.password"
+          type="password"
+          placeholder="请输入密码"
+          class="custom-input"
+          show-password
+        >
           <template #prefix>
             <el-icon class="input-icon">
-              <Lock />
+              <Lock></Lock>
             </el-icon>
           </template>
         </el-input>
       </el-form-item>
 
-      <el-form-item :label="$t('login.repassword')" prop="repassword" class="form-item">
-        <el-input v-model="registerForm.repassword" type="password" placeholder="请再次输入密码" class="custom-input"
-          show-password>
+      <el-form-item
+        :label="$t('login.repassword')"
+        prop="repassword"
+        class="form-item"
+      >
+        <el-input
+          v-model="registerForm.repassword"
+          type="password"
+          placeholder="请再次输入密码"
+          class="custom-input"
+          show-password
+        >
           <template #prefix>
             <el-icon class="input-icon">
-              <Lock />
+              <Lock></Lock>
             </el-icon>
           </template>
         </el-input>
       </el-form-item>
 
       <el-form-item class="register-button-item">
-        <el-button class="register-button" type="primary" @click="register" :loading="loading">
+        <el-button
+          class="register-button"
+          type="primary"
+          @click="register"
+          :loading="loading"
+        >
           {{ $t("login.create") }}
         </el-button>
       </el-form-item>
@@ -50,9 +91,9 @@
 
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { ElMessage } from 'element-plus';
+import { ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { ElMessage } from "element-plus";
 import { FormInstance, FormItemRule } from "element-plus";
 import { useRouter, LocationQuery, useRoute } from "vue-router";
 import { useSettingsStore } from "@/store/modules/settings";
@@ -67,9 +108,9 @@ const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const loading = ref<boolean>(false);
-const token = computed(() => route.query.token as string || '');
+const token = computed(() => (route.query.token as string) || "");
 
-const emit = defineEmits(['register-success', 'back-to-login']);
+const emit = defineEmits(["register-success", "back-to-login"]);
 
 const registerForm = ref({
   username: "",
@@ -163,7 +204,7 @@ const register = async () => {
         if (data?.success) {
           ElMessage.success(t("login.success"));
           Token.setToken(data.token);
-          emit('register-success');
+          emit("register-success");
           const { path, queryParams } = parseRedirect();
           router.push({ path: path, query: queryParams });
         } else {
@@ -181,7 +222,7 @@ const register = async () => {
 };
 
 const backToLogin = () => {
-  emit('back-to-login');
+  emit("back-to-login");
 };
 </script>
 

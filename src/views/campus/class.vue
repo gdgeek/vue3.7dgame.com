@@ -1,15 +1,19 @@
 <template>
   <div class="class-page-container">
-    <ClassDetail v-if="classId" :class-id="classId" @class-loaded="onClassLoaded" />
-    <el-empty v-else :description="$t('common.noData')" />
+    <ClassDetail
+      v-if="classId"
+      :class-id="classId"
+      @class-loaded="onClassLoaded"
+    ></ClassDetail>
+    <el-empty v-else :description="$t('common.noData')"></el-empty>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
-import ClassDetail from './components/ClassDetail.vue';
-import type { EduClass } from '@/api/v1/types/edu-class';
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+import ClassDetail from "./components/ClassDetail.vue";
+import type { EduClass } from "@/api/v1/types/edu-class";
 
 const route = useRoute();
 
@@ -20,7 +24,7 @@ const classId = computed(() => {
 
 const onClassLoaded = (classInfo: EduClass) => {
   // Optionally update page title or perform other actions
-  document.title = classInfo.name || 'Class';
+  document.title = classInfo.name || "Class";
 };
 </script>
 

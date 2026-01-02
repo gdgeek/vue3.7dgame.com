@@ -1,7 +1,11 @@
 <template>
   <TransitionWrapper>
     <div>
-      <mr-p-p-upload dir="voxel" :file-type="fileType" @save-resource="saveVoxel">
+      <mr-p-p-upload
+        dir="voxel"
+        :file-type="fileType"
+        @save-resource="saveVoxel"
+      >
         <div>{{ $t("voxel.uploadFile") }}</div>
       </mr-p-p-upload>
     </div>

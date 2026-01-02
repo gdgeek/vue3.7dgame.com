@@ -1,10 +1,16 @@
 <template>
   <el-breadcrumb class="flex-y-center">
-    <transition-group enter-active-class="animate__animated animate__fadeInRight">
+    <transition-group
+      enter-active-class="animate__animated animate__fadeInRight"
+    >
       <el-breadcrumb-item v-for="(item, index) in breadcrumbs" :key="item.path">
-        <span v-if="
-          item.redirect === 'noredirect' || index === breadcrumbs.length - 1
-        " class="color-gray-400">{{ translateRouteTitle(item.meta.title) }}</span>
+        <span
+          v-if="
+            item.redirect === 'noredirect' || index === breadcrumbs.length - 1
+          "
+          class="color-gray-400"
+          >{{ translateRouteTitle(item.meta.title) }}</span
+        >
         <a v-else @click.prevent="handleLink(item)">
           {{ translateRouteTitle(item.meta.title) }}
         </a>
@@ -26,13 +32,13 @@ const routeQueryMap = ref(new Map<string, any>());
 // 从 localStorage 加载保存的路由参数
 function loadRouteQueryMap() {
   try {
-    const savedMap = localStorage.getItem('routeQueryMap');
+    const savedMap = localStorage.getItem("routeQueryMap");
     if (savedMap) {
       const parsedMap = JSON.parse(savedMap);
       routeQueryMap.value = new Map(Object.entries(parsedMap));
     }
   } catch (error) {
-    console.error('加载路由参数失败:', error);
+    console.error("加载路由参数失败:", error);
   }
 }
 
@@ -40,9 +46,9 @@ function loadRouteQueryMap() {
 function saveRouteQueryMap() {
   try {
     const mapObject = Object.fromEntries(routeQueryMap.value);
-    localStorage.setItem('routeQueryMap', JSON.stringify(mapObject));
+    localStorage.setItem("routeQueryMap", JSON.stringify(mapObject));
   } catch (error) {
-    console.error('保存路由参数失败:', error);
+    console.error("保存路由参数失败:", error);
   }
 }
 
@@ -75,22 +81,22 @@ function getBreadcrumb() {
     // 确定基础路径和标题key
     let basePath, titleKey;
 
-    if (currentRoute.path.includes('/verse/')) {
-      basePath = '/verse/scene';
-      titleKey = 'project.sceneEditor';
+    if (currentRoute.path.includes("/verse/")) {
+      basePath = "/verse/scene";
+      titleKey = "project.sceneEditor";
     } else {
       // 从meta实体编辑进入脚本编辑
-      basePath = '/meta/scene';
-      titleKey = 'meta.sceneEditor';
+      basePath = "/meta/scene";
+      titleKey = "meta.sceneEditor";
     }
 
     // 获取保存的场景编辑器的查询参数，如果没有则使用当前的
     const savedSceneQuery = routeQueryMap.value.get(basePath) || {
       id: currentRoute.query.id,
-      title: currentRoute.query.title
+      title: currentRoute.query.title,
     };
 
-    console.log('使用保存的场景查询参数:', basePath, savedSceneQuery);
+    console.log("使用保存的场景查询参数:", basePath, savedSceneQuery);
 
     // 创建 sceneBreadcrumb 对象，并携带保存的路由参数
     const sceneBreadcrumb = {
@@ -153,7 +159,7 @@ function handleLink(item: any) {
   } else if (item.path) {
     routeParams.path = item.path;
   } else {
-    console.warn('无效的路由路径:', item);
+    console.warn("无效的路由路径:", item);
     return;
   }
 
@@ -161,29 +167,32 @@ function handleLink(item: any) {
   if (item.query) {
     // 使用保存的查询参数
     routeParams.query = item.query;
-    console.log('使用item.query:', routeParams.query);
+    console.log("使用item.query:", routeParams.query);
   } else if (item.enterCallbacks) {
     routeParams.query = item.enterCallbacks;
-    console.log('使用item.enterCallbacks:', routeParams.query);
-  } else if (typeof routeParams.path === 'string' && routeParams.path.includes('/scene')) {
+    console.log("使用item.enterCallbacks:", routeParams.query);
+  } else if (
+    typeof routeParams.path === "string" &&
+    routeParams.path.includes("/scene")
+  ) {
     // 尝试从 Map 中获取保存的查询参数
     const savedQuery = routeQueryMap.value.get(routeParams.path);
     if (savedQuery) {
       routeParams.query = savedQuery;
-      console.log('使用保存的查询参数:', routeParams.query);
+      console.log("使用保存的查询参数:", routeParams.query);
     } else {
       routeParams.query = {
         id: currentRoute.query.id,
-        title: currentRoute.query.title
+        title: currentRoute.query.title,
       };
-      console.log('使用当前查询参数:', routeParams.query);
+      console.log("使用当前查询参数:", routeParams.query);
     }
   }
 
-  console.log('路由跳转参数:', routeParams);
+  console.log("路由跳转参数:", routeParams);
 
   router.push(routeParams).catch((err) => {
-    console.warn('路由跳转失败:', err);
+    console.warn("路由跳转失败:", err);
   });
 }
 

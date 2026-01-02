@@ -1,15 +1,32 @@
 <template>
   <span>
     <!-- 修改对话框组件 -->
-    <mr-p-p-verse-window-create ref="changedDialog" :close-on-click-modal="true"
+    <mr-p-p-verse-window-create
+      ref="changedDialog"
+      :close-on-click-modal="true"
       :dialog-title="$t('verse.page.list.toolbar.dialogTitle')"
-      :dialog-submit="$t('verse.page.list.toolbar.dialogSubmit')" @submit="submitChange"></mr-p-p-verse-window-create>
+      :dialog-submit="$t('verse.page.list.toolbar.dialogSubmit')"
+      @submit="submitChange"
+    ></mr-p-p-verse-window-create>
     <!-- 按钮组 -->
 
     <el-button-group v-if="verse" style="float: right" :inline="true">
-      <el-button v-if="saveable" type="success" size="small" icon="Edit" @click="changedWindow"></el-button>
-      <el-button v-if="deleteable" type="danger" size="small" icon="delete" loading-icon="Eleme" :loading="deleteLoading"
-        @click="deletedWindow"></el-button>
+      <el-button
+        v-if="saveable"
+        type="success"
+        size="small"
+        icon="Edit"
+        @click="changedWindow"
+      ></el-button>
+      <el-button
+        v-if="deleteable"
+        type="danger"
+        size="small"
+        icon="delete"
+        loading-icon="Eleme"
+        :loading="deleteLoading"
+        @click="deletedWindow"
+      ></el-button>
       &nbsp;
     </el-button-group>
   </span>
@@ -84,7 +101,7 @@ const submitChange = async (form: any, imageId: number | null) => {
 
   const data: { name: string; description: string; image_id?: number } = {
     name: form.name,
-   // info: JSON.stringify(form),
+    // info: JSON.stringify(form),
     description: form.description,
   };
 

@@ -20,10 +20,7 @@ import { useRouter } from "vue-router";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 
-import {
-  useUserStore,
-} from "@/store";
-
+import { useUserStore } from "@/store";
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -32,7 +29,6 @@ const { t } = useI18n();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
 onMounted(async () => {
-
   await userStore.logout();
   setTimeout(() => {
     router.push("/web/index");

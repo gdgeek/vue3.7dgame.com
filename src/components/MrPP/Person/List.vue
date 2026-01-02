@@ -1,32 +1,75 @@
 <template>
   <!-- <div> -->
-  <waterfall v-if="viewCards.length > 0" :lazyload="true" :list="viewCards" :gutter="10" :width="240" :breakpoints="{
-    640: { rowPerView: 1 },
-  }" :backgroundColor="'rgba(255, 255, 255, .05)'">
+  <waterfall
+    v-if="viewCards.length > 0"
+    :lazyload="true"
+    :list="viewCards"
+    :gutter="10"
+    :width="240"
+    :breakpoints="{
+      640: { rowPerView: 1 },
+    }"
+    :backgroundColor="'rgba(255, 255, 255, .05)'"
+  >
     <template #default="{ item }">
       <el-card style="width: 100%" :body-style="{ padding: '0px' }">
-        <LazyImg v-if="item.avatar == null" style="width: 100%; height: auto" fit="contain"
-          :url="`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.username}`"></LazyImg>
-        <LazyImg v-if="item.avatar" style="width: 100%; height: auto" fit="contain" :url="item.avatar.url"></LazyImg>
+        <LazyImg
+          v-if="item.avatar == null"
+          style="width: 100%; height: auto"
+          fit="contain"
+          :url="`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.username}`"
+        ></LazyImg>
+        <LazyImg
+          v-if="item.avatar"
+          style="width: 100%; height: auto"
+          fit="contain"
+          :url="item.avatar.url"
+        ></LazyImg>
         <div style="padding: 14px">
           <span>{{ item.username }}</span>
           <div class="bottom clearfix">
-            <el-descriptions v-if="!people(item.roles)" class="margin-top" :title="item.nickname" :column="1"
-              size="small">
+            <el-descriptions
+              v-if="!people(item.roles)"
+              class="margin-top"
+              :title="item.nickname"
+              :column="1"
+              size="small"
+            >
               <el-descriptions-item :label="$t('manager.list.label')">
                 {{ getAblity(item.roles) }}
               </el-descriptions-item>
             </el-descriptions>
-            <el-descriptions v-else class="margin-top" :title="item.nickname" :column="1" size="small">
+            <el-descriptions
+              v-else
+              class="margin-top"
+              :title="item.nickname"
+              :column="1"
+              size="small"
+            >
               <el-descriptions-item :label="$t('manager.list.label')">
-                <el-select v-model="item.selectedRole" placeholder="Select" size="small"
-                  style="float: right; width: 118px" @change="handleRoleChange(item)">
-                  <el-option v-for="(role, index) in getAbilities(item.roles)" :key="index" :label="role"
-                    :value="role"></el-option>
+                <el-select
+                  v-model="item.selectedRole"
+                  placeholder="Select"
+                  size="small"
+                  style="float: right; width: 118px"
+                  @change="handleRoleChange(item)"
+                >
+                  <el-option
+                    v-for="(role, index) in getAbilities(item.roles)"
+                    :key="index"
+                    :label="role"
+                    :value="role"
+                  ></el-option>
                 </el-select>
               </el-descriptions-item>
             </el-descriptions>
-            <el-button v-if="people(item.roles)" type="danger" size="small" class="button" @click="deleted(item)">
+            <el-button
+              v-if="people(item.roles)"
+              type="danger"
+              size="small"
+              class="button"
+              @click="deleted(item)"
+            >
               {{ $t("manager.list.cancel") }}
             </el-button>
           </div>

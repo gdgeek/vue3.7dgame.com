@@ -1,20 +1,41 @@
 <template>
   <TransitionWrapper>
-    <CardListPage ref="cardListPageRef" :fetch-data="fetchParticles" wrapper-class="particle-index"
-      @refresh="handleRefresh">
+    <CardListPage
+      ref="cardListPageRef"
+      :fetch-data="fetchParticles"
+      wrapper-class="particle-index"
+      @refresh="handleRefresh"
+    >
       <template #header-actions>
         <el-button-group :inline="true">
-          <el-button size="small" type="primary" icon="uploadFilled" @click="openUploadDialog">
-            <span class="hidden-sm-and-down">{{ $t("particle.uploadParticle") }}</span>
+          <el-button
+            size="small"
+            type="primary"
+            icon="uploadFilled"
+            @click="openUploadDialog"
+          >
+            <span class="hidden-sm-and-down">{{
+              $t("particle.uploadParticle")
+            }}</span>
           </el-button>
         </el-button-group>
       </template>
 
       <template #card="{ item }">
-        <mr-p-p-card :item="item" type="粒子" color="#e67e22" @named="namedWindow" @deleted="deletedWindow">
+        <mr-p-p-card
+          :item="item"
+          type="粒子"
+          color="#e67e22"
+          @named="namedWindow"
+          @deleted="deletedWindow"
+        >
           <template #enter>
             <router-link :to="`/resource/particle/view?id=${item.id}`">
-              <el-button v-if="item.info === null || item.image === null" type="warning" size="small">
+              <el-button
+                v-if="item.info === null || item.image === null"
+                type="warning"
+                size="small"
+              >
                 {{ $t("particle.initializeParticleData") }}
               </el-button>
               <el-button v-else type="primary" size="small">
@@ -26,8 +47,14 @@
       </template>
 
       <template #dialogs>
-        <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="particle" :file-type="fileType"
-          :show-effect-type-select="true" @save-resource="saveParticle" @success="handleUploadSuccess">
+        <mr-p-p-upload-dialog
+          v-model="uploadDialogVisible"
+          dir="particle"
+          :file-type="fileType"
+          :show-effect-type-select="true"
+          @save-resource="saveParticle"
+          @success="handleUploadSuccess"
+        >
           {{ $t("particle.uploadFile") }}
         </mr-p-p-upload-dialog>
       </template>
@@ -36,27 +63,35 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import CardListPage from '@/components/MrPP/CardListPage/index.vue';
-import MrPPCard from '@/components/MrPP/MrPPCard/index.vue';
-import MrPPUploadDialog from '@/components/MrPP/MrPPUploadDialog/index.vue';
-import TransitionWrapper from '@/components/TransitionWrapper.vue';
-import { getParticles, putParticle, deleteParticle, postParticle } from '@/api/v1/resources/index';
-import type { FetchParams, FetchResponse } from '@/components/MrPP/CardListPage/types';
+import { ref } from "vue";
+import { useI18n } from "vue-i18n";
+import { ElMessage, ElMessageBox } from "element-plus";
+import CardListPage from "@/components/MrPP/CardListPage/index.vue";
+import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
+import MrPPUploadDialog from "@/components/MrPP/MrPPUploadDialog/index.vue";
+import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import {
+  getParticles,
+  putParticle,
+  deleteParticle,
+  postParticle,
+} from "@/api/v1/resources/index";
+import type {
+  FetchParams,
+  FetchResponse,
+} from "@/components/MrPP/CardListPage/types";
 
 const { t } = useI18n();
 const cardListPageRef = ref<InstanceType<typeof CardListPage> | null>(null);
 
 const uploadDialogVisible = ref(false);
-const fileType = ref('.json');
+const fileType = ref(".json");
 
 const fetchParticles = async (params: FetchParams): Promise<FetchResponse> => {
   return await getParticles(params.sort, params.search, params.page);
 };
 
-const handleRefresh = (data: any[]) => { };
+const handleRefresh = (data: any[]) => {};
 
 const refreshList = () => {
   cardListPageRef.value?.refresh();
@@ -96,7 +131,7 @@ const saveParticle = async (
       callback(response.data.id);
     }
   } catch (err) {
-    console.error('Failed to save particle:', err);
+    console.error("Failed to save particle:", err);
     callback(-1);
   }
 };
@@ -104,40 +139,43 @@ const saveParticle = async (
 const namedWindow = async (item: { id: string; name: string }) => {
   try {
     const { value } = await ElMessageBox.prompt(
-      t('particle.prompt.message1'),
-      t('particle.prompt.message2'),
+      t("particle.prompt.message1"),
+      t("particle.prompt.message2"),
       {
-        confirmButtonText: t('particle.prompt.confirm'),
-        cancelButtonText: t('particle.prompt.cancel'),
+        confirmButtonText: t("particle.prompt.confirm"),
+        cancelButtonText: t("particle.prompt.cancel"),
         closeOnClickModal: false,
         inputValue: item.name,
       }
     );
     await putParticle(item.id, { name: value });
     refreshList();
-    ElMessage.success(t('particle.prompt.success') + value);
+    ElMessage.success(t("particle.prompt.success") + value);
   } catch {
-    ElMessage.info(t('particle.prompt.info'));
+    ElMessage.info(t("particle.prompt.info"));
   }
 };
 
-const deletedWindow = async (item: { id: string }, resetLoading: () => void) => {
+const deletedWindow = async (
+  item: { id: string },
+  resetLoading: () => void
+) => {
   try {
     await ElMessageBox.confirm(
-      t('particle.confirm.message1'),
-      t('particle.confirm.message2'),
+      t("particle.confirm.message1"),
+      t("particle.confirm.message2"),
       {
-        confirmButtonText: t('particle.confirm.confirm'),
-        cancelButtonText: t('particle.confirm.cancel'),
+        confirmButtonText: t("particle.confirm.confirm"),
+        cancelButtonText: t("particle.confirm.cancel"),
         closeOnClickModal: false,
-        type: 'warning',
+        type: "warning",
       }
     );
     await deleteParticle(item.id);
     refreshList();
-    ElMessage.success(t('particle.confirm.success'));
+    ElMessage.success(t("particle.confirm.success"));
   } catch {
-    ElMessage.info(t('particle.confirm.info'));
+    ElMessage.info(t("particle.confirm.info"));
     resetLoading();
   }
 };
