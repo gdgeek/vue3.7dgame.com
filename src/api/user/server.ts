@@ -1,6 +1,4 @@
 import request from "@/utils/request";
-import qs from "querystringify";
-import path from "path-browserify";
 
 export const bindEmail = (email: string) => {
   return request({

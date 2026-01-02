@@ -1,14 +1,10 @@
 <template>
   <div>
-    <div
-      id="scene"
-      ref="scene"
-      :style="{
-        height: isSceneFullscreen ? '100vh' : '75vh',
-        width: '100%',
-        margin: '0 auto',
-      }"
-    ></div>
+    <div id="scene" ref="scene" :style="{
+      height: isSceneFullscreen ? '100vh' : '75vh',
+      width: '100%',
+      margin: '0 auto',
+    }"></div>
   </div>
 </template>
 
@@ -249,8 +245,8 @@ const loadModel = async (
             mesh.scale.set(
               entity.parameters.transform.scale.x * baseScale,
               entity.parameters.transform.scale.y *
-                baseScale *
-                (1 / aspectRatio),
+              baseScale *
+              (1 / aspectRatio),
               entity.parameters.transform.scale.z * baseScale
             );
           }
@@ -349,7 +345,6 @@ const loadModel = async (
 
           const aspectRatio = texture.image.width / texture.image.height;
           const width = entity.parameters.width || 1;
-          const height = width / aspectRatio;
 
           const geometry = new THREE.PlaneGeometry(1, 1);
           const material = new THREE.MeshBasicMaterial({
@@ -382,8 +377,8 @@ const loadModel = async (
             mesh.scale.set(
               entity.parameters.transform.scale.x * baseScale,
               entity.parameters.transform.scale.y *
-                baseScale *
-                (1 / aspectRatio),
+              baseScale *
+              (1 / aspectRatio),
               entity.parameters.transform.scale.z * baseScale
             );
           }
@@ -772,9 +767,6 @@ const loadModel = async (
                 moveableObjects.value.push(moveableObject);
 
                 // 创建平面用于拖拽
-                const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0)); // 拖动平面
-                const intersection = new THREE.Vector3(); // 拖动交点
-
                 // 添加鼠标事件处理
                 const onMouseDown = (event: MouseEvent) => {
                   event.preventDefault();
@@ -1206,9 +1198,6 @@ const loadModel = async (
               moveableObjects.value.push(moveableObject);
 
               // 创建平面用于拖拽
-              const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0)); // 拖动平面
-              const intersection = new THREE.Vector3(); // 拖动交点
-
               // 添加鼠标事件处理
               const onMouseDown = (event: MouseEvent) => {
                 event.preventDefault();
@@ -1801,7 +1790,7 @@ onMounted(async () => {
   // 监听全屏状态变化
   watch(
     () => props.isSceneFullscreen,
-    (newValue) => {
+    (_newValue) => {
       // 给浏览器一点时间来完成全屏切换
       setTimeout(() => {
         handleResize();

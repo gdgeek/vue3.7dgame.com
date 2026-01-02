@@ -1,11 +1,15 @@
 <template>
   <div>
-    <div id="scene" ref="scene" :style="{
-      height: isSceneFullscreen ? '100vh' : '75vh',
-      width: '100%',
-      margin: '0 auto',
-      position: 'relative',
-    }"></div>
+    <div
+      id="scene"
+      ref="scene"
+      :style="{
+        height: isSceneFullscreen ? '100vh' : '75vh',
+        width: '100%',
+        margin: '0 auto',
+        position: 'relative',
+      }"
+    ></div>
   </div>
 </template>
 

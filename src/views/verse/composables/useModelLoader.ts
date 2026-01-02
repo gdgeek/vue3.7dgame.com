@@ -67,11 +67,6 @@ export function useModelLoader(context: ModelLoaderContext) {
     renderer,
     mixers,
     sources,
-    collisionObjects,
-    rotatingObjects,
-    moveableObjects,
-    dragState,
-    controls,
     mouse,
     raycaster,
     verse,
@@ -528,15 +523,6 @@ export function useModelLoader(context: ModelLoaderContext) {
               if (entity.children?.components) {
                 const actionComponent = entity.children.components.find(
                   (comp) => comp.type === "Action"
-                );
-                const triggerComponent = entity.children.components.find(
-                  (comp) => comp.type === "Trigger"
-                );
-                const rotateComponent = entity.children.components.find(
-                  (comp) => comp.type === "Rotate"
-                );
-                const movedComponent = entity.children.components.find(
-                  (comp) => comp.type === "Moved"
                 );
 
                 if (actionComponent) {

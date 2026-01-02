@@ -93,7 +93,6 @@ export const getMessagesWithAuthor = (
   });
 };
 
-export function putMessage(id: number, data: any) {
 export function putMessage(id: number, data: unknown) {
   return request<MessageType>({
     url: `/messages/${id}`,

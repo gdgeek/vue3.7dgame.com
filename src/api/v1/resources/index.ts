@@ -26,7 +26,9 @@ type ResourceData = {
 };
 
 type ResourcePut = {
-  name: string;
+  name?: string;
+  info?: string;
+  image_id?: number;
   [key: string]: unknown;
 };
 

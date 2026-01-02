@@ -74,7 +74,7 @@ type Data = {
   emailBind: boolean;
 };
 
-type User = {
+export type User = {
   username: string;
   data: Data;
   roles: string[];

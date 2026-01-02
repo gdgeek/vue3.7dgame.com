@@ -10,7 +10,13 @@
               <span v-if="voxelData">{{ voxelData.name }}</span>
             </template>
             <div v-loading="false" class="box-item">
-              <Voxel v-if="voxelData" ref="three" :file="voxelData.file" @loaded="loaded" @progress="progress">
+              <Voxel
+                v-if="voxelData"
+                ref="three"
+                :file="voxelData.file"
+                @loaded="loaded"
+                @progress="progress"
+              >
               </Voxel>
             </div>
             <el-progress :percentage="percentage"></el-progress>
@@ -28,11 +34,20 @@
 
         <!-- 体素模型信息和操作区域 -->
         <el-col :sm="8">
-          <MrppInfo v-if="voxelData" :title="$t('voxel.view.info.title')" titleSuffix=" :" :tableData="tableData"
-            :itemLabel="$t('voxel.view.info.label1')" :textLabel="$t('voxel.view.info.label2')"
-            :downloadText="$t('voxel.view.info.download')" :renameText="$t('voxel.view.info.name')"
-            :deleteText="$t('voxel.view.info.delete')" @download="downloadVoxel" @rename="namedWindow"
-            @delete="deleteWindow">
+          <MrppInfo
+            v-if="voxelData"
+            :title="$t('voxel.view.info.title')"
+            titleSuffix=" :"
+            :tableData="tableData"
+            :itemLabel="$t('voxel.view.info.label1')"
+            :textLabel="$t('voxel.view.info.label2')"
+            :downloadText="$t('voxel.view.info.download')"
+            :renameText="$t('voxel.view.info.name')"
+            :deleteText="$t('voxel.view.info.delete')"
+            @download="downloadVoxel"
+            @rename="namedWindow"
+            @delete="deleteWindow"
+          >
           </MrppInfo>
           <br />
         </el-col>
@@ -212,11 +227,7 @@ const createVerse = async () => {
           image_id: voxel.image_id ?? 0,
           info: voxel.info,
         };
-        const result = await createVerseFromResource(
-          "Voxel",
-          value,
-          resource
-        );
+        const result = await createVerseFromResource("Voxel", value, resource);
 
         ElMessage.success(t("voxel.view.prompt.success") + value);
         // 创建成功后跳转到虚拟世界查看页面
@@ -377,7 +388,7 @@ const loaded = async (info: VoxelInfo) => {
         md5,
         extension,
         file,
-        () => { },
+        () => {},
         handler,
         "screenshot/voxel"
       );

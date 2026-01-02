@@ -1,13 +1,6 @@
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    :title="$t('audio.view.title')"
-    width="800px"
-    center
-    destroy-on-close
-    append-to-body
-    @closed="handleClose"
-  >
+  <el-dialog v-model="dialogVisible" :title="$t('audio.view.title')" width="800px" center destroy-on-close
+    append-to-body @closed="handleClose">
     <div class="document-index" v-loading="loading">
       <el-row :gutter="20">
         <el-col :sm="16">
@@ -20,47 +13,24 @@
             <div class="box-item" style="text-align: center">
               <section class="audio-bgc">
                 <div class="audio-box">
-                  <div
-                    class="audio-record"
-                    :class="{ 'audio-record-playfast': isPlay }"
-                    @click="handlePlayAudio"
-                  ></div>
-                  <div
-                    class="audio-record-image"
-                    :class="{ 'audio-record-play': isPlay }"
-                    @click="handlePlayAudio"
-                  ></div>
+                  <div class="audio-record" :class="{ 'audio-record-playfast': isPlay }" @click="handlePlayAudio"></div>
+                  <div class="audio-record-image" :class="{ 'audio-record-play': isPlay }" @click="handlePlayAudio">
+                  </div>
                 </div>
-                <audio
-                  id="audio-dialog-player"
-                  controls
-                  style="width: 95%; height: 50px; margin-top: 20px"
-                  :src="file"
-                  preload="auto"
-                  @play="listenPlay"
-                  @pause="listenPause"
-                  @ended="listenEnd"
-                  @canplaythrough="dealWith"
-                ></audio>
+                <audio id="audio-dialog-player" controls style="width: 95%; height: 50px; margin-top: 20px" :src="file"
+                  preload="auto" @play="listenPlay" @pause="listenPause" @ended="listenEnd"
+                  @canplaythrough="dealWith"></audio>
               </section>
             </div>
           </el-card>
         </el-col>
         <el-col :sm="8">
-          <MrppInfo
-            v-if="audioData"
-            :title="$t('audio.view.info.title')"
-            titleSuffix=" :"
-            :tableData="tableData"
-            :itemLabel="$t('audio.view.info.label1')"
-            :textLabel="$t('audio.view.info.label2')"
-            :downloadText="$t('audio.view.info.download')"
-            :renameText="$t('audio.view.info.name')"
-            :deleteText="$t('audio.view.info.delete')"
-            @download="downloadAudio"
-            @rename="namedWindow"
-            @delete="deleteWindow"
-          ></MrppInfo>
+          <MrppInfo v-if="audioData" :title="$t('audio.view.info.title')" titleSuffix=" :" :tableData="tableData"
+            :itemLabel="$t('audio.view.info.label1')" :textLabel="$t('audio.view.info.label2')"
+            :downloadText="$t('audio.view.info.download')" :renameText="$t('audio.view.info.name')"
+            :deleteText="$t('audio.view.info.delete')" @download="downloadAudio" @rename="namedWindow"
+            @delete="deleteWindow">
+          </MrppInfo>
         </el-col>
       </el-row>
     </div>
@@ -70,10 +40,6 @@
 <script setup lang="ts">
 import { getAudio, putAudio, deleteAudio } from "@/api/v1/resources";
 import type { ResourceInfo } from "@/api/v1/resources/model";
-import { postFile } from "@/api/v1/files";
-import { UploadFileType } from "@/api/user/model";
-import { useFileStore } from "@/store/modules/config";
-import { FileHandler } from "@/assets/js/file/server";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 import MrppInfo from "@/components/MrPP/MrppInfo/index.vue";
 import { downloadResource } from "@/utils/downloadHelper";
@@ -86,8 +52,6 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(["update:modelValue", "deleted", "renamed"]);
-
-const store = useFileStore().store;
 const { t } = useI18n();
 const audioData = ref<ResourceInfo | null>(null);
 const file = ref<string>();
@@ -126,7 +90,7 @@ const tableData = computed(() => {
     let info: any = {};
     try {
       info = JSON.parse(audioData.value.info || "{}");
-    } catch {}
+    } catch { }
     if (info.length) {
       base.push({
         item: t("audio.view.info.item5"),
@@ -327,11 +291,9 @@ watch(
   width: 100%;
   height: 300px;
   background: rgb(238, 174, 202);
-  background: radial-gradient(
-    circle,
-    rgba(238, 174, 202, 1) 0%,
-    rgb(169, 196, 228) 100%
-  );
+  background: radial-gradient(circle,
+      rgba(238, 174, 202, 1) 0%,
+      rgb(169, 196, 228) 100%);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
