@@ -17,7 +17,6 @@ export default {
     name: "名前",
     description: "説明",
     edit: "編集",
-    enter: "入る",
     back: "戻る",
     comingSoon: "近日公開",
     submit: "送信",
@@ -29,7 +28,6 @@ export default {
     deleteFailed: "削除に失敗しました",
     operationFailed: "操作失敗",
     networkError: "ネットワークエラーです。ネットワーク接続を確認してください",
-    noData: "データがありません",
   },
   request: {
     loginExpired: "ログインの有効期限が切れました。再度ログインしてください",

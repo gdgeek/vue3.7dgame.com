@@ -2,119 +2,15 @@
   <TransitionWrapper>
     <div class="tencent-tts">
       <div class="main-content">
-        <div class="voice-select-section">
-          <div class="voice-filters">
-            <div class="filter-item">
-              <span class="param-label">{{ t('tts.voiceType') }}</span>
-              <el-select v-model="voiceType" :placeholder="t('tts.voiceType')">
-                <el-option :label="t('tts.all')" value="" />
-                <el-option :label="t('tts.premiumVoice')" value="精品音色" />
-                <el-option :label="t('tts.standardVoice')" value="标准音色" />
-              </el-select>
-            </div>
-            <div class="filter-item">
-              <span class="param-label">{{ t('tts.voiceScene') }}</span>
-              <el-select v-model="voiceScene" :placeholder="t('tts.voiceScene')">
-                <el-option :label="t('tts.all')" value="" />
-                <el-option v-for="scene in availableScenes" :key="scene" :label="scene" :value="scene" />
-              </el-select>
-            </div>
-            <div class="filter-item">
-              <span class="param-label">{{ t('tts.voiceLanguage') }}</span>
-              <div class="language-control">
-                <el-select v-model="voiceLanguage" :placeholder="t('tts.voiceLanguage')" :disabled="autoSwitchLanguage">
-                  <el-option :label="t('tts.all')" value="" />
-                  <el-option :label="t('tts.chinese')" value="中文" />
-                  <el-option :label="t('tts.english')" value="英文" />
-                  <el-option :label="t('tts.japanese')" value="日文" />
-                </el-select>
-                <el-tooltip :content="t('tts.openAutoSwitch')" placement="top" :effect="isDark ? 'light' : 'dark'">
-                  <el-switch v-model="autoSwitchLanguage" inline-prompt :active-text="t('tts.autoSwitch')"
-                    :inactive-text="t('tts.openAutoSwitch')" class="auto-detect-switch" />
-                </el-tooltip>
-              </div>
-            </div>
-          </div>
-          <div class="voice-type">
-            <span class="param-label">{{ t('tts.voice') }}</span>
-            <el-select v-model="selectedVoiceType" :placeholder="t('tts.voice')" class="voice-select">
-              <el-option-group v-for="group in groupedVoices" :key="group.type" :label="group.type">
-                <el-option v-for="voice in group.voices" :key="voice.value" :label="voice.label" :value="voice.value">
-                  <div class="voice-option">
-                    <span>{{ voice.label }}</span>
-                    <div class="voice-tags">
-                      <el-tag size="small"
-                        :type="voice.scene.includes('男') ? 'primary' : voice.scene.includes('女') ? 'danger' : 'info'">
-                        {{ voice.scene }}
-                      </el-tag>
-                      <el-tag size="small"
-                        :type="voice.language === '中文' ? 'danger' : voice.language === '日文' ? 'success' : 'primary'"
-                        effect="dark">
-                        {{ voice.language === '中文' ? t('tts.chinese') : voice.language === '英文' ? t('tts.english') :
-                          voice.language === '日文' ? t('tts.japanese') : voice.language }}
-                      </el-tag>
-                      <el-tag v-if="voice.emotions.length > 1" size="small" type="warning" effect="plain"
-                        @click="showEmotions(voice)">
-                        {{ voice.emotions.length }}{{ t('tts.emotionCount') }}
-                      </el-tag>
-                    </div>
-                  </div>
-                </el-option>
-              </el-option-group>
-            </el-select>
-          </div>
+        <!-- 语音选择器组件 -->
+        <VoiceSelector v-model:selected-voice="selectedVoiceType" v-model:voice-type="voiceType"
+          v-model:voice-scene="voiceScene" v-model:voice-language="voiceLanguage"
+          v-model:auto-switch-language="autoSwitchLanguage" v-model:emotion-category="emotionCategory"
+          v-model:emotion-intensity="emotionIntensity" :is-dark="isDark" @show-emotions="showEmotions" />
 
-          <div class="param-item emotion-params">
-            <div class="emotion-controls">
-              <div class="emotion-row">
-                <div class="emotion-type">
-                  <span class="param-label">{{ t('tts.emotionType') }}</span>
-                  <el-select v-model="emotionCategory" :placeholder="t('tts.emotionType')" class="emotion-select"
-                    :disabled="availableEmotions.length <= 1">
-                    <el-option :label="t('tts.default')" value="" />
-                    <el-option v-for="emotion in filteredEmotions" :key="emotion" :label="emotion" :value="emotion" />
-                  </el-select>
-                </div>
-                <div class="emotion-intensity" v-if="emotionCategory">
-                  <span class="param-label">{{ t('tts.emotionIntensity') }} ({{ emotionIntensity }})</span>
-                  <el-slider v-model="emotionIntensity" :min="50" :max="200" :step="10" show-stops
-                    class="intensity-slider" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="params-section">
-          <div class="param-row">
-            <div class="param-item">
-              <span class="param-label">{{ t('tts.volume') }}</span>
-              <el-slider v-model="volume" :min="-10" :max="10" :step="1" show-stops />
-            </div>
-            <div class="param-item">
-              <span class="param-label">{{ t('tts.speed') }}</span>
-              <el-slider v-model="speed" :min="-2" :max="6" :step="0.5" show-stops />
-            </div>
-          </div>
-          <div class="param-row">
-            <div class="param-item">
-              <span class="param-label">{{ t('tts.audioFormat') }}</span>
-              <el-radio-group v-model="codec">
-                <el-radio :value="'wav'">WAV</el-radio>
-                <el-radio :value="'mp3'">MP3</el-radio>
-                <el-radio :value="'pcm'">PCM</el-radio>
-              </el-radio-group>
-            </div>
-            <div class="param-item">
-              <span class="param-label">{{ t('tts.sampleRate') }}</span>
-              <el-radio-group v-model="sampleRate">
-                <el-radio :value="8000">8k</el-radio>
-                <el-radio :value="16000">16k</el-radio>
-                <el-radio v-if="supportHighSampleRate" :value="24000">24k</el-radio>
-              </el-radio-group>
-            </div>
-          </div>
-        </div>
+        <!-- TTS 参数控制组件 -->
+        <TTSParams v-model:volume="volume" v-model:speed="speed" v-model:codec="codec" v-model:sample-rate="sampleRate"
+          :support-high-sample-rate="supportHighSampleRate" />
 
         <div class="input-section">
           <div class="tag-actions-container">
@@ -149,30 +45,8 @@
           </div>
 
           <!-- 语言分析组件 -->
-          <div class="language-analysis" v-if="showLanguageAnalysis && text.length > 0">
-            <div class="analysis-header">
-              <span class="analysis-title">{{ t('tts.languageAnalysis') }}</span>
-              <el-button type="text" size="small" @click="showLanguageAnalysis = false">{{ t('tts.close') }}</el-button>
-            </div>
-            <div class="language-analysis-content">
-              <div class="language-bars">
-                <div class="language-bar-item" v-for="[type, item] in languageItems" :key="type">
-                  <div class="bar-label" :class="type">
-                    {{ item.label }} ({{ Math.round(animatedPercentages[type] || 0) }}% - {{ item.count }}{{
-                      t('tts.totalChars')
-                    }})
-                  </div>
-                  <el-progress :percentage="animatedPercentages[type] || 0" :color="getProgressColor(type)"
-                    :show-text="false" :stroke-width="8" :track-color="isDark ? '#444' : '#e4e7ed'"
-                    class="language-progress" />
-                </div>
-              </div>
-              <div class="language-chart" ref="languageChartRef"></div>
-            </div>
-            <div class="analysis-suggestion" v-if="languageAnalysis.suggestion">
-              <el-alert :title="languageAnalysis.suggestion" type="info" :closable="false" />
-            </div>
-          </div>
+          <LanguageAnalysis :visible="showLanguageAnalysis" :text="text" :analysis="languageAnalysis" :is-dark="isDark"
+            @close="showLanguageAnalysis = false" />
 
           <div class="text-area-container">
             <div class="text-container" ref="textContainerRef" v-show="isPlaying">
@@ -237,11 +111,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from 'axios'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from "vue-router"
-import * as echarts from 'echarts/core'
-import { PieChart } from 'echarts/charts'
-import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components'
-import { LabelLayout } from 'echarts/features'
-import { CanvasRenderer } from 'echarts/renderers'
+
 import { availableVoices as voicesList, emotionMap } from '@/store/modules/availableVoices'
 import { postFile } from "@/api/v1/files"
 import { postAudio } from "@/api/v1/resources/index"
@@ -249,6 +119,9 @@ import { useFileStore } from "@/store/modules/config"
 import { useSettingsStore } from '@/store'
 import { ThemeEnum } from '@/enums/ThemeEnum'
 import TransitionWrapper from '@/components/TransitionWrapper.vue'
+import VoiceSelector from './components/VoiceSelector.vue'
+import TTSParams from './components/TTSParams.vue'
+import LanguageAnalysis from './components/LanguageAnalysis.vue'
 import type { UploadFileType } from "@/api/user/model"
 
 interface VoiceOption {
@@ -276,15 +149,7 @@ interface LanguageAnalysis {
   detectedLanguage: string
 }
 
-// 注册ECharts组件
-echarts.use([
-  PieChart,
-  TitleComponent,
-  TooltipComponent,
-  LegendComponent,
-  LabelLayout,
-  CanvasRenderer
-])
+
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -323,10 +188,10 @@ let languageDetectionTimer: number | null = null
 // DOM引用
 const textContainerRef = ref<HTMLElement | null>(null)
 const audioPlayerRef = ref<HTMLAudioElement | null>(null)
-const languageChartRef = ref<HTMLElement | null>(null)
+
 
 // 图表实例
-let languageChart: echarts.ECharts | null = null
+
 
 // TTS参数
 const selectedVoiceType = ref(101002) // 默认音色：智聆
@@ -511,113 +376,9 @@ const updateAnimatedPercentages = () => {
   requestAnimationFrame(animate)
 }
 
-// 更新语言分析图表
-const updateLanguageChart = () => {
-  if (!languageChartRef.value) return
 
-  if (!languageChart) {
-    languageChart = echarts.init(languageChartRef.value)
-  } else {
-    languageChart.resize()
-  }
 
-  const colorMap = {
-    '中文': '#f56c6c',
-    '日文': '#67c23a',
-    '英文': '#409eff',
-    '其他': '#909399'
-  }
 
-  const chartData = [
-    {
-      value: languageAnalysis.value.chinesePercentage,
-      name: t('tts.chinese'),
-      itemStyle: { color: colorMap['中文'] },
-      count: languageAnalysis.value.chineseCount
-    },
-    {
-      value: languageAnalysis.value.japanesePercentage,
-      name: t('tts.japanese'),
-      itemStyle: { color: colorMap['日文'] },
-      count: languageAnalysis.value.japaneseCount
-    },
-    {
-      value: languageAnalysis.value.englishPercentage,
-      name: t('tts.english'),
-      itemStyle: { color: colorMap['英文'] },
-      count: languageAnalysis.value.englishCount
-    },
-    {
-      value: languageAnalysis.value.otherPercentage,
-      name: t('tts.other'),
-      itemStyle: { color: colorMap['其他'] },
-      count: languageAnalysis.value.otherCount
-    }
-  ].filter(item => item.value > 0)
-
-  const option = {
-    tooltip: {
-      trigger: 'item',
-      formatter: function (params: any) {
-        return `${t('tts.languageAnalysis')}<br/>
-               ${params.name}: ${params.percent}%<br/>
-               ${t('tts.totalChars')}: ${params.data.count}<br/>
-              `
-      },
-      textStyle: {
-        color: isDark.value ? '#fff' : '#333'
-      },
-      backgroundColor: isDark.value ? '#1e1e1e' : '#fff',
-      borderColor: isDark.value ? '#444' : '#ddd'
-    },
-    legend: {
-      orient: 'vertical',
-      left: 'left',
-      textStyle: {
-        color: isDark.value ? '#e0e0e0' : '#606266'
-      }
-    },
-    series: [
-      {
-        name: t('tts.languageAnalysis'),
-        type: 'pie',
-        radius: ['40%', '95%'],
-        avoidLabelOverlap: false,
-        itemStyle: {
-          borderRadius: 8,
-          borderColor: isDark.value ? '#1e1e1e' : '#fff',
-          borderWidth: 2
-        },
-        label: {
-          show: false,
-          position: 'center',
-          color: isDark.value ? '#e0e0e0' : '#606266'
-        },
-        emphasis: {
-          label: {
-            show: true,
-            fontSize: '20',
-            fontWeight: 'bold',
-            color: isDark.value ? '#e0e0e0' : '#606266'
-          }
-        },
-        labelLine: {
-          show: false
-        },
-        data: chartData
-      }
-    ]
-  }
-
-  languageChart.setOption(option)
-}
-
-// 事件处理方法
-const handleResize = () => {
-  if (languageChart) {
-    languageChart.resize()
-  }
-}
 
 const onTextInput = () => {
   highlightedText.value = ''
@@ -676,9 +437,7 @@ const checkTextLanguage = () => {
     detectedLanguage: ''
   }
 
-  nextTick(() => {
-    updateLanguageChart()
-  })
+
 
   let detectedLanguage = ''
   let isMultiLanguage = false
@@ -994,14 +753,7 @@ const uploadAudio = async () => {
 // 监听主题变化
 watch(isDark, () => {
   if (showLanguageAnalysis.value) {
-    if (languageChart) {
-      const oldChart = languageChart
-      nextTick(() => {
-        oldChart.dispose()
-        languageChart = null
-        updateLanguageChart()
-      })
-    }
+
 
     const currentPercentages = { ...animatedPercentages.value }
     animatedPercentages.value = {}
@@ -1068,12 +820,7 @@ watch(voiceLanguage, (newLanguage, oldLanguage) => {
       }
     }
 
-    // 更新图表以反映语言变化
-    if (showLanguageAnalysis.value && languageChart) {
-      nextTick(() => {
-        updateLanguageChart()
-      })
-    }
+
   }
 })
 
@@ -1084,22 +831,7 @@ watch(autoSwitchLanguage, (newValue) => {
   }
 })
 
-// 监听语言分析显示状态
-watch(showLanguageAnalysis, (newVal) => {
-  if (newVal) {
-    nextTick(() => {
-      setTimeout(() => {
-        if (languageChart) {
-          languageChart.dispose()
-          languageChart = null
-        }
-        updateLanguageChart()
-        animatedPercentages.value = {}
-        updateAnimatedPercentages()
-      }, 100)
-    })
-  }
-})
+
 
 // 监听语言分析数据变化
 watch(() => languageAnalysis.value, () => {
@@ -1109,11 +841,7 @@ watch(() => languageAnalysis.value, () => {
 
 // 监听i18n语言变化
 watch(() => locale.value, () => {
-  if (showLanguageAnalysis.value && languageChart) {
-    nextTick(() => {
-      updateLanguageChart()
-    })
-  }
+
 
   // 更新语言分析建议文本
   if (text.value && languageAnalysis.value.totalChars > 0) {
@@ -1152,12 +880,12 @@ onMounted(() => {
 
   nextTick(() => {
     if (showLanguageAnalysis.value && text.value.length > 5) {
-      updateLanguageChart()
+
       updateAnimatedPercentages()
     }
   })
 
-  window.addEventListener('resize', handleResize)
+
 })
 
 onUnmounted(() => {
@@ -1188,12 +916,9 @@ onUnmounted(() => {
     textContainerRef.value.removeEventListener('mouseleave', () => { })
   }
 
-  if (languageChart) {
-    languageChart.dispose()
-    languageChart = null
-  }
 
-  window.removeEventListener('resize', handleResize)
+
+
 })
 </script>
 

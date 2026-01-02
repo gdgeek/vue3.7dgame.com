@@ -17,7 +17,6 @@ export default {
     name: "名稱",
     description: "描述",
     edit: "編輯",
-    enter: "進入",
     back: "返回",
     comingSoon: "敬請期待",
     submit: "提交",

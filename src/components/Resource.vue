@@ -33,7 +33,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from "vue";
 const resourceDialog = ref<InstanceType<typeof ResourceDialog> | null>(null)
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import PolygenView from "./PolygenView.vue";

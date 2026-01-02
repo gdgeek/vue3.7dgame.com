@@ -45,14 +45,9 @@ onMounted(async () => {
   // Fetch domain SEO info on app startup
   await domainStore.fetchDomainInfo();
 
-  // Debug logs (remove after testing)
-  console.error(domainStore)
-  console.log("Domain Info:", domainStore.title, domainStore.description, domainStore.keywords, domainStore.author, domainStore.links);
-
   const hasToken = Token.getToken();
   if (hasToken) {
     userStore.getUserInfo();
-    //  userStore.setupRefreshInterval();
   }
 });
 

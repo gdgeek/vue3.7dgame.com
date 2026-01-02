@@ -18,7 +18,6 @@ export default {
     name: "Name",
     description: "Description",
     edit: "Edit",
-    enter: "Enter",
     back: "Back",
     comingSoon: "Coming Soon",
     submit: "Submit",

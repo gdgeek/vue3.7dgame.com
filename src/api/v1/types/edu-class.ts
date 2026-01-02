@@ -7,6 +7,7 @@ export interface EduClass {
   created_at: string;
   updated_at: string;
   image?: FileType;
+  school?: { id: number; name: string }; // 关联学校
   eduStudents?: { id: number; user: UserType }[];
   eduTeachers?: { id: number; user: UserType }[];
   info: {

@@ -102,7 +102,7 @@
 
 <script setup lang="ts">
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
-import { ref, computed, defineEmits, defineExpose } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Waterfall } from "vue-waterfall-plugin-next";

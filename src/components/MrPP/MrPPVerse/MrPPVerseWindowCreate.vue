@@ -23,7 +23,7 @@
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">{{
           $t("verse.page.form.cancel")
-        }}</el-button>
+          }}</el-button>
         <el-button type="primary" @click="submitForm">
           {{ dialogSubmit }}
         </el-button>
@@ -37,7 +37,7 @@ import { VerseData } from "@/api/v1/verse";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";
 import { useUserStore } from "@/store/modules/user";
 import { FormInstance, ElMessage } from "element-plus";
-import { ref, computed, defineProps, defineEmits } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
