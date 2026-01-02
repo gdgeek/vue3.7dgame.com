@@ -1,83 +1,141 @@
 <template>
   <div class="app-container" :class="{ 'dark-theme': isDark }">
     <!-- 导航栏 -->
-    <nav class="nav-container" :class="{ 'nav-scrolled': scrolled, 'dark-theme': isDark }">
+    <nav
+      class="nav-container"
+      :class="{ 'nav-scrolled': scrolled, 'dark-theme': isDark }"
+    >
       <div class="nav-left">
         <img src="/media/image/logo.gif" alt="Logo" class="logo" />
-        <RadiantText class="company-name" :duration="5" :fontSize="isMobile ? 16 : 20" :textColor="textColor">
-          <span class="font-bold">BuJiaBan.com</span>
+        <RadiantText
+          class="company-name"
+          :duration="5"
+          :fontSize="isMobile ? 16 : 20"
+          :textColor="textColor"
+        >
+          <span class="font-bold">{{
+            domainStore.domain || "Loading..."
+          }}</span>
         </RadiantText>
       </div>
       <div class="nav-middle" v-if="!isMobile">
-        <div class="nav-menu-item" v-for="(item, index) in navMenuItems" :key="index" @click="select(item)">
+        <div
+          class="nav-menu-item"
+          v-for="(item, index) in navMenuItems"
+          :key="index"
+          @click="select(item)"
+        >
           <div class="menu-text">{{ item.label }}</div>
           <div class="menu-line"></div>
         </div>
       </div>
       <div class="nav-right">
         <div class="theme-switch" v-if="!isMobile">
-          <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
-            @change="toggleTheme"></el-switch>
+          <el-switch
+            v-model="isDark"
+            inline-prompt
+            active-icon="Moon"
+            inactive-icon="Sunny"
+            @change="toggleTheme"
+          ></el-switch>
         </div>
-        <el-button type="primary" class="login-button" @click="openLoginDialog" :class="{ 'mobile-button': isMobile }">
-          登录平台
+        <div class="lang-select" v-if="!isMobile">
+          <LangSelect></LangSelect>
+        </div>
+        <el-button
+          type="primary"
+          class="login-button"
+          @click="openLoginDialog"
+          :class="{ 'mobile-button': isMobile }"
+        >
+          {{ $t("web.login") }}
         </el-button>
         <div class="hamburger-menu" v-if="isMobile" @click="toggleSidebar">
           <el-icon>
-            <component :is="sidebarVisible ? 'Close' : 'Fold'" />
+            <component :is="sidebarVisible ? 'Close' : 'Fold'"></component>
           </el-icon>
         </div>
       </div>
     </nav>
 
     <!-- 移动端侧边栏菜单 -->
-    <div class="sidebar-overlay" v-if="isMobile && sidebarVisible" @click="toggleSidebar"></div>
-    <div class="sidebar-menu" :class="{ 'sidebar-visible': sidebarVisible, 'dark-theme': isDark }" v-if="isMobile">
+    <div
+      class="sidebar-overlay"
+      v-if="isMobile && sidebarVisible"
+      @click="toggleSidebar"
+    ></div>
+    <div
+      class="sidebar-menu"
+      :class="{ 'sidebar-visible': sidebarVisible, 'dark-theme': isDark }"
+      v-if="isMobile"
+    >
       <!-- 侧边栏顶部 -->
       <div class="sidebar-header">
         <img src="/media/image/logo.gif" alt="Logo" class="sidebar-logo" />
-        <span class="sidebar-company-name">不加班AR创造平台</span>
+        <span class="sidebar-company-name">{{ domainStore.title }}</span>
       </div>
       <div class="sidebar-items">
         <div class="theme-switch-mobile">
-          <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
-            @change="toggleTheme"></el-switch>
+          <el-switch
+            v-model="isDark"
+            inline-prompt
+            active-icon="Moon"
+            inactive-icon="Sunny"
+            @change="toggleTheme"
+          ></el-switch>
         </div>
-        <div v-for="item in navMenuItems" :key="item.key" class="sidebar-item" @click="select(item); toggleSidebar()">
+        <div class="lang-select-mobile">
+          <LangSelect></LangSelect>
+        </div>
+        <div
+          v-for="item in navMenuItems"
+          :key="item.key"
+          class="sidebar-item"
+          @click="
+            select(item);
+            toggleSidebar();
+          "
+        >
           {{ item.label }}
         </div>
         <div class="sidebar-item" @click="openLoginDialog">
-          登录平台
+          {{ $t("web.login") }}
         </div>
       </div>
     </div>
 
     <!-- 主体内容区域 -->
-    <div class="content-container" ref="contentRef" :class="{ 'dark-theme': isDark }">
-
-      <Hero v-if="isIndex" @openLogin="openLoginDialog" />
+    <div
+      class="content-container"
+      ref="contentRef"
+      :class="{ 'dark-theme': isDark }"
+    >
+      <Hero v-if="isIndex" @open-login="openLoginDialog"></Hero>
       <router-view></router-view>
-      <Footer :maxwidth="true" />
+      <Footer :maxwidth="true"></Footer>
     </div>
     <!-- 登录对话框 -->
-    <LoginDialog ref="loginDialogRef" />
+    <LoginDialog ref="loginDialogRef"></LoginDialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import "@/assets/font/font.css";
 import { useRouter, useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import LoginDialog from "@/components/Account/LoginDialog.vue";
+import LangSelect from "@/components/LangSelect/index.vue";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-
+import { useDomainStore } from "@/store/modules/domain";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const router = useRouter();
 const route = useRoute();
 const contentRef = ref<HTMLElement | null>(null);
 const settingsStore = useSettingsStore();
+const domainStore = useDomainStore();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
 defineOptions({
@@ -86,12 +144,21 @@ defineOptions({
 });
 
 // 导航菜单项
-const navMenuItems = [
-  { key: "news", label: "首页", path: "/web/index" },
-  { key: "tutorial", label: "案例教程", path: "/web/category?section=tutorial" },
-  { key: "buy", label: "平台授权", path: "/web/buy" },
-  { key: "bbs", label: "Rokid 论坛", path: "https://forum.rokid.com/index" }
-];
+const { t } = useI18n();
+const navMenuItems = computed(() => [
+  { key: "news", label: t("web.nav.home"), path: "/web/index" },
+  {
+    key: "tutorial",
+    label: t("web.nav.tutorial"),
+    path: "/web/category?section=tutorial",
+  },
+  { key: "buy", label: t("web.nav.authorization"), path: "/web/buy" },
+  {
+    key: "bbs",
+    label: t("web.nav.forum"),
+    path: "https://forum.rokid.com/index",
+  },
+]);
 const loginDialogRef = ref<any>(null);
 
 /** 主题切换 */
@@ -102,24 +169,23 @@ const toggleTheme = () => {
 
 const textColor = computed(() => {
   if (isDark.value) {
-    return '#fff';
+    return "#fff";
   } else {
-    return scrolled.value ? '#333' : '#fff';
+    return scrolled.value ? "#333" : "#fff";
   }
-})
+});
 const isIndex = computed(() => {
   if (route.path == "/web/index") {
     return true;
   }
   return false;
-})
+});
 const scrolled = computed(() => {
   if (!isIndex.value) {
     return true;
   }
   return isScrolled.value;
-})
-
+});
 
 const openLoginDialog = () => {
   if (loginDialogRef.value) {
@@ -127,11 +193,10 @@ const openLoginDialog = () => {
   }
 };
 
-
 const isScrolled = ref(false);
 
 // 自动滚动
-const SCROLL_POSITION_KEY = 'web_scroll_position';
+const SCROLL_POSITION_KEY = "web_scroll_position";
 
 // 保存滚动位置
 const saveScrollPosition = () => {
@@ -140,7 +205,7 @@ const saveScrollPosition = () => {
     try {
       sessionStorage.setItem(SCROLL_POSITION_KEY, scrollTop.toString());
     } catch (e) {
-      console.error('保存滚动位置失败:', e);
+      console.error("保存滚动位置失败:", e);
     }
   }
 };
@@ -153,12 +218,12 @@ const restoreScrollPosition = () => {
       nextTick(() => {
         window.scrollTo({
           top: parseInt(savedPosition),
-          behavior: 'auto'
+          behavior: "auto",
         });
       });
     }
   } catch (e) {
-    console.error('恢复滚动位置失败:', e);
+    console.error("恢复滚动位置失败:", e);
   }
 };
 
@@ -195,20 +260,19 @@ const toggleSidebar = () => {
   sidebarVisible.value = !sidebarVisible.value;
 };
 
-
 const select = (item: any) => {
-
-  if (item.path && (item.path.startsWith('http://') || item.path.startsWith('https://'))) {
+  if (
+    item.path &&
+    (item.path.startsWith("http://") || item.path.startsWith("https://"))
+  ) {
     // 使用 window.open 在新窗口/标签页中打开外部链接
 
-    window.open(item.path, '_blank');
+    window.open(item.path, "_blank");
   } else {
     // 内部路由跳转
     router.push(item.path);
   }
-
-
-}
+};
 // 滚动到指定部分的函数
 const scrollToSection = (sectionId: string) => {
   // 计算导航栏高度（加点额外的间距）
@@ -226,7 +290,7 @@ const scrollToSection = (sectionId: string) => {
     // 平滑滚动到指定位置
     window.scrollTo({
       top: offsetPosition,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   }
 };
@@ -236,7 +300,6 @@ onMounted(() => {
   //滚到news上
   const section = route.query.section;
   if (section) {
-
     setTimeout(() => {
       scrollToSection("news");
     }, 100);
@@ -249,7 +312,7 @@ onMounted(() => {
   AOS.init({
     duration: 1000,
     once: false,
-    mirror: true
+    mirror: true,
   });
 
   // 恢复滚动位置
@@ -257,7 +320,7 @@ onMounted(() => {
 
   // 监听路由变化，在路由变化后保存滚动位置
   router.beforeEach((to, from) => {
-    if (from.path.startsWith('/web')) {
+    if (from.path.startsWith("/web")) {
       saveScrollPosition();
     }
     return true;
@@ -388,6 +451,32 @@ onUnmounted(() => {
       margin-right: 24px;
     }
 
+    .lang-select {
+      margin-right: 24px;
+      cursor: pointer;
+      color: #fff;
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+      font-size: 18px;
+
+      :deep(.lang-trigger),
+      :deep(.lang-text),
+      :deep(.svg-icon) {
+        color: #fff !important;
+        fill: #fff !important;
+      }
+
+      &:hover {
+        border-color: #00dbde;
+        background-color: rgba(0, 219, 222, 0.1);
+        transform: translateY(-1px);
+      }
+    }
+
     .login-button {
       padding: 8px 20px;
       font-size: 15px;
@@ -424,19 +513,41 @@ onUnmounted(() => {
   }
 
   &.nav-scrolled {
-
     .nav-left .company-name,
     .nav-middle .nav-menu-item .menu-text,
-    .nav-right .hamburger-menu {
+    .nav-right .hamburger-menu,
+    .nav-right .lang-select {
       color: #333;
     }
 
-    &.dark-theme {
+    .nav-right .lang-select {
+      border-color: rgba(51, 51, 51, 0.5);
 
+      :deep(.lang-trigger),
+      :deep(.lang-text),
+      :deep(.svg-icon) {
+        color: #333 !important;
+        fill: #333 !important;
+      }
+    }
+
+    &.dark-theme {
       .nav-left .company-name,
       .nav-middle .nav-menu-item .menu-text,
-      .nav-right .hamburger-menu {
+      .nav-right .hamburger-menu,
+      .nav-right .lang-select {
         color: #fff;
+      }
+
+      .nav-right .lang-select {
+        border-color: rgba(255, 255, 255, 0.5);
+
+        :deep(.lang-trigger),
+        :deep(.lang-text),
+        :deep(.svg-icon) {
+          color: #fff !important;
+          fill: #fff !important;
+        }
       }
     }
   }
@@ -559,6 +670,14 @@ onUnmounted(() => {
       display: flex;
       justify-content: flex-start;
       border-bottom: 1px solid #f0f0f0;
+    }
+
+    .lang-select-mobile {
+      padding: 16px 24px;
+      display: flex;
+      justify-content: flex-start;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
     }
 
     .sidebar-item {

@@ -1,6 +1,5 @@
 <template>
-  <div class="project-index">
-    <br />
+  <div class="ai-index">
     <el-container>
       <el-header>
         <mr-p-p-header
@@ -19,11 +18,11 @@
         </mr-p-p-header>
       </el-header>
       <el-main>
-        <el-card>
+        <el-card style="width: 100%; min-height: 400px">
           <Waterfall
             :list="items"
             :width="320"
-            :gutter="10"
+            :gutter="20"
             :backgroundColor="'rgba(255, 255, 255, .05)'"
           >
             <template #default="{ item }">
@@ -95,7 +94,6 @@
         </el-card>
       </el-footer>
     </el-container>
-    <br />
   </div>
 </template>
 
@@ -186,3 +184,9 @@ const refresh = async () => {
 
 onMounted(() => refresh());
 </script>
+
+<style scoped>
+.ai-index {
+  padding: 20px;
+}
+</style>

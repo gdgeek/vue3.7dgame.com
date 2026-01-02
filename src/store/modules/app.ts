@@ -2,8 +2,6 @@ import defaultSettings from "@/settings";
 
 // 导入 Element Plus 中英文语言包
 import zhCn from "element-plus/es/locale/lang/zh-cn";
-import en from "element-plus/es/locale/lang/en";
-import ja from "element-plus/es/locale/lang/ja";
 import { store } from "@/store";
 import { DeviceEnum } from "@/enums/DeviceEnum";
 import { SidebarStatusEnum } from "@/enums/SidebarStatusEnum";
@@ -15,24 +13,13 @@ export const useAppStore = defineStore("app", () => {
   const size = useStorage("size", defaultSettings.size);
   const language = useStorage("language", defaultSettings.language);
   const sidebarStatus = useStorage("sidebarStatus", SidebarStatusEnum.CLOSED);
+  const locale = ref<any>(zhCn); // 默认使用中文
 
   const sidebar = reactive({
     opened: sidebarStatus.value === SidebarStatusEnum.OPENED,
     withoutAnimation: false,
   });
   const activeTopMenuPath = useStorage("activeTopMenuPath", "");
-  /**
-   * 根据语言标识读取对应的语言包
-   */
-  const locale = computed(() => {
-    if (language?.value == "en") {
-      return en;
-    } else if (language?.value == "ja") {
-      return ja;
-    } else {
-      return zhCn;
-    }
-  });
 
   // actions
   function toggleSidebar() {
@@ -64,8 +51,27 @@ export const useAppStore = defineStore("app", () => {
    *
    * @param val
    */
-  function changeLanguage(val: string) {
+  async function changeLanguage(val: string) {
     language.value = val;
+    switch (val) {
+      case "en-US":
+        locale.value = (await import("element-plus/es/locale/lang/en")).default;
+        break;
+      case "ja-JP":
+        locale.value = (await import("element-plus/es/locale/lang/ja")).default;
+        break;
+      case "th-TH":
+        locale.value = (await import("element-plus/es/locale/lang/th")).default;
+        break;
+      case "zh-TW":
+        locale.value = (
+          await import("element-plus/es/locale/lang/zh-tw")
+        ).default;
+        break;
+      case "zh-CN":
+      default:
+        locale.value = zhCn;
+    }
   }
   /**
    * 混合模式顶部切换

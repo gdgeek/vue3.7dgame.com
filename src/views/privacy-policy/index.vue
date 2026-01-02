@@ -1,7 +1,12 @@
 <template>
   <div class="privacy-policy">
     <!-- 添加顶部选项卡导航 -->
-    <el-tabs v-model="activeTab" class="policy-tabs" type="border-card" @tab-click="handleTabClick">
+    <el-tabs
+      v-model="activeTab"
+      class="policy-tabs"
+      type="border-card"
+      @tab-click="handleTabClick"
+    >
       <el-tab-pane label="隐私政策" name="privacy"></el-tab-pane>
       <el-tab-pane label="服务条款" name="terms"></el-tab-pane>
     </el-tabs>
@@ -34,7 +39,9 @@
           <el-collapse v-model="activeCollection" class="custom-collapse">
             <el-collapse-item title="1.1 账户信息" name="1">
               <div class="right-content">
-                <p>为了提供个性化服务和确保账户安全，我们收集的账户信息包括：</p>
+                <p>
+                  为了提供个性化服务和确保账户安全，我们收集的账户信息包括：
+                </p>
                 <ul>
                   <li>
                     <strong>基本账户信息</strong>
@@ -153,7 +160,9 @@
 
             <el-collapse-item title="1.4 设备传感器数据" name="4">
               <div class="right-content">
-                <p>为了实现混合现实功能和空间交互，我们需要访问以下传感器数据：</p>
+                <p>
+                  为了实现混合现实功能和空间交互，我们需要访问以下传感器数据：
+                </p>
                 <ul>
                   <li>
                     <strong>摄像头数据</strong>
@@ -172,8 +181,12 @@
                       <li>数据实时处理，不存储原始图像</li>
                       <li>可随时通过权限设置关闭</li>
                       <li>用于游戏场景中的虚实融合</li>
-                      <li>人脸数据仅用于AR效果中的面部遮罩、位置跟踪和表情识别</li>
-                      <li>人脸数据全部在本地设备上实时处理，不会上传至服务器或共享给第三方</li>
+                      <li>
+                        人脸数据仅用于AR效果中的面部遮罩、位置跟踪和表情识别
+                      </li>
+                      <li>
+                        人脸数据全部在本地设备上实时处理，不会上传至服务器或共享给第三方
+                      </li>
                       <li>我们不会保存任何可识别个人身份的人脸数据</li>
                     </ul>
                   </li>
@@ -225,7 +238,9 @@
                     <strong>3D资源数据</strong>
                     <p>支持的文件格式和内容：</p>
                     <ul>
-                      <li>3D模型：.gltf/.glb, .fbx, .obj, .3ds, .dae, .stl等</li>
+                      <li>
+                        3D模型：.gltf/.glb, .fbx, .obj, .3ds, .dae, .stl等
+                      </li>
                       <li>材质贴图：.png, .jpg, .hdr, .exr, .tga, .ktx2等</li>
                       <li>动画数据：骨骼动画、变形动画、关键帧等</li>
                       <li>场景数据：光照、相机、变换等</li>
@@ -662,7 +677,9 @@
                     </ul>
                   </li>
                 </ul>
-                <p>我们有权对违规内容进行下架、删除，并视情节严重程度对账号进行限制或封禁。</p>
+                <p>
+                  我们有权对违规内容进行下架、删除，并视情节严重程度对账号进行限制或封禁。
+                </p>
               </div>
             </el-collapse-item>
           </el-collapse>
@@ -742,10 +759,24 @@
 
         <section class="cookies">
           <h2>5. Cookie的使用</h2>
-          <el-table :data="cookieData" style="width: 100%" stripe border class="custom-table">
-            <el-table-column prop="type" label="Cookie类型" width="180"></el-table-column>
+          <el-table
+            :data="cookieData"
+            style="width: 100%"
+            stripe
+            border
+            class="custom-table"
+          >
+            <el-table-column
+              prop="type"
+              label="Cookie类型"
+              width="180"
+            ></el-table-column>
             <el-table-column prop="purpose" label="使用目的"></el-table-column>
-            <el-table-column prop="duration" label="保存时间" width="180"></el-table-column>
+            <el-table-column
+              prop="duration"
+              label="保存时间"
+              width="180"
+            ></el-table-column>
           </el-table>
         </section>
 
@@ -759,10 +790,14 @@
               <el-tag size="small" type="success">+86 150-0015-9790</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="工作时间">
-              <el-tag size="small" type="warning">周一至周五 10:00-18:30</el-tag>
+              <el-tag size="small" type="warning"
+                >周一至周五 10:00-18:30</el-tag
+              >
             </el-descriptions-item>
             <el-descriptions-item label="响应时间">
-              <el-tag size="small" type="info">收到请求后5个工作日内回复</el-tag>
+              <el-tag size="small" type="info"
+                >收到请求后5个工作日内回复</el-tag
+              >
             </el-descriptions-item>
           </el-descriptions>
         </section>
@@ -773,8 +808,13 @@
             我们可能会适时更新本隐私政策。当本隐私政策发生重大变更时，我们会在网站显著位置发布通知，并通过站内信或邮件等方式通知您。
           </p>
           <el-timeline class="policy-timeline">
-            <el-timeline-item v-for="(update, index) in policyUpdates" :key="index" :timestamp="update.date"
-              :type="index === 0 ? 'primary' : 'info'" :size="index === 0 ? 'large' : 'normal'">
+            <el-timeline-item
+              v-for="(update, index) in policyUpdates"
+              :key="index"
+              :timestamp="update.date"
+              :type="index === 0 ? 'primary' : 'info'"
+              :size="index === 0 ? 'large' : 'normal'"
+            >
               {{ update.content }}
             </el-timeline-item>
           </el-timeline>
@@ -823,7 +863,9 @@
                   <li>支持Rokid等AR设备的应用开发</li>
                   <li>在线游戏体验与分享</li>
                 </ul>
-                <p>我们有权在任何时候修改或中断服务，而无需通知您。我们不对因服务中断给您带来的不便或损失承担责任。</p>
+                <p>
+                  我们有权在任何时候修改或中断服务，而无需通知您。我们不对因服务中断给您带来的不便或损失承担责任。
+                </p>
               </div>
             </el-collapse-item>
 
@@ -838,7 +880,9 @@
                   <li>平台重大技术调整或业务调整</li>
                   <li>AR/VR设备支持策略调整</li>
                 </ul>
-                <p>服务变更或终止前，我们将尽可能通过适当方式通知您，并为您提供合理的时间保存和导出您的数据。</p>
+                <p>
+                  服务变更或终止前，我们将尽可能通过适当方式通知您，并为您提供合理的时间保存和导出您的数据。
+                </p>
               </div>
             </el-collapse-item>
           </el-collapse>
@@ -858,7 +902,9 @@
                   <li>遵守健康游戏规则，合理控制游戏时间</li>
                   <li>未成年人使用服务前应获得监护人同意</li>
                 </ul>
-                <p>您对通过您的账户所进行的所有活动和事件负责。如因您未妥善保管账户信息导致的损失，由您自行承担。</p>
+                <p>
+                  您对通过您的账户所进行的所有活动和事件负责。如因您未妥善保管账户信息导致的损失，由您自行承担。
+                </p>
               </div>
             </el-collapse-item>
 
@@ -876,7 +922,9 @@
                   <li>创建或分享不适当的游戏内容</li>
                   <li>干扰其他用户的游戏体验</li>
                 </ul>
-                <p>账户注销后，您的个人资料和数据将按照我们的隐私政策进行处理。注销流程通常需要5-15个工作日完成，在此期间您仍可取消注销申请。</p>
+                <p>
+                  账户注销后，您的个人资料和数据将按照我们的隐私政策进行处理。注销流程通常需要5-15个工作日完成，在此期间您仍可取消注销申请。
+                </p>
               </div>
             </el-collapse-item>
           </el-collapse>
@@ -898,7 +946,9 @@
                   <li>不得创建导致AR设备使用者产生身体不适的内容</li>
                   <li>不得设计可能导致用户在现实环境中产生危险的游戏机制</li>
                 </ul>
-                <p>我们有权对违反上述规定的内容进行删除，并视情况对相关账户进行处理。</p>
+                <p>
+                  我们有权对违反上述规定的内容进行删除，并视情况对相关账户进行处理。
+                </p>
               </div>
             </el-collapse-item>
 
@@ -906,14 +956,30 @@
               <div class="right-content">
                 <p>关于知识产权的规定如下：</p>
                 <ul>
-                  <li>我们的服务、软件及其中的所有权利（包括但不限于著作权、商标权、专利权等）均归我们所有</li>
-                  <li>您创作的内容的知识产权归您所有，但您授予我们全球性、免费、非独占、可转授权的许可，以便我们存储、使用、传输、展示和分发您的内容</li>
-                  <li>您保证对您上传的内容拥有合法权利，不会侵犯任何第三方的合法权益</li>
-                  <li>如您的内容侵犯他人权益，您将承担全部法律责任，并赔偿因此给我们造成的损失</li>
-                  <li>您同意不会对我们的服务、软件进行反向工程、反编译或试图提取源代码</li>
-                  <li>您通过平台创作的游戏内容，在使用我们的SDK或API进行商业化时，可能需要额外的商业授权</li>
-                  <li>对于平台提供的游戏模板、素材和工具，您仅获得在平台内使用的权利，不得单独提取用于其他商业目的</li>
-                  <li>在游戏设计中使用AI生成内容时，需遵守相关的使用条款和版权规定</li>
+                  <li>
+                    我们的服务、软件及其中的所有权利（包括但不限于著作权、商标权、专利权等）均归我们所有
+                  </li>
+                  <li>
+                    您创作的内容的知识产权归您所有，但您授予我们全球性、免费、非独占、可转授权的许可，以便我们存储、使用、传输、展示和分发您的内容
+                  </li>
+                  <li>
+                    您保证对您上传的内容拥有合法权利，不会侵犯任何第三方的合法权益
+                  </li>
+                  <li>
+                    如您的内容侵犯他人权益，您将承担全部法律责任，并赔偿因此给我们造成的损失
+                  </li>
+                  <li>
+                    您同意不会对我们的服务、软件进行反向工程、反编译或试图提取源代码
+                  </li>
+                  <li>
+                    您通过平台创作的游戏内容，在使用我们的SDK或API进行商业化时，可能需要额外的商业授权
+                  </li>
+                  <li>
+                    对于平台提供的游戏模板、素材和工具，您仅获得在平台内使用的权利，不得单独提取用于其他商业目的
+                  </li>
+                  <li>
+                    在游戏设计中使用AI生成内容时，需遵守相关的使用条款和版权规定
+                  </li>
                 </ul>
               </div>
             </el-collapse-item>
@@ -927,13 +993,25 @@
               <div class="right-content">
                 <p>关于我们的服务，您需了解以下事项：</p>
                 <ul>
-                  <li>我们将尽最大努力确保服务的安全性和稳定性，但不能保证服务完全不会中断或没有错误</li>
-                  <li>我们不对因网络故障、系统维护、升级等原因导致的服务中断承担责任</li>
-                  <li>我们不对因您的设备、网络环境等原因导致的服务体验问题承担责任</li>
-                  <li>我们不保证服务满足您的所有需求，也不保证服务的准确性和及时性</li>
+                  <li>
+                    我们将尽最大努力确保服务的安全性和稳定性，但不能保证服务完全不会中断或没有错误
+                  </li>
+                  <li>
+                    我们不对因网络故障、系统维护、升级等原因导致的服务中断承担责任
+                  </li>
+                  <li>
+                    我们不对因您的设备、网络环境等原因导致的服务体验问题承担责任
+                  </li>
+                  <li>
+                    我们不保证服务满足您的所有需求，也不保证服务的准确性和及时性
+                  </li>
                   <li>我们不对AR/VR设备使用过程中可能产生的身体不适承担责任</li>
-                  <li>我们不对用户在使用AR功能时因注意力分散导致的意外承担责任</li>
-                  <li>我们不对第三方创建的游戏可能产生的任何争议或纠纷承担责任</li>
+                  <li>
+                    我们不对用户在使用AR功能时因注意力分散导致的意外承担责任
+                  </li>
+                  <li>
+                    我们不对第三方创建的游戏可能产生的任何争议或纠纷承担责任
+                  </li>
                 </ul>
               </div>
             </el-collapse-item>
@@ -942,12 +1020,24 @@
               <div class="right-content">
                 <p>在法律允许的最大范围内：</p>
                 <ul>
-                  <li>我们不对您使用我们服务过程中的间接损失、特殊损失、附带损失或惩罚性损害赔偿承担责任</li>
-                  <li>我们对您使用服务造成的直接损失的赔偿责任，以您在损失发生前12个月内为服务支付的费用为上限</li>
-                  <li>对于通过我们的服务获取的任何第三方服务或内容，我们不承担任何责任</li>
-                  <li>我们不对用户创建的游戏可能产生的任何争议或纠纷承担责任</li>
-                  <li>我们不对因使用AR/VR设备可能产生的眩晕、头痛等不适症状承担责任</li>
-                  <li>我们建议用户在使用AR/VR功能时保持安全环境，避免在危险场所使用</li>
+                  <li>
+                    我们不对您使用我们服务过程中的间接损失、特殊损失、附带损失或惩罚性损害赔偿承担责任
+                  </li>
+                  <li>
+                    我们对您使用服务造成的直接损失的赔偿责任，以您在损失发生前12个月内为服务支付的费用为上限
+                  </li>
+                  <li>
+                    对于通过我们的服务获取的任何第三方服务或内容，我们不承担任何责任
+                  </li>
+                  <li>
+                    我们不对用户创建的游戏可能产生的任何争议或纠纷承担责任
+                  </li>
+                  <li>
+                    我们不对因使用AR/VR设备可能产生的眩晕、头痛等不适症状承担责任
+                  </li>
+                  <li>
+                    我们建议用户在使用AR/VR功能时保持安全环境，避免在危险场所使用
+                  </li>
                 </ul>
               </div>
             </el-collapse-item>
@@ -957,8 +1047,12 @@
         <section class="terms-disputes">
           <h2>5. 争议解决</h2>
           <div class="right-content">
-            <p>本服务条款的解释、效力及争议解决均适用中华人民共和国大陆地区法律（不包括冲突法规则）。</p>
-            <p>您与我们之间的任何争议应友好协商解决。协商不成的，任何一方均有权将争议提交至上海市徐汇区人民法院诉讼解决。</p>
+            <p>
+              本服务条款的解释、效力及争议解决均适用中华人民共和国大陆地区法律（不包括冲突法规则）。
+            </p>
+            <p>
+              您与我们之间的任何争议应友好协商解决。协商不成的，任何一方均有权将争议提交至上海市徐汇区人民法院诉讼解决。
+            </p>
             <p>我们提供多种争议解决渠道，包括：</p>
             <ul>
               <li>在线客服反馈</li>
@@ -974,9 +1068,15 @@
           <div class="right-content">
             <ul>
               <li>本服务条款构成您与我们之间关于使用服务的完整协议</li>
-              <li>本服务条款的任何条款被认定为无效或不可执行，不影响其他条款的效力</li>
-              <li>我们未行使或执行本服务条款中的任何权利或规定，不构成对该权利或规定的放弃</li>
-              <li>我们有权随时修改本服务条款，修改后的条款将在网站上公布，并自公布之日起生效</li>
+              <li>
+                本服务条款的任何条款被认定为无效或不可执行，不影响其他条款的效力
+              </li>
+              <li>
+                我们未行使或执行本服务条款中的任何权利或规定，不构成对该权利或规定的放弃
+              </li>
+              <li>
+                我们有权随时修改本服务条款，修改后的条款将在网站上公布，并自公布之日起生效
+              </li>
               <li>如条款内容与中国大陆地区法律相抵触，则以法律规定为准</li>
               <li>本条款的标题仅为方便阅读，不影响对条款内容的理解和解释</li>
               <li>服务协议以中文版本为准，其他语言版本仅供参考</li>
@@ -994,10 +1094,14 @@
               <el-tag size="small" type="success">+86 150-0015-9790</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="工作时间">
-              <el-tag size="small" type="warning">周一至周五 10:00-18:30</el-tag>
+              <el-tag size="small" type="warning"
+                >周一至周五 10:00-18:30</el-tag
+              >
             </el-descriptions-item>
             <el-descriptions-item label="响应时间">
-              <el-tag size="small" type="info">收到请求后5个工作日内回复</el-tag>
+              <el-tag size="small" type="info"
+                >收到请求后5个工作日内回复</el-tag
+              >
             </el-descriptions-item>
           </el-descriptions>
         </section>
@@ -1046,7 +1150,7 @@ onMounted(() => {
 const handleTabClick = () => {
   router.replace({
     path: route.path,
-    query: { tab: activeTab.value }
+    query: { tab: activeTab.value },
   });
 };
 
@@ -1058,7 +1162,8 @@ const cookieData = ref([
   },
   {
     type: "功能Cookie",
-    purpose: "存储用户偏好，如界面布局、3D视图设置、编程环境配置、语言选择、游戏设置等",
+    purpose:
+      "存储用户偏好，如界面布局、3D视图设置、编程环境配置、语言选择、游戏设置等",
     duration: "1年",
   },
   {
@@ -1237,7 +1342,7 @@ const policyUpdates = ref([
           position: relative;
 
           &::after {
-            content: '';
+            content: "";
             position: absolute;
             bottom: -2px;
             left: 0;

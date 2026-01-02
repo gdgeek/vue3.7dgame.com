@@ -56,7 +56,6 @@
 import type { Author, VerseData } from "@/api/v1/verse";
 import DOMPurify from "dompurify";
 
-
 interface Course {
   id: number;
   title: {

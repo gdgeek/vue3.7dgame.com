@@ -1,10 +1,14 @@
 <template>
   <div>
-    <div id="scene" ref="scene" :style="{
-      height: isSceneFullscreen ? '100vh' : '75vh',
-      width: '100%',
-      margin: '0 auto',
-    }"></div>
+    <div
+      id="scene"
+      ref="scene"
+      :style="{
+        height: isSceneFullscreen ? '100vh' : '75vh',
+        width: '100%',
+        margin: '0 auto',
+      }"
+    ></div>
   </div>
 </template>
 
@@ -174,12 +178,14 @@ const loadModel = async (
     entityUUID: entity.parameters?.uuid,
     resourceType: resource.type,
     isActive: entity.parameters.active,
-    parentActive
+    parentActive,
   });
 
   // 计算当前实体的可见性状态，需要考虑父级的可见性
   const currentActive =
-    (entity.parameters?.active !== undefined ? entity.parameters.active : true) && parentActive;
+    (entity.parameters?.active !== undefined
+      ? entity.parameters.active
+      : true) && parentActive;
 
   // 初始化可见性
   const setInitialVisibility = (mesh: THREE.Object3D) => {
@@ -243,8 +249,8 @@ const loadModel = async (
             mesh.scale.set(
               entity.parameters.transform.scale.x * baseScale,
               entity.parameters.transform.scale.y *
-              baseScale *
-              (1 / aspectRatio),
+                baseScale *
+                (1 / aspectRatio),
               entity.parameters.transform.scale.z * baseScale
             );
           }
@@ -376,8 +382,8 @@ const loadModel = async (
             mesh.scale.set(
               entity.parameters.transform.scale.x * baseScale,
               entity.parameters.transform.scale.y *
-              baseScale *
-              (1 / aspectRatio),
+                baseScale *
+                (1 / aspectRatio),
               entity.parameters.transform.scale.z * baseScale
             );
           }
@@ -1544,7 +1550,9 @@ const processEntities = async (
 
     // 计算当前实体的可见性状态，需要考虑父级的可见性
     const currentActive =
-      (entity.parameters?.active !== undefined ? entity.parameters.active : true) && parentActive;
+      (entity.parameters?.active !== undefined
+        ? entity.parameters.active
+        : true) && parentActive;
 
     console.log(`处理实体 [Level ${level}]:`, {
       type: entity.type,
@@ -1554,7 +1562,7 @@ const processEntities = async (
       parentTransform,
       combinedTransform: entityTransform,
       isActive: currentActive,
-      parentActive
+      parentActive,
     });
 
     // 处理当前实体
@@ -1572,7 +1580,7 @@ const processEntities = async (
             parameters: {
               ...entity.parameters,
               transform: entityTransform,
-              active: currentActive // 传递计算后的可见性状态
+              active: currentActive, // 传递计算后的可见性状态
             },
           },
           currentActive // 使用计算后的可见性状态
@@ -1607,7 +1615,7 @@ const processEntities = async (
               parameters: {
                 ...entity.parameters,
                 transform: entityTransform,
-                active: currentActive // 传递计算后的可见性状态
+                active: currentActive, // 传递计算后的可见性状态
               },
             },
             currentActive // 使用计算后的可见性状态

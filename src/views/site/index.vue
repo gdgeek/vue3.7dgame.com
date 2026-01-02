@@ -1,20 +1,25 @@
 <template>
-
   <body :class="{ 'dark-theme': isDark }">
     <div :class="['header', { 'dark-theme': isDark }]">
       <div style="height: 30px" v-if="!isMobile">
         <RouterLink to="/introduce" class="logo">
           <img src="/favicon.ico" alt="" />
-          <span class="project_title">{{ $t("login.title") }}</span>
+          <span class="project_title">{{ domainStore.title }}</span>
         </RouterLink>
-        <div class="link" style="margin-left: 250px">
-
-        </div>
+        <div class="link" style="margin-left: 250px"></div>
         <div class="header-right">
           <div class="top-bar">
-            <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
-              @change="toggleTheme"></el-switch>
-            <lang-select class="ml-2 cursor-pointer" style="margin-left: 25px"></lang-select>
+            <el-switch
+              v-model="isDark"
+              inline-prompt
+              active-icon="Moon"
+              inactive-icon="Sunny"
+              @change="toggleTheme"
+            ></el-switch>
+            <lang-select
+              class="ml-2 cursor-pointer"
+              style="margin-left: 25px"
+            ></lang-select>
           </div>
         </div>
       </div>
@@ -22,32 +27,65 @@
       <div class="mobile" v-else>
         <el-dropdown>
           <span class="">
-            <img src="/favicon.ico" alt="" style="margin-left: 10px; width: auto" />
-            <span class="project_title">{{ $t("login.title") }}</span>
+            <img
+              src="/favicon.ico"
+              alt=""
+              style="margin-left: 10px; width: auto"
+            />
+            <span class="project_title">{{ domainStore.title }}</span>
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item><el-link href="https://testflight.apple.com/join/V4XNEG6t" target="_blank"
-                  :underline="false">
+              <el-dropdown-item
+                ><el-link
+                  href="https://testflight.apple.com/join/V4XNEG6t"
+                  target="_blank"
+                  :underline="false"
+                >
                   <img src="/testflight.ico" style="width: 25px" alt="" />
                   <span style="margin-left: 5px">TestFlight</span>
-                </el-link></el-dropdown-item>
-              <el-dropdown-item><el-link href="https://discord.gg/KhkJySu7bb" target="_blank" :underline="false">
+                </el-link></el-dropdown-item
+              >
+              <el-dropdown-item
+                ><el-link
+                  href="https://discord.gg/KhkJySu7bb"
+                  target="_blank"
+                  :underline="false"
+                >
                   <img src="/discord.ico" style="width: 25px" alt="" />
                   <span style="margin-left: 5px">Discord</span>
-                </el-link></el-dropdown-item>
-              <el-dropdown-item><el-link href="https://x.com/GD_Geek" target="_blank" :underline="false">
-                  <img src="/x3.png" style="width: 26px; border-radius: 25%" alt="" />
+                </el-link></el-dropdown-item
+              >
+              <el-dropdown-item
+                ><el-link
+                  href="https://x.com/GD_Geek"
+                  target="_blank"
+                  :underline="false"
+                >
+                  <img
+                    src="/x3.png"
+                    style="width: 26px; border-radius: 25%"
+                    alt=""
+                  />
                   <span style="margin-left: 5px">X.com</span>
-                </el-link></el-dropdown-item>
+                </el-link></el-dropdown-item
+              >
             </el-dropdown-menu>
           </template>
         </el-dropdown>
         <div class="header-right">
           <div :class="['top-bar', { mobile: isMobile }]">
-            <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
-              @change="toggleTheme"></el-switch>
-            <lang-select class="ml-2 cursor-pointer" style="margin-left: 10px"></lang-select>
+            <el-switch
+              v-model="isDark"
+              inline-prompt
+              active-icon="Moon"
+              inactive-icon="Sunny"
+              @change="toggleTheme"
+            ></el-switch>
+            <lang-select
+              class="ml-2 cursor-pointer"
+              style="margin-left: 10px"
+            ></lang-select>
           </div>
         </div>
       </div>
@@ -55,132 +93,33 @@
     <!-- 子路由内容将渲染在这里 -->
     <router-view></router-view>
 
-    <el-card v-if="!isMobile" style="
+    <el-card
+      v-if="!isMobile"
+      style="
         height: 7%;
         width: 100%;
         display: flex;
         justify-content: flex-end;
         align-items: center;
-      ">
+      "
+    >
       <div class="background-screen-max">
-        <div style="display: flex; align-items: center; gap: 10px">
-          <span v-for="item in informationStore.companies" :key="item.name" style="display: flex; align-items: center">
-            <el-link :href="item.url" target="_blank" :underline="false" style="display: flex; align-items: center">
-              <el-icon>
-                <HomeFilled></HomeFilled>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ item.name }} ({{ informationStore.description }})
-              </span>
-            </el-link>
-          </span>
-
-          <span v-if="informationStore.beian" style="display: flex; align-items: center">
-            |
-            <el-link href="https://beian.miit.gov.cn/" target="_blank" :underline="false"
-              style="display: flex; align-items: center; margin-left: 10px">
-              <el-icon>
-                <Grid></Grid>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ informationStore.beian }}
-              </span>
-            </el-link>
-          </span>
-
-          <span v-if="informationStore.privacyPolicy" style="display: flex; align-items: center">
-            |
-            <el-link :href="informationStore.privacyPolicy.url" target="_blank" :underline="false"
-              style="display: flex; align-items: center; margin-left: 10px">
-              <el-icon>
-                <Briefcase></Briefcase>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ informationStore.privacyPolicy.name }}
-              </span>
-            </el-link>
-          </span>
-
-          <span v-if="informationStore.version" style="display: flex; align-items: center">
-            |
-            <el-link target="_blank" :underline="false" style="display: flex; align-items: center; margin-left: 10px">
-              <el-icon>
-                <InfoFilled></InfoFilled>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ informationStore.version }}
-              </span>
-            </el-link>
-          </span>
-        </div>
+        <div style="display: flex; align-items: center; gap: 10px"></div>
       </div>
     </el-card>
 
     <el-card v-if="isMobile" style="width: 100%">
       <div class="background-screen-max">
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
-          <span v-for="item in informationStore.companies" :key="item.name"
-            style="display: flex; align-items: center; width: 100%">
-            <el-link :href="item.url" target="_blank" :underline="false" style="display: flex; align-items: center">
-              <el-icon>
-                <HomeFilled></HomeFilled>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ item.name }} ({{ informationStore.description }})
-              </span>
-            </el-link>
-          </span>
-        </div>
-        <div style="
+        <div
+          style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+        ></div>
+        <div
+          style="
             display: flex;
             justify-content: space-between;
             margin-top: 10px;
-          ">
-          <span v-if="informationStore.beian" style="display: flex; align-items: center; flex: 2">
-            <el-link href="https://beian.miit.gov.cn/" target="_blank" :underline="false"
-              style="display: flex; align-items: center">
-              <el-icon>
-                <Grid></Grid>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ informationStore.beian }}
-              </span>
-            </el-link>
-          </span>
-
-          <span v-if="informationStore.privacyPolicy" style="
-              display: flex;
-              align-items: center;
-              flex: 1;
-              justify-content: center;
-            ">
-            <el-link :href="informationStore.privacyPolicy.url" target="_blank" :underline="false"
-              style="display: flex; align-items: center">
-              <el-icon>
-                <Briefcase></Briefcase>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ informationStore.privacyPolicy.name }}
-              </span>
-            </el-link>
-          </span>
-
-          <span v-if="informationStore.version" style="
-              display: flex;
-              align-items: center;
-              flex: 1;
-              justify-content: flex-end;
-            ">
-            <el-link target="_blank" :underline="false" style="display: flex; align-items: center">
-              <el-icon>
-                <InfoFilled></InfoFilled>
-              </el-icon>
-              <span class="font-text" style="margin-left: 5px">
-                {{ informationStore.version }}
-              </span>
-            </el-link>
-          </span>
-        </div>
+          "
+        ></div>
       </div>
     </el-card>
   </body>
@@ -192,14 +131,16 @@ import { useRouter, useRoute } from "vue-router";
 
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
-import { useInfomationStore } from "@/store/modules/information";
+//import { useInfomationStore } from "@/store/modules/information";
+import { useDomainStore } from "@/store/modules/domain";
 import { useTagsViewStore, useUserStore, useScreenStore } from "@/store";
 
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
 const tagsViewStore = useTagsViewStore();
-const informationStore = useInfomationStore();
+//const informationStore = useInfomationStore();
+const domainStore = useDomainStore();
 const settingsStore = useSettingsStore();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 const screenStore = useScreenStore();

@@ -14,7 +14,7 @@ dist-ssr
 *.local
 
 package-lock.json
-pnpm-lock.yaml
+
 stats.html
 .lh
 .vite

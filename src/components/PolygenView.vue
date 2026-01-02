@@ -1,14 +1,28 @@
 <template>
-
   <el-card class="box-card">
     <template #header v-if="animations.length !== 0">
-
-
-      <el-select v-model="selectedAnimationIndex" @change="playAnimation" placeholder="Select Animation"
-        style="width: 100%" size="small" :emptyText="'No data'" :disabled="animations.length === 0">
-        <el-option v-if="animations.length === 0" :key="0" :label="'No data'" :value="0" disabled></el-option>
-        <el-option v-for="(animation, index) in animations" :key="index" :label="animation.name"
-          :value="index"></el-option>
+      <el-select
+        v-model="selectedAnimationIndex"
+        @change="playAnimation"
+        placeholder="Select Animation"
+        style="width: 100%"
+        size="small"
+        :emptyText="'No data'"
+        :disabled="animations.length === 0"
+      >
+        <el-option
+          v-if="animations.length === 0"
+          :key="0"
+          :label="'No data'"
+          :value="0"
+          disabled
+        ></el-option>
+        <el-option
+          v-for="(animation, index) in animations"
+          :key="index"
+          :label="animation.name"
+          :value="index"
+        ></el-option>
       </el-select>
       <!--
       <el-switch v-model="isAnimationPlaying" @change="toggleAnimation" style="margin-left: 5px" inline-prompt
@@ -20,23 +34,41 @@
 
     <!--动画时间进度条 -->
     <div v-if="animations.length > 0" class="animation-progress">
-      <el-slider v-model="animationProgress" :disabled="animations.length === 0" :min="0" :max="100" :step="0.1"
-        @input="previewAnimation" @change="seekAnimation" size="small" :show-tooltip="true"
-        :format-tooltip="value => `${value.toFixed(1)}%`" />
+      <el-slider
+        v-model="animationProgress"
+        :disabled="animations.length === 0"
+        :min="0"
+        :max="100"
+        :step="0.1"
+        @input="previewAnimation"
+        @change="seekAnimation"
+        size="small"
+        :show-tooltip="true"
+        :format-tooltip="(value) => `${value.toFixed(1)}%`"
+      ></el-slider>
       <div class="animation-controls">
-        <div class="animation-button" @click="animations.length > 0 && toggleAnimation(!isAnimationPlaying)"
-          :class="{ 'disabled': animations.length === 0 }">
-          <img :src="isAnimationPlaying ? '/media/icon/animation_pause.png' : '/media/icon/animation_play.png'"
-            class="animation-icon" alt="animation control" />
+        <div
+          class="animation-button"
+          @click="animations.length > 0 && toggleAnimation(!isAnimationPlaying)"
+          :class="{ disabled: animations.length === 0 }"
+        >
+          <img
+            :src="
+              isAnimationPlaying
+                ? '/media/icon/animation_pause.png'
+                : '/media/icon/animation_play.png'
+            "
+            class="animation-icon"
+            alt="animation control"
+          />
         </div>
         <span v-if="animations.length > 0" class="animation-time">
-          {{ formatTime(currentAnimationTime) }} / {{ formatTime(totalAnimationDuration) }}
+          {{ formatTime(currentAnimationTime) }} /
+          {{ formatTime(totalAnimationDuration) }}
         </span>
       </div>
     </div>
   </el-card>
-
-
 </template>
 
 <script setup lang="ts">
@@ -62,11 +94,14 @@ const props = defineProps<{
   target?: number;
 }>();
 const emit = defineEmits<{
-  (e: "loaded", data: {
-    size: THREE.Vector3;
-    center: THREE.Vector3;
-    anim?: { name: string; length: number }[]
-  }): void;
+  (
+    e: "loaded",
+    data: {
+      size: THREE.Vector3;
+      center: THREE.Vector3;
+      anim?: { name: string; length: number }[];
+    }
+  ): void;
   (e: "progress", progress: number): void;
 }>();
 
@@ -92,7 +127,7 @@ let currentAction: THREE.AnimationAction | null = null; // 当前播放的动画
 const formatTime = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 };
 
 // 在拖动进度条时实时预览动画状态
@@ -227,17 +262,15 @@ const refresh = () => {
   dracoLoader.setDecoderPath("/js/three.js/libs/draco/");
   gltfLoader.setDRACOLoader(dracoLoader);
 
-
   // ★ KTX2
   if (renderer && !ktx2Loader) {
     ktx2Loader = new KTX2Loader()
       .setTranscoderPath("/js/three.js/libs/basis/") // 放 basis_transcoder.* 的目录
-      .detectSupport(renderer);                     // 侦测 GPU 支持
+      .detectSupport(renderer); // 侦测 GPU 支持
   }
   if (ktx2Loader) {
     gltfLoader.setKTX2Loader(ktx2Loader);
   }
-
 
   const url = convertToHttps(props.file.url);
   gltfLoader.load(
@@ -281,15 +314,15 @@ const refresh = () => {
       scene?.add(model);
 
       // 创建动画信息数组
-      const animationsInfo = animations.value.map(anim => ({
+      const animationsInfo = animations.value.map((anim) => ({
         name: anim.name,
-        length: anim.duration
+        length: anim.duration,
       }));
 
       emit("loaded", {
         size: toFixedVector3(size, 5),
         center: toFixedVector3(center, 5),
-        anim: animationsInfo
+        anim: animationsInfo,
       });
     },
     (xhr: any) => {
@@ -409,7 +442,8 @@ onMounted(() => {
 
           // 更新动画进度
           if (animations.value.length > 0) {
-            const selectedAnimation = animations.value[selectedAnimationIndex.value];
+            const selectedAnimation =
+              animations.value[selectedAnimationIndex.value];
             if (selectedAnimation) {
               // 判断是否是短动画（小于0.1秒）
               const isShortAnimation = selectedAnimation.duration < 0.1;
@@ -418,16 +452,22 @@ onMounted(() => {
               currentAnimationTime.value += delta;
 
               // 对于短动画，一旦达到100%就保持不变
-              if (isShortAnimation && currentAnimationTime.value >= selectedAnimation.duration) {
+              if (
+                isShortAnimation &&
+                currentAnimationTime.value >= selectedAnimation.duration
+              ) {
                 currentAnimationTime.value = selectedAnimation.duration;
                 animationProgress.value = 100;
               } else {
                 // 正常动画循环逻辑
                 if (currentAnimationTime.value > selectedAnimation.duration) {
-                  currentAnimationTime.value = currentAnimationTime.value % selectedAnimation.duration;
+                  currentAnimationTime.value =
+                    currentAnimationTime.value % selectedAnimation.duration;
                 }
                 // 计算进度百分比
-                animationProgress.value = (currentAnimationTime.value / selectedAnimation.duration) * 100;
+                animationProgress.value =
+                  (currentAnimationTime.value / selectedAnimation.duration) *
+                  100;
               }
             }
           }

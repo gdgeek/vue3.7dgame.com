@@ -1,27 +1,43 @@
 <template>
   <div>
-    <div id="scene" ref="scene" :style="{
-      height: isSceneFullscreen ? '100vh' : '75vh',
-      width: '100%',
-      margin: '0 auto',
-    }"></div>
+    <div
+      id="scene"
+      ref="scene"
+      :style="{
+        height: isSceneFullscreen ? '100vh' : '75vh',
+        width: '100%',
+        margin: '0 auto',
+        position: 'relative',
+      }"
+    ></div>
   </div>
 </template>
 
 <script setup lang="ts">
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { getConfiguredGLTFLoader } from "@/lib/three/loaders";
+import Stats from "stats.js";
+
 import { ref, onMounted, onUnmounted, watch } from "vue";
-import { convertToHttps } from "@/assets/js/helper";
-import { VOXLoader, VOXMesh } from "@/assets/js/voxel/VOXLoader.js";
+
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
+import { useModelLoader } from "./composables/useModelLoader";
+import {
+  Verse,
+  Entity,
+  Resource,
+  CollisionObject,
+  RotatingObject,
+  MoveableObject,
+  DragState,
+  Transform,
+} from "@/types/verse";
 
 const settingsStore = useSettingsStore();
 
 const props = defineProps<{
-  verse: any;
+  verse: Verse;
   isSceneFullscreen?: boolean;
 }>();
 
@@ -35,53 +51,24 @@ declare global {
 
 const scene = ref<HTMLDivElement | null>(null);
 const threeScene = new THREE.Scene();
-let camera: THREE.PerspectiveCamera | null = null;
-let renderer: THREE.WebGLRenderer | null = null;
+const camera = ref<THREE.PerspectiveCamera | null>(null);
+const renderer = ref<THREE.WebGLRenderer | null>(null);
 let mixers: Map<string, THREE.AnimationMixer> = new Map();
 let sources: Map<string, any> = new Map();
 let clock = new THREE.Clock();
 const eventContainer = ref<{ [key: string]: any }>({});
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
-const collisionObjects = ref<
-  Array<{
-    sourceUuid: string;
-    targetUuid: string;
-    eventUuid: string;
-    boundingBox: THREE.Box3;
-    isColliding: boolean;
-    lastPosition: THREE.Vector3;
-    checkVisibility: boolean;
-  }>
->([]);
+const collisionObjects = ref<CollisionObject[]>([]);
 
-const rotatingObjects = ref<
-  Array<{
-    mesh: THREE.Object3D;
-    speed: { x: number; y: number; z: number };
-    checkVisibility: boolean;
-  }>
->([]);
+const rotatingObjects = ref<RotatingObject[]>([]);
 
-const moveableObjects = ref<
-  Array<{
-    mesh: THREE.Object3D;
-    isDragging: boolean;
-    magnetic: boolean;
-    scalable: boolean;
-    limit: {
-      x: { enable: boolean; min: number; max: number };
-      y: { enable: boolean; min: number; max: number };
-      z: { enable: boolean; min: number; max: number };
-    };
-    checkVisibility: boolean;
-  }>
->([]);
+const moveableObjects = ref<MoveableObject[]>([]);
 
 // 添加拖拽状态管理
-const dragState = reactive({
+const dragState = reactive<DragState>({
   isDragging: false,
-  draggedObject: null as THREE.Object3D | null, // 拖动的对象
+  draggedObject: null, // 拖动的对象
   dragStartPosition: new THREE.Vector3(), // 拖动开始位置
   dragOffset: new THREE.Vector3(), // 拖动偏移量
   mouseStartPosition: new THREE.Vector2(), // 鼠标开始位置
@@ -95,8 +82,10 @@ const raycaster = new THREE.Raycaster(); // 射线投射器
 // 初始化事件容器
 const initEventContainer = () => {
   if (props.verse?.data) {
-    // const verseData = JSON.parse(props.verse.data);
-    const verseData = props.verse.data;
+    const verseData =
+      typeof props.verse.data === "string"
+        ? JSON.parse(props.verse.data)
+        : props.verse.data;
     if (verseData.children?.modules) {
       verseData.children.modules.forEach((module: any) => {
         const metaId = module.parameters.meta_id;
@@ -199,1206 +188,21 @@ const combineTransforms = (parentTransform: any, childTransform: any) => {
 };
 
 // 加载模型
-const loadModel = async (
-  resource: any,
-  entity: any,
-  moduleTransform?: any,
-  parentActive: boolean = true
-) => {
-  console.log("开始加载模型:", {
-    entityType: entity.type,
-    entityUUID: entity.parameters?.uuid,
-    resourceType: resource.type,
-    isActive: entity.parameters.active,
-  });
-
-  // 初始化可见性
-  const setInitialVisibility = (
-    mesh: THREE.Object3D,
-    parentActive: boolean = true
-  ) => {
-    const isActive =
-      entity.parameters.active !== undefined ? entity.parameters.active : true;
-    mesh.visible = parentActive && isActive;
-    console.error(
-      `设置模型 ${entity.parameters.uuid} 的初始可见性:`,
-      mesh.visible
-    );
-    return isActive;
-  };
-
-  // 合并Module和Entity的transform
-  // const combinedTransform = combineTransforms(
-  //   moduleTransform,
-  //   entity.parameters?.transform
-  // );
-
-  // 处理视频类型
-  if (resource.type === "video" || entity.type === "Video") {
-    return new Promise((resolve, reject) => {
-      try {
-        const video = document.createElement("video");
-        video.src = convertToHttps(resource.file.url);
-        video.crossOrigin = "anonymous";
-
-        // 设置视频属性
-        video.loop = entity.parameters.loop || false;
-        video.muted = entity.parameters.muted || false; // 是否静音
-        video.playsInline = true;
-        video.volume = entity.parameters.volume || 1.0;
-
-        const texture = new THREE.VideoTexture(video);
-        texture.minFilter = THREE.LinearFilter;
-        texture.magFilter = THREE.LinearFilter;
-        texture.format = THREE.RGBAFormat;
-
-        video.addEventListener("loadedmetadata", () => {
-          const aspectRatio = video.videoWidth / video.videoHeight;
-          const width = entity.parameters.width || 1;
-
-          const geometry = new THREE.PlaneGeometry(1, 1);
-          const material = new THREE.MeshBasicMaterial({
-            map: texture,
-            side: THREE.DoubleSide,
-            transparent: true,
-          });
-
-          const mesh = new THREE.Mesh(geometry, material);
-          setInitialVisibility(mesh, parentActive);
-
-          // 应用变换
-          if (entity.parameters?.transform) {
-            mesh.position.set(
-              entity.parameters.transform.position.x,
-              entity.parameters.transform.position.y,
-              entity.parameters.transform.position.z
-            );
-
-            mesh.rotation.set(
-              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
-              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
-              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
-            );
-
-            const baseScale = width;
-            mesh.scale.set(
-              entity.parameters.transform.scale.x * baseScale,
-              entity.parameters.transform.scale.y *
-              baseScale *
-              (1 / aspectRatio),
-              entity.parameters.transform.scale.z * baseScale
-            );
-          }
-
-          const handleVideoClick = (event: MouseEvent) => {
-            // 计算鼠标位置
-            const rect = renderer!.domElement.getBoundingClientRect();
-            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-            // 更新射线
-            raycaster.setFromCamera(mouse, camera!);
-
-            // 检查是否点击到视频平面
-            const intersects = raycaster.intersectObject(mesh);
-            if (intersects.length > 0) {
-              if (video.paused) {
-                video.play().catch((error) => {
-                  console.warn("视频播放失败:", error);
-                });
-              } else {
-                video.pause();
-              }
-            }
-          };
-
-          renderer!.domElement.addEventListener("click", handleVideoClick);
-
-          const uuid = entity.parameters.uuid.toString();
-          sources.set(uuid, {
-            type: "video",
-            data: {
-              mesh,
-              video,
-              texture,
-              cleanup: () => {
-                renderer!.domElement.removeEventListener(
-                  "click",
-                  handleVideoClick
-                );
-              },
-              setVisibility: (isVisible: boolean) => {
-                mesh.visible = isVisible;
-              },
-            },
-          });
-
-          threeScene.add(mesh);
-
-          // 如果设置了自动播放
-          if (entity.parameters.play) {
-            // 添加用户交互检测
-            const handleFirstInteraction = () => {
-              video.play().catch((error) => {
-                console.warn("视频播放失败:", error);
-              });
-              document.removeEventListener("click", handleFirstInteraction);
-              document.removeEventListener(
-                "touchstart",
-                handleFirstInteraction
-              );
-            };
-
-            document.addEventListener("click", handleFirstInteraction);
-            document.addEventListener("touchstart", handleFirstInteraction);
-          }
-
-          resolve(mesh);
-        });
-
-        video.addEventListener("error", (error) => {
-          console.error("视频加载失败:", error);
-          reject(error);
-        });
-      } catch (error) {
-        console.error("处理视频资源时出错:", error);
-        reject(error);
-      }
-    });
-  }
-
-  // 处理图片类型
-  if (resource.type === "picture" || entity.type === "Picture") {
-    return new Promise((resolve, reject) => {
-      const textureLoader = new THREE.TextureLoader();
-      const url = convertToHttps(resource.file.url);
-
-      textureLoader.load(
-        url,
-        (texture) => {
-          // 优化纹理设置
-          texture.colorSpace = THREE.SRGBColorSpace;
-          texture.minFilter = THREE.LinearFilter;
-          texture.magFilter = THREE.LinearFilter;
-          texture.anisotropy = renderer!.capabilities.getMaxAnisotropy();
-
-          const aspectRatio = texture.image.width / texture.image.height;
-          const width = entity.parameters.width || 1;
-          const height = width / aspectRatio;
-
-          const geometry = new THREE.PlaneGeometry(1, 1);
-          const material = new THREE.MeshBasicMaterial({
-            map: texture,
-            transparent: true,
-            side: THREE.DoubleSide,
-            // 确保图片显示清晰
-            depthWrite: true,
-            depthTest: true,
-          });
-
-          const mesh = new THREE.Mesh(geometry, material);
-          setInitialVisibility(mesh, parentActive);
-
-          // 应用变换
-          if (entity.parameters?.transform) {
-            mesh.position.set(
-              entity.parameters.transform.position.x,
-              entity.parameters.transform.position.y,
-              entity.parameters.transform.position.z
-            );
-
-            mesh.rotation.set(
-              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
-              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
-              THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
-            );
-
-            const baseScale = width;
-            mesh.scale.set(
-              entity.parameters.transform.scale.x * baseScale,
-              entity.parameters.transform.scale.y *
-              baseScale *
-              (1 / aspectRatio),
-              entity.parameters.transform.scale.z * baseScale
-            );
-          }
-
-          // 确保图片始终清晰可见
-          mesh.renderOrder = 1;
-
-          const uuid = entity.parameters.uuid.toString();
-          sources.set(uuid, {
-            type: "picture",
-            data: {
-              mesh,
-              setVisibility: (isVisible: boolean) => {
-                mesh.visible = isVisible;
-              },
-            },
-          });
-
-          threeScene.add(mesh);
-
-          resolve(mesh);
-        },
-        undefined,
-        reject
-      );
-    });
-  }
-
-  // 处理音频类型
-  if (resource.type === "audio" || entity.type === "Sound") {
-    return new Promise((resolve) => {
-      const uuid = entity.parameters.uuid.toString();
-      const audioUrl = convertToHttps(resource.file.url);
-
-      sources.set(uuid, {
-        type: "audio",
-        data: { url: audioUrl },
-      });
-
-      console.log("音频资源加载完成:", {
-        uuid,
-        url: audioUrl,
-      });
-
-      resolve(true);
-    });
-  }
-
-  // 处理文本类型
-  if (resource.type === "text" || entity.type === "Text") {
-    return new Promise((resolve, reject) => {
-      try {
-        // 创建文本几何体
-        const text = entity.parameters.text || resource.content || "默认文本";
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-
-        if (!context) {
-          throw new Error("无法创建 2D 上下文");
-        }
-
-        // 设置画布大小和文本样式
-        canvas.width = 512;
-        canvas.height = 128;
-        context.fillStyle = entity.parameters.color || "#000000";
-        context.font = `${entity.parameters.fontSize || 48}px Arial`;
-        context.textAlign = "center";
-        context.textBaseline = "middle";
-
-        // 绘制文本
-        context.fillText(text, canvas.width / 2, canvas.height / 2);
-
-        // 创建纹理
-        const texture = new THREE.CanvasTexture(canvas);
-        texture.needsUpdate = true;
-
-        // 创建材质和平面
-        const geometry = new THREE.PlaneGeometry(1, 0.25);
-        const material = new THREE.MeshBasicMaterial({
-          map: texture,
-          transparent: true,
-          side: THREE.DoubleSide,
-        });
-
-        const mesh = new THREE.Mesh(geometry, material);
-        setInitialVisibility(mesh, parentActive);
-
-        // 应用变换
-        if (entity.parameters?.transform) {
-          mesh.position.set(
-            entity.parameters.transform.position.x,
-            entity.parameters.transform.position.y,
-            entity.parameters.transform.position.z
-          );
-
-          mesh.rotation.set(
-            THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
-            THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
-            THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
-          );
-
-          mesh.scale.set(
-            entity.parameters.transform.scale.x,
-            entity.parameters.transform.scale.y,
-            entity.parameters.transform.scale.z
-          );
-        }
-
-        const uuid = entity.parameters.uuid.toString();
-        sources.set(uuid, {
-          type: "text",
-          data: {
-            mesh,
-            setText: (newText: string) => {
-              context.clearRect(0, 0, canvas.width, canvas.height);
-              context.fillStyle = entity.parameters.color || "#000000";
-              context.font = `${entity.parameters.fontSize || 48}px Arial`;
-              context.textAlign = "center";
-              context.textBaseline = "middle";
-              context.fillText(newText, canvas.width / 2, canvas.height / 2);
-              texture.needsUpdate = true;
-            },
-            setVisibility: (isVisible: boolean) => {
-              mesh.visible = isVisible;
-            },
-          },
-        });
-
-        threeScene.add(mesh);
-
-        resolve(mesh);
-      } catch (error) {
-        console.error("创建文本实体失败:", error);
-        reject(error);
-      }
-    });
-  }
-
-  // 处理体素
-  if (
-    resource.type === "voxel" ||
-    entity.type === "Voxel" ||
-    entity.type === "Entity"
-  ) {
-    const loader = new VOXLoader();
-    const url = convertToHttps(resource.file.url);
-
-    return new Promise((resolve, reject) => {
-      loader.load(
-        url,
-        async (chunks: any[]) => {
-          try {
-            const chunk = chunks[0];
-            if (!chunk || !chunk.data || !chunk.size) {
-              throw new Error("无效的VOX数据结构");
-            }
-
-            console.log("创建VOX模型:", {
-              size: chunk.size,
-              dataLength: chunk.data.length,
-              paletteLength: chunk.palette.length,
-            });
-
-            const voxMesh = new VOXMesh(chunk, 1);
-            setInitialVisibility(voxMesh, parentActive);
-
-            // 应用变换
-            if (entity.parameters?.transform) {
-              voxMesh.position.set(
-                entity.parameters.transform.position.x,
-                entity.parameters.transform.position.y,
-                entity.parameters.transform.position.z
-              );
-
-              voxMesh.rotation.set(
-                THREE.MathUtils.degToRad(entity.parameters.transform.rotate.x),
-                THREE.MathUtils.degToRad(entity.parameters.transform.rotate.y),
-                THREE.MathUtils.degToRad(entity.parameters.transform.rotate.z)
-              );
-
-              voxMesh.scale.set(
-                entity.parameters.transform.scale.x,
-                entity.parameters.transform.scale.y,
-                entity.parameters.transform.scale.z
-              );
-            }
-
-            const uuid = entity.parameters.uuid.toString();
-            voxMesh.uuid = uuid;
-
-            // 处理子实体
-            if (entity.children?.entities) {
-              const childMeshes = await Promise.all(
-                entity.children.entities.map((childEntity: any) => {
-                  if (childEntity.parameters?.resource) {
-                    const childResource = props.verse.resources.find(
-                      (r: any) =>
-                        r.id.toString() ===
-                        childEntity.parameters.resource.toString()
-                    );
-                    if (childResource) {
-                      return loadModel(
-                        childResource,
-                        childEntity,
-                        parentActive && voxMesh.visible
-                      );
-                    }
-                  } else if (childEntity.type === "Text") {
-                    const textResource = {
-                      type: "text",
-                      content: childEntity.parameters.text || "DEFAULT TEXT",
-                      id: childEntity.parameters.uuid || crypto.randomUUID(),
-                    };
-                    return loadModel(
-                      textResource,
-                      childEntity,
-                      parentActive && voxMesh.visible
-                    );
-                  }
-                  return null;
-                })
-              );
-
-              // 将有效的子级mesh添加到父级mesh
-              childMeshes.filter(Boolean).forEach((childMesh) => {
-                voxMesh.add(childMesh);
-              });
-            }
-
-            // 启用阴影
-            voxMesh.castShadow = true;
-            voxMesh.receiveShadow = true;
-
-            let sourceData = {
-              type: "model",
-              data: {
-                mesh: voxMesh,
-                setVisibility: (isVisible: boolean) => {
-                  voxMesh.visible = isVisible;
-                },
-                cleanup: undefined as (() => void) | undefined,
-                updateBoundingBox: undefined as (() => void) | undefined,
-                setRotating: undefined as
-                  | ((isRotating: boolean) => void)
-                  | undefined,
-              },
-            };
-
-            if (entity.children?.components) {
-              // 点击触发
-              const actionComponent = entity.children.components.find(
-                (comp: any) => comp.type === "Action"
-              );
-              // 碰撞触发
-              const triggerComponent = entity.children.components.find(
-                (comp: any) => comp.type === "Trigger"
-              );
-              // 自旋转
-              const rotateComponent = entity.children.components.find(
-                (comp: any) => comp.type === "Rotate"
-              );
-              // 可移动
-              const movedComponent = entity.children.components.find(
-                (comp: any) => comp.type === "Moved"
-              );
-
-              // 处理点击事件
-              if (actionComponent) {
-                console.log("发现点击触发组件:", actionComponent);
-                let isExecuting = false;
-
-                const handleClick = async (event: MouseEvent) => {
-                  if (!voxMesh.visible) {
-                    return;
-                  }
-                  if (isExecuting) {
-                    console.log("事件正在执行中，请等待完成...");
-                    return;
-                  }
-
-                  const rect = renderer!.domElement.getBoundingClientRect();
-                  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-                  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-                  raycaster.setFromCamera(mouse, camera!);
-                  const intersects = raycaster.intersectObject(voxMesh, true);
-
-                  if (intersects.length > 0) {
-                    console.log("体素模型被点击:", uuid);
-                    const eventId = actionComponent.parameters.uuid;
-                    if (
-                      window.verse &&
-                      typeof window.verse[`@${eventId}`] === "function"
-                    ) {
-                      try {
-                        isExecuting = true;
-                        await window.verse[`@${eventId}`]();
-                      } catch (error) {
-                        console.error("执行事件处理函数失败:", error);
-                      } finally {
-                        isExecuting = false;
-                      }
-                    }
-                  }
-                };
-
-                renderer!.domElement.addEventListener("click", handleClick);
-                sourceData.data.cleanup = () => {
-                  renderer!.domElement.removeEventListener(
-                    "click",
-                    handleClick
-                  );
-                };
-              }
-
-              // 处理碰撞检测
-              if (triggerComponent) {
-                console.log("发现碰撞触发组件:", triggerComponent);
-                const boundingBox = new THREE.Box3();
-                boundingBox.setFromObject(voxMesh);
-                const lastPosition = voxMesh.position.clone();
-
-                collisionObjects.value.push({
-                  sourceUuid: uuid,
-                  targetUuid: triggerComponent.parameters.target,
-                  eventUuid: triggerComponent.parameters.uuid,
-                  boundingBox: boundingBox,
-                  isColliding: false,
-                  lastPosition: lastPosition,
-                  checkVisibility: true,
-                });
-
-                sourceData.data.updateBoundingBox = () => {
-                  boundingBox.setFromObject(voxMesh);
-                };
-              }
-
-              // 处理自旋转
-              if (rotateComponent) {
-                console.log("发现自旋转组件:", rotateComponent);
-                const speed = {
-                  x: THREE.MathUtils.degToRad(
-                    rotateComponent.parameters.speed.x
-                  ),
-                  y: THREE.MathUtils.degToRad(
-                    rotateComponent.parameters.speed.y
-                  ),
-                  z: THREE.MathUtils.degToRad(
-                    rotateComponent.parameters.speed.z
-                  ),
-                };
-
-                rotatingObjects.value.push({
-                  mesh: voxMesh,
-                  speed: speed,
-                  checkVisibility: true,
-                });
-
-                sourceData.data.setRotating = (isRotating: boolean) => {
-                  const index = rotatingObjects.value.findIndex(
-                    (obj) => obj.mesh === voxMesh
-                  );
-                  if (index !== -1 && !isRotating) {
-                    rotatingObjects.value.splice(index, 1);
-                  } else if (index === -1 && isRotating) {
-                    rotatingObjects.value.push({
-                      mesh: voxMesh,
-                      speed: speed,
-                      checkVisibility: true,
-                    });
-                  }
-                };
-              }
-
-              // 处理可移动
-              if (movedComponent) {
-                console.log("发现可移动组件:", movedComponent);
-                const moveableObject = {
-                  mesh: voxMesh,
-                  isDragging: false,
-                  magnetic: movedComponent.parameters.magnetic,
-                  scalable: movedComponent.parameters.scalable,
-                  limit: movedComponent.parameters.limit,
-                  checkVisibility: true,
-                };
-
-                moveableObjects.value.push(moveableObject);
-
-                const onMouseDown = (event: MouseEvent) => {
-                  event.preventDefault();
-                  const rect = renderer!.domElement.getBoundingClientRect();
-                  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-                  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-                  raycaster.setFromCamera(mouse, camera!);
-                  const intersects = raycaster.intersectObject(voxMesh, true);
-
-                  if (intersects.length > 0) {
-                    console.log("开始拖拽体素模型:", entity.parameters.uuid);
-                    dragState.isDragging = true;
-                    dragState.draggedObject = voxMesh;
-                    dragState.dragStartPosition.copy(voxMesh.position);
-                    dragState.mouseStartPosition.copy(mouse);
-
-                    const intersectPoint = intersects[0].point;
-                    dragState.dragOffset
-                      .copy(voxMesh.position)
-                      .sub(intersectPoint);
-                    dragState.lastIntersection.copy(intersectPoint);
-
-                    controls.value!.enabled = false;
-                  }
-                };
-
-                const onMouseMove = (event: MouseEvent) => {
-                  if (!dragState.isDragging || !dragState.draggedObject) return;
-
-                  const rect = renderer!.domElement.getBoundingClientRect();
-                  const mouse = new THREE.Vector2(
-                    ((event.clientX - rect.left) / rect.width) * 2 - 1,
-                    -((event.clientY - rect.top) / rect.height) * 2 + 1
-                  );
-
-                  raycaster.setFromCamera(mouse, camera!);
-
-                  const cameraNormal = new THREE.Vector3(0, 0, -1);
-                  cameraNormal.applyQuaternion(camera!.quaternion);
-                  const dragPlane = new THREE.Plane(
-                    cameraNormal,
-                    -dragState.dragStartPosition.dot(cameraNormal)
-                  );
-
-                  const intersection = new THREE.Vector3();
-
-                  if (raycaster.ray.intersectPlane(dragPlane, intersection)) {
-                    intersection.add(dragState.dragOffset);
-
-                    const moveableObject = moveableObjects.value.find(
-                      (obj) => obj.mesh === dragState.draggedObject
-                    );
-
-                    const newPosition = new THREE.Vector3();
-                    newPosition.lerpVectors(
-                      dragState.draggedObject.position,
-                      intersection,
-                      0.5
-                    );
-
-                    if (moveableObject?.limit) {
-                      if (moveableObject.limit.x.enable) {
-                        newPosition.x = THREE.MathUtils.clamp(
-                          newPosition.x,
-                          moveableObject.limit.x.min,
-                          moveableObject.limit.x.max
-                        );
-                      }
-                      if (moveableObject.limit.y.enable) {
-                        newPosition.y = THREE.MathUtils.clamp(
-                          newPosition.y,
-                          moveableObject.limit.y.min,
-                          moveableObject.limit.y.max
-                        );
-                      }
-                      if (moveableObject.limit.z.enable) {
-                        newPosition.z = THREE.MathUtils.clamp(
-                          newPosition.z,
-                          moveableObject.limit.z.min,
-                          moveableObject.limit.z.max
-                        );
-                      }
-                    }
-
-                    dragState.draggedObject.position.copy(newPosition);
-                    dragState.lastIntersection.copy(intersection);
-                    console.log("移动体素到位置:", newPosition);
-                  }
-                };
-
-                const onMouseUp = () => {
-                  if (dragState.isDragging) {
-                    console.log("结束拖拽体素");
-                    dragState.isDragging = false;
-                    dragState.draggedObject = null;
-                    controls.value!.enabled = true;
-                  }
-                };
-
-                renderer!.domElement.addEventListener("mousedown", onMouseDown);
-                document.addEventListener("mousemove", onMouseMove);
-                document.addEventListener("mouseup", onMouseUp);
-
-                const prevCleanup = sourceData.data.cleanup;
-                sourceData.data.cleanup = () => {
-                  if (prevCleanup) prevCleanup();
-                  renderer!.domElement.removeEventListener(
-                    "mousedown",
-                    onMouseDown
-                  );
-                  document.removeEventListener("mousemove", onMouseMove);
-                  document.removeEventListener("mouseup", onMouseUp);
-                };
-              }
-
-              console.log("VOX模型加载完成:", {
-                uuid,
-                position: voxMesh.position.toArray(),
-                rotation: voxMesh.rotation.toArray(),
-                scale: voxMesh.scale.toArray(),
-                modelSize: chunk.size,
-              });
-
-              sources.set(uuid, sourceData);
-            } else {
-              sources.set(uuid, {
-                type: "model",
-                data: {
-                  mesh: voxMesh,
-                  setVisibility: (isVisible: boolean) => {
-                    voxMesh.visible = isVisible;
-                  },
-                },
-              });
-            }
-
-            threeScene.add(voxMesh);
-            resolve(voxMesh);
-          } catch (error) {
-            console.error("处理VOX数据时出错:", error);
-            reject(error);
-          }
-        },
-        undefined,
-        (error: any) => {
-          console.error("VOX模型加载失败:", error);
-          reject(error);
-        }
-      );
-    });
-  } else {
-    // 处理gltf模型
-    const loader = getConfiguredGLTFLoader();
-    const url = convertToHttps(resource.file.url);
-
-    return new Promise((resolve, reject) => {
-      loader.load(
-        url,
-        async (gltf) => {
-          const model = gltf.scene;
-          setInitialVisibility(model, parentActive);
-          const uuid = entity.parameters.uuid.toString();
-          if (!entity.parameters || !entity.parameters.uuid) {
-            console.error("entity.parameters对象无效:", entity.parameters);
-            return reject(new Error("Invalid entity.parameters object"));
-          } else {
-            model.uuid = uuid;
-          }
-
-          if (entity.parameters?.transform) {
-            model.position.set(
-              entity.parameters.transform.position.x,
-              entity.parameters.transform.position.y,
-              entity.parameters.transform.position.z
-            );
-            model.rotation.set(
-              entity.parameters.transform.rotate.x,
-              entity.parameters.transform.rotate.y,
-              entity.parameters.transform.rotate.z
-            );
-            model.scale.set(
-              entity.parameters.transform.scale.x,
-              entity.parameters.transform.scale.y,
-              entity.parameters.transform.scale.z
-            );
-          }
-
-          if (gltf.animations && gltf.animations.length > 0) {
-            const mixer = new THREE.AnimationMixer(model);
-            mixers.set(entity.parameters.uuid, mixer);
-            model.userData.animations = gltf.animations;
-            console.log(`模型 ${entity.parameters.uuid} 动画加载完成:`, {
-              animations: gltf.animations,
-              animationNames: gltf.animations.map((a) => a.name),
-            });
-          }
-
-          // 处理子实体
-          if (entity.children?.entities) {
-            const childMeshes = await Promise.all(
-              entity.children.entities.map((childEntity: any) => {
-                if (childEntity.parameters?.resource) {
-                  const childResource = props.verse.resources.find(
-                    (r: any) =>
-                      r.id.toString() ===
-                      childEntity.parameters.resource.toString()
-                  );
-                  if (childResource) {
-                    return loadModel(
-                      childResource,
-                      childEntity,
-                      parentActive && model.visible
-                    );
-                  }
-                } else if (childEntity.type === "Text") {
-                  const textResource = {
-                    type: "text",
-                    content: childEntity.parameters.text || "DEFAULT TEXT",
-                    id: childEntity.parameters.uuid || crypto.randomUUID(),
-                  };
-                  return loadModel(
-                    textResource,
-                    childEntity,
-                    parentActive && model.visible
-                  );
-                }
-                return null;
-              })
-            );
-
-            // 将有效的子级mesh添加到父级mesh
-            childMeshes.filter(Boolean).forEach((childMesh) => {
-              model.add(childMesh);
-            });
-          }
-
-          if (entity.children?.components) {
-            // 点击触发
-            const actionComponent = entity.children.components.find(
-              (comp: any) => comp.type === "Action"
-            );
-            // 碰撞触发
-            const triggerComponent = entity.children.components.find(
-              (comp: any) => comp.type === "Trigger"
-            );
-            // 自旋转
-            const rotateComponent = entity.children.components.find(
-              (comp: any) => comp.type === "Rotate"
-            );
-            // 可移动
-            const movedComponent = entity.children.components.find(
-              (comp: any) => comp.type === "Moved"
-            );
-
-            if (actionComponent) {
-              console.log("发现点击触发组件:", actionComponent);
-
-              let isExecuting = false;
-
-              // 添加点击事件处理
-              const handleClick = async (event: MouseEvent) => {
-                if (!model.visible) {
-                  return;
-                }
-                if (isExecuting) {
-                  console.log("事件正在执行中，请等待完成...");
-                  return;
-                }
-
-                // 计算鼠标位置
-                const rect = renderer!.domElement.getBoundingClientRect();
-                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-                // 更新射线
-                raycaster.setFromCamera(mouse, camera!);
-
-                // 检查是否点击到模型
-                const intersects = raycaster.intersectObject(model, true);
-                if (intersects.length > 0) {
-                  console.log("模型被点击:", entity.parameters.uuid);
-
-                  // 查找并执行对应的事件处理函数
-                  const eventId = actionComponent.parameters.uuid;
-                  if (
-                    window.meta &&
-                    typeof window.meta[`@${eventId}`] === "function"
-                  ) {
-                    try {
-                      isExecuting = true;
-                      await window.meta[`@${eventId}`]();
-                    } catch (error) {
-                      console.error("执行事件处理函数失败:", error);
-                    } finally {
-                      isExecuting = false;
-                    }
-                  }
-                }
-              };
-
-              // 添加点击事件监听器
-              renderer!.domElement.addEventListener("click", handleClick);
-
-              // 在sources中存储模型数据时包含cleanup函数
-              const sourceData = {
-                type: "model",
-                data: {
-                  mesh: model,
-                  setVisibility: (isVisible: boolean) => {
-                    model.visible = isVisible;
-                  },
-                  cleanup: () => {
-                    renderer!.domElement.removeEventListener(
-                      "click",
-                      handleClick
-                    );
-                  },
-                },
-              };
-
-              sources.set(uuid, sourceData);
-            }
-            if (triggerComponent) {
-              console.log("发现碰撞触发组件:", triggerComponent);
-
-              // 创建包围盒
-              const boundingBox = new THREE.Box3();
-              boundingBox.setFromObject(model);
-
-              // 记录上一帧的位置
-              let lastPosition = model.position.clone();
-
-              // 添加到动画循环中检查的碰撞对象列表
-              const collisionData = {
-                sourceUuid: entity.parameters.uuid,
-                targetUuid: triggerComponent.parameters.target,
-                eventUuid: triggerComponent.parameters.uuid,
-                boundingBox: boundingBox,
-                isColliding: false, // 防止重复触发
-                lastPosition: lastPosition,
-                checkVisibility: true,
-              };
-
-              // 将碰撞数据添加到碰撞检测列表
-              collisionObjects.value.push(collisionData);
-
-              // 更新包围盒的函数
-              const updateBoundingBox = () => {
-                boundingBox.setFromObject(model);
-              };
-
-              // 在 sources 中保存更新函数
-              const sourceData = sources.get(uuid);
-
-              if (sourceData) {
-                sourceData.data.updateBoundingBox = updateBoundingBox;
-              }
-            }
-            if (rotateComponent) {
-              console.log("发现自旋转组件:", rotateComponent);
-
-              // 将速度从度/秒转换为弧度/秒
-              const speed = {
-                x: THREE.MathUtils.degToRad(rotateComponent.parameters.speed.x),
-                y: THREE.MathUtils.degToRad(rotateComponent.parameters.speed.y),
-                z: THREE.MathUtils.degToRad(rotateComponent.parameters.speed.z),
-              };
-
-              // 添加到旋转对象列表
-              rotatingObjects.value.push({
-                mesh: model,
-                speed: speed,
-                checkVisibility: true,
-              });
-
-              // 在 sourceData 中添加控制旋转的方法
-              const sourceData = {
-                type: "model",
-                data: {
-                  mesh: model,
-                  setVisibility: (isVisible: boolean) => {
-                    model.visible = isVisible;
-                  },
-                  setRotating: (isRotating: boolean) => {
-                    const index = rotatingObjects.value.findIndex(
-                      (obj) => obj.mesh === model
-                    );
-                    if (index !== -1 && !isRotating) {
-                      rotatingObjects.value.splice(index, 1);
-                    } else if (index === -1 && isRotating) {
-                      rotatingObjects.value.push({
-                        mesh: model,
-                        speed: speed,
-                        checkVisibility: true,
-                      });
-                    }
-                  },
-                },
-              };
-
-              sources.set(uuid, sourceData);
-            }
-            if (movedComponent) {
-              console.log("发现可移动组件:", movedComponent);
-
-              const moveableObject = {
-                mesh: model,
-                isDragging: false,
-                magnetic: movedComponent.parameters.magnetic,
-                scalable: movedComponent.parameters.scalable,
-                limit: movedComponent.parameters.limit,
-                checkVisibility: true,
-              };
-
-              moveableObjects.value.push(moveableObject);
-
-              // 创建平面用于拖拽
-              const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0)); // 拖动平面
-              const intersection = new THREE.Vector3(); // 拖动交点
-
-              // 添加鼠标事件处理
-              const onMouseDown = (event: MouseEvent) => {
-                event.preventDefault();
-                const rect = renderer!.domElement.getBoundingClientRect();
-                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-                raycaster.setFromCamera(mouse, camera!);
-                const intersects = raycaster.intersectObject(model, true);
-
-                if (intersects.length > 0) {
-                  console.log("开始拖拽模型:", entity.parameters.uuid);
-                  dragState.isDragging = true;
-                  dragState.draggedObject = model;
-                  dragState.dragStartPosition.copy(model.position);
-                  dragState.mouseStartPosition.copy(mouse);
-
-                  // 计算点击点与物体中心的偏移
-                  const intersectPoint = intersects[0].point;
-                  dragState.dragOffset.copy(model.position).sub(intersectPoint);
-                  dragState.lastIntersection.copy(intersectPoint);
-
-                  controls.value!.enabled = false;
-                }
-              };
-
-              const onMouseMove = (event: MouseEvent) => {
-                if (!dragState.isDragging || !dragState.draggedObject) return;
-
-                const rect = renderer!.domElement.getBoundingClientRect();
-                const mouse = new THREE.Vector2(
-                  ((event.clientX - rect.left) / rect.width) * 2 - 1,
-                  -((event.clientY - rect.top) / rect.height) * 2 + 1
-                );
-
-                raycaster.setFromCamera(mouse, camera!);
-
-                // 创建一个与相机视角垂直的平面
-                const cameraNormal = new THREE.Vector3(0, 0, -1);
-                cameraNormal.applyQuaternion(camera!.quaternion);
-                const dragPlane = new THREE.Plane(
-                  cameraNormal,
-                  -dragState.dragStartPosition.dot(cameraNormal)
-                );
-
-                const intersection = new THREE.Vector3();
-
-                if (raycaster.ray.intersectPlane(dragPlane, intersection)) {
-                  // 应用偏移
-                  intersection.add(dragState.dragOffset);
-
-                  // 找到当前正在拖动的物体对应的moveableObject
-                  const moveableObject = moveableObjects.value.find(
-                    (obj) => obj.mesh === dragState.draggedObject
-                  );
-
-                  // 计算新位置
-                  const newPosition = new THREE.Vector3();
-                  newPosition.lerpVectors(
-                    dragState.draggedObject.position,
-                    intersection,
-                    0.5
-                  );
-
-                  // 只有当moveableObject存在且有限制设置时才应用限制
-                  if (moveableObject?.limit) {
-                    if (moveableObject.limit.x.enable) {
-                      newPosition.x = THREE.MathUtils.clamp(
-                        newPosition.x,
-                        moveableObject.limit.x.min,
-                        moveableObject.limit.x.max
-                      );
-                    }
-
-                    if (moveableObject.limit.y.enable) {
-                      newPosition.y = THREE.MathUtils.clamp(
-                        newPosition.y,
-                        moveableObject.limit.y.min,
-                        moveableObject.limit.y.max
-                      );
-                    }
-
-                    if (moveableObject.limit.z.enable) {
-                      newPosition.z = THREE.MathUtils.clamp(
-                        newPosition.z,
-                        moveableObject.limit.z.min,
-                        moveableObject.limit.z.max
-                      );
-                    }
-                  }
-
-                  // 应用新位置
-                  dragState.draggedObject.position.copy(newPosition);
-                  dragState.lastIntersection.copy(intersection);
-                  console.log("移动到位置:", newPosition);
-                }
-              };
-
-              const onMouseUp = () => {
-                if (dragState.isDragging) {
-                  console.log("结束拖拽");
-                  dragState.isDragging = false;
-                  dragState.draggedObject = null;
-                  controls.value!.enabled = true;
-                }
-              };
-
-              // 添加事件监听器
-              renderer!.domElement.addEventListener("mousedown", onMouseDown);
-              document.addEventListener("mousemove", onMouseMove);
-              document.addEventListener("mouseup", onMouseUp);
-
-              // 更新 sourceData
-              const sourceData = {
-                type: "model",
-                data: {
-                  mesh: model,
-                  setVisibility: (isVisible: boolean) => {
-                    model.visible = isVisible;
-                  },
-                  cleanup: () => {
-                    renderer!.domElement.removeEventListener(
-                      "mousedown",
-                      onMouseDown
-                    );
-                    document.removeEventListener("mousemove", onMouseMove);
-                    document.removeEventListener("mouseup", onMouseUp);
-                  },
-                },
-              };
-
-              sources.set(uuid, sourceData);
-            } else {
-              sources.set(uuid, {
-                type: "model",
-                data: {
-                  mesh: model,
-                  setVisibility: (isVisible: boolean) => {
-                    model.visible = isVisible;
-                  },
-                },
-              });
-            }
-          } else {
-            sources.set(uuid, {
-              type: "model",
-              data: {
-                mesh: model,
-                setVisibility: (isVisible: boolean) => {
-                  model.visible = isVisible;
-                },
-              },
-            });
-          }
-
-          threeScene.add(model);
-
-          resolve(model);
-        },
-        (progress) => {
-          console.log(
-            `模型加载进度: ${((progress.loaded / progress.total) * 100).toFixed(2)}%`
-          );
-        },
-        (error) => {
-          console.error("模型加载失败:", error);
-          reject(error);
-        }
-      );
-    });
-  }
-};
+const { loadModel } = useModelLoader({
+  threeScene,
+  camera,
+  renderer,
+  mixers,
+  sources,
+  collisionObjects,
+  rotatingObjects,
+  moveableObjects,
+  dragState,
+  controls,
+  mouse,
+  raycaster,
+  verse: props.verse,
+});
 
 // 获取音频URL
 const getAudioUrl = (uuid: string): string | undefined => {
@@ -1556,8 +360,8 @@ const playQueuedAudio = async (
 
 // 递归处理meta中的实体
 const processEntities = async (
-  entities: any[],
-  parentTransform?: any,
+  entities: Entity[],
+  parentTransform?: Transform,
   level: number = 0,
   parentActive: boolean = true
 ) => {
@@ -1569,7 +373,9 @@ const processEntities = async (
 
     // 计算当前实体的可见性状态，需要考虑父级的可见性
     const currentActive =
-      (entity.parameters?.active !== undefined ? entity.parameters.active : true) && parentActive;
+      (entity.parameters?.active !== undefined
+        ? entity.parameters.active
+        : true) && parentActive;
 
     console.log(`处理实体 [Level ${level}]:`, {
       type: entity.type,
@@ -1579,16 +385,17 @@ const processEntities = async (
       parentTransform,
       combinedTransform: entityTransform,
       isActive: currentActive,
-      parentActive
+      parentActive,
     });
 
     // 处理当前实体
     if (entity.type === "Text") {
       try {
-        const textResource = {
+        const textResource: Resource = {
           type: "text",
           content: entity.parameters.text || "DEFAULT TEXT",
           id: entity.parameters.uuid || crypto.randomUUID(),
+          file: { url: "" },
         };
         await loadModel(
           textResource,
@@ -1597,9 +404,10 @@ const processEntities = async (
             parameters: {
               ...entity.parameters,
               transform: entityTransform,
-              active: currentActive // 传递计算后的可见性状态
+              active: currentActive, // 传递计算后的可见性状态
             },
           },
+          undefined,
           currentActive // 使用计算后的可见性状态
         );
       } catch (error) {
@@ -1621,7 +429,8 @@ const processEntities = async (
       sources.set(entity.parameters.uuid, entityData);
     } else if (entity.parameters?.resource) {
       const resource = props.verse.resources.find(
-        (r: any) => r.id.toString() === entity.parameters.resource.toString()
+        (r: Resource) =>
+          r.id?.toString() === entity.parameters.resource?.toString()
       );
       if (resource) {
         try {
@@ -1632,9 +441,10 @@ const processEntities = async (
               parameters: {
                 ...entity.parameters,
                 transform: entityTransform,
-                active: currentActive // 传递计算后的可见性状态
+                active: currentActive, // 传递计算后的可见性状态
               },
             },
+            undefined,
             currentActive // 使用计算后的可见性状态
           );
         } catch (error) {
@@ -1663,19 +473,19 @@ onMounted(async () => {
   const height = scene.value.clientHeight;
 
   // 渲染器设置
-  renderer = new THREE.WebGLRenderer({
+  renderer.value = new THREE.WebGLRenderer({
     antialias: true,
     alpha: true,
   });
-  renderer.setSize(width, height);
-  renderer.setClearColor(isDark.value ? 0x242424 : 0xeeeeee, 1);
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  scene.value.appendChild(renderer.domElement);
+  renderer.value.setSize(width, height);
+  renderer.value.setClearColor(isDark.value ? 0x242424 : 0xeeeeee, 1);
+  renderer.value.setPixelRatio(window.devicePixelRatio);
+  renderer.value.outputColorSpace = THREE.SRGBColorSpace;
+  scene.value.appendChild(renderer.value.domElement);
 
   // 相机设置
-  camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1800); //
-  camera.position.set(0, 7, 20); // 调整相机距离
+  camera.value = new THREE.PerspectiveCamera(50, width / height, 0.1, 1800); //
+  camera.value.position.set(0, 7, 20); // 调整相机距离
 
   // 主环境光
   const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
@@ -1694,7 +504,7 @@ onMounted(async () => {
   threeScene.add(fillLight);
 
   // 轨道控制器设置
-  controls.value = new OrbitControls(camera, renderer.domElement);
+  controls.value = new OrbitControls(camera.value!, renderer.value!.domElement);
   controls.value.enableDamping = true;
   controls.value.dampingFactor = 0.05;
   controls.value.screenSpacePanning = true;
@@ -1703,8 +513,10 @@ onMounted(async () => {
 
   // 加载verse中所有数据
   if (props.verse?.data) {
-    // const verseData = JSON.parse(props.verse.data);
-    const verseData = props.verse.data;
+    const verseData =
+      typeof props.verse.data === "string"
+        ? JSON.parse(props.verse.data)
+        : props.verse.data;
     console.log("解析后的verse全部数据:", props.verse);
     if (verseData.children?.modules) {
       for (const module of verseData.children.modules) {
@@ -1732,8 +544,19 @@ onMounted(async () => {
   initEventContainer();
   console.error("事件容器:", eventContainer.value);
 
+  // 初始化性能监控
+  const stats = new Stats();
+  stats.showPanel(0); // 0: fps, 1: ms, 2: mb
+  stats.dom.style.position = "absolute";
+  stats.dom.style.top = "0px";
+  stats.dom.style.left = "0px";
+  if (scene.value) {
+    scene.value.appendChild(stats.dom);
+  }
+
   // 动画循环
   const animate = () => {
+    stats.begin();
     requestAnimationFrame(animate);
     const delta = clock.getDelta();
     mixers.forEach((mixer) => mixer.update(delta));
@@ -1807,23 +630,24 @@ onMounted(async () => {
     }
 
     controls.value!.update();
-    renderer!.render(threeScene, camera!);
+    renderer.value!.render(threeScene, camera.value!);
+    stats.end();
   };
   animate();
 
   // 窗口大小变化监听
   const handleResize = () => {
-    if (!scene.value || !camera || !renderer) return;
+    if (!scene.value || !camera.value || !renderer.value) return;
     // 获取新的尺寸
     const width = scene.value.clientWidth;
     const height = scene.value.clientHeight;
     // 更新相机
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
+    camera.value.aspect = width / height;
+    camera.value.updateProjectionMatrix();
     // 更新渲染器
-    renderer.setSize(width, height, true); // 添加 true 参数以更新像素比
+    renderer.value.setSize(width, height, true); // 添加 true 参数以更新像素比
     // 强制重新渲染一帧
-    renderer.render(threeScene, camera);
+    renderer.value.render(threeScene, camera.value);
   };
 
   // 监听容器尺寸变化
@@ -1859,8 +683,8 @@ onMounted(async () => {
 
 // 监听主题变化
 watch(isDark, (newValue) => {
-  if (renderer) {
-    renderer.setClearColor(newValue ? 0x242424 : 0xeeeeee, 1);
+  if (renderer.value) {
+    renderer.value.setClearColor(newValue ? 0x242424 : 0xeeeeee, 1);
   }
 });
 
@@ -1892,10 +716,10 @@ onUnmounted(() => {
     }
   });
 
-  if (renderer) {
-    renderer.dispose();
-    renderer.forceContextLoss();
-    renderer.domElement.remove();
+  if (renderer.value) {
+    renderer.value.dispose();
+    renderer.value.forceContextLoss();
+    renderer.value.domElement.remove();
   }
 
   isPlaying = false;

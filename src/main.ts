@@ -4,22 +4,28 @@ import setupPlugins from "@/plugins";
 import "vue-cropper/dist/index.css";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { fas } from "@fortawesome/free-solid-svg-icons";
+// 按需导入图标，而不是全量导入 fas（可减少约 750KB）
+import {
+  faThumbsUp,
+  faUser,
+  faPlus,
+  faInfo,
+  faBoxOpen,
+  faEdit,
+  faEye,
+} from "@fortawesome/free-solid-svg-icons";
 import VueIframe from "vue-iframes";
 import { VueAppleLoginConfig } from "@/utils/helper";
-import VueForm from "@lljj/vue3-form-element";
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
-
-import JsonSchemaEditor from "json-schema-editor-vue3";
-import "json-schema-editor-vue3/lib/json-schema-editor-vue3.css";
 import { ability } from "@/ability";
 
 import { abilitiesPlugin } from "@casl/vue";
 
 import highlightDirective from "./directive/highlight";
 import VueAppleLogin from "vue-apple-login";
-library.add(fas);
+// 只注册实际使用的图标
+library.add(faThumbsUp, faUser, faPlus, faInfo, faBoxOpen, faEdit, faEye);
 
 // 本地SVG图标
 import "virtual:svg-icons-register";
@@ -31,14 +37,15 @@ import "uno.css";
 import "animate.css";
 import { useRouter } from "@/router";
 import { translateRouteTitle } from "./utils/i18n";
-import { useAppStore } from "./store";
+import { useAppStore, store } from "./store";
+import { useDomainStore } from "./store/modules/domain";
 const router = useRouter();
+const domainStore = useDomainStore(store);
 
 // 更新页面标题
 const updateTitle = (title: string) => {
-  document.title = title
-    ? `${translateRouteTitle(title)} - bujiaban.com`
-    : "bujiaban.com";
+  const domain = domainStore.domain || window.location.hostname;
+  document.title = title ? `${translateRouteTitle(title)} - ${domain}` : domain;
 };
 
 // 监听路由变化更新页面标题
@@ -51,7 +58,7 @@ router.beforeEach((to) => {
   }
 });
 
-const appStore = useAppStore();
+const appStore = useAppStore(store);
 
 // 监听语言变化，自动更新页面标题
 watch(
@@ -73,11 +80,20 @@ app.use(abilitiesPlugin, ability, {
   useGlobalProperties: true,
 });
 app.component("FontAwesomeIcon", FontAwesomeIcon);
-app.component("VueForm", VueForm);
 app.directive("highlight", highlightDirective);
 app.use(setupPlugins);
 app.use(VueIframe);
-app.use(ElementPlus);
-app.use(JsonSchemaEditor);
+//app.use(ElementPlus);
+import { loadLanguageAsync } from "@/lang";
 
-app.mount("#app");
+// 加载当前语言包
+loadLanguageAsync(appStore.language).then(() => {
+  app.mount("#app");
+  // 确保路由就绪后，再更新页面标题（修复刷新时标题多语言不生效的问题）
+  router.isReady().then(() => {
+    const metaTitle = router.currentRoute.value.meta.title as string;
+    if (metaTitle) {
+      updateTitle(metaTitle);
+    }
+  });
+});

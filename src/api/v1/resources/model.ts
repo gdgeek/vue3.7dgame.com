@@ -1,5 +1,4 @@
-
-import { FileType } from  "../../user/model";
+import { FileType } from "../../user/model";
 
 export type Author = {
   id: number;

@@ -14,32 +14,12 @@ watch(
 );
 
 // 动态错误消息
-const messages = {
-  en: [
-    "Login expired, please log in again",
-    "Network error, please check your internet connection",
-    "Internal server error, please try again later",
-  ],
-  ja: [
-    "ログインの有効期限が切れました。再度ログインしてください",
-    "ネットワークエラーです。ネットワーク接続を確認してください",
-    "サーバー内部エラーです。しばらくしてから再度お試しください",
-  ],
-  zh: [
-    "登录过期，请重新登录",
-    "网络错误，请检查您的网络连接",
-    "服务器内部错误，请稍后再试",
-  ],
-};
-
 const getMessageArray = () => {
-  switch (lang.value) {
-    case "en":
-      return messages.en;
-    case "zh-cn":
-    default:
-      return messages.zh;
-  }
+  return [
+    i18n.global.t("request.loginExpired"),
+    i18n.global.t("request.networkError"),
+    i18n.global.t("request.serverError"),
+  ];
 };
 
 // 创建一个 axios 实例

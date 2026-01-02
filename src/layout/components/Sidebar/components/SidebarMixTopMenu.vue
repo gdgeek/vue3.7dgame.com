@@ -1,12 +1,24 @@
 <!-- 混合布局菜单(top) -->
 <template>
   <el-scrollbar>
-    <el-menu mode="horizontal" :default-active="activePath" :background-color="variables['menu-background']"
-      :text-color="variables['menu-text']" :active-text-color="variables['menu-active-text']"
-      @select="handleMenuSelect">
-      <el-menu-item v-for="route in mixTopMenus" :key="route.path" :index="route.path">
+    <el-menu
+      mode="horizontal"
+      :default-active="activePath"
+      :background-color="variables['menu-background']"
+      :text-color="variables['menu-text']"
+      :active-text-color="variables['menu-active-text']"
+      @select="handleMenuSelect"
+    >
+      <el-menu-item
+        v-for="route in mixTopMenus"
+        :key="route.path"
+        :index="route.path"
+      >
         <template #title>
-          <svg-icon v-if="route.meta && route.meta.icon" :icon-class="route.meta.icon"></svg-icon>
+          <svg-icon
+            v-if="route.meta && route.meta.icon"
+            :icon-class="route.meta.icon"
+          ></svg-icon>
           <span v-if="route.path === '/'">首页</span>
           <template v-else>
             <span v-if="route.meta && route.meta.title" class="ml-1">

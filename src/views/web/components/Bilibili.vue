@@ -1,17 +1,24 @@
 <template>
   <div class="bilibili-player-container">
-
     <el-card v-if="loading" :style="{ height: `${height}px` }">
-      <el-card v-loading="true" class="loading-container">
-      </el-card>
+      <el-card v-loading="true" class="loading-container"> </el-card>
     </el-card>
-    <iframe v-show="!loading" ref="playerRef" class="bilibili-player" :src="embedUrl" :style="{ height: `${height}px` }"
-      frameborder="0" allowfullscreen scrolling="no" @load="handleIframeLoaded"></iframe>
+    <iframe
+      v-show="!loading"
+      ref="playerRef"
+      class="bilibili-player"
+      :src="embedUrl"
+      :style="{ height: `${height}px` }"
+      frameborder="0"
+      allowfullscreen
+      scrolling="no"
+      @load="handleIframeLoaded"
+    ></iframe>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from "vue";
 
 interface BilibiliPlayerProps {
   /** B站视频BV号或完整链接 */
@@ -31,13 +38,13 @@ interface BilibiliPlayerProps {
 }
 
 const props = withDefaults(defineProps<BilibiliPlayerProps>(), {
-  bvid: '',
-  aid: '',
+  bvid: "",
+  aid: "",
   page: 1,
   height: 500,
   autoplay: false,
   danmaku: true,
-  isWide: true
+  isWide: true,
 });
 
 const loading = ref(true);
@@ -52,50 +59,47 @@ const handleIframeLoaded = () => {
 const parseVideoId = () => {
   if (props.bvid) {
     // 如果是完整链接
-    if (props.bvid.includes('bilibili.com')) {
+    if (props.bvid.includes("bilibili.com")) {
       const match = props.bvid.match(/\/video\/(BV[a-zA-Z0-9]+)/);
-      return match ? match[1] : '';
+      return match ? match[1] : "";
     }
     // 如果只是BV号
-    else if (props.bvid.startsWith('BV')) {
+    else if (props.bvid.startsWith("BV")) {
       return props.bvid;
     }
   }
-  return '';
+  return "";
 };
 
 // 构建嵌入URL
 const embedUrl = computed(() => {
   const parsedBvid = parseVideoId();
-  const baseUrl = 'https://player.bilibili.com/player.html?';
+  const baseUrl = "https://player.bilibili.com/player.html?";
 
   const params = new URLSearchParams();
 
   // 优先使用BV号
   if (parsedBvid) {
-    params.append('bvid', parsedBvid);
+    params.append("bvid", parsedBvid);
   }
   // 其次使用AV号
   else if (props.aid) {
-    params.append('aid', props.aid.toString());
+    params.append("aid", props.aid.toString());
   }
 
-  params.append('page', props.page.toString());
-  params.append('autoplay', props.autoplay ? '1' : '0');
-  params.append('danmaku', props.danmaku ? '1' : '0');
-  params.append('high_quality', '1');
-  params.append('as_wide', props.isWide ? '1' : '0');
+  params.append("page", props.page.toString());
+  params.append("autoplay", props.autoplay ? "1" : "0");
+  params.append("danmaku", props.danmaku ? "1" : "0");
+  params.append("high_quality", "1");
+  params.append("as_wide", props.isWide ? "1" : "0");
 
   return baseUrl + params.toString();
 });
 
 // 在属性变化时重新加载播放器
-watch(
-  [() => props.bvid, () => props.aid, () => props.page],
-  () => {
-    loading.value = true;
-  }
-);
+watch([() => props.bvid, () => props.aid, () => props.page], () => {
+  loading.value = true;
+});
 </script>
 
 <style lang="scss" scoped>

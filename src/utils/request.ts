@@ -18,43 +18,21 @@ watch(
 );
 
 // 动态错误消息
-const messages = {
-  en: [
-    "Login expired, please log in again",
-    "Network error, please check your internet connection",
-    "Internal server error, please try again later",
-  ],
-  ja: [
-    "ログインの有効期限が切れました。再度ログインしてください",
-    "ネットワークエラーです。ネットワーク接続を確認してください",
-    "サーバー内部エラーです。しばらくしてから再度お試しください",
-  ],
-  zh: [
-    "登录过期，请重新登录",
-    "网络错误，请检查您的网络连接",
-    "服务器内部错误，请稍后再试",
-  ],
-};
-
 const getMessageArray = () => {
-  switch (lang.value) {
-    case "en":
-      return messages.en;
-    case "ja":
-      return messages.ja;
-    case "zh-cn":
-    default:
-      return messages.zh;
-  }
+  return [
+    i18n.global.t("request.loginExpired"),
+    i18n.global.t("request.networkError"),
+    i18n.global.t("request.serverError"),
+  ];
 };
 
 let refreshPromise: Promise<any> | null = null;
 
 // 刷新token的API白名单
 const refreshTokenWhitelist = [
-  "/v1/auth/refresh", // 刷新token的接口
-  "/v1/auth/login", // 登录接口
-  "/v1/auth/logout", // 登出接口
+  `/auth/refresh`, // 刷新token的接口
+  `/auth/login`, // 登录接口
+  `/auth/logout`, // 登出接口
 ];
 
 // 判断token是否即将过期（例如，提前5分钟刷新）
@@ -72,7 +50,7 @@ const isTokenExpiringSoon = (token: any): boolean => {
 
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: env.api,
+  baseURL: env.baseURL,
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
 });
@@ -101,6 +79,7 @@ service.interceptors.request.use(
       const isWhitelisted = refreshTokenWhitelist.some((url) =>
         config.url?.includes(url)
       );
+      // alert(isWhitelisted);
       //   alert(config.url);
       if (!isWhitelisted && isTokenExpiringSoon(token)) {
         try {
@@ -122,7 +101,7 @@ service.interceptors.request.use(
         }
       }
     }
-
+    //alert(2222);
     return config;
   },
   (error: any) => {
@@ -134,7 +113,16 @@ function showErrorMessage(message: string, duration = 5000) {
   ElMessage.error({ message, duration });
 }
 
+// Flag to prevent multiple unauthorized handlers from executing
+let isHandlingUnauthorized = false;
+
 function handleUnauthorized(router: ReturnType<typeof useRouter>) {
+  // If already handling unauthorized, just reject silently
+  if (isHandlingUnauthorized) {
+    return Promise.reject("");
+  }
+
+  isHandlingUnauthorized = true;
   const messages = getMessageArray();
 
   showErrorMessage(messages[0]);
@@ -142,6 +130,17 @@ function handleUnauthorized(router: ReturnType<typeof useRouter>) {
     .resetToken()
     .then(() => {
       router.push({ path: "/web/index" });
+      // Reset the flag after a short delay to allow future handling
+      setTimeout(() => {
+        isHandlingUnauthorized = false;
+      }, 1000);
+      return Promise.reject("");
+    })
+    .catch(() => {
+      // Reset the flag even if navigation fails
+      setTimeout(() => {
+        isHandlingUnauthorized = false;
+      }, 1000);
       return Promise.reject("");
     });
 }
@@ -168,9 +167,13 @@ service.interceptors.response.use(
       return Promise.reject(error);
     }
     if (response.status === 401) {
+      // alert(1234);
       // 仅当身份认证失败，执行登出操作
       return handleUnauthorized(router);
+    } else if (response.status === 404) {
+      showErrorMessage(i18n.global.t("request.error404"));
     } else if (response.status >= 500) {
+      console.error("服务器内部错误", response);
       // 服务器内部错误
       showErrorMessage(messages[2]);
     } else {

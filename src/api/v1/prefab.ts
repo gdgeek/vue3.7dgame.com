@@ -1,6 +1,5 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import path from "path-browserify";
 import type { metaInfo } from "./meta";
 import { ResourceInfo } from "@/api/v1/resources/model";
 import { cybersType } from "./cyber";
@@ -46,13 +45,13 @@ export type prefabsData = {
 // export type prefabsData = metaInfo;
 export const deletePrefab = (id: number) => {
   return request({
-    url: path.join("v1", "prefabs", id.toString()),
+    url: `/prefabs/${id}`,
     method: "delete",
   });
 };
 export const postPrefab = (data: Record<string, any>) => {
   return request({
-    url: path.join("v1", "prefabs"),
+    url: `/prefabs`,
     method: "post",
     data,
   });
@@ -60,11 +59,7 @@ export const postPrefab = (data: Record<string, any>) => {
 
 export const getPrefab = (id: number, expand = "") => {
   return request<prefabsData>({
-    url: path.join(
-      "v1",
-      "prefabs",
-      id.toString() + qs.stringify({ expand: expand }, true)
-    ),
+    url: `/prefabs/${id}${qs.stringify({ expand: expand }, true)}`,
     method: "get",
   });
 };
@@ -91,14 +86,14 @@ export const getPrefabs = (
   }
 
   return request<prefabsData[]>({
-    url: path.join("v1", "prefabs" + qs.stringify(query, true)),
+    url: `/prefabs${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const putPrefab = (id: number, data: prefabsData) => {
   return request({
-    url: path.join("v1", "prefabs", id.toString()),
+    url: `/prefabs/${id}`,
     method: "put",
     data,
   });

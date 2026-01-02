@@ -12,19 +12,35 @@
         </div>
       </template>
 
-      <el-form v-loading="loading" :element-loading-text="progress.title" label-width="auto">
-        <el-form-item v-if="imageUrl" :label="$t('ai.generation.form.image')" prop="image">
+      <el-form
+        v-loading="loading"
+        :element-loading-text="progress.title"
+        label-width="auto"
+      >
+        <el-form-item
+          v-if="imageUrl"
+          :label="$t('ai.generation.form.image')"
+          prop="image"
+        >
           <el-image style="max-width: 300px" :src="imageUrl">
             <template #placeholder>
               <div class="image-slot">Loading<span class="dot">...</span></div>
             </template>
           </el-image>
         </el-form-item>
-        <el-form-item v-if="props.data.query.prompt" :label="$t('ai.generation.form.prompt')" prop="prompt">
+        <el-form-item
+          v-if="props.data.query.prompt"
+          :label="$t('ai.generation.form.prompt')"
+          prop="prompt"
+        >
           {{ props.data.query.prompt }}
         </el-form-item>
 
-        <el-form-item v-if="props.data.query.quality" :label="$t('ai.generation.form.quality.title')" prop="quality">
+        <el-form-item
+          v-if="props.data.query.quality"
+          :label="$t('ai.generation.form.quality.title')"
+          prop="quality"
+        >
           <el-radio v-model="localData.query.quality" disabled value="high">
             {{ $t("ai.generation.form.quality.value1") }}
           </el-radio>
@@ -34,14 +50,19 @@
           <el-radio v-model="localData.query.quality" disabled value="low">
             {{ $t("ai.generation.form.quality.value3") }}
           </el-radio>
-          <el-radio v-model="localData.query.quality" disabled value="extra-low">
-            {{ $t("ai.generation.form.quality.value4") }}</el-radio>
+          <el-radio
+            v-model="localData.query.quality"
+            disabled
+            value="extra-low"
+          >
+            {{ $t("ai.generation.form.quality.value4") }}</el-radio
+          >
         </el-form-item>
 
         <div>
           <el-button style="width: 100%" type="primary" @click="process()">{{
             $t("ai.generation.form.submit")
-            }}</el-button>
+          }}</el-button>
         </div>
       </el-form>
     </el-card>

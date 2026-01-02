@@ -1,6 +1,5 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import path from "path-browserify";
 import { v4 as uuidv4 } from "uuid";
 import environment from "@/environment";
 import { MessageType } from "./message";
@@ -73,6 +72,7 @@ export type VerseData = {
   name: string;
   info: string | null;
   description: string | null;
+  public?: boolean;
   data: any;
   version: number;
   uuid: string;
@@ -125,7 +125,7 @@ export const postVerse = (data: PostVerseData) => {
   data.version = environment.version;
   data.uuid = data.uuid || uuidv4();
   return request({
-    url: path.join("v1", "verses"),
+    url: `/verses`,
     method: "post",
     data,
   });
@@ -133,46 +133,31 @@ export const postVerse = (data: PostVerseData) => {
 
 export const putVerseCode = (id: number, data: VerseCode) => {
   return request<VerseCode>({
-    url: path.join(
-      "v1",
-      "system",
-      `verse-code${qs.stringify({ verse_id: id }, true)}`
-    ),
+    url: `/verses/${id}/code`,
     data,
     method: "put",
   });
-  /*
-  return request<VerseCode>({
-    url: path.join("v1", "verses", `code${qs.stringify({ id: id }, true)}`),
-    data,
-    method: "put",
-  });*/
 };
-export const getVerse = (id: number, expand = "metas,share") => {
+export const getVerse = (id: number, expand = "metas,share", cl = "lua") => {
   return request({
-    url: path.join(
-      "v1",
-      "verses",
-      `${id.toString()}${qs.stringify({ expand: expand }, true)}`
-    ),
+    url: `/verses/${id}${qs.stringify({ expand: expand, cl }, true)}`,
     method: "get",
   });
 };
-
+/*
 export const getVerseMetasWithJsCode = (
   id: number,
   expand = "id,name,description,data,metas,resources,code,uuid,code",
   cl = "js"
 ) => {
   return request({
-    url: path.join(
-      "v1",
-      "system",
-      `verse${qs.stringify({ verse_id: id, expand: expand, cl }, true)}`
-    ),
+    url: `/system/verse${qs.stringify(
+      { verse_id: id, expand: expand, cl },
+      true
+    )}`,
     method: "get",
   });
-};
+};*/
 export interface VersesParams {
   sort?: string;
   search?: string;
@@ -203,48 +188,20 @@ const createQueryParams = ({
   }
   return query;
 };
-/*
-export const getVersesWithShare = (
-  sort = "-created_at",
-  search = "",
-  page = 0,
-  expand = "image,author"
-) => {
-  const query = createQueryParams({ sort, search, page, expand });
-  return request({
-    url: path.join("v1", "verses", "share" + qs.stringify(query, true)),
-    method: "get",
-  });
-};
-*/
-/*
-export const getVersesWithOpen = (
-  sort = "-created_at",
-  search = "",
-  page = 0,
-  expand = "image,author"
-) => {
-  const query = createQueryParams({ sort, search, page, expand });
-  return request({
-    url: path.join("v1", "verses", "open" + qs.stringify(query, true)),
-    method: "get",
-  });
-};
-*/
 
 export const getPublic = (params: VersesParams) => {
   const query = createQueryParams(params);
 
   //expand = "id,name,description,data,metas,resources,code,uuid,code",
   return request({
-    url: path.join("v1", "verses", "public" + qs.stringify(query, true)),
+    url: `/verses/public${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 export const getVerses = (params: VersesParams) => {
   const query = createQueryParams(params);
   return request({
-    url: path.join("v1", "verses" + qs.stringify(query, true)),
+    url: `/verses${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -252,7 +209,7 @@ export const getVerses = (params: VersesParams) => {
 export const putVerse = (id: number, data: any) => {
   data.version = environment.version;
   return request({
-    url: path.join("v1", "verses", id.toString()),
+    url: `/verses/${id}`,
     method: "put",
     data,
   });
@@ -260,7 +217,62 @@ export const putVerse = (id: number, data: any) => {
 
 export const deleteVerse = (id: number | string) => {
   return request({
-    url: path.join("v1", "verses", id.toString()),
+    url: `/verses/${id}`,
     method: "delete",
+  });
+};
+
+/**
+ * 将 verse 设为公开
+ * POST /v1/verse/{id}/public
+ */
+export const addPublic = (id: number | string) => {
+  return request({
+    url: `/verses/${id}/public`,
+    method: "post",
+  });
+};
+
+/**
+ * 取消 verse 公开状态
+ * DELETE /v1/verse/{id}/public
+ */
+export const removePublic = (id: number | string) => {
+  return request({
+    url: `/verses/${id}/public`,
+    method: "delete",
+  });
+};
+
+/**
+ * 为 verse 添加标签
+ * POST /v1/verses/{id}/tag?tags_id={tags_id}
+ */
+export const addTag = (id: number | string, tagsId: number | string) => {
+  return request({
+    url: `/verses/${id}/tag${qs.stringify({ tags_id: tagsId }, true)}`,
+    method: "post",
+  });
+};
+
+/**
+ * 移除 verse 的标签
+ * DELETE /v1/verses/{id}/tag?tags_id={tags_id}
+ */
+export const removeTag = (id: number | string, tagsId: number | string) => {
+  return request({
+    url: `/verses/${id}/tag${qs.stringify({ tags_id: tagsId }, true)}`,
+    method: "delete",
+  });
+};
+
+/**
+ * 为 verse 拍照生成快照
+ * POST /v1/verses/{id}/take-photo
+ */
+export const takePhoto = (verseId: number) => {
+  return request({
+    url: `/verses/${verseId}/take-photo`,
+    method: "post",
   });
 };

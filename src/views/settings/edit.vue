@@ -14,7 +14,9 @@
           <el-col align="right">
             <span>
               <router-link to="/home/index">
-                <el-button size="small">{{ $t("homepage.edit.return") }}</el-button>
+                <el-button size="small">{{
+                  $t("homepage.edit.return")
+                }}</el-button>
               </router-link>
             </span>
           </el-col>
@@ -29,14 +31,39 @@
         </div>
 
         <el-row :gutter="24">
-          <el-col :xs="23" :sm="16" :md="14" :lg="12" :xl="10" class="section-margin-left">
-            <el-form ref="nickNameFormRef" :model="nicknameForm" :rules="nicknameRules" label-width="auto">
+          <el-col
+            :xs="23"
+            :sm="16"
+            :md="14"
+            :lg="12"
+            :xl="10"
+            class="section-margin-left"
+          >
+            <el-form
+              ref="nickNameFormRef"
+              :model="nicknameForm"
+              :rules="nicknameRules"
+              label-width="auto"
+            >
               <!-- 昵称输入框 -->
-              <el-form-item :label="$t('homepage.edit.nickname')" prop="nickname" style="margin-bottom: 26px">
-                <el-input v-model="nicknameForm.nickname" style="width: 100%"
-                  :placeholder="$t('homepage.edit.nickname')" autocomplete="off" @keyup.enter="submitNickname">
+              <el-form-item
+                :label="$t('homepage.edit.nickname')"
+                prop="nickname"
+                style="margin-bottom: 26px"
+              >
+                <el-input
+                  v-model="nicknameForm.nickname"
+                  style="width: 100%"
+                  :placeholder="$t('homepage.edit.nickname')"
+                  autocomplete="off"
+                  @keyup.enter="submitNickname"
+                >
                   <template #suffix>
-                    <el-button style="margin-right: -10px" :disabled="isDisable" @click="submitNickname">
+                    <el-button
+                      style="margin-right: -10px"
+                      :disabled="isDisable"
+                      @click="submitNickname"
+                    >
                       {{ $t("homepage.edit.confirm") }}
                     </el-button>
                   </template>
@@ -45,11 +72,18 @@
 
               <!-- 头像上传 -->
               <el-form-item :label="$t('homepage.edit.avatar')">
-                <el-upload class="avatar-uploader" action="" :auto-upload="false" :show-file-list="false"
-                  :on-change="handleChangeUpload" accept="image/jpeg,image/gif,image/png,image/bmp" style="float: left">
+                <el-upload
+                  class="avatar-uploader"
+                  action=""
+                  :auto-upload="false"
+                  :show-file-list="false"
+                  :on-change="handleChangeUpload"
+                  accept="image/jpeg,image/gif,image/png,image/bmp"
+                  style="float: left"
+                >
                   <img v-if="imageUrl" :src="imageUrl" class="avatar" />
                   <div v-else class="avatar-uploader-icon">
-                    <font-awesome-icon icon="plus" />
+                    <font-awesome-icon icon="plus"></font-awesome-icon>
                   </div>
                 </el-upload>
                 <div style="float: left">
@@ -73,8 +107,20 @@
         </div>
 
         <el-row :gutter="24">
-          <el-col :xs="23" :sm="16" :md="14" :lg="12" :xl="10" class="section-margin-left box-margin-bottom">
-            <el-form ref="ruleFormRef" :model="infoForm" :rules="infoRules" label-width="auto">
+          <el-col
+            :xs="23"
+            :sm="16"
+            :md="14"
+            :lg="12"
+            :xl="10"
+            class="section-margin-left box-margin-bottom"
+          >
+            <el-form
+              ref="ruleFormRef"
+              :model="infoForm"
+              :rules="infoRules"
+              label-width="auto"
+            >
               <!-- 性别选择 -->
               <el-form-item :label="$t('homepage.edit.gender')">
                 <el-radio-group v-model="infoForm.sex">
@@ -94,11 +140,21 @@
               </el-form-item>
 
               <!-- 行业选择 -->
-              <el-form-item :label="$t('homepage.edit.industry')" prop="industry">
-                <el-select v-model="infoForm.industry" style="width: 100%"
-                  :placeholder="$t('homepage.edit.industryStatement')">
-                  <el-option v-for="item in industryOptions" :key="item.value" :label="item.label"
-                    :value="item.value"></el-option>
+              <el-form-item
+                :label="$t('homepage.edit.industry')"
+                prop="industry"
+              >
+                <el-select
+                  v-model="infoForm.industry"
+                  style="width: 100%"
+                  :placeholder="$t('homepage.edit.industryStatement')"
+                >
+                  <el-option
+                    v-for="item in industryOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  ></el-option>
                 </el-select>
               </el-form-item>
               <!-- <el-form-item
@@ -115,15 +171,27 @@
             </el-form-item> -->
 
               <!-- 个人简介 -->
-              <el-form-item :label="$t('homepage.edit.individualResume')" prop="textarea">
-                <el-input v-model="infoForm.textarea" style="width: 100%" type="textarea"
+              <el-form-item
+                :label="$t('homepage.edit.individualResume')"
+                prop="textarea"
+              >
+                <el-input
+                  v-model="infoForm.textarea"
+                  style="width: 100%"
+                  type="textarea"
                   :autosize="{ minRows: 4, maxRows: 10 }"
-                  :placeholder="$t('homepage.edit.individualResumeStatement')"></el-input>
+                  :placeholder="$t('homepage.edit.individualResumeStatement')"
+                ></el-input>
               </el-form-item>
 
               <!-- 保存按钮 -->
               <el-form-item>
-                <el-button type="primary" style="width: 150px" :disabled="isDisable" @click="saveInfo">
+                <el-button
+                  type="primary"
+                  style="width: 150px"
+                  :disabled="isDisable"
+                  @click="saveInfo"
+                >
                   {{ $t("homepage.edit.save") }}
                 </el-button>
               </el-form-item>
@@ -138,27 +206,59 @@
           </template>
           <div class="cropper-content">
             <div class="cropper" style="text-align: center">
-              <VueCropper ref="cropperRef" :img="option.img" :output-type="option.outputType" :info="true"
-                :full="option.full" :can-move-box="option.canMoveBox" :original="option.original"
-                :auto-crop="option.autoCrop" :fixed="option.fixed" :fixed-number="option.fixedNumber"
-                :center-box="option.centerBox" :info-true="option.infoTrue" :fixed-box="option.fixedBox"
-                :auto-crop-width="option.autoCropWidth" :auto-crop-height="option.autoCropHeight">
+              <VueCropper
+                ref="cropperRef"
+                :img="option.img"
+                :output-type="option.outputType"
+                :info="true"
+                :full="option.full"
+                :can-move-box="option.canMoveBox"
+                :original="option.original"
+                :auto-crop="option.autoCrop"
+                :fixed="option.fixed"
+                :fixed-number="option.fixedNumber"
+                :center-box="option.centerBox"
+                :info-true="option.infoTrue"
+                :fixed-box="option.fixedBox"
+                :auto-crop-width="option.autoCropWidth"
+                :auto-crop-height="option.autoCropHeight"
+              >
               </VueCropper>
             </div>
           </div>
           <template #footer>
             <div class="dialog-footer">
               <el-button-group style="float: left">
-                <el-button size="small" type="primary" plain @click="rotateLeftHandle">
+                <el-button
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="rotateLeftHandle"
+                >
                   {{ $t("homepage.edit.avatarCropping.leftRotation") }}
                 </el-button>
-                <el-button size="small" type="primary" plain @click="rotateRightHandle">
+                <el-button
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="rotateRightHandle"
+                >
                   {{ $t("homepage.edit.avatarCropping.rightRotation") }}
                 </el-button>
-                <el-button size="small" type="primary" plain @click="changeScaleHandle(1)">
+                <el-button
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="changeScaleHandle(1)"
+                >
                   {{ $t("homepage.edit.avatarCropping.enlarge") }}
                 </el-button>
-                <el-button size="small" type="primary" plain @click="changeScaleHandle(-1)">
+                <el-button
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="changeScaleHandle(-1)"
+                >
                   {{ $t("homepage.edit.avatarCropping.shrink") }}
                 </el-button>
               </el-button-group>
@@ -204,7 +304,11 @@ const cropperRef = ref<any>({});
 
 // 计算用户头像URL
 const imageUrl = computed(() => {
-  if (userStore.userInfo == null || userStore.userInfo.userInfo == null || !userStore.userInfo.userInfo.avatar) {
+  if (
+    userStore.userInfo == null ||
+    userStore.userInfo.userInfo == null ||
+    !userStore.userInfo.userInfo.avatar
+  ) {
     return "";
   }
   return userStore.userInfo.userInfo.avatar.url;
@@ -408,7 +512,12 @@ const handleChangeUpload = async (file: UploadFile, fileList: UploadFiles) => {
   const selectedFile = file.raw;
   if (selectedFile) {
     // 验证图片格式和大小
-    const isJPG = ["image/jpeg", "image/png", "image/bmp", "image/gif"].includes(selectedFile.type);
+    const isJPG = [
+      "image/jpeg",
+      "image/png",
+      "image/bmp",
+      "image/gif",
+    ].includes(selectedFile.type);
     const isLt2M = selectedFile.size / 1024 / 1024 < 2;
 
     if (!isJPG) {
@@ -468,9 +577,13 @@ const saveAvatar = async (
 const finish = async () => {
   cropperRef.value.getCropBlob(async (blob: Blob) => {
     // 创建File对象
-    const file = new File([blob], userStore.userInfo?.userData?.username + ".jpg", {
-      type: "image/jpeg",
-    });
+    const file = new File(
+      [blob],
+      userStore.userInfo?.userData?.username + ".jpg",
+      {
+        type: "image/jpeg",
+      }
+    );
 
     const md5 = await fileStore.store.fileMD5(file);
     const handler = await fileStore.store.publicHandler();
@@ -492,7 +605,7 @@ const finish = async () => {
         md5,
         file.name.split(".").pop() || "",
         file,
-        (p: any) => { },
+        (p: any) => {},
         handler,
         "backup"
       );
@@ -511,23 +624,27 @@ const finish = async () => {
 };
 
 // 监听用户信息变化，更新表单数据
-watch(() => userStore.userInfo, (newUserInfo) => {
-  if (newUserInfo == null || newUserInfo.id === 0) {
-    return;
-  }
+watch(
+  () => userStore.userInfo,
+  (newUserInfo) => {
+    if (newUserInfo == null || newUserInfo.id === 0) {
+      return;
+    }
 
-  const parsedInfo = newUserInfo.userInfo?.info;
-  nicknameForm.value.nickname = newUserInfo.userData?.nickname || "";
+    const parsedInfo = newUserInfo.userInfo?.info;
+    nicknameForm.value.nickname = newUserInfo.userData?.nickname || "";
 
-  if (parsedInfo) {
-    infoForm.value.sex = parsedInfo.sex || "";
-    infoForm.value.industry = parsedInfo.industry || "";
-    infoForm.value.selectedOptions = parsedInfo.selectedOptions || [];
-    infoForm.value.textarea = parsedInfo.textarea || "";
-  }
+    if (parsedInfo) {
+      infoForm.value.sex = parsedInfo.sex || "";
+      infoForm.value.industry = parsedInfo.industry || "";
+      infoForm.value.selectedOptions = parsedInfo.selectedOptions || [];
+      infoForm.value.textarea = parsedInfo.textarea || "";
+    }
 
-  isLoading.value = false;
-}, { deep: true, immediate: true });
+    isLoading.value = false;
+  },
+  { deep: true, immediate: true }
+);
 </script>
 
 <style lang="scss" scoped>

@@ -1,28 +1,30 @@
 <template>
-  <el-dialog v-model="dialogVisible" width="420px" destroy-on-close center @closed="handleDialogClosed"
-    class="login-dialog" :class="{ 'dark-theme': isDark }">
+  <el-dialog
+    v-model="dialogVisible"
+    width="420px"
+    destroy-on-close
+    center
+    @closed="handleDialogClosed"
+    class="login-dialog"
+    :class="{ 'dark-theme': isDark }"
+  >
     <div class="login-container">
       <!-- 顶部标题与图标 -->
       <div class="login-header">
         <img src="/media/image/logo.gif" alt="Logo" class="login-logo" />
-        <h2 class="login-title">不加班AR创造平台</h2>
+        <h2 class="login-title">{{ domainStore.title }}</h2>
       </div>
-
-
 
       <!-- 内容区域 -->
       <div class="login-content">
-        <transition name="fade" mode="out-in">
-          <div>
-            <NamePassword @login-success="handleLoginSuccess" @switch-to-register="toggleRegisterMode" />
-            <br />
-            <Wechat />
-
-          </div>
-
-        </transition>
-
-
+        <div>
+          <NamePassword
+            @login-success="handleLoginSuccess"
+            @switch-to-register="toggleRegisterMode"
+          ></NamePassword>
+          <br />
+          <Wechat></Wechat>
+        </div>
       </div>
 
       <!-- 底部协议 -->
@@ -39,24 +41,26 @@
 </template>
 
 <script setup lang="ts">
-import NamePassword from './NamePassword.vue';
-import RegisterForm from './RegisterForm.vue';
-import Wechat from './Wechat.vue';
+import NamePassword from "./NamePassword.vue";
+import RegisterForm from "./RegisterForm.vue";
+import Wechat from "./Wechat.vue";
 import { useSettingsStore } from "@/store/modules/settings";
+import { useDomainStore } from "@/store/modules/domain";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 
 const props = defineProps({
   title: {
     type: String,
-    default: '用户登录/注册'
-  }
+    default: "用户登录/注册",
+  },
 });
 
-const emit = defineEmits(['dialog-closed']);
+const emit = defineEmits(["dialog-closed"]);
 const settingsStore = useSettingsStore();
+const domainStore = useDomainStore();
 const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
 const dialogVisible = ref(false);
-const activeTab = ref('account-register');
+const activeTab = ref("account-register");
 const isRegisterMode = ref(false);
 
 // 切换账号登录和注册模式
@@ -67,7 +71,7 @@ const toggleRegisterMode = () => {
 // 处理tab点击事件
 const handleTabClick = () => {
   // 当点击微信登录tab时，重置注册模式
-  if (activeTab.value === 'wechat') {
+  if (activeTab.value === "wechat") {
     isRegisterMode.value = false;
   }
 };
@@ -82,25 +86,25 @@ const closeDialog = () => {
 
 const handleLoginSuccess = () => {
   dialogVisible.value = false;
-  ElMessage.success('登录成功！');
+  ElMessage.success("登录成功！");
 };
 
 const handleDialogClosed = () => {
-  emit('dialog-closed');
+  emit("dialog-closed");
   // 重置状态
-  activeTab.value = 'account-register';
+  activeTab.value = "account-register";
   isRegisterMode.value = false;
 };
 
-const openAgreement = (type: 'terms' | 'privacy') => {
+const openAgreement = (type: "terms" | "privacy") => {
   // 打开相应的协议页面，都指向隐私政策页面，通过tab参数区分
   const url = `/privacy-policy?tab=${type}`;
-  window.open(url, '_blank');
+  window.open(url, "_blank");
 };
 
 defineExpose({
   openDialog,
-  closeDialog
+  closeDialog,
 });
 </script>
 

@@ -10,6 +10,8 @@ import IconsResolver from "unplugin-icons/resolver";
 
 import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 import mockDevServerPlugin from "vite-plugin-mock-dev-server";
+import { visualizer } from "rollup-plugin-visualizer";
+import viteCompression from "vite-plugin-compression";
 
 import UnoCSS from "unocss/vite";
 import { resolve } from "path";
@@ -45,6 +47,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       preprocessorOptions: {
         // 定义全局 SCSS 变量
         scss: {
+          api: "modern-compiler",
           javascriptEnabled: true,
           additionalData: `
             @use "@/styles/variables.scss" as *;
@@ -59,16 +62,18 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       port: Number(env.VITE_APP_PORT),
       // 运行是否自动打开浏览器
       open: true,
-      proxy: {
-        /** 代理前缀为 /dev-api 的请求  */
-        [env.VITE_APP_BASE_API]: {
-          changeOrigin: true,
-          // 接口地址
-          target: env.VITE_APP_API_URL,
-          rewrite: (path) =>
-            path.replace(new RegExp("^" + env.VITE_APP_BASE_API), ""),
-        },
-      },
+      proxy: env.VITE_APP_BASE_API
+        ? {
+            /** 代理前缀为 /dev-api 的请求  */
+            [env.VITE_APP_BASE_API]: {
+              changeOrigin: true,
+              // 接口地址
+              target: env.VITE_APP_API_URL,
+              rewrite: (path) =>
+                path.replace(new RegExp("^" + env.VITE_APP_BASE_API), ""),
+            },
+          }
+        : undefined,
     },
     plugins: [
       vue(),
@@ -132,6 +137,19 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       VueDevTools({
         openInEditorHost: `http://localhost:${env.VITE_APP_PORT}`,
       }),
+      visualizer({
+        open: true,
+        gzipSize: true,
+        brotliSize: true,
+        filename: "stats.html",
+      }),
+      viteCompression({
+        verbose: true,
+        disable: false,
+        threshold: 10240, // 10kb
+        algorithm: "gzip",
+        ext: ".gz",
+      }),
     ],
     // 预加载项目必需的组件
     optimizeDeps: {
@@ -144,85 +162,49 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         "path-to-regexp",
         "vue-i18n",
         "path-browserify",
-        "element-plus/es/components/form/style/css",
-        "element-plus/es/components/form-item/style/css",
-        "element-plus/es/components/button/style/css",
-        "element-plus/es/components/input/style/css",
-        "element-plus/es/components/input-number/style/css",
-        "element-plus/es/components/switch/style/css",
-        "element-plus/es/components/upload/style/css",
-        "element-plus/es/components/menu/style/css",
-        "element-plus/es/components/col/style/css",
-        "element-plus/es/components/icon/style/css",
-        "element-plus/es/components/row/style/css",
-        "element-plus/es/components/tag/style/css",
-        "element-plus/es/components/dialog/style/css",
-        "element-plus/es/components/loading/style/css",
-        "element-plus/es/components/radio/style/css",
-        "element-plus/es/components/radio-group/style/css",
-        "element-plus/es/components/popover/style/css",
-        "element-plus/es/components/scrollbar/style/css",
-        "element-plus/es/components/tooltip/style/css",
-        "element-plus/es/components/dropdown/style/css",
-        "element-plus/es/components/dropdown-menu/style/css",
-        "element-plus/es/components/dropdown-item/style/css",
-        "element-plus/es/components/sub-menu/style/css",
-        "element-plus/es/components/menu-item/style/css",
-        "element-plus/es/components/divider/style/css",
-        "element-plus/es/components/card/style/css",
-        "element-plus/es/components/link/style/css",
-        "element-plus/es/components/breadcrumb/style/css",
-        "element-plus/es/components/breadcrumb-item/style/css",
-        "element-plus/es/components/table/style/css",
-        "element-plus/es/components/tree-select/style/css",
-        "element-plus/es/components/table-column/style/css",
-        "element-plus/es/components/select/style/css",
-        "element-plus/es/components/option/style/css",
-        "element-plus/es/components/pagination/style/css",
-        "element-plus/es/components/tree/style/css",
-        "element-plus/es/components/alert/style/css",
-        "element-plus/es/components/radio-button/style/css",
-        "element-plus/es/components/checkbox-group/style/css",
-        "element-plus/es/components/checkbox/style/css",
-        "element-plus/es/components/tabs/style/css",
-        "element-plus/es/components/tab-pane/style/css",
-        "element-plus/es/components/rate/style/css",
-        "element-plus/es/components/date-picker/style/css",
-        "element-plus/es/components/notification/style/css",
-        "element-plus/es/components/image/style/css",
-        "element-plus/es/components/statistic/style/css",
-        "element-plus/es/components/watermark/style/css",
-        "element-plus/es/components/config-provider/style/css",
-        "element-plus/es/components/text/style/css",
-        "element-plus/es/components/drawer/style/css",
-        "element-plus/es/components/color-picker/style/css",
-        "element-plus/es/components/backtop/style/css",
         "@fortawesome/fontawesome-svg-core",
       ],
+    },
+    // 生产环境移除 console 和 debugger
+    esbuild: {
+      drop: mode === "production" ? ["console", "debugger"] : [],
     },
     // 构建配置
     build: {
       chunkSizeWarningLimit: 4000, // 消除打包大小超过500kb警告
-      minify: "terser", // Vite 2.6.x 以上需要配置 minify: "terser", terserOptions 才能生效
-      terserOptions: {
-        compress: {
-          keep_infinity: true, // 防止 Infinity 被压缩成 1/0，这可能会导致 Chrome 上的性能问题
-          drop_console: true, // 生产环境去除 console
-          drop_debugger: true, // 生产环境去除 debugger
-        },
-        format: {
-          comments: false, // 删除注释
-        },
-      },
+      minify: "esbuild",
       commonjsOptions: {
         include: [/node_modules/],
         transformMixedEsModules: true,
       },
       rollupOptions: {
         output: {
-          // manualChunks: {
-          //   "vue-i18n": ["vue-i18n"],
-          // },
+          // 手动分割第三方库到独立 chunk
+          manualChunks: {
+            // Vue 核心
+            "vue-core": ["vue", "vue-router", "pinia", "vue-i18n"],
+            // Element Plus 组件库
+            "element-plus": ["element-plus", "@element-plus/icons-vue"],
+            // 3D 相关
+            three: ["three"],
+            // 图表
+            echarts: ["echarts"],
+            // 代码编辑器
+            codemirror: [
+              "codemirror",
+              "@codemirror/lang-javascript",
+              "@codemirror/lang-json",
+              "@codemirror/lint",
+              "@codemirror/theme-one-dark",
+              "vue-codemirror",
+            ],
+            // FontAwesome 图标
+            fontawesome: [
+              "@fortawesome/fontawesome-svg-core",
+              "@fortawesome/free-solid-svg-icons",
+              "@fortawesome/vue-fontawesome",
+            ],
+          },
           // 用于从入口点创建的块的打包输出格式[name]表示文件名,[hash]表示该文件内容hash值
           entryFileNames: "js/[name].[hash].js",
           // 用于命名代码拆分时创建的共享块的输出命名

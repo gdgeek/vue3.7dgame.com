@@ -1,10 +1,8 @@
 <template>
   <!-- 新闻动态 -->
   <section id="news" ref="newsRef">
-    <News :activeTabName="section" />
+    <News :activeTabName="section"></News>
   </section>
-
-
 </template>
 
 <script setup lang="ts">
@@ -13,8 +11,8 @@ import { useRouter, useRoute } from "vue-router";
 import News from "./components/News/index.vue";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const router = useRouter();
 const route = useRoute();
@@ -28,18 +26,16 @@ defineOptions({
 });
 
 const section = computed(() => {
-  return route.query.section ? route.query.section as string : "news";
+  return route.query.section ? (route.query.section as string) : "news";
 });
 const loginDialogRef = ref<any>(null);
-
-
 
 // 根据主题和滚动状态获取文本颜色
 const getTextColor = () => {
   if (isDark.value) {
-    return '#fff';
+    return "#fff";
   } else {
-    return isScrolled.value ? '#333' : '#fff';
+    return isScrolled.value ? "#333" : "#fff";
   }
 };
 
@@ -52,7 +48,7 @@ const openLoginDialog = () => {
 const isScrolled = ref(false);
 
 // 自动滚动
-const SCROLL_POSITION_KEY = 'web_scroll_position';
+const SCROLL_POSITION_KEY = "web_scroll_position";
 
 // 保存滚动位置
 const saveScrollPosition = () => {
@@ -61,7 +57,7 @@ const saveScrollPosition = () => {
     try {
       sessionStorage.setItem(SCROLL_POSITION_KEY, scrollTop.toString());
     } catch (e) {
-      console.error('保存滚动位置失败:', e);
+      console.error("保存滚动位置失败:", e);
     }
   }
 };
@@ -74,12 +70,12 @@ const restoreScrollPosition = () => {
       nextTick(() => {
         window.scrollTo({
           top: parseInt(savedPosition),
-          behavior: 'auto'
+          behavior: "auto",
         });
       });
     }
   } catch (e) {
-    console.error('恢复滚动位置失败:', e);
+    console.error("恢复滚动位置失败:", e);
   }
 };
 
@@ -128,8 +124,7 @@ const select = (item: any) => {
   router.push(route.path + "?section=" + item.section);
   //关闭侧边栏
   // sidebarVisible.value = false;
-
-}
+};
 // 滚动到指定部分的函数
 const scrollToSection = (sectionId: string) => {
   // 计算导航栏高度（加点额外的间距）
@@ -147,7 +142,7 @@ const scrollToSection = (sectionId: string) => {
     // 平滑滚动到指定位置
     window.scrollTo({
       top: offsetPosition,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   }
 };
@@ -157,7 +152,6 @@ onMounted(() => {
   //滚到news上
   const section = route.query.section;
   if (section) {
-
     setTimeout(() => {
       scrollToSection("news");
     }, 100);
@@ -170,7 +164,7 @@ onMounted(() => {
   AOS.init({
     duration: 1000,
     once: false,
-    mirror: true
+    mirror: true,
   });
 
   // 恢复滚动位置
@@ -178,7 +172,7 @@ onMounted(() => {
 
   // 监听路由变化，在路由变化后保存滚动位置
   router.beforeEach((to, from) => {
-    if (from.path.startsWith('/web')) {
+    if (from.path.startsWith("/web")) {
       saveScrollPosition();
     }
     return true;
@@ -345,7 +339,6 @@ onUnmounted(() => {
   }
 
   &.nav-scrolled {
-
     .nav-left .company-name,
     .nav-middle .nav-menu-item .menu-text,
     .nav-right .hamburger-menu {
@@ -353,7 +346,6 @@ onUnmounted(() => {
     }
 
     &.dark-theme {
-
       .nav-left .company-name,
       .nav-middle .nav-menu-item .menu-text,
       .nav-right .hamburger-menu {

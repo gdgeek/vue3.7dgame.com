@@ -1,22 +1,21 @@
 <template>
   <div v-loading="loading" :class="['box1', { 'dark-theme': isDark }]">
     <div :class="['box2', { 'dark-theme': isDark }]">
-
       <h1>{{ $t("login.h1") }}</h1>
       <h4>{{ $t("login.h4") }}</h4>
       1234
       <br />
       <el-card style="width: 100%" shadow="never">
         <span>登录账号</span>
-        <br>
-        <br>
-        <name-password />
+        <br />
+        <br />
+        <name-password></name-password>
       </el-card>
       <br />
       <div style="width: 100%" shadow="never" class="apple-login-container">
-        <wechat />
+        <wechat></wechat>
       </div>
-      <br>
+      <br />
     </div>
   </div>
 </template>

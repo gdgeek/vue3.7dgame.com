@@ -1,6 +1,5 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import path from "path-browserify";
 
 export type userData = {
   id: string;
@@ -16,7 +15,7 @@ export type userData = {
 
 export const postPerson = (data: any) => {
   return request({
-    url: "v1/people",
+    url: `/people`,
     method: "post",
     data: data,
   });
@@ -24,14 +23,14 @@ export const postPerson = (data: any) => {
 
 export const deletePerson = (id: number) => {
   return request({
-    url: "v1/people/" + id,
+    url: `/people/${id}`,
     method: "delete",
   });
 };
 
 export const putPerson = (data: { id: number; auth: string }) => {
   return request({
-    url: "v1/people/auth",
+    url: `/people/auth`,
     method: "put",
     data,
   });
@@ -46,15 +45,14 @@ export const getPerson = (
   const query: Record<string, any> = [];
   query["expand"] = expand;
   query["sort"] = sort;
-
   if (search !== "") {
-    query["UserSearch[username]"] = search;
+    query["PersonSearch[username]"] = search;
   }
   if (page > 1) {
     query["page"] = page;
   }
   return request<userData[]>({
-    url: path.join("v1", "people" + qs.stringify(query, true)),
+    url: `/people${qs.stringify(query, true)}`,
     method: "get",
   });
 };

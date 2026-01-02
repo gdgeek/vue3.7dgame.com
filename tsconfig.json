@@ -36,5 +36,11 @@
     "src/assets/test/blockly/storage.js",
     "src/utils/utilityFunctions.ts"
   ],
-  "exclude": ["node_modules", "dist", "**/*.js"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.js",
+    "src/stories",
+    "**/*.stories.ts"
+  ]
 }

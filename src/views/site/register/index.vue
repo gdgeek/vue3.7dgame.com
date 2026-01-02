@@ -7,18 +7,34 @@
         <br />
         <el-tabs style="width: 100%" type="border-card" :stretch="true">
           <el-tab-pane :label="$t('login.createAccount')">
-            <el-form ref="registerFormRef" class="login-form" :rules="registerRules" :model="registerForm"
-              label-width="auto">
+            <el-form
+              ref="registerFormRef"
+              class="login-form"
+              :rules="registerRules"
+              :model="registerForm"
+              label-width="auto"
+            >
               <el-form-item :label="$t('login.username')" prop="username">
-                <el-input v-model="registerForm.username" suffix-icon="Message"></el-input>
+                <el-input
+                  v-model="registerForm.username"
+                  suffix-icon="Message"
+                ></el-input>
               </el-form-item>
 
               <el-form-item :label="$t('login.password')" prop="password">
-                <el-input v-model="registerForm.password" type="password" suffix-icon="Lock"></el-input>
+                <el-input
+                  v-model="registerForm.password"
+                  type="password"
+                  suffix-icon="Lock"
+                ></el-input>
               </el-form-item>
 
               <el-form-item :label="$t('login.repassword')" prop="repassword">
-                <el-input v-model="registerForm.repassword" type="password" suffix-icon="Lock"></el-input>
+                <el-input
+                  v-model="registerForm.repassword"
+                  type="password"
+                  suffix-icon="Lock"
+                ></el-input>
               </el-form-item>
 
               <el-form-item class="login-button">
@@ -32,9 +48,9 @@
         <br />
         <el-button style="width: 100%" @click="back">
           <el-icon>
-            <Back />
+            <Back></Back>
           </el-icon>
-          &nbsp;&nbsp; 返回
+          &nbsp;&nbsp; {{ $t("login.back") }}
         </el-button>
       </div>
     </div>

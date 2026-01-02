@@ -2,7 +2,6 @@
   <TransitionWrapper>
     <div class="meta-edit">
       <Edit @get-item="getMetaData" @put-item="putMetaData"></Edit>
-
     </div>
   </TransitionWrapper>
 </template>
@@ -18,7 +17,6 @@ const getMetaData = async (
   callback: (data: any) => void
 ) => {
   try {
-
     const response = await getMeta(id, params);
     console.log("response:", response);
     callback(response.data);

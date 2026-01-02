@@ -7,15 +7,20 @@
 
     <div class="container">
       <div class="section-header" data-aos="fade-up">
-        <h2 class="section-title">如何获得平台授权</h2>
-        <p class="section-subtitle">只需从本渠道购买相应设备，即可终生使用平台。</p>
+        <h2 class="section-title">{{ $t("web.buy.title") }}</h2>
+        <p class="section-subtitle">{{ $t("web.buy.subtitle") }}</p>
       </div>
 
       <div class="stats-grid">
-        <div class="stat-item" v-for="(stat, index) in stats" :key="index" data-aos="zoom-in"
-          :data-aos-delay="index * 100">
+        <div
+          class="stat-item"
+          v-for="(stat, index) in stats"
+          :key="index"
+          data-aos="zoom-in"
+          :data-aos-delay="index * 100"
+        >
           <div class="stat-icon">
-            <component :is="stat.icon" />
+            <component :is="stat.icon"></component>
           </div>
           <div class="stat-number">
             <span class="unit">{{ stat.label }}</span>
@@ -25,20 +30,30 @@
       </div>
 
       <div class="cases-grid" data-aos="fade-up">
-        <div @click="buy(item)" class="case-card" v-for="(item, index) in cases" :key="index" data-aos="fade-up"
-          :data-aos-delay="index * 100">
+        <div
+          @click="buy(item)"
+          class="case-card"
+          v-for="(item, index) in cases"
+          :key="index"
+          data-aos="fade-up"
+          :data-aos-delay="index * 100"
+        >
           <div class="case-image">
             <img :src="item.image" :alt="item.title" />
             <div class="case-overlay">
               <div class="case-tags">
-                <span class="case-tag" v-for="(tag, tagIndex) in item.tags" :key="tagIndex">
+                <span
+                  class="case-tag"
+                  v-for="(tag, tagIndex) in item.tags"
+                  :key="tagIndex"
+                >
                   {{ tag }}
                 </span>
               </div>
             </div>
           </div>
           <div class="case-content">
-            <h3 class="case-title">{{ item.title }} </h3>
+            <h3 class="case-title">{{ item.title }}</h3>
             <p class="stat-number">{{ item.price }}</p>
             <p class="stat-label">{{ item.description }}</p>
             <p class="case-description">{{ item.annotate }}</p>
@@ -47,39 +62,57 @@
       </div>
     </div>
   </div>
-  <el-dialog v-if="buyItem" v-model="dialogVisible" :title="'微信扫描购买'" width="300">
+  <el-dialog
+    v-if="buyItem"
+    v-model="dialogVisible"
+    :title="$t('web.buy.scanToBuy')"
+    width="300"
+  >
     <ElCard class="buy-card">
       <div class="card-content">
-        <el-image style="width: 100%; height: 100%" :src="buyItem.qrcode" fit="cover" />
+        <el-image
+          style="width: 100%; height: 100%"
+          :src="buyItem.qrcode"
+          fit="cover"
+        ></el-image>
         <div class="card-details">
-          <h3><b>{{ buyItem.title }}</b></h3>
+          <h3>
+            <b>{{ buyItem.title }}</b>
+          </h3>
           <p>{{ buyItem.annotate }}</p>
           <p class="price">{{ buyItem.price }}</p>
-          <p>购买完成后请联系解锁设备</p>
+          <p>{{ $t("web.buy.contactUnlock") }}</p>
         </div>
       </div>
       <div class="card-footer">
-        <el-button type="primary" @click="open">立即购买</el-button>
-        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="open">{{
+          $t("web.buy.buyNow")
+        }}</el-button>
+        <el-button @click="dialogVisible = false">{{
+          $t("web.buy.cancel")
+        }}</el-button>
       </div>
     </ElCard>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, onUnmounted } from 'vue';
-import { useSettingsStore } from '@/store/modules/settings';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import { DataAnalysis, User, Cellphone, Star } from '@element-plus/icons-vue';
-import { ElMessageBox } from 'element-plus'
-import type { Action } from 'element-plus'
+import { ref, onMounted, computed, onUnmounted } from "vue";
+import { useI18n } from "vue-i18n";
+import { useSettingsStore } from "@/store/modules/settings";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { DataAnalysis, User, Cellphone, Star } from "@element-plus/icons-vue";
+import { ElMessageBox } from "element-plus";
+import type { Action } from "element-plus";
+
+const { t } = useI18n();
 
 const dialogVisible = ref(false);
 const open = () => {
-  ElMessageBox.alert('请扫小程序码进入商城', '购买', {
-    confirmButtonText: '确认',
-    callback: (action: Action) => { }
+  ElMessageBox.alert(t("web.buy.scanQrCode"), t("web.buy.purchase"), {
+    confirmButtonText: t("web.buy.confirm"),
+    callback: (action: Action) => {},
   });
 };
 
@@ -90,14 +123,14 @@ const buy = (item: any) => {
 };
 
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.theme === 'dark');
+const isDark = computed(() => settingsStore.theme === "dark");
 
 // 视差效果
 const mouseX = ref(0);
 const mouseY = ref(0);
 const parallaxStyle = computed(() => {
   return {
-    transform: `translate(${mouseX.value * -15}px, ${mouseY.value * -15}px) scale(1.1)`
+    transform: `translate(${mouseX.value * -15}px, ${mouseY.value * -15}px) scale(1.1)`,
   };
 });
 
@@ -111,48 +144,51 @@ const handleMouseMove = (e: MouseEvent) => {
 };
 
 // 统计数据
-const stats = [
+const stats = computed(() => [
   {
-    label: '免费版本',
-    message: '无需任何费用，即可使用！',
-    icon: DataAnalysis
+    label: t("web.buy.freeVersion"),
+    message: t("web.buy.freeVersionDesc"),
+    icon: DataAnalysis,
   },
   {
-    label: '设备解锁',
-    message: '从本站渠道采购硬件设备，获得完全授权去除水印。',
-    icon: User
+    label: t("web.buy.deviceUnlock"),
+    message: t("web.buy.deviceUnlockDesc"),
+    icon: User,
   },
   {
-    label: '定制开发',
-    message: '定制开发项目，可免费解锁十台设备',
-    icon: Cellphone
+    label: t("web.buy.customDev"),
+    message: t("web.buy.customDevDesc"),
+    icon: Cellphone,
   },
   {
-    label: '设备解锁',
-    message: '可以单独购买设备解锁码，解锁设备',
-    icon: Star
-  }
-];
+    label: t("web.buy.unlockCode"),
+    message: t("web.buy.unlockCodeDesc"),
+    icon: Star,
+  },
+]);
 
 // 案例数据
 const cases = [
   {
-    image: '/media/bg/rokid/studio.png',
-    qrcode: '/media/bg/rokid/qr_studio.png',
-    title: 'Rokid AR Studio',
-    description: '6Dof 设备，完整AR体验，适合所有场景，可以完整使用三方视角。商业项目请优先选择这个。',
-    price: '￥8,300 + ￥8,500',
-    annotate: '注：完整体验需要购买Max Pro 眼镜和  Station Pro 计算单元。',
-    tags: ['6Dof 设备', '手势识别', '语音控制', '图片追踪']
+    image: "/media/bg/rokid/studio.png",
+    qrcode: "/media/bg/rokid/qr_studio.png",
+    title: "Rokid AR Studio",
+    description:
+      "6Dof 设备，完整AR体验，适合所有场景，可以完整使用三方视角。商业项目请优先选择这个。",
+    price: "￥8,300 + ￥8,500",
+    annotate: "注：完整体验需要购买Max Pro 眼镜和  Station Pro 计算单元。",
+    tags: ["6Dof 设备", "手势识别", "语音控制", "图片追踪"],
   },
   {
-    image: '/media/bg/rokid/lite.png',
-    qrcode: '/media/bg/rokid/qr_lite.png',
-    title: 'Rokid AR Lite',
-    description: '3Dof设备，简单灵活，适合简单的AR体验，适合教育和轻量级商业项目。',
-    annotate: '注：Lite设备没有空间定位能力，无法完整实现三方视角，但可以实现多设备互动，购买前请确认是否适合您的项目。',
-    price: '￥4,499',
-    tags: ['Rokid AR Lite', '3Dof 设备']
+    image: "/media/bg/rokid/lite.png",
+    qrcode: "/media/bg/rokid/qr_lite.png",
+    title: "Rokid AR Lite",
+    description:
+      "3Dof设备，简单灵活，适合简单的AR体验，适合教育和轻量级商业项目。",
+    annotate:
+      "注：Lite设备没有空间定位能力，无法完整实现三方视角，但可以实现多设备互动，购买前请确认是否适合您的项目。",
+    price: "￥4,499",
+    tags: ["Rokid AR Lite", "3Dof 设备"],
   },
 ];
 
@@ -160,15 +196,15 @@ onMounted(() => {
   // 初始化AOS动画
   AOS.init({
     duration: 1000,
-    once: false
+    once: false,
   });
 
   // 添加鼠标移动监听
-  window.addEventListener('mousemove', handleMouseMove);
+  window.addEventListener("mousemove", handleMouseMove);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('mousemove', handleMouseMove);
+  window.removeEventListener("mousemove", handleMouseMove);
 });
 </script>
 
@@ -203,7 +239,11 @@ onUnmounted(() => {
     }
 
     .stats-background .overlay {
-      background: linear-gradient(to right, rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.9));
+      background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.9),
+        rgba(240, 240, 240, 0.9)
+      );
     }
 
     .case-title {
@@ -266,7 +306,7 @@ onUnmounted(() => {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('/media/bg/cloudbgc5.jpg');
+    background-image: url("/media/bg/cloudbgc5.jpg");
     background-size: cover;
     background-position: center;
     transition: transform 0.2s ease-out;
@@ -278,7 +318,11 @@ onUnmounted(() => {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to right, rgba(52, 48, 149, 0.8), rgba(59, 178, 184, 0.8));
+    background: linear-gradient(
+      to right,
+      rgba(52, 48, 149, 0.8),
+      rgba(59, 178, 184, 0.8)
+    );
   }
 }
 
@@ -303,7 +347,7 @@ onUnmounted(() => {
     display: inline-block;
 
     &:after {
-      content: '';
+      content: "";
       position: absolute;
       bottom: -10px;
       left: 50%;

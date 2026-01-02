@@ -2,7 +2,6 @@ import request from "@/utils/request";
 import { v4 as uuidv4 } from "uuid";
 import { convertToHttps } from "@/assets/js/helper";
 import qs from "querystringify";
-import path from "path-browserify";
 import type { ApiResponse, ResourceInfo } from "./model";
 import { AxiosResponse } from "axios";
 
@@ -22,6 +21,8 @@ type ResourceData = {
   type?: ResourceType;
   uuid?: string;
   effect_type?: string; // 添加 effect_type 字段
+  info?: string;
+  image_id?: number;
 };
 
 type ResourcePut = {
@@ -50,9 +51,8 @@ export const getResources = (
   }
 
   const queryString = qs.stringify(query, true);
-  const url = `v1/resources${queryString}`; // 拼接 URL
   return request<ResourceInfo[]>({
-    url,
+    url: `/resources${queryString}`, // 拼接 URL
     method: "get",
   });
 };
@@ -95,9 +95,8 @@ export const getParticles = (
 
 // 修改资源
 const putResources = (id: number | string, resource: ResourcePut) => {
-  const url = path.join("v1", "resources", id.toString());
   return request({
-    url,
+    url: `/resources/${id}`,
     method: "put",
     data: resource,
   });
@@ -125,9 +124,8 @@ export const putParticle = (id: number | string, particle: any) =>
 const postResources = (data: ResourceData) => {
   data.uuid = uuidv4(); // 生成 UUID
 
-  const url = path.join("v1", "resources");
   return request({
-    url,
+    url: `/resources`,
     method: "post",
     data,
   });
@@ -158,9 +156,8 @@ export const postParticle = (data: Omit<ResourceData, "type">) =>
 
 // 删除资源
 const deleteResources = (id: number | string) => {
-  const url = path.join("v1", "resources", id.toString());
   return request({
-    url,
+    url: `/resources/${id}`,
     method: "delete",
   });
 };
@@ -188,7 +185,7 @@ const getResource = (
     expand,
   };
   const queryString = qs.stringify(query, true);
-  const url = path.join("v1", "resources", id.toString() + queryString);
+  const url = `/resources/${id}${queryString}`;
   return request({
     url,
     method: "get",

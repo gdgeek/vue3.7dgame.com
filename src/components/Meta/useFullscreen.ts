@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from "vue";
 
 /** Manage two fullscreen contexts: editor area and scene area. */
 export function useFullscreen() {
@@ -42,10 +42,10 @@ export function useFullscreen() {
   };
 
   onMounted(() => {
-    document.addEventListener('fullscreenchange', syncState);
+    document.addEventListener("fullscreenchange", syncState);
   });
   onUnmounted(() => {
-    document.removeEventListener('fullscreenchange', syncState);
+    document.removeEventListener("fullscreenchange", syncState);
   });
 
   return { isFullscreen, isSceneFullscreen, toggleEditor, toggleScene };

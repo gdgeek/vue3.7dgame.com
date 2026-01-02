@@ -5,25 +5,52 @@
       <el-col :sm="16">
         <el-card v-if="item" class="box-card">
           <template #header>
-            <el-form ref="itemForm" :rules="rules" v-if="item" :model="item" label-width="80px">
-              <el-form-item :label="$t('meta.metaEdit.form.title')" prop="title">
+            <el-form
+              ref="itemForm"
+              :rules="rules"
+              v-if="item"
+              :model="item"
+              label-width="80px"
+            >
+              <el-form-item
+                :label="$t('meta.metaEdit.form.title')"
+                prop="title"
+              >
                 <el-input v-model="item.title" @change="onSubmit"></el-input>
               </el-form-item>
-              <el-form-item :label="$t('meta.metaEdit.form.picture')" prop="title">
+              <el-form-item
+                :label="$t('meta.metaEdit.form.picture')"
+                prop="title"
+              >
                 <div class="box-item" style="width: 100%; text-align: center">
-                  <ImageSelector :imageUrl="image" :itemId="id" @image-selected="handleImageSelected"
-                    @image-upload-success="handleImageUploadSuccess" />
+                  <ImageSelector
+                    :imageUrl="image"
+                    :itemId="id"
+                    @image-selected="handleImageSelected"
+                    @image-upload-success="handleImageUploadSuccess"
+                  ></ImageSelector>
                 </div>
               </el-form-item>
               <el-form-item v-if="prefab" label="Info" prop="title">
-                <el-input v-model="jsonInfo" type="textarea" @change="onSubmit"></el-input>
+                <el-input
+                  v-model="jsonInfo"
+                  type="textarea"
+                  @change="onSubmit"
+                ></el-input>
               </el-form-item>
             </el-form>
           </template>
         </el-card>
         <br />
         <el-card v-if="item !== null" class="box-card">
-          <el-button v-if="item.viewable" @click="editor" icon="Edit" type="primary" size="small" style="width: 100%">
+          <el-button
+            v-if="item.viewable"
+            @click="editor"
+            icon="Edit"
+            type="primary"
+            size="small"
+            style="width: 100%"
+          >
             {{ $t("meta.metaEdit.contentEdit") }}
           </el-button>
           <br />
@@ -41,13 +68,12 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { metaInfo } from "@/api/v1/meta";
 import { translateRouteTitle } from "@/utils/i18n";
-import { useI18n } from "vue-i18n"
+import { useI18n } from "vue-i18n";
 
 const route = useRoute();
 const router = useRouter();
@@ -159,7 +185,7 @@ const editor = () => {
 // 处理从资源库选择的图片
 interface ImageUpdateEvent {
   imageId: number;
-  itemId: number;
+  itemId: number | null;
 }
 
 const handleImageSelected = async (event: ImageUpdateEvent) => {

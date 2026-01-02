@@ -1,6 +1,11 @@
 <template>
   <div class="app-container" :class="{ 'dark-theme': isDark }">
-    <iframe src="https://forum.rokid.com/index" class="full-height" frameborder="0" allowfullscreen></iframe>
+    <iframe
+      src="https://forum.rokid.com/index"
+      class="full-height"
+      frameborder="0"
+      allowfullscreen
+    ></iframe>
   </div>
 </template>
 
@@ -9,10 +14,10 @@ import "@/assets/font/font.css";
 import { useRouter, useRoute } from "vue-router";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import { ElMessage, ElMessageBox } from 'element-plus'
-import type { Action } from 'element-plus'
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { ElMessage, ElMessageBox } from "element-plus";
+import type { Action } from "element-plus";
 const router = useRouter();
 const route = useRoute();
 const contentRef = ref<HTMLElement | null>(null);
@@ -25,24 +30,22 @@ defineOptions({
 });
 
 const open = () => {
-  ElMessageBox.alert('链接至Rokid论坛，如有问题进入【低代码编程】分区进行讨论。', '论坛求助', {
-    // if you want to disable its autofocus
-    // autofocus: false,
-    confirmButtonText: '确认',
-    callback: (action: Action) => {
-
-    },
-  })
-}
+  ElMessageBox.alert(
+    "链接至Rokid论坛，如有问题进入【低代码编程】分区进行讨论。",
+    "论坛求助",
+    {
+      // if you want to disable its autofocus
+      // autofocus: false,
+      confirmButtonText: "确认",
+      callback: (action: Action) => {},
+    }
+  );
+};
 
 const loginDialogRef = ref<any>(null);
 
-
-
-
-
 // 自动滚动
-const SCROLL_POSITION_KEY = 'web_scroll_position';
+const SCROLL_POSITION_KEY = "web_scroll_position";
 
 // 保存滚动位置
 const saveScrollPosition = () => {
@@ -51,7 +54,7 @@ const saveScrollPosition = () => {
     try {
       sessionStorage.setItem(SCROLL_POSITION_KEY, scrollTop.toString());
     } catch (e) {
-      console.error('保存滚动位置失败:', e);
+      console.error("保存滚动位置失败:", e);
     }
   }
 };
@@ -64,12 +67,12 @@ const restoreScrollPosition = () => {
       nextTick(() => {
         window.scrollTo({
           top: parseInt(savedPosition),
-          behavior: 'auto'
+          behavior: "auto",
         });
       });
     }
   } catch (e) {
-    console.error('恢复滚动位置失败:', e);
+    console.error("恢复滚动位置失败:", e);
   }
 };
 
@@ -118,7 +121,7 @@ const scrollToSection = (sectionId: string) => {
     // 平滑滚动到指定位置
     window.scrollTo({
       top: offsetPosition,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   }
 };
@@ -129,7 +132,6 @@ onMounted(() => {
   //滚到news上
   const section = route.query.section;
   if (section) {
-
     setTimeout(() => {
       scrollToSection("news");
     }, 100);
@@ -142,7 +144,7 @@ onMounted(() => {
   AOS.init({
     duration: 1000,
     once: false,
-    mirror: true
+    mirror: true,
   });
 
   // 恢复滚动位置
@@ -150,7 +152,7 @@ onMounted(() => {
 
   // 监听路由变化，在路由变化后保存滚动位置
   router.beforeEach((to, from) => {
-    if (from.path.startsWith('/web')) {
+    if (from.path.startsWith("/web")) {
       saveScrollPosition();
     }
     return true;
@@ -323,7 +325,6 @@ onUnmounted(() => {
   }
 
   &.nav-scrolled {
-
     .nav-left .company-name,
     .nav-middle .nav-menu-item .menu-text,
     .nav-right .hamburger-menu {
@@ -331,7 +332,6 @@ onUnmounted(() => {
     }
 
     &.dark-theme {
-
       .nav-left .company-name,
       .nav-middle .nav-menu-item .menu-text,
       .nav-right .hamburger-menu {

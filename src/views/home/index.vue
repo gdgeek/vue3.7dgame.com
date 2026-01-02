@@ -3,7 +3,7 @@
     <div>
       <Book :items="list"></Book>
       <el-tabs v-if="env.local()" type="border-card" lazy>
-        <el-tab-pane :label="informationStore.title">
+        <el-tab-pane :label="domainStore.title">
           <LocalPage></LocalPage>
         </el-tab-pane>
       </el-tabs>
@@ -12,17 +12,18 @@
 </template>
 
 <script setup lang="ts">
-import { useInfomationStore } from "@/store/modules/information";
+import { useDomainStore } from "@/store/modules/domain";
 import environment from "@/environment";
 import Book from "@/components/Home/Book.vue";
 import LocalPage from "@/components/Home/LocalPage.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
-import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
-const informationStore = useInfomationStore();
+const domainStore = useDomainStore();
 const env = computed(() => environment);
 const { t } = useI18n();
+
 /*
 const mrpp = computed(() => {
   return [
@@ -36,7 +37,6 @@ const mrpp = computed(() => {
 const list = computed(() => {
   return [
     { label: t("homepage.dashboard"), type: "document", id: 1455 },
-
     { label: t("homepage.news"), type: "category", id: 74 },
   ];
 });

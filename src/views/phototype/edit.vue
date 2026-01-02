@@ -1,57 +1,69 @@
 <template>
   <div>
-    <br>
+    <br />
     <el-row :gutter="20" style="margin: 0px 18px 0">
       <el-col :sm="16">
         <el-card class="box-card">
-
           <template #header>
             <b id="title">json格式</b>
           </template>
           <el-card class="box-card" style="margin-bottom: 10px">
-
-            <el-input v-if="phototype" v-model="phototype.type" style="width: 240px" placeholder="Please input" />
-
+            <el-input
+              v-if="phototype"
+              v-model="phototype.type"
+              style="width: 240px"
+              placeholder="Please input"
+            ></el-input>
           </el-card>
 
-          <json-schema-editor class="schema" :value="tree" disabledType lang="zh_CN" custom :extra="extraSetting" />
+          <json-schema-editor
+            class="schema"
+            :value="tree"
+            disabledType
+            lang="zh_CN"
+            custom
+            :extra="extraSetting"
+          ></json-schema-editor>
           <br />
           <el-card class="box-card" style="min-height: 500px">
-            <codemirror v-model="jsonStr" :readOnly="false" />
+            <codemirror v-model="jsonStr" :readOnly="false"></codemirror>
           </el-card>
           <br />
-          <el-button icon="Edit" @click="saveChanges" type="primary" size="small" style="width: 100%">
+          <el-button
+            icon="Edit"
+            @click="saveChanges"
+            type="primary"
+            size="small"
+            style="width: 100%"
+          >
             保存
           </el-button>
-
         </el-card>
         <br />
 
         <br />
-
-
       </el-col>
 
       <el-col :sm="8">
         <div v-if="phototype">
-
-          <Resource v-if="phototype" @selected="handleSelected" :resource="phototype.resource"></Resource>
+          <Resource
+            v-if="phototype"
+            @selected="handleSelected"
+            :resource="phototype.resource"
+          ></Resource>
           <br />
-          <Transform v-if="phototype && phototype.data && phototype.data.transform" :data="phototype.data.transform"
-            @save="handleTransformSave" />
+          <Transform
+            v-if="phototype && phototype.data && phototype.data.transform"
+            :data="phototype.data.transform"
+            @save="handleTransformSave"
+          ></Transform>
         </div>
         <br />
 
         <br />
-
-
       </el-col>
     </el-row>
   </div>
-
-
-
-
 </template>
 
 <script setup lang="ts">
@@ -63,9 +75,8 @@ import Transform from "@/components/Transform.vue";
 import { useRoute } from "vue-router";
 
 const handleTransformSave = async (transform: any) => {
-
   const response = await putPhototype(id.value, {
-    data: { ...phototype.value.data, transform }
+    data: { ...phototype.value.data, transform },
   });
   ElMessage.success("保存成功a");
   phototype.value = response.data;
@@ -120,16 +131,15 @@ const refresh = async () => {
     phototype.value = response.data;
     if (phototype.value) {
       if (!phototype.value.data) {
-        phototype.value.data = {}
+        phototype.value.data = {};
       }
       if (!phototype.value.data.transform) {
         phototype.value.data.transform = {
           scale: { x: 1, y: 1, z: 1 },
           rotate: { x: 0, y: 0, z: 0 },
           position: { x: 0, y: 0, z: 0 },
-        }
+        };
       }
-
     }
     if (phototype.value && phototype.value.schema) {
       tree.value = phototype.value.schema;

@@ -1,6 +1,10 @@
 <template>
   <div class="document-index">
-    <resource-dialog @selected="selected" @cancel="cancel" ref="dialog"></resource-dialog>
+    <resource-dialog
+      @selected="selected"
+      @cancel="cancel"
+      ref="dialog"
+    ></resource-dialog>
     <el-card class="box-card-component" style="margin: 18px 18px 0">
       <template #header>
         <div class="box-card-header">
@@ -13,16 +17,37 @@
 
       <template #footer>
         <div class="progress-item">
-          <el-progress v-if="progress.percentage === 100" :percentage="100" status="success"></el-progress>
+          <el-progress
+            v-if="progress.percentage === 100"
+            :percentage="100"
+            status="success"
+          ></el-progress>
           <el-progress v-else :percentage="progress.percentage"></el-progress>
         </div>
       </template>
-      <el-form v-loading="loading" :element-loading-text="progress.title" ref="formRef" :rules="rules" :model="form"
-        label-width="auto">
+      <el-form
+        v-loading="loading"
+        :element-loading-text="progress.title"
+        ref="formRef"
+        :rules="rules"
+        :model="form"
+        label-width="auto"
+      >
         <el-form-item :label="$t('ai.generation.form.image')" prop="image">
-          <el-button v-if="!imageUrl" style="max-width: 300px" :icon="Search" @click="open" round>{{
-            $t("ai.generation.form.select") }}</el-button>
-          <el-image v-else style="max-width: 300px" @click="open" :src="imageUrl">
+          <el-button
+            v-if="!imageUrl"
+            style="max-width: 300px"
+            :icon="Search"
+            @click="open"
+            round
+            >{{ $t("ai.generation.form.select") }}</el-button
+          >
+          <el-image
+            v-else
+            style="max-width: 300px"
+            @click="open"
+            :src="imageUrl"
+          >
             <template #placeholder>
               <div class="image-slot">Loading<span class="dot">...</span></div>
             </template>
@@ -31,7 +56,10 @@
         <el-form-item :label="$t('ai.generation.form.prompt')" prop="prompt">
           <el-input v-model="form.prompt"></el-input>
         </el-form-item>
-        <el-form-item :label="$t('ai.generation.form.quality.title')" prop="prompt">
+        <el-form-item
+          :label="$t('ai.generation.form.quality.title')"
+          prop="prompt"
+        >
           <el-radio-group v-model="form.quality">
             <el-radio :value="'high'">{{
               $t("ai.generation.form.quality.value1")
@@ -49,8 +77,12 @@
         </el-form-item>
 
         <div>
-          <el-button style="width: 100%" type="primary" @click="generation(formRef)">{{ $t("ai.generation.form.submit")
-          }}</el-button>
+          <el-button
+            style="width: 100%"
+            type="primary"
+            @click="generation(formRef)"
+            >{{ $t("ai.generation.form.submit") }}</el-button
+          >
         </div>
       </el-form>
     </el-card>

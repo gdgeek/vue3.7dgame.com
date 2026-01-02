@@ -4,8 +4,13 @@
       <el-card class="box-card-component" style="margin: 18px 18px 0">
         <template #header>
           <div class="box-card-header">
-            <h3>{{ title }}:</h3>
-            {{ declared }}
+            <div>
+              <h3>{{ title }}:</h3>
+              <span class="header-declared">{{ declared }}</span>
+            </div>
+            <div v-if="maxSize > 0" class="size-limit-badge">
+              {{ $t("upload.maxSizeLimit", { size: maxSize }) }}
+            </div>
           </div>
         </template>
         <div style="position: relative">
@@ -39,17 +44,17 @@ const props = withDefaults(
     fileType: string;
     dir: string | null;
     advanced?: boolean;
+    maxSize?: number; // 最大文件大小限制 (MB)
   }>(),
   {
     fileType: "*",
     dir: null,
     advanced: false,
+    maxSize: 0, // 0 表示不限制
   }
 );
 
-const emit = defineEmits([
-  "saveResource",
-]);
+const emit = defineEmits(["saveResource"]);
 const fileStore = useFileStore();
 
 const data = computed(() => [
@@ -112,8 +117,7 @@ const saveFile = async (
   handler: FileHandler,
   totalFiles: number
 ) => {
-
-  extension = extension.startsWith('.') ? extension : `.${extension}`;
+  extension = extension.startsWith(".") ? extension : `.${extension}`;
   const data: UploadFileType = {
     filename: file.name,
     md5,
@@ -137,6 +141,24 @@ const saveFile = async (
 const select = async () => {
   try {
     const files = await fileStore.store.fileOpen(props.fileType, true);
+
+    // 文件大小检查
+    if (props.maxSize > 0) {
+      const maxBytes = props.maxSize * 1024 * 1024;
+      const oversizedFiles = files.filter((f: File) => f.size > maxBytes);
+      if (oversizedFiles.length > 0) {
+        const names = oversizedFiles.map((f: File) => f.name).join(", ");
+        ElMessage.error(`文件超过 ${props.maxSize}MB 限制: ${names}`);
+        // 过滤掉超大文件
+        const validFiles = files.filter((f: File) => f.size <= maxBytes);
+        if (validFiles.length === 0) {
+          return;
+        }
+        files.length = 0;
+        files.push(...validFiles);
+      }
+    }
+
     isDisabled.value = true; // 禁用按钮
     let fileCount = 0; // 已完成文件计数
     const totalFiles = files.length; // 总文件数
@@ -149,7 +171,9 @@ const select = async () => {
         const handler = await fileStore.store.publicHandler();
         let extension = ".bytes";
         if (file.extension !== undefined) {
-          extension = file.extension.startsWith('.') ? file.extension : `.${file.extension}`;
+          extension = file.extension.startsWith(".")
+            ? file.extension
+            : `.${file.extension}`;
         }
         const has = await fileStore.store.fileHas(
           md5,
@@ -197,8 +221,26 @@ const select = async () => {
 
 .box-card-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+}
+
+.box-card-header h3 {
+  margin: 0 0 4px 0;
+}
+
+.header-declared {
+  color: #909399;
+  font-size: 13px;
+}
+
+.size-limit-badge {
+  background-color: #409eff;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .progress-item {

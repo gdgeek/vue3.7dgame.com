@@ -1,24 +1,38 @@
 <template>
   <div class="verse-scene">
-    <phototype-dialog @selected="selectedPhototype" ref="phototypeDialogRef"></phototype-dialog>
+    <phototype-dialog
+      @selected="selectedPhototype"
+      ref="phototypeDialogRef"
+    ></phototype-dialog>
     <resource-dialog @selected="selected" :on-get-datas="getDatas" ref="dialog">
       <template #bar="{ item }">
         <div v-if="item.type === 'audio'" class="info-container">
-          <audio id="audio" controls style="width: 100%; height: 30px" :src="item.context.file.url"
-            @play="handleAudioPlay"></audio>
+          <audio
+            id="audio"
+            controls
+            style="width: 100%; height: 30px"
+            :src="item.context.file.url"
+            @play="handleAudioPlay"
+          ></audio>
         </div>
       </template>
     </resource-dialog>
     <el-container>
       <el-main>
-        <iframe ref="editor" id="editor" :src="src" class="content" height="100%" width="100%"></iframe>
+        <iframe
+          ref="editor"
+          id="editor"
+          :src="src"
+          class="content"
+          height="100%"
+          width="100%"
+        ></iframe>
       </el-main>
     </el-container>
   </div>
 </template>
 
 <script setup lang="ts">
-
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
 import { getResources } from "@/api/v1/resources";
 import { getPhototypes, PhototypeType } from "@/api/v1/phototype";
@@ -33,15 +47,10 @@ const handleAudioPlay = (event: Event) => {
   currentPlayingAudio.value = audioElement;
 };
 
-
 const getDatas = (input: DataInput): Promise<DataOutput> => {
-
   return new Promise(async (resolve, reject) => {
     try {
-
-
-      if (input.type === 'phototype') {
-
+      if (input.type === "phototype") {
         const response = await getPhototypes(
           input.sorted,
           input.searched,
@@ -51,15 +60,15 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
         console.error(response.data);
         // 处理响应数据，转换为 CardInfo 数组
         const items = response.data.map((item: any) => {
-          return ({
+          return {
             id: item.id,
             context: item,
-            type: 'phototype',
+            type: "phototype",
             created_at: item.created_at,
             name: item.name ? item.name : item.title, // 使用name或title
-            image: item.image ? { "url": item.image.url } : null,
+            image: item.image ? { url: item.image.url } : null,
             enabled: true,
-          } as CardInfo);
+          } as CardInfo;
         });
 
         const pagination = {
@@ -78,23 +87,20 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
           "image"
         );
 
-
         const items = response.data.map((item: any) => {
-
           let enabled: boolean = true;
           if (item.type === "polygen" && !item.image) {
             enabled = false;
           }
-          return ({
+          return {
             id: item.id,
             context: item,
             type: item.type,
             created_at: item.created_at,
             name: item.name ? item.name : item.title, // 使用name或title
-            image: item.image ? { "url": item.image.url } : null,
+            image: item.image ? { url: item.image.url } : null,
             enabled,
-
-          } as CardInfo);
+          } as CardInfo;
         });
 
         const pagination = {
@@ -105,13 +111,10 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
         };
         resolve({ items, pagination });
       }
-
-
     } catch (error) {
       console.error("获取数据失败", error);
       reject(error);
     }
-
   });
 };
 import { useRoute, useRouter } from "vue-router";
@@ -120,13 +123,13 @@ import PhototypeDialog from "@/components/MrPP/PhototypeDialog.vue";
 import { putMeta, getMeta } from "@/api/v1/meta";
 import { useAppStore } from "@/store/modules/app";
 import { translateRouteTitle } from "@/utils/i18n";
-import env from "@/environment"
+import env from "@/environment";
 import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
 import { AbilityEdit } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
 import { useUserStore } from "@/store/modules/user";
-import { until } from '@vueuse/core'
+import { until } from "@vueuse/core";
 import { da } from "element-plus/es/locale";
 
 import qs from "querystringify";
@@ -148,21 +151,18 @@ const userStore = useUserStore();
 const id = computed(() => parseInt(route.query.id as string));
 const title = computed(() => route.query.title?.slice(4) as string);
 const src = computed(() => {
-
-
   const query: Record<string, any> = {
     language: appStore.language,
     timestamp: Date.now(),
-    a1_api: env.a1
+    a1_api: env.a1,
   };
 
-  const url = `${env.editor}/three.js/editor/meta-editor.html` + qs.stringify(query, true);
+  const url =
+    `${env.editor}/three.js/editor/meta-editor.html` +
+    qs.stringify(query, true);
 
   return url;
   //return `${env.editor}/three.js/editor/meta-editor.html?language=${appStore.language}&timestamp=${Date.now()}`;
-
-
-
 });
 // 监听语言变化
 watch(
@@ -179,31 +179,33 @@ watch(
     // 用户信息变化时，向编辑器发送最新用户信息
     postMessage("user-info", {
       id: userStore.userInfo?.id || null,
-      roles: userStore.userInfo?.roles || [],
-      role: userStore.getRole()
+      //roles: userStore.userInfo?.roles || [],
+      role: userStore.getRole(),
     });
   },
   { deep: true }
 );
 
-const selectedPhototype = async (phototype: PhototypeType, replace: boolean = false) => {
-
+const selectedPhototype = async (
+  phototype: PhototypeType,
+  replace: boolean = false
+) => {
   console.error(phototype.resource);
   phototypeDialogRef.value?.open(phototype.schema.root, (data: any) => {
     // const d = { ...data, id: phototype.id };
     postMessage("load-phototype", {
       data: {
         type: phototype.type,
-        context: JSON.stringify(data)
+        context: JSON.stringify(data),
       },
-      type: 'phototype',
+      type: "phototype",
       title: phototype.title,
     });
   });
 };
 // 资源操作相关函数
 const selected = async (info: CardInfo, replace: boolean = false) => {
-  if (info.type === 'phototype') {
+  if (info.type === "phototype") {
     console.error(info.context);
     selectedPhototype(info.context as PhototypeType, replace);
     return;
@@ -215,14 +217,12 @@ const selected = async (info: CardInfo, replace: boolean = false) => {
   }
 };
 
-
-
 const loadResource = (data: any) => {
   dialog.value.open(null, id.value, data.type);
 };
 
 const replaceResource = (data: any) => {
-  dialog.value.open(null, id.value, data.type, 'replace');
+  dialog.value.open(null, id.value, data.type, "replace");
 };
 
 // 权限检查
@@ -251,14 +251,20 @@ const postMessage = (action: string, data: any = {}) => {
 
 // 获取可用的资源类型
 const getAvailableResourceTypes = () => {
+  const resourceTypes = [
+    "polygen",
+    "picture",
+    "video",
+    "voxel",
+    "audio",
+    "particle",
+    "phototype",
+  ]; // 所有资源类型
 
-
-  const resourceTypes = ['polygen', 'picture', 'video', 'voxel', 'audio', 'particle', 'phototype']; // 所有资源类型
-
-
-  return resourceTypes.filter((type) => ability.can('edit', new AbilityEdit(type)));
+  return resourceTypes.filter((type) =>
+    ability.can("edit", new AbilityEdit(type))
+  );
 };
-
 
 // 保存元数据
 const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
@@ -315,8 +321,8 @@ const handleUploadCover = async (data: any) => {
 
     // 将base64图片数据转换为Blob对象
     const imageData = data.imageData;
-    const byteString = atob(imageData.split(',')[1]);
-    const mimeType = imageData.split(',')[0].split(':')[1].split(';')[0];
+    const byteString = atob(imageData.split(",")[1]);
+    const mimeType = imageData.split(",")[0].split(":")[1].split(";")[0];
     const ab = new ArrayBuffer(byteString.length);
     const ia = new Uint8Array(ab);
 
@@ -325,7 +331,7 @@ const handleUploadCover = async (data: any) => {
     }
 
     const blob = new Blob([ab], { type: mimeType });
-    const extension = mimeType.split('/')[1];
+    const extension = mimeType.split("/")[1];
     const fileName = `cover_${id.value}_${Date.now()}.${extension}`;
     const file = new File([blob], fileName, { type: mimeType });
 
@@ -339,7 +345,12 @@ const handleUploadCover = async (data: any) => {
     }
 
     // 检查文件是否已存在
-    const has = await fileStore.store.fileHas(md5, extension, handler, "backup");
+    const has = await fileStore.store.fileHas(
+      md5,
+      extension,
+      handler,
+      "backup"
+    );
 
     // 如果文件不存在，上传文件
     if (!has) {
@@ -347,7 +358,7 @@ const handleUploadCover = async (data: any) => {
         md5,
         extension,
         file,
-        (p: any) => { },
+        (p: any) => {},
         handler,
         "backup"
       );
@@ -434,12 +445,9 @@ const handleMessage = async (e: MessageEvent) => {
       break;
 
     case "get-available-resource-types":
-
       // 如果编辑器明确请求可用资源类型，就发送它们
 
-      await until(
-        () => userStore.userInfo != null
-      ).toBeTruthy()
+      await until(() => userStore.userInfo != null).toBeTruthy();
       const availableTypes = getAvailableResourceTypes();
 
       postMessage("available-resource-types", availableTypes);
@@ -450,10 +458,11 @@ const handleMessage = async (e: MessageEvent) => {
         init = true;
         await refresh();
       } else {
+        console.log("post user info to editor");
         postMessage("user-info", {
           id: userStore.userInfo?.id || null,
-          roles: userStore.userInfo?.roles || [],
-          role: userStore.getRole()
+          //roles: userStore.userInfo?.roles || [],
+          role: userStore.getRole(),
         });
       }
       break;
@@ -478,12 +487,12 @@ const refresh = async () => {
       availableResourceTypes: availableTypes,
       user: {
         id: userStore.userInfo?.id || null,
-        roles: userStore.userInfo?.roles || [],
-        role: userStore.getRole() // 获取用户角色
+        //roles: userStore.userInfo?.roles || [],
+        role: userStore.getRole(), // 获取用户角色
       },
       system: {
-        a1: import.meta.env.VITE_APP_A1_API
-      }
+        a1: import.meta.env.VITE_APP_A1_API,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -492,7 +501,6 @@ const refresh = async () => {
 // 生命周期钩子
 onMounted(() => {
   window.addEventListener("message", handleMessage);
-
 });
 
 onBeforeUnmount(() => {

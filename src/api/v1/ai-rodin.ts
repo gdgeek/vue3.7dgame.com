@@ -1,6 +1,5 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import path from "path-browserify";
 
 const schedule = (jobs: any[]) => {
   const length: number = jobs.length;
@@ -23,8 +22,7 @@ const schedule = (jobs: any[]) => {
 const file = (id: number) => {
   const url =
     import.meta.env.VITE_APP_AI_API +
-    "/" +
-    path.join("file" + qs.stringify({ id: id.toString() }, true));
+    `/file${qs.stringify({ id: id.toString() }, true)}`;
 
   return request({
     url,
@@ -32,10 +30,10 @@ const file = (id: number) => {
   });
 };
 const rodin = (query: Record<string, string | number>) => {
-  const url =
-    import.meta.env.VITE_APP_AI_API +
-    "/" +
-    path.join("rodin" + qs.stringify(query, true));
+  const url = `${import.meta.env.VITE_APP_AI_API}/rodin${qs.stringify(
+    query,
+    true
+  )}`;
 
   return request({
     url,
@@ -45,8 +43,7 @@ const rodin = (query: Record<string, string | number>) => {
 const check = (id: number) => {
   const url =
     import.meta.env.VITE_APP_AI_API +
-    "/" +
-    path.join("check" + qs.stringify({ id: id.toString() }, true));
+    `/check${qs.stringify({ id: id.toString() }, true)}`;
 
   return request({
     url,
@@ -57,8 +54,7 @@ const check = (id: number) => {
 const download = (id: number) => {
   const url =
     import.meta.env.VITE_APP_AI_API +
-    "/" +
-    path.join("download" + qs.stringify({ id: id.toString() }, true));
+    `/download${qs.stringify({ id: id.toString() }, true)}`;
 
   return request({
     url,
@@ -71,13 +67,13 @@ const get = (id: number, expand: string = "resource,step") => {
   };
   const queryString = qs.stringify(query, true);
   return request({
-    url: path.join("v1", `ai-rodin/${id}${queryString}`),
+    url: `/ai-rodin/${id}${queryString}`,
     method: "get",
   });
 };
 const del = (id: number) => {
   return request({
-    url: path.join("v1", `ai-rodin/${id}`),
+    url: `/ai-rodin/${id}`,
     method: "delete",
   });
 };
@@ -102,7 +98,7 @@ const list = (
   const queryString = qs.stringify(query, true);
 
   return request({
-    url: path.join("v1", `ai-rodin${queryString}`),
+    url: `/ai-rodin${queryString}`,
     method: "get",
   });
 };

@@ -10,7 +10,13 @@
               <span v-if="voxelData">{{ voxelData.name }}</span>
             </template>
             <div v-loading="false" class="box-item">
-              <Voxel v-if="voxelData" ref="three" :file="voxelData.file" @loaded="loaded" @progress="progress">
+              <Voxel
+                v-if="voxelData"
+                ref="three"
+                :file="voxelData.file"
+                @loaded="loaded"
+                @progress="progress"
+              >
               </Voxel>
             </div>
             <el-progress :percentage="percentage"></el-progress>
@@ -28,11 +34,20 @@
 
         <!-- 体素模型信息和操作区域 -->
         <el-col :sm="8">
-          <MrppInfo v-if="voxelData" :title="$t('voxel.view.info.title')" titleSuffix=" :" :tableData="tableData"
-            :itemLabel="$t('voxel.view.info.label1')" :textLabel="$t('voxel.view.info.label2')"
-            :downloadText="$t('voxel.view.info.download')" :renameText="$t('voxel.view.info.name')"
-            :deleteText="$t('voxel.view.info.delete')" @download="downloadVoxel" @rename="namedWindow"
-            @delete="deleteWindow" />
+          <MrppInfo
+            v-if="voxelData"
+            :title="$t('voxel.view.info.title')"
+            titleSuffix=" :"
+            :tableData="tableData"
+            :itemLabel="$t('voxel.view.info.label1')"
+            :textLabel="$t('voxel.view.info.label2')"
+            :downloadText="$t('voxel.view.info.download')"
+            :renameText="$t('voxel.view.info.name')"
+            :deleteText="$t('voxel.view.info.delete')"
+            @download="downloadVoxel"
+            @rename="namedWindow"
+            @delete="deleteWindow"
+          ></MrppInfo>
           <br />
         </el-col>
       </el-row>
@@ -127,12 +142,12 @@ const downloadVoxel = async () => {
   // 确保下载文件的扩展名为.vox
   await downloadResource(
     {
-      name: voxelData.value.name || 'voxel',
-      file: voxelData.value.file
+      name: voxelData.value.name || "voxel",
+      file: voxelData.value.file,
     },
-    '.vox',
+    ".vox",
     t,
-    'voxel.view.download'
+    "voxel.view.download"
   );
 };
 
@@ -326,7 +341,7 @@ const loaded = async (info: any) => {
         md5,
         extension,
         file,
-        () => { },
+        () => {},
         handler,
         "screenshot/voxel"
       );

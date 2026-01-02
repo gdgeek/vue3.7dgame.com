@@ -1,13 +1,17 @@
 <template>
   <div class="home-header">
-
-
     <el-row :gutter="10">
       <el-col :md="14" :span="24">
-
         <div :class="['home-avatar-container', { mobile: isMobile }]">
-          <el-avatar shape="square" class="home-avatar-child" icon="avatar" :src="avatarUrl" :size="100"
-            style="float: left" @click="showQRCode()"></el-avatar>
+          <el-avatar
+            shape="square"
+            class="home-avatar-child"
+            icon="avatar"
+            :src="avatarUrl"
+            :size="100"
+            style="float: left"
+            @click="showQRCode()"
+          ></el-avatar>
 
           <div>
             <div class="home-avatar-info">
@@ -22,21 +26,24 @@
       <el-col :md="10" :span="24">
         <div class="hidden-sm-and-down hidden-box"></div>
         <div :class="['home-header-button', { mobile: isMobile }]">
-
           <!--一个二维码icon按钮 -->
-          <el-button size="small" type="primary" :icon="Menu" @click="showQRCode()">
-         登录码
-           </el-button>
+          <el-button
+            size="small"
+            type="primary"
+            :icon="Menu"
+            @click="showQRCode()"
+          >
+            {{ t("login.loginCode") }}
+          </el-button>
           <el-button size="small" type="primary" @click="gotoEdit">{{
             $t("homepage.edit.title")
-            }}</el-button>
+          }}</el-button>
         </div>
       </el-col>
     </el-row>
   </div>
 
-  <QRCodeDialog ref="codeDialog" />
-
+  <QRCodeDialog ref="codeDialog"></QRCodeDialog>
 </template>
 
 <script setup lang="ts">
@@ -46,7 +53,6 @@ import QrcodeVue from "qrcode.vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/store/modules/user";
 import { useScreenStore } from "@/store";
-
 
 import { Menu } from "@element-plus/icons-vue";
 const codeDialog = ref<any>(null);
@@ -98,7 +104,7 @@ const textarea = computed(() => {
 });
 const showQRCode = () => {
   codeDialog.value.openDialog();
-}
+};
 const gotoEdit = () => {
   router.push("/settings/edit");
 };

@@ -12,7 +12,6 @@ import { getVerses } from "@/api/v1/verse";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const loaded = async (data: any, result: Function) => {
-
   try {
     const response = await getVerses({
       sort: data.sorted,
@@ -35,3 +34,9 @@ const loaded = async (data: any, result: Function) => {
   }
 };
 </script>
+
+<style scoped>
+.verse-index {
+  padding: 20px;
+}
+</style>

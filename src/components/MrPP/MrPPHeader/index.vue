@@ -1,18 +1,22 @@
 <template>
   <div>
     <el-card class="box-card">
-
       <el-row :gutter="0">
-
         <el-col :xs="16" :sm="16" :md="16" :lg="16" :xl="16">
           <slot></slot>
           &nbsp;
           <el-button-group v-if="sorted !== ''" :inline="true">
-            <el-button v-if="sorted_name" size="small" type="success" label="名称排序" icon="ChatDotSquare"
-              @click="sort(sortByName)">
+            <el-button
+              v-if="sorted_name"
+              size="small"
+              type="success"
+              label="名称排序"
+              icon="ChatDotSquare"
+              @click="sort(sortByName)"
+            >
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByName")
-                }}</span>
+              }}</span>
               <el-icon v-if="sorted_up">
                 <ArrowUp></ArrowUp>
               </el-icon>
@@ -20,16 +24,29 @@
                 <ArrowDown></ArrowDown>
               </el-icon>
             </el-button>
-            <el-button v-else size="small" type="info" label="名称排序" icon="ChatDotSquare" @click="sort(sortByName)">
+            <el-button
+              v-else
+              size="small"
+              type="info"
+              label="名称排序"
+              icon="ChatDotSquare"
+              @click="sort(sortByName)"
+            >
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByName")
-                }}</span>
+              }}</span>
             </el-button>
-            <el-button v-if="sorted_created_at" size="small" type="success" icon="Clock" label="时间排序"
-              @click="sort(sortByTime)">
+            <el-button
+              v-if="sorted_created_at"
+              size="small"
+              type="success"
+              icon="Clock"
+              label="时间排序"
+              @click="sort(sortByTime)"
+            >
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByTime")
-                }}</span>
+              }}</span>
               <el-icon v-if="sorted_up">
                 <ArrowUp></ArrowUp>
               </el-icon>
@@ -37,24 +54,43 @@
                 <ArrowDown></ArrowDown>
               </el-icon>
             </el-button>
-            <el-button v-else size="small" type="info" label="时间排序" icon="Clock" @click="sort(sortByTime)">
+            <el-button
+              v-else
+              size="small"
+              type="info"
+              label="时间排序"
+              icon="Clock"
+              @click="sort(sortByTime)"
+            >
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByTime")
-                }}</span>
+              }}</span>
             </el-button>
-
           </el-button-group>
           &nbsp;
-          <tags-select v-if="hasTags" @tagsChange="handleTagsChange" />
-
+          <tags-select
+            v-if="hasTags"
+            @tags-change="handleTagsChange"
+          ></tags-select>
         </el-col>
         <el-col v-if="hasSearch" :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
-          <el-input v-model="input" size="small" :placeholder="$t('MrppHeader.search')" class="input-with-select"
-            @keyup.enter="keyDown">
+          <el-input
+            v-model="input"
+            size="small"
+            :placeholder="$t('MrppHeader.search')"
+            class="input-with-select"
+            clearable
+            @clear="search"
+            @keyup.enter="keyDown"
+          >
             <!-- <template #append> -->
-            <template #suffix>
-              <el-button style="margin-right: -7px" icon="Search" size="small" class="search"
-                @click="search"></el-button>
+            <template #append>
+              <el-button
+                icon="Search"
+                size="small"
+                class="search"
+                @click="search"
+              ></el-button>
             </template>
           </el-input>
         </el-col>
@@ -65,14 +101,13 @@
 
 <script setup lang="ts">
 import TagsSelect from "@/components/TagsSelect.vue";
-import { defineProps, defineEmits, ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 
 const handleTagsChange = (tags: number[]) => {
-
-  console.log('父组件收到标签变化:', tags)
+  console.log("父组件收到标签变化:", tags);
   emits("tags", tags);
   // 执行其他操作
-}
+};
 const props = defineProps({
   sorted: {
     type: String,
@@ -104,7 +139,14 @@ const props = defineProps({
 
 const emits = defineEmits(["search", "sort", "tags"]);
 
-const input = ref("");
+const input = ref(props.searched);
+
+watch(
+  () => props.searched,
+  (val) => {
+    input.value = val;
+  }
+);
 
 const sorted_created_at = computed(() =>
   props.sorted.includes(props.sortByTime)
@@ -113,8 +155,8 @@ const sorted_name = computed(() => props.sorted.includes(props.sortByName));
 const sorted_up = computed(() => !props.sorted.startsWith("-"));
 
 const search = () => {
+  console.log("MrPPHeader: search triggered", input.value);
   emits("search", input.value);
-  input.value = "";
 };
 
 const sort = (value: string) => {

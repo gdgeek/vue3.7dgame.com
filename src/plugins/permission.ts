@@ -16,6 +16,7 @@ export function setupPermission() {
   // 白名单路由
   const whiteList = [
     "/site/login",
+    "/sso",
     "/site/register",
     "/site",
     "/web",
@@ -33,7 +34,6 @@ export function setupPermission() {
     "/web/index",
     "/site/register",
     "/site/logout",
-
     "/privacy-policy",
     "/404",
     "/401",

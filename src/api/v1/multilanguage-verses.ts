@@ -1,6 +1,5 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import path from "path-browserify";
 
 type MultilanguageVerses = {
   verse_id?: number;
@@ -16,18 +15,14 @@ type putData = {
 
 export const getlanguages = (id: number, expand = "languages") => {
   return request({
-    url: path.join(
-      "v1",
-      "verses",
-      `${id.toString()}${qs.stringify({ expand: expand }, true)}`
-    ),
+    url: `/verses/${id}${qs.stringify({ expand: expand }, true)}`,
     method: "get",
   });
 };
 
 export const postlanguages = (data: MultilanguageVerses) => {
   return request({
-    url: path.join("v1", "multilanguage-verses"),
+    url: `/multilanguage-verses`,
     method: "post",
     data,
   });
@@ -35,7 +30,7 @@ export const postlanguages = (data: MultilanguageVerses) => {
 
 export const putlanguages = (id: number, data: putData) => {
   return request({
-    url: path.join("v1", "multilanguage-verses", `${id.toString()}`),
+    url: `/multilanguage-verses/${id}`,
     method: "put",
     data,
   });
@@ -43,7 +38,7 @@ export const putlanguages = (id: number, data: putData) => {
 
 export const dellanguages = (id: number) => {
   return request({
-    url: path.join("v1", "multilanguage-verses", `${id.toString()}`),
+    url: `/multilanguage-verses/${id}`,
     method: "delete",
   });
 };

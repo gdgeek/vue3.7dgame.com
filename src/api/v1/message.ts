@@ -33,7 +33,7 @@ export type MessageType = {
 
 export const postMessageAPI = (data: any) => {
   return request<any>({
-    url: "v1/messages",
+    url: `/messages`,
     method: "post",
     data: data,
   });
@@ -41,10 +41,7 @@ export const postMessageAPI = (data: any) => {
 
 export const getMessage = (id: number) => {
   return request<MessageType>({
-    url:
-      "v1/messages/" +
-      id +
-      "?expand=messageTags,replies,author,like,likesCount",
+    url: `/messages/${id}?expand=messageTags,replies,author,like,likesCount`,
     method: "get",
   });
 };
@@ -55,15 +52,15 @@ export const getMessages = (
   page = 0,
   tag = NaN
 ) => {
-  let url = "v1/messages?expand=author,messageTags&sort=" + sort;
+  let url = `/messages?expand=author,messageTags&sort=${sort}`;
   if (!isNaN(tag)) {
-    url += "&tag=" + tag;
+    url += `&tag=${tag}`;
   }
   if (search) {
-    url += "&MessageSearch[title]=" + search;
+    url += `&MessageSearch[title]=${search}`;
   }
   if (page > 1) {
-    url += "&page=" + page;
+    url += `&page=${page}`;
   }
 
   return request<MessageType[]>({
@@ -78,16 +75,16 @@ export const getMessagesWithAuthor = (
   search = null,
   page = 0
 ) => {
-  let url = "v1/messages?expand=author,messageTags&sort=" + sort;
+  let url = `/messages?expand=author,messageTags&sort=${sort}`;
   if (!isNaN(author_id)) {
-    url += "&MessageSearch[author_id]=" + author_id;
+    url += `&MessageSearch[author_id]=${author_id}`;
   }
   if (search) {
-    url += "&MessageSearch[title]=" + search;
+    url += `&MessageSearch[title]=${search}`;
   }
 
   if (page > 1) {
-    url += "&page=" + page;
+    url += `&page=${page}`;
   }
 
   return request({
@@ -98,14 +95,14 @@ export const getMessagesWithAuthor = (
 
 export function putMessage(id: number, data: any) {
   return request({
-    url: "v1/messages/" + id,
+    url: `/messages/${id}`,
     method: "put",
     data: data,
   });
 }
 export function deleteMessage(id: number) {
   return request({
-    url: "v1/messages/" + id,
+    url: `/messages/${id}`,
     method: "delete",
   });
 }

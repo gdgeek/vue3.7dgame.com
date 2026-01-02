@@ -10,40 +10,83 @@
             </template>
             <div class="box-item" style="text-align: center">
               <template v-if="isVideo">
-                <video id="particle" controls style="height: 300px; width: auto">
+                <video
+                  id="particle"
+                  controls
+                  style="height: 300px; width: auto"
+                >
                   <source v-if="file !== null" id="src" :src="file" />
                 </video>
-                <video id="new_particle" style="height: 100%; width: auto" hidden @canplaythrough="dealWith"></video>
+                <video
+                  id="new_particle"
+                  style="height: 100%; width: auto"
+                  hidden
+                  @canplaythrough="dealWith"
+                ></video>
               </template>
               <template v-else-if="isAudio">
                 <section class="audio-bgc">
                   <br />
                   <div class="audio-box">
-                    <div class="audio-record" :class="{ 'audio-record-playfast': isPlay }" @click="handlePlayAudio"></div>
-                    <div class="audio-record-image" :class="{ 'audio-record-play': isPlay }" @click="handlePlayAudio"></div>
+                    <div
+                      class="audio-record"
+                      :class="{ 'audio-record-playfast': isPlay }"
+                      @click="handlePlayAudio"
+                    ></div>
+                    <div
+                      class="audio-record-image"
+                      :class="{ 'audio-record-play': isPlay }"
+                      @click="handlePlayAudio"
+                    ></div>
                   </div>
-                  <audio id="audio" controls style="width: 95%; height: 84px" :src="file || ''" preload="auto"
-                    @play="listenPlay" @pause="listenPause" @ended="listenEnd" @canplaythrough="dealWith"></audio>
+                  <audio
+                    id="audio"
+                    controls
+                    style="width: 95%; height: 84px"
+                    :src="file || ''"
+                    preload="auto"
+                    @play="listenPlay"
+                    @pause="listenPause"
+                    @ended="listenEnd"
+                    @canplaythrough="dealWith"
+                  ></audio>
                 </section>
               </template>
               <template v-else-if="isImage">
-                <img id="image" ref="image" v-loading="expire" :element-loading-text="t('particle.view.loadingText')"
-                  element-loading-background="rgba(255,255, 255, 0.3)" style="height: 300px; width: auto" :src="file || ''"
-                  fit="contain" @load="dealWith" />
+                <img
+                  id="image"
+                  ref="image"
+                  v-loading="expire"
+                  :element-loading-text="t('particle.view.loadingText')"
+                  element-loading-background="rgba(255,255, 255, 0.3)"
+                  style="height: 300px; width: auto"
+                  :src="file || ''"
+                  fit="contain"
+                  @load="dealWith"
+                />
               </template>
               <template v-else>
-                <el-skeleton :rows="7" />
+                <el-skeleton :rows="7"></el-skeleton>
               </template>
             </div>
           </el-card>
           <br />
         </el-col>
         <el-col :sm="8">
-          <MrppInfo v-if="particleData" :title="$t('particle.view.info.title')" titleSuffix=" :" :tableData="tableData"
-            :itemLabel="$t('particle.view.info.label1')" :textLabel="$t('particle.view.info.label2')"
-            :downloadText="$t('particle.view.info.download')" :renameText="$t('particle.view.info.name')"
-            :deleteText="$t('particle.view.info.delete')" @download="downloadParticle" @rename="namedWindow"
-            @delete="deleteWindow" />
+          <MrppInfo
+            v-if="particleData"
+            :title="$t('particle.view.info.title')"
+            titleSuffix=" :"
+            :tableData="tableData"
+            :itemLabel="$t('particle.view.info.label1')"
+            :textLabel="$t('particle.view.info.label2')"
+            :downloadText="$t('particle.view.info.download')"
+            :renameText="$t('particle.view.info.name')"
+            :deleteText="$t('particle.view.info.delete')"
+            @download="downloadParticle"
+            @rename="namedWindow"
+            @delete="deleteWindow"
+          ></MrppInfo>
           <br />
         </el-col>
       </el-row>
@@ -53,7 +96,11 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import { getParticle, putParticle, deleteParticle } from "@/api/v1/resources/index";
+import {
+  getParticle,
+  putParticle,
+  deleteParticle,
+} from "@/api/v1/resources/index";
 import { postFile } from "@/api/v1/files";
 import { UploadFileType } from "@/api/user/model";
 import { printVector2 } from "@/assets/js/helper";
@@ -64,7 +111,7 @@ import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import MrppInfo from "@/components/MrPP/MrppInfo/index.vue";
 import { downloadResource } from "@/utils/downloadHelper";
 
-const route = useRoute(); 
+const route = useRoute();
 const router = useRouter();
 const store = useFileStore().store;
 
@@ -103,9 +150,15 @@ const handlePlayAudio = () => {
   }
   isPlay.value = !isPlay.value;
 };
-const listenPlay = () => { isPlay.value = true; };
-const listenPause = () => { isPlay.value = false; };
-const listenEnd = () => { isPlay.value = false; };
+const listenPlay = () => {
+  isPlay.value = true;
+};
+const listenPause = () => {
+  isPlay.value = false;
+};
+const listenEnd = () => {
+  isPlay.value = false;
+};
 
 onMounted(async () => {
   expire.value = true;
@@ -119,21 +172,39 @@ onMounted(async () => {
 });
 
 // 处理三种类型的 setup
-const setupVideo = async (video: HTMLVideoElement, size: { x: number; y: number }) => {
+const setupVideo = async (
+  video: HTMLVideoElement,
+  size: { x: number; y: number }
+) => {
   if (size.x !== 0) {
     const length = video.duration;
     const info = JSON.stringify({ size, length });
     const file = await thumbnailVideo(video, size.x * 0.5, size.y * 0.5);
     const md5 = await store.fileMD5(file);
     const handler = await store.publicHandler();
-    const has = await store.fileHas(md5, file.type.split("/").pop()!, handler, "screenshot/particle");
+    const has = await store.fileHas(
+      md5,
+      file.type.split("/").pop()!,
+      handler,
+      "screenshot/particle"
+    );
     if (!has) {
-      await store.fileUpload(md5, file.type.split("/").pop()!, file, () => {}, handler, "screenshot/particle");
+      await store.fileUpload(
+        md5,
+        file.type.split("/").pop()!,
+        file,
+        () => {},
+        handler,
+        "screenshot/particle"
+      );
     }
     await save(md5, file.type.split("/").pop()!, info, file, handler);
   }
 };
-const setupImage = async (img: HTMLImageElement, size: { x: number; y: number }) => {
+const setupImage = async (
+  img: HTMLImageElement,
+  size: { x: number; y: number }
+) => {
   const info = JSON.stringify({ size });
   if (size.x <= 1024) {
     const picture = { image_id: particleData.value!.file.id, info };
@@ -146,9 +217,21 @@ const setupImage = async (img: HTMLImageElement, size: { x: number; y: number })
   const file = await thumbnailImage(img, 512, size.y * (512 / size.x));
   const md5 = await store.fileMD5(file);
   const handler = await store.publicHandler();
-  const has = await store.fileHas(md5, file.type.split("/").pop()!, handler, "screenshot/particle");
+  const has = await store.fileHas(
+    md5,
+    file.type.split("/").pop()!,
+    handler,
+    "screenshot/particle"
+  );
   if (!has) {
-    await store.fileUpload(md5, file.type.split("/").pop()!, file, () => {}, handler, "screenshot/particle");
+    await store.fileUpload(
+      md5,
+      file.type.split("/").pop()!,
+      file,
+      () => {},
+      handler,
+      "screenshot/particle"
+    );
   }
   await save(md5, file.type.split("/").pop()!, info, file, handler);
 };
@@ -159,9 +242,21 @@ const setupAudio = async (audio: HTMLAudioElement) => {
   const file = await thumbnailAudio(size.x * 0.5, size.y * 0.5);
   const md5 = await store.fileMD5(file);
   const handler = await store.publicHandler();
-  const has = await store.fileHas(md5, file.type.split("/").pop()!, handler, "screenshot/particle");
+  const has = await store.fileHas(
+    md5,
+    file.type.split("/").pop()!,
+    handler,
+    "screenshot/particle"
+  );
   if (!has) {
-    await store.fileUpload(md5, file.type.split("/").pop()!, file, () => {}, handler, "screenshot/particle");
+    await store.fileUpload(
+      md5,
+      file.type.split("/").pop()!,
+      file,
+      () => {},
+      handler,
+      "screenshot/particle"
+    );
   }
   await save(md5, file.type.split("/").pop()!, info, file, handler);
 };
@@ -182,7 +277,10 @@ const thumbnailVideo = (
       ctx.drawImage(video, 0, 0, width, height);
       canvas.toBlob((blob) => {
         if (blob) {
-          const file = new File([blob], "thumbnail.jpg", { type: imageType, lastModified: new Date().getTime() });
+          const file = new File([blob], "thumbnail.jpg", {
+            type: imageType,
+            lastModified: new Date().getTime(),
+          });
           resolve(file);
         } else {
           reject("Failed to create blob");
@@ -213,10 +311,7 @@ const thumbnailImage = (
     }
   });
 };
-const thumbnailAudio = (
-  width: number,
-  height: number
-): Promise<File> => {
+const thumbnailAudio = (width: number, height: number): Promise<File> => {
   return new Promise((resolve) => {
     const imageType = "image/jpeg";
     const canvas = document.createElement("canvas");
@@ -243,7 +338,9 @@ const dealWith = async () => {
   if (!prepare.value) {
     if (isVideo.value) {
       const particle = document.getElementById("particle") as HTMLVideoElement;
-      const new_particle = document.getElementById("new_particle") as HTMLVideoElement;
+      const new_particle = document.getElementById(
+        "new_particle"
+      ) as HTMLVideoElement;
       if (particle) {
         const size = { x: particle.videoWidth, y: particle.videoHeight };
         await setupVideo(new_particle, size);
@@ -270,19 +367,46 @@ const tableData = computed(() => {
   if (particleData.value && prepare.value) {
     const base = [
       { item: t("particle.view.info.item1"), text: particleData.value.name },
-      { item: t("particle.view.info.item2"), text: particleData.value.author?.username || particleData.value.author?.nickname },
-      { item: t("particle.view.info.item3"), text: convertToLocalTime(particleData.value.created_at) },
-      { item: t("particle.view.info.item4"), text: formatFileSize(particleData.value.file.size) },
+      {
+        item: t("particle.view.info.item2"),
+        text:
+          particleData.value.author?.username ||
+          particleData.value.author?.nickname,
+      },
+      {
+        item: t("particle.view.info.item3"),
+        text: convertToLocalTime(particleData.value.created_at),
+      },
+      {
+        item: t("particle.view.info.item4"),
+        text: formatFileSize(particleData.value.file.size),
+      },
     ];
     let info: any = {};
-    try { info = JSON.parse(particleData.value.info || '{}'); } catch {}
+    try {
+      info = JSON.parse(particleData.value.info || "{}");
+    } catch {}
     if (isVideo.value) {
-      base.push({ item: t("particle.view.info.item5"), text: info?.size ? printVector2(info.size) : '-' });
-      base.push({ item: t('particle.view.info.item6'), text: typeof info?.length === 'number' ? `${info.length.toFixed(2)}s` : '-' });
+      base.push({
+        item: t("particle.view.info.item5"),
+        text: info?.size ? printVector2(info.size) : "-",
+      });
+      base.push({
+        item: t("particle.view.info.item6"),
+        text:
+          typeof info?.length === "number" ? `${info.length.toFixed(2)}s` : "-",
+      });
     } else if (isImage.value) {
-      base.push({ item: t("particle.view.info.item5"), text: info?.size ? printVector2(info.size) : '-' });
+      base.push({
+        item: t("particle.view.info.item5"),
+        text: info?.size ? printVector2(info.size) : "-",
+      });
     } else if (isAudio.value) {
-      base.push({ item: t('particle.view.info.item6'), text: typeof info?.length === 'number' ? `${info.length.toFixed(2)}s` : '-' });
+      base.push({
+        item: t("particle.view.info.item6"),
+        text:
+          typeof info?.length === "number" ? `${info.length.toFixed(2)}s` : "-",
+      });
     }
     return base;
   }
@@ -292,16 +416,17 @@ const tableData = computed(() => {
 const downloadParticle = async () => {
   if (!particleData.value) return;
 
-  const fileName = particleData.value.file.filename || '';
-  const fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase() || '.mp4';
+  const fileName = particleData.value.file.filename || "";
+  const fileExt =
+    fileName.substring(fileName.lastIndexOf(".")).toLowerCase() || ".mp4";
   await downloadResource(
     {
-      name: particleData.value.name || 'particle',
-      file: particleData.value.file
+      name: particleData.value.name || "particle",
+      file: particleData.value.file,
     },
     fileExt,
     t,
-    'particle.view.download'
+    "particle.view.download"
   );
 };
 
@@ -309,7 +434,9 @@ const init = () => {
   const particle = document.getElementById("particle") as HTMLVideoElement;
   const source = document.getElementById("src") as HTMLSourceElement;
 
-  const new_particle = document.getElementById("new_particle") as HTMLVideoElement;
+  const new_particle = document.getElementById(
+    "new_particle"
+  ) as HTMLVideoElement;
   new_particle.src = source.src + "?t=" + new Date();
   new_particle.crossOrigin = "anonymous";
   new_particle.currentTime = 0.000001;
@@ -329,7 +456,6 @@ const save = async (
   file: File,
   handler: any
 ) => {
-
   extension = extension.startsWith(".") ? extension : `.${extension}`;
   const data: UploadFileType = {
     md5,
@@ -340,7 +466,7 @@ const save = async (
   try {
     const response1 = await postFile(data);
     const particle = { image_id: response1.data.id, info };
-      const response2 = await putParticle(particleData.value!.id, particle);
+    const response2 = await putParticle(particleData.value!.id, particle);
 
     particleData.value!.image_id = response2.data.image_id;
     particleData.value!.info = response2.data.info;
@@ -410,7 +536,11 @@ const named = async (id: number, name: string) => {
   width: 100%;
   height: 350px;
   background: rgb(238, 174, 202);
-  background: radial-gradient(circle, rgba(238, 174, 202, 1) 0%, rgb(169, 196, 228) 100%);
+  background: radial-gradient(
+    circle,
+    rgba(238, 174, 202, 1) 0%,
+    rgb(169, 196, 228) 100%
+  );
 }
 .audio-box {
   position: relative;
@@ -452,11 +582,19 @@ const named = async (id: number, name: string) => {
   animation: recordfast 0.16s infinite linear;
 }
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 @keyframes recordfast {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(1.1deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(1.1deg);
+  }
 }
 </style>

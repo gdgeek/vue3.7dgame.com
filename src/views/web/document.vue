@@ -1,20 +1,18 @@
 <template>
-  <div style="height: 50px;">
-
-
-  </div>
+  <div style="height: 50px"></div>
   <el-card shadow="never" class="back-button-container">
-
     <el-card id="news-detail-content">
-
-
-      <Document :post-id="id" :category="true" category-path="/web/category"></Document>
+      <Document
+        :post-id="id"
+        :category="true"
+        category-path="/web/category"
+      ></Document>
     </el-card>
   </el-card>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Document from "@/components/Home/Document.vue";
 
@@ -27,17 +25,18 @@ onMounted(() => {
 
   // 自动滚动到内容区域
   setTimeout(() => {
-    const element = document.getElementById('news-detail-content');
+    const element = document.getElementById("news-detail-content");
     if (element) {
       // 计算滚动位置
       const navbarHeight = 64;
-      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      const elementPosition =
+        element.getBoundingClientRect().top + window.scrollY;
       const offsetPosition = elementPosition - navbarHeight;
 
       // 滚动到指定位置
       window.scrollTo({
         top: offsetPosition,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     }
   }, 300);

@@ -2,7 +2,12 @@
   <div class="hero-section" :class="{ 'dark-theme': isDark }">
     <div class="hero-background">
       <div class="particle-container">
-        <div v-for="n in 20" :key="n" class="particle" :style="getParticleStyle(n)"></div>
+        <div
+          v-for="n in 20"
+          :key="n"
+          class="particle"
+          :style="getParticleStyle(n)"
+        ></div>
       </div>
       <div class="overlay"></div>
     </div>
@@ -14,23 +19,33 @@
     <div class="hero-content">
       <div class="hero-text" data-aos="fade-up" data-aos-delay="200">
         <h1 class="hero-title">
-          <span class="gradient-text">不加班AR创造平台</span>
+          <span class="gradient-text">{{
+            domainStore.title || $t("web.hero.loading")
+          }}</span>
         </h1>
-        <p class="hero-subtitle">让每个人都可以快乐的创造世界！</p>
+        <p class="hero-subtitle">{{ domainStore.description }}</p>
         <div class="hero-cta">
-          <el-button type="primary" style="width:150px" size="large" @click="openLoginDialog">
-            开始创建
+          <el-button
+            type="primary"
+            style="width: 150px"
+            size="large"
+            @click="openLoginDialog"
+          >
+            {{ $t("web.hero.startCreating") }}
             <el-icon class="el-icon--right">
-              <ArrowRight />
+              <ArrowRight></ArrowRight>
             </el-icon>
           </el-button>
-          <el-button style="width:100px" size="large" @click="scrollToAuthorization">
-            授权
+          <el-button
+            style="width: 100px"
+            size="large"
+            @click="scrollToAuthorization"
+          >
+            {{ $t("web.hero.authorize") }}
             <el-icon class="el-icon--right">
-              <ArrowDown />
+              <ArrowDown></ArrowDown>
             </el-icon>
           </el-button>
-
         </div>
       </div>
 
@@ -38,36 +53,60 @@
         <!-- 3D展示区域 -->
         <div class="showcase-container">
           <!-- 主图片区域 -->
-          <img src="/media/bg/bujiaban.png" @click="openVideoDialog" alt="不加班AR创造平台" class="primary-image" />
+          <img
+            src="/media/bg/bujiaban.png"
+            @click="openVideoDialog"
+            :alt="domainStore.title"
+            class="primary-image"
+          />
 
           <!-- 悬浮元素容器 -->
           <div class="floating-elements">
             <!-- 产品合作伙伴 - Rokid -->
             <el-link class="floating-element partner-card" href="/web/buy">
-              <img src="/media/bg/rokid.webp" alt="Rokid合作伙伴" class="partner-logo" />
+              <img
+                src="/media/bg/rokid.webp"
+                alt="Rokid合作伙伴"
+                class="partner-logo"
+              />
               <div class="partner-info">
                 <span class="partner-name">Rokid</span>
-                <div class="partner-badge">官方合作伙伴</div>
+                <div class="partner-badge">
+                  {{ $t("web.hero.officialPartner") }}
+                </div>
               </div>
             </el-link>
 
             <el-link class="floating-element device-card" href="/web/buy">
-
-              <img src="/media/bg/rokid-lite.webp" alt="Rokid AR眼镜" class="device-image" />
+              <img
+                src="/media/bg/rokid-lite.webp"
+                alt="Rokid AR眼镜"
+                class="device-image"
+              />
               <div class="device-info">
                 <span class="device-name">Rokid AR</span>
-                <div class="device-badge">推荐设备</div>
+                <div class="device-badge">
+                  {{ $t("web.hero.recommendedDevice") }}
+                </div>
               </div>
             </el-link>
 
             <!-- 功能亮点卡片 -->
             <div class="floating-element feature-card" @click="test">
               <div class="feature-icon">
-                <img src="/media/icon/blockly_logo_only.png" alt="可视化编程" class="feature-img" />
+                <img
+                  src="/media/icon/blockly_logo_only.png"
+                  alt="可视化编程"
+                  class="feature-img"
+                />
               </div>
               <div class="feature-info">
-                <span class="feature-title">可视化编程</span>
-                <span class="feature-desc">快速构建AR应用</span>
+                <span class="feature-title">{{
+                  $t("web.hero.visualProgramming")
+                }}</span>
+                <span class="feature-desc">{{
+                  $t("web.hero.buildArApps")
+                }}</span>
               </div>
             </div>
           </div>
@@ -76,10 +115,10 @@
           <div class="play-button-container" @click="openVideoDialog">
             <div class="play-button">
               <el-icon class="play-icon">
-                <VideoPlay />
+                <VideoPlay></VideoPlay>
               </el-icon>
             </div>
-            <div class="play-label">观看演示</div>
+            <div class="play-label">{{ $t("web.hero.watchDemo") }}</div>
           </div>
 
           <!-- 3D效果装饰 -->
@@ -94,42 +133,52 @@
     </div>
 
     <div class="scroll-indicator" @click="scrollToFeatures">
-      <div class="scroll-text">向下滚动了解更多</div>
+      <div class="scroll-text">{{ $t("web.hero.scrollDown") }}</div>
       <div class="scroll-icon">
         <el-icon class="scroll-arrow">
-          <ArrowDown />
+          <ArrowDown></ArrowDown>
         </el-icon>
       </div>
     </div>
   </div>
 
   <!-- 视频弹窗 -->
-  <el-dialog v-model="videoDialogVisible" title="不加班AR创造平台介绍视频" width="70%" :before-close="handleCloseVideo"
-    destroy-on-close>
-    <Bilibili :bvid="bilibiliVideoId" :height="500" :autoplay="true" />
+  <el-dialog
+    v-model="videoDialogVisible"
+    :title="domainStore.title + ' ' + $t('web.hero.introVideo')"
+    width="70%"
+    :before-close="handleCloseVideo"
+    destroy-on-close
+  >
+    <Bilibili :bvid="bilibiliVideoId" :height="500" :autoplay="true"></Bilibili>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { useSettingsStore } from '@/store/modules/settings';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import { VideoPlay, ArrowDown, ArrowRight } from '@element-plus/icons-vue';
+import { ref, onMounted, onUnmounted, computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { useSettingsStore } from "@/store/modules/settings";
+import { useDomainStore } from "@/store/modules/domain";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { VideoPlay, ArrowDown, ArrowRight } from "@element-plus/icons-vue";
+
+const { t } = useI18n();
 
 // 获取主题设置
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.theme === 'dark');
+const domainStore = useDomainStore();
+const isDark = computed(() => settingsStore.theme === "dark");
 
-const emit = defineEmits(['openLogin']);
+const emit = defineEmits(["openLogin"]);
 const test = () => {
   alert("test");
-}
+};
 // 视频弹窗控制
 const videoDialogVisible = ref(false);
 
 // B站视频ID
-const bilibiliVideoId = ref('BV1j2dPYWEh1');
+const bilibiliVideoId = ref("BV1j2dPYWEh1");
 
 // 视差效果状态
 const mouseX = ref(0);
@@ -152,7 +201,7 @@ const getParticleStyle = (n: number) => {
   const size = Math.floor(Math.random() * 10) + 3;
   const posX = Math.random() * 100;
   const posY = Math.random() * 100;
-  const duration = (Math.random() * 20) + 10;
+  const duration = Math.random() * 20 + 10;
   const delay = Math.random() * 5;
 
   return {
@@ -161,7 +210,7 @@ const getParticleStyle = (n: number) => {
     left: `${posX}%`,
     top: `${posY}%`,
     animationDuration: `${duration}s`,
-    animationDelay: `${delay}s`
+    animationDelay: `${delay}s`,
   };
 };
 
@@ -176,37 +225,37 @@ const handleMouseMove = (e: MouseEvent) => {
 };
 
 const openLoginDialog = () => {
-  emit('openLogin');
+  emit("openLogin");
 };
 
 const scrollToFeatures = () => {
-  const newsSection = document.querySelector('.news-section');
+  const newsSection = document.querySelector(".news-section");
   if (newsSection) {
-    newsSection.scrollIntoView({ behavior: 'smooth' });
+    newsSection.scrollIntoView({ behavior: "smooth" });
   }
 };
 
 // 滚动到授权部分
 const scrollToAuthorization = () => {
-  const statsSection = document.querySelector('.stats-section');
+  const statsSection = document.querySelector(".stats-section");
   if (statsSection) {
-    statsSection.scrollIntoView({ behavior: 'smooth' });
+    statsSection.scrollIntoView({ behavior: "smooth" });
   }
 };
 
 onMounted(() => {
-  window.addEventListener('mousemove', handleMouseMove);
+  window.addEventListener("mousemove", handleMouseMove);
 
   // 初始化AOS动画库
   AOS.init({
     duration: 1000,
     once: false,
-    mirror: true
+    mirror: true,
   });
 });
 
 onUnmounted(() => {
-  window.removeEventListener('mousemove', handleMouseMove);
+  window.removeEventListener("mousemove", handleMouseMove);
 });
 </script>
 
@@ -336,7 +385,8 @@ onUnmounted(() => {
     position: relative;
     width: 100%;
     transform-style: preserve-3d;
-    transform: rotateY(calc(var(--mouse-x, 0) * 5deg)) rotateX(calc(var(--mouse-y, 0) * -5deg));
+    transform: rotateY(calc(var(--mouse-x, 0) * 5deg))
+      rotateX(calc(var(--mouse-y, 0) * -5deg));
     transition: transform 0.1s ease-out;
 
     &:hover {
@@ -378,10 +428,14 @@ onUnmounted(() => {
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(15px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15), 0 3px 10px rgba(0, 0, 0, 0.1);
+    box-shadow:
+      0 15px 35px rgba(0, 0, 0, 0.15),
+      0 3px 10px rgba(0, 0, 0, 0.1);
     padding: 12px;
     transform-style: preserve-3d;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
     overflow: hidden;
 
     &:hover {
@@ -390,13 +444,17 @@ onUnmounted(() => {
     }
 
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 50%);
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 255, 255, 0) 50%
+      );
       z-index: -1;
     }
   }
@@ -564,14 +622,16 @@ onUnmounted(() => {
     justify-content: center;
 
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       width: 100%;
       height: 100%;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.3);
       z-index: -1;
-      transition: transform 0.5s ease, opacity 0.5s ease;
+      transition:
+        transform 0.5s ease,
+        opacity 0.5s ease;
       animation: pulse-ring 2s infinite;
     }
 
@@ -616,7 +676,11 @@ onUnmounted(() => {
     height: 300px;
     top: -100px;
     right: -100px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%);
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.8) 0%,
+      rgba(255, 255, 255, 0) 70%
+    );
     animation: pulse-slow 10s infinite;
   }
 
@@ -625,13 +689,22 @@ onUnmounted(() => {
     height: 200px;
     bottom: -50px;
     left: -70px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%);
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.8) 0%,
+      rgba(255, 255, 255, 0) 70%
+    );
     animation: pulse-slow 8s infinite 1s;
   }
 
   .deco-line {
     position: absolute;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
     height: 1px;
     width: 100%;
     opacity: 0.5;
@@ -651,7 +724,6 @@ onUnmounted(() => {
 }
 
 @keyframes float-card {
-
   0%,
   100% {
     transform: translateY(0);
@@ -680,7 +752,6 @@ onUnmounted(() => {
 }
 
 @keyframes pulse-slow {
-
   0%,
   100% {
     transform: scale(1);

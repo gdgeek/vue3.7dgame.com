@@ -8,7 +8,13 @@
       <router-link v-else class="wh-full flex-center" to="/">
         <img v-if="settingsStore.sidebarLogo" :src="logo" class="logo-image" />
         <!-- <span class="logo-title"> {{ defaultSettings.title }}</span> -->
-        <span class="logo-title"> {{ $t("login.title") }}</span>
+        <el-tooltip
+          :content="domainStore.title"
+          placement="bottom"
+          :show-after="300"
+        >
+          <span class="logo-title">{{ domainStore.title }}</span>
+        </el-tooltip>
       </router-link>
     </transition>
   </div>
@@ -17,8 +23,10 @@
 <script lang="ts" setup>
 import defaultSettings from "@/settings";
 import { useSettingsStore } from "@/store";
+import { useDomainStore } from "@/store/modules/domain";
 
 const settingsStore = useSettingsStore();
+const domainStore = useDomainStore();
 
 defineProps({
   collapse: {
@@ -44,12 +52,14 @@ const logo = ref(
   }
 
   .logo-title {
-    flex-shrink: 0;
-    /* 防止容器在空间不足时缩小 */
     margin-left: 10px;
     font-size: 14px;
     font-weight: 400;
     color: white;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
