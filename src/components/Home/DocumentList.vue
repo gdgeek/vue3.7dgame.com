@@ -34,11 +34,9 @@
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
-import moment from "moment";
+import { formatDateTime } from "@/utils/dayjs";
 import { Posts, getCategory } from "@/api/home/wordpress";
 import DOMPurify from "dompurify";
-
-moment.locale("zh-cn");
 
 const router = useRouter();
 
@@ -112,7 +110,7 @@ onMounted(() => {
 });
 
 // 计算日期时间
-const dateTime = (date: Date) => moment(date).format("YYYY-MM-DD HH:mm:ss");
+const dateTime = (date: Date) => formatDateTime(date);
 
 // 处理分页变化
 const handleCurrentChange = (page: number) => {

@@ -48,8 +48,7 @@
                     {{ $t("verse.view.reply.publish") }}
                     <time class="time">{{ reply.updated_at }}</time>
                     &nbsp; &nbsp;
-                    <el-button v-if="canDelete(reply)" size="small" link 
-                      @click="deletedWindow(reply.id)"><el-icon>
+                    <el-button v-if="canDelete(reply)" size="small" link @click="deletedWindow(reply.id)"><el-icon>
                         <Delete></Delete>
                       </el-icon></el-button>
                   </div>
@@ -70,13 +69,10 @@
 <script setup lang="ts">
 import { VueEditor } from "vue3-editor";
 import { getReplies, postReply, deleteReply, ReplyType } from "@/api/v1/reply";
-import moment from "moment";
 import { useTagsStore } from "@/store/modules/tags";
 import { useUserStore } from "@/store/modules/user";
 import { FormInstance } from "element-plus";
 import DOMPurify from "dompurify";
-
-moment.locale("zh-cn");
 
 const props = defineProps<{ messageId: number | undefined }>();
 

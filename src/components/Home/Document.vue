@@ -30,11 +30,9 @@
 </template>
 
 <script setup lang="ts">
-import moment from "moment";
+import { formatDateTime } from "@/utils/dayjs";
 import { Article } from "@/api/home/wordpress";
 import DOMPurify from "dompurify";
-
-moment.locale("zh-cn");
 
 interface Item {
   id: number;
@@ -71,7 +69,7 @@ onMounted(async () => {
 });
 
 // 格式化日期
-const dateTime = (date: string) => moment(date).format("YYYY-MM-DD HH:mm:ss");
+const dateTime = (date: string) => formatDateTime(date);
 
 const sanitizedTitle = computed(() => {
   return data.value ? DOMPurify.sanitize(data.value.title.rendered) : "";

@@ -53,19 +53,22 @@ module.exports = {
     ],
 
     "@typescript-eslint/no-empty-function": "off", // 关闭空方法检查
-    "@typescript-eslint/no-explicit-any": "off", // 关闭any类型的警告
+    // 逐步启用类型检查规则（先警告，后续可改为 error）
+    "@typescript-eslint/no-explicit-any": "warn", // 警告 any 类型
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/ban-types": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-var-requires": "off",
-    "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/no-use-before-define": "off",
-    "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/no-unused-vars": "off",
+    // 警告未使用的变量（忽略以 _ 开头的变量）
+    "@typescript-eslint/no-unused-vars": ["warn", {
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^_",
+      "caughtErrorsIgnorePattern": "^_"
+    }],
 
     "prettier/prettier": [
       "error",

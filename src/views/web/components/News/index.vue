@@ -125,7 +125,7 @@ import { useI18n } from "vue-i18n";
 import { useSettingsStore } from "@/store/modules/settings";
 import { Posts, Article, getCategory } from "@/api/home/wordpress";
 import DOMPurify from "dompurify";
-import moment from "moment";
+import { dayjs, formatDate as formatDateUtil } from "@/utils/dayjs";
 import { ElMessage } from 'element-plus';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -286,14 +286,14 @@ const handlePageChange = (page: number) => {
 
 // 格式化日期
 const formatDate = (dateString: string) => {
-  return moment(dateString).format('YYYY-MM-DD');
+  return formatDateUtil(dateString);
 };
 
 // 格式化相对时间
 const formatRelativeTime = (dateString: string) => {
-  const date = moment(dateString);
-  const now = moment();
-  const diffDays = now.diff(date, 'days');
+  const date = dayjs(dateString);
+  const now = dayjs();
+  const diffDays = now.diff(date, 'day');
 
   if (diffDays < 1) {
     return t('web.news.today');
@@ -316,9 +316,9 @@ const isNewest = (dateString: string, index?: number) => {
   }
 
   // 向后兼容：如果没有提供索引，仍然使用日期判断
-  const articleDate = moment(dateString);
-  const now = moment();
-  return now.diff(articleDate, 'days') < 7; // 7天内发布的认为是最新
+  const articleDate = dayjs(dateString);
+  const now = dayjs();
+  return now.diff(articleDate, 'day') < 7; // 7天内发布的认为是最新
 };
 
 // 获取时间线颜色
@@ -328,9 +328,9 @@ const getTimelineColor = (dateString: string) => {
     return '#00dbde';
   }
   // 使用渐变灰色来表示时间流逝
-  const articleDate = moment(dateString);
-  const now = moment();
-  const diffDays = now.diff(articleDate, 'days');
+  const articleDate = dayjs(dateString);
+  const now = dayjs();
+  const diffDays = now.diff(articleDate, 'day');
 
   if (diffDays < 30) {
     return '#409EFF';

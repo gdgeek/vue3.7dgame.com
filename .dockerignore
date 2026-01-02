@@ -1,0 +1,60 @@
+# ===========================================
+# Docker 构建忽略文件
+# ===========================================
+
+# 依赖目录
+node_modules
+
+# 本地构建产物
+dist
+dist-ssr
+
+# Git
+.git
+.gitignore
+
+# IDE 和编辑器
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# 本地环境文件
+*.local
+.env.development
+.env.local
+
+# 日志和临时文件
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.lh
+.vite
+temp
+
+# 测试
+test
+*.test.ts
+*.spec.ts
+coverage
+
+# 文档
+*.md
+!README.md
+licenses
+
+# macOS
+.DS_Store
+
+# 其他 Docker 相关目录
+docker
+
+# 统计和分析
+stats.html
+.history
+
+# Python 临时文件
+*.py
+__pycache__
