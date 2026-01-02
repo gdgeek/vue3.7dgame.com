@@ -10,13 +10,7 @@
               <span v-if="voxelData">{{ voxelData.name }}</span>
             </template>
             <div v-loading="false" class="box-item">
-              <Voxel
-                v-if="voxelData"
-                ref="three"
-                :file="voxelData.file"
-                @loaded="loaded"
-                @progress="progress"
-              >
+              <Voxel v-if="voxelData" ref="three" :file="voxelData.file" @loaded="loaded" @progress="progress">
               </Voxel>
             </div>
             <el-progress :percentage="percentage"></el-progress>
@@ -34,20 +28,11 @@
 
         <!-- 体素模型信息和操作区域 -->
         <el-col :sm="8">
-          <MrppInfo
-            v-if="voxelData"
-            :title="$t('voxel.view.info.title')"
-            titleSuffix=" :"
-            :tableData="tableData"
-            :itemLabel="$t('voxel.view.info.label1')"
-            :textLabel="$t('voxel.view.info.label2')"
-            :downloadText="$t('voxel.view.info.download')"
-            :renameText="$t('voxel.view.info.name')"
-            :deleteText="$t('voxel.view.info.delete')"
-            @download="downloadVoxel"
-            @rename="namedWindow"
-            @delete="deleteWindow"
-          >
+          <MrppInfo v-if="voxelData" :title="$t('voxel.view.info.title')" titleSuffix=" :" :tableData="tableData"
+            :itemLabel="$t('voxel.view.info.label1')" :textLabel="$t('voxel.view.info.label2')"
+            :downloadText="$t('voxel.view.info.download')" :renameText="$t('voxel.view.info.name')"
+            :deleteText="$t('voxel.view.info.delete')" @download="downloadVoxel" @rename="namedWindow"
+            @delete="deleteWindow">
           </MrppInfo>
           <br />
         </el-col>
@@ -203,6 +188,8 @@ const progress = (progress: number) => {
 
 // 基于体素创建虚拟世界
 const createVerse = async () => {
+  if (!voxelData.value) return;
+  const voxel = voxelData.value;
   try {
     const { value } = await ElMessageBox.prompt(
       t("voxel.view.prompt.message1"),
@@ -210,7 +197,7 @@ const createVerse = async () => {
       {
         confirmButtonText: t("voxel.view.prompt.confirm"),
         cancelButtonText: t("voxel.view.prompt.cancel"),
-        inputValue: voxelData.value.name,
+        inputValue: voxel.name,
         inputErrorMessage: t("voxel.view.prompt.inputError"),
       }
     );
@@ -219,10 +206,16 @@ const createVerse = async () => {
       loading.value = true;
       try {
         // 调用API创建虚拟世界
+        const resource = {
+          id: Number(voxel.id),
+          name: voxel.name,
+          image_id: voxel.image_id ?? 0,
+          info: voxel.info,
+        };
         const result = await createVerseFromResource(
           "Voxel",
           value,
-          voxelData.value
+          resource
         );
 
         ElMessage.success(t("voxel.view.prompt.success") + value);
@@ -248,6 +241,8 @@ const createVerse = async () => {
 
 // 删除体素确认对话框
 const deleteWindow = async () => {
+  if (!voxelData.value) return;
+  const voxel = voxelData.value;
   try {
     await ElMessageBox.confirm(
       t("voxel.view.confirm.message1"),
@@ -261,7 +256,7 @@ const deleteWindow = async () => {
     );
 
     // 执行删除操作
-    await deleteVoxel(voxelData.value.id);
+    await deleteVoxel(voxel.id);
     ElMessage.success(t("voxel.view.confirm.success"));
     // 删除成功后返回体素列表页
     router.push("/resource/voxel/index");
@@ -382,7 +377,7 @@ const loaded = async (info: VoxelInfo) => {
         md5,
         extension,
         file,
-        () => {},
+        () => { },
         handler,
         "screenshot/voxel"
       );

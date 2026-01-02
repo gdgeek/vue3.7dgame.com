@@ -1,8 +1,21 @@
 <template>
-  <el-dialog :model-value="modelValue" :title="dialogTitle" width="90%" append-to-body destroy-on-close
-    @update:model-value="$emit('update:modelValue', $event)">
-    <CardListPage ref="cardListPageRef" :fetch-data="fetchClasses" wrapper-class="class-management-dialog"
-      :show-empty="true" :auto-fill="true" :min-card-width="280" @refresh="handleRefresh">
+  <el-dialog
+    :model-value="modelValue"
+    :title="dialogTitle"
+    width="90%"
+    append-to-body
+    destroy-on-close
+    @update:model-value="$emit('update:modelValue', $event)"
+  >
+    <CardListPage
+      ref="cardListPageRef"
+      :fetch-data="fetchClasses"
+      wrapper-class="class-management-dialog"
+      :show-empty="true"
+      :auto-fill="true"
+      :min-card-width="280"
+      @refresh="handleRefresh"
+    >
       <template #header-actions>
         <el-button-group :inline="true">
           <el-button size="small" type="primary" @click="handleCreate">
@@ -10,7 +23,7 @@
             &nbsp;
             <span class="hidden-sm-and-down">{{
               $t("manager.createClass")
-              }}</span>
+            }}</span>
           </el-button>
         </el-button-group>
       </template>
@@ -18,18 +31,27 @@
       <!-- School Info Card (before cards) -->
       <template #before-cards>
         <div v-if="school" style="margin-bottom: 20px">
-          <el-card shadow="hover" :body-style="{
-            padding: '20px',
-            display: 'flex',
-            alignItems: 'center',
-          }">
-            <div style="
+          <el-card
+            shadow="hover"
+            :body-style="{
+              padding: '20px',
+              display: 'flex',
+              alignItems: 'center',
+            }"
+          >
+            <div
+              style="
                 width: 100px;
                 height: 100px;
                 margin-right: 20px;
                 flex-shrink: 0;
-              ">
-              <Id2Image :id="school.id" :image="school.image?.url || null" :lazy="false"></Id2Image>
+              "
+            >
+              <Id2Image
+                :id="school.id"
+                :image="school.image?.url || null"
+                :lazy="false"
+              ></Id2Image>
             </div>
             <div style="flex-grow: 1">
               <h2 style="margin: 0 0 10px 0">{{ school.name }}</h2>
@@ -56,9 +78,19 @@
       </template>
 
       <template #card="{ item }">
-        <MrPPCard :item="item" type="班级" color="#f39c12" @named="handleEdit" @deleted="handleDeleteWithCallback">
+        <MrPPCard
+          :item="item"
+          type="班级"
+          color="#f39c12"
+          @named="handleEdit"
+          @deleted="handleDeleteWithCallback"
+        >
           <div style="padding: 10px; font-size: 12px; color: #666">
-            <div v-for="teacher in (item.eduTeachers || []).slice(0, 3)" :key="teacher.id" style="margin-bottom: 2px">
+            <div
+              v-for="teacher in (item.eduTeachers || []).slice(0, 3)"
+              :key="teacher.id"
+              style="margin-bottom: 2px"
+            >
               {{ teacher.user.nickname || teacher.user.username }}
             </div>
             <div v-if="(item.eduTeachers || []).length > 3" style="color: #999">
@@ -66,7 +98,11 @@
             </div>
           </div>
           <template #enter>
-            <el-button type="primary" size="small" @click="handleViewTeachers(item)">
+            <el-button
+              type="primary"
+              size="small"
+              @click="handleViewTeachers(item)"
+            >
               {{ $t("manager.class.teacher") }}
             </el-button>
           </template>
@@ -75,29 +111,46 @@
 
       <template #dialogs>
         <!-- Edit Class Dialog -->
-        <el-dialog v-model="editDialogVisible" :title="$t('manager.class.dialog.editTitle')" width="500px"
-          :close-on-click-modal="false" append-to-body>
+        <el-dialog
+          v-model="editDialogVisible"
+          :title="$t('manager.class.dialog.editTitle')"
+          width="500px"
+          :close-on-click-modal="false"
+          append-to-body
+        >
           <el-form :model="editForm" label-width="120px">
             <el-form-item :label="$t('manager.class.form.name')">
-              <el-input v-model="editForm.name" :placeholder="$t('manager.class.form.namePlaceholder')"></el-input>
+              <el-input
+                v-model="editForm.name"
+                :placeholder="$t('manager.class.form.namePlaceholder')"
+              ></el-input>
             </el-form-item>
             <el-form-item :label="$t('manager.class.form.image')">
-              <ImageSelector :item-id="editForm.id" :image-url="editForm.imageUrl" @image-selected="handleImageSelected"
-                @image-upload-success="handleImageSelected"></ImageSelector>
+              <ImageSelector
+                :item-id="editForm.id"
+                :image-url="editForm.imageUrl"
+                @image-selected="handleImageSelected"
+                @image-upload-success="handleImageSelected"
+              ></ImageSelector>
             </el-form-item>
           </el-form>
           <template #footer>
             <el-button @click="editDialogVisible = false">{{
               $t("manager.form.cancel")
-              }}</el-button>
+            }}</el-button>
             <el-button type="primary" @click="handleSaveEdit">{{
               $t("manager.form.submit")
-              }}</el-button>
+            }}</el-button>
           </template>
         </el-dialog>
 
         <!-- Teacher List Dialog -->
-        <el-dialog v-model="teacherDialogVisible" :title="$t('manager.class.teacherList')" width="600px" append-to-body>
+        <el-dialog
+          v-model="teacherDialogVisible"
+          :title="$t('manager.class.teacherList')"
+          width="600px"
+          append-to-body
+        >
           <div style="margin-bottom: 10px">
             <el-button type="primary" size="small" @click="handleAddTeacher">
               <el-icon>
@@ -107,11 +160,22 @@
             </el-button>
           </div>
           <el-table :data="teachers" v-loading="teachersLoading">
-            <el-table-column prop="user.username" :label="$t('common.username')"></el-table-column>
-            <el-table-column prop="user.nickname" :label="$t('common.nickname')"></el-table-column>
+            <el-table-column
+              prop="user.username"
+              :label="$t('common.username')"
+            ></el-table-column>
+            <el-table-column
+              prop="user.nickname"
+              :label="$t('common.nickname')"
+            ></el-table-column>
             <el-table-column :label="$t('meta.actions')" width="100">
               <template #default="{ row }">
-                <el-button type="danger" size="small" link @click="handleRemoveTeacher(row)">
+                <el-button
+                  type="danger"
+                  size="small"
+                  link
+                  @click="handleRemoveTeacher(row)"
+                >
                   {{ $t("manager.list.remove") }}
                 </el-button>
               </template>
@@ -120,12 +184,17 @@
           <template #footer>
             <el-button @click="teacherDialogVisible = false">{{
               $t("manager.form.cancel")
-              }}</el-button>
+            }}</el-button>
           </template>
         </el-dialog>
 
         <!-- Student List Dialog -->
-        <el-dialog v-model="studentDialogVisible" :title="$t('manager.class.studentList')" width="600px" append-to-body>
+        <el-dialog
+          v-model="studentDialogVisible"
+          :title="$t('manager.class.studentList')"
+          width="600px"
+          append-to-body
+        >
           <div style="margin-bottom: 10px">
             <el-button type="primary" size="small" @click="handleAddStudent">
               <el-icon>
@@ -135,11 +204,22 @@
             </el-button>
           </div>
           <el-table :data="students" v-loading="studentsLoading">
-            <el-table-column prop="user.username" :label="$t('common.username')"></el-table-column>
-            <el-table-column prop="user.nickname" :label="$t('common.nickname')"></el-table-column>
+            <el-table-column
+              prop="user.username"
+              :label="$t('common.username')"
+            ></el-table-column>
+            <el-table-column
+              prop="user.nickname"
+              :label="$t('common.nickname')"
+            ></el-table-column>
             <el-table-column :label="$t('meta.actions')" width="100">
               <template #default="{ row }">
-                <el-button type="danger" size="small" link @click="handleRemoveStudent(row)">
+                <el-button
+                  type="danger"
+                  size="small"
+                  link
+                  @click="handleRemoveStudent(row)"
+                >
                   {{ $t("manager.list.remove") }}
                 </el-button>
               </template>
@@ -148,12 +228,16 @@
           <template #footer>
             <el-button @click="studentDialogVisible = false">{{
               $t("manager.form.cancel")
-              }}</el-button>
+            }}</el-button>
           </template>
         </el-dialog>
 
         <!-- User Selection Dialog -->
-        <UserSelector v-model="userDialogVisible" :title="userDialogTitle" @select="handleSelectUser"></UserSelector>
+        <UserSelector
+          v-model="userDialogVisible"
+          :title="userDialogTitle"
+          @select="handleSelectUser"
+        ></UserSelector>
       </template>
     </CardListPage>
   </el-dialog>
@@ -256,7 +340,7 @@ const fetchClasses = async (params: FetchParams): Promise<FetchResponse> => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const handleRefresh = (_data: unknown[]) => { };
+const handleRefresh = (_data: unknown[]) => {};
 
 const refreshList = () => {
   cardListPageRef.value?.refresh();

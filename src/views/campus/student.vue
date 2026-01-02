@@ -3,12 +3,20 @@
     <div v-loading="loading">
       <!-- Has Classes: Show Class Headers -->
       <div v-if="!loading && studentRecords.length > 0" class="class-list">
-        <div v-for="record in studentRecords" :key="record.id" class="class-wrapper">
+        <div
+          v-for="record in studentRecords"
+          :key="record.id"
+          class="class-wrapper"
+        >
           <div class="class-header">
             <div class="class-header-left">
               <div class="class-image">
-                <Id2Image :id="record.class?.id || record.id" :image="record.class?.image?.url || null" :lazy="false"
-                  fit="cover"></Id2Image>
+                <Id2Image
+                  :id="record.class?.id || record.id"
+                  :image="record.class?.image?.url || null"
+                  :lazy="false"
+                  fit="cover"
+                ></Id2Image>
               </div>
               <div class="class-info">
                 <h3 class="class-name">
@@ -23,7 +31,12 @@
               </div>
             </div>
             <div class="class-header-right">
-              <el-button type="danger" link :loading="leavingRecordId === record.id" @click="handleLeaveClass(record)">
+              <el-button
+                type="danger"
+                link
+                :loading="leavingRecordId === record.id"
+                @click="handleLeaveClass(record)"
+              >
                 {{ $t("route.personalCenter.campus.leaveClass") }}
               </el-button>
             </div>
@@ -31,21 +44,31 @@
 
           <!-- Group List Section - Embedded under class header -->
           <div class="group-section">
-            <ClassGroupList :ref="(el) =>
-                setGroupListRef(record.class?.id || record.eduClass?.id, el)
-              " :class-id="record.class?.id || record.eduClass?.id || 0" :my-groups="record.groups || []"
-              :joining-group-id="joiningGroupId" @join-group="(group) => handleJoinGroup(group, record)"
-              @create-group="() => openGroupDialog(record)" @edit-group="(group) => openGroupDialog(record, group)"
+            <ClassGroupList
+              :ref="
+                (el) =>
+                  setGroupListRef(record.class?.id || record.eduClass?.id, el)
+              "
+              :class-id="record.class?.id || record.eduClass?.id || 0"
+              :my-groups="record.groups || []"
+              :joining-group-id="joiningGroupId"
+              @join-group="(group) => handleJoinGroup(group, record)"
+              @create-group="() => openGroupDialog(record)"
+              @edit-group="(group) => openGroupDialog(record, group)"
               @delete-group="(group) => handleDeleteGroup(group, record)"
               @leave-group="(group) => handleLeaveGroup(group, record)"
-              @enter-group="(group) => handleEnterGroup(group)"></ClassGroupList>
+              @enter-group="(group) => handleEnterGroup(group)"
+            ></ClassGroupList>
           </div>
           <br />
         </div>
       </div>
 
       <!-- No Classes: Show Apply Button -->
-      <el-empty v-else-if="!loading" :description="$t('route.personalCenter.campus.noClasses')">
+      <el-empty
+        v-else-if="!loading"
+        :description="$t('route.personalCenter.campus.noClasses')"
+      >
         <el-button type="primary" size="large" @click="showApplyDialog">
           <el-icon>
             <Plus></Plus>
@@ -56,11 +79,21 @@
     </div>
 
     <!-- Apply Class Dialog -->
-    <el-dialog v-model="applyDialogVisible" :title="$t('route.personalCenter.campus.selectClass')" width="700px"
-      :close-on-click-modal="false">
+    <el-dialog
+      v-model="applyDialogVisible"
+      :title="$t('route.personalCenter.campus.selectClass')"
+      width="700px"
+      :close-on-click-modal="false"
+    >
       <div class="dialog-controls">
-        <el-input v-model="searchKeyword" :placeholder="$t('route.personalCenter.campus.searchPlaceholder')"
-          @keyup.enter="handleSearch" clearable class="search-input" @clear="handleSearch">
+        <el-input
+          v-model="searchKeyword"
+          :placeholder="$t('route.personalCenter.campus.searchPlaceholder')"
+          @keyup.enter="handleSearch"
+          clearable
+          class="search-input"
+          @clear="handleSearch"
+        >
           <template #append>
             <el-button :icon="Search" @click="handleSearch"></el-button>
           </template>
@@ -68,22 +101,43 @@
       </div>
 
       <div v-loading="searchLoading" class="class-list">
-        <el-empty v-if="!searchLoading && searchResults.length === 0"
-          :description="$t('route.personalCenter.campus.noClasses')"></el-empty>
+        <el-empty
+          v-if="!searchLoading && searchResults.length === 0"
+          :description="$t('route.personalCenter.campus.noClasses')"
+        ></el-empty>
         <div v-else class="class-list-items">
-          <div v-for="item in searchResults" :key="item.id" class="class-list-item">
+          <div
+            v-for="item in searchResults"
+            :key="item.id"
+            class="class-list-item"
+          >
             <div class="class-list-image">
-              <Id2Image :id="item.id" :image="item.image?.url || null" :lazy="false" fit="cover"></Id2Image>
+              <Id2Image
+                :id="item.id"
+                :image="item.image?.url || null"
+                :lazy="false"
+                fit="cover"
+              ></Id2Image>
             </div>
             <div class="class-list-info">
               <h4>{{ item.name }}</h4>
               <p>{{ item.school?.name || "-" }}</p>
             </div>
-            <el-button v-if="isJoined(item.id)" type="info" size="small" disabled>
+            <el-button
+              v-if="isJoined(item.id)"
+              type="info"
+              size="small"
+              disabled
+            >
               {{ $t("route.personalCenter.campus.alreadyJoined") }}
             </el-button>
-            <el-button v-else type="primary" size="small" :loading="applyingClassId === item.id"
-              @click="handleApply(item)">
+            <el-button
+              v-else
+              type="primary"
+              size="small"
+              :loading="applyingClassId === item.id"
+              @click="handleApply(item)"
+            >
               {{ $t("route.personalCenter.campus.apply") }}
             </el-button>
           </div>
@@ -93,34 +147,56 @@
       <template #footer>
         <el-button @click="applyDialogVisible = false">{{
           $t("common.cancel")
-          }}</el-button>
+        }}</el-button>
       </template>
     </el-dialog>
 
     <!-- Create/Edit Group Dialog -->
-    <el-dialog v-model="groupDialogVisible" :title="groupForm.id
-        ? $t('common.edit')
-        : $t('route.personalCenter.campus.createGroup')
-      " width="500px">
+    <el-dialog
+      v-model="groupDialogVisible"
+      :title="
+        groupForm.id
+          ? $t('common.edit')
+          : $t('route.personalCenter.campus.createGroup')
+      "
+      width="500px"
+    >
       <el-form :model="groupForm" label-width="100px">
         <el-form-item :label="$t('common.name')" required>
-          <el-input v-model="groupForm.name" :placeholder="$t('route.personalCenter.campus.groupNamePlaceholder')
-            "></el-input>
+          <el-input
+            v-model="groupForm.name"
+            :placeholder="
+              $t('route.personalCenter.campus.groupNamePlaceholder')
+            "
+          ></el-input>
         </el-form-item>
         <el-form-item :label="$t('common.description')">
-          <el-input v-model="groupForm.description" type="textarea" :placeholder="$t('route.personalCenter.campus.groupDescPlaceholder')
-            "></el-input>
+          <el-input
+            v-model="groupForm.description"
+            type="textarea"
+            :placeholder="
+              $t('route.personalCenter.campus.groupDescPlaceholder')
+            "
+          ></el-input>
         </el-form-item>
         <el-form-item :label="$t('route.personalCenter.campus.groupImage')">
-          <ImageSelector :item-id="groupForm.id || undefined" :image-url="groupForm.imageUrl"
-            @image-selected="handleGroupImageSelected" @image-upload-success="handleGroupImageSelected"></ImageSelector>
+          <ImageSelector
+            :item-id="groupForm.id || undefined"
+            :image-url="groupForm.imageUrl"
+            @image-selected="handleGroupImageSelected"
+            @image-upload-success="handleGroupImageSelected"
+          ></ImageSelector>
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="groupDialogVisible = false">{{
           $t("common.cancel")
-          }}</el-button>
-        <el-button type="primary" :loading="savingGroup" @click="handleSaveGroup">
+        }}</el-button>
+        <el-button
+          type="primary"
+          :loading="savingGroup"
+          @click="handleSaveGroup"
+        >
           {{ $t("common.confirm") }}
         </el-button>
       </template>

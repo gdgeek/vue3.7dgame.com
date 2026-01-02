@@ -31,8 +31,8 @@ export type MessageType = {
   messageTags?: MessageTag[];
 } | null;
 
-export const postMessageAPI = (data: any) => {
-  return request<any>({
+export const postMessageAPI = (data: unknown) => {
+  return request<MessageType>({
     url: `/messages`,
     method: "post",
     data: data,
@@ -94,7 +94,8 @@ export const getMessagesWithAuthor = (
 };
 
 export function putMessage(id: number, data: any) {
-  return request({
+export function putMessage(id: number, data: unknown) {
+  return request<MessageType>({
     url: `/messages/${id}`,
     method: "put",
     data: data,

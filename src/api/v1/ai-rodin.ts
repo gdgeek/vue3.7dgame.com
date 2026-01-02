@@ -1,7 +1,9 @@
 import request from "@/utils/request";
 import qs from "querystringify";
 
-const schedule = (jobs: any[]) => {
+type RodinJob = { status: string };
+
+const schedule = (jobs: RodinJob[]) => {
   const length: number = jobs.length;
   const max = length * 2;
   let count = 0;

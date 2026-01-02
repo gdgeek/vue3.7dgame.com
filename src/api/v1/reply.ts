@@ -13,8 +13,8 @@ export type ReplyType = {
   author: Author;
 };
 
-export const postReply = (data: any) => {
-  return request({
+export const postReply = (data: unknown) => {
+  return request<ReplyType>({
     url: `/replies`,
     method: "post",
     data: data,
@@ -42,8 +42,8 @@ export const getReplies = (message_id = -1, sort = "created_at", page = 0) => {
   });
 };
 
-export const putReply = (id: number, data: any) => {
-  return request({
+export const putReply = (id: number, data: unknown) => {
+  return request<ReplyType>({
     url: `/replies/${id}`,
     method: "put",
     data: data,
