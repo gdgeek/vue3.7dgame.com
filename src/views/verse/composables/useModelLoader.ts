@@ -15,12 +15,41 @@ import {
   Transform,
 } from "@/types/verse";
 
+export interface SourceDataVideo {
+  mesh: THREE.Mesh;
+  video: HTMLVideoElement;
+  stop?: () => void;
+  play?: () => void;
+  cleanup?: () => void;
+  [key: string]: any; // Allow extensibility for now
+}
+
+export interface SourceDataMesh {
+  mesh: THREE.Object3D;
+  setVisibility?: (visible: boolean) => void;
+  setText?: (text: string) => void;
+  [key: string]: any;
+}
+
+export interface SourceDataAudio {
+  url: string;
+  [key: string]: any;
+}
+
+export type SourceItem =
+  | { type: "video"; data: SourceDataVideo }
+  | { type: "picture"; data: SourceDataMesh }
+  | { type: "text"; data: SourceDataMesh }
+  | { type: "model"; data: SourceDataMesh }
+  | { type: "audio"; data: SourceDataAudio }
+  | { type: string; data: any }; // Fallback for unknown types
+
 interface ModelLoaderContext {
   threeScene: THREE.Scene;
   camera: Ref<THREE.PerspectiveCamera | null>;
   renderer: Ref<THREE.WebGLRenderer | null>;
   mixers: Map<string, THREE.AnimationMixer>;
-  sources: Map<string, any>; // Sources might store different data structures per type, could be a union type later
+  sources: Map<string, SourceItem>;
   collisionObjects: Ref<CollisionObject[]>;
   rotatingObjects: Ref<RotatingObject[]>;
   moveableObjects: Ref<MoveableObject[]>;
@@ -38,11 +67,6 @@ export function useModelLoader(context: ModelLoaderContext) {
     renderer,
     mixers,
     sources,
-    collisionObjects,
-    rotatingObjects,
-    moveableObjects,
-    dragState,
-    controls,
     mouse,
     raycaster,
     verse,
@@ -398,6 +422,7 @@ export function useModelLoader(context: ModelLoaderContext) {
       return new Promise((resolve, reject) => {
         loader.load(
           url,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           async (chunks: any[]) => {
             try {
               const chunk = chunks[0];
@@ -497,16 +522,7 @@ export function useModelLoader(context: ModelLoaderContext) {
 
               if (entity.children?.components) {
                 const actionComponent = entity.children.components.find(
-                  (comp: any) => comp.type === "Action"
-                );
-                const triggerComponent = entity.children.components.find(
-                  (comp: any) => comp.type === "Trigger"
-                );
-                const rotateComponent = entity.children.components.find(
-                  (comp: any) => comp.type === "Rotate"
-                );
-                const movedComponent = entity.children.components.find(
-                  (comp: any) => comp.type === "Moved"
+                  (comp) => comp.type === "Action"
                 );
 
                 if (actionComponent) {

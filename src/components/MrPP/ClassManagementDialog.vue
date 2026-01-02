@@ -255,6 +255,7 @@ import UserSelector from "@/components/UserSelector/index.vue";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";
 import type { EduClass } from "@/api/v1/types/edu-class";
 import type { EduSchool } from "@/api/v1/types/edu-school";
+import type { UserType } from "@/api/v1/types/user";
 import {
   getClasses,
   getClass,
@@ -263,7 +264,7 @@ import {
   updateClass,
   addTeacherToClass,
 } from "@/api/v1/edu-class";
-import { createTeacher, deleteTeacher } from "@/api/v1/edu-teacher";
+import { deleteTeacher } from "@/api/v1/edu-teacher";
 import { createStudent, deleteStudent } from "@/api/v1/edu-student";
 import type {
   FetchParams,
@@ -311,13 +312,16 @@ const originalForm = ref({
 });
 
 const currentClass = ref<EduClass | null>(null);
-const teachers = ref<any[]>([]);
-const students = ref<any[]>([]);
+type TeacherInfo = { id: number; user: UserType };
+type StudentInfo = { id: number; user: UserType };
+
+const teachers = ref<TeacherInfo[]>([]);
+const students = ref<StudentInfo[]>([]);
 const teachersLoading = ref(false);
 const studentsLoading = ref(false);
 
 const fetchClasses = async (params: FetchParams): Promise<FetchResponse> => {
-  const queryParams: any = {
+  const queryParams = {
     sort: params.sort,
     search: params.search,
     page: params.page,
@@ -332,10 +336,11 @@ const fetchClasses = async (params: FetchParams): Promise<FetchResponse> => {
     queryParams.expand,
     queryParams.school_id
   );
-  return response;
+  return response as unknown as FetchResponse;
 };
 
-const handleRefresh = (data: any[]) => {};
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const handleRefresh = (_data: unknown[]) => {};
 
 const refreshList = () => {
   cardListPageRef.value?.refresh();
@@ -397,7 +402,7 @@ const handleSaveEdit = async () => {
   }
 
   try {
-    const data: any = {
+    const data: Record<string, unknown> = {
       name: trimmedName,
     };
 
@@ -421,11 +426,14 @@ const handleSaveEdit = async () => {
 
     editDialogVisible.value = false;
     refreshList();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to save class:", error);
-    if (error.response?.status === 422) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((error as any).response?.status === 422) {
       const errorMsg =
-        error.response?.data?.message || t("manager.errors.validationFailed");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error as any).response?.data?.message ||
+        t("manager.errors.validationFailed");
       ElMessage.error(errorMsg);
     } else {
       ElMessage.error(t("manager.errors.saveFailed"));
@@ -451,7 +459,7 @@ const handleDeleteWithCallback = async (
     await deleteClass(item.id);
     ElMessage.success(t("manager.messages.deleteSuccess"));
     refreshList();
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== "cancel") {
       console.error("Failed to delete class:", error);
       ElMessage.error(t("manager.errors.deleteFailed"));
@@ -493,7 +501,7 @@ const handleAddStudent = () => {
   userDialogVisible.value = true;
 };
 
-const handleSelectUser = async (user: any) => {
+const handleSelectUser = async (user: UserType) => {
   if (!currentClass.value) return;
 
   try {
@@ -513,11 +521,14 @@ const handleSelectUser = async (user: any) => {
     }
     userDialogVisible.value = false;
     refreshList();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to add member:", error);
-    if (error.response?.status === 422) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((error as any).response?.status === 422) {
       const errorMsg =
-        error.response?.data?.message || t("manager.errors.alreadyInClass");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error as any).response?.data?.message ||
+        t("manager.errors.alreadyInClass");
       ElMessage.error(errorMsg);
     } else {
       ElMessage.error(t("manager.errors.addFailed"));
@@ -528,7 +539,7 @@ const handleSelectUser = async (user: any) => {
   }
 };
 
-const handleRemoveTeacher = async (teacher: any) => {
+const handleRemoveTeacher = async (teacher: TeacherInfo) => {
   if (!currentClass.value) return;
 
   try {
@@ -547,12 +558,15 @@ const handleRemoveTeacher = async (teacher: any) => {
     ElMessage.success(t("manager.messages.removeSuccess"));
     await refreshTeachers();
     refreshList();
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== "cancel") {
       console.error("Failed to remove teacher:", error);
-      if (error.response?.status === 422) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((error as any).response?.status === 422) {
         const errorMsg =
-          error.response?.data?.message || t("manager.errors.removeFailed");
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (error as any).response?.data?.message ||
+          t("manager.errors.removeFailed");
         ElMessage.error(errorMsg);
       } else {
         ElMessage.error(t("manager.errors.removeFailed"));
@@ -563,7 +577,7 @@ const handleRemoveTeacher = async (teacher: any) => {
   }
 };
 
-const handleRemoveStudent = async (student: any) => {
+const handleRemoveStudent = async (student: StudentInfo) => {
   if (!currentClass.value) return;
 
   try {
@@ -582,12 +596,15 @@ const handleRemoveStudent = async (student: any) => {
     ElMessage.success(t("manager.messages.removeSuccess"));
     await refreshStudents();
     refreshList();
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== "cancel") {
       console.error("Failed to remove student:", error);
-      if (error.response?.status === 422) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((error as any).response?.status === 422) {
         const errorMsg =
-          error.response?.data?.message || t("manager.errors.removeFailed");
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (error as any).response?.data?.message ||
+          t("manager.errors.removeFailed");
         ElMessage.error(errorMsg);
       } else {
         ElMessage.error(t("manager.errors.removeFailed"));

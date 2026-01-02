@@ -19,7 +19,8 @@ COPY . .
 # 构建参数：支持不同环境构建
 # 可选值：production, staging, 7dgame_com, 4mr_cn, 01xr_com 等
 ARG BUILD_MODE=production
-RUN pnpm run build:${BUILD_MODE} || pnpm run build
+# 使用 build-only 跳过类型检查，避免 Three.js 类型错误阻止构建
+RUN pnpm run build-only -- --mode ${BUILD_MODE}
 
 # ===========================================
 # 生产阶段

@@ -280,15 +280,39 @@ const activeTabName = ref(props.activeTabName);
 const item = computed(() => {
   return items.value.find((item) => item.key === activeTabName.value);
 });
+
+interface RenderedField {
+  rendered: string;
+}
+
+interface PostSummary {
+  id: number;
+  title: RenderedField;
+  sort?: number;
+  excerpt: RenderedField;
+  jetpack_featured_media_url: string;
+  date: string;
+}
+
+interface ArticleDetail {
+  id: number;
+  title: RenderedField;
+  content: RenderedField;
+  date: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  _embedded?: any;
+}
+
 // 新闻数据
-const newsData = ref<any[]>([]);
+const newsData = ref<PostSummary[]>([]);
 const loading = ref(false);
 const error = ref(false);
 
 // 文章详情
 const dialogVisible = ref(false);
-const selectedArticle = ref<any>(null);
-const articleContent = ref<any>(null);
+const selectedArticle = ref<PostSummary | null>(null);
+const articleContent = ref<ArticleDetail | null>(null);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const articleTerms = ref<any[]>([]);
 const articleLoading = ref(false);
 const articleError = ref(false);
@@ -463,7 +487,7 @@ const getTimelineColor = (dateString: string) => {
 };
 
 // 打开文章详情弹窗
-const openArticleDetails = async (article: any) => {
+const openArticleDetails = async (article: PostSummary) => {
   // 如果文章已经被选中，则直接打开弹窗
 
   router.push("/web/document?id=" + article.id);

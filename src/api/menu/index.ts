@@ -1,5 +1,3 @@
-import request from "@/utils/request";
-import { RouteVO } from "./model";
 /*
 class MenuAPI {
   

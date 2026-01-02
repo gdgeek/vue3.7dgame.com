@@ -12,20 +12,12 @@
               <!--
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
               -->
-              <el-button
-                v-if="disabled"
-                type="primary"
-                size="small"
-                @click="disabled = false"
-              >
+              <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
                 返回
               </el-button>
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="save">
-                  <font-awesome-icon
-                    class="icon"
-                    icon="save"
-                  ></font-awesome-icon>
+                  <font-awesome-icon class="icon" icon="save"></font-awesome-icon>
                   {{ $t("meta.script.save") }}
                 </el-button>
               </el-button-group>
@@ -34,42 +26,26 @@
           <el-container v-if="!disabled">
             <el-tabs v-model="activeName" type="card" style="width: 100%">
               <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
-                <el-main
-                  style="
+                <el-main style="
                     margin: 0;
                     padding: 0;
                     height: 70vh;
                     position: relative;
-                  "
-                >
+                  ">
                   <div class="fullscreen-controls">
                     <el-button-group>
-                      <el-button
-                        class="fullscreen-btn"
-                        size="small"
-                        type="primary"
-                        plain
-                        @click="toggleFullscreen"
-                      >
+                      <el-button class="fullscreen-btn" size="small" type="primary" plain @click="toggleFullscreen">
                         <el-icon>
                           <FullScreen v-if="!isFullscreen"></FullScreen>
                           <Aim v-else></Aim>
                         </el-icon>
                       </el-button>
                       <template v-if="isFullscreen">
-                        <el-button
-                          size="small"
-                          type="primary"
-                          @click="showFullscreenCode('lua')"
-                        >
+                        <el-button size="small" type="primary" @click="showFullscreenCode('lua')">
                           Lua
                         </el-button>
-                        <el-button
-                          size="small"
-                          color="#F7DF1E"
-                          style="margin-right: 10px"
-                          @click="showFullscreenCode('javascript')"
-                        >
+                        <el-button size="small" color="#F7DF1E" style="margin-right: 10px"
+                          @click="showFullscreenCode('javascript')">
                           JavaScript
                         </el-button>
                         <!--
@@ -77,39 +53,21 @@
                           测试运行
                         </el-button>
                         -->
-                        <el-button
-                          size="small"
-                          type="primary"
-                          style="margin-right: 50px"
-                          @click="save"
-                        >
-                          <font-awesome-icon
-                            class="icon"
-                            icon="save"
-                          ></font-awesome-icon>
+                        <el-button size="small" type="primary" style="margin-right: 50px" @click="save">
+                          <font-awesome-icon class="icon" icon="save"></font-awesome-icon>
                           {{ $t("meta.script.save") }}
                         </el-button>
                       </template>
                     </el-button-group>
                   </div>
 
-                  <el-dialog
-                    v-model="showCodeDialog"
-                    :title="codeDialogTitle"
-                    fullscreen
-                    :show-close="true"
-                    :close-on-click-modal="false"
-                    :close-on-press-escape="true"
-                  >
+                  <el-dialog v-model="showCodeDialog" :title="codeDialogTitle" fullscreen :show-close="true"
+                    :close-on-click-modal="false" :close-on-press-escape="true">
                     <div class="code-dialog-content">
                       <el-card :class="isDark ? 'dark-theme' : 'light-theme'">
                         <div v-highlight>
                           <div class="code-container2">
-                            <el-button
-                              class="copy-button2"
-                              text
-                              @click="copyCode(currentCode)"
-                            >
+                            <el-button class="copy-button2" text @click="copyCode(currentCode)">
                               <el-icon class="icon">
                                 <CopyDocument></CopyDocument>
                               </el-icon>
@@ -126,45 +84,25 @@
                     </div>
                   </el-dialog>
 
-                  <iframe
-                    style="margin: 0; padding: 0; height: 100%; width: 100%"
-                    id="editor"
-                    ref="editor"
-                    :src="src"
-                  ></iframe>
+                  <iframe style="margin: 0; padding: 0; height: 100%; width: 100%" id="editor" ref="editor"
+                    :src="src"></iframe>
                 </el-main>
               </el-tab-pane>
-              <el-tab-pane
-                :label="$t('verse.view.script.code') || 'Script Code'"
-                name="script"
-              >
-                <el-card
-                  v-if="activeName === 'script'"
-                  class="box-card"
-                  :class="isDark ? 'dark-theme' : 'light-theme'"
-                >
+              <el-tab-pane :label="$t('verse.view.script.code') || 'Script Code'" name="script">
+                <el-card v-if="activeName === 'script'" class="box-card" :class="isDark ? 'dark-theme' : 'light-theme'">
                   <div v-highlight>
                     <el-tabs v-model="languageName">
                       <el-tab-pane label="Lua" name="lua">
                         <template #label>
                           <span style="display: flex; align-items: center">
-                            <img
-                              src="/lua.png"
-                              style="width: 25px; margin-right: 5px"
-                              alt=""
-                            />
+                            <img src="/lua.png" style="width: 25px; margin-right: 5px" alt="" />
                             <span>Lua</span>
                           </span>
                         </template>
                         <div class="code-container">
-                          <el-button
-                            class="copy-button"
-                            text
-                            @click="copyCode(LuaCode)"
-                            ><el-icon class="icon">
-                              <CopyDocument></CopyDocument> </el-icon
-                            >{{ $t("copy.title") || "Copy" }}</el-button
-                          >
+                          <el-button class="copy-button" text @click="copyCode(LuaCode)"><el-icon class="icon">
+                              <CopyDocument></CopyDocument>
+                            </el-icon>{{ $t("copy.title") || "Copy" }}</el-button>
                           <pre>
                   <code class="lua">{{ LuaCode }}</code>
                 </pre>
@@ -173,23 +111,14 @@
                       <el-tab-pane label="JavaScript" name="javascript">
                         <template #label>
                           <span style="display: flex; align-items: center">
-                            <img
-                              src="/javascript.png"
-                              style="width: 25px; margin-right: 5px"
-                              alt=""
-                            />
+                            <img src="/javascript.png" style="width: 25px; margin-right: 5px" alt="" />
                             <span>JavaScript</span>
                           </span>
                         </template>
                         <div class="code-container">
-                          <el-button
-                            class="copy-button"
-                            text
-                            @click="copyCode(JavaScriptCode)"
-                            ><el-icon class="icon">
-                              <CopyDocument></CopyDocument> </el-icon
-                            >{{ $t("copy.title") }}</el-button
-                          >
+                          <el-button class="copy-button" text @click="copyCode(JavaScriptCode)"><el-icon class="icon">
+                              <CopyDocument></CopyDocument>
+                            </el-icon>{{ $t("copy.title") }}</el-button>
                           <pre>
                   <code class="javascript">{{ JavaScriptCode }}</code>
                 </pre>
@@ -203,24 +132,14 @@
           </el-container>
           <div v-if="disabled" class="runArea">
             <div class="scene-fullscreen-controls">
-              <el-button
-                class="scene-fullscreen-btn"
-                size="small"
-                type="primary"
-                plain
-                @click="toggleSceneFullscreen"
-              >
+              <el-button class="scene-fullscreen-btn" size="small" type="primary" plain @click="toggleSceneFullscreen">
                 <el-icon>
                   <FullScreen v-if="!isSceneFullscreen"></FullScreen>
                   <Aim v-else></Aim>
                 </el-icon>
               </el-button>
             </div>
-            <ScenePlayer
-              ref="scenePlayer"
-              :meta="meta"
-              :is-scene-fullscreen="isSceneFullscreen"
-            ></ScenePlayer>
+            <ScenePlayer ref="scenePlayer" :meta="meta" :is-scene-fullscreen="isSceneFullscreen"></ScenePlayer>
           </div>
         </el-card>
       </el-main>
@@ -271,7 +190,6 @@ const showCodeDialog = ref(false);
 const currentCode = ref("");
 const currentCodeType = ref("");
 const codeDialogTitle = ref("");
-const editorContainer = ref<HTMLElement | null>(null);
 const unsavedBlocklyData = ref<any>(null);
 
 // 监听用户信息变化
@@ -494,7 +412,7 @@ let saveResolve: (() => void) | null = null;
 
 const save = (): Promise<void> => {
   hasUnsavedChanges.value = false;
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<void>((resolve) => {
     saveResolve = resolve;
     postMessage("save", { language: ["lua", "js"], data: {} });
   });
@@ -550,7 +468,7 @@ onBeforeRouteLeave(async (to, from, next) => {
   }
 });
 
-watch(LuaCode, (newValue, oldValue) => {
+watch(LuaCode, (newValue, _oldValue) => {
   hasUnsavedChanges.value = false;
   if (newValue !== initLuaCode.get()) {
     hasUnsavedChanges.value = true;
@@ -693,7 +611,7 @@ onMounted(async () => {
     if (response.data.resources.length > 0) {
       try {
         // 循环处理每个模型文件
-        for (const [index, model] of response.data.resources.entries()) {
+        for (const model of response.data.resources) {
           if (model.type !== "polygen") {
             meta.value = response.data;
             continue;
@@ -818,514 +736,502 @@ const handleSound = (uuid: string): HTMLAudioElement | undefined => {
   const audio = new Audio(audioUrl);
   return audio;
 };
-
 const run = async () => {
-  // 保存当前的全屏状态
-  const wasFullscreen = isFullscreen.value;
-
-  // 如果当前是全屏状态，先退出编辑器的全屏
-  if (wasFullscreen) {
-    document.exitFullscreen();
-    await new Promise((resolve) => setTimeout(resolve, 100)); // 确保退出全屏后再进入全屏
-  }
-
   disabled.value = true;
 
-  await nextTick();
-
-  // 如果之前是全屏状态，则将运行区域设置为全屏
-  if (wasFullscreen) {
-    const runArea = document.querySelector(".runArea");
-    if (runArea) {
-      runArea.requestFullscreen();
-      isSceneFullscreen.value = true;
+  // 递归计算实体数量
+  const countEntities = (entities: any[]): number => {
+    let count = 0;
+    for (const entity of entities) {
+      count++;
+      if (entity.children?.entities?.length > 0) {
+        count += countEntities(entity.children.entities);
+      }
     }
-  }
+    return count;
+  };
 
-  // 添加延迟等待所有模型加载完成
   const waitForModels = () => {
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       const checkModels = () => {
-        // const metaData = JSON.parse(meta.value!.data!);
-        const metaData = meta.value!.data!;
-        // 递归计算实体数量
-        const countEntities = (entities: any[]): number => {
-          let count = 0;
-          for (const entity of entities) {
-            count++;
-            if (entity.children?.entities?.length > 0) {
-              count += countEntities(entity.children.entities);
-            }
-          }
-          return count;
-        };
+        const metaData = meta.value?.data;
+        const entities = metaData?.children?.entities;
 
-        const expectedModels = countEntities(metaData.children.entities);
+        if (!entities || entities.length === 0) {
+          resolve();
+          return;
+        }
 
-        if (scenePlayer.value?.sources.size === expectedModels) {
+        const expectedModels = countEntities(entities);
+        const loadedModels = scenePlayer.value?.sources?.size ?? 0;
+
+        if (loadedModels === expectedModels) {
           console.log("所有资源加载完成:", {
             expected: expectedModels,
-            loaded: scenePlayer.value!.sources.size,
-            sources: scenePlayer.value!.sources,
+            loaded: loadedModels,
+            sources: scenePlayer.value?.sources,
           });
-          resolve(true);
-        } else {
-          console.log("等待资源加载...", {
-            expected: expectedModels,
-            current: scenePlayer.value?.sources.size || 0,
-          });
-          setTimeout(checkModels, 100);
+          resolve();
+          return;
         }
+
+        console.log("等待资源加载...", {
+          expected: expectedModels,
+          current: loadedModels,
+        });
+        setTimeout(checkModels, 100);
       };
+
       checkModels();
     });
   };
 
   await waitForModels();
 
-  if (JavaScriptCode.value) {
-    window.meta = {};
-    const Vector3 = THREE.Vector3;
-    const polygen = {
-      playAnimation: (polygenInstance: any, animationName: string) => {
-        if (!polygenInstance) {
-          console.error("polygen实例为空");
-          return;
-        }
-        if (typeof polygenInstance.playAnimation !== "function") {
-          console.error("polygen实例缺少playAnimation方法");
-          return;
-        }
-        polygenInstance.playAnimation(animationName);
-      },
-    };
+  if (!JavaScriptCode.value) return;
 
-    const sound = {
-      play: async (
-        audio: HTMLAudioElement | undefined,
-        skipQueue: boolean = false
-      ) => {
-        if (!audio) {
-          console.error("音频资源无效");
-          return;
-        }
-        await scenePlayer.value?.playQueuedAudio(audio, skipQueue);
-      },
+  window.meta = {};
+  const Vector3 = THREE.Vector3;
+  const polygen = {
+    playAnimation: (polygenInstance: any, animationName: string) => {
+      if (!polygenInstance) {
+        console.error("polygen实例为空");
+        return;
+      }
+      if (typeof polygenInstance.playAnimation !== "function") {
+        console.error("polygen实例缺少playAnimation方法");
+        return;
+      }
+      polygenInstance.playAnimation(animationName);
+    },
+  };
 
-      createTask: (audio: HTMLAudioElement | undefined) => {
-        if (!audio) {
-          console.error("音频资源无效");
-          return null;
-        }
-        return {
-          type: "audio",
-          execute: async () => {
-            await scenePlayer.value?.playQueuedAudio(audio);
-          },
-          data: audio,
-        };
-      },
+  const sound = {
+    play: async (
+      audio: HTMLAudioElement | undefined,
+      skipQueue: boolean = false
+    ) => {
+      if (!audio) {
+        console.error("音频资源无效");
+        return;
+      }
+      await scenePlayer.value?.playQueuedAudio(audio, skipQueue);
+    },
 
-      playTask: (audio: HTMLAudioElement | undefined) => {
-        const taskObj = sound.createTask(audio);
-        if (!taskObj) return null;
-
-        // 立即执行
-        taskObj.execute();
-        return taskObj;
-      },
-    };
-
-    const helper = {
-      handler: (index: string, uuid: string) => {
-        const source = scenePlayer.value?.sources.get(uuid);
-        console.error("当前的source", source);
-        if (!source) {
-          console.error(`找不到UUID为 ${uuid} 的实体`);
-          return null;
-        }
-        return source.data;
-      },
-    };
-
-    // 处理文本实体
-    const handleText = (uuid: string) => {
-      const source = scenePlayer.value?.sources.get(uuid);
-      if (!source) {
-        console.error(`找不到UUID为 ${uuid} 的文本实体`);
+    createTask: (audio: HTMLAudioElement | undefined) => {
+      if (!audio) {
+        console.error("音频资源无效");
         return null;
       }
-      return source.data;
-    };
+      return {
+        type: "audio",
+        execute: async () => {
+          await scenePlayer.value?.playQueuedAudio(audio);
+        },
+        data: audio,
+      };
+    },
 
-    // 处理所有类型的实体(polygen模型、voxel体素、picture图片、text文本、video视频等)
-    const handleEntity = (uuid: string) => {
+    playTask: (audio: HTMLAudioElement | undefined) => {
+      const taskObj = sound.createTask(audio);
+      if (!taskObj) return null;
+
+      // 立即执行
+      taskObj.execute();
+      return taskObj;
+    },
+  };
+
+  const helper = {
+    handler: (index: string, uuid: string) => {
       const source = scenePlayer.value?.sources.get(uuid);
+      console.error("当前的source", source);
       if (!source) {
         console.error(`找不到UUID为 ${uuid} 的实体`);
         return null;
       }
       return source.data;
-    };
+    },
+  };
 
-    // 补间动画工具类
-    const tween = {
-      to_object: (
-        fromObj: any,
-        toObj: any,
-        duration: number,
-        easing: string
-      ) => {
-        if (!fromObj || !toObj) {
-          console.error("补间动画对象无效");
-          return null;
-        }
+  // 处理文本实体
+  const handleText = (uuid: string) => {
+    const source = scenePlayer.value?.sources.get(uuid);
+    if (!source) {
+      console.error(`找不到UUID为 ${uuid} 的文本实体`);
+      return null;
+    }
+    return source.data;
+  };
 
-        const startPos = fromObj.mesh.position.clone();
-        const endPos = toObj.mesh.position.clone();
+  // 处理所有类型的实体(polygen模型、voxel体素、picture图片、text文本、video视频等)
+  const handleEntity = (uuid: string) => {
+    const source = scenePlayer.value?.sources.get(uuid);
+    if (!source) {
+      console.error(`找不到UUID为 ${uuid} 的实体`);
+      return null;
+    }
+    return source.data;
+  };
 
-        return {
-          type: "object",
-          fromObj,
-          startPos,
-          endPos,
-          duration,
-          easing,
-        };
-      },
+  // 补间动画工具类
+  const tween = {
+    to_object: (
+      fromObj: any,
+      toObj: any,
+      duration: number,
+      easing: string
+    ) => {
+      if (!fromObj || !toObj) {
+        console.error("补间动画对象无效");
+        return null;
+      }
 
-      to_data: (
-        obj: any,
-        transformData: any,
-        duration: number,
-        easing: string
-      ) => {
-        if (!obj) {
-          console.error("目标对象无效");
-          return null;
-        }
+      const startPos = fromObj.mesh.position.clone();
+      const endPos = toObj.mesh.position.clone();
 
-        const startPos = obj.mesh.position.clone();
-        const endPos = transformData.position;
-
-        // 将角度转换为弧度
-        const endRotationRadians = new THREE.Vector3(
-          THREE.MathUtils.degToRad(transformData.rotation.x),
-          THREE.MathUtils.degToRad(transformData.rotation.y),
-          THREE.MathUtils.degToRad(transformData.rotation.z)
-        );
-
-        return {
-          type: "data",
-          obj,
-          startPos,
-          endPos,
-          startRotation: obj.mesh.rotation.clone(),
-          endRotation: endRotationRadians, // 使用转换后的弧度值
-          startScale: obj.mesh.scale.clone(),
-          endScale: transformData.scale,
-          duration,
-          easing,
-        };
-      },
-    };
-
-    // 任务执行器
-    const task = {
-      circle: async (count: number, taskToRepeat: any) => {
-        console.log("Executing circle task:", { count, taskToRepeat });
-
-        if (typeof count !== "number" || count < 0) {
-          console.warn("循环次数必须是正数:", count);
-          return;
-        }
-
-        let resolvedTask = taskToRepeat;
-        if (taskToRepeat instanceof Promise) {
-          resolvedTask = await taskToRepeat;
-        }
-
-        for (let i = 0; i < count; i++) {
-          console.log(`执行第 ${i + 1}/${count} 次任务`);
-
-          try {
-            if (resolvedTask) {
-              if (typeof resolvedTask === "function") {
-                await resolvedTask();
-              } else if (typeof resolvedTask.execute === "function") {
-                await resolvedTask.execute();
-              } else if (resolvedTask.type === "audio") {
-                await sound.play(resolvedTask.data);
-              } else if (resolvedTask.type === "animation") {
-                await resolvedTask.execute();
-              } else {
-                console.warn(`无法执行的任务类型:`, resolvedTask);
-                return;
-              }
-            }
-
-            if (i < count - 1) {
-              await new Promise((resolve) => setTimeout(resolve, 100));
-            }
-          } catch (error) {
-            console.error(`第 ${i + 1} 次任务执行失败:`, error);
-          }
-        }
-      },
-
-      array: (type: string, items: any[]) => {
-        console.log("Creating array:", { type, items });
-
-        const processArrayItems = (items: any[]): any[] => {
-          return items.map((item) => {
-            // 如果是数组，递归处理
-            if (Array.isArray(item)) {
-              return processArrayItems(item);
-            }
-            if (item && typeof item === "object" && item.type) {
-              return item;
-            }
-            if (item && typeof item === "object" && item.url) {
-              return "audio";
-            }
-            if (item instanceof Promise) {
-              return item;
-            }
-            return item;
-          });
-        };
-
-        let result;
-        if (type === "LIST") {
-          result = processArrayItems(items);
-        } else if (type === "SET") {
-          const processed = processArrayItems(items);
-          result = Array.from(new Set(processed));
-        } else {
-          console.warn(`未知的数组类型: ${type}，默认使用 LIST 类型`);
-          result = processArrayItems(items);
-        }
-
-        console.log("Processed array result:", result);
-        return result;
-      },
-
-      execute: async (tweenData: any) => {
-        if (!tweenData) return;
-
-        if (typeof tweenData === "function") {
-          await tweenData();
-          return;
-        }
-        if (tweenData instanceof Promise) {
-          return await tweenData;
-        }
-
-        type EasingFunction = (t: number) => number;
-        type EasingType =
-          | "LINEAR"
-          | "EASE_IN"
-          | "EASE_OUT"
-          | "EASE_IN_OUT"
-          | "BOUNCE_IN"
-          | "BOUNCE_OUT"
-          | "BOUNCE_IN_OUT";
-
-        const easingFunctions: Record<EasingType, EasingFunction> = {
-          LINEAR: (t: number) => t,
-          EASE_IN: (t: number) => t * t,
-          EASE_OUT: (t: number) => 1 - Math.pow(1 - t, 2),
-          EASE_IN_OUT: (t: number) =>
-            t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
-          BOUNCE_IN: (t: number) => 1 - easingFunctions.BOUNCE_OUT(1 - t),
-          BOUNCE_OUT: (t: number) => {
-            if (t < 1 / 2.75) {
-              return 7.5625 * t * t;
-            } else if (t < 2 / 2.75) {
-              return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
-            } else if (t < 2.5 / 2.75) {
-              return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
-            } else {
-              return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
-            }
-          },
-          BOUNCE_IN_OUT: (t: number) => {
-            return t < 0.5
-              ? (1 - easingFunctions.BOUNCE_OUT(1 - 2 * t)) / 2
-              : (1 + easingFunctions.BOUNCE_OUT(2 * t - 1)) / 2;
-          },
-        };
-
-        return new Promise<void>((resolve) => {
-          const startTime = Date.now();
-          const animate = () => {
-            const currentTime = Date.now();
-            const elapsed = (currentTime - startTime) / 1000;
-            const progress = Math.min(elapsed / tweenData.duration, 1);
-
-            const easing = (
-              tweenData.easing || "LINEAR"
-            ).toUpperCase() as EasingType;
-            const easingFunction =
-              easingFunctions[easing] || easingFunctions.LINEAR;
-            const easeProgress = easingFunction(progress);
-
-            if (tweenData.type === "object") {
-              const newPos = tweenData.startPos
-                .clone()
-                .lerp(tweenData.endPos, easeProgress);
-              tweenData.fromObj.mesh.position.copy(newPos);
-            } else if (tweenData.type === "data") {
-              const newPos = tweenData.startPos
-                .clone()
-                .lerp(tweenData.endPos, easeProgress);
-              tweenData.obj.mesh.position.copy(newPos);
-
-              // 使用 THREE.MathUtils.lerp 进行旋转插值
-              tweenData.obj.mesh.rotation.set(
-                THREE.MathUtils.lerp(
-                  tweenData.startRotation.x,
-                  tweenData.endRotation.x,
-                  easeProgress
-                ),
-                THREE.MathUtils.lerp(
-                  tweenData.startRotation.y,
-                  tweenData.endRotation.y,
-                  easeProgress
-                ),
-                THREE.MathUtils.lerp(
-                  tweenData.startRotation.z,
-                  tweenData.endRotation.z,
-                  easeProgress
-                )
-              );
-
-              const newScale = tweenData.startScale
-                .clone()
-                .lerp(tweenData.endScale, easeProgress);
-              tweenData.obj.mesh.scale.copy(newScale);
-            }
-
-            if (progress < 1) {
-              requestAnimationFrame(animate);
-            } else {
-              resolve();
-            }
-          };
-
-          animate();
-        });
-      },
-
-      sleep: (seconds: number) => {
-        return () =>
-          new Promise<void>((resolve) => setTimeout(resolve, seconds * 1000));
-      },
-    };
-
-    // 动画工具类
-    const animation = {
-      createTask: (polygenInstance: any, animationName: string) => {
-        if (!polygenInstance) {
-          console.error("polygen实例为空");
-          return null;
-        }
-        if (typeof polygenInstance.playAnimation !== "function") {
-          console.error("polygen实例缺少playAnimation方法");
-          return null;
-        }
-
-        return {
-          type: "animation",
-          execute: async () => {
-            polygenInstance.playAnimation(animationName);
-          },
-          data: {
-            instance: polygenInstance,
-            animationName: animationName,
-          },
-        };
-      },
-
-      playTask: (polygenInstance: any, animationName: string) => {
-        const taskObj = animation.createTask(polygenInstance, animationName);
-        if (!taskObj) return null;
-
-        // 立即执行
-        taskObj.execute();
-        return taskObj;
-      },
-    };
-
-    const event = {
-      trigger: (index: any, eventId: string) => {
-        console.log("触发事件:", index, eventId);
-      },
-    };
-
-    const text = {
-      setText: (object: any, setText: string) => {
-        if (object && typeof object.setText === "function") {
-          object.setText(setText);
-        } else {
-          console.warn("object.setText is not a function");
-        }
-      },
-    };
-
-    const point = {
-      setVisual: (object: any, setVisual: boolean) => {
-        console.error("setVisual", object, setVisual);
-        if (object && typeof object.setVisibility === "function") {
-          object.setVisibility(setVisual);
-        } else {
-          console.error("object.setVisibility is not a function");
-        }
-      },
-    };
-
-    const transform = (position: any, rotation: any, scale: any) => {
       return {
-        position: position instanceof Vector3 ? position : new Vector3(),
-        rotation: rotation instanceof Vector3 ? rotation : new Vector3(),
-        scale: scale instanceof Vector3 ? scale : new Vector3(1, 1, 1),
+        type: "object",
+        fromObj,
+        startPos,
+        endPos,
+        duration,
+        easing,
       };
-    };
+    },
 
-    const argument = {
-      boolean: (value: boolean) => {
-        return value;
-      },
-      number: (value: number) => {
-        return value;
-      },
-      string: (value: string) => {
-        return value;
-      },
-      idPlayer: (value: number) => {
-        return value;
-      },
-      point: (position: any) => {
-        return position instanceof Vector3 ? position : new Vector3();
-      },
-      range: (centerPoint: THREE.Vector3, radius: number) => {
-        const center =
-          centerPoint instanceof Vector3 ? centerPoint : new Vector3();
-        // 生成随机角度
-        const theta = Math.random() * Math.PI * 2; // 水平角度 (0 到 2π)
-        const phi = Math.acos(2 * Math.random() - 1); // 垂直角度 (0 到 π)
-        // 生成随机半径 (0 到指定半径)
-        const r = radius * Math.cbrt(Math.random()); // 使用立方根来确保均匀分布
-        // 计算随机点的坐标
-        const x = center.x + r * Math.sin(phi) * Math.cos(theta);
-        const y = center.y + r * Math.sin(phi) * Math.sin(theta);
-        const z = center.z + r * Math.cos(phi);
-        return new Vector3(x, y, z);
-      },
-    };
+    to_data: (
+      obj: any,
+      transformData: any,
+      duration: number,
+      easing: string
+    ) => {
+      if (!obj) {
+        console.error("目标对象无效");
+        return null;
+      }
 
-    try {
-      const wrappedCode = `
+      const startPos = obj.mesh.position.clone();
+      const endPos = transformData.position;
+
+      // 将角度转换为弧度
+      const endRotationRadians = new THREE.Vector3(
+        THREE.MathUtils.degToRad(transformData.rotation.x),
+        THREE.MathUtils.degToRad(transformData.rotation.y),
+        THREE.MathUtils.degToRad(transformData.rotation.z)
+      );
+
+      return {
+        type: "data",
+        obj,
+        startPos,
+        endPos,
+        startRotation: obj.mesh.rotation.clone(),
+        endRotation: endRotationRadians, // 使用转换后的弧度值
+        startScale: obj.mesh.scale.clone(),
+        endScale: transformData.scale,
+        duration,
+        easing,
+      };
+    },
+  };
+
+  // 任务执行器
+  const task = {
+    circle: async (count: number, taskToRepeat: any) => {
+      console.log("Executing circle task:", { count, taskToRepeat });
+
+      if (typeof count !== "number" || count < 0) {
+        console.warn("循环次数必须是正数:", count);
+        return;
+      }
+
+      let resolvedTask = taskToRepeat;
+      if (taskToRepeat instanceof Promise) {
+        resolvedTask = await taskToRepeat;
+      }
+
+      for (let i = 0; i < count; i++) {
+        console.log(`执行第 ${i + 1}/${count} 次任务`);
+
+        try {
+          if (resolvedTask) {
+            if (typeof resolvedTask === "function") {
+              await resolvedTask();
+            } else if (typeof resolvedTask.execute === "function") {
+              await resolvedTask.execute();
+            } else if (resolvedTask.type === "audio") {
+              await sound.play(resolvedTask.data);
+            } else if (resolvedTask.type === "animation") {
+              await resolvedTask.execute();
+            } else {
+              console.warn(`无法执行的任务类型:`, resolvedTask);
+              return;
+            }
+          }
+
+          if (i < count - 1) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+        } catch (error) {
+          console.error(`第 ${i + 1} 次任务执行失败:`, error);
+        }
+      }
+    },
+
+    array: (type: string, items: any[]) => {
+      console.log("Creating array:", { type, items });
+
+      const processArrayItems = (items: any[]): any[] => {
+        return items.map((item) => {
+          // 如果是数组，递归处理
+          if (Array.isArray(item)) {
+            return processArrayItems(item);
+          }
+          if (item && typeof item === "object" && item.type) {
+            return item;
+          }
+          if (item && typeof item === "object" && item.url) {
+            return "audio";
+          }
+          if (item instanceof Promise) {
+            return item;
+          }
+          return item;
+        });
+      };
+
+      let result;
+      if (type === "LIST") {
+        result = processArrayItems(items);
+      } else if (type === "SET") {
+        const processed = processArrayItems(items);
+        result = Array.from(new Set(processed));
+      } else {
+        console.warn(`未知的数组类型: ${type}，默认使用 LIST 类型`);
+        result = processArrayItems(items);
+      }
+
+      console.log("Processed array result:", result);
+      return result;
+    },
+
+    execute: async (tweenData: any) => {
+      if (!tweenData) return;
+
+      if (typeof tweenData === "function") {
+        await tweenData();
+        return;
+      }
+      if (tweenData instanceof Promise) {
+        return await tweenData;
+      }
+
+      type EasingFunction = (t: number) => number;
+      type EasingType =
+        | "LINEAR"
+        | "EASE_IN"
+        | "EASE_OUT"
+        | "EASE_IN_OUT"
+        | "BOUNCE_IN"
+        | "BOUNCE_OUT"
+        | "BOUNCE_IN_OUT";
+
+      const easingFunctions: Record<EasingType, EasingFunction> = {
+        LINEAR: (t: number) => t,
+        EASE_IN: (t: number) => t * t,
+        EASE_OUT: (t: number) => 1 - Math.pow(1 - t, 2),
+        EASE_IN_OUT: (t: number) =>
+          t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
+        BOUNCE_IN: (t: number) => 1 - easingFunctions.BOUNCE_OUT(1 - t),
+        BOUNCE_OUT: (t: number) => {
+          if (t < 1 / 2.75) {
+            return 7.5625 * t * t;
+          } else if (t < 2 / 2.75) {
+            return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
+          } else if (t < 2.5 / 2.75) {
+            return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
+          } else {
+            return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
+          }
+        },
+        BOUNCE_IN_OUT: (t: number) => {
+          return t < 0.5
+            ? (1 - easingFunctions.BOUNCE_OUT(1 - 2 * t)) / 2
+            : (1 + easingFunctions.BOUNCE_OUT(2 * t - 1)) / 2;
+        },
+      };
+
+      return new Promise<void>((resolve) => {
+        const startTime = Date.now();
+        const animate = () => {
+          const currentTime = Date.now();
+          const elapsed = (currentTime - startTime) / 1000;
+          const progress = Math.min(elapsed / tweenData.duration, 1);
+
+          const easing = (
+            tweenData.easing || "LINEAR"
+          ).toUpperCase() as EasingType;
+          const easingFunction =
+            easingFunctions[easing] || easingFunctions.LINEAR;
+          const easeProgress = easingFunction(progress);
+
+          if (tweenData.type === "object") {
+            const newPos = tweenData.startPos
+              .clone()
+              .lerp(tweenData.endPos, easeProgress);
+            tweenData.fromObj.mesh.position.copy(newPos);
+          } else if (tweenData.type === "data") {
+            const newPos = tweenData.startPos
+              .clone()
+              .lerp(tweenData.endPos, easeProgress);
+            tweenData.obj.mesh.position.copy(newPos);
+
+            // 使用 THREE.MathUtils.lerp 进行旋转插值
+            tweenData.obj.mesh.rotation.set(
+              THREE.MathUtils.lerp(
+                tweenData.startRotation.x,
+                tweenData.endRotation.x,
+                easeProgress
+              ),
+              THREE.MathUtils.lerp(
+                tweenData.startRotation.y,
+                tweenData.endRotation.y,
+                easeProgress
+              ),
+              THREE.MathUtils.lerp(
+                tweenData.startRotation.z,
+                tweenData.endRotation.z,
+                easeProgress
+              )
+            );
+
+            const newScale = tweenData.startScale
+              .clone()
+              .lerp(tweenData.endScale, easeProgress);
+            tweenData.obj.mesh.scale.copy(newScale);
+          }
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            resolve();
+          }
+        };
+
+        animate();
+      });
+    },
+
+    sleep: (seconds: number) => {
+      return () =>
+        new Promise<void>((resolve) => setTimeout(resolve, seconds * 1000));
+    },
+  };
+
+  // 动画工具类
+  const animation = {
+    createTask: (polygenInstance: any, animationName: string) => {
+      if (!polygenInstance) {
+        console.error("polygen实例为空");
+        return null;
+      }
+      if (typeof polygenInstance.playAnimation !== "function") {
+        console.error("polygen实例缺少playAnimation方法");
+        return null;
+      }
+
+      return {
+        type: "animation",
+        execute: async () => {
+          polygenInstance.playAnimation(animationName);
+        },
+        data: {
+          instance: polygenInstance,
+          animationName: animationName,
+        },
+      };
+    },
+
+    playTask: (polygenInstance: any, animationName: string) => {
+      const taskObj = animation.createTask(polygenInstance, animationName);
+      if (!taskObj) return null;
+
+      // 立即执行
+      taskObj.execute();
+      return taskObj;
+    },
+  };
+
+  const event = {
+    trigger: (index: any, eventId: string) => {
+      console.log("触发事件:", index, eventId);
+    },
+  };
+
+  const text = {
+    setText: (object: any, setText: string) => {
+      if (object && typeof object.setText === "function") {
+        object.setText(setText);
+      } else {
+        console.warn("object.setText is not a function");
+      }
+    },
+  };
+
+  const point = {
+    setVisual: (object: any, setVisual: boolean) => {
+      console.error("setVisual", object, setVisual);
+      if (object && typeof object.setVisibility === "function") {
+        object.setVisibility(setVisual);
+      } else {
+        console.error("object.setVisibility is not a function");
+      }
+    },
+  };
+
+  const transform = (position: any, rotation: any, scale: any) => {
+    return {
+      position: position instanceof Vector3 ? position : new Vector3(),
+      rotation: rotation instanceof Vector3 ? rotation : new Vector3(),
+      scale: scale instanceof Vector3 ? scale : new Vector3(1, 1, 1),
+    };
+  };
+
+  const argument = {
+    boolean: (value: boolean) => {
+      return value;
+    },
+    number: (value: number) => {
+      return value;
+    },
+    string: (value: string) => {
+      return value;
+    },
+    idPlayer: (value: number) => {
+      return value;
+    },
+    point: (position: any) => {
+      return position instanceof Vector3 ? position : new Vector3();
+    },
+    range: (centerPoint: THREE.Vector3, radius: number) => {
+      const center =
+        centerPoint instanceof Vector3 ? centerPoint : new Vector3();
+      // 生成随机角度
+      const theta = Math.random() * Math.PI * 2; // 水平角度 (0 到 2π)
+      const phi = Math.acos(2 * Math.random() - 1); // 垂直角度 (0 到 π)
+      // 生成随机半径 (0 到指定半径)
+      const r = radius * Math.cbrt(Math.random()); // 使用立方根来确保均匀分布
+      // 计算随机点的坐标
+      const x = center.x + r * Math.sin(phi) * Math.cos(theta);
+      const y = center.y + r * Math.sin(phi) * Math.sin(theta);
+      const z = center.z + r * Math.cos(phi);
+      return new Vector3(x, y, z);
+    },
+  };
+
+  try {
+    const wrappedCode = `
         return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument, handleText, handleEntity) {
           const meta = window.meta;
           const index = ${meta.value?.id};
@@ -1339,34 +1245,35 @@ const run = async () => {
         }
       `;
 
-      const createFunction = new Function(wrappedCode);
-      const executableFunction = createFunction();
+    const createFunction = new Function(wrappedCode);
+    const executableFunction = createFunction();
 
-      await executableFunction(
-        handlePolygen,
-        polygen,
-        handleSound,
-        sound,
-        THREE,
-        task,
-        tween,
-        helper,
-        animation,
-        event,
-        text,
-        point,
-        transform,
-        Vector3,
-        argument,
-        handleText,
-        handleEntity
-      );
-    } catch (e: any) {
-      console.error("执行代码出错:", e);
-      ElMessage.error(`执行代码出错: ${e.message}`);
-    }
+    await executableFunction(
+      handlePolygen,
+      polygen,
+      handleSound,
+      sound,
+      THREE,
+      task,
+      tween,
+      helper,
+      animation,
+      event,
+      text,
+      point,
+      transform,
+      Vector3,
+      argument,
+      handleText,
+      handleEntity
+    );
+  } catch (e: any) {
+    console.error("执行代码出错:", e);
+    ElMessage.error(`执行代码出错: ${e.message}`);
   }
 };
+
+defineExpose({ run });
 </script>
 
 <style scoped>

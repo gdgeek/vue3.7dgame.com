@@ -1,6 +1,5 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import type { metaInfo } from "./meta";
 import { ResourceInfo } from "@/api/v1/resources/model";
 import { cybersType } from "./cyber";
 

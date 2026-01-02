@@ -28,7 +28,6 @@ defineOptions({
 const section = computed(() => {
   return route.query.section ? (route.query.section as string) : "news";
 });
-const loginDialogRef = ref<any>(null);
 
 // 根据主题和滚动状态获取文本颜色
 const getTextColor = () => {
@@ -36,12 +35,6 @@ const getTextColor = () => {
     return "#fff";
   } else {
     return isScrolled.value ? "#333" : "#fff";
-  }
-};
-
-const openLoginDialog = () => {
-  if (loginDialogRef.value) {
-    loginDialogRef.value.openDialog();
   }
 };
 
@@ -82,7 +75,7 @@ const restoreScrollPosition = () => {
 // 防抖
 const debounce = (fn: Function, delay: number) => {
   let timer: number | null = null;
-  return (...args: any[]) => {
+  return (...args: unknown[]) => {
     if (timer) clearTimeout(timer);
     timer = window.setTimeout(() => {
       fn(...args);
@@ -116,15 +109,7 @@ const toggleSidebar = () => {
 const featuresRef = ref<HTMLElement | null>(null);
 const casesRef = ref<HTMLElement | null>(null);
 const newsRef = ref<HTMLElement | null>(null);
-const select = (item: any) => {
-  //本网页的path
-  // const currentPath = route.path;
-  //alert(item.path)
-  //跳转到另外一个path
-  router.push(route.path + "?section=" + item.section);
-  //关闭侧边栏
-  // sidebarVisible.value = false;
-};
+
 // 滚动到指定部分的函数
 const scrollToSection = (sectionId: string) => {
   // 计算导航栏高度（加点额外的间距）

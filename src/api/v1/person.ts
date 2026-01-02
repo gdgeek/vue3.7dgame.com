@@ -8,12 +8,12 @@ export type userData = {
   roles: string[];
   avatar: {
     url: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
-export const postPerson = (data: any) => {
+export const postPerson = (data: unknown) => {
   return request({
     url: `/people`,
     method: "post",
@@ -42,7 +42,7 @@ export const getPerson = (
   page = 1,
   expand = ""
 ) => {
-  const query: Record<string, any> = [];
+  const query: Record<string, unknown> = {};
   query["expand"] = expand;
   query["sort"] = sort;
   if (search !== "") {

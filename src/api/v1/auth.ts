@@ -31,4 +31,6 @@ const register = (data: any) => {
 export default {
   login,
   refresh,
+  link,
+  register,
 };

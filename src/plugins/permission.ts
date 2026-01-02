@@ -1,16 +1,10 @@
-import {
-  NavigationGuardNext,
-  RouteLocationNormalized,
-  RouteRecordRaw,
-} from "vue-router";
+import { NavigationGuardNext, RouteLocationNormalized } from "vue-router";
 
 import NProgress from "@/utils/nprogress";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { useRouter } from "@/router";
 import Token from "@/store/modules/token";
-import { UserInfoType, _UserDataType } from "@/api/user/model";
 const router = useRouter();
-import { usePermissionStore, useUserStore } from "@/store";
+import { useUserStore } from "@/store";
 
 export function setupPermission() {
   // 白名单路由

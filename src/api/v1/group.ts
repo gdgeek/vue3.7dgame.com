@@ -17,9 +17,9 @@ export const getGroups = (
   page = 1,
   perPage = 20,
   expand = "image,user",
-  filters: Record<string, any> = {}
+  filters: Record<string, unknown> = {}
 ) => {
-  const query: Record<string, any> = {
+  const query: Record<string, unknown> = {
     sort,
     expand,
   };
@@ -53,7 +53,7 @@ export const getGroups = (
  * @param expand - Expand related data
  */
 export const getGroup = (id: number, expand = "image,user") => {
-  const query: Record<string, any> = {};
+  const query: Record<string, unknown> = {};
   if (expand) {
     query["expand"] = expand;
   }

@@ -1,5 +1,3 @@
-import exp from "constants";
-
 /**
  * 登录用户信息
  */

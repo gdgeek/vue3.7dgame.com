@@ -1,23 +1,9 @@
 <template>
-  <div
-    class="name-password-form"
-    :class="{ 'dark-theme': isDark }"
-    v-loading="loading"
-  >
+  <div class="name-password-form" :class="{ 'dark-theme': isDark }" v-loading="loading">
     <el-card class="login-card" :body-style="{ padding: '20px' }">
-      <el-form
-        ref="formRef"
-        class="login-form"
-        :rules="rules"
-        :model="form"
-        label-position="top"
-      >
+      <el-form ref="formRef" class="login-form" :rules="rules" :model="form" label-position="top">
         <el-form-item :label="''" prop="username" class="form-item">
-          <el-input
-            v-model="form.username"
-            placeholder="请输入用户名/邮箱"
-            class="custom-input"
-          >
+          <el-input v-model="form.username" placeholder="请输入用户名/邮箱" class="custom-input">
             <template #prefix>
               <el-icon class="input-icon">
                 <UserFilled></UserFilled>
@@ -27,13 +13,7 @@
         </el-form-item>
 
         <el-form-item :label="''" prop="password" class="form-item">
-          <el-input
-            v-model="form.password"
-            type="password"
-            placeholder="请输入密码"
-            class="custom-input"
-            show-password
-          >
+          <el-input v-model="form.password" type="password" placeholder="请输入密码" class="custom-input" show-password>
             <template #prefix>
               <el-icon class="input-icon">
                 <Lock></Lock>
@@ -50,12 +30,7 @@
   -->
 
         <el-form-item class="login-button-item">
-          <el-button
-            class="login-button"
-            type="primary"
-            @click="submit"
-            :loading="loading"
-          >
+          <el-button class="login-button" type="primary" @click="submit" :loading="loading">
             {{ $t("login.login") }}
           </el-button>
         </el-form-item>
@@ -65,8 +40,6 @@
 </template>
 
 <script setup lang="ts">
-import request from "@/utils/request";
-import { UserInfoReturnType } from "@/api/user/model";
 import "@/assets/font/font.css";
 import { FormInstance } from "element-plus";
 import { useRouter, LocationQuery, useRoute } from "vue-router";
@@ -78,7 +51,6 @@ const formRef = ref<FormInstance>();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
-const rememberMe = ref(false);
 
 const { t } = useI18n();
 
@@ -153,23 +125,6 @@ const submit = () => {
       ElMessage.warning("请输入正确的登录信息");
     }
   });
-};
-
-// 处理忘记密码
-const handleForgotPassword = () => {
-  ElMessage.info("请联系管理员重置密码");
-  // 或者可以跳转到密码重置页面
-  // router.push('/reset-password');
-};
-
-// 处理注册新账号
-const handleRegister = () => {
-  router.push("/signup");
-};
-
-// 切换到注册选项卡
-const switchToRegister = () => {
-  emit("switch-to-register");
 };
 </script>
 

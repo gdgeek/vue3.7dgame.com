@@ -242,7 +242,6 @@ interface StudentRecord {
   class?: ClassWithSchool;
   school?: { id: number; name: string };
   groups?: Group[];
-  [key: string]: any;
 }
 
 const loading = ref(false);
@@ -274,6 +273,7 @@ const groupListRefs = ref<
   Map<number, InstanceType<typeof ClassGroupList> | null>
 >(new Map());
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const setGroupListRef = (classId: number | undefined, el: any) => {
   if (classId) {
     groupListRefs.value.set(classId, el);
@@ -295,7 +295,8 @@ const fetchStudentRecords = async () => {
   loading.value = true;
   try {
     const response = await getStudentMe("-created_at", "", 1, "class,school");
-    const data = response.data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = (response as any).data;
     const records = (Array.isArray(data)
       ? data
       : data
@@ -315,7 +316,8 @@ const fetchStudentRecords = async () => {
               1,
               "image,user,joined"
             );
-            const groupData = myGroupRes.data;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const groupData = (myGroupRes as any).data;
             if (Array.isArray(groupData)) {
               record.groups = groupData;
             } else {
@@ -374,10 +376,11 @@ const handleApply = async (classItem: ClassWithSchool) => {
     ElMessage.success(t("route.personalCenter.campus.applySuccess"));
     applyDialogVisible.value = false;
     await fetchStudentRecords();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to apply to class:", error);
     const errorMsg =
-      error.response?.data?.message ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (error as any).response?.data?.message ||
       t("route.personalCenter.campus.applyFailed");
     ElMessage.error(errorMsg);
   } finally {
@@ -401,11 +404,12 @@ const handleLeaveClass = async (record: StudentRecord) => {
     await deleteStudent(record.id);
     ElMessage.success(t("route.personalCenter.campus.leaveSuccess"));
     await fetchStudentRecords();
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== "cancel") {
       console.error("Failed to leave class:", error);
       const errorMsg =
-        error.response?.data?.message ||
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error as any).response?.data?.message ||
         t("route.personalCenter.campus.leaveFailed");
       ElMessage.error(errorMsg);
     }
@@ -423,7 +427,7 @@ const openGroupDialog = (record: StudentRecord, group?: Group) => {
       id: group.id,
       name: group.name,
       description: group.description || "",
-      image_id: (group as any).image_id || null,
+      image_id: group.image_id || null,
       imageUrl: group.image?.url || "",
     };
     if (!groupForm.value.image_id && group.image) {
@@ -501,10 +505,11 @@ const handleSaveGroup = async () => {
     // Refresh the ClassGroupList component
     const listRef = groupListRefs.value.get(classId);
     listRef?.refresh();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to save group:", error);
     const errorMsg =
-      error.response?.data?.message ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (error as any).response?.data?.message ||
       (groupForm.value.id
         ? t("common.operationFailed")
         : t("common.createFailed"));
@@ -534,10 +539,11 @@ const handleJoinGroup = async (group: Group, record: StudentRecord) => {
       const listRef = groupListRefs.value.get(classId);
       listRef?.refresh();
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== "cancel") {
       console.error("Failed to join group:", error);
-      const backendMsg = error.response?.data?.message || "";
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const backendMsg = (error as any).response?.data?.message || "";
       let errorMsg = t("route.personalCenter.campus.joinFailed");
       if (backendMsg.includes("already joined")) {
         errorMsg = t("route.personalCenter.campus.alreadyJoinedGroup");
@@ -569,11 +575,12 @@ const handleLeaveGroup = async (group: Group, record: StudentRecord) => {
       const listRef = groupListRefs.value.get(classId);
       listRef?.refresh();
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== "cancel") {
       console.error("Failed to leave group:", error);
       const errorMsg =
-        error.response?.data?.message || t("common.operationFailed");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error as any).response?.data?.message || t("common.operationFailed");
       ElMessage.error(errorMsg);
     }
   } finally {
@@ -600,11 +607,12 @@ const handleDeleteGroup = async (group: Group, record: StudentRecord) => {
       const listRef = groupListRefs.value.get(classId);
       listRef?.refresh();
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== "cancel") {
       console.error("Failed to delete group:", error);
       const errorMsg =
-        error.response?.data?.message || t("common.deleteFailed");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error as any).response?.data?.message || t("common.deleteFailed");
       ElMessage.error(errorMsg);
     }
   }
