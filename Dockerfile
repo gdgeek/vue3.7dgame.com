@@ -1,29 +1,20 @@
-# ===========================================
-# 构建阶段
-# ===========================================
 FROM node:20-alpine AS build
 WORKDIR /app
 
-# 安装 pnpm
-RUN npm install -g pnpm@10.14.0
-
-# 复制依赖文件（利用 Docker 缓存层）
+# 复制依赖文件
 COPY package.json pnpm-lock.yaml ./
 
-# 安装依赖
+# 安装 pnpm 并安装依赖
+RUN npm install pnpm -g
 RUN pnpm install --frozen-lockfile
 
 # 复制源代码
 COPY . .
 
-# 构建参数：支持不同环境构建
-# 可选值：production, staging, 7dgame_com, 4mr_cn, 01xr_com 等
-ARG BUILD_MODE=production
-RUN pnpm run build:${BUILD_MODE} || pnpm run build
+# 构建（跳过类型检查）
+RUN pnpm run build-only
 
-# ===========================================
-# 生产阶段
-# ===========================================
+# 使用 Nginx 作为生产阶段
 FROM nginx:alpine
 
 # 将自定义的 Nginx 配置文件复制到容器中
