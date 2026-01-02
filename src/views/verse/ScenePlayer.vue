@@ -4,6 +4,7 @@
       height: isSceneFullscreen ? '100vh' : '75vh',
       width: '100%',
       margin: '0 auto',
+      position: 'relative',
     }"></div>
   </div>
 </template>
@@ -11,17 +12,28 @@
 <script setup lang="ts">
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import Stats from 'stats.js';
 
 import { ref, onMounted, onUnmounted, watch } from "vue";
 
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useModelLoader } from "./composables/useModelLoader";
+import {
+  Verse,
+  Entity,
+  Resource,
+  CollisionObject,
+  RotatingObject,
+  MoveableObject,
+  DragState,
+  Transform
+} from "@/types/verse";
 
 const settingsStore = useSettingsStore();
 
 const props = defineProps<{
-  verse: any;
+  verse: Verse;
   isSceneFullscreen?: boolean;
 }>();
 
@@ -43,45 +55,16 @@ let clock = new THREE.Clock();
 const eventContainer = ref<{ [key: string]: any }>({});
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 
-const collisionObjects = ref<
-  Array<{
-    sourceUuid: string;
-    targetUuid: string;
-    eventUuid: string;
-    boundingBox: THREE.Box3;
-    isColliding: boolean;
-    lastPosition: THREE.Vector3;
-    checkVisibility: boolean;
-  }>
->([]);
+const collisionObjects = ref<CollisionObject[]>([]);
 
-const rotatingObjects = ref<
-  Array<{
-    mesh: THREE.Object3D;
-    speed: { x: number; y: number; z: number };
-    checkVisibility: boolean;
-  }>
->([]);
+const rotatingObjects = ref<RotatingObject[]>([]);
 
-const moveableObjects = ref<
-  Array<{
-    mesh: THREE.Object3D;
-    isDragging: boolean;
-    magnetic: boolean;
-    scalable: boolean;
-    limit: {
-      x: { enable: boolean; min: number; max: number };
-      y: { enable: boolean; min: number; max: number };
-      z: { enable: boolean; min: number; max: number };
-    };
-    checkVisibility: boolean;
-  }>
->([]);
+const moveableObjects = ref<MoveableObject[]>([]);
 
 // 添加拖拽状态管理
-const dragState = reactive({
+const dragState = reactive<DragState>({
   isDragging: false,
-  draggedObject: null as THREE.Object3D | null, // 拖动的对象
+  draggedObject: null, // 拖动的对象
   dragStartPosition: new THREE.Vector3(), // 拖动开始位置
   dragOffset: new THREE.Vector3(), // 拖动偏移量
   mouseStartPosition: new THREE.Vector2(), // 鼠标开始位置
@@ -95,8 +78,7 @@ const raycaster = new THREE.Raycaster(); // 射线投射器
 // 初始化事件容器
 const initEventContainer = () => {
   if (props.verse?.data) {
-    // const verseData = JSON.parse(props.verse.data);
-    const verseData = props.verse.data;
+    const verseData = typeof props.verse.data === 'string' ? JSON.parse(props.verse.data) : props.verse.data;
     if (verseData.children?.modules) {
       verseData.children.modules.forEach((module: any) => {
         const metaId = module.parameters.meta_id;
@@ -371,8 +353,8 @@ const playQueuedAudio = async (
 
 // 递归处理meta中的实体
 const processEntities = async (
-  entities: any[],
-  parentTransform?: any,
+  entities: Entity[],
+  parentTransform?: Transform,
   level: number = 0,
   parentActive: boolean = true
 ) => {
@@ -400,10 +382,11 @@ const processEntities = async (
     // 处理当前实体
     if (entity.type === "Text") {
       try {
-        const textResource = {
+        const textResource: Resource = {
           type: "text",
           content: entity.parameters.text || "DEFAULT TEXT",
           id: entity.parameters.uuid || crypto.randomUUID(),
+          file: { url: "" }
         };
         await loadModel(
           textResource,
@@ -437,7 +420,7 @@ const processEntities = async (
       sources.set(entity.parameters.uuid, entityData);
     } else if (entity.parameters?.resource) {
       const resource = props.verse.resources.find(
-        (r: any) => r.id.toString() === entity.parameters.resource.toString()
+        (r: Resource) => r.id?.toString() === entity.parameters.resource?.toString()
       );
       if (resource) {
         try {
@@ -520,8 +503,7 @@ onMounted(async () => {
 
   // 加载verse中所有数据
   if (props.verse?.data) {
-    // const verseData = JSON.parse(props.verse.data);
-    const verseData = props.verse.data;
+    const verseData = typeof props.verse.data === 'string' ? JSON.parse(props.verse.data) : props.verse.data;
     console.log("解析后的verse全部数据:", props.verse);
     if (verseData.children?.modules) {
       for (const module of verseData.children.modules) {
@@ -549,8 +531,19 @@ onMounted(async () => {
   initEventContainer();
   console.error("事件容器:", eventContainer.value);
 
+  // 初始化性能监控
+  const stats = new Stats();
+  stats.showPanel(0); // 0: fps, 1: ms, 2: mb
+  stats.dom.style.position = 'absolute';
+  stats.dom.style.top = '0px';
+  stats.dom.style.left = '0px';
+  if (scene.value) {
+    scene.value.appendChild(stats.dom);
+  }
+
   // 动画循环
   const animate = () => {
+    stats.begin();
     requestAnimationFrame(animate);
     const delta = clock.getDelta();
     mixers.forEach((mixer) => mixer.update(delta));
@@ -625,6 +618,7 @@ onMounted(async () => {
 
     controls.value!.update();
     renderer.value!.render(threeScene, camera.value!);
+    stats.end();
   };
   animate();
 

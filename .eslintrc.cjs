@@ -7,12 +7,12 @@ module.exports = {
   },
   parser: "vue-eslint-parser",
   extends: [
-    // https://eslint.vuejs.org/user-guide/#usage
     "plugin:vue/vue3-recommended",
     "./.eslintrc-auto-import.json",
     "prettier",
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended",
+    "plugin:storybook/recommended"
   ],
   parserOptions: {
     ecmaVersion: "latest",

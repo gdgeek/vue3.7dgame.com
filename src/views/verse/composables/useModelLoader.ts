@@ -4,21 +4,31 @@ import { getConfiguredGLTFLoader } from "@/lib/three/loaders";
 import { convertToHttps } from "@/assets/js/helper";
 import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Ref } from "vue";
+import {
+  Verse,
+  Entity,
+  Resource,
+  CollisionObject,
+  RotatingObject,
+  MoveableObject,
+  DragState,
+  Transform,
+} from "@/types/verse";
 
 interface ModelLoaderContext {
   threeScene: THREE.Scene;
   camera: Ref<THREE.PerspectiveCamera | null>;
   renderer: Ref<THREE.WebGLRenderer | null>;
   mixers: Map<string, THREE.AnimationMixer>;
-  sources: Map<string, any>;
-  collisionObjects: Ref<any[]>;
-  rotatingObjects: Ref<any[]>;
-  moveableObjects: Ref<any[]>;
-  dragState: any;
+  sources: Map<string, any>; // Sources might store different data structures per type, could be a union type later
+  collisionObjects: Ref<CollisionObject[]>;
+  rotatingObjects: Ref<RotatingObject[]>;
+  moveableObjects: Ref<MoveableObject[]>;
+  dragState: DragState;
   controls: Ref<OrbitControls | null>;
   mouse: THREE.Vector2;
   raycaster: THREE.Raycaster;
-  verse: any;
+  verse: Verse;
 }
 
 export function useModelLoader(context: ModelLoaderContext) {
@@ -39,9 +49,9 @@ export function useModelLoader(context: ModelLoaderContext) {
   } = context;
 
   const loadModel = async (
-    resource: any,
-    entity: any,
-    moduleTransform?: any,
+    resource: Resource,
+    entity: Entity,
+    moduleTransform?: Transform,
     parentActive: boolean = true
   ): Promise<THREE.Object3D | boolean | undefined> => {
     console.log("开始加载模型:", {
@@ -63,11 +73,11 @@ export function useModelLoader(context: ModelLoaderContext) {
       return isActive;
     };
 
-    if (resource.type === "video" || entity.type === "Video") {
+    if (resource.type.toLowerCase() === "video" && resource.file) {
       return new Promise((resolve, reject) => {
         try {
           const video = document.createElement("video");
-          video.src = convertToHttps(resource.file.url);
+          video.src = convertToHttps(resource.file!.url);
           video.crossOrigin = "anonymous";
 
           video.loop = entity.parameters.loop || false;
@@ -193,10 +203,13 @@ export function useModelLoader(context: ModelLoaderContext) {
       });
     }
 
-    if (resource.type === "picture" || entity.type === "Picture") {
+    if (
+      (resource.type === "picture" || entity.type === "Picture") &&
+      resource.file
+    ) {
       return new Promise((resolve, reject) => {
         const textureLoader = new THREE.TextureLoader();
-        const url = convertToHttps(resource.file.url);
+        const url = convertToHttps(resource.file!.url);
 
         textureLoader.load(
           url,
@@ -269,10 +282,13 @@ export function useModelLoader(context: ModelLoaderContext) {
       });
     }
 
-    if (resource.type === "audio" || entity.type === "Sound") {
+    if (
+      (resource.type === "audio" || entity.type === "Sound") &&
+      resource.file
+    ) {
       return new Promise((resolve) => {
         const uuid = entity.parameters.uuid.toString();
-        const audioUrl = convertToHttps(resource.file.url);
+        const audioUrl = convertToHttps(resource.file!.url);
 
         sources.set(uuid, {
           type: "audio",
@@ -371,12 +387,13 @@ export function useModelLoader(context: ModelLoaderContext) {
     }
 
     if (
-      resource.type === "voxel" ||
-      entity.type === "Voxel" ||
-      entity.type === "Entity"
+      (resource.type === "voxel" ||
+        entity.type === "Voxel" ||
+        entity.type === "Entity") &&
+      resource.file
     ) {
       const loader = new VOXLoader();
-      const url = convertToHttps(resource.file.url);
+      const url = convertToHttps(resource.file!.url);
 
       return new Promise((resolve, reject) => {
         loader.load(
@@ -420,12 +437,12 @@ export function useModelLoader(context: ModelLoaderContext) {
 
               if (entity.children?.entities) {
                 const childMeshes = await Promise.all(
-                  entity.children.entities.map((childEntity: any) => {
+                  entity.children.entities.map((childEntity: Entity) => {
                     if (childEntity.parameters?.resource) {
                       const childResource = verse.resources.find(
-                        (r: any) =>
-                          r.id.toString() ===
-                          childEntity.parameters.resource.toString()
+                        (r: Resource) =>
+                          r.id?.toString() ===
+                          childEntity.parameters.resource?.toString()
                       );
                       if (childResource) {
                         return loadModel(
@@ -436,10 +453,11 @@ export function useModelLoader(context: ModelLoaderContext) {
                         );
                       }
                     } else if (childEntity.type === "Text") {
-                      const textResource = {
+                      const textResource: Resource = {
                         type: "text",
                         content: childEntity.parameters.text || "DEFAULT TEXT",
                         id: childEntity.parameters.uuid || crypto.randomUUID(),
+                        file: { url: "" }, // Satisfy potential strict requirements if any, or rely on optional
                       };
                       return loadModel(
                         textResource,
@@ -452,8 +470,8 @@ export function useModelLoader(context: ModelLoaderContext) {
                   })
                 );
 
-                childMeshes.filter(Boolean).forEach((childMesh) => {
-                  if (childMesh instanceof THREE.Object3D) {
+                childMeshes.forEach((childMesh) => {
+                  if (childMesh && childMesh instanceof THREE.Object3D) {
                     voxMesh.add(childMesh);
                   }
                 });
@@ -552,11 +570,14 @@ export function useModelLoader(context: ModelLoaderContext) {
       });
     }
 
-    if (resource.type === "model" || entity.type === "Model") {
+    if (
+      (resource.type === "model" || entity.type === "Model") &&
+      resource.file
+    ) {
       // GLTF Loader logic
       // ... reusing getConfiguredGLTFLoader
       const loader = getConfiguredGLTFLoader();
-      const url = convertToHttps(resource.file.url);
+      const url = convertToHttps(resource.file!.url);
 
       return new Promise((resolve, reject) => {
         loader.load(

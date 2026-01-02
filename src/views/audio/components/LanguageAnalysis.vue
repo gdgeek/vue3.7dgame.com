@@ -16,7 +16,6 @@
             :stroke-width="8" :track-color="isDark ? '#444' : '#e4e7ed'" class="language-progress" />
         </div>
       </div>
-      <div class="language-chart" ref="languageChartRef"></div>
     </div>
     <div class="analysis-suggestion" v-if="analysis.suggestion">
       <el-alert :title="analysis.suggestion" type="info" :closable="false" />
@@ -25,23 +24,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
-import * as echarts from 'echarts/core'
-import { PieChart } from 'echarts/charts'
-import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components'
-import { LabelLayout } from 'echarts/features'
-import { CanvasRenderer } from 'echarts/renderers'
-
-// 注册ECharts组件
-echarts.use([
-  PieChart,
-  TitleComponent,
-  TooltipComponent,
-  LegendComponent,
-  LabelLayout,
-  CanvasRenderer
-])
 
 interface LanguageAnalysis {
   chinesePercentage: number
@@ -70,12 +54,6 @@ defineEmits<{
 }>()
 
 const { t } = useI18n()
-
-// DOM引用
-const languageChartRef = ref<HTMLElement | null>(null)
-
-// 图表实例
-let languageChart: echarts.ECharts | null = null
 
 // 动画相关
 const animatedPercentages = ref<Record<string, number>>({})
@@ -164,114 +142,10 @@ const updateAnimatedPercentages = () => {
   requestAnimationFrame(animate)
 }
 
-// 更新语言分析图表
-const updateLanguageChart = () => {
-  if (!languageChartRef.value) return
-
-  if (!languageChart) {
-    languageChart = echarts.init(languageChartRef.value)
-  } else {
-    languageChart.resize()
-  }
-
-  const colorMap = {
-    '中文': '#f56c6c',
-    '日文': '#67c23a',
-    '英文': '#409eff',
-    '其他': '#909399'
-  }
-
-  const chartData = [
-    {
-      value: props.analysis.chinesePercentage,
-      name: t('tts.chinese'),
-      itemStyle: { color: colorMap['中文'] },
-      count: props.analysis.chineseCount
-    },
-    {
-      value: props.analysis.japanesePercentage,
-      name: t('tts.japanese'),
-      itemStyle: { color: colorMap['日文'] },
-      count: props.analysis.japaneseCount
-    },
-    {
-      value: props.analysis.englishPercentage,
-      name: t('tts.english'),
-      itemStyle: { color: colorMap['英文'] },
-      count: props.analysis.englishCount
-    },
-    {
-      value: props.analysis.otherPercentage,
-      name: t('tts.other'),
-      itemStyle: { color: colorMap['其他'] },
-      count: props.analysis.otherCount
-    }
-  ].filter(item => item.value > 0)
-
-  const option = {
-    tooltip: {
-      trigger: 'item',
-      formatter: function (params: any) {
-        return `${t('tts.languageAnalysis')}<br/>
-               ${params.name}: ${params.percent}%<br/>
-               ${t('tts.totalChars')}: ${params.data.count}<br/>
-              `
-      },
-      textStyle: {
-        color: props.isDark ? '#fff' : '#333'
-      },
-      backgroundColor: props.isDark ? '#1e1e1e' : '#fff',
-      borderColor: props.isDark ? '#444' : '#ddd'
-    },
-    legend: {
-      orient: 'vertical',
-      left: 'left',
-      textStyle: {
-        color: props.isDark ? '#e0e0e0' : '#606266'
-      }
-    },
-    series: [
-      {
-        name: t('tts.languageAnalysis'),
-        type: 'pie',
-        radius: ['40%', '95%'],
-        avoidLabelOverlap: false,
-        itemStyle: {
-          borderRadius: 8,
-          borderColor: props.isDark ? '#1e1e1e' : '#fff',
-          borderWidth: 2
-        },
-        label: {
-          show: false,
-          position: 'center',
-          color: props.isDark ? '#e0e0e0' : '#606266'
-        },
-        emphasis: {
-          label: {
-            show: true,
-            fontSize: '20',
-            fontWeight: 'bold',
-            color: props.isDark ? '#e0e0e0' : '#606266'
-          }
-        },
-        labelLine: {
-          show: false
-        },
-        data: chartData
-      }
-    ]
-  }
-
-  languageChart.setOption(option)
-}
-
 // 监听 analysis 变化
 watch(() => props.analysis, () => {
   if (props.visible) {
     updateAnimatedPercentages()
-    nextTick(() => {
-      updateLanguageChart()
-    })
   }
 }, { deep: true })
 
@@ -280,33 +154,15 @@ watch(() => props.visible, (newVal) => {
   if (newVal) {
     nextTick(() => {
       updateAnimatedPercentages()
-      updateLanguageChart()
     })
   }
 })
 
-// 窗口大小变化时重新绘制图表
-const handleResize = () => {
-  if (languageChart) {
-    languageChart.resize()
-  }
-}
-
 onMounted(() => {
-  window.addEventListener('resize', handleResize)
   if (props.visible) {
     nextTick(() => {
       updateAnimatedPercentages()
-      updateLanguageChart()
     })
-  }
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
-  if (languageChart) {
-    languageChart.dispose()
-    languageChart = null
   }
 })
 </script>
@@ -369,11 +225,6 @@ onUnmounted(() => {
   &.other {
     color: #909399;
   }
-}
-
-.language-chart {
-  width: 150px;
-  height: 150px;
 }
 
 .analysis-suggestion {

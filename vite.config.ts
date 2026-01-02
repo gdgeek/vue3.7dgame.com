@@ -10,6 +10,7 @@ import IconsResolver from "unplugin-icons/resolver";
 
 import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 import mockDevServerPlugin from "vite-plugin-mock-dev-server";
+import { visualizer } from "rollup-plugin-visualizer";
 
 import UnoCSS from "unocss/vite";
 import { resolve } from "path";
@@ -135,6 +136,12 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       VueDevTools({
         openInEditorHost: `http://localhost:${env.VITE_APP_PORT}`,
       }),
+      visualizer({
+        open: true,
+        gzipSize: true,
+        brotliSize: true,
+        filename: "stats.html",
+      }),
     ],
     // 预加载项目必需的组件
     optimizeDeps: {
@@ -189,6 +196,10 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
               "@fortawesome/free-solid-svg-icons",
               "@fortawesome/vue-fontawesome",
             ],
+            // Heavy Libs
+            "china-division": ["element-china-area-data"],
+            highlight: ["highlight.js", "vue-hljs"],
+            "audio-libs": ["howler"],
           },
           // 用于从入口点创建的块的打包输出格式[name]表示文件名,[hash]表示该文件内容hash值
           entryFileNames: "js/[name].[hash].js",

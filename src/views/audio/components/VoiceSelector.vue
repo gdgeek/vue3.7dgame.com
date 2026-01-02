@@ -85,7 +85,6 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { availableVoices as voicesList } from '@/store/modules/availableVoices'
 
 interface VoiceOption {
   value: number
@@ -98,6 +97,7 @@ interface VoiceOption {
 }
 
 const props = defineProps<{
+  // Model values
   selectedVoice: number
   voiceType: string
   voiceScene: string
@@ -105,6 +105,13 @@ const props = defineProps<{
   autoSwitchLanguage: boolean
   emotionCategory: string
   emotionIntensity: number
+
+  // Data props from composable
+  availableScenes: string[]
+  groupedVoices: { type: string; voices: VoiceOption[] }[]
+  availableEmotions: string[]
+  filteredEmotions: string[]
+
   isDark: boolean
 }>()
 
@@ -119,7 +126,7 @@ const emit = defineEmits<{
   'show-emotions': [voice: VoiceOption]
 }>()
 
-// 双向绑定
+// Wrappers for v-model binding
 const localSelectedVoice = computed({
   get: () => props.selectedVoice,
   set: (val) => emit('update:selectedVoice', val)
@@ -153,56 +160,6 @@ const localEmotionCategory = computed({
 const localEmotionIntensity = computed({
   get: () => props.emotionIntensity,
   set: (val) => emit('update:emotionIntensity', val)
-})
-
-// 可用场景列表
-const availableScenes = computed(() => {
-  const scenes = new Set<string>()
-  voicesList.forEach(voice => scenes.add(voice.scene))
-  return Array.from(scenes)
-})
-
-// 根据筛选条件过滤音色
-const filteredVoices = computed(() => {
-  return voicesList.filter(voice => {
-    if (props.voiceType && voice.type !== props.voiceType) return false
-    if (props.voiceScene && voice.scene !== props.voiceScene) return false
-    if (props.voiceLanguage && voice.language !== props.voiceLanguage) return false
-    return true
-  })
-})
-
-// 按类型分组音色
-const groupedVoices = computed(() => {
-  const groups: { type: string; voices: VoiceOption[] }[] = []
-  const typeMap = new Map<string, VoiceOption[]>()
-
-  filteredVoices.value.forEach(voice => {
-    if (!typeMap.has(voice.type)) {
-      typeMap.set(voice.type, [])
-    }
-    typeMap.get(voice.type)?.push(voice)
-  })
-
-  typeMap.forEach((voices, type) => {
-    groups.push({ type, voices })
-  })
-
-  return groups
-})
-
-// 可用情感列表
-const availableEmotions = computed(() => {
-  const selectedVoice = voicesList.find(voice => voice.value === props.selectedVoice)
-  return selectedVoice ? selectedVoice.emotions : ['中性']
-})
-
-// 过滤后的情感列表
-const filteredEmotions = computed(() => {
-  if (availableEmotions.value.length === 1) {
-    return availableEmotions.value
-  }
-  return availableEmotions.value.filter(emotion => emotion !== '中性')
 })
 </script>
 

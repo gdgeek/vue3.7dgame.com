@@ -6,7 +6,9 @@
         <VoiceSelector v-model:selected-voice="selectedVoiceType" v-model:voice-type="voiceType"
           v-model:voice-scene="voiceScene" v-model:voice-language="voiceLanguage"
           v-model:auto-switch-language="autoSwitchLanguage" v-model:emotion-category="emotionCategory"
-          v-model:emotion-intensity="emotionIntensity" :is-dark="isDark" @show-emotions="showEmotions" />
+          v-model:emotion-intensity="emotionIntensity" :available-scenes="availableScenes"
+          :grouped-voices="groupedVoices" :available-emotions="availableEmotions" :filtered-emotions="filteredEmotions"
+          :is-dark="isDark" @show-emotions="showEmotions" />
 
         <!-- TTS 参数控制组件 -->
         <TTSParams v-model:volume="volume" v-model:speed="speed" v-model:codec="codec" v-model:sample-rate="sampleRate"
@@ -106,212 +108,111 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import axios from 'axios'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from "vue-router"
 
-import { availableVoices as voicesList, emotionMap } from '@/store/modules/availableVoices'
-import { postFile } from "@/api/v1/files"
-import { postAudio } from "@/api/v1/resources/index"
-import { useFileStore } from "@/store/modules/config"
 import { useSettingsStore } from '@/store'
 import { ThemeEnum } from '@/enums/ThemeEnum'
 import TransitionWrapper from '@/components/TransitionWrapper.vue'
 import VoiceSelector from './components/VoiceSelector.vue'
 import TTSParams from './components/TTSParams.vue'
 import LanguageAnalysis from './components/LanguageAnalysis.vue'
-import type { UploadFileType } from "@/api/user/model"
 
-interface VoiceOption {
-  value: number
-  label: string
-  type: string
-  scene: string
-  language: string
-  emotions: string[]
-  sampleRate: string[]
-}
+import { useVoiceSelection, VoiceOption } from './composables/useVoiceSelection'
+import { useLanguageAnalysis } from './composables/useLanguageAnalysis'
+import { useTTS } from './composables/useTTS'
 
-interface LanguageAnalysis {
-  chinesePercentage: number
-  japanesePercentage: number
-  englishPercentage: number
-  otherPercentage: number
-  chineseCount: number
-  japaneseCount: number
-  englishCount: number
-  otherCount: number
-  totalChars: number
-  suggestion: string
-  isMultiLanguage: boolean
-  detectedLanguage: string
-}
-
-
-
-const { t, locale } = useI18n()
-const router = useRouter()
-const fileStore = useFileStore()
+const { t } = useI18n()
 const settingsStore = useSettingsStore()
 
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK)
 
-// 动画相关
-const animatedPercentages = ref<Record<string, number>>({})
-let animationStartTime: number | null = null
-const animationDuration = 1500
-
-// 文本相关
+// Text State
 const text = ref('')
-const highlightedText = ref('')
-const normalText = ref('')
-const currentCharIndex = ref(0)
-const isManualScrolling = ref(false)
-const isMouseHovering = ref(false)
+const showLanguageAnalysis = ref(false)
 
-// 音频相关
-const isLoading = ref(false)
-const audioUrl = ref('')
-const currentAudioBlob = ref<Blob | null>(null)
-const isUploading = ref(false)
+// Composables
+const {
+  selectedVoiceType,
+  voiceType,
+  voiceScene,
+  voiceLanguage,
+  autoSwitchLanguage,
+  emotionCategory,
+  emotionIntensity,
+  availableScenes,
+  groupedVoices,
+  availableEmotions,
+  filteredEmotions,
+  supportHighSampleRate,
+  voiceType: voiceTypeRef, // Alias if needed, or use struct desc
+} = useVoiceSelection()
 
-// 播放状态
-const isPlaying = ref(false)
+const {
+  languageAnalysis,
+  checkTextLanguage
+} = useLanguageAnalysis()
 
-// 定时器
-let scrollTimeout: number | null = null
-let hoverTimeout: number | null = null
-let languageDetectionTimer: number | null = null
-
-// DOM引用
-const textContainerRef = ref<HTMLElement | null>(null)
-const audioPlayerRef = ref<HTMLAudioElement | null>(null)
-
-
-// 图表实例
-
-
-// TTS参数
-const selectedVoiceType = ref(101002) // 默认音色：智聆
+// Initialize useTTS with refs from other composables
 const volume = ref(0)
 const speed = ref(0)
 const codec = ref('mp3')
 const sampleRate = ref(16000)
-const emotionCategory = ref('')
-const emotionIntensity = ref(100)
 
-// 筛选参数
-const voiceType = ref('')
-const voiceScene = ref('')
-const voiceLanguage = ref('')
-const autoSwitchLanguage = ref(true)
-
-// 语言分析相关
-const showLanguageAnalysis = ref(false)
-const languageAnalysis = ref<LanguageAnalysis>({
-  chinesePercentage: 0,
-  japanesePercentage: 0,
-  englishPercentage: 0,
-  otherPercentage: 0,
-  chineseCount: 0,
-  japaneseCount: 0,
-  englishCount: 0,
-  otherCount: 0,
-  totalChars: 0,
-  suggestion: '',
-  isMultiLanguage: false,
-  detectedLanguage: ''
+const {
+  isLoading,
+  isUploading,
+  isPlaying,
+  audioUrl,
+  currentAudioBlob,
+  audioPlayerRef,
+  textContainerRef,
+  highlightedText,
+  normalText,
+  synthesizeSpeech,
+  uploadAudio,
+  onTextInput: handleTextInput, // Rename to avoid conflict if any
+  onAudioPlayerPlay,
+  onAudioPlayerPause,
+  onAudioPlayerEnded
+} = useTTS({
+  text,
+  volume,
+  speed,
+  selectedVoiceType,
+  codec,
+  sampleRate,
+  voiceLanguage,
+  voiceType,
+  emotionCategory,
+  emotionIntensity,
+  checkTextLanguage: () => checkTextLanguage(text.value, voiceLanguage, autoSwitchLanguage)
 })
 
-// 情感选择相关
+// Dialog State (UI concern)
 const emotionsDialogVisible = ref(false)
 const selectedVoiceEmotions = ref<string[]>([])
 
-// 可用场景列表
-const availableScenes = computed(() => {
-  const scenes = new Set<string>()
-  voicesList.forEach(voice => scenes.add(voice.scene))
-  return Array.from(scenes)
-})
+// UI Methods
+const showEmotions = (voice: VoiceOption) => {
+  selectedVoiceEmotions.value = voice.emotions
+  emotionsDialogVisible.value = true
+}
 
-// 根据筛选条件过滤音色
-const filteredVoices = computed(() => {
-  return voicesList.filter(voice => {
-    if (voiceType.value && voice.type !== voiceType.value) return false
-    if (voiceScene.value && voice.scene !== voiceScene.value) return false
-    if (voiceLanguage.value && voice.language !== voiceLanguage.value) return false
-    return true
-  })
-})
+const selectEmotion = (emotion: string) => {
+  emotionCategory.value = emotion
+}
 
-// 按类型分组音色
-const groupedVoices = computed(() => {
-  const groups: { type: string; voices: VoiceOption[] }[] = []
-  const typeMap = new Map<string, VoiceOption[]>()
+const confirmEmotionSelection = () => {
+  emotionsDialogVisible.value = false
+}
 
-  filteredVoices.value.forEach(voice => {
-    if (!typeMap.has(voice.type)) {
-      typeMap.set(voice.type, [])
-    }
-    typeMap.get(voice.type)?.push(voice)
-  })
+// Handler wrapper to update local state logic if needed
+const onTextInput = () => {
+  handleTextInput()
+}
 
-  typeMap.forEach((voices, type) => {
-    groups.push({ type, voices })
-  })
-
-  return groups
-})
-
-// 可用情感列表
-const availableEmotions = computed(() => {
-  const selectedVoice = voicesList.find(voice => voice.value === selectedVoiceType.value)
-  return selectedVoice ? selectedVoice.emotions : ['中性']
-})
-
-// 过滤后的情感列表
-const filteredEmotions = computed(() => {
-  if (availableEmotions.value.length === 1) {
-    return availableEmotions.value
-  }
-  return availableEmotions.value.filter(emotion => emotion !== '中性')
-})
-
-// 是否支持高采样率
-const supportHighSampleRate = computed(() => {
-  const selectedVoice = voicesList.find(voice => voice.value === selectedVoiceType.value)
-  return selectedVoice?.sampleRate.includes('24k') || false
-})
-
-// 语言分析项
-const languageItems = computed(() => {
-  return Object.entries({
-    chinese: {
-      label: t('tts.chinese'),
-      percentage: languageAnalysis.value.chinesePercentage,
-      count: languageAnalysis.value.chineseCount
-    },
-    japanese: {
-      label: t('tts.japanese'),
-      percentage: languageAnalysis.value.japanesePercentage,
-      count: languageAnalysis.value.japaneseCount
-    },
-    english: {
-      label: t('tts.english'),
-      percentage: languageAnalysis.value.englishPercentage,
-      count: languageAnalysis.value.englishCount
-    },
-    other: {
-      label: t('tts.other'),
-      percentage: languageAnalysis.value.otherPercentage,
-      count: languageAnalysis.value.otherCount
-    }
-  }).filter(([_, item]) => item.percentage > 0)
-})
-
-// 当前语言的文本限制说明
+// Derived UI Computeds
 const getLanguageLimitText = computed(() => {
   switch (voiceLanguage.value) {
     case '中文':
@@ -324,603 +225,9 @@ const getLanguageLimitText = computed(() => {
       return t('tts.selectLanguageFirst')
   }
 })
-
-// 缓动函数
-const easeOutCubic = (x: number): number => {
-  return 1 - Math.pow(1 - x, 3)
-}
-
-// 获取进度条颜色
-const getProgressColor = (type: string): string => {
-  const colorMap: Record<string, string> = {
-    chinese: '#f56c6c',
-    japanese: '#67c23a',
-    english: '#409eff',
-    other: '#909399'
-  }
-  return colorMap[type] || '#909399'
-}
-
-// 更新动画百分比
-const updateAnimatedPercentages = () => {
-  const targetPercentages: Record<string, number> = {}
-  languageItems.value.forEach(([type, item]) => {
-    targetPercentages[type] = item.percentage
-  })
-
-  Object.keys(targetPercentages).forEach(type => {
-    if (!(type in animatedPercentages.value)) {
-      animatedPercentages.value[type] = 0
-    }
-  })
-
-  const animate = (timestamp: number) => {
-    if (!animationStartTime) {
-      animationStartTime = timestamp
-    }
-
-    const progress = Math.min((timestamp - animationStartTime) / animationDuration, 1)
-    const easeProgress = easeOutCubic(progress)
-
-    Object.keys(targetPercentages).forEach(type => {
-      const target = targetPercentages[type]
-      const start = animatedPercentages.value[type] || 0
-      animatedPercentages.value[type] = start + (target - start) * easeProgress
-    })
-
-    if (progress < 1) {
-      requestAnimationFrame(animate)
-    }
-  }
-
-  requestAnimationFrame(animate)
-}
-
-
-
-
-
-const onTextInput = () => {
-  highlightedText.value = ''
-  normalText.value = text.value
-
-  if (audioPlayerRef.value) {
-    audioPlayerRef.value.pause()
-  }
-  isPlaying.value = false
-
-  checkTextLanguage()
-}
-
-const onAudioPlayerPlay = () => isPlaying.value = true
-const onAudioPlayerPause = () => { }
-const onAudioPlayerEnded = () => {
-  isPlaying.value = false
-  highlightedText.value = text.value
-  normalText.value = ''
-}
-
-// 语言检测相关方法
-const checkTextLanguage = () => {
-  if (!text.value) return
-
-  const chineseRegex = /[\u4e00-\u9fa5]/g
-  const japaneseRegex = /[\u3040-\u309F\u30A0-\u30FF]/g
-  const japaneseKanjiRegex = /[\u4E00-\u9FAF]/g
-  const englishRegex = /[a-zA-Z]/g
-
-  const chineseCount = (text.value.match(chineseRegex) || []).length
-  const japaneseKanaCount = (text.value.match(japaneseRegex) || []).length
-  const japaneseKanjiCount = (text.value.match(japaneseKanjiRegex) || []).length - chineseCount
-  const japaneseCount = japaneseKanaCount + Math.max(0, japaneseKanjiCount)
-  const englishCount = (text.value.match(englishRegex) || []).length
-  const otherCount = text.value.length - (chineseCount + japaneseCount + englishCount)
-
-  const totalChars = text.value.length
-  const chinesePercentage = (chineseCount / totalChars) * 100
-  const japanesePercentage = (japaneseCount / totalChars) * 100
-  const englishPercentage = (englishCount / totalChars) * 100
-  const otherPercentage = 100 - chinesePercentage - japanesePercentage - englishPercentage
-
-  languageAnalysis.value = {
-    chinesePercentage: Math.round(chinesePercentage),
-    japanesePercentage: Math.round(japanesePercentage),
-    englishPercentage: Math.round(englishPercentage),
-    otherPercentage: Math.round(otherPercentage),
-    chineseCount,
-    japaneseCount,
-    englishCount,
-    otherCount,
-    totalChars,
-    suggestion: '',
-    isMultiLanguage: false,
-    detectedLanguage: ''
-  }
-
-
-
-  let detectedLanguage = ''
-  let isMultiLanguage = false
-  const maxCount = Math.max(chineseCount, japaneseCount, englishCount)
-
-  if (maxCount > 0) {
-    if (chineseCount > 0 && (japaneseCount > 0 || englishCount > 0)) {
-      isMultiLanguage = true
-    } else if (japaneseCount > 0 && (chineseCount > 0 || englishCount > 0)) {
-      isMultiLanguage = true
-    } else if (englishCount > 0 && (chineseCount > 0 || japaneseCount > 0)) {
-      isMultiLanguage = true
-    }
-
-    if (chineseCount >= japaneseCount && chineseCount >= englishCount) {
-      detectedLanguage = '中文'
-    } else if (japaneseCount >= chineseCount && japaneseCount >= englishCount) {
-      detectedLanguage = '日文'
-    } else {
-      detectedLanguage = '英文'
-    }
-  }
-
-  // 将检测结果保存到更新建议的函数中使用
-  languageAnalysis.value.isMultiLanguage = isMultiLanguage
-  languageAnalysis.value.detectedLanguage = detectedLanguage
-
-  // 更新建议
-  updateLanguageSuggestion()
-
-  if (isMultiLanguage && text.value.length > 10) {
-    const languageInfo = t('tts.languagePercentage', [
-      Math.round(chinesePercentage),
-      Math.round(japanesePercentage),
-      Math.round(englishPercentage)
-    ])
-
-    if (languageDetectionTimer) {
-      clearTimeout(languageDetectionTimer)
-    }
-
-    languageDetectionTimer = window.setTimeout(() => {
-      const detectedLanguageText = detectedLanguage === '中文' ? t('tts.chinese') :
-        detectedLanguage === '英文' ? t('tts.english') :
-          detectedLanguage === '日文' ? t('tts.japanese') : detectedLanguage
-      ElMessage({
-        message: `${languageInfo}，${autoSwitchLanguage.value ? t('tts.autoSwitched', [detectedLanguageText]) : t('tts.mixedLanguageDetected', [detectedLanguageText])}`,
-        type: 'warning',
-        duration: 5000
-      })
-    }, 3000)
-  }
-
-  if (autoSwitchLanguage.value) {
-    if (detectedLanguage && voiceLanguage.value && detectedLanguage !== voiceLanguage.value) {
-      const oldLanguage = voiceLanguage.value
-      const oldLanguageText = oldLanguage === '中文' ? t('tts.chinese') :
-        oldLanguage === '英文' ? t('tts.english') :
-          oldLanguage === '日文' ? t('tts.japanese') : oldLanguage
-      voiceLanguage.value = detectedLanguage
-      const newLanguageText = detectedLanguage === '中文' ? t('tts.chinese') :
-        detectedLanguage === '英文' ? t('tts.english') :
-          detectedLanguage === '日文' ? t('tts.japanese') : detectedLanguage
-      if (!isMultiLanguage) {
-        ElMessage.success(t('tts.autoSwitchedLanguage', [oldLanguageText, newLanguageText]))
-      }
-    }
-
-    if (detectedLanguage && !voiceLanguage.value) {
-      voiceLanguage.value = detectedLanguage
-      const detectedLanguageText = detectedLanguage === '中文' ? t('tts.chinese') :
-        detectedLanguage === '英文' ? t('tts.english') :
-          detectedLanguage === '日文' ? t('tts.japanese') : detectedLanguage
-      if (!isMultiLanguage) {
-        ElMessage.success(t('tts.autoDetectedLanguage', [detectedLanguageText]))
-      }
-    }
-  }
-
-  if (detectedLanguage === '中文' || detectedLanguage === '日文') {
-    if (text.value.length > 150) {
-      const detectedLanguageText = detectedLanguage === '中文' ? t('tts.chinese') : t('tts.japanese')
-      ElMessage.warning(t('tts.textLimitWarning', [detectedLanguageText, 150, text.value.length]))
-    }
-  } else if (detectedLanguage === '英文') {
-    if (text.value.length > 500) {
-      ElMessage.warning(t('tts.textLimitWarning', [t('tts.english'), 500, text.value.length]))
-    }
-  }
-}
-
-// 更新语言分析建议的函数
-const updateLanguageSuggestion = () => {
-  const { isMultiLanguage, detectedLanguage } = languageAnalysis.value
-
-  if (!detectedLanguage) return
-
-  if (isMultiLanguage) {
-    const detectedLanguageText = detectedLanguage === '中文' ? t('tts.chinese') :
-      detectedLanguage === '英文' ? t('tts.english') :
-        detectedLanguage === '日文' ? t('tts.japanese') : detectedLanguage
-    languageAnalysis.value.suggestion = t('tts.mixedLanguageDetected', [detectedLanguageText])
-  } else {
-    const detectedLanguageText = detectedLanguage === '中文' ? t('tts.chinese') :
-      detectedLanguage === '英文' ? t('tts.english') :
-        detectedLanguage === '日文' ? t('tts.japanese') : detectedLanguage
-    languageAnalysis.value.suggestion = t('tts.mainLanguageDetected', [detectedLanguageText])
-  }
-}
-
-// 显示情感选择
-const showEmotions = (voice: VoiceOption) => {
-  selectedVoiceEmotions.value = voice.emotions
-  emotionsDialogVisible.value = true
-}
-
-// 选择情感
-const selectEmotion = (emotion: string) => {
-  emotionCategory.value = emotion
-}
-
-// 确认情感选择
-const confirmEmotionSelection = () => {
-  emotionsDialogVisible.value = false
-}
-
-// 更新文本高亮
-const updateHighlight = () => {
-  if (!audioPlayerRef.value || !text.value) return
-
-  const progress = audioPlayerRef.value.currentTime / audioPlayerRef.value.duration
-  const charCount = Math.floor(text.value.length * progress)
-
-  currentCharIndex.value = charCount
-  highlightedText.value = text.value.substring(0, charCount)
-  normalText.value = text.value.substring(charCount)
-
-  nextTick(() => {
-    if (textContainerRef.value) {
-      const container = textContainerRef.value
-      const highlightedElement = container.querySelector('.highlighted-text')// 获取高亮元素
-
-      if (highlightedElement && !isManualScrolling.value && !isMouseHovering.value) {
-        const containerRect = container.getBoundingClientRect()// 获取容器位置
-        const highlightedRect = highlightedElement.getBoundingClientRect()// 获取高亮元素位置
-        const lineHeight = parseFloat(getComputedStyle(highlightedElement).lineHeight)// 获取行高
-        const reserveSpace = 2 * lineHeight// 预留2行高
-
-        // 如果高亮元素超出容器底部或超出容器顶部，则滚动容器
-        if (highlightedRect.bottom > (containerRect.bottom - reserveSpace) || highlightedRect.top < containerRect.top) {
-          container.scrollTo({
-            top: container.scrollTop + (highlightedRect.bottom - (containerRect.bottom - reserveSpace)),
-            behavior: 'smooth'
-          })
-        }
-      }
-    }
-  })
-}
-
-// 语音合成
-const synthesizeSpeech = async () => {
-  if (!text.value) {
-    ElMessage.warning(t('tts.noText'))
-    return
-  }
-
-  try {
-    isLoading.value = true
-
-    const params = {
-      Text: text.value,
-      SessionId: `session-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      Volume: volume.value,
-      Speed: speed.value,
-      VoiceType: selectedVoiceType.value,
-      Codec: codec.value,
-      SampleRate: sampleRate.value,
-      PrimaryLanguage: voiceLanguage.value === '中文' ? 1 : voiceLanguage.value === '英文' ? 2 : 3,
-      ModelType: voiceType.value === '精品音色' ? 1 : 0,
-      ...(emotionCategory.value && {
-        EmotionCategory: emotionMap[emotionCategory.value] || 'neutral',
-        EmotionIntensity: emotionIntensity.value
-      })// 如果选择了情感，则添加情感参数
-    }
-
-    // 调用云函数API
-    const response = await axios.post(
-      'https://sound.bujiaban.com/tencentTTS',
-      params,
-      { headers: { 'Content-Type': 'application/json' } }
-    )
-
-    if (response.data?.Audio) {
-      const audioData = atob(response.data.Audio)
-      const arrayBuffer = new ArrayBuffer(audioData.length)
-      const uint8Array = new Uint8Array(arrayBuffer)
-
-      for (let i = 0; i < audioData.length; i++) {
-        uint8Array[i] = audioData.charCodeAt(i)
-      }
-
-      const blob = new Blob([arrayBuffer], { type: `audio/${codec.value}` })
-      currentAudioBlob.value = blob
-
-      if (audioUrl.value) {
-        URL.revokeObjectURL(audioUrl.value)
-      }
-      audioUrl.value = URL.createObjectURL(blob)
-
-      highlightedText.value = ''
-      normalText.value = text.value
-      currentCharIndex.value = 0
-      isPlaying.value = true
-
-      await nextTick()
-
-      if (audioPlayerRef.value) {
-        audioPlayerRef.value.addEventListener('timeupdate', updateHighlight)
-        audioPlayerRef.value.play()
-      }
-
-      ElMessage.success(t('tts.synthesisSuccess'))
-    } else {
-      throw new Error(t('tts.synthesisError'))
-    }
-  } catch (error) {
-    console.error('语音合成错误:', error)
-    ElMessage.error(t('tts.synthesisError'))
-  } finally {
-    isLoading.value = false
-  }
-}
-
-// 上传音频
-const uploadAudio = async () => {
-  if (!currentAudioBlob.value) {
-    ElMessage.warning(t('tts.noAudio'))
-    return
-  }
-
-  try {
-    const { value: audioName } = await ElMessageBox.prompt(
-      t('tts.enterAudioName'),
-      t('tts.uploadAudio'),
-      {
-        confirmButtonText: t('tts.confirm'),
-        cancelButtonText: t('tts.cancel'),
-        inputPattern: /.+/,
-        inputErrorMessage: t('tts.nameRequired'),
-        inputValue: text.value.slice(0, 20) + '...',
-      }
-    )
-
-    if (!audioName) return
-
-    isUploading.value = true
-    const fileName = `tts_${Date.now()}.${codec.value}`
-    const file = new File([currentAudioBlob.value], fileName, { type: `audio/${codec.value}` })
-
-    const handler = await fileStore.store.publicHandler()
-    const md5 = await fileStore.store.fileMD5(file, (p: number) => {
-      console.log('MD5计算进度:', p)
-    })
-    const extension = `.${codec.value}`
-
-    const has = await fileStore.store.fileHas(md5, extension, handler, 'audio')
-    if (!has) {
-      await fileStore.store.fileUpload(md5, extension, file, (p: number) => {
-        console.log('上传进度:', p)
-      }, handler, 'audio')
-    }
-
-    const data: UploadFileType = {
-      filename: fileName,
-      md5,
-      key: md5 + extension,
-      url: fileStore.store.fileUrl(md5, extension, handler, 'audio'),
-    }
-
-    const fileResponse = await postFile(data)
-
-    if (fileResponse.data?.id) {
-      const audioResponse = await postAudio({
-        name: audioName,
-        file_id: fileResponse.data.id
-      })
-
-      if (audioResponse.data?.id) {
-        ElMessage.success(t('tts.uploadSuccess'))
-        await router.push({
-          path: '/resource/audio/view',
-          query: { id: audioResponse.data.id }
-        })
-      } else {
-        throw new Error(t('tts.uploadError'))
-      }
-    } else {
-      throw new Error(t('tts.uploadError'))
-    }
-  } catch (error) {
-    if (error === 'cancel') {
-      ElMessage.info(t('tts.uploadCanceled'))
-      return
-    }
-    console.error('上传错误:', error)
-    ElMessage.error(t('tts.uploadError'))
-  } finally {
-    isUploading.value = false
-  }
-}
-
-// 监听主题变化
-watch(isDark, () => {
-  if (showLanguageAnalysis.value) {
-
-
-    const currentPercentages = { ...animatedPercentages.value }
-    animatedPercentages.value = {}
-    nextTick(() => {
-      Object.keys(currentPercentages).forEach(key => {
-        animatedPercentages.value[key] = 0
-      })
-      requestAnimationFrame(() => {
-        updateAnimatedPercentages()
-      })
-    })
-
-    const bars = document.querySelectorAll('.language-bar-item')
-    bars.forEach((bar) => {
-      const element = bar as HTMLElement
-      element.style.animation = 'none'
-      void element.offsetWidth
-      element.style.animation = ''
-    })
-  }
-})
-
-// 监听音色变化
-watch(selectedVoiceType, () => {
-  if (emotionCategory.value && !availableEmotions.value.includes(emotionCategory.value)) {
-    emotionCategory.value = ''
-  }
-
-  if (!supportHighSampleRate.value && sampleRate.value === 24000) {
-    sampleRate.value = 16000
-  }
-})
-
-// 监听筛选条件变化
-watch([voiceType, voiceScene, voiceLanguage], () => {
-  const firstVoice = filteredVoices.value[0]
-  if (firstVoice) {
-    selectedVoiceType.value = firstVoice.value
-  }
-})
-
-// 监听语言变化
-watch(voiceLanguage, (newLanguage, oldLanguage) => {
-  if (newLanguage !== oldLanguage) {
-    if (text.value) {
-      checkTextLanguage()
-    }
-
-    if (newLanguage === '英文') {
-      ElMessage.success(t('tts.englishLimit'))
-      if (text.value && text.value.length > 500) {
-        text.value = text.value.substring(0, 500)
-        ElMessage.warning(t('tts.textLimitWarning', [t('tts.english'), 500, text.value.length]))
-      }
-    } else if (newLanguage === '中文' || newLanguage === '日文') {
-      ElMessage.success(newLanguage === '中文' ? t('tts.chineseLimit') : t('tts.japaneseLimit'))
-      if (text.value && text.value.length > 150) {
-        text.value = text.value.substring(0, 150)
-        ElMessage.warning(t('tts.textLimitWarning', [
-          newLanguage === '中文' ? t('tts.chinese') : t('tts.japanese'),
-          150,
-          text.value.length
-        ]))
-      }
-    }
-
-
-  }
-})
-
-// 监听自动语言切换
-watch(autoSwitchLanguage, (newValue) => {
-  if (newValue && text.value) {
-    checkTextLanguage()
-  }
-})
-
-
-
-// 监听语言分析数据变化
-watch(() => languageAnalysis.value, () => {
-  animatedPercentages.value = {}
-  updateAnimatedPercentages()
-}, { deep: true })
-
-// 监听i18n语言变化
-watch(() => locale.value, () => {
-
-
-  // 更新语言分析建议文本
-  if (text.value && languageAnalysis.value.totalChars > 0) {
-    updateLanguageSuggestion()
-  }
-}, { immediate: true })
-
-onMounted(() => {
-  if (textContainerRef.value) {
-    textContainerRef.value.addEventListener('scroll', () => {
-      if (scrollTimeout) {
-        window.clearTimeout(scrollTimeout)
-      }
-      isManualScrolling.value = true
-      scrollTimeout = window.setTimeout(() => {
-        isManualScrolling.value = false
-      }, 1000)
-    })
-
-    textContainerRef.value.addEventListener('mouseenter', () => {
-      isMouseHovering.value = true
-      if (hoverTimeout) {
-        window.clearTimeout(hoverTimeout)
-      }
-    })
-
-    textContainerRef.value.addEventListener('mouseleave', () => {
-      if (hoverTimeout) {
-        window.clearTimeout(hoverTimeout)
-      }
-      hoverTimeout = window.setTimeout(() => {
-        isMouseHovering.value = false
-      }, 1000)
-    })
-  }
-
-  nextTick(() => {
-    if (showLanguageAnalysis.value && text.value.length > 5) {
-
-      updateAnimatedPercentages()
-    }
-  })
-
-
-})
-
-onUnmounted(() => {
-  if (audioPlayerRef.value) {
-    audioPlayerRef.value.pause()
-    audioPlayerRef.value.removeEventListener('timeupdate', updateHighlight)
-  }
-
-  if (audioUrl.value) {
-    URL.revokeObjectURL(audioUrl.value)
-  }
-
-  if (scrollTimeout) {
-    window.clearTimeout(scrollTimeout)
-  }
-
-  if (hoverTimeout) {
-    window.clearTimeout(hoverTimeout)
-  }
-
-  if (languageDetectionTimer) {
-    clearTimeout(languageDetectionTimer)
-  }
-
-  if (textContainerRef.value) {
-    textContainerRef.value.removeEventListener('scroll', () => { })
-    textContainerRef.value.removeEventListener('mouseenter', () => { })
-    textContainerRef.value.removeEventListener('mouseleave', () => { })
-  }
-
-
-
-
-})
 </script>
+
+
 
 <style scoped lang="scss">
 .tencent-tts {

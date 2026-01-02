@@ -7,7 +7,7 @@
             <div v-if="verse" class="clearfix">
               <el-link :href="`/verse/view?id=${id}`" :underline="false">{{
                 verse.name
-                }}</el-link>
+              }}</el-link>
               /【{{ $t("verse.view.script.title") }}】
 
               <!--<el-button type="primary" size="small" @click="run">测试运行</el-button>
@@ -135,7 +135,8 @@
                 </el-icon>
               </el-button>
             </div>
-            <ScenePlayer ref="scenePlayer" :verse="verseMetasWithJsCodeData" :is-scene-fullscreen="isSceneFullscreen">
+            <ScenePlayer v-if="verseMetasWithJsCodeData" ref="scenePlayer" :verse="verseMetasWithJsCodeData"
+              :is-scene-fullscreen="isSceneFullscreen">
             </ScenePlayer>
           </div>
         </el-card>
