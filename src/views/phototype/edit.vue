@@ -29,6 +29,16 @@
 
       <el-col :sm="8">
         <div v-if="phototype">
+          <el-card class="box-card" style="margin-bottom: 20px;">
+            <template #header>
+              <b>预览图</b>
+            </template>
+            <div style="display: flex; justify-content: center;">
+              <ImageSelector :item-id="phototype.id" :image-url="phototype.image?.url"
+                @image-selected="handleImageUpdate" @image-upload-success="handleImageUpdate" />
+            </div>
+          </el-card>
+
           <Resource v-if="phototype" @selected="handleSelected" :resource="phototype.resource"></Resource>
           <br />
           <Transform v-if="phototype && phototype.data && phototype.data.transform" :data="phototype.data.transform"
@@ -48,6 +58,7 @@ import Codemirror from "@/components/Codemirror.vue";
 import GenerateSchema from "generate-schema";
 import Resource from "@/components/Resource.vue";
 import Transform from "@/components/Transform.vue";
+import ImageSelector from "@/components/MrPP/ImageSelector.vue";
 import { useRoute } from "vue-router";
 
 const handleTransformSave = async (transform: any) => {
@@ -69,6 +80,19 @@ const handleSelected = async (data: any) => {
   });
   phototype.value = response.data;
 };
+
+const handleImageUpdate = async (data: { imageId: number; itemId: number | null }) => {
+  try {
+    const response = await putPhototype(id.value, {
+      image_id: data.imageId,
+    });
+    phototype.value = response.data;
+    console.log("Image updated successfully", response.data);
+  } catch (error) {
+    console.error("Failed to update image", error);
+  }
+};
+
 const route = useRoute();
 const id = computed(() => route.query.id as string);
 const tree = ref({

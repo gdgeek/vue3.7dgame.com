@@ -55,7 +55,7 @@ const src = computed(() => {
   const query: Record<string, any> = {
     language: appStore.language,
     timestamp: Date.now(),
-    a1_api: env.a1,
+    api: env.api,
   };
 
   const url =

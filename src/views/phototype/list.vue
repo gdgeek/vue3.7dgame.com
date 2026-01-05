@@ -1,11 +1,7 @@
 <template>
   <TransitionWrapper>
-    <CardListPage
-      ref="cardListPageRef"
-      :fetch-data="fetchPhototypes"
-      wrapper-class="phototype-list"
-      @refresh="handleRefresh"
-    >
+    <CardListPage ref="cardListPageRef" :fetch-data="fetchPhototypes" wrapper-class="phototype-list"
+      @refresh="handleRefresh">
       <template #header-actions>
         <el-button-group :inline="true">
           <el-button size="small" type="primary" @click="addPrefab">
@@ -18,19 +14,14 @@
             &nbsp;
             <span class="hidden-sm-and-down">{{
               $t("phototype.fromModel")
-            }}</span>
+              }}</span>
           </el-button>
         </el-button-group>
       </template>
 
       <template #card="{ item }">
-        <mr-p-p-card
-          :item="item"
-          type="预制体"
-          color="#8e44ad"
-          @named="namedWindow"
-          @deleted="deletedWindow"
-        >
+        <mr-p-p-card :item="item" type="预制体" color="#8e44ad" @named="namedWindow" @deleted="deletedWindow">
+
           <template #enter>
             <el-button-group>
               <el-button type="primary" size="small" @click="edit(item.id)">
@@ -41,6 +32,27 @@
         </mr-p-p-card>
       </template>
     </CardListPage>
+
+
+    <!-- Edit Dialog -->
+    <el-dialog v-model="editDialogVisible" :title="$t('common.edit') || 'Edit'" width="500px" append-to-body
+      destroy-on-close>
+      <el-form :model="editForm" label-width="80px">
+        <el-form-item :label="$t('phototype.prompt.message2') || 'Name'">
+          <el-input v-model="editForm.title" :placeholder="$t('phototype.prompt.message1')"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('resource.type.picture') || 'Image'">
+          <ImageSelector :item-id="Number(editForm.id) || null" :image-url="editForm.image_url"
+            @image-selected="handleEditImageSelected" @image-upload-success="handleEditImageSelected" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="editDialogVisible = false">{{ $t('common.cancel') || 'Cancel' }}</el-button>
+          <el-button type="primary" @click="saveEdit">{{ $t('common.confirm') || 'Confirm' }}</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </TransitionWrapper>
 </template>
 
@@ -59,6 +71,7 @@ import {
   deletePhototype,
   putPhototype,
 } from "@/api/v1/phototype";
+import ImageSelector from "@/components/MrPP/ImageSelector.vue";
 import type { PhototypeType } from "@/api/v1/phototype";
 import type {
   FetchParams,
@@ -73,7 +86,7 @@ const fetchPhototypes = async (params: FetchParams): Promise<FetchResponse> => {
   return await getPhototypes(params.sort, params.search, params.page);
 };
 
-const handleRefresh = (data: any[]) => {};
+const handleRefresh = (data: any[]) => { };
 
 const refreshList = () => {
   cardListPageRef.value?.refresh();
@@ -91,23 +104,54 @@ const addPrefabFromPolygen = () => {
   router.push("/phototype/fromModel");
 };
 
-const namedWindow = async (item: { id: string; title: string }) => {
+const editDialogVisible = ref(false);
+const editForm = ref({
+  id: "",
+  title: "",
+  image_id: 0,
+  image_url: "",
+});
+
+const namedWindow = (item: any) => {
+  editForm.value = {
+    id: item.id,
+    title: item.title || item.name,
+    image_id: item.image?.id || 0,
+    image_url: item.image?.url || "",
+  };
+  editDialogVisible.value = true;
+};
+
+const handleEditImageSelected = (data: { imageId: number; imageUrl?: string }) => {
+  editForm.value.image_id = data.imageId;
+  if (data.imageUrl) {
+    editForm.value.image_url = data.imageUrl;
+  }
+};
+
+const saveEdit = async () => {
   try {
-    const { value } = await ElMessageBox.prompt(
-      t("phototype.prompt.message1"),
-      t("phototype.prompt.message2"),
-      {
-        confirmButtonText: t("phototype.prompt.confirm"),
-        cancelButtonText: t("phototype.prompt.cancel"),
-        closeOnClickModal: false,
-        inputValue: item.title,
-      }
-    );
-    await putPhototype(item.id, { title: value });
+    if (!editForm.value.title) {
+      ElMessage.warning(t("phototype.prompt.error1")); // Name cannot be empty
+      return;
+    }
+
+    const updateData: any = {
+      title: editForm.value.title,
+    };
+
+    if (editForm.value.image_id) {
+      updateData.image_id = editForm.value.image_id;
+    }
+
+    await putPhototype(editForm.value.id, updateData);
+
+    ElMessage.success(t("common.updateSuccess") || "Update Successful");
+    editDialogVisible.value = false;
     refreshList();
-    ElMessage.success(t("phototype.prompt.success") + value);
-  } catch {
-    ElMessage.info(t("phototype.prompt.info"));
+  } catch (error) {
+    console.error("Failed to update:", error);
+    ElMessage.error(t("common.updateFailed") || "Update Failed");
   }
 };
 
@@ -134,6 +178,8 @@ const deletedWindow = async (
     resetLoading();
   }
 };
+
+
 </script>
 
 <style scoped>

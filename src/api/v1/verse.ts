@@ -139,7 +139,6 @@ export const putVerseCode = (id: number, data: VerseCode) => {
   });
 };
 export const getVerse = (id: number, expand = "metas,share", cl = "lua") => {
-  //alert(`/verses/${id}${qs.stringify({ expand: expand, cl }, true)}`);
   return request({
     url: `/verses/${id}${qs.stringify({ expand: expand, cl }, true)}`,
     method: "get",

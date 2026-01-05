@@ -50,7 +50,7 @@ const isTokenExpiringSoon = (token: any): boolean => {
 
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: env.baseURL,
+  baseURL: env.api,
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
 });

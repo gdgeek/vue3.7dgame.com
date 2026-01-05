@@ -364,10 +364,14 @@ export default {
     fromModel: "从模型",
     prompt: {
       message1: "请输入原型名称",
+      message2: "提示",
       error1: "原型名称不能为空",
       error2: "原型名称长度不能少于3个字符",
       error3: "原型名称长度不能超过20个字符",
       success: "原型名称是",
+      confirm: "确认",
+      cancel: "取消",
+      info: "取消输入",
     },
   },
 };

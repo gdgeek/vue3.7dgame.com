@@ -507,4 +507,9 @@ export default {
     stage2: "Uploading...",
     stage3: "Saving...",
   },
+  resource: {
+    type: {
+      picture: "Picture",
+    },
+  },
 };

@@ -31,7 +31,6 @@ import { PostSiteAppleId } from "@/api/v1/site";
 import { VueAppleLoginConfig } from "@/utils/helper";
 import { LoginData } from "@/api/auth/model";
 
-alert(import.meta.env.VITE_APP_BASE_API);
 const formRef = ref<FormInstance>();
 
 const settingsStore = useSettingsStore();

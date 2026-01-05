@@ -57,7 +57,7 @@ export const getGroup = (id: number, expand = "image,user") => {
   if (expand) {
     query["expand"] = expand;
   }
-  //alert(`/group/${id}${qs.stringify(query, true)}`);
+
   return request<Group>({
     url: `/group/${id}${qs.stringify(query, true)}`,
     method: "get",

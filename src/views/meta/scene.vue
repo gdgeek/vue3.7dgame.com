@@ -136,10 +136,11 @@ const userStore = useUserStore();
 const id = computed(() => parseInt(route.query.id as string));
 const title = computed(() => route.query.title?.slice(4) as string);
 const src = computed(() => {
+
   const query: Record<string, any> = {
     language: appStore.language,
     timestamp: Date.now(),
-    a1_api: env.a1,
+    api: env.api,
   };
 
   const url =
