@@ -119,7 +119,6 @@ export function UpdateAbility(
       can("people", AbilityRole.name, { role: "user" }); //管理员可以管理用户
       can("manager", "all");
       menu = menu.concat([/^\/manager(\/|$)/]);
-      menu = menu.concat([/^\/ai(\/|$)/]);
     }
 
     if (roles.some((role) => root.includes(role))) {
@@ -127,6 +126,7 @@ export function UpdateAbility(
       can("people", AbilityRole.name, { role: "admin" }); //超级管理员可以管理管理员
       can("phototype", "all");
       menu = menu.concat([/^\/phototype(\/|$)/]);
+      menu = menu.concat([/^\/ai(\/|$)/]); // AI功能仅root用户可用
     }
 
     menu.forEach((item) => {

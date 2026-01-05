@@ -20,6 +20,10 @@ import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import { ability } from "@/ability";
 
+// @ts-ignore
+import JsonSchemaEditor from "json-schema-editor-vue3";
+import "json-schema-editor-vue3/lib/json-schema-editor-vue3.css";
+
 import { abilitiesPlugin } from "@casl/vue";
 
 import highlightDirective from "./directive/highlight";
@@ -83,6 +87,7 @@ app.component("FontAwesomeIcon", FontAwesomeIcon);
 app.directive("highlight", highlightDirective);
 app.use(setupPlugins);
 app.use(VueIframe);
+app.use(JsonSchemaEditor);
 //app.use(ElementPlus);
 import { loadLanguageAsync } from "@/lang";
 

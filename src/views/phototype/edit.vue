@@ -8,34 +8,17 @@
             <b id="title">json格式</b>
           </template>
           <el-card class="box-card" style="margin-bottom: 10px">
-            <el-input
-              v-if="phototype"
-              v-model="phototype.type"
-              style="width: 240px"
-              placeholder="Please input"
-            ></el-input>
+            <el-input v-if="phototype" v-model="phototype.type" style="width: 240px"
+              placeholder="Please input"></el-input>
           </el-card>
-
-          <json-schema-editor
-            class="schema"
-            :value="tree"
-            disabledType
-            lang="zh_CN"
-            custom
-            :extra="extraSetting"
-          ></json-schema-editor>
+          <json-schema-editor class="schema" :value="tree" disabledType lang="zh_CN" custom
+            :extra="extraSetting"></json-schema-editor>
           <br />
           <el-card class="box-card" style="min-height: 500px">
             <codemirror v-model="jsonStr" :readOnly="false"></codemirror>
           </el-card>
           <br />
-          <el-button
-            icon="Edit"
-            @click="saveChanges"
-            type="primary"
-            size="small"
-            style="width: 100%"
-          >
+          <el-button icon="Edit" @click="saveChanges" type="primary" size="small" style="width: 100%">
             保存
           </el-button>
         </el-card>
@@ -46,17 +29,10 @@
 
       <el-col :sm="8">
         <div v-if="phototype">
-          <Resource
-            v-if="phototype"
-            @selected="handleSelected"
-            :resource="phototype.resource"
-          ></Resource>
+          <Resource v-if="phototype" @selected="handleSelected" :resource="phototype.resource"></Resource>
           <br />
-          <Transform
-            v-if="phototype && phototype.data && phototype.data.transform"
-            :data="phototype.data.transform"
-            @save="handleTransformSave"
-          ></Transform>
+          <Transform v-if="phototype && phototype.data && phototype.data.transform" :data="phototype.data.transform"
+            @save="handleTransformSave"></Transform>
         </div>
         <br />
 

@@ -1,18 +1,12 @@
 <template>
   <div class="verse-scene">
+
     <KnightDataDialog ref="knightDataRef"></KnightDataDialog>
     <MetaDialog @selected="selected" ref="metaDialogRef"></MetaDialog>
     <!--<PrefabDialog @selected="selected" ref="prefabDialogRef"></PrefabDialog>-->
     <el-container>
       <el-main>
-        <iframe
-          id="editor"
-          ref="editor"
-          :src="src"
-          class="content"
-          height="100%"
-          width="100%"
-        ></iframe>
+        <iframe id="editor" ref="editor" :src="src" class="content" height="100%" width="100%"></iframe>
       </el-main>
     </el-container>
   </div>
@@ -91,15 +85,16 @@ watch(
   },
   { deep: true }
 );
+const verse = ref<VerseData | null>(null);
 // 刷新场景数据
 const refresh = async () => {
   const response = await getVerse(id.value, "metas, resources");
-  const verse = response.data;
-  saveable.value = verse ? verse.editable : false;
+  verse.value = response.data;
+  saveable.value = verse.value ? verse.value.editable : false;
 
   postMessage("load", {
     id: id.value,
-    data: verse,
+    data: verse.value,
     saveable: saveable.value,
     user: {
       id: userStore.userInfo?.id || null,
@@ -380,7 +375,7 @@ const handleUploadCover = async (data: any) => {
         md5,
         extension,
         file,
-        (p: any) => {},
+        (p: any) => { },
         handler,
         "backup"
       );
