@@ -1,6 +1,6 @@
 <template>
   <div>
-    {{ schema }}
+
     <el-dialog v-model="dialogVisible" width="95%" :show-close="false" @close="cancel">
       <template #header>
         {{ $t("verse.view.prefabDialog.knight.title") }}
