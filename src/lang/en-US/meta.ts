@@ -115,6 +115,7 @@ export default {
       error: "No scene editor",
       info: "No save permission!",
       success: "Scene saved successfully~",
+      saveError: "Failed to save scene",
       coverUploadError: "Cover upload error: Image data not found",
       handlerError: "Failed to get file handler",
       coverUploadSuccess: "Cover image uploaded successfully",

@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { getTags } from "@/api/v1/tags";
@@ -37,7 +38,7 @@ export const useTagsStore = defineStore("tags", () => {
       });
       tagsMap.value = map;
     } catch (error) {
-      console.error(error);
+      logger.error(error);
     }
   };
 

@@ -115,7 +115,6 @@ import { AbilityEdit } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
 import { useUserStore } from "@/store/modules/user";
 import { until } from "@vueuse/core";
-import { da } from "element-plus/es/locale";
 
 import qs from "querystringify";
 

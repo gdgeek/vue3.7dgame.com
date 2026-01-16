@@ -94,6 +94,7 @@ export default {
       error: "エディターがありません",
       info: "保存権限がありません！",
       success: "シーン保存成功~",
+      saveError: "シーン保存に失敗しました",
       coverUploadError:
         "カバー画像アップロードエラー：画像データが見つかりません",
       handlerError: "ファイルハンドラの取得に失敗しました",

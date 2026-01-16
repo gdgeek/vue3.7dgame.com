@@ -1,5 +1,5 @@
 {
-  "name": "Mixed Reality Programming Platform",
+  "name": "mixed-reality-programming-platform",
   "version": "2.11.3",
   "private": true,
   "type": "module",
@@ -28,7 +28,10 @@
     "prepare": "husky",
     "commit": "git-cz",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "clean": "node scripts/clean.js",
+    "check": "node scripts/check-project.js",
+    "replace-console": "node scripts/replace-console.js"
   },
   "config": {
     "commitizen": {
