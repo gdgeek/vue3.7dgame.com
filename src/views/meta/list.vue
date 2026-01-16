@@ -1,11 +1,6 @@
 <template>
   <TransitionWrapper>
-    <CardListPage
-      ref="cardListPageRef"
-      :fetch-data="fetchMetas"
-      wrapper-class="root"
-      @refresh="handleRefresh"
-    >
+    <CardListPage ref="cardListPageRef" :fetch-data="fetchMetas" wrapper-class="root" @refresh="handleRefresh">
       <template #header-actions>
         <el-button-group :inline="true">
           <el-button size="small" type="primary" @click="addMeta">
@@ -17,45 +12,26 @@
       </template>
 
       <template #card="{ item }">
-        <mr-p-p-card
-          :item="item"
-          type="实体"
-          color="#3498db"
-          :isMeta="true"
-          @named="namedWindow"
-          @deleted="deletedWindow"
-        >
+        <mr-p-p-card :item="item" type="实体" color="#3498db" :isMeta="true" @named="namedWindow"
+          @deleted="deletedWindow">
           <template #enter>
             <el-button-group>
-              <el-button
-                type="primary"
-                size="small"
-                @click="openDetail(item.id)"
-              >
+              <el-button type="primary" size="small" @click="openDetail(item.id)">
                 {{ $t("common.open") }}
               </el-button>
-              <el-button
-                type="primary"
-                :loading="copyLoadingMap.get(item.id)"
-                size="small"
-                icon="CopyDocument"
-                @click="copyWindow(item)"
-              >
+              <el-button type="primary" :loading="copyLoadingMap.get(item.id)" size="small" icon="CopyDocument"
+                @click="copyWindow(item)">
                 <template #loading>
                   <div class="custom-loading">
                     <svg class="circular" viewBox="-10, -10, 50, 50">
-                      <path
-                        class="path"
-                        d="
+                      <path class="path" d="
                         M 30 15
                         L 28 17
                         M 25.61 25.61
                         A 15 15, 0, 0, 1, 15 30
                         A 15 15, 0, 1, 1, 27.99 7.5
                         L 15 15
-                      "
-                        style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"
-                      />
+                      " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)" />
                     </svg>
                   </div>
                 </template>
@@ -66,17 +42,8 @@
       </template>
 
       <template #dialogs>
-        <el-dialog
-          v-model="detailVisible"
-          :title="$t('meta.edit')"
-          width="80%"
-          append-to-body
-          destroy-on-close
-        >
-          <MetaDetail
-            :metaId="currentMetaId"
-            @changed="refreshList"
-          ></MetaDetail>
+        <el-dialog v-model="detailVisible" :title="$t('meta.edit')" width="80%" append-to-body destroy-on-close>
+          <MetaDetail :metaId="currentMetaId" @changed="refreshList"></MetaDetail>
         </el-dialog>
       </template>
     </CardListPage>
@@ -119,7 +86,7 @@ const fetchMetas = async (params: FetchParams): Promise<FetchResponse> => {
   return await getMetas(params.sort, params.search, params.page);
 };
 
-const handleRefresh = (data: any[]) => {};
+const handleRefresh = (data: any[]) => { };
 
 const refreshList = () => {
   cardListPageRef.value?.refresh();
@@ -198,15 +165,21 @@ const copy = async (id: number, newTitle: string) => {
       title: newTitle,
       uuid: uuidv4(),
       image_id: meta.image_id,
+      data: meta.data,
+      info: meta.info,
+      events: meta.events,
+      prefab: meta.prefab,
     };
 
     const createResponse = await postMeta(newMeta);
     const newMetaId = createResponse.data.id;
 
-    await putMetaCode(newMetaId, {
-      lua: meta.metaCode?.lua,
-      blockly: meta.metaCode?.blockly || "",
-    });
+    if (meta.metaCode) {
+      await putMetaCode(newMetaId, {
+        lua: meta.metaCode.lua,
+        blockly: meta.metaCode.blockly || "",
+      });
+    }
 
     refreshList();
   } catch (error) {
