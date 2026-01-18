@@ -32,7 +32,7 @@ const url = computed(() => {
   // 使用 Vite 的 new URL 方式解析静态资源路径
   let imageUrl = props.image;
   if (!imageUrl) {
-    imageUrl = `https://api.dicebear.com/9.x/icons/svg?seed=${props.id}`;
+    imageUrl = `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${props.id}`;
   }
 
   // Check if it's a Tencent Cloud COS URL

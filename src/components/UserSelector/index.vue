@@ -1,53 +1,22 @@
 <template>
-  <el-dialog
-    :model-value="modelValue"
-    :title="title || $t('common.selectUser')"
-    width="900px"
-    :close-on-click-modal="false"
-    append-to-body
-    @update:model-value="$emit('update:modelValue', $event)"
-  >
+  <el-dialog :model-value="modelValue" :title="title || $t('common.selectUser')" width="900px"
+    :close-on-click-modal="false" append-to-body @update:model-value="$emit('update:modelValue', $event)">
     <div class="user-selector-header">
-      <MrPPHeader
-        :sorted="sorted"
-        :searched="searched"
-        @search="handleSearch"
-        @sort="handleSort"
-        :hasTags="false"
-      >
+      <MrPPHeader :sorted="sorted" :searched="searched" @search="handleSearch" @sort="handleSort" :hasTags="false">
       </MrPPHeader>
     </div>
 
     <div class="user-list" v-loading="loading">
       <el-row :gutter="20">
-        <el-col
-          :xs="24"
-          :sm="12"
-          :md="8"
-          :lg="6"
-          v-for="user in users"
-          :key="user.id"
-        >
-          <el-card
-            class="user-card"
-            :body-style="{ padding: '0px' }"
-            @click="handleSelect(user)"
-          >
+        <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="user in users" :key="user.id">
+          <el-card class="user-card" :body-style="{ padding: '0px' }" @click="handleSelect(user)">
             <div class="image-container">
-              <el-image
-                :src="
-                  user.avatar?.url ||
-                  `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
-                "
-                fit="cover"
-                class="image"
-              >
+              <el-image :src="user.avatar?.url ||
+                `https://api.dicebear.com/9.x/glass/svg?seed=${user.username}`
+                " fit="cover" class="image">
                 <template #error>
                   <div class="image-slot">
-                    <img
-                      :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`"
-                      class="image"
-                    />
+                    <img :src="`https://api.dicebear.com/9.x/glass/svg?seed=${user.username}`" class="image" />
                   </div>
                 </template>
               </el-image>
@@ -55,15 +24,10 @@
             <div style="padding: 14px">
               <span class="user-name" :title="user.nickname || user.username">{{
                 user.nickname || user.username
-              }}</span>
+                }}</span>
               <div class="bottom clearfix">
                 <span class="user-username">{{ user.username }}</span>
-                <el-button
-                  type="primary"
-                  size="small"
-                  class="button"
-                  @click.stop="handleSelect(user)"
-                >
+                <el-button type="primary" size="small" class="button" @click.stop="handleSelect(user)">
                   {{ $t("common.select") }}
                 </el-button>
               </div>
@@ -71,22 +35,13 @@
           </el-card>
         </el-col>
       </el-row>
-      <el-empty
-        v-if="!loading && users.length === 0"
-        :description="$t('common.noUsers')"
-      ></el-empty>
+      <el-empty v-if="!loading && users.length === 0" :description="$t('common.noUsers')"></el-empty>
     </div>
 
     <div class="pagination-container">
-      <el-pagination
-        v-if="pagination.total > 0"
-        :current-page="pagination.current"
-        :page-size="pagination.size"
-        :total="pagination.total"
-        layout="prev, pager, next"
-        @current-change="handlePageChange"
-        background
-      ></el-pagination>
+      <el-pagination v-if="pagination.total > 0" :current-page="pagination.current" :page-size="pagination.size"
+        :total="pagination.total" layout="prev, pager, next" @current-change="handlePageChange"
+        background></el-pagination>
     </div>
   </el-dialog>
 </template>
