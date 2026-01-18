@@ -23,13 +23,14 @@
 
 #### Acceptance Criteria
 
-1. WHEN 用户触发实体复制操作 THEN THE Copy_Function SHALL 从原实体获取完整的数据
+1. WHEN 用户触发实体复制操作 THEN THE Copy_Function SHALL 从原实体获取完整的数据（使用 expand 参数）
 2. WHEN 创建新实体时 THEN THE Copy_Function SHALL 复制 data 字段到新实体
 3. WHEN 创建新实体时 THEN THE Copy_Function SHALL 复制 info 字段到新实体
 4. WHEN 创建新实体时 THEN THE Copy_Function SHALL 复制 events 字段到新实体
 5. WHEN 创建新实体时 THEN THE Copy_Function SHALL 复制 prefab 字段到新实体
 6. WHEN 创建新实体时 THEN THE Copy_Function SHALL 保持复制 image_id 字段到新实体
 7. WHEN 创建新实体时 THEN THE Copy_Function SHALL 保持复制 metaCode 字段到新实体
+8. WHEN 获取原实体数据时 THEN THE Copy_Function SHALL 使用 expand 参数以获取完整的关联数据
 
 ### Requirement 2: 生成唯一标识符
 
