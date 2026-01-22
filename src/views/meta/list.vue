@@ -159,7 +159,7 @@ const copy = async (id: number, newTitle: string) => {
   copyLoadingMap.value.set(id, true);
   try {
     // 添加 expand 参数以获取完整的关联数据
-    const response = await getMeta(id, { expand: 'image,author' });
+    const response = await getMeta(id, { expand: 'image,author,metaCode' });
     const meta = response.data;
 
     // Debug: 检查原实体的 image_id
@@ -192,6 +192,7 @@ const copy = async (id: number, newTitle: string) => {
         lua: meta.metaCode.lua,
         blockly: meta.metaCode.blockly || "",
       });
+      console.log('8. Code copied successfully');
     }
 
     refreshList();
