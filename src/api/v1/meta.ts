@@ -53,21 +53,21 @@ export type metaInfo = {
 
 export const postMeta = (data: Record<string, any>) => {
   return request<metaInfo>({
-    url: `/v1/metas`,
+    url: `/metas`,
     method: "post",
     data,
   });
 };
 export const putMetaCode = (id: string | number, data: MetaCode) => {
   return request<MetaCode>({
-    url: `/v1/metas/${id}/code`,
+    url: `/system/meta-code${qs.stringify({ meta_id: id }, true)}`,
     data,
     method: "put",
   });
 };
 export const getMeta = (id: string | number, params = {}) => {
   return request<metaInfo>({
-    url: `/v1/metas/${id}${qs.stringify(params, true)}`,
+    url: `/metas/${id}${qs.stringify(params, true)}`,
     method: "get",
   });
 };
@@ -95,14 +95,14 @@ export const getMetas = (
   }
 
   return request<metaInfo[]>({
-    url: `/v1/metas${qs.stringify(query, true)}`,
+    url: `/metas${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const putMeta = (id: string | number, data: Record<string, any>) => {
   return request({
-    url: `/v1/metas/${id}`,
+    url: `/metas/${id}`,
     method: "put",
     data,
   });
@@ -110,7 +110,7 @@ export const putMeta = (id: string | number, data: Record<string, any>) => {
 
 export const deleteMeta = (id: string | number) => {
   return request({
-    url: `/v1/metas/${id}`,
+    url: `/metas/${id}`,
     method: "delete",
   });
 };

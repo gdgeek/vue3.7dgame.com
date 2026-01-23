@@ -158,14 +158,15 @@ const copyWindow = async (item: metaInfo) => {
 const copy = async (id: number, newTitle: string) => {
   copyLoadingMap.value.set(id, true);
   try {
-    // 添加 expand 参数以获取完整的关联数据，包括 metaCode
+    // 添加 expand 参数以获取完整的关联数据
     const response = await getMeta(id, { expand: 'image,author,metaCode' });
     const meta = response.data;
 
+    // Debug: 检查原实体的 image_id
     console.log('=== Entity Copy Debug ===');
     console.log('1. Original entity:', meta);
     console.log('2. Original image_id:', meta.image_id);
-    console.log('3. Original metaCode:', meta.metaCode);
+    console.log('3. Original image:', meta.image);
 
     const newMeta = {
       title: newTitle,
@@ -182,21 +183,16 @@ const copy = async (id: number, newTitle: string) => {
     const createResponse = await postMeta(newMeta);
     const newMetaId = createResponse.data.id;
 
-    console.log('5. Created new entity with id:', newMetaId);
+    console.log('5. Created response:', createResponse.data);
+    console.log('6. New entity id:', newMetaId);
+    console.log('7. New entity image_id:', createResponse.data.image_id);
 
-    // 拷贝代码和 blockly
     if (meta.metaCode) {
-      console.log('6. Copying code - lua length:', meta.metaCode.lua?.length || 0);
-      console.log('7. Copying code - blockly length:', meta.metaCode.blockly?.length || 0);
-
       await putMetaCode(newMetaId, {
-        lua: meta.metaCode.lua || "",
+        lua: meta.metaCode.lua,
         blockly: meta.metaCode.blockly || "",
       });
-
       console.log('8. Code copied successfully');
-    } else {
-      console.log('6. No metaCode to copy');
     }
 
     refreshList();
