@@ -35,6 +35,22 @@ export default {
     serverError: "サーバー内部エラーです。しばらくしてから再度お試しください",
     error404: "リクエストに失敗しました。リソースが見つかりません (404)",
   },
+  errors: {
+    networkError:
+      "ネットワーク接続に失敗しました。ネットワークを確認してください",
+    validationError: "入力された情報が正しいか確認してください",
+    rateLimitExceeded:
+      "リクエストが多すぎます。{seconds}秒後に再試行してください",
+    invalidCode: "認証コードが正しくないか、有効期限が切れています",
+    accountLocked: "失敗回数が多すぎます。{seconds}秒後に再試行してください",
+    serverError: "サーバーエラーです。後でもう一度お試しください",
+  },
+  emailVerification: {
+    codeSent: "認証コードがメールアドレスに送信されました",
+    verifySuccess: "メール認証に成功しました",
+    sendFailed: "認証コードの送信に失敗しました",
+    verifyFailed: "認証に失敗しました",
+  },
   web: {
     login: "ログイン",
     nav: {

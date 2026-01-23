@@ -15,7 +15,7 @@ export type ReplyType = {
 
 export const postReply = (data: any) => {
   return request({
-    url: `/replies`,
+    url: `/v1/replies`,
     method: "post",
     data: data,
   });
@@ -23,7 +23,7 @@ export const postReply = (data: any) => {
 
 export const getReply = (id: number) => {
   return request<ReplyType>({
-    url: `/replies/${id}?expand=message`,
+    url: `/v1/replies/${id}?expand=message`,
     method: "get",
   });
 };
@@ -44,7 +44,7 @@ export const getReplies = (message_id = -1, sort = "created_at", page = 0) => {
 
 export const putReply = (id: number, data: any) => {
   return request({
-    url: `/replies/${id}`,
+    url: `/v1/replies/${id}`,
     method: "put",
     data: data,
   });
@@ -52,7 +52,7 @@ export const putReply = (id: number, data: any) => {
 
 export const deleteReply = (id: number) => {
   return request({
-    url: `/replies/${id}`,
+    url: `/v1/replies/${id}`,
     method: "delete",
   });
 };

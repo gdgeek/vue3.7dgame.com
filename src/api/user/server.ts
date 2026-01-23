@@ -4,7 +4,7 @@ import path from "path-browserify";
 
 export const bindEmail = (email: string) => {
   return request({
-    url: `/servers/bind-email`,
+    url: `/v1/servers/bind-email`,
     method: "post",
     data: { email },
   });
@@ -12,7 +12,7 @@ export const bindEmail = (email: string) => {
 
 export const resetPassword = (oldPassword: string, password: string) => {
   return request({
-    url: `/servers/reset-password`,
+    url: `/v1/servers/reset-password`,
     method: "post",
     data: { oldPassword, password },
   });

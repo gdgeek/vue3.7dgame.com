@@ -55,9 +55,7 @@ function subtitle(): string {
 }
 const environment = {
   ip: GetIP(),
-  api:
-    ReplaceURL(import.meta.env.VITE_APP_BASE_URL || "") +
-    ReplaceURL(import.meta.env.VITE_APP_BASE_API || ""),
+  api: ReplaceURL(import.meta.env.VITE_APP_API_URL || ""),
   doc: ReplaceURL(import.meta.env.VITE_APP_DOC_API || ""),
   blockly: ReplaceURL(import.meta.env.VITE_APP_BLOCKLY_URL || ""),
   editor: ReplaceURL(import.meta.env.VITE_APP_EDITOR_URL || ""),

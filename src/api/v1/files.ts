@@ -3,7 +3,7 @@ import { FileType } from "../user/model";
 
 export const postFile = (data: any) => {
   return request<FileType>({
-    url: `/files`,
+    url: `/v1/files`,
     method: "post",
     data,
   });

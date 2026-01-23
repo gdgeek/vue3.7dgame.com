@@ -162,9 +162,7 @@ vue3.7dgame.com/
 VITE_APP_PORT=3001
 
 # API 配置
-VITE_APP_API_URL="http://localhost:81/v1"
-VITE_APP_BASE_API="/v1"
-VITE_APP_BASE_URL="http://localhost:81"
+VITE_APP_API_URL="http://localhost:81"
 
 # 是否启用 Mock 服务
 VITE_MOCK_DEV_SERVER=false
@@ -175,9 +173,7 @@ VITE_MOCK_DEV_SERVER=false
 取消注释 `.env.development` 中的线上配置：
 
 ```bash
-# VITE_APP_API_URL="https://api.bupingfan.com/v1"
-# VITE_APP_BASE_API="/v1"
-# VITE_APP_BASE_URL="https://api.bupingfan.com"
+# VITE_APP_API_URL="https://api.bupingfan.com"
 ```
 
 ---

@@ -27,7 +27,23 @@ export default {
     deleteSuccess: "ลบสำเร็จ",
     deleteFailed: "ลบล้มเหลว",
     operationFailed: "การดำเนินงานล้มเหลว",
-    networkError: "Network error, please check your internet connection",
+    networkError:
+      "เกิดข้อผิดพลาดเครือข่าย กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ",
+  },
+  errors: {
+    networkError:
+      "เกิดข้อผิดพลาดเครือข่าย กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ",
+    rateLimitExceeded: "ส่งรหัสบ่อยเกินไป กรุณารอ {seconds} วินาที",
+    invalidCode: "รหัสยืนยันไม่ถูกต้องหรือหมดอายุ",
+    accountLocked:
+      "บัญชีถูกล็อคเนื่องจากความพยายามล้มเหลวหลายครั้ง กรุณาลองใหม่ใน {minutes} นาที",
+    serverError: "เกิดข้อผิดพลาดของเซิร์ฟเวอร์ กรุณาลองใหม่ภายหลัง",
+  },
+  emailVerification: {
+    codeSent: "ส่งรหัสยืนยันไปยังอีเมลของคุณแล้ว",
+    verifySuccess: "ยืนยันอีเมลสำเร็จ",
+    sendFailed: "ส่งรหัสยืนยันล้มเหลว",
+    verifyFailed: "ยืนยันอีเมลล้มเหลว",
   },
   request: {
     loginExpired: "Login expired, please log in again",

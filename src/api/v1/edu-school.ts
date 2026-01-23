@@ -25,7 +25,7 @@ export const getSchools = (
   }
 
   return request<EduSchool[]>({
-    url: `/edu-school${qs.stringify(query, true)}`,
+    url: `/v1/edu-school${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -36,14 +36,14 @@ export const getSchool = (id: number, expand = "image,principal") => {
     query["expand"] = expand;
   }
   return request<EduSchool>({
-    url: `/edu-school/${id}${qs.stringify(query, true)}`,
+    url: `/v1/edu-school/${id}${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const createSchool = (data: any) => {
   return request({
-    url: `/edu-school`,
+    url: `/v1/edu-school`,
     method: "post",
     data,
   });
@@ -51,7 +51,7 @@ export const createSchool = (data: any) => {
 
 export const updateSchool = (id: number, data: any) => {
   return request({
-    url: `/edu-school/${id}`,
+    url: `/v1/edu-school/${id}`,
     method: "put",
     data,
   });
@@ -59,7 +59,7 @@ export const updateSchool = (id: number, data: any) => {
 
 export const deleteSchool = (id: number) => {
   return request({
-    url: `/edu-school/${id}`,
+    url: `/v1/edu-school/${id}`,
     method: "delete",
   });
 };
@@ -82,7 +82,7 @@ export const getPrincipalSchools = (
   }
 
   return request<EduSchool[]>({
-    url: `/edu-school/principal${qs.stringify(query, true)}`,
+    url: `/v1/edu-school/principal${qs.stringify(query, true)}`,
     method: "get",
   });
 };

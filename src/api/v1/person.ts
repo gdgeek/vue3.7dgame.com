@@ -15,7 +15,7 @@ export type userData = {
 
 export const postPerson = (data: any) => {
   return request({
-    url: `/people`,
+    url: `/v1/people`,
     method: "post",
     data: data,
   });
@@ -23,14 +23,14 @@ export const postPerson = (data: any) => {
 
 export const deletePerson = (id: number) => {
   return request({
-    url: `/people/${id}`,
+    url: `/v1/people/${id}`,
     method: "delete",
   });
 };
 
 export const putPerson = (data: { id: number; auth: string }) => {
   return request({
-    url: `/people/auth`,
+    url: `/v1/people/auth`,
     method: "put",
     data,
   });
@@ -52,7 +52,7 @@ export const getPerson = (
     query["page"] = page;
   }
   return request<userData[]>({
-    url: `/people${qs.stringify(query, true)}`,
+    url: `/v1/people${qs.stringify(query, true)}`,
     method: "get",
   });
 };

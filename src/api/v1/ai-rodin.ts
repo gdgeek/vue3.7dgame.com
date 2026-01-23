@@ -67,13 +67,13 @@ const get = (id: number, expand: string = "resource,step") => {
   };
   const queryString = qs.stringify(query, true);
   return request({
-    url: `/ai-rodin/${id}${queryString}`,
+    url: `/v1/ai-rodin/${id}${queryString}`,
     method: "get",
   });
 };
 const del = (id: number) => {
   return request({
-    url: `/ai-rodin/${id}`,
+    url: `/v1/ai-rodin/${id}`,
     method: "delete",
   });
 };
@@ -98,7 +98,7 @@ const list = (
   const queryString = qs.stringify(query, true);
 
   return request({
-    url: `/ai-rodin${queryString}`,
+    url: `/v1/ai-rodin${queryString}`,
     method: "get",
   });
 };

@@ -46,6 +46,18 @@ export default {
       individualResume: "個人の履歴書",
       individualResumeStatement: "個人情報の簡単な紹介",
       save: "保存",
+      // メール認証
+      emailVerification: "メール認証",
+      emailVerificationStatement:
+        "アカウントのセキュリティを確保するためにメールアドレスを確認してください",
+      email: "メールアドレス",
+      emailPlaceholder: "メールアドレスを入力してください",
+      verificationCode: "認証コード",
+      codePlaceholder: "6桁のコードを入力してください",
+      sendCode: "コードを送信",
+      verifyEmail: "メールを確認",
+      accountLocked:
+        "アカウントがロックされています。{time}秒後に再試行してください",
       avatarCropping: {
         title: "アバターのトリミング",
         leftRotation: "左回転",
@@ -93,6 +105,14 @@ export default {
         success: "情報の更新に成功しました",
         error1: "情報の更新に失敗しました",
         error2: "フォーム検証に失敗しました",
+        email: {
+          required: "メールアドレスを入力してください",
+          invalid: "メールアドレスの形式が正しくありません",
+        },
+        code: {
+          required: "認証コードを入力してください",
+          invalid: "認証コードは6桁の数字である必要があります",
+        },
       },
     },
     account: {

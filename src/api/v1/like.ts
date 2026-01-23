@@ -13,7 +13,7 @@ export type postLike = {
 export const postLike = (message_id: number) => {
   const data = { message_id };
   return request({
-    url: `/likes`,
+    url: `/v1/likes`,
     method: "post",
     data: data,
   });
@@ -21,7 +21,7 @@ export const postLike = (message_id: number) => {
 
 export const removeLike = (message_id: number) => {
   return request({
-    url: `/likes/remove?message_id=${message_id}`,
+    url: `/v1/likes/remove?message_id=${message_id}`,
     method: "post",
   });
 };
@@ -29,7 +29,7 @@ export const removeLike = (message_id: number) => {
 export const isLike = (user_id: number, message_id: number) => {
   // 我是否like
   return request({
-    url: `/likes?LikeSearch[message_id]=${message_id}&LikeSearch[user_id]=${user_id}`,
+    url: `/v1/likes?LikeSearch[message_id]=${message_id}&LikeSearch[user_id]=${user_id}`,
     method: "get",
   });
 };

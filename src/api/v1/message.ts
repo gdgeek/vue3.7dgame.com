@@ -33,7 +33,7 @@ export type MessageType = {
 
 export const postMessageAPI = (data: any) => {
   return request<any>({
-    url: `/messages`,
+    url: `/v1/messages`,
     method: "post",
     data: data,
   });
@@ -41,7 +41,7 @@ export const postMessageAPI = (data: any) => {
 
 export const getMessage = (id: number) => {
   return request<MessageType>({
-    url: `/messages/${id}?expand=messageTags,replies,author,like,likesCount`,
+    url: `/v1/messages/${id}?expand=messageTags,replies,author,like,likesCount`,
     method: "get",
   });
 };
@@ -95,14 +95,14 @@ export const getMessagesWithAuthor = (
 
 export function putMessage(id: number, data: any) {
   return request({
-    url: `/messages/${id}`,
+    url: `/v1/messages/${id}`,
     method: "put",
     data: data,
   });
 }
 export function deleteMessage(id: number) {
   return request({
-    url: `/messages/${id}`,
+    url: `/v1/messages/${id}`,
     method: "delete",
   });
 }

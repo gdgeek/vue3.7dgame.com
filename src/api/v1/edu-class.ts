@@ -24,7 +24,7 @@ export const getClasses = (
     query["page"] = page;
   }
   return request<EduClass[]>({
-    url: `/edu-class${qs.stringify(query, true)}`,
+    url: `/v1/edu-class${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -35,14 +35,14 @@ export const getClass = (id: number, expand = "") => {
     query["expand"] = expand;
   }
   return request<EduClass>({
-    url: `/edu-class/${id}${qs.stringify(query, true)}`,
+    url: `/v1/edu-class/${id}${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const createClass = (data: any) => {
   return request({
-    url: `/edu-class`,
+    url: `/v1/edu-class`,
     method: "post",
     data,
   });
@@ -50,7 +50,7 @@ export const createClass = (data: any) => {
 
 export const updateClass = (id: number, data: any) => {
   return request({
-    url: `/edu-class/${id}`,
+    url: `/v1/edu-class/${id}`,
     method: "put",
     data,
   });
@@ -58,7 +58,7 @@ export const updateClass = (id: number, data: any) => {
 
 export const deleteClass = (id: number) => {
   return request({
-    url: `/edu-class/${id}`,
+    url: `/v1/edu-class/${id}`,
     method: "delete",
   });
 };
@@ -76,7 +76,7 @@ export const getMyTeacherClasses = (
     query["page"] = page;
   }
   return request<EduClass[]>({
-    url: `/edu-class/teacher-me${qs.stringify(query, true)}`,
+    url: `/v1/edu-class/teacher-me${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -95,7 +95,7 @@ export const getMyStudentClasses = (
     query["page"] = page;
   }
   return request<(EduClass & { user_id: number })[]>({
-    url: `/edu-class/by-student${qs.stringify(query, true)}`,
+    url: `/v1/edu-class/by-student${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -103,7 +103,7 @@ export const getMyStudentClasses = (
 // Apply to join a class as a student
 export const applyToClass = (class_id: number) => {
   return request({
-    url: `/edu-class/apply`,
+    url: `/v1/edu-class/apply`,
     method: "post",
     data: { class_id },
   });
@@ -112,7 +112,7 @@ export const applyToClass = (class_id: number) => {
 // Leave a class as a student
 export const leaveClass = (class_id: number) => {
   return request({
-    url: `/edu-class/leave`,
+    url: `/v1/edu-class/leave`,
     method: "post",
     data: { class_id },
   });
@@ -135,7 +135,7 @@ export const searchClasses = (
     query["page"] = page;
   }
   return request<EduClass[]>({
-    url: `/edu-class${qs.stringify(query, true)}`,
+    url: `/v1/edu-class${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -162,7 +162,7 @@ export const getClassGroups = (
     query["page"] = page;
   }
   return request({
-    url: `/edu-class/${classId}/groups${qs.stringify(query, true)}`,
+    url: `/v1/edu-class/${classId}/groups${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -173,7 +173,7 @@ export const createClassGroup = (
   data: { name?: string; description?: string; image_id?: number | null } = {}
 ) => {
   return request({
-    url: `/edu-class/${classId}/group`,
+    url: `/v1/edu-class/${classId}/group`,
     method: "post",
     data,
   });
@@ -181,7 +181,7 @@ export const createClassGroup = (
 
 export const addTeacherToClass = (classId: number, teacherId: number) => {
   return request({
-    url: `/edu-class/${classId}/teacher`,
+    url: `/v1/edu-class/${classId}/teacher`,
     method: "post",
     data: { user_id: teacherId },
   });
@@ -190,7 +190,7 @@ export const addTeacherToClass = (classId: number, teacherId: number) => {
 // Remove a teacher from a class
 export const removeTeacherFromClass = (classId: number, teacherId: number) => {
   return request({
-    url: `/edu-class/${classId}/teacher`,
+    url: `/v1/edu-class/${classId}/teacher`,
     method: "delete",
     data: { user_id: teacherId },
   });
@@ -211,7 +211,7 @@ export const getClassesByTeacher = (
     query["page"] = page;
   }
   return request<EduClass[]>({
-    url: `/edu-class/by-teacher${qs.stringify(query, true)}`,
+    url: `/v1/edu-class/by-teacher${qs.stringify(query, true)}`,
     method: "get",
   });
 };

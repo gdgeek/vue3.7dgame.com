@@ -3,14 +3,14 @@ import qs from "querystringify";
 
 export const postVpMap = (data: any) => {
   return request({
-    url: `/vp-maps`,
+    url: `/v1/vp-maps`,
     method: "post",
     data: data,
   });
 };
 export const deleteVpMap = (id: number) => {
   return request({
-    url: `/vp-maps/${id}`,
+    url: `/v1/vp-maps/${id}`,
     method: "delete",
   });
 };
@@ -20,7 +20,7 @@ export const getVpMaps = (page = 1) => {
     query["page"] = page;
   }
   return request({
-    url: `/vp-maps${qs.stringify(query, true)}`,
+    url: `/v1/vp-maps${qs.stringify(query, true)}`,
     method: "get",
   });
 };

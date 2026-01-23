@@ -47,6 +47,17 @@ export default {
       individualResume: "Personal Profile",
       individualResumeStatement: "A brief introduction of personal information",
       save: "Save",
+      // Email Verification
+      emailVerification: "Email Verification",
+      emailVerificationStatement:
+        "Verify your email address to ensure account security",
+      email: "Email Address",
+      emailPlaceholder: "Please enter email address",
+      verificationCode: "Verification Code",
+      codePlaceholder: "Please enter 6-digit code",
+      sendCode: "Send Code",
+      verifyEmail: "Verify Email",
+      accountLocked: "Account locked, please try again in {time} seconds",
       avatarCropping: {
         title: "Avatar Cropping",
         leftRotation: "Left Rotate",
@@ -92,6 +103,14 @@ export default {
         success: "Information updated successfully",
         error1: "Information update failed",
         error2: "Form validation failed",
+        email: {
+          required: "Please enter email address",
+          invalid: "Invalid email format",
+        },
+        code: {
+          required: "Please enter verification code",
+          invalid: "Verification code must be 6 digits",
+        },
       },
     },
     account: {

@@ -15,14 +15,14 @@ type putData = {
 
 export const getlanguages = (id: number, expand = "languages") => {
   return request({
-    url: `/verses/${id}${qs.stringify({ expand: expand }, true)}`,
+    url: `/v1/verses/${id}${qs.stringify({ expand: expand }, true)}`,
     method: "get",
   });
 };
 
 export const postlanguages = (data: MultilanguageVerses) => {
   return request({
-    url: `/multilanguage-verses`,
+    url: `/v1/multilanguage-verses`,
     method: "post",
     data,
   });
@@ -30,7 +30,7 @@ export const postlanguages = (data: MultilanguageVerses) => {
 
 export const putlanguages = (id: number, data: putData) => {
   return request({
-    url: `/multilanguage-verses/${id}`,
+    url: `/v1/multilanguage-verses/${id}`,
     method: "put",
     data,
   });
@@ -38,7 +38,7 @@ export const putlanguages = (id: number, data: putData) => {
 
 export const dellanguages = (id: number) => {
   return request({
-    url: `/multilanguage-verses/${id}`,
+    url: `/v1/multilanguage-verses/${id}`,
     method: "delete",
   });
 };

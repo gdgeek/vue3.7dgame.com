@@ -36,6 +36,22 @@ export default {
     serverError: "Internal server error, please try again later",
     error404: "Request failed, resource not found (404)",
   },
+  errors: {
+    networkError: "Network connection failed, please check your network",
+    validationError: "Please check if the information entered is correct",
+    rateLimitExceeded:
+      "Too many requests, please try again in {seconds} seconds",
+    invalidCode: "Verification code is incorrect or expired",
+    accountLocked:
+      "Too many failed attempts, please try again in {seconds} seconds",
+    serverError: "Server error, please try again later",
+  },
+  emailVerification: {
+    codeSent: "Verification code has been sent to your email",
+    verifySuccess: "Email verified successfully",
+    sendFailed: "Failed to send verification code",
+    verifyFailed: "Verification failed",
+  },
   web: {
     login: "Login",
     nav: {

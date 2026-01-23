@@ -30,9 +30,9 @@ let refreshPromise: Promise<any> | null = null;
 
 // 刷新token的API白名单
 const refreshTokenWhitelist = [
-  `/auth/refresh`, // 刷新token的接口
-  `/auth/login`, // 登录接口
-  `/auth/logout`, // 登出接口
+  `/v1/auth/refresh`, // 刷新token的接口
+  `/v1/auth/login`, // 登录接口
+  `/v1/auth/logout`, // 登出接口
 ];
 
 // 判断token是否即将过期（例如，提前5分钟刷新）

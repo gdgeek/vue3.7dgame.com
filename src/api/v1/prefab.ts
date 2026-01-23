@@ -45,13 +45,13 @@ export type prefabsData = {
 // export type prefabsData = metaInfo;
 export const deletePrefab = (id: number) => {
   return request({
-    url: `/prefabs/${id}`,
+    url: `/v1/prefabs/${id}`,
     method: "delete",
   });
 };
 export const postPrefab = (data: Record<string, any>) => {
   return request({
-    url: `/prefabs`,
+    url: `/v1/prefabs`,
     method: "post",
     data,
   });
@@ -59,7 +59,7 @@ export const postPrefab = (data: Record<string, any>) => {
 
 export const getPrefab = (id: number, expand = "") => {
   return request<prefabsData>({
-    url: `/prefabs/${id}${qs.stringify({ expand: expand }, true)}`,
+    url: `/v1/prefabs/${id}${qs.stringify({ expand: expand }, true)}`,
     method: "get",
   });
 };
@@ -86,14 +86,14 @@ export const getPrefabs = (
   }
 
   return request<prefabsData[]>({
-    url: `/prefabs${qs.stringify(query, true)}`,
+    url: `/v1/prefabs${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const putPrefab = (id: number, data: prefabsData) => {
   return request({
-    url: `/prefabs/${id}`,
+    url: `/v1/prefabs/${id}`,
     method: "put",
     data,
   });

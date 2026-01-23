@@ -36,7 +36,7 @@ export type PhototypeType = {
 
 export const postPhototype = (data: PhototypeType) => {
   return request<PhototypeType>({
-    url: `/phototypes`,
+    url: `/v1/phototypes`,
     method: "post",
     data,
   });
@@ -105,7 +105,7 @@ export const putPhototype = (
 
 export const deletePhototype = (id: string | number) => {
   return request({
-    url: `/phototypes/${id}`,
+    url: `/v1/phototypes/${id}`,
     method: "delete",
   });
 };

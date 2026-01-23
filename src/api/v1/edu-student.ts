@@ -29,35 +29,35 @@ export const getStudents = (
     query["page"] = page;
   }
   return request<Student[]>({
-    url: `/edu-student${qs.stringify(query, true)}`,
+    url: `/v1/edu-student${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const getStudent = (id: number) => {
   return request<Student>({
-    url: `/edu-student/view?id=${id}`,
+    url: `/v1/edu-student/view?id=${id}`,
     method: "get",
   });
 };
 
 export const createStudent = (data: { user_id?: number; class_id: number }) => {
   return request({
-    url: `/edu-student`,
+    url: `/v1/edu-student`,
     method: "post",
     data,
   });
 };
 export const deleteStudent = (id: number) => {
   return request({
-    url: `/edu-student/${id}`,
+    url: `/v1/edu-student/${id}`,
     method: "delete",
   });
 };
 
 export const updateStudent = (id: number, data: Partial<Student>) => {
   return request({
-    url: `/edu-student/${id}`,
+    url: `/v1/edu-student/${id}`,
     method: "put",
     data,
   });
@@ -76,7 +76,7 @@ export const getMyStudentRecords = (
     query["page"] = page;
   }
   return request<{ id: number; eduClass: any }[]>({
-    url: `/edu-student${qs.stringify(query, true)}`,
+    url: `/v1/edu-student${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -98,14 +98,14 @@ export const getStudentMe = (
     query["page"] = page;
   }
   return request<Student[]>({
-    url: `/edu-student/me${qs.stringify(query, true)}`,
+    url: `/v1/edu-student/me${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const joinClass = (data: { class_id: number }) => {
   return request({
-    url: `/edu-student/join`,
+    url: `/v1/edu-student/join`,
     method: "post",
     data,
   });

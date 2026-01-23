@@ -17,7 +17,7 @@ export const getUserCreation = () => {
       "pictureCount,videoCount,polygenCount,postCount,likeCount, verseCount",
   };
   return request<userCreationData>({
-    url: `/user/creation${qs.stringify(query, true)}`,
+    url: `/v1/user/creation${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -25,7 +25,7 @@ export const getUserCreation = () => {
 export const putUserData = (data: any) => {
   console.error(data);
   return request<UserInfoReturnType>({
-    url: `/user/update`,
+    url: `/v1/user/update`,
     method: "put",
     data,
   });
@@ -33,7 +33,7 @@ export const putUserData = (data: any) => {
 
 export const info = () => {
   return request<UserInfoReturnType>({
-    url: `/user/info`,
+    url: `/v1/user/info`,
     method: "get",
   });
 };

@@ -8,7 +8,7 @@ export type cybersType = {
 
 export const putCyber = (id: number, data: any) => {
   return request<cybersType>({
-    url: `/cybers/${id}`,
+    url: `/v1/cybers/${id}`,
     method: "put",
     data: data,
   });
@@ -16,7 +16,7 @@ export const putCyber = (id: number, data: any) => {
 
 export const postCyber = (data: any) => {
   return request({
-    url: `/cybers`,
+    url: `/v1/cybers`,
     method: "post",
     data,
   });

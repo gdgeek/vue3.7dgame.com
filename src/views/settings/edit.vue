@@ -16,7 +16,7 @@
               <router-link to="/home/index">
                 <el-button size="small">{{
                   $t("homepage.edit.return")
-                }}</el-button>
+                  }}</el-button>
               </router-link>
             </span>
           </el-col>
@@ -31,39 +31,14 @@
         </div>
 
         <el-row :gutter="24">
-          <el-col
-            :xs="23"
-            :sm="16"
-            :md="14"
-            :lg="12"
-            :xl="10"
-            class="section-margin-left"
-          >
-            <el-form
-              ref="nickNameFormRef"
-              :model="nicknameForm"
-              :rules="nicknameRules"
-              label-width="auto"
-            >
+          <el-col :xs="23" :sm="16" :md="14" :lg="12" :xl="10" class="section-margin-left">
+            <el-form ref="nickNameFormRef" :model="nicknameForm" :rules="nicknameRules" label-width="auto">
               <!-- 昵称输入框 -->
-              <el-form-item
-                :label="$t('homepage.edit.nickname')"
-                prop="nickname"
-                style="margin-bottom: 26px"
-              >
-                <el-input
-                  v-model="nicknameForm.nickname"
-                  style="width: 100%"
-                  :placeholder="$t('homepage.edit.nickname')"
-                  autocomplete="off"
-                  @keyup.enter="submitNickname"
-                >
+              <el-form-item :label="$t('homepage.edit.nickname')" prop="nickname" style="margin-bottom: 26px">
+                <el-input v-model="nicknameForm.nickname" style="width: 100%"
+                  :placeholder="$t('homepage.edit.nickname')" autocomplete="off" @keyup.enter="submitNickname">
                   <template #suffix>
-                    <el-button
-                      style="margin-right: -10px"
-                      :disabled="isDisable"
-                      @click="submitNickname"
-                    >
+                    <el-button style="margin-right: -10px" :disabled="isDisable" @click="submitNickname">
                       {{ $t("homepage.edit.confirm") }}
                     </el-button>
                   </template>
@@ -72,15 +47,8 @@
 
               <!-- 头像上传 -->
               <el-form-item :label="$t('homepage.edit.avatar')">
-                <el-upload
-                  class="avatar-uploader"
-                  action=""
-                  :auto-upload="false"
-                  :show-file-list="false"
-                  :on-change="handleChangeUpload"
-                  accept="image/jpeg,image/gif,image/png,image/bmp"
-                  style="float: left"
-                >
+                <el-upload class="avatar-uploader" action="" :auto-upload="false" :show-file-list="false"
+                  :on-change="handleChangeUpload" accept="image/jpeg,image/gif,image/png,image/bmp" style="float: left">
                   <img v-if="imageUrl" :src="imageUrl" class="avatar" />
                   <div v-else class="avatar-uploader-icon">
                     <font-awesome-icon icon="plus"></font-awesome-icon>
@@ -107,20 +75,8 @@
         </div>
 
         <el-row :gutter="24">
-          <el-col
-            :xs="23"
-            :sm="16"
-            :md="14"
-            :lg="12"
-            :xl="10"
-            class="section-margin-left box-margin-bottom"
-          >
-            <el-form
-              ref="ruleFormRef"
-              :model="infoForm"
-              :rules="infoRules"
-              label-width="auto"
-            >
+          <el-col :xs="23" :sm="16" :md="14" :lg="12" :xl="10" class="section-margin-left box-margin-bottom">
+            <el-form ref="ruleFormRef" :model="infoForm" :rules="infoRules" label-width="auto">
               <!-- 性别选择 -->
               <el-form-item :label="$t('homepage.edit.gender')">
                 <el-radio-group v-model="infoForm.sex">
@@ -140,21 +96,11 @@
               </el-form-item>
 
               <!-- 行业选择 -->
-              <el-form-item
-                :label="$t('homepage.edit.industry')"
-                prop="industry"
-              >
-                <el-select
-                  v-model="infoForm.industry"
-                  style="width: 100%"
-                  :placeholder="$t('homepage.edit.industryStatement')"
-                >
-                  <el-option
-                    v-for="item in industryOptions"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  ></el-option>
+              <el-form-item :label="$t('homepage.edit.industry')" prop="industry">
+                <el-select v-model="infoForm.industry" style="width: 100%"
+                  :placeholder="$t('homepage.edit.industryStatement')">
+                  <el-option v-for="item in industryOptions" :key="item.value" :label="item.label"
+                    :value="item.value"></el-option>
                 </el-select>
               </el-form-item>
               <!-- <el-form-item
@@ -171,28 +117,61 @@
             </el-form-item> -->
 
               <!-- 个人简介 -->
-              <el-form-item
-                :label="$t('homepage.edit.individualResume')"
-                prop="textarea"
-              >
-                <el-input
-                  v-model="infoForm.textarea"
-                  style="width: 100%"
-                  type="textarea"
+              <el-form-item :label="$t('homepage.edit.individualResume')" prop="textarea">
+                <el-input v-model="infoForm.textarea" style="width: 100%" type="textarea"
                   :autosize="{ minRows: 4, maxRows: 10 }"
-                  :placeholder="$t('homepage.edit.individualResumeStatement')"
-                ></el-input>
+                  :placeholder="$t('homepage.edit.individualResumeStatement')"></el-input>
               </el-form-item>
 
               <!-- 保存按钮 -->
               <el-form-item>
-                <el-button
-                  type="primary"
-                  style="width: 150px"
-                  :disabled="isDisable"
-                  @click="saveInfo"
-                >
+                <el-button type="primary" style="width: 150px" :disabled="isDisable" @click="saveInfo">
                   {{ $t("homepage.edit.save") }}
+                </el-button>
+              </el-form-item>
+            </el-form>
+          </el-col>
+        </el-row>
+
+        <el-divider></el-divider>
+
+        <!-- 邮箱验证部分 -->
+        <div class="box-title box-margin-bottom">
+          <h3 class="font-color">{{ $t("homepage.edit.emailVerification") }}</h3>
+          <small>{{ $t("homepage.edit.emailVerificationStatement") }}</small>
+        </div>
+
+        <el-row :gutter="24">
+          <el-col :xs="23" :sm="16" :md="14" :lg="12" :xl="10" class="section-margin-left box-margin-bottom">
+            <el-form ref="emailFormRef" :model="emailForm" :rules="emailRules" label-width="auto">
+              <!-- 邮箱输入 -->
+              <el-form-item :label="$t('homepage.edit.email')" prop="email">
+                <el-input v-model="emailForm.email" type="email" :placeholder="$t('homepage.edit.emailPlaceholder')"
+                  :disabled="emailLoading" />
+              </el-form-item>
+
+              <!-- 验证码输入 -->
+              <el-form-item :label="$t('homepage.edit.verificationCode')" prop="code">
+                <div style="display: flex; gap: 10px">
+                  <el-input v-model="emailForm.code" :placeholder="$t('homepage.edit.codePlaceholder')" maxlength="6"
+                    :disabled="emailLoading || isLocked" @input="handleCodeInput" />
+                  <el-button type="primary" :disabled="!canSendCode || !emailForm.email" :loading="emailLoading"
+                    @click="handleSendCode">
+                    {{ sendCodeButtonText }}
+                  </el-button>
+                </div>
+              </el-form-item>
+
+              <!-- 锁定提示 -->
+              <el-alert v-if="isLocked" type="warning" :closable="false" show-icon style="margin-bottom: 20px">
+                {{ $t("homepage.edit.accountLocked", { time: lockTime }) }}
+              </el-alert>
+
+              <!-- 验证按钮 -->
+              <el-form-item>
+                <el-button type="success" :disabled="!canVerify || !emailForm.email || !emailForm.code"
+                  :loading="emailLoading" @click="handleVerify">
+                  {{ $t("homepage.edit.verifyEmail") }}
                 </el-button>
               </el-form-item>
             </el-form>
@@ -206,59 +185,27 @@
           </template>
           <div class="cropper-content">
             <div class="cropper" style="text-align: center">
-              <VueCropper
-                ref="cropperRef"
-                :img="option.img"
-                :output-type="option.outputType"
-                :info="true"
-                :full="option.full"
-                :can-move-box="option.canMoveBox"
-                :original="option.original"
-                :auto-crop="option.autoCrop"
-                :fixed="option.fixed"
-                :fixed-number="option.fixedNumber"
-                :center-box="option.centerBox"
-                :info-true="option.infoTrue"
-                :fixed-box="option.fixedBox"
-                :auto-crop-width="option.autoCropWidth"
-                :auto-crop-height="option.autoCropHeight"
-              >
+              <VueCropper ref="cropperRef" :img="option.img" :output-type="option.outputType" :info="true"
+                :full="option.full" :can-move-box="option.canMoveBox" :original="option.original"
+                :auto-crop="option.autoCrop" :fixed="option.fixed" :fixed-number="option.fixedNumber"
+                :center-box="option.centerBox" :info-true="option.infoTrue" :fixed-box="option.fixedBox"
+                :auto-crop-width="option.autoCropWidth" :auto-crop-height="option.autoCropHeight">
               </VueCropper>
             </div>
           </div>
           <template #footer>
             <div class="dialog-footer">
               <el-button-group style="float: left">
-                <el-button
-                  size="small"
-                  type="primary"
-                  plain
-                  @click="rotateLeftHandle"
-                >
+                <el-button size="small" type="primary" plain @click="rotateLeftHandle">
                   {{ $t("homepage.edit.avatarCropping.leftRotation") }}
                 </el-button>
-                <el-button
-                  size="small"
-                  type="primary"
-                  plain
-                  @click="rotateRightHandle"
-                >
+                <el-button size="small" type="primary" plain @click="rotateRightHandle">
                   {{ $t("homepage.edit.avatarCropping.rightRotation") }}
                 </el-button>
-                <el-button
-                  size="small"
-                  type="primary"
-                  plain
-                  @click="changeScaleHandle(1)"
-                >
+                <el-button size="small" type="primary" plain @click="changeScaleHandle(1)">
                   {{ $t("homepage.edit.avatarCropping.enlarge") }}
                 </el-button>
-                <el-button
-                  size="small"
-                  type="primary"
-                  plain
-                  @click="changeScaleHandle(-1)"
-                >
+                <el-button size="small" type="primary" plain @click="changeScaleHandle(-1)">
                   {{ $t("homepage.edit.avatarCropping.shrink") }}
                 </el-button>
               </el-button-group>
@@ -290,17 +237,33 @@ import type { FileHandler } from "@/assets/js/file/server";
 import { FormItemRule } from "element-plus";
 import type { UploadFile, UploadFiles } from "element-plus";
 import { _InfoType, UploadFileType } from "@/api/user/model";
+import { useEmailVerification } from "@/composables/useEmailVerification";
 
 // 初始化store和ref
 const userStore = useUserStore();
 const fileStore = useFileStore();
 const ruleFormRef = ref<FormInstance>();
 const nickNameFormRef = ref<FormInstance>();
+const emailFormRef = ref<FormInstance>();
 const { t } = useI18n();
 const isDisable = ref(false);
 const isLoading = ref(true);
 const dialogVisible = ref(false);
 const cropperRef = ref<any>({});
+
+// 初始化邮箱验证Composable
+const {
+  loading: emailLoading,
+  error: emailError,
+  countdown,
+  isLocked,
+  lockTime,
+  canSendCode,
+  canVerify,
+  sendCode,
+  verifyCode,
+  cleanup: cleanupEmailVerification,
+} = useEmailVerification();
 
 // 计算用户头像URL
 const imageUrl = computed(() => {
@@ -358,6 +321,45 @@ const infoForm = ref<_InfoType>({
   industry: "",
   selectedOptions: [],
   textarea: "",
+});
+
+// 邮箱验证表单
+type EmailFormType = {
+  email: string;
+  code: string;
+};
+
+const emailForm = ref<EmailFormType>({
+  email: "",
+  code: "",
+});
+
+// 邮箱验证规则
+const emailRules = ref<FormRules<EmailFormType>>({
+  email: [
+    {
+      required: true,
+      message: t("homepage.edit.rules.email.required"),
+      trigger: "blur",
+    },
+    {
+      type: "email",
+      message: t("homepage.edit.rules.email.invalid"),
+      trigger: "blur",
+    },
+  ],
+  code: [
+    {
+      required: true,
+      message: t("homepage.edit.rules.code.required"),
+      trigger: "blur",
+    },
+    {
+      pattern: /^\d{6}$/,
+      message: t("homepage.edit.rules.code.invalid"),
+      trigger: "blur",
+    },
+  ],
 });
 
 // 基本信息验证规则
@@ -605,7 +607,7 @@ const finish = async () => {
         md5,
         file.name.split(".").pop() || "",
         file,
-        (p: any) => {},
+        (p: any) => { },
         handler,
         "backup"
       );
@@ -620,6 +622,69 @@ const finish = async () => {
     );
 
     dialogVisible.value = false;
+  });
+};
+
+// 邮箱验证相关函数
+
+// 发送验证码按钮文本
+const sendCodeButtonText = computed(() => {
+  if (countdown.value > 0) {
+    return `${countdown.value}秒后重试`;
+  }
+  return t("homepage.edit.sendCode");
+});
+
+// 发送验证码
+const handleSendCode = async () => {
+  if (!emailForm.value.email) {
+    ElMessage.warning(t("homepage.edit.rules.email.required"));
+    return;
+  }
+
+  // 验证邮箱格式
+  await emailFormRef.value?.validateField("email", async (valid: boolean) => {
+    if (!valid) {
+      return;
+    }
+
+    const success = await sendCode(emailForm.value.email);
+
+    if (success) {
+      ElMessage.success(t("emailVerification.codeSent"));
+    } else if (emailError.value) {
+      ElMessage.error(emailError.value);
+    }
+  });
+};
+
+// 验证码输入处理（只允许数字，最多6位）
+const handleCodeInput = (value: string) => {
+  emailForm.value.code = value.replace(/\D/g, "").slice(0, 6);
+};
+
+// 验证邮箱
+const handleVerify = async () => {
+  if (!emailForm.value.email || !emailForm.value.code) {
+    ElMessage.warning(t("homepage.edit.rules.code.required"));
+    return;
+  }
+
+  // 验证表单
+  await emailFormRef.value?.validate(async (valid: boolean) => {
+    if (!valid) {
+      return;
+    }
+
+    const success = await verifyCode(emailForm.value.email, emailForm.value.code);
+
+    if (success) {
+      ElMessage.success(t("emailVerification.verifySuccess"));
+      // 清空表单
+      emailForm.value.code = "";
+    } else if (emailError.value) {
+      ElMessage.error(emailError.value);
+    }
   });
 };
 
@@ -645,6 +710,11 @@ watch(
   },
   { deep: true, immediate: true }
 );
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  cleanupEmailVerification();
+});
 </script>
 
 <style lang="scss" scoped>

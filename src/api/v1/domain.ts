@@ -24,7 +24,7 @@ export const getDomainInfo = (
   };
 
   return request<DomainInfo>({
-    url: `/domain/info${qs.stringify(query, true)}`,
+    url: `/v1/domain/info${qs.stringify(query, true)}`,
     method: "get",
   });
 };
