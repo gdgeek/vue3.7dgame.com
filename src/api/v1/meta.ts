@@ -60,7 +60,7 @@ export const postMeta = (data: Record<string, any>) => {
 };
 export const putMetaCode = (id: string | number, data: MetaCode) => {
   return request<MetaCode>({
-    url: `v1/system/meta-code${qs.stringify({ meta_id: id }, true)}`,
+    url: `v1/metas/${id}/code`,
     data,
     method: "put",
   });
