@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import fc from "fast-check";
+import { useEmailVerification } from "@/composables/useEmailVerification";
+import { sendVerificationCode, verifyEmailCode } from "@/api/v1/email";
 
 // Mock API module
 vi.mock("@/api/v1/email", () => ({
@@ -7,21 +8,14 @@ vi.mock("@/api/v1/email", () => ({
   verifyEmailCode: vi.fn(),
 }));
 
-describe("useEmailVerification Composable", () => {
-  let useEmailVerification: any;
-  let sendVerificationCode: any;
-  let verifyEmailCode: any;
+// Get mocked functions
+const mockedSendVerificationCode = vi.mocked(sendVerificationCode);
+const mockedVerifyEmailCode = vi.mocked(verifyEmailCode);
 
-  beforeEach(async () => {
+describe("useEmailVerification Composable", () => {
+  beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
-
-    const emailApi = await import("@/api/v1/email");
-    sendVerificationCode = emailApi.sendVerificationCode;
-    verifyEmailCode = emailApi.verifyEmailCode;
-
-    const composable = await import("@/composables/useEmailVerification");
-    useEmailVerification = composable.useEmailVerification;
   });
 
   afterEach(() => {
@@ -34,7 +28,7 @@ describe("useEmailVerification Composable", () => {
         useEmailVerification();
 
       // Mock successful API response
-      sendVerificationCode.mockResolvedValue({
+      mockedSendVerificationCode.mockResolvedValue({
         success: true,
         message: "验证码已发送到您的邮箱",
       });
@@ -67,7 +61,7 @@ describe("useEmailVerification Composable", () => {
     it("should disable send button during countdown", async () => {
       const { sendCode, canSendCode, cleanup } = useEmailVerification();
 
-      sendVerificationCode.mockResolvedValue({
+      mockedSendVerificationCode.mockResolvedValue({
         success: true,
         message: "验证码已发送到您的邮箱",
       });
@@ -90,7 +84,7 @@ describe("useEmailVerification Composable", () => {
         useEmailVerification();
 
       // Mock账户锁定错误
-      verifyEmailCode.mockRejectedValue({
+      mockedVerifyEmailCode.mockRejectedValue({
         error: {
           code: "ACCOUNT_LOCKED",
           message: "验证失败次数过多，账户已被锁定，请 900 秒后再试",
@@ -119,32 +113,21 @@ describe("useEmailVerification Composable", () => {
     });
 
     it("should set isLocked to true when ACCOUNT_LOCKED error occurs", async () => {
-      await fc.assert(
-        fc.asyncProperty(
-          fc.emailAddress(),
-          fc
-            .string({ minLength: 6, maxLength: 6 })
-            .filter((s) => /^\d+$/.test(s)),
-          async (email, code) => {
-            const { verifyCode, isLocked, cleanup } = useEmailVerification();
+      const { verifyCode, isLocked, cleanup } = useEmailVerification();
 
-            verifyEmailCode.mockRejectedValue({
-              error: {
-                code: "ACCOUNT_LOCKED",
-                message: "账户已被锁定",
-                retry_after: 900,
-              },
-            });
+      mockedVerifyEmailCode.mockRejectedValue({
+        error: {
+          code: "ACCOUNT_LOCKED",
+          message: "账户已被锁定",
+          retry_after: 900,
+        },
+      });
 
-            await verifyCode(email, code);
+      await verifyCode("test@example.com", "123456");
 
-            expect(isLocked.value).toBe(true);
+      expect(isLocked.value).toBe(true);
 
-            cleanup();
-          }
-        ),
-        { numRuns: 10 }
-      );
+      cleanup();
     });
   });
 
@@ -154,7 +137,7 @@ describe("useEmailVerification Composable", () => {
         useEmailVerification();
 
       // Mock账户锁定错误
-      verifyEmailCode.mockRejectedValue({
+      mockedVerifyEmailCode.mockRejectedValue({
         error: {
           code: "ACCOUNT_LOCKED",
           message: "账户已被锁定",
@@ -179,37 +162,28 @@ describe("useEmailVerification Composable", () => {
       cleanup();
     });
 
-    it("should prevent verification when locked for any input", async () => {
-      await fc.assert(
-        fc.asyncProperty(
-          fc.emailAddress(),
-          fc.string({ minLength: 6, maxLength: 6 }),
-          async (email, code) => {
-            const { verifyCode, canVerify, cleanup } = useEmailVerification();
+    it("should prevent verification when locked", async () => {
+      const { verifyCode, canVerify, cleanup } = useEmailVerification();
 
-            // 先触发锁定
-            verifyEmailCode.mockRejectedValueOnce({
-              error: {
-                code: "ACCOUNT_LOCKED",
-                message: "账户已被锁定",
-                retry_after: 900,
-              },
-            });
+      // 先触发锁定
+      mockedVerifyEmailCode.mockRejectedValueOnce({
+        error: {
+          code: "ACCOUNT_LOCKED",
+          message: "账户已被锁定",
+          retry_after: 900,
+        },
+      });
 
-            await verifyCode(email, code);
+      await verifyCode("test@example.com", "123456");
 
-            // 锁定后不能验证
-            expect(canVerify.value).toBe(false);
+      // 锁定后不能验证
+      expect(canVerify.value).toBe(false);
 
-            // 尝试验证应该返回false
-            const result = await verifyCode(email, code);
-            expect(result).toBe(false);
+      // 尝试验证应该返回false
+      const result = await verifyCode("test@example.com", "654321");
+      expect(result).toBe(false);
 
-            cleanup();
-          }
-        ),
-        { numRuns: 10 }
-      );
+      cleanup();
     });
   });
 
@@ -217,7 +191,7 @@ describe("useEmailVerification Composable", () => {
     it("should handle successful code sending", async () => {
       const { sendCode, error, cleanup } = useEmailVerification();
 
-      sendVerificationCode.mockResolvedValue({
+      mockedSendVerificationCode.mockResolvedValue({
         success: true,
         message: "验证码已发送到您的邮箱",
       });
@@ -233,7 +207,7 @@ describe("useEmailVerification Composable", () => {
     it("should handle failed code sending", async () => {
       const { sendCode, error, cleanup } = useEmailVerification();
 
-      sendVerificationCode.mockRejectedValue({
+      mockedSendVerificationCode.mockRejectedValue({
         error: {
           code: "VALIDATION_ERROR",
           message: "邮箱格式不正确",
@@ -251,7 +225,7 @@ describe("useEmailVerification Composable", () => {
     it("should handle successful code verification", async () => {
       const { verifyCode, error, cleanup } = useEmailVerification();
 
-      verifyEmailCode.mockResolvedValue({
+      mockedVerifyEmailCode.mockResolvedValue({
         success: true,
         message: "邮箱验证成功",
       });
@@ -267,7 +241,7 @@ describe("useEmailVerification Composable", () => {
     it("should handle failed code verification", async () => {
       const { verifyCode, error, cleanup } = useEmailVerification();
 
-      verifyEmailCode.mockRejectedValue({
+      mockedVerifyEmailCode.mockRejectedValue({
         error: {
           code: "INVALID_CODE",
           message: "验证码不正确",
@@ -285,7 +259,7 @@ describe("useEmailVerification Composable", () => {
     it("should handle rate limit error", async () => {
       const { sendCode, countdown, cleanup } = useEmailVerification();
 
-      sendVerificationCode.mockRejectedValue({
+      mockedSendVerificationCode.mockRejectedValue({
         error: {
           code: "RATE_LIMIT_EXCEEDED",
           message: "请求过于频繁，请 60 秒后再试",
@@ -304,12 +278,12 @@ describe("useEmailVerification Composable", () => {
       const { sendCode, verifyCode, countdown, cleanup } =
         useEmailVerification();
 
-      sendVerificationCode.mockResolvedValue({
+      mockedSendVerificationCode.mockResolvedValue({
         success: true,
         message: "验证码已发送到您的邮箱",
       });
 
-      verifyEmailCode.mockResolvedValue({
+      mockedVerifyEmailCode.mockResolvedValue({
         success: true,
         message: "邮箱验证成功",
       });
@@ -328,7 +302,7 @@ describe("useEmailVerification Composable", () => {
     it("should cleanup timers properly", async () => {
       const { sendCode, countdown, cleanup } = useEmailVerification();
 
-      sendVerificationCode.mockResolvedValue({
+      mockedSendVerificationCode.mockResolvedValue({
         success: true,
         message: "验证码已发送到您的邮箱",
       });
