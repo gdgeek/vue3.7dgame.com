@@ -1,10 +1,24 @@
 <template>
-  <el-form ref="formRef" :model="modelValue" label-width="120px" label-position="right" class="json-schema-form">
-    <SchemaField v-if="schema" v-model="innerModel" :schema="schema" />
+  <el-form
+    ref="formRef"
+    :model="modelValue"
+    label-width="120px"
+    label-position="right"
+    class="json-schema-form"
+  >
+    <SchemaField
+      v-if="schema"
+      v-model="innerModel"
+      :schema="schema"
+    ></SchemaField>
 
     <div class="form-footer" v-if="formFooter.show">
-      <el-button @click="handleCancel">{{ formFooter.cancelBtn || 'Cancel' }}</el-button>
-      <el-button type="primary" @click="handleSubmit">{{ formFooter.okBtn || 'Save' }}</el-button>
+      <el-button @click="handleCancel">{{
+        formFooter.cancelBtn || "Cancel"
+      }}</el-button>
+      <el-button type="primary" @click="handleSubmit">{{
+        formFooter.okBtn || "Save"
+      }}</el-button>
     </div>
   </el-form>
 </template>
@@ -45,7 +59,7 @@ const innerModel = computed({
 const initDefaults = (schema: any, model: any) => {
   if (!schema || !model) return;
 
-  if (schema.type === 'object' && schema.properties) {
+  if (schema.type === "object" && schema.properties) {
     for (const key in schema.properties) {
       const propSchema = schema.properties[key];
       // Set default if model value is undefined
@@ -59,7 +73,7 @@ const initDefaults = (schema: any, model: any) => {
       }
 
       // Recursively init defaults for nested objects (if they exist in model or are created)
-      if (propSchema.type === 'object' && model[key]) {
+      if (propSchema.type === "object" && model[key]) {
         initDefaults(propSchema, model[key]);
       }
     }
@@ -70,7 +84,7 @@ watch(
   () => props.schema,
   (newSchema) => {
     if (newSchema) {
-      // Create a shallow copy to modify triggers reactivity potentially? 
+      // Create a shallow copy to modify triggers reactivity potentially?
       // Actually accessing props.modelValue directly is reactive object.
       initDefaults(newSchema, props.modelValue);
     }

@@ -1,12 +1,23 @@
 <template>
   <div>
-
-    <el-dialog v-model="dialogVisible" width="95%" :show-close="false" @close="cancel">
+    <el-dialog
+      v-model="dialogVisible"
+      width="95%"
+      :show-close="false"
+      @close="cancel"
+    >
       <template #header>
         {{ $t("verse.view.prefabDialog.knight.title") }}
       </template>
-      <VueForm v-if="schema" v-model="formData" :schema="schema" :form-footer="formFooter" @submit="handlerSubmit"
-        @cancel="handlerCancel" @change="handlerChange"></VueForm>
+      <VueForm
+        v-if="schema"
+        v-model="formData"
+        :schema="schema"
+        :form-footer="formFooter"
+        @submit="handlerSubmit"
+        @cancel="handlerCancel"
+        @change="handlerChange"
+      ></VueForm>
     </el-dialog>
   </div>
 </template>

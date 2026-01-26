@@ -2,7 +2,12 @@
   <div class="hero-section" :class="{ 'dark-theme': isDark }">
     <div class="hero-background">
       <div class="particle-container">
-        <div v-for="n in 20" :key="n" class="particle" :style="getParticleStyle(n)"></div>
+        <div
+          v-for="n in 20"
+          :key="n"
+          class="particle"
+          :style="getParticleStyle(n)"
+        ></div>
       </div>
       <div class="overlay"></div>
     </div>
@@ -16,17 +21,26 @@
         <h1 class="hero-title">
           <span class="gradient-text">{{
             domainStore.title || $t("web.hero.loading")
-            }}</span>
+          }}</span>
         </h1>
         <p class="hero-subtitle">{{ domainStore.description }}</p>
         <div class="hero-cta">
-          <el-button type="primary" style="width: 150px" size="large" @click="openLoginDialog">
+          <el-button
+            type="primary"
+            style="width: 150px"
+            size="large"
+            @click="openLoginDialog"
+          >
             {{ $t("web.hero.startCreating") }}
             <el-icon class="el-icon--right">
               <ArrowRight></ArrowRight>
             </el-icon>
           </el-button>
-          <el-button style="width: 100px" size="large" @click="scrollToAuthorization">
+          <el-button
+            style="width: 100px"
+            size="large"
+            @click="scrollToAuthorization"
+          >
             {{ $t("web.hero.authorize") }}
             <el-icon class="el-icon--right">
               <ArrowDown></ArrowDown>
@@ -39,13 +53,22 @@
         <!-- 3D展示区域 -->
         <div class="showcase-container">
           <!-- 主图片区域 -->
-          <img src="/media/bg/bujiaban.png" @click="openVideoDialog" :alt="domainStore.title" class="primary-image" />
+          <img
+            src="/media/bg/bujiaban.png"
+            @click="openVideoDialog"
+            :alt="domainStore.title"
+            class="primary-image"
+          />
 
           <!-- 悬浮元素容器 -->
           <div class="floating-elements">
             <!-- 产品合作伙伴 - Rokid -->
             <el-link class="floating-element partner-card" href="/web/buy">
-              <img src="/media/bg/rokid.webp" alt="Rokid合作伙伴" class="partner-logo" />
+              <img
+                src="/media/bg/rokid.webp"
+                alt="Rokid合作伙伴"
+                class="partner-logo"
+              />
               <div class="partner-info">
                 <span class="partner-name">Rokid</span>
                 <div class="partner-badge">
@@ -55,7 +78,11 @@
             </el-link>
 
             <el-link class="floating-element device-card" href="/web/buy">
-              <img src="/media/bg/rokid-lite.webp" alt="Rokid AR眼镜" class="device-image" />
+              <img
+                src="/media/bg/rokid-lite.webp"
+                alt="Rokid AR眼镜"
+                class="device-image"
+              />
               <div class="device-info">
                 <span class="device-name">Rokid AR</span>
                 <div class="device-badge">
@@ -67,15 +94,19 @@
             <!-- 功能亮点卡片 -->
             <div class="floating-element feature-card" @click="test">
               <div class="feature-icon">
-                <img src="/media/icon/blockly_logo_only.png" alt="可视化编程" class="feature-img" />
+                <img
+                  src="/media/icon/blockly_logo_only.png"
+                  alt="可视化编程"
+                  class="feature-img"
+                />
               </div>
               <div class="feature-info">
                 <span class="feature-title">{{
                   $t("web.hero.visualProgramming")
-                  }}</span>
+                }}</span>
                 <span class="feature-desc">{{
                   $t("web.hero.buildArApps")
-                  }}</span>
+                }}</span>
               </div>
             </div>
           </div>
@@ -112,8 +143,13 @@
   </div>
 
   <!-- 视频弹窗 -->
-  <el-dialog v-model="videoDialogVisible" :title="domainStore.title + ' ' + $t('web.hero.introVideo')" width="70%"
-    :before-close="handleCloseVideo" destroy-on-close>
+  <el-dialog
+    v-model="videoDialogVisible"
+    :title="domainStore.title + ' ' + $t('web.hero.introVideo')"
+    width="70%"
+    :before-close="handleCloseVideo"
+    destroy-on-close
+  >
     <Bilibili :bvid="bilibiliVideoId" :height="500" :autoplay="true"></Bilibili>
   </el-dialog>
 </template>
@@ -349,7 +385,8 @@ onUnmounted(() => {
     position: relative;
     width: 100%;
     transform-style: preserve-3d;
-    transform: rotateY(calc(var(--mouse-x, 0) * 5deg)) rotateX(calc(var(--mouse-y, 0) * -5deg));
+    transform: rotateY(calc(var(--mouse-x, 0) * 5deg))
+      rotateX(calc(var(--mouse-y, 0) * -5deg));
     transition: transform 0.1s ease-out;
 
     &:hover {
@@ -413,9 +450,11 @@ onUnmounted(() => {
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg,
-          rgba(255, 255, 255, 0.4) 0%,
-          rgba(255, 255, 255, 0) 50%);
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 255, 255, 0) 50%
+      );
       z-index: -1;
     }
   }
@@ -637,9 +676,11 @@ onUnmounted(() => {
     height: 300px;
     top: -100px;
     right: -100px;
-    background: radial-gradient(circle,
-        rgba(255, 255, 255, 0.8) 0%,
-        rgba(255, 255, 255, 0) 70%);
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.8) 0%,
+      rgba(255, 255, 255, 0) 70%
+    );
     animation: pulse-slow 10s infinite;
   }
 
@@ -648,18 +689,22 @@ onUnmounted(() => {
     height: 200px;
     bottom: -50px;
     left: -70px;
-    background: radial-gradient(circle,
-        rgba(255, 255, 255, 0.8) 0%,
-        rgba(255, 255, 255, 0) 70%);
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.8) 0%,
+      rgba(255, 255, 255, 0) 70%
+    );
     animation: pulse-slow 8s infinite 1s;
   }
 
   .deco-line {
     position: absolute;
-    background: linear-gradient(90deg,
-        rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.3) 50%,
-        rgba(255, 255, 255, 0) 100%);
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
     height: 1px;
     width: 100%;
     opacity: 0.5;
@@ -679,7 +724,6 @@ onUnmounted(() => {
 }
 
 @keyframes float-card {
-
   0%,
   100% {
     transform: translateY(0);
@@ -708,7 +752,6 @@ onUnmounted(() => {
 }
 
 @keyframes pulse-slow {
-
   0%,
   100% {
     transform: scale(1);

@@ -1,9 +1,21 @@
 <template>
   <div v-loading="loading" class="image-wrapper">
-    <LazyImg v-if="lazy" :url="url" style="width: 100%; height: 100%" :fit="fit" @success="loading = false"
-      @error="loading = false"></LazyImg>
-    <el-image v-else :src="url" :fit="fit" style="width: 100%; height: 100%" @load="loading = false"
-      @error="loading = false"></el-image>
+    <LazyImg
+      v-if="lazy"
+      :url="url"
+      style="width: 100%; height: 100%"
+      :fit="fit"
+      @success="loading = false"
+      @error="loading = false"
+    ></LazyImg>
+    <el-image
+      v-else
+      :src="url"
+      :fit="fit"
+      style="width: 100%; height: 100%"
+      @load="loading = false"
+      @error="loading = false"
+    ></el-image>
   </div>
 </template>
 <script setup lang="ts">

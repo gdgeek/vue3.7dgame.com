@@ -16,7 +16,7 @@ export interface AppleIdToken {
 export interface AppleData {
   key: string;
   url: string;
-  data: any;
+  data: unknown;
 }
 
 export type AppleIdTokenAndUserPassData = {
@@ -74,11 +74,14 @@ type Data = {
   emailBind: boolean;
 };
 
-type User = {
+type _User = {
   username: string;
   data: Data;
   roles: string[];
 };
+
+// Suppress unused warning - type is kept for documentation
+export type { _User };
 
 // export type LoginResult = {
 //   data: any;

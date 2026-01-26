@@ -1,7 +1,6 @@
 <template>
   <div class="vue-form-demo-wrapper">
-    <VueForm v-model="formData" :schema="schema">
-    </VueForm>
+    <VueForm v-model="formData" :schema="schema"> </VueForm>
     <div class="vue-form-demo">
       <h1>VueForm 测试页面</h1>
 
@@ -15,15 +14,22 @@
           <pre>{{ JSON.stringify(schema, null, 2) }}</pre>
         </div>
 
-        <el-divider />
+        <el-divider></el-divider>
 
         <div class="form-container">
           <h4>表单：</h4>
-          <VueForm v-if="schema" v-model="formData" :schema="schema" :form-footer="formFooter" @submit="handleSubmit"
-            @cancel="handleCancel" @change="handleChange" />
+          <VueForm
+            v-if="schema"
+            v-model="formData"
+            :schema="schema"
+            :form-footer="formFooter"
+            @submit="handleSubmit"
+            @cancel="handleCancel"
+            @change="handleChange"
+          ></VueForm>
         </div>
 
-        <el-divider />
+        <el-divider></el-divider>
 
         <div class="data-display">
           <h4>表单数据：</h4>
@@ -37,10 +43,18 @@
         </template>
 
         <el-button-group>
-          <el-button type="primary" @click="useSchema1">Schema 1: 粒子</el-button>
-          <el-button type="success" @click="useSchema2">Schema 2: 用户信息</el-button>
-          <el-button type="warning" @click="useSchema3">Schema 3: 物品配置</el-button>
-          <el-button type="danger" @click="useSchema4">Schema 4: 综合测试</el-button>
+          <el-button type="primary" @click="useSchema1"
+            >Schema 1: 粒子</el-button
+          >
+          <el-button type="success" @click="useSchema2"
+            >Schema 2: 用户信息</el-button
+          >
+          <el-button type="warning" @click="useSchema3"
+            >Schema 3: 物品配置</el-button
+          >
+          <el-button type="danger" @click="useSchema4"
+            >Schema 4: 综合测试</el-button
+          >
         </el-button-group>
       </el-card>
     </div>
@@ -244,7 +258,13 @@ const handleCancel = () => {
   ElMessage.warning("取消操作");
 };
 
-const handleChange = ({ oldValue, newValue }: { oldValue: any; newValue: any }) => {
+const handleChange = ({
+  oldValue,
+  newValue,
+}: {
+  oldValue: any;
+  newValue: any;
+}) => {
   console.log("数据变化：", { oldValue, newValue });
 };
 </script>

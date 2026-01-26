@@ -1,7 +1,11 @@
 import request from "@/utils/request";
 import qs from "querystringify";
 
-const schedule = (jobs: any[]) => {
+interface Job {
+  status: string;
+}
+
+const schedule = (jobs: Job[]) => {
   const length: number = jobs.length;
   const max = length * 2;
   let count = 0;

@@ -1,5 +1,5 @@
-import request from "@/utils/request";
-import { RouteVO } from "./model";
+// import request from "@/utils/request";
+// import type { RouteVO } from "./model";
 /*
 class MenuAPI {
   

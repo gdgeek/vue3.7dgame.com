@@ -1,6 +1,11 @@
 <template>
   <TransitionWrapper>
-    <CardListPage ref="cardListPageRef" :fetch-data="fetchMetas" wrapper-class="root" @refresh="handleRefresh">
+    <CardListPage
+      ref="cardListPageRef"
+      :fetch-data="fetchMetas"
+      wrapper-class="root"
+      @refresh="handleRefresh"
+    >
       <template #header-actions>
         <el-button-group :inline="true">
           <el-button size="small" type="primary" @click="addMeta">
@@ -12,26 +17,45 @@
       </template>
 
       <template #card="{ item }">
-        <mr-p-p-card :item="item" type="实体" color="#3498db" :isMeta="true" @named="namedWindow"
-          @deleted="deletedWindow">
+        <mr-p-p-card
+          :item="item"
+          type="实体"
+          color="#3498db"
+          :isMeta="true"
+          @named="namedWindow"
+          @deleted="deletedWindow"
+        >
           <template #enter>
             <el-button-group>
-              <el-button type="primary" size="small" @click="openDetail(item.id)">
+              <el-button
+                type="primary"
+                size="small"
+                @click="openDetail(item.id)"
+              >
                 {{ $t("common.open") }}
               </el-button>
-              <el-button type="primary" :loading="copyLoadingMap.get(item.id)" size="small" icon="CopyDocument"
-                @click="copyWindow(item)">
+              <el-button
+                type="primary"
+                :loading="copyLoadingMap.get(item.id)"
+                size="small"
+                icon="CopyDocument"
+                @click="copyWindow(item)"
+              >
                 <template #loading>
                   <div class="custom-loading">
                     <svg class="circular" viewBox="-10, -10, 50, 50">
-                      <path class="path" d="
+                      <path
+                        class="path"
+                        d="
                         M 30 15
                         L 28 17
                         M 25.61 25.61
                         A 15 15, 0, 0, 1, 15 30
                         A 15 15, 0, 1, 1, 27.99 7.5
                         L 15 15
-                      " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)" />
+                      "
+                        style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"
+                      />
                     </svg>
                   </div>
                 </template>
@@ -42,8 +66,17 @@
       </template>
 
       <template #dialogs>
-        <el-dialog v-model="detailVisible" :title="$t('meta.edit')" width="80%" append-to-body destroy-on-close>
-          <MetaDetail :metaId="currentMetaId" @changed="refreshList"></MetaDetail>
+        <el-dialog
+          v-model="detailVisible"
+          :title="$t('meta.edit')"
+          width="80%"
+          append-to-body
+          destroy-on-close
+        >
+          <MetaDetail
+            :metaId="currentMetaId"
+            @changed="refreshList"
+          ></MetaDetail>
         </el-dialog>
       </template>
     </CardListPage>
@@ -86,7 +119,7 @@ const fetchMetas = async (params: FetchParams): Promise<FetchResponse> => {
   return await getMetas(params.sort, params.search, params.page);
 };
 
-const handleRefresh = (data: any[]) => { };
+const handleRefresh = (data: any[]) => {};
 
 const refreshList = () => {
   cardListPageRef.value?.refresh();
@@ -159,14 +192,14 @@ const copy = async (id: number, newTitle: string) => {
   copyLoadingMap.value.set(id, true);
   try {
     // 添加 expand 参数以获取完整的关联数据
-    const response = await getMeta(id, { expand: 'image,author,metaCode' });
+    const response = await getMeta(id, { expand: "image,author,metaCode" });
     const meta = response.data;
 
     // Debug: 检查原实体的 image_id
-    console.log('=== Entity Copy Debug ===');
-    console.log('1. Original entity:', meta);
-    console.log('2. Original image_id:', meta.image_id);
-    console.log('3. Original image:', meta.image);
+    console.log("=== Entity Copy Debug ===");
+    console.log("1. Original entity:", meta);
+    console.log("2. Original image_id:", meta.image_id);
+    console.log("3. Original image:", meta.image);
 
     const newMeta = {
       title: newTitle,
@@ -178,24 +211,24 @@ const copy = async (id: number, newTitle: string) => {
       prefab: meta.prefab,
     };
 
-    console.log('4. New meta to create:', newMeta);
+    console.log("4. New meta to create:", newMeta);
 
     const createResponse = await postMeta(newMeta);
     const newMetaId = createResponse.data.id;
 
-    console.log('5. Created response:', createResponse.data);
-    console.log('6. New entity id:', newMetaId);
-    console.log('7. New entity image_id:', createResponse.data.image_id);
+    console.log("5. Created response:", createResponse.data);
+    console.log("6. New entity id:", newMetaId);
+    console.log("7. New entity image_id:", createResponse.data.image_id);
 
     if (meta.metaCode) {
       await putMetaCode(newMetaId, meta.metaCode);
-      console.log('8. Code copied successfully');
+      console.log("8. Code copied successfully");
     }
 
     refreshList();
-    console.log('=== Copy Complete ===');
+    console.log("=== Copy Complete ===");
   } catch (error) {
-    console.error('Copy error:', error);
+    console.error("Copy error:", error);
     ElMessage.error(t("meta.copy.error"));
   } finally {
     copyLoadingMap.value.set(id, false);

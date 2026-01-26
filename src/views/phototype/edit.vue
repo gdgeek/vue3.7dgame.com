@@ -8,17 +8,33 @@
             <b id="title">json格式</b>
           </template>
           <el-card class="box-card" style="margin-bottom: 10px">
-            <el-input v-if="phototype" v-model="phototype.type" style="width: 240px"
-              placeholder="Please input"></el-input>
+            <el-input
+              v-if="phototype"
+              v-model="phototype.type"
+              style="width: 240px"
+              placeholder="Please input"
+            ></el-input>
           </el-card>
-          <json-schema-editor class="schema" :value="tree" disabledType lang="zh_CN" custom
-            :extra="extraSetting"></json-schema-editor>
+          <json-schema-editor
+            class="schema"
+            :value="tree"
+            disabledType
+            lang="zh_CN"
+            custom
+            :extra="extraSetting"
+          ></json-schema-editor>
           <br />
           <el-card class="box-card" style="min-height: 500px">
             <codemirror v-model="jsonStr" :readOnly="false"></codemirror>
           </el-card>
           <br />
-          <el-button icon="Edit" @click="saveChanges" type="primary" size="small" style="width: 100%">
+          <el-button
+            icon="Edit"
+            @click="saveChanges"
+            type="primary"
+            size="small"
+            style="width: 100%"
+          >
             保存
           </el-button>
         </el-card>
@@ -29,20 +45,31 @@
 
       <el-col :sm="8">
         <div v-if="phototype">
-          <el-card class="box-card" style="margin-bottom: 20px;">
+          <el-card class="box-card" style="margin-bottom: 20px">
             <template #header>
               <b>预览图</b>
             </template>
-            <div style="display: flex; justify-content: center;">
-              <ImageSelector :item-id="phototype.id" :image-url="phototype.image?.url"
-                @image-selected="handleImageUpdate" @image-upload-success="handleImageUpdate" />
+            <div style="display: flex; justify-content: center">
+              <ImageSelector
+                :item-id="phototype.id"
+                :image-url="phototype.image?.url"
+                @image-selected="handleImageUpdate"
+                @image-upload-success="handleImageUpdate"
+              ></ImageSelector>
             </div>
           </el-card>
 
-          <Resource v-if="phototype" @selected="handleSelected" :resource="phototype.resource"></Resource>
+          <Resource
+            v-if="phototype"
+            @selected="handleSelected"
+            :resource="phototype.resource"
+          ></Resource>
           <br />
-          <Transform v-if="phototype && phototype.data && phototype.data.transform" :data="phototype.data.transform"
-            @save="handleTransformSave"></Transform>
+          <Transform
+            v-if="phototype && phototype.data && phototype.data.transform"
+            :data="phototype.data.transform"
+            @save="handleTransformSave"
+          ></Transform>
         </div>
         <br />
 
@@ -81,7 +108,10 @@ const handleSelected = async (data: any) => {
   phototype.value = response.data;
 };
 
-const handleImageUpdate = async (data: { imageId: number; itemId: number | null }) => {
+const handleImageUpdate = async (data: {
+  imageId: number;
+  itemId: number | null;
+}) => {
   try {
     const response = await putPhototype(id.value, {
       image_id: data.imageId,

@@ -61,7 +61,7 @@ class AuthAPI {
    * 获取验证码
    */
   static getCaptcha(): Promise<CaptchaResult> {
-    return request<any, CaptchaResult>({
+    return request<unknown, CaptchaResult>({
       url: `/v1/auth/captcha`,
       method: "get",
     });
