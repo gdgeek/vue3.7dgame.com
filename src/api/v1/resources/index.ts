@@ -185,7 +185,7 @@ const getResource = (
     expand,
   };
   const queryString = qs.stringify(query, true);
-  const url = `/resources/${id}${queryString}`;
+  const url = `/v1/resources/${id}${queryString}`;
   return request({
     url,
     method: "get",

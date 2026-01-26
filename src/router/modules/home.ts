@@ -49,16 +49,6 @@ export const homeRoutes: RouteRecordRaw = {
       name: "HomeCategory",
       component: () => import("@/views/home/category.vue"),
     },
-    {
-      meta: {
-        title: "personalCenter.processOfCreation",
-        hidden: true,
-        private: true,
-      },
-      path: "/home/creator",
-      name: "SettingsCreator",
-      component: () => import("@/views/home/creator.vue"),
-    },
   ],
 };
 

@@ -2,7 +2,6 @@ import request from "@/utils/request";
 import qs from "querystringify";
 import { v4 as uuidv4 } from "uuid";
 import environment from "@/environment";
-import { MessageType } from "./message";
 import { metaInfo } from "./meta";
 import { ResourceInfo } from "@/api/v1/resources/model";
 
@@ -81,7 +80,6 @@ export type VerseData = {
   //verseOpen: VerseOpen | null;
   verseRelease: VerseRelease | null;
   verseShare?: VerseShare;
-  message: MessageType | null;
   image: ImageDetails;
   author?: Author;
   languages?: Languages[];

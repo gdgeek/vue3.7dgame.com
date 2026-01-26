@@ -188,10 +188,7 @@ const copy = async (id: number, newTitle: string) => {
     console.log('7. New entity image_id:', createResponse.data.image_id);
 
     if (meta.metaCode) {
-      await putMetaCode(newMetaId, {
-        lua: meta.metaCode.lua,
-        blockly: meta.metaCode.blockly || "",
-      });
+      await putMetaCode(newMetaId, meta.metaCode);
       console.log('8. Code copied successfully');
     }
 
