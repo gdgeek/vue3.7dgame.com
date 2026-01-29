@@ -2,15 +2,15 @@
 import { defineAbility } from "@casl/ability";
 
 export class AbilityRouter {
-  constructor(public path: string) {}
+  constructor(public path: string) { }
 }
 
 export class AbilityEdit {
-  constructor(public type: string) {}
+  constructor(public type: string) { }
 }
 
 export class AbilityEditable {
-  constructor(public editable: boolean) {}
+  constructor(public editable: boolean) { }
 }
 
 export class AbilityRole {
@@ -29,18 +29,18 @@ export class AbilityRole {
 }
 
 export class AbilityViewable {
-  constructor(public viewable: boolean) {}
+  constructor(public viewable: boolean) { }
 }
 
 export class AbilityWorks {
-  constructor(public id: number) {}
+  constructor(public id: number) { }
 }
 
 export class AbilityMessage {
   constructor(
     public id: number,
     public managed: number
-  ) {}
+  ) { }
 }
 const user = ["user", "manager", "admin", "root"];
 const manager = ["manager", "admin", "root"];
@@ -127,6 +127,7 @@ export function UpdateAbility(
       can("phototype", "all");
       menu = menu.concat([/^\/phototype(\/|$)/]);
       menu = menu.concat([/^\/ai(\/|$)/]); // AI功能仅root用户可用
+      menu = menu.concat([/^\/campus(\/|$)/]);//学校管理
     }
 
     menu.forEach((item) => {
