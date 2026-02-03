@@ -50,7 +50,7 @@ export const getPhototype = (
   if (expand) {
     query["expand"] = expand;
   }
-  const url = `/phototypes/${id}${qs.stringify(query, true)}`;
+  const url = `/v1/phototypes/${id}${qs.stringify(query, true)}`;
   return request<PhototypeType>({
     url,
     method: "get",
@@ -78,7 +78,7 @@ export const getPhototypes = (
   if (page > 1) {
     query["page"] = page;
   }
-  const url = `/phototypes${qs.stringify(query, true)}`;
+  const url = `/v1/phototypes${qs.stringify(query, true)}`;
 
   return request<PhototypeType[]>({
     url,
@@ -95,7 +95,7 @@ export const putPhototype = (
   if (expand) {
     query["expand"] = expand;
   }
-  const url = `/phototypes/${id}${qs.stringify(query, true)}`;
+  const url = `/v1/phototypes/${id}${qs.stringify(query, true)}`;
   return request<PhototypeType>({
     url,
     method: "put",
