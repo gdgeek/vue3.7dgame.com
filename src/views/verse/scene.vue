@@ -12,6 +12,7 @@
           class="content"
           height="100%"
           width="100%"
+          allow="xr-spatial-tracking; fullscreen; autoplay; clipboard-read; clipboard-write;"
         ></iframe>
       </el-main>
     </el-container>

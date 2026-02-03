@@ -23,7 +23,7 @@ import { computed, ref } from "vue";
 import { LazyImg } from "vue-waterfall-plugin-next";
 const props = withDefaults(
   defineProps<{
-    id?: number;
+    id?: number | string;
     image?: string | null;
     lazy?: boolean; // 是否启用懒加载
     thumbnailSize?: string; // 缩略图尺寸

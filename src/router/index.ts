@@ -148,10 +148,11 @@ const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   const can = ability.can.bind(ability);
   route.forEach((route) => {
     if (route.meta) {
-      // 临时跳过校园相关路由的权限检查
-      if (!route.path.startsWith("/campus")) {
-        route.meta.hidden = !can("open", new AbilityRouter(route.path));
-      }
+      // // 临时跳过校园相关路由的权限检查
+      // if (!route.path.startsWith("/campus")) {
+      //   route.meta.hidden = !can("open", new AbilityRouter(route.path));
+      // }
+      route.meta.hidden = !can("open", new AbilityRouter(route.path));
     }
     if (route.children) {
       check(route.children, ability);
