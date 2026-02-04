@@ -79,6 +79,7 @@ function parsePoint(node: any, typeList: string[]): EntityInfo | undefined {
   const animations = node.parameters?.animations ?? null;
   const isPolygen = node.type.toLowerCase() === "polygen";
   const isPicture = node.type.toLowerCase() === "picture";
+  const isPhototype = node.type.toLowerCase() === "phototype";
 
   let hasMoved = false;
   let hasRotate = false;
@@ -100,6 +101,7 @@ function parsePoint(node: any, typeList: string[]): EntityInfo | undefined {
       ? { animations, moved: hasMoved, rotate: hasRotate, hasTooltips }
       : {}),
     ...(isPicture ? { moved: hasMoved, rotate: hasRotate, hasTooltips } : {}),
+    ...(isPhototype ? { data: node.parameters.data ?? null } : {}),
   };
 }
 
