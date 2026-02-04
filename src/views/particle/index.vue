@@ -138,7 +138,7 @@ const saveParticle = async (
 
 const namedWindow = async (item: { id: string; name: string }) => {
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       t("particle.prompt.message1"),
       t("particle.prompt.message2"),
       {
@@ -147,7 +147,7 @@ const namedWindow = async (item: { id: string; name: string }) => {
         closeOnClickModal: false,
         inputValue: item.name,
       }
-    );
+    )) as { value: string };
     await putParticle(item.id, { name: value });
     refreshList();
     ElMessage.success(t("particle.prompt.success") + value);

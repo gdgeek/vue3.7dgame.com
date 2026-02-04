@@ -192,14 +192,14 @@ const selected = async (data: any) => {
 
 const input = async (text: string): Promise<string> => {
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       text,
       t("verse.view.metaDialog.prompt.message"),
       {
         confirmButtonText: t("verse.view.metaDialog.prompt.confirm"),
         cancelButtonText: t("verse.view.metaDialog.prompt.cancel"),
       }
-    );
+    )) as { value: string };
     return value;
   } catch {
     ElMessage.info(t("verse.view.metaDialog.prompt.info"));

@@ -136,7 +136,7 @@ const saveVoxel = async (
 
 const namedWindow = async (item: { id: string; name: string }) => {
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       t("voxel.prompt.message1"),
       t("voxel.prompt.message2"),
       {
@@ -145,7 +145,7 @@ const namedWindow = async (item: { id: string; name: string }) => {
         closeOnClickModal: false,
         inputValue: item.name,
       }
-    );
+    )) as { value: string };
     await putVoxel(item.id, { name: value });
     refreshList();
     ElMessage.success(t("voxel.prompt.success") + value);

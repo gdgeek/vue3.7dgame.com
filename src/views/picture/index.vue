@@ -169,7 +169,7 @@ const savePicture = async (
 // 重命名处理
 const namedWindow = async (item: { id: string; name: string }) => {
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       t("picture.prompt.message1"),
       t("picture.prompt.message2"),
       {
@@ -178,7 +178,7 @@ const namedWindow = async (item: { id: string; name: string }) => {
         closeOnClickModal: false,
         inputValue: item.name,
       }
-    );
+    )) as { value: string };
     await putPicture(item.id, { name: value });
     refreshList();
     ElMessage.success(t("picture.prompt.success") + value);

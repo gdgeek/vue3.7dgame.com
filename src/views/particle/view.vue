@@ -497,7 +497,7 @@ const deleteWindow = async () => {
 
 const namedWindow = async () => {
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       t("particle.view.namePrompt.message1"),
       t("particle.view.namePrompt.message2"),
       {
@@ -506,7 +506,7 @@ const namedWindow = async () => {
         closeOnClickModal: false,
         inputValue: particleData.value!.name,
       }
-    );
+    )) as { value: string };
 
     if (value) {
       await named(particleData.value!.id, value);

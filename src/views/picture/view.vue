@@ -199,7 +199,7 @@ const deleteWindow = async () => {
 
 const namedWindow = async () => {
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       t("picture.view.namePrompt.message1"),
       t("picture.view.namePrompt.message2"),
       {
@@ -208,7 +208,7 @@ const namedWindow = async () => {
         closeOnClickModal: false,
         inputValue: pictureData.value!.name,
       }
-    );
+    )) as { value: string };
 
     if (value) {
       const response = await putPicture(pictureData.value!.id, { name: value });

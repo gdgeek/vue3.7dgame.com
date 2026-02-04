@@ -200,7 +200,7 @@ const deleteWindow = async () => {
 // 重命名音频对话框
 const namedWindow = async () => {
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       t("audio.view.namePrompt.message1"),
       t("audio.view.namePrompt.message2"),
       {
@@ -209,7 +209,7 @@ const namedWindow = async () => {
         closeOnClickModal: false,
         inputValue: audioData.value!.name,
       }
-    );
+    )) as { value: string };
 
     if (value) {
       await named(audioData.value!.id, value);

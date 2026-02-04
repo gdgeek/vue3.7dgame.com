@@ -206,7 +206,7 @@ const createVerse = async () => {
   if (!voxelData.value) return;
   const voxel = voxelData.value;
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       t("voxel.view.prompt.message1"),
       t("voxel.view.prompt.message2"),
       {
@@ -215,7 +215,7 @@ const createVerse = async () => {
         inputValue: voxel.name,
         inputErrorMessage: t("voxel.view.prompt.inputError"),
       }
-    );
+    )) as { value: string };
 
     if (value) {
       loading.value = true;
@@ -280,7 +280,7 @@ const deleteWindow = async () => {
 const namedWindow = async () => {
   if (!voxelData.value) return;
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       t("voxel.view.namePrompt.message1"),
       t("voxel.view.namePrompt.message2"),
       {
@@ -289,7 +289,7 @@ const namedWindow = async () => {
         closeOnClickModal: false,
         inputValue: voxelData.value.name,
       }
-    );
+    )) as { value: string };
 
     if (value) {
       await named(voxelData.value.id, value);

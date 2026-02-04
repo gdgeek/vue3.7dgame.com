@@ -174,7 +174,7 @@ export function useTTS(props: UseTTSProps) {
     }
 
     try {
-      const { value: audioName } = await ElMessageBox.prompt(
+      const { value: audioName } = (await ElMessageBox.prompt(
         t("tts.enterAudioName"),
         t("tts.uploadAudio"),
         {
@@ -184,7 +184,7 @@ export function useTTS(props: UseTTSProps) {
           inputErrorMessage: t("tts.nameRequired"),
           inputValue: props.text.value.slice(0, 20) + "...",
         }
-      );
+      )) as { value: string };
 
       if (!audioName) return;
 
@@ -271,7 +271,7 @@ export function useTTS(props: UseTTSProps) {
   };
 
   const onAudioPlayerPlay = () => (isPlaying.value = true);
-  const onAudioPlayerPause = () => {};
+  const onAudioPlayerPause = () => { };
   const onAudioPlayerEnded = () => {
     isPlaying.value = false;
     highlightedText.value = props.text.value;
