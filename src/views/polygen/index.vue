@@ -1,59 +1,30 @@
 <template>
   <TransitionWrapper>
-    <CardListPage
-      ref="cardListPageRef"
-      :fetch-data="fetchPolygens"
-      wrapper-class="polygen-index"
-      @refresh="handleRefresh"
-    >
+    <CardListPage ref="cardListPageRef" :fetch-data="fetchPolygens" wrapper-class="polygen-index"
+      @refresh="handleRefresh">
       <template #header-actions>
         <el-button-group :inline="true">
-          <el-button
-            size="small"
-            type="primary"
-            icon="uploadFilled"
-            @click="openUploadDialog"
-          >
+          <el-button size="small" type="primary" icon="uploadFilled" @click="openUploadDialog">
             <span class="hidden-sm-and-down">{{
               $t("polygen.uploadPolygen")
-            }}</span>
+              }}</span>
           </el-button>
         </el-button-group>
       </template>
 
       <template #card="{ item }">
-        <mr-p-p-card
-          :item="item"
-          type="模型"
-          color="#2ecc71"
-          @named="namedWindow"
-          @deleted="deletedWindow"
-        >
+        <mr-p-p-card :item="item" type="模型" color="#2ecc71" @named="namedWindow" @deleted="deletedWindow">
           <template #info>
             <PolygenView :file="item.file" @progress="progress"></PolygenView>
-            <el-progress
-              v-if="percentage === 100"
-              :percentage="100"
-              status="success"
-            ></el-progress>
+            <el-progress v-if="percentage === 100" :percentage="100" status="success"></el-progress>
             <el-progress v-else :percentage="percentage"></el-progress>
           </template>
           <template #enter>
             <el-button-group :inline="true">
-              <el-button
-                v-if="item.info === null"
-                type="warning"
-                size="small"
-                @click="openViewDialog(item.id)"
-              >
+              <el-button v-if="item.info === null" type="warning" size="small" @click="openViewDialog(item.id)">
                 {{ $t("polygen.initializePolygenData") }}
               </el-button>
-              <el-button
-                v-else
-                type="primary"
-                size="small"
-                @click="openViewDialog(item.id)"
-              >
+              <el-button v-else type="primary" size="small" @click="openViewDialog(item.id)">
                 {{ $t("polygen.viewPolygen") }}
               </el-button>
             </el-button-group>
@@ -62,23 +33,13 @@
       </template>
 
       <template #dialogs>
-        <mr-p-p-upload-dialog
-          v-model="uploadDialogVisible"
-          dir="polygen"
-          :file-type="fileType"
-          :max-size="30"
-          @save-resource="savePolygen"
-          @success="handleUploadSuccess"
-        >
+        <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="polygen" :file-type="fileType" :max-size="100"
+          @save-resource="savePolygen" @success="handleUploadSuccess">
           {{ $t("polygen.uploadFile") }}
         </mr-p-p-upload-dialog>
 
-        <PolygenDialog
-          v-model="viewDialogVisible"
-          :id="currentPolygenId"
-          @refresh="refreshList"
-          @deleted="refreshList"
-        ></PolygenDialog>
+        <PolygenDialog v-model="viewDialogVisible" :id="currentPolygenId" @refresh="refreshList" @deleted="refreshList">
+        </PolygenDialog>
       </template>
     </CardListPage>
   </TransitionWrapper>
@@ -118,7 +79,7 @@ const fetchPolygens = async (params: FetchParams): Promise<FetchResponse> => {
   return await getPolygens(params.sort, params.search, params.page);
 };
 
-const handleRefresh = (data: any[]) => {};
+const handleRefresh = (data: any[]) => { };
 
 const refreshList = () => {
   cardListPageRef.value?.refresh();
