@@ -399,10 +399,14 @@ export default {
     fromModel: "From Model",
     prompt: {
       message1: "Please enter phototype name",
+      message2: "Prompt",
       error1: "Phototype name cannot be empty",
       error2: "Phototype name length cannot be less than 3 characters",
       error3: "Phototype name length cannot exceed 20 characters",
       success: "Phototype name is ",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      info: "Input canceled",
     },
   },
 };

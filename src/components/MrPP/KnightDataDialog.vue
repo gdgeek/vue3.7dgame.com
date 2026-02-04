@@ -7,7 +7,7 @@
       @close="cancel"
     >
       <template #header>
-        {{ $t("verse.view.prefabDialog.knight.title") }}
+        112 {{ $t("verse.view.prefabDialog.knight.title") }}
       </template>
       <template #footer>
         <vue-form
@@ -24,6 +24,8 @@
 </template>
 
 <script setup lang="ts">
+import VueForm from "@lljj/vue3-form-element";
+
 const formData = ref({});
 const schema = ref<Schema>();
 const dialogVisible = ref(false);

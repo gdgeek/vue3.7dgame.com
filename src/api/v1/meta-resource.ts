@@ -4,7 +4,7 @@ import { metaInfo } from "./meta";
 
 export const postMetaResource = (data: Record<string, any>) => {
   return request({
-    url: `/meta-resources`,
+    url: `/v1/meta-resources`,
     method: "post",
     data,
   });
@@ -32,7 +32,7 @@ export const getMetaResources = (
     query["page"] = page;
   }
 
-  const url = `/meta-resources/resources${qs.stringify(query, true)}`;
+  const url = `/v1/meta-resources/resources${qs.stringify(query, true)}`;
   return request<metaInfo[]>({
     url,
     method: "get",
@@ -43,7 +43,7 @@ export const putMetaResource = (
   id: number | string,
   data: Record<string, any>
 ) => {
-  const url = `/meta-resources/${id}`;
+  const url = `/v1/meta-resources/${id}`;
   return request({
     url,
     method: "put",
@@ -52,7 +52,7 @@ export const putMetaResource = (
 };
 
 export const deleteMetaResource = (id: number | string) => {
-  const url = `/meta-resources/${id}`;
+  const url = `/v1/meta-resources/${id}`;
   return request({
     url,
     method: "delete",

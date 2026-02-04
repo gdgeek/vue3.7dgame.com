@@ -199,6 +199,91 @@
           </el-col>
         </el-row>
 
+        <el-divider></el-divider>
+
+        <!-- 邮箱验证部分 -->
+        <div class="box-title box-margin-bottom">
+          <h3 class="font-color">
+            {{ $t("homepage.edit.emailVerification") }}
+          </h3>
+          <small>{{ $t("homepage.edit.emailVerificationStatement") }}</small>
+        </div>
+
+        <el-row :gutter="24">
+          <el-col
+            :xs="23"
+            :sm="16"
+            :md="14"
+            :lg="12"
+            :xl="10"
+            class="section-margin-left box-margin-bottom"
+          >
+            <el-form
+              ref="emailFormRef"
+              :model="emailForm"
+              :rules="emailRules"
+              label-width="auto"
+            >
+              <!-- 邮箱输入 -->
+              <el-form-item :label="$t('homepage.edit.email')" prop="email">
+                <el-input
+                  v-model="emailForm.email"
+                  type="email"
+                  :placeholder="$t('homepage.edit.emailPlaceholder')"
+                  :disabled="emailLoading"
+                ></el-input>
+              </el-form-item>
+
+              <!-- 验证码输入 -->
+              <el-form-item
+                :label="$t('homepage.edit.verificationCode')"
+                prop="code"
+              >
+                <div style="display: flex; gap: 10px">
+                  <el-input
+                    v-model="emailForm.code"
+                    :placeholder="$t('homepage.edit.codePlaceholder')"
+                    maxlength="6"
+                    :disabled="emailLoading || isLocked"
+                    @input="handleCodeInput"
+                  ></el-input>
+                  <el-button
+                    type="primary"
+                    :disabled="!canSendCode || !emailForm.email"
+                    :loading="emailLoading"
+                    @click="handleSendCode"
+                  >
+                    {{ sendCodeButtonText }}
+                  </el-button>
+                </div>
+              </el-form-item>
+
+              <!-- 锁定提示 -->
+              <el-alert
+                v-if="isLocked"
+                type="warning"
+                :closable="false"
+                show-icon
+                style="margin-bottom: 20px"
+              >
+                {{ $t("homepage.edit.accountLocked", { time: lockTime }) }}
+              </el-alert>
+
+              <!-- 验证按钮 -->
+              <el-form-item>
+                <el-button
+                  type="success"
+                  :disabled="!canVerify || !emailForm.email || !emailForm.code"
+                  :loading="emailLoading"
+                  @click="handleVerify"
+                >
+                  {{ $t("homepage.edit.verifyEmail") }}
+                </el-button>
+              </el-form-item>
+            </el-form>
+          </el-col>
+        </el-row>
+
         <!-- 图片裁剪对话框 -->
         <el-dialog v-model="dialogVisible" class="crop-dialog" append-to-body>
           <template #header>
@@ -290,17 +375,33 @@ import type { FileHandler } from "@/assets/js/file/server";
 import { FormItemRule } from "element-plus";
 import type { UploadFile, UploadFiles } from "element-plus";
 import { _InfoType, UploadFileType } from "@/api/user/model";
+import { useEmailVerification } from "@/composables/useEmailVerification";
 
 // 初始化store和ref
 const userStore = useUserStore();
 const fileStore = useFileStore();
 const ruleFormRef = ref<FormInstance>();
 const nickNameFormRef = ref<FormInstance>();
+const emailFormRef = ref<FormInstance>();
 const { t } = useI18n();
 const isDisable = ref(false);
 const isLoading = ref(true);
 const dialogVisible = ref(false);
 const cropperRef = ref<any>({});
+
+// 初始化邮箱验证Composable
+const {
+  loading: emailLoading,
+  error: emailError,
+  countdown,
+  isLocked,
+  lockTime,
+  canSendCode,
+  canVerify,
+  sendCode,
+  verifyCode,
+  cleanup: cleanupEmailVerification,
+} = useEmailVerification();
 
 // 计算用户头像URL
 const imageUrl = computed(() => {
@@ -358,6 +459,45 @@ const infoForm = ref<_InfoType>({
   industry: "",
   selectedOptions: [],
   textarea: "",
+});
+
+// 邮箱验证表单
+type EmailFormType = {
+  email: string;
+  code: string;
+};
+
+const emailForm = ref<EmailFormType>({
+  email: "",
+  code: "",
+});
+
+// 邮箱验证规则
+const emailRules = ref<FormRules<EmailFormType>>({
+  email: [
+    {
+      required: true,
+      message: t("homepage.edit.rules.email.required"),
+      trigger: "blur",
+    },
+    {
+      type: "email",
+      message: t("homepage.edit.rules.email.invalid"),
+      trigger: "blur",
+    },
+  ],
+  code: [
+    {
+      required: true,
+      message: t("homepage.edit.rules.code.required"),
+      trigger: "blur",
+    },
+    {
+      pattern: /^\d{6}$/,
+      message: t("homepage.edit.rules.code.invalid"),
+      trigger: "blur",
+    },
+  ],
 });
 
 // 基本信息验证规则
@@ -623,6 +763,72 @@ const finish = async () => {
   });
 };
 
+// 邮箱验证相关函数
+
+// 发送验证码按钮文本
+const sendCodeButtonText = computed(() => {
+  if (countdown.value > 0) {
+    return `${countdown.value}秒后重试`;
+  }
+  return t("homepage.edit.sendCode");
+});
+
+// 发送验证码
+const handleSendCode = async () => {
+  if (!emailForm.value.email) {
+    ElMessage.warning(t("homepage.edit.rules.email.required"));
+    return;
+  }
+
+  // 验证邮箱格式
+  await emailFormRef.value?.validateField("email", async (valid: boolean) => {
+    if (!valid) {
+      return;
+    }
+
+    const success = await sendCode(emailForm.value.email);
+
+    if (success) {
+      ElMessage.success(t("emailVerification.codeSent"));
+    } else if (emailError.value) {
+      ElMessage.error(emailError.value);
+    }
+  });
+};
+
+// 验证码输入处理（只允许数字，最多6位）
+const handleCodeInput = (value: string) => {
+  emailForm.value.code = value.replace(/\D/g, "").slice(0, 6);
+};
+
+// 验证邮箱
+const handleVerify = async () => {
+  if (!emailForm.value.email || !emailForm.value.code) {
+    ElMessage.warning(t("homepage.edit.rules.code.required"));
+    return;
+  }
+
+  // 验证表单
+  await emailFormRef.value?.validate(async (valid: boolean) => {
+    if (!valid) {
+      return;
+    }
+
+    const success = await verifyCode(
+      emailForm.value.email,
+      emailForm.value.code
+    );
+
+    if (success) {
+      ElMessage.success(t("emailVerification.verifySuccess"));
+      // 清空表单
+      emailForm.value.code = "";
+    } else if (emailError.value) {
+      ElMessage.error(emailError.value);
+    }
+  });
+};
+
 // 监听用户信息变化，更新表单数据
 watch(
   () => userStore.userInfo,
@@ -645,6 +851,11 @@ watch(
   },
   { deep: true, immediate: true }
 );
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  cleanupEmailVerification();
+});
 </script>
 
 <style lang="scss" scoped>

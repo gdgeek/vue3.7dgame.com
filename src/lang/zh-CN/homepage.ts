@@ -45,6 +45,16 @@ export default {
       individualResume: "个人简介",
       individualResumeStatement: "个人信息的简要介绍",
       save: "保存",
+      // 邮箱验证
+      emailVerification: "邮箱验证",
+      emailVerificationStatement: "验证您的邮箱地址以确保账户安全",
+      email: "邮箱地址",
+      emailPlaceholder: "请输入邮箱地址",
+      verificationCode: "验证码",
+      codePlaceholder: "请输入6位验证码",
+      sendCode: "发送验证码",
+      verifyEmail: "验证邮箱",
+      accountLocked: "账户已被锁定，请 {time} 秒后再试",
       avatarCropping: {
         title: "头像裁剪",
         leftRotation: "左旋转",
@@ -89,6 +99,14 @@ export default {
         success: "信息更新成功",
         error1: "信息更新失败",
         error2: "表单校验未通过",
+        email: {
+          required: "请输入邮箱地址",
+          invalid: "邮箱格式不正确",
+        },
+        code: {
+          required: "请输入验证码",
+          invalid: "验证码必须是6位数字",
+        },
       },
     },
     account: {

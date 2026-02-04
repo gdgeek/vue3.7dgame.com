@@ -48,26 +48,26 @@ export type metaInfo = {
   cyber: cybersType;
   author?: Author;
   verseMetas: any[];
-  metaCode?: MetaCode;
+  metaCode?: MetaCode | null;
 };
 
 export const postMeta = (data: Record<string, any>) => {
   return request<metaInfo>({
-    url: `/metas`,
+    url: `/v1/metas`,
     method: "post",
     data,
   });
 };
-export const putMetaCode = (id: string | number, data: MetaCode) => {
+export const putMetaCode = (id: string | number, data: MetaCode | null) => {
   return request<MetaCode>({
-    url: `/metas/${id}/code`,
+    url: `/v1/metas/${id}/code`,
     data,
     method: "put",
   });
 };
 export const getMeta = (id: string | number, params = {}) => {
   return request<metaInfo>({
-    url: `/metas/${id}${qs.stringify(params, true)}`,
+    url: `/v1/metas/${id}${qs.stringify(params, true)}`,
     method: "get",
   });
 };
@@ -95,14 +95,14 @@ export const getMetas = (
   }
 
   return request<metaInfo[]>({
-    url: `/metas${qs.stringify(query, true)}`,
+    url: `/v1/metas${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const putMeta = (id: string | number, data: Record<string, any>) => {
   return request({
-    url: `/metas/${id}`,
+    url: `/v1/metas/${id}`,
     method: "put",
     data,
   });
@@ -110,7 +110,7 @@ export const putMeta = (id: string | number, data: Record<string, any>) => {
 
 export const deleteMeta = (id: string | number) => {
   return request({
-    url: `/metas/${id}`,
+    url: `/v1/metas/${id}`,
     method: "delete",
   });
 };

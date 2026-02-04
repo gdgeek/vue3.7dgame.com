@@ -191,26 +191,44 @@ const copyWindow = async (item: metaInfo) => {
 const copy = async (id: number, newTitle: string) => {
   copyLoadingMap.value.set(id, true);
   try {
-    const response = await getMeta(id);
+    // 添加 expand 参数以获取完整的关联数据
+    const response = await getMeta(id, { expand: "image,author,metaCode" });
     const meta = response.data;
+
+    // Debug: 检查原实体的 image_id
+    console.log("=== Entity Copy Debug ===");
+    console.log("1. Original entity:", meta);
+    console.log("2. Original image_id:", meta.image_id);
+    console.log("3. Original image:", meta.image);
 
     const newMeta = {
       title: newTitle,
       uuid: uuidv4(),
       image_id: meta.image_id,
+      data: meta.data,
+      info: meta.info,
+      events: meta.events,
+      prefab: meta.prefab,
     };
+
+    console.log("4. New meta to create:", newMeta);
 
     const createResponse = await postMeta(newMeta);
     const newMetaId = createResponse.data.id;
 
-    await putMetaCode(newMetaId, {
-      lua: meta.metaCode?.lua,
-      blockly: meta.metaCode?.blockly || "",
-    });
+    console.log("5. Created response:", createResponse.data);
+    console.log("6. New entity id:", newMetaId);
+    console.log("7. New entity image_id:", createResponse.data.image_id);
+
+    if (meta.metaCode) {
+      await putMetaCode(newMetaId, meta.metaCode);
+      console.log("8. Code copied successfully");
+    }
 
     refreshList();
+    console.log("=== Copy Complete ===");
   } catch (error) {
-    console.error(error);
+    console.error("Copy error:", error);
     ElMessage.error(t("meta.copy.error"));
   } finally {
     copyLoadingMap.value.set(id, false);

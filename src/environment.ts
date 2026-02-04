@@ -2,7 +2,7 @@ import { GetIP, ReplaceIP, ReplaceURL } from "./utils/helper";
 function useCloud(): boolean {
   return import.meta.env.VITE_APP_BASE_MODE !== "local";
 }
-
+/*
 function mrpp(): boolean {
   return import.meta.env.VITE_APP_BASE_MODE === "mrpp.com";
 }
@@ -12,7 +12,7 @@ function mrcn(): boolean {
     import.meta.env.VITE_APP_BASE_MODE === "01xr.com" ||
     import.meta.env.VITE_APP_BASE_MODE === "7dgame.com"
   );
-}
+}*/
 
 function local(): boolean {
   return import.meta.env.VITE_APP_BASE_MODE === "local";
@@ -55,22 +55,16 @@ function subtitle(): string {
 }
 const environment = {
   ip: GetIP(),
-  api: ReplaceURL(import.meta.env.VITE_APP_BASE_API || ""),
+  api: ReplaceURL(import.meta.env.VITE_APP_API_URL || ""),
   doc: ReplaceURL(import.meta.env.VITE_APP_DOC_API || ""),
   blockly: ReplaceURL(import.meta.env.VITE_APP_BLOCKLY_URL || ""),
   editor: ReplaceURL(import.meta.env.VITE_APP_EDITOR_URL || ""),
   auth_api: ReplaceURL(import.meta.env.VITE_APP_AUTH_API || ""),
   ai: ReplaceURL(import.meta.env.VITE_APP_AI_API || ""),
-  baseURL:
-    ReplaceURL(import.meta.env.VITE_APP_BASE_URL || "") +
-    ReplaceURL(import.meta.env.VITE_APP_BASE_API || ""),
-  a1: ReplaceURL(import.meta.env.VITE_APP_A1_API || ""),
-  version: 3,
+  //a1: ReplaceURL(import.meta.env.VITE_APP_A1_API || ""),
+  version: 1,
   subtitle,
-  //title,
   useCloud,
-  mrcn,
-  mrpp,
   local,
   replaceIP: ReplaceIP,
 };

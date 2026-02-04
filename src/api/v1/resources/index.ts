@@ -55,7 +55,7 @@ export const getResources = (
 
   const queryString = qs.stringify(query, true);
   return request<ResourceInfo[]>({
-    url: `/resources${queryString}`, // 拼接 URL
+    url: `/v1/resources${queryString}`, // 拼接 URL
     method: "get",
   });
 };
@@ -99,7 +99,7 @@ export const getParticles = (
 // 修改资源
 const putResources = (id: number | string, resource: ResourcePut) => {
   return request({
-    url: `/resources/${id}`,
+    url: `/v1/resources/${id}`,
     method: "put",
     data: resource,
   });
@@ -128,7 +128,7 @@ const postResources = (data: ResourceData) => {
   data.uuid = uuidv4(); // 生成 UUID
 
   return request({
-    url: `/resources`,
+    url: `/v1/resources`,
     method: "post",
     data,
   });
@@ -160,7 +160,7 @@ export const postParticle = (data: Omit<ResourceData, "type">) =>
 // 删除资源
 const deleteResources = (id: number | string) => {
   return request({
-    url: `/resources/${id}`,
+    url: `/v1/resources/${id}`,
     method: "delete",
   });
 };
@@ -188,7 +188,7 @@ const getResource = (
     expand,
   };
   const queryString = qs.stringify(query, true);
-  const url = `/resources/${id}${queryString}`;
+  const url = `/v1/resources/${id}${queryString}`;
   return request({
     url,
     method: "get",

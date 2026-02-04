@@ -83,6 +83,7 @@ export default {
       error: "没有场景编辑器",
       info: "没有保存权限！",
       success: "实体保存成功",
+      saveError: "实体保存失败",
       coverUploadError: "上传封面图片错误：未找到图片数据",
       handlerError: "获取文件处理器失败",
       coverUploadSuccess: "封面图片上传成功",

@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import { store } from "@/store";
 
 import { TOKEN_KEY } from "@/enums/CacheEnum";
@@ -21,7 +22,7 @@ function getToken() {
     try {
       return JSON.parse(token);
     } catch (e) {
-      console.error("Failed to parse token:", e);
+      logger.error("Failed to parse token:", e);
       return null;
     }
   }

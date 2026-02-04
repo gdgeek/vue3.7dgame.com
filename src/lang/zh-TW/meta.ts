@@ -88,6 +88,7 @@ export default {
       error: "沒有場景編輯器",
       info: "沒有保存權限！",
       success: "實體保存成功",
+      saveError: "實體保存失敗",
       coverUploadError: "上傳封面圖片錯誤：未找到圖片數據",
       handlerError: "獲取文件處理器失敗",
       coverUploadSuccess: "封面圖片上傳成功",

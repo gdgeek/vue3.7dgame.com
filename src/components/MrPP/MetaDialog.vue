@@ -180,8 +180,8 @@ const clearSearched = () => {
 
 const selected = async (data: any) => {
   if (data) {
-    const title = await input(t("verse.view.metaDialog.input1"));
-    data.title = title;
+    // const title = await input(t("verse.view.metaDialog.input1"));
+    data.title = data.data.title;
     console.log("metadata", data);
     emit("selected", data);
   } else {

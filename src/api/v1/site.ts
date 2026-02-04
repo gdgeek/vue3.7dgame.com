@@ -15,7 +15,7 @@ export interface AppleIdReturn {
 export const PostSiteAppleId = (data: AppleIdData) => {
   //alert(JSON.stringify(data));
   return request({
-    url: `/site/apple-id`,
+    url: `/v1/site/apple-id`,
     method: "post",
     data: data,
   });

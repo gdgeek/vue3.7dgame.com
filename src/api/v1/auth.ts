@@ -1,28 +1,28 @@
 import request from "@/utils/request";
 const login = (data: any) => {
   return request({
-    url: `/auth/login`,
+    url: `/v1/auth/login`,
     method: "post",
     data,
   });
 };
 const refresh = (refreshToken: string) => {
   return request({
-    url: `/auth/refresh`,
+    url: `/v1/auth/refresh`,
     method: "post",
     data: { refreshToken },
   });
 };
 const link = (data: any) => {
   return request({
-    url: `/auth/link`,
+    url: `/v1/auth/link`,
     method: "post",
     data,
   });
 };
 const register = (data: any) => {
   return request({
-    url: `/auth/register`,
+    url: `/v1/auth/register`,
     method: "post",
     data,
   });

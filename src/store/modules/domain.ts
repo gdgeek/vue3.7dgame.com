@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import { defineStore } from "pinia";
 import { getDomainInfo, type DomainInfo } from "@/api/v1/domain";
 
@@ -77,7 +78,7 @@ export const useDomainStore = defineStore("domain", {
           this.refreshFromAPI();
           return this.info;
         } catch (e) {
-          console.warn("Failed to parse cached domain info:", e);
+          logger.warn("Failed to parse cached domain info:", e);
         }
       }
 
@@ -103,7 +104,7 @@ export const useDomainStore = defineStore("domain", {
           this.currentLang = lang;
           this.updateDocumentMeta();
         } catch (e) {
-          console.warn("Failed to parse cached domain info:", e);
+          logger.warn("Failed to parse cached domain info:", e);
           this.info = null;
         }
       } else {
@@ -128,7 +129,7 @@ export const useDomainStore = defineStore("domain", {
 
         return this.info;
       } catch (err: any) {
-        console.error("Failed to fetch domain info:", err);
+        logger.error("Failed to fetch domain info:", err);
         this.error = err.message || "Failed to fetch domain info";
         return null;
       } finally {

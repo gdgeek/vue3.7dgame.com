@@ -2,7 +2,6 @@ import request from "@/utils/request";
 import qs from "querystringify";
 import { v4 as uuidv4 } from "uuid";
 import environment from "@/environment";
-import { MessageType } from "./message";
 import { metaInfo } from "./meta";
 import { ResourceInfo } from "@/api/v1/resources/model";
 
@@ -81,7 +80,6 @@ export type VerseData = {
   //verseOpen: VerseOpen | null;
   verseRelease: VerseRelease | null;
   verseShare?: VerseShare;
-  message: MessageType | null;
   image: ImageDetails;
   author?: Author;
   languages?: Languages[];
@@ -125,7 +123,7 @@ export const postVerse = (data: PostVerseData) => {
   data.version = environment.version;
   data.uuid = data.uuid || uuidv4();
   return request({
-    url: `/verses`,
+    url: `/v1/verses`,
     method: "post",
     data,
   });
@@ -133,14 +131,14 @@ export const postVerse = (data: PostVerseData) => {
 
 export const putVerseCode = (id: number, data: VerseCode) => {
   return request<VerseCode>({
-    url: `/verses/${id}/code`,
+    url: `/v1/verses/${id}/code`,
     data,
     method: "put",
   });
 };
 export const getVerse = (id: number, expand = "metas,share", cl = "lua") => {
   return request({
-    url: `/verses/${id}${qs.stringify({ expand: expand, cl }, true)}`,
+    url: `/v1/verses/${id}${qs.stringify({ expand: expand, cl }, true)}`,
     method: "get",
   });
 };
@@ -151,7 +149,7 @@ export const getVerseMetasWithJsCode = (
   cl = "js"
 ) => {
   return request({
-    url: `/system/verse${qs.stringify(
+    url: `/v1/system/verse${qs.stringify(
       { verse_id: id, expand: expand, cl },
       true
     )}`,
@@ -194,14 +192,14 @@ export const getPublic = (params: VersesParams) => {
 
   //expand = "id,name,description,data,metas,resources,code,uuid,code",
   return request({
-    url: `/verses/public${qs.stringify(query, true)}`,
+    url: `/v1/verses/public${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 export const getVerses = (params: VersesParams) => {
   const query = createQueryParams(params);
   return request({
-    url: `/verses${qs.stringify(query, true)}`,
+    url: `/v1/verses${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -209,7 +207,7 @@ export const getVerses = (params: VersesParams) => {
 export const putVerse = (id: number, data: any) => {
   data.version = environment.version;
   return request({
-    url: `/verses/${id}`,
+    url: `/v1/verses/${id}`,
     method: "put",
     data,
   });
@@ -217,7 +215,7 @@ export const putVerse = (id: number, data: any) => {
 
 export const deleteVerse = (id: number | string) => {
   return request({
-    url: `/verses/${id}`,
+    url: `/v1/verses/${id}`,
     method: "delete",
   });
 };
@@ -228,7 +226,7 @@ export const deleteVerse = (id: number | string) => {
  */
 export const addPublic = (id: number | string) => {
   return request({
-    url: `/verses/${id}/public`,
+    url: `/v1/verses/${id}/public`,
     method: "post",
   });
 };
@@ -239,7 +237,7 @@ export const addPublic = (id: number | string) => {
  */
 export const removePublic = (id: number | string) => {
   return request({
-    url: `/verses/${id}/public`,
+    url: `/v1/verses/${id}/public`,
     method: "delete",
   });
 };
@@ -250,7 +248,7 @@ export const removePublic = (id: number | string) => {
  */
 export const addTag = (id: number | string, tagsId: number | string) => {
   return request({
-    url: `/verses/${id}/tag${qs.stringify({ tags_id: tagsId }, true)}`,
+    url: `/v1/verses/${id}/tag${qs.stringify({ tags_id: tagsId }, true)}`,
     method: "post",
   });
 };
@@ -261,7 +259,7 @@ export const addTag = (id: number | string, tagsId: number | string) => {
  */
 export const removeTag = (id: number | string, tagsId: number | string) => {
   return request({
-    url: `/verses/${id}/tag${qs.stringify({ tags_id: tagsId }, true)}`,
+    url: `/v1/verses/${id}/tag${qs.stringify({ tags_id: tagsId }, true)}`,
     method: "delete",
   });
 };
@@ -272,7 +270,7 @@ export const removeTag = (id: number | string, tagsId: number | string) => {
  */
 export const takePhoto = (verseId: number) => {
   return request({
-    url: `/verses/${verseId}/take-photo`,
+    url: `/v1/verses/${verseId}/take-photo`,
     method: "post",
   });
 };

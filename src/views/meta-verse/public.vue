@@ -21,7 +21,6 @@ const loaded = async (data: any, result: Function) => {
       expand: "image,author,tags,public",
       tags: data.tags,
     });
-    console.error(response.data);
     const pagination = {
       current: parseInt(response.headers["x-pagination-current-page"]),
       count: parseInt(response.headers["x-pagination-page-count"]),

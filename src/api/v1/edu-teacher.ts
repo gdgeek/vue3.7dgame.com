@@ -27,14 +27,14 @@ export const getTeachers = (
     query["page"] = page;
   }
   return request<Teacher[]>({
-    url: `/edu-teacher${qs.stringify(query, true)}`,
+    url: `/v1/edu-teacher${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const getTeacher = (id: number) => {
   return request<Teacher>({
-    url: `/edu-teacher/${id}`,
+    url: `/v1/edu-teacher/${id}`,
     method: "get",
   });
 };
@@ -67,7 +67,7 @@ export const getTeacherMe = (
     query["page"] = page;
   }
   return request<Teacher[]>({
-    url: `/edu-teacher/me${qs.stringify(query, true)}`,
+    url: `/v1/edu-teacher/me${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -78,7 +78,7 @@ export const createTeacher = (data: {
   school_id: number;
 }) => {
   return request({
-    url: `/edu-teacher`,
+    url: `/v1/edu-teacher`,
     method: "post",
     data,
   });
@@ -86,14 +86,14 @@ export const createTeacher = (data: {
 
 export const deleteTeacher = (id: number) => {
   return request({
-    url: `/edu-teacher/${id}`,
+    url: `/v1/edu-teacher/${id}`,
     method: "delete",
   });
 };
 
 export const updateTeacher = (id: number, data: Partial<Teacher>) => {
   return request({
-    url: `/edu-teacher/${id}`,
+    url: `/v1/edu-teacher/${id}`,
     method: "put",
     data,
   });

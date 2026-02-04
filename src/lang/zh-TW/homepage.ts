@@ -45,6 +45,16 @@ export default {
       individualResume: "個人簡介",
       individualResumeStatement: "個人信息的簡要介紹",
       save: "保存",
+      // 郵箱驗證
+      emailVerification: "郵箱驗證",
+      emailVerificationStatement: "驗證您的郵箱地址以確保賬戶安全",
+      email: "郵箱地址",
+      emailPlaceholder: "請輸入郵箱地址",
+      verificationCode: "驗證碼",
+      codePlaceholder: "請輸入6位驗證碼",
+      sendCode: "發送驗證碼",
+      verifyEmail: "驗證郵箱",
+      accountLocked: "賬戶已被鎖定，請 {time} 秒後再試",
       avatarCropping: {
         title: "頭像裁剪",
         leftRotation: "左旋轉",
@@ -89,6 +99,14 @@ export default {
         success: "信息更新成功",
         error1: "信息更新失敗",
         error2: "表單校驗未通過",
+        email: {
+          required: "請輸入郵箱地址",
+          invalid: "郵箱格式不正確",
+        },
+        code: {
+          required: "請輸入驗證碼",
+          invalid: "驗證碼必須是6位數字",
+        },
       },
     },
     account: {

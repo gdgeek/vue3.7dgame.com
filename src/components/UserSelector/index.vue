@@ -37,7 +37,7 @@
               <el-image
                 :src="
                   user.avatar?.url ||
-                  `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
+                  `https://api.dicebear.com/9.x/glass/svg?seed=${user.username}`
                 "
                 fit="cover"
                 class="image"
@@ -45,7 +45,7 @@
                 <template #error>
                   <div class="image-slot">
                     <img
-                      :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`"
+                      :src="`https://api.dicebear.com/9.x/glass/svg?seed=${user.username}`"
                       class="image"
                     />
                   </div>

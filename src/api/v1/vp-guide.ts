@@ -3,7 +3,7 @@ import qs from "querystringify";
 
 export const postVpGuide = (data: unknown) => {
   return request({
-    url: `/vp-guides`,
+    url: `/v1/vp-guides`,
     method: "post",
     data: data,
   });
@@ -27,14 +27,14 @@ export const getVerses = ({
   }
 
   return request({
-    url: `/vp-guides/verses${qs.stringify(query, true)}`,
+    url: `/v1/vp-guides/verses${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const getVpGuide = (id: number) => {
   return request({
-    url: `/vp-guides/${id}`,
+    url: `/v1/vp-guides/${id}`,
     method: "get",
   });
 };
@@ -47,21 +47,21 @@ export const getVpGuides = (page = 0) => {
   }
 
   return request({
-    url: `/vp-guides${qs.stringify(query, true)}`,
+    url: `/v1/vp-guides${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
 export const putVpGuide = (id: number, data: unknown) => {
   return request({
-    url: `/vp-guides/${id}`,
+    url: `/v1/vp-guides/${id}`,
     method: "put",
     data,
   });
 };
 export const deleteVpGuide = (id: number) => {
   return request({
-    url: `/vp-guides/${id}`,
+    url: `/v1/vp-guides/${id}`,
     method: "delete",
   });
 };

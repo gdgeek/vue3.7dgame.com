@@ -42,7 +42,7 @@ export const getGroups = (
   });
 
   return request<Group[]>({
-    url: `/group${qs.stringify(query, true)}`,
+    url: `/v1/group${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -57,9 +57,9 @@ export const getGroup = (id: number, expand = "image,user") => {
   if (expand) {
     query["expand"] = expand;
   }
-  //alert(`/group/${id}${qs.stringify(query, true)}`);
+
   return request<Group>({
-    url: `/group/${id}${qs.stringify(query, true)}`,
+    url: `/v1/group/${id}${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -70,7 +70,7 @@ export const getGroup = (id: number, expand = "image,user") => {
  */
 export const createGroup = (data: GroupCreateData) => {
   return request<Group>({
-    url: `/group`,
+    url: `/v1/group`,
     method: "post",
     data,
   });
@@ -83,7 +83,7 @@ export const createGroup = (data: GroupCreateData) => {
  */
 export const updateGroup = (id: number, data: GroupUpdateData) => {
   return request<Group>({
-    url: `/group/${id}`,
+    url: `/v1/group/${id}`,
     method: "put",
     data,
   });
@@ -96,7 +96,7 @@ export const updateGroup = (id: number, data: GroupUpdateData) => {
  */
 export const patchGroup = (id: number, data: Partial<GroupUpdateData>) => {
   return request<Group>({
-    url: `/group/${id}`,
+    url: `/v1/group/${id}`,
     method: "patch",
     data,
   });
@@ -108,7 +108,7 @@ export const patchGroup = (id: number, data: Partial<GroupUpdateData>) => {
  */
 export const deleteGroup = (id: number) => {
   return request({
-    url: `/group/${id}`,
+    url: `/v1/group/${id}`,
     method: "delete",
   });
 };
@@ -118,7 +118,7 @@ export const deleteGroup = (id: number) => {
  */
 export const getGroupOptions = () => {
   return request({
-    url: `/group`,
+    url: `/v1/group`,
     method: "options",
   });
 };
@@ -129,7 +129,7 @@ export const getGroupOptions = () => {
  */
 export const joinGroup = (id: number) => {
   return request({
-    url: `/group/${id}/join`,
+    url: `/v1/group/${id}/join`,
     method: "post",
   });
 };
@@ -140,7 +140,7 @@ export const joinGroup = (id: number) => {
  */
 export const leaveGroup = (id: number) => {
   return request({
-    url: `/group/${id}/leave`,
+    url: `/v1/group/${id}/leave`,
     method: "post",
   });
 };
@@ -160,7 +160,7 @@ export const createGroupVerse = (
   }
 ) => {
   return request<any>({
-    url: `/group/${groupId}/verse`,
+    url: `/v1/group/${groupId}/verse`,
     method: "post",
     data,
   });
@@ -213,7 +213,7 @@ export const getGroupVerses = (
   }
 
   return request<GroupVerse[]>({
-    url: `/group/${groupId}/verses${qs.stringify(query, true)}`,
+    url: `/v1/group/${groupId}/verses${qs.stringify(query, true)}`,
     method: "get",
   });
 };
@@ -226,7 +226,7 @@ export const getGroupVerses = (
  */
 export const deleteGroupVerse = (groupId: number, verseId: number) => {
   return request<void>({
-    url: `/group/${groupId}/verse/${verseId}`,
+    url: `/v1/group/${groupId}/verse/${verseId}`,
     method: "delete",
   });
 };

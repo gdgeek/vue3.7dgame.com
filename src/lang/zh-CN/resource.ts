@@ -501,4 +501,9 @@ export default {
     maxSizeLimit: "单个文件最大 {size}MB",
     fileTooLarge: "文件超过 {size}MB 限制",
   },
+  resource: {
+    type: {
+      picture: "图片",
+    },
+  },
 };

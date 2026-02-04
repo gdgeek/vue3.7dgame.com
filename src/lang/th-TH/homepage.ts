@@ -45,6 +45,17 @@ export default {
       individualResume: "ประวัติโดยย่อ",
       individualResumeStatement: "แนะนำข้อมูลส่วนตัวโดยย่อ",
       save: "บันทึก",
+      // การยืนยันอีเมล
+      emailVerification: "การยืนยันอีเมล",
+      emailVerificationStatement:
+        "ยืนยันที่อยู่อีเมลของคุณเพื่อความปลอดภัยของบัญชี",
+      email: "ที่อยู่อีเมล",
+      emailPlaceholder: "กรุณากรอกที่อยู่อีเมล",
+      verificationCode: "รหัสยืนยัน",
+      codePlaceholder: "กรุณากรอกรหัส 6 หลัก",
+      sendCode: "ส่งรหัสยืนยัน",
+      verifyEmail: "ยืนยันอีเมล",
+      accountLocked: "บัญชีถูกล็อค กรุณาลองใหม่ใน {time} วินาที",
       avatarCropping: {
         title: "ตัดรูปประจำตัว",
         leftRotation: "หมุนซ้าย",
@@ -89,6 +100,14 @@ export default {
         success: "อัปเดตข้อมูลสำเร็จ",
         error1: "อัปเดตข้อมูลล้มเหลว",
         error2: "การตรวจสอบแบบฟอร์มไม่ผ่าน",
+        email: {
+          required: "กรุณากรอกที่อยู่อีเมล",
+          invalid: "รูปแบบอีเมลไม่ถูกต้อง",
+        },
+        code: {
+          required: "กรุณากรอกรหัสยืนยัน",
+          invalid: "รหัสยืนยันต้องเป็นตัวเลข 6 หลัก",
+        },
       },
     },
     account: {

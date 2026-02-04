@@ -9,21 +9,25 @@
       <template #header>
         {{ $t("verse.view.prefabDialog.knight.title") }}
       </template>
-      <template #footer>
-        <vue-form
-          v-model="formData"
-          :schema="schema"
-          :form-footer="formFooter"
-          @submit="handlerSubmit"
-          @cancel="handlerCancel"
-          @change="handlerChange"
-        ></vue-form>
-      </template>
+      <VueForm
+        v-if="schema"
+        v-model="formData"
+        :schema="schema"
+        :form-footer="formFooter"
+        @submit="handlerSubmit"
+        @cancel="handlerCancel"
+        @change="handlerChange"
+      ></VueForm>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
+import VueForm from "@/components/JsonSchemaForm/index.vue";
+import { ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { ElMessage } from "element-plus";
+
 const formData = ref({});
 import { v4 as uuidv4 } from "uuid";
 const schema = ref<any>();
@@ -36,11 +40,12 @@ interface FormData {
 }
 
 const formFooter = computed(() => ({
+  show: true,
   okBtn: t("verse.view.prefabDialog.knight.save"),
   cancelBtn: t("verse.view.prefabDialog.knight.cancel"),
 }));
 
-const handlerSubmit = async () => {
+const handlerSubmit = () => {
   if (callback) {
     callback(formData.value);
   }

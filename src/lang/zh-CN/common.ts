@@ -35,6 +35,20 @@ export default {
     serverError: "服务器内部错误，请稍后再试",
     error404: "请求失败，未找到资源 (404)",
   },
+  errors: {
+    networkError: "网络连接失败，请检查网络",
+    validationError: "请检查输入的信息是否正确",
+    rateLimitExceeded: "请求过于频繁，请 {seconds} 秒后再试",
+    invalidCode: "验证码不正确或已过期",
+    accountLocked: "验证失败次数过多，请 {seconds} 秒后再试",
+    serverError: "服务器错误，请稍后重试",
+  },
+  emailVerification: {
+    codeSent: "验证码已发送到您的邮箱",
+    verifySuccess: "邮箱验证成功",
+    sendFailed: "发送验证码失败",
+    verifyFailed: "验证失败",
+  },
   web: {
     login: "登录平台",
     nav: {

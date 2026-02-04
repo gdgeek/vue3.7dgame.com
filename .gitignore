@@ -1,20 +1,47 @@
+# Dependencies
 node_modules
-.DS_Store
+package-lock.json
+
+# Build outputs
 dist
 dist-ssr
+stats.html
+
+# Environment files
 *.local
-.history
+.env.local
+.env.*.local
 
 # Editor directories and files
+.DS_Store
 .idea
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-*.local
+.history
 
-package-lock.json
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-stats.html
-.lh
+# Testing
+coverage
+.nyc_output
+test-results
+
+# Cache
+.cache
 .vite
+.lh
+.eslintcache
+
+# OS
+Thumbs.db

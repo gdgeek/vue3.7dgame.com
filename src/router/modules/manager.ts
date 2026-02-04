@@ -46,6 +46,15 @@ export const managerRoutes: RouteRecordRaw = {
       },
       component: () => import("@/views/phototype/edit.vue"),
     },
+    {
+      path: "/test/vue-form-demo",
+      name: "VueFormDemo",
+      meta: {
+        title: "VueForm 测试",
+        hidden: false,
+      },
+      component: () => import("@/views/test/VueFormDemo.vue"),
+    },
   ],
 };
 

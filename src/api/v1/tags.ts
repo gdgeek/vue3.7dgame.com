@@ -8,7 +8,7 @@ export const getTags = (type: string | null = null) => {
     query["TagsSearch[type]"] = type;
   }
   return request({
-    url: `/tags${qs.stringify(query, true)}`,
+    url: `/v1/tags${qs.stringify(query, true)}`,
     method: "get",
   });
 };

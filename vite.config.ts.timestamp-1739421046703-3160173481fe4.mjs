@@ -158,11 +158,11 @@ var vite_config_default = defineConfig(({ mode }) => {
       open: true,
       proxy: {
         /** 代理前缀为 /dev-api 的请求  */
-        [env.VITE_APP_BASE_API]: {
+        [env.VITE_APP_API_URL]: {
           changeOrigin: true,
           // 接口地址
           target: env.VITE_APP_API_URL,
-          rewrite: (path) => path.replace(new RegExp("^" + env.VITE_APP_BASE_API), "")
+          rewrite: (path) => path.replace(new RegExp("^" + env.VITE_APP_API_URL), "")
         }
       }
     },

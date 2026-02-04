@@ -1,9 +1,8 @@
 import request from "@/utils/request";
 
 export const getUserLinked = () => {
-  //alert(1);
   return request({
-    url: `/tools/user-linked`,
+    url: `/v1/tools/user-linked`,
     method: "get",
   });
 };

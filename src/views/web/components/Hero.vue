@@ -172,7 +172,7 @@ const isDark = computed(() => settingsStore.theme === "dark");
 
 const emit = defineEmits(["openLogin"]);
 const test = () => {
-  alert("test");
+  //alert("test");
 };
 // 视频弹窗控制
 const videoDialogVisible = ref(false);

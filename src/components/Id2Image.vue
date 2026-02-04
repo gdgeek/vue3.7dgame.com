@@ -23,7 +23,7 @@ import { computed, ref } from "vue";
 import { LazyImg } from "vue-waterfall-plugin-next";
 const props = withDefaults(
   defineProps<{
-    id?: number;
+    id?: number | string;
     image?: string | null;
     lazy?: boolean; // 是否启用懒加载
     thumbnailSize?: string; // 缩略图尺寸
@@ -44,7 +44,7 @@ const url = computed(() => {
   // 使用 Vite 的 new URL 方式解析静态资源路径
   let imageUrl = props.image;
   if (!imageUrl) {
-    imageUrl = `https://api.dicebear.com/7.x/shapes/svg?seed=${props.id}`;
+    imageUrl = `https://api.dicebear.com/9.x/icons/svg?seed=${props.id}`;
   }
 
   // Check if it's a Tencent Cloud COS URL

@@ -12,6 +12,7 @@
           class="content"
           height="100%"
           width="100%"
+          allow="xr-spatial-tracking; fullscreen; autoplay; clipboard-read; clipboard-write;"
         ></iframe>
       </el-main>
     </el-container>
@@ -61,7 +62,7 @@ const src = computed(() => {
   const query: Record<string, any> = {
     language: appStore.language,
     timestamp: Date.now(),
-    a1_api: env.a1,
+    api: env.api,
   };
 
   const url =
@@ -91,15 +92,16 @@ watch(
   },
   { deep: true }
 );
+const verse = ref<VerseData | null>(null);
 // 刷新场景数据
 const refresh = async () => {
   const response = await getVerse(id.value, "metas, resources");
-  const verse = response.data;
-  saveable.value = verse ? verse.editable : false;
+  verse.value = response.data;
+  saveable.value = verse.value ? verse.value.editable : false;
 
   postMessage("load", {
     id: id.value,
-    data: verse,
+    data: verse.value,
     saveable: saveable.value,
     user: {
       id: userStore.userInfo?.id || null,

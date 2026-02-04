@@ -81,8 +81,8 @@ export const aiRoutes: RouteRecordRaw = {
   meta: {
     title: "ai.title",
     icon: "el-icon-opportunity",
-    hidden: true,
-    private: true,
+    hidden: false, // 在菜单中显示，权限由 ability.ts 控制
+    private: false, // 设为 false 才能在菜单中显示
     alwaysShow: false,
     params: null,
   },
@@ -94,7 +94,7 @@ export const aiRoutes: RouteRecordRaw = {
       meta: {
         title: "ai.list",
         icon: "cascader",
-        hidden: true,
+        hidden: false, // 在菜单中显示
         keepAlive: true,
         alwaysShow: false,
         params: null,

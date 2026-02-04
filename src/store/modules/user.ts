@@ -1,4 +1,5 @@
 //import AuthAPI from "@/api/auth";
+import { logger } from "@/utils/logger";
 import AuthAPI from "@/api/v1/auth";
 //import { resetRouter } from "@/router";
 import { store } from "@/store";
@@ -118,15 +119,15 @@ export const useUserStore = defineStore(
     const setUserInfo = async (data: any) => {
       try {
         const response = await UserAPI.putUserData(data);
-        //  console.error("getUserInfo response:", response);
+        //  logger.error("getUserInfo response:", response);
         // 确保数据存在
         if (!response.data || !response.data.success) {
-          console.error("Verification failed, please Login again.");
+          logger.error("Verification failed, please Login again.");
           return;
         }
         const user = response.data.data;
         if (!user.roles) {
-          console.error("getUserInfo: roles must be a non-null array!");
+          logger.error("getUserInfo: roles must be a non-null array!");
           return;
         }
 
@@ -140,7 +141,7 @@ export const useUserStore = defineStore(
 
         return userInfo.value;
       } catch (error) {
-        console.error("Error fetching user info:", error);
+        logger.error("Error fetching user info:", error);
       }
     };
     const perms: string[] = [
@@ -171,15 +172,14 @@ export const useUserStore = defineStore(
     const getUserInfo = async () => {
       try {
         const response = await UserAPI.info();
-        console.error("getUserInfo response:", response);
         // 确保数据存在
         if (!response.data || !response.data.success) {
-          console.error("Verification failed, please Login again.");
+          logger.error("Verification failed, please Login again.");
           return;
         }
         const user = response.data.data;
         if (!user.roles) {
-          console.error("getUserInfo: roles must be a non-null array!");
+          logger.error("getUserInfo: roles must be a non-null array!");
           return;
         }
 
@@ -189,7 +189,7 @@ export const useUserStore = defineStore(
 
         return userInfo.value;
       } catch (error) {
-        console.error("Error fetching user info:", error);
+        logger.error("Error fetching user info:", error);
       }
     };
 
@@ -241,7 +241,7 @@ export const useUserStore = defineStore(
 
     // remove token
     function resetToken() {
-      console.log("resetToken");
+      logger.log("resetToken");
       return new Promise<void>((resolve) => {
         localStorage.setItem(TOKEN_KEY, "");
         //   resetRouter();

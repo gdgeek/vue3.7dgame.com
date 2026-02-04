@@ -29,6 +29,19 @@ export default {
     operationFailed: "操作失敗",
     networkError: "網絡錯誤，請檢查您的網絡連接",
   },
+  errors: {
+    networkError: "網絡錯誤，請檢查您的網絡連接",
+    rateLimitExceeded: "發送驗證碼過於頻繁，請等待 {seconds} 秒",
+    invalidCode: "驗證碼無效或已過期",
+    accountLocked: "由於多次失敗嘗試，賬戶已被鎖定，請在 {minutes} 分鐘後重試",
+    serverError: "服務器錯誤，請稍後再試",
+  },
+  emailVerification: {
+    codeSent: "驗證碼已發送到您的郵箱",
+    verifySuccess: "郵箱驗證成功",
+    sendFailed: "發送驗證碼失敗",
+    verifyFailed: "郵箱驗證失敗",
+  },
   request: {
     loginExpired: "登錄過期，請重新登錄",
     networkError: "網絡錯誤，請檢查您的網絡連接",

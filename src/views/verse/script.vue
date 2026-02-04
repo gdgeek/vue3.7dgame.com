@@ -710,11 +710,11 @@ onMounted(async () => {
     );
     const response2 = await getVerse(
       id.value,
-
       "id,name,description,data,metas,resources,code,uuid,code",
       "js"
     );
     verse.value = response.data;
+    console.error(verse.value);
     verseMetasWithJsCodeData.value = response2.data;
     metasJavaScriptCode.value = response2.data.metas
       .map((meta: meta) => meta.script)

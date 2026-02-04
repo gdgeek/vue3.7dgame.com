@@ -62,15 +62,15 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       port: Number(env.VITE_APP_PORT),
       // 运行是否自动打开浏览器
       open: true,
-      proxy: env.VITE_APP_BASE_API
+      proxy: env.VITE_APP_API_URL
         ? {
             /** 代理前缀为 /dev-api 的请求  */
-            [env.VITE_APP_BASE_API]: {
+            [env.VITE_APP_API_URL]: {
               changeOrigin: true,
               // 接口地址
               target: env.VITE_APP_API_URL,
               rewrite: (path) =>
-                path.replace(new RegExp("^" + env.VITE_APP_BASE_API), ""),
+                path.replace(new RegExp("^" + env.VITE_APP_API_URL), ""),
             },
           }
         : undefined,
