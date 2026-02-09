@@ -1,0 +1,9 @@
+services:
+  vue3:
+    build: .
+    environment:
+      - VITE_APP_API_URL=https://api.your-domain.com
+      - VITE_APP_AUTH_API=https://auth.your-domain.com
+      - VITE_APP_AI_API=https://ai.your-domain.com
+    ports:
+      - "8088:80"
