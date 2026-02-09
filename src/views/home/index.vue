@@ -7,6 +7,9 @@
           <LocalPage></LocalPage>
         </el-tab-pane>
       </el-tabs>
+      <div class="api-info">
+        <span>API: {{ env.api }}</span>
+      </div>
     </div>
   </TransitionWrapper>
 </template>
@@ -41,3 +44,13 @@ const list = computed(() => {
   ];
 });
 </script>
+
+<style scoped>
+.api-info {
+  text-align: center;
+  padding: 16px 0;
+  margin-top: 20px;
+  color: #909399;
+  font-size: 12px;
+}
+</style>
