@@ -23,8 +23,8 @@ export default {
       },
       password: {
         message1: "请输入密码",
-        message2: "密码长度应该大于6小于20",
-        message3: "密码必须包含大小写字母、数字",
+        message2: "密码长度应为12~128个字符",
+        message3: "密码必须包含大小写字母、数字和特殊字符",
       },
       repassword: {
         message1: "请再次输入密码",
@@ -49,6 +49,21 @@ export default {
     },
     back: "返回",
     loginResponseMissingToken: "登录响应缺少 access_token",
+  },
+  passwordPolicy: {
+    minLength: "至少 12 个字符",
+    maxLength: "不超过 128 个字符",
+    uppercase: "包含大写字母 (A-Z)",
+    lowercase: "包含小写字母 (a-z)",
+    digit: "包含数字 (0-9)",
+    specialChar: "包含特殊字符 (!@#$%^&* 等)",
+    strength: {
+      weak: "弱",
+      medium: "中",
+      strong: "强",
+    },
+    description:
+      "密码要求：至少 12 个字符，包含大写字母、小写字母、数字和特殊字符",
   },
   imageSelector: {
     selectImageMethod: "选择图片方式",

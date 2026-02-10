@@ -140,7 +140,7 @@ export default {
         },
         new: {
           message1: "Please enter the new password",
-          message2: "The new password must be longer than 6 characters",
+          message2: "The new password must be longer than 12 characters",
           error1: "Please enter the password",
           error2: "New password cannot be the same as the old one!",
         },

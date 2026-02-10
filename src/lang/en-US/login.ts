@@ -22,8 +22,9 @@ export default {
       },
       password: {
         message1: "Please enter your password",
-        message2: "Greater than 6 and less than 20",
-        message3: "Min 1 uppercase, 1 lowercase, 1 number",
+        message2: "Between 12 and 128 characters",
+        message3:
+          "Must include uppercase, lowercase, digits, and special characters",
       },
       repassword: {
         message1: "Please enter the password again",
@@ -48,6 +49,21 @@ export default {
     },
     back: "Back",
     loginResponseMissingToken: "The login response is missing the access_token",
+  },
+  passwordPolicy: {
+    minLength: "At least 12 characters",
+    maxLength: "No more than 128 characters",
+    uppercase: "Contains uppercase letter (A-Z)",
+    lowercase: "Contains lowercase letter (a-z)",
+    digit: "Contains digit (0-9)",
+    specialChar: "Contains special character (!@#$%^&* etc.)",
+    strength: {
+      weak: "Weak",
+      medium: "Medium",
+      strong: "Strong",
+    },
+    description:
+      "Password requirements: at least 12 characters, including uppercase, lowercase, digits, and special characters",
   },
   imageSelector: {
     selectImageMethod: "Select Image Method",

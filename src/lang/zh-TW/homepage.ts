@@ -136,7 +136,7 @@ export default {
         },
         new: {
           message1: "請輸入新密碼",
-          message2: "新密碼長度應該大於6",
+          message2: "新密碼長度應該大於12",
           error1: "請輸入密碼",
           error2: "新密碼不能和舊密碼一致！",
         },

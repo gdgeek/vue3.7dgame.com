@@ -7,34 +7,19 @@
         <br />
         <el-tabs style="width: 100%" type="border-card" :stretch="true">
           <el-tab-pane :label="$t('login.createAccount')">
-            <el-form
-              ref="registerFormRef"
-              class="login-form"
-              :rules="registerRules"
-              :model="registerForm"
-              label-width="auto"
-            >
+            <el-form ref="registerFormRef" class="login-form" :rules="registerRules" :model="registerForm"
+              label-width="auto">
               <el-form-item :label="$t('login.username')" prop="username">
-                <el-input
-                  v-model="registerForm.username"
-                  suffix-icon="Message"
-                ></el-input>
+                <el-input v-model="registerForm.username" suffix-icon="Message"></el-input>
               </el-form-item>
 
               <el-form-item :label="$t('login.password')" prop="password">
-                <el-input
-                  v-model="registerForm.password"
-                  type="password"
-                  suffix-icon="Lock"
-                ></el-input>
+                <el-input v-model="registerForm.password" type="password" suffix-icon="Lock"></el-input>
+                <PasswordStrength :password="registerForm.password" />
               </el-form-item>
 
               <el-form-item :label="$t('login.repassword')" prop="repassword">
-                <el-input
-                  v-model="registerForm.repassword"
-                  type="password"
-                  suffix-icon="Lock"
-                ></el-input>
+                <el-input v-model="registerForm.repassword" type="password" suffix-icon="Lock"></el-input>
               </el-form-item>
 
               <el-form-item class="login-button">
@@ -62,7 +47,7 @@ import "@/assets/font/font.css";
 import { LocationQuery, useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { useSettingsStore } from "@/store/modules/settings";
-import { FormInstance, FormItemRule } from "element-plus";
+import { FormInstance } from "element-plus";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { onMounted, watch, ref } from "vue";
 import { useI18n } from "vue-i18n"; // Ensure you have this import
@@ -70,6 +55,8 @@ import { useI18n } from "vue-i18n"; // Ensure you have this import
 import WechatApi from "@/api/v1/wechat";
 import { RegisterData } from "@/api/auth/model";
 import Token from "@/store/modules/token";
+import { createPasswordFormRules } from "@/utils/password-validator";
+import PasswordStrength from "@/components/PasswordStrength/index.vue";
 const { t } = useI18n(); // I18n for translations
 const token = computed(() => route.query.token as string);
 const settingsStore = useSettingsStore();
@@ -106,8 +93,7 @@ const validatePass2 = (rule: any, value: any, callback: any) => {
     callback();
   }
 };
-type Arrayable<T> = T | T[];
-const registerRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
+const registerRules = {
   username: [
     {
       required: true,
@@ -115,29 +101,12 @@ const registerRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
       trigger: "blur",
     },
     {
-      type: "email",
+      type: "email" as const,
       message: "need email",
       trigger: "blur",
     },
   ],
-  password: [
-    {
-      required: true,
-      message: t("login.rules.password.message1"),
-      trigger: "blur",
-    },
-    {
-      min: 6,
-      max: 20,
-      message: t("login.rules.password.message2"),
-      trigger: "blur",
-    },
-    {
-      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/,
-      message: t("login.rules.password.message3"),
-      trigger: "blur",
-    },
-  ],
+  password: createPasswordFormRules(t),
   repassword: [
     {
       required: true,
@@ -169,19 +138,33 @@ function parseRedirect(): {
 const register = async () => {
   registerFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
-      const response = await WechatApi.register({
-        username: registerForm.value.username,
-        password: registerForm.value.password,
-        token: token.value,
-      });
-      const data = response.data;
-      if (data.success) {
-        ElMessage.success(t("login.success"));
-        Token.setToken(data.token);
-        const { path, queryParams } = parseRedirect();
-        router.push({ path: path, query: queryParams });
-      } else {
-        ElMessage.error(t("login.error"));
+      try {
+        const response = await WechatApi.register({
+          username: registerForm.value.username,
+          password: registerForm.value.password,
+          token: token.value,
+        });
+        const data = response.data;
+        if (data.success) {
+          ElMessage.success(t("login.success"));
+          Token.setToken(data.token);
+          const { path, queryParams } = parseRedirect();
+          router.push({ path: path, query: queryParams });
+        } else {
+          ElMessage.error(t("login.error"));
+        }
+      } catch (error: unknown) {
+        const axiosError = error as {
+          response?: { data?: { password?: string[]; message?: string } };
+        };
+        const passwordErrors = axiosError?.response?.data?.password;
+        if (Array.isArray(passwordErrors)) {
+          passwordErrors.forEach((msg: string) => ElMessage.error(msg));
+        } else {
+          ElMessage.error(
+            axiosError?.response?.data?.message || t("login.error")
+          );
+        }
       }
     } else {
       ElMessage.error(t("login.error"));
