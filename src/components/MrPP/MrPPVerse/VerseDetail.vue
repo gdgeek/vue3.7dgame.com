@@ -20,30 +20,16 @@
 
           <template #footer>
             <div style="display: flex; align-items: center; gap: 12px">
-              <tags
-                v-if="verse && verse.verseTags"
-                :editable="verse.editable"
-                @add="addTags"
-                @remove="removeTags"
-                :verseTags="verse.verseTags"
-              ></tags>
-              <el-switch
-                v-if="verse && isAdmin"
-                v-model="verse.public"
-                :active-text="$t('verse.view.public.open')"
-                :inactive-text="$t('verse.view.public.private')"
-                @change="handlePublicChange"
-              ></el-switch>
+              <tags v-if="verse && verse.verseTags" :editable="verse.editable" @add="addTags" @remove="removeTags"
+                :verseTags="verse.verseTags"></tags>
+              <el-switch v-if="verse && isAdmin" v-model="verse.public" :active-text="$t('verse.view.public.open')"
+                :inactive-text="$t('verse.view.public.private')" @change="handlePublicChange"></el-switch>
             </div>
           </template>
 
           <div class="box-item">
-            <ImageSelector
-              :imageUrl="verse.image ? verse.image.url : ''"
-              :itemId="verse.id"
-              @image-selected="handleImageSelected"
-              @image-upload-success="handleImageUploadSuccess"
-            ></ImageSelector>
+            <ImageSelector :imageUrl="verse.image ? verse.image.url : ''" :itemId="verse.id"
+              @image-selected="handleImageSelected" @image-upload-success="handleImageUploadSuccess"></ImageSelector>
           </div>
         </el-card>
 
@@ -51,21 +37,19 @@
 
         <!-- 操作按钮卡片 -->
         <el-card v-if="verse" class="box-card">
-          <el-button
-            style="width: 100%"
-            type="primary"
-            size="small"
-            @click="comeIn"
-          >
-            <div v-if="saveable">
-              <font-awesome-icon icon="edit"></font-awesome-icon>
-              &nbsp;{{ $t("verse.view.edit") }}
-            </div>
-            <div v-else>
-              <font-awesome-icon icon="eye"></font-awesome-icon>
-              &nbsp;{{ $t("verse.view.eye") }}
-            </div>
-          </el-button>
+          <div style="display: flex; gap: 8px; align-items: center">
+            <el-button style="flex: 1" type="primary" @click="comeIn">
+              <div v-if="saveable">
+                <font-awesome-icon icon="edit"></font-awesome-icon>
+                &nbsp;{{ $t("verse.view.edit") }}
+              </div>
+              <div v-else>
+                <font-awesome-icon icon="eye"></font-awesome-icon>
+                &nbsp;{{ $t("verse.view.eye") }}
+              </div>
+            </el-button>
+            <ExportButton :verseId="verse.id" />
+          </div>
         </el-card>
 
         <br />
@@ -82,12 +66,7 @@
               <el-button-group style="float: right"></el-button-group>
             </aside>
           </div>
-          <VerseToolbar
-            v-if="verse"
-            :verse="verse"
-            @deleted="deleted"
-            @changed="changed"
-          ></VerseToolbar>
+          <VerseToolbar v-if="verse" :verse="verse" @deleted="deleted" @changed="changed"></VerseToolbar>
           <br />
         </el-card>
 
@@ -116,6 +95,7 @@ import { useUserStore } from "@/store/modules/user";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";
+import ExportButton from "@/components/ScenePackage/ExportButton.vue";
 import { EditPen, View } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 
@@ -223,8 +203,8 @@ const handleImageUploadSuccess = async (event: ImageUpdateEvent) => {
 
 const removeTags = async (
   tagId: number,
-  resolve: () => void = () => {},
-  reject: () => void = () => {}
+  resolve: () => void = () => { },
+  reject: () => void = () => { }
 ) => {
   try {
     await ElMessageBox.confirm(
@@ -248,8 +228,8 @@ const removeTags = async (
 
 const addTags = async (
   tagId: number,
-  resolve: () => void = () => {},
-  reject: () => void = () => {}
+  resolve: () => void = () => { },
+  reject: () => void = () => { }
 ) => {
   try {
     await ElMessageBox.confirm(

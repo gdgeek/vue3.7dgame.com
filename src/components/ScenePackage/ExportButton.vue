@@ -1,12 +1,7 @@
 <template>
-  <div class="export-button-wrapper">
-    <el-button type="primary" :loading="exporting" @click="handleExport">
-      <el-icon v-if="!exporting">
-        <Download />
-      </el-icon>
-      导出场景
-    </el-button>
-  </div>
+  <el-tooltip content="导出场景" placement="top">
+    <el-button type="success" :loading="exporting" :icon="Download" @click="handleExport" />
+  </el-tooltip>
 </template>
 
 <script setup lang="ts">

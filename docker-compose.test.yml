@@ -5,5 +5,7 @@ services:
       - VITE_APP_API_URL=https://api.your-domain.com
       - VITE_APP_AUTH_API=https://auth.your-domain.com
       - VITE_APP_AI_API=https://ai.your-domain.com
+    volumes:
+      - ./dist:/usr/share/nginx/html
     ports:
       - "8088:80"

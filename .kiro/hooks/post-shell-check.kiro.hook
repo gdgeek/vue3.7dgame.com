@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "命令执行后检查",
+  "description": "在执行 shell 命令后，检查输出是否有错误或警告需要处理",
+  "version": "1",
+  "when": {
+    "type": "postToolUse",
+    "toolTypes": [
+      "shell"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "检查刚才执行的命令输出。如果有错误或重要警告，分析原因并提出修复建议。如果一切正常，继续当前任务。"
+  }
+}

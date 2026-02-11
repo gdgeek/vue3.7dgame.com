@@ -12,7 +12,7 @@
 ![](https://foruda.gitee.com/images/1708618984641188532/a7cca095_716974.png "rainbow.png")
 
 <div align="center">
-  <a target="_blank" href="http://vue3.youlai.tech">👀 在线预览</a> |  <a target="_blank" href="https://juejin.cn/post/7228990409909108793">📖 阅读文档</a>  
+  <a target="_blank" href="http://vue3.youlai.tech">👀 在线预览</a> |  <a target="_blank" href="https://juejin.cn/post/7228990409909108793">📖 阅读文档</a>
 </div>
 
 ## 项目简介
@@ -98,7 +98,7 @@ server {
 	# 反向代理配置
 	location /prod-api/ {
             # vapi.youlai.tech 替换后端API地址，注意保留后面的斜杠 /
-            proxy_pass http://vapi.youlai.tech/; 
+            proxy_pass http://vapi.youlai.tech/;
 	}
 }
 ```
@@ -115,6 +115,76 @@ server {
 2. 根据后端工程的说明文档 [README.md](https://gitee.com/youlaiorg/youlai-boot#%E9%A1%B9%E7%9B%AE%E8%BF%90%E8%A1%8C) 完成本地启动。
 3. 修改 `.env.development` 文件中的 `VITE_APP_API_URL` 的值，将其从 http://vapi.youlai.tech 更改为 http://localhost:8989。
 
+
+## 场景导出/导入功能
+
+本项目支持将完整场景（Verse）导出为 ZIP 压缩包，并支持跨账号导入还原。
+
+### 功能概述
+
+- **导出**：在场景详情页点击「导出场景」按钮，系统会收集场景数据、实体、脚本和资源文件，打包为 `.zip` 文件下载到本地
+- **导入**：在场景列表页点击「导入场景」按钮，选择 `.zip` 场景包文件，系统会自动解析、上传资源并创建新场景
+
+### ZIP 包结构
+
+```
+scene-package.zip
+├── manifest.json          # 清单文件（场景结构、实体关系、资源映射）
+└── resources/             # 资源文件目录
+    ├── {uuid}.glb
+    ├── {uuid}.png
+    └── ...
+```
+
+### 导出流程
+
+1. 调用后端 `GET /v1/verses/{id}/export` 获取完整场景数据树
+2. 生成 `manifest.json`（剥离服务端 ID，构建 UUID 映射）
+3. 下载所有资源文件并进行 MD5 校验
+4. 使用 JSZip 打包为 ZIP 文件，触发浏览器下载
+5. 部分资源下载失败不会中断导出，完成后会报告失败列表
+
+### 导入流程
+
+1. 验证 ZIP 格式有效性
+2. 读取并验证 `manifest.json` 格式版本兼容性
+3. 逐个上传资源文件到服务器
+4. 调用后端 `POST /v1/verses/import` 批量创建场景数据
+5. 导入成功后可直接跳转到新场景
+
+### 后端 API 依赖
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/v1/verses/{id}/export` | GET | 返回场景完整数据树（Verse + Meta + Resource + Code） |
+| `/v1/verses/import` | POST | 接受完整场景数据，服务端创建并返回 ID 映射 |
+
+### 相关文件
+
+```
+src/
+├── api/v1/scene-package.ts              # API 类型定义和请求函数
+├── services/scene-package/
+│   ├── manifest.ts                       # Manifest 类型、构建、解析、验证
+│   ├── uuid-mapper.ts                    # UUID 映射器、ID 重映射函数
+│   ├── export-service.ts                 # 导出服务（下载、MD5校验、打包）
+│   └── import-service.ts                 # 导入服务（解压、上传、创建）
+├── components/ScenePackage/
+│   ├── ExportButton.vue                  # 导出按钮组件
+│   └── ImportDialog.vue                  # 导入对话框组件
+test/
+└── unit/services/scene-package/
+    ├── manifest.spec.ts                  # 51 个测试
+    └── uuid-mapper.spec.ts              # 38 个测试
+```
+
+### 运行测试
+
+```bash
+npx vitest run test/unit/services/scene-package/
+```
+
+---
 
 ## 注意事项
 
