@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 import qs from "querystringify";
 
-export const postVpGuide = (data: any) => {
+export const postVpGuide = (data: unknown) => {
   return request({
     url: `/v1/vp-guides`,
     method: "post",
@@ -15,7 +15,7 @@ export const getVerses = ({
   page = 0,
   expand = "image,author,share",
 }) => {
-  const query: Record<string, any> = [];
+  const query: Record<string, unknown> = {};
   query["expand"] = expand;
   query["sort"] = sort;
 
@@ -39,7 +39,7 @@ export const getVpGuide = (id: number) => {
   });
 };
 export const getVpGuides = (page = 0) => {
-  const query: Record<string, any> = [];
+  const query: Record<string, unknown> = {};
 
   query["sort"] = "order";
   if (page > 1) {
@@ -52,7 +52,7 @@ export const getVpGuides = (page = 0) => {
   });
 };
 
-export const putVpGuide = (id: number, data: any) => {
+export const putVpGuide = (id: number, data: unknown) => {
   return request({
     url: `/v1/vp-guides/${id}`,
     method: "put",

@@ -168,14 +168,14 @@ const selected = async (data: any = null) => {
 
 const create = async () => {
   try {
-    const { value: name } = await ElMessageBox.prompt(
+    const { value: name } = (await ElMessageBox.prompt(
       t("game.verseDialog.prompt.message1"),
       t("game.verseDialog.prompt.message2"),
       {
         confirmButtonText: t("game.verseDialog.prompt.confirm"),
         cancelButtonText: t("game.verseDialog.prompt.cancel"),
       }
-    );
+    )) as { value: string };
 
     const response = await postMeta({
       title: name || "新建实体",

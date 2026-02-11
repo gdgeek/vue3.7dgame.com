@@ -10,43 +10,25 @@
       <!-- 邮箱绑定部分 -->
       <el-row :gutter="24">
         <el-col :xs="16" :sm="16" :md="12" :lg="10" :xl="10">
-          <el-form
-            ref="emailFormRef"
-            :model="emailForm"
-            label-width="auto"
-            style="min-width: 300px"
-          >
-            <el-form-item
-              v-if="
-                typeof email === 'undefined' || email === null || !emailBind
-              "
-              :label="$t('homepage.account.label1')"
-              prop="email"
-              :rules="[
-                {
-                  required: true,
-                  message: $t('homepage.account.rules1.message1'),
-                  trigger: 'blur',
-                },
-                {
-                  type: 'email',
-                  message: $t('homepage.account.rules1.message2'),
-                  trigger: ['blur', 'change'],
-                },
-              ]"
-            >
-              <el-input
-                v-model="emailForm.email"
-                autocomplete="off"
-                type="email"
-                :placeholder="$t('homepage.account.placeholder')"
-              >
+          <el-form ref="emailFormRef" :model="emailForm" label-width="auto" style="min-width: 300px">
+            <el-form-item v-if="
+              typeof email === 'undefined' || email === null || !emailBind
+            " :label="$t('homepage.account.label1')" prop="email" :rules="[
+              {
+                required: true,
+                message: $t('homepage.account.rules1.message1'),
+                trigger: 'blur',
+              },
+              {
+                type: 'email',
+                message: $t('homepage.account.rules1.message2'),
+                trigger: ['blur', 'change'],
+              },
+            ]">
+              <el-input v-model="emailForm.email" autocomplete="off" type="email"
+                :placeholder="$t('homepage.account.placeholder')">
                 <template #append>
-                  <el-button
-                    v-if="!emailBind"
-                    @click="postEmail"
-                    :class="{ 'hover-blue': true }"
-                  >
+                  <el-button v-if="!emailBind" @click="postEmail" :class="{ 'hover-blue': true }">
                     <div v-if="null === email">
                       {{ $t("homepage.account.bind") }}
                     </div>
@@ -56,12 +38,7 @@
               </el-input>
             </el-form-item>
 
-            <el-form-item
-              v-else
-              v-model="emailForm.email"
-              :label="$t('homepage.account.label1')"
-              prop="email"
-            >
+            <el-form-item v-else v-model="emailForm.email" :label="$t('homepage.account.label1')" prop="email">
               <el-tag>{{ email }}</el-tag>
             </el-form-item>
           </el-form>
@@ -77,11 +54,7 @@
                 <el-button type="warning" @click="dialogPasswordVisible = true">
                   {{ $t("homepage.account.change") }}
                 </el-button>
-                <el-button
-                  disabled
-                  type="warning"
-                  @click="dialogPasswordVisible = true"
-                >
+                <el-button disabled type="warning" @click="dialogPasswordVisible = true">
                   {{ $t("homepage.account.recover") }}
                 </el-button>
               </el-button-group>
@@ -90,63 +63,27 @@
         </el-col>
       </el-row>
       <!-- 修改密码弹窗 -->
-      <el-dialog
-        v-model="dialogPasswordVisible"
-        :close-on-click-modal="false"
-        style="min-width: 560px"
-        @close="resetForm"
-      >
+      <el-dialog v-model="dialogPasswordVisible" :close-on-click-modal="false" style="min-width: 560px"
+        @close="resetForm">
         <template #header> {{ $t("homepage.account.change") }} </template>
-        <el-form
-          ref="passwordFormRef"
-          :model="passwordForm"
-          :rules="passwordRules"
-          label-width="auto"
-        >
+        <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="auto">
           <el-row :gutter="24">
             <el-col :xs="20" :sm="20" :md="14" :lg="14" :xl="14" :offset="4">
-              <el-form-item
-                :label="$t('homepage.account.label3')"
-                prop="oldPassword"
-                style="margin-bottom: 26px"
-              >
-                <el-input
-                  v-model="passwordForm.oldPassword"
-                  type="password"
-                  autocomplete="off"
-                ></el-input>
+              <el-form-item :label="$t('homepage.account.label3')" prop="oldPassword" style="margin-bottom: 26px">
+                <el-input v-model="passwordForm.oldPassword" type="password" autocomplete="off"></el-input>
               </el-form-item>
 
-              <el-form-item
-                :label="$t('homepage.account.label4')"
-                prop="password"
-                style="margin-bottom: 26px"
-              >
-                <el-input
-                  v-model="passwordForm.password"
-                  type="password"
-                  autocomplete="off"
-                ></el-input>
+              <el-form-item :label="$t('homepage.account.label4')" prop="password" style="margin-bottom: 26px">
+                <el-input v-model="passwordForm.password" type="password" autocomplete="off"></el-input>
+                <PasswordStrength :password="passwordForm.password ?? ''" />
               </el-form-item>
 
-              <el-form-item
-                :label="$t('homepage.account.label5')"
-                prop="checkPassword"
-                style="margin-bottom: 26px"
-              >
-                <el-input
-                  v-model="passwordForm.checkPassword"
-                  type="password"
-                  autocomplete="off"
-                ></el-input>
+              <el-form-item :label="$t('homepage.account.label5')" prop="checkPassword" style="margin-bottom: 26px">
+                <el-input v-model="passwordForm.checkPassword" type="password" autocomplete="off"></el-input>
               </el-form-item>
 
               <el-form-item>
-                <el-button
-                  style="width: 100%"
-                  type="primary"
-                  @click="resetPassword"
-                >
+                <el-button style="width: 100%" type="primary" @click="resetPassword">
                   {{ $t("homepage.account.confirm") }}
                 </el-button>
               </el-form-item>
@@ -165,6 +102,8 @@ import {
   bindEmail,
   resetPassword as apiResetPassword,
 } from "@/api/user/server";
+import { createPasswordFormRules } from "@/utils/password-validator";
+import PasswordStrength from "@/components/PasswordStrength/index.vue";
 import type { FormInstance } from "element-plus";
 
 // 组件状态
@@ -191,7 +130,7 @@ const passwordForm = ref({
 
 // 密码验证规则
 const passwordRules = {
-  // 旧密码验证规则
+  // 旧密码验证规则（保持不变，老用户不受影响）
   oldPassword: [
     {
       required: true,
@@ -204,7 +143,7 @@ const passwordRules = {
       trigger: "blur",
     },
     {
-      validator: (rule: any, value: string, callback: Function) => {
+      validator: (_rule: unknown, value: string, callback: (error?: Error) => void) => {
         if (value === "") {
           callback(new Error(t("homepage.account.rules2.old.error1")));
         } else if (value === passwordForm.value.password) {
@@ -216,23 +155,16 @@ const passwordRules = {
       trigger: "blur",
     },
   ],
-  // 新密码验证规则
+  // 新密码验证规则 — 使用共享密码策略验证
   password: [
+    ...createPasswordFormRules(t),
     {
-      required: true,
-      message: t("homepage.account.rules2.new.message1"),
-      trigger: "blur",
-    },
-    {
-      min: 6,
-      message: t("homepage.account.rules2.new.message2"),
-      trigger: "blur",
-    },
-    {
-      validator: (rule: any, value: string, callback: Function) => {
-        if (value === "") {
-          callback(new Error(t("homepage.account.rules2.new.error1")));
-        } else if (value === passwordForm.value.oldPassword) {
+      validator: (_rule: unknown, value: string, callback: (error?: Error) => void) => {
+        if (!value) {
+          callback();
+          return;
+        }
+        if (value === passwordForm.value.oldPassword) {
           callback(new Error(t("homepage.account.rules2.new.error2")));
         } else {
           if (passwordForm.value.checkPassword !== "") {
@@ -253,7 +185,7 @@ const passwordRules = {
       trigger: "blur",
     },
     {
-      validator: (rule: any, value: string, callback: Function) => {
+      validator: (_rule: unknown, value: string, callback: (error?: Error) => void) => {
         if (value === "") {
           callback(new Error(t("homepage.account.rules2.check.error1")));
         } else if (value !== passwordForm.value.password) {

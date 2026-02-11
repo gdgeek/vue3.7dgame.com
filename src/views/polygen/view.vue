@@ -132,7 +132,7 @@ const progress = (progress: number) => {
 
 const createVerse = async () => {
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       t("polygen.view.prompt.message1"),
       t("polygen.view.prompt.message2"),
       {
@@ -141,7 +141,7 @@ const createVerse = async () => {
         inputValue: polygenData.value.name,
         inputErrorMessage: t("polygen.view.prompt.inputError"),
       }
-    );
+    )) as { value: string };
 
     loading.value = true;
 
@@ -194,7 +194,7 @@ const deleteWindow = async () => {
 
 const namedWindow = async () => {
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       t("polygen.view.namePrompt.message1"),
       t("polygen.view.namePrompt.message2"),
       {
@@ -203,7 +203,7 @@ const namedWindow = async () => {
         closeOnClickModal: false,
         inputValue: polygenData.value.name,
       }
-    );
+    )) as { value: string };
 
     await putPolygen(polygenData.value.id, { name: value });
 

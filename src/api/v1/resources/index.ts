@@ -26,7 +26,10 @@ type ResourceData = {
 };
 
 type ResourcePut = {
-  name: string;
+  name?: string;
+  info?: string;
+  image_id?: number;
+  [key: string]: unknown;
 };
 
 // 获取资源列表
@@ -102,22 +105,22 @@ const putResources = (id: number | string, resource: ResourcePut) => {
   });
 };
 
-export const putPolygen = (id: number | string, polygen: any) =>
+export const putPolygen = (id: number | string, polygen: ResourcePut) =>
   putResources(id, polygen);
 
-export const putVoxel = (id: number | string, voxel: any) =>
+export const putVoxel = (id: number | string, voxel: ResourcePut) =>
   putResources(id, voxel);
 
-export const putPicture = (id: number | string, picture: any) =>
+export const putPicture = (id: number | string, picture: ResourcePut) =>
   putResources(id, picture);
 
-export const putVideo = (id: number | string, video: any) =>
+export const putVideo = (id: number | string, video: ResourcePut) =>
   putResources(id, video);
 
-export const putAudio = (id: number | string, audio: any) =>
+export const putAudio = (id: number | string, audio: ResourcePut) =>
   putResources(id, audio);
 
-export const putParticle = (id: number | string, particle: any) =>
+export const putParticle = (id: number | string, particle: ResourcePut) =>
   putResources(id, particle);
 
 // 上传资源

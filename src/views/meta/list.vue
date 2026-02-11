@@ -139,7 +139,7 @@ const generateDefaultName = (prefix: string) => {
 
 const addMeta = async () => {
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       t("meta.create.namePlaceholder"),
       t("meta.create.title"),
       {
@@ -154,7 +154,7 @@ const addMeta = async () => {
           return true;
         },
       }
-    );
+    )) as { value: string };
 
     const newMeta = {
       title: value.trim(),
@@ -171,7 +171,7 @@ const addMeta = async () => {
 
 const copyWindow = async (item: metaInfo) => {
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       t("meta.prompt.message1"),
       t("meta.prompt.message2"),
       {
@@ -180,7 +180,7 @@ const copyWindow = async (item: metaInfo) => {
         closeOnClickModal: false,
         inputValue: item.title + " - Copy",
       }
-    );
+    )) as { value: string };
     await copy(item.id, value);
     ElMessage.success(t("meta.prompt.success") + value);
   } catch {
@@ -237,7 +237,7 @@ const copy = async (id: number, newTitle: string) => {
 
 const namedWindow = async (item: { id: string; title: string }) => {
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       t("meta.prompt.message1"),
       t("meta.prompt.message2"),
       {
@@ -246,7 +246,7 @@ const namedWindow = async (item: { id: string; title: string }) => {
         closeOnClickModal: false,
         inputValue: item.title,
       }
-    );
+    )) as { value: string };
     await putMeta(item.id, { title: value });
     refreshList();
     ElMessage.success(t("meta.prompt.success") + value);

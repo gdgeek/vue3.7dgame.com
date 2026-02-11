@@ -209,7 +209,7 @@ const deleteWindow = async () => {
 
 const namedWindow = async () => {
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       t("video.view.namePrompt.message1"),
       t("video.view.namePrompt.message2"),
       {
@@ -218,7 +218,7 @@ const namedWindow = async () => {
         closeOnClickModal: false,
         inputValue: videoData.value!.name,
       }
-    );
+    )) as { value: string };
 
     if (value) {
       await named(videoData.value!.id, value);

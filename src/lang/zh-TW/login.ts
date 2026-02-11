@@ -22,8 +22,8 @@ export default {
       },
       password: {
         message1: "請輸入密碼",
-        message2: "密碼長度應該大於6小於20",
-        message3: "密碼必須包含大小寫字母、數字",
+        message2: "密碼長度應為12~128個字元",
+        message3: "密碼必須包含大小寫字母、數字和特殊字元",
       },
       repassword: {
         message1: "請再次輸入密碼",
@@ -48,6 +48,21 @@ export default {
     },
     back: "返回",
     loginResponseMissingToken: "登錄響應缺少 access_token",
+  },
+  passwordPolicy: {
+    minLength: "至少 12 個字元",
+    maxLength: "不超過 128 個字元",
+    uppercase: "包含大寫字母 (A-Z)",
+    lowercase: "包含小寫字母 (a-z)",
+    digit: "包含數字 (0-9)",
+    specialChar: "包含特殊字元 (!@#$%^&* 等)",
+    strength: {
+      weak: "弱",
+      medium: "中",
+      strong: "強",
+    },
+    description:
+      "密碼要求：至少 12 個字元，包含大寫字母、小寫字母、數字和特殊字元",
   },
   imageSelector: {
     selectImageMethod: "選擇圖片方式",

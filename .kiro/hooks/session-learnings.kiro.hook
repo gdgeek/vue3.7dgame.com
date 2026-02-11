@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "会话学习提取",
+  "description": "在 agent 执行结束时，提醒回顾本次会话中的关键发现和可复用模式",
+  "version": "1",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "会话即将结束。如果本次会话中有值得记录的模式、踩坑经验或技术发现，请简要总结并建议是否需要更新 .kiro/skills/ 中的相关文件。不需要每次都更新，只在有真正有价值的发现时才建议。"
+  }
+}

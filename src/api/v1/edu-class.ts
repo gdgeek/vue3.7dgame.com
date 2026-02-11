@@ -10,7 +10,7 @@ export const getClasses = (
   expand = "image,eduTeachers,eduStudents",
   school_id: number | null = null
 ) => {
-  const query: Record<string, any> = [];
+  const query: Record<string, string | number> = {};
   query["expand"] = expand;
   query["sort"] = sort;
 
@@ -30,7 +30,7 @@ export const getClasses = (
 };
 
 export const getClass = (id: number, expand = "") => {
-  const query: Record<string, any> = {};
+  const query: Record<string, string | number> = {};
   if (expand) {
     query["expand"] = expand;
   }
@@ -40,7 +40,7 @@ export const getClass = (id: number, expand = "") => {
   });
 };
 
-export const createClass = (data: any) => {
+export const createClass = (data: Record<string, unknown>) => {
   return request({
     url: `/v1/edu-class`,
     method: "post",
@@ -48,7 +48,7 @@ export const createClass = (data: any) => {
   });
 };
 
-export const updateClass = (id: number, data: any) => {
+export const updateClass = (id: number, data: Record<string, unknown>) => {
   return request({
     url: `/v1/edu-class/${id}`,
     method: "put",
@@ -69,7 +69,7 @@ export const getMyTeacherClasses = (
   page = 1,
   expand = "image"
 ) => {
-  const query: Record<string, any> = {};
+  const query: Record<string, string | number> = {};
   query["expand"] = expand;
   query["sort"] = sort;
   if (page > 1) {
@@ -88,7 +88,7 @@ export const getMyStudentClasses = (
   page = 1,
   expand = "image,school"
 ) => {
-  const query: Record<string, any> = {};
+  const query: Record<string, string | number> = {};
   query["expand"] = expand;
   query["sort"] = sort;
   if (page > 1) {
@@ -125,7 +125,7 @@ export const searchClasses = (
   page = 1,
   expand = "image,school"
 ) => {
-  const query: Record<string, any> = {};
+  const query: Record<string, string | number> = {};
   query["expand"] = expand;
   query["sort"] = sort;
   if (search !== "") {
@@ -148,7 +148,7 @@ export const getClassGroups = (
   page = 1,
   expand = ""
 ) => {
-  const query: Record<string, any> = {};
+  const query: Record<string, string | number> = {};
   if (expand) {
     query["expand"] = expand;
   }
@@ -203,7 +203,7 @@ export const getClassesByTeacher = (
   page = 1,
   expand = "image"
 ) => {
-  const query: Record<string, any> = {};
+  const query: Record<string, string | number> = {};
   query["expand"] = expand;
   query["sort"] = sort;
   query["user_id"] = teacherId;

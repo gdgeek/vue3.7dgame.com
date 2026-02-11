@@ -23,7 +23,11 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # 将构建的文件复制到 Nginx 默认的静态文件目录
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# 复制启动脚本
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # 暴露端口
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

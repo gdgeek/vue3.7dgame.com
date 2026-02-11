@@ -205,14 +205,14 @@ const selected = async (data: any = null) => {
 
 const input = async (text: string): Promise<string> => {
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       text,
       t("verse.view.prefabDialog.prompt.message"),
       {
         confirmButtonText: t("verse.view.prefabDialog.prompt.confirm"),
         cancelButtonText: t("verse.view.prefabDialog.prompt.cancel"),
       }
-    );
+    )) as { value: string };
     return value;
   } catch {
     ElMessage.info(t("verse.view.prefabDialog.prompt.info"));

@@ -22,7 +22,7 @@ export const getUserCreation = () => {
   });
 };
 
-export const putUserData = (data: any) => {
+export const putUserData = (data: unknown) => {
   console.error(data);
   return request<UserInfoReturnType>({
     url: `/v1/user/update`,

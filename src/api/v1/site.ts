@@ -1,4 +1,3 @@
-import { token } from "./tencent-cloud";
 import request from "@/utils/request";
 
 export interface AppleIdData {

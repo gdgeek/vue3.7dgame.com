@@ -196,7 +196,7 @@ const deleteWindow = async () => {
 
 const namedWindow = async () => {
   try {
-    const { value } = await ElMessageBox.prompt(
+    const { value } = (await ElMessageBox.prompt(
       t("polygen.view.namePrompt.message1"),
       t("polygen.view.namePrompt.message2"),
       {
@@ -205,7 +205,7 @@ const namedWindow = async () => {
         closeOnClickModal: false,
         inputValue: polygenData.value.name,
       }
-    );
+    )) as { value: string };
 
     if (value) {
       await putPolygen(polygenData.value.id, { name: value });

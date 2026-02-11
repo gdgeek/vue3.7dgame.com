@@ -1,6 +1,6 @@
 import request from "@/utils/request";
 
-export const uploadFile = (data: any) => {
+export const uploadFile = (data: unknown) => {
   console.error("uploadFile");
   console.error(data);
   return request({

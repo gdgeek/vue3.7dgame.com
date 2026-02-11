@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "写入前规范检查",
+  "description": "在写入 TypeScript 或 Vue 文件前，提醒检查是否符合项目编码规范（类型安全、命名约定、Vue Composition API 等）",
+  "version": "1",
+  "when": {
+    "type": "preToolUse",
+    "toolTypes": [
+      "write"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "在写入文件前，快速检查：1) TypeScript 类型是否完整（无 any）2) 命名是否符合约定 3) Vue 组件是否使用 Composition API + script setup 4) 无硬编码密钥或敏感信息。如果都没问题，继续执行。"
+  }
+}

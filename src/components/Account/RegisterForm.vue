@@ -1,26 +1,8 @@
 <template>
-  <div
-    class="register-form"
-    :class="{ 'dark-theme': isDark }"
-    v-loading="loading"
-  >
-    <el-form
-      ref="registerFormRef"
-      class="login-form"
-      :rules="registerRules"
-      :model="registerForm"
-      label-position="top"
-    >
-      <el-form-item
-        :label="$t('login.username')"
-        prop="username"
-        class="form-item"
-      >
-        <el-input
-          v-model="registerForm.username"
-          placeholder="请输入邮箱"
-          class="custom-input"
-        >
+  <div class="register-form" :class="{ 'dark-theme': isDark }" v-loading="loading">
+    <el-form ref="registerFormRef" class="login-form" :rules="registerRules" :model="registerForm" label-position="top">
+      <el-form-item :label="$t('login.username')" prop="username" class="form-item">
+        <el-input v-model="registerForm.username" placeholder="请输入邮箱" class="custom-input">
           <template #prefix>
             <el-icon class="input-icon">
               <UserFilled></UserFilled>
@@ -29,38 +11,21 @@
         </el-input>
       </el-form-item>
 
-      <el-form-item
-        :label="$t('login.password')"
-        prop="password"
-        class="form-item"
-      >
-        <el-input
-          v-model="registerForm.password"
-          type="password"
-          placeholder="请输入密码"
-          class="custom-input"
-          show-password
-        >
+      <el-form-item :label="$t('login.password')" prop="password" class="form-item">
+        <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" class="custom-input"
+          show-password>
           <template #prefix>
             <el-icon class="input-icon">
               <Lock></Lock>
             </el-icon>
           </template>
         </el-input>
+        <PasswordStrength :password="registerForm.password" />
       </el-form-item>
 
-      <el-form-item
-        :label="$t('login.repassword')"
-        prop="repassword"
-        class="form-item"
-      >
-        <el-input
-          v-model="registerForm.repassword"
-          type="password"
-          placeholder="请再次输入密码"
-          class="custom-input"
-          show-password
-        >
+      <el-form-item :label="$t('login.repassword')" prop="repassword" class="form-item">
+        <el-input v-model="registerForm.repassword" type="password" placeholder="请再次输入密码" class="custom-input"
+          show-password>
           <template #prefix>
             <el-icon class="input-icon">
               <Lock></Lock>
@@ -70,12 +35,7 @@
       </el-form-item>
 
       <el-form-item class="register-button-item">
-        <el-button
-          class="register-button"
-          type="primary"
-          @click="register"
-          :loading="loading"
-        >
+        <el-button class="register-button" type="primary" @click="register" :loading="loading">
           {{ $t("login.create") }}
         </el-button>
       </el-form-item>
@@ -100,6 +60,8 @@ import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import WechatApi from "@/api/v1/wechat";
 import Token from "@/store/modules/token";
+import { createPasswordFormRules } from "@/utils/password-validator";
+import PasswordStrength from "@/components/PasswordStrength/index.vue";
 
 const registerFormRef = ref<FormInstance>();
 const settingsStore = useSettingsStore();
@@ -143,24 +105,7 @@ const registerRules = computed<Record<string, Arrayable<FormItemRule>>>(() => {
         trigger: "blur",
       },
     ],
-    password: [
-      {
-        required: true,
-        message: t("login.rules.password.message1"),
-        trigger: "blur",
-      },
-      {
-        min: 6,
-        max: 20,
-        message: t("login.rules.password.message2"),
-        trigger: "blur",
-      },
-      {
-        pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/,
-        message: t("login.rules.password.message3"),
-        trigger: "blur",
-      },
-    ],
+    password: createPasswordFormRules(t),
     repassword: [
       {
         required: true,
@@ -210,8 +155,18 @@ const register = async () => {
         } else {
           ElMessage.error(t("login.error"));
         }
-      } catch (error: any) {
-        ElMessage.error(error?.response?.data?.message || t("login.error"));
+      } catch (error: unknown) {
+        const axiosError = error as {
+          response?: { data?: { password?: string[]; message?: string } };
+        };
+        const passwordErrors = axiosError?.response?.data?.password;
+        if (Array.isArray(passwordErrors)) {
+          passwordErrors.forEach((msg: string) => ElMessage.error(msg));
+        } else {
+          ElMessage.error(
+            axiosError?.response?.data?.message || t("login.error")
+          );
+        }
       } finally {
         loading.value = false;
       }
