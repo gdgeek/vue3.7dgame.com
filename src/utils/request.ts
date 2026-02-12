@@ -110,6 +110,7 @@ service.interceptors.request.use(
 );
 
 function showErrorMessage(message: string, duration = 5000) {
+  if (!message) return;
   ElMessage.error({ message, duration });
 }
 

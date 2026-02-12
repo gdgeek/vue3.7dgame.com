@@ -1,19 +1,13 @@
 <template>
   <div class="verse-scene">
+
     <KnightDataDialog ref="knightDataRef"></KnightDataDialog>
     <MetaDialog @selected="selected" ref="metaDialogRef"></MetaDialog>
     <!--<PrefabDialog @selected="selected" ref="prefabDialogRef"></PrefabDialog>-->
     <el-container>
       <el-main>
-        <iframe
-          id="editor"
-          ref="editor"
-          :src="src"
-          class="content"
-          height="100%"
-          width="100%"
-          allow="xr-spatial-tracking; fullscreen; autoplay; clipboard-read; clipboard-write;"
-        ></iframe>
+        <iframe id="editor" ref="editor" :src="src" class="content" height="100%" width="100%"
+          allow="xr-spatial-tracking; fullscreen; autoplay; clipboard-read; clipboard-write;"></iframe>
       </el-main>
     </el-container>
   </div>
@@ -382,7 +376,7 @@ const handleUploadCover = async (data: any) => {
         md5,
         extension,
         file,
-        (p: any) => {},
+        (p: any) => { },
         handler,
         "backup"
       );
