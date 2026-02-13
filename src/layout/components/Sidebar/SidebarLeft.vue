@@ -156,7 +156,7 @@
             popper-class="sidebar-submenu-popover">
             <template #reference>
               <div class="menu-trigger-wrapper">
-                <div class="sidebar-item" :class="{ 'sidebar-item-active': route.path.startsWith('/campus') }">
+                <div class="sidebar-item">
                   <span class="material-symbols-outlined">corporate_fare</span>
                   <span class="item-text">校园管理</span>
                 </div>
@@ -209,8 +209,7 @@
             popper-class="sidebar-submenu-popover">
             <template #reference>
               <div class="menu-trigger-wrapper">
-                <div class="sidebar-item"
-                  :class="{ 'sidebar-item-active': route.path.startsWith('/manager') || route.path.startsWith('/phototype') }">
+                <div class="sidebar-item">
                   <span class="material-symbols-outlined">display_settings</span>
                   <span class="item-text">管理中心</span>
                 </div>
