@@ -6,6 +6,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted, type Ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import aiRodin from "@/api/v1/ai-rodin";
 const route = useRoute();
