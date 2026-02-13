@@ -10,9 +10,9 @@ type Vector3 = {
   z: number;
 }
 
-const printVector3 = (vec: Vector3): string => `(${vec.x}, ${vec.y}, ${vec.z})`;
+const printVector3 = (vec: Vector3): string => `${vec.x} X ${vec.y} X ${vec.z}`;
 
-const printVector2 = (vec: Vector2): string => `(${vec.x}, ${vec.y})`;
+const printVector2 = (vec: Vector2): string => `${vec.x} X ${vec.y}`;
 
 // 截取字符串
 const cutString = (str: string, len: number): string => {

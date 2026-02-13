@@ -1,77 +1,34 @@
 <template>
-  <el-card class="box-card">
-    <template #header v-if="animations.length !== 0">
-      <el-select
-        v-model="selectedAnimationIndex"
-        @change="playAnimation"
-        placeholder="Select Animation"
-        style="width: 100%"
-        size="small"
-        :emptyText="'No data'"
-        :disabled="animations.length === 0"
-      >
-        <el-option
-          v-if="animations.length === 0"
-          :key="0"
-          :label="'No data'"
-          :value="0"
-          disabled
-        ></el-option>
-        <el-option
-          v-for="(animation, index) in animations"
-          :key="index"
-          :label="animation.name"
-          :value="index"
-        ></el-option>
-      </el-select>
-      <!--
-      <el-switch v-model="isAnimationPlaying" @change="toggleAnimation" style="margin-left: 5px" inline-prompt
-        :active-text="$t('polygen.animation.animationOn')" :inactive-text="$t('polygen.animation.animationOff')"
-        :disabled="animations.length === 0"></el-switch>-->
-    </template>
-
+  <el-card class="box-card" shadow="never" style="background: transparent; border: none;">
     <div id="three" ref="three" style="height: 400px; width: 100%"></div>
 
-    <!--动画时间进度条 -->
-    <div v-if="animations.length > 0" class="animation-progress">
-      <el-slider
-        v-model="animationProgress"
-        :disabled="animations.length === 0"
-        :min="0"
-        :max="100"
-        :step="0.1"
-        @input="previewAnimation"
-        @change="seekAnimation"
-        size="small"
-        :show-tooltip="true"
-        :format-tooltip="(value) => `${value.toFixed(1)}%`"
-      ></el-slider>
-      <div class="animation-controls">
-        <div
-          class="animation-button"
-          @click="animations.length > 0 && toggleAnimation(!isAnimationPlaying)"
-          :class="{ disabled: animations.length === 0 }"
-        >
-          <img
-            :src="
-              isAnimationPlaying
-                ? '/media/icon/animation_pause.png'
-                : '/media/icon/animation_play.png'
-            "
-            class="animation-icon"
-            alt="animation control"
-          />
-        </div>
-        <span v-if="animations.length > 0" class="animation-time">
-          {{ formatTime(currentAnimationTime) }} /
-          {{ formatTime(totalAnimationDuration) }}
-        </span>
+    <!-- Animation Controls - Visible only when animations exist -->
+    <div class="animation-bar" v-if="animations && animations.length > 0">
+      <div class="animation-play-btn" :class="{ disabled: animations.length === 0 }"
+        @click="animations.length > 0 && toggleAnimation(!isAnimationPlaying)">
+        <span class="material-symbols-outlined">{{ isAnimationPlaying ? 'pause' : 'play_arrow' }}</span>
+      </div>
+
+      <div class="animation-select-wrapper">
+        <span class="animation-label">动画</span>
+        <el-select v-model="selectedAnimationIndex" @change="playAnimation" placeholder="Static"
+          class="animation-select" size="default" :disabled="animations.length === 0">
+          <el-option v-if="animations.length === 0" :key="-1" label="Static" :value="-1"></el-option>
+          <el-option v-for="(animation, index) in animations" :key="index"
+            :label="animation.name || 'Animation ' + (index + 1)" :value="index"></el-option>
+        </el-select>
+      </div>
+
+      <div class="animation-time">
+        {{ formatTime(currentAnimationTime) }} / {{ formatTime(totalAnimationDuration) }}
       </div>
     </div>
   </el-card>
 </template>
 
 <script setup lang="ts">
+import { ref, watch, onMounted } from "vue";
+import { useDark } from "@vueuse/core";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -122,6 +79,23 @@ const animationProgress = ref(0); // 动画进度（百分比）
 const currentAnimationTime = ref(0); // 当前动画时间（秒）
 const totalAnimationDuration = ref(0); // 总动画时长（秒）
 let currentAction: THREE.AnimationAction | null = null; // 当前播放的动画
+
+const isDark = useDark();
+
+// 监听主题变化，调整 3D 场景氛围
+watch(isDark, (dark) => {
+  if (scene) {
+    // 可以在这里调整背景色或灯光强度，实现更好的风格适配
+    scene.traverse((child) => {
+      if (child instanceof THREE.AmbientLight) {
+        child.intensity = dark ? 0.6 : 0.8;
+      }
+      if (child instanceof THREE.DirectionalLight) {
+        child.intensity = dark ? 1.5 : 2.0;
+      }
+    });
+  }
+}, { immediate: true });
 
 // 格式化时间为 MM:SS 格式
 const formatTime = (seconds: number) => {
@@ -277,17 +251,13 @@ const refresh = () => {
     url,
     (gltf) => {
       const model = gltf.scene;
-      console.log("GLTF", gltf);
 
-      animations.value = gltf.animations;
-      console.log("GLTF Animations:", animations);
+      animations.value = gltf.animations || [];
 
-      if (animations.value.length > 0) {
-        console.log("Animations found:");
+      if (animations.value && animations.value.length > 0) {
         mixer = new THREE.AnimationMixer(model);
         playAnimation(selectedAnimationIndex.value);
       } else {
-        console.log("No animations found in this GLB file.");
       }
 
       const box = new THREE.Box3().setFromObject(model);
@@ -388,12 +358,13 @@ onMounted(() => {
     renderer = new THREE.WebGLRenderer({
       preserveDrawingBuffer: true,
       antialias: true,
+      alpha: true, // Allow transparency
     });
     renderer.setViewport(0, 0, width, height);
     renderer.setSize(width, height, true);
-    renderer.setClearColor(0xeeffff, 1);
-    renderer.shadowMap.enabled = true; // 启用阴影
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 设置阴影类型
+    renderer.setClearColor(0x000000, 0); // Transparent background
+    renderer.setClearColor(0x000000, 0); // Transparent background
+    renderer.shadowMap.enabled = false;
     content.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -486,37 +457,77 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.animation-progress {
-  margin-top: 10px;
-}
-
-.animation-controls {
+/* Animation Bar - New Style */
+.animation-bar {
   display: flex;
   align-items: center;
-  margin-top: 8px;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-card, #fff);
+  border-top: 1px solid var(--border-color, #e2e8f0);
 }
 
-.animation-time {
-  margin-left: 10px;
-  font-size: 14px;
-  color: #606266;
-}
-
-.animation-icon {
-  width: 24px;
-  height: 24px;
-  vertical-align: middle;
-}
-
-.animation-button {
-  cursor: pointer;
+.animation-play-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg-hover, #f1f5f9);
+  border: 1px solid var(--border-color, #e2e8f0);
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
-.animation-button.disabled {
+.animation-play-btn:hover:not(.disabled) {
+  background: var(--bg-active, #e2e8f0);
+}
+
+.animation-play-btn.disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.animation-play-btn .material-symbols-outlined {
+  font-size: 24px;
+  color: var(--text-secondary, #64748b);
+}
+
+.animation-select-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.animation-label {
+  font-size: 12px;
+  color: var(--text-muted, #94a3b8);
+}
+
+.animation-select {
+  width: 100%;
+}
+
+.animation-select :deep(.el-input__wrapper) {
+  background: var(--bg-hover, #f8fafc);
+  border-radius: var(--radius-md, 12px);
+  box-shadow: none;
+  border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.animation-select :deep(.el-input__inner) {
+  color: var(--text-primary, #1e293b);
+}
+
+.animation-time {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary, #64748b);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 </style>

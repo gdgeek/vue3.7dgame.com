@@ -63,10 +63,32 @@ export const processModel = (file: File): Promise<ProcessedModel> => {
           length: anim.duration,
         }));
 
+
+
+        // Calculate face count
+        let faceCount = 0;
+
+        // Enable shadows and count faces
+        model.traverse((child) => {
+          child.castShadow = true;
+          if (child instanceof THREE.Mesh) {
+            child.geometry.computeVertexNormals();
+            child.receiveShadow = true;
+
+            const geometry = child.geometry;
+            if (geometry.index) {
+              faceCount += geometry.index.count / 3;
+            } else if (geometry.attributes.position) {
+              faceCount += geometry.attributes.position.count / 3;
+            }
+          }
+        });
+
         const info = JSON.stringify({
           size: toFixedVector3(size, 5),
           center: toFixedVector3(center, 5),
           anim: animationsInfo,
+          faces: Math.round(faceCount),
         });
 
         // Setup scene for screenshot
@@ -96,15 +118,6 @@ export const processModel = (file: File): Promise<ProcessedModel> => {
           -center.z * scale
         );
         model.scale.set(scale, scale, scale);
-
-        // Enable shadows
-        model.traverse((child) => {
-          child.castShadow = true;
-          if (child instanceof THREE.Mesh) {
-            child.geometry.computeVertexNormals();
-            child.receiveShadow = true;
-          }
-        });
 
         scene.add(model);
 

@@ -3,9 +3,7 @@
     <template v-if="!isMobile">
       <!--全屏 -->
       <div class="setting-item" @click="toggle">
-        <svg-icon
-          :icon-class="isFullscreen ? 'fullscreen-exit' : 'fullscreen'"
-        ></svg-icon>
+        <svg-icon :icon-class="isFullscreen ? 'fullscreen-exit' : 'fullscreen'"></svg-icon>
       </div>
 
       <!-- 布局大小 -->
@@ -26,30 +24,22 @@
     <!-- 用户头像 -->
     <el-dropdown class="setting-item" trigger="click">
       <div class="flex-center h100% p10px">
-        <img
-          v-if="avatarUrl !== null"
-          :src="avatarUrl + '?imageView2/1/w/80/h/80'"
-          class="rounded-md mr-10px w24px w24px"
-        />
+        <img v-if="avatarUrl !== null" :src="avatarUrl + '?imageView2/1/w/80/h/80'"
+          class="rounded-md mr-10px w24px w24px" />
 
-        <el-avatar
-          v-else
-          shape="square"
-          :size="24"
-          class="mr-10px"
-          src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"
-        ></el-avatar>
+        <el-avatar v-else shape="square" :size="24" class="mr-10px"
+          src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"></el-avatar>
 
         <span :class="['gradient-text', { mobile: isMobile }]">{{
           nickname
-        }}</span>
+          }}</span>
       </div>
       <template #dropdown>
         <el-dropdown-menu>
           <RouterLink to="/settings/edit">
             <el-dropdown-item>{{
               $t("navbar.AccountSetting")
-            }}</el-dropdown-item>
+              }}</el-dropdown-item>
           </RouterLink>
           <!-- <RouterLink to="/settings/account">
             <el-dropdown-item>{{
@@ -151,21 +141,21 @@ const logout = async () => {
   cursor: pointer;
 
   &:hover {
-    background: rgb(0 0 0 / 10%);
+    background: var(--bg-hover, #f8fafc);
   }
 }
 
 .layout-top,
 .layout-mix {
+
   .setting-item,
   .el-icon {
     color: var(--el-color-white);
   }
 }
 
-.dark .setting-item:hover {
-  background: rgb(255 255 255 / 20%);
-}
+// Removed redundant .dark override as var(--bg-hover) handles dark mode via global variables
+
 
 .gradient-text {
   font-size: 14px;

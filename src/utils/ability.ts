@@ -109,6 +109,7 @@ export function UpdateAbility(
     }
 
     if (roles.some((role) => manager.includes(role))) {
+      can("manager", "all");
       // can("phototype", "all");
       // menu = menu.concat([/^\/phototype(\/|$)/]);
     }

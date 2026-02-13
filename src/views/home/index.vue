@@ -1,8 +1,16 @@
 <template>
   <TransitionWrapper>
-    <div>
+    <div class="home-page">
+      <HomeHeader />
+      <el-divider class="home-divider" />
+      <QuickStart />
+
+      <div class="section-header">
+        <span class="material-symbols-outlined header-icon">campaign</span>
+        <h2 class="section-title">{{ t("homepage.announcements.title", "平台公告") }}</h2>
+      </div>
       <Book :items="list"></Book>
-      <el-tabs v-if="env.local()" type="border-card" lazy>
+      <el-tabs v-if="env.local()" type="border-card" lazy class="home-local-tabs">
         <el-tab-pane :label="domainStore.title">
           <LocalPage></LocalPage>
         </el-tab-pane>
@@ -19,6 +27,8 @@ import { useDomainStore } from "@/store/modules/domain";
 import environment from "@/environment";
 import Book from "@/components/Home/Book.vue";
 import LocalPage from "@/components/Home/LocalPage.vue";
+import HomeHeader from "@/components/Home/HomeHeader.vue";
+import QuickStart from "@/components/Home/QuickStart.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
@@ -45,12 +55,57 @@ const list = computed(() => {
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+.home-page {
+  padding: 40px 120px;
+  background: var(--bg-page);
+  min-height: 100%;
+  transition: padding var(--transition-normal);
+
+  @media (max-width: 1200px) {
+    padding: 40px 60px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 24px 20px;
+  }
+}
+
 .api-info {
-  text-align: center;
-  padding: 16px 0;
-  margin-top: 20px;
-  color: #909399;
-  font-size: 12px;
+  display: none; // Hide API info
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-lg);
+  color: var(--text-primary);
+  margin-top: var(--spacing-xl);
+  padding: 0; // Removed padding for alignment
+}
+
+.header-icon {
+  font-size: 28px; // Increased icon size
+  color: var(--primary-color);
+}
+
+.section-title {
+  font-size: 20px; // Increased font size
+  font-weight: 600;
+  margin: 0;
+}
+
+.home-divider {
+  margin: var(--spacing-xl) 0;
+  border-color: var(--border-color);
+}
+
+.home-local-tabs {
+  margin-top: var(--spacing-lg);
+  background: var(--bg-card);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 </style>

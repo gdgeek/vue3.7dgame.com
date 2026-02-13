@@ -10,60 +10,28 @@
             </template>
             <div class="box-item" style="text-align: center">
               <template v-if="isVideo">
-                <video
-                  id="particle"
-                  controls
-                  style="height: 300px; width: auto"
-                >
+                <video id="particle" controls style="height: 300px; width: auto">
                   <source v-if="file !== null" id="src" :src="file" />
                 </video>
-                <video
-                  id="new_particle"
-                  style="height: 100%; width: auto"
-                  hidden
-                  @canplaythrough="dealWith"
-                ></video>
+                <video id="new_particle" style="height: 100%; width: auto" hidden @canplaythrough="dealWith"></video>
               </template>
               <template v-else-if="isAudio">
                 <section class="audio-bgc">
                   <br />
                   <div class="audio-box">
-                    <div
-                      class="audio-record"
-                      :class="{ 'audio-record-playfast': isPlay }"
-                      @click="handlePlayAudio"
-                    ></div>
-                    <div
-                      class="audio-record-image"
-                      :class="{ 'audio-record-play': isPlay }"
-                      @click="handlePlayAudio"
-                    ></div>
+                    <div class="audio-record" :class="{ 'audio-record-playfast': isPlay }" @click="handlePlayAudio">
+                    </div>
+                    <div class="audio-record-image" :class="{ 'audio-record-play': isPlay }" @click="handlePlayAudio">
+                    </div>
                   </div>
-                  <audio
-                    id="audio"
-                    controls
-                    style="width: 95%; height: 84px"
-                    :src="file || ''"
-                    preload="auto"
-                    @play="listenPlay"
-                    @pause="listenPause"
-                    @ended="listenEnd"
-                    @canplaythrough="dealWith"
-                  ></audio>
+                  <audio id="audio" controls style="width: 95%; height: 84px" :src="file || ''" preload="auto"
+                    @play="listenPlay" @pause="listenPause" @ended="listenEnd" @canplaythrough="dealWith"></audio>
                 </section>
               </template>
               <template v-else-if="isImage">
-                <img
-                  id="image"
-                  ref="image"
-                  v-loading="expire"
-                  :element-loading-text="t('particle.view.loadingText')"
-                  element-loading-background="rgba(255,255, 255, 0.3)"
-                  style="height: 300px; width: auto"
-                  :src="file || ''"
-                  fit="contain"
-                  @load="dealWith"
-                />
+                <img id="image" ref="image" v-loading="expire" :element-loading-text="t('particle.view.loadingText')"
+                  element-loading-background="rgba(255,255, 255, 0.3)" style="height: 300px; width: auto"
+                  :src="file || ''" fit="contain" @load="dealWith" />
               </template>
               <template v-else>
                 <el-skeleton :rows="7"></el-skeleton>
@@ -73,20 +41,11 @@
           <br />
         </el-col>
         <el-col :sm="8">
-          <MrppInfo
-            v-if="particleData"
-            :title="$t('particle.view.info.title')"
-            titleSuffix=" :"
-            :tableData="tableData"
-            :itemLabel="$t('particle.view.info.label1')"
-            :textLabel="$t('particle.view.info.label2')"
-            :downloadText="$t('particle.view.info.download')"
-            :renameText="$t('particle.view.info.name')"
-            :deleteText="$t('particle.view.info.delete')"
-            @download="downloadParticle"
-            @rename="namedWindow"
-            @delete="deleteWindow"
-          ></MrppInfo>
+          <MrppInfo v-if="particleData" :title="$t('particle.view.info.title')" titleSuffix=" :" :tableData="tableData"
+            :itemLabel="$t('particle.view.info.label1')" :textLabel="$t('particle.view.info.label2')"
+            :downloadText="$t('particle.view.info.download')" :renameText="$t('particle.view.info.name')"
+            :deleteText="$t('particle.view.info.delete')" @download="downloadParticle" @rename="namedWindow"
+            @delete="deleteWindow"></MrppInfo>
           <br />
         </el-col>
       </el-row>
@@ -95,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from "vue-router";
+import { Message, MessageBox } from "@/components/Dialog";
 import {
   getParticle,
   putParticle,
@@ -193,7 +152,7 @@ const setupVideo = async (
         md5,
         file.type.split("/").pop()!,
         file,
-        () => {},
+        () => { },
         handler,
         "screenshot/particle"
       );
@@ -228,7 +187,7 @@ const setupImage = async (
       md5,
       file.type.split("/").pop()!,
       file,
-      () => {},
+      () => { },
       handler,
       "screenshot/particle"
     );
@@ -253,7 +212,7 @@ const setupAudio = async (audio: HTMLAudioElement) => {
       md5,
       file.type.split("/").pop()!,
       file,
-      () => {},
+      () => { },
       handler,
       "screenshot/particle"
     );
@@ -370,8 +329,8 @@ const tableData = computed(() => {
       {
         item: t("particle.view.info.item2"),
         text:
-          particleData.value.author?.username ||
-          particleData.value.author?.nickname,
+          particleData.value.author?.nickname ||
+          particleData.value.author?.username || '—',
       },
       {
         item: t("particle.view.info.item3"),
@@ -385,7 +344,7 @@ const tableData = computed(() => {
     let info: any = {};
     try {
       info = JSON.parse(particleData.value.info || "{}");
-    } catch {}
+    } catch { }
     if (isVideo.value) {
       base.push({
         item: t("particle.view.info.item5"),
@@ -478,7 +437,7 @@ const save = async (
 
 const deleteWindow = async () => {
   try {
-    await ElMessageBox.confirm(
+    await MessageBox.confirm(
       t("particle.view.confirm.message1"),
       t("particle.view.confirm.message2"),
       {
@@ -488,34 +447,33 @@ const deleteWindow = async () => {
       }
     );
     await deleteParticle(particleData.value!.id);
-    ElMessage.success(t("particle.view.confirm.success"));
+    Message.success(t("particle.view.confirm.success"));
     router.push({ path: "/resource/particle/index" });
   } catch {
-    ElMessage.info(t("particle.view.confirm.info"));
+    Message.info(t("particle.view.confirm.info"));
   }
 };
 
 const namedWindow = async () => {
   try {
-    const { value } = (await ElMessageBox.prompt(
+    const { value } = (await MessageBox.prompt(
       t("particle.view.namePrompt.message1"),
       t("particle.view.namePrompt.message2"),
       {
         confirmButtonText: t("particle.view.namePrompt.confirm"),
         cancelButtonText: t("particle.view.namePrompt.cancel"),
-        closeOnClickModal: false,
-        inputValue: particleData.value!.name,
+        defaultValue: particleData.value!.name,
       }
     )) as { value: string };
 
     if (value) {
       await named(particleData.value!.id, value);
-      ElMessage.success(t("particle.view.namePrompt.success") + value);
+      Message.success(t("particle.view.namePrompt.success") + value);
     } else {
-      ElMessage.info(t("particle.view.namePrompt.info"));
+      Message.info(t("particle.view.namePrompt.info"));
     }
   } catch {
-    ElMessage.info(t("particle.view.namePrompt.info"));
+    Message.info(t("particle.view.namePrompt.info"));
   }
 };
 
@@ -531,17 +489,17 @@ const named = async (id: number, name: string) => {
 
 <style lang="scss" scoped>
 @use "@/styles/view-style.scss" as *;
+
 .audio-bgc {
   position: relative;
   width: 100%;
   height: 350px;
   background: rgb(238, 174, 202);
-  background: radial-gradient(
-    circle,
-    rgba(238, 174, 202, 1) 0%,
-    rgb(169, 196, 228) 100%
-  );
+  background: radial-gradient(circle,
+      rgba(238, 174, 202, 1) 0%,
+      rgb(169, 196, 228) 100%);
 }
+
 .audio-box {
   position: relative;
   margin: auto;
@@ -549,6 +507,7 @@ const named = async (id: number, name: string) => {
   width: 200px;
   height: 200px;
 }
+
 .audio-record {
   position: absolute;
   left: 0;
@@ -562,6 +521,7 @@ const named = async (id: number, name: string) => {
   background: url("/media/bg/audio-record.jpg") center no-repeat;
   background-size: cover;
 }
+
 .audio-record-image {
   position: absolute;
   left: 0;
@@ -575,24 +535,30 @@ const named = async (id: number, name: string) => {
   background: url("/media/bg/audio-img.jpg") center no-repeat;
   background-size: 113%;
 }
+
 .audio-record-play {
   animation: spin 6s infinite linear;
 }
+
 .audio-record-playfast {
   animation: recordfast 0.16s infinite linear;
 }
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
 }
+
 @keyframes recordfast {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(1.1deg);
   }

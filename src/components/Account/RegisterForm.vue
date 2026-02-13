@@ -53,7 +53,8 @@
 import "@/assets/font/font.css";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { ElMessage } from "element-plus";
+// import { ElMessage } from "element-plus";
+import { Message } from "@/components/Dialog";
 import { FormInstance, FormItemRule } from "element-plus";
 import { useRouter, LocationQuery, useRoute } from "vue-router";
 import { useSettingsStore } from "@/store/modules/settings";
@@ -147,13 +148,13 @@ const register = async () => {
         });
         const data = response?.data;
         if (data?.success) {
-          ElMessage.success(t("login.success"));
+          Message.success(t("login.success"));
           Token.setToken(data.token);
           emit("register-success");
           const { path, queryParams } = parseRedirect();
           router.push({ path: path, query: queryParams });
         } else {
-          ElMessage.error(t("login.error"));
+          Message.error(t("login.error"));
         }
       } catch (error: unknown) {
         const axiosError = error as {
@@ -161,9 +162,9 @@ const register = async () => {
         };
         const passwordErrors = axiosError?.response?.data?.password;
         if (Array.isArray(passwordErrors)) {
-          passwordErrors.forEach((msg: string) => ElMessage.error(msg));
+          passwordErrors.forEach((msg: string) => Message.error(msg));
         } else {
-          ElMessage.error(
+          Message.error(
             axiosError?.response?.data?.message || t("login.error")
           );
         }
@@ -171,7 +172,7 @@ const register = async () => {
         loading.value = false;
       }
     } else {
-      ElMessage.warning(t("login.error"));
+      Message.warning(t("login.error"));
     }
   });
 };
@@ -184,53 +185,6 @@ const backToLogin = () => {
 <style scoped lang="scss">
 .register-form {
   width: 100%;
-
-  &.dark-theme {
-    .form-item :deep(.el-form-item__label) {
-      color: #ddd;
-    }
-
-    .custom-input {
-      background-color: #2a2a2a;
-
-      :deep(.el-input__wrapper) {
-        background-color: rgba(255, 255, 255, 0.05);
-        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-
-        &.is-focus {
-          box-shadow: 0 0 0 1px #00dbde inset;
-        }
-      }
-
-      :deep(.el-input__inner) {
-        color: #eee;
-
-        &::placeholder {
-          color: rgba(255, 255, 255, 0.4);
-        }
-      }
-
-      .input-icon {
-        color: rgba(255, 255, 255, 0.5);
-      }
-    }
-
-    .register-button-item {
-      margin-top: 8px;
-    }
-
-    .login-link {
-      color: #bbb;
-
-      a {
-        color: #00dbde;
-
-        &:hover {
-          color: #6cffff;
-        }
-      }
-    }
-  }
 }
 
 .login-form {
@@ -244,7 +198,7 @@ const backToLogin = () => {
     padding-bottom: 6px;
     font-size: 14px;
     font-weight: 500;
-    color: #333;
+    color: var(--text-primary, #333);
     line-height: 1;
   }
 }
@@ -256,28 +210,29 @@ const backToLogin = () => {
   :deep(.el-input__wrapper) {
     padding: 0 12px;
     border-radius: 8px;
-    background-color: #f8f8f8;
-    box-shadow: 0 0 0 1px #e0e0e0 inset;
+    background-color: var(--bg-hover, #f8f8f8);
+    box-shadow: 0 0 0 1px var(--border-color, #e0e0e0) inset;
     transition: all 0.3s;
 
     &.is-focus {
-      box-shadow: 0 0 0 1px #00a8ab inset;
+      box-shadow: 0 0 0 1px var(--primary-color, #00a8ab) inset;
+      background-color: var(--bg-card, #fff);
     }
   }
 
   :deep(.el-input__inner) {
-    color: #333;
+    color: var(--text-primary, #333);
     font-size: 14px;
 
     &::placeholder {
-      color: #999;
+      color: var(--text-muted, #999);
     }
   }
 
   .input-icon {
     margin-right: 8px;
     font-size: 16px;
-    color: #999;
+    color: var(--text-muted, #999);
   }
 }
 
@@ -290,13 +245,15 @@ const backToLogin = () => {
   height: 42px;
   font-size: 15px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #00a8ab 0%, #00dbde 100%);
+  background: var(--primary-color, #00a8ab);
   border: none;
   transition: all 0.3s;
+  color: #fff;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 171, 173, 0.15);
+    background: var(--primary-hover, #00dbde);
+    box-shadow: var(--shadow-lg, 0 6px 16px rgba(0, 171, 173, 0.15));
   }
 
   &:active {
@@ -308,17 +265,17 @@ const backToLogin = () => {
   margin-top: 16px;
   text-align: center;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary, #666);
 
   a {
     margin-left: 4px;
-    color: #00a8ab;
+    color: var(--primary-color, #00a8ab);
     font-weight: 500;
     text-decoration: none;
     transition: color 0.3s;
 
     &:hover {
-      color: #00dbde;
+      color: var(--primary-hover, #00dbde);
       text-decoration: underline;
     }
   }

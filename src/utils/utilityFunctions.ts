@@ -53,3 +53,26 @@ export const formatFileSize = (size: number) => {
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   return (size / Math.pow(1024, i)).toFixed(2) + " " + sizes[i];
 };
+
+/**
+ * Identify if a URL is a video file and append COS snapshot parameters if needed.
+ * @param url The image/video URL
+ * @returns The snapshot URL if it's a video, otherwise the original URL
+ */
+export const getVideoCover = (url?: string) => {
+  if (!url) return '';
+  // Check if it already has snapshot params
+  if (url.includes('ci-process=snapshot')) return url;
+
+  // Check extensions
+  const cleanUrl = url.split('?')[0];
+  const isVideo = /\.(mp4|webm|mov|avi|mkv)$/i.test(cleanUrl);
+
+  if (isVideo) {
+    const separator = url.includes('?') ? '&' : '?';
+    // Use time=1 presumably to skip black frame at 0s? 
+    // Or maybe 0 is fine. Code uses 1 in my test.
+    return `${url}${separator}ci-process=snapshot&time=1&format=jpg`;
+  }
+  return url;
+};

@@ -62,14 +62,8 @@ body {
     justify-content: center;
     width: 450px;
     height: 90%;
-    background-color: #fff;
+    background-color: var(--bg-card, #fff);
     transition: all 0.3s ease;
-
-    &.dark-theme {
-      background-color: rgb(63, 63, 63);
-      border-color: #494949;
-      color: white;
-    }
 
     &.mobile {
       width: 430;
@@ -83,33 +77,28 @@ body {
       width: 90%;
       height: 90%;
       padding: 25px;
-      border: 1px solid #ebeefe;
+      border: 1px solid var(--border-color, #ebeefe);
       border-radius: 4px;
       transition: all 0.3s ease;
-
-      &.dark-theme {
-        background-color: rgb(52, 52, 52);
-        border-color: #494949;
-        color: white;
-      }
+      background-color: var(--bg-card, #fff);
+      color: var(--text-primary, #333);
 
       &:hover {
-        box-shadow: 0 0 10px rgb(0 0 0 / 10%);
+        box-shadow: var(--shadow-md, 0 0 10px rgb(0 0 0 / 10%));
         transition: all 0.4s;
       }
 
       h1 {
         margin-top: 0;
-        //font-family: "KaiTi", "STKaiti", "华文楷体", "楷体", serif;
         font-size: 36px;
         font-weight: 500;
       }
 
       h4 {
         margin-top: 0;
-        //font-family: "KaiTi", "STKaiti", "华文楷体", "楷体", serif;
         font-size: 18px;
         font-weight: 400;
+        color: var(--text-secondary, #666);
       }
 
       el-button {

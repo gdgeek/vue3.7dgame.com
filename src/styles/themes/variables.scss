@@ -1,0 +1,126 @@
+/**
+ * 主题 CSS 变量
+ * 这些变量会在运行时被 useTheme composable 动态设置
+ * 这里定义默认值作为 fallback
+ */
+
+:root {
+  // ============================================
+  // 颜色变量
+  // ============================================
+  
+  // 主色调
+  --primary-color: #00BAFF;
+  --primary-hover: #0099DD;
+  --primary-light: rgba(0, 186, 255, 0.1);
+  --primary-dark: #0077AA;
+  
+  // 文字颜色
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --text-inverse: #ffffff;
+  
+  // 背景颜色
+  --bg-page: #f0f4f8;
+  --bg-card: #ffffff;
+  --bg-hover: #f8fafc;
+  --bg-active: #e2e8f0;
+  --bg-secondary: #f1f5f9;
+  --bg-tertiary: #e2e8f0;
+  
+  // 兼容旧变量名
+  --bg-color: var(--bg-page);
+  --card-bg: var(--bg-card);
+  
+  // 边框颜色
+  --border-color: #e2e8f0;
+  --border-color-hover: #94a3b8;
+  --border-color-light: #f8fafc;
+  
+  // 语义色
+  --success-color: #22c55e;
+  --success-light: rgba(34, 197, 94, 0.1);
+  --warning-color: #f59e0b;
+  --warning-light: rgba(245, 158, 11, 0.1);
+  --danger-color: #ef4444;
+  --danger-light: rgba(239, 68, 68, 0.1);
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --danger-border: #ef4444;
+  --info-color: #00BAFF;
+  --info-light: rgba(0, 186, 255, 0.1);
+  
+  // ============================================
+  // 风格变量
+  // ============================================
+  
+  // 圆角
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+  
+  // 阴影
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  
+  // 间距
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  // 字体
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-weight: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+  
+  // 动画
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+  
+  // 边框
+  --border-width: 1px;
+}
+
+// 深色模式默认值
+.dark,
+[data-mode="dark"] {
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #0f172a;
+  
+  --bg-page: #0f172a;
+  --bg-card: #1e293b;
+  --bg-hover: #334155;
+  --bg-active: #475569;
+  --bg-secondary: #0f172a; // Darker background for secondary elements
+  --bg-tertiary: #334155;
+  
+  --bg-color: var(--bg-page);
+  --card-bg: var(--bg-card);
+  
+  --border-color: #334155;
+  --border-color-hover: #64748b;
+  --border-color-light: #1e293b;
+  
+  --success-color: #4ade80;
+  --success-light: rgba(74, 222, 128, 0.15);
+  --warning-color: #fbbf24;
+  --warning-light: rgba(251, 191, 36, 0.15);
+  --danger-color: #f87171;
+  --danger-light: rgba(248, 113, 113, 0.15);
+  --danger-bg: rgba(248, 113, 113, 0.15);
+  --info-color: #38bdf8;
+  --info-light: rgba(56, 189, 248, 0.15);
+}

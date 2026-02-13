@@ -1,43 +1,20 @@
 <template>
   <div class="home-header">
-    <el-row :gutter="10">
-      <el-col :md="14" :span="24">
-        <div :class="['home-avatar-container', { mobile: isMobile }]">
-          <el-avatar
-            shape="square"
-            class="home-avatar-child"
-            icon="avatar"
-            :src="avatarUrl"
-            :size="100"
-            style="float: left"
-            @click="showQRCode()"
-          ></el-avatar>
-
-          <div>
-            <div class="home-avatar-info">
-              <h3 class="home-avatar-name">{{ greeting }} {{ name }}</h3>
-              <small v-if="textarea != ''" style="color: #777777">
-                {{ textarea }}
-              </small>
-            </div>
-          </div>
+    <el-row :gutter="10" justify="space-between" align="middle" class="home-header-row">
+      <el-col :md="16" :span="24">
+        <div class="home-greeting-container">
+          <h1 class="home-greeting-title">{{ greeting }}<span class="home-username">{{ name }}</span></h1>
+          <p class="home-greeting-subtitle">
+            {{ t("homepage.header.subtitle", "探索 AR 的无限可能，开启您的创意之旅。") }}
+          </p>
         </div>
       </el-col>
-      <el-col :md="10" :span="24">
-        <div class="hidden-sm-and-down hidden-box"></div>
+      <el-col :md="8" :span="24">
         <div :class="['home-header-button', { mobile: isMobile }]">
-          <!--一个二维码icon按钮 -->
-          <el-button
-            size="small"
-            type="primary"
-            :icon="Menu"
-            @click="showQRCode()"
-          >
+          <button class="btn-secondary home-btn" @click="showQRCode()">
+            <span class="material-symbols-outlined btn-icon">qr_code_2</span>
             {{ t("login.loginCode") }}
-          </el-button>
-          <el-button size="small" type="primary" @click="gotoEdit">{{
-            $t("homepage.edit.title")
-          }}</el-button>
+          </button>
         </div>
       </el-col>
     </el-row>
@@ -48,17 +25,14 @@
 
 <script setup lang="ts">
 import QRCodeDialog from "./QRCodeDialog.vue";
-import LocalPage from "@/components/Home/LocalPage.vue";
-import QrcodeVue from "qrcode.vue";
-import { useRouter } from "vue-router";
 import { useUserStore } from "@/store/modules/user";
 import { useScreenStore } from "@/store";
+import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
 
-import { Menu } from "@element-plus/icons-vue";
 const codeDialog = ref<any>(null);
 
 const userStore = useUserStore();
-const router = useRouter();
 const { t } = useI18n();
 const screenStore = useScreenStore();
 const isMobile = computed(() => screenStore.isMobile);
@@ -87,110 +61,84 @@ const greeting = computed(() => {
   }
 });
 
-// 头像
-const avatarUrl = computed(() => {
-  if (!userStore?.userInfo?.userInfo) {
-    return "";
-  }
-  return userStore.userInfo.userInfo.avatar?.url ?? "";
-});
-
-// 个人简介
-const textarea = computed(() => {
-  if (!userStore?.userInfo?.userInfo) {
-    return "";
-  }
-  return userStore.userInfo.userInfo.info?.textarea ?? "";
-});
 const showQRCode = () => {
   codeDialog.value.openDialog();
 };
-const gotoEdit = () => {
-  router.push("/settings/edit");
-};
 </script>
 
+
 <style lang="scss" scoped>
-.home-avatar-name {
-  margin: 16px 0 10px;
-  font-size: 18px;
-  font-weight: 700;
-  color: #555;
-}
-
 .home-header {
-  min-height: 150px;
+  position: relative;
   width: auto;
-  // background-image: url("/media/image/header_bg.jpg");
-  background-image: url("/media/image/bgcsky.jpg");
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
+  padding: 0;
+  background: transparent;
 }
 
-.hidden-box {
-  height: 90px;
+.home-greeting-title {
+  margin: 0 0 16px 0; // Increased spacing to 16px as requested
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.home-username {
+  color: var(--primary-color, #03a9f4);
+}
+
+.home-greeting-subtitle {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.home-header-row {
+  position: relative;
+  z-index: 1;
+  align-items: flex-end; // Align items to bottom so button aligns with subtitle
 }
 
 .home-header-button {
-  float: right;
-  margin: 22px 50px 18px 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0;
+  margin-top: 0;
+  padding-bottom: 4px; // Fine-tune alignment with text baseline
 
   &.mobile {
-    margin: 20px 15px 18px 0;
+    justify-content: flex-start;
+    margin-top: var(--spacing-md);
+    padding-bottom: 0;
   }
 }
 
-.home-avatar-container {
-  // outline: dashed 1px black;
+.home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 20px;
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  box-shadow: 0 4px 12px var(--shadow-sm, rgba(0, 0, 0, 0.08));
 
-  /* Setup */
-  position: relative;
-  height: 100px;
-  margin-top: 25px;
-  margin-right: 50px;
-  margin-left: 50px;
-
-  &.mobile {
-    margin-left: 15px;
+  .btn-icon {
+    font-size: 20px;
+    color: var(--primary-color, #03a9f4);
   }
-}
 
-.home-avatar-info {
-  position: absolute;
-  margin-top: 10px;
-  margin-left: 120px;
-}
-
-.home-avatar-child {
-  position: absolute;
-  top: 50%;
-  left: 0%;
-  width: 100px;
-  height: 100px;
-  margin-top: -50px;
-  /* Half this element's height */
-  // margin-left: -50px; /* Half this element's height */
-}
-
-.el-col {
-  border-radius: 4px;
-}
-
-.bg-purple-dark {
-  background: #99a9bf;
-}
-
-.bg-purple {
-  background: #d3dce6;
-}
-
-.bg-purple-light {
-  background: #e5e9f2;
-}
-
-.grid-content {
-  min-height: 36px;
-  border-radius: 4px;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px var(--shadow-md, rgba(0, 0, 0, 0.12));
+    background: var(--bg-hover, #f8fafc);
+  }
 }
 </style>

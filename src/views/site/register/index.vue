@@ -45,7 +45,8 @@
 <script setup lang="ts">
 import "@/assets/font/font.css";
 import { LocationQuery, useRoute, useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
+// import { ElMessage } from "element-plus";
+import { Message, MessageBox } from "@/components/Dialog";
 import { useSettingsStore } from "@/store/modules/settings";
 import { FormInstance } from "element-plus";
 import { ThemeEnum } from "@/enums/ThemeEnum";
@@ -68,7 +69,7 @@ const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
 const back = async () => {
   try {
-    await ElMessageBox.confirm("确认放弃注册？", "警告", {
+    await MessageBox.confirm("确认放弃注册？", "警告", {
       confirmButtonText: "确认",
       cancelButtonText: "继续注册",
       type: "warning",
@@ -146,12 +147,12 @@ const register = async () => {
         });
         const data = response.data;
         if (data.success) {
-          ElMessage.success(t("login.success"));
+          Message.success(t("login.success"));
           Token.setToken(data.token);
           const { path, queryParams } = parseRedirect();
           router.push({ path: path, query: queryParams });
         } else {
-          ElMessage.error(t("login.error"));
+          Message.error(t("login.error"));
         }
       } catch (error: unknown) {
         const axiosError = error as {
@@ -159,15 +160,15 @@ const register = async () => {
         };
         const passwordErrors = axiosError?.response?.data?.password;
         if (Array.isArray(passwordErrors)) {
-          passwordErrors.forEach((msg: string) => ElMessage.error(msg));
+          passwordErrors.forEach((msg: string) => Message.error(msg));
         } else {
-          ElMessage.error(
+          Message.error(
             axiosError?.response?.data?.message || t("login.error")
           );
         }
       }
     } else {
-      ElMessage.error(t("login.error"));
+      Message.error(t("login.error"));
     }
   });
 };

@@ -51,22 +51,17 @@ function back() {
           <li class="link-type">
             <a href="https://www.bujiaban.com/">{{
               t("errorPage.justLook")
-            }}</a>
+              }}</a>
           </li>
           <li>
             <a href="#" @click.prevent="dialogVisible = true">{{
               t("errorPage.clickToSee")
-            }}</a>
+              }}</a>
           </li>
         </ul>
       </el-col>
       <el-col :span="12">
-        <img
-          :src="errGif"
-          width="313"
-          height="428"
-          alt="Girl has dropped her ice cream."
-        />
+        <img :src="errGif" width="313" height="428" alt="Girl has dropped her ice cream." />
       </el-col>
     </el-row>
     <el-dialog v-model="dialogVisible">
@@ -84,7 +79,7 @@ function back() {
 
   .pan-back-btn {
     color: #fff;
-    background: #008489;
+    background: var(--primary-color, #008489);
     border: none !important;
   }
 
@@ -102,7 +97,7 @@ function back() {
   .text-jumbo {
     font-size: 60px;
     font-weight: 700;
-    color: #484848;
+    color: var(--text-primary, #484848);
   }
 
   .list-unstyled {
@@ -113,7 +108,7 @@ function back() {
     }
 
     a {
-      color: #008489;
+      color: var(--primary-color, #008489);
       text-decoration: none;
 
       &:hover {

@@ -1,33 +1,33 @@
 <template>
-  <TransitionWrapper>
-    <div class="verse-index">
-      <page @loaded="loaded" :created="true"></page>
-    </div>
-  </TransitionWrapper>
+  <PersonPage :created="true" @loaded="handleLoaded"></PersonPage>
 </template>
 
 <script setup lang="ts">
-import Page from "@/components/MrPP/Person/Page.vue";
+import PersonPage from "@/components/MrPP/Person/Page.vue";
 import { getPerson } from "@/api/v1/person";
-import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
-const loaded = async (data: any, result: Function) => {
+const handleLoaded = async (params: any, callback: (val: any) => void) => {
   try {
     const response = await getPerson(
-      data.sorted,
-      data.searched,
-      data.current,
-      "roles, avatar"
+      params.sorted,
+      params.searched,
+      params.current,
+      "avatar,roles"
     );
-    const pagination = {
-      current: parseInt(response.headers["x-pagination-current-page"]),
-      count: parseInt(response.headers["x-pagination-page-count"]),
-      size: parseInt(response.headers["x-pagination-per-page"]),
-      total: parseInt(response.headers["x-pagination-total-count"]),
-    };
-    result({ data: response.data, pagination });
+    callback({
+      data: response.data,
+      pagination: {
+        current: parseInt(response.headers["x-pagination-current-page"] || "1"),
+        count: parseInt(response.headers["x-pagination-page-count"] || "1"),
+        size: parseInt(response.headers["x-pagination-per-page"] || "20"),
+        total: parseInt(response.headers["x-pagination-total-count"] || "0"),
+      },
+    });
   } catch (error) {
-    console.log(error);
+    console.error("Failed to load users:", error);
+    callback({ data: [], pagination: { current: 1, count: 0, size: 20, total: 0 } });
   }
 };
 </script>
+
+<style scoped></style>

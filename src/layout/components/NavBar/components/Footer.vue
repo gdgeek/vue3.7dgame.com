@@ -1,83 +1,87 @@
 <template>
-  <el-card v-if="!isMobile">
-    <div :class="{ 'background-screen-max': props.maxwidth }">
-      <div
-        style="
-          float: right;
-          height: 40px;
-          padding-right: 10px;
-          display: flex;
-          align-items: center;
-        "
-      >
+  <footer class="app-footer" :class="{ 'dark-mode': isDarkMode }">
+    <div class="footer-content">
+
+      <div class="footer-links">
         <template v-for="(link, index) in domainStore.links" :key="link.url">
-          <el-link :href="link.url" target="_blank" :underline="false">
-            <span class="font-text">{{ link.name }}</span>
-          </el-link>
-          <span
-            v-if="index < domainStore.links.length - 1"
-            style="margin: 0 8px"
-            >|</span
-          >
+          <a :href="link.url" target="_blank" class="footer-link">
+            {{ link.name }}
+          </a>
+          <span v-if="index < domainStore.links.length - 1" class="divider">|</span>
         </template>
       </div>
     </div>
-  </el-card>
-  <el-card v-if="isMobile" style="width: 100%">
-    <div class="background-screen-max">
-      <div
-        style="
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          flex-wrap: wrap;
-          justify-content: center;
-        "
-      >
-        <template v-for="(link, index) in domainStore.links" :key="link.url">
-          <el-link :href="link.url" target="_blank" :underline="false">
-            <span class="font-text">{{ link.name }}</span>
-          </el-link>
-          <span v-if="index < domainStore.links.length - 1">|</span>
-        </template>
-      </div>
-    </div>
-  </el-card>
+  </footer>
 </template>
 
 <script setup lang="ts">
-import "@/assets/font/font.css";
-import { useScreenStore } from "@/store";
-import { useDomainStore } from "@/store/modules/domain";
-import { useRouter } from "vue-router";
+import { computed } from 'vue';
+import { useDomainStore } from '@/store/modules/domain';
+import { useSettingsStore } from '@/store/modules/settings';
+import { ThemeEnum } from '@/enums/ThemeEnum';
 
 const domainStore = useDomainStore();
-const screenStore = useScreenStore();
-const isMobile = computed(() => screenStore.isMobile);
-const router = useRouter();
+const settingsStore = useSettingsStore();
+
+const isDarkMode = computed(() => settingsStore.theme === ThemeEnum.DARK);
 
 const props = defineProps<{
-  maxwidth: boolean;
+  maxwidth?: boolean;
 }>();
-
-// 跳转到联系我们部分
-const goToContact = () => {
-  // 先跳转到首页
-  if (router.currentRoute.value.path !== "/web/index") {
-    router.push("/web/index");
-    // 给页面加载一些时间后再滚动
-    setTimeout(() => {
-      const contactSection = document.getElementById("contact");
-      if (contactSection) {
-        contactSection.scrollIntoView({ behavior: "smooth" });
-      }
-    }, 300);
-  } else {
-    // 如果已经在首页，直接滚动
-    const contactSection = document.getElementById("contact");
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: "smooth" });
-    }
-  }
-};
 </script>
+
+<style lang="scss" scoped>
+// 使用全局主题变量
+.app-footer {
+  width: 100%;
+  padding: 16px 24px;
+}
+
+.footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; // Changed from space-between to align right
+  gap: 24px;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+
+  .logo-img {
+    width: 28px;
+    height: 28px;
+    opacity: 0.7;
+  }
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+
+  @media (max-width: 640px) {
+    justify-content: center;
+  }
+}
+
+.footer-link {
+  font-size: 12px;
+  text-decoration: none;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.divider {
+  font-size: 12px;
+}
+</style>

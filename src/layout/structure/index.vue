@@ -1,6 +1,5 @@
 <template>
   <div>
-    <home-header></home-header>
     <el-container>
       <el-main>
         <!-- 隐藏“我的创作”card,调整布局 -->
@@ -23,7 +22,6 @@
 
 <script setup lang="ts">
 import MrPPUserCreater from "@/components/MrPP/MrPPUserSettings/MrPPUserCreater.vue";
-import HomeHeader from "@/components/Home/HomeHeader.vue";
 </script>
 
 <style lang="scss" scoped>

@@ -1,11 +1,7 @@
 <template>
   <TransitionWrapper>
-    <CardListPage
-      ref="cardListPageRef"
-      :fetch-data="fetchPhototypes"
-      wrapper-class="phototype-list"
-      @refresh="handleRefresh"
-    >
+    <CardListPage ref="cardListPageRef" :fetch-data="fetchPhototypes" wrapper-class="phototype-list"
+      @refresh="handleRefresh">
       <template #header-actions>
         <el-button-group :inline="true">
           <el-button size="small" type="primary" @click="addPrefab">
@@ -18,19 +14,13 @@
             &nbsp;
             <span class="hidden-sm-and-down">{{
               $t("phototype.fromModel")
-            }}</span>
+              }}</span>
           </el-button>
         </el-button-group>
       </template>
 
       <template #card="{ item }">
-        <mr-p-p-card
-          :item="item"
-          type="预制体"
-          color="#8e44ad"
-          @named="namedWindow"
-          @deleted="deletedWindow"
-        >
+        <mr-p-p-card :item="item" type="预制体" color="#8e44ad" @named="namedWindow" @deleted="deletedWindow">
           <template #enter>
             <el-button-group>
               <el-button type="primary" size="small" @click="edit(item.id)">
@@ -43,37 +33,25 @@
     </CardListPage>
 
     <!-- Edit Dialog -->
-    <el-dialog
-      v-model="editDialogVisible"
-      :title="$t('common.edit') || 'Edit'"
-      width="500px"
-      append-to-body
-      destroy-on-close
-    >
+    <el-dialog v-model="editDialogVisible" :title="$t('common.edit') || 'Edit'" width="500px" append-to-body
+      destroy-on-close>
       <el-form :model="editForm" label-width="80px">
         <el-form-item :label="$t('phototype.prompt.message2') || 'Name'">
-          <el-input
-            v-model="editForm.title"
-            :placeholder="$t('phototype.prompt.message1')"
-          ></el-input>
+          <el-input v-model="editForm.title" :placeholder="$t('phototype.prompt.message1')"></el-input>
         </el-form-item>
         <el-form-item :label="$t('resource.type.picture') || 'Image'">
-          <ImageSelector
-            :item-id="Number(editForm.id) || null"
-            :image-url="editForm.image_url"
-            @image-selected="handleEditImageSelected"
-            @image-upload-success="handleEditImageSelected"
-          ></ImageSelector>
+          <ImageSelector :item-id="Number(editForm.id) || null" :image-url="editForm.image_url"
+            @image-selected="handleEditImageSelected" @image-upload-success="handleEditImageSelected"></ImageSelector>
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="editDialogVisible = false">{{
             $t("common.cancel") || "Cancel"
-          }}</el-button>
+            }}</el-button>
           <el-button type="primary" @click="saveEdit">{{
             $t("common.confirm") || "Confirm"
-          }}</el-button>
+            }}</el-button>
         </span>
       </template>
     </el-dialog>
@@ -84,7 +62,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { Message, MessageBox } from "@/components/Dialog";
 import { v4 as uuidv4 } from "uuid";
 import CardListPage from "@/components/MrPP/CardListPage/index.vue";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
@@ -110,7 +88,7 @@ const fetchPhototypes = async (params: FetchParams): Promise<FetchResponse> => {
   return await getPhototypes(params.sort, params.search, params.page);
 };
 
-const handleRefresh = (data: any[]) => {};
+const handleRefresh = (data: any[]) => { };
 
 const refreshList = () => {
   cardListPageRef.value?.refresh();
@@ -159,7 +137,7 @@ const handleEditImageSelected = (data: {
 const saveEdit = async () => {
   try {
     if (!editForm.value.title) {
-      ElMessage.warning(t("phototype.prompt.error1")); // Name cannot be empty
+      Message.warning(t("phototype.prompt.error1")); // Name cannot be empty
       return;
     }
 
@@ -173,12 +151,12 @@ const saveEdit = async () => {
 
     await putPhototype(editForm.value.id, updateData);
 
-    ElMessage.success(t("common.updateSuccess") || "Update Successful");
+    Message.success(t("common.updateSuccess") || "Update Successful");
     editDialogVisible.value = false;
     refreshList();
   } catch (error) {
     console.error("Failed to update:", error);
-    ElMessage.error(t("common.updateFailed") || "Update Failed");
+    Message.error(t("common.updateFailed") || "Update Failed");
   }
 };
 
@@ -187,21 +165,20 @@ const deletedWindow = async (
   resetLoading: () => void
 ) => {
   try {
-    await ElMessageBox.confirm(
+    await MessageBox.confirm(
       t("phototype.confirm.message1"),
       t("phototype.confirm.message2"),
       {
         confirmButtonText: t("phototype.confirm.confirm"),
         cancelButtonText: t("phototype.confirm.cancel"),
-        closeOnClickModal: false,
         type: "warning",
       }
     );
     await deletePhototype(item.id);
     refreshList();
-    ElMessage.success(t("phototype.confirm.success"));
+    Message.success(t("phototype.confirm.success"));
   } catch {
-    ElMessage.info(t("phototype.confirm.info"));
+    Message.info(t("phototype.confirm.info"));
     resetLoading();
   }
 };

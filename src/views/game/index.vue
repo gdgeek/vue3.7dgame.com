@@ -6,22 +6,15 @@
         <VerseDialog ref="dialogRef" @selected="selected"></VerseDialog>
         <el-container>
           <el-header>
-            <mr-p-p-header
-              :sorted="sorted"
-              :searched="searched"
-              sortByTime="created_at"
-              sortByName="title"
-              @search="search"
-              @sort="sort"
-              :hasSearch="false"
-            >
+            <mr-p-p-header :sorted="sorted" :searched="searched" sortByTime="created_at" sortByName="title"
+              @search="search" @sort="sort" :hasSearch="false">
               <el-button-group :inline="true">
                 <el-button size="small" type="primary" @click="addGuide">
                   <font-awesome-icon icon="plus"></font-awesome-icon>
                   &nbsp;
                   <span class="hidden-sm-and-down">{{
                     $t("game.index.title")
-                  }}</span>
+                    }}</span>
                 </el-button>
               </el-button-group>
             </mr-p-p-header>
@@ -29,39 +22,18 @@
           <el-main>
             <el-card>
               <el-table :data="items" style="width: 100%">
-                <el-table-column
-                  prop="order"
-                  :label="$t('game.index.form.label1')"
-                  width="180"
-                >
+                <el-table-column prop="order" :label="$t('game.index.form.label1')" width="180">
                   <template #default="{ row }">
-                    <el-input
-                      type="number"
-                      @change="(value: any) => onchange(row.id, value)"
-                      size="small"
-                      v-model="row.order"
-                      :placeholder="$t('game.index.form.placeholder')"
-                    ></el-input>
+                    <el-input type="number" @change="(value: any) => onchange(row.id, value)" size="small"
+                      v-model="row.order" :placeholder="$t('game.index.form.placeholder')"></el-input>
                   </template>
                 </el-table-column>
-                <el-table-column
-                  prop="level_id"
-                  :label="$t('game.index.form.label2')"
-                  width="180"
-                ></el-table-column>
-                <el-table-column
-                  prop="level.name"
-                  :label="$t('game.index.form.label3')"
-                  width="180"
-                ></el-table-column>
+                <el-table-column prop="level_id" :label="$t('game.index.form.label2')" width="180"></el-table-column>
+                <el-table-column prop="level.name" :label="$t('game.index.form.label3')" width="180"></el-table-column>
 
                 <el-table-column :label="$t('game.index.form.label4')">
                   <template #default="{ row }">
-                    <el-button
-                      size="small"
-                      type="danger"
-                      @click="() => del(row.id)"
-                    >
+                    <el-button size="small" type="danger" @click="() => del(row.id)">
                       {{ $t("game.index.delete") }}
                     </el-button>
                   </template>
@@ -71,15 +43,9 @@
           </el-main>
           <el-footer>
             <el-card class="box-card">
-              <el-pagination
-                :current-page="pagination.current"
-                :page-count="pagination.count"
-                :page-size="pagination.size"
-                :total="pagination.total"
-                layout="prev, pager, next, jumper"
-                background
-                @current-change="handleCurrentChange"
-              ></el-pagination>
+              <el-pagination :current-page="pagination.current" :page-count="pagination.count"
+                :page-size="pagination.size" :total="pagination.total" layout="prev, pager, next, jumper" background
+                @current-change="handleCurrentChange"></el-pagination>
             </el-card>
           </el-footer>
         </el-container>
@@ -98,6 +64,7 @@ import {
   deleteVpGuide,
 } from "@/api/v1/vp-guide";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import { Message, MessageBox } from "@/components/Dialog";
 
 const dialogRef = ref<InstanceType<typeof VerseDialog> | null>(null);
 const items = ref<any[]>([]);
@@ -128,7 +95,7 @@ const refresh = async () => {
 
 const onchange = async (id: number, val: number) => {
   try {
-    await ElMessageBox.confirm(
+    await MessageBox.confirm(
       t("game.index.form.confirm.message1"),
       t("game.index.form.confirm.message2"),
       {
@@ -139,17 +106,17 @@ const onchange = async (id: number, val: number) => {
     );
     await putVpGuide(id, { order: val });
     await refresh();
-    ElMessage.success(t("game.index.form.confirm.success"));
+    Message.success(t("game.index.form.confirm.success"));
   } catch (e) {
     console.error(e);
-    ElMessage.info(t("game.index.form.confirm.info"));
+    Message.info(t("game.index.form.confirm.info"));
   }
 };
 
 const selected = async (item: any) => {
   try {
     await postVpGuide({ level_id: item.data.id });
-    ElMessage.success(t("game.index.success"));
+    Message.success(t("game.index.success"));
     await refresh();
   } catch (e) {
     console.error(e);
@@ -162,7 +129,7 @@ const addGuide = () => {
 
 const del = async (id: number) => {
   try {
-    await ElMessageBox.confirm(
+    await MessageBox.confirm(
       t("game.index.confirm.message1"),
       t("game.index.confirm.message2"),
       {
@@ -173,10 +140,10 @@ const del = async (id: number) => {
     );
     await deleteVpGuide(id);
     await refresh();
-    ElMessage.success(t("game.index.confirm.success"));
+    Message.success(t("game.index.confirm.success"));
   } catch (e) {
     console.error(e);
-    ElMessage.info(t("game.index.confirm.info"));
+    Message.info(t("game.index.confirm.info"));
   }
 };
 

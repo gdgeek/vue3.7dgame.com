@@ -1,35 +1,21 @@
 <template>
   <div class="mrpp-card-wrapper">
-    <el-card
-      class="box-card"
-      :body-style="{ padding: '0px' }"
-      :style="cardStyle"
-    >
+    <el-card class="box-card" :body-style="{ padding: '0px' }" :style="cardStyle">
       <template #header>
         <div class="card-header">
           <span class="mrpp-title">
             <span class="card-title" nowrap>
-              <b v-if="type" class="type-prefix" :style="typeStyle"
-                >{{ type }}:</b
-              ><span class="title-text">{{ item.name || item.title }}</span>
+              <b v-if="type" class="type-prefix" :style="typeStyle">{{ type }}:</b><span class="title-text">{{ item.name
+                || item.title }}</span>
             </span>
           </span>
-          <span
-            v-if="color"
-            class="color-indicator"
-            :style="{ backgroundColor: color }"
-          ></span>
+          <span v-if="color" class="color-indicator" :style="{ backgroundColor: color }"></span>
         </div>
       </template>
 
       <div class="image-container">
-        <Id2Image
-          :image="item.image ? item.image.url : null"
-          :id="item.id"
-          :lazy="lazy"
-        >
-          444</Id2Image
-        >
+        <Id2Image :image="item.image ? item.image.url : null" :id="item.id" :lazy="lazy">
+          444</Id2Image>
 
         <!-- 覆盖层插槽 -->
         <div class="overlay-container" v-if="$slots.overlay">
@@ -44,20 +30,9 @@
         <slot name="enter">入口</slot>
 
         <el-button-group v-if="showActions" style="float: right" :inline="true">
-          <el-button
-            type="success"
-            size="small"
-            icon="Edit"
-            @click="named"
-          ></el-button>
-          <el-button
-            type="danger"
-            size="small"
-            icon="Delete"
-            loading-icon="Eleme"
-            :loading="deleteLoading"
-            @click="deleted"
-          ></el-button>
+          <el-button type="success" size="small" icon="Edit" @click="named"></el-button>
+          <el-button type="danger" size="small" icon="Delete" loading-icon="Eleme" :loading="deleteLoading"
+            @click="deleted"></el-button>
           &nbsp;
         </el-button-group>
       </template>
@@ -74,7 +49,7 @@ const props = defineProps({
       id: number;
       name?: string;
       title?: string;
-      image?: { url: string; [key: string]: any } | null;
+      image?: { url: string;[key: string]: any } | null;
     }>,
     required: true,
   },
@@ -140,15 +115,17 @@ const deleted = () => {
 }
 
 .mrpp-card-wrapper:hover .box-card {
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg, 0 12px 24px rgba(0, 0, 0, 0.15));
 }
 
 .box-card {
-  border-radius: 12px;
+  border-radius: var(--radius-md, 12px);
   overflow: hidden;
   transition:
     box-shadow 0.3s ease,
     border-color 0.3s ease;
+  background-color: var(--bg-card, white);
+  border: 1px solid var(--border-color, #e4e7ed);
 }
 
 .card-header {
@@ -162,6 +139,7 @@ const deleted = () => {
   padding: 0;
   flex: 1;
   min-width: 0;
+  color: var(--text-primary, #303133);
 }
 
 .card-title {
@@ -178,7 +156,7 @@ const deleted = () => {
 
 .title-text {
   font-weight: 400;
-  color: #333;
+  color: var(--text-primary, #333);
 }
 
 .color-indicator {
@@ -187,7 +165,7 @@ const deleted = () => {
   border-radius: 50%;
   flex-shrink: 0;
   margin-left: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 /* 图片容器样式 */
@@ -196,6 +174,7 @@ const deleted = () => {
   width: 100%;
   height: auto;
   overflow: hidden;
+  background-color: var(--bg-hover, #f5f7fa);
 }
 
 .image-container :deep(img) {
@@ -229,11 +208,9 @@ const deleted = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.2) 0%,
-    rgba(0, 0, 0, 0.5) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(0, 0, 0, 0.2) 0%,
+      rgba(0, 0, 0, 0.5) 100%);
   display: flex;
   justify-content: center;
   align-items: center;
