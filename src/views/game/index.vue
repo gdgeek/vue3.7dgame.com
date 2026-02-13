@@ -6,15 +6,22 @@
         <VerseDialog ref="dialogRef" @selected="selected"></VerseDialog>
         <el-container>
           <el-header>
-            <mr-p-p-header :sorted="sorted" :searched="searched" sortByTime="created_at" sortByName="title"
-              @search="search" @sort="sort" :hasSearch="false">
+            <mr-p-p-header
+              :sorted="sorted"
+              :searched="searched"
+              sortByTime="created_at"
+              sortByName="title"
+              @search="search"
+              @sort="sort"
+              :hasSearch="false"
+            >
               <el-button-group :inline="true">
                 <el-button size="small" type="primary" @click="addGuide">
                   <font-awesome-icon icon="plus"></font-awesome-icon>
                   &nbsp;
                   <span class="hidden-sm-and-down">{{
                     $t("game.index.title")
-                    }}</span>
+                  }}</span>
                 </el-button>
               </el-button-group>
             </mr-p-p-header>
@@ -22,18 +29,39 @@
           <el-main>
             <el-card>
               <el-table :data="items" style="width: 100%">
-                <el-table-column prop="order" :label="$t('game.index.form.label1')" width="180">
+                <el-table-column
+                  prop="order"
+                  :label="$t('game.index.form.label1')"
+                  width="180"
+                >
                   <template #default="{ row }">
-                    <el-input type="number" @change="(value: any) => onchange(row.id, value)" size="small"
-                      v-model="row.order" :placeholder="$t('game.index.form.placeholder')"></el-input>
+                    <el-input
+                      type="number"
+                      @change="(value: any) => onchange(row.id, value)"
+                      size="small"
+                      v-model="row.order"
+                      :placeholder="$t('game.index.form.placeholder')"
+                    ></el-input>
                   </template>
                 </el-table-column>
-                <el-table-column prop="level_id" :label="$t('game.index.form.label2')" width="180"></el-table-column>
-                <el-table-column prop="level.name" :label="$t('game.index.form.label3')" width="180"></el-table-column>
+                <el-table-column
+                  prop="level_id"
+                  :label="$t('game.index.form.label2')"
+                  width="180"
+                ></el-table-column>
+                <el-table-column
+                  prop="level.name"
+                  :label="$t('game.index.form.label3')"
+                  width="180"
+                ></el-table-column>
 
                 <el-table-column :label="$t('game.index.form.label4')">
                   <template #default="{ row }">
-                    <el-button size="small" type="danger" @click="() => del(row.id)">
+                    <el-button
+                      size="small"
+                      type="danger"
+                      @click="() => del(row.id)"
+                    >
                       {{ $t("game.index.delete") }}
                     </el-button>
                   </template>
@@ -43,9 +71,15 @@
           </el-main>
           <el-footer>
             <el-card class="box-card">
-              <el-pagination :current-page="pagination.current" :page-count="pagination.count"
-                :page-size="pagination.size" :total="pagination.total" layout="prev, pager, next, jumper" background
-                @current-change="handleCurrentChange"></el-pagination>
+              <el-pagination
+                :current-page="pagination.current"
+                :page-count="pagination.count"
+                :page-size="pagination.size"
+                :total="pagination.total"
+                layout="prev, pager, next, jumper"
+                background
+                @current-change="handleCurrentChange"
+              ></el-pagination>
             </el-card>
           </el-footer>
         </el-container>

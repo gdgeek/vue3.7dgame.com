@@ -4,26 +4,37 @@
     <div class="actions-group">
       <button class="icon-btn" @click="toggleFullscreen" title="全屏">
         <span class="material-symbols-outlined">
-          {{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}
+          {{ isFullscreen ? "fullscreen_exit" : "fullscreen" }}
         </span>
       </button>
 
       <!-- 主题切换下拉菜单 -->
-      <el-dropdown @command="handleThemeChange" trigger="click" class="theme-dropdown">
+      <el-dropdown
+        @command="handleThemeChange"
+        trigger="click"
+        class="theme-dropdown"
+      >
         <button class="icon-btn" title="切换主题">
           <span class="material-symbols-outlined">palette</span>
         </button>
         <template #dropdown>
           <el-dropdown-menu class="theme-menu">
-            <el-dropdown-item v-for="theme in availableThemes" :key="theme.name" :command="theme.name"
-              :class="{ 'is-active': currentThemeName === theme.name }">
+            <el-dropdown-item
+              v-for="theme in availableThemes"
+              :key="theme.name"
+              :command="theme.name"
+              :class="{ 'is-active': currentThemeName === theme.name }"
+            >
               <div class="theme-item">
                 <div class="theme-preview-mini" :class="theme.name"></div>
                 <div class="theme-info">
                   <span class="theme-name">{{ theme.displayName }}</span>
                   <span class="theme-desc">{{ theme.description }}</span>
                 </div>
-                <span v-if="currentThemeName === theme.name" class="theme-check">
+                <span
+                  v-if="currentThemeName === theme.name"
+                  class="theme-check"
+                >
                   <span class="material-symbols-outlined">check</span>
                 </span>
               </div>
@@ -32,17 +43,28 @@
         </template>
       </el-dropdown>
 
-      <el-dropdown @command="handleLanguageChange" trigger="click" class="language-dropdown">
+      <el-dropdown
+        @command="handleLanguageChange"
+        trigger="click"
+        class="language-dropdown"
+      >
         <button class="icon-btn" title="语言">
           <span class="material-symbols-outlined">language</span>
         </button>
         <template #dropdown>
           <el-dropdown-menu class="language-menu">
-            <el-dropdown-item v-for="lang in languages" :key="lang.value" :command="lang.value"
-              :class="{ 'is-active': currentLocale === lang.value }">
+            <el-dropdown-item
+              v-for="lang in languages"
+              :key="lang.value"
+              :command="lang.value"
+              :class="{ 'is-active': currentLocale === lang.value }"
+            >
               <div class="language-item">
                 <span class="language-name">{{ lang.label }}</span>
-                <span v-if="currentLocale === lang.value" class="language-check">
+                <span
+                  v-if="currentLocale === lang.value"
+                  class="language-check"
+                >
                   <span class="material-symbols-outlined">check</span>
                 </span>
               </div>
@@ -55,10 +77,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useTheme } from '@/composables/useTheme';
-import { useFullscreen } from '@vueuse/core';
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { useTheme } from "@/composables/useTheme";
+import { useFullscreen } from "@vueuse/core";
 
 const { locale } = useI18n();
 const { availableThemes, currentThemeName, setTheme } = useTheme();
@@ -67,11 +89,11 @@ const { isFullscreen, toggle: toggleFullscreen } = useFullscreen();
 const currentLocale = computed(() => locale.value);
 
 const languages = [
-  { value: 'en-US', label: 'English' },
-  { value: 'zh-CN', label: '简体中文' },
-  { value: 'zh-TW', label: '繁體中文' },
-  { value: 'ja-JP', label: '日本語' },
-  { value: 'th-TH', label: 'ภาษาไทย' },
+  { value: "en-US", label: "English" },
+  { value: "zh-CN", label: "简体中文" },
+  { value: "zh-TW", label: "繁體中文" },
+  { value: "ja-JP", label: "日本語" },
+  { value: "th-TH", label: "ภาษาไทย" },
 ];
 
 const handleThemeChange = (themeName: string) => {
@@ -79,7 +101,7 @@ const handleThemeChange = (themeName: string) => {
 };
 
 const handleLanguageChange = async (lang: string) => {
-  const { loadLanguageAsync } = await import('@/lang');
+  const { loadLanguageAsync } = await import("@/lang");
   await loadLanguageAsync(lang);
 };
 </script>
@@ -156,7 +178,7 @@ const handleLanguageChange = async (lang: string) => {
     background: linear-gradient(90deg, #ffffff 30%, #f0f4f8 30%);
 
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       top: 4px;
       right: 4px;
@@ -170,10 +192,10 @@ const handleLanguageChange = async (lang: string) => {
 
   // 夜间模式
   &.deep-space {
-    background: linear-gradient(90deg, #080A0F 30%, #0B0E14 30%);
+    background: linear-gradient(90deg, #080a0f 30%, #0b0e14 30%);
 
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       top: 4px;
       right: 4px;
@@ -181,28 +203,28 @@ const handleLanguageChange = async (lang: string) => {
       height: 8px;
       background: #151921;
       border-radius: 2px;
-      border: 1px solid #21262D;
+      border: 1px solid #21262d;
     }
 
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: 6px;
       left: 4px;
       width: 3px;
       height: 3px;
-      background: #2D68FF;
+      background: #2d68ff;
       border-radius: 50%;
     }
   }
 
   // 赛博科技
   &.cyber-tech {
-    background: linear-gradient(90deg, #080A0F 30%, #0B0E14 30%);
+    background: linear-gradient(90deg, #080a0f 30%, #0b0e14 30%);
     border-color: rgba(0, 242, 255, 0.3);
 
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       top: 4px;
       right: 4px;
@@ -217,21 +239,25 @@ const handleLanguageChange = async (lang: string) => {
 
   // 教育友好
   &.edu-friendly {
-    background: linear-gradient(90deg, linear-gradient(180deg, #FF6B35, #FFB347) 30%, #FFF8F5 30%);
-    background: #FFF8F5;
+    background: linear-gradient(
+      90deg,
+      linear-gradient(180deg, #ff6b35, #ffb347) 30%,
+      #fff8f5 30%
+    );
+    background: #fff8f5;
 
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       left: 0;
       top: 0;
       bottom: 0;
       width: 30%;
-      background: linear-gradient(180deg, #FF6B35, #FFB347);
+      background: linear-gradient(180deg, #ff6b35, #ffb347);
     }
 
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       top: 4px;
       right: 4px;
@@ -239,35 +265,35 @@ const handleLanguageChange = async (lang: string) => {
       height: 8px;
       background: #ffffff;
       border-radius: 4px;
-      border: 2px solid #FFE4DB;
+      border: 2px solid #ffe4db;
     }
   }
 
   // 新粗犷主义
   &.neo-brutalism {
-    background: #FAFAF8;
+    background: #fafaf8;
     border: 2px solid #000000;
     border-radius: 2px;
 
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       left: 0;
       top: 0;
       bottom: 0;
       width: 30%;
-      background: #FFFFFF;
+      background: #ffffff;
       border-right: 2px solid #000000;
     }
 
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       top: 4px;
       right: 4px;
       width: 10px;
       height: 6px;
-      background: #FFF000;
+      background: #fff000;
       border: 1px solid #000000;
       box-shadow: 2px 2px 0 #000000;
     }
@@ -279,7 +305,7 @@ const handleLanguageChange = async (lang: string) => {
     border-radius: 0;
 
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       left: 0;
       top: 0;
@@ -290,7 +316,7 @@ const handleLanguageChange = async (lang: string) => {
     }
 
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       top: 4px;
       right: 4px;

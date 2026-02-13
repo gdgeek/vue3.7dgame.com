@@ -1,21 +1,44 @@
 <template>
   <TransitionWrapper>
     <div class="meta-list">
-      <PageActionBar title="所有实体" search-placeholder="搜索实体..." @search="handleSearch" @sort-change="handleSortChange"
-        @view-change="handleViewChange">
+      <PageActionBar
+        title="所有实体"
+        search-placeholder="搜索实体..."
+        @search="handleSearch"
+        @sort-change="handleSortChange"
+        @view-change="handleViewChange"
+      >
         <template #actions>
           <el-button type="primary" @click="addMeta">
-            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">add</span>
+            <span
+              class="material-symbols-outlined"
+              style="font-size: 18px; margin-right: 4px"
+              >add</span
+            >
             {{ $t("meta.title") }}
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
+      <ViewContainer
+        class="list-view"
+        :items="items"
+        :view-mode="viewMode"
+        :loading="loading"
+        @row-click="openDetail"
+      >
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.title || item.name || '未命名'" action-text="进入编辑器"
-            action-icon="edit" type-icon="token" placeholder-icon="extension" :show-checkbox="false"
-            @view="openDetail(item)" @action="goToEditor(item)" />
+          <StandardCard
+            :image="item.image?.url"
+            :title="item.title || item.name || '未命名'"
+            action-text="进入编辑器"
+            action-icon="edit"
+            type-icon="token"
+            placeholder-icon="extension"
+            :show-checkbox="false"
+            @view="openDetail(item)"
+            @action="goToEditor(item)"
+          ></StandardCard>
         </template>
 
         <template #list-header>
@@ -30,26 +53,52 @@
           <div class="col-checkbox"></div>
           <div class="col-name">
             <div class="item-thumb">
-              <img v-if="item.image?.url" :src="item.image.url" :alt="item.title" />
-              <div v-else class="thumb-placeholder"><span class="material-symbols-outlined">token</span></div>
+              <img
+                v-if="item.image?.url"
+                :src="item.image.url"
+                :alt="item.title"
+              />
+              <div v-else class="thumb-placeholder">
+                <span class="material-symbols-outlined">token</span>
+              </div>
             </div>
-            <span class="item-name">{{ item.title || item.name || '—' }}</span>
-            <el-button class="btn-hover-action" type="primary" @click.stop="goToEditor(item)">
+            <span class="item-name">{{ item.title || item.name || "—" }}</span>
+            <el-button
+              class="btn-hover-action"
+              type="primary"
+              @click.stop="goToEditor(item)"
+            >
               进入编辑器
             </el-button>
           </div>
-          <div class="col-author">{{ item.author?.nickname || item.author?.username || '—' }}</div>
-          <div class="col-date">{{ formatItemDate(item.updated_at || item.created_at) }}</div>
+          <div class="col-author">
+            {{ item.author?.nickname || item.author?.username || "—" }}
+          </div>
+          <div class="col-date">
+            {{ formatItemDate(item.updated_at || item.created_at) }}
+          </div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <span class="material-symbols-outlined actions-icon">more_horiz</span>
+              <span class="material-symbols-outlined actions-icon"
+                >more_horiz</span
+              >
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="openDetail(item)">查看详情</el-dropdown-item>
-                  <el-dropdown-item @click="goToEditor(item)">进入编辑器</el-dropdown-item>
-                  <el-dropdown-item @click="copyWindow(item)">复制</el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)">重命名</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => { })">删除</el-dropdown-item>
+                  <el-dropdown-item @click="openDetail(item)"
+                    >查看详情</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="goToEditor(item)"
+                    >进入编辑器</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="copyWindow(item)"
+                    >复制</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="namedWindow(item)"
+                    >重命名</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="deletedWindow(item, () => {})"
+                    >删除</el-dropdown-item
+                  >
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -57,66 +106,111 @@
         </template>
 
         <template #empty>
-          <EmptyState icon="category" text="暂无实体" action-text="新建实体" @action="addMeta" />
+          <EmptyState
+            icon="category"
+            text="暂无实体"
+            action-text="新建实体"
+            @action="addMeta"
+          ></EmptyState>
         </template>
       </ViewContainer>
 
-      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange" />
+      <PagePagination
+        :current-page="pagination.current"
+        :total-pages="totalPages"
+        @page-change="handlePageChange"
+      ></PagePagination>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="detailVisible" title="实体详情" :name="currentMeta?.title || ''" :loading="detailLoading"
-        :properties="detailProperties" placeholder-icon="category" :show-delete="true" :secondary-action="true"
-        secondary-action-text="进入编辑器" download-text="复制实体" delete-text="删除实体" action-layout="grid" width="560px"
-        @download="handleCopy" @rename="handleRename" @delete="handleDelete" @secondary="handleGoToEditor"
-        @close="handlePanelClose">
+      <DetailPanel
+        v-model="detailVisible"
+        title="实体详情"
+        :name="currentMeta?.title || ''"
+        :loading="detailLoading"
+        :properties="detailProperties"
+        placeholder-icon="category"
+        :show-delete="true"
+        :secondary-action="true"
+        secondary-action-text="进入编辑器"
+        download-text="复制实体"
+        delete-text="删除实体"
+        action-layout="grid"
+        width="560px"
+        @download="handleCopy"
+        @rename="handleRename"
+        @delete="handleDelete"
+        @secondary="handleGoToEditor"
+        @close="handlePanelClose"
+      >
         <template #preview>
           <div class="meta-preview" @click="triggerFileSelect">
-            <img v-if="currentMeta?.image?.url" :src="currentMeta.image.url" :alt="currentMeta.title" />
+            <img
+              v-if="currentMeta?.image?.url"
+              :src="currentMeta.image.url"
+              :alt="currentMeta.title"
+            />
             <div v-else class="preview-placeholder">
               <span class="material-symbols-outlined">category</span>
             </div>
 
-            <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/jpg" class="hidden-input"
-              @change="handleCoverUpload" />
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/png,image/jpeg,image/jpg"
+              class="hidden-input"
+              @change="handleCoverUpload"
+            />
           </div>
         </template>
       </DetailPanel>
     </div>
 
     <!-- Selection Method Dialog -->
-    <el-dialog v-model="imageSelectDialogVisible" :title="$t('meta.metaEdit.selectImageMethod')" width="500px"
-      align-center :close-on-click-modal="false" append-to-body>
+    <el-dialog
+      v-model="imageSelectDialogVisible"
+      :title="$t('meta.metaEdit.selectImageMethod')"
+      width="500px"
+      align-center
+      :close-on-click-modal="false"
+      append-to-body
+    >
       <div class="selection-container">
         <div class="selection-card" @click="openResourceDialog">
           <div class="card-icon">
             <el-icon :size="32">
-              <FolderOpened />
+              <FolderOpened></FolderOpened>
             </el-icon>
           </div>
           <div class="card-title">
             {{ $t("meta.metaEdit.selectFromResource") }}
           </div>
           <div class="card-description">
-            {{ $t("imageSelector.selectFromResourceDesc") || '从我的资源库中选择' }}
+            {{
+              $t("imageSelector.selectFromResourceDesc") || "从我的资源库中选择"
+            }}
           </div>
         </div>
 
         <div class="selection-card" @click="openLocalUpload">
           <div class="card-icon">
             <el-icon :size="32">
-              <Upload />
+              <Upload></Upload>
             </el-icon>
           </div>
           <div class="card-title">{{ $t("meta.metaEdit.uploadLocal") }}</div>
           <div class="card-description">
-            {{ $t("imageSelector.uploadLocalDesc") || '上传本地图片文件' }}
+            {{ $t("imageSelector.uploadLocalDesc") || "上传本地图片文件" }}
           </div>
         </div>
       </div>
     </el-dialog>
 
     <!-- Resource Dialog -->
-    <ResourceDialog :multiple="false" @selected="onResourceSelected" ref="resourceDialogRef" />
+    <ResourceDialog
+      :multiple="false"
+      @selected="onResourceSelected"
+      ref="resourceDialogRef"
+    ></ResourceDialog>
   </TransitionWrapper>
 </template>
 
@@ -127,9 +221,23 @@ import { useI18n } from "vue-i18n";
 // import { ElMessage, ElMessageBox } from "element-plus";
 import { Message, MessageBox } from "@/components/Dialog";
 import { v4 as uuidv4 } from "uuid";
-import { PageActionBar, ViewContainer, PagePagination, EmptyState, StandardCard, DetailPanel } from "@/components/StandardPage";
+import {
+  PageActionBar,
+  ViewContainer,
+  PagePagination,
+  EmptyState,
+  StandardCard,
+  DetailPanel,
+} from "@/components/StandardPage";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
-import { getMetas, postMeta, deleteMeta, putMeta, getMeta, putMetaCode } from "@/api/v1/meta";
+import {
+  getMetas,
+  postMeta,
+  deleteMeta,
+  putMeta,
+  getMeta,
+  putMetaCode,
+} from "@/api/v1/meta";
 import type { metaInfo } from "@/api/v1/meta";
 import { usePageData } from "@/composables/usePageData";
 import { useFileStore } from "@/store/modules/config";
@@ -144,10 +252,19 @@ const { t } = useI18n();
 const router = useRouter();
 
 const {
-  items, loading, pagination, viewMode, totalPages,
-  refresh, handleSearch, handleSortChange, handlePageChange, handleViewChange,
+  items,
+  loading,
+  pagination,
+  viewMode,
+  totalPages,
+  refresh,
+  handleSearch,
+  handleSortChange,
+  handlePageChange,
+  handleViewChange,
 } = usePageData({
-  fetchFn: async (params) => await getMetas(params.sort, params.search, params.page),
+  fetchFn: async (params) =>
+    await getMetas(params.sort, params.search, params.page),
 });
 
 const detailVisible = ref(false);
@@ -180,14 +297,16 @@ const onResourceSelected = async (data: any) => {
     detailLoading.value = true;
     try {
       let finalImageId = imageId;
-      if (data.type === 'picture') {
+      if (data.type === "picture") {
         const response = await getPicture(data.id);
         finalImageId = response.data.image_id || response.data.file?.id;
       }
       await putMeta(String(currentMeta.value.id), { image_id: finalImageId });
       Message.success("封面更新成功");
       // Refresh details
-      const response = await getMeta(currentMeta.value.id, { expand: "image,author" });
+      const response = await getMeta(currentMeta.value.id, {
+        expand: "image,author",
+      });
       currentMeta.value = response.data;
       refresh();
     } catch (error) {
@@ -196,7 +315,7 @@ const onResourceSelected = async (data: any) => {
     } finally {
       detailLoading.value = false;
     }
-  };
+  }
 };
 
 const handleCoverUpload = async (event: Event) => {
@@ -223,15 +342,17 @@ const handleCoverUpload = async (event: Event) => {
 
     if (!has) {
       await new Promise<void>((resolve, reject) => {
-        fileStore.store.fileUpload(
-          md5, extension, file,
-          (p: number) => { }, handler, dir
-        ).then(() => resolve()).catch(reject);
+        fileStore.store
+          .fileUpload(md5, extension, file, (p: number) => {}, handler, dir)
+          .then(() => resolve())
+          .catch(reject);
       });
     }
 
     const fileData: UploadFileType = {
-      filename: file.name, md5, key: md5 + extension,
+      filename: file.name,
+      md5,
+      key: md5 + extension,
       url: fileStore.store.fileUrl(md5, extension, handler, dir),
     };
     const response = await postFile(fileData);
@@ -240,7 +361,9 @@ const handleCoverUpload = async (event: Event) => {
     if (currentMeta.value) {
       await putMeta(String(currentMeta.value.id), { image_id: imageId });
       Message.success("封面更新成功");
-      const res = await getMeta(currentMeta.value.id, { expand: "image,author" });
+      const res = await getMeta(currentMeta.value.id, {
+        expand: "image,author",
+      });
       currentMeta.value = res.data;
       refresh();
     }
@@ -256,8 +379,14 @@ const handleCoverUpload = async (event: Event) => {
 const detailProperties = computed(() => {
   if (!currentMeta.value) return [];
   return [
-    { label: '类型', value: '实体' },
-    { label: '作者', value: currentMeta.value.author?.nickname || currentMeta.value.author?.username || '—' },
+    { label: "类型", value: "实体" },
+    {
+      label: "作者",
+      value:
+        currentMeta.value.author?.nickname ||
+        currentMeta.value.author?.username ||
+        "—",
+    },
   ];
 });
 
@@ -280,7 +409,7 @@ const handlePanelClose = () => {
 };
 
 const goToEditor = (item: metaInfo) => {
-  const title = encodeURIComponent(`实体编辑【${item.title || '未命名'}】`);
+  const title = encodeURIComponent(`实体编辑【${item.title || "未命名"}】`);
   router.push({ path: "/meta/scene", query: { id: item.id, title } });
 };
 
@@ -294,12 +423,19 @@ const handleCopy = async () => {
   if (!currentMeta.value) return;
   try {
     const { value } = (await MessageBox.prompt(
-      t("meta.prompt.message1"), t("meta.prompt.message2"),
-      { confirmButtonText: t("meta.prompt.confirm"), cancelButtonText: t("meta.prompt.cancel"), defaultValue: currentMeta.value.title + " - Copy" }
+      t("meta.prompt.message1"),
+      t("meta.prompt.message2"),
+      {
+        confirmButtonText: t("meta.prompt.confirm"),
+        cancelButtonText: t("meta.prompt.cancel"),
+        defaultValue: currentMeta.value.title + " - Copy",
+      }
     )) as { value: string };
     await copy(currentMeta.value.id, value);
     Message.success(t("meta.prompt.success") + value);
-  } catch { Message.info(t("meta.prompt.info")); }
+  } catch {
+    Message.info(t("meta.prompt.info"));
+  }
 };
 
 const copy = async (id: number, newTitle: string) => {
@@ -307,8 +443,13 @@ const copy = async (id: number, newTitle: string) => {
     const response = await getMeta(id, { expand: "image,author,metaCode" });
     const meta = response.data;
     const newMeta = {
-      title: newTitle, uuid: uuidv4(), image_id: meta.image_id,
-      data: meta.data, info: meta.info, events: meta.events, prefab: meta.prefab,
+      title: newTitle,
+      uuid: uuidv4(),
+      image_id: meta.image_id,
+      data: meta.data,
+      info: meta.info,
+      events: meta.events,
+      prefab: meta.prefab,
     };
     const createResponse = await postMeta(newMeta);
     const newMetaId = createResponse.data.id;
@@ -335,13 +476,22 @@ const handleRename = async (newName: string) => {
 const handleDelete = async () => {
   if (!currentMeta.value) return;
   try {
-    await MessageBox.confirm(t("meta.confirm.message1"), t("meta.confirm.message2"),
-      { confirmButtonText: t("meta.confirm.confirm"), cancelButtonText: t("meta.confirm.cancel"), type: "warning" });
+    await MessageBox.confirm(
+      t("meta.confirm.message1"),
+      t("meta.confirm.message2"),
+      {
+        confirmButtonText: t("meta.confirm.confirm"),
+        cancelButtonText: t("meta.confirm.cancel"),
+        type: "warning",
+      }
+    );
     await deleteMeta(String(currentMeta.value.id));
     detailVisible.value = false;
     refresh();
     Message.success(t("meta.confirm.success"));
-  } catch { Message.info(t("meta.confirm.info")); }
+  } catch {
+    Message.info(t("meta.confirm.info"));
+  }
 };
 
 const generateDefaultName = (prefix: string) => {
@@ -354,57 +504,85 @@ const generateDefaultName = (prefix: string) => {
 const addMeta = async () => {
   try {
     const { value } = (await MessageBox.prompt(
-      t("meta.create.namePlaceholder"), t("meta.create.title"),
+      t("meta.create.namePlaceholder"),
+      t("meta.create.title"),
       {
         confirmButtonText: t("common.confirm"),
         cancelButtonText: t("common.cancel"),
         defaultValue: generateDefaultName(t("meta.create.defaultName")),
-        inputValidator: (val) => (!val || !val.trim()) ? t("meta.create.nameRequired") : true,
+        inputValidator: (val) =>
+          !val || !val.trim() ? t("meta.create.nameRequired") : true,
       }
     )) as { value: string };
     await postMeta({ title: value.trim(), uuid: uuidv4() });
     refresh();
     Message.success(t("meta.create.success"));
-  } catch { /* User cancelled */ }
+  } catch {
+    /* User cancelled */
+  }
 };
 
 const copyWindow = async (item: metaInfo) => {
   try {
     const { value } = (await MessageBox.prompt(
-      t("meta.prompt.message1"), t("meta.prompt.message2"),
-      { confirmButtonText: t("meta.prompt.confirm"), cancelButtonText: t("meta.prompt.cancel"), defaultValue: item.title + " - Copy" }
+      t("meta.prompt.message1"),
+      t("meta.prompt.message2"),
+      {
+        confirmButtonText: t("meta.prompt.confirm"),
+        cancelButtonText: t("meta.prompt.cancel"),
+        defaultValue: item.title + " - Copy",
+      }
     )) as { value: string };
     await copy(item.id, value);
     Message.success(t("meta.prompt.success") + value);
-  } catch { Message.info(t("meta.prompt.info")); }
+  } catch {
+    Message.info(t("meta.prompt.info"));
+  }
 };
 
 const namedWindow = async (item: metaInfo) => {
   try {
     const { value } = (await MessageBox.prompt(
-      t("meta.prompt.message1"), t("meta.prompt.message2"),
-      { confirmButtonText: t("meta.prompt.confirm"), cancelButtonText: t("meta.prompt.cancel"), defaultValue: item.title }
+      t("meta.prompt.message1"),
+      t("meta.prompt.message2"),
+      {
+        confirmButtonText: t("meta.prompt.confirm"),
+        cancelButtonText: t("meta.prompt.cancel"),
+        defaultValue: item.title,
+      }
     )) as { value: string };
     await putMeta(String(item.id), { title: value });
     refresh();
     Message.success(t("meta.prompt.success") + value);
-  } catch { Message.info(t("meta.prompt.info")); }
+  } catch {
+    Message.info(t("meta.prompt.info"));
+  }
 };
 
 const deletedWindow = async (item: metaInfo, resetLoading: () => void) => {
   try {
-    await MessageBox.confirm(t("meta.confirm.message1"), t("meta.confirm.message2"),
-      { confirmButtonText: t("meta.confirm.confirm"), cancelButtonText: t("meta.confirm.cancel"), type: "warning" });
+    await MessageBox.confirm(
+      t("meta.confirm.message1"),
+      t("meta.confirm.message2"),
+      {
+        confirmButtonText: t("meta.confirm.confirm"),
+        cancelButtonText: t("meta.confirm.cancel"),
+        type: "warning",
+      }
+    );
     await deleteMeta(String(item.id));
     refresh();
     Message.success(t("meta.confirm.success"));
-  } catch { Message.info(t("meta.confirm.info")); resetLoading(); }
+  } catch {
+    Message.info(t("meta.confirm.info"));
+    resetLoading();
+  }
 };
 
 const formatItemDate = (dateStr?: string) => {
-  if (!dateStr) return '—';
+  if (!dateStr) return "—";
   const d = new Date(dateStr);
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
 };
 </script>
 
@@ -499,7 +677,6 @@ const formatItemDate = (dateStr?: string) => {
   display: flex;
   align-items: center;
   justify-content: center;
-
 
   img {
     width: 100%;

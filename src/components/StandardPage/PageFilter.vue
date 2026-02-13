@@ -1,13 +1,25 @@
 <template>
-  <el-popover placement="bottom-start" :width="220" trigger="click" popper-class="page-filter-popper" @show="handleShow"
-    @hide="handleHide">
+  <el-popover
+    placement="bottom-start"
+    :width="220"
+    trigger="click"
+    popper-class="page-filter-popper"
+    @show="handleShow"
+    @hide="handleHide"
+  >
     <template #reference>
-      <div class="filter-trigger" :class="{ 'is-active': dropdownVisible || selectedCount > 0 }">
+      <div
+        class="filter-trigger"
+        :class="{ 'is-active': dropdownVisible || selectedCount > 0 }"
+      >
         <span class="material-symbols-outlined filter-icon">{{ icon }}</span>
         <span class="filter-label">
           {{ displayLabel }}
         </span>
-        <span class="material-symbols-outlined filter-arrow" :class="{ 'is-open': dropdownVisible }">
+        <span
+          class="material-symbols-outlined filter-arrow"
+          :class="{ 'is-open': dropdownVisible }"
+        >
           expand_more
         </span>
       </div>
@@ -17,9 +29,21 @@
     <div class="filter-content">
       <el-scrollbar max-height="320px">
         <div class="filter-list">
-          <div v-for="opt in options" :key="opt.value" class="filter-item" @click="toggleOption(opt.value)">
-            <div class="filter-checkbox" :class="{ 'is-checked': isChecked(opt.value) }">
-              <span v-if="isChecked(opt.value)" class="material-symbols-outlined check-icon">check</span>
+          <div
+            v-for="opt in options"
+            :key="opt.value"
+            class="filter-item"
+            @click="toggleOption(opt.value)"
+          >
+            <div
+              class="filter-checkbox"
+              :class="{ 'is-checked': isChecked(opt.value) }"
+            >
+              <span
+                v-if="isChecked(opt.value)"
+                class="material-symbols-outlined check-icon"
+                >check</span
+              >
             </div>
             <span class="filter-item-label">{{ opt.label }}</span>
           </div>
@@ -28,91 +52,89 @@
 
       <!-- Clear Button (only show when has selection) -->
       <div v-if="selectedCount > 0" class="filter-footer">
-        <button class="clear-btn" @click="clearSelection">
-          清除筛选
-        </button>
+        <button class="clear-btn" @click="clearSelection">清除筛选</button>
       </div>
     </div>
   </el-popover>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch } from "vue";
 
 interface FilterOption {
-  label: string
-  value: string | number
+  label: string;
+  value: string | number;
 }
 
 const props = withDefaults(
   defineProps<{
-    modelValue?: (string | number)[]
-    label?: string
-    icon?: string
-    options?: FilterOption[]
-    placeholder?: string
+    modelValue?: (string | number)[];
+    label?: string;
+    icon?: string;
+    options?: FilterOption[];
+    placeholder?: string;
   }>(),
   {
     modelValue: () => [],
     options: () => [],
-    icon: 'label',
-    placeholder: '筛选'
+    icon: "label",
+    placeholder: "筛选",
   }
-)
+);
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: (string | number)[]): void
-  (e: 'change', value: (string | number)[]): void
-}>()
+  (e: "update:modelValue", value: (string | number)[]): void;
+  (e: "change", value: (string | number)[]): void;
+}>();
 
-const dropdownVisible = ref(false)
-const internalValue = ref<(string | number)[]>([])
+const dropdownVisible = ref(false);
+const internalValue = ref<(string | number)[]>([]);
 
 watch(
   () => props.modelValue,
   (val) => {
-    internalValue.value = val ? [...val] : []
+    internalValue.value = val ? [...val] : [];
   },
   { immediate: true }
-)
+);
 
-const selectedCount = computed(() => internalValue.value.length)
+const selectedCount = computed(() => internalValue.value.length);
 
 const displayLabel = computed(() => {
   if (selectedCount.value > 0) {
-    return `${props.label || props.placeholder} (${selectedCount.value})`
+    return `${props.label || props.placeholder} (${selectedCount.value})`;
   }
-  return props.label || props.placeholder
-})
+  return props.label || props.placeholder;
+});
 
 const isChecked = (value: string | number) => {
-  return internalValue.value.includes(value)
-}
+  return internalValue.value.includes(value);
+};
 
 const toggleOption = (value: string | number) => {
-  const index = internalValue.value.indexOf(value)
+  const index = internalValue.value.indexOf(value);
   if (index > -1) {
-    internalValue.value.splice(index, 1)
+    internalValue.value.splice(index, 1);
   } else {
-    internalValue.value.push(value)
+    internalValue.value.push(value);
   }
-  emit('update:modelValue', [...internalValue.value])
-  emit('change', [...internalValue.value])
-}
+  emit("update:modelValue", [...internalValue.value]);
+  emit("change", [...internalValue.value]);
+};
 
 const handleShow = () => {
-  dropdownVisible.value = true
-}
+  dropdownVisible.value = true;
+};
 
 const handleHide = () => {
-  dropdownVisible.value = false
-}
+  dropdownVisible.value = false;
+};
 
 const clearSelection = () => {
-  internalValue.value = []
-  emit('update:modelValue', [])
-  emit('change', [])
-}
+  internalValue.value = [];
+  emit("update:modelValue", []);
+  emit("change", []);
+};
 </script>
 
 <style scoped lang="scss">

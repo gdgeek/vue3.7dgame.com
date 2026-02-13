@@ -14,23 +14,48 @@
               <section class="audio-bgc">
                 <br />
                 <div class="audio-box">
-                  <div class="audio-record" :class="{ 'audio-record-playfast': isPlay }" @click="handlePlayAudio"></div>
-                  <div class="audio-record-image" :class="{ 'audio-record-play': isPlay }" @click="handlePlayAudio">
-                  </div>
+                  <div
+                    class="audio-record"
+                    :class="{ 'audio-record-playfast': isPlay }"
+                    @click="handlePlayAudio"
+                  ></div>
+                  <div
+                    class="audio-record-image"
+                    :class="{ 'audio-record-play': isPlay }"
+                    @click="handlePlayAudio"
+                  ></div>
                 </div>
-                <audio id="audio" controls style="width: 95%; height: 84px" :src="file" preload="auto"
-                  @play="listenPlay" @pause="listenPause" @ended="listenEnd" @canplaythrough="dealWith"></audio>
+                <audio
+                  id="audio"
+                  controls
+                  style="width: 95%; height: 84px"
+                  :src="file"
+                  preload="auto"
+                  @play="listenPlay"
+                  @pause="listenPause"
+                  @ended="listenEnd"
+                  @canplaythrough="dealWith"
+                ></audio>
               </section>
             </div>
           </el-card>
           <br />
         </el-col>
         <el-col :sm="8">
-          <MrppInfo v-if="audioData" :title="$t('audio.view.info.title')" titleSuffix=" :" :tableData="tableData"
-            :itemLabel="$t('audio.view.info.label1')" :textLabel="$t('audio.view.info.label2')"
-            :downloadText="$t('audio.view.info.download')" :renameText="$t('audio.view.info.name')"
-            :deleteText="$t('audio.view.info.delete')" @download="downloadAudio" @rename="namedWindow"
-            @delete="deleteWindow">
+          <MrppInfo
+            v-if="audioData"
+            :title="$t('audio.view.info.title')"
+            titleSuffix=" :"
+            :tableData="tableData"
+            :itemLabel="$t('audio.view.info.label1')"
+            :textLabel="$t('audio.view.info.label2')"
+            :downloadText="$t('audio.view.info.download')"
+            :renameText="$t('audio.view.info.name')"
+            :deleteText="$t('audio.view.info.delete')"
+            @download="downloadAudio"
+            @rename="namedWindow"
+            @delete="deleteWindow"
+          >
           </MrppInfo>
           <br />
         </el-col>
@@ -77,7 +102,9 @@ const tableData = computed(() => {
       {
         item: t("audio.view.info.item2"),
         text:
-          audioData.value.author?.nickname || audioData.value.author?.username || '—',
+          audioData.value.author?.nickname ||
+          audioData.value.author?.username ||
+          "—",
       },
       {
         item: t("audio.view.info.item3"),
@@ -91,7 +118,7 @@ const tableData = computed(() => {
     let info: any = {};
     try {
       info = JSON.parse(audioData.value.info || "{}");
-    } catch { }
+    } catch {}
     if (info.length) {
       base.push({
         item: t("audio.view.info.item5"),
@@ -211,7 +238,7 @@ const setup = async (
         md5,
         extension,
         file,
-        () => { },
+        () => {},
         handler,
         "screenshot/audio"
       );
@@ -322,9 +349,11 @@ onMounted(async () => {
   width: 100%;
   height: 350px;
   background: rgb(238, 174, 202);
-  background: radial-gradient(circle,
-      rgba(238, 174, 202, 1) 0%,
-      rgb(169, 196, 228) 100%);
+  background: radial-gradient(
+    circle,
+    rgba(238, 174, 202, 1) 0%,
+    rgb(169, 196, 228) 100%
+  );
 }
 
 .audio-box {

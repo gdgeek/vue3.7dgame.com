@@ -1,10 +1,14 @@
 <template>
   <div>
-    <div id="scene" ref="scene" :style="{
-      height: isSceneFullscreen ? '100vh' : '75vh',
-      width: '100%',
-      margin: '0 auto',
-    }"></div>
+    <div
+      id="scene"
+      ref="scene"
+      :style="{
+        height: isSceneFullscreen ? '100vh' : '75vh',
+        width: '100%',
+        margin: '0 auto',
+      }"
+    ></div>
   </div>
 </template>
 
@@ -245,8 +249,8 @@ const loadModel = async (
             mesh.scale.set(
               entity.parameters.transform.scale.x * baseScale,
               entity.parameters.transform.scale.y *
-              baseScale *
-              (1 / aspectRatio),
+                baseScale *
+                (1 / aspectRatio),
               entity.parameters.transform.scale.z * baseScale
             );
           }
@@ -377,8 +381,8 @@ const loadModel = async (
             mesh.scale.set(
               entity.parameters.transform.scale.x * baseScale,
               entity.parameters.transform.scale.y *
-              baseScale *
-              (1 / aspectRatio),
+                baseScale *
+                (1 / aspectRatio),
               entity.parameters.transform.scale.z * baseScale
             );
           }

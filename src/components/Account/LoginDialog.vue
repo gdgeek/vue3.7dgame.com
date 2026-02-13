@@ -1,6 +1,13 @@
 <template>
-  <el-dialog v-model="dialogVisible" width="420px" destroy-on-close center @closed="handleDialogClosed"
-    class="login-dialog" :class="{ 'dark-theme': isDark }">
+  <el-dialog
+    v-model="dialogVisible"
+    width="420px"
+    destroy-on-close
+    center
+    @closed="handleDialogClosed"
+    class="login-dialog"
+    :class="{ 'dark-theme': isDark }"
+  >
     <div class="login-container">
       <!-- 顶部标题与图标 -->
       <div class="login-header">
@@ -11,7 +18,10 @@
       <!-- 内容区域 -->
       <div class="login-content">
         <div>
-          <NamePassword @login-success="handleLoginSuccess" @switch-to-register="toggleRegisterMode"></NamePassword>
+          <NamePassword
+            @login-success="handleLoginSuccess"
+            @switch-to-register="toggleRegisterMode"
+          ></NamePassword>
           <br />
           <Wechat></Wechat>
         </div>
@@ -184,12 +194,12 @@ defineExpose({
 
     &.is-active,
     &:hover {
-      color: var(--primary-color, #00BAFF);
+      color: var(--primary-color, #00baff);
     }
   }
 
   :deep(.el-tabs__active-bar) {
-    background-color: var(--primary-color, #00BAFF);
+    background-color: var(--primary-color, #00baff);
   }
 
   .tab-label {
@@ -237,12 +247,12 @@ defineExpose({
     margin: 4px 0;
 
     a {
-      color: var(--primary-color, #00BAFF);
+      color: var(--primary-color, #00baff);
       text-decoration: none;
       transition: color 0.2s;
 
       &:hover {
-        color: var(--primary-hover, #0099DD);
+        color: var(--primary-hover, #0099dd);
         text-decoration: underline;
       }
     }

@@ -1,11 +1,23 @@
 <template>
   <div class="home-header">
-    <el-row :gutter="10" justify="space-between" align="middle" class="home-header-row">
+    <el-row
+      :gutter="10"
+      justify="space-between"
+      align="middle"
+      class="home-header-row"
+    >
       <el-col :md="16" :span="24">
         <div class="home-greeting-container">
-          <h1 class="home-greeting-title">{{ greeting }}<span class="home-username">{{ name }}</span></h1>
+          <h1 class="home-greeting-title">
+            {{ greeting }}<span class="home-username">{{ name }}</span>
+          </h1>
           <p class="home-greeting-subtitle">
-            {{ t("homepage.header.subtitle", "探索 AR 的无限可能，开启您的创意之旅。") }}
+            {{
+              t(
+                "homepage.header.subtitle",
+                "探索 AR 的无限可能，开启您的创意之旅。"
+              )
+            }}
           </p>
         </div>
       </el-col>
@@ -65,7 +77,6 @@ const showQRCode = () => {
   codeDialog.value.openDialog();
 };
 </script>
-
 
 <style lang="scss" scoped>
 .home-header {

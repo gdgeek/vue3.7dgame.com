@@ -7,25 +7,25 @@
         id="hamburger-container"
         :is-active="appStore.sidebar.opened"
         class="hamburger-container"
-        @toggleClick="toggleSideBar"
-      />
-      <Breadcrumb />
+        @toggle-click="toggleSideBar"
+      ></Hamburger>
+      <Breadcrumb></Breadcrumb>
     </div>
-    
+
     <!-- 右侧 - 操作按钮和用户信息 -->
     <div class="navbar-right">
-      <HeaderActions />
-      <UserDropdown />
+      <HeaderActions></HeaderActions>
+      <UserDropdown></UserDropdown>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from '@/store';
-import Breadcrumb from './components/Breadcrumb.vue';
-import HeaderActions from './components/HeaderActions.vue';
-import UserDropdown from './components/UserDropdown.vue';
-import Hamburger from '@/components/Hamburger/index.vue';
+import { useAppStore } from "@/store";
+import Breadcrumb from "./components/Breadcrumb.vue";
+import HeaderActions from "./components/HeaderActions.vue";
+import UserDropdown from "./components/UserDropdown.vue";
+import Hamburger from "@/components/Hamburger/index.vue";
 
 const appStore = useAppStore();
 

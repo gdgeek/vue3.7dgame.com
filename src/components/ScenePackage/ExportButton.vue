@@ -1,6 +1,11 @@
 <template>
   <el-tooltip content="导出场景" placement="top">
-    <el-button type="success" :loading="exporting" :icon="Download" @click="handleExport" />
+    <el-button
+      type="success"
+      :loading="exporting"
+      :icon="Download"
+      @click="handleExport"
+    ></el-button>
   </el-tooltip>
 </template>
 

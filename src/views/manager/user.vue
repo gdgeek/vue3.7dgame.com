@@ -6,7 +6,26 @@
 import PersonPage from "@/components/MrPP/Person/Page.vue";
 import { getPerson } from "@/api/v1/person";
 
-const handleLoaded = async (params: any, callback: (val: any) => void) => {
+interface LoadedParams {
+  sorted: string;
+  searched: string;
+  current: number;
+}
+
+interface LoadedResponse {
+  data: any[];
+  pagination: {
+    current: number;
+    count: number;
+    size: number;
+    total: number;
+  };
+}
+
+const handleLoaded = async (
+  params: LoadedParams,
+  callback: (val: LoadedResponse) => void
+) => {
   try {
     const response = await getPerson(
       params.sorted,
@@ -25,7 +44,10 @@ const handleLoaded = async (params: any, callback: (val: any) => void) => {
     });
   } catch (error) {
     console.error("Failed to load users:", error);
-    callback({ data: [], pagination: { current: 1, count: 0, size: 20, total: 0 } });
+    callback({
+      data: [],
+      pagination: { current: 1, count: 0, size: 20, total: 0 },
+    });
   }
 };
 </script>

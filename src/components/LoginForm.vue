@@ -117,4 +117,5 @@ body {
   }
 }
 
-// Removed unused .header, .logo, .login-title, etc as they were not in template</style>
+// Removed unused .header, .logo, .login-title, etc as they were not in template
+</style>

@@ -6,32 +6,63 @@
         <div class="header-main">
           <div class="title-section">
             <h1 class="hero-title">场景示例</h1>
-            <p class="hero-subtitle">从我们精心设计的示例开始，快速启动您的下一个 AR 项目。</p>
+            <p class="hero-subtitle">
+              从我们精心设计的示例开始，快速启动您的下一个 AR 项目。
+            </p>
           </div>
           <div class="search-section">
             <div class="hero-search-box">
               <span class="material-symbols-outlined search-icon">search</span>
-              <input v-model="searchValue" type="text" class="hero-search-input" placeholder="搜索示例..."
-                @keyup.enter="handleHeroSearch" />
+              <input
+                v-model="searchValue"
+                type="text"
+                class="hero-search-input"
+                placeholder="搜索示例..."
+                @keyup.enter="handleHeroSearch"
+              />
             </div>
           </div>
         </div>
 
         <div class="header-tabs">
-          <div v-for="tab in categories" :key="tab.id" class="tab-item" :class="{ active: currentTab === tab.id }"
-            @click="selectTab(tab.id)">
+          <div
+            v-for="tab in categories"
+            :key="tab.id"
+            class="tab-item"
+            :class="{ active: currentTab === tab.id }"
+            @click="selectTab(tab.id)"
+          >
             {{ tab.name }}
           </div>
         </div>
       </div>
 
-      <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading"
-        :breakpoints="cardBreakpoints" @row-click="openDetail">
+      <ViewContainer
+        class="list-view"
+        :items="items"
+        :view-mode="viewMode"
+        :loading="loading"
+        :breakpoints="cardBreakpoints"
+        @row-click="openDetail"
+      >
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.name || '未命名'" :description="item.description"
-            :meta="{ author: item.author?.nickname || item.author?.username, date: formatItemDate(item.created_at) }"
-            action-text="查看此示例" action-icon="visibility" type-icon="layers" placeholder-icon="landscape"
-            :show-checkbox="false" aspect-ratio="1.6 / 1" @view="openDetail(item)" @action="goToScene(item)" />
+          <StandardCard
+            :image="item.image?.url"
+            :title="item.name || '未命名'"
+            :description="item.description"
+            :meta="{
+              author: item.author?.nickname || item.author?.username,
+              date: formatItemDate(item.created_at),
+            }"
+            action-text="查看此示例"
+            action-icon="visibility"
+            type-icon="layers"
+            placeholder-icon="landscape"
+            :show-checkbox="false"
+            aspect-ratio="1.6 / 1"
+            @view="openDetail(item)"
+            @action="goToScene(item)"
+          ></StandardCard>
         </template>
 
         <template #list-header>
@@ -46,15 +77,27 @@
           <div class="col-checkbox"></div>
           <div class="col-name">
             <div class="item-thumb">
-              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
-              <div v-else class="thumb-placeholder"><span class="material-symbols-outlined">layers</span></div>
+              <img
+                v-if="item.image?.url"
+                :src="item.image.url"
+                :alt="item.name"
+              />
+              <div v-else class="thumb-placeholder">
+                <span class="material-symbols-outlined">layers</span>
+              </div>
             </div>
-            <span class="item-name">{{ item.name || '—' }}</span>
-            <el-button class="btn-hover-action" type="primary" @click.stop="openDetail(item)">
+            <span class="item-name">{{ item.name || "—" }}</span>
+            <el-button
+              class="btn-hover-action"
+              type="primary"
+              @click.stop="openDetail(item)"
+            >
               {{ $t("common.open") }}
             </el-button>
           </div>
-          <div class="col-author">{{ item.author?.nickname || item.author?.username || '—' }}</div>
+          <div class="col-author">
+            {{ item.author?.nickname || item.author?.username || "—" }}
+          </div>
           <div class="col-date">{{ formatItemDate(item.created_at) }}</div>
           <div class="col-actions" @click.stop>
             <el-button type="primary" size="small" @click="openDetail(item)">
@@ -64,16 +107,35 @@
         </template>
       </ViewContainer>
 
-      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange" />
+      <PagePagination
+        :current-page="pagination.current"
+        :total-pages="totalPages"
+        @page-change="handlePageChange"
+      ></PagePagination>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="detailVisible" title="场景详情" :name="currentVerse?.name || ''" :loading="detailLoading"
-        :properties="detailProperties" placeholder-icon="landscape" width="560px" :show-delete="false"
-        action-layout="stacked" :secondary-action="false" download-text="查看此示例" @download="handleGoToPage"
-        @close="handlePanelClose">
+      <DetailPanel
+        v-model="detailVisible"
+        title="场景详情"
+        :name="currentVerse?.name || ''"
+        :loading="detailLoading"
+        :properties="detailProperties"
+        placeholder-icon="landscape"
+        width="560px"
+        :show-delete="false"
+        action-layout="stacked"
+        :secondary-action="false"
+        download-text="查看此示例"
+        @download="handleGoToPage"
+        @close="handlePanelClose"
+      >
         <template #preview>
           <div class="verse-preview">
-            <img v-if="currentVerse?.image?.url" :src="currentVerse.image.url" :alt="currentVerse.name" />
+            <img
+              v-if="currentVerse?.image?.url"
+              :src="currentVerse.image.url"
+              :alt="currentVerse.name"
+            />
             <div v-else class="preview-placeholder">
               <span class="material-symbols-outlined">landscape</span>
             </div>
@@ -84,14 +146,25 @@
             <!-- DescriptionSection -->
             <div class="info-section">
               <div class="section-header">场景简介</div>
-              <p class="description-text">{{ currentVerse?.description || '暂无简介' }}</p>
+              <p class="description-text">
+                {{ currentVerse?.description || "暂无简介" }}
+              </p>
             </div>
 
             <!-- Tags Section -->
             <div class="info-section">
               <div class="section-header">场景标签</div>
-              <div v-if="currentVerse?.tags?.length || currentVerse?.verseTags?.length" class="tag-list">
-                <el-tag v-for="tag in (currentVerse.tags || currentVerse.verseTags)" :key="tag.id" class="mr-2 mb-2">
+              <div
+                v-if="
+                  currentVerse?.tags?.length || currentVerse?.verseTags?.length
+                "
+                class="tag-list"
+              >
+                <el-tag
+                  v-for="tag in currentVerse.tags || currentVerse.verseTags"
+                  :key="tag.id"
+                  class="mr-2 mb-2"
+                >
                   {{ tag.name }}
                 </el-tag>
               </div>
@@ -108,7 +181,12 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ViewContainer, PagePagination, StandardCard, DetailPanel } from "@/components/StandardPage";
+import {
+  ViewContainer,
+  PagePagination,
+  StandardCard,
+  DetailPanel,
+} from "@/components/StandardPage";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { getPublic, getVerse } from "@/api/v1/verse";
 import { getTags } from "@/api/v1/tags";
@@ -139,16 +217,26 @@ onMounted(async () => {
 });
 
 const {
-  items, loading, pagination, viewMode, totalPages,
-  refresh, handleSearch, handleSortChange, handlePageChange, handleViewChange, handleTagsChange,
+  items,
+  loading,
+  pagination,
+  viewMode,
+  totalPages,
+  refresh,
+  handleSearch,
+  handleSortChange,
+  handlePageChange,
+  handleViewChange,
+  handleTagsChange,
 } = usePageData({
-  fetchFn: async (params) => await getPublic({
-    sort: params.sort,
-    search: params.search,
-    page: params.page,
-    tags: params.tags,
-    expand: "image,author,tags",
-  }),
+  fetchFn: async (params) =>
+    await getPublic({
+      sort: params.sort,
+      search: params.search,
+      page: params.page,
+      tags: params.tags,
+      expand: "image,author,tags",
+    }),
 });
 
 const cardBreakpoints = {
@@ -173,9 +261,9 @@ const selectTab = (id: number) => {
 };
 
 const formatItemDate = (dateStr?: string) => {
-  if (!dateStr) return '—';
+  if (!dateStr) return "—";
   const d = new Date(dateStr);
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
 };
 
 // Detail Panel Logic
@@ -186,9 +274,20 @@ const currentVerse = ref<any | null>(null);
 const detailProperties = computed(() => {
   if (!currentVerse.value) return [];
   return [
-    { label: '类型', value: '场景' },
-    { label: '作者', value: currentVerse.value.author?.nickname || currentVerse.value.author?.username || '—' },
-    { label: '修改时间', value: currentVerse.value.updated_at ? convertToLocalTime(currentVerse.value.updated_at) : '—' },
+    { label: "类型", value: "场景" },
+    {
+      label: "作者",
+      value:
+        currentVerse.value.author?.nickname ||
+        currentVerse.value.author?.username ||
+        "—",
+    },
+    {
+      label: "修改时间",
+      value: currentVerse.value.updated_at
+        ? convertToLocalTime(currentVerse.value.updated_at)
+        : "—",
+    },
   ];
 });
 
@@ -216,7 +315,7 @@ const handleGoToPage = () => {
 };
 
 const goToScene = (item: any) => {
-  const title = encodeURIComponent(`场景【${item.name || '未命名'}】`);
+  const title = encodeURIComponent(`场景【${item.name || "未命名"}】`);
   router.push({ path: "/verse/scene", query: { id: item.id, title } });
 };
 </script>
@@ -309,7 +408,7 @@ const goToScene = (item: any) => {
         font-weight: 600;
 
         &::after {
-          content: '';
+          content: "";
           position: absolute;
           bottom: -1px;
           left: 0;

@@ -1,46 +1,81 @@
 <template>
   <TransitionWrapper>
     <div class="polygen-index">
-      <PageActionBar title="所有模型素材" search-placeholder="搜索模型..." :selection-count="selectedCount"
-        :is-page-selected="isPageSelected" @search="handleSearch" @sort-change="handleSortChange"
-        @view-change="handleViewChange" @batch-download="handleBatchDownload" @batch-delete="handleBatchDelete"
-        @cancel-selection="handleCancelSelection" @select-all-page="handleSelectAllPage"
-        @cancel-select-all-page="handleCancelSelectAllPage">
+      <PageActionBar
+        title="所有模型素材"
+        search-placeholder="搜索模型..."
+        :selection-count="selectedCount"
+        :is-page-selected="isPageSelected"
+        @search="handleSearch"
+        @sort-change="handleSortChange"
+        @view-change="handleViewChange"
+        @batch-download="handleBatchDownload"
+        @batch-delete="handleBatchDelete"
+        @cancel-selection="handleCancelSelection"
+        @select-all-page="handleSelectAllPage"
+        @cancel-select-all-page="handleCancelSelectAllPage"
+      >
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
-            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">upload</span>
+            <span
+              class="material-symbols-outlined"
+              style="font-size: 18px; margin-right: 4px"
+              >upload</span
+            >
             {{ $t("polygen.uploadPolygen") }}
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer :items="items" :view-mode="viewMode" :loading="loading"
-        @row-click="(item) => openViewDialog(item.id)">
+      <ViewContainer
+        :items="items"
+        :view-mode="viewMode"
+        :loading="loading"
+        @row-click="(item) => openViewDialog(item.id)"
+      >
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.name || '未命名'"
-            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" :selected="isSelected(item.id)"
-            :selection-mode="hasSelection" type-icon="view_in_ar" placeholder-icon="view_in_ar"
-            @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)" />
+          <StandardCard
+            :image="item.image?.url"
+            :title="item.name || '未命名'"
+            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
+            :selected="isSelected(item.id)"
+            :selection-mode="hasSelection"
+            type-icon="view_in_ar"
+            placeholder-icon="view_in_ar"
+            @view="openViewDialog(item.id)"
+            @select="() => toggleSelection(item.id)"
+          ></StandardCard>
         </template>
 
         <template #list-item="{ item }">
           <div class="col-checkbox" @click.stop>
-            <el-checkbox :model-value="isSelected(item.id)" @change="() => toggleSelection(item.id)" />
+            <el-checkbox
+              :model-value="isSelected(item.id)"
+              @change="() => toggleSelection(item.id)"
+            ></el-checkbox>
           </div>
           <div class="col-name">
             <div class="item-thumb">
-              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
+              <img
+                v-if="item.image?.url"
+                :src="item.image.url"
+                :alt="item.name"
+              />
               <div v-else class="thumb-placeholder">
                 <span class="material-symbols-outlined">view_in_ar</span>
               </div>
             </div>
-            <span class="item-name">{{ item.name || '—' }}</span>
+            <span class="item-name">{{ item.name || "—" }}</span>
           </div>
           <div class="col-size">{{ formatSize(item.file?.size || 0) }}</div>
-          <div class="col-date">{{ formatItemDate(item.updated_at || item.created_at) }}</div>
+          <div class="col-date">
+            {{ formatItemDate(item.updated_at || item.created_at) }}
+          </div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <span class="material-symbols-outlined actions-icon">more_horiz</span>
+              <span class="material-symbols-outlined actions-icon"
+                >more_horiz</span
+              >
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openViewDialog(item.id)">
@@ -49,7 +84,7 @@
                   <el-dropdown-item @click="namedWindow(item)">
                     重命名
                   </el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => { })">
+                  <el-dropdown-item @click="deletedWindow(item, () => {})">
                     删除
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -59,27 +94,66 @@
         </template>
 
         <template #empty>
-          <EmptyState icon="view_in_ar" text="暂无模型" action-text="上传模型" @action="openUploadDialog" />
+          <EmptyState
+            icon="view_in_ar"
+            text="暂无模型"
+            action-text="上传模型"
+            @action="openUploadDialog"
+          ></EmptyState>
         </template>
       </ViewContainer>
 
-      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange" />
+      <PagePagination
+        :current-page="pagination.current"
+        :total-pages="totalPages"
+        @page-change="handlePageChange"
+      ></PagePagination>
 
       <!-- Dialogs -->
       <!-- Dialogs -->
-      <StandardUploadDialog v-model="uploadDialogVisible" dir="polygen" :file-type="fileType" :max-size="30"
-        :title="$t('polygen.uploadPolygen')" @save-resource="savePolygen" @success="handleUploadSuccess" />
+      <StandardUploadDialog
+        v-model="uploadDialogVisible"
+        dir="polygen"
+        :file-type="fileType"
+        :max-size="30"
+        :title="$t('polygen.uploadPolygen')"
+        @save-resource="savePolygen"
+        @success="handleUploadSuccess"
+      ></StandardUploadDialog>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="viewDialogVisible" title="模型详情" :name="currentPolygen?.name || ''" :loading="detailLoading"
-        :properties="detailProperties" placeholder-icon="view_in_ar" download-text="下载模型" delete-text="删除此模型"
-        @download="handleDownload" @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
+      <DetailPanel
+        v-model="viewDialogVisible"
+        title="模型详情"
+        :name="currentPolygen?.name || ''"
+        :loading="detailLoading"
+        :properties="detailProperties"
+        placeholder-icon="view_in_ar"
+        download-text="下载模型"
+        delete-text="删除此模型"
+        @download="handleDownload"
+        @rename="handleRename"
+        @delete="handleDelete"
+        @close="handlePanelClose"
+      >
         <template #preview>
-          <div v-if="currentPolygen" class="polygen-preview" :class="{ 'has-animations': hasAnimations }">
-            <polygen-view ref="polygenViewRef" :file="currentPolygen.file" @loaded="handleModelLoaded"
-              @progress="handleModelProgress" />
-            <el-progress v-if="modelProgress < 100" :percentage="modelProgress" :stroke-width="4"
-              class="model-progress" />
+          <div
+            v-if="currentPolygen"
+            class="polygen-preview"
+            :class="{ 'has-animations': hasAnimations }"
+          >
+            <polygen-view
+              ref="polygenViewRef"
+              :file="currentPolygen.file"
+              @loaded="handleModelLoaded"
+              @progress="handleModelProgress"
+            ></polygen-view>
+            <el-progress
+              v-if="modelProgress < 100"
+              :percentage="modelProgress"
+              :stroke-width="4"
+              class="model-progress"
+            ></el-progress>
           </div>
           <div v-else class="preview-placeholder">
             <span class="material-symbols-outlined">view_in_ar</span>
@@ -95,7 +169,14 @@ import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 // import { ElMessage, ElMessageBox } from "element-plus";
 import { Message, MessageBox } from "@/components/Dialog";
-import { PageActionBar, ViewContainer, PagePagination, EmptyState, StandardCard, DetailPanel } from "@/components/StandardPage";
+import {
+  PageActionBar,
+  ViewContainer,
+  PagePagination,
+  EmptyState,
+  StandardCard,
+  DetailPanel,
+} from "@/components/StandardPage";
 import StandardUploadDialog from "@/components/StandardPage/StandardUploadDialog.vue";
 import PolygenView from "@/components/PolygenView.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
@@ -116,7 +197,10 @@ import type { ResourceInfo } from "@/api/v1/resources/model";
 import { usePageData } from "@/composables/usePageData";
 import { useSelection } from "@/composables/useSelection";
 import { downloadResource } from "@/utils/downloadHelper";
-import { convertToLocalTime, formatFileSize as formatSize } from "@/utils/utilityFunctions";
+import {
+  convertToLocalTime,
+  formatFileSize as formatSize,
+} from "@/utils/utilityFunctions";
 import { printVector3 } from "@/assets/js/helper";
 
 const { t } = useI18n();
@@ -183,13 +267,22 @@ const polygenViewRef = ref<InstanceType<typeof PolygenView> | null>(null);
 
 const detailProperties = computed(() => {
   if (!currentPolygen.value) return [];
-  const info = currentPolygen.value.info ? JSON.parse(currentPolygen.value.info) : null;
+  const info = currentPolygen.value.info
+    ? JSON.parse(currentPolygen.value.info)
+    : null;
   return [
-    { label: '类型', value: '模型' },
-    { label: '大小', value: formatSize(currentPolygen.value.file?.size || 0) },
-    { label: '创建时间', value: convertToLocalTime(currentPolygen.value.created_at) },
-    ...(info?.size ? [{ label: '尺寸', value: printVector3(info.size) + ' （m）' }] : []),
-    ...(info?.faces ? [{ label: '模型面数', value: info.faces.toLocaleString() }] : []),
+    { label: "类型", value: "模型" },
+    { label: "大小", value: formatSize(currentPolygen.value.file?.size || 0) },
+    {
+      label: "创建时间",
+      value: convertToLocalTime(currentPolygen.value.created_at),
+    },
+    ...(info?.size
+      ? [{ label: "尺寸", value: printVector3(info.size) + " （m）" }]
+      : []),
+    ...(info?.faces
+      ? [{ label: "模型面数", value: info.faces.toLocaleString() }]
+      : []),
   ];
 });
 
@@ -220,7 +313,7 @@ const openViewDialog = async (id: number) => {
   hasAnimations.value = false;
 
   try {
-    const response = await getPolygen(id) as any;
+    const response = (await getPolygen(id)) as any;
     currentPolygen.value = response.data;
   } catch (err) {
     Message.error(String(err));
@@ -254,9 +347,9 @@ const handleDownload = async () => {
   if (currentPolygen.value) {
     const resource = {
       ...currentPolygen.value,
-      name: currentPolygen.value.name || 'model',
+      name: currentPolygen.value.name || "model",
     };
-    await downloadResource(resource, '.glb', t, 'polygen.view.download');
+    await downloadResource(resource, ".glb", t, "polygen.view.download");
   }
 };
 
@@ -371,8 +464,8 @@ const handleBatchDelete = async () => {
   try {
     await MessageBox.confirm(
       `确定要删除选中的 ${selected.length} 个模型吗？`,
-      '批量删除',
-      { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' }
+      "批量删除",
+      { confirmButtonText: "删除", cancelButtonText: "取消", type: "warning" }
     );
 
     for (const item of selected) {
@@ -383,7 +476,7 @@ const handleBatchDelete = async () => {
     refresh();
     Message.success(`成功删除 ${selected.length} 个模型`);
   } catch {
-    Message.info('已取消删除');
+    Message.info("已取消删除");
   }
 };
 
@@ -393,12 +486,11 @@ const handleCancelSelection = () => {
 
 // Helpers for list view
 const formatItemDate = (dateStr?: string) => {
-  if (!dateStr) return '—';
+  if (!dateStr) return "—";
   const d = new Date(dateStr);
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
 };
 </script>
-
 
 <style scoped lang="scss">
 .polygen-index {
@@ -553,7 +645,7 @@ const formatItemDate = (dateStr?: string) => {
   }
 }
 
-.panel-preview>.preview-placeholder {
+.panel-preview > .preview-placeholder {
   width: 100%;
   height: 100%;
   display: flex;

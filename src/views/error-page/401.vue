@@ -51,17 +51,22 @@ function back() {
           <li class="link-type">
             <a href="https://www.bujiaban.com/">{{
               t("errorPage.justLook")
-              }}</a>
+            }}</a>
           </li>
           <li>
             <a href="#" @click.prevent="dialogVisible = true">{{
               t("errorPage.clickToSee")
-              }}</a>
+            }}</a>
           </li>
         </ul>
       </el-col>
       <el-col :span="12">
-        <img :src="errGif" width="313" height="428" alt="Girl has dropped her ice cream." />
+        <img
+          :src="errGif"
+          width="313"
+          height="428"
+          alt="Girl has dropped her ice cream."
+        />
       </el-col>
     </el-row>
     <el-dialog v-model="dialogVisible">

@@ -1,22 +1,34 @@
 <template>
   <div>
-    <el-dialog v-model="dialogVisible" width="420px" align-center class="qrcode-dialog" :show-close="true">
+    <el-dialog
+      v-model="dialogVisible"
+      width="420px"
+      align-center
+      class="qrcode-dialog"
+      :show-close="true"
+    >
       <template #header>
         <div class="dialog-header-custom">
-          <span class="material-symbols-outlined header-icon">qr_code_scanner</span>
+          <span class="material-symbols-outlined header-icon"
+            >qr_code_scanner</span
+          >
           <span class="header-title">{{ t("login.loginCode", "登录码") }}</span>
         </div>
       </template>
       <div class="qrcode-container">
         <div class="qrcode-wrapper">
           <div v-loading="code === ''" class="qrcode-box">
-            <qrcode-vue v-if="code !== ''" :value="code" :size="260" level="H" class="qrcode-img"></qrcode-vue>
+            <qrcode-vue
+              v-if="code !== ''"
+              :value="code"
+              :size="260"
+              level="H"
+              class="qrcode-img"
+            ></qrcode-vue>
           </div>
         </div>
         <p class="qrcode-tip">请使用手机扫描二维码登录</p>
-        <p class="qrcode-subtip">
-          打开不加班AR平台APP扫描二维码快速登录
-        </p>
+        <p class="qrcode-subtip">打开不加班AR平台APP扫描二维码快速登录</p>
       </div>
     </el-dialog>
   </div>
@@ -121,7 +133,7 @@ defineExpose({
 
     .el-dialog__close {
       color: var(--text-secondary, #909399);
-      
+
       &:hover {
         color: var(--text-primary, #303133);
       }

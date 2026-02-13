@@ -7,9 +7,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, type Ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import aiRodin from "@/api/v1/ai-rodin";
 const route = useRoute();
+
+interface AiData {
+  id: number;
+  [key: string]: any;
+}
 
 import AIUpload from "@/components/MrPP/AIUpload.vue";
 import AIProcess from "@/components/MrPP/AIProcess.vue";
@@ -19,7 +24,7 @@ const id: Ref<number | undefined> = computed(() => {
 });
 const loading: Ref<boolean> = ref(false);
 //import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
-const data = ref<any>(null);
+const data = ref<AiData | null>(null);
 onMounted(async () => {
   if (id.value) {
     try {

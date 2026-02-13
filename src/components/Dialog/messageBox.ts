@@ -1,10 +1,10 @@
-import { createVNode, render } from 'vue';
-import ConfirmDialog from './ConfirmDialog.vue';
-import InputDialog from './InputDialog.vue';
+import { createVNode, render } from "vue";
+import ConfirmDialog from "./ConfirmDialog.vue";
+import InputDialog from "./InputDialog.vue";
 
 interface ConfirmOptions {
   title?: string;
-  type?: 'warning' | 'danger' | 'info' | 'success';
+  type?: "warning" | "danger" | "info" | "success";
   confirmButtonText?: string;
   cancelButtonText?: string;
   description?: string;
@@ -18,42 +18,46 @@ interface PromptOptions extends ConfirmOptions {
 }
 
 const MessageBox = {
-  confirm: (message: string, titleOrOptions?: string | ConfirmOptions, options?: ConfirmOptions) => {
-    let title = '确认';
+  confirm: (
+    message: string,
+    titleOrOptions?: string | ConfirmOptions,
+    options?: ConfirmOptions
+  ) => {
+    let title = "确认";
     let opts: ConfirmOptions = {};
 
-    if (typeof titleOrOptions === 'string') {
+    if (typeof titleOrOptions === "string") {
       title = titleOrOptions;
       if (options) opts = options;
-    } else if (typeof titleOrOptions === 'object') {
+    } else if (typeof titleOrOptions === "object") {
       opts = titleOrOptions;
       if (opts.title) title = opts.title;
     }
 
     return new Promise<void>((resolve, reject) => {
-      const container = document.createElement('div');
-      
+      const container = document.createElement("div");
+
       const props = {
         modelValue: true,
         message,
         title,
         ...opts,
-        'onUpdate:modelValue': (val: boolean) => {
+        "onUpdate:modelValue": (val: boolean) => {
           if (!val) {
-             // Delay unmount to allow animation if needed, but for now strict close
-             handleClose();
-             reject('cancel');
+            // Delay unmount to allow animation if needed, but for now strict close
+            handleClose();
+            reject("cancel");
           }
         },
         onConfirm: () => {
           handleClose();
           render(null, container);
-          resolve(); 
+          resolve();
         },
         onCancel: () => {
           handleClose();
-          reject('cancel');
-        }
+          reject("cancel");
+        },
       };
 
       const vnode = createVNode(ConfirmDialog, props);
@@ -73,41 +77,47 @@ const MessageBox = {
     });
   },
 
-  prompt: (message: string, title: string = '输入', options: PromptOptions = {}) => {
-    return new Promise<{ value: string; action: 'confirm' }>((resolve, reject) => {
-      const container = document.createElement('div');
+  prompt: (
+    message: string,
+    title: string = "输入",
+    options: PromptOptions = {}
+  ) => {
+    return new Promise<{ value: string; action: "confirm" }>(
+      (resolve, reject) => {
+        const container = document.createElement("div");
 
-      const props = {
-        modelValue: true,
-        title,
-        description: message, // Prompt usually treats message as description/content
-        ...options,
-        'onUpdate:modelValue': (val: boolean) => {
-          if (!val) {
+        const props = {
+          modelValue: true,
+          title,
+          description: message, // Prompt usually treats message as description/content
+          ...options,
+          "onUpdate:modelValue": (val: boolean) => {
+            if (!val) {
+              handleClose();
+              reject("cancel");
+            }
+          },
+          onConfirm: (value: string) => {
             handleClose();
-            reject('cancel');
-          }
-        },
-        onConfirm: (value: string) => {
-          handleClose();
-          resolve({ value, action: 'confirm' });
-        },
-        onCancel: () => {
-          handleClose();
-          reject('cancel');
+            resolve({ value, action: "confirm" });
+          },
+          onCancel: () => {
+            handleClose();
+            reject("cancel");
+          },
+        };
+
+        const vnode = createVNode(InputDialog, props);
+        render(vnode, container);
+        document.body.appendChild(container);
+
+        function handleClose() {
+          render(null, container);
+          document.body.removeChild(container);
         }
-      };
-
-      const vnode = createVNode(InputDialog, props);
-      render(vnode, container);
-      document.body.appendChild(container);
-
-      function handleClose() {
-        render(null, container);
-        document.body.removeChild(container);
       }
-    });
-  }
+    );
+  },
 };
 
 export default MessageBox;

@@ -1,51 +1,89 @@
 <template>
   <TransitionWrapper>
     <div class="audio-index">
-      <PageActionBar title="所有音频素材" search-placeholder="搜索音频..." :selection-count="selectedCount" @search="handleSearch"
-        @sort-change="handleSortChange" @view-change="handleViewChange" @batch-download="handleBatchDownload"
-        @batch-delete="handleBatchDelete" @cancel-selection="handleCancelSelection">
+      <PageActionBar
+        title="所有音频素材"
+        search-placeholder="搜索音频..."
+        :selection-count="selectedCount"
+        @search="handleSearch"
+        @sort-change="handleSortChange"
+        @view-change="handleViewChange"
+        @batch-download="handleBatchDownload"
+        @batch-delete="handleBatchDelete"
+        @cancel-selection="handleCancelSelection"
+      >
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
-            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">upload</span>
+            <span
+              class="material-symbols-outlined"
+              style="font-size: 18px; margin-right: 4px"
+              >upload</span
+            >
             {{ $t("audio.uploadAudio") }}
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer :items="items" :view-mode="viewMode" :loading="loading"
-        @row-click="(item) => openViewDialog(item.id)">
+      <ViewContainer
+        :items="items"
+        :view-mode="viewMode"
+        :loading="loading"
+        @row-click="(item) => openViewDialog(item.id)"
+      >
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.name || '未命名'"
-            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" :selected="isSelected(item.id)"
-            :selection-mode="hasSelection" type-icon="audiotrack" placeholder-icon="audiotrack"
-            @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)" />
+          <StandardCard
+            :image="item.image?.url"
+            :title="item.name || '未命名'"
+            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
+            :selected="isSelected(item.id)"
+            :selection-mode="hasSelection"
+            type-icon="audiotrack"
+            placeholder-icon="audiotrack"
+            @view="openViewDialog(item.id)"
+            @select="() => toggleSelection(item.id)"
+          ></StandardCard>
         </template>
 
         <template #list-item="{ item }">
           <div class="col-checkbox" @click.stop>
-            <el-checkbox :model-value="isSelected(item.id)" @change="() => toggleSelection(item.id)" />
+            <el-checkbox
+              :model-value="isSelected(item.id)"
+              @change="() => toggleSelection(item.id)"
+            ></el-checkbox>
           </div>
           <div class="col-name">
             <div class="item-thumb">
-              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
+              <img
+                v-if="item.image?.url"
+                :src="item.image.url"
+                :alt="item.name"
+              />
               <div v-else class="thumb-placeholder">
                 <span class="material-symbols-outlined">headphones</span>
               </div>
             </div>
-            <span class="item-name">{{ item.name || '—' }}</span>
+            <span class="item-name">{{ item.name || "—" }}</span>
           </div>
           <div class="col-size">{{ formatFileSize(item.file?.size) }}</div>
-          <div class="col-date">{{ formatItemDate(item.updated_at || item.created_at) }}</div>
+          <div class="col-date">
+            {{ formatItemDate(item.updated_at || item.created_at) }}
+          </div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <span class="material-symbols-outlined actions-icon">more_horiz</span>
+              <span class="material-symbols-outlined actions-icon"
+                >more_horiz</span
+              >
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openViewDialog(item.id)">
                     {{ $t("audio.viewAudio") }}
                   </el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)">重命名</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => { })">删除</el-dropdown-item>
+                  <el-dropdown-item @click="namedWindow(item)"
+                    >重命名</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="deletedWindow(item, () => {})"
+                    >删除</el-dropdown-item
+                  >
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -53,24 +91,51 @@
         </template>
       </ViewContainer>
 
-      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange" />
+      <PagePagination
+        :current-page="pagination.current"
+        :total-pages="totalPages"
+        @page-change="handlePageChange"
+      ></PagePagination>
 
       <!-- Dialogs -->
       <!-- Dialogs -->
-      <StandardUploadDialog v-model="uploadDialogVisible" dir="audio" :file-type="fileType" :max-size="5"
-        :title="$t('audio.uploadAudio')" @save-resource="saveAudio" @success="handleUploadSuccess" />
+      <StandardUploadDialog
+        v-model="uploadDialogVisible"
+        dir="audio"
+        :file-type="fileType"
+        :max-size="5"
+        :title="$t('audio.uploadAudio')"
+        @save-resource="saveAudio"
+        @success="handleUploadSuccess"
+      ></StandardUploadDialog>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="viewDialogVisible" title="音频详情" :name="currentAudio?.name || ''" :loading="detailLoading"
-        :properties="detailProperties" placeholder-icon="headphones" download-text="下载音频" delete-text="删除此音频"
-        @download="handleDownload" @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
+      <DetailPanel
+        v-model="viewDialogVisible"
+        title="音频详情"
+        :name="currentAudio?.name || ''"
+        :loading="detailLoading"
+        :properties="detailProperties"
+        placeholder-icon="headphones"
+        download-text="下载音频"
+        delete-text="删除此音频"
+        @download="handleDownload"
+        @rename="handleRename"
+        @delete="handleDelete"
+        @close="handlePanelClose"
+      >
         <template #preview>
           <div class="audio-preview">
             <div class="audio-visual">
               <span class="material-symbols-outlined">headphones</span>
             </div>
-            <audio v-if="currentAudio?.file?.url" ref="audioRef" :src="currentAudio.file.url" controls
-              class="audio-player" />
+            <audio
+              v-if="currentAudio?.file?.url"
+              ref="audioRef"
+              :src="currentAudio.file.url"
+              controls
+              class="audio-player"
+            ></audio>
           </div>
         </template>
       </DetailPanel>
@@ -83,23 +148,47 @@ import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 // import { ElMessage, ElMessageBox } from "element-plus";
 import { Message, MessageBox } from "@/components/Dialog";
-import { PageActionBar, ViewContainer, PagePagination, StandardCard, DetailPanel } from "@/components/StandardPage";
+import {
+  PageActionBar,
+  ViewContainer,
+  PagePagination,
+  StandardCard,
+  DetailPanel,
+} from "@/components/StandardPage";
 import StandardUploadDialog from "@/components/StandardPage/StandardUploadDialog.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
-import { getAudios, getAudio, putAudio, deleteAudio, postAudio } from "@/api/v1/resources/index";
+import {
+  getAudios,
+  getAudio,
+  putAudio,
+  deleteAudio,
+  postAudio,
+} from "@/api/v1/resources/index";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import { usePageData } from "@/composables/usePageData";
 import { useSelection } from "@/composables/useSelection";
 import { downloadResource } from "@/utils/downloadHelper";
-import { convertToLocalTime, formatFileSize as formatSize } from "@/utils/utilityFunctions";
+import {
+  convertToLocalTime,
+  formatFileSize as formatSize,
+} from "@/utils/utilityFunctions";
 
 const { t } = useI18n();
 
 const {
-  items, loading, pagination, viewMode, totalPages,
-  refresh, handleSearch, handleSortChange, handlePageChange, handleViewChange,
+  items,
+  loading,
+  pagination,
+  viewMode,
+  totalPages,
+  refresh,
+  handleSearch,
+  handleSortChange,
+  handlePageChange,
+  handleViewChange,
 } = usePageData({
-  fetchFn: async (params) => await getAudios(params.sort, params.search, params.page),
+  fetchFn: async (params) =>
+    await getAudios(params.sort, params.search, params.page),
 });
 
 const {
@@ -122,17 +211,25 @@ const detailLoading = ref(false);
 
 const detailProperties = computed(() => {
   if (!currentAudio.value) return [];
-  const info = currentAudio.value.info ? JSON.parse(currentAudio.value.info) : null;
+  const info = currentAudio.value.info
+    ? JSON.parse(currentAudio.value.info)
+    : null;
   const props = [
-    { label: '类型', value: '音频' },
-    { label: '大小', value: formatSize(currentAudio.value.file?.size) },
-    { label: '创建时间', value: convertToLocalTime(currentAudio.value.created_at) },
+    { label: "类型", value: "音频" },
+    { label: "大小", value: formatSize(currentAudio.value.file?.size) },
+    {
+      label: "创建时间",
+      value: convertToLocalTime(currentAudio.value.created_at),
+    },
   ];
-  if (info?.length) props.push({ label: '时长', value: info.length.toFixed(2) + 's' });
+  if (info?.length)
+    props.push({ label: "时长", value: info.length.toFixed(2) + "s" });
   return props;
 });
 
-const openUploadDialog = () => { uploadDialogVisible.value = true; };
+const openUploadDialog = () => {
+  uploadDialogVisible.value = true;
+};
 
 const openViewDialog = async (id: number) => {
   viewDialogVisible.value = true;
@@ -157,13 +254,14 @@ const handlePanelClose = () => {
 
 const handleDownload = async () => {
   if (!currentAudio.value) return;
-  const fileName = currentAudio.value.file?.filename || '';
-  const fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase() || '.mp3';
+  const fileName = currentAudio.value.file?.filename || "";
+  const fileExt =
+    fileName.substring(fileName.lastIndexOf(".")).toLowerCase() || ".mp3";
   await downloadResource(
-    { name: currentAudio.value.name || 'audio', file: currentAudio.value.file },
+    { name: currentAudio.value.name || "audio", file: currentAudio.value.file },
     fileExt,
     t,
-    'audio.view.download'
+    "audio.view.download"
   );
 };
 
@@ -207,8 +305,13 @@ const handleUploadSuccess = async () => {
 };
 
 const saveAudio = async (
-  name: string, file_id: number, totalFiles: number,
-  callback: (id: number) => void, effectType?: string, info?: string, image_id?: number
+  name: string,
+  file_id: number,
+  totalFiles: number,
+  callback: (id: number) => void,
+  effectType?: string,
+  info?: string,
+  image_id?: number
 ) => {
   try {
     const data: any = { name, file_id };
@@ -225,25 +328,43 @@ const saveAudio = async (
 const namedWindow = async (item: { id: string; name: string }) => {
   try {
     const { value } = (await MessageBox.prompt(
-      t("audio.prompt.message1"), t("audio.prompt.message2"),
-      { confirmButtonText: t("audio.prompt.confirm"), cancelButtonText: t("audio.prompt.cancel"), defaultValue: item.name }
+      t("audio.prompt.message1"),
+      t("audio.prompt.message2"),
+      {
+        confirmButtonText: t("audio.prompt.confirm"),
+        cancelButtonText: t("audio.prompt.cancel"),
+        defaultValue: item.name,
+      }
     )) as { value: string };
     await putAudio(item.id, { name: value });
     refresh();
     Message.success(t("audio.prompt.success") + value);
-  } catch { Message.info(t("audio.prompt.info")); }
+  } catch {
+    Message.info(t("audio.prompt.info"));
+  }
 };
 
-const deletedWindow = async (item: { id: string }, resetLoading: () => void) => {
+const deletedWindow = async (
+  item: { id: string },
+  resetLoading: () => void
+) => {
   try {
     await MessageBox.confirm(
-      t("audio.confirm.message1"), t("audio.confirm.message2"),
-      { confirmButtonText: t("audio.confirm.confirm"), cancelButtonText: t("audio.confirm.cancel"), type: "warning" }
+      t("audio.confirm.message1"),
+      t("audio.confirm.message2"),
+      {
+        confirmButtonText: t("audio.confirm.confirm"),
+        cancelButtonText: t("audio.confirm.cancel"),
+        type: "warning",
+      }
     );
     await deleteAudio(item.id);
     refresh();
     Message.success(t("audio.confirm.success"));
-  } catch { Message.info(t("audio.confirm.info")); resetLoading(); }
+  } catch {
+    Message.info(t("audio.confirm.info"));
+    resetLoading();
+  }
 };
 
 const handleBatchDownload = () => {
@@ -256,8 +377,8 @@ const handleBatchDelete = async () => {
   try {
     await MessageBox.confirm(
       `确定要删除选中的 ${selected.length} 个音频吗？`,
-      '批量删除',
-      { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' }
+      "批量删除",
+      { confirmButtonText: "删除", cancelButtonText: "取消", type: "warning" }
     );
 
     for (const item of selected) {
@@ -268,7 +389,7 @@ const handleBatchDelete = async () => {
     refresh();
     Message.success(`成功删除 ${selected.length} 个音频`);
   } catch {
-    Message.info('已取消删除');
+    Message.info("已取消删除");
   }
 };
 
@@ -277,16 +398,16 @@ const handleCancelSelection = () => {
 };
 
 const formatFileSize = (bytes?: number) => {
-  if (!bytes) return '—';
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  if (!bytes) return "—";
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(2) + " MB";
 };
 
 const formatItemDate = (dateStr?: string) => {
-  if (!dateStr) return '—';
+  if (!dateStr) return "—";
   const d = new Date(dateStr);
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
 };
 </script>
 
@@ -401,7 +522,11 @@ const formatItemDate = (dateStr?: string) => {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-color, #03a9f4), var(--primary-dark, #0288d1));
+  background: linear-gradient(
+    135deg,
+    var(--primary-color, #03a9f4),
+    var(--primary-dark, #0288d1)
+  );
   display: flex;
   align-items: center;
   justify-content: center;

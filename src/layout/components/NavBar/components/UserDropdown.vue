@@ -13,8 +13,8 @@
     <!-- Dropdown Menu -->
     <Transition name="dropdown">
       <div v-if="isMenuOpen" class="dropdown-menu">
-        <router-link 
-          to="/settings/edit" 
+        <router-link
+          to="/settings/edit"
           class="dropdown-item"
           @click="closeMenu"
         >
@@ -39,15 +39,15 @@
       confirm-text="退出登录"
       cancel-text="取消"
       @confirm="confirmLogout"
-    />
+    ></ConfirmDialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
-import ConfirmDialog from '@/components/Dialog/ConfirmDialog.vue';
-import { useUserStore } from '@/store';
+import { ref, computed, onMounted, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
+import ConfirmDialog from "@/components/Dialog/ConfirmDialog.vue";
+import { useUserStore } from "@/store";
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -63,16 +63,16 @@ const userName = computed(() => {
   if (userStore.userInfo?.userData?.username) {
     return userStore.userInfo.userData.username;
   }
-  return '用户';
+  return "用户";
 });
 
 // 账户类型 - 可根据 roles 判断
 const accountType = computed(() => {
   const roles = userStore.userInfo?.roles || [];
-  if (roles.includes('root') || roles.includes('admin')) {
-    return '管理员账户';
+  if (roles.includes("root") || roles.includes("admin")) {
+    return "管理员账户";
   }
-  return '普通账户';
+  return "普通账户";
 });
 
 // 从用户数据中获取头像URL
@@ -81,7 +81,7 @@ const avatarUrl = computed(() => {
     return userStore.userInfo.userInfo.avatar.url;
   }
   // 默认头像
-  return '/local/ar_logo.png';
+  return "/local/ar_logo.png";
 });
 
 const toggleMenu = () => {
@@ -100,7 +100,7 @@ const handleLogout = () => {
 const confirmLogout = async () => {
   showLogoutDialog.value = false;
   await userStore.logout();
-  router.push('/login');
+  router.push("/login");
 };
 
 // Close menu when clicking outside
@@ -111,11 +111,11 @@ const handleClickOutside = (event: MouseEvent) => {
 };
 
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside);
+  document.addEventListener("click", handleClickOutside);
 });
 
 onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside);
+  document.removeEventListener("click", handleClickOutside);
 });
 </script>
 

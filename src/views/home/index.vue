@@ -1,16 +1,23 @@
 <template>
   <TransitionWrapper>
     <div class="home-page">
-      <HomeHeader />
-      <el-divider class="home-divider" />
-      <QuickStart />
+      <HomeHeader></HomeHeader>
+      <el-divider class="home-divider"></el-divider>
+      <QuickStart></QuickStart>
 
       <div class="section-header">
         <span class="material-symbols-outlined header-icon">campaign</span>
-        <h2 class="section-title">{{ t("homepage.announcements.title", "平台公告") }}</h2>
+        <h2 class="section-title">
+          {{ t("homepage.announcements.title", "平台公告") }}
+        </h2>
       </div>
       <Book :items="list"></Book>
-      <el-tabs v-if="env.local()" type="border-card" lazy class="home-local-tabs">
+      <el-tabs
+        v-if="env.local()"
+        type="border-card"
+        lazy
+        class="home-local-tabs"
+      >
         <el-tab-pane :label="domainStore.title">
           <LocalPage></LocalPage>
         </el-tab-pane>

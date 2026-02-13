@@ -1,29 +1,61 @@
 <template>
   <TransitionWrapper>
     <div class="verse-index">
-      <PageActionBar title="我的场景" search-placeholder="搜索场景..." :show-tags="true" @search="handleSearch"
-        @sort-change="handleSortChange" @view-change="handleViewChange">
+      <PageActionBar
+        title="我的场景"
+        search-placeholder="搜索场景..."
+        :show-tags="true"
+        @search="handleSearch"
+        @sort-change="handleSortChange"
+        @view-change="handleViewChange"
+      >
         <template #filters>
-          <TagsSelect @tagsChange="handleTagsChange" />
+          <TagsSelect @tags-change="handleTagsChange"></TagsSelect>
         </template>
         <template #actions>
           <el-button type="primary" @click="createWindow">
-            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">add</span>
+            <span
+              class="material-symbols-outlined"
+              style="font-size: 18px; margin-right: 4px"
+              >add</span
+            >
             {{ $t("verse.page.title") }}
           </el-button>
           <el-button @click="openImportDialog">
-            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">upload</span>
+            <span
+              class="material-symbols-outlined"
+              style="font-size: 18px; margin-right: 4px"
+              >upload</span
+            >
             导入场景
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
+      <ViewContainer
+        class="list-view"
+        :items="items"
+        :view-mode="viewMode"
+        :loading="loading"
+        @row-click="openDetail"
+      >
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.name || '未命名'" :description="item.description"
-            :meta="{ author: item.author?.nickname || item.author?.username, date: formatItemDate(item.created_at) }"
-            action-text="进入编辑器" action-icon="edit" type-icon="layers" placeholder-icon="landscape"
-            :show-checkbox="false" @view="openDetail(item)" @action="goToEditor(item)" />
+          <StandardCard
+            :image="item.image?.url"
+            :title="item.name || '未命名'"
+            :description="item.description"
+            :meta="{
+              author: item.author?.nickname || item.author?.username,
+              date: formatItemDate(item.created_at),
+            }"
+            action-text="进入编辑器"
+            action-icon="edit"
+            type-icon="layers"
+            placeholder-icon="landscape"
+            :show-checkbox="false"
+            @view="openDetail(item)"
+            @action="goToEditor(item)"
+          ></StandardCard>
         </template>
 
         <template #list-header>
@@ -38,25 +70,47 @@
           <div class="col-checkbox"></div>
           <div class="col-name">
             <div class="item-thumb">
-              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
-              <div v-else class="thumb-placeholder"><span class="material-symbols-outlined">layers</span></div>
+              <img
+                v-if="item.image?.url"
+                :src="item.image.url"
+                :alt="item.name"
+              />
+              <div v-else class="thumb-placeholder">
+                <span class="material-symbols-outlined">layers</span>
+              </div>
             </div>
-            <span class="item-name">{{ item.name || '—' }}</span>
-            <el-button class="btn-hover-action" type="primary" @click.stop="goToEditor(item)">
+            <span class="item-name">{{ item.name || "—" }}</span>
+            <el-button
+              class="btn-hover-action"
+              type="primary"
+              @click.stop="goToEditor(item)"
+            >
               进入编辑器
             </el-button>
           </div>
-          <div class="col-author">{{ item.author?.nickname || item.author?.username || '—' }}</div>
+          <div class="col-author">
+            {{ item.author?.nickname || item.author?.username || "—" }}
+          </div>
           <div class="col-date">{{ formatItemDate(item.created_at) }}</div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <span class="material-symbols-outlined actions-icon">more_horiz</span>
+              <span class="material-symbols-outlined actions-icon"
+                >more_horiz</span
+              >
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="openDetail(item)">查看详情</el-dropdown-item>
-                  <el-dropdown-item @click="goToEditor(item)">进入编辑器</el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)">重命名</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item)">删除</el-dropdown-item>
+                  <el-dropdown-item @click="openDetail(item)"
+                    >查看详情</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="goToEditor(item)"
+                    >进入编辑器</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="namedWindow(item)"
+                    >重命名</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="deletedWindow(item)"
+                    >删除</el-dropdown-item
+                  >
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -64,27 +118,60 @@
         </template>
       </ViewContainer>
 
-      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange" />
+      <PagePagination
+        :current-page="pagination.current"
+        :total-pages="totalPages"
+        @page-change="handlePageChange"
+      ></PagePagination>
 
       <!-- Create Dialog -->
-      <create ref="createdDialog" :dialog-title="$t('verse.page.dialogTitle')"
-        :dialog-submit="$t('verse.page.dialogSubmit')" @submit="submitCreate"></create>
+      <create
+        ref="createdDialog"
+        :dialog-title="$t('verse.page.dialogTitle')"
+        :dialog-submit="$t('verse.page.dialogSubmit')"
+        @submit="submitCreate"
+      ></create>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="detailVisible" title="场景详情" :name="currentVerse?.name || ''" :loading="detailLoading"
-        :properties="detailProperties" placeholder-icon="landscape" width="560px" :show-delete="true"
-        action-layout="grid" :secondary-action="true" secondary-action-text="进入编辑器" download-text="导出场景"
-        download-icon="download" delete-text="删除场景" @download="handleExport" @rename="handleRename"
-        @delete="handleDelete" @secondary="handleGoToEditor" @close="handlePanelClose">
+      <DetailPanel
+        v-model="detailVisible"
+        title="场景详情"
+        :name="currentVerse?.name || ''"
+        :loading="detailLoading"
+        :properties="detailProperties"
+        placeholder-icon="landscape"
+        width="560px"
+        :show-delete="true"
+        action-layout="grid"
+        :secondary-action="true"
+        secondary-action-text="进入编辑器"
+        download-text="导出场景"
+        download-icon="download"
+        delete-text="删除场景"
+        @download="handleExport"
+        @rename="handleRename"
+        @delete="handleDelete"
+        @secondary="handleGoToEditor"
+        @close="handlePanelClose"
+      >
         <template #preview>
           <div class="verse-preview" @click="triggerFileSelect">
-            <img v-if="currentVerse?.image?.url" :src="currentVerse.image.url" :alt="currentVerse.name" />
+            <img
+              v-if="currentVerse?.image?.url"
+              :src="currentVerse.image.url"
+              :alt="currentVerse.name"
+            />
             <div v-else class="preview-placeholder">
               <span class="material-symbols-outlined">landscape</span>
             </div>
 
-            <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/jpg" class="hidden-input"
-              @change="handleCoverUpload" />
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/png,image/jpeg,image/jpg"
+              class="hidden-input"
+              @change="handleCoverUpload"
+            />
           </div>
         </template>
         <template #info>
@@ -92,24 +179,44 @@
             <!-- DescriptionSection -->
             <div class="info-section">
               <div class="section-header">场景简介</div>
-              <el-input v-model="editingDescription" type="textarea" :rows="4" placeholder="请输入场景简介（可选）"
-                @blur="handleDescriptionBlur" />
+              <el-input
+                v-model="editingDescription"
+                type="textarea"
+                :rows="4"
+                placeholder="请输入场景简介（可选）"
+                @blur="handleDescriptionBlur"
+              ></el-input>
             </div>
 
             <!-- Tags Section (Restricted) -->
             <div v-if="canManage" class="info-section">
               <div class="section-header">场景标签</div>
               <div v-if="currentVerse?.verseTags?.length" class="tag-list">
-                <el-tag v-for="tag in currentVerse.verseTags" :key="tag.id" closable class="mr-2 mb-2"
-                  @close="handleRemoveTag(tag.id)">
+                <el-tag
+                  v-for="tag in currentVerse.verseTags"
+                  :key="tag.id"
+                  closable
+                  class="mr-2 mb-2"
+                  @close="handleRemoveTag(tag.id)"
+                >
                   {{ tag.name }}
                 </el-tag>
               </div>
               <div v-else class="empty-tags">暂无标签</div>
-              <el-select v-model="selectedTag" placeholder="添加标签..." filterable class="tag-select"
-                @change="handleAddTag">
-                <el-option v-for="tag in allTags" :key="tag.value" :label="tag.label" :value="tag.value"
-                  :disabled="isTagSelected(tag.value)" />
+              <el-select
+                v-model="selectedTag"
+                placeholder="添加标签..."
+                filterable
+                class="tag-select"
+                @change="handleAddTag"
+              >
+                <el-option
+                  v-for="tag in allTags"
+                  :key="tag.value"
+                  :label="tag.label"
+                  :value="tag.value"
+                  :disabled="isTagSelected(tag.value)"
+                ></el-option>
               </el-select>
             </div>
 
@@ -117,12 +224,19 @@
             <div v-if="canManage" class="info-section">
               <div class="section-header">可见性</div>
               <div class="visibility-group">
-                <button class="vis-btn" :class="{ active: !currentVerse?.public }"
-                  @click="handleVisibilityChange(false)">
+                <button
+                  class="vis-btn"
+                  :class="{ active: !currentVerse?.public }"
+                  @click="handleVisibilityChange(false)"
+                >
                   <span class="material-symbols-outlined">lock</span>
                   私有
                 </button>
-                <button class="vis-btn" :class="{ active: currentVerse?.public }" @click="handleVisibilityChange(true)">
+                <button
+                  class="vis-btn"
+                  :class="{ active: currentVerse?.public }"
+                  @click="handleVisibilityChange(true)"
+                >
                   <span class="material-symbols-outlined">public</span>
                   公开
                 </button>
@@ -135,42 +249,57 @@
   </TransitionWrapper>
 
   <!-- Selection Method Dialog -->
-  <el-dialog v-model="imageSelectDialogVisible" :title="$t('meta.metaEdit.selectImageMethod')" width="500px"
-    align-center :close-on-click-modal="false" append-to-body>
+  <el-dialog
+    v-model="imageSelectDialogVisible"
+    :title="$t('meta.metaEdit.selectImageMethod')"
+    width="500px"
+    align-center
+    :close-on-click-modal="false"
+    append-to-body
+  >
     <div class="selection-container">
       <div class="selection-card" @click="openResourceDialog">
         <div class="card-icon">
           <el-icon :size="32">
-            <FolderOpened />
+            <FolderOpened></FolderOpened>
           </el-icon>
         </div>
         <div class="card-title">
           {{ $t("meta.metaEdit.selectFromResource") }}
         </div>
         <div class="card-description">
-          {{ $t("imageSelector.selectFromResourceDesc") || '从我的资源库中选择' }}
+          {{
+            $t("imageSelector.selectFromResourceDesc") || "从我的资源库中选择"
+          }}
         </div>
       </div>
 
       <div class="selection-card" @click="openLocalUpload">
         <div class="card-icon">
           <el-icon :size="32">
-            <Upload />
+            <Upload></Upload>
           </el-icon>
         </div>
         <div class="card-title">{{ $t("meta.metaEdit.uploadLocal") }}</div>
         <div class="card-description">
-          {{ $t("imageSelector.uploadLocalDesc") || '上传本地图片文件' }}
+          {{ $t("imageSelector.uploadLocalDesc") || "上传本地图片文件" }}
         </div>
       </div>
     </div>
   </el-dialog>
 
   <!-- Resource Dialog -->
-  <ResourceDialog :multiple="false" @selected="onResourceSelected" ref="resourceDialogRef" />
+  <ResourceDialog
+    :multiple="false"
+    @selected="onResourceSelected"
+    ref="resourceDialogRef"
+  ></ResourceDialog>
 
   <!-- Import Dialog -->
-  <ImportDialog v-model="importDialogVisible" @success="handleImportSuccess" />
+  <ImportDialog
+    v-model="importDialogVisible"
+    @success="handleImportSuccess"
+  ></ImportDialog>
 </template>
 
 <script setup lang="ts">
@@ -179,14 +308,30 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { Message, MessageBox } from "@/components/Dialog";
 import { v4 as uuidv4 } from "uuid";
-import { PageActionBar, ViewContainer, PagePagination, StandardCard, DetailPanel } from "@/components/StandardPage";
+import {
+  PageActionBar,
+  ViewContainer,
+  PagePagination,
+  StandardCard,
+  DetailPanel,
+} from "@/components/StandardPage";
 import TagsSelect from "@/components/TagsSelect.vue";
 import Create from "@/components/MrPP/MrPPVerse/MrPPVerseWindowCreate.vue";
 import ImportDialog from "@/components/ScenePackage/ImportDialog.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import { FolderOpened, Upload } from "@element-plus/icons-vue";
-import { getVerses, getVerse, postVerse, putVerse, deleteVerse, addPublic, removePublic, addTag, removeTag } from "@/api/v1/verse";
+import {
+  getVerses,
+  getVerse,
+  postVerse,
+  putVerse,
+  deleteVerse,
+  addPublic,
+  removePublic,
+  addTag,
+  removeTag,
+} from "@/api/v1/verse";
 import { exportScene } from "@/services/scene-package/export-service";
 import { getPicture } from "@/api/v1/resources/index";
 import { useFileStore } from "@/store/modules/config";
@@ -203,16 +348,26 @@ const router = useRouter();
 const createdDialog = ref<InstanceType<typeof Create> | null>(null);
 
 const {
-  items, loading, pagination, viewMode, totalPages,
-  refresh, handleSearch, handleSortChange, handlePageChange, handleViewChange, handleTagsChange,
+  items,
+  loading,
+  pagination,
+  viewMode,
+  totalPages,
+  refresh,
+  handleSearch,
+  handleSortChange,
+  handlePageChange,
+  handleViewChange,
+  handleTagsChange,
 } = usePageData({
-  fetchFn: async (params) => await getVerses({
-    sort: params.sort,
-    search: params.search,
-    page: params.page,
-    tags: params.tags,
-    expand: "image,author",
-  }),
+  fetchFn: async (params) =>
+    await getVerses({
+      sort: params.sort,
+      search: params.search,
+      page: params.page,
+      tags: params.tags,
+      expand: "image,author",
+    }),
 });
 
 const detailVisible = ref(false);
@@ -221,7 +376,11 @@ const currentVerse = ref<any | null>(null);
 const ability = useAbility();
 
 const canManage = computed(() => {
-  return ability.can("manager", "all") || ability.can("admin", "all") || ability.can("root", "all");
+  return (
+    ability.can("manager", "all") ||
+    ability.can("admin", "all") ||
+    ability.can("root", "all")
+  );
 });
 
 const editingDescription = ref("");
@@ -248,9 +407,20 @@ const handleImportSuccess = (verseId: number) => {
 const detailProperties = computed(() => {
   if (!currentVerse.value) return [];
   return [
-    { label: '类型', value: '场景' },
-    { label: '作者', value: currentVerse.value.author?.nickname || currentVerse.value.author?.username || '—' },
-    { label: '创建时间', value: currentVerse.value.created_at ? convertToLocalTime(currentVerse.value.created_at) : '—' },
+    { label: "类型", value: "场景" },
+    {
+      label: "作者",
+      value:
+        currentVerse.value.author?.nickname ||
+        currentVerse.value.author?.username ||
+        "—",
+    },
+    {
+      label: "创建时间",
+      value: currentVerse.value.created_at
+        ? convertToLocalTime(currentVerse.value.created_at)
+        : "—",
+    },
   ];
 });
 
@@ -283,7 +453,7 @@ const onResourceSelected = async (data: any) => {
 
       // Ensure we have the correct ID. 'data.id' is likely the Resource ID.
       let finalImageId = imageId;
-      if (data.type === 'picture') {
+      if (data.type === "picture") {
         const response = await getPicture(data.id);
         finalImageId = response.data.image_id || response.data.file?.id;
       }
@@ -329,14 +499,17 @@ const handleCoverUpload = async (event: Event) => {
     // 3. Upload if needed
     if (!has) {
       await new Promise<void>((resolve, reject) => {
-        fileStore.store.fileUpload(
-          md5,
-          extension,
-          file,
-          (p: number) => { }, // progress
-          handler,
-          dir
-        ).then(() => resolve()).catch(reject);
+        fileStore.store
+          .fileUpload(
+            md5,
+            extension,
+            file,
+            (p: number) => {}, // progress
+            handler,
+            dir
+          )
+          .then(() => resolve())
+          .catch(reject);
       });
     }
 
@@ -391,10 +564,16 @@ const openDetail = async (item: VerseData) => {
 };
 
 const handleDescriptionBlur = async () => {
-  if (!currentVerse.value || editingDescription.value === (currentVerse.value.description || '')) return;
+  if (
+    !currentVerse.value ||
+    editingDescription.value === (currentVerse.value.description || "")
+  )
+    return;
 
   try {
-    await putVerse(currentVerse.value.id, { description: editingDescription.value });
+    await putVerse(currentVerse.value.id, {
+      description: editingDescription.value,
+    });
     currentVerse.value.description = editingDescription.value;
     Message.success("简介已更新");
     refresh();
@@ -412,7 +591,7 @@ const handleAddTag = async (tagId: number | undefined) => {
   if (tagId === undefined || !currentVerse.value) return;
   try {
     await addTag(currentVerse.value.id, tagId);
-    const tag = allTags.value.find(t => t.value === tagId);
+    const tag = allTags.value.find((t) => t.value === tagId);
     if (tag) {
       if (!currentVerse.value.verseTags) currentVerse.value.verseTags = [];
       currentVerse.value.verseTags.push({ id: tag.value, name: tag.label });
@@ -429,7 +608,9 @@ const handleRemoveTag = async (tagId: number) => {
   if (!currentVerse.value) return;
   try {
     await removeTag(currentVerse.value.id, tagId);
-    currentVerse.value.verseTags = currentVerse.value.verseTags.filter((t: any) => t.id !== tagId);
+    currentVerse.value.verseTags = currentVerse.value.verseTags.filter(
+      (t: any) => t.id !== tagId
+    );
     Message.success("标签已移除");
     refresh();
   } catch (err) {
@@ -447,7 +628,7 @@ const handleVisibilityChange = async (isPublic: boolean) => {
       await removePublic(currentVerse.value.id);
     }
     currentVerse.value.public = isPublic;
-    Message.success(`场景已设为${isPublic ? '公开' : '私有'}`);
+    Message.success(`场景已设为${isPublic ? "公开" : "私有"}`);
     refresh();
   } catch (err) {
     Message.error("更新可见性失败");
@@ -459,7 +640,7 @@ const handlePanelClose = () => {
 };
 
 const goToEditor = (item: VerseData) => {
-  const title = encodeURIComponent(`场景【${item.name || '未命名'}】`);
+  const title = encodeURIComponent(`场景【${item.name || "未命名"}】`);
   router.push({ path: "/verse/scene", query: { id: item.id, title } });
 };
 
@@ -472,10 +653,11 @@ const handleGoToEditor = () => {
 const handleCopy = async () => {
   if (!currentVerse.value) return;
   try {
-    const { value } = (await MessageBox.prompt(
-      "请输入新场景名称", "复制场景",
-      { confirmButtonText: "确定", cancelButtonText: "取消", defaultValue: currentVerse.value.name + " - Copy" }
-    )) as { value: string };
+    const { value } = (await MessageBox.prompt("请输入新场景名称", "复制场景", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      defaultValue: currentVerse.value.name + " - Copy",
+    })) as { value: string };
 
     const data: PostVerseData = {
       name: value,
@@ -486,7 +668,9 @@ const handleCopy = async () => {
     await postVerse(data);
     refresh();
     Message.success("复制成功：" + value);
-  } catch { Message.info("已取消"); }
+  } catch {
+    Message.info("已取消");
+  }
 };
 
 const handleExport = async () => {
@@ -515,26 +699,41 @@ const handleRename = async (newName: string) => {
 const handleDelete = async () => {
   if (!currentVerse.value) return;
   try {
-    await MessageBox.confirm("确定要删除此场景吗？", "删除场景",
-      { confirmButtonText: "删除", cancelButtonText: "取消", type: "warning" });
+    await MessageBox.confirm("确定要删除此场景吗？", "删除场景", {
+      confirmButtonText: "删除",
+      cancelButtonText: "取消",
+      type: "warning",
+    });
     await deleteVerse(currentVerse.value.id);
     detailVisible.value = false;
     refresh();
     Message.success("删除成功");
-  } catch { Message.info("已取消"); }
+  } catch {
+    Message.info("已取消");
+  }
 };
 
 const createWindow = () => {
   createdDialog.value?.show();
 };
 
-const submitCreate = async (form: Record<string, string>, imageId: number | null) => {
-  const data: PostVerseData = { name: form.name, description: form.description, uuid: uuidv4() };
+const submitCreate = async (
+  form: Record<string, string>,
+  imageId: number | null
+) => {
+  const data: PostVerseData = {
+    name: form.name,
+    description: form.description,
+    uuid: uuidv4(),
+  };
   if (imageId !== null) data.image_id = imageId;
   try {
     const response = await postVerse(data);
     const title = encodeURIComponent(`场景【${form.name}】`);
-    router.push({ path: "/verse/scene", query: { id: response.data.id, title } });
+    router.push({
+      path: "/verse/scene",
+      query: { id: response.data.id, title },
+    });
   } catch (error) {
     console.error(error);
   }
@@ -542,30 +741,38 @@ const submitCreate = async (form: Record<string, string>, imageId: number | null
 
 const namedWindow = async (item: VerseData) => {
   try {
-    const { value } = (await MessageBox.prompt(
-      "请输入新名称", "重命名",
-      { confirmButtonText: "确定", cancelButtonText: "取消", defaultValue: item.name }
-    )) as { value: string };
+    const { value } = (await MessageBox.prompt("请输入新名称", "重命名", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      defaultValue: item.name,
+    })) as { value: string };
     await putVerse(item.id, { name: value });
     refresh();
     Message.success("重命名成功：" + value);
-  } catch { Message.info("已取消"); }
+  } catch {
+    Message.info("已取消");
+  }
 };
 
 const deletedWindow = async (item: VerseData) => {
   try {
-    await MessageBox.confirm("确定要删除此场景吗？", "删除场景",
-      { confirmButtonText: "删除", cancelButtonText: "取消", type: "warning" });
+    await MessageBox.confirm("确定要删除此场景吗？", "删除场景", {
+      confirmButtonText: "删除",
+      cancelButtonText: "取消",
+      type: "warning",
+    });
     await deleteVerse(item.id);
     refresh();
     Message.success("删除成功");
-  } catch { Message.info("已取消"); }
+  } catch {
+    Message.info("已取消");
+  }
 };
 
 const formatItemDate = (dateStr?: string) => {
-  if (!dateStr) return '—';
+  if (!dateStr) return "—";
   const d = new Date(dateStr);
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
 };
 </script>
 

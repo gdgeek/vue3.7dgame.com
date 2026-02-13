@@ -13,20 +13,20 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    icon?: string
-    text?: string
-    actionText?: string
+    icon?: string;
+    text?: string;
+    actionText?: string;
   }>(),
   {
-    icon: 'folder_open',
-    text: '暂无数据',
-    actionText: ''
+    icon: "folder_open",
+    text: "暂无数据",
+    actionText: "",
   }
-)
+);
 
 defineEmits<{
-  (e: 'action'): void
-}>()
+  (e: "action"): void;
+}>();
 </script>
 
 <style scoped lang="scss">

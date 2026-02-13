@@ -1,21 +1,35 @@
 <template>
   <div class="mrpp-card-wrapper">
-    <el-card class="box-card" :body-style="{ padding: '0px' }" :style="cardStyle">
+    <el-card
+      class="box-card"
+      :body-style="{ padding: '0px' }"
+      :style="cardStyle"
+    >
       <template #header>
         <div class="card-header">
           <span class="mrpp-title">
             <span class="card-title" nowrap>
-              <b v-if="type" class="type-prefix" :style="typeStyle">{{ type }}:</b><span class="title-text">{{ item.name
-                || item.title }}</span>
+              <b v-if="type" class="type-prefix" :style="typeStyle"
+                >{{ type }}:</b
+              ><span class="title-text">{{ item.name || item.title }}</span>
             </span>
           </span>
-          <span v-if="color" class="color-indicator" :style="{ backgroundColor: color }"></span>
+          <span
+            v-if="color"
+            class="color-indicator"
+            :style="{ backgroundColor: color }"
+          ></span>
         </div>
       </template>
 
       <div class="image-container">
-        <Id2Image :image="item.image ? item.image.url : null" :id="item.id" :lazy="lazy">
-          444</Id2Image>
+        <Id2Image
+          :image="item.image ? item.image.url : null"
+          :id="item.id"
+          :lazy="lazy"
+        >
+          444</Id2Image
+        >
 
         <!-- 覆盖层插槽 -->
         <div class="overlay-container" v-if="$slots.overlay">
@@ -30,9 +44,20 @@
         <slot name="enter">入口</slot>
 
         <el-button-group v-if="showActions" style="float: right" :inline="true">
-          <el-button type="success" size="small" icon="Edit" @click="named"></el-button>
-          <el-button type="danger" size="small" icon="Delete" loading-icon="Eleme" :loading="deleteLoading"
-            @click="deleted"></el-button>
+          <el-button
+            type="success"
+            size="small"
+            icon="Edit"
+            @click="named"
+          ></el-button>
+          <el-button
+            type="danger"
+            size="small"
+            icon="Delete"
+            loading-icon="Eleme"
+            :loading="deleteLoading"
+            @click="deleted"
+          ></el-button>
           &nbsp;
         </el-button-group>
       </template>
@@ -49,7 +74,7 @@ const props = defineProps({
       id: number;
       name?: string;
       title?: string;
-      image?: { url: string;[key: string]: any } | null;
+      image?: { url: string; [key: string]: any } | null;
     }>,
     required: true,
   },
@@ -208,9 +233,11 @@ const deleted = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg,
-      rgba(0, 0, 0, 0.2) 0%,
-      rgba(0, 0, 0, 0.5) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.2) 0%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
   display: flex;
   justify-content: center;
   align-items: center;

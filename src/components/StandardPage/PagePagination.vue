@@ -1,7 +1,16 @@
 <template>
   <div class="page-pagination">
-    <el-button round class="page-btn" :disabled="currentPage <= 1" @click="changePage(currentPage - 1)">
-      <span class="material-symbols-outlined btn-icon" style="margin-right: 4px; font-size: 18px;">chevron_left</span>
+    <el-button
+      round
+      class="page-btn"
+      :disabled="currentPage <= 1"
+      @click="changePage(currentPage - 1)"
+    >
+      <span
+        class="material-symbols-outlined btn-icon"
+        style="margin-right: 4px; font-size: 18px"
+        >chevron_left</span
+      >
       上一页
     </el-button>
 
@@ -9,25 +18,34 @@
       第 <strong>{{ currentPage }}</strong> 页 / 共 {{ totalPages }} 页
     </span>
 
-    <el-button round class="page-btn" :disabled="currentPage >= totalPages" @click="changePage(currentPage + 1)">
+    <el-button
+      round
+      class="page-btn"
+      :disabled="currentPage >= totalPages"
+      @click="changePage(currentPage + 1)"
+    >
       下一页
-      <span class="material-symbols-outlined btn-icon" style="margin-left: 4px; font-size: 18px;">chevron_right</span>
+      <span
+        class="material-symbols-outlined btn-icon"
+        style="margin-left: 4px; font-size: 18px"
+        >chevron_right</span
+      >
     </el-button>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { PagePaginationProps } from './types'
+import type { PagePaginationProps } from "./types";
 
-const props = defineProps<PagePaginationProps>()
+const props = defineProps<PagePaginationProps>();
 const emit = defineEmits<{
-  (e: 'page-change', page: number): void
-}>()
+  (e: "page-change", page: number): void;
+}>();
 
 const changePage = (page: number) => {
-  if (page < 1 || page > props.totalPages) return
-  emit('page-change', page)
-}
+  if (page < 1 || page > props.totalPages) return;
+  emit("page-change", page);
+};
 </script>
 
 <style scoped lang="scss">

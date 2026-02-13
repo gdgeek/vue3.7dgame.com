@@ -1,101 +1,128 @@
 <template>
-  <el-dialog v-model="visible" :title="title" width="420px" append-to-body destroy-on-close class="custom-input-dialog"
-    :close-on-click-modal="false" :show-close="false">
+  <el-dialog
+    v-model="visible"
+    :title="title"
+    width="420px"
+    append-to-body
+    destroy-on-close
+    class="custom-input-dialog"
+    :close-on-click-modal="false"
+    :show-close="false"
+  >
     <div class="dialog-content">
       <p v-if="description" class="dialog-desc">{{ description }}</p>
       <div class="input-group">
         <label v-if="label" class="input-label">{{ label }}</label>
-        <input ref="inputRef" v-model="inputValue" type="text" class="custom-input"
-          :class="{ 'has-error': errorMessage }" :placeholder="placeholder" @keyup.enter="handleConfirm"
-          @input="handleInput" />
-        <span v-if="errorMessage" class="error-message">{{ errorMessage }}</span>
+        <input
+          ref="inputRef"
+          v-model="inputValue"
+          type="text"
+          class="custom-input"
+          :class="{ 'has-error': errorMessage }"
+          :placeholder="placeholder"
+          @keyup.enter="handleConfirm"
+          @input="handleInput"
+        />
+        <span v-if="errorMessage" class="error-message">{{
+          errorMessage
+        }}</span>
       </div>
       <div class="dialog-actions">
-        <button class="btn-secondary" @click="handleCancel">{{ cancelText }}</button>
-        <button class="btn-primary" @click="handleConfirm">{{ confirmText }}</button>
+        <button class="btn-secondary" @click="handleCancel">
+          {{ cancelText }}
+        </button>
+        <button class="btn-primary" @click="handleConfirm">
+          {{ confirmText }}
+        </button>
       </div>
     </div>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick } from "vue";
 
-const props = withDefaults(defineProps<{
-  modelValue: boolean
-  title?: string
-  description?: string
-  label?: string
-  placeholder?: string
-  defaultValue?: string
-  confirmText?: string
-  cancelText?: string
-  inputValidator?: (value: string) => boolean | string
-}>(), {
-  title: '提示',
-  description: '',
-  label: '',
-  placeholder: '请输入',
-  defaultValue: '',
-  confirmText: '确认',
-  cancelText: '取消',
-  inputValidator: undefined
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean;
+    title?: string;
+    description?: string;
+    label?: string;
+    placeholder?: string;
+    defaultValue?: string;
+    confirmText?: string;
+    cancelText?: string;
+    inputValidator?: (value: string) => boolean | string;
+  }>(),
+  {
+    title: "提示",
+    description: "",
+    label: "",
+    placeholder: "请输入",
+    defaultValue: "",
+    confirmText: "确认",
+    cancelText: "取消",
+    inputValidator: undefined,
+  }
+);
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-  (e: 'confirm', value: string): void
-  (e: 'cancel'): void
-}>()
+  (e: "update:modelValue", value: boolean): void;
+  (e: "confirm", value: string): void;
+  (e: "cancel"): void;
+}>();
 
-const visible = ref(props.modelValue)
-const inputValue = ref(props.defaultValue)
-const inputRef = ref<HTMLInputElement | null>(null)
-const errorMessage = ref('')
+const visible = ref(props.modelValue);
+const inputValue = ref(props.defaultValue);
+const inputRef = ref<HTMLInputElement | null>(null);
+const errorMessage = ref("");
 
-watch(() => props.modelValue, (val) => {
-  visible.value = val
-  if (val) {
-    inputValue.value = props.defaultValue
-    errorMessage.value = ''
-    nextTick(() => {
-      inputRef.value?.focus()
-      inputRef.value?.select()
-    })
+watch(
+  () => props.modelValue,
+  (val) => {
+    visible.value = val;
+    if (val) {
+      inputValue.value = props.defaultValue;
+      errorMessage.value = "";
+      nextTick(() => {
+        inputRef.value?.focus();
+        inputRef.value?.select();
+      });
+    }
   }
-})
+);
 
 watch(visible, (val) => {
-  emit('update:modelValue', val)
-})
+  emit("update:modelValue", val);
+});
 
 const handleInput = () => {
   if (errorMessage.value) {
-    validate()
+    validate();
   }
-}
+};
 
 const validate = (): boolean => {
-  if (!props.inputValidator) return true
-  const result = props.inputValidator(inputValue.value)
+  if (!props.inputValidator) return true;
+  const result = props.inputValidator(inputValue.value);
   if (result === true) {
-    errorMessage.value = ''
-    return true
+    errorMessage.value = "";
+    return true;
   }
-  errorMessage.value = typeof result === 'string' ? result : '输入无效'
-  return false
-}
+  errorMessage.value = typeof result === "string" ? result : "输入无效";
+  return false;
+};
 
 const handleConfirm = () => {
   if (validate()) {
-    emit('confirm', inputValue.value)
+    emit("confirm", inputValue.value);
   }
-}
+};
 
 const handleCancel = () => {
-  visible.value = false
-  emit('cancel')
-}
+  visible.value = false;
+  emit("cancel");
+};
 </script>
 
 <style lang="scss">
@@ -124,7 +151,8 @@ const handleCancel = () => {
   }
 }
 
-// Removed redundant .dark override</style>
+// Removed redundant .dark override
+</style>
 
 <style lang="scss" scoped>
 .dialog-content {
@@ -169,7 +197,7 @@ const handleCancel = () => {
 
   &:focus {
     outline: none;
-    border-color: var(--primary-color, #00BAFF);
+    border-color: var(--primary-color, #00baff);
     background: var(--bg-card, #ffffff);
   }
 
@@ -201,7 +229,7 @@ const handleCancel = () => {
   padding: 0 32px;
   border: none;
   border-radius: 22px;
-  background: var(--primary-color, #00BAFF);
+  background: var(--primary-color, #00baff);
   color: var(--text-inverse, white);
   font-size: 15px;
   font-weight: 500;
@@ -209,7 +237,7 @@ const handleCancel = () => {
   transition: all 0.2s ease;
 
   &:hover {
-    background: var(--primary-hover, #0099DD);
+    background: var(--primary-hover, #0099dd);
   }
 }
 
@@ -231,4 +259,5 @@ const handleCancel = () => {
   }
 }
 
-// Removed redundant .dark override</style>
+// Removed redundant .dark override
+</style>

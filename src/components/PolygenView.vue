@@ -1,26 +1,51 @@
 <template>
-  <el-card class="box-card" shadow="never" style="background: transparent; border: none;">
+  <el-card
+    class="box-card"
+    shadow="never"
+    style="background: transparent; border: none"
+  >
     <div id="three" ref="three" style="height: 400px; width: 100%"></div>
 
     <!-- Animation Controls - Visible only when animations exist -->
     <div class="animation-bar" v-if="animations && animations.length > 0">
-      <div class="animation-play-btn" :class="{ disabled: animations.length === 0 }"
-        @click="animations.length > 0 && toggleAnimation(!isAnimationPlaying)">
-        <span class="material-symbols-outlined">{{ isAnimationPlaying ? 'pause' : 'play_arrow' }}</span>
+      <div
+        class="animation-play-btn"
+        :class="{ disabled: animations.length === 0 }"
+        @click="animations.length > 0 && toggleAnimation(!isAnimationPlaying)"
+      >
+        <span class="material-symbols-outlined">{{
+          isAnimationPlaying ? "pause" : "play_arrow"
+        }}</span>
       </div>
 
       <div class="animation-select-wrapper">
         <span class="animation-label">动画</span>
-        <el-select v-model="selectedAnimationIndex" @change="playAnimation" placeholder="Static"
-          class="animation-select" size="default" :disabled="animations.length === 0">
-          <el-option v-if="animations.length === 0" :key="-1" label="Static" :value="-1"></el-option>
-          <el-option v-for="(animation, index) in animations" :key="index"
-            :label="animation.name || 'Animation ' + (index + 1)" :value="index"></el-option>
+        <el-select
+          v-model="selectedAnimationIndex"
+          @change="playAnimation"
+          placeholder="Static"
+          class="animation-select"
+          size="default"
+          :disabled="animations.length === 0"
+        >
+          <el-option
+            v-if="animations.length === 0"
+            :key="-1"
+            label="Static"
+            :value="-1"
+          ></el-option>
+          <el-option
+            v-for="(animation, index) in animations"
+            :key="index"
+            :label="animation.name || 'Animation ' + (index + 1)"
+            :value="index"
+          ></el-option>
         </el-select>
       </div>
 
       <div class="animation-time">
-        {{ formatTime(currentAnimationTime) }} / {{ formatTime(totalAnimationDuration) }}
+        {{ formatTime(currentAnimationTime) }} /
+        {{ formatTime(totalAnimationDuration) }}
       </div>
     </div>
   </el-card>
@@ -83,19 +108,23 @@ let currentAction: THREE.AnimationAction | null = null; // 当前播放的动画
 const isDark = useDark();
 
 // 监听主题变化，调整 3D 场景氛围
-watch(isDark, (dark) => {
-  if (scene) {
-    // 可以在这里调整背景色或灯光强度，实现更好的风格适配
-    scene.traverse((child) => {
-      if (child instanceof THREE.AmbientLight) {
-        child.intensity = dark ? 0.6 : 0.8;
-      }
-      if (child instanceof THREE.DirectionalLight) {
-        child.intensity = dark ? 1.5 : 2.0;
-      }
-    });
-  }
-}, { immediate: true });
+watch(
+  isDark,
+  (dark) => {
+    if (scene) {
+      // 可以在这里调整背景色或灯光强度，实现更好的风格适配
+      scene.traverse((child) => {
+        if (child instanceof THREE.AmbientLight) {
+          child.intensity = dark ? 0.6 : 0.8;
+        }
+        if (child instanceof THREE.DirectionalLight) {
+          child.intensity = dark ? 1.5 : 2.0;
+        }
+      });
+    }
+  },
+  { immediate: true }
+);
 
 // 格式化时间为 MM:SS 格式
 const formatTime = (seconds: number) => {

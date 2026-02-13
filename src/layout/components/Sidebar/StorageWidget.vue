@@ -5,14 +5,17 @@
       <span class="storage-percent">{{ usagePercent }}%</span>
     </div>
     <div class="storage-bar">
-      <div class="storage-bar-fill" :style="{ width: `${usagePercent}%` }"></div>
+      <div
+        class="storage-bar-fill"
+        :style="{ width: `${usagePercent}%` }"
+      ></div>
     </div>
     <p class="storage-text">已用 {{ usedFormatted }} / {{ totalFormatted }}</p>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref } from "vue";
 
 // In a real app, these would come from an API/store
 const usedBytes = ref(7.5 * 1024 * 1024 * 1024); // 7.5GB

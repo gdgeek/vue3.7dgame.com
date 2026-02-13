@@ -1,79 +1,99 @@
 <template>
-  <el-dialog v-model="visible" :title="title" width="420px" append-to-body destroy-on-close
-    class="custom-confirm-dialog" :close-on-click-modal="false" :show-close="false">
+  <el-dialog
+    v-model="visible"
+    :title="title"
+    width="420px"
+    append-to-body
+    destroy-on-close
+    class="custom-confirm-dialog"
+    :close-on-click-modal="false"
+    :show-close="false"
+  >
     <div class="dialog-content">
       <div class="confirm-box" :class="type">
-        <span class="material-symbols-outlined confirm-icon">{{ iconName }}</span>
+        <span class="material-symbols-outlined confirm-icon">{{
+          iconName
+        }}</span>
         <div class="confirm-text">
           <p class="confirm-title">{{ message }}</p>
           <p v-if="description" class="confirm-desc">{{ description }}</p>
         </div>
       </div>
       <div class="dialog-actions">
-        <button class="btn-secondary" @click="handleCancel">{{ cancelText }}</button>
-        <button :class="confirmBtnClass" @click="handleConfirm">{{ confirmText }}</button>
+        <button class="btn-secondary" @click="handleCancel">
+          {{ cancelText }}
+        </button>
+        <button :class="confirmBtnClass" @click="handleConfirm">
+          {{ confirmText }}
+        </button>
       </div>
     </div>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed } from "vue";
 
-const props = withDefaults(defineProps<{
-  modelValue: boolean
-  title?: string
-  message: string
-  description?: string
-  type?: 'warning' | 'danger' | 'info' | 'success'
-  confirmText?: string
-  cancelText?: string
-}>(), {
-  title: '确认',
-  description: '',
-  type: 'warning',
-  confirmText: '确认',
-  cancelText: '取消'
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean;
+    title?: string;
+    message: string;
+    description?: string;
+    type?: "warning" | "danger" | "info" | "success";
+    confirmText?: string;
+    cancelText?: string;
+  }>(),
+  {
+    title: "确认",
+    description: "",
+    type: "warning",
+    confirmText: "确认",
+    cancelText: "取消",
+  }
+);
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-  (e: 'confirm'): void
-  (e: 'cancel'): void
-}>()
+  (e: "update:modelValue", value: boolean): void;
+  (e: "confirm"): void;
+  (e: "cancel"): void;
+}>();
 
-const visible = ref(props.modelValue)
+const visible = ref(props.modelValue);
 
-watch(() => props.modelValue, (val) => {
-  visible.value = val
-})
+watch(
+  () => props.modelValue,
+  (val) => {
+    visible.value = val;
+  }
+);
 
 watch(visible, (val) => {
-  emit('update:modelValue', val)
-})
+  emit("update:modelValue", val);
+});
 
 const iconName = computed(() => {
   const icons: Record<string, string> = {
-    warning: 'warning',
-    danger: 'error',
-    info: 'info',
-    success: 'check_circle'
-  }
-  return icons[props.type] || 'warning'
-})
+    warning: "warning",
+    danger: "error",
+    info: "info",
+    success: "check_circle",
+  };
+  return icons[props.type] || "warning";
+});
 
 const confirmBtnClass = computed(() => {
-  return props.type === 'danger' ? 'btn-danger' : 'btn-primary'
-})
+  return props.type === "danger" ? "btn-danger" : "btn-primary";
+});
 
 const handleConfirm = () => {
-  emit('confirm')
-}
+  emit("confirm");
+};
 
 const handleCancel = () => {
-  visible.value = false
-  emit('cancel')
-}
+  visible.value = false;
+  emit("cancel");
+};
 </script>
 
 <style lang="scss">
@@ -102,7 +122,8 @@ const handleCancel = () => {
   }
 }
 
-// Removed redundant .dark override</style>
+// Removed redundant .dark override
+</style>
 
 <style lang="scss" scoped>
 .dialog-content {
@@ -138,7 +159,7 @@ const handleCancel = () => {
     background: var(--primary-light, rgba(0, 186, 255, 0.08));
 
     .confirm-icon {
-      color: var(--primary-color, #00BAFF);
+      color: var(--primary-color, #00baff);
     }
   }
 
@@ -185,7 +206,7 @@ const handleCancel = () => {
   padding: 0 32px;
   border: none;
   border-radius: 22px;
-  background: var(--primary-color, #00BAFF);
+  background: var(--primary-color, #00baff);
   color: var(--text-inverse, white);
   font-size: 15px;
   font-weight: 500;
@@ -193,7 +214,7 @@ const handleCancel = () => {
   transition: all 0.2s ease;
 
   &:hover {
-    background: var(--primary-hover, #0099DD);
+    background: var(--primary-hover, #0099dd);
   }
 }
 
@@ -232,4 +253,5 @@ const handleCancel = () => {
   }
 }
 
-// Removed redundant .dark override</style>
+// Removed redundant .dark override
+</style>

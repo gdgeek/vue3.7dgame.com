@@ -4,8 +4,12 @@
       <template #header>
         <h2 class="document-title" :innerHTML="sanitizedTitle"></h2>
         <div v-if="category" class="document-tags">
-          <router-link v-for="(item, index) in data._embedded['wp:term'][0]" :key="index"
-            :to="`${categoryPath}?id=${item.id}`" class="document-tag-link">
+          <router-link
+            v-for="(item, index) in data._embedded['wp:term'][0]"
+            :key="index"
+            :to="`${categoryPath}?id=${item.id}`"
+            class="document-tag-link"
+          >
             <span class="document-tag">{{ item.name }}</span>
           </router-link>
         </div>

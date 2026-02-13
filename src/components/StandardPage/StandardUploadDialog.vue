@@ -1,8 +1,22 @@
 <template>
-  <el-dialog v-model="dialogVisible" :title="title" width="600px" class="standard-upload-dialog" destroy-on-close
-    append-to-body :close-on-click-modal="false" @closed="handleDialogClose">
-    <div class="upload-area" :class="{ 'is-dragover': isDragOver, 'is-disabled': isDisabled }"
-      @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave" @drop.prevent="onDrop" @click="triggerFileSelect">
+  <el-dialog
+    v-model="dialogVisible"
+    :title="title"
+    width="600px"
+    class="standard-upload-dialog"
+    destroy-on-close
+    append-to-body
+    :close-on-click-modal="false"
+    @closed="handleDialogClose"
+  >
+    <div
+      class="upload-area"
+      :class="{ 'is-dragover': isDragOver, 'is-disabled': isDisabled }"
+      @dragover.prevent="onDragOver"
+      @dragleave.prevent="onDragLeave"
+      @drop.prevent="onDrop"
+      @click="triggerFileSelect"
+    >
       <div class="upload-content">
         <div class="cloud-icon">
           <span class="material-symbols-outlined">cloud_upload</span>
@@ -11,7 +25,12 @@
           <h3>拖拽文件到此处，或点击浏览</h3>
           <p>支持多个文件同时上传</p>
         </div>
-        <el-button type="primary" class="browse-btn" :loading="isDisabled" @click.stop="triggerFileSelect">
+        <el-button
+          type="primary"
+          class="browse-btn"
+          :loading="isDisabled"
+          @click.stop="triggerFileSelect"
+        >
           浏览文件
         </el-button>
       </div>
@@ -19,7 +38,11 @@
       <!-- Upload Progress Overlay -->
       <div v-if="isDisabled" class="upload-progress-overlay" @click.stop>
         <div class="progress-content">
-          <el-progress type="circle" :percentage="unifiedProgress" :status="uploadStatus" />
+          <el-progress
+            type="circle"
+            :percentage="unifiedProgress"
+            :status="uploadStatus"
+          ></el-progress>
           <p class="progress-text">{{ currentStageText }}</p>
           <p class="file-count" v-if="totalFilesCount > 1">
             {{ uploadedCount }} / {{ totalFilesCount }}
@@ -143,7 +166,7 @@ const onDrop = (e: DragEvent) => {
   const files = Array.from(e.dataTransfer?.files || []);
   if (files.length > 0) {
     // Filter by type if possible (simple check)
-    // Note: Proper type checking is complex with drag-drop, 
+    // Note: Proper type checking is complex with drag-drop,
     // we'll rely on processFiles to validate.
     processFiles(files);
   }
@@ -152,7 +175,10 @@ const onDrop = (e: DragEvent) => {
 const triggerFileSelect = async () => {
   if (isDisabled.value) return;
   try {
-    const files = await fileStore.store.fileOpen(props.fileType, props.multiple);
+    const files = await fileStore.store.fileOpen(
+      props.fileType,
+      props.multiple
+    );
     if (files.length > 0) {
       processFiles(files);
     }
@@ -165,11 +191,13 @@ const processFiles = async (files: File[]) => {
   // 1. Validate Size
   if (props.maxSize > 0) {
     const maxBytes = props.maxSize * 1024 * 1024;
-    const oversized = files.filter(f => f.size > maxBytes);
+    const oversized = files.filter((f) => f.size > maxBytes);
     if (oversized.length > 0) {
-      const names = oversized.map(f => f.name).join(", ");
-      Message.error(`${t("upload.fileTooLarge", { size: props.maxSize })}: ${names}`);
-      files = files.filter(f => f.size <= maxBytes);
+      const names = oversized.map((f) => f.name).join(", ");
+      Message.error(
+        `${t("upload.fileTooLarge", { size: props.maxSize })}: ${names}`
+      );
+      files = files.filter((f) => f.size <= maxBytes);
     }
   }
 
@@ -206,7 +234,12 @@ const uploadSingleFile = async (file: File) => {
     if (nameExt) extension = nameExt;
 
     // Check if exists
-    const has = await fileStore.store.fileHas(md5, extension, handler, props.dir);
+    const has = await fileStore.store.fileHas(
+      md5,
+      extension,
+      handler,
+      props.dir
+    );
 
     // Stage 2: Upload
     currentStage.value = 2;
@@ -251,7 +284,10 @@ const uploadSingleFile = async (file: File) => {
       }
     }
     // Polygen (Model)
-    else if (props.dir === "polygen" && (file.name.toLowerCase().endsWith(".glb"))) {
+    else if (
+      props.dir === "polygen" &&
+      file.name.toLowerCase().endsWith(".glb")
+    ) {
       try {
         const processed = await processModel(file);
         info = processed.info;
@@ -260,10 +296,22 @@ const uploadSingleFile = async (file: File) => {
         const imageFile = processed.image;
         const imageMd5 = await fileStore.store.fileMD5(imageFile);
         const imageExtension = ".jpg";
-        const imageHas = await fileStore.store.fileHas(imageMd5, imageExtension, handler, "screenshot/polygen");
+        const imageHas = await fileStore.store.fileHas(
+          imageMd5,
+          imageExtension,
+          handler,
+          "screenshot/polygen"
+        );
 
         if (!imageHas) {
-          await fileStore.store.fileUpload(imageMd5, imageExtension, imageFile, () => { }, handler, "screenshot/polygen");
+          await fileStore.store.fileUpload(
+            imageMd5,
+            imageExtension,
+            imageFile,
+            () => {},
+            handler,
+            "screenshot/polygen"
+          );
         }
 
         // Register Screenshot File
@@ -271,7 +319,12 @@ const uploadSingleFile = async (file: File) => {
           filename: imageFile.name,
           md5: imageMd5,
           key: imageMd5 + imageExtension,
-          url: fileStore.store.fileUrl(imageMd5, imageExtension, handler, "screenshot/polygen"),
+          url: fileStore.store.fileUrl(
+            imageMd5,
+            imageExtension,
+            handler,
+            "screenshot/polygen"
+          ),
         };
         const imageResponse = await postFile(imageData);
         image_id = imageResponse.data.id;
@@ -287,7 +340,6 @@ const uploadSingleFile = async (file: File) => {
     await saveFileRecord(md5, extension, file, handler, info, image_id);
 
     stageProgress.value[2] = 100;
-
   } catch (err) {
     console.error(`Error uploading ${file.name}`, err);
     Message.error(`Upload failed: ${file.name}`);
@@ -358,7 +410,9 @@ const getImageSize = (file: File): Promise<{ x: number; y: number }> => {
   });
 };
 
-const getVideoInfo = (file: File): Promise<{ size: { x: number; y: number }; length: number }> => {
+const getVideoInfo = (
+  file: File
+): Promise<{ size: { x: number; y: number }; length: number }> => {
   return new Promise((resolve) => {
     const video = document.createElement("video");
     video.preload = "metadata";
@@ -444,7 +498,10 @@ const handleDialogClose = () => {
 .cloud-icon {
   width: 80px;
   height: 80px;
-  background-color: var(--info-light, #e0f2fe); // Ensure info-light is defined or fallback
+  background-color: var(
+    --info-light,
+    #e0f2fe
+  ); // Ensure info-light is defined or fallback
   border-radius: 50%;
   display: flex;
   align-items: center;

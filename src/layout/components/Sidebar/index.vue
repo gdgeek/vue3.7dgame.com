@@ -2,7 +2,10 @@
   <div :class="{ 'has-logo': sidebarLogo }">
     <!--混合布局-->
     <div class="flex w-full" v-if="layout == LayoutEnum.MIX">
-      <SidebarLogo v-if="sidebarLogo" :collapse="!appStore.sidebar.opened"></SidebarLogo>
+      <SidebarLogo
+        v-if="sidebarLogo"
+        :collapse="!appStore.sidebar.opened"
+      ></SidebarLogo>
       <SidebarMixTopMenu class="flex-1"></SidebarMixTopMenu>
       <NavbarRight></NavbarRight>
     </div>
@@ -12,7 +15,10 @@
     </template>
     <!-- 顶部布局 -->
     <template v-else>
-      <SidebarLogo v-if="sidebarLogo" :collapse="!appStore.sidebar.opened"></SidebarLogo>
+      <SidebarLogo
+        v-if="sidebarLogo"
+        :collapse="!appStore.sidebar.opened"
+      ></SidebarLogo>
       <el-scrollbar>
         <SidebarMenu :menu-list="routes" base-path=""></SidebarMenu>
       </el-scrollbar>

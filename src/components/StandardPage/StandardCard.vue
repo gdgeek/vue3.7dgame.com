@@ -1,16 +1,28 @@
 <template>
-  <div class="standard-card" :class="{ 'is-selected': isSelected, 'selection-mode': selectionMode }"
-    @mouseenter="isHovered = true" @mouseleave="isHovered = false">
+  <div
+    class="standard-card"
+    :class="{ 'is-selected': isSelected, 'selection-mode': selectionMode }"
+    @mouseenter="isHovered = true"
+    @mouseleave="isHovered = false"
+  >
     <!-- Selection Checkbox -->
-    <div v-if="showCheckbox" class="card-checkbox" :class="{ visible: selectionMode || isHovered || isSelected }"
-      @click.stop="toggleSelect">
+    <div
+      v-if="showCheckbox"
+      class="card-checkbox"
+      :class="{ visible: selectionMode || isHovered || isSelected }"
+      @click.stop="toggleSelect"
+    >
       <div class="checkbox-inner" :class="{ checked: isSelected }">
         <span v-if="isSelected" class="material-symbols-outlined">check</span>
       </div>
     </div>
 
     <!-- Type Icon -->
-    <div v-if="typeIcon" class="card-type-icon" :class="{ 'with-checkbox': selectionMode || isHovered || isSelected }">
+    <div
+      v-if="typeIcon"
+      class="card-type-icon"
+      :class="{ 'with-checkbox': selectionMode || isHovered || isSelected }"
+    >
       <span class="material-symbols-outlined">{{ typeIcon }}</span>
     </div>
 
@@ -36,7 +48,9 @@
         <span v-for="tag in displayTags" :key="tag" class="tag-badge">
           {{ tag }}
         </span>
-        <span v-if="tags.length > 2" class="tag-more">+{{ tags.length - 2 }}</span>
+        <span v-if="tags.length > 2" class="tag-more"
+          >+{{ tags.length - 2 }}</span
+        >
       </div>
     </div>
 
@@ -58,61 +72,63 @@
 
     <!-- Action Footer -->
     <div v-if="actionText" class="card-action" @click.stop="$emit('action')">
-      <span class="material-symbols-outlined action-icon">{{ actionIcon }}</span>
+      <span class="material-symbols-outlined action-icon">{{
+        actionIcon
+      }}</span>
       <span class="action-text">{{ actionText }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed } from "vue";
 
 interface CardMeta {
-  author?: string
-  date?: string
+  author?: string;
+  date?: string;
 }
 
 const props = withDefaults(
   defineProps<{
-    image?: string
-    title: string
-    description?: string
-    tags?: string[]
-    meta?: CardMeta
-    actionText?: string
-    actionIcon?: string
-    placeholderIcon?: string
-    selected?: boolean
-    selectionMode?: boolean
-    typeIcon?: string
-    showCheckbox?: boolean
-    aspectRatio?: string
+    image?: string;
+    title: string;
+    description?: string;
+    tags?: string[];
+    meta?: CardMeta;
+    actionText?: string;
+    actionIcon?: string;
+    placeholderIcon?: string;
+    selected?: boolean;
+    selectionMode?: boolean;
+    typeIcon?: string;
+    showCheckbox?: boolean;
+    aspectRatio?: string;
   }>(),
   {
-    actionIcon: 'edit',
-    placeholderIcon: 'image',
+    actionIcon: "edit",
+    placeholderIcon: "image",
     selected: false,
     selectionMode: false,
-    typeIcon: '',
+    typeIcon: "",
     showCheckbox: true,
-    aspectRatio: '1 / 1'
+    aspectRatio: "1 / 1",
   }
-)
+);
 
 const emit = defineEmits<{
-  (e: 'view'): void
-  (e: 'action'): void
-  (e: 'select', selected: boolean): void
-}>()
+  (e: "view"): void;
+  (e: "action"): void;
+  (e: "select", selected: boolean): void;
+}>();
 
-const isHovered = ref(false)
-const isSelected = computed(() => props.selected)
+const isHovered = ref(false);
+const isSelected = computed(() => props.selected);
 
-const displayTags = computed(() => props.tags?.slice(0, 2) || [])
+const displayTags = computed(() => props.tags?.slice(0, 2) || []);
 
 const toggleSelect = () => {
-  emit('select', !isSelected.value)
-}
+  emit("select", !isSelected.value);
+};
 </script>
 
 <style scoped lang="scss">
@@ -241,7 +257,11 @@ const toggleSelect = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--bg-secondary, #f1f5f9) 0%, var(--bg-tertiary, #e2e8f0) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--bg-secondary, #f1f5f9) 0%,
+    var(--bg-tertiary, #e2e8f0) 100%
+  );
 
   .material-symbols-outlined {
     font-size: 48px;

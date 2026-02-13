@@ -2,22 +2,33 @@
   <div :class="['password-strength', { 'dark-theme': isDark }]">
     <!-- 规则列表 -->
     <ul class="password-strength__rules">
-      <li v-for="rule in validationResult.rules" :key="rule.key"
-        :class="['password-strength__rule', { passed: rule.passed }]">
-        <span class="password-strength__icon">{{ rule.passed ? "✓" : "✗" }}</span>
+      <li
+        v-for="rule in validationResult.rules"
+        :key="rule.key"
+        :class="['password-strength__rule', { passed: rule.passed }]"
+      >
+        <span class="password-strength__icon">{{
+          rule.passed ? "✓" : "✗"
+        }}</span>
         <span class="password-strength__text">{{ $t(rule.message) }}</span>
       </li>
     </ul>
 
     <!-- 强度条 -->
     <div class="password-strength__bar-wrapper">
-      <div class="password-strength__bar" :class="[`password-strength__bar--${validationResult.strength}`]"
-        :style="{ width: strengthBarWidth }" />
+      <div
+        class="password-strength__bar"
+        :class="[`password-strength__bar--${validationResult.strength}`]"
+        :style="{ width: strengthBarWidth }"
+      ></div>
     </div>
 
     <!-- 强度文字 -->
-    <span v-if="password.length > 0" class="password-strength__label"
-      :class="[`password-strength__label--${validationResult.strength}`]">
+    <span
+      v-if="password.length > 0"
+      class="password-strength__label"
+      :class="[`password-strength__label--${validationResult.strength}`]"
+    >
       {{ $t(`passwordPolicy.strength.${validationResult.strength}`) }}
     </span>
   </div>
@@ -99,7 +110,9 @@ const strengthBarWidth = computed(() => {
   &__bar {
     height: 100%;
     border-radius: 3px;
-    transition: width 0.3s ease, background-color 0.3s ease;
+    transition:
+      width 0.3s ease,
+      background-color 0.3s ease;
 
     &--weak {
       background-color: var(--danger-color, #f56c6c);

@@ -1,43 +1,43 @@
-import { ref, reactive, computed, onMounted } from 'vue'
-import type { ViewMode } from '@/components/StandardPage/types'
+import { ref, reactive, computed, onMounted } from "vue";
+import type { ViewMode } from "@/components/StandardPage/types";
 
 export interface FetchParams {
-  sort: string
-  search: string
-  page: number
-  tags?: number[]
-  [key: string]: any
+  sort: string;
+  search: string;
+  page: number;
+  tags?: number[];
+  [key: string]: any;
 }
 
 export interface FetchResponse {
-  data: any[]
-  headers: any
+  data: any[];
+  headers: any;
 }
 
 export interface UsePageDataOptions {
-  fetchFn: (params: FetchParams) => Promise<FetchResponse>
-  defaultSort?: string
-  pageSize?: number
+  fetchFn: (params: FetchParams) => Promise<FetchResponse>;
+  defaultSort?: string;
+  pageSize?: number;
   /** 是否自动在挂载时加载 */
-  immediate?: boolean
+  immediate?: boolean;
 }
 
 export function usePageData(options: UsePageDataOptions) {
   const {
     fetchFn,
-    defaultSort = '-created_at',
+    defaultSort = "-created_at",
     pageSize = 20,
     immediate = true,
-  } = options
+  } = options;
 
   // Data state
-  const items = ref<any[] | null>(null)
-  const loading = ref(false)
+  const items = ref<any[] | null>(null);
+  const loading = ref(false);
 
   // Filter state
-  const sorted = ref(defaultSort)
-  const searched = ref('')
-  const tags = ref<number[]>([])
+  const sorted = ref(defaultSort);
+  const searched = ref("");
+  const tags = ref<number[]>([]);
 
   // Pagination
   const pagination = reactive({
@@ -45,82 +45,82 @@ export function usePageData(options: UsePageDataOptions) {
     count: 1,
     size: pageSize,
     total: 0,
-  })
+  });
 
   // View mode
-  const viewMode = ref<ViewMode>('grid')
+  const viewMode = ref<ViewMode>("grid");
 
   // Computed total pages
-  const totalPages = computed(() => pagination.count || 1)
+  const totalPages = computed(() => pagination.count || 1);
 
   // Fetch
   const refresh = async () => {
-    loading.value = true
+    loading.value = true;
     try {
       const params: FetchParams = {
         sort: sorted.value,
         search: searched.value,
         page: pagination.current,
-      }
+      };
       if (tags.value.length > 0) {
-        params.tags = tags.value
+        params.tags = tags.value;
       }
 
-      const response = await fetchFn(params)
+      const response = await fetchFn(params);
 
       // Parse pagination headers
       pagination.current = parseInt(
-        response.headers['x-pagination-current-page'] || '1'
-      )
+        response.headers["x-pagination-current-page"] || "1"
+      );
       pagination.count = parseInt(
-        response.headers['x-pagination-page-count'] || '1'
-      )
+        response.headers["x-pagination-page-count"] || "1"
+      );
       pagination.size = parseInt(
-        response.headers['x-pagination-per-page'] || String(pageSize)
-      )
+        response.headers["x-pagination-per-page"] || String(pageSize)
+      );
       pagination.total = parseInt(
-        response.headers['x-pagination-total-count'] || '0'
-      )
+        response.headers["x-pagination-total-count"] || "0"
+      );
 
-      items.value = response.data || []
+      items.value = response.data || [];
     } catch (error) {
-      console.error('Failed to fetch data:', error)
-      items.value = []
+      console.error("Failed to fetch data:", error);
+      items.value = [];
     } finally {
-      loading.value = false
+      loading.value = false;
     }
-  }
+  };
 
   // Event handlers
   const handleSearch = (value: string) => {
-    searched.value = value
-    pagination.current = 1
-    refresh()
-  }
+    searched.value = value;
+    pagination.current = 1;
+    refresh();
+  };
 
   const handleSortChange = (value: string) => {
-    sorted.value = value
-    refresh()
-  }
+    sorted.value = value;
+    refresh();
+  };
 
   const handlePageChange = (page: number) => {
-    pagination.current = page
-    refresh()
-  }
+    pagination.current = page;
+    refresh();
+  };
 
   const handleViewChange = (mode: ViewMode) => {
-    viewMode.value = mode
-  }
+    viewMode.value = mode;
+  };
 
   const handleTagsChange = (tagIds: number[]) => {
-    tags.value = tagIds
-    pagination.current = 1
-    refresh()
-  }
+    tags.value = tagIds;
+    pagination.current = 1;
+    refresh();
+  };
 
   // Auto-load on mount
   if (immediate) {
-    onMounted(refresh)
+    onMounted(refresh);
   }
 
   return {
@@ -141,5 +141,5 @@ export function usePageData(options: UsePageDataOptions) {
     handlePageChange,
     handleViewChange,
     handleTagsChange,
-  }
+  };
 }

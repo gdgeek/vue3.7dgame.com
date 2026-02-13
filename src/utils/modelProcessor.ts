@@ -63,8 +63,6 @@ export const processModel = (file: File): Promise<ProcessedModel> => {
           length: anim.duration,
         }));
 
-
-
         // Calculate face count
         let faceCount = 0;
 

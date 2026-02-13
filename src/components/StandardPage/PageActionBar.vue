@@ -6,7 +6,9 @@
         <h2 class="page-title">{{ title }}</h2>
         <p v-if="subtitle" class="page-subtitle">{{ subtitle }}</p>
         <!-- Selection count -->
-        <p v-if="selectionCount > 0" class="selection-count">{{ selectionCount }}个已选择</p>
+        <p v-if="selectionCount > 0" class="selection-count">
+          {{ selectionCount }}个已选择
+        </p>
       </div>
     </div>
 
@@ -16,8 +18,13 @@
         <!-- Search - Hide in selection mode -->
         <div v-if="showSearch && selectionCount === 0" class="search-box">
           <span class="material-symbols-outlined search-icon">search</span>
-          <input v-model="searchValue" type="text" class="search-input" :placeholder="searchPlaceholder || '搜索...'"
-            @keyup.enter="handleSearch" />
+          <input
+            v-model="searchValue"
+            type="text"
+            class="search-input"
+            :placeholder="searchPlaceholder || '搜索...'"
+            @keyup.enter="handleSearch"
+          />
         </div>
 
         <!-- Custom filters slot (tags, visibility, etc.) - Hide in selection mode -->
@@ -27,20 +34,39 @@
       <div class="controls-right">
         <!-- Batch actions - Show in selection mode -->
         <template v-if="selectionCount > 0">
-          <el-button v-if="isPageSelected" @click="$emit('cancel-select-all-page')">
-            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">remove_done</span>
+          <el-button
+            v-if="isPageSelected"
+            @click="$emit('cancel-select-all-page')"
+          >
+            <span
+              class="material-symbols-outlined"
+              style="font-size: 18px; margin-right: 4px"
+              >remove_done</span
+            >
             取消全选
           </el-button>
           <el-button v-else @click="$emit('select-all-page')">
-            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">done_all</span>
+            <span
+              class="material-symbols-outlined"
+              style="font-size: 18px; margin-right: 4px"
+              >done_all</span
+            >
             全选本页
           </el-button>
           <el-button @click="$emit('batch-download')">
-            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">download</span>
+            <span
+              class="material-symbols-outlined"
+              style="font-size: 18px; margin-right: 4px"
+              >download</span
+            >
             批量下载
           </el-button>
           <el-button type="danger" @click="$emit('batch-delete')">
-            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">delete</span>
+            <span
+              class="material-symbols-outlined"
+              style="font-size: 18px; margin-right: 4px"
+              >delete</span
+            >
             批量删除
           </el-button>
           <el-button @click="$emit('cancel-selection')">取消</el-button>
@@ -52,19 +78,35 @@
           <!-- Sort buttons -->
           <template v-if="showSort">
             <div class="sort-control">
-              <button class="sort-btn" :class="{ active: isSortedByTime }" @click="toggleSort(sortByTime)">
-                <span class="material-symbols-outlined sort-icon">schedule</span>
+              <button
+                class="sort-btn"
+                :class="{ active: isSortedByTime }"
+                @click="toggleSort(sortByTime)"
+              >
+                <span class="material-symbols-outlined sort-icon"
+                  >schedule</span
+                >
                 时间
-                <span v-if="isSortedByTime" class="material-symbols-outlined sort-arrow">
-                  {{ sortAscending ? 'expand_more' : 'expand_less' }}
+                <span
+                  v-if="isSortedByTime"
+                  class="material-symbols-outlined sort-arrow"
+                >
+                  {{ sortAscending ? "expand_more" : "expand_less" }}
                 </span>
               </button>
 
-              <button class="sort-btn" :class="{ active: isSortedByName }" @click="toggleSort(sortByNameField)">
+              <button
+                class="sort-btn"
+                :class="{ active: isSortedByName }"
+                @click="toggleSort(sortByNameField)"
+              >
                 <span class="sort-az">A<small>Z</small></span>
                 名称
-                <span v-if="isSortedByName" class="material-symbols-outlined sort-arrow">
-                  {{ sortAscending ? 'expand_more' : 'expand_less' }}
+                <span
+                  v-if="isSortedByName"
+                  class="material-symbols-outlined sort-arrow"
+                >
+                  {{ sortAscending ? "expand_more" : "expand_less" }}
                 </span>
               </button>
             </div>
@@ -76,12 +118,20 @@
           <!-- View toggle -->
           <div v-if="showViewToggle" class="view-toggle">
             <div class="segment-control">
-              <button class="segment-btn" :class="{ active: currentView === 'grid' }" title="网格视图"
-                @click="setView('grid')">
+              <button
+                class="segment-btn"
+                :class="{ active: currentView === 'grid' }"
+                title="网格视图"
+                @click="setView('grid')"
+              >
                 <span class="material-symbols-outlined">grid_view</span>
               </button>
-              <button class="segment-btn" :class="{ active: currentView === 'list' }" title="列表视图"
-                @click="setView('list')">
+              <button
+                class="segment-btn"
+                :class="{ active: currentView === 'list' }"
+                title="列表视图"
+                @click="setView('list')"
+              >
                 <span class="material-symbols-outlined">view_list</span>
               </button>
             </div>
@@ -100,76 +150,85 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import type { PageActionBarProps, ViewMode } from './types'
+import { ref, computed, watch } from "vue";
+import type { PageActionBarProps, ViewMode } from "./types";
 
-const props = withDefaults(defineProps<PageActionBarProps & { selectionCount?: number; isPageSelected?: boolean }>(), {
-  showSearch: true,
-  showSort: true,
-  showViewToggle: true,
-  defaultView: 'grid',
-  defaultSort: '-created_at',
-  sortByName: 'name',
-  sortByTime: 'created_at',
-  selectionCount: 0,
-  isPageSelected: false,
-})
+const props = withDefaults(
+  defineProps<
+    PageActionBarProps & { selectionCount?: number; isPageSelected?: boolean }
+  >(),
+  {
+    showSearch: true,
+    showSort: true,
+    showViewToggle: true,
+    defaultView: "grid",
+    defaultSort: "-created_at",
+    sortByName: "name",
+    sortByTime: "created_at",
+    selectionCount: 0,
+    isPageSelected: false,
+  }
+);
 
 const emit = defineEmits<{
-  (e: 'search', value: string): void
-  (e: 'sort-change', value: string): void
-  (e: 'view-change', mode: ViewMode): void
-  (e: 'batch-download'): void
-  (e: 'batch-delete'): void
-  (e: 'cancel-selection'): void
-  (e: 'select-all-page'): void
-  (e: 'cancel-select-all-page'): void
-}>()
+  (e: "search", value: string): void;
+  (e: "sort-change", value: string): void;
+  (e: "view-change", mode: ViewMode): void;
+  (e: "batch-download"): void;
+  (e: "batch-delete"): void;
+  (e: "cancel-selection"): void;
+  (e: "select-all-page"): void;
+  (e: "cancel-select-all-page"): void;
+}>();
 
-const searchValue = ref('')
-const currentSort = ref(props.defaultSort)
-const currentView = ref<ViewMode>(props.defaultView)
+const searchValue = ref("");
+const currentSort = ref(props.defaultSort);
+const currentView = ref<ViewMode>(props.defaultView);
 
-const sortByNameField = computed(() => props.sortByName || 'name')
+const sortByNameField = computed(() => props.sortByName || "name");
 
-const isSortedByTime = computed(() => currentSort.value.includes(props.sortByTime))
-const isSortedByName = computed(() => currentSort.value.includes(sortByNameField.value))
-const sortAscending = computed(() => !currentSort.value.startsWith('-'))
+const isSortedByTime = computed(() =>
+  currentSort.value.includes(props.sortByTime)
+);
+const isSortedByName = computed(() =>
+  currentSort.value.includes(sortByNameField.value)
+);
+const sortAscending = computed(() => !currentSort.value.startsWith("-"));
 
 const handleSearch = () => {
-  emit('search', searchValue.value)
-}
+  emit("search", searchValue.value);
+};
 
 const toggleSort = (field: string) => {
   if (currentSort.value === field) {
-    currentSort.value = '-' + field
-  } else if (currentSort.value === '-' + field) {
-    currentSort.value = field
+    currentSort.value = "-" + field;
+  } else if (currentSort.value === "-" + field) {
+    currentSort.value = field;
   } else {
-    currentSort.value = '-' + field
+    currentSort.value = "-" + field;
   }
-  emit('sort-change', currentSort.value)
-}
+  emit("sort-change", currentSort.value);
+};
 
 const setView = (mode: ViewMode) => {
-  currentView.value = mode
-  emit('view-change', mode)
-}
+  currentView.value = mode;
+  emit("view-change", mode);
+};
 
 watch(
   () => searchValue.value,
   (val) => {
-    if (val === '') {
-      emit('search', '')
+    if (val === "") {
+      emit("search", "");
     }
   }
-)
+);
 
 defineExpose({
   searchValue,
   currentSort,
-  currentView
-})
+  currentView,
+});
 </script>
 
 <style scoped lang="scss">
@@ -346,7 +405,9 @@ defineExpose({
   &.active {
     background: var(--bg-card, #fff);
     color: var(--primary-color, #00baff);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06); // Soft shadow
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.1),
+      0 1px 2px rgba(0, 0, 0, 0.06); // Soft shadow
     font-weight: 600;
 
     &:hover {
@@ -422,10 +483,12 @@ defineExpose({
     &.active {
       background-color: var(--bg-card, #fff);
       color: var(--primary-color, #00baff);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(0, 0, 0, 0.05); // Enhanced shadow
+      box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.1),
+        0 1px 1px rgba(0, 0, 0, 0.05); // Enhanced shadow
 
       .material-symbols-outlined {
-        font-variation-settings: 'FILL' 1;
+        font-variation-settings: "FILL" 1;
       }
     }
   }

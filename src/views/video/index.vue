@@ -1,47 +1,89 @@
 <template>
   <TransitionWrapper>
     <div class="video-index">
-      <PageActionBar title="所有视频素材" search-placeholder="搜索视频..." :selection-count="selectedCount" @search="handleSearch"
-        @sort-change="handleSortChange" @view-change="handleViewChange" @batch-download="handleBatchDownload"
-        @batch-delete="handleBatchDelete" @cancel-selection="handleCancelSelection">
+      <PageActionBar
+        title="所有视频素材"
+        search-placeholder="搜索视频..."
+        :selection-count="selectedCount"
+        @search="handleSearch"
+        @sort-change="handleSortChange"
+        @view-change="handleViewChange"
+        @batch-download="handleBatchDownload"
+        @batch-delete="handleBatchDelete"
+        @cancel-selection="handleCancelSelection"
+      >
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
-            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">upload</span>
+            <span
+              class="material-symbols-outlined"
+              style="font-size: 18px; margin-right: 4px"
+              >upload</span
+            >
             {{ $t("video.uploadVideo") }}
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer :items="items" :view-mode="viewMode" :loading="loading"
-        @row-click="(item) => openViewDialog(item.id)">
+      <ViewContainer
+        :items="items"
+        :view-mode="viewMode"
+        :loading="loading"
+        @row-click="(item) => openViewDialog(item.id)"
+      >
         <template #grid-card="{ item }">
-          <StandardCard :image="getVideoCover(item.image?.url)" :title="item.name || '未命名'"
-            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" :selected="isSelected(item.id)"
-            :selection-mode="hasSelection" type-icon="videocam" placeholder-icon="videocam"
-            @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)" />
+          <StandardCard
+            :image="getVideoCover(item.image?.url)"
+            :title="item.name || '未命名'"
+            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
+            :selected="isSelected(item.id)"
+            :selection-mode="hasSelection"
+            type-icon="videocam"
+            placeholder-icon="videocam"
+            @view="openViewDialog(item.id)"
+            @select="() => toggleSelection(item.id)"
+          ></StandardCard>
         </template>
 
         <template #list-item="{ item }">
           <div class="col-checkbox" @click.stop>
-            <el-checkbox :model-value="isSelected(item.id)" @change="() => toggleSelection(item.id)" />
+            <el-checkbox
+              :model-value="isSelected(item.id)"
+              @change="() => toggleSelection(item.id)"
+            ></el-checkbox>
           </div>
           <div class="col-name">
             <div class="item-thumb">
-              <img v-if="item.image?.url" :src="getVideoCover(item.image.url)" :alt="item.name" />
-              <div v-else class="thumb-placeholder"><span class="material-symbols-outlined">videocam</span></div>
+              <img
+                v-if="item.image?.url"
+                :src="getVideoCover(item.image.url)"
+                :alt="item.name"
+              />
+              <div v-else class="thumb-placeholder">
+                <span class="material-symbols-outlined">videocam</span>
+              </div>
             </div>
-            <span class="item-name">{{ item.name || '—' }}</span>
+            <span class="item-name">{{ item.name || "—" }}</span>
           </div>
           <div class="col-size">{{ formatFileSize(item.file?.size) }}</div>
-          <div class="col-date">{{ formatItemDate(item.updated_at || item.created_at) }}</div>
+          <div class="col-date">
+            {{ formatItemDate(item.updated_at || item.created_at) }}
+          </div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <span class="material-symbols-outlined actions-icon">more_horiz</span>
+              <span class="material-symbols-outlined actions-icon"
+                >more_horiz</span
+              >
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="openViewDialog(item.id)">{{ $t("video.viewVideo") }}</el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)">重命名</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => { })">删除</el-dropdown-item>
+                  <el-dropdown-item @click="openViewDialog(item.id)">{{
+                    $t("video.viewVideo")
+                  }}</el-dropdown-item>
+                  <el-dropdown-item @click="namedWindow(item)"
+                    >重命名</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="deletedWindow(item, () => {})"
+                    >删除</el-dropdown-item
+                  >
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -49,19 +91,46 @@
         </template>
       </ViewContainer>
 
-      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange" />
+      <PagePagination
+        :current-page="pagination.current"
+        :total-pages="totalPages"
+        @page-change="handlePageChange"
+      ></PagePagination>
 
       <!-- Dialogs -->
       <!-- Dialogs -->
-      <StandardUploadDialog v-model="uploadDialogVisible" dir="video" :file-type="fileType" :max-size="80"
-        :title="$t('video.uploadVideo')" @save-resource="saveVideo" @success="handleUploadSuccess" />
+      <StandardUploadDialog
+        v-model="uploadDialogVisible"
+        dir="video"
+        :file-type="fileType"
+        :max-size="80"
+        :title="$t('video.uploadVideo')"
+        @save-resource="saveVideo"
+        @success="handleUploadSuccess"
+      ></StandardUploadDialog>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="viewDialogVisible" title="视频详情" :name="currentVideo?.name || ''" :loading="detailLoading"
-        :properties="detailProperties" placeholder-icon="videocam" download-text="下载视频" delete-text="删除此视频"
-        @download="handleDownload" @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
+      <DetailPanel
+        v-model="viewDialogVisible"
+        title="视频详情"
+        :name="currentVideo?.name || ''"
+        :loading="detailLoading"
+        :properties="detailProperties"
+        placeholder-icon="videocam"
+        download-text="下载视频"
+        delete-text="删除此视频"
+        @download="handleDownload"
+        @rename="handleRename"
+        @delete="handleDelete"
+        @close="handlePanelClose"
+      >
         <template #preview>
-          <video v-if="currentVideo?.file?.url" :src="currentVideo.file.url" controls class="video-preview" />
+          <video
+            v-if="currentVideo?.file?.url"
+            :src="currentVideo.file.url"
+            controls
+            class="video-preview"
+          ></video>
         </template>
       </DetailPanel>
     </div>
@@ -73,24 +142,49 @@ import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 // import { ElMessage, ElMessageBox } from "element-plus";
 import { Message, MessageBox } from "@/components/Dialog";
-import { PageActionBar, ViewContainer, PagePagination, StandardCard, DetailPanel } from "@/components/StandardPage";
+import {
+  PageActionBar,
+  ViewContainer,
+  PagePagination,
+  StandardCard,
+  DetailPanel,
+} from "@/components/StandardPage";
 import StandardUploadDialog from "@/components/StandardPage/StandardUploadDialog.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
-import { getVideos, getVideo, putVideo, deleteVideo, postVideo } from "@/api/v1/resources/index";
+import {
+  getVideos,
+  getVideo,
+  putVideo,
+  deleteVideo,
+  postVideo,
+} from "@/api/v1/resources/index";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import { usePageData } from "@/composables/usePageData";
 import { useSelection } from "@/composables/useSelection";
 import { downloadResource } from "@/utils/downloadHelper";
-import { convertToLocalTime, formatFileSize as formatSize, getVideoCover } from "@/utils/utilityFunctions";
+import {
+  convertToLocalTime,
+  formatFileSize as formatSize,
+  getVideoCover,
+} from "@/utils/utilityFunctions";
 import { printVector2 } from "@/assets/js/helper";
 
 const { t } = useI18n();
 
 const {
-  items, loading, pagination, viewMode, totalPages,
-  refresh, handleSearch, handleSortChange, handlePageChange, handleViewChange,
+  items,
+  loading,
+  pagination,
+  viewMode,
+  totalPages,
+  refresh,
+  handleSearch,
+  handleSortChange,
+  handlePageChange,
+  handleViewChange,
 } = usePageData({
-  fetchFn: async (params) => await getVideos(params.sort, params.search, params.page),
+  fetchFn: async (params) =>
+    await getVideos(params.sort, params.search, params.page),
 });
 
 const {
@@ -113,18 +207,27 @@ const detailLoading = ref(false);
 
 const detailProperties = computed(() => {
   if (!currentVideo.value) return [];
-  const info = currentVideo.value.info ? JSON.parse(currentVideo.value.info) : null;
+  const info = currentVideo.value.info
+    ? JSON.parse(currentVideo.value.info)
+    : null;
   const props = [
-    { label: '类型', value: '视频' },
-    { label: '大小', value: formatSize(currentVideo.value.file?.size) },
-    { label: '创建时间', value: convertToLocalTime(currentVideo.value.created_at) },
+    { label: "类型", value: "视频" },
+    { label: "大小", value: formatSize(currentVideo.value.file?.size) },
+    {
+      label: "创建时间",
+      value: convertToLocalTime(currentVideo.value.created_at),
+    },
   ];
-  if (info?.size) props.push({ label: '分辨率', value: printVector2(info.size) });
-  if (info?.length) props.push({ label: '时长', value: info.length.toFixed(2) + 's' });
+  if (info?.size)
+    props.push({ label: "分辨率", value: printVector2(info.size) });
+  if (info?.length)
+    props.push({ label: "时长", value: info.length.toFixed(2) + "s" });
   return props;
 });
 
-const openUploadDialog = () => { uploadDialogVisible.value = true; };
+const openUploadDialog = () => {
+  uploadDialogVisible.value = true;
+};
 
 const openViewDialog = async (id: number) => {
   currentVideoId.value = id;
@@ -147,13 +250,14 @@ const handlePanelClose = () => {
 
 const handleDownload = async () => {
   if (!currentVideo.value) return;
-  const fileName = currentVideo.value.file?.filename || '';
-  const fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase() || '.mp4';
+  const fileName = currentVideo.value.file?.filename || "";
+  const fileExt =
+    fileName.substring(fileName.lastIndexOf(".")).toLowerCase() || ".mp4";
   await downloadResource(
-    { name: currentVideo.value.name || 'video', file: currentVideo.value.file },
+    { name: currentVideo.value.name || "video", file: currentVideo.value.file },
     fileExt,
     t,
-    'video.view.download'
+    "video.view.download"
   );
 };
 
@@ -191,36 +295,73 @@ const handleDelete = async () => {
   }
 };
 
-const handleUploadSuccess = async () => { uploadDialogVisible.value = false; refresh(); };
+const handleUploadSuccess = async () => {
+  uploadDialogVisible.value = false;
+  refresh();
+};
 
 const saveVideo = async (
-  name: string, file_id: number, totalFiles: number,
-  callback: (id: number) => void, effectType?: string, info?: string, image_id?: number
+  name: string,
+  file_id: number,
+  totalFiles: number,
+  callback: (id: number) => void,
+  effectType?: string,
+  info?: string,
+  image_id?: number
 ) => {
   try {
     const data: any = { name, file_id };
     if (info) data.info = info;
-    if (image_id) data.image_id = image_id; else data.image_id = file_id;
+    if (image_id) data.image_id = image_id;
+    else data.image_id = file_id;
     const response = await postVideo(data);
     if (response.data.id) callback(response.data.id);
-  } catch (err) { console.error("Failed to save video:", err); callback(-1); }
+  } catch (err) {
+    console.error("Failed to save video:", err);
+    callback(-1);
+  }
 };
 
 const namedWindow = async (item: { id: string; name: string }) => {
   try {
-    const { value } = (await MessageBox.prompt(t("video.prompt.message1"), t("video.prompt.message2"),
-      { confirmButtonText: t("video.prompt.confirm"), cancelButtonText: t("video.prompt.cancel"), defaultValue: item.name }
+    const { value } = (await MessageBox.prompt(
+      t("video.prompt.message1"),
+      t("video.prompt.message2"),
+      {
+        confirmButtonText: t("video.prompt.confirm"),
+        cancelButtonText: t("video.prompt.cancel"),
+        defaultValue: item.name,
+      }
     )) as { value: string };
-    await putVideo(item.id, { name: value }); refresh(); Message.success(t("video.prompt.success") + value);
-  } catch { Message.info(t("video.prompt.info")); }
+    await putVideo(item.id, { name: value });
+    refresh();
+    Message.success(t("video.prompt.success") + value);
+  } catch {
+    Message.info(t("video.prompt.info"));
+  }
 };
 
-const deletedWindow = async (item: { id: string }, resetLoading: () => void) => {
+const deletedWindow = async (
+  item: { id: string },
+  resetLoading: () => void
+) => {
   try {
-    await MessageBox.confirm(t("video.confirm.message1"), t("video.confirm.message2"),
-      { confirmButtonText: t("video.confirm.confirm"), cancelButtonText: t("video.confirm.cancel"), type: "warning" });
-    await deleteVideo(item.id); refresh(); Message.success(t("video.confirm.success"));
-  } catch { Message.info(t("video.confirm.info")); resetLoading(); }
+    await MessageBox.confirm(
+      t("video.confirm.message1"),
+      t("video.confirm.message2"),
+      {
+        confirmButtonText: t("video.confirm.confirm"),
+        cancelButtonText: t("video.confirm.cancel"),
+        type: "warning",
+      }
+    );
+    await deleteVideo(item.id);
+    refresh();
+    Message.success(t("video.confirm.success"));
+  } catch {
+    Message.info(t("video.confirm.info"));
+    resetLoading();
+  }
 };
 
 const handleBatchDownload = () => {
@@ -233,8 +374,8 @@ const handleBatchDelete = async () => {
   try {
     await MessageBox.confirm(
       `确定要删除选中的 ${selected.length} 个视频吗？`,
-      '批量删除',
-      { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' }
+      "批量删除",
+      { confirmButtonText: "删除", cancelButtonText: "取消", type: "warning" }
     );
 
     for (const item of selected) {
@@ -245,7 +386,7 @@ const handleBatchDelete = async () => {
     refresh();
     Message.success(`成功删除 ${selected.length} 个视频`);
   } catch {
-    Message.info('已取消删除');
+    Message.info("已取消删除");
   }
 };
 
@@ -254,12 +395,15 @@ const handleCancelSelection = () => {
 };
 
 const formatFileSize = (bytes?: number) => {
-  if (!bytes) return '—'; if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB'; return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  if (!bytes) return "—";
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(2) + " MB";
 };
 const formatItemDate = (dateStr?: string) => {
-  if (!dateStr) return '—'; const d = new Date(dateStr);
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
 };
 </script>
 

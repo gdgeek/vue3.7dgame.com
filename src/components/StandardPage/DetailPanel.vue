@@ -1,9 +1,17 @@
 <template>
   <Teleport to="body">
     <Transition name="panel-fade">
-      <div v-if="modelValue" class="detail-panel-overlay" @click.self="handleClose">
+      <div
+        v-if="modelValue"
+        class="detail-panel-overlay"
+        @click.self="handleClose"
+      >
         <Transition name="panel-slide">
-          <div v-if="modelValue" class="detail-panel" :style="{ width: panelWidth }">
+          <div
+            v-if="modelValue"
+            class="detail-panel"
+            :style="{ width: panelWidth }"
+          >
             <!-- Header -->
             <div class="panel-header">
               <h3 class="panel-title">{{ title }}</h3>
@@ -18,7 +26,9 @@
               <div class="panel-preview" :style="{ height: previewHeight }">
                 <slot name="preview">
                   <div class="preview-placeholder">
-                    <span class="material-symbols-outlined">{{ placeholderIcon }}</span>
+                    <span class="material-symbols-outlined">{{
+                      placeholderIcon
+                    }}</span>
                     <span v-if="placeholderText">{{ placeholderText }}</span>
                   </div>
                 </slot>
@@ -30,23 +40,45 @@
                 <div class="info-name-section">
                   <div v-if="!isEditing" class="info-name-row">
                     <h4 class="info-name">{{ name }}</h4>
-                    <button v-if="editable" class="btn-icon-only" @click="startEditing">
+                    <button
+                      v-if="editable"
+                      class="btn-icon-only"
+                      @click="startEditing"
+                    >
                       <span class="material-symbols-outlined">edit</span>
                     </button>
                   </div>
                   <div v-else class="info-name-edit">
-                    <input ref="nameInputRef" v-model="editingName" type="text" class="name-input"
-                      @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
+                    <input
+                      ref="nameInputRef"
+                      v-model="editingName"
+                      type="text"
+                      class="name-input"
+                      @keyup.enter="saveEdit"
+                      @keyup.escape="cancelEdit"
+                    />
                     <div class="edit-actions">
-                      <button class="btn-edit-cancel" @click="cancelEdit">取消</button>
-                      <button class="btn-edit-save" @click="saveEdit" :disabled="!editingName.trim()">保存</button>
+                      <button class="btn-edit-cancel" @click="cancelEdit">
+                        取消
+                      </button>
+                      <button
+                        class="btn-edit-save"
+                        @click="saveEdit"
+                        :disabled="!editingName.trim()"
+                      >
+                        保存
+                      </button>
                     </div>
                   </div>
                 </div>
 
                 <!-- Properties Table -->
                 <div class="info-table">
-                  <div v-for="(item, index) in properties" :key="index" class="info-row">
+                  <div
+                    v-for="(item, index) in properties"
+                    :key="index"
+                    class="info-row"
+                  >
                     <span class="info-label">{{ item.label }}</span>
                     <span class="info-value">{{ item.value }}</span>
                   </div>
@@ -60,32 +92,52 @@
             <!-- Footer Area (Fixed) -->
             <div class="panel-footer">
               <!-- Actions Area -->
-              <div class="panel-actions" :class="{ 'layout-grid': actionLayout === 'grid' }">
+              <div
+                class="panel-actions"
+                :class="{ 'layout-grid': actionLayout === 'grid' }"
+              >
                 <slot name="actions">
                   <template v-if="actionLayout === 'grid'">
                     <!-- Top: Secondary Action (Enter Editor) -->
-                    <button v-if="secondaryAction" class="btn-pill-primary" @click="$emit('secondary')">
+                    <button
+                      v-if="secondaryAction"
+                      class="btn-pill-primary"
+                      @click="$emit('secondary')"
+                    >
                       <span class="material-symbols-outlined">edit_note</span>
                       {{ secondaryActionText }}
                     </button>
                     <!-- Bottom: Download and Delete side by side -->
                     <div class="actions-row">
-                      <button class="btn-pill-secondary" @click="$emit('download')">
-                        <span class="material-symbols-outlined">{{ downloadIcon }}</span>
-                        {{ downloadText || '复制' }}
+                      <button
+                        class="btn-pill-secondary"
+                        @click="$emit('download')"
+                      >
+                        <span class="material-symbols-outlined">{{
+                          downloadIcon
+                        }}</span>
+                        {{ downloadText || "复制" }}
                       </button>
-                      <button v-if="showDelete" class="btn-pill-danger" @click="$emit('delete')">
+                      <button
+                        v-if="showDelete"
+                        class="btn-pill-danger"
+                        @click="$emit('delete')"
+                      >
                         <span class="material-symbols-outlined">delete</span>
-                        {{ deleteText || '删除' }}
+                        {{ deleteText || "删除" }}
                       </button>
                     </div>
                   </template>
                   <template v-else>
                     <button class="btn-primary-full" @click="$emit('download')">
                       <span class="material-symbols-outlined">download</span>
-                      {{ downloadText || '下载' }}
+                      {{ downloadText || "下载" }}
                     </button>
-                    <button v-if="secondaryAction" class="btn-text-link" @click="$emit('secondary')">
+                    <button
+                      v-if="secondaryAction"
+                      class="btn-text-link"
+                      @click="$emit('secondary')"
+                    >
                       {{ secondaryActionText }}
                     </button>
                   </template>
@@ -93,10 +145,13 @@
               </div>
 
               <!-- Danger Zone (only for stacked layout) -->
-              <div v-if="showDelete && actionLayout === 'stacked'" class="panel-danger">
+              <div
+                v-if="showDelete && actionLayout === 'stacked'"
+                class="panel-danger"
+              >
                 <button class="btn-danger-text" @click="$emit('delete')">
                   <span class="material-symbols-outlined">delete</span>
-                  {{ deleteText || '删除此资源' }}
+                  {{ deleteText || "删除此资源" }}
                 </button>
               </div>
             </div>
@@ -132,42 +187,42 @@ interface Props {
   secondaryActionText?: string;
   showDelete?: boolean;
   width?: string;
-  actionLayout?: 'stacked' | 'grid';
+  actionLayout?: "stacked" | "grid";
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: '资源详情',
-  name: '',
+  title: "资源详情",
+  name: "",
   loading: false,
   editable: true,
   properties: () => [],
-  previewHeight: '300px',
-  placeholderIcon: 'image',
-  placeholderText: '',
-  downloadText: '下载',
-  downloadIcon: 'content_copy',
-  deleteText: '删除此资源',
+  previewHeight: "300px",
+  placeholderIcon: "image",
+  placeholderText: "",
+  downloadText: "下载",
+  downloadIcon: "content_copy",
+  deleteText: "删除此资源",
   secondaryAction: false,
-  secondaryActionText: '在编辑器中使用',
+  secondaryActionText: "在编辑器中使用",
   showDelete: true,
-  width: '840px',
-  actionLayout: 'stacked',
+  width: "840px",
+  actionLayout: "stacked",
 });
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void;
-  (e: 'close'): void;
-  (e: 'download'): void;
-  (e: 'rename', newName: string): void;
-  (e: 'delete'): void;
-  (e: 'secondary'): void;
+  (e: "update:modelValue", value: boolean): void;
+  (e: "close"): void;
+  (e: "download"): void;
+  (e: "rename", newName: string): void;
+  (e: "delete"): void;
+  (e: "secondary"): void;
 }>();
 
 const panelWidth = computed(() => props.width);
 
 // Inline editing state
 const isEditing = ref(false);
-const editingName = ref('');
+const editingName = ref("");
 const nameInputRef = ref<HTMLInputElement | null>(null);
 
 const startEditing = () => {
@@ -181,42 +236,45 @@ const startEditing = () => {
 
 const cancelEdit = () => {
   isEditing.value = false;
-  editingName.value = '';
+  editingName.value = "";
 };
 
 const saveEdit = () => {
   if (editingName.value.trim() && editingName.value !== props.name) {
-    emit('rename', editingName.value.trim());
+    emit("rename", editingName.value.trim());
   }
   isEditing.value = false;
 };
 
 // Reset editing state when panel closes or name changes
-watch(() => props.modelValue, (newVal) => {
-  if (!newVal) {
-    isEditing.value = false;
-    editingName.value = '';
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    if (!newVal) {
+      isEditing.value = false;
+      editingName.value = "";
+    }
   }
-});
+);
 
 const handleClose = () => {
-  emit('update:modelValue', false);
-  emit('close');
+  emit("update:modelValue", false);
+  emit("close");
 };
 
 // Close on Escape key (but not when editing)
 const handleKeydown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && props.modelValue && !isEditing.value) {
+  if (e.key === "Escape" && props.modelValue && !isEditing.value) {
     handleClose();
   }
 };
 
 onMounted(() => {
-  document.addEventListener('keydown', handleKeydown);
+  document.addEventListener("keydown", handleKeydown);
 });
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeydown);
+  document.removeEventListener("keydown", handleKeydown);
 });
 </script>
 
@@ -380,7 +438,10 @@ onUnmounted(() => {
   font-size: 15px;
   font-weight: 500;
   color: var(--text-primary, #1e293b);
-  background: var(--bg-input, var(--bg-card, #fff)); // Use bg-input if available
+  background: var(
+    --bg-input,
+    var(--bg-card, #fff)
+  ); // Use bg-input if available
   border: 2px solid var(--primary-color, #03a9f4);
   border-radius: var(--radius-md, 12px);
   outline: none;

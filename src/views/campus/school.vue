@@ -1,21 +1,44 @@
 <template>
   <TransitionWrapper>
     <div class="school-list">
-      <PageActionBar :title="$t('manager.schoolManagement')" :search-placeholder="$t('manager.form.namePlaceholder')"
-        @search="handleSearch" @sort-change="handleSortChange" @view-change="handleViewChange">
+      <PageActionBar
+        :title="$t('manager.schoolManagement')"
+        :search-placeholder="$t('manager.form.namePlaceholder')"
+        @search="handleSearch"
+        @sort-change="handleSortChange"
+        @view-change="handleViewChange"
+      >
         <template #actions>
           <el-button type="primary" @click="addSchool">
-            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">add</span>
+            <span
+              class="material-symbols-outlined"
+              style="font-size: 18px; margin-right: 4px"
+              >add</span
+            >
             {{ $t("manager.createSchool") }}
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
+      <ViewContainer
+        class="list-view"
+        :items="items"
+        :view-mode="viewMode"
+        :loading="loading"
+        @row-click="openDetail"
+      >
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.name" action-text="查看详情" action-icon="visibility"
-            type-icon="corporate_fare" placeholder-icon="school" :show-checkbox="false" @view="openDetail(item)"
-            @action="openDetail(item)" />
+          <StandardCard
+            :image="item.image?.url"
+            :title="item.name"
+            action-text="查看详情"
+            action-icon="visibility"
+            type-icon="corporate_fare"
+            placeholder-icon="school"
+            :show-checkbox="false"
+            @view="openDetail(item)"
+            @action="openDetail(item)"
+          ></StandardCard>
         </template>
 
         <template #list-header>
@@ -30,20 +53,34 @@
           <div class="col-checkbox"></div>
           <div class="col-name">
             <div class="item-thumb">
-              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
-              <div v-else class="thumb-placeholder"><span class="material-symbols-outlined">corporate_fare</span></div>
+              <img
+                v-if="item.image?.url"
+                :src="item.image.url"
+                :alt="item.name"
+              />
+              <div v-else class="thumb-placeholder">
+                <span class="material-symbols-outlined">corporate_fare</span>
+              </div>
             </div>
-            <span class="item-name">{{ item.name || '—' }}</span>
+            <span class="item-name">{{ item.name || "—" }}</span>
           </div>
-          <div class="col-principal">{{ item.principal?.nickname || item.principal?.username || '—' }}</div>
+          <div class="col-principal">
+            {{ item.principal?.nickname || item.principal?.username || "—" }}
+          </div>
           <div class="col-date">{{ formatItemDate(item.created_at) }}</div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <span class="material-symbols-outlined actions-icon">more_horiz</span>
+              <span class="material-symbols-outlined actions-icon"
+                >more_horiz</span
+              >
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="openDetail(item)">查看详情</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item)">删除</el-dropdown-item>
+                  <el-dropdown-item @click="openDetail(item)"
+                    >查看详情</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="deletedWindow(item)"
+                    >删除</el-dropdown-item
+                  >
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -51,17 +88,34 @@
         </template>
 
         <template #empty>
-          <EmptyState icon="school" :text="$t('manager.messages.noSchools') || '暂无学校'"
-            :action-text="$t('manager.createSchool')" @action="addSchool" />
+          <EmptyState
+            icon="school"
+            :text="$t('manager.messages.noSchools') || '暂无学校'"
+            :action-text="$t('manager.createSchool')"
+            @action="addSchool"
+          ></EmptyState>
         </template>
       </ViewContainer>
 
-      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange" />
+      <PagePagination
+        :current-page="pagination.current"
+        :total-pages="totalPages"
+        @page-change="handlePageChange"
+      ></PagePagination>
 
       <!-- Detail Panel (Read-only for now) -->
-      <DetailPanel v-model="detailVisible" title="学校详情" :name="currentSchool?.name || ''" :loading="detailLoading"
-        :properties="detailProperties" placeholder-icon="corporate_fare" :show-delete="true" delete-text="删除学校"
-        @delete="handleDelete" @close="handlePanelClose" />
+      <DetailPanel
+        v-model="detailVisible"
+        title="学校详情"
+        :name="currentSchool?.name || ''"
+        :loading="detailLoading"
+        :properties="detailProperties"
+        placeholder-icon="corporate_fare"
+        :show-delete="true"
+        delete-text="删除学校"
+        @delete="handleDelete"
+        @close="handlePanelClose"
+      ></DetailPanel>
     </div>
   </TransitionWrapper>
 </template>
@@ -70,7 +124,14 @@
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { Message, MessageBox } from "@/components/Dialog";
-import { PageActionBar, ViewContainer, PagePagination, EmptyState, StandardCard, DetailPanel } from "@/components/StandardPage";
+import {
+  PageActionBar,
+  ViewContainer,
+  PagePagination,
+  EmptyState,
+  StandardCard,
+  DetailPanel,
+} from "@/components/StandardPage";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { getSchools, deleteSchool } from "@/api/v1/edu-school";
 import { usePageData } from "@/composables/usePageData";
@@ -78,26 +139,55 @@ import { usePageData } from "@/composables/usePageData";
 const { t } = useI18n();
 
 const {
-  items, loading, pagination, viewMode, totalPages,
-  refresh, handleSearch, handleSortChange, handlePageChange, handleViewChange,
+  items,
+  loading,
+  pagination,
+  viewMode,
+  totalPages,
+  refresh,
+  handleSearch,
+  handleSortChange,
+  handlePageChange,
+  handleViewChange,
 } = usePageData({
-  fetchFn: async (params) => await getSchools(params.sort, params.search, params.page),
+  fetchFn: async (params) =>
+    await getSchools(params.sort, params.search, params.page),
 });
 
 const detailVisible = ref(false);
 const detailLoading = ref(false);
-const currentSchool = ref<any>(null);
+interface School {
+  id: number;
+  name: string;
+  address?: string;
+  principal?: {
+    nickname?: string;
+    username?: string;
+  };
+  image?: {
+    url: string;
+  };
+  created_at: string;
+}
+
+const currentSchool = ref<School | null>(null);
 
 const detailProperties = computed(() => {
   if (!currentSchool.value) return [];
   return [
-    { label: '学校名称', value: currentSchool.value.name },
-    { label: '校长', value: currentSchool.value.principal?.nickname || currentSchool.value.principal?.username || '—' },
-    { label: '地址', value: currentSchool.value.address || '—' },
+    { label: "学校名称", value: currentSchool.value.name },
+    {
+      label: "校长",
+      value:
+        currentSchool.value.principal?.nickname ||
+        currentSchool.value.principal?.username ||
+        "—",
+    },
+    { label: "地址", value: currentSchool.value.address || "—" },
   ];
 });
 
-const openDetail = (item: any) => {
+const openDetail = (item: School) => {
   currentSchool.value = item;
   detailVisible.value = true;
 };
@@ -113,27 +203,35 @@ const addSchool = () => {
 const handleDelete = async () => {
   if (!currentSchool.value) return;
   try {
-    await MessageBox.confirm(t("manager.confirm.deleteMessage"), t("manager.confirm.deleteTitle"), { type: "warning" });
+    await MessageBox.confirm(
+      t("manager.confirm.deleteMessage"),
+      t("manager.confirm.deleteTitle"),
+      { type: "warning" }
+    );
     await deleteSchool(currentSchool.value.id);
     detailVisible.value = false;
     refresh();
     Message.success(t("manager.messages.deleteSuccess"));
-  } catch { }
+  } catch {}
 };
 
-const deletedWindow = async (item: any) => {
+const deletedWindow = async (item: School) => {
   try {
-    await MessageBox.confirm(t("manager.confirm.deleteMessage"), t("manager.confirm.deleteTitle"), { type: "warning" });
+    await MessageBox.confirm(
+      t("manager.confirm.deleteMessage"),
+      t("manager.confirm.deleteTitle"),
+      { type: "warning" }
+    );
     await deleteSchool(item.id);
     refresh();
     Message.success(t("manager.messages.deleteSuccess"));
-  } catch { }
+  } catch {}
 };
 
 const formatItemDate = (dateStr?: string) => {
-  if (!dateStr) return '—';
+  if (!dateStr) return "—";
   const d = new Date(dateStr);
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
 };
 </script>
 

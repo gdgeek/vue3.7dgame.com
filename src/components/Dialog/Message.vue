@@ -1,9 +1,21 @@
 <template>
-  <Transition name="message-fade" @before-leave="onClose" @after-leave="$emit('destroy')">
-    <div v-show="visible" class="custom-message" :class="type" :style="{ top: top + 'px', zIndex }"
-      @mouseenter="clearTimer" @mouseleave="startTimer">
+  <Transition
+    name="message-fade"
+    @before-leave="onClose"
+    @after-leave="$emit('destroy')"
+  >
+    <div
+      v-show="visible"
+      class="custom-message"
+      :class="type"
+      :style="{ top: top + 'px', zIndex }"
+      @mouseenter="clearTimer"
+      @mouseleave="startTimer"
+    >
       <div class="message-content-wrapper">
-        <span class="material-symbols-outlined message-icon">{{ iconName }}</span>
+        <span class="material-symbols-outlined message-icon">{{
+          iconName
+        }}</span>
         <span class="message-text">{{ message }}</span>
       </div>
       <button v-if="showClose" class="message-close" @click.stop="close">
@@ -14,27 +26,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted } from "vue";
 
-const props = withDefaults(defineProps<{
-  id: string;
-  message: string;
-  type?: 'success' | 'warning' | 'info' | 'error';
-  duration?: number;
-  offset?: number;
-  zIndex?: number;
-  showClose?: boolean;
-  onClose?: () => void;
-}>(), {
-  type: 'info',
-  duration: 3000,
-  offset: 20,
-  zIndex: 2000,
-  showClose: false,
-});
+const props = withDefaults(
+  defineProps<{
+    id: string;
+    message: string;
+    type?: "success" | "warning" | "info" | "error";
+    duration?: number;
+    offset?: number;
+    zIndex?: number;
+    showClose?: boolean;
+    onClose?: () => void;
+  }>(),
+  {
+    type: "info",
+    duration: 3000,
+    offset: 20,
+    zIndex: 2000,
+    showClose: false,
+  }
+);
 
 const emit = defineEmits<{
-  (e: 'destroy'): void;
+  (e: "destroy"): void;
 }>();
 
 const visible = ref(false);
@@ -42,12 +57,12 @@ let timer: any = null;
 
 const iconName = computed(() => {
   const icons = {
-    success: 'check_circle',
-    warning: 'warning',
-    info: 'info',
-    error: 'error'
+    success: "check_circle",
+    warning: "warning",
+    info: "info",
+    error: "error",
   };
-  return icons[props.type] || 'info';
+  return icons[props.type] || "info";
 });
 
 const top = computed(() => props.offset);
@@ -78,7 +93,7 @@ onMounted(() => {
 
 defineExpose({
   visible,
-  close
+  close,
 });
 </script>
 
@@ -95,8 +110,14 @@ defineExpose({
   max-width: 480px;
   border-radius: 50px; // Pill shape to differentiate from Dialogs but align with button styles
   background: var(--bg-card, #ffffff);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
-  transition: opacity 0.3s, transform 0.4s, top 0.4s;
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.08),
+    0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  transition:
+    opacity 0.3s,
+    transform 0.4s,
+    top 0.4s;
   pointer-events: all;
   box-sizing: border-box;
 
@@ -133,7 +154,7 @@ defineExpose({
     border: 1px solid var(--primary-light, rgba(0, 186, 255, 0.2));
 
     .message-icon {
-      color: var(--primary-color, #00BAFF);
+      color: var(--primary-color, #00baff);
     }
   }
 }

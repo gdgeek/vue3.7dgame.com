@@ -28,14 +28,15 @@
             <span class="theme-name">{{ theme.displayName }}</span>
             <span class="theme-desc">{{ theme.description }}</span>
           </div>
-          <span 
-            v-if="currentThemeName === theme.name" 
+          <span
+            v-if="currentThemeName === theme.name"
             class="material-symbols-outlined check-icon"
-          >check_circle</span>
+            >check_circle</span
+          >
         </button>
       </div>
     </div>
-    
+
     <!-- 日间模式主题色选择 -->
     <div v-if="currentThemeName === 'modern-blue'" class="theme-section">
       <div class="section-header">
@@ -53,25 +54,26 @@
             :title="preset.name"
             @click="handleColorSelect(preset.color)"
           >
-            <span 
-              v-if="currentPrimaryColor === preset.color" 
+            <span
+              v-if="currentPrimaryColor === preset.color"
               class="material-symbols-outlined color-check"
-            >check</span>
+              >check</span
+            >
           </button>
         </div>
         <div class="custom-color-row">
           <label class="custom-color-label">
             <span class="material-symbols-outlined">edit</span>
             <span>自定义</span>
-            <input 
-              type="color" 
+            <input
+              type="color"
               :value="currentPrimaryColor"
               class="color-input"
               @input="handleCustomColor"
             />
           </label>
-          <button 
-            v-if="customPrimaryColor" 
+          <button
+            v-if="customPrimaryColor"
             class="reset-btn"
             @click="handleResetColor"
           >
@@ -85,8 +87,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useTheme } from '@/composables/useTheme'
+import { computed } from "vue";
+import { useTheme } from "@/composables/useTheme";
 
 const {
   availableThemes,
@@ -95,30 +97,32 @@ const {
   presetPrimaryColors,
   setCustomPrimaryColor,
   getCustomPrimaryColor,
-} = useTheme()
+} = useTheme();
 
 // 当前主题色
-const customPrimaryColor = computed(() => getCustomPrimaryColor())
-const currentPrimaryColor = computed(() => customPrimaryColor.value || '#00BAFF')
+const customPrimaryColor = computed(() => getCustomPrimaryColor());
+const currentPrimaryColor = computed(
+  () => customPrimaryColor.value || "#00BAFF"
+);
 
 // 选择预设颜色
 function handleColorSelect(color: string) {
-  if (color === '#00BAFF') {
-    setCustomPrimaryColor(null)
+  if (color === "#00BAFF") {
+    setCustomPrimaryColor(null);
   } else {
-    setCustomPrimaryColor(color)
+    setCustomPrimaryColor(color);
   }
 }
 
 // 自定义颜色
 function handleCustomColor(e: Event) {
-  const color = (e.target as HTMLInputElement).value
-  setCustomPrimaryColor(color)
+  const color = (e.target as HTMLInputElement).value;
+  setCustomPrimaryColor(color);
 }
 
 // 重置为默认
 function handleResetColor() {
-  setCustomPrimaryColor(null)
+  setCustomPrimaryColor(null);
 }
 </script>
 
@@ -134,12 +138,12 @@ function handleResetColor() {
   align-items: center;
   gap: 8px;
   margin-bottom: 16px;
-  
+
   .material-symbols-outlined {
     font-size: 20px;
-    color: var(--primary-color, #00BAFF);
+    color: var(--primary-color, #00baff);
   }
-  
+
   .section-title {
     font-size: 15px;
     font-weight: 600;
@@ -165,13 +169,13 @@ function handleResetColor() {
   cursor: pointer;
   transition: all 0.2s;
   text-align: left;
-  
+
   &:hover {
     border-color: var(--border-color-hover, #94a3b8);
   }
-  
+
   &.active {
-    border-color: var(--primary-color, #00BAFF);
+    border-color: var(--primary-color, #00baff);
     background: var(--primary-light, rgba(0, 186, 255, 0.05));
   }
 }
@@ -185,12 +189,12 @@ function handleResetColor() {
   flex-shrink: 0;
   border: 1px solid rgba(0, 0, 0, 0.1);
   position: relative;
-  
+
   .preview-sidebar {
     width: 16px;
     background: #1e293b;
   }
-  
+
   .preview-content {
     flex: 1;
     background: #f0f4f8;
@@ -199,117 +203,122 @@ function handleResetColor() {
     flex-direction: column;
     gap: 3px;
   }
-  
+
   .preview-header {
     height: 8px;
     background: #ffffff;
     border-radius: 2px;
   }
-  
+
   .preview-cards {
     flex: 1;
     display: flex;
     gap: 3px;
   }
-  
+
   .preview-card {
     flex: 1;
     background: #ffffff;
     border-radius: 4px;
     border: 1px solid #e2e8f0;
   }
-  
+
   // 日间模式预览 (modern-blue)
   &.modern-blue {
-    .preview-sidebar { background: #ffffff; border-right: 1px solid #e2e8f0; }
-    .preview-content { background: #f0f4f8; }
-    .preview-card { 
-      border-radius: 6px; 
+    .preview-sidebar {
+      background: #ffffff;
+      border-right: 1px solid #e2e8f0;
+    }
+    .preview-content {
+      background: #f0f4f8;
+    }
+    .preview-card {
+      border-radius: 6px;
       border-color: #e2e8f0;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
   }
-  
+
   // 夜间模式预览 (deep-space)
   &.deep-space {
-    .preview-sidebar { 
-      background: #080A0F; 
-      border-right: 1px solid #21262D;
+    .preview-sidebar {
+      background: #080a0f;
+      border-right: 1px solid #21262d;
     }
-    .preview-content { 
-      background: #0B0E14;
+    .preview-content {
+      background: #0b0e14;
     }
-    .preview-header { 
+    .preview-header {
       background: #151921;
       border-radius: 2px;
     }
-    .preview-card { 
-      background: #151921; 
-      border-radius: 4px; 
-      border-color: #21262D;
+    .preview-card {
+      background: #151921;
+      border-radius: 4px;
+      border-color: #21262d;
     }
-    
+
     // 蓝色高亮点缀
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       top: 8px;
       left: 20px;
       width: 4px;
       height: 4px;
-      background: #2D68FF;
+      background: #2d68ff;
       border-radius: 50%;
-      box-shadow: 0 0 6px #2D68FF;
+      box-shadow: 0 0 6px #2d68ff;
     }
   }
-  
+
   // 赛博科技预览 - 深色背景、霓虹边框
   &.cyber-tech {
-    .preview-sidebar { 
-      background: #080A0F; 
-      border-right: 1px solid #00F2FF;
+    .preview-sidebar {
+      background: #080a0f;
+      border-right: 1px solid #00f2ff;
       box-shadow: 0 0 8px rgba(0, 242, 255, 0.3);
     }
-    .preview-content { 
-      background: #0B0E14;
-      background-image: 
+    .preview-content {
+      background: #0b0e14;
+      background-image:
         linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
       background-size: 8px 8px;
     }
-    .preview-header { 
-      background: rgba(18, 24, 32, 0.85); 
+    .preview-header {
+      background: rgba(18, 24, 32, 0.85);
       border-radius: 2px;
     }
-    .preview-card { 
-      background: rgba(18, 24, 32, 0.85); 
-      border-radius: 3px; 
+    .preview-card {
+      background: rgba(18, 24, 32, 0.85);
+      border-radius: 3px;
       border-color: rgba(0, 242, 255, 0.2);
       box-shadow: 0 0 4px rgba(0, 242, 255, 0.2);
     }
   }
-  
+
   // 教育友好预览 - 温暖色调、大圆角
   &.edu-friendly {
-    .preview-sidebar { 
-      background: linear-gradient(180deg, #FF6B35 0%, #FFB347 100%);
+    .preview-sidebar {
+      background: linear-gradient(180deg, #ff6b35 0%, #ffb347 100%);
     }
-    .preview-content { 
-      background: #FFF8F5;
+    .preview-content {
+      background: #fff8f5;
     }
-    .preview-header { 
+    .preview-header {
       background: #ffffff;
       border-radius: 4px;
     }
-    .preview-card { 
-      border-radius: 8px; 
-      border-color: #FFE4DB;
+    .preview-card {
+      border-radius: 8px;
+      border-color: #ffe4db;
       border-width: 2px;
     }
-    
+
     // 波浪装饰
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       bottom: 0;
       left: 16px;
@@ -319,46 +328,46 @@ function handleResetColor() {
       background-size: cover;
     }
   }
-  
+
   // 新粗犷主义预览 - 粗边框、硬阴影
   &.neo-brutalism {
     border-radius: 4px;
-    .preview-sidebar { 
-      background: #FFFFFF;
+    .preview-sidebar {
+      background: #ffffff;
       border-right: 2px solid #000000;
     }
-    .preview-content { 
-      background: #FAFAF8;
+    .preview-content {
+      background: #fafaf8;
     }
-    .preview-header { 
-      background: #FFF000;
+    .preview-header {
+      background: #fff000;
       border-radius: 2px;
       border: 1px solid #000000;
     }
-    .preview-card { 
-      border-radius: 2px; 
+    .preview-card {
+      border-radius: 2px;
       border: 2px solid #000000;
       box-shadow: 2px 2px 0 #000000;
     }
   }
-  
+
   // 极简纯净预览 - 无圆角、纯黑白
   &.minimal-pure {
     border-radius: 0;
-    .preview-sidebar { 
+    .preview-sidebar {
       background: #fafafa;
       border-right: 1px solid #e0e0e0;
     }
-    .preview-content { 
+    .preview-content {
       background: #ffffff;
     }
-    .preview-header { 
+    .preview-header {
       background: #fafafa;
       border-radius: 0;
       border-bottom: 1px solid #e0e0e0;
     }
-    .preview-card { 
-      border-radius: 0; 
+    .preview-card {
+      border-radius: 0;
       border-color: #e0e0e0;
       box-shadow: none;
     }
@@ -389,7 +398,7 @@ function handleResetColor() {
 
 .check-icon {
   font-size: 24px;
-  color: var(--primary-color, #00BAFF);
+  color: var(--primary-color, #00baff);
   flex-shrink: 0;
 }
 
@@ -398,7 +407,7 @@ function handleResetColor() {
   .theme-desc {
     display: none;
   }
-  
+
   .theme-preview {
     width: 60px;
     height: 42px;
@@ -430,17 +439,19 @@ function handleResetColor() {
   align-items: center;
   justify-content: center;
   position: relative;
-  
+
   &:hover {
     transform: scale(1.1);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
-  
+
   &.active {
     border-color: var(--text-primary, #1e293b);
-    box-shadow: 0 0 0 2px var(--bg-card, #ffffff), 0 0 0 4px var(--preset-color);
+    box-shadow:
+      0 0 0 2px var(--bg-card, #ffffff),
+      0 0 0 4px var(--preset-color);
   }
-  
+
   .color-check {
     font-size: 18px;
     color: #ffffff;
@@ -466,16 +477,16 @@ function handleResetColor() {
   font-size: 13px;
   color: var(--text-secondary, #64748b);
   transition: all 0.2s;
-  
+
   &:hover {
     border-color: var(--border-color-hover, #94a3b8);
     color: var(--text-primary, #1e293b);
   }
-  
+
   .material-symbols-outlined {
     font-size: 16px;
   }
-  
+
   .color-input {
     width: 24px;
     height: 24px;
@@ -484,11 +495,11 @@ function handleResetColor() {
     border-radius: 50%;
     cursor: pointer;
     background: transparent;
-    
+
     &::-webkit-color-swatch-wrapper {
       padding: 0;
     }
-    
+
     &::-webkit-color-swatch {
       border: 1px solid var(--border-color, #e2e8f0);
       border-radius: 50%;
@@ -508,13 +519,13 @@ function handleResetColor() {
   font-size: 13px;
   color: var(--text-muted, #94a3b8);
   transition: all 0.2s;
-  
+
   &:hover {
     border-color: var(--danger-color, #ef4444);
     color: var(--danger-color, #ef4444);
     background: var(--danger-light, rgba(239, 68, 68, 0.1));
   }
-  
+
   .material-symbols-outlined {
     font-size: 16px;
   }

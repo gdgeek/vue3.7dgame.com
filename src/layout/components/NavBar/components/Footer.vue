@@ -1,13 +1,14 @@
 <template>
   <footer class="app-footer" :class="{ 'dark-mode': isDarkMode }">
     <div class="footer-content">
-
       <div class="footer-links">
         <template v-for="(link, index) in domainStore.links" :key="link.url">
           <a :href="link.url" target="_blank" class="footer-link">
             {{ link.name }}
           </a>
-          <span v-if="index < domainStore.links.length - 1" class="divider">|</span>
+          <span v-if="index < domainStore.links.length - 1" class="divider"
+            >|</span
+          >
         </template>
       </div>
     </div>
@@ -15,10 +16,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useDomainStore } from '@/store/modules/domain';
-import { useSettingsStore } from '@/store/modules/settings';
-import { ThemeEnum } from '@/enums/ThemeEnum';
+import { computed } from "vue";
+import { useDomainStore } from "@/store/modules/domain";
+import { useSettingsStore } from "@/store/modules/settings";
+import { ThemeEnum } from "@/enums/ThemeEnum";
 
 const domainStore = useDomainStore();
 const settingsStore = useSettingsStore();

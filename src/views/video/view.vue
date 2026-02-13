@@ -9,20 +9,38 @@
               <span v-if="videoData">{{ videoData.name }}</span>
             </template>
             <div class="box-item" style="text-align: center">
-              <video id="video" controls="true" style="height: 300px; width: auto">
+              <video
+                id="video"
+                controls="true"
+                style="height: 300px; width: auto"
+              >
                 <source v-if="file !== null" id="src" :src="file" />
               </video>
-              <video id="new_video" style="height: 100%; width: auto" hidden @canplaythrough="dealWith"></video>
+              <video
+                id="new_video"
+                style="height: 100%; width: auto"
+                hidden
+                @canplaythrough="dealWith"
+              ></video>
             </div>
           </el-card>
           <br />
         </el-col>
         <el-col :sm="8">
-          <MrppInfo v-if="videoData" :title="$t('video.view.info.title')" titleSuffix=" :" :tableData="tableData"
-            :itemLabel="$t('video.view.info.label1')" :textLabel="$t('video.view.info.label2')"
-            :downloadText="$t('video.view.info.download')" :renameText="$t('video.view.info.name')"
-            :deleteText="$t('video.view.info.delete')" @download="downloadVideo" @rename="namedWindow"
-            @delete="deleteWindow">
+          <MrppInfo
+            v-if="videoData"
+            :title="$t('video.view.info.title')"
+            titleSuffix=" :"
+            :tableData="tableData"
+            :itemLabel="$t('video.view.info.label1')"
+            :textLabel="$t('video.view.info.label2')"
+            :downloadText="$t('video.view.info.download')"
+            :renameText="$t('video.view.info.name')"
+            :deleteText="$t('video.view.info.delete')"
+            @download="downloadVideo"
+            @rename="namedWindow"
+            @delete="deleteWindow"
+          >
           </MrppInfo>
           <br />
         </el-col>
@@ -76,7 +94,9 @@ const tableData = computed(() => {
       {
         item: t("video.view.info.item2"),
         text:
-          videoData.value.author?.nickname || videoData.value.author?.username || '—',
+          videoData.value.author?.nickname ||
+          videoData.value.author?.username ||
+          "—",
       },
       {
         item: t("video.view.info.item3"),
@@ -94,7 +114,7 @@ const tableData = computed(() => {
     let info: any = {};
     try {
       info = JSON.parse(videoData.value.info || "{}");
-    } catch { }
+    } catch {}
     if (info.length) {
       base.push({
         item: t("video.view.info.item6"),
