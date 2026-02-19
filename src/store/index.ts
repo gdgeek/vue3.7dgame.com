@@ -17,4 +17,5 @@ export * from "./modules/screen";
 export * from "./modules/settings";
 export * from "./modules/tagsView";
 export * from "./modules/user";
+export * from "./modules/domain";
 export { store };

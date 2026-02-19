@@ -17,6 +17,31 @@ watch(
   }
 );
 
+// --- API Failover Configuration ---
+const PRIMARY_API = env.api;
+const BACKUP_API = env.backup_api;
+let currentApi = PRIMARY_API;
+let healthCheckTimer: ReturnType<typeof setInterval> | null = null;
+
+const startHealthCheck = () => {
+  if (healthCheckTimer || !PRIMARY_API) return;
+
+  healthCheckTimer = setInterval(async () => {
+    try {
+      await axios.get(`${PRIMARY_API}/health`, { timeout: 3000 });
+      console.info("[API Failover] Primary API restored, switching back.");
+      currentApi = PRIMARY_API;
+      if (healthCheckTimer) {
+        clearInterval(healthCheckTimer);
+        healthCheckTimer = null;
+      }
+    } catch (e) {
+      // Primary still down
+    }
+  }, 30000);
+};
+// ----------------------------------
+
 // 动态错误消息
 const getMessageArray = () => {
   return [
@@ -50,7 +75,7 @@ const isTokenExpiringSoon = (token: any): boolean => {
 
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: env.api,
+  baseURL: currentApi,
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
 });
@@ -69,6 +94,12 @@ const refreshToken = async () => {
 // 请求拦截器
 service.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
+    // --- Failover Logic: Dynamic Base URL ---
+    if (currentApi && !config.baseURL?.startsWith("http")) {
+      config.baseURL = currentApi;
+    }
+    // ----------------------------------------
+
     const token = Token.getToken();
 
     // 设置token
@@ -128,9 +159,9 @@ function handleUnauthorized(router: ReturnType<typeof useRouter>) {
 
   showErrorMessage(messages[0]);
   return useUserStoreHook()
-    .resetToken()
+    .logout()
     .then(() => {
-      router.push({ path: "/web/index" });
+      router.push({ path: "/site/logout" });
       // Reset the flag after a short delay to allow future handling
       setTimeout(() => {
         isHandlingUnauthorized = false;
@@ -154,8 +185,27 @@ service.interceptors.response.use(
   //
   async (error: any) => {
     const router = useRouter();
-    const { response } = error;
+    const { response, config } = error;
     const messages = getMessageArray();
+
+    // --- Failover Logic: Retry on Network Error ---
+    if (
+      !response &&
+      config &&
+      !config._retry &&
+      BACKUP_API &&
+      currentApi === PRIMARY_API
+    ) {
+      console.warn(
+        "[API Failover] Primary API unreachable, switching to backup."
+      );
+      currentApi = BACKUP_API;
+      config._retry = true;
+      config.baseURL = currentApi;
+      startHealthCheck();
+      return service(config);
+    }
+    // --------------------------------------------
 
     if (!response) {
       if (error.message === "Network Error") {

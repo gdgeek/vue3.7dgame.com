@@ -2,9 +2,12 @@ services:
   vue3:
     build: .
     environment:
-      - VITE_APP_API_URL=https://api.your-domain.com
-      - VITE_APP_AUTH_API=https://auth.your-domain.com
-      - VITE_APP_AI_API=https://ai.your-domain.com
+      - APP_API_URL=https://api.your-domain.com
+      - APP_BACKUP_API_URL=https://backup-api.your-domain.com
+      - APP_DOMAIN_INFO_API_URL=https://domain-info.your-domain.com
+      - APP_BACKUP_DOMAIN_INFO_API_URL=https://backup-domain-info.your-domain.com
+      - APP_AUTH_API=https://auth.your-domain.com
+      - APP_AI_API=https://ai.your-domain.com
     volumes:
       - ./dist:/usr/share/nginx/html
     ports:

@@ -13,11 +13,7 @@
       <el-scrollbar>
         <!-- 主页 -->
         <router-link to="/home" custom v-slot="{ isActive, navigate }">
-          <div
-            class="sidebar-item"
-            :class="{ 'sidebar-item-active': isActive }"
-            @click="navigate"
-          >
+          <div class="sidebar-item" :class="{ 'sidebar-item-active': isActive }" @click="navigate">
             <span class="material-symbols-outlined">home</span>
             <span class="item-text">主页</span>
           </div>
@@ -25,13 +21,8 @@
 
         <!-- 素材库 (可展开) -->
         <div class="nav-group">
-          <el-popover
-            placement="right"
-            :width="200"
-            trigger="hover"
-            :disabled="!collapsed"
-            popper-class="sidebar-submenu-popover"
-          >
+          <el-popover placement="right" :width="200" trigger="hover" :disabled="!collapsed"
+            popper-class="sidebar-submenu-popover">
             <template #reference>
               <div class="menu-trigger-wrapper">
                 <div class="sidebar-item">
@@ -42,55 +33,23 @@
             </template>
             <!-- Popover Content -->
             <div class="popover-menu">
-              <router-link
-                to="/resource/polygen/index"
-                custom
-                v-slot="{ isActive, navigate }"
-              >
-                <div
-                  class="popover-item"
-                  :class="{ active: isActive }"
-                  @click="navigate"
-                >
+              <router-link to="/resource/polygen/index" custom v-slot="{ isActive, navigate }">
+                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
                   <span>模型</span>
                 </div>
               </router-link>
-              <router-link
-                to="/resource/picture/index"
-                custom
-                v-slot="{ isActive, navigate }"
-              >
-                <div
-                  class="popover-item"
-                  :class="{ active: isActive }"
-                  @click="navigate"
-                >
+              <router-link to="/resource/picture/index" custom v-slot="{ isActive, navigate }">
+                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
                   <span>图片</span>
                 </div>
               </router-link>
-              <router-link
-                to="/resource/audio/index"
-                custom
-                v-slot="{ isActive, navigate }"
-              >
-                <div
-                  class="popover-item"
-                  :class="{ active: isActive }"
-                  @click="navigate"
-                >
+              <router-link to="/resource/audio/index" custom v-slot="{ isActive, navigate }">
+                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
                   <span>音频</span>
                 </div>
               </router-link>
-              <router-link
-                to="/resource/video/index"
-                custom
-                v-slot="{ isActive, navigate }"
-              >
-                <div
-                  class="popover-item"
-                  :class="{ active: isActive }"
-                  @click="navigate"
-                >
+              <router-link to="/resource/video/index" custom v-slot="{ isActive, navigate }">
+                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
                   <span>视频</span>
                 </div>
               </router-link>
@@ -99,58 +58,26 @@
 
           <!-- Inline Submenu - Hidden when collapsed -->
           <div v-show="!collapsed" class="submenu">
-            <router-link
-              to="/resource/polygen/index"
-              custom
-              v-slot="{ isActive, navigate }"
-            >
-              <div
-                class="sidebar-subitem"
-                :class="{ 'sidebar-subitem-active': isActive }"
-                @click="navigate"
-              >
+            <router-link to="/resource/polygen/index" custom v-slot="{ isActive, navigate }">
+              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
                 <span>模型</span>
               </div>
             </router-link>
-            <router-link
-              to="/resource/picture/index"
-              custom
-              v-slot="{ isActive, navigate }"
-            >
-              <div
-                class="sidebar-subitem"
-                :class="{ 'sidebar-subitem-active': isActive }"
-                @click="navigate"
-              >
+            <router-link to="/resource/picture/index" custom v-slot="{ isActive, navigate }">
+              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
                 <span>图片</span>
               </div>
             </router-link>
-            <router-link
-              to="/resource/audio/index"
-              custom
-              v-slot="{ isActive, navigate }"
-            >
-              <div
-                class="sidebar-subitem"
-                :class="{ 'sidebar-subitem-active': isActive }"
-                @click="navigate"
-              >
+            <router-link to="/resource/audio/index" custom v-slot="{ isActive, navigate }">
+              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
                 <span>音频</span>
               </div>
             </router-link>
-            <router-link
-              to="/resource/video/index"
-              custom
-              v-slot="{ isActive, navigate }"
-            >
-              <div
-                class="sidebar-subitem"
-                :class="{ 'sidebar-subitem-active': isActive }"
-                @click="navigate"
-              >
+            <router-link to="/resource/video/index" custom v-slot="{ isActive, navigate }">
+              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
                 <span>视频</span>
               </div>
@@ -160,27 +87,16 @@
 
         <!-- 实体 -->
         <router-link to="/meta/list" custom v-slot="{ isActive, navigate }">
-          <div
-            class="sidebar-item"
-            :class="{ 'sidebar-item-active': isActive }"
-            @click="navigate"
-          >
+          <div class="sidebar-item" :class="{ 'sidebar-item-active': isActive }" @click="navigate">
             <span class="material-symbols-outlined">token</span>
             <span class="item-text">实体</span>
           </div>
         </router-link>
 
         <!-- AI 创作 (Conditional) -->
-        <div
-          v-if="ability.can('open', new AbilityRouter('/ai'))"
-          class="nav-group"
-        >
+        <div v-if="ability.can('open', new AbilityRouter('/ai'))" class="nav-group">
           <router-link to="/ai/list" custom v-slot="{ isActive, navigate }">
-            <div
-              class="sidebar-item"
-              :class="{ 'sidebar-item-active': isActive }"
-              @click="navigate"
-            >
+            <div class="sidebar-item" :class="{ 'sidebar-item-active': isActive }" @click="navigate">
               <span class="material-symbols-outlined">smart_toy</span>
               <span class="item-text">AI 创作</span>
             </div>
@@ -189,21 +105,13 @@
 
         <!-- 场景 (可展开) -->
         <div class="nav-group">
-          <el-popover
-            placement="right"
-            :width="200"
-            trigger="hover"
-            :disabled="!collapsed"
-            popper-class="sidebar-submenu-popover"
-          >
+          <el-popover placement="right" :width="200" trigger="hover" :disabled="!collapsed"
+            popper-class="sidebar-submenu-popover">
             <template #reference>
               <div class="menu-trigger-wrapper">
                 <router-link to="/verse" custom v-slot="{ navigate }">
-                  <div
-                    class="sidebar-item"
-                    :class="{ 'sidebar-item-active': isExactActive('/verse') }"
-                    @click="navigate"
-                  >
+                  <div class="sidebar-item" :class="{ 'sidebar-item-active': isExactActive('/verse') }"
+                    @click="navigate">
                     <span class="material-symbols-outlined">layers</span>
                     <span class="item-text">场景</span>
                   </div>
@@ -212,29 +120,13 @@
             </template>
             <!-- Popover Content -->
             <div class="popover-menu">
-              <router-link
-                to="/verse/index"
-                custom
-                v-slot="{ isActive, navigate }"
-              >
-                <div
-                  class="popover-item"
-                  :class="{ active: isActive }"
-                  @click="navigate"
-                >
+              <router-link to="/verse/index" custom v-slot="{ isActive, navigate }">
+                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
                   <span>自己创造</span>
                 </div>
               </router-link>
-              <router-link
-                to="/verse/public"
-                custom
-                v-slot="{ isActive, navigate }"
-              >
-                <div
-                  class="popover-item"
-                  :class="{ active: isActive }"
-                  @click="navigate"
-                >
+              <router-link to="/verse/public" custom v-slot="{ isActive, navigate }">
+                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
                   <span>系统推荐</span>
                 </div>
               </router-link>
@@ -243,30 +135,14 @@
 
           <!-- Inline Submenu - Hidden when collapsed -->
           <div v-show="!collapsed" class="submenu">
-            <router-link
-              to="/verse/index"
-              custom
-              v-slot="{ isActive, navigate }"
-            >
-              <div
-                class="sidebar-subitem"
-                :class="{ 'sidebar-subitem-active': isActive }"
-                @click="navigate"
-              >
+            <router-link to="/verse/index" custom v-slot="{ isActive, navigate }">
+              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
                 <span>自己创造</span>
               </div>
             </router-link>
-            <router-link
-              to="/verse/public"
-              custom
-              v-slot="{ isActive, navigate }"
-            >
-              <div
-                class="sidebar-subitem"
-                :class="{ 'sidebar-subitem-active': isActive }"
-                @click="navigate"
-              >
+            <router-link to="/verse/public" custom v-slot="{ isActive, navigate }">
+              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
                 <span>系统推荐</span>
               </div>
@@ -275,17 +151,9 @@
         </div>
 
         <!-- 校园管理 (Conditional) -->
-        <div
-          v-if="ability.can('open', new AbilityRouter('/campus'))"
-          class="nav-group"
-        >
-          <el-popover
-            placement="right"
-            :width="200"
-            trigger="hover"
-            :disabled="!collapsed"
-            popper-class="sidebar-submenu-popover"
-          >
+        <div v-if="ability.can('open', new AbilityRouter('/campus'))" class="nav-group">
+          <el-popover placement="right" :width="200" trigger="hover" :disabled="!collapsed"
+            popper-class="sidebar-submenu-popover">
             <template #reference>
               <div class="menu-trigger-wrapper">
                 <div class="sidebar-item">
@@ -295,42 +163,18 @@
               </div>
             </template>
             <div class="popover-menu">
-              <router-link
-                to="/campus/school"
-                custom
-                v-slot="{ isActive, navigate }"
-              >
-                <div
-                  class="popover-item"
-                  :class="{ active: isActive }"
-                  @click="navigate"
-                >
+              <router-link to="/campus/school" custom v-slot="{ isActive, navigate }">
+                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
                   <span>学校管理</span>
                 </div>
               </router-link>
-              <router-link
-                to="/campus/teacher"
-                custom
-                v-slot="{ isActive, navigate }"
-              >
-                <div
-                  class="popover-item"
-                  :class="{ active: isActive }"
-                  @click="navigate"
-                >
+              <router-link to="/campus/teacher" custom v-slot="{ isActive, navigate }">
+                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
                   <span>老师管理</span>
                 </div>
               </router-link>
-              <router-link
-                to="/campus/student"
-                custom
-                v-slot="{ isActive, navigate }"
-              >
-                <div
-                  class="popover-item"
-                  :class="{ active: isActive }"
-                  @click="navigate"
-                >
+              <router-link to="/campus/student" custom v-slot="{ isActive, navigate }">
+                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
                   <span>学生管理</span>
                 </div>
               </router-link>
@@ -338,44 +182,20 @@
           </el-popover>
 
           <div v-show="!collapsed" class="submenu">
-            <router-link
-              to="/campus/school"
-              custom
-              v-slot="{ isActive, navigate }"
-            >
-              <div
-                class="sidebar-subitem"
-                :class="{ 'sidebar-subitem-active': isActive }"
-                @click="navigate"
-              >
+            <router-link to="/campus/school" custom v-slot="{ isActive, navigate }">
+              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
                 <span>学校管理</span>
               </div>
             </router-link>
-            <router-link
-              to="/campus/teacher"
-              custom
-              v-slot="{ isActive, navigate }"
-            >
-              <div
-                class="sidebar-subitem"
-                :class="{ 'sidebar-subitem-active': isActive }"
-                @click="navigate"
-              >
+            <router-link to="/campus/teacher" custom v-slot="{ isActive, navigate }">
+              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
                 <span>老师管理</span>
               </div>
             </router-link>
-            <router-link
-              to="/campus/student"
-              custom
-              v-slot="{ isActive, navigate }"
-            >
-              <div
-                class="sidebar-subitem"
-                :class="{ 'sidebar-subitem-active': isActive }"
-                @click="navigate"
-              >
+            <router-link to="/campus/student" custom v-slot="{ isActive, navigate }">
+              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
                 <span>学生管理</span>
               </div>
@@ -384,51 +204,25 @@
         </div>
 
         <!-- 管理中心 (Conditional) -->
-        <div
-          v-if="ability.can('open', new AbilityRouter('/manager'))"
-          class="nav-group"
-        >
-          <el-popover
-            placement="right"
-            :width="200"
-            trigger="hover"
-            :disabled="!collapsed"
-            popper-class="sidebar-submenu-popover"
-          >
+        <div v-if="ability.can('open', new AbilityRouter('/manager'))" class="nav-group">
+          <el-popover placement="right" :width="200" trigger="hover" :disabled="!collapsed"
+            popper-class="sidebar-submenu-popover">
             <template #reference>
               <div class="menu-trigger-wrapper">
                 <div class="sidebar-item">
-                  <span class="material-symbols-outlined"
-                    >display_settings</span
-                  >
+                  <span class="material-symbols-outlined">display_settings</span>
                   <span class="item-text">管理中心</span>
                 </div>
               </div>
             </template>
             <div class="popover-menu">
-              <router-link
-                to="/manager/user"
-                custom
-                v-slot="{ isActive, navigate }"
-              >
-                <div
-                  class="popover-item"
-                  :class="{ active: isActive }"
-                  @click="navigate"
-                >
+              <router-link to="/manager/user" custom v-slot="{ isActive, navigate }">
+                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
                   <span>用户管理</span>
                 </div>
               </router-link>
-              <router-link
-                to="/phototype/list"
-                custom
-                v-slot="{ isActive, navigate }"
-              >
-                <div
-                  class="popover-item"
-                  :class="{ active: isActive }"
-                  @click="navigate"
-                >
+              <router-link to="/phototype/list" custom v-slot="{ isActive, navigate }">
+                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
                   <span>预制体管理</span>
                 </div>
               </router-link>
@@ -436,30 +230,14 @@
           </el-popover>
 
           <div v-show="!collapsed" class="submenu">
-            <router-link
-              to="/manager/user"
-              custom
-              v-slot="{ isActive, navigate }"
-            >
-              <div
-                class="sidebar-subitem"
-                :class="{ 'sidebar-subitem-active': isActive }"
-                @click="navigate"
-              >
+            <router-link to="/manager/user" custom v-slot="{ isActive, navigate }">
+              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
                 <span>用户管理</span>
               </div>
             </router-link>
-            <router-link
-              to="/phototype/list"
-              custom
-              v-slot="{ isActive, navigate }"
-            >
-              <div
-                class="sidebar-subitem"
-                :class="{ 'sidebar-subitem-active': isActive }"
-                @click="navigate"
-              >
+            <router-link to="/phototype/list" custom v-slot="{ isActive, navigate }">
+              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
                 <span>预制体管理</span>
               </div>
@@ -490,16 +268,8 @@
     </div>
 
     <!-- 退出登录确认弹窗 -->
-    <ConfirmDialog
-      v-model="showLogoutDialog"
-      title="退出登录"
-      message="确定要退出登录吗？"
-      description="退出后需要重新登录才能访问您的账户。"
-      type="warning"
-      confirm-text="退出登录"
-      cancel-text="取消"
-      @confirm="confirmLogout"
-    ></ConfirmDialog>
+    <ConfirmDialog v-model="showLogoutDialog" title="退出登录" message="确定要退出登录吗？" description="退出后需要重新登录才能访问您的账户。"
+      type="warning" confirm-text="退出登录" cancel-text="取消" @confirm="confirmLogout"></ConfirmDialog>
   </aside>
 </template>
 
@@ -537,13 +307,14 @@ const isResourceActive = computed(() => {
 });
 
 const handleLogout = () => {
+
   showLogoutDialog.value = true;
 };
 
 const confirmLogout = async () => {
   showLogoutDialog.value = false;
   await userStore.logout();
-  router.push("/login");
+  router.push("/logout");
 };
 </script>
 

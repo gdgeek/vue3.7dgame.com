@@ -55,12 +55,29 @@ function subtitle(): string {
 }
 const environment = {
   ip: GetIP(),
-  api: ReplaceURL(import.meta.env.VITE_APP_API_URL || ""),
+  api: ReplaceURL(
+    (window as any).__API_URL__ || import.meta.env.VITE_APP_API_URL || ""
+  ),
   doc: ReplaceURL(import.meta.env.VITE_APP_DOC_API || ""),
   blockly: ReplaceURL(import.meta.env.VITE_APP_BLOCKLY_URL || ""),
   editor: ReplaceURL(import.meta.env.VITE_APP_EDITOR_URL || ""),
   auth_api: ReplaceURL(import.meta.env.VITE_APP_AUTH_API || ""),
   ai: ReplaceURL(import.meta.env.VITE_APP_AI_API || ""),
+  backup_api: ReplaceURL(
+    (window as any).__BACKUP_API_URL__ ||
+      import.meta.env.VITE_APP_BACKUP_API_URL ||
+      ""
+  ),
+  domain_info: ReplaceURL(
+    (window as any).__DOMAIN_INFO_API_URL__ ||
+      import.meta.env.VITE_APP_DOMAIN_INFO_API_URL ||
+      "https://domain.xrteeth.com"
+  ),
+  domain_info_backup: ReplaceURL(
+    (window as any).__BACKUP_DOMAIN_INFO_API_URL__ ||
+      import.meta.env.VITE_APP_BACKUP_DOMAIN_INFO_API_URL ||
+      ""
+  ),
   //a1: ReplaceURL(import.meta.env.VITE_APP_A1_API || ""),
   version: 1,
   subtitle,

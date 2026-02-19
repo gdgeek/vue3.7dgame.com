@@ -59,9 +59,10 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       // 允许IP访问
       host: "0.0.0.0",
       // 应用端口 (默认:3000)
-      port: Number(env.VITE_APP_PORT),
+      port: Number(process.env.VITE_APP_PORT || env.VITE_APP_PORT || 3000),
       // 运行是否自动打开浏览器
-      open: true,
+      open: false,
+      strictPort: true,
       proxy: env.VITE_APP_API_URL
         ? {
             /** 代理前缀为 /dev-api 的请求  */

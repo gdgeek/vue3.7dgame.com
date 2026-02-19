@@ -32,9 +32,9 @@ docker compose -f docker-compose.test.yml up --build -d
 
 ```yaml
 environment:
-  - VITE_APP_API_URL=https://api.your-domain.com
-  - VITE_APP_AUTH_API=https://auth.your-domain.com
-  - VITE_APP_AI_API=https://ai.your-domain.com
+  - APP_API_URL=https://api.your-domain.com
+  - APP_AUTH_API=https://auth.your-domain.com
+  - APP_AI_API=https://ai.your-domain.com
 ```
 
 ### 原理

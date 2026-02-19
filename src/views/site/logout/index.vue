@@ -20,7 +20,7 @@ import { useRouter } from "vue-router";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 
-import { useUserStore } from "@/store";
+import { useUserStore, useDomainStore } from "@/store";
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -31,7 +31,15 @@ const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 onMounted(async () => {
   await userStore.logout();
   setTimeout(() => {
-    router.push("/web/index");
+    const domainStore = useDomainStore(); // already imported? no, need to import
+    console.error("Logout view - Homepage:", domainStore.homepage);
+    console.error("Logout view - Info:", domainStore.info);
+    if (domainStore.homepage) {
+      window.location.href = domainStore.homepage;
+    } else {
+      alert(123)
+      // router.push("/web/index");
+    }
   }, 500);
 });
 </script>

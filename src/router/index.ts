@@ -63,23 +63,6 @@ const routes: RouteRecordRaw[] = [
       // 游戏
       gameRoutes,
 
-      // 登出
-      {
-        path: "/site/logout",
-        name: "LogOut",
-        component: null,
-        redirect: "/logout",
-        meta: {
-          title: "logout.title",
-          icon: "el-icon-back",
-          hidden: false,
-          private: false,
-          alwaysShow: false,
-          params: null,
-        },
-        children: [],
-      },
-
       // 错误页面
       {
         path: "/401",

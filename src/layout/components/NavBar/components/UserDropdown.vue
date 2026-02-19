@@ -13,11 +13,7 @@
     <!-- Dropdown Menu -->
     <Transition name="dropdown">
       <div v-if="isMenuOpen" class="dropdown-menu">
-        <router-link
-          to="/settings/edit"
-          class="dropdown-item"
-          @click="closeMenu"
-        >
+        <router-link to="/settings/edit" class="dropdown-item" @click="closeMenu">
           <span class="material-symbols-outlined">settings</span>
           <span>个人设置</span>
         </router-link>
@@ -30,16 +26,8 @@
     </Transition>
 
     <!-- 退出登录确认弹窗 -->
-    <ConfirmDialog
-      v-model="showLogoutDialog"
-      title="退出登录"
-      message="确定要退出登录吗？"
-      description="退出后需要重新登录才能访问您的账户。"
-      type="warning"
-      confirm-text="退出登录"
-      cancel-text="取消"
-      @confirm="confirmLogout"
-    ></ConfirmDialog>
+    <ConfirmDialog v-model="showLogoutDialog" title="退出登录" message="确定要退出登录吗？" description="退出后需要重新登录才能访问您的账户。"
+      type="warning" confirm-text="退出登录" cancel-text="取消" @confirm="confirmLogout"></ConfirmDialog>
   </div>
 </template>
 
@@ -93,14 +81,13 @@ const closeMenu = () => {
 };
 
 const handleLogout = () => {
-  closeMenu();
-  showLogoutDialog.value = true;
+  alert(123)
 };
 
 const confirmLogout = async () => {
   showLogoutDialog.value = false;
-  await userStore.logout();
-  router.push("/login");
+  //await userStore.logout();
+  router.push("/logout");
 };
 
 // Close menu when clicking outside

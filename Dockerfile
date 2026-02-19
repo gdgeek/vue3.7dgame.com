@@ -14,6 +14,17 @@ COPY . .
 # 构建
 RUN pnpm run build
 
+# 开发阶段
+FROM node:20-alpine AS dev
+WORKDIR /app
+COPY package.json ./
+RUN npm install pnpm -g
+RUN pnpm install
+
+# 暴露 Vite 默认端口
+EXPOSE 5173
+CMD ["pnpm", "run", "dev", "--host"]
+
 # 使用 Nginx 作为生产阶段
 FROM nginx:alpine
 

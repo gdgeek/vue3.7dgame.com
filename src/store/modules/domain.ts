@@ -1,6 +1,7 @@
 import { logger } from "@/utils/logger";
 import { defineStore } from "pinia";
-import { getDomainInfo, type DomainInfo } from "@/api/v1/domain";
+import { getDomainConfig, type DomainInfo } from "@/api/domain-query";
+import { store } from "@/store";
 
 const DOMAIN_COOKIE_KEY_PREFIX = "domain_info_";
 const COOKIE_EXPIRY_DAYS = 7;
@@ -49,6 +50,7 @@ export const useDomainStore = defineStore("domain", {
     description: (state) => state.info?.description || "",
     keywords: (state) => state.info?.keywords || "",
     author: (state) => state.info?.author || "",
+    homepage: (state) => state.info?.homepage || "",
     domain: (state) => state.info?.domain || "",
     links: (state) => state.info?.links || [],
     isLoaded: (state) => state.info !== null && !state.loading,
@@ -117,9 +119,17 @@ export const useDomainStore = defineStore("domain", {
       this.error = null;
 
       try {
-        const response = await getDomainInfo(window.location.origin, lang);
+        let domain = window.location.hostname;
+        // 本地开发环境使用特定域名
+        if (domain === "localhost" || domain === "127.0.0.1") {
+          domain = "d.xiading.hxgxonline.com";
+        }
+
+        const response: any = await getDomainConfig(domain, lang);
         this.info = response.data;
         this.currentLang = lang;
+        console.error("Domain info:", this.info);
+        console.error("Homepage:", this.info?.homepage);
 
         // Save to language-specific cookie
         setCookie(cookieKey, JSON.stringify(this.info), COOKIE_EXPIRY_DAYS);
@@ -174,3 +184,8 @@ export const useDomainStore = defineStore("domain", {
     },
   },
 });
+
+// 非setup
+export function useDomainStoreHook() {
+  return useDomainStore(store);
+}

@@ -199,8 +199,18 @@ export const useUserStore = defineStore(
     });
 
     const logout = async () => {
-      await localStorage.setItem(TOKEN_KEY, "");
-      // location.reload(); // 清空路由
+      // 调用后端注销 API（忽略失败，确保本地清理总是执行）
+      try {
+        if (Token.hasToken()) {
+          await AuthAPI.logout();
+        }
+      } catch (error) {
+        logger.error("Backend logout failed:", error);
+      }
+
+      // 正确清除 token
+      Token.removeToken();
+
       // 用户数据清空
       userInfo.value = {
         id: 0,
@@ -232,22 +242,12 @@ export const useUserStore = defineStore(
         roles: [],
         perms: [],
       };
-      // location.reload(); // 清空路由
+
       if (refreshInterval.value) {
         clearInterval(refreshInterval.value);
         refreshInterval.value = null;
       }
     };
-
-    // remove token
-    function resetToken() {
-      logger.log("resetToken");
-      return new Promise<void>((resolve) => {
-        localStorage.setItem(TOKEN_KEY, "");
-        //   resetRouter();
-        resolve();
-      });
-    }
 
     return {
       userInfo,
@@ -256,7 +256,7 @@ export const useUserStore = defineStore(
       getUserInfo,
       setUserInfo,
       logout,
-      resetToken,
+
       form,
       getRole,
       isUserPermissionGreater,
