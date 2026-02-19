@@ -47,6 +47,7 @@ import Wechat from "./Wechat.vue";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useDomainStore } from "@/store/modules/domain";
 import { ThemeEnum } from "@/enums/ThemeEnum";
+import { Message } from "@/components/Dialog";
 
 const props = defineProps({
   title: {
@@ -86,7 +87,7 @@ const closeDialog = () => {
 
 const handleLoginSuccess = () => {
   dialogVisible.value = false;
-  ElMessage.success("登录成功！");
+  Message.success("登录成功！");
 };
 
 const handleDialogClosed = () => {
@@ -113,7 +114,8 @@ defineExpose({
   :deep(.el-dialog) {
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+    background-color: var(--bg-card, #fff);
+    box-shadow: var(--shadow-xl, 0 12px 32px rgba(0, 0, 0, 0.1));
 
     .el-dialog__header {
       margin: 0;
@@ -129,18 +131,9 @@ defineExpose({
     .el-dialog__body {
       padding: 24px;
     }
-  }
 
-  &.dark-theme {
-    :deep(.el-dialog) {
-      background-color: #202020;
-      color: #f0f0f0;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
-
-      .el-dialog__header,
-      .el-dialog__title {
-        color: #f0f0f0;
-      }
+    .el-dialog__title {
+      color: var(--text-primary, #333);
     }
   }
 }
@@ -167,12 +160,8 @@ defineExpose({
   .login-title {
     font-size: 20px;
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary, #333);
     margin: 0;
-
-    .dark-theme & {
-      color: #f0f0f0;
-    }
   }
 }
 
@@ -199,34 +188,18 @@ defineExpose({
     padding: 6px 0;
     font-size: 15px;
     font-weight: 500;
-    color: #666;
+    color: var(--text-secondary, #666);
     height: auto;
     transition: all 0.3s ease;
 
-    &.is-active {
-      color: #00a8ab;
-    }
-
+    &.is-active,
     &:hover {
-      color: #00a8ab;
-    }
-
-    .dark-theme & {
-      color: #aaa;
-
-      &.is-active,
-      &:hover {
-        color: #00dbde;
-      }
+      color: var(--primary-color, #00baff);
     }
   }
 
   :deep(.el-tabs__active-bar) {
-    background-color: #00a8ab;
-
-    .dark-theme & {
-      background-color: #00dbde;
-    }
+    background-color: var(--primary-color, #00baff);
   }
 
   .tab-label {
@@ -258,12 +231,8 @@ defineExpose({
 
       p {
         margin: 6px 0;
-        color: #888;
+        color: var(--text-muted, #888);
         font-size: 14px;
-
-        .dark-theme & {
-          color: #aaa;
-        }
       }
     }
   }
@@ -274,30 +243,18 @@ defineExpose({
 
   .agreement-text {
     font-size: 13px;
-    color: #888;
+    color: var(--text-muted, #888);
     margin: 4px 0;
 
     a {
-      color: #00a8ab;
+      color: var(--primary-color, #00baff);
       text-decoration: none;
       transition: color 0.2s;
 
       &:hover {
-        color: #008385;
+        color: var(--primary-hover, #0099dd);
         text-decoration: underline;
       }
-
-      .dark-theme & {
-        color: #00dbde;
-
-        &:hover {
-          color: #6cffff;
-        }
-      }
-    }
-
-    .dark-theme & {
-      color: #aaa;
     }
   }
 }

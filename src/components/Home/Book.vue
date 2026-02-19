@@ -4,6 +4,7 @@
     lazy
     v-model="activeTab"
     @tab-click="handleTabClick"
+    class="home-tabs"
   >
     <el-tab-pane
       v-for="(item, index) in items"
@@ -68,3 +69,48 @@ const documentPath = computed(() => props.documentPath ?? "/home/document");
 const categoryPath = computed(() => props.categoryPath ?? "/home/category");
 const category = computed(() => props.category ?? true);
 </script>
+
+<style lang="scss" scoped>
+.home-tabs {
+  background: var(--bg-card);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+
+  :deep(.el-tabs__header) {
+    background: var(--bg-hover);
+    border-bottom: var(--border-width) solid var(--border-color);
+    margin: 0;
+  }
+
+  :deep(.el-tabs__nav) {
+    border: none !important;
+  }
+
+  :deep(.el-tabs__item) {
+    color: var(--text-secondary);
+    font-size: var(--font-size-md);
+    font-weight: 500;
+    border: none !important;
+    padding: 0 var(--spacing-lg);
+    height: 44px;
+    line-height: 44px;
+    transition: color var(--transition-fast);
+
+    &:hover {
+      color: var(--primary-color);
+    }
+
+    &.is-active {
+      color: var(--primary-color);
+      background: var(--bg-card);
+      font-weight: 600;
+    }
+  }
+
+  :deep(.el-tabs__content) {
+    padding: var(--spacing-lg);
+  }
+}
+</style>

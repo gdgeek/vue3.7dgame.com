@@ -214,7 +214,7 @@ function message() {
       font-size: 32px;
       font-weight: bold;
       line-height: 40px;
-      color: #1482f0;
+      color: var(--primary-color, #1482f0);
       opacity: 0;
       animation-name: slideUp;
       animation-duration: 0.5s;
@@ -226,7 +226,7 @@ function message() {
       font-size: 20px;
       font-weight: bold;
       line-height: 24px;
-      color: #222;
+      color: var(--text-primary, #222);
       opacity: 0;
       animation-name: slideUp;
       animation-duration: 0.5s;
@@ -238,7 +238,7 @@ function message() {
       margin-bottom: 30px;
       font-size: 13px;
       line-height: 21px;
-      color: grey;
+      color: var(--text-secondary, grey);
       opacity: 0;
       animation-name: slideUp;
       animation-duration: 0.5s;
@@ -256,7 +256,7 @@ function message() {
       color: #fff;
       text-align: center;
       cursor: pointer;
-      background: #1482f0;
+      background: var(--primary-color, #1482f0);
       border-radius: 100px;
       opacity: 0;
       animation-name: slideUp;

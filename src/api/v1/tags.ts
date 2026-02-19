@@ -4,7 +4,7 @@ import qs from "querystringify";
 
 export const getTags = (type: string | null = null) => {
   const query: Record<string, unknown> = {};
-  if (type === null) {
+  if (type !== null) {
     query["TagsSearch[type]"] = type;
   }
   return request({

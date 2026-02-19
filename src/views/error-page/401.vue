@@ -84,7 +84,7 @@ function back() {
 
   .pan-back-btn {
     color: #fff;
-    background: #008489;
+    background: var(--primary-color, #008489);
     border: none !important;
   }
 
@@ -102,7 +102,7 @@ function back() {
   .text-jumbo {
     font-size: 60px;
     font-weight: 700;
-    color: #484848;
+    color: var(--text-primary, #484848);
   }
 
   .list-unstyled {
@@ -113,7 +113,7 @@ function back() {
     }
 
     a {
-      color: #008489;
+      color: var(--primary-color, #008489);
       text-decoration: none;
 
       &:hover {

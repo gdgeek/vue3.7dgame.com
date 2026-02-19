@@ -271,7 +271,7 @@ export function useTTS(props: UseTTSProps) {
   };
 
   const onAudioPlayerPlay = () => (isPlaying.value = true);
-  const onAudioPlayerPause = () => { };
+  const onAudioPlayerPause = () => {};
   const onAudioPlayerEnded = () => {
     isPlaying.value = false;
     highlightedText.value = props.text.value;

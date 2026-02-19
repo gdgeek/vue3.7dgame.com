@@ -253,10 +253,8 @@ body {
   margin: 0;
   background-image: url("/media/bg/02.jpg");
   background-size: 100% auto;
-  // transition:  0.3s ease;
 
   &.dark-theme {
-    background-image: url("/media/bg/02.jpg");
     filter: brightness(80%);
   }
 }
@@ -268,14 +266,10 @@ body {
   width: 102%;
   height: 7%;
   margin-right: 10px;
-  background-color: #f1f1f1;
+  background-color: var(--bg-secondary, #f1f1f1);
 
   transition: background-color 0.3s ease;
   padding: 10px;
-
-  &.dark-theme {
-    background-color: rgb(37, 37, 37);
-  }
 }
 
 .logo {
@@ -295,9 +289,10 @@ body {
   font-family: "KaiTi", sans-serif;
   // font-size: 14px;
   font-weight: 600;
+  color: var(--text-primary, #333);
 
   &:hover {
-    color: #3876c2;
+    color: var(--primary-color, #3876c2);
   }
 }
 
@@ -334,6 +329,7 @@ body {
     font-family: "KaiTi", sans-serif;
     font-weight: bold;
     text-align: center;
+    color: var(--text-primary);
   }
 
   .login-form {
@@ -355,13 +351,13 @@ body {
   .login-link a {
     font-family: "KaiTi", sans-serif;
     font-size: 16px;
-    color: rgb(28 160 212);
+    color: var(--primary-color, rgb(28 160 212));
   }
 
   .error-message {
     margin-top: 10px;
     font-family: "KaiTi", sans-serif;
-    color: red;
+    color: var(--danger-color, red);
     text-align: center;
   }
 }
@@ -375,16 +371,11 @@ body {
   margin: 0 auto;
   margin-bottom: 20px;
   border-radius: 5px;
-  background-color: #fff;
+  background-color: var(--bg-card, #fff);
   overflow: hidden;
 
   transition: all 0.3s ease;
-
-  &.dark-theme {
-    background-color: rgb(63, 63, 63);
-    border-color: #494949;
-    color: white;
-  }
+  border: 1px solid transparent; // Consistent border handling
 }
 
 .logout-head {
@@ -396,25 +387,25 @@ body {
   font-size: 14px;
   padding: 10px;
   text-align: center;
-  color: #666;
+  color: var(--text-secondary, #666);
 }
 
 .logout-welcome {
   margin-top: 20px;
   font-size: 36px;
   font-weight: normal;
-  color: #666;
+  color: var(--text-primary, #666);
 }
 
 .logout-text {
   font-size: 21px;
   font-weight: lighter;
-  color: #666;
+  color: var(--text-secondary, #666);
 }
 
 .logout-lead {
   font-size: 21px;
   font-weight: lighter;
-  color: #666;
+  color: var(--text-secondary, #666);
 }
 </style>

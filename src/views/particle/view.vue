@@ -95,7 +95,7 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from "vue-router";
+import { Message, MessageBox } from "@/components/Dialog";
 import {
   getParticle,
   putParticle,
@@ -370,8 +370,9 @@ const tableData = computed(() => {
       {
         item: t("particle.view.info.item2"),
         text:
+          particleData.value.author?.nickname ||
           particleData.value.author?.username ||
-          particleData.value.author?.nickname,
+          "—",
       },
       {
         item: t("particle.view.info.item3"),
@@ -478,7 +479,7 @@ const save = async (
 
 const deleteWindow = async () => {
   try {
-    await ElMessageBox.confirm(
+    await MessageBox.confirm(
       t("particle.view.confirm.message1"),
       t("particle.view.confirm.message2"),
       {
@@ -488,34 +489,33 @@ const deleteWindow = async () => {
       }
     );
     await deleteParticle(particleData.value!.id);
-    ElMessage.success(t("particle.view.confirm.success"));
+    Message.success(t("particle.view.confirm.success"));
     router.push({ path: "/resource/particle/index" });
   } catch {
-    ElMessage.info(t("particle.view.confirm.info"));
+    Message.info(t("particle.view.confirm.info"));
   }
 };
 
 const namedWindow = async () => {
   try {
-    const { value } = (await ElMessageBox.prompt(
+    const { value } = (await MessageBox.prompt(
       t("particle.view.namePrompt.message1"),
       t("particle.view.namePrompt.message2"),
       {
         confirmButtonText: t("particle.view.namePrompt.confirm"),
         cancelButtonText: t("particle.view.namePrompt.cancel"),
-        closeOnClickModal: false,
-        inputValue: particleData.value!.name,
+        defaultValue: particleData.value!.name,
       }
     )) as { value: string };
 
     if (value) {
       await named(particleData.value!.id, value);
-      ElMessage.success(t("particle.view.namePrompt.success") + value);
+      Message.success(t("particle.view.namePrompt.success") + value);
     } else {
-      ElMessage.info(t("particle.view.namePrompt.info"));
+      Message.info(t("particle.view.namePrompt.info"));
     }
   } catch {
-    ElMessage.info(t("particle.view.namePrompt.info"));
+    Message.info(t("particle.view.namePrompt.info"));
   }
 };
 
@@ -531,6 +531,7 @@ const named = async (id: number, name: string) => {
 
 <style lang="scss" scoped>
 @use "@/styles/view-style.scss" as *;
+
 .audio-bgc {
   position: relative;
   width: 100%;
@@ -542,6 +543,7 @@ const named = async (id: number, name: string) => {
     rgb(169, 196, 228) 100%
   );
 }
+
 .audio-box {
   position: relative;
   margin: auto;
@@ -549,6 +551,7 @@ const named = async (id: number, name: string) => {
   width: 200px;
   height: 200px;
 }
+
 .audio-record {
   position: absolute;
   left: 0;
@@ -562,6 +565,7 @@ const named = async (id: number, name: string) => {
   background: url("/media/bg/audio-record.jpg") center no-repeat;
   background-size: cover;
 }
+
 .audio-record-image {
   position: absolute;
   left: 0;
@@ -575,24 +579,30 @@ const named = async (id: number, name: string) => {
   background: url("/media/bg/audio-img.jpg") center no-repeat;
   background-size: 113%;
 }
+
 .audio-record-play {
   animation: spin 6s infinite linear;
 }
+
 .audio-record-playfast {
   animation: recordfast 0.16s infinite linear;
 }
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
 }
+
 @keyframes recordfast {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(1.1deg);
   }

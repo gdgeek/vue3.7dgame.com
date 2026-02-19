@@ -205,12 +205,13 @@ const login = async function () {
   :deep(.el-dialog) {
     border-radius: 16px;
     overflow: hidden;
+    background-color: var(--bg-card, #fff);
 
     .el-dialog__header {
       padding: 16px;
       margin: 0;
       text-align: center;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid var(--border-color, #f0f0f0);
     }
 
     .el-dialog__body {
@@ -221,20 +222,10 @@ const login = async function () {
       top: 16px;
       right: 16px;
     }
-  }
 
-  &.dark-theme {
-    :deep(.el-dialog) {
-      background-color: #202020;
-
-      .el-dialog__header {
-        border-bottom: 1px solid #333;
-      }
-
-      .el-dialog__title,
-      .el-dialog__close {
-        color: #eee;
-      }
+    .el-dialog__title,
+    .el-dialog__close {
+      color: var(--text-primary, #333);
     }
   }
 }
@@ -250,13 +241,13 @@ const login = async function () {
   position: relative;
   width: 200px;
   height: 200px;
-  background-color: white;
+  background-color: var(--bg-card, white);
   border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg, 0 4px 12px rgba(0, 0, 0, 0.1));
 
   .qrcode-box {
     width: 100%;
@@ -267,7 +258,7 @@ const login = async function () {
     position: absolute;
     width: 40px;
     height: 40px;
-    background: white;
+    background: var(--bg-card, white);
     border-radius: 8px;
     padding: 4px;
     display: flex;
@@ -280,11 +271,6 @@ const login = async function () {
       border-radius: 4px;
     }
   }
-
-  .dark-theme & {
-    background-color: #333;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
 }
 
 .qrcode-tips {
@@ -293,21 +279,13 @@ const login = async function () {
   .main-tip {
     font-size: 15px;
     font-weight: 500;
-    color: #333;
+    color: var(--text-primary, #333);
     margin-bottom: 4px;
-
-    .dark-theme & {
-      color: #eee;
-    }
   }
 
   .sub-tip {
     font-size: 13px;
-    color: #999;
-
-    .dark-theme & {
-      color: #aaa;
-    }
+    color: var(--text-secondary, #999);
   }
 }
 
@@ -319,11 +297,7 @@ const login = async function () {
 
   .scanning-text {
     font-size: 14px;
-    color: #666;
-
-    .dark-theme & {
-      color: #bbb;
-    }
+    color: var(--text-secondary, #666);
   }
 }
 </style>

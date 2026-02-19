@@ -50,7 +50,8 @@
             @download="downloadModel"
             @rename="namedWindow"
             @delete="deleteWindow"
-          ></MrppInfo>
+          >
+          </MrppInfo>
           <br />
         </el-col>
       </el-row>
@@ -96,7 +97,7 @@ const dataInfo = computed(() =>
 
 const tableData = computed(() => {
   if (polygenData.value !== null && prepare.value) {
-    return [
+    const data = [
       { item: t("polygen.view.info.item1"), text: polygenData.value.name },
       {
         item: t("polygen.view.info.item2"),
@@ -114,13 +115,22 @@ const tableData = computed(() => {
       },
       {
         item: t("polygen.view.info.item5"),
-        text: printVector3(dataInfo.value.size),
+        text: printVector3(dataInfo.value.size) + " m",
       },
       {
         item: t("polygen.view.info.item6"),
         text: printVector3(dataInfo.value.center),
       },
     ];
+
+    if (dataInfo.value.faces) {
+      data.push({
+        item: "模型面数",
+        text: dataInfo.value.faces.toLocaleString(),
+      });
+    }
+
+    return data;
   } else {
     return [];
   }

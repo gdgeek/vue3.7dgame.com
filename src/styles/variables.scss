@@ -1,29 +1,81 @@
-/** 全局SCSS变量 */
+/** 全局SCSS变量 - AR创作平台现代化主题 */
 
 :root {
-  --menu-background: #304156;
-  --menu-text: #bfcbd9;
-  --menu-active-text: var(--el-menu-active-color);
-  --menu-hover: #263445;
-  --sidebar-logo-background: #2d3748;
+  /* 主色调 - 映射到全局主题变量 */
+  --ar-primary: var(--primary-color, #00BAFF);
+  --ar-primary-dark: var(--primary-dark, #0099DD);
+  --ar-primary-light: var(--primary-light, #33C8FF);
+  --ar-primary-alpha-10: rgba(0, 186, 255, 0.1); // Keep as is for now or use primary-light
+  --ar-primary-alpha-20: rgba(0, 186, 255, 0.2);
+
+  /* 背景色 */
+  --ar-bg-light: var(--bg-page, #f8fafc);
+  --ar-bg-dark: var(--bg-page, #0f172a); // Just alias to bg-page
+
+  /* 侧边栏样式 - 自动适配主题 */
+  --menu-background: var(--bg-card, #ffffff);
+  --menu-text: var(--text-secondary, #64748b);
+  --menu-active-text: #ffffff;
+  --menu-active-bg: var(--primary-color, #00BAFF);
+  --menu-hover: var(--bg-hover, #f1f5f9);
+  --sidebar-logo-background: var(--bg-card, #ffffff);
+  --sidebar-border: var(--border-color, #e2e8f0);
+
+  /* 卡片和边框 */
+  --ar-card-bg: var(--bg-card, #ffffff);
+  --ar-card-border: var(--border-color, #e2e8f0);
+  --ar-divider: var(--border-color, #e2e8f0);
+
+  /* 文字颜色 */
+  --ar-text-primary: var(--text-primary, #1e293b);
+  --ar-text-secondary: var(--text-secondary, #64748b);
+  --ar-text-muted: var(--text-muted, #94a3b8);
+  --ar-text-danger: var(--danger-color, #ef4444);
 }
 
-/** 暗黑主题 */
+/** 暗黑主题 - 变量会自动跟随全局主题变化，此处只需保留特定差异 */
 html.dark {
-  --menu-background: var(--el-bg-color-overlay);
-  --menu-text: #fff;
-  --menu-active-text: var(--el-menu-active-color);
-  --menu-hover: rgb(0 0 0 / 20%);
-  --sidebar-logo-background: rgb(0 0 0 / 20%);
+  /* 覆盖 Element Plus 页面背景色 */
+  --el-bg-color-page: var(--bg-page);
+  
+  /* Sidebar logo background transparency if needed, or just follow bg-card */
+  --sidebar-logo-background: var(--bg-card);
 }
 
-$menu-background: var(--menu-background); // 菜单背景色
-$menu-text: var(--menu-text); // 菜单文字颜色
-$menu-active-text: var(--menu-active-text); // 菜单激活文字颜色
-$menu-hover: var(--menu-hover); // 菜单悬停背景色
-$sidebar-logo-background: var(--sidebar-logo-background); // 侧边栏 Logo 背景色
+/* SCSS 变量映射 */
+$ar-primary: var(--ar-primary);
+$ar-primary-dark: var(--ar-primary-dark);
+$menu-background: var(--menu-background);
+$menu-text: var(--menu-text);
+$menu-active-text: var(--menu-active-text);
+$menu-hover: var(--menu-hover);
+$sidebar-logo-background: var(--sidebar-logo-background);
 
-$sidebar-width: 210px; // 侧边栏宽度
-$sidebar-width-collapsed: 54px; // 侧边栏收缩宽度
-$navbar-height: 50px; // 导航栏高度
-$tags-view-height: 34px; // TagsView 高度
+/* 布局尺寸 */
+$sidebar-width: 288px; // w-72 equivalent
+$sidebar-width-collapsed: 64px;
+$navbar-height: 64px;
+$tags-view-height: 34px;
+
+/* 圆角 */
+$border-radius-sm: 0.5rem;
+$border-radius-md: 0.75rem;
+$border-radius-lg: 1rem;
+$border-radius-xl: 1.5rem;
+$border-radius-2xl: 1.5rem;
+$border-radius-3xl: 1.5rem;
+
+/* 阴影 */
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+$shadow-primary: 0 10px 15px -3px rgba(0, 186, 255, 0.2);
+
+/* 过渡动画 */
+$transition-fast: 150ms ease;
+$transition-normal: 200ms ease;
+$transition-slow: 300ms ease;
+
+/* 字体 */
+$font-family-base: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

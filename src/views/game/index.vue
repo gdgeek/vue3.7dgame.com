@@ -98,6 +98,7 @@ import {
   deleteVpGuide,
 } from "@/api/v1/vp-guide";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
+import { Message, MessageBox } from "@/components/Dialog";
 
 const dialogRef = ref<InstanceType<typeof VerseDialog> | null>(null);
 const items = ref<any[]>([]);
@@ -128,7 +129,7 @@ const refresh = async () => {
 
 const onchange = async (id: number, val: number) => {
   try {
-    await ElMessageBox.confirm(
+    await MessageBox.confirm(
       t("game.index.form.confirm.message1"),
       t("game.index.form.confirm.message2"),
       {
@@ -139,17 +140,17 @@ const onchange = async (id: number, val: number) => {
     );
     await putVpGuide(id, { order: val });
     await refresh();
-    ElMessage.success(t("game.index.form.confirm.success"));
+    Message.success(t("game.index.form.confirm.success"));
   } catch (e) {
     console.error(e);
-    ElMessage.info(t("game.index.form.confirm.info"));
+    Message.info(t("game.index.form.confirm.info"));
   }
 };
 
 const selected = async (item: any) => {
   try {
     await postVpGuide({ level_id: item.data.id });
-    ElMessage.success(t("game.index.success"));
+    Message.success(t("game.index.success"));
     await refresh();
   } catch (e) {
     console.error(e);
@@ -162,7 +163,7 @@ const addGuide = () => {
 
 const del = async (id: number) => {
   try {
-    await ElMessageBox.confirm(
+    await MessageBox.confirm(
       t("game.index.confirm.message1"),
       t("game.index.confirm.message2"),
       {
@@ -173,10 +174,10 @@ const del = async (id: number) => {
     );
     await deleteVpGuide(id);
     await refresh();
-    ElMessage.success(t("game.index.confirm.success"));
+    Message.success(t("game.index.confirm.success"));
   } catch (e) {
     console.error(e);
-    ElMessage.info(t("game.index.confirm.info"));
+    Message.info(t("game.index.confirm.info"));
   }
 };
 

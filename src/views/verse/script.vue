@@ -241,7 +241,7 @@ import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useUserStore } from "@/store/modules/user";
 import { useI18n } from "vue-i18n";
-import { ElMessageBox, ElMessage } from "element-plus";
+import { Message, MessageBox } from "@/components/Dialog";
 
 import { takePhoto } from "@/api/v1/verse";
 import pako from "pako";
@@ -391,9 +391,9 @@ watch(isDark, (newValue) => {
 const copyCode = async (code: string) => {
   try {
     await navigator.clipboard.writeText(code);
-    ElMessage.success(t("copy.success"));
+    Message.success(t("copy.success"));
   } catch (error) {
-    ElMessage.error(t("copy.error"));
+    Message.error(t("copy.error"));
   }
 };
 
@@ -420,11 +420,11 @@ const save = (): Promise<void> => {
 
 const postScript = async (message: any) => {
   if (verse.value === null) {
-    ElMessage.error(t("verse.view.script.error1"));
+    Message.error(t("verse.view.script.error1"));
     return;
   }
   if (!verse.value!.editable) {
-    ElMessage.error(t("verse.view.script.error2"));
+    Message.error(t("verse.view.script.error2"));
     return;
   }
 
@@ -444,21 +444,21 @@ const postScript = async (message: any) => {
     lua: message.lua,
   });
 
-  ElMessage.success(t("verse.view.script.success"));
-  ElMessageBox.confirm("保存成功，是否发布？", "发布场景", {
+  Message.success(t("verse.view.script.success"));
+  MessageBox.confirm("保存成功，是否发布？", "发布场景", {
     confirmButtonText: "OK",
     cancelButtonText: "Cancel",
     type: "warning",
   })
     .then(async () => {
       await takePhoto(id.value);
-      ElMessage({
+      Message({
         type: "success",
         message: "发布成功",
       });
     })
     .catch(() => {
-      ElMessage({
+      Message({
         type: "info",
         message: "取消发布",
       });
@@ -516,7 +516,7 @@ const handleMessage = async (e: MessageEvent) => {
         saveResolve = null;
       }
     } else if (params.action === "post:no-change") {
-      ElMessage.info(t("verse.view.script.info"));
+      Message.info(t("verse.view.script.info"));
     } else if (params.action === "update") {
       LuaCode.value = "local verse = {}\nlocal index = ''\n" + params.data.lua;
       JavaScriptCode.value = formatJavaScript(params.data.js);
@@ -543,16 +543,13 @@ const handleBeforeUnload = (event: any) => {
 onBeforeRouteLeave(async (to, from, next) => {
   if (hasUnsavedChanges.value) {
     try {
-      await ElMessageBox.confirm(
+      await MessageBox.confirm(
         t("verse.view.script.leave.message1"),
         t("verse.view.script.leave.message2"),
         {
           confirmButtonText: t("verse.view.script.leave.confirm"),
           cancelButtonText: t("verse.view.script.leave.cancel"),
           type: "warning",
-          showClose: true,
-          closeOnClickModal: false,
-          distinguishCancelAndClose: true,
         }
       );
 
@@ -561,13 +558,13 @@ onBeforeRouteLeave(async (to, from, next) => {
         await save();
         next();
       } catch (error) {
-        ElMessage.error(t("verse.view.script.leave.error"));
+        Message.error(t("verse.view.script.leave.error"));
         next(false);
       }
     } catch (action) {
       if (action === "cancel") {
         hasUnsavedChanges.value = false;
-        ElMessage.info(t("verse.view.script.leave.info"));
+        Message.info(t("verse.view.script.leave.info"));
         next();
       } else {
         next(false);
@@ -597,7 +594,7 @@ const postMessage = (action: string, data: any = {}) => {
       "*"
     );
   } else {
-    ElMessage.error(t("verse.view.script.error3"));
+    Message.error(t("verse.view.script.error3"));
   }
 };
 
@@ -741,7 +738,7 @@ onMounted(async () => {
     }
     initEditor();
   } catch (error: any) {
-    ElMessage.error(error.message);
+    Message.error(error.message);
   } finally {
     loading.value = false;
   }

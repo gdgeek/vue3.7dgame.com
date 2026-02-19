@@ -151,7 +151,7 @@ const logout = async () => {
   cursor: pointer;
 
   &:hover {
-    background: rgb(0 0 0 / 10%);
+    background: var(--bg-hover, #f8fafc);
   }
 }
 
@@ -163,9 +163,7 @@ const logout = async () => {
   }
 }
 
-.dark .setting-item:hover {
-  background: rgb(255 255 255 / 20%);
-}
+// Removed redundant .dark override as var(--bg-hover) handles dark mode via global variables
 
 .gradient-text {
   font-size: 14px;

@@ -69,16 +69,10 @@ body {
   margin: 0 auto;
   margin-bottom: 20px;
   border-radius: 5px;
-  background-color: #fff;
+  background-color: var(--bg-card, #fff);
   overflow: hidden;
-
   transition: all 0.3s ease;
-
-  &.dark-theme {
-    background-color: rgb(63, 63, 63);
-    border-color: #494949;
-    color: white;
-  }
+  border: 1px solid transparent; // Consistent border handling
 }
 
 .logout-head {
@@ -90,18 +84,18 @@ body {
   margin-top: 20px;
   font-size: 36px;
   font-weight: normal;
-  color: #666;
+  color: var(--text-primary, #666);
 }
 
 .logout-text {
   font-size: 21px;
   font-weight: lighter;
-  color: #666;
+  color: var(--text-secondary, #666);
 }
 
 .logout-lead {
   font-size: 21px;
   font-weight: lighter;
-  color: #666;
+  color: var(--text-secondary, #666);
 }
 </style>

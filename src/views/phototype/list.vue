@@ -84,7 +84,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { Message, MessageBox } from "@/components/Dialog";
 import { v4 as uuidv4 } from "uuid";
 import CardListPage from "@/components/MrPP/CardListPage/index.vue";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
@@ -159,7 +159,7 @@ const handleEditImageSelected = (data: {
 const saveEdit = async () => {
   try {
     if (!editForm.value.title) {
-      ElMessage.warning(t("phototype.prompt.error1")); // Name cannot be empty
+      Message.warning(t("phototype.prompt.error1")); // Name cannot be empty
       return;
     }
 
@@ -173,12 +173,12 @@ const saveEdit = async () => {
 
     await putPhototype(editForm.value.id, updateData);
 
-    ElMessage.success(t("common.updateSuccess") || "Update Successful");
+    Message.success(t("common.updateSuccess") || "Update Successful");
     editDialogVisible.value = false;
     refreshList();
   } catch (error) {
     console.error("Failed to update:", error);
-    ElMessage.error(t("common.updateFailed") || "Update Failed");
+    Message.error(t("common.updateFailed") || "Update Failed");
   }
 };
 
@@ -187,21 +187,20 @@ const deletedWindow = async (
   resetLoading: () => void
 ) => {
   try {
-    await ElMessageBox.confirm(
+    await MessageBox.confirm(
       t("phototype.confirm.message1"),
       t("phototype.confirm.message2"),
       {
         confirmButtonText: t("phototype.confirm.confirm"),
         cancelButtonText: t("phototype.confirm.cancel"),
-        closeOnClickModal: false,
         type: "warning",
       }
     );
     await deletePhototype(item.id);
     refreshList();
-    ElMessage.success(t("phototype.confirm.success"));
+    Message.success(t("phototype.confirm.success"));
   } catch {
-    ElMessage.info(t("phototype.confirm.info"));
+    Message.info(t("phototype.confirm.info"));
     resetLoading();
   }
 };

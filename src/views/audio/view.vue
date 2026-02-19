@@ -55,7 +55,8 @@
             @download="downloadAudio"
             @rename="namedWindow"
             @delete="deleteWindow"
-          ></MrppInfo>
+          >
+          </MrppInfo>
           <br />
         </el-col>
       </el-row>
@@ -101,7 +102,9 @@ const tableData = computed(() => {
       {
         item: t("audio.view.info.item2"),
         text:
-          audioData.value.author?.username || audioData.value.author?.nickname,
+          audioData.value.author?.nickname ||
+          audioData.value.author?.username ||
+          "—",
       },
       {
         item: t("audio.view.info.item3"),

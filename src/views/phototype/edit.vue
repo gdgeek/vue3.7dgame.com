@@ -10,22 +10,43 @@
           <el-card class="box-card" style="margin-bottom: 10px">
             <el-form label-width="80px">
               <el-form-item label="名称">
-                <el-input v-if="phototype" v-model="phototype.title" placeholder="请输入原型名称"
-                  style="width: 100%"></el-input>
+                <el-input
+                  v-if="phototype"
+                  v-model="phototype.title"
+                  placeholder="请输入原型名称"
+                  style="width: 100%"
+                ></el-input>
               </el-form-item>
               <el-form-item label="类型">
-                <el-input v-if="phototype" v-model="phototype.type" placeholder="请输入类型" style="width: 100%"></el-input>
+                <el-input
+                  v-if="phototype"
+                  v-model="phototype.type"
+                  placeholder="请输入类型"
+                  style="width: 100%"
+                ></el-input>
               </el-form-item>
             </el-form>
           </el-card>
-          <json-schema-editor class="schema" :value="tree" disabledType lang="zh_CN" custom
-            :extra="extraSetting"></json-schema-editor>
+          <json-schema-editor
+            class="schema"
+            :value="tree"
+            disabledType
+            lang="zh_CN"
+            custom
+            :extra="extraSetting"
+          ></json-schema-editor>
           <br />
           <el-card class="box-card" style="min-height: 500px">
             <codemirror v-model="jsonStr" :readOnly="false"></codemirror>
           </el-card>
           <br />
-          <el-button icon="Edit" @click="saveChanges" type="primary" size="small" style="width: 100%">
+          <el-button
+            icon="Edit"
+            @click="saveChanges"
+            type="primary"
+            size="small"
+            style="width: 100%"
+          >
             保存
           </el-button>
         </el-card>
@@ -41,15 +62,26 @@
               <b>预览图</b>
             </template>
             <div style="display: flex; justify-content: center">
-              <ImageSelector :item-id="phototype.id" :image-url="phototype.image?.url"
-                @image-selected="handleImageUpdate" @image-upload-success="handleImageUpdate"></ImageSelector>
+              <ImageSelector
+                :item-id="phototype.id"
+                :image-url="phototype.image?.url"
+                @image-selected="handleImageUpdate"
+                @image-upload-success="handleImageUpdate"
+              ></ImageSelector>
             </div>
           </el-card>
 
-          <Resource v-if="phototype" @selected="handleSelected" :resource="phototype.resource"></Resource>
+          <Resource
+            v-if="phototype"
+            @selected="handleSelected"
+            :resource="phototype.resource"
+          ></Resource>
           <br />
-          <Transform v-if="phototype && phototype.data && phototype.data.transform" :data="phototype.data.transform"
-            @save="handleTransformSave"></Transform>
+          <Transform
+            v-if="phototype && phototype.data && phototype.data.transform"
+            :data="phototype.data.transform"
+            @save="handleTransformSave"
+          ></Transform>
         </div>
         <br />
 
@@ -141,7 +173,10 @@ const saveChanges = async () => {
       });
       ElMessage.success("创建成功");
       // 跳转到编辑页面
-      router.replace({ path: "/phototype/edit", query: { id: response.data.id } });
+      router.replace({
+        path: "/phototype/edit",
+        query: { id: response.data.id },
+      });
       phototype.value = response.data;
     } else {
       // 更新

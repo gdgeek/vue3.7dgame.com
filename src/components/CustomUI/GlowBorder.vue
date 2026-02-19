@@ -3,7 +3,7 @@
     :style="parentStyles"
     :class="
       cn(
-        'relative grid min-h-[60px] w-fit min-w-[300px] place-items-center rounded-[--border-radius] bg-white p-3 text-black dark:bg-black dark:text-white glow-border',
+        'relative grid min-h-[60px] w-fit min-w-[300px] place-items-center rounded-[--border-radius] bg-[var(--bg-card)] p-3 text-[var(--text-primary)] glow-border',
         $props.class
       )
     "
@@ -65,9 +65,11 @@ const childStyles = computed(() => ({
   0% {
     background-position: 0% 0%;
   }
+
   50% {
     background-position: 100% 100%;
   }
+
   100% {
     background-position: 0% 0%;
   }

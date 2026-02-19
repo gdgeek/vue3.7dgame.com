@@ -140,15 +140,17 @@ const deleted = () => {
 }
 
 .mrpp-card-wrapper:hover .box-card {
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg, 0 12px 24px rgba(0, 0, 0, 0.15));
 }
 
 .box-card {
-  border-radius: 12px;
+  border-radius: var(--radius-md, 12px);
   overflow: hidden;
   transition:
     box-shadow 0.3s ease,
     border-color 0.3s ease;
+  background-color: var(--bg-card, white);
+  border: 1px solid var(--border-color, #e4e7ed);
 }
 
 .card-header {
@@ -162,6 +164,7 @@ const deleted = () => {
   padding: 0;
   flex: 1;
   min-width: 0;
+  color: var(--text-primary, #303133);
 }
 
 .card-title {
@@ -178,7 +181,7 @@ const deleted = () => {
 
 .title-text {
   font-weight: 400;
-  color: #333;
+  color: var(--text-primary, #333);
 }
 
 .color-indicator {
@@ -187,7 +190,7 @@ const deleted = () => {
   border-radius: 50%;
   flex-shrink: 0;
   margin-left: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 /* 图片容器样式 */
@@ -196,6 +199,7 @@ const deleted = () => {
   width: 100%;
   height: auto;
   overflow: hidden;
+  background-color: var(--bg-hover, #f5f7fa);
 }
 
 .image-container :deep(img) {

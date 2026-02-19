@@ -1,12 +1,25 @@
 <template>
-  <el-dialog v-model="dialogVisible" title="导入场景" width="480px" :close-on-click-modal="!importing"
-    :close-on-press-escape="!importing" :show-close="!importing" @close="handleClose">
+  <el-dialog
+    v-model="dialogVisible"
+    title="导入场景"
+    width="480px"
+    :close-on-click-modal="!importing"
+    :close-on-press-escape="!importing"
+    :show-close="!importing"
+    @close="handleClose"
+  >
     <!-- 文件选择状态 -->
     <div v-if="state === 'idle'" class="import-upload">
-      <el-upload ref="uploadRef" drag accept=".zip" :auto-upload="false" :show-file-list="false"
-        :on-change="handleFileChange">
+      <el-upload
+        ref="uploadRef"
+        drag
+        accept=".zip"
+        :auto-upload="false"
+        :show-file-list="false"
+        :on-change="handleFileChange"
+      >
         <el-icon class="upload-icon">
-          <Upload />
+          <Upload></Upload>
         </el-icon>
         <div class="upload-text">将场景包拖到此处，或<em>点击选择文件</em></div>
         <template #tip>
@@ -18,19 +31,27 @@
     <!-- 导入中状态（简化为 loading） -->
     <div v-else-if="state === 'importing'" class="import-loading">
       <el-icon class="is-loading loading-icon">
-        <Loading />
+        <Loading></Loading>
       </el-icon>
       <p class="loading-text">导入中...</p>
     </div>
 
     <!-- 导入成功状态 -->
     <div v-else-if="state === 'success'" class="import-result">
-      <el-result icon="success" title="导入成功" sub-title="场景已成功导入，可以前往查看" />
+      <el-result
+        icon="success"
+        title="导入成功"
+        sub-title="场景已成功导入，可以前往查看"
+      ></el-result>
     </div>
 
     <!-- 导入失败状态 -->
     <div v-else-if="state === 'error'" class="import-result">
-      <el-result icon="error" title="导入失败" :sub-title="importError" />
+      <el-result
+        icon="error"
+        title="导入失败"
+        :sub-title="importError"
+      ></el-result>
     </div>
 
     <!-- 底部按钮 -->
@@ -41,9 +62,7 @@
 
       <template v-else-if="state === 'success'">
         <el-button @click="dialogVisible = false">关闭</el-button>
-        <el-button type="primary" @click="handleNavigate">
-          前往查看
-        </el-button>
+        <el-button type="primary" @click="handleNavigate"> 前往查看 </el-button>
       </template>
 
       <template v-else-if="state === 'error'">

@@ -20,16 +20,30 @@
 
           <template #footer>
             <div style="display: flex; align-items: center; gap: 12px">
-              <tags v-if="verse && verse.verseTags" :editable="verse.editable" @add="addTags" @remove="removeTags"
-                :verseTags="verse.verseTags"></tags>
-              <el-switch v-if="verse && isAdmin" v-model="verse.public" :active-text="$t('verse.view.public.open')"
-                :inactive-text="$t('verse.view.public.private')" @change="handlePublicChange"></el-switch>
+              <tags
+                v-if="verse && verse.verseTags"
+                :editable="verse.editable"
+                @add="addTags"
+                @remove="removeTags"
+                :verseTags="verse.verseTags"
+              ></tags>
+              <el-switch
+                v-if="verse && isAdmin"
+                v-model="verse.public"
+                :active-text="$t('verse.view.public.open')"
+                :inactive-text="$t('verse.view.public.private')"
+                @change="handlePublicChange"
+              ></el-switch>
             </div>
           </template>
 
           <div class="box-item">
-            <ImageSelector :imageUrl="verse.image ? verse.image.url : ''" :itemId="verse.id"
-              @image-selected="handleImageSelected" @image-upload-success="handleImageUploadSuccess"></ImageSelector>
+            <ImageSelector
+              :imageUrl="verse.image ? verse.image.url : ''"
+              :itemId="verse.id"
+              @image-selected="handleImageSelected"
+              @image-upload-success="handleImageUploadSuccess"
+            ></ImageSelector>
           </div>
         </el-card>
 
@@ -48,7 +62,7 @@
                 &nbsp;{{ $t("verse.view.eye") }}
               </div>
             </el-button>
-            <ExportButton :verseId="verse.id" />
+            <ExportButton :verseId="verse.id"></ExportButton>
           </div>
         </el-card>
 
@@ -66,7 +80,12 @@
               <el-button-group style="float: right"></el-button-group>
             </aside>
           </div>
-          <VerseToolbar v-if="verse" :verse="verse" @deleted="deleted" @changed="changed"></VerseToolbar>
+          <VerseToolbar
+            v-if="verse"
+            :verse="verse"
+            @deleted="deleted"
+            @changed="changed"
+          ></VerseToolbar>
           <br />
         </el-card>
 
@@ -203,8 +222,8 @@ const handleImageUploadSuccess = async (event: ImageUpdateEvent) => {
 
 const removeTags = async (
   tagId: number,
-  resolve: () => void = () => { },
-  reject: () => void = () => { }
+  resolve: () => void = () => {},
+  reject: () => void = () => {}
 ) => {
   try {
     await ElMessageBox.confirm(
@@ -228,8 +247,8 @@ const removeTags = async (
 
 const addTags = async (
   tagId: number,
-  resolve: () => void = () => { },
-  reject: () => void = () => { }
+  resolve: () => void = () => {},
+  reject: () => void = () => {}
 ) => {
   try {
     await ElMessageBox.confirm(
