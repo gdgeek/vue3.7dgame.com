@@ -6,7 +6,7 @@
         <img :src="domainStore.icon || '/media/image/logo.gif'" alt="Logo" class="logo" />
         <RadiantText class="company-name" :duration="5" :fontSize="isMobile ? 16 : 20" :textColor="textColor">
           <span class="font-bold">{{
-            domainStore.domain || "Loading..."
+            domainStore.title || "不加班AR创作平台"
           }}</span>
         </RadiantText>
       </div>
@@ -252,6 +252,12 @@ const scrollToSection = (sectionId: string) => {
 
 // 监听窗口大小变化和滚动事件
 onMounted(() => {
+  // 如果设置了 homepage，自动跳转
+  if (domainStore.homepage) {
+    window.location.href = domainStore.homepage;
+    return;
+  }
+
   //滚到news上
   const section = route.query.section;
   if (section) {
