@@ -1,22 +1,14 @@
 <template>
   <Teleport to="body">
     <Transition name="panel-fade">
-      <div
-        v-if="modelValue"
-        class="detail-panel-overlay"
-        @click.self="handleClose"
-      >
+      <div v-if="modelValue" class="detail-panel-overlay" @click.self="handleClose">
         <Transition name="panel-slide">
-          <div
-            v-if="modelValue"
-            class="detail-panel"
-            :style="{ width: panelWidth }"
-          >
+          <div v-if="modelValue" class="detail-panel" :style="{ width: panelWidth }">
             <!-- Header -->
             <div class="panel-header">
               <h3 class="panel-title">{{ title }}</h3>
               <button class="panel-close" @click="handleClose">
-                <span class="material-symbols-outlined">close</span>
+                <font-awesome-icon :icon="['fas', 'xmark']" />
               </button>
             </div>
 
@@ -26,9 +18,7 @@
               <div class="panel-preview" :style="{ height: previewHeight }">
                 <slot name="preview">
                   <div class="preview-placeholder">
-                    <span class="material-symbols-outlined">{{
-                      placeholderIcon
-                    }}</span>
+                    <font-awesome-icon :icon="placeholderIcon" />
                     <span v-if="placeholderText">{{ placeholderText }}</span>
                   </div>
                 </slot>
@@ -40,32 +30,18 @@
                 <div class="info-name-section">
                   <div v-if="!isEditing" class="info-name-row">
                     <h4 class="info-name">{{ name }}</h4>
-                    <button
-                      v-if="editable"
-                      class="btn-icon-only"
-                      @click="startEditing"
-                    >
-                      <span class="material-symbols-outlined">edit</span>
+                    <button v-if="editable" class="btn-icon-only" @click="startEditing">
+                      <font-awesome-icon :icon="['fas', 'pen-to-square']" />
                     </button>
                   </div>
                   <div v-else class="info-name-edit">
-                    <input
-                      ref="nameInputRef"
-                      v-model="editingName"
-                      type="text"
-                      class="name-input"
-                      @keyup.enter="saveEdit"
-                      @keyup.escape="cancelEdit"
-                    />
+                    <input ref="nameInputRef" v-model="editingName" type="text" class="name-input"
+                      @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
                     <div class="edit-actions">
                       <button class="btn-edit-cancel" @click="cancelEdit">
                         取消
                       </button>
-                      <button
-                        class="btn-edit-save"
-                        @click="saveEdit"
-                        :disabled="!editingName.trim()"
-                      >
+                      <button class="btn-edit-save" @click="saveEdit" :disabled="!editingName.trim()">
                         保存
                       </button>
                     </div>
@@ -74,11 +50,7 @@
 
                 <!-- Properties Table -->
                 <div class="info-table">
-                  <div
-                    v-for="(item, index) in properties"
-                    :key="index"
-                    class="info-row"
-                  >
+                  <div v-for="(item, index) in properties" :key="index" class="info-row">
                     <span class="info-label">{{ item.label }}</span>
                     <span class="info-value">{{ item.value }}</span>
                   </div>
@@ -92,52 +64,32 @@
             <!-- Footer Area (Fixed) -->
             <div class="panel-footer">
               <!-- Actions Area -->
-              <div
-                class="panel-actions"
-                :class="{ 'layout-grid': actionLayout === 'grid' }"
-              >
+              <div class="panel-actions" :class="{ 'layout-grid': actionLayout === 'grid' }">
                 <slot name="actions">
                   <template v-if="actionLayout === 'grid'">
                     <!-- Top: Secondary Action (Enter Editor) -->
-                    <button
-                      v-if="secondaryAction"
-                      class="btn-pill-primary"
-                      @click="$emit('secondary')"
-                    >
-                      <span class="material-symbols-outlined">edit_note</span>
+                    <button v-if="secondaryAction" class="btn-pill-primary" @click="$emit('secondary')">
+                      <font-awesome-icon :icon="['fas', 'file-lines']" />
                       {{ secondaryActionText }}
                     </button>
                     <!-- Bottom: Download and Delete side by side -->
                     <div class="actions-row">
-                      <button
-                        class="btn-pill-secondary"
-                        @click="$emit('download')"
-                      >
-                        <span class="material-symbols-outlined">{{
-                          downloadIcon
-                        }}</span>
+                      <button class="btn-pill-secondary" @click="$emit('download')">
+                        <font-awesome-icon :icon="downloadIcon" />
                         {{ downloadText || "复制" }}
                       </button>
-                      <button
-                        v-if="showDelete"
-                        class="btn-pill-danger"
-                        @click="$emit('delete')"
-                      >
-                        <span class="material-symbols-outlined">delete</span>
+                      <button v-if="showDelete" class="btn-pill-danger" @click="$emit('delete')">
+                        <font-awesome-icon :icon="['fas', 'trash-can']" />
                         {{ deleteText || "删除" }}
                       </button>
                     </div>
                   </template>
                   <template v-else>
                     <button class="btn-primary-full" @click="$emit('download')">
-                      <span class="material-symbols-outlined">download</span>
+                      <font-awesome-icon :icon="['fas', 'download']" />
                       {{ downloadText || "下载" }}
                     </button>
-                    <button
-                      v-if="secondaryAction"
-                      class="btn-text-link"
-                      @click="$emit('secondary')"
-                    >
+                    <button v-if="secondaryAction" class="btn-text-link" @click="$emit('secondary')">
                       {{ secondaryActionText }}
                     </button>
                   </template>
@@ -145,12 +97,9 @@
               </div>
 
               <!-- Danger Zone (only for stacked layout) -->
-              <div
-                v-if="showDelete && actionLayout === 'stacked'"
-                class="panel-danger"
-              >
+              <div v-if="showDelete && actionLayout === 'stacked'" class="panel-danger">
                 <button class="btn-danger-text" @click="$emit('delete')">
-                  <span class="material-symbols-outlined">delete</span>
+                  <font-awesome-icon :icon="['fas', 'trash-can']" />
                   {{ deleteText || "删除此资源" }}
                 </button>
               </div>
@@ -178,10 +127,10 @@ interface Props {
   editable?: boolean;
   properties?: PropertyItem[];
   previewHeight?: string;
-  placeholderIcon?: string;
+  placeholderIcon?: string | string[];
   placeholderText?: string;
   downloadText?: string;
-  downloadIcon?: string;
+  downloadIcon?: string | string[];
   deleteText?: string;
   secondaryAction?: boolean;
   secondaryActionText?: string;
@@ -197,10 +146,10 @@ const props = withDefaults(defineProps<Props>(), {
   editable: true,
   properties: () => [],
   previewHeight: "300px",
-  placeholderIcon: "image",
+  placeholderIcon: () => ['fas', 'image'],
   placeholderText: "",
   downloadText: "下载",
-  downloadIcon: "content_copy",
+  downloadIcon: () => ['fas', 'copy'],
   deleteText: "删除此资源",
   secondaryAction: false,
   secondaryActionText: "在编辑器中使用",
@@ -335,7 +284,7 @@ onUnmounted(() => {
     color: var(--text-primary, #1e293b);
   }
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 20px;
   }
 }
@@ -387,7 +336,7 @@ onUnmounted(() => {
   gap: 8px;
   color: var(--text-muted, #94a3b8);
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 48px;
   }
 
@@ -438,10 +387,8 @@ onUnmounted(() => {
   font-size: 15px;
   font-weight: 500;
   color: var(--text-primary, #1e293b);
-  background: var(
-    --bg-input,
-    var(--bg-card, #fff)
-  ); // Use bg-input if available
+  background: var(--bg-input,
+      var(--bg-card, #fff)); // Use bg-input if available
   border: 2px solid var(--primary-color, #03a9f4);
   border-radius: var(--radius-md, 12px);
   outline: none;
@@ -521,7 +468,7 @@ onUnmounted(() => {
     color: var(--primary-color, #03a9f4);
   }
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 18px;
   }
 }
@@ -591,7 +538,7 @@ onUnmounted(() => {
     transform: translateY(-1px);
   }
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 20px;
   }
 }
@@ -641,7 +588,7 @@ onUnmounted(() => {
     border-radius: var(--radius-sm, 8px);
   }
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 18px;
   }
 }
@@ -707,7 +654,7 @@ onUnmounted(() => {
     background: var(--primary-light, rgba(3, 169, 244, 0.05));
   }
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 20px;
   }
 }
@@ -732,7 +679,7 @@ onUnmounted(() => {
     background: var(--danger-light, rgba(239, 68, 68, 0.1));
   }
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 20px;
   }
 }

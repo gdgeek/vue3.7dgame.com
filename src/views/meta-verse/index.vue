@@ -1,61 +1,30 @@
 <template>
   <TransitionWrapper>
     <div class="verse-index">
-      <PageActionBar
-        title="我的场景"
-        search-placeholder="搜索场景..."
-        :show-tags="true"
-        @search="handleSearch"
-        @sort-change="handleSortChange"
-        @view-change="handleViewChange"
-      >
+      <PageActionBar title="我的场景" search-placeholder="搜索场景..." :show-tags="true" @search="handleSearch"
+        @sort-change="handleSortChange" @view-change="handleViewChange">
         <template #filters>
           <TagsSelect @tags-change="handleTagsChange"></TagsSelect>
         </template>
         <template #actions>
           <el-button type="primary" @click="createWindow">
-            <span
-              class="material-symbols-outlined"
-              style="font-size: 18px; margin-right: 4px"
-              >add</span
-            >
+            <font-awesome-icon :icon="['fas', 'plus']" style="font-size: 18px; margin-right: 4px" />
             {{ $t("verse.page.title") }}
           </el-button>
           <el-button @click="openImportDialog">
-            <span
-              class="material-symbols-outlined"
-              style="font-size: 18px; margin-right: 4px"
-              >upload</span
-            >
+            <font-awesome-icon :icon="['fas', 'upload']" style="font-size: 18px; margin-right: 4px" />
             导入场景
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer
-        class="list-view"
-        :items="items"
-        :view-mode="viewMode"
-        :loading="loading"
-        @row-click="openDetail"
-      >
+      <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
         <template #grid-card="{ item }">
-          <StandardCard
-            :image="item.image?.url"
-            :title="item.name || '未命名'"
-            :description="item.description"
-            :meta="{
-              author: item.author?.nickname || item.author?.username,
-              date: formatItemDate(item.created_at),
-            }"
-            action-text="进入编辑器"
-            action-icon="edit"
-            type-icon="layers"
-            placeholder-icon="landscape"
-            :show-checkbox="false"
-            @view="openDetail(item)"
-            @action="goToEditor(item)"
-          ></StandardCard>
+          <StandardCard :image="item.image?.url" :title="item.name || '未命名'" :description="item.description" :meta="{
+            author: item.author?.nickname || item.author?.username,
+            date: formatItemDate(item.created_at),
+          }" action-text="进入编辑器" action-icon="edit" type-icon="layers" placeholder-icon="landscape"
+            :show-checkbox="false" @view="openDetail(item)" @action="goToEditor(item)"></StandardCard>
         </template>
 
         <template #list-header>
@@ -70,21 +39,13 @@
           <div class="col-checkbox"></div>
           <div class="col-name">
             <div class="item-thumb">
-              <img
-                v-if="item.image?.url"
-                :src="item.image.url"
-                :alt="item.name"
-              />
+              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
               <div v-else class="thumb-placeholder">
-                <span class="material-symbols-outlined">layers</span>
+                <font-awesome-icon :icon="['fas', 'layer-group']" />
               </div>
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
-            <el-button
-              class="btn-hover-action"
-              type="primary"
-              @click.stop="goToEditor(item)"
-            >
+            <el-button class="btn-hover-action" type="primary" @click.stop="goToEditor(item)">
               进入编辑器
             </el-button>
           </div>
@@ -94,23 +55,13 @@
           <div class="col-date">{{ formatItemDate(item.created_at) }}</div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <span class="material-symbols-outlined actions-icon"
-                >more_horiz</span
-              >
+              <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon" />
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="openDetail(item)"
-                    >查看详情</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="goToEditor(item)"
-                    >进入编辑器</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="namedWindow(item)"
-                    >重命名</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="deletedWindow(item)"
-                    >删除</el-dropdown-item
-                  >
+                  <el-dropdown-item @click="openDetail(item)">查看详情</el-dropdown-item>
+                  <el-dropdown-item @click="goToEditor(item)">进入编辑器</el-dropdown-item>
+                  <el-dropdown-item @click="namedWindow(item)">重命名</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item)">删除</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -118,60 +69,28 @@
         </template>
       </ViewContainer>
 
-      <PagePagination
-        :current-page="pagination.current"
-        :total-pages="totalPages"
-        @page-change="handlePageChange"
-      ></PagePagination>
+      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
+      </PagePagination>
 
       <!-- Create Dialog -->
-      <create
-        ref="createdDialog"
-        :dialog-title="$t('verse.page.dialogTitle')"
-        :dialog-submit="$t('verse.page.dialogSubmit')"
-        @submit="submitCreate"
-      ></create>
+      <create ref="createdDialog" :dialog-title="$t('verse.page.dialogTitle')"
+        :dialog-submit="$t('verse.page.dialogSubmit')" @submit="submitCreate"></create>
 
       <!-- Detail Panel -->
-      <DetailPanel
-        v-model="detailVisible"
-        title="场景详情"
-        :name="currentVerse?.name || ''"
-        :loading="detailLoading"
-        :properties="detailProperties"
-        placeholder-icon="landscape"
-        width="560px"
-        :show-delete="true"
-        action-layout="grid"
-        :secondary-action="true"
-        secondary-action-text="进入编辑器"
-        download-text="导出场景"
-        download-icon="download"
-        delete-text="删除场景"
-        @download="handleExport"
-        @rename="handleRename"
-        @delete="handleDelete"
-        @secondary="handleGoToEditor"
-        @close="handlePanelClose"
-      >
+      <DetailPanel v-model="detailVisible" title="场景详情" :name="currentVerse?.name || ''" :loading="detailLoading"
+        :properties="detailProperties" placeholder-icon="landscape" width="560px" :show-delete="true"
+        action-layout="grid" :secondary-action="true" secondary-action-text="进入编辑器" download-text="导出场景"
+        download-icon="download" delete-text="删除场景" @download="handleExport" @rename="handleRename"
+        @delete="handleDelete" @secondary="handleGoToEditor" @close="handlePanelClose">
         <template #preview>
           <div class="verse-preview" @click="triggerFileSelect">
-            <img
-              v-if="currentVerse?.image?.url"
-              :src="currentVerse.image.url"
-              :alt="currentVerse.name"
-            />
+            <img v-if="currentVerse?.image?.url" :src="currentVerse.image.url" :alt="currentVerse.name" />
             <div v-else class="preview-placeholder">
-              <span class="material-symbols-outlined">landscape</span>
+              <font-awesome-icon :icon="['fas', 'image']" />
             </div>
 
-            <input
-              ref="fileInput"
-              type="file"
-              accept="image/png,image/jpeg,image/jpg"
-              class="hidden-input"
-              @change="handleCoverUpload"
-            />
+            <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/jpg" class="hidden-input"
+              @change="handleCoverUpload" />
           </div>
         </template>
         <template #info>
@@ -179,44 +98,24 @@
             <!-- DescriptionSection -->
             <div class="info-section">
               <div class="section-header">场景简介</div>
-              <el-input
-                v-model="editingDescription"
-                type="textarea"
-                :rows="4"
-                placeholder="请输入场景简介（可选）"
-                @blur="handleDescriptionBlur"
-              ></el-input>
+              <el-input v-model="editingDescription" type="textarea" :rows="4" placeholder="请输入场景简介（可选）"
+                @blur="handleDescriptionBlur"></el-input>
             </div>
 
             <!-- Tags Section (Restricted) -->
             <div v-if="canManage" class="info-section">
               <div class="section-header">场景标签</div>
               <div v-if="currentVerse?.verseTags?.length" class="tag-list">
-                <el-tag
-                  v-for="tag in currentVerse.verseTags"
-                  :key="tag.id"
-                  closable
-                  class="mr-2 mb-2"
-                  @close="handleRemoveTag(tag.id)"
-                >
+                <el-tag v-for="tag in currentVerse.verseTags" :key="tag.id" closable class="mr-2 mb-2"
+                  @close="handleRemoveTag(tag.id)">
                   {{ tag.name }}
                 </el-tag>
               </div>
               <div v-else class="empty-tags">暂无标签</div>
-              <el-select
-                v-model="selectedTag"
-                placeholder="添加标签..."
-                filterable
-                class="tag-select"
-                @change="handleAddTag"
-              >
-                <el-option
-                  v-for="tag in allTags"
-                  :key="tag.value"
-                  :label="tag.label"
-                  :value="tag.value"
-                  :disabled="isTagSelected(tag.value)"
-                ></el-option>
+              <el-select v-model="selectedTag" placeholder="添加标签..." filterable class="tag-select"
+                @change="handleAddTag">
+                <el-option v-for="tag in allTags" :key="tag.value" :label="tag.label" :value="tag.value"
+                  :disabled="isTagSelected(tag.value)"></el-option>
               </el-select>
             </div>
 
@@ -224,20 +123,13 @@
             <div v-if="canManage" class="info-section">
               <div class="section-header">可见性</div>
               <div class="visibility-group">
-                <button
-                  class="vis-btn"
-                  :class="{ active: !currentVerse?.public }"
-                  @click="handleVisibilityChange(false)"
-                >
-                  <span class="material-symbols-outlined">lock</span>
+                <button class="vis-btn" :class="{ active: !currentVerse?.public }"
+                  @click="handleVisibilityChange(false)">
+                  <font-awesome-icon :icon="['fas', 'lock']" />
                   私有
                 </button>
-                <button
-                  class="vis-btn"
-                  :class="{ active: currentVerse?.public }"
-                  @click="handleVisibilityChange(true)"
-                >
-                  <span class="material-symbols-outlined">public</span>
+                <button class="vis-btn" :class="{ active: currentVerse?.public }" @click="handleVisibilityChange(true)">
+                  <font-awesome-icon :icon="['fas', 'globe']" />
                   公开
                 </button>
               </div>
@@ -249,14 +141,8 @@
   </TransitionWrapper>
 
   <!-- Selection Method Dialog -->
-  <el-dialog
-    v-model="imageSelectDialogVisible"
-    :title="$t('meta.metaEdit.selectImageMethod')"
-    width="500px"
-    align-center
-    :close-on-click-modal="false"
-    append-to-body
-  >
+  <el-dialog v-model="imageSelectDialogVisible" :title="$t('meta.metaEdit.selectImageMethod')" width="500px"
+    align-center :close-on-click-modal="false" append-to-body>
     <div class="selection-container">
       <div class="selection-card" @click="openResourceDialog">
         <div class="card-icon">
@@ -289,17 +175,10 @@
   </el-dialog>
 
   <!-- Resource Dialog -->
-  <ResourceDialog
-    :multiple="false"
-    @selected="onResourceSelected"
-    ref="resourceDialogRef"
-  ></ResourceDialog>
+  <ResourceDialog :multiple="false" @selected="onResourceSelected" ref="resourceDialogRef"></ResourceDialog>
 
   <!-- Import Dialog -->
-  <ImportDialog
-    v-model="importDialogVisible"
-    @success="handleImportSuccess"
-  ></ImportDialog>
+  <ImportDialog v-model="importDialogVisible" @success="handleImportSuccess"></ImportDialog>
 </template>
 
 <script setup lang="ts">
@@ -504,7 +383,7 @@ const handleCoverUpload = async (event: Event) => {
             md5,
             extension,
             file,
-            (p: number) => {}, // progress
+            (p: number) => { }, // progress
             handler,
             dir
           )
@@ -835,7 +714,7 @@ const formatItemDate = (dateStr?: string) => {
 .thumb-placeholder {
   color: var(--text-muted, #94a3b8);
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 24px;
   }
 }
@@ -899,7 +778,7 @@ const formatItemDate = (dateStr?: string) => {
     border-radius: var(--radius-lg, 16px);
     color: white;
 
-    .material-symbols-outlined {
+    .svg-inline--fa {
       font-size: 48px;
       margin-bottom: 8px;
     }
@@ -935,7 +814,7 @@ const formatItemDate = (dateStr?: string) => {
   background: #f1f5f9;
   border-radius: var(--radius-lg, 16px);
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 64px;
   }
 }
@@ -1043,7 +922,7 @@ const formatItemDate = (dateStr?: string) => {
   cursor: pointer;
   transition: all 0.2s ease;
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 20px;
   }
 

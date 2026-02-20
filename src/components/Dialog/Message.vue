@@ -1,25 +1,13 @@
 <template>
-  <Transition
-    name="message-fade"
-    @before-leave="onClose"
-    @after-leave="$emit('destroy')"
-  >
-    <div
-      v-show="visible"
-      class="custom-message"
-      :class="type"
-      :style="{ top: top + 'px', zIndex }"
-      @mouseenter="clearTimer"
-      @mouseleave="startTimer"
-    >
+  <Transition name="message-fade" @before-leave="onClose" @after-leave="$emit('destroy')">
+    <div v-show="visible" class="custom-message" :class="type" :style="{ top: top + 'px', zIndex }"
+      @mouseenter="clearTimer" @mouseleave="startTimer">
       <div class="message-content-wrapper">
-        <span class="material-symbols-outlined message-icon">{{
-          iconName
-        }}</span>
+        <font-awesome-icon :icon="iconName" class="message-icon" />
         <span class="message-text">{{ message }}</span>
       </div>
       <button v-if="showClose" class="message-close" @click.stop="close">
-        <span class="material-symbols-outlined">close</span>
+        <font-awesome-icon :icon="['fas', 'xmark']" />
       </button>
     </div>
   </Transition>
@@ -56,13 +44,13 @@ const visible = ref(false);
 let timer: any = null;
 
 const iconName = computed(() => {
-  const icons = {
-    success: "check_circle",
-    warning: "warning",
-    info: "info",
-    error: "error",
+  const icons: Record<string, string[]> = {
+    success: ["fas", "circle-check"],
+    warning: ["fas", "triangle-exclamation"],
+    info: ["fas", "circle-info"],
+    error: ["fas", "circle-exclamation"],
   };
-  return icons[props.type] || "info";
+  return icons[props.type] || ["fas", "circle-info"];
 });
 
 const top = computed(() => props.offset);
@@ -188,7 +176,7 @@ defineExpose({
   color: var(--text-secondary, #64748b);
   cursor: pointer;
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 18px;
   }
 

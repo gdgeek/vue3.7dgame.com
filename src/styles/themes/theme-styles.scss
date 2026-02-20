@@ -257,7 +257,7 @@ body::before {
       object-fit: cover !important;
     }
     
-    .material-symbols-outlined {
+    .svg-inline--fa {
       font-size: 22px !important;
       color: var(--text-muted) !important;
     }
@@ -328,7 +328,7 @@ body::before {
     gap: 5px !important;
     font-size: 13px !important;
     
-    .material-symbols-outlined {
+    .svg-inline--fa {
       font-size: 16px !important;
     }
     
@@ -361,7 +361,7 @@ body::before {
     cursor: pointer !important;
     transition: all var(--transition-fast) !important;
     
-    .material-symbols-outlined {
+    .svg-inline--fa {
       font-size: 20px !important;
     }
     
@@ -397,7 +397,7 @@ body::before {
     transition: background var(--transition-fast) !important;
     border-radius: calc(var(--radius-md) - 6px) !important;
     
-    .material-symbols-outlined {
+    .svg-inline--fa {
       font-size: 18px !important;
       color: var(--text-secondary) !important;
     }
@@ -409,7 +409,7 @@ body::before {
     &.danger {
       color: var(--danger-color) !important;
       
-      .material-symbols-outlined {
+      .svg-inline--fa {
         color: var(--danger-color) !important;
       }
       
@@ -932,7 +932,7 @@ body::before {
     .cover-placeholder {
       background: rgba(0, 242, 255, 0.03) !important;
       
-      .material-symbols-outlined {
+      .svg-inline--fa {
         color: rgba(0, 242, 255, 0.5) !important;
       }
     }
@@ -1217,7 +1217,7 @@ body::before {
     box-shadow: 0 0 20px rgba(0, 242, 255, 0.2), inset 0 0 10px rgba(0, 242, 255, 0.05) !important;
     
     .item-text,
-    .material-symbols-outlined {
+    .svg-inline--fa {
       color: #00F2FF !important;
       text-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
     }
@@ -1381,7 +1381,7 @@ body::before {
       .menu-item {
         color: #E8F4F8 !important;
         
-        .material-symbols-outlined {
+        .svg-inline--fa {
           color: #8BA3AD !important;
         }
         
@@ -1392,7 +1392,7 @@ body::before {
         &.danger {
           color: #FF3366 !important;
           
-          .material-symbols-outlined {
+          .svg-inline--fa {
             color: #FF3366 !important;
           }
           
@@ -1564,7 +1564,7 @@ body::before {
     .cover-placeholder {
       background: linear-gradient(135deg, #FFF8F5 0%, #FFE8DD 100%) !important;
       
-      .material-symbols-outlined {
+      .svg-inline--fa {
         color: #FF6B35 !important;
       }
     }
@@ -1821,12 +1821,12 @@ body::before {
   }
   
   // 图标动画
-  .material-symbols-outlined {
+  .svg-inline--fa {
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   
-  .sidebar-item:hover .material-symbols-outlined,
-  .btn:hover .material-symbols-outlined {
+  .sidebar-item:hover .svg-inline--fa,
+  .btn:hover .svg-inline--fa {
     transform: scale(1.1);
   }
   
@@ -1932,7 +1932,7 @@ body::before {
         color: #2D1810 !important;
         border-radius: 10px !important;
         
-        .material-symbols-outlined {
+        .svg-inline--fa {
           color: #8B6F5C !important;
         }
         
@@ -1944,7 +1944,7 @@ body::before {
         &.danger {
           color: #FF6B6B !important;
           
-          .material-symbols-outlined {
+          .svg-inline--fa {
             color: #FF6B6B !important;
           }
           
@@ -2075,7 +2075,7 @@ body::before {
     .cover-placeholder {
       background: #fafafa !important;
       
-      .material-symbols-outlined {
+      .svg-inline--fa {
         color: #666666 !important;
       }
     }
@@ -2350,7 +2350,7 @@ body::before {
     border-left: 2px solid #000000 !important;
     color: #000000 !important;
     
-    .material-symbols-outlined {
+    .svg-inline--fa {
       color: #000000 !important;
     }
   }
@@ -2456,7 +2456,7 @@ body::before {
         color: #000000 !important;
         border-radius: 0 !important;
         
-        .material-symbols-outlined {
+        .svg-inline--fa {
           color: #666666 !important;
         }
         
@@ -2467,7 +2467,7 @@ body::before {
         &.danger {
           color: #000000 !important;
           
-          .material-symbols-outlined {
+          .svg-inline--fa {
             color: #000000 !important;
           }
           
@@ -2566,7 +2566,7 @@ body::before {
     .cover-placeholder {
       background: #E0F7FF !important;
       
-      .material-symbols-outlined {
+      .svg-inline--fa {
         color: #000000 !important;
       }
     }
@@ -2951,7 +2951,7 @@ body::before {
     box-shadow: 3px 3px 0px #000000 !important;
     
     .sidebar-text,
-    .material-symbols-outlined {
+    .svg-inline--fa {
       color: #000000 !important;
       font-weight: 700 !important;
     }
@@ -3179,7 +3179,7 @@ body::before {
         font-weight: 600 !important;
         border-radius: 4px !important;
         
-        .material-symbols-outlined {
+        .svg-inline--fa {
           color: #000000 !important;
         }
         
@@ -3190,7 +3190,7 @@ body::before {
         &.danger {
           color: #FF1744 !important;
           
-          .material-symbols-outlined {
+          .svg-inline--fa {
             color: #FF1744 !important;
           }
           
@@ -3198,7 +3198,7 @@ body::before {
             background: #FF1744 !important;
             color: #FFFFFF !important;
             
-            .material-symbols-outlined {
+            .svg-inline--fa {
               color: #FFFFFF !important;
             }
           }
@@ -3496,7 +3496,7 @@ body::before {
         color: var(--text-primary, #1e293b) !important;
         border-radius: calc(var(--radius-md, 20px) - 6px) !important;
         
-        .material-symbols-outlined {
+        .svg-inline--fa {
           color: var(--text-secondary, #64748b) !important;
         }
         
@@ -3507,7 +3507,7 @@ body::before {
         &.danger {
           color: var(--danger-color, #ef4444) !important;
           
-          .material-symbols-outlined {
+          .svg-inline--fa {
             color: var(--danger-color, #ef4444) !important;
           }
           
@@ -3574,7 +3574,7 @@ body::before {
     .cover-placeholder {
       background: #11141B !important;
       
-      .material-symbols-outlined {
+      .svg-inline--fa {
         color: #8B949E !important;
       }
     }
@@ -3877,7 +3877,7 @@ body::before {
     border-left: 3px solid #2D68FF !important;
     
     .sidebar-text,
-    .material-symbols-outlined {
+    .svg-inline--fa {
       color: #4080FF !important;
     }
   }
@@ -4035,7 +4035,7 @@ body::before {
       .menu-item {
         color: #B0B3B8 !important;
         
-        .material-symbols-outlined {
+        .svg-inline--fa {
           color: #63676D !important;
         }
         
@@ -4043,7 +4043,7 @@ body::before {
           background: #1C2128 !important;
           color: #FFFFFF !important;
           
-          .material-symbols-outlined {
+          .svg-inline--fa {
             color: #B0B3B8 !important;
           }
         }
@@ -4051,7 +4051,7 @@ body::before {
         &.danger {
           color: #F85149 !important;
           
-          .material-symbols-outlined {
+          .svg-inline--fa {
             color: #F85149 !important;
           }
           
@@ -4250,7 +4250,7 @@ body::before {
     .cover-placeholder {
       background: var(--bg-hover) !important;
       
-      .material-symbols-outlined {
+      .svg-inline--fa {
         color: var(--text-muted) !important;
       }
     }
@@ -4523,7 +4523,7 @@ body::before {
       color: var(--text-primary) !important;
       border-radius: var(--radius-sm) !important;
 
-      .material-symbols-outlined {
+      .svg-inline--fa {
         color: var(--text-secondary) !important;
       }
       
@@ -4534,7 +4534,7 @@ body::before {
       &.danger {
         color: var(--danger-color) !important;
         
-        .material-symbols-outlined {
+        .svg-inline--fa {
           color: var(--danger-color) !important;
         }
         
@@ -5054,7 +5054,7 @@ body::before {
     background: var(--bg-card) !important;
     border-radius: var(--radius-lg) !important;
     
-    .material-symbols-outlined {
+    .svg-inline--fa {
       color: var(--text-muted) !important;
     }
     
@@ -5088,7 +5088,7 @@ body::before {
     background: var(--border-color) !important;
     
     .thumbnail-placeholder {
-      .material-symbols-outlined {
+      .svg-inline--fa {
         color: var(--text-muted) !important;
       }
     }
@@ -5097,7 +5097,7 @@ body::before {
       background: var(--bg-card) !important;
       border-radius: 50% !important;
       
-      .material-symbols-outlined {
+      .svg-inline--fa {
         color: var(--text-primary) !important;
       }
     }
@@ -5128,7 +5128,7 @@ body::before {
   .doc-icon {
     border-radius: var(--radius-md) !important;
     
-    .material-symbols-outlined {
+    .svg-inline--fa {
       color: var(--primary-color) !important;
     }
   }
@@ -5186,7 +5186,7 @@ body::before {
     .qrcode-placeholder {
       background: var(--bg-card) !important;
       
-      .material-symbols-outlined {
+      .svg-inline--fa {
         color: var(--text-muted) !important;
       }
     }
@@ -5201,7 +5201,7 @@ body::before {
     border-radius: var(--radius-lg) !important;
     background: var(--primary-light) !important;
     
-    .material-symbols-outlined {
+    .svg-inline--fa {
       color: var(--primary-color) !important;
     }
   }
@@ -6713,7 +6713,7 @@ body::before {
       
       &.info {
         background: rgba(255, 107, 53, 0.08) !important;
-        .material-symbols-outlined { color: #FF6B35 !important; }
+        .svg-inline--fa { color: #FF6B35 !important; }
       }
     }
     
@@ -6801,7 +6801,7 @@ body::before {
       &.danger {
         background: #FF1744 !important;
         p, .hint-title { color: #FFFFFF !important; }
-        .material-symbols-outlined { color: #FFFFFF !important; }
+        .svg-inline--fa { color: #FFFFFF !important; }
       }
     }
     
@@ -6895,17 +6895,17 @@ body::before {
       
       &.info {
         border-color: #000000 !important;
-        .material-symbols-outlined { color: #000000 !important; }
+        .svg-inline--fa { color: #000000 !important; }
       }
       
       &.warning {
         border-color: #666666 !important;
-        .material-symbols-outlined { color: #666666 !important; }
+        .svg-inline--fa { color: #666666 !important; }
       }
       
       &.danger {
         border-color: #000000 !important;
-        .material-symbols-outlined { color: #000000 !important; }
+        .svg-inline--fa { color: #000000 !important; }
       }
     }
     
@@ -7647,7 +7647,7 @@ body::before {
   background: linear-gradient(135deg, var(--bg-hover) 0%, var(--bg-active) 100%) !important;
   border-radius: var(--radius-md) !important;
   
-  .preview-placeholder .material-symbols-outlined {
+  .preview-placeholder .svg-inline--fa {
     color: var(--text-muted) !important;
   }
 }
@@ -8485,7 +8485,7 @@ body::before {
       font-weight: 600 !important;
     }
     
-    .material-symbols-outlined {
+    .svg-inline--fa {
       color: #00F2FF !important;
       text-shadow: 0 0 10px rgba(0, 242, 255, 0.8) !important;
     }
@@ -8713,7 +8713,7 @@ body::before {
     letter-spacing: 0.5px !important;
     transition: transform 0.1s ease-out, box-shadow 0.1s ease-out !important;
     
-    .material-symbols-outlined {
+    .svg-inline--fa {
       color: #000000 !important;
     }
     
@@ -8741,7 +8741,7 @@ body::before {
       background: #FF007A !important;
       color: #FFFFFF !important;
       
-      .material-symbols-outlined,
+      .svg-inline--fa,
       span {
         color: #FFFFFF !important;
       }
@@ -8782,7 +8782,7 @@ body::before {
       border: 2px solid #000000 !important;
       border-radius: 4px !important;
       
-      .material-symbols-outlined {
+      .svg-inline--fa {
         color: #000000 !important;
       }
     }
@@ -8791,7 +8791,7 @@ body::before {
       background: #FF007A !important;
       border-color: #000000 !important;
       
-      .material-symbols-outlined {
+      .svg-inline--fa {
         color: #FFFFFF !important;
       }
     }

@@ -14,7 +14,7 @@
         <!-- 主页 -->
         <router-link to="/home" custom v-slot="{ isActive, navigate }">
           <div class="sidebar-item" :class="{ 'sidebar-item-active': isActive }" @click="navigate">
-            <span class="material-symbols-outlined">home</span>
+            <font-awesome-icon :icon="['fas', 'home']" class="sidebar-icon" />
             <span class="item-text">主页</span>
           </div>
         </router-link>
@@ -26,7 +26,7 @@
             <template #reference>
               <div class="menu-trigger-wrapper">
                 <div class="sidebar-item">
-                  <span class="material-symbols-outlined">category</span>
+                  <font-awesome-icon :icon="['fas', 'th-large']" class="sidebar-icon" />
                   <span class="item-text">素材库</span>
                 </div>
               </div>
@@ -88,7 +88,7 @@
         <!-- 实体 -->
         <router-link to="/meta/list" custom v-slot="{ isActive, navigate }">
           <div class="sidebar-item" :class="{ 'sidebar-item-active': isActive }" @click="navigate">
-            <span class="material-symbols-outlined">token</span>
+            <font-awesome-icon :icon="['fas', 'puzzle-piece']" class="sidebar-icon" />
             <span class="item-text">实体</span>
           </div>
         </router-link>
@@ -97,7 +97,7 @@
         <div v-if="ability.can('open', new AbilityRouter('/ai'))" class="nav-group">
           <router-link to="/ai/list" custom v-slot="{ isActive, navigate }">
             <div class="sidebar-item" :class="{ 'sidebar-item-active': isActive }" @click="navigate">
-              <span class="material-symbols-outlined">smart_toy</span>
+              <font-awesome-icon :icon="['fas', 'robot']" class="sidebar-icon" />
               <span class="item-text">AI 创作</span>
             </div>
           </router-link>
@@ -112,7 +112,7 @@
                 <router-link to="/verse" custom v-slot="{ navigate }">
                   <div class="sidebar-item" :class="{ 'sidebar-item-active': isExactActive('/verse') }"
                     @click="navigate">
-                    <span class="material-symbols-outlined">layers</span>
+                    <font-awesome-icon :icon="['fas', 'layer-group']" class="sidebar-icon" />
                     <span class="item-text">场景</span>
                   </div>
                 </router-link>
@@ -157,7 +157,7 @@
             <template #reference>
               <div class="menu-trigger-wrapper">
                 <div class="sidebar-item">
-                  <span class="material-symbols-outlined">corporate_fare</span>
+                  <font-awesome-icon :icon="['fas', 'building']" class="sidebar-icon" />
                   <span class="item-text">校园管理</span>
                 </div>
               </div>
@@ -210,7 +210,7 @@
             <template #reference>
               <div class="menu-trigger-wrapper">
                 <div class="sidebar-item">
-                  <span class="material-symbols-outlined">display_settings</span>
+                  <font-awesome-icon :icon="['fas', 'sliders']" class="sidebar-icon" />
                   <span class="item-text">管理中心</span>
                 </div>
               </div>
@@ -256,12 +256,12 @@
       <div class="bottom-links">
         <!-- <router-link to="/help" custom v-slot="{ isActive, navigate }">
           <div class="sidebar-item" :class="{ 'sidebar-item-active': isActive }" @click="navigate">
-            <span class="material-symbols-outlined">help</span>
+            <font-awesome-icon :icon="['fas', 'circle-question']" class="sidebar-icon" />
             <span class="item-text">帮助中心</span>
           </div>
         </router-link> -->
         <div class="sidebar-item logout-item" @click="handleLogout">
-          <span class="material-symbols-outlined">logout</span>
+          <font-awesome-icon :icon="['fas', 'right-from-bracket']" class="sidebar-icon" />
           <span class="item-text">退出登录</span>
         </div>
       </div>
@@ -314,7 +314,7 @@ const handleLogout = () => {
 const confirmLogout = async () => {
   showLogoutDialog.value = false;
   await userStore.logout();
-  router.push("/logout");
+  router.push("/site/logout");
 };
 </script>
 
@@ -362,7 +362,7 @@ const confirmLogout = async () => {
       height: 40px; // Reduce height from 44px to 40px for compact look
       margin-bottom: 0; // Ensure no extra margin
 
-      .material-symbols-outlined {
+      .sidebar-icon {
         margin-right: 0;
       }
     }
@@ -479,15 +479,17 @@ const confirmLogout = async () => {
     background-color: var(--danger-light, rgba(239, 68, 68, 0.1)) !important;
   }
 
-  .material-symbols-outlined {
+  .sidebar-icon {
     color: var(--ar-text-danger);
   }
 }
 
 .sidebar-item {
-  .material-symbols-outlined {
+  .sidebar-icon {
     margin-right: 12px;
-    font-size: 24px;
+    font-size: 20px;
+    width: 24px;
+    text-align: center;
   }
 }
 </style>

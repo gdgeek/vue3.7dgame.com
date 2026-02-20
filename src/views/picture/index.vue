@@ -1,65 +1,35 @@
 <template>
   <TransitionWrapper>
     <div class="picture-index">
-      <PageActionBar
-        title="所有图片素材"
-        search-placeholder="搜索图片..."
-        :selection-count="selectedCount"
-        @search="handleSearch"
-        @sort-change="handleSortChange"
-        @view-change="handleViewChange"
-        @batch-download="handleBatchDownload"
-        @batch-delete="handleBatchDelete"
-        @cancel-selection="handleCancelSelection"
-      >
+      <PageActionBar title="所有图片素材" search-placeholder="搜索图片..." :selection-count="selectedCount" @search="handleSearch"
+        @sort-change="handleSortChange" @view-change="handleViewChange" @batch-download="handleBatchDownload"
+        @batch-delete="handleBatchDelete" @cancel-selection="handleCancelSelection">
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
-            <span
-              class="material-symbols-outlined"
-              style="font-size: 18px; margin-right: 4px"
-              >upload</span
-            >
+            <font-awesome-icon :icon="['fas', 'upload']" style="font-size: 18px; margin-right: 4px" />
             {{ $t("picture.uploadPicture") }}
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer
-        :items="items"
-        :view-mode="viewMode"
-        :loading="loading"
-        @row-click="(item) => openViewDialog(item.id)"
-      >
+      <ViewContainer :items="items" :view-mode="viewMode" :loading="loading"
+        @row-click="(item) => openViewDialog(item.id)">
         <template #grid-card="{ item }">
-          <StandardCard
-            :image="item.image?.url"
-            :title="item.name || '未命名'"
-            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
-            placeholder-icon="image"
-            :selected="isSelected(item.id)"
-            :selection-mode="hasSelection"
-            type-icon="image"
-            @view="openViewDialog(item.id)"
-            @select="() => toggleSelection(item.id)"
-          ></StandardCard>
+          <StandardCard :image="item.image?.url" :title="item.name || '未命名'"
+            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" placeholder-icon="image"
+            :selected="isSelected(item.id)" :selection-mode="hasSelection" type-icon="image"
+            @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)"></StandardCard>
         </template>
 
         <template #list-item="{ item }">
           <div class="col-checkbox" @click.stop>
-            <el-checkbox
-              :model-value="isSelected(item.id)"
-              @change="() => toggleSelection(item.id)"
-            ></el-checkbox>
+            <el-checkbox :model-value="isSelected(item.id)" @change="() => toggleSelection(item.id)"></el-checkbox>
           </div>
           <div class="col-name">
             <div class="item-thumb">
-              <img
-                v-if="item.image?.url"
-                :src="item.image.url"
-                :alt="item.name"
-              />
+              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
               <div v-else class="thumb-placeholder">
-                <span class="material-symbols-outlined">image</span>
+                <font-awesome-icon :icon="['fas', 'image']" />
               </div>
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
@@ -70,20 +40,14 @@
           </div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <span class="material-symbols-outlined actions-icon"
-                >more_horiz</span
-              >
+              <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon" />
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openViewDialog(item.id)">
                     {{ $t("picture.viewPicture") }}
                   </el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)"
-                    >重命名</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="deletedWindow(item, () => {})"
-                    >删除</el-dropdown-item
-                  >
+                  <el-dropdown-item @click="namedWindow(item)">重命名</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item, () => { })">删除</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -91,45 +55,21 @@
         </template>
       </ViewContainer>
 
-      <PagePagination
-        :current-page="pagination.current"
-        :total-pages="totalPages"
-        @page-change="handlePageChange"
-      ></PagePagination>
+      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
+      </PagePagination>
 
       <!-- Dialogs -->
       <!-- Dialogs -->
-      <StandardUploadDialog
-        v-model="uploadDialogVisible"
-        dir="picture"
-        :file-type="fileType"
-        :max-size="5"
-        :title="$t('picture.uploadPicture')"
-        @save-resource="savePicture"
-        @success="handleUploadSuccess"
-      ></StandardUploadDialog>
+      <StandardUploadDialog v-model="uploadDialogVisible" dir="picture" :file-type="fileType" :max-size="5"
+        :title="$t('picture.uploadPicture')" @save-resource="savePicture" @success="handleUploadSuccess">
+      </StandardUploadDialog>
 
       <!-- Detail Panel -->
-      <DetailPanel
-        v-model="viewDialogVisible"
-        title="图片详情"
-        :name="currentPicture?.name || ''"
-        :loading="detailLoading"
-        :properties="detailProperties"
-        placeholder-icon="image"
-        download-text="下载图片"
-        delete-text="删除此图片"
-        @download="handleDownload"
-        @rename="handleRename"
-        @delete="handleDelete"
-        @close="handlePanelClose"
-      >
+      <DetailPanel v-model="viewDialogVisible" title="图片详情" :name="currentPicture?.name || ''" :loading="detailLoading"
+        :properties="detailProperties" placeholder-icon="image" download-text="下载图片" delete-text="删除此图片"
+        @download="handleDownload" @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
         <template #preview>
-          <img
-            v-if="currentPicture?.file?.url"
-            :src="currentPicture.file.url"
-            :alt="currentPicture.name"
-          />
+          <img v-if="currentPicture?.file?.url" :src="currentPicture.file.url" :alt="currentPicture.name" />
         </template>
       </DetailPanel>
     </div>
@@ -473,7 +413,7 @@ const formatItemDate = (dateStr?: string) => {
 .thumb-placeholder {
   color: var(--text-muted, #94a3b8);
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 24px;
   }
 }

@@ -7,37 +7,19 @@
         <br />
         <el-tabs style="width: 100%" type="border-card" :stretch="true">
           <el-tab-pane :label="$t('login.createAccount')">
-            <el-form
-              ref="registerFormRef"
-              class="login-form"
-              :rules="registerRules"
-              :model="registerForm"
-              label-width="auto"
-            >
+            <el-form ref="registerFormRef" class="login-form" :rules="registerRules" :model="registerForm"
+              label-width="auto">
               <el-form-item :label="$t('login.username')" prop="username">
-                <el-input
-                  v-model="registerForm.username"
-                  suffix-icon="Message"
-                ></el-input>
+                <el-input v-model="registerForm.username" suffix-icon="Message"></el-input>
               </el-form-item>
 
               <el-form-item :label="$t('login.password')" prop="password">
-                <el-input
-                  v-model="registerForm.password"
-                  type="password"
-                  suffix-icon="Lock"
-                ></el-input>
-                <PasswordStrength
-                  :password="registerForm.password"
-                ></PasswordStrength>
+                <el-input v-model="registerForm.password" type="password" suffix-icon="Lock"></el-input>
+                <PasswordStrength :password="registerForm.password"></PasswordStrength>
               </el-form-item>
 
               <el-form-item :label="$t('login.repassword')" prop="repassword">
-                <el-input
-                  v-model="registerForm.repassword"
-                  type="password"
-                  suffix-icon="Lock"
-                ></el-input>
+                <el-input v-model="registerForm.repassword" type="password" suffix-icon="Lock"></el-input>
               </el-form-item>
 
               <el-form-item class="login-button">
@@ -141,7 +123,7 @@ function parseRedirect(): {
   queryParams: Record<string, string>;
 } {
   const query: LocationQuery = route.query;
-  const redirect = (query.redirect as string) ?? "/";
+  const redirect = (query.redirect as string) ?? "/home/index";
 
   const url = new URL(redirect, window.location.origin);
   const path = url.pathname;

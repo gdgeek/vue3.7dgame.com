@@ -1,11 +1,6 @@
 <template>
   <div class="home-header">
-    <el-row
-      :gutter="10"
-      justify="space-between"
-      align="middle"
-      class="home-header-row"
-    >
+    <el-row :gutter="10" justify="space-between" align="middle" class="home-header-row">
       <el-col :md="16" :span="24">
         <div class="home-greeting-container">
           <h1 class="home-greeting-title">
@@ -24,7 +19,7 @@
       <el-col :md="8" :span="24">
         <div :class="['home-header-button', { mobile: isMobile }]">
           <button class="btn-secondary home-btn" @click="showQRCode()">
-            <span class="material-symbols-outlined btn-icon">qr_code_2</span>
+            <font-awesome-icon :icon="['fas', 'qrcode']" class="btn-icon" />
             {{ t("login.loginCode") }}
           </button>
         </div>

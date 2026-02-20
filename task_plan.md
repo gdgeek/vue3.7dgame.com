@@ -1,71 +1,38 @@
-# 任务：Scene (Verse) Export/Import 功能可行性分析
+# Task: Material Symbols → FontAwesome 迁移
 
 ## 目标
-分析项目中场景（verse）导出/导入功能的可行性，包括：
-- API 层分析（meta-verse, meta, resources）
-- 数据模型和类型定义
-- 现有导出/导入功能
-- 实现路线图和工作量估计
+将所有 `material-symbols-outlined` 图标替换为 FontAwesome，去掉 Google CDN 依赖，解决图标加载前显示文字的问题。
 
-## 阶段
+## 状态: `complete` ✅
 
-| 阶段 | 描述 | 状态 |
-|------|------|------|
-| 1 | 收集 API 层信息 | `complete` |
-| 2 | 分析数据结构和关系 | `complete` |
-| 3 | 评估可行性和风险 | `complete` |
-| 4 | 生成详细报告 | `complete` |
+---
 
-## 关键发现
+## Phase 1: 注册所有需要的 FA 图标 (`complete` ✅)
+在 `src/main.ts` 中 `library.add()` 添加所有需要的图标导入（~60个图标）。
 
-### API 层
-- ✅ Verse API: POST/GET/PUT/DELETE /v1/verses
-- ✅ Meta API: POST/GET/PUT/DELETE /v1/metas
-- ✅ Resources API: 完整的 CRUD 操作
-- ✅ Meta-Resource 链接 API
+## Phase 2: 替换侧边栏图标 (`complete` ✅)
+文件: `src/layout/components/Sidebar/SidebarLeft.vue`
 
-### 数据结构
-- ✅ Verse 包含 metas 数组和 verseCode
-- ✅ Meta 包含 data、events、metaCode
-- ✅ Resources 有完整的元数据和文件信息
-- ✅ 使用 UUID 进行唯一标识
+## Phase 3: 替换 NavBar 图标 (`complete` ✅)
+文件: `HeaderActions.vue`, `UserDropdown.vue`
 
-### 现有基础设施
-- ✅ 文件处理系统 (src/assets/js/file/)
-- ✅ 权限系统 (src/utils/ability.ts)
-- ✅ UI 组件库
-- ✅ 国际化支持
+## Phase 4: 替换各 views 和 components 页面图标 (`complete` ✅)
+- 14 个 view 文件
+- 16 个 component 文件
+- 所有 `<span class="material-symbols-outlined">xxx</span>` → `<font-awesome-icon :icon="['fas', 'xxx']" />`
 
-### 可行性结论
-**✅ 高度可行** - 中等实现工作量
+## Phase 5: 清理 CSS 中的 `.material-symbols-outlined` 样式 (`complete` ✅)
+- `src/styles/ar-platform.scss` — 7 处替换为 `.svg-inline--fa`
+- `src/styles/themes/theme-styles.scss` — 51 处替换为 `.svg-inline--fa`（sed 批量替换）
 
-## 创建的文件
+## Phase 6: 去掉 CDN 引用和字体文件 (`complete` ✅)
+- `index.html`: 删除 3 个 Google Fonts CDN `<link>` 标签
+- 删除 `src/assets/fonts/material-symbols.css`
+- 删除 `src/assets/fonts/material-symbols-outlined.woff2`
+- `pnpm remove @material-symbols/font-400`
 
-- `findings.md` - 详细的可行性分析报告
+## Phase 7: 处理动态图标绑定 (`complete` ✅)
+StandardCard/EmptyState/DetailPanel 的 prop 类型已改为 `string | string[]`，支持 FA 数组格式。
 
-## 工作量估计
-
-| 阶段 | 工作量 |
-|------|--------|
-| 导出功能 | 4-6 小时 |
-| 导入功能（URL 模式） | 6-8 小时 |
-| 导入功能（完整模式） | 12-16 小时 |
-| UI 集成 | 4-6 小时 |
-| 测试 | 8-10 小时 |
-| **总计** | **34-46 小时** |
-
-## 建议的实现顺序
-
-1. **Phase 1**: 导出功能（最简单）
-2. **Phase 2**: 导入功能 - URL 模式（中等）
-3. **Phase 3**: 资源处理（中等）
-4. **Phase 4**: UI 集成（简单）
-
-## 错误日志
-
-无错误
-
-## 下一步行动
-
-- 根据需要开始实现导出功能
-- 或进行更详细的设计评审
+## 最终验证
+`grep -r 'material-symbols' src/ index.html` — 零匹配 ✅

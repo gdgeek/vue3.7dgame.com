@@ -31,14 +31,11 @@ const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 onMounted(async () => {
   await userStore.logout();
   setTimeout(() => {
-    const domainStore = useDomainStore(); // already imported? no, need to import
-    console.error("Logout view - Homepage:", domainStore.homepage);
-    console.error("Logout view - Info:", domainStore.info);
+    const domainStore = useDomainStore();
     if (domainStore.homepage) {
       window.location.href = domainStore.homepage;
     } else {
-      alert(123)
-      // router.push("/web/index");
+      router.push("/web/index");
     }
   }, 500);
 });

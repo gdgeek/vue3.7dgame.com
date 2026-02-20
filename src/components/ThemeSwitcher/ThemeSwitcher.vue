@@ -3,17 +3,12 @@
     <!-- 风格主题选择 -->
     <div class="theme-section">
       <div class="section-header">
-        <span class="material-symbols-outlined">palette</span>
+        <font-awesome-icon :icon="['fas', 'palette']" />
         <span class="section-title">界面风格</span>
       </div>
       <div class="theme-list">
-        <button
-          v-for="theme in availableThemes"
-          :key="theme.name"
-          class="theme-card"
-          :class="{ active: currentThemeName === theme.name }"
-          @click="setTheme(theme.name)"
-        >
+        <button v-for="theme in availableThemes" :key="theme.name" class="theme-card"
+          :class="{ active: currentThemeName === theme.name }" @click="setTheme(theme.name)">
           <div class="theme-preview" :class="theme.name">
             <div class="preview-sidebar"></div>
             <div class="preview-content">
@@ -28,11 +23,8 @@
             <span class="theme-name">{{ theme.displayName }}</span>
             <span class="theme-desc">{{ theme.description }}</span>
           </div>
-          <span
-            v-if="currentThemeName === theme.name"
-            class="material-symbols-outlined check-icon"
-            >check_circle</span
-          >
+          <font-awesome-icon v-if="currentThemeName === theme.name" :icon="['fas', 'circle-check']"
+            class="check-icon" />
         </button>
       </div>
     </div>
@@ -40,44 +32,26 @@
     <!-- 日间模式主题色选择 -->
     <div v-if="currentThemeName === 'modern-blue'" class="theme-section">
       <div class="section-header">
-        <span class="material-symbols-outlined">colorize</span>
+        <font-awesome-icon :icon="['fas', 'eye-dropper']" />
         <span class="section-title">主题色</span>
       </div>
       <div class="color-picker-section">
         <div class="preset-colors">
-          <button
-            v-for="preset in presetPrimaryColors"
-            :key="preset.color"
-            class="color-btn"
-            :class="{ active: currentPrimaryColor === preset.color }"
-            :style="{ '--preset-color': preset.color }"
-            :title="preset.name"
-            @click="handleColorSelect(preset.color)"
-          >
-            <span
-              v-if="currentPrimaryColor === preset.color"
-              class="material-symbols-outlined color-check"
-              >check</span
-            >
+          <button v-for="preset in presetPrimaryColors" :key="preset.color" class="color-btn"
+            :class="{ active: currentPrimaryColor === preset.color }" :style="{ '--preset-color': preset.color }"
+            :title="preset.name" @click="handleColorSelect(preset.color)">
+            <font-awesome-icon v-if="currentPrimaryColor === preset.color" :icon="['fas', 'check']"
+              class="color-check" />
           </button>
         </div>
         <div class="custom-color-row">
           <label class="custom-color-label">
-            <span class="material-symbols-outlined">edit</span>
+            <font-awesome-icon :icon="['fas', 'pen-to-square']" />
             <span>自定义</span>
-            <input
-              type="color"
-              :value="currentPrimaryColor"
-              class="color-input"
-              @input="handleCustomColor"
-            />
+            <input type="color" :value="currentPrimaryColor" class="color-input" @input="handleCustomColor" />
           </label>
-          <button
-            v-if="customPrimaryColor"
-            class="reset-btn"
-            @click="handleResetColor"
-          >
-            <span class="material-symbols-outlined">restart_alt</span>
+          <button v-if="customPrimaryColor" class="reset-btn" @click="handleResetColor">
+            <font-awesome-icon :icon="['fas', 'arrows-rotate']" />
             <span>重置</span>
           </button>
         </div>
@@ -139,7 +113,7 @@ function handleResetColor() {
   gap: 8px;
   margin-bottom: 16px;
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 20px;
     color: var(--primary-color, #00baff);
   }
@@ -229,9 +203,11 @@ function handleResetColor() {
       background: #ffffff;
       border-right: 1px solid #e2e8f0;
     }
+
     .preview-content {
       background: #f0f4f8;
     }
+
     .preview-card {
       border-radius: 6px;
       border-color: #e2e8f0;
@@ -245,13 +221,16 @@ function handleResetColor() {
       background: #080a0f;
       border-right: 1px solid #21262d;
     }
+
     .preview-content {
       background: #0b0e14;
     }
+
     .preview-header {
       background: #151921;
       border-radius: 2px;
     }
+
     .preview-card {
       background: #151921;
       border-radius: 4px;
@@ -279,6 +258,7 @@ function handleResetColor() {
       border-right: 1px solid #00f2ff;
       box-shadow: 0 0 8px rgba(0, 242, 255, 0.3);
     }
+
     .preview-content {
       background: #0b0e14;
       background-image:
@@ -286,10 +266,12 @@ function handleResetColor() {
         linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
       background-size: 8px 8px;
     }
+
     .preview-header {
       background: rgba(18, 24, 32, 0.85);
       border-radius: 2px;
     }
+
     .preview-card {
       background: rgba(18, 24, 32, 0.85);
       border-radius: 3px;
@@ -303,13 +285,16 @@ function handleResetColor() {
     .preview-sidebar {
       background: linear-gradient(180deg, #ff6b35 0%, #ffb347 100%);
     }
+
     .preview-content {
       background: #fff8f5;
     }
+
     .preview-header {
       background: #ffffff;
       border-radius: 4px;
     }
+
     .preview-card {
       border-radius: 8px;
       border-color: #ffe4db;
@@ -332,18 +317,22 @@ function handleResetColor() {
   // 新粗犷主义预览 - 粗边框、硬阴影
   &.neo-brutalism {
     border-radius: 4px;
+
     .preview-sidebar {
       background: #ffffff;
       border-right: 2px solid #000000;
     }
+
     .preview-content {
       background: #fafaf8;
     }
+
     .preview-header {
       background: #fff000;
       border-radius: 2px;
       border: 1px solid #000000;
     }
+
     .preview-card {
       border-radius: 2px;
       border: 2px solid #000000;
@@ -354,18 +343,22 @@ function handleResetColor() {
   // 极简纯净预览 - 无圆角、纯黑白
   &.minimal-pure {
     border-radius: 0;
+
     .preview-sidebar {
       background: #fafafa;
       border-right: 1px solid #e0e0e0;
     }
+
     .preview-content {
       background: #ffffff;
     }
+
     .preview-header {
       background: #fafafa;
       border-radius: 0;
       border-bottom: 1px solid #e0e0e0;
     }
+
     .preview-card {
       border-radius: 0;
       border-color: #e0e0e0;
@@ -483,7 +476,7 @@ function handleResetColor() {
     color: var(--text-primary, #1e293b);
   }
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 16px;
   }
 
@@ -526,7 +519,7 @@ function handleResetColor() {
     background: var(--danger-light, rgba(239, 68, 68, 0.1));
   }
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 16px;
   }
 }

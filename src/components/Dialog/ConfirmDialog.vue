@@ -1,19 +1,9 @@
 <template>
-  <el-dialog
-    v-model="visible"
-    :title="title"
-    width="420px"
-    append-to-body
-    destroy-on-close
-    class="custom-confirm-dialog"
-    :close-on-click-modal="false"
-    :show-close="false"
-  >
+  <el-dialog v-model="visible" :title="title" width="420px" append-to-body destroy-on-close
+    class="custom-confirm-dialog" :close-on-click-modal="false" :show-close="false">
     <div class="dialog-content">
       <div class="confirm-box" :class="type">
-        <span class="material-symbols-outlined confirm-icon">{{
-          iconName
-        }}</span>
+        <font-awesome-icon :icon="iconName" class="confirm-icon" />
         <div class="confirm-text">
           <p class="confirm-title">{{ message }}</p>
           <p v-if="description" class="confirm-desc">{{ description }}</p>
@@ -73,13 +63,13 @@ watch(visible, (val) => {
 });
 
 const iconName = computed(() => {
-  const icons: Record<string, string> = {
-    warning: "warning",
-    danger: "error",
-    info: "info",
-    success: "check_circle",
+  const icons: Record<string, string[]> = {
+    warning: ["fas", "triangle-exclamation"],
+    danger: ["fas", "circle-exclamation"],
+    info: ["fas", "circle-info"],
+    success: ["fas", "circle-check"],
   };
-  return icons[props.type] || "warning";
+  return icons[props.type] || ["fas", "triangle-exclamation"];
 });
 
 const confirmBtnClass = computed(() => {
@@ -122,8 +112,7 @@ const handleCancel = () => {
   }
 }
 
-// Removed redundant .dark override
-</style>
+// Removed redundant .dark override</style>
 
 <style lang="scss" scoped>
 .dialog-content {
@@ -253,5 +242,4 @@ const handleCancel = () => {
   }
 }
 
-// Removed redundant .dark override
-</style>
+// Removed redundant .dark override</style>

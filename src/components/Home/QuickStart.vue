@@ -1,7 +1,7 @@
 <template>
   <div class="quick-start-section">
     <div class="section-header">
-      <span class="material-symbols-outlined header-icon">bolt</span>
+      <font-awesome-icon :icon="['fas', 'bolt']" class="header-icon" />
       <h2 class="section-title">
         {{ t("homepage.quickStart.title", "快速开始") }}
       </h2>
@@ -10,29 +10,16 @@
     <el-row :gutter="20">
       <el-col :xs="24" :sm="8" v-for="(item, index) in quickItems" :key="index">
         <div class="quick-card" @click="handleQuickAction(item.action)">
-          <div
-            class="card-icon-wrapper"
-            :style="{ backgroundColor: item.bgColor }"
-          >
-            <span
-              class="material-symbols-outlined card-icon"
-              :style="{ color: item.iconColor }"
-              >{{ item.icon }}</span
-            >
+          <div class="card-icon-wrapper" :style="{ backgroundColor: item.bgColor }">
+            <font-awesome-icon :icon="item.icon" class="card-icon" :style="{ color: item.iconColor }" />
           </div>
           <div class="card-content">
             <h3 class="card-title">{{ item.title }}</h3>
             <p class="card-desc">{{ item.desc }}</p>
           </div>
           <div class="card-action">
-            <span class="action-text" :style="{ color: item.iconColor }"
-              >立即{{ item.title.slice(0, 2) }}</span
-            >
-            <span
-              class="material-symbols-outlined action-arrow"
-              :style="{ color: item.iconColor }"
-              >arrow_forward</span
-            >
+            <span class="action-text" :style="{ color: item.iconColor }">立即{{ item.title.slice(0, 2) }}</span>
+            <font-awesome-icon :icon="['fas', 'arrow-right']" class="action-arrow" :style="{ color: item.iconColor }" />
           </div>
         </div>
       </el-col>
@@ -54,7 +41,7 @@ const quickItems = [
       "homepage.quickStart.upload.desc",
       "导入 3D 模型或多媒体文件到您的个人库中。"
     ),
-    icon: "cloud_upload",
+    icon: ["fas", "cloud-arrow-up"] as string[],
     bgColor: "var(--primary-light)", // Use theme var
     iconColor: "var(--primary-color)", // Use theme var
     action: "/resource/polygen/index",
@@ -65,7 +52,7 @@ const quickItems = [
       "homepage.quickStart.edit.desc",
       "管理交互式组件和行为脚本，赋予 AR 资产生命力。"
     ),
-    icon: "edit_square",
+    icon: ["fas", "pen-to-square"] as string[],
     bgColor: "var(--primary-light)", // Use theme var
     iconColor: "var(--primary-color)", // Use theme var
     action: "/meta/list",
@@ -76,7 +63,7 @@ const quickItems = [
       "homepage.quickStart.create.desc",
       "从零开始构建一个全新的沉浸式 AR 互动体验。"
     ),
-    icon: "add_box",
+    icon: ["fas", "square-plus"] as string[],
     bgColor: "var(--primary-light)", // Use theme var
     iconColor: "var(--primary-color)", // Use theme var
     action: "/verse/index",

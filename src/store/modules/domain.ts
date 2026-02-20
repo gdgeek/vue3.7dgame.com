@@ -120,8 +120,14 @@ export const useDomainStore = defineStore("domain", {
 
       try {
         let domain = window.location.hostname;
-        // 本地开发环境使用特定域名
-        if (domain === "localhost" || domain === "127.0.0.1") {
+        // 本地开发环境使用特定域名（localhost、127.0.0.1、局域网 IP）
+        if (
+          domain === "localhost" ||
+          domain === "127.0.0.1" ||
+          /^192\.168\./.test(domain) ||
+          /^10\./.test(domain) ||
+          /^172\.(1[6-9]|2\d|3[01])\./.test(domain)
+        ) {
           domain = "d.xiading.hxgxonline.com";
         }
 

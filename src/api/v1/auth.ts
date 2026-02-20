@@ -28,9 +28,22 @@ const register = (data: any) => {
   });
 };
 
+const logout = () => {
+  return new Promise((resolve) => {
+    // localStorage.clear();
+    resolve(true);
+  });
+  /*
+  return request({
+    url: `/v1/auth/logout`,
+    method: "delete",
+  });*/
+};
+
 export default {
   login,
   refresh,
   link,
   register,
+  logout,
 };

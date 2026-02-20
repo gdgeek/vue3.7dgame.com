@@ -7,16 +7,8 @@
       <span>微信扫码注册/登录</span>
     </el-button>
 
-    <el-dialog
-      v-model="dialogVisible"
-      title="微信扫码注册/登录"
-      width="340px"
-      class="qrcode-dialog"
-      :class="{ 'dark-theme': isDark }"
-      :show-close="true"
-      align-center
-      @close="close"
-    >
+    <el-dialog v-model="dialogVisible" title="微信扫码注册/登录" width="340px" class="qrcode-dialog"
+      :class="{ 'dark-theme': isDark }" :show-close="true" align-center @close="close">
       <div class="qrcode-container">
         <div class="qrcode-wrapper">
           <div class="qrcode-box">
@@ -33,12 +25,7 @@
         </div>
 
         <div class="loading-status" v-if="isScanning">
-          <el-progress
-            type="circle"
-            :percentage="scanProgress"
-            :width="36"
-            :stroke-width="4"
-          ></el-progress>
+          <el-progress type="circle" :percentage="scanProgress" :width="36" :stroke-width="4"></el-progress>
           <span class="scanning-text">扫码中，请稍候...</span>
         </div>
       </div>
@@ -81,7 +68,7 @@ const parseRedirect = (): {
   queryParams: Record<string, string>;
 } => {
   const query: LocationQuery = route.query;
-  const redirect = (query.redirect as string) ?? "/";
+  const redirect = (query.redirect as string) ?? "/home/index";
   const url = new URL(redirect, window.location.origin);
   const path = url.pathname;
   const queryParams: Record<string, string> = {};

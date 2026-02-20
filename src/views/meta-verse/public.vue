@@ -12,57 +12,30 @@
           </div>
           <div class="search-section">
             <div class="hero-search-box">
-              <span class="material-symbols-outlined search-icon">search</span>
-              <input
-                v-model="searchValue"
-                type="text"
-                class="hero-search-input"
-                placeholder="搜索示例..."
-                @keyup.enter="handleHeroSearch"
-              />
+              <font-awesome-icon :icon="['fas', 'search']" class="search-icon" />
+              <input v-model="searchValue" type="text" class="hero-search-input" placeholder="搜索示例..."
+                @keyup.enter="handleHeroSearch" />
             </div>
           </div>
         </div>
 
         <div class="header-tabs">
-          <div
-            v-for="tab in categories"
-            :key="tab.id"
-            class="tab-item"
-            :class="{ active: currentTab === tab.id }"
-            @click="selectTab(tab.id)"
-          >
+          <div v-for="tab in categories" :key="tab.id" class="tab-item" :class="{ active: currentTab === tab.id }"
+            @click="selectTab(tab.id)">
             {{ tab.name }}
           </div>
         </div>
       </div>
 
-      <ViewContainer
-        class="list-view"
-        :items="items"
-        :view-mode="viewMode"
-        :loading="loading"
-        :breakpoints="cardBreakpoints"
-        @row-click="openDetail"
-      >
+      <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading"
+        :breakpoints="cardBreakpoints" @row-click="openDetail">
         <template #grid-card="{ item }">
-          <StandardCard
-            :image="item.image?.url"
-            :title="item.name || '未命名'"
-            :description="item.description"
-            :meta="{
-              author: item.author?.nickname || item.author?.username,
-              date: formatItemDate(item.created_at),
-            }"
-            action-text="查看此示例"
-            action-icon="visibility"
-            type-icon="layers"
-            placeholder-icon="landscape"
-            :show-checkbox="false"
-            aspect-ratio="1.6 / 1"
-            @view="openDetail(item)"
-            @action="goToScene(item)"
-          ></StandardCard>
+          <StandardCard :image="item.image?.url" :title="item.name || '未命名'" :description="item.description" :meta="{
+            author: item.author?.nickname || item.author?.username,
+            date: formatItemDate(item.created_at),
+          }" action-text="查看此示例" action-icon="visibility" type-icon="layers" placeholder-icon="landscape"
+            :show-checkbox="false" aspect-ratio="1.6 / 1" @view="openDetail(item)" @action="goToScene(item)">
+          </StandardCard>
         </template>
 
         <template #list-header>
@@ -77,21 +50,13 @@
           <div class="col-checkbox"></div>
           <div class="col-name">
             <div class="item-thumb">
-              <img
-                v-if="item.image?.url"
-                :src="item.image.url"
-                :alt="item.name"
-              />
+              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
               <div v-else class="thumb-placeholder">
-                <span class="material-symbols-outlined">layers</span>
+                <font-awesome-icon :icon="['fas', 'layer-group']" />
               </div>
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
-            <el-button
-              class="btn-hover-action"
-              type="primary"
-              @click.stop="openDetail(item)"
-            >
+            <el-button class="btn-hover-action" type="primary" @click.stop="openDetail(item)">
               {{ $t("common.open") }}
             </el-button>
           </div>
@@ -107,37 +72,19 @@
         </template>
       </ViewContainer>
 
-      <PagePagination
-        :current-page="pagination.current"
-        :total-pages="totalPages"
-        @page-change="handlePageChange"
-      ></PagePagination>
+      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
+      </PagePagination>
 
       <!-- Detail Panel -->
-      <DetailPanel
-        v-model="detailVisible"
-        title="场景详情"
-        :name="currentVerse?.name || ''"
-        :loading="detailLoading"
-        :properties="detailProperties"
-        placeholder-icon="landscape"
-        width="560px"
-        :show-delete="false"
-        action-layout="stacked"
-        :secondary-action="false"
-        download-text="查看此示例"
-        @download="handleGoToPage"
-        @close="handlePanelClose"
-      >
+      <DetailPanel v-model="detailVisible" title="场景详情" :name="currentVerse?.name || ''" :loading="detailLoading"
+        :properties="detailProperties" placeholder-icon="landscape" width="560px" :show-delete="false"
+        action-layout="stacked" :secondary-action="false" download-text="查看此示例" @download="handleGoToPage"
+        @close="handlePanelClose">
         <template #preview>
           <div class="verse-preview">
-            <img
-              v-if="currentVerse?.image?.url"
-              :src="currentVerse.image.url"
-              :alt="currentVerse.name"
-            />
+            <img v-if="currentVerse?.image?.url" :src="currentVerse.image.url" :alt="currentVerse.name" />
             <div v-else class="preview-placeholder">
-              <span class="material-symbols-outlined">landscape</span>
+              <font-awesome-icon :icon="['fas', 'image']" />
             </div>
           </div>
         </template>
@@ -154,17 +101,10 @@
             <!-- Tags Section -->
             <div class="info-section">
               <div class="section-header">场景标签</div>
-              <div
-                v-if="
-                  currentVerse?.tags?.length || currentVerse?.verseTags?.length
-                "
-                class="tag-list"
-              >
-                <el-tag
-                  v-for="tag in currentVerse.tags || currentVerse.verseTags"
-                  :key="tag.id"
-                  class="mr-2 mb-2"
-                >
+              <div v-if="
+                currentVerse?.tags?.length || currentVerse?.verseTags?.length
+              " class="tag-list">
+                <el-tag v-for="tag in currentVerse.tags || currentVerse.verseTags" :key="tag.id" class="mr-2 mb-2">
                   {{ tag.name }}
                 </el-tag>
               </div>
@@ -516,7 +456,7 @@ const goToScene = (item: any) => {
   justify-content: center;
   color: var(--text-muted, #94a3b8);
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 64px;
   }
 }

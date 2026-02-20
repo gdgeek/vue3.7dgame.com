@@ -17,14 +17,9 @@
       <div class="controls-left">
         <!-- Search - Hide in selection mode -->
         <div v-if="showSearch && selectionCount === 0" class="search-box">
-          <span class="material-symbols-outlined search-icon">search</span>
-          <input
-            v-model="searchValue"
-            type="text"
-            class="search-input"
-            :placeholder="searchPlaceholder || '搜索...'"
-            @keyup.enter="handleSearch"
-          />
+          <font-awesome-icon :icon="['fas', 'search']" class="search-icon" />
+          <input v-model="searchValue" type="text" class="search-input" :placeholder="searchPlaceholder || '搜索...'"
+            @keyup.enter="handleSearch" />
         </div>
 
         <!-- Custom filters slot (tags, visibility, etc.) - Hide in selection mode -->
@@ -34,39 +29,20 @@
       <div class="controls-right">
         <!-- Batch actions - Show in selection mode -->
         <template v-if="selectionCount > 0">
-          <el-button
-            v-if="isPageSelected"
-            @click="$emit('cancel-select-all-page')"
-          >
-            <span
-              class="material-symbols-outlined"
-              style="font-size: 18px; margin-right: 4px"
-              >remove_done</span
-            >
+          <el-button v-if="isPageSelected" @click="$emit('cancel-select-all-page')">
+            <font-awesome-icon :icon="['fas', 'square-minus']" style="font-size: 18px; margin-right: 4px" />
             取消全选
           </el-button>
           <el-button v-else @click="$emit('select-all-page')">
-            <span
-              class="material-symbols-outlined"
-              style="font-size: 18px; margin-right: 4px"
-              >done_all</span
-            >
+            <font-awesome-icon :icon="['fas', 'check-double']" style="font-size: 18px; margin-right: 4px" />
             全选本页
           </el-button>
           <el-button @click="$emit('batch-download')">
-            <span
-              class="material-symbols-outlined"
-              style="font-size: 18px; margin-right: 4px"
-              >download</span
-            >
+            <font-awesome-icon :icon="['fas', 'download']" style="font-size: 18px; margin-right: 4px" />
             批量下载
           </el-button>
           <el-button type="danger" @click="$emit('batch-delete')">
-            <span
-              class="material-symbols-outlined"
-              style="font-size: 18px; margin-right: 4px"
-              >delete</span
-            >
+            <font-awesome-icon :icon="['fas', 'trash-can']" style="font-size: 18px; margin-right: 4px" />
             批量删除
           </el-button>
           <el-button @click="$emit('cancel-selection')">取消</el-button>
@@ -78,36 +54,18 @@
           <!-- Sort buttons -->
           <template v-if="showSort">
             <div class="sort-control">
-              <button
-                class="sort-btn"
-                :class="{ active: isSortedByTime }"
-                @click="toggleSort(sortByTime)"
-              >
-                <span class="material-symbols-outlined sort-icon"
-                  >schedule</span
-                >
+              <button class="sort-btn" :class="{ active: isSortedByTime }" @click="toggleSort(sortByTime)">
+                <font-awesome-icon :icon="['fas', 'clock']" class="sort-icon" />
                 时间
-                <span
-                  v-if="isSortedByTime"
-                  class="material-symbols-outlined sort-arrow"
-                >
-                  {{ sortAscending ? "expand_more" : "expand_less" }}
-                </span>
+                <font-awesome-icon v-if="isSortedByTime" :icon="['fas', sortAscending ? 'chevron-down' : 'chevron-up']"
+                  class="sort-arrow" />
               </button>
 
-              <button
-                class="sort-btn"
-                :class="{ active: isSortedByName }"
-                @click="toggleSort(sortByNameField)"
-              >
+              <button class="sort-btn" :class="{ active: isSortedByName }" @click="toggleSort(sortByNameField)">
                 <span class="sort-az">A<small>Z</small></span>
                 名称
-                <span
-                  v-if="isSortedByName"
-                  class="material-symbols-outlined sort-arrow"
-                >
-                  {{ sortAscending ? "expand_more" : "expand_less" }}
-                </span>
+                <font-awesome-icon v-if="isSortedByName" :icon="['fas', sortAscending ? 'chevron-down' : 'chevron-up']"
+                  class="sort-arrow" />
               </button>
             </div>
           </template>
@@ -118,21 +76,13 @@
           <!-- View toggle -->
           <div v-if="showViewToggle" class="view-toggle">
             <div class="segment-control">
-              <button
-                class="segment-btn"
-                :class="{ active: currentView === 'grid' }"
-                title="网格视图"
-                @click="setView('grid')"
-              >
-                <span class="material-symbols-outlined">grid_view</span>
+              <button class="segment-btn" :class="{ active: currentView === 'grid' }" title="网格视图"
+                @click="setView('grid')">
+                <font-awesome-icon :icon="['fas', 'grip']" />
               </button>
-              <button
-                class="segment-btn"
-                :class="{ active: currentView === 'list' }"
-                title="列表视图"
-                @click="setView('list')"
-              >
-                <span class="material-symbols-outlined">view_list</span>
+              <button class="segment-btn" :class="{ active: currentView === 'list' }" title="列表视图"
+                @click="setView('list')">
+                <font-awesome-icon :icon="['fas', 'list']" />
               </button>
             </div>
           </div>
@@ -472,7 +422,7 @@ defineExpose({
     cursor: pointer;
     transition: all var(--transition-fast, 0.15s ease);
 
-    .material-symbols-outlined {
+    .svg-inline--fa {
       font-size: 20px;
     }
 
@@ -487,7 +437,7 @@ defineExpose({
         0 1px 2px rgba(0, 0, 0, 0.1),
         0 1px 1px rgba(0, 0, 0, 0.05); // Enhanced shadow
 
-      .material-symbols-outlined {
+      .svg-inline--fa {
         font-variation-settings: "FILL" 1;
       }
     }

@@ -1,7 +1,7 @@
 <template>
   <div class="empty-state">
     <div class="empty-icon">
-      <span class="material-symbols-outlined">{{ icon }}</span>
+      <font-awesome-icon :icon="icon" />
     </div>
     <p class="empty-text">{{ text }}</p>
     <button v-if="actionText" class="empty-action" @click="$emit('action')">
@@ -13,12 +13,12 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    icon?: string;
+    icon?: string | string[];
     text?: string;
     actionText?: string;
   }>(),
   {
-    icon: "folder_open",
+    icon: () => ['fas', 'folder-open'],
     text: "暂无数据",
     actionText: "",
   }
@@ -42,7 +42,7 @@ defineEmits<{
 .empty-icon {
   margin-bottom: 24px;
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 72px;
     color: var(--text-muted, #94a3b8);
     font-weight: 300;

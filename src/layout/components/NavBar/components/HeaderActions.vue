@@ -3,39 +3,26 @@
     <!-- Icon button group -->
     <div class="actions-group">
       <button class="icon-btn" @click="toggleFullscreen" title="全屏">
-        <span class="material-symbols-outlined">
-          {{ isFullscreen ? "fullscreen_exit" : "fullscreen" }}
-        </span>
+        <font-awesome-icon :icon="['fas', isFullscreen ? 'compress' : 'expand']" />
       </button>
 
       <!-- 主题切换下拉菜单 -->
-      <el-dropdown
-        @command="handleThemeChange"
-        trigger="click"
-        class="theme-dropdown"
-      >
+      <el-dropdown @command="handleThemeChange" trigger="click" class="theme-dropdown">
         <button class="icon-btn" title="切换主题">
-          <span class="material-symbols-outlined">palette</span>
+          <font-awesome-icon :icon="['fas', 'palette']" />
         </button>
         <template #dropdown>
           <el-dropdown-menu class="theme-menu">
-            <el-dropdown-item
-              v-for="theme in availableThemes"
-              :key="theme.name"
-              :command="theme.name"
-              :class="{ 'is-active': currentThemeName === theme.name }"
-            >
+            <el-dropdown-item v-for="theme in availableThemes" :key="theme.name" :command="theme.name"
+              :class="{ 'is-active': currentThemeName === theme.name }">
               <div class="theme-item">
                 <div class="theme-preview-mini" :class="theme.name"></div>
                 <div class="theme-info">
                   <span class="theme-name">{{ theme.displayName }}</span>
                   <span class="theme-desc">{{ theme.description }}</span>
                 </div>
-                <span
-                  v-if="currentThemeName === theme.name"
-                  class="theme-check"
-                >
-                  <span class="material-symbols-outlined">check</span>
+                <span v-if="currentThemeName === theme.name" class="theme-check">
+                  <font-awesome-icon :icon="['fas', 'check']" />
                 </span>
               </div>
             </el-dropdown-item>
@@ -43,29 +30,18 @@
         </template>
       </el-dropdown>
 
-      <el-dropdown
-        @command="handleLanguageChange"
-        trigger="click"
-        class="language-dropdown"
-      >
+      <el-dropdown @command="handleLanguageChange" trigger="click" class="language-dropdown">
         <button class="icon-btn" title="语言">
-          <span class="material-symbols-outlined">language</span>
+          <font-awesome-icon :icon="['fas', 'language']" />
         </button>
         <template #dropdown>
           <el-dropdown-menu class="language-menu">
-            <el-dropdown-item
-              v-for="lang in languages"
-              :key="lang.value"
-              :command="lang.value"
-              :class="{ 'is-active': currentLocale === lang.value }"
-            >
+            <el-dropdown-item v-for="lang in languages" :key="lang.value" :command="lang.value"
+              :class="{ 'is-active': currentLocale === lang.value }">
               <div class="language-item">
                 <span class="language-name">{{ lang.label }}</span>
-                <span
-                  v-if="currentLocale === lang.value"
-                  class="language-check"
-                >
-                  <span class="material-symbols-outlined">check</span>
+                <span v-if="currentLocale === lang.value" class="language-check">
+                  <font-awesome-icon :icon="['fas', 'check']" />
                 </span>
               </div>
             </el-dropdown-item>
@@ -239,11 +215,9 @@ const handleLanguageChange = async (lang: string) => {
 
   // 教育友好
   &.edu-friendly {
-    background: linear-gradient(
-      90deg,
-      linear-gradient(180deg, #ff6b35, #ffb347) 30%,
-      #fff8f5 30%
-    );
+    background: linear-gradient(90deg,
+        linear-gradient(180deg, #ff6b35, #ffb347) 30%,
+        #fff8f5 30%);
     background: #fff8f5;
 
     &::before {
@@ -356,9 +330,8 @@ const handleLanguageChange = async (lang: string) => {
   color: var(--primary-color);
   flex-shrink: 0;
 
-  .material-symbols-outlined {
-    font-size: 18px;
-    font-weight: 600;
+  .svg-inline--fa {
+    font-size: 14px;
   }
 }
 
@@ -419,9 +392,8 @@ const handleLanguageChange = async (lang: string) => {
   align-items: center;
   color: var(--primary-color);
 
-  .material-symbols-outlined {
-    font-size: 18px;
-    font-weight: 600;
+  .svg-inline--fa {
+    font-size: 14px;
   }
 }
 </style>

@@ -1,65 +1,35 @@
 <template>
   <TransitionWrapper>
     <div class="audio-index">
-      <PageActionBar
-        title="所有音频素材"
-        search-placeholder="搜索音频..."
-        :selection-count="selectedCount"
-        @search="handleSearch"
-        @sort-change="handleSortChange"
-        @view-change="handleViewChange"
-        @batch-download="handleBatchDownload"
-        @batch-delete="handleBatchDelete"
-        @cancel-selection="handleCancelSelection"
-      >
+      <PageActionBar title="所有音频素材" search-placeholder="搜索音频..." :selection-count="selectedCount" @search="handleSearch"
+        @sort-change="handleSortChange" @view-change="handleViewChange" @batch-download="handleBatchDownload"
+        @batch-delete="handleBatchDelete" @cancel-selection="handleCancelSelection">
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
-            <span
-              class="material-symbols-outlined"
-              style="font-size: 18px; margin-right: 4px"
-              >upload</span
-            >
+            <font-awesome-icon :icon="['fas', 'upload']" style="font-size: 18px; margin-right: 4px" />
             {{ $t("audio.uploadAudio") }}
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer
-        :items="items"
-        :view-mode="viewMode"
-        :loading="loading"
-        @row-click="(item) => openViewDialog(item.id)"
-      >
+      <ViewContainer :items="items" :view-mode="viewMode" :loading="loading"
+        @row-click="(item) => openViewDialog(item.id)">
         <template #grid-card="{ item }">
-          <StandardCard
-            :image="item.image?.url"
-            :title="item.name || '未命名'"
-            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
-            :selected="isSelected(item.id)"
-            :selection-mode="hasSelection"
-            type-icon="audiotrack"
-            placeholder-icon="audiotrack"
-            @view="openViewDialog(item.id)"
-            @select="() => toggleSelection(item.id)"
-          ></StandardCard>
+          <StandardCard :image="item.image?.url" :title="item.name || '未命名'"
+            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" :selected="isSelected(item.id)"
+            :selection-mode="hasSelection" type-icon="audiotrack" placeholder-icon="audiotrack"
+            @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)"></StandardCard>
         </template>
 
         <template #list-item="{ item }">
           <div class="col-checkbox" @click.stop>
-            <el-checkbox
-              :model-value="isSelected(item.id)"
-              @change="() => toggleSelection(item.id)"
-            ></el-checkbox>
+            <el-checkbox :model-value="isSelected(item.id)" @change="() => toggleSelection(item.id)"></el-checkbox>
           </div>
           <div class="col-name">
             <div class="item-thumb">
-              <img
-                v-if="item.image?.url"
-                :src="item.image.url"
-                :alt="item.name"
-              />
+              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
               <div v-else class="thumb-placeholder">
-                <span class="material-symbols-outlined">headphones</span>
+                <font-awesome-icon :icon="['fas', 'headphones']" />
               </div>
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
@@ -70,20 +40,14 @@
           </div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <span class="material-symbols-outlined actions-icon"
-                >more_horiz</span
-              >
+              <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon" />
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openViewDialog(item.id)">
                     {{ $t("audio.viewAudio") }}
                   </el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)"
-                    >重命名</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="deletedWindow(item, () => {})"
-                    >删除</el-dropdown-item
-                  >
+                  <el-dropdown-item @click="namedWindow(item)">重命名</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item, () => { })">删除</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -91,51 +55,26 @@
         </template>
       </ViewContainer>
 
-      <PagePagination
-        :current-page="pagination.current"
-        :total-pages="totalPages"
-        @page-change="handlePageChange"
-      ></PagePagination>
+      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
+      </PagePagination>
 
       <!-- Dialogs -->
       <!-- Dialogs -->
-      <StandardUploadDialog
-        v-model="uploadDialogVisible"
-        dir="audio"
-        :file-type="fileType"
-        :max-size="5"
-        :title="$t('audio.uploadAudio')"
-        @save-resource="saveAudio"
-        @success="handleUploadSuccess"
-      ></StandardUploadDialog>
+      <StandardUploadDialog v-model="uploadDialogVisible" dir="audio" :file-type="fileType" :max-size="5"
+        :title="$t('audio.uploadAudio')" @save-resource="saveAudio" @success="handleUploadSuccess">
+      </StandardUploadDialog>
 
       <!-- Detail Panel -->
-      <DetailPanel
-        v-model="viewDialogVisible"
-        title="音频详情"
-        :name="currentAudio?.name || ''"
-        :loading="detailLoading"
-        :properties="detailProperties"
-        placeholder-icon="headphones"
-        download-text="下载音频"
-        delete-text="删除此音频"
-        @download="handleDownload"
-        @rename="handleRename"
-        @delete="handleDelete"
-        @close="handlePanelClose"
-      >
+      <DetailPanel v-model="viewDialogVisible" title="音频详情" :name="currentAudio?.name || ''" :loading="detailLoading"
+        :properties="detailProperties" placeholder-icon="headphones" download-text="下载音频" delete-text="删除此音频"
+        @download="handleDownload" @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
         <template #preview>
           <div class="audio-preview">
             <div class="audio-visual">
-              <span class="material-symbols-outlined">headphones</span>
+              <font-awesome-icon :icon="['fas', 'headphones']" />
             </div>
-            <audio
-              v-if="currentAudio?.file?.url"
-              ref="audioRef"
-              :src="currentAudio.file.url"
-              controls
-              class="audio-player"
-            ></audio>
+            <audio v-if="currentAudio?.file?.url" ref="audioRef" :src="currentAudio.file.url" controls
+              class="audio-player"></audio>
           </div>
         </template>
       </DetailPanel>
@@ -476,7 +415,7 @@ const formatItemDate = (dateStr?: string) => {
 .thumb-placeholder {
   color: var(--text-muted, #94a3b8);
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 24px;
   }
 }
@@ -522,17 +461,15 @@ const formatItemDate = (dateStr?: string) => {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: linear-gradient(
-    135deg,
-    var(--primary-color, #03a9f4),
-    var(--primary-dark, #0288d1)
-  );
+  background: linear-gradient(135deg,
+      var(--primary-color, #03a9f4),
+      var(--primary-dark, #0288d1));
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 8px 32px rgba(3, 169, 244, 0.3);
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 56px;
     color: #fff;
   }

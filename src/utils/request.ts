@@ -1,5 +1,4 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
-import { useUserStoreHook } from "@/store/modules/user";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { useRouter } from "@/router";
 import i18n from "@/lang";
@@ -110,8 +109,6 @@ service.interceptors.request.use(
       const isWhitelisted = refreshTokenWhitelist.some((url) =>
         config.url?.includes(url)
       );
-      // alert(isWhitelisted);
-      //   alert(config.url);
       if (!isWhitelisted && isTokenExpiringSoon(token)) {
         try {
           if (!refreshPromise) {
@@ -132,7 +129,6 @@ service.interceptors.request.use(
         }
       }
     }
-    //alert(2222);
     return config;
   },
   (error: any) => {
@@ -158,23 +154,17 @@ function handleUnauthorized(router: ReturnType<typeof useRouter>) {
   const messages = getMessageArray();
 
   showErrorMessage(messages[0]);
-  return useUserStoreHook()
-    .logout()
-    .then(() => {
-      router.push({ path: "/site/logout" });
-      // Reset the flag after a short delay to allow future handling
-      setTimeout(() => {
-        isHandlingUnauthorized = false;
-      }, 1000);
-      return Promise.reject("");
-    })
-    .catch(() => {
-      // Reset the flag even if navigation fails
-      setTimeout(() => {
-        isHandlingUnauthorized = false;
-      }, 1000);
-      return Promise.reject("");
-    });
+
+  // 只清除本地 token 防止后续请求再触发 401，完整 logout 交给 logout 页面处理
+  Token.removeToken();
+
+  router.push({ path: "/site/logout" });
+
+  setTimeout(() => {
+    isHandlingUnauthorized = false;
+  }, 1000);
+
+  return Promise.reject("");
 }
 
 // 响应拦截器
@@ -218,8 +208,6 @@ service.interceptors.response.use(
       return Promise.reject(error);
     }
     if (response.status === 401) {
-      // alert(1234);
-      // 仅当身份认证失败，执行登出操作
       return handleUnauthorized(router);
     } else if (response.status === 404) {
       showErrorMessage(i18n.global.t("request.error404"));

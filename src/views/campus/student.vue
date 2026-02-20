@@ -1,44 +1,21 @@
 <template>
   <TransitionWrapper>
     <div class="student-list">
-      <PageActionBar
-        :title="$t('manager.studentManagement')"
-        search-placeholder="搜索学生姓名..."
-        @search="handleSearch"
-        @sort-change="handleSortChange"
-        @view-change="handleViewChange"
-      >
+      <PageActionBar :title="$t('manager.studentManagement')" search-placeholder="搜索学生姓名..." @search="handleSearch"
+        @sort-change="handleSortChange" @view-change="handleViewChange">
         <template #actions>
           <el-button type="primary" @click="addStudent">
-            <span
-              class="material-symbols-outlined"
-              style="font-size: 18px; margin-right: 4px"
-              >add</span
-            >
+            <font-awesome-icon :icon="['fas', 'plus']" style="font-size: 18px; margin-right: 4px" />
             添加学生
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer
-        class="list-view"
-        :items="items"
-        :view-mode="viewMode"
-        :loading="loading"
-        @row-click="openDetail"
-      >
+      <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
         <template #grid-card="{ item }">
-          <StandardCard
-            :image="item.user?.avatar?.url"
-            :title="item.user?.nickname || item.user?.username || '学生'"
-            action-text="查看详情"
-            action-icon="visibility"
-            type-icon="person"
-            placeholder-icon="person"
-            :show-checkbox="false"
-            @view="openDetail(item)"
-            @action="openDetail(item)"
-          ></StandardCard>
+          <StandardCard :image="item.user?.avatar?.url" :title="item.user?.nickname || item.user?.username || '学生'"
+            action-text="查看详情" action-icon="visibility" type-icon="person" placeholder-icon="person"
+            :show-checkbox="false" @view="openDetail(item)" @action="openDetail(item)"></StandardCard>
         </template>
 
         <template #list-header>
@@ -53,34 +30,24 @@
           <div class="col-checkbox"></div>
           <div class="col-name">
             <div class="item-thumb">
-              <img
-                v-if="item.user?.avatar?.url"
-                :src="item.user.avatar.url"
-                :alt="item.user.nickname"
-              />
+              <img v-if="item.user?.avatar?.url" :src="item.user.avatar.url" :alt="item.user.nickname" />
               <div v-else class="thumb-placeholder">
-                <span class="material-symbols-outlined">person</span>
+                <font-awesome-icon :icon="['fas', 'user']" />
               </div>
             </div>
             <span class="item-name">{{
               item.user?.nickname || item.user?.username || "—"
-            }}</span>
+              }}</span>
           </div>
           <div class="col-school">{{ item.school?.name || "—" }}</div>
           <div class="col-class">{{ item.eduClass?.name || "—" }}</div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <span class="material-symbols-outlined actions-icon"
-                >more_horiz</span
-              >
+              <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon" />
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="openDetail(item)"
-                    >查看详情</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="deletedWindow(item)"
-                    >移除</el-dropdown-item
-                  >
+                  <el-dropdown-item @click="openDetail(item)">查看详情</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item)">移除</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -88,35 +55,17 @@
         </template>
 
         <template #empty>
-          <EmptyState
-            icon="person"
-            text="暂无学生"
-            action-text="添加学生"
-            @action="addStudent"
-          ></EmptyState>
+          <EmptyState icon="person" text="暂无学生" action-text="添加学生" @action="addStudent"></EmptyState>
         </template>
       </ViewContainer>
 
-      <PagePagination
-        :current-page="pagination.current"
-        :total-pages="totalPages"
-        @page-change="handlePageChange"
-      >
+      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
       </PagePagination>
 
       <!-- Detail Panel -->
-      <DetailPanel
-        v-model="detailVisible"
-        title="学生详情"
-        :name="currentStudent?.user?.nickname || ''"
-        :loading="detailLoading"
-        :properties="detailProperties"
-        placeholder-icon="person"
-        :show-delete="true"
-        delete-text="从学校移除"
-        @delete="handleDelete"
-        @close="handlePanelClose"
-      ></DetailPanel>
+      <DetailPanel v-model="detailVisible" title="学生详情" :name="currentStudent?.user?.nickname || ''"
+        :loading="detailLoading" :properties="detailProperties" placeholder-icon="person" :show-delete="true"
+        delete-text="从学校移除" @delete="handleDelete" @close="handlePanelClose"></DetailPanel>
     </div>
   </TransitionWrapper>
 </template>
@@ -221,7 +170,7 @@ const handleDelete = async () => {
     detailVisible.value = false;
     refresh();
     Message.success("移除成功");
-  } catch {}
+  } catch { }
 };
 
 const deletedWindow = async (item: Student) => {
@@ -232,7 +181,7 @@ const deletedWindow = async (item: Student) => {
     await deleteStudent(item.id);
     refresh();
     Message.success("移除成功");
-  } catch {}
+  } catch { }
 };
 </script>
 

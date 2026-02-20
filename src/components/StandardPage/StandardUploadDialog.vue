@@ -1,36 +1,17 @@
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    :title="title"
-    width="600px"
-    class="standard-upload-dialog"
-    destroy-on-close
-    append-to-body
-    :close-on-click-modal="false"
-    @closed="handleDialogClose"
-  >
-    <div
-      class="upload-area"
-      :class="{ 'is-dragover': isDragOver, 'is-disabled': isDisabled }"
-      @dragover.prevent="onDragOver"
-      @dragleave.prevent="onDragLeave"
-      @drop.prevent="onDrop"
-      @click="triggerFileSelect"
-    >
+  <el-dialog v-model="dialogVisible" :title="title" width="600px" class="standard-upload-dialog" destroy-on-close
+    append-to-body :close-on-click-modal="false" @closed="handleDialogClose">
+    <div class="upload-area" :class="{ 'is-dragover': isDragOver, 'is-disabled': isDisabled }"
+      @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave" @drop.prevent="onDrop" @click="triggerFileSelect">
       <div class="upload-content">
         <div class="cloud-icon">
-          <span class="material-symbols-outlined">cloud_upload</span>
+          <font-awesome-icon :icon="['fas', 'cloud-arrow-up']" />
         </div>
         <div class="upload-text">
           <h3>拖拽文件到此处，或点击浏览</h3>
           <p>支持多个文件同时上传</p>
         </div>
-        <el-button
-          type="primary"
-          class="browse-btn"
-          :loading="isDisabled"
-          @click.stop="triggerFileSelect"
-        >
+        <el-button type="primary" class="browse-btn" :loading="isDisabled" @click.stop="triggerFileSelect">
           浏览文件
         </el-button>
       </div>
@@ -38,11 +19,7 @@
       <!-- Upload Progress Overlay -->
       <div v-if="isDisabled" class="upload-progress-overlay" @click.stop>
         <div class="progress-content">
-          <el-progress
-            type="circle"
-            :percentage="unifiedProgress"
-            :status="uploadStatus"
-          ></el-progress>
+          <el-progress type="circle" :percentage="unifiedProgress" :status="uploadStatus"></el-progress>
           <p class="progress-text">{{ currentStageText }}</p>
           <p class="file-count" v-if="totalFilesCount > 1">
             {{ uploadedCount }} / {{ totalFilesCount }}
@@ -308,7 +285,7 @@ const uploadSingleFile = async (file: File) => {
             imageMd5,
             imageExtension,
             imageFile,
-            () => {},
+            () => { },
             handler,
             "screenshot/polygen"
           );
@@ -498,17 +475,15 @@ const handleDialogClose = () => {
 .cloud-icon {
   width: 80px;
   height: 80px;
-  background-color: var(
-    --info-light,
-    #e0f2fe
-  ); // Ensure info-light is defined or fallback
+  background-color: var(--info-light,
+      #e0f2fe); // Ensure info-light is defined or fallback
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 24px;
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 40px;
     color: var(--primary-color, #0ea5e9);
   }

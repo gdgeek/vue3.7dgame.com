@@ -81,13 +81,13 @@ const closeMenu = () => {
 };
 
 const handleLogout = () => {
-  alert(123)
+  showLogoutDialog.value = true;
 };
 
 const confirmLogout = async () => {
   showLogoutDialog.value = false;
-  //await userStore.logout();
-  router.push("/logout");
+
+  router.push("/site/logout");
 };
 
 // Close menu when clicking outside

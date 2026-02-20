@@ -1,29 +1,17 @@
 <template>
-  <div
-    class="standard-card"
-    :class="{ 'is-selected': isSelected, 'selection-mode': selectionMode }"
-    @mouseenter="isHovered = true"
-    @mouseleave="isHovered = false"
-  >
+  <div class="standard-card" :class="{ 'is-selected': isSelected, 'selection-mode': selectionMode }"
+    @mouseenter="isHovered = true" @mouseleave="isHovered = false">
     <!-- Selection Checkbox -->
-    <div
-      v-if="showCheckbox"
-      class="card-checkbox"
-      :class="{ visible: selectionMode || isHovered || isSelected }"
-      @click.stop="toggleSelect"
-    >
+    <div v-if="showCheckbox" class="card-checkbox" :class="{ visible: selectionMode || isHovered || isSelected }"
+      @click.stop="toggleSelect">
       <div class="checkbox-inner" :class="{ checked: isSelected }">
-        <span v-if="isSelected" class="material-symbols-outlined">check</span>
+        <font-awesome-icon v-if="isSelected" :icon="['fas', 'check']" />
       </div>
     </div>
 
     <!-- Type Icon -->
-    <div
-      v-if="typeIcon"
-      class="card-type-icon"
-      :class="{ 'with-checkbox': selectionMode || isHovered || isSelected }"
-    >
-      <span class="material-symbols-outlined">{{ typeIcon }}</span>
+    <div v-if="typeIcon" class="card-type-icon" :class="{ 'with-checkbox': selectionMode || isHovered || isSelected }">
+      <font-awesome-icon :icon="typeIcon" />
     </div>
 
     <!-- Thumbnail Area -->
@@ -31,14 +19,14 @@
       <div class="thumbnail-inner">
         <img v-if="image" :src="image" :alt="title" />
         <div v-else class="thumbnail-placeholder">
-          <span class="material-symbols-outlined">{{ placeholderIcon }}</span>
+          <font-awesome-icon :icon="placeholderIcon" />
         </div>
       </div>
 
       <!-- Hover Overlay -->
       <div class="thumbnail-overlay">
         <button class="overlay-btn" @click.stop="$emit('view')">
-          <span class="material-symbols-outlined">info</span>
+          <font-awesome-icon :icon="['fas', 'circle-info']" />
           <span>查看信息</span>
         </button>
       </div>
@@ -48,9 +36,7 @@
         <span v-for="tag in displayTags" :key="tag" class="tag-badge">
           {{ tag }}
         </span>
-        <span v-if="tags.length > 2" class="tag-more"
-          >+{{ tags.length - 2 }}</span
-        >
+        <span v-if="tags.length > 2" class="tag-more">+{{ tags.length - 2 }}</span>
       </div>
     </div>
 
@@ -60,11 +46,11 @@
       <p v-if="description" class="card-description">{{ description }}</p>
       <div v-if="meta" class="card-meta">
         <span v-if="meta.author" class="meta-item">
-          <span class="material-symbols-outlined meta-icon">person</span>
+          <font-awesome-icon :icon="['fas', 'user']" class="meta-icon" />
           {{ meta.author }}
         </span>
         <span v-if="meta.date" class="meta-item">
-          <span class="material-symbols-outlined meta-icon">schedule</span>
+          <font-awesome-icon :icon="['fas', 'clock']" class="meta-icon" />
           {{ meta.date }}
         </span>
       </div>
@@ -72,9 +58,7 @@
 
     <!-- Action Footer -->
     <div v-if="actionText" class="card-action" @click.stop="$emit('action')">
-      <span class="material-symbols-outlined action-icon">{{
-        actionIcon
-      }}</span>
+      <font-awesome-icon :icon="actionIcon" class="action-icon" />
       <span class="action-text">{{ actionText }}</span>
     </div>
   </div>
@@ -96,17 +80,17 @@ const props = withDefaults(
     tags?: string[];
     meta?: CardMeta;
     actionText?: string;
-    actionIcon?: string;
-    placeholderIcon?: string;
+    actionIcon?: string | string[];
+    placeholderIcon?: string | string[];
     selected?: boolean;
     selectionMode?: boolean;
-    typeIcon?: string;
+    typeIcon?: string | string[];
     showCheckbox?: boolean;
     aspectRatio?: string;
   }>(),
   {
-    actionIcon: "edit",
-    placeholderIcon: "image",
+    actionIcon: () => ['fas', 'pen-to-square'],
+    placeholderIcon: () => ['fas', 'image'],
     selected: false,
     selectionMode: false,
     typeIcon: "",
@@ -189,7 +173,7 @@ const toggleSelect = () => {
     background: var(--primary-color, #00baff);
     border-color: var(--primary-color, #00baff);
 
-    .material-symbols-outlined {
+    .svg-inline--fa {
       color: #fff; // Always white on primary
       font-size: 16px;
       font-weight: 600;
@@ -216,7 +200,7 @@ const toggleSelect = () => {
   pointer-events: none;
   transition: all var(--transition-fast, 0.15s ease);
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 16px;
   }
 }
@@ -257,13 +241,11 @@ const toggleSelect = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(
-    135deg,
-    var(--bg-secondary, #f1f5f9) 0%,
-    var(--bg-tertiary, #e2e8f0) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--bg-secondary, #f1f5f9) 0%,
+      var(--bg-tertiary, #e2e8f0) 100%);
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 48px;
     color: var(--text-muted, #94a3b8);
   }
@@ -302,7 +284,7 @@ const toggleSelect = () => {
   transform: translateY(10px);
   box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.15));
 
-  .material-symbols-outlined {
+  .svg-inline--fa {
     font-size: 20px;
   }
 

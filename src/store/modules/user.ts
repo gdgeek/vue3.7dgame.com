@@ -1,4 +1,3 @@
-//import AuthAPI from "@/api/auth";
 import { logger } from "@/utils/logger";
 import AuthAPI from "@/api/v1/auth";
 //import { resetRouter } from "@/router";
