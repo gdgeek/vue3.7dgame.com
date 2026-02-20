@@ -3,7 +3,7 @@
     <!-- 导航栏 -->
     <nav class="nav-container" :class="{ 'nav-scrolled': scrolled, 'dark-theme': isDark }">
       <div class="nav-left">
-        <img src="/media/image/logo.gif" alt="Logo" class="logo" />
+        <img :src="domainStore.icon || '/media/image/logo.gif'" alt="Logo" class="logo" />
         <RadiantText class="company-name" :duration="5" :fontSize="isMobile ? 16 : 20" :textColor="textColor">
           <span class="font-bold">{{
             domainStore.domain || "Loading..."
@@ -40,7 +40,7 @@
     <div class="sidebar-menu" :class="{ 'sidebar-visible': sidebarVisible, 'dark-theme': isDark }" v-if="isMobile">
       <!-- 侧边栏顶部 -->
       <div class="sidebar-header">
-        <img src="/media/image/logo.gif" alt="Logo" class="sidebar-logo" />
+        <img :src="domainStore.icon || '/media/image/logo.gif'" alt="Logo" class="sidebar-logo" />
         <span class="sidebar-company-name">{{ domainStore.title }}</span>
       </div>
       <div class="sidebar-items">

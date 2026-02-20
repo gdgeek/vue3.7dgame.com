@@ -98,6 +98,8 @@ export const useDomainStore = defineStore("domain", {
     },
     /** WordPress 博客地址 */
     blog: (state) => state.defaultInfo?.blog || "",
+    /** 域名自定义图标 */
+    icon: (state) => state.defaultInfo?.icon || "",
     isLoaded: (state) =>
       state.defaultInfo !== null && state.langInfo !== null && !state.loading,
   },
@@ -149,6 +151,18 @@ export const useDomainStore = defineStore("domain", {
         if (targetTheme) {
           setTheme(targetTheme.name);
         }
+      }
+
+      // 域名指定了自定义图标 → 替换 favicon
+      if (this.defaultInfo?.icon) {
+        let iconLink =
+          document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+        if (!iconLink) {
+          iconLink = document.createElement("link");
+          iconLink.setAttribute("rel", "icon");
+          document.head.appendChild(iconLink);
+        }
+        iconLink.setAttribute("href", this.defaultInfo.icon);
       }
     },
 

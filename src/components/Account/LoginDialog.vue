@@ -4,7 +4,7 @@
     <div class="login-container">
       <!-- 顶部标题与图标 -->
       <div class="login-header">
-        <img src="/media/image/logo.gif" alt="Logo" class="login-logo" />
+        <img :src="domainStore.icon || '/media/image/logo.gif'" alt="Logo" class="login-logo" />
         <h2 class="login-title">{{ domainStore.title }}</h2>
       </div>
 

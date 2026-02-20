@@ -15,7 +15,7 @@
             <Qrcode :text="url" :options="qrOptions"></Qrcode>
           </div>
           <div class="qrcode-logo">
-            <img src="/media/image/logo.gif" alt="Logo" />
+            <img :src="domainStore.icon || '/media/image/logo.gif'" alt="Logo" />
           </div>
         </div>
 
@@ -38,6 +38,7 @@ import { useUserStore } from "@/store";
 import Qrcode from "./Qrcode.vue";
 import { getQrcode, refresh } from "@/api/auth/wechat";
 import { useSettingsStore } from "@/store/modules/settings";
+import { useDomainStore } from "@/store/modules/domain";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useRouter, LocationQuery, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -49,6 +50,7 @@ const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
+const domainStore = useDomainStore();
 const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
 const dialogVisible = ref(false);
 const isScanning = ref(false);

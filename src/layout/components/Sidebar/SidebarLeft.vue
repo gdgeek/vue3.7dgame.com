@@ -3,7 +3,7 @@
     <!-- Logo Section -->
     <div class="sidebar-logo">
       <div class="logo-icon">
-        <img alt="Logo" src="/icon.png" />
+        <img alt="Logo" :src="logoIcon" />
       </div>
       <span class="logo-text">{{ domainStore.title || '不加班AR创作平台' }}</span>
     </div>
@@ -300,6 +300,7 @@ const userStore = useUserStore();
 const domainStore = useDomainStore();
 const ability = useAbility();
 
+const logoIcon = computed(() => domainStore.icon || '/icon.png');
 const showLogoutDialog = ref(false);
 
 // Check if route is exactly active (for parent menus)

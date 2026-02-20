@@ -4,7 +4,7 @@
     <div :class="['header', { 'dark-theme': isDark }]">
       <div style="height: 30px" v-if="!isMobile">
         <RouterLink to="/introduce" class="logo">
-          <img src="/favicon.ico" alt="" />
+          <img :src="domainStore.icon || '/favicon.ico'" alt="" />
           <span class="project_title">{{ domainStore.title }}</span>
         </RouterLink>
         <div class="link" style="margin-left: 250px"></div>
@@ -21,7 +21,7 @@
       <div class="mobile" v-else>
         <el-dropdown>
           <span class="">
-            <img src="/favicon.ico" alt="" style="margin-left: 10px; width: auto" />
+            <img :src="domainStore.icon || '/favicon.ico'" alt="" style="margin-left: 10px; width: auto" />
             <span class="project_title">{{ domainStore.title }}</span>
           </span>
           <template #dropdown>
