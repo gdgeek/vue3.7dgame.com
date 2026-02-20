@@ -7,6 +7,7 @@ export interface DomainDefaultInfo {
   lang: string;
   style: number;
   blog: string;
+  icon: string;
 }
 
 export interface DomainLanguageInfo {

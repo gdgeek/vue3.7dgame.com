@@ -46,7 +46,7 @@
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openViewDialog(item.id)">{{
                     $t("video.viewVideo")
-                    }}</el-dropdown-item>
+                  }}</el-dropdown-item>
                   <el-dropdown-item @click="namedWindow(item)">{{ t("common.edit") }}</el-dropdown-item>
                   <el-dropdown-item @click="deletedWindow(item, () => { })">{{ t("common.delete") }}</el-dropdown-item>
                 </el-dropdown-menu>
@@ -223,7 +223,6 @@ const handleDelete = async () => {
       {
         confirmButtonText: t("video.confirm.confirm"),
         cancelButtonText: t("video.confirm.cancel"),
-        closeOnClickModal: false,
         type: "warning",
       }
     );
