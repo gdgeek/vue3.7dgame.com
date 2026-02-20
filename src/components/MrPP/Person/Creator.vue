@@ -3,53 +3,25 @@
     <template #header>
       {{ props.dialogTitle }}
     </template>
-    <el-form
-      ref="formRef"
-      :rules="rules"
-      :model="form"
-      class="signup-form"
-      label-width="auto"
-    >
-      <el-form-item
-        :label="$t('manager.creator.form.label1')"
-        prop="username"
-        style="margin-bottom: 26px"
-      >
+    <el-form ref="formRef" :rules="rules" :model="form" class="signup-form" label-width="auto">
+      <el-form-item :label="$t('manager.creator.form.label1')" prop="username" style="margin-bottom: 26px">
         <el-input v-model="form.username" suffix-icon="el-icon-user"></el-input>
       </el-form-item>
-      <el-form-item
-        :label="$t('manager.creator.form.label2')"
-        prop="password"
-        style="margin-bottom: 26px"
-      >
-        <el-input
-          v-model="form.password"
-          autocomplete="off"
-          suffix-icon="el-icon-lock"
-          type="password"
-        ></el-input>
+      <el-form-item :label="$t('manager.creator.form.label2')" prop="password" style="margin-bottom: 26px">
+        <el-input v-model="form.password" autocomplete="off" suffix-icon="el-icon-lock" type="password"></el-input>
       </el-form-item>
-      <el-form-item
-        :label="$t('manager.creator.form.label3')"
-        prop="checkPassword"
-        style="margin-bottom: 26px"
-      >
-        <el-input
-          v-model="form.checkPassword"
-          type="password"
-          autocomplete="off"
-          suffix-icon="el-icon-view"
-        ></el-input>
+      <el-form-item :label="$t('manager.creator.form.label3')" prop="checkPassword" style="margin-bottom: 26px">
+        <el-input v-model="form.checkPassword" type="password" autocomplete="off" suffix-icon="el-icon-view"></el-input>
       </el-form-item>
     </el-form>
 
     <template #footer>
       <el-button @click="dialogVisible = false">{{
         $t("manager.creator.form.cancel")
-      }}</el-button>
+        }}</el-button>
       <el-button type="primary" @click="submitForm">{{
         $t("manager.creator.form.submit")
-      }}</el-button>
+        }}</el-button>
     </template>
   </el-dialog>
 </template>
@@ -106,7 +78,7 @@ const checkPassword = (rule: any, value: string, callback: any) => {
   }
 };
 
-const rules = {
+const rules = computed(() => ({
   username: [
     {
       required: true,
@@ -137,7 +109,7 @@ const rules = {
     },
     { validator: checkPassword, trigger: "blur" },
   ],
-};
+}));
 
 const submitForm = async () => {
   try {

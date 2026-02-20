@@ -1,22 +1,13 @@
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    append-to-body
-    :close-on-click-modal="closeOnClickModal"
-    width="70%"
-    @keydown.enter="submitForm"
-  >
+  <el-dialog v-model="dialogVisible" append-to-body :close-on-click-modal="closeOnClickModal" width="70%"
+    @keydown.enter="submitForm">
     <template #header>
       {{ dialogTitle }}
     </template>
     <el-form ref="formRef" :rules="rules" :model="item" label-width="auto">
       <el-form-item :label="$t('verse.page.form.picture')">
-        <ImageSelector
-          :item-id="item.id"
-          :image-url="item.image?.url"
-          @image-selected="handleImageSelected"
-          @image-upload-success="handleImageSelected"
-        ></ImageSelector>
+        <ImageSelector :item-id="item.id" :image-url="item.image?.url" @image-selected="handleImageSelected"
+          @image-upload-success="handleImageSelected"></ImageSelector>
       </el-form-item>
       <el-form-item prop="name" :label="$t('verse.page.form.name')">
         <el-input v-model="item.name"></el-input>
@@ -31,7 +22,7 @@
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">{{
           $t("verse.page.form.cancel")
-        }}</el-button>
+          }}</el-button>
         <el-button type="primary" @click="submitForm">
           {{ dialogSubmit }}
         </el-button>
@@ -72,7 +63,7 @@ const imageId = ref<number | null>(null);
 
 const item = ref<VerseData>({} as VerseData);
 
-const rules = {
+const rules = computed(() => ({
   name: [
     {
       required: true,
@@ -86,7 +77,7 @@ const rules = {
       trigger: "blur",
     },
   ],
-};
+}));
 
 const formRef = ref<FormInstance>();
 

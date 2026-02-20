@@ -94,7 +94,7 @@ const validatePass2 = (rule: any, value: any, callback: any) => {
     callback();
   }
 };
-const registerRules = {
+const registerRules = computed(() => ({
   username: [
     {
       required: true,
@@ -103,7 +103,7 @@ const registerRules = {
     },
     {
       type: "email" as const,
-      message: "need email",
+      message: t("login.rules.username.email"),
       trigger: "blur",
     },
   ],
@@ -116,7 +116,7 @@ const registerRules = {
     },
     { validator: validatePass2, trigger: "blur" },
   ],
-};
+}));
 
 function parseRedirect(): {
   path: string;
