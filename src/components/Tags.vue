@@ -1,28 +1,17 @@
 <template>
   <div v-if="classify" class="flex gap-2">
-    <el-tag
-      v-for="tag in tags"
-      :type="tag.type === 'Classify' ? 'primary' : 'success'"
-      :key="tag.name"
-      :closable="props.editable"
-      @close="close(tag.id)"
-    >
+    <el-tag v-for="tag in tags" :type="tag.type === 'Classify' ? 'primary' : 'success'" :key="tag.name"
+      :closable="props.editable" @close="close(tag.id)">
       {{ tag.name }}
     </el-tag>
-    <el-select-v2
-      v-if="props.editable"
-      @change="handleChange"
-      v-model="value"
-      size="small"
-      :options="classify"
-      placeholder="添加标签"
-      style="width: 108px"
-    ></el-select-v2>
+    <el-select-v2 v-if="props.editable" @change="handleChange" v-model="value" size="small" :options="classify"
+      :placeholder="t('verse.listPage.addTag')" style="width: 108px"></el-select-v2>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { getTags } from "@/api/v1/tags";
 
 import type { TagProps } from "element-plus";
@@ -38,6 +27,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["add", "remove"]);
+const { t } = useI18n();
 const value = ref();
 interface TagsItem {
   id: number;

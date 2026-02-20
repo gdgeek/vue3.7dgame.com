@@ -15,27 +15,31 @@
       <div v-if="isMenuOpen" class="dropdown-menu">
         <router-link to="/settings/edit" class="dropdown-item" @click="closeMenu">
           <span class="material-symbols-outlined">settings</span>
-          <span>个人设置</span>
+          <span>{{ t('ui.personalSettings') }}</span>
         </router-link>
         <div class="dropdown-divider"></div>
         <div class="dropdown-item danger" @click="handleLogout">
           <span class="material-symbols-outlined">logout</span>
-          <span>退出登录</span>
+          <span>{{ t('sidebar.logout') }}</span>
         </div>
       </div>
     </Transition>
 
     <!-- 退出登录确认弹窗 -->
-    <ConfirmDialog v-model="showLogoutDialog" title="退出登录" message="确定要退出登录吗？" description="退出后需要重新登录才能访问您的账户。"
-      type="warning" confirm-text="退出登录" cancel-text="取消" @confirm="confirmLogout"></ConfirmDialog>
+    <ConfirmDialog v-model="showLogoutDialog" :title="t('ui.logoutConfirmTitle')"
+      :message="t('ui.logoutConfirmMessage')" :description="t('ui.logoutConfirmDesc')" type="warning"
+      :confirm-text="t('sidebar.logout')" :cancel-text="t('common.cancel')" @confirm="confirmLogout"></ConfirmDialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import ConfirmDialog from "@/components/Dialog/ConfirmDialog.vue";
 import { useUserStore } from "@/store";
+
+const { t } = useI18n();
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -51,16 +55,16 @@ const userName = computed(() => {
   if (userStore.userInfo?.userData?.username) {
     return userStore.userInfo.userData.username;
   }
-  return "用户";
+  return t("ui.user");
 });
 
 // 账户类型 - 可根据 roles 判断
 const accountType = computed(() => {
   const roles = userStore.userInfo?.roles || [];
   if (roles.includes("root") || roles.includes("admin")) {
-    return "管理员账户";
+    return t("ui.adminAccount");
   }
-  return "普通账户";
+  return t("ui.normalAccount");
 });
 
 // 从用户数据中获取头像URL

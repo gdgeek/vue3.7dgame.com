@@ -1,10 +1,6 @@
 <template>
   <div class="class-page-container">
-    <ClassDetail
-      v-if="classId"
-      :class-id="classId"
-      @class-loaded="onClassLoaded"
-    ></ClassDetail>
+    <ClassDetail v-if="classId" :class-id="classId" @class-loaded="onClassLoaded"></ClassDetail>
     <el-empty v-else :description="$t('common.noData')"></el-empty>
   </div>
 </template>
@@ -14,8 +10,10 @@ import { computed } from "vue";
 import { useRoute } from "vue-router";
 import ClassDetail from "./components/ClassDetail.vue";
 import type { EduClass } from "@/api/v1/types/edu-class";
+import { useDomainStore } from "@/store/modules/domain";
 
 const route = useRoute();
+const domainStore = useDomainStore();
 
 const classId = computed(() => {
   const id = route.query.class_id;
@@ -23,8 +21,8 @@ const classId = computed(() => {
 });
 
 const onClassLoaded = (classInfo: EduClass) => {
-  // Optionally update page title or perform other actions
-  document.title = classInfo.name || "Class";
+  const siteName = domainStore.title || "不加班AR创作平台";
+  document.title = classInfo.name ? `${classInfo.name} - ${siteName}` : siteName;
 };
 </script>
 

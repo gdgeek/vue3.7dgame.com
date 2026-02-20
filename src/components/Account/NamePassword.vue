@@ -3,7 +3,7 @@
     <el-card class="login-card" :body-style="{ padding: '20px' }">
       <el-form ref="formRef" class="login-form" :rules="rules" :model="form" label-position="top">
         <el-form-item :label="''" prop="username" class="form-item">
-          <el-input v-model="form.username" placeholder="请输入用户名/邮箱" class="custom-input">
+          <el-input v-model="form.username" :placeholder="t('login.username')" class="custom-input">
             <template #prefix>
               <el-icon class="input-icon">
                 <UserFilled></UserFilled>
@@ -13,7 +13,8 @@
         </el-form-item>
 
         <el-form-item :label="''" prop="password" class="form-item">
-          <el-input v-model="form.password" type="password" placeholder="请输入密码" class="custom-input" show-password>
+          <el-input v-model="form.password" type="password" :placeholder="t('login.password')" class="custom-input"
+            show-password>
             <template #prefix>
               <el-icon class="input-icon">
                 <Lock></Lock>
@@ -119,11 +120,10 @@ const submit = () => {
         router.push({ path: path, query: queryParams });
       } catch (e: any) {
         loading.value = false;
-        let errorMessage = "登录失败，请稍后再试";
-        Message.error(errorMessage);
+        Message.error(t("login.error"));
       }
     } else {
-      Message.warning("请输入正确的登录信息");
+      Message.warning(t("login.error"));
     }
   });
 };

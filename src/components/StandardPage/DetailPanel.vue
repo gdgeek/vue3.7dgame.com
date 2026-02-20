@@ -6,7 +6,7 @@
           <div v-if="modelValue" class="detail-panel" :style="{ width: panelWidth }">
             <!-- Header -->
             <div class="panel-header">
-              <h3 class="panel-title">{{ title }}</h3>
+              <h3 class="panel-title">{{ title || t("ui.resourceDetail") }}</h3>
               <button class="panel-close" @click="handleClose">
                 <font-awesome-icon :icon="['fas', 'xmark']" />
               </button>
@@ -39,10 +39,10 @@
                       @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
                     <div class="edit-actions">
                       <button class="btn-edit-cancel" @click="cancelEdit">
-                        取消
+                        {{ t("common.cancel") }}
                       </button>
                       <button class="btn-edit-save" @click="saveEdit" :disabled="!editingName.trim()">
-                        保存
+                        {{ t("ui.save") }}
                       </button>
                     </div>
                   </div>
@@ -70,27 +70,27 @@
                     <!-- Top: Secondary Action (Enter Editor) -->
                     <button v-if="secondaryAction" class="btn-pill-primary" @click="$emit('secondary')">
                       <font-awesome-icon :icon="['fas', 'file-lines']" />
-                      {{ secondaryActionText }}
+                      {{ secondaryActionText || t("ui.useInEditor") }}
                     </button>
                     <!-- Bottom: Download and Delete side by side -->
                     <div class="actions-row">
                       <button class="btn-pill-secondary" @click="$emit('download')">
                         <font-awesome-icon :icon="downloadIcon" />
-                        {{ downloadText || "复制" }}
+                        {{ downloadText || t("ui.copy") }}
                       </button>
                       <button v-if="showDelete" class="btn-pill-danger" @click="$emit('delete')">
                         <font-awesome-icon :icon="['fas', 'trash-can']" />
-                        {{ deleteText || "删除" }}
+                        {{ deleteText || t("common.delete") }}
                       </button>
                     </div>
                   </template>
                   <template v-else>
                     <button class="btn-primary-full" @click="$emit('download')">
                       <font-awesome-icon :icon="['fas', 'download']" />
-                      {{ downloadText || "下载" }}
+                      {{ downloadText || t("ui.download") }}
                     </button>
                     <button v-if="secondaryAction" class="btn-text-link" @click="$emit('secondary')">
-                      {{ secondaryActionText }}
+                      {{ secondaryActionText || t("ui.useInEditor") }}
                     </button>
                   </template>
                 </slot>
@@ -100,7 +100,7 @@
               <div v-if="showDelete && actionLayout === 'stacked'" class="panel-danger">
                 <button class="btn-danger-text" @click="$emit('delete')">
                   <font-awesome-icon :icon="['fas', 'trash-can']" />
-                  {{ deleteText || "删除此资源" }}
+                  {{ deleteText || t("ui.deleteResource") }}
                 </button>
               </div>
             </div>
@@ -113,6 +113,9 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 interface PropertyItem {
   label: string;
@@ -140,7 +143,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: "资源详情",
+  title: "",
   name: "",
   loading: false,
   editable: true,
@@ -148,11 +151,11 @@ const props = withDefaults(defineProps<Props>(), {
   previewHeight: "300px",
   placeholderIcon: () => ['fas', 'image'],
   placeholderText: "",
-  downloadText: "下载",
+  downloadText: "",
   downloadIcon: () => ['fas', 'copy'],
-  deleteText: "删除此资源",
+  deleteText: "",
   secondaryAction: false,
-  secondaryActionText: "在编辑器中使用",
+  secondaryActionText: "",
   showDelete: true,
   width: "840px",
   actionLayout: "stacked",

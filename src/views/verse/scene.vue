@@ -5,15 +5,8 @@
     <!--<PrefabDialog @selected="selected" ref="prefabDialogRef"></PrefabDialog>-->
     <el-container>
       <el-main>
-        <iframe
-          id="editor"
-          ref="editor"
-          :src="src"
-          class="content"
-          height="100%"
-          width="100%"
-          allow="xr-spatial-tracking; fullscreen; autoplay; clipboard-read; clipboard-write;"
-        ></iframe>
+        <iframe id="editor" ref="editor" :src="src" class="content" height="100%" width="100%"
+          allow="xr-spatial-tracking; fullscreen; autoplay; clipboard-read; clipboard-write;"></iframe>
       </el-main>
     </el-container>
   </div>
@@ -142,7 +135,6 @@ const setupPrefab = async ({ meta_id, data, uuid }: any) => {
 // 添加预制件
 //const addPrefab = () => {
 //  prefabDialogRef.value?.open(id.value);
-//  ElMessage.info(t("verse.view.sceneEditor.info1"));
 //};
 
 // 添加实体
@@ -198,22 +190,26 @@ const saveVerse = async (data: any) => {
   }
   await putVerse(id.value, { data: verse });
 
-  ElMessageBox.confirm("保存成功，是否发布？", "发布场景", {
-    confirmButtonText: "OK",
-    cancelButtonText: "Cancel",
-    type: "warning",
-  })
+  ElMessageBox.confirm(
+    t("verse.view.sceneEditor.saveAndPublishConfirm"),
+    t("verse.view.sceneEditor.publishScene"),
+    {
+      confirmButtonText: t("verse.view.sceneEditor.confirm"),
+      cancelButtonText: t("verse.view.sceneEditor.cancel"),
+      type: "warning",
+    }
+  )
     .then(async () => {
       await takePhoto(id.value);
       ElMessage({
         type: "success",
-        message: "发布成功",
+        message: t("verse.view.sceneEditor.publishSuccess"),
       });
     })
     .catch(() => {
       ElMessage({
         type: "info",
-        message: "取消发布",
+        message: t("verse.view.sceneEditor.publishCanceled"),
       });
     });
 };
@@ -221,12 +217,12 @@ const saveVerse = async (data: any) => {
 //发布场景
 const releaseVerse = async (data: any) => {
   if (!data.verse) {
-    ElMessage.error("没有可发布的项目");
+    ElMessage.error(t("verse.view.sceneEditor.noProjectToPublish"));
     return;
   }
 
   if (!saveable.value) {
-    ElMessage.info("没有发布权限");
+    ElMessage.info(t("verse.view.sceneEditor.noPublishPermission"));
     return;
   }
 
@@ -278,7 +274,7 @@ const handleMessage = async (e: MessageEvent) => {
 
     case "save-verse":
       saveVerse(data);
-      ElMessage.success("储存完成");
+      ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
 
       break;
 
@@ -287,7 +283,7 @@ const handleMessage = async (e: MessageEvent) => {
       break;
 
     case "save-verse-none":
-      ElMessage.warning("项目没有改变");
+      ElMessage.warning(t("verse.view.sceneEditor.noChanges"));
       break;
 
     case "goto":
@@ -382,7 +378,7 @@ const handleUploadCover = async (data: any) => {
         md5,
         extension,
         file,
-        (p: any) => {},
+        (p: any) => { },
         handler,
         "backup"
       );

@@ -5,7 +5,7 @@
       <div class="logo-icon">
         <img alt="Logo" src="/icon.png" />
       </div>
-      <span class="logo-text">不加班AR创作平台</span>
+      <span class="logo-text">{{ domainStore.title || '不加班AR创作平台' }}</span>
     </div>
 
     <!-- Navigation Section -->
@@ -15,7 +15,7 @@
         <router-link to="/home" custom v-slot="{ isActive, navigate }">
           <div class="sidebar-item" :class="{ 'sidebar-item-active': isActive }" @click="navigate">
             <font-awesome-icon :icon="['fas', 'home']" class="sidebar-icon" />
-            <span class="item-text">主页</span>
+            <span class="item-text">{{ t('sidebar.home') }}</span>
           </div>
         </router-link>
 
@@ -27,7 +27,7 @@
               <div class="menu-trigger-wrapper">
                 <div class="sidebar-item">
                   <font-awesome-icon :icon="['fas', 'th-large']" class="sidebar-icon" />
-                  <span class="item-text">素材库</span>
+                  <span class="item-text">{{ t('sidebar.resources') }}</span>
                 </div>
               </div>
             </template>
@@ -35,22 +35,22 @@
             <div class="popover-menu">
               <router-link to="/resource/polygen/index" custom v-slot="{ isActive, navigate }">
                 <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>模型</span>
+                  <span>{{ t('sidebar.model') }}</span>
                 </div>
               </router-link>
               <router-link to="/resource/picture/index" custom v-slot="{ isActive, navigate }">
                 <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>图片</span>
+                  <span>{{ t('sidebar.picture') }}</span>
                 </div>
               </router-link>
               <router-link to="/resource/audio/index" custom v-slot="{ isActive, navigate }">
                 <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>音频</span>
+                  <span>{{ t('sidebar.audio') }}</span>
                 </div>
               </router-link>
               <router-link to="/resource/video/index" custom v-slot="{ isActive, navigate }">
                 <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>视频</span>
+                  <span>{{ t('sidebar.video') }}</span>
                 </div>
               </router-link>
             </div>
@@ -61,25 +61,25 @@
             <router-link to="/resource/polygen/index" custom v-slot="{ isActive, navigate }">
               <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
-                <span>模型</span>
+                <span>{{ t('sidebar.model') }}</span>
               </div>
             </router-link>
             <router-link to="/resource/picture/index" custom v-slot="{ isActive, navigate }">
               <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
-                <span>图片</span>
+                <span>{{ t('sidebar.picture') }}</span>
               </div>
             </router-link>
             <router-link to="/resource/audio/index" custom v-slot="{ isActive, navigate }">
               <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
-                <span>音频</span>
+                <span>{{ t('sidebar.audio') }}</span>
               </div>
             </router-link>
             <router-link to="/resource/video/index" custom v-slot="{ isActive, navigate }">
               <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
-                <span>视频</span>
+                <span>{{ t('sidebar.video') }}</span>
               </div>
             </router-link>
           </div>
@@ -89,7 +89,7 @@
         <router-link to="/meta/list" custom v-slot="{ isActive, navigate }">
           <div class="sidebar-item" :class="{ 'sidebar-item-active': isActive }" @click="navigate">
             <font-awesome-icon :icon="['fas', 'puzzle-piece']" class="sidebar-icon" />
-            <span class="item-text">实体</span>
+            <span class="item-text">{{ t('sidebar.entity') }}</span>
           </div>
         </router-link>
 
@@ -98,7 +98,7 @@
           <router-link to="/ai/list" custom v-slot="{ isActive, navigate }">
             <div class="sidebar-item" :class="{ 'sidebar-item-active': isActive }" @click="navigate">
               <font-awesome-icon :icon="['fas', 'robot']" class="sidebar-icon" />
-              <span class="item-text">AI 创作</span>
+              <span class="item-text">{{ t('sidebar.aiCreation') }}</span>
             </div>
           </router-link>
         </div>
@@ -113,7 +113,7 @@
                   <div class="sidebar-item" :class="{ 'sidebar-item-active': isExactActive('/verse') }"
                     @click="navigate">
                     <font-awesome-icon :icon="['fas', 'layer-group']" class="sidebar-icon" />
-                    <span class="item-text">场景</span>
+                    <span class="item-text">{{ t('sidebar.scene') }}</span>
                   </div>
                 </router-link>
               </div>
@@ -122,12 +122,12 @@
             <div class="popover-menu">
               <router-link to="/verse/index" custom v-slot="{ isActive, navigate }">
                 <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>自己创造</span>
+                  <span>{{ t('sidebar.selfCreated') }}</span>
                 </div>
               </router-link>
               <router-link to="/verse/public" custom v-slot="{ isActive, navigate }">
                 <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>系统推荐</span>
+                  <span>{{ t('sidebar.systemRecommend') }}</span>
                 </div>
               </router-link>
             </div>
@@ -138,13 +138,13 @@
             <router-link to="/verse/index" custom v-slot="{ isActive, navigate }">
               <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
-                <span>自己创造</span>
+                <span>{{ t('sidebar.selfCreated') }}</span>
               </div>
             </router-link>
             <router-link to="/verse/public" custom v-slot="{ isActive, navigate }">
               <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
-                <span>系统推荐</span>
+                <span>{{ t('sidebar.systemRecommend') }}</span>
               </div>
             </router-link>
           </div>
@@ -158,24 +158,24 @@
               <div class="menu-trigger-wrapper">
                 <div class="sidebar-item">
                   <font-awesome-icon :icon="['fas', 'building']" class="sidebar-icon" />
-                  <span class="item-text">校园管理</span>
+                  <span class="item-text">{{ t('sidebar.campusManagement') }}</span>
                 </div>
               </div>
             </template>
             <div class="popover-menu">
               <router-link to="/campus/school" custom v-slot="{ isActive, navigate }">
                 <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>学校管理</span>
+                  <span>{{ t('sidebar.schoolManagement') }}</span>
                 </div>
               </router-link>
               <router-link to="/campus/teacher" custom v-slot="{ isActive, navigate }">
                 <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>老师管理</span>
+                  <span>{{ t('sidebar.teacherManagement') }}</span>
                 </div>
               </router-link>
               <router-link to="/campus/student" custom v-slot="{ isActive, navigate }">
                 <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>学生管理</span>
+                  <span>{{ t('sidebar.studentManagement') }}</span>
                 </div>
               </router-link>
             </div>
@@ -185,19 +185,19 @@
             <router-link to="/campus/school" custom v-slot="{ isActive, navigate }">
               <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
-                <span>学校管理</span>
+                <span>{{ t('sidebar.schoolManagement') }}</span>
               </div>
             </router-link>
             <router-link to="/campus/teacher" custom v-slot="{ isActive, navigate }">
               <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
-                <span>老师管理</span>
+                <span>{{ t('sidebar.teacherManagement') }}</span>
               </div>
             </router-link>
             <router-link to="/campus/student" custom v-slot="{ isActive, navigate }">
               <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
-                <span>学生管理</span>
+                <span>{{ t('sidebar.studentManagement') }}</span>
               </div>
             </router-link>
           </div>
@@ -211,19 +211,19 @@
               <div class="menu-trigger-wrapper">
                 <div class="sidebar-item">
                   <font-awesome-icon :icon="['fas', 'sliders']" class="sidebar-icon" />
-                  <span class="item-text">管理中心</span>
+                  <span class="item-text">{{ t('sidebar.adminCenter') }}</span>
                 </div>
               </div>
             </template>
             <div class="popover-menu">
               <router-link to="/manager/user" custom v-slot="{ isActive, navigate }">
                 <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>用户管理</span>
+                  <span>{{ t('sidebar.userManagement') }}</span>
                 </div>
               </router-link>
               <router-link to="/phototype/list" custom v-slot="{ isActive, navigate }">
                 <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>预制体管理</span>
+                  <span>{{ t('sidebar.prefabManagement') }}</span>
                 </div>
               </router-link>
             </div>
@@ -233,13 +233,13 @@
             <router-link to="/manager/user" custom v-slot="{ isActive, navigate }">
               <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
-                <span>用户管理</span>
+                <span>{{ t('sidebar.userManagement') }}</span>
               </div>
             </router-link>
             <router-link to="/phototype/list" custom v-slot="{ isActive, navigate }">
               <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
                 <span class="submenu-dot"></span>
-                <span>预制体管理</span>
+                <span>{{ t('sidebar.prefabManagement') }}</span>
               </div>
             </router-link>
           </div>
@@ -262,25 +262,30 @@
         </router-link> -->
         <div class="sidebar-item logout-item" @click="handleLogout">
           <font-awesome-icon :icon="['fas', 'right-from-bracket']" class="sidebar-icon" />
-          <span class="item-text">退出登录</span>
+          <span class="item-text">{{ t('sidebar.logout') }}</span>
         </div>
       </div>
     </div>
 
     <!-- 退出登录确认弹窗 -->
-    <ConfirmDialog v-model="showLogoutDialog" title="退出登录" message="确定要退出登录吗？" description="退出后需要重新登录才能访问您的账户。"
-      type="warning" confirm-text="退出登录" cancel-text="取消" @confirm="confirmLogout"></ConfirmDialog>
+    <ConfirmDialog v-model="showLogoutDialog" :title="t('sidebar.logoutConfirmTitle')"
+      :message="t('sidebar.logoutConfirmMessage')" :description="t('sidebar.logoutConfirmDesc')" type="warning"
+      :confirm-text="t('sidebar.logout')" :cancel-text="t('common.cancel')" @confirm="confirmLogout"></ConfirmDialog>
   </aside>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import StorageWidget from "./StorageWidget.vue";
 import ConfirmDialog from "@/components/Dialog/ConfirmDialog.vue";
 import { useUserStore } from "@/store";
+import { useDomainStore } from "@/store/modules/domain";
 import { useAbility } from "@casl/vue";
 import { AbilityRouter } from "@/utils/ability";
+
+const { t } = useI18n();
 
 const props = defineProps({
   collapsed: {
@@ -292,6 +297,7 @@ const props = defineProps({
 const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
+const domainStore = useDomainStore();
 const ability = useAbility();
 
 const showLogoutDialog = ref(false);

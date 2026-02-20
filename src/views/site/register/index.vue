@@ -69,9 +69,9 @@ const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
 const back = async () => {
   try {
-    await MessageBox.confirm("确认放弃注册？", "警告", {
-      confirmButtonText: "确认",
-      cancelButtonText: "继续注册",
+    await MessageBox.confirm(t("login.abandonRegisterConfirm"), t("login.abandonRegisterTitle"), {
+      confirmButtonText: t("login.abandonRegisterConfirmButton"),
+      cancelButtonText: t("login.abandonRegisterCancelButton"),
       type: "warning",
     });
     router.push("/site/login");

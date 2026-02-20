@@ -5,49 +5,29 @@
       <el-col :sm="16">
         <el-card class="box-card">
           <template #header>
-            <b id="title">json格式</b>
+            <b id="title">{{ t("phototype.edit.jsonFormat") }}</b>
           </template>
           <el-card class="box-card" style="margin-bottom: 10px">
             <el-form label-width="80px">
-              <el-form-item label="名称">
-                <el-input
-                  v-if="phototype"
-                  v-model="phototype.title"
-                  placeholder="请输入原型名称"
-                  style="width: 100%"
-                ></el-input>
+              <el-form-item :label="t('phototype.edit.name')">
+                <el-input v-if="phototype" v-model="phototype.title" :placeholder="t('phototype.edit.enterName')"
+                  style="width: 100%"></el-input>
               </el-form-item>
-              <el-form-item label="类型">
-                <el-input
-                  v-if="phototype"
-                  v-model="phototype.type"
-                  placeholder="请输入类型"
-                  style="width: 100%"
-                ></el-input>
+              <el-form-item :label="t('phototype.edit.type')">
+                <el-input v-if="phototype" v-model="phototype.type" :placeholder="t('phototype.edit.enterType')"
+                  style="width: 100%"></el-input>
               </el-form-item>
             </el-form>
           </el-card>
-          <json-schema-editor
-            class="schema"
-            :value="tree"
-            disabledType
-            lang="zh_CN"
-            custom
-            :extra="extraSetting"
-          ></json-schema-editor>
+          <json-schema-editor class="schema" :value="tree" disabledType lang="zh_CN" custom
+            :extra="extraSetting"></json-schema-editor>
           <br />
           <el-card class="box-card" style="min-height: 500px">
             <codemirror v-model="jsonStr" :readOnly="false"></codemirror>
           </el-card>
           <br />
-          <el-button
-            icon="Edit"
-            @click="saveChanges"
-            type="primary"
-            size="small"
-            style="width: 100%"
-          >
-            保存
+          <el-button icon="Edit" @click="saveChanges" type="primary" size="small" style="width: 100%">
+            {{ t("common.button.save") }}
           </el-button>
         </el-card>
         <br />
@@ -59,29 +39,18 @@
         <div v-if="phototype">
           <el-card class="box-card" style="margin-bottom: 20px">
             <template #header>
-              <b>预览图</b>
+              <b>{{ t("phototype.edit.previewImage") }}</b>
             </template>
             <div style="display: flex; justify-content: center">
-              <ImageSelector
-                :item-id="phototype.id"
-                :image-url="phototype.image?.url"
-                @image-selected="handleImageUpdate"
-                @image-upload-success="handleImageUpdate"
-              ></ImageSelector>
+              <ImageSelector :item-id="phototype.id" :image-url="phototype.image?.url"
+                @image-selected="handleImageUpdate" @image-upload-success="handleImageUpdate"></ImageSelector>
             </div>
           </el-card>
 
-          <Resource
-            v-if="phototype"
-            @selected="handleSelected"
-            :resource="phototype.resource"
-          ></Resource>
+          <Resource v-if="phototype" @selected="handleSelected" :resource="phototype.resource"></Resource>
           <br />
-          <Transform
-            v-if="phototype && phototype.data && phototype.data.transform"
-            :data="phototype.data.transform"
-            @save="handleTransformSave"
-          ></Transform>
+          <Transform v-if="phototype && phototype.data && phototype.data.transform" :data="phototype.data.transform"
+            @save="handleTransformSave"></Transform>
         </div>
         <br />
 
@@ -99,16 +68,19 @@ import Resource from "@/components/Resource.vue";
 import Transform from "@/components/Transform.vue";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const handleTransformSave = async (transform: any) => {
   if (!id.value) {
-    ElMessage.warning("请先保存基本信息");
+    ElMessage.warning(t("phototype.edit.saveBasicFirst"));
     return;
   }
   const response = await putPhototype(id.value, {
     data: { ...phototype.value.data, transform },
   });
-  ElMessage.success("保存成功");
+  ElMessage.success(t("common.message.saveSuccess"));
   phototype.value = response.data;
 };
 const handleSelected = async (data: any) => {
@@ -116,7 +88,7 @@ const handleSelected = async (data: any) => {
     return;
   }
   if (!id.value) {
-    ElMessage.warning("请先保存基本信息");
+    ElMessage.warning(t("phototype.edit.saveBasicFirst"));
     return;
   }
   if (phototype.value.resource_id == data.id) {
@@ -133,7 +105,7 @@ const handleImageUpdate = async (data: {
   itemId: number | null;
 }) => {
   if (!id.value) {
-    ElMessage.warning("请先保存基本信息");
+    ElMessage.warning(t("phototype.edit.saveBasicFirst"));
     return;
   }
   try {
@@ -153,14 +125,14 @@ const id = computed(() => route.query.id as string);
 const tree = ref({
   root: {
     type: "object",
-    title: "条件",
+    title: t("phototype.edit.condition"),
   },
 });
 
 const saveChanges = async () => {
   try {
     if (!phototype.value.title) {
-      ElMessage.warning("请输入原型名称");
+      ElMessage.warning(t("phototype.prompt.message1"));
       return;
     }
 
@@ -171,7 +143,7 @@ const saveChanges = async () => {
         type: phototype.value.type,
         schema: tree.value,
       });
-      ElMessage.success("创建成功");
+      ElMessage.success(t("common.message.createSuccess"));
       // 跳转到编辑页面
       router.replace({
         path: "/phototype/edit",
@@ -185,11 +157,11 @@ const saveChanges = async () => {
         type: phototype.value.type,
         schema: tree.value,
       });
-      ElMessage.success("保存成功");
+      ElMessage.success(t("common.message.saveSuccess"));
     }
   } catch (error) {
     console.error("Failed to save phototype", error);
-    ElMessage.error("保存失败");
+    ElMessage.error(t("common.message.saveFailed"));
   }
 };
 
@@ -222,7 +194,7 @@ const refresh = async () => {
     tree.value = {
       root: {
         type: "object",
-        title: "条件",
+        title: t("phototype.edit.condition"),
       },
     };
     return;
@@ -249,7 +221,7 @@ const refresh = async () => {
       tree.value = {
         root: {
           type: "object",
-          title: "条件",
+          title: t("phototype.edit.condition"),
         },
       };
     }
@@ -264,13 +236,13 @@ onMounted(() => {
 const extraSetting = {
   integer: {
     default: {
-      name: "默认值",
+      name: t("phototype.edit.defaultValue"),
       type: "integer",
     },
   },
   string: {
     default: {
-      name: "默认值",
+      name: t("phototype.edit.defaultValue"),
       type: "integer",
     },
   },

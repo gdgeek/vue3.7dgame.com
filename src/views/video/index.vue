@@ -1,9 +1,10 @@
 <template>
   <TransitionWrapper>
     <div class="video-index">
-      <PageActionBar title="所有视频素材" search-placeholder="搜索视频..." :selection-count="selectedCount" @search="handleSearch"
-        @sort-change="handleSortChange" @view-change="handleViewChange" @batch-download="handleBatchDownload"
-        @batch-delete="handleBatchDelete" @cancel-selection="handleCancelSelection">
+      <PageActionBar :title="t('video.listPageTitle')" :search-placeholder="t('video.searchPlaceholder')"
+        :selection-count="selectedCount" @search="handleSearch" @sort-change="handleSortChange"
+        @view-change="handleViewChange" @batch-download="handleBatchDownload" @batch-delete="handleBatchDelete"
+        @cancel-selection="handleCancelSelection">
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
             <font-awesome-icon :icon="['fas', 'upload']" style="font-size: 18px; margin-right: 4px" />
@@ -15,7 +16,7 @@
       <ViewContainer :items="items" :view-mode="viewMode" :loading="loading"
         @row-click="(item) => openViewDialog(item.id)">
         <template #grid-card="{ item }">
-          <StandardCard :image="getVideoCover(item.image?.url)" :title="item.name || '未命名'"
+          <StandardCard :image="getVideoCover(item.image?.url)" :title="item.name || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" :selected="isSelected(item.id)"
             :selection-mode="hasSelection" type-icon="videocam" placeholder-icon="videocam"
             @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)"></StandardCard>
@@ -45,9 +46,9 @@
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openViewDialog(item.id)">{{
                     $t("video.viewVideo")
-                  }}</el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)">重命名</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => { })">删除</el-dropdown-item>
+                    }}</el-dropdown-item>
+                  <el-dropdown-item @click="namedWindow(item)">{{ t("common.edit") }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item, () => { })">{{ t("common.delete") }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -65,9 +66,10 @@
       </StandardUploadDialog>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="viewDialogVisible" title="视频详情" :name="currentVideo?.name || ''" :loading="detailLoading"
-        :properties="detailProperties" placeholder-icon="videocam" download-text="下载视频" delete-text="删除此视频"
-        @download="handleDownload" @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
+      <DetailPanel v-model="viewDialogVisible" :title="t('video.detailsTitle')" :name="currentVideo?.name || ''"
+        :loading="detailLoading" :properties="detailProperties" placeholder-icon="videocam"
+        :download-text="t('video.downloadText')" :delete-text="t('video.deleteText')" @download="handleDownload"
+        @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
         <template #preview>
           <video v-if="currentVideo?.file?.url" :src="currentVideo.file.url" controls class="video-preview"></video>
         </template>
@@ -150,17 +152,17 @@ const detailProperties = computed(() => {
     ? JSON.parse(currentVideo.value.info)
     : null;
   const props = [
-    { label: "类型", value: "视频" },
-    { label: "大小", value: formatSize(currentVideo.value.file?.size) },
+    { label: t("ui.type"), value: t("video.typeName") },
+    { label: t("ui.size"), value: formatSize(currentVideo.value.file?.size) },
     {
-      label: "创建时间",
+      label: t("ui.createdAt"),
       value: convertToLocalTime(currentVideo.value.created_at),
     },
   ];
   if (info?.size)
-    props.push({ label: "分辨率", value: printVector2(info.size) });
+    props.push({ label: t("ui.resolution"), value: printVector2(info.size) });
   if (info?.length)
-    props.push({ label: "时长", value: info.length.toFixed(2) + "s" });
+    props.push({ label: t("ui.duration"), value: info.length.toFixed(2) + "s" });
   return props;
 });
 
@@ -215,7 +217,7 @@ const handleRename = async (newName: string) => {
 const handleDelete = async () => {
   if (!currentVideo.value) return;
   try {
-    await ElMessageBox.confirm(
+    await MessageBox.confirm(
       t("video.confirm.message1"),
       t("video.confirm.message2"),
       {
@@ -305,16 +307,28 @@ const deletedWindow = async (
 
 const handleBatchDownload = () => {
   const selected = getSelectedItems(items.value || []);
-  Message.info(`批量下载 ${selected.length} 个视频文件（功能开发中）`);
+  Message.info(
+    t("ui.batchDownloadDev", {
+      count: selected.length,
+      resource: t("video.resourceName"),
+    })
+  );
 };
 
 const handleBatchDelete = async () => {
   const selected = getSelectedItems(items.value || []);
   try {
     await MessageBox.confirm(
-      `确定要删除选中的 ${selected.length} 个视频吗？`,
-      "批量删除",
-      { confirmButtonText: "删除", cancelButtonText: "取消", type: "warning" }
+      t("ui.batchDeleteConfirm", {
+        count: selected.length,
+        resource: t("video.resourceName"),
+      }),
+      t("ui.batchDeleteTitle"),
+      {
+        confirmButtonText: t("common.delete"),
+        cancelButtonText: t("common.cancel"),
+        type: "warning",
+      }
     );
 
     for (const item of selected) {
@@ -323,9 +337,14 @@ const handleBatchDelete = async () => {
 
     clearSelection();
     refresh();
-    Message.success(`成功删除 ${selected.length} 个视频`);
+    Message.success(
+      t("ui.batchDeleteSuccess", {
+        count: selected.length,
+        resource: t("video.resourceName"),
+      })
+    );
   } catch {
-    Message.info("已取消删除");
+    Message.info(t("ui.cancelDelete"));
   }
 };
 

@@ -1,8 +1,8 @@
 <template>
   <TransitionWrapper>
     <div class="voxel-index">
-      <PageActionBar title="所有体素素材" search-placeholder="搜索体素..." @search="handleSearch" @sort-change="handleSortChange"
-        @view-change="handleViewChange">
+      <PageActionBar :title="t('voxel.listPageTitle')" :search-placeholder="t('voxel.searchPlaceholder')"
+        @search="handleSearch" @sort-change="handleSortChange" @view-change="handleViewChange">
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
             <font-awesome-icon :icon="['fas', 'upload']" style="font-size: 18px; margin-right: 4px" />
@@ -13,7 +13,8 @@
 
       <ViewContainer :items="items" :view-mode="viewMode" :loading="loading">
         <template #grid-card="{ item }">
-          <MrPPCard :item="item" type="体素" color="#9b59b6" @named="namedWindow" @deleted="deletedWindow">
+          <MrPPCard :item="item" :type="t('voxel.typeName')" color="#9b59b6" @named="namedWindow"
+            @deleted="deletedWindow">
             <template #enter>
               <router-link :to="`/resource/voxel/view?id=${item.id}`">
                 <el-button-group :inline="true">
@@ -51,8 +52,8 @@
                   <el-dropdown-item><router-link :to="`/resource/voxel/view?id=${item.id}`">{{
                     $t("voxel.viewVoxel")
                       }}</router-link></el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)">重命名</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => { })">删除</el-dropdown-item>
+                  <el-dropdown-item @click="namedWindow(item)">{{ t("common.edit") }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item, () => { })">{{ t("common.delete") }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>

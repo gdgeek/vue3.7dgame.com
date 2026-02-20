@@ -1,28 +1,29 @@
 <template>
   <TransitionWrapper>
     <div class="teacher-list">
-      <PageActionBar :title="$t('manager.teacherManagement')" search-placeholder="搜索教师姓名..." @search="handleSearch"
-        @sort-change="handleSortChange" @view-change="handleViewChange">
+      <PageActionBar :title="$t('manager.teacherManagement')" :search-placeholder="$t('ui.search')"
+        @search="handleSearch" @sort-change="handleSortChange" @view-change="handleViewChange">
         <template #actions>
           <el-button type="primary" @click="addTeacher">
             <font-awesome-icon :icon="['fas', 'plus']" style="font-size: 18px; margin-right: 4px" />
-            邀请教师
+            {{ $t("manager.createTeacher") }}
           </el-button>
         </template>
       </PageActionBar>
 
       <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
         <template #grid-card="{ item }">
-          <StandardCard :image="item.user?.avatar?.url" :title="item.user?.nickname || item.user?.username || '教师'"
-            action-text="查看详情" action-icon="visibility" type-icon="person_4" placeholder-icon="person"
-            :show-checkbox="false" @view="openDetail(item)" @action="openDetail(item)"></StandardCard>
+          <StandardCard :image="item.user?.avatar?.url" :title="item.user?.nickname || item.user?.username || '—'"
+            :action-text="$t('manager.ui.viewDetail')" action-icon="visibility" type-icon="person_4"
+            placeholder-icon="person" :show-checkbox="false" @view="openDetail(item)" @action="openDetail(item)">
+          </StandardCard>
         </template>
 
         <template #list-header>
           <div class="col-checkbox"></div>
-          <div class="col-name">姓名</div>
-          <div class="col-school">所属学校</div>
-          <div class="col-subject">科目</div>
+          <div class="col-name">{{ $t("common.name") }}</div>
+          <div class="col-school">{{ $t("manager.ui.affiliatedSchool") }}</div>
+          <div class="col-subject">{{ $t("manager.teacher.subject") }}</div>
           <div class="col-actions"></div>
         </template>
 
@@ -37,7 +38,7 @@
             </div>
             <span class="item-name">{{
               item.user?.nickname || item.user?.username || "—"
-              }}</span>
+            }}</span>
           </div>
           <div class="col-school">{{ item.school?.name || "—" }}</div>
           <div class="col-subject">{{ item.subject || "—" }}</div>
@@ -46,8 +47,8 @@
               <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon" />
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="openDetail(item)">查看详情</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item)">移除</el-dropdown-item>
+                  <el-dropdown-item @click="openDetail(item)">{{ $t("manager.ui.viewDetail") }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item)">{{ $t("manager.list.remove") }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -55,7 +56,8 @@
         </template>
 
         <template #empty>
-          <EmptyState icon="person_4" text="暂无教师" action-text="邀请教师" @action="addTeacher"></EmptyState>
+          <EmptyState icon="person_4" :text="$t('manager.ui.noTeachers')" :action-text="$t('manager.createTeacher')"
+            @action="addTeacher"></EmptyState>
         </template>
       </ViewContainer>
 
@@ -63,16 +65,17 @@
       </PagePagination>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="detailVisible" title="教师详情" :name="currentTeacher?.user?.nickname || ''"
-        :loading="detailLoading" :properties="detailProperties" placeholder-icon="person_4" :show-delete="true"
-        delete-text="从学校移除" @delete="handleDelete" @close="handlePanelClose"></DetailPanel>
+      <DetailPanel v-model="detailVisible" :title="$t('manager.ui.teacherDetail')"
+        :name="currentTeacher?.user?.nickname || ''" :loading="detailLoading" :properties="detailProperties"
+        placeholder-icon="person_4" :show-delete="true" :delete-text="$t('manager.ui.removeFromSchool')"
+        @delete="handleDelete" @close="handlePanelClose"></DetailPanel>
     </div>
   </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-// import { useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 import { Message, MessageBox } from "@/components/Dialog";
 import {
   PageActionBar,
@@ -86,7 +89,7 @@ import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { getTeachers, deleteTeacher } from "@/api/v1/edu-teacher";
 import { usePageData } from "@/composables/usePageData";
 
-// const { t } = useI18n(); // Removed unused t
+const { t } = useI18n();
 
 const {
   items,
@@ -133,15 +136,15 @@ const detailProperties = computed(() => {
   if (!currentTeacher.value) return [];
   return [
     {
-      label: "教师姓名",
+      label: t("manager.ui.teacherName"),
       value:
         currentTeacher.value.user?.nickname ||
         currentTeacher.value.user?.username ||
         "—",
     },
-    { label: "所属学校", value: currentTeacher.value.school?.name || "—" },
-    { label: "科目", value: currentTeacher.value.subject || "—" },
-    { label: "电话", value: currentTeacher.value.phone || "—" },
+    { label: t("manager.ui.affiliatedSchool"), value: currentTeacher.value.school?.name || "—" },
+    { label: t("manager.teacher.subject"), value: currentTeacher.value.subject || "—" },
+    { label: t("manager.teacher.phone"), value: currentTeacher.value.phone || "—" },
   ];
 });
 
@@ -155,30 +158,30 @@ const handlePanelClose = () => {
 };
 
 const addTeacher = () => {
-  Message.info("邀请教师功能暂未开放");
+  Message.info(t("manager.ui.inviteTeacherPending"));
 };
 
 const handleDelete = async () => {
   if (!currentTeacher.value) return;
   try {
-    await MessageBox.confirm("确定要移除该教师吗？", "移除确认", {
+    await MessageBox.confirm(t("manager.ui.removeTeacherConfirm"), t("manager.ui.removeConfirmTitle"), {
       type: "warning",
     });
     await deleteTeacher(currentTeacher.value.id);
     detailVisible.value = false;
     refresh();
-    Message.success("移除成功");
+    Message.success(t("manager.messages.removeSuccess"));
   } catch { }
 };
 
 const deletedWindow = async (item: Teacher) => {
   try {
-    await MessageBox.confirm("确定要移除该教师吗？", "移除确认", {
+    await MessageBox.confirm(t("manager.ui.removeTeacherConfirm"), t("manager.ui.removeConfirmTitle"), {
       type: "warning",
     });
     await deleteTeacher(item.id);
     refresh();
-    Message.success("移除成功");
+    Message.success(t("manager.messages.removeSuccess"));
   } catch { }
 };
 </script>

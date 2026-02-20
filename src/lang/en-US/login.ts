@@ -1,7 +1,6 @@
 // login translations for en-US
 export default {
   login: {
-    appleLoginFail: "Apple login failed",
     title: "BuJiaBan.com",
     register: "Platform Register/Login",
     h1: "Welcome!",
@@ -12,7 +11,7 @@ export default {
     login: "Login",
     loginCode: "Login Code",
     scanTip: "Please scan the QR code with your phone to log in",
-    download: "Download Related Programs",
+    scanSubTip: "Auto register or login after scanning",
     rules: {
       username: {
         message1: "Please enter your username",
@@ -32,13 +31,15 @@ export default {
       },
     },
     success: "Login Successful",
-    usernameError: "Username Error",
-    passwordError: "Password Error",
     error: "Form Validation Failed",
     createAccount: "Create Account",
     repassword: "Confirm Password",
     create: "Create",
     linkAccount: "Login Account",
+    agreementPrefix: "By registering or logging in, you agree to",
+    agreementAnd: "and",
+    termsOfService: "Terms of Service",
+    privacyPolicy: "Privacy Policy",
     logout: {
       message1: "Are you sure you want to log out and exit the system?",
       message2: "Prompt",
@@ -48,7 +49,12 @@ export default {
       text: "Logging out this session from the server",
     },
     back: "Back",
+    abandonRegisterConfirm: "Are you sure you want to abandon registration?",
+    abandonRegisterTitle: "Warning",
+    abandonRegisterConfirmButton: "Confirm",
+    abandonRegisterCancelButton: "Continue registration",
     loginResponseMissingToken: "The login response is missing the access_token",
+    qrcodeFetchFailed: "Failed to get WeChat QR code, please try again later",
   },
   passwordPolicy: {
     minLength: "At least 12 characters",

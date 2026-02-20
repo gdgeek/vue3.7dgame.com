@@ -2,7 +2,7 @@
   <div class="register-form" :class="{ 'dark-theme': isDark }" v-loading="loading">
     <el-form ref="registerFormRef" class="login-form" :rules="registerRules" :model="registerForm" label-position="top">
       <el-form-item :label="$t('login.username')" prop="username" class="form-item">
-        <el-input v-model="registerForm.username" placeholder="请输入邮箱" class="custom-input">
+        <el-input v-model="registerForm.username" :placeholder="$t('login.username')" class="custom-input">
           <template #prefix>
             <el-icon class="input-icon">
               <UserFilled></UserFilled>
@@ -12,8 +12,8 @@
       </el-form-item>
 
       <el-form-item :label="$t('login.password')" prop="password" class="form-item">
-        <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" class="custom-input"
-          show-password>
+        <el-input v-model="registerForm.password" type="password" :placeholder="$t('login.password')"
+          class="custom-input" show-password>
           <template #prefix>
             <el-icon class="input-icon">
               <Lock></Lock>
@@ -24,8 +24,8 @@
       </el-form-item>
 
       <el-form-item :label="$t('login.repassword')" prop="repassword" class="form-item">
-        <el-input v-model="registerForm.repassword" type="password" placeholder="请再次输入密码" class="custom-input"
-          show-password>
+        <el-input v-model="registerForm.repassword" type="password" :placeholder="$t('login.repassword')"
+          class="custom-input" show-password>
           <template #prefix>
             <el-icon class="input-icon">
               <Lock></Lock>
@@ -42,8 +42,8 @@
 
       <!-- 返回登录 -->
       <div class="login-link">
-        <span>已有账号?</span>
-        <a href="#" @click.prevent="backToLogin">返回登录</a>
+        <span>{{ $t("login.linkAccount") }}?</span>
+        <a href="#" @click.prevent="backToLogin">{{ $t("login.back") }}</a>
       </div>
     </el-form>
   </div>

@@ -11,6 +11,13 @@ export default {
       afternoon: "Good afternoon,",
       evening: "Good evening,",
     },
+    header: {
+      subtitle:
+        "Explore the infinite possibilities of AR and start your creative journey.",
+    },
+    announcements: {
+      title: "Announcements",
+    },
     myCreation: {
       title: "Creation",
       myPolygen: "Polygen",
@@ -21,6 +28,24 @@ export default {
       myLike: "Like",
       enter: "Enter",
       Iliked: "I Liked",
+    },
+    quickStart: {
+      title: "Quick Start",
+      upload: {
+        title: "Upload Assets",
+        desc: "Import 3D models or multimedia files into your personal library.",
+        action: "Upload Now",
+      },
+      edit: {
+        title: "Edit Entities",
+        desc: "Manage interactive components and behavior scripts for your AR assets.",
+        action: "Edit Now",
+      },
+      create: {
+        title: "Create Scene",
+        desc: "Build a brand-new immersive AR interactive experience from scratch.",
+        action: "Create Now",
+      },
     },
     edit: {
       title: "Edit Personal Data",

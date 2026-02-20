@@ -7,7 +7,7 @@
         <p v-if="subtitle" class="page-subtitle">{{ subtitle }}</p>
         <!-- Selection count -->
         <p v-if="selectionCount > 0" class="selection-count">
-          {{ selectionCount }}个已选择
+          {{ t("ui.selected", { count: selectionCount }) }}
         </p>
       </div>
     </div>
@@ -18,8 +18,8 @@
         <!-- Search - Hide in selection mode -->
         <div v-if="showSearch && selectionCount === 0" class="search-box">
           <font-awesome-icon :icon="['fas', 'search']" class="search-icon" />
-          <input v-model="searchValue" type="text" class="search-input" :placeholder="searchPlaceholder || '搜索...'"
-            @keyup.enter="handleSearch" />
+          <input v-model="searchValue" type="text" class="search-input"
+            :placeholder="searchPlaceholder || t('ui.search')" @keyup.enter="handleSearch" />
         </div>
 
         <!-- Custom filters slot (tags, visibility, etc.) - Hide in selection mode -->
@@ -31,21 +31,21 @@
         <template v-if="selectionCount > 0">
           <el-button v-if="isPageSelected" @click="$emit('cancel-select-all-page')">
             <font-awesome-icon :icon="['fas', 'square-minus']" style="font-size: 18px; margin-right: 4px" />
-            取消全选
+            {{ t("ui.cancelSelectAll") }}
           </el-button>
           <el-button v-else @click="$emit('select-all-page')">
             <font-awesome-icon :icon="['fas', 'check-double']" style="font-size: 18px; margin-right: 4px" />
-            全选本页
+            {{ t("ui.selectAllPage") }}
           </el-button>
           <el-button @click="$emit('batch-download')">
             <font-awesome-icon :icon="['fas', 'download']" style="font-size: 18px; margin-right: 4px" />
-            批量下载
+            {{ t("ui.batchDownload") }}
           </el-button>
           <el-button type="danger" @click="$emit('batch-delete')">
             <font-awesome-icon :icon="['fas', 'trash-can']" style="font-size: 18px; margin-right: 4px" />
-            批量删除
+            {{ t("ui.batchDelete") }}
           </el-button>
-          <el-button @click="$emit('cancel-selection')">取消</el-button>
+          <el-button @click="$emit('cancel-selection')">{{ t("common.cancel") }}</el-button>
         </template>
 
         <!-- Normal actions - Hide in selection mode -->
@@ -56,14 +56,14 @@
             <div class="sort-control">
               <button class="sort-btn" :class="{ active: isSortedByTime }" @click="toggleSort(sortByTime)">
                 <font-awesome-icon :icon="['fas', 'clock']" class="sort-icon" />
-                时间
+                {{ t("ui.time") }}
                 <font-awesome-icon v-if="isSortedByTime" :icon="['fas', sortAscending ? 'chevron-down' : 'chevron-up']"
                   class="sort-arrow" />
               </button>
 
               <button class="sort-btn" :class="{ active: isSortedByName }" @click="toggleSort(sortByNameField)">
                 <span class="sort-az">A<small>Z</small></span>
-                名称
+                {{ t("common.name") }}
                 <font-awesome-icon v-if="isSortedByName" :icon="['fas', sortAscending ? 'chevron-down' : 'chevron-up']"
                   class="sort-arrow" />
               </button>
@@ -76,11 +76,11 @@
           <!-- View toggle -->
           <div v-if="showViewToggle" class="view-toggle">
             <div class="segment-control">
-              <button class="segment-btn" :class="{ active: currentView === 'grid' }" title="网格视图"
+              <button class="segment-btn" :class="{ active: currentView === 'grid' }" :title="t('ui.gridView')"
                 @click="setView('grid')">
                 <font-awesome-icon :icon="['fas', 'grip']" />
               </button>
-              <button class="segment-btn" :class="{ active: currentView === 'list' }" title="列表视图"
+              <button class="segment-btn" :class="{ active: currentView === 'list' }" :title="t('ui.listView')"
                 @click="setView('list')">
                 <font-awesome-icon :icon="['fas', 'list']" />
               </button>
@@ -101,7 +101,10 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import type { PageActionBarProps, ViewMode } from "./types";
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<

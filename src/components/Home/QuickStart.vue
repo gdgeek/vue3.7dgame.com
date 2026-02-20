@@ -3,7 +3,7 @@
     <div class="section-header">
       <font-awesome-icon :icon="['fas', 'bolt']" class="header-icon" />
       <h2 class="section-title">
-        {{ t("homepage.quickStart.title", "快速开始") }}
+        {{ t("homepage.quickStart.title") }}
       </h2>
     </div>
 
@@ -18,7 +18,7 @@
             <p class="card-desc">{{ item.desc }}</p>
           </div>
           <div class="card-action">
-            <span class="action-text" :style="{ color: item.iconColor }">立即{{ item.title.slice(0, 2) }}</span>
+            <span class="action-text" :style="{ color: item.iconColor }">{{ item.actionText }}</span>
             <font-awesome-icon :icon="['fas', 'arrow-right']" class="action-arrow" :style="{ color: item.iconColor }" />
           </div>
         </div>
@@ -28,47 +28,42 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 
 const { t } = useI18n();
 const router = useRouter();
 
-const quickItems = [
+const quickItems = computed(() => [
   {
-    title: t("homepage.quickStart.upload.title", "上传素材"),
-    desc: t(
-      "homepage.quickStart.upload.desc",
-      "导入 3D 模型或多媒体文件到您的个人库中。"
-    ),
+    title: t("homepage.quickStart.upload.title"),
+    desc: t("homepage.quickStart.upload.desc"),
+    actionText: t("homepage.quickStart.upload.action"),
     icon: ["fas", "cloud-arrow-up"] as string[],
-    bgColor: "var(--primary-light)", // Use theme var
-    iconColor: "var(--primary-color)", // Use theme var
+    bgColor: "var(--primary-light)",
+    iconColor: "var(--primary-color)",
     action: "/resource/polygen/index",
   },
   {
-    title: t("homepage.quickStart.edit.title", "编辑实体"),
-    desc: t(
-      "homepage.quickStart.edit.desc",
-      "管理交互式组件和行为脚本，赋予 AR 资产生命力。"
-    ),
+    title: t("homepage.quickStart.edit.title"),
+    desc: t("homepage.quickStart.edit.desc"),
+    actionText: t("homepage.quickStart.edit.action"),
     icon: ["fas", "pen-to-square"] as string[],
-    bgColor: "var(--primary-light)", // Use theme var
-    iconColor: "var(--primary-color)", // Use theme var
+    bgColor: "var(--primary-light)",
+    iconColor: "var(--primary-color)",
     action: "/meta/list",
   },
   {
-    title: t("homepage.quickStart.create.title", "创建场景"),
-    desc: t(
-      "homepage.quickStart.create.desc",
-      "从零开始构建一个全新的沉浸式 AR 互动体验。"
-    ),
+    title: t("homepage.quickStart.create.title"),
+    desc: t("homepage.quickStart.create.desc"),
+    actionText: t("homepage.quickStart.create.action"),
     icon: ["fas", "square-plus"] as string[],
-    bgColor: "var(--primary-light)", // Use theme var
-    iconColor: "var(--primary-color)", // Use theme var
+    bgColor: "var(--primary-light)",
+    iconColor: "var(--primary-color)",
     action: "/verse/index",
   },
-];
+]);
 
 const handleQuickAction = (path: string) => {
   router.push(path);

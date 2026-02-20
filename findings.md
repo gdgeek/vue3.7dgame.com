@@ -1,134 +1,114 @@
-# 退出登录流程分析
+# 多语言缺失扫描结果与修改计划
 
-## 所有退出登录相关路径
+## 问题根因
+之前的图标迁移（Material Symbols → FontAwesome）重写了大量组件模板，新写的文本直接用了中文硬编码，没有使用 `$t()` / `t()` 国际化函数。
 
-### 1. 路由定义（重复/冲突）
+## 扫描结果汇总
 
-| 位置 | 路径 | 行为 |
-|------|------|------|
-| `src/router/modules/public.ts` | `/site/logout` | → `@/views/site/logout/index.vue` |
-| `src/router/index.ts` (Layout children) | `/site/logout` | `redirect: "/logout"`, component: null |
+| 文件 | 硬编码数量 | 优先级 |
+|------|-----------|--------|
+| SidebarLeft.vue | 36 | P0 - 每个用户都看到 |
+| UserDropdown.vue | 10 | P0 |
+| HeaderActions.vue | 3 | P0 |
+| PageActionBar.vue | 11 | P1 - 通用组件 |
+| StandardUploadDialog.vue | 11 | P1 |
+| DetailPanel.vue | 10 | P1 |
+| ViewContainer.vue | 4 | P1 |
+| PagePagination.vue | 3 | P1 |
+| PageFilter.vue | 2 | P1 |
+| ThemeSwitcher.vue | 4 | P1 |
+| ConfirmDialog.vue | 3 | P1 |
+| StandardCard.vue | 1 | P2 |
+| EmptyState.vue | 1 | P2 |
+| QRCodeDialog.vue | 2 | P2 |
+| QuickStart.vue | 1 | P2 |
+| **总计** | **~102** | |
 
-⚠️ **问题1：`/site/logout` 路由定义了两次，且行为不同。**
-
-### 2. 触发退出的入口
-
-| 触发方式 | 文件 | 说明 |
-|----------|------|------|
-| 401 响应 | `src/utils/request.ts` | `handleUnauthorized()` → `userStore.logout()` → `router.push("/site/logout")` |
-| Token 刷新失败 | `src/utils/request.ts` | 请求拦截器中 refreshToken 失败 → `handleUnauthorized()` |
-| permission 守卫 | `src/plugins/permission.ts` | catch 中 `Token.removeToken()` → `redirectToLogin()` |
-
-### 3. 退出登录的处理逻辑（多处重复）
-
-| 文件 | 逻辑 |
-|------|------|
-| `src/views/site/logout/index.vue` | `onMounted` → `userStore.logout()` → 延迟跳转 homepage |
-| `src/views/login/index.vue` | watch route → `/site/logout` → `userStore.logout()` + `delAllViews()` + 跳转 |
-| `src/views/site/index.vue` | watch route → `/site/logout` → `userStore.logout()` + `delAllViews()` + 跳转 |
-| `src/views/register/index.vue` | watch route → `/site/logout` → `userStore.logout()` + `delAllViews()` + 跳转 |
-
-### 4. `userStore.logout()` 实现问题
-
-```ts
-// 用空字符串而非删除
-await localStorage.setItem(TOKEN_KEY, "");
-```
-
-### 5. `Token.removeToken()` 实现
-
-```ts
-// 真正删除
-localStorage.removeItem(TOKEN_KEY);
-```
+已完成国际化（无需处理）：Message.vue、HomeHeader.vue、logout/index.vue
 
 ---
 
-## 发现的问题汇总
+## 修改计划
 
-### 问题1：`/site/logout` 路由重复定义，行为冲突
-- `public.ts` → 渲染 `site/logout/index.vue`
-- `router/index.ts` Layout children → redirect 到 `/logout`（该路径无对应路由，会 404）
+### Phase 1: 补充 i18n key 定义
 
-### 问题2：`userStore.logout()` 没有调用后端 API
-- `AuthAPI.logout()` 存在（DELETE `/v1/auth/logout`），但完全没被调用
-- 服务端 session/token 没有被注销
+在 `zh-CN/common.ts` 新增 `sidebar` 和 `ui` 两个命名空间，覆盖所有缺失文本。
+很多 key 在 `route.ts` 中已有（如场景、校园管理等），可直接复用 `$t('route.xxx')`，无需重复定义。
+`common.ts` 已有 `confirm`、`cancel`、`noData`、`delete` 等通用 key，优先复用。
 
-### 问题3：Token 清除方式不一致
-- `userStore.logout()` → `localStorage.setItem(TOKEN_KEY, "")` 设为空字符串
-- `Token.removeToken()` → `localStorage.removeItem(TOKEN_KEY)` 真正删除
-- 空字符串会导致 `JSON.parse("")` 抛异常（虽被 catch），不干净
+需要新增的 key 分两类：
+- `sidebar.*` — 侧边栏菜单专用（主页、素材库、实体、AI创作、场景、校园管理、管理中心、退出登录等）
+- `ui.*` — 通用 UI 文本（个人设置、退出确认、搜索、全选、批量操作、分页、上传、主题切换等）
 
-### 问题4：退出逻辑在多个视图中重复
-- 4 个文件都有各自的 logout 处理，造成维护困难和潜在的死代码
+### Phase 2: 替换 SidebarLeft.vue（P0，36处）
+所有菜单文字 → `$t('sidebar.xxx')` 或复用 `$t('route.xxx')`
 
-### 问题5：`site/logout/index.vue` 中有调试代码残留
-- `console.error(...)` 和 `alert(123)`
+### Phase 3: 替换 UserDropdown.vue + HeaderActions.vue（P0，13处）
+用户菜单、退出确认、title 属性 → `$t('ui.xxx')`
 
-### 问题6：permission.ts 中的退出处理不完整
-- 只调用 `Token.removeToken()`，没有清空 userInfo
-- `userStore.resetToken()` 被注释掉了
+### Phase 4: 替换 StandardPage 组件（P1，42处）
+PageActionBar、DetailPanel、ViewContainer、PagePagination、PageFilter、StandardUploadDialog、StandardCard、EmptyState
 
+### Phase 5: 替换 ThemeSwitcher + ConfirmDialog（P1，7处）
+
+### Phase 6: 替换 QRCodeDialog + QuickStart（P2，3处）
+
+### Phase 7: 同步其他 4 个语言文件
+en-US、ja-JP、th-TH、zh-TW 各自翻译对应 key
 
 ---
 
-# 侧边栏图标加载问题分析
+## 各文件详细硬编码清单
 
-## 根本原因
-侧边栏使用 Google Material Symbols Outlined 字体图标，通过 CDN (`fonts.googleapis.com`) 加载。
-字体下载完成前，浏览器显示图标的文字名称（如 "home"、"category"），导致用户看到长文字。
+### SidebarLeft.vue（36处）
+- 不加班AR创作平台（fallback）、主页、素材库、模型、图片、音频、视频
+- 实体、AI 创作、场景、自己创造、系统推荐
+- 校园管理、学校管理、老师管理、学生管理
+- 管理中心、用户管理、预制体管理
+- 退出登录、确定要退出登录吗？、退出后需要重新登录...、取消
 
-## 当前状态
-- `src/assets/fonts/material-symbols-outlined.woff2` 已下载到本地（3MB）
-- `src/assets/fonts/material-symbols.css` 已创建（本地 @font-face）
-- FontAwesome (`@fortawesome`) 已通过 npm 本地安装，不依赖 CDN
+### UserDropdown.vue（10处）
+- 个人设置、退出登录、确定要退出登录吗？、退出后需要重新登录...、取消
+- 用户（fallback）、管理员账户、普通账户
 
-## Material Symbols → FontAwesome Free 映射表
+### HeaderActions.vue（3处）
+- 全屏、切换主题、语言（title 属性）
 
-| Material Symbols | FontAwesome Free | FA 导入名 | 用途 |
-|-----------------|-----------------|-----------|------|
-| home | fas home | faHome | 主页 |
-| category | fas th-large | faThLarge | 素材库 |
-| token | fas puzzle-piece | faPuzzlePiece | 实体 |
-| smart_toy | fas robot | faRobot | AI 创作 |
-| layers | fas layer-group | faLayerGroup | 场景 |
-| corporate_fare | fas building | faBuilding | 校园管理 |
-| display_settings | fas sliders | faSliders | 管理中心 |
-| logout | fas right-from-bracket | faRightFromBracket | 退出登录 |
-| help | fas circle-question | faCircleQuestion | 帮助中心 |
-| settings | fas gear | faGear | 个人设置 |
-| search | fas search | faSearch | 搜索 |
-| check | fas check | faCheck | 选中 |
-| close | fas xmark | faXmark | 关闭 |
-| delete | fas trash-can | faTrashCan | 删除 |
-| edit | fas pen-to-square | faPenToSquare | 编辑 |
-| edit_note | fas file-lines | faFileLines | 编辑备注 |
-| download | fas download | faDownload | 下载 |
-| upload / cloud_upload | fas cloud-arrow-up | faCloudArrowUp | 上传 |
-| image | fas image | faImage | 图片 |
-| headphones | fas headphones | faHeadphones | 音频 |
-| videocam | fas video | faVideo | 视频 |
-| person | fas user | faUser | 用户 |
-| person_4 | fas user-tie | faUserTie | 老师 |
-| lock | fas lock | faLock | 私有 |
-| public | fas globe | faGlobe | 公开 |
-| language | fas language | faLanguage | 语言 |
-| palette | fas palette | faPalette | 主题 |
-| bolt | fas bolt | faBolt | 闪电 |
-| campaign | fas bullhorn | faBullhorn | 公告 |
-| schedule | fas clock | faClock | 时间 |
-| info | fas circle-info | faCircleInfo | 信息 |
-| qr_code_2 | fas qrcode | faQrcode | 二维码 |
-| view_in_ar | fas cube | faCube | 3D模型 |
-| deployed_code | fas cubes | faCubes | 体素 |
-| blur_on | fas circle-dot | faCircleDot | 粒子 |
-| landscape | fas image | faImage | 预览占位 |
-| grid_view | fas grip | faGrip | 网格视图 |
-| view_list | fas list | faList | 列表视图 |
-| restart_alt | fas arrows-rotate | faArrowsRotate | 重置 |
-| colorize | fas eye-dropper | faEyeDropper | 取色 |
-| fullscreen / fullscreen_exit | fas expand/compress | faExpand/faCompress | 全屏 |
+### PageActionBar.vue（11处）
+- 个已选择、搜索...、取消全选、全选本页、批量下载、批量删除、取消
+- 时间、名称（排序）、网格视图、列表视图
 
-## 结论
-所有 Material Symbols 图标都能在 FontAwesome Free 中找到合理替代。
-可以完全迁移到 FontAwesome，去掉 Material Symbols CDN 依赖。
+### StandardUploadDialog.vue（11处）
+- 上传资源、拖拽文件到此处或点击浏览、支持多个文件同时上传、浏览文件
+- 支持格式、单个文件大小、最大 xxxMB
+- 正在校验文件...、正在上传文件...、正在保存资源...、准备中...
+
+### DetailPanel.vue（10处）
+- 资源详情、取消、保存、复制、删除、下载、删除此资源、在编辑器中使用
+
+### ViewContainer.vue（4处）
+- 名称、大小、修改日期、暂无数据
+
+### PagePagination.vue（3处）
+- 上一页、下一页、第x页/共x页
+
+### PageFilter.vue（2处）
+- 筛选、清除筛选
+
+### ThemeSwitcher.vue（4处）
+- 界面风格、主题色、自定义、重置
+
+### ConfirmDialog.vue（3处）
+- 确认（title默认值）、确认（confirmText默认值）、取消（cancelText默认值）
+
+### StandardCard.vue（1处）
+- 查看信息
+
+### EmptyState.vue（1处）
+- 暂无数据
+
+### QRCodeDialog.vue（2处）
+- 请使用手机扫描二维码登录、打开APP扫描二维码快速登录
+
+### QuickStart.vue（1处）
+- 立即

@@ -1,32 +1,17 @@
 <template>
   <div class="verse-scene">
-    <phototype-dialog
-      @selected="selectedPhototype"
-      ref="phototypeDialogRef"
-    ></phototype-dialog>
+    <phototype-dialog @selected="selectedPhototype" ref="phototypeDialogRef"></phototype-dialog>
     <resource-dialog @selected="selected" :on-get-datas="getDatas" ref="dialog">
       <template #bar="{ item }">
         <div v-if="item.type === 'audio'" class="info-container">
-          <audio
-            id="audio"
-            controls
-            style="width: 100%; height: 30px"
-            :src="item.context.file.url"
-            @play="handleAudioPlay"
-          ></audio>
+          <audio id="audio" controls style="width: 100%; height: 30px" :src="item.context.file.url"
+            @play="handleAudioPlay"></audio>
         </div>
       </template>
     </resource-dialog>
     <el-container>
       <el-main>
-        <iframe
-          ref="editor"
-          id="editor"
-          :src="src"
-          class="content"
-          height="100%"
-          width="100%"
-        ></iframe>
+        <iframe ref="editor" id="editor" :src="src" class="content" height="100%" width="100%"></iframe>
       </el-main>
     </el-container>
   </div>
@@ -112,7 +97,7 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
         resolve({ items, pagination });
       }
     } catch (error) {
-      console.error("获取数据失败", error);
+      console.error("Failed to fetch data", error);
       reject(error);
     }
   });
@@ -357,7 +342,7 @@ const handleUploadCover = async (data: any) => {
         md5,
         extension,
         file,
-        (p: any) => {},
+        (p: any) => { },
         handler,
         "backup"
       );
@@ -384,7 +369,7 @@ const handleUploadCover = async (data: any) => {
       }
     }
   } catch (error) {
-    console.error("上传封面图片失败:", error);
+    console.error("Failed to upload cover image:", error);
     ElMessage.error(t("meta.scene.coverUploadFailed"));
   }
 };
@@ -405,7 +390,7 @@ const handleMessage = async (e: MessageEvent) => {
       break;
 
     case "save-meta-none":
-      ElMessage.warning("项目没有改变");
+      ElMessage.warning(t("meta.scene.noChanges"));
       break;
 
     case "load-resource":

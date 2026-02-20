@@ -1,11 +1,6 @@
 <template>
-  <PageFilter
-    v-model="value"
-    label="标签筛选"
-    :options="options"
-    placeholder="标签筛选"
-    @change="handleChange"
-  ></PageFilter>
+  <PageFilter v-model="value" :label="$t('ui.filter')" :options="options" :placeholder="$t('ui.filter')"
+    @change="handleChange"></PageFilter>
 </template>
 
 <script lang="ts" setup>

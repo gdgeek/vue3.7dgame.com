@@ -1,29 +1,16 @@
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    title="导入场景"
-    width="480px"
-    :close-on-click-modal="!importing"
-    :close-on-press-escape="!importing"
-    :show-close="!importing"
-    @close="handleClose"
-  >
+  <el-dialog v-model="dialogVisible" :title="t('ui.importScene')" width="480px" :close-on-click-modal="!importing"
+    :close-on-press-escape="!importing" :show-close="!importing" @close="handleClose">
     <!-- 文件选择状态 -->
     <div v-if="state === 'idle'" class="import-upload">
-      <el-upload
-        ref="uploadRef"
-        drag
-        accept=".zip"
-        :auto-upload="false"
-        :show-file-list="false"
-        :on-change="handleFileChange"
-      >
+      <el-upload ref="uploadRef" drag accept=".zip" :auto-upload="false" :show-file-list="false"
+        :on-change="handleFileChange">
         <el-icon class="upload-icon">
           <Upload></Upload>
         </el-icon>
-        <div class="upload-text">将场景包拖到此处，或<em>点击选择文件</em></div>
+        <div class="upload-text">{{ t("ui.dragOrSelectScenePackage") }}</div>
         <template #tip>
-          <div class="upload-tip">仅支持 .zip 格式的场景包文件</div>
+          <div class="upload-tip">{{ t("ui.onlyZipScenePackage") }}</div>
         </template>
       </el-upload>
     </div>
@@ -33,42 +20,34 @@
       <el-icon class="is-loading loading-icon">
         <Loading></Loading>
       </el-icon>
-      <p class="loading-text">导入中...</p>
+      <p class="loading-text">{{ t("ui.importing") }}</p>
     </div>
 
     <!-- 导入成功状态 -->
     <div v-else-if="state === 'success'" class="import-result">
-      <el-result
-        icon="success"
-        title="导入成功"
-        sub-title="场景已成功导入，可以前往查看"
-      ></el-result>
+      <el-result icon="success" :title="t('ui.importSuccess')" :sub-title="t('ui.importSuccessSubtitle')"></el-result>
     </div>
 
     <!-- 导入失败状态 -->
     <div v-else-if="state === 'error'" class="import-result">
-      <el-result
-        icon="error"
-        title="导入失败"
-        :sub-title="importError"
-      ></el-result>
+      <el-result icon="error" :title="t('ui.importFailed')" :sub-title="importError"></el-result>
     </div>
 
     <!-- 底部按钮 -->
     <template #footer>
       <template v-if="state === 'idle'">
-        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button @click="dialogVisible = false">{{ t("common.cancel") }}</el-button>
       </template>
 
       <template v-else-if="state === 'success'">
-        <el-button @click="dialogVisible = false">关闭</el-button>
-        <el-button type="primary" @click="handleNavigate"> 前往查看 </el-button>
+        <el-button @click="dialogVisible = false">{{ t("ui.close") }}</el-button>
+        <el-button type="primary" @click="handleNavigate">{{ t("ui.goToView") }}</el-button>
       </template>
 
       <template v-else-if="state === 'error'">
-        <el-button @click="dialogVisible = false">关闭</el-button>
+        <el-button @click="dialogVisible = false">{{ t("ui.close") }}</el-button>
         <el-button type="primary" @click="handleRetry">
-          重新选择文件
+          {{ t("ui.reselectFile") }}
         </el-button>
       </template>
     </template>
@@ -78,6 +57,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { Loading, Upload } from "@element-plus/icons-vue";
 
 import { importScene } from "@/services/scene-package/import-service";
@@ -100,6 +80,7 @@ const emit = defineEmits<{
 
 type ImportState = "idle" | "importing" | "success" | "error";
 
+const { t } = useI18n();
 const router = useRouter();
 
 const state = ref<ImportState>("idle");
@@ -117,7 +98,7 @@ const handleFileChange = async (uploadFile: UploadFile) => {
 
   // 验证文件类型
   if (!file.name.endsWith(".zip")) {
-    ElMessage.error("请选择 .zip 格式的场景包文件");
+    ElMessage.error(t("ui.selectZipScenePackage"));
     return;
   }
 
@@ -133,11 +114,11 @@ const handleFileChange = async (uploadFile: UploadFile) => {
       state.value = "success";
       emit("success", result.verseId);
     } else {
-      importError.value = result.error || "导入失败，请重试";
+      importError.value = result.error || t("ui.retryLater");
       state.value = "error";
     }
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "未知错误";
+    const message = err instanceof Error ? err.message : t("ui.unknownError");
     importError.value = message;
     state.value = "error";
   } finally {

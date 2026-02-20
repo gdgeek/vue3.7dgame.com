@@ -1,7 +1,6 @@
 // login translations for ja-JP
 export default {
   login: {
-    appleLoginFail: "Appleログインに失敗しました",
     title: "bujiaban.com",
     register: "プラットフォーム登録/ログイン",
     h1: "ようこそ！",
@@ -12,7 +11,7 @@ export default {
     login: "ログイン",
     loginCode: "ログインコード",
     scanTip: "携帯電話でQRコードをスキャンしてログインしてください",
-    download: "関連プログラムのダウンロード",
+    scanSubTip: "スキャン後に自動で登録またはログインします",
     rules: {
       username: {
         message1: "ユーザー名を入力してください",
@@ -33,13 +32,16 @@ export default {
       },
     },
     success: "ログイン成功",
-    usernameError: "ユーザー名エラー",
-    passwordError: "パスワードエラー",
     error: "フォーム検証に失敗しました",
     createAccount: "アカウントを作成",
     repassword: "パスワードを確認",
     create: "作成",
     linkAccount: "アカウントにログイン",
+    agreementPrefix:
+      "登録またはログインすることで、次に同意したものとみなされます：",
+    agreementAnd: "および",
+    termsOfService: "利用規約",
+    privacyPolicy: "プライバシーポリシー",
     logout: {
       message1: "ログアウトしてシステムを終了しますか？",
       message2: "ヒント",
@@ -49,7 +51,13 @@ export default {
       text: "サーバーからこのセッションをログアウトしています",
     },
     back: "戻る",
+    abandonRegisterConfirm: "登録を中止しますか？",
+    abandonRegisterTitle: "警告",
+    abandonRegisterConfirmButton: "確認",
+    abandonRegisterCancelButton: "登録を続行",
     loginResponseMissingToken: "ログインレスポンスに access_token がありません",
+    qrcodeFetchFailed:
+      "WeChatのQRコード取得に失敗しました。しばらくしてからお試しください",
   },
   passwordPolicy: {
     minLength: "12文字以上",

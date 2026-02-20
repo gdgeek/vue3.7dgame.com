@@ -3,6 +3,9 @@ export default {
   voxel: {
     uploadVoxel: "ボクセルをアップロード",
     initializeVoxelData: "ボクセルデータを初期化",
+    listPageTitle: "すべてのボクセル素材",
+    searchPlaceholder: "ボクセルを検索...",
+    typeName: "ボクセル",
     viewVoxel: "ボクセルを表示",
     initializingModels: "ボクセルを初期化中...",
     initializingModelProgress:
@@ -87,6 +90,16 @@ export default {
   },
   polygen: {
     uploadPolygen: "モデルをアップロード",
+    listPageTitle: "すべてのモデル素材",
+    searchPlaceholder: "モデルを検索...",
+    emptyText: "モデルがありません",
+    detailsTitle: "モデル詳細",
+    downloadText: "モデルをダウンロード",
+    deleteText: "このモデルを削除",
+    resourceName: "モデル",
+    typeName: "モデル",
+    selectPageSuccess: "このページのモデル {count} 件をすべて選択しました",
+    cancelSelectPageSuccess: "このページの全選択を解除しました",
     initializePolygenData: "モデルデータを初期化",
     initializeAll: "モデルを一括初期化",
     initializingModels: "モデルを初期化中...",
@@ -249,6 +262,13 @@ export default {
   },
   video: {
     uploadVideo: "ビデオをアップロード",
+    listPageTitle: "すべての動画素材",
+    searchPlaceholder: "動画を検索...",
+    detailsTitle: "動画詳細",
+    downloadText: "動画をダウンロード",
+    deleteText: "この動画を削除",
+    resourceName: "動画",
+    typeName: "動画",
     initializeVideoData: "ビデオデータを初期化",
     viewVideo: "ビデオを表示",
     initializingModels: "ビデオを初期化中...",
@@ -393,6 +413,9 @@ export default {
   particle: {
     uploadParticle: "特效をアップロード",
     initializeParticleData: "特效データを初期化",
+    listPageTitle: "すべてのパーティクル素材",
+    searchPlaceholder: "パーティクルを検索...",
+    typeName: "パーティクル",
     viewParticle: "特效を表示",
     initializingModels: "特效を初期化中...",
     initializingModelProgress:

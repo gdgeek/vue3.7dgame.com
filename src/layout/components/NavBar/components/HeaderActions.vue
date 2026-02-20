@@ -2,13 +2,13 @@
   <div class="header-actions">
     <!-- Icon button group -->
     <div class="actions-group">
-      <button class="icon-btn" @click="toggleFullscreen" title="全屏">
+      <button class="icon-btn" @click="toggleFullscreen" :title="t('ui.fullscreen')">
         <font-awesome-icon :icon="['fas', isFullscreen ? 'compress' : 'expand']" />
       </button>
 
       <!-- 主题切换下拉菜单 -->
       <el-dropdown @command="handleThemeChange" trigger="click" class="theme-dropdown">
-        <button class="icon-btn" title="切换主题">
+        <button class="icon-btn" :title="t('ui.switchTheme')">
           <font-awesome-icon :icon="['fas', 'palette']" />
         </button>
         <template #dropdown>
@@ -31,7 +31,7 @@
       </el-dropdown>
 
       <el-dropdown @command="handleLanguageChange" trigger="click" class="language-dropdown">
-        <button class="icon-btn" title="语言">
+        <button class="icon-btn" :title="t('ui.language')">
           <font-awesome-icon :icon="['fas', 'language']" />
         </button>
         <template #dropdown>
@@ -58,7 +58,7 @@ import { useI18n } from "vue-i18n";
 import { useTheme } from "@/composables/useTheme";
 import { useFullscreen } from "@vueuse/core";
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 const { availableThemes, currentThemeName, setTheme } = useTheme();
 const { isFullscreen, toggle: toggleFullscreen } = useFullscreen();
 

@@ -182,8 +182,10 @@ const domainStore = useDomainStore(store);
 
 // 更新页面标题
 const updateTitle = (title: string) => {
-  const domain = domainStore.domain || window.location.hostname;
-  document.title = title ? `${translateRouteTitle(title)} - ${domain}` : domain;
+  const siteName = domainStore.title || "不加班AR创作平台";
+  document.title = title
+    ? `${translateRouteTitle(title)} - ${siteName}`
+    : siteName;
 };
 
 // 监听路由变化更新页面标题

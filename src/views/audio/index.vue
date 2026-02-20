@@ -1,7 +1,8 @@
 <template>
   <TransitionWrapper>
     <div class="audio-index">
-      <PageActionBar title="所有音频素材" search-placeholder="搜索音频..." :selection-count="selectedCount" @search="handleSearch"
+      <PageActionBar :title="t('route.resourceManagement.audioManagement.audioList')"
+        :search-placeholder="t('ui.search')" :selection-count="selectedCount" @search="handleSearch"
         @sort-change="handleSortChange" @view-change="handleViewChange" @batch-download="handleBatchDownload"
         @batch-delete="handleBatchDelete" @cancel-selection="handleCancelSelection">
         <template #actions>
@@ -15,7 +16,7 @@
       <ViewContainer :items="items" :view-mode="viewMode" :loading="loading"
         @row-click="(item) => openViewDialog(item.id)">
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.name || '未命名'"
+          <StandardCard :image="item.image?.url" :title="item.name || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" :selected="isSelected(item.id)"
             :selection-mode="hasSelection" type-icon="audiotrack" placeholder-icon="audiotrack"
             @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)"></StandardCard>
@@ -46,8 +47,8 @@
                   <el-dropdown-item @click="openViewDialog(item.id)">
                     {{ $t("audio.viewAudio") }}
                   </el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)">重命名</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => { })">删除</el-dropdown-item>
+                  <el-dropdown-item @click="namedWindow(item)">{{ t("verse.listPage.rename") }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item, () => { })">{{ t("common.delete") }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -65,9 +66,10 @@
       </StandardUploadDialog>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="viewDialogVisible" title="音频详情" :name="currentAudio?.name || ''" :loading="detailLoading"
-        :properties="detailProperties" placeholder-icon="headphones" download-text="下载音频" delete-text="删除此音频"
-        @download="handleDownload" @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
+      <DetailPanel v-model="viewDialogVisible" :title="t('audio.viewAudio')" :name="currentAudio?.name || ''"
+        :loading="detailLoading" :properties="detailProperties" placeholder-icon="headphones"
+        :download-text="t('ui.download')" :delete-text="t('ui.deleteResource')" @download="handleDownload"
+        @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
         <template #preview>
           <div class="audio-preview">
             <div class="audio-visual">
@@ -154,15 +156,14 @@ const detailProperties = computed(() => {
     ? JSON.parse(currentAudio.value.info)
     : null;
   const props = [
-    { label: "类型", value: "音频" },
-    { label: "大小", value: formatSize(currentAudio.value.file?.size) },
+    { label: t("verse.listPage.type"), value: t("route.resourceManagement.audioManagement.title") },
+    { label: t("ui.size"), value: formatSize(currentAudio.value.file?.size) },
     {
-      label: "创建时间",
+      label: t("verse.listPage.createdTime"),
       value: convertToLocalTime(currentAudio.value.created_at),
     },
   ];
-  if (info?.length)
-    props.push({ label: "时长", value: info.length.toFixed(2) + "s" });
+  if (info?.length) props.push({ label: t("video.view.info.item6"), value: info.length.toFixed(2) + "s" });
   return props;
 });
 
@@ -308,16 +309,16 @@ const deletedWindow = async (
 
 const handleBatchDownload = () => {
   const selected = getSelectedItems(items.value || []);
-  Message.info(`批量下载 ${selected.length} 个音频文件（功能开发中）`);
+  Message.info(t("ui.batchDownloadDev", { count: selected.length, resource: t("route.resourceManagement.audioManagement.title") }));
 };
 
 const handleBatchDelete = async () => {
   const selected = getSelectedItems(items.value || []);
   try {
     await MessageBox.confirm(
-      `确定要删除选中的 ${selected.length} 个音频吗？`,
-      "批量删除",
-      { confirmButtonText: "删除", cancelButtonText: "取消", type: "warning" }
+      t("ui.batchDeleteConfirm", { count: selected.length, resource: t("route.resourceManagement.audioManagement.title") }),
+      t("ui.batchDeleteTitle"),
+      { confirmButtonText: t("common.delete"), cancelButtonText: t("common.cancel"), type: "warning" }
     );
 
     for (const item of selected) {
@@ -326,9 +327,9 @@ const handleBatchDelete = async () => {
 
     clearSelection();
     refresh();
-    Message.success(`成功删除 ${selected.length} 个音频`);
+    Message.success(t("ui.batchDeleteSuccess", { count: selected.length, resource: t("route.resourceManagement.audioManagement.title") }));
   } catch {
-    Message.info("已取消删除");
+    Message.info(t("ui.cancelDelete"));
   }
 };
 

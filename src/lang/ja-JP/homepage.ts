@@ -11,6 +11,12 @@ export default {
       afternoon: "午後の挨拶、",
       evening: "こんばんは、",
     },
+    header: {
+      subtitle: "ARの無限の可能性を探求し、創造の旅を始めましょう。",
+    },
+    announcements: {
+      title: "お知らせ",
+    },
     myCreation: {
       title: "私の作品",
       myPolygen: "モデル",
@@ -21,6 +27,24 @@ export default {
       myLike: "いいね",
       enter: "入る",
       Iliked: "私がいいねしたもの",
+    },
+    quickStart: {
+      title: "クイックスタート",
+      upload: {
+        title: "素材をアップロード",
+        desc: "3Dモデルやマルチメディアファイルを個人ライブラリに取り込みます。",
+        action: "今すぐアップロード",
+      },
+      edit: {
+        title: "エンティティ編集",
+        desc: "インタラクティブなコンポーネントと挙動スクリプトを管理します。",
+        action: "今すぐ編集",
+      },
+      create: {
+        title: "シーン作成",
+        desc: "没入感のある新しいARインタラクティブ体験をゼロから構築します。",
+        action: "今すぐ作成",
+      },
     },
     edit: {
       title: "プロフィールを編集",

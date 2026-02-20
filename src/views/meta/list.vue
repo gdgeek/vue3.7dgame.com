@@ -1,8 +1,8 @@
 <template>
   <TransitionWrapper>
     <div class="meta-list">
-      <PageActionBar title="所有实体" search-placeholder="搜索实体..." @search="handleSearch" @sort-change="handleSortChange"
-        @view-change="handleViewChange">
+      <PageActionBar :title="t('meta.list.pageTitle')" :search-placeholder="t('meta.list.searchPlaceholder')"
+        @search="handleSearch" @sort-change="handleSortChange" @view-change="handleViewChange">
         <template #actions>
           <el-button type="primary" @click="addMeta">
             <font-awesome-icon :icon="['fas', 'plus']" style="font-size: 18px; margin-right: 4px" />
@@ -13,16 +13,16 @@
 
       <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.title || item.name || '未命名'" action-text="进入编辑器"
-            action-icon="edit" type-icon="token" placeholder-icon="extension" :show-checkbox="false"
-            @view="openDetail(item)" @action="goToEditor(item)"></StandardCard>
+          <StandardCard :image="item.image?.url" :title="item.title || item.name || t('meta.list.unnamed')"
+            :action-text="t('meta.list.enterEditor')" action-icon="edit" type-icon="token" placeholder-icon="extension"
+            :show-checkbox="false" @view="openDetail(item)" @action="goToEditor(item)"></StandardCard>
         </template>
 
         <template #list-header>
           <div class="col-checkbox"></div>
-          <div class="col-name">实体名称</div>
-          <div class="col-author">作者</div>
-          <div class="col-date">修改日期</div>
+          <div class="col-name">{{ t("meta.list.columns.name") }}</div>
+          <div class="col-author">{{ t("meta.list.columns.author") }}</div>
+          <div class="col-date">{{ t("meta.list.columns.updatedAt") }}</div>
           <div class="col-actions"></div>
         </template>
 
@@ -37,7 +37,7 @@
             </div>
             <span class="item-name">{{ item.title || item.name || "—" }}</span>
             <el-button class="btn-hover-action" type="primary" @click.stop="goToEditor(item)">
-              进入编辑器
+              {{ t("meta.list.enterEditor") }}
             </el-button>
           </div>
           <div class="col-author">
@@ -51,11 +51,11 @@
               <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon" />
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="openDetail(item)">查看详情</el-dropdown-item>
-                  <el-dropdown-item @click="goToEditor(item)">进入编辑器</el-dropdown-item>
-                  <el-dropdown-item @click="copyWindow(item)">复制</el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)">重命名</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => { })">删除</el-dropdown-item>
+                  <el-dropdown-item @click="openDetail(item)">{{ t("meta.list.viewDetail") }}</el-dropdown-item>
+                  <el-dropdown-item @click="goToEditor(item)">{{ t("meta.list.enterEditor") }}</el-dropdown-item>
+                  <el-dropdown-item @click="copyWindow(item)">{{ t("meta.copy") }}</el-dropdown-item>
+                  <el-dropdown-item @click="namedWindow(item)">{{ t("meta.list.rename") }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item, () => { })">{{ t("meta.delete") }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -63,7 +63,8 @@
         </template>
 
         <template #empty>
-          <EmptyState icon="category" text="暂无实体" action-text="新建实体" @action="addMeta"></EmptyState>
+          <EmptyState icon="category" :text="t('meta.list.emptyText')" :action-text="t('meta.list.createAction')"
+            @action="addMeta"></EmptyState>
         </template>
       </ViewContainer>
 
@@ -71,10 +72,11 @@
       </PagePagination>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="detailVisible" title="实体详情" :name="currentMeta?.title || ''" :loading="detailLoading"
-        :properties="detailProperties" placeholder-icon="category" :show-delete="true" :secondary-action="true"
-        secondary-action-text="进入编辑器" download-text="复制实体" delete-text="删除实体" action-layout="grid" width="560px"
-        @download="handleCopy" @rename="handleRename" @delete="handleDelete" @secondary="handleGoToEditor"
+      <DetailPanel v-model="detailVisible" :title="t('meta.list.detailTitle')" :name="currentMeta?.title || ''"
+        :loading="detailLoading" :properties="detailProperties" placeholder-icon="category" :show-delete="true"
+        :secondary-action="true" :secondary-action-text="t('meta.list.enterEditor')"
+        :download-text="t('meta.list.copyEntity')" :delete-text="t('meta.list.deleteEntity')" action-layout="grid"
+        width="560px" @download="handleCopy" @rename="handleRename" @delete="handleDelete" @secondary="handleGoToEditor"
         @close="handlePanelClose">
         <template #preview>
           <div class="meta-preview" @click="triggerFileSelect">
@@ -104,9 +106,7 @@
             {{ $t("meta.metaEdit.selectFromResource") }}
           </div>
           <div class="card-description">
-            {{
-              $t("imageSelector.selectFromResourceDesc") || "从我的资源库中选择"
-            }}
+            {{ $t("imageSelector.selectFromResourceDesc") }}
           </div>
         </div>
 
@@ -118,7 +118,7 @@
           </div>
           <div class="card-title">{{ $t("meta.metaEdit.uploadLocal") }}</div>
           <div class="card-description">
-            {{ $t("imageSelector.uploadLocalDesc") || "上传本地图片文件" }}
+            {{ $t("imageSelector.uploadLocalDesc") }}
           </div>
         </div>
       </div>
@@ -217,7 +217,7 @@ const onResourceSelected = async (data: any) => {
         finalImageId = response.data.image_id || response.data.file?.id;
       }
       await putMeta(String(currentMeta.value.id), { image_id: finalImageId });
-      Message.success("封面更新成功");
+      Message.success(t("meta.metaEdit.image.updateSuccess"));
       // Refresh details
       const response = await getMeta(currentMeta.value.id, {
         expand: "image,author",
@@ -226,7 +226,7 @@ const onResourceSelected = async (data: any) => {
       refresh();
     } catch (error) {
       console.error("Failed to update meta image:", error);
-      Message.error("封面更新失败");
+      Message.error(t("meta.metaEdit.image.updateError"));
     } finally {
       detailLoading.value = false;
     }
@@ -239,11 +239,11 @@ const handleCoverUpload = async (event: Event) => {
   if (!file) return;
 
   if (!file.type.startsWith("image/")) {
-    Message.error("请选择图片文件");
+    Message.error(t("meta.list.selectImageFile"));
     return;
   }
   if (file.size > 5 * 1024 * 1024) {
-    Message.error("图片大小不能超过 5MB");
+    Message.error(t("meta.list.imageTooLarge"));
     return;
   }
 
@@ -275,7 +275,7 @@ const handleCoverUpload = async (event: Event) => {
 
     if (currentMeta.value) {
       await putMeta(String(currentMeta.value.id), { image_id: imageId });
-      Message.success("封面更新成功");
+      Message.success(t("meta.metaEdit.image.updateSuccess"));
       const res = await getMeta(currentMeta.value.id, {
         expand: "image,author",
       });
@@ -284,7 +284,7 @@ const handleCoverUpload = async (event: Event) => {
     }
   } catch (error) {
     console.error("Upload failed", error);
-    Message.error("封面更新失败");
+    Message.error(t("meta.metaEdit.image.updateError"));
   } finally {
     detailLoading.value = false;
     target.value = "";
@@ -294,9 +294,9 @@ const handleCoverUpload = async (event: Event) => {
 const detailProperties = computed(() => {
   if (!currentMeta.value) return [];
   return [
-    { label: "类型", value: "实体" },
+    { label: t("meta.list.properties.type"), value: t("meta.list.properties.entity") },
     {
-      label: "作者",
+      label: t("meta.list.properties.author"),
       value:
         currentMeta.value.author?.nickname ||
         currentMeta.value.author?.username ||
@@ -324,7 +324,11 @@ const handlePanelClose = () => {
 };
 
 const goToEditor = (item: metaInfo) => {
-  const title = encodeURIComponent(`实体编辑【${item.title || "未命名"}】`);
+  const title = encodeURIComponent(
+    t("meta.list.editorTitle", {
+      name: item.title || t("meta.list.unnamed"),
+    })
+  );
   router.push({ path: "/meta/scene", query: { id: item.id, title } });
 };
 
@@ -343,7 +347,7 @@ const handleCopy = async () => {
       {
         confirmButtonText: t("meta.prompt.confirm"),
         cancelButtonText: t("meta.prompt.cancel"),
-        defaultValue: currentMeta.value.title + " - Copy",
+        defaultValue: `${currentMeta.value.title}${t("meta.list.copySuffix")}`,
       }
     )) as { value: string };
     await copy(currentMeta.value.id, value);
@@ -445,7 +449,7 @@ const copyWindow = async (item: metaInfo) => {
       {
         confirmButtonText: t("meta.prompt.confirm"),
         cancelButtonText: t("meta.prompt.cancel"),
-        defaultValue: item.title + " - Copy",
+        defaultValue: `${item.title}${t("meta.list.copySuffix")}`,
       }
     )) as { value: string };
     await copy(item.id, value);

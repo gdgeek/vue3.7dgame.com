@@ -1,7 +1,6 @@
 // login translations for zh-TW
 export default {
   login: {
-    appleLoginFail: "蘋果登錄失敗",
     title: "不加班AR創造平台",
     register: "平台註冊/登錄",
     h1: "歡迎！",
@@ -12,7 +11,7 @@ export default {
     login: "登錄",
     loginCode: "登錄碼",
     scanTip: "請使用手機掃描二維碼登錄",
-    download: "下載相關程序",
+    scanSubTip: "掃碼後自動註冊或登錄",
     rules: {
       username: {
         message1: "請輸入用戶名",
@@ -31,13 +30,15 @@ export default {
       },
     },
     success: "登錄成功",
-    usernameError: "用戶名錯誤",
-    passwordError: "密碼錯誤",
     error: "表單檢驗未通過",
     createAccount: "創建新賬號",
     repassword: "確認密碼",
     create: "創建",
     linkAccount: "綁定已有賬號",
+    agreementPrefix: "註冊或登入即表示您同意",
+    agreementAnd: "和",
+    termsOfService: "服務條款",
+    privacyPolicy: "隱私政策",
     logout: {
       message1: "確定註銷並退出系統嗎？",
       message2: "提示",
@@ -47,7 +48,12 @@ export default {
       text: "向服務器註銷此次登錄",
     },
     back: "返回",
+    abandonRegisterConfirm: "確認放棄註冊？",
+    abandonRegisterTitle: "警告",
+    abandonRegisterConfirmButton: "確認",
+    abandonRegisterCancelButton: "繼續註冊",
     loginResponseMissingToken: "登錄響應缺少 access_token",
+    qrcodeFetchFailed: "獲取微信二維碼失敗，請稍後再試",
   },
   passwordPolicy: {
     minLength: "至少 12 個字元",

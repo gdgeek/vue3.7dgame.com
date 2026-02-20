@@ -27,7 +27,7 @@
       <div class="thumbnail-overlay">
         <button class="overlay-btn" @click.stop="$emit('view')">
           <font-awesome-icon :icon="['fas', 'circle-info']" />
-          <span>查看信息</span>
+          <span>{{ t("ui.viewInfo") }}</span>
         </button>
       </div>
 
@@ -66,6 +66,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 interface CardMeta {
   author?: string;

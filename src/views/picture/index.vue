@@ -1,7 +1,8 @@
 <template>
   <TransitionWrapper>
     <div class="picture-index">
-      <PageActionBar title="所有图片素材" search-placeholder="搜索图片..." :selection-count="selectedCount" @search="handleSearch"
+      <PageActionBar :title="t('route.resourceManagement.pictureManagement.pictureList')"
+        :search-placeholder="t('ui.search')" :selection-count="selectedCount" @search="handleSearch"
         @sort-change="handleSortChange" @view-change="handleViewChange" @batch-download="handleBatchDownload"
         @batch-delete="handleBatchDelete" @cancel-selection="handleCancelSelection">
         <template #actions>
@@ -15,7 +16,7 @@
       <ViewContainer :items="items" :view-mode="viewMode" :loading="loading"
         @row-click="(item) => openViewDialog(item.id)">
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.name || '未命名'"
+          <StandardCard :image="item.image?.url" :title="item.name || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" placeholder-icon="image"
             :selected="isSelected(item.id)" :selection-mode="hasSelection" type-icon="image"
             @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)"></StandardCard>
@@ -46,8 +47,8 @@
                   <el-dropdown-item @click="openViewDialog(item.id)">
                     {{ $t("picture.viewPicture") }}
                   </el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)">重命名</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => { })">删除</el-dropdown-item>
+                  <el-dropdown-item @click="namedWindow(item)">{{ t("verse.listPage.rename") }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item, () => { })">{{ t("common.delete") }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -65,9 +66,10 @@
       </StandardUploadDialog>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="viewDialogVisible" title="图片详情" :name="currentPicture?.name || ''" :loading="detailLoading"
-        :properties="detailProperties" placeholder-icon="image" download-text="下载图片" delete-text="删除此图片"
-        @download="handleDownload" @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
+      <DetailPanel v-model="viewDialogVisible" :title="t('picture.viewPicture')" :name="currentPicture?.name || ''"
+        :loading="detailLoading" :properties="detailProperties" placeholder-icon="image"
+        :download-text="t('ui.download')" :delete-text="t('ui.deleteResource')" @download="handleDownload"
+        @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
         <template #preview>
           <img v-if="currentPicture?.file?.url" :src="currentPicture.file.url" :alt="currentPicture.name" />
         </template>
@@ -150,13 +152,13 @@ const detailProperties = computed(() => {
     ? JSON.parse(currentPicture.value.info)
     : null;
   return [
-    { label: "类型", value: "图片" },
-    { label: "大小", value: formatSize(currentPicture.value.file?.size) },
+    { label: t("verse.listPage.type"), value: t("route.resourceManagement.pictureManagement.title") },
+    { label: t("ui.size"), value: formatSize(currentPicture.value.file?.size) },
     {
-      label: "创建时间",
+      label: t("verse.listPage.createdTime"),
       value: convertToLocalTime(currentPicture.value.created_at),
     },
-    ...(info?.size ? [{ label: "尺寸", value: printVector2(info.size) }] : []),
+    ...(info?.size ? [{ label: t("picture.view.info.item5"), value: printVector2(info.size) }] : []),
   ];
 });
 
@@ -306,16 +308,16 @@ const deletedWindow = async (
 // Batch operations
 const handleBatchDownload = () => {
   const selected = getSelectedItems(items.value || []);
-  Message.info(`批量下载 ${selected.length} 个文件（功能开发中）`);
+  Message.info(t("ui.batchDownloadDev", { count: selected.length, resource: t("route.resourceManagement.pictureManagement.title") }));
 };
 
 const handleBatchDelete = async () => {
   const selected = getSelectedItems(items.value || []);
   try {
     await MessageBox.confirm(
-      `确定要删除选中的 ${selected.length} 个图片吗？`,
-      "批量删除",
-      { confirmButtonText: "删除", cancelButtonText: "取消", type: "warning" }
+      t("ui.batchDeleteConfirm", { count: selected.length, resource: t("route.resourceManagement.pictureManagement.title") }),
+      t("ui.batchDeleteTitle"),
+      { confirmButtonText: t("common.delete"), cancelButtonText: t("common.cancel"), type: "warning" }
     );
 
     for (const item of selected) {
@@ -324,9 +326,9 @@ const handleBatchDelete = async () => {
 
     clearSelection();
     refresh();
-    Message.success(`成功删除 ${selected.length} 个图片`);
+    Message.success(t("ui.batchDeleteSuccess", { count: selected.length, resource: t("route.resourceManagement.pictureManagement.title") }));
   } catch {
-    Message.info("已取消删除");
+    Message.info(t("ui.cancelDelete"));
   }
 };
 

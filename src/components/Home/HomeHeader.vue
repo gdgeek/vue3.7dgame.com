@@ -7,12 +7,7 @@
             {{ greeting }}<span class="home-username">{{ name }}</span>
           </h1>
           <p class="home-greeting-subtitle">
-            {{
-              t(
-                "homepage.header.subtitle",
-                "探索 AR 的无限可能，开启您的创意之旅。"
-              )
-            }}
+            {{ t("homepage.header.subtitle") }}
           </p>
         </div>
       </el-col>

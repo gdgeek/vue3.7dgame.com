@@ -1,7 +1,6 @@
 // 登录页面国际化
 export default {
   login: {
-    appleLoginFail: "苹果登录失败",
     title: "不加班AR创造平台",
     register: "平台注册/登录",
     h1: "欢迎！",
@@ -12,8 +11,7 @@ export default {
     login: "登录",
     loginCode: "登录码",
     scanTip: "请使用手机扫描二维码登录",
-    code: "验证码",
-    download: "下载相关程序",
+    scanSubTip: "扫码后自动注册或者登录",
     rules: {
       username: {
         message1: "请输入用户名",
@@ -32,13 +30,15 @@ export default {
       },
     },
     success: "登录成功",
-    usernameError: "用户名错误",
-    passwordError: "密码错误",
     error: "表单检验未通过",
     createAccount: "创建新账号",
     repassword: "确认密码",
     create: "创建",
     linkAccount: "绑定已有账号",
+    agreementPrefix: "注册或登录即表示您同意",
+    agreementAnd: "和",
+    termsOfService: "服务条款",
+    privacyPolicy: "隐私政策",
     logout: {
       message1: "确定注销并退出系统吗？",
       message2: "提示",
@@ -48,7 +48,12 @@ export default {
       text: "向服务器注销此次登录",
     },
     back: "返回",
+    abandonRegisterConfirm: "确认放弃注册？",
+    abandonRegisterTitle: "警告",
+    abandonRegisterConfirmButton: "确认",
+    abandonRegisterCancelButton: "继续注册",
     loginResponseMissingToken: "登录响应缺少 access_token",
+    qrcodeFetchFailed: "获取微信二维码失败，请稍后再试",
   },
   passwordPolicy: {
     minLength: "至少 12 个字符",

@@ -4,7 +4,7 @@
       <template #header>
         <div class="dialog-header-custom">
           <font-awesome-icon :icon="['fas', 'qrcode']" class="header-icon" />
-          <span class="header-title">{{ t("login.loginCode", "登录码") }}</span>
+          <span class="header-title">{{ t("login.loginCode") }}</span>
         </div>
       </template>
       <div class="qrcode-container">
@@ -13,8 +13,8 @@
             <qrcode-vue v-if="code !== ''" :value="code" :size="260" level="H" class="qrcode-img"></qrcode-vue>
           </div>
         </div>
-        <p class="qrcode-tip">请使用手机扫描二维码登录</p>
-        <p class="qrcode-subtip">打开不加班AR平台APP扫描二维码快速登录</p>
+        <p class="qrcode-tip">{{ t("login.scanTip") }}</p>
+        <p class="qrcode-subtip">{{ t("login.scanSubTip") }}</p>
       </div>
     </el-dialog>
   </div>

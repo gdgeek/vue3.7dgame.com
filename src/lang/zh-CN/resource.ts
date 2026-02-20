@@ -3,6 +3,9 @@ export default {
   // 体素管理国际化
   voxel: {
     uploadVoxel: "上传体素",
+    listPageTitle: "所有体素素材",
+    searchPlaceholder: "搜索体素...",
+    typeName: "体素",
     initializeVoxelData: "初始化体素数据",
     viewVoxel: "查看体素",
     initializingModels: "正在初始化体素...",
@@ -89,6 +92,16 @@ export default {
   // 模型管理国际化
   polygen: {
     uploadPolygen: "上传模型",
+    listPageTitle: "所有模型素材",
+    searchPlaceholder: "搜索模型...",
+    emptyText: "暂无模型",
+    detailsTitle: "模型详情",
+    downloadText: "下载模型",
+    deleteText: "删除此模型",
+    resourceName: "模型",
+    typeName: "模型",
+    selectPageSuccess: "已全选当前页 {count} 个模型",
+    cancelSelectPageSuccess: "已取消当前页全选",
     initializePolygenData: "初始化模型数据",
     initializeAll: "批量初始化模型",
     initializingModels: "正在初始化模型...",
@@ -253,6 +266,13 @@ export default {
   // 视频管理国际化
   video: {
     uploadVideo: "上传视频",
+    listPageTitle: "所有视频素材",
+    searchPlaceholder: "搜索视频...",
+    detailsTitle: "视频详情",
+    downloadText: "下载视频",
+    deleteText: "删除此视频",
+    resourceName: "视频",
+    typeName: "视频",
     initializeVideoData: "初始化视频数据",
     viewVideo: "查看视频",
     initializingModels: "正在初始化视频...",
@@ -398,6 +418,9 @@ export default {
   // 特效管理国际化
   particle: {
     uploadParticle: "上传特效",
+    listPageTitle: "所有粒子素材",
+    searchPlaceholder: "搜索粒子...",
+    typeName: "粒子",
     initializeParticleData: "初始化特效数据",
     viewParticle: "查看特效",
     initializingModels: "正在初始化特效...",

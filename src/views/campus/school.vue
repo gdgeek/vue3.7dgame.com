@@ -13,16 +13,16 @@
 
       <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.name" action-text="查看详情" action-icon="visibility"
-            type-icon="corporate_fare" placeholder-icon="school" :show-checkbox="false" @view="openDetail(item)"
-            @action="openDetail(item)"></StandardCard>
+          <StandardCard :image="item.image?.url" :title="item.name" :action-text="t('manager.ui.viewDetail')"
+            action-icon="visibility" type-icon="corporate_fare" placeholder-icon="school" :show-checkbox="false"
+            @view="openDetail(item)" @action="openDetail(item)"></StandardCard>
         </template>
 
         <template #list-header>
           <div class="col-checkbox"></div>
-          <div class="col-name">学校名称</div>
-          <div class="col-principal">校长</div>
-          <div class="col-date">创建日期</div>
+          <div class="col-name">{{ t("manager.ui.schoolName") }}</div>
+          <div class="col-principal">{{ t("manager.school.principal") }}</div>
+          <div class="col-date">{{ t("manager.ui.createdDate") }}</div>
           <div class="col-actions"></div>
         </template>
 
@@ -46,8 +46,8 @@
               <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon" />
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="openDetail(item)">查看详情</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item)">删除</el-dropdown-item>
+                  <el-dropdown-item @click="openDetail(item)">{{ t("manager.ui.viewDetail") }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item)">{{ t("common.delete") }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -55,8 +55,8 @@
         </template>
 
         <template #empty>
-          <EmptyState icon="school" :text="$t('manager.messages.noSchools') || '暂无学校'"
-            :action-text="$t('manager.createSchool')" @action="addSchool"></EmptyState>
+          <EmptyState icon="school" :text="$t('manager.ui.noSchools')" :action-text="$t('manager.createSchool')"
+            @action="addSchool"></EmptyState>
         </template>
       </ViewContainer>
 
@@ -64,9 +64,9 @@
       </PagePagination>
 
       <!-- Detail Panel (Read-only for now) -->
-      <DetailPanel v-model="detailVisible" title="学校详情" :name="currentSchool?.name || ''" :loading="detailLoading"
-        :properties="detailProperties" placeholder-icon="corporate_fare" :show-delete="true" delete-text="删除学校"
-        @delete="handleDelete" @close="handlePanelClose"></DetailPanel>
+      <DetailPanel v-model="detailVisible" :title="t('manager.ui.schoolDetail')" :name="currentSchool?.name || ''"
+        :loading="detailLoading" :properties="detailProperties" placeholder-icon="corporate_fare" :show-delete="true"
+        :delete-text="t('common.delete')" @delete="handleDelete" @close="handlePanelClose"></DetailPanel>
     </div>
   </TransitionWrapper>
 </template>
@@ -126,15 +126,15 @@ const currentSchool = ref<School | null>(null);
 const detailProperties = computed(() => {
   if (!currentSchool.value) return [];
   return [
-    { label: "学校名称", value: currentSchool.value.name },
+    { label: t("manager.ui.schoolName"), value: currentSchool.value.name },
     {
-      label: "校长",
+      label: t("manager.school.principal"),
       value:
         currentSchool.value.principal?.nickname ||
         currentSchool.value.principal?.username ||
         "—",
     },
-    { label: "地址", value: currentSchool.value.address || "—" },
+    { label: t("manager.school.address"), value: currentSchool.value.address || "—" },
   ];
 });
 
@@ -148,7 +148,7 @@ const handlePanelClose = () => {
 };
 
 const addSchool = () => {
-  Message.info("创建学校功能暂未开放（请使用原管理后台）");
+  Message.info(t("manager.ui.createSchoolPending"));
 };
 
 const handleDelete = async () => {

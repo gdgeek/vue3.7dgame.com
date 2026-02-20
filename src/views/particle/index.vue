@@ -1,8 +1,8 @@
 <template>
   <TransitionWrapper>
     <div class="particle-index">
-      <PageActionBar title="所有粒子素材" search-placeholder="搜索粒子..." @search="handleSearch" @sort-change="handleSortChange"
-        @view-change="handleViewChange">
+      <PageActionBar :title="t('particle.listPageTitle')" :search-placeholder="t('particle.searchPlaceholder')"
+        @search="handleSearch" @sort-change="handleSortChange" @view-change="handleViewChange">
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
             <font-awesome-icon :icon="['fas', 'upload']" style="font-size: 18px; margin-right: 4px" />
@@ -13,7 +13,8 @@
 
       <ViewContainer :items="items" :view-mode="viewMode" :loading="loading">
         <template #grid-card="{ item }">
-          <mr-p-p-card :item="item" type="粒子" color="#e67e22" @named="namedWindow" @deleted="deletedWindow">
+          <mr-p-p-card :item="item" :type="t('particle.typeName')" color="#e67e22" @named="namedWindow"
+            @deleted="deletedWindow">
             <template #enter>
               <router-link :to="`/resource/particle/view?id=${item.id}`">
                 <el-button v-if="item.info === null || item.image === null" type="warning" size="small">
@@ -48,8 +49,8 @@
                 <el-dropdown-menu>
                   <el-dropdown-item><router-link :to="`/resource/particle/view?id=${item.id}`">{{
                     $t("particle.viewParticle") }}</router-link></el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)">重命名</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => { })">删除</el-dropdown-item>
+                  <el-dropdown-item @click="namedWindow(item)">{{ t("common.edit") }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item, () => { })">{{ t("common.delete") }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>

@@ -1,11 +1,11 @@
 <template>
   <TransitionWrapper>
     <div class="polygen-index">
-      <PageActionBar title="所有模型素材" search-placeholder="搜索模型..." :selection-count="selectedCount"
-        :is-page-selected="isPageSelected" @search="handleSearch" @sort-change="handleSortChange"
-        @view-change="handleViewChange" @batch-download="handleBatchDownload" @batch-delete="handleBatchDelete"
-        @cancel-selection="handleCancelSelection" @select-all-page="handleSelectAllPage"
-        @cancel-select-all-page="handleCancelSelectAllPage">
+      <PageActionBar :title="t('polygen.listPageTitle')" :search-placeholder="t('polygen.searchPlaceholder')"
+        :selection-count="selectedCount" :is-page-selected="isPageSelected" @search="handleSearch"
+        @sort-change="handleSortChange" @view-change="handleViewChange" @batch-download="handleBatchDownload"
+        @batch-delete="handleBatchDelete" @cancel-selection="handleCancelSelection"
+        @select-all-page="handleSelectAllPage" @cancel-select-all-page="handleCancelSelectAllPage">
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
             <font-awesome-icon :icon="['fas', 'upload']" style="font-size: 18px; margin-right: 4px" />
@@ -17,7 +17,7 @@
       <ViewContainer :items="items" :view-mode="viewMode" :loading="loading"
         @row-click="(item) => openViewDialog(item.id)">
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.name || '未命名'"
+          <StandardCard :image="item.image?.url" :title="item.name || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" :selected="isSelected(item.id)"
             :selection-mode="hasSelection" type-icon="view_in_ar" placeholder-icon="view_in_ar"
             @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)"></StandardCard>
@@ -48,12 +48,8 @@
                   <el-dropdown-item @click="openViewDialog(item.id)">
                     {{ $t("polygen.viewPolygen") }}
                   </el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)">
-                    重命名
-                  </el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => { })">
-                    删除
-                  </el-dropdown-item>
+                  <el-dropdown-item @click="namedWindow(item)">{{ t("common.edit") }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item, () => { })">{{ t("common.delete") }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -61,7 +57,8 @@
         </template>
 
         <template #empty>
-          <EmptyState icon="view_in_ar" text="暂无模型" action-text="上传模型" @action="openUploadDialog"></EmptyState>
+          <EmptyState icon="view_in_ar" :text="t('polygen.emptyText')" :action-text="t('polygen.uploadPolygen')"
+            @action="openUploadDialog"></EmptyState>
         </template>
       </ViewContainer>
 
@@ -75,9 +72,10 @@
       </StandardUploadDialog>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="viewDialogVisible" title="模型详情" :name="currentPolygen?.name || ''" :loading="detailLoading"
-        :properties="detailProperties" placeholder-icon="view_in_ar" download-text="下载模型" delete-text="删除此模型"
-        @download="handleDownload" @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
+      <DetailPanel v-model="viewDialogVisible" :title="t('polygen.detailsTitle')" :name="currentPolygen?.name || ''"
+        :loading="detailLoading" :properties="detailProperties" placeholder-icon="view_in_ar"
+        :download-text="t('polygen.downloadText')" :delete-text="t('polygen.deleteText')" @download="handleDownload"
+        @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
         <template #preview>
           <div v-if="currentPolygen" class="polygen-preview" :class="{ 'has-animations': hasAnimations }">
             <polygen-view ref="polygenViewRef" :file="currentPolygen.file" @loaded="handleModelLoaded"
@@ -172,14 +170,14 @@ const isPageSelected = computed(() => {
 const handleSelectAllPage = () => {
   if (items.value && items.value.length > 0) {
     selectItems(items.value);
-    Message.success(`已全选当前页 ${items.value.length} 个模型`);
+    Message.success(t("polygen.selectPageSuccess", { count: items.value.length }));
   }
 };
 
 const handleCancelSelectAllPage = () => {
   if (items.value && items.value.length > 0) {
     deselectItems(items.value);
-    Message.success(`已取消当前页全选`);
+    Message.success(t("polygen.cancelSelectPageSuccess"));
   }
 };
 
@@ -201,17 +199,17 @@ const detailProperties = computed(() => {
     ? JSON.parse(currentPolygen.value.info)
     : null;
   return [
-    { label: "类型", value: "模型" },
-    { label: "大小", value: formatSize(currentPolygen.value.file?.size || 0) },
+    { label: t("ui.type"), value: t("polygen.typeName") },
+    { label: t("ui.size"), value: formatSize(currentPolygen.value.file?.size || 0) },
     {
-      label: "创建时间",
+      label: t("ui.createdAt"),
       value: convertToLocalTime(currentPolygen.value.created_at),
     },
     ...(info?.size
-      ? [{ label: "尺寸", value: printVector3(info.size) + " （m）" }]
+      ? [{ label: t("ui.dimensions"), value: printVector3(info.size) + " (m)" }]
       : []),
     ...(info?.faces
-      ? [{ label: "模型面数", value: info.faces.toLocaleString() }]
+      ? [{ label: t("ui.modelFaces"), value: info.faces.toLocaleString() }]
       : []),
   ];
 });
@@ -298,7 +296,7 @@ const handleRename = async (newName: string) => {
 const handleDelete = async () => {
   if (!currentPolygen.value) return;
   try {
-    await ElMessageBox.confirm(
+    await MessageBox.confirm(
       t("polygen.confirm.message1"),
       t("polygen.confirm.message2"),
       {
@@ -386,16 +384,28 @@ const deletedWindow = async (
 
 const handleBatchDownload = () => {
   const selected = getSelectedItems(items.value || []);
-  Message.info(`批量下载 ${selected.length} 个模型文件（功能开发中）`);
+  Message.info(
+    t("ui.batchDownloadDev", {
+      count: selected.length,
+      resource: t("polygen.resourceName"),
+    })
+  );
 };
 
 const handleBatchDelete = async () => {
   const selected = getSelectedItems(items.value || []);
   try {
     await MessageBox.confirm(
-      `确定要删除选中的 ${selected.length} 个模型吗？`,
-      "批量删除",
-      { confirmButtonText: "删除", cancelButtonText: "取消", type: "warning" }
+      t("ui.batchDeleteConfirm", {
+        count: selected.length,
+        resource: t("polygen.resourceName"),
+      }),
+      t("ui.batchDeleteTitle"),
+      {
+        confirmButtonText: t("common.delete"),
+        cancelButtonText: t("common.cancel"),
+        type: "warning",
+      }
     );
 
     for (const item of selected) {
@@ -404,9 +414,14 @@ const handleBatchDelete = async () => {
 
     clearSelection();
     refresh();
-    Message.success(`成功删除 ${selected.length} 个模型`);
+    Message.success(
+      t("ui.batchDeleteSuccess", {
+        count: selected.length,
+        resource: t("polygen.resourceName"),
+      })
+    );
   } catch {
-    Message.info("已取消删除");
+    Message.info(t("ui.cancelDelete"));
   }
 };
 

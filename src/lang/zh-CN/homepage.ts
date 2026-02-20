@@ -11,6 +11,12 @@ export default {
       afternoon: "下午好，",
       evening: "晚上好，",
     },
+    header: {
+      subtitle: "探索 AR 的无限可能，开启您的创意之旅。",
+    },
+    announcements: {
+      title: "平台公告",
+    },
     myCreation: {
       title: "我的创作",
       myPolygen: "模型",
@@ -21,6 +27,24 @@ export default {
       myLike: "点赞",
       enter: "进入",
       Iliked: "我点赞的",
+    },
+    quickStart: {
+      title: "快速开始",
+      upload: {
+        title: "上传素材",
+        desc: "导入 3D 模型或多媒体文件到您的个人库中。",
+        action: "立即上传",
+      },
+      edit: {
+        title: "编辑实体",
+        desc: "管理交互式组件和行为脚本，赋予 AR 资产生命力。",
+        action: "立即编辑",
+      },
+      create: {
+        title: "创建场景",
+        desc: "从零开始构建一个全新的沉浸式 AR 互动体验。",
+        action: "立即创建",
+      },
     },
     edit: {
       title: "编辑个人资料",

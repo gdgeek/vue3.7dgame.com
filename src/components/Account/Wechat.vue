@@ -4,10 +4,10 @@
       <el-icon class="wechat-icon">
         <ChatRound></ChatRound>
       </el-icon>
-      <span>微信扫码注册/登录</span>
+      <span>{{ t("login.register") }}</span>
     </el-button>
 
-    <el-dialog v-model="dialogVisible" title="微信扫码注册/登录" width="340px" class="qrcode-dialog"
+    <el-dialog v-model="dialogVisible" :title="t('login.register')" width="340px" class="qrcode-dialog"
       :class="{ 'dark-theme': isDark }" :show-close="true" align-center @close="close">
       <div class="qrcode-container">
         <div class="qrcode-wrapper">
@@ -20,13 +20,13 @@
         </div>
 
         <div class="qrcode-tips">
-          <p class="main-tip">打开微信，扫一扫注册/登录</p>
-          <p class="sub-tip">扫码后自动注册或者登录</p>
+          <p class="main-tip">{{ t("login.scanTip") }}</p>
+          <p class="sub-tip">{{ t("login.scanSubTip") }}</p>
         </div>
 
         <div class="loading-status" v-if="isScanning">
           <el-progress type="circle" :percentage="scanProgress" :width="36" :stroke-width="4"></el-progress>
-          <span class="scanning-text">扫码中，请稍候...</span>
+          <span class="scanning-text">{{ t("ui.preparing") }}</span>
         </div>
       </div>
     </el-dialog>
@@ -40,6 +40,9 @@ import { getQrcode, refresh } from "@/api/auth/wechat";
 import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useRouter, LocationQuery, useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const url = ref("");
 const route = useRoute();
@@ -148,7 +151,7 @@ const login = async function () {
     intervalId = setInterval(fetchRefresh, 3000);
   } catch (error) {
     console.error("获取微信二维码失败:", error);
-    ElMessage.error("获取微信二维码失败，请稍后再试");
+    ElMessage.error(t("login.qrcodeFetchFailed"));
   }
 };
 </script>

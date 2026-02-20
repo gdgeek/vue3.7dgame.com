@@ -7,59 +7,82 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 const route = useRoute();
+const { t } = useI18n();
 
 const breadcrumbText = computed(() => {
   const path = route.path;
 
-  // 直接映射路径到完整面包屑
-  const breadcrumbMap: Record<string, string> = {
-    // 主页
-    "/home": "工作台 / 主页",
-    "/home/index": "工作台 / 主页",
+  const breadcrumbMap: Record<string, string[]> = {
+    "/home": ["breadcrumb.workspace", "sidebar.home"],
+    "/home/index": ["breadcrumb.workspace", "sidebar.home"],
 
-    // 素材库
-    "/resource": "工作台 / 素材库",
-    "/resource/polygen/index": "工作台 / 素材库 / 模型",
-    "/resource/picture/index": "工作台 / 素材库 / 图片",
-    "/resource/audio/index": "工作台 / 素材库 / 音频",
-    "/resource/video/index": "工作台 / 素材库 / 视频",
+    "/resource": ["breadcrumb.workspace", "sidebar.resources"],
+    "/resource/polygen/index": [
+      "breadcrumb.workspace",
+      "sidebar.resources",
+      "sidebar.model",
+    ],
+    "/resource/picture/index": [
+      "breadcrumb.workspace",
+      "sidebar.resources",
+      "sidebar.picture",
+    ],
+    "/resource/audio/index": [
+      "breadcrumb.workspace",
+      "sidebar.resources",
+      "sidebar.audio",
+    ],
+    "/resource/video/index": [
+      "breadcrumb.workspace",
+      "sidebar.resources",
+      "sidebar.video",
+    ],
 
-    // 实体
-    "/meta/list": "工作台 / 实体",
-    "/meta/phototype/index": "工作台 / 实体",
+    "/meta/list": ["breadcrumb.workspace", "sidebar.entity"],
+    "/meta/phototype/index": ["breadcrumb.workspace", "sidebar.entity"],
 
-    // 场景
-    "/verse": "工作台 / 场景",
-    "/verse/index": "工作台 / 场景 / 我的场景",
-    "/verse/public": "工作台 / 场景 / 场景示例",
+    "/verse": ["breadcrumb.workspace", "sidebar.scene"],
+    "/verse/index": [
+      "breadcrumb.workspace",
+      "sidebar.scene",
+      "sidebar.selfCreated",
+    ],
+    "/verse/public": [
+      "breadcrumb.workspace",
+      "sidebar.scene",
+      "sidebar.systemRecommend",
+    ],
 
-    // 帮助中心
-    "/help": "支持 / 帮助中心",
-    "/help/index": "支持 / 帮助中心",
-    "/help/videos": "支持 / 帮助中心 / 视频教程",
+    "/help": ["breadcrumb.support", "breadcrumb.helpCenter"],
+    "/help/index": ["breadcrumb.support", "breadcrumb.helpCenter"],
+    "/help/videos": [
+      "breadcrumb.support",
+      "breadcrumb.helpCenter",
+      "breadcrumb.videoTutorial",
+    ],
 
-    // 设置
-    "/settings": "设置",
-    "/settings/edit": "设置 / 个人资料",
-    "/settings/account": "设置 / 账号安全",
+    "/settings": ["breadcrumb.settings"],
+    "/settings/edit": ["breadcrumb.settings", "breadcrumb.profile"],
+    "/settings/account": [
+      "breadcrumb.settings",
+      "breadcrumb.accountSecurity",
+    ],
   };
 
-  // 精确匹配
   if (breadcrumbMap[path]) {
-    return breadcrumbMap[path];
+    return breadcrumbMap[path].map((key) => t(key)).join(" / ");
   }
 
-  // 前缀匹配（处理动态路由）
   for (const [key, value] of Object.entries(breadcrumbMap)) {
     if (path.startsWith(key + "/") || path.startsWith(key + "?")) {
-      return value;
+      return value.map((item) => t(item)).join(" / ");
     }
   }
 
-  // 默认返回工作台
-  return "工作台";
+  return t("breadcrumb.workspace");
 });
 </script>
 

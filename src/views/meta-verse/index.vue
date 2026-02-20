@@ -1,8 +1,8 @@
 <template>
   <TransitionWrapper>
     <div class="verse-index">
-      <PageActionBar title="我的场景" search-placeholder="搜索场景..." :show-tags="true" @search="handleSearch"
-        @sort-change="handleSortChange" @view-change="handleViewChange">
+      <PageActionBar :title="t('verse.listPage.myScenes')" :search-placeholder="t('verse.listPage.searchScenes')"
+        :show-tags="true" @search="handleSearch" @sort-change="handleSortChange" @view-change="handleViewChange">
         <template #filters>
           <TagsSelect @tags-change="handleTagsChange"></TagsSelect>
         </template>
@@ -13,25 +13,27 @@
           </el-button>
           <el-button @click="openImportDialog">
             <font-awesome-icon :icon="['fas', 'upload']" style="font-size: 18px; margin-right: 4px" />
-            导入场景
+            {{ t("ui.importScene") }}
           </el-button>
         </template>
       </PageActionBar>
 
       <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.name || '未命名'" :description="item.description" :meta="{
-            author: item.author?.nickname || item.author?.username,
-            date: formatItemDate(item.created_at),
-          }" action-text="进入编辑器" action-icon="edit" type-icon="layers" placeholder-icon="landscape"
-            :show-checkbox="false" @view="openDetail(item)" @action="goToEditor(item)"></StandardCard>
+          <StandardCard :image="item.image?.url" :title="item.name || t('verse.listPage.unnamed')"
+            :description="item.description" :meta="{
+              author: item.author?.nickname || item.author?.username,
+              date: formatItemDate(item.created_at),
+            }" :action-text="t('verse.listPage.enterEditor')" action-icon="edit" type-icon="layers"
+            placeholder-icon="landscape" :show-checkbox="false" @view="openDetail(item)" @action="goToEditor(item)">
+          </StandardCard>
         </template>
 
         <template #list-header>
           <div class="col-checkbox"></div>
-          <div class="col-name">场景名称</div>
-          <div class="col-author">作者</div>
-          <div class="col-date">修改日期</div>
+          <div class="col-name">{{ t("verse.listPage.sceneName") }}</div>
+          <div class="col-author">{{ t("verse.listPage.author") }}</div>
+          <div class="col-date">{{ t("verse.listPage.modifiedDate") }}</div>
           <div class="col-actions"></div>
         </template>
 
@@ -46,7 +48,7 @@
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
             <el-button class="btn-hover-action" type="primary" @click.stop="goToEditor(item)">
-              进入编辑器
+              {{ t("verse.listPage.enterEditor") }}
             </el-button>
           </div>
           <div class="col-author">
@@ -58,10 +60,10 @@
               <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon" />
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="openDetail(item)">查看详情</el-dropdown-item>
-                  <el-dropdown-item @click="goToEditor(item)">进入编辑器</el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)">重命名</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item)">删除</el-dropdown-item>
+                  <el-dropdown-item @click="openDetail(item)">{{ t("verse.listPage.viewDetail") }}</el-dropdown-item>
+                  <el-dropdown-item @click="goToEditor(item)">{{ t("verse.listPage.enterEditor") }}</el-dropdown-item>
+                  <el-dropdown-item @click="namedWindow(item)">{{ t("verse.listPage.rename") }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item)">{{ t("verse.listPage.delete") }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -77,11 +79,12 @@
         :dialog-submit="$t('verse.page.dialogSubmit')" @submit="submitCreate"></create>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="detailVisible" title="场景详情" :name="currentVerse?.name || ''" :loading="detailLoading"
-        :properties="detailProperties" placeholder-icon="landscape" width="560px" :show-delete="true"
-        action-layout="grid" :secondary-action="true" secondary-action-text="进入编辑器" download-text="导出场景"
-        download-icon="download" delete-text="删除场景" @download="handleExport" @rename="handleRename"
-        @delete="handleDelete" @secondary="handleGoToEditor" @close="handlePanelClose">
+      <DetailPanel v-model="detailVisible" :title="t('verse.listPage.detailTitle')" :name="currentVerse?.name || ''"
+        :loading="detailLoading" :properties="detailProperties" placeholder-icon="landscape" width="560px"
+        :show-delete="true" action-layout="grid" :secondary-action="true"
+        :secondary-action-text="t('verse.listPage.enterEditor')" :download-text="t('ui.exportScene')"
+        download-icon="download" :delete-text="t('verse.listPage.deleteScene')" @download="handleExport"
+        @rename="handleRename" @delete="handleDelete" @secondary="handleGoToEditor" @close="handlePanelClose">
         <template #preview>
           <div class="verse-preview" @click="triggerFileSelect">
             <img v-if="currentVerse?.image?.url" :src="currentVerse.image.url" :alt="currentVerse.name" />
@@ -97,22 +100,22 @@
           <div class="verse-detail-info">
             <!-- DescriptionSection -->
             <div class="info-section">
-              <div class="section-header">场景简介</div>
-              <el-input v-model="editingDescription" type="textarea" :rows="4" placeholder="请输入场景简介（可选）"
-                @blur="handleDescriptionBlur"></el-input>
+              <div class="section-header">{{ t("verse.listPage.sceneIntro") }}</div>
+              <el-input v-model="editingDescription" type="textarea" :rows="4"
+                :placeholder="t('verse.listPage.sceneIntroPlaceholder')" @blur="handleDescriptionBlur"></el-input>
             </div>
 
             <!-- Tags Section (Restricted) -->
             <div v-if="canManage" class="info-section">
-              <div class="section-header">场景标签</div>
+              <div class="section-header">{{ t("verse.listPage.sceneTags") }}</div>
               <div v-if="currentVerse?.verseTags?.length" class="tag-list">
                 <el-tag v-for="tag in currentVerse.verseTags" :key="tag.id" closable class="mr-2 mb-2"
                   @close="handleRemoveTag(tag.id)">
                   {{ tag.name }}
                 </el-tag>
               </div>
-              <div v-else class="empty-tags">暂无标签</div>
-              <el-select v-model="selectedTag" placeholder="添加标签..." filterable class="tag-select"
+              <div v-else class="empty-tags">{{ t("verse.listPage.noTags") }}</div>
+              <el-select v-model="selectedTag" :placeholder="t('verse.listPage.addTag')" filterable class="tag-select"
                 @change="handleAddTag">
                 <el-option v-for="tag in allTags" :key="tag.value" :label="tag.label" :value="tag.value"
                   :disabled="isTagSelected(tag.value)"></el-option>
@@ -121,16 +124,16 @@
 
             <!-- Visibility Section (Restricted) -->
             <div v-if="canManage" class="info-section">
-              <div class="section-header">可见性</div>
+              <div class="section-header">{{ t("verse.listPage.visibility") }}</div>
               <div class="visibility-group">
                 <button class="vis-btn" :class="{ active: !currentVerse?.public }"
                   @click="handleVisibilityChange(false)">
                   <font-awesome-icon :icon="['fas', 'lock']" />
-                  私有
+                  {{ t("verse.listPage.private") }}
                 </button>
                 <button class="vis-btn" :class="{ active: currentVerse?.public }" @click="handleVisibilityChange(true)">
                   <font-awesome-icon :icon="['fas', 'globe']" />
-                  公开
+                  {{ t("verse.listPage.public") }}
                 </button>
               </div>
             </div>
@@ -154,9 +157,7 @@
           {{ $t("meta.metaEdit.selectFromResource") }}
         </div>
         <div class="card-description">
-          {{
-            $t("imageSelector.selectFromResourceDesc") || "从我的资源库中选择"
-          }}
+          {{ $t("imageSelector.selectFromResourceDesc") }}
         </div>
       </div>
 
@@ -168,7 +169,7 @@
         </div>
         <div class="card-title">{{ $t("meta.metaEdit.uploadLocal") }}</div>
         <div class="card-description">
-          {{ $t("imageSelector.uploadLocalDesc") || "上传本地图片文件" }}
+          {{ $t("imageSelector.uploadLocalDesc") }}
         </div>
       </div>
     </div>
@@ -281,21 +282,21 @@ const openImportDialog = () => {
 const handleImportSuccess = (verseId: number) => {
   importDialogVisible.value = false;
   refresh();
-  Message.success("场景导入成功");
+  Message.success(t("verse.listPage.importSuccess"));
 };
 const detailProperties = computed(() => {
   if (!currentVerse.value) return [];
   return [
-    { label: "类型", value: "场景" },
+    { label: t("verse.listPage.type"), value: t("verse.listPage.scene") },
     {
-      label: "作者",
+      label: t("verse.listPage.author"),
       value:
         currentVerse.value.author?.nickname ||
         currentVerse.value.author?.username ||
         "—",
     },
     {
-      label: "创建时间",
+      label: t("verse.listPage.createdTime"),
       value: currentVerse.value.created_at
         ? convertToLocalTime(currentVerse.value.created_at)
         : "—",
@@ -338,11 +339,11 @@ const onResourceSelected = async (data: any) => {
       }
 
       await putVerse(currentVerse.value.id, { image_id: finalImageId });
-      Message.success("封面更新成功");
+      Message.success(t("verse.view.image.updateSuccess"));
       await openDetail(currentVerse.value);
     } catch (error) {
       console.error("Failed to update verse image:", error);
-      Message.error("封面更新失败");
+      Message.error(t("verse.view.image.updateError"));
     } finally {
       detailLoading.value = false;
     }
@@ -356,11 +357,11 @@ const handleCoverUpload = async (event: Event) => {
 
   // Simple validation
   if (!file.type.startsWith("image/")) {
-    Message.error("请选择图片文件");
+    Message.error(t("verse.listPage.selectImageFile"));
     return;
   }
   if (file.size > 5 * 1024 * 1024) {
-    Message.error("图片大小不能超过 5MB");
+    Message.error(t("verse.listPage.imageTooLarge"));
     return;
   }
 
@@ -405,13 +406,13 @@ const handleCoverUpload = async (event: Event) => {
     // 5. Update Verse
     if (currentVerse.value) {
       await putVerse(currentVerse.value.id, { image_id: imageId });
-      Message.success("封面更新成功");
+      Message.success(t("verse.view.image.updateSuccess"));
       // Refresh details
       await openDetail(currentVerse.value);
     }
   } catch (error) {
     console.error("Upload failed", error);
-    Message.error("封面更新失败");
+    Message.error(t("verse.view.image.updateError"));
   } finally {
     detailLoading.value = false;
     // Reset input
@@ -454,10 +455,10 @@ const handleDescriptionBlur = async () => {
       description: editingDescription.value,
     });
     currentVerse.value.description = editingDescription.value;
-    Message.success("简介已更新");
+    Message.success(t("verse.listPage.descriptionUpdated"));
     refresh();
   } catch (err) {
-    Message.error("更新简介失败");
+    Message.error(t("verse.listPage.descriptionUpdateFailed"));
     editingDescription.value = currentVerse.value.description || "";
   }
 };
@@ -476,10 +477,10 @@ const handleAddTag = async (tagId: number | undefined) => {
       currentVerse.value.verseTags.push({ id: tag.value, name: tag.label });
     }
     selectedTag.value = undefined;
-    Message.success("标签已添加");
+    Message.success(t("verse.listPage.tagAdded"));
     refresh();
   } catch (err) {
-    Message.error("添加标签失败");
+    Message.error(t("verse.listPage.tagAddFailed"));
   }
 };
 
@@ -490,10 +491,10 @@ const handleRemoveTag = async (tagId: number) => {
     currentVerse.value.verseTags = currentVerse.value.verseTags.filter(
       (t: any) => t.id !== tagId
     );
-    Message.success("标签已移除");
+    Message.success(t("verse.listPage.tagRemoved"));
     refresh();
   } catch (err) {
-    Message.error("移除标签失败");
+    Message.error(t("verse.listPage.tagRemoveFailed"));
   }
 };
 
@@ -507,10 +508,12 @@ const handleVisibilityChange = async (isPublic: boolean) => {
       await removePublic(currentVerse.value.id);
     }
     currentVerse.value.public = isPublic;
-    Message.success(`场景已设为${isPublic ? "公开" : "私有"}`);
+    Message.success(
+      isPublic ? t("verse.view.public.addSuccess") : t("verse.view.public.removeSuccess")
+    );
     refresh();
   } catch (err) {
-    Message.error("更新可见性失败");
+    Message.error(t("verse.listPage.visibilityUpdateFailed"));
   }
 };
 
@@ -519,7 +522,11 @@ const handlePanelClose = () => {
 };
 
 const goToEditor = (item: VerseData) => {
-  const title = encodeURIComponent(`场景【${item.name || "未命名"}】`);
+  const title = encodeURIComponent(
+    t("verse.listPage.editorTitle", {
+      name: item.name || t("verse.listPage.unnamed"),
+    })
+  );
   router.push({ path: "/verse/scene", query: { id: item.id, title } });
 };
 
@@ -532,11 +539,15 @@ const handleGoToEditor = () => {
 const handleCopy = async () => {
   if (!currentVerse.value) return;
   try {
-    const { value } = (await MessageBox.prompt("请输入新场景名称", "复制场景", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      defaultValue: currentVerse.value.name + " - Copy",
-    })) as { value: string };
+    const { value } = (await MessageBox.prompt(
+      t("verse.listPage.copyPromptMessage"),
+      t("verse.listPage.copyPromptTitle"),
+      {
+        confirmButtonText: t("common.confirm"),
+        cancelButtonText: t("common.cancel"),
+        defaultValue: `${currentVerse.value.name}${t("verse.listPage.copySuffix")}`,
+      }
+    )) as { value: string };
 
     const data: PostVerseData = {
       name: value,
@@ -546,9 +557,9 @@ const handleCopy = async () => {
     };
     await postVerse(data);
     refresh();
-    Message.success("复制成功：" + value);
+    Message.success(t("verse.listPage.copySuccess") + value);
   } catch {
-    Message.info("已取消");
+    Message.info(t("verse.listPage.cancelInfo"));
   }
 };
 
@@ -556,10 +567,10 @@ const handleExport = async () => {
   if (!currentVerse.value) return;
   try {
     await exportScene(currentVerse.value.id);
-    Message.success("导出成功");
+    Message.success(t("ui.exportSuccess"));
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "未知错误";
-    Message.error(`导出失败：${message}`);
+    const message = err instanceof Error ? err.message : t("ui.unknownError");
+    Message.error(t("ui.exportFailed", { message }));
   }
 };
 
@@ -569,7 +580,7 @@ const handleRename = async (newName: string) => {
     await putVerse(currentVerse.value.id, { name: newName });
     currentVerse.value.name = newName;
     refresh();
-    Message.success("重命名成功：" + newName);
+    Message.success(t("verse.listPage.renameSuccess") + newName);
   } catch (err) {
     Message.error(String(err));
   }
@@ -578,17 +589,17 @@ const handleRename = async (newName: string) => {
 const handleDelete = async () => {
   if (!currentVerse.value) return;
   try {
-    await MessageBox.confirm("确定要删除此场景吗？", "删除场景", {
-      confirmButtonText: "删除",
-      cancelButtonText: "取消",
+    await MessageBox.confirm(t("verse.listPage.deleteConfirmMessage"), t("verse.listPage.deleteConfirmTitle"), {
+      confirmButtonText: t("verse.listPage.delete"),
+      cancelButtonText: t("common.cancel"),
       type: "warning",
     });
     await deleteVerse(currentVerse.value.id);
     detailVisible.value = false;
     refresh();
-    Message.success("删除成功");
+    Message.success(t("common.deleteSuccess"));
   } catch {
-    Message.info("已取消");
+    Message.info(t("verse.listPage.cancelInfo"));
   }
 };
 
@@ -608,7 +619,7 @@ const submitCreate = async (
   if (imageId !== null) data.image_id = imageId;
   try {
     const response = await postVerse(data);
-    const title = encodeURIComponent(`场景【${form.name}】`);
+    const title = encodeURIComponent(t("verse.listPage.editorTitle", { name: form.name }));
     router.push({
       path: "/verse/scene",
       query: { id: response.data.id, title },
@@ -620,31 +631,31 @@ const submitCreate = async (
 
 const namedWindow = async (item: VerseData) => {
   try {
-    const { value } = (await MessageBox.prompt("请输入新名称", "重命名", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
+    const { value } = (await MessageBox.prompt(t("meta.prompt2.message1"), t("meta.prompt2.message2"), {
+      confirmButtonText: t("common.confirm"),
+      cancelButtonText: t("common.cancel"),
       defaultValue: item.name,
     })) as { value: string };
     await putVerse(item.id, { name: value });
     refresh();
-    Message.success("重命名成功：" + value);
+    Message.success(t("verse.listPage.renameSuccess") + value);
   } catch {
-    Message.info("已取消");
+    Message.info(t("verse.listPage.cancelInfo"));
   }
 };
 
 const deletedWindow = async (item: VerseData) => {
   try {
-    await MessageBox.confirm("确定要删除此场景吗？", "删除场景", {
-      confirmButtonText: "删除",
-      cancelButtonText: "取消",
+    await MessageBox.confirm(t("verse.listPage.deleteConfirmMessage"), t("verse.listPage.deleteConfirmTitle"), {
+      confirmButtonText: t("verse.listPage.delete"),
+      cancelButtonText: t("common.cancel"),
       type: "warning",
     });
     await deleteVerse(item.id);
     refresh();
-    Message.success("删除成功");
+    Message.success(t("common.deleteSuccess"));
   } catch {
-    Message.info("已取消");
+    Message.info(t("verse.listPage.cancelInfo"));
   }
 };
 

@@ -5,16 +5,16 @@
       <div class="hero-header">
         <div class="header-main">
           <div class="title-section">
-            <h1 class="hero-title">场景示例</h1>
+            <h1 class="hero-title">{{ t("verse.publicPage.examplesTitle") }}</h1>
             <p class="hero-subtitle">
-              从我们精心设计的示例开始，快速启动您的下一个 AR 项目。
+              {{ t("verse.publicPage.examplesSubtitle") }}
             </p>
           </div>
           <div class="search-section">
             <div class="hero-search-box">
               <font-awesome-icon :icon="['fas', 'search']" class="search-icon" />
-              <input v-model="searchValue" type="text" class="hero-search-input" placeholder="搜索示例..."
-                @keyup.enter="handleHeroSearch" />
+              <input v-model="searchValue" type="text" class="hero-search-input"
+                :placeholder="t('verse.publicPage.searchExamples')" @keyup.enter="handleHeroSearch" />
             </div>
           </div>
         </div>
@@ -30,19 +30,21 @@
       <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading"
         :breakpoints="cardBreakpoints" @row-click="openDetail">
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.name || '未命名'" :description="item.description" :meta="{
-            author: item.author?.nickname || item.author?.username,
-            date: formatItemDate(item.created_at),
-          }" action-text="查看此示例" action-icon="visibility" type-icon="layers" placeholder-icon="landscape"
-            :show-checkbox="false" aspect-ratio="1.6 / 1" @view="openDetail(item)" @action="goToScene(item)">
+          <StandardCard :image="item.image?.url" :title="item.name || t('verse.listPage.unnamed')"
+            :description="item.description" :meta="{
+              author: item.author?.nickname || item.author?.username,
+              date: formatItemDate(item.created_at),
+            }" :action-text="t('verse.publicPage.viewExample')" action-icon="visibility" type-icon="layers"
+            placeholder-icon="landscape" :show-checkbox="false" aspect-ratio="1.6 / 1" @view="openDetail(item)"
+            @action="goToScene(item)">
           </StandardCard>
         </template>
 
         <template #list-header>
           <div class="col-checkbox"></div>
-          <div class="col-name">场景名称</div>
-          <div class="col-author">作者</div>
-          <div class="col-date">修改日期</div>
+          <div class="col-name">{{ t("verse.listPage.sceneName") }}</div>
+          <div class="col-author">{{ t("verse.listPage.author") }}</div>
+          <div class="col-date">{{ t("verse.listPage.modifiedDate") }}</div>
           <div class="col-actions"></div>
         </template>
 
@@ -76,10 +78,10 @@
       </PagePagination>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="detailVisible" title="场景详情" :name="currentVerse?.name || ''" :loading="detailLoading"
-        :properties="detailProperties" placeholder-icon="landscape" width="560px" :show-delete="false"
-        action-layout="stacked" :secondary-action="false" download-text="查看此示例" @download="handleGoToPage"
-        @close="handlePanelClose">
+      <DetailPanel v-model="detailVisible" :title="t('verse.listPage.detailTitle')" :name="currentVerse?.name || ''"
+        :loading="detailLoading" :properties="detailProperties" placeholder-icon="landscape" width="560px"
+        :show-delete="false" action-layout="stacked" :secondary-action="false"
+        :download-text="t('verse.publicPage.viewExample')" @download="handleGoToPage" @close="handlePanelClose">
         <template #preview>
           <div class="verse-preview">
             <img v-if="currentVerse?.image?.url" :src="currentVerse.image.url" :alt="currentVerse.name" />
@@ -92,15 +94,15 @@
           <div class="verse-detail-info">
             <!-- DescriptionSection -->
             <div class="info-section">
-              <div class="section-header">场景简介</div>
+              <div class="section-header">{{ t("verse.listPage.sceneIntro") }}</div>
               <p class="description-text">
-                {{ currentVerse?.description || "暂无简介" }}
+                {{ currentVerse?.description || t("verse.publicPage.noDescription") }}
               </p>
             </div>
 
             <!-- Tags Section -->
             <div class="info-section">
-              <div class="section-header">场景标签</div>
+              <div class="section-header">{{ t("verse.listPage.sceneTags") }}</div>
               <div v-if="
                 currentVerse?.tags?.length || currentVerse?.verseTags?.length
               " class="tag-list">
@@ -108,7 +110,7 @@
                   {{ tag.name }}
                 </el-tag>
               </div>
-              <div v-else class="empty-tags">暂无标签</div>
+              <div v-else class="empty-tags">{{ t("verse.listPage.noTags") }}</div>
             </div>
           </div>
         </template>
@@ -118,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import {
@@ -139,7 +141,7 @@ const router = useRouter();
 
 const searchValue = ref("");
 const categories = ref<{ id: number; name: string }[]>([
-  { id: 0, name: "全部" },
+  { id: 0, name: t("verse.publicPage.allCategory") },
 ]);
 const currentTab = ref(0);
 
@@ -150,7 +152,10 @@ onMounted(async () => {
     const classifyTags = res.data
       .filter((tag: any) => tag.type === "Classify")
       .map((tag: any) => ({ id: tag.id, name: tag.name }));
-    categories.value = [{ id: 0, name: "全部" }, ...classifyTags];
+    categories.value = [
+      { id: 0, name: t("verse.publicPage.allCategory") },
+      ...classifyTags,
+    ];
   } catch (e) {
     console.error("Failed to load tags:", e);
   }
@@ -214,16 +219,16 @@ const currentVerse = ref<any | null>(null);
 const detailProperties = computed(() => {
   if (!currentVerse.value) return [];
   return [
-    { label: "类型", value: "场景" },
+    { label: t("verse.listPage.type"), value: t("verse.listPage.scene") },
     {
-      label: "作者",
+      label: t("verse.listPage.author"),
       value:
         currentVerse.value.author?.nickname ||
         currentVerse.value.author?.username ||
         "—",
     },
     {
-      label: "修改时间",
+      label: t("verse.publicPage.updatedTime"),
       value: currentVerse.value.updated_at
         ? convertToLocalTime(currentVerse.value.updated_at)
         : "—",
@@ -255,7 +260,11 @@ const handleGoToPage = () => {
 };
 
 const goToScene = (item: any) => {
-  const title = encodeURIComponent(`场景【${item.name || "未命名"}】`);
+  const title = encodeURIComponent(
+    t("verse.listPage.editorTitle", {
+      name: item.name || t("verse.listPage.unnamed"),
+    })
+  );
   router.push({ path: "/verse/scene", query: { id: item.id, title } });
 };
 </script>

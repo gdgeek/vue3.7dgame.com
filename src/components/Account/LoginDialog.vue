@@ -1,13 +1,6 @@
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    width="420px"
-    destroy-on-close
-    center
-    @closed="handleDialogClosed"
-    class="login-dialog"
-    :class="{ 'dark-theme': isDark }"
-  >
+  <el-dialog v-model="dialogVisible" width="420px" destroy-on-close center @closed="handleDialogClosed"
+    class="login-dialog" :class="{ 'dark-theme': isDark }">
     <div class="login-container">
       <!-- 顶部标题与图标 -->
       <div class="login-header">
@@ -18,10 +11,7 @@
       <!-- 内容区域 -->
       <div class="login-content">
         <div>
-          <NamePassword
-            @login-success="handleLoginSuccess"
-            @switch-to-register="toggleRegisterMode"
-          ></NamePassword>
+          <NamePassword @login-success="handleLoginSuccess" @switch-to-register="toggleRegisterMode"></NamePassword>
           <br />
           <Wechat></Wechat>
         </div>
@@ -30,10 +20,10 @@
       <!-- 底部协议 -->
       <div class="login-footer">
         <p class="agreement-text">
-          注册或登录即表示您同意
-          <a href="#" @click.prevent="openAgreement('terms')">服务条款</a>
-          和
-          <a href="#" @click.prevent="openAgreement('privacy')">隐私政策</a>
+          {{ t("login.agreementPrefix") }}
+          <a href="#" @click.prevent="openAgreement('terms')">{{ t("login.termsOfService") }}</a>
+          {{ t("login.agreementAnd") }}
+          <a href="#" @click.prevent="openAgreement('privacy')">{{ t("login.privacyPolicy") }}</a>
         </p>
       </div>
     </div>
@@ -44,6 +34,7 @@
 import NamePassword from "./NamePassword.vue";
 import RegisterForm from "./RegisterForm.vue";
 import Wechat from "./Wechat.vue";
+import { useI18n } from "vue-i18n";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useDomainStore } from "@/store/modules/domain";
 import { ThemeEnum } from "@/enums/ThemeEnum";
@@ -59,6 +50,7 @@ const props = defineProps({
 const emit = defineEmits(["dialog-closed"]);
 const settingsStore = useSettingsStore();
 const domainStore = useDomainStore();
+const { t } = useI18n();
 const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);
 const dialogVisible = ref(false);
 const activeTab = ref("account-register");
@@ -87,7 +79,7 @@ const closeDialog = () => {
 
 const handleLoginSuccess = () => {
   dialogVisible.value = false;
-  Message.success("登录成功！");
+  Message.success(t("login.success"));
 };
 
 const handleDialogClosed = () => {

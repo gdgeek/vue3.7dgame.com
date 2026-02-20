@@ -18,15 +18,8 @@
 
         <div class="form-container">
           <h4>表单：</h4>
-          <VueForm
-            v-if="schema"
-            v-model="formData"
-            :schema="schema"
-            :form-footer="formFooter"
-            @submit="handleSubmit"
-            @cancel="handleCancel"
-            @change="handleChange"
-          ></VueForm>
+          <VueForm v-if="schema" v-model="formData" :schema="schema" :form-footer="formFooter" @submit="handleSubmit"
+            @cancel="handleCancel" @change="handleChange"></VueForm>
         </div>
 
         <el-divider></el-divider>
@@ -43,18 +36,10 @@
         </template>
 
         <el-button-group>
-          <el-button type="primary" @click="useSchema1"
-            >Schema 1: 粒子</el-button
-          >
-          <el-button type="success" @click="useSchema2"
-            >Schema 2: 用户信息</el-button
-          >
-          <el-button type="warning" @click="useSchema3"
-            >Schema 3: 物品配置</el-button
-          >
-          <el-button type="danger" @click="useSchema4"
-            >Schema 4: 综合测试</el-button
-          >
+          <el-button type="primary" @click="useSchema1">Schema 1: 粒子</el-button>
+          <el-button type="success" @click="useSchema2">Schema 2: 用户信息</el-button>
+          <el-button type="warning" @click="useSchema3">Schema 3: 物品配置</el-button>
+          <el-button type="danger" @click="useSchema4">Schema 4: 综合测试</el-button>
         </el-button-group>
       </el-card>
     </div>
@@ -250,12 +235,12 @@ const useSchema4 = () => {
 };
 
 const handleSubmit = () => {
-  ElMessage.success("表单提交成功！");
-  console.log("提交的数据：", formData.value);
+  ElMessage.success("Form submitted successfully!");
+  console.log("Submitted data:", formData.value);
 };
 
 const handleCancel = () => {
-  ElMessage.warning("取消操作");
+  ElMessage.warning("Operation canceled");
 };
 
 const handleChange = ({
@@ -265,7 +250,7 @@ const handleChange = ({
   oldValue: any;
   newValue: any;
 }) => {
-  console.log("数据变化：", { oldValue, newValue });
+  console.log("Data changed:", { oldValue, newValue });
 };
 </script>
 

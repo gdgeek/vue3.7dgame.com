@@ -8,7 +8,7 @@
       <div class="section-header">
         <font-awesome-icon :icon="['fas', 'bullhorn']" class="header-icon" />
         <h2 class="section-title">
-          {{ t("homepage.announcements.title", "平台公告") }}
+          {{ t("homepage.announcements.title") }}
         </h2>
       </div>
       <Book :items="list"></Book>
