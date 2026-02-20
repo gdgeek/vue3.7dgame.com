@@ -1,64 +1,55 @@
 <template>
   <div class="document-list-wrapper">
-    <el-tooltip
-      v-if="category"
-      :content="category.description"
-      placement="top"
-      effect="light"
-    >
-      <span class="document-list-category-tag">
-        {{ category.name }}
-      </span>
-    </el-tooltip>
-    <el-timeline v-if="data" :reverse="reverse" class="document-timeline">
-      <el-timeline-item
-        v-for="(item, index) in data"
-        :key="index"
-        :timestamp="dateTime(new Date(item.date))"
-      >
-        <div class="document-box-card" @click="select(item.id)">
-          <img
-            v-if="item.jetpack_featured_media_url"
-            align="left"
-            class="document-list-img"
-            :src="item.jetpack_featured_media_url"
-            fit="cover"
-          />
-          <div class="document-list-text">
-            <h3
-              class="document-list-title"
-              :innerHTML="sanitizedTitle(item)"
-            ></h3>
-            <div
-              class="document-list-excerpt"
-              :innerHTML="sanitizedExcerpt(item)"
-            ></div>
+    <!-- 分类不存在 -->
+    <el-empty v-if="categoryState === 'not-found'" description="分类不存在" />
+
+    <!-- 分类加载错误 -->
+    <el-empty v-else-if="categoryState === 'error'" :description="errorMessage || '加载失败，请重试'">
+      <el-button type="primary" @click="retry">重试</el-button>
+    </el-empty>
+
+    <!-- 文章列表为空（404） -->
+    <el-empty v-else-if="postsState === 'not-found'" description="暂无文章" />
+
+    <!-- 文章加载错误 -->
+    <el-empty v-else-if="postsState === 'error'" :description="errorMessage || '加载失败，请重试'">
+      <el-button type="primary" @click="retry">重试</el-button>
+    </el-empty>
+
+    <!-- 正常内容 -->
+    <template v-else>
+      <el-tooltip v-if="category" :content="category.description" placement="top" effect="light">
+        <span class="document-list-category-tag">
+          {{ category.name }}
+        </span>
+      </el-tooltip>
+      <el-timeline v-if="data" :reverse="reverse" class="document-timeline">
+        <el-timeline-item v-for="(item, index) in data" :key="index" :timestamp="dateTime(new Date(item.date))">
+
+          <div class="document-box-card" @click="select(item.id)">
+            <img v-if="item.jetpack_featured_media_url" align="left" class="document-list-img"
+              :src="item.jetpack_featured_media_url" fit="cover" />
+            <div class="document-list-text">
+              <h3 class="document-list-title" :innerHTML="sanitizedTitle(item)"></h3>
+              <div class="document-list-excerpt" :innerHTML="sanitizedExcerpt(item)"></div>
+            </div>
           </div>
-        </div>
-      </el-timeline-item>
-    </el-timeline>
-    <el-timeline v-else>
-      <el-timeline-item>
-        <el-skeleton :rows="3"></el-skeleton>
-      </el-timeline-item>
-      <el-timeline-item>
-        <el-skeleton :rows="3"></el-skeleton>
-      </el-timeline-item>
-    </el-timeline>
-    <div
-      v-if="pagination.count && pagination.count > 1"
-      class="document-pagination"
-    >
-      <el-pagination
-        :current-page="pagination.current"
-        :page-count="pagination.count ?? 0"
-        :page-size="pagination.size"
-        :total="pagination.total ?? 0"
-        layout="prev, pager, next, jumper"
-        background
-        @current-change="handleCurrentChange"
-      ></el-pagination>
-    </div>
+        </el-timeline-item>
+      </el-timeline>
+      <el-timeline v-else>
+        <el-timeline-item>
+          <el-skeleton :rows="3"></el-skeleton>
+        </el-timeline-item>
+        <el-timeline-item>
+          <el-skeleton :rows="3"></el-skeleton>
+        </el-timeline-item>
+      </el-timeline>
+      <div v-if="pagination.count && pagination.count > 1" class="document-pagination">
+        <el-pagination :current-page="pagination.current" :page-count="pagination.count ?? 0"
+          :page-size="pagination.size" :total="pagination.total ?? 0" layout="prev, pager, next, jumper" background
+          @current-change="handleCurrentChange"></el-pagination>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -67,6 +58,9 @@ import { useRouter } from "vue-router";
 import { formatDateTime } from "@/utils/dayjs";
 import { Posts, getCategory } from "@/api/home/wordpress";
 import DOMPurify from "dompurify";
+import { AxiosError } from "axios";
+
+type LoadState = "loading" | "success" | "not-found" | "error";
 
 const router = useRouter();
 
@@ -100,6 +94,11 @@ const props = withDefaults(
   }
 );
 
+// 状态管理
+const categoryState = ref<LoadState>("loading");
+const postsState = ref<LoadState>("loading");
+const errorMessage = ref<string | null>(null);
+
 // 初始化响应式数据
 const reverse = ref(false);
 const category = ref<Category | null>(null);
@@ -111,12 +110,46 @@ const pagination = ref<Pagination>({
   total: null,
 });
 
+/**
+ * 判断错误是否为 404 Not Found
+ * 兼容 AxiosError 和 wp.ts 拦截器返回的 response 对象
+ */
+function isNotFoundError(error: unknown): boolean {
+  if (error instanceof AxiosError) {
+    return error.response?.status === 404;
+  }
+  // wp.ts 响应拦截器在 HTTP 错误时 reject(response)，response 有 status 属性
+  if (error && typeof error === "object" && "status" in error) {
+    return (error as { status: number }).status === 404;
+  }
+  return false;
+}
+
 // 获取分类数据和文章数据
 const refresh = async () => {
+  categoryState.value = "loading";
+  postsState.value = "loading";
+  errorMessage.value = null;
+  data.value = null;
+  category.value = null;
+
+  // 获取分类
   try {
     const categoryResponse = await getCategory(props.categoryId);
     category.value = categoryResponse.data;
+    categoryState.value = "success";
+  } catch (error: unknown) {
+    if (isNotFoundError(error)) {
+      categoryState.value = "not-found";
+    } else {
+      categoryState.value = "error";
+      errorMessage.value = "加载失败，请重试";
+    }
+    return; // 分类失败则不继续加载文章
+  }
 
+  // 获取文章列表
+  try {
     const postsResponse = await Posts(
       props.categoryId,
       pagination.value.size,
@@ -130,9 +163,21 @@ const refresh = async () => {
       size: pagination.value.size,
       total: parseInt(postsResponse.headers["x-wp-total"]),
     };
-  } catch (error) {
-    console.error("Failed to fetch data:", error);
+    postsState.value = "success";
+  } catch (error: unknown) {
+    if (isNotFoundError(error)) {
+      postsState.value = "not-found";
+    } else {
+      postsState.value = "error";
+      errorMessage.value = "加载失败，请重试";
+    }
   }
+};
+
+// 重试
+const retry = () => {
+  pagination.value.current = 1;
+  refresh();
 };
 
 onMounted(() => {
@@ -254,6 +299,7 @@ const sanitizedExcerpt = (item: Item) => {
   padding: var(--spacing-lg) 0;
 
   :deep(.el-pagination) {
+
     .btn-prev,
     .btn-next,
     .el-pager li {

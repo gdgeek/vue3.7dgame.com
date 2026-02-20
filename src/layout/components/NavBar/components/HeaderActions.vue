@@ -7,7 +7,8 @@
       </button>
 
       <!-- 主题切换下拉菜单 -->
-      <el-dropdown @command="handleThemeChange" trigger="click" class="theme-dropdown">
+      <el-dropdown v-if="!domainStore.isStyleLocked" @command="handleThemeChange" trigger="click"
+        class="theme-dropdown">
         <button class="icon-btn" :title="t('ui.switchTheme')">
           <font-awesome-icon :icon="['fas', 'palette']" />
         </button>
@@ -30,7 +31,8 @@
         </template>
       </el-dropdown>
 
-      <el-dropdown @command="handleLanguageChange" trigger="click" class="language-dropdown">
+      <el-dropdown v-if="!domainStore.isLanguageLocked" @command="handleLanguageChange" trigger="click"
+        class="language-dropdown">
         <button class="icon-btn" :title="t('ui.language')">
           <font-awesome-icon :icon="['fas', 'language']" />
         </button>
@@ -57,10 +59,12 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useTheme } from "@/composables/useTheme";
 import { useFullscreen } from "@vueuse/core";
+import { useDomainStore } from "@/store/modules/domain";
 
 const { locale, t } = useI18n();
 const { availableThemes, currentThemeName, setTheme } = useTheme();
 const { isFullscreen, toggle: toggleFullscreen } = useFullscreen();
+const domainStore = useDomainStore();
 
 const currentLocale = computed(() => locale.value);
 

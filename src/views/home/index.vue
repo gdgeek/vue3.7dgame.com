@@ -11,7 +11,27 @@
           {{ t("homepage.announcements.title") }}
         </h2>
       </div>
-      <Book :items="list"></Book>
+
+      <!-- 加载状态：骨架屏 -->
+      <div v-if="loading" class="home-loading">
+        <el-skeleton :rows="4" animated />
+      </div>
+
+      <!-- 错误状态：错误提示 + 重试按钮 -->
+      <div v-else-if="error" class="home-error">
+        <el-empty description="加载失败，请重试">
+          <el-button type="primary" @click="retry">重试</el-button>
+        </el-empty>
+      </div>
+
+      <!-- 空状态：无内容提示 -->
+      <div v-else-if="items.length === 0" class="home-empty">
+        <el-empty description="暂无内容" />
+      </div>
+
+      <!-- 正常状态：传递 items 给 Book -->
+      <Book v-else :items="items"></Book>
+
       <el-tabs v-if="env.local()" type="border-card" lazy class="home-local-tabs">
         <el-tab-pane :label="domainStore.title">
           <LocalPage></LocalPage>
@@ -25,35 +45,34 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
+
 import { useDomainStore } from "@/store/modules/domain";
 import environment from "@/environment";
+import { useCategories } from "@/composables/useCategories";
 import Book from "@/components/Home/Book.vue";
 import LocalPage from "@/components/Home/LocalPage.vue";
 import HomeHeader from "@/components/Home/HomeHeader.vue";
 import QuickStart from "@/components/Home/QuickStart.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
-import { computed } from "vue";
-import { useI18n } from "vue-i18n";
+
+import type { TabItem } from "@/types/news";
+
+const props = defineProps<{
+  includeCategories?: (number | string)[];
+  excludeCategories?: (number | string)[];
+  pinnedItems?: TabItem[];
+}>();
 
 const domainStore = useDomainStore();
 const env = computed(() => environment);
 const { t } = useI18n();
 
-/*
-const mrpp = computed(() => {
-  return [
-    { label: t("homepage.dashboard"), type: "document", id: 999 },
-    { label: t("homepage.news"), type: "category", id: 74 },
-    { label: t("homepage.relatedDownload"), type: "category", id: 77 },
-    { label: t("homepage.caseCourse"), type: "category", id: 79 },
-  ];
-});*/
-
-const list = computed(() => {
-  return [
-    { label: t("homepage.dashboard"), type: "document", id: 1455 },
-    { label: t("homepage.news"), type: "category", id: 74 },
-  ];
+const { items, loading, error, retry } = useCategories({
+  includeCategories: props.includeCategories,
+  excludeCategories: props.excludeCategories,
+  pinnedItems: props.pinnedItems,
 });
 </script>
 
@@ -109,5 +128,11 @@ const list = computed(() => {
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-lg);
   overflow: hidden;
+}
+
+.home-loading,
+.home-error,
+.home-empty {
+  padding: var(--spacing-xl) 0;
 }
 </style>

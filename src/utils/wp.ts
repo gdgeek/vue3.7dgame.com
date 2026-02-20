@@ -1,5 +1,6 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { useUserStoreHook } from "@/store/modules/user";
+import { useDomainStoreHook } from "@/store/modules/domain";
 import { useRouter } from "vue-router";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import i18n from "@/lang";
@@ -31,6 +32,17 @@ const service = axios.create({
 // 请求拦截器
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // 如果域名配置了 blog 地址，动态覆盖 baseURL
+    try {
+      const domainStore = useDomainStoreHook();
+      if (domainStore.blog) {
+        // blog 存的是 WordPress 域名，拼接 WP REST API 路径
+        const blogUrl = domainStore.blog.replace(/\/+$/, "");
+        config.baseURL = `${blogUrl}/wp-json/wp/v2/`;
+      }
+    } catch {
+      // store 未初始化时忽略，使用默认 baseURL
+    }
     return config;
   },
   (error: any) => {

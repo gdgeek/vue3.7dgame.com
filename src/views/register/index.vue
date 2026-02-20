@@ -28,7 +28,8 @@
           <div class="top-bar">
             <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
               @change="toggleTheme"></el-switch>
-            <lang-select class="ml-2 cursor-pointer" style="margin-left: 25px"></lang-select>
+            <lang-select v-if="!domainStore.isLanguageLocked" class="ml-2 cursor-pointer"
+              style="margin-left: 25px"></lang-select>
           </div>
         </div>
       </div>
@@ -61,7 +62,8 @@
           <div :class="['top-bar', { mobile: isMobile }]">
             <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
               @change="toggleTheme"></el-switch>
-            <lang-select class="ml-2 cursor-pointer" style="margin-left: 10px"></lang-select>
+            <lang-select v-if="!domainStore.isLanguageLocked" class="ml-2 cursor-pointer"
+              style="margin-left: 10px"></lang-select>
           </div>
         </div>
       </div>

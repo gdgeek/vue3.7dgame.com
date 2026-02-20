@@ -1,15 +1,20 @@
 <template>
   <div class="document-wrapper">
-    <el-card v-if="data" shadow="never" class="document-card">
+    <!-- 文章不存在 -->
+    <el-empty v-if="state === 'not-found'" description="文章不存在" />
+
+    <!-- 通用错误 + 重试按钮 -->
+    <el-empty v-else-if="state === 'error'" :description="errorMessage || '加载失败，请重试'">
+      <el-button type="primary" @click="retry">重试</el-button>
+    </el-empty>
+
+    <!-- 正常内容 -->
+    <el-card v-else-if="data" shadow="never" class="document-card">
       <template #header>
         <h2 class="document-title" :innerHTML="sanitizedTitle"></h2>
         <div v-if="category" class="document-tags">
-          <router-link
-            v-for="(item, index) in data._embedded['wp:term'][0]"
-            :key="index"
-            :to="`${categoryPath}?id=${item.id}`"
-            class="document-tag-link"
-          >
+          <router-link v-for="(item, index) in data._embedded['wp:term'][0]" :key="index"
+            :to="`${categoryPath}?id=${item.id}`" class="document-tag-link">
             <span class="document-tag">{{ item.name }}</span>
           </router-link>
         </div>
@@ -24,6 +29,7 @@
       </div>
     </el-card>
 
+    <!-- 加载骨架屏 -->
     <el-card v-else shadow="never" class="document-card">
       <template #header>
         <el-skeleton :rows="1"></el-skeleton>
@@ -37,6 +43,9 @@
 import { formatDateTime } from "@/utils/dayjs";
 import { Article } from "@/api/home/wordpress";
 import DOMPurify from "dompurify";
+import { AxiosError } from "axios";
+
+type LoadState = "loading" | "success" | "not-found" | "error";
 
 interface Item {
   id: number;
@@ -59,17 +68,52 @@ const props = defineProps<{
 }>();
 
 const data = ref<Data | null>(null);
+const state = ref<LoadState>("loading");
+const errorMessage = ref<string | null>(null);
 const categoryPath = computed(() => props.categoryPath ?? "/home/category");
 const category = computed(() => props.category ?? true);
 
+/**
+ * 判断错误是否为 404 Not Found
+ * 兼容 AxiosError 和 wp.ts 拦截器返回的 response 对象
+ */
+function isNotFoundError(error: unknown): boolean {
+  if (error instanceof AxiosError) {
+    return error.response?.status === 404;
+  }
+  if (error && typeof error === "object" && "status" in error) {
+    return (error as { status: number }).status === 404;
+  }
+  return false;
+}
+
 // 获取文章数据
-onMounted(async () => {
+const refresh = async () => {
+  state.value = "loading";
+  errorMessage.value = null;
+  data.value = null;
+
   try {
     const res = await Article(props.postId);
     data.value = res.data;
-  } catch (error) {
-    console.error("Failed to fetch article:", error);
+    state.value = "success";
+  } catch (error: unknown) {
+    if (isNotFoundError(error)) {
+      state.value = "not-found";
+    } else {
+      state.value = "error";
+      errorMessage.value = "加载失败，请重试";
+    }
   }
+};
+
+// 重试
+const retry = () => {
+  refresh();
+};
+
+onMounted(() => {
+  refresh();
 });
 
 // 格式化日期

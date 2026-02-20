@@ -1,53 +1,30 @@
 <template>
   <div class="app-container" :class="{ 'dark-theme': isDark }">
     <!-- 导航栏 -->
-    <nav
-      class="nav-container"
-      :class="{ 'nav-scrolled': scrolled, 'dark-theme': isDark }"
-    >
+    <nav class="nav-container" :class="{ 'nav-scrolled': scrolled, 'dark-theme': isDark }">
       <div class="nav-left">
         <img src="/media/image/logo.gif" alt="Logo" class="logo" />
-        <RadiantText
-          class="company-name"
-          :duration="5"
-          :fontSize="isMobile ? 16 : 20"
-          :textColor="textColor"
-        >
+        <RadiantText class="company-name" :duration="5" :fontSize="isMobile ? 16 : 20" :textColor="textColor">
           <span class="font-bold">{{
             domainStore.domain || "Loading..."
           }}</span>
         </RadiantText>
       </div>
       <div class="nav-middle" v-if="!isMobile">
-        <div
-          class="nav-menu-item"
-          v-for="(item, index) in navMenuItems"
-          :key="index"
-          @click="select(item)"
-        >
+        <div class="nav-menu-item" v-for="(item, index) in navMenuItems" :key="index" @click="select(item)">
           <div class="menu-text">{{ item.label }}</div>
           <div class="menu-line"></div>
         </div>
       </div>
       <div class="nav-right">
         <div class="theme-switch" v-if="!isMobile">
-          <el-switch
-            v-model="isDark"
-            inline-prompt
-            active-icon="Moon"
-            inactive-icon="Sunny"
-            @change="toggleTheme"
-          ></el-switch>
+          <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
+            @change="toggleTheme"></el-switch>
         </div>
-        <div class="lang-select" v-if="!isMobile">
+        <div class="lang-select" v-if="!isMobile && !domainStore.isLanguageLocked">
           <LangSelect></LangSelect>
         </div>
-        <el-button
-          type="primary"
-          class="login-button"
-          @click="openLoginDialog"
-          :class="{ 'mobile-button': isMobile }"
-        >
+        <el-button type="primary" class="login-button" @click="openLoginDialog" :class="{ 'mobile-button': isMobile }">
           {{ $t("web.login") }}
         </el-button>
         <div class="hamburger-menu" v-if="isMobile" @click="toggleSidebar">
@@ -59,16 +36,8 @@
     </nav>
 
     <!-- 移动端侧边栏菜单 -->
-    <div
-      class="sidebar-overlay"
-      v-if="isMobile && sidebarVisible"
-      @click="toggleSidebar"
-    ></div>
-    <div
-      class="sidebar-menu"
-      :class="{ 'sidebar-visible': sidebarVisible, 'dark-theme': isDark }"
-      v-if="isMobile"
-    >
+    <div class="sidebar-overlay" v-if="isMobile && sidebarVisible" @click="toggleSidebar"></div>
+    <div class="sidebar-menu" :class="{ 'sidebar-visible': sidebarVisible, 'dark-theme': isDark }" v-if="isMobile">
       <!-- 侧边栏顶部 -->
       <div class="sidebar-header">
         <img src="/media/image/logo.gif" alt="Logo" class="sidebar-logo" />
@@ -76,26 +45,16 @@
       </div>
       <div class="sidebar-items">
         <div class="theme-switch-mobile">
-          <el-switch
-            v-model="isDark"
-            inline-prompt
-            active-icon="Moon"
-            inactive-icon="Sunny"
-            @change="toggleTheme"
-          ></el-switch>
+          <el-switch v-model="isDark" inline-prompt active-icon="Moon" inactive-icon="Sunny"
+            @change="toggleTheme"></el-switch>
         </div>
-        <div class="lang-select-mobile">
+        <div class="lang-select-mobile" v-if="!domainStore.isLanguageLocked">
           <LangSelect></LangSelect>
         </div>
-        <div
-          v-for="item in navMenuItems"
-          :key="item.key"
-          class="sidebar-item"
-          @click="
-            select(item);
-            toggleSidebar();
-          "
-        >
+        <div v-for="item in navMenuItems" :key="item.key" class="sidebar-item" @click="
+          select(item);
+        toggleSidebar();
+        ">
           {{ item.label }}
         </div>
         <div class="sidebar-item" @click="openLoginDialog">
@@ -105,11 +64,7 @@
     </div>
 
     <!-- 主体内容区域 -->
-    <div
-      class="content-container"
-      ref="contentRef"
-      :class="{ 'dark-theme': isDark }"
-    >
+    <div class="content-container" ref="contentRef" :class="{ 'dark-theme': isDark }">
       <Hero v-if="isIndex" @open-login="openLoginDialog"></Hero>
       <router-view></router-view>
       <Footer :maxwidth="true"></Footer>
@@ -513,6 +468,7 @@ onUnmounted(() => {
   }
 
   &.nav-scrolled {
+
     .nav-left .company-name,
     .nav-middle .nav-menu-item .menu-text,
     .nav-right .hamburger-menu,
@@ -532,6 +488,7 @@ onUnmounted(() => {
     }
 
     &.dark-theme {
+
       .nav-left .company-name,
       .nav-middle .nav-menu-item .menu-text,
       .nav-right .hamburger-menu,

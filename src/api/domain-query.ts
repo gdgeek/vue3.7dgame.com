@@ -2,13 +2,19 @@ import axios from "axios";
 import env from "@/environment";
 import qs from "querystringify";
 
-export interface DomainInfo {
+export interface DomainDefaultInfo {
+  homepage: string;
+  lang: string;
+  style: number;
+  blog: string;
+}
+
+export interface DomainLanguageInfo {
   domain: string;
   title: string;
   description: string;
   keywords: string;
   author: string;
-  homepage: string;
   links: {
     name: string;
     url: string;
@@ -82,14 +88,27 @@ service.interceptors.response.use(
  * @param domain 域名 (默认当前域名)
  * @param lang 语言代码
  */
-export const getDomainConfig = (domain?: string, lang?: string) => {
+export const getDomainDefault = (domain?: string) => {
+  const query = {
+    domain: domain || window.location.hostname,
+  };
+  return service.get(`/api/query/default${qs.stringify(query, true)}`);
+};
+
+/**
+ * 获取域名配置信息
+ * @param domain 域名 (默认当前域名)
+ * @param lang 语言代码
+ */
+export const getDomainLanguage = (domain?: string, lang?: string) => {
   const query = {
     domain: domain || window.location.hostname,
     lang: lang || "zh-CN",
   };
-  return service.get(`/api/query${qs.stringify(query, true)}`);
+  return service.get(`/api/query/language${qs.stringify(query, true)}`);
 };
 
 export default {
-  getDomainConfig,
+  getDomainLanguage,
+  getDomainDefault,
 };

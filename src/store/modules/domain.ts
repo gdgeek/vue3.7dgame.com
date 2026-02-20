@@ -1,9 +1,24 @@
 import { logger } from "@/utils/logger";
 import { defineStore } from "pinia";
-import { getDomainConfig, type DomainInfo } from "@/api/domain-query";
+import {
+  getDomainDefault,
+  getDomainLanguage,
+  type DomainDefaultInfo,
+  type DomainLanguageInfo,
+} from "@/api/domain-query";
 import { store } from "@/store";
 
+// 支持的语言列表（与 LanguageEnum 保持一致）
+const SUPPORTED_LANGUAGES = new Set([
+  "zh-CN",
+  "en-US",
+  "ja-JP",
+  "th-TH",
+  "zh-TW",
+]);
+
 const DOMAIN_COOKIE_KEY_PREFIX = "domain_info_";
+const DOMAIN_DEFAULT_COOKIE_KEY = "domain_default_info";
 const COOKIE_EXPIRY_DAYS = 7;
 
 // Cookie helper functions
@@ -26,12 +41,28 @@ function getCookie(name: string): string | null {
 }
 
 // Get cookie key for specific language
-function getDomainCookieKey(lang: string): string {
+function getLangCookieKey(lang: string): string {
   return `${DOMAIN_COOKIE_KEY_PREFIX}${lang}`;
 }
 
+function getDomainForQuery(): string {
+  let domain = window.location.hostname;
+  // 本地开发环境使用特定域名（localhost、127.0.0.1、局域网 IP）
+  if (
+    domain === "localhost" ||
+    domain === "127.0.0.1" ||
+    /^192\.168\./.test(domain) ||
+    /^10\./.test(domain) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(domain)
+  ) {
+    domain = "d.xiading.hxgxonline.com";
+  }
+  return domain;
+}
+
 interface DomainState {
-  info: DomainInfo | null;
+  defaultInfo: DomainDefaultInfo | null;
+  langInfo: DomainLanguageInfo | null;
   loading: boolean;
   error: string | null;
   currentLang: string | null;
@@ -39,114 +70,149 @@ interface DomainState {
 
 export const useDomainStore = defineStore("domain", {
   state: (): DomainState => ({
-    info: null,
+    defaultInfo: null,
+    langInfo: null,
     loading: false,
     error: null,
     currentLang: null,
   }),
 
   getters: {
-    title: (state) => state.info?.title || "",
-    description: (state) => state.info?.description || "",
-    keywords: (state) => state.info?.keywords || "",
-    author: (state) => state.info?.author || "",
-    homepage: (state) => state.info?.homepage || "",
-    domain: (state) => state.info?.domain || "",
-    links: (state) => state.info?.links || [],
-    isLoaded: (state) => state.info !== null && !state.loading,
+    title: (state) => state.langInfo?.title || "",
+    description: (state) => state.langInfo?.description || "",
+    keywords: (state) => state.langInfo?.keywords || "",
+    author: (state) => state.langInfo?.author || "",
+    homepage: (state) => state.defaultInfo?.homepage || "",
+    domain: (state) => state.langInfo?.domain || "",
+    links: (state) => state.langInfo?.links || [],
+    defaultLang: (state) => state.defaultInfo?.lang || "",
+    /** 域名指定了支持的语言时，锁定语言，隐藏切换 */
+    isLanguageLocked: (state) => {
+      const lang = state.defaultInfo?.lang;
+      return !!lang && SUPPORTED_LANGUAGES.has(lang);
+    },
+    /** 域名指定了有效样式（style > 0）时，锁定样式，隐藏切换 */
+    isStyleLocked: (state) => {
+      const style = state.defaultInfo?.style;
+      return !!style && style > 0;
+    },
+    /** WordPress 博客地址 */
+    blog: (state) => state.defaultInfo?.blog || "",
+    isLoaded: (state) =>
+      state.defaultInfo !== null && state.langInfo !== null && !state.loading,
   },
 
   actions: {
+    /**
+     * 启动时调用一次，获取基础信息（homepage, lang）
+     */
+    async fetchDefaultInfo() {
+      // Try cookie cache first
+      const cachedData = getCookie(DOMAIN_DEFAULT_COOKIE_KEY);
+      if (cachedData) {
+        try {
+          this.defaultInfo = JSON.parse(cachedData);
+        } catch (e) {
+          logger.warn("Failed to parse cached default domain info:", e);
+        }
+      }
+
+      try {
+        const domain = getDomainForQuery();
+        const response: { data: DomainDefaultInfo } =
+          await getDomainDefault(domain);
+        this.defaultInfo = response.data;
+        setCookie(
+          DOMAIN_DEFAULT_COOKIE_KEY,
+          JSON.stringify(this.defaultInfo),
+          COOKIE_EXPIRY_DAYS
+        );
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error ? err.message : "Failed to fetch default info";
+        logger.error("Failed to fetch default domain info:", err);
+        this.error = message;
+      }
+
+      // 域名指定了支持的语言 → 强制锁定
+      if (this.isLanguageLocked && this.defaultInfo?.lang) {
+        const { loadLanguageAsync } = await import("@/lang");
+        await loadLanguageAsync(this.defaultInfo.lang);
+      }
+
+      // 域名指定了有效样式 → 强制切换到对应主题（style 从 1 开始，themes 数组从 0 开始）
+      if (this.isStyleLocked && this.defaultInfo?.style) {
+        const { useTheme } = await import("@/composables/useTheme");
+        const { availableThemes, setTheme } = useTheme();
+        const themeIndex = this.defaultInfo.style - 1;
+        const targetTheme = availableThemes.value[themeIndex];
+        if (targetTheme) {
+          setTheme(targetTheme.name);
+        }
+      }
+    },
+
+    /**
+     * 获取语言相关信息，启动时和切换语言时调用
+     */
     async fetchDomainInfo() {
-      // Get current language
+      // 先获取基础信息（仅首次）
+      if (!this.defaultInfo) {
+        await this.fetchDefaultInfo();
+      }
+
+      // 获取语言信息
+      await this.refreshFromAPI();
+    },
+
+    /**
+     * 刷新语言相关数据（切换语言时调用）
+     */
+    async refreshFromAPI() {
       const { useAppStore } = await import("@/store/modules/app");
       const appStore = useAppStore();
       const lang = appStore.language || "zh-CN";
 
       // If already loaded for this language, skip
-      if (this.info !== null && this.currentLang === lang) {
-        return this.info;
+      if (this.langInfo !== null && this.currentLang === lang) {
+        return this.langInfo;
       }
 
-      // Try to load from language-specific cookie first
-      const cookieKey = getDomainCookieKey(lang);
+      // Try cookie cache
+      const cookieKey = getLangCookieKey(lang);
       const cachedData = getCookie(cookieKey);
       if (cachedData) {
         try {
-          this.info = JSON.parse(cachedData);
-          this.currentLang = lang;
-          this.updateDocumentMeta();
-          // Still fetch from API in background to refresh cache
-          this.refreshFromAPI();
-          return this.info;
-        } catch (e) {
-          logger.warn("Failed to parse cached domain info:", e);
-        }
-      }
-
-      // Fetch from API
-      return await this.refreshFromAPI();
-    },
-
-    async refreshFromAPI() {
-      // Get current language from app store
-      const { useAppStore } = await import("@/store/modules/app");
-      const appStore = useAppStore();
-      const lang = appStore.language || "zh-CN";
-
-      // Check if we have cached data for this language
-      const cookieKey = getDomainCookieKey(lang);
-      const cachedData = getCookie(cookieKey);
-
-      // Immediately update: if cache exists, show it; otherwise clear to show loading
-      if (cachedData) {
-        try {
-          // Immediately show cached content for this language
-          this.info = JSON.parse(cachedData);
+          this.langInfo = JSON.parse(cachedData);
           this.currentLang = lang;
           this.updateDocumentMeta();
         } catch (e) {
-          logger.warn("Failed to parse cached domain info:", e);
-          this.info = null;
+          logger.warn("Failed to parse cached lang domain info:", e);
+          this.langInfo = null;
         }
-      } else {
-        // No cache - immediately show loading state
-        this.info = null;
-        this.currentLang = null;
       }
 
       this.loading = true;
       this.error = null;
 
       try {
-        let domain = window.location.hostname;
-        // 本地开发环境使用特定域名（localhost、127.0.0.1、局域网 IP）
-        if (
-          domain === "localhost" ||
-          domain === "127.0.0.1" ||
-          /^192\.168\./.test(domain) ||
-          /^10\./.test(domain) ||
-          /^172\.(1[6-9]|2\d|3[01])\./.test(domain)
-        ) {
-          domain = "d.xiading.hxgxonline.com";
-        }
-
-        const response: any = await getDomainConfig(domain, lang);
-        this.info = response.data;
+        const domain = getDomainForQuery();
+        const response: { data: DomainLanguageInfo } = await getDomainLanguage(
+          domain,
+          lang
+        );
+        this.langInfo = response.data;
         this.currentLang = lang;
-        console.error("Domain info:", this.info);
-        console.error("Homepage:", this.info?.homepage);
 
-        // Save to language-specific cookie
-        setCookie(cookieKey, JSON.stringify(this.info), COOKIE_EXPIRY_DAYS);
-
-        // Update document meta tags
+        setCookie(cookieKey, JSON.stringify(this.langInfo), COOKIE_EXPIRY_DAYS);
         this.updateDocumentMeta();
 
-        return this.info;
-      } catch (err: any) {
+        return this.langInfo;
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error ? err.message : "Failed to fetch domain info";
         logger.error("Failed to fetch domain info:", err);
-        this.error = err.message || "Failed to fetch domain info";
+        this.error = message;
         return null;
       } finally {
         this.loading = false;
@@ -154,39 +220,35 @@ export const useDomainStore = defineStore("domain", {
     },
 
     updateDocumentMeta() {
-      if (!this.info) return;
+      if (!this.langInfo) return;
 
-      // Update document title
-      if (this.info.title) {
-        document.title = this.info.title;
+      if (this.langInfo.title) {
+        document.title = this.langInfo.title;
       }
 
-      // Update meta description
       let descMeta = document.querySelector('meta[name="description"]');
       if (!descMeta) {
         descMeta = document.createElement("meta");
         descMeta.setAttribute("name", "description");
         document.head.appendChild(descMeta);
       }
-      descMeta.setAttribute("content", this.info.description || "");
+      descMeta.setAttribute("content", this.langInfo.description || "");
 
-      // Update meta keywords
       let keywordsMeta = document.querySelector('meta[name="keywords"]');
       if (!keywordsMeta) {
         keywordsMeta = document.createElement("meta");
         keywordsMeta.setAttribute("name", "keywords");
         document.head.appendChild(keywordsMeta);
       }
-      keywordsMeta.setAttribute("content", this.info.keywords || "");
+      keywordsMeta.setAttribute("content", this.langInfo.keywords || "");
 
-      // Update meta author
       let authorMeta = document.querySelector('meta[name="author"]');
       if (!authorMeta) {
         authorMeta = document.createElement("meta");
         authorMeta.setAttribute("name", "author");
         document.head.appendChild(authorMeta);
       }
-      authorMeta.setAttribute("content", this.info.author || "");
+      authorMeta.setAttribute("content", this.langInfo.author || "");
     },
   },
 });

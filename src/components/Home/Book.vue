@@ -1,42 +1,23 @@
 <template>
-  <el-tabs
-    type="border-card"
-    lazy
-    v-model="activeTab"
-    @tab-click="handleTabClick"
-    class="home-tabs"
-  >
-    <el-tab-pane
-      v-for="(item, index) in items"
-      :key="item.label"
-      :label="item.label"
-      :name="index"
-    >
-      <Document
-        v-if="item.type === 'document'"
-        :post-id="item.id"
-        :category="category"
-        :category-path="categoryPath"
-      >
+  <el-empty v-if="!items || items.length === 0" description="暂无内容" />
+  <el-tabs v-else type="border-card" lazy v-model="activeTab" @tab-click="handleTabClick" class="home-tabs">
+    <el-tab-pane v-for="(item, index) in items" :key="item.label" :label="item.label" :name="index">
+      <Document v-if="item.type === 'document'" :post-id="item.id" :category="category" :category-path="categoryPath">
       </Document>
-      <DocumentList
-        v-if="item.type === 'category'"
-        :category-id="item.id"
-        :document-path="documentPath"
-      ></DocumentList>
+      <DocumentList v-if="item.type === 'category'" :category-id="item.id" :document-path="documentPath"></DocumentList>
     </el-tab-pane>
   </el-tabs>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed } from "vue";
 import Document from "@/components/Home/Document.vue";
 import DocumentList from "@/components/Home/DocumentList.vue";
 
-const { t } = useI18n();
+import type { TabItem } from "@/types/news";
 
 const props = defineProps<{
-  items?: { label: string; type: string; id: number }[];
+  items: TabItem[];
   documentPath?: string;
   categoryPath?: string;
   category?: boolean;
@@ -53,17 +34,6 @@ const activeTab = computed({
 const handleTabClick = (tab: any) => {
   emit("tab-change", Number(tab.props.name));
 };
-
-// 提供默认值
-const items = computed(
-  () =>
-    props.items ?? [
-      { label: t("homepage.dashboard"), type: "document", id: 999 },
-      { label: t("homepage.news"), type: "category", id: 74 },
-      { label: t("homepage.relatedDownload"), type: "category", id: 84 },
-      { label: t("homepage.caseCourse"), type: "category", id: 79 },
-    ]
-);
 
 const documentPath = computed(() => props.documentPath ?? "/home/document");
 const categoryPath = computed(() => props.categoryPath ?? "/home/category");
