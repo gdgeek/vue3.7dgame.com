@@ -1,6 +1,11 @@
 <template>
-  <PageFilter v-model="value" :label="$t('ui.filter')" :options="options" :placeholder="$t('ui.filter')"
-    @change="handleChange"></PageFilter>
+  <PageFilter
+    v-model="value"
+    :label="$t('ui.filter')"
+    :options="options"
+    :placeholder="$t('ui.filter')"
+    @change="handleChange"
+  ></PageFilter>
 </template>
 
 <script lang="ts" setup>

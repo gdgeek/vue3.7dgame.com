@@ -1,13 +1,22 @@
 <template>
-  <el-dialog v-model="dialogVisible" append-to-body :close-on-click-modal="closeOnClickModal" width="70%"
-    @keydown.enter="submitForm">
+  <el-dialog
+    v-model="dialogVisible"
+    append-to-body
+    :close-on-click-modal="closeOnClickModal"
+    width="70%"
+    @keydown.enter="submitForm"
+  >
     <template #header>
       {{ dialogTitle }}
     </template>
     <el-form ref="formRef" :rules="rules" :model="item" label-width="auto">
       <el-form-item :label="$t('verse.page.form.picture')">
-        <ImageSelector :item-id="item.id" :image-url="item.image?.url" @image-selected="handleImageSelected"
-          @image-upload-success="handleImageSelected"></ImageSelector>
+        <ImageSelector
+          :item-id="item.id"
+          :image-url="item.image?.url"
+          @image-selected="handleImageSelected"
+          @image-upload-success="handleImageSelected"
+        ></ImageSelector>
       </el-form-item>
       <el-form-item prop="name" :label="$t('verse.page.form.name')">
         <el-input v-model="item.name"></el-input>
@@ -22,7 +31,7 @@
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">{{
           $t("verse.page.form.cancel")
-          }}</el-button>
+        }}</el-button>
         <el-button type="primary" @click="submitForm">
           {{ dialogSubmit }}
         </el-button>
@@ -130,7 +139,10 @@ const handleImageSelected = (data: {
   // Actually show() resets item from props, so this local update is just for current session.
   if (item.value && data.imageUrl) {
     if (!item.value.image) {
-      item.value.image = { url: data.imageUrl, id: data.imageId } as unknown as typeof item.value.image;
+      item.value.image = {
+        url: data.imageUrl,
+        id: data.imageId,
+      } as unknown as typeof item.value.image;
     } else {
       item.value.image.url = data.imageUrl;
       item.value.image.id = data.imageId;

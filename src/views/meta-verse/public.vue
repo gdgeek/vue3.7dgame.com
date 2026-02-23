@@ -5,38 +5,69 @@
       <div class="hero-header">
         <div class="header-main">
           <div class="title-section">
-            <h1 class="hero-title">{{ t("verse.publicPage.examplesTitle") }}</h1>
+            <h1 class="hero-title">
+              {{ t("verse.publicPage.examplesTitle") }}
+            </h1>
             <p class="hero-subtitle">
               {{ t("verse.publicPage.examplesSubtitle") }}
             </p>
           </div>
           <div class="search-section">
             <div class="hero-search-box">
-              <font-awesome-icon :icon="['fas', 'search']" class="search-icon" />
-              <input v-model="searchValue" type="text" class="hero-search-input"
-                :placeholder="t('verse.publicPage.searchExamples')" @keyup.enter="handleHeroSearch" />
+              <font-awesome-icon
+                :icon="['fas', 'search']"
+                class="search-icon"
+              ></font-awesome-icon>
+              <input
+                v-model="searchValue"
+                type="text"
+                class="hero-search-input"
+                :placeholder="t('verse.publicPage.searchExamples')"
+                @keyup.enter="handleHeroSearch"
+              />
             </div>
           </div>
         </div>
 
         <div class="header-tabs">
-          <div v-for="tab in categories" :key="tab.id" class="tab-item" :class="{ active: currentTab === tab.id }"
-            @click="selectTab(tab.id)">
+          <div
+            v-for="tab in categories"
+            :key="tab.id"
+            class="tab-item"
+            :class="{ active: currentTab === tab.id }"
+            @click="selectTab(tab.id)"
+          >
             {{ tab.name }}
           </div>
         </div>
       </div>
 
-      <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading"
-        :breakpoints="cardBreakpoints" @row-click="openDetail">
+      <ViewContainer
+        class="list-view"
+        :items="items"
+        :view-mode="viewMode"
+        :loading="loading"
+        :breakpoints="cardBreakpoints"
+        @row-click="openDetail"
+      >
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.name || t('verse.listPage.unnamed')"
-            :description="item.description" :meta="{
+          <StandardCard
+            :image="item.image?.url"
+            :title="item.name || t('verse.listPage.unnamed')"
+            :description="item.description"
+            :meta="{
               author: item.author?.nickname || item.author?.username,
               date: formatItemDate(item.created_at),
-            }" :action-text="t('verse.publicPage.viewExample')" :action-icon="['fas', 'eye']"
-            :type-icon="['fas', 'layer-group']" :placeholder-icon="['fas', 'image']" :show-checkbox="false"
-            aspect-ratio="1.6 / 1" @view="openDetail(item)" @action="goToScene(item)">
+            }"
+            :action-text="t('verse.publicPage.viewExample')"
+            :action-icon="['fas', 'eye']"
+            :type-icon="['fas', 'layer-group']"
+            :placeholder-icon="['fas', 'image']"
+            :show-checkbox="false"
+            aspect-ratio="1.6 / 1"
+            @view="openDetail(item)"
+            @action="goToScene(item)"
+          >
           </StandardCard>
         </template>
 
@@ -52,13 +83,23 @@
           <div class="col-checkbox"></div>
           <div class="col-name">
             <div class="item-thumb">
-              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
+              <img
+                v-if="item.image?.url"
+                :src="item.image.url"
+                :alt="item.name"
+              />
               <div v-else class="thumb-placeholder">
-                <font-awesome-icon :icon="['fas', 'layer-group']" />
+                <font-awesome-icon
+                  :icon="['fas', 'layer-group']"
+                ></font-awesome-icon>
               </div>
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
-            <el-button class="btn-hover-action" type="primary" @click.stop="openDetail(item)">
+            <el-button
+              class="btn-hover-action"
+              type="primary"
+              @click.stop="openDetail(item)"
+            >
               {{ $t("common.open") }}
             </el-button>
           </div>
@@ -74,19 +115,38 @@
         </template>
       </ViewContainer>
 
-      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
+      <PagePagination
+        :current-page="pagination.current"
+        :total-pages="totalPages"
+        @page-change="handlePageChange"
+      >
       </PagePagination>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="detailVisible" :title="t('verse.listPage.detailTitle')" :name="currentVerse?.name || ''"
-        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'image']" width="560px"
-        :show-delete="false" action-layout="stacked" :secondary-action="false"
-        :download-text="t('verse.publicPage.viewExample')" @download="handleGoToPage" @close="handlePanelClose">
+      <DetailPanel
+        v-model="detailVisible"
+        :title="t('verse.listPage.detailTitle')"
+        :name="currentVerse?.name || ''"
+        :loading="detailLoading"
+        :properties="detailProperties"
+        :placeholder-icon="['fas', 'image']"
+        width="560px"
+        :show-delete="false"
+        action-layout="stacked"
+        :secondary-action="false"
+        :download-text="t('verse.publicPage.viewExample')"
+        @download="handleGoToPage"
+        @close="handlePanelClose"
+      >
         <template #preview>
           <div class="verse-preview">
-            <img v-if="currentVerse?.image?.url" :src="currentVerse.image.url" :alt="currentVerse.name" />
+            <img
+              v-if="currentVerse?.image?.url"
+              :src="currentVerse.image.url"
+              :alt="currentVerse.name"
+            />
             <div v-else class="preview-placeholder">
-              <font-awesome-icon :icon="['fas', 'image']" />
+              <font-awesome-icon :icon="['fas', 'image']"></font-awesome-icon>
             </div>
           </div>
         </template>
@@ -94,23 +154,39 @@
           <div class="verse-detail-info">
             <!-- DescriptionSection -->
             <div class="info-section">
-              <div class="section-header">{{ t("verse.listPage.sceneIntro") }}</div>
+              <div class="section-header">
+                {{ t("verse.listPage.sceneIntro") }}
+              </div>
               <p class="description-text">
-                {{ currentVerse?.description || t("verse.publicPage.noDescription") }}
+                {{
+                  currentVerse?.description ||
+                  t("verse.publicPage.noDescription")
+                }}
               </p>
             </div>
 
             <!-- Tags Section -->
             <div class="info-section">
-              <div class="section-header">{{ t("verse.listPage.sceneTags") }}</div>
-              <div v-if="
-                currentVerse?.tags?.length || currentVerse?.verseTags?.length
-              " class="tag-list">
-                <el-tag v-for="tag in currentVerse.tags || currentVerse.verseTags" :key="tag.id" class="mr-2 mb-2">
+              <div class="section-header">
+                {{ t("verse.listPage.sceneTags") }}
+              </div>
+              <div
+                v-if="
+                  currentVerse?.tags?.length || currentVerse?.verseTags?.length
+                "
+                class="tag-list"
+              >
+                <el-tag
+                  v-for="tag in currentVerse.tags || currentVerse.verseTags"
+                  :key="tag.id"
+                  class="mr-2 mb-2"
+                >
                   {{ tag.name }}
                 </el-tag>
               </div>
-              <div v-else class="empty-tags">{{ t("verse.listPage.noTags") }}</div>
+              <div v-else class="empty-tags">
+                {{ t("verse.listPage.noTags") }}
+              </div>
             </div>
           </div>
         </template>

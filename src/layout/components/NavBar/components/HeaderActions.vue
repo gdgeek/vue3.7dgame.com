@@ -2,28 +2,47 @@
   <div class="header-actions">
     <!-- Icon button group -->
     <div class="actions-group">
-      <button class="icon-btn" @click="toggleFullscreen" :title="t('ui.fullscreen')">
-        <font-awesome-icon :icon="['fas', isFullscreen ? 'compress' : 'expand']" />
+      <button
+        class="icon-btn"
+        @click="toggleFullscreen"
+        :title="t('ui.fullscreen')"
+      >
+        <font-awesome-icon
+          :icon="['fas', isFullscreen ? 'compress' : 'expand']"
+        ></font-awesome-icon>
       </button>
 
       <!-- 主题切换下拉菜单 -->
-      <el-dropdown v-if="!domainStore.isStyleLocked" @command="handleThemeChange" trigger="click"
-        class="theme-dropdown">
+      <el-dropdown
+        v-if="!domainStore.isStyleLocked"
+        @command="handleThemeChange"
+        trigger="click"
+        class="theme-dropdown"
+      >
         <button class="icon-btn" :title="t('ui.switchTheme')">
-          <font-awesome-icon :icon="['fas', 'palette']" />
+          <font-awesome-icon :icon="['fas', 'palette']"></font-awesome-icon>
         </button>
         <template #dropdown>
           <el-dropdown-menu class="theme-menu">
-            <el-dropdown-item v-for="theme in availableThemes" :key="theme.name" :command="theme.name"
-              :class="{ 'is-active': currentThemeName === theme.name }">
+            <el-dropdown-item
+              v-for="theme in availableThemes"
+              :key="theme.name"
+              :command="theme.name"
+              :class="{ 'is-active': currentThemeName === theme.name }"
+            >
               <div class="theme-item">
                 <div class="theme-preview-mini" :class="theme.name"></div>
                 <div class="theme-info">
                   <span class="theme-name">{{ theme.displayName }}</span>
                   <span class="theme-desc">{{ theme.description }}</span>
                 </div>
-                <span v-if="currentThemeName === theme.name" class="theme-check">
-                  <font-awesome-icon :icon="['fas', 'check']" />
+                <span
+                  v-if="currentThemeName === theme.name"
+                  class="theme-check"
+                >
+                  <font-awesome-icon
+                    :icon="['fas', 'check']"
+                  ></font-awesome-icon>
                 </span>
               </div>
             </el-dropdown-item>
@@ -31,19 +50,32 @@
         </template>
       </el-dropdown>
 
-      <el-dropdown v-if="!domainStore.isLanguageLocked" @command="handleLanguageChange" trigger="click"
-        class="language-dropdown">
+      <el-dropdown
+        v-if="!domainStore.isLanguageLocked"
+        @command="handleLanguageChange"
+        trigger="click"
+        class="language-dropdown"
+      >
         <button class="icon-btn" :title="t('ui.language')">
-          <font-awesome-icon :icon="['fas', 'language']" />
+          <font-awesome-icon :icon="['fas', 'language']"></font-awesome-icon>
         </button>
         <template #dropdown>
           <el-dropdown-menu class="language-menu">
-            <el-dropdown-item v-for="lang in languages" :key="lang.value" :command="lang.value"
-              :class="{ 'is-active': currentLocale === lang.value }">
+            <el-dropdown-item
+              v-for="lang in languages"
+              :key="lang.value"
+              :command="lang.value"
+              :class="{ 'is-active': currentLocale === lang.value }"
+            >
               <div class="language-item">
                 <span class="language-name">{{ lang.label }}</span>
-                <span v-if="currentLocale === lang.value" class="language-check">
-                  <font-awesome-icon :icon="['fas', 'check']" />
+                <span
+                  v-if="currentLocale === lang.value"
+                  class="language-check"
+                >
+                  <font-awesome-icon
+                    :icon="['fas', 'check']"
+                  ></font-awesome-icon>
                 </span>
               </div>
             </el-dropdown-item>
@@ -219,9 +251,11 @@ const handleLanguageChange = async (lang: string) => {
 
   // 教育友好
   &.edu-friendly {
-    background: linear-gradient(90deg,
-        linear-gradient(180deg, #ff6b35, #ffb347) 30%,
-        #fff8f5 30%);
+    background: linear-gradient(
+      90deg,
+      linear-gradient(180deg, #ff6b35, #ffb347) 30%,
+      #fff8f5 30%
+    );
     background: #fff8f5;
 
     &::before {

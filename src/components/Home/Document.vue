@@ -1,10 +1,13 @@
 <template>
   <div class="document-wrapper">
     <!-- 文章不存在 -->
-    <el-empty v-if="state === 'not-found'" description="文章不存在" />
+    <el-empty v-if="state === 'not-found'" description="文章不存在"></el-empty>
 
     <!-- 通用错误 + 重试按钮 -->
-    <el-empty v-else-if="state === 'error'" :description="errorMessage || '加载失败，请重试'">
+    <el-empty
+      v-else-if="state === 'error'"
+      :description="errorMessage || '加载失败，请重试'"
+    >
       <el-button type="primary" @click="retry">重试</el-button>
     </el-empty>
 
@@ -13,8 +16,12 @@
       <template #header>
         <h2 class="document-title" :innerHTML="sanitizedTitle"></h2>
         <div v-if="category" class="document-tags">
-          <router-link v-for="(item, index) in data._embedded['wp:term'][0]" :key="index"
-            :to="`${categoryPath}?id=${item.id}`" class="document-tag-link">
+          <router-link
+            v-for="(item, index) in data._embedded['wp:term'][0]"
+            :key="index"
+            :to="`${categoryPath}?id=${item.id}`"
+            class="document-tag-link"
+          >
             <span class="document-tag">{{ item.name }}</span>
           </router-link>
         </div>

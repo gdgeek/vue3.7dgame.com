@@ -66,10 +66,7 @@ const breadcrumbText = computed(() => {
 
     "/settings": ["breadcrumb.settings"],
     "/settings/edit": ["breadcrumb.settings", "breadcrumb.profile"],
-    "/settings/account": [
-      "breadcrumb.settings",
-      "breadcrumb.accountSecurity",
-    ],
+    "/settings/account": ["breadcrumb.settings", "breadcrumb.accountSecurity"],
   };
 
   if (breadcrumbMap[path]) {

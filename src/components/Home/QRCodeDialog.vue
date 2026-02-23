@@ -1,16 +1,31 @@
 <template>
   <div>
-    <el-dialog v-model="dialogVisible" width="420px" align-center class="qrcode-dialog" :show-close="true">
+    <el-dialog
+      v-model="dialogVisible"
+      width="420px"
+      align-center
+      class="qrcode-dialog"
+      :show-close="true"
+    >
       <template #header>
         <div class="dialog-header-custom">
-          <font-awesome-icon :icon="['fas', 'qrcode']" class="header-icon" />
+          <font-awesome-icon
+            :icon="['fas', 'qrcode']"
+            class="header-icon"
+          ></font-awesome-icon>
           <span class="header-title">{{ t("login.loginCode") }}</span>
         </div>
       </template>
       <div class="qrcode-container">
         <div class="qrcode-wrapper">
           <div v-loading="code === ''" class="qrcode-box">
-            <qrcode-vue v-if="code !== ''" :value="code" :size="260" level="H" class="qrcode-img"></qrcode-vue>
+            <qrcode-vue
+              v-if="code !== ''"
+              :value="code"
+              :size="260"
+              level="H"
+              class="qrcode-img"
+            ></qrcode-vue>
           </div>
         </div>
         <p class="qrcode-tip">{{ t("login.scanTip") }}</p>

@@ -7,15 +7,26 @@
       <span>{{ t("login.register") }}</span>
     </el-button>
 
-    <el-dialog v-model="dialogVisible" :title="t('login.register')" width="340px" class="qrcode-dialog"
-      :class="{ 'dark-theme': isDark }" :show-close="true" align-center @close="close">
+    <el-dialog
+      v-model="dialogVisible"
+      :title="t('login.register')"
+      width="340px"
+      class="qrcode-dialog"
+      :class="{ 'dark-theme': isDark }"
+      :show-close="true"
+      align-center
+      @close="close"
+    >
       <div class="qrcode-container">
         <div class="qrcode-wrapper">
           <div class="qrcode-box">
             <Qrcode :text="url" :options="qrOptions"></Qrcode>
           </div>
           <div class="qrcode-logo">
-            <img :src="domainStore.icon || '/media/image/logo.gif'" alt="Logo" />
+            <img
+              :src="domainStore.icon || '/media/image/logo.gif'"
+              alt="Logo"
+            />
           </div>
         </div>
 
@@ -25,7 +36,12 @@
         </div>
 
         <div class="loading-status" v-if="isScanning">
-          <el-progress type="circle" :percentage="scanProgress" :width="36" :stroke-width="4"></el-progress>
+          <el-progress
+            type="circle"
+            :percentage="scanProgress"
+            :width="36"
+            :stroke-width="4"
+          ></el-progress>
           <span class="scanning-text">{{ t("ui.preparing") }}</span>
         </div>
       </div>

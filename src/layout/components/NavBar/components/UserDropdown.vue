@@ -13,22 +13,33 @@
     <!-- Dropdown Menu -->
     <Transition name="dropdown">
       <div v-if="isMenuOpen" class="dropdown-menu">
-        <router-link to="/settings/edit" class="dropdown-item" @click="closeMenu">
+        <router-link
+          to="/settings/edit"
+          class="dropdown-item"
+          @click="closeMenu"
+        >
           <span class="material-symbols-outlined">settings</span>
-          <span>{{ t('ui.personalSettings') }}</span>
+          <span>{{ t("ui.personalSettings") }}</span>
         </router-link>
         <div class="dropdown-divider"></div>
         <div class="dropdown-item danger" @click="handleLogout">
           <span class="material-symbols-outlined">logout</span>
-          <span>{{ t('sidebar.logout') }}</span>
+          <span>{{ t("sidebar.logout") }}</span>
         </div>
       </div>
     </Transition>
 
     <!-- 退出登录确认弹窗 -->
-    <ConfirmDialog v-model="showLogoutDialog" :title="t('ui.logoutConfirmTitle')"
-      :message="t('ui.logoutConfirmMessage')" :description="t('ui.logoutConfirmDesc')" type="warning"
-      :confirm-text="t('sidebar.logout')" :cancel-text="t('common.cancel')" @confirm="confirmLogout"></ConfirmDialog>
+    <ConfirmDialog
+      v-model="showLogoutDialog"
+      :title="t('ui.logoutConfirmTitle')"
+      :message="t('ui.logoutConfirmMessage')"
+      :description="t('ui.logoutConfirmDesc')"
+      type="warning"
+      :confirm-text="t('sidebar.logout')"
+      :cancel-text="t('common.cancel')"
+      @confirm="confirmLogout"
+    ></ConfirmDialog>
   </div>
 </template>
 

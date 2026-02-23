@@ -1342,7 +1342,9 @@ const run = async () => {
     );
   } catch (e) {
     console.error("执行代码出错:", e);
-    ElMessage.error(`执行代码出错: ${e instanceof Error ? e.message : String(e)}`);
+    ElMessage.error(
+      `执行代码出错: ${e instanceof Error ? e.message : String(e)}`
+    );
   }
 };
 

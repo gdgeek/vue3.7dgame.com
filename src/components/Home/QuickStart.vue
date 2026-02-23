@@ -1,7 +1,10 @@
 <template>
   <div class="quick-start-section">
     <div class="section-header">
-      <font-awesome-icon :icon="['fas', 'bolt']" class="header-icon" />
+      <font-awesome-icon
+        :icon="['fas', 'bolt']"
+        class="header-icon"
+      ></font-awesome-icon>
       <h2 class="section-title">
         {{ t("homepage.quickStart.title") }}
       </h2>
@@ -10,16 +13,29 @@
     <el-row :gutter="20">
       <el-col :xs="24" :sm="8" v-for="(item, index) in quickItems" :key="index">
         <div class="quick-card" @click="handleQuickAction(item.action)">
-          <div class="card-icon-wrapper" :style="{ backgroundColor: item.bgColor }">
-            <font-awesome-icon :icon="item.icon" class="card-icon" :style="{ color: item.iconColor }" />
+          <div
+            class="card-icon-wrapper"
+            :style="{ backgroundColor: item.bgColor }"
+          >
+            <font-awesome-icon
+              :icon="item.icon"
+              class="card-icon"
+              :style="{ color: item.iconColor }"
+            ></font-awesome-icon>
           </div>
           <div class="card-content">
             <h3 class="card-title">{{ item.title }}</h3>
             <p class="card-desc">{{ item.desc }}</p>
           </div>
           <div class="card-action">
-            <span class="action-text" :style="{ color: item.iconColor }">{{ item.actionText }}</span>
-            <font-awesome-icon :icon="['fas', 'arrow-right']" class="action-arrow" :style="{ color: item.iconColor }" />
+            <span class="action-text" :style="{ color: item.iconColor }">{{
+              item.actionText
+            }}</span>
+            <font-awesome-icon
+              :icon="['fas', 'arrow-right']"
+              class="action-arrow"
+              :style="{ color: item.iconColor }"
+            ></font-awesome-icon>
           </div>
         </div>
       </el-col>

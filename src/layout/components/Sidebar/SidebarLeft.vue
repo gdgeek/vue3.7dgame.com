@@ -5,7 +5,9 @@
       <div class="logo-icon">
         <img alt="Logo" :src="logoIcon" />
       </div>
-      <span class="logo-text">{{ domainStore.title || '不加班AR创作平台' }}</span>
+      <span class="logo-text">{{
+        domainStore.title || "不加班AR创作平台"
+      }}</span>
     </div>
 
     <!-- Navigation Section -->
@@ -13,44 +15,91 @@
       <el-scrollbar>
         <!-- 主页 -->
         <router-link to="/home" custom v-slot="{ isActive, navigate }">
-          <div class="sidebar-item" :class="{ 'sidebar-item-active': isActive }" @click="navigate">
-            <font-awesome-icon :icon="['fas', 'home']" class="sidebar-icon" />
-            <span class="item-text">{{ t('sidebar.home') }}</span>
+          <div
+            class="sidebar-item"
+            :class="{ 'sidebar-item-active': isActive }"
+            @click="navigate"
+          >
+            <font-awesome-icon
+              :icon="['fas', 'home']"
+              class="sidebar-icon"
+            ></font-awesome-icon>
+            <span class="item-text">{{ t("sidebar.home") }}</span>
           </div>
         </router-link>
 
         <!-- 素材库 (可展开) -->
         <div class="nav-group">
-          <el-popover placement="right" :width="200" trigger="hover" :disabled="!collapsed"
-            popper-class="sidebar-submenu-popover">
+          <el-popover
+            placement="right"
+            :width="200"
+            trigger="hover"
+            :disabled="!collapsed"
+            popper-class="sidebar-submenu-popover"
+          >
             <template #reference>
               <div class="menu-trigger-wrapper">
                 <div class="sidebar-item">
-                  <font-awesome-icon :icon="['fas', 'th-large']" class="sidebar-icon" />
-                  <span class="item-text">{{ t('sidebar.resources') }}</span>
+                  <font-awesome-icon
+                    :icon="['fas', 'th-large']"
+                    class="sidebar-icon"
+                  ></font-awesome-icon>
+                  <span class="item-text">{{ t("sidebar.resources") }}</span>
                 </div>
               </div>
             </template>
             <!-- Popover Content -->
             <div class="popover-menu">
-              <router-link to="/resource/polygen/index" custom v-slot="{ isActive, navigate }">
-                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>{{ t('sidebar.model') }}</span>
+              <router-link
+                to="/resource/polygen/index"
+                custom
+                v-slot="{ isActive, navigate }"
+              >
+                <div
+                  class="popover-item"
+                  :class="{ active: isActive }"
+                  @click="navigate"
+                >
+                  <span>{{ t("sidebar.model") }}</span>
                 </div>
               </router-link>
-              <router-link to="/resource/picture/index" custom v-slot="{ isActive, navigate }">
-                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>{{ t('sidebar.picture') }}</span>
+              <router-link
+                to="/resource/picture/index"
+                custom
+                v-slot="{ isActive, navigate }"
+              >
+                <div
+                  class="popover-item"
+                  :class="{ active: isActive }"
+                  @click="navigate"
+                >
+                  <span>{{ t("sidebar.picture") }}</span>
                 </div>
               </router-link>
-              <router-link to="/resource/audio/index" custom v-slot="{ isActive, navigate }">
-                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>{{ t('sidebar.audio') }}</span>
+              <router-link
+                to="/resource/audio/index"
+                custom
+                v-slot="{ isActive, navigate }"
+              >
+                <div
+                  class="popover-item"
+                  :class="{ active: isActive }"
+                  @click="navigate"
+                >
+                  <span>{{ t("sidebar.audio") }}</span>
                 </div>
               </router-link>
-              <router-link to="/resource/video/index" custom v-slot="{ isActive, navigate }">
-                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>{{ t('sidebar.video') }}</span>
+              <router-link
+                to="/resource/video/index"
+                custom
+                v-slot="{ isActive, navigate }"
+              >
+                <div
+                  class="popover-item"
+                  :class="{ active: isActive }"
+                  @click="navigate"
+                >
+                  <span>{{ t("sidebar.video") }}</span>
                 </div>
               </router-link>
             </div>
@@ -58,28 +107,60 @@
 
           <!-- Inline Submenu - Hidden when collapsed -->
           <div v-show="!collapsed" class="submenu">
-            <router-link to="/resource/polygen/index" custom v-slot="{ isActive, navigate }">
-              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
+            <router-link
+              to="/resource/polygen/index"
+              custom
+              v-slot="{ isActive, navigate }"
+            >
+              <div
+                class="sidebar-subitem"
+                :class="{ 'sidebar-subitem-active': isActive }"
+                @click="navigate"
+              >
                 <span class="submenu-dot"></span>
-                <span>{{ t('sidebar.model') }}</span>
+                <span>{{ t("sidebar.model") }}</span>
               </div>
             </router-link>
-            <router-link to="/resource/picture/index" custom v-slot="{ isActive, navigate }">
-              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
+            <router-link
+              to="/resource/picture/index"
+              custom
+              v-slot="{ isActive, navigate }"
+            >
+              <div
+                class="sidebar-subitem"
+                :class="{ 'sidebar-subitem-active': isActive }"
+                @click="navigate"
+              >
                 <span class="submenu-dot"></span>
-                <span>{{ t('sidebar.picture') }}</span>
+                <span>{{ t("sidebar.picture") }}</span>
               </div>
             </router-link>
-            <router-link to="/resource/audio/index" custom v-slot="{ isActive, navigate }">
-              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
+            <router-link
+              to="/resource/audio/index"
+              custom
+              v-slot="{ isActive, navigate }"
+            >
+              <div
+                class="sidebar-subitem"
+                :class="{ 'sidebar-subitem-active': isActive }"
+                @click="navigate"
+              >
                 <span class="submenu-dot"></span>
-                <span>{{ t('sidebar.audio') }}</span>
+                <span>{{ t("sidebar.audio") }}</span>
               </div>
             </router-link>
-            <router-link to="/resource/video/index" custom v-slot="{ isActive, navigate }">
-              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
+            <router-link
+              to="/resource/video/index"
+              custom
+              v-slot="{ isActive, navigate }"
+            >
+              <div
+                class="sidebar-subitem"
+                :class="{ 'sidebar-subitem-active': isActive }"
+                @click="navigate"
+              >
                 <span class="submenu-dot"></span>
-                <span>{{ t('sidebar.video') }}</span>
+                <span>{{ t("sidebar.video") }}</span>
               </div>
             </router-link>
           </div>
@@ -87,47 +168,91 @@
 
         <!-- 实体 -->
         <router-link to="/meta/list" custom v-slot="{ isActive, navigate }">
-          <div class="sidebar-item" :class="{ 'sidebar-item-active': isActive }" @click="navigate">
-            <font-awesome-icon :icon="['fas', 'puzzle-piece']" class="sidebar-icon" />
-            <span class="item-text">{{ t('sidebar.entity') }}</span>
+          <div
+            class="sidebar-item"
+            :class="{ 'sidebar-item-active': isActive }"
+            @click="navigate"
+          >
+            <font-awesome-icon
+              :icon="['fas', 'puzzle-piece']"
+              class="sidebar-icon"
+            ></font-awesome-icon>
+            <span class="item-text">{{ t("sidebar.entity") }}</span>
           </div>
         </router-link>
 
         <!-- AI 创作 (Conditional) -->
-        <div v-if="ability.can('open', new AbilityRouter('/ai'))" class="nav-group">
+        <div
+          v-if="ability.can('open', new AbilityRouter('/ai'))"
+          class="nav-group"
+        >
           <router-link to="/ai/list" custom v-slot="{ isActive, navigate }">
-            <div class="sidebar-item" :class="{ 'sidebar-item-active': isActive }" @click="navigate">
-              <font-awesome-icon :icon="['fas', 'robot']" class="sidebar-icon" />
-              <span class="item-text">{{ t('sidebar.aiCreation') }}</span>
+            <div
+              class="sidebar-item"
+              :class="{ 'sidebar-item-active': isActive }"
+              @click="navigate"
+            >
+              <font-awesome-icon
+                :icon="['fas', 'robot']"
+                class="sidebar-icon"
+              ></font-awesome-icon>
+              <span class="item-text">{{ t("sidebar.aiCreation") }}</span>
             </div>
           </router-link>
         </div>
 
         <!-- 场景 (可展开) -->
         <div class="nav-group">
-          <el-popover placement="right" :width="200" trigger="hover" :disabled="!collapsed"
-            popper-class="sidebar-submenu-popover">
+          <el-popover
+            placement="right"
+            :width="200"
+            trigger="hover"
+            :disabled="!collapsed"
+            popper-class="sidebar-submenu-popover"
+          >
             <template #reference>
               <div class="menu-trigger-wrapper">
                 <router-link to="/verse" custom v-slot="{ navigate }">
-                  <div class="sidebar-item" :class="{ 'sidebar-item-active': isExactActive('/verse') }"
-                    @click="navigate">
-                    <font-awesome-icon :icon="['fas', 'layer-group']" class="sidebar-icon" />
-                    <span class="item-text">{{ t('sidebar.scene') }}</span>
+                  <div
+                    class="sidebar-item"
+                    :class="{ 'sidebar-item-active': isExactActive('/verse') }"
+                    @click="navigate"
+                  >
+                    <font-awesome-icon
+                      :icon="['fas', 'layer-group']"
+                      class="sidebar-icon"
+                    ></font-awesome-icon>
+                    <span class="item-text">{{ t("sidebar.scene") }}</span>
                   </div>
                 </router-link>
               </div>
             </template>
             <!-- Popover Content -->
             <div class="popover-menu">
-              <router-link to="/verse/index" custom v-slot="{ isActive, navigate }">
-                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>{{ t('sidebar.selfCreated') }}</span>
+              <router-link
+                to="/verse/index"
+                custom
+                v-slot="{ isActive, navigate }"
+              >
+                <div
+                  class="popover-item"
+                  :class="{ active: isActive }"
+                  @click="navigate"
+                >
+                  <span>{{ t("sidebar.selfCreated") }}</span>
                 </div>
               </router-link>
-              <router-link to="/verse/public" custom v-slot="{ isActive, navigate }">
-                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>{{ t('sidebar.systemRecommend') }}</span>
+              <router-link
+                to="/verse/public"
+                custom
+                v-slot="{ isActive, navigate }"
+              >
+                <div
+                  class="popover-item"
+                  :class="{ active: isActive }"
+                  @click="navigate"
+                >
+                  <span>{{ t("sidebar.systemRecommend") }}</span>
                 </div>
               </router-link>
             </div>
@@ -135,111 +260,231 @@
 
           <!-- Inline Submenu - Hidden when collapsed -->
           <div v-show="!collapsed" class="submenu">
-            <router-link to="/verse/index" custom v-slot="{ isActive, navigate }">
-              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
+            <router-link
+              to="/verse/index"
+              custom
+              v-slot="{ isActive, navigate }"
+            >
+              <div
+                class="sidebar-subitem"
+                :class="{ 'sidebar-subitem-active': isActive }"
+                @click="navigate"
+              >
                 <span class="submenu-dot"></span>
-                <span>{{ t('sidebar.selfCreated') }}</span>
+                <span>{{ t("sidebar.selfCreated") }}</span>
               </div>
             </router-link>
-            <router-link to="/verse/public" custom v-slot="{ isActive, navigate }">
-              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
+            <router-link
+              to="/verse/public"
+              custom
+              v-slot="{ isActive, navigate }"
+            >
+              <div
+                class="sidebar-subitem"
+                :class="{ 'sidebar-subitem-active': isActive }"
+                @click="navigate"
+              >
                 <span class="submenu-dot"></span>
-                <span>{{ t('sidebar.systemRecommend') }}</span>
+                <span>{{ t("sidebar.systemRecommend") }}</span>
               </div>
             </router-link>
           </div>
         </div>
 
         <!-- 校园管理 (Conditional) -->
-        <div v-if="ability.can('open', new AbilityRouter('/campus'))" class="nav-group">
-          <el-popover placement="right" :width="200" trigger="hover" :disabled="!collapsed"
-            popper-class="sidebar-submenu-popover">
+        <div
+          v-if="ability.can('open', new AbilityRouter('/campus'))"
+          class="nav-group"
+        >
+          <el-popover
+            placement="right"
+            :width="200"
+            trigger="hover"
+            :disabled="!collapsed"
+            popper-class="sidebar-submenu-popover"
+          >
             <template #reference>
               <div class="menu-trigger-wrapper">
                 <div class="sidebar-item">
-                  <font-awesome-icon :icon="['fas', 'building']" class="sidebar-icon" />
-                  <span class="item-text">{{ t('sidebar.campusManagement') }}</span>
+                  <font-awesome-icon
+                    :icon="['fas', 'building']"
+                    class="sidebar-icon"
+                  ></font-awesome-icon>
+                  <span class="item-text">{{
+                    t("sidebar.campusManagement")
+                  }}</span>
                 </div>
               </div>
             </template>
             <div class="popover-menu">
-              <router-link to="/campus/school" custom v-slot="{ isActive, navigate }">
-                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>{{ t('sidebar.schoolManagement') }}</span>
+              <router-link
+                to="/campus/school"
+                custom
+                v-slot="{ isActive, navigate }"
+              >
+                <div
+                  class="popover-item"
+                  :class="{ active: isActive }"
+                  @click="navigate"
+                >
+                  <span>{{ t("sidebar.schoolManagement") }}</span>
                 </div>
               </router-link>
-              <router-link to="/campus/teacher" custom v-slot="{ isActive, navigate }">
-                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>{{ t('sidebar.teacherManagement') }}</span>
+              <router-link
+                to="/campus/teacher"
+                custom
+                v-slot="{ isActive, navigate }"
+              >
+                <div
+                  class="popover-item"
+                  :class="{ active: isActive }"
+                  @click="navigate"
+                >
+                  <span>{{ t("sidebar.teacherManagement") }}</span>
                 </div>
               </router-link>
-              <router-link to="/campus/student" custom v-slot="{ isActive, navigate }">
-                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>{{ t('sidebar.studentManagement') }}</span>
+              <router-link
+                to="/campus/student"
+                custom
+                v-slot="{ isActive, navigate }"
+              >
+                <div
+                  class="popover-item"
+                  :class="{ active: isActive }"
+                  @click="navigate"
+                >
+                  <span>{{ t("sidebar.studentManagement") }}</span>
                 </div>
               </router-link>
             </div>
           </el-popover>
 
           <div v-show="!collapsed" class="submenu">
-            <router-link to="/campus/school" custom v-slot="{ isActive, navigate }">
-              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
+            <router-link
+              to="/campus/school"
+              custom
+              v-slot="{ isActive, navigate }"
+            >
+              <div
+                class="sidebar-subitem"
+                :class="{ 'sidebar-subitem-active': isActive }"
+                @click="navigate"
+              >
                 <span class="submenu-dot"></span>
-                <span>{{ t('sidebar.schoolManagement') }}</span>
+                <span>{{ t("sidebar.schoolManagement") }}</span>
               </div>
             </router-link>
-            <router-link to="/campus/teacher" custom v-slot="{ isActive, navigate }">
-              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
+            <router-link
+              to="/campus/teacher"
+              custom
+              v-slot="{ isActive, navigate }"
+            >
+              <div
+                class="sidebar-subitem"
+                :class="{ 'sidebar-subitem-active': isActive }"
+                @click="navigate"
+              >
                 <span class="submenu-dot"></span>
-                <span>{{ t('sidebar.teacherManagement') }}</span>
+                <span>{{ t("sidebar.teacherManagement") }}</span>
               </div>
             </router-link>
-            <router-link to="/campus/student" custom v-slot="{ isActive, navigate }">
-              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
+            <router-link
+              to="/campus/student"
+              custom
+              v-slot="{ isActive, navigate }"
+            >
+              <div
+                class="sidebar-subitem"
+                :class="{ 'sidebar-subitem-active': isActive }"
+                @click="navigate"
+              >
                 <span class="submenu-dot"></span>
-                <span>{{ t('sidebar.studentManagement') }}</span>
+                <span>{{ t("sidebar.studentManagement") }}</span>
               </div>
             </router-link>
           </div>
         </div>
 
         <!-- 管理中心 (Conditional) -->
-        <div v-if="ability.can('open', new AbilityRouter('/manager'))" class="nav-group">
-          <el-popover placement="right" :width="200" trigger="hover" :disabled="!collapsed"
-            popper-class="sidebar-submenu-popover">
+        <div
+          v-if="ability.can('open', new AbilityRouter('/manager'))"
+          class="nav-group"
+        >
+          <el-popover
+            placement="right"
+            :width="200"
+            trigger="hover"
+            :disabled="!collapsed"
+            popper-class="sidebar-submenu-popover"
+          >
             <template #reference>
               <div class="menu-trigger-wrapper">
                 <div class="sidebar-item">
-                  <font-awesome-icon :icon="['fas', 'sliders']" class="sidebar-icon" />
-                  <span class="item-text">{{ t('sidebar.adminCenter') }}</span>
+                  <font-awesome-icon
+                    :icon="['fas', 'sliders']"
+                    class="sidebar-icon"
+                  ></font-awesome-icon>
+                  <span class="item-text">{{ t("sidebar.adminCenter") }}</span>
                 </div>
               </div>
             </template>
             <div class="popover-menu">
-              <router-link to="/manager/user" custom v-slot="{ isActive, navigate }">
-                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>{{ t('sidebar.userManagement') }}</span>
+              <router-link
+                to="/manager/user"
+                custom
+                v-slot="{ isActive, navigate }"
+              >
+                <div
+                  class="popover-item"
+                  :class="{ active: isActive }"
+                  @click="navigate"
+                >
+                  <span>{{ t("sidebar.userManagement") }}</span>
                 </div>
               </router-link>
-              <router-link to="/phototype/list" custom v-slot="{ isActive, navigate }">
-                <div class="popover-item" :class="{ active: isActive }" @click="navigate">
-                  <span>{{ t('sidebar.prefabManagement') }}</span>
+              <router-link
+                to="/phototype/list"
+                custom
+                v-slot="{ isActive, navigate }"
+              >
+                <div
+                  class="popover-item"
+                  :class="{ active: isActive }"
+                  @click="navigate"
+                >
+                  <span>{{ t("sidebar.prefabManagement") }}</span>
                 </div>
               </router-link>
             </div>
           </el-popover>
 
           <div v-show="!collapsed" class="submenu">
-            <router-link to="/manager/user" custom v-slot="{ isActive, navigate }">
-              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
+            <router-link
+              to="/manager/user"
+              custom
+              v-slot="{ isActive, navigate }"
+            >
+              <div
+                class="sidebar-subitem"
+                :class="{ 'sidebar-subitem-active': isActive }"
+                @click="navigate"
+              >
                 <span class="submenu-dot"></span>
-                <span>{{ t('sidebar.userManagement') }}</span>
+                <span>{{ t("sidebar.userManagement") }}</span>
               </div>
             </router-link>
-            <router-link to="/phototype/list" custom v-slot="{ isActive, navigate }">
-              <div class="sidebar-subitem" :class="{ 'sidebar-subitem-active': isActive }" @click="navigate">
+            <router-link
+              to="/phototype/list"
+              custom
+              v-slot="{ isActive, navigate }"
+            >
+              <div
+                class="sidebar-subitem"
+                :class="{ 'sidebar-subitem-active': isActive }"
+                @click="navigate"
+              >
                 <span class="submenu-dot"></span>
-                <span>{{ t('sidebar.prefabManagement') }}</span>
+                <span>{{ t("sidebar.prefabManagement") }}</span>
               </div>
             </router-link>
           </div>
@@ -261,16 +506,26 @@
           </div>
         </router-link> -->
         <div class="sidebar-item logout-item" @click="handleLogout">
-          <font-awesome-icon :icon="['fas', 'right-from-bracket']" class="sidebar-icon" />
-          <span class="item-text">{{ t('sidebar.logout') }}</span>
+          <font-awesome-icon
+            :icon="['fas', 'right-from-bracket']"
+            class="sidebar-icon"
+          ></font-awesome-icon>
+          <span class="item-text">{{ t("sidebar.logout") }}</span>
         </div>
       </div>
     </div>
 
     <!-- 退出登录确认弹窗 -->
-    <ConfirmDialog v-model="showLogoutDialog" :title="t('sidebar.logoutConfirmTitle')"
-      :message="t('sidebar.logoutConfirmMessage')" :description="t('sidebar.logoutConfirmDesc')" type="warning"
-      :confirm-text="t('sidebar.logout')" :cancel-text="t('common.cancel')" @confirm="confirmLogout"></ConfirmDialog>
+    <ConfirmDialog
+      v-model="showLogoutDialog"
+      :title="t('sidebar.logoutConfirmTitle')"
+      :message="t('sidebar.logoutConfirmMessage')"
+      :description="t('sidebar.logoutConfirmDesc')"
+      type="warning"
+      :confirm-text="t('sidebar.logout')"
+      :cancel-text="t('common.cancel')"
+      @confirm="confirmLogout"
+    ></ConfirmDialog>
   </aside>
 </template>
 
@@ -300,7 +555,7 @@ const userStore = useUserStore();
 const domainStore = useDomainStore();
 const ability = useAbility();
 
-const logoIcon = computed(() => domainStore.icon || '/icon.png');
+const logoIcon = computed(() => domainStore.icon || "/icon.png");
 const showLogoutDialog = ref(false);
 
 // Check if route is exactly active (for parent menus)
@@ -314,7 +569,6 @@ const isResourceActive = computed(() => {
 });
 
 const handleLogout = () => {
-
   showLogoutDialog.value = true;
 };
 

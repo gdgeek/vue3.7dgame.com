@@ -1,9 +1,20 @@
 <template>
-  <el-dialog v-model="visible" :title="title" width="420px" append-to-body destroy-on-close
-    class="custom-confirm-dialog" :close-on-click-modal="false" :show-close="false">
+  <el-dialog
+    v-model="visible"
+    :title="title"
+    width="420px"
+    append-to-body
+    destroy-on-close
+    class="custom-confirm-dialog"
+    :close-on-click-modal="false"
+    :show-close="false"
+  >
     <div class="dialog-content">
       <div class="confirm-box" :class="type">
-        <font-awesome-icon :icon="iconName" class="confirm-icon" />
+        <font-awesome-icon
+          :icon="iconName"
+          class="confirm-icon"
+        ></font-awesome-icon>
         <div class="confirm-text">
           <p class="confirm-title">{{ message }}</p>
           <p v-if="description" class="confirm-desc">{{ description }}</p>
@@ -112,7 +123,8 @@ const handleCancel = () => {
   }
 }
 
-// Removed redundant .dark override</style>
+// Removed redundant .dark override
+</style>
 
 <style lang="scss" scoped>
 .dialog-content {
@@ -242,4 +254,5 @@ const handleCancel = () => {
   }
 }
 
-// Removed redundant .dark override</style>
+// Removed redundant .dark override
+</style>

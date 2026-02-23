@@ -1,15 +1,28 @@
 <template>
   <TransitionWrapper>
-    <CardListPage ref="cardListPageRef" :fetch-data="fetchAiRodins" wrapper-class="ai-list" @refresh="handleRefresh">
+    <CardListPage
+      ref="cardListPageRef"
+      :fetch-data="fetchAiRodins"
+      wrapper-class="ai-list"
+      @refresh="handleRefresh"
+    >
       <template #header-actions>
         <el-button type="primary" @click="createAI">
-          <font-awesome-icon :icon="['fas', 'plus']" style="font-size: 18px; margin-right: 4px" />
+          <font-awesome-icon
+            :icon="['fas', 'plus']"
+            style="font-size: 18px; margin-right: 4px"
+          ></font-awesome-icon>
           {{ $t("ai.generation") }}
         </el-button>
       </template>
 
       <template #card="{ item }">
-        <MrPPCard :item="item" :type="$t('ai.title')" color="#3498db" @deleted="deletedWindow">
+        <MrPPCard
+          :item="item"
+          :type="$t('ai.title')"
+          color="#3498db"
+          @deleted="deletedWindow"
+        >
           <template #enter>
             <el-button type="primary" size="small" @click="view(item.id)">
               {{ $t("meta.enter") }}

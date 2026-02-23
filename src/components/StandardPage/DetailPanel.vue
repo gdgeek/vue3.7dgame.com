@@ -1,14 +1,22 @@
 <template>
   <Teleport to="body">
     <Transition name="panel-fade">
-      <div v-if="modelValue" class="detail-panel-overlay" @click.self="handleClose">
+      <div
+        v-if="modelValue"
+        class="detail-panel-overlay"
+        @click.self="handleClose"
+      >
         <Transition name="panel-slide">
-          <div v-if="modelValue" class="detail-panel" :style="{ width: panelWidth }">
+          <div
+            v-if="modelValue"
+            class="detail-panel"
+            :style="{ width: panelWidth }"
+          >
             <!-- Header -->
             <div class="panel-header">
               <h3 class="panel-title">{{ title || t("ui.resourceDetail") }}</h3>
               <button class="panel-close" @click="handleClose">
-                <font-awesome-icon :icon="['fas', 'xmark']" />
+                <font-awesome-icon :icon="['fas', 'xmark']"></font-awesome-icon>
               </button>
             </div>
 
@@ -18,7 +26,9 @@
               <div class="panel-preview" :style="{ height: previewHeight }">
                 <slot name="preview">
                   <div class="preview-placeholder">
-                    <font-awesome-icon :icon="placeholderIcon" />
+                    <font-awesome-icon
+                      :icon="placeholderIcon"
+                    ></font-awesome-icon>
                     <span v-if="placeholderText">{{ placeholderText }}</span>
                   </div>
                 </slot>
@@ -30,18 +40,34 @@
                 <div class="info-name-section">
                   <div v-if="!isEditing" class="info-name-row">
                     <h4 class="info-name">{{ name }}</h4>
-                    <button v-if="editable" class="btn-icon-only" @click="startEditing">
-                      <font-awesome-icon :icon="['fas', 'pen-to-square']" />
+                    <button
+                      v-if="editable"
+                      class="btn-icon-only"
+                      @click="startEditing"
+                    >
+                      <font-awesome-icon
+                        :icon="['fas', 'pen-to-square']"
+                      ></font-awesome-icon>
                     </button>
                   </div>
                   <div v-else class="info-name-edit">
-                    <input ref="nameInputRef" v-model="editingName" type="text" class="name-input"
-                      @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
+                    <input
+                      ref="nameInputRef"
+                      v-model="editingName"
+                      type="text"
+                      class="name-input"
+                      @keyup.enter="saveEdit"
+                      @keyup.escape="cancelEdit"
+                    />
                     <div class="edit-actions">
                       <button class="btn-edit-cancel" @click="cancelEdit">
                         {{ t("common.cancel") }}
                       </button>
-                      <button class="btn-edit-save" @click="saveEdit" :disabled="!editingName.trim()">
+                      <button
+                        class="btn-edit-save"
+                        @click="saveEdit"
+                        :disabled="!editingName.trim()"
+                      >
                         {{ t("ui.save") }}
                       </button>
                     </div>
@@ -50,7 +76,11 @@
 
                 <!-- Properties Table -->
                 <div class="info-table">
-                  <div v-for="(item, index) in properties" :key="index" class="info-row">
+                  <div
+                    v-for="(item, index) in properties"
+                    :key="index"
+                    class="info-row"
+                  >
                     <span class="info-label">{{ item.label }}</span>
                     <span class="info-value">{{ item.value }}</span>
                   </div>
@@ -64,32 +94,58 @@
             <!-- Footer Area (Fixed) -->
             <div class="panel-footer">
               <!-- Actions Area -->
-              <div class="panel-actions" :class="{ 'layout-grid': actionLayout === 'grid' }">
+              <div
+                class="panel-actions"
+                :class="{ 'layout-grid': actionLayout === 'grid' }"
+              >
                 <slot name="actions">
                   <template v-if="actionLayout === 'grid'">
                     <!-- Top: Secondary Action (Enter Editor) -->
-                    <button v-if="secondaryAction" class="btn-pill-primary" @click="$emit('secondary')">
-                      <font-awesome-icon :icon="['fas', 'file-lines']" />
+                    <button
+                      v-if="secondaryAction"
+                      class="btn-pill-primary"
+                      @click="$emit('secondary')"
+                    >
+                      <font-awesome-icon
+                        :icon="['fas', 'file-lines']"
+                      ></font-awesome-icon>
                       {{ secondaryActionText || t("ui.useInEditor") }}
                     </button>
                     <!-- Bottom: Download and Delete side by side -->
                     <div class="actions-row">
-                      <button class="btn-pill-secondary" @click="$emit('download')">
-                        <font-awesome-icon :icon="downloadIcon" />
+                      <button
+                        class="btn-pill-secondary"
+                        @click="$emit('download')"
+                      >
+                        <font-awesome-icon
+                          :icon="downloadIcon"
+                        ></font-awesome-icon>
                         {{ downloadText || t("ui.copy") }}
                       </button>
-                      <button v-if="showDelete" class="btn-pill-danger" @click="$emit('delete')">
-                        <font-awesome-icon :icon="['fas', 'trash-can']" />
+                      <button
+                        v-if="showDelete"
+                        class="btn-pill-danger"
+                        @click="$emit('delete')"
+                      >
+                        <font-awesome-icon
+                          :icon="['fas', 'trash-can']"
+                        ></font-awesome-icon>
                         {{ deleteText || t("common.delete") }}
                       </button>
                     </div>
                   </template>
                   <template v-else>
                     <button class="btn-primary-full" @click="$emit('download')">
-                      <font-awesome-icon :icon="['fas', 'download']" />
+                      <font-awesome-icon
+                        :icon="['fas', 'download']"
+                      ></font-awesome-icon>
                       {{ downloadText || t("ui.download") }}
                     </button>
-                    <button v-if="secondaryAction" class="btn-text-link" @click="$emit('secondary')">
+                    <button
+                      v-if="secondaryAction"
+                      class="btn-text-link"
+                      @click="$emit('secondary')"
+                    >
                       {{ secondaryActionText || t("ui.useInEditor") }}
                     </button>
                   </template>
@@ -97,9 +153,14 @@
               </div>
 
               <!-- Danger Zone (only for stacked layout) -->
-              <div v-if="showDelete && actionLayout === 'stacked'" class="panel-danger">
+              <div
+                v-if="showDelete && actionLayout === 'stacked'"
+                class="panel-danger"
+              >
                 <button class="btn-danger-text" @click="$emit('delete')">
-                  <font-awesome-icon :icon="['fas', 'trash-can']" />
+                  <font-awesome-icon
+                    :icon="['fas', 'trash-can']"
+                  ></font-awesome-icon>
                   {{ deleteText || t("ui.deleteResource") }}
                 </button>
               </div>
@@ -149,10 +210,10 @@ const props = withDefaults(defineProps<Props>(), {
   editable: true,
   properties: () => [],
   previewHeight: "300px",
-  placeholderIcon: () => ['fas', 'image'],
+  placeholderIcon: () => ["fas", "image"],
   placeholderText: "",
   downloadText: "",
-  downloadIcon: () => ['fas', 'copy'],
+  downloadIcon: () => ["fas", "copy"],
   deleteText: "",
   secondaryAction: false,
   secondaryActionText: "",
@@ -390,8 +451,10 @@ onUnmounted(() => {
   font-size: 15px;
   font-weight: 500;
   color: var(--text-primary, #1e293b);
-  background: var(--bg-input,
-      var(--bg-card, #fff)); // Use bg-input if available
+  background: var(
+    --bg-input,
+    var(--bg-card, #fff)
+  ); // Use bg-input if available
   border: 2px solid var(--primary-color, #03a9f4);
   border-radius: var(--radius-md, 12px);
   outline: none;

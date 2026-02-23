@@ -144,7 +144,9 @@ export function useEmailVerification() {
 
       return false;
     } catch (err) {
-      const apiErr = err as { error?: { message?: string; code?: string; retry_after?: number } };
+      const apiErr = err as {
+        error?: { message?: string; code?: string; retry_after?: number };
+      };
       error.value = apiErr.error?.message || "验证失败";
 
       // 处理账户锁定

@@ -9,31 +9,81 @@
     <el-form :model="localData" label-width="auto" style="max-width: 600px">
       <!--三元向量输入element ui, 在一行,只能是数字，然后size是mini，前面标题是缩放-->
       <el-form-item :label="t('ui.scale')">
-        <el-input v-model.number="localData.scale.x" placeholder="X" size="small" type="number"
-          style="width: 60px"></el-input>
-        <el-input v-model.number="localData.scale.y" placeholder="Y" size="small" type="number"
-          style="width: 60px"></el-input>
-        <el-input v-model.number="localData.scale.z" placeholder="Z" size="small" type="number"
-          style="width: 60px"></el-input>
+        <el-input
+          v-model.number="localData.scale.x"
+          placeholder="X"
+          size="small"
+          type="number"
+          style="width: 60px"
+        ></el-input>
+        <el-input
+          v-model.number="localData.scale.y"
+          placeholder="Y"
+          size="small"
+          type="number"
+          style="width: 60px"
+        ></el-input>
+        <el-input
+          v-model.number="localData.scale.z"
+          placeholder="Z"
+          size="small"
+          type="number"
+          style="width: 60px"
+        ></el-input>
       </el-form-item>
       <el-form-item :label="t('ui.rotation')">
-        <el-input v-model.number="localData.rotate.x" placeholder="X" size="small" type="number"
-          style="width: 60px"></el-input>
-        <el-input v-model.number="localData.rotate.y" placeholder="Y" size="small" type="number"
-          style="width: 60px"></el-input>
-        <el-input v-model.number="localData.rotate.z" placeholder="Z" size="small" type="number"
-          style="width: 60px"></el-input>
+        <el-input
+          v-model.number="localData.rotate.x"
+          placeholder="X"
+          size="small"
+          type="number"
+          style="width: 60px"
+        ></el-input>
+        <el-input
+          v-model.number="localData.rotate.y"
+          placeholder="Y"
+          size="small"
+          type="number"
+          style="width: 60px"
+        ></el-input>
+        <el-input
+          v-model.number="localData.rotate.z"
+          placeholder="Z"
+          size="small"
+          type="number"
+          style="width: 60px"
+        ></el-input>
       </el-form-item>
       <el-form-item :label="t('ui.position')">
-        <el-input v-model.number="localData.position.x" placeholder="X" size="small" type="number"
-          style="width: 60px"></el-input>
-        <el-input v-model.number="localData.position.y" placeholder="Y" size="small" type="number"
-          style="width: 60px"></el-input>
-        <el-input v-model.number="localData.position.z" placeholder="Z" size="small" type="number"
-          style="width: 60px"></el-input>
+        <el-input
+          v-model.number="localData.position.x"
+          placeholder="X"
+          size="small"
+          type="number"
+          style="width: 60px"
+        ></el-input>
+        <el-input
+          v-model.number="localData.position.y"
+          placeholder="Y"
+          size="small"
+          type="number"
+          style="width: 60px"
+        ></el-input>
+        <el-input
+          v-model.number="localData.position.z"
+          placeholder="Z"
+          size="small"
+          type="number"
+          style="width: 60px"
+        ></el-input>
       </el-form-item>
     </el-form>
-    <el-button icon="check" @click="handleSave" size="small" style="width: 100%">
+    <el-button
+      icon="check"
+      @click="handleSave"
+      size="small"
+      style="width: 100%"
+    >
       {{ t("ui.saveData") }}
     </el-button>
   </el-card>

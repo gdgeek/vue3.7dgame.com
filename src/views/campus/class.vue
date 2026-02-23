@@ -1,6 +1,10 @@
 <template>
   <div class="class-page-container">
-    <ClassDetail v-if="classId" :class-id="classId" @class-loaded="onClassLoaded"></ClassDetail>
+    <ClassDetail
+      v-if="classId"
+      :class-id="classId"
+      @class-loaded="onClassLoaded"
+    ></ClassDetail>
     <el-empty v-else :description="$t('common.noData')"></el-empty>
   </div>
 </template>
@@ -22,7 +26,9 @@ const classId = computed(() => {
 
 const onClassLoaded = (classInfo: EduClass) => {
   const siteName = domainStore.title || "不加班AR创作平台";
-  document.title = classInfo.name ? `${classInfo.name} - ${siteName}` : siteName;
+  document.title = classInfo.name
+    ? `${classInfo.name} - ${siteName}`
+    : siteName;
 };
 </script>
 

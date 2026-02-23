@@ -1,11 +1,23 @@
 <template>
   <div v-if="classify" class="flex gap-2">
-    <el-tag v-for="tag in tags" :type="tag.type === 'Classify' ? 'primary' : 'success'" :key="tag.name"
-      :closable="props.editable" @close="close(tag.id)">
+    <el-tag
+      v-for="tag in tags"
+      :type="tag.type === 'Classify' ? 'primary' : 'success'"
+      :key="tag.name"
+      :closable="props.editable"
+      @close="close(tag.id)"
+    >
       {{ tag.name }}
     </el-tag>
-    <el-select-v2 v-if="props.editable" @change="handleChange" v-model="value" size="small" :options="classify"
-      :placeholder="t('verse.listPage.addTag')" style="width: 108px"></el-select-v2>
+    <el-select-v2
+      v-if="props.editable"
+      @change="handleChange"
+      v-model="value"
+      size="small"
+      :options="classify"
+      :placeholder="t('verse.listPage.addTag')"
+      style="width: 108px"
+    ></el-select-v2>
   </div>
 </template>
 

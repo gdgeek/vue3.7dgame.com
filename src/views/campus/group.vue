@@ -176,7 +176,8 @@ const handleCreateVerse = async (form: any, imageId: number | null) => {
   } catch (error) {
     console.error("Failed to create verse:", error);
     const axiosErr = error as { response?: { data?: { message?: string } } };
-    const errorMsg = axiosErr.response?.data?.message || t("common.createFailed");
+    const errorMsg =
+      axiosErr.response?.data?.message || t("common.createFailed");
     ElMessage.error(errorMsg);
   }
 };

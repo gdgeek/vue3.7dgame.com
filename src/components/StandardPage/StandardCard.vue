@@ -1,17 +1,32 @@
 <template>
-  <div class="standard-card" :class="{ 'is-selected': isSelected, 'selection-mode': selectionMode }"
-    @mouseenter="isHovered = true" @mouseleave="isHovered = false">
+  <div
+    class="standard-card"
+    :class="{ 'is-selected': isSelected, 'selection-mode': selectionMode }"
+    @mouseenter="isHovered = true"
+    @mouseleave="isHovered = false"
+  >
     <!-- Selection Checkbox -->
-    <div v-if="showCheckbox" class="card-checkbox" :class="{ visible: selectionMode || isHovered || isSelected }"
-      @click.stop="toggleSelect">
+    <div
+      v-if="showCheckbox"
+      class="card-checkbox"
+      :class="{ visible: selectionMode || isHovered || isSelected }"
+      @click.stop="toggleSelect"
+    >
       <div class="checkbox-inner" :class="{ checked: isSelected }">
-        <font-awesome-icon v-if="isSelected" :icon="['fas', 'check']" />
+        <font-awesome-icon
+          v-if="isSelected"
+          :icon="['fas', 'check']"
+        ></font-awesome-icon>
       </div>
     </div>
 
     <!-- Type Icon -->
-    <div v-if="typeIcon" class="card-type-icon" :class="{ 'with-checkbox': selectionMode || isHovered || isSelected }">
-      <font-awesome-icon :icon="typeIcon" />
+    <div
+      v-if="typeIcon"
+      class="card-type-icon"
+      :class="{ 'with-checkbox': selectionMode || isHovered || isSelected }"
+    >
+      <font-awesome-icon :icon="typeIcon"></font-awesome-icon>
     </div>
 
     <!-- Thumbnail Area -->
@@ -19,14 +34,14 @@
       <div class="thumbnail-inner">
         <img v-if="image" :src="image" :alt="title" />
         <div v-else class="thumbnail-placeholder">
-          <font-awesome-icon :icon="placeholderIcon" />
+          <font-awesome-icon :icon="placeholderIcon"></font-awesome-icon>
         </div>
       </div>
 
       <!-- Hover Overlay -->
       <div class="thumbnail-overlay">
         <button class="overlay-btn" @click.stop="$emit('view')">
-          <font-awesome-icon :icon="['fas', 'circle-info']" />
+          <font-awesome-icon :icon="['fas', 'circle-info']"></font-awesome-icon>
           <span>{{ t("ui.viewInfo") }}</span>
         </button>
       </div>
@@ -36,7 +51,9 @@
         <span v-for="tag in displayTags" :key="tag" class="tag-badge">
           {{ tag }}
         </span>
-        <span v-if="tags.length > 2" class="tag-more">+{{ tags.length - 2 }}</span>
+        <span v-if="tags.length > 2" class="tag-more"
+          >+{{ tags.length - 2 }}</span
+        >
       </div>
     </div>
 
@@ -46,11 +63,17 @@
       <p v-if="description" class="card-description">{{ description }}</p>
       <div v-if="meta" class="card-meta">
         <span v-if="meta.author" class="meta-item">
-          <font-awesome-icon :icon="['fas', 'user']" class="meta-icon" />
+          <font-awesome-icon
+            :icon="['fas', 'user']"
+            class="meta-icon"
+          ></font-awesome-icon>
           {{ meta.author }}
         </span>
         <span v-if="meta.date" class="meta-item">
-          <font-awesome-icon :icon="['fas', 'clock']" class="meta-icon" />
+          <font-awesome-icon
+            :icon="['fas', 'clock']"
+            class="meta-icon"
+          ></font-awesome-icon>
           {{ meta.date }}
         </span>
       </div>
@@ -58,7 +81,10 @@
 
     <!-- Action Footer -->
     <div v-if="actionText" class="card-action" @click.stop="$emit('action')">
-      <font-awesome-icon :icon="actionIcon" class="action-icon" />
+      <font-awesome-icon
+        :icon="actionIcon"
+        class="action-icon"
+      ></font-awesome-icon>
       <span class="action-text">{{ actionText }}</span>
     </div>
   </div>
@@ -92,8 +118,8 @@ const props = withDefaults(
     aspectRatio?: string;
   }>(),
   {
-    actionIcon: () => ['fas', 'pen-to-square'],
-    placeholderIcon: () => ['fas', 'image'],
+    actionIcon: () => ["fas", "pen-to-square"],
+    placeholderIcon: () => ["fas", "image"],
     selected: false,
     selectionMode: false,
     typeIcon: "",
@@ -244,9 +270,11 @@ const toggleSelect = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg,
-      var(--bg-secondary, #f1f5f9) 0%,
-      var(--bg-tertiary, #e2e8f0) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--bg-secondary, #f1f5f9) 0%,
+    var(--bg-tertiary, #e2e8f0) 100%
+  );
 
   .svg-inline--fa {
     font-size: 48px;

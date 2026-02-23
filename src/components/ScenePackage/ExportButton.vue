@@ -1,6 +1,11 @@
 <template>
   <el-tooltip :content="t('ui.exportScene')" placement="top">
-    <el-button type="success" :loading="exporting" :icon="Download" @click="handleExport"></el-button>
+    <el-button
+      type="success"
+      :loading="exporting"
+      :icon="Download"
+      @click="handleExport"
+    ></el-button>
   </el-tooltip>
 </template>
 

@@ -1,14 +1,29 @@
 <template>
-  <el-popover placement="bottom-start" :width="220" trigger="click" popper-class="page-filter-popper" @show="handleShow"
-    @hide="handleHide">
+  <el-popover
+    placement="bottom-start"
+    :width="220"
+    trigger="click"
+    popper-class="page-filter-popper"
+    @show="handleShow"
+    @hide="handleHide"
+  >
     <template #reference>
-      <div class="filter-trigger" :class="{ 'is-active': dropdownVisible || selectedCount > 0 }">
-        <font-awesome-icon :icon="['fas', icon]" class="filter-icon" />
+      <div
+        class="filter-trigger"
+        :class="{ 'is-active': dropdownVisible || selectedCount > 0 }"
+      >
+        <font-awesome-icon
+          :icon="['fas', icon]"
+          class="filter-icon"
+        ></font-awesome-icon>
         <span class="filter-label">
           {{ displayLabel }}
         </span>
-        <font-awesome-icon :icon="['fas', 'chevron-down']" class="filter-arrow"
-          :class="{ 'is-open': dropdownVisible }" />
+        <font-awesome-icon
+          :icon="['fas', 'chevron-down']"
+          class="filter-arrow"
+          :class="{ 'is-open': dropdownVisible }"
+        ></font-awesome-icon>
       </div>
     </template>
 
@@ -16,9 +31,21 @@
     <div class="filter-content">
       <el-scrollbar max-height="320px">
         <div class="filter-list">
-          <div v-for="opt in options" :key="opt.value" class="filter-item" @click="toggleOption(opt.value)">
-            <div class="filter-checkbox" :class="{ 'is-checked': isChecked(opt.value) }">
-              <font-awesome-icon v-if="isChecked(opt.value)" :icon="['fas', 'check']" class="check-icon" />
+          <div
+            v-for="opt in options"
+            :key="opt.value"
+            class="filter-item"
+            @click="toggleOption(opt.value)"
+          >
+            <div
+              class="filter-checkbox"
+              :class="{ 'is-checked': isChecked(opt.value) }"
+            >
+              <font-awesome-icon
+                v-if="isChecked(opt.value)"
+                :icon="['fas', 'check']"
+                class="check-icon"
+              ></font-awesome-icon>
             </div>
             <span class="filter-item-label">{{ opt.label }}</span>
           </div>

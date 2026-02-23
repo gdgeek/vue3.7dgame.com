@@ -1,10 +1,34 @@
 <template>
-  <el-empty v-if="!items || items.length === 0" description="暂无内容" />
-  <el-tabs v-else type="border-card" lazy v-model="activeTab" @tab-click="handleTabClick" class="home-tabs">
-    <el-tab-pane v-for="(item, index) in items" :key="item.label" :label="item.label" :name="index">
-      <Document v-if="item.type === 'document'" :post-id="item.id" :category="category" :category-path="categoryPath">
+  <el-empty
+    v-if="!items || items.length === 0"
+    description="暂无内容"
+  ></el-empty>
+  <el-tabs
+    v-else
+    type="border-card"
+    lazy
+    v-model="activeTab"
+    @tab-click="handleTabClick"
+    class="home-tabs"
+  >
+    <el-tab-pane
+      v-for="(item, index) in items"
+      :key="item.label"
+      :label="item.label"
+      :name="index"
+    >
+      <Document
+        v-if="item.type === 'document'"
+        :post-id="item.id"
+        :category="category"
+        :category-path="categoryPath"
+      >
       </Document>
-      <DocumentList v-if="item.type === 'category'" :category-id="item.id" :document-path="documentPath"></DocumentList>
+      <DocumentList
+        v-if="item.type === 'category'"
+        :category-id="item.id"
+        :document-path="documentPath"
+      ></DocumentList>
     </el-tab-pane>
   </el-tabs>
 </template>

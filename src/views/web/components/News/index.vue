@@ -7,65 +7,136 @@
       </div>
 
       <div class="news-tabs-wrapper" data-aos="fade-up">
-        <el-tabs v-model="activeTabName" class="news-tabs" @tab-click="handleTabClick">
-          <el-tab-pane v-for="(item, index) in items" :key="index" :label="item.label" :name="item.key">
+        <el-tabs
+          v-model="activeTabName"
+          class="news-tabs"
+          @tab-click="handleTabClick"
+        >
+          <el-tab-pane
+            v-for="(item, index) in items"
+            :key="index"
+            :label="item.label"
+            :name="item.key"
+          >
             <div v-if="loading" class="news-loading">
               <el-skeleton :rows="3" animated></el-skeleton>
-              <el-skeleton :rows="3" animated style="margin-top: 20px"></el-skeleton>
-              <el-skeleton :rows="3" animated style="margin-top: 20px"></el-skeleton>
+              <el-skeleton
+                :rows="3"
+                animated
+                style="margin-top: 20px"
+              ></el-skeleton>
+              <el-skeleton
+                :rows="3"
+                animated
+                style="margin-top: 20px"
+              ></el-skeleton>
             </div>
             <div v-else-if="error" class="news-error">
               <el-empty :description="$t('web.news.loadFailed')"></el-empty>
             </div>
             <div v-else class="news-timeline">
               <el-timeline>
-                <el-timeline-item v-for="(article, aIndex) in displayNewsData" :key="article.id"
-                  :timestamp="formatDate(article.date)" :type="isNewest(article.date) ? 'primary' : 'info'"
-                  :hollow="!isNewest(article.date)" placement="top" :color="getTimelineColor(article.date)"
-                  :size="isNewest(article.date) ? 'large' : 'normal'">
-                  <div class="timeline-card" :class="{ 'newest-article': isNewest(article.date) }" data-aos="fade-up"
-                    :data-aos-delay="aIndex * 50" @click="openArticleDetails(article)">
-                    <div class="card-content" :class="{
-                      'with-image': article.jetpack_featured_media_url,
-                    }">
+                <el-timeline-item
+                  v-for="(article, aIndex) in displayNewsData"
+                  :key="article.id"
+                  :timestamp="formatDate(article.date)"
+                  :type="isNewest(article.date) ? 'primary' : 'info'"
+                  :hollow="!isNewest(article.date)"
+                  placement="top"
+                  :color="getTimelineColor(article.date)"
+                  :size="isNewest(article.date) ? 'large' : 'normal'"
+                >
+                  <div
+                    class="timeline-card"
+                    :class="{ 'newest-article': isNewest(article.date) }"
+                    data-aos="fade-up"
+                    :data-aos-delay="aIndex * 50"
+                    @click="openArticleDetails(article)"
+                  >
+                    <div
+                      class="card-content"
+                      :class="{
+                        'with-image': article.jetpack_featured_media_url,
+                      }"
+                    >
                       <div class="article-meta">
-                        <el-tag size="small" effect="plain" class="category-tag">
+                        <el-tag
+                          size="small"
+                          effect="plain"
+                          class="category-tag"
+                        >
                           {{ item?.label }}
                         </el-tag>
                         <span class="article-date">{{
                           formatRelativeTime(article.date)
-                          }}</span>
-                        <el-tag v-if="isNewest(article.date, aIndex)" size="small" type="success" effect="plain"
-                          class="newest-tag" style="margin-left: 12px">
+                        }}</span>
+                        <el-tag
+                          v-if="isNewest(article.date, aIndex)"
+                          size="small"
+                          type="success"
+                          effect="plain"
+                          class="newest-tag"
+                          style="margin-left: 12px"
+                        >
                           {{ $t("web.news.newest") }}
                         </el-tag>
                       </div>
-                      <h3 class="article-title" :innerHTML="sanitizeHtml(article.title.rendered)"></h3>
-                      <div class="article-excerpt" :innerHTML="sanitizeHtml(article.excerpt.rendered)"></div>
+                      <h3
+                        class="article-title"
+                        :innerHTML="sanitizeHtml(article.title.rendered)"
+                      ></h3>
+                      <div
+                        class="article-excerpt"
+                        :innerHTML="sanitizeHtml(article.excerpt.rendered)"
+                      ></div>
 
                       <div class="article-actions">
-                        <span class="read-more">{{ $t("web.news.readMore") }}
+                        <span class="read-more"
+                          >{{ $t("web.news.readMore") }}
                           <el-icon>
                             <ArrowRight></ArrowRight>
                           </el-icon>
                         </span>
                       </div>
                     </div>
-                    <div v-if="article.jetpack_featured_media_url" class="card-image">
-                      <img :src="article.jetpack_featured_media_url" :alt="sanitizeText(article.title.rendered)" />
+                    <div
+                      v-if="article.jetpack_featured_media_url"
+                      class="card-image"
+                    >
+                      <img
+                        :src="article.jetpack_featured_media_url"
+                        :alt="sanitizeText(article.title.rendered)"
+                      />
                     </div>
                   </div>
                 </el-timeline-item>
               </el-timeline>
 
-              <div class="news-pagination" v-if="pagination.count > 1 && !showAllNews">
-                <el-pagination v-model:current-page="pagination.current" :page-size="pagination.size"
-                  :total="pagination.total" layout="prev, pager, next" background
-                  @current-change="handlePageChange"></el-pagination>
+              <div
+                class="news-pagination"
+                v-if="pagination.count > 1 && !showAllNews"
+              >
+                <el-pagination
+                  v-model:current-page="pagination.current"
+                  :page-size="pagination.size"
+                  :total="pagination.total"
+                  layout="prev, pager, next"
+                  background
+                  @current-change="handlePageChange"
+                ></el-pagination>
               </div>
 
-              <div class="news-more" v-if="newsData.length > 2 && !showAllNews" data-aos="fade-up">
-                <el-button type="primary" @click="showAllContent" class="expand-button" round>
+              <div
+                class="news-more"
+                v-if="newsData.length > 2 && !showAllNews"
+                data-aos="fade-up"
+              >
+                <el-button
+                  type="primary"
+                  @click="showAllContent"
+                  class="expand-button"
+                  round
+                >
                   {{ $t("web.news.expandAll") }}{{ item?.label }}
                   <el-icon class="el-icon--right">
                     <ArrowDown></ArrowDown>
@@ -74,7 +145,12 @@
               </div>
 
               <div class="news-more" v-if="showAllNews" data-aos="fade-up">
-                <el-button type="primary" @click="hideAllContent" class="expand-button" round>
+                <el-button
+                  type="primary"
+                  @click="hideAllContent"
+                  class="expand-button"
+                  round
+                >
                   {{ $t("web.news.collapseAll") }}{{ item?.label }}
                   <el-icon class="el-icon--right">
                     <ArrowUp></ArrowUp>
@@ -88,21 +164,39 @@
     </div>
 
     <!-- 文章详情弹窗 -->
-    <el-dialog v-model="dialogVisible" :title="selectedArticle?.title?.rendered
-        ? sanitizeText(selectedArticle.title.rendered)
-        : $t('web.news.articleDetail')
-      " width="800px" top="50px" destroy-on-close fullscreen :class="{ 'dark-theme': isDark }">
+    <el-dialog
+      v-model="dialogVisible"
+      :title="
+        selectedArticle?.title?.rendered
+          ? sanitizeText(selectedArticle.title.rendered)
+          : $t('web.news.articleDetail')
+      "
+      width="800px"
+      top="50px"
+      destroy-on-close
+      fullscreen
+      :class="{ 'dark-theme': isDark }"
+    >
       <div v-if="articleLoading" class="article-loading">
         <el-skeleton :rows="10" animated></el-skeleton>
       </div>
       <div v-else-if="articleError" class="article-error">
-        <el-result icon="error" :title="$t('web.news.loadArticleFailed')"
-          :sub-title="$t('web.news.loadArticleFailedDesc')"></el-result>
+        <el-result
+          icon="error"
+          :title="$t('web.news.loadArticleFailed')"
+          :sub-title="$t('web.news.loadArticleFailedDesc')"
+        ></el-result>
       </div>
       <div v-else-if="articleContent" class="article-detail">
         <div class="article-meta-detail">
           <div class="article-tags">
-            <el-tag v-for="(tag, index) in articleTerms" :key="index" size="small" effect="plain" class="article-tag">
+            <el-tag
+              v-for="(tag, index) in articleTerms"
+              :key="index"
+              size="small"
+              effect="plain"
+              class="article-tag"
+            >
               {{ tag.name }}
             </el-tag>
           </div>
@@ -111,15 +205,23 @@
           </div>
         </div>
 
-        <div class="article-content" :innerHTML="sanitizeHtml(articleContent.content.rendered)"></div>
+        <div
+          class="article-content"
+          :innerHTML="sanitizeHtml(articleContent.content.rendered)"
+        ></div>
       </div>
 
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="dialogVisible = false">{{
             $t("web.news.close")
-            }}</el-button>
-          <el-button v-if="articleContent" type="primary" @click="shareArticle">{{ $t("web.news.share") }}</el-button>
+          }}</el-button>
+          <el-button
+            v-if="articleContent"
+            type="primary"
+            @click="shareArticle"
+            >{{ $t("web.news.share") }}</el-button
+          >
         </div>
       </template>
     </el-dialog>

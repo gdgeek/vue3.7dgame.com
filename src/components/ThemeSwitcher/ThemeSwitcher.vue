@@ -3,12 +3,17 @@
     <!-- 风格主题选择 -->
     <div class="theme-section">
       <div class="section-header">
-        <font-awesome-icon :icon="['fas', 'palette']" />
+        <font-awesome-icon :icon="['fas', 'palette']"></font-awesome-icon>
         <span class="section-title">界面风格</span>
       </div>
       <div class="theme-list">
-        <button v-for="theme in availableThemes" :key="theme.name" class="theme-card"
-          :class="{ active: currentThemeName === theme.name }" @click="setTheme(theme.name)">
+        <button
+          v-for="theme in availableThemes"
+          :key="theme.name"
+          class="theme-card"
+          :class="{ active: currentThemeName === theme.name }"
+          @click="setTheme(theme.name)"
+        >
           <div class="theme-preview" :class="theme.name">
             <div class="preview-sidebar"></div>
             <div class="preview-content">
@@ -23,8 +28,11 @@
             <span class="theme-name">{{ theme.displayName }}</span>
             <span class="theme-desc">{{ theme.description }}</span>
           </div>
-          <font-awesome-icon v-if="currentThemeName === theme.name" :icon="['fas', 'circle-check']"
-            class="check-icon" />
+          <font-awesome-icon
+            v-if="currentThemeName === theme.name"
+            :icon="['fas', 'circle-check']"
+            class="check-icon"
+          ></font-awesome-icon>
         </button>
       </div>
     </div>
@@ -32,26 +40,48 @@
     <!-- 日间模式主题色选择 -->
     <div v-if="currentThemeName === 'modern-blue'" class="theme-section">
       <div class="section-header">
-        <font-awesome-icon :icon="['fas', 'eye-dropper']" />
+        <font-awesome-icon :icon="['fas', 'eye-dropper']"></font-awesome-icon>
         <span class="section-title">主题色</span>
       </div>
       <div class="color-picker-section">
         <div class="preset-colors">
-          <button v-for="preset in presetPrimaryColors" :key="preset.color" class="color-btn"
-            :class="{ active: currentPrimaryColor === preset.color }" :style="{ '--preset-color': preset.color }"
-            :title="preset.name" @click="handleColorSelect(preset.color)">
-            <font-awesome-icon v-if="currentPrimaryColor === preset.color" :icon="['fas', 'check']"
-              class="color-check" />
+          <button
+            v-for="preset in presetPrimaryColors"
+            :key="preset.color"
+            class="color-btn"
+            :class="{ active: currentPrimaryColor === preset.color }"
+            :style="{ '--preset-color': preset.color }"
+            :title="preset.name"
+            @click="handleColorSelect(preset.color)"
+          >
+            <font-awesome-icon
+              v-if="currentPrimaryColor === preset.color"
+              :icon="['fas', 'check']"
+              class="color-check"
+            ></font-awesome-icon>
           </button>
         </div>
         <div class="custom-color-row">
           <label class="custom-color-label">
-            <font-awesome-icon :icon="['fas', 'pen-to-square']" />
+            <font-awesome-icon
+              :icon="['fas', 'pen-to-square']"
+            ></font-awesome-icon>
             <span>自定义</span>
-            <input type="color" :value="currentPrimaryColor" class="color-input" @input="handleCustomColor" />
+            <input
+              type="color"
+              :value="currentPrimaryColor"
+              class="color-input"
+              @input="handleCustomColor"
+            />
           </label>
-          <button v-if="customPrimaryColor" class="reset-btn" @click="handleResetColor">
-            <font-awesome-icon :icon="['fas', 'arrows-rotate']" />
+          <button
+            v-if="customPrimaryColor"
+            class="reset-btn"
+            @click="handleResetColor"
+          >
+            <font-awesome-icon
+              :icon="['fas', 'arrows-rotate']"
+            ></font-awesome-icon>
             <span>重置</span>
           </button>
         </div>

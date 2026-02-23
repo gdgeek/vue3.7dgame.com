@@ -1,17 +1,31 @@
 <template>
-  <el-dialog v-model="dialogVisible" width="420px" destroy-on-close center @closed="handleDialogClosed"
-    class="login-dialog" :class="{ 'dark-theme': isDark }">
+  <el-dialog
+    v-model="dialogVisible"
+    width="420px"
+    destroy-on-close
+    center
+    @closed="handleDialogClosed"
+    class="login-dialog"
+    :class="{ 'dark-theme': isDark }"
+  >
     <div class="login-container">
       <!-- 顶部标题与图标 -->
       <div class="login-header">
-        <img :src="domainStore.icon || '/media/image/logo.gif'" alt="Logo" class="login-logo" />
+        <img
+          :src="domainStore.icon || '/media/image/logo.gif'"
+          alt="Logo"
+          class="login-logo"
+        />
         <h2 class="login-title">{{ domainStore.title }}</h2>
       </div>
 
       <!-- 内容区域 -->
       <div class="login-content">
         <div>
-          <NamePassword @login-success="handleLoginSuccess" @switch-to-register="toggleRegisterMode"></NamePassword>
+          <NamePassword
+            @login-success="handleLoginSuccess"
+            @switch-to-register="toggleRegisterMode"
+          ></NamePassword>
           <br />
           <Wechat></Wechat>
         </div>
@@ -21,9 +35,13 @@
       <div class="login-footer">
         <p class="agreement-text">
           {{ t("login.agreementPrefix") }}
-          <a href="#" @click.prevent="openAgreement('terms')">{{ t("login.termsOfService") }}</a>
+          <a href="#" @click.prevent="openAgreement('terms')">{{
+            t("login.termsOfService")
+          }}</a>
           {{ t("login.agreementAnd") }}
-          <a href="#" @click.prevent="openAgreement('privacy')">{{ t("login.privacyPolicy") }}</a>
+          <a href="#" @click.prevent="openAgreement('privacy')">{{
+            t("login.privacyPolicy")
+          }}</a>
         </p>
       </div>
     </div>

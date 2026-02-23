@@ -1,37 +1,68 @@
 <template>
   <div class="document-list-wrapper">
     <!-- 分类不存在 -->
-    <el-empty v-if="categoryState === 'not-found'" description="分类不存在" />
+    <el-empty
+      v-if="categoryState === 'not-found'"
+      description="分类不存在"
+    ></el-empty>
 
     <!-- 分类加载错误 -->
-    <el-empty v-else-if="categoryState === 'error'" :description="errorMessage || '加载失败，请重试'">
+    <el-empty
+      v-else-if="categoryState === 'error'"
+      :description="errorMessage || '加载失败，请重试'"
+    >
       <el-button type="primary" @click="retry">重试</el-button>
     </el-empty>
 
     <!-- 文章列表为空（404） -->
-    <el-empty v-else-if="postsState === 'not-found'" description="暂无文章" />
+    <el-empty
+      v-else-if="postsState === 'not-found'"
+      description="暂无文章"
+    ></el-empty>
 
     <!-- 文章加载错误 -->
-    <el-empty v-else-if="postsState === 'error'" :description="errorMessage || '加载失败，请重试'">
+    <el-empty
+      v-else-if="postsState === 'error'"
+      :description="errorMessage || '加载失败，请重试'"
+    >
       <el-button type="primary" @click="retry">重试</el-button>
     </el-empty>
 
     <!-- 正常内容 -->
     <template v-else>
-      <el-tooltip v-if="category" :content="category.description" placement="top" effect="light">
+      <el-tooltip
+        v-if="category"
+        :content="category.description"
+        placement="top"
+        effect="light"
+      >
         <span class="document-list-category-tag">
           {{ category.name }}
         </span>
       </el-tooltip>
       <el-timeline v-if="data" :reverse="reverse" class="document-timeline">
-        <el-timeline-item v-for="(item, index) in data" :key="index" :timestamp="dateTime(new Date(item.date))">
-
+        <el-timeline-item
+          v-for="(item, index) in data"
+          :key="index"
+          :timestamp="dateTime(new Date(item.date))"
+        >
           <div class="document-box-card" @click="select(item.id)">
-            <img v-if="item.jetpack_featured_media_url" align="left" class="document-list-img"
-              :src="item.jetpack_featured_media_url" fit="cover" />
+            <img
+              v-if="item.jetpack_featured_media_url"
+              align="left"
+              class="document-list-img"
+              :src="item.jetpack_featured_media_url"
+              fit="cover"
+            />
             <div class="document-list-text">
-              <h3 class="document-list-title" :innerHTML="sanitizedTitle(item)"></h3>
-              <div class="document-list-excerpt" :innerHTML="sanitizedExcerpt(item)"></div>
+              <h3
+                class="document-list-title"
+                :innerHTML="sanitizedTitle(item)"
+              ></h3>
+              <div
+                class="document-list-excerpt"
+                :innerHTML="sanitizedExcerpt(item)"
+              ></div>
             </div>
           </div>
         </el-timeline-item>
@@ -44,10 +75,19 @@
           <el-skeleton :rows="3"></el-skeleton>
         </el-timeline-item>
       </el-timeline>
-      <div v-if="pagination.count && pagination.count > 1" class="document-pagination">
-        <el-pagination :current-page="pagination.current" :page-count="pagination.count ?? 0"
-          :page-size="pagination.size" :total="pagination.total ?? 0" layout="prev, pager, next, jumper" background
-          @current-change="handleCurrentChange"></el-pagination>
+      <div
+        v-if="pagination.count && pagination.count > 1"
+        class="document-pagination"
+      >
+        <el-pagination
+          :current-page="pagination.current"
+          :page-count="pagination.count ?? 0"
+          :page-size="pagination.size"
+          :total="pagination.total ?? 0"
+          layout="prev, pager, next, jumper"
+          background
+          @current-change="handleCurrentChange"
+        ></el-pagination>
       </div>
     </template>
   </div>
@@ -299,7 +339,6 @@ const sanitizedExcerpt = (item: Item) => {
   padding: var(--spacing-lg) 0;
 
   :deep(.el-pagination) {
-
     .btn-prev,
     .btn-next,
     .el-pager li {

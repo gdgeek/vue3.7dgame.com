@@ -1,36 +1,67 @@
 <template>
   <TransitionWrapper>
     <div class="audio-index">
-      <PageActionBar :title="t('route.resourceManagement.audioManagement.audioList')"
-        :search-placeholder="t('ui.search')" :selection-count="selectedCount" @search="handleSearch"
-        @sort-change="handleSortChange" @view-change="handleViewChange" @batch-download="handleBatchDownload"
-        @batch-delete="handleBatchDelete" @cancel-selection="handleCancelSelection">
+      <PageActionBar
+        :title="t('route.resourceManagement.audioManagement.audioList')"
+        :search-placeholder="t('ui.search')"
+        :selection-count="selectedCount"
+        @search="handleSearch"
+        @sort-change="handleSortChange"
+        @view-change="handleViewChange"
+        @batch-download="handleBatchDownload"
+        @batch-delete="handleBatchDelete"
+        @cancel-selection="handleCancelSelection"
+      >
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
-            <font-awesome-icon :icon="['fas', 'upload']" style="font-size: 18px; margin-right: 4px" />
+            <font-awesome-icon
+              :icon="['fas', 'upload']"
+              style="font-size: 18px; margin-right: 4px"
+            ></font-awesome-icon>
             {{ $t("audio.uploadAudio") }}
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer :items="items" :view-mode="viewMode" :loading="loading"
-        @row-click="(item) => openViewDialog(item.id)">
+      <ViewContainer
+        :items="items"
+        :view-mode="viewMode"
+        :loading="loading"
+        @row-click="(item) => openViewDialog(item.id)"
+      >
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url || `https://api.dicebear.com/9.x/thumbs/svg?seed=${item.id}`"
-            :title="item.name || t('ui.unnamed')" :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
-            :selected="isSelected(item.id)" :selection-mode="hasSelection" :type-icon="['fas', 'headphones']"
-            :placeholder-icon="['fas', 'headphones']" @view="openViewDialog(item.id)"
-            @select="() => toggleSelection(item.id)"></StandardCard>
+          <StandardCard
+            :image="
+              item.image?.url ||
+              `https://api.dicebear.com/9.x/thumbs/svg?seed=${item.id}`
+            "
+            :title="item.name || t('ui.unnamed')"
+            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
+            :selected="isSelected(item.id)"
+            :selection-mode="hasSelection"
+            :type-icon="['fas', 'headphones']"
+            :placeholder-icon="['fas', 'headphones']"
+            @view="openViewDialog(item.id)"
+            @select="() => toggleSelection(item.id)"
+          ></StandardCard>
         </template>
 
         <template #list-item="{ item }">
           <div class="col-checkbox" @click.stop>
-            <el-checkbox :model-value="isSelected(item.id)" @change="() => toggleSelection(item.id)"></el-checkbox>
+            <el-checkbox
+              :model-value="isSelected(item.id)"
+              @change="() => toggleSelection(item.id)"
+            ></el-checkbox>
           </div>
           <div class="col-name">
             <div class="item-thumb">
-              <img :src="item.image?.url || `https://api.dicebear.com/9.x/thumbs/svg?seed=${item.id}`"
-                :alt="item.name" />
+              <img
+                :src="
+                  item.image?.url ||
+                  `https://api.dicebear.com/9.x/thumbs/svg?seed=${item.id}`
+                "
+                :alt="item.name"
+              />
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
           </div>
@@ -40,14 +71,21 @@
           </div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon" />
+              <font-awesome-icon
+                :icon="['fas', 'ellipsis']"
+                class="actions-icon"
+              ></font-awesome-icon>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openViewDialog(item.id)">
                     {{ $t("audio.viewAudio") }}
                   </el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)">{{ t("verse.listPage.rename") }}</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => { })">{{ t("common.delete") }}</el-dropdown-item>
+                  <el-dropdown-item @click="namedWindow(item)">{{
+                    t("verse.listPage.rename")
+                  }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item, () => {})">{{
+                    t("common.delete")
+                  }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -55,27 +93,55 @@
         </template>
       </ViewContainer>
 
-      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
+      <PagePagination
+        :current-page="pagination.current"
+        :total-pages="totalPages"
+        @page-change="handlePageChange"
+      >
       </PagePagination>
 
       <!-- Dialogs -->
       <!-- Dialogs -->
-      <StandardUploadDialog v-model="uploadDialogVisible" dir="audio" :file-type="fileType" :max-size="5"
-        :title="$t('audio.uploadAudio')" @save-resource="saveAudio" @success="handleUploadSuccess">
+      <StandardUploadDialog
+        v-model="uploadDialogVisible"
+        dir="audio"
+        :file-type="fileType"
+        :max-size="5"
+        :title="$t('audio.uploadAudio')"
+        @save-resource="saveAudio"
+        @success="handleUploadSuccess"
+      >
       </StandardUploadDialog>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="viewDialogVisible" :title="t('audio.viewAudio')" :name="currentAudio?.name || ''"
-        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'headphones']"
-        :download-text="t('ui.download')" :delete-text="t('ui.deleteResource')" @download="handleDownload"
-        @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
+      <DetailPanel
+        v-model="viewDialogVisible"
+        :title="t('audio.viewAudio')"
+        :name="currentAudio?.name || ''"
+        :loading="detailLoading"
+        :properties="detailProperties"
+        :placeholder-icon="['fas', 'headphones']"
+        :download-text="t('ui.download')"
+        :delete-text="t('ui.deleteResource')"
+        @download="handleDownload"
+        @rename="handleRename"
+        @delete="handleDelete"
+        @close="handlePanelClose"
+      >
         <template #preview>
           <div class="audio-preview">
             <div class="audio-visual">
-              <font-awesome-icon :icon="['fas', 'headphones']" />
+              <font-awesome-icon
+                :icon="['fas', 'headphones']"
+              ></font-awesome-icon>
             </div>
-            <audio v-if="currentAudio?.file?.url" ref="audioRef" :src="currentAudio.file.url" controls
-              class="audio-player"></audio>
+            <audio
+              v-if="currentAudio?.file?.url"
+              ref="audioRef"
+              :src="currentAudio.file.url"
+              controls
+              class="audio-player"
+            ></audio>
           </div>
         </template>
       </DetailPanel>
@@ -155,14 +221,21 @@ const detailProperties = computed(() => {
     ? JSON.parse(currentAudio.value.info)
     : null;
   const props = [
-    { label: t("verse.listPage.type"), value: t("route.resourceManagement.audioManagement.title") },
+    {
+      label: t("verse.listPage.type"),
+      value: t("route.resourceManagement.audioManagement.title"),
+    },
     { label: t("ui.size"), value: formatSize(currentAudio.value.file?.size) },
     {
       label: t("verse.listPage.createdTime"),
       value: convertToLocalTime(currentAudio.value.created_at),
     },
   ];
-  if (info?.length) props.push({ label: t("video.view.info.item6"), value: info.length.toFixed(2) + "s" });
+  if (info?.length)
+    props.push({
+      label: t("video.view.info.item6"),
+      value: info.length.toFixed(2) + "s",
+    });
   return props;
 });
 
@@ -307,16 +380,28 @@ const deletedWindow = async (
 
 const handleBatchDownload = () => {
   const selected = getSelectedItems(items.value || []);
-  Message.info(t("ui.batchDownloadDev", { count: selected.length, resource: t("route.resourceManagement.audioManagement.title") }));
+  Message.info(
+    t("ui.batchDownloadDev", {
+      count: selected.length,
+      resource: t("route.resourceManagement.audioManagement.title"),
+    })
+  );
 };
 
 const handleBatchDelete = async () => {
   const selected = getSelectedItems(items.value || []);
   try {
     await MessageBox.confirm(
-      t("ui.batchDeleteConfirm", { count: selected.length, resource: t("route.resourceManagement.audioManagement.title") }),
+      t("ui.batchDeleteConfirm", {
+        count: selected.length,
+        resource: t("route.resourceManagement.audioManagement.title"),
+      }),
       t("ui.batchDeleteTitle"),
-      { confirmButtonText: t("common.delete"), cancelButtonText: t("common.cancel"), type: "warning" }
+      {
+        confirmButtonText: t("common.delete"),
+        cancelButtonText: t("common.cancel"),
+        type: "warning",
+      }
     );
 
     for (const item of selected) {
@@ -325,7 +410,12 @@ const handleBatchDelete = async () => {
 
     clearSelection();
     refresh();
-    Message.success(t("ui.batchDeleteSuccess", { count: selected.length, resource: t("route.resourceManagement.audioManagement.title") }));
+    Message.success(
+      t("ui.batchDeleteSuccess", {
+        count: selected.length,
+        resource: t("route.resourceManagement.audioManagement.title"),
+      })
+    );
   } catch {
     Message.info(t("ui.cancelDelete"));
   }
@@ -460,9 +550,11 @@ const formatItemDate = (dateStr?: string) => {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: linear-gradient(135deg,
-      var(--primary-color, #03a9f4),
-      var(--primary-dark, #0288d1));
+  background: linear-gradient(
+    135deg,
+    var(--primary-color, #03a9f4),
+    var(--primary-dark, #0288d1)
+  );
   display: flex;
   align-items: center;
   justify-content: center;

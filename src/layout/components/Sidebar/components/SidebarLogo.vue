@@ -8,7 +8,11 @@
       <router-link v-else class="wh-full flex-center" to="/">
         <img v-if="settingsStore.sidebarLogo" :src="logo" class="logo-image" />
         <!-- <span class="logo-title"> {{ defaultSettings.title }}</span> -->
-        <el-tooltip :content="domainStore.title" placement="bottom" :show-after="300">
+        <el-tooltip
+          :content="domainStore.title"
+          placement="bottom"
+          :show-after="300"
+        >
           <span class="logo-title">{{ domainStore.title }}</span>
         </el-tooltip>
       </router-link>
@@ -30,9 +34,10 @@ defineProps({
   },
 });
 
-const logo = computed(() =>
-  domainStore.icon ||
-  new URL("../../../../../public/media/image/logo.gif", import.meta.url).href
+const logo = computed(
+  () =>
+    domainStore.icon ||
+    new URL("../../../../../public/media/image/logo.gif", import.meta.url).href
 );
 </script>
 

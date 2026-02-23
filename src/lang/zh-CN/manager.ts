@@ -3,6 +3,9 @@ export default {
   // 管理部分国际化
   manager: {
     title: "添加用户",
+    schoolManagement: "学校管理",
+    teacherManagement: "教师管理",
+    studentManagement: "学生管理",
     createSchool: "创建学校",
     createClass: "创建班级",
     createTeacher: "创建教师",

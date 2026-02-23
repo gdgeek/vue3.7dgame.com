@@ -56,7 +56,9 @@ function subtitle(): string {
 const environment = {
   ip: GetIP(),
   api: ReplaceURL(
-    ((window as unknown as Record<string, string>).__API_URL__) || import.meta.env.VITE_APP_API_URL || ""
+    (window as unknown as Record<string, string>).__API_URL__ ||
+      import.meta.env.VITE_APP_API_URL ||
+      ""
   ),
   doc: ReplaceURL(import.meta.env.VITE_APP_DOC_API || ""),
   blockly: ReplaceURL(import.meta.env.VITE_APP_BLOCKLY_URL || ""),
@@ -64,17 +66,18 @@ const environment = {
   auth_api: ReplaceURL(import.meta.env.VITE_APP_AUTH_API || ""),
   ai: ReplaceURL(import.meta.env.VITE_APP_AI_API || ""),
   backup_api: ReplaceURL(
-    ((window as unknown as Record<string, string>).__BACKUP_API_URL__) ||
+    (window as unknown as Record<string, string>).__BACKUP_API_URL__ ||
       import.meta.env.VITE_APP_BACKUP_API_URL ||
       ""
   ),
   domain_info: ReplaceURL(
-    ((window as unknown as Record<string, string>).__DOMAIN_INFO_API_URL__) ||
+    (window as unknown as Record<string, string>).__DOMAIN_INFO_API_URL__ ||
       import.meta.env.VITE_APP_DOMAIN_INFO_API_URL ||
       "https://domain.xrteeth.com"
   ),
   domain_info_backup: ReplaceURL(
-    ((window as unknown as Record<string, string>).__BACKUP_DOMAIN_INFO_API_URL__) ||
+    (window as unknown as Record<string, string>)
+      .__BACKUP_DOMAIN_INFO_API_URL__ ||
       import.meta.env.VITE_APP_BACKUP_DOMAIN_INFO_API_URL ||
       ""
   ),

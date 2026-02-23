@@ -1,22 +1,43 @@
 <template>
   <TransitionWrapper>
     <div class="meta-list">
-      <PageActionBar :title="t('meta.list.pageTitle')" :search-placeholder="t('meta.list.searchPlaceholder')"
-        @search="handleSearch" @sort-change="handleSortChange" @view-change="handleViewChange">
+      <PageActionBar
+        :title="t('meta.list.pageTitle')"
+        :search-placeholder="t('meta.list.searchPlaceholder')"
+        @search="handleSearch"
+        @sort-change="handleSortChange"
+        @view-change="handleViewChange"
+      >
         <template #actions>
           <el-button type="primary" @click="addMeta">
-            <font-awesome-icon :icon="['fas', 'plus']" style="font-size: 18px; margin-right: 4px" />
+            <font-awesome-icon
+              :icon="['fas', 'plus']"
+              style="font-size: 18px; margin-right: 4px"
+            ></font-awesome-icon>
             {{ $t("meta.title") }}
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
+      <ViewContainer
+        class="list-view"
+        :items="items"
+        :view-mode="viewMode"
+        :loading="loading"
+        @row-click="openDetail"
+      >
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.title || item.name || t('meta.list.unnamed')"
-            :action-text="t('meta.list.enterEditor')" :action-icon="['fas', 'pen-to-square']"
-            :type-icon="['fas', 'puzzle-piece']" :placeholder-icon="['fas', 'puzzle-piece']" :show-checkbox="false"
-            @view="openDetail(item)" @action="goToEditor(item)"></StandardCard>
+          <StandardCard
+            :image="item.image?.url"
+            :title="item.title || item.name || t('meta.list.unnamed')"
+            :action-text="t('meta.list.enterEditor')"
+            :action-icon="['fas', 'pen-to-square']"
+            :type-icon="['fas', 'puzzle-piece']"
+            :placeholder-icon="['fas', 'puzzle-piece']"
+            :show-checkbox="false"
+            @view="openDetail(item)"
+            @action="goToEditor(item)"
+          ></StandardCard>
         </template>
 
         <template #list-header>
@@ -31,13 +52,23 @@
           <div class="col-checkbox"></div>
           <div class="col-name">
             <div class="item-thumb">
-              <img v-if="item.image?.url" :src="item.image.url" :alt="item.title" />
+              <img
+                v-if="item.image?.url"
+                :src="item.image.url"
+                :alt="item.title"
+              />
               <div v-else class="thumb-placeholder">
-                <font-awesome-icon :icon="['fas', 'puzzle-piece']" />
+                <font-awesome-icon
+                  :icon="['fas', 'puzzle-piece']"
+                ></font-awesome-icon>
               </div>
             </div>
             <span class="item-name">{{ item.title || item.name || "—" }}</span>
-            <el-button class="btn-hover-action" type="primary" @click.stop="goToEditor(item)">
+            <el-button
+              class="btn-hover-action"
+              type="primary"
+              @click.stop="goToEditor(item)"
+            >
               {{ t("meta.list.enterEditor") }}
             </el-button>
           </div>
@@ -49,14 +80,27 @@
           </div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon" />
+              <font-awesome-icon
+                :icon="['fas', 'ellipsis']"
+                class="actions-icon"
+              ></font-awesome-icon>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="openDetail(item)">{{ t("meta.list.viewDetail") }}</el-dropdown-item>
-                  <el-dropdown-item @click="goToEditor(item)">{{ t("meta.list.enterEditor") }}</el-dropdown-item>
-                  <el-dropdown-item @click="copyWindow(item)">{{ t("meta.copy") }}</el-dropdown-item>
-                  <el-dropdown-item @click="namedWindow(item)">{{ t("meta.list.rename") }}</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => { })">{{ t("meta.delete") }}</el-dropdown-item>
+                  <el-dropdown-item @click="openDetail(item)">{{
+                    t("meta.list.viewDetail")
+                  }}</el-dropdown-item>
+                  <el-dropdown-item @click="goToEditor(item)">{{
+                    t("meta.list.enterEditor")
+                  }}</el-dropdown-item>
+                  <el-dropdown-item @click="copyWindow(item)">{{
+                    t("meta.copy")
+                  }}</el-dropdown-item>
+                  <el-dropdown-item @click="namedWindow(item)">{{
+                    t("meta.list.rename")
+                  }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item, () => {})">{{
+                    t("meta.delete")
+                  }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -64,38 +108,77 @@
         </template>
 
         <template #empty>
-          <EmptyState :icon="['fas', 'folder-open']" :text="t('meta.list.emptyText')"
-            :action-text="t('meta.list.createAction')" @action="addMeta"></EmptyState>
+          <EmptyState
+            :icon="['fas', 'folder-open']"
+            :text="t('meta.list.emptyText')"
+            :action-text="t('meta.list.createAction')"
+            @action="addMeta"
+          ></EmptyState>
         </template>
       </ViewContainer>
 
-      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
+      <PagePagination
+        :current-page="pagination.current"
+        :total-pages="totalPages"
+        @page-change="handlePageChange"
+      >
       </PagePagination>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="detailVisible" :title="t('meta.list.detailTitle')" :name="currentMeta?.title || ''"
-        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'folder-open']"
-        :show-delete="true" :secondary-action="true" :secondary-action-text="t('meta.list.enterEditor')"
-        :download-text="t('meta.list.copyEntity')" :delete-text="t('meta.list.deleteEntity')" action-layout="grid"
-        width="560px" @download="handleCopy" @rename="handleRename" @delete="handleDelete" @secondary="handleGoToEditor"
-        @close="handlePanelClose">
+      <DetailPanel
+        v-model="detailVisible"
+        :title="t('meta.list.detailTitle')"
+        :name="currentMeta?.title || ''"
+        :loading="detailLoading"
+        :properties="detailProperties"
+        :placeholder-icon="['fas', 'folder-open']"
+        :show-delete="true"
+        :secondary-action="true"
+        :secondary-action-text="t('meta.list.enterEditor')"
+        :download-text="t('meta.list.copyEntity')"
+        :delete-text="t('meta.list.deleteEntity')"
+        action-layout="grid"
+        width="560px"
+        @download="handleCopy"
+        @rename="handleRename"
+        @delete="handleDelete"
+        @secondary="handleGoToEditor"
+        @close="handlePanelClose"
+      >
         <template #preview>
           <div class="meta-preview" @click="triggerFileSelect">
-            <img v-if="currentMeta?.image?.url" :src="currentMeta.image.url" :alt="currentMeta.title" />
+            <img
+              v-if="currentMeta?.image?.url"
+              :src="currentMeta.image.url"
+              :alt="currentMeta.title"
+            />
             <div v-else class="preview-placeholder">
-              <font-awesome-icon :icon="['fas', 'th-large']" />
+              <font-awesome-icon
+                :icon="['fas', 'th-large']"
+              ></font-awesome-icon>
             </div>
 
-            <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/jpg" class="hidden-input"
-              @change="handleCoverUpload" />
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/png,image/jpeg,image/jpg"
+              class="hidden-input"
+              @change="handleCoverUpload"
+            />
           </div>
         </template>
       </DetailPanel>
     </div>
 
     <!-- Selection Method Dialog -->
-    <el-dialog v-model="imageSelectDialogVisible" :title="$t('meta.metaEdit.selectImageMethod')" width="500px"
-      align-center :close-on-click-modal="false" append-to-body>
+    <el-dialog
+      v-model="imageSelectDialogVisible"
+      :title="$t('meta.metaEdit.selectImageMethod')"
+      width="500px"
+      align-center
+      :close-on-click-modal="false"
+      append-to-body
+    >
       <div class="selection-container">
         <div class="selection-card" @click="openResourceDialog">
           <div class="card-icon">
@@ -126,7 +209,11 @@
     </el-dialog>
 
     <!-- Resource Dialog -->
-    <ResourceDialog :multiple="false" @selected="onResourceSelected" ref="resourceDialogRef"></ResourceDialog>
+    <ResourceDialog
+      :multiple="false"
+      @selected="onResourceSelected"
+      ref="resourceDialogRef"
+    ></ResourceDialog>
   </TransitionWrapper>
 </template>
 
@@ -259,7 +346,7 @@ const handleCoverUpload = async (event: Event) => {
     if (!has) {
       await new Promise<void>((resolve, reject) => {
         fileStore.store
-          .fileUpload(md5, extension, file, (p: number) => { }, handler, dir)
+          .fileUpload(md5, extension, file, (p: number) => {}, handler, dir)
           .then(() => resolve())
           .catch(reject);
       });
@@ -295,7 +382,10 @@ const handleCoverUpload = async (event: Event) => {
 const detailProperties = computed(() => {
   if (!currentMeta.value) return [];
   return [
-    { label: t("meta.list.properties.type"), value: t("meta.list.properties.entity") },
+    {
+      label: t("meta.list.properties.type"),
+      value: t("meta.list.properties.entity"),
+    },
     {
       label: t("meta.list.properties.author"),
       value:

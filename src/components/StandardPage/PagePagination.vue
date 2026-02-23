@@ -1,7 +1,16 @@
 <template>
   <div class="page-pagination">
-    <el-button round class="page-btn" :disabled="currentPage <= 1" @click="changePage(currentPage - 1)">
-      <font-awesome-icon :icon="['fas', 'chevron-left']" class="btn-icon" style="margin-right: 4px; font-size: 18px" />
+    <el-button
+      round
+      class="page-btn"
+      :disabled="currentPage <= 1"
+      @click="changePage(currentPage - 1)"
+    >
+      <font-awesome-icon
+        :icon="['fas', 'chevron-left']"
+        class="btn-icon"
+        style="margin-right: 4px; font-size: 18px"
+      ></font-awesome-icon>
       上一页
     </el-button>
 
@@ -9,9 +18,18 @@
       第 <strong>{{ currentPage }}</strong> 页 / 共 {{ totalPages }} 页
     </span>
 
-    <el-button round class="page-btn" :disabled="currentPage >= totalPages" @click="changePage(currentPage + 1)">
+    <el-button
+      round
+      class="page-btn"
+      :disabled="currentPage >= totalPages"
+      @click="changePage(currentPage + 1)"
+    >
       下一页
-      <font-awesome-icon :icon="['fas', 'chevron-right']" class="btn-icon" style="margin-left: 4px; font-size: 18px" />
+      <font-awesome-icon
+        :icon="['fas', 'chevron-right']"
+        class="btn-icon"
+        style="margin-left: 4px; font-size: 18px"
+      ></font-awesome-icon>
     </el-button>
   </div>
 </template>

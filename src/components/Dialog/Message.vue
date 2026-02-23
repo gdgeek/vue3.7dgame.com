@@ -1,13 +1,26 @@
 <template>
-  <Transition name="message-fade" @before-leave="onClose" @after-leave="$emit('destroy')">
-    <div v-show="visible" class="custom-message" :class="type" :style="{ top: top + 'px', zIndex }"
-      @mouseenter="clearTimer" @mouseleave="startTimer">
+  <Transition
+    name="message-fade"
+    @before-leave="onClose"
+    @after-leave="$emit('destroy')"
+  >
+    <div
+      v-show="visible"
+      class="custom-message"
+      :class="type"
+      :style="{ top: top + 'px', zIndex }"
+      @mouseenter="clearTimer"
+      @mouseleave="startTimer"
+    >
       <div class="message-content-wrapper">
-        <font-awesome-icon :icon="iconName" class="message-icon" />
+        <font-awesome-icon
+          :icon="iconName"
+          class="message-icon"
+        ></font-awesome-icon>
         <span class="message-text">{{ message }}</span>
       </div>
       <button v-if="showClose" class="message-close" @click.stop="close">
-        <font-awesome-icon :icon="['fas', 'xmark']" />
+        <font-awesome-icon :icon="['fas', 'xmark']"></font-awesome-icon>
       </button>
     </div>
   </Transition>

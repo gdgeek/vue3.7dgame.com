@@ -1,7 +1,7 @@
 <template>
   <div class="empty-state">
     <div class="empty-icon">
-      <font-awesome-icon :icon="icon" />
+      <font-awesome-icon :icon="icon"></font-awesome-icon>
     </div>
     <p class="empty-text">{{ text }}</p>
     <button v-if="actionText" class="empty-action" @click="$emit('action')">
@@ -18,7 +18,7 @@ withDefaults(
     actionText?: string;
   }>(),
   {
-    icon: () => ['fas', 'folder-open'],
+    icon: () => ["fas", "folder-open"],
     text: "暂无数据",
     actionText: "",
   }

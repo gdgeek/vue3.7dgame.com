@@ -6,7 +6,10 @@
       <QuickStart></QuickStart>
 
       <div class="section-header">
-        <font-awesome-icon :icon="['fas', 'bullhorn']" class="header-icon" />
+        <font-awesome-icon
+          :icon="['fas', 'bullhorn']"
+          class="header-icon"
+        ></font-awesome-icon>
         <h2 class="section-title">
           {{ t("homepage.announcements.title") }}
         </h2>
@@ -14,7 +17,7 @@
 
       <!-- 加载状态：骨架屏 -->
       <div v-if="loading" class="home-loading">
-        <el-skeleton :rows="4" animated />
+        <el-skeleton :rows="4" animated></el-skeleton>
       </div>
 
       <!-- 错误状态：错误提示 + 重试按钮 -->
@@ -26,13 +29,18 @@
 
       <!-- 空状态：无内容提示 -->
       <div v-else-if="items.length === 0" class="home-empty">
-        <el-empty description="暂无内容" />
+        <el-empty description="暂无内容"></el-empty>
       </div>
 
       <!-- 正常状态：传递 items 给 Book -->
       <Book v-else :items="items"></Book>
 
-      <el-tabs v-if="env.local()" type="border-card" lazy class="home-local-tabs">
+      <el-tabs
+        v-if="env.local()"
+        type="border-card"
+        lazy
+        class="home-local-tabs"
+      >
         <el-tab-pane :label="domainStore.title">
           <LocalPage></LocalPage>
         </el-tab-pane>

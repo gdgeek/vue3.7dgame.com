@@ -18,8 +18,15 @@
 
         <div class="form-container">
           <h4>表单：</h4>
-          <VueForm v-if="schema" v-model="formData" :schema="schema" :form-footer="formFooter" @submit="handleSubmit"
-            @cancel="handleCancel" @change="handleChange"></VueForm>
+          <VueForm
+            v-if="schema"
+            v-model="formData"
+            :schema="schema"
+            :form-footer="formFooter"
+            @submit="handleSubmit"
+            @cancel="handleCancel"
+            @change="handleChange"
+          ></VueForm>
         </div>
 
         <el-divider></el-divider>
@@ -36,10 +43,18 @@
         </template>
 
         <el-button-group>
-          <el-button type="primary" @click="useSchema1">Schema 1: 粒子</el-button>
-          <el-button type="success" @click="useSchema2">Schema 2: 用户信息</el-button>
-          <el-button type="warning" @click="useSchema3">Schema 3: 物品配置</el-button>
-          <el-button type="danger" @click="useSchema4">Schema 4: 综合测试</el-button>
+          <el-button type="primary" @click="useSchema1"
+            >Schema 1: 粒子</el-button
+          >
+          <el-button type="success" @click="useSchema2"
+            >Schema 2: 用户信息</el-button
+          >
+          <el-button type="warning" @click="useSchema3"
+            >Schema 3: 物品配置</el-button
+          >
+          <el-button type="danger" @click="useSchema4"
+            >Schema 4: 综合测试</el-button
+          >
         </el-button-group>
       </el-card>
     </div>

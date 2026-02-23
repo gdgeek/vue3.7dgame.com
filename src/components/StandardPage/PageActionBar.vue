@@ -17,9 +17,17 @@
       <div class="controls-left">
         <!-- Search - Hide in selection mode -->
         <div v-if="showSearch && selectionCount === 0" class="search-box">
-          <font-awesome-icon :icon="['fas', 'search']" class="search-icon" />
-          <input v-model="searchValue" type="text" class="search-input"
-            :placeholder="searchPlaceholder || t('ui.search')" @keyup.enter="handleSearch" />
+          <font-awesome-icon
+            :icon="['fas', 'search']"
+            class="search-icon"
+          ></font-awesome-icon>
+          <input
+            v-model="searchValue"
+            type="text"
+            class="search-input"
+            :placeholder="searchPlaceholder || t('ui.search')"
+            @keyup.enter="handleSearch"
+          />
         </div>
 
         <!-- Custom filters slot (tags, visibility, etc.) - Hide in selection mode -->
@@ -29,23 +37,40 @@
       <div class="controls-right">
         <!-- Batch actions - Show in selection mode -->
         <template v-if="selectionCount > 0">
-          <el-button v-if="isPageSelected" @click="$emit('cancel-select-all-page')">
-            <font-awesome-icon :icon="['fas', 'square-minus']" style="font-size: 18px; margin-right: 4px" />
+          <el-button
+            v-if="isPageSelected"
+            @click="$emit('cancel-select-all-page')"
+          >
+            <font-awesome-icon
+              :icon="['fas', 'square-minus']"
+              style="font-size: 18px; margin-right: 4px"
+            ></font-awesome-icon>
             {{ t("ui.cancelSelectAll") }}
           </el-button>
           <el-button v-else @click="$emit('select-all-page')">
-            <font-awesome-icon :icon="['fas', 'check-double']" style="font-size: 18px; margin-right: 4px" />
+            <font-awesome-icon
+              :icon="['fas', 'check-double']"
+              style="font-size: 18px; margin-right: 4px"
+            ></font-awesome-icon>
             {{ t("ui.selectAllPage") }}
           </el-button>
           <el-button @click="$emit('batch-download')">
-            <font-awesome-icon :icon="['fas', 'download']" style="font-size: 18px; margin-right: 4px" />
+            <font-awesome-icon
+              :icon="['fas', 'download']"
+              style="font-size: 18px; margin-right: 4px"
+            ></font-awesome-icon>
             {{ t("ui.batchDownload") }}
           </el-button>
           <el-button type="danger" @click="$emit('batch-delete')">
-            <font-awesome-icon :icon="['fas', 'trash-can']" style="font-size: 18px; margin-right: 4px" />
+            <font-awesome-icon
+              :icon="['fas', 'trash-can']"
+              style="font-size: 18px; margin-right: 4px"
+            ></font-awesome-icon>
             {{ t("ui.batchDelete") }}
           </el-button>
-          <el-button @click="$emit('cancel-selection')">{{ t("common.cancel") }}</el-button>
+          <el-button @click="$emit('cancel-selection')">{{
+            t("common.cancel")
+          }}</el-button>
         </template>
 
         <!-- Normal actions - Hide in selection mode -->
@@ -54,18 +79,35 @@
           <!-- Sort buttons -->
           <template v-if="showSort">
             <div class="sort-control">
-              <button class="sort-btn" :class="{ active: isSortedByTime }" @click="toggleSort(sortByTime)">
-                <font-awesome-icon :icon="['fas', 'clock']" class="sort-icon" />
+              <button
+                class="sort-btn"
+                :class="{ active: isSortedByTime }"
+                @click="toggleSort(sortByTime)"
+              >
+                <font-awesome-icon
+                  :icon="['fas', 'clock']"
+                  class="sort-icon"
+                ></font-awesome-icon>
                 {{ t("ui.time") }}
-                <font-awesome-icon v-if="isSortedByTime" :icon="['fas', sortAscending ? 'chevron-down' : 'chevron-up']"
-                  class="sort-arrow" />
+                <font-awesome-icon
+                  v-if="isSortedByTime"
+                  :icon="['fas', sortAscending ? 'chevron-down' : 'chevron-up']"
+                  class="sort-arrow"
+                ></font-awesome-icon>
               </button>
 
-              <button class="sort-btn" :class="{ active: isSortedByName }" @click="toggleSort(sortByNameField)">
+              <button
+                class="sort-btn"
+                :class="{ active: isSortedByName }"
+                @click="toggleSort(sortByNameField)"
+              >
                 <span class="sort-az">A<small>Z</small></span>
                 {{ t("common.name") }}
-                <font-awesome-icon v-if="isSortedByName" :icon="['fas', sortAscending ? 'chevron-down' : 'chevron-up']"
-                  class="sort-arrow" />
+                <font-awesome-icon
+                  v-if="isSortedByName"
+                  :icon="['fas', sortAscending ? 'chevron-down' : 'chevron-up']"
+                  class="sort-arrow"
+                ></font-awesome-icon>
               </button>
             </div>
           </template>
@@ -76,13 +118,21 @@
           <!-- View toggle -->
           <div v-if="showViewToggle" class="view-toggle">
             <div class="segment-control">
-              <button class="segment-btn" :class="{ active: currentView === 'grid' }" :title="t('ui.gridView')"
-                @click="setView('grid')">
-                <font-awesome-icon :icon="['fas', 'grip']" />
+              <button
+                class="segment-btn"
+                :class="{ active: currentView === 'grid' }"
+                :title="t('ui.gridView')"
+                @click="setView('grid')"
+              >
+                <font-awesome-icon :icon="['fas', 'grip']"></font-awesome-icon>
               </button>
-              <button class="segment-btn" :class="{ active: currentView === 'list' }" :title="t('ui.listView')"
-                @click="setView('list')">
-                <font-awesome-icon :icon="['fas', 'list']" />
+              <button
+                class="segment-btn"
+                :class="{ active: currentView === 'list' }"
+                :title="t('ui.listView')"
+                @click="setView('list')"
+              >
+                <font-awesome-icon :icon="['fas', 'list']"></font-awesome-icon>
               </button>
             </div>
           </div>

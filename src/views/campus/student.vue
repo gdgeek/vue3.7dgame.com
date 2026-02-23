@@ -1,22 +1,43 @@
 <template>
   <TransitionWrapper>
     <div class="student-list">
-      <PageActionBar :title="$t('manager.studentManagement')" :search-placeholder="$t('ui.search')"
-        @search="handleSearch" @sort-change="handleSortChange" @view-change="handleViewChange">
+      <PageActionBar
+        :title="$t('manager.studentManagement')"
+        :search-placeholder="$t('ui.search')"
+        @search="handleSearch"
+        @sort-change="handleSortChange"
+        @view-change="handleViewChange"
+      >
         <template #actions>
           <el-button type="primary" @click="addStudent">
-            <font-awesome-icon :icon="['fas', 'plus']" style="font-size: 18px; margin-right: 4px" />
+            <font-awesome-icon
+              :icon="['fas', 'plus']"
+              style="font-size: 18px; margin-right: 4px"
+            ></font-awesome-icon>
             {{ $t("manager.createStudent") }}
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
+      <ViewContainer
+        class="list-view"
+        :items="items"
+        :view-mode="viewMode"
+        :loading="loading"
+        @row-click="openDetail"
+      >
         <template #grid-card="{ item }">
-          <StandardCard :image="item.user?.avatar?.url" :title="item.user?.nickname || item.user?.username || '—'"
-            :action-text="$t('manager.ui.viewDetail')" :action-icon="['fas', 'eye']" :type-icon="['fas', 'user']"
-            :placeholder-icon="['fas', 'user']" :show-checkbox="false" @view="openDetail(item)"
-            @action="openDetail(item)">
+          <StandardCard
+            :image="item.user?.avatar?.url"
+            :title="item.user?.nickname || item.user?.username || '—'"
+            :action-text="$t('manager.ui.viewDetail')"
+            :action-icon="['fas', 'eye']"
+            :type-icon="['fas', 'user']"
+            :placeholder-icon="['fas', 'user']"
+            :show-checkbox="false"
+            @view="openDetail(item)"
+            @action="openDetail(item)"
+          >
           </StandardCard>
         </template>
 
@@ -32,24 +53,35 @@
           <div class="col-checkbox"></div>
           <div class="col-name">
             <div class="item-thumb">
-              <img v-if="item.user?.avatar?.url" :src="item.user.avatar.url" :alt="item.user.nickname" />
+              <img
+                v-if="item.user?.avatar?.url"
+                :src="item.user.avatar.url"
+                :alt="item.user.nickname"
+              />
               <div v-else class="thumb-placeholder">
-                <font-awesome-icon :icon="['fas', 'user']" />
+                <font-awesome-icon :icon="['fas', 'user']"></font-awesome-icon>
               </div>
             </div>
             <span class="item-name">{{
               item.user?.nickname || item.user?.username || "—"
-              }}</span>
+            }}</span>
           </div>
           <div class="col-school">{{ item.school?.name || "—" }}</div>
           <div class="col-class">{{ item.eduClass?.name || "—" }}</div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon" />
+              <font-awesome-icon
+                :icon="['fas', 'ellipsis']"
+                class="actions-icon"
+              ></font-awesome-icon>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="openDetail(item)">{{ $t("manager.ui.viewDetail") }}</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item)">{{ $t("manager.list.remove") }}</el-dropdown-item>
+                  <el-dropdown-item @click="openDetail(item)">{{
+                    $t("manager.ui.viewDetail")
+                  }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item)">{{
+                    $t("manager.list.remove")
+                  }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -57,19 +89,35 @@
         </template>
 
         <template #empty>
-          <EmptyState :icon="['fas', 'user']" :text="$t('manager.ui.noStudents')"
-            :action-text="$t('manager.createStudent')" @action="addStudent"></EmptyState>
+          <EmptyState
+            :icon="['fas', 'user']"
+            :text="$t('manager.ui.noStudents')"
+            :action-text="$t('manager.createStudent')"
+            @action="addStudent"
+          ></EmptyState>
         </template>
       </ViewContainer>
 
-      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
+      <PagePagination
+        :current-page="pagination.current"
+        :total-pages="totalPages"
+        @page-change="handlePageChange"
+      >
       </PagePagination>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="detailVisible" :title="$t('manager.ui.studentDetail')"
-        :name="currentStudent?.user?.nickname || ''" :loading="detailLoading" :properties="detailProperties"
-        :placeholder-icon="['fas', 'user']" :show-delete="true" :delete-text="$t('manager.ui.removeFromSchool')"
-        @delete="handleDelete" @close="handlePanelClose"></DetailPanel>
+      <DetailPanel
+        v-model="detailVisible"
+        :title="$t('manager.ui.studentDetail')"
+        :name="currentStudent?.user?.nickname || ''"
+        :loading="detailLoading"
+        :properties="detailProperties"
+        :placeholder-icon="['fas', 'user']"
+        :show-delete="true"
+        :delete-text="$t('manager.ui.removeFromSchool')"
+        @delete="handleDelete"
+        @close="handlePanelClose"
+      ></DetailPanel>
     </div>
   </TransitionWrapper>
 </template>
@@ -145,9 +193,18 @@ const detailProperties = computed(() => {
         currentStudent.value.user?.username ||
         "—",
     },
-    { label: t("manager.ui.affiliatedSchool"), value: currentStudent.value.school?.name || "—" },
-    { label: t("manager.ui.currentClass"), value: currentStudent.value.eduClass?.name || "—" },
-    { label: t("common.username"), value: currentStudent.value.student_id || "—" },
+    {
+      label: t("manager.ui.affiliatedSchool"),
+      value: currentStudent.value.school?.name || "—",
+    },
+    {
+      label: t("manager.ui.currentClass"),
+      value: currentStudent.value.eduClass?.name || "—",
+    },
+    {
+      label: t("common.username"),
+      value: currentStudent.value.student_id || "—",
+    },
   ];
 });
 
@@ -167,25 +224,33 @@ const addStudent = () => {
 const handleDelete = async () => {
   if (!currentStudent.value) return;
   try {
-    await MessageBox.confirm(t("manager.ui.removeStudentConfirm"), t("manager.ui.removeConfirmTitle"), {
-      type: "warning",
-    });
+    await MessageBox.confirm(
+      t("manager.ui.removeStudentConfirm"),
+      t("manager.ui.removeConfirmTitle"),
+      {
+        type: "warning",
+      }
+    );
     await deleteStudent(currentStudent.value.id);
     detailVisible.value = false;
     refresh();
     Message.success(t("manager.messages.removeSuccess"));
-  } catch { }
+  } catch {}
 };
 
 const deletedWindow = async (item: Student) => {
   try {
-    await MessageBox.confirm(t("manager.ui.removeStudentConfirm"), t("manager.ui.removeConfirmTitle"), {
-      type: "warning",
-    });
+    await MessageBox.confirm(
+      t("manager.ui.removeStudentConfirm"),
+      t("manager.ui.removeConfirmTitle"),
+      {
+        type: "warning",
+      }
+    );
     await deleteStudent(item.id);
     refresh();
     Message.success(t("manager.messages.removeSuccess"));
-  } catch { }
+  } catch {}
 };
 </script>
 
