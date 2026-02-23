@@ -30,13 +30,13 @@ const formData = ref({});
 const schema = ref<Schema>();
 const dialogVisible = ref(false);
 const { t, locale } = useI18n();
-let callback: ((data: any) => void) | null = null;
+let callback: ((data: Record<string, unknown>) => void) | null = null;
 
 interface SchemaProperty {
   type: string;
   title: string;
-  default?: any;
-  value?: any;
+  default?: unknown;
+  value?: unknown;
   "ui:hidden"?: string;
   "ui:options"?: {
     placeholder?: string;
@@ -59,7 +59,7 @@ interface Schema {
 }
 
 interface FormData {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const formFooter = computed(() => ({
@@ -83,8 +83,8 @@ const handlerChange = ({
   oldValue,
   newValue,
 }: {
-  oldValue: any;
-  newValue: any;
+  oldValue: unknown;
+  newValue: unknown;
 }) => {
   // 可以根据需要处理数据变化
 };
@@ -95,7 +95,7 @@ const open = ({
   data,
 }: {
   schema: Schema;
-  callback: (data: any) => void;
+  callback: (data: Record<string, unknown>) => void;
   data: FormData;
 }) => {
   const currentLocale = locale.value;

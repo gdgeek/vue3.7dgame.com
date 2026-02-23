@@ -7,7 +7,7 @@
         <RadiantText class="company-name" :duration="5" :fontSize="isMobile ? 16 : 20" :textColor="textColor">
           <span class="font-bold">{{
             domainStore.title || "不加班AR创作平台"
-          }}</span>
+            }}</span>
         </RadiantText>
       </div>
       <div class="nav-middle" v-if="!isMobile">
@@ -185,7 +185,7 @@ const restoreScrollPosition = () => {
 // 防抖
 const debounce = (fn: Function, delay: number) => {
   let timer: number | null = null;
-  return (...args: any[]) => {
+  return (...args: unknown[]) => {
     if (timer) clearTimeout(timer);
     timer = window.setTimeout(() => {
       fn(...args);
@@ -252,8 +252,8 @@ const scrollToSection = (sectionId: string) => {
 
 // 监听窗口大小变化和滚动事件
 onMounted(() => {
-  // 如果设置了 homepage，自动跳转
-  if (domainStore.homepage) {
+  // 如果设置了 homepage，自动跳转（本地开发环境跳过）
+  if (domainStore.homepage && !import.meta.env.DEV) {
     window.location.href = domainStore.homepage;
     return;
   }

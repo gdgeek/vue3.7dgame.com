@@ -45,7 +45,7 @@ service.interceptors.request.use(
     }
     return config;
   },
-  (error: any) => {
+  (error) => {
     return Promise.reject(error);
   }
 );
@@ -68,7 +68,7 @@ service.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
-  async (error: any) => {
+  async (error) => {
     const router = useRouter();
     const { response } = error;
     const messages = getMessageArray();

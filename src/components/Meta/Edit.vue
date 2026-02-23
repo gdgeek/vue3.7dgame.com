@@ -109,7 +109,7 @@ const refresh = async () => {
   item.value = data;
 };
 
-const getItem = async (id: number, params: any) => {
+const getItem = async (id: number, params: Record<string, unknown>) => {
   return new Promise<metaInfo>((resolve, reject) => {
     try {
       emit("getItem", id, params, (data: metaInfo) => {

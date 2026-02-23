@@ -118,7 +118,7 @@ const submit = () => {
         const { path, queryParams } = parseRedirect();
         emit("login-success");
         router.push({ path: path, query: queryParams });
-      } catch (e: any) {
+      } catch (e) {
         loading.value = false;
         Message.error(t("login.error"));
       }

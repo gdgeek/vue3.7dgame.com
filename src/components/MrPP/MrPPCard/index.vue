@@ -74,7 +74,7 @@ const props = defineProps({
       id: number;
       name?: string;
       title?: string;
-      image?: { url: string; [key: string]: any } | null;
+      image?: { url: string; [key: string]: unknown } | null;
     }>,
     required: true,
   },

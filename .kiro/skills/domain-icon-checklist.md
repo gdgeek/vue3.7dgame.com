@@ -24,3 +24,4 @@
 - 项目有多个 sidebar 组件：`SidebarLogo.vue`(MIX/TOP) 和 `SidebarLeft.vue`(LEFT)，改动态内容时两边都要改
 - `Wechat.vue` 默认没有导入 `domainStore`，需要手动添加 import 和实例化
 - 新增页面如果有 logo 展示，记得查此清单并使用同样的模式
+- `domainStore` 数据来自异步 API，首次访问无 cookie 缓存时 `onMounted` 阶段 `defaultInfo` 可能还是 null。如果逻辑依赖 `homepage`/`icon` 等字段且必须在首次访问生效，需要用 `watch` 监听变化而非仅在 `onMounted` 中读取

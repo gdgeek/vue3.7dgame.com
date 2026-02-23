@@ -14,8 +14,8 @@
       <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
         <template #grid-card="{ item }">
           <StandardCard :image="item.image?.url" :title="item.name" :action-text="t('manager.ui.viewDetail')"
-            action-icon="visibility" type-icon="corporate_fare" placeholder-icon="school" :show-checkbox="false"
-            @view="openDetail(item)" @action="openDetail(item)"></StandardCard>
+            :action-icon="['fas', 'eye']" :type-icon="['fas', 'building']" :placeholder-icon="['fas', 'building']"
+            :show-checkbox="false" @view="openDetail(item)" @action="openDetail(item)"></StandardCard>
         </template>
 
         <template #list-header>
@@ -55,8 +55,8 @@
         </template>
 
         <template #empty>
-          <EmptyState icon="school" :text="$t('manager.ui.noSchools')" :action-text="$t('manager.createSchool')"
-            @action="addSchool"></EmptyState>
+          <EmptyState :icon="['fas', 'building']" :text="$t('manager.ui.noSchools')"
+            :action-text="$t('manager.createSchool')" @action="addSchool"></EmptyState>
         </template>
       </ViewContainer>
 
@@ -65,8 +65,9 @@
 
       <!-- Detail Panel (Read-only for now) -->
       <DetailPanel v-model="detailVisible" :title="t('manager.ui.schoolDetail')" :name="currentSchool?.name || ''"
-        :loading="detailLoading" :properties="detailProperties" placeholder-icon="corporate_fare" :show-delete="true"
-        :delete-text="t('common.delete')" @delete="handleDelete" @close="handlePanelClose"></DetailPanel>
+        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'building']"
+        :show-delete="true" :delete-text="t('common.delete')" @delete="handleDelete" @close="handlePanelClose">
+      </DetailPanel>
     </div>
   </TransitionWrapper>
 </template>

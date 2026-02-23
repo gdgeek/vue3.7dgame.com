@@ -381,7 +381,7 @@ const copyCode = async (code: string) => {
     await navigator.clipboard.writeText(code);
 
     Message.success(t("copy.success"));
-  } catch (error) {
+  } catch (_error) {
     Message.error(t("copy.error"));
   }
 };
@@ -480,8 +480,8 @@ const handleMessage = async (e: MessageEvent) => {
       initLuaCode.set(LuaCode.value);
       handleBlocklyChange(params.data.blocklyData);
     }
-  } catch (e: any) {
-    console.log("ex:" + e);
+  } catch (_e) {
+    console.log("ex:" + String(_e));
     return;
   }
 };
@@ -730,7 +730,7 @@ onMounted(async () => {
             );
           });
         }
-      } catch (error: any) {
+      } catch (error) {
         meta.value = response.data;
       }
     } else {
@@ -738,8 +738,8 @@ onMounted(async () => {
     }
 
     initEditor();
-  } catch (error: any) {
-    Message.error(error.message);
+  } catch (error) {
+    Message.error(error instanceof Error ? error.message : String(error));
   } finally {
     loading.value = false;
   }
@@ -1340,9 +1340,9 @@ const run = async () => {
       handleText,
       handleEntity
     );
-  } catch (e: any) {
+  } catch (e) {
     console.error("执行代码出错:", e);
-    ElMessage.error(`执行代码出错: ${e.message}`);
+    ElMessage.error(`执行代码出错: ${e instanceof Error ? e.message : String(e)}`);
   }
 };
 

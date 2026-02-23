@@ -40,3 +40,18 @@ environment:
 ### 原理
 
 `docker-entrypoint.sh` 在容器启动时用 sed 替换构建产物中的占位符。不传环境变量则由浏览器端 `ReplaceURL()` 根据当前域名动态拼接。
+
+## 已知坑：本地开发首页自动跳转
+
+`src/views/web/index.vue` 的 `onMounted` 里有：
+
+```typescript
+if (domainStore.homepage && !import.meta.env.DEV) {
+  window.location.href = domainStore.homepage;
+  return;
+}
+```
+
+原因：本地开发时 `getDomainForQuery()` 会把 `localhost` 映射到 `d.xiading.hxgxonline.com`，如果该域名在后端配置了 `homepage` 字段，页面会直接跳走。
+
+修法：加 `!import.meta.env.DEV` 判断，跳过本地环境的跳转。

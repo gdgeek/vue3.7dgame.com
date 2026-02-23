@@ -41,7 +41,7 @@ const emit = defineEmits<{
 }>();
 
 const visible = ref(false);
-let timer: any = null;
+let timer: ReturnType<typeof setTimeout> | null = null;
 
 const iconName = computed(() => {
   const icons: Record<string, string[]> = {

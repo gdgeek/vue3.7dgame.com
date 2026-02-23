@@ -216,7 +216,7 @@ const toggleAnimation = (value: string | number | boolean) => {
 };
 
 // 切换阴影功能
-const toggleShadow = (value: any) => {
+const toggleShadow = (value: boolean) => {
   scene.traverse((child) => {
     if (child instanceof THREE.Light) {
       child.castShadow = value; // 控制光源是否启用阴影
@@ -300,7 +300,7 @@ const refresh = () => {
         anim: animationsInfo,
       });
     },
-    (xhr: any) => {
+    (xhr: ProgressEvent) => {
       emit("progress", parseFloat(((xhr.loaded / xhr.total) * 100).toFixed(1)));
       console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
     }
@@ -347,7 +347,7 @@ const screenshot = (): Promise<Blob> => {
 defineExpose({ screenshot });
 
 // 解析模型节点
-const parseNode = async (json: any): Promise<THREE.Object3D> => {
+const parseNode = async (json: Record<string, unknown>): Promise<THREE.Object3D> => {
   const loader = new THREE.ObjectLoader();
   return loader.parseAsync(json);
 };

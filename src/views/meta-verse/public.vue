@@ -34,9 +34,9 @@
             :description="item.description" :meta="{
               author: item.author?.nickname || item.author?.username,
               date: formatItemDate(item.created_at),
-            }" :action-text="t('verse.publicPage.viewExample')" action-icon="visibility" type-icon="layers"
-            placeholder-icon="landscape" :show-checkbox="false" aspect-ratio="1.6 / 1" @view="openDetail(item)"
-            @action="goToScene(item)">
+            }" :action-text="t('verse.publicPage.viewExample')" :action-icon="['fas', 'eye']"
+            :type-icon="['fas', 'layer-group']" :placeholder-icon="['fas', 'image']" :show-checkbox="false"
+            aspect-ratio="1.6 / 1" @view="openDetail(item)" @action="goToScene(item)">
           </StandardCard>
         </template>
 
@@ -79,7 +79,7 @@
 
       <!-- Detail Panel -->
       <DetailPanel v-model="detailVisible" :title="t('verse.listPage.detailTitle')" :name="currentVerse?.name || ''"
-        :loading="detailLoading" :properties="detailProperties" placeholder-icon="landscape" width="560px"
+        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'image']" width="560px"
         :show-delete="false" action-layout="stacked" :secondary-action="false"
         :download-text="t('verse.publicPage.viewExample')" @download="handleGoToPage" @close="handlePanelClose">
         <template #preview>

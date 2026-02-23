@@ -19,7 +19,7 @@
         <template #grid-card="{ item }">
           <StandardCard :image="item.image?.url" :title="item.name || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" :selected="isSelected(item.id)"
-            :selection-mode="hasSelection" type-icon="view_in_ar" placeholder-icon="view_in_ar"
+            :selection-mode="hasSelection" :type-icon="['fas', 'cube']" :placeholder-icon="['fas', 'cube']"
             @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)"></StandardCard>
         </template>
 
@@ -57,7 +57,7 @@
         </template>
 
         <template #empty>
-          <EmptyState icon="view_in_ar" :text="t('polygen.emptyText')" :action-text="t('polygen.uploadPolygen')"
+          <EmptyState :icon="['fas', 'cube']" :text="t('polygen.emptyText')" :action-text="t('polygen.uploadPolygen')"
             @action="openUploadDialog"></EmptyState>
         </template>
       </ViewContainer>
@@ -73,7 +73,7 @@
 
       <!-- Detail Panel -->
       <DetailPanel v-model="viewDialogVisible" :title="t('polygen.detailsTitle')" :name="currentPolygen?.name || ''"
-        :loading="detailLoading" :properties="detailProperties" placeholder-icon="view_in_ar"
+        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'cube']"
         :download-text="t('polygen.downloadText')" :delete-text="t('polygen.deleteText')" @download="handleDownload"
         @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
         <template #preview>

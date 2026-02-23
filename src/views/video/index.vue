@@ -18,7 +18,7 @@
         <template #grid-card="{ item }">
           <StandardCard :image="getVideoCover(item.image?.url)" :title="item.name || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" :selected="isSelected(item.id)"
-            :selection-mode="hasSelection" type-icon="videocam" placeholder-icon="videocam"
+            :selection-mode="hasSelection" :type-icon="['fas', 'video']" :placeholder-icon="['fas', 'video']"
             @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)"></StandardCard>
         </template>
 
@@ -67,7 +67,7 @@
 
       <!-- Detail Panel -->
       <DetailPanel v-model="viewDialogVisible" :title="t('video.detailsTitle')" :name="currentVideo?.name || ''"
-        :loading="detailLoading" :properties="detailProperties" placeholder-icon="videocam"
+        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'video']"
         :download-text="t('video.downloadText')" :delete-text="t('video.deleteText')" @download="handleDownload"
         @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
         <template #preview>

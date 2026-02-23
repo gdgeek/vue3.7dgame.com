@@ -45,3 +45,12 @@ test-results
 
 # OS
 Thumbs.db
+
+# Reports (temporary)
+reports/
+
+# Vite temp files
+vite.config.ts.timestamp-*.mjs
+
+# Cleanup plan (temporary)
+.cleanup-plan.md

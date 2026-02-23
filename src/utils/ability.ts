@@ -47,7 +47,7 @@ const manager = ["manager", "admin", "root"];
 const admin = ["admin", "root"];
 const root = ["root"];
 export function UpdateAbility(
-  ability: any,
+  ability: { update: (rules: unknown[]) => void },
   roles: string[] | null,
   userId: number
 ) {

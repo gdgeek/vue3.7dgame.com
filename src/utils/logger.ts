@@ -12,30 +12,30 @@ class Logger {
     this.prefix = prefix;
   }
 
-  log(...args: any[]) {
+  log(...args: unknown[]) {
     if (isDev) {
       console.log(this.prefix ? `[${this.prefix}]` : "", ...args);
     }
   }
 
-  warn(...args: any[]) {
+  warn(...args: unknown[]) {
     if (isDev) {
       console.warn(this.prefix ? `[${this.prefix}]` : "", ...args);
     }
   }
 
-  error(...args: any[]) {
+  error(...args: unknown[]) {
     // error 在生产环境也保留，用于错误追踪
     console.error(this.prefix ? `[${this.prefix}]` : "", ...args);
   }
 
-  info(...args: any[]) {
+  info(...args: unknown[]) {
     if (isDev) {
       console.info(this.prefix ? `[${this.prefix}]` : "", ...args);
     }
   }
 
-  debug(...args: any[]) {
+  debug(...args: unknown[]) {
     if (isDev) {
       console.debug(this.prefix ? `[${this.prefix}]` : "", ...args);
     }

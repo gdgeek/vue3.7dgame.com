@@ -24,8 +24,9 @@
             :description="item.description" :meta="{
               author: item.author?.nickname || item.author?.username,
               date: formatItemDate(item.created_at),
-            }" :action-text="t('verse.listPage.enterEditor')" action-icon="edit" type-icon="layers"
-            placeholder-icon="landscape" :show-checkbox="false" @view="openDetail(item)" @action="goToEditor(item)">
+            }" :action-text="t('verse.listPage.enterEditor')" :action-icon="['fas', 'pen-to-square']"
+            :type-icon="['fas', 'layer-group']" :placeholder-icon="['fas', 'layer-group']" :show-checkbox="false"
+            @view="openDetail(item)" @action="goToEditor(item)">
           </StandardCard>
         </template>
 
@@ -80,10 +81,10 @@
 
       <!-- Detail Panel -->
       <DetailPanel v-model="detailVisible" :title="t('verse.listPage.detailTitle')" :name="currentVerse?.name || ''"
-        :loading="detailLoading" :properties="detailProperties" placeholder-icon="landscape" width="560px"
+        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'image']" width="560px"
         :show-delete="true" action-layout="grid" :secondary-action="true"
         :secondary-action-text="t('verse.listPage.enterEditor')" :download-text="t('ui.exportScene')"
-        download-icon="download" :delete-text="t('verse.listPage.deleteScene')" @download="handleExport"
+        :download-icon="['fas', 'download']" :delete-text="t('verse.listPage.deleteScene')" @download="handleExport"
         @rename="handleRename" @delete="handleDelete" @secondary="handleGoToEditor" @close="handlePanelClose">
         <template #preview>
           <div class="verse-preview" @click="triggerFileSelect">

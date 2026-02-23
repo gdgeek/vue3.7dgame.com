@@ -79,7 +79,7 @@ const restoreScrollPosition = () => {
 // 防抖
 const debounce = (fn: Function, delay: number) => {
   let timer: number | null = null;
-  return (...args: any[]) => {
+  return (...args: unknown[]) => {
     if (timer) clearTimeout(timer);
     timer = window.setTimeout(() => {
       fn(...args);

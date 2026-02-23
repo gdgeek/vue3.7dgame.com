@@ -173,9 +173,10 @@ const handleCreateVerse = async (form: any, imageId: number | null) => {
     createDialogRef.value?.hide();
     // Refresh the list to show new verse
     pageRef.value?.refresh();
-  } catch (error: any) {
+  } catch (error) {
     console.error("Failed to create verse:", error);
-    const errorMsg = error.response?.data?.message || t("common.createFailed");
+    const axiosErr = error as { response?: { data?: { message?: string } } };
+    const errorMsg = axiosErr.response?.data?.message || t("common.createFailed");
     ElMessage.error(errorMsg);
   }
 };

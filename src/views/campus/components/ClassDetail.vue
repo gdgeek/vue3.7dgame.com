@@ -255,10 +255,11 @@ const handleSaveGroup = async () => {
     groupDialogVisible.value = false;
     await fetchGroups();
     groupListRef.value?.refresh();
-  } catch (error: any) {
+  } catch (error) {
     console.error("Failed to save group:", error);
+    const axiosErr = error as { response?: { data?: { message?: string } } };
     const errorMsg =
-      error.response?.data?.message || t("common.operationFailed");
+      axiosErr.response?.data?.message || t("common.operationFailed");
     ElMessage.error(errorMsg);
   } finally {
     savingGroup.value = false;
@@ -281,9 +282,10 @@ const handleJoinGroup = async (group: Group) => {
     ElMessage.success(t("route.personalCenter.campus.joinSuccess"));
     await fetchGroups();
     groupListRef.value?.refresh();
-  } catch (error: any) {
+  } catch (error) {
     if (error !== "cancel") {
-      const backendMsg = error.response?.data?.message || "";
+      const axiosErr = error as { response?: { data?: { message?: string } } };
+      const backendMsg = axiosErr.response?.data?.message || "";
       let errorMsg = t("route.personalCenter.campus.joinFailed");
       if (backendMsg.includes("already joined")) {
         errorMsg = t("route.personalCenter.campus.alreadyJoinedGroup");
@@ -311,10 +313,11 @@ const handleLeaveGroup = async (group: Group) => {
     ElMessage.success(t("route.personalCenter.campus.leaveSuccess"));
     await fetchGroups();
     groupListRef.value?.refresh();
-  } catch (error: any) {
+  } catch (error) {
     if (error !== "cancel") {
+      const axiosErr = error as { response?: { data?: { message?: string } } };
       ElMessage.error(
-        error.response?.data?.message || t("common.operationFailed")
+        axiosErr.response?.data?.message || t("common.operationFailed")
       );
     }
   } finally {
@@ -337,10 +340,11 @@ const handleDeleteGroup = async (group: Group) => {
     ElMessage.success(t("common.deleteSuccess"));
     await fetchGroups();
     groupListRef.value?.refresh();
-  } catch (error: any) {
+  } catch (error) {
     if (error !== "cancel") {
+      const axiosErr = error as { response?: { data?: { message?: string } } };
       ElMessage.error(
-        error.response?.data?.message || t("common.deleteFailed")
+        axiosErr.response?.data?.message || t("common.deleteFailed")
       );
     }
   }

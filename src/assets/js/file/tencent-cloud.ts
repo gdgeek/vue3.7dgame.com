@@ -91,8 +91,8 @@ const fileProcess = async (
   handler: FileHandler,
   dir = '',
   time = 1000
-): Promise<any> => {
-  return new Promise<any>(async (resolve, reject) => {
+): Promise<unknown> => {
+  return new Promise<unknown>(async (resolve, reject) => {
     try {
       const start = Date.now();
 
@@ -131,11 +131,11 @@ const fileDownload = async (
   progress: ProgressCallback,
   handler: FileHandler,
   dir = ''
-): Promise<any> => {
+): Promise<unknown> => {
   const ext = extension.startsWith('.') ? extension : `.${extension}`;
   const filename = path.join(dir, name + ext);
 
-  return new Promise<any>(async (resolve, reject) => {
+  return new Promise<unknown>(async (resolve, reject) => {
     try {
       const data = await handler.cos.getObject({
         Bucket: handler.bucket,
@@ -161,12 +161,12 @@ const fileUpload = async (
   progress: ProgressCallback,
   handler: FileHandler,
   dir = ''
-): Promise<any> => {
+): Promise<unknown> => {
   const ext = extension.startsWith('.') ? extension : `.${extension}`;
   const filename = path.join(dir, md5 + ext);
 
 
-  return new Promise<any>(async (resolve, reject) => {
+  return new Promise<unknown>(async (resolve, reject) => {
     try {
       const data = await handler.cos.uploadFile({
         Bucket: handler.bucket,

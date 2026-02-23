@@ -50,7 +50,7 @@ const getMessageArray = () => {
   ];
 };
 
-let refreshPromise: Promise<any> | null = null;
+let refreshPromise: Promise<unknown> | null = null;
 
 // 刷新token的API白名单
 const refreshTokenWhitelist = [
@@ -60,7 +60,7 @@ const refreshTokenWhitelist = [
 ];
 
 // 判断token是否即将过期（例如，提前5分钟刷新）
-const isTokenExpiringSoon = (token: any): boolean => {
+const isTokenExpiringSoon = (token: { expires?: string }): boolean => {
   if (!token || !token.expires) return false;
 
   // 转换为毫秒时间戳
@@ -131,7 +131,7 @@ service.interceptors.request.use(
     }
     return config;
   },
-  (error: any) => {
+  (error) => {
     return Promise.reject(error);
   }
 );
@@ -173,7 +173,7 @@ service.interceptors.response.use(
     return response;
   },
   //
-  async (error: any) => {
+  async (error) => {
     const router = useRouter();
     const { response, config } = error;
     const messages = getMessageArray();

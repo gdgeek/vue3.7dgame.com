@@ -130,7 +130,7 @@ const handleImageSelected = (data: {
   // Actually show() resets item from props, so this local update is just for current session.
   if (item.value && data.imageUrl) {
     if (!item.value.image) {
-      item.value.image = { url: data.imageUrl, id: data.imageId } as any;
+      item.value.image = { url: data.imageUrl, id: data.imageId } as unknown as typeof item.value.image;
     } else {
       item.value.image.url = data.imageUrl;
       item.value.image.id = data.imageId;

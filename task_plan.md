@@ -1,31 +1,25 @@
-# WordPress API 升级计划
+# 去除项目中所有 any 类型
 
 ## 目标
-将实际代码对齐到 wordpress-news skill 描述的架构：
-1. 独立的 `wordpressApi` 服务对象 + `transformPost` 转换层
-2. `rest_route` 兼容逻辑（支持未开启 pretty permalinks）
-3. 分类缓存机制
+消除 src/ 下所有非测试文件中的 `any` 类型，替换为正确的类型。
+保持 0 build errors。
 
-## 阶段
+## 策略 (v2 - 安全替换)
+之前的尝试导致 478 个构建错误。新策略：
+1. 从 clean baseline (0 errors) 开始
+2. 按文件批量替换，每批后 build 验证
+3. 优先使用 unknown 替代 any（安全且不破坏构建）
+4. 需要类型守卫的地方添加类型守卫
+5. catch (e) 不需要类型注解（默认 unknown）
+6. as any → 正确的类型断言
 
-### Phase 1: 调研 `[complete]`
-- 3 个调用方: News/index.vue, DocumentList.vue, Document.vue
-- 都直接使用原始 WP 响应 (response.data)
-- baseURL 来自 VITE_APP_DOC_API 或 domainStore.blog
+## 进度
 
-### Phase 2: 创建类型定义 `[complete]`
-- 创建 `src/types/news.ts`
+### Phase 1: utils and core - in_progress
+### Phase 2: assets and store
+### Phase 3: components (简单)
+### Phase 4: components (复杂)
+### Phase 5: views
+### Phase 6: api, router, layout, stories
 
-### Phase 3: 重写 WordPress API 服务 `[complete]`
-- 重写 `src/api/home/wordpress.ts`
-- 包含 transformPost、rest_route 兼容、分类缓存
-- 保留向后兼容的旧函数 (getCategory, Article, Post, Posts)
-- buildEndpoint 同时检查 domainStore.blog 和 defaults.baseURL
-
-### Phase 4: 验证 `[complete]`
-- 所有文件 0 diagnostics
-
-## 文件变更
-- 新增: `src/types/news.ts`
-- 重写: `src/api/home/wordpress.ts`
-- 未修改调用方（向后兼容）
+## 状态: in_progress - Phase 1

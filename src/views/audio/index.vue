@@ -16,10 +16,11 @@
       <ViewContainer :items="items" :view-mode="viewMode" :loading="loading"
         @row-click="(item) => openViewDialog(item.id)">
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.name || t('ui.unnamed')"
-            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" :selected="isSelected(item.id)"
-            :selection-mode="hasSelection" type-icon="audiotrack" placeholder-icon="audiotrack"
-            @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)"></StandardCard>
+          <StandardCard :image="item.image?.url || `https://api.dicebear.com/9.x/thumbs/svg?seed=${item.id}`"
+            :title="item.name || t('ui.unnamed')" :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
+            :selected="isSelected(item.id)" :selection-mode="hasSelection" :type-icon="['fas', 'headphones']"
+            :placeholder-icon="['fas', 'headphones']" @view="openViewDialog(item.id)"
+            @select="() => toggleSelection(item.id)"></StandardCard>
         </template>
 
         <template #list-item="{ item }">
@@ -28,10 +29,8 @@
           </div>
           <div class="col-name">
             <div class="item-thumb">
-              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
-              <div v-else class="thumb-placeholder">
-                <font-awesome-icon :icon="['fas', 'headphones']" />
-              </div>
+              <img :src="item.image?.url || `https://api.dicebear.com/9.x/thumbs/svg?seed=${item.id}`"
+                :alt="item.name" />
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
           </div>
@@ -67,7 +66,7 @@
 
       <!-- Detail Panel -->
       <DetailPanel v-model="viewDialogVisible" :title="t('audio.viewAudio')" :name="currentAudio?.name || ''"
-        :loading="detailLoading" :properties="detailProperties" placeholder-icon="headphones"
+        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'headphones']"
         :download-text="t('ui.download')" :delete-text="t('ui.deleteResource')" @download="handleDownload"
         @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
         <template #preview>
@@ -256,7 +255,6 @@ const saveAudio = async (
   try {
     const data: any = { name, file_id };
     if (info) data.info = info;
-    if (image_id) data.image_id = image_id;
     const response = await postAudio(data);
     if (response.data.id) callback(response.data.id);
   } catch (err) {

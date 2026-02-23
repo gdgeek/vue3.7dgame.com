@@ -17,8 +17,8 @@
         @row-click="(item) => openViewDialog(item.id)">
         <template #grid-card="{ item }">
           <StandardCard :image="item.image?.url" :title="item.name || t('ui.unnamed')"
-            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" placeholder-icon="image"
-            :selected="isSelected(item.id)" :selection-mode="hasSelection" type-icon="image"
+            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" :placeholder-icon="['fas', 'image']"
+            :selected="isSelected(item.id)" :selection-mode="hasSelection" :type-icon="['fas', 'image']"
             @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)"></StandardCard>
         </template>
 
@@ -67,7 +67,7 @@
 
       <!-- Detail Panel -->
       <DetailPanel v-model="viewDialogVisible" :title="t('picture.viewPicture')" :name="currentPicture?.name || ''"
-        :loading="detailLoading" :properties="detailProperties" placeholder-icon="image"
+        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'image']"
         :download-text="t('ui.download')" :delete-text="t('ui.deleteResource')" @download="handleDownload"
         @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
         <template #preview>

@@ -14,8 +14,9 @@
       <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
         <template #grid-card="{ item }">
           <StandardCard :image="item.image?.url" :title="item.title || item.name || t('meta.list.unnamed')"
-            :action-text="t('meta.list.enterEditor')" action-icon="edit" type-icon="token" placeholder-icon="extension"
-            :show-checkbox="false" @view="openDetail(item)" @action="goToEditor(item)"></StandardCard>
+            :action-text="t('meta.list.enterEditor')" :action-icon="['fas', 'pen-to-square']"
+            :type-icon="['fas', 'puzzle-piece']" :placeholder-icon="['fas', 'puzzle-piece']" :show-checkbox="false"
+            @view="openDetail(item)" @action="goToEditor(item)"></StandardCard>
         </template>
 
         <template #list-header>
@@ -63,8 +64,8 @@
         </template>
 
         <template #empty>
-          <EmptyState icon="category" :text="t('meta.list.emptyText')" :action-text="t('meta.list.createAction')"
-            @action="addMeta"></EmptyState>
+          <EmptyState :icon="['fas', 'folder-open']" :text="t('meta.list.emptyText')"
+            :action-text="t('meta.list.createAction')" @action="addMeta"></EmptyState>
         </template>
       </ViewContainer>
 
@@ -73,8 +74,8 @@
 
       <!-- Detail Panel -->
       <DetailPanel v-model="detailVisible" :title="t('meta.list.detailTitle')" :name="currentMeta?.title || ''"
-        :loading="detailLoading" :properties="detailProperties" placeholder-icon="category" :show-delete="true"
-        :secondary-action="true" :secondary-action-text="t('meta.list.enterEditor')"
+        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'folder-open']"
+        :show-delete="true" :secondary-action="true" :secondary-action-text="t('meta.list.enterEditor')"
         :download-text="t('meta.list.copyEntity')" :delete-text="t('meta.list.deleteEntity')" action-layout="grid"
         width="560px" @download="handleCopy" @rename="handleRename" @delete="handleDelete" @secondary="handleGoToEditor"
         @close="handlePanelClose">

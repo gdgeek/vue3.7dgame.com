@@ -52,12 +52,12 @@ const form = reactive({
   checkPassword: "",
 });
 
-const checkUsername = (rule: any, value: string, callback: any) => {
+const checkUsername = (_rule: unknown, value: string, callback: (error?: Error) => void) => {
   form.username = value.replace(/[\u4E00-\u9FA5]/g, "");
   callback();
 };
 
-const validatePassword = (rule: any, value: string, callback: any) => {
+const validatePassword = (_rule: unknown, value: string, callback: (error?: Error) => void) => {
   if (value === "") {
     callback(new Error(t("manager.creator.form.error1")));
   } else {
@@ -68,7 +68,7 @@ const validatePassword = (rule: any, value: string, callback: any) => {
   }
 };
 
-const checkPassword = (rule: any, value: string, callback: any) => {
+const checkPassword = (_rule: unknown, value: string, callback: (error?: Error) => void) => {
   if (value === "") {
     callback(new Error(t("manager.creator.form.error2")));
   } else if (value !== form.password) {

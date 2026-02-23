@@ -161,8 +161,8 @@ const enter = async (
     const { path, queryParams } = parseRedirect();
     router.push({ path: path, query: queryParams });
     resolve();
-  } catch (e: any) {
-    reject(e.message);
+  } catch (e) {
+    reject(e instanceof Error ? e.message : String(e));
   }
 };
 

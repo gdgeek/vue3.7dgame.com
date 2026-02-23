@@ -24,5 +24,37 @@
 - FontAwesome SVG 用 `.svg-inline--fa` 选择器
 - 主题文件 `theme-styles.scss` 中有大量 `.material-symbols-outlined` 样式需要替换
 
+## ⚠️ 组件 Prop 传图标的正确方式
+
+Vue 组件 prop 传 FontAwesome 图标时，**必须用绑定数组**，不能用静态字符串：
+
+```html
+<!-- ❌ 错误：静态字符串会被当作 Material Symbols 名称，运行时报错 -->
+<StandardCard type-icon="videocam" placeholder-icon="extension" />
+
+<!-- ✅ 正确：绑定数组 -->
+<StandardCard :type-icon="['fas', 'video']" :placeholder-icon="['fas', 'puzzle-piece']" />
+```
+
+## 常见 Material Symbols → FontAwesome 映射
+
+| Material Symbols | FontAwesome | FA 变量名 |
+|-----------------|-------------|-----------|
+| `videocam` | `video` | `faVideo` |
+| `extension` | `puzzle-piece` | `faPuzzlePiece` |
+| `token` | `circle-dot` | `faCircleDot` |
+| `edit` | `pen-to-square` | `faPenToSquare` |
+| `home` | `home` | `faHome` |
+| `layers` | `layer-group` | `faLayerGroup` |
+| `visibility` | `eye` | `faEye` |
+| `landscape` | `image` | `faImage` |
+| `category` | `folder-open` | `faFolderOpen` |
+| `school` | `building` | `faBuilding` |
+| `corporate_fare` | `building` | `faBuilding` |
+| `person` / `person_4` | `user` | `faUser` |
+| `download` | `download` | `faDownload` |
+
+所有图标需在 `src/main.ts` 的 `library.add()` 中注册后才能使用。
+
 ## 迁移计划
 详见 `task_plan.md`

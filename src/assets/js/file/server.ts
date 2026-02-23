@@ -55,7 +55,7 @@ const fileUpdateImpl = async (
   handler: FileHandler,
   dir: string,
   skip: number
-): Promise<any> => {
+): Promise<unknown> => {
   
   const filename = md5 + extension;
   const data = new FormData();
@@ -95,7 +95,7 @@ const fileUpload = (
   progress: ProgressCallback,
   handler: FileHandler,
   dir: string = ''
-): Promise<any> => fileUpdateImpl(md5, extension, file, progress, handler, dir, 0);
+): Promise<unknown> => fileUpdateImpl(md5, extension, file, progress, handler, dir, 0);
 
 
 const getUrl = (info: FileInfo, file: { md5: string; ext: string }, handler: FileHandler): string => {
@@ -109,7 +109,7 @@ const fileDownload = async (
   progress: ProgressCallback,
   handler: FileHandler,
   dir: string = ''
-): Promise<any> => {
+): Promise<unknown> => {
   try {
     const url = fileUrl(name, extension, handler, dir);
     const response = await axios.get(env.replaceIP(url), { responseType: 'arraybuffer' });
@@ -128,7 +128,7 @@ const fileProcess = async (
   handler: FileHandler,
   dir: string = '',
   time: number = 1000
-): Promise<any> => {
+): Promise<unknown> => {
   const start = Date.now();
   while (Date.now() < start + time) {
     console.log(handler);

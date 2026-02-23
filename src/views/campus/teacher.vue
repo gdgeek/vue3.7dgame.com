@@ -14,8 +14,9 @@
       <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
         <template #grid-card="{ item }">
           <StandardCard :image="item.user?.avatar?.url" :title="item.user?.nickname || item.user?.username || '—'"
-            :action-text="$t('manager.ui.viewDetail')" action-icon="visibility" type-icon="person_4"
-            placeholder-icon="person" :show-checkbox="false" @view="openDetail(item)" @action="openDetail(item)">
+            :action-text="$t('manager.ui.viewDetail')" :action-icon="['fas', 'eye']" :type-icon="['fas', 'user']"
+            :placeholder-icon="['fas', 'user']" :show-checkbox="false" @view="openDetail(item)"
+            @action="openDetail(item)">
           </StandardCard>
         </template>
 
@@ -56,8 +57,8 @@
         </template>
 
         <template #empty>
-          <EmptyState icon="person_4" :text="$t('manager.ui.noTeachers')" :action-text="$t('manager.createTeacher')"
-            @action="addTeacher"></EmptyState>
+          <EmptyState :icon="['fas', 'user']" :text="$t('manager.ui.noTeachers')"
+            :action-text="$t('manager.createTeacher')" @action="addTeacher"></EmptyState>
         </template>
       </ViewContainer>
 
@@ -67,7 +68,7 @@
       <!-- Detail Panel -->
       <DetailPanel v-model="detailVisible" :title="$t('manager.ui.teacherDetail')"
         :name="currentTeacher?.user?.nickname || ''" :loading="detailLoading" :properties="detailProperties"
-        placeholder-icon="person_4" :show-delete="true" :delete-text="$t('manager.ui.removeFromSchool')"
+        :placeholder-icon="['fas', 'user']" :show-delete="true" :delete-text="$t('manager.ui.removeFromSchool')"
         @delete="handleDelete" @close="handlePanelClose"></DetailPanel>
     </div>
   </TransitionWrapper>

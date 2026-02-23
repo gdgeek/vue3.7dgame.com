@@ -1,6 +1,6 @@
 export type MessageType = {
   action: string;
-  data: any;
+  data: unknown;
 };
 export function GetCurrentUrl() {
   const fullUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ""}`;

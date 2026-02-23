@@ -95,12 +95,18 @@ export function useEmailVerification() {
       }
 
       return false;
-    } catch (err: any) {
-      error.value = err.error?.message || "发送验证码失败";
+    } catch (err) {
+      const apiErr = err as {
+        error?: { message?: string; code?: string; retry_after?: number };
+      };
+      error.value = apiErr.error?.message || "发送验证码失败";
 
       // 处理速率限制
-      if (err.error?.code === "RATE_LIMIT_EXCEEDED" && err.error?.retry_after) {
-        startCountdown(err.error.retry_after);
+      if (
+        apiErr.error?.code === "RATE_LIMIT_EXCEEDED" &&
+        apiErr.error?.retry_after
+      ) {
+        startCountdown(apiErr.error.retry_after);
       }
 
       return false;
@@ -137,12 +143,16 @@ export function useEmailVerification() {
       }
 
       return false;
-    } catch (err: any) {
-      error.value = err.error?.message || "验证失败";
+    } catch (err) {
+      const apiErr = err as { error?: { message?: string; code?: string; retry_after?: number } };
+      error.value = apiErr.error?.message || "验证失败";
 
       // 处理账户锁定
-      if (err.error?.code === "ACCOUNT_LOCKED" && err.error?.retry_after) {
-        startLockCountdown(err.error.retry_after);
+      if (
+        apiErr.error?.code === "ACCOUNT_LOCKED" &&
+        apiErr.error?.retry_after
+      ) {
+        startLockCountdown(apiErr.error.retry_after);
       }
 
       return false;

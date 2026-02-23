@@ -42,7 +42,7 @@ export const loadLanguageAsync = async (locale: string) => {
 
   if (hasMessages) {
     if (i18n.global.locale.value !== locale) {
-      (i18n.global.locale as any).value = locale;
+      (i18n.global.locale as unknown as { value: string }).value = locale;
       await appStore.changeLanguage(locale);
       // Refresh domain info with new language
       await refreshDomainInfo();
@@ -61,12 +61,18 @@ export const loadLanguageAsync = async (locale: string) => {
   });
 
   if (targetPath && modules[targetPath]) {
-    return (modules[targetPath]() as Promise<any>).then(async (messages) => {
+    return (
+      modules[targetPath]() as Promise<{ default: Record<string, unknown> }>
+    ).then(async (messages) => {
       // 从路径 ./en-US/index.ts 提取 locale 名称 en-US
       const correctLocale = targetPath.split("/")[1] || locale;
 
-      i18n.global.setLocaleMessage(correctLocale, messages.default);
-      (i18n.global.locale as any).value = correctLocale;
+      i18n.global.setLocaleMessage(
+        correctLocale,
+        messages.default as Parameters<typeof i18n.global.setLocaleMessage>[1]
+      );
+      (i18n.global.locale as unknown as { value: string }).value =
+        correctLocale;
       await appStore.changeLanguage(correctLocale);
       // Refresh domain info with new language
       await refreshDomainInfo();
@@ -78,7 +84,7 @@ export const loadLanguageAsync = async (locale: string) => {
       `Language file not found for locale: ${locale}, falling back to zh-CN`
     );
     if (i18n.global.locale.value !== "zh-CN") {
-      (i18n.global.locale as any).value = "zh-CN";
+      (i18n.global.locale as unknown as { value: string }).value = "zh-CN";
       await appStore.changeLanguage("zh-CN");
       // Refresh domain info with new language
       await refreshDomainInfo();
