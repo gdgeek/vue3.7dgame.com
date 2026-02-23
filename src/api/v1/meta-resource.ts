@@ -1,9 +1,14 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import { metaInfo } from "./meta";
+import type { MetaInfo } from "./types/meta";
+import type {
+  MetaResourceItem,
+  CreateMetaResourceRequest,
+  UpdateMetaResourceRequest,
+} from "./types/meta-resource";
 
-export const postMetaResource = (data: Record<string, any>) => {
-  return request({
+export const postMetaResource = (data: CreateMetaResourceRequest) => {
+  return request<MetaResourceItem>({
     url: `/v1/meta-resources`,
     method: "post",
     data,
@@ -18,7 +23,7 @@ export const getMetaResources = (
   page = 0,
   expand = ""
 ) => {
-  const query: Record<string, any> = {
+  const query: Record<string, unknown> = {
     type,
     meta_id,
     sort,
@@ -33,7 +38,7 @@ export const getMetaResources = (
   }
 
   const url = `/v1/meta-resources/resources${qs.stringify(query, true)}`;
-  return request<metaInfo[]>({
+  return request<MetaInfo[]>({
     url,
     method: "get",
   });
@@ -41,10 +46,10 @@ export const getMetaResources = (
 
 export const putMetaResource = (
   id: number | string,
-  data: Record<string, any>
+  data: UpdateMetaResourceRequest
 ) => {
   const url = `/v1/meta-resources/${id}`;
-  return request({
+  return request<MetaResourceItem>({
     url,
     method: "put",
     data,

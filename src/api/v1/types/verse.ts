@@ -2,7 +2,8 @@
  * Verse（场景）相关类型定义
  */
 
-import type { Author } from "./common";
+import type { Author, JsonValue } from "./common";
+import type { MetaInfo as MetaInfoFull } from "./meta";
 
 /** 图片详情 */
 export interface ImageDetails {
@@ -57,13 +58,8 @@ export interface Script {
   workspace: string;
 }
 
-/** Meta 信息（简化版） */
-export interface MetaInfo {
-  id: number;
-  name: string;
-  uuid: string;
-  [key: string]: unknown;
-}
+/** Meta 信息（复用 Meta 类型） */
+export type MetaInfo = MetaInfoFull;
 
 /** 场景数据 */
 export interface VerseData {
@@ -74,7 +70,7 @@ export interface VerseData {
   info: string | null;
   description: string | null;
   public?: boolean;
-  data: Record<string, unknown>; // 场景配置数据
+  data: JsonValue; // 场景配置数据
   version: number;
   uuid: string;
   editable: boolean;
@@ -86,7 +82,7 @@ export interface VerseData {
   languages?: VerseLanguage[];
   metas?: MetaInfo[];
   script?: Script;
-  verseCode?: VerseCode;
+  verseCode?: VerseCode | null;
   verseTags?: string[];
 }
 
@@ -106,7 +102,7 @@ export interface PutVerseData {
   name?: string;
   uuid?: string;
   version?: number;
-  data?: string | Record<string, unknown>;
+  data?: string | JsonValue;
 }
 
 /** 场景列表查询参数 */

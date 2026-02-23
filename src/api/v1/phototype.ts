@@ -1,40 +1,13 @@
 import request from "@/utils/request";
 import qs from "querystringify";
+import type { AxiosResponse } from "axios";
+import type {
+  PhototypeType,
+  CreatePhototypeRequest,
+  UpdatePhototypeRequest,
+} from "./types/phototype";
 
-import { AxiosResponse } from "axios";
-import { ResourceInfo } from "./resources/model";
-export type PhototypeType = {
-  id?: number;
-  type?: string | null;
-  title?: string;
-  uuid?: string | null;
-  data?: any | null;
-  schema?: any | null;
-  created_at?: string;
-  updated_at?: string;
-  image_id?: number | null;
-  updater_id?: number;
-  author_id?: number;
-  resource_id?: number | null;
-  author?: {
-    id: number;
-    nickname: string;
-    email: string | null;
-    username: string;
-  };
-  resource?: ResourceInfo | null;
-  image?: {
-    id: number;
-    md5: string;
-    type: string;
-    url: string;
-    filename: string;
-    size: number;
-    key: string;
-  };
-};
-
-export const postPhototype = (data: PhototypeType) => {
+export const postPhototype = (data: CreatePhototypeRequest) => {
   return request<PhototypeType>({
     url: `/v1/phototypes`,
     method: "post",
@@ -46,7 +19,7 @@ export const getPhototype = (
   id: string | number,
   expand = "resource,image"
 ) => {
-  const query: Record<string, any> = {};
+  const query: Record<string, unknown> = {};
   if (expand) {
     query["expand"] = expand;
   }
@@ -63,7 +36,7 @@ export const getPhototypes = (
   page = 0,
   expand = "resource,image,author"
 ): Promise<AxiosResponse<PhototypeType[]>> => {
-  const query: Record<string, any> = {};
+  const query: Record<string, unknown> = {};
   if (sort === "title") {
     sort = "title";
   } else if (sort === "-title") {
@@ -88,10 +61,10 @@ export const getPhototypes = (
 
 export const putPhototype = (
   id: string | number,
-  data: PhototypeType,
+  data: UpdatePhototypeRequest,
   expand = "resource,image"
 ) => {
-  const query: Record<string, any> = {};
+  const query: Record<string, unknown> = {};
   if (expand) {
     query["expand"] = expand;
   }

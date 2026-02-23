@@ -1,7 +1,7 @@
 import request from "@/utils/request";
-import { FileType } from "../user/model";
+import type { FileType, UploadFileType } from "../user/model";
 
-export const postFile = (data: any) => {
+export const postFile = (data: UploadFileType) => {
   return request<FileType>({
     url: `/v1/files`,
     method: "post",

@@ -2,8 +2,9 @@
  * Meta（实体）相关类型定义
  */
 
-import type { Author, FileInfo } from "./common";
+import type { Author, FileInfo, JsonValue } from "./common";
 import type { ResourceInfo } from "@/api/v1/resources/model";
+import type { CyberType } from "./cyber";
 
 /** Meta 代码 */
 export interface MetaCode {
@@ -32,19 +33,12 @@ export interface EventOutput {
   [key: string]: unknown;
 }
 
-/** Cyber 类型 */
-export interface CyberType {
-  id: number;
-  name: string;
-  [key: string]: unknown;
-}
-
 /** Meta 信息 */
 export interface MetaInfo {
   id: number;
   author_id: number;
   info: string | null;
-  data: Record<string, unknown> | null;
+  data: JsonValue | null;
   created_at?: string;
   image_id: number | null;
   uuid: string;
@@ -75,7 +69,7 @@ export interface CreateMetaRequest {
   title: string;
   image_id?: number | null;
   prefab?: number;
-  data?: Record<string, unknown> | null;
+  data?: JsonValue | null;
   events?: Events | null;
   info?: string | null;
   uuid?: string; // 支持 uuid
@@ -89,7 +83,7 @@ export interface UpdateMetaRequest {
   title?: string;
   image_id?: number;
   prefab?: number;
-  data?: Record<string, unknown> | null;
+  data?: JsonValue | null;
   events?: Events | null;
   info?: string | null;
   uuid?: string;

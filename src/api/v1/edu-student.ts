@@ -1,16 +1,11 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import { FileType } from "./types/file";
-
-export interface Student {
-  id: number;
-  name: string;
-  age: number;
-  grade: string;
-  class: string;
-  avatar: FileType;
-  [key: string]: any;
-}
+import type {
+  Student,
+  CreateStudentRequest,
+  UpdateStudentRequest,
+  StudentRecord,
+} from "./types/edu/student";
 
 export const getStudents = (
   sort = "-created_at",
@@ -18,7 +13,7 @@ export const getStudents = (
   page = 1,
   expand = ""
 ) => {
-  const query: Record<string, any> = [];
+  const query: Record<string, unknown> = {};
   query["expand"] = expand;
   query["sort"] = sort;
 
@@ -41,7 +36,7 @@ export const getStudent = (id: number) => {
   });
 };
 
-export const createStudent = (data: { user_id?: number; class_id: number }) => {
+export const createStudent = (data: CreateStudentRequest) => {
   return request({
     url: `/v1/edu-student`,
     method: "post",
@@ -55,7 +50,7 @@ export const deleteStudent = (id: number) => {
   });
 };
 
-export const updateStudent = (id: number, data: Partial<Student>) => {
+export const updateStudent = (id: number, data: UpdateStudentRequest) => {
   return request({
     url: `/v1/edu-student/${id}`,
     method: "put",
@@ -69,13 +64,13 @@ export const getMyStudentRecords = (
   page = 1,
   expand = "image,school"
 ) => {
-  const query: Record<string, any> = {};
+  const query: Record<string, unknown> = {};
   query["expand"] = expand;
   query["sort"] = sort;
   if (page > 1) {
     query["page"] = page;
   }
-  return request<{ id: number; eduClass: any }[]>({
+  return request<StudentRecord[]>({
     url: `/v1/edu-student${qs.stringify(query, true)}`,
     method: "get",
   });
@@ -87,7 +82,7 @@ export const getStudentMe = (
   page = 1,
   expand = "class,school"
 ) => {
-  const query: Record<string, any> = {};
+  const query: Record<string, unknown> = {};
   query["expand"] = expand;
   query["sort"] = sort;
   if (search !== "") {

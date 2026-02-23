@@ -10,9 +10,7 @@ export interface EduClass {
   school?: { id: number; name: string }; // 关联学校
   eduStudents?: { id: number; user: UserType }[];
   eduTeachers?: { id: number; user: UserType }[];
-  info: {
-    [key: string]: any;
-  };
+  info: Record<string, unknown>;
 }
 
 /*

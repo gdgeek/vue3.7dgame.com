@@ -1,20 +1,9 @@
 import request from "@/utils/request";
+import type { AppleData, AppleIdReturn } from "@/api/auth/model";
 
-export interface AppleIdData {
-  key: string;
-  url: string;
-  data: any;
-}
-
-export interface AppleIdReturn {
-  apple_id: string;
-  email: string;
-  user: any;
-  token: string;
-}
-export const PostSiteAppleId = (data: AppleIdData) => {
+export const PostSiteAppleId = (data: AppleData) => {
   //alert(JSON.stringify(data));
-  return request({
+  return request<AppleIdReturn>({
     url: `/v1/site/apple-id`,
     method: "post",
     data: data,

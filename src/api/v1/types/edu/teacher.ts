@@ -3,6 +3,9 @@
  */
 
 /** 教师信息 */
+import type { FileType } from "../file";
+import type { UserType } from "../user";
+
 export interface Teacher {
   id: number;
   name: string;
@@ -14,6 +17,9 @@ export interface Teacher {
   school_id?: number;
   created_at?: string;
   updated_at?: string;
+  user?: UserType & { avatar?: FileType };
+  school?: { id: number; name: string };
+  eduClass?: { id: number; name: string };
   [key: string]: unknown;
 }
 

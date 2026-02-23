@@ -1,8 +1,9 @@
 import request from "@/utils/request";
 import qs from "querystringify";
+import type { VpMap, CreateVpMapRequest } from "./types/vp-map";
 
-export const postVpMap = (data: any) => {
-  return request({
+export const postVpMap = (data: CreateVpMapRequest) => {
+  return request<VpMap>({
     url: `/v1/vp-maps`,
     method: "post",
     data: data,
@@ -15,11 +16,11 @@ export const deleteVpMap = (id: number) => {
   });
 };
 export const getVpMaps = (page = 1) => {
-  const query: Record<string, any> = [];
+  const query: Record<string, unknown> = {};
   if (page > 1) {
     query["page"] = page;
   }
-  return request({
+  return request<VpMap[]>({
     url: `/v1/vp-maps${qs.stringify(query, true)}`,
     method: "get",
   });

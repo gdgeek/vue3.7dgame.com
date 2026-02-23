@@ -1,11 +1,10 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-import { EduSchool } from "./types/edu-school";
-export interface UserType {
-  id: number;
-  nickname: string;
-  username: string;
-}
+import type {
+  EduSchool,
+  CreateSchoolRequest,
+  UpdateSchoolRequest,
+} from "./types/edu-school";
 
 export const getSchools = (
   sort = "-created_at",
@@ -13,7 +12,7 @@ export const getSchools = (
   page = 1,
   expand = "image,principal"
 ) => {
-  const query: Record<string, any> = [];
+  const query: Record<string, unknown> = {};
   query["expand"] = expand;
   query["sort"] = sort;
 
@@ -31,7 +30,7 @@ export const getSchools = (
 };
 
 export const getSchool = (id: number, expand = "image,principal") => {
-  const query: Record<string, any> = {};
+  const query: Record<string, unknown> = {};
   if (expand) {
     query["expand"] = expand;
   }
@@ -41,7 +40,7 @@ export const getSchool = (id: number, expand = "image,principal") => {
   });
 };
 
-export const createSchool = (data: any) => {
+export const createSchool = (data: CreateSchoolRequest) => {
   return request({
     url: `/v1/edu-school`,
     method: "post",
@@ -49,7 +48,7 @@ export const createSchool = (data: any) => {
   });
 };
 
-export const updateSchool = (id: number, data: any) => {
+export const updateSchool = (id: number, data: UpdateSchoolRequest) => {
   return request({
     url: `/v1/edu-school/${id}`,
     method: "put",
@@ -70,7 +69,7 @@ export const getPrincipalSchools = (
   page = 1,
   expand = "image,principal"
 ) => {
-  const query: Record<string, any> = [];
+  const query: Record<string, unknown> = {};
   query["expand"] = expand;
   query["sort"] = sort;
 

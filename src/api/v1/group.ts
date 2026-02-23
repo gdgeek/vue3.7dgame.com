@@ -1,6 +1,7 @@
 import request from "@/utils/request";
 import qs from "querystringify";
 import type { Group, GroupCreateData, GroupUpdateData } from "./types/group";
+import type { VerseData, PostVerseData } from "./types/verse";
 
 /**
  * Get list of groups with pagination, sorting, and filtering
@@ -151,15 +152,8 @@ export const leaveGroup = (id: number) => {
  * @param groupId - Group ID
  * @param data - Verse creation data
  */
-export const createGroupVerse = (
-  groupId: number,
-  data: {
-    name: string;
-    description?: string;
-    image_id?: number;
-  }
-) => {
-  return request<any>({
+export const createGroupVerse = (groupId: number, data: PostVerseData) => {
+  return request<VerseData>({
     url: `/v1/group/${groupId}/verse`,
     method: "post",
     data,
@@ -175,8 +169,8 @@ export interface GroupVerse {
   verse_id: number;
   created_at?: string;
   updated_at?: string;
-  group?: any;
-  verse?: any;
+  group?: Group;
+  verse?: VerseData;
 }
 
 /**
@@ -197,7 +191,7 @@ export const getGroupVerses = (
   expand = "verse.image,verse.author",
   search = ""
 ) => {
-  const query: Record<string, any> = {
+  const query: Record<string, unknown> = {
     sort,
     expand,
   };

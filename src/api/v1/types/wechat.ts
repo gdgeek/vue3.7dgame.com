@@ -6,14 +6,15 @@ import type { TokenInfo } from "./auth";
 
 /** 微信登录请求 */
 export interface WechatLoginRequest {
-  code: string;
-  state?: string;
+  token: string;
 }
 
 /** 微信登录响应 */
 export interface WechatLoginResponse {
+  success?: boolean;
+  message?: string;
   token: TokenInfo;
-  user: {
+  user?: {
     id: number;
     username: string;
     nickname?: string;
@@ -24,8 +25,7 @@ export interface WechatLoginResponse {
 
 /** 微信账号关联请求 */
 export interface WechatLinkRequest {
-  code: string;
-  state?: string;
+  token: string;
 }
 
 /** 微信账号关联响应 */
@@ -36,15 +36,18 @@ export interface WechatLinkResponse {
 
 /** 微信注册请求 */
 export interface WechatRegisterRequest {
-  code: string;
-  username?: string;
+  token: string;
+  username: string;
+  password: string;
   nickname?: string;
 }
 
 /** 微信注册响应 */
 export interface WechatRegisterResponse {
+  success?: boolean;
+  message?: string;
   token: TokenInfo;
-  user: {
+  user?: {
     id: number;
     username: string;
     nickname?: string;

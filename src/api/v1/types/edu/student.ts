@@ -3,6 +3,7 @@
  */
 
 import type { FileType } from "../file";
+import type { UserType } from "../user";
 
 /** 学生信息 */
 export interface Student {
@@ -12,10 +13,14 @@ export interface Student {
   grade: string;
   class: string;
   avatar: FileType;
+  student_id?: string;
   user_id?: number;
   class_id?: number;
   created_at?: string;
   updated_at?: string;
+  user?: UserType & { avatar?: FileType };
+  school?: { id: number; name: string };
+  eduClass?: { id: number; name: string };
   [key: string]: unknown;
 }
 

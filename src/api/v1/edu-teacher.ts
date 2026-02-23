@@ -1,14 +1,10 @@
 import request from "@/utils/request";
 import qs from "querystringify";
-
-export interface Teacher {
-  id: number;
-  name: string;
-  subject: string;
-  phone: string;
-  avatar: string;
-  [key: string]: any;
-}
+import type {
+  Teacher,
+  CreateTeacherRequest,
+  UpdateTeacherRequest,
+} from "./types/edu/teacher";
 
 export const getTeachers = (
   sort = "-created_at",
@@ -16,7 +12,7 @@ export const getTeachers = (
   page = 1,
   expand = ""
 ) => {
-  const query: Record<string, any> = [];
+  const query: Record<string, unknown> = {};
   query["expand"] = expand;
   query["sort"] = sort;
 
@@ -45,7 +41,7 @@ export const getTeacherMe = (
   page = 1,
   expand = "class,school"
 ) => {
-  const query: Record<string, any> = {};
+  const query: Record<string, unknown> = {};
   query["expand"] = expand;
   query["sort"] = sort;
 
@@ -72,11 +68,7 @@ export const getTeacherMe = (
   });
 };
 
-export const createTeacher = (data: {
-  user_id: number;
-  class_id: number;
-  school_id: number;
-}) => {
+export const createTeacher = (data: CreateTeacherRequest) => {
   return request({
     url: `/v1/edu-teacher`,
     method: "post",
@@ -91,7 +83,7 @@ export const deleteTeacher = (id: number) => {
   });
 };
 
-export const updateTeacher = (id: number, data: Partial<Teacher>) => {
+export const updateTeacher = (id: number, data: UpdateTeacherRequest) => {
   return request({
     url: `/v1/edu-teacher/${id}`,
     method: "put",

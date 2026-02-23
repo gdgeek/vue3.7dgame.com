@@ -9,8 +9,17 @@ export interface EduSchool {
   image_id?: number;
   image?: FileType;
   principal_id?: number;
-  principal?: number | UserType;
-  info: {
-    [key: string]: any;
-  };
+  principal?: UserType | null;
+  address?: string;
+  info: Record<string, unknown>;
 }
+
+export interface CreateSchoolRequest {
+  name: string;
+  image_id?: number;
+  principal_id?: number;
+  address?: string;
+  info?: Record<string, unknown>;
+}
+
+export type UpdateSchoolRequest = Partial<CreateSchoolRequest>;

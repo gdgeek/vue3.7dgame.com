@@ -2,104 +2,18 @@ import request from "@/utils/request";
 import qs from "querystringify";
 import { v4 as uuidv4 } from "uuid";
 import environment from "@/environment";
-import { metaInfo } from "./meta";
+import type {
+  VerseData,
+  VerseCode,
+  PostVerseData,
+  PutVerseData,
+} from "./types/verse";
+import type { JsonValue } from "./types/common";
 import { ResourceInfo } from "@/api/v1/resources/model";
-
-export type Author = {
-  id: number;
-  nickname: string;
-  email: string | null;
-  username: string;
-};
-
-type ImageDetails = {
-  id: number;
-  md5: string;
-  type: string;
-  url: string;
-  filename: string;
-  size: number;
-  key: string;
-};
-/*
-type VerseOpen = {
-  id: number;
-  verse_id: number;
-  user_id: number;
-  message_id: number;
-};
-*/
-type VerseRelease = {
-  id: number;
-  code: string;
-};
-
-export type VerseShare = {
-  id: number;
-  verse_id: number;
-  info: string;
-  editable: 1 | 0;
-  user: Author;
-};
-
-type Languages = {
-  id: number;
-  verse_id: number;
-  language: string;
-  name: string;
-  description: string;
-};
-export type VerseCode = {
-  blockly: string;
-  lua?: string;
-  js?: string;
-};
-export type Script = {
-  id: number;
-  created_at: string;
-  verse_id: number;
-  script: string;
-  title: string;
-  uuid: string;
-  workspace: string;
-};
-
-export type VerseData = {
-  id: number;
-  author_id: number;
-  created_at?: string;
-  name: string;
-  info: string | null;
-  description: string | null;
-  public?: boolean;
-  data: any;
-  version: number;
-  uuid: string;
-  editable: boolean;
-  viewable: boolean;
-  //verseOpen: VerseOpen | null;
-  verseRelease: VerseRelease | null;
-  verseShare?: VerseShare;
-  image: ImageDetails;
-  author?: Author;
-  languages?: Languages[];
-  metas?: metaInfo[];
-  script?: Script;
-  verseCode?: any;
-  verseTags?: [];
-};
-
-export type PostVerseData = {
-  image_id?: number;
-  description: string;
-  name: string;
-  uuid: string;
-  version?: number;
-};
 
 export type meta = {
   id: number;
-  data: any;
+  data: JsonValue;
   uuid: string;
   events: string;
   title: string;
@@ -137,7 +51,7 @@ export const putVerseCode = (id: number, data: VerseCode) => {
   });
 };
 export const getVerse = (id: number, expand = "metas,share", cl = "lua") => {
-  return request({
+  return request<VerseData>({
     url: `/v1/verses/${id}${qs.stringify({ expand: expand, cl }, true)}`,
     method: "get",
   });
@@ -170,8 +84,8 @@ const createQueryParams = ({
   page,
   expand,
   tags,
-}: VersesParams): Record<string, any> => {
-  const query: Record<string, any> = [];
+}: VersesParams): Record<string, unknown> => {
+  const query: Record<string, unknown> = {};
   query["expand"] = expand;
   query["sort"] = sort;
   if (search && search !== "") {
@@ -191,20 +105,20 @@ export const getPublic = (params: VersesParams) => {
   const query = createQueryParams(params);
 
   //expand = "id,name,description,data,metas,resources,code,uuid,code",
-  return request({
+  return request<VerseData[]>({
     url: `/v1/verses/public${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 export const getVerses = (params: VersesParams) => {
   const query = createQueryParams(params);
-  return request({
+  return request<VerseData[]>({
     url: `/v1/verses${qs.stringify(query, true)}`,
     method: "get",
   });
 };
 
-export const putVerse = (id: number, data: any) => {
+export const putVerse = (id: number, data: PutVerseData) => {
   data.version = environment.version;
   return request({
     url: `/v1/verses/${id}`,
