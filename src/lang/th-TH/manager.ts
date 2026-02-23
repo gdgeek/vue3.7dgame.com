@@ -31,6 +31,9 @@ export default {
     },
     defaultSchoolName: "โรงเรียนใหม่",
     defaultClassName: "ชั้นเรียนใหม่",
+    schoolManagement: "การจัดการโรงเรียน",
+    teacherManagement: "การจัดการครู",
+    studentManagement: "การจัดการนักเรียน",
     filteringBySchool: "กรองตามรหัสโรงเรียนปัจจุบัน",
     backToAll: "กลับไปที่ชั้นเรียนทั้งหมด",
     school: {

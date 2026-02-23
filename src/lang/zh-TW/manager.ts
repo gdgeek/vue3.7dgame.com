@@ -30,6 +30,9 @@ export default {
     },
     defaultSchoolName: "新學校",
     defaultClassName: "新班級",
+    schoolManagement: "學校管理",
+    teacherManagement: "教師管理",
+    studentManagement: "學生管理",
     filteringBySchool: "當前篩選學校ID",
     backToAll: "返回所有班級",
     school: {

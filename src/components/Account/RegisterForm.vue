@@ -122,7 +122,11 @@ const registerForm = ref({
   repassword: "",
 });
 
-const validatePass2 = (rule: any, value: any, callback: any) => {
+const validatePass2 = (
+  _rule: FormItemRule,
+  value: string,
+  callback: (error?: Error) => void
+) => {
   if (value === "") {
     callback(new Error(t("login.rules.repassword.message1")));
   } else if (value !== registerForm.value.password) {

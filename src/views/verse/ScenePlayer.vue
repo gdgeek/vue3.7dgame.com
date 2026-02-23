@@ -18,7 +18,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "stats.js";
 
-import { ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, onMounted, onUnmounted, watch, computed, reactive } from "vue";
 
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
@@ -26,7 +26,9 @@ import { useModelLoader, type SourceItem } from "./composables/useModelLoader";
 import {
   Verse,
   Entity,
+  EntityParameters,
   Resource,
+  VerseData,
   CollisionObject,
   RotatingObject,
   MoveableObject,
@@ -40,6 +42,25 @@ const props = defineProps<{
   verse: Verse;
   isSceneFullscreen?: boolean;
 }>();
+
+type MetaData = {
+  children?: {
+    entities?: Entity[];
+  };
+};
+
+type MetaInfo = {
+  id: string | number;
+  data?: MetaData | string;
+  events?: unknown;
+};
+
+type ModuleParameters = EntityParameters & {
+  meta_id?: string | number;
+  uuid: string;
+  transform?: Transform;
+  play?: boolean;
+};
 
 declare global {
   interface Window {
@@ -80,42 +101,56 @@ const mouse = new THREE.Vector2(); // 鼠标位置
 const raycaster = new THREE.Raycaster(); // 射线投射器
 // 使用共享的 getConfiguredGLTFLoader()
 // 初始化事件容器
-const initEventContainer = () => {
-  if (props.verse?.data) {
-    const verseData =
-      typeof props.verse.data === "string"
-        ? JSON.parse(props.verse.data)
-        : props.verse.data;
-    if (verseData.children?.modules) {
-      verseData.children.modules.forEach((module: any) => {
-        const metaId = module.parameters.meta_id;
-        const meta = props.verse.metas.find(
-          (m: any) => m.id.toString() === metaId.toString()
-        );
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
 
-        if (meta?.events) {
-          try {
-            // const events = JSON.parse(meta.events);
-            const events = meta.events;
-            eventContainer.value[module.parameters.uuid] = events;
-            console.log(
-              `Module ${module.parameters.uuid} 的事件已加载:`,
-              events
-            );
-          } catch (error) {
-            console.error(
-              `解析Module ${module.parameters.uuid} 的事件失败:`,
-              error
-            );
-          }
-        }
-      });
+const isMetaInfo = (value: unknown): value is MetaInfo =>
+  isRecord(value) && ("id" in value || "data" in value || "events" in value);
+
+const parseVerseData = (): VerseData | null => {
+  if (!props.verse?.data) return null;
+  if (typeof props.verse.data === "string") {
+    try {
+      return JSON.parse(props.verse.data) as VerseData;
+    } catch (error) {
+      console.error("解析verse数据失败:", error);
+      return null;
     }
   }
+  return props.verse.data;
+};
+
+const initEventContainer = () => {
+  const verseData = parseVerseData();
+  if (!verseData?.children?.modules) return;
+
+  verseData.children.modules.forEach((module) => {
+    const moduleParams = module.parameters as ModuleParameters | undefined;
+    if (!moduleParams?.meta_id || !moduleParams.uuid) return;
+
+    const meta = props.verse.metas.find(
+      (candidate): candidate is MetaInfo =>
+        isMetaInfo(candidate) &&
+        String(candidate.id) === String(moduleParams.meta_id)
+    );
+
+    if (meta?.events) {
+      try {
+        const events = meta.events;
+        eventContainer.value[moduleParams.uuid] = events;
+        console.log(`Module ${moduleParams.uuid} 的事件已加载:`, events);
+      } catch (error) {
+        console.error(`解析Module ${moduleParams.uuid} 的事件失败:`, error);
+      }
+    }
+  });
 };
 
 // 合并transform, 处理父子相对位置
-const combineTransforms = (parentTransform: any, childTransform: any) => {
+const combineTransforms = (
+  parentTransform?: Transform,
+  childTransform?: Transform
+): Transform => {
   if (!parentTransform) {
     return (
       childTransform || {
@@ -513,27 +548,29 @@ onMounted(async () => {
 
   // 加载verse中所有数据
   if (props.verse?.data) {
-    const verseData =
-      typeof props.verse.data === "string"
-        ? JSON.parse(props.verse.data)
-        : props.verse.data;
+    const verseData = parseVerseData();
     console.log("解析后的verse全部数据:", props.verse);
-    if (verseData.children?.modules) {
+    if (verseData?.children?.modules) {
       for (const module of verseData.children.modules) {
-        const metaId = module.parameters.meta_id;
+        const moduleParams = module.parameters as ModuleParameters | undefined;
+        if (!moduleParams?.meta_id) continue;
+        const metaId = moduleParams.meta_id;
         const meta = props.verse.metas.find(
-          (m: any) => m.id.toString() === metaId.toString()
+          (candidate): candidate is MetaInfo =>
+            isMetaInfo(candidate) && String(candidate.id) === String(metaId)
         );
 
         if (meta && meta.data) {
-          // const metaData = JSON.parse(meta.data);
-          const metaData = meta.data;
+          const metaData =
+            typeof meta.data === "string"
+              ? (JSON.parse(meta.data) as MetaData)
+              : meta.data;
           console.log("解析后的metaData:", metaData);
           if (metaData.children?.entities) {
             // 使用递归处理可能存在的多级嵌套
             await processEntities(
               metaData.children.entities,
-              module.parameters.transform
+              moduleParams.transform
             );
           }
         }
@@ -661,7 +698,7 @@ onMounted(async () => {
   // 监听全屏状态变化
   watch(
     () => props.isSceneFullscreen,
-    (newValue) => {
+    (_newValue) => {
       // 给浏览器一点时间来完成全屏切换
       setTimeout(() => {
         handleResize();

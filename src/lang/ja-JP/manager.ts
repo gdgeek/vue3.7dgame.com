@@ -31,6 +31,9 @@ export default {
     },
     defaultSchoolName: "新しい学校",
     defaultClassName: "新しいクラス",
+    schoolManagement: "学校管理",
+    teacherManagement: "教師管理",
+    studentManagement: "学生管理",
     filteringBySchool: "現在の学校IDでフィルタリング",
     backToAll: "すべてのクラスに戻る",
     school: {

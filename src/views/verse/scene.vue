@@ -59,7 +59,7 @@ const title = computed(() => {
 const id = computed(() => parseInt(route.query.id as string));
 
 const src = computed(() => {
-  const query: Record<string, any> = {
+  const query: Record<string, string | number> = {
     language: appStore.language,
     timestamp: Date.now(),
     api: env.api,
@@ -112,7 +112,56 @@ const refresh = async () => {
 };
 
 // 向编辑器发送消息
-const postMessage = (action: string, data: any) => {
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+type PrefabSetupPayload = {
+  meta_id: number | string;
+  data: string;
+  uuid: string;
+};
+
+type SelectedMetaPayload = {
+  data: unknown;
+  setup?: unknown;
+  title?: string;
+};
+
+type VerseModule = {
+  parameters: {
+    title: string;
+  } & Record<string, unknown>;
+};
+
+type VerseEditorData = {
+  children?: {
+    modules?: VerseModule[];
+  };
+} & Record<string, unknown>;
+
+type VerseEditorPayload = {
+  verse?: VerseEditorData;
+};
+
+type EditorMessage = {
+  action: string;
+  data?: unknown;
+};
+
+type CoverUploadPayload = {
+  imageData: string;
+};
+
+const isEditorMessage = (value: unknown): value is EditorMessage =>
+  isRecord(value) && typeof value.action === "string";
+
+const isPrefabSetupPayload = (value: unknown): value is PrefabSetupPayload =>
+  isRecord(value) && "meta_id" in value && "data" in value && "uuid" in value;
+
+const isCoverUploadPayload = (value: unknown): value is CoverUploadPayload =>
+  isRecord(value) && typeof value.imageData === "string";
+
+const postMessage = (action: string, data: unknown) => {
   if (editor.value && editor.value.contentWindow) {
     editor.value.contentWindow.postMessage(
       {
@@ -128,12 +177,12 @@ const postMessage = (action: string, data: any) => {
 };
 
 // 设置预制件属性
-const setupPrefab = async ({ meta_id, data, uuid }: any) => {
+const setupPrefab = async ({ meta_id, data, uuid }: PrefabSetupPayload) => {
   const response = await getPrefab(meta_id);
   knightDataRef.value?.open({
     schema: JSON.parse(response.data.data!),
     data: JSON.parse(data),
-    callback: (setup: any) => {
+    callback: (setup: unknown) => {
       postMessage("setup-module", { uuid, setup });
     },
   });
@@ -150,17 +199,18 @@ const addMeta = () => {
 };
 
 // 选择元素后的回调
-const selected = async ({ data, setup, title }: any) => {
+const selected = async ({ data, setup, title }: SelectedMetaPayload) => {
   postMessage("add-module", { data, setup, title });
 };
 
 // 保存场景数据
-const saveVerse = async (data: any) => {
-  if (!data.verse) {
+const saveVerse = async (data: unknown) => {
+  const payload = data as VerseEditorPayload;
+  if (!payload.verse) {
     return;
   }
 
-  const verse = data.verse;
+  const verse = payload.verse;
 
   if (!saveable.value) {
     ElMessage.info(t("verse.view.sceneEditor.info3"));
@@ -168,7 +218,7 @@ const saveVerse = async (data: any) => {
   }
 
   // 处理重复标题，确保标题唯一
-  const retitleVerses = (verses: any[]) => {
+  const retitleVerses = (verses: VerseModule[]) => {
     const titleCount: Record<string, number> = {};
 
     verses.forEach((verse) => {
@@ -222,8 +272,9 @@ const saveVerse = async (data: any) => {
 };
 
 //发布场景
-const releaseVerse = async (data: any) => {
-  if (!data.verse) {
+const releaseVerse = async (data: unknown) => {
+  const payload = data as VerseEditorPayload;
+  if (!payload.verse) {
     ElMessage.error(t("verse.view.sceneEditor.noProjectToPublish"));
     return;
   }
@@ -254,7 +305,7 @@ const releaseVerse = async (data: any) => {
 
 // 处理来自编辑器的消息
 const handleMessage = async (e: MessageEvent) => {
-  if (!e.data || !e.data.action) return;
+  if (!isEditorMessage(e.data)) return;
 
   const action = e.data.action;
   const data = e.data.data;
@@ -268,7 +319,9 @@ const handleMessage = async (e: MessageEvent) => {
       break;
 
     case "setup-prefab":
-      setupPrefab(data);
+      if (isPrefabSetupPayload(data)) {
+        setupPrefab(data);
+      }
       break;
 
     case "add-meta":
@@ -335,9 +388,9 @@ const handleMessage = async (e: MessageEvent) => {
 };
 
 // 处理上传封面图片
-const handleUploadCover = async (data: any) => {
+const handleUploadCover = async (data: unknown) => {
   try {
-    if (!data || !data.imageData) {
+    if (!isCoverUploadPayload(data)) {
       ElMessage.error(t("verse.view.sceneEditor.coverUploadError"));
       return;
     }
@@ -385,7 +438,7 @@ const handleUploadCover = async (data: any) => {
         md5,
         extension,
         file,
-        (p: any) => {},
+        (_progress: unknown) => {},
         handler,
         "backup"
       );

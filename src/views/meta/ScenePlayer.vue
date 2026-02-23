@@ -16,16 +16,18 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { getConfiguredGLTFLoader } from "@/lib/three/loaders";
-import { ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, onMounted, onUnmounted, watch, computed, reactive } from "vue";
 import { convertToHttps } from "@/assets/js/helper";
 import { VOXLoader, VOXMesh } from "@/assets/js/voxel/VOXLoader.js";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
+import type { MetaInfo } from "@/api/v1/types/meta";
+import type { ResourceInfo } from "@/api/v1/resources/model";
 
 const settingsStore = useSettingsStore();
 
 const props = defineProps<{
-  meta: any;
+  meta: MetaInfo;
   isSceneFullscreen?: boolean;
 }>();
 
@@ -42,7 +44,36 @@ const threeScene = new THREE.Scene();
 let camera: THREE.PerspectiveCamera | null = null;
 let renderer: THREE.WebGLRenderer | null = null;
 let mixers: Map<string, THREE.AnimationMixer> = new Map();
-let sources: Map<string, any> = new Map();
+type SourceModelData = {
+  mesh: THREE.Object3D;
+  setVisibility?: (isVisible: boolean) => void;
+  cleanup?: () => void;
+  updateBoundingBox?: () => void;
+  setRotating?: (isRotating: boolean) => void;
+};
+type SourceVideoData = {
+  mesh: THREE.Object3D;
+  video: HTMLVideoElement;
+  texture: THREE.VideoTexture;
+  cleanup: () => void;
+  setVisibility: (isVisible: boolean) => void;
+};
+type SourceAudioData = { url: string };
+type SourceTextData = {
+  mesh: THREE.Object3D;
+  setText: (text: string) => void;
+  setVisibility: (isVisible: boolean) => void;
+};
+type SourceEntityData = { transform: TransformData; setVisibility: () => void };
+type SourceRecord =
+  | { type: "model"; data: SourceModelData }
+  | { type: "picture"; data: SourceModelData }
+  | { type: "video"; data: SourceVideoData }
+  | { type: "audio"; data: SourceAudioData }
+  | { type: "text"; data: SourceTextData }
+  | { type: "entity"; data: SourceEntityData };
+
+let sources: Map<string, SourceRecord> = new Map();
 let clock = new THREE.Clock();
 
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
@@ -96,7 +127,69 @@ const controls = ref<OrbitControls | null>(null);
 const mouse = new THREE.Vector2(); // 鼠标位置
 const raycaster = new THREE.Raycaster(); // 射线投射器
 
-const combineTransforms = (parentTransform: any, childTransform: any) => {
+type TransformAxis = { x: number; y: number; z: number };
+type TransformData = {
+  position: TransformAxis;
+  rotate: TransformAxis;
+  scale: TransformAxis;
+};
+
+type EntityParameters = {
+  uuid: string;
+  name?: string;
+  title?: string;
+  active?: boolean;
+  play?: boolean;
+  resource?: string | number;
+  text?: string;
+  width?: number;
+  height?: number;
+  loop?: boolean;
+  muted?: boolean;
+  volume?: number;
+  color?: string;
+  fontSize?: number;
+  transform?: TransformData;
+};
+
+type ComponentParameters = {
+  uuid: string;
+  target?: string;
+  speed?: TransformAxis;
+  magnetic?: boolean;
+  scalable?: boolean;
+  limit?: {
+    x: { enable: boolean; min: number; max: number };
+    y: { enable: boolean; min: number; max: number };
+    z: { enable: boolean; min: number; max: number };
+  };
+};
+
+type EntityComponent = {
+  type: string;
+  parameters: ComponentParameters;
+};
+
+type EntityNode = {
+  type: string;
+  parameters: EntityParameters;
+  children?: {
+    entities?: EntityNode[];
+    components?: EntityComponent[];
+  };
+};
+
+type ResourceLike = {
+  type: string;
+  id?: string | number;
+  content?: string;
+  file?: { url: string };
+} & Partial<ResourceInfo>;
+
+const combineTransforms = (
+  parentTransform: TransformData | undefined,
+  childTransform: TransformData | undefined
+) => {
   if (!parentTransform) {
     return (
       childTransform || {
@@ -169,8 +262,8 @@ const combineTransforms = (parentTransform: any, childTransform: any) => {
 };
 
 const loadModel = async (
-  resource: any,
-  entity: any,
+  resource: ResourceLike,
+  entity: EntityNode,
   parentActive: boolean = true
 ) => {
   console.log("开始加载模型:", {
@@ -203,7 +296,9 @@ const loadModel = async (
     return new Promise((resolve, reject) => {
       try {
         const video = document.createElement("video");
-        video.src = convertToHttps(resource.file.url);
+        const videoUrl =
+          "file" in resource && resource.file?.url ? resource.file.url : "";
+        video.src = convertToHttps(videoUrl);
         video.crossOrigin = "anonymous";
 
         // 设置视频属性
@@ -336,7 +431,10 @@ const loadModel = async (
   if (resource.type === "picture" || entity.type === "Picture") {
     return new Promise((resolve, reject) => {
       const textureLoader = new THREE.TextureLoader();
-      const url = convertToHttps(resource.file.url);
+      const url =
+        "file" in resource && resource.file?.url
+          ? convertToHttps(resource.file.url)
+          : "";
 
       textureLoader.load(
         url,
@@ -415,7 +513,10 @@ const loadModel = async (
   if (resource.type === "audio" || entity.type === "Sound") {
     return new Promise((resolve) => {
       const uuid = entity.parameters.uuid.toString();
-      const audioUrl = convertToHttps(resource.file.url);
+      const audioUrl =
+        "file" in resource && resource.file?.url
+          ? convertToHttps(resource.file.url)
+          : "";
 
       sources.set(uuid, {
         type: "audio",
@@ -524,14 +625,21 @@ const loadModel = async (
   // 处理体素
   if (resource.type === "voxel" || entity.type === "Voxel") {
     const loader = new VOXLoader();
-    const url = convertToHttps(resource.file.url);
+    const url =
+      "file" in resource && resource.file?.url
+        ? convertToHttps(resource.file.url)
+        : "";
 
     return new Promise((resolve, reject) => {
       loader.load(
         url,
-        async (chunks: any[]) => {
+        async (chunks: unknown[]) => {
           try {
-            const chunk = chunks[0];
+            const chunk = chunks[0] as {
+              data: unknown[];
+              size: TransformAxis;
+              palette: unknown[];
+            };
             if (!chunk || !chunk.data || !chunk.size) {
               throw new Error("无效的VOX数据结构");
             }
@@ -572,12 +680,11 @@ const loadModel = async (
             // 处理子实体
             if (entity.children?.entities) {
               const childMeshes = await Promise.all(
-                entity.children.entities.map((childEntity: any) => {
-                  if (childEntity.parameters?.resource) {
+                entity.children.entities.map((childEntity: EntityNode) => {
+                  const resourceId = childEntity.parameters?.resource;
+                  if (resourceId) {
                     const childResource = props.meta.resources.find(
-                      (r: any) =>
-                        r.id.toString() ===
-                        childEntity.parameters.resource.toString()
+                      (r) => r.id.toString() === resourceId.toString()
                     );
                     if (childResource) {
                       return loadModel(
@@ -603,8 +710,10 @@ const loadModel = async (
               );
 
               // 将有效的子级mesh添加到父级mesh
-              childMeshes.filter(Boolean).forEach((childMesh) => {
-                voxMesh.add(childMesh);
+              childMeshes.forEach((childMesh) => {
+                if (childMesh instanceof THREE.Object3D) {
+                  voxMesh.add(childMesh);
+                }
               });
             }
 
@@ -615,19 +724,19 @@ const loadModel = async (
             if (entity.children?.components) {
               // 点击触发
               const actionComponent = entity.children.components.find(
-                (comp: any) => comp.type === "Action"
+                (comp) => comp.type === "Action"
               );
               // 碰撞触发
               const triggerComponent = entity.children.components.find(
-                (comp: any) => comp.type === "Trigger"
+                (comp) => comp.type === "Trigger"
               );
               // 自旋转
               const rotateComponent = entity.children.components.find(
-                (comp: any) => comp.type === "Rotate"
+                (comp) => comp.type === "Rotate"
               );
               // 可移动
               const movedComponent = entity.children.components.find(
-                (comp: any) => comp.type === "Moved"
+                (comp) => comp.type === "Moved"
               );
 
               let sourceData = {
@@ -703,15 +812,17 @@ const loadModel = async (
                 boundingBox.setFromObject(voxMesh);
                 const lastPosition = voxMesh.position.clone();
 
-                collisionObjects.value.push({
-                  sourceUuid: uuid,
-                  targetUuid: triggerComponent.parameters.target,
-                  eventUuid: triggerComponent.parameters.uuid,
-                  boundingBox: boundingBox,
-                  isColliding: false,
-                  lastPosition: lastPosition,
-                  checkVisibility: true,
-                });
+                if (triggerComponent.parameters.target) {
+                  collisionObjects.value.push({
+                    sourceUuid: uuid,
+                    targetUuid: triggerComponent.parameters.target,
+                    eventUuid: triggerComponent.parameters.uuid,
+                    boundingBox: boundingBox,
+                    isColliding: false,
+                    lastPosition: lastPosition,
+                    checkVisibility: true,
+                  });
+                }
 
                 sourceData.data.updateBoundingBox = () => {
                   boundingBox.setFromObject(voxMesh);
@@ -937,7 +1048,10 @@ const loadModel = async (
   } else {
     // 处理gltf模型
     const loader = getConfiguredGLTFLoader();
-    const url = convertToHttps(resource.file.url);
+    const url = resource.file?.url ? convertToHttps(resource.file.url) : "";
+    if (!url) {
+      return Promise.reject(new Error("资源缺少文件地址"));
+    }
 
     return new Promise((resolve, reject) => {
       loader.load(
@@ -984,12 +1098,11 @@ const loadModel = async (
           // 处理子实体
           if (entity.children?.entities) {
             const childMeshes = await Promise.all(
-              entity.children.entities.map((childEntity: any) => {
-                if (childEntity.parameters?.resource) {
+              entity.children.entities.map((childEntity: EntityNode) => {
+                const resourceId = childEntity.parameters?.resource;
+                if (resourceId) {
                   const childResource = props.meta.resources.find(
-                    (r: any) =>
-                      r.id.toString() ===
-                      childEntity.parameters.resource.toString()
+                    (r) => r.id.toString() === resourceId.toString()
                   );
                   if (childResource) {
                     return loadModel(
@@ -1015,27 +1128,29 @@ const loadModel = async (
             );
 
             // 将有效的子级mesh添加到父级mesh
-            childMeshes.filter(Boolean).forEach((childMesh) => {
-              model.add(childMesh);
+            childMeshes.forEach((childMesh) => {
+              if (childMesh instanceof THREE.Object3D) {
+                model.add(childMesh);
+              }
             });
           }
 
           if (entity.children?.components) {
             // 点击触发
             const actionComponent = entity.children.components.find(
-              (comp: any) => comp.type === "Action"
+              (comp) => comp.type === "Action"
             );
             // 碰撞触发
             const triggerComponent = entity.children.components.find(
-              (comp: any) => comp.type === "Trigger"
+              (comp) => comp.type === "Trigger"
             );
             // 自旋转
             const rotateComponent = entity.children.components.find(
-              (comp: any) => comp.type === "Rotate"
+              (comp) => comp.type === "Rotate"
             );
             // 可移动
             const movedComponent = entity.children.components.find(
-              (comp: any) => comp.type === "Moved"
+              (comp) => comp.type === "Moved"
             );
 
             if (actionComponent) {
@@ -1118,18 +1233,20 @@ const loadModel = async (
               let lastPosition = model.position.clone();
 
               // 添加到动画循环中检查的碰撞对象列表，增加可见性检查
-              const collisionData = {
-                sourceUuid: entity.parameters.uuid,
-                targetUuid: triggerComponent.parameters.target,
-                eventUuid: triggerComponent.parameters.uuid,
-                boundingBox: boundingBox,
-                isColliding: false,
-                lastPosition: lastPosition,
-                checkVisibility: true,
-              };
+              if (triggerComponent.parameters.target) {
+                const collisionData = {
+                  sourceUuid: entity.parameters.uuid,
+                  targetUuid: triggerComponent.parameters.target,
+                  eventUuid: triggerComponent.parameters.uuid,
+                  boundingBox: boundingBox,
+                  isColliding: false,
+                  lastPosition: lastPosition,
+                  checkVisibility: true,
+                };
 
-              // 将碰撞数据添加到碰撞检测列表
-              collisionObjects.value.push(collisionData);
+                // 将碰撞数据添加到碰撞检测列表
+                collisionObjects.value.push(collisionData);
+              }
 
               // 更新包围盒的函数
               const updateBoundingBox = () => {
@@ -1530,8 +1647,8 @@ const playQueuedAudio = async (
 };
 
 const processEntities = async (
-  entities: any[],
-  parentTransform?: any,
+  entities: EntityNode[],
+  parentTransform?: TransformData,
   level: number = 0,
   parentActive: boolean = true
 ) => {
@@ -1597,7 +1714,7 @@ const processEntities = async (
       sources.set(entity.parameters.uuid, entityData);
     } else if (entity.parameters?.resource) {
       const resource = props.meta.resources.find(
-        (r: any) => r.id.toString() === entity.parameters.resource.toString()
+        (r) => r.id.toString() === entity.parameters.resource.toString()
       );
       if (resource) {
         try {

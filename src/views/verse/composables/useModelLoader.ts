@@ -21,19 +21,19 @@ export interface SourceDataVideo {
   stop?: () => void;
   play?: () => void;
   cleanup?: () => void;
-  [key: string]: any; // Allow extensibility for now
+  [key: string]: unknown; // Allow extensibility for now
 }
 
 export interface SourceDataMesh {
   mesh: THREE.Object3D;
   setVisibility?: (visible: boolean) => void;
   setText?: (text: string) => void;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface SourceDataAudio {
   url: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export type SourceItem =
@@ -42,7 +42,7 @@ export type SourceItem =
   | { type: "text"; data: SourceDataMesh }
   | { type: "model"; data: SourceDataMesh }
   | { type: "audio"; data: SourceDataAudio }
-  | { type: string; data: any }; // Fallback for unknown types
+  | { type: string; data: unknown }; // Fallback for unknown types
 
 interface ModelLoaderContext {
   threeScene: THREE.Scene;
@@ -422,10 +422,11 @@ export function useModelLoader(context: ModelLoaderContext) {
       return new Promise((resolve, reject) => {
         loader.load(
           url,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          async (chunks: any[]) => {
+          async (chunks: unknown[]) => {
             try {
-              const chunk = chunks[0];
+              const chunk = chunks[0] as
+                | { data?: unknown; size?: unknown }
+                | undefined;
               if (!chunk || !chunk.data || !chunk.size) {
                 throw new Error("无效的VOX数据结构");
               }

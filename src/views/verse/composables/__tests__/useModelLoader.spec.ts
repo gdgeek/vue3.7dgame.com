@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useModelLoader } from "../useModelLoader";
 import { ref, reactive } from "vue";
 import * as THREE from "three";
+import type { DragState, Entity, Resource, Verse } from "@/types/verse";
 
 // Mock Dependencies
 vi.mock("@/assets/js/voxel/VOXLoader.js", () => ({
@@ -10,20 +11,28 @@ vi.mock("@/assets/js/voxel/VOXLoader.js", () => ({
 }));
 vi.mock("@/lib/three/loaders", () => ({
   getConfiguredGLTFLoader: vi.fn(() => ({
-    load: vi.fn((url, onLoad) => {
-      onLoad({ scene: new THREE.Object3D(), animations: [] });
-    }),
+    load: vi.fn(
+      (
+        url: string,
+        onLoad: (gltf: {
+          scene: THREE.Object3D;
+          animations: THREE.AnimationClip[];
+        }) => void
+      ) => {
+        onLoad({ scene: new THREE.Object3D(), animations: [] });
+      }
+    ),
   })),
 }));
 vi.mock("@/assets/js/helper", () => ({
-  convertToHttps: vi.fn((url) => url),
+  convertToHttps: vi.fn((url: string) => url),
 }));
 
 // Mock THREE
 vi.mock("three", async () => {
-  const actual = await vi.importActual("three");
+  const actual = await vi.importActual<typeof import("three")>("three");
   return {
-    ...(actual as any),
+    ...actual,
     Scene: vi.fn(() => ({ add: vi.fn(), remove: vi.fn() })),
     PerspectiveCamera: vi.fn(),
     WebGLRenderer: vi.fn(),
@@ -34,27 +43,52 @@ vi.mock("three", async () => {
   };
 });
 
-describe("useModelLoader", () => {
-  const mockContext = () => ({
-    threeScene: new THREE.Scene(),
-    camera: ref(null),
-    renderer: ref(null),
-    mixers: new Map(),
-    sources: new Map(),
-    collisionObjects: ref([]),
-    rotatingObjects: ref([]),
-    moveableObjects: ref([]),
-    dragState: reactive({} as any),
-    controls: ref(null),
-    mouse: new THREE.Vector2(),
-    raycaster: new THREE.Raycaster(),
-    verse: { data: {}, metas: [], resources: [] },
-  });
+const createDragState = (): DragState => ({
+  isDragging: false,
+  draggedObject: null,
+  dragStartPosition: new THREE.Vector3(),
+  dragOffset: new THREE.Vector3(),
+  mouseStartPosition: new THREE.Vector2(),
+  lastIntersection: new THREE.Vector3(),
+});
 
+const createVerse = (): Verse => ({
+  data: {},
+  metas: [],
+  resources: [],
+});
+
+const createContext = (): Parameters<typeof useModelLoader>[0] => ({
+  threeScene: new THREE.Scene(),
+  camera: ref(null),
+  renderer: ref(null),
+  mixers: new Map(),
+  sources: new Map(),
+  collisionObjects: ref([]),
+  rotatingObjects: ref([]),
+  moveableObjects: ref([]),
+  dragState: reactive(createDragState()),
+  controls: ref(null),
+  mouse: new THREE.Vector2(),
+  raycaster: new THREE.Raycaster(),
+  verse: createVerse(),
+});
+
+const createVideoResource = (): Resource => ({
+  type: "video",
+  file: { url: "http://test.com/video.mp4" },
+  id: 1,
+});
+
+const createVideoEntity = (): Entity => ({
+  type: "Video",
+  parameters: { uuid: "v1", active: true, width: 1, height: 1 },
+});
+describe("useModelLoader", () => {
   let loader: ReturnType<typeof useModelLoader>;
 
   beforeEach(() => {
-    loader = useModelLoader(mockContext() as any);
+    loader = useModelLoader(createContext());
   });
 
   it("should be defined", () => {
@@ -63,15 +97,8 @@ describe("useModelLoader", () => {
   });
 
   it("should load video resource", async () => {
-    const resource = {
-      type: "video",
-      file: { url: "http://test.com/video.mp4" },
-      id: 1,
-    };
-    const entity = {
-      type: "Video",
-      parameters: { uuid: "v1", active: true, width: 1, height: 1 },
-    };
+    const resource = createVideoResource();
+    const entity = createVideoEntity();
 
     // Spy on document.createElement to handle video
     const mockVideo = {
@@ -83,14 +110,16 @@ describe("useModelLoader", () => {
       videoHeight: 100,
       style: {},
     };
-    vi.spyOn(document, "createElement").mockReturnValue(mockVideo as any);
+    vi.spyOn(document, "createElement").mockReturnValue(
+      mockVideo as unknown as HTMLVideoElement
+    );
 
-    const result = await loader.loadModel(resource as any, entity as any);
+    const result = await loader.loadModel(resource, entity);
 
     expect(result).toBeDefined();
     // Since we mocked Scene.add, verifying calls to it would be ideal
     // But result returns the mesh, so we can check that.
     // However, in mock implementations, types might be loose.
-    expect((result as any).isMesh).toBe(true);
+    expect(result && result instanceof THREE.Object3D).toBe(true);
   });
 });

@@ -12,14 +12,14 @@
             :icon="['fas', 'plus']"
             style="font-size: 18px; margin-right: 4px"
           ></font-awesome-icon>
-          {{ $t("ai.generation") }}
+          {{ $t("route.ai.generation") }}
         </el-button>
       </template>
 
       <template #card="{ item }">
         <MrPPCard
           :item="item"
-          :type="$t('ai.title')"
+          :type="$t('route.ai.title')"
           color="#3498db"
           @deleted="deletedWindow"
         >

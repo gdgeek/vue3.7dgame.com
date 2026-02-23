@@ -10,14 +10,16 @@ defineOptions({
   inheritAttrs: false,
 });
 
+import { computed } from "vue";
 import { isExternal } from "@/utils/index";
 
-const props = defineProps({
-  to: {
-    type: Object,
-    required: true,
-  },
-});
+type AppLinkTo = {
+  path?: string;
+} & Record<string, unknown>;
+
+const props = defineProps<{
+  to: AppLinkTo;
+}>();
 
 const isExternalLink = computed(() => {
   return isExternal(props.to.path || "");
@@ -25,7 +27,7 @@ const isExternalLink = computed(() => {
 
 const linkType = computed(() => (isExternalLink.value ? "a" : "router-link"));
 
-const linkProps = (to: any) => {
+const linkProps = (to: AppLinkTo) => {
   if (isExternalLink.value) {
     return {
       href: to.path,
