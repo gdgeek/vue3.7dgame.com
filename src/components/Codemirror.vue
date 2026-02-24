@@ -14,6 +14,7 @@
 </template>
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { shallowRef } from "vue";
 import { Codemirror } from "vue-codemirror";
 import { json } from "@codemirror/lang-json";
@@ -31,6 +32,6 @@ function handleReady(payload: { view: EditorView }) {
 
 // 事件日志
 function log(event: string, eventObj: unknown) {
-  console.log(event, eventObj);
+  logger.log(event, eventObj);
 }
 </script>

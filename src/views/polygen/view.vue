@@ -60,6 +60,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { useRoute, useRouter } from "vue-router";
 import PolygenView from "@/components/PolygenView.vue";
 import {
@@ -171,7 +172,7 @@ const createVerse = async () => {
       image_id: polygenData.value.image_id ?? 0,
       info: polygenData.value.info ?? "",
     });
-    console.error(result);
+    logger.error(result);
     ElMessage.success(t("polygen.view.prompt.success") + value);
 
     setTimeout(() => {
@@ -268,7 +269,7 @@ const updatePolygen = async (
 
     expire.value = false;
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 
@@ -292,7 +293,7 @@ const saveFile = async (
 };
 
 const loaded = async (info: Record<string, unknown>) => {
-  console.log("模型信息:", info);
+  logger.log("模型信息:", info);
 
   if (prepare.value) {
     expire.value = false;
@@ -332,7 +333,7 @@ const loaded = async (info: Record<string, unknown>) => {
       await saveFile(md5, extension, info, file, handler);
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 /*
@@ -343,7 +344,7 @@ const screenshot = () => {
 onMounted(async () => {
   expire.value = true;
   const response = (await getPolygen(id.value)) as { data: ResourceInfo };
-  console.error(response.data);
+  logger.error(response.data);
   polygenData.value = response.data;
 });
 </script>

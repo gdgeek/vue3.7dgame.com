@@ -5,6 +5,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import ElementResizeDetector from "element-resize-detector";
 
 import * as THREE from "three";
@@ -109,7 +110,7 @@ const refresh = () => {
       chunks: { data: Uint8Array; size: { x: number; y: number; z: number } }[]
     ) => {
       const chunk = chunks[0];
-      console.error(chunks);
+      logger.error(chunks);
       const mesh = new VOXMesh(chunk);
 
       const box = new THREE.Box3().setFromObject(mesh);
@@ -138,7 +139,7 @@ const refresh = () => {
     (xhr: { loaded: number; total: number }) => {
       emit("progress", parseFloat(((xhr.loaded / xhr.total) * 100).toFixed(1)));
       // emit("progress", (xhr.loaded / xhr.total) * 100);
-      console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+      logger.log((xhr.loaded / xhr.total) * 100 + "% loaded");
     }
   );
 };

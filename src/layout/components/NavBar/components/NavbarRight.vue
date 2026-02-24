@@ -77,6 +77,7 @@
   </div>
 </template>
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { useAppStore, useUserStore, useSettingsStore } from "@/store";
 import { useDomainStore } from "@/store/modules/domain";
 
@@ -132,7 +133,7 @@ const logout = async () => {
 
     router.push("/site/logout");
   } catch (e) {
-    console.error(e);
+    logger.error(e);
   }
 };
 

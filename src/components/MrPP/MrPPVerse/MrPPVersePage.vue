@@ -55,6 +55,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { useRouter } from "vue-router";
 import { v4 as uuidv4 } from "uuid";
 import { postVerse, putVerse } from "@/api/v1/verse";
@@ -117,7 +118,7 @@ const submitCreate = async (form: VerseData, imageId: number | null) => {
     const response = await postVerse(data);
     router.push({ path: "/verse/view", query: { id: response.data.id } });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 

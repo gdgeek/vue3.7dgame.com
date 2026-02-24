@@ -64,6 +64,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import PolygenView from "@/components/PolygenView.vue";
 import {
   getPolygen,
@@ -177,7 +178,7 @@ const progress = (progress: number) => {
 const loaded = async (info: unknown) => {
   // Logic mostly removed as preprocessing handles this now.
   // We can keep it for logging or fallback if needed, but for now just log.
-  console.log("Model loaded in dialog:", info);
+  logger.log("Model loaded in dialog:", info);
 };
 
 const loadData = async () => {

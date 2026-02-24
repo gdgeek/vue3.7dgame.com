@@ -112,6 +112,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -182,7 +183,7 @@ const saveVoxel = async (
     const response = await postVoxel(data);
     if (response.data.id) callback(response.data.id);
   } catch (err) {
-    console.error("Failed to save voxel:", err);
+    logger.error("Failed to save voxel:", err);
     callback(-1);
   }
 };

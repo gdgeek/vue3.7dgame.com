@@ -113,6 +113,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import VerseDialog from "@/components/MrPP/VerseDialog.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { getVpMaps, postVpMap, deleteVpMap } from "@/api/v1/vp-map";
@@ -145,7 +146,7 @@ const refresh = async () => {
       total: parseInt(response.headers["x-pagination-total-count"]),
     };
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 
@@ -164,7 +165,7 @@ const onchange = async (id: number, val: number) => {
     await refresh();
     ElMessage.success(t("game.map.form.confirm.success"));
   } catch (e) {
-    console.error(e);
+    logger.error(e);
     ElMessage.info(t("game.map.form.confirm.info"));
   }
 };
@@ -175,7 +176,7 @@ const selected = async (item: { data: { id: number } }) => {
     ElMessage.success(t("game.map.success"));
     await refresh();
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 
@@ -196,7 +197,7 @@ const addMap = async () => {
     ElMessage.success(t("game.map.confirm1.success"));
     await refresh();
   } catch (e) {
-    console.error(e);
+    logger.error(e);
     ElMessage.info(t("game.map.confirm1.info"));
   }
 };
@@ -217,7 +218,7 @@ const removeMap = async () => {
     ElMessage.success(t("game.map.confirm2.success"));
     await refresh();
   } catch (e) {
-    console.error(e);
+    logger.error(e);
     ElMessage.info(t("game.map.confirm2.info"));
   }
 };
@@ -241,7 +242,7 @@ const del = async (id: number) => {
     await refresh();
     ElMessage.success(t("game.map.confirm3.success"));
   } catch (e) {
-    console.error(e);
+    logger.error(e);
     ElMessage.info(t("game.map.confirm3.info"));
   }
 };

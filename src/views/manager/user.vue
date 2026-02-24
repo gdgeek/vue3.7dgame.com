@@ -4,6 +4,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import PersonPage from "@/components/MrPP/Person/Page.vue";
 import { getPerson } from "@/api/v1/person";
 
@@ -44,7 +45,7 @@ const handleLoaded = async (
       },
     });
   } catch (error) {
-    console.error("Failed to load users:", error);
+    logger.error("Failed to load users:", error);
     callback({
       data: [],
       pagination: { current: 1, count: 0, size: 20, total: 0 },

@@ -196,6 +196,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -240,7 +241,7 @@ onMounted(async () => {
       ...classifyTags,
     ];
   } catch (e) {
-    console.error("Failed to load tags:", e);
+    logger.error("Failed to load tags:", e);
   }
 });
 

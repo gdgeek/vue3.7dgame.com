@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import request from "@/utils/request";
 import qs from "querystringify";
 import { UserInfoReturnType } from "../user/model";
@@ -23,7 +24,7 @@ export const getUserCreation = () => {
 };
 
 export const putUserData = (data: unknown) => {
-  console.error(data);
+  logger.error(data);
   return request<UserInfoReturnType>({
     url: `/v1/user/update`,
     method: "put",

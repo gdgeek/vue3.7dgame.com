@@ -219,6 +219,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -319,7 +320,7 @@ const onResourceSelected = async (data: {
       currentMeta.value = response.data;
       refresh();
     } catch (error) {
-      console.error("Failed to update meta image:", error);
+      logger.error("Failed to update meta image:", error);
       Message.error(t("meta.metaEdit.image.updateError"));
     } finally {
       detailLoading.value = false;
@@ -377,7 +378,7 @@ const handleCoverUpload = async (event: Event) => {
       refresh();
     }
   } catch (error) {
-    console.error("Upload failed", error);
+    logger.error("Upload failed", error);
     Message.error(t("meta.metaEdit.image.updateError"));
   } finally {
     detailLoading.value = false;
@@ -472,7 +473,7 @@ const copy = async (id: number, newTitle: string) => {
     if (meta.metaCode) await putMetaCode(newMetaId, meta.metaCode);
     refresh();
   } catch (error) {
-    console.error("Copy error:", error);
+    logger.error("Copy error:", error);
     Message.error(t("meta.copy.error"));
   }
 };

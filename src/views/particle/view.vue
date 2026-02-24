@@ -95,6 +95,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { Message, MessageBox } from "@/components/Dialog";
 import {
   getParticle,
@@ -164,7 +165,7 @@ const listenEnd = () => {
 onMounted(async () => {
   expire.value = true;
   const response = await getParticle(id.value);
-  console.log("Particle:", response.data);
+  logger.log("Particle:", response.data);
   particleData.value = response.data;
   file.value = response.data.file.url;
   setTimeout(() => {
@@ -478,7 +479,7 @@ const save = async (
     particleData.value!.info = response2.data.info;
     expire.value = false;
   } catch (e) {
-    console.error(e);
+    logger.error(e);
   }
 };
 
@@ -529,7 +530,7 @@ const named = async (id: number, name: string) => {
     const response = await putParticle(id, { name });
     particleData.value!.name = response.data.name;
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 };
 </script>

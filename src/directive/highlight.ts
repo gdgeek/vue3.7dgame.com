@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import { Directive } from "vue";
 import hljs from "highlight.js";
 import lua from "highlight.js/lib/languages/lua";
@@ -14,7 +15,7 @@ hljs.registerLanguage("javascript", javascript);
 const highlightDirective: Directive = {
   beforeMount(el) {
     const blocks = el.querySelectorAll("pre code");
-    console.log("blocks", blocks);
+    logger.log("blocks", blocks);
     blocks.forEach((block: HTMLElement) => {
       hljs.highlightElement(block);
     });

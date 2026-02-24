@@ -42,6 +42,7 @@
 <script setup lang="ts">
 // @ts-nocheck
 const resourceDialog = ref<InstanceType<typeof ResourceDialog> | null>(null);
+import { logger } from "@/utils/logger";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import PolygenView from "./PolygenView.vue";
 import type { ResourceInfo } from "@/api/v1/resources/model";
@@ -57,6 +58,6 @@ const emit = defineEmits<{
 }>();
 const selecteModel = () => {
   resourceDialog.value?.openIt({ type: "polygen" });
-  console.log("selecteModel");
+  logger.log("selecteModel");
 };
 </script>

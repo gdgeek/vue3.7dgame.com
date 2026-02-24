@@ -3,6 +3,7 @@
  * 支持完整的风格主题切换（颜色 + 样式 + 装饰）
  * 每个主题是独立的风格，不再区分日间/夜间模式
  */
+import { logger } from "@/utils/logger";
 import { computed, watch } from "vue";
 import { useStorage } from "@vueuse/core";
 import {
@@ -299,7 +300,7 @@ export function useTheme() {
    */
   function setCustomPrimaryColor(color: string | null) {
     if (currentThemeName.value !== "modern-blue") {
-      console.warn("自定义主题色仅在日间模式下有效");
+      logger.warn("自定义主题色仅在日间模式下有效");
       return;
     }
 

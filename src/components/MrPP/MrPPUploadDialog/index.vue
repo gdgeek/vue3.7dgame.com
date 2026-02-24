@@ -125,6 +125,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { useFileStore } from "@/store/modules/config";
 import { UploadFileType } from "@/api/user/model";
 import { postFile } from "@/api/v1/files";
@@ -388,7 +389,7 @@ const saveFile = async (
       image_id
     );
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 };
 
@@ -537,7 +538,7 @@ const select = async () => {
             const imageResponse = await postFile(imageData);
             image_id = imageResponse.data.id;
           } catch (e) {
-            console.error("Failed to process model:", e);
+            logger.error("Failed to process model:", e);
             ElMessage.warning(
               t("upload.modelProcessFailed", { name: file.name })
             );
@@ -554,7 +555,7 @@ const select = async () => {
           image_id
         );
       } catch (fileError) {
-        console.error(`Error processing file ${file.name}:`, fileError);
+        logger.error(`Error processing file ${file.name}:`, fileError);
       } finally {
         if (uploadedCount.value === totalFilesCount.value) {
           isDisabled.value = false;
@@ -562,7 +563,7 @@ const select = async () => {
       }
     }
   } catch (error) {
-    console.error("Error in select function:", error);
+    logger.error("Error in select function:", error);
     isDisabled.value = false;
   }
 };

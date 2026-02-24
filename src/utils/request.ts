@@ -1,5 +1,4 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { useRouter } from "@/router";
 import i18n from "@/lang";
 import { ElMessage } from "element-plus";
@@ -7,6 +6,7 @@ import AuthAPI from "@/api/v1/auth";
 import env from "@/environment";
 import { ref, watch } from "vue";
 import Token from "@/store/modules/token";
+import { logger } from "@/utils/logger";
 
 const lang = ref(i18n.global.locale.value);
 watch(
@@ -28,7 +28,7 @@ const startHealthCheck = () => {
   healthCheckTimer = setInterval(async () => {
     try {
       await axios.get(`${PRIMARY_API}/health`, { timeout: 3000 });
-      console.info("[API Failover] Primary API restored, switching back.");
+      logger.info("[API Failover] Primary API restored, switching back.");
       currentApi = PRIMARY_API;
       if (healthCheckTimer) {
         clearInterval(healthCheckTimer);
@@ -50,6 +50,8 @@ const getMessageArray = () => {
   ];
 };
 
+// 所有并发请求共享同一个刷新 Promise：刷新完成后延迟一个微任务再清空，
+// 确保所有 await refreshPromise 的调用者都拿到结果后再允许下次刷新。
 let refreshPromise: Promise<unknown> | null = null;
 
 // 刷新token的API白名单
@@ -112,8 +114,21 @@ service.interceptors.request.use(
       if (!isWhitelisted && isTokenExpiringSoon(token)) {
         try {
           if (!refreshPromise) {
-            // 开始刷新并保存 Promise，其他请求可以 await 它
-            refreshPromise = refreshToken();
+            // 启动刷新，用 .then 在微任务中清空，保证所有并发 await 都已消费结果
+            refreshPromise = refreshToken().then(
+              (result) => {
+                Promise.resolve().then(() => {
+                  refreshPromise = null;
+                });
+                return result;
+              },
+              (err) => {
+                Promise.resolve().then(() => {
+                  refreshPromise = null;
+                });
+                throw err;
+              }
+            );
           }
           await refreshPromise;
           const newToken = Token.getToken();
@@ -124,8 +139,6 @@ service.interceptors.request.use(
           // 刷新失败 -> 跳转登录
           const router = useRouter();
           return handleUnauthorized(router);
-        } finally {
-          refreshPromise = null;
         }
       }
     }
@@ -186,9 +199,7 @@ service.interceptors.response.use(
       BACKUP_API &&
       currentApi === PRIMARY_API
     ) {
-      console.warn(
-        "[API Failover] Primary API unreachable, switching to backup."
-      );
+      logger.warn("[API Failover] Primary API unreachable, switching to backup.");
       currentApi = BACKUP_API;
       config._retry = true;
       config.baseURL = currentApi;
@@ -201,7 +212,7 @@ service.interceptors.response.use(
       if (error.message === "Network Error") {
         showErrorMessage(messages[1]);
       } else {
-        console.error("未知错误", error.message);
+        logger.error("未知错误", error.message);
 
         showErrorMessage(error.message);
       }
@@ -212,7 +223,7 @@ service.interceptors.response.use(
     } else if (response.status === 404) {
       showErrorMessage(i18n.global.t("request.error404"));
     } else if (response.status >= 500) {
-      console.error("服务器内部错误", response);
+      logger.error("服务器内部错误", response);
       // 服务器内部错误
       showErrorMessage(messages[2]);
     } else {

@@ -101,6 +101,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
@@ -195,7 +196,7 @@ const create = async () => {
     selected({ data: response.data });
     dialogVisible.value = false;
   } catch (error) {
-    console.log(error);
+    logger.log(error);
     ElMessage.info(t("game.verseDialog.prompt.info"));
   }
 };

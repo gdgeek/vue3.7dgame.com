@@ -55,6 +55,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { FormInstance } from "element-plus";
 import { postPerson } from "@/api/v1/person";
 
@@ -162,7 +163,7 @@ const submitForm = async () => {
       ElMessage.error(t("manager.creator.form.error4"));
     }
   } catch (error) {
-    console.error("error submit:", error);
+    logger.error("error submit:", error);
   }
 };
 

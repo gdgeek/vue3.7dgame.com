@@ -92,6 +92,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, watch } from "vue";
 import { getPerson, type userData } from "@/api/v1/person";
 import { useI18n } from "vue-i18n";
@@ -149,7 +150,7 @@ const fetchUsers = async () => {
       (user) => !props.excludeIds.includes(Number(user.id))
     );
   } catch (error) {
-    console.error("Failed to fetch users:", error);
+    logger.error("Failed to fetch users:", error);
     users.value = [];
   } finally {
     loading.value = false;

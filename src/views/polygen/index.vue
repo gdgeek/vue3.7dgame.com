@@ -167,6 +167,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { Message, MessageBox } from "@/components/Dialog";
@@ -400,7 +401,7 @@ const savePolygen = async (
     const response = await postPolygen(data);
     if (response.data.id) callback(response.data.id);
   } catch (err) {
-    console.error("Failed to save polygen:", err);
+    logger.error("Failed to save polygen:", err);
     callback(-1);
   }
 };

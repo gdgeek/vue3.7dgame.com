@@ -59,6 +59,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { useRoute, useRouter, RouteRecordRaw } from "vue-router";
 import { resolve } from "path-browserify";
 import { translateRouteTitle } from "@/utils/i18n";
@@ -87,7 +88,7 @@ const { visitedViews } = storeToRefs(tagsViewStore);
 const settingsStore = useSettingsStore();
 const layout = computed(() => settingsStore.layout);
 
-console.log("visitedViews", visitedViews.value);
+logger.log("visitedViews", visitedViews.value);
 
 const selectedTag = ref<TagView>({
   path: "",

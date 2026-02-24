@@ -53,6 +53,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { getVerse } from "@/api/v1/verse";
 import {
   postMultilanguageVerse,
@@ -201,7 +202,7 @@ const remove = async () => {
       await refresh();
       ElMessage.success(t("verse.view.success3"));
     } catch (error) {
-      console.error(error);
+      logger.error(error);
     }
   }
 };
@@ -230,11 +231,11 @@ const submitForm = async () => {
       }
       await refresh();
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       ElMessage.error(t("verse.view.error1"));
     }
   } else {
-    console.error("error submit!!");
+    logger.error("error submit!!");
     ElMessage.error(t("verse.view.error2"));
   }
 };

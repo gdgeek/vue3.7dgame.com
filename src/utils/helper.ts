@@ -1,10 +1,11 @@
+import { logger } from "@/utils/logger";
 export type MessageType = {
   action: string;
   data: unknown;
 };
 export function GetCurrentUrl() {
   const fullUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ""}`;
-  console.log(`Full URL: ${fullUrl}`);
+  logger.log(`Full URL: ${fullUrl}`);
   return fullUrl;
 }
 

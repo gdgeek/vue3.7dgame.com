@@ -109,6 +109,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { ref, computed } from "vue";
 import { useUserStoreHook } from "@/store/modules/user";
 import { Plus } from "@element-plus/icons-vue";
@@ -147,7 +148,7 @@ const isMyGroup = (group: Group) => {
 const cardListPageRef = ref<InstanceType<typeof CardListPage> | null>(null);
 
 const fetchGroups = async (params: FetchParams): Promise<FetchResponse> => {
-  console.log("ClassGroupList: fetchGroups called with", params);
+  logger.log("ClassGroupList: fetchGroups called with", params);
   const response = await getClassGroups(
     props.classId,
     params.sort,

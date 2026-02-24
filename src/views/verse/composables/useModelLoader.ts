@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import * as THREE from "three";
 import { VOXLoader, VOXMesh } from "@/assets/js/voxel/VOXLoader.js";
 import { getConfiguredGLTFLoader } from "@/lib/three/loaders";
@@ -78,7 +79,7 @@ export function useModelLoader(context: ModelLoaderContext) {
     moduleTransform?: Transform,
     parentActive: boolean = true
   ): Promise<THREE.Object3D | boolean | undefined> => {
-    console.log("开始加载模型:", {
+    logger.log("开始加载模型:", {
       entityType: entity.type,
       entityUUID: entity.parameters?.uuid,
       resourceType: resource.type,
@@ -163,7 +164,7 @@ export function useModelLoader(context: ModelLoaderContext) {
               if (intersects.length > 0) {
                 if (video.paused) {
                   video.play().catch((error) => {
-                    console.warn("视频播放失败:", error);
+                    logger.warn("视频播放失败:", error);
                   });
                 } else {
                   video.pause();
@@ -200,7 +201,7 @@ export function useModelLoader(context: ModelLoaderContext) {
             if (entity.parameters.play) {
               const handleFirstInteraction = () => {
                 video.play().catch((error) => {
-                  console.warn("视频播放失败:", error);
+                  logger.warn("视频播放失败:", error);
                 });
                 document.removeEventListener("click", handleFirstInteraction);
                 document.removeEventListener(
@@ -217,11 +218,11 @@ export function useModelLoader(context: ModelLoaderContext) {
           });
 
           video.addEventListener("error", (error) => {
-            console.error("视频加载失败:", error);
+            logger.error("视频加载失败:", error);
             reject(error);
           });
         } catch (error) {
-          console.error("处理视频资源时出错:", error);
+          logger.error("处理视频资源时出错:", error);
           reject(error);
         }
       });
@@ -319,7 +320,7 @@ export function useModelLoader(context: ModelLoaderContext) {
           data: { url: audioUrl },
         });
 
-        console.log("音频资源加载完成:", {
+        logger.log("音频资源加载完成:", {
           uuid,
           url: audioUrl,
         });
@@ -404,7 +405,7 @@ export function useModelLoader(context: ModelLoaderContext) {
           threeScene.add(mesh);
           resolve(mesh);
         } catch (error) {
-          console.error("创建文本实体失败:", error);
+          logger.error("创建文本实体失败:", error);
           reject(error);
         }
       });
@@ -553,7 +554,7 @@ export function useModelLoader(context: ModelLoaderContext) {
                         try {
                           await window.verse[`@${eventId}`]();
                         } catch (e) {
-                          console.error(e);
+                          logger.error(e);
                         }
                       }
                     }

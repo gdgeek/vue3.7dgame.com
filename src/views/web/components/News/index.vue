@@ -230,6 +230,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -400,7 +401,7 @@ const loadNewsData = async () => {
       total: parseInt(response.headers["x-wp-total"] || "0"),
     };
   } catch (err) {
-    console.error("Failed to load news data:", err);
+    logger.error("Failed to load news data:", err);
     error.value = true;
   } finally {
     loading.value = false;
@@ -509,7 +510,7 @@ const openArticleDetails = async (article: PostSummary) => {
       articleTerms.value = [];
     }
   } catch (err) {
-    console.error('加载文章详情失败:', err);
+    logger.error('加载文章详情失败:', err);
     articleError.value = true;
   } finally {
     articleLoading.value = false;
@@ -541,7 +542,7 @@ const showAllContent = async () => {
 
       newsData.value = response.data;
     } catch (err) {
-      console.error("Failed to load all news data:", err);
+      logger.error("Failed to load all news data:", err);
       ElMessage.error(t("web.news.loadAllFailed"));
     } finally {
       loading.value = false;

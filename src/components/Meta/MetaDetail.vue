@@ -69,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { getMeta, putMeta, metaInfo } from "@/api/v1/meta";
@@ -136,7 +137,7 @@ const jsonInfo = computed({
         item.value.info = JSON.stringify(JSON.parse(value));
       }
     } catch (error) {
-      console.error("Invalid JSON format", error);
+      logger.error("Invalid JSON format", error);
     }
   },
 });
@@ -147,7 +148,7 @@ const refresh = async () => {
     const data = await getMeta(props.metaId, { expand: "image,author" });
     item.value = data.data; // getMeta returns AxiosResponse, so data.data
   } catch (error) {
-    console.error("Failed to fetch meta data:", error);
+    logger.error("Failed to fetch meta data:", error);
   }
 };
 
@@ -194,7 +195,7 @@ const handleImageSelected = async (event: ImageUpdateEvent) => {
       await refresh();
       emit("changed");
     } catch (error) {
-      console.error("Failed to update meta image:", error);
+      logger.error("Failed to update meta image:", error);
       ElMessage.error(t("meta.metaEdit.image.updateError"));
     }
   }
@@ -210,7 +211,7 @@ const handleImageUploadSuccess = async (event: ImageUpdateEvent) => {
       await refresh();
       emit("changed");
     } catch (error) {
-      console.error("Failed to update meta image:", error);
+      logger.error("Failed to update meta image:", error);
       ElMessage.error(t("meta.metaEdit.image.updateError"));
     }
   }
@@ -230,7 +231,7 @@ const onSubmit = async () => {
     await refresh();
     emit("changed");
   } else {
-    console.error("error submit!!");
+    logger.error("error submit!!");
     ElMessage.error(t("verse.view.error2"));
   }
 };

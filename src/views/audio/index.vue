@@ -150,6 +150,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 // import { ElMessage, ElMessageBox } from "element-plus";
@@ -334,7 +335,7 @@ const saveAudio = async (
     const response = await postAudio(data);
     if (response.data.id) callback(response.data.id);
   } catch (err) {
-    console.error("Failed to save audio:", err);
+    logger.error("Failed to save audio:", err);
     callback(-1);
   }
 };

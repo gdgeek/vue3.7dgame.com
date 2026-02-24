@@ -8,6 +8,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import Edit from "@/components/Meta/Edit.vue";
 import { getMeta, putMeta } from "@/api/v1/meta";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
@@ -19,10 +20,10 @@ const getMetaData = async (
 ) => {
   try {
     const response = await getMeta(id, params);
-    console.log("response:", response);
+    logger.log("response:", response);
     callback(response.data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 
@@ -35,7 +36,7 @@ const putMetaData = async (
     const response = await putMeta(id, data);
     callback(response.data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 </script>

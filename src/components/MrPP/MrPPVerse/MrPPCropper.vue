@@ -92,6 +92,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import "vue-cropper/dist/index.css";
 import { VueCropper } from "vue-cropper";
 import { postFile } from "@/api/v1/files";
@@ -227,7 +228,7 @@ const saveFile = async (
     const response = await postFile(data);
     emit("saveFile", response.data.id);
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
   loading.value = false;
 };
@@ -262,7 +263,7 @@ const finish = async () => {
         "backup"
       );
     }
-    console.log("图片数据", md5, file.extension, file, handler);
+    logger.log("图片数据", md5, file.extension, file, handler);
     await saveFile(md5, file.extension, file, handler);
 
     dialogVisible.value = false;

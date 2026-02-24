@@ -227,6 +227,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import { useRoute, useRouter, onBeforeRouteLeave } from "vue-router";
 import {
@@ -408,7 +409,7 @@ const defineSingleAssignment = <T,>(initialValue: T) => {
         isAssigned = true;
         // console.log("值已成功赋值为:", newValue);
       } else {
-        console.log("cannot be assigned again");
+        logger.log("cannot be assigned again");
       }
     },
   };
@@ -432,7 +433,7 @@ const loadHighlightStyle = (isDark: boolean) => {
   const existingLink = document.querySelector(
     "#highlight-style"
   ) as HTMLLinkElement;
-  console.log("existingLink", existingLink);
+  logger.log("existingLink", existingLink);
   if (existingLink) {
     existingLink.href = isDark
       ? "https://cdn.jsdelivr.net/npm/highlight.js/styles/a11y-dark.css"
@@ -555,7 +556,7 @@ const formatJavaScript = (code: string) => {
       comma_first: false,
     });
   } catch (error) {
-    console.error("代码格式化失败:", error);
+    logger.error("代码格式化失败:", error);
     return code;
   }
 };
@@ -600,7 +601,7 @@ const handleMessage = async (e: MessageEvent) => {
       handleBlocklyChange(params.data.blocklyData);
     }
   } catch (_error) {
-    console.error(String(_error));
+    logger.error(String(_error));
   }
 };
 
@@ -700,7 +701,7 @@ const initEditor = () => {
       },
     });
   } catch (error) {
-    console.error("Fail to decompress or parse data:", error);
+    logger.error("Fail to decompress or parse data:", error);
   }
 };
 
@@ -785,14 +786,14 @@ onMounted(async () => {
       "js"
     );
     verse.value = response.data;
-    console.error(verse.value);
+    logger.error(verse.value);
     verseMetasWithJsCodeData.value = response2.data;
     metasJavaScriptCode.value = response2.data.metas
       .map((meta: meta) => meta.script)
       .join("\n");
-    console.log("Verse", verse.value);
+    logger.log("Verse", verse.value);
     //console.error("Verse Metas With Js Code", verseMetasWithJsCodeData.value);
-    console.log("metasJavaScriptCode", metasJavaScriptCode.value);
+    logger.log("metasJavaScriptCode", metasJavaScriptCode.value);
     if (verse.value && verse.value.data) {
       const data = verse.value.data;
       // const json: string = verse.value.data;
@@ -832,7 +833,7 @@ onMounted(async () => {
 
 const handlePolygen = (uuid: string) => {
   if (!scenePlayer.value) {
-    console.error("ScenePlayer未初始化");
+    logger.error("ScenePlayer未初始化");
     return null;
   }
 
@@ -848,7 +849,7 @@ const handlePolygen = (uuid: string) => {
     }
 
     if (retries > 0) {
-      console.log(`模型未找到，剩余重试次数: ${retries}`);
+      logger.log(`模型未找到，剩余重试次数: ${retries}`);
       setTimeout(() => getModel(uuid, retries - 1), 100);
     }
     return null;
@@ -856,7 +857,7 @@ const handlePolygen = (uuid: string) => {
 
   const model = getModel(modelUuid);
 
-  console.log("查找模型:", {
+  logger.log("查找模型:", {
     requestedUuid: modelUuid,
     availableModels: Array.from(scenePlayer.value.sources.keys()),
     modelExists: scenePlayer.value.sources.has(modelUuid),
@@ -864,13 +865,13 @@ const handlePolygen = (uuid: string) => {
   });
 
   if (!model) {
-    console.error(`找不到UUID为 ${modelUuid} 的模型`);
+    logger.error(`找不到UUID为 ${modelUuid} 的模型`);
     return null;
   }
 
   return {
     playAnimation: (animationName: string) => {
-      console.log("播放动画:", {
+      logger.log("播放动画:", {
         uuid: modelUuid,
         animationName,
         model: model,
@@ -883,7 +884,7 @@ const handlePolygen = (uuid: string) => {
 const handleSound = (uuid: string): HTMLAudioElement | undefined => {
   const audioUrl = scenePlayer.value?.getAudioUrl(uuid);
   if (!audioUrl) {
-    console.error(`找不到UUID为 ${uuid} 的音频资源`);
+    logger.error(`找不到UUID为 ${uuid} 的音频资源`);
     return undefined;
   }
 
@@ -947,14 +948,14 @@ const run = async () => {
         }
 
         if (scenePlayer.value?.sources.size === expectedModels) {
-          console.error("所有资源加载完成:", {
+          logger.error("所有资源加载完成:", {
             expected: expectedModels,
             loaded: scenePlayer.value!.sources.size,
             sources: scenePlayer.value!.sources,
           });
           resolve(true);
         } else {
-          console.log("等待资源加载...", {
+          logger.log("等待资源加载...", {
             expected: expectedModels,
             current: scenePlayer.value?.sources.size || 0,
             sources: scenePlayer.value?.sources,
@@ -978,11 +979,11 @@ const run = async () => {
         animationName: string
       ) => {
         if (!polygenInstance) {
-          console.error("polygen实例为空");
+          logger.error("polygen实例为空");
           return;
         }
         if (typeof polygenInstance.playAnimation !== "function") {
-          console.error("polygen实例缺少playAnimation方法");
+          logger.error("polygen实例缺少playAnimation方法");
           return;
         }
         polygenInstance.playAnimation(animationName);
@@ -992,7 +993,7 @@ const run = async () => {
     const sound = {
       play: async (audio: HTMLAudioElement | undefined) => {
         if (!audio) {
-          console.error("音频资源无效");
+          logger.error("音频资源无效");
           return;
         }
         await scenePlayer.value?.playQueuedAudio(audio);
@@ -1000,7 +1001,7 @@ const run = async () => {
 
       createTask: (audio: HTMLAudioElement | undefined) => {
         if (!audio) {
-          console.error("音频资源无效");
+          logger.error("音频资源无效");
           return null;
         }
         return {
@@ -1026,7 +1027,7 @@ const run = async () => {
       handler: (index: string, uuid: string) => {
         const source = scenePlayer.value?.sources.get(uuid);
         if (!source) {
-          console.error(`找不到UUID为 ${uuid} 的实体`);
+          logger.error(`找不到UUID为 ${uuid} 的实体`);
           return null;
         }
         return source.data;
@@ -1037,7 +1038,7 @@ const run = async () => {
     const handleText = (uuid: string) => {
       const source = scenePlayer.value?.sources.get(uuid);
       if (!source) {
-        console.error(`找不到UUID为 ${uuid} 的文本实体`);
+        logger.error(`找不到UUID为 ${uuid} 的文本实体`);
         return null;
       }
       return source.data;
@@ -1047,7 +1048,7 @@ const run = async () => {
     const handleEntity = (uuid: string) => {
       const source = scenePlayer.value?.sources.get(uuid);
       if (!source) {
-        console.error(`找不到UUID为 ${uuid} 的实体`);
+        logger.error(`找不到UUID为 ${uuid} 的实体`);
         return null;
       }
       return source.data;
@@ -1062,7 +1063,7 @@ const run = async () => {
         easing: string
       ) => {
         if (!fromObj || !toObj) {
-          console.error("补间动画对象无效");
+          logger.error("补间动画对象无效");
           return null;
         }
 
@@ -1090,7 +1091,7 @@ const run = async () => {
         easing: string
       ) => {
         if (!obj) {
-          console.error("目标对象无效");
+          logger.error("目标对象无效");
           return null;
         }
 
@@ -1122,10 +1123,10 @@ const run = async () => {
     // 任务执行器
     const task = {
       circle: async (count: number, taskToRepeat: unknown) => {
-        console.log("Executing circle task:", { count, taskToRepeat });
+        logger.log("Executing circle task:", { count, taskToRepeat });
 
         if (typeof count !== "number" || count < 0) {
-          console.warn("循环次数必须是正数:", count);
+          logger.warn("循环次数必须是正数:", count);
           return;
         }
 
@@ -1135,7 +1136,7 @@ const run = async () => {
         }
 
         for (let i = 0; i < count; i++) {
-          console.log(`执行第 ${i + 1}/${count} 次任务`);
+          logger.log(`执行第 ${i + 1}/${count} 次任务`);
 
           try {
             if (resolvedTask) {
@@ -1148,7 +1149,7 @@ const run = async () => {
               } else if (resolvedTask.type === "animation") {
                 await resolvedTask.execute();
               } else {
-                console.warn(`无法执行的任务类型:`, resolvedTask);
+                logger.warn(`无法执行的任务类型:`, resolvedTask);
                 return;
               }
             }
@@ -1157,13 +1158,13 @@ const run = async () => {
               await new Promise((resolve) => setTimeout(resolve, 100));
             }
           } catch (error) {
-            console.error(`第 ${i + 1} 次任务执行失败:`, error);
+            logger.error(`第 ${i + 1} 次任务执行失败:`, error);
           }
         }
       },
 
       array: (type: string, items: unknown[]) => {
-        console.log("Creating array:", { type, items });
+        logger.log("Creating array:", { type, items });
 
         const processArrayItems = (items: unknown[]): unknown[] => {
           return items.map((item) => {
@@ -1191,11 +1192,11 @@ const run = async () => {
           const processed = processArrayItems(items);
           result = Array.from(new Set(processed));
         } else {
-          console.warn(`未知的数组类型: ${type}，默认使用 LIST 类型`);
+          logger.warn(`未知的数组类型: ${type}，默认使用 LIST 类型`);
           result = processArrayItems(items);
         }
 
-        console.log("Processed array result:", result);
+        logger.log("Processed array result:", result);
         return result;
       },
 
@@ -1316,11 +1317,11 @@ const run = async () => {
     const animation = {
       createTask: (polygenInstance: MeshWrapper, animationName: string) => {
         if (!polygenInstance) {
-          console.error("polygen实例为空");
+          logger.error("polygen实例为空");
           return null;
         }
         if (typeof polygenInstance.playAnimation !== "function") {
-          console.error("polygen实例缺少playAnimation方法");
+          logger.error("polygen实例缺少playAnimation方法");
           return null;
         }
 
@@ -1348,10 +1349,10 @@ const run = async () => {
 
     const event = {
       trigger: (index: unknown, eventId: string) => {
-        console.log("触发事件:", index, eventId);
+        logger.log("触发事件:", index, eventId);
       },
       signal: (moduleUuid: string, eventUuid: string, parameter?: unknown) => {
-        console.log("触发事件:", moduleUuid, eventUuid, parameter);
+        logger.log("触发事件:", moduleUuid, eventUuid, parameter);
       },
     };
 
@@ -1360,20 +1361,20 @@ const run = async () => {
         if (object && typeof object.setText === "function") {
           (object as { setText: (val: string) => void }).setText(setText);
         } else {
-          console.warn("object.setText is not a function");
+          logger.warn("object.setText is not a function");
         }
       },
     };
 
     const point = {
       setVisual: (object: unknown, setVisual: boolean) => {
-        console.error("setVisual", object, setVisual);
+        logger.error("setVisual", object, setVisual);
         if (object && typeof object.setVisibility === "function") {
           (object as { setVisibility: (val: boolean) => void }).setVisibility(
             setVisual
           );
         } else {
-          console.error("object.setVisibility is not a function");
+          logger.error("object.setVisibility is not a function");
         }
       },
     };
@@ -1480,7 +1481,7 @@ const run = async () => {
         handleEntity
       );
     } catch (e) {
-      console.error("执行代码出错:", e);
+      logger.error("执行代码出错:", e);
       ElMessage.error(
         `执行代码出错: ${e instanceof Error ? e.message : String(e)}`
       );

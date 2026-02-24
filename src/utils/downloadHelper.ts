@@ -1,6 +1,7 @@
 /**
  * 通用文件下载工具
  */
+import { logger } from "@/utils/logger";
 import { ElMessage } from "element-plus";
 
 export interface DownloadableResource {
@@ -57,7 +58,7 @@ export async function downloadResource(
 
     ElMessage.success(t(`${translationPrefix}.success`));
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     ElMessage.error(t(`${translationPrefix}.error`) + error);
   }
 }

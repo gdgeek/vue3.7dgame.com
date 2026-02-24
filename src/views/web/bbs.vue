@@ -10,6 +10,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import "@/assets/font/font.css";
 import { useRoute, useRouter } from "vue-router";
 import { ThemeEnum } from "@/enums/ThemeEnum";
@@ -52,7 +53,7 @@ const saveScrollPosition = () => {
     try {
       sessionStorage.setItem(SCROLL_POSITION_KEY, scrollTop.toString());
     } catch (e) {
-      console.error("保存滚动位置失败:", e);
+      logger.error("保存滚动位置失败:", e);
     }
   }
 };
@@ -70,7 +71,7 @@ const restoreScrollPosition = () => {
       });
     }
   } catch (e) {
-    console.error("恢复滚动位置失败:", e);
+    logger.error("恢复滚动位置失败:", e);
   }
 };
 

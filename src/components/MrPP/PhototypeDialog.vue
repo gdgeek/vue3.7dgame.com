@@ -24,6 +24,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import VueForm from "@/components/JsonSchemaForm/index.vue";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
@@ -91,7 +92,7 @@ const handlerChange = ({
           newValue[key] = handler(newValue[key]);
         }
 
-        console.error(`找到 setup 属性 "${key1}"，分解后：${setupName}`, val1);
+        logger.error(`找到 setup 属性 "${key1}"，分解后：${setupName}`, val1);
       }
     }
   }

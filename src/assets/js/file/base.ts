@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import SparkMD5 from 'spark-md5';
 
 // 文件对象类型
@@ -69,7 +70,7 @@ const fileOpen = (accept: string, multiple = false): Promise<FileWithExtension[]
 
       input.click();
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       reject(err);
     }
   });

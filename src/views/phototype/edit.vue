@@ -93,6 +93,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { getPhototype, putPhototype, postPhototype } from "@/api/v1/phototype";
 import type { PhototypeType } from "@/api/v1/types/phototype";
 import type { ResourceInfo } from "@/api/v1/resources/model";
@@ -150,9 +151,9 @@ const handleImageUpdate = async (data: {
       image_id: data.imageId,
     });
     phototype.value = response.data;
-    console.log("Image updated successfully", response.data);
+    logger.log("Image updated successfully", response.data);
   } catch (error) {
-    console.error("Failed to update image", error);
+    logger.error("Failed to update image", error);
   }
 };
 
@@ -197,7 +198,7 @@ const saveChanges = async () => {
       ElMessage.success(t("common.message.saveSuccess"));
     }
   } catch (error) {
-    console.error("Failed to save phototype", error);
+    logger.error("Failed to save phototype", error);
     ElMessage.error(t("common.message.saveFailed"));
   }
 };
@@ -208,7 +209,7 @@ const jsonStr = computed({
     try {
       tree.value = JSON.parse(newVal);
     } catch (e) {
-      console.error("Invalid JSON format", e);
+      logger.error("Invalid JSON format", e);
     }
   },
 });
@@ -264,7 +265,7 @@ const refresh = async () => {
     }
     // tree.value = JSON.parse(phtototype.value.schema);
   } catch (error) {
-    console.error("Failed to fetch phototype", error);
+    logger.error("Failed to fetch phototype", error);
   }
 };
 onMounted(() => {

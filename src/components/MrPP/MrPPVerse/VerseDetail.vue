@@ -97,6 +97,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, computed, watch } from "vue";
 import Tags from "@/components/Tags.vue";
 import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
@@ -152,7 +153,7 @@ const refresh = async () => {
     );
     verse.value = response.data;
   } catch (error) {
-    console.error("Failed to fetch verse data:", error);
+    logger.error("Failed to fetch verse data:", error);
     return;
   }
 };
@@ -192,7 +193,7 @@ const handleImageSelected = async (event: ImageUpdateEvent) => {
       await refresh();
       emit("changed");
     } catch (error) {
-      console.error("Failed to update verse image:", error);
+      logger.error("Failed to update verse image:", error);
       ElMessage.error(t("verse.view.image.updateError"));
     }
   }
@@ -210,7 +211,7 @@ const handleImageUploadSuccess = async (event: ImageUpdateEvent) => {
       await refresh();
       emit("changed");
     } catch (error) {
-      console.error("Failed to update verse image:", error);
+      logger.error("Failed to update verse image:", error);
       ElMessage.error(t("verse.view.image.updateError"));
     }
   }

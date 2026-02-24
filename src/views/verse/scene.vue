@@ -20,6 +20,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { takePhoto } from "@/api/v1/verse";
 import { useRoute, useRouter } from "vue-router";
 import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
@@ -473,7 +474,7 @@ const handleUploadCover = async (data: unknown) => {
       }
     }
   } catch (error) {
-    console.error("上传封面图片失败:", error);
+    logger.error("上传封面图片失败:", error);
     ElMessage.error(t("verse.view.sceneEditor.coverUploadFailed"));
   }
 };

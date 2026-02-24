@@ -103,6 +103,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, watch, onMounted } from "vue";
 import { OfficeBuilding } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -159,7 +160,7 @@ const fetchClassInfo = async () => {
     emit("class-loaded", response.data);
     await fetchGroups();
   } catch (error) {
-    console.error("Failed to fetch class info:", error);
+    logger.error("Failed to fetch class info:", error);
     classInfo.value = null;
   } finally {
     loading.value = false;
@@ -183,7 +184,7 @@ const fetchGroups = async () => {
         ? [groupData]
         : [];
   } catch (error) {
-    console.error("Failed to fetch groups:", error);
+    logger.error("Failed to fetch groups:", error);
     groups.value = [];
   }
 };
@@ -256,7 +257,7 @@ const handleSaveGroup = async () => {
     await fetchGroups();
     groupListRef.value?.refresh();
   } catch (error) {
-    console.error("Failed to save group:", error);
+    logger.error("Failed to save group:", error);
     const axiosErr = error as { response?: { data?: { message?: string } } };
     const errorMsg =
       axiosErr.response?.data?.message || t("common.operationFailed");

@@ -53,6 +53,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import type { VerseData } from "@/api/v1/verse";
 
 interface Course {
@@ -78,7 +79,7 @@ onMounted(async () => {
       const r = await Post(props.info.course);
       course.value = r.data;
     } catch (e) {
-      console.error(e);
+      logger.error(e);
     }
   }*/
 });

@@ -90,6 +90,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import AiRodin from "@/api/v1/ai-rodin";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import { useI18n } from "vue-i18n";
@@ -156,7 +157,7 @@ const rodin = async () => {
   do {
     await sleep(10000);
     const response2 = await AiRodin.check(data.id);
-    console.log(response2.data.check);
+    logger.log(response2.data.check);
     schedule = AiRodin.schedule(response2.data.check.jobs);
     progress.value.percentage = 10 + 70 * schedule;
   } while (schedule !== 1);
@@ -188,7 +189,7 @@ const generation = async (formEl: FormInstance | undefined) => {
       }
       loading.value = false;
     } else {
-      console.log("error submit!", fields);
+      logger.log("error submit!", fields);
     }
   });
 };

@@ -15,6 +15,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "stats.js";
@@ -114,7 +115,7 @@ const parseVerseData = (): VerseData | null => {
     try {
       return JSON.parse(props.verse.data) as VerseData;
     } catch (error) {
-      console.error("解析verse数据失败:", error);
+      logger.error("解析verse数据失败:", error);
       return null;
     }
   }
@@ -139,9 +140,9 @@ const initEventContainer = () => {
       try {
         const events = meta.events;
         eventContainer.value[moduleParams.uuid] = events;
-        console.log(`Module ${moduleParams.uuid} 的事件已加载:`, events);
+        logger.log(`Module ${moduleParams.uuid} 的事件已加载:`, events);
       } catch (error) {
-        console.error(`解析Module ${moduleParams.uuid} 的事件失败:`, error);
+        logger.error(`解析Module ${moduleParams.uuid} 的事件失败:`, error);
       }
     }
   });
@@ -244,7 +245,7 @@ const { loadModel } = useModelLoader({
 const getAudioUrl = (uuid: string): string | undefined => {
   const source = sources.get(uuid.toString());
   if (!source || source.type !== "audio") {
-    console.error(`找不到UUID为 ${uuid} 的音频资源`);
+    logger.error(`找不到UUID为 ${uuid} 的音频资源`);
     return undefined;
   }
   return (source.data as { url: string }).url;
@@ -254,7 +255,7 @@ const getAudioUrl = (uuid: string): string | undefined => {
 const playAnimation = (uuid: string, animationName: string) => {
   const source = sources.get(uuid.toString());
   if (!source || source.type !== "model") {
-    console.error(`找不到UUID为 ${uuid} 的模型资源`);
+    logger.error(`找不到UUID为 ${uuid} 的模型资源`);
     return;
   }
 
@@ -263,7 +264,7 @@ const playAnimation = (uuid: string, animationName: string) => {
   const mixer = mixers.get(uuid);
 
   if (!model) {
-    console.error(
+    logger.error(
       `找不到UUID为 ${uuid} 的模型，可用模型:`,
       Array.from(sources.keys())
     );
@@ -271,13 +272,13 @@ const playAnimation = (uuid: string, animationName: string) => {
   }
 
   if (!mixer) {
-    console.error(`找不到UUID为 ${uuid} 的动画混合器`);
+    logger.error(`找不到UUID为 ${uuid} 的动画混合器`);
     return;
   }
 
   const animations = model.userData?.animations;
   if (!animations || animations.length === 0) {
-    console.error(`模型 ${uuid} 没有动画数据`);
+    logger.error(`模型 ${uuid} 没有动画数据`);
     return;
   }
 
@@ -285,7 +286,7 @@ const playAnimation = (uuid: string, animationName: string) => {
     (anim: THREE.AnimationClip) => anim.name === animationName
   );
   if (!clip) {
-    console.error(
+    logger.error(
       `找不到动画 "${animationName}"，可用动画:`,
       animations.map((a: THREE.AnimationClip) => a.name)
     );
@@ -302,7 +303,7 @@ const playAnimation = (uuid: string, animationName: string) => {
 
 // 音频播放处理
 const handleAudioPlay = (audio: HTMLAudioElement) => {
-  console.log("开始处理音频播放:", {
+  logger.log("开始处理音频播放:", {
     src: audio.src,
     duration: audio.duration,
     currentTime: audio.currentTime,
@@ -314,7 +315,7 @@ const handleAudioPlay = (audio: HTMLAudioElement) => {
 
     // 当音频播放结束时调用 resolve
     audio.onended = () => {
-      console.log("音频播放完成:", {
+      logger.log("音频播放完成:", {
         src: audio.src,
         duration: audio.duration,
       });
@@ -323,7 +324,7 @@ const handleAudioPlay = (audio: HTMLAudioElement) => {
 
     // 处理音频播放错误
     audio.onerror = () => {
-      console.error("音频播放出错:", {
+      logger.error("音频播放出错:", {
         src: audio.src,
         error: audio.error,
       });
@@ -332,7 +333,7 @@ const handleAudioPlay = (audio: HTMLAudioElement) => {
 
     // 开始播放
     audio.play().catch((error) => {
-      console.error("播放音频失败:", {
+      logger.error("播放音频失败:", {
         src: audio.src,
         error: error,
       });
@@ -347,7 +348,7 @@ let isPlaying = false;
 
 // 处理音频队列
 const processAudioQueue = async () => {
-  console.log("处理音频队列:", {
+  logger.log("处理音频队列:", {
     isPlaying,
     queueLength: audioPlaybackQueue.length,
   });
@@ -358,7 +359,7 @@ const processAudioQueue = async () => {
 
   while (audioPlaybackQueue.length > 0) {
     const current = audioPlaybackQueue[0];
-    console.log("播放队列中的音频:", {
+    logger.log("播放队列中的音频:", {
       src: current.audio.src,
       queueLength: audioPlaybackQueue.length,
     });
@@ -369,7 +370,7 @@ const processAudioQueue = async () => {
   }
 
   isPlaying = false;
-  console.log("音频队列处理完成");
+  logger.log("音频队列处理完成");
 };
 
 // 音频播放
@@ -377,7 +378,7 @@ const playQueuedAudio = async (
   audio: HTMLAudioElement,
   skipQueue: boolean = false
 ) => {
-  console.log("添加音频到播放队列:", {
+  logger.log("添加音频到播放队列:", {
     src: audio.src,
     skipQueue,
     currentQueueLength: audioPlaybackQueue.length,
@@ -414,7 +415,7 @@ const processEntities = async (
         ? entity.parameters.active
         : true) && parentActive;
 
-    console.log(`处理实体 [Level ${level}]:`, {
+    logger.log(`处理实体 [Level ${level}]:`, {
       type: entity.type,
       name: entity.parameters?.name,
       uuid: entity.parameters?.uuid,
@@ -448,18 +449,18 @@ const processEntities = async (
           currentActive // 使用计算后的可见性状态
         );
       } catch (error) {
-        console.error("处理文本实体失败:", error);
+        logger.error("处理文本实体失败:", error);
       }
     } else if (entity.type === "Entity") {
       // 处理Entity类型
-      console.log("处理Entity类型容器:", entity.parameters.uuid);
+      logger.log("处理Entity类型容器:", entity.parameters.uuid);
       const entityData = {
         type: "entity",
         data: {
           transform: entityTransform,
           setVisibility: () => {
             // Entity本身没有可见性，需要通过子实体控制
-            console.log("Entity不支持直接设置可见性");
+            logger.log("Entity不支持直接设置可见性");
           },
         },
       };
@@ -485,7 +486,7 @@ const processEntities = async (
             currentActive // 使用计算后的可见性状态
           );
         } catch (error) {
-          console.error(`加载模型失败:`, error);
+          logger.error(`加载模型失败:`, error);
         }
       }
     }
@@ -551,7 +552,7 @@ onMounted(async () => {
   // 加载verse中所有数据
   if (props.verse?.data) {
     const verseData = parseVerseData();
-    console.log("解析后的verse全部数据:", props.verse);
+    logger.log("解析后的verse全部数据:", props.verse);
     if (verseData?.children?.modules) {
       for (const module of verseData.children.modules) {
         const moduleParams = module.parameters as ModuleParameters | undefined;
@@ -567,7 +568,7 @@ onMounted(async () => {
             typeof meta.data === "string"
               ? (JSON.parse(meta.data) as MetaData)
               : meta.data;
-          console.log("解析后的metaData:", metaData);
+          logger.log("解析后的metaData:", metaData);
           if (metaData.children?.entities) {
             // 使用递归处理可能存在的多级嵌套
             await processEntities(
@@ -581,7 +582,7 @@ onMounted(async () => {
   }
 
   initEventContainer();
-  console.error("事件容器:", eventContainer.value);
+  logger.error("事件容器:", eventContainer.value);
 
   // 初始化性能监控
   const stats = new Stats();
@@ -648,7 +649,7 @@ onMounted(async () => {
           // 如果发生碰撞且之前未处于碰撞状态
           if (isColliding && !collisionObj.isColliding) {
             collisionObj.isColliding = true;
-            console.log("检测到碰撞:", {
+            logger.log("检测到碰撞:", {
               source: collisionObj.sourceUuid,
               target: collisionObj.targetUuid,
             });
@@ -661,7 +662,7 @@ onMounted(async () => {
               try {
                 window.meta[`@${collisionObj.eventUuid}`]();
               } catch (error) {
-                console.error("执行碰撞事件处理函数失败:", error);
+                logger.error("执行碰撞事件处理函数失败:", error);
               }
             }
           }

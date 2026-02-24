@@ -84,6 +84,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { deletePerson, putPerson, userData } from "@/api/v1/person";
@@ -209,7 +210,7 @@ const handleRoleChange = async (item: ViewCard) => {
     id: Number(item.id),
     auth: getAbilitiesFromRole(newRole),
   };
-  console.log("roleid", Number(item.id));
+  logger.log("roleid", Number(item.id));
   try {
     await putPerson(data);
     ElMessage.success(t("manager.list.success"));

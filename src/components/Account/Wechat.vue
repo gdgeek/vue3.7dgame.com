@@ -50,6 +50,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { useUserStore } from "@/store";
 import Qrcode from "./Qrcode.vue";
 import { getQrcode, refresh } from "@/api/auth/wechat";
@@ -141,7 +142,7 @@ const fetchRefresh = async () => {
       }
     }
   } catch (error) {
-    console.error("微信登录刷新错误:", error);
+    logger.error("微信登录刷新错误:", error);
   }
 };
 
@@ -168,7 +169,7 @@ const login = async function () {
     // 启动轮询检查登录状态
     intervalId = setInterval(fetchRefresh, 3000);
   } catch (error) {
-    console.error("获取微信二维码失败:", error);
+    logger.error("获取微信二维码失败:", error);
     ElMessage.error(t("login.qrcodeFetchFailed"));
   }
 };

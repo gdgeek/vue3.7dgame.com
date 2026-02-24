@@ -13,6 +13,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { useRouter } from "vue-router";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 import { postParticle } from "@/api/v1/resources/index";
@@ -42,7 +43,7 @@ const saveParticle = async (
       }
     }
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   } finally {
     callback();
   }

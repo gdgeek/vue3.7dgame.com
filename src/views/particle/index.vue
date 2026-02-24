@@ -114,6 +114,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { Message, MessageBox } from "@/components/Dialog";
@@ -185,7 +186,7 @@ const saveParticle = async (
     const response = await postParticle(data);
     if (response.data.id) callback(response.data.id);
   } catch (err) {
-    console.error("Failed to save particle:", err);
+    logger.error("Failed to save particle:", err);
     callback(-1);
   }
 };

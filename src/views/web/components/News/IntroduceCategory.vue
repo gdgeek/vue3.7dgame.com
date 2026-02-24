@@ -8,6 +8,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { computed } from "vue";
 import DocumentList from "@/components/Home/DocumentList.vue";
 import { useRoute } from "vue-router";
@@ -15,6 +16,6 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 const id = computed(() => parseInt(route.query.id as string));
 onMounted(() => {
-  console.error(id.value);
+  logger.error(id.value);
 });
 </script>

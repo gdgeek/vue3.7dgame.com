@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import COS from 'cos-js-sdk-v5';
 import { token, store, cloud } from '@/api/v1/tencent-cloud';
 import { fileMD5, fileOpen, sleep } from './base';
@@ -181,11 +182,11 @@ const fileUpload = async (
         Key: filename,
         Body: file,
         onHashProgress: (progressData: { percent: number }) => {
-          console.log('校验中', JSON.stringify(progressData));
+          logger.log('校验中', JSON.stringify(progressData));
         },
         onProgress: (progressData: { percent: number; }) => {
           progress(progressData.percent);
-          console.log('上传中', JSON.stringify(progressData));
+          logger.log('上传中', JSON.stringify(progressData));
         },
       });
 
@@ -209,7 +210,7 @@ const getUrl = (info: FileInfo, file: { md5: string; ext: string }, handler: Fil
       Sign: true,
     },
     (_err, data) => {
-      console.log(data?.Url);
+      logger.log(data?.Url);
     }
   );
 };
@@ -229,7 +230,7 @@ const fileUrl = (md5: string, extension: string, handler: FileHandler, dir = '')
       Sign: true,
     },
     (_err, data) => {
-      console.log(data?.Url);
+      logger.log(data?.Url);
     }
   );
 };

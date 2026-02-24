@@ -69,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { getAudio, putAudio, deleteAudio } from "@/api/v1/resources";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
@@ -203,7 +204,7 @@ const setup = async (audio: HTMLAudioElement) => {
     const response = await putAudio(audioData.value.id, { info });
     audioData.value.info = response.data.info;
   } catch (e) {
-    console.error(e);
+    logger.error(e);
   }
 };
 
@@ -276,7 +277,7 @@ const named = async (id: number, name: string) => {
     audioData.value!.name = response.data.name;
     emit("renamed", { id, name });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 };
 
@@ -294,13 +295,13 @@ const fetchData = async () => {
           "audio-dialog-player"
         ) as HTMLAudioElement;
         if (audio) {
-          audio.play().catch((e) => console.error("Auto-play failed:", e));
+          audio.play().catch((e) => logger.error("Auto-play failed:", e));
           isPlay.value = true;
         }
       });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     ElMessage.error(t("audio.view.loadError") || "Failed to load audio data");
   } finally {
     loading.value = false;

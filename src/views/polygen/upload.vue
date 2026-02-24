@@ -14,6 +14,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { useRouter } from "vue-router";
 import { postPolygen } from "@/api/v1/resources/index";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
@@ -38,7 +39,7 @@ const savePolygen = async (
       }
     }
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   } finally {
     callback();
   }

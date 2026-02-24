@@ -6,6 +6,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, computed, onMounted, type Ref } from "vue";
 import { useRoute } from "vue-router";
 import aiRodin from "@/api/v1/ai-rodin";
@@ -29,7 +30,7 @@ onMounted(async () => {
       const response = await aiRodin.get(id.value);
       data.value = response.data;
     } catch (error) {
-      console.error(error);
+      logger.error(error);
     } finally {
       loading.value = false;
     }

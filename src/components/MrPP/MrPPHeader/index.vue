@@ -100,11 +100,12 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import TagsSelect from "@/components/TagsSelect.vue";
 import { ref, computed, watch } from "vue";
 
 const handleTagsChange = (tags: number[]) => {
-  console.log("父组件收到标签变化:", tags);
+  logger.log("父组件收到标签变化:", tags);
   emits("tags", tags);
   // 执行其他操作
 };
@@ -155,7 +156,7 @@ const sorted_name = computed(() => props.sorted.includes(props.sortByName));
 const sorted_up = computed(() => !props.sorted.startsWith("-"));
 
 const search = () => {
-  console.log("MrPPHeader: search triggered", input.value);
+  logger.log("MrPPHeader: search triggered", input.value);
   emits("search", input.value);
 };
 

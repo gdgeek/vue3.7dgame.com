@@ -34,6 +34,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { useI18n } from "vue-i18n";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { putVerse, deleteVerse, VerseData } from "@/api/v1/verse";
@@ -113,7 +114,7 @@ const submitChange = async (form: VerseData, imageId: number | null) => {
     changedDialog.value?.hide();
     emit("changed", response.data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     ElMessage.error(t("verse.page.list.toolbar.changeError"));
   }
 };

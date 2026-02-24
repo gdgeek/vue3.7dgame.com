@@ -65,6 +65,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { useRoute, useRouter } from "vue-router";
 import { getAudio, putAudio, deleteAudio } from "@/api/v1/resources";
 import type { ResourceInfo } from "@/api/v1/resources/model";
@@ -276,7 +277,7 @@ const save = async (
     audioData.value!.info = response2.data.info;
     expire.value = false;
   } catch (e) {
-    console.error(e);
+    logger.error(e);
   }
 };
 
@@ -331,7 +332,7 @@ const named = async (id: number, name: string) => {
     const response = await putAudio(id, { name });
     audioData.value!.name = response.data.name;
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 };
 

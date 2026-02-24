@@ -61,6 +61,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import PersonCreator from "./Creator.vue";
 import List from "@/components/MrPP/Person/List.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
@@ -104,7 +105,7 @@ const createWindow = () => {
 const handleCurrentChange = async (page: number) => {
   pagination.value.current = page;
   await refresh();
-  console.log(pagination.value.current);
+  logger.log(pagination.value.current);
 };
 
 const sort = async (value: string) => {

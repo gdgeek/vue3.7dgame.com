@@ -24,6 +24,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, computed, watch, withDefaults } from "vue";
 import SchemaField from "./SchemaField.vue";
 import {
@@ -114,7 +115,7 @@ const handleSubmit = async () => {
       emit("submit", props.modelValue);
     } else {
       ElMessage.warning("Please check the form for errors.");
-      console.warn("Validation failed", fields);
+      logger.warn("Validation failed", fields);
     }
   };
   await formRef.value.validate(callback);

@@ -63,6 +63,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import VueForm from "@/components/JsonSchemaForm/index.vue";
 import { ref, computed, nextTick } from "vue";
 import { ElMessage } from "element-plus";
@@ -253,7 +254,7 @@ const useSchema4 = () => {
 
 const handleSubmit = () => {
   ElMessage.success("Form submitted successfully!");
-  console.log("Submitted data:", formData.value);
+  logger.log("Submitted data:", formData.value);
 };
 
 const handleCancel = () => {
@@ -267,7 +268,7 @@ const handleChange = ({
   oldValue: Record<string, JsonValue>;
   newValue: Record<string, JsonValue>;
 }) => {
-  console.log("Data changed:", { oldValue, newValue });
+  logger.log("Data changed:", { oldValue, newValue });
 };
 </script>
 

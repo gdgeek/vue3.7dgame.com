@@ -317,6 +317,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -476,7 +477,7 @@ const onResourceSelected = async (data: CardInfo) => {
       Message.success(t("verse.view.image.updateSuccess"));
       await openDetail(currentVerse.value);
     } catch (error) {
-      console.error("Failed to update verse image:", error);
+      logger.error("Failed to update verse image:", error);
       Message.error(t("verse.view.image.updateError"));
     } finally {
       detailLoading.value = false;
@@ -545,7 +546,7 @@ const handleCoverUpload = async (event: Event) => {
       await openDetail(currentVerse.value);
     }
   } catch (error) {
-    console.error("Upload failed", error);
+    logger.error("Upload failed", error);
     Message.error(t("verse.view.image.updateError"));
   } finally {
     detailLoading.value = false;
@@ -766,7 +767,7 @@ const submitCreate = async (
       query: { id: response.data.id, title },
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 

@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import type { App } from "vue";
 import { createI18n } from "vue-i18n";
 import { useAppStoreHook } from "@/store/modules/app";
@@ -80,7 +81,7 @@ export const loadLanguageAsync = async (locale: string) => {
     });
   } else {
     // 回退到简体中文
-    console.warn(
+    logger.warn(
       `Language file not found for locale: ${locale}, falling back to zh-CN`
     );
     if (i18n.global.locale.value !== "zh-CN") {

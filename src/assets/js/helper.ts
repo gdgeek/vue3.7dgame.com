@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 // 定义 Vector2 和 Vector3 类型
 type Vector2 = {
   x: number;
@@ -38,7 +39,7 @@ const cutString = (str: string, len: number): string => {
 const isHttps = (): boolean => {
   const protocol = window.location.protocol;
   const isHttps = protocol === 'https:';
-  console.log(isHttps ? "这个网页是使用HTTPS" : "这个网页不是使用HTTPS");
+  logger.log(isHttps ? "这个网页是使用HTTPS" : "这个网页不是使用HTTPS");
   return isHttps;
 };
 
@@ -59,7 +60,7 @@ const convertToHttps = (url?: string): string => {
 };
  const getCurrentUrl = () => {
   const fullUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ""}`;
-  console.log(`Full URL: ${fullUrl}`);
+  logger.log(`Full URL: ${fullUrl}`);
   return fullUrl;
  }
 

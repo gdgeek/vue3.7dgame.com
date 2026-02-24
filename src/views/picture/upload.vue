@@ -14,6 +14,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { useRouter } from "vue-router";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 import { postPicture } from "@/api/v1/resources/index";
@@ -39,7 +40,7 @@ const savePicture = async (
       }
     }
   } catch (err) {
-    console.error("Failed to save picture:", err);
+    logger.error("Failed to save picture:", err);
   } finally {
     callback();
   }

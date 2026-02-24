@@ -109,6 +109,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
 import { getPrefabs, prefabsData } from "@/api/v1/prefab";
@@ -168,7 +169,7 @@ type KnightDataSchema = {
   [key: string]: unknown;
 };
 const setup = ({ data }: { data: prefabsData }) => {
-  console.error("setup", data);
+  logger.error("setup", data);
   if (data.data) {
     knightData.value?.open({
       schema: data.info as unknown as KnightDataSchema,
@@ -191,7 +192,7 @@ type PrefabSelection = {
 };
 
 const selected = async (data: PrefabSelection | null = null) => {
-  console.log("data", data);
+  logger.log("data", data);
   if (data) {
     const title = await input(t("verse.view.prefabDialog.input"));
     data.title = title;
@@ -244,7 +245,7 @@ const clearSearched = async () => {
 };
 
 const knightDataSubmit = (data: Record<string, JsonValue>) => {
-  console.error(data);
+  logger.error(data);
 };
 
 onMounted(() => {
@@ -286,7 +287,7 @@ const transformToViewCard = (items: prefabsData[]): ViewCard[] => {
 
 const viewCards = computed(() => {
   const cards = transformToViewCard(active.value.items);
-  console.log("viewCards", cards);
+  logger.log("viewCards", cards);
   return cards;
 });
 

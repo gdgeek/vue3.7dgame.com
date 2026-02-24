@@ -69,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { metaInfo } from "@/api/v1/meta";
@@ -127,7 +128,7 @@ const jsonInfo = computed({
       // 将输入的字符串解析为对象并赋值给 item.info
       item.value!.info = JSON.stringify(JSON.parse(value));
     } catch (error) {
-      console.error("Invalid JSON format", error);
+      logger.error("Invalid JSON format", error);
     }
   },
 });
@@ -197,7 +198,7 @@ const handleImageSelected = async (event: ImageUpdateEvent) => {
       ElMessage.success(t("meta.metaEdit.image.updateSuccess"));
       await refresh();
     } catch (error) {
-      console.error("Failed to update meta image:", error);
+      logger.error("Failed to update meta image:", error);
       ElMessage.error(t("meta.metaEdit.image.updateError"));
     }
   }
@@ -212,7 +213,7 @@ const handleImageUploadSuccess = async (event: ImageUpdateEvent) => {
       ElMessage.success(t("meta.metaEdit.image.updateSuccess"));
       await refresh();
     } catch (error) {
-      console.error("Failed to update meta image:", error);
+      logger.error("Failed to update meta image:", error);
       ElMessage.error(t("meta.metaEdit.image.updateError"));
     }
   }
@@ -226,7 +227,7 @@ const onSubmit = async () => {
     ElMessage.success(t("meta.metaEdit.success"));
     await refresh();
   } else {
-    console.error("error submit!!");
+    logger.error("error submit!!");
     ElMessage.error(t("verse.view.error2"));
   }
 };

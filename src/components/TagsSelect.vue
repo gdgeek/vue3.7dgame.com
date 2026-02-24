@@ -9,6 +9,7 @@
 </template>
 
 <script lang="ts" setup>
+import { logger } from "@/utils/logger";
 import { ref, onMounted } from "vue";
 import { PageFilter } from "@/components/StandardPage";
 import { getTags } from "@/api/v1/tags";
@@ -20,7 +21,7 @@ const options = ref<{ label: string; value: string | number }[]>([]);
 type TagRecord = { id: number; name: string };
 
 const handleChange = (val: (string | number)[]) => {
-  console.log("选择完毕，选中的标签:", val);
+  logger.log("选择完毕，选中的标签:", val);
   emit("tagsChange", val);
 };
 

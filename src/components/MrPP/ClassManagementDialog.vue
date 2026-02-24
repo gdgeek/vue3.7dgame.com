@@ -245,6 +245,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { ref, computed, watch } from "vue";
 import { Plus } from "@element-plus/icons-vue";
 import { useI18n } from "vue-i18n";
@@ -428,7 +429,7 @@ const handleSaveEdit = async () => {
     editDialogVisible.value = false;
     refreshList();
   } catch (error: unknown) {
-    console.error("Failed to save class:", error);
+    logger.error("Failed to save class:", error);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((error as any).response?.status === 422) {
       const errorMsg =
@@ -462,7 +463,7 @@ const handleDeleteWithCallback = async (
     refreshList();
   } catch (error: unknown) {
     if (error !== "cancel") {
-      console.error("Failed to delete class:", error);
+      logger.error("Failed to delete class:", error);
       ElMessage.error(t("manager.errors.deleteFailed"));
     }
     resetLoading();
@@ -517,7 +518,7 @@ const handleSelectUser = async (user: UserType) => {
     userDialogVisible.value = false;
     refreshList();
   } catch (error: unknown) {
-    console.error("Failed to add member:", error);
+    logger.error("Failed to add member:", error);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((error as any).response?.status === 422) {
       const errorMsg =
@@ -555,7 +556,7 @@ const handleRemoveTeacher = async (teacher: TeacherInfo) => {
     refreshList();
   } catch (error: unknown) {
     if (error !== "cancel") {
-      console.error("Failed to remove teacher:", error);
+      logger.error("Failed to remove teacher:", error);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((error as any).response?.status === 422) {
         const errorMsg =
@@ -593,7 +594,7 @@ const handleRemoveStudent = async (student: StudentInfo) => {
     refreshList();
   } catch (error: unknown) {
     if (error !== "cancel") {
-      console.error("Failed to remove student:", error);
+      logger.error("Failed to remove student:", error);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((error as any).response?.status === 422) {
         const errorMsg =
@@ -619,7 +620,7 @@ const refreshTeachers = async () => {
       currentClass.value = response.data;
     }
   } catch (error) {
-    console.error("Failed to refresh teachers:", error);
+    logger.error("Failed to refresh teachers:", error);
   }
 };
 
@@ -632,7 +633,7 @@ const refreshStudents = async () => {
       currentClass.value = response.data;
     }
   } catch (error) {
-    console.error("Failed to refresh students:", error);
+    logger.error("Failed to refresh students:", error);
   }
 };
 

@@ -77,6 +77,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { ref, reactive, onMounted, computed } from "vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
@@ -174,7 +175,7 @@ const refresh = async () => {
     // Emit refresh event
     emit("refresh", items.value);
   } catch (error) {
-    console.error("Failed to fetch data:", error);
+    logger.error("Failed to fetch data:", error);
     items.value = [];
   } finally {
     loading.value = false;

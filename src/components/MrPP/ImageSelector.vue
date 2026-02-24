@@ -86,6 +86,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { FolderOpened, Upload, Plus } from "@element-plus/icons-vue";
@@ -186,7 +187,7 @@ const savePicture = async (
       callback(response.data.id);
     }
   } catch (err) {
-    console.error("Failed to save picture:", err);
+    logger.error("Failed to save picture:", err);
     callback(-1);
   }
 };
@@ -196,7 +197,7 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
   const ids = Array.isArray(uploadedIds) ? uploadedIds : [uploadedIds];
   const pictureResourceId = ids[0];
 
-  console.log(
+  logger.log(
     "ImageSelector: Upload success, picture resource ID:",
     pictureResourceId
   );
@@ -204,7 +205,7 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
   try {
     // Fetch the picture resource to get its image_id (file ID)
     const response = await getPicture(pictureResourceId);
-    console.log("ImageSelector: Fetched picture resource:", response.data);
+    logger.log("ImageSelector: Fetched picture resource:", response.data);
 
     // For picture resources, strictly speaking the 'file' IS the image.
     // Sometimes 'image_id' (thumbnail) might not be generated or linked yet,
@@ -214,7 +215,7 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
     const imageUrl = response.data.image?.url || response.data.file?.url;
 
     if (imageId) {
-      console.log(
+      logger.log(
         "ImageSelector: Emitting image-upload-success with imageId:",
         imageId
       );
@@ -230,11 +231,11 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
         imageUrl: imageUrl,
       });
     } else {
-      console.error("ImageSelector: No image_id in response:", response.data);
+      logger.error("ImageSelector: No image_id in response:", response.data);
       ElMessage.error("Failed to get image ID from uploaded picture");
     }
   } catch (error) {
-    console.error("ImageSelector: Failed to fetch uploaded picture:", error);
+    logger.error("ImageSelector: Failed to fetch uploaded picture:", error);
     ElMessage.error("Failed to update image");
   }
 };

@@ -6,6 +6,7 @@
 </template>
 
 <script setup>
+import { logger } from "@/utils/logger";
 import { onMounted, ref, watch } from "vue";
 import QRCode from "qrcode";
 
@@ -48,7 +49,7 @@ const generateQRCode = async (text) => {
 
     await QRCode.toCanvas(qrcodeCanvas.value, text, qrOptions);
   } catch (error) {
-    console.error("生成二维码时出错:", error);
+    logger.error("生成二维码时出错:", error);
   }
 };
 

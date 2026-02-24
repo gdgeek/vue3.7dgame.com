@@ -32,6 +32,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { useFileStore } from "@/store/modules/config";
 import { UploadFileType } from "@/api/user/model";
 import { postFile } from "@/api/v1/files";
@@ -133,7 +134,7 @@ const saveFile = async (
       progress(2, 1);
     });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 };
 
@@ -195,7 +196,7 @@ const select = async () => {
 
         await saveFile(md5, extension, file, handler, totalFiles);
       } catch (fileError) {
-        console.error(`Error processing file ${file.name}:`, fileError);
+        logger.error(`Error processing file ${file.name}:`, fileError);
       } finally {
         fileCount++;
         if (fileCount === totalFiles) {
@@ -204,7 +205,7 @@ const select = async () => {
       }
     }
   } catch (error) {
-    console.error("Error in select function:", error);
+    logger.error("Error in select function:", error);
     isDisabled.value = false;
   }
 };

@@ -13,6 +13,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { useRouter } from "vue-router";
 import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 import { postVoxel } from "@/api/v1/resources/index";
@@ -37,7 +38,7 @@ const saveVoxel = async (
       }
     }
   } catch (err) {
-    console.log(err);
+    logger.log(err);
   } finally {
     callback();
   }

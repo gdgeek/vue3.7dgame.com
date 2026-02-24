@@ -116,6 +116,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, onMounted } from "vue";
 import { getUserCreation } from "@/api/v1/user";
 
@@ -135,7 +136,7 @@ const fetchCreation = async () => {
     const r = await getUserCreation();
     creation.value = r.data;
   } catch (error) {
-    console.error("Error fetching creation data:", error);
+    logger.error("Error fetching creation data:", error);
   }
 };
 

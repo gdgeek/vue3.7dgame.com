@@ -155,6 +155,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -272,7 +273,7 @@ async function getDatas(input: DataInput): Promise<DataOutput> {
         input.current,
         "image"
       );
-      console.log("获取数据", response.data);
+      logger.log("获取数据", response.data);
       const items = response.data.map((item: ResourceInfo) => {
         return {
           id: item.id,
@@ -303,7 +304,7 @@ async function getDatas(input: DataInput): Promise<DataOutput> {
       };
       resolve({ items, pagination });
     } catch (error) {
-      console.error("获取数据失败", error);
+      logger.error("获取数据失败", error);
       reject(error);
     }
   });
@@ -355,7 +356,7 @@ const doClose = () => {
 };
 
 async function doBatchSelect() {
-  console.log("doBatchSelect", selectedIds.value);
+  logger.log("doBatchSelect", selectedIds.value);
   if (selectedIds.value.length === 0) {
     ElMessage.warning(t("meta.ResourceDialog.noItemSelected"));
     return;
@@ -378,11 +379,11 @@ async function doBatchSelect() {
 
     for (const id of selectedIds.value) {
       const obj = active.value.items.find((item) => item.id == id);
-      console.log("doBatchSelectobj", obj);
+      logger.log("doBatchSelectobj", obj);
       if (obj) {
         // 转换为ViewCard确保所有属性都被包含
         //  const viewCardObj = [obj][0];
-        console.log("doBatchSelectviewCardObj", obj);
+        logger.log("doBatchSelectviewCardObj", obj);
         doSelect(obj);
       }
     }

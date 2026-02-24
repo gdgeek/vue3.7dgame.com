@@ -22,6 +22,7 @@
 </template>
 
 <script lang="ts" setup>
+import { logger } from "@/utils/logger";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { getTags } from "@/api/v1/tags";
@@ -51,7 +52,7 @@ const emit = defineEmits(["add", "remove"]);
 const { t } = useI18n();
 const value = ref<number | null>(null);
 const close = (id: number) => {
-  console.log("删除标签:", id);
+  logger.log("删除标签:", id);
   emit("remove", id);
 };
 const data = computed(() => {
@@ -91,7 +92,7 @@ const tags = computed(() => {
 });
 
 const handleChange = (val: number) => {
-  console.log("选择完毕，选中的标签:", val);
+  logger.log("选择完毕，选中的标签:", val);
   emit("add", val);
   value.value = null;
 };

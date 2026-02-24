@@ -1,5 +1,6 @@
 // Shared GLTF loader factory with DRACO + KTX2 support.
 // Ensures KTX2Loader.detectSupport() is called only once and re-used.
+import { logger } from "@/utils/logger";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
@@ -32,7 +33,7 @@ export function getConfiguredGLTFLoader(): GLTFLoader {
       if (typeof tmpRenderer.forceContextLoss === "function")
         tmpRenderer.forceContextLoss();
     } catch (e) {
-      console.warn("KTX2Loader 初始化失败 (shared)", e);
+      logger.warn("KTX2Loader 初始化失败 (shared)", e);
     }
   }
   if (sharedKTX2) loader.setKTX2Loader(sharedKTX2);

@@ -34,6 +34,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
 import { getResources } from "@/api/v1/resources";
 import { getPhototypes } from "@/api/v1/phototype";
@@ -88,7 +89,7 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
           input.current
         );
 
-        console.error(response.data);
+        logger.error(response.data);
         // 处理响应数据，转换为 CardInfo 数组
         const items = response.data.map((item: PhototypeType) => {
           return {
@@ -143,7 +144,7 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
         resolve({ items, pagination });
       }
     } catch (error) {
-      console.error("Failed to fetch data", error);
+      logger.error("Failed to fetch data", error);
       reject(error);
     }
   });
@@ -221,7 +222,7 @@ const selectedPhototype = async (
   phototype: PhototypeType,
   replace: boolean = false
 ) => {
-  console.error(phototype.resource);
+  logger.error(phototype.resource);
   phototypeDialogRef.value?.open(
     (phototype.schema as { root?: unknown })?.root,
     (data: unknown) => {
@@ -240,11 +241,11 @@ const selectedPhototype = async (
 // 资源操作相关函数
 const selected = async (info: CardInfo, replace: boolean = false) => {
   if (info.type === "phototype") {
-    console.error(info.context);
+    logger.error(info.context);
     if (isPhototypeType(info.context)) {
       selectedPhototype(info.context, replace);
     } else {
-      console.error("phototype数据格式错误:", info.context);
+      logger.error("phototype数据格式错误:", info.context);
     }
     return;
   }
@@ -437,7 +438,7 @@ const handleUploadCover = async (data: unknown) => {
       }
     }
   } catch (error) {
-    console.error("Failed to upload cover image:", error);
+    logger.error("Failed to upload cover image:", error);
     ElMessage.error(t("meta.scene.coverUploadFailed"));
   }
 };
@@ -510,7 +511,7 @@ const handleMessage = async (e: MessageEvent) => {
         init = true;
         await refresh();
       } else {
-        console.log("post user info to editor");
+        logger.log("post user info to editor");
         postMessage("user-info", {
           id: userStore.userInfo?.id || null,
           //roles: userStore.userInfo?.roles || [],
@@ -530,7 +531,7 @@ const refresh = async () => {
   try {
     const meta = await getMeta(id.value);
     const availableTypes = getAvailableResourceTypes();
-    console.log(availableTypes);
+    logger.log(availableTypes);
 
     // 发送元数据和可用资源类型到编辑器
     postMessage("load", {
@@ -547,7 +548,7 @@ const refresh = async () => {
       },
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 // 生命周期钩子

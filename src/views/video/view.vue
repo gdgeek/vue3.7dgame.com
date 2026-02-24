@@ -50,6 +50,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { useRoute, useRouter } from "vue-router";
 import { getVideo, putVideo, deleteVideo } from "@/api/v1/resources/index";
 import { printVector2 } from "@/assets/js/helper";
@@ -90,7 +91,7 @@ const parseVideoInfo = (raw?: string | null): VideoInfo | null => {
 onMounted(async () => {
   expire.value = true;
   const response = await getVideo(id.value);
-  console.log("video:", response.data);
+  logger.log("video:", response.data);
   videoData.value = response.data;
   file.value = response.data.file.url;
   setTimeout(() => {
@@ -250,7 +251,7 @@ const named = async (id: number, name: string) => {
     const response = await putVideo(id, { name });
     videoData.value!.name = response.data.name;
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 };
 </script>

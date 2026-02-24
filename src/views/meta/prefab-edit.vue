@@ -8,6 +8,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import Edit from "@/components/Meta/Edit.vue";
 import { getPrefab, putPrefab } from "@/api/v1/prefab";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
@@ -19,10 +20,10 @@ const getPrefabData = async (
 ) => {
   try {
     const response = await getPrefab(id, expand);
-    console.log("response:", response);
+    logger.log("response:", response);
     callback(response.data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 
@@ -35,7 +36,7 @@ const putPrefabData = async (
     const response = await putPrefab(id, data);
     callback(response.data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 </script>

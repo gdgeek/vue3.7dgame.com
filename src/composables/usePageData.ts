@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import { ref, reactive, computed, onMounted } from "vue";
 import type { ViewMode } from "@/components/StandardPage/types";
 import type { FetchParams, FetchResponse } from "@/types/api";
@@ -75,7 +76,7 @@ export function usePageData<T = unknown>(options: UsePageDataOptions<T>) {
 
       items.value = response.data || [];
     } catch (error) {
-      console.error("Failed to fetch data:", error);
+      logger.error("Failed to fetch data:", error);
       items.value = [];
     } finally {
       loading.value = false;

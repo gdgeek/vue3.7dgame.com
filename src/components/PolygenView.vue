@@ -52,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, watch, onMounted } from "vue";
 import { useDark } from "@vueuse/core";
 import * as THREE from "three";
@@ -284,7 +285,7 @@ const refresh = () => {
     },
     (xhr: ProgressEvent) => {
       emit("progress", parseFloat(((xhr.loaded / xhr.total) * 100).toFixed(1)));
-      console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+      logger.log((xhr.loaded / xhr.total) * 100 + "% loaded");
     }
   );
 };

@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import { fileMD5, fileOpen, sleep } from './base';
 import env from '@/environment';
 import axios from 'axios';
@@ -132,7 +133,7 @@ const fileProcess = async (
 ): Promise<unknown> => {
   const start = Date.now();
   while (Date.now() < start + time) {
-    console.log(handler);
+    logger.log(handler);
     const has = await fileHas(md5, extension, handler, dir);
 
     if (!has) {

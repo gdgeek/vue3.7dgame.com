@@ -61,6 +61,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import "@/assets/font/font.css";
 import { LocationQuery, useRoute, useRouter } from "vue-router";
 import { Message, MessageBox } from "@/components/Dialog";
@@ -97,7 +98,7 @@ const back = async () => {
     );
     router.push("/site/login");
   } catch (e) {
-    console.error(e);
+    logger.error(e);
   }
 };
 const registerForm = ref<RegisterData>({

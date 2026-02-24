@@ -3,6 +3,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAppStore } from "@/store/modules/app";
@@ -28,10 +29,10 @@ onMounted(async () => {
       try {
         await userStore.getUserInfo();
       } catch (err) {
-        console.error("Failed to fetch user info after refresh:", err);
+        logger.error("Failed to fetch user info after refresh:", err);
       }
     } catch (err) {
-      console.error("Refresh token failed in SSO callback:", err);
+      logger.error("Refresh token failed in SSO callback:", err);
     }
   }
 

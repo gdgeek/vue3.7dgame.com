@@ -57,6 +57,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { useRoute, useRouter } from "vue-router";
 import { useFileStore } from "@/store/modules/config";
 import { getVoxel, putVoxel, deleteVoxel } from "@/api/v1/resources/index";
@@ -190,7 +191,7 @@ const loadVoxelData = async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     voxelData.value = (response as any).data;
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 
@@ -309,7 +310,7 @@ const named = async (id: string | number, name: string) => {
       voxelData.value.name = response.data.name;
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 
@@ -322,7 +323,7 @@ const updateVoxel = async (imageId: number, info: VoxelInfo) => {
     voxelData.value.image_id = response.data.image_id;
     voxelData.value.info = response.data.info;
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 

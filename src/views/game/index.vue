@@ -92,6 +92,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import VerseDialog from "@/components/MrPP/VerseDialog.vue";
 import {
@@ -127,7 +128,7 @@ const refresh = async () => {
       total: parseInt(response.headers["x-pagination-total-count"]),
     };
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 
@@ -146,7 +147,7 @@ const onchange = async (id: number, val: number) => {
     await refresh();
     Message.success(t("game.index.form.confirm.success"));
   } catch (e) {
-    console.error(e);
+    logger.error(e);
     Message.info(t("game.index.form.confirm.info"));
   }
 };
@@ -157,7 +158,7 @@ const selected = async (item: { data: { id: number } }) => {
     Message.success(t("game.index.success"));
     await refresh();
   } catch (e) {
-    console.error(e);
+    logger.error(e);
   }
 };
 
@@ -180,7 +181,7 @@ const del = async (id: number) => {
     await refresh();
     Message.success(t("game.index.confirm.success"));
   } catch (e) {
-    console.error(e);
+    logger.error(e);
     Message.info(t("game.index.confirm.info"));
   }
 };

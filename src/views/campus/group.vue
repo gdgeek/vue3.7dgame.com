@@ -70,6 +70,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
@@ -115,7 +116,7 @@ const fetchGroup = async () => {
     const response = await getGroup(groupId.value, "image,user");
     group.value = response.data;
   } catch (error) {
-    console.error("Failed to fetch group:", error);
+    logger.error("Failed to fetch group:", error);
     ElMessage.error(t("common.networkError"));
   } finally {
     loading.value = false;
@@ -153,7 +154,7 @@ const handleLoaded = async (
     };
     result({ data: response.data, pagination: pagination });
   } catch (error) {
-    console.error("Failed to fetch group verses:", error);
+    logger.error("Failed to fetch group verses:", error);
     result({
       data: [],
       pagination: { current: 1, count: 1, size: 20, total: 0 },
@@ -181,7 +182,7 @@ const handleCreateVerse = async (
     // Refresh the list to show new verse
     pageRef.value?.refresh();
   } catch (error) {
-    console.error("Failed to create verse:", error);
+    logger.error("Failed to create verse:", error);
     const axiosErr = error as { response?: { data?: { message?: string } } };
     const errorMsg =
       axiosErr.response?.data?.message || t("common.createFailed");

@@ -58,6 +58,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { getVideo, putVideo, deleteVideo } from "@/api/v1/resources/index";
 import { printVector2 } from "@/assets/js/helper";
 import type { ResourceInfo } from "@/api/v1/resources/model";
@@ -223,7 +224,7 @@ const loadData = async () => {
       if (props.autoPlay) {
         const video = document.getElementById("video") as HTMLVideoElement;
         if (video) {
-          video.play().catch((e) => console.error("Auto-play failed:", e));
+          video.play().catch((e) => logger.error("Auto-play failed:", e));
         }
       }
     }, 0);
@@ -302,7 +303,7 @@ const named = async (id: number, name: string) => {
       videoData.value.name = response.data.name;
     }
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 };
 </script>

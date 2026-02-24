@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import axios from "axios";
 import env from "@/environment";
 import qs from "querystringify";
@@ -40,7 +41,7 @@ function startHealthCheck() {
   healthCheckTimer = setInterval(async () => {
     try {
       await axios.get(`${PRIMARY_API}/api/health`, { timeout: 3000 });
-      console.info("[Domain API] Primary restored, switching back.");
+      logger.info("[Domain API] Primary restored, switching back.");
       currentApi = PRIMARY_API;
       if (healthCheckTimer) {
         clearInterval(healthCheckTimer);
@@ -73,7 +74,7 @@ service.interceptors.response.use(
       BACKUP_API &&
       currentApi === PRIMARY_API
     ) {
-      console.warn("[Domain API] Primary unreachable, switching to backup.");
+      logger.warn("[Domain API] Primary unreachable, switching to backup.");
       currentApi = BACKUP_API;
       config._retry = true;
       config.baseURL = currentApi;

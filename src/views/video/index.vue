@@ -140,6 +140,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 // import { ElMessage, ElMessageBox } from "element-plus";
@@ -338,7 +339,7 @@ const saveVideo = async (
     const response = await postVideo(data);
     if (response.data.id) callback(response.data.id);
   } catch (err) {
-    console.error("Failed to save video:", err);
+    logger.error("Failed to save video:", err);
     callback(-1);
   }
 };

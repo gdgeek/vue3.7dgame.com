@@ -364,6 +364,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { useUserStore } from "@/store/modules/user";
 import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
@@ -709,7 +710,7 @@ const saveAvatar = async (
     await userStore.setUserInfo({ avatar_id: post.data.id });
     ElMessage.success(t("homepage.edit.avatarCropping.success"));
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 };
 

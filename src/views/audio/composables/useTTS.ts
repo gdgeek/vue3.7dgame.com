@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import { ref, Ref, nextTick } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
@@ -160,7 +161,7 @@ export function useTTS(props: UseTTSProps) {
         throw new Error(t("tts.synthesisError"));
       }
     } catch (error) {
-      console.error("语音合成错误:", error);
+      logger.error("语音合成错误:", error);
       ElMessage.error(t("tts.synthesisError"));
     } finally {
       isLoading.value = false;
@@ -196,7 +197,7 @@ export function useTTS(props: UseTTSProps) {
 
       const handler = await fileStore.store.publicHandler();
       const md5 = await fileStore.store.fileMD5(file, (p: number) => {
-        console.log("MD5计算进度:", p);
+        logger.log("MD5计算进度:", p);
       });
       const extension = `.${props.codec.value}`;
 
@@ -212,7 +213,7 @@ export function useTTS(props: UseTTSProps) {
           extension,
           file,
           (p: number) => {
-            console.log("上传进度:", p);
+            logger.log("上传进度:", p);
           },
           handler,
           "audio"
@@ -251,7 +252,7 @@ export function useTTS(props: UseTTSProps) {
         ElMessage.info(t("tts.uploadCanceled"));
         return;
       }
-      console.error("上传错误:", error);
+      logger.error("上传错误:", error);
       ElMessage.error(t("tts.uploadError"));
     } finally {
       isUploading.value = false;

@@ -21,6 +21,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { RouteLocationMatched, type LocationQuery } from "vue-router";
 import { useRouter } from "@/router";
 const router = useRouter();
@@ -55,7 +56,7 @@ function loadRouteQueryMap() {
       }
     }
   } catch (error) {
-    console.error("加载路由参数失败:", error);
+    logger.error("加载路由参数失败:", error);
   }
 }
 
@@ -65,7 +66,7 @@ function saveRouteQueryMap() {
     const mapObject = Object.fromEntries(routeQueryMap.value);
     localStorage.setItem("routeQueryMap", JSON.stringify(mapObject));
   } catch (error) {
-    console.error("保存路由参数失败:", error);
+    logger.error("保存路由参数失败:", error);
   }
 }
 
@@ -113,7 +114,7 @@ function getBreadcrumb() {
       title: currentRoute.query.title,
     };
 
-    console.log("使用保存的场景查询参数:", basePath, savedSceneQuery);
+    logger.log("使用保存的场景查询参数:", basePath, savedSceneQuery);
 
     // 创建 sceneBreadcrumb 对象，并携带保存的路由参数
     const sceneBreadcrumb = {
@@ -178,7 +179,7 @@ function handleLink(item: BreadcrumbRoute) {
   } else if (item.path) {
     routeParams.path = item.path;
   } else {
-    console.warn("无效的路由路径:", item);
+    logger.warn("无效的路由路径:", item);
     return;
   }
 
@@ -186,10 +187,10 @@ function handleLink(item: BreadcrumbRoute) {
   if (item.query) {
     // 使用保存的查询参数
     routeParams.query = item.query;
-    console.log("使用item.query:", routeParams.query);
+    logger.log("使用item.query:", routeParams.query);
   } else if (item.enterCallbacks) {
     routeParams.query = item.enterCallbacks;
-    console.log("使用item.enterCallbacks:", routeParams.query);
+    logger.log("使用item.enterCallbacks:", routeParams.query);
   } else if (
     typeof routeParams.path === "string" &&
     routeParams.path.includes("/scene")
@@ -198,20 +199,20 @@ function handleLink(item: BreadcrumbRoute) {
     const savedQuery = routeQueryMap.value.get(routeParams.path);
     if (savedQuery) {
       routeParams.query = savedQuery;
-      console.log("使用保存的查询参数:", routeParams.query);
+      logger.log("使用保存的查询参数:", routeParams.query);
     } else {
       routeParams.query = {
         id: currentRoute.query.id,
         title: currentRoute.query.title,
       };
-      console.log("使用当前查询参数:", routeParams.query);
+      logger.log("使用当前查询参数:", routeParams.query);
     }
   }
 
-  console.log("路由跳转参数:", routeParams);
+  logger.log("路由跳转参数:", routeParams);
 
   router.push(routeParams).catch((err) => {
-    console.warn("路由跳转失败:", err);
+    logger.warn("路由跳转失败:", err);
   });
 }
 

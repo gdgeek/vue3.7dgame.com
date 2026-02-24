@@ -36,6 +36,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, onMounted } from "vue";
 import { getUserLinked } from "@/api/v1/tools";
 import { useI18n } from "vue-i18n";
@@ -56,7 +57,7 @@ onMounted(async () => {
       code.value = "web_" + userLinked.data.key;
     }
   } catch (error) {
-    console.error("Failed to initialize QR code:", error);
+    logger.error("Failed to initialize QR code:", error);
   }
 });
 

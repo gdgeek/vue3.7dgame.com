@@ -101,6 +101,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import Id2Image from "../Id2Image.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
@@ -144,7 +145,7 @@ const open = async (newValue?: unknown, newVerseId?: number) => {
     await refresh();
     dialogVisible.value = true;
   } catch (error) {
-    console.error("Error in open method:", error);
+    logger.error("Error in open method:", error);
   }
 };
 
@@ -156,7 +157,7 @@ const refresh = async () => {
     "image"
   );
   active.value.items = response.data;
-  console.log("active", active);
+  logger.log("active", active);
   active.value.pagination = {
     current: parseInt(
       String(response.headers["x-pagination-current-page"] ?? "1")
@@ -188,7 +189,7 @@ const selected = async (data: MetaSelection | null) => {
   if (data) {
     // const title = await input(t("verse.view.metaDialog.input1"));
     data.title = data.data.title;
-    console.log("metadata", data);
+    logger.log("metadata", data);
     emit("selected", data);
   } else {
     emit("selected", null);
@@ -283,7 +284,7 @@ const transformToViewCard = (items: metaInfo[]): ViewCard[] => {
 
 const viewCards = computed(() => {
   const cards = transformToViewCard(active.value.items);
-  console.log("viewCards", cards);
+  logger.log("viewCards", cards);
   return cards;
 });
 </script>

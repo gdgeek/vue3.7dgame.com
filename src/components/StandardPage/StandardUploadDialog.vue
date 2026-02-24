@@ -67,6 +67,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from "@/utils/logger";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { Message } from "@/components/Dialog";
@@ -185,7 +186,7 @@ const triggerFileSelect = async () => {
       processFiles(files);
     }
   } catch (err) {
-    console.error("File selection failed:", err);
+    logger.error("File selection failed:", err);
   }
 };
 
@@ -331,7 +332,7 @@ const uploadSingleFile = async (file: File) => {
         const imageResponse = await postFile(imageData);
         image_id = imageResponse.data.id;
       } catch (e) {
-        console.error("Model processing failed", e);
+        logger.error("Model processing failed", e);
       }
     }
 
@@ -343,7 +344,7 @@ const uploadSingleFile = async (file: File) => {
 
     stageProgress.value[2] = 100;
   } catch (err) {
-    console.error(`Error uploading ${file.name}`, err);
+    logger.error(`Error uploading ${file.name}`, err);
     Message.error(`Upload failed: ${file.name}`);
   } finally {
     if (uploadedCount.value === totalFilesCount.value) {
@@ -392,7 +393,7 @@ const saveFileRecord = async (
       image_id
     );
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 };
 

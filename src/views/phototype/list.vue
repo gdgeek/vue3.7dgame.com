@@ -82,6 +82,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { logger } from "@/utils/logger";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -181,7 +182,7 @@ const saveEdit = async () => {
     editDialogVisible.value = false;
     refreshList();
   } catch (error) {
-    console.error("Failed to update:", error);
+    logger.error("Failed to update:", error);
     Message.error(t("common.updateFailed") || "Update Failed");
   }
 };
