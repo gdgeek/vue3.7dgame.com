@@ -1,43 +1,21 @@
 <template>
   <TransitionWrapper>
     <div class="school-list">
-      <PageActionBar
-        :title="$t('manager.schoolManagement')"
-        :search-placeholder="$t('manager.form.namePlaceholder')"
-        @search="handleSearch"
-        @sort-change="handleSortChange"
-        @view-change="handleViewChange"
-      >
+      <PageActionBar :title="$t('manager.schoolManagement')" :search-placeholder="$t('manager.form.namePlaceholder')"
+        @search="handleSearch" @sort-change="handleSortChange" @view-change="handleViewChange">
         <template #actions>
           <el-button type="primary" @click="addSchool">
-            <font-awesome-icon
-              :icon="['fas', 'plus']"
-              style="font-size: 18px; margin-right: 4px"
-            ></font-awesome-icon>
+            <font-awesome-icon :icon="['fas', 'plus']" style="font-size: 18px; margin-right: 4px"></font-awesome-icon>
             {{ $t("manager.createSchool") }}
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer
-        class="list-view"
-        :items="items"
-        :view-mode="viewMode"
-        :loading="loading"
-        @row-click="openDetail"
-      >
+      <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
         <template #grid-card="{ item }">
-          <StandardCard
-            :image="item.image?.url"
-            :title="item.name"
-            :action-text="t('manager.ui.viewDetail')"
-            :action-icon="['fas', 'eye']"
-            :type-icon="['fas', 'building']"
-            :placeholder-icon="['fas', 'building']"
-            :show-checkbox="false"
-            @view="openDetail(item)"
-            @action="openDetail(item)"
-          ></StandardCard>
+          <StandardCard :image="item.image?.url" :title="item.name" :action-text="t('manager.ui.viewDetail')"
+            :action-icon="['fas', 'eye']" :type-icon="['fas', 'building']" :placeholder-icon="['fas', 'building']"
+            :show-checkbox="false" @view="openDetail(item)" @action="openDetail(item)"></StandardCard>
         </template>
 
         <template #list-header>
@@ -52,15 +30,9 @@
           <div class="col-checkbox"></div>
           <div class="col-name">
             <div class="item-thumb">
-              <img
-                v-if="item.image?.url"
-                :src="item.image.url"
-                :alt="item.name"
-              />
+              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
               <div v-else class="thumb-placeholder">
-                <font-awesome-icon
-                  :icon="['fas', 'building']"
-                ></font-awesome-icon>
+                <font-awesome-icon :icon="['fas', 'building']"></font-awesome-icon>
               </div>
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
@@ -71,18 +43,15 @@
           <div class="col-date">{{ formatItemDate(item.created_at) }}</div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <font-awesome-icon
-                :icon="['fas', 'ellipsis']"
-                class="actions-icon"
-              ></font-awesome-icon>
+              <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon"></font-awesome-icon>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openDetail(item)">{{
                     t("manager.ui.viewDetail")
-                  }}</el-dropdown-item>
+                    }}</el-dropdown-item>
                   <el-dropdown-item @click="deletedWindow(item)">{{
                     t("common.delete")
-                  }}</el-dropdown-item>
+                    }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -90,35 +59,18 @@
         </template>
 
         <template #empty>
-          <EmptyState
-            :icon="['fas', 'building']"
-            :text="$t('manager.ui.noSchools')"
-            :action-text="$t('manager.createSchool')"
-            @action="addSchool"
-          ></EmptyState>
+          <EmptyState :icon="['fas', 'building']" :text="$t('manager.ui.noSchools')"
+            :action-text="$t('manager.createSchool')" @action="addSchool"></EmptyState>
         </template>
       </ViewContainer>
 
-      <PagePagination
-        :current-page="pagination.current"
-        :total-pages="totalPages"
-        @page-change="handlePageChange"
-      >
+      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
       </PagePagination>
 
       <!-- Detail Panel (Read-only for now) -->
-      <DetailPanel
-        v-model="detailVisible"
-        :title="t('manager.ui.schoolDetail')"
-        :name="currentSchool?.name || ''"
-        :loading="detailLoading"
-        :properties="detailProperties"
-        :placeholder-icon="['fas', 'building']"
-        :show-delete="true"
-        :delete-text="t('common.delete')"
-        @delete="handleDelete"
-        @close="handlePanelClose"
-      >
+      <DetailPanel v-model="detailVisible" :title="t('manager.ui.schoolDetail')" :name="currentSchool?.name || ''"
+        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'building']"
+        :show-delete="true" :delete-text="t('common.delete')" @delete="handleDelete" @close="handlePanelClose">
       </DetailPanel>
     </div>
   </TransitionWrapper>
@@ -167,11 +119,12 @@ interface School {
   principal?: {
     nickname?: string;
     username?: string;
-  };
+  } | null;
   image?: {
     url: string;
-  };
+  } | null;
   created_at: string;
+  [key: string]: unknown;
 }
 
 const currentSchool = ref<School | null>(null);
@@ -219,7 +172,7 @@ const handleDelete = async () => {
     detailVisible.value = false;
     refresh();
     Message.success(t("manager.messages.deleteSuccess"));
-  } catch {}
+  } catch { }
 };
 
 const deletedWindow = async (item: School) => {
@@ -232,7 +185,7 @@ const deletedWindow = async (item: School) => {
     await deleteSchool(item.id);
     refresh();
     Message.success(t("manager.messages.deleteSuccess"));
-  } catch {}
+  } catch { }
 };
 
 const formatItemDate = (dateStr?: string) => {

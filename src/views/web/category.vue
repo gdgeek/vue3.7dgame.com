@@ -7,13 +7,15 @@
 
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import News from "./components/News/index.vue";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
 const route = useRoute();
+const router = useRouter();
 const contentRef = ref<HTMLElement | null>(null);
+const isScrolled = ref(false);
 
 defineOptions({
   name: "WebHome",
@@ -133,7 +135,7 @@ onMounted(() => {
   restoreScrollPosition();
 
   // 监听路由变化，在路由变化后保存滚动位置
-  router.beforeEach((to, from) => {
+  router.beforeEach((_to, from) => {
     if (from.path.startsWith("/web")) {
       saveScrollPosition();
     }
@@ -301,6 +303,7 @@ onUnmounted(() => {
   }
 
   &.nav-scrolled {
+
     .nav-left .company-name,
     .nav-middle .nav-menu-item .menu-text,
     .nav-right .hamburger-menu {
@@ -308,6 +311,7 @@ onUnmounted(() => {
     }
 
     &.dark-theme {
+
       .nav-left .company-name,
       .nav-middle .nav-menu-item .menu-text,
       .nav-right .hamburger-menu {

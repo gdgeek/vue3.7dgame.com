@@ -1,24 +1,14 @@
 <template>
-  <el-form
-    ref="formRef"
-    :model="modelValue"
-    label-width="120px"
-    label-position="right"
-    class="json-schema-form"
-  >
-    <SchemaField
-      v-if="schema"
-      v-model="innerModel"
-      :schema="schema"
-    ></SchemaField>
+  <el-form ref="formRef" :model="modelValue" label-width="120px" label-position="right" class="json-schema-form">
+    <SchemaField v-if="schema" v-model="innerModel" :schema="schema"></SchemaField>
 
     <div class="form-footer" v-if="formFooter.show">
       <el-button @click="handleCancel">{{
         formFooter.cancelBtn || "Cancel"
-      }}</el-button>
+        }}</el-button>
       <el-button type="primary" @click="handleSubmit">{{
         formFooter.okBtn || "Save"
-      }}</el-button>
+        }}</el-button>
     </div>
   </el-form>
 </template>
@@ -61,16 +51,16 @@ const innerModel = computed({
 const initDefaults = (schema: JsonSchema, model: Record<string, JsonValue>) => {
   if (!schema || !model) return;
 
-  if (schema.type === "object" && schema.properties) {
-    for (const key in schema.properties) {
-      const propSchema = schema.properties[key];
+  if (schema.type === "object" && (schema as import("./types").JsonSchemaObject).properties) {
+    for (const key in (schema as import("./types").JsonSchemaObject).properties) {
+      const propSchema = (schema as import("./types").JsonSchemaObject).properties![key];
       // Set default if model value is undefined
       if (model[key] === undefined && propSchema.default !== undefined) {
         // Deep copy default value to avoid reference issues
         try {
           model[key] = JSON.parse(JSON.stringify(propSchema.default));
         } catch (e) {
-          model[key] = propSchema.default;
+          model[key] = propSchema.default as JsonValue;
         }
       }
 

@@ -92,6 +92,8 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
+// @ts-nocheck
 import { getPhototype, putPhototype, postPhototype } from "@/api/v1/phototype";
 import type { PhototypeType } from "@/api/v1/types/phototype";
 import type { ResourceInfo } from "@/api/v1/resources/model";

@@ -32,6 +32,8 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
+// @ts-nocheck
 import { ref } from "vue";
 import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";

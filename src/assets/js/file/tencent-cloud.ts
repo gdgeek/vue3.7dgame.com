@@ -137,16 +137,20 @@ const fileDownload = async (
 
   return new Promise<unknown>(async (resolve, reject) => {
     try {
+      if (!handler.cos) {
+        reject(new Error('COS instance not available'));
+        return;
+      }
       const data = await handler.cos.getObject({
         Bucket: handler.bucket,
-        Region: handler.region,
+        Region: handler.region!,
         Key: filename,
         onProgress: (progressData: { percent: number; }) => {
-          progress(progressData.percent); // 更新进度
+          progress(progressData.percent);
         },
       });
 
-      resolve(JSON.parse(data.Body as string)); // 解析并返回文件内容
+      resolve(JSON.parse(data.Body as string));
     } catch (error) {
       reject(error);
     }
@@ -165,19 +169,22 @@ const fileUpload = async (
   const ext = extension.startsWith('.') ? extension : `.${extension}`;
   const filename = path.join(dir, md5 + ext);
 
-
   return new Promise<unknown>(async (resolve, reject) => {
     try {
+      if (!handler.cos) {
+        reject(new Error('COS instance not available'));
+        return;
+      }
       const data = await handler.cos.uploadFile({
         Bucket: handler.bucket,
-        Region: handler.region,
+        Region: handler.region!,
         Key: filename,
         Body: file,
         onHashProgress: (progressData: { percent: number }) => {
-          console.log('校验中', JSON.stringify(progressData)); // 校验进度
+          console.log('校验中', JSON.stringify(progressData));
         },
         onProgress: (progressData: { percent: number; }) => {
-          progress(progressData.percent); // 上传进度
+          progress(progressData.percent);
           console.log('上传中', JSON.stringify(progressData));
         },
       });
@@ -191,6 +198,7 @@ const fileUpload = async (
 
 // 获取文件 URL
 const getUrl = (info: FileInfo, file: { md5: string; ext: string }, handler: FileHandler): string => {
+  if (!handler.cos) return '';
   const ext = file.ext.startsWith('.') ? file.ext : `.${file.ext}`;
   return handler.cos.getObjectUrl(
     {
@@ -200,47 +208,49 @@ const getUrl = (info: FileInfo, file: { md5: string; ext: string }, handler: Fil
       Expires: 60,
       Sign: true,
     },
-    (err: Error | null, data: { Url: string }) => {
-      console.log(err || (data && data.Url));
+    (_err, data) => {
+      console.log(data?.Url);
     }
   );
 };
 
 // 文件 URL
 const fileUrl = (md5: string, extension: string, handler: FileHandler, dir = ''): string => {
+  if (!handler.cos) return '';
   const ext = extension.startsWith('.') ? extension : `.${extension}`;
   const filename = path.join(dir, md5 + ext);
 
   return handler.cos.getObjectUrl(
     {
       Bucket: handler.bucket,
-      Region: handler.region,
+      Region: handler.region!,
       Key: filename,
       Expires: 60,
       Sign: true,
     },
-    (err: Error | null, data: { Url: string }) => {
-      console.log(err || (data && data.Url));
+    (_err, data) => {
+      console.log(data?.Url);
     }
   );
 };
 
 // 检查文件是否存在
 const fileHas = async (md5: string, extension: string, handler: FileHandler, dir = ''): Promise<boolean> => {
+  if (!handler.cos) return false;
   const ext = extension.startsWith('.') ? extension : `.${extension}`;
   const filename = path.join(dir, md5 + ext);
 
-  return new Promise<boolean>(async (resolve, reject) => {
+  return new Promise<boolean>(async (resolve, _reject) => {
     try {
-      await handler.cos.headObject({
+      await handler.cos!.headObject({
         Bucket: handler.bucket,
-        Region: handler.region,
+        Region: handler.region!,
         Key: filename,
       });
 
-      resolve(true); // 文件存在
+      resolve(true);
     } catch (error) {
-      resolve(false); // 文件不存在
+      resolve(false);
     }
   });
 };

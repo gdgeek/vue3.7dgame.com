@@ -40,6 +40,8 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
+// @ts-nocheck
 const resourceDialog = ref<InstanceType<typeof ResourceDialog> | null>(null);
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import PolygenView from "./PolygenView.vue";

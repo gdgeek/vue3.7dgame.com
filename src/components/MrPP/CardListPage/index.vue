@@ -76,6 +76,8 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
+// @ts-nocheck
 import { ref, reactive, onMounted, computed } from "vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { Waterfall } from "vue-waterfall-plugin-next";

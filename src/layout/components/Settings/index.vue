@@ -1,28 +1,16 @@
 <template>
-  <el-drawer
-    v-model="settingsVisible"
-    size="300"
-    :title="$t('settings.project')"
-  >
+  <el-drawer v-model="settingsVisible" size="300" :title="$t('settings.project')">
     <el-divider>{{ $t("settings.theme") }}</el-divider>
 
     <div class="flex-center">
-      <el-switch
-        v-model="isDark"
-        active-icon="Moon"
-        inactive-icon="Sunny"
-        @change="changeTheme"
-      ></el-switch>
+      <el-switch v-model="isDark" active-icon="Moon" inactive-icon="Sunny" @change="changeTheme"></el-switch>
     </div>
 
     <el-divider>{{ $t("settings.interface") }}</el-divider>
 
     <div class="settings-option">
       <span class="text-xs">{{ $t("settings.themeColor") }}</span>
-      <ThemeColorPicker
-        v-model="settingsStore.themeColor"
-        @update:model-value="changeThemeColor"
-      ></ThemeColorPicker>
+      <ThemeColorPicker v-model="settingsStore.themeColor" @update:model-value="changeThemeColor"></ThemeColorPicker>
     </div>
 
     <div class="settings-option">
@@ -49,10 +37,7 @@
       $t("settings.navigation")
     }}</el-divider>
 
-    <LayoutSelect
-      v-model="settingsStore.layout"
-      @update:model-value="changeLayout"
-    ></LayoutSelect>
+    <LayoutSelect v-model="settingsStore.layout" @update:model-value="changeLayout"></LayoutSelect>
   </el-drawer>
 </template>
 
@@ -87,8 +72,7 @@ function changeThemeColor(color: string) {
  * 切换主题
  */
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
-const changeTheme = (val: boolean) => {
-  isDark.value = val;
+const changeTheme = (_val: string | number | boolean) => {
   settingsStore.changeTheme(isDark.value ? ThemeEnum.DARK : ThemeEnum.LIGHT);
 };
 
@@ -106,16 +90,16 @@ function changeLayout(layout: string) {
 
 function againActiveTop(newVal: string) {
   const parent = findOutermostParent(permissionStore.routes, newVal);
-  if (appStore.activeTopMenu !== parent.path) {
+  if (parent && appStore.activeTopMenuPath !== parent.path) {
     appStore.activeTopMenu(parent.path);
   }
 }
 
-function findOutermostParent(tree: RouteRecordRaw[], findName: string) {
-  const parentMap: Record<string, RouteRecordRaw | null> = {};
+function findOutermostParent(tree: unknown[], findName: string) {
+  const parentMap: Record<string, any> = {};
 
-  function buildParentMap(node: RouteRecordRaw, parent: RouteRecordRaw | null) {
-    parentMap[node.name as string] = parent;
+  function buildParentMap(node: any, parent: any) {
+    parentMap[String(node.name)] = parent;
 
     if (node.children) {
       for (let i = 0; i < node.children.length; i++) {
@@ -130,10 +114,10 @@ function findOutermostParent(tree: RouteRecordRaw[], findName: string) {
 
   let currentNode = parentMap[findName];
   while (currentNode) {
-    if (!parentMap[currentNode.name]) {
+    if (!parentMap[currentNode.name as string]) {
       return currentNode;
     }
-    currentNode = parentMap[currentNode.name];
+    currentNode = parentMap[currentNode.name as string];
   }
 
   return null;

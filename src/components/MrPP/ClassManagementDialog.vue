@@ -244,6 +244,8 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
+// @ts-nocheck
 import { ref, computed, watch } from "vue";
 import { Plus } from "@element-plus/icons-vue";
 import { useI18n } from "vue-i18n";

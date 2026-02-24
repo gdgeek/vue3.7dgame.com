@@ -1,21 +1,9 @@
 <template>
   <div>
-    <el-dialog
-      v-model="dialogVisible"
-      width="95%"
-      height="100px"
-      :show-close="false"
-      @close="doClose"
-      append-to-body
-    >
+    <el-dialog v-model="dialogVisible" width="95%" height="100px" :show-close="false" @close="doClose" append-to-body>
       <template #header>
         <div class="dialog-footer">
-          <MrPPHeader
-            :sorted="sorted"
-            :searched="searched"
-            @search="search"
-            @sort="sort"
-          >
+          <MrPPHeader :sorted="sorted" :searched="searched" @search="search" @sort="sort">
             <el-tag>
               <b>{{
                 $t(
@@ -27,53 +15,33 @@
             </el-tag>
           </MrPPHeader>
           <el-divider content-position="left">
-            <el-tag
-              v-if="searched !== ''"
-              size="small"
-              closable
-              @close="clearSearched"
-            >
+            <el-tag v-if="searched !== ''" size="small" closable @close="clearSearched">
               {{ searched }}
             </el-tag>
           </el-divider>
         </div>
       </template>
       <el-card shadow="hover" :body-style="{ padding: '0px' }">
-        <Waterfall
-          v-if="active.items?.length"
-          :list="active.items"
-          :width="230"
-          :gutter="10"
-          :backgroundColor="'rgba(255, 255, 255, .05)'"
-        >
+        <Waterfall v-if="active.items?.length" :list="active.items" :width="230" :gutter="10"
+          :backgroundColor="'rgba(255, 255, 255, .05)'">
           <template #default="{ item }">
             <div style="width: 230px" v-loading="!item.enabled">
-              <el-card
-                style="width: 220px"
-                class="box-card"
-                :class="{ 'selected-card': isSelected(item) }"
-              >
+              <el-card style="width: 220px" class="box-card" :class="{ 'selected-card': isSelected(item) }">
                 <template #header>
                   <el-card shadow="hover" :body-style="{ padding: '0px' }">
                     <div class="mrpp-title">
                       <b class="card-title" nowrap>{{ getItemTitle(item) }}</b>
                     </div>
                     <div class="image-container">
-                      <Id2Image
-                        :image="item.image ? item.image.url : null"
-                        :id="item.id"
-                      ></Id2Image>
+                      <Id2Image :image="item.image ? item.image.url : null" :id="item.id"></Id2Image>
                       <slot name="bar" :item="item"></slot>
                     </div>
-                    <div
-                      v-if="item.created_at"
-                      style="
+                    <div v-if="item.created_at" style="
                         width: 100%;
                         text-align: center;
                         position: relative;
                         z-index: 2;
-                      "
-                    >
+                      ">
                       {{ convertToLocalTime(item.created_at) }}
                     </div>
                   </el-card>
@@ -81,11 +49,7 @@
 
                 <div class="clearfix">
                   <div class="demo-button-style">
-                    <el-checkbox-group
-                      v-if="mode !== 'replace'"
-                      v-model="selectedIds"
-                      size="small"
-                    >
+                    <el-checkbox-group v-if="mode !== 'replace'" v-model="selectedIds" size="small">
                       <el-checkbox-button :value="item.id" v-if="multiple">
                         {{ $t("meta.ResourceDialog.select") }}
                       </el-checkbox-button>
@@ -114,33 +78,17 @@
         <div class="dialog-footer">
           <el-row :gutter="0">
             <el-col :xs="16" :sm="16" :md="16" :lg="16" :xl="16">
-              <el-pagination
-                :current-page="active.pagination.current"
-                :page-count="active.pagination.count"
-                :page-size="active.pagination.size"
-                :total="active.pagination.total"
-                layout="prev, pager, next, jumper"
-                background
-                @current-change="handleCurrentChange"
-              ></el-pagination>
+              <el-pagination :current-page="active.pagination.current" :page-count="active.pagination.count"
+                :page-size="active.pagination.size" :total="active.pagination.total" layout="prev, pager, next, jumper"
+                background @current-change="handleCurrentChange"></el-pagination>
             </el-col>
             <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
               <el-button-group>
                 <template v-if="mode !== 'replace'">
-                  <el-button
-                    v-if="multiple"
-                    size="small"
-                    :disabled="selectedIds.length == 0"
-                    @click="doBatchSelect()"
-                    >{{ $t("meta.ResourceDialog.putAllIn") }}</el-button
-                  >
-                  <el-button
-                    v-if="multiple"
-                    size="small"
-                    :disabled="selectedIds.length == 0"
-                    @click="doEmpty()"
-                    >{{ $t("meta.ResourceDialog.empty") }}</el-button
-                  >
+                  <el-button v-if="multiple" size="small" :disabled="selectedIds.length == 0"
+                    @click="doBatchSelect()">{{ $t("meta.ResourceDialog.putAllIn") }}</el-button>
+                  <el-button v-if="multiple" size="small" :disabled="selectedIds.length == 0" @click="doEmpty()">{{
+                    $t("meta.ResourceDialog.empty") }}</el-button>
                 </template>
                 <el-button size="small" @click="dialogVisible = false">
                   {{ $t("meta.ResourceDialog.cancel") }}
@@ -212,7 +160,7 @@ const isSelected = (item: CardInfo): boolean => {
 };
 
 const getItemTitle = (item: CardInfo): string => {
-  return item.title ?? item.name ?? "title";
+  return (item as CardInfo & { title?: string }).title ?? item.name ?? "title";
 };
 
 const open = async (
@@ -228,7 +176,7 @@ const open = async (
     pagination: { current: 1, count: 1, size: 20, total: 20 },
   };
 
-  type.value = newType;
+  type.value = newType ?? "polygen";
   metaId.value = meta_id;
   value.value = newValue;
   mode.value = openMode; // 设置打开模式
@@ -279,7 +227,7 @@ async function getDatas(input: DataInput): Promise<DataOutput> {
           context: item,
           type: item.type,
           created_at: item.created_at,
-          name: item.name ? item.name : item.title, // 使用name或title
+          name: item.name ? item.name : (item as ResourceInfo & { title?: string }).title ?? "", // 使用name或title
           image: item.image ? { url: item.image.url } : null,
           enabled: true,
         } as CardInfo;

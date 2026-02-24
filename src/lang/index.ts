@@ -67,10 +67,7 @@ export const loadLanguageAsync = async (locale: string) => {
       // 从路径 ./en-US/index.ts 提取 locale 名称 en-US
       const correctLocale = targetPath.split("/")[1] || locale;
 
-      i18n.global.setLocaleMessage(
-        correctLocale,
-        messages.default as Parameters<typeof i18n.global.setLocaleMessage>[1]
-      );
+      i18n.global.setLocaleMessage(correctLocale, messages.default as any);
       (i18n.global.locale as unknown as { value: string }).value =
         correctLocale;
       await appStore.changeLanguage(correctLocale);

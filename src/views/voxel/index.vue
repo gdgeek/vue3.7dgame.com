@@ -1,19 +1,11 @@
 <template>
   <TransitionWrapper>
     <div class="voxel-index">
-      <PageActionBar
-        :title="t('voxel.listPageTitle')"
-        :search-placeholder="t('voxel.searchPlaceholder')"
-        @search="handleSearch"
-        @sort-change="handleSortChange"
-        @view-change="handleViewChange"
-      >
+      <PageActionBar :title="t('voxel.listPageTitle')" :search-placeholder="t('voxel.searchPlaceholder')"
+        @search="handleSearch" @sort-change="handleSortChange" @view-change="handleViewChange">
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
-            <font-awesome-icon
-              :icon="['fas', 'upload']"
-              style="font-size: 18px; margin-right: 4px"
-            ></font-awesome-icon>
+            <font-awesome-icon :icon="['fas', 'upload']" style="font-size: 18px; margin-right: 4px"></font-awesome-icon>
             {{ $t("voxel.uploadVoxel") }}
           </el-button>
         </template>
@@ -21,21 +13,12 @@
 
       <ViewContainer :items="items" :view-mode="viewMode" :loading="loading">
         <template #grid-card="{ item }">
-          <MrPPCard
-            :item="item"
-            :type="t('voxel.typeName')"
-            color="#9b59b6"
-            @named="namedWindow"
-            @deleted="deletedWindow"
-          >
+          <MrPPCard :item="item" :type="t('voxel.typeName')" color="#9b59b6" @named="namedWindow"
+            @deleted="deletedWindow">
             <template #enter>
               <router-link :to="`/resource/voxel/view?id=${item.id}`">
                 <el-button-group :inline="true">
-                  <el-button
-                    v-if="item.info === null || item.image === null"
-                    type="warning"
-                    size="small"
-                  >
+                  <el-button v-if="item.info === null || item.image === null" type="warning" size="small">
                     {{ $t("voxel.initializeVoxelData") }}
                   </el-button>
                   <el-button v-else type="primary" size="small">
@@ -50,11 +33,7 @@
         <template #list-item="{ item }">
           <div class="col-name">
             <div class="item-thumb">
-              <img
-                v-if="item.image?.url"
-                :src="item.image.url"
-                :alt="item.name"
-              />
+              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
               <div v-else class="thumb-placeholder">
                 <font-awesome-icon :icon="['fas', 'cubes']"></font-awesome-icon>
               </div>
@@ -67,21 +46,16 @@
           </div>
           <div class="col-actions">
             <el-dropdown trigger="click">
-              <font-awesome-icon
-                :icon="['fas', 'ellipsis']"
-                class="actions-icon"
-              ></font-awesome-icon>
+              <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon"></font-awesome-icon>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item
-                    ><router-link :to="`/resource/voxel/view?id=${item.id}`">{{
-                      $t("voxel.viewVoxel")
-                    }}</router-link></el-dropdown-item
-                  >
+                  <el-dropdown-item><router-link :to="`/resource/voxel/view?id=${item.id}`">{{
+                    $t("voxel.viewVoxel")
+                      }}</router-link></el-dropdown-item>
                   <el-dropdown-item @click="namedWindow(item)">{{
                     t("common.edit")
                   }}</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => {})">{{
+                  <el-dropdown-item @click="deletedWindow(item, () => { })">{{
                     t("common.delete")
                   }}</el-dropdown-item>
                 </el-dropdown-menu>
@@ -91,20 +65,11 @@
         </template>
       </ViewContainer>
 
-      <PagePagination
-        :current-page="pagination.current"
-        :total-pages="totalPages"
-        @page-change="handlePageChange"
-      >
+      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
       </PagePagination>
 
-      <mr-p-p-upload-dialog
-        v-model="uploadDialogVisible"
-        dir="voxel"
-        :file-type="fileType"
-        @save-resource="saveVoxel"
-        @success="handleUploadSuccess"
-      >
+      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="voxel" :file-type="fileType" @save-resource="saveVoxel"
+        @success="handleUploadSuccess">
         {{ $t("voxel.uploadFile") }}
       </mr-p-p-upload-dialog>
     </div>
@@ -187,7 +152,7 @@ const saveVoxel = async (
   }
 };
 
-const namedWindow = async (item: { id: string; name: string }) => {
+const namedWindow = async (item: { id: number; name?: string }) => {
   try {
     const { value } = (await ElMessageBox.prompt(
       t("voxel.prompt.message1"),
@@ -196,7 +161,7 @@ const namedWindow = async (item: { id: string; name: string }) => {
         confirmButtonText: t("voxel.prompt.confirm"),
         cancelButtonText: t("voxel.prompt.cancel"),
         closeOnClickModal: false,
-        inputValue: item.name,
+        inputValue: item.name || "",
       }
     )) as { value: string };
     await putVoxel(item.id, { name: value });
@@ -208,7 +173,7 @@ const namedWindow = async (item: { id: string; name: string }) => {
 };
 
 const deletedWindow = async (
-  item: { id: string },
+  item: { id: number },
   resetLoading: () => void
 ) => {
   try {

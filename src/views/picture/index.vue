@@ -1,62 +1,34 @@
 <template>
   <TransitionWrapper>
     <div class="picture-index">
-      <PageActionBar
-        :title="t('route.resourceManagement.pictureManagement.pictureList')"
-        :search-placeholder="t('ui.search')"
-        :selection-count="selectedCount"
-        @search="handleSearch"
-        @sort-change="handleSortChange"
-        @view-change="handleViewChange"
-        @batch-download="handleBatchDownload"
-        @batch-delete="handleBatchDelete"
-        @cancel-selection="handleCancelSelection"
-      >
+      <PageActionBar :title="t('route.resourceManagement.pictureManagement.pictureList')"
+        :search-placeholder="t('ui.search')" :selection-count="selectedCount" @search="handleSearch"
+        @sort-change="handleSortChange" @view-change="handleViewChange" @batch-download="handleBatchDownload"
+        @batch-delete="handleBatchDelete" @cancel-selection="handleCancelSelection">
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
-            <font-awesome-icon
-              :icon="['fas', 'upload']"
-              style="font-size: 18px; margin-right: 4px"
-            ></font-awesome-icon>
+            <font-awesome-icon :icon="['fas', 'upload']" style="font-size: 18px; margin-right: 4px"></font-awesome-icon>
             {{ $t("picture.uploadPicture") }}
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer
-        :items="items"
-        :view-mode="viewMode"
-        :loading="loading"
-        @row-click="(item) => openViewDialog(item.id)"
-      >
+      <ViewContainer :items="items" :view-mode="viewMode" :loading="loading"
+        @row-click="(item) => openViewDialog(item.id)">
         <template #grid-card="{ item }">
-          <StandardCard
-            :image="item.image?.url"
-            :title="item.name || t('ui.unnamed')"
-            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
-            :placeholder-icon="['fas', 'image']"
-            :selected="isSelected(item.id)"
-            :selection-mode="hasSelection"
-            :type-icon="['fas', 'image']"
-            @view="openViewDialog(item.id)"
-            @select="() => toggleSelection(item.id)"
-          ></StandardCard>
+          <StandardCard :image="item.image?.url" :title="item.name || t('ui.unnamed')"
+            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" :placeholder-icon="['fas', 'image']"
+            :selected="isSelected(item.id)" :selection-mode="hasSelection" :type-icon="['fas', 'image']"
+            @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)"></StandardCard>
         </template>
 
         <template #list-item="{ item }">
           <div class="col-checkbox" @click.stop>
-            <el-checkbox
-              :model-value="isSelected(item.id)"
-              @change="() => toggleSelection(item.id)"
-            ></el-checkbox>
+            <el-checkbox :model-value="isSelected(item.id)" @change="() => toggleSelection(item.id)"></el-checkbox>
           </div>
           <div class="col-name">
             <div class="item-thumb">
-              <img
-                v-if="item.image?.url"
-                :src="item.image.url"
-                :alt="item.name"
-              />
+              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
               <div v-else class="thumb-placeholder">
                 <font-awesome-icon :icon="['fas', 'image']"></font-awesome-icon>
               </div>
@@ -69,10 +41,7 @@
           </div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <font-awesome-icon
-                :icon="['fas', 'ellipsis']"
-                class="actions-icon"
-              ></font-awesome-icon>
+              <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon"></font-awesome-icon>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openViewDialog(item.id)">
@@ -80,10 +49,10 @@
                   </el-dropdown-item>
                   <el-dropdown-item @click="namedWindow(item)">{{
                     t("verse.listPage.rename")
-                  }}</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => {})">{{
+                    }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item, () => { })">{{
                     t("common.delete")
-                  }}</el-dropdown-item>
+                    }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -91,47 +60,22 @@
         </template>
       </ViewContainer>
 
-      <PagePagination
-        :current-page="pagination.current"
-        :total-pages="totalPages"
-        @page-change="handlePageChange"
-      >
+      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
       </PagePagination>
 
       <!-- Dialogs -->
       <!-- Dialogs -->
-      <StandardUploadDialog
-        v-model="uploadDialogVisible"
-        dir="picture"
-        :file-type="fileType"
-        :max-size="5"
-        :title="$t('picture.uploadPicture')"
-        @save-resource="savePicture"
-        @success="handleUploadSuccess"
-      >
+      <StandardUploadDialog v-model="uploadDialogVisible" dir="picture" :file-type="fileType" :max-size="5"
+        :title="$t('picture.uploadPicture')" @save-resource="savePicture" @success="handleUploadSuccess">
       </StandardUploadDialog>
 
       <!-- Detail Panel -->
-      <DetailPanel
-        v-model="viewDialogVisible"
-        :title="t('picture.viewPicture')"
-        :name="currentPicture?.name || ''"
-        :loading="detailLoading"
-        :properties="detailProperties"
-        :placeholder-icon="['fas', 'image']"
-        :download-text="t('ui.download')"
-        :delete-text="t('ui.deleteResource')"
-        @download="handleDownload"
-        @rename="handleRename"
-        @delete="handleDelete"
-        @close="handlePanelClose"
-      >
+      <DetailPanel v-model="viewDialogVisible" :title="t('picture.viewPicture')" :name="currentPicture?.name || ''"
+        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'image']"
+        :download-text="t('ui.download')" :delete-text="t('ui.deleteResource')" @download="handleDownload"
+        @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
         <template #preview>
-          <img
-            v-if="currentPicture?.file?.url"
-            :src="currentPicture.file.url"
-            :alt="currentPicture.name"
-          />
+          <img v-if="currentPicture?.file?.url" :src="currentPicture.file.url" :alt="currentPicture.name" />
         </template>
       </DetailPanel>
     </div>
@@ -223,11 +167,11 @@ const detailProperties = computed(() => {
     },
     ...(info?.size
       ? [
-          {
-            label: t("picture.view.info.item5"),
-            value: printVector2(info.size),
-          },
-        ]
+        {
+          label: t("picture.view.info.item5"),
+          value: printVector2(info.size),
+        },
+      ]
       : []),
   ];
 });
@@ -320,7 +264,7 @@ const savePicture = async (
   image_id?: number
 ) => {
   try {
-    const data: { name: string; file_id: number; info?: string } = {
+    const data: { name: string; file_id: number; info?: string; image_id?: number } = {
       name,
       file_id,
     };
@@ -336,7 +280,7 @@ const savePicture = async (
   }
 };
 
-const namedWindow = async (item: { id: string; name: string }) => {
+const namedWindow = async (item: { id: number; name?: string }) => {
   try {
     const { value } = (await MessageBox.prompt(
       t("picture.prompt.message1"),
@@ -344,7 +288,7 @@ const namedWindow = async (item: { id: string; name: string }) => {
       {
         confirmButtonText: t("picture.prompt.confirm"),
         cancelButtonText: t("picture.prompt.cancel"),
-        defaultValue: item.name,
+        defaultValue: item.name || "",
       }
     )) as { value: string };
     await putPicture(item.id, { name: value });
@@ -356,7 +300,7 @@ const namedWindow = async (item: { id: string; name: string }) => {
 };
 
 const deletedWindow = async (
-  item: { id: string },
+  item: { id: number },
   resetLoading: () => void
 ) => {
   try {

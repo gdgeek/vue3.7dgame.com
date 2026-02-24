@@ -40,10 +40,12 @@ export interface MetaInfo {
   info: string | null;
   data: JsonValue | null;
   created_at?: string;
+  updated_at?: string;
   image_id: number | null;
   uuid: string;
   events: Events | null;
   title: string;
+  name?: string;
   prefab: number;
   image: FileInfo;
   resources: ResourceInfo[];
@@ -81,7 +83,7 @@ export interface CreateMetaRequest {
 export interface UpdateMetaRequest {
   id?: number; // 可选，因为有时通过 URL 传递
   title?: string;
-  image_id?: number;
+  image_id?: number | null;
   prefab?: number;
   data?: JsonValue | null;
   events?: Events | null;

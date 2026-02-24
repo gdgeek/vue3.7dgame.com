@@ -4,7 +4,7 @@
     "useDefineForClassFields": true,
     "module": "esnext",
     "moduleResolution": "node",
-    "strict": true,
+    "strict": false,
     "noLib": false,
     "sourceMap": true,
     "resolveJsonModule": true,
@@ -32,6 +32,9 @@
     "jsx": "preserve",
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment"
+  },
+  "vueCompilerOptions": {
+    "strictTemplates": false
   },
   "include": [
     "src/**/*.ts",

@@ -3,25 +3,15 @@
     <div v-for="(item, index) in modelValue" :key="index" class="array-item">
       <div class="item-header">
         <span class="item-title">Item {{ index + 1 }}</span>
-        <el-button
-          type="danger"
-          link
-          size="small"
-          icon="Delete"
-          @click="removeItem(index)"
-        >
+        <el-button type="danger" link size="small" icon="Delete" @click="removeItem(index)">
           Remove
         </el-button>
       </div>
       <div class="item-content">
         <!-- Recursively render SchemaField for each item -->
         <!-- We use a computed property for the v-model to handle array updates -->
-        <SchemaField
-          v-model="modelValue[index]"
-          :schema="schema.items"
-          :prop-key="String(index)"
-          :parent-prop="`${parentProp || ''}[${index}]`"
-        ></SchemaField>
+        <SchemaField v-model="modelValue[index]" :schema="(schema as import('./types').JsonSchemaArray).items!"
+          :prop-key="String(index)" :parent-prop="`${parentProp || ''}[${index}]`"></SchemaField>
       </div>
     </div>
 
@@ -35,7 +25,7 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent, toRefs } from "vue";
-import type { JsonSchema, JsonValue } from "./types";
+import type { JsonSchema, JsonSchemaArray, JsonValue } from "./types";
 // Circular dependency: SchemaField needs ArrayField, ArrayField needs SchemaField.
 // Use Async Component or global registration. simpler to use recursive component pattern
 // However, since we are in script setup, we can't easily cycle import.
@@ -46,7 +36,7 @@ import type { JsonSchema, JsonValue } from "./types";
 const SchemaField = defineAsyncComponent(() => import("./SchemaField.vue"));
 
 const props = defineProps<{
-  schema: JsonSchema;
+  schema: JsonSchemaArray;
   modelValue: JsonValue[];
   propKey?: string;
   parentProp?: string;

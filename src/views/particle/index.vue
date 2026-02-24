@@ -1,19 +1,11 @@
 <template>
   <TransitionWrapper>
     <div class="particle-index">
-      <PageActionBar
-        :title="t('particle.listPageTitle')"
-        :search-placeholder="t('particle.searchPlaceholder')"
-        @search="handleSearch"
-        @sort-change="handleSortChange"
-        @view-change="handleViewChange"
-      >
+      <PageActionBar :title="t('particle.listPageTitle')" :search-placeholder="t('particle.searchPlaceholder')"
+        @search="handleSearch" @sort-change="handleSortChange" @view-change="handleViewChange">
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
-            <font-awesome-icon
-              :icon="['fas', 'upload']"
-              style="font-size: 18px; margin-right: 4px"
-            ></font-awesome-icon>
+            <font-awesome-icon :icon="['fas', 'upload']" style="font-size: 18px; margin-right: 4px"></font-awesome-icon>
             {{ $t("particle.uploadParticle") }}
           </el-button>
         </template>
@@ -21,20 +13,11 @@
 
       <ViewContainer :items="items" :view-mode="viewMode" :loading="loading">
         <template #grid-card="{ item }">
-          <mr-p-p-card
-            :item="item"
-            :type="t('particle.typeName')"
-            color="#e67e22"
-            @named="namedWindow"
-            @deleted="deletedWindow"
-          >
+          <mr-p-p-card :item="item" :type="t('particle.typeName')" color="#e67e22" @named="namedWindow"
+            @deleted="deletedWindow">
             <template #enter>
               <router-link :to="`/resource/particle/view?id=${item.id}`">
-                <el-button
-                  v-if="item.info === null || item.image === null"
-                  type="warning"
-                  size="small"
-                >
+                <el-button v-if="item.info === null || item.image === null" type="warning" size="small">
                   {{ $t("particle.initializeParticleData") }}
                 </el-button>
                 <el-button v-else type="primary" size="small">
@@ -48,15 +31,9 @@
         <template #list-item="{ item }">
           <div class="col-name">
             <div class="item-thumb">
-              <img
-                v-if="item.image?.url"
-                :src="item.image.url"
-                :alt="item.name"
-              />
+              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
               <div v-else class="thumb-placeholder">
-                <font-awesome-icon
-                  :icon="['fas', 'circle-dot']"
-                ></font-awesome-icon>
+                <font-awesome-icon :icon="['fas', 'circle-dot']"></font-awesome-icon>
               </div>
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
@@ -67,24 +44,17 @@
           </div>
           <div class="col-actions">
             <el-dropdown trigger="click">
-              <font-awesome-icon
-                :icon="['fas', 'ellipsis']"
-                class="actions-icon"
-              ></font-awesome-icon>
+              <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon"></font-awesome-icon>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item
-                    ><router-link
-                      :to="`/resource/particle/view?id=${item.id}`"
-                      >{{ $t("particle.viewParticle") }}</router-link
-                    ></el-dropdown-item
-                  >
+                  <el-dropdown-item><router-link :to="`/resource/particle/view?id=${item.id}`">{{
+                    $t("particle.viewParticle") }}</router-link></el-dropdown-item>
                   <el-dropdown-item @click="namedWindow(item)">{{
                     t("common.edit")
-                  }}</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => {})">{{
+                    }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item, () => { })">{{
                     t("common.delete")
-                  }}</el-dropdown-item>
+                    }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -92,21 +62,11 @@
         </template>
       </ViewContainer>
 
-      <PagePagination
-        :current-page="pagination.current"
-        :total-pages="totalPages"
-        @page-change="handlePageChange"
-      >
+      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
       </PagePagination>
 
-      <mr-p-p-upload-dialog
-        v-model="uploadDialogVisible"
-        dir="particle"
-        :file-type="fileType"
-        :show-effect-type-select="true"
-        @save-resource="saveParticle"
-        @success="handleUploadSuccess"
-      >
+      <mr-p-p-upload-dialog v-model="uploadDialogVisible" dir="particle" :file-type="fileType"
+        :show-effect-type-select="true" @save-resource="saveParticle" @success="handleUploadSuccess">
         {{ $t("particle.uploadFile") }}
       </mr-p-p-upload-dialog>
     </div>
@@ -177,6 +137,7 @@ const saveParticle = async (
       file_id: number;
       effect_type?: string;
       info?: string;
+      image_id?: number;
     } = { name, file_id };
     if (effectType) data.effect_type = effectType;
     if (info) data.info = info;
@@ -189,7 +150,7 @@ const saveParticle = async (
   }
 };
 
-const namedWindow = async (item: { id: string; name: string }) => {
+const namedWindow = async (item: { id: number; name?: string }) => {
   try {
     const { value } = (await MessageBox.prompt(
       t("particle.prompt.message1"),
@@ -197,7 +158,7 @@ const namedWindow = async (item: { id: string; name: string }) => {
       {
         confirmButtonText: t("particle.prompt.confirm"),
         cancelButtonText: t("particle.prompt.cancel"),
-        defaultValue: item.name,
+        defaultValue: item.name || "",
       }
     )) as { value: string };
     await putParticle(item.id, { name: value });
@@ -209,7 +170,7 @@ const namedWindow = async (item: { id: string; name: string }) => {
 };
 
 const deletedWindow = async (
-  item: { id: string },
+  item: { id: number },
   resetLoading: () => void
 ) => {
   try {

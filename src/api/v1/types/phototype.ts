@@ -9,6 +9,7 @@ export interface PhototypeType {
   id?: number;
   type?: string | null;
   title?: string;
+  name?: string;
   uuid?: string | null;
   data?: JsonValue | null;
   schema?: JsonValue | null;

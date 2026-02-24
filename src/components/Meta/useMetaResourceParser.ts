@@ -153,7 +153,12 @@ export function buildMetaResourceIndex(meta: metaInfo): MetaResourceIndex {
     text: [],
     sound: [],
     entity: [],
-    events: meta.events! || { inputs: [], outputs: [] },
+    events: meta.events
+      ? {
+          inputs: meta.events.inputs.map((e) => e.name),
+          outputs: meta.events.outputs.map((e) => e.name),
+        }
+      : { inputs: [], outputs: [] },
   };
   if (data) walk(data, index);
   return index;

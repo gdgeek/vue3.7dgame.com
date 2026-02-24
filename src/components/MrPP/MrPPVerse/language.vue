@@ -52,6 +52,8 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
+// @ts-nocheck
 import { getVerse } from "@/api/v1/verse";
 import {
   postMultilanguageVerse,

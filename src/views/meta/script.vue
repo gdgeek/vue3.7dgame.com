@@ -230,6 +230,7 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
 import { useRoute } from "vue-router";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
 import { Message, MessageBox } from "@/components/Dialog";

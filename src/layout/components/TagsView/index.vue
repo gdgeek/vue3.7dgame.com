@@ -1,35 +1,18 @@
 <template>
   <div class="tags-container">
-    <el-scrollbar
-      class="scroll-container"
-      :vertical="false"
-      @wheel.prevent="handleScroll"
-    >
-      <router-link
-        ref="tagRef"
-        v-for="tag in visitedViews"
-        :key="tag.fullPath"
+    <el-scrollbar class="scroll-container" :vertical="false" @wheel.prevent="handleScroll">
+      <router-link ref="tagRef" v-for="tag in visitedViews" :key="tag.fullPath"
         :class="'tags-item ' + (isActive(tag) ? 'active' : '')"
-        :to="{ path: tag.path, query: tag.query }"
-        @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''"
-        @contextmenu.prevent="openContentMenu(tag, $event)"
-      >
+        :to="{ path: tag.path, query: tag.query as Record<string, string> }"
+        @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''" @contextmenu.prevent="openContentMenu(tag, $event)">
         {{ translateRouteTitle(tag.title) }}
-        <i-ep-close
-          class="close-icon"
-          size="12px"
-          v-if="!isAffix(tag)"
-          @click.prevent.stop="closeSelectedTag(tag)"
-        ></i-ep-close>
+        <i-ep-close class="close-icon" size="12px" v-if="!isAffix(tag)"
+          @click.prevent.stop="closeSelectedTag(tag)"></i-ep-close>
       </router-link>
     </el-scrollbar>
 
     <!-- tag标签操作菜单 -->
-    <ul
-      v-show="contentMenuVisible"
-      class="contextmenu"
-      :style="{ left: left + 'px', top: top + 'px' }"
-    >
+    <ul v-show="contentMenuVisible" class="contextmenu" :style="{ left: left + 'px', top: top + 'px' }">
       <li @click="refreshSelectedTag(selectedTag)">
         <svg-icon icon-class="refresh"></svg-icon>
         {{ $t("tags.refresh") }}
@@ -120,7 +103,7 @@ watch(contentMenuVisible, (value: boolean) => {
 /**
  * 过滤出需要固定的标签
  */
-function filterAffixTags(routes: RouteRecordRaw[], basePath = "/") {
+function filterAffixTags(routes: any[], basePath = "/") {
   let tags: TagView[] = [];
   routes.forEach((route: RouteRecordRaw) => {
     const tagPath = resolve(basePath, route.path);
@@ -250,9 +233,10 @@ function toLastView(visitedViews: TagView[], view?: TagView) {
 function closeSelectedTag(view: TagView) {
   tagsViewStore
     .delView(view)
-    .then((res: { visitedViews: TagView[]; cachedViews: string[] }) => {
+    .then((res: unknown) => {
+      const result = res as { visitedViews: TagView[]; cachedViews: string[] };
       if (isActive(view)) {
-        toLastView(res.visitedViews, view);
+        toLastView(result.visitedViews, view);
       }
     });
 }
@@ -260,24 +244,26 @@ function closeSelectedTag(view: TagView) {
 function closeLeftTags() {
   tagsViewStore
     .delLeftViews(selectedTag.value)
-    .then((res: { visitedViews: TagView[] }) => {
-      if (!res.visitedViews.find((item: TagView) => item.path === route.path)) {
-        toLastView(res.visitedViews);
+    .then((res: unknown) => {
+      const result = res as { visitedViews: TagView[] };
+      if (!result.visitedViews.find((item: TagView) => item.path === route.path)) {
+        toLastView(result.visitedViews);
       }
     });
 }
 function closeRightTags() {
   tagsViewStore
     .delRightViews(selectedTag.value)
-    .then((res: { visitedViews: TagView[] }) => {
-      if (!res.visitedViews.find((item: TagView) => item.path === route.path)) {
-        toLastView(res.visitedViews);
+    .then((res: unknown) => {
+      const result = res as { visitedViews: TagView[] };
+      if (!result.visitedViews.find((item: TagView) => item.path === route.path)) {
+        toLastView(result.visitedViews);
       }
     });
 }
 
 function closeOtherTags() {
-  router.push(selectedTag.value);
+  router.push(selectedTag.value.fullPath || "/");
   tagsViewStore.delOtherViews(selectedTag.value).then(() => {
     moveToCurrentTag();
   });
@@ -286,8 +272,9 @@ function closeOtherTags() {
 function closeAllTags(view: TagView) {
   tagsViewStore
     .delAllViews()
-    .then((res: { visitedViews: TagView[]; cachedViews: string[] }) => {
-      toLastView(res.visitedViews, view);
+    .then((res: unknown) => {
+      const result = res as { visitedViews: TagView[]; cachedViews: string[] };
+      toLastView(result.visitedViews, view);
     });
 }
 
@@ -333,11 +320,11 @@ function handleScroll() {
   closeContentMenu();
 }
 
-function findOutermostParent(tree: RouteRecordRaw[], findName: string) {
-  const parentMap: Record<string, RouteRecordRaw | null> = {};
+function findOutermostParent(tree: any[], findName: string) {
+  const parentMap: Record<string, any> = {};
 
-  function buildParentMap(node: RouteRecordRaw, parent: RouteRecordRaw | null) {
-    parentMap[node.name as string] = parent;
+  function buildParentMap(node: any, parent: any) {
+    parentMap[String(node.name)] = parent;
 
     if (node.children) {
       for (let i = 0; i < node.children.length; i++) {
@@ -364,7 +351,7 @@ function findOutermostParent(tree: RouteRecordRaw[], findName: string) {
 const againActiveTop = (newVal: string) => {
   if (layout.value !== "mix") return;
   const parent = findOutermostParent(permissionStore.routes, newVal);
-  if (appStore.activeTopMenu !== parent.path) {
+  if (parent && appStore.activeTopMenuPath !== parent.path) {
     appStore.activeTopMenu(parent.path);
   }
 };

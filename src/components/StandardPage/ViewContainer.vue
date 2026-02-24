@@ -40,7 +40,7 @@
                 </div>
                 <span class="item-name">{{
                   item.name || item.title || "—"
-                  }}</span>
+                }}</span>
               </div>
               <div class="col-size">{{ formatSize(item.file?.size) }}</div>
               <div class="col-date">
@@ -69,62 +69,63 @@
   </div>
 </template>
 
-<script setup lang="ts" generic="T = unknown">
-import { computed } from "vue";
-import { Waterfall } from "vue-waterfall-plugin-next";
-import "vue-waterfall-plugin-next/dist/style.css";
-import type { ViewMode } from "./types";
+<script setup lang="ts"
+  generic="T extends { id?: number | string; name?: string; title?: string; image?: { url?: string } | null; file?: { size?: number; url?: string } | null; updated_at?: string; created_at?: string } = Record<string, unknown>">
+  import { computed } from "vue";
+  import { Waterfall } from "vue-waterfall-plugin-next";
+  import "vue-waterfall-plugin-next/dist/style.css";
+  import type { ViewMode } from "./types";
 
-interface Props {
-  items: T[] | null;
-  viewMode?: ViewMode;
-  loading?: boolean;
-  showEmpty?: boolean;
-  emptyText?: string;
-  cardWidth?: number;
-  cardGutter?: number;
-  breakpoints?: Record<number, { rowPerView: number }>;
-}
+  interface Props {
+    items: T[] | null;
+    viewMode?: ViewMode;
+    loading?: boolean;
+    showEmpty?: boolean;
+    emptyText?: string;
+    cardWidth?: number;
+    cardGutter?: number;
+    breakpoints?: Record<number, { rowPerView: number }>;
+  }
 
-const props = withDefaults(defineProps<Props>(), {
-  viewMode: "grid",
-  loading: false,
-  showEmpty: true,
-  emptyText: "",
-  cardWidth: 320,
-  cardGutter: 20,
-});
+  const props = withDefaults(defineProps<Props>(), {
+    viewMode: "grid",
+    loading: false,
+    showEmpty: true,
+    emptyText: "",
+    cardWidth: 320,
+    cardGutter: 20,
+  });
 
-const emit = defineEmits<{
-  (e: "row-click", item: T): void;
-}>();
+  const emit = defineEmits<{
+    (e: "row-click", item: T): void;
+  }>();
 
-const defaultBreakpoints = {
-  1800: { rowPerView: 6 },
-  1400: { rowPerView: 5 },
-  1100: { rowPerView: 4 },
-  800: { rowPerView: 3 },
-  500: { rowPerView: 2 },
-  300: { rowPerView: 1 },
-};
+  const defaultBreakpoints = {
+    1800: { rowPerView: 6 },
+    1400: { rowPerView: 5 },
+    1100: { rowPerView: 4 },
+    800: { rowPerView: 3 },
+    500: { rowPerView: 2 },
+    300: { rowPerView: 1 },
+  };
 
-const breakpoints = computed(() => props.breakpoints || defaultBreakpoints);
+  const breakpoints = computed(() => props.breakpoints || defaultBreakpoints);
 
-const formatSize = (bytes?: number) => {
-  if (!bytes) return "—";
-  if (bytes < 1024) return bytes + " B";
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
-  return (bytes / (1024 * 1024)).toFixed(2) + " MB";
-};
+  const formatSize = (bytes?: number) => {
+    if (!bytes) return "—";
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+  };
 
-const formatDate = (dateStr?: string) => {
-  if (!dateStr) return "—";
-  const d = new Date(dateStr);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}/${m}/${day}`;
-};
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "—";
+    const d = new Date(dateStr);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}/${m}/${day}`;
+  };
 </script>
 
 <style scoped lang="scss">

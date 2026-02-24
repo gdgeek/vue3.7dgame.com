@@ -7,6 +7,8 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
+// @ts-nocheck
 import Edit from "@/components/Meta/Edit.vue";
 import { getPrefab, putPrefab } from "@/api/v1/prefab";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";

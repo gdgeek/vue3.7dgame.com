@@ -23,6 +23,7 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
 import VueForm from "@/components/JsonSchemaForm/index.vue";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";

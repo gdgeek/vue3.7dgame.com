@@ -5,15 +5,8 @@
     <!--<PrefabDialog @selected="selected" ref="prefabDialogRef"></PrefabDialog>-->
     <el-container>
       <el-main>
-        <iframe
-          id="editor"
-          ref="editor"
-          :src="src"
-          class="content"
-          height="100%"
-          width="100%"
-          allow="xr-spatial-tracking; fullscreen; autoplay; clipboard-read; clipboard-write;"
-        ></iframe>
+        <iframe id="editor" ref="editor" :src="src" class="content" height="100%" width="100%"
+          allow="xr-spatial-tracking; fullscreen; autoplay; clipboard-read; clipboard-write;"></iframe>
       </el-main>
     </el-container>
   </div>
@@ -27,6 +20,7 @@ import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 import MetaDialog from "@/components/MrPP/MetaDialog.vue";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
 import { putVerse, getVerse, VerseData } from "@/api/v1/verse";
+import type { JsonValue } from "@/api/v1/types/common";
 import { getPrefab } from "@/api/v1/prefab";
 import { useAppStore } from "@/store/modules/app";
 import { useUserStore } from "@/store/modules/user";
@@ -178,7 +172,7 @@ const postMessage = (action: string, data: unknown) => {
 
 // 设置预制件属性
 const setupPrefab = async ({ meta_id, data, uuid }: PrefabSetupPayload) => {
-  const response = await getPrefab(meta_id);
+  const response = await getPrefab(Number(meta_id));
   knightDataRef.value?.open({
     schema: JSON.parse(response.data.data!),
     data: JSON.parse(data),
@@ -245,7 +239,7 @@ const saveVerse = async (data: unknown) => {
   if (verse?.children?.modules) {
     retitleVerses(verse.children.modules);
   }
-  await putVerse(id.value, { data: verse });
+  await putVerse(id.value, { data: verse as unknown as JsonValue });
 
   ElMessageBox.confirm(
     t("verse.view.sceneEditor.saveAndPublishConfirm"),
@@ -312,10 +306,12 @@ const handleMessage = async (e: MessageEvent) => {
 
   switch (action) {
     case "edit-meta":
-      router.push({
-        path: "/meta/scene",
-        query: { id: data.meta_id },
-      });
+      if (isRecord(data)) {
+        router.push({
+          path: "/meta/scene",
+          query: { id: data.meta_id as string },
+        });
+      }
       break;
 
     case "setup-prefab":
@@ -347,7 +343,7 @@ const handleMessage = async (e: MessageEvent) => {
       break;
 
     case "goto":
-      if (data.target === "blockly.js") {
+      if (isRecord(data) && data.target === "blockly.js") {
         const scriptRoute = router
           .getRoutes()
           .find((route) => route.path === "/verse/script");
@@ -438,7 +434,7 @@ const handleUploadCover = async (data: unknown) => {
         md5,
         extension,
         file,
-        (_progress: unknown) => {},
+        (_progress: unknown) => { },
         handler,
         "backup"
       );
@@ -459,7 +455,12 @@ const handleUploadCover = async (data: unknown) => {
       const verse = await getVerse(id.value);
       if (verse && verse.data) {
         verse.data.image_id = response.data.id;
-        await putVerse(id.value, verse.data);
+        await putVerse(id.value, {
+          image_id: response.data.id,
+          name: verse.data.name,
+          uuid: verse.data.uuid,
+          description: verse.data.description ?? undefined,
+        });
         ElMessage.success(t("verse.view.sceneEditor.coverUploadSuccess"));
         await refresh();
       }

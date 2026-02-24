@@ -11,19 +11,9 @@
             </template>
             <div class="box-item">
               <div v-if="polygenData">
-                <polygen-view
-                  ref="three"
-                  :file="polygenData.file"
-                  @loaded="loaded"
-                  @progress="progress"
-                ></polygen-view>
-                <el-progress
-                  style="width: 100%"
-                  :stroke-width="18"
-                  v-if="percentage !== 100"
-                  :text-inside="true"
-                  :percentage="percentage"
-                >
+                <polygen-view ref="three" :file="polygenData.file" @loaded="loaded" @progress="progress"></polygen-view>
+                <el-progress style="width: 100%" :stroke-width="18" v-if="percentage !== 100" :text-inside="true"
+                  :percentage="percentage">
                 </el-progress>
               </div>
               <el-card v-else>
@@ -37,20 +27,11 @@
         </el-col>
 
         <el-col :sm="8">
-          <MrppInfo
-            v-if="polygenData"
-            :title="$t('polygen.view.info.title')"
-            titleSuffix=" :"
-            :tableData="tableData"
-            :itemLabel="$t('polygen.view.info.label1')"
-            :textLabel="$t('polygen.view.info.label2')"
-            :downloadText="$t('polygen.view.info.download')"
-            :renameText="$t('polygen.view.info.name')"
-            :deleteText="$t('polygen.view.info.delete')"
-            @download="downloadModel"
-            @rename="namedWindow"
-            @delete="deleteWindow"
-          >
+          <MrppInfo v-if="polygenData" :title="$t('polygen.view.info.title')" titleSuffix=" :" :tableData="tableData"
+            :itemLabel="$t('polygen.view.info.label1')" :textLabel="$t('polygen.view.info.label2')"
+            :downloadText="$t('polygen.view.info.download')" :renameText="$t('polygen.view.info.name')"
+            :deleteText="$t('polygen.view.info.delete')" @download="downloadModel" @rename="namedWindow"
+            @delete="deleteWindow">
           </MrppInfo>
           <br />
         </el-col>
@@ -73,6 +54,7 @@ import { postFile } from "@/api/v1/files";
 import { UploadFileType } from "@/api/user/model";
 import { printVector3 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
+import type { FileHandler } from "@/assets/js/file/server";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import MrppInfo from "@/components/MrPP/MrppInfo/index.vue";
@@ -93,7 +75,7 @@ const prepare = computed(
   () => polygenData.value !== null && polygenData.value.info !== null
 );
 const dataInfo = computed(() =>
-  prepare.value ? JSON.parse(polygenData.value.info) : null
+  prepare.value && polygenData.value?.info ? JSON.parse(polygenData.value.info) : null
 );
 
 const tableData = computed(() => {
@@ -103,8 +85,9 @@ const tableData = computed(() => {
       {
         item: t("polygen.view.info.item2"),
         text:
-          polygenData.value.author.nickname ||
-          polygenData.value.author.username,
+          polygenData.value.author?.nickname ||
+          polygenData.value.author?.username ||
+          "",
       },
       {
         item: t("polygen.view.info.item3"),
@@ -116,15 +99,15 @@ const tableData = computed(() => {
       },
       {
         item: t("polygen.view.info.item5"),
-        text: printVector3(dataInfo.value.size) + " m",
+        text: dataInfo.value?.size ? printVector3(dataInfo.value.size) + " m" : "—",
       },
       {
         item: t("polygen.view.info.item6"),
-        text: printVector3(dataInfo.value.center),
+        text: dataInfo.value?.center ? printVector3(dataInfo.value.center) : "—",
       },
     ];
 
-    if (dataInfo.value.faces) {
+    if (dataInfo.value?.faces) {
       data.push({
         item: "模型面数",
         text: dataInfo.value.faces.toLocaleString(),
@@ -142,6 +125,7 @@ const progress = (progress: number) => {
 };
 
 const createVerse = async () => {
+  if (!polygenData.value) return;
   try {
     const { value } = (await ElMessageBox.prompt(
       t("polygen.view.prompt.message1"),
@@ -159,7 +143,12 @@ const createVerse = async () => {
     const result = await createVerseFromResource(
       "Polygen",
       value,
-      polygenData.value
+      {
+        id: polygenData.value.id,
+        name: polygenData.value.name ?? value,
+        image_id: polygenData.value.image_id ?? 0,
+        info: polygenData.value.info ?? '',
+      }
     );
     console.error(result);
     ElMessage.success(t("polygen.view.prompt.success") + value);
@@ -194,6 +183,7 @@ const deleteWindow = async () => {
       }
     );
 
+    if (!polygenData.value) return;
     await deletePolygen(polygenData.value.id);
 
     ElMessage.success(t("polygen.view.confirm.success"));
@@ -205,6 +195,7 @@ const deleteWindow = async () => {
 
 const namedWindow = async () => {
   try {
+    if (!polygenData.value) return;
     const { value } = (await ElMessageBox.prompt(
       t("polygen.view.namePrompt.message1"),
       t("polygen.view.namePrompt.message2"),
@@ -227,13 +218,21 @@ const namedWindow = async () => {
 };
 
 const downloadModel = async () => {
-  await downloadResource(polygenData.value, ".glb", t, "polygen.view.download");
+  if (polygenData.value) {
+    await downloadResource(
+      { name: polygenData.value.name ?? '', file: { url: polygenData.value.file?.url ?? '' } },
+      ".glb",
+      t,
+      "polygen.view.download"
+    );
+  }
 };
 
 const updatePolygen = async (
   imageId: number,
   info: Record<string, unknown>
 ) => {
+  if (!polygenData.value) return;
   try {
     const response = await putPolygen(polygenData.value.id, {
       image_id: imageId,
@@ -254,7 +253,7 @@ const saveFile = async (
   extension: string,
   info: Record<string, unknown>,
   file: File,
-  handler: string
+  handler: FileHandler
 ) => {
   extension = extension.startsWith(".") ? extension : `.${extension}`;
   const data = {
@@ -269,7 +268,6 @@ const saveFile = async (
 };
 
 const loaded = async (info: Record<string, unknown>) => {
-  // 保存动画信息到info对象
   console.log("模型信息:", info);
 
   if (prepare.value) {
@@ -277,13 +275,15 @@ const loaded = async (info: Record<string, unknown>) => {
     return;
   }
 
+  if (!polygenData.value) return;
+
   try {
     const blob: Blob | undefined = await three.value?.screenshot();
 
     if (blob) {
-      const file: File = new File([blob], polygenData.value.name, {
+      const file: File = new File([blob], polygenData.value.name ?? 'model', {
         type: "image/jpeg",
-        lastModified: new Date().getTime(), // 设定最后修改时间
+        lastModified: new Date().getTime(),
       });
       const extension = ".jpg";
       const md5 = await store.fileMD5(file);
@@ -300,7 +300,7 @@ const loaded = async (info: Record<string, unknown>) => {
           md5,
           extension,
           file,
-          () => {},
+          () => { },
           handler,
           "screenshot/polygen"
         );

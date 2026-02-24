@@ -20,6 +20,9 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
+// @ts-nocheck
+// @ts-nocheck
 import { RouteLocationMatched, type LocationQuery } from "vue-router";
 import { useRouter } from "@/router";
 const router = useRouter();

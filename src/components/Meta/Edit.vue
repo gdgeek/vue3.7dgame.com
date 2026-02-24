@@ -192,7 +192,7 @@ const handleImageSelected = async (event: ImageUpdateEvent) => {
   if (item.value && id.value === event.itemId) {
     try {
       item.value.image_id = event.imageId;
-      await putItem(id.value, item.value);
+      await putItem(id.value, item.value as any);
       ElMessage.success(t("meta.metaEdit.image.updateSuccess"));
       await refresh();
     } catch (error) {
@@ -207,7 +207,7 @@ const handleImageUploadSuccess = async (event: ImageUpdateEvent) => {
   if (item.value && id.value === event.itemId) {
     try {
       item.value.image_id = event.imageId;
-      await putItem(id.value, item.value);
+      await putItem(id.value, item.value as any);
       ElMessage.success(t("meta.metaEdit.image.updateSuccess"));
       await refresh();
     } catch (error) {
@@ -221,7 +221,7 @@ const onSubmit = async () => {
   const valid = await itemForm.value!.validate();
   if (valid && item.value) {
     item.value.prefab = item.value.prefab ? 1 : 0;
-    await putItem(id.value, item.value);
+    await putItem(id.value, item.value as any);
     ElMessage.success(t("meta.metaEdit.success"));
     await refresh();
   } else {

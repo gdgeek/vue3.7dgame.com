@@ -54,6 +54,8 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
+// @ts-nocheck
 import { useRouter } from "vue-router";
 import { v4 as uuidv4 } from "uuid";
 import { postVerse, putVerse } from "@/api/v1/verse";

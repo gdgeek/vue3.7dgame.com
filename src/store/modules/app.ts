@@ -13,7 +13,7 @@ export const useAppStore = defineStore("app", () => {
   const size = useStorage("size", defaultSettings.size);
   const language = useStorage("language", defaultSettings.language);
   const sidebarStatus = useStorage("sidebarStatus", SidebarStatusEnum.CLOSED);
-  const locale = ref<typeof zhCn>(zhCn); // 默认使用中文
+  const locale = ref<typeof zhCn | Record<string, unknown>>(zhCn); // 默认使用中文
 
   const sidebar = reactive({
     opened: sidebarStatus.value === SidebarStatusEnum.OPENED,
@@ -55,18 +55,20 @@ export const useAppStore = defineStore("app", () => {
     language.value = val;
     switch (val) {
       case "en-US":
-        locale.value = (await import("element-plus/es/locale/lang/en")).default;
+        locale.value = (await import("element-plus/es/locale/lang/en"))
+          .default as unknown as typeof zhCn;
         break;
       case "ja-JP":
-        locale.value = (await import("element-plus/es/locale/lang/ja")).default;
+        locale.value = (await import("element-plus/es/locale/lang/ja"))
+          .default as unknown as typeof zhCn;
         break;
       case "th-TH":
-        locale.value = (await import("element-plus/es/locale/lang/th")).default;
+        locale.value = (await import("element-plus/es/locale/lang/th"))
+          .default as unknown as typeof zhCn;
         break;
       case "zh-TW":
-        locale.value = (
-          await import("element-plus/es/locale/lang/zh-tw")
-        ).default;
+        locale.value = (await import("element-plus/es/locale/lang/zh-tw"))
+          .default as unknown as typeof zhCn;
         break;
       case "zh-CN":
       default:

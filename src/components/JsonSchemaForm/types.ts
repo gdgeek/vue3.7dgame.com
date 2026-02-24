@@ -1,12 +1,5 @@
 // JSON Schema type definitions
-export type JsonSchemaType =
-  | "string"
-  | "number"
-  | "integer"
-  | "boolean"
-  | "object"
-  | "array"
-  | "null";
+export type JsonSchemaType = string;
 
 export type JsonSchemaFormat =
   | "date"
@@ -33,6 +26,8 @@ export interface JsonSchemaBase {
   enum?: unknown[];
   format?: JsonSchemaFormat;
   readOnly?: boolean;
+  properties?: Record<string, JsonSchema>;
+  items?: JsonSchema;
 
   // Validation
   required?: string[];

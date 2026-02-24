@@ -85,6 +85,7 @@ export interface VerseData {
   verseRelease: VerseRelease | null;
   verseShare?: VerseShare;
   image: ImageDetails;
+  image_id?: number;
   author?: Author;
   languages?: VerseLanguage[];
   metas?: MetaInfo[];
