@@ -34,7 +34,6 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-// @ts-nocheck
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
 import { getResources } from "@/api/v1/resources";
 import { getPhototypes } from "@/api/v1/phototype";

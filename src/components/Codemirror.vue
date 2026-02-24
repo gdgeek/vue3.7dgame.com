@@ -14,7 +14,6 @@
 </template>
 <script setup lang="ts">
 // @ts-nocheck
-// @ts-nocheck
 import { shallowRef } from "vue";
 import { Codemirror } from "vue-codemirror";
 import { json } from "@codemirror/lang-json";

@@ -230,7 +230,6 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-// @ts-nocheck
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -301,8 +300,7 @@ interface ArticleDetail {
   title: RenderedField;
   content: RenderedField;
   date: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _embedded?: any;
+  _embedded?: Record<string, unknown>;
 }
 
 // 新闻数据

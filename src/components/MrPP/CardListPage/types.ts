@@ -1,23 +1,6 @@
-export interface FetchParams {
-  sort: string;
-  search: string;
-  page: number;
-  [key: string]: unknown; // Allow additional params
-}
+import type { FetchParams, FetchResponse, Pagination } from "@/types/api";
 
-type PaginationHeaderValue = string | number | undefined;
-
-export interface FetchResponse<T = unknown> {
-  data: T[];
-  headers: Record<string, PaginationHeaderValue>;
-}
-
-export interface Pagination {
-  current: number;
-  count: number;
-  size: number;
-  total: number;
-}
+export type { FetchParams, FetchResponse, Pagination };
 
 export interface CardListPageProps<T = unknown> {
   // Data fetching function

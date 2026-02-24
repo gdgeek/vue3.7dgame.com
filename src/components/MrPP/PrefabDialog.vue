@@ -109,7 +109,6 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-// @ts-nocheck
 import { Waterfall } from "vue-waterfall-plugin-next";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
 import { getPrefabs, prefabsData } from "@/api/v1/prefab";

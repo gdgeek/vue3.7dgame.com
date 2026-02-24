@@ -1,21 +1,10 @@
 import { ref, reactive, computed, onMounted } from "vue";
 import type { ViewMode } from "@/components/StandardPage/types";
+import type { FetchParams, FetchResponse } from "@/types/api";
+
+export type { FetchParams, FetchResponse };
 
 type FetchExtraParams = Record<string, unknown>;
-export type PaginationHeaderValue = string | number | undefined;
-
-export interface FetchParams {
-  sort: string;
-  search: string;
-  page: number;
-  tags?: number[];
-  [key: string]: unknown;
-}
-
-export interface FetchResponse<T = unknown> {
-  data: T[];
-  headers: { [key: string]: unknown };
-}
 
 export interface UsePageDataOptions<T = unknown> {
   fetchFn: (

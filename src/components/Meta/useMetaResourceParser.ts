@@ -1,10 +1,33 @@
 import type { metaInfo } from "@/api/v1/meta";
 
+/** 场景节点参数（来自后端 JSON，字段可变） */
+interface MetaNodeParameters {
+  uuid: string;
+  action?: string;
+  parameter?: unknown;
+  name?: string;
+  animations?: unknown;
+  data?: unknown;
+  [key: string]: unknown;
+}
+
+/** 场景节点子节点集合 */
+interface MetaNodeChildren {
+  components?: MetaNode[];
+  [key: string]: MetaNode[] | MetaNode | undefined;
+}
+
+/** 场景树节点 */
+interface MetaNode {
+  type?: string;
+  parameters: MetaNodeParameters;
+  children?: MetaNodeChildren;
+}
+
 export interface ActionInfo {
   uuid: string;
   name: string | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parameter: any | null;
+  parameter: unknown;
   type: string | null;
   parentUuid?: string | null;
 }
@@ -12,8 +35,7 @@ export interface ActionInfo {
 export interface EntityInfo {
   uuid: string;
   name: string | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  animations?: any | null;
+  animations?: unknown;
   moved?: boolean;
   rotate?: boolean;
   hasTooltips?: boolean;
@@ -21,8 +43,7 @@ export interface EntityInfo {
 
 export interface MetaResourceIndex {
   action: ActionInfo[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  trigger: any[];
+  trigger: unknown[];
   polygen: EntityInfo[];
   picture: EntityInfo[];
   video: EntityInfo[];
@@ -48,8 +69,7 @@ function normalizeEventNames(events: unknown): string[] {
     .filter((name): name is string => Boolean(name));
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parseAction(node: any, parentUuid?: string): ActionInfo | null {
+function parseAction(node: MetaNode | undefined, parentUuid?: string): ActionInfo | null {
   if (
     !node ||
     !node.parameters ||
@@ -65,8 +85,7 @@ function parseAction(node: any, parentUuid?: string): ActionInfo | null {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parsePoint(node: any, typeList: string[]): EntityInfo | undefined {
+function parsePoint(node: MetaNode | undefined, typeList: string[]): EntityInfo | undefined {
   if (!node) return undefined;
   const match = typeList.find(
     (t) => node.type?.toLowerCase() === t.toLowerCase()
@@ -83,12 +102,9 @@ function parsePoint(node: any, typeList: string[]): EntityInfo | undefined {
   let hasTooltips = false;
   if ((isPolygen || isPicture) && node.children?.components) {
     const comps = node.children.components;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    hasMoved = comps.some((c: any) => c.type === "Moved");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    hasRotate = comps.some((c: any) => c.type === "Rotate");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    hasTooltips = comps.some((c: any) => c.type === "Tooltip");
+    hasMoved = comps.some((c) => c.type === "Moved");
+    hasRotate = comps.some((c) => c.type === "Rotate");
+    hasTooltips = comps.some((c) => c.type === "Tooltip");
   }
 
   return {
@@ -102,8 +118,7 @@ function parsePoint(node: any, typeList: string[]): EntityInfo | undefined {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function walk(node: any, acc: MetaResourceIndex) {
+function walk(node: MetaNode | undefined, acc: MetaResourceIndex) {
   if (!node) return;
   const action = parseAction(node);
   if (action) acc.action.push(action);
@@ -139,8 +154,7 @@ function walk(node: any, acc: MetaResourceIndex) {
   if (node.children) {
     const parentUuid = node.parameters?.uuid;
     if (node.children.components) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      node.children.components.forEach((comp: any) => {
+      node.children.components.forEach((comp) => {
         const compAction = parseAction(comp, parentUuid);
         if (compAction) acc.action.push(compAction);
       });
@@ -154,8 +168,7 @@ function walk(node: any, acc: MetaResourceIndex) {
 }
 
 export function buildMetaResourceIndex(meta: metaInfo): MetaResourceIndex {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data: any = meta.data!;
+  const data = meta.data as unknown as MetaNode | undefined;
   const index: MetaResourceIndex = {
     action: [],
     trigger: [],

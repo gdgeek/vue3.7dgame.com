@@ -63,7 +63,6 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-// @ts-nocheck
 import VueForm from "@/components/JsonSchemaForm/index.vue";
 import { ref, computed, nextTick } from "vue";
 import { ElMessage } from "element-plus";

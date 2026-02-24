@@ -4,7 +4,6 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-// @ts-nocheck
 import PersonPage from "@/components/MrPP/Person/Page.vue";
 import { getPerson } from "@/api/v1/person";
 

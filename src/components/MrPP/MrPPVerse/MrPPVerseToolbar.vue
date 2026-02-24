@@ -34,7 +34,6 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-// @ts-nocheck
 import { useI18n } from "vue-i18n";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { putVerse, deleteVerse, VerseData } from "@/api/v1/verse";

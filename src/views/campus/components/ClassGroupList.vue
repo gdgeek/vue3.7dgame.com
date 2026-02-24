@@ -109,7 +109,6 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-// @ts-nocheck
 import { ref, computed } from "vue";
 import { useUserStoreHook } from "@/store/modules/user";
 import { Plus } from "@element-plus/icons-vue";

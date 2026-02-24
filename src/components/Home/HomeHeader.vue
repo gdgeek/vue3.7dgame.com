@@ -35,7 +35,6 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-// @ts-nocheck
 import QRCodeDialog from "./QRCodeDialog.vue";
 import { useUserStore } from "@/store/modules/user";
 import { useScreenStore } from "@/store";

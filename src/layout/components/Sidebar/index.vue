@@ -29,7 +29,6 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-// @ts-nocheck
 import { useSettingsStore, useAppStore } from "@/store";
 import { LayoutEnum } from "@/enums/LayoutEnum";
 import { routerData } from "@/router";

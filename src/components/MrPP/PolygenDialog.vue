@@ -64,7 +64,6 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-// @ts-nocheck
 import PolygenView from "@/components/PolygenView.vue";
 import {
   getPolygen,
