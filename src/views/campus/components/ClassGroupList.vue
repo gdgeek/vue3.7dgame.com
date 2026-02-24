@@ -128,15 +128,6 @@ const props = defineProps<{
   pageSize?: number;
 }>();
 
-const emit = defineEmits<{
-  (e: "create-group"): void;
-  (e: "edit-group", group: Group): void;
-  (e: "delete-group", group: Group): void;
-  (e: "join-group", group: Group): void;
-  (e: "leave-group", group: Group): void;
-  (e: "enter-group", group: Group): void;
-}>();
-
 const userStore = useUserStoreHook();
 const currentUserId = computed(() => userStore.userInfo?.id);
 

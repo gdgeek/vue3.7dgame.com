@@ -108,7 +108,6 @@ import "vue-waterfall-plugin-next/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
 import { getMetas, metaInfo, postMeta } from "@/api/v1/meta";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import type { VerseMetaRelation } from "@/api/v1/types/meta";
 
 const emit = defineEmits(["selected", "cancel"]);
 

@@ -160,12 +160,11 @@ import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 //import { useInfomationStore } from "@/store/modules/information";
 import { useDomainStore } from "@/store/modules/domain";
-import { useUserStore, useScreenStore } from "@/store";
+import { useScreenStore } from "@/store";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 
 const router = useRouter();
 const route = useRoute();
-const userStore = useUserStore();
 //const informationStore = useInfomationStore();
 const domainStore = useDomainStore();
 const settingsStore = useSettingsStore();

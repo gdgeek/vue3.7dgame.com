@@ -223,7 +223,7 @@ watch(
 
 const selectedPhototype = async (
   phototype: PhototypeType,
-  replace: boolean = false
+  _replace: boolean = false
 ) => {
   logger.error(phototype.resource);
   const schemaRoot =

@@ -66,10 +66,7 @@ import { logger } from "@/utils/logger";
 import VueForm from "@/components/JsonSchemaForm/index.vue";
 import { ref, computed, nextTick } from "vue";
 import { ElMessage } from "element-plus";
-import { useI18n } from "vue-i18n";
 import type { JsonSchema, JsonValue } from "@/components/JsonSchemaForm/types";
-
-const { t } = useI18n();
 
 const formData = ref<Record<string, JsonValue>>({});
 

@@ -57,7 +57,7 @@
 import { logger } from "@/utils/logger";
 import { useRouter } from "vue-router";
 import { v4 as uuidv4 } from "uuid";
-import { postVerse, putVerse } from "@/api/v1/verse";
+import { postVerse } from "@/api/v1/verse";
 import VerseList from "@/components/MrPP/MrPPVerse/MrPPVerseList.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import Create from "@/components/MrPP/MrPPVerse/MrPPVerseWindowCreate.vue";

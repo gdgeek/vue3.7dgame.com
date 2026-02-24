@@ -115,7 +115,7 @@ const getAblity = (roles: string[]) => {
   return JSON.stringify(roles);
 };
 
-const getAbilities = (roles: string[]): string[] => {
+const getAbilities = (_roles: string[]): string[] => {
   const userInfo = userStore.userInfo;
   if (userInfo == null) return [];
   const currentUserRoles = userInfo.roles as (

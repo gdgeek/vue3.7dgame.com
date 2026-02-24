@@ -22,7 +22,6 @@
   </div>
 </template>
 <script setup lang="ts">
-import environment from "@/environment";
 import "@/assets/font/font.css";
 import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";

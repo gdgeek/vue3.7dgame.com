@@ -149,7 +149,7 @@ const getImageSize = (
 
 const setup = async (
   size: { x: number; y: number },
-  image: HTMLImageElement
+  _image: HTMLImageElement
 ) => {
   const info = JSON.stringify({ size });
   // Update info and use original file ID as image_id (using COS thumbnail instead of separate file)
@@ -163,8 +163,6 @@ const setup = async (
 const dealWith = async () => {
   if (!prepare.value) {
     if (image.value) {
-      const img: HTMLImageElement = image.value;
-
       image.value.crossOrigin = "anonymous";
 
       if (image.value.complete) {

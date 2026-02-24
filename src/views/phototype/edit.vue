@@ -97,7 +97,6 @@ import { getPhototype, putPhototype, postPhototype } from "@/api/v1/phototype";
 import type { PhototypeType } from "@/api/v1/types/phototype";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import Codemirror from "@/components/Codemirror.vue";
-import GenerateSchema from "generate-schema";
 import Resource from "@/components/Resource.vue";
 import Transform from "@/components/Transform.vue";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";

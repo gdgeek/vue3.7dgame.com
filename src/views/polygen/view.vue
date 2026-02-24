@@ -69,9 +69,7 @@ import {
   deletePolygen,
 } from "@/api/v1/resources/index";
 import type { ResourceInfo } from "@/api/v1/resources/model";
-import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
-import { UploadFileType } from "@/api/user/model";
 import { printVector3 } from "@/assets/js/helper";
 import { useFileStore } from "@/store/modules/config";
 import type { FileHandler } from "@/assets/js/file/server";
@@ -148,48 +146,6 @@ const tableData = computed(() => {
 
 const progress = (progress: number) => {
   percentage.value = progress;
-};
-
-const createVerse = async () => {
-  if (!polygenData.value) return;
-  try {
-    const { value } = (await ElMessageBox.prompt(
-      t("polygen.view.prompt.message1"),
-      t("polygen.view.prompt.message2"),
-      {
-        confirmButtonText: t("polygen.view.prompt.confirm"),
-        cancelButtonText: t("polygen.view.prompt.cancel"),
-        inputValue: polygenData.value.name,
-        inputErrorMessage: t("polygen.view.prompt.inputError"),
-      }
-    )) as { value: string };
-
-    loading.value = true;
-
-    const result = await createVerseFromResource("Polygen", value, {
-      id: polygenData.value.id,
-      name: polygenData.value.name ?? value,
-      image_id: polygenData.value.image_id ?? 0,
-      info: polygenData.value.info ?? "",
-    });
-    logger.error(result);
-    ElMessage.success(t("polygen.view.prompt.success") + value);
-
-    setTimeout(() => {
-      router.push({
-        path: "/verse/view",
-        query: { id: result.verse.id },
-      });
-    }, 300);
-  } catch (error) {
-    if (error !== "cancel") {
-      ElMessage.error(t("polygen.view.prompt.error") + error);
-    } else {
-      ElMessage.info(t("polygen.view.prompt.info"));
-    }
-  } finally {
-    loading.value = false;
-  }
 };
 
 const deleteWindow = async () => {

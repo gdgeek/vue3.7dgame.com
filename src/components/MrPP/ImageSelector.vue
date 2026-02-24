@@ -88,7 +88,6 @@
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
 import { ref, watch } from "vue";
-import { useI18n } from "vue-i18n";
 import { FolderOpened, Upload, Plus } from "@element-plus/icons-vue";
 import ResourceDialog from "./ResourceDialog.vue";
 import MrPPUploadDialog from "./MrPPUploadDialog/index.vue";

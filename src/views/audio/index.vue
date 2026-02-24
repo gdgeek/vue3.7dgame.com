@@ -324,7 +324,7 @@ const saveAudio = async (
   callback: (id: number) => void,
   effectType?: string,
   info?: string,
-  image_id?: number
+  _image_id?: number
 ) => {
   try {
     const data: { name: string; file_id: number; info?: string } = {

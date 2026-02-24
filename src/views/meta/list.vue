@@ -250,7 +250,6 @@ import { getPicture } from "@/api/v1/resources/index";
 import type { UploadFileType } from "@/api/user/model";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import { FolderOpened, Upload } from "@element-plus/icons-vue";
-import { convertToLocalTime } from "@/utils/utilityFunctions";
 import type { CardInfo } from "@/utils/types";
 
 const { t } = useI18n();
@@ -352,7 +351,7 @@ const handleCoverUpload = async (event: Event) => {
     if (!has) {
       await new Promise<void>((resolve, reject) => {
         fileStore.store
-          .fileUpload(md5, extension, file, (p: number) => {}, handler, dir)
+          .fileUpload(md5, extension, file, (_p: number) => {}, handler, dir)
           .then(() => resolve())
           .catch(reject);
       });

@@ -13,10 +13,10 @@
           @tab-click="handleTabClick"
         >
           <el-tab-pane
-            v-for="(item, index) in items"
+            v-for="(tabItem, index) in items"
             :key="index"
-            :label="item.label"
-            :name="item.key"
+            :label="tabItem.label"
+            :name="tabItem.key"
           >
             <div v-if="loading" class="news-loading">
               <el-skeleton :rows="3" animated></el-skeleton>
@@ -231,10 +231,10 @@
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useSettingsStore } from "@/store/modules/settings";
-import { Posts, Article, getCategory } from "@/api/home/wordpress";
+import { Posts } from "@/api/home/wordpress";
 import DOMPurify from "dompurify";
 import { dayjs, formatDate as formatDateUtil } from "@/utils/dayjs";
 import { ElMessage } from "element-plus";
@@ -247,7 +247,6 @@ const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.theme === "dark");
 
-const route = useRoute();
 const router = useRouter();
 
 // 分类标签

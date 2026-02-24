@@ -29,7 +29,7 @@ import VueForm from "@lljj/vue3-form-element";
 const formData = ref({});
 const schema = ref<Schema>();
 const dialogVisible = ref(false);
-const { t, locale } = useI18n();
+const { t } = useI18n();
 let callback: ((data: Record<string, unknown>) => void) | null = null;
 
 interface SchemaProperty {

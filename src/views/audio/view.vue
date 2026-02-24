@@ -189,7 +189,7 @@ const thumbnail = async (
   width: number,
   height: number
 ): Promise<File> => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const imageType = "image/jpeg";
     const canvas = document.createElement("canvas");
     const bgImg = document.getElementById("imgs") as HTMLImageElement;

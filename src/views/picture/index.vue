@@ -318,7 +318,7 @@ const savePicture = async (
   callback: (id: number) => void,
   effectType?: string,
   info?: string,
-  image_id?: number
+  _image_id?: number
 ) => {
   try {
     const data: {

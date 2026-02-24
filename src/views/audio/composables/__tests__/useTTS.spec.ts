@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useTTS } from "../useTTS";
-import { ref, nextTick } from "vue";
+import { ref } from "vue";
 import axios from "axios";
 
 // Mock dependencies

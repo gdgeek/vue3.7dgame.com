@@ -20,7 +20,6 @@ import { logger } from "@/utils/logger";
 import { computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Document from "@/components/Home/Document.vue";
-import { ArrowLeft } from "@element-plus/icons-vue";
 
 const route = useRoute();
 const router = useRouter();

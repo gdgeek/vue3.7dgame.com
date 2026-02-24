@@ -112,7 +112,7 @@ const dialogVisible = ref(false);
 const open = () => {
   ElMessageBox.alert(t("web.buy.scanQrCode"), t("web.buy.purchase"), {
     confirmButtonText: t("web.buy.confirm"),
-    callback: (action: Action) => {},
+    callback: (_action: Action) => {},
   });
 };
 

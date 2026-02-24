@@ -229,7 +229,7 @@
 // @ts-nocheck
 import { logger } from "@/utils/logger";
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
-import { useRoute, useRouter, onBeforeRouteLeave } from "vue-router";
+import { useRoute, onBeforeRouteLeave } from "vue-router";
 import {
   getVerse,
   // getVerseMetasWithJsCode,
@@ -259,7 +259,6 @@ const loading = ref(false);
 const verse = ref<VerseData>();
 const verseMetasWithJsCodeData = ref<VerseMetasWithJsCode>();
 const route = useRoute();
-const router = useRouter();
 const id = computed(() => parseInt(route.query.id as string));
 const activeName = ref<string>("blockly");
 const languageName = ref<string>("lua");
@@ -649,7 +648,7 @@ onBeforeRouteLeave(async (to, from, next) => {
   }
 });
 
-watch(LuaCode, (newValue, oldValue) => {
+watch(LuaCode, (newValue, _oldValue) => {
   hasUnsavedChanges.value = false;
   if (newValue !== initLuaCode.get()) {
     hasUnsavedChanges.value = true;

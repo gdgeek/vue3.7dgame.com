@@ -266,7 +266,6 @@ const {
   availableEmotions,
   filteredEmotions,
   supportHighSampleRate,
-  voiceType: voiceTypeRef, // Alias if needed, or use struct desc
 } = useVoiceSelection();
 
 const { languageAnalysis, checkTextLanguage } = useLanguageAnalysis();

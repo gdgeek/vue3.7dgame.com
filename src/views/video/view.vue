@@ -157,7 +157,6 @@ const downloadVideo = async () => {
 };
 
 const init = () => {
-  const video = document.getElementById("video") as HTMLVideoElement;
   const source = document.getElementById("src") as HTMLSourceElement;
 
   const new_video = document.getElementById("new_video") as HTMLVideoElement;
@@ -168,7 +167,6 @@ const init = () => {
 
 const dealWith = () => {
   if (!prepare.value) {
-    const video = document.getElementById("video") as HTMLVideoElement;
     const new_video = document.getElementById("new_video") as HTMLVideoElement;
     // Wait for metadata to be loaded to ensure duration is available
     if (new_video.readyState >= 1) {

@@ -104,7 +104,7 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
-import { ref, watch, onMounted } from "vue";
+import { ref, watch } from "vue";
 import { OfficeBuilding } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useI18n } from "vue-i18n";

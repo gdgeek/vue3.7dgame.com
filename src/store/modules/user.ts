@@ -2,28 +2,12 @@ import { logger } from "@/utils/logger";
 import AuthAPI from "@/api/v1/auth";
 //import { resetRouter } from "@/router";
 import { store } from "@/store";
-import { LoginData, LoginResult } from "@/api/auth/model";
+import { LoginData } from "@/api/auth/model";
 import { UserInfoType, _UserDataType } from "@/api/user/model";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
 import Wechat from "@/api/v1/wechat";
 import type { WechatLoginRequest } from "@/api/v1/types/wechat";
-import SecureLS from "secure-ls";
 import Token from "@/store/modules/token";
 import UserAPI from "@/api/v1/user";
-
-const ls = new SecureLS({
-  isCompression: false,
-  encryptionSecret: "38c31684-d00d-30dc-82e0-fad9eec46d1d",
-});
-
-const st: Pick<Storage, "getItem" | "setItem"> = {
-  setItem(key: string, value: string) {
-    ls.set(key, value);
-  },
-  getItem(key: string): string | null {
-    return ls.get(key);
-  },
-};
 
 export const useUserStore = defineStore(
   "user",

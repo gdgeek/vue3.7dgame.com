@@ -649,7 +649,7 @@ const saveInfo = () => {
 };
 
 // 处理图片上传并打开裁剪对话框
-const handleChangeUpload = async (file: UploadFile, fileList: UploadFiles) => {
+const handleChangeUpload = async (file: UploadFile, _fileList: UploadFiles) => {
   const selectedFile = file.raw;
   if (selectedFile) {
     // 验证图片格式和大小
@@ -746,7 +746,7 @@ const finish = async () => {
         md5,
         file.name.split(".").pop() || "",
         file,
-        (p: number) => {},
+        (_p: number) => {},
         handler,
         "backup"
       );

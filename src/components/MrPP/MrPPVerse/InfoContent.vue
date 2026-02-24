@@ -53,35 +53,13 @@
 </template>
 
 <script setup lang="ts">
-import { logger } from "@/utils/logger";
 import type { VerseData } from "@/api/v1/verse";
-
-interface Course {
-  id: number;
-  title: {
-    rendered: string;
-  };
-}
 
 const props = defineProps<{
   verse: VerseData;
 }>();
 const author = computed(() => {
   return props.verse?.author;
-});
-
-const course = ref<Course | null>(null);
-
-onMounted(async () => {
-  /*
-  if (props.info?.course && props.info.course !== -1) {
-    try {
-      const r = await Post(props.info.course);
-      course.value = r.data;
-    } catch (e) {
-      logger.error(e);
-    }
-  }*/
 });
 </script>
 

@@ -1,8 +1,6 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
-import { useUserStoreHook } from "@/store/modules/user";
 import { useDomainStoreHook } from "@/store/modules/domain";
 import { useRouter } from "vue-router";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
 import i18n from "@/lang";
 
 // 获取当前语言

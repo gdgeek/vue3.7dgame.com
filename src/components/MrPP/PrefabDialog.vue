@@ -114,7 +114,7 @@ import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
 import { getPrefabs, prefabsData } from "@/api/v1/prefab";
 import Id2Image from "../Id2Image.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
-import type { JsonSchema, JsonValue } from "@/components/JsonSchemaForm/types";
+import type { JsonValue } from "@/components/JsonSchemaForm/types";
 
 const emit = defineEmits(["selected", "cancel"]);
 const dialogVisible = ref(false);
@@ -162,12 +162,6 @@ const refresh = async () => {
   };
 };
 
-type Schema = JsonSchema;
-type KnightDataSchema = {
-  type: string;
-  properties: Record<string, unknown>;
-  [key: string]: unknown;
-};
 const setup = ({ data }: { data: prefabsData }) => {
   logger.error("setup", data);
   if (data.data) {

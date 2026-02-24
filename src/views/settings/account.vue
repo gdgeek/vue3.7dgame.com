@@ -162,8 +162,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { useUserStore } from "@/store/modules/user";
+import { ref } from "vue";
 import {
   bindEmail,
   resetPassword as apiResetPassword,
@@ -174,7 +173,6 @@ import type { FormInstance } from "element-plus";
 
 // 组件状态
 const { t } = useI18n();
-const userStore = useUserStore();
 const email = ref("email");
 const emailBind = ref(true);
 const dialogPasswordVisible = ref(false);

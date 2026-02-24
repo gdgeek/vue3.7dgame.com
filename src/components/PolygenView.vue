@@ -159,40 +159,6 @@ const playAnimation = (index: number) => {
   }
 };
 
-// 通过进度条控制动画播放位置（释放进度条时触发）
-const seekAnimation = (progress: number | number[]) => {
-  if (mixer && currentAction && animations.value.length > 0) {
-    const selectedAnimation = animations.value[selectedAnimationIndex.value];
-    // 确保progress是数字类型
-    const progressValue = Array.isArray(progress) ? progress[0] : progress;
-    const targetTime = (progressValue / 100) * selectedAnimation.duration;
-
-    // 更新当前时间
-    currentAnimationTime.value = targetTime;
-
-    // 确保动画动作处于激活状态
-    if (currentAction.paused) {
-      // 如果是暂停状态，我们需要先激活动作再设置时间
-      currentAction.paused = false;
-      mixer.setTime(targetTime);
-      currentAction.paused = true;
-    } else {
-      // 如果是播放状态，直接设置时间
-      mixer.setTime(targetTime);
-    }
-
-    // 确保在任何状态下都渲染一帧，以便显示当前位置的动画帧
-    if (renderer && camera) {
-      renderer.render(scene, camera);
-    }
-
-    // 如果动画是在播放状态，重置时钟以避免大的时间跳跃
-    if (isAnimationPlaying.value) {
-      clock.getDelta();
-    }
-  }
-};
-
 // 切换动画的播放状态
 const toggleAnimation = (value: string | number | boolean) => {
   isAnimationPlaying.value = Boolean(value);

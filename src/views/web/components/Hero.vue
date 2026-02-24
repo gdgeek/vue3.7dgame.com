@@ -156,14 +156,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from "vue";
-import { useI18n } from "vue-i18n";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useDomainStore } from "@/store/modules/domain";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { VideoPlay, ArrowDown, ArrowRight } from "@element-plus/icons-vue";
-
-const { t } = useI18n();
 
 // 获取主题设置
 const settingsStore = useSettingsStore();
@@ -197,7 +194,7 @@ const handleCloseVideo = () => {
 };
 
 // 生成粒子样式
-const getParticleStyle = (n: number) => {
+const getParticleStyle = (_n: number) => {
   const size = Math.floor(Math.random() * 10) + 3;
   const posX = Math.random() * 100;
   const posY = Math.random() * 100;
