@@ -172,7 +172,12 @@ const saveParticle = async (
   image_id?: number
 ) => {
   try {
-    const data: any = { name, file_id };
+    const data: {
+      name: string;
+      file_id: number;
+      effect_type?: string;
+      info?: string;
+    } = { name, file_id };
     if (effectType) data.effect_type = effectType;
     if (info) data.info = info;
     if (image_id) data.image_id = image_id;

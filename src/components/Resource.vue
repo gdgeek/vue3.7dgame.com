@@ -43,15 +43,16 @@
 const resourceDialog = ref<InstanceType<typeof ResourceDialog> | null>(null);
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import PolygenView from "./PolygenView.vue";
+import type { ResourceInfo } from "@/api/v1/resources/model";
 const props = defineProps<{
-  resource: any;
+  resource: ResourceInfo | null;
 }>();
-const handleSelected = (data: any, replace: boolean) => {
+const handleSelected = (data: { context: ResourceInfo }, _replace: boolean) => {
   emit("selected", data.context);
 };
 
 const emit = defineEmits<{
-  (e: "selected", data: any): void;
+  (e: "selected", data: ResourceInfo): void;
 }>();
 const selecteModel = () => {
   resourceDialog.value?.openIt({ type: "polygen" });

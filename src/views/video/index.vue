@@ -173,6 +173,20 @@ import { printVector2 } from "@/assets/js/helper";
 
 const { t } = useI18n();
 
+type Vector2 = { x: number; y: number };
+type VideoInfo = { size?: Vector2; length?: number };
+
+const parseVideoInfo = (raw?: string | null): VideoInfo | null => {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object") {
+      return parsed as VideoInfo;
+    }
+  } catch {}
+  return null;
+};
+
 const {
   items,
   loading,
@@ -184,7 +198,7 @@ const {
   handleSortChange,
   handlePageChange,
   handleViewChange,
-} = usePageData({
+} = usePageData<ResourceInfo>({
   fetchFn: async (params) =>
     await getVideos(params.sort, params.search, params.page),
 });
@@ -209,9 +223,7 @@ const detailLoading = ref(false);
 
 const detailProperties = computed(() => {
   if (!currentVideo.value) return [];
-  const info = currentVideo.value.info
-    ? JSON.parse(currentVideo.value.info)
-    : null;
+  const info = parseVideoInfo(currentVideo.value.info);
   const props = [
     { label: t("ui.type"), value: t("video.typeName") },
     { label: t("ui.size"), value: formatSize(currentVideo.value.file?.size) },
@@ -314,7 +326,12 @@ const saveVideo = async (
   image_id?: number
 ) => {
   try {
-    const data: any = { name, file_id };
+    const data: {
+      name: string;
+      file_id: number;
+      info?: string;
+      image_id?: number;
+    } = { name, file_id };
     if (info) data.info = info;
     if (image_id) data.image_id = image_id;
     else data.image_id = file_id;

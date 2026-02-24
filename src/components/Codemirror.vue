@@ -13,25 +13,24 @@
   ></codemirror>
 </template>
 <script setup lang="ts">
-import { ref, shallowRef } from "vue";
-import { linter } from "@codemirror/lint";
+import { shallowRef } from "vue";
 import { Codemirror } from "vue-codemirror";
 import { json } from "@codemirror/lang-json";
-import { oneDark } from "@codemirror/theme-one-dark";
+import type { EditorView } from "@codemirror/view";
 
 // Codemirror 扩展
 const extensions = [json()];
 
 // Codemirror EditorView 实例
-const view = shallowRef<any>(null);
+const view = shallowRef<EditorView | null>(null);
 
 // 编辑器就绪回调
-function handleReady(payload: { view: any }) {
+function handleReady(payload: { view: EditorView }) {
   view.value = payload.view;
 }
 
 // 事件日志
-function log(event: string, eventObj: any) {
+function log(event: string, eventObj: unknown) {
   console.log(event, eventObj);
 }
 </script>

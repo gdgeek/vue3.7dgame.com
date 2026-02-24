@@ -11,7 +11,7 @@ const meta = {
    */
   title: "Example/Header",
   component: MyHeader,
-  render: (args: any) => ({
+  render: (args: InstanceType<typeof MyHeader>["$props"]) => ({
     components: { MyHeader },
     setup() {
       return { args };

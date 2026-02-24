@@ -85,18 +85,17 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { Message, MessageBox } from "@/components/Dialog";
-import { v4 as uuidv4 } from "uuid";
 import CardListPage from "@/components/MrPP/CardListPage/index.vue";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import {
   getPhototypes,
-  postPhototype,
   deletePhototype,
   putPhototype,
 } from "@/api/v1/phototype";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";
 import type { PhototypeType } from "@/api/v1/phototype";
+import type { UpdatePhototypeRequest } from "@/api/v1/types/phototype";
 import type {
   FetchParams,
   FetchResponse,
@@ -110,7 +109,7 @@ const fetchPhototypes = async (params: FetchParams): Promise<FetchResponse> => {
   return await getPhototypes(params.sort, params.search, params.page);
 };
 
-const handleRefresh = (data: any[]) => {};
+const handleRefresh = (_data: PhototypeType[]) => {};
 
 const refreshList = () => {
   cardListPageRef.value?.refresh();
@@ -136,7 +135,7 @@ const editForm = ref({
   image_url: "",
 });
 
-const namedWindow = (item: any) => {
+const namedWindow = (item: PhototypeType) => {
   editForm.value = {
     id: item.id,
     title: item.title || item.name,
@@ -163,7 +162,7 @@ const saveEdit = async () => {
       return;
     }
 
-    const updateData: any = {
+    const updateData: UpdatePhototypeRequest = {
       title: editForm.value.title,
     };
 

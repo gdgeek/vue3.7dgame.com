@@ -95,6 +95,21 @@ export function setupRouter(app: App<Element>) {
   app.use(router);
 }
 
+const getComponentName = (
+  component: RouteRecordRaw["component"]
+): string | undefined => {
+  if (!component) {
+    return undefined;
+  }
+  if (typeof component === "function") {
+    return component.name || undefined;
+  }
+  if (typeof component === "object" && "name" in component) {
+    return (component as { name?: string }).name;
+  }
+  return undefined;
+};
+
 // 将路由转换为 RouteVO 格式的函数
 const convertRoutes = (routes: RouteRecordRaw[], isRoot = false): RouteVO[] => {
   return routes.map((route) => {
@@ -103,7 +118,7 @@ const convertRoutes = (routes: RouteRecordRaw[], isRoot = false): RouteVO[] => {
 
     return {
       path: formattedPath,
-      component: component ? (component as any).name : undefined,
+      component: getComponentName(component),
       redirect: (redirect as string) || undefined,
       name: typeof name === "string" ? name : undefined,
       meta: meta as Meta,

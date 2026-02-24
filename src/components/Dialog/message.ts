@@ -1,4 +1,4 @@
-import { createVNode, render, shallowReactive } from "vue";
+import { createVNode, render, shallowReactive, type VNode } from "vue";
 import MessageConstructor from "./Message.vue";
 
 export type MessageType = "success" | "warning" | "info" | "error";
@@ -13,7 +13,15 @@ export interface MessageOptions {
   onClose?: () => void;
 }
 
-const instances = shallowReactive<any[]>([]);
+type MessageInstance = {
+  id: string;
+  vnode: VNode;
+  vm: VNode["component"];
+  el: VNode["el"];
+  props: MessageOptions & { id: string; zIndex: number; offset: number };
+};
+
+const instances = shallowReactive<MessageInstance[]>([]);
 let seed = 1;
 const zIndexStart = 2000;
 

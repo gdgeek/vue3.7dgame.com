@@ -35,6 +35,7 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent, toRefs } from "vue";
+import type { JsonSchema, JsonValue } from "./types";
 // Circular dependency: SchemaField needs ArrayField, ArrayField needs SchemaField.
 // Use Async Component or global registration. simpler to use recursive component pattern
 // However, since we are in script setup, we can't easily cycle import.
@@ -45,8 +46,8 @@ import { defineAsyncComponent, toRefs } from "vue";
 const SchemaField = defineAsyncComponent(() => import("./SchemaField.vue"));
 
 const props = defineProps<{
-  schema: any;
-  modelValue: any[];
+  schema: JsonSchema;
+  modelValue: JsonValue[];
   propKey?: string;
   parentProp?: string;
 }>();
@@ -67,7 +68,8 @@ const removeItem = (index: number) => {
   emit("update:modelValue", newList);
 };
 
-const getDefaultValue = (itemSchema: any) => {
+const getDefaultValue = (itemSchema?: JsonSchema): JsonValue => {
+  if (!itemSchema) return "";
   if (itemSchema.default !== undefined)
     return JSON.parse(JSON.stringify(itemSchema.default));
   if (itemSchema.type === "string") return "";

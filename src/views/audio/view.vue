@@ -115,7 +115,7 @@ const tableData = computed(() => {
         text: formatFileSize(audioData.value.file.size),
       },
     ];
-    let info: any = {};
+    let info: { length?: number } = {};
     try {
       info = JSON.parse(audioData.value.info || "{}");
     } catch {}

@@ -85,6 +85,7 @@ import type {
   CardListPageEmits,
   Pagination,
   FetchParams,
+  FetchResponse,
 } from "./types";
 
 const props = withDefaults(defineProps<CardListPageProps>(), {
@@ -102,10 +103,12 @@ const props = withDefaults(defineProps<CardListPageProps>(), {
   wrapperClass: "card-list-page",
 });
 
-const emit = defineEmits<CardListPageEmits>();
+type CardItem = unknown;
+
+const emit = defineEmits<CardListPageEmits<CardItem>>();
 
 // State
-const items = ref<any[] | null>(null);
+const items = ref<CardItem[] | null>(null);
 const loading = ref(false);
 const sorted = ref(props.defaultSort);
 const searched = ref("");
@@ -151,21 +154,18 @@ const refresh = async () => {
       page: pagination.current,
     };
 
-    const response = await props.fetchData(params);
+    const response = (await props.fetchData(params)) as FetchResponse<CardItem>;
 
     // Update pagination from headers
-    pagination.current = parseInt(
-      response.headers["x-pagination-current-page"] || "1"
-    );
-    pagination.count = parseInt(
-      response.headers["x-pagination-page-count"] || "1"
-    );
-    pagination.size = parseInt(
-      response.headers["x-pagination-per-page"] || String(props.pageSize)
-    );
-    pagination.total = parseInt(
-      response.headers["x-pagination-total-count"] || "0"
-    );
+    const currentPageHeader = response.headers["x-pagination-current-page"];
+    const pageCountHeader = response.headers["x-pagination-page-count"];
+    const pageSizeHeader = response.headers["x-pagination-per-page"];
+    const totalCountHeader = response.headers["x-pagination-total-count"];
+
+    pagination.current = parseInt(String(currentPageHeader ?? "1"));
+    pagination.count = parseInt(String(pageCountHeader ?? "1"));
+    pagination.size = parseInt(String(pageSizeHeader ?? props.pageSize));
+    pagination.total = parseInt(String(totalCountHeader ?? "0"));
 
     // Update items
     items.value = response.data || [];

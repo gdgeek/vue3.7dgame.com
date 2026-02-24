@@ -21,6 +21,8 @@
 </template>
 
 <script lang="ts" setup>
+import type { PropType } from "vue";
+import type { RouteRecordRaw } from "vue-router";
 import { useSettingsStore, useAppStore } from "@/store";
 import { isExternal } from "@/utils/index";
 import path from "path-browserify";
@@ -36,7 +38,7 @@ const props = defineProps({
     default: () => {
       return [];
     },
-    type: Array<any>,
+    type: Array as PropType<RouteRecordRaw[]>,
   },
   basePath: {
     type: String,

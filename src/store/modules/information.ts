@@ -14,6 +14,7 @@ interface InformationState {
 
 export const useInfomationStore = defineStore("information", () => {
   const lang = ref(i18n.global.locale.value);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const companies = computed(() => {
     if (document.domain.toLowerCase().indexOf("u7gm.com") >= 0) {
       // return [{ name: "上海游七网络科技有限公司", url: "https://u7gm.com" }];

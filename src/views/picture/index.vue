@@ -320,7 +320,10 @@ const savePicture = async (
   image_id?: number
 ) => {
   try {
-    const data: any = { name, file_id };
+    const data: { name: string; file_id: number; info?: string } = {
+      name,
+      file_id,
+    };
     if (info) {
       data.info = info;
       data.image_id = file_id;

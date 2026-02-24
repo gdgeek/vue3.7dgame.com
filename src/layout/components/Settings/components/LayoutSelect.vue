@@ -38,7 +38,7 @@
 <script lang="ts" setup>
 import { LayoutEnum } from "@/enums/LayoutEnum";
 
-const props = defineProps({
+defineProps({
   modelValue: String,
 });
 

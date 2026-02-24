@@ -153,11 +153,11 @@ const supportedFormats = computed(() => {
 });
 
 // Drag & Drop Handlers
-const onDragOver = (e: DragEvent) => {
+const onDragOver = (_e: DragEvent) => {
   isDragOver.value = true;
 };
 
-const onDragLeave = (e: DragEvent) => {
+const onDragLeave = (_e: DragEvent) => {
   isDragOver.value = false;
 };
 

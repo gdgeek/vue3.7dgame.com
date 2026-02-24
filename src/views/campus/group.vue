@@ -122,7 +122,10 @@ const fetchGroup = async () => {
 };
 
 // Loaded callback for MrPPVersePage
-const handleLoaded = async (data: any, result: Function) => {
+const handleLoaded = async (
+  data: { sorted: string; current: number; searched?: string },
+  result: Function
+) => {
   if (!groupId.value) {
     result({
       data: [],
@@ -161,7 +164,10 @@ const openCreateDialog = () => {
   createDialogRef.value?.show();
 };
 
-const handleCreateVerse = async (form: any, imageId: number | null) => {
+const handleCreateVerse = async (
+  form: { name: string; description: string },
+  imageId: number | null
+) => {
   try {
     await createGroupVerse(groupId.value, {
       name: form.name,

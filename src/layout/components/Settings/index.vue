@@ -60,6 +60,7 @@
 import { useSettingsStore, usePermissionStore, useAppStore } from "@/store";
 import { LayoutEnum } from "@/enums/LayoutEnum";
 import { ThemeEnum } from "@/enums/ThemeEnum";
+import type { RouteRecordRaw } from "vue-router";
 
 const route = useRoute();
 const appStore = useAppStore();
@@ -86,7 +87,7 @@ function changeThemeColor(color: string) {
  * 切换主题
  */
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
-const changeTheme = (val: any) => {
+const changeTheme = (val: boolean) => {
   isDark.value = val;
   settingsStore.changeTheme(isDark.value ? ThemeEnum.DARK : ThemeEnum.LIGHT);
 };
@@ -110,11 +111,11 @@ function againActiveTop(newVal: string) {
   }
 }
 
-function findOutermostParent(tree: any[], findName: string) {
-  let parentMap: any = {};
+function findOutermostParent(tree: RouteRecordRaw[], findName: string) {
+  const parentMap: Record<string, RouteRecordRaw | null> = {};
 
-  function buildParentMap(node: any, parent: any) {
-    parentMap[node.name] = parent;
+  function buildParentMap(node: RouteRecordRaw, parent: RouteRecordRaw | null) {
+    parentMap[node.name as string] = parent;
 
     if (node.children) {
       for (let i = 0; i < node.children.length; i++) {

@@ -37,7 +37,9 @@
                   <template #default="{ row }">
                     <el-input
                       type="number"
-                      @change="(value: any) => onchange(row.id, value)"
+                      @change="
+                        (value: string | number) => onchange(row.id, value)
+                      "
                       size="small"
                       v-model="row.order"
                       :placeholder="$t('game.index.form.placeholder')"
@@ -97,11 +99,12 @@ import {
   postVpGuide,
   deleteVpGuide,
 } from "@/api/v1/vp-guide";
+import type { VpMapGuide } from "@/api/v1/types/vp-map";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { Message, MessageBox } from "@/components/Dialog";
 
 const dialogRef = ref<InstanceType<typeof VerseDialog> | null>(null);
-const items = ref<any[]>([]);
+const items = ref<VpMapGuide[]>([]);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
 const { t } = useI18n();
@@ -147,7 +150,7 @@ const onchange = async (id: number, val: number) => {
   }
 };
 
-const selected = async (item: any) => {
+const selected = async (item: { data: { id: number } }) => {
   try {
     await postVpGuide({ level_id: item.data.id });
     Message.success(t("game.index.success"));

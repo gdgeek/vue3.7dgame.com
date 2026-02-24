@@ -312,8 +312,6 @@ const error = ref(false);
 const dialogVisible = ref(false);
 const selectedArticle = ref<PostSummary | null>(null);
 const articleContent = ref<ArticleDetail | null>(null);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const articleTerms = ref<any[]>([]);
 const articleLoading = ref(false);
 const articleError = ref(false);
 

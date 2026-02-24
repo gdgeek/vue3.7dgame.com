@@ -3,7 +3,6 @@ import qs from "querystringify";
 import type {
   MetaInfo,
   MetaCode,
-  Events,
   CreateMetaRequest,
   UpdateMetaRequest,
 } from "./types/meta";

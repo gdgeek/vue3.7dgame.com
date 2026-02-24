@@ -3,7 +3,7 @@
     <el-card class="box-card-component" style="margin: 18px 18px 0">
       <template #header>
         <div class="box-card-header">
-          <h3>{{ $t("ai.generation.title") }}{{ data.name }}</h3>
+          <h3>{{ $t("ai.generation.title") }}{{ localData.name }}</h3>
         </div>
       </template>
       <template #footer>
@@ -29,15 +29,15 @@
           </el-image>
         </el-form-item>
         <el-form-item
-          v-if="props.data.query.prompt"
+          v-if="localData.query.prompt"
           :label="$t('ai.generation.form.prompt')"
           prop="prompt"
         >
-          {{ props.data.query.prompt }}
+          {{ localData.query.prompt }}
         </el-form-item>
 
         <el-form-item
-          v-if="props.data.query.quality"
+          v-if="localData.query.quality"
           :label="$t('ai.generation.form.quality.title')"
           prop="quality"
         >
@@ -71,14 +71,20 @@
 
 <script setup lang="ts">
 import AiRodin from "@/api/v1/ai-rodin";
-import { useI18n } from "vue-i18n";
 import { sleep } from "@/assets/js/helper";
 import { getPicture } from "@/api/v1/resources/index";
 import { useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
+import type { ResourceInfo } from "@/api/v1/resources/model";
+import type { AiRodinItem } from "@/types/ai-rodin";
 
-const props = defineProps<{ data: any | undefined }>();
-const localData = ref({ ...props.data });
-const { t } = useI18n();
+type AiJob = { status: string };
+
+const props = defineProps<{ data: AiRodinItem }>();
+const localData = ref<AiRodinItem>({
+  ...props.data,
+  query: props.data.query ?? {},
+});
 const loading = ref(false);
 const router = useRouter();
 
@@ -92,23 +98,20 @@ const progress = ref<ProgressType>({
   percentage: 0,
   declared: "declared",
 });
-const resource: Ref<any> = ref<any>(null);
+const resource: Ref<ResourceInfo | null> = ref(null);
 const imageUrl = computed<string | undefined>(() => {
-  if (resource.value) {
-    return resource.value.image.url;
-  }
-  return undefined;
+  return resource.value?.image?.url;
 });
 
-const rodin = async (step: number) => {
+const rodin = async (step: number): Promise<AiRodinItem> => {
   progress.value.percentage = 5;
   progress.value.title = "AI Generating";
-  let data = props.data;
+  let data: AiRodinItem = props.data;
   if (step === 1) {
     const response = await AiRodin.rodin({
       id: data.id,
     });
-    data = response.data;
+    data = response.data as AiRodinItem;
   }
   progress.value.percentage = 10;
   if (step <= 3) {
@@ -116,7 +119,10 @@ const rodin = async (step: number) => {
     do {
       const response2 = await AiRodin.check(data.id);
       //console.log(response2.data.check);
-      schedule = AiRodin.schedule(response2.data.check.jobs);
+      const jobs = Array.isArray(response2.data?.check?.jobs)
+        ? (response2.data.check.jobs as AiJob[])
+        : [];
+      schedule = AiRodin.schedule(jobs);
       progress.value.percentage = 10 + 70 * schedule;
       if (schedule !== 1) {
         await sleep(10000);
@@ -129,7 +135,7 @@ const rodin = async (step: number) => {
   if (step <= 4) {
     const response4 = await AiRodin.file(data.id);
     progress.value.percentage = 100;
-    return response4.data;
+    return response4.data as AiRodinItem;
   }
   return props.data;
 };
@@ -146,16 +152,17 @@ const process = async () => {
       });
     }
     //if(data.)
-  } catch (e: any) {
-    ElMessage.error(e.message);
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
+    ElMessage.error(message);
   }
   loading.value = false;
 };
 
 onMounted(async () => {
   if (localData.value.query.resource_id) {
-    const response = await getPicture(props.data.query.resource_id);
-    resource.value = response.data;
+    const response = await getPicture(localData.value.query.resource_id);
+    resource.value = response.data as ResourceInfo;
     await process();
   }
 });

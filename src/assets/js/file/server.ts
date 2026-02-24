@@ -3,12 +3,13 @@ import env from '@/environment';
 import axios from 'axios';
 import { uploadFile } from '@/api/v1/upload';
 import path from 'path-browserify';
+import type COS from 'cos-js-sdk-v5';
 
 // 文件处理程序类型
 export type FileHandler = {
   bucket: string;
   region?: string; 
-  cos?: any;
+  cos?: COS;
 };
 
 

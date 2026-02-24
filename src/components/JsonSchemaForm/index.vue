@@ -24,39 +24,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, withDefaults } from "vue";
 import SchemaField from "./SchemaField.vue";
-import { ElMessage } from "element-plus";
+import {
+  ElMessage,
+  type FormInstance,
+  type FormValidateCallback,
+} from "element-plus";
+import type { FormFooterConfig, JsonSchema, JsonValue } from "./types";
 
-const props = defineProps({
-  schema: {
-    type: Object,
-    default: undefined,
-  },
-  modelValue: {
-    type: Object,
-    default: () => ({}),
-  },
-  formFooter: {
-    type: Object,
-    default: () => ({
+const props = withDefaults(
+  defineProps<{
+    schema?: JsonSchema;
+    modelValue?: Record<string, JsonValue>;
+    formFooter?: FormFooterConfig;
+  }>(),
+  {
+    modelValue: () => ({}),
+    formFooter: () => ({
       show: true,
       okBtn: "Save",
       cancelBtn: "Cancel",
     }),
-  },
-});
+  }
+);
 
 const emit = defineEmits(["update:modelValue", "submit", "cancel", "change"]);
 
-const formRef = ref();
+const formRef = ref<FormInstance>();
 
 const innerModel = computed({
   get: () => props.modelValue,
   set: (val) => emit("update:modelValue", val),
 });
 
-const initDefaults = (schema: any, model: any) => {
+const initDefaults = (schema: JsonSchema, model: Record<string, JsonValue>) => {
   if (!schema || !model) return;
 
   if (schema.type === "object" && schema.properties) {
@@ -74,7 +76,7 @@ const initDefaults = (schema: any, model: any) => {
 
       // Recursively init defaults for nested objects (if they exist in model or are created)
       if (propSchema.type === "object" && model[key]) {
-        initDefaults(propSchema, model[key]);
+        initDefaults(propSchema, model[key] as Record<string, JsonValue>);
       }
     }
   }
@@ -102,14 +104,15 @@ watch(
 
 const handleSubmit = async () => {
   if (!formRef.value) return;
-  await formRef.value.validate((valid: boolean, fields: any) => {
+  const callback: FormValidateCallback = (valid, fields) => {
     if (valid) {
       emit("submit", props.modelValue);
     } else {
       ElMessage.warning("Please check the form for errors.");
       console.warn("Validation failed", fields);
     }
-  });
+  };
+  await formRef.value.validate(callback);
 };
 
 const handleCancel = () => {

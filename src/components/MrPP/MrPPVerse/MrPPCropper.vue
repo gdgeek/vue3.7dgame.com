@@ -98,6 +98,7 @@ import { postFile } from "@/api/v1/files";
 import { UploadFileType } from "@/api/user/model";
 import { useFileStore } from "@/store/modules/config";
 import { UploadFile } from "element-plus";
+import type { FileHandler } from "@/assets/js/file/server";
 
 const props = defineProps<{
   imageUrl: string | null;
@@ -201,7 +202,7 @@ const rotateRightHandle = () => {
 };
 
 // 截图框移动回调函数
-const cropMoving = (data: any) => {
+const cropMoving = (_data: unknown) => {
   // 截图框的左上角 x，y和右下角坐标x，y
   // const cropAxis = [data.axis.x1, data.axis.y1, data.axis.x2, data.axis.y2];
   // console.log(cropAxis)
@@ -211,7 +212,7 @@ const saveFile = async (
   md5: string,
   extension: string,
   file: File,
-  handler: any
+  handler: FileHandler
 ) => {
   extension = extension.startsWith(".") ? extension : `.${extension}`;
   const data: UploadFileType = {
@@ -256,7 +257,7 @@ const finish = async () => {
         md5,
         file.extension,
         file,
-        (p: any) => {},
+        (_p: number) => {},
         handler,
         "backup"
       );

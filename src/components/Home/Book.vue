@@ -37,6 +37,7 @@
 import { computed } from "vue";
 import Document from "@/components/Home/Document.vue";
 import DocumentList from "@/components/Home/DocumentList.vue";
+import type { TabsPaneContext } from "element-plus";
 
 import type { TabItem } from "@/types/news";
 
@@ -55,7 +56,7 @@ const activeTab = computed({
   set: (value) => emit("tab-change", value),
 });
 
-const handleTabClick = (tab: any) => {
+const handleTabClick = (tab: TabsPaneContext) => {
   emit("tab-change", Number(tab.props.name));
 };
 

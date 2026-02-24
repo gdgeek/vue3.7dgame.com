@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { useSettingsStore, usePermissionStore, useAppStore } from "@/store";
+import { useSettingsStore, useAppStore } from "@/store";
 import { LayoutEnum } from "@/enums/LayoutEnum";
 import { routerData } from "@/router";
 import SidebarLeft from "./SidebarLeft.vue";

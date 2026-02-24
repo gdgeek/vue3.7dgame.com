@@ -13,7 +13,7 @@ export const useAppStore = defineStore("app", () => {
   const size = useStorage("size", defaultSettings.size);
   const language = useStorage("language", defaultSettings.language);
   const sidebarStatus = useStorage("sidebarStatus", SidebarStatusEnum.CLOSED);
-  const locale = ref<any>(zhCn); // 默认使用中文
+  const locale = ref<typeof zhCn>(zhCn); // 默认使用中文
 
   const sidebar = reactive({
     opened: sidebarStatus.value === SidebarStatusEnum.OPENED,

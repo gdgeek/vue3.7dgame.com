@@ -35,7 +35,37 @@
 <script setup lang="ts">
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
 import { getResources } from "@/api/v1/resources";
-import { getPhototypes, PhototypeType } from "@/api/v1/phototype";
+import { getPhototypes } from "@/api/v1/phototype";
+import type { PhototypeType } from "@/api/v1/types/phototype";
+import type { ResourceInfo } from "@/api/v1/resources/model";
+
+type ResourceListItem = ResourceInfo & { title?: string };
+type MetaEntity = {
+  parameters: {
+    name: string;
+  };
+  children?: {
+    entities?: MetaEntity[];
+  };
+};
+
+type MetaPayload = {
+  children?: {
+    entities?: MetaEntity[];
+  };
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const isPhototypeType = (value: unknown): value is PhototypeType =>
+  isRecord(value) && "schema" in value && "title" in value;
+
+const hasTypeField = (value: unknown): value is { type: string } =>
+  isRecord(value) && typeof value.type === "string";
+
+const hasImageData = (value: unknown): value is { imageData: string } =>
+  isRecord(value) && typeof value.imageData === "string";
 
 const currentPlayingAudio = ref<HTMLAudioElement | null>(null);
 
@@ -59,7 +89,7 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
 
         console.error(response.data);
         // 处理响应数据，转换为 CardInfo 数组
-        const items = response.data.map((item: any) => {
+        const items = response.data.map((item: PhototypeType) => {
           return {
             id: item.id,
             context: item,
@@ -87,7 +117,7 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
           "image"
         );
 
-        const items = response.data.map((item: any) => {
+        const items = response.data.map((item: ResourceListItem) => {
           let enabled: boolean = true;
           if (item.type === "polygen" && !item.image) {
             enabled = false;
@@ -121,6 +151,7 @@ import { useRoute, useRouter } from "vue-router";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import PhototypeDialog from "@/components/MrPP/PhototypeDialog.vue";
 import { putMeta, getMeta } from "@/api/v1/meta";
+import type { UpdateMetaRequest } from "@/api/v1/types/meta";
 import { useAppStore } from "@/store/modules/app";
 import { translateRouteTitle } from "@/utils/i18n";
 import env from "@/environment";
@@ -150,7 +181,7 @@ const userStore = useUserStore();
 const id = computed(() => parseInt(route.query.id as string));
 const title = computed(() => route.query.title?.slice(4) as string);
 const src = computed(() => {
-  const query: Record<string, any> = {
+  const query: Record<string, string | number> = {
     language: appStore.language,
     timestamp: Date.now(),
     api: env.api,
@@ -190,7 +221,7 @@ const selectedPhototype = async (
   replace: boolean = false
 ) => {
   console.error(phototype.resource);
-  phototypeDialogRef.value?.open(phototype.schema.root, (data: any) => {
+  phototypeDialogRef.value?.open(phototype.schema.root, (data: unknown) => {
     // const d = { ...data, id: phototype.id };
     postMessage("load-phototype", {
       data: {
@@ -206,7 +237,11 @@ const selectedPhototype = async (
 const selected = async (info: CardInfo, replace: boolean = false) => {
   if (info.type === "phototype") {
     console.error(info.context);
-    selectedPhototype(info.context as PhototypeType, replace);
+    if (isPhototypeType(info.context)) {
+      selectedPhototype(info.context, replace);
+    } else {
+      console.error("phototype数据格式错误:", info.context);
+    }
     return;
   }
   if (replace) {
@@ -216,24 +251,26 @@ const selected = async (info: CardInfo, replace: boolean = false) => {
   }
 };
 
-const loadResource = (data: any) => {
+const loadResource = (data: unknown) => {
+  if (!hasTypeField(data)) return;
   dialog.value.open(null, id.value, data.type);
 };
 
-const replaceResource = (data: any) => {
+const replaceResource = (data: unknown) => {
+  if (!hasTypeField(data)) return;
   dialog.value.open(null, id.value, data.type, "replace");
 };
 
 // 权限检查
-const saveable = (data: any) => {
-  if (data === null) {
+const saveable = (data: unknown) => {
+  if (!isRecord(data)) {
     return false;
   }
-  return data.editable;
+  return Boolean(data.editable);
 };
 
 // 向编辑器发送消息
-const postMessage = (action: string, data: any = {}) => {
+const postMessage = (action: string, data: unknown = {}) => {
   if (editor.value && editor.value.contentWindow) {
     editor.value.contentWindow.postMessage(
       {
@@ -266,14 +303,20 @@ const getAvailableResourceTypes = () => {
 };
 
 // 保存元数据
-const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
+const saveMeta = async ({
+  meta,
+  events,
+}: {
+  meta: MetaPayload;
+  events: unknown;
+}) => {
   if (!saveable) {
     ElMessage.info(t("meta.scene.info"));
     return;
   }
 
   // 在上传前处理 meta 数据，确保 name 唯一
-  const renameEntities = (entities: any[]) => {
+  const renameEntities = (entities: MetaEntity[]) => {
     const nameCount: Record<string, number> = {};
 
     entities.forEach((entity) => {
@@ -311,9 +354,9 @@ const saveMeta = async ({ meta, events }: { meta: any; events: any }) => {
 };
 
 // 处理上传封面图片
-const handleUploadCover = async (data: any) => {
+const handleUploadCover = async (data: unknown) => {
   try {
-    if (!data || !data.imageData) {
+    if (!hasImageData(data)) {
       ElMessage.error(t("meta.scene.coverUploadError"));
       return;
     }
@@ -357,7 +400,7 @@ const handleUploadCover = async (data: any) => {
         md5,
         extension,
         file,
-        (p: any) => {},
+        (_progress: unknown) => {},
         handler,
         "backup"
       );
@@ -377,8 +420,11 @@ const handleUploadCover = async (data: any) => {
       // 更新Meta的image_id
       const meta = await getMeta(id.value);
       if (meta && meta.data) {
-        meta.data.image_id = response.data.id;
-        await putMeta(id.value, meta.data);
+        const updatePayload: UpdateMetaRequest = {
+          ...meta.data,
+          image_id: response.data.id ?? undefined,
+        };
+        await putMeta(id.value, updatePayload);
         ElMessage.success(t("meta.scene.coverUploadSuccess"));
         await refresh();
       }

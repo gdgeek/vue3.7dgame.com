@@ -40,7 +40,11 @@ import { useScreenStore } from "@/store";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 
-const codeDialog = ref<any>(null);
+type QRCodeDialogExpose = {
+  openDialog: () => void;
+};
+
+const codeDialog = ref<QRCodeDialogExpose | null>(null);
 
 const userStore = useUserStore();
 const { t } = useI18n();

@@ -107,7 +107,7 @@ const props = withDefaults(defineProps<ViewContainerProps>(), {
 });
 
 const emit = defineEmits<{
-  (e: "row-click", item: any): void;
+  (e: "row-click", item: unknown): void;
 }>();
 
 const defaultBreakpoints = {

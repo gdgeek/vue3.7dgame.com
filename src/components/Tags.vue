@@ -26,32 +26,36 @@ import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { getTags } from "@/api/v1/tags";
 
-import type { TagProps } from "element-plus";
-const props = defineProps({
-  verseTags: {
-    type: Array,
-    default: () => [],
-  },
-  editable: {
-    type: Boolean,
-    default: () => false,
-  },
-});
+type VerseTagLink = {
+  tags_id: number;
+};
 
-const emit = defineEmits(["add", "remove"]);
-const { t } = useI18n();
-const value = ref();
-interface TagsItem {
+type TagRecord = {
   id: number;
   name: string;
   type: string;
-}
+  key?: string | number;
+};
+
+const props = withDefaults(
+  defineProps<{
+    verseTags: VerseTagLink[];
+    editable?: boolean;
+  }>(),
+  {
+    editable: false,
+  }
+);
+
+const emit = defineEmits(["add", "remove"]);
+const { t } = useI18n();
+const value = ref<number | null>(null);
 const close = (id: number) => {
   console.log("删除标签:", id);
   emit("remove", id);
 };
 const data = computed(() => {
-  return props.verseTags.map((item: any) => {
+  return props.verseTags.map((item) => {
     return item.tags_id;
   });
 });
@@ -59,10 +63,10 @@ const data = computed(() => {
 const classify = computed(() => {
   if (list.value === null) return [];
   return list.value
-    .filter((item: any) => {
+    .filter((item) => {
       return !data.value.includes(item.id) && item.type === "Classify";
     })
-    .map((item: any) => {
+    .map((item) => {
       return {
         label: item.name,
         value: item.id,
@@ -74,10 +78,10 @@ const tags = computed(() => {
   if (list.value === null) return [];
 
   return list.value
-    .filter((item: any) => {
+    .filter((item) => {
       return data.value.includes(item.id) && item.type === "Classify";
     })
-    .map((item: any) => {
+    .map((item) => {
       return {
         name: item.name,
         id: item.id,
@@ -86,15 +90,15 @@ const tags = computed(() => {
     });
 });
 
-const handleChange = (val: any) => {
+const handleChange = (val: number) => {
   console.log("选择完毕，选中的标签:", val);
   emit("add", val);
   value.value = null;
 };
 
-const list: Ref<null | []> = ref(null);
+const list: Ref<TagRecord[] | null> = ref(null);
 onMounted(async () => {
   const res = await getTags();
-  list.value = res.data;
+  list.value = res.data as TagRecord[];
 });
 </script>

@@ -53,19 +53,13 @@
 </template>
 
 <script setup lang="ts">
-import type { Author, VerseData } from "@/api/v1/verse";
-import DOMPurify from "dompurify";
+import type { VerseData } from "@/api/v1/verse";
 
 interface Course {
   id: number;
   title: {
     rendered: string;
   };
-}
-interface Item {
-  icon: string;
-  label: string;
-  value: string;
 }
 
 const props = defineProps<{
@@ -76,11 +70,6 @@ const author = computed(() => {
 });
 
 const course = ref<Course | null>(null);
-
-// 返回清理后的 HTML
-const sanitizedTitle = computed(() => {
-  return course.value ? DOMPurify.sanitize(course.value.title.rendered) : "";
-});
 
 onMounted(async () => {
   /*

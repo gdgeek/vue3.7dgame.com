@@ -20,22 +20,24 @@ export const useTagsStore = defineStore("tags", () => {
       const classify = await getTags("Classify");
 
       const map = new Map<number, TagInfo>();
-      classify.data.forEach((item: any) => {
-        const obj: TagInfo = {
-          name: item.name,
-          color: "#000000",
-          type: "#000000",
-          explan: "无内容",
-          managed: item.managed,
-        };
-        const info = JSON.parse(item.info);
-        if (info) {
-          obj.color = info.color || "#000000";
-          obj.type = info.type || "#000000";
-          obj.explan = info.explan || "无内容";
+      classify.data.forEach(
+        (item: { id: number; name: string; info: string; managed: 0 | 1 }) => {
+          const obj: TagInfo = {
+            name: item.name,
+            color: "#000000",
+            type: "#000000",
+            explan: "无内容",
+            managed: item.managed,
+          };
+          const info = JSON.parse(item.info);
+          if (info) {
+            obj.color = info.color || "#000000";
+            obj.type = info.type || "#000000";
+            obj.explan = info.explan || "无内容";
+          }
+          map.set(item.id, obj);
         }
-        map.set(item.id, obj);
-      });
+      );
       tagsMap.value = map;
     } catch (error) {
       logger.error(error);

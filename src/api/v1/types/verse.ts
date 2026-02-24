@@ -61,6 +61,13 @@ export interface Script {
 /** Meta 信息（复用 Meta 类型） */
 export type MetaInfo = MetaInfoFull;
 
+/** 标签 */
+export interface VerseTag {
+  id: number;
+  name: string;
+  type?: string;
+}
+
 /** 场景数据 */
 export interface VerseData {
   id: number;
@@ -83,7 +90,9 @@ export interface VerseData {
   metas?: MetaInfo[];
   script?: Script;
   verseCode?: VerseCode | null;
-  verseTags?: string[];
+  verseTags?: VerseTag[];
+  tags?: VerseTag[];
+  updated_at?: string;
 }
 
 /** 创建/更新场景请求 */

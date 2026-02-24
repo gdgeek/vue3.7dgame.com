@@ -172,15 +172,15 @@ const getRoleLevel = (roles: string[]): number => {
   return -1;
 };
 
-const people = (roles: string[]): boolean => {
-  return can("people", new AbilityRole(roles));
+const people = (_roles: string[]): boolean => {
+  return can("people", new AbilityRole(_roles));
 };
 
 const refresh = () => {
   emit("refresh");
 };
 
-const deleted = async (item: any) => {
+const deleted = async (item: ViewCard) => {
   try {
     await ElMessageBox.confirm(
       t("manager.list.confirm.message1"),
@@ -235,12 +235,14 @@ const getAbilitiesFromRole = (role: string): string => {
 };
 
 type ViewCard = {
-  src: string;
+  src?: string;
   id?: string;
-  name?: string;
-  star?: boolean;
-  backgroundColor?: string;
-  [attr: string]: any;
+  email?: string | null;
+  username?: string;
+  nickname?: string | null;
+  avatar?: userData["avatar"] | null;
+  roles: string[];
+  selectedRole: string;
 };
 
 // 瀑布流数据类型转换

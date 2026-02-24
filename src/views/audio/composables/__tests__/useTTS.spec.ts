@@ -92,7 +92,7 @@ describe("useTTS", () => {
     tts.audioPlayerRef.value = mockAudio;
 
     // Mock Axios response
-    (axios.post as any).mockResolvedValueOnce({
+    vi.mocked(axios.post).mockResolvedValueOnce({
       data: {
         Audio: "base64audiocontent", // "audio" in base64
         SessionId: "123",

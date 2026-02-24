@@ -26,8 +26,8 @@ export type ViewMode = "grid" | "list";
 export type SortDirection = string; // e.g. "-created_at", "name"
 
 // ===== ViewContainer =====
-export interface ViewContainerProps {
-  items: any[] | null;
+export interface ViewContainerProps<T = unknown> {
+  items: T[] | null;
   viewMode: ViewMode;
   loading?: boolean;
   showEmpty?: boolean;

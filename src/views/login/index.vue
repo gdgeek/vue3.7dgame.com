@@ -159,13 +159,11 @@ import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 //import { useInfomationStore } from "@/store/modules/information";
 import { useDomainStore } from "@/store/modules/domain";
-import { useUserStore, useScreenStore } from "@/store";
+import { useScreenStore } from "@/store";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
-import AuthAPI from "@/api/v1/auth";
 
 const router = useRouter();
 const route = useRoute();
-const userStore = useUserStore();
 //const informationStore = useInfomationStore();
 const domainStore = useDomainStore();
 const settingsStore = useSettingsStore();
@@ -175,7 +173,7 @@ const loginFormRef = ref<InstanceType<typeof LoginForm>>();
 const screenStore = useScreenStore();
 const isMobile = computed(() => screenStore.isMobile);
 
-import { Message, MessageBox } from "@/components/Dialog";
+import { Message } from "@/components/Dialog";
 
 const parseRedirect = (): {
   path: string;
@@ -194,9 +192,12 @@ const parseRedirect = (): {
   return { path, queryParams };
 };
 
+type LoginPayload = { auth?: string };
+type LoginFormPayload = { value?: unknown };
+
 const enter = async (
-  user: any,
-  form: any,
+  user: LoginPayload,
+  form: LoginFormPayload,
   resolve: () => void,
   reject: (message: string) => void
 ) => {

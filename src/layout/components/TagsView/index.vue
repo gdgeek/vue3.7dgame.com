@@ -109,7 +109,7 @@ watch(
 );
 
 const contentMenuVisible = ref(false); // 右键菜单是否显示
-watch(contentMenuVisible, (value: any) => {
+watch(contentMenuVisible, (value: boolean) => {
   if (value) {
     document.body.addEventListener("click", closeContentMenu);
   } else {
@@ -248,26 +248,32 @@ function toLastView(visitedViews: TagView[], view?: TagView) {
 }
 
 function closeSelectedTag(view: TagView) {
-  tagsViewStore.delView(view).then((res: any) => {
-    if (isActive(view)) {
-      toLastView(res.visitedViews, view);
-    }
-  });
+  tagsViewStore
+    .delView(view)
+    .then((res: { visitedViews: TagView[]; cachedViews: string[] }) => {
+      if (isActive(view)) {
+        toLastView(res.visitedViews, view);
+      }
+    });
 }
 
 function closeLeftTags() {
-  tagsViewStore.delLeftViews(selectedTag.value).then((res: any) => {
-    if (!res.visitedViews.find((item: any) => item.path === route.path)) {
-      toLastView(res.visitedViews);
-    }
-  });
+  tagsViewStore
+    .delLeftViews(selectedTag.value)
+    .then((res: { visitedViews: TagView[] }) => {
+      if (!res.visitedViews.find((item: TagView) => item.path === route.path)) {
+        toLastView(res.visitedViews);
+      }
+    });
 }
 function closeRightTags() {
-  tagsViewStore.delRightViews(selectedTag.value).then((res: any) => {
-    if (!res.visitedViews.find((item: any) => item.path === route.path)) {
-      toLastView(res.visitedViews);
-    }
-  });
+  tagsViewStore
+    .delRightViews(selectedTag.value)
+    .then((res: { visitedViews: TagView[] }) => {
+      if (!res.visitedViews.find((item: TagView) => item.path === route.path)) {
+        toLastView(res.visitedViews);
+      }
+    });
 }
 
 function closeOtherTags() {
@@ -278,9 +284,11 @@ function closeOtherTags() {
 }
 
 function closeAllTags(view: TagView) {
-  tagsViewStore.delAllViews().then((res: any) => {
-    toLastView(res.visitedViews, view);
-  });
+  tagsViewStore
+    .delAllViews()
+    .then((res: { visitedViews: TagView[]; cachedViews: string[] }) => {
+      toLastView(res.visitedViews, view);
+    });
 }
 
 /**
@@ -325,11 +333,11 @@ function handleScroll() {
   closeContentMenu();
 }
 
-function findOutermostParent(tree: any[], findName: string) {
-  let parentMap: any = {};
+function findOutermostParent(tree: RouteRecordRaw[], findName: string) {
+  const parentMap: Record<string, RouteRecordRaw | null> = {};
 
-  function buildParentMap(node: any, parent: any) {
-    parentMap[node.name] = parent;
+  function buildParentMap(node: RouteRecordRaw, parent: RouteRecordRaw | null) {
+    parentMap[node.name as string] = parent;
 
     if (node.children) {
       for (let i = 0; i < node.children.length; i++) {
@@ -344,10 +352,10 @@ function findOutermostParent(tree: any[], findName: string) {
 
   let currentNode = parentMap[findName];
   while (currentNode) {
-    if (!parentMap[currentNode.name]) {
+    if (!parentMap[currentNode.name as string]) {
       return currentNode;
     }
-    currentNode = parentMap[currentNode.name];
+    currentNode = parentMap[currentNode.name as string];
   }
 
   return null;
@@ -363,7 +371,7 @@ const againActiveTop = (newVal: string) => {
 // 如果是混合模式，更改selectedTag，需要对应高亮的activeTop
 watch(
   () => route.name,
-  (newVal: any) => {
+  (newVal: string | symbol | null | undefined) => {
     if (newVal) {
       againActiveTop(newVal as string);
     }

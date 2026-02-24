@@ -129,7 +129,7 @@ import { useFileStore } from "@/store/modules/config";
 import { UploadFileType } from "@/api/user/model";
 import { postFile } from "@/api/v1/files";
 import { FileHandler } from "@/assets/js/file/server";
-import { Delete, Document, Upload } from "@element-plus/icons-vue";
+import { Delete, Document } from "@element-plus/icons-vue";
 import { processModel } from "@/utils/modelProcessor";
 
 const { t } = useI18n();

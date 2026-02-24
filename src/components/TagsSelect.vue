@@ -17,6 +17,7 @@ const emit = defineEmits(["tagsChange"]);
 
 const value = ref<(string | number)[]>([]);
 const options = ref<{ label: string; value: string | number }[]>([]);
+type TagRecord = { id: number; name: string };
 
 const handleChange = (val: (string | number)[]) => {
   console.log("选择完毕，选中的标签:", val);
@@ -25,7 +26,7 @@ const handleChange = (val: (string | number)[]) => {
 
 onMounted(() => {
   getTags().then((res) => {
-    options.value = res.data.map((item: any) => ({
+    options.value = (res.data as TagRecord[]).map((item) => ({
       label: item.name,
       value: item.id,
     }));

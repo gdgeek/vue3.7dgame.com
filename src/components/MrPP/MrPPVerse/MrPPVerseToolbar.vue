@@ -33,13 +33,10 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { putVerse, deleteVerse, VerseData } from "@/api/v1/verse";
 import MrPPVerseWindowCreate from "@/components/MrPP/MrPPVerse/MrPPVerseWindowCreate.vue";
-
-const router = useRouter();
 
 const deleteLoading = ref(false);
 
@@ -96,7 +93,7 @@ const del = async () => {
 };
 
 // 提交修改
-const submitChange = async (form: any, imageId: number | null) => {
+const submitChange = async (form: VerseData, imageId: number | null) => {
   if (!props.verse) return;
 
   const data: { name: string; description: string; image_id?: number } = {

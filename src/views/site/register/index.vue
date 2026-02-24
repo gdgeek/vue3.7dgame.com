@@ -63,10 +63,9 @@
 <script setup lang="ts">
 import "@/assets/font/font.css";
 import { LocationQuery, useRoute, useRouter } from "vue-router";
-// import { ElMessage } from "element-plus";
 import { Message, MessageBox } from "@/components/Dialog";
 import { useSettingsStore } from "@/store/modules/settings";
-import { FormInstance } from "element-plus";
+import { FormInstance, type FormItemRule } from "element-plus";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { onMounted, watch, ref } from "vue";
 import { useI18n } from "vue-i18n"; // Ensure you have this import
@@ -107,7 +106,7 @@ const registerForm = ref<RegisterData>({
   repassword: "",
 });
 
-const validatePass2 = (rule: any, value: any, callback: any) => {
+const validatePass2: FormItemRule["validator"] = (_rule, value, callback) => {
   if (value === "") {
     callback(new Error(t("login.rules.repassword.message1")));
   } else if (value !== registerForm.value.password) {

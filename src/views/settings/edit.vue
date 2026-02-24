@@ -387,7 +387,7 @@ const { t } = useI18n();
 const isDisable = ref(false);
 const isLoading = ref(true);
 const dialogVisible = ref(false);
-const cropperRef = ref<any>({});
+const cropperRef = ref<InstanceType<typeof VueCropper> | null>(null);
 
 // 初始化邮箱验证Composable
 const {
@@ -745,7 +745,7 @@ const finish = async () => {
         md5,
         file.name.split(".").pop() || "",
         file,
-        (p: any) => {},
+        (p: number) => {},
         handler,
         "backup"
       );

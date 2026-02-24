@@ -11,10 +11,7 @@ import { useRoute } from "vue-router";
 import aiRodin from "@/api/v1/ai-rodin";
 const route = useRoute();
 
-interface AiData {
-  id: number;
-  [key: string]: any;
-}
+import type { AiRodinItem } from "@/types/ai-rodin";
 
 import AIUpload from "@/components/MrPP/AIUpload.vue";
 import AIProcess from "@/components/MrPP/AIProcess.vue";
@@ -24,7 +21,7 @@ const id: Ref<number | undefined> = computed(() => {
 });
 const loading: Ref<boolean> = ref(false);
 //import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
-const data = ref<AiData | null>(null);
+const data = ref<AiRodinItem | null>(null);
 onMounted(async () => {
   if (id.value) {
     try {

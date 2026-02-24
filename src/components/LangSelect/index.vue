@@ -43,7 +43,7 @@ const langOptions = [
 
 const appStore = useAppStore();
 const domainStore = useDomainStore();
-const { locale, t } = useI18n();
+const { t } = useI18n();
 
 const currentLangLabel = computed(() => {
   const currentLang = langOptions.find(

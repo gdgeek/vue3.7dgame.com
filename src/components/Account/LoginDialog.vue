@@ -50,20 +50,12 @@
 
 <script setup lang="ts">
 import NamePassword from "./NamePassword.vue";
-import RegisterForm from "./RegisterForm.vue";
 import Wechat from "./Wechat.vue";
 import { useI18n } from "vue-i18n";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useDomainStore } from "@/store/modules/domain";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { Message } from "@/components/Dialog";
-
-const props = defineProps({
-  title: {
-    type: String,
-    default: "用户登录/注册",
-  },
-});
 
 const emit = defineEmits(["dialog-closed"]);
 const settingsStore = useSettingsStore();
@@ -77,14 +69,6 @@ const isRegisterMode = ref(false);
 // 切换账号登录和注册模式
 const toggleRegisterMode = () => {
   isRegisterMode.value = !isRegisterMode.value;
-};
-
-// 处理tab点击事件
-const handleTabClick = () => {
-  // 当点击微信登录tab时，重置注册模式
-  if (activeTab.value === "wechat") {
-    isRegisterMode.value = false;
-  }
 };
 
 const openDialog = () => {

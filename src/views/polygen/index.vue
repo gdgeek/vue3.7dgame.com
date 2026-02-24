@@ -169,7 +169,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
-// import { ElMessage, ElMessageBox } from "element-plus";
 import { Message, MessageBox } from "@/components/Dialog";
 import {
   PageActionBar,
@@ -182,19 +181,13 @@ import {
 import StandardUploadDialog from "@/components/StandardPage/StandardUploadDialog.vue";
 import PolygenView from "@/components/PolygenView.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
-import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
-import { FolderOpened, Upload } from "@element-plus/icons-vue";
 import {
   getPolygens,
   getPolygen,
   putPolygen,
   deletePolygen,
   postPolygen,
-  getPicture,
 } from "@/api/v1/resources/index";
-import { useFileStore } from "@/store/modules/config";
-import { postFile } from "@/api/v1/files";
-import type { UploadFileType } from "@/api/user/model";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import { usePageData } from "@/composables/usePageData";
 import { useSelection } from "@/composables/useSelection";
@@ -297,21 +290,6 @@ const openUploadDialog = () => {
   uploadDialogVisible.value = true;
 };
 
-const fileInput = ref<HTMLInputElement | null>(null);
-const fileStore = useFileStore();
-
-// Image selection state - Removed
-// const imageSelectDialogVisible = ref(false);
-// const resourceDialogRef = ref<InstanceType<typeof ResourceDialog> | null>(null);
-
-const onResourceSelected = async (data: any) => {
-  // Unused in Polygen now
-};
-
-const handleCoverUpload = async (event: Event) => {
-  // Unused in Polygen now
-};
-
 const openViewDialog = async (id: number) => {
   currentPolygenId.value = id;
   viewDialogVisible.value = true;
@@ -320,7 +298,7 @@ const openViewDialog = async (id: number) => {
   hasAnimations.value = false;
 
   try {
-    const response = (await getPolygen(id)) as any;
+    const response = (await getPolygen(id)) as { data: ResourceInfo };
     currentPolygen.value = response.data;
   } catch (err) {
     Message.error(String(err));
@@ -393,7 +371,7 @@ const handleDelete = async () => {
   }
 };
 
-const handleUploadSuccess = async (uploadedIds: number | number[]) => {
+const handleUploadSuccess = async (_uploadedIds: number | number[]) => {
   uploadDialogVisible.value = false;
   refresh();
 };
@@ -408,7 +386,10 @@ const savePolygen = async (
   image_id?: number
 ) => {
   try {
-    const data: any = { name, file_id };
+    const data: { name: string; file_id: number; info?: string } = {
+      name,
+      file_id,
+    };
     if (info) data.info = info;
     if (image_id) data.image_id = image_id;
     const response = await postPolygen(data);

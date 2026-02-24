@@ -35,7 +35,6 @@
 import { usePermissionStore, useAppStore } from "@/store";
 import { translateRouteTitle } from "@/utils/i18n";
 import variables from "@/styles/variables.module.scss";
-import { RouteRecordRaw } from "vue-router";
 import { RouteVO } from "@/api/menu/model";
 import { routerData } from "@/router";
 

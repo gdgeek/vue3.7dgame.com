@@ -120,11 +120,8 @@ const tableData = computed(() => {
         text: formatFileSize(audioData.value.file.size),
       },
     ];
-    let info: any = {};
-    try {
-      info = JSON.parse(audioData.value.info || "{}");
-    } catch {}
-    if (info.length) {
+    const info = parseAudioInfo(audioData.value.info);
+    if (info?.length) {
       base.push({
         item: t("audio.view.info.item5"),
         text: info.length.toFixed(2) + "s",
@@ -202,11 +199,28 @@ const setup = async (audio: HTMLAudioElement) => {
 
   // 更新音频信息
   try {
-    const response = await putAudio(audioData.value!.id, { info });
-    audioData.value!.info = response.data.info;
+    if (!audioData.value) return;
+    const response = await putAudio(audioData.value.id, { info });
+    audioData.value.info = response.data.info;
   } catch (e) {
     console.error(e);
   }
+};
+
+type AudioInfo = {
+  size?: { x: number; y: number };
+  length?: number;
+};
+
+const parseAudioInfo = (raw?: string | null): AudioInfo | null => {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object") {
+      return parsed as AudioInfo;
+    }
+  } catch {}
+  return null;
 };
 
 // 删除音频确认对话框

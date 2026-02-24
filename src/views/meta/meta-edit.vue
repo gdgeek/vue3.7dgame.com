@@ -13,8 +13,8 @@ import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const getMetaData = async (
   id: number,
-  params: any,
-  callback: (data: any) => void
+  params: Record<string, unknown>,
+  callback: (data: Record<string, unknown>) => void
 ) => {
   try {
     const response = await getMeta(id, params);
@@ -27,8 +27,8 @@ const getMetaData = async (
 
 const putMetaData = async (
   id: number,
-  data: any,
-  callback: (data: any) => void
+  data: Record<string, unknown>,
+  callback: (data: Record<string, unknown>) => void
 ) => {
   try {
     const response = await putMeta(id, data);

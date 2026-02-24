@@ -294,7 +294,12 @@ const openResourceDialog = () => {
   resourceDialogRef.value?.openIt({ type: "picture" });
 };
 
-const onResourceSelected = async (data: any) => {
+const onResourceSelected = async (data: {
+  context?: { image_id?: number };
+  image?: { id?: number };
+  id: number;
+  type?: string;
+}) => {
   const imageId = data.context?.image_id || data.image?.id || data.id;
   if (imageId && currentMeta.value) {
     detailLoading.value = true;

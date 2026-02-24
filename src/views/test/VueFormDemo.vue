@@ -63,13 +63,14 @@
 
 <script setup lang="ts">
 import VueForm from "@/components/JsonSchemaForm/index.vue";
-import { ref, computed, nextTick, watch } from "vue";
+import { ref, computed, nextTick } from "vue";
 import { ElMessage } from "element-plus";
 import { useI18n } from "vue-i18n";
+import type { JsonSchema, JsonValue } from "@/components/JsonSchemaForm/types";
 
 const { t } = useI18n();
 
-const formData = ref<Record<string, any>>({});
+const formData = ref<Record<string, JsonValue>>({});
 
 // 示例 Schema 1: 粒子类型
 const schema1 = {
@@ -209,7 +210,7 @@ const schema4 = {
   },
 };
 
-const schema = ref<any>(schema1);
+const schema = ref<JsonSchema>(schema1);
 
 const formFooter = computed(() => ({
   show: true,
@@ -262,8 +263,8 @@ const handleChange = ({
   oldValue,
   newValue,
 }: {
-  oldValue: any;
-  newValue: any;
+  oldValue: Record<string, JsonValue>;
+  newValue: Record<string, JsonValue>;
 }) => {
   console.log("Data changed:", { oldValue, newValue });
 };

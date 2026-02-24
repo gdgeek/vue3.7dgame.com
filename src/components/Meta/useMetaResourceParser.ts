@@ -34,23 +34,6 @@ export interface MetaResourceIndex {
   events: { inputs: string[]; outputs: string[] };
 }
 
-interface Node {
-  type: string;
-  parameters?: {
-    uuid: string;
-    action?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    parameter?: any;
-    name?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    animations?: any;
-  };
-  children?: {
-    components?: Node[];
-    [key: string]: Node[] | undefined;
-  };
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseAction(node: any, parentUuid?: string): ActionInfo | null {
   if (

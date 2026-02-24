@@ -38,9 +38,6 @@ defineOptions({
 const section = computed(() => {
   return route.query.section ? (route.query.section as string) : "news";
 });
-const loginDialogRef = ref<any>(null);
-
-const isScrolled = ref(false);
 
 // 自动滚动
 const SCROLL_POSITION_KEY = "web_scroll_position";
@@ -75,6 +72,7 @@ const restoreScrollPosition = () => {
 };
 
 // 防抖
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const debounce = (fn: Function, delay: number) => {
   let timer: number | null = null;
   return (...args: unknown[]) => {

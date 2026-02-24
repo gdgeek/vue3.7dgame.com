@@ -333,7 +333,6 @@ import Create from "@/components/MrPP/MrPPVerse/MrPPVerseWindowCreate.vue";
 import ImportDialog from "@/components/ScenePackage/ImportDialog.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
-import { FolderOpened, Upload } from "@element-plus/icons-vue";
 import {
   getVerses,
   getVerse,
@@ -352,6 +351,7 @@ import { postFile } from "@/api/v1/files";
 import type { UploadFileType } from "@/api/user/model";
 import { getTags } from "@/api/v1/tags";
 import type { PostVerseData, VerseData } from "@/api/v1/verse";
+import type { CardInfo } from "@/utils/types";
 import { usePageData } from "@/composables/usePageData";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
 import { useAbility } from "@casl/vue";
@@ -385,7 +385,7 @@ const {
 
 const detailVisible = ref(false);
 const detailLoading = ref(false);
-const currentVerse = ref<any | null>(null);
+const currentVerse = ref<VerseData | null>(null);
 const ability = useAbility();
 
 const canManage = computed(() => {
@@ -397,7 +397,6 @@ const canManage = computed(() => {
 });
 
 const editingDescription = ref("");
-const fileInput = ref<HTMLInputElement | null>(null);
 const fileStore = useFileStore();
 const allTags = ref<{ label: string; value: number }[]>([]);
 const selectedTag = ref<number | undefined>(undefined);
@@ -412,7 +411,7 @@ const openImportDialog = () => {
   importDialogVisible.value = true;
 };
 
-const handleImportSuccess = (verseId: number) => {
+const handleImportSuccess = (_verseId: number) => {
   importDialogVisible.value = false;
   refresh();
   Message.success(t("verse.listPage.importSuccess"));
@@ -451,7 +450,7 @@ const openResourceDialog = () => {
   resourceDialogRef.value?.openIt({ type: "picture" });
 };
 
-const onResourceSelected = async (data: any) => {
+const onResourceSelected = async (data: CardInfo) => {
   // data is CardInfo, but to be sure
   const imageId = data.context?.image_id || data.image?.id || data.id;
   if (imageId && currentVerse.value) {
@@ -517,7 +516,7 @@ const handleCoverUpload = async (event: Event) => {
             md5,
             extension,
             file,
-            (p: number) => {}, // progress
+            (_p: number) => {}, // progress
             handler,
             dir
           )
@@ -564,7 +563,7 @@ const openDetail = async (item: VerseData) => {
 
     if (canManage.value) {
       const tagsRes = await getTags();
-      allTags.value = tagsRes.data.map((tag: any) => ({
+      allTags.value = tagsRes.data.map((tag: { id: number; name: string }) => ({
         label: tag.name,
         value: tag.id,
       }));
@@ -597,7 +596,7 @@ const handleDescriptionBlur = async () => {
 };
 
 const isTagSelected = (tagId: number) => {
-  return currentVerse.value?.verseTags?.some((t: any) => t.id === tagId);
+  return currentVerse.value?.verseTags?.some((t) => t.id === tagId);
 };
 
 const handleAddTag = async (tagId: number | undefined) => {
@@ -622,7 +621,7 @@ const handleRemoveTag = async (tagId: number) => {
   try {
     await removeTag(currentVerse.value.id, tagId);
     currentVerse.value.verseTags = currentVerse.value.verseTags.filter(
-      (t: any) => t.id !== tagId
+      (t) => t.id !== tagId
     );
     Message.success(t("verse.listPage.tagRemoved"));
     refresh();
@@ -671,7 +670,7 @@ const handleGoToEditor = () => {
   }
 };
 
-const handleCopy = async () => {
+const _handleCopy = async () => {
   if (!currentVerse.value) return;
   try {
     const { value } = (await MessageBox.prompt(

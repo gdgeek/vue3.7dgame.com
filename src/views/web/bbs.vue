@@ -11,14 +11,13 @@
 
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { useRouter, useRoute } from "vue-router";
+import { useRoute } from "vue-router";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { ElMessageBox } from "element-plus";
 import type { Action } from "element-plus";
-const router = useRouter();
 const route = useRoute();
 const contentRef = ref<HTMLElement | null>(null);
 const settingsStore = useSettingsStore();
@@ -37,12 +36,10 @@ const open = () => {
       // if you want to disable its autofocus
       // autofocus: false,
       confirmButtonText: "确认",
-      callback: (action: Action) => {},
+      callback: (_action: Action) => {},
     }
   );
 };
-
-const loginDialogRef = ref<any>(null);
 
 // 自动滚动
 const SCROLL_POSITION_KEY = "web_scroll_position";
@@ -98,7 +95,6 @@ const handleScroll = () => {
 };
 
 const isMobile = ref(false);
-const sidebarVisible = ref(false);
 
 const checkMobile = () => {
   isMobile.value = window.innerWidth <= 768;

@@ -116,8 +116,18 @@ const open = () => {
   });
 };
 
-const buyItem = ref<any>(null);
-const buy = (item: any) => {
+type CaseItem = {
+  image: string;
+  qrcode: string;
+  title: string;
+  description: string;
+  price: string;
+  annotate: string;
+  tags: string[];
+};
+
+const buyItem = ref<CaseItem | null>(null);
+const buy = (item: CaseItem) => {
   buyItem.value = item;
   dialogVisible.value = true;
 };

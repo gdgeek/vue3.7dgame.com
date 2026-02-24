@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { getMeta, putMeta, metaInfo } from "@/api/v1/meta";
 import { translateRouteTitle } from "@/utils/i18n";

@@ -20,9 +20,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import MrPPUserCreater from "@/components/MrPP/MrPPUserSettings/MrPPUserCreater.vue";
-</script>
+<script setup lang="ts"></script>
 
 <style lang="scss" scoped>
 .el-row {

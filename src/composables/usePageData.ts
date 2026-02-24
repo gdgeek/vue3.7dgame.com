@@ -1,28 +1,33 @@
 import { ref, reactive, computed, onMounted } from "vue";
 import type { ViewMode } from "@/components/StandardPage/types";
 
+type FetchExtraParams = Record<string, unknown>;
+type PaginationHeaderValue = string | number | undefined;
+
 export interface FetchParams {
   sort: string;
   search: string;
   page: number;
   tags?: number[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
-export interface FetchResponse {
-  data: any[];
-  headers: any;
+export interface FetchResponse<T = unknown> {
+  data: T[];
+  headers: Record<string, PaginationHeaderValue>;
 }
 
-export interface UsePageDataOptions {
-  fetchFn: (params: FetchParams) => Promise<FetchResponse>;
+export interface UsePageDataOptions<T = unknown> {
+  fetchFn: (
+    params: FetchParams & FetchExtraParams
+  ) => Promise<FetchResponse<T>>;
   defaultSort?: string;
   pageSize?: number;
   /** 是否自动在挂载时加载 */
   immediate?: boolean;
 }
 
-export function usePageData(options: UsePageDataOptions) {
+export function usePageData<T = unknown>(options: UsePageDataOptions<T>) {
   const {
     fetchFn,
     defaultSort = "-created_at",
@@ -31,7 +36,7 @@ export function usePageData(options: UsePageDataOptions) {
   } = options;
 
   // Data state
-  const items = ref<any[] | null>(null);
+  const items = ref<T[] | null>(null);
   const loading = ref(false);
 
   // Filter state
@@ -69,18 +74,15 @@ export function usePageData(options: UsePageDataOptions) {
       const response = await fetchFn(params);
 
       // Parse pagination headers
-      pagination.current = parseInt(
-        response.headers["x-pagination-current-page"] || "1"
-      );
-      pagination.count = parseInt(
-        response.headers["x-pagination-page-count"] || "1"
-      );
-      pagination.size = parseInt(
-        response.headers["x-pagination-per-page"] || String(pageSize)
-      );
-      pagination.total = parseInt(
-        response.headers["x-pagination-total-count"] || "0"
-      );
+      const currentPageHeader = response.headers["x-pagination-current-page"];
+      const pageCountHeader = response.headers["x-pagination-page-count"];
+      const pageSizeHeader = response.headers["x-pagination-per-page"];
+      const totalCountHeader = response.headers["x-pagination-total-count"];
+
+      pagination.current = parseInt(String(currentPageHeader ?? "1"));
+      pagination.count = parseInt(String(pageCountHeader ?? "1"));
+      pagination.size = parseInt(String(pageSizeHeader ?? pageSize));
+      pagination.total = parseInt(String(totalCountHeader ?? "0"));
 
       items.value = response.data || [];
     } catch (error) {

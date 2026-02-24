@@ -179,12 +179,29 @@ type EntityNode = {
   };
 };
 
-type ResourceLike = {
-  type: string;
-  id?: string | number;
-  content?: string;
-  file?: { url: string };
-} & Partial<ResourceInfo>;
+type MetaData = {
+  children?: {
+    entities?: EntityNode[];
+  };
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const isMetaData = (value: unknown): value is MetaData =>
+  isRecord(value) && ("children" in value || "entities" in value);
+
+type ResourceLike =
+  | ResourceInfo
+  | {
+      type: string;
+      id?: string | number;
+      content?: string;
+      file?: { url: string };
+    };
+
+const getResourceContent = (resource: ResourceLike): string | undefined =>
+  "content" in resource ? resource.content : undefined;
 
 const combineTransforms = (
   parentTransform: TransformData | undefined,
@@ -537,7 +554,8 @@ const loadModel = async (
     return new Promise((resolve, reject) => {
       try {
         // 创建文本几何体
-        const text = entity.parameters.text || resource.content || "默认文本";
+        const text =
+          entity.parameters.text || getResourceContent(resource) || "默认文本";
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d");
 
@@ -694,7 +712,7 @@ const loadModel = async (
                       );
                     }
                   } else if (childEntity.type === "Text") {
-                    const textResource = {
+                    const textResource: ResourceLike = {
                       type: "text",
                       content: childEntity.parameters.text || "DEFAULT TEXT",
                       id: childEntity.parameters.uuid || crypto.randomUUID(),
@@ -739,7 +757,7 @@ const loadModel = async (
                 (comp) => comp.type === "Moved"
               );
 
-              let sourceData = {
+              const sourceData: SourceRecord = {
                 type: "model",
                 data: {
                   mesh: voxMesh,
@@ -824,24 +842,25 @@ const loadModel = async (
                   });
                 }
 
-                sourceData.data.updateBoundingBox = () => {
-                  boundingBox.setFromObject(voxMesh);
-                };
+                if (sourceData.type === "model") {
+                  sourceData.data.updateBoundingBox = () => {
+                    boundingBox.setFromObject(voxMesh);
+                  };
+                }
               }
 
               // 处理自旋转
               if (rotateComponent) {
                 console.log("发现自旋转组件:", rotateComponent);
+                const speedValue = rotateComponent.parameters.speed;
+                if (!speedValue) {
+                  console.warn("旋转组件缺少速度参数");
+                  return;
+                }
                 const speed = {
-                  x: THREE.MathUtils.degToRad(
-                    rotateComponent.parameters.speed.x
-                  ),
-                  y: THREE.MathUtils.degToRad(
-                    rotateComponent.parameters.speed.y
-                  ),
-                  z: THREE.MathUtils.degToRad(
-                    rotateComponent.parameters.speed.z
-                  ),
+                  x: THREE.MathUtils.degToRad(speedValue.x),
+                  y: THREE.MathUtils.degToRad(speedValue.y),
+                  z: THREE.MathUtils.degToRad(speedValue.z),
                 };
 
                 rotatingObjects.value.push({
@@ -870,12 +889,17 @@ const loadModel = async (
               if (movedComponent) {
                 console.log("发现可移动组件:", movedComponent);
 
+                const limit = movedComponent.parameters.limit ?? {
+                  x: { enable: false, min: 0, max: 0 },
+                  y: { enable: false, min: 0, max: 0 },
+                  z: { enable: false, min: 0, max: 0 },
+                };
                 const moveableObject = {
                   mesh: voxMesh,
                   isDragging: false,
-                  magnetic: movedComponent.parameters.magnetic,
-                  scalable: movedComponent.parameters.scalable,
-                  limit: movedComponent.parameters.limit,
+                  magnetic: Boolean(movedComponent.parameters.magnetic),
+                  scalable: Boolean(movedComponent.parameters.scalable),
+                  limit,
                   checkVisibility: true,
                 };
 
@@ -1112,7 +1136,7 @@ const loadModel = async (
                     );
                   }
                 } else if (childEntity.type === "Text") {
-                  const textResource = {
+                  const textResource: ResourceLike = {
                     type: "text",
                     content: childEntity.parameters.text || "DEFAULT TEXT",
                     id: childEntity.parameters.uuid || crypto.randomUUID(),
@@ -1204,7 +1228,7 @@ const loadModel = async (
               renderer!.domElement.addEventListener("click", handleClick);
 
               // 在sources中存储模型数据时包含cleanup函数
-              const sourceData = {
+              const sourceData: SourceRecord = {
                 type: "model",
                 data: {
                   mesh: model,
@@ -1256,7 +1280,7 @@ const loadModel = async (
               // 在 sources 中保存更新函数
               const sourceData = sources.get(uuid);
 
-              if (sourceData) {
+              if (sourceData && sourceData.type === "model") {
                 sourceData.data.updateBoundingBox = updateBoundingBox;
               }
             }
@@ -1264,10 +1288,15 @@ const loadModel = async (
               console.log("发现自旋转组件:", rotateComponent);
 
               // 将速度从度/秒转换为弧度/秒
+              const speedValue = rotateComponent.parameters.speed;
+              if (!speedValue) {
+                console.warn("旋转组件缺少速度参数");
+                return;
+              }
               const speed = {
-                x: THREE.MathUtils.degToRad(rotateComponent.parameters.speed.x),
-                y: THREE.MathUtils.degToRad(rotateComponent.parameters.speed.y),
-                z: THREE.MathUtils.degToRad(rotateComponent.parameters.speed.z),
+                x: THREE.MathUtils.degToRad(speedValue.x),
+                y: THREE.MathUtils.degToRad(speedValue.y),
+                z: THREE.MathUtils.degToRad(speedValue.z),
               };
 
               // 添加到旋转对象列表时包含可见性检查
@@ -1278,7 +1307,7 @@ const loadModel = async (
               });
 
               // 在 sourceData 中添加控制旋转的方法
-              const sourceData = {
+              const sourceData: SourceRecord = {
                 type: "model",
                 data: {
                   mesh: model,
@@ -1307,12 +1336,17 @@ const loadModel = async (
             if (movedComponent) {
               console.log("发现可移动组件:", movedComponent);
 
+              const limit = movedComponent.parameters.limit ?? {
+                x: { enable: false, min: 0, max: 0 },
+                y: { enable: false, min: 0, max: 0 },
+                z: { enable: false, min: 0, max: 0 },
+              };
               const moveableObject = {
                 mesh: model,
                 isDragging: false,
-                magnetic: movedComponent.parameters.magnetic,
-                scalable: movedComponent.parameters.scalable,
-                limit: movedComponent.parameters.limit,
+                magnetic: Boolean(movedComponent.parameters.magnetic),
+                scalable: Boolean(movedComponent.parameters.scalable),
+                limit,
                 checkVisibility: true,
               };
 
@@ -1432,7 +1466,7 @@ const loadModel = async (
               document.addEventListener("mouseup", onMouseUp);
 
               // 更新 sourceData
-              const sourceData = {
+              const sourceData: SourceRecord = {
                 type: "model",
                 data: {
                   mesh: model,
@@ -1678,7 +1712,7 @@ const processEntities = async (
     // 处理当前实体
     if (entity.type === "Text") {
       try {
-        const textResource = {
+        const textResource: ResourceLike = {
           type: "text",
           content: entity.parameters.text || "DEFAULT TEXT",
           id: entity.parameters.uuid || crypto.randomUUID(),
@@ -1701,7 +1735,7 @@ const processEntities = async (
     } else if (entity.type === "Entity") {
       // 处理Entity类型
       console.log("处理Entity类型容器:", entity.parameters.uuid);
-      const entityData = {
+      const entityData: SourceRecord = {
         type: "entity",
         data: {
           transform: entityTransform,
@@ -1713,9 +1747,12 @@ const processEntities = async (
       };
       sources.set(entity.parameters.uuid, entityData);
     } else if (entity.parameters?.resource) {
-      const resource = props.meta.resources.find(
-        (r) => r.id.toString() === entity.parameters.resource.toString()
-      );
+      const resourceId = entity.parameters.resource;
+      const resource = resourceId
+        ? props.meta.resources.find(
+            (r) => r.id.toString() === resourceId.toString()
+          )
+        : undefined;
       if (resource) {
         try {
           await loadModel(
@@ -1799,7 +1836,7 @@ onMounted(async () => {
   const metaData = props.meta.data;
   console.log("解析后的metaData:", metaData);
 
-  if (metaData.children?.entities) {
+  if (isMetaData(metaData) && metaData.children?.entities) {
     await processEntities(metaData.children.entities);
   } else {
     console.error("metaData格式错误:", metaData);
@@ -1826,13 +1863,21 @@ onMounted(async () => {
     // 碰撞检测
     if (collisionObjects.value.length > 0) {
       for (const collisionObj of collisionObjects.value) {
-        const sourceModel = sources.get(collisionObj.sourceUuid)?.data.mesh;
-        const targetModel = sources.get(collisionObj.targetUuid)?.data.mesh;
+        const source = sources.get(collisionObj.sourceUuid);
+        const target = sources.get(collisionObj.targetUuid);
+        const sourceModel =
+          source && source.type === "model" ? source.data.mesh : undefined;
+        const targetModel =
+          target && target.type === "model" ? target.data.mesh : undefined;
+
+        if (!sourceModel || !targetModel) {
+          continue;
+        }
 
         // 如果任一模型不可见，跳过碰撞检测
         if (
           collisionObj.checkVisibility &&
-          (!sourceModel?.visible || !targetModel?.visible)
+          (!sourceModel.visible || !targetModel.visible)
         ) {
           continue;
         }

@@ -36,14 +36,14 @@ export interface Resource {
   type: ResourceType;
   file?: ResourceFile; // Optional for text
   content?: string; // For text resources
-  data?: any; // Runtime data (e.g. loaded texture, audio buffer)
+  data?: unknown; // Runtime data (e.g. loaded texture, audio buffer)
   id?: string | number;
   name?: string; // From ResourceInfo
   uuid?: string; // From ResourceInfo
-  image?: any; // From ResourceInfo
+  image?: { id: number; url: string; name?: string }; // From ResourceInfo
   created_at?: string; // From ResourceInfo
   info?: string; // From ResourceInfo
-  author?: any; // From ResourceInfo
+  author?: { id: number; username: string; nickname?: string }; // From ResourceInfo
 }
 
 export interface EntityParameters {
@@ -99,7 +99,7 @@ export interface Verse {
   description?: string;
   uuid?: string;
   data: VerseData | string; // Sometimes it's a JSON string that needs parsing
-  metas: any[]; // Array of meta info (events etc)
+  metas: unknown[]; // Array of meta info (events etc)
   resources: Resource[];
   code?: string;
 }

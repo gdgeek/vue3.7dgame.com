@@ -69,6 +69,7 @@ import {
   putPolygen,
   deletePolygen,
 } from "@/api/v1/resources/index";
+import type { ResourceInfo } from "@/api/v1/resources/model";
 import { printVector3 } from "@/assets/js/helper";
 import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 import MrppInfo from "@/components/MrPP/MrppInfo/index.vue";
@@ -84,7 +85,7 @@ const emit = defineEmits(["update:modelValue", "refresh", "deleted"]);
 
 const { t } = useI18n();
 const loading = ref(false);
-const polygenData = ref<any>(null);
+const polygenData = ref<ResourceInfo | null>(null);
 const percentage = ref(0);
 const three = ref<InstanceType<typeof PolygenView> | null>(null);
 
@@ -97,8 +98,26 @@ const prepare = computed(
   () => polygenData.value !== null && polygenData.value.info !== null
 );
 
+type Vector3 = { x: number; y: number; z: number };
+type PolygenInfo = {
+  size?: Vector3;
+  center?: Vector3;
+  faces?: number;
+};
+
+const parsePolygenInfo = (raw?: string | null): PolygenInfo | null => {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object") {
+      return parsed as PolygenInfo;
+    }
+  } catch {}
+  return null;
+};
+
 const dataInfo = computed(() =>
-  prepare.value ? JSON.parse(polygenData.value.info) : null
+  prepare.value ? parsePolygenInfo(polygenData.value?.info) : null
 );
 
 const tableData = computed(() => {
@@ -146,7 +165,7 @@ const progress = (progress: number) => {
   percentage.value = progress;
 };
 
-const loaded = async (info: any) => {
+const loaded = async (info: unknown) => {
   // Logic mostly removed as preprocessing handles this now.
   // We can keep it for logging or fallback if needed, but for now just log.
   console.log("Model loaded in dialog:", info);
@@ -158,7 +177,7 @@ const loadData = async () => {
   percentage.value = 0;
   try {
     const response = await getPolygen(props.id);
-    polygenData.value = (response as any).data;
+    polygenData.value = (response as { data: ResourceInfo }).data;
   } catch (err) {
     ElMessage.error(String(err));
   } finally {

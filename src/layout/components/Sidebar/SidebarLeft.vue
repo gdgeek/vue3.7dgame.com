@@ -533,7 +533,6 @@
 import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import StorageWidget from "./StorageWidget.vue";
 import ConfirmDialog from "@/components/Dialog/ConfirmDialog.vue";
 import { useUserStore } from "@/store";
 import { useDomainStore } from "@/store/modules/domain";
@@ -542,7 +541,7 @@ import { AbilityRouter } from "@/utils/ability";
 
 const { t } = useI18n();
 
-const props = defineProps({
+defineProps({
   collapsed: {
     type: Boolean,
     default: false,
@@ -562,11 +561,6 @@ const showLogoutDialog = ref(false);
 const isExactActive = (path: string) => {
   return route.path === path;
 };
-
-// Check if any resource sub-route is active
-const isResourceActive = computed(() => {
-  return route.path.startsWith("/resource");
-});
 
 const handleLogout = () => {
   showLogoutDialog.value = true;

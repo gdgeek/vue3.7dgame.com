@@ -95,13 +95,15 @@ import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import { useI18n } from "vue-i18n";
 import { sleep } from "@/assets/js/helper";
 import { Search } from "@element-plus/icons-vue";
-import type { FormInstance, FormRules } from "element-plus";
+import type { FormInstance, FormRules, FormItemRule } from "element-plus";
 import { useRouter } from "vue-router";
 
 import type { CardInfo } from "@/utils/types";
+import type { ResourceInfo } from "@/api/v1/resources/model";
+import type { AiRodinQuality } from "@/types/ai-rodin";
 const { t } = useI18n();
 const loading = ref(false);
-const dialog = ref();
+const dialog = ref<InstanceType<typeof ResourceDialog> | null>(null);
 const router = useRouter();
 
 export type ProgressType = {
@@ -115,21 +117,22 @@ const progress = ref<ProgressType>({
   declared: "declared",
 });
 const open = () => {
-  dialog.value.openIt({
+  dialog.value?.openIt({
     type: "picture",
   });
 };
-const resource: Ref<any> = ref<any>(null);
+const resource: Ref<ResourceInfo | null> = ref(null);
 const imageUrl = computed<string | undefined>(() => {
-  if (resource.value) {
-    return resource.value.image.url;
-  }
-  return undefined;
+  return resource.value?.image?.url;
 });
 
 //const src: Ref<string | undefined> = ref<string | undefined>(undefined);
 const selected = (data: CardInfo) => {
-  resource.value = data.context;
+  if (isResourceInfo(data.context)) {
+    resource.value = data.context;
+  } else {
+    resource.value = null;
+  }
 };
 const cancel = () => {
   resource.value = null;
@@ -179,8 +182,9 @@ const generation = async (formEl: FormInstance | undefined) => {
             query: { id: data.resource_id },
           });
         }
-      } catch (e: any) {
-        ElMessage.error(e.message);
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e);
+        ElMessage.error(message);
       }
       loading.value = false;
     } else {
@@ -191,7 +195,7 @@ const generation = async (formEl: FormInstance | undefined) => {
 interface RuleForm {
   image_id: number | null;
   prompt: string;
-  quality: string;
+  quality: AiRodinQuality;
 }
 const formRef = ref<FormInstance>();
 const form = reactive<RuleForm>({
@@ -199,7 +203,7 @@ const form = reactive<RuleForm>({
   prompt: "",
   quality: "medium",
 });
-const validatePrompt = (rule: any, value: any, callback: any) => {
+const validatePrompt: FormItemRule["validator"] = (_rule, _value, callback) => {
   if (
     (resource.value === null || resource.value === undefined) &&
     !form.prompt
@@ -220,6 +224,15 @@ const rules = reactive<FormRules<RuleForm>>({
     },
   ],
 });
+
+const isResourceInfo = (value: unknown): value is ResourceInfo => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "id" in value &&
+    "file" in value
+  );
+};
 </script>
 
 <style scoped>

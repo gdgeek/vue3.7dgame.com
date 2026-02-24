@@ -129,6 +129,7 @@ import {
   deleteVoxel,
   postVoxel,
 } from "@/api/v1/resources/index";
+import type { ResourceInfo } from "@/api/v1/resources/model";
 import { usePageData } from "@/composables/usePageData";
 
 const { t } = useI18n();
@@ -144,7 +145,7 @@ const {
   handleSortChange,
   handlePageChange,
   handleViewChange,
-} = usePageData({
+} = usePageData<ResourceInfo>({
   fetchFn: async (params) =>
     await getVoxels(params.sort, params.search, params.page),
 });
@@ -170,7 +171,12 @@ const saveVoxel = async (
   image_id?: number
 ) => {
   try {
-    const data: any = { name, file_id };
+    const data: {
+      name: string;
+      file_id: number;
+      info?: string;
+      image_id?: number;
+    } = { name, file_id };
     if (info) data.info = info;
     if (image_id) data.image_id = image_id;
     const response = await postVoxel(data);

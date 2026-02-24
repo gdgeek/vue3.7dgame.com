@@ -117,7 +117,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
 import { getUserCreation } from "@/api/v1/user";
 
 interface Creation {
@@ -130,11 +129,6 @@ interface Creation {
 }
 
 const creation = ref<Creation | null>(null);
-const router = useRouter();
-
-const gotoCreator = () => {
-  router.push({ path: "/home/creator" });
-};
 
 const fetchCreation = async () => {
   try {

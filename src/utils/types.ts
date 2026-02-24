@@ -7,7 +7,7 @@ export type CardInfo = {
   type: string;
   created_at: string;
   name: string;
-  context: any;
+  context: unknown;
   enabled: boolean;
 };
 

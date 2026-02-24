@@ -108,11 +108,12 @@
 </template>
 
 <script setup lang="ts">
-import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import { Waterfall } from "vue-waterfall-plugin-next";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
 import { getPrefabs, prefabsData } from "@/api/v1/prefab";
 import Id2Image from "../Id2Image.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import type { JsonSchema, JsonValue } from "@/components/JsonSchemaForm/types";
 
 const emit = defineEmits(["selected", "cancel"]);
 const dialogVisible = ref(false);
@@ -124,12 +125,12 @@ const active = ref({
   pagination: { current: 1, count: 1, size: 20, total: 20 },
 });
 const knightData = ref<InstanceType<typeof KnightDataDialog>>();
-let verse_id = ref(-1);
-let value = ref(null);
+const verse_id = ref(-1);
+const value = ref<unknown>(null);
 
-const title = (item: any) => item.title || item.name || "title";
+const title = (item: prefabsData) => item.title || item.name || "title";
 
-const open = async (val?: any, v_id?: number) => {
+const open = async (val?: unknown, v_id?: number) => {
   active.value.items = [];
   active.value.sorted = "-created_at";
   active.value.searched = "";
@@ -149,38 +150,25 @@ const refresh = async () => {
   );
   active.value.items = response.data;
   active.value.pagination = {
-    current: parseInt(response.headers["x-pagination-current-page"]),
-    count: parseInt(response.headers["x-pagination-page-count"]),
-    size: parseInt(response.headers["x-pagination-per-page"]),
-    total: parseInt(response.headers["x-pagination-total-count"]),
+    current: parseInt(
+      String(response.headers["x-pagination-current-page"] ?? "1")
+    ),
+    count: parseInt(String(response.headers["x-pagination-page-count"] ?? "1")),
+    size: parseInt(String(response.headers["x-pagination-per-page"] ?? "20")),
+    total: parseInt(
+      String(response.headers["x-pagination-total-count"] ?? "0")
+    ),
   };
 };
 
-interface SchemaProperty {
-  type: string;
-  title: string;
-  default?: any;
-  value?: any;
-  "ui:hidden"?: string;
-  "ui:options"?: {
-    placeholder?: string;
-    type?: string;
-    rows?: number;
-  };
-  minLength?: number;
-}
-interface Schema {
-  type: string;
-  required?: string[];
-  properties: Record<string, SchemaProperty>;
-}
+type Schema = JsonSchema;
 const setup = ({ data }: { data: prefabsData }) => {
   console.error("setup", data);
   if (data.data) {
     knightData.value?.open({
       schema: data.info as Schema,
       data: {},
-      callback: (setup: any) => {
+      callback: (setup: Record<string, JsonValue>) => {
         selected({ data, setup });
         dialogVisible.value = false;
       },
@@ -191,7 +179,9 @@ const setup = ({ data }: { data: prefabsData }) => {
   }
 };
 
-const selected = async (data: any = null) => {
+type PrefabSelection = { data: prefabsData; setup?: Record<string, JsonValue> };
+
+const selected = async (data: PrefabSelection | null = null) => {
   console.log("data", data);
   if (data) {
     const title = await input(t("verse.view.prefabDialog.input"));
@@ -244,7 +234,7 @@ const clearSearched = async () => {
   await refresh();
 };
 
-const knightDataSubmit = (data: any) => {
+const knightDataSubmit = (data: Record<string, JsonValue>) => {
   console.error(data);
 };
 
@@ -257,19 +247,22 @@ defineExpose({
 });
 
 type ViewCard = {
-  src: string;
+  src?: string;
   id?: string;
   name?: string;
-  star?: boolean;
-  backgroundColor?: string;
-  [attr: string]: any;
+  data: prefabsData["data"];
+  info: prefabsData["info"];
+  uuid: prefabsData["uuid"];
+  image_id: prefabsData["image_id"];
+  image: prefabsData["image"];
+  resources: prefabsData["resources"];
 };
 
 // 瀑布流数据类型转换
 const transformToViewCard = (items: prefabsData[]): ViewCard[] => {
   return items.map((item) => {
     return {
-      src: item.image.url,
+      src: item.image?.url,
       id: item.id ? item.id.toString() : undefined,
       name: item.title,
       data: item.data,

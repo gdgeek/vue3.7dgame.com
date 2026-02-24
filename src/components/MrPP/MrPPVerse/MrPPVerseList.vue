@@ -25,7 +25,7 @@ import VerseCard from "@/components/VerseCard.vue"; // 新的 VerseCard 组件
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 
-const props = defineProps<{ items: VerseData[] | null }>();
+defineProps<{ items: VerseData[] | null }>();
 const emit = defineEmits<{ (e: "refresh"): void }>();
 
 //const newItems = ref<VerseData[]>([]);

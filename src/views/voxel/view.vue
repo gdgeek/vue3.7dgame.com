@@ -106,7 +106,6 @@ interface VoxelData {
 
 const voxelData = ref<VoxelData | null>(null);
 const percentage = ref(0);
-const expire = ref(false);
 
 // 工具和路由
 const store = useFileStore().store;
@@ -131,12 +130,12 @@ const dataInfo = computed(() =>
 );
 
 // 计算体素网格尺寸
-const meshSize = computed(() =>
+const _meshSize = computed(() =>
   prepare.value ? dataInfo.value.size : t("voxel.view.update")
 );
 
 // 计算体素网格中心点
-const meshCenter = computed(() =>
+const _meshCenter = computed(() =>
   prepare.value ? dataInfo.value.center : t("voxel.view.update")
 );
 
@@ -186,7 +185,6 @@ const downloadVoxel = async () => {
 
 // 加载体素数据
 const loadVoxelData = async () => {
-  expire.value = true;
   try {
     const response = await getVoxel(id.value);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -202,7 +200,7 @@ const progress = (progress: number) => {
 };
 
 // 基于体素创建虚拟世界
-const createVerse = async () => {
+const _createVerse = async () => {
   if (!voxelData.value) return;
   const voxel = voxelData.value;
   try {
@@ -323,7 +321,6 @@ const updateVoxel = async (imageId: number, info: VoxelInfo) => {
     const response = await putVoxel(voxelData.value.id, voxel);
     voxelData.value.image_id = response.data.image_id;
     voxelData.value.info = response.data.info;
-    expire.value = false;
   } catch (error) {
     console.error(error);
   }
@@ -354,7 +351,6 @@ const saveFile = async (
 // 处理体素加载完成，生成缩略图
 const loaded = async (info: VoxelInfo) => {
   if (prepare.value) {
-    expire.value = false;
     return;
   }
 

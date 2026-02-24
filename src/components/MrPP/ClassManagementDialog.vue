@@ -483,12 +483,6 @@ const handleViewTeachers = async (item: EduClass) => {
   teacherDialogVisible.value = true;
 };
 
-const handleViewStudents = async (item: EduClass) => {
-  currentClass.value = item;
-  students.value = item.eduStudents || [];
-  studentDialogVisible.value = true;
-};
-
 const handleAddTeacher = () => {
   userSelectionMode.value = "teacher";
   userDialogTitle.value = t("manager.class.selectTeacher");

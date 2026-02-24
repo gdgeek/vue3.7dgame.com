@@ -192,9 +192,12 @@ const parseRedirect = (): {
   return { path, queryParams };
 };
 
+type LoginPayload = { auth?: string };
+type LoginFormPayload = { value?: unknown };
+
 const enter = async (
-  user: any,
-  form: any,
+  user: LoginPayload,
+  form: LoginFormPayload,
   resolve: () => void,
   reject: (message: string) => void
 ) => {

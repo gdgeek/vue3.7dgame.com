@@ -89,8 +89,23 @@ const prepare = computed(
   () => videoData.value !== null && videoData.value.info !== null
 );
 
+type Vector2 = { x: number; y: number };
+type VideoInfo = { size?: Vector2; length?: number };
+
+const parseVideoInfo = (raw?: string | null): VideoInfo | null => {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object") {
+      return parsed as VideoInfo;
+    }
+  } catch {}
+  return null;
+};
+
 const tableData = computed(() => {
   if (videoData.value && prepare.value) {
+    const info = parseVideoInfo(videoData.value.info);
     const base = [
       {
         item: t("video.view.info.item1"),
@@ -113,14 +128,10 @@ const tableData = computed(() => {
       },
       {
         item: t("video.view.info.item5"),
-        text: printVector2(JSON.parse(videoData.value.info).size),
+        text: info?.size ? printVector2(info.size) : "—",
       },
     ];
-    let info: any = {};
-    try {
-      info = JSON.parse(videoData.value.info || "{}");
-    } catch {}
-    if (info.length) {
+    if (info?.length) {
       base.push({
         item: t("video.view.info.item6"),
         text: info.length.toFixed(2) + "s",

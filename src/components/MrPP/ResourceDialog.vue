@@ -156,7 +156,7 @@
 
 <script setup lang="ts">
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Waterfall } from "vue-waterfall-plugin-next";
@@ -165,6 +165,7 @@ import { getResources } from "@/api/v1/resources";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
 import Id2Image from "../Id2Image.vue";
+import type { ResourceInfo } from "@/api/v1/resources/model";
 
 const props = withDefaults(
   defineProps<{
@@ -179,12 +180,12 @@ const sorted = ref("-created_at");
 const searched = ref("");
 
 // 响应式状态
-const selectedIds = ref<any[]>([]);
+const selectedIds = ref<number[]>([]);
 const singleSelectedId = ref<number>();
 const dialogVisible = ref(false);
 const type = ref("polygen");
 const metaId = ref<number | null>(null);
-const value = ref<any>(null);
+const value = ref<unknown>(null);
 const mode = ref<"normal" | "replace">("normal");
 
 const active = ref<DataOutput>({
@@ -203,21 +204,21 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 // 方法
-const isSelected = (item: any): boolean => {
+const isSelected = (item: CardInfo): boolean => {
   if (mode.value === "replace") {
     return singleSelectedId.value === item.id;
   }
   return selectedIds.value.some((id) => id === item.id);
 };
 
-const getItemTitle = (item: any): string => {
+const getItemTitle = (item: CardInfo): string => {
   return item.title ?? item.name ?? "title";
 };
 
 const open = async (
-  newValue: any,
-  meta_id: any = null,
-  newType: any = null,
+  newValue: unknown,
+  meta_id: number | null = null,
+  newType: string | null = null,
   openMode: "normal" | "replace" = "normal"
 ) => {
   active.value = {
@@ -239,8 +240,14 @@ const open = async (
   dialogVisible.value = true;
 };
 
+type OpenItParams = {
+  selected?: unknown;
+  binding?: number | null;
+  type: string;
+};
+
 const openIt = async (
-  { selected = null, binding = null, type }: any,
+  { selected = null, binding = null, type }: OpenItParams,
   openMode: "normal" | "replace" = "normal"
 ) => {
   await open(selected, binding, type, openMode);
@@ -266,24 +273,31 @@ async function getDatas(input: DataInput): Promise<DataOutput> {
         "image"
       );
       console.log("获取数据", response.data);
-      const items = response.data.map(
-        (item: any) =>
-          ({
-            id: item.id,
-            context: item,
-            type: item.type,
-            created_at: item.created_at,
-            name: item.name ? item.name : item.title, // 使用name或title
-            image: item.image ? { url: item.image.url } : null,
-            enabled: true,
-          }) as CardInfo
-      );
+      const items = response.data.map((item: ResourceInfo) => {
+        return {
+          id: item.id,
+          context: item,
+          type: item.type,
+          created_at: item.created_at,
+          name: item.name ? item.name : item.title, // 使用name或title
+          image: item.image ? { url: item.image.url } : null,
+          enabled: true,
+        } as CardInfo;
+      });
 
       const pagination = {
-        current: parseInt(response.headers["x-pagination-current-page"]),
-        count: parseInt(response.headers["x-pagination-page-count"]),
-        size: parseInt(response.headers["x-pagination-per-page"]),
-        total: parseInt(response.headers["x-pagination-total-count"]),
+        current: parseInt(
+          String(response.headers["x-pagination-current-page"] ?? "1")
+        ),
+        count: parseInt(
+          String(response.headers["x-pagination-page-count"] ?? "1")
+        ),
+        size: parseInt(
+          String(response.headers["x-pagination-per-page"] ?? "20")
+        ),
+        total: parseInt(
+          String(response.headers["x-pagination-total-count"] ?? "0")
+        ),
       };
       resolve({ items, pagination });
     } catch (error) {

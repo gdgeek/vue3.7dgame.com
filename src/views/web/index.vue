@@ -170,7 +170,11 @@ const navMenuItems = computed(() => [
     path: "https://forum.rokid.com/index",
   },
 ]);
-const loginDialogRef = ref<any>(null);
+type LoginDialogExpose = {
+  openDialog: () => void;
+};
+
+const loginDialogRef = ref<LoginDialogExpose | null>(null);
 
 /** 主题切换 */
 const toggleTheme = () => {
@@ -260,18 +264,12 @@ const handleScroll = () => {
 };
 
 const isMobile = ref(false);
-const sidebarVisible = ref(false);
 
 const checkMobile = () => {
   isMobile.value = window.innerWidth <= 768;
 };
 
-// 切换侧边栏显
-const toggleSidebar = () => {
-  sidebarVisible.value = !sidebarVisible.value;
-};
-
-const select = (item: any) => {
+const select = (item: { path?: string }) => {
   if (
     item.path &&
     (item.path.startsWith("http://") || item.path.startsWith("https://"))

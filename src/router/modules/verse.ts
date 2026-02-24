@@ -55,7 +55,7 @@ export const verseRoutes: RouteRecordRaw = {
         hidden: true,
         private: true,
       },
-      component: (): any => import("@/views/verse/script.vue"),
+      component: () => import("@/views/verse/script.vue"),
     },
     {
       path: "/verse/scene",

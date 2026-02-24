@@ -6,6 +6,7 @@ import { LoginData, LoginResult } from "@/api/auth/model";
 import { UserInfoType, _UserDataType } from "@/api/user/model";
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 import Wechat from "@/api/v1/wechat";
+import type { WechatLoginRequest } from "@/api/v1/types/wechat";
 import SecureLS from "secure-ls";
 import Token from "@/store/modules/token";
 import UserAPI from "@/api/v1/user";
@@ -30,7 +31,7 @@ export const useUserStore = defineStore(
     const defaultUserInfo: UserInfoType | null = null;
     const userInfo = ref<UserInfoType | null>(defaultUserInfo);
 
-    async function loginByWechat(data: any) {
+    async function loginByWechat(data: WechatLoginRequest) {
       const response = await Wechat.login(data);
       if (!response.data.success) {
         throw new Error("Login failed, please try again later.");
@@ -115,7 +116,7 @@ export const useUserStore = defineStore(
     }
 
     const refreshInterval = ref<NodeJS.Timeout | null>(null);
-    const setUserInfo = async (data: any) => {
+    const setUserInfo = async (data: unknown) => {
       try {
         const response = await UserAPI.putUserData(data);
         //  logger.error("getUserInfo response:", response);

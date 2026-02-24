@@ -170,10 +170,6 @@ const show = () => {
   dialogVisible.value = true;
 };
 
-const hide = () => {
-  dialogVisible.value = false;
-};
-
 // onMounted(() => {
 //   show();
 // });

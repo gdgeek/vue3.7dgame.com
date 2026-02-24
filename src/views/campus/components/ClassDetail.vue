@@ -194,7 +194,7 @@ const openGroupDialog = (group?: Group) => {
       id: group.id,
       name: group.name,
       description: group.description || "",
-      image_id: (group as any).image_id || group.image?.id || null,
+      image_id: group.image_id || group.image?.id || null,
       imageUrl: group.image?.url || "",
     };
   } else {

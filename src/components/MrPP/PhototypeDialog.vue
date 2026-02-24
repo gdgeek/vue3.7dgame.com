@@ -27,17 +27,14 @@ import VueForm from "@/components/JsonSchemaForm/index.vue";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { ElMessage } from "element-plus";
+import type { JsonSchema, JsonValue } from "@/components/JsonSchemaForm/types";
 
-const formData = ref({});
+const formData = ref<Record<string, JsonValue>>({});
 import { v4 as uuidv4 } from "uuid";
-const schema = ref<any>();
+const schema = ref<JsonSchema>();
 const dialogVisible = ref(false);
-const { t, locale } = useI18n();
-let callback: ((data: any) => void) | null = null;
-
-interface FormData {
-  [key: string]: any;
-}
+const { t } = useI18n();
+let callback: ((data: Record<string, JsonValue>) => void) | null = null;
 
 const formFooter = computed(() => ({
   show: true,
@@ -58,12 +55,12 @@ const handlerCancel = () => {
 };
 // 或者用 interface
 interface Handler {
-  (data: any): any;
+  (data: JsonValue): JsonValue;
 }
 const handlers: Map<string, Handler> = new Map([
   [
     "uuid",
-    (data: any): any => {
+    (data: JsonValue): JsonValue => {
       if (!data) {
         return uuidv4();
       }
@@ -73,13 +70,16 @@ const handlers: Map<string, Handler> = new Map([
 ]);
 
 const handlerChange = ({
-  oldValue,
+  oldValue: _oldValue,
   newValue,
 }: {
-  oldValue: any;
-  newValue: any;
+  oldValue: Record<string, JsonValue>;
+  newValue: Record<string, JsonValue>;
 }) => {
-  const properties = (schema.value?.properties as Record<string, any>) || {};
+  const properties = (schema.value?.properties || {}) as Record<
+    string,
+    JsonSchema
+  >;
   for (const [key, val] of Object.entries(properties)) {
     for (const [key1, val1] of Object.entries(val)) {
       const match = /^setup:(.+)$/.exec(key1);
@@ -96,7 +96,10 @@ const handlerChange = ({
   }
 };
 
-const open = (iSchema: any, iCallback: (data: any) => void) => {
+const open = (
+  iSchema: JsonSchema,
+  iCallback: (data: Record<string, JsonValue>) => void
+) => {
   formData.value = {};
   schema.value = iSchema;
   callback = iCallback;

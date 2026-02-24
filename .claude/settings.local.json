@@ -27,7 +27,27 @@
       "Bash(npm run type-check 2>&1 | grep -E \"\\(src/layout/components/Settings/index.vue|src/layout/components/Sidebar/components/SidebarMenu.vue|src/layout/components/TagsView/index.vue|src/views/test/VueFormDemo.vue|src/views/site/register/index.vue|src/views/site/login/index.vue|src/views/site/index.vue|src/views/settings/edit.vue|src/views/settings/account.vue|src/views/register/index.vue\\)\" || echo \"✓ No TypeScript errors in the fixed files\")",
       "Bash(npx vue-tsc --noEmit 2>&1 | grep -E \"src/views/\\(web|ai\\)/\" | head -50)",
       "Bash(npx vue-tsc --noEmit 2>&1 | grep -E \"src/views/\\(web|ai\\)/\")",
-      "Bash(python3 -c \"\nimport re\nwith open\\('/tmp/eslint-output.txt'\\) as f:\n    lines = f.readlines\\(\\)\nfile_counts = {}\ncurrent_file = ''\nfor line in lines:\n    line = line.strip\\(\\)\n    if line.startswith\\('/'\\) and \\(line.endswith\\('.vue'\\) or line.endswith\\('.ts'\\) or line.endswith\\('.tsx'\\)\\):\n        current_file = line\n    elif 'Unexpected any' in line and current_file:\n        file_counts[current_file] = file_counts.get\\(current_file, 0\\) + 1\nfor count, f in sorted\\([\\(-v,k\\) for k,v in file_counts.items\\(\\)]\\):\n    print\\(-count, f\\)\n\")"
+      "Bash(python3 -c \"\nimport re\nwith open\\('/tmp/eslint-output.txt'\\) as f:\n    lines = f.readlines\\(\\)\nfile_counts = {}\ncurrent_file = ''\nfor line in lines:\n    line = line.strip\\(\\)\n    if line.startswith\\('/'\\) and \\(line.endswith\\('.vue'\\) or line.endswith\\('.ts'\\) or line.endswith\\('.tsx'\\)\\):\n        current_file = line\n    elif 'Unexpected any' in line and current_file:\n        file_counts[current_file] = file_counts.get\\(current_file, 0\\) + 1\nfor count, f in sorted\\([\\(-v,k\\) for k,v in file_counts.items\\(\\)]\\):\n    print\\(-count, f\\)\n\")",
+      "Bash(cd /Users/dirui/Projects/web/frontend/vue3.7dgame.com && npx vitest run src/views/meta/__tests__/list.property.spec.ts 2>&1 | tail -30)",
+      "Bash(npx eslint src --ext .vue,.ts --format=compact 2>&1 | grep -i \"any\" | wc -l)",
+      "Bash(npx eslint src --ext .vue,.ts --format=compact 2>&1 | grep \"@typescript-eslint/no-explicit-any\")",
+      "Bash(npx vitest run src/views/meta/__tests__/list.spec.ts 2>&1)",
+      "Bash(npx eslint --rule '{\"@typescript-eslint/no-explicit-any\": \"error\"}' --no-eslintrc --parser vue-eslint-parser --parser-options '{\"parser\":\"@typescript-eslint/parser\"}' --plugin '@typescript-eslint' src/layout/components/Sidebar/components/SidebarMenu.vue src/views/game/index.vue src/views/game/map.vue src/views/polygen/index.vue src/views/polygen/view.vue src/views/settings/edit.vue src/views/phototype/edit.vue src/views/campus/components/ClassDetail.vue 2>&1 | head -60)",
+      "Bash(npx eslint src --ext .vue,.ts --format=compact 2>&1 | grep \"@typescript-eslint/no-explicit-any\" | wc -l)",
+      "Bash(npx eslint src --ext .vue,.ts --format=compact 2>&1 | tail -5)",
+      "Bash(npx eslint src --ext .vue,.ts --format=compact 2>&1 | grep -oP '\\\\\\(\\\\d+ .+?\\\\\\)' | sort | uniq -c | sort -rn | head -20)",
+      "Bash(npx eslint src --ext .vue,.ts --format=compact 2>&1 | wc -l)",
+      "Bash(npx eslint src --ext .vue,.ts --format=compact 2>&1 | grep -o '\\([^\\)]*\\)'  | sort | uniq -c | sort -rn | head -20)",
+      "Bash(npx vue-tsc --noEmit 2>&1 | tail -5)",
+      "Bash(npx vue-tsc --noEmit 2>&1 | grep \"error TS\" | wc -l)",
+      "Bash(npx vue-tsc --noEmit 2>&1 | grep \"error TS\" | grep -oE 'TS[0-9]+' | sort | uniq -c | sort -rn | head -15)",
+      "Bash(npx vue-tsc --noEmit 2>&1 | grep \"error TS\" | grep -oE 'src/[^\\(]+' | sort | uniq -c | sort -rn | head -20)",
+      "Bash(npx eslint src --ext .vue,.ts --format=compact 2>&1 | grep \"no-unused-vars\" | grep -oE 'src/[^:]+' | sort | uniq -c | sort -rn | head -15)",
+      "Bash(ls src/__tests__/ 2>/dev/null || echo \"No tests directory\"; find src -name \"*.test.ts\" -o -name \"*.spec.ts\" 2>/dev/null | wc -l)",
+      "Bash(cat /Users/dirui/Projects/web/frontend/vue3.7dgame.com/.eslintrc.* 2>/dev/null || cat /Users/dirui/Projects/web/frontend/vue3.7dgame.com/eslint.config.* 2>/dev/null | head -40)",
+      "Bash(npx eslint src --ext .vue,.ts --fix 2>&1 | tail -10)",
+      "Bash(npx eslint src --ext .vue,.ts --format json 2>/dev/null | python3 -c \"\nimport json, sys\ndata = json.load\\(sys.stdin\\)\nfor f in data:\n    msgs = [m for m in f['messages'] if 'no-unused-vars' in \\(m.get\\('ruleId'\\) or ''\\)]\n    if msgs:\n        path = f['filePath'].replace\\('/Users/dirui/Projects/web/frontend/vue3.7dgame.com/', ''\\)\n        for m in msgs:\n            print\\(f\\\\\"{path}:{m['line']}:{m['column']} {m['message']}\\\\\"\\)\n\" 2>&1)",
+      "Bash(npx eslint src --ext .vue,.ts --format json 2>/dev/null | python3 -c \"\nimport json, sys\ndata = json.load\\(sys.stdin\\)\nfor f in data:\n    msgs = [m for m in f['messages'] if 'no-unused-vars' in \\(m.get\\('ruleId'\\) or ''\\)]\n    if msgs:\n        path = f['filePath'].replace\\('/Users/dirui/Projects/web/frontend/vue3.7dgame.com/', ''\\)\n        for m in msgs:\n            print\\(f\\\\\"{path}:{m['line']}:{m['column']} {m['message']}\\\\\"\\)\n\" 2>&1 | wc -l)"
     ]
   }
 }

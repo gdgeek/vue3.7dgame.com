@@ -60,7 +60,9 @@
                 <template #default="scope">
                   <el-input
                     type="number"
-                    @change="(value: any) => onchange(scope.row.id, value)"
+                    @change="
+                      (value: string | number) => onchange(scope.row.id, value)
+                    "
                     size="small"
                     v-model="scope.row.order"
                     :placeholder="$t('game.map.form.placeholder')"
@@ -114,9 +116,10 @@ import VerseDialog from "@/components/MrPP/VerseDialog.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { getVpMaps, postVpMap, deleteVpMap } from "@/api/v1/vp-map";
 import { putVpGuide, postVpGuide, deleteVpGuide } from "@/api/v1/vp-guide";
+import type { VpMap } from "@/api/v1/types/vp-map";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
-const data = ref<any>(null);
+const data = ref<VpMap | null>(null);
 const dialogRef = ref<InstanceType<typeof VerseDialog> | null>(null);
 const sorted = ref<string>("-created_at");
 const searched = ref<string>("");
@@ -165,7 +168,7 @@ const onchange = async (id: number, val: number) => {
   }
 };
 
-const selected = async (item: any) => {
+const selected = async (item: { data: { id: number } }) => {
   try {
     await postVpGuide({ level_id: item.data.id, map_id: data.value.id });
     ElMessage.success(t("game.map.success"));

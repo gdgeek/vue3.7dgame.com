@@ -26,7 +26,7 @@ const settingsStore = useSettingsStore();
 
 const isDarkMode = computed(() => settingsStore.theme === ThemeEnum.DARK);
 
-const props = defineProps<{
+defineProps<{
   maxwidth?: boolean;
 }>();
 </script>

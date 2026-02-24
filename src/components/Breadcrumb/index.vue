@@ -20,14 +20,26 @@
 </template>
 
 <script setup lang="ts">
-import { RouteLocationMatched } from "vue-router";
+import { RouteLocationMatched, type LocationQuery } from "vue-router";
 import { useRouter } from "@/router";
 const router = useRouter();
 import { translateRouteTitle } from "@/utils/i18n";
 const currentRoute = useRoute();
 
 // 使用 Map 存储路由路径和对应的查询参数
-const routeQueryMap = ref(new Map<string, any>());
+type StoredQuery = Record<string, unknown>;
+
+type BreadcrumbRoute = RouteLocationMatched & {
+  query?: StoredQuery;
+  enterCallbacks?: StoredQuery;
+  redirect?: string;
+};
+
+const routeQueryMap = ref(new Map<string, StoredQuery>());
+
+function normalizeQuery(query: LocationQuery): StoredQuery {
+  return Object.fromEntries(Object.entries(query));
+}
 
 // 从 localStorage 加载保存的路由参数
 function loadRouteQueryMap() {
@@ -35,7 +47,11 @@ function loadRouteQueryMap() {
     const savedMap = localStorage.getItem("routeQueryMap");
     if (savedMap) {
       const parsedMap = JSON.parse(savedMap);
-      routeQueryMap.value = new Map(Object.entries(parsedMap));
+      if (parsedMap && typeof parsedMap === "object") {
+        routeQueryMap.value = new Map(
+          Object.entries(parsedMap as Record<string, StoredQuery>)
+        );
+      }
     }
   } catch (error) {
     console.error("加载路由参数失败:", error);
@@ -57,7 +73,7 @@ function saveCurrentRouteQuery() {
   if (currentRoute.path) {
     // 为了确保路径的唯一性，我们使用完整的路径作为键
     const key = currentRoute.path;
-    routeQueryMap.value.set(key, { ...currentRoute.query });
+    routeQueryMap.value.set(key, normalizeQuery(currentRoute.query));
     saveRouteQueryMap();
   }
 }
@@ -126,9 +142,11 @@ function getBreadcrumb() {
   // 如果第一个面包屑不是 dashboard 则添加 dashboard
   const first = matched[0];
   if (!isDashboard(first)) {
-    matched = [
-      { path: "/home/index", meta: { title: "dashboard" } } as any,
-    ].concat(matched);
+    const dashboard = {
+      path: "/home/index",
+      meta: { title: "dashboard" },
+    } as RouteLocationMatched;
+    matched = [dashboard].concat(matched);
   }
 
   breadcrumbs.value = matched.filter((item) => {
@@ -147,11 +165,11 @@ function isDashboard(route: RouteLocationMatched) {
   );
 }
 
-function handleLink(item: any) {
+function handleLink(item: BreadcrumbRoute) {
   if (!item) return;
 
   // 构建完整的路由参数
-  const routeParams: any = {};
+  const routeParams: { path?: string; query?: StoredQuery } = {};
 
   // 处理路径
   if (item.redirect) {

@@ -102,11 +102,12 @@
 
 <script setup lang="ts">
 import Id2Image from "../Id2Image.vue";
-import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
 import { getMetas, metaInfo, postMeta } from "@/api/v1/meta";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import type { VerseMetaRelation } from "@/api/v1/types/meta";
 
 const emit = defineEmits(["selected", "cancel"]);
 
@@ -121,15 +122,16 @@ const active = ref({
   pagination: { current: 1, count: 1, size: 20, total: 20 },
 });
 
-const isBinding = (item: any) => {
-  return item.verseMetas.some((meta: any) => meta.verse_id === verse_id.value);
+type MetaSelection = {
+  data: metaInfo;
+  title?: string;
 };
 
-const title = (item: any) => {
+const title = (item: metaInfo) => {
   return item.title || item.name || "title";
 };
 
-const open = async (newValue?: any, newVerseId?: number) => {
+const open = async (newValue?: unknown, newVerseId?: number) => {
   try {
     active.value = {
       items: [],
@@ -156,10 +158,14 @@ const refresh = async () => {
   active.value.items = response.data;
   console.log("active", active);
   active.value.pagination = {
-    current: parseInt(response.headers["x-pagination-current-page"]),
-    count: parseInt(response.headers["x-pagination-page-count"]),
-    size: parseInt(response.headers["x-pagination-per-page"]),
-    total: parseInt(response.headers["x-pagination-total-count"]),
+    current: parseInt(
+      String(response.headers["x-pagination-current-page"] ?? "1")
+    ),
+    count: parseInt(String(response.headers["x-pagination-page-count"] ?? "1")),
+    size: parseInt(String(response.headers["x-pagination-per-page"] ?? "20")),
+    total: parseInt(
+      String(response.headers["x-pagination-total-count"] ?? "0")
+    ),
   };
 };
 
@@ -178,7 +184,7 @@ const clearSearched = () => {
   refresh();
 };
 
-const selected = async (data: any) => {
+const selected = async (data: MetaSelection | null) => {
   if (data) {
     // const title = await input(t("verse.view.metaDialog.input1"));
     data.title = data.data.title;
@@ -231,12 +237,24 @@ defineExpose({
 });
 
 type ViewCard = {
-  src: string;
+  src?: string;
   id?: string;
   name?: string;
   star?: boolean;
   backgroundColor?: string;
-  [attr: string]: any;
+  author_id: number;
+  info: metaInfo["info"];
+  data: metaInfo["data"];
+  events: metaInfo["events"];
+  title: metaInfo["title"];
+  uuid: metaInfo["uuid"];
+  prefab: metaInfo["prefab"];
+  image_id: metaInfo["image_id"];
+  image: metaInfo["image"];
+  resources: metaInfo["resources"];
+  editable: metaInfo["editable"];
+  viewable: metaInfo["viewable"];
+  verseMetas: metaInfo["verseMetas"];
 };
 
 // 瀑布流数据类型转换
@@ -267,25 +285,5 @@ const viewCards = computed(() => {
   const cards = transformToViewCard(active.value.items);
   console.log("viewCards", cards);
   return cards;
-});
-
-const breakpoints = ref({
-  3000: {
-    //当屏幕宽度小于等于3000
-    rowPerView: 8, // 一行8图
-  },
-  1800: {
-    //当屏幕宽度小于等于1800
-    rowPerView: 6, // 一行6图
-  },
-  1200: {
-    //当屏幕宽度小于等于1200
-    rowPerView: 4,
-  },
-
-  500: {
-    //当屏幕宽度小于等于500
-    rowPerView: 2,
-  },
 });
 </script>

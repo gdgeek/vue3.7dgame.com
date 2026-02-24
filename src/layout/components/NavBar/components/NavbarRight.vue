@@ -77,24 +77,17 @@
   </div>
 </template>
 <script setup lang="ts">
-import {
-  useAppStore,
-  useTagsViewStore,
-  useUserStore,
-  useSettingsStore,
-} from "@/store";
+import { useAppStore, useUserStore, useSettingsStore } from "@/store";
 import { useDomainStore } from "@/store/modules/domain";
 
 import defaultSettings from "@/settings";
 import { DeviceEnum } from "@/enums/DeviceEnum";
 
 const appStore = useAppStore();
-const tagsViewStore = useTagsViewStore();
 const userStore = useUserStore();
 const settingStore = useSettingsStore();
 const domainStore = useDomainStore();
 
-const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 

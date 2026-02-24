@@ -133,35 +133,6 @@ const formatTime = (seconds: number) => {
   return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 };
 
-// 在拖动进度条时实时预览动画状态
-const previewAnimation = (progress: number | number[]) => {
-  if (mixer && currentAction && animations.value.length > 0) {
-    const selectedAnimation = animations.value[selectedAnimationIndex.value];
-    // 确保progress是数字类型
-    const progressValue = Array.isArray(progress) ? progress[0] : progress;
-    const targetTime = (progressValue / 100) * selectedAnimation.duration;
-
-    // 更新当前时间显示
-    currentAnimationTime.value = targetTime;
-
-    // 根据动画状态处理
-    if (currentAction.paused) {
-      // 如果是暂停状态，我们需要先激活动作再设置时间
-      currentAction.paused = false;
-      mixer.setTime(targetTime);
-      currentAction.paused = true;
-    } else {
-      // 如果是播放状态，直接设置时间
-      mixer.setTime(targetTime);
-    }
-
-    // 确保视图立即更新，不管是否在播放
-    if (renderer && camera) {
-      renderer.render(scene, camera);
-    }
-  }
-};
-
 // 动画切换
 const playAnimation = (index: number) => {
   if (index === 0 && animations.value.length === 0) return;
@@ -237,19 +208,6 @@ const toggleAnimation = (value: string | number | boolean) => {
       currentAction.paused = true;
     }
   }
-};
-
-// 切换阴影功能
-const toggleShadow = (value: boolean) => {
-  scene.traverse((child) => {
-    if (child instanceof THREE.Light) {
-      child.castShadow = value; // 控制光源是否启用阴影
-    }
-    if (child instanceof THREE.Mesh) {
-      child.receiveShadow = value; // 控制物体是否接收阴影
-      child.castShadow = value; // 控制物体是否投射阴影
-    }
-  });
 };
 
 let ktx2Loader: KTX2Loader | null = null; // ★ 新增
@@ -370,15 +328,7 @@ const screenshot = (): Promise<Blob> => {
 };
 defineExpose({ screenshot });
 
-// 解析模型节点
-const parseNode = async (
-  json: Record<string, unknown>
-): Promise<THREE.Object3D> => {
-  const loader = new THREE.ObjectLoader();
-  return loader.parseAsync(json);
-};
-
-onMounted(() => {
+let ktx2Loader: KTX2Loader | null = null; // ★ 新增
   const content = three.value;
   if (content) {
     const width = content.clientWidth;

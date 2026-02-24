@@ -67,6 +67,7 @@ import {
   putPolygen,
   deletePolygen,
 } from "@/api/v1/resources/index";
+import type { ResourceInfo } from "@/api/v1/resources/model";
 import { createVerseFromResource } from "@/api/v1/meta-verse";
 import { postFile } from "@/api/v1/files";
 import { UploadFileType } from "@/api/user/model";
@@ -78,7 +79,7 @@ import MrppInfo from "@/components/MrPP/MrppInfo/index.vue";
 import { downloadResource } from "@/utils/downloadHelper";
 
 const loading = ref(false);
-const polygenData = ref<any>(null);
+const polygenData = ref<ResourceInfo | null>(null);
 const expire = ref(true);
 const percentage = ref(0);
 const route = useRoute();
@@ -229,7 +230,10 @@ const downloadModel = async () => {
   await downloadResource(polygenData.value, ".glb", t, "polygen.view.download");
 };
 
-const updatePolygen = async (imageId: number, info: any) => {
+const updatePolygen = async (
+  imageId: number,
+  info: Record<string, unknown>
+) => {
   try {
     const response = await putPolygen(polygenData.value.id, {
       image_id: imageId,
@@ -248,9 +252,9 @@ const updatePolygen = async (imageId: number, info: any) => {
 const saveFile = async (
   md5: string,
   extension: string,
-  info: any,
-  file: any,
-  handler: any
+  info: Record<string, unknown>,
+  file: File,
+  handler: string
 ) => {
   extension = extension.startsWith(".") ? extension : `.${extension}`;
   const data = {
@@ -264,7 +268,7 @@ const saveFile = async (
   updatePolygen(response.data.id!, info);
 };
 
-const loaded = async (info: any) => {
+const loaded = async (info: Record<string, unknown>) => {
   // 保存动画信息到info对象
   console.log("模型信息:", info);
 
@@ -314,9 +318,9 @@ const screenshot = () => {
 */
 onMounted(async () => {
   expire.value = true;
-  const response = await getPolygen(id.value);
-  console.error((response as any).data);
-  polygenData.value = (response as any).data;
+  const response = (await getPolygen(id.value)) as { data: ResourceInfo };
+  console.error(response.data);
+  polygenData.value = response.data;
 });
 </script>
 

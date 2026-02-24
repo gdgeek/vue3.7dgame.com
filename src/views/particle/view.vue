@@ -383,7 +383,7 @@ const tableData = computed(() => {
         text: formatFileSize(particleData.value.file.size),
       },
     ];
-    let info: any = {};
+    let info: Record<string, unknown> = {};
     try {
       info = JSON.parse(particleData.value.info || "{}");
     } catch {}
@@ -455,7 +455,7 @@ const save = async (
   extension: string,
   info: string,
   file: File,
-  handler: any
+  handler: string
 ) => {
   extension = extension.startsWith(".") ? extension : `.${extension}`;
   const data: UploadFileType = {

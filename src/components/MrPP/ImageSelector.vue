@@ -118,7 +118,6 @@ const emit = defineEmits<{
   ): void;
 }>();
 
-const { t } = useI18n();
 const resourceDialog = ref<InstanceType<typeof ResourceDialog> | null>(null);
 const imageSelectDialogVisible = ref(false);
 const uploadDialogVisible = ref(false);
@@ -146,8 +145,12 @@ const openResourceDialog = () => {
 };
 
 const onResourceSelected = (data: CardInfo) => {
+  const context =
+    typeof data.context === "object" && data.context !== null
+      ? (data.context as { image_id?: number })
+      : undefined;
   emit("image-selected", {
-    imageId: data.context.image_id || data.image?.id || 0, // Fallback to image.id
+    imageId: context?.image_id || data.image?.id || 0, // Fallback to image.id
     itemId: props.itemId,
     imageUrl: data.image?.url,
   });
@@ -165,10 +168,15 @@ const savePicture = async (
   callback: (id: number) => void,
   effectType?: string,
   info?: string,
-  image_id?: number
+  _image_id?: number
 ) => {
   try {
-    const data: any = { name, file_id };
+    const data: {
+      name: string;
+      file_id: number;
+      info?: string;
+      image_id?: number;
+    } = { name, file_id };
     if (info) {
       data.info = info;
       data.image_id = file_id;

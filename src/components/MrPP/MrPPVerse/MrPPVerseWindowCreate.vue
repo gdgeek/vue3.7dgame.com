@@ -43,7 +43,6 @@
 <script setup lang="ts">
 import { VerseData } from "@/api/v1/verse";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";
-import { useUserStore } from "@/store/modules/user";
 import { FormInstance, ElMessage } from "element-plus";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";

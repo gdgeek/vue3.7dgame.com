@@ -18,14 +18,6 @@ function local(): boolean {
   return import.meta.env.VITE_APP_BASE_MODE === "local";
 }
 
-function getIP(): string | null {
-  const reg = /^([^:]+)/g;
-  const ret = reg.exec(window.location.host);
-  if (ret !== null) {
-    return ret[1];
-  }
-  return null;
-}
 /*
 function title(): string {
   const hostname = window.location.hostname.toLowerCase();

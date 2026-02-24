@@ -207,6 +207,7 @@ import {
 } from "@/components/StandardPage";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { getPublic, getVerse } from "@/api/v1/verse";
+import type { VerseData } from "@/api/v1/verse";
 import { getTags } from "@/api/v1/tags";
 import { usePageData } from "@/composables/usePageData";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
@@ -226,8 +227,14 @@ onMounted(async () => {
   try {
     const res = await getTags();
     const classifyTags = res.data
-      .filter((tag: any) => tag.type === "Classify")
-      .map((tag: any) => ({ id: tag.id, name: tag.name }));
+      .filter(
+        (tag: { id: number; name: string; type?: string }) =>
+          tag.type === "Classify"
+      )
+      .map((tag: { id: number; name: string; type?: string }) => ({
+        id: tag.id,
+        name: tag.name,
+      }));
     categories.value = [
       { id: 0, name: t("verse.publicPage.allCategory") },
       ...classifyTags,
@@ -243,11 +250,11 @@ const {
   pagination,
   viewMode,
   totalPages,
-  refresh,
+  refresh: _refresh,
   handleSearch,
-  handleSortChange,
+  handleSortChange: _handleSortChange,
   handlePageChange,
-  handleViewChange,
+  handleViewChange: _handleViewChange,
   handleTagsChange,
 } = usePageData({
   fetchFn: async (params) =>
@@ -290,7 +297,7 @@ const formatItemDate = (dateStr?: string) => {
 // Detail Panel Logic
 const detailVisible = ref(false);
 const detailLoading = ref(false);
-const currentVerse = ref<any | null>(null);
+const currentVerse = ref<VerseData | null>(null);
 
 const detailProperties = computed(() => {
   if (!currentVerse.value) return [];
@@ -312,7 +319,7 @@ const detailProperties = computed(() => {
   ];
 });
 
-const openDetail = async (item: any) => {
+const openDetail = async (item: VerseData) => {
   detailVisible.value = true;
   detailLoading.value = true;
   try {
@@ -335,7 +342,7 @@ const handleGoToPage = () => {
   }
 };
 
-const goToScene = (item: any) => {
+const goToScene = (item: VerseData) => {
   const title = encodeURIComponent(
     t("verse.listPage.editorTitle", {
       name: item.name || t("verse.listPage.unnamed"),

@@ -7,18 +7,13 @@
 
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { useRouter, useRoute } from "vue-router";
+import { useRoute } from "vue-router";
 import News from "./components/News/index.vue";
-import { ThemeEnum } from "@/enums/ThemeEnum";
-import { useSettingsStore } from "@/store/modules/settings";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
-const router = useRouter();
 const route = useRoute();
 const contentRef = ref<HTMLElement | null>(null);
-const settingsStore = useSettingsStore();
-const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 
 defineOptions({
   name: "WebHome",
@@ -28,17 +23,6 @@ defineOptions({
 const section = computed(() => {
   return route.query.section ? (route.query.section as string) : "news";
 });
-
-// 根据主题和滚动状态获取文本颜色
-const getTextColor = () => {
-  if (isDark.value) {
-    return "#fff";
-  } else {
-    return isScrolled.value ? "#333" : "#fff";
-  }
-};
-
-const isScrolled = ref(false);
 
 // 自动滚动
 const SCROLL_POSITION_KEY = "web_scroll_position";
@@ -73,6 +57,7 @@ const restoreScrollPosition = () => {
 };
 
 // 防抖
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const debounce = (fn: Function, delay: number) => {
   let timer: number | null = null;
   return (...args: unknown[]) => {
@@ -94,20 +79,12 @@ const handleScroll = () => {
 };
 
 const isMobile = ref(false);
-const sidebarVisible = ref(false);
 
 const checkMobile = () => {
   isMobile.value = window.innerWidth <= 768;
 };
 
-// 切换侧边栏显
-const toggleSidebar = () => {
-  sidebarVisible.value = !sidebarVisible.value;
-};
-
 // 创建各部分的引用
-const featuresRef = ref<HTMLElement | null>(null);
-const casesRef = ref<HTMLElement | null>(null);
 const newsRef = ref<HTMLElement | null>(null);
 
 // 滚动到指定部分的函数

@@ -47,16 +47,23 @@ import type {
   FetchParams,
   FetchResponse,
 } from "@/components/MrPP/CardListPage/types";
+import type { AiRodinItem } from "@/types/ai-rodin";
 
 const { t } = useI18n();
 const router = useRouter();
 const cardListPageRef = ref<InstanceType<typeof CardListPage> | null>(null);
 
-const fetchAiRodins = async (params: FetchParams): Promise<FetchResponse> => {
-  return await aiRodin.list(params.sort, params.search, params.page);
+const fetchAiRodins = async (
+  params: FetchParams
+): Promise<FetchResponse<AiRodinItem>> => {
+  return (await aiRodin.list(
+    params.sort,
+    params.search,
+    params.page
+  )) as FetchResponse<AiRodinItem>;
 };
 
-const handleRefresh = (_data: any[]) => {
+const handleRefresh = (_data: AiRodinItem[]) => {
   // console.log("AI list refreshed", data);
 };
 
@@ -68,7 +75,7 @@ const view = (id: number) => {
   router.push({ path: "/ai/generation", query: { id } });
 };
 
-const deletedWindow = async (item: any, resetLoading: () => void) => {
+const deletedWindow = async (item: AiRodinItem, resetLoading: () => void) => {
   try {
     await MessageBox.confirm(
       t("meta.confirm.message1"),

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import fc from "fast-check";
 import { arbitraryMetaInfo, arbitraryNewTitle } from "./generators";
+import type { CreateMetaRequest, MetaCode } from "@/api/v1/types/meta";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -51,22 +52,26 @@ describe("Entity Copy Function - Property-Based Tests", () => {
         async (originalMeta, newTitle) => {
           // Generate a unique UUID for this test iteration
           const newUuid = `test-uuid-${originalMeta.id}`;
-          (uuidv4 as any).mockReturnValue(newUuid);
+          (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
           // Mock getMeta to return the original entity
-          (getMeta as any).mockResolvedValue({ data: originalMeta });
-
-          // Mock postMeta to capture the new entity data
-          let capturedNewMeta: any = null;
-          (postMeta as any).mockImplementation((data: any) => {
-            capturedNewMeta = data;
-            return Promise.resolve({
-              data: { ...data, id: originalMeta.id + 1 },
-            });
+          (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+            data: originalMeta,
           });
 
+          // Mock postMeta to capture the new entity data
+          let capturedNewMeta: CreateMetaRequest | null = null;
+          (postMeta as ReturnType<typeof vi.fn>).mockImplementation(
+            (data: CreateMetaRequest) => {
+              capturedNewMeta = data;
+              return Promise.resolve({
+                data: { ...data, id: originalMeta.id + 1 },
+              });
+            }
+          );
+
           // Mock putMetaCode
-          (putMetaCode as any).mockResolvedValue({
+          (putMetaCode as ReturnType<typeof vi.fn>).mockResolvedValue({
             data: originalMeta.metaCode || { blockly: "", lua: "" },
           });
 
@@ -139,23 +144,27 @@ describe("Entity Copy Function - Property-Based Tests", () => {
         async (originalMeta, newTitle) => {
           // Generate a unique UUID for this test iteration
           const newUuid = `test-uuid-${originalMeta.id}`;
-          (uuidv4 as any).mockReturnValue(newUuid);
+          (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
           // Mock getMeta to return the original entity
-          (getMeta as any).mockResolvedValue({ data: originalMeta });
+          (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+            data: originalMeta,
+          });
 
           // Mock postMeta
           const newMetaId = originalMeta.id + 1;
-          (postMeta as any).mockResolvedValue({
+          (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
             data: { id: newMetaId },
           });
 
           // Mock putMetaCode to capture the code being set
-          let capturedMetaCode: any = null;
-          (putMetaCode as any).mockImplementation((_id: number, code: any) => {
-            capturedMetaCode = code;
-            return Promise.resolve({ data: code });
-          });
+          let capturedMetaCode: MetaCode | null = null;
+          (putMetaCode as ReturnType<typeof vi.fn>).mockImplementation(
+            (_id: number, code: MetaCode) => {
+              capturedMetaCode = code;
+              return Promise.resolve({ data: code });
+            }
+          );
 
           // Simulate the copy function logic from list.vue
           const simulateCopy = async (id: number, newTitle: string) => {
@@ -223,22 +232,26 @@ describe("Entity Copy Function - Property-Based Tests", () => {
           const generatedUuid = realUuidv4();
 
           // Mock uuidv4 to return the generated UUID
-          (uuidv4 as any).mockReturnValue(generatedUuid);
+          (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(generatedUuid);
 
           // Mock getMeta to return the original entity
-          (getMeta as any).mockResolvedValue({ data: originalMeta });
-
-          // Mock postMeta to capture the new entity data
-          let capturedNewMeta: any = null;
-          (postMeta as any).mockImplementation((data: any) => {
-            capturedNewMeta = data;
-            return Promise.resolve({
-              data: { ...data, id: originalMeta.id + 1 },
-            });
+          (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+            data: originalMeta,
           });
 
+          // Mock postMeta to capture the new entity data
+          let capturedNewMeta: CreateMetaRequest | null = null;
+          (postMeta as ReturnType<typeof vi.fn>).mockImplementation(
+            (data: CreateMetaRequest) => {
+              capturedNewMeta = data;
+              return Promise.resolve({
+                data: { ...data, id: originalMeta.id + 1 },
+              });
+            }
+          );
+
           // Mock putMetaCode
-          (putMetaCode as any).mockResolvedValue({
+          (putMetaCode as ReturnType<typeof vi.fn>).mockResolvedValue({
             data: originalMeta.metaCode || { blockly: "", lua: "" },
           });
 
@@ -314,22 +327,26 @@ describe("Entity Copy Function - Property-Based Tests", () => {
 
           // Generate a unique UUID for this test iteration
           const newUuid = `test-uuid-${originalMeta.id}`;
-          (uuidv4 as any).mockReturnValue(newUuid);
+          (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
           // Mock getMeta to return the original entity
-          (getMeta as any).mockResolvedValue({ data: originalMeta });
-
-          // Mock postMeta to capture the new entity data
-          let capturedNewMeta: any = null;
-          (postMeta as any).mockImplementation((data: any) => {
-            capturedNewMeta = data;
-            return Promise.resolve({
-              data: { ...data, id: originalMeta.id + 1 },
-            });
+          (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+            data: originalMeta,
           });
 
+          // Mock postMeta to capture the new entity data
+          let capturedNewMeta: CreateMetaRequest | null = null;
+          (postMeta as ReturnType<typeof vi.fn>).mockImplementation(
+            (data: CreateMetaRequest) => {
+              capturedNewMeta = data;
+              return Promise.resolve({
+                data: { ...data, id: originalMeta.id + 1 },
+              });
+            }
+          );
+
           // Mock putMetaCode
-          (putMetaCode as any).mockResolvedValue({
+          (putMetaCode as ReturnType<typeof vi.fn>).mockResolvedValue({
             data: originalMeta.metaCode || { blockly: "", lua: "" },
           });
 
@@ -395,23 +412,27 @@ describe("Entity Copy Function - Property-Based Tests", () => {
         async (originalMeta, newTitle) => {
           // Generate a unique UUID for this test iteration
           const newUuid = `test-uuid-${originalMeta.id}`;
-          (uuidv4 as any).mockReturnValue(newUuid);
+          (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
           // Mock getMeta to return the original entity
-          (getMeta as any).mockResolvedValue({ data: originalMeta });
+          (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+            data: originalMeta,
+          });
 
           // Mock postMeta to simulate backend auto-generating a new ID
           // The new ID should be different from the original ID
           const newId = originalMeta.id + 1000; // Ensure it's different
           let capturedNewId: number | null = null;
-          (postMeta as any).mockImplementation((data: any) => {
-            return Promise.resolve({
-              data: { ...data, id: newId },
-            });
-          });
+          (postMeta as ReturnType<typeof vi.fn>).mockImplementation(
+            (data: CreateMetaRequest) => {
+              return Promise.resolve({
+                data: { ...data, id: newId },
+              });
+            }
+          );
 
           // Mock putMetaCode
-          (putMetaCode as any).mockResolvedValue({
+          (putMetaCode as ReturnType<typeof vi.fn>).mockResolvedValue({
             data: originalMeta.metaCode || { blockly: "", lua: "" },
           });
 
@@ -486,7 +507,7 @@ describe("Entity Copy Function - Property-Based Tests", () => {
         async (originalMeta, newTitle, shouldSucceed) => {
           // Generate a unique UUID for this test iteration
           const newUuid = `test-uuid-${originalMeta.id}`;
-          (uuidv4 as any).mockReturnValue(newUuid);
+          (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
           // Track loading state changes
           const loadingStates: boolean[] = [];
@@ -501,11 +522,13 @@ describe("Entity Copy Function - Property-Based Tests", () => {
           // Mock API calls based on success/failure scenario
           if (shouldSucceed) {
             // Success scenario
-            (getMeta as any).mockResolvedValue({ data: originalMeta });
-            (postMeta as any).mockResolvedValue({
+            (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+              data: originalMeta,
+            });
+            (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
               data: { ...originalMeta, id: originalMeta.id + 1 },
             });
-            (putMetaCode as any).mockResolvedValue({
+            (putMetaCode as ReturnType<typeof vi.fn>).mockResolvedValue({
               data: originalMeta.metaCode || { blockly: "", lua: "" },
             });
           } else {
@@ -513,21 +536,23 @@ describe("Entity Copy Function - Property-Based Tests", () => {
             const failureStage = originalMeta.id % 3; // 0: getMeta, 1: postMeta, 2: putMetaCode
 
             if (failureStage === 0) {
-              (getMeta as any).mockRejectedValue(
+              (getMeta as ReturnType<typeof vi.fn>).mockRejectedValue(
                 new Error("Failed to get meta")
               );
             } else {
-              (getMeta as any).mockResolvedValue({ data: originalMeta });
+              (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+                data: originalMeta,
+              });
 
               if (failureStage === 1) {
-                (postMeta as any).mockRejectedValue(
+                (postMeta as ReturnType<typeof vi.fn>).mockRejectedValue(
                   new Error("Failed to create meta")
                 );
               } else {
-                (postMeta as any).mockResolvedValue({
+                (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
                   data: { ...originalMeta, id: originalMeta.id + 1 },
                 });
-                (putMetaCode as any).mockRejectedValue(
+                (putMetaCode as ReturnType<typeof vi.fn>).mockRejectedValue(
                   new Error("Failed to update code")
                 );
               }

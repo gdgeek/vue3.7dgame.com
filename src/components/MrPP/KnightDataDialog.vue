@@ -80,8 +80,8 @@ const handlerCancel = () => {
 };
 
 const handlerChange = ({
-  oldValue,
-  newValue,
+  oldValue: _oldValue,
+  newValue: _newValue,
 }: {
   oldValue: unknown;
   newValue: unknown;
@@ -98,7 +98,6 @@ const open = ({
   callback: (data: Record<string, unknown>) => void;
   data: FormData;
 }) => {
-  const currentLocale = locale.value;
   schema.value = newSchema;
   /*
   if (currentLocale === "en") {

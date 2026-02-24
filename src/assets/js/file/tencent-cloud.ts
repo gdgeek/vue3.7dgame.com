@@ -173,7 +173,7 @@ const fileUpload = async (
         Region: handler.region,
         Key: filename,
         Body: file,
-        onHashProgress: (progressData: any) => {
+        onHashProgress: (progressData: { percent: number }) => {
           console.log('校验中', JSON.stringify(progressData)); // 校验进度
         },
         onProgress: (progressData: { percent: number; }) => {
@@ -200,7 +200,7 @@ const getUrl = (info: FileInfo, file: { md5: string; ext: string }, handler: Fil
       Expires: 60,
       Sign: true,
     },
-    (err: any, data: { Url: string; }) => {
+    (err: Error | null, data: { Url: string }) => {
       console.log(err || (data && data.Url));
     }
   );
@@ -219,7 +219,7 @@ const fileUrl = (md5: string, extension: string, handler: FileHandler, dir = '')
       Expires: 60,
       Sign: true,
     },
-    (err: any, data: { Url: any; }) => {
+    (err: Error | null, data: { Url: string }) => {
       console.log(err || (data && data.Url));
     }
   );

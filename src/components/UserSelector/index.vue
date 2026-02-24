@@ -93,11 +93,11 @@
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import { getPerson } from "@/api/v1/person";
+import { getPerson, type userData } from "@/api/v1/person";
 import { useI18n } from "vue-i18n";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 
-const { t } = useI18n();
+const {} = useI18n();
 
 interface Props {
   modelValue: boolean;
@@ -112,10 +112,10 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];
-  select: [user: any];
+  select: [user: userData];
 }>();
 
-const users = ref<any[]>([]);
+const users = ref<userData[]>([]);
 const loading = ref(false);
 const sorted = ref("-created_at");
 const searched = ref("");
@@ -146,7 +146,7 @@ const fetchUsers = async () => {
 
     // Filter out excluded IDs
     users.value = (response.data || []).filter(
-      (user: any) => !props.excludeIds.includes(user.id)
+      (user) => !props.excludeIds.includes(Number(user.id))
     );
   } catch (error) {
     console.error("Failed to fetch users:", error);
@@ -156,7 +156,7 @@ const fetchUsers = async () => {
   }
 };
 
-const handleSelect = (user: any) => {
+const handleSelect = (user: userData) => {
   emit("select", user);
 };
 

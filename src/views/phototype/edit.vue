@@ -93,6 +93,8 @@
 
 <script setup lang="ts">
 import { getPhototype, putPhototype, postPhototype } from "@/api/v1/phototype";
+import type { PhototypeType } from "@/api/v1/types/phototype";
+import type { ResourceInfo } from "@/api/v1/resources/model";
 import Codemirror from "@/components/Codemirror.vue";
 import GenerateSchema from "generate-schema";
 import Resource from "@/components/Resource.vue";
@@ -103,7 +105,10 @@ import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 
-const handleTransformSave = async (transform: any) => {
+const handleTransformSave = async (
+  transform: Record<string, { x: number; y: number; z: number }>
+) => {
+  if (!phototype.value) return;
   if (!id.value) {
     ElMessage.warning(t("phototype.edit.saveBasicFirst"));
     return;
@@ -114,7 +119,7 @@ const handleTransformSave = async (transform: any) => {
   ElMessage.success(t("common.message.saveSuccess"));
   phototype.value = response.data;
 };
-const handleSelected = async (data: any) => {
+const handleSelected = async (data: ResourceInfo) => {
   if (!phototype.value) {
     return;
   }
@@ -162,7 +167,7 @@ const tree = ref({
 
 const saveChanges = async () => {
   try {
-    if (!phototype.value.title) {
+    if (!phototype.value || !phototype.value.title) {
       ElMessage.warning(t("phototype.prompt.message1"));
       return;
     }
@@ -206,7 +211,7 @@ const jsonStr = computed({
     }
   },
 });
-const phototype = ref<any>(null);
+const phototype = ref<PhototypeType | null>(null);
 const refresh = async () => {
   // 如果没有 id，说明是新建，初始化空数据
   if (!id.value) {

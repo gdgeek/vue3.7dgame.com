@@ -135,11 +135,10 @@ import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 //import { useInfomationStore } from "@/store/modules/information";
 import { useDomainStore } from "@/store/modules/domain";
-import { useUserStore, useScreenStore } from "@/store";
+import { useScreenStore } from "@/store";
 
-const router = useRouter();
-const route = useRoute();
-const userStore = useUserStore();
+const _router = useRouter();
+const _route = useRoute();
 //const informationStore = useInfomationStore();
 const domainStore = useDomainStore();
 const settingsStore = useSettingsStore();

@@ -52,17 +52,6 @@ const toFixedVector3 = (vec: THREE.Vector3, n: number) => {
   return result;
 };
 
-// 解析节点
-const parseNode = async (json: any) => {
-  try {
-    const loader = new THREE.ObjectLoader();
-    const data = await loader.parseAsync(json);
-    return data;
-  } catch (e) {
-    throw e;
-  }
-};
-
 /**
  * 截图函数
  *
@@ -116,7 +105,9 @@ const refresh = () => {
   // 加载
   loader.load(
     url,
-    (chunks: any) => {
+    (
+      chunks: { data: Uint8Array; size: { x: number; y: number; z: number } }[]
+    ) => {
       const chunk = chunks[0];
       console.error(chunks);
       const mesh = new VOXMesh(chunk);
@@ -144,7 +135,7 @@ const refresh = () => {
         ),
       });
     },
-    (xhr: any) => {
+    (xhr: { loaded: number; total: number }) => {
       emit("progress", parseFloat(((xhr.loaded / xhr.total) * 100).toFixed(1)));
       // emit("progress", (xhr.loaded / xhr.total) * 100);
       console.log((xhr.loaded / xhr.total) * 100 + "% loaded");

@@ -2,7 +2,10 @@ import { logger } from "@/utils/logger";
 import { store } from "@/store";
 
 import { TOKEN_KEY } from "@/enums/CacheEnum";
-function setToken(token: any) {
+
+export type TokenValue = unknown;
+
+function setToken(token: TokenValue) {
   localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
 }
 function hasToken() {
@@ -15,7 +18,7 @@ function hasToken() {
 function removeToken() {
   localStorage.removeItem(TOKEN_KEY);
 }
-function getToken() {
+function getToken(): TokenValue | null {
   const token = localStorage.getItem(TOKEN_KEY);
 
   if (token) {

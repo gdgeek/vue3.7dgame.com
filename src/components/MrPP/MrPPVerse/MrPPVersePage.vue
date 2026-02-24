@@ -71,7 +71,16 @@ interface Pagination {
 
 const props = defineProps<{ created: boolean }>();
 const emit = defineEmits<{
-  (e: "loaded", params: any, callback: (val: any) => void): void;
+  (
+    e: "loaded",
+    params: {
+      sorted: string;
+      searched: string;
+      current: number;
+      tags: number[];
+    },
+    callback: (val: { data: VerseData[]; pagination: Pagination }) => void
+  ): void;
 }>();
 
 const createdDialog = ref<InstanceType<typeof Create> | null>(null);
@@ -94,7 +103,7 @@ const createWindow = () => {
   }
 };
 
-const submitCreate = async (form: any, imageId: number | null) => {
+const submitCreate = async (form: VerseData, imageId: number | null) => {
   const data: PostVerseData = {
     name: form.name,
     description: form.description,
@@ -130,15 +139,6 @@ const search = (value: string) => {
   refresh();
 };
 
-const named = async (id: number, newValue: string) => {
-  try {
-    await putVerse(id, { name: newValue });
-    refresh();
-  } catch (error) {
-    console.error(error);
-  }
-};
-
 const refresh = () => {
   emit(
     "loaded",
@@ -148,7 +148,7 @@ const refresh = () => {
       current: pagination.value.current,
       tags: tagList.value,
     },
-    (value: any) => {
+    (value) => {
       items.value = value.data;
       pagination.value = value.pagination;
     }

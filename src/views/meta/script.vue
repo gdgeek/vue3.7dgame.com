@@ -7,17 +7,25 @@
             <div v-if="meta" class="clearfix">
               <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
                 meta.title
-                }}</el-link>
+              }}</el-link>
               /【{{ $t("meta.script.title") }}】
               <!--
               <el-button type="primary" size="small" @click="run">测试运行</el-button>
               -->
-              <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
+              <el-button
+                v-if="disabled"
+                type="primary"
+                size="small"
+                @click="disabled = false"
+              >
                 返回
               </el-button>
               <el-button-group style="float: right">
                 <el-button type="primary" size="small" @click="save">
-                  <font-awesome-icon class="icon" icon="save"></font-awesome-icon>
+                  <font-awesome-icon
+                    class="icon"
+                    icon="save"
+                  ></font-awesome-icon>
                   {{ $t("meta.script.save") }}
                 </el-button>
               </el-button-group>
@@ -26,26 +34,42 @@
           <el-container v-if="!disabled">
             <el-tabs v-model="activeName" type="card" style="width: 100%">
               <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
-                <el-main style="
+                <el-main
+                  style="
                     margin: 0;
                     padding: 0;
                     height: 70vh;
                     position: relative;
-                  ">
+                  "
+                >
                   <div class="fullscreen-controls">
                     <el-button-group>
-                      <el-button class="fullscreen-btn" size="small" type="primary" plain @click="toggleFullscreen">
+                      <el-button
+                        class="fullscreen-btn"
+                        size="small"
+                        type="primary"
+                        plain
+                        @click="toggleFullscreen"
+                      >
                         <el-icon>
                           <FullScreen v-if="!isFullscreen"></FullScreen>
                           <Aim v-else></Aim>
                         </el-icon>
                       </el-button>
                       <template v-if="isFullscreen">
-                        <el-button size="small" type="primary" @click="showFullscreenCode('lua')">
+                        <el-button
+                          size="small"
+                          type="primary"
+                          @click="showFullscreenCode('lua')"
+                        >
                           Lua
                         </el-button>
-                        <el-button size="small" color="#F7DF1E" style="margin-right: 10px"
-                          @click="showFullscreenCode('javascript')">
+                        <el-button
+                          size="small"
+                          color="#F7DF1E"
+                          style="margin-right: 10px"
+                          @click="showFullscreenCode('javascript')"
+                        >
                           JavaScript
                         </el-button>
                         <!--
@@ -53,21 +77,39 @@
                           测试运行
                         </el-button>
                         -->
-                        <el-button size="small" type="primary" style="margin-right: 50px" @click="save">
-                          <font-awesome-icon class="icon" icon="save"></font-awesome-icon>
+                        <el-button
+                          size="small"
+                          type="primary"
+                          style="margin-right: 50px"
+                          @click="save"
+                        >
+                          <font-awesome-icon
+                            class="icon"
+                            icon="save"
+                          ></font-awesome-icon>
                           {{ $t("meta.script.save") }}
                         </el-button>
                       </template>
                     </el-button-group>
                   </div>
 
-                  <el-dialog v-model="showCodeDialog" :title="codeDialogTitle" fullscreen :show-close="true"
-                    :close-on-click-modal="false" :close-on-press-escape="true">
+                  <el-dialog
+                    v-model="showCodeDialog"
+                    :title="codeDialogTitle"
+                    fullscreen
+                    :show-close="true"
+                    :close-on-click-modal="false"
+                    :close-on-press-escape="true"
+                  >
                     <div class="code-dialog-content">
                       <el-card :class="isDark ? 'dark-theme' : 'light-theme'">
                         <div v-highlight>
                           <div class="code-container2">
-                            <el-button class="copy-button2" text @click="copyCode(currentCode)">
+                            <el-button
+                              class="copy-button2"
+                              text
+                              @click="copyCode(currentCode)"
+                            >
                               <el-icon class="icon">
                                 <CopyDocument></CopyDocument>
                               </el-icon>
@@ -84,25 +126,45 @@
                     </div>
                   </el-dialog>
 
-                  <iframe style="margin: 0; padding: 0; height: 100%; width: 100%" id="editor" ref="editor"
-                    :src="src"></iframe>
+                  <iframe
+                    style="margin: 0; padding: 0; height: 100%; width: 100%"
+                    id="editor"
+                    ref="editor"
+                    :src="src"
+                  ></iframe>
                 </el-main>
               </el-tab-pane>
-              <el-tab-pane :label="$t('verse.view.script.code') || 'Script Code'" name="script">
-                <el-card v-if="activeName === 'script'" class="box-card" :class="isDark ? 'dark-theme' : 'light-theme'">
+              <el-tab-pane
+                :label="$t('verse.view.script.code') || 'Script Code'"
+                name="script"
+              >
+                <el-card
+                  v-if="activeName === 'script'"
+                  class="box-card"
+                  :class="isDark ? 'dark-theme' : 'light-theme'"
+                >
                   <div v-highlight>
                     <el-tabs v-model="languageName">
                       <el-tab-pane label="Lua" name="lua">
                         <template #label>
                           <span style="display: flex; align-items: center">
-                            <img src="/lua.png" style="width: 25px; margin-right: 5px" alt="" />
+                            <img
+                              src="/lua.png"
+                              style="width: 25px; margin-right: 5px"
+                              alt=""
+                            />
                             <span>Lua</span>
                           </span>
                         </template>
                         <div class="code-container">
-                          <el-button class="copy-button" text @click="copyCode(LuaCode)"><el-icon class="icon">
-                              <CopyDocument></CopyDocument>
-                            </el-icon>{{ $t("copy.title") || "Copy" }}</el-button>
+                          <el-button
+                            class="copy-button"
+                            text
+                            @click="copyCode(LuaCode)"
+                            ><el-icon class="icon">
+                              <CopyDocument></CopyDocument> </el-icon
+                            >{{ $t("copy.title") || "Copy" }}</el-button
+                          >
                           <pre>
                   <code class="lua">{{ LuaCode }}</code>
                 </pre>
@@ -111,14 +173,23 @@
                       <el-tab-pane label="JavaScript" name="javascript">
                         <template #label>
                           <span style="display: flex; align-items: center">
-                            <img src="/javascript.png" style="width: 25px; margin-right: 5px" alt="" />
+                            <img
+                              src="/javascript.png"
+                              style="width: 25px; margin-right: 5px"
+                              alt=""
+                            />
                             <span>JavaScript</span>
                           </span>
                         </template>
                         <div class="code-container">
-                          <el-button class="copy-button" text @click="copyCode(JavaScriptCode)"><el-icon class="icon">
-                              <CopyDocument></CopyDocument>
-                            </el-icon>{{ $t("copy.title") }}</el-button>
+                          <el-button
+                            class="copy-button"
+                            text
+                            @click="copyCode(JavaScriptCode)"
+                            ><el-icon class="icon">
+                              <CopyDocument></CopyDocument> </el-icon
+                            >{{ $t("copy.title") }}</el-button
+                          >
                           <pre>
                   <code class="javascript">{{ JavaScriptCode }}</code>
                 </pre>
@@ -132,14 +203,25 @@
           </el-container>
           <div v-if="disabled" class="runArea">
             <div class="scene-fullscreen-controls">
-              <el-button class="scene-fullscreen-btn" size="small" type="primary" plain @click="toggleSceneFullscreen">
+              <el-button
+                class="scene-fullscreen-btn"
+                size="small"
+                type="primary"
+                plain
+                @click="toggleSceneFullscreen"
+              >
                 <el-icon>
                   <FullScreen v-if="!isSceneFullscreen"></FullScreen>
                   <Aim v-else></Aim>
                 </el-icon>
               </el-button>
             </div>
-            <ScenePlayer ref="scenePlayer" :meta="meta" :is-scene-fullscreen="isSceneFullscreen"></ScenePlayer>
+            <ScenePlayer
+              v-if="meta"
+              ref="scenePlayer"
+              :meta="meta"
+              :is-scene-fullscreen="isSceneFullscreen"
+            ></ScenePlayer>
           </div>
         </el-card>
       </el-main>
@@ -186,7 +268,17 @@ const settingsStore = useSettingsStore();
 const userStore = useUserStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 const disabled = ref<boolean>(false);
-const scenePlayer = ref<InstanceType<typeof ScenePlayer>>();
+type ScenePlayerExpose = {
+  sources: Map<string, SceneSource>;
+  playAnimation: (uuid: string, animationName: string) => void;
+  getAudioUrl: (uuid: string) => string | undefined;
+  playQueuedAudio: (
+    audio: HTMLAudioElement,
+    skipQueue?: boolean
+  ) => Promise<void> | void;
+};
+
+const scenePlayer = ref<ScenePlayerExpose | null>(null);
 const isSceneFullscreen = ref(false);
 const isFullscreen = ref(false);
 const showCodeDialog = ref(false);
@@ -214,6 +306,9 @@ type EditorEventPayload = {
 
 type MeshWrapper = {
   mesh: THREE.Object3D;
+  playAnimation?: (animationName: string) => void;
+  setText?: (text: string) => void;
+  setVisibility?: (visible: boolean) => void;
 };
 
 type EntityNode = {
@@ -226,8 +321,183 @@ type EntityNode = {
   };
 };
 
+type MetaData = {
+  children?: {
+    entities?: EntityNode[];
+  };
+};
+
+type SceneSource = {
+  type: string;
+  data: {
+    mesh?: THREE.Object3D;
+    setText?: (text: string) => void;
+    setVisibility?: (visible: boolean) => void;
+    url?: string;
+  };
+};
+
+type TaskObject = {
+  type?: string;
+  execute?: () => Promise<void> | void;
+  data?: unknown;
+};
+
+type HandlePolygen = (uuid: string) => MeshWrapper | null;
+type HandleSound = (uuid: string) => HTMLAudioElement | undefined;
+type SoundAPI = {
+  play: (
+    audio: HTMLAudioElement | undefined,
+    skipQueue?: boolean
+  ) => Promise<void> | void;
+  createTask: (audio: HTMLAudioElement | undefined) => TaskObject | null;
+  playTask: (audio: HTMLAudioElement | undefined) => TaskObject | null;
+};
+type TaskAPI = {
+  circle: (count: number, taskToRepeat: unknown) => Promise<void> | void;
+  array: (type: string, items: unknown[]) => unknown[];
+  execute: (tweenData: unknown) => Promise<void> | void;
+  sleep: (seconds: number) => () => Promise<void>;
+};
+type TweenAPI = {
+  to_object: (
+    fromObj: MeshWrapper,
+    toObj: MeshWrapper,
+    duration: number,
+    easing: string
+  ) => TweenPayload | null;
+  to_data: (
+    obj: MeshWrapper,
+    transformData: {
+      position: THREE.Vector3;
+      rotation: THREE.Vector3;
+      scale: THREE.Vector3;
+    },
+    duration: number,
+    easing: string
+  ) => TweenPayload | null;
+};
+type HelperAPI = {
+  handler: (index: string, uuid: string) => unknown;
+};
+type AnimationAPI = {
+  createTask: (
+    polygenInstance: MeshWrapper,
+    animationName: string
+  ) => TaskObject | null;
+  playTask: (
+    polygenInstance: MeshWrapper,
+    animationName: string
+  ) => TaskObject | null;
+};
+type EventAPI = {
+  trigger: (index: unknown, eventId: string) => void;
+};
+type TextAPI = {
+  setText: (object: unknown, setText: string) => void;
+};
+type PointAPI = {
+  setVisual: (object: unknown, setVisual: boolean) => void;
+};
+type TransformAPI = (
+  position: unknown,
+  rotation: unknown,
+  scale: unknown
+) => {
+  position: THREE.Vector3;
+  rotation: THREE.Vector3;
+  scale: THREE.Vector3;
+};
+type ArgumentAPI = {
+  boolean: (value: boolean) => boolean;
+  number: (value: number) => number;
+  string: (value: string) => string;
+  idPlayer: (value: number) => number;
+  point: (position: unknown) => THREE.Vector3;
+  range: (centerPoint: THREE.Vector3, radius: number) => THREE.Vector3;
+};
+
+type PolygenAPI = {
+  playAnimation: (
+    polygenInstance: MeshWrapper | null,
+    animationName: string
+  ) => void;
+};
+
+type ScriptExecutor = (
+  handlePolygen: HandlePolygen,
+  polygen: PolygenAPI,
+  handleSound: HandleSound,
+  sound: SoundAPI,
+  THREE: typeof THREE,
+  task: TaskAPI,
+  tween: TweenAPI,
+  helper: HelperAPI,
+  animation: AnimationAPI,
+  event: EventAPI,
+  text: TextAPI,
+  point: PointAPI,
+  transform: TransformAPI,
+  Vector3: typeof Vector3,
+  argument: ArgumentAPI,
+  handleText: typeof handleText,
+  handleEntity: typeof handleEntity
+) => Promise<void>;
+
+type TweenObject = {
+  type: "object";
+  fromObj: MeshWrapper;
+  startPos: THREE.Vector3;
+  endPos: THREE.Vector3;
+  duration: number;
+  easing?: string;
+};
+
+type TweenData = {
+  type: "data";
+  obj: MeshWrapper;
+  startPos: THREE.Vector3;
+  endPos: THREE.Vector3;
+  startRotation: THREE.Euler;
+  endRotation: THREE.Vector3;
+  startScale: THREE.Vector3;
+  endScale: THREE.Vector3;
+  duration: number;
+  easing?: string;
+};
+
+type TweenPayload = TweenObject | TweenData;
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
+
+const hasSetText = (
+  value: unknown
+): value is { setText: (val: string) => void } =>
+  isRecord(value) && typeof value.setText === "function";
+
+const hasSetVisibility = (
+  value: unknown
+): value is { setVisibility: (val: boolean) => void } =>
+  isRecord(value) && typeof value.setVisibility === "function";
+
+const isMetaData = (value: unknown): value is MetaData =>
+  isRecord(value) && ("children" in value || "entities" in value);
+
+const isTaskObject = (value: unknown): value is TaskObject =>
+  isRecord(value) && ("execute" in value || "type" in value || "data" in value);
+
+const isTweenPayload = (value: unknown): value is TweenPayload => {
+  if (!isRecord(value)) return false;
+  const typeValue = value.type;
+  return typeValue === "object" || typeValue === "data";
+};
+
+const isObjectWithType = (value: unknown): value is { type: unknown } =>
+  isRecord(value) && "type" in value;
+
+const isObjectWithUrl = (value: unknown): value is { url: unknown } =>
+  isRecord(value) && "url" in value;
 
 const isEditorPostPayload = (value: unknown): value is EditorPostPayload => {
   if (!isRecord(value)) return false;
@@ -745,10 +1015,10 @@ const handlePolygen = (uuid: string) => {
   // 添加重试机制
   const getModel = (uuid: string, retries = 3): THREE.Object3D | null => {
     const source = scenePlayer.value?.sources.get(uuid) as
-      | { type: string; data: unknown }
+      | SceneSource
       | undefined;
-    if (source && source.type === "model") {
-      return source.data as THREE.Object3D;
+    if (source && source.type === "model" && source.data.mesh) {
+      return source.data.mesh;
     }
 
     if (retries > 0) {
@@ -773,6 +1043,7 @@ const handlePolygen = (uuid: string) => {
   }
 
   return {
+    mesh: model,
     playAnimation: (animationName: string) => {
       console.log("播放动画:", {
         uuid: modelUuid,
@@ -802,8 +1073,9 @@ const run = async () => {
     let count = 0;
     for (const entity of entities) {
       count++;
-      if (entity.children?.entities?.length > 0) {
-        count += countEntities(entity.children.entities);
+      const childEntities = entity.children?.entities;
+      if (childEntities && childEntities.length > 0) {
+        count += countEntities(childEntities);
       }
     }
     return count;
@@ -813,7 +1085,9 @@ const run = async () => {
     return new Promise<void>((resolve) => {
       const checkModels = () => {
         const metaData = meta.value?.data;
-        const entities = metaData?.children?.entities;
+        const entities = isMetaData(metaData)
+          ? metaData.children?.entities
+          : undefined;
 
         if (!entities || entities.length === 0) {
           resolve();
@@ -898,7 +1172,7 @@ const run = async () => {
       if (!taskObj) return null;
 
       // 立即执行
-      taskObj.execute();
+      taskObj.execute?.();
       return taskObj;
     },
   };
@@ -1011,7 +1285,7 @@ const run = async () => {
         return;
       }
 
-      let resolvedTask = taskToRepeat;
+      let resolvedTask: unknown = taskToRepeat;
       if (taskToRepeat instanceof Promise) {
         resolvedTask = await taskToRepeat;
       }
@@ -1023,12 +1297,23 @@ const run = async () => {
           if (resolvedTask) {
             if (typeof resolvedTask === "function") {
               await resolvedTask();
-            } else if (typeof resolvedTask.execute === "function") {
+            } else if (
+              isTaskObject(resolvedTask) &&
+              typeof resolvedTask.execute === "function"
+            ) {
               await resolvedTask.execute();
-            } else if (resolvedTask.type === "audio") {
-              await sound.play(resolvedTask.data);
-            } else if (resolvedTask.type === "animation") {
-              await resolvedTask.execute();
+            } else if (
+              isTaskObject(resolvedTask) &&
+              resolvedTask.type === "audio"
+            ) {
+              await sound.play(
+                resolvedTask.data as HTMLAudioElement | undefined
+              );
+            } else if (
+              isTaskObject(resolvedTask) &&
+              resolvedTask.type === "animation"
+            ) {
+              await resolvedTask.execute?.();
             } else {
               console.warn(`无法执行的任务类型:`, resolvedTask);
               return;
@@ -1053,10 +1338,10 @@ const run = async () => {
           if (Array.isArray(item)) {
             return processArrayItems(item);
           }
-          if (item && typeof item === "object" && item.type) {
+          if (isObjectWithType(item)) {
             return item;
           }
-          if (item && typeof item === "object" && item.url) {
+          if (isObjectWithUrl(item)) {
             return "audio";
           }
           if (item instanceof Promise) {
@@ -1091,7 +1376,7 @@ const run = async () => {
       if (tweenData instanceof Promise) {
         return await tweenData;
       }
-      if (!isRecord(tweenData)) return;
+      if (!isTweenPayload(tweenData)) return;
 
       type EasingFunction = (t: number) => number;
       type EasingType =
@@ -1143,39 +1428,39 @@ const run = async () => {
           const easeProgress = easingFunction(progress);
 
           if (tweenData.type === "object") {
-            const newPos = (tweenData.startPos as THREE.Vector3)
+            const newPos = tweenData.startPos
               .clone()
-              .lerp(tweenData.endPos as THREE.Vector3, easeProgress);
-            (tweenData.fromObj as MeshWrapper).mesh.position.copy(newPos);
+              .lerp(tweenData.endPos, easeProgress);
+            tweenData.fromObj.mesh.position.copy(newPos);
           } else if (tweenData.type === "data") {
-            const newPos = (tweenData.startPos as THREE.Vector3)
+            const newPos = tweenData.startPos
               .clone()
-              .lerp(tweenData.endPos as THREE.Vector3, easeProgress);
-            (tweenData.obj as MeshWrapper).mesh.position.copy(newPos);
+              .lerp(tweenData.endPos, easeProgress);
+            tweenData.obj.mesh.position.copy(newPos);
 
             // 使用 THREE.MathUtils.lerp 进行旋转插值
-            (tweenData.obj as MeshWrapper).mesh.rotation.set(
+            tweenData.obj.mesh.rotation.set(
               THREE.MathUtils.lerp(
-                (tweenData.startRotation as THREE.Euler).x,
-                (tweenData.endRotation as THREE.Vector3).x,
+                tweenData.startRotation.x,
+                tweenData.endRotation.x,
                 easeProgress
               ),
               THREE.MathUtils.lerp(
-                (tweenData.startRotation as THREE.Euler).y,
-                (tweenData.endRotation as THREE.Vector3).y,
+                tweenData.startRotation.y,
+                tweenData.endRotation.y,
                 easeProgress
               ),
               THREE.MathUtils.lerp(
-                (tweenData.startRotation as THREE.Euler).z,
-                (tweenData.endRotation as THREE.Vector3).z,
+                tweenData.startRotation.z,
+                tweenData.endRotation.z,
                 easeProgress
               )
             );
 
-            const newScale = (tweenData.startScale as THREE.Vector3)
+            const newScale = tweenData.startScale
               .clone()
-              .lerp(tweenData.endScale as THREE.Vector3, easeProgress);
-            (tweenData.obj as MeshWrapper).mesh.scale.copy(newScale);
+              .lerp(tweenData.endScale, easeProgress);
+            tweenData.obj.mesh.scale.copy(newScale);
           }
 
           if (progress < 1) {
@@ -1224,7 +1509,7 @@ const run = async () => {
       if (!taskObj) return null;
 
       // 立即执行
-      taskObj.execute();
+      taskObj.execute?.();
       return taskObj;
     },
   };
@@ -1237,8 +1522,8 @@ const run = async () => {
 
   const text = {
     setText: (object: unknown, setText: string) => {
-      if (object && typeof object.setText === "function") {
-        (object as { setText: (val: string) => void }).setText(setText);
+      if (hasSetText(object)) {
+        object.setText(setText);
       } else {
         console.warn("object.setText is not a function");
       }
@@ -1248,10 +1533,8 @@ const run = async () => {
   const point = {
     setVisual: (object: unknown, setVisual: boolean) => {
       console.error("setVisual", object, setVisual);
-      if (object && typeof object.setVisibility === "function") {
-        (object as { setVisibility: (val: boolean) => void }).setVisibility(
-          setVisual
-        );
+      if (hasSetVisibility(object)) {
+        object.setVisibility(setVisual);
       } else {
         console.error("object.setVisibility is not a function");
       }
@@ -1314,25 +1597,7 @@ const run = async () => {
       `;
 
     const createFunction = new Function(wrappedCode);
-    const executableFunction = createFunction() as (
-      handlePolygen: typeof handlePolygen,
-      polygen: typeof polygen,
-      handleSound: typeof handleSound,
-      sound: typeof sound,
-      THREE: typeof THREE,
-      task: typeof task,
-      tween: typeof tween,
-      helper: typeof helper,
-      animation: typeof animation,
-      event: typeof event,
-      text: typeof text,
-      point: typeof point,
-      transform: typeof transform,
-      Vector3: typeof Vector3,
-      argument: typeof argument,
-      handleText: typeof handleText,
-      handleEntity: typeof handleEntity
-    ) => Promise<void>;
+    const executableFunction = createFunction() as ScriptExecutor;
 
     await executableFunction(
       handlePolygen,

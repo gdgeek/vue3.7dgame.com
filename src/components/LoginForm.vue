@@ -24,14 +24,6 @@ import "@/assets/font/font.css";
 import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 
-import { FormInstance } from "element-plus";
-import type { AppleIdReturn } from "@/api/v1/site";
-import { PostSiteAppleId } from "@/api/v1/site";
-import { VueAppleLoginConfig } from "@/utils/helper";
-import { LoginData } from "@/api/auth/model";
-
-const formRef = ref<FormInstance>();
-
 const settingsStore = useSettingsStore();
 const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
 

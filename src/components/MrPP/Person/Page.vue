@@ -70,7 +70,11 @@ const props = defineProps<{
   created: boolean;
 }>();
 const emit = defineEmits<{
-  (e: "loaded", params: any, callback: (val: any) => void): void;
+  (
+    e: "loaded",
+    params: { sorted: string; searched: string; current: number },
+    callback: (val: { data: userData[]; pagination: Pagination }) => void
+  ): void;
 }>();
 
 interface Pagination {
@@ -121,7 +125,7 @@ const refresh = () => {
       searched: searched.value,
       current: pagination.value.current,
     },
-    (val: any) => {
+    (val) => {
       if (val && val.data) {
         items.value = val.data;
         pagination.value = val.pagination;

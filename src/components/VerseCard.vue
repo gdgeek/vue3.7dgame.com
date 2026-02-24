@@ -33,18 +33,14 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
 import InfoContent from "@/components/MrPP/MrPPVerse/InfoContent.vue";
 import VerseToolbar from "@/components/MrPP/MrPPVerse/MrPPVerseToolbar.vue";
 import VerseDetail from "@/components/MrPP/MrPPVerse/VerseDetail.vue";
 import { VerseData } from "@/api/v1/verse";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 
-const props = defineProps<{ item: VerseData }>();
+defineProps<{ item: VerseData }>();
 const emit = defineEmits(["changed", "deleted"]);
-const { t } = useI18n();
-const router = useRouter();
 
 const detailVisible = ref(false);
 

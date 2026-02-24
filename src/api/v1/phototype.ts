@@ -7,6 +7,8 @@ import type {
   UpdatePhototypeRequest,
 } from "./types/phototype";
 
+export type { PhototypeType };
+
 export const postPhototype = (data: CreatePhototypeRequest) => {
   return request<PhototypeType>({
     url: `/v1/phototypes`,

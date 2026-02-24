@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { v4 as uuidv4 } from "uuid";
-import type { metaInfo, MetaCode } from "@/api/v1/meta";
+import type { metaInfo } from "@/api/v1/meta";
+import type { CyberType } from "@/api/v1/types/cyber";
+import type { FileInfo } from "@/api/v1/types/common";
 
 /**
  * Unit tests for the copy() function in list.vue
@@ -63,7 +65,7 @@ describe("Entity Copy Function - Unit Tests", () => {
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
         metaCode: {
           lua: "print('hello')",
@@ -74,10 +76,14 @@ describe("Entity Copy Function - Unit Tests", () => {
       const newMetaId = 789;
 
       // Mock API responses
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
-      (postMeta as any).mockResolvedValue({ data: { id: newMetaId } });
-      (putMetaCode as any).mockResolvedValue({ data: {} });
-      (uuidv4 as any).mockReturnValue(newUuid);
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
+      (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { id: newMetaId },
+      });
+      (putMetaCode as ReturnType<typeof vi.fn>).mockResolvedValue({ data: {} });
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Create a mock copy function that mimics the actual implementation
       const copy = async (id: number, newTitle: string) => {
@@ -134,10 +140,10 @@ describe("Entity Copy Function - Unit Tests", () => {
       });
 
       // 4. Verify call order using mock.invocationCallOrder
-      const getMetaCallOrder = (getMeta as any).mock.invocationCallOrder[0];
-      const postMetaCallOrder = (postMeta as any).mock.invocationCallOrder[0];
-      const putMetaCodeCallOrder = (putMetaCode as any).mock
-        .invocationCallOrder[0];
+      const getMetaCallOrder = vi.mocked(getMeta).mock.invocationCallOrder[0];
+      const postMetaCallOrder = vi.mocked(postMeta).mock.invocationCallOrder[0];
+      const putMetaCodeCallOrder =
+        vi.mocked(putMetaCode).mock.invocationCallOrder[0];
 
       expect(getMetaCallOrder).toBeLessThan(postMetaCallOrder);
       expect(postMetaCallOrder).toBeLessThan(putMetaCodeCallOrder);
@@ -159,11 +165,11 @@ describe("Entity Copy Function - Unit Tests", () => {
         events: null, // Test null value
         prefab: 1,
         image_id: null, // Test null value
-        image: {} as any,
+        image: {} as FileInfo,
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
         metaCode: {
           lua: "test",
@@ -172,10 +178,14 @@ describe("Entity Copy Function - Unit Tests", () => {
       };
 
       // Mock API responses
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
-      (postMeta as any).mockResolvedValue({ data: { id: 200 } });
-      (putMetaCode as any).mockResolvedValue({ data: {} });
-      (uuidv4 as any).mockReturnValue(newUuid);
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
+      (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { id: 200 },
+      });
+      (putMetaCode as ReturnType<typeof vi.fn>).mockResolvedValue({ data: {} });
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Create a mock copy function
       const copy = async (id: number, newTitle: string) => {
@@ -233,19 +243,23 @@ describe("Entity Copy Function - Unit Tests", () => {
         events: { inputs: [], outputs: [] },
         prefab: 0,
         image_id: 1,
-        image: {} as any,
+        image: {} as FileInfo,
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
         // metaCode is undefined
       };
 
       // Mock API responses
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
-      (postMeta as any).mockResolvedValue({ data: { id: 400 } });
-      (uuidv4 as any).mockReturnValue("uuid-no-code");
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
+      (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { id: 400 },
+      });
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue("uuid-no-code");
 
       // Create a mock copy function
       const copy = async (id: number, newTitle: string) => {
@@ -317,7 +331,7 @@ describe("Entity Copy Function - Unit Tests", () => {
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
         metaCode: {
           lua: "print('test')",
@@ -326,10 +340,14 @@ describe("Entity Copy Function - Unit Tests", () => {
       };
 
       // Mock successful API responses
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
-      (postMeta as any).mockResolvedValue({ data: { id: newMetaId } });
-      (putMetaCode as any).mockResolvedValue({ data: {} });
-      (uuidv4 as any).mockReturnValue(newUuid);
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
+      (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { id: newMetaId },
+      });
+      (putMetaCode as ReturnType<typeof vi.fn>).mockResolvedValue({ data: {} });
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Mock refreshList function
       const refreshList = vi.fn();
@@ -406,7 +424,7 @@ describe("Entity Copy Function - Unit Tests", () => {
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
         metaCode: {
           lua: "return true",
@@ -415,10 +433,14 @@ describe("Entity Copy Function - Unit Tests", () => {
       };
 
       // Mock successful API responses
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
-      (postMeta as any).mockResolvedValue({ data: { id: newMetaId } });
-      (putMetaCode as any).mockResolvedValue({ data: {} });
-      (uuidv4 as any).mockReturnValue(newUuid);
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
+      (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { id: newMetaId },
+      });
+      (putMetaCode as ReturnType<typeof vi.fn>).mockResolvedValue({ data: {} });
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Mock refreshList function
       const refreshList = vi.fn();
@@ -487,15 +509,19 @@ describe("Entity Copy Function - Unit Tests", () => {
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
         // metaCode is undefined
       };
 
       // Mock successful API responses
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
-      (postMeta as any).mockResolvedValue({ data: { id: newMetaId } });
-      (uuidv4 as any).mockReturnValue(newUuid);
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
+      (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { id: newMetaId },
+      });
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Mock refreshList function
       const refreshList = vi.fn();
@@ -555,7 +581,9 @@ describe("Entity Copy Function - Unit Tests", () => {
       const errorMessage = "Failed to fetch entity";
 
       // Mock getMeta to reject
-      (getMeta as any).mockRejectedValue(new Error(errorMessage));
+      (getMeta as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error(errorMessage)
+      );
 
       // Mock ElMessage.error
       const mockElMessageError = vi.fn();
@@ -641,7 +669,7 @@ describe("Entity Copy Function - Unit Tests", () => {
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
         metaCode: {
           lua: "print('test')",
@@ -650,12 +678,16 @@ describe("Entity Copy Function - Unit Tests", () => {
       };
 
       // Mock getMeta to succeed
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
 
       // Mock postMeta to reject
-      (postMeta as any).mockRejectedValue(new Error(errorMessage));
+      (postMeta as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error(errorMessage)
+      );
 
-      (uuidv4 as any).mockReturnValue(newUuid);
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Mock ElMessage.error
       const mockElMessageError = vi.fn();
@@ -726,7 +758,9 @@ describe("Entity Copy Function - Unit Tests", () => {
       const newTitle = "Loading State Test";
 
       // Mock getMeta to reject
-      (getMeta as any).mockRejectedValue(new Error("Test error"));
+      (getMeta as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error("Test error")
+      );
 
       // Mock ElMessage.error
       const mockElMessageError = vi.fn();
@@ -808,7 +842,7 @@ describe("Entity Copy Function - Unit Tests", () => {
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
         metaCode: {
           lua: "print('test')",
@@ -817,13 +851,19 @@ describe("Entity Copy Function - Unit Tests", () => {
       };
 
       // Mock getMeta and postMeta to succeed
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
-      (postMeta as any).mockResolvedValue({ data: { id: newMetaId } });
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
+      (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { id: newMetaId },
+      });
 
       // Mock putMetaCode to reject
-      (putMetaCode as any).mockRejectedValue(new Error(errorMessage));
+      (putMetaCode as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error(errorMessage)
+      );
 
-      (uuidv4 as any).mockReturnValue(newUuid);
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Mock ElMessage.error
       const mockElMessageError = vi.fn();
@@ -918,15 +958,19 @@ describe("Entity Copy Function - Unit Tests", () => {
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
         // metaCode is undefined - this is the boundary condition
       };
 
       // Mock API responses
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
-      (postMeta as any).mockResolvedValue({ data: { id: newMetaId } });
-      (uuidv4 as any).mockReturnValue(newUuid);
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
+      (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { id: newMetaId },
+      });
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Create a mock copy function
       const copy = async (id: number, newTitle: string) => {
@@ -993,14 +1037,18 @@ describe("Entity Copy Function - Unit Tests", () => {
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
       };
 
       // Mock API responses
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
-      (postMeta as any).mockResolvedValue({ data: { id: newMetaId } });
-      (uuidv4 as any).mockReturnValue(newUuid);
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
+      (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { id: newMetaId },
+      });
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Create a mock copy function
       const copy = async (id: number, newTitle: string) => {
@@ -1039,7 +1087,7 @@ describe("Entity Copy Function - Unit Tests", () => {
       );
 
       // Verify the exact call to ensure null is preserved
-      const postMetaCall = (postMeta as any).mock.calls[0][0];
+      const postMetaCall = vi.mocked(postMeta).mock.calls[0][0];
       expect(postMetaCall.data).toBeNull();
       expect(postMetaCall.data).not.toBe(undefined);
       expect(postMetaCall.data).not.toEqual({});
@@ -1074,14 +1122,18 @@ describe("Entity Copy Function - Unit Tests", () => {
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
       };
 
       // Mock API responses
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
-      (postMeta as any).mockResolvedValue({ data: { id: newMetaId } });
-      (uuidv4 as any).mockReturnValue(newUuid);
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
+      (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { id: newMetaId },
+      });
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Create a mock copy function
       const copy = async (id: number, newTitle: string) => {
@@ -1120,7 +1172,7 @@ describe("Entity Copy Function - Unit Tests", () => {
       );
 
       // Verify the exact call to ensure null is preserved
-      const postMetaCall = (postMeta as any).mock.calls[0][0];
+      const postMetaCall = vi.mocked(postMeta).mock.calls[0][0];
       expect(postMetaCall.info).toBeNull();
       expect(postMetaCall.info).not.toBe(undefined);
       expect(postMetaCall.info).not.toBe("");
@@ -1155,14 +1207,18 @@ describe("Entity Copy Function - Unit Tests", () => {
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
       };
 
       // Mock API responses
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
-      (postMeta as any).mockResolvedValue({ data: { id: newMetaId } });
-      (uuidv4 as any).mockReturnValue(newUuid);
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
+      (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { id: newMetaId },
+      });
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Create a mock copy function
       const copy = async (id: number, newTitle: string) => {
@@ -1201,7 +1257,7 @@ describe("Entity Copy Function - Unit Tests", () => {
       );
 
       // Verify the exact call to ensure null is preserved
-      const postMetaCall = (postMeta as any).mock.calls[0][0];
+      const postMetaCall = vi.mocked(postMeta).mock.calls[0][0];
       expect(postMetaCall.events).toBeNull();
       expect(postMetaCall.events).not.toBe(undefined);
       expect(postMetaCall.events).not.toEqual({ inputs: [], outputs: [] });
@@ -1236,15 +1292,19 @@ describe("Entity Copy Function - Unit Tests", () => {
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
         // metaCode is also undefined
       };
 
       // Mock API responses
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
-      (postMeta as any).mockResolvedValue({ data: { id: newMetaId } });
-      (uuidv4 as any).mockReturnValue(newUuid);
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
+      (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { id: newMetaId },
+      });
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Create a mock copy function
       const copy = async (id: number, newTitle: string) => {
@@ -1290,7 +1350,7 @@ describe("Entity Copy Function - Unit Tests", () => {
       expect(putMetaCode).not.toHaveBeenCalled();
 
       // Verify the exact call to ensure all nulls are preserved
-      const postMetaCall = (postMeta as any).mock.calls[0][0];
+      const postMetaCall = vi.mocked(postMeta).mock.calls[0][0];
       expect(postMetaCall.data).toBeNull();
       expect(postMetaCall.info).toBeNull();
       expect(postMetaCall.events).toBeNull();
@@ -1326,7 +1386,7 @@ describe("Entity Copy Function - Unit Tests", () => {
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
         metaCode: {
           lua: "print('test')",
@@ -1335,10 +1395,14 @@ describe("Entity Copy Function - Unit Tests", () => {
       };
 
       // Mock API responses
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
-      (postMeta as any).mockResolvedValue({ data: { id: newMetaId } });
-      (putMetaCode as any).mockResolvedValue({ data: {} });
-      (uuidv4 as any).mockReturnValue(newUuid);
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
+      (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { id: newMetaId },
+      });
+      (putMetaCode as ReturnType<typeof vi.fn>).mockResolvedValue({ data: {} });
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Create a mock copy function
       const copy = async (id: number, newTitle: string) => {
@@ -1425,7 +1489,7 @@ describe("Entity Copy Function - Unit Tests", () => {
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
         metaCode: {
           lua: "return { test = true }",
@@ -1434,10 +1498,14 @@ describe("Entity Copy Function - Unit Tests", () => {
       };
 
       // Mock API responses
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
-      (postMeta as any).mockResolvedValue({ data: { id: newMetaId } });
-      (putMetaCode as any).mockResolvedValue({ data: {} });
-      (uuidv4 as any).mockReturnValue(newUuid);
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
+      (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { id: newMetaId },
+      });
+      (putMetaCode as ReturnType<typeof vi.fn>).mockResolvedValue({ data: {} });
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Create a mock copy function
       const copy = async (id: number, newTitle: string) => {
@@ -1484,7 +1552,7 @@ describe("Entity Copy Function - Unit Tests", () => {
       });
 
       // Verify the data structure is preserved (deep equality)
-      const postMetaCall = (postMeta as any).mock.calls[0][0];
+      const postMetaCall = vi.mocked(postMeta).mock.calls[0][0];
       expect(postMetaCall.data).toEqual(originalMeta.data);
       expect(postMetaCall.events).toEqual(originalMeta.events);
     });
@@ -1531,7 +1599,7 @@ describe("Entity Copy Function - Unit Tests", () => {
         resources: [],
         editable: true,
         viewable: true,
-        cyber: {} as any,
+        cyber: {} as CyberType,
         verseMetas: [],
         metaCode: {
           lua: "function init() return true end",
@@ -1541,10 +1609,14 @@ describe("Entity Copy Function - Unit Tests", () => {
       };
 
       // Mock API responses
-      (getMeta as any).mockResolvedValue({ data: originalMeta });
-      (postMeta as any).mockResolvedValue({ data: { id: newMetaId } });
-      (putMetaCode as any).mockResolvedValue({ data: {} });
-      (uuidv4 as any).mockReturnValue(newUuid);
+      (getMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: originalMeta,
+      });
+      (postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { id: newMetaId },
+      });
+      (putMetaCode as ReturnType<typeof vi.fn>).mockResolvedValue({ data: {} });
+      (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Create a mock copy function
       const copy = async (id: number, newTitle: string) => {
@@ -1579,7 +1651,7 @@ describe("Entity Copy Function - Unit Tests", () => {
       expect(getMeta).toHaveBeenCalledWith(originalId);
 
       // Verify all necessary fields are copied
-      const postMetaCall = (postMeta as any).mock.calls[0][0];
+      const postMetaCall = vi.mocked(postMeta).mock.calls[0][0];
 
       // Check each field individually
       expect(postMetaCall.title).toBe(newTitle);

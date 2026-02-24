@@ -29,8 +29,4 @@
     </el-card>
   </div>
 </template>
-<script setup lang="ts">
-import { useAbility } from "@casl/vue";
-const ability = useAbility();
-const can = ability.can.bind(ability);
-</script>
+<script setup lang="ts"></script>

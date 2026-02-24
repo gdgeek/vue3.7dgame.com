@@ -125,13 +125,14 @@
 <script setup lang="ts">
 import { computed, toRefs, defineAsyncComponent } from "vue";
 import type { FormItemRule } from "element-plus";
+import type { JsonSchema, JsonSchemaUIOptions, JsonValue } from "./types";
 
 // Async import to handle circular dependency if ArrayField imports SchemaField (it does)
 const ArrayField = defineAsyncComponent(() => import("./ArrayField.vue"));
 
 const props = defineProps<{
-  schema: any;
-  modelValue: any;
+  schema: JsonSchema;
+  modelValue: JsonValue;
   propKey?: string;
   parentProp?: string;
   required?: boolean;
@@ -147,7 +148,9 @@ const innerValue = computed({
 });
 
 // UI helpers
-const uiOptions = computed(() => schema.value["ui:options"] || {});
+const uiOptions = computed<JsonSchemaUIOptions>(
+  () => schema.value["ui:options"] || {}
+);
 const uiHidden = computed(() => {
   const hidden = schema.value["ui:hidden"];
   return hidden === true || hidden === "true";
@@ -162,17 +165,18 @@ const uiDisabled = computed(
 const uiType = computed(() => uiOptions.value.type);
 const uiRows = computed(() => uiOptions.value.rows || 2);
 
-const isFieldHidden = (propSchema: any) => propSchema["ui:hidden"] === true;
+const isFieldHidden = (propSchema: JsonSchema) =>
+  propSchema["ui:hidden"] === true;
 
 const isRequired = (key: string | number) => {
   if (!schema.value.required) return false;
-  return schema.value.required.includes(key);
+  return schema.value.required.includes(String(key));
 };
 
 const enumOptions = computed(() => {
   if (schema.value.enum) {
-    return schema.value.enum.map((val: any) => ({
-      label: val,
+    return schema.value.enum.map((val) => ({
+      label: String(val),
       value: val,
     }));
   }

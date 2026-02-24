@@ -13,7 +13,7 @@ interface LoadedParams {
 }
 
 interface LoadedResponse {
-  data: any[];
+  data: Record<string, unknown>[];
   pagination: {
     current: number;
     count: number;

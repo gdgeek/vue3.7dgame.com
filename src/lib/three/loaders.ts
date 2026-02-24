@@ -28,9 +28,9 @@ export function getConfiguredGLTFLoader(): GLTFLoader {
         .setTranscoderPath("/js/three.js/libs/basis/")
         .detectSupport(tmpRenderer);
       tmpRenderer.dispose();
-      // @ts-ignore optional in some browsers
-      if (typeof (tmpRenderer as any).forceContextLoss === "function")
-        (tmpRenderer as any).forceContextLoss();
+      // @ts-expect-error forceContextLoss is optional in some browsers
+      if (typeof tmpRenderer.forceContextLoss === "function")
+        tmpRenderer.forceContextLoss();
     } catch (e) {
       console.warn("KTX2Loader 初始化失败 (shared)", e);
     }

@@ -82,7 +82,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import VueIframe from "vue-iframes";
 import { VueAppleLoginConfig } from "@/utils/helper";
-import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import { ability } from "@/ability";
 

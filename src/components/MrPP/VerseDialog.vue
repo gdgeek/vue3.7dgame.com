@@ -101,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
 import { getVerses } from "@/api/v1/vp-guide";
@@ -109,9 +109,22 @@ import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { postMeta } from "@/api/v1/meta";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
 import Id2Image from "@/components/Id2Image.vue";
+import type { FileInfo } from "@/api/v1/types/common";
 const dialogVisible = ref(false);
+type VerseItem = {
+  id: number;
+  name?: string;
+  title?: string;
+  created_at?: string;
+  info?: string | null;
+  data?: unknown;
+  uuid?: string;
+  type?: string;
+  image?: FileInfo | null;
+};
+
 const active = ref({
-  items: [] as any[],
+  items: [] as VerseItem[],
   sorted: "-created_at",
   searched: "",
   pagination: { current: 1, count: 1, size: 20, total: 20 },
@@ -119,7 +132,7 @@ const active = ref({
 
 const emit = defineEmits(["selected", "cancel"]);
 const { t } = useI18n();
-const title = (item: any) => item.title || item.name || "title";
+const title = (item: VerseItem) => item.title || item.name || "title";
 
 const open = () => {
   active.value = {
@@ -142,10 +155,6 @@ const refresh = async () => {
   active.value.items = response.data;
 };
 
-const close = () => {
-  dialogVisible.value = false;
-};
-
 const sort = (value: string) => {
   active.value.sorted = value;
   refresh();
@@ -161,7 +170,7 @@ const clearSearched = () => {
   refresh();
 };
 
-const selected = async (data: any = null) => {
+const selected = async (data: { data: VerseItem } | null = null) => {
   emit("selected", data);
   dialogVisible.value = false;
 };
@@ -205,16 +214,19 @@ defineExpose({
 });
 
 type ViewCard = {
-  src: string;
+  src?: FileInfo | null;
   id?: string;
+  created_at?: string;
   name?: string;
-  star?: boolean;
-  backgroundColor?: string;
-  [attr: string]: any;
+  info?: string | null;
+  data?: unknown;
+  uuid?: string;
+  type?: string;
+  image?: FileInfo | null;
 };
 
 // 瀑布流数据类型转换
-const transformToViewCard = (items: any[]): ViewCard[] => {
+const transformToViewCard = (items: VerseItem[]): ViewCard[] => {
   return items.map((item) => {
     return {
       src: item.image,

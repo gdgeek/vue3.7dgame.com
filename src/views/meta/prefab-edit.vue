@@ -14,7 +14,7 @@ import TransitionWrapper from "@/components/TransitionWrapper.vue";
 const getPrefabData = async (
   id: number,
   expand: string,
-  callback: (data: any) => void
+  callback: (data: Record<string, unknown>) => void
 ) => {
   try {
     const response = await getPrefab(id, expand);
@@ -27,8 +27,8 @@ const getPrefabData = async (
 
 const putPrefabData = async (
   id: number,
-  data: any,
-  callback: (data: any) => void
+  data: Record<string, unknown>,
+  callback: (data: Record<string, unknown>) => void
 ) => {
   try {
     const response = await putPrefab(id, data);

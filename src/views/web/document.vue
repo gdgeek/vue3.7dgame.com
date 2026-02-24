@@ -13,11 +13,10 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import Document from "@/components/Home/Document.vue";
 
 const route = useRoute();
-const router = useRouter();
 const id = computed(() => parseInt(route.query.id as string));
 
 onMounted(() => {

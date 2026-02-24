@@ -2,12 +2,14 @@ export interface FetchParams {
   sort: string;
   search: string;
   page: number;
-  [key: string]: any; // Allow additional params
+  [key: string]: unknown; // Allow additional params
 }
 
-export interface FetchResponse {
-  data: any[];
-  headers: any; // Use any to be compatible with AxiosResponseHeaders
+type PaginationHeaderValue = string | number | undefined;
+
+export interface FetchResponse<T = unknown> {
+  data: T[];
+  headers: Record<string, PaginationHeaderValue>;
 }
 
 export interface Pagination {
@@ -17,9 +19,9 @@ export interface Pagination {
   total: number;
 }
 
-export interface CardListPageProps {
+export interface CardListPageProps<T = unknown> {
   // Data fetching function
-  fetchData: (params: FetchParams) => Promise<FetchResponse>;
+  fetchData: (params: FetchParams) => Promise<FetchResponse<T>>;
 
   // Optional customization
   defaultSort?: string;
@@ -40,7 +42,7 @@ export interface CardListPageProps {
   wrapperClass?: string;
 }
 
-export interface CardListPageEmits {
-  (e: "refresh", data: any[]): void;
-  (e: "item-click", item: any): void;
+export interface CardListPageEmits<T = unknown> {
+  (e: "refresh", data: T[]): void;
+  (e: "item-click", item: T): void;
 }
