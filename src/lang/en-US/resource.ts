@@ -330,7 +330,6 @@ export default {
     listPageTitle: "All Particle Assets",
     searchPlaceholder: "Search particles...",
     typeName: "Particle",
-    initializeParticleData: "Init The Particle Effect Data",
     viewParticle: "View Particle Effect",
     prompt: {
       message1: "Please enter a new name",
