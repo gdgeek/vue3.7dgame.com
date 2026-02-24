@@ -1,0 +1,171 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { TokenInfo } from "@/api/v1/types/auth";
+
+// Mock logger to avoid side effects
+vi.mock("@/utils/logger", () => ({
+  logger: {
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn(),
+  },
+}));
+
+const TOKEN_KEY = "access_token";
+
+const makeToken = (overrides: Partial<TokenInfo> = {}): TokenInfo => ({
+  token: "test-token",
+  accessToken: "access-abc123",
+  refreshToken: "refresh-xyz789",
+  expires: new Date(Date.now() + 3600 * 1000).toISOString(), // 1小时后过期
+  tokenType: "Bearer",
+  ...overrides,
+});
+
+describe("Token store module", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  describe("setToken()", () => {
+    it("应将 token 序列化后存入 localStorage", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+      const token = makeToken();
+
+      Token.setToken(token);
+
+      const stored = localStorage.getItem(TOKEN_KEY);
+      expect(stored).not.toBeNull();
+      expect(JSON.parse(stored!)).toEqual(token);
+    });
+
+    it("覆盖已有的 token", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+      const token1 = makeToken({ accessToken: "first" });
+      const token2 = makeToken({ accessToken: "second" });
+
+      Token.setToken(token1);
+      Token.setToken(token2);
+
+      expect(Token.getToken()?.accessToken).toBe("second");
+    });
+  });
+
+  describe("getToken()", () => {
+    it("localStorage 为空时返回 null", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+      expect(Token.getToken()).toBeNull();
+    });
+
+    it("成功反序列化并返回 TokenInfo 对象", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+      const token = makeToken();
+
+      localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
+
+      const result = Token.getToken();
+      expect(result).toEqual(token);
+      expect(result?.accessToken).toBe(token.accessToken);
+      expect(result?.refreshToken).toBe(token.refreshToken);
+      expect(result?.expires).toBe(token.expires);
+    });
+
+    it("localStorage 存储了非法 JSON 时返回 null 并记录错误", async () => {
+      const { logger } = await import("@/utils/logger");
+      const Token = (await import("@/store/modules/token")).default;
+
+      localStorage.setItem(TOKEN_KEY, "{ invalid json }");
+
+      const result = Token.getToken();
+
+      expect(result).toBeNull();
+      expect(logger.error).toHaveBeenCalled();
+    });
+
+    it("保留所有 TokenInfo 字段", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+      const token = makeToken({ tokenType: "Bearer" });
+      Token.setToken(token);
+
+      const result = Token.getToken();
+      expect(result?.token).toBe(token.token);
+      expect(result?.tokenType).toBe("Bearer");
+    });
+  });
+
+  describe("hasToken()", () => {
+    it("无 token 时返回 false", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+      expect(Token.hasToken()).toBe(false);
+    });
+
+    it("有效 token 存在时返回 true", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+      Token.setToken(makeToken());
+      expect(Token.hasToken()).toBe(true);
+    });
+
+    it("token 被移除后返回 false", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+      Token.setToken(makeToken());
+      Token.removeToken();
+      expect(Token.hasToken()).toBe(false);
+    });
+  });
+
+  describe("removeToken()", () => {
+    it("从 localStorage 中删除 token", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+      Token.setToken(makeToken());
+
+      Token.removeToken();
+
+      expect(localStorage.getItem(TOKEN_KEY)).toBeNull();
+      expect(Token.getToken()).toBeNull();
+    });
+
+    it("无 token 时调用 removeToken 不抛出异常", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+      expect(() => Token.removeToken()).not.toThrow();
+    });
+  });
+
+  describe("完整生命周期", () => {
+    it("set → get → has → remove 完整流程", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+      const token = makeToken();
+
+      // 初始无 token
+      expect(Token.hasToken()).toBe(false);
+      expect(Token.getToken()).toBeNull();
+
+      // 设置 token
+      Token.setToken(token);
+      expect(Token.hasToken()).toBe(true);
+      expect(Token.getToken()).toEqual(token);
+
+      // 删除 token
+      Token.removeToken();
+      expect(Token.hasToken()).toBe(false);
+      expect(Token.getToken()).toBeNull();
+    });
+
+    it("set → set（覆盖）→ get 返回最新 token", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+
+      const oldToken = makeToken({ accessToken: "old-access" });
+      const newToken = makeToken({
+        accessToken: "new-access",
+        refreshToken: "new-refresh",
+      });
+
+      Token.setToken(oldToken);
+      Token.setToken(newToken);
+
+      const result = Token.getToken();
+      expect(result?.accessToken).toBe("new-access");
+      expect(result?.refreshToken).toBe("new-refresh");
+    });
+  });
+});
