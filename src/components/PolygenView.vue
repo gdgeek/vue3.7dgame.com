@@ -1,45 +1,21 @@
 <template>
-  <el-card
-    class="box-card"
-    shadow="never"
-    style="background: transparent; border: none"
-  >
+  <el-card class="box-card" shadow="never" style="background: transparent; border: none">
     <div id="three" ref="three" style="height: 400px; width: 100%"></div>
 
     <!-- Animation Controls - Visible only when animations exist -->
     <div class="animation-bar" v-if="animations && animations.length > 0">
-      <div
-        class="animation-play-btn"
-        :class="{ disabled: animations.length === 0 }"
-        @click="animations.length > 0 && toggleAnimation(!isAnimationPlaying)"
-      >
-        <font-awesome-icon
-          :icon="['fas', isAnimationPlaying ? 'pause' : 'play']"
-        ></font-awesome-icon>
+      <div class="animation-play-btn" :class="{ disabled: animations.length === 0 }"
+        @click="animations.length > 0 && toggleAnimation(!isAnimationPlaying)">
+        <font-awesome-icon :icon="['fas', isAnimationPlaying ? 'pause' : 'play']"></font-awesome-icon>
       </div>
 
       <div class="animation-select-wrapper">
         <span class="animation-label">动画</span>
-        <el-select
-          v-model="selectedAnimationIndex"
-          @change="playAnimation"
-          placeholder="Static"
-          class="animation-select"
-          size="default"
-          :disabled="animations.length === 0"
-        >
-          <el-option
-            v-if="animations.length === 0"
-            :key="-1"
-            label="Static"
-            :value="-1"
-          ></el-option>
-          <el-option
-            v-for="(animation, index) in animations"
-            :key="index"
-            :label="animation.name || 'Animation ' + (index + 1)"
-            :value="index"
-          ></el-option>
+        <el-select v-model="selectedAnimationIndex" @change="playAnimation" placeholder="Static"
+          class="animation-select" size="default" :disabled="animations.length === 0">
+          <el-option v-if="animations.length === 0" :key="-1" label="Static" :value="-1"></el-option>
+          <el-option v-for="(animation, index) in animations" :key="index"
+            :label="animation.name || 'Animation ' + (index + 1)" :value="index"></el-option>
         </el-select>
       </div>
 
@@ -328,7 +304,7 @@ const screenshot = (): Promise<Blob> => {
 };
 defineExpose({ screenshot });
 
-let ktx2Loader: KTX2Loader | null = null; // ★ 新增
+onMounted(() => {
   const content = three.value;
   if (content) {
     const width = content.clientWidth;

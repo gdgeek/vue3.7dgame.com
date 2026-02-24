@@ -47,7 +47,8 @@
       "Bash(cat /Users/dirui/Projects/web/frontend/vue3.7dgame.com/.eslintrc.* 2>/dev/null || cat /Users/dirui/Projects/web/frontend/vue3.7dgame.com/eslint.config.* 2>/dev/null | head -40)",
       "Bash(npx eslint src --ext .vue,.ts --fix 2>&1 | tail -10)",
       "Bash(npx eslint src --ext .vue,.ts --format json 2>/dev/null | python3 -c \"\nimport json, sys\ndata = json.load\\(sys.stdin\\)\nfor f in data:\n    msgs = [m for m in f['messages'] if 'no-unused-vars' in \\(m.get\\('ruleId'\\) or ''\\)]\n    if msgs:\n        path = f['filePath'].replace\\('/Users/dirui/Projects/web/frontend/vue3.7dgame.com/', ''\\)\n        for m in msgs:\n            print\\(f\\\\\"{path}:{m['line']}:{m['column']} {m['message']}\\\\\"\\)\n\" 2>&1)",
-      "Bash(npx eslint src --ext .vue,.ts --format json 2>/dev/null | python3 -c \"\nimport json, sys\ndata = json.load\\(sys.stdin\\)\nfor f in data:\n    msgs = [m for m in f['messages'] if 'no-unused-vars' in \\(m.get\\('ruleId'\\) or ''\\)]\n    if msgs:\n        path = f['filePath'].replace\\('/Users/dirui/Projects/web/frontend/vue3.7dgame.com/', ''\\)\n        for m in msgs:\n            print\\(f\\\\\"{path}:{m['line']}:{m['column']} {m['message']}\\\\\"\\)\n\" 2>&1 | wc -l)"
+      "Bash(npx eslint src --ext .vue,.ts --format json 2>/dev/null | python3 -c \"\nimport json, sys\ndata = json.load\\(sys.stdin\\)\nfor f in data:\n    msgs = [m for m in f['messages'] if 'no-unused-vars' in \\(m.get\\('ruleId'\\) or ''\\)]\n    if msgs:\n        path = f['filePath'].replace\\('/Users/dirui/Projects/web/frontend/vue3.7dgame.com/', ''\\)\n        for m in msgs:\n            print\\(f\\\\\"{path}:{m['line']}:{m['column']} {m['message']}\\\\\"\\)\n\" 2>&1 | wc -l)",
+      "Bash(npx eslint src --ext .vue,.ts --format=compact 2>&1 | grep \"no-unused-vars\")"
     ]
   }
 }
