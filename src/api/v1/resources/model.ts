@@ -17,6 +17,7 @@ export type ResourceInfo = {
   image?: FileType;
   file: FileType;
   created_at: string;
+  updated_at?: string;
   info: string;
   author?: Author;
 };

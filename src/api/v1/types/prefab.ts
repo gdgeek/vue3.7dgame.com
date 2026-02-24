@@ -4,7 +4,7 @@
 
 import type { Author, FileInfo } from "./common";
 import type { ResourceInfo } from "@/api/v1/resources/model";
-import type { CyberType } from "./meta";
+import type { CyberType } from "./cyber";
 
 /** Prefab 数据 */
 export interface PrefabData {

@@ -12,6 +12,14 @@ import type {
 import type { JsonValue } from "./types/common";
 import { ResourceInfo } from "@/api/v1/resources/model";
 
+// Re-export types for consumers that import directly from this module
+export type {
+  VerseData,
+  VerseCode,
+  PostVerseData,
+  PutVerseData,
+} from "./types/verse";
+
 export type meta = {
   id: number;
   data: JsonValue;

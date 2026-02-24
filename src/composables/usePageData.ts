@@ -2,7 +2,7 @@ import { ref, reactive, computed, onMounted } from "vue";
 import type { ViewMode } from "@/components/StandardPage/types";
 
 type FetchExtraParams = Record<string, unknown>;
-type PaginationHeaderValue = string | number | undefined;
+export type PaginationHeaderValue = string | number | undefined;
 
 export interface FetchParams {
   sort: string;
@@ -14,7 +14,7 @@ export interface FetchParams {
 
 export interface FetchResponse<T = unknown> {
   data: T[];
-  headers: Record<string, PaginationHeaderValue>;
+  headers: { [key: string]: unknown };
 }
 
 export interface UsePageDataOptions<T = unknown> {

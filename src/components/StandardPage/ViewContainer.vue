@@ -2,13 +2,8 @@
   <div class="view-container">
     <!-- Grid Mode: Waterfall layout -->
     <div v-if="viewMode === 'grid'" class="grid-view">
-      <Waterfall
-        v-if="items && items.length > 0"
-        :list="items"
-        :breakpoints="breakpoints"
-        :gutter="cardGutter"
-        backgroundColor="transparent"
-      >
+      <Waterfall v-if="items && items.length > 0" :list="items" :breakpoints="breakpoints" :gutter="cardGutter"
+        backgroundColor="transparent">
         <template #default="{ item }">
           <slot name="grid-card" :item="item"></slot>
         </template>
@@ -30,12 +25,7 @@
         </div>
         <!-- List Items -->
         <div class="list-items">
-          <div
-            v-for="(item, index) in items"
-            :key="item.id || index"
-            class="list-row"
-            @click="emit('row-click', item)"
-          >
+          <div v-for="(item, index) in items" :key="item.id || index" class="list-row" @click="emit('row-click', item)">
             <slot name="list-item" :item="item" :index="index">
               <!-- Default list row fallback -->
               <div class="col-checkbox" @click.stop>
@@ -43,20 +33,14 @@
               </div>
               <div class="col-name">
                 <div class="item-thumb">
-                  <img
-                    v-if="item.image?.url"
-                    :src="item.image.url"
-                    :alt="item.name || item.title"
-                  />
+                  <img v-if="item.image?.url" :src="item.image.url" :alt="item.name || item.title" />
                   <div v-else class="thumb-placeholder">
-                    <font-awesome-icon
-                      :icon="['fas', 'image']"
-                    ></font-awesome-icon>
+                    <font-awesome-icon :icon="['fas', 'image']"></font-awesome-icon>
                   </div>
                 </div>
                 <span class="item-name">{{
                   item.name || item.title || "—"
-                }}</span>
+                  }}</span>
               </div>
               <div class="col-size">{{ formatSize(item.file?.size) }}</div>
               <div class="col-date">
@@ -64,10 +48,7 @@
               </div>
               <div class="col-actions" @click.stop>
                 <slot name="list-actions" :item="item">
-                  <font-awesome-icon
-                    :icon="['fas', 'ellipsis']"
-                    class="actions-icon"
-                  ></font-awesome-icon>
+                  <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon"></font-awesome-icon>
                 </slot>
               </div>
             </slot>
@@ -77,10 +58,7 @@
     </div>
 
     <!-- Empty state -->
-    <div
-      v-if="!loading && showEmpty && (!items || items.length === 0)"
-      class="empty-state"
-    >
+    <div v-if="!loading && showEmpty && (!items || items.length === 0)" class="empty-state">
       <slot name="empty">
         <el-empty :description="emptyText || '暂无数据'"></el-empty>
       </slot>
@@ -91,13 +69,24 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="T = unknown">
 import { computed } from "vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
-import type { ViewContainerProps } from "./types";
+import type { ViewMode } from "./types";
 
-const props = withDefaults(defineProps<ViewContainerProps>(), {
+interface Props {
+  items: T[] | null;
+  viewMode?: ViewMode;
+  loading?: boolean;
+  showEmpty?: boolean;
+  emptyText?: string;
+  cardWidth?: number;
+  cardGutter?: number;
+  breakpoints?: Record<number, { rowPerView: number }>;
+}
+
+const props = withDefaults(defineProps<Props>(), {
   viewMode: "grid",
   loading: false,
   showEmpty: true,
@@ -107,7 +96,7 @@ const props = withDefaults(defineProps<ViewContainerProps>(), {
 });
 
 const emit = defineEmits<{
-  (e: "row-click", item: unknown): void;
+  (e: "row-click", item: T): void;
 }>();
 
 const defaultBreakpoints = {
@@ -305,6 +294,7 @@ const formatDate = (dateStr?: string) => {
 
 // Responsive adjustments
 @media (max-width: 768px) {
+
   .list-header,
   .list-row {
     padding: 12px 16px;

@@ -131,6 +131,7 @@ export const createVerseFromResource = (
       await postMetaResource({
         meta_id: meta.id,
         resource_id: resource.id,
+        type: "model",
       });
 
       const verse2 = await updateVerse(type, verse, meta);

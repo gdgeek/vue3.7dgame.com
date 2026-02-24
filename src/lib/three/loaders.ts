@@ -28,7 +28,7 @@ export function getConfiguredGLTFLoader(): GLTFLoader {
         .setTranscoderPath("/js/three.js/libs/basis/")
         .detectSupport(tmpRenderer);
       tmpRenderer.dispose();
-      // @ts-expect-error forceContextLoss is optional in some browsers
+      // forceContextLoss is optional in some browsers
       if (typeof tmpRenderer.forceContextLoss === "function")
         tmpRenderer.forceContextLoss();
     } catch (e) {

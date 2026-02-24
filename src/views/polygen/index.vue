@@ -1,65 +1,35 @@
 <template>
   <TransitionWrapper>
     <div class="polygen-index">
-      <PageActionBar
-        :title="t('polygen.listPageTitle')"
-        :search-placeholder="t('polygen.searchPlaceholder')"
-        :selection-count="selectedCount"
-        :is-page-selected="isPageSelected"
-        @search="handleSearch"
-        @sort-change="handleSortChange"
-        @view-change="handleViewChange"
-        @batch-download="handleBatchDownload"
-        @batch-delete="handleBatchDelete"
-        @cancel-selection="handleCancelSelection"
-        @select-all-page="handleSelectAllPage"
-        @cancel-select-all-page="handleCancelSelectAllPage"
-      >
+      <PageActionBar :title="t('polygen.listPageTitle')" :search-placeholder="t('polygen.searchPlaceholder')"
+        :selection-count="selectedCount" :is-page-selected="isPageSelected" @search="handleSearch"
+        @sort-change="handleSortChange" @view-change="handleViewChange" @batch-download="handleBatchDownload"
+        @batch-delete="handleBatchDelete" @cancel-selection="handleCancelSelection"
+        @select-all-page="handleSelectAllPage" @cancel-select-all-page="handleCancelSelectAllPage">
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
-            <font-awesome-icon
-              :icon="['fas', 'upload']"
-              style="font-size: 18px; margin-right: 4px"
-            ></font-awesome-icon>
+            <font-awesome-icon :icon="['fas', 'upload']" style="font-size: 18px; margin-right: 4px"></font-awesome-icon>
             {{ $t("polygen.uploadPolygen") }}
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer
-        :items="items"
-        :view-mode="viewMode"
-        :loading="loading"
-        @row-click="(item) => openViewDialog(item.id)"
-      >
+      <ViewContainer :items="items" :view-mode="viewMode" :loading="loading"
+        @row-click="(item) => openViewDialog(item.id)">
         <template #grid-card="{ item }">
-          <StandardCard
-            :image="item.image?.url"
-            :title="item.name || t('ui.unnamed')"
-            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
-            :selected="isSelected(item.id)"
-            :selection-mode="hasSelection"
-            :type-icon="['fas', 'cube']"
-            :placeholder-icon="['fas', 'cube']"
-            @view="openViewDialog(item.id)"
-            @select="() => toggleSelection(item.id)"
-          ></StandardCard>
+          <StandardCard :image="item.image?.url" :title="item.name || t('ui.unnamed')"
+            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" :selected="isSelected(item.id)"
+            :selection-mode="hasSelection" :type-icon="['fas', 'cube']" :placeholder-icon="['fas', 'cube']"
+            @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)"></StandardCard>
         </template>
 
         <template #list-item="{ item }">
           <div class="col-checkbox" @click.stop>
-            <el-checkbox
-              :model-value="isSelected(item.id)"
-              @change="() => toggleSelection(item.id)"
-            ></el-checkbox>
+            <el-checkbox :model-value="isSelected(item.id)" @change="() => toggleSelection(item.id)"></el-checkbox>
           </div>
           <div class="col-name">
             <div class="item-thumb">
-              <img
-                v-if="item.image?.url"
-                :src="item.image.url"
-                :alt="item.name"
-              />
+              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
               <div v-else class="thumb-placeholder">
                 <font-awesome-icon :icon="['fas', 'cube']"></font-awesome-icon>
               </div>
@@ -72,10 +42,7 @@
           </div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <font-awesome-icon
-                :icon="['fas', 'ellipsis']"
-                class="actions-icon"
-              ></font-awesome-icon>
+              <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon"></font-awesome-icon>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openViewDialog(item.id)">
@@ -83,10 +50,10 @@
                   </el-dropdown-item>
                   <el-dropdown-item @click="namedWindow(item)">{{
                     t("common.edit")
-                  }}</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => {})">{{
+                    }}</el-dropdown-item>
+                  <el-dropdown-item @click="deletedWindow(item, () => { })">{{
                     t("common.delete")
-                  }}</el-dropdown-item>
+                    }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -94,68 +61,31 @@
         </template>
 
         <template #empty>
-          <EmptyState
-            :icon="['fas', 'cube']"
-            :text="t('polygen.emptyText')"
-            :action-text="t('polygen.uploadPolygen')"
-            @action="openUploadDialog"
-          ></EmptyState>
+          <EmptyState :icon="['fas', 'cube']" :text="t('polygen.emptyText')" :action-text="t('polygen.uploadPolygen')"
+            @action="openUploadDialog"></EmptyState>
         </template>
       </ViewContainer>
 
-      <PagePagination
-        :current-page="pagination.current"
-        :total-pages="totalPages"
-        @page-change="handlePageChange"
-      >
+      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
       </PagePagination>
 
       <!-- Dialogs -->
       <!-- Dialogs -->
-      <StandardUploadDialog
-        v-model="uploadDialogVisible"
-        dir="polygen"
-        :file-type="fileType"
-        :max-size="30"
-        :title="$t('polygen.uploadPolygen')"
-        @save-resource="savePolygen"
-        @success="handleUploadSuccess"
-      >
+      <StandardUploadDialog v-model="uploadDialogVisible" dir="polygen" :file-type="fileType" :max-size="30"
+        :title="$t('polygen.uploadPolygen')" @save-resource="savePolygen" @success="handleUploadSuccess">
       </StandardUploadDialog>
 
       <!-- Detail Panel -->
-      <DetailPanel
-        v-model="viewDialogVisible"
-        :title="t('polygen.detailsTitle')"
-        :name="currentPolygen?.name || ''"
-        :loading="detailLoading"
-        :properties="detailProperties"
-        :placeholder-icon="['fas', 'cube']"
-        :download-text="t('polygen.downloadText')"
-        :delete-text="t('polygen.deleteText')"
-        @download="handleDownload"
-        @rename="handleRename"
-        @delete="handleDelete"
-        @close="handlePanelClose"
-      >
+      <DetailPanel v-model="viewDialogVisible" :title="t('polygen.detailsTitle')" :name="currentPolygen?.name || ''"
+        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'cube']"
+        :download-text="t('polygen.downloadText')" :delete-text="t('polygen.deleteText')" @download="handleDownload"
+        @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
         <template #preview>
-          <div
-            v-if="currentPolygen"
-            class="polygen-preview"
-            :class="{ 'has-animations': hasAnimations }"
-          >
-            <polygen-view
-              ref="polygenViewRef"
-              :file="currentPolygen.file"
-              @loaded="handleModelLoaded"
-              @progress="handleModelProgress"
-            ></polygen-view>
-            <el-progress
-              v-if="modelProgress < 100"
-              :percentage="modelProgress"
-              :stroke-width="4"
-              class="model-progress"
-            ></el-progress>
+          <div v-if="currentPolygen" class="polygen-preview" :class="{ 'has-animations': hasAnimations }">
+            <polygen-view ref="polygenViewRef" :file="currentPolygen.file" @loaded="handleModelLoaded"
+              @progress="handleModelProgress"></polygen-view>
+            <el-progress v-if="modelProgress < 100" :percentage="modelProgress" :stroke-width="4"
+              class="model-progress"></el-progress>
           </div>
           <div v-else class="preview-placeholder">
             <font-awesome-icon :icon="['fas', 'cube']"></font-awesome-icon>
@@ -212,7 +142,7 @@ const {
   handleSortChange,
   handlePageChange,
   handleViewChange,
-} = usePageData({
+} = usePageData<ResourceInfo>({
   fetchFn: async (params) => {
     return await getPolygens(params.sort, params.search, params.page);
   },
@@ -386,7 +316,7 @@ const savePolygen = async (
   image_id?: number
 ) => {
   try {
-    const data: { name: string; file_id: number; info?: string } = {
+    const data: { name: string; file_id: number; info?: string; image_id?: number } = {
       name,
       file_id,
     };
@@ -400,7 +330,7 @@ const savePolygen = async (
   }
 };
 
-const namedWindow = async (item: { id: string; name: string }) => {
+const namedWindow = async (item: { id: number; name?: string }) => {
   try {
     const { value } = (await MessageBox.prompt(
       t("polygen.prompt.message1"),
@@ -420,7 +350,7 @@ const namedWindow = async (item: { id: string; name: string }) => {
 };
 
 const deletedWindow = async (
-  item: { id: string },
+  item: { id: number },
   resetLoading: () => void
 ) => {
   try {
@@ -433,7 +363,7 @@ const deletedWindow = async (
         type: "warning",
       }
     );
-    await deletePolygen(item.id);
+    await deletePolygen(String(item.id));
     refresh();
     Message.success(t("polygen.confirm.success"));
   } catch {
@@ -650,7 +580,7 @@ const formatItemDate = (dateStr?: string) => {
   }
 }
 
-.panel-preview > .preview-placeholder {
+.panel-preview>.preview-placeholder {
   width: 100%;
   height: 100%;
   display: flex;

@@ -1,11 +1,9 @@
 import { logger } from "@/utils/logger";
-import { store } from "@/store";
+import type { TokenInfo } from "@/api/v1/types/auth";
 
 import { TOKEN_KEY } from "@/enums/CacheEnum";
 
-export type TokenValue = unknown;
-
-function setToken(token: TokenValue) {
+function setToken(token: TokenInfo) {
   localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
 }
 function hasToken() {
@@ -18,12 +16,12 @@ function hasToken() {
 function removeToken() {
   localStorage.removeItem(TOKEN_KEY);
 }
-function getToken(): TokenValue | null {
+function getToken(): TokenInfo | null {
   const token = localStorage.getItem(TOKEN_KEY);
 
   if (token) {
     try {
-      return JSON.parse(token);
+      return JSON.parse(token) as TokenInfo;
     } catch (e) {
       logger.error("Failed to parse token:", e);
       return null;
