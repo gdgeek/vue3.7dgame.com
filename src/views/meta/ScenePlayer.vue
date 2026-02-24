@@ -15,7 +15,7 @@
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { getConfiguredGLTFLoader } from "@/lib/three/loaders";
 import { ref, onMounted, onUnmounted, watch, computed, reactive } from "vue";
 import { convertToHttps } from "@/assets/js/helper";

@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { VOXLoader, VOXMesh } from "@/assets/js/voxel/VOXLoader.js";
 import { getConfiguredGLTFLoader } from "@/lib/three/loaders";
 import { convertToHttps } from "@/assets/js/helper";
-import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Ref } from "vue";
 import {
   Verse,

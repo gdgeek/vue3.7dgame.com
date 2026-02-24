@@ -9,7 +9,7 @@ import { logger } from "@/utils/logger";
 import ElementResizeDetector from "element-resize-detector";
 
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 import { VOXLoader, VOXMesh } from "@/assets/js/voxel/VOXLoader.js";
 import { convertToHttps } from "@/assets/js/helper";
