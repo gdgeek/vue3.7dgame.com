@@ -11,6 +11,7 @@
           >
         </template>
       </div>
+      <div class="footer-version">版本 {{ versionTag }}</div>
     </div>
   </footer>
 </template>
@@ -25,6 +26,9 @@ const domainStore = useDomainStore();
 const settingsStore = useSettingsStore();
 
 const isDarkMode = computed(() => settingsStore.theme === ThemeEnum.DARK);
+const DEV_DATE = String(import.meta.env.VITE_DEV_DATE || "20260224");
+const DEV_LETTER = String(import.meta.env.VITE_DEV_LETTER || "A");
+const versionTag = computed(() => `${DEV_DATE}${DEV_LETTER}`);
 
 defineProps<{
   maxwidth?: boolean;
@@ -84,5 +88,11 @@ defineProps<{
 
 .divider {
   font-size: 12px;
+}
+
+.footer-version {
+  font-size: 12px;
+  opacity: 0.8;
+  white-space: nowrap;
 }
 </style>
