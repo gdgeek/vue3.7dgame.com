@@ -155,6 +155,7 @@ export default {
       success5: "共有停止",
       error1: "送信失敗",
       error2: "フォーム検証に失敗しました",
+      error3: "プリハブのスキーマ形式が無効です",
       messageTitle: "【场景】名：",
       scene: "シーン",
       tags: {

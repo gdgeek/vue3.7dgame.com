@@ -8,18 +8,6 @@ export default {
     typeName: "体素",
     initializeVoxelData: "初始化体素数据",
     viewVoxel: "查看体素",
-    initializingModels: "正在初始化体素...",
-    initializingModelProgress:
-      "正在初始化体素 {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "成功初始化 {count} 个体素",
-    partialInitializeSuccess:
-      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
-    retryInitializeFailed: "是否重试初始化失败的 {count} 个体素?",
-    retryTitle: "重试初始化",
-    retryConfirm: "重试",
-    retryCancel: "跳过",
-    initializeSuccess: "体素初始化成功",
-    initializeError: "体素初始化失败",
     prompt: {
       message1: "请输入新名称",
       message2: "修改体素名称",
@@ -48,7 +36,6 @@ export default {
         item2: "创建者",
         item3: "创建时间",
         item4: "文件大小",
-        size: "字节",
         item5: "模型尺寸",
         item6: "模型中心点",
         item7: "体素数量",
@@ -102,20 +89,6 @@ export default {
     typeName: "模型",
     selectPageSuccess: "已全选当前页 {count} 个模型",
     cancelSelectPageSuccess: "已取消当前页全选",
-    initializePolygenData: "初始化模型数据",
-    initializeAll: "批量初始化模型",
-    initializingModels: "正在初始化模型...",
-    initializingModelProgress:
-      "正在初始化模型 {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "成功初始化 {count} 个模型",
-    partialInitializeSuccess:
-      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
-    retryInitializeFailed: "是否重试初始化失败的 {count} 个模型?",
-    retryTitle: "重试初始化",
-    retryConfirm: "重试",
-    retryCancel: "跳过",
-    initializeSuccess: "模型初始化成功",
-    initializeError: "模型初始化失败",
     viewPolygen: "查看模型",
     prompt: {
       message1: "请输入新名称",
@@ -136,7 +109,6 @@ export default {
     uploadFile: "选择模型（.glb文件），并上传",
     view: {
       title: "模型名称：",
-      titleStatement: "用此模型创建【场景】",
       info: {
         title: "模型信息",
         label1: "条目",
@@ -145,22 +117,11 @@ export default {
         item2: "创建者",
         item3: "创建时间",
         item4: "文件大小",
-        size: "字节",
         item5: "模型尺寸",
         item6: "模型中心",
         name: "改名",
         delete: "删除",
         download: "下载",
-      },
-      prompt: {
-        message1: "用此模型创建【场景】",
-        message2: "提示",
-        confirm: "确认",
-        cancel: "取消",
-        inputError: "请填写相应名称",
-        success: "你创建了新的场景: ",
-        error: "创建失败: ",
-        info: "取消输入",
       },
       confirm: {
         message1: "此操作将永久删除该文件, 是否继续?",
@@ -183,30 +144,11 @@ export default {
         error: "下载失败: ",
       },
     },
-    animation: {
-      animationOn: "动画开启",
-      animationOff: "动画关闭",
-      shadowOn: "阴影开启",
-      shadowOff: "阴影关闭",
-    },
   },
   // 图片管理国际化
   picture: {
     uploadPicture: "上传图片",
-    initializePictureData: "初始化图片数据",
     viewPicture: "查看图片",
-    initializingModels: "正在初始化图片...",
-    initializingModelProgress:
-      "正在初始化图片 {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "成功初始化 {count} 个图片",
-    partialInitializeSuccess:
-      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
-    retryInitializeFailed: "是否重试初始化失败的 {count} 个图片?",
-    retryTitle: "重试初始化",
-    retryConfirm: "重试",
-    retryCancel: "跳过",
-    initializeSuccess: "图片初始化成功",
-    initializeError: "图片初始化失败",
     prompt: {
       message1: "请输入新名称",
       message2: "修改图片名称",
@@ -235,19 +177,10 @@ export default {
         item2: "创建者",
         item3: "创建时间",
         item4: "文件大小",
-        size: "字节",
         item5: "图片尺寸",
         name: "改名",
         delete: "删除",
         download: "下载",
-      },
-      confirm: {
-        message1: "此操作将永久删除该文件, 是否继续?",
-        message2: "提示",
-        confirm: "确认",
-        cancel: "取消",
-        success: "删除成功！",
-        info: "已取消删除",
       },
       namePrompt: {
         message1: "请输入新名称",
@@ -273,20 +206,7 @@ export default {
     deleteText: "删除此视频",
     resourceName: "视频",
     typeName: "视频",
-    initializeVideoData: "初始化视频数据",
     viewVideo: "查看视频",
-    initializingModels: "正在初始化视频...",
-    initializingModelProgress:
-      "正在初始化视频 {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "成功初始化 {count} 个视频",
-    partialInitializeSuccess:
-      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
-    retryInitializeFailed: "是否重试初始化失败的 {count} 个视频?",
-    retryTitle: "重试初始化",
-    retryConfirm: "重试",
-    retryCancel: "跳过",
-    initializeSuccess: "视频初始化成功",
-    initializeError: "视频初始化失败",
     prompt: {
       message1: "请输入新名称",
       message2: "修改视频名称",
@@ -314,7 +234,6 @@ export default {
         item2: "创建者",
         item3: "创建时间",
         item4: "文件大小",
-        size: "字节",
         item5: "视频尺寸",
         item6: "时长",
         name: "改名",
@@ -346,20 +265,7 @@ export default {
   // 音频管理国际化
   audio: {
     uploadAudio: "上传音频",
-    initializeAudioData: "初始化音频数据",
     viewAudio: "查看音频",
-    initializingModels: "正在初始化音频...",
-    initializingModelProgress:
-      "正在初始化音频 {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "成功初始化 {count} 个音频",
-    partialInitializeSuccess:
-      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
-    retryInitializeFailed: "是否重试初始化失败的 {count} 个音频?",
-    retryTitle: "重试初始化",
-    retryConfirm: "重试",
-    retryCancel: "跳过",
-    initializeSuccess: "音频初始化成功",
-    initializeError: "音频初始化失败",
     prompt: {
       message1: "请输入新名称",
       message2: "修改音频名称",
@@ -379,6 +285,7 @@ export default {
     uploadFile: "选择音频（.mp3/.wav），并上传",
     view: {
       title: "音频名称：",
+      loadError: "加载音频失败",
       info: {
         title: "音频信息",
         label1: "条目",
@@ -388,7 +295,6 @@ export default {
         item3: "创建时间",
         item4: "文件大小",
         item5: "时长",
-        size: "字节",
         name: "改名",
         delete: "删除",
         download: "下载",
@@ -423,18 +329,6 @@ export default {
     typeName: "粒子",
     initializeParticleData: "初始化特效数据",
     viewParticle: "查看特效",
-    initializingModels: "正在初始化特效...",
-    initializingModelProgress:
-      "正在初始化特效 {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "成功初始化 {count} 个特效",
-    partialInitializeSuccess:
-      "初始化结果: {success}个成功, {failed}个失败 (共{total}个)",
-    retryInitializeFailed: "是否重试初始化失败的 {count} 个特效?",
-    retryTitle: "重试初始化",
-    retryConfirm: "重试",
-    retryCancel: "跳过",
-    initializeSuccess: "特效初始化成功",
-    initializeError: "特效初始化失败",
     prompt: {
       message1: "请输入新名称",
       message2: "修改特效名称",
@@ -463,7 +357,6 @@ export default {
         item2: "创建者",
         item3: "创建时间",
         item4: "文件大小",
-        size: "字节",
         item5: "特效尺寸",
         item6: "时长",
         name: "改名",

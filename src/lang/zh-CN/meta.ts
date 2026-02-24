@@ -8,6 +8,7 @@ export default {
     delete: "删除",
     actions: "操作",
     copy: "副本",
+    copyError: "复制实体失败",
     list: {
       pageTitle: "所有实体",
       searchPlaceholder: "搜索实体...",

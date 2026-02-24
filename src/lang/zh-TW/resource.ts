@@ -374,6 +374,7 @@ export default {
     uploadFile: "選擇音頻（.mp3/.wav），並上傳",
     view: {
       title: "音頻名稱：",
+      loadError: "載入音頻失敗",
       info: {
         title: "音頻信息",
         label1: "條目",

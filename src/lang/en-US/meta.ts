@@ -7,6 +7,7 @@ export default {
     delete: "Delete",
     actions: "Actions",
     copy: "Copy",
+    copyError: "Failed to copy entity",
     list: {
       pageTitle: "All Entities",
       searchPlaceholder: "Search entities...",

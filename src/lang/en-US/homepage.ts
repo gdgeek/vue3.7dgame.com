@@ -171,6 +171,7 @@ export default {
         },
         check: {
           message: "Please enter the confirmation password",
+          message1: "Please enter the confirmation password",
           error1: "Please re-enter the password",
           error2: "The two passwords do not match",
         },

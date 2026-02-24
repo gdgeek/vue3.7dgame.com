@@ -71,9 +71,6 @@ importers:
       crypto-js:
         specifier: ^4.2.0
         version: 4.2.0
-      css-doodle:
-        specifier: ^0.41.0
-        version: 0.41.0
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
@@ -101,9 +98,6 @@ importers:
       highlight.js:
         specifier: ^10.7.3
         version: 10.7.3
-      howler:
-        specifier: ^2.2.4
-        version: 2.2.4
       https-localhost:
         specifier: ^4.7.1
         version: 4.7.1
@@ -2585,9 +2579,6 @@ packages:
   crypto-js@4.2.0:
     resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
 
-  css-doodle@0.41.0:
-    resolution: {integrity: sha512-uoXiU//BsAjRP51V4XaRe+rSJVlTOFfbrhUijMoO2DLH89AZWejOv+suVlrDkozbQI6i9vqKgHcXcccM/qOznw==}
-
   css-functions-list@3.2.3:
     resolution: {integrity: sha512-IQOkD3hbR5KrN93MtcYuad6YPuTSUhntLHDuLEbFWE+ff2/XSZNdZG+LcbbIW5AXKg/WFIfYItIzVoHngHXZzA==}
     engines: {node: '>=12 || >=16'}
@@ -3623,9 +3614,6 @@ packages:
   hosted-git-info@4.1.0:
     resolution: {integrity: sha512-kyCuEOWjJqZuDbRHzL8V93NzQhwIB71oFWSyzVo+KPZI+pnQPPxucdkrOZvkLRnrf5URsQM+IJ09Dw29cRALIA==}
     engines: {node: '>=10'}
-
-  howler@2.2.4:
-    resolution: {integrity: sha512-iARIBPgcQrwtEr+tALF+rapJ8qSc+Set2GJQl7xT1MQzWaVkFebdJhR3alVlSiUf5U7nAANKuj3aWpwerocD5w==}
 
   hpack.js@2.1.6:
     resolution: {integrity: sha512-zJxVehUdMGIKsRaNt7apO2Gqp0BdqW5yaiGHXXmbpvxgBYVZnAql+BJb4RO5ad2MgpbZKn5G6nMnegrH1FcNYQ==}
@@ -6258,8 +6246,8 @@ packages:
   vue-component-type-helpers@2.2.12:
     resolution: {integrity: sha512-YbGqHZ5/eW4SnkPNR44mKVc6ZKQoRs/Rux1sxC6rdwXb4qpbOSYfDr9DsTHolOTGmIKgM9j141mZbBeg05R1pw==}
 
-  vue-component-type-helpers@3.2.4:
-    resolution: {integrity: sha512-05lR16HeZDcDpB23ku5b5f1fBOoHqFnMiKRr2CiEvbG5Ux4Yi0McmQBOET0dR0nxDXosxyVqv67q6CzS3AK8rw==}
+  vue-component-type-helpers@3.2.5:
+    resolution: {integrity: sha512-tkvNr+bU8+xD/onAThIe7CHFvOJ/BO6XCOrxMzeytJq40nTfpGDJuVjyCM8ccGZKfAbGk2YfuZyDMXM56qheZQ==}
 
   vue-cropper@1.1.4:
     resolution: {integrity: sha512-5m98vBsCEI9rbS4JxELxXidtAui3qNyTHLHg67Qbn7g8cg+E6LcnC+hh3SM/p94x6mFh6KRxT1ttnta+wCYqWA==}
@@ -7601,7 +7589,7 @@ snapshots:
       storybook: 10.1.11(@testing-library/dom@10.4.1)(prettier@3.5.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       type-fest: 2.19.0
       vue: 3.5.13(typescript@5.8.3)
-      vue-component-type-helpers: 3.2.4
+      vue-component-type-helpers: 3.2.5
 
   '@sxzz/popperjs-es@2.11.7': {}
 
@@ -9056,8 +9044,6 @@ snapshots:
 
   crypto-js@4.2.0: {}
 
-  css-doodle@0.41.0: {}
-
   css-functions-list@3.2.3: {}
 
   css-select@4.3.0:
@@ -10279,8 +10265,6 @@ snapshots:
   hosted-git-info@4.1.0:
     dependencies:
       lru-cache: 6.0.0
-
-  howler@2.2.4: {}
 
   hpack.js@2.1.6:
     dependencies:
@@ -13184,7 +13168,7 @@ snapshots:
 
   vue-component-type-helpers@2.2.12: {}
 
-  vue-component-type-helpers@3.2.4: {}
+  vue-component-type-helpers@3.2.5: {}
 
   vue-cropper@1.1.4: {}
 

@@ -160,6 +160,7 @@ export default {
       success5: "Sharing stopped",
       error1: "Submission failed",
       error2: "Form validation failed",
+      error3: "Prefab schema format is invalid",
       messageTitle: "【Project】Name:",
       scene: "scene",
       tags: {

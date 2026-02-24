@@ -29,6 +29,28 @@ export default {
     operationFailed: "การดำเนินงานล้มเหลว",
     networkError:
       "เกิดข้อผิดพลาดเครือข่าย กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ",
+    updateFailed: "อัปเดตล้มเหลว",
+    invalidData: "ข้อมูลไม่ถูกต้อง",
+    button: {
+      save: "บันทึก",
+    },
+    message: {
+      createSuccess: "สร้างสำเร็จ",
+      saveSuccess: "บันทึกสำเร็จ",
+      saveFailed: "บันทึกล้มเหลว",
+    },
+  },
+  errorPage: {
+    back: "กลับ",
+    gifSource: "แหล่งที่มาของรูปภาพ: ",
+    page: "อ๊อปส! เกิดข้อผิดพลาด",
+    noPermission: "คุณไม่มีสิทธิ์เข้าถึงหน้านี้",
+    contactLeader: "กรุณาติดต่อผู้บังคับบัญชาหรือผู้ดูแลระบบ",
+    orGoTo: "หรือไปที่",
+    backHome: "กลับหน้าหลัก",
+    justLook: "แค่เดินเล่น",
+    clickToSee: "คลิกเพื่อดู",
+    justLookTitle: "แค่เดินเล่น",
   },
   sidebar: {
     home: "หน้าแรก",

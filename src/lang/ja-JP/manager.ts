@@ -101,6 +101,10 @@ export default {
       operationFailed: "操作に失敗しました",
       addFailed: "追加に失敗しました",
       saveFailed: "保存に失敗しました",
+      deleteFailed: "削除に失敗しました",
+      removeFailed: "削除に失敗しました",
+      alreadyInClass: "このメンバーはすでにクラスに参加しています",
+      validationFailed: "フォームの検証に失敗しました",
     },
     dialog: {
       createTitle: "学校を作成",
@@ -126,6 +130,7 @@ export default {
     messages: {
       addSuccess: "追加に成功しました",
       removeSuccess: "削除に成功しました",
+      deleteSuccess: "削除しました",
       createConfirm: "新しい学校を作成しますか？",
       createSuccess: "学校の作成に成功しました",
       createFailed: "学校の作成に失敗しました",

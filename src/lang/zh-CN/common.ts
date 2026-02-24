@@ -28,6 +28,28 @@ export default {
     deleteFailed: "删除失败",
     operationFailed: "操作失败",
     networkError: "网络错误，请检查您的网络连接",
+    updateFailed: "更新失败",
+    invalidData: "数据无效",
+    button: {
+      save: "保存",
+    },
+    message: {
+      createSuccess: "创建成功",
+      saveSuccess: "保存成功",
+      saveFailed: "保存失败",
+    },
+  },
+  errorPage: {
+    back: "返回",
+    gifSource: "图片来源于",
+    page: "Oops! 页面出错了",
+    noPermission: "你没有权限访问该页面",
+    contactLeader: "请联系你的上级或管理员",
+    orGoTo: "或者去",
+    backHome: "回到首页",
+    justLook: "随便逛逛",
+    clickToSee: "点击查看",
+    justLookTitle: "随便逛逛",
   },
   request: {
     loginExpired: "登录过期，请重新登录",

@@ -383,6 +383,7 @@ export default {
     uploadFile: "เลือกเสียง (.mp3/.wav) และอัปโหลด",
     view: {
       title: "ชื่อเสียง: ",
+      loadError: "โหลดเสียงล้มเหลว",
       info: {
         title: "ข้อมูลเสียง",
         label1: "รายการ",

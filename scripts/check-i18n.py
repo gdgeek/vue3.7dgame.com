@@ -69,8 +69,9 @@ def _parse_object_body(text: str, prefix: str, results: Dict[str, str]):
     """
     # Match key: value pairs
     # Keys can be quoted or unquoted identifiers
+    # Also support inline/single-line objects: { key1: v, key2: v }
     key_pat = re.compile(
-        r'''(?:^|\n)\s*(?:"([^"]+)"|'([^']+)'|([a-zA-Z_$][a-zA-Z0-9_$]*))\s*:''',
+        r'''(?:^|[\n,{])\s*(?:"([^"]+)"|'([^']+)'|([a-zA-Z_$][a-zA-Z0-9_$]*))\s*:(?!:)''',
         re.MULTILINE
     )
 
@@ -125,7 +126,8 @@ def _parse_object_body(text: str, prefix: str, results: Dict[str, str]):
 
             value = text[j:val_end].strip().strip('"\'`')
             results[full_key] = value
-            i = val_end + 1
+            # Keep the delimiter (,/\n) so the next key_pat search can match it
+            i = val_end
 
 
 def load_lang_keys() -> Dict[str, str]:
@@ -179,6 +181,15 @@ T_PATTERN = re.compile(
 # Dynamic keys like t(`prefix.${var}`) — capture prefix
 T_DYNAMIC = re.compile(
     r'(?<!\w)(?:\$t|tc?|te|tm)\(\s*`([^`]*)\$\{'
+)
+# Dynamic keys via string concatenation: t("prefix." + var) or i18n.global.te("prefix." + var)
+T_DYNAMIC_CONCAT = re.compile(
+    r'''(?:t|te|tm|tc)\(['"]([\w.]+\.)['"] *\+'''
+)
+# i18n key prefixes passed as downloadResource() argument (e.g. "audio.view.download")
+# Matches standalone quoted strings that look like i18n translation prefixes for download/view helpers
+T_I18N_PREFIX_ARG = re.compile(
+    r'''["']([a-z]\w+\.view\.(?:download|confirm|info|namePrompt))["']'''
 )
 
 SKIP_DIRS = {
@@ -238,6 +249,16 @@ def scan_source_files() -> Tuple[Set[str], Set[str], Dict[str, List[str]]]:
                         if prefix:
                             dynamic_prefixes.add(prefix)
 
+                    for m in T_DYNAMIC_CONCAT.finditer(line):
+                        prefix = m.group(1).rstrip('.')
+                        if prefix:
+                            dynamic_prefixes.add(prefix)
+
+                    for m in T_I18N_PREFIX_ARG.finditer(line):
+                        prefix = m.group(1)
+                        if prefix:
+                            dynamic_prefixes.add(prefix)
+
     return static_keys, dynamic_prefixes, key_locations
 
 
@@ -264,7 +285,7 @@ def main():
     missing: List[str] = sorted(
         k for k in static_keys
         if not check_key_exists(k, lang_keys)
-        # Skip keys that look like dynamic (contain dots already common)
+        and not k.endswith('.')  # Skip dynamic prefix false-positives (e.g. "route." + var)
     )
 
     # Unused: defined in lang but never used in code

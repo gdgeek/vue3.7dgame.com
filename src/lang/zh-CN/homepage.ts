@@ -166,6 +166,7 @@ export default {
         },
         check: {
           message: "请输入校验密码",
+          message1: "请输入校验密码",
           error1: "请再次输入密码",
           error2: "两次输入密码不一致",
         },

@@ -112,6 +112,10 @@ export default {
       operationFailed: "Operation failed",
       addFailed: "Failed to add",
       saveFailed: "Failed to save",
+      deleteFailed: "Delete failed",
+      removeFailed: "Remove failed",
+      alreadyInClass: "This member is already in the class",
+      validationFailed: "Form validation failed",
     },
     dialog: {
       createTitle: "Create School",
@@ -137,6 +141,7 @@ export default {
     messages: {
       addSuccess: "Added successfully",
       removeSuccess: "Removed successfully",
+      deleteSuccess: "Deleted successfully",
       createConfirm: "Confirm to create a new school?",
       createSuccess: "School created successfully",
       createFailed: "Failed to create school",

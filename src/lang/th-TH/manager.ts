@@ -101,6 +101,10 @@ export default {
       operationFailed: "การดำเนินการล้มเหลว",
       addFailed: "เพิ่มไม่สำเร็จ",
       saveFailed: "บันทึกไม่สำเร็จ",
+      deleteFailed: "ลบล้มเหลว",
+      removeFailed: "ลบออกล้มเหลว",
+      alreadyInClass: "สมาชิกนี้อยู่ในชั้นเรียนนี้แล้ว",
+      validationFailed: "การตรวจสอบแบบฟอร์มล้มเหลว",
     },
     dialog: {
       createTitle: "สร้างโรงเรียน",
@@ -126,6 +130,7 @@ export default {
     messages: {
       addSuccess: "เพิ่มสำเร็จ",
       removeSuccess: "ลบสำเร็จ",
+      deleteSuccess: "ลบสำเร็จ",
       createConfirm: "ยืนยันการสร้างโรงเรียนใหม่หรือไม่?",
       createSuccess: "สร้างโรงเรียนสำเร็จ",
       createFailed: "การสร้างโรงเรียนล้มเหลว",

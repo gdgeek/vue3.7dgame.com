@@ -156,6 +156,7 @@ export default {
       success5: "หยุดแบ่งปัน",
       error1: "ส่งล้มเหลว",
       error2: "การตรวจสอบแบบฟอร์มล้มเหลว",
+      error3: "รูปแบบ Schema ของ Prefab ไม่ถูกต้อง",
       messageTitle: "ชื่อ【ฉาก】: ",
       scene: "ฉาก",
       tags: {

@@ -7,18 +7,6 @@ export default {
     typeName: "Voxel",
     initializeVoxelData: "Init The Voxel Data",
     viewVoxel: "View Voxel",
-    initializingModels: "Initializing voxels...",
-    initializingModelProgress:
-      "Initializing voxel {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "Successfully initialized {count} voxels",
-    partialInitializeSuccess:
-      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
-    retryInitializeFailed: "Retry initializing {count} failed voxels?",
-    retryTitle: "Retry Initialization",
-    retryConfirm: "Retry",
-    retryCancel: "Skip",
-    initializeSuccess: "Voxels initialized successfully",
-    initializeError: "Failed to initialize voxels",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit voxel name",
@@ -48,7 +36,6 @@ export default {
         item2: "Creator",
         item3: "Creation Time",
         item4: "File Size",
-        size: "Bytes",
         item5: "Voxel Dimensions",
         item6: "Voxel Center",
         item7: "Voxel Count",
@@ -102,20 +89,6 @@ export default {
     typeName: "Model",
     selectPageSuccess: "Selected all {count} models on this page",
     cancelSelectPageSuccess: "Cleared all selections on this page",
-    initializePolygenData: "Init The Polygen Data",
-    initializeAll: "Batch Initialize Models",
-    initializingModels: "Initializing models...",
-    initializingModelProgress:
-      "Initializing model {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "Successfully initialized {count} models",
-    partialInitializeSuccess:
-      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
-    retryInitializeFailed: "Retry initializing {count} failed models?",
-    retryTitle: "Retry Initialization",
-    retryConfirm: "Retry",
-    retryCancel: "Skip",
-    initializeSuccess: "Models initialized successfully",
-    initializeError: "Failed to initialize models",
     viewPolygen: "View Polygen",
     prompt: {
       message1: "Please enter a new name",
@@ -137,7 +110,6 @@ export default {
     uploadFile: "Select a polygen (.glb file) and upload it",
     view: {
       title: "Ploygen Name: ",
-      titleStatement: "Create a 【Project】 with this polygen",
       info: {
         title: "Polygen Information",
         label1: "Item",
@@ -146,22 +118,11 @@ export default {
         item2: "Creator",
         item3: "Creation Time",
         item4: "File Size",
-        size: "Bytes",
         item5: "Polygen Dimensions",
         item6: "Polygen Center",
         name: "Rename",
         delete: "Delete",
         download: "Download",
-      },
-      prompt: {
-        message1: "Create a 【Project】 with this polygen",
-        message2: "Prompt",
-        confirm: "Confirm",
-        cancel: "Cancel",
-        inputError: "Please enter the required name",
-        success: "You created a new scene: ",
-        error: "Creation failed: ",
-        info: "Cancel input",
       },
       confirm: {
         message1:
@@ -185,29 +146,10 @@ export default {
         error: "Download failed: ",
       },
     },
-    animation: {
-      animationOn: "Animation On",
-      animationOff: "Animation Off",
-      shadowOn: "Shadow On",
-      shadowOff: "Shadow Off",
-    },
   },
   picture: {
     uploadPicture: "Upload Picture",
-    initializePictureData: "Init The Picture Data",
     viewPicture: "View Picture",
-    initializingModels: "Initializing pictures...",
-    initializingModelProgress:
-      "Initializing picture {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "Successfully initialized {count} pictures",
-    partialInitializeSuccess:
-      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
-    retryInitializeFailed: "Retry initializing {count} failed pictures?",
-    retryTitle: "Retry Initialization",
-    retryConfirm: "Retry",
-    retryCancel: "Skip",
-    initializeSuccess: "Pictures initialized successfully",
-    initializeError: "Failed to initialize pictures",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Polygen name",
@@ -237,20 +179,10 @@ export default {
         item2: "Creator",
         item3: "Creation Time",
         item4: "File Size",
-        size: "Bytes",
         item5: "Picture Dimensions",
         name: "Rename",
         delete: "Delete",
         download: "Download",
-      },
-      confirm: {
-        message1:
-          "This action will permanently delete the file. Do you want to continue?",
-        message2: "Prompt",
-        confirm: "Confirm",
-        cancel: "Cancel",
-        success: "Deleted successfully!",
-        info: "Deletion canceled",
       },
       namePrompt: {
         message1: "Please enter a new name",
@@ -275,20 +207,7 @@ export default {
     deleteText: "Delete This Video",
     resourceName: "video",
     typeName: "Video",
-    initializeVideoData: "Init The VideoData",
     viewVideo: "View Video",
-    initializingModels: "Initializing videos...",
-    initializingModelProgress:
-      "Initializing video {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "Successfully initialized {count} videos",
-    partialInitializeSuccess:
-      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
-    retryInitializeFailed: "Retry initializing {count} failed videos?",
-    retryTitle: "Retry Initialization",
-    retryConfirm: "Retry",
-    retryCancel: "Skip",
-    initializeSuccess: "Videos initialized successfully",
-    initializeError: "Failed to initialize videos",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Video name",
@@ -317,7 +236,6 @@ export default {
         item2: "Creator",
         item3: "Creation Time",
         item4: "File Size",
-        size: "Bytes",
         item5: "Video Dimensions",
         item6: "Duration",
         name: "Rename",
@@ -349,20 +267,7 @@ export default {
   },
   audio: {
     uploadAudio: "Upload Audio",
-    initializeAudioData: "Init The Audio Data",
     viewAudio: "View Audio",
-    initializingModels: "Initializing audios...",
-    initializingModelProgress:
-      "Initializing audio {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "Successfully initialized {count} audios",
-    partialInitializeSuccess:
-      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
-    retryInitializeFailed: "Retry initializing {count} failed audios?",
-    retryTitle: "Retry Initialization",
-    retryConfirm: "Retry",
-    retryCancel: "Skip",
-    initializeSuccess: "Audios initialized successfully",
-    initializeError: "Failed to initialize audios",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Audio name",
@@ -383,6 +288,7 @@ export default {
     uploadFile: "Select a audio (.mp3/.wav) and upload it",
     view: {
       title: "Audio Name: ",
+      loadError: "Failed to load audio",
       info: {
         title: "Audio Information",
         label1: "Item",
@@ -392,7 +298,6 @@ export default {
         item3: "Creation Time",
         item4: "File Size",
         item5: "Duration",
-        size: "Bytes",
         name: "Rename",
         delete: "Delete",
         download: "Download",
@@ -427,19 +332,6 @@ export default {
     typeName: "Particle",
     initializeParticleData: "Init The Particle Effect Data",
     viewParticle: "View Particle Effect",
-    initializingModels: "Initializing particle effects...",
-    initializingModelProgress:
-      "Initializing particle effect {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "Successfully initialized {count} particle effects",
-    partialInitializeSuccess:
-      "Initialization result: {success} succeeded, {failed} failed (out of {total})",
-    retryInitializeFailed:
-      "Retry initializing {count} failed particle effects?",
-    retryTitle: "Retry Initialization",
-    retryConfirm: "Retry",
-    retryCancel: "Skip",
-    initializeSuccess: "Particle effects initialized successfully",
-    initializeError: "Failed to initialize particle effects",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Particle Effect name",
@@ -470,7 +362,6 @@ export default {
         item2: "Creator",
         item3: "Creation Time",
         item4: "File Size",
-        size: "Bytes",
         item5: "Particle Effect Dimensions",
         item6: "Duration",
         name: "Rename",

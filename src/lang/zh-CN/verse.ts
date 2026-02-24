@@ -153,6 +153,7 @@ export default {
       success5: "停止共享",
       error1: "提交失败",
       error2: "表单验证失败",
+      error3: "预制体 Schema 格式无效",
       messageTitle: "【场景】名称：",
       scene: "场景",
       tags: {

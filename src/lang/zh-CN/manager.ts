@@ -99,6 +99,10 @@ export default {
       operationFailed: "操作失败",
       addFailed: "添加失败",
       saveFailed: "保存失败",
+      deleteFailed: "删除失败",
+      removeFailed: "移除失败",
+      alreadyInClass: "该成员已在该班级中",
+      validationFailed: "表单验证失败",
     },
     dialog: { createTitle: "创建学校", editTitle: "编辑学校" },
     form: {
@@ -121,6 +125,7 @@ export default {
     messages: {
       addSuccess: "添加成功",
       removeSuccess: "移除成功",
+      deleteSuccess: "删除成功",
       createConfirm: "确认创建新学校吗？",
       createSuccess: "学校创建成功",
       createFailed: "学校创建失败",

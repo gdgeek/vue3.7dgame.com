@@ -7,6 +7,7 @@ export default {
     delete: "ลบ",
     actions: "การดำเนินการ",
     copy: "สำเนา",
+    copyError: "คัดลอก Entity ล้มเหลว",
     list: {
       pageTitle: "เอนทิตีทั้งหมด",
       searchPlaceholder: "ค้นหาเอนทิตี...",

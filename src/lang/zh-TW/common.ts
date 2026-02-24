@@ -28,6 +28,28 @@ export default {
     deleteFailed: "刪除失敗",
     operationFailed: "操作失敗",
     networkError: "網絡錯誤，請檢查您的網絡連接",
+    updateFailed: "更新失敗",
+    invalidData: "數據無效",
+    button: {
+      save: "保存",
+    },
+    message: {
+      createSuccess: "創建成功",
+      saveSuccess: "保存成功",
+      saveFailed: "保存失敗",
+    },
+  },
+  errorPage: {
+    back: "返回",
+    gifSource: "圖片來源於",
+    page: "Oops! 頁面出錯了",
+    noPermission: "你沒有權限訪問該頁面",
+    contactLeader: "請聯繫你的上級或管理員",
+    orGoTo: "或者去",
+    backHome: "回到首頁",
+    justLook: "隨便逛逛",
+    clickToSee: "點擊查看",
+    justLookTitle: "隨便逛逛",
   },
   sidebar: {
     home: "首頁",

@@ -28,6 +28,28 @@ export default {
     deleteFailed: "削除に失敗しました",
     operationFailed: "操作失敗",
     networkError: "ネットワークエラーです。ネットワーク接続を確認してください",
+    updateFailed: "更新に失敗しました",
+    invalidData: "データが無効です",
+    button: {
+      save: "保存",
+    },
+    message: {
+      createSuccess: "作成成功",
+      saveSuccess: "保存成功",
+      saveFailed: "保存に失敗しました",
+    },
+  },
+  errorPage: {
+    back: "戻る",
+    gifSource: "画像出典：",
+    page: "Oops! エラーが発生しました",
+    noPermission: "このページにアクセスする権限がありません",
+    contactLeader: "上司または管理者にお問い合わせください",
+    orGoTo: "または",
+    backHome: "ホームに戻る",
+    justLook: "見るだけ",
+    clickToSee: "クリックして表示",
+    justLookTitle: "見るだけ",
   },
   sidebar: {
     home: "ホーム",

@@ -374,6 +374,7 @@ export default {
     uploadFile: "音声(.mp3/.wav)を選択してアップロード",
     view: {
       title: "音声名：",
+      loadError: "音声の読み込みに失敗しました",
       info: {
         title: "音声情報",
         label1: "項目",

@@ -155,6 +155,7 @@ export default {
       success5: "停止共享",
       error1: "提交失敗",
       error2: "表單驗證失敗",
+      error3: "預製體 Schema 格式無效",
       messageTitle: "【場景】名稱：",
       scene: "場景",
       tags: {
