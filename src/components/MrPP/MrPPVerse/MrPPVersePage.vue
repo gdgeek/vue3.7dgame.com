@@ -54,7 +54,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import { useRouter } from "vue-router";
 import { v4 as uuidv4 } from "uuid";

@@ -14,7 +14,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";

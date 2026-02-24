@@ -52,7 +52,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import { getVerse } from "@/api/v1/verse";
 import {
@@ -60,7 +59,7 @@ import {
   putMultilanguageVerse,
   deleteMultilanguageVerse,
 } from "@/api/v1/multilanguage-verse";
-import { FormInstance } from "element-plus";
+import type { FormInstance, FormItemRule } from "element-plus";
 
 interface LanguageOption {
   value: string;
@@ -93,7 +92,7 @@ const form = ref<FormModel>({
   description: "",
 });
 
-const rules = ref({
+const rules = ref<Record<string, FormItemRule[]>>({
   language: [
     {
       required: true,

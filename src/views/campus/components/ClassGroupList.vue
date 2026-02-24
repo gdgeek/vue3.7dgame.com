@@ -108,7 +108,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import { ref, computed } from "vue";
 import { useUserStoreHook } from "@/store/modules/user";

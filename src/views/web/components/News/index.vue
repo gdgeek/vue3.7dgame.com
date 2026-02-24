@@ -229,7 +229,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -315,6 +314,7 @@ const selectedArticle = ref<PostSummary | null>(null);
 const articleContent = ref<ArticleDetail | null>(null);
 const articleLoading = ref(false);
 const articleError = ref(false);
+const articleTerms = ref<Array<{ name: string }>>([]);
 
 // 分页信息
 const pagination = ref({

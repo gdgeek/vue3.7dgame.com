@@ -81,7 +81,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import { ref } from "vue";
 import { useRouter } from "vue-router";

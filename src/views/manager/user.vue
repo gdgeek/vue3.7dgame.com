@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import PersonPage from "@/components/MrPP/Person/Page.vue";
 import { getPerson } from "@/api/v1/person";

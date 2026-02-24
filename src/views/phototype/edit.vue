@@ -92,7 +92,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import { getPhototype, putPhototype, postPhototype } from "@/api/v1/phototype";
 import type { PhototypeType } from "@/api/v1/types/phototype";
@@ -107,9 +106,12 @@ import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 
-const handleTransformSave = async (
-  transform: Record<string, { x: number; y: number; z: number }>
-) => {
+type TransformData = {
+  scale: { x: number; y: number; z: number };
+  rotate: { x: number; y: number; z: number };
+  position: { x: number; y: number; z: number };
+};
+const handleTransformSave = async (transform: TransformData) => {
   if (!phototype.value) return;
   if (!id.value) {
     ElMessage.warning(t("phototype.edit.saveBasicFirst"));

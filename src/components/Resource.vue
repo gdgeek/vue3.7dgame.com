@@ -11,7 +11,7 @@
       <polygen-view
         ref="three"
         :file="props.resource.file"
-        :key="props.resource.file"
+        :key="props.resource.uuid"
       ></polygen-view>
       <br />
 
@@ -40,17 +40,17 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 const resourceDialog = ref<InstanceType<typeof ResourceDialog> | null>(null);
 import { logger } from "@/utils/logger";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import PolygenView from "./PolygenView.vue";
 import type { ResourceInfo } from "@/api/v1/resources/model";
+import type { CardInfo } from "@/utils/types";
 const props = defineProps<{
   resource: ResourceInfo | null;
 }>();
-const handleSelected = (data: { context: ResourceInfo }, _replace: boolean) => {
-  emit("selected", data.context);
+const handleSelected = (data: CardInfo, _replace: boolean) => {
+  emit("selected", data.context as ResourceInfo);
 };
 
 const emit = defineEmits<{

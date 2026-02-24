@@ -7,16 +7,16 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import Edit from "@/components/Meta/Edit.vue";
 import { getPrefab, putPrefab } from "@/api/v1/prefab";
+import type { PrefabData, UpdatePrefabRequest } from "@/api/v1/types/prefab";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 const getPrefabData = async (
   id: number,
   expand: string,
-  callback: (data: Record<string, unknown>) => void
+  callback: (data: PrefabData) => void
 ) => {
   try {
     const response = await getPrefab(id, expand);
@@ -29,8 +29,8 @@ const getPrefabData = async (
 
 const putPrefabData = async (
   id: number,
-  data: Record<string, unknown>,
-  callback: (data: Record<string, unknown>) => void
+  data: UpdatePrefabRequest,
+  callback: (data: PrefabData) => void
 ) => {
   try {
     const response = await putPrefab(id, data);

@@ -108,7 +108,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
@@ -165,6 +164,7 @@ const refresh = async () => {
 
 type Schema = JsonSchema;
 type KnightDataSchema = {
+  type: string;
   properties: Record<string, unknown>;
   [key: string]: unknown;
 };
@@ -172,7 +172,8 @@ const setup = ({ data }: { data: prefabsData }) => {
   logger.error("setup", data);
   if (data.data) {
     knightData.value?.open({
-      schema: data.info as unknown as KnightDataSchema,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      schema: data.info as any,
       data: {},
       callback: (setup: Record<string, unknown>) => {
         selected({ data, setup: setup as Record<string, JsonValue> });

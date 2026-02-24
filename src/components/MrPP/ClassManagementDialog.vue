@@ -244,7 +244,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import { ref, computed, watch } from "vue";
 import { Plus } from "@element-plus/icons-vue";
@@ -258,6 +257,7 @@ import ImageSelector from "@/components/MrPP/ImageSelector.vue";
 import type { EduClass } from "@/api/v1/types/edu-class";
 import type { EduSchool } from "@/api/v1/types/edu-school";
 import type { UserType } from "@/api/v1/types/user";
+import type { userData } from "@/api/v1/person";
 import {
   getClasses,
   getClass,
@@ -497,19 +497,19 @@ const handleAddStudent = () => {
   userDialogVisible.value = true;
 };
 
-const handleSelectUser = async (user: UserType) => {
+const handleSelectUser = async (user: userData) => {
   if (!currentClass.value) return;
 
   try {
     if (userSelectionMode.value === "teacher") {
       teachersLoading.value = true;
-      await addTeacherToClass(currentClass.value.id, user.id);
+      await addTeacherToClass(currentClass.value.id, Number(user.id));
       ElMessage.success(t("manager.messages.addSuccess"));
       await refreshTeachers();
     } else {
       studentsLoading.value = true;
       await createStudent({
-        user_id: user.id,
+        user_id: Number(user.id),
         class_id: currentClass.value.id,
       });
       ElMessage.success(t("manager.messages.addSuccess"));

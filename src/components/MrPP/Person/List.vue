@@ -83,7 +83,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
@@ -194,7 +193,7 @@ const deleted = async (item: ViewCard) => {
         type: "warning",
       }
     );
-    await deletePerson(item.id);
+    await deletePerson(Number(item.id));
     ElMessage.success(t("manager.list.confirm.success"));
     refresh();
   } catch {
@@ -253,7 +252,7 @@ const transformToViewCard = (items: userData[]): ViewCard[] => {
     return {
       src: item.avatar?.url,
       id: item.id ? item.id.toString() : undefined,
-      email: item.email,
+      email: item.email as string | null | undefined,
       username: item.username,
       nickname: item.nickname,
       avatar: item.avatar,

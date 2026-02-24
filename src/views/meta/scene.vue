@@ -33,7 +33,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
 import { getResources } from "@/api/v1/resources";

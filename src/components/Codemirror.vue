@@ -13,20 +13,20 @@
   ></codemirror>
 </template>
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import { shallowRef } from "vue";
 import { Codemirror } from "vue-codemirror";
 import { json } from "@codemirror/lang-json";
+import type { EditorView } from "@codemirror/view";
 
 // Codemirror 扩展
 const extensions = [json()];
 
 // Codemirror EditorView 实例
-const view = shallowRef<unknown>(null);
+const view = shallowRef<InstanceType<typeof EditorView> | null>(null);
 
 // 编辑器就绪回调
-function handleReady(payload: { view: EditorView }) {
+function handleReady(payload: { view: InstanceType<typeof EditorView> }) {
   view.value = payload.view;
 }
 

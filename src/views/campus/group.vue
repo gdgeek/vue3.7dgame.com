@@ -69,7 +69,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -174,6 +173,7 @@ const handleCreateVerse = async (
     await createGroupVerse(groupId.value, {
       name: form.name,
       description: form.description,
+      uuid: crypto.randomUUID(),
       image_id: imageId ?? undefined,
     });
 

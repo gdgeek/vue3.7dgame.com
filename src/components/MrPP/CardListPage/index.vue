@@ -76,7 +76,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import { ref, reactive, onMounted, computed } from "vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";

@@ -20,7 +20,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import { RouteLocationMatched, type LocationQuery } from "vue-router";
 import { useRouter } from "@/router";
@@ -31,10 +30,13 @@ const currentRoute = useRoute();
 // 使用 Map 存储路由路径和对应的查询参数
 type StoredQuery = Record<string, unknown>;
 
-type BreadcrumbRoute = RouteLocationMatched & {
+type BreadcrumbRoute = {
+  path?: string;
+  redirect?: string;
   query?: StoredQuery;
   enterCallbacks?: StoredQuery;
-  redirect?: string;
+  meta?: { title?: string; breadcrumb?: boolean; [key: string]: unknown };
+  [key: string]: unknown;
 };
 
 const routeQueryMap = ref(new Map<string, StoredQuery>());
@@ -80,7 +82,7 @@ function saveCurrentRouteQuery() {
   }
 }
 
-const breadcrumbs = ref<Array<RouteLocationMatched>>([]);
+const breadcrumbs = ref<Array<BreadcrumbRoute>>([]);
 
 function getBreadcrumb() {
   // 过滤出包含 meta 和 title 的路由
@@ -143,7 +145,7 @@ function getBreadcrumb() {
 
   // 如果第一个面包屑不是 dashboard 则添加 dashboard
   const first = matched[0];
-  if (!isDashboard(first)) {
+  if (!isDashboard(first as unknown as BreadcrumbRoute)) {
     const dashboard = {
       path: "/home/index",
       meta: { title: "dashboard" },
@@ -153,10 +155,10 @@ function getBreadcrumb() {
 
   breadcrumbs.value = matched.filter((item) => {
     return item.meta && item.meta.title && item.meta.breadcrumb !== false;
-  });
+  }) as unknown as BreadcrumbRoute[];
 }
 
-function isDashboard(route: RouteLocationMatched) {
+function isDashboard(route: BreadcrumbRoute) {
   const name = route && route.name;
   if (!name) {
     return false;
@@ -211,7 +213,7 @@ function handleLink(item: BreadcrumbRoute) {
 
   logger.log("路由跳转参数:", routeParams);
 
-  router.push(routeParams).catch((err) => {
+  router.push({ path: routeParams.path!, query: routeParams.query as Record<string, string> }).catch((err) => {
     logger.warn("路由跳转失败:", err);
   });
 }

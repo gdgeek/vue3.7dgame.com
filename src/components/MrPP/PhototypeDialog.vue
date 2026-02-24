@@ -23,7 +23,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import VueForm from "@/components/JsonSchemaForm/index.vue";
 import { ref, computed } from "vue";

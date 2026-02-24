@@ -28,13 +28,13 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { useSettingsStore, useAppStore } from "@/store";
 import { LayoutEnum } from "@/enums/LayoutEnum";
 import { routerData } from "@/router";
 import SidebarLeft from "./SidebarLeft.vue";
+import type { RouteRecordRaw } from "vue-router";
 
-const routes = computed(() => routerData.value);
+const routes = computed(() => routerData.value as unknown as RouteRecordRaw[]);
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
 

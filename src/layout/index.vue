@@ -57,12 +57,12 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { useAppStore, useSettingsStore, usePermissionStore } from "@/store";
 import defaultSettings from "@/settings";
 import Footer from "./components/NavBar/components/Footer.vue";
 import { DeviceEnum } from "@/enums/DeviceEnum";
 import { LayoutEnum } from "@/enums/LayoutEnum";
+import type { RouteRecordRaw } from "vue-router";
 
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
@@ -76,7 +76,7 @@ const fixedHeader = computed(() => settingsStore.fixedHeader); // 是否固定he
 const showTagsView = computed(() => settingsStore.tagsView); // 是否显示tagsView
 const layout = computed(() => settingsStore.layout); // 布局模式 left top mix
 const activeTopMenuPath = computed(() => appStore.activeTopMenuPath); // 顶部菜单激活path
-const mixLeftMenus = computed(() => permissionStore.mixLeftMenus); // 混合布局左侧菜单
+const mixLeftMenus = computed(() => permissionStore.mixLeftMenus as unknown as RouteRecordRaw[]); // 混合布局左侧菜单
 
 watch(
   () => activeTopMenuPath.value,
