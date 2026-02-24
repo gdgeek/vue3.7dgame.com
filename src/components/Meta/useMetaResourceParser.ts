@@ -69,7 +69,10 @@ function normalizeEventNames(events: unknown): string[] {
     .filter((name): name is string => Boolean(name));
 }
 
-function parseAction(node: MetaNode | undefined, parentUuid?: string): ActionInfo | null {
+function parseAction(
+  node: MetaNode | undefined,
+  parentUuid?: string
+): ActionInfo | null {
   if (
     !node ||
     !node.parameters ||
@@ -85,17 +88,21 @@ function parseAction(node: MetaNode | undefined, parentUuid?: string): ActionInf
   };
 }
 
-function parsePoint(node: MetaNode | undefined, typeList: string[]): EntityInfo | undefined {
+function parsePoint(
+  node: MetaNode | undefined,
+  typeList: string[]
+): EntityInfo | undefined {
   if (!node) return undefined;
   const match = typeList.find(
     (t) => node.type?.toLowerCase() === t.toLowerCase()
   );
   if (!match) return undefined;
 
+  const nodeType = node.type?.toLowerCase();
   const animations = node.parameters?.animations ?? null;
-  const isPolygen = node.type.toLowerCase() === "polygen";
-  const isPicture = node.type.toLowerCase() === "picture";
-  const isPhototype = node.type.toLowerCase() === "phototype";
+  const isPolygen = nodeType === "polygen";
+  const isPicture = nodeType === "picture";
+  const isPhototype = nodeType === "phototype";
 
   let hasMoved = false;
   let hasRotate = false;
@@ -151,17 +158,18 @@ function walk(node: MetaNode | undefined, acc: MetaResourceIndex) {
   const phototype = parsePoint(node, ["phototype"]);
   if (phototype) acc.phototype.push(phototype);
 
-  if (node.children) {
+  const children = node.children;
+  if (children) {
     const parentUuid = node.parameters?.uuid;
-    if (node.children.components) {
-      node.children.components.forEach((comp) => {
+    if (children.components) {
+      children.components.forEach((comp) => {
         const compAction = parseAction(comp, parentUuid);
         if (compAction) acc.action.push(compAction);
       });
     }
-    Object.keys(node.children).forEach((key) => {
+    Object.keys(children).forEach((key) => {
       if (key === "components") return;
-      const arr = node.children[key];
+      const arr = children[key];
       if (Array.isArray(arr)) arr.forEach((child) => walk(child, acc));
     });
   }

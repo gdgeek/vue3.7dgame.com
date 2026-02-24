@@ -6,6 +6,7 @@
 import { logger } from "@/utils/logger";
 import PersonPage from "@/components/MrPP/Person/Page.vue";
 import { getPerson } from "@/api/v1/person";
+import type { userData } from "@/api/v1/person";
 
 interface LoadedParams {
   sorted: string;
@@ -14,7 +15,7 @@ interface LoadedParams {
 }
 
 interface LoadedResponse {
-  data: Record<string, unknown>[];
+  data: userData[];
   pagination: {
     current: number;
     count: number;

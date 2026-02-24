@@ -624,11 +624,14 @@ onMounted(async () => {
             mesh?: THREE.Object3D;
           }
         )?.mesh;
+        if (!sourceModel || !targetModel) {
+          continue;
+        }
 
         // 如果任一模型不可见，跳过碰撞检测
         if (
           collisionObj.checkVisibility &&
-          (!sourceModel?.visible || !targetModel?.visible)
+          (!sourceModel.visible || !targetModel.visible)
         ) {
           continue;
         }

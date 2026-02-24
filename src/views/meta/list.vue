@@ -251,6 +251,7 @@ import type { UploadFileType } from "@/api/user/model";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import { FolderOpened, Upload } from "@element-plus/icons-vue";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
+import type { CardInfo } from "@/utils/types";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -295,13 +296,12 @@ const openResourceDialog = () => {
   resourceDialogRef.value?.openIt({ type: "picture" });
 };
 
-const onResourceSelected = async (data: {
-  context?: { image_id?: number };
-  image?: { id?: number };
-  id: number;
-  type?: string;
-}) => {
-  const imageId = data.context?.image_id || data.image?.id || data.id;
+const onResourceSelected = async (data: CardInfo) => {
+  const context =
+    typeof data.context === "object" && data.context !== null
+      ? (data.context as { image_id?: number })
+      : undefined;
+  const imageId = context?.image_id || data.image?.id || data.id;
   if (imageId && currentMeta.value) {
     detailLoading.value = true;
     try {

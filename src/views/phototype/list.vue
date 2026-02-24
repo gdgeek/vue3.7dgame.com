@@ -175,6 +175,11 @@ const saveEdit = async () => {
       updateData.image_id = editForm.value.image_id;
     }
 
+    if (editForm.value.id === undefined) {
+      Message.warning(t("common.invalidData") || "Invalid Data");
+      return;
+    }
+
     await putPhototype(editForm.value.id, updateData);
 
     Message.success(t("common.updateSuccess") || "Update Successful");

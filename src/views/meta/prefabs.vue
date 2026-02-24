@@ -93,7 +93,7 @@ const fetchPrefabs = async (params: FetchParams): Promise<FetchResponse> => {
   return await getPrefabs(params.sort, params.search, params.page);
 };
 
-const handleRefresh = (data: Record<string, unknown>[]) => {};
+const handleRefresh = (_data: unknown[]) => {};
 
 const refreshList = () => {
   cardListPageRef.value?.refresh();

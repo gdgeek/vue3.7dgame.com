@@ -454,7 +454,10 @@ const openResourceDialog = () => {
 
 const onResourceSelected = async (data: CardInfo) => {
   // data is CardInfo, but to be sure
-  const imageId = (data.context as Record<string, unknown>)?.image_id || data.image?.id || data.id;
+  const imageId =
+    (data.context as Record<string, unknown>)?.image_id ||
+    data.image?.id ||
+    data.id;
   if (imageId && currentVerse.value) {
     detailLoading.value = true;
     try {
@@ -472,7 +475,9 @@ const onResourceSelected = async (data: CardInfo) => {
         finalImageId = response.data.image_id || response.data.file?.id;
       }
 
-      await putVerse(currentVerse.value.id, { image_id: finalImageId as number | undefined });
+      await putVerse(currentVerse.value.id, {
+        image_id: finalImageId as number | undefined,
+      });
       Message.success(t("verse.view.image.updateSuccess"));
       await openDetail(currentVerse.value);
     } catch (error) {

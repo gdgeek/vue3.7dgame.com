@@ -199,7 +199,9 @@ service.interceptors.response.use(
       BACKUP_API &&
       currentApi === PRIMARY_API
     ) {
-      logger.warn("[API Failover] Primary API unreachable, switching to backup.");
+      logger.warn(
+        "[API Failover] Primary API unreachable, switching to backup."
+      );
       currentApi = BACKUP_API;
       config._retry = true;
       config.baseURL = currentApi;

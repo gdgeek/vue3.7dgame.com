@@ -221,7 +221,6 @@ const formFooter = computed(() => ({
 
 const useSchema1 = () => {
   formData.value = {};
-  schema.value = null;
   nextTick(() => {
     schema.value = schema1;
   });
@@ -229,7 +228,6 @@ const useSchema1 = () => {
 
 const useSchema2 = () => {
   formData.value = {};
-  schema.value = null;
   nextTick(() => {
     schema.value = schema2;
   });
@@ -237,7 +235,6 @@ const useSchema2 = () => {
 
 const useSchema3 = () => {
   formData.value = {};
-  schema.value = null;
   nextTick(() => {
     schema.value = schema3;
   });
@@ -245,7 +242,6 @@ const useSchema3 = () => {
 
 const useSchema4 = () => {
   formData.value = {};
-  schema.value = null;
   nextTick(() => {
     schema.value = schema4;
   });

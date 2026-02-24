@@ -39,6 +39,7 @@ import { getResources } from "@/api/v1/resources";
 import { getPhototypes } from "@/api/v1/phototype";
 import type { PhototypeType } from "@/api/v1/types/phototype";
 import type { ResourceInfo } from "@/api/v1/resources/model";
+import type { JsonSchema } from "@/components/JsonSchemaForm/types";
 
 type ResourceListItem = ResourceInfo & { title?: string };
 type MetaEntity = {
@@ -67,6 +68,9 @@ const hasTypeField = (value: unknown): value is { type: string } =>
 
 const hasImageData = (value: unknown): value is { imageData: string } =>
   isRecord(value) && typeof value.imageData === "string";
+
+const isJsonSchema = (value: unknown): value is JsonSchema =>
+  isRecord(value) && typeof value.type === "string";
 
 const currentPlayingAudio = ref<HTMLAudioElement | null>(null);
 
@@ -222,20 +226,23 @@ const selectedPhototype = async (
   replace: boolean = false
 ) => {
   logger.error(phototype.resource);
-  phototypeDialogRef.value?.open(
-    (phototype.schema as { root?: unknown })?.root,
-    (data: unknown) => {
-      // const d = { ...data, id: phototype.id };
-      postMessage("load-phototype", {
-        data: {
-          type: phototype.type,
-          context: JSON.stringify(data),
-        },
-        type: "phototype",
-        title: phototype.title,
-      });
-    }
-  );
+  const schemaRoot =
+    (phototype.schema as { root?: unknown } | null | undefined)?.root ?? null;
+  if (!isJsonSchema(schemaRoot)) {
+    ElMessage.warning(t("verse.view.error3"));
+    return;
+  }
+  phototypeDialogRef.value?.open(schemaRoot, (data: unknown) => {
+    // const d = { ...data, id: phototype.id };
+    postMessage("load-phototype", {
+      data: {
+        type: phototype.type,
+        context: JSON.stringify(data),
+      },
+      type: "phototype",
+      title: phototype.title,
+    });
+  });
 };
 // 资源操作相关函数
 const selected = async (info: CardInfo, replace: boolean = false) => {

@@ -19,7 +19,9 @@
           <!-- 自适应填充模式 - 使用 Waterfall 配合 breakpoints 实现响应式 -->
           <Waterfall
             v-if="autoFill && items && items.length > 0"
-            :list="items"
+            :list="
+              items as unknown as Array<{ id?: string | number; src?: string }>
+            "
             :breakpoints="breakpoints"
             :gutter="cardGutter"
             :backgroundColor="'rgba(255, 255, 255, .05)'"
@@ -31,7 +33,9 @@
           <!-- 固定宽度模式 - 使用 Waterfall -->
           <Waterfall
             v-else-if="!autoFill && items && items.length > 0"
-            :list="items"
+            :list="
+              items as unknown as Array<{ id?: string | number; src?: string }>
+            "
             :width="cardWidth"
             :gutter="cardGutter"
             :align="align"

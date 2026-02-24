@@ -261,7 +261,7 @@ const downloadModel = async () => {
   if (polygenData.value) {
     await downloadResource(
       {
-        name: polygenData.value.name,
+        name: polygenData.value.name ?? "",
         file: { url: polygenData.value.file?.url ?? "" },
       },
       ".glb",

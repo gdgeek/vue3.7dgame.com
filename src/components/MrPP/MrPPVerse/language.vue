@@ -143,7 +143,7 @@ const defaultLanguageOptions = [
 
 const refresh = async () => {
   const res = await getVerse(props.verseId, "languages");
-  multilanguage.value = res.data.languages;
+  multilanguage.value = res.data.languages ?? [];
   reload();
 };
 

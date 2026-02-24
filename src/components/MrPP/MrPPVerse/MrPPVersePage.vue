@@ -107,7 +107,7 @@ const createWindow = () => {
 const submitCreate = async (form: VerseData, imageId: number | null) => {
   const data: PostVerseData = {
     name: form.name,
-    description: form.description,
+    description: form.description ?? "",
     uuid: uuidv4(),
   };
   if (imageId !== null) {

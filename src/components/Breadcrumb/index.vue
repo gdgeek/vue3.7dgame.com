@@ -9,10 +9,10 @@
             item.redirect === 'noredirect' || index === breadcrumbs.length - 1
           "
           class="color-gray-400"
-          >{{ translateRouteTitle(item.meta.title) }}</span
+          >{{ translateRouteTitle(item.meta?.title || "") }}</span
         >
         <a v-else @click.prevent="handleLink(item)">
-          {{ translateRouteTitle(item.meta.title) }}
+          {{ translateRouteTitle(item.meta?.title || "") }}
         </a>
       </el-breadcrumb-item>
     </transition-group>
@@ -213,9 +213,14 @@ function handleLink(item: BreadcrumbRoute) {
 
   logger.log("路由跳转参数:", routeParams);
 
-  router.push({ path: routeParams.path!, query: routeParams.query as Record<string, string> }).catch((err) => {
-    logger.warn("路由跳转失败:", err);
-  });
+  router
+    .push({
+      path: routeParams.path!,
+      query: routeParams.query as Record<string, string>,
+    })
+    .catch((err) => {
+      logger.warn("路由跳转失败:", err);
+    });
 }
 
 // 监听路由变化，更新面包屑

@@ -63,7 +63,7 @@ const fetchAiRodins = async (
   )) as FetchResponse<AiRodinItem>;
 };
 
-const handleRefresh = (_data: AiRodinItem[]) => {
+const handleRefresh = (_data: unknown[]) => {
   // console.log("AI list refreshed", data);
 };
 

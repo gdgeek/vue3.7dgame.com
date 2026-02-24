@@ -54,7 +54,7 @@
       <!-- Enum / Select -->
       <el-select
         v-if="schema.enum || uiWidget === 'SelectWidget'"
-        v-model="innerValue"
+        v-model="selectValue"
         :placeholder="uiPlaceholder"
         :disabled="uiDisabled"
         style="width: 100%"
@@ -185,14 +185,38 @@ const isRequired = (key: string | number) => {
   return schema.value.required.includes(String(key));
 };
 
-const enumOptions = computed(() => {
-  if (schema.value.enum) {
-    return schema.value.enum.map((val) => ({
-      label: String(val),
-      value: val,
-    }));
+type SelectValue = string | number | boolean | Record<string, unknown>;
+
+const enumOptions = computed<Array<{ label: string; value: SelectValue }>>(
+  () => {
+    if (schema.value.enum) {
+      return schema.value.enum.map((val) => ({
+        label: String(val),
+        value: val as SelectValue,
+      }));
+    }
+    return [];
   }
-  return [];
+);
+
+const selectValue = computed<SelectValue | undefined>({
+  get: () => {
+    const value = innerValue.value;
+    if (
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean"
+    ) {
+      return value;
+    }
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      return value as Record<string, unknown>;
+    }
+    return undefined;
+  },
+  set: (val) => {
+    innerValue.value = (val ?? null) as JsonValue;
+  },
 });
 
 const validationRules = computed<FormItemRule[]>(() => {

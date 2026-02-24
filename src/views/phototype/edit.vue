@@ -74,7 +74,7 @@
           <Resource
             v-if="phototype"
             @selected="handleSelected"
-            :resource="phototype.resource"
+            :resource="phototype.resource ?? null"
           ></Resource>
           <br />
           <Transform

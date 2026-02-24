@@ -76,7 +76,7 @@ const greeting = computed(() => {
 });
 
 const showQRCode = () => {
-  codeDialog.value.openDialog();
+  codeDialog.value?.openDialog();
 };
 </script>
 

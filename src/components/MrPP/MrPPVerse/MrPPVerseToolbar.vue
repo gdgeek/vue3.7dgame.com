@@ -100,7 +100,7 @@ const submitChange = async (form: VerseData, imageId: number | null) => {
   const data: { name: string; description: string; image_id?: number } = {
     name: form.name,
     // info: JSON.stringify(form),
-    description: form.description,
+    description: form.description ?? "",
   };
 
   if (imageId !== null) {
