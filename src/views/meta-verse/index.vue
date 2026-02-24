@@ -1,32 +1,59 @@
 <template>
   <TransitionWrapper>
     <div class="verse-index">
-      <PageActionBar :title="t('verse.listPage.myScenes')" :search-placeholder="t('verse.listPage.searchScenes')"
-        :show-tags="true" @search="handleSearch" @sort-change="handleSortChange" @view-change="handleViewChange">
+      <PageActionBar
+        :title="t('verse.listPage.myScenes')"
+        :search-placeholder="t('verse.listPage.searchScenes')"
+        :show-tags="true"
+        @search="handleSearch"
+        @sort-change="handleSortChange"
+        @view-change="handleViewChange"
+      >
         <template #filters>
           <TagsSelect @tags-change="handleTagsChange"></TagsSelect>
         </template>
         <template #actions>
           <el-button type="primary" @click="createWindow">
-            <font-awesome-icon :icon="['fas', 'plus']" style="font-size: 18px; margin-right: 4px"></font-awesome-icon>
+            <font-awesome-icon
+              :icon="['fas', 'plus']"
+              style="font-size: 18px; margin-right: 4px"
+            ></font-awesome-icon>
             {{ $t("verse.page.title") }}
           </el-button>
           <el-button @click="openImportDialog">
-            <font-awesome-icon :icon="['fas', 'upload']" style="font-size: 18px; margin-right: 4px"></font-awesome-icon>
+            <font-awesome-icon
+              :icon="['fas', 'upload']"
+              style="font-size: 18px; margin-right: 4px"
+            ></font-awesome-icon>
             {{ t("ui.importScene") }}
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer class="list-view" :items="items" :view-mode="viewMode" :loading="loading" @row-click="openDetail">
+      <ViewContainer
+        class="list-view"
+        :items="items"
+        :view-mode="viewMode"
+        :loading="loading"
+        @row-click="openDetail"
+      >
         <template #grid-card="{ item }">
-          <StandardCard :image="item.image?.url" :title="item.name || t('verse.listPage.unnamed')"
-            :description="item.description" :meta="{
+          <StandardCard
+            :image="item.image?.url"
+            :title="item.name || t('verse.listPage.unnamed')"
+            :description="item.description"
+            :meta="{
               author: item.author?.nickname || item.author?.username,
               date: formatItemDate(item.created_at),
-            }" :action-text="t('verse.listPage.enterEditor')" :action-icon="['fas', 'pen-to-square']"
-            :type-icon="['fas', 'layer-group']" :placeholder-icon="['fas', 'layer-group']" :show-checkbox="false"
-            @view="openDetail(item)" @action="goToEditor(item)">
+            }"
+            :action-text="t('verse.listPage.enterEditor')"
+            :action-icon="['fas', 'pen-to-square']"
+            :type-icon="['fas', 'layer-group']"
+            :placeholder-icon="['fas', 'layer-group']"
+            :show-checkbox="false"
+            @view="openDetail(item)"
+            @action="goToEditor(item)"
+          >
           </StandardCard>
         </template>
 
@@ -42,13 +69,23 @@
           <div class="col-checkbox"></div>
           <div class="col-name">
             <div class="item-thumb">
-              <img v-if="item.image?.url" :src="item.image.url" :alt="item.name" />
+              <img
+                v-if="item.image?.url"
+                :src="item.image.url"
+                :alt="item.name"
+              />
               <div v-else class="thumb-placeholder">
-                <font-awesome-icon :icon="['fas', 'layer-group']"></font-awesome-icon>
+                <font-awesome-icon
+                  :icon="['fas', 'layer-group']"
+                ></font-awesome-icon>
               </div>
             </div>
             <span class="item-name">{{ item.name || "—" }}</span>
-            <el-button class="btn-hover-action" type="primary" @click.stop="goToEditor(item)">
+            <el-button
+              class="btn-hover-action"
+              type="primary"
+              @click.stop="goToEditor(item)"
+            >
               {{ t("verse.listPage.enterEditor") }}
             </el-button>
           </div>
@@ -58,7 +95,10 @@
           <div class="col-date">{{ formatItemDate(item.created_at) }}</div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon"></font-awesome-icon>
+              <font-awesome-icon
+                :icon="['fas', 'ellipsis']"
+                class="actions-icon"
+              ></font-awesome-icon>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openDetail(item)">{{
@@ -80,29 +120,61 @@
         </template>
       </ViewContainer>
 
-      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
+      <PagePagination
+        :current-page="pagination.current"
+        :total-pages="totalPages"
+        @page-change="handlePageChange"
+      >
       </PagePagination>
 
       <!-- Create Dialog -->
-      <create ref="createdDialog" :dialog-title="$t('verse.page.dialogTitle')"
-        :dialog-submit="$t('verse.page.dialogSubmit')" @submit="submitCreate"></create>
+      <create
+        ref="createdDialog"
+        :dialog-title="$t('verse.page.dialogTitle')"
+        :dialog-submit="$t('verse.page.dialogSubmit')"
+        @submit="submitCreate"
+      ></create>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="detailVisible" :title="t('verse.listPage.detailTitle')" :name="currentVerse?.name || ''"
-        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'image']" width="560px"
-        :show-delete="true" action-layout="grid" :secondary-action="true"
-        :secondary-action-text="t('verse.listPage.enterEditor')" :download-text="t('ui.exportScene')"
-        :download-icon="['fas', 'download']" :delete-text="t('verse.listPage.deleteScene')" @download="handleExport"
-        @rename="handleRename" @delete="handleDelete" @secondary="handleGoToEditor" @close="handlePanelClose">
+      <DetailPanel
+        v-model="detailVisible"
+        :title="t('verse.listPage.detailTitle')"
+        :name="currentVerse?.name || ''"
+        :loading="detailLoading"
+        :properties="detailProperties"
+        :placeholder-icon="['fas', 'image']"
+        width="560px"
+        :show-delete="true"
+        action-layout="grid"
+        :secondary-action="true"
+        :secondary-action-text="t('verse.listPage.enterEditor')"
+        :download-text="t('ui.exportScene')"
+        :download-icon="['fas', 'download']"
+        :delete-text="t('verse.listPage.deleteScene')"
+        @download="handleExport"
+        @rename="handleRename"
+        @delete="handleDelete"
+        @secondary="handleGoToEditor"
+        @close="handlePanelClose"
+      >
         <template #preview>
           <div class="verse-preview" @click="triggerFileSelect">
-            <img v-if="currentVerse?.image?.url" :src="currentVerse.image.url" :alt="currentVerse.name" />
+            <img
+              v-if="currentVerse?.image?.url"
+              :src="currentVerse.image.url"
+              :alt="currentVerse.name"
+            />
             <div v-else class="preview-placeholder">
               <font-awesome-icon :icon="['fas', 'image']"></font-awesome-icon>
             </div>
 
-            <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/jpg" class="hidden-input"
-              @change="handleCoverUpload" />
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/png,image/jpeg,image/jpg"
+              class="hidden-input"
+              @change="handleCoverUpload"
+            />
           </div>
         </template>
         <template #info>
@@ -112,8 +184,13 @@
               <div class="section-header">
                 {{ t("verse.listPage.sceneIntro") }}
               </div>
-              <el-input v-model="editingDescription" type="textarea" :rows="4"
-                :placeholder="t('verse.listPage.sceneIntroPlaceholder')" @blur="handleDescriptionBlur"></el-input>
+              <el-input
+                v-model="editingDescription"
+                type="textarea"
+                :rows="4"
+                :placeholder="t('verse.listPage.sceneIntroPlaceholder')"
+                @blur="handleDescriptionBlur"
+              ></el-input>
             </div>
 
             <!-- Tags Section (Restricted) -->
@@ -122,18 +199,33 @@
                 {{ t("verse.listPage.sceneTags") }}
               </div>
               <div v-if="currentVerse?.verseTags?.length" class="tag-list">
-                <el-tag v-for="tag in currentVerse.verseTags" :key="tag.id" closable class="mr-2 mb-2"
-                  @close="handleRemoveTag(tag.id)">
+                <el-tag
+                  v-for="tag in currentVerse.verseTags"
+                  :key="tag.id"
+                  closable
+                  class="mr-2 mb-2"
+                  @close="handleRemoveTag(tag.id)"
+                >
                   {{ tag.name }}
                 </el-tag>
               </div>
               <div v-else class="empty-tags">
                 {{ t("verse.listPage.noTags") }}
               </div>
-              <el-select v-model="selectedTag" :placeholder="t('verse.listPage.addTag')" filterable class="tag-select"
-                @change="handleAddTag">
-                <el-option v-for="tag in allTags" :key="tag.value" :label="tag.label" :value="tag.value"
-                  :disabled="isTagSelected(tag.value)"></el-option>
+              <el-select
+                v-model="selectedTag"
+                :placeholder="t('verse.listPage.addTag')"
+                filterable
+                class="tag-select"
+                @change="handleAddTag"
+              >
+                <el-option
+                  v-for="tag in allTags"
+                  :key="tag.value"
+                  :label="tag.label"
+                  :value="tag.value"
+                  :disabled="isTagSelected(tag.value)"
+                ></el-option>
               </el-select>
             </div>
 
@@ -143,13 +235,24 @@
                 {{ t("verse.listPage.visibility") }}
               </div>
               <div class="visibility-group">
-                <button class="vis-btn" :class="{ active: !currentVerse?.public }"
-                  @click="handleVisibilityChange(false)">
-                  <font-awesome-icon :icon="['fas', 'lock']"></font-awesome-icon>
+                <button
+                  class="vis-btn"
+                  :class="{ active: !currentVerse?.public }"
+                  @click="handleVisibilityChange(false)"
+                >
+                  <font-awesome-icon
+                    :icon="['fas', 'lock']"
+                  ></font-awesome-icon>
                   {{ t("verse.listPage.private") }}
                 </button>
-                <button class="vis-btn" :class="{ active: currentVerse?.public }" @click="handleVisibilityChange(true)">
-                  <font-awesome-icon :icon="['fas', 'globe']"></font-awesome-icon>
+                <button
+                  class="vis-btn"
+                  :class="{ active: currentVerse?.public }"
+                  @click="handleVisibilityChange(true)"
+                >
+                  <font-awesome-icon
+                    :icon="['fas', 'globe']"
+                  ></font-awesome-icon>
                   {{ t("verse.listPage.public") }}
                 </button>
               </div>
@@ -161,8 +264,14 @@
   </TransitionWrapper>
 
   <!-- Selection Method Dialog -->
-  <el-dialog v-model="imageSelectDialogVisible" :title="$t('meta.metaEdit.selectImageMethod')" width="500px"
-    align-center :close-on-click-modal="false" append-to-body>
+  <el-dialog
+    v-model="imageSelectDialogVisible"
+    :title="$t('meta.metaEdit.selectImageMethod')"
+    width="500px"
+    align-center
+    :close-on-click-modal="false"
+    append-to-body
+  >
     <div class="selection-container">
       <div class="selection-card" @click="openResourceDialog">
         <div class="card-icon">
@@ -193,10 +302,17 @@
   </el-dialog>
 
   <!-- Resource Dialog -->
-  <ResourceDialog :multiple="false" @selected="onResourceSelected" ref="resourceDialogRef"></ResourceDialog>
+  <ResourceDialog
+    :multiple="false"
+    @selected="onResourceSelected"
+    ref="resourceDialogRef"
+  ></ResourceDialog>
 
   <!-- Import Dialog -->
-  <ImportDialog v-model="importDialogVisible" @success="handleImportSuccess"></ImportDialog>
+  <ImportDialog
+    v-model="importDialogVisible"
+    @success="handleImportSuccess"
+  ></ImportDialog>
 </template>
 
 <script setup lang="ts">
@@ -403,7 +519,7 @@ const handleCoverUpload = async (event: Event) => {
             md5,
             extension,
             file,
-            (_p: number) => { }, // progress
+            (_p: number) => {}, // progress
             handler,
             dir
           )
@@ -507,9 +623,8 @@ const handleRemoveTag = async (tagId: number) => {
   if (!currentVerse.value) return;
   try {
     await removeTag(currentVerse.value.id, tagId);
-    currentVerse.value.verseTags = currentVerse.value.verseTags?.filter(
-      (t) => t.id !== tagId
-    ) ?? [];
+    currentVerse.value.verseTags =
+      currentVerse.value.verseTags?.filter((t) => t.id !== tagId) ?? [];
     Message.success(t("verse.listPage.tagRemoved"));
     refresh();
   } catch (err) {

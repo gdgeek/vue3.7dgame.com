@@ -1,11 +1,15 @@
 <template>
   <div>
-    <div id="scene" ref="scene" :style="{
-      height: isSceneFullscreen ? '100vh' : '75vh',
-      width: '100%',
-      margin: '0 auto',
-      position: 'relative',
-    }"></div>
+    <div
+      id="scene"
+      ref="scene"
+      :style="{
+        height: isSceneFullscreen ? '100vh' : '75vh',
+        width: '100%',
+        margin: '0 auto',
+        position: 'relative',
+      }"
+    ></div>
   </div>
 </template>
 
@@ -254,7 +258,8 @@ const playAnimation = (uuid: string, animationName: string) => {
     return;
   }
 
-  const model = (source.data as { mesh?: THREE.Object3D }).mesh as THREE.Object3D;
+  const model = (source.data as { mesh?: THREE.Object3D })
+    .mesh as THREE.Object3D;
   const mixer = mixers.get(uuid);
 
   if (!model) {
@@ -609,8 +614,16 @@ onMounted(async () => {
     if (collisionObjects.value.length > 0) {
       for (const collisionObj of collisionObjects.value) {
         // 更新当前物体的包围盒
-        const sourceModel = (sources.get(collisionObj.sourceUuid)?.data as { mesh?: THREE.Object3D })?.mesh;
-        const targetModel = (sources.get(collisionObj.targetUuid)?.data as { mesh?: THREE.Object3D })?.mesh;
+        const sourceModel = (
+          sources.get(collisionObj.sourceUuid)?.data as {
+            mesh?: THREE.Object3D;
+          }
+        )?.mesh;
+        const targetModel = (
+          sources.get(collisionObj.targetUuid)?.data as {
+            mesh?: THREE.Object3D;
+          }
+        )?.mesh;
 
         // 如果任一模型不可见，跳过碰撞检测
         if (
@@ -726,7 +739,10 @@ watch(isDark, (newValue) => {
 onUnmounted(() => {
   sources.forEach((source) => {
     if (source.type === "video") {
-      const videoData = source.data as { video: HTMLVideoElement; cleanup?: () => void };
+      const videoData = source.data as {
+        video: HTMLVideoElement;
+        cleanup?: () => void;
+      };
       const video = videoData.video;
       video.pause();
       video.src = "";

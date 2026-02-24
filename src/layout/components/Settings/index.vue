@@ -1,16 +1,28 @@
 <template>
-  <el-drawer v-model="settingsVisible" size="300" :title="$t('settings.project')">
+  <el-drawer
+    v-model="settingsVisible"
+    size="300"
+    :title="$t('settings.project')"
+  >
     <el-divider>{{ $t("settings.theme") }}</el-divider>
 
     <div class="flex-center">
-      <el-switch v-model="isDark" active-icon="Moon" inactive-icon="Sunny" @change="changeTheme"></el-switch>
+      <el-switch
+        v-model="isDark"
+        active-icon="Moon"
+        inactive-icon="Sunny"
+        @change="changeTheme"
+      ></el-switch>
     </div>
 
     <el-divider>{{ $t("settings.interface") }}</el-divider>
 
     <div class="settings-option">
       <span class="text-xs">{{ $t("settings.themeColor") }}</span>
-      <ThemeColorPicker v-model="settingsStore.themeColor" @update:model-value="changeThemeColor"></ThemeColorPicker>
+      <ThemeColorPicker
+        v-model="settingsStore.themeColor"
+        @update:model-value="changeThemeColor"
+      ></ThemeColorPicker>
     </div>
 
     <div class="settings-option">
@@ -37,7 +49,10 @@
       $t("settings.navigation")
     }}</el-divider>
 
-    <LayoutSelect v-model="settingsStore.layout" @update:model-value="changeLayout"></LayoutSelect>
+    <LayoutSelect
+      v-model="settingsStore.layout"
+      @update:model-value="changeLayout"
+    ></LayoutSelect>
   </el-drawer>
 </template>
 
@@ -89,16 +104,24 @@ function changeLayout(layout: string) {
 }
 
 function againActiveTop(newVal: string) {
-  const parent = findOutermostParent(permissionStore.routes, newVal);
+  const parent = findOutermostParent(
+    permissionStore.routes as AppRoute[],
+    newVal
+  );
   if (parent && appStore.activeTopMenuPath !== parent.path) {
     appStore.activeTopMenu(parent.path);
   }
 }
 
-function findOutermostParent(tree: unknown[], findName: string) {
-  const parentMap: Record<string, any> = {};
+type AppRoute = RouteRecordRaw & {
+  children?: AppRoute[];
+  name?: string | symbol | null;
+};
 
-  function buildParentMap(node: any, parent: any) {
+function findOutermostParent(tree: AppRoute[], findName: string) {
+  const parentMap: Record<string, AppRoute | null> = {};
+
+  function buildParentMap(node: AppRoute, parent: AppRoute | null) {
     parentMap[String(node.name)] = parent;
 
     if (node.children) {

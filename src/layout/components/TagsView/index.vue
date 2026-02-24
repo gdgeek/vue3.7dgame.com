@@ -1,18 +1,35 @@
 <template>
   <div class="tags-container">
-    <el-scrollbar class="scroll-container" :vertical="false" @wheel.prevent="handleScroll">
-      <router-link ref="tagRef" v-for="tag in visitedViews" :key="tag.fullPath"
+    <el-scrollbar
+      class="scroll-container"
+      :vertical="false"
+      @wheel.prevent="handleScroll"
+    >
+      <router-link
+        ref="tagRef"
+        v-for="tag in visitedViews"
+        :key="tag.fullPath"
         :class="'tags-item ' + (isActive(tag) ? 'active' : '')"
         :to="{ path: tag.path, query: tag.query as Record<string, string> }"
-        @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''" @contextmenu.prevent="openContentMenu(tag, $event)">
+        @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''"
+        @contextmenu.prevent="openContentMenu(tag, $event)"
+      >
         {{ translateRouteTitle(tag.title) }}
-        <i-ep-close class="close-icon" size="12px" v-if="!isAffix(tag)"
-          @click.prevent.stop="closeSelectedTag(tag)"></i-ep-close>
+        <i-ep-close
+          class="close-icon"
+          size="12px"
+          v-if="!isAffix(tag)"
+          @click.prevent.stop="closeSelectedTag(tag)"
+        ></i-ep-close>
       </router-link>
     </el-scrollbar>
 
     <!-- tag标签操作菜单 -->
-    <ul v-show="contentMenuVisible" class="contextmenu" :style="{ left: left + 'px', top: top + 'px' }">
+    <ul
+      v-show="contentMenuVisible"
+      class="contextmenu"
+      :style="{ left: left + 'px', top: top + 'px' }"
+    >
       <li @click="refreshSelectedTag(selectedTag)">
         <svg-icon icon-class="refresh"></svg-icon>
         {{ $t("tags.refresh") }}
@@ -52,6 +69,11 @@ import {
   useSettingsStore,
   useAppStore,
 } from "@/store";
+
+type AppRoute = RouteRecordRaw & {
+  children?: AppRoute[];
+  name?: string | symbol | null;
+};
 
 const { proxy } = getCurrentInstance()!;
 const router = useRouter();
@@ -103,7 +125,7 @@ watch(contentMenuVisible, (value: boolean) => {
 /**
  * 过滤出需要固定的标签
  */
-function filterAffixTags(routes: any[], basePath = "/") {
+function filterAffixTags(routes: AppRoute[], basePath = "/") {
   let tags: TagView[] = [];
   routes.forEach((route: RouteRecordRaw) => {
     const tagPath = resolve(basePath, route.path);
@@ -128,7 +150,7 @@ function filterAffixTags(routes: any[], basePath = "/") {
 }
 
 function initTags() {
-  const tags: TagView[] = filterAffixTags(permissionStore.routes);
+  const tags: TagView[] = filterAffixTags(permissionStore.routes as AppRoute[]);
   affixTags.value = tags;
   for (const tag of tags) {
     // Must have tag name
@@ -231,35 +253,33 @@ function toLastView(visitedViews: TagView[], view?: TagView) {
 }
 
 function closeSelectedTag(view: TagView) {
-  tagsViewStore
-    .delView(view)
-    .then((res: unknown) => {
-      const result = res as { visitedViews: TagView[]; cachedViews: string[] };
-      if (isActive(view)) {
-        toLastView(result.visitedViews, view);
-      }
-    });
+  tagsViewStore.delView(view).then((res: unknown) => {
+    const result = res as { visitedViews: TagView[]; cachedViews: string[] };
+    if (isActive(view)) {
+      toLastView(result.visitedViews, view);
+    }
+  });
 }
 
 function closeLeftTags() {
-  tagsViewStore
-    .delLeftViews(selectedTag.value)
-    .then((res: unknown) => {
-      const result = res as { visitedViews: TagView[] };
-      if (!result.visitedViews.find((item: TagView) => item.path === route.path)) {
-        toLastView(result.visitedViews);
-      }
-    });
+  tagsViewStore.delLeftViews(selectedTag.value).then((res: unknown) => {
+    const result = res as { visitedViews: TagView[] };
+    if (
+      !result.visitedViews.find((item: TagView) => item.path === route.path)
+    ) {
+      toLastView(result.visitedViews);
+    }
+  });
 }
 function closeRightTags() {
-  tagsViewStore
-    .delRightViews(selectedTag.value)
-    .then((res: unknown) => {
-      const result = res as { visitedViews: TagView[] };
-      if (!result.visitedViews.find((item: TagView) => item.path === route.path)) {
-        toLastView(result.visitedViews);
-      }
-    });
+  tagsViewStore.delRightViews(selectedTag.value).then((res: unknown) => {
+    const result = res as { visitedViews: TagView[] };
+    if (
+      !result.visitedViews.find((item: TagView) => item.path === route.path)
+    ) {
+      toLastView(result.visitedViews);
+    }
+  });
 }
 
 function closeOtherTags() {
@@ -270,12 +290,10 @@ function closeOtherTags() {
 }
 
 function closeAllTags(view: TagView) {
-  tagsViewStore
-    .delAllViews()
-    .then((res: unknown) => {
-      const result = res as { visitedViews: TagView[]; cachedViews: string[] };
-      toLastView(result.visitedViews, view);
-    });
+  tagsViewStore.delAllViews().then((res: unknown) => {
+    const result = res as { visitedViews: TagView[]; cachedViews: string[] };
+    toLastView(result.visitedViews, view);
+  });
 }
 
 /**
@@ -320,10 +338,10 @@ function handleScroll() {
   closeContentMenu();
 }
 
-function findOutermostParent(tree: any[], findName: string) {
-  const parentMap: Record<string, any> = {};
+function findOutermostParent(tree: AppRoute[], findName: string) {
+  const parentMap: Record<string, AppRoute | null> = {};
 
-  function buildParentMap(node: any, parent: any) {
+  function buildParentMap(node: AppRoute, parent: AppRoute | null) {
     parentMap[String(node.name)] = parent;
 
     if (node.children) {
@@ -350,7 +368,10 @@ function findOutermostParent(tree: any[], findName: string) {
 
 const againActiveTop = (newVal: string) => {
   if (layout.value !== "mix") return;
-  const parent = findOutermostParent(permissionStore.routes, newVal);
+  const parent = findOutermostParent(
+    permissionStore.routes as AppRoute[],
+    newVal
+  );
   if (parent && appStore.activeTopMenuPath !== parent.path) {
     appStore.activeTopMenu(parent.path);
   }

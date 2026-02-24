@@ -5,25 +5,52 @@
       <el-col :sm="16">
         <el-card v-if="item" class="box-card">
           <template #header>
-            <el-form ref="itemForm" :rules="rules" v-if="item" :model="item" label-width="80px">
-              <el-form-item :label="$t('meta.metaEdit.form.title')" prop="title">
+            <el-form
+              ref="itemForm"
+              :rules="rules"
+              v-if="item"
+              :model="item"
+              label-width="80px"
+            >
+              <el-form-item
+                :label="$t('meta.metaEdit.form.title')"
+                prop="title"
+              >
                 <el-input v-model="item.title" @change="onSubmit"></el-input>
               </el-form-item>
-              <el-form-item :label="$t('meta.metaEdit.form.picture')" prop="title">
+              <el-form-item
+                :label="$t('meta.metaEdit.form.picture')"
+                prop="title"
+              >
                 <div class="box-item" style="width: 100%; text-align: center">
-                  <ImageSelector :imageUrl="image" :itemId="item.id" @image-selected="handleImageSelected"
-                    @image-upload-success="handleImageUploadSuccess"></ImageSelector>
+                  <ImageSelector
+                    :imageUrl="image"
+                    :itemId="item.id"
+                    @image-selected="handleImageSelected"
+                    @image-upload-success="handleImageUploadSuccess"
+                  ></ImageSelector>
                 </div>
               </el-form-item>
               <el-form-item v-if="prefab" label="Info" prop="title">
-                <el-input v-model="jsonInfo" type="textarea" @change="onSubmit"></el-input>
+                <el-input
+                  v-model="jsonInfo"
+                  type="textarea"
+                  @change="onSubmit"
+                ></el-input>
               </el-form-item>
             </el-form>
           </template>
         </el-card>
         <br />
         <el-card v-if="item !== null" class="box-card">
-          <el-button v-if="item.viewable" @click="editor" icon="Edit" type="primary" size="small" style="width: 100%">
+          <el-button
+            v-if="item.viewable"
+            @click="editor"
+            icon="Edit"
+            type="primary"
+            size="small"
+            style="width: 100%"
+          >
             {{ $t("meta.metaEdit.contentEdit") }}
           </el-button>
           <br />
@@ -194,7 +221,11 @@ const onSubmit = async () => {
   const valid = await itemForm.value.validate();
   if (valid && item.value) {
     item.value.prefab = item.value.prefab ? 1 : 0;
-    await putMeta(item.value.id, { title: item.value.title, prefab: item.value.prefab, info: item.value.info });
+    await putMeta(item.value.id, {
+      title: item.value.title,
+      prefab: item.value.prefab,
+      info: item.value.info,
+    });
     ElMessage.success(t("meta.metaEdit.success"));
     await refresh();
     emit("changed");

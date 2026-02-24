@@ -3,15 +3,25 @@
     <div v-for="(item, index) in modelValue" :key="index" class="array-item">
       <div class="item-header">
         <span class="item-title">Item {{ index + 1 }}</span>
-        <el-button type="danger" link size="small" icon="Delete" @click="removeItem(index)">
+        <el-button
+          type="danger"
+          link
+          size="small"
+          icon="Delete"
+          @click="removeItem(index)"
+        >
           Remove
         </el-button>
       </div>
       <div class="item-content">
         <!-- Recursively render SchemaField for each item -->
         <!-- We use a computed property for the v-model to handle array updates -->
-        <SchemaField v-model="modelValue[index]" :schema="(schema as import('./types').JsonSchemaArray).items!"
-          :prop-key="String(index)" :parent-prop="`${parentProp || ''}[${index}]`"></SchemaField>
+        <SchemaField
+          v-model="modelValue[index]"
+          :schema="(schema as import('./types').JsonSchemaArray).items!"
+          :prop-key="String(index)"
+          :parent-prop="`${parentProp || ''}[${index}]`"
+        ></SchemaField>
       </div>
     </div>
 

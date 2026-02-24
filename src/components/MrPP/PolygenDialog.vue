@@ -1,6 +1,12 @@
 <template>
-  <el-dialog v-model="visible" :title="$t('polygen.view.title')" width="80%" append-to-body destroy-on-close
-    @closed="handleClose">
+  <el-dialog
+    v-model="visible"
+    :title="$t('polygen.view.title')"
+    width="80%"
+    append-to-body
+    destroy-on-close
+    @closed="handleClose"
+  >
     <div class="document-index" v-loading="loading">
       <el-row :gutter="20">
         <el-col :sm="16">
@@ -10,9 +16,19 @@
             </template>
             <div class="box-item">
               <div v-if="polygenData">
-                <polygen-view ref="three" :file="polygenData.file" @loaded="loaded" @progress="progress"></polygen-view>
-                <el-progress style="width: 100%" :stroke-width="18" v-if="percentage !== 100" :text-inside="true"
-                  :percentage="percentage">
+                <polygen-view
+                  ref="three"
+                  :file="polygenData.file"
+                  @loaded="loaded"
+                  @progress="progress"
+                ></polygen-view>
+                <el-progress
+                  style="width: 100%"
+                  :stroke-width="18"
+                  v-if="percentage !== 100"
+                  :text-inside="true"
+                  :percentage="percentage"
+                >
                 </el-progress>
               </div>
               <el-card v-else>
@@ -24,11 +40,20 @@
         </el-col>
 
         <el-col :sm="8">
-          <MrppInfo v-if="polygenData" :title="$t('polygen.view.info.title')" titleSuffix=" :" :tableData="tableData"
-            :itemLabel="$t('polygen.view.info.label1')" :textLabel="$t('polygen.view.info.label2')"
-            :downloadText="$t('polygen.view.info.download')" :renameText="$t('polygen.view.info.name')"
-            :deleteText="$t('polygen.view.info.delete')" @download="downloadModel" @rename="namedWindow"
-            @delete="deleteWindow">
+          <MrppInfo
+            v-if="polygenData"
+            :title="$t('polygen.view.info.title')"
+            titleSuffix=" :"
+            :tableData="tableData"
+            :itemLabel="$t('polygen.view.info.label1')"
+            :textLabel="$t('polygen.view.info.label2')"
+            :downloadText="$t('polygen.view.info.download')"
+            :renameText="$t('polygen.view.info.name')"
+            :deleteText="$t('polygen.view.info.delete')"
+            @download="downloadModel"
+            @rename="namedWindow"
+            @delete="deleteWindow"
+          >
           </MrppInfo>
           <br />
         </el-col>
@@ -89,7 +114,7 @@ const parsePolygenInfo = (raw?: string | null): PolygenInfo | null => {
     if (parsed && typeof parsed === "object") {
       return parsed as PolygenInfo;
     }
-  } catch { }
+  } catch {}
   return null;
 };
 
@@ -100,7 +125,10 @@ const dataInfo = computed(() =>
 const tableData = computed(() => {
   if (polygenData.value !== null && prepare.value) {
     const data = [
-      { item: t("polygen.view.info.item1"), text: polygenData.value.name ?? "" },
+      {
+        item: t("polygen.view.info.item1"),
+        text: polygenData.value.name ?? "",
+      },
       {
         item: t("polygen.view.info.item2"),
         text:
@@ -118,11 +146,15 @@ const tableData = computed(() => {
       },
       {
         item: t("polygen.view.info.item5"),
-        text: dataInfo.value?.size ? printVector3(dataInfo.value.size) + " m" : "—",
+        text: dataInfo.value?.size
+          ? printVector3(dataInfo.value.size) + " m"
+          : "—",
       },
       {
         item: t("polygen.view.info.item6"),
-        text: dataInfo.value?.center ? printVector3(dataInfo.value.center) : "—",
+        text: dataInfo.value?.center
+          ? printVector3(dataInfo.value.center)
+          : "—",
       },
     ];
 
@@ -229,7 +261,10 @@ const namedWindow = async () => {
 const downloadModel = async () => {
   if (polygenData.value) {
     await downloadResource(
-      { name: polygenData.value.name, file: { url: polygenData.value.file?.url ?? '' } },
+      {
+        name: polygenData.value.name,
+        file: { url: polygenData.value.file?.url ?? "" },
+      },
       ".glb",
       t,
       "polygen.view.download"

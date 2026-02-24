@@ -2,19 +2,41 @@
   <div v-if="!uiHidden" class="schema-field">
     <!-- Object Type -->
     <div v-if="schema.type === 'object'">
-      <template v-for="(propSchema, key) in (schema as import('./types').JsonSchemaObject).properties" :key="key">
-        <SchemaField v-if="!isFieldHidden(propSchema)"
-          v-model="(modelValue as Record<string | number, import('./types').JsonValue>)[key]" :schema="propSchema"
-          :prop-key="String(key)" :parent-prop="parentProp ? `${parentProp}.${String(key)}` : String(key)
-            " :required="isRequired(key)"></SchemaField>
+      <template
+        v-for="(propSchema, key) in (
+          schema as import('./types').JsonSchemaObject
+        ).properties"
+        :key="key"
+      >
+        <SchemaField
+          v-if="!isFieldHidden(propSchema)"
+          v-model="
+            (modelValue as Record<string, import('./types').JsonValue>)[key]
+          "
+          :schema="propSchema"
+          :prop-key="String(key)"
+          :parent-prop="
+            parentProp ? `${parentProp}.${String(key)}` : String(key)
+          "
+          :required="isRequired(key)"
+        ></SchemaField>
       </template>
     </div>
 
     <!-- Array Type -->
     <div v-else-if="schema.type === 'array'">
-      <el-form-item :label="schema.title || propKey" :prop="parentProp" :required="required" :rules="validationRules">
-        <ArrayField v-model="(innerValue as JsonValue[])" :schema="(schema as JsonSchemaArray)" :prop-key="propKey"
-          :parentProp="parentProp"></ArrayField>
+      <el-form-item
+        :label="schema.title || propKey"
+        :prop="parentProp"
+        :required="required"
+        :rules="validationRules"
+      >
+        <ArrayField
+          v-model="innerValue as JsonValue[]"
+          :schema="schema as JsonSchemaArray"
+          :prop-key="propKey"
+          :parentProp="parentProp"
+        ></ArrayField>
         <div v-if="schema.description" class="field-description">
           {{ schema.description }}
         </div>
@@ -22,39 +44,83 @@
     </div>
 
     <!-- Leaf Types -->
-    <el-form-item v-else :label="schema.title || propKey" :prop="parentProp" :required="required"
-      :rules="validationRules">
+    <el-form-item
+      v-else
+      :label="schema.title || propKey"
+      :prop="parentProp"
+      :required="required"
+      :rules="validationRules"
+    >
       <!-- Enum / Select -->
-      <el-select v-if="schema.enum || uiWidget === 'SelectWidget'" v-model="(innerValue as string | number | boolean)"
-        :placeholder="uiPlaceholder" :disabled="uiDisabled" style="width: 100%" clearable>
-        <el-option v-for="item in enumOptions" :key="String(item.value)" :label="item.label"
-          :value="(item.value as string | number | boolean)"></el-option>
+      <el-select
+        v-if="schema.enum || uiWidget === 'SelectWidget'"
+        v-model="innerValue"
+        :placeholder="uiPlaceholder"
+        :disabled="uiDisabled"
+        style="width: 100%"
+        clearable
+      >
+        <el-option
+          v-for="item in enumOptions"
+          :key="String(item.value)"
+          :label="item.label"
+          :value="item.value"
+        ></el-option>
       </el-select>
 
       <!-- Boolean / Switch -->
-      <el-switch v-else-if="schema.type === 'boolean'" v-model="(innerValue as boolean)"
-        :disabled="uiDisabled"></el-switch>
+      <el-switch
+        v-else-if="schema.type === 'boolean'"
+        v-model="innerValue as boolean"
+        :disabled="uiDisabled"
+      ></el-switch>
 
       <!-- Integer / Number -->
-      <el-input-number v-else-if="schema.type === 'integer' || schema.type === 'number'"
-        v-model="(innerValue as number)" :min="schema.minimum" :max="schema.maximum" :disabled="uiDisabled"
-        :placeholder="uiPlaceholder"></el-input-number>
+      <el-input-number
+        v-else-if="schema.type === 'integer' || schema.type === 'number'"
+        v-model="innerValue as number"
+        :min="schema.minimum"
+        :max="schema.maximum"
+        :disabled="uiDisabled"
+        :placeholder="uiPlaceholder"
+      ></el-input-number>
 
       <!-- Date / DateTime -->
-      <el-date-picker v-else-if="schema.format === 'date'" v-model="(innerValue as string)" type="date"
-        value-format="YYYY-MM-DD" :placeholder="uiPlaceholder" :disabled="uiDisabled"
-        style="width: 100%"></el-date-picker>
-      <el-date-picker v-else-if="schema.format === 'date-time'" v-model="(innerValue as string)" type="datetime"
-        value-format="YYYY-MM-DD HH:mm:ss" :placeholder="uiPlaceholder" :disabled="uiDisabled"
-        style="width: 100%"></el-date-picker>
+      <el-date-picker
+        v-else-if="schema.format === 'date'"
+        v-model="innerValue as string"
+        type="date"
+        value-format="YYYY-MM-DD"
+        :placeholder="uiPlaceholder"
+        :disabled="uiDisabled"
+        style="width: 100%"
+      ></el-date-picker>
+      <el-date-picker
+        v-else-if="schema.format === 'date-time'"
+        v-model="innerValue as string"
+        type="datetime"
+        value-format="YYYY-MM-DD HH:mm:ss"
+        :placeholder="uiPlaceholder"
+        :disabled="uiDisabled"
+        style="width: 100%"
+      ></el-date-picker>
 
       <!-- Color -->
-      <el-color-picker v-else-if="schema.format === 'color'" v-model="(innerValue as string)"
-        :disabled="uiDisabled"></el-color-picker>
+      <el-color-picker
+        v-else-if="schema.format === 'color'"
+        v-model="innerValue as string"
+        :disabled="uiDisabled"
+      ></el-color-picker>
 
       <!-- String / Textarea -->
-      <el-input v-else v-model="(innerValue as string)" :type="uiType === 'textarea' ? 'textarea' : 'text'"
-        :rows="uiRows" :placeholder="uiPlaceholder" :disabled="uiDisabled"></el-input>
+      <el-input
+        v-else
+        v-model="innerValue as string"
+        :type="uiType === 'textarea' ? 'textarea' : 'text'"
+        :rows="uiRows"
+        :placeholder="uiPlaceholder"
+        :disabled="uiDisabled"
+      ></el-input>
 
       <div v-if="schema.description" class="field-description">
         {{ schema.description }}

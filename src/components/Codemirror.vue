@@ -23,7 +23,7 @@ import { json } from "@codemirror/lang-json";
 const extensions = [json()];
 
 // Codemirror EditorView 实例
-const view = shallowRef<any>(null);
+const view = shallowRef<unknown>(null);
 
 // 编辑器就绪回调
 function handleReady(payload: { view: EditorView }) {

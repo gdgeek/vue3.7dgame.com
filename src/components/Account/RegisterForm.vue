@@ -1,8 +1,26 @@
 <template>
-  <div class="register-form" :class="{ 'dark-theme': isDark }" v-loading="loading">
-    <el-form ref="registerFormRef" class="login-form" :rules="registerRules" :model="registerForm" label-position="top">
-      <el-form-item :label="$t('login.username')" prop="username" class="form-item">
-        <el-input v-model="registerForm.username" :placeholder="$t('login.username')" class="custom-input">
+  <div
+    class="register-form"
+    :class="{ 'dark-theme': isDark }"
+    v-loading="loading"
+  >
+    <el-form
+      ref="registerFormRef"
+      class="login-form"
+      :rules="registerRules"
+      :model="registerForm"
+      label-position="top"
+    >
+      <el-form-item
+        :label="$t('login.username')"
+        prop="username"
+        class="form-item"
+      >
+        <el-input
+          v-model="registerForm.username"
+          :placeholder="$t('login.username')"
+          class="custom-input"
+        >
           <template #prefix>
             <el-icon class="input-icon">
               <UserFilled></UserFilled>
@@ -11,9 +29,18 @@
         </el-input>
       </el-form-item>
 
-      <el-form-item :label="$t('login.password')" prop="password" class="form-item">
-        <el-input v-model="registerForm.password" type="password" :placeholder="$t('login.password')"
-          class="custom-input" show-password>
+      <el-form-item
+        :label="$t('login.password')"
+        prop="password"
+        class="form-item"
+      >
+        <el-input
+          v-model="registerForm.password"
+          type="password"
+          :placeholder="$t('login.password')"
+          class="custom-input"
+          show-password
+        >
           <template #prefix>
             <el-icon class="input-icon">
               <Lock></Lock>
@@ -23,9 +50,18 @@
         <PasswordStrength :password="registerForm.password"></PasswordStrength>
       </el-form-item>
 
-      <el-form-item :label="$t('login.repassword')" prop="repassword" class="form-item">
-        <el-input v-model="registerForm.repassword" type="password" :placeholder="$t('login.repassword')"
-          class="custom-input" show-password>
+      <el-form-item
+        :label="$t('login.repassword')"
+        prop="repassword"
+        class="form-item"
+      >
+        <el-input
+          v-model="registerForm.repassword"
+          type="password"
+          :placeholder="$t('login.repassword')"
+          class="custom-input"
+          show-password
+        >
           <template #prefix>
             <el-icon class="input-icon">
               <Lock></Lock>
@@ -35,7 +71,12 @@
       </el-form-item>
 
       <el-form-item class="register-button-item">
-        <el-button class="register-button" type="primary" @click="register" :loading="loading">
+        <el-button
+          class="register-button"
+          type="primary"
+          @click="register"
+          :loading="loading"
+        >
           {{ $t("login.create") }}
         </el-button>
       </el-form-item>

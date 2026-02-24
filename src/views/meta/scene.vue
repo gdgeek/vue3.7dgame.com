@@ -1,17 +1,32 @@
 <template>
   <div class="verse-scene">
-    <phototype-dialog @selected="selectedPhototype" ref="phototypeDialogRef"></phototype-dialog>
+    <phototype-dialog
+      @selected="selectedPhototype"
+      ref="phototypeDialogRef"
+    ></phototype-dialog>
     <resource-dialog @selected="selected" :on-get-datas="getDatas" ref="dialog">
       <template #bar="{ item }">
         <div v-if="item.type === 'audio'" class="info-container">
-          <audio id="audio" controls style="width: 100%; height: 30px" :src="item.context.file.url"
-            @play="handleAudioPlay"></audio>
+          <audio
+            id="audio"
+            controls
+            style="width: 100%; height: 30px"
+            :src="item.context.file.url"
+            @play="handleAudioPlay"
+          ></audio>
         </div>
       </template>
     </resource-dialog>
     <el-container>
       <el-main>
-        <iframe ref="editor" id="editor" :src="src" class="content" height="100%" width="100%"></iframe>
+        <iframe
+          ref="editor"
+          id="editor"
+          :src="src"
+          class="content"
+          height="100%"
+          width="100%"
+        ></iframe>
       </el-main>
     </el-container>
   </div>
@@ -82,7 +97,7 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
             context: item,
             type: "phototype",
             created_at: item.created_at,
-            name: item.name ? item.name : item.title ?? "", // 使用name或title
+            name: item.name ? item.name : (item.title ?? ""), // 使用name或title
             image: item.image ? { url: item.image.url } : null,
             enabled: true,
           } as CardInfo;
@@ -114,7 +129,7 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
             context: item,
             type: item.type,
             created_at: item.created_at,
-            name: item.name ? item.name : item.title ?? "", // 使用name或title
+            name: item.name ? item.name : (item.title ?? ""), // 使用name或title
             image: item.image ? { url: item.image.url } : null,
             enabled,
           } as CardInfo;
@@ -208,17 +223,20 @@ const selectedPhototype = async (
   replace: boolean = false
 ) => {
   console.error(phototype.resource);
-  phototypeDialogRef.value?.open((phototype.schema as { root?: unknown })?.root, (data: unknown) => {
-    // const d = { ...data, id: phototype.id };
-    postMessage("load-phototype", {
-      data: {
-        type: phototype.type,
-        context: JSON.stringify(data),
-      },
-      type: "phototype",
-      title: phototype.title,
-    });
-  });
+  phototypeDialogRef.value?.open(
+    (phototype.schema as { root?: unknown })?.root,
+    (data: unknown) => {
+      // const d = { ...data, id: phototype.id };
+      postMessage("load-phototype", {
+        data: {
+          type: phototype.type,
+          context: JSON.stringify(data),
+        },
+        type: "phototype",
+        title: phototype.title,
+      });
+    }
+  );
 };
 // 资源操作相关函数
 const selected = async (info: CardInfo, replace: boolean = false) => {
@@ -333,7 +351,10 @@ const saveMeta = async ({
   }
 
   try {
-    await putMeta(id.value, { data: meta, events: events as import("@/api/v1/types/meta").Events | null });
+    await putMeta(id.value, {
+      data: meta,
+      events: events as import("@/api/v1/types/meta").Events | null,
+    });
     ElMessage.success(t("meta.scene.success"));
   } catch (error) {
     ElMessage.error(t("meta.scene.saveError"));
@@ -387,7 +408,7 @@ const handleUploadCover = async (data: unknown) => {
         md5,
         extension,
         file,
-        (_progress: unknown) => { },
+        (_progress: unknown) => {},
         handler,
         "backup"
       );

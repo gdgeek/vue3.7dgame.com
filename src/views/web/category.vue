@@ -303,7 +303,6 @@ onUnmounted(() => {
   }
 
   &.nav-scrolled {
-
     .nav-left .company-name,
     .nav-middle .nav-menu-item .menu-text,
     .nav-right .hamburger-menu {
@@ -311,7 +310,6 @@ onUnmounted(() => {
     }
 
     &.dark-theme {
-
       .nav-left .company-name,
       .nav-middle .nav-menu-item .menu-text,
       .nav-right .hamburger-menu {

@@ -1,34 +1,62 @@
 <template>
   <TransitionWrapper>
     <div class="video-index">
-      <PageActionBar :title="t('video.listPageTitle')" :search-placeholder="t('video.searchPlaceholder')"
-        :selection-count="selectedCount" @search="handleSearch" @sort-change="handleSortChange"
-        @view-change="handleViewChange" @batch-download="handleBatchDownload" @batch-delete="handleBatchDelete"
-        @cancel-selection="handleCancelSelection">
+      <PageActionBar
+        :title="t('video.listPageTitle')"
+        :search-placeholder="t('video.searchPlaceholder')"
+        :selection-count="selectedCount"
+        @search="handleSearch"
+        @sort-change="handleSortChange"
+        @view-change="handleViewChange"
+        @batch-download="handleBatchDownload"
+        @batch-delete="handleBatchDelete"
+        @cancel-selection="handleCancelSelection"
+      >
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
-            <font-awesome-icon :icon="['fas', 'upload']" style="font-size: 18px; margin-right: 4px"></font-awesome-icon>
+            <font-awesome-icon
+              :icon="['fas', 'upload']"
+              style="font-size: 18px; margin-right: 4px"
+            ></font-awesome-icon>
             {{ $t("video.uploadVideo") }}
           </el-button>
         </template>
       </PageActionBar>
 
-      <ViewContainer :items="items" :view-mode="viewMode" :loading="loading"
-        @row-click="(item) => openViewDialog(item.id)">
+      <ViewContainer
+        :items="items"
+        :view-mode="viewMode"
+        :loading="loading"
+        @row-click="(item) => openViewDialog(item.id)"
+      >
         <template #grid-card="{ item }">
-          <StandardCard :image="getVideoCover(item.image?.url)" :title="item.name || t('ui.unnamed')"
-            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }" :selected="isSelected(item.id)"
-            :selection-mode="hasSelection" :type-icon="['fas', 'video']" :placeholder-icon="['fas', 'video']"
-            @view="openViewDialog(item.id)" @select="() => toggleSelection(item.id)"></StandardCard>
+          <StandardCard
+            :image="getVideoCover(item.image?.url)"
+            :title="item.name || t('ui.unnamed')"
+            :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
+            :selected="isSelected(item.id)"
+            :selection-mode="hasSelection"
+            :type-icon="['fas', 'video']"
+            :placeholder-icon="['fas', 'video']"
+            @view="openViewDialog(item.id)"
+            @select="() => toggleSelection(item.id)"
+          ></StandardCard>
         </template>
 
         <template #list-item="{ item }">
           <div class="col-checkbox" @click.stop>
-            <el-checkbox :model-value="isSelected(item.id)" @change="() => toggleSelection(item.id)"></el-checkbox>
+            <el-checkbox
+              :model-value="isSelected(item.id)"
+              @change="() => toggleSelection(item.id)"
+            ></el-checkbox>
           </div>
           <div class="col-name">
             <div class="item-thumb">
-              <img v-if="item.image?.url" :src="getVideoCover(item.image.url)" :alt="item.name" />
+              <img
+                v-if="item.image?.url"
+                :src="getVideoCover(item.image.url)"
+                :alt="item.name"
+              />
               <div v-else class="thumb-placeholder">
                 <font-awesome-icon :icon="['fas', 'video']"></font-awesome-icon>
               </div>
@@ -41,7 +69,10 @@
           </div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
-              <font-awesome-icon :icon="['fas', 'ellipsis']" class="actions-icon"></font-awesome-icon>
+              <font-awesome-icon
+                :icon="['fas', 'ellipsis']"
+                class="actions-icon"
+              ></font-awesome-icon>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openViewDialog(item.id)">{{
@@ -50,7 +81,7 @@
                   <el-dropdown-item @click="namedWindow(item)">{{
                     t("common.edit")
                   }}</el-dropdown-item>
-                  <el-dropdown-item @click="deletedWindow(item, () => { })">{{
+                  <el-dropdown-item @click="deletedWindow(item, () => {})">{{
                     t("common.delete")
                   }}</el-dropdown-item>
                 </el-dropdown-menu>
@@ -60,22 +91,48 @@
         </template>
       </ViewContainer>
 
-      <PagePagination :current-page="pagination.current" :total-pages="totalPages" @page-change="handlePageChange">
+      <PagePagination
+        :current-page="pagination.current"
+        :total-pages="totalPages"
+        @page-change="handlePageChange"
+      >
       </PagePagination>
 
       <!-- Dialogs -->
       <!-- Dialogs -->
-      <StandardUploadDialog v-model="uploadDialogVisible" dir="video" :file-type="fileType" :max-size="80"
-        :title="$t('video.uploadVideo')" @save-resource="saveVideo" @success="handleUploadSuccess">
+      <StandardUploadDialog
+        v-model="uploadDialogVisible"
+        dir="video"
+        :file-type="fileType"
+        :max-size="80"
+        :title="$t('video.uploadVideo')"
+        @save-resource="saveVideo"
+        @success="handleUploadSuccess"
+      >
       </StandardUploadDialog>
 
       <!-- Detail Panel -->
-      <DetailPanel v-model="viewDialogVisible" :title="t('video.detailsTitle')" :name="currentVideo?.name || ''"
-        :loading="detailLoading" :properties="detailProperties" :placeholder-icon="['fas', 'video']"
-        :download-text="t('video.downloadText')" :delete-text="t('video.deleteText')" @download="handleDownload"
-        @rename="handleRename" @delete="handleDelete" @close="handlePanelClose">
+      <DetailPanel
+        v-model="viewDialogVisible"
+        :title="t('video.detailsTitle')"
+        :name="currentVideo?.name || ''"
+        :loading="detailLoading"
+        :properties="detailProperties"
+        :placeholder-icon="['fas', 'video']"
+        :download-text="t('video.downloadText')"
+        :delete-text="t('video.deleteText')"
+        @download="handleDownload"
+        @rename="handleRename"
+        @delete="handleDelete"
+        @close="handlePanelClose"
+      >
         <template #preview>
-          <video v-if="currentVideo?.file?.url" :src="currentVideo.file.url" controls class="video-preview"></video>
+          <video
+            v-if="currentVideo?.file?.url"
+            :src="currentVideo.file.url"
+            controls
+            class="video-preview"
+          ></video>
         </template>
       </DetailPanel>
     </div>
@@ -126,7 +183,7 @@ const parseVideoInfo = (raw?: string | null): VideoInfo | null => {
     if (parsed && typeof parsed === "object") {
       return parsed as VideoInfo;
     }
-  } catch { }
+  } catch {}
   return null;
 };
 

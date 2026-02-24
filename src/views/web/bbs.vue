@@ -1,6 +1,11 @@
 <template>
   <div class="app-container" :class="{ 'dark-theme': isDark }">
-    <iframe src="https://forum.rokid.com/index" class="full-height" frameborder="0" allowfullscreen></iframe>
+    <iframe
+      src="https://forum.rokid.com/index"
+      class="full-height"
+      frameborder="0"
+      allowfullscreen
+    ></iframe>
   </div>
 </template>
 
@@ -32,7 +37,7 @@ const open = () => {
       // if you want to disable its autofocus
       // autofocus: false,
       confirmButtonText: "确认",
-      callback: (_action: Action) => { },
+      callback: (_action: Action) => {},
     }
   );
 };
@@ -317,7 +322,6 @@ onUnmounted(() => {
   }
 
   &.nav-scrolled {
-
     .nav-left .company-name,
     .nav-middle .nav-menu-item .menu-text,
     .nav-right .hamburger-menu {
@@ -325,7 +329,6 @@ onUnmounted(() => {
     }
 
     &.dark-theme {
-
       .nav-left .company-name,
       .nav-middle .nav-menu-item .menu-text,
       .nav-right .hamburger-menu {
