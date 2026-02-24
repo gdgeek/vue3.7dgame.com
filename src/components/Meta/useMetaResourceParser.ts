@@ -34,6 +34,20 @@ export interface MetaResourceIndex {
   events: { inputs: string[]; outputs: string[] };
 }
 
+function normalizeEventNames(events: unknown): string[] {
+  if (!Array.isArray(events)) return [];
+  return events
+    .map((event) => {
+      if (typeof event === "string") return event;
+      if (event && typeof event === "object" && "name" in event) {
+        const name = (event as { name?: unknown }).name;
+        return typeof name === "string" ? name : undefined;
+      }
+      return undefined;
+    })
+    .filter((name): name is string => Boolean(name));
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseAction(node: any, parentUuid?: string): ActionInfo | null {
   if (
@@ -155,8 +169,8 @@ export function buildMetaResourceIndex(meta: metaInfo): MetaResourceIndex {
     entity: [],
     events: meta.events
       ? {
-          inputs: meta.events.inputs.map((e) => e.name),
-          outputs: meta.events.outputs.map((e) => e.name),
+          inputs: normalizeEventNames(meta.events.inputs),
+          outputs: normalizeEventNames(meta.events.outputs),
         }
       : { inputs: [], outputs: [] },
   };

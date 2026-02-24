@@ -69,7 +69,7 @@ export const loadLanguageAsync = async (locale: string) => {
 
       i18n.global.setLocaleMessage(
         correctLocale,
-        messages.default as Record<string, unknown>
+        messages.default as typeof zhCnLocale
       );
       (i18n.global.locale as unknown as { value: string }).value =
         correctLocale;
