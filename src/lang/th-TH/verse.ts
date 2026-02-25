@@ -66,7 +66,6 @@ export default {
         picture: "รูปปก",
         name: "ชื่อ",
         description: "คำอธิบายเนื้อหา",
-        course: "ผูกบทเรียน",
         cancel: "ยกเลิก",
         dialogTitle: "เลือกไฟล์",
         dialogSubmit: "ตกลง",
@@ -77,12 +76,8 @@ export default {
         error: "การตรวจสอบแบบฟอร์มล้มเหลว",
       },
       list: {
-        enter: "เข้าสู่",
-        infoTable: "คำอธิบายเนื้อหา:",
         infoContent: {
           author: "ผู้เขียน",
-          learn: "เรียนรู้",
-          blank: "ลิงก์เริ่มต้น",
           description: "คำอธิบาย",
           share: "ID แบ่งปัน",
         },
@@ -152,12 +147,9 @@ export default {
       success1: "แก้ไขสำเร็จ",
       success2: "ส่งสำเร็จ",
       success3: "ลบสำเร็จ",
-      success4: "แบ่งปันสำเร็จ",
-      success5: "หยุดแบ่งปัน",
       error1: "ส่งล้มเหลว",
       error2: "การตรวจสอบแบบฟอร์มล้มเหลว",
       error3: "รูปแบบ Schema ของ Prefab ไม่ถูกต้อง",
-      messageTitle: "ชื่อ【ฉาก】: ",
       scene: "ฉาก",
       tags: {
         confirmRemove: {
@@ -315,7 +307,6 @@ export default {
           message2: "แจ้งเตือน",
           confirm: "ใช่",
           cancel: "ไม่",
-          success: "บันทึกสำเร็จ",
           error: "บันทึกล้มเหลว",
           info: "ละทิ้งการเปลี่ยนแปลงที่ยังไม่ได้บันทึก",
         },

@@ -170,7 +170,7 @@ export default {
     uploadFile: "Select a picture and upload it",
     view: {
       title: "Picture Name: ",
-      loadingText: "Preprocessing in progres",
+      loadingText: "Preprocessing in progress",
       info: {
         title: "Picture Information",
         label1: "Item",

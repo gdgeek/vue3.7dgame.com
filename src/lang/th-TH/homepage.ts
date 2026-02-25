@@ -1,10 +1,6 @@
 // homepage translations for th-TH
 export default {
   homepage: {
-    dashboard: "หน้าหลัก",
-    news: "ข่าวสาร",
-    relatedDownload: "ดาวน์โหลดที่เกี่ยวข้อง",
-    caseCourse: "บทเรียนตัวอย่าง",
     greeting: {
       morning: "สวัสดีตอนเช้า,",
       noon: "สวัสดีตอนเที่ยง,",
@@ -27,7 +23,6 @@ export default {
       myPublish: "เผยแพร่",
       myLike: "ถูกใจ",
       enter: "เข้าสู่",
-      Iliked: "ที่ฉันถูกใจ",
     },
     quickStart: {
       title: "เริ่มต้นอย่างรวดเร็ว",
@@ -48,7 +43,6 @@ export default {
       },
     },
     edit: {
-      title: "แก้ไขข้อมูลส่วนตัว",
       personalData: "ข้อมูลส่วนตัว",
       personalDataStatement: "แก้ไขชื่อเล่น รูปประจำตัว และข้อมูลพื้นฐาน",
       return: "กลับสู่ศูนย์ส่วนบุคคล",
@@ -168,13 +162,9 @@ export default {
           error2: "รหัสผ่านใหม่ต้องไม่เหมือนกับรหัสผ่านเก่า!",
         },
         new: {
-          message1: "กรุณากรอกรหัสผ่านใหม่",
-          message2: "ความยาวรหัสผ่านใหม่ควรมากกว่า 12",
-          error1: "กรุณากรอกรหัสผ่าน",
           error2: "รหัสผ่านใหม่ต้องไม่เหมือนกับรหัสผ่านเก่า!",
         },
         check: {
-          message: "กรุณากรอกรหัสผ่านยืนยัน",
           message1: "กรุณากรอกรหัสผ่านยืนยัน",
           error1: "กรุณากรอกรหัสผ่านอีกครั้ง",
           error2: "รหัสผ่านที่ป้อนสองครั้งไม่ตรงกัน",

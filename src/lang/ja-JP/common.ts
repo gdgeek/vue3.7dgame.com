@@ -12,14 +12,10 @@ export default {
     enter: "入る",
     open: "開く",
     add: "追加",
-    newest: "最新",
-    oldest: "最古",
     name: "名前",
     description: "説明",
     edit: "編集",
     back: "戻る",
-    comingSoon: "近日公開",
-    submit: "送信",
     updateSuccess: "更新成功",
     createSuccess: "作成成功",
     createFailed: "作成失敗",
@@ -158,21 +154,9 @@ export default {
     serverError: "サーバー内部エラーです。しばらくしてから再度お試しください",
     error404: "リクエストに失敗しました。リソースが見つかりません (404)",
   },
-  errors: {
-    networkError:
-      "ネットワーク接続に失敗しました。ネットワークを確認してください",
-    validationError: "入力された情報が正しいか確認してください",
-    rateLimitExceeded:
-      "リクエストが多すぎます。{seconds}秒後に再試行してください",
-    invalidCode: "認証コードが正しくないか、有効期限が切れています",
-    accountLocked: "失敗回数が多すぎます。{seconds}秒後に再試行してください",
-    serverError: "サーバーエラーです。後でもう一度お試しください",
-  },
   emailVerification: {
     codeSent: "認証コードがメールアドレスに送信されました",
     verifySuccess: "メール認証に成功しました",
-    sendFailed: "認証コードの送信に失敗しました",
-    verifyFailed: "認証に失敗しました",
   },
   web: {
     login: "ログイン",

@@ -92,6 +92,9 @@
 </template>
 
 <script setup lang="ts">
+// @ts-ignore
+import JsonSchemaEditor from "json-schema-editor-vue3";
+import "json-schema-editor-vue3/lib/json-schema-editor-vue3.css";
 import { logger } from "@/utils/logger";
 import { getPhototype, putPhototype, postPhototype } from "@/api/v1/phototype";
 import type { PhototypeType } from "@/api/v1/types/phototype";

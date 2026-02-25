@@ -1,7 +1,6 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import setupPlugins from "@/plugins";
-import "vue-cropper/dist/index.css";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 // 按需导入图标，而不是全量导入 fas（可减少约 750KB）
@@ -80,14 +79,9 @@ import {
   faSquareMinus,
   faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
-import VueIframe from "vue-iframes";
 import { VueAppleLoginConfig } from "@/utils/helper";
 import "element-plus/dist/index.css";
 import { ability } from "@/ability";
-
-// @ts-ignore
-import JsonSchemaEditor from "json-schema-editor-vue3";
-import "json-schema-editor-vue3/lib/json-schema-editor-vue3.css";
 
 import { abilitiesPlugin } from "@casl/vue";
 
@@ -171,7 +165,7 @@ import "element-plus/theme-chalk/display.css";
 import "element-plus/theme-chalk/dark/css-vars.css";
 import "@/styles/index.scss";
 import "uno.css";
-import "animate.css";
+import "@/styles/animate.css";
 import { useRouter } from "@/router";
 import { translateRouteTitle } from "./utils/i18n";
 import { useAppStore, store } from "./store";
@@ -221,8 +215,6 @@ app.use(abilitiesPlugin, ability, {
 app.component("FontAwesomeIcon", FontAwesomeIcon);
 app.directive("highlight", highlightDirective);
 app.use(setupPlugins);
-app.use(VueIframe);
-app.use(JsonSchemaEditor);
 //app.use(ElementPlus);
 import { loadLanguageAsync } from "@/lang";
 

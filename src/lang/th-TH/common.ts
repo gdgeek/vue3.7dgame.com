@@ -12,14 +12,10 @@ export default {
     enter: "เข้าสู่",
     open: "เปิด",
     add: "เพิ่ม",
-    newest: "ล่าสุด",
-    oldest: "เก่าสุด",
     name: "ชื่อ",
     description: "คำอธิบาย",
     edit: "แก้ไข",
     back: "กลับ",
-    comingSoon: "เร็วๆ นี้",
-    submit: "ส่ง",
     updateSuccess: "อัปเดตสำเร็จ",
     createSuccess: "สร้างสำเร็จ",
     createFailed: "สร้างล้มเหลว",
@@ -153,20 +149,9 @@ export default {
     rotation: "การหมุน",
     position: "ตำแหน่ง",
   },
-  errors: {
-    networkError:
-      "เกิดข้อผิดพลาดเครือข่าย กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ",
-    rateLimitExceeded: "ส่งรหัสบ่อยเกินไป กรุณารอ {seconds} วินาที",
-    invalidCode: "รหัสยืนยันไม่ถูกต้องหรือหมดอายุ",
-    accountLocked:
-      "บัญชีถูกล็อคเนื่องจากความพยายามล้มเหลวหลายครั้ง กรุณาลองใหม่ใน {minutes} นาที",
-    serverError: "เกิดข้อผิดพลาดของเซิร์ฟเวอร์ กรุณาลองใหม่ภายหลัง",
-  },
   emailVerification: {
     codeSent: "ส่งรหัสยืนยันไปยังอีเมลของคุณแล้ว",
     verifySuccess: "ยืนยันอีเมลสำเร็จ",
-    sendFailed: "ส่งรหัสยืนยันล้มเหลว",
-    verifyFailed: "ยืนยันอีเมลล้มเหลว",
   },
   request: {
     loginExpired: "Login expired, please log in again",

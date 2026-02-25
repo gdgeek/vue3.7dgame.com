@@ -5,7 +5,6 @@ export default {
     register: "プラットフォーム登録/ログイン",
     h1: "ようこそ！",
     h4: "準備はできましたか？",
-    loginTitle: "アカウントにログイン",
     username: "email",
     password: "パスワード",
     login: "ログイン",
@@ -15,16 +14,11 @@ export default {
     rules: {
       username: {
         message1: "ユーザー名を入力してください",
-        message2: "ユーザー名は5文字以上にしてください",
-        message3:
-          "ユーザー名は、アルファベット、数字、アンダースコア、@、. のみ使用できます。",
         email: "有効な電子メールアドレスを入力してください",
       },
       password: {
         message1: "パスワードを入力してください",
         message2: "パスワードは12〜128文字で入力してください",
-        message3:
-          "パスワードは大文字・小文字・数字・特殊文字を含む必要があります",
       },
       repassword: {
         message1: "もう一度パスワードを入力してください",
@@ -94,8 +88,6 @@ export default {
       medium: "普通",
       strong: "強い",
     },
-    description:
-      "パスワード要件：12文字以上、大文字・小文字・数字・特殊文字を含むこと",
   },
   imageSelector: {
     selectImageMethod: "画像選択方法",

@@ -29,14 +29,11 @@ export default {
       removeTeacherConfirm: "Are you sure you want to remove this teacher?",
       removeConfirmTitle: "Remove Confirmation",
     },
-    defaultSchoolName: "New School",
     defaultClassName: "New Class",
     schoolManagement: "School Management",
     classManagement: "Class Management",
     teacherManagement: "Teacher Management",
     studentManagement: "Student Management",
-    filteringBySchool: "Filtering by School ID",
-    backToAll: "Back to All Classes",
     school: {
       principal: "School Administrator",
       address: "Address",
@@ -46,15 +43,11 @@ export default {
     class: {
       title: "Class Management",
       schoolTitle: "{school} - Class Management",
-      grade: "Grade",
       teacher: "Teacher",
-      student: "Student",
       teacherList: "Teacher List",
       studentList: "Student List",
       selectTeacher: "Select Teacher",
       selectStudent: "Select Student",
-      assignTeacher: "Assign Teacher",
-      assignStudent: "Assign Student",
       form: {
         name: "Class Name",
         namePlaceholder: "Please enter class name",
@@ -97,11 +90,6 @@ export default {
       nickname: "Nickname",
     },
     errors: {
-      fetchFailed: "Failed to fetch schools",
-      noData: "No Data",
-      createPending: "Create functionality to be implemented",
-      editPending: "Edit school: {name}",
-      operationFailed: "Operation failed",
       addFailed: "Failed to add",
       saveFailed: "Failed to save",
       deleteFailed: "Delete failed",
@@ -114,14 +102,7 @@ export default {
       editTitle: "Edit School",
     },
     form: {
-      name: "School Name",
       namePlaceholder: "Please enter school name",
-      address: "School Address",
-      addressPlaceholder: "Please enter school address",
-      principal: "School Administrator",
-      principalPlaceholder: "Select School Administrator",
-      image: "School Image",
-      edit: "Edit",
       cancel: "Cancel",
       submit: "Submit",
       submitting: "Submitting...",
@@ -134,9 +115,7 @@ export default {
       addSuccess: "Added successfully",
       removeSuccess: "Removed successfully",
       deleteSuccess: "Deleted successfully",
-      createConfirm: "Confirm to create a new school?",
       createSuccess: "School created successfully",
-      createFailed: "Failed to create school",
       updateSuccess: "School updated successfully",
       updateFailed: "Failed to update school",
       deleteFailed: "Failed to delete school",
@@ -165,7 +144,6 @@ export default {
     list: {
       label: "Perms:",
       cancel: "Delete",
-      manage: "Manage",
       remove: "Remove",
       roles: {
         root: "Root User",
@@ -250,7 +228,6 @@ export default {
       success: "Added successfully",
       confirm1: {
         message1: "Create Map",
-        message2: "Prompt",
         confirm: "Confirm",
         cancel: "Cancel",
         success: "Created successfully",
@@ -302,7 +279,6 @@ export default {
     closeAll: "CloseAll",
   },
   navbar: {
-    dashboard: "Dashboard",
     logout: "Logout",
     AccountSetting: "Account Setting",
     personalCenter: "Home Page",
@@ -344,7 +320,6 @@ export default {
     mix: "Mixed Mode",
   },
   tts: {
-    title: "Tencent Text-to-Speech",
     voiceType: "Voice Type",
     voiceScene: "Scene",
     voiceLanguage: "Language",
@@ -414,7 +389,6 @@ export default {
   },
   phototype: {
     title: "Phototype",
-    list: "List",
     create: "Create Phototype",
     fromModel: "From Model",
     typeName: "Prefab",
