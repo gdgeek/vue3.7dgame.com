@@ -150,6 +150,14 @@ export default {
       bind: "Bind",
       rebind: "Rebind",
       label2: "Account Password",
+      securityEmailTitle: "Email Security",
+      securityEmailBoundHint:
+        "Your email is bound. You can change or unbind it.",
+      securityEmailUnboundHint:
+        "No email is currently bound. Please bind one first.",
+      securityPasswordTitle: "Password Security",
+      securityPasswordHint:
+        "Change or recover your password to improve account security.",
       change: "Change Password",
       recover: "Recover Password",
       label3: "Old Password",

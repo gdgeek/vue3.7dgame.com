@@ -162,7 +162,7 @@ vue3.7dgame.com/
 VITE_APP_PORT=3001
 
 # API 配置
-VITE_APP_API_URL="http://localhost:81"
+VITE_APP_API_URL="http://localhost:8081"
 
 # 是否启用 Mock 服务
 VITE_MOCK_DEV_SERVER=false

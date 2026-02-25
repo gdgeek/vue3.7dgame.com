@@ -25,7 +25,7 @@ const classId = computed(() => {
 });
 
 const onClassLoaded = (classInfo: EduClass) => {
-  const siteName = domainStore.title || "不加班AR创作平台";
+  const siteName = domainStore.title || "XR UGC平台（XRUGC.com）";
   document.title = classInfo.name
     ? `${classInfo.name} - ${siteName}`
     : siteName;

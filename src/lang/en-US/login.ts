@@ -1,7 +1,7 @@
 // login translations for en-US
 export default {
   login: {
-    title: "BuJiaBan.com",
+    title: "XR UGC平台（XRUGC.com）",
     register: "Platform Register/Login",
     h1: "Welcome!",
     h4: "Ready to get started?",
@@ -55,6 +55,26 @@ export default {
     abandonRegisterCancelButton: "Continue registration",
     loginResponseMissingToken: "The login response is missing the access_token",
     qrcodeFetchFailed: "Failed to get WeChat QR code, please try again later",
+    forgotPassword: "Forgot password?",
+    forgotDialogTitle: "Reset Password",
+    forgotTipBoundEmail:
+      "Password reset is only available for accounts with a verified bound email.",
+    forgotTokenLabel: "Verification Code",
+    forgotTokenPlaceholder: "Enter the 6-digit code from your email",
+    forgotNewPasswordLabel: "New Password",
+    forgotConfirmPasswordLabel: "Confirm New Password",
+    sendResetEmail: "Send Code",
+    verifyResetToken: "Verify Code",
+    verifyTokenFirst: "Please verify the code first",
+    forgotTokenRequired: "Please enter the verification code",
+    requestResetSuccess: "Password reset code sent. Please check your email",
+    requestResetFailedFallback: "Failed to send code. Please try again",
+    verifyTokenSuccess: "Code verified",
+    verifyTokenFailed: "Code is invalid or expired",
+    resetPassword: "Reset Password",
+    resetPasswordSuccess: "Password reset successful. Please log in again",
+    resetPasswordFailedFallback: "Password reset failed. Please try again",
+    cancel: "Cancel",
   },
   passwordPolicy: {
     minLength: "At least 12 characters",

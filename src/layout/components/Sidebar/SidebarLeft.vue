@@ -6,7 +6,7 @@
         <img alt="Logo" :src="logoIcon" />
       </div>
       <span class="logo-text">{{
-        domainStore.title || "不加班AR创作平台"
+        domainStore.title || "XR UGC平台（XRUGC.com）"
       }}</span>
     </div>
 
