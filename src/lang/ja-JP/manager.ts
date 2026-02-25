@@ -27,7 +27,7 @@ export default {
       inviteTeacherPending: "教師招待機能はまだ利用できません",
       removeStudentConfirm: "この学生を削除してもよろしいですか？",
       removeTeacherConfirm: "この教師を削除してもよろしいですか？",
-      removeConfirmTitle: "削除確認"
+      removeConfirmTitle: "削除確認",
     },
     defaultClassName: "新しいクラス",
     schoolManagement: "学校管理",
@@ -35,7 +35,7 @@ export default {
     studentManagement: "学生管理",
     school: {
       principal: "学校管理者",
-      address: "住所"
+      address: "住所",
     },
     class: {
       title: "クラス管理",
@@ -48,15 +48,15 @@ export default {
       form: {
         name: "クラス名",
         namePlaceholder: "クラス名を入力してください",
-        image: "クラス画像"
+        image: "クラス画像",
       },
       validation: {
-        nameRequired: "クラス名を入力してください"
-      }
+        nameRequired: "クラス名を入力してください",
+      },
     },
     teacher: {
       subject: "科目",
-      phone: "電話"
+      phone: "電話",
     },
     errors: {
       addFailed: "追加に失敗しました",
@@ -64,19 +64,19 @@ export default {
       deleteFailed: "削除に失敗しました",
       removeFailed: "削除に失敗しました",
       alreadyInClass: "このメンバーはすでにクラスに参加しています",
-      validationFailed: "フォームの検証に失敗しました"
+      validationFailed: "フォームの検証に失敗しました",
     },
     form: {
       namePlaceholder: "学校名を入力してください",
       cancel: "キャンセル",
-      submit: "送信"
+      submit: "送信",
     },
     messages: {
       addSuccess: "追加に成功しました",
       removeSuccess: "削除に成功しました",
       deleteSuccess: "削除しました",
       createSuccess: "学校の作成に成功しました",
-      updateSuccess: "学校の更新に成功しました"
+      updateSuccess: "学校の更新に成功しました",
     },
     creator: {
       form: {
@@ -94,8 +94,8 @@ export default {
         error3: "2回入力されたパスワードが一致しません",
         error4: "フォーム検証に失敗しました",
         cancel: "キャンセル",
-        submit: "アカウントを登録"
-      }
+        submit: "アカウントを登録",
+      },
     },
     list: {
       label: "権限:",
@@ -105,7 +105,7 @@ export default {
         root: "ルートユーザー",
         admin: "スーパー管理者",
         manager: "管理者",
-        user: "ユーザー"
+        user: "ユーザー",
       },
       confirm: {
         message1: "この操作は学校を永久に削除します。続行しますか？",
@@ -113,10 +113,10 @@ export default {
         confirm: "確認",
         cancel: "キャンセル",
         success: "削除成功！",
-        info: "削除がキャンセルされました"
+        info: "削除がキャンセルされました",
       },
       success: "権限の更新に成功しました！",
-      error: "権限の更新に失敗しました！"
+      error: "権限の更新に失敗しました！",
     },
     confirm: {
       deleteTitle: "削除の確認",
@@ -124,8 +124,8 @@ export default {
       removeMemberTitle: "メンバー削除の確認",
       removeMemberMessage: "このメンバーを削除してもよろしいですか？",
       confirm: "確認",
-      cancel: "キャンセル"
-    }
+      cancel: "キャンセル",
+    },
   },
   game: {
     index: {
@@ -143,8 +143,8 @@ export default {
           confirm: "確認",
           cancel: "キャンセル",
           success: "削除成功",
-          info: "変更がキャンセルされました"
-        }
+          info: "変更がキャンセルされました",
+        },
       },
       success: "追加成功",
       confirm: {
@@ -153,8 +153,8 @@ export default {
         confirm: "確認",
         cancel: "キャンセル",
         success: "削除成功",
-        info: "削除がキャンセルされました"
-      }
+        info: "削除がキャンセルされました",
+      },
     },
     map: {
       title1: "第",
@@ -175,8 +175,8 @@ export default {
           confirm: "確認",
           cancel: "キャンセル",
           success: "削除成功",
-          info: "変更がキャンセルされました"
-        }
+          info: "変更がキャンセルされました",
+        },
       },
       success: "追加成功",
       confirm1: {
@@ -184,7 +184,7 @@ export default {
         confirm: "確認",
         cancel: "キャンセル",
         success: "作成成功",
-        info: "作成がキャンセルされました"
+        info: "作成がキャンセルされました",
       },
       confirm2: {
         message1: "マップを削除しますか？",
@@ -192,7 +192,7 @@ export default {
         confirm: "確認",
         cancel: "キャンセル",
         success: "削除成功",
-        info: "削除がキャンセルされました"
+        info: "削除がキャンセルされました",
       },
       confirm3: {
         message1: "この操作は【レベル】を永久に削除しますが、続行しますか？",
@@ -200,8 +200,8 @@ export default {
         confirm: "確認",
         cancel: "キャンセル",
         success: "削除成功",
-        info: "削除がキャンセルされました"
-      }
+        info: "削除がキャンセルされました",
+      },
     },
     verseDialog: {
       title: "【场景】を選択",
@@ -213,14 +213,14 @@ export default {
         message2: "ヒント",
         confirm: "確認",
         cancel: "キャンセル",
-        info: "入力がキャンセルされました"
-      }
-    }
+        info: "入力がキャンセルされました",
+      },
+    },
   },
   MrppHeader: {
     sortByName: "名前で並び替え",
     sortByTime: "時間で並び替え",
-    search: "名前を検索"
+    search: "名前を検索",
   },
   tags: {
     refresh: "更新",
@@ -228,12 +228,12 @@ export default {
     closeOthers: "他を閉じる",
     closeLeft: "左側を閉じる",
     closeRight: "右側を閉じる",
-    closeAll: "すべて閉じる"
+    closeAll: "すべて閉じる",
   },
   navbar: {
     logout: "ログアウト",
     AccountSetting: "アカウント設定",
-    helpSupport: "サポート"
+    helpSupport: "サポート",
   },
   sizeSelect: {
     tooltip: "レイアウトサイズ",
@@ -241,18 +241,18 @@ export default {
     large: "大",
     small: "小",
     message: {
-      success: "レイアウトサイズの切り替えに成功しました！"
-    }
+      success: "レイアウトサイズの切り替えに成功しました！",
+    },
   },
   copy: {
     title: "コピー",
     success: "コードがクリップボードにコピーされました",
-    error: "コピーに失敗しました"
+    error: "コピーに失敗しました",
   },
   langSelect: {
     message: {
-      success: "言語切り替えに成功しました！"
-    }
+      success: "言語切り替えに成功しました！",
+    },
   },
   settings: {
     project: "プロジェクト設定",
@@ -263,12 +263,12 @@ export default {
     tagsView: "Tags-Viewを有効化",
     fixedHeader: "固定ヘッダー",
     sidebarLogo: "サイドバーのロゴ",
-    watermark: "透かしを有効化"
+    watermark: "透かしを有効化",
   },
   layoutSelect: {
     left: "左側モード",
     top: "上部モード",
-    mix: "ミックスモード"
+    mix: "ミックスモード",
   },
   tts: {
     voiceType: "音声タイプ",
@@ -336,7 +336,7 @@ export default {
     uploadAudio: "音声をアップロード",
     nameRequired: "名前を空にすることはできません",
     noText: "テキストを入力してください",
-    noAudio: "まず音声を合成してください"
+    noAudio: "まず音声を合成してください",
   },
   phototype: {
     title: "プロトタイプ",
@@ -352,12 +352,12 @@ export default {
       previewImage: "プレビュー画像",
       saveBasicFirst: "先に基本情報を保存してください",
       condition: "条件",
-      defaultValue: "デフォルト値"
+      defaultValue: "デフォルト値",
     },
     prompt: {
       message1: "プロトタイプ名を入力してください",
       message2: "ヒント",
-      error1: "プロトタイプ名は空にできません"
+      error1: "プロトタイプ名は空にできません",
     },
     confirm: {
       message1: "この操作でファイルが永久に削除されます。続行しますか？",
@@ -365,7 +365,7 @@ export default {
       confirm: "確認",
       cancel: "キャンセル",
       success: "削除に成功しました！",
-      info: "削除がキャンセルされました"
-    }
-  }
+      info: "削除がキャンセルされました",
+    },
+  },
 };

@@ -5,13 +5,13 @@ export default {
       morning: "早上好，",
       noon: "中午好，",
       afternoon: "下午好，",
-      evening: "晚上好，"
+      evening: "晚上好，",
     },
     header: {
-      subtitle: "探索 AR 的無限可能，開啟您的創意之旅。"
+      subtitle: "探索 AR 的無限可能，開啟您的創意之旅。",
     },
     announcements: {
-      title: "平台公告"
+      title: "平台公告",
     },
     myCreation: {
       title: "我的創作",
@@ -21,25 +21,25 @@ export default {
       myProject: "場景",
       myPublish: "發布",
       myLike: "點贊",
-      enter: "進入"
+      enter: "進入",
     },
     quickStart: {
       title: "快速開始",
       upload: {
         title: "上傳素材",
         desc: "匯入 3D 模型或多媒體檔案到您的個人庫中。",
-        action: "立即上傳"
+        action: "立即上傳",
       },
       edit: {
         title: "編輯實體",
         desc: "管理互動元件和行為腳本，賦予 AR 資產生命力。",
-        action: "立即編輯"
+        action: "立即編輯",
       },
       create: {
         title: "建立場景",
         desc: "從零開始建構一個全新的沉浸式 AR 互動體驗。",
-        action: "立即建立"
-      }
+        action: "立即建立",
+      },
     },
     edit: {
       personalData: "個人資料",
@@ -85,7 +85,7 @@ export default {
         error2: "上傳頭像圖片大小不能超過 2MB!",
         error3: "請選擇有效的文件！",
         error4: "處理文件時出錯",
-        success: "修改頭像成功"
+        success: "修改頭像成功",
       },
       rules: {
         nickname: {
@@ -95,7 +95,7 @@ export default {
           error2: "昵稱僅支持中文、字母、數字、下劃線",
           error3: "昵稱更新失敗",
           error4: "表單校驗未通過",
-          success: "昵稱更新成功"
+          success: "昵稱更新成功",
         },
         industry: {
           message: "請選擇行業",
@@ -105,27 +105,27 @@ export default {
           label4: "能源、製造業",
           label5: "農、林、漁、牧",
           label6: "服務業",
-          label7: "其他行業"
+          label7: "其他行業",
         },
         selectedOptions: {
-          message: "請選擇居住地"
+          message: "請選擇居住地",
         },
         textarea: {
           message1: "請輸入個人簡介",
-          message2: "個人簡介應多於10個字符"
+          message2: "個人簡介應多於10個字符",
         },
         success: "信息更新成功",
         error1: "信息更新失敗",
         error2: "表單校驗未通過",
         email: {
           required: "請輸入郵箱地址",
-          invalid: "郵箱格式不正確"
+          invalid: "郵箱格式不正確",
         },
         code: {
           required: "請輸入驗證碼",
-          invalid: "驗證碼必須是6位數字"
-        }
-      }
+          invalid: "驗證碼必須是6位數字",
+        },
+      },
     },
     account: {
       title: "賬號設置",
@@ -133,7 +133,7 @@ export default {
       label1: "郵箱",
       rules1: {
         message1: "請輸入郵箱",
-        message2: "請輸入正確的郵箱地址"
+        message2: "請輸入正確的郵箱地址",
       },
       placeholder: "綁定郵箱",
       bind: "綁定",
@@ -150,27 +150,27 @@ export default {
           message1: "請輸入舊密碼",
           message2: "舊密碼長度應該大於6",
           error1: "舊密碼不能為空",
-          error2: "新密碼不能和舊密碼一致！"
+          error2: "新密碼不能和舊密碼一致！",
         },
         new: {
-          error2: "新密碼不能和舊密碼一致！"
+          error2: "新密碼不能和舊密碼一致！",
         },
         check: {
           message1: "請輸入校驗密碼",
           error1: "請再次輸入密碼",
-          error2: "兩次輸入密碼不一致"
-        }
+          error2: "兩次輸入密碼不一致",
+        },
       },
       validate1: {
         success: "密碼修改成功",
         error1: "密碼修改失敗",
-        error2: "表單校驗未通過"
+        error2: "表單校驗未通過",
       },
       validate2: {
         success: "綁定成功",
         error1: "綁定失敗",
-        error2: "表單校驗未通過"
-      }
-    }
-  }
+        error2: "表單校驗未通過",
+      },
+    },
+  },
 };

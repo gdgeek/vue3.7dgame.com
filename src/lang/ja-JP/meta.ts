@@ -27,20 +27,20 @@ export default {
       columns: {
         name: "エンティティ名",
         author: "作成者",
-        updatedAt: "更新日"
+        updatedAt: "更新日",
       },
       properties: {
         type: "種類",
         entity: "エンティティ",
-        author: "作成者"
-      }
+        author: "作成者",
+      },
     },
     create: {
       title: "エンティティを作成",
       defaultName: "新しいエンティティ",
       namePlaceholder: "エンティティ名を入力してください",
       nameRequired: "エンティティ名は空にできません",
-      success: "エンティティの作成に成功しました"
+      success: "エンティティの作成に成功しました",
     },
     confirm: {
       message1:
@@ -49,7 +49,7 @@ export default {
       confirm: "確認",
       cancel: "キャンセル",
       success: "削除に成功しました！",
-      info: "削除をキャンセルしました"
+      info: "削除をキャンセルしました",
     },
     prompt: {
       message1: "エンティティ名を入力してください",
@@ -57,21 +57,21 @@ export default {
       confirm: "確認",
       cancel: "キャンセル",
       success: "エンティティ名は：",
-      info: "入力をキャンセルしました"
+      info: "入力をキャンセルしました",
     },
     prompt2: {
       message1: "新しい名前を入力してください",
-      message2: "エンティティ名を変更する"
+      message2: "エンティティ名を変更する",
     },
     metaEdit: {
       form: {
         title: "名前",
-        picture: "画像"
+        picture: "画像",
       },
       contentEdit: "内容編集",
       rules: {
         message1: "名前を入力してください",
-        message2: "長さは2〜20文字である必要があります"
+        message2: "長さは2〜20文字である必要があります",
       },
       success: "保存成功",
       imageSelector: {
@@ -86,12 +86,12 @@ export default {
         imageTooLarge: "画像サイズは2MBを超えることはできません",
         handlerError: "ファイルハンドラの取得に失敗しました",
         uploadFailed: "画像のアップロードに失敗しました",
-        saveFailed: "画像情報の保存に失敗しました"
+        saveFailed: "画像情報の保存に失敗しました",
       },
       image: {
         updateSuccess: "画像更新成功",
-        updateError: "画像更新に失敗しました"
-      }
+        updateError: "画像更新に失敗しました",
+      },
     },
     scene: {
       error: "エディターがありません",
@@ -103,7 +103,7 @@ export default {
         "カバー画像アップロードエラー：画像データが見つかりません",
       handlerError: "ファイルハンドラの取得に失敗しました",
       coverUploadSuccess: "カバー画像アップロード成功",
-      coverUploadFailed: "カバー画像アップロードに失敗しました"
+      coverUploadFailed: "カバー画像アップロードに失敗しました",
     },
     script: {
       title: "スクリプト",
@@ -119,8 +119,8 @@ export default {
         confirm: "はい",
         cancel: "いいえ",
         error: "保存に失敗しました",
-        info: "保存されていない変更は破棄されました"
-      }
+        info: "保存されていない変更は破棄されました",
+      },
     },
     ResourceDialog: {
       title: "リソースを選択",
@@ -139,10 +139,10 @@ export default {
           message2: "リソースをデプロイ",
           confirm: "確認",
           cancel: "キャンセル",
-          success: "デプロイ成功！"
-        }
-      }
-    }
+          success: "デプロイ成功！",
+        },
+      },
+    },
   },
   ai: {
     generation: {
@@ -157,12 +157,12 @@ export default {
           value1: "高",
           value2: "中",
           value3: "低",
-          value4: "極めて低い"
+          value4: "極めて低い",
         },
         message: "長さは4から50文字である必要があります",
         error: "プロンプトを入力するか、画像を選択してください",
-        submit: "生成"
-      }
-    }
-  }
+        submit: "生成",
+      },
+    },
+  },
 };

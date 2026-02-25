@@ -5,14 +5,14 @@ export default {
       morning: "Good morning,",
       noon: "Good noon,",
       afternoon: "Good afternoon,",
-      evening: "Good evening,"
+      evening: "Good evening,",
     },
     header: {
       subtitle:
-        "Explore the infinite possibilities of AR and start your creative journey."
+        "Explore the infinite possibilities of AR and start your creative journey.",
     },
     announcements: {
-      title: "Announcements"
+      title: "Announcements",
     },
     myCreation: {
       title: "Creation",
@@ -22,25 +22,25 @@ export default {
       myProject: "Project",
       myPublish: "Publish",
       myLike: "Like",
-      enter: "Enter"
+      enter: "Enter",
     },
     quickStart: {
       title: "Quick Start",
       upload: {
         title: "Upload Assets",
         desc: "Import 3D models or multimedia files into your personal library.",
-        action: "Upload Now"
+        action: "Upload Now",
       },
       edit: {
         title: "Edit Entities",
         desc: "Manage interactive components and behavior scripts for your AR assets.",
-        action: "Edit Now"
+        action: "Edit Now",
       },
       create: {
         title: "Create Scene",
         desc: "Build a brand-new immersive AR interactive experience from scratch.",
-        action: "Create Now"
-      }
+        action: "Create Now",
+      },
     },
     edit: {
       personalData: "Personal Data",
@@ -89,7 +89,7 @@ export default {
         error2: "Avatar image size cannot exceed 2MB!",
         error3: "Please select a valid file!",
         error4: "Error processing the file",
-        success: "Avatar updated successfully"
+        success: "Avatar updated successfully",
       },
       rules: {
         nickname: {
@@ -100,7 +100,7 @@ export default {
             "The nickname only supports Chinese characters, letters, numbers, and underscores",
           error3: "Nickname update failed",
           error4: "Form validation failed",
-          success: "Nickname updated successfully"
+          success: "Nickname updated successfully",
         },
         industry: {
           message: "Please select an industry",
@@ -110,27 +110,27 @@ export default {
           label4: "Energy, Manufacturing",
           label5: "Agriculture, Forestry, Fishing, Animal Husbandry",
           label6: "Services industry",
-          label7: "Other industries"
+          label7: "Other industries",
         },
         selectedOptions: {
-          message: "Please select a place of residence"
+          message: "Please select a place of residence",
         },
         textarea: {
           message1: "Please enter a personal profile",
-          message2: "The personal profile should be more than 10 characters"
+          message2: "The personal profile should be more than 10 characters",
         },
         success: "Information updated successfully",
         error1: "Information update failed",
         error2: "Form validation failed",
         email: {
           required: "Please enter email address",
-          invalid: "Invalid email format"
+          invalid: "Invalid email format",
         },
         code: {
           required: "Please enter verification code",
-          invalid: "Verification code must be 6 digits"
-        }
-      }
+          invalid: "Verification code must be 6 digits",
+        },
+      },
     },
     account: {
       title: "Account Settings",
@@ -138,7 +138,7 @@ export default {
       label1: "Email",
       rules1: {
         message1: "Please enter your email",
-        message2: "Please enter a valid email address"
+        message2: "Please enter a valid email address",
       },
       placeholder: "Bind Email",
       bind: "Bind",
@@ -155,27 +155,27 @@ export default {
           message1: "Please enter the old password",
           message2: "The old password must be longer than 6 characters",
           error1: "Old password cannot be empty",
-          error2: "New password cannot be the same as the old one!"
+          error2: "New password cannot be the same as the old one!",
         },
         new: {
-          error2: "New password cannot be the same as the old one!"
+          error2: "New password cannot be the same as the old one!",
         },
         check: {
           message1: "Please enter the confirmation password",
           error1: "Please re-enter the password",
-          error2: "The two passwords do not match"
-        }
+          error2: "The two passwords do not match",
+        },
       },
       validate1: {
         success: "Password changed successfully",
         error1: "Password change failed",
-        error2: "Form validation failed"
+        error2: "Form validation failed",
       },
       validate2: {
         success: "Email bound successfully",
         error1: "Email binding failed",
-        error2: "Form validation failed"
-      }
-    }
-  }
+        error2: "Form validation failed",
+      },
+    },
+  },
 };

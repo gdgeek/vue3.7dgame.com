@@ -27,20 +27,20 @@ export default {
       columns: {
         name: "實體名稱",
         author: "作者",
-        updatedAt: "修改日期"
+        updatedAt: "修改日期",
       },
       properties: {
         type: "類型",
         entity: "實體",
-        author: "作者"
-      }
+        author: "作者",
+      },
     },
     create: {
       title: "創建實體",
       defaultName: "新實體",
       namePlaceholder: "請輸入實體名稱",
       nameRequired: "實體名稱不能為空",
-      success: "實體創建成功"
+      success: "實體創建成功",
     },
     confirm: {
       message1: "此操作將永久刪除該【實體】, 是否繼續?",
@@ -48,7 +48,7 @@ export default {
       confirm: "確認",
       cancel: "取消",
       success: "刪除成功！",
-      info: "已取消刪除"
+      info: "已取消刪除",
     },
     prompt: {
       message1: "請輸入實體名稱",
@@ -56,21 +56,21 @@ export default {
       confirm: "確認",
       cancel: "取消",
       success: "實體名稱是: ",
-      info: "取消輸入"
+      info: "取消輸入",
     },
     prompt2: {
       message1: "請輸入新名稱",
-      message2: "修改實體名稱"
+      message2: "修改實體名稱",
     },
     metaEdit: {
       form: {
         title: "名稱",
-        picture: "圖片"
+        picture: "圖片",
       },
       contentEdit: "內容編輯",
       rules: {
         message1: "請輸入名稱",
-        message2: "長度在 2 到 20 個字符"
+        message2: "長度在 2 到 20 個字符",
       },
       success: "保存成功e",
       selectImageMethod: "選擇圖片方式",
@@ -78,8 +78,8 @@ export default {
       uploadLocal: "本地上傳",
       image: {
         updateSuccess: "圖片更新成功",
-        updateError: "圖片更新失敗"
-      }
+        updateError: "圖片更新失敗",
+      },
     },
     scene: {
       error: "沒有場景編輯器",
@@ -90,7 +90,7 @@ export default {
       coverUploadError: "上傳封面圖片錯誤：未找到圖片數據",
       handlerError: "獲取文件處理器失敗",
       coverUploadSuccess: "封面圖片上傳成功",
-      coverUploadFailed: "封面圖片上傳失敗"
+      coverUploadFailed: "封面圖片上傳失敗",
     },
     script: {
       title: "腳本",
@@ -106,8 +106,8 @@ export default {
         confirm: "是",
         cancel: "否",
         error: "保存失敗",
-        info: "已放棄對未保存的更改"
-      }
+        info: "已放棄對未保存的更改",
+      },
     },
     ResourceDialog: {
       title: "選擇資源",
@@ -125,10 +125,10 @@ export default {
           message2: "部署資源",
           confirm: "確認",
           cancel: "取消",
-          success: "部署成功！"
-        }
-      }
-    }
+          success: "部署成功！",
+        },
+      },
+    },
   },
   ai: {
     generation: {
@@ -143,12 +143,12 @@ export default {
           value1: "高",
           value2: "中",
           value3: "低",
-          value4: "極低"
+          value4: "極低",
         },
         message: "長度應為 4 到 50 個字符",
         error: "請輸入提示或選擇圖像",
-        submit: "生成"
-      }
-    }
-  }
+        submit: "生成",
+      },
+    },
+  },
 };

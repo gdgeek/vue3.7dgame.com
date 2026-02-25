@@ -2,7 +2,7 @@
 export default {
   verse: {
     create: {
-      defaultName: "ฉากใหม่"
+      defaultName: "ฉากใหม่",
     },
     listPage: {
       myScenes: "ฉากของฉัน",
@@ -46,7 +46,7 @@ export default {
       deleteConfirmMessage: "คุณแน่ใจหรือไม่ว่าต้องการลบฉากนี้",
       deleteConfirmTitle: "ลบฉาก",
       cancelInfo: "ยกเลิกแล้ว",
-      unnamed: "ไม่มีชื่อ"
+      unnamed: "ไม่มีชื่อ",
     },
     publicPage: {
       examplesTitle: "ตัวอย่างฉาก",
@@ -56,7 +56,7 @@ export default {
       viewExample: "ดูตัวอย่างนี้",
       noDescription: "ไม่มีคำอธิบาย",
       allCategory: "ทั้งหมด",
-      updatedTime: "เวลาแก้ไข"
+      updatedTime: "เวลาแก้ไข",
     },
     page: {
       dialogTitle: "สร้าง!【ฉาก】",
@@ -71,14 +71,14 @@ export default {
         dialogSubmit: "ตกลง",
         rules: {
           message1: "กรุณากรอกชื่อกิจกรรม",
-          message2: "ความยาวระหว่าง 3 ถึง 64 ตัวอักษร"
+          message2: "ความยาวระหว่าง 3 ถึง 64 ตัวอักษร",
         },
-        error: "การตรวจสอบแบบฟอร์มล้มเหลว"
+        error: "การตรวจสอบแบบฟอร์มล้มเหลว",
       },
       list: {
         infoContent: {
           author: "ผู้เขียน",
-          description: "คำอธิบาย"
+          description: "คำอธิบาย",
         },
         releaseConfirm: {
           message1: "ยืนยันที่จะเผยแพร่ฉากนี้หรือไม่?",
@@ -86,7 +86,7 @@ export default {
           confirm: "ยืนยัน",
           cancel: "ยกเลิก",
           success: "เผยแพร่สำเร็จ",
-          info: "ยกเลิกแล้ว"
+          info: "ยกเลิกแล้ว",
         },
         toolbar: {
           dialogTitle: "แก้ไขข้อมูล",
@@ -98,17 +98,17 @@ export default {
             confirm: "ยืนยัน",
             cancel: "ยกเลิก",
             success: "ลบสำเร็จ!",
-            info: "ยกเลิกการลบแล้ว"
+            info: "ยกเลิกการลบแล้ว",
           },
           success: "แก้ไขสำเร็จ!",
           changeError: "แก้ไขล้มเหลว!",
           qrcode: {
             cancel: "ยกเลิก",
             dialogTitle1: "กรุณาใช้อุปกรณ์สแกน QR Code เพื่อเข้าสู่",
-            dialogTitle2: "กรุณาใช้อุปกรณ์สแกน QR Code เพื่อเข้าสู่ฉาก"
-          }
-        }
-      }
+            dialogTitle2: "กรุณาใช้อุปกรณ์สแกน QR Code เพื่อเข้าสู่ฉาก",
+          },
+        },
+      },
     },
     view: {
       header: "แก้ไขข้อมูล",
@@ -127,8 +127,8 @@ export default {
           message2: "ความยาวระหว่าง 2 ถึง 10 ตัวอักษร",
           message3: "กรุณากรอกชื่อ",
           message4: "ความยาวระหว่าง 2 ถึง 50 ตัวอักษร",
-          message5: "กรุณากรอกคำแนะนำ"
-        }
+          message5: "กรุณากรอกคำแนะนำ",
+        },
       },
       edit: "แก้ไข【ฉาก】",
       eye: "ดู【ฉาก】",
@@ -149,7 +149,7 @@ export default {
           confirm: "ยืนยัน",
           cancel: "ยกเลิก",
           success: "ลบแท็กสำเร็จ",
-          error: "ยกเลิกการลบแท็ก"
+          error: "ยกเลิกการลบแท็ก",
         },
         confirmAdd: {
           message: "ยืนยันเพิ่มแท็ก?",
@@ -157,8 +157,8 @@ export default {
           confirm: "ยืนยัน",
           cancel: "ยกเลิก",
           success: "เพิ่มแท็กสำเร็จ",
-          error: "ยกเลิกการเพิ่มแท็ก"
-        }
+          error: "ยกเลิกการเพิ่มแท็ก",
+        },
       },
       metaDialog: {
         title: "เลือกเอนทิตี",
@@ -171,8 +171,8 @@ export default {
           message: "แจ้งเตือน",
           confirm: "ตกลง",
           cancel: "ยกเลิก",
-          info: "ยกเลิกการป้อนข้อมูล"
-        }
+          info: "ยกเลิกการป้อนข้อมูล",
+        },
       },
       prefabDialog: {
         title: "เลือกข้อมูลพรีเซ็ต",
@@ -183,14 +183,14 @@ export default {
           message: "แจ้งเตือน",
           confirm: "ตกลง",
           cancel: "ยกเลิก",
-          info: "ยกเลิกการป้อนข้อมูล"
+          info: "ยกเลิกการป้อนข้อมูล",
         },
         knight: {
           title: "ป้อนข้อมูล",
           save: "บันทึก",
           cancel: "ยกเลิก",
-          warn: "คลิกยกเลิกแล้ว"
-        }
+          warn: "คลิกยกเลิกแล้ว",
+        },
       },
       sceneEditor: {
         error1: "ไม่มีตัวแก้ไขฉาก",
@@ -208,7 +208,7 @@ export default {
         coverUploadError: "ข้อผิดพลาดในการอัปโหลดรูปปก: ไม่พบข้อมูลรูปภาพ",
         handlerError: "รับตัวจัดการไฟล์ล้มเหลว",
         coverUploadSuccess: "อัปโหลดรูปปกสำเร็จ",
-        coverUploadFailed: "อัปโหลดรูปปกล้มเหลว"
+        coverUploadFailed: "อัปโหลดรูปปกล้มเหลว",
       },
       script: {
         title: "สคริปต์",
@@ -226,20 +226,20 @@ export default {
           confirm: "ใช่",
           cancel: "ไม่",
           error: "บันทึกล้มเหลว",
-          info: "ละทิ้งการเปลี่ยนแปลงที่ยังไม่ได้บันทึก"
-        }
+          info: "ละทิ้งการเปลี่ยนแปลงที่ยังไม่ได้บันทึก",
+        },
       },
       public: {
         open: "สาธารณะ",
         private: "ส่วนตัว",
         addSuccess: "ตั้งค่าเป็นสาธารณะแล้ว",
         removeSuccess: "ตั้งค่าเป็นส่วนตัวแล้ว",
-        error: "การดำเนินการล้มเหลว"
+        error: "การดำเนินการล้มเหลว",
       },
       image: {
         updateSuccess: "อัปเดตรูปภาพสำเร็จ",
-        updateError: "อัปเดตรูปภาพล้มเหลว"
-      }
-    }
-  }
+        updateError: "อัปเดตรูปภาพล้มเหลว",
+      },
+    },
+  },
 };

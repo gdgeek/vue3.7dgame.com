@@ -2,7 +2,7 @@
 export default {
   verse: {
     create: {
-      defaultName: "New Scene"
+      defaultName: "New Scene",
     },
     listPage: {
       myScenes: "My Scenes",
@@ -46,7 +46,7 @@ export default {
       deleteConfirmMessage: "Are you sure you want to delete this scene?",
       deleteConfirmTitle: "Delete Scene",
       cancelInfo: "Cancelled",
-      unnamed: "Untitled"
+      unnamed: "Untitled",
     },
     publicPage: {
       examplesTitle: "Scene Examples",
@@ -56,7 +56,7 @@ export default {
       viewExample: "View This Example",
       noDescription: "No description",
       allCategory: "All",
-      updatedTime: "Updated Time"
+      updatedTime: "Updated Time",
     },
     page: {
       dialogTitle: "Create!【Project】",
@@ -71,14 +71,14 @@ export default {
         dialogSubmit: "Confirm",
         rules: {
           message1: "Please enter an activity name",
-          message2: "Length should be between 3 and 64 characters"
+          message2: "Length should be between 3 and 64 characters",
         },
-        error: "Form validation failed"
+        error: "Form validation failed",
       },
       list: {
         infoContent: {
           author: "Author",
-          description: "Description"
+          description: "Description",
         },
         releaseConfirm: {
           message1: "Are you sure you want to release this project?",
@@ -86,7 +86,7 @@ export default {
           confirm: "Confirm",
           cancel: "Cancel",
           success: "Release successful",
-          info: "Cancelled"
+          info: "Cancelled",
         },
         toolbar: {
           dialogTitle: "Edit Data",
@@ -98,7 +98,7 @@ export default {
             confirm: "Confirm",
             cancel: "Cancel",
             success: "Deleted successfully!",
-            info: "Deletion canceled"
+            info: "Deletion canceled",
           },
           success: "Modified successfully!",
           changeError: "Modified failed!",
@@ -106,10 +106,10 @@ export default {
             cancel: "Cancel",
             dialogTitle1: "Please use a device to scan the QR code to enter",
             dialogTitle2:
-              "Please use a device to scan the QR code to enter the scene."
-          }
-        }
-      }
+              "Please use a device to scan the QR code to enter the scene.",
+          },
+        },
+      },
     },
     view: {
       header: "Edit Information",
@@ -128,14 +128,14 @@ export default {
           message2: "Length should be between 2 and 10 characters",
           message3: "Please enter a name",
           message4: "Length should be between 2 and 50 characters",
-          message5: "Please enter a description"
-        }
+          message5: "Please enter a description",
+        },
       },
       edit: "Edit【Project】",
       eye: "View【Project】",
       info: {
         title: "Scene Information",
-        download: "Download"
+        download: "Download",
       },
       verseOpen: "Open【Project】",
       verseClose: "Close【Project】",
@@ -153,7 +153,7 @@ export default {
           confirm: "Confirm",
           cancel: "Cancel",
           success: "Tag deleted successfully",
-          error: "Tag deletion cancelled"
+          error: "Tag deletion cancelled",
         },
         confirmAdd: {
           message: "Confirm add tag?",
@@ -161,8 +161,8 @@ export default {
           confirm: "Confirm",
           cancel: "Cancel",
           success: "Tag added successfully",
-          error: "Tag addition cancelled"
-        }
+          error: "Tag addition cancelled",
+        },
       },
       metaDialog: {
         title: "Select Entity",
@@ -175,8 +175,8 @@ export default {
           message: "Prompt",
           confirm: "Confirm",
           cancel: "Cancel",
-          info: "Cancel Input"
-        }
+          info: "Cancel Input",
+        },
       },
       prefabDialog: {
         title: "Select Prefab Data",
@@ -187,14 +187,14 @@ export default {
           message: "Prompt",
           confirm: "Confirm",
           cancel: "Cancel",
-          info: "Cancel Input"
+          info: "Cancel Input",
         },
         knight: {
           title: "Input Data",
           save: "Save",
           cancel: "Cancel",
-          warn: "Clicked Cancel"
-        }
+          warn: "Clicked Cancel",
+        },
       },
       sceneEditor: {
         error1: "No editor available",
@@ -212,7 +212,7 @@ export default {
         coverUploadError: "Cover upload error: Image data not found",
         handlerError: "Failed to get file handler",
         coverUploadSuccess: "Cover image uploaded successfully",
-        coverUploadFailed: "Failed to upload cover image"
+        coverUploadFailed: "Failed to upload cover image",
       },
       script: {
         title: "Script",
@@ -230,20 +230,20 @@ export default {
           confirm: "Yes",
           cancel: "No",
           error: "Save failed",
-          info: "Unsaved changes have been discarded"
-        }
+          info: "Unsaved changes have been discarded",
+        },
       },
       public: {
         open: "Public",
         private: "Private",
         addSuccess: "Set to public",
         removeSuccess: "Set to private",
-        error: "Operation failed"
+        error: "Operation failed",
       },
       image: {
         updateSuccess: "Image updated successfully",
-        updateError: "Failed to update image"
-      }
-    }
-  }
+        updateError: "Failed to update image",
+      },
+    },
+  },
 };

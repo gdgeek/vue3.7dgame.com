@@ -27,20 +27,20 @@ export default {
       columns: {
         name: "ชื่อเอนทิตี",
         author: "ผู้เขียน",
-        updatedAt: "วันที่แก้ไข"
+        updatedAt: "วันที่แก้ไข",
       },
       properties: {
         type: "ประเภท",
         entity: "เอนทิตี",
-        author: "ผู้เขียน"
-      }
+        author: "ผู้เขียน",
+      },
     },
     create: {
       title: "สร้างเอนทิตี",
       defaultName: "เอนทิตีใหม่",
       namePlaceholder: "กรุณากรอกชื่อเอนทิตี",
       nameRequired: "ชื่อเอนทิตีต้องไม่ว่างเปล่า",
-      success: "สร้างเอนทิตีสำเร็จ"
+      success: "สร้างเอนทิตีสำเร็จ",
     },
     confirm: {
       message1:
@@ -49,7 +49,7 @@ export default {
       confirm: "ยืนยัน",
       cancel: "ยกเลิก",
       success: "ลบสำเร็จ!",
-      info: "ยกเลิกการลบแล้ว"
+      info: "ยกเลิกการลบแล้ว",
     },
     prompt: {
       message1: "กรุณากรอกชื่อเอนทิตี",
@@ -57,21 +57,21 @@ export default {
       confirm: "ยืนยัน",
       cancel: "ยกเลิก",
       success: "ชื่อเอนทิตีคือ: ",
-      info: "ยกเลิกการป้อนข้อมูล"
+      info: "ยกเลิกการป้อนข้อมูล",
     },
     prompt2: {
       message1: "กรุณากรอกชื่อใหม่",
-      message2: "แก้ไขชื่อเอนทิตี"
+      message2: "แก้ไขชื่อเอนทิตี",
     },
     metaEdit: {
       form: {
         title: "ชื่อ",
-        picture: "รูปภาพ"
+        picture: "รูปภาพ",
       },
       contentEdit: "แก้ไขเนื้อหา",
       rules: {
         message1: "กรุณากรอกชื่อ",
-        message2: "ความยาวระหว่าง 2 ถึง 20 ตัวอักษร"
+        message2: "ความยาวระหว่าง 2 ถึง 20 ตัวอักษร",
       },
       success: "บันทึกสำเร็จ",
       selectImageMethod: "เลือกวิธีรูปภาพ",
@@ -79,8 +79,8 @@ export default {
       uploadLocal: "อัปโหลดจากเครื่อง",
       image: {
         updateSuccess: "อัปเดตรูปภาพสำเร็จ",
-        updateError: "อัปเดตรูปภาพล้มเหลว"
-      }
+        updateError: "อัปเดตรูปภาพล้มเหลว",
+      },
     },
     scene: {
       error: "ไม่มีตัวแก้ไขฉาก",
@@ -91,7 +91,7 @@ export default {
       coverUploadError: "ข้อผิดพลาดในการอัปโหลดรูปปก: ไม่พบข้อมูลรูปภาพ",
       handlerError: "รับตัวจัดการไฟล์ล้มเหลว",
       coverUploadSuccess: "อัปโหลดรูปปกสำเร็จ",
-      coverUploadFailed: "อัปโหลดรูปปกล้มเหลว"
+      coverUploadFailed: "อัปโหลดรูปปกล้มเหลว",
     },
     script: {
       title: "สคริปต์",
@@ -107,8 +107,8 @@ export default {
         confirm: "ใช่",
         cancel: "ไม่",
         error: "บันทึกล้มเหลว",
-        info: "ละทิ้งการเปลี่ยนแปลงที่ยังไม่ได้บันทึก"
-      }
+        info: "ละทิ้งการเปลี่ยนแปลงที่ยังไม่ได้บันทึก",
+      },
     },
     ResourceDialog: {
       title: "เลือกทรัพยากร",
@@ -127,10 +127,10 @@ export default {
           message2: "ปรับใช้ทรัพยากร",
           confirm: "ยืนยัน",
           cancel: "ยกเลิก",
-          success: "ปรับใช้สำเร็จ!"
-        }
-      }
-    }
+          success: "ปรับใช้สำเร็จ!",
+        },
+      },
+    },
   },
   ai: {
     generation: {
@@ -145,12 +145,12 @@ export default {
           value1: "สูง",
           value2: "กลาง",
           value3: "ต่ำ",
-          value4: "ต่ำมาก"
+          value4: "ต่ำมาก",
         },
         message: "ความยาวควรอยู่ระหว่าง 4 ถึง 50 ตัวอักษร",
         error: "กรุณาป้อนคำสั่งหรือเลือกรูปภาพ",
-        submit: "สร้าง"
-      }
-    }
-  }
+        submit: "สร้าง",
+      },
+    },
+  },
 };

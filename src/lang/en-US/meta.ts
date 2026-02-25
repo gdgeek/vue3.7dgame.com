@@ -27,20 +27,20 @@ export default {
       columns: {
         name: "Entity Name",
         author: "Author",
-        updatedAt: "Updated At"
+        updatedAt: "Updated At",
       },
       properties: {
         type: "Type",
         entity: "Entity",
-        author: "Author"
-      }
+        author: "Author",
+      },
     },
     create: {
       title: "Create Entity",
       defaultName: "New Entity",
       namePlaceholder: "Please enter entity name",
       nameRequired: "Entity name cannot be empty",
-      success: "Entity created successfully"
+      success: "Entity created successfully",
     },
     confirm: {
       message1:
@@ -49,7 +49,7 @@ export default {
       confirm: "Confirm",
       cancel: "Cancel",
       success: "Deleted successfully!",
-      info: "Deletion canceled"
+      info: "Deletion canceled",
     },
     prompt: {
       message1: "Please enter entity name",
@@ -57,11 +57,11 @@ export default {
       confirm: "Confirm",
       cancel: "Cancel",
       success: "Entity name is: ",
-      info: "Cancel input"
+      info: "Cancel input",
     },
     prompt2: {
       message1: "Please enter a new name",
-      message2: "Edit entity name"
+      message2: "Edit entity name",
     },
     prompt4: {
       message1: "Please enter the tag name",
@@ -71,10 +71,10 @@ export default {
       inputValidator: {
         item1: "Tag name cannot be empty",
         item2: "Tag name cannot be less than 3 characters",
-        item3: "Tag name cannot be more than 20 characters"
+        item3: "Tag name cannot be more than 20 characters",
       },
       success: "The tag name is: ",
-      info: "cancel input"
+      info: "cancel input",
     },
     prompt5: {
       message1: "Please enter the tag description",
@@ -84,20 +84,20 @@ export default {
       inputValidator: {
         item1: "Tag description cannot be empty",
         item2: "Tag description cannot be less than 3 characters",
-        item3: "Tag description cannot be more than 200 characters"
+        item3: "Tag description cannot be more than 200 characters",
       },
       success: "The tag description is: ",
-      info: "cancel input"
+      info: "cancel input",
     },
     metaEdit: {
       form: {
         title: "Name",
-        picture: "Picture"
+        picture: "Picture",
       },
       contentEdit: "Content Editing",
       rules: {
         message1: "Please enter a name",
-        message2: "Length should be between 2 and 20 characters"
+        message2: "Length should be between 2 and 20 characters",
       },
       success: "Saved successfully",
       selectImageMethod: "Select Image Method",
@@ -105,8 +105,8 @@ export default {
       uploadLocal: "Upload from Local",
       image: {
         updateSuccess: "Image updated successfully",
-        updateError: "Failed to update image"
-      }
+        updateError: "Failed to update image",
+      },
     },
     scene: {
       error: "No scene editor",
@@ -117,7 +117,7 @@ export default {
       coverUploadError: "Cover upload error: Image data not found",
       handlerError: "Failed to get file handler",
       coverUploadSuccess: "Cover image uploaded successfully",
-      coverUploadFailed: "Failed to upload cover image"
+      coverUploadFailed: "Failed to upload cover image",
     },
     script: {
       title: "Script",
@@ -133,8 +133,8 @@ export default {
         confirm: "Yes",
         cancel: "No",
         error: "Save failed",
-        info: "Unsaved changes have been discarded"
-      }
+        info: "Unsaved changes have been discarded",
+      },
     },
     ResourceDialog: {
       title: "Select Resource",
@@ -153,12 +153,12 @@ export default {
           message2: "Deploy Resource",
           confirm: "Confirm",
           cancel: "Cancel",
-          success: "Deployed successfully!"
-        }
+          success: "Deployed successfully!",
+        },
       },
       selectAll: "Select All",
-      deselectAll: "Deselect All"
-    }
+      deselectAll: "Deselect All",
+    },
   },
   ai: {
     generation: {
@@ -173,12 +173,12 @@ export default {
           value1: "High",
           value2: "Medium",
           value3: "Low",
-          value4: "Extra Low"
+          value4: "Extra Low",
         },
         message: "Length should be between 4 and 50 characters",
         error: "Please input the prompt or select the image",
-        submit: "Generate"
-      }
-    }
-  }
+        submit: "Generate",
+      },
+    },
+  },
 };

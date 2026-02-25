@@ -28,13 +28,13 @@ export default {
     updateFailed: "Update failed",
     invalidData: "Invalid data",
     button: {
-      save: "Save"
+      save: "Save",
     },
     message: {
       createSuccess: "Created successfully",
       saveSuccess: "Saved successfully",
-      saveFailed: "Save failed"
-    }
+      saveFailed: "Save failed",
+    },
   },
   errorPage: {
     back: "Back",
@@ -46,7 +46,7 @@ export default {
     backHome: "Back to Home",
     justLook: "Just Browse",
     clickToSee: "Click to see",
-    justLookTitle: "Just Browse"
+    justLookTitle: "Just Browse",
   },
   sidebar: {
     home: "Home",
@@ -71,7 +71,7 @@ export default {
     logoutConfirmTitle: "Sign Out",
     logoutConfirmMessage: "Are you sure you want to sign out?",
     logoutConfirmDesc:
-      "You need to log in again to access your account after signing out."
+      "You need to log in again to access your account after signing out.",
   },
   breadcrumb: {
     workspace: "Workspace",
@@ -80,7 +80,7 @@ export default {
     videoTutorial: "Video Tutorial",
     settings: "Settings",
     profile: "Profile",
-    accountSecurity: "Account Security"
+    accountSecurity: "Account Security",
   },
   ui: {
     personalSettings: "Personal Settings",
@@ -148,17 +148,17 @@ export default {
     transformTitle: "Object Transform",
     scale: "Scale",
     rotation: "Rotation",
-    position: "Position"
+    position: "Position",
   },
   request: {
     loginExpired: "Login expired, please log in again",
     networkError: "Network error, please check your internet connection",
     serverError: "Internal server error, please try again later",
-    error404: "Request failed, resource not found (404)"
+    error404: "Request failed, resource not found (404)",
   },
   emailVerification: {
     codeSent: "Verification code has been sent to your email",
-    verifySuccess: "Email verified successfully"
+    verifySuccess: "Email verified successfully",
   },
   web: {
     login: "Login",
@@ -166,7 +166,7 @@ export default {
       home: "Home",
       tutorial: "Tutorials",
       authorization: "Authorization",
-      forum: "Rokid Forum"
+      forum: "Rokid Forum",
     },
     hero: {
       loading: "Loading...",
@@ -178,7 +178,7 @@ export default {
       buildArApps: "Build AR apps quickly",
       watchDemo: "Watch Demo",
       scrollDown: "Scroll down to learn more",
-      introVideo: "Introduction Video"
+      introVideo: "Introduction Video",
     },
     news: {
       loadFailed: "Failed to load, please try again later",
@@ -201,7 +201,7 @@ export default {
       newsCategory: "News",
       tutorialCategory: "Tutorials",
       relatedContent: "Related Content",
-      videoTutorial: "Video Tutorial Content"
+      videoTutorial: "Video Tutorial Content",
     },
     buy: {
       title: "How to Get Platform Authorization",
@@ -223,7 +223,7 @@ export default {
       contactUnlock: "Please contact us to unlock your device after purchase",
       scanQrCode: "Scan the QR code to enter the store",
       purchase: "Purchase",
-      confirm: "Confirm"
-    }
-  }
+      confirm: "Confirm",
+    },
+  },
 };

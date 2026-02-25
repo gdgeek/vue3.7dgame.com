@@ -13,16 +13,16 @@ export default {
     rules: {
       username: {
         message1: "Please enter your username",
-        email: "Please enter a valid email address"
+        email: "Please enter a valid email address",
       },
       password: {
         message1: "Please enter your password",
-        message2: "Between 12 and 128 characters"
+        message2: "Between 12 and 128 characters",
       },
       repassword: {
         message1: "Please enter the password again",
-        message2: "The two passwords do not match"
-      }
+        message2: "The two passwords do not match",
+      },
     },
     success: "Login Successful",
     error: "Form Validation Failed",
@@ -40,7 +40,7 @@ export default {
       confirm: "Confirm",
       cancel: "Cancel",
       title: "Logging out",
-      text: "Logging out this session from the server"
+      text: "Logging out this session from the server",
     },
     back: "Back",
     abandonRegisterConfirm: "Are you sure you want to abandon registration?",
@@ -48,7 +48,7 @@ export default {
     abandonRegisterConfirmButton: "Confirm",
     abandonRegisterCancelButton: "Continue registration",
     loginResponseMissingToken: "The login response is missing the access_token",
-    qrcodeFetchFailed: "Failed to get WeChat QR code, please try again later"
+    qrcodeFetchFailed: "Failed to get WeChat QR code, please try again later",
   },
   passwordPolicy: {
     minLength: "At least 12 characters",
@@ -60,8 +60,8 @@ export default {
     strength: {
       weak: "Weak",
       medium: "Medium",
-      strong: "Strong"
-    }
+      strong: "Strong",
+    },
   },
   imageSelector: {
     selectImageMethod: "Select Image Method",
@@ -69,6 +69,6 @@ export default {
     selectFromResourceDesc: "Select from uploaded image resources",
     uploadLocal: "Upload Local Image",
     uploadLocalDesc: "Upload a new image file",
-    uploadFile: "Upload File"
-  }
+    uploadFile: "Upload File",
+  },
 };

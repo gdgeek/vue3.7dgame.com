@@ -13,16 +13,16 @@ export default {
     rules: {
       username: {
         message1: "ユーザー名を入力してください",
-        email: "有効な電子メールアドレスを入力してください"
+        email: "有効な電子メールアドレスを入力してください",
       },
       password: {
         message1: "パスワードを入力してください",
-        message2: "パスワードは12〜128文字で入力してください"
+        message2: "パスワードは12〜128文字で入力してください",
       },
       repassword: {
         message1: "もう一度パスワードを入力してください",
-        message2: "2回入力したパスワードが一致しません"
-      }
+        message2: "2回入力したパスワードが一致しません",
+      },
     },
     success: "ログイン成功",
     error: "フォーム検証に失敗しました",
@@ -41,7 +41,7 @@ export default {
       confirm: "確認",
       cancel: "キャンセル",
       title: "ログアウト中",
-      text: "サーバーからこのセッションをログアウトしています"
+      text: "サーバーからこのセッションをログアウトしています",
     },
     back: "戻る",
     abandonRegisterConfirm: "登録を中止しますか？",
@@ -50,7 +50,7 @@ export default {
     abandonRegisterCancelButton: "登録を続行",
     loginResponseMissingToken: "ログインレスポンスに access_token がありません",
     qrcodeFetchFailed:
-      "WeChatのQRコード取得に失敗しました。しばらくしてからお試しください"
+      "WeChatのQRコード取得に失敗しました。しばらくしてからお試しください",
   },
   passwordPolicy: {
     minLength: "12文字以上",
@@ -62,8 +62,8 @@ export default {
     strength: {
       weak: "弱い",
       medium: "普通",
-      strong: "強い"
-    }
+      strong: "強い",
+    },
   },
   imageSelector: {
     selectImageMethod: "画像選択方法",
@@ -71,6 +71,6 @@ export default {
     selectFromResourceDesc: "アップロード済みの画像リソースから選択",
     uploadLocal: "ローカル画像をアップロード",
     uploadLocalDesc: "新しい画像ファイルをアップロード",
-    uploadFile: "ファイルをアップロード"
-  }
+    uploadFile: "ファイルをアップロード",
+  },
 };

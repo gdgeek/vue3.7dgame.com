@@ -47,20 +47,14 @@ function subtitle(): string {
 }
 const environment = {
   ip: GetIP(),
-  api: ReplaceURL(
-    window.__API_URL__ ||
-      import.meta.env.VITE_APP_API_URL ||
-      ""
-  ),
+  api: ReplaceURL(window.__API_URL__ || import.meta.env.VITE_APP_API_URL || ""),
   doc: ReplaceURL(import.meta.env.VITE_APP_DOC_API || ""),
   blockly: ReplaceURL(import.meta.env.VITE_APP_BLOCKLY_URL || ""),
   editor: ReplaceURL(import.meta.env.VITE_APP_EDITOR_URL || ""),
   auth_api: ReplaceURL(import.meta.env.VITE_APP_AUTH_API || ""),
   ai: ReplaceURL(import.meta.env.VITE_APP_AI_API || ""),
   backup_api: ReplaceURL(
-    window.__BACKUP_API_URL__ ||
-      import.meta.env.VITE_APP_BACKUP_API_URL ||
-      ""
+    window.__BACKUP_API_URL__ || import.meta.env.VITE_APP_BACKUP_API_URL || ""
   ),
   domain_info: ReplaceURL(
     window.__DOMAIN_INFO_API_URL__ ||

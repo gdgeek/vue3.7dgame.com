@@ -1,8 +1,6 @@
 export default {
   campus: {
-    student: {
-    },
-    form: {
-    }
-  }
+    student: {},
+    form: {},
+  },
 };

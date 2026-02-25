@@ -14,16 +14,16 @@ export default {
     rules: {
       username: {
         message1: "กรุณากรอกชื่อผู้ใช้",
-        email: "กรุณากรอกที่อยู่อีเมลที่ถูกต้อง"
+        email: "กรุณากรอกที่อยู่อีเมลที่ถูกต้อง",
       },
       password: {
         message1: "กรุณากรอกรหัสผ่าน",
-        message2: "รหัสผ่านต้องมีความยาว 12~128 ตัวอักษร"
+        message2: "รหัสผ่านต้องมีความยาว 12~128 ตัวอักษร",
       },
       repassword: {
         message1: "กรุณากรอกรหัสผ่านอีกครั้ง",
-        message2: "รหัสผ่านที่ป้อนสองครั้งไม่ตรงกัน"
-      }
+        message2: "รหัสผ่านที่ป้อนสองครั้งไม่ตรงกัน",
+      },
     },
     success: "เข้าสู่ระบบสำเร็จ",
     error: "การตรวจสอบแบบฟอร์มไม่ผ่าน",
@@ -41,7 +41,7 @@ export default {
       confirm: "ตกลง",
       cancel: "ยกเลิก",
       title: "กำลังออกจากระบบ",
-      text: "กำลังออกจากระบบจากเซิร์ฟเวอร์"
+      text: "กำลังออกจากระบบจากเซิร์ฟเวอร์",
     },
     back: "กลับ",
     loginResponseMissingToken: "การตอบกลับการเข้าสู่ระบบขาด access_token",
@@ -49,7 +49,7 @@ export default {
     abandonRegisterTitle: "คำเตือน",
     abandonRegisterConfirmButton: "ยืนยัน",
     abandonRegisterCancelButton: "สมัครต่อ",
-    qrcodeFetchFailed: "ไม่สามารถรับ QR code ได้ กรุณาลองใหม่อีกครั้ง"
+    qrcodeFetchFailed: "ไม่สามารถรับ QR code ได้ กรุณาลองใหม่อีกครั้ง",
   },
   passwordPolicy: {
     minLength: "อย่างน้อย 12 ตัวอักษร",
@@ -61,8 +61,8 @@ export default {
     strength: {
       weak: "อ่อน",
       medium: "ปานกลาง",
-      strong: "แข็งแกร่ง"
-    }
+      strong: "แข็งแกร่ง",
+    },
   },
   imageSelector: {
     selectImageMethod: "เลือกวิธีการเลือกรูปภาพ",
@@ -70,6 +70,6 @@ export default {
     selectFromResourceDesc: "เลือกจากทรัพยากรรูปภาพที่อัปโหลดแล้ว",
     uploadLocal: "อัปโหลดรูปภาพจากเครื่อง",
     uploadLocalDesc: "อัปโหลดไฟล์รูปภาพใหม่",
-    uploadFile: "อัปโหลดไฟล์"
-  }
+    uploadFile: "อัปโหลดไฟล์",
+  },
 };

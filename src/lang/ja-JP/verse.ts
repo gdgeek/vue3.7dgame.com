@@ -2,7 +2,7 @@
 export default {
   verse: {
     create: {
-      defaultName: "新しいシーン"
+      defaultName: "新しいシーン",
     },
     listPage: {
       myScenes: "マイシーン",
@@ -46,7 +46,7 @@ export default {
       deleteConfirmMessage: "このシーンを削除してもよろしいですか？",
       deleteConfirmTitle: "シーンを削除",
       cancelInfo: "キャンセルしました",
-      unnamed: "無題"
+      unnamed: "無題",
     },
     publicPage: {
       examplesTitle: "シーン例",
@@ -56,7 +56,7 @@ export default {
       viewExample: "このサンプルを見る",
       noDescription: "説明なし",
       allCategory: "すべて",
-      updatedTime: "更新日時"
+      updatedTime: "更新日時",
     },
     page: {
       dialogTitle: "作成！【场景】",
@@ -71,14 +71,14 @@ export default {
         dialogSubmit: "確認",
         rules: {
           message1: "イベント名を入力してください",
-          message2: "長さは3〜64文字である必要があります"
+          message2: "長さは3〜64文字である必要があります",
         },
-        error: "フォーム検証に失敗しました"
+        error: "フォーム検証に失敗しました",
       },
       list: {
         infoContent: {
           author: "作者",
-          description: "説明"
+          description: "説明",
         },
         releaseConfirm: {
           message1: "このプロジェクトを公開しますか？",
@@ -86,7 +86,7 @@ export default {
           confirm: "確認",
           cancel: "キャンセル",
           success: "公開に成功しました",
-          info: "キャンセルされました"
+          info: "キャンセルされました",
         },
         toolbar: {
           dialogTitle: "データを変更",
@@ -97,17 +97,17 @@ export default {
             confirm: "確認",
             cancel: "キャンセル",
             success: "削除成功！",
-            info: "削除がキャンセルされました"
+            info: "削除がキャンセルされました",
           },
           success: "変更成功！",
           changeError: "変更に失敗しました！",
           qrcode: {
             cancel: "キャンセル",
             dialogTitle1: "デバイスでQRコードをスキャンして入ります",
-            dialogTitle2: "デバイスでQRコードをスキャンしてシーンに入ります。"
-          }
-        }
-      }
+            dialogTitle2: "デバイスでQRコードをスキャンしてシーンに入ります。",
+          },
+        },
+      },
     },
     view: {
       header: "情報を変更",
@@ -126,8 +126,8 @@ export default {
           message2: "長さは2〜10文字である必要があります",
           message3: "名前を入力してください",
           message4: "長さは2〜50文字である必要があります",
-          message5: "紹介を入力してください"
-        }
+          message5: "紹介を入力してください",
+        },
       },
       edit: "【场景】を編集",
       eye: "【场景】を表示",
@@ -148,7 +148,7 @@ export default {
           confirm: "確認",
           cancel: "キャンセル",
           success: "タグが正常に削除されました",
-          error: "タグの削除がキャンセルされました"
+          error: "タグの削除がキャンセルされました",
         },
         confirmAdd: {
           message: "タグを追加しますか？",
@@ -156,8 +156,8 @@ export default {
           confirm: "確認",
           cancel: "キャンセル",
           success: "タグが正常に追加されました",
-          error: "タグの追加がキャンセルされました"
-        }
+          error: "タグの追加がキャンセルされました",
+        },
       },
       metaDialog: {
         title: "メタデータを選択",
@@ -170,8 +170,8 @@ export default {
           message: "ヒント",
           confirm: "確認",
           cancel: "キャンセル",
-          info: "入力がキャンセルされました"
-        }
+          info: "入力がキャンセルされました",
+        },
       },
       prefabDialog: {
         title: "プリセットデータを選択",
@@ -182,14 +182,14 @@ export default {
           message: "ヒント",
           confirm: "確認",
           cancel: "キャンセル",
-          info: "入力がキャンセルされました"
+          info: "入力がキャンセルされました",
         },
         knight: {
           title: "データ入力",
           save: "保存",
           cancel: "キャンセル",
-          warn: "キャンセルがクリックされました"
-        }
+          warn: "キャンセルがクリックされました",
+        },
       },
       sceneEditor: {
         error1: "エディターがありません",
@@ -208,7 +208,7 @@ export default {
           "カバー画像アップロードエラー：画像データが見つかりません",
         handlerError: "ファイルハンドラの取得に失敗しました",
         coverUploadSuccess: "カバー画像アップロード成功",
-        coverUploadFailed: "カバー画像アップロードに失敗しました"
+        coverUploadFailed: "カバー画像アップロードに失敗しました",
       },
       script: {
         title: "スクリプト",
@@ -226,20 +226,20 @@ export default {
           confirm: "はい",
           cancel: "いいえ",
           error: "保存に失敗しました",
-          info: "保存されていない変更は破棄されました"
-        }
+          info: "保存されていない変更は破棄されました",
+        },
       },
       public: {
         open: "公開",
         private: "非公開",
         addSuccess: "公開に設定しました",
         removeSuccess: "非公開に設定しました",
-        error: "操作に失敗しました"
+        error: "操作に失敗しました",
       },
       image: {
         updateSuccess: "画像が正常に更新されました",
-        updateError: "画像の更新に失敗しました"
-      }
-    }
-  }
+        updateError: "画像の更新に失敗しました",
+      },
+    },
+  },
 };

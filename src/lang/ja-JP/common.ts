@@ -27,13 +27,13 @@ export default {
     updateFailed: "更新に失敗しました",
     invalidData: "データが無効です",
     button: {
-      save: "保存"
+      save: "保存",
     },
     message: {
       createSuccess: "作成成功",
       saveSuccess: "保存成功",
-      saveFailed: "保存に失敗しました"
-    }
+      saveFailed: "保存に失敗しました",
+    },
   },
   errorPage: {
     back: "戻る",
@@ -45,7 +45,7 @@ export default {
     backHome: "ホームに戻る",
     justLook: "見るだけ",
     clickToSee: "クリックして表示",
-    justLookTitle: "見るだけ"
+    justLookTitle: "見るだけ",
   },
   sidebar: {
     home: "ホーム",
@@ -70,7 +70,7 @@ export default {
     logoutConfirmTitle: "ログアウト",
     logoutConfirmMessage: "ログアウトしてもよろしいですか？",
     logoutConfirmDesc:
-      "ログアウト後、アカウントにアクセスするには再度ログインが必要です。"
+      "ログアウト後、アカウントにアクセスするには再度ログインが必要です。",
   },
   breadcrumb: {
     workspace: "ワークスペース",
@@ -79,7 +79,7 @@ export default {
     videoTutorial: "動画チュートリアル",
     settings: "設定",
     profile: "プロフィール",
-    accountSecurity: "アカウントセキュリティ"
+    accountSecurity: "アカウントセキュリティ",
   },
   ui: {
     personalSettings: "個人設定",
@@ -146,17 +146,17 @@ export default {
     transformTitle: "オブジェクト変換",
     scale: "スケール",
     rotation: "回転",
-    position: "位置"
+    position: "位置",
   },
   request: {
     loginExpired: "ログインの有効期限が切れました。再度ログインしてください",
     networkError: "ネットワークエラーです。ネットワーク接続を確認してください",
     serverError: "サーバー内部エラーです。しばらくしてから再度お試しください",
-    error404: "リクエストに失敗しました。リソースが見つかりません (404)"
+    error404: "リクエストに失敗しました。リソースが見つかりません (404)",
   },
   emailVerification: {
     codeSent: "認証コードがメールアドレスに送信されました",
-    verifySuccess: "メール認証に成功しました"
+    verifySuccess: "メール認証に成功しました",
   },
   web: {
     login: "ログイン",
@@ -164,7 +164,7 @@ export default {
       home: "ホーム",
       tutorial: "チュートリアル",
       authorization: "認証",
-      forum: "Rokid フォーラム"
+      forum: "Rokid フォーラム",
     },
     hero: {
       loading: "読み込み中...",
@@ -176,7 +176,7 @@ export default {
       buildArApps: "ARアプリを素早く構築",
       watchDemo: "デモを見る",
       scrollDown: "下にスクロールして詳細を確認",
-      introVideo: "紹介ビデオ"
+      introVideo: "紹介ビデオ",
     },
     news: {
       loadFailed: "読み込みに失敗しました。後でもう一度お試しください",
@@ -200,7 +200,7 @@ export default {
       newsCategory: "ニュース",
       tutorialCategory: "チュートリアル",
       relatedContent: "関連コンテンツ",
-      videoTutorial: "ビデオチュートリアル"
+      videoTutorial: "ビデオチュートリアル",
     },
     buy: {
       title: "プラットフォーム認証の取得方法",
@@ -222,7 +222,7 @@ export default {
       contactUnlock: "購入後、デバイスのロック解除についてお問い合わせください",
       scanQrCode: "QRコードをスキャンしてストアに入る",
       purchase: "購入",
-      confirm: "確認"
-    }
-  }
+      confirm: "確認",
+    },
+  },
 };
