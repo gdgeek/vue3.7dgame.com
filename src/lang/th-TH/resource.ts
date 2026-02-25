@@ -7,19 +7,6 @@ export default {
     typeName: "วอกเซล",
     initializeVoxelData: "เริ่มต้นข้อมูลวอกเซล",
     viewVoxel: "ดูวอกเซล",
-    initializingModels: "กำลังเริ่มต้นวอกเซล...",
-    initializingModelProgress:
-      "กำลังเริ่มต้นวอกเซล {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "เริ่มต้นวอกเซลสำเร็จ {count} รายการ",
-    partialInitializeSuccess:
-      "ผลการเริ่มต้น: สำเร็จ {success}, ล้มเหลว {failed} (ทั้งหมด {total})",
-    retryInitializeFailed:
-      "ลองใหม่สำหรับวอกเซลที่ล้มเหลว {count} รายการหรือไม่?",
-    retryTitle: "ลองเริ่มต้นใหม่",
-    retryConfirm: "ลองใหม่",
-    retryCancel: "ข้าม",
-    initializeSuccess: "เริ่มต้นวอกเซลสำเร็จ",
-    initializeError: "เริ่มต้นวอกเซลล้มเหลว",
     prompt: {
       message1: "กรุณากรอกชื่อใหม่",
       message2: "แก้ไขชื่อวอกเซล",
@@ -48,7 +35,6 @@ export default {
         item2: "ผู้สร้าง",
         item3: "เวลาที่สร้าง",
         item4: "ขนาดไฟล์",
-        size: "ไบต์",
         item5: "ขนาดโมเดล",
         item6: "จุดศูนย์กลางโมเดล",
         item7: "จำนวนวอกเซล",
@@ -102,21 +88,6 @@ export default {
     typeName: "โมเดล",
     selectPageSuccess: "เลือกโมเดลทั้งหมด {count} รายการในหน้านี้แล้ว",
     cancelSelectPageSuccess: "ยกเลิกการเลือกทั้งหมดในหน้านี้แล้ว",
-    initializePolygenData: "เริ่มต้นข้อมูลโมเดล",
-    initializeAll: "เริ่มต้นโมเดลทั้งหมด",
-    initializingModels: "กำลังเริ่มต้นโมเดล...",
-    initializingModelProgress:
-      "กำลังเริ่มต้นโมเดล {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "เริ่มต้นโมเดลสำเร็จ {count} รายการ",
-    partialInitializeSuccess:
-      "ผลการเริ่มต้น: สำเร็จ {success}, ล้มเหลว {failed} (ทั้งหมด {total})",
-    retryInitializeFailed:
-      "ลองใหม่สำหรับโมเดลที่ล้มเหลว {count} รายการหรือไม่?",
-    retryTitle: "ลองเริ่มต้นใหม่",
-    retryConfirm: "ลองใหม่",
-    retryCancel: "ข้าม",
-    initializeSuccess: "เริ่มต้นโมเดลสำเร็จ",
-    initializeError: "เริ่มต้นโมเดลล้มเหลว",
     viewPolygen: "ดูโมเดล",
     prompt: {
       message1: "กรุณากรอกชื่อใหม่",
@@ -137,7 +108,6 @@ export default {
     uploadFile: "เลือกโมเดล (.glb) และอัปโหลด",
     view: {
       title: "ชื่อโมเดล: ",
-      titleStatement: "ใช้โมเดลนี้สร้าง【ฉาก】",
       info: {
         title: "ข้อมูลโมเดล",
         label1: "รายการ",
@@ -146,22 +116,11 @@ export default {
         item2: "ผู้สร้าง",
         item3: "เวลาที่สร้าง",
         item4: "ขนาดไฟล์",
-        size: "ไบต์",
         item5: "ขนาดโมเดล",
         item6: "จุดศูนย์กลางโมเดล",
         name: "เปลี่ยนชื่อ",
         delete: "ลบ",
         download: "ดาวน์โหลด",
-      },
-      prompt: {
-        message1: "ใช้โมเดลนี้สร้าง【ฉาก】",
-        message2: "แจ้งเตือน",
-        confirm: "ยืนยัน",
-        cancel: "ยกเลิก",
-        inputError: "กรุณากรอกชื่อที่เกี่ยวข้อง",
-        success: "คุณสร้างฉากใหม่: ",
-        error: "สร้างล้มเหลว: ",
-        info: "ยกเลิกการป้อนข้อมูล",
       },
       confirm: {
         message1:
@@ -185,30 +144,10 @@ export default {
         error: "ดาวน์โหลดล้มเหลว: ",
       },
     },
-    animation: {
-      animationOn: "เปิดแอนิเมชัน",
-      animationOff: "ปิดแอนิเมชัน",
-      shadowOn: "เปิดเงา",
-      shadowOff: "ปิดเงา",
-    },
   },
   picture: {
     uploadPicture: "อัปโหลดรูปภาพ",
-    initializePictureData: "เริ่มต้นข้อมูลรูปภาพ",
     viewPicture: "ดูรูปภาพ",
-    initializingModels: "กำลังเริ่มต้นรูปภาพ...",
-    initializingModelProgress:
-      "กำลังเริ่มต้นรูปภาพ {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "เริ่มต้นรูปภาพสำเร็จ {count} รายการ",
-    partialInitializeSuccess:
-      "ผลการเริ่มต้น: สำเร็จ {success}, ล้มเหลว {failed} (ทั้งหมด {total})",
-    retryInitializeFailed:
-      "ลองใหม่สำหรับรูปภาพที่ล้มเหลว {count} รายการหรือไม่?",
-    retryTitle: "ลองเริ่มต้นใหม่",
-    retryConfirm: "ลองใหม่",
-    retryCancel: "ข้าม",
-    initializeSuccess: "เริ่มต้นรูปภาพสำเร็จ",
-    initializeError: "เริ่มต้นรูปภาพล้มเหลว",
     prompt: {
       message1: "กรุณากรอกชื่อใหม่",
       message2: "แก้ไขชื่อรูปภาพ",
@@ -237,20 +176,10 @@ export default {
         item2: "ผู้สร้าง",
         item3: "เวลาที่สร้าง",
         item4: "ขนาดไฟล์",
-        size: "ไบต์",
         item5: "ขนาดรูปภาพ",
         name: "เปลี่ยนชื่อ",
         delete: "ลบ",
         download: "ดาวน์โหลด",
-      },
-      confirm: {
-        message1:
-          "การดำเนินการนี้จะลบไฟล์อย่างถาวร ต้องการดำเนินการต่อหรือไม่?",
-        message2: "แจ้งเตือน",
-        confirm: "ยืนยัน",
-        cancel: "ยกเลิก",
-        success: "ลบสำเร็จ!",
-        info: "ยกเลิกการลบแล้ว",
       },
       namePrompt: {
         message1: "กรุณากรอกชื่อใหม่",
@@ -275,21 +204,7 @@ export default {
     deleteText: "ลบวิดีโอนี้",
     resourceName: "วิดีโอ",
     typeName: "วิดีโอ",
-    initializeVideoData: "เริ่มต้นข้อมูลวิดีโอ",
     viewVideo: "ดูวิดีโอ",
-    initializingModels: "กำลังเริ่มต้นวิดีโอ...",
-    initializingModelProgress:
-      "กำลังเริ่มต้นวิดีโอ {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "เริ่มต้นวิดีโอสำเร็จ {count} รายการ",
-    partialInitializeSuccess:
-      "ผลการเริ่มต้น: สำเร็จ {success}, ล้มเหลว {failed} (ทั้งหมด {total})",
-    retryInitializeFailed:
-      "ลองใหม่สำหรับวิดีโอที่ล้มเหลว {count} รายการหรือไม่?",
-    retryTitle: "ลองเริ่มต้นใหม่",
-    retryConfirm: "ลองใหม่",
-    retryCancel: "ข้าม",
-    initializeSuccess: "เริ่มต้นวิดีโอสำเร็จ",
-    initializeError: "เริ่มต้นวิดีโอล้มเหลว",
     prompt: {
       message1: "กรุณากรอกชื่อใหม่",
       message2: "แก้ไขชื่อวิดีโอ",
@@ -317,7 +232,6 @@ export default {
         item2: "ผู้สร้าง",
         item3: "เวลาที่สร้าง",
         item4: "ขนาดไฟล์",
-        size: "ไบต์",
         item5: "ขนาดวิดีโอ",
         item6: "ความยาว",
         name: "เปลี่ยนชื่อ",
@@ -349,21 +263,7 @@ export default {
   },
   audio: {
     uploadAudio: "อัปโหลดเสียง",
-    initializeAudioData: "เริ่มต้นข้อมูลเสียง",
     viewAudio: "ดูเสียง",
-    initializingModels: "กำลังเริ่มต้นเสียง...",
-    initializingModelProgress:
-      "กำลังเริ่มต้นเสียง {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "เริ่มต้นเสียงสำเร็จ {count} รายการ",
-    partialInitializeSuccess:
-      "ผลการเริ่มต้น: สำเร็จ {success}, ล้มเหลว {failed} (ทั้งหมด {total})",
-    retryInitializeFailed:
-      "ลองใหม่สำหรับเสียงที่ล้มเหลว {count} รายการหรือไม่?",
-    retryTitle: "ลองเริ่มต้นใหม่",
-    retryConfirm: "ลองใหม่",
-    retryCancel: "ข้าม",
-    initializeSuccess: "เริ่มต้นเสียงสำเร็จ",
-    initializeError: "เริ่มต้นเสียงล้มเหลว",
     prompt: {
       message1: "กรุณากรอกชื่อใหม่",
       message2: "แก้ไขชื่อเสียง",
@@ -393,7 +293,6 @@ export default {
         item3: "เวลาที่สร้าง",
         item4: "ขนาดไฟล์",
         item5: "ความยาว",
-        size: "ไบต์",
         name: "เปลี่ยนชื่อ",
         delete: "ลบ",
         download: "ดาวน์โหลด",
@@ -428,19 +327,6 @@ export default {
     typeName: "พาร์ติเคิล",
     initializeParticleData: "เริ่มต้นข้อมูลเอฟเฟกต์",
     viewParticle: "ดูเอฟเฟกต์",
-    initializingModels: "กำลังเริ่มต้นเอฟเฟกต์...",
-    initializingModelProgress:
-      "กำลังเริ่มต้นเอฟเฟกต์ {current}/{total} ({percentage}%)",
-    batchInitializeSuccess: "เริ่มต้นเอฟเฟกต์สำเร็จ {count} รายการ",
-    partialInitializeSuccess:
-      "ผลการเริ่มต้น: สำเร็จ {success}, ล้มเหลว {failed} (ทั้งหมด {total})",
-    retryInitializeFailed:
-      "ลองใหม่สำหรับเอฟเฟกต์ที่ล้มเหลว {count} รายการหรือไม่?",
-    retryTitle: "ลองเริ่มต้นใหม่",
-    retryConfirm: "ลองใหม่",
-    retryCancel: "ข้าม",
-    initializeSuccess: "เริ่มต้นเอฟเฟกต์สำเร็จ",
-    initializeError: "เริ่มต้นเอฟเฟกต์ล้มเหลว",
     prompt: {
       message1: "กรุณากรอกชื่อใหม่",
       message2: "แก้ไขชื่อเอฟเฟกต์",
@@ -469,7 +355,6 @@ export default {
         item2: "ผู้สร้าง",
         item3: "เวลาที่สร้าง",
         item4: "ขนาดไฟล์",
-        size: "ไบต์",
         item5: "ขนาดเอฟเฟกต์",
         item6: "ความยาว",
         name: "เปลี่ยนชื่อ",
