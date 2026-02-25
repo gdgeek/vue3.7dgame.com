@@ -1,11 +1,9 @@
 // 登录页面国际化
 export default {
   login: {
-    title: "不加班AR创造平台",
     register: "平台注册/登录",
     h1: "欢迎！",
     h4: "准备好出发了么？",
-    loginTitle: "登录账号",
     username: "电子信箱",
     password: "设置密码",
     login: "登录",
@@ -15,19 +13,16 @@ export default {
     rules: {
       username: {
         message1: "请输入用户名",
-        message2: "用户名称长度应大于4小于20",
-        message3: "用户名仅支持字母、数字、下划线、@、.",
-        email: "请输入有效的电子邮箱地址",
+        email: "请输入有效的电子邮箱地址"
       },
       password: {
         message1: "请输入密码",
-        message2: "密码长度应为12~128个字符",
-        message3: "密码必须包含大小写字母、数字和特殊字符",
+        message2: "密码长度应为12~128个字符"
       },
       repassword: {
         message1: "请再次输入密码",
-        message2: "两次输入的密码不一致",
-      },
+        message2: "两次输入的密码不一致"
+      }
     },
     success: "登录成功",
     error: "表单检验未通过",
@@ -45,7 +40,7 @@ export default {
       confirm: "确定",
       cancel: "取消",
       title: "正在登出",
-      text: "向服务器注销此次登录",
+      text: "向服务器注销此次登录"
     },
     back: "返回",
     abandonRegisterConfirm: "确认放弃注册？",
@@ -53,7 +48,7 @@ export default {
     abandonRegisterConfirmButton: "确认",
     abandonRegisterCancelButton: "继续注册",
     loginResponseMissingToken: "登录响应缺少 access_token",
-    qrcodeFetchFailed: "获取微信二维码失败，请稍后再试",
+    qrcodeFetchFailed: "获取微信二维码失败，请稍后再试"
   },
   passwordPolicy: {
     minLength: "至少 12 个字符",
@@ -65,10 +60,8 @@ export default {
     strength: {
       weak: "弱",
       medium: "中",
-      strong: "强",
+      strong: "强"
     },
-    description:
-      "密码要求：至少 12 个字符，包含大写字母、小写字母、数字和特殊字符",
   },
   imageSelector: {
     selectImageMethod: "选择图片方式",
@@ -76,6 +69,6 @@ export default {
     selectFromResourceDesc: "从已上传的图片资源中选择",
     uploadLocal: "上传本地图片",
     uploadLocalDesc: "上传新的图片文件",
-    uploadFile: "上传文件",
-  },
+    uploadFile: "上传文件"
+  }
 };

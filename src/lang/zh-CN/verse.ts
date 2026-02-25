@@ -44,7 +44,7 @@ export default {
       deleteConfirmMessage: "确定要删除此场景吗？",
       deleteConfirmTitle: "删除场景",
       cancelInfo: "已取消",
-      unnamed: "未命名",
+      unnamed: "未命名"
     },
     publicPage: {
       examplesTitle: "场景示例",
@@ -54,7 +54,7 @@ export default {
       viewExample: "查看此示例",
       noDescription: "暂无简介",
       allCategory: "全部",
-      updatedTime: "修改时间",
+      updatedTime: "修改时间"
     },
     page: {
       dialogTitle: "创建！【场景】",
@@ -64,25 +64,19 @@ export default {
         picture: "封面图片",
         name: "名称",
         description: "内容说明",
-        course: "绑定教程",
         cancel: "取 消",
         dialogTitle: "选择文件",
         dialogSubmit: "确定",
         rules: {
           message1: "请输入活动名称",
-          message2: "长度在 3 到 64 个字符",
+          message2: "长度在 3 到 64 个字符"
         },
-        error: "表单验证失败",
+        error: "表单验证失败"
       },
       list: {
-        enter: "进入",
-        infoTable: "内容说明：",
         infoContent: {
           author: "作者",
-          learn: "学习",
-          blank: "默认链接",
-          description: "说明",
-          share: "共享ID",
+          description: "说明"
         },
         releaseConfirm: {
           message1: "确定发布该场景吗？",
@@ -90,15 +84,7 @@ export default {
           confirm: "确认",
           cancel: "取消",
           success: "发布成功",
-          info: "已取消",
-        },
-        restrainConfirm: {
-          message1: "确定下线该场景吗？",
-          message2: "提示",
-          confirm: "确认",
-          cancel: "取消",
-          success: "下线成功",
-          info: "已取消",
+          info: "已取消"
         },
         toolbar: {
           dialogTitle: "修改数据",
@@ -109,17 +95,17 @@ export default {
             confirm: "确认",
             cancel: "取消",
             success: "删除成功！",
-            info: "已取消删除",
+            info: "已取消删除"
           },
           success: "修改成功!",
           changeError: "修改失败！",
           qrcode: {
             cancel: "取 消",
             dialogTitle1: "请用设备扫描二维码，进入",
-            dialogTitle2: "请用设备扫描二维码，进入场景。",
-          },
-        },
-      },
+            dialogTitle2: "请用设备扫描二维码，进入场景。"
+          }
+        }
+      }
     },
     view: {
       header: "修改信息",
@@ -138,8 +124,8 @@ export default {
           message2: "长度在 2 到 10 个字符",
           message3: "请输入名称",
           message4: "长度在 2 到 50 个字符",
-          message5: "请输入介绍",
-        },
+          message5: "请输入介绍"
+        }
       },
       edit: "编辑【场景】",
       eye: "查看【场景】",
@@ -149,12 +135,9 @@ export default {
       success1: "修改成功",
       success2: "提交成功",
       success3: "删除成功",
-      success4: "分享成功",
-      success5: "停止共享",
       error1: "提交失败",
       error2: "表单验证失败",
       error3: "预制体 Schema 格式无效",
-      messageTitle: "【场景】名称：",
       scene: "场景",
       tags: {
         confirmRemove: {
@@ -163,7 +146,7 @@ export default {
           confirm: "确认",
           cancel: "取消",
           success: "删除标签成功",
-          error: "取消删除标签",
+          error: "取消删除标签"
         },
         confirmAdd: {
           message: "确认增加标签?",
@@ -171,81 +154,22 @@ export default {
           confirm: "确认",
           cancel: "取消",
           success: "增加标签成功",
-          error: "取消增加标签",
-        },
+          error: "取消增加标签"
+        }
       },
       share: {
-        header1: "共享给其他用户",
-        header2: "修改共享信息",
-        form: {
-          label1: "用户名",
-          label2: "相关信息",
-          label3: "编辑权限",
-          placeholder: "请输入用户名",
-          ruleMessage: "用户名不能为空",
-          label4: "可编辑",
-          confirm: "确 认",
-          cancel: "取 消",
-        },
-        title1: "【场景】共享",
-        title2: "共享给好友",
         confirm: {
-          message1: "是否确认关闭共享？",
-          message2: "提示",
-          confirm: "确认",
-          cancel: "取消",
-          success: "关闭成功！",
-          info: "已取消关闭",
-        },
+        }
       },
       message: {
-        header: "修改内容",
-        loading: "载入...",
-        update: "修改内容",
-        delete: "删除帖子",
-        like: "赞同",
-        edit: "编辑于",
-        message1: "已撤销",
-        message2: "已点赞",
-        confirm: {
-          message1: "是否确定删除？",
-          message2: "提示",
-          confirm: "确认",
-          cancel: "取消",
-          success: "删除成功！",
-          info: "已取消删除",
-        },
       },
       reply: {
-        timestamp: "现在就回复",
-        title: "回复",
-        publish: "发布于",
-        rules: { message1: "请填写内容", message2: "长度至少10个字符" },
-        confirm: {
-          message1: "是否确定删除？",
-          message2: "提示",
-          confirm: "确认",
-          cancel: "取消",
-          success: "删除成功！",
-          info: "已取消删除",
-        },
-        success: "回复成功",
       },
       messageForm: {
         form: {
-          label1: "标题",
-          label2: "内容",
           rules: {
-            title: {
-              message1: "请输入标题",
-              message2: "长度在 3 到 100 个字符",
-            },
-            body: { message1: "请输入内容", message2: "长度至少10个字符" },
-          },
-        },
-        submit: "提交",
-        reset: "重置",
-        success: "发帖成功",
+          }
+        }
       },
       metaDialog: {
         title: "选择实体",
@@ -258,8 +182,8 @@ export default {
           message: "提示",
           confirm: "确定",
           cancel: "取消",
-          info: "取消输入",
-        },
+          info: "取消输入"
+        }
       },
       prefabDialog: {
         title: "选择预设数据",
@@ -270,16 +194,14 @@ export default {
           message: "提示",
           confirm: "确定",
           cancel: "取消",
-          info: "取消输入",
+          info: "取消输入"
         },
         knight: {
           title: "输入数据",
           save: "保存",
           cancel: "取消",
-          warn: "点击了取消",
-          typeTitle: "类型",
-          nameTitle: "物品名称",
-        },
+          warn: "点击了取消"
+        }
       },
       sceneEditor: {
         error1: "没有场景编辑器",
@@ -297,7 +219,7 @@ export default {
         coverUploadError: "上传封面图片错误：未找到图片数据",
         handlerError: "获取文件处理器失败",
         coverUploadSuccess: "封面图片上传成功",
-        coverUploadFailed: "封面图片上传失败",
+        coverUploadFailed: "封面图片上传失败"
       },
       script: {
         title: "脚本",
@@ -314,19 +236,18 @@ export default {
           message2: "提示",
           confirm: "是",
           cancel: "否",
-          success: "保存成功",
           error: "保存失败",
-          info: "已放弃对未保存的更改",
-        },
+          info: "已放弃对未保存的更改"
+        }
       },
       public: {
         open: "公开",
         private: "私有",
         addSuccess: "已设为公开",
         removeSuccess: "已设为私有",
-        error: "操作失败",
+        error: "操作失败"
       },
-      image: { updateSuccess: "图片更新成功", updateError: "图片更新失败" },
-    },
-  },
+      image: { updateSuccess: "图片更新成功", updateError: "图片更新失败" }
+    }
+  }
 };

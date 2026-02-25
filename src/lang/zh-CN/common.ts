@@ -11,15 +11,11 @@ export default {
     noData: "暂无数据",
     enter: "进入",
     back: "返回",
-    comingSoon: "敬请期待",
     open: "打开",
     add: "添加",
-    newest: "最新",
-    oldest: "最早",
     name: "名称",
     description: "描述",
     edit: "编辑",
-    submit: "提交",
     updateSuccess: "更新成功",
     createSuccess: "创建成功",
     createFailed: "创建失败",
@@ -31,13 +27,13 @@ export default {
     updateFailed: "更新失败",
     invalidData: "数据无效",
     button: {
-      save: "保存",
+      save: "保存"
     },
     message: {
       createSuccess: "创建成功",
       saveSuccess: "保存成功",
-      saveFailed: "保存失败",
-    },
+      saveFailed: "保存失败"
+    }
   },
   errorPage: {
     back: "返回",
@@ -49,27 +45,17 @@ export default {
     backHome: "回到首页",
     justLook: "随便逛逛",
     clickToSee: "点击查看",
-    justLookTitle: "随便逛逛",
+    justLookTitle: "随便逛逛"
   },
   request: {
     loginExpired: "登录过期，请重新登录",
     networkError: "网络错误，请检查您的网络连接",
     serverError: "服务器内部错误，请稍后再试",
-    error404: "请求失败，未找到资源 (404)",
-  },
-  errors: {
-    networkError: "网络连接失败，请检查网络",
-    validationError: "请检查输入的信息是否正确",
-    rateLimitExceeded: "请求过于频繁，请 {seconds} 秒后再试",
-    invalidCode: "验证码不正确或已过期",
-    accountLocked: "验证失败次数过多，请 {seconds} 秒后再试",
-    serverError: "服务器错误，请稍后重试",
+    error404: "请求失败，未找到资源 (404)"
   },
   emailVerification: {
     codeSent: "验证码已发送到您的邮箱",
-    verifySuccess: "邮箱验证成功",
-    sendFailed: "发送验证码失败",
-    verifyFailed: "验证失败",
+    verifySuccess: "邮箱验证成功"
   },
   sidebar: {
     home: "主页",
@@ -93,7 +79,7 @@ export default {
     logout: "退出登录",
     logoutConfirmTitle: "退出登录",
     logoutConfirmMessage: "确定要退出登录吗？",
-    logoutConfirmDesc: "退出后需要重新登录才能访问您的账户。",
+    logoutConfirmDesc: "退出后需要重新登录才能访问您的账户。"
   },
   breadcrumb: {
     workspace: "工作台",
@@ -102,7 +88,7 @@ export default {
     videoTutorial: "视频教程",
     settings: "设置",
     profile: "个人资料",
-    accountSecurity: "账号安全",
+    accountSecurity: "账号安全"
   },
   ui: {
     personalSettings: "个人设置",
@@ -135,31 +121,9 @@ export default {
     resolution: "分辨率",
     duration: "时长",
     modelFaces: "模型面数",
-    modifiedDate: "修改日期",
-    uploadResource: "上传资源",
-    dragOrBrowse: "拖拽文件到此处，或点击浏览",
-    multiUploadSupport: "支持多个文件同时上传",
-    browseFiles: "浏览文件",
-    supportedFormats: "支持格式",
-    maxFileSize: "单个文件大小",
-    maxSizeMB: "最大 {size}MB",
-    validatingFiles: "正在校验文件...",
-    uploadingFiles: "正在上传文件...",
-    savingResources: "正在保存资源...",
     preparing: "准备中...",
-    prevPage: "上一页",
-    nextPage: "下一页",
-    pageInfo: "第 {current} 页 / 共 {total} 页",
     filter: "筛选",
-    clearFilter: "清除筛选",
     viewInfo: "查看信息",
-    interfaceStyle: "界面风格",
-    themeColor: "主题色",
-    custom: "自定义",
-    reset: "重置",
-    scanQrLogin: "请使用手机扫描二维码登录",
-    scanQrSubtip: "打开APP扫描二维码快速登录",
-    startNow: "立即",
     importScene: "导入场景",
     dragOrSelectScenePackage: "将场景包拖到此处，或点击选择文件",
     onlyZipScenePackage: "仅支持 .zip 格式的场景包文件",
@@ -188,7 +152,7 @@ export default {
     transformTitle: "定位物体变换",
     scale: "缩放",
     rotation: "旋转",
-    position: "位置",
+    position: "位置"
   },
   web: {
     login: "登录平台",
@@ -196,7 +160,7 @@ export default {
       home: "首页",
       tutorial: "案例教程",
       authorization: "平台授权",
-      forum: "Rokid 论坛",
+      forum: "Rokid 论坛"
     },
     hero: {
       loading: "载入中...",
@@ -208,7 +172,7 @@ export default {
       buildArApps: "快速构建AR应用",
       watchDemo: "观看演示",
       scrollDown: "向下滚动了解更多",
-      introVideo: "介绍视频",
+      introVideo: "介绍视频"
     },
     news: {
       loadFailed: "加载失败，请稍后再试",
@@ -230,7 +194,7 @@ export default {
       newsCategory: "新闻动态",
       tutorialCategory: "案例教程",
       relatedContent: "相关内容",
-      videoTutorial: "视频教程内容",
+      videoTutorial: "视频教程内容"
     },
     buy: {
       title: "如何获得平台授权",
@@ -249,7 +213,7 @@ export default {
       contactUnlock: "购买完成后请联系解锁设备",
       scanQrCode: "请扫小程序码进入商城",
       purchase: "购买",
-      confirm: "确认",
-    },
-  },
+      confirm: "确认"
+    }
+  }
 };

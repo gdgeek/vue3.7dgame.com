@@ -30,109 +30,50 @@ export default {
       inviteTeacherPending: "邀请教师功能暂未开放",
       removeStudentConfirm: "确定要移除该学生吗？",
       removeTeacherConfirm: "确定要移除该教师吗？",
-      removeConfirmTitle: "移除确认",
+      removeConfirmTitle: "移除确认"
     },
-    defaultSchoolName: "新学校",
     defaultClassName: "新班级",
-    filteringBySchool: "当前筛选学校ID",
-    backToAll: "返回所有班级",
     school: {
       principal: "学校管理员",
-      address: "地址",
-      description: "描述",
-      classList: "班级列表",
+      address: "地址"
     },
     class: {
       title: "班级管理",
       schoolTitle: "{school} - 班级管理",
-      grade: "年级",
       teacher: "老师",
-      student: "学生",
       teacherList: "老师列表",
       studentList: "学生列表",
       selectTeacher: "选择教师",
       selectStudent: "选择学生",
-      assignTeacher: "分配老师",
-      assignStudent: "分配学生",
-      dialog: { createTitle: "创建班级", editTitle: "编辑班级" },
+      dialog: { editTitle: "编辑班级" },
       form: {
         name: "班级名称",
         namePlaceholder: "请输入班级名称",
-        image: "班级图片",
+        image: "班级图片"
       },
-      messages: {
-        createConfirm: "确定要创建一个新班级吗？",
-        createSuccess: "班级创建成功",
-        createFailed: "班级创建失败",
-        updateSuccess: "班级更新成功",
-        updateFailed: "班级更新失败",
-        deleteFailed: "班级删除失败",
-        removeTeacherConfirm: "确定要移除该教师吗？",
-        removeTeacherSuccess: "教师移除成功",
-        removeTeacherFailed: "教师移除失败",
-        removeStudentConfirm: "确定要移除该学生吗？",
-        removeStudentSuccess: "学生移除成功",
-        removeStudentFailed: "学生移除失败",
-        selectSchoolFirst: "请先选择学校，再创建班级",
-        assignTeacherSuccess: "分配教师成功",
-        assignStudentSuccess: "分配学生成功",
-        teacherAlreadyInClass: "该教师已在此班级中",
-      },
-      validation: { nameRequired: "请输入班级名称" },
+      validation: { nameRequired: "请输入班级名称" }
     },
     teacher: { subject: "科目", phone: "电话" },
-    student: { grade: "年级", class: "班级" },
-    principal: {
-      assign: "分配学校管理员",
-      selectUser: "选择用户",
-      select: "选择",
-      assignSuccess: "学校管理员分配成功",
-      assignFailed: "学校管理员分配失败",
-      username: "用户名",
-      nickname: "昵称",
-    },
+
     errors: {
-      fetchFailed: "获取学校列表失败",
-      noData: "暂无数据",
-      createPending: "创建功能开发中",
-      editPending: "编辑学校: {name}",
-      operationFailed: "操作失败",
       addFailed: "添加失败",
       saveFailed: "保存失败",
       deleteFailed: "删除失败",
       removeFailed: "移除失败",
       alreadyInClass: "该成员已在该班级中",
-      validationFailed: "表单验证失败",
+      validationFailed: "表单验证失败"
     },
-    dialog: { createTitle: "创建学校", editTitle: "编辑学校" },
     form: {
-      name: "学校名称",
       namePlaceholder: "请输入学校名称",
-      address: "学校地址",
-      addressPlaceholder: "请输入学校地址",
-      principal: "学校管理员",
-      principalPlaceholder: "请选择学校管理员",
-      image: "学校图片",
-      edit: "编辑",
       cancel: "取消",
-      submit: "提交",
-      submitting: "提交中...",
-    },
-    validation: {
-      nameRequired: "请输入学校名称",
-      nameLength: "学校名称长度应在2-50个字符之间",
+      submit: "提交"
     },
     messages: {
       addSuccess: "添加成功",
       removeSuccess: "移除成功",
       deleteSuccess: "删除成功",
-      createConfirm: "确认创建新学校吗？",
       createSuccess: "学校创建成功",
-      createFailed: "学校创建失败",
-      updateSuccess: "学校更新成功",
-      updateFailed: "学校更新失败",
-      deleteFailed: "学校删除失败",
-      clearPrincipalConfirm: "确认要清空学校管理员吗？",
+      updateSuccess: "学校更新成功"
     },
     creator: {
       form: {
@@ -150,19 +91,18 @@ export default {
         error3: "两次输入的密码不一致",
         error4: "表单校验失败",
         cancel: "取 消",
-        submit: "注册账号",
-      },
+        submit: "注册账号"
+      }
     },
     list: {
       label: "权限:",
       cancel: "删除",
-      manage: "管理",
       remove: "移除",
       roles: {
         root: "根用户",
         admin: "超级管理员",
         manager: "管理员",
-        user: "用户",
+        user: "用户"
       },
       confirm: {
         message1: "此操作将永久删除该学校, 是否继续?",
@@ -170,10 +110,10 @@ export default {
         confirm: "确认",
         cancel: "取消",
         success: "删除成功!",
-        info: "已取消删除",
+        info: "已取消删除"
       },
       success: "权限更新成功！",
-      error: "权限更新失败！",
+      error: "权限更新失败！"
     },
     confirm: {
       deleteTitle: "确认删除",
@@ -181,8 +121,8 @@ export default {
       removeMemberTitle: "确认移除",
       removeMemberMessage: "确定要移除该成员吗？",
       confirm: "确认",
-      cancel: "取消",
-    },
+      cancel: "取消"
+    }
   },
   // 游戏部分国际化
   game: {
@@ -201,8 +141,8 @@ export default {
           confirm: "确认",
           cancel: "取消",
           success: "删除成功",
-          info: "已取消修改",
-        },
+          info: "已取消修改"
+        }
       },
       success: "添加成功",
       confirm: {
@@ -211,8 +151,8 @@ export default {
         confirm: "确认",
         cancel: "取消",
         success: "删除成功",
-        info: "已取消删除",
-      },
+        info: "已取消删除"
+      }
     },
     map: {
       title1: "第",
@@ -233,17 +173,16 @@ export default {
           confirm: "确认",
           cancel: "取消",
           success: "删除成功",
-          info: "已取消修改",
-        },
+          info: "已取消修改"
+        }
       },
       success: "添加成功",
       confirm1: {
         message1: "创建地图",
-        message2: "提示",
         confirm: "确认",
         cancel: "取消",
         success: "创建成功",
-        info: "已取消创建",
+        info: "已取消创建"
       },
       confirm2: {
         message1: "删除地图",
@@ -251,7 +190,7 @@ export default {
         confirm: "确认",
         cancel: "取消",
         success: "删除成功",
-        info: "已取消删除",
+        info: "已取消删除"
       },
       confirm3: {
         message1: "此操作将永久删除该【关卡】, 是否继续?",
@@ -259,8 +198,8 @@ export default {
         confirm: "确认",
         cancel: "取消",
         success: "删除成功",
-        info: "已取消删除",
-      },
+        info: "已取消删除"
+      }
     },
     verseDialog: {
       title: "选择【场景】",
@@ -272,15 +211,15 @@ export default {
         message2: "提示",
         confirm: "确认",
         cancel: "取消",
-        info: "取消输入",
-      },
-    },
+        info: "取消输入"
+      }
+    }
   },
   // MrppHeader国际化
   MrppHeader: {
     sortByName: "名称排序",
     sortByTime: "时间排序",
-    search: "搜索名称",
+    search: "搜索名称"
   },
   // tags国际化
   tags: {
@@ -289,22 +228,20 @@ export default {
     closeOthers: "关闭其他",
     closeLeft: "关闭左侧",
     closeRight: "关闭右侧",
-    closeAll: "关闭全部",
+    closeAll: "关闭全部"
   },
   // 导航栏国际化
   navbar: {
-    dashboard: "首页",
     logout: "注销登出",
     AccountSetting: "账号设置",
-    personalCenter: "个人中心",
-    helpSupport: "帮助支持",
+    helpSupport: "帮助支持"
   },
   sizeSelect: {
     tooltip: "布局大小",
     default: "默认",
     large: "大型",
     small: "小型",
-    message: { success: "切换布局大小成功！" },
+    message: { success: "切换布局大小成功！" }
   },
   // 复制
   copy: { title: "复制", success: "代码已复制到剪贴板", error: "复制失败" },
@@ -318,12 +255,11 @@ export default {
     tagsView: "开启 Tags-View",
     fixedHeader: "固定 Header",
     sidebarLogo: "侧边栏 Logo",
-    watermark: "开启水印",
+    watermark: "开启水印"
   },
   layoutSelect: { left: "左侧模式", top: "顶部模式", mix: "混合模式" },
   // TTS语音合成
   tts: {
-    title: "腾讯语音合成",
     voiceType: "音色类型",
     voiceScene: "场景",
     voiceLanguage: "语言",
@@ -385,11 +321,10 @@ export default {
     uploadAudio: "上传音频",
     nameRequired: "名称不能为空",
     noText: "请输入文本",
-    noAudio: "请先合成语音",
+    noAudio: "请先合成语音"
   },
   phototype: {
     title: "原型",
-    list: "列表",
     create: "创建原型",
     fromModel: "从模型",
     typeName: "预制体",
@@ -402,18 +337,12 @@ export default {
       previewImage: "预览图",
       saveBasicFirst: "请先保存基本信息",
       condition: "条件",
-      defaultValue: "默认值",
+      defaultValue: "默认值"
     },
     prompt: {
       message1: "请输入原型名称",
       message2: "提示",
-      error1: "原型名称不能为空",
-      error2: "原型名称长度不能少于3个字符",
-      error3: "原型名称长度不能超过20个字符",
-      success: "原型名称是",
-      confirm: "确认",
-      cancel: "取消",
-      info: "取消输入",
+      error1: "原型名称不能为空"
     },
     confirm: {
       message1: "此操作将永久删除该文件, 是否继续?",
@@ -421,7 +350,7 @@ export default {
       confirm: "确认",
       cancel: "取消",
       success: "删除成功！",
-      info: "已取消删除",
-    },
-  },
+      info: "已取消删除"
+    }
+  }
 };
