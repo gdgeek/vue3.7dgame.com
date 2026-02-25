@@ -316,6 +316,7 @@
 </template>
 
 <script setup lang="ts">
+import { FolderOpened } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";

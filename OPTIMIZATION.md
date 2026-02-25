@@ -51,15 +51,13 @@
 
 ### 高优先级
 
-#### 1. Element Plus 图标真正按需自动导入（预计 -50KB）
-- **当前状态**：`src/plugins/icons.ts` 手动注册 ~30 个图标
-- **建议**：改用 `unplugin-vue-components` `IconsResolver` 实现按需自动导入（`<IEpEdit>` 格式）
-- **注意**：需将全部模板中 `<Edit>`、`<Delete>` 等改为 `<IEpEdit>`、`<IEpDelete>`，改动量较大
-- **相关文件**：`src/plugins/icons.ts`、`vite.config.ts`、所有使用图标组件的 `.vue` 文件
+#### ~~1. Element Plus 图标按需导入~~ ✅ 已完成（2026-02-25）
+删除 `src/plugins/icons.ts` 全局注册，改为在各使用文件中本地 `import { X } from "@element-plus/icons-vue"`。
+额外修复：`web/index.vue` 中字符串动态组件 `<component :is="'Close'">` 原本失效，已改为对象引用。
+涉及文件：11 个 `.vue` 文件 + `src/plugins/index.ts`。
 
-#### 2. 新增图标漏注册风险
-- **当前状态**：新页面使用新图标时若忘记加入 `src/plugins/icons.ts`，图标不显示但不报错
-- **建议**：添加脚本扫描模板中用到的图标组件名，与 `icons.ts` 中注册列表做 diff，集成到 CI
+#### ~~2. 新增图标漏导入检查脚本~~ ✅ 已完成（2026-02-25）
+`scripts/check-icons.js` + `pnpm run check:icons`：扫描所有模板，找出使用了 EP 图标但未在同文件 `<script>` 中 import 的情况。
 
 ### 中等优先级
 

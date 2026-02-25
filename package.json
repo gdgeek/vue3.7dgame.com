@@ -31,7 +31,8 @@
     "build-storybook": "storybook build",
     "clean": "node scripts/clean.js",
     "check": "node scripts/check-project.js",
-    "replace-console": "node scripts/replace-console.js"
+    "replace-console": "node scripts/replace-console.js",
+    "check:icons": "node scripts/check-icons.js"
   },
   "config": {
     "commitizen": {

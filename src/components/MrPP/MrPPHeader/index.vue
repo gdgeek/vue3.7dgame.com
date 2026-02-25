@@ -100,6 +100,7 @@
 </template>
 
 <script setup lang="ts">
+import { ArrowDown, ArrowUp } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import TagsSelect from "@/components/TagsSelect.vue";
 import { ref, computed, watch } from "vue";
