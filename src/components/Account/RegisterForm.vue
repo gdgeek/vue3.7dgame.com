@@ -91,6 +91,7 @@
 </template>
 
 <script setup lang="ts">
+import { Lock, UserFilled } from "@element-plus/icons-vue";
 import "@/assets/font/font.css";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";

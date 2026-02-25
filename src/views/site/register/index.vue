@@ -61,6 +61,7 @@
 </template>
 
 <script setup lang="ts">
+import { Back } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import "@/assets/font/font.css";
 import { LocationQuery, useRoute, useRouter } from "vue-router";

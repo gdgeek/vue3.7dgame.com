@@ -52,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+import { Check, Delete } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { getVerse } from "@/api/v1/verse";
 import {

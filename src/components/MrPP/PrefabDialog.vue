@@ -115,16 +115,15 @@ import { getPrefabs, prefabsData } from "@/api/v1/prefab";
 import Id2Image from "../Id2Image.vue";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import type { JsonValue } from "@/components/JsonSchemaForm/types";
+import { useDialogList } from "@/composables/useDialogList";
 
 const emit = defineEmits(["selected", "cancel"]);
-const dialogVisible = ref(false);
 const { t } = useI18n();
-const active = ref({
-  items: [] as prefabsData[],
-  sorted: "-created_at",
-  searched: "",
-  pagination: { current: 1, count: 1, size: 20, total: 20 },
-});
+
+const { dialogVisible, active, sort, search, clearSearched, handleCurrentChange, openDialog } =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  useDialogList<prefabsData>((sorted, searched, page) => getPrefabs(sorted, searched, page, "image") as any);
+
 const knightData = ref<InstanceType<typeof KnightDataDialog>>();
 const verse_id = ref(-1);
 const value = ref<unknown>(null);
@@ -132,34 +131,9 @@ const value = ref<unknown>(null);
 const title = (item: prefabsData) => item.title || "title";
 
 const open = async (val?: unknown, v_id?: number) => {
-  active.value.items = [];
-  active.value.sorted = "-created_at";
-  active.value.searched = "";
-  active.value.pagination = { current: 1, count: 1, size: 20, total: 20 };
   verse_id.value = v_id!;
   value.value = val;
-  await refresh();
-  dialogVisible.value = true;
-};
-
-const refresh = async () => {
-  const response = await getPrefabs(
-    active.value.sorted,
-    active.value.searched,
-    active.value.pagination.current,
-    "image"
-  );
-  active.value.items = response.data;
-  active.value.pagination = {
-    current: parseInt(
-      String(response.headers["x-pagination-current-page"] ?? "1")
-    ),
-    count: parseInt(String(response.headers["x-pagination-page-count"] ?? "1")),
-    size: parseInt(String(response.headers["x-pagination-per-page"] ?? "20")),
-    total: parseInt(
-      String(response.headers["x-pagination-total-count"] ?? "0")
-    ),
-  };
+  await openDialog();
 };
 
 const setup = ({ data }: { data: prefabsData }) => {
@@ -219,32 +193,12 @@ const cancel = () => {
   emit("cancel");
 };
 
-const handleCurrentChange = async (page: number) => {
-  active.value.pagination.current = page;
-  await refresh();
-};
-
-const search = async (value: string) => {
-  active.value.searched = value;
-  await refresh();
-};
-
-const sort = async (value: string) => {
-  active.value.sorted = value;
-  await refresh();
-};
-
-const clearSearched = async () => {
-  active.value.searched = "";
-  await refresh();
-};
-
 const knightDataSubmit = (data: Record<string, JsonValue>) => {
   logger.error(data);
 };
 
 onMounted(() => {
-  refresh();
+  openDialog();
 });
 
 defineExpose({
@@ -263,21 +217,18 @@ type ViewCard = {
   resources: prefabsData["resources"];
 };
 
-// 瀑布流数据类型转换
 const transformToViewCard = (items: prefabsData[]): ViewCard[] => {
-  return items.map((item) => {
-    return {
-      src: item.image?.url,
-      id: item.id ? item.id.toString() : undefined,
-      name: item.title,
-      data: item.data,
-      info: item.info,
-      uuid: item.uuid,
-      image_id: item.image_id,
-      image: item.image,
-      resources: item.resources,
-    };
-  });
+  return items.map((item) => ({
+    src: item.image?.url,
+    id: item.id ? item.id.toString() : undefined,
+    name: item.title,
+    data: item.data,
+    info: item.info,
+    uuid: item.uuid,
+    image_id: item.image_id,
+    image: item.image,
+    resources: item.resources,
+  }));
 };
 
 const viewCards = computed(() => {
@@ -287,22 +238,9 @@ const viewCards = computed(() => {
 });
 
 const breakpoints = ref({
-  3000: {
-    //当屏幕宽度小于等于3000
-    rowPerView: 8, // 一行8图
-  },
-  1800: {
-    //当屏幕宽度小于等于1800
-    rowPerView: 6, // 一行6图
-  },
-  1200: {
-    //当屏幕宽度小于等于1200
-    rowPerView: 4,
-  },
-
-  500: {
-    //当屏幕宽度小于等于500
-    rowPerView: 2,
-  },
+  3000: { rowPerView: 8 },
+  1800: { rowPerView: 6 },
+  1200: { rowPerView: 4 },
+  500: { rowPerView: 2 },
 });
 </script>

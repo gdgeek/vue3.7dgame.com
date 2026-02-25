@@ -231,6 +231,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { CopyDocument } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { useRoute } from "vue-router";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";

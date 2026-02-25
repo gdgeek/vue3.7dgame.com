@@ -16,6 +16,7 @@
 </template>
 
 <script setup lang="ts">
+import { Back } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";

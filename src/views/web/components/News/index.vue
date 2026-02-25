@@ -229,6 +229,7 @@
 </template>
 
 <script setup lang="ts">
+import { ArrowDown, ArrowRight, ArrowUp } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRouter } from "vue-router";

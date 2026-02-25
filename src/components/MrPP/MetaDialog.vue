@@ -108,19 +108,17 @@ import "vue-waterfall-plugin-next/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
 import { getMetas, metaInfo, postMeta } from "@/api/v1/meta";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import { useDialogList } from "@/composables/useDialogList";
 
 const emit = defineEmits(["selected", "cancel"]);
 
 const verse_id = ref(-1);
 const value = ref<unknown>(null);
-const dialogVisible = ref(false);
 const { t } = useI18n();
-const active = ref({
-  items: [] as metaInfo[],
-  sorted: "-created_at",
-  searched: "",
-  pagination: { current: 1, count: 1, size: 20, total: 20 },
-});
+
+const { dialogVisible, active, sort, search, clearSearched, handleCurrentChange, openDialog } =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  useDialogList<metaInfo>((sorted, searched, page) => getMetas(sorted, searched, page, "image") as any);
 
 type MetaSelection = {
   data: metaInfo;
@@ -133,60 +131,16 @@ const title = (item: metaInfo) => {
 
 const open = async (newValue?: unknown, newVerseId?: number) => {
   try {
-    active.value = {
-      items: [],
-      sorted: "-created_at",
-      searched: "",
-      pagination: { current: 1, count: 1, size: 20, total: 20 },
-    };
     verse_id.value = newVerseId!;
     value.value = newValue;
-    await refresh();
-    dialogVisible.value = true;
+    await openDialog();
   } catch (error) {
     logger.error("Error in open method:", error);
   }
 };
 
-const refresh = async () => {
-  const response = await getMetas(
-    active.value.sorted,
-    active.value.searched,
-    active.value.pagination.current,
-    "image"
-  );
-  active.value.items = response.data;
-  logger.log("active", active);
-  active.value.pagination = {
-    current: parseInt(
-      String(response.headers["x-pagination-current-page"] ?? "1")
-    ),
-    count: parseInt(String(response.headers["x-pagination-page-count"] ?? "1")),
-    size: parseInt(String(response.headers["x-pagination-per-page"] ?? "20")),
-    total: parseInt(
-      String(response.headers["x-pagination-total-count"] ?? "0")
-    ),
-  };
-};
-
-const sort = (value: string) => {
-  active.value.sorted = value;
-  refresh();
-};
-
-const search = (value: string) => {
-  active.value.searched = value;
-  refresh();
-};
-
-const clearSearched = () => {
-  active.value.searched = "";
-  refresh();
-};
-
 const selected = async (data: MetaSelection | null) => {
   if (data) {
-    // const title = await input(t("verse.view.metaDialog.input1"));
     data.title = data.data.title;
     logger.log("metadata", data);
     emit("selected", data);
@@ -227,11 +181,6 @@ const cancel = () => {
   emit("cancel");
 };
 
-const handleCurrentChange = (page: number) => {
-  active.value.pagination.current = page;
-  refresh();
-};
-
 defineExpose({
   open,
 });
@@ -257,28 +206,25 @@ type ViewCard = {
   verseMetas: metaInfo["verseMetas"];
 };
 
-// 瀑布流数据类型转换
 const transformToViewCard = (items: metaInfo[]): ViewCard[] => {
-  return items.map((item) => {
-    return {
-      src: item.image?.url,
-      id: item.id ? item.id.toString() : undefined,
-      author_id: item.author_id,
-      name: item.title,
-      info: item.info,
-      data: item.data,
-      events: item.events,
-      title: item.title,
-      uuid: item.uuid,
-      prefab: item.prefab,
-      image_id: item.image_id,
-      image: item.image,
-      resources: item.resources,
-      editable: item.editable,
-      viewable: item.viewable,
-      verseMetas: item.verseMetas,
-    };
-  });
+  return items.map((item) => ({
+    src: item.image?.url,
+    id: item.id ? item.id.toString() : undefined,
+    author_id: item.author_id,
+    name: item.title,
+    info: item.info,
+    data: item.data,
+    events: item.events,
+    title: item.title,
+    uuid: item.uuid,
+    prefab: item.prefab,
+    image_id: item.image_id,
+    image: item.image,
+    resources: item.resources,
+    editable: item.editable,
+    viewable: item.viewable,
+    verseMetas: item.verseMetas,
+  }));
 };
 
 const viewCards = computed(() => {

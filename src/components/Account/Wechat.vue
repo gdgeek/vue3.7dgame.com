@@ -50,6 +50,7 @@
 </template>
 
 <script setup lang="ts">
+import { ChatRound } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { useUserStore } from "@/store";
 import Qrcode from "./Qrcode.vue";

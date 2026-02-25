@@ -59,7 +59,7 @@
         </el-button>
         <div class="hamburger-menu" v-if="isMobile" @click="toggleSidebar">
           <el-icon>
-            <component :is="sidebarVisible ? 'Close' : 'Fold'"></component>
+            <component :is="sidebarVisible ? Close : Fold"></component>
           </el-icon>
         </div>
       </div>
@@ -131,6 +131,7 @@
 </template>
 
 <script setup lang="ts">
+import { Close, Fold } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import "@/assets/font/font.css";
 import { useRouter, useRoute } from "vue-router";
