@@ -61,10 +61,10 @@
 
 ### 中等优先级
 
-#### 3. 重复的弹窗模式（MetaDialog / PrefabDialog / VerseDialog）
-- **位置**：`src/components/MrPP/MetaDialog.vue`（289行）、`PrefabDialog.vue`（308行）、`VerseDialog.vue`（250行）
-- **问题**：三者共享约 80% 代码（瀑布流网格 + 搜索 + 分页）
-- **建议**：提取 `useDialogList<T>` composable，减少约 200 行重复代码
+#### ~~3. 重复的弹窗模式~~ ✅ 已完成（2026-02-25）
+新建 `src/composables/useDialogList.ts`，提取公共的 `active` 状态（items/sorted/searched/pagination）、`dialogVisible`、`sort/search/clearSearched/handleCurrentChange/openDialog` 方法。
+MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialog（250行→175行）均已重构。
+`ResourceDialog.vue` 使用略不同的独立 refs 风格，暂未重构，可后续跟进。
 
 #### 4. CSS 主题文件拆分（`theme-styles.scss` 9648 行）
 - **位置**：`src/styles/themes/theme-styles.scss`

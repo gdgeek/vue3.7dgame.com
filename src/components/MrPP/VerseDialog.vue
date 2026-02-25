@@ -111,7 +111,8 @@ import { postMeta } from "@/api/v1/meta";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
 import Id2Image from "@/components/Id2Image.vue";
 import type { FileInfo } from "@/api/v1/types/common";
-const dialogVisible = ref(false);
+import { useDialogList } from "@/composables/useDialogList";
+
 type VerseItem = {
   id: number;
   name?: string;
@@ -124,51 +125,17 @@ type VerseItem = {
   image?: FileInfo | null;
 };
 
-const active = ref({
-  items: [] as VerseItem[],
-  sorted: "-created_at",
-  searched: "",
-  pagination: { current: 1, count: 1, size: 20, total: 20 },
-});
-
 const emit = defineEmits(["selected", "cancel"]);
 const { t } = useI18n();
+
+const { dialogVisible, active, sort, search, clearSearched, handleCurrentChange, openDialog } =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  useDialogList<VerseItem>((sorted, searched, page) => getVerses({ sort: sorted, search: searched, page, expand: "image" }) as any);
+
 const title = (item: VerseItem) => item.title || item.name || "title";
 
 const open = () => {
-  active.value = {
-    items: [],
-    sorted: "-created_at",
-    searched: "",
-    pagination: { current: 1, count: 1, size: 20, total: 20 },
-  };
-  refresh();
-  dialogVisible.value = true;
-};
-
-const refresh = async () => {
-  const response = await getVerses({
-    sort: active.value.sorted,
-    search: active.value.searched,
-    page: active.value.pagination.current,
-    expand: "image",
-  });
-  active.value.items = response.data;
-};
-
-const sort = (value: string) => {
-  active.value.sorted = value;
-  refresh();
-};
-
-const search = (value: string) => {
-  active.value.searched = value;
-  refresh();
-};
-
-const clearSearched = () => {
-  active.value.searched = "";
-  refresh();
+  openDialog();
 };
 
 const selected = async (data: { data: VerseItem } | null = null) => {
@@ -205,11 +172,6 @@ const cancel = () => {
   emit("cancel");
 };
 
-const handleCurrentChange = (page: number) => {
-  active.value.pagination.current = page;
-  refresh();
-};
-
 defineExpose({
   open,
 });
@@ -226,25 +188,19 @@ type ViewCard = {
   image?: FileInfo | null;
 };
 
-// 瀑布流数据类型转换
 const transformToViewCard = (items: VerseItem[]): ViewCard[] => {
-  return items.map((item) => {
-    return {
-      src: item.image,
-      id: item.id ? item.id.toString() : undefined,
-      created_at: item.created_at,
-      name: item.name,
-      info: item.info,
-      data: item.data,
-      uuid: item.uuid,
-      type: item.type,
-      image: item.image,
-    };
-  });
+  return items.map((item) => ({
+    src: item.image,
+    id: item.id ? item.id.toString() : undefined,
+    created_at: item.created_at,
+    name: item.name,
+    info: item.info,
+    data: item.data,
+    uuid: item.uuid,
+    type: item.type,
+    image: item.image,
+  }));
 };
 
-const viewCards = computed(() => {
-  const cards = transformToViewCard(active.value.items);
-  return cards;
-});
+const viewCards = computed(() => transformToViewCard(active.value.items));
 </script>
