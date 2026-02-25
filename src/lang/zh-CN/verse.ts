@@ -44,7 +44,7 @@ export default {
       deleteConfirmMessage: "确定要删除此场景吗？",
       deleteConfirmTitle: "删除场景",
       cancelInfo: "已取消",
-      unnamed: "未命名"
+      unnamed: "未命名",
     },
     publicPage: {
       examplesTitle: "场景示例",
@@ -54,7 +54,7 @@ export default {
       viewExample: "查看此示例",
       noDescription: "暂无简介",
       allCategory: "全部",
-      updatedTime: "修改时间"
+      updatedTime: "修改时间",
     },
     page: {
       dialogTitle: "创建！【场景】",
@@ -69,14 +69,14 @@ export default {
         dialogSubmit: "确定",
         rules: {
           message1: "请输入活动名称",
-          message2: "长度在 3 到 64 个字符"
+          message2: "长度在 3 到 64 个字符",
         },
-        error: "表单验证失败"
+        error: "表单验证失败",
       },
       list: {
         infoContent: {
           author: "作者",
-          description: "说明"
+          description: "说明",
         },
         releaseConfirm: {
           message1: "确定发布该场景吗？",
@@ -84,7 +84,7 @@ export default {
           confirm: "确认",
           cancel: "取消",
           success: "发布成功",
-          info: "已取消"
+          info: "已取消",
         },
         toolbar: {
           dialogTitle: "修改数据",
@@ -95,17 +95,17 @@ export default {
             confirm: "确认",
             cancel: "取消",
             success: "删除成功！",
-            info: "已取消删除"
+            info: "已取消删除",
           },
           success: "修改成功!",
           changeError: "修改失败！",
           qrcode: {
             cancel: "取 消",
             dialogTitle1: "请用设备扫描二维码，进入",
-            dialogTitle2: "请用设备扫描二维码，进入场景。"
-          }
-        }
-      }
+            dialogTitle2: "请用设备扫描二维码，进入场景。",
+          },
+        },
+      },
     },
     view: {
       header: "修改信息",
@@ -124,8 +124,8 @@ export default {
           message2: "长度在 2 到 10 个字符",
           message3: "请输入名称",
           message4: "长度在 2 到 50 个字符",
-          message5: "请输入介绍"
-        }
+          message5: "请输入介绍",
+        },
       },
       edit: "编辑【场景】",
       eye: "查看【场景】",
@@ -146,7 +146,7 @@ export default {
           confirm: "确认",
           cancel: "取消",
           success: "删除标签成功",
-          error: "取消删除标签"
+          error: "取消删除标签",
         },
         confirmAdd: {
           message: "确认增加标签?",
@@ -154,22 +154,18 @@ export default {
           confirm: "确认",
           cancel: "取消",
           success: "增加标签成功",
-          error: "取消增加标签"
-        }
+          error: "取消增加标签",
+        },
       },
       share: {
-        confirm: {
-        }
+        confirm: {},
       },
-      message: {
-      },
-      reply: {
-      },
+      message: {},
+      reply: {},
       messageForm: {
         form: {
-          rules: {
-          }
-        }
+          rules: {},
+        },
       },
       metaDialog: {
         title: "选择实体",
@@ -182,8 +178,8 @@ export default {
           message: "提示",
           confirm: "确定",
           cancel: "取消",
-          info: "取消输入"
-        }
+          info: "取消输入",
+        },
       },
       prefabDialog: {
         title: "选择预设数据",
@@ -194,14 +190,14 @@ export default {
           message: "提示",
           confirm: "确定",
           cancel: "取消",
-          info: "取消输入"
+          info: "取消输入",
         },
         knight: {
           title: "输入数据",
           save: "保存",
           cancel: "取消",
-          warn: "点击了取消"
-        }
+          warn: "点击了取消",
+        },
       },
       sceneEditor: {
         error1: "没有场景编辑器",
@@ -219,7 +215,7 @@ export default {
         coverUploadError: "上传封面图片错误：未找到图片数据",
         handlerError: "获取文件处理器失败",
         coverUploadSuccess: "封面图片上传成功",
-        coverUploadFailed: "封面图片上传失败"
+        coverUploadFailed: "封面图片上传失败",
       },
       script: {
         title: "脚本",
@@ -237,17 +233,17 @@ export default {
           confirm: "是",
           cancel: "否",
           error: "保存失败",
-          info: "已放弃对未保存的更改"
-        }
+          info: "已放弃对未保存的更改",
+        },
       },
       public: {
         open: "公开",
         private: "私有",
         addSuccess: "已设为公开",
         removeSuccess: "已设为私有",
-        error: "操作失败"
+        error: "操作失败",
       },
-      image: { updateSuccess: "图片更新成功", updateError: "图片更新失败" }
-    }
-  }
+      image: { updateSuccess: "图片更新成功", updateError: "图片更新失败" },
+    },
+  },
 };

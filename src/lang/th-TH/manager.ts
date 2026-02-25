@@ -27,7 +27,7 @@ export default {
       inviteTeacherPending: "ฟังก์ชันเชิญครูยังไม่พร้อมใช้งาน",
       removeStudentConfirm: "คุณแน่ใจหรือไม่ว่าต้องการนำนักเรียนคนนี้ออก",
       removeTeacherConfirm: "คุณแน่ใจหรือไม่ว่าต้องการนำครูคนนี้ออก",
-      removeConfirmTitle: "ยืนยันการนำออก"
+      removeConfirmTitle: "ยืนยันการนำออก",
     },
     defaultSchoolName: "โรงเรียนใหม่",
     defaultClassName: "ชั้นเรียนใหม่",
@@ -40,7 +40,7 @@ export default {
       principal: "ผู้ดูแลโรงเรียน",
       address: "ที่อยู่",
       description: "คำอธิบาย",
-      classList: "รายชื่อชั้นเรียน"
+      classList: "รายชื่อชั้นเรียน",
     },
     class: {
       title: "การจัดการชั้นเรียน",
@@ -57,7 +57,7 @@ export default {
       form: {
         name: "ชื่อชั้นเรียน",
         namePlaceholder: "กรุณากรอกชื่อชั้นเรียน",
-        image: "รูปภาพชั้นเรียน"
+        image: "รูปภาพชั้นเรียน",
       },
       messages: {
         createConfirm: "ยืนยันการสร้างชั้นเรียนใหม่?",
@@ -66,15 +66,15 @@ export default {
         updateSuccess: "อัปเดตชั้นเรียนสำเร็จ",
         updateFailed: "การอัปเดตชั้นเรียนล้มเหลว",
         selectSchoolFirst: "กรุณาเลือกโรงเรียนก่อนสร้างชั้นเรียน",
-        teacherAlreadyInClass: "ครูคนนี้อยู่ในชั้นเรียนนี้แล้ว"
+        teacherAlreadyInClass: "ครูคนนี้อยู่ในชั้นเรียนนี้แล้ว",
       },
       validation: {
-        nameRequired: "กรุณากรอกชื่อชั้นเรียน"
-      }
+        nameRequired: "กรุณากรอกชื่อชั้นเรียน",
+      },
     },
     teacher: {
       subject: "วิชา",
-      phone: "โทรศัพท์"
+      phone: "โทรศัพท์",
     },
     principal: {
       assign: "มอบหมายผู้ดูแลโรงเรียน",
@@ -83,7 +83,7 @@ export default {
       assignSuccess: "มอบหมายผู้ดูแลโรงเรียนสำเร็จ",
       assignFailed: "การมอบหมายผู้ดูแลโรงเรียนล้มเหลว",
       username: "ชื่อผู้ใช้",
-      nickname: "ชื่อเล่น"
+      nickname: "ชื่อเล่น",
     },
     errors: {
       fetchFailed: "ไม่สามารถดึงรายการโรงเรียนได้",
@@ -96,11 +96,11 @@ export default {
       deleteFailed: "ลบล้มเหลว",
       removeFailed: "ลบออกล้มเหลว",
       alreadyInClass: "สมาชิกนี้อยู่ในชั้นเรียนนี้แล้ว",
-      validationFailed: "การตรวจสอบแบบฟอร์มล้มเหลว"
+      validationFailed: "การตรวจสอบแบบฟอร์มล้มเหลว",
     },
     dialog: {
       createTitle: "สร้างโรงเรียน",
-      editTitle: "แก้ไขโรงเรียน"
+      editTitle: "แก้ไขโรงเรียน",
     },
     form: {
       name: "ชื่อโรงเรียน",
@@ -113,11 +113,11 @@ export default {
       edit: "แก้ไข",
       cancel: "ยกเลิก",
       submit: "ส่ง",
-      submitting: "กำลังส่ง..."
+      submitting: "กำลังส่ง...",
     },
     validation: {
       nameRequired: "กรุณากรอกชื่อโรงเรียน",
-      nameLength: "ความยาวชื่อโรงเรียนควรอยู่ระหว่าง 2-50 ตัวอักษร"
+      nameLength: "ความยาวชื่อโรงเรียนควรอยู่ระหว่าง 2-50 ตัวอักษร",
     },
     messages: {
       addSuccess: "เพิ่มสำเร็จ",
@@ -129,7 +129,7 @@ export default {
       updateSuccess: "อัปเดตโรงเรียนสำเร็จ",
       updateFailed: "การอัปเดตโรงเรียนล้มเหลว",
       deleteFailed: "การลบโรงเรียนล้มเหลว",
-      clearPrincipalConfirm: "คุณแน่ใจหรือไม่ว่าต้องการล้างผู้ดูแลโรงเรียน?"
+      clearPrincipalConfirm: "คุณแน่ใจหรือไม่ว่าต้องการล้างผู้ดูแลโรงเรียน?",
     },
     creator: {
       form: {
@@ -147,8 +147,8 @@ export default {
         error3: "รหัสผ่านที่ป้อนสองครั้งไม่ตรงกัน",
         error4: "การตรวจสอบแบบฟอร์มล้มเหลว",
         cancel: "ยกเลิก",
-        submit: "ลงทะเบียนบัญชี"
-      }
+        submit: "ลงทะเบียนบัญชี",
+      },
     },
     list: {
       label: "สิทธิ์:",
@@ -159,7 +159,7 @@ export default {
         root: "ผู้ใช้ Root",
         admin: "ผู้ดูแลระบบสูงสุด",
         manager: "ผู้ดูแลระบบ",
-        user: "ผู้ใช้"
+        user: "ผู้ใช้",
       },
       confirm: {
         message1:
@@ -168,10 +168,10 @@ export default {
         confirm: "ยืนยัน",
         cancel: "ยกเลิก",
         success: "ลบสำเร็จ!",
-        info: "ยกเลิกการลบแล้ว"
+        info: "ยกเลิกการลบแล้ว",
       },
       success: "อัปเดตสิทธิ์สำเร็จ!",
-      error: "อัปเดตสิทธิ์ล้มเหลว!"
+      error: "อัปเดตสิทธิ์ล้มเหลว!",
     },
     confirm: {
       deleteTitle: "ยืนยันการลบ",
@@ -180,8 +180,8 @@ export default {
       removeMemberTitle: "ยืนยันการลบออก",
       removeMemberMessage: "คุณแน่ใจหรือไม่ว่าต้องการลบสมาชิกนี้ออก?",
       confirm: "ยืนยัน",
-      cancel: "ยกเลิก"
-    }
+      cancel: "ยกเลิก",
+    },
   },
   game: {
     index: {
@@ -199,8 +199,8 @@ export default {
           confirm: "ยืนยัน",
           cancel: "ยกเลิก",
           success: "ลบสำเร็จ",
-          info: "ยกเลิกการแก้ไขแล้ว"
-        }
+          info: "ยกเลิกการแก้ไขแล้ว",
+        },
       },
       success: "เพิ่มสำเร็จ",
       confirm: {
@@ -210,8 +210,8 @@ export default {
         confirm: "ยืนยัน",
         cancel: "ยกเลิก",
         success: "ลบสำเร็จ",
-        info: "ยกเลิกการลบแล้ว"
-      }
+        info: "ยกเลิกการลบแล้ว",
+      },
     },
     map: {
       title1: "ที่",
@@ -232,8 +232,8 @@ export default {
           confirm: "ยืนยัน",
           cancel: "ยกเลิก",
           success: "ลบสำเร็จ",
-          info: "ยกเลิกการแก้ไขแล้ว"
-        }
+          info: "ยกเลิกการแก้ไขแล้ว",
+        },
       },
       success: "เพิ่มสำเร็จ",
       confirm1: {
@@ -242,7 +242,7 @@ export default {
         confirm: "ยืนยัน",
         cancel: "ยกเลิก",
         success: "สร้างสำเร็จ",
-        info: "ยกเลิกการสร้างแล้ว"
+        info: "ยกเลิกการสร้างแล้ว",
       },
       confirm2: {
         message1: "ลบแผนที่",
@@ -250,7 +250,7 @@ export default {
         confirm: "ยืนยัน",
         cancel: "ยกเลิก",
         success: "ลบสำเร็จ",
-        info: "ยกเลิกการลบแล้ว"
+        info: "ยกเลิกการลบแล้ว",
       },
       confirm3: {
         message1:
@@ -259,8 +259,8 @@ export default {
         confirm: "ยืนยัน",
         cancel: "ยกเลิก",
         success: "ลบสำเร็จ",
-        info: "ยกเลิกการลบแล้ว"
-      }
+        info: "ยกเลิกการลบแล้ว",
+      },
     },
     verseDialog: {
       title: "เลือก【ฉาก】",
@@ -272,14 +272,14 @@ export default {
         message2: "แจ้งเตือน",
         confirm: "ยืนยัน",
         cancel: "ยกเลิก",
-        info: "ยกเลิกการป้อนข้อมูล"
-      }
-    }
+        info: "ยกเลิกการป้อนข้อมูล",
+      },
+    },
   },
   MrppHeader: {
     sortByName: "เรียงตามชื่อ",
     sortByTime: "เรียงตามเวลา",
-    search: "ค้นหาชื่อ"
+    search: "ค้นหาชื่อ",
   },
   tags: {
     refresh: "รีเฟรช",
@@ -287,14 +287,14 @@ export default {
     closeOthers: "ปิดอื่นๆ",
     closeLeft: "ปิดด้านซ้าย",
     closeRight: "ปิดด้านขวา",
-    closeAll: "ปิดทั้งหมด"
+    closeAll: "ปิดทั้งหมด",
   },
   navbar: {
     dashboard: "หน้าหลัก",
     logout: "ออกจากระบบ",
     AccountSetting: "ตั้งค่าบัญชี",
     personalCenter: "ศูนย์ส่วนบุคคล",
-    helpSupport: "ช่วยเหลือและสนับสนุน"
+    helpSupport: "ช่วยเหลือและสนับสนุน",
   },
   sizeSelect: {
     tooltip: "ขนาดเลย์เอาต์",
@@ -302,18 +302,18 @@ export default {
     large: "ขนาดใหญ่",
     small: "ขนาดเล็ก",
     message: {
-      success: "เปลี่ยนขนาดเลย์เอาต์สำเร็จ!"
-    }
+      success: "เปลี่ยนขนาดเลย์เอาต์สำเร็จ!",
+    },
   },
   copy: {
     title: "คัดลอก",
     success: "คัดลอกโค้ดไปยังคลิปบอร์ดแล้ว",
-    error: "คัดลอกล้มเหลว"
+    error: "คัดลอกล้มเหลว",
   },
   langSelect: {
     message: {
-      success: "เปลี่ยนภาษาสำเร็จ!"
-    }
+      success: "เปลี่ยนภาษาสำเร็จ!",
+    },
   },
   settings: {
     project: "การกำหนดค่าโครงการ",
@@ -324,12 +324,12 @@ export default {
     tagsView: "เปิด Tags-View",
     fixedHeader: "ตรึง Header",
     sidebarLogo: "โลโก้แถบด้านข้าง",
-    watermark: "เปิดลายน้ำ"
+    watermark: "เปิดลายน้ำ",
   },
   layoutSelect: {
     left: "โหมดด้านซ้าย",
     top: "โหมดด้านบน",
-    mix: "โหมดผสม"
+    mix: "โหมดผสม",
   },
   tts: {
     title: "Tencent Text-to-Speech",
@@ -398,7 +398,7 @@ export default {
     uploadAudio: "อัปโหลดเสียง",
     nameRequired: "ชื่อต้องไม่ว่างเปล่า",
     noText: "กรุณากรอกข้อความ",
-    noAudio: "กรุณาสังเคราะห์เสียงก่อน"
+    noAudio: "กรุณาสังเคราะห์เสียงก่อน",
   },
   phototype: {
     title: "ต้นแบบ",
@@ -415,7 +415,7 @@ export default {
       previewImage: "ภาพตัวอย่าง",
       saveBasicFirst: "กรุณาบันทึกข้อมูลพื้นฐานก่อน",
       condition: "เงื่อนไข",
-      defaultValue: "ค่าเริ่มต้น"
+      defaultValue: "ค่าเริ่มต้น",
     },
     prompt: {
       message1: "กรุณาใส่ชื่อต้นแบบ",
@@ -426,7 +426,7 @@ export default {
       success: "ชื่อต้นแบบคือ ",
       confirm: "ยืนยัน",
       cancel: "ยกเลิก",
-      info: "ยกเลิกการป้อนข้อมูล"
+      info: "ยกเลิกการป้อนข้อมูล",
     },
     confirm: {
       message1: "การดำเนินการนี้จะลบไฟล์อย่างถาวร ต้องการดำเนินการต่อหรือไม่?",
@@ -434,7 +434,7 @@ export default {
       confirm: "ยืนยัน",
       cancel: "ยกเลิก",
       success: "ลบสำเร็จ!",
-      info: "ยกเลิกการลบแล้ว"
-    }
-  }
+      info: "ยกเลิกการลบแล้ว",
+    },
+  },
 };

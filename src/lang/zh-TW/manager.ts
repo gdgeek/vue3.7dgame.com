@@ -26,7 +26,7 @@ export default {
       inviteTeacherPending: "邀請教師功能暫未開放",
       removeStudentConfirm: "確定要移除該學生嗎？",
       removeTeacherConfirm: "確定要移除該教師嗎？",
-      removeConfirmTitle: "移除確認"
+      removeConfirmTitle: "移除確認",
     },
     defaultSchoolName: "新學校",
     defaultClassName: "新班級",
@@ -39,7 +39,7 @@ export default {
       principal: "學校管理員",
       address: "地址",
       description: "描述",
-      classList: "班級列表"
+      classList: "班級列表",
     },
     class: {
       title: "班級管理",
@@ -56,7 +56,7 @@ export default {
       form: {
         name: "班級名稱",
         namePlaceholder: "請輸入班級名稱",
-        image: "班級圖片"
+        image: "班級圖片",
       },
       messages: {
         createConfirm: "確認創建新班級嗎？",
@@ -65,15 +65,15 @@ export default {
         updateSuccess: "班級更新成功",
         updateFailed: "班級更新失敗",
         selectSchoolFirst: "請先選擇學校，再創建班級",
-        teacherAlreadyInClass: "該教師已在此班級中"
+        teacherAlreadyInClass: "該教師已在此班級中",
       },
       validation: {
-        nameRequired: "請輸入班級名稱"
-      }
+        nameRequired: "請輸入班級名稱",
+      },
     },
     teacher: {
       subject: "科目",
-      phone: "電話"
+      phone: "電話",
     },
     principal: {
       assign: "分配學校管理員",
@@ -82,7 +82,7 @@ export default {
       assignSuccess: "學校管理員分配成功",
       assignFailed: "學校管理員分配失敗",
       username: "用戶名",
-      nickname: "暱稱"
+      nickname: "暱稱",
     },
     errors: {
       fetchFailed: "獲取學校列表失敗",
@@ -95,11 +95,11 @@ export default {
       deleteFailed: "刪除失敗",
       removeFailed: "移除失敗",
       alreadyInClass: "該成員已在該班級中",
-      validationFailed: "表單驗證失敗"
+      validationFailed: "表單驗證失敗",
     },
     dialog: {
       createTitle: "創建學校",
-      editTitle: "編輯學校"
+      editTitle: "編輯學校",
     },
     form: {
       name: "學校名稱",
@@ -112,11 +112,11 @@ export default {
       edit: "編輯",
       cancel: "取消",
       submit: "提交",
-      submitting: "提交中..."
+      submitting: "提交中...",
     },
     validation: {
       nameRequired: "請輸入學校名稱",
-      nameLength: "學校名稱長度應在2-50個字符之間"
+      nameLength: "學校名稱長度應在2-50個字符之間",
     },
     messages: {
       addSuccess: "添加成功",
@@ -128,7 +128,7 @@ export default {
       updateSuccess: "學校更新成功",
       updateFailed: "學校更新失敗",
       deleteFailed: "學校刪除失敗",
-      clearPrincipalConfirm: "確認要清空學校管理員嗎？"
+      clearPrincipalConfirm: "確認要清空學校管理員嗎？",
     },
     creator: {
       form: {
@@ -146,8 +146,8 @@ export default {
         error3: "兩次輸入的密碼不一致",
         error4: "表單校驗失敗",
         cancel: "取 消",
-        submit: "註冊賬號"
-      }
+        submit: "註冊賬號",
+      },
     },
     list: {
       label: "權限:",
@@ -158,7 +158,7 @@ export default {
         root: "根用戶",
         admin: "超級管理員",
         manager: "管理員",
-        user: "用戶"
+        user: "用戶",
       },
       confirm: {
         message1: "此操作將永久刪除該學校, 是否繼續?",
@@ -166,10 +166,10 @@ export default {
         confirm: "確認",
         cancel: "取消",
         success: "刪除成功!",
-        info: "已取消刪除"
+        info: "已取消刪除",
       },
       success: "權限更新成功！",
-      error: "權限更新失敗！"
+      error: "權限更新失敗！",
     },
     confirm: {
       deleteTitle: "確認刪除",
@@ -177,8 +177,8 @@ export default {
       removeMemberTitle: "確認移除",
       removeMemberMessage: "確定要移除該成員嗎？",
       confirm: "確認",
-      cancel: "取消"
-    }
+      cancel: "取消",
+    },
   },
   game: {
     index: {
@@ -196,8 +196,8 @@ export default {
           confirm: "確認",
           cancel: "取消",
           success: "刪除成功",
-          info: "已取消修改"
-        }
+          info: "已取消修改",
+        },
       },
       success: "添加成功",
       confirm: {
@@ -206,8 +206,8 @@ export default {
         confirm: "確認",
         cancel: "取消",
         success: "刪除成功",
-        info: "已取消刪除"
-      }
+        info: "已取消刪除",
+      },
     },
     map: {
       title1: "第",
@@ -228,8 +228,8 @@ export default {
           confirm: "確認",
           cancel: "取消",
           success: "刪除成功",
-          info: "已取消修改"
-        }
+          info: "已取消修改",
+        },
       },
       success: "添加成功",
       confirm1: {
@@ -238,7 +238,7 @@ export default {
         confirm: "確認",
         cancel: "取消",
         success: "創建成功",
-        info: "已取消創建"
+        info: "已取消創建",
       },
       confirm2: {
         message1: "刪除地圖",
@@ -246,7 +246,7 @@ export default {
         confirm: "確認",
         cancel: "取消",
         success: "刪除成功",
-        info: "已取消刪除"
+        info: "已取消刪除",
       },
       confirm3: {
         message1: "此操作將永久刪除該【關卡】, 是否繼續?",
@@ -254,8 +254,8 @@ export default {
         confirm: "確認",
         cancel: "取消",
         success: "刪除成功",
-        info: "已取消刪除"
-      }
+        info: "已取消刪除",
+      },
     },
     verseDialog: {
       title: "選擇【場景】",
@@ -267,14 +267,14 @@ export default {
         message2: "提示",
         confirm: "確認",
         cancel: "取消",
-        info: "取消輸入"
-      }
-    }
+        info: "取消輸入",
+      },
+    },
   },
   MrppHeader: {
     sortByName: "名稱排序",
     sortByTime: "時間排序",
-    search: "搜索名稱"
+    search: "搜索名稱",
   },
   tags: {
     refresh: "刷新",
@@ -282,14 +282,14 @@ export default {
     closeOthers: "關閉其他",
     closeLeft: "關閉左側",
     closeRight: "關閉右側",
-    closeAll: "關閉全部"
+    closeAll: "關閉全部",
   },
   navbar: {
     dashboard: "首頁",
     logout: "註銷登出",
     AccountSetting: "賬號設置",
     personalCenter: "個人中心",
-    helpSupport: "幫助支持"
+    helpSupport: "幫助支持",
   },
   sizeSelect: {
     tooltip: "布局大小",
@@ -297,18 +297,18 @@ export default {
     large: "大型",
     small: "小型",
     message: {
-      success: "切換布局大小成功！"
-    }
+      success: "切換布局大小成功！",
+    },
   },
   copy: {
     title: "複製",
     success: "代碼已複製到剪貼板",
-    error: "複製失敗"
+    error: "複製失敗",
   },
   langSelect: {
     message: {
-      success: "切換語言成功！"
-    }
+      success: "切換語言成功！",
+    },
   },
   settings: {
     project: "項目配置",
@@ -319,12 +319,12 @@ export default {
     tagsView: "開啟 Tags-View",
     fixedHeader: "固定 Header",
     sidebarLogo: "側邊欄 Logo",
-    watermark: "開啟水印"
+    watermark: "開啟水印",
   },
   layoutSelect: {
     left: "左側模式",
     top: "頂部模式",
-    mix: "混合模式"
+    mix: "混合模式",
   },
   tts: {
     title: "騰訊語音合成",
@@ -389,7 +389,7 @@ export default {
     uploadAudio: "上傳音頻",
     nameRequired: "名稱不能為空",
     noText: "請輸入文本",
-    noAudio: "請先合成語音"
+    noAudio: "請先合成語音",
   },
   phototype: {
     title: "原型",
@@ -406,7 +406,7 @@ export default {
       previewImage: "預覽圖",
       saveBasicFirst: "請先保存基本信息",
       condition: "條件",
-      defaultValue: "默認值"
+      defaultValue: "默認值",
     },
     prompt: {
       message1: "請輸入原型名稱",
@@ -417,7 +417,7 @@ export default {
       success: "原型名稱是",
       confirm: "確認",
       cancel: "取消",
-      info: "取消輸入"
+      info: "取消輸入",
     },
     confirm: {
       message1: "此操作將永久刪除該文件, 是否繼續?",
@@ -425,7 +425,7 @@ export default {
       confirm: "確認",
       cancel: "取消",
       success: "刪除成功！",
-      info: "已取消刪除"
-    }
-  }
+      info: "已取消刪除",
+    },
+  },
 };

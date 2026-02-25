@@ -2,7 +2,7 @@
 export default {
   verse: {
     create: {
-      defaultName: "新しいシーン"
+      defaultName: "新しいシーン",
     },
     listPage: {
       myScenes: "マイシーン",
@@ -46,7 +46,7 @@ export default {
       deleteConfirmMessage: "このシーンを削除してもよろしいですか？",
       deleteConfirmTitle: "シーンを削除",
       cancelInfo: "キャンセルしました",
-      unnamed: "無題"
+      unnamed: "無題",
     },
     publicPage: {
       examplesTitle: "シーン例",
@@ -56,7 +56,7 @@ export default {
       viewExample: "このサンプルを見る",
       noDescription: "説明なし",
       allCategory: "すべて",
-      updatedTime: "更新日時"
+      updatedTime: "更新日時",
     },
     page: {
       dialogTitle: "作成！【场景】",
@@ -72,9 +72,9 @@ export default {
         dialogSubmit: "確認",
         rules: {
           message1: "イベント名を入力してください",
-          message2: "長さは3〜64文字である必要があります"
+          message2: "長さは3〜64文字である必要があります",
         },
-        error: "フォーム検証に失敗しました"
+        error: "フォーム検証に失敗しました",
       },
       list: {
         enter: "入る",
@@ -84,7 +84,7 @@ export default {
           learn: "学習",
           blank: "デフォルトリンク",
           description: "説明",
-          share: "共有ID"
+          share: "共有ID",
         },
         releaseConfirm: {
           message1: "このプロジェクトを公開しますか？",
@@ -92,7 +92,7 @@ export default {
           confirm: "確認",
           cancel: "キャンセル",
           success: "公開に成功しました",
-          info: "キャンセルされました"
+          info: "キャンセルされました",
         },
         restrainConfirm: {
           message1: "このプロジェクトをオフラインにしますか？",
@@ -100,7 +100,7 @@ export default {
           confirm: "確認",
           cancel: "キャンセル",
           success: "オフラインに成功しました",
-          info: "キャンセルされました"
+          info: "キャンセルされました",
         },
         toolbar: {
           dialogTitle: "データを変更",
@@ -111,17 +111,17 @@ export default {
             confirm: "確認",
             cancel: "キャンセル",
             success: "削除成功！",
-            info: "削除がキャンセルされました"
+            info: "削除がキャンセルされました",
           },
           success: "変更成功！",
           changeError: "変更に失敗しました！",
           qrcode: {
             cancel: "キャンセル",
             dialogTitle1: "デバイスでQRコードをスキャンして入ります",
-            dialogTitle2: "デバイスでQRコードをスキャンしてシーンに入ります。"
-          }
-        }
-      }
+            dialogTitle2: "デバイスでQRコードをスキャンしてシーンに入ります。",
+          },
+        },
+      },
     },
     view: {
       header: "情報を変更",
@@ -140,8 +140,8 @@ export default {
           message2: "長さは2〜10文字である必要があります",
           message3: "名前を入力してください",
           message4: "長さは2〜50文字である必要があります",
-          message5: "紹介を入力してください"
-        }
+          message5: "紹介を入力してください",
+        },
       },
       edit: "【场景】を編集",
       eye: "【场景】を表示",
@@ -165,7 +165,7 @@ export default {
           confirm: "確認",
           cancel: "キャンセル",
           success: "タグが正常に削除されました",
-          error: "タグの削除がキャンセルされました"
+          error: "タグの削除がキャンセルされました",
         },
         confirmAdd: {
           message: "タグを追加しますか？",
@@ -173,8 +173,8 @@ export default {
           confirm: "確認",
           cancel: "キャンセル",
           success: "タグが正常に追加されました",
-          error: "タグの追加がキャンセルされました"
-        }
+          error: "タグの追加がキャンセルされました",
+        },
       },
       share: {
         header1: "他のユーザーと共有",
@@ -187,7 +187,7 @@ export default {
           ruleMessage: "ユーザー名は空にできません",
           label4: "編集可能",
           confirm: "確認",
-          cancel: "キャンセル"
+          cancel: "キャンセル",
         },
         title1: "【场景】を共有",
         title2: "友達と共有",
@@ -197,8 +197,8 @@ export default {
           confirm: "確認",
           cancel: "キャンセル",
           success: "共有停止成功！",
-          info: "共有停止がキャンセルされました"
-        }
+          info: "共有停止がキャンセルされました",
+        },
       },
       message: {
         header: "内容を変更",
@@ -215,8 +215,8 @@ export default {
           confirm: "確認",
           cancel: "キャンセル",
           success: "削除成功！",
-          info: "削除がキャンセルされました"
-        }
+          info: "削除がキャンセルされました",
+        },
       },
       reply: {
         timestamp: "今すぐ返信",
@@ -228,9 +228,9 @@ export default {
           confirm: "確認",
           cancel: "キャンセル",
           success: "削除成功！",
-          info: "削除がキャンセルされました"
+          info: "削除がキャンセルされました",
         },
-        success: "返信成功"
+        success: "返信成功",
       },
       messageForm: {
         form: {
@@ -239,13 +239,13 @@ export default {
           rules: {
             title: {
               message1: "タイトルを入力してください",
-              message2: "長さは3〜100文字である必要があります"
-            }
-          }
+              message2: "長さは3〜100文字である必要があります",
+            },
+          },
         },
         submit: "送信",
         reset: "リセット",
-        success: "投稿成功"
+        success: "投稿成功",
       },
       metaDialog: {
         title: "メタデータを選択",
@@ -258,8 +258,8 @@ export default {
           message: "ヒント",
           confirm: "確認",
           cancel: "キャンセル",
-          info: "入力がキャンセルされました"
-        }
+          info: "入力がキャンセルされました",
+        },
       },
       prefabDialog: {
         title: "プリセットデータを選択",
@@ -270,7 +270,7 @@ export default {
           message: "ヒント",
           confirm: "確認",
           cancel: "キャンセル",
-          info: "入力がキャンセルされました"
+          info: "入力がキャンセルされました",
         },
         knight: {
           title: "データ入力",
@@ -278,8 +278,8 @@ export default {
           cancel: "キャンセル",
           warn: "キャンセルがクリックされました",
           typeTitle: "タイプ",
-          nameTitle: "アイテム名"
-        }
+          nameTitle: "アイテム名",
+        },
       },
       sceneEditor: {
         error1: "エディターがありません",
@@ -298,7 +298,7 @@ export default {
           "カバー画像アップロードエラー：画像データが見つかりません",
         handlerError: "ファイルハンドラの取得に失敗しました",
         coverUploadSuccess: "カバー画像アップロード成功",
-        coverUploadFailed: "カバー画像アップロードに失敗しました"
+        coverUploadFailed: "カバー画像アップロードに失敗しました",
       },
       script: {
         title: "スクリプト",
@@ -317,20 +317,20 @@ export default {
           cancel: "いいえ",
           success: "保存が成功しました",
           error: "保存に失敗しました",
-          info: "保存されていない変更は破棄されました"
-        }
+          info: "保存されていない変更は破棄されました",
+        },
       },
       public: {
         open: "公開",
         private: "非公開",
         addSuccess: "公開に設定しました",
         removeSuccess: "非公開に設定しました",
-        error: "操作に失敗しました"
+        error: "操作に失敗しました",
       },
       image: {
         updateSuccess: "画像が正常に更新されました",
-        updateError: "画像の更新に失敗しました"
-      }
-    }
-  }
+        updateError: "画像の更新に失敗しました",
+      },
+    },
+  },
 };

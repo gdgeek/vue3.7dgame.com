@@ -2,7 +2,7 @@
 export default {
   verse: {
     create: {
-      defaultName: "新場景"
+      defaultName: "新場景",
     },
     listPage: {
       myScenes: "我的場景",
@@ -46,7 +46,7 @@ export default {
       deleteConfirmMessage: "確定要刪除此場景嗎？",
       deleteConfirmTitle: "刪除場景",
       cancelInfo: "已取消",
-      unnamed: "未命名"
+      unnamed: "未命名",
     },
     publicPage: {
       examplesTitle: "場景示例",
@@ -56,7 +56,7 @@ export default {
       viewExample: "查看此示例",
       noDescription: "暫無簡介",
       allCategory: "全部",
-      updatedTime: "修改時間"
+      updatedTime: "修改時間",
     },
     page: {
       dialogTitle: "創建！【場景】",
@@ -72,9 +72,9 @@ export default {
         dialogSubmit: "確定",
         rules: {
           message1: "請輸入活動名稱",
-          message2: "長度在 3 到 64 個字符"
+          message2: "長度在 3 到 64 個字符",
         },
-        error: "表單驗證失敗"
+        error: "表單驗證失敗",
       },
       list: {
         enter: "進入",
@@ -84,7 +84,7 @@ export default {
           learn: "學習",
           blank: "默認鏈接",
           description: "說明",
-          share: "共享ID"
+          share: "共享ID",
         },
         releaseConfirm: {
           message1: "確定發布該場景嗎？",
@@ -92,7 +92,7 @@ export default {
           confirm: "確認",
           cancel: "取消",
           success: "發布成功",
-          info: "已取消"
+          info: "已取消",
         },
         restrainConfirm: {
           message1: "確定下線該場景嗎？",
@@ -100,7 +100,7 @@ export default {
           confirm: "確認",
           cancel: "取消",
           success: "下線成功",
-          info: "已取消"
+          info: "已取消",
         },
         toolbar: {
           dialogTitle: "修改數據",
@@ -111,17 +111,17 @@ export default {
             confirm: "確認",
             cancel: "取消",
             success: "刪除成功！",
-            info: "已取消刪除"
+            info: "已取消刪除",
           },
           success: "修改成功!",
           changeError: "修改失敗！",
           qrcode: {
             cancel: "取 消",
             dialogTitle1: "請用設備掃描二維碼，進入",
-            dialogTitle2: "請用設備掃描二維碼，進入場景。"
-          }
-        }
-      }
+            dialogTitle2: "請用設備掃描二維碼，進入場景。",
+          },
+        },
+      },
     },
     view: {
       header: "修改信息",
@@ -140,8 +140,8 @@ export default {
           message2: "長度在 2 到 10 個字符",
           message3: "請輸入名稱",
           message4: "長度在 2 到 50 個字符",
-          message5: "請輸入介紹"
-        }
+          message5: "請輸入介紹",
+        },
       },
       edit: "編輯【場景】",
       eye: "查看【場景】",
@@ -165,7 +165,7 @@ export default {
           confirm: "確認",
           cancel: "取消",
           success: "刪除標籤成功",
-          error: "取消刪除標籤"
+          error: "取消刪除標籤",
         },
         confirmAdd: {
           message: "確認增加標籤?",
@@ -173,8 +173,8 @@ export default {
           confirm: "確認",
           cancel: "取消",
           success: "增加標籤成功",
-          error: "取消增加標籤"
-        }
+          error: "取消增加標籤",
+        },
       },
       share: {
         header1: "共享給其他用戶",
@@ -187,7 +187,7 @@ export default {
           ruleMessage: "用戶名不能為空",
           label4: "可編輯",
           confirm: "確 認",
-          cancel: "取 消"
+          cancel: "取 消",
         },
         title1: "【場景】共享",
         title2: "共享給好友",
@@ -197,8 +197,8 @@ export default {
           confirm: "確認",
           cancel: "取消",
           success: "關閉成功！",
-          info: "已取消關閉"
-        }
+          info: "已取消關閉",
+        },
       },
       message: {
         header: "修改內容",
@@ -215,8 +215,8 @@ export default {
           confirm: "確認",
           cancel: "取消",
           success: "刪除成功！",
-          info: "已取消刪除"
-        }
+          info: "已取消刪除",
+        },
       },
       reply: {
         timestamp: "現在就回復",
@@ -228,9 +228,9 @@ export default {
           confirm: "確認",
           cancel: "取消",
           success: "刪除成功！",
-          info: "已取消刪除"
+          info: "已取消刪除",
         },
-        success: "回復成功"
+        success: "回復成功",
       },
       messageForm: {
         form: {
@@ -239,13 +239,13 @@ export default {
           rules: {
             title: {
               message1: "請輸入標題",
-              message2: "長度在 3 到 100 個字符"
-            }
-          }
+              message2: "長度在 3 到 100 個字符",
+            },
+          },
         },
         submit: "提交",
         reset: "重置",
-        success: "發帖成功"
+        success: "發帖成功",
       },
       metaDialog: {
         title: "選擇實體",
@@ -258,8 +258,8 @@ export default {
           message: "提示",
           confirm: "確定",
           cancel: "取消",
-          info: "取消輸入"
-        }
+          info: "取消輸入",
+        },
       },
       prefabDialog: {
         title: "選擇預設數據",
@@ -270,7 +270,7 @@ export default {
           message: "提示",
           confirm: "確定",
           cancel: "取消",
-          info: "取消輸入"
+          info: "取消輸入",
         },
         knight: {
           title: "輸入數據",
@@ -278,8 +278,8 @@ export default {
           cancel: "取消",
           warn: "點擊了取消",
           typeTitle: "類型",
-          nameTitle: "物品名稱"
-        }
+          nameTitle: "物品名稱",
+        },
       },
       sceneEditor: {
         error1: "沒有場景編輯器",
@@ -297,7 +297,7 @@ export default {
         coverUploadError: "上傳封面圖片錯誤：未找到圖片數據",
         handlerError: "獲取文件處理器失敗",
         coverUploadSuccess: "封面圖片上傳成功",
-        coverUploadFailed: "封面圖片上傳失敗"
+        coverUploadFailed: "封面圖片上傳失敗",
       },
       script: {
         title: "腳本",
@@ -316,20 +316,20 @@ export default {
           cancel: "否",
           success: "保存成功",
           error: "保存失敗",
-          info: "已放棄對未保存的更改"
-        }
+          info: "已放棄對未保存的更改",
+        },
       },
       public: {
         open: "公開",
         private: "私有",
         addSuccess: "已設為公開",
         removeSuccess: "已設為私有",
-        error: "操作失敗"
+        error: "操作失敗",
       },
       image: {
         updateSuccess: "圖片更新成功",
-        updateError: "圖片更新失敗"
-      }
-    }
-  }
+        updateError: "圖片更新失敗",
+      },
+    },
+  },
 };

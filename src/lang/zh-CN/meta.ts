@@ -28,20 +28,20 @@ export default {
       columns: {
         name: "实体名称",
         author: "作者",
-        updatedAt: "修改日期"
+        updatedAt: "修改日期",
       },
       properties: {
         type: "类型",
         entity: "实体",
-        author: "作者"
-      }
+        author: "作者",
+      },
     },
     create: {
       title: "创建实体",
       defaultName: "新实体",
       namePlaceholder: "请输入实体名称",
       nameRequired: "实体名称不能为空",
-      success: "实体创建成功"
+      success: "实体创建成功",
     },
     confirm: {
       message1: "此操作将永久删除该【实体】, 是否继续?",
@@ -49,7 +49,7 @@ export default {
       confirm: "确认",
       cancel: "取消",
       success: "删除成功！",
-      info: "已取消删除"
+      info: "已取消删除",
     },
     prompt: {
       message1: "请输入实体名称",
@@ -57,16 +57,16 @@ export default {
       confirm: "确认",
       cancel: "取消",
       success: "实体名称是: ",
-      info: "取消输入"
+      info: "取消输入",
     },
     prompt2: {
       message1: "请输入新名称",
-      message2: "修改实体名称"
+      message2: "修改实体名称",
     },
     metaEdit: {
       form: {
         title: "名称",
-        picture: "图片"
+        picture: "图片",
       },
       contentEdit: "内容编辑",
       rules: { message1: "请输入名称", message2: "长度在 2 到 20 个字符" },
@@ -74,7 +74,7 @@ export default {
       selectImageMethod: "选择图片方式",
       selectFromResource: "从资源库选择",
       uploadLocal: "本地上传",
-      image: { updateSuccess: "图片更新成功", updateError: "图片更新失败" }
+      image: { updateSuccess: "图片更新成功", updateError: "图片更新失败" },
     },
     scene: {
       error: "没有场景编辑器",
@@ -85,7 +85,7 @@ export default {
       coverUploadError: "上传封面图片错误：未找到图片数据",
       handlerError: "获取文件处理器失败",
       coverUploadSuccess: "封面图片上传成功",
-      coverUploadFailed: "封面图片上传失败"
+      coverUploadFailed: "封面图片上传失败",
     },
     script: {
       title: "脚本",
@@ -101,8 +101,8 @@ export default {
         confirm: "是",
         cancel: "否",
         error: "保存失败",
-        info: "已放弃对未保存的更改"
-      }
+        info: "已放弃对未保存的更改",
+      },
     },
     ResourceDialog: {
       title: "选择资源",
@@ -120,14 +120,12 @@ export default {
           message2: "部署资源",
           confirm: "确认",
           cancel: "取消",
-          success: "部署成功！"
-        }
+          success: "部署成功！",
+        },
       },
-      batchUnbindConfirm: {
-      },
-      confirm2: {
-      }
-    }
+      batchUnbindConfirm: {},
+      confirm2: {},
+    },
   },
   // AI部分国际化
   ai: {
@@ -143,12 +141,12 @@ export default {
           value1: "高",
           value2: "中",
           value3: "低",
-          value4: "极低"
+          value4: "极低",
         },
         message: "长度应为 4 到 50 个字符",
         error: "请输入提示或选择图像",
-        submit: "生成"
-      }
-    }
-  }
+        submit: "生成",
+      },
+    },
+  },
 };
