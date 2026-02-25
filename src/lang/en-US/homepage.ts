@@ -1,10 +1,6 @@
 // homepage translations for en-US
 export default {
   homepage: {
-    dashboard: "Dashboard",
-    news: "News",
-    relatedDownload: "Related Download",
-    caseCourse: "CaseCourse",
     greeting: {
       morning: "Good morning,",
       noon: "Good noon,",
@@ -27,7 +23,6 @@ export default {
       myPublish: "Publish",
       myLike: "Like",
       enter: "Enter",
-      Iliked: "I Liked",
     },
     quickStart: {
       title: "Quick Start",
@@ -48,7 +43,6 @@ export default {
       },
     },
     edit: {
-      title: "Edit Personal Data",
       personalData: "Personal Data",
       personalDataStatement:
         "Modify the user nickname, profile picture, and basic information",
@@ -172,13 +166,9 @@ export default {
           error2: "New password cannot be the same as the old one!",
         },
         new: {
-          message1: "Please enter the new password",
-          message2: "The new password must be longer than 12 characters",
-          error1: "Please enter the password",
           error2: "New password cannot be the same as the old one!",
         },
         check: {
-          message: "Please enter the confirmation password",
           message1: "Please enter the confirmation password",
           error1: "Please re-enter the password",
           error2: "The two passwords do not match",

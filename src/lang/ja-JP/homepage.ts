@@ -1,10 +1,6 @@
 // homepage translations for ja-JP
 export default {
   homepage: {
-    dashboard: "ダッシュボード",
-    news: "ニュース",
-    relatedDownload: "関連ダウンロード",
-    caseCourse: "ケースチュートリアル",
     greeting: {
       morning: "おはようございます、",
       noon: "こんにちは、",
@@ -26,7 +22,6 @@ export default {
       myPublish: "公開",
       myLike: "いいね",
       enter: "入る",
-      Iliked: "私がいいねしたもの",
     },
     quickStart: {
       title: "クイックスタート",
@@ -47,7 +42,6 @@ export default {
       },
     },
     edit: {
-      title: "プロフィールを編集",
       personalData: "個人データ",
       personalDataStatement: "ユーザー名、アバター、基本情報の変更",
       return: "個人センターに戻る",
@@ -173,13 +167,9 @@ export default {
           error2: "新しいパスワードは古いパスワードと同じにできません！",
         },
         new: {
-          message1: "新しいパスワードを入力してください",
-          message2: "新しいパスワードは12文字以上である必要があります",
-          error1: "パスワードを入力してください",
           error2: "新しいパスワードは古いパスワードと同じにできません！",
         },
         check: {
-          message: "確認用パスワードを入力してください",
           message1: "確認用パスワードを入力してください",
           error1: "もう一度パスワードを入力してください",
           error2: "2回入力したパスワードが一致しません",

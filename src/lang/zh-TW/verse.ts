@@ -66,7 +66,6 @@ export default {
         picture: "封面圖片",
         name: "名稱",
         description: "內容說明",
-        course: "綁定教程",
         cancel: "取 消",
         dialogTitle: "選擇文件",
         dialogSubmit: "確定",
@@ -77,12 +76,8 @@ export default {
         error: "表單驗證失敗",
       },
       list: {
-        enter: "進入",
-        infoTable: "內容說明：",
         infoContent: {
           author: "作者",
-          learn: "學習",
-          blank: "默認鏈接",
           description: "說明",
           share: "共享ID",
         },
@@ -151,12 +146,9 @@ export default {
       success1: "修改成功",
       success2: "提交成功",
       success3: "刪除成功",
-      success4: "分享成功",
-      success5: "停止共享",
       error1: "提交失敗",
       error2: "表單驗證失敗",
       error3: "預製體 Schema 格式無效",
-      messageTitle: "【場景】名稱：",
       scene: "場景",
       tags: {
         confirmRemove: {
@@ -314,7 +306,6 @@ export default {
           message2: "提示",
           confirm: "是",
           cancel: "否",
-          success: "保存成功",
           error: "保存失敗",
           info: "已放棄對未保存的更改",
         },

@@ -29,13 +29,10 @@ export default {
       removeTeacherConfirm: "คุณแน่ใจหรือไม่ว่าต้องการนำครูคนนี้ออก",
       removeConfirmTitle: "ยืนยันการนำออก",
     },
-    defaultSchoolName: "โรงเรียนใหม่",
     defaultClassName: "ชั้นเรียนใหม่",
     schoolManagement: "การจัดการโรงเรียน",
     teacherManagement: "การจัดการครู",
     studentManagement: "การจัดการนักเรียน",
-    filteringBySchool: "กรองตามรหัสโรงเรียนปัจจุบัน",
-    backToAll: "กลับไปที่ชั้นเรียนทั้งหมด",
     school: {
       principal: "ผู้ดูแลโรงเรียน",
       address: "ที่อยู่",
@@ -45,15 +42,11 @@ export default {
     class: {
       title: "การจัดการชั้นเรียน",
       schoolTitle: "{school} - การจัดการชั้นเรียน",
-      grade: "ระดับชั้น",
       teacher: "ครู",
-      student: "นักเรียน",
       teacherList: "รายชื่อครู",
       studentList: "รายชื่อนักเรียน",
       selectTeacher: "เลือกครู",
       selectStudent: "เลือกนักเรียน",
-      assignTeacher: "มอบหมายครู",
-      assignStudent: "มอบหมายนักเรียน",
       form: {
         name: "ชื่อชั้นเรียน",
         namePlaceholder: "กรุณากรอกชื่อชั้นเรียน",
@@ -86,11 +79,6 @@ export default {
       nickname: "ชื่อเล่น",
     },
     errors: {
-      fetchFailed: "ไม่สามารถดึงรายการโรงเรียนได้",
-      noData: "ไม่มีข้อมูล",
-      createPending: "ฟังก์ชันการสร้างกำลังพัฒนา",
-      editPending: "แก้ไขโรงเรียน: {name}",
-      operationFailed: "การดำเนินการล้มเหลว",
       addFailed: "เพิ่มไม่สำเร็จ",
       saveFailed: "บันทึกไม่สำเร็จ",
       deleteFailed: "ลบล้มเหลว",
@@ -103,14 +91,7 @@ export default {
       editTitle: "แก้ไขโรงเรียน",
     },
     form: {
-      name: "ชื่อโรงเรียน",
       namePlaceholder: "กรุณากรอกชื่อโรงเรียน",
-      address: "ที่อยู่โรงเรียน",
-      addressPlaceholder: "กรุณากรอกที่อยู่โรงเรียน",
-      principal: "ผู้ดูแลโรงเรียน",
-      principalPlaceholder: "โปรดเลือกผู้ดูแลโรงเรียน",
-      image: "รูปภาพโรงเรียน",
-      edit: "แก้ไข",
       cancel: "ยกเลิก",
       submit: "ส่ง",
       submitting: "กำลังส่ง...",
@@ -123,9 +104,7 @@ export default {
       addSuccess: "เพิ่มสำเร็จ",
       removeSuccess: "ลบสำเร็จ",
       deleteSuccess: "ลบสำเร็จ",
-      createConfirm: "ยืนยันการสร้างโรงเรียนใหม่หรือไม่?",
       createSuccess: "สร้างโรงเรียนสำเร็จ",
-      createFailed: "การสร้างโรงเรียนล้มเหลว",
       updateSuccess: "อัปเดตโรงเรียนสำเร็จ",
       updateFailed: "การอัปเดตโรงเรียนล้มเหลว",
       deleteFailed: "การลบโรงเรียนล้มเหลว",
@@ -153,7 +132,6 @@ export default {
     list: {
       label: "สิทธิ์:",
       cancel: "ลบ",
-      manage: "จัดการ",
       remove: "นำออก",
       roles: {
         root: "ผู้ใช้ Root",
@@ -238,7 +216,6 @@ export default {
       success: "เพิ่มสำเร็จ",
       confirm1: {
         message1: "สร้างแผนที่",
-        message2: "แจ้งเตือน",
         confirm: "ยืนยัน",
         cancel: "ยกเลิก",
         success: "สร้างสำเร็จ",
@@ -290,7 +267,6 @@ export default {
     closeAll: "ปิดทั้งหมด",
   },
   navbar: {
-    dashboard: "หน้าหลัก",
     logout: "ออกจากระบบ",
     AccountSetting: "ตั้งค่าบัญชี",
     personalCenter: "ศูนย์ส่วนบุคคล",
@@ -332,7 +308,6 @@ export default {
     mix: "โหมดผสม",
   },
   tts: {
-    title: "Tencent Text-to-Speech",
     voiceType: "ประเภทเสียง",
     voiceScene: "ฉาก",
     voiceLanguage: "ภาษา",
@@ -402,7 +377,6 @@ export default {
   },
   phototype: {
     title: "ต้นแบบ",
-    list: "รายการ",
     create: "สร้างต้นแบบ",
     fromModel: "จากโมเดล",
     typeName: "พรีแฟบ",

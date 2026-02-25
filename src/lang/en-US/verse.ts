@@ -66,7 +66,6 @@ export default {
         picture: "Cover Image",
         name: "Name",
         description: "Description",
-        course: "Bind Course",
         cancel: "Cancel",
         dialogTitle: "Select File",
         dialogSubmit: "Confirm",
@@ -77,12 +76,8 @@ export default {
         error: "Form validation failed",
       },
       list: {
-        enter: "Enter",
-        infoTable: "Description:",
         infoContent: {
           author: "Author",
-          learn: "Learn",
-          blank: "Default Link",
           description: "Description",
           share: "ShareID",
         },
@@ -156,12 +151,9 @@ export default {
       success1: "Edit successful",
       success2: "Submission successful",
       success3: "Deletion successful",
-      success4: "Share successful",
-      success5: "Sharing stopped",
       error1: "Submission failed",
       error2: "Form validation failed",
       error3: "Prefab schema format is invalid",
-      messageTitle: "【Project】Name:",
       scene: "scene",
       tags: {
         confirmRemove: {
@@ -319,7 +311,6 @@ export default {
           message2: "Prompt",
           confirm: "Yes",
           cancel: "No",
-          success: "Saved successfully",
           error: "Save failed",
           info: "Unsaved changes have been discarded",
         },

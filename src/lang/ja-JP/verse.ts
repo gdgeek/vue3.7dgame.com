@@ -66,7 +66,6 @@ export default {
         picture: "カバー画像",
         name: "名前",
         description: "内容の説明",
-        course: "チュートリアルをバインド",
         cancel: "キャンセル",
         dialogTitle: "ファイルを選択",
         dialogSubmit: "確認",
@@ -77,12 +76,8 @@ export default {
         error: "フォーム検証に失敗しました",
       },
       list: {
-        enter: "入る",
-        infoTable: "内容の説明：",
         infoContent: {
           author: "作者",
-          learn: "学習",
-          blank: "デフォルトリンク",
           description: "説明",
           share: "共有ID",
         },
@@ -151,12 +146,9 @@ export default {
       success1: "変更成功",
       success2: "送信成功",
       success3: "削除成功",
-      success4: "共有成功",
-      success5: "共有停止",
       error1: "送信失敗",
       error2: "フォーム検証に失敗しました",
       error3: "プリハブのスキーマ形式が無効です",
-      messageTitle: "【场景】名：",
       scene: "シーン",
       tags: {
         confirmRemove: {
@@ -315,7 +307,6 @@ export default {
           message2: "ヒント",
           confirm: "はい",
           cancel: "いいえ",
-          success: "保存が成功しました",
           error: "保存に失敗しました",
           info: "保存されていない変更は破棄されました",
         },

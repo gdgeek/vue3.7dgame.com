@@ -5,7 +5,6 @@ export default {
     register: "Platform Register/Login",
     h1: "Welcome!",
     h4: "Ready to get started?",
-    loginTitle: "Login Account",
     username: "Email",
     password: "Password",
     login: "Login",
@@ -15,15 +14,11 @@ export default {
     rules: {
       username: {
         message1: "Please enter your username",
-        message2: "Greater than 4 and less than 20",
-        message3: "only letters, numbers, _, -, @, and .",
         email: "Please enter a valid email address",
       },
       password: {
         message1: "Please enter your password",
         message2: "Between 12 and 128 characters",
-        message3:
-          "Must include uppercase, lowercase, digits, and special characters",
       },
       repassword: {
         message1: "Please enter the password again",
@@ -88,8 +83,6 @@ export default {
       medium: "Medium",
       strong: "Strong",
     },
-    description:
-      "Password requirements: at least 12 characters, including uppercase, lowercase, digits, and special characters",
   },
   imageSelector: {
     selectImageMethod: "Select Image Method",

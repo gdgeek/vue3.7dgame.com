@@ -185,11 +185,9 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
             // Vue 核心
             "vue-core": ["vue", "vue-router", "pinia", "vue-i18n"],
             // Element Plus 组件库
-            "element-plus": ["element-plus", "@element-plus/icons-vue"],
+            "element-plus": ["element-plus"],
             // 3D 相关
             three: ["three"],
-            // 图表
-            echarts: ["echarts"],
             // 代码编辑器
             codemirror: [
               "codemirror",
@@ -199,6 +197,8 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
               "@codemirror/theme-one-dark",
               "vue-codemirror",
             ],
+            // JSON Schema 编辑器（仅在 phototype/edit 中使用）
+            "json-schema-editor": ["json-schema-editor-vue3"],
             // FontAwesome 图标
             fontawesome: [
               "@fortawesome/fontawesome-svg-core",

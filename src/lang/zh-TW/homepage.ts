@@ -1,10 +1,6 @@
 // homepage translations for zh-TW
 export default {
   homepage: {
-    dashboard: "首頁",
-    news: "新聞",
-    relatedDownload: "相關下載",
-    caseCourse: "案例教程",
     greeting: {
       morning: "早上好，",
       noon: "中午好，",
@@ -26,7 +22,6 @@ export default {
       myPublish: "發布",
       myLike: "點贊",
       enter: "進入",
-      Iliked: "我點贊的",
     },
     quickStart: {
       title: "快速開始",
@@ -47,7 +42,6 @@ export default {
       },
     },
     edit: {
-      title: "編輯個人資料",
       personalData: "個人資料",
       personalDataStatement: "用戶昵稱、頭像、基本信息修改",
       return: "返回個人中心",
@@ -164,13 +158,9 @@ export default {
           error2: "新密碼不能和舊密碼一致！",
         },
         new: {
-          message1: "請輸入新密碼",
-          message2: "新密碼長度應該大於12",
-          error1: "請輸入密碼",
           error2: "新密碼不能和舊密碼一致！",
         },
         check: {
-          message: "請輸入校驗密碼",
           message1: "請輸入校驗密碼",
           error1: "請再次輸入密碼",
           error2: "兩次輸入密碼不一致",
