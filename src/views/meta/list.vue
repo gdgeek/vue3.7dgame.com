@@ -472,7 +472,7 @@ const copy = async (id: number, newTitle: string) => {
     refresh();
   } catch (error) {
     logger.error("Copy error:", error);
-    Message.error(t("meta.copy.error"));
+    Message.error(t("meta.copyError"));
   }
 };
 

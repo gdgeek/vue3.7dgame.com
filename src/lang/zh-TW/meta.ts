@@ -7,6 +7,7 @@ export default {
     delete: "刪除",
     actions: "操作",
     copy: "副本",
+    copyError: "複製實體失敗",
     list: {
       pageTitle: "所有實體",
       searchPlaceholder: "搜尋實體...",

@@ -1,21 +1,17 @@
 // 主页国际化
 export default {
   homepage: {
-    dashboard: "首页",
-    news: "新闻",
-    relatedDownload: "相关下载",
-    caseCourse: "案例教程",
     greeting: {
       morning: "早上好，",
       noon: "中午好，",
       afternoon: "下午好，",
-      evening: "晚上好，",
+      evening: "晚上好，"
     },
     header: {
-      subtitle: "探索 AR 的无限可能，开启您的创意之旅。",
+      subtitle: "探索 AR 的无限可能，开启您的创意之旅。"
     },
     announcements: {
-      title: "平台公告",
+      title: "平台公告"
     },
     myCreation: {
       title: "我的创作",
@@ -25,29 +21,27 @@ export default {
       myProject: "场景",
       myPublish: "发布",
       myLike: "点赞",
-      enter: "进入",
-      Iliked: "我点赞的",
+      enter: "进入"
     },
     quickStart: {
       title: "快速开始",
       upload: {
         title: "上传素材",
         desc: "导入 3D 模型或多媒体文件到您的个人库中。",
-        action: "立即上传",
+        action: "立即上传"
       },
       edit: {
         title: "编辑实体",
         desc: "管理交互式组件和行为脚本，赋予 AR 资产生命力。",
-        action: "立即编辑",
+        action: "立即编辑"
       },
       create: {
         title: "创建场景",
         desc: "从零开始构建一个全新的沉浸式 AR 互动体验。",
-        action: "立即创建",
-      },
+        action: "立即创建"
+      }
     },
     edit: {
-      title: "编辑个人资料",
       personalData: "个人资料",
       personalDataStatement: "用户昵称、头像、基本信息修改",
       return: "返回个人中心",
@@ -91,7 +85,7 @@ export default {
         error2: "上传头像图片大小不能超过 2MB!",
         error3: "请选择有效的文件！",
         error4: "处理文件时出错",
-        success: "修改头像成功",
+        success: "修改头像成功"
       },
       rules: {
         nickname: {
@@ -101,7 +95,7 @@ export default {
           error2: "昵称仅支持中文、字母、数字、下划线",
           error3: "昵称更新失败",
           error4: "表单校验未通过",
-          success: "昵称更新成功",
+          success: "昵称更新成功"
         },
         industry: {
           message: "请选择行业",
@@ -111,27 +105,27 @@ export default {
           label4: "能源、制造业",
           label5: "农、林、渔、牧",
           label6: "服务业",
-          label7: "其他行业",
+          label7: "其他行业"
         },
         selectedOptions: {
-          message: "请选择居住地",
+          message: "请选择居住地"
         },
         textarea: {
           message1: "请输入个人简介",
-          message2: "个人简介应多于10个字符",
+          message2: "个人简介应多于10个字符"
         },
         success: "信息更新成功",
         error1: "信息更新失败",
         error2: "表单校验未通过",
         email: {
           required: "请输入邮箱地址",
-          invalid: "邮箱格式不正确",
+          invalid: "邮箱格式不正确"
         },
         code: {
           required: "请输入验证码",
-          invalid: "验证码必须是6位数字",
-        },
-      },
+          invalid: "验证码必须是6位数字"
+        }
+      }
     },
     account: {
       title: "账号设置",
@@ -139,7 +133,7 @@ export default {
       label1: "邮箱",
       rules1: {
         message1: "请输入邮箱",
-        message2: "请输入正确的邮箱地址",
+        message2: "请输入正确的邮箱地址"
       },
       placeholder: "绑定邮箱",
       bind: "绑定",
@@ -156,30 +150,27 @@ export default {
           message1: "请输入旧密码",
           message2: "旧密码长度应该大于6",
           error1: "旧密码不能为空",
-          error2: "新密码不能和旧密码一致！",
+          error2: "新密码不能和旧密码一致！"
         },
         new: {
-          message1: "请输入新密码",
-          message2: "新密码长度应该大于12",
-          error1: "请输入密码",
-          error2: "新密码不能和旧密码一致！",
+          error2: "新密码不能和旧密码一致！"
         },
         check: {
-          message: "请输入校验密码",
+          message1: "请输入校验密码",
           error1: "请再次输入密码",
-          error2: "两次输入密码不一致",
-        },
+          error2: "两次输入密码不一致"
+        }
       },
       validate1: {
         success: "密码修改成功",
         error1: "密码修改失败",
-        error2: "表单校验未通过",
+        error2: "表单校验未通过"
       },
       validate2: {
         success: "绑定成功",
         error1: "绑定失败",
-        error2: "表单校验未通过",
-      },
-    },
-  },
+        error2: "表单校验未通过"
+      }
+    }
+  }
 };

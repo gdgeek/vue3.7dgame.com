@@ -27,7 +27,7 @@ export default {
       inviteTeacherPending: "Invite teacher is not available yet",
       removeStudentConfirm: "Are you sure you want to remove this student?",
       removeTeacherConfirm: "Are you sure you want to remove this teacher?",
-      removeConfirmTitle: "Remove Confirmation",
+      removeConfirmTitle: "Remove Confirmation"
     },
     defaultSchoolName: "New School",
     defaultClassName: "New Class",
@@ -41,7 +41,7 @@ export default {
       principal: "School Administrator",
       address: "Address",
       description: "Description",
-      classList: "Class List",
+      classList: "Class List"
     },
     class: {
       title: "Class Management",
@@ -55,14 +55,10 @@ export default {
       selectStudent: "Select Student",
       assignTeacher: "Assign Teacher",
       assignStudent: "Assign Student",
-      dialog: {
-        createTitle: "Create Class",
-        editTitle: "Edit Class",
-      },
       form: {
         name: "Class Name",
         namePlaceholder: "Please enter class name",
-        image: "Class Image",
+        image: "Class Image"
       },
       messages: {
         createConfirm: "Are you sure you want to create a new class?",
@@ -81,19 +77,15 @@ export default {
           "Please select a school first before creating a class",
         assignTeacherSuccess: "Teacher assigned successfully",
         assignStudentSuccess: "Student assigned successfully",
-        teacherAlreadyInClass: "This teacher is already in this class",
+        teacherAlreadyInClass: "This teacher is already in this class"
       },
       validation: {
-        nameRequired: "Please enter class name",
-      },
+        nameRequired: "Please enter class name"
+      }
     },
     teacher: {
       subject: "Subject",
-      phone: "Phone",
-    },
-    student: {
-      grade: "Grade",
-      class: "Class",
+      phone: "Phone"
     },
     principal: {
       assign: "Assign School Administrator",
@@ -102,7 +94,7 @@ export default {
       assignSuccess: "School administrator assigned successfully",
       assignFailed: "Failed to assign school administrator",
       username: "Username",
-      nickname: "Nickname",
+      nickname: "Nickname"
     },
     errors: {
       fetchFailed: "Failed to fetch schools",
@@ -112,10 +104,14 @@ export default {
       operationFailed: "Operation failed",
       addFailed: "Failed to add",
       saveFailed: "Failed to save",
+      deleteFailed: "Delete failed",
+      removeFailed: "Remove failed",
+      alreadyInClass: "This member is already in the class",
+      validationFailed: "Form validation failed"
     },
     dialog: {
       createTitle: "Create School",
-      editTitle: "Edit School",
+      editTitle: "Edit School"
     },
     form: {
       name: "School Name",
@@ -128,15 +124,16 @@ export default {
       edit: "Edit",
       cancel: "Cancel",
       submit: "Submit",
-      submitting: "Submitting...",
+      submitting: "Submitting..."
     },
     validation: {
       nameRequired: "Please enter school name",
-      nameLength: "School name length should be between 2-50 characters",
+      nameLength: "School name length should be between 2-50 characters"
     },
     messages: {
       addSuccess: "Added successfully",
       removeSuccess: "Removed successfully",
+      deleteSuccess: "Deleted successfully",
       createConfirm: "Confirm to create a new school?",
       createSuccess: "School created successfully",
       createFailed: "Failed to create school",
@@ -144,7 +141,7 @@ export default {
       updateFailed: "Failed to update school",
       deleteFailed: "Failed to delete school",
       clearPrincipalConfirm:
-        "Are you sure you want to clear the school administrator?",
+        "Are you sure you want to clear the school administrator?"
     },
     creator: {
       form: {
@@ -162,8 +159,8 @@ export default {
         error3: "The passwords do not match",
         error4: "Form validation failed",
         cancel: "Cancel",
-        submit: "RegisterAccount",
-      },
+        submit: "RegisterAccount"
+      }
     },
     list: {
       label: "Perms:",
@@ -174,7 +171,7 @@ export default {
         root: "Root User",
         admin: "Super Administrator",
         manager: "Administrator",
-        user: "User",
+        user: "User"
       },
       confirm: {
         message1:
@@ -183,10 +180,10 @@ export default {
         confirm: "Confirm",
         cancel: "Cancel",
         success: "Deleted successfully!",
-        info: "Deletion canceled",
+        info: "Deletion canceled"
       },
       success: "Permissions updated successfully!",
-      error: "Permissions update failed!",
+      error: "Permissions update failed!"
     },
     confirm: {
       deleteTitle: "Confirm Delete",
@@ -195,8 +192,8 @@ export default {
       removeMemberTitle: "Confirm Remove",
       removeMemberMessage: "Are you sure you want to remove this member?",
       confirm: "Confirm",
-      cancel: "Cancel",
-    },
+      cancel: "Cancel"
+    }
   },
   game: {
     index: {
@@ -214,8 +211,8 @@ export default {
           confirm: "Confirm",
           cancel: "Cancel",
           success: "Deleted successfully",
-          info: "Order change canceled",
-        },
+          info: "Order change canceled"
+        }
       },
       success: "Added successfully",
       confirm: {
@@ -225,8 +222,8 @@ export default {
         confirm: "Confirm",
         cancel: "Cancel",
         success: "Deleted successfully",
-        info: "Deletion canceled",
-      },
+        info: "Deletion canceled"
+      }
     },
     map: {
       title1: "Level ",
@@ -247,8 +244,8 @@ export default {
           confirm: "Confirm",
           cancel: "Cancel",
           success: "Deleted successfully",
-          info: "Order change canceled",
-        },
+          info: "Order change canceled"
+        }
       },
       success: "Added successfully",
       confirm1: {
@@ -257,7 +254,7 @@ export default {
         confirm: "Confirm",
         cancel: "Cancel",
         success: "Created successfully",
-        info: "Creation canceled",
+        info: "Creation canceled"
       },
       confirm2: {
         message1: "Delete Map",
@@ -265,7 +262,7 @@ export default {
         confirm: "Confirm",
         cancel: "Cancel",
         success: "Deleted successfully",
-        info: "Deletion canceled",
+        info: "Deletion canceled"
       },
       confirm3: {
         message1:
@@ -274,8 +271,8 @@ export default {
         confirm: "Confirm",
         cancel: "Cancel",
         success: "Deleted successfully",
-        info: "Deletion canceled",
-      },
+        info: "Deletion canceled"
+      }
     },
     verseDialog: {
       title: "Select【Project】",
@@ -287,14 +284,14 @@ export default {
         message2: "Prompt",
         confirm: "Confirm",
         cancel: "Cancel",
-        info: "Cancel input",
-      },
-    },
+        info: "Cancel input"
+      }
+    }
   },
   MrppHeader: {
     sortByName: "Name",
     sortByTime: "Time",
-    search: "Search",
+    search: "Search"
   },
   tags: {
     refresh: "Refresh",
@@ -302,14 +299,14 @@ export default {
     closeOthers: "CloseOthers",
     closeLeft: "CloseLeft",
     closeRight: "CloseRight",
-    closeAll: "CloseAll",
+    closeAll: "CloseAll"
   },
   navbar: {
     dashboard: "Dashboard",
     logout: "Logout",
     AccountSetting: "Account Setting",
     personalCenter: "Home Page",
-    helpSupport: "Help & Support",
+    helpSupport: "Help & Support"
   },
   sizeSelect: {
     tooltip: "Layout Size",
@@ -317,18 +314,18 @@ export default {
     large: "Large",
     small: "Small",
     message: {
-      success: "Switch Layout Size Successful!",
-    },
+      success: "Switch Layout Size Successful!"
+    }
   },
   copy: {
     title: "Copy",
     success: "Code has been copied to clipboard",
-    error: "Copy failed",
+    error: "Copy failed"
   },
   langSelect: {
     message: {
-      success: "Switch Language Successful!",
-    },
+      success: "Switch Language Successful!"
+    }
   },
   settings: {
     project: "Project Settings",
@@ -339,12 +336,12 @@ export default {
     tagsView: "Tags View",
     fixedHeader: "Fixed Header",
     sidebarLogo: "Sidebar Logo",
-    watermark: "Watermark",
+    watermark: "Watermark"
   },
   layoutSelect: {
     left: "Left Mode",
     top: "Top Mode",
-    mix: "Mixed Mode",
+    mix: "Mixed Mode"
   },
   tts: {
     title: "Tencent Text-to-Speech",
@@ -413,7 +410,7 @@ export default {
     uploadAudio: "Upload Audio",
     nameRequired: "Name cannot be empty",
     noText: "Please enter text",
-    noAudio: "Please synthesize speech first",
+    noAudio: "Please synthesize speech first"
   },
   phototype: {
     title: "Phototype",
@@ -430,7 +427,7 @@ export default {
       previewImage: "Preview Image",
       saveBasicFirst: "Please save basic information first",
       condition: "Condition",
-      defaultValue: "Default Value",
+      defaultValue: "Default Value"
     },
     prompt: {
       message1: "Please enter phototype name",
@@ -441,7 +438,7 @@ export default {
       success: "Phototype name is ",
       confirm: "Confirm",
       cancel: "Cancel",
-      info: "Input canceled",
+      info: "Input canceled"
     },
     confirm: {
       message1:
@@ -450,7 +447,7 @@ export default {
       confirm: "Confirm",
       cancel: "Cancel",
       success: "Deleted successfully!",
-      info: "Deletion canceled",
-    },
-  },
+      info: "Deletion canceled"
+    }
+  }
 };

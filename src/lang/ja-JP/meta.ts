@@ -7,6 +7,7 @@ export default {
     delete: "削除",
     actions: "操作",
     copy: "コピー",
+    copyError: "エンティティのコピーに失敗しました",
     list: {
       pageTitle: "すべてのエンティティ",
       searchPlaceholder: "エンティティを検索...",

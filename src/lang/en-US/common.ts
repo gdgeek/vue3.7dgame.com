@@ -29,6 +29,28 @@ export default {
     deleteFailed: "Delete failed",
     operationFailed: "Operation failed",
     networkError: "Network error, please check your internet connection",
+    updateFailed: "Update failed",
+    invalidData: "Invalid data",
+    button: {
+      save: "Save",
+    },
+    message: {
+      createSuccess: "Created successfully",
+      saveSuccess: "Saved successfully",
+      saveFailed: "Save failed",
+    },
+  },
+  errorPage: {
+    back: "Back",
+    gifSource: "Image source: ",
+    page: "Oops! Something went wrong",
+    noPermission: "You do not have permission to access this page",
+    contactLeader: "Please contact your supervisor or admin",
+    orGoTo: "Or go to",
+    backHome: "Back to Home",
+    justLook: "Just Browse",
+    clickToSee: "Click to see",
+    justLookTitle: "Just Browse",
   },
   sidebar: {
     home: "Home",

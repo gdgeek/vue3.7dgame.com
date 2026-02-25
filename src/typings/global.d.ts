@@ -81,6 +81,16 @@ declare global {
   }
 
   /**
+   * 运行时注入的窗口变量（由服务端渲染或 index.html 脚本注入）
+   */
+  interface Window {
+    __API_URL__?: string;
+    __BACKUP_API_URL__?: string;
+    __DOMAIN_INFO_API_URL__?: string;
+    __BACKUP_DOMAIN_INFO_API_URL__?: string;
+  }
+
+  /**
    * 组件数据源
    */
   interface OptionType {

@@ -2,7 +2,7 @@
 export default {
   verse: {
     create: {
-      defaultName: "ฉากใหม่",
+      defaultName: "ฉากใหม่"
     },
     listPage: {
       myScenes: "ฉากของฉัน",
@@ -46,7 +46,7 @@ export default {
       deleteConfirmMessage: "คุณแน่ใจหรือไม่ว่าต้องการลบฉากนี้",
       deleteConfirmTitle: "ลบฉาก",
       cancelInfo: "ยกเลิกแล้ว",
-      unnamed: "ไม่มีชื่อ",
+      unnamed: "ไม่มีชื่อ"
     },
     publicPage: {
       examplesTitle: "ตัวอย่างฉาก",
@@ -56,7 +56,7 @@ export default {
       viewExample: "ดูตัวอย่างนี้",
       noDescription: "ไม่มีคำอธิบาย",
       allCategory: "ทั้งหมด",
-      updatedTime: "เวลาแก้ไข",
+      updatedTime: "เวลาแก้ไข"
     },
     page: {
       dialogTitle: "สร้าง!【ฉาก】",
@@ -72,9 +72,9 @@ export default {
         dialogSubmit: "ตกลง",
         rules: {
           message1: "กรุณากรอกชื่อกิจกรรม",
-          message2: "ความยาวระหว่าง 3 ถึง 64 ตัวอักษร",
+          message2: "ความยาวระหว่าง 3 ถึง 64 ตัวอักษร"
         },
-        error: "การตรวจสอบแบบฟอร์มล้มเหลว",
+        error: "การตรวจสอบแบบฟอร์มล้มเหลว"
       },
       list: {
         enter: "เข้าสู่",
@@ -84,7 +84,7 @@ export default {
           learn: "เรียนรู้",
           blank: "ลิงก์เริ่มต้น",
           description: "คำอธิบาย",
-          share: "ID แบ่งปัน",
+          share: "ID แบ่งปัน"
         },
         releaseConfirm: {
           message1: "ยืนยันที่จะเผยแพร่ฉากนี้หรือไม่?",
@@ -92,7 +92,7 @@ export default {
           confirm: "ยืนยัน",
           cancel: "ยกเลิก",
           success: "เผยแพร่สำเร็จ",
-          info: "ยกเลิกแล้ว",
+          info: "ยกเลิกแล้ว"
         },
         restrainConfirm: {
           message1: "ยืนยันที่จะนำฉากนี้ออฟไลน์หรือไม่?",
@@ -100,7 +100,7 @@ export default {
           confirm: "ยืนยัน",
           cancel: "ยกเลิก",
           success: "นำออฟไลน์สำเร็จ",
-          info: "ยกเลิกแล้ว",
+          info: "ยกเลิกแล้ว"
         },
         toolbar: {
           dialogTitle: "แก้ไขข้อมูล",
@@ -112,17 +112,17 @@ export default {
             confirm: "ยืนยัน",
             cancel: "ยกเลิก",
             success: "ลบสำเร็จ!",
-            info: "ยกเลิกการลบแล้ว",
+            info: "ยกเลิกการลบแล้ว"
           },
           success: "แก้ไขสำเร็จ!",
           changeError: "แก้ไขล้มเหลว!",
           qrcode: {
             cancel: "ยกเลิก",
             dialogTitle1: "กรุณาใช้อุปกรณ์สแกน QR Code เพื่อเข้าสู่",
-            dialogTitle2: "กรุณาใช้อุปกรณ์สแกน QR Code เพื่อเข้าสู่ฉาก",
-          },
-        },
-      },
+            dialogTitle2: "กรุณาใช้อุปกรณ์สแกน QR Code เพื่อเข้าสู่ฉาก"
+          }
+        }
+      }
     },
     view: {
       header: "แก้ไขข้อมูล",
@@ -141,8 +141,8 @@ export default {
           message2: "ความยาวระหว่าง 2 ถึง 10 ตัวอักษร",
           message3: "กรุณากรอกชื่อ",
           message4: "ความยาวระหว่าง 2 ถึง 50 ตัวอักษร",
-          message5: "กรุณากรอกคำแนะนำ",
-        },
+          message5: "กรุณากรอกคำแนะนำ"
+        }
       },
       edit: "แก้ไข【ฉาก】",
       eye: "ดู【ฉาก】",
@@ -156,6 +156,7 @@ export default {
       success5: "หยุดแบ่งปัน",
       error1: "ส่งล้มเหลว",
       error2: "การตรวจสอบแบบฟอร์มล้มเหลว",
+      error3: "รูปแบบ Schema ของ Prefab ไม่ถูกต้อง",
       messageTitle: "ชื่อ【ฉาก】: ",
       scene: "ฉาก",
       tags: {
@@ -165,7 +166,7 @@ export default {
           confirm: "ยืนยัน",
           cancel: "ยกเลิก",
           success: "ลบแท็กสำเร็จ",
-          error: "ยกเลิกการลบแท็ก",
+          error: "ยกเลิกการลบแท็ก"
         },
         confirmAdd: {
           message: "ยืนยันเพิ่มแท็ก?",
@@ -173,8 +174,8 @@ export default {
           confirm: "ยืนยัน",
           cancel: "ยกเลิก",
           success: "เพิ่มแท็กสำเร็จ",
-          error: "ยกเลิกการเพิ่มแท็ก",
-        },
+          error: "ยกเลิกการเพิ่มแท็ก"
+        }
       },
       share: {
         header1: "แบ่งปันให้ผู้ใช้อื่น",
@@ -187,7 +188,7 @@ export default {
           ruleMessage: "ชื่อผู้ใช้ต้องไม่ว่างเปล่า",
           label4: "แก้ไขได้",
           confirm: "ตกลง",
-          cancel: "ยกเลิก",
+          cancel: "ยกเลิก"
         },
         title1: "การแบ่งปัน【ฉาก】",
         title2: "แบ่งปันให้เพื่อน",
@@ -197,8 +198,8 @@ export default {
           confirm: "ยืนยัน",
           cancel: "ยกเลิก",
           success: "ปิดสำเร็จ!",
-          info: "ยกเลิกการปิดแล้ว",
-        },
+          info: "ยกเลิกการปิดแล้ว"
+        }
       },
       message: {
         header: "แก้ไขเนื้อหา",
@@ -215,26 +216,22 @@ export default {
           confirm: "ยืนยัน",
           cancel: "ยกเลิก",
           success: "ลบสำเร็จ!",
-          info: "ยกเลิกการลบแล้ว",
-        },
+          info: "ยกเลิกการลบแล้ว"
+        }
       },
       reply: {
         timestamp: "ตอบกลับทันที",
         title: "ตอบกลับ",
         publish: "เผยแพร่เมื่อ",
-        rules: {
-          message1: "กรุณากรอกเนื้อหา",
-          message2: "ความยาวอย่างน้อย 10 ตัวอักษร",
-        },
         confirm: {
           message1: "ยืนยันที่จะลบหรือไม่?",
           message2: "แจ้งเตือน",
           confirm: "ยืนยัน",
           cancel: "ยกเลิก",
           success: "ลบสำเร็จ!",
-          info: "ยกเลิกการลบแล้ว",
+          info: "ยกเลิกการลบแล้ว"
         },
-        success: "ตอบกลับสำเร็จ",
+        success: "ตอบกลับสำเร็จ"
       },
       messageForm: {
         form: {
@@ -243,17 +240,13 @@ export default {
           rules: {
             title: {
               message1: "กรุณากรอกหัวข้อ",
-              message2: "ความยาวระหว่าง 3 ถึง 100 ตัวอักษร",
-            },
-            body: {
-              message1: "กรุณากรอกเนื้อหา",
-              message2: "ความยาวอย่างน้อย 10 ตัวอักษร",
-            },
-          },
+              message2: "ความยาวระหว่าง 3 ถึง 100 ตัวอักษร"
+            }
+          }
         },
         submit: "ส่ง",
         reset: "รีเซ็ต",
-        success: "โพสต์สำเร็จ",
+        success: "โพสต์สำเร็จ"
       },
       metaDialog: {
         title: "เลือกเอนทิตี",
@@ -266,8 +259,8 @@ export default {
           message: "แจ้งเตือน",
           confirm: "ตกลง",
           cancel: "ยกเลิก",
-          info: "ยกเลิกการป้อนข้อมูล",
-        },
+          info: "ยกเลิกการป้อนข้อมูล"
+        }
       },
       prefabDialog: {
         title: "เลือกข้อมูลพรีเซ็ต",
@@ -278,7 +271,7 @@ export default {
           message: "แจ้งเตือน",
           confirm: "ตกลง",
           cancel: "ยกเลิก",
-          info: "ยกเลิกการป้อนข้อมูล",
+          info: "ยกเลิกการป้อนข้อมูล"
         },
         knight: {
           title: "ป้อนข้อมูล",
@@ -286,8 +279,8 @@ export default {
           cancel: "ยกเลิก",
           warn: "คลิกยกเลิกแล้ว",
           typeTitle: "ประเภท",
-          nameTitle: "ชื่อไอเทม",
-        },
+          nameTitle: "ชื่อไอเทม"
+        }
       },
       sceneEditor: {
         error1: "ไม่มีตัวแก้ไขฉาก",
@@ -305,7 +298,7 @@ export default {
         coverUploadError: "ข้อผิดพลาดในการอัปโหลดรูปปก: ไม่พบข้อมูลรูปภาพ",
         handlerError: "รับตัวจัดการไฟล์ล้มเหลว",
         coverUploadSuccess: "อัปโหลดรูปปกสำเร็จ",
-        coverUploadFailed: "อัปโหลดรูปปกล้มเหลว",
+        coverUploadFailed: "อัปโหลดรูปปกล้มเหลว"
       },
       script: {
         title: "สคริปต์",
@@ -324,20 +317,20 @@ export default {
           cancel: "ไม่",
           success: "บันทึกสำเร็จ",
           error: "บันทึกล้มเหลว",
-          info: "ละทิ้งการเปลี่ยนแปลงที่ยังไม่ได้บันทึก",
-        },
+          info: "ละทิ้งการเปลี่ยนแปลงที่ยังไม่ได้บันทึก"
+        }
       },
       public: {
         open: "สาธารณะ",
         private: "ส่วนตัว",
         addSuccess: "ตั้งค่าเป็นสาธารณะแล้ว",
         removeSuccess: "ตั้งค่าเป็นส่วนตัวแล้ว",
-        error: "การดำเนินการล้มเหลว",
+        error: "การดำเนินการล้มเหลว"
       },
       image: {
         updateSuccess: "อัปเดตรูปภาพสำเร็จ",
-        updateError: "อัปเดตรูปภาพล้มเหลว",
-      },
-    },
-  },
+        updateError: "อัปเดตรูปภาพล้มเหลว"
+      }
+    }
+  }
 };

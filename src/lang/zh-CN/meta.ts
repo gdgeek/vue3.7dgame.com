@@ -8,6 +8,7 @@ export default {
     delete: "删除",
     actions: "操作",
     copy: "副本",
+    copyError: "复制实体失败",
     list: {
       pageTitle: "所有实体",
       searchPlaceholder: "搜索实体...",
@@ -27,20 +28,20 @@ export default {
       columns: {
         name: "实体名称",
         author: "作者",
-        updatedAt: "修改日期",
+        updatedAt: "修改日期"
       },
       properties: {
         type: "类型",
         entity: "实体",
-        author: "作者",
-      },
+        author: "作者"
+      }
     },
     create: {
       title: "创建实体",
       defaultName: "新实体",
       namePlaceholder: "请输入实体名称",
       nameRequired: "实体名称不能为空",
-      success: "实体创建成功",
+      success: "实体创建成功"
     },
     confirm: {
       message1: "此操作将永久删除该【实体】, 是否继续?",
@@ -48,63 +49,32 @@ export default {
       confirm: "确认",
       cancel: "取消",
       success: "删除成功！",
-      info: "已取消删除",
+      info: "已取消删除"
     },
     prompt: {
       message1: "请输入实体名称",
       message2: "提示(3-20个字符)",
       confirm: "确认",
       cancel: "取消",
-      inputValidator: {
-        item1: "实体名称不能为空",
-        item2: "实体名称不能小于3个字符",
-        item3: "实体名称不能大于20个字符",
-      },
       success: "实体名称是: ",
-      info: "取消输入",
+      info: "取消输入"
     },
     prompt2: {
       message1: "请输入新名称",
-      message2: "修改实体名称",
-      confirm: "确认",
-      cancel: "取消",
-      success: "新的实体名称是: ",
-      info: "取消输入",
-    },
-    prompt3: {
-      message1: "请输入复制后的实体名称",
-      message2: "复制实体",
-      confirm: "确认",
-      cancel: "取消",
-      success: "复制成功! 新实体名称: ",
-      info: "取消复制",
+      message2: "修改实体名称"
     },
     metaEdit: {
-      title: "【实体】名称：",
       form: {
         title: "名称",
-        picture: "图片",
-        input: "输入事件",
-        output: "输出事件",
-        data: "数据",
-        info: "信息",
+        picture: "图片"
       },
-      eventEdit: "事件编辑",
       contentEdit: "内容编辑",
-      save: "信息保存",
-      metaInfo: "【实体】信息",
       rules: { message1: "请输入名称", message2: "长度在 2 到 20 个字符" },
       success: "保存成功e",
       selectImageMethod: "选择图片方式",
       selectFromResource: "从资源库选择",
       uploadLocal: "本地上传",
-      uploadError: "上传失败：未找到文件",
-      invalidImageType: "请上传JPG/PNG/BMP/GIF格式的图片",
-      imageTooLarge: "图片大小不能超过2MB",
-      handlerError: "获取文件处理器失败",
-      uploadFailed: "上传图片失败",
-      saveFailed: "保存图片信息失败",
-      image: { updateSuccess: "图片更新成功", updateError: "图片更新失败" },
+      image: { updateSuccess: "图片更新成功", updateError: "图片更新失败" }
     },
     scene: {
       error: "没有场景编辑器",
@@ -115,7 +85,7 @@ export default {
       coverUploadError: "上传封面图片错误：未找到图片数据",
       handlerError: "获取文件处理器失败",
       coverUploadSuccess: "封面图片上传成功",
-      coverUploadFailed: "封面图片上传失败",
+      coverUploadFailed: "封面图片上传失败"
     },
     script: {
       title: "脚本",
@@ -130,111 +100,37 @@ export default {
         message2: "提示",
         confirm: "是",
         cancel: "否",
-        success: "保存成功～",
         error: "保存失败",
-        info: "已放弃对未保存的更改",
-      },
-    },
-    eventDialog: {
-      title: "事件管理窗口",
-      output: "输出事件",
-      input: "输入事件",
-      cancel: "取 消",
-      confirm: "确 定",
+        info: "已放弃对未保存的更改"
+      }
     },
     ResourceDialog: {
-      label1: "绑定资源",
-      label2: "我的资源",
       title: "选择资源",
       replaceTitle: "替换资源",
-      cancelSelect: "取消选择",
       select: "选择",
       putIn: "放入",
       replace: "替换",
-      doUnbind: "解绑",
-      bind: "绑定",
       putAllIn: "全部放入",
       empty: "清 空",
       cancel: "取 消",
-      enterMultiSelect: "批量选择",
-      exitMultiSelect: "退出批量选择",
-      batchBind: "批量绑定",
-      batchDeploy: "批量部署",
-      batchUnbind: "批量解绑",
-      deselect: "取消选择",
       noItemSelected: "请至少选择一个资源",
-      availableForBinding: "可绑定资源数量：{count}",
-      availableForDeployment: "可部署资源数量：{count}",
       batchConfirm: {
-        message1: "是否将选中的 {count} 个资源批量绑定到场景?",
-        message2: "批量绑定资源",
-        confirm: "确认",
-        cancel: "取消",
-        success: "批量绑定成功！",
         selectOne: {
           message1: "您已成功批量绑定资源，是否直接确认部署这些资源？",
           message2: "部署资源",
           confirm: "确认",
           cancel: "取消",
-          success: "部署成功！",
-          info: "已取消",
-        },
-      },
-      batchConfirm2: {
-        message1: "是否将选中的 {count} 个资源批量部署到场景?",
-        message2: "批量部署资源",
-        confirm: "确认",
-        cancel: "取消",
-        success: "批量部署成功！",
-        info: "已取消",
+          success: "部署成功！"
+        }
       },
       batchUnbindConfirm: {
-        message1: "是否要解绑选中的 {count} 个资源?",
-        message2: "批量解绑",
-        confirm: "确认",
-        cancel: "取消",
-        success: "批量解绑成功！",
-        info: "已取消",
-      },
-      confirm1: {
-        message1: "是否解除资源绑定?",
-        message2: "解除绑定",
-        confirm: "确认",
-        cancel: "取消",
-        success: "解绑成功！",
-        info: "已取消",
       },
       confirm2: {
-        message1: "是否将资源绑定到场景?",
-        message2: "绑定资源",
-        confirm: "确认",
-        cancel: "取消",
-        success: "绑定成功！",
-        confirm2: {
-          message1: "是否直接确认部署资源?",
-          message2: "部署资源",
-          confirm: "确认",
-          cancel: "取消",
-          success: "部署成功！",
-        },
-      },
-      info: "已取消",
-    },
+      }
+    }
   },
   // AI部分国际化
   ai: {
-    create: "创建",
-    show: "查看",
-    delete: "删除",
-    generate: "生成",
-    confirm: {
-      message1: "此操作将永久删除该文件。您想继续吗？",
-      message2: "警告",
-      confirm: "确认",
-      cancel: "取消",
-      success: "删除成功！",
-      info: "删除已取消",
-    },
     generation: {
       title: "通过 AI (Rodin) 创建模型：",
       declare: "声明",
@@ -247,12 +143,12 @@ export default {
           value1: "高",
           value2: "中",
           value3: "低",
-          value4: "极低",
+          value4: "极低"
         },
         message: "长度应为 4 到 50 个字符",
         error: "请输入提示或选择图像",
-        submit: "生成",
-      },
-    },
-  },
+        submit: "生成"
+      }
+    }
+  }
 };
