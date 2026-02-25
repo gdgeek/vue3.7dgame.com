@@ -387,6 +387,7 @@ export default {
     selectedFiles: "已選擇 {count} 個文件",
     clearFiles: "清除所有文件",
     effectType: "特效類型",
+    ready: "準備上傳...",
     item1: {
       title: "預先處理",
       failed: "md5計算失敗",

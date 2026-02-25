@@ -72,20 +72,12 @@
 
               <!-- 头像上传 -->
               <el-form-item :label="$t('homepage.edit.avatar')">
-                <el-upload
-                  class="avatar-uploader"
-                  action=""
-                  :auto-upload="false"
-                  :show-file-list="false"
-                  :on-change="handleChangeUpload"
-                  accept="image/jpeg,image/gif,image/png,image/bmp"
-                  style="float: left"
-                >
-                  <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-                  <div v-else class="avatar-uploader-icon">
-                    <font-awesome-icon icon="plus"></font-awesome-icon>
-                  </div>
-                </el-upload>
+                <ImageSelector
+                  :image-url="imageUrl"
+                  :enable-crop="true"
+                  @image-selected="handleAvatarImageUpdate"
+                  @image-upload-success="handleAvatarImageUpdate"
+                ></ImageSelector>
                 <div style="float: left">
                   <p class="user-explain">
                     {{ $t("homepage.edit.avatarStatement") }}
@@ -465,99 +457,17 @@
             </el-button>
           </template>
         </el-dialog>
-
-        <!-- 图片裁剪对话框 -->
-        <el-dialog v-model="dialogVisible" class="crop-dialog" append-to-body>
-          <template #header>
-            {{ $t("homepage.edit.avatarCropping.title") }}
-          </template>
-          <div class="cropper-content">
-            <div class="cropper" style="text-align: center">
-              <VueCropper
-                ref="cropperRef"
-                :img="option.img"
-                :output-type="option.outputType"
-                :info="true"
-                :full="option.full"
-                :can-move-box="option.canMoveBox"
-                :original="option.original"
-                :auto-crop="option.autoCrop"
-                :fixed="option.fixed"
-                :fixed-number="option.fixedNumber"
-                :center-box="option.centerBox"
-                :info-true="option.infoTrue"
-                :fixed-box="option.fixedBox"
-                :auto-crop-width="option.autoCropWidth"
-                :auto-crop-height="option.autoCropHeight"
-              >
-              </VueCropper>
-            </div>
-          </div>
-          <template #footer>
-            <div class="dialog-footer">
-              <el-button-group style="float: left">
-                <el-button
-                  size="small"
-                  type="primary"
-                  plain
-                  @click="rotateLeftHandle"
-                >
-                  {{ $t("homepage.edit.avatarCropping.leftRotation") }}
-                </el-button>
-                <el-button
-                  size="small"
-                  type="primary"
-                  plain
-                  @click="rotateRightHandle"
-                >
-                  {{ $t("homepage.edit.avatarCropping.rightRotation") }}
-                </el-button>
-                <el-button
-                  size="small"
-                  type="primary"
-                  plain
-                  @click="changeScaleHandle(1)"
-                >
-                  {{ $t("homepage.edit.avatarCropping.enlarge") }}
-                </el-button>
-                <el-button
-                  size="small"
-                  type="primary"
-                  plain
-                  @click="changeScaleHandle(-1)"
-                >
-                  {{ $t("homepage.edit.avatarCropping.shrink") }}
-                </el-button>
-              </el-button-group>
-              <el-button-group>
-                <el-button size="small" @click="dialogVisible = false">
-                  {{ $t("homepage.edit.avatarCropping.cancel") }}
-                </el-button>
-                <el-button size="small" type="primary" @click="finish">
-                  {{ $t("homepage.edit.avatarCropping.confirm") }}
-                </el-button>
-              </el-button-group>
-            </div>
-          </template>
-        </el-dialog>
       </el-card>
     </div>
   </TransitionWrapper>
 </template>
 
 <script setup lang="ts">
-import { logger } from "@/utils/logger";
 import { useUserStore } from "@/store/modules/user";
-import { useFileStore } from "@/store/modules/config";
-import { postFile } from "@/api/v1/files";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { ElMessage, FormInstance, FormRules } from "element-plus";
-import "vue-cropper/dist/index.css";
-import { VueCropper } from "vue-cropper";
-import type { FileHandler } from "@/assets/js/file/server";
 import { FormItemRule } from "element-plus";
-import type { UploadFile, UploadFiles } from "element-plus";
-import { _InfoType, UploadFileType } from "@/api/user/model";
+import { _InfoType } from "@/api/user/model";
 import { getEmailStatus } from "@/api/v1/email";
 import {
   changePassword,
@@ -570,17 +480,16 @@ import { createPasswordFormRules } from "@/utils/password-validator";
 import PasswordStrength from "@/components/PasswordStrength/index.vue";
 import { useRouter } from "vue-router";
 import EmailVerificationPanel from "@/components/Account/EmailVerificationPanel.vue";
+import ImageSelector from "@/components/MrPP/ImageSelector.vue";
 
 // 初始化store和ref
 const userStore = useUserStore();
 const router = useRouter();
-const fileStore = useFileStore();
 const ruleFormRef = ref<FormInstance>();
 const nickNameFormRef = ref<FormInstance>();
 const { t } = useI18n();
 const isDisable = ref(false);
 const isLoading = ref(true);
-const dialogVisible = ref(false);
 const dialogEmailVisible = ref(false);
 const emailDialogAction = ref<"default" | "bind" | "change" | "unbind">(
   "default"
@@ -594,7 +503,6 @@ const recoverSending = ref(false);
 const recoverVerifying = ref(false);
 const recoverResetting = ref(false);
 const recoverCodeVerified = ref(false);
-const cropperRef = ref<InstanceType<typeof VueCropper> | null>(null);
 const passwordFormRef = ref<FormInstance>();
 const recoverFormRef = ref<FormInstance>();
 
@@ -864,45 +772,6 @@ const industryOptions = computed(() => {
   ];
 });
 
-// 图片裁剪选项配置
-type optionType = {
-  img: string | ArrayBuffer | null;
-  info: true;
-  outputSize: number;
-  outputType: "jpeg";
-  canScale: boolean;
-  autoCrop: boolean;
-  autoCropWidth: number;
-  autoCropHeight: number;
-  fixedBox: boolean;
-  fixed: boolean;
-  fixedNumber: Array<number>;
-  full: boolean;
-  canMoveBox: boolean;
-  original: boolean;
-  centerBox: boolean;
-  infoTrue: boolean;
-};
-
-const option = ref<optionType>({
-  img: "", // 裁剪图片的地址
-  info: true, // 裁剪框的大小信息
-  outputSize: 1, // 裁剪生成图片的质量
-  outputType: "jpeg", // 裁剪生成图片的格式
-  canScale: true, // 图片是否允许滚轮缩放
-  autoCrop: true, // 是否默认生成截图框
-  canMoveBox: true, // 截图框能否拖动
-  autoCropWidth: 300, // 默认生成截图框宽度
-  autoCropHeight: 300, // 默认生成截图框高度
-  fixedBox: false, // 固定截图框大小 不允许改变
-  fixed: true, // 是否开启截图框宽高固定比例
-  fixedNumber: [1, 1], // 截图框的宽高比例
-  full: false, // 是否输出原图比例的截图
-  original: false, // 上传图片按照原始比例渲染
-  centerBox: true, // 截图框是否被限制在图片里面
-  infoTrue: true, // true 为展示真实输出图片宽高 false 展示看到的截图框宽高
-});
-
 // 更新用户昵称
 const submitNickname = async () => {
   isDisable.value = true;
@@ -1152,120 +1021,24 @@ const handleRecoverResetPassword = async () => {
   }
 };
 
-// 处理图片上传并打开裁剪对话框
-const handleChangeUpload = async (file: UploadFile, _fileList: UploadFiles) => {
-  const selectedFile = file.raw;
-  if (selectedFile) {
-    // 验证图片格式和大小
-    const isJPG = [
-      "image/jpeg",
-      "image/png",
-      "image/bmp",
-      "image/gif",
-    ].includes(selectedFile.type);
-    const isLt2M = selectedFile.size / 1024 / 1024 < 2;
-
-    if (!isJPG) {
-      ElMessage.error(t("homepage.edit.avatarCropping.error1"));
-      return;
-    }
-    if (!isLt2M) {
-      ElMessage.error(t("homepage.edit.avatarCropping.error2"));
-      return;
-    }
-
-    // 上传成功后将图片地址赋值给裁剪框显示图片
-    await nextTick();
-    const res = URL.createObjectURL(selectedFile);
-    option.value.img = res;
-    dialogVisible.value = true;
-  } else {
+const handleAvatarImageUpdate = async (payload: {
+  imageId: number;
+  itemId: number | null;
+  imageUrl?: string;
+}) => {
+  if (!payload.imageId) {
     ElMessage.error(t("homepage.edit.avatarCropping.error3"));
+    return;
   }
-};
-
-// 裁剪框操作方法
-const rotateLeftHandle = () => cropperRef.value?.rotateLeft();
-const rotateRightHandle = () => cropperRef.value?.rotateRight();
-const changeScaleHandle = (num: number) => {
-  num = num || 1;
-  cropperRef.value?.changeScale(num);
-};
-
-// 保存用户头像
-const saveAvatar = async (
-  md5: string,
-  extension: string,
-  file: File,
-  handler: FileHandler
-) => {
-  extension = extension.startsWith(".") ? extension : `.${extension}`;
-  const data: UploadFileType = {
-    md5,
-    key: md5 + extension,
-    filename: file.name,
-    url: fileStore.store.fileUrl(md5, extension, handler, "backup"),
-  };
-
   try {
     isLoading.value = true;
-    dialogVisible.value = false;
-    const post = await postFile(data);
-    await userStore.setUserInfo({ avatar_id: post.data.id });
+    await userStore.setUserInfo({ avatar_id: payload.imageId });
     ElMessage.success(t("homepage.edit.avatarCropping.success"));
-  } catch (err) {
-    logger.error(err);
+  } catch (_error) {
+    ElMessage.error(t("homepage.edit.rules.error1"));
+  } finally {
+    isLoading.value = false;
   }
-};
-
-// 完成头像裁剪并上传
-const finish = async () => {
-  cropperRef.value.getCropBlob(async (blob: Blob) => {
-    // 创建File对象
-    const file = new File(
-      [blob],
-      userStore.userInfo?.userData?.username + ".jpg",
-      {
-        type: "image/jpeg",
-      }
-    );
-
-    const md5 = await fileStore.store.fileMD5(file);
-    const handler = await fileStore.store.publicHandler();
-    if (!handler) {
-      ElMessage.error(t("homepage.edit.avatarCropping.error4"));
-      return;
-    }
-
-    // 检查文件是否已存在
-    const has = await fileStore.store.fileHas(
-      md5,
-      file.name.split(".").pop() || "",
-      handler,
-      "backup"
-    );
-
-    if (!has) {
-      await fileStore.store.fileUpload(
-        md5,
-        file.name.split(".").pop() || "",
-        file,
-        (_p: number) => {},
-        handler,
-        "backup"
-      );
-    }
-
-    // 保存头像
-    await saveAvatar(
-      md5,
-      "." + (file.name.split(".").pop() || ""),
-      file,
-      handler
-    );
-
-    dialogVisible.value = false;
-  });
 };
 
 onMounted(() => {
@@ -1390,44 +1163,5 @@ watch(
   font-size: 12px;
   line-height: 20px;
   color: #6f6f6f;
-}
-
-/* 裁剪框样式 */
-.cropper-content {
-  .cropper {
-    width: auto;
-    height: 350px;
-  }
-}
-
-/* 头像上传样式 */
-.avatar-uploader {
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-
-  &:hover {
-    border-color: #409eff;
-  }
-}
-
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 132px;
-  height: 132px;
-  line-height: 132px;
-  text-align: center;
-  border: 1px dashed #d9d9d9;
-  margin-right: 12px;
-  border-radius: 6px;
-}
-
-.avatar {
-  width: 132px;
-  height: 132px;
-  display: block;
-  border-radius: 6px;
-  margin-right: 12px;
 }
 </style>

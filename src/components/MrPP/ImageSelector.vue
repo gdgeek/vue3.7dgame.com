@@ -82,11 +82,75 @@
     >
       {{ $t("imageSelector.uploadFile") }}
     </mr-p-p-upload-dialog>
+
+    <el-dialog
+      v-model="cropDialogVisible"
+      :title="$t('imageSelector.cropTitle')"
+      width="640px"
+      align-center
+      :close-on-click-modal="false"
+      append-to-body
+      @closed="handleCropDialogClosed"
+    >
+      <p class="crop-tip">{{ $t("imageSelector.cropTip") }}</p>
+      <div class="cropper-wrap">
+        <VueCropper
+          ref="cropperRef"
+          :img="cropOptions.img"
+          :output-type="cropOptions.outputType"
+          :info="true"
+          :full="cropOptions.full"
+          :can-move-box="cropOptions.canMoveBox"
+          :original="cropOptions.original"
+          :auto-crop="cropOptions.autoCrop"
+          :fixed="cropOptions.fixed"
+          :fixed-number="cropOptions.fixedNumber"
+          :center-box="cropOptions.centerBox"
+          :info-true="cropOptions.infoTrue"
+          :fixed-box="cropOptions.fixedBox"
+          :auto-crop-width="cropOptions.autoCropWidth"
+          :auto-crop-height="cropOptions.autoCropHeight"
+        ></VueCropper>
+      </div>
+      <template #footer>
+        <div class="crop-footer">
+          <el-button-group>
+            <el-button plain @click="rotateLeftHandle">
+              {{ $t("imageSelector.rotateLeft") }}
+            </el-button>
+            <el-button plain @click="rotateRightHandle">
+              {{ $t("imageSelector.rotateRight") }}
+            </el-button>
+            <el-button plain @click="changeScaleHandle(1)">
+              {{ $t("imageSelector.zoomIn") }}
+            </el-button>
+            <el-button plain @click="changeScaleHandle(-1)">
+              {{ $t("imageSelector.zoomOut") }}
+            </el-button>
+          </el-button-group>
+          <div>
+            <el-button @click="cropDialogVisible = false">
+              {{ $t("imageSelector.cancel") }}
+            </el-button>
+            <el-button
+              type="primary"
+              :loading="cropSubmitting"
+              @click="finishCropAndUpload"
+            >
+              {{ $t("imageSelector.confirm") }}
+            </el-button>
+          </div>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
+import { UploadFileType } from "@/api/user/model";
+import { postFile } from "@/api/v1/files";
+import { useFileStore } from "@/store/modules/config";
 import { ref, watch } from "vue";
 import { FolderOpened, Upload, Plus } from "@element-plus/icons-vue";
 import ResourceDialog from "./ResourceDialog.vue";
@@ -95,15 +159,26 @@ import Id2Image from "@/components/Id2Image.vue";
 import { postPicture, getPicture } from "@/api/v1/resources/index";
 import { ElMessage } from "element-plus";
 import { CardInfo } from "@/utils/types";
+import { VueCropper } from "vue-cropper";
+import "vue-cropper/dist/index.css";
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
     imageUrl?: string;
     itemId?: number | null;
+    enableCrop?: boolean;
+    cropFixed?: boolean;
+    cropFixedNumber?: [number, number];
+    cropMaxSizeMB?: number;
   }>(),
   {
     imageUrl: "",
     itemId: null,
+    enableCrop: false,
+    cropFixed: true,
+    cropFixedNumber: () => [1, 1] as [number, number],
+    cropMaxSizeMB: 2,
   }
 );
 
@@ -122,6 +197,27 @@ const resourceDialog = ref<InstanceType<typeof ResourceDialog> | null>(null);
 const imageSelectDialogVisible = ref(false);
 const uploadDialogVisible = ref(false);
 const fileType = ref("image/jpeg,image/gif,image/png,image/bmp");
+const fileStore = useFileStore();
+const cropDialogVisible = ref(false);
+const cropSubmitting = ref(false);
+const cropperRef = ref<InstanceType<typeof VueCropper> | null>(null);
+const selectedLocalFileName = ref("image.jpg");
+const objectUrl = ref("");
+const cropOptions = ref({
+  img: "",
+  outputType: "jpeg" as const,
+  autoCrop: true,
+  autoCropWidth: 300,
+  autoCropHeight: 300,
+  fixedBox: false,
+  fixed: props.cropFixed,
+  fixedNumber: props.cropFixedNumber,
+  full: false,
+  canMoveBox: true,
+  original: false,
+  centerBox: true,
+  infoTrue: true,
+});
 
 // 显示的图片 URL，传递给 Id2Image 组件
 const displayImageUrl = ref<string | null>(null);
@@ -156,8 +252,46 @@ const onResourceSelected = (data: CardInfo) => {
   });
 };
 
-const openUploadDialog = () => {
+const revokeObjectUrl = () => {
+  if (!objectUrl.value) return;
+  URL.revokeObjectURL(objectUrl.value);
+  objectUrl.value = "";
+};
+
+const selectLocalImageForCrop = async () => {
+  const files = await fileStore.store.fileOpen(fileType.value, false);
+  if (!files.length) return;
+  const file = files[0];
+  if (!file.type.startsWith("image/")) {
+    ElMessage.error(t("imageSelector.invalidType"));
+    return;
+  }
+
+  if (props.cropMaxSizeMB > 0) {
+    const isLtLimit = file.size / 1024 / 1024 < props.cropMaxSizeMB;
+    if (!isLtLimit) {
+      ElMessage.error(
+        t("imageSelector.invalidSize", { size: props.cropMaxSizeMB })
+      );
+      return;
+    }
+  }
+
+  selectedLocalFileName.value = file.name || "image.jpg";
+  revokeObjectUrl();
+  objectUrl.value = URL.createObjectURL(file);
+  cropOptions.value.img = objectUrl.value;
+  cropOptions.value.fixed = props.cropFixed;
+  cropOptions.value.fixedNumber = props.cropFixedNumber;
+  cropDialogVisible.value = true;
+};
+
+const openUploadDialog = async () => {
   imageSelectDialogVisible.value = false;
+  if (props.enableCrop) {
+    await selectLocalImageForCrop();
+    return;
+  }
   uploadDialogVisible.value = true;
 };
 
@@ -238,6 +372,105 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
     ElMessage.error("Failed to update image");
   }
 };
+
+const handleCropDialogClosed = () => {
+  cropSubmitting.value = false;
+  cropOptions.value.img = "";
+  revokeObjectUrl();
+};
+
+const rotateLeftHandle = () => cropperRef.value?.rotateLeft();
+const rotateRightHandle = () => cropperRef.value?.rotateRight();
+const changeScaleHandle = (num: number) => {
+  cropperRef.value?.changeScale(num || 1);
+};
+
+const getCroppedBlob = () =>
+  new Promise<Blob>((resolve, reject) => {
+    if (!cropperRef.value) {
+      reject(new Error("cropper-not-ready"));
+      return;
+    }
+    cropperRef.value.getCropBlob((blob: Blob) => {
+      if (!blob) {
+        reject(new Error("crop-blob-empty"));
+        return;
+      }
+      resolve(blob);
+    });
+  });
+
+const uploadSingleImage = async (file: File) => {
+  const md5 = await fileStore.store.fileMD5(file);
+  const handler = await fileStore.store.publicHandler();
+  if (!handler) {
+    throw new Error("no-file-handler");
+  }
+
+  const extension = ".jpg";
+  const has = await fileStore.store.fileHas(md5, extension, handler, "picture");
+  if (!has) {
+    await fileStore.store.fileUpload(
+      md5,
+      extension,
+      file,
+      () => {},
+      handler,
+      "picture"
+    );
+  }
+
+  const fileData: UploadFileType = {
+    filename: file.name,
+    md5,
+    key: md5 + extension,
+    url: fileStore.store.fileUrl(md5, extension, handler, "picture"),
+  };
+  const fileResponse = await postFile(fileData);
+
+  const pictureResponse = await postPicture({
+    name: file.name,
+    file_id: fileResponse.data.id,
+  });
+  const pictureResourceId = pictureResponse.data.id;
+
+  const pictureDetail = await getPicture(pictureResourceId);
+  const imageId =
+    pictureDetail.data.image_id ||
+    pictureDetail.data.file?.id ||
+    fileResponse.data.id;
+  const imageUrl =
+    pictureDetail.data.image?.url ||
+    pictureDetail.data.file?.url ||
+    fileData.url;
+
+  return { imageId, imageUrl };
+};
+
+const finishCropAndUpload = async () => {
+  cropSubmitting.value = true;
+  try {
+    const blob = await getCroppedBlob();
+    const baseName = selectedLocalFileName.value.replace(/\.[^.]+$/, "");
+    const fileName = `${baseName || "image"}_crop.jpg`;
+    const file = new File([blob], fileName, {
+      type: "image/jpeg",
+    });
+    const uploaded = await uploadSingleImage(file);
+    displayImageUrl.value = uploaded.imageUrl;
+    emit("image-upload-success", {
+      imageId: uploaded.imageId,
+      itemId: props.itemId,
+      imageUrl: uploaded.imageUrl,
+    });
+    cropDialogVisible.value = false;
+  } catch (error) {
+    logger.error("ImageSelector: crop upload failed", error);
+    ElMessage.error(t("imageSelector.uploadFailed"));
+  } finally {
+    cropSubmitting.value = false;
+  }
+};
 </script>
 
 <style scoped>
@@ -255,6 +488,25 @@ const handleUploadSuccess = async (uploadedIds: number | number[]) => {
   display: flex;
   gap: 15px;
   padding: 5px;
+}
+
+.crop-tip {
+  margin: 0 0 10px;
+  color: #606266;
+  font-size: 13px;
+}
+
+.cropper-wrap {
+  width: 100%;
+  height: 360px;
+  text-align: center;
+}
+
+.crop-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .selection-card {
