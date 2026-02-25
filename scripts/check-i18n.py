@@ -174,22 +174,29 @@ def load_lang_keys_v2() -> Set[str]:
 # ─────────────────────────────────────────────
 
 # Patterns for t('key'), $t('key'), t("key"), $t("key")
-# Also tc(), te(), tm()
+# Also tc(), te(), tm() — applied to full file content (multiline)
 T_PATTERN = re.compile(
-    r'(?<!\w)(?:\$t|tc?|te|tm)\(\s*["\']([^"\']+)["\']'
+    r'(?<!\w)(?:\$t|tc?|te|tm)\(\s*["\']([^"\']+)["\']',
+    re.DOTALL,
 )
 # Dynamic keys like t(`prefix.${var}`) — capture prefix
 T_DYNAMIC = re.compile(
-    r'(?<!\w)(?:\$t|tc?|te|tm)\(\s*`([^`]*)\$\{'
+    r'(?<!\w)(?:\$t|tc?|te|tm)\(\s*`([^`]*)\$\{',
+    re.DOTALL,
 )
 # Dynamic keys via string concatenation: t("prefix." + var) or i18n.global.te("prefix." + var)
 T_DYNAMIC_CONCAT = re.compile(
-    r'''(?:t|te|tm|tc)\(['"]([\w.]+\.)['"] *\+'''
+    r'''(?:t|te|tm|tc)\(\s*['"]([\w.]+\.)['"] *\+'''
 )
 # i18n key prefixes passed as downloadResource() argument (e.g. "audio.view.download")
 # Matches standalone quoted strings that look like i18n translation prefixes for download/view helpers
 T_I18N_PREFIX_ARG = re.compile(
     r'''["']([a-z]\w+\.view\.(?:download|confirm|info|namePrompt))["']'''
+)
+# Raw string literals that look like i18n keys: "a.b.c" stored in arrays/maps for later t() call
+# Must have at least 2 segments and use only word chars + dots
+T_RAW_KEY = re.compile(
+    r'''["']([a-z][a-zA-Z0-9]*(?:\.[a-zA-Z][a-zA-Z0-9_]*){1,6})["']'''
 )
 
 SKIP_DIRS = {
@@ -214,16 +221,18 @@ def should_skip(path: Path) -> bool:
     return False
 
 
-def scan_source_files() -> Tuple[Set[str], Set[str], Dict[str, List[str]]]:
+def scan_source_files() -> Tuple[Set[str], Set[str], Dict[str, List[str]], Set[str]]:
     """
     Returns:
       - static_keys: all literal key strings found in t() calls
       - dynamic_prefixes: prefixes of dynamic t() calls
       - key_locations: key -> list of "file:line" strings
+      - raw_candidates: quoted strings that look like i18n keys (filtered later)
     """
     static_keys: Set[str] = set()
     dynamic_prefixes: Set[str] = set()
     key_locations: Dict[str, List[str]] = {}
+    raw_candidates: Set[str] = set()
 
     for src_dir in SOURCE_DIRS:
         for ext in ("**/*.ts", "**/*.vue", "**/*.tsx"):
@@ -236,30 +245,38 @@ def scan_source_files() -> Tuple[Set[str], Set[str], Dict[str, List[str]]]:
                     continue
 
                 rel = str(fpath.relative_to(ROOT))
-                lines = content.splitlines()
 
-                for i, line in enumerate(lines, 1):
-                    for m in T_PATTERN.finditer(line):
-                        key = m.group(1)
+                # Apply multiline-aware patterns on the full file content
+                for m in T_PATTERN.finditer(content):
+                    key = m.group(1)
+                    # Skip keys with embedded newlines (false positives from DOTALL)
+                    if '\n' not in key and '\r' not in key:
+                        lineno = content.count('\n', 0, m.start()) + 1
                         static_keys.add(key)
-                        key_locations.setdefault(key, []).append(f"{rel}:{i}")
+                        key_locations.setdefault(key, []).append(f"{rel}:{lineno}")
 
-                    for m in T_DYNAMIC.finditer(line):
-                        prefix = m.group(1).rstrip('.')
-                        if prefix:
-                            dynamic_prefixes.add(prefix)
+                for m in T_DYNAMIC.finditer(content):
+                    prefix = m.group(1).rstrip('.')
+                    if prefix and '\n' not in prefix:
+                        dynamic_prefixes.add(prefix)
 
-                    for m in T_DYNAMIC_CONCAT.finditer(line):
-                        prefix = m.group(1).rstrip('.')
-                        if prefix:
-                            dynamic_prefixes.add(prefix)
+                for m in T_DYNAMIC_CONCAT.finditer(content):
+                    prefix = m.group(1).rstrip('.')
+                    if prefix:
+                        dynamic_prefixes.add(prefix)
 
-                    for m in T_I18N_PREFIX_ARG.finditer(line):
-                        prefix = m.group(1)
-                        if prefix:
-                            dynamic_prefixes.add(prefix)
+                for m in T_I18N_PREFIX_ARG.finditer(content):
+                    prefix = m.group(1)
+                    if prefix:
+                        dynamic_prefixes.add(prefix)
 
-    return static_keys, dynamic_prefixes, key_locations
+                # Raw string literals: collect candidates, filter vs lang_keys in main()
+                for m in T_RAW_KEY.finditer(content):
+                    key = m.group(1)
+                    if '\n' not in key:
+                        raw_candidates.add(key)
+
+    return static_keys, dynamic_prefixes, key_locations, raw_candidates
 
 
 # ─────────────────────────────────────────────
@@ -277,8 +294,11 @@ def main():
     print(f"  Found {len(lang_keys)} defined keys\n")
 
     print("Scanning source files for t() usages...")
-    static_keys, dynamic_prefixes, key_locations = scan_source_files()
-    print(f"  Found {len(static_keys)} static keys used")
+    static_keys, dynamic_prefixes, key_locations, raw_candidates = scan_source_files()
+    # Only count raw string literals that actually exist in the lang file
+    confirmed_raw = raw_candidates & lang_keys
+    static_keys |= confirmed_raw
+    print(f"  Found {len(static_keys)} static keys used ({len(confirmed_raw)} via raw string refs)")
     print(f"  Found {len(dynamic_prefixes)} dynamic key prefixes\n")
 
     # Missing: used in code but not in lang
