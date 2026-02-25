@@ -3,6 +3,7 @@
  * 路由定义已拆分到 modules 目录下，按功能模块组织
  */
 import type { App } from "vue";
+import { ref } from "vue";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import { Meta, RouteVO } from "@/api/menu/model";
 
