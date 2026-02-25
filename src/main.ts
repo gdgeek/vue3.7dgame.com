@@ -1,7 +1,6 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import setupPlugins from "@/plugins";
-import "vue-cropper/dist/index.css";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 // 按需导入图标，而不是全量导入 fas（可减少约 750KB）
@@ -166,7 +165,7 @@ import "element-plus/theme-chalk/display.css";
 import "element-plus/theme-chalk/dark/css-vars.css";
 import "@/styles/index.scss";
 import "uno.css";
-import "animate.css";
+import "@/styles/animate.css";
 import { useRouter } from "@/router";
 import { translateRouteTitle } from "./utils/i18n";
 import { useAppStore, store } from "./store";

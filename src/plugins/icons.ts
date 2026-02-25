@@ -1,9 +1,73 @@
 import type { App } from "vue";
-import * as ElementPlusIconsVue from "@element-plus/icons-vue";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  Back,
+  ChatDotSquare,
+  ChatRound,
+  Check,
+  Clock,
+  CopyDocument,
+  Delete,
+  Document,
+  Download,
+  Edit,
+  EditPen,
+  Eleme,
+  FolderOpened,
+  Loading,
+  Lock,
+  Message,
+  Moon,
+  OfficeBuilding,
+  Plus,
+  Search,
+  Sunny,
+  Upload,
+  UploadFilled,
+  User,
+  UserFilled,
+  View,
+} from "@element-plus/icons-vue";
 
-// 注册所有图标
+const icons = [
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  Back,
+  ChatDotSquare,
+  ChatRound,
+  Check,
+  Clock,
+  CopyDocument,
+  Delete,
+  Document,
+  Download,
+  Edit,
+  EditPen,
+  Eleme,
+  FolderOpened,
+  Loading,
+  Lock,
+  Message,
+  Moon,
+  OfficeBuilding,
+  Plus,
+  Search,
+  Sunny,
+  Upload,
+  UploadFilled,
+  User,
+  UserFilled,
+  View,
+];
+
+// 只注册实际使用的图标，而非全量 ~300 个
 export function setupElIcons(app: App<Element>) {
-  for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
-    app.component(key, component);
+  for (const icon of icons) {
+    app.component(icon.name, icon);
   }
 }

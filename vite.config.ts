@@ -185,7 +185,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
             // Vue 核心
             "vue-core": ["vue", "vue-router", "pinia", "vue-i18n"],
             // Element Plus 组件库
-            "element-plus": ["element-plus", "@element-plus/icons-vue"],
+            "element-plus": ["element-plus"],
             // 3D 相关
             three: ["three"],
             // 代码编辑器
