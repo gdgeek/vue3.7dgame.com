@@ -93,14 +93,13 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 | `src/views/audio/tts.vue` | 992 | 大型功能页面，可按区域拆分 |
 | `src/views/settings/edit.vue` | 939 | 各表单区块可拆分 |
 
-#### 7. `useTheme` composable 批量 DOM 操作优化
-- **位置**：`src/composables/useTheme.ts`（380行）
-- **问题**：每次切换主题会对 100+ 个 CSS 变量逐一调用 `setProperty`
-- **建议**：用 `cssText` 或临时 `<style>` 标签批量写入，减少重绘次数
+#### ~~7. `useTheme` composable 批量 DOM 操作~~ ⏭ 评估后跳过
+现代浏览器会自动批量处理同步 `setProperty` 调用（同一微任务内只触发一次重绘）。
+用 `cssText` 替换的风险是清除 `:root` 上所有内联样式，用 `<style>` 标签的特异性低于内联样式。
+实际收益极小，维护成本不低，不值得修改。
 
-#### 8. `src/styles/variables.module.scss` 使用情况
-- 该文件在 `.scss` 文件中无 `@use`/`@import`，需确认是否只在 `.ts`/`.vue` 的 CSS Modules 中使用
-- 若已无使用，可删除
+#### ~~8. `variables.module.scss` 使用确认~~ ✅ 已确认，无需操作（2026-02-25）
+3 个布局组件通过 CSS Modules 导入使用：AppMain/index.vue、SidebarMenu.vue、SidebarMixTopMenu.vue。保留。
 
 ---
 
