@@ -11,16 +11,22 @@
       <el-tab-pane label="服务条款" name="terms"></el-tab-pane>
     </el-tabs>
 
-    <PrivacyPolicyTab v-if="activeTab === 'privacy'" />
-    <TermsOfServiceTab v-else />
+    <keep-alive>
+      <component :is="activeTab === 'privacy' ? PrivacyPolicyTab : TermsOfServiceTab" />
+    </keep-alive>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, defineAsyncComponent } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import PrivacyPolicyTab from "./components/PrivacyPolicyTab.vue";
-import TermsOfServiceTab from "./components/TermsOfServiceTab.vue";
+
+const PrivacyPolicyTab = defineAsyncComponent(
+  () => import("./components/PrivacyPolicyTab.vue"),
+);
+const TermsOfServiceTab = defineAsyncComponent(
+  () => import("./components/TermsOfServiceTab.vue"),
+);
 
 defineOptions({
   name: "PrivacyPolicy",

@@ -851,411 +851,94 @@ const policyUpdates = ref([
 </script>
 
 <style lang="scss" scoped>
-.policy-card {
-  margin-bottom: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+@use "./policy-card" as *;
 
-  &:hover {
-    transform: translateY(-2px);
-  }
+// PrivacyPolicyTab-specific: Cookie table
+.policy-card .policy-content section {
+  &.updates {
+    .policy-timeline {
+      margin-top: 30px;
+      padding-left: 20px;
 
-  :deep(.el-card__header) {
-    padding: 25px 20px;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
-    border-bottom: 1px solid #ebeef5;
-  }
-
-  :deep(.el-card__body) {
-    padding: 30px;
-
-    @media screen and (max-width: 768px) {
-      padding: 15px 10px;
-    }
-  }
-
-  .card-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-
-    h1 {
-      margin: 0;
-      padding: 0;
-      font-size: 30px;
-      font-weight: 600;
-      color: #333;
-      letter-spacing: 0.5px;
-    }
-
-    .header-meta {
-      font-size: 15px;
-      color: #666;
-      margin-top: 8px;
-      display: flex;
-      gap: 20px;
-
-      .version,
-      .update-time {
-        display: inline-flex;
-        align-items: center;
-
-        &::before {
-          content: "";
-          display: inline-block;
-          width: 8px;
-          height: 8px;
-          background-color: #409eff;
-          border-radius: 50%;
-          margin-right: 8px;
-        }
+      :deep(.el-timeline-item__wrapper) {
+        padding-left: 20px;
       }
 
-      .update-time::before {
-        background-color: #67c23a;
-      }
-    }
-  }
-
-  .policy-content {
-    section {
-      margin-bottom: 40px;
-      animation: fadeIn 0.5s ease-in-out;
-
-      h2 {
-        font-size: 22px;
-        font-weight: 600;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #ebeef5;
-        color: #333;
-        position: relative;
-
-        &::after {
-          content: "";
-          position: absolute;
-          bottom: -2px;
-          left: 0;
-          width: 60px;
-          height: 2px;
-          background-color: #409eff;
-        }
+      :deep(.el-timeline-item__timestamp) {
+        font-size: 14px;
+        color: #409eff;
+        font-weight: 500;
       }
 
-      p {
-        margin-bottom: 18px;
-        line-height: 1.8;
-        color: #444;
-        text-align: justify;
+      :deep(.el-timeline-item__content) {
         font-size: 15px;
+        color: #333;
+        line-height: 1.6;
+        padding: 10px 15px;
+        background-color: #f9f9f9;
+        border-radius: 6px;
+        border-left: 3px solid #409eff;
       }
 
-      ul {
-        padding-left: 5px;
-
-        li {
-          margin-bottom: 10px;
-          position: relative;
-          padding-left: 20px;
-          line-height: 1.6;
-          font-size: 15px;
-
-          &::before {
-            content: "•";
-            color: #409eff;
-            position: absolute;
-            left: 0;
-            font-size: 18px;
-          }
-        }
+      :deep(.el-timeline-item__node--normal) {
+        left: -2px;
+        width: 14px;
+        height: 14px;
       }
 
-      .custom-collapse {
-        :deep(.el-collapse-item__header) {
-          font-size: 16px;
-          font-weight: 500;
-          padding: 15px;
-          background-color: #f5f7fa;
-          border-radius: 4px;
-          margin-bottom: 2px;
-          transition: all 0.3s;
+      :deep(.el-timeline-item__node--large) {
+        left: -4px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
 
-          &.is-active {
-            background-color: #ecf5ff;
-            color: #409eff;
-          }
+  &.cookies {
+    .custom-table {
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #ebeef5;
+      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.03);
 
-          &:hover {
-            background-color: #ecf5ff;
-          }
-        }
-
-        :deep(.el-collapse-item__arrow) {
-          margin-right: 8px;
-          transition: transform 0.3s;
-        }
-
-        :deep(.el-collapse-item__wrap) {
-          background-color: transparent;
-          border: none;
-        }
-
-        :deep(.el-collapse-item__content) {
-          padding: 5px 0;
-        }
+      :deep(th) {
+        background-color: #f5f7fa;
+        color: #333;
+        font-weight: 600;
+        padding: 15px;
       }
 
-      .right-content {
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.03);
-        border: 1px solid #ebeef5;
-
-        ul {
-          padding-left: 5px;
-
-          li {
-            margin-bottom: 20px;
-            position: relative;
-            padding-left: 20px;
-
-            &::before {
-              content: "•";
-              color: #409eff;
-              position: absolute;
-              left: 0;
-              font-size: 18px;
-            }
-
-            strong {
-              color: #333;
-              font-weight: 600;
-              font-size: 16px;
-              display: block;
-              margin-bottom: 8px;
-            }
-
-            p {
-              margin: 10px 0;
-              color: #555;
-              line-height: 1.6;
-            }
-
-            ul {
-              margin-top: 10px;
-              padding-left: 5px;
-
-              li {
-                margin-bottom: 8px;
-                color: #555;
-                list-style-type: none;
-                position: relative;
-                padding-left: 18px;
-
-                &::before {
-                  content: "◦";
-                  color: #67c23a;
-                  position: absolute;
-                  left: 0;
-                  font-size: 16px;
-                }
-              }
-            }
-          }
-        }
+      :deep(td) {
+        padding: 15px;
+        color: #444;
       }
 
-      &.contact {
-        .contact-info {
-          margin-top: 20px;
-          border-radius: 8px;
-          overflow: hidden;
-
-          :deep(.el-descriptions__header) {
-            display: none;
-          }
-
-          :deep(.el-descriptions__body) {
-            background-color: #fff;
-          }
-
-          :deep(.el-descriptions__label) {
-            width: 120px;
-            font-weight: 500;
-            background-color: #f5f7fa;
-          }
-
-          :deep(.el-descriptions__content) {
-            padding: 15px 20px;
-          }
-
-          :deep(.el-tag) {
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 14px;
-          }
-        }
-      }
-
-      &.updates {
-        .policy-timeline {
-          margin-top: 30px;
-          padding-left: 20px;
-
-          :deep(.el-timeline-item__wrapper) {
-            padding-left: 20px;
-          }
-
-          :deep(.el-timeline-item__timestamp) {
-            font-size: 14px;
-            color: #409eff;
-            font-weight: 500;
-          }
-
-          :deep(.el-timeline-item__content) {
-            font-size: 15px;
-            color: #333;
-            line-height: 1.6;
-            padding: 10px 15px;
-            background-color: #f9f9f9;
-            border-radius: 6px;
-            border-left: 3px solid #409eff;
-          }
-
-          :deep(.el-timeline-item__node--normal) {
-            left: -2px;
-            width: 14px;
-            height: 14px;
-          }
-
-          :deep(.el-timeline-item__node--large) {
-            left: -4px;
-            width: 18px;
-            height: 18px;
-          }
-        }
-      }
-
-      &.cookies {
-        .custom-table {
-          border-radius: 8px;
-          overflow: hidden;
-          border: 1px solid #ebeef5;
-          box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.03);
-
-          :deep(th) {
-            background-color: #f5f7fa;
-            color: #333;
-            font-weight: 600;
-            padding: 15px;
-          }
-
-          :deep(td) {
-            padding: 15px;
-            color: #444;
-          }
-
-          :deep(.el-table__row:hover) td {
-            background-color: #ecf5ff;
-          }
-        }
+      :deep(.el-table__row:hover) td {
+        background-color: #ecf5ff;
       }
     }
   }
 }
 
 @media screen and (max-width: 768px) {
-  .policy-card {
-    .card-header {
-      h1 {
-        font-size: 22px;
-      }
+  .policy-card .policy-content section {
+    &.cookies {
+      .custom-table {
+        :deep(.el-table) {
+          width: 100% !important;
 
-      .header-meta {
-        flex-direction: column;
-        gap: 8px;
-        align-items: center;
-      }
-    }
-
-    .policy-content {
-      section {
-        h2 {
-          font-size: 18px;
-        }
-
-        p,
-        ul li {
-          font-size: 14px;
-        }
-
-        .right-content {
-          padding: 15px;
-
-          ul li strong {
-            font-size: 15px;
+          .el-table__cell {
+            padding: 10px 8px;
           }
-        }
 
-        &.contact {
-          .contact-info {
-            :deep(.el-descriptions-item__label) {
-              width: 100px;
-              min-width: 100px;
-              padding: 12px 8px;
-              font-size: 14px;
-            }
-
-            :deep(.el-descriptions-item__content) {
-              padding: 12px 8px;
-            }
-
-            :deep(.el-tag) {
-              max-width: 100%;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-              font-size: 12px;
-              padding: 3px 6px;
-            }
-          }
-        }
-
-        &.cookies {
-          .custom-table {
-            :deep(.el-table) {
-              width: 100% !important;
-
-              .el-table__cell {
-                padding: 10px 8px;
-              }
-
-              .cell {
-                white-space: normal;
-                word-break: break-all;
-                font-size: 13px;
-              }
-            }
+          .cell {
+            white-space: normal;
+            word-break: break-all;
+            font-size: 13px;
           }
         }
       }
     }
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 </style>
