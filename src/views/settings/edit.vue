@@ -376,24 +376,19 @@
           >
             <el-row :gutter="24">
               <el-col :xs="20" :sm="20" :md="14" :lg="14" :xl="14" :offset="4">
-                <el-form-item
-                  :label="$t('homepage.account.label1')"
-                  prop="email"
-                >
-                  <el-input
-                    v-model="recoverForm.email"
-                    type="email"
-                    :placeholder="$t('homepage.account.rules1.message2')"
+                <el-form-item :label="$t('homepage.account.label1')">
+                  <span>{{ recoverForm.email }}</span>
+                </el-form-item>
+
+                <el-form-item>
+                  <el-button
+                    style="width: 100%"
+                    :loading="recoverSending"
+                    :disabled="!canSendRecoverCode"
+                    @click="handleRecoverSendEmail"
                   >
-                    <template #append>
-                      <el-button
-                        :loading="recoverSending"
-                        @click="handleRecoverSendEmail"
-                      >
-                        {{ $t("login.sendResetEmail") }}
-                      </el-button>
-                    </template>
-                  </el-input>
+                    {{ recoverSendButtonText }}
+                  </el-button>
                 </el-form-item>
 
                 <el-form-item :label="$t('login.forgotTokenLabel')" prop="code">
@@ -448,8 +443,9 @@
               {{ $t("login.cancel") }}
             </el-button>
             <el-button
+              class="recover-reset-btn"
               type="primary"
-              :disabled="!recoverCodeVerified"
+              :disabled="!canRecoverResetPassword"
               :loading="recoverResetting"
               @click="handleRecoverResetPassword"
             >
@@ -503,8 +499,25 @@ const recoverSending = ref(false);
 const recoverVerifying = ref(false);
 const recoverResetting = ref(false);
 const recoverCodeVerified = ref(false);
+const recoverCooldownSeconds = ref(0);
 const passwordFormRef = ref<FormInstance>();
 const recoverFormRef = ref<FormInstance>();
+let recoverCooldownTimer: ReturnType<typeof setInterval> | null = null;
+const RECOVER_SEND_COOLDOWN_SECONDS = 60;
+
+const canSendRecoverCode = computed(
+  () => !recoverSending.value && recoverCooldownSeconds.value === 0
+);
+const canRecoverResetPassword = computed(
+  () => recoverCodeVerified.value && !recoverVerifying.value
+);
+
+const recoverSendButtonText = computed(() => {
+  if (recoverCooldownSeconds.value > 0) {
+    return `${t("login.sendResetEmail")} (${recoverCooldownSeconds.value}s)`;
+  }
+  return t("login.sendResetEmail");
+});
 
 // 计算用户头像URL
 const imageUrl = computed(() => {
@@ -686,18 +699,6 @@ const recoverForm = ref({
 });
 
 const recoverRules = computed(() => ({
-  email: [
-    {
-      required: true,
-      message: t("homepage.account.rules1.message1"),
-      trigger: "blur",
-    },
-    {
-      type: "email" as const,
-      message: t("homepage.account.rules1.message2"),
-      trigger: ["blur", "change"],
-    },
-  ],
   code: [
     {
       required: true,
@@ -907,45 +908,69 @@ const checkCurrentEmailVerified = async () => {
   }
 };
 
-const checkCurrentEmailBound = async () => {
-  try {
-    const status = await getEmailStatus();
-    return Boolean(status.success && status.data?.email);
-  } catch (_error) {
-    return false;
-  }
-};
-
 const resetRecoverForm = () => {
   recoverCodeVerified.value = false;
-  recoverForm.value.email = "";
   recoverForm.value.code = "";
   recoverForm.value.password = "";
   recoverForm.value.checkPassword = "";
   recoverFormRef.value?.clearValidate();
 };
 
+const getCurrentBoundEmail = async () => {
+  try {
+    const status = await getEmailStatus();
+    if (!status.success || !status.data?.email) {
+      return "";
+    }
+    return status.data.email;
+  } catch (_error) {
+    return "";
+  }
+};
+
+const stopRecoverCooldown = () => {
+  if (recoverCooldownTimer) {
+    clearInterval(recoverCooldownTimer);
+    recoverCooldownTimer = null;
+  }
+};
+
+const startRecoverCooldown = (seconds = RECOVER_SEND_COOLDOWN_SECONDS) => {
+  stopRecoverCooldown();
+  recoverCooldownSeconds.value = seconds;
+  recoverCooldownTimer = setInterval(() => {
+    if (recoverCooldownSeconds.value <= 1) {
+      recoverCooldownSeconds.value = 0;
+      stopRecoverCooldown();
+      return;
+    }
+    recoverCooldownSeconds.value -= 1;
+  }, 1000);
+};
+
 const openRecoverDialog = async () => {
-  const isBound = await checkCurrentEmailBound();
-  if (!isBound) {
+  const boundEmail = await getCurrentBoundEmail();
+  if (!boundEmail) {
     ElMessage.warning("当前账号未绑定邮箱，请先前往邮箱验证页面绑定邮箱");
     openEmailDialog("bind");
     return;
   }
 
+  recoverForm.value.email = boundEmail;
   dialogRecoverVisible.value = true;
 };
 
 const handleRecoverSendEmail = async () => {
-  const valid = await recoverFormRef.value
-    ?.validateField("email")
-    .then(() => true)
-    .catch(() => false);
-  if (!valid) return;
+  const email = recoverForm.value.email || currentBoundEmail.value;
+  if (!email) {
+    ElMessage.warning("未获取到绑定邮箱，请刷新后重试");
+    return;
+  }
 
+  recoverCodeVerified.value = false;
   recoverSending.value = true;
   try {
-    const result = await requestPasswordReset(recoverForm.value.email);
+    const result = await requestPasswordReset(email);
     if (!result.success) {
       ElMessage.error(
         getApiErrorMessage(result, t("login.requestResetFailedFallback"))
@@ -953,6 +978,7 @@ const handleRecoverSendEmail = async () => {
       return;
     }
     ElMessage.success(result.message || t("login.requestResetSuccess"));
+    startRecoverCooldown();
   } catch (_error) {
     ElMessage.error(t("login.requestResetFailedFallback"));
   } finally {
@@ -961,18 +987,21 @@ const handleRecoverSendEmail = async () => {
 };
 
 const handleRecoverVerifyCode = async () => {
+  const email = recoverForm.value.email || currentBoundEmail.value;
+  if (!email) {
+    ElMessage.warning("未获取到绑定邮箱，请刷新后重试");
+    return;
+  }
+
   const valid = await recoverFormRef.value
-    ?.validateField(["email", "code"])
+    ?.validateField("code")
     .then(() => true)
     .catch(() => false);
   if (!valid) return;
 
   recoverVerifying.value = true;
   try {
-    const result = await verifyResetCode(
-      recoverForm.value.email,
-      recoverForm.value.code
-    );
+    const result = await verifyResetCode(email, recoverForm.value.code);
     if (!result.success || result.valid === false) {
       recoverCodeVerified.value = false;
       ElMessage.error(getApiErrorMessage(result, t("login.verifyTokenFailed")));
@@ -989,6 +1018,12 @@ const handleRecoverVerifyCode = async () => {
 };
 
 const handleRecoverResetPassword = async () => {
+  const email = recoverForm.value.email || currentBoundEmail.value;
+  if (!email) {
+    ElMessage.warning("未获取到绑定邮箱，请刷新后重试");
+    return;
+  }
+
   if (!recoverCodeVerified.value) {
     ElMessage.warning(t("login.verifyTokenFirst"));
     return;
@@ -1002,7 +1037,7 @@ const handleRecoverResetPassword = async () => {
   recoverResetting.value = true;
   try {
     const result = await resetPasswordByCode(
-      recoverForm.value.email,
+      email,
       recoverForm.value.code,
       recoverForm.value.password
     );
@@ -1014,6 +1049,7 @@ const handleRecoverResetPassword = async () => {
     }
     ElMessage.success(result.message || t("login.resetPasswordSuccess"));
     dialogRecoverVisible.value = false;
+    router.push("/site/logout");
   } catch (_error) {
     ElMessage.error(t("login.resetPasswordFailedFallback"));
   } finally {
@@ -1043,6 +1079,17 @@ const handleAvatarImageUpdate = async (payload: {
 
 onMounted(() => {
   refreshEmailStatusSummary();
+});
+
+watch(
+  () => recoverForm.value.code,
+  () => {
+    recoverCodeVerified.value = false;
+  }
+);
+
+onUnmounted(() => {
+  stopRecoverCooldown();
 });
 
 // 监听用户信息变化，更新表单数据
@@ -1156,6 +1203,48 @@ watch(
   margin: 0 0 12px;
   color: #6f6f6f;
   font-size: 13px;
+}
+
+.recover-reset-btn {
+  min-width: 120px;
+  border-radius: 8px;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.recover-reset-btn:not(.is-disabled) {
+  background-color: #409eff !important;
+  border-color: #409eff !important;
+  color: #fff !important;
+  box-shadow: 0 6px 14px rgba(64, 158, 255, 0.24);
+}
+
+.recover-reset-btn:not(.is-disabled):hover,
+.recover-reset-btn:not(.is-disabled):focus-visible {
+  background-color: #5aafff !important;
+  border-color: #5aafff !important;
+  color: #fff !important;
+}
+
+.recover-reset-btn:not(.is-disabled):active {
+  background-color: #2f8ee5 !important;
+  border-color: #2f8ee5 !important;
+  color: #fff !important;
+}
+
+.recover-reset-btn.is-disabled,
+.recover-reset-btn.is-disabled:hover,
+.recover-reset-btn.is-disabled:focus,
+.recover-reset-btn.is-disabled:active {
+  background-color: #f2f4f7 !important;
+  border-color: #e5e9f0 !important;
+  color: #b6bfcc !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  cursor: not-allowed !important;
 }
 
 /* 用户说明文字样式 */
