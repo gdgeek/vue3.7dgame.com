@@ -188,8 +188,6 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
             "element-plus": ["element-plus", "@element-plus/icons-vue"],
             // 3D 相关
             three: ["three"],
-            // 图表
-            echarts: ["echarts"],
             // 代码编辑器
             codemirror: [
               "codemirror",
@@ -199,6 +197,8 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
               "@codemirror/theme-one-dark",
               "vue-codemirror",
             ],
+            // JSON Schema 编辑器（仅在 phototype/edit 中使用）
+            "json-schema-editor": ["json-schema-editor-vue3"],
             // FontAwesome 图标
             fontawesome: [
               "@fortawesome/fontawesome-svg-core",

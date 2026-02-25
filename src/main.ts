@@ -80,14 +80,9 @@ import {
   faSquareMinus,
   faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
-import VueIframe from "vue-iframes";
 import { VueAppleLoginConfig } from "@/utils/helper";
 import "element-plus/dist/index.css";
 import { ability } from "@/ability";
-
-// @ts-ignore
-import JsonSchemaEditor from "json-schema-editor-vue3";
-import "json-schema-editor-vue3/lib/json-schema-editor-vue3.css";
 
 import { abilitiesPlugin } from "@casl/vue";
 
@@ -221,8 +216,6 @@ app.use(abilitiesPlugin, ability, {
 app.component("FontAwesomeIcon", FontAwesomeIcon);
 app.directive("highlight", highlightDirective);
 app.use(setupPlugins);
-app.use(VueIframe);
-app.use(JsonSchemaEditor);
 //app.use(ElementPlus);
 import { loadLanguageAsync } from "@/lang";
 
