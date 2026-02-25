@@ -1,21 +1,17 @@
 // homepage translations for ja-JP
 export default {
   homepage: {
-    dashboard: "ダッシュボード",
-    news: "ニュース",
-    relatedDownload: "関連ダウンロード",
-    caseCourse: "ケースチュートリアル",
     greeting: {
       morning: "おはようございます、",
       noon: "こんにちは、",
       afternoon: "午後の挨拶、",
-      evening: "こんばんは、",
+      evening: "こんばんは、"
     },
     header: {
-      subtitle: "ARの無限の可能性を探求し、創造の旅を始めましょう。",
+      subtitle: "ARの無限の可能性を探求し、創造の旅を始めましょう。"
     },
     announcements: {
-      title: "お知らせ",
+      title: "お知らせ"
     },
     myCreation: {
       title: "私の作品",
@@ -25,29 +21,27 @@ export default {
       myProject: "场景",
       myPublish: "公開",
       myLike: "いいね",
-      enter: "入る",
-      Iliked: "私がいいねしたもの",
+      enter: "入る"
     },
     quickStart: {
       title: "クイックスタート",
       upload: {
         title: "素材をアップロード",
         desc: "3Dモデルやマルチメディアファイルを個人ライブラリに取り込みます。",
-        action: "今すぐアップロード",
+        action: "今すぐアップロード"
       },
       edit: {
         title: "エンティティ編集",
         desc: "インタラクティブなコンポーネントと挙動スクリプトを管理します。",
-        action: "今すぐ編集",
+        action: "今すぐ編集"
       },
       create: {
         title: "シーン作成",
         desc: "没入感のある新しいARインタラクティブ体験をゼロから構築します。",
-        action: "今すぐ作成",
-      },
+        action: "今すぐ作成"
+      }
     },
     edit: {
-      title: "プロフィールを編集",
       personalData: "個人データ",
       personalDataStatement: "ユーザー名、アバター、基本情報の変更",
       return: "個人センターに戻る",
@@ -96,7 +90,7 @@ export default {
           "アップロードされたアバター画像のサイズは2MBを超えてはなりません！",
         error3: "有効なファイルを選択してください！",
         error4: "ファイル処理中にエラーが発生しました",
-        success: "アバターの変更に成功しました",
+        success: "アバターの変更に成功しました"
       },
       rules: {
         nickname: {
@@ -107,7 +101,7 @@ export default {
             "ニックネームは中国語、アルファベット、数字、アンダースコアのみをサポートしています",
           error3: "ニックネームの更新に失敗しました",
           error4: "フォーム検証に失敗しました",
-          success: "ニックネームの更新に成功しました",
+          success: "ニックネームの更新に成功しました"
         },
         industry: {
           message: "業界を選択してください",
@@ -117,27 +111,27 @@ export default {
           label4: "エネルギー、製造業",
           label5: "農業、林業、漁業、畜産",
           label6: "サービス業",
-          label7: "その他の業界",
+          label7: "その他の業界"
         },
         selectedOptions: {
-          message: "居住地を選択してください",
+          message: "居住地を選択してください"
         },
         textarea: {
           message1: "個人の紹介を入力してください",
-          message2: "個人の紹介は10文字以上である必要があります",
+          message2: "個人の紹介は10文字以上である必要があります"
         },
         success: "情報の更新に成功しました",
         error1: "情報の更新に失敗しました",
         error2: "フォーム検証に失敗しました",
         email: {
           required: "メールアドレスを入力してください",
-          invalid: "メールアドレスの形式が正しくありません",
+          invalid: "メールアドレスの形式が正しくありません"
         },
         code: {
           required: "認証コードを入力してください",
-          invalid: "認証コードは6桁の数字である必要があります",
-        },
-      },
+          invalid: "認証コードは6桁の数字である必要があります"
+        }
+      }
     },
     account: {
       title: "アカウント設定",
@@ -145,7 +139,7 @@ export default {
       label1: "メール",
       rules1: {
         message1: "メールアドレスを入力してください",
-        message2: "正しいメールアドレスを入力してください",
+        message2: "正しいメールアドレスを入力してください"
       },
       placeholder: "メールアドレスをバインド",
       bind: "バインド",
@@ -162,31 +156,27 @@ export default {
           message1: "古いパスワードを入力してください",
           message2: "古いパスワードは6文字以上である必要があります",
           error1: "古いパスワードを空にすることはできません",
-          error2: "新しいパスワードは古いパスワードと同じにできません！",
+          error2: "新しいパスワードは古いパスワードと同じにできません！"
         },
         new: {
-          message1: "新しいパスワードを入力してください",
-          message2: "新しいパスワードは12文字以上である必要があります",
-          error1: "パスワードを入力してください",
-          error2: "新しいパスワードは古いパスワードと同じにできません！",
+          error2: "新しいパスワードは古いパスワードと同じにできません！"
         },
         check: {
-          message: "確認用パスワードを入力してください",
           message1: "確認用パスワードを入力してください",
           error1: "もう一度パスワードを入力してください",
-          error2: "2回入力したパスワードが一致しません",
-        },
+          error2: "2回入力したパスワードが一致しません"
+        }
       },
       validate1: {
         success: "パスワードの変更に成功しました",
         error1: "パスワードの変更に失敗しました",
-        error2: "フォーム検証に失敗しました",
+        error2: "フォーム検証に失敗しました"
       },
       validate2: {
         success: "バインド成功",
         error1: "バインド失敗",
-        error2: "フォーム検証に失敗しました",
-      },
-    },
-  },
+        error2: "フォーム検証に失敗しました"
+      }
+    }
+  }
 };

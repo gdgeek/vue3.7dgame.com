@@ -29,44 +29,26 @@ export default {
       removeTeacherConfirm: "この教師を削除してもよろしいですか？",
       removeConfirmTitle: "削除確認"
     },
-    defaultSchoolName: "新しい学校",
     defaultClassName: "新しいクラス",
     schoolManagement: "学校管理",
     teacherManagement: "教師管理",
     studentManagement: "学生管理",
-    filteringBySchool: "現在の学校IDでフィルタリング",
-    backToAll: "すべてのクラスに戻る",
     school: {
       principal: "学校管理者",
-      address: "住所",
-      description: "説明",
-      classList: "クラスリスト"
+      address: "住所"
     },
     class: {
       title: "クラス管理",
       schoolTitle: "{school} - クラス管理",
-      grade: "学年",
       teacher: "教師",
-      student: "生徒",
       teacherList: "教師リスト",
       studentList: "生徒リスト",
       selectTeacher: "教師を選択",
       selectStudent: "生徒を選択",
-      assignTeacher: "教師を割り当て",
-      assignStudent: "生徒を割り当て",
       form: {
         name: "クラス名",
         namePlaceholder: "クラス名を入力してください",
         image: "クラス画像"
-      },
-      messages: {
-        createConfirm: "新しいクラスを作成しますか？",
-        createSuccess: "クラスの作成に成功しました",
-        createFailed: "クラスの作成に失敗しました",
-        updateSuccess: "クラスの更新に成功しました",
-        updateFailed: "クラスの更新に失敗しました",
-        selectSchoolFirst: "クラスを作成する前に学校を選択してください",
-        teacherAlreadyInClass: "この教師はすでにこのクラスに所属しています"
       },
       validation: {
         nameRequired: "クラス名を入力してください"
@@ -76,21 +58,7 @@ export default {
       subject: "科目",
       phone: "電話"
     },
-    principal: {
-      assign: "学校管理者を割り当てる",
-      selectUser: "ユーザーを選択",
-      select: "選択",
-      assignSuccess: "学校管理者の割り当てに成功しました",
-      assignFailed: "学校管理者の割り当てに失敗しました",
-      username: "ユーザー名",
-      nickname: "ニックネーム"
-    },
     errors: {
-      fetchFailed: "学校リストの取得に失敗しました",
-      noData: "データがありません",
-      createPending: "作成機能は開発中です",
-      editPending: "学校を編集: {name}",
-      operationFailed: "操作に失敗しました",
       addFailed: "追加に失敗しました",
       saveFailed: "保存に失敗しました",
       deleteFailed: "削除に失敗しました",
@@ -98,38 +66,17 @@ export default {
       alreadyInClass: "このメンバーはすでにクラスに参加しています",
       validationFailed: "フォームの検証に失敗しました"
     },
-    dialog: {
-      createTitle: "学校を作成",
-      editTitle: "学校を編集"
-    },
     form: {
-      name: "学校名",
       namePlaceholder: "学校名を入力してください",
-      address: "学校住所",
-      addressPlaceholder: "学校住所を入力してください",
-      principal: "学校管理者",
-      principalPlaceholder: "学校管理者を選択してください",
-      image: "学校の画像",
-      edit: "編集",
       cancel: "キャンセル",
-      submit: "送信",
-      submitting: "送信中..."
-    },
-    validation: {
-      nameRequired: "学校名を入力してください",
-      nameLength: "学校名は2〜50文字である必要があります"
+      submit: "送信"
     },
     messages: {
       addSuccess: "追加に成功しました",
       removeSuccess: "削除に成功しました",
       deleteSuccess: "削除しました",
-      createConfirm: "新しい学校を作成しますか？",
       createSuccess: "学校の作成に成功しました",
-      createFailed: "学校の作成に失敗しました",
-      updateSuccess: "学校の更新に成功しました",
-      updateFailed: "学校の更新に失敗しました",
-      deleteFailed: "学校の削除に失敗しました",
-      clearPrincipalConfirm: "学校管理者をクリアしてもよろしいですか？"
+      updateSuccess: "学校の更新に成功しました"
     },
     creator: {
       form: {
@@ -153,7 +100,6 @@ export default {
     list: {
       label: "権限:",
       cancel: "削除",
-      manage: "管理",
       remove: "削除",
       roles: {
         root: "ルートユーザー",
@@ -235,7 +181,6 @@ export default {
       success: "追加成功",
       confirm1: {
         message1: "マップを作成",
-        message2: "ヒント",
         confirm: "確認",
         cancel: "キャンセル",
         success: "作成成功",
@@ -286,10 +231,8 @@ export default {
     closeAll: "すべて閉じる"
   },
   navbar: {
-    dashboard: "ダッシュボード",
     logout: "ログアウト",
     AccountSetting: "アカウント設定",
-    personalCenter: "個人センター",
     helpSupport: "サポート"
   },
   sizeSelect: {
@@ -328,7 +271,6 @@ export default {
     mix: "ミックスモード"
   },
   tts: {
-    title: "テンセント音声合成",
     voiceType: "音声タイプ",
     voiceScene: "シーン",
     voiceLanguage: "言語",
@@ -398,7 +340,6 @@ export default {
   },
   phototype: {
     title: "プロトタイプ",
-    list: "リスト",
     create: "プロトタイプ作成",
     fromModel: "モデルから",
     typeName: "プレハブ",
@@ -416,13 +357,7 @@ export default {
     prompt: {
       message1: "プロトタイプ名を入力してください",
       message2: "ヒント",
-      error1: "プロトタイプ名は空にできません",
-      error2: "プロトタイプ名の長さは3文字以上である必要があります",
-      error3: "プロトタイプ名の長さは20文字を超えることはできません",
-      success: "プロトタイプ名は",
-      confirm: "確認",
-      cancel: "キャンセル",
-      info: "入力がキャンセルされました"
+      error1: "プロトタイプ名は空にできません"
     },
     confirm: {
       message1: "この操作でファイルが永久に削除されます。続行しますか？",

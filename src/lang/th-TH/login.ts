@@ -1,11 +1,9 @@
 // login translations for th-TH
 export default {
   login: {
-    title: "แพลตฟอร์มสร้างสรรค์ AR ไม่ทำงานล่วงเวลา",
     register: "ลงทะเบียน/เข้าสู่ระบบแพลตฟอร์ม",
     h1: "ยินดีต้อนรับ!",
     h4: "พร้อมที่จะเริ่มหรือยัง?",
-    loginTitle: "เข้าสู่ระบบบัญชี",
     username: "อีเมล",
     password: "รหัสผ่าน",
     login: "เข้าสู่ระบบ",
@@ -16,20 +14,16 @@ export default {
     rules: {
       username: {
         message1: "กรุณากรอกชื่อผู้ใช้",
-        message2: "ความยาวชื่อผู้ใช้ควรมากกว่า 4 และน้อยกว่า 20",
-        message3: "ชื่อผู้ใช้รองรับเฉพาะตัวอักษร ตัวเลข ขีดล่าง @ และ .",
-        email: "กรุณากรอกที่อยู่อีเมลที่ถูกต้อง",
+        email: "กรุณากรอกที่อยู่อีเมลที่ถูกต้อง"
       },
       password: {
         message1: "กรุณากรอกรหัสผ่าน",
-        message2: "รหัสผ่านต้องมีความยาว 12~128 ตัวอักษร",
-        message3:
-          "รหัสผ่านต้องประกอบด้วยตัวพิมพ์ใหญ่ ตัวพิมพ์เล็ก ตัวเลข และอักขระพิเศษ",
+        message2: "รหัสผ่านต้องมีความยาว 12~128 ตัวอักษร"
       },
       repassword: {
         message1: "กรุณากรอกรหัสผ่านอีกครั้ง",
-        message2: "รหัสผ่านที่ป้อนสองครั้งไม่ตรงกัน",
-      },
+        message2: "รหัสผ่านที่ป้อนสองครั้งไม่ตรงกัน"
+      }
     },
     success: "เข้าสู่ระบบสำเร็จ",
     error: "การตรวจสอบแบบฟอร์มไม่ผ่าน",
@@ -47,7 +41,7 @@ export default {
       confirm: "ตกลง",
       cancel: "ยกเลิก",
       title: "กำลังออกจากระบบ",
-      text: "กำลังออกจากระบบจากเซิร์ฟเวอร์",
+      text: "กำลังออกจากระบบจากเซิร์ฟเวอร์"
     },
     back: "กลับ",
     loginResponseMissingToken: "การตอบกลับการเข้าสู่ระบบขาด access_token",
@@ -55,7 +49,7 @@ export default {
     abandonRegisterTitle: "คำเตือน",
     abandonRegisterConfirmButton: "ยืนยัน",
     abandonRegisterCancelButton: "สมัครต่อ",
-    qrcodeFetchFailed: "ไม่สามารถรับ QR code ได้ กรุณาลองใหม่อีกครั้ง",
+    qrcodeFetchFailed: "ไม่สามารถรับ QR code ได้ กรุณาลองใหม่อีกครั้ง"
   },
   passwordPolicy: {
     minLength: "อย่างน้อย 12 ตัวอักษร",
@@ -67,10 +61,8 @@ export default {
     strength: {
       weak: "อ่อน",
       medium: "ปานกลาง",
-      strong: "แข็งแกร่ง",
-    },
-    description:
-      "ข้อกำหนดรหัสผ่าน: อย่างน้อย 12 ตัวอักษร ประกอบด้วยตัวพิมพ์ใหญ่ ตัวพิมพ์เล็ก ตัวเลข และอักขระพิเศษ",
+      strong: "แข็งแกร่ง"
+    }
   },
   imageSelector: {
     selectImageMethod: "เลือกวิธีการเลือกรูปภาพ",
@@ -78,6 +70,6 @@ export default {
     selectFromResourceDesc: "เลือกจากทรัพยากรรูปภาพที่อัปโหลดแล้ว",
     uploadLocal: "อัปโหลดรูปภาพจากเครื่อง",
     uploadLocalDesc: "อัปโหลดไฟล์รูปภาพใหม่",
-    uploadFile: "อัปโหลดไฟล์",
-  },
+    uploadFile: "อัปโหลดไฟล์"
+  }
 };

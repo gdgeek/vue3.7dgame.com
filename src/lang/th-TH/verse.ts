@@ -66,7 +66,6 @@ export default {
         picture: "รูปปก",
         name: "ชื่อ",
         description: "คำอธิบายเนื้อหา",
-        course: "ผูกบทเรียน",
         cancel: "ยกเลิก",
         dialogTitle: "เลือกไฟล์",
         dialogSubmit: "ตกลง",
@@ -77,14 +76,9 @@ export default {
         error: "การตรวจสอบแบบฟอร์มล้มเหลว"
       },
       list: {
-        enter: "เข้าสู่",
-        infoTable: "คำอธิบายเนื้อหา:",
         infoContent: {
           author: "ผู้เขียน",
-          learn: "เรียนรู้",
-          blank: "ลิงก์เริ่มต้น",
-          description: "คำอธิบาย",
-          share: "ID แบ่งปัน"
+          description: "คำอธิบาย"
         },
         releaseConfirm: {
           message1: "ยืนยันที่จะเผยแพร่ฉากนี้หรือไม่?",
@@ -92,14 +86,6 @@ export default {
           confirm: "ยืนยัน",
           cancel: "ยกเลิก",
           success: "เผยแพร่สำเร็จ",
-          info: "ยกเลิกแล้ว"
-        },
-        restrainConfirm: {
-          message1: "ยืนยันที่จะนำฉากนี้ออฟไลน์หรือไม่?",
-          message2: "แจ้งเตือน",
-          confirm: "ยืนยัน",
-          cancel: "ยกเลิก",
-          success: "นำออฟไลน์สำเร็จ",
           info: "ยกเลิกแล้ว"
         },
         toolbar: {
@@ -152,12 +138,9 @@ export default {
       success1: "แก้ไขสำเร็จ",
       success2: "ส่งสำเร็จ",
       success3: "ลบสำเร็จ",
-      success4: "แบ่งปันสำเร็จ",
-      success5: "หยุดแบ่งปัน",
       error1: "ส่งล้มเหลว",
       error2: "การตรวจสอบแบบฟอร์มล้มเหลว",
       error3: "รูปแบบ Schema ของ Prefab ไม่ถูกต้อง",
-      messageTitle: "ชื่อ【ฉาก】: ",
       scene: "ฉาก",
       tags: {
         confirmRemove: {
@@ -176,77 +159,6 @@ export default {
           success: "เพิ่มแท็กสำเร็จ",
           error: "ยกเลิกการเพิ่มแท็ก"
         }
-      },
-      share: {
-        header1: "แบ่งปันให้ผู้ใช้อื่น",
-        header2: "แก้ไขข้อมูลการแบ่งปัน",
-        form: {
-          label1: "ชื่อผู้ใช้",
-          label2: "ข้อมูลที่เกี่ยวข้อง",
-          label3: "สิทธิ์การแก้ไข",
-          placeholder: "กรุณากรอกชื่อผู้ใช้",
-          ruleMessage: "ชื่อผู้ใช้ต้องไม่ว่างเปล่า",
-          label4: "แก้ไขได้",
-          confirm: "ตกลง",
-          cancel: "ยกเลิก"
-        },
-        title1: "การแบ่งปัน【ฉาก】",
-        title2: "แบ่งปันให้เพื่อน",
-        confirm: {
-          message1: "ยืนยันที่จะปิดการแบ่งปันหรือไม่?",
-          message2: "แจ้งเตือน",
-          confirm: "ยืนยัน",
-          cancel: "ยกเลิก",
-          success: "ปิดสำเร็จ!",
-          info: "ยกเลิกการปิดแล้ว"
-        }
-      },
-      message: {
-        header: "แก้ไขเนื้อหา",
-        loading: "กำลังโหลด...",
-        update: "แก้ไขเนื้อหา",
-        delete: "ลบโพสต์",
-        like: "เห็นด้วย",
-        edit: "แก้ไขเมื่อ",
-        message1: "เพิกถอนแล้ว",
-        message2: "ถูกใจแล้ว",
-        confirm: {
-          message1: "ยืนยันที่จะลบหรือไม่?",
-          message2: "แจ้งเตือน",
-          confirm: "ยืนยัน",
-          cancel: "ยกเลิก",
-          success: "ลบสำเร็จ!",
-          info: "ยกเลิกการลบแล้ว"
-        }
-      },
-      reply: {
-        timestamp: "ตอบกลับทันที",
-        title: "ตอบกลับ",
-        publish: "เผยแพร่เมื่อ",
-        confirm: {
-          message1: "ยืนยันที่จะลบหรือไม่?",
-          message2: "แจ้งเตือน",
-          confirm: "ยืนยัน",
-          cancel: "ยกเลิก",
-          success: "ลบสำเร็จ!",
-          info: "ยกเลิกการลบแล้ว"
-        },
-        success: "ตอบกลับสำเร็จ"
-      },
-      messageForm: {
-        form: {
-          label1: "หัวข้อ",
-          label2: "เนื้อหา",
-          rules: {
-            title: {
-              message1: "กรุณากรอกหัวข้อ",
-              message2: "ความยาวระหว่าง 3 ถึง 100 ตัวอักษร"
-            }
-          }
-        },
-        submit: "ส่ง",
-        reset: "รีเซ็ต",
-        success: "โพสต์สำเร็จ"
       },
       metaDialog: {
         title: "เลือกเอนทิตี",
@@ -277,9 +189,7 @@ export default {
           title: "ป้อนข้อมูล",
           save: "บันทึก",
           cancel: "ยกเลิก",
-          warn: "คลิกยกเลิกแล้ว",
-          typeTitle: "ประเภท",
-          nameTitle: "ชื่อไอเทม"
+          warn: "คลิกยกเลิกแล้ว"
         }
       },
       sceneEditor: {
@@ -315,7 +225,6 @@ export default {
           message2: "แจ้งเตือน",
           confirm: "ใช่",
           cancel: "ไม่",
-          success: "บันทึกสำเร็จ",
           error: "บันทึกล้มเหลว",
           info: "ละทิ้งการเปลี่ยนแปลงที่ยังไม่ได้บันทึก"
         }

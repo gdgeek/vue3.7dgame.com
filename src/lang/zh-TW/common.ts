@@ -12,14 +12,10 @@ export default {
     enter: "進入",
     open: "打開",
     add: "添加",
-    newest: "最新",
-    oldest: "最早",
     name: "名稱",
     description: "描述",
     edit: "編輯",
     back: "返回",
-    comingSoon: "敬請期待",
-    submit: "提交",
     updateSuccess: "更新成功",
     createSuccess: "創建成功",
     createFailed: "創建失敗",
@@ -31,13 +27,13 @@ export default {
     updateFailed: "更新失敗",
     invalidData: "數據無效",
     button: {
-      save: "保存",
+      save: "保存"
     },
     message: {
       createSuccess: "創建成功",
       saveSuccess: "保存成功",
-      saveFailed: "保存失敗",
-    },
+      saveFailed: "保存失敗"
+    }
   },
   errorPage: {
     back: "返回",
@@ -49,7 +45,7 @@ export default {
     backHome: "回到首頁",
     justLook: "隨便逛逛",
     clickToSee: "點擊查看",
-    justLookTitle: "隨便逛逛",
+    justLookTitle: "隨便逛逛"
   },
   sidebar: {
     home: "首頁",
@@ -73,7 +69,7 @@ export default {
     logout: "登出",
     logoutConfirmTitle: "登出",
     logoutConfirmMessage: "確定要登出嗎？",
-    logoutConfirmDesc: "登出後需要重新登入才能存取您的帳戶。",
+    logoutConfirmDesc: "登出後需要重新登入才能存取您的帳戶。"
   },
   breadcrumb: {
     workspace: "工作台",
@@ -82,7 +78,7 @@ export default {
     videoTutorial: "影片教學",
     settings: "設定",
     profile: "個人資料",
-    accountSecurity: "帳號安全",
+    accountSecurity: "帳號安全"
   },
   ui: {
     personalSettings: "個人設定",
@@ -146,26 +142,17 @@ export default {
     transformTitle: "定位物件變換",
     scale: "縮放",
     rotation: "旋轉",
-    position: "位置",
-  },
-  errors: {
-    networkError: "網絡錯誤，請檢查您的網絡連接",
-    rateLimitExceeded: "發送驗證碼過於頻繁，請等待 {seconds} 秒",
-    invalidCode: "驗證碼無效或已過期",
-    accountLocked: "由於多次失敗嘗試，賬戶已被鎖定，請在 {minutes} 分鐘後重試",
-    serverError: "服務器錯誤，請稍後再試",
+    position: "位置"
   },
   emailVerification: {
     codeSent: "驗證碼已發送到您的郵箱",
-    verifySuccess: "郵箱驗證成功",
-    sendFailed: "發送驗證碼失敗",
-    verifyFailed: "郵箱驗證失敗",
+    verifySuccess: "郵箱驗證成功"
   },
   request: {
     loginExpired: "登錄過期，請重新登錄",
     networkError: "網絡錯誤，請檢查您的網絡連接",
     serverError: "服務器內部錯誤，請稍後再試",
-    error404: "請求失敗，未找到資源 (404)",
+    error404: "請求失敗，未找到資源 (404)"
   },
   web: {
     login: "登錄平台",
@@ -173,7 +160,7 @@ export default {
       home: "首頁",
       tutorial: "案例教程",
       authorization: "平台授權",
-      forum: "Rokid 論壇",
+      forum: "Rokid 論壇"
     },
     hero: {
       loading: "載入中...",
@@ -185,7 +172,7 @@ export default {
       buildArApps: "快速構建AR應用",
       watchDemo: "觀看演示",
       scrollDown: "向下滾動了解更多",
-      introVideo: "介紹視頻",
+      introVideo: "介紹視頻"
     },
     news: {
       loadFailed: "載入失敗，請稍後再試",
@@ -207,7 +194,7 @@ export default {
       newsCategory: "新聞動態",
       tutorialCategory: "案例教程",
       relatedContent: "相關內容",
-      videoTutorial: "視頻教程內容",
+      videoTutorial: "視頻教程內容"
     },
     buy: {
       title: "如何獲得平台授權",
@@ -226,7 +213,7 @@ export default {
       contactUnlock: "購買完成後請聯繫解鎖設備",
       scanQrCode: "請掃小程式碼進入商城",
       purchase: "購買",
-      confirm: "確認",
-    },
-  },
+      confirm: "確認"
+    }
+  }
 };

@@ -66,7 +66,6 @@ export default {
         picture: "カバー画像",
         name: "名前",
         description: "内容の説明",
-        course: "チュートリアルをバインド",
         cancel: "キャンセル",
         dialogTitle: "ファイルを選択",
         dialogSubmit: "確認",
@@ -77,14 +76,9 @@ export default {
         error: "フォーム検証に失敗しました"
       },
       list: {
-        enter: "入る",
-        infoTable: "内容の説明：",
         infoContent: {
           author: "作者",
-          learn: "学習",
-          blank: "デフォルトリンク",
-          description: "説明",
-          share: "共有ID"
+          description: "説明"
         },
         releaseConfirm: {
           message1: "このプロジェクトを公開しますか？",
@@ -92,14 +86,6 @@ export default {
           confirm: "確認",
           cancel: "キャンセル",
           success: "公開に成功しました",
-          info: "キャンセルされました"
-        },
-        restrainConfirm: {
-          message1: "このプロジェクトをオフラインにしますか？",
-          message2: "お知らせ",
-          confirm: "確認",
-          cancel: "キャンセル",
-          success: "オフラインに成功しました",
           info: "キャンセルされました"
         },
         toolbar: {
@@ -151,12 +137,9 @@ export default {
       success1: "変更成功",
       success2: "送信成功",
       success3: "削除成功",
-      success4: "共有成功",
-      success5: "共有停止",
       error1: "送信失敗",
       error2: "フォーム検証に失敗しました",
       error3: "プリハブのスキーマ形式が無効です",
-      messageTitle: "【场景】名：",
       scene: "シーン",
       tags: {
         confirmRemove: {
@@ -175,77 +158,6 @@ export default {
           success: "タグが正常に追加されました",
           error: "タグの追加がキャンセルされました"
         }
-      },
-      share: {
-        header1: "他のユーザーと共有",
-        header2: "共有情報を変更",
-        form: {
-          label1: "ユーザー名",
-          label2: "関連情報",
-          label3: "編集権限",
-          placeholder: "ユーザー名を入力してください",
-          ruleMessage: "ユーザー名は空にできません",
-          label4: "編集可能",
-          confirm: "確認",
-          cancel: "キャンセル"
-        },
-        title1: "【场景】を共有",
-        title2: "友達と共有",
-        confirm: {
-          message1: "共有を停止してもよろしいですか？",
-          message2: "ヒント",
-          confirm: "確認",
-          cancel: "キャンセル",
-          success: "共有停止成功！",
-          info: "共有停止がキャンセルされました"
-        }
-      },
-      message: {
-        header: "内容を変更",
-        loading: "ロード中...",
-        update: "内容を変更",
-        delete: "投稿を削除",
-        like: "賛同",
-        edit: "編集",
-        message1: "取り消されました",
-        message2: "いいねしました",
-        confirm: {
-          message1: "削除してもよろしいですか？",
-          message2: "ヒント",
-          confirm: "確認",
-          cancel: "キャンセル",
-          success: "削除成功！",
-          info: "削除がキャンセルされました"
-        }
-      },
-      reply: {
-        timestamp: "今すぐ返信",
-        title: "返信",
-        publish: "公開日時",
-        confirm: {
-          message1: "削除してもよろしいですか？",
-          message2: "ヒント",
-          confirm: "確認",
-          cancel: "キャンセル",
-          success: "削除成功！",
-          info: "削除がキャンセルされました"
-        },
-        success: "返信成功"
-      },
-      messageForm: {
-        form: {
-          label1: "タイトル",
-          label2: "内容",
-          rules: {
-            title: {
-              message1: "タイトルを入力してください",
-              message2: "長さは3〜100文字である必要があります"
-            }
-          }
-        },
-        submit: "送信",
-        reset: "リセット",
-        success: "投稿成功"
       },
       metaDialog: {
         title: "メタデータを選択",
@@ -276,9 +188,7 @@ export default {
           title: "データ入力",
           save: "保存",
           cancel: "キャンセル",
-          warn: "キャンセルがクリックされました",
-          typeTitle: "タイプ",
-          nameTitle: "アイテム名"
+          warn: "キャンセルがクリックされました"
         }
       },
       sceneEditor: {
@@ -315,7 +225,6 @@ export default {
           message2: "ヒント",
           confirm: "はい",
           cancel: "いいえ",
-          success: "保存が成功しました",
           error: "保存に失敗しました",
           info: "保存されていない変更は破棄されました"
         }

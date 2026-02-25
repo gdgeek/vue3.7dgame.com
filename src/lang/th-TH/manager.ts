@@ -29,44 +29,26 @@ export default {
       removeTeacherConfirm: "คุณแน่ใจหรือไม่ว่าต้องการนำครูคนนี้ออก",
       removeConfirmTitle: "ยืนยันการนำออก"
     },
-    defaultSchoolName: "โรงเรียนใหม่",
     defaultClassName: "ชั้นเรียนใหม่",
     schoolManagement: "การจัดการโรงเรียน",
     teacherManagement: "การจัดการครู",
     studentManagement: "การจัดการนักเรียน",
-    filteringBySchool: "กรองตามรหัสโรงเรียนปัจจุบัน",
-    backToAll: "กลับไปที่ชั้นเรียนทั้งหมด",
     school: {
       principal: "ผู้ดูแลโรงเรียน",
-      address: "ที่อยู่",
-      description: "คำอธิบาย",
-      classList: "รายชื่อชั้นเรียน"
+      address: "ที่อยู่"
     },
     class: {
       title: "การจัดการชั้นเรียน",
       schoolTitle: "{school} - การจัดการชั้นเรียน",
-      grade: "ระดับชั้น",
       teacher: "ครู",
-      student: "นักเรียน",
       teacherList: "รายชื่อครู",
       studentList: "รายชื่อนักเรียน",
       selectTeacher: "เลือกครู",
       selectStudent: "เลือกนักเรียน",
-      assignTeacher: "มอบหมายครู",
-      assignStudent: "มอบหมายนักเรียน",
       form: {
         name: "ชื่อชั้นเรียน",
         namePlaceholder: "กรุณากรอกชื่อชั้นเรียน",
         image: "รูปภาพชั้นเรียน"
-      },
-      messages: {
-        createConfirm: "ยืนยันการสร้างชั้นเรียนใหม่?",
-        createSuccess: "สร้างชั้นเรียนสำเร็จ",
-        createFailed: "การสร้างชั้นเรียนล้มเหลว",
-        updateSuccess: "อัปเดตชั้นเรียนสำเร็จ",
-        updateFailed: "การอัปเดตชั้นเรียนล้มเหลว",
-        selectSchoolFirst: "กรุณาเลือกโรงเรียนก่อนสร้างชั้นเรียน",
-        teacherAlreadyInClass: "ครูคนนี้อยู่ในชั้นเรียนนี้แล้ว"
       },
       validation: {
         nameRequired: "กรุณากรอกชื่อชั้นเรียน"
@@ -76,21 +58,7 @@ export default {
       subject: "วิชา",
       phone: "โทรศัพท์"
     },
-    principal: {
-      assign: "มอบหมายผู้ดูแลโรงเรียน",
-      selectUser: "เลือกผู้ใช้",
-      select: "เลือก",
-      assignSuccess: "มอบหมายผู้ดูแลโรงเรียนสำเร็จ",
-      assignFailed: "การมอบหมายผู้ดูแลโรงเรียนล้มเหลว",
-      username: "ชื่อผู้ใช้",
-      nickname: "ชื่อเล่น"
-    },
     errors: {
-      fetchFailed: "ไม่สามารถดึงรายการโรงเรียนได้",
-      noData: "ไม่มีข้อมูล",
-      createPending: "ฟังก์ชันการสร้างกำลังพัฒนา",
-      editPending: "แก้ไขโรงเรียน: {name}",
-      operationFailed: "การดำเนินการล้มเหลว",
       addFailed: "เพิ่มไม่สำเร็จ",
       saveFailed: "บันทึกไม่สำเร็จ",
       deleteFailed: "ลบล้มเหลว",
@@ -98,38 +66,17 @@ export default {
       alreadyInClass: "สมาชิกนี้อยู่ในชั้นเรียนนี้แล้ว",
       validationFailed: "การตรวจสอบแบบฟอร์มล้มเหลว"
     },
-    dialog: {
-      createTitle: "สร้างโรงเรียน",
-      editTitle: "แก้ไขโรงเรียน"
-    },
     form: {
-      name: "ชื่อโรงเรียน",
       namePlaceholder: "กรุณากรอกชื่อโรงเรียน",
-      address: "ที่อยู่โรงเรียน",
-      addressPlaceholder: "กรุณากรอกที่อยู่โรงเรียน",
-      principal: "ผู้ดูแลโรงเรียน",
-      principalPlaceholder: "โปรดเลือกผู้ดูแลโรงเรียน",
-      image: "รูปภาพโรงเรียน",
-      edit: "แก้ไข",
       cancel: "ยกเลิก",
-      submit: "ส่ง",
-      submitting: "กำลังส่ง..."
-    },
-    validation: {
-      nameRequired: "กรุณากรอกชื่อโรงเรียน",
-      nameLength: "ความยาวชื่อโรงเรียนควรอยู่ระหว่าง 2-50 ตัวอักษร"
+      submit: "ส่ง"
     },
     messages: {
       addSuccess: "เพิ่มสำเร็จ",
       removeSuccess: "ลบสำเร็จ",
       deleteSuccess: "ลบสำเร็จ",
-      createConfirm: "ยืนยันการสร้างโรงเรียนใหม่หรือไม่?",
       createSuccess: "สร้างโรงเรียนสำเร็จ",
-      createFailed: "การสร้างโรงเรียนล้มเหลว",
-      updateSuccess: "อัปเดตโรงเรียนสำเร็จ",
-      updateFailed: "การอัปเดตโรงเรียนล้มเหลว",
-      deleteFailed: "การลบโรงเรียนล้มเหลว",
-      clearPrincipalConfirm: "คุณแน่ใจหรือไม่ว่าต้องการล้างผู้ดูแลโรงเรียน?"
+      updateSuccess: "อัปเดตโรงเรียนสำเร็จ"
     },
     creator: {
       form: {
@@ -153,7 +100,6 @@ export default {
     list: {
       label: "สิทธิ์:",
       cancel: "ลบ",
-      manage: "จัดการ",
       remove: "นำออก",
       roles: {
         root: "ผู้ใช้ Root",
@@ -238,7 +184,6 @@ export default {
       success: "เพิ่มสำเร็จ",
       confirm1: {
         message1: "สร้างแผนที่",
-        message2: "แจ้งเตือน",
         confirm: "ยืนยัน",
         cancel: "ยกเลิก",
         success: "สร้างสำเร็จ",
@@ -290,10 +235,8 @@ export default {
     closeAll: "ปิดทั้งหมด"
   },
   navbar: {
-    dashboard: "หน้าหลัก",
     logout: "ออกจากระบบ",
     AccountSetting: "ตั้งค่าบัญชี",
-    personalCenter: "ศูนย์ส่วนบุคคล",
     helpSupport: "ช่วยเหลือและสนับสนุน"
   },
   sizeSelect: {
@@ -332,7 +275,6 @@ export default {
     mix: "โหมดผสม"
   },
   tts: {
-    title: "Tencent Text-to-Speech",
     voiceType: "ประเภทเสียง",
     voiceScene: "ฉาก",
     voiceLanguage: "ภาษา",
@@ -402,7 +344,6 @@ export default {
   },
   phototype: {
     title: "ต้นแบบ",
-    list: "รายการ",
     create: "สร้างต้นแบบ",
     fromModel: "จากโมเดล",
     typeName: "พรีแฟบ",
@@ -420,13 +361,7 @@ export default {
     prompt: {
       message1: "กรุณาใส่ชื่อต้นแบบ",
       message2: "แจ้งเตือน",
-      error1: "ชื่อต้นแบบต้องไม่ว่างเปล่า",
-      error2: "ความยาวชื่อต้นแบบต้องไม่น้อยกว่า 3 ตัวอักษร",
-      error3: "ความยาวชื่อต้นแบบต้องไม่เกิน 20 ตัวอักษร",
-      success: "ชื่อต้นแบบคือ ",
-      confirm: "ยืนยัน",
-      cancel: "ยกเลิก",
-      info: "ยกเลิกการป้อนข้อมูล"
+      error1: "ชื่อต้นแบบต้องไม่ว่างเปล่า"
     },
     confirm: {
       message1: "การดำเนินการนี้จะลบไฟล์อย่างถาวร ต้องการดำเนินการต่อหรือไม่?",

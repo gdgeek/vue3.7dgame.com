@@ -1,11 +1,9 @@
 // login translations for zh-TW
 export default {
   login: {
-    title: "不加班AR創造平台",
     register: "平台註冊/登錄",
     h1: "歡迎！",
     h4: "準備好出發了么？",
-    loginTitle: "登錄賬號",
     username: "電子信箱",
     password: "密碼",
     login: "登錄",
@@ -15,19 +13,16 @@ export default {
     rules: {
       username: {
         message1: "請輸入用戶名",
-        message2: "用戶名稱長度應大於4小於20",
-        message3: "用戶名僅支持字母、數字、下劃線、@、.",
-        email: "請輸入有效的電子郵箱地址",
+        email: "請輸入有效的電子郵箱地址"
       },
       password: {
         message1: "請輸入密碼",
-        message2: "密碼長度應為12~128個字元",
-        message3: "密碼必須包含大小寫字母、數字和特殊字元",
+        message2: "密碼長度應為12~128個字元"
       },
       repassword: {
         message1: "請再次輸入密碼",
-        message2: "兩次輸入的密碼不一致",
-      },
+        message2: "兩次輸入的密碼不一致"
+      }
     },
     success: "登錄成功",
     error: "表單檢驗未通過",
@@ -45,7 +40,7 @@ export default {
       confirm: "確定",
       cancel: "取消",
       title: "正在登出",
-      text: "向服務器註銷此次登錄",
+      text: "向服務器註銷此次登錄"
     },
     back: "返回",
     abandonRegisterConfirm: "確認放棄註冊？",
@@ -53,7 +48,7 @@ export default {
     abandonRegisterConfirmButton: "確認",
     abandonRegisterCancelButton: "繼續註冊",
     loginResponseMissingToken: "登錄響應缺少 access_token",
-    qrcodeFetchFailed: "獲取微信二維碼失敗，請稍後再試",
+    qrcodeFetchFailed: "獲取微信二維碼失敗，請稍後再試"
   },
   passwordPolicy: {
     minLength: "至少 12 個字元",
@@ -65,10 +60,8 @@ export default {
     strength: {
       weak: "弱",
       medium: "中",
-      strong: "強",
-    },
-    description:
-      "密碼要求：至少 12 個字元，包含大寫字母、小寫字母、數字和特殊字元",
+      strong: "強"
+    }
   },
   imageSelector: {
     selectImageMethod: "選擇圖片方式",
@@ -76,6 +69,6 @@ export default {
     selectFromResourceDesc: "從已上傳的圖片資源中選擇",
     uploadLocal: "上傳本地圖片",
     uploadLocalDesc: "上傳新的圖片檔案",
-    uploadFile: "上傳檔案",
-  },
+    uploadFile: "上傳檔案"
+  }
 };

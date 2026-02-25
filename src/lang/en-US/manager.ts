@@ -29,55 +29,27 @@ export default {
       removeTeacherConfirm: "Are you sure you want to remove this teacher?",
       removeConfirmTitle: "Remove Confirmation"
     },
-    defaultSchoolName: "New School",
     defaultClassName: "New Class",
     schoolManagement: "School Management",
     classManagement: "Class Management",
     teacherManagement: "Teacher Management",
     studentManagement: "Student Management",
-    filteringBySchool: "Filtering by School ID",
-    backToAll: "Back to All Classes",
     school: {
       principal: "School Administrator",
-      address: "Address",
-      description: "Description",
-      classList: "Class List"
+      address: "Address"
     },
     class: {
       title: "Class Management",
       schoolTitle: "{school} - Class Management",
-      grade: "Grade",
       teacher: "Teacher",
-      student: "Student",
       teacherList: "Teacher List",
       studentList: "Student List",
       selectTeacher: "Select Teacher",
       selectStudent: "Select Student",
-      assignTeacher: "Assign Teacher",
-      assignStudent: "Assign Student",
       form: {
         name: "Class Name",
         namePlaceholder: "Please enter class name",
         image: "Class Image"
-      },
-      messages: {
-        createConfirm: "Are you sure you want to create a new class?",
-        createSuccess: "Class created successfully",
-        createFailed: "Failed to create class",
-        updateSuccess: "Class updated successfully",
-        updateFailed: "Failed to update class",
-        deleteFailed: "Failed to delete class",
-        removeTeacherConfirm: "Are you sure you want to remove this teacher?",
-        removeTeacherSuccess: "Teacher removed successfully",
-        removeTeacherFailed: "Failed to remove teacher",
-        removeStudentConfirm: "Are you sure you want to remove this student?",
-        removeStudentSuccess: "Student removed successfully",
-        removeStudentFailed: "Failed to remove student",
-        selectSchoolFirst:
-          "Please select a school first before creating a class",
-        assignTeacherSuccess: "Teacher assigned successfully",
-        assignStudentSuccess: "Student assigned successfully",
-        teacherAlreadyInClass: "This teacher is already in this class"
       },
       validation: {
         nameRequired: "Please enter class name"
@@ -87,21 +59,7 @@ export default {
       subject: "Subject",
       phone: "Phone"
     },
-    principal: {
-      assign: "Assign School Administrator",
-      selectUser: "Select User",
-      select: "Select",
-      assignSuccess: "School administrator assigned successfully",
-      assignFailed: "Failed to assign school administrator",
-      username: "Username",
-      nickname: "Nickname"
-    },
     errors: {
-      fetchFailed: "Failed to fetch schools",
-      noData: "No Data",
-      createPending: "Create functionality to be implemented",
-      editPending: "Edit school: {name}",
-      operationFailed: "Operation failed",
       addFailed: "Failed to add",
       saveFailed: "Failed to save",
       deleteFailed: "Delete failed",
@@ -109,39 +67,17 @@ export default {
       alreadyInClass: "This member is already in the class",
       validationFailed: "Form validation failed"
     },
-    dialog: {
-      createTitle: "Create School",
-      editTitle: "Edit School"
-    },
     form: {
-      name: "School Name",
       namePlaceholder: "Please enter school name",
-      address: "School Address",
-      addressPlaceholder: "Please enter school address",
-      principal: "School Administrator",
-      principalPlaceholder: "Select School Administrator",
-      image: "School Image",
-      edit: "Edit",
       cancel: "Cancel",
-      submit: "Submit",
-      submitting: "Submitting..."
-    },
-    validation: {
-      nameRequired: "Please enter school name",
-      nameLength: "School name length should be between 2-50 characters"
+      submit: "Submit"
     },
     messages: {
       addSuccess: "Added successfully",
       removeSuccess: "Removed successfully",
       deleteSuccess: "Deleted successfully",
-      createConfirm: "Confirm to create a new school?",
       createSuccess: "School created successfully",
-      createFailed: "Failed to create school",
-      updateSuccess: "School updated successfully",
-      updateFailed: "Failed to update school",
-      deleteFailed: "Failed to delete school",
-      clearPrincipalConfirm:
-        "Are you sure you want to clear the school administrator?"
+      updateSuccess: "School updated successfully"
     },
     creator: {
       form: {
@@ -165,7 +101,6 @@ export default {
     list: {
       label: "Perms:",
       cancel: "Delete",
-      manage: "Manage",
       remove: "Remove",
       roles: {
         root: "Root User",
@@ -250,7 +185,6 @@ export default {
       success: "Added successfully",
       confirm1: {
         message1: "Create Map",
-        message2: "Prompt",
         confirm: "Confirm",
         cancel: "Cancel",
         success: "Created successfully",
@@ -302,10 +236,8 @@ export default {
     closeAll: "CloseAll"
   },
   navbar: {
-    dashboard: "Dashboard",
     logout: "Logout",
     AccountSetting: "Account Setting",
-    personalCenter: "Home Page",
     helpSupport: "Help & Support"
   },
   sizeSelect: {
@@ -344,7 +276,6 @@ export default {
     mix: "Mixed Mode"
   },
   tts: {
-    title: "Tencent Text-to-Speech",
     voiceType: "Voice Type",
     voiceScene: "Scene",
     voiceLanguage: "Language",
@@ -414,7 +345,6 @@ export default {
   },
   phototype: {
     title: "Phototype",
-    list: "List",
     create: "Create Phototype",
     fromModel: "From Model",
     typeName: "Prefab",
@@ -432,13 +362,7 @@ export default {
     prompt: {
       message1: "Please enter phototype name",
       message2: "Prompt",
-      error1: "Phototype name cannot be empty",
-      error2: "Phototype name length cannot be less than 3 characters",
-      error3: "Phototype name length cannot exceed 20 characters",
-      success: "Phototype name is ",
-      confirm: "Confirm",
-      cancel: "Cancel",
-      info: "Input canceled"
+      error1: "Phototype name cannot be empty"
     },
     confirm: {
       message1:

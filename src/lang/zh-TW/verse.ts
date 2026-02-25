@@ -66,7 +66,6 @@ export default {
         picture: "封面圖片",
         name: "名稱",
         description: "內容說明",
-        course: "綁定教程",
         cancel: "取 消",
         dialogTitle: "選擇文件",
         dialogSubmit: "確定",
@@ -77,14 +76,9 @@ export default {
         error: "表單驗證失敗"
       },
       list: {
-        enter: "進入",
-        infoTable: "內容說明：",
         infoContent: {
           author: "作者",
-          learn: "學習",
-          blank: "默認鏈接",
-          description: "說明",
-          share: "共享ID"
+          description: "說明"
         },
         releaseConfirm: {
           message1: "確定發布該場景嗎？",
@@ -92,14 +86,6 @@ export default {
           confirm: "確認",
           cancel: "取消",
           success: "發布成功",
-          info: "已取消"
-        },
-        restrainConfirm: {
-          message1: "確定下線該場景嗎？",
-          message2: "提示",
-          confirm: "確認",
-          cancel: "取消",
-          success: "下線成功",
           info: "已取消"
         },
         toolbar: {
@@ -151,12 +137,9 @@ export default {
       success1: "修改成功",
       success2: "提交成功",
       success3: "刪除成功",
-      success4: "分享成功",
-      success5: "停止共享",
       error1: "提交失敗",
       error2: "表單驗證失敗",
       error3: "預製體 Schema 格式無效",
-      messageTitle: "【場景】名稱：",
       scene: "場景",
       tags: {
         confirmRemove: {
@@ -175,77 +158,6 @@ export default {
           success: "增加標籤成功",
           error: "取消增加標籤"
         }
-      },
-      share: {
-        header1: "共享給其他用戶",
-        header2: "修改共享信息",
-        form: {
-          label1: "用戶名",
-          label2: "相關信息",
-          label3: "編輯權限",
-          placeholder: "請輸入用戶名",
-          ruleMessage: "用戶名不能為空",
-          label4: "可編輯",
-          confirm: "確 認",
-          cancel: "取 消"
-        },
-        title1: "【場景】共享",
-        title2: "共享給好友",
-        confirm: {
-          message1: "是否確認關閉共享？",
-          message2: "提示",
-          confirm: "確認",
-          cancel: "取消",
-          success: "關閉成功！",
-          info: "已取消關閉"
-        }
-      },
-      message: {
-        header: "修改內容",
-        loading: "載入...",
-        update: "修改內容",
-        delete: "刪除帖子",
-        like: "贊同",
-        edit: "編輯於",
-        message1: "已撤銷",
-        message2: "已點贊",
-        confirm: {
-          message1: "是否確定刪除？",
-          message2: "提示",
-          confirm: "確認",
-          cancel: "取消",
-          success: "刪除成功！",
-          info: "已取消刪除"
-        }
-      },
-      reply: {
-        timestamp: "現在就回復",
-        title: "回復",
-        publish: "發布於",
-        confirm: {
-          message1: "是否確定刪除？",
-          message2: "提示",
-          confirm: "確認",
-          cancel: "取消",
-          success: "刪除成功！",
-          info: "已取消刪除"
-        },
-        success: "回復成功"
-      },
-      messageForm: {
-        form: {
-          label1: "標題",
-          label2: "內容",
-          rules: {
-            title: {
-              message1: "請輸入標題",
-              message2: "長度在 3 到 100 個字符"
-            }
-          }
-        },
-        submit: "提交",
-        reset: "重置",
-        success: "發帖成功"
       },
       metaDialog: {
         title: "選擇實體",
@@ -276,9 +188,7 @@ export default {
           title: "輸入數據",
           save: "保存",
           cancel: "取消",
-          warn: "點擊了取消",
-          typeTitle: "類型",
-          nameTitle: "物品名稱"
+          warn: "點擊了取消"
         }
       },
       sceneEditor: {
@@ -314,7 +224,6 @@ export default {
           message2: "提示",
           confirm: "是",
           cancel: "否",
-          success: "保存成功",
           error: "保存失敗",
           info: "已放棄對未保存的更改"
         }

@@ -12,14 +12,10 @@ export default {
     enter: "เข้าสู่",
     open: "เปิด",
     add: "เพิ่ม",
-    newest: "ล่าสุด",
-    oldest: "เก่าสุด",
     name: "ชื่อ",
     description: "คำอธิบาย",
     edit: "แก้ไข",
     back: "กลับ",
-    comingSoon: "เร็วๆ นี้",
-    submit: "ส่ง",
     updateSuccess: "อัปเดตสำเร็จ",
     createSuccess: "สร้างสำเร็จ",
     createFailed: "สร้างล้มเหลว",
@@ -32,13 +28,13 @@ export default {
     updateFailed: "อัปเดตล้มเหลว",
     invalidData: "ข้อมูลไม่ถูกต้อง",
     button: {
-      save: "บันทึก",
+      save: "บันทึก"
     },
     message: {
       createSuccess: "สร้างสำเร็จ",
       saveSuccess: "บันทึกสำเร็จ",
-      saveFailed: "บันทึกล้มเหลว",
-    },
+      saveFailed: "บันทึกล้มเหลว"
+    }
   },
   errorPage: {
     back: "กลับ",
@@ -50,7 +46,7 @@ export default {
     backHome: "กลับหน้าหลัก",
     justLook: "แค่เดินเล่น",
     clickToSee: "คลิกเพื่อดู",
-    justLookTitle: "แค่เดินเล่น",
+    justLookTitle: "แค่เดินเล่น"
   },
   sidebar: {
     home: "หน้าแรก",
@@ -75,7 +71,7 @@ export default {
     logoutConfirmTitle: "ออกจากระบบ",
     logoutConfirmMessage: "คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ",
     logoutConfirmDesc:
-      "หลังออกจากระบบ คุณต้องเข้าสู่ระบบใหม่เพื่อเข้าถึงบัญชีของคุณ",
+      "หลังออกจากระบบ คุณต้องเข้าสู่ระบบใหม่เพื่อเข้าถึงบัญชีของคุณ"
   },
   breadcrumb: {
     workspace: "พื้นที่ทำงาน",
@@ -84,7 +80,7 @@ export default {
     videoTutorial: "วิดีโอสอน",
     settings: "การตั้งค่า",
     profile: "โปรไฟล์",
-    accountSecurity: "ความปลอดภัยของบัญชี",
+    accountSecurity: "ความปลอดภัยของบัญชี"
   },
   ui: {
     personalSettings: "การตั้งค่าส่วนตัว",
@@ -151,28 +147,17 @@ export default {
     transformTitle: "การแปลงวัตถุ",
     scale: "สเกล",
     rotation: "การหมุน",
-    position: "ตำแหน่ง",
-  },
-  errors: {
-    networkError:
-      "เกิดข้อผิดพลาดเครือข่าย กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ",
-    rateLimitExceeded: "ส่งรหัสบ่อยเกินไป กรุณารอ {seconds} วินาที",
-    invalidCode: "รหัสยืนยันไม่ถูกต้องหรือหมดอายุ",
-    accountLocked:
-      "บัญชีถูกล็อคเนื่องจากความพยายามล้มเหลวหลายครั้ง กรุณาลองใหม่ใน {minutes} นาที",
-    serverError: "เกิดข้อผิดพลาดของเซิร์ฟเวอร์ กรุณาลองใหม่ภายหลัง",
+    position: "ตำแหน่ง"
   },
   emailVerification: {
     codeSent: "ส่งรหัสยืนยันไปยังอีเมลของคุณแล้ว",
-    verifySuccess: "ยืนยันอีเมลสำเร็จ",
-    sendFailed: "ส่งรหัสยืนยันล้มเหลว",
-    verifyFailed: "ยืนยันอีเมลล้มเหลว",
+    verifySuccess: "ยืนยันอีเมลสำเร็จ"
   },
   request: {
     loginExpired: "Login expired, please log in again",
     networkError: "Network error, please check your internet connection",
     serverError: "Internal server error, please try again later",
-    error404: "คำขอล้มเหลว ไม่พบทรัพยากร (404)",
+    error404: "คำขอล้มเหลว ไม่พบทรัพยากร (404)"
   },
   web: {
     login: "เข้าสู่ระบบ",
@@ -180,7 +165,7 @@ export default {
       home: "หน้าแรก",
       tutorial: "บทเรียน",
       authorization: "การอนุญาต",
-      forum: "ฟอรัม Rokid",
+      forum: "ฟอรัม Rokid"
     },
     hero: {
       loading: "กำลังโหลด...",
@@ -192,7 +177,7 @@ export default {
       buildArApps: "สร้างแอป AR อย่างรวดเร็ว",
       watchDemo: "ดูตัวอย่าง",
       scrollDown: "เลื่อนลงเพื่อดูเพิ่มเติม",
-      introVideo: "วิดีโอแนะนำ",
+      introVideo: "วิดีโอแนะนำ"
     },
     news: {
       loadFailed: "โหลดไม่สำเร็จ กรุณาลองใหม่ภายหลัง",
@@ -215,7 +200,7 @@ export default {
       newsCategory: "ข่าว",
       tutorialCategory: "บทเรียน",
       relatedContent: "เนื้อหาที่เกี่ยวข้อง",
-      videoTutorial: "วิดีโอบทเรียน",
+      videoTutorial: "วิดีโอบทเรียน"
     },
     buy: {
       title: "วิธีรับการอนุญาตแพลตฟอร์ม",
@@ -237,7 +222,7 @@ export default {
       contactUnlock: "กรุณาติดต่อเราเพื่อปลดล็อคอุปกรณ์หลังจากซื้อ",
       scanQrCode: "สแกน QR code เพื่อเข้าร้านค้า",
       purchase: "ซื้อ",
-      confirm: "ยืนยัน",
-    },
-  },
+      confirm: "ยืนยัน"
+    }
+  }
 };

@@ -66,7 +66,6 @@ export default {
         picture: "Cover Image",
         name: "Name",
         description: "Description",
-        course: "Bind Course",
         cancel: "Cancel",
         dialogTitle: "Select File",
         dialogSubmit: "Confirm",
@@ -77,14 +76,9 @@ export default {
         error: "Form validation failed"
       },
       list: {
-        enter: "Enter",
-        infoTable: "Description:",
         infoContent: {
           author: "Author",
-          learn: "Learn",
-          blank: "Default Link",
-          description: "Description",
-          share: "ShareID"
+          description: "Description"
         },
         releaseConfirm: {
           message1: "Are you sure you want to release this project?",
@@ -92,14 +86,6 @@ export default {
           confirm: "Confirm",
           cancel: "Cancel",
           success: "Release successful",
-          info: "Cancelled"
-        },
-        restrainConfirm: {
-          message1: "Are you sure you want to take this project offline?",
-          message2: "Prompt",
-          confirm: "Confirm",
-          cancel: "Cancel",
-          success: "Offline successful",
           info: "Cancelled"
         },
         toolbar: {
@@ -156,12 +142,9 @@ export default {
       success1: "Edit successful",
       success2: "Submission successful",
       success3: "Deletion successful",
-      success4: "Share successful",
-      success5: "Sharing stopped",
       error1: "Submission failed",
       error2: "Form validation failed",
       error3: "Prefab schema format is invalid",
-      messageTitle: "【Project】Name:",
       scene: "scene",
       tags: {
         confirmRemove: {
@@ -180,77 +163,6 @@ export default {
           success: "Tag added successfully",
           error: "Tag addition cancelled"
         }
-      },
-      share: {
-        header1: "Share with Other Users",
-        header2: "Edit Sharing Information",
-        form: {
-          label1: "Username",
-          label2: "Related Info",
-          label3: "Edit Permission",
-          placeholder: "Please enter a username",
-          ruleMessage: "Username cannot be empty",
-          label4: "Editable",
-          confirm: "Confirm",
-          cancel: "Cancel"
-        },
-        title1: "【Project】Sharing",
-        title2: "Share",
-        confirm: {
-          message1: "Are you sure you want to stop sharing?",
-          message2: "Prompt",
-          confirm: "Confirm",
-          cancel: "Cancel",
-          success: "Sharing stopped successfully!",
-          info: "Sharing stop canceled"
-        }
-      },
-      message: {
-        header: "Edit Content",
-        loading: "Loading...",
-        update: "Update Content",
-        delete: "Delete Post",
-        like: "Like",
-        edit: "edited on",
-        message1: "Undo",
-        message2: "Liked",
-        confirm: {
-          message1: "Are you sure you want to delete?",
-          message2: "Prompt",
-          confirm: "Confirm",
-          cancel: "Cancel",
-          success: "Deleted successfully!",
-          info: "Deletion canceled"
-        }
-      },
-      reply: {
-        timestamp: "Reply Now",
-        title: "Reply",
-        publish: "Published on",
-        confirm: {
-          message1: "Are you sure you want to delete?",
-          message2: "Prompt",
-          confirm: "Confirm",
-          cancel: "Cancel",
-          success: "Deleted successfully!",
-          info: "Deletion canceled"
-        },
-        success: "Reply successful"
-      },
-      messageForm: {
-        form: {
-          label1: "Title",
-          label2: "Content",
-          rules: {
-            title: {
-              message1: "Please enter a title",
-              message2: "Length should be between 3 and 100 characters"
-            }
-          }
-        },
-        submit: "Submit",
-        reset: "Reset",
-        success: "Post submitted successfully"
       },
       metaDialog: {
         title: "Select Entity",
@@ -281,9 +193,7 @@ export default {
           title: "Input Data",
           save: "Save",
           cancel: "Cancel",
-          warn: "Clicked Cancel",
-          typeTitle: "Type",
-          nameTitle: "Item Name"
+          warn: "Clicked Cancel"
         }
       },
       sceneEditor: {
@@ -319,7 +229,6 @@ export default {
           message2: "Prompt",
           confirm: "Yes",
           cancel: "No",
-          success: "Saved successfully",
           error: "Save failed",
           info: "Unsaved changes have been discarded"
         }

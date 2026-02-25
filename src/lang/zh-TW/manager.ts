@@ -28,44 +28,26 @@ export default {
       removeTeacherConfirm: "確定要移除該教師嗎？",
       removeConfirmTitle: "移除確認"
     },
-    defaultSchoolName: "新學校",
     defaultClassName: "新班級",
     schoolManagement: "學校管理",
     teacherManagement: "教師管理",
     studentManagement: "學生管理",
-    filteringBySchool: "當前篩選學校ID",
-    backToAll: "返回所有班級",
     school: {
       principal: "學校管理員",
-      address: "地址",
-      description: "描述",
-      classList: "班級列表"
+      address: "地址"
     },
     class: {
       title: "班級管理",
       schoolTitle: "{school} - 班級管理",
-      grade: "年級",
       teacher: "教師",
-      student: "學生",
       teacherList: "教師列表",
       studentList: "學生列表",
       selectTeacher: "選擇教師",
       selectStudent: "選擇學生",
-      assignTeacher: "分配教師",
-      assignStudent: "分配學生",
       form: {
         name: "班級名稱",
         namePlaceholder: "請輸入班級名稱",
         image: "班級圖片"
-      },
-      messages: {
-        createConfirm: "確認創建新班級嗎？",
-        createSuccess: "班級創建成功",
-        createFailed: "班級創建失敗",
-        updateSuccess: "班級更新成功",
-        updateFailed: "班級更新失敗",
-        selectSchoolFirst: "請先選擇學校，再創建班級",
-        teacherAlreadyInClass: "該教師已在此班級中"
       },
       validation: {
         nameRequired: "請輸入班級名稱"
@@ -75,21 +57,7 @@ export default {
       subject: "科目",
       phone: "電話"
     },
-    principal: {
-      assign: "分配學校管理員",
-      selectUser: "選擇用戶",
-      select: "選擇",
-      assignSuccess: "學校管理員分配成功",
-      assignFailed: "學校管理員分配失敗",
-      username: "用戶名",
-      nickname: "暱稱"
-    },
     errors: {
-      fetchFailed: "獲取學校列表失敗",
-      noData: "暫無數據",
-      createPending: "創建功能開發中",
-      editPending: "編輯學校: {name}",
-      operationFailed: "操作失敗",
       addFailed: "添加失敗",
       saveFailed: "保存失敗",
       deleteFailed: "刪除失敗",
@@ -97,38 +65,17 @@ export default {
       alreadyInClass: "該成員已在該班級中",
       validationFailed: "表單驗證失敗"
     },
-    dialog: {
-      createTitle: "創建學校",
-      editTitle: "編輯學校"
-    },
     form: {
-      name: "學校名稱",
       namePlaceholder: "請輸入學校名稱",
-      address: "學校地址",
-      addressPlaceholder: "請輸入學校地址",
-      principal: "學校管理員",
-      principalPlaceholder: "請選擇學校管理員",
-      image: "學校圖片",
-      edit: "編輯",
       cancel: "取消",
-      submit: "提交",
-      submitting: "提交中..."
-    },
-    validation: {
-      nameRequired: "請輸入學校名稱",
-      nameLength: "學校名稱長度應在2-50個字符之間"
+      submit: "提交"
     },
     messages: {
       addSuccess: "添加成功",
       removeSuccess: "移除成功",
       deleteSuccess: "刪除成功",
-      createConfirm: "確認創建新學校嗎？",
       createSuccess: "學校創建成功",
-      createFailed: "學校創建失敗",
-      updateSuccess: "學校更新成功",
-      updateFailed: "學校更新失敗",
-      deleteFailed: "學校刪除失敗",
-      clearPrincipalConfirm: "確認要清空學校管理員嗎？"
+      updateSuccess: "學校更新成功"
     },
     creator: {
       form: {
@@ -152,7 +99,6 @@ export default {
     list: {
       label: "權限:",
       cancel: "刪除",
-      manage: "管理",
       remove: "移除",
       roles: {
         root: "根用戶",
@@ -234,7 +180,6 @@ export default {
       success: "添加成功",
       confirm1: {
         message1: "創建地圖",
-        message2: "提示",
         confirm: "確認",
         cancel: "取消",
         success: "創建成功",
@@ -285,10 +230,8 @@ export default {
     closeAll: "關閉全部"
   },
   navbar: {
-    dashboard: "首頁",
     logout: "註銷登出",
     AccountSetting: "賬號設置",
-    personalCenter: "個人中心",
     helpSupport: "幫助支持"
   },
   sizeSelect: {
@@ -327,7 +270,6 @@ export default {
     mix: "混合模式"
   },
   tts: {
-    title: "騰訊語音合成",
     voiceType: "音色類型",
     voiceScene: "場景",
     voiceLanguage: "語言",
@@ -393,7 +335,6 @@ export default {
   },
   phototype: {
     title: "原型",
-    list: "列表",
     create: "創建原型",
     fromModel: "從模型",
     typeName: "預製體",
@@ -411,13 +352,7 @@ export default {
     prompt: {
       message1: "請輸入原型名稱",
       message2: "提示",
-      error1: "原型名稱不能為空",
-      error2: "原型名稱長度不能少於3個字符",
-      error3: "原型名稱長度不能超過20個字符",
-      success: "原型名稱是",
-      confirm: "確認",
-      cancel: "取消",
-      info: "取消輸入"
+      error1: "原型名稱不能為空"
     },
     confirm: {
       message1: "此操作將永久刪除該文件, 是否繼續?",
