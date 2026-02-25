@@ -175,7 +175,7 @@ const domainStore = useDomainStore(store);
 
 // 更新页面标题
 const updateTitle = (title: string) => {
-  const siteName = domainStore.title || "不加班AR创作平台";
+  const siteName = domainStore.title || "XR UGC平台（XRUGC.com）";
   document.title = title
     ? `${translateRouteTitle(title)} - ${siteName}`
     : siteName;

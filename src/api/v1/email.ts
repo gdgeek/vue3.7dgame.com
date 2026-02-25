@@ -1,4 +1,7 @@
 import request from "@/utils/request";
+import env from "@/environment";
+
+const emailApiBase = env.email_api;
 
 // API响应基础类型
 export interface ApiResponse<T = unknown> {
@@ -16,26 +19,68 @@ export interface ApiError {
   retry_after?: number;
 }
 
-// 发送验证码请求参数
-export interface SendVerificationRequest {
-  email: string;
+export interface EmailStatus {
+  user_id: number;
+  username: string;
+  email: string | null;
+  email_verified: boolean;
+  email_verified_at: number | null;
+  email_verified_at_formatted: string | null;
 }
 
-// 验证验证码请求参数
+export interface EmailCooldown {
+  email: string | null;
+  can_send: boolean;
+  retry_after: number;
+  limit_seconds: number;
+}
+
 export interface VerifyEmailRequest {
   email: string;
   code: string;
+  change_token?: string;
 }
 
-/**
- * 发送邮箱验证码
- * @param email - 邮箱地址
- * @returns Promise<ApiResponse>
- */
+export interface VerifyChangeConfirmationData {
+  change_token: string;
+  expires_in: number;
+}
+
+export interface EmailUserData {
+  id: number;
+  username?: string;
+  email: string | null;
+  email_verified_at: number | null;
+}
+
+export interface VerifyEmailData {
+  user: EmailUserData;
+}
+
+export interface UnbindEmailData {
+  user: EmailUserData;
+}
+
+export interface TestEmailData {
+  from: string;
+  to: string;
+  time: string;
+}
+
+export const getEmailStatus = async (): Promise<ApiResponse<EmailStatus>> => {
+  const response = await request<ApiResponse<EmailStatus>>({
+    baseURL: emailApiBase,
+    url: "/v1/email/status",
+    method: "get",
+  });
+  return response.data;
+};
+
 export const sendVerificationCode = async (
   email: string
 ): Promise<ApiResponse> => {
   const response = await request<ApiResponse>({
+    baseURL: emailApiBase,
     url: "/v1/email/send-verification",
     method: "post",
     data: { email },
@@ -43,25 +88,81 @@ export const sendVerificationCode = async (
   return response.data;
 };
 
-/**
- * 验证邮箱验证码
- * @param email - 邮箱地址
- * @param code - 6位数字验证码
- * @returns Promise<ApiResponse>
- */
 export const verifyEmailCode = async (
-  email: string,
-  code: string
-): Promise<ApiResponse> => {
-  const response = await request<ApiResponse>({
+  payload: VerifyEmailRequest
+): Promise<ApiResponse<VerifyEmailData>> => {
+  const response = await request<ApiResponse<VerifyEmailData>>({
+    baseURL: emailApiBase,
     url: "/v1/email/verify",
     method: "post",
-    data: { email, code },
+    data: payload,
+  });
+  return response.data;
+};
+
+export const sendChangeConfirmation = async (): Promise<ApiResponse> => {
+  const response = await request<ApiResponse>({
+    baseURL: emailApiBase,
+    url: "/v1/email/send-change-confirmation",
+    method: "post",
+  });
+  return response.data;
+};
+
+export const verifyChangeConfirmation = async (
+  code: string
+): Promise<ApiResponse<VerifyChangeConfirmationData>> => {
+  const response = await request<ApiResponse<VerifyChangeConfirmationData>>({
+    baseURL: emailApiBase,
+    url: "/v1/email/verify-change-confirmation",
+    method: "post",
+    data: { code },
+  });
+  return response.data;
+};
+
+export const unbindEmail = async (
+  code?: string
+): Promise<ApiResponse<UnbindEmailData>> => {
+  const response = await request<ApiResponse<UnbindEmailData>>({
+    baseURL: emailApiBase,
+    url: "/v1/email/unbind",
+    method: "post",
+    data: code ? { code } : {},
+  });
+  return response.data;
+};
+
+export const getEmailCooldown = async (
+  email?: string
+): Promise<ApiResponse<EmailCooldown>> => {
+  const response = await request<ApiResponse<EmailCooldown>>({
+    baseURL: emailApiBase,
+    url: "/v1/email/cooldown",
+    method: "get",
+    params: email ? { email } : {},
+  });
+  return response.data;
+};
+
+export const testEmailService = async (): Promise<
+  ApiResponse<TestEmailData>
+> => {
+  const response = await request<ApiResponse<TestEmailData>>({
+    baseURL: emailApiBase,
+    url: "/v1/email/test",
+    method: "get",
   });
   return response.data;
 };
 
 export default {
+  getEmailStatus,
   sendVerificationCode,
   verifyEmailCode,
+  sendChangeConfirmation,
+  verifyChangeConfirmation,
+  unbindEmail,
+  getEmailCooldown,
+  testEmailService,
 };

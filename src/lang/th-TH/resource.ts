@@ -392,6 +392,7 @@ export default {
     selectedFiles: "เลือกแล้ว {count} ไฟล์",
     clearFiles: "ล้างไฟล์ทั้งหมด",
     effectType: "ประเภทเอฟเฟกต์",
+    ready: "พร้อมอัปโหลด...",
     item1: {
       title: "ประมวลผลล่วงหน้า",
       failed: "คำนวณ md5 ล้มเหลว",

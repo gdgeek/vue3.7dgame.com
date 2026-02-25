@@ -1,9 +1,26 @@
 import { defineConfig } from "vitest/config";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
+import AutoImport from "unplugin-auto-import/vite";
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    AutoImport({
+      imports: ["vue", "@vueuse/core", "pinia", "vue-router", "vue-i18n"],
+      dts: false,
+      vueTemplate: true,
+    }),
+  ],
+  define: {
+    __APP_INFO__: JSON.stringify({
+      pkg: {
+        name: "test-app",
+        version: "0.0.0-test",
+      },
+      buildTimestamp: 0,
+    }),
+  },
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
@@ -14,6 +31,7 @@ export default defineConfig({
     environment: "jsdom",
     // 全局变量（无需每次导入 describe, it, expect 等）
     globals: true,
+    setupFiles: ["./test/setup.ts"],
     // 包含的测试文件
     include: ["test/**/*.{test,spec}.{js,ts}", "src/**/*.{test,spec}.{js,ts}"],
     // 排除的文件

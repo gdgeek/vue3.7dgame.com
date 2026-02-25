@@ -1,6 +1,7 @@
 // login translations for ja-JP
 export default {
   login: {
+    title: "XR UGC平台（XRUGC.com）",
     register: "プラットフォーム登録/ログイン",
     h1: "ようこそ！",
     h4: "準備はできましたか？",
@@ -51,6 +52,29 @@ export default {
     loginResponseMissingToken: "ログインレスポンスに access_token がありません",
     qrcodeFetchFailed:
       "WeChatのQRコード取得に失敗しました。しばらくしてからお試しください",
+    forgotPassword: "パスワードをお忘れですか？",
+    forgotDialogTitle: "パスワード再設定",
+    forgotTipBoundEmail:
+      "メール認証済みのバインド済みメールアドレスを持つアカウントのみ利用できます。",
+    forgotTokenLabel: "認証コード",
+    forgotTokenPlaceholder: "メール内の6桁認証コードを入力してください",
+    forgotNewPasswordLabel: "新しいパスワード",
+    forgotConfirmPasswordLabel: "新しいパスワード（確認）",
+    sendResetEmail: "認証コードを送信",
+    verifyResetToken: "認証コードを検証",
+    verifyTokenFirst: "先に認証コードを検証してください",
+    forgotTokenRequired: "認証コードを入力してください",
+    requestResetSuccess: "パスワード再設定用の認証コードを送信しました",
+    requestResetFailedFallback:
+      "認証コードの送信に失敗しました。しばらくしてから再試行してください",
+    verifyTokenSuccess: "認証コードの検証に成功しました",
+    verifyTokenFailed: "認証コードが無効または期限切れです",
+    resetPassword: "パスワードを再設定",
+    resetPasswordSuccess:
+      "パスワードの再設定に成功しました。新しいパスワードでログインしてください",
+    resetPasswordFailedFallback:
+      "パスワードの再設定に失敗しました。しばらくしてから再試行してください",
+    cancel: "キャンセル",
   },
   passwordPolicy: {
     minLength: "12文字以上",
@@ -72,5 +96,16 @@ export default {
     uploadLocal: "ローカル画像をアップロード",
     uploadLocalDesc: "新しい画像ファイルをアップロード",
     uploadFile: "ファイルをアップロード",
+    cropTitle: "画像をトリミング",
+    cropTip: "アップロード前にトリミング範囲を調整してください",
+    rotateLeft: "左回転",
+    rotateRight: "右回転",
+    zoomIn: "拡大",
+    zoomOut: "縮小",
+    confirm: "確認",
+    cancel: "キャンセル",
+    invalidType: "JPG/PNG/BMP/GIF 形式の画像をアップロードしてください",
+    invalidSize: "画像サイズは {size}MB を超えられません",
+    uploadFailed: "画像のアップロードに失敗しました。再試行してください",
   },
 };

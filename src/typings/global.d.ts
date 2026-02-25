@@ -85,6 +85,7 @@ declare global {
    */
   interface Window {
     __API_URL__?: string;
+    __EMAIL_API_URL__?: string;
     __BACKUP_API_URL__?: string;
     __DOMAIN_INFO_API_URL__?: string;
     __BACKUP_DOMAIN_INFO_API_URL__?: string;

@@ -37,6 +37,8 @@ export default {
     school: {
       principal: "School Administrator",
       address: "Address",
+      description: "Description",
+      classList: "Class List",
     },
     class: {
       title: "Class Management",
@@ -51,6 +53,25 @@ export default {
         namePlaceholder: "Please enter class name",
         image: "Class Image",
       },
+      messages: {
+        createConfirm: "Are you sure you want to create a new class?",
+        createSuccess: "Class created successfully",
+        createFailed: "Failed to create class",
+        updateSuccess: "Class updated successfully",
+        updateFailed: "Failed to update class",
+        deleteFailed: "Failed to delete class",
+        removeTeacherConfirm: "Are you sure you want to remove this teacher?",
+        removeTeacherSuccess: "Teacher removed successfully",
+        removeTeacherFailed: "Failed to remove teacher",
+        removeStudentConfirm: "Are you sure you want to remove this student?",
+        removeStudentSuccess: "Student removed successfully",
+        removeStudentFailed: "Failed to remove student",
+        selectSchoolFirst:
+          "Please select a school first before creating a class",
+        assignTeacherSuccess: "Teacher assigned successfully",
+        assignStudentSuccess: "Student assigned successfully",
+        teacherAlreadyInClass: "This teacher is already in this class",
+      },
       validation: {
         nameRequired: "Please enter class name",
       },
@@ -58,6 +79,15 @@ export default {
     teacher: {
       subject: "Subject",
       phone: "Phone",
+    },
+    principal: {
+      assign: "Assign School Administrator",
+      selectUser: "Select User",
+      select: "Select",
+      assignSuccess: "School administrator assigned successfully",
+      assignFailed: "Failed to assign school administrator",
+      username: "Username",
+      nickname: "Nickname",
     },
     errors: {
       addFailed: "Failed to add",
@@ -67,10 +97,19 @@ export default {
       alreadyInClass: "This member is already in the class",
       validationFailed: "Form validation failed",
     },
+    dialog: {
+      createTitle: "Create School",
+      editTitle: "Edit School",
+    },
     form: {
       namePlaceholder: "Please enter school name",
       cancel: "Cancel",
       submit: "Submit",
+      submitting: "Submitting...",
+    },
+    validation: {
+      nameRequired: "Please enter school name",
+      nameLength: "School name length should be between 2-50 characters",
     },
     messages: {
       addSuccess: "Added successfully",
@@ -78,6 +117,10 @@ export default {
       deleteSuccess: "Deleted successfully",
       createSuccess: "School created successfully",
       updateSuccess: "School updated successfully",
+      updateFailed: "Failed to update school",
+      deleteFailed: "Failed to delete school",
+      clearPrincipalConfirm:
+        "Are you sure you want to clear the school administrator?",
     },
     creator: {
       form: {
@@ -238,6 +281,7 @@ export default {
   navbar: {
     logout: "Logout",
     AccountSetting: "Account Setting",
+    personalCenter: "Home Page",
     helpSupport: "Help & Support",
   },
   sizeSelect: {
@@ -363,6 +407,12 @@ export default {
       message1: "Please enter phototype name",
       message2: "Prompt",
       error1: "Phototype name cannot be empty",
+      error2: "Phototype name length cannot be less than 3 characters",
+      error3: "Phototype name length cannot exceed 20 characters",
+      success: "Phototype name is ",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      info: "Input canceled",
     },
     confirm: {
       message1:

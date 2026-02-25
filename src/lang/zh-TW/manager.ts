@@ -35,6 +35,8 @@ export default {
     school: {
       principal: "學校管理員",
       address: "地址",
+      description: "描述",
+      classList: "班級列表",
     },
     class: {
       title: "班級管理",
@@ -49,6 +51,15 @@ export default {
         namePlaceholder: "請輸入班級名稱",
         image: "班級圖片",
       },
+      messages: {
+        createConfirm: "確認創建新班級嗎？",
+        createSuccess: "班級創建成功",
+        createFailed: "班級創建失敗",
+        updateSuccess: "班級更新成功",
+        updateFailed: "班級更新失敗",
+        selectSchoolFirst: "請先選擇學校，再創建班級",
+        teacherAlreadyInClass: "該教師已在此班級中",
+      },
       validation: {
         nameRequired: "請輸入班級名稱",
       },
@@ -56,6 +67,15 @@ export default {
     teacher: {
       subject: "科目",
       phone: "電話",
+    },
+    principal: {
+      assign: "分配學校管理員",
+      selectUser: "選擇用戶",
+      select: "選擇",
+      assignSuccess: "學校管理員分配成功",
+      assignFailed: "學校管理員分配失敗",
+      username: "用戶名",
+      nickname: "暱稱",
     },
     errors: {
       addFailed: "添加失敗",
@@ -65,10 +85,19 @@ export default {
       alreadyInClass: "該成員已在該班級中",
       validationFailed: "表單驗證失敗",
     },
+    dialog: {
+      createTitle: "創建學校",
+      editTitle: "編輯學校",
+    },
     form: {
       namePlaceholder: "請輸入學校名稱",
       cancel: "取消",
       submit: "提交",
+      submitting: "提交中...",
+    },
+    validation: {
+      nameRequired: "請輸入學校名稱",
+      nameLength: "學校名稱長度應在2-50個字符之間",
     },
     messages: {
       addSuccess: "添加成功",
@@ -76,6 +105,9 @@ export default {
       deleteSuccess: "刪除成功",
       createSuccess: "學校創建成功",
       updateSuccess: "學校更新成功",
+      updateFailed: "學校更新失敗",
+      deleteFailed: "學校刪除失敗",
+      clearPrincipalConfirm: "確認要清空學校管理員嗎？",
     },
     creator: {
       form: {
@@ -232,6 +264,7 @@ export default {
   navbar: {
     logout: "註銷登出",
     AccountSetting: "賬號設置",
+    personalCenter: "個人中心",
     helpSupport: "幫助支持",
   },
   sizeSelect: {
@@ -353,6 +386,12 @@ export default {
       message1: "請輸入原型名稱",
       message2: "提示",
       error1: "原型名稱不能為空",
+      error2: "原型名稱長度不能少於3個字符",
+      error3: "原型名稱長度不能超過20個字符",
+      success: "原型名稱是",
+      confirm: "確認",
+      cancel: "取消",
+      info: "取消輸入",
     },
     confirm: {
       message1: "此操作將永久刪除該文件, 是否繼續?",

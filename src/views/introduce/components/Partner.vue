@@ -62,7 +62,7 @@ const partners: Partner[] = [
   {
     id: 3,
     name: "中国联通",
-    logo: "http://iservice.10010.com/wt_manage/uploadImg/1730297793913.png",
+    logo: "https://iservice.10010.com/wt_manage/uploadImg/1730297793913.png",
   },
 ];
 

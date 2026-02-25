@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import env from "@/environment";
 
 // Mock request module before importing the email API
 vi.mock("@/utils/request", () => ({
@@ -9,9 +10,11 @@ describe("Email API", () => {
   let sendVerificationCode: any;
   let verifyEmailCode: any;
   let request: any;
+  let emailApiBase: string;
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    emailApiBase = env.email_api;
 
     // Import after mocking
     request = (await import("@/utils/request")).default;
@@ -34,6 +37,7 @@ describe("Email API", () => {
       const result = await sendVerificationCode("test@example.com");
 
       expect(request).toHaveBeenCalledWith({
+        baseURL: emailApiBase,
         url: "/v1/email/send-verification",
         method: "post",
         data: { email: "test@example.com" },
@@ -87,9 +91,13 @@ describe("Email API", () => {
 
       request.mockResolvedValue(mockResponse);
 
-      const result = await verifyEmailCode("test@example.com", "123456");
+      const result = await verifyEmailCode({
+        email: "test@example.com",
+        code: "123456",
+      });
 
       expect(request).toHaveBeenCalledWith({
+        baseURL: emailApiBase,
         url: "/v1/email/verify",
         method: "post",
         data: { email: "test@example.com", code: "123456" },
@@ -108,7 +116,10 @@ describe("Email API", () => {
 
       request.mockResolvedValue(mockResponse);
 
-      await verifyEmailCode("user@domain.com", "654321");
+      await verifyEmailCode({
+        email: "user@domain.com",
+        code: "654321",
+      });
 
       const callArgs = request.mock.calls[0][0];
       expect(callArgs.data).toHaveProperty("email");
@@ -127,7 +138,10 @@ describe("Email API", () => {
 
       request.mockResolvedValue(mockResponse);
 
-      const result = await verifyEmailCode("test@example.com", "123456");
+      const result = await verifyEmailCode({
+        email: "test@example.com",
+        code: "123456",
+      });
 
       expect(result.success).toBe(true);
       expect(result.message).toBe("邮箱验证成功");

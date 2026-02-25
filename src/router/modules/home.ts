@@ -74,6 +74,16 @@ export const settingsRoutes: RouteRecordRaw = {
     },
     {
       meta: {
+        title: "settings.accountSetting",
+        hidden: true,
+        private: true,
+      },
+      path: "/settings/email",
+      name: "SettingsEmail",
+      component: () => import("@/views/settings/email.vue"),
+    },
+    {
+      meta: {
         title: "settings.userPresentation",
         hidden: true,
         private: true,

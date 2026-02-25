@@ -389,6 +389,7 @@ export default {
     selectedFiles: "選択された {count} 個のファイル",
     clearFiles: "すべてのファイルをクリア",
     effectType: "エフェクトタイプ",
+    ready: "アップロード準備完了...",
     item1: {
       title: "事前処理",
       failed: "md5の計算に失敗しました",

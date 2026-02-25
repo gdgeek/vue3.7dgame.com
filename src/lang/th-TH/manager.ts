@@ -36,6 +36,8 @@ export default {
     school: {
       principal: "ผู้ดูแลโรงเรียน",
       address: "ที่อยู่",
+      description: "คำอธิบาย",
+      classList: "รายชื่อชั้นเรียน",
     },
     class: {
       title: "การจัดการชั้นเรียน",
@@ -50,6 +52,15 @@ export default {
         namePlaceholder: "กรุณากรอกชื่อชั้นเรียน",
         image: "รูปภาพชั้นเรียน",
       },
+      messages: {
+        createConfirm: "ยืนยันการสร้างชั้นเรียนใหม่?",
+        createSuccess: "สร้างชั้นเรียนสำเร็จ",
+        createFailed: "การสร้างชั้นเรียนล้มเหลว",
+        updateSuccess: "อัปเดตชั้นเรียนสำเร็จ",
+        updateFailed: "การอัปเดตชั้นเรียนล้มเหลว",
+        selectSchoolFirst: "กรุณาเลือกโรงเรียนก่อนสร้างชั้นเรียน",
+        teacherAlreadyInClass: "ครูคนนี้อยู่ในชั้นเรียนนี้แล้ว",
+      },
       validation: {
         nameRequired: "กรุณากรอกชื่อชั้นเรียน",
       },
@@ -57,6 +68,15 @@ export default {
     teacher: {
       subject: "วิชา",
       phone: "โทรศัพท์",
+    },
+    principal: {
+      assign: "มอบหมายผู้ดูแลโรงเรียน",
+      selectUser: "เลือกผู้ใช้",
+      select: "เลือก",
+      assignSuccess: "มอบหมายผู้ดูแลโรงเรียนสำเร็จ",
+      assignFailed: "การมอบหมายผู้ดูแลโรงเรียนล้มเหลว",
+      username: "ชื่อผู้ใช้",
+      nickname: "ชื่อเล่น",
     },
     errors: {
       addFailed: "เพิ่มไม่สำเร็จ",
@@ -66,10 +86,19 @@ export default {
       alreadyInClass: "สมาชิกนี้อยู่ในชั้นเรียนนี้แล้ว",
       validationFailed: "การตรวจสอบแบบฟอร์มล้มเหลว",
     },
+    dialog: {
+      createTitle: "สร้างโรงเรียน",
+      editTitle: "แก้ไขโรงเรียน",
+    },
     form: {
       namePlaceholder: "กรุณากรอกชื่อโรงเรียน",
       cancel: "ยกเลิก",
       submit: "ส่ง",
+      submitting: "กำลังส่ง...",
+    },
+    validation: {
+      nameRequired: "กรุณากรอกชื่อโรงเรียน",
+      nameLength: "ความยาวชื่อโรงเรียนควรอยู่ระหว่าง 2-50 ตัวอักษร",
     },
     messages: {
       addSuccess: "เพิ่มสำเร็จ",
@@ -77,6 +106,9 @@ export default {
       deleteSuccess: "ลบสำเร็จ",
       createSuccess: "สร้างโรงเรียนสำเร็จ",
       updateSuccess: "อัปเดตโรงเรียนสำเร็จ",
+      updateFailed: "การอัปเดตโรงเรียนล้มเหลว",
+      deleteFailed: "การลบโรงเรียนล้มเหลว",
+      clearPrincipalConfirm: "คุณแน่ใจหรือไม่ว่าต้องการล้างผู้ดูแลโรงเรียน?",
     },
     creator: {
       form: {
@@ -237,6 +269,7 @@ export default {
   navbar: {
     logout: "ออกจากระบบ",
     AccountSetting: "ตั้งค่าบัญชี",
+    personalCenter: "ศูนย์ส่วนบุคคล",
     helpSupport: "ช่วยเหลือและสนับสนุน",
   },
   sizeSelect: {
@@ -362,6 +395,12 @@ export default {
       message1: "กรุณาใส่ชื่อต้นแบบ",
       message2: "แจ้งเตือน",
       error1: "ชื่อต้นแบบต้องไม่ว่างเปล่า",
+      error2: "ความยาวชื่อต้นแบบต้องไม่น้อยกว่า 3 ตัวอักษร",
+      error3: "ความยาวชื่อต้นแบบต้องไม่เกิน 20 ตัวอักษร",
+      success: "ชื่อต้นแบบคือ ",
+      confirm: "ยืนยัน",
+      cancel: "ยกเลิก",
+      info: "ยกเลิกการป้อนข้อมูล",
     },
     confirm: {
       message1: "การดำเนินการนี้จะลบไฟล์อย่างถาวร ต้องการดำเนินการต่อหรือไม่?",

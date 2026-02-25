@@ -77,13 +77,13 @@ pnpm run replace-console  # 批量替换 console
 
 **原配置**：
 ```bash
-VITE_APP_API_URL = "{scheme}//{domain}:81"
+VITE_APP_API_URL = "{scheme}//{domain}:8081"
 ```
 
 **新配置**：
 ```bash
 # 本地开发
-VITE_APP_API_URL="http://localhost:81"
+VITE_APP_API_URL="http://localhost:8081"
 
 # 线上 API（注释状态，需要时取消注释）
 # VITE_APP_API_URL="https://api.bupingfan.com"

@@ -141,6 +141,13 @@ export default {
       bind: "ผูก",
       rebind: "ผูกใหม่",
       label2: "รหัสผ่านบัญชี",
+      securityEmailTitle: "ความปลอดภัยอีเมล",
+      securityEmailBoundHint:
+        "อีเมลปัจจุบันผูกแล้ว สามารถเปลี่ยนหรือยกเลิกการผูกได้",
+      securityEmailUnboundHint: "ยังไม่ได้ผูกอีเมล กรุณาผูกอีเมลก่อน",
+      securityPasswordTitle: "ความปลอดภัยรหัสผ่าน",
+      securityPasswordHint:
+        "เปลี่ยนหรือกู้คืนรหัสผ่านเพื่อเพิ่มความปลอดภัยบัญชี",
       change: "แก้ไขรหัสผ่าน",
       recover: "กู้คืนรหัสผ่าน",
       label3: "รหัสผ่านเก่า",

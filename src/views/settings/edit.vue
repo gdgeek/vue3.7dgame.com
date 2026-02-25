@@ -72,20 +72,12 @@
 
               <!-- 头像上传 -->
               <el-form-item :label="$t('homepage.edit.avatar')">
-                <el-upload
-                  class="avatar-uploader"
-                  action=""
-                  :auto-upload="false"
-                  :show-file-list="false"
-                  :on-change="handleChangeUpload"
-                  accept="image/jpeg,image/gif,image/png,image/bmp"
-                  style="float: left"
-                >
-                  <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-                  <div v-else class="avatar-uploader-icon">
-                    <font-awesome-icon icon="plus"></font-awesome-icon>
-                  </div>
-                </el-upload>
+                <ImageSelector
+                  :image-url="imageUrl"
+                  :enable-crop="true"
+                  @image-selected="handleAvatarImageUpdate"
+                  @image-upload-success="handleAvatarImageUpdate"
+                ></ImageSelector>
                 <div style="float: left">
                   <p class="user-explain">
                     {{ $t("homepage.edit.avatarStatement") }}
@@ -113,7 +105,7 @@
             :md="14"
             :lg="12"
             :xl="10"
-            class="section-margin-left box-margin-bottom"
+            class="box-margin-bottom"
           >
             <el-form
               ref="ruleFormRef"
@@ -201,12 +193,10 @@
 
         <el-divider></el-divider>
 
-        <!-- 邮箱验证部分 -->
+        <!-- 账号安全部分 -->
         <div class="box-title box-margin-bottom">
-          <h3 class="font-color">
-            {{ $t("homepage.edit.emailVerification") }}
-          </h3>
-          <small>{{ $t("homepage.edit.emailVerificationStatement") }}</small>
+          <h3 class="font-color">{{ $t("breadcrumb.accountSecurity") }}</h3>
+          <small>{{ $t("homepage.account.titleStatement") }}</small>
         </div>
 
         <el-row :gutter="24">
@@ -218,144 +208,253 @@
             :xl="10"
             class="section-margin-left box-margin-bottom"
           >
-            <el-form
-              ref="emailFormRef"
-              :model="emailForm"
-              :rules="emailRules"
-              label-width="auto"
-            >
-              <!-- 邮箱输入 -->
-              <el-form-item :label="$t('homepage.edit.email')" prop="email">
-                <el-input
-                  v-model="emailForm.email"
-                  type="email"
-                  :placeholder="$t('homepage.edit.emailPlaceholder')"
-                  :disabled="emailLoading"
-                ></el-input>
-              </el-form-item>
-
-              <!-- 验证码输入 -->
-              <el-form-item
-                :label="$t('homepage.edit.verificationCode')"
-                prop="code"
-              >
-                <div style="display: flex; gap: 10px">
-                  <el-input
-                    v-model="emailForm.code"
-                    :placeholder="$t('homepage.edit.codePlaceholder')"
-                    maxlength="6"
-                    :disabled="emailLoading || isLocked"
-                    @input="handleCodeInput"
-                  ></el-input>
-                  <el-button
-                    type="primary"
-                    :disabled="!canSendCode || !emailForm.email"
-                    :loading="emailLoading"
-                    @click="handleSendCode"
-                  >
-                    {{ sendCodeButtonText }}
+            <div class="security-action-card">
+              <div class="security-main">
+                <p class="security-title">
+                  {{ $t("homepage.account.securityEmailTitle") }}
+                </p>
+                <p class="security-subtitle">
+                  {{
+                    emailBound
+                      ? $t("homepage.account.securityEmailBoundHint")
+                      : $t("homepage.account.securityEmailUnboundHint")
+                  }}
+                </p>
+                <el-tag v-if="emailBound" type="success" class="email-pill">
+                  {{ currentBoundEmail }}
+                </el-tag>
+              </div>
+              <div class="security-actions">
+                <template v-if="emailBound">
+                  <el-button type="primary" @click="openEmailDialog('change')">
+                    改绑邮箱
                   </el-button>
-                </div>
-              </el-form-item>
-
-              <!-- 锁定提示 -->
-              <el-alert
-                v-if="isLocked"
-                type="warning"
-                :closable="false"
-                show-icon
-                style="margin-bottom: 20px"
-              >
-                {{ $t("homepage.edit.accountLocked", { time: lockTime }) }}
-              </el-alert>
-
-              <!-- 验证按钮 -->
-              <el-form-item>
-                <el-button
-                  type="success"
-                  :disabled="!canVerify || !emailForm.email || !emailForm.code"
-                  :loading="emailLoading"
-                  @click="handleVerify"
-                >
-                  {{ $t("homepage.edit.verifyEmail") }}
+                  <el-button
+                    type="danger"
+                    plain
+                    @click="openEmailDialog('unbind')"
+                  >
+                    解绑邮箱
+                  </el-button>
+                </template>
+                <template v-else>
+                  <el-button type="primary" @click="openEmailDialog('bind')">
+                    绑定邮箱
+                  </el-button>
+                </template>
+              </div>
+            </div>
+          </el-col>
+          <el-col
+            :xs="23"
+            :sm="16"
+            :md="14"
+            :lg="12"
+            :xl="10"
+            class="section-margin-left box-margin-bottom"
+          >
+            <div class="security-action-card">
+              <div class="security-main">
+                <p class="security-title">
+                  {{ $t("homepage.account.securityPasswordTitle") }}
+                </p>
+                <p class="security-subtitle">
+                  {{ $t("homepage.account.securityPasswordHint") }}
+                </p>
+              </div>
+              <div class="security-actions">
+                <el-button type="primary" @click="openPasswordDialog">
+                  {{ $t("homepage.account.change") }}
                 </el-button>
-              </el-form-item>
-            </el-form>
+                <el-button type="primary" @click="openRecoverDialog">
+                  {{ $t("homepage.account.recover") }}
+                </el-button>
+              </div>
+            </div>
           </el-col>
         </el-row>
 
-        <!-- 图片裁剪对话框 -->
-        <el-dialog v-model="dialogVisible" class="crop-dialog" append-to-body>
+        <el-dialog
+          v-model="dialogEmailVisible"
+          :close-on-click-modal="false"
+          destroy-on-close
+          style="min-width: 560px"
+          @closed="refreshEmailStatusSummary"
+        >
           <template #header>
-            {{ $t("homepage.edit.avatarCropping.title") }}
+            {{ $t("homepage.edit.emailVerification") }}
           </template>
-          <div class="cropper-content">
-            <div class="cropper" style="text-align: center">
-              <VueCropper
-                ref="cropperRef"
-                :img="option.img"
-                :output-type="option.outputType"
-                :info="true"
-                :full="option.full"
-                :can-move-box="option.canMoveBox"
-                :original="option.original"
-                :auto-crop="option.autoCrop"
-                :fixed="option.fixed"
-                :fixed-number="option.fixedNumber"
-                :center-box="option.centerBox"
-                :info-true="option.infoTrue"
-                :fixed-box="option.fixedBox"
-                :auto-crop-width="option.autoCropWidth"
-                :auto-crop-height="option.autoCropHeight"
-              >
-              </VueCropper>
-            </div>
-          </div>
+          <EmailVerificationPanel
+            :initial-action="emailDialogAction"
+          ></EmailVerificationPanel>
+        </el-dialog>
+
+        <el-dialog
+          v-model="dialogPasswordVisible"
+          :close-on-click-modal="false"
+          style="min-width: 560px"
+          @close="resetPasswordForm"
+        >
+          <template #header> {{ $t("homepage.account.change") }} </template>
+          <el-form
+            ref="passwordFormRef"
+            :model="passwordForm"
+            :rules="passwordRules"
+            label-width="auto"
+          >
+            <el-row :gutter="24">
+              <el-col :xs="20" :sm="20" :md="14" :lg="14" :xl="14" :offset="4">
+                <el-form-item
+                  :label="$t('homepage.account.label3')"
+                  prop="oldPassword"
+                  style="margin-bottom: 26px"
+                >
+                  <el-input
+                    v-model="passwordForm.oldPassword"
+                    type="password"
+                    autocomplete="off"
+                  ></el-input>
+                </el-form-item>
+
+                <el-form-item
+                  :label="$t('homepage.account.label4')"
+                  prop="password"
+                  style="margin-bottom: 26px"
+                >
+                  <el-input
+                    v-model="passwordForm.password"
+                    type="password"
+                    autocomplete="off"
+                    show-password
+                  ></el-input>
+                  <PasswordStrength
+                    :password="passwordForm.password ?? ''"
+                  ></PasswordStrength>
+                </el-form-item>
+
+                <el-form-item
+                  :label="$t('homepage.account.label5')"
+                  prop="checkPassword"
+                  style="margin-bottom: 26px"
+                >
+                  <el-input
+                    v-model="passwordForm.checkPassword"
+                    type="password"
+                    autocomplete="off"
+                    show-password
+                  ></el-input>
+                </el-form-item>
+
+                <el-form-item>
+                  <el-button
+                    style="width: 100%"
+                    type="primary"
+                    :loading="passwordSubmitting"
+                    @click="submitPasswordChange"
+                  >
+                    {{ $t("homepage.account.confirm") }}
+                  </el-button>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-dialog>
+
+        <el-dialog
+          v-model="dialogRecoverVisible"
+          :close-on-click-modal="false"
+          style="min-width: 560px"
+          @close="resetRecoverForm"
+        >
+          <template #header> {{ $t("homepage.account.recover") }} </template>
+          <p class="recover-tip">{{ $t("login.forgotTipBoundEmail") }}</p>
+          <el-form
+            ref="recoverFormRef"
+            :model="recoverForm"
+            :rules="recoverRules"
+            label-width="auto"
+          >
+            <el-row :gutter="24">
+              <el-col :xs="20" :sm="20" :md="14" :lg="14" :xl="14" :offset="4">
+                <el-form-item
+                  :label="$t('homepage.account.label1')"
+                  prop="email"
+                >
+                  <el-input
+                    v-model="recoverForm.email"
+                    type="email"
+                    :placeholder="$t('homepage.account.rules1.message2')"
+                  >
+                    <template #append>
+                      <el-button
+                        :loading="recoverSending"
+                        @click="handleRecoverSendEmail"
+                      >
+                        {{ $t("login.sendResetEmail") }}
+                      </el-button>
+                    </template>
+                  </el-input>
+                </el-form-item>
+
+                <el-form-item :label="$t('login.forgotTokenLabel')" prop="code">
+                  <el-input
+                    v-model="recoverForm.code"
+                    :placeholder="$t('login.forgotTokenPlaceholder')"
+                  >
+                    <template #append>
+                      <el-button
+                        :loading="recoverVerifying"
+                        @click="handleRecoverVerifyCode"
+                      >
+                        {{ $t("login.verifyResetToken") }}
+                      </el-button>
+                    </template>
+                  </el-input>
+                </el-form-item>
+
+                <template v-if="recoverCodeVerified">
+                  <el-form-item
+                    :label="$t('homepage.account.label4')"
+                    prop="password"
+                  >
+                    <el-input
+                      v-model="recoverForm.password"
+                      type="password"
+                      autocomplete="off"
+                      show-password
+                    ></el-input>
+                    <PasswordStrength
+                      :password="recoverForm.password ?? ''"
+                    ></PasswordStrength>
+                  </el-form-item>
+
+                  <el-form-item
+                    :label="$t('homepage.account.label5')"
+                    prop="checkPassword"
+                  >
+                    <el-input
+                      v-model="recoverForm.checkPassword"
+                      type="password"
+                      autocomplete="off"
+                      show-password
+                    ></el-input>
+                  </el-form-item>
+                </template>
+              </el-col>
+            </el-row>
+          </el-form>
           <template #footer>
-            <div class="dialog-footer">
-              <el-button-group style="float: left">
-                <el-button
-                  size="small"
-                  type="primary"
-                  plain
-                  @click="rotateLeftHandle"
-                >
-                  {{ $t("homepage.edit.avatarCropping.leftRotation") }}
-                </el-button>
-                <el-button
-                  size="small"
-                  type="primary"
-                  plain
-                  @click="rotateRightHandle"
-                >
-                  {{ $t("homepage.edit.avatarCropping.rightRotation") }}
-                </el-button>
-                <el-button
-                  size="small"
-                  type="primary"
-                  plain
-                  @click="changeScaleHandle(1)"
-                >
-                  {{ $t("homepage.edit.avatarCropping.enlarge") }}
-                </el-button>
-                <el-button
-                  size="small"
-                  type="primary"
-                  plain
-                  @click="changeScaleHandle(-1)"
-                >
-                  {{ $t("homepage.edit.avatarCropping.shrink") }}
-                </el-button>
-              </el-button-group>
-              <el-button-group>
-                <el-button size="small" @click="dialogVisible = false">
-                  {{ $t("homepage.edit.avatarCropping.cancel") }}
-                </el-button>
-                <el-button size="small" type="primary" @click="finish">
-                  {{ $t("homepage.edit.avatarCropping.confirm") }}
-                </el-button>
-              </el-button-group>
-            </div>
+            <el-button @click="dialogRecoverVisible = false">
+              {{ $t("login.cancel") }}
+            </el-button>
+            <el-button
+              type="primary"
+              :disabled="!recoverCodeVerified"
+              :loading="recoverResetting"
+              @click="handleRecoverResetPassword"
+            >
+              {{ $t("login.resetPassword") }}
+            </el-button>
           </template>
         </el-dialog>
       </el-card>
@@ -364,45 +463,48 @@
 </template>
 
 <script setup lang="ts">
-import { logger } from "@/utils/logger";
 import { useUserStore } from "@/store/modules/user";
-import { useFileStore } from "@/store/modules/config";
-import { postFile } from "@/api/v1/files";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { ElMessage, FormInstance, FormRules } from "element-plus";
-import "vue-cropper/dist/index.css";
-import { VueCropper } from "vue-cropper";
-import type { FileHandler } from "@/assets/js/file/server";
 import { FormItemRule } from "element-plus";
-import type { UploadFile, UploadFiles } from "element-plus";
-import { _InfoType, UploadFileType } from "@/api/user/model";
-import { useEmailVerification } from "@/composables/useEmailVerification";
+import { _InfoType } from "@/api/user/model";
+import { getEmailStatus } from "@/api/v1/email";
+import {
+  changePassword,
+  requestPasswordReset,
+  verifyResetCode,
+  resetPasswordByCode,
+  type PasswordApiResponse,
+} from "@/api/v1/password";
+import { createPasswordFormRules } from "@/utils/password-validator";
+import PasswordStrength from "@/components/PasswordStrength/index.vue";
+import { useRouter } from "vue-router";
+import EmailVerificationPanel from "@/components/Account/EmailVerificationPanel.vue";
+import ImageSelector from "@/components/MrPP/ImageSelector.vue";
 
 // 初始化store和ref
 const userStore = useUserStore();
-const fileStore = useFileStore();
+const router = useRouter();
 const ruleFormRef = ref<FormInstance>();
 const nickNameFormRef = ref<FormInstance>();
-const emailFormRef = ref<FormInstance>();
 const { t } = useI18n();
 const isDisable = ref(false);
 const isLoading = ref(true);
-const dialogVisible = ref(false);
-const cropperRef = ref<InstanceType<typeof VueCropper> | null>(null);
-
-// 初始化邮箱验证Composable
-const {
-  loading: emailLoading,
-  error: emailError,
-  countdown,
-  isLocked,
-  lockTime,
-  canSendCode,
-  canVerify,
-  sendCode,
-  verifyCode,
-  cleanup: cleanupEmailVerification,
-} = useEmailVerification();
+const dialogEmailVisible = ref(false);
+const emailDialogAction = ref<"default" | "bind" | "change" | "unbind">(
+  "default"
+);
+const emailBound = ref(false);
+const currentBoundEmail = ref("");
+const dialogPasswordVisible = ref(false);
+const dialogRecoverVisible = ref(false);
+const passwordSubmitting = ref(false);
+const recoverSending = ref(false);
+const recoverVerifying = ref(false);
+const recoverResetting = ref(false);
+const recoverCodeVerified = ref(false);
+const passwordFormRef = ref<FormInstance>();
+const recoverFormRef = ref<FormInstance>();
 
 // 计算用户头像URL
 const imageUrl = computed(() => {
@@ -462,45 +564,6 @@ const infoForm = ref<_InfoType>({
   textarea: "",
 });
 
-// 邮箱验证表单
-type EmailFormType = {
-  email: string;
-  code: string;
-};
-
-const emailForm = ref<EmailFormType>({
-  email: "",
-  code: "",
-});
-
-// 邮箱验证规则
-const emailRules = ref<FormRules<EmailFormType>>({
-  email: [
-    {
-      required: true,
-      message: t("homepage.edit.rules.email.required"),
-      trigger: "blur",
-    },
-    {
-      type: "email",
-      message: t("homepage.edit.rules.email.invalid"),
-      trigger: "blur",
-    },
-  ],
-  code: [
-    {
-      required: true,
-      message: t("homepage.edit.rules.code.required"),
-      trigger: "blur",
-    },
-    {
-      pattern: /^\d{6}$/,
-      message: t("homepage.edit.rules.code.invalid"),
-      trigger: "blur",
-    },
-  ],
-});
-
 // 基本信息验证规则
 const infoRules = ref<FormRules<_InfoType>>({
   industry: [
@@ -530,6 +593,150 @@ const infoRules = ref<FormRules<_InfoType>>({
     },
   ],
 });
+
+const passwordForm = ref({
+  oldPassword: null as string | null,
+  password: null as string | null,
+  checkPassword: null as string | null,
+});
+
+const passwordRules = computed(() => ({
+  oldPassword: [
+    {
+      required: true,
+      message: t("homepage.account.rules2.old.message1"),
+      trigger: "blur",
+    },
+    {
+      min: 6,
+      message: t("homepage.account.rules2.old.message2"),
+      trigger: "blur",
+    },
+    {
+      validator: (
+        _rule: unknown,
+        value: string,
+        callback: (error?: Error) => void
+      ) => {
+        if (value === "") {
+          callback(new Error(t("homepage.account.rules2.old.error1")));
+        } else if (value === passwordForm.value.password) {
+          callback(new Error(t("homepage.account.rules2.old.error2")));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+  password: [
+    ...createPasswordFormRules(t),
+    {
+      validator: (
+        _rule: unknown,
+        value: string,
+        callback: (error?: Error) => void
+      ) => {
+        if (!value) {
+          callback();
+          return;
+        }
+        if (value === passwordForm.value.oldPassword) {
+          callback(new Error(t("homepage.account.rules2.new.error2")));
+        } else {
+          if (passwordForm.value.checkPassword !== "") {
+            passwordFormRef.value?.validateField("checkPassword");
+          }
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+  checkPassword: [
+    {
+      required: true,
+      message: t("homepage.account.rules2.check.message1"),
+      trigger: "blur",
+    },
+    {
+      validator: (
+        _rule: unknown,
+        value: string,
+        callback: (error?: Error) => void
+      ) => {
+        if (value === "") {
+          callback(new Error(t("homepage.account.rules2.check.error1")));
+        } else if (value !== passwordForm.value.password) {
+          callback(new Error(t("homepage.account.rules2.check.error2")));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+}));
+
+const recoverForm = ref({
+  email: "",
+  code: "",
+  password: "",
+  checkPassword: "",
+});
+
+const recoverRules = computed(() => ({
+  email: [
+    {
+      required: true,
+      message: t("homepage.account.rules1.message1"),
+      trigger: "blur",
+    },
+    {
+      type: "email" as const,
+      message: t("homepage.account.rules1.message2"),
+      trigger: ["blur", "change"],
+    },
+  ],
+  code: [
+    {
+      required: true,
+      message: t("login.forgotTokenRequired"),
+      trigger: "blur",
+    },
+    {
+      pattern: /^\d{6}$/,
+      message: t("homepage.edit.rules.code.invalid"),
+      trigger: "blur",
+    },
+  ],
+  password: [...createPasswordFormRules(t)],
+  checkPassword: [
+    {
+      required: true,
+      message: t("homepage.account.rules2.check.message1"),
+      trigger: "blur",
+    },
+    {
+      validator: (
+        _rule: unknown,
+        value: string,
+        callback: (error?: Error) => void
+      ) => {
+        if (!value) {
+          callback(new Error(t("homepage.account.rules2.check.error1")));
+          return;
+        }
+        if (value !== recoverForm.value.password) {
+          callback(new Error(t("homepage.account.rules2.check.error2")));
+          return;
+        }
+        callback();
+      },
+      trigger: "blur",
+    },
+  ],
+}));
 
 // 行业选项
 const industryOptions = computed(() => {
@@ -563,45 +770,6 @@ const industryOptions = computed(() => {
       value: t("homepage.edit.rules.industry.label7"),
     },
   ];
-});
-
-// 图片裁剪选项配置
-type optionType = {
-  img: string | ArrayBuffer | null;
-  info: true;
-  outputSize: number;
-  outputType: "jpeg";
-  canScale: boolean;
-  autoCrop: boolean;
-  autoCropWidth: number;
-  autoCropHeight: number;
-  fixedBox: boolean;
-  fixed: boolean;
-  fixedNumber: Array<number>;
-  full: boolean;
-  canMoveBox: boolean;
-  original: boolean;
-  centerBox: boolean;
-  infoTrue: boolean;
-};
-
-const option = ref<optionType>({
-  img: "", // 裁剪图片的地址
-  info: true, // 裁剪框的大小信息
-  outputSize: 1, // 裁剪生成图片的质量
-  outputType: "jpeg", // 裁剪生成图片的格式
-  canScale: true, // 图片是否允许滚轮缩放
-  autoCrop: true, // 是否默认生成截图框
-  canMoveBox: true, // 截图框能否拖动
-  autoCropWidth: 300, // 默认生成截图框宽度
-  autoCropHeight: 300, // 默认生成截图框高度
-  fixedBox: false, // 固定截图框大小 不允许改变
-  fixed: true, // 是否开启截图框宽高固定比例
-  fixedNumber: [1, 1], // 截图框的宽高比例
-  full: false, // 是否输出原图比例的截图
-  original: false, // 上传图片按照原始比例渲染
-  centerBox: true, // 截图框是否被限制在图片里面
-  infoTrue: true, // true 为展示真实输出图片宽高 false 展示看到的截图框宽高
 });
 
 // 更新用户昵称
@@ -648,187 +816,234 @@ const saveInfo = () => {
   });
 };
 
-// 处理图片上传并打开裁剪对话框
-const handleChangeUpload = async (file: UploadFile, _fileList: UploadFiles) => {
-  const selectedFile = file.raw;
-  if (selectedFile) {
-    // 验证图片格式和大小
-    const isJPG = [
-      "image/jpeg",
-      "image/png",
-      "image/bmp",
-      "image/gif",
-    ].includes(selectedFile.type);
-    const isLt2M = selectedFile.size / 1024 / 1024 < 2;
+const resetPasswordForm = () => {
+  passwordForm.value.oldPassword = null;
+  passwordForm.value.password = null;
+  passwordForm.value.checkPassword = null;
+  passwordFormRef.value?.clearValidate();
+};
 
-    if (!isJPG) {
-      ElMessage.error(t("homepage.edit.avatarCropping.error1"));
+const openPasswordDialog = () => {
+  checkCurrentEmailVerified().then((verified) => {
+    if (!verified) {
+      ElMessage.warning("邮箱未验证，请先完成邮箱验证后再修改密码");
       return;
     }
-    if (!isLt2M) {
-      ElMessage.error(t("homepage.edit.avatarCropping.error2"));
+    dialogPasswordVisible.value = true;
+  });
+};
+
+const openEmailDialog = (
+  action: "default" | "bind" | "change" | "unbind" = "default"
+) => {
+  emailDialogAction.value = action;
+  dialogEmailVisible.value = true;
+};
+
+const refreshEmailStatusSummary = async () => {
+  try {
+    const status = await getEmailStatus();
+    if (!status.success || !status.data) {
+      emailBound.value = false;
+      currentBoundEmail.value = "";
       return;
     }
 
-    // 上传成功后将图片地址赋值给裁剪框显示图片
-    await nextTick();
-    const res = URL.createObjectURL(selectedFile);
-    option.value.img = res;
-    dialogVisible.value = true;
-  } else {
-    ElMessage.error(t("homepage.edit.avatarCropping.error3"));
+    emailBound.value = Boolean(status.data.email);
+    currentBoundEmail.value = status.data.email || "";
+  } catch (_error) {
+    emailBound.value = false;
+    currentBoundEmail.value = "";
   }
 };
 
-// 裁剪框操作方法
-const rotateLeftHandle = () => cropperRef.value?.rotateLeft();
-const rotateRightHandle = () => cropperRef.value?.rotateRight();
-const changeScaleHandle = (num: number) => {
-  num = num || 1;
-  cropperRef.value?.changeScale(num);
+const submitPasswordChange = () => {
+  passwordFormRef.value?.validate(async (valid: boolean) => {
+    if (!valid) {
+      ElMessage.error(t("homepage.account.validate1.error2"));
+      return;
+    }
+    passwordSubmitting.value = true;
+    try {
+      const verified = await checkCurrentEmailVerified();
+      if (!verified) {
+        ElMessage.error("邮箱未验证，请先完成邮箱验证后再修改密码");
+        return;
+      }
+      const response = await changePassword(
+        passwordForm.value.oldPassword!,
+        passwordForm.value.password!,
+        passwordForm.value.checkPassword!
+      );
+      if (!response.success) {
+        ElMessage.error(
+          response.error?.message || t("homepage.account.validate1.error1")
+        );
+        return;
+      }
+      ElMessage.success(
+        response.message || t("homepage.account.validate1.success")
+      );
+      dialogPasswordVisible.value = false;
+      router.push("/site/logout");
+    } catch (_error) {
+      ElMessage.error(t("homepage.account.validate1.error1"));
+    } finally {
+      passwordSubmitting.value = false;
+    }
+  });
 };
 
-// 保存用户头像
-const saveAvatar = async (
-  md5: string,
-  extension: string,
-  file: File,
-  handler: FileHandler
-) => {
-  extension = extension.startsWith(".") ? extension : `.${extension}`;
-  const data: UploadFileType = {
-    md5,
-    key: md5 + extension,
-    filename: file.name,
-    url: fileStore.store.fileUrl(md5, extension, handler, "backup"),
-  };
+const getApiErrorMessage = (result: PasswordApiResponse, fallback: string) => {
+  return result.error?.message || result.message || fallback;
+};
 
+const checkCurrentEmailVerified = async () => {
+  try {
+    const status = await getEmailStatus();
+    return Boolean(status.success && status.data?.email_verified);
+  } catch (_error) {
+    return false;
+  }
+};
+
+const checkCurrentEmailBound = async () => {
+  try {
+    const status = await getEmailStatus();
+    return Boolean(status.success && status.data?.email);
+  } catch (_error) {
+    return false;
+  }
+};
+
+const resetRecoverForm = () => {
+  recoverCodeVerified.value = false;
+  recoverForm.value.email = "";
+  recoverForm.value.code = "";
+  recoverForm.value.password = "";
+  recoverForm.value.checkPassword = "";
+  recoverFormRef.value?.clearValidate();
+};
+
+const openRecoverDialog = async () => {
+  const isBound = await checkCurrentEmailBound();
+  if (!isBound) {
+    ElMessage.warning("当前账号未绑定邮箱，请先前往邮箱验证页面绑定邮箱");
+    openEmailDialog("bind");
+    return;
+  }
+
+  dialogRecoverVisible.value = true;
+};
+
+const handleRecoverSendEmail = async () => {
+  const valid = await recoverFormRef.value
+    ?.validateField("email")
+    .then(() => true)
+    .catch(() => false);
+  if (!valid) return;
+
+  recoverSending.value = true;
+  try {
+    const result = await requestPasswordReset(recoverForm.value.email);
+    if (!result.success) {
+      ElMessage.error(
+        getApiErrorMessage(result, t("login.requestResetFailedFallback"))
+      );
+      return;
+    }
+    ElMessage.success(result.message || t("login.requestResetSuccess"));
+  } catch (_error) {
+    ElMessage.error(t("login.requestResetFailedFallback"));
+  } finally {
+    recoverSending.value = false;
+  }
+};
+
+const handleRecoverVerifyCode = async () => {
+  const valid = await recoverFormRef.value
+    ?.validateField(["email", "code"])
+    .then(() => true)
+    .catch(() => false);
+  if (!valid) return;
+
+  recoverVerifying.value = true;
+  try {
+    const result = await verifyResetCode(
+      recoverForm.value.email,
+      recoverForm.value.code
+    );
+    if (!result.success || result.valid === false) {
+      recoverCodeVerified.value = false;
+      ElMessage.error(getApiErrorMessage(result, t("login.verifyTokenFailed")));
+      return;
+    }
+    recoverCodeVerified.value = true;
+    ElMessage.success(result.message || t("login.verifyTokenSuccess"));
+  } catch (_error) {
+    recoverCodeVerified.value = false;
+    ElMessage.error(t("login.verifyTokenFailed"));
+  } finally {
+    recoverVerifying.value = false;
+  }
+};
+
+const handleRecoverResetPassword = async () => {
+  if (!recoverCodeVerified.value) {
+    ElMessage.warning(t("login.verifyTokenFirst"));
+    return;
+  }
+  const valid = await recoverFormRef.value
+    ?.validateField(["password", "checkPassword"])
+    .then(() => true)
+    .catch(() => false);
+  if (!valid) return;
+
+  recoverResetting.value = true;
+  try {
+    const result = await resetPasswordByCode(
+      recoverForm.value.email,
+      recoverForm.value.code,
+      recoverForm.value.password
+    );
+    if (!result.success) {
+      ElMessage.error(
+        getApiErrorMessage(result, t("login.resetPasswordFailedFallback"))
+      );
+      return;
+    }
+    ElMessage.success(result.message || t("login.resetPasswordSuccess"));
+    dialogRecoverVisible.value = false;
+  } catch (_error) {
+    ElMessage.error(t("login.resetPasswordFailedFallback"));
+  } finally {
+    recoverResetting.value = false;
+  }
+};
+
+const handleAvatarImageUpdate = async (payload: {
+  imageId: number;
+  itemId: number | null;
+  imageUrl?: string;
+}) => {
+  if (!payload.imageId) {
+    ElMessage.error(t("homepage.edit.avatarCropping.error3"));
+    return;
+  }
   try {
     isLoading.value = true;
-    dialogVisible.value = false;
-    const post = await postFile(data);
-    await userStore.setUserInfo({ avatar_id: post.data.id });
+    await userStore.setUserInfo({ avatar_id: payload.imageId });
     ElMessage.success(t("homepage.edit.avatarCropping.success"));
-  } catch (err) {
-    logger.error(err);
+  } catch (_error) {
+    ElMessage.error(t("homepage.edit.rules.error1"));
+  } finally {
+    isLoading.value = false;
   }
 };
 
-// 完成头像裁剪并上传
-const finish = async () => {
-  cropperRef.value.getCropBlob(async (blob: Blob) => {
-    // 创建File对象
-    const file = new File(
-      [blob],
-      userStore.userInfo?.userData?.username + ".jpg",
-      {
-        type: "image/jpeg",
-      }
-    );
-
-    const md5 = await fileStore.store.fileMD5(file);
-    const handler = await fileStore.store.publicHandler();
-    if (!handler) {
-      ElMessage.error(t("homepage.edit.avatarCropping.error4"));
-      return;
-    }
-
-    // 检查文件是否已存在
-    const has = await fileStore.store.fileHas(
-      md5,
-      file.name.split(".").pop() || "",
-      handler,
-      "backup"
-    );
-
-    if (!has) {
-      await fileStore.store.fileUpload(
-        md5,
-        file.name.split(".").pop() || "",
-        file,
-        (_p: number) => {},
-        handler,
-        "backup"
-      );
-    }
-
-    // 保存头像
-    await saveAvatar(
-      md5,
-      "." + (file.name.split(".").pop() || ""),
-      file,
-      handler
-    );
-
-    dialogVisible.value = false;
-  });
-};
-
-// 邮箱验证相关函数
-
-// 发送验证码按钮文本
-const sendCodeButtonText = computed(() => {
-  if (countdown.value > 0) {
-    return `${countdown.value}秒后重试`;
-  }
-  return t("homepage.edit.sendCode");
+onMounted(() => {
+  refreshEmailStatusSummary();
 });
-
-// 发送验证码
-const handleSendCode = async () => {
-  if (!emailForm.value.email) {
-    ElMessage.warning(t("homepage.edit.rules.email.required"));
-    return;
-  }
-
-  // 验证邮箱格式
-  await emailFormRef.value?.validateField("email", async (valid: boolean) => {
-    if (!valid) {
-      return;
-    }
-
-    const success = await sendCode(emailForm.value.email);
-
-    if (success) {
-      ElMessage.success(t("emailVerification.codeSent"));
-    } else if (emailError.value) {
-      ElMessage.error(emailError.value);
-    }
-  });
-};
-
-// 验证码输入处理（只允许数字，最多6位）
-const handleCodeInput = (value: string) => {
-  emailForm.value.code = value.replace(/\D/g, "").slice(0, 6);
-};
-
-// 验证邮箱
-const handleVerify = async () => {
-  if (!emailForm.value.email || !emailForm.value.code) {
-    ElMessage.warning(t("homepage.edit.rules.code.required"));
-    return;
-  }
-
-  // 验证表单
-  await emailFormRef.value?.validate(async (valid: boolean) => {
-    if (!valid) {
-      return;
-    }
-
-    const success = await verifyCode(
-      emailForm.value.email,
-      emailForm.value.code
-    );
-
-    if (success) {
-      ElMessage.success(t("emailVerification.verifySuccess"));
-      // 清空表单
-      emailForm.value.code = "";
-    } else if (emailError.value) {
-      ElMessage.error(emailError.value);
-    }
-  });
-};
 
 // 监听用户信息变化，更新表单数据
 watch(
@@ -852,11 +1067,6 @@ watch(
   },
   { deep: true, immediate: true }
 );
-
-// 组件卸载时清理定时器
-onUnmounted(() => {
-  cleanupEmailVerification();
-});
 </script>
 
 <style lang="scss" scoped>
@@ -891,49 +1101,67 @@ onUnmounted(() => {
   font-weight: 500;
 }
 
+.security-action-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #ebeef5;
+  border-radius: 10px;
+  background: #fafcff;
+  padding: 16px;
+}
+
+.security-main {
+  min-width: 0;
+}
+
+.security-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.security-subtitle {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #909399;
+}
+
+.email-pill {
+  margin-top: 10px;
+}
+
+.security-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+@media screen and (max-width: 768px) {
+  .security-action-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .security-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+.recover-tip {
+  margin: 0 0 12px;
+  color: #6f6f6f;
+  font-size: 13px;
+}
+
 /* 用户说明文字样式 */
 .user-explain {
   font-size: 12px;
   line-height: 20px;
   color: #6f6f6f;
-}
-
-/* 裁剪框样式 */
-.cropper-content {
-  .cropper {
-    width: auto;
-    height: 350px;
-  }
-}
-
-/* 头像上传样式 */
-.avatar-uploader {
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-
-  &:hover {
-    border-color: #409eff;
-  }
-}
-
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 132px;
-  height: 132px;
-  line-height: 132px;
-  text-align: center;
-  border: 1px dashed #d9d9d9;
-  margin-right: 12px;
-  border-radius: 6px;
-}
-
-.avatar {
-  width: 132px;
-  height: 132px;
-  display: block;
-  border-radius: 6px;
-  margin-right: 12px;
 }
 </style>

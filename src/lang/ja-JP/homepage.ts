@@ -145,6 +145,14 @@ export default {
       bind: "バインド",
       rebind: "再バインド",
       label2: "アカウントパスワード",
+      securityEmailTitle: "メールセキュリティ",
+      securityEmailBoundHint:
+        "現在メールは連携済みです。変更または解除が可能です。",
+      securityEmailUnboundHint:
+        "現在メールが連携されていません。先に連携してください。",
+      securityPasswordTitle: "パスワードセキュリティ",
+      securityPasswordHint:
+        "パスワードの変更や再設定でアカウントの安全性を高めます。",
       change: "パスワードの変更",
       recover: "パスワードを回復",
       label3: "古いパスワード",

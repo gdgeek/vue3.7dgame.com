@@ -66,6 +66,10 @@ const breadcrumbText = computed(() => {
 
     "/settings": ["breadcrumb.settings"],
     "/settings/edit": ["breadcrumb.settings", "breadcrumb.profile"],
+    "/settings/email": [
+      "breadcrumb.settings",
+      "homepage.edit.emailVerification",
+    ],
     "/settings/account": ["breadcrumb.settings", "breadcrumb.accountSecurity"],
   };
 

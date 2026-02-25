@@ -26,7 +26,7 @@ const domainStore = useDomainStore();
 const settingsStore = useSettingsStore();
 
 const isDarkMode = computed(() => settingsStore.theme === ThemeEnum.DARK);
-const DEV_DATE = String(import.meta.env.VITE_DEV_DATE || "20260224");
+const DEV_DATE = String(import.meta.env.VITE_DEV_DATE || "202602251637");
 const DEV_LETTER = String(import.meta.env.VITE_DEV_LETTER || "A");
 const versionTag = computed(() => `${DEV_DATE}${DEV_LETTER}`);
 

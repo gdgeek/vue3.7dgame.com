@@ -18,7 +18,7 @@
           :textColor="textColor"
         >
           <span class="font-bold">{{
-            domainStore.title || "不加班AR创作平台"
+            domainStore.title || "XR UGC平台（XRUGC.com）"
           }}</span>
         </RadiantText>
       </div>

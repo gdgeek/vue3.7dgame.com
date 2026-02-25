@@ -5,7 +5,9 @@ export type _UserDataType = {
   nickname: string | null;
   email: string | null;
   username: string | null;
-  emailBind: boolean;
+  emailBind: boolean | null;
+  emailVerified?: boolean | null;
+  emailVerifiedAt?: number | null;
 };
 export type UploadFileType = {
   md5: string;

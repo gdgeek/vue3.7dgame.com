@@ -1,6 +1,7 @@
 // login translations for th-TH
 export default {
   login: {
+    title: "XR UGC平台（XRUGC.com）",
     register: "ลงทะเบียน/เข้าสู่ระบบแพลตฟอร์ม",
     h1: "ยินดีต้อนรับ!",
     h4: "พร้อมที่จะเริ่มหรือยัง?",
@@ -50,6 +51,27 @@ export default {
     abandonRegisterConfirmButton: "ยืนยัน",
     abandonRegisterCancelButton: "สมัครต่อ",
     qrcodeFetchFailed: "ไม่สามารถรับ QR code ได้ กรุณาลองใหม่อีกครั้ง",
+    forgotPassword: "ลืมรหัสผ่าน?",
+    forgotDialogTitle: "กู้คืนรหัสผ่าน",
+    forgotTipBoundEmail: "ใช้ได้เฉพาะบัญชีที่ผูกและยืนยันอีเมลแล้วเท่านั้น",
+    forgotTokenLabel: "รหัสยืนยัน",
+    forgotTokenPlaceholder: "กรอกรหัสยืนยัน 6 หลักจากอีเมล",
+    forgotNewPasswordLabel: "รหัสผ่านใหม่",
+    forgotConfirmPasswordLabel: "ยืนยันรหัสผ่านใหม่",
+    sendResetEmail: "ส่งรหัสยืนยัน",
+    verifyResetToken: "ตรวจสอบรหัสยืนยัน",
+    verifyTokenFirst: "กรุณาตรวจสอบรหัสยืนยันก่อน",
+    forgotTokenRequired: "กรุณากรอกรหัสยืนยัน",
+    requestResetSuccess:
+      "ส่งรหัสยืนยันสำหรับรีเซ็ตรหัสผ่านแล้ว กรุณาตรวจสอบอีเมล",
+    requestResetFailedFallback: "ส่งรหัสยืนยันไม่สำเร็จ กรุณาลองใหม่",
+    verifyTokenSuccess: "ตรวจสอบรหัสยืนยันสำเร็จ",
+    verifyTokenFailed: "รหัสยืนยันไม่ถูกต้องหรือหมดอายุ",
+    resetPassword: "รีเซ็ตรหัสผ่าน",
+    resetPasswordSuccess:
+      "รีเซ็ตรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่",
+    resetPasswordFailedFallback: "รีเซ็ตรหัสผ่านไม่สำเร็จ กรุณาลองใหม่",
+    cancel: "ยกเลิก",
   },
   passwordPolicy: {
     minLength: "อย่างน้อย 12 ตัวอักษร",
@@ -71,5 +93,16 @@ export default {
     uploadLocal: "อัปโหลดรูปภาพจากเครื่อง",
     uploadLocalDesc: "อัปโหลดไฟล์รูปภาพใหม่",
     uploadFile: "อัปโหลดไฟล์",
+    cropTitle: "ครอปรูปภาพ",
+    cropTip: "ปรับพื้นที่ครอปก่อนยืนยันอัปโหลด",
+    rotateLeft: "หมุนซ้าย",
+    rotateRight: "หมุนขวา",
+    zoomIn: "ขยาย",
+    zoomOut: "ย่อ",
+    confirm: "ยืนยัน",
+    cancel: "ยกเลิก",
+    invalidType: "กรุณาอัปโหลดรูปแบบ JPG/PNG/BMP/GIF",
+    invalidSize: "ขนาดรูปภาพต้องไม่เกิน {size}MB",
+    uploadFailed: "อัปโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่",
   },
 };
