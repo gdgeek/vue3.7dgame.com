@@ -105,4 +105,77 @@ describe("usePermissionStore", () => {
     // constantRoutes is mocked as [] and no dynamic routes → routes stays []
     expect(Array.isArray(store.routes)).toBe(true);
   });
+
+  // -----------------------------------------------------------------------
+  // transformRoutes — via generateRoutes()
+  // -----------------------------------------------------------------------
+  it("transformRoutes replaces 'Layout' component string with a lazy import function", async () => {
+    mockRouterData.value = [
+      { path: "/app", component: "Layout", children: [] },
+    ] as never;
+    const store = usePermissionStore();
+    const result = await store.generateRoutes();
+    expect(result).toHaveLength(1);
+    // Layout becomes the lazy import arrow function
+    expect(typeof result[0].component).toBe("function");
+  });
+
+  it("transformRoutes falls back to 404 component for unknown view component", async () => {
+    mockRouterData.value = [
+      { path: "/unknown", component: "nonexistent/Page" },
+    ] as never;
+    const store = usePermissionStore();
+    const result = await store.generateRoutes();
+    expect(result).toHaveLength(1);
+    // 404.vue exists in the project, so the fallback is a lazy import function
+    expect(typeof result[0].component).toBe("function");
+  });
+
+  it("transformRoutes recursively processes children routes", async () => {
+    mockRouterData.value = [
+      {
+        path: "/app",
+        component: "Layout",
+        children: [
+          { path: "dashboard", component: "home/Dashboard" },
+          { path: "settings", component: "settings/Index" },
+        ],
+      },
+    ] as never;
+    const store = usePermissionStore();
+    const result = await store.generateRoutes();
+    expect(result[0].children).toHaveLength(2);
+  });
+
+  it("transformRoutes processes nested children recursively", async () => {
+    mockRouterData.value = [
+      {
+        path: "/root",
+        component: "Layout",
+        children: [
+          {
+            path: "parent",
+            component: "some/Parent",
+            children: [{ path: "child", component: "some/Child" }],
+          },
+        ],
+      },
+    ] as never;
+    const store = usePermissionStore();
+    const result = await store.generateRoutes();
+    const parent = result[0].children?.[0] as { children?: unknown[] };
+    expect(parent?.children).toHaveLength(1);
+  });
+
+  // -----------------------------------------------------------------------
+  // usePermissionStoreHook()
+  // -----------------------------------------------------------------------
+  it("usePermissionStoreHook() returns a store with expected interface", async () => {
+    const { usePermissionStoreHook } = await import("@/store/modules/permission");
+    const hook = usePermissionStoreHook();
+    expect(hook).toHaveProperty("routes");
+    expect(hook).toHaveProperty("generateRoutes");
+    expect(hook).toHaveProperty("mixLeftMenus");
+    expect(hook).toHaveProperty("setMixLeftMenus");
+  });
 });

@@ -114,6 +114,27 @@ describe("EduStudent API", () => {
       const url: string = request.mock.calls[0][0].url;
       expect(url).toContain("/v1/edu-student/me");
     });
+
+    it("includes StudentSearch[name] when search is provided", async () => {
+      await studentApi.getStudentMe("-created_at", "alice");
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("StudentSearch");
+      expect(url).toContain("alice");
+    });
+
+    it("includes page when page > 1", async () => {
+      await studentApi.getStudentMe("-created_at", "", 3);
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("page=3");
+    });
+  });
+
+  describe("getMyStudentRecords() — page > 1", () => {
+    it("includes page when page > 1", async () => {
+      await studentApi.getMyStudentRecords("-created_at", 2);
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("page=2");
+    });
   });
 
   describe("joinClass()", () => {
@@ -191,6 +212,19 @@ describe("EduTeacher API", () => {
       await teacherApi.getTeacherMe();
       const url: string = request.mock.calls[0][0].url;
       expect(url).toContain("/v1/edu-teacher/me");
+    });
+
+    it("includes TeacherSearch[subject] when search is provided", async () => {
+      await teacherApi.getTeacherMe("-created_at", "math");
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("TeacherSearch");
+      expect(url).toContain("math");
+    });
+
+    it("includes page when page > 1", async () => {
+      await teacherApi.getTeacherMe("-created_at", "", 4);
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("page=4");
     });
   });
 

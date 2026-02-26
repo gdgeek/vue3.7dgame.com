@@ -230,4 +230,97 @@ describe("useUserStore", () => {
     await expect(store.logout()).resolves.toBeUndefined();
     expect(token.removeToken).toHaveBeenCalled();
   });
+
+  it("logout() clears active refreshInterval and sets it to null", async () => {
+    vi.useFakeTimers();
+    token.hasToken.mockReturnValue(false);
+    const store = useUserStore();
+    const interval = setInterval(() => {}, 100000);
+    store.refreshInterval = interval as unknown as NodeJS.Timeout;
+    await store.logout();
+    expect(store.refreshInterval).toBeNull();
+    vi.useRealTimers();
+  });
+
+  // -----------------------------------------------------------------------
+  // getUserInfo()
+  // -----------------------------------------------------------------------
+  it("getUserInfo() returns updated userInfo on success", async () => {
+    const mockUser = { id: 1, roles: ["user"], userData: {}, userInfo: {} };
+    userApi.info.mockResolvedValue({ data: { success: true, data: mockUser } });
+    const store = useUserStore();
+    const result = await store.getUserInfo();
+    expect(result).toBe(store.userInfo);
+    expect(store.userInfo?.id).toBe(1);
+  });
+
+  it("getUserInfo() returns undefined when success is false", async () => {
+    userApi.info.mockResolvedValue({ data: { success: false } });
+    const store = useUserStore();
+    const result = await store.getUserInfo();
+    expect(result).toBeUndefined();
+  });
+
+  it("getUserInfo() returns undefined when roles is null", async () => {
+    userApi.info.mockResolvedValue({
+      data: { success: true, data: { id: 2, roles: null } },
+    });
+    const store = useUserStore();
+    const result = await store.getUserInfo();
+    expect(result).toBeUndefined();
+  });
+
+  it("getUserInfo() returns undefined on network error", async () => {
+    userApi.info.mockRejectedValue(new Error("Network error"));
+    const store = useUserStore();
+    const result = await store.getUserInfo();
+    expect(result).toBeUndefined();
+  });
+
+  // -----------------------------------------------------------------------
+  // setUserInfo()
+  // -----------------------------------------------------------------------
+  it("setUserInfo() updates userInfo on success", async () => {
+    const mockUser = { id: 5, roles: ["admin"], userData: {}, userInfo: {} };
+    userApi.putUserData.mockResolvedValue({ data: { success: true, data: mockUser } });
+    const store = useUserStore();
+    const result = await store.setUserInfo({ nickname: "Alice" });
+    expect(result).toBe(store.userInfo);
+    expect(store.userInfo?.id).toBe(5);
+  });
+
+  it("setUserInfo() returns undefined when success is false", async () => {
+    userApi.putUserData.mockResolvedValue({ data: { success: false } });
+    const store = useUserStore();
+    const result = await store.setUserInfo({});
+    expect(result).toBeUndefined();
+  });
+
+  it("setUserInfo() returns undefined when roles is null", async () => {
+    userApi.putUserData.mockResolvedValue({
+      data: { success: true, data: { id: 3, roles: null } },
+    });
+    const store = useUserStore();
+    const result = await store.setUserInfo({});
+    expect(result).toBeUndefined();
+  });
+
+  it("setUserInfo() returns undefined on network error", async () => {
+    userApi.putUserData.mockRejectedValue(new Error("API error"));
+    const store = useUserStore();
+    const result = await store.setUserInfo({});
+    expect(result).toBeUndefined();
+  });
+
+  // -----------------------------------------------------------------------
+  // useUserStoreHook()
+  // -----------------------------------------------------------------------
+  it("useUserStoreHook() returns a store with expected interface", async () => {
+    const { useUserStoreHook } = await import("@/store/modules/user");
+    const hook = useUserStoreHook();
+    expect(hook).toHaveProperty("userInfo");
+    expect(hook).toHaveProperty("login");
+    expect(hook).toHaveProperty("logout");
+    expect(hook).toHaveProperty("getRole");
+  });
 });

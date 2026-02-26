@@ -1,11 +1,10 @@
 /**
  * Unit tests for src/composables/useCategories.ts
- * Only tests the pure utility functions:
  *   - mapCategoryToTabItem
  *   - filterCategories
- * (useCategories itself makes network calls and is excluded from unit scope.)
+ *   - useCategories (composable with async load, stale-while-revalidate, retry)
  */
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Prevent import chain from reaching pinia / request / i18n
 vi.mock("@/api/home/wordpress", () => ({
@@ -22,8 +21,10 @@ vi.mock("@/lang", () => ({
 import {
   mapCategoryToTabItem,
   filterCategories,
+  useCategories,
 } from "@/composables/useCategories";
-import type { NewsCategory } from "@/types/news";
+import type { NewsCategory, TabItem } from "@/types/news";
+import { wordpressApi } from "@/api/home/wordpress";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -181,5 +182,131 @@ describe("filterCategories() — excludeCategories blacklist", () => {
   it("returns all when options is undefined", () => {
     const result = filterCategories(cats, undefined);
     expect(result).toHaveLength(3);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// useCategories() composable
+// ---------------------------------------------------------------------------
+/** Flush all pending microtasks and one macrotask (setTimeout 0). */
+const flushAsync = () => new Promise<void>((r) => setTimeout(r, 0));
+
+describe("useCategories() composable", () => {
+  const mockGetWithCache = wordpressApi.getCategoriesWithCache as ReturnType<typeof vi.fn>;
+  const mockGetCategories = wordpressApi.getCategories as ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("starts loading=true immediately, then sets to false after resolution", async () => {
+    mockGetWithCache.mockResolvedValue({ data: [], isStale: false });
+    const { loading } = useCategories();
+    expect(loading.value).toBe(true);
+    await flushAsync();
+    expect(loading.value).toBe(false);
+  });
+
+  it("loads and transforms categories into TabItems", async () => {
+    mockGetWithCache.mockResolvedValue({
+      data: [
+        { id: 1, name: "Tech", slug: "tech", count: 5 },
+        { id: 2, name: "Art", slug: "art", count: 3 },
+      ],
+      isStale: false,
+    });
+    const { items, error } = useCategories();
+    await flushAsync();
+    expect(error.value).toBeNull();
+    expect(items.value).toHaveLength(2);
+    expect(items.value[0].label).toBe("Tech");
+    expect(items.value[1].label).toBe("Art");
+  });
+
+  it("sets error.value to the Error message on API failure", async () => {
+    mockGetWithCache.mockRejectedValue(new Error("Network failure"));
+    const { error, loading } = useCategories();
+    await flushAsync();
+    expect(error.value).toBe("Network failure");
+    expect(loading.value).toBe(false);
+  });
+
+  it("sets generic error message for non-Error rejection", async () => {
+    mockGetWithCache.mockRejectedValue("string error");
+    const { error } = useCategories();
+    await flushAsync();
+    expect(error.value).toBe("加载分类失败");
+  });
+
+  it("triggers background refresh when isStale is true and updates items", async () => {
+    const freshData = [{ id: 9, name: "Fresh", slug: "fresh", count: 2 }];
+    mockGetWithCache.mockResolvedValue({
+      data: [{ id: 1, name: "Stale", slug: "stale", count: 2 }],
+      isStale: true,
+    });
+    mockGetCategories.mockResolvedValue(freshData);
+
+    const { items } = useCategories();
+    await flushAsync();
+
+    expect(mockGetCategories).toHaveBeenCalled();
+    expect(items.value[0].label).toBe("Fresh");
+  });
+
+  it("silently ignores background refresh failure and keeps stale data", async () => {
+    mockGetWithCache.mockResolvedValue({
+      data: [{ id: 5, name: "Cached", slug: "cached", count: 1 }],
+      isStale: true,
+    });
+    mockGetCategories.mockRejectedValue(new Error("bg error"));
+
+    const { items, error } = useCategories();
+    await flushAsync();
+
+    expect(items.value[0].label).toBe("Cached");
+    expect(error.value).toBeNull();
+  });
+
+  it("retry() re-invokes load and returns updated data", async () => {
+    mockGetWithCache.mockResolvedValue({ data: [], isStale: false });
+    const { retry, items } = useCategories();
+    await flushAsync();
+
+    mockGetWithCache.mockResolvedValue({
+      data: [{ id: 7, name: "Retried", slug: "retried", count: 1 }],
+      isStale: false,
+    });
+    await retry();
+
+    expect(mockGetWithCache).toHaveBeenCalledTimes(2);
+    expect(items.value[0].label).toBe("Retried");
+  });
+
+  it("prepends pinnedItems to transformed category list", async () => {
+    mockGetWithCache.mockResolvedValue({
+      data: [{ id: 10, name: "Sports", slug: "sports", count: 3 }],
+      isStale: false,
+    });
+    const pinned: TabItem[] = [{ label: "All", type: "category", id: 0 }];
+    const { items } = useCategories({ pinnedItems: pinned });
+    await flushAsync();
+
+    expect(items.value[0].label).toBe("All");
+    expect(items.value[1].label).toBe("Sports");
+  });
+
+  it("applies includeCategories filter during load", async () => {
+    mockGetWithCache.mockResolvedValue({
+      data: [
+        { id: 1, name: "Tech", slug: "tech", count: 5 },
+        { id: 2, name: "Art", slug: "art", count: 3 },
+      ],
+      isStale: false,
+    });
+    const { items } = useCategories({ includeCategories: [2] });
+    await flushAsync();
+
+    expect(items.value).toHaveLength(1);
+    expect(items.value[0].label).toBe("Art");
   });
 });
