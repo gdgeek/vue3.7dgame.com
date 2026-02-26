@@ -147,4 +147,97 @@ describe("Email API", () => {
       expect(result.message).toBe("邮箱验证成功");
     });
   });
+
+  describe("getEmailStatus", () => {
+    it("calls GET /v1/email/status with emailApiBase", async () => {
+      const emailApi = await import("@/api/v1/email");
+      request.mockResolvedValue({ data: { success: true, data: {} } });
+      await emailApi.getEmailStatus();
+      expect(request).toHaveBeenCalledWith({
+        baseURL: emailApiBase,
+        url: "/v1/email/status",
+        method: "get",
+      });
+    });
+
+    it("returns response.data", async () => {
+      const emailApi = await import("@/api/v1/email");
+      const payload = { success: true, data: { email: "x@y.com", email_verified: true } };
+      request.mockResolvedValue({ data: payload });
+      const result = await emailApi.getEmailStatus();
+      expect(result).toEqual(payload);
+    });
+  });
+
+  describe("sendChangeConfirmation", () => {
+    it("calls POST /v1/email/send-change-confirmation with no body", async () => {
+      const emailApi = await import("@/api/v1/email");
+      request.mockResolvedValue({ data: { success: true } });
+      await emailApi.sendChangeConfirmation();
+      const arg = request.mock.calls[0][0];
+      expect(arg.url).toBe("/v1/email/send-change-confirmation");
+      expect(arg.method).toBe("post");
+      expect(arg.baseURL).toBe(emailApiBase);
+    });
+  });
+
+  describe("verifyChangeConfirmation", () => {
+    it("calls POST /v1/email/verify-change-confirmation with code", async () => {
+      const emailApi = await import("@/api/v1/email");
+      request.mockResolvedValue({ data: { success: true } });
+      await emailApi.verifyChangeConfirmation("ABC123");
+      const arg = request.mock.calls[0][0];
+      expect(arg.url).toBe("/v1/email/verify-change-confirmation");
+      expect(arg.data).toEqual({ code: "ABC123" });
+    });
+  });
+
+  describe("unbindEmail", () => {
+    it("calls POST /v1/email/unbind with empty body when no code", async () => {
+      const emailApi = await import("@/api/v1/email");
+      request.mockResolvedValue({ data: { success: true } });
+      await emailApi.unbindEmail();
+      const arg = request.mock.calls[0][0];
+      expect(arg.url).toBe("/v1/email/unbind");
+      expect(arg.data).toEqual({});
+    });
+
+    it("calls POST /v1/email/unbind with code when provided", async () => {
+      const emailApi = await import("@/api/v1/email");
+      request.mockResolvedValue({ data: { success: true } });
+      await emailApi.unbindEmail("XYZ");
+      const arg = request.mock.calls[0][0];
+      expect(arg.data).toEqual({ code: "XYZ" });
+    });
+  });
+
+  describe("getEmailCooldown", () => {
+    it("calls GET /v1/email/cooldown with no params when email omitted", async () => {
+      const emailApi = await import("@/api/v1/email");
+      request.mockResolvedValue({ data: { success: true } });
+      await emailApi.getEmailCooldown();
+      const arg = request.mock.calls[0][0];
+      expect(arg.url).toBe("/v1/email/cooldown");
+      expect(arg.params).toEqual({});
+    });
+
+    it("calls GET /v1/email/cooldown with email param when provided", async () => {
+      const emailApi = await import("@/api/v1/email");
+      request.mockResolvedValue({ data: { success: true } });
+      await emailApi.getEmailCooldown("a@b.com");
+      const arg = request.mock.calls[0][0];
+      expect(arg.params).toEqual({ email: "a@b.com" });
+    });
+  });
+
+  describe("testEmailService", () => {
+    it("calls GET /v1/email/test", async () => {
+      const emailApi = await import("@/api/v1/email");
+      request.mockResolvedValue({ data: { success: true } });
+      await emailApi.testEmailService();
+      const arg = request.mock.calls[0][0];
+      expect(arg.url).toBe("/v1/email/test");
+      expect(arg.method).toBe("get");
+    });
+  });
 });

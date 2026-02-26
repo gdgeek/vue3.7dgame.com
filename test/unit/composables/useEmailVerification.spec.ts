@@ -208,4 +208,155 @@ describe("useEmailVerification Composable", () => {
       expect(sendCooldown.value).toBe(0);
     });
   });
+
+  describe("unbindCurrentEmail()", () => {
+    it("returns false immediately when email is verified but no code provided", async () => {
+      const { unbindCurrentEmail, loadStatus, cleanup } = useEmailVerification();
+
+      // Load status with email_verified = true
+      mockedGetEmailStatus.mockResolvedValue({
+        success: true,
+        data: {
+          user_id: 1,
+          username: "test",
+          email: "x@y.com",
+          email_verified: true,
+          email_verified_at: null,
+          email_verified_at_formatted: null,
+        },
+      });
+      await loadStatus();
+
+      const result = await unbindCurrentEmail(); // no code
+      expect(result).toBe(false);
+      cleanup();
+    });
+
+    it("calls unbindEmail and returns true on success when email is not verified", async () => {
+      const { unbindCurrentEmail, loadStatus, cleanup } = useEmailVerification();
+      const { unbindEmail } = await import("@/api/v1/email");
+      vi.mocked(unbindEmail).mockResolvedValue({ success: true });
+
+      // Status: email bound but not verified → unbind_direct path
+      mockedGetEmailStatus.mockResolvedValue({
+        success: true,
+        data: {
+          user_id: 1,
+          username: "test",
+          email: "x@y.com",
+          email_verified: false,
+          email_verified_at: null,
+          email_verified_at_formatted: null,
+        },
+      });
+      await loadStatus();
+
+      const result = await unbindCurrentEmail();
+      expect(result).toBe(true);
+      cleanup();
+    });
+
+    it("returns false and sets error on API failure", async () => {
+      const { unbindCurrentEmail, loadStatus, error, cleanup } =
+        useEmailVerification();
+      const { unbindEmail } = await import("@/api/v1/email");
+      vi.mocked(unbindEmail).mockResolvedValue({
+        success: false,
+        message: "unbind failed",
+      });
+
+      mockedGetEmailStatus.mockResolvedValue({
+        success: true,
+        data: {
+          user_id: 1,
+          username: "test",
+          email: "x@y.com",
+          email_verified: false,
+          email_verified_at: null,
+          email_verified_at_formatted: null,
+        },
+      });
+      await loadStatus();
+
+      const result = await unbindCurrentEmail();
+      expect(result).toBe(false);
+      expect(error.value).toBe("unbind failed");
+      cleanup();
+    });
+  });
+
+  describe("cancelCurrentAction()", () => {
+    it("sets step to 'manage' when email is bound", async () => {
+      const { cancelCurrentAction, loadStatus, step, cleanup } =
+        useEmailVerification();
+
+      mockedGetEmailStatus.mockResolvedValue({
+        success: true,
+        data: {
+          user_id: 1,
+          username: "test",
+          email: "x@y.com",
+          email_verified: false,
+          email_verified_at: null,
+          email_verified_at_formatted: null,
+        },
+      });
+      await loadStatus();
+
+      cancelCurrentAction();
+      expect(step.value).toBe("manage");
+      cleanup();
+    });
+
+    it("sets step to 'bind' when no email is bound", async () => {
+      const { cancelCurrentAction, loadStatus, step, cleanup } =
+        useEmailVerification();
+
+      mockedGetEmailStatus.mockResolvedValue({
+        success: true,
+        data: {
+          user_id: 1,
+          username: "test",
+          email: null,
+          email_verified: false,
+          email_verified_at: null,
+          email_verified_at_formatted: null,
+        },
+      });
+      await loadStatus();
+
+      cancelCurrentAction();
+      expect(step.value).toBe("bind");
+      cleanup();
+    });
+
+    it("clears form fields and changeToken", async () => {
+      const { cancelCurrentAction, loadStatus, newEmailForm, unbindForm, oldEmailForm, changeToken, cleanup } =
+        useEmailVerification();
+
+      mockedGetEmailStatus.mockResolvedValue({
+        success: true,
+        data: {
+          user_id: 1,
+          username: "test",
+          email: null,
+          email_verified: false,
+          email_verified_at: null,
+          email_verified_at_formatted: null,
+        },
+      });
+      await loadStatus();
+
+      newEmailForm.code = "abc";
+      unbindForm.code = "def";
+      oldEmailForm.code = "ghi";
+
+      cancelCurrentAction();
+      expect(newEmailForm.code).toBe("");
+      expect(unbindForm.code).toBe("");
+      expect(oldEmailForm.code).toBe("");
+      expect(changeToken.value).toBeNull();
+      cleanup();
+    });
+  });
 });
