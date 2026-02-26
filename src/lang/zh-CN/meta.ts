@@ -29,11 +29,19 @@ export default {
         name: "实体名称",
         author: "作者",
         updatedAt: "修改日期",
+        resources: "资源数",
       },
       properties: {
         type: "类型",
         entity: "实体",
         author: "作者",
+        resources: "使用资源数",
+      },
+      events: {
+        title: "信号",
+        inputs: "输入",
+        outputs: "输出",
+        empty: "无信号",
       },
     },
     create: {
