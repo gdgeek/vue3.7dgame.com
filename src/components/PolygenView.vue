@@ -7,7 +7,7 @@
     <div id="three" ref="three" style="height: 400px; width: 100%"></div>
 
     <!-- Animation Controls - Visible only when animations exist -->
-    <div class="animation-bar" v-if="animations && animations.length > 0">
+    <div class="animation-bar" v-if="showAnimationBar">
       <div
         class="animation-play-btn"
         :class="{ disabled: animations.length === 0 }"
@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
-import { ref, watch, onMounted } from "vue";
+import { computed, ref, watch, onMounted } from "vue";
 import { useDark } from "@vueuse/core";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -75,6 +75,7 @@ function toFixedVector3(vec: THREE.Vector3, n: number): THREE.Vector3 {
 const props = defineProps<{
   file: { url: string };
   target?: number;
+  hasAnimations?: boolean;
 }>();
 const emit = defineEmits<{
   (
@@ -105,6 +106,10 @@ const animationProgress = ref(0); // 动画进度（百分比）
 const currentAnimationTime = ref(0); // 当前动画时间（秒）
 const totalAnimationDuration = ref(0); // 总动画时长（秒）
 let currentAction: THREE.AnimationAction | null = null; // 当前播放的动画
+let currentModel: THREE.Object3D | null = null;
+const showAnimationBar = computed(
+  () => Boolean(props.hasAnimations) || animations.value.length > 0
+);
 
 const isDark = useDark();
 
@@ -179,11 +184,32 @@ const toggleAnimation = (value: string | number | boolean) => {
 
 let ktx2Loader: KTX2Loader | null = null; // ★ 新增
 
+const resetAnimationState = () => {
+  animations.value = [];
+  selectedAnimationIndex.value = 0;
+  isAnimationPlaying.value = true;
+  animationProgress.value = 0;
+  currentAnimationTime.value = 0;
+  totalAnimationDuration.value = 0;
+  currentAction = null;
+  mixer = null;
+};
+
+const clearCurrentModel = () => {
+  if (currentModel) {
+    scene.remove(currentModel);
+    currentModel = null;
+  }
+};
+
 // 刷新场景并加载新模型
 const refresh = () => {
   if (!props.file || !props.file.url) {
     return;
   }
+  resetAnimationState();
+  clearCurrentModel();
+
   const gltfLoader = new GLTFLoader();
 
   const dracoLoader = new DRACOLoader();
@@ -236,6 +262,7 @@ const refresh = () => {
       });
 
       scene?.add(model);
+      currentModel = model;
 
       // 创建动画信息数组
       const animationsInfo = animations.value.map((anim) => ({
@@ -402,6 +429,14 @@ onMounted(() => {
     refresh();
   }
 });
+
+watch(
+  () => props.file?.url,
+  (url, prevUrl) => {
+    if (!url || url === prevUrl) return;
+    refresh();
+  }
+);
 </script>
 
 <style scoped>
