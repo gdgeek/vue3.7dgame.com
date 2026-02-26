@@ -10,6 +10,7 @@ import {
   isPasswordValid,
   getPasswordStrength,
   PASSWORD_POLICY,
+  createPasswordFormRules,
 } from "@/utils/password-validator";
 import type { PasswordRuleResult } from "@/utils/password-validator";
 
@@ -220,5 +221,78 @@ describe("password-validator property-based tests", () => {
         })
       );
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createPasswordFormRules
+// ---------------------------------------------------------------------------
+describe("createPasswordFormRules()", () => {
+  const t = (key: string) => `[${key}]`;
+
+  it("returns an array of 2 rules", () => {
+    const rules = createPasswordFormRules(t);
+    expect(rules).toHaveLength(2);
+  });
+
+  it("first rule is required with trigger=blur", () => {
+    const rules = createPasswordFormRules(t);
+    expect(rules[0].required).toBe(true);
+    expect(rules[0].trigger).toBe("blur");
+  });
+
+  it("second rule has a validator function and trigger=blur", () => {
+    const rules = createPasswordFormRules(t);
+    expect(typeof rules[1].validator).toBe("function");
+    expect(rules[1].trigger).toBe("blur");
+  });
+
+  it("validator calls callback() with no error for a valid password", () => {
+    const rules = createPasswordFormRules(t);
+    const validator = rules[1].validator as (
+      rule: unknown,
+      value: string,
+      callback: (err?: Error) => void
+    ) => void;
+    const callback = vi.fn();
+    validator({}, "ValidPass1!@#ValidPass", callback);
+    expect(callback).toHaveBeenCalledWith();
+  });
+
+  it("validator calls callback(Error) for an invalid password", () => {
+    const rules = createPasswordFormRules(t);
+    const validator = rules[1].validator as (
+      rule: unknown,
+      value: string,
+      callback: (err?: Error) => void
+    ) => void;
+    const callback = vi.fn();
+    validator({}, "short", callback);
+    expect(callback).toHaveBeenCalledWith(expect.any(Error));
+  });
+
+  it("validator calls callback() with no error for empty value", () => {
+    const rules = createPasswordFormRules(t);
+    const validator = rules[1].validator as (
+      rule: unknown,
+      value: string,
+      callback: (err?: Error) => void
+    ) => void;
+    const callback = vi.fn();
+    validator({}, "", callback);
+    expect(callback).toHaveBeenCalledWith();
+  });
+
+  it("error message includes translated rule messages joined by ；", () => {
+    const rules = createPasswordFormRules(t);
+    const validator = rules[1].validator as (
+      rule: unknown,
+      value: string,
+      callback: (err?: Error) => void
+    ) => void;
+    const callback = vi.fn();
+    validator({}, "short", callback);
+    const err = callback.mock.calls[0][0] as Error;
+    expect(err.message).toContain("；");
   });
 });

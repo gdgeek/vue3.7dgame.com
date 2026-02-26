@@ -223,3 +223,108 @@ describe("delRightViews()", () => {
     expect(store.visitedViews.some((x) => x.path === v3.path)).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// delOtherCachedViews
+// ---------------------------------------------------------------------------
+describe("delOtherCachedViews()", () => {
+  it("keeps only the cached view matching the target name", async () => {
+    const store = useTagsViewStore();
+    const v1 = makeView({ keepAlive: true, name: "ViewA" });
+    const v2 = makeView({ keepAlive: true, name: "ViewB" });
+    const v3 = makeView({ keepAlive: true, name: "ViewC" });
+    store.addCachedView(v1);
+    store.addCachedView(v2);
+    store.addCachedView(v3);
+    await store.delOtherCachedViews(v2);
+    expect(store.cachedViews).toContain("ViewB");
+    expect(store.cachedViews).not.toContain("ViewA");
+    expect(store.cachedViews).not.toContain("ViewC");
+  });
+
+  it("clears all cached views when target name is not in cache", async () => {
+    const store = useTagsViewStore();
+    const v1 = makeView({ keepAlive: true, name: "ViewX" });
+    const v2 = makeView({ keepAlive: true, name: "ViewY" });
+    store.addCachedView(v1);
+    store.addCachedView(v2);
+    const notCached = makeView({ name: "NotCached" });
+    await store.delOtherCachedViews(notCached);
+    expect(store.cachedViews).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// delAllVisitedViews
+// ---------------------------------------------------------------------------
+describe("delAllVisitedViews()", () => {
+  it("removes all non-affix visited views", async () => {
+    const store = useTagsViewStore();
+    const regular = makeView();
+    const affix = makeView({ affix: true, path: "/affix" });
+    store.addVisitedView(regular);
+    store.addVisitedView(affix);
+    await store.delAllVisitedViews();
+    expect(store.visitedViews.some((v) => v.path === regular.path)).toBe(false);
+    expect(store.visitedViews.some((v) => v.path === "/affix")).toBe(true);
+  });
+
+  it("returns array of remaining views", async () => {
+    const store = useTagsViewStore();
+    const result = await store.delAllVisitedViews();
+    expect(Array.isArray(result)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// delAllCachedViews
+// ---------------------------------------------------------------------------
+describe("delAllCachedViews()", () => {
+  it("clears all cached views", async () => {
+    const store = useTagsViewStore();
+    const v = makeView({ keepAlive: true });
+    store.addCachedView(v);
+    await store.delAllCachedViews();
+    expect(store.cachedViews).toHaveLength(0);
+  });
+
+  it("returns empty array", async () => {
+    const store = useTagsViewStore();
+    const result = await store.delAllCachedViews();
+    expect(result).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// delOtherViews (composite)
+// ---------------------------------------------------------------------------
+describe("delOtherViews()", () => {
+  it("resolves with visitedViews and cachedViews", async () => {
+    const store = useTagsViewStore();
+    const v = makeView({ keepAlive: true });
+    store.addView(v);
+    const result = (await store.delOtherViews(v)) as {
+      visitedViews: TagView[];
+      cachedViews: string[];
+    };
+    expect(Array.isArray(result.visitedViews)).toBe(true);
+    expect(Array.isArray(result.cachedViews)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// delAllViews (composite)
+// ---------------------------------------------------------------------------
+describe("delAllViews()", () => {
+  it("clears all non-affix views and all cached views", async () => {
+    const store = useTagsViewStore();
+    const v = makeView({ keepAlive: true });
+    const affix = makeView({ affix: true, path: "/home" });
+    store.addView(v);
+    store.addVisitedView(affix);
+    await store.delAllViews();
+    expect(store.cachedViews).toHaveLength(0);
+    expect(store.visitedViews.some((x) => x.path === v.path)).toBe(false);
+    expect(store.visitedViews.some((x) => x.path === "/home")).toBe(true);
+  });
+});

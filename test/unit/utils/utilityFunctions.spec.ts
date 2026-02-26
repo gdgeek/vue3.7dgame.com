@@ -6,6 +6,7 @@ import {
   BeijingData,
   convertToLocalTime,
   formatFileSize,
+  getVideoCover,
 } from "@/utils/utilityFunctions";
 
 describe("utilityFunctions", () => {
@@ -74,6 +75,56 @@ describe("utilityFunctions", () => {
 
     it("should handle zero", () => {
       expect(formatFileSize(0)).toBe("0 B");
+    });
+  });
+
+  describe("getVideoCover", () => {
+    it("returns empty string for undefined", () => {
+      expect(getVideoCover(undefined)).toBe("");
+    });
+
+    it("returns empty string for empty string", () => {
+      expect(getVideoCover("")).toBe("");
+    });
+
+    it("returns url unchanged if already has ci-process=snapshot", () => {
+      const url = "https://example.com/video.mp4?ci-process=snapshot&time=1";
+      expect(getVideoCover(url)).toBe(url);
+    });
+
+    it("appends snapshot params for .mp4 URLs", () => {
+      const url = "https://example.com/video.mp4";
+      const result = getVideoCover(url);
+      expect(result).toContain("ci-process=snapshot");
+      expect(result).toContain("time=1");
+      expect(result).toContain("format=jpg");
+    });
+
+    it("appends snapshot params for .webm URLs", () => {
+      const result = getVideoCover("https://cdn.example.com/clip.webm");
+      expect(result).toContain("ci-process=snapshot");
+    });
+
+    it("appends snapshot params for .mov URLs", () => {
+      const result = getVideoCover("https://cdn.example.com/clip.mov");
+      expect(result).toContain("ci-process=snapshot");
+    });
+
+    it("returns image URL unchanged", () => {
+      const url = "https://example.com/photo.jpg";
+      expect(getVideoCover(url)).toBe(url);
+    });
+
+    it("uses & separator when URL already has query params", () => {
+      const url = "https://example.com/video.mp4?quality=hd";
+      const result = getVideoCover(url);
+      expect(result).toMatch(/\?quality=hd&ci-process=snapshot/);
+    });
+
+    it("uses ? separator when URL has no query params", () => {
+      const url = "https://example.com/video.mp4";
+      const result = getVideoCover(url);
+      expect(result).toMatch(/\?ci-process=snapshot/);
     });
   });
 });
