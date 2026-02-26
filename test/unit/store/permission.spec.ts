@@ -131,6 +131,18 @@ describe("usePermissionStore", () => {
     expect(typeof result[0].component).toBe("function");
   });
 
+  it("transformRoutes assigns matched module component for existing view", async () => {
+    // src/views/home/index.vue exists in the project, so import.meta.glob resolves it
+    mockRouterData.value = [
+      { path: "/home", component: "home/index" },
+    ] as never;
+    const store = usePermissionStore();
+    const result = await store.generateRoutes();
+    expect(result).toHaveLength(1);
+    // The component should be the resolved lazy loader (a function), not undefined
+    expect(typeof result[0].component).toBe("function");
+  });
+
   it("transformRoutes recursively processes children routes", async () => {
     mockRouterData.value = [
       {
