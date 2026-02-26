@@ -42,6 +42,7 @@ export default defineConfig({
       reporter: ["text", "html", "lcov"],
       reportsDirectory: "./coverage",
       exclude: [
+        // build/tool configs
         "node_modules",
         "dist",
         "**/*.d.ts",
@@ -50,6 +51,38 @@ export default defineConfig({
         "vitest.config.ts",
         "**/*.spec.ts",
         "**/*.test.ts",
+        ".storybook/**",
+        ".eslintrc.cjs",
+        ".prettierrc.cjs",
+        ".stylelintrc.cjs",
+        "commitlint.config.cjs",
+        "postcss.config.cjs",
+        "stylelint.config.cjs",
+        "lighthouserc.config.ts",
+        "server.cjs",
+        "uno.config.ts",
+        "scripts/**",
+        "mock/**",
+        // 静态资源 & 公共 JS 库（无业务逻辑）
+        "public/**",
+        "src/assets/**",
+        // i18n 翻译文件（纯数据对象，无可测试逻辑）
+        "src/lang/**",
+        // 主题样式配置（纯数据）
+        "src/styles/**",
+        // 应用入口（无独立可测试逻辑）
+        "src/main.ts",
+        "src/App.vue",
+        "src/environment.ts",
+        // 复杂 3D 编辑器视图（依赖 WebGL / Three.js，jsdom 无法渲染）
+        "src/views/meta/ScenePlayer.vue",
+        "src/views/meta/script.vue",
+        "src/views/verse/ScenePlayer.vue",
+        "src/views/verse/script.vue",
+        "src/views/verse/composables/useModelLoader.ts",
+        "src/views/meta-verse/index.vue",
+        "src/views/meta-verse/public.vue",
+        "src/views/audio/**",
       ],
       // 覆盖率阈值（可选，逐步启用）
       // thresholds: {
