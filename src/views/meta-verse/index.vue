@@ -10,7 +10,10 @@
         @view-change="handleViewChange"
       >
         <template #filters>
-          <TagsSelect @tags-change="handleTagsChange"></TagsSelect>
+          <TagsSelect
+            v-if="canViewSceneFilter"
+            @tags-change="handleTagsChange"
+          ></TagsSelect>
         </template>
         <template #actions>
           <el-button type="primary" @click="createWindow">
@@ -396,6 +399,10 @@ const canManage = computed(() => {
     ability.can("admin", "all") ||
     ability.can("root", "all")
   );
+});
+
+const canViewSceneFilter = computed(() => {
+  return ability.can("admin", "all") || ability.can("root", "all");
 });
 
 const editingDescription = ref("");
