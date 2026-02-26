@@ -26,7 +26,7 @@
               }}</b>
             </el-tag>
           </MrPPHeader>
-          <el-divider content-position="left">
+          <div class="search-chip-row">
             <el-tag
               v-if="searched !== ''"
               size="small"
@@ -35,76 +35,61 @@
             >
               {{ searched }}
             </el-tag>
-          </el-divider>
+          </div>
         </div>
       </template>
-      <el-card shadow="hover" :body-style="{ padding: '0px' }">
-        <Waterfall
-          v-if="active.items?.length"
-          :list="active.items"
-          :width="230"
-          :gutter="10"
-          :backgroundColor="'rgba(255, 255, 255, .05)'"
-        >
-          <template #default="{ item }">
-            <div style="width: 230px" v-loading="!item.enabled">
-              <el-card
-                style="width: 220px"
-                class="box-card"
-                :class="{ 'selected-card': isSelected(item) }"
-              >
-                <template #header>
-                  <el-card shadow="hover" :body-style="{ padding: '0px' }">
-                    <div class="mrpp-title">
-                      <b class="card-title" nowrap>{{ getItemTitle(item) }}</b>
-                    </div>
-                    <div class="image-container">
-                      <Id2Image
-                        :image="item.image ? item.image.url : null"
-                        :id="item.id"
-                      ></Id2Image>
-                      <slot name="bar" :item="item"></slot>
-                    </div>
-                    <div
-                      v-if="item.created_at"
-                      style="
-                        width: 100%;
-                        text-align: center;
-                        position: relative;
-                        z-index: 2;
-                      "
-                    >
-                      {{ convertToLocalTime(item.created_at) }}
-                    </div>
-                  </el-card>
+      <el-card shadow="hover" :body-style="{ padding: '8px' }">
+        <div v-if="active.items?.length" class="resource-grid">
+          <div
+            v-for="item in active.items"
+            :key="item.id"
+            class="resource-item"
+            :class="{ disabled: !item.enabled }"
+          >
+            <div v-loading="!item.enabled">
+              <StandardCard
+                :image="item.image?.url"
+                :title="getItemTitle(item)"
+                :meta="{
+                  date: item.created_at ? convertToLocalTime(item.created_at) : '',
+                }"
+                :selected="isSelected(item)"
+                :selection-mode="mode !== 'replace' && multiple"
+                :type-icon="getTypeIcon(item.type)"
+                :placeholder-icon="getTypeIcon(item.type)"
+                @select="() => toggleSelection(item)"
+                @view="() => (mode === 'replace' ? doReplace(item) : doSelect(item))"
+              ></StandardCard>
+              <slot name="bar" :item="item"></slot>
+              <div class="card-actions">
+                <template v-if="mode !== 'replace'">
+                  <el-button
+                    v-if="multiple"
+                    size="small"
+                    @click="toggleSelection(item)"
+                  >
+                    {{
+                      isSelected(item)
+                        ? $t("meta.ResourceDialog.cancelSelect")
+                        : $t("meta.ResourceDialog.select")
+                    }}
+                  </el-button>
+                  <el-button size="small" type="primary" @click="doSelect(item)">
+                    {{ $t("meta.ResourceDialog.putIn") }}
+                  </el-button>
                 </template>
-
-                <div class="clearfix">
-                  <div class="demo-button-style">
-                    <el-checkbox-group
-                      v-if="mode !== 'replace'"
-                      v-model="selectedIds"
-                      size="small"
-                    >
-                      <el-checkbox-button :value="item.id" v-if="multiple">
-                        {{ $t("meta.ResourceDialog.select") }}
-                      </el-checkbox-button>
-                      <el-checkbox-button @click="doSelect(item)">
-                        {{ $t("meta.ResourceDialog.putIn") }}
-                      </el-checkbox-button>
-                    </el-checkbox-group>
-                    <el-button v-else size="small" @click="doReplace(item)">
-                      {{ $t("meta.ResourceDialog.replace") }}
-                    </el-button>
-                  </div>
-                </div>
-
-                <div class="bottom clearfix"></div>
-              </el-card>
-              <br />
+                <el-button
+                  v-else
+                  size="small"
+                  type="primary"
+                  @click="doReplace(item)"
+                >
+                  {{ $t("meta.ResourceDialog.replace") }}
+                </el-button>
+              </div>
             </div>
-          </template>
-        </Waterfall>
+          </div>
+        </div>
         <template v-else>
           <el-skeleton></el-skeleton>
         </template>
@@ -127,6 +112,22 @@
             <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
               <el-button-group>
                 <template v-if="mode !== 'replace'">
+                  <el-button
+                    v-if="multiple && !isPageSelected"
+                    size="small"
+                    :disabled="active.items.length === 0"
+                    @click="selectAllCurrentPage"
+                  >
+                    {{ $t("ui.selectAllPage") }}
+                  </el-button>
+                  <el-button
+                    v-if="multiple && isPageSelected"
+                    size="small"
+                    :disabled="active.items.length === 0"
+                    @click="clearCurrentPageSelection"
+                  >
+                    {{ $t("ui.cancelSelectAll") }}
+                  </el-button>
                   <el-button
                     v-if="multiple"
                     size="small"
@@ -155,17 +156,14 @@
 </template>
 
 <script setup lang="ts">
-import { logger } from "@/utils/logger";
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Waterfall } from "vue-waterfall-plugin-next";
-import "vue-waterfall-plugin-next/dist/style.css";
 import { getResources } from "@/api/v1/resources";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
-import Id2Image from "../Id2Image.vue";
+import { StandardCard } from "@/components/StandardPage";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 
 const props = withDefaults(
@@ -181,8 +179,8 @@ const sorted = ref("-created_at");
 const searched = ref("");
 
 // 响应式状态
-const selectedIds = ref<number[]>([]);
-const singleSelectedId = ref<number>();
+const selectedIds = ref<Array<number | string>>([]);
+const singleSelectedId = ref<number | string>();
 const dialogVisible = ref(false);
 const type = ref("polygen");
 const metaId = ref<number | null>(null);
@@ -213,8 +211,35 @@ const isSelected = (item: CardInfo): boolean => {
 };
 
 const getItemTitle = (item: CardInfo): string => {
-  return (item as CardInfo & { title?: string }).title ?? item.name ?? "title";
+  return item.title ?? item.name ?? "title";
 };
+
+const getTypeIcon = (type?: string): string[] => {
+  switch (type) {
+    case "polygen":
+      return ["fas", "cube"];
+    case "picture":
+    case "phototype":
+      return ["fas", "image"];
+    case "video":
+      return ["fas", "video"];
+    case "audio":
+      return ["fas", "music"];
+    case "voxel":
+      return ["fas", "cubes"];
+    case "particle":
+      return ["fas", "wand-magic-sparkles"];
+    default:
+      return ["fas", "file"];
+  }
+};
+
+const isPageSelected = computed(() => {
+  if (!props.multiple || active.value.items.length === 0) return false;
+  return active.value.items.every(
+    (item) => item.enabled && selectedIds.value.includes(item.id)
+  );
+});
 
 const open = async (
   newValue: unknown,
@@ -229,7 +254,7 @@ const open = async (
     pagination: { current: 1, count: 1, size: 20, total: 20 },
   };
 
-  type.value = newType ?? "polygen";
+  type.value = newType;
   metaId.value = meta_id;
   value.value = newValue;
   mode.value = openMode; // 设置打开模式
@@ -273,16 +298,14 @@ async function getDatas(input: DataInput): Promise<DataOutput> {
         input.current,
         "image"
       );
-      logger.log("获取数据", response.data);
+      console.log("获取数据", response.data);
       const items = response.data.map((item: ResourceInfo) => {
         return {
           id: item.id,
           context: item,
           type: item.type,
           created_at: item.created_at,
-          name: item.name
-            ? item.name
-            : ((item as ResourceInfo & { title?: string }).title ?? ""), // 使用name或title
+          name: item.name ? item.name : item.title, // 使用name或title
           image: item.image ? { url: item.image.url } : null,
           enabled: true,
         } as CardInfo;
@@ -304,7 +327,7 @@ async function getDatas(input: DataInput): Promise<DataOutput> {
       };
       resolve({ items, pagination });
     } catch (error) {
-      logger.error("获取数据失败", error);
+      console.error("获取数据失败", error);
       reject(error);
     }
   });
@@ -329,11 +352,13 @@ function sort(value: string) {
 
 function search(value: string) {
   searched.value = value;
+  active.value.pagination.current = 1;
   refresh();
 }
 
 function clearSearched() {
   searched.value = "";
+  active.value.pagination.current = 1;
   refresh();
 }
 
@@ -348,6 +373,26 @@ function doEmpty() {
   selectedIds.value = [];
 }
 
+function toggleSelection(item: CardInfo) {
+  if (!item.enabled || mode.value === "replace") return;
+  const id = item.id;
+  if (selectedIds.value.includes(id)) {
+    selectedIds.value = selectedIds.value.filter((v) => v !== id);
+  } else {
+    selectedIds.value = [...selectedIds.value, id];
+  }
+}
+
+function selectAllCurrentPage() {
+  const pageIds = active.value.items.filter((item) => item.enabled).map((item) => item.id);
+  selectedIds.value = Array.from(new Set([...selectedIds.value, ...pageIds]));
+}
+
+function clearCurrentPageSelection() {
+  const pageIdSet = new Set(active.value.items.map((item) => item.id));
+  selectedIds.value = selectedIds.value.filter((id) => !pageIdSet.has(id));
+}
+
 const doClose = () => {
   selectedIds.value = [];
   singleSelectedId.value = undefined;
@@ -356,7 +401,7 @@ const doClose = () => {
 };
 
 async function doBatchSelect() {
-  logger.log("doBatchSelect", selectedIds.value);
+  console.log("doBatchSelect", selectedIds.value);
   if (selectedIds.value.length === 0) {
     ElMessage.warning(t("meta.ResourceDialog.noItemSelected"));
     return;
@@ -379,12 +424,8 @@ async function doBatchSelect() {
 
     for (const id of selectedIds.value) {
       const obj = active.value.items.find((item) => item.id == id);
-      logger.log("doBatchSelectobj", obj);
       if (obj) {
-        // 转换为ViewCard确保所有属性都被包含
-        //  const viewCardObj = [obj][0];
-        logger.log("doBatchSelectviewCardObj", obj);
-        doSelect(obj);
+        emit("selected", obj, false);
       }
     }
 
@@ -407,43 +448,37 @@ defineExpose({
 });
 </script>
 
-<style scoped>
-.card-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+<style scoped lang="scss">
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  max-height: 62vh;
+  overflow: auto;
+  padding-right: 4px;
 }
 
-.image-container {
-  position: relative;
-  width: 100%;
-  height: auto;
+.search-chip-row {
+  min-height: 8px;
+  margin-top: 4px;
+}
+
+.resource-item {
+  min-width: 0;
+
+  &.disabled {
+    opacity: 0.55;
+  }
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-top: 8px;
 }
 
 .info-container {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  text-align: center;
-  padding: 10px;
-  transform: scale(0);
-  opacity: 0;
-  transition:
-    transform 0.5s ease,
-    opacity 0.5s ease;
-}
-
-.image-container:hover .info-container {
-  transform: scale(1);
-  opacity: 1;
-}
-
-.selected-card {
-  border: 1px solid #3894ff !important;
-  box-shadow: 0 0 10px rgba(56, 148, 255, 0.5) !important;
-  transform: scale(1.02);
-  transition: all 0.3s ease;
+  margin-top: 8px;
 }
 </style>

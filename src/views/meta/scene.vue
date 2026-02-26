@@ -570,7 +570,8 @@ onBeforeUnmount(() => {
 <style lang="scss" scoped>
 .content {
   height: calc(100vh - 140px);
-  border-style: solid;
-  border-width: 1px;
+  border: 0;
+  outline: none;
+  border-radius: 16px;
 }
 </style>
