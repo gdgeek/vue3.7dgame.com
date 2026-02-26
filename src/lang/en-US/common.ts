@@ -16,6 +16,7 @@ export default {
     name: "Name",
     description: "Description",
     edit: "Edit",
+    rename: "Rename",
     back: "Back",
     updateSuccess: "Update successful",
     createSuccess: "Create successful",
