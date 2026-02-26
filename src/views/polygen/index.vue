@@ -129,6 +129,7 @@
         :title="t('polygen.detailsTitle')"
         :name="currentPolygen?.name || ''"
         :loading="detailLoading"
+        preview-height="360px"
         :properties="detailProperties"
         :placeholder-icon="['fas', 'cube']"
         :download-text="t('polygen.downloadText')"
@@ -143,13 +144,26 @@
             v-if="currentPolygen"
             class="polygen-preview"
             :class="{ 'has-animations': hasAnimations }"
+            @mouseenter="isPreviewHovered = true"
+            @mouseleave="isPreviewHovered = false"
+            @pointerdown.capture="handlePreviewInteracted"
+            @wheel.capture.passive="handlePreviewInteracted"
+            @touchstart.capture.passive="handlePreviewInteracted"
           >
             <polygen-view
               ref="polygenViewRef"
+              :key="currentPolygen.id"
               :file="currentPolygen.file"
+              :has-animations="hasAnimations"
               @loaded="handleModelLoaded"
               @progress="handleModelProgress"
             ></polygen-view>
+            <div
+              v-show="isPreviewHovered && !hasPreviewInteracted"
+              class="preview-center-hint"
+            >
+              <font-awesome-icon :icon="['fas', 'hand']"></font-awesome-icon>
+            </div>
             <el-progress
               v-if="modelProgress < 100"
               :percentage="modelProgress"
@@ -255,13 +269,14 @@ const handleCancelSelectAllPage = () => {
 const uploadDialogVisible = ref(false);
 const fileType = ref(".glb, .gltf, .obj, .fbx");
 const viewDialogVisible = ref(false);
-const currentPolygenId = ref<number | null>(null);
 
 // Detail panel state
 const currentPolygen = ref<ResourceInfo | null>(null);
 const detailLoading = ref(false);
 const modelProgress = ref(0);
 const polygenViewRef = ref<InstanceType<typeof PolygenView> | null>(null);
+const isPreviewHovered = ref(false);
+const hasPreviewInteracted = ref(false);
 
 const detailProperties = computed(() => {
   if (!currentPolygen.value) return [];
@@ -292,7 +307,6 @@ const openUploadDialog = () => {
 };
 
 const openViewDialog = async (id: number) => {
-  currentPolygenId.value = id;
   viewDialogVisible.value = true;
   detailLoading.value = true;
   modelProgress.value = 0;
@@ -301,6 +315,9 @@ const openViewDialog = async (id: number) => {
   try {
     const response = (await getPolygen(id)) as { data: ResourceInfo };
     currentPolygen.value = response.data;
+    hasAnimations.value = hasAnimationsFromResourceInfo(response.data);
+    hasPreviewInteracted.value = false;
+    isPreviewHovered.value = false;
   } catch (err) {
     Message.error(String(err));
   } finally {
@@ -312,9 +329,27 @@ const handlePanelClose = () => {
   currentPolygen.value = null;
   modelProgress.value = 0;
   hasAnimations.value = false;
+  isPreviewHovered.value = false;
+  hasPreviewInteracted.value = false;
 };
 
 const hasAnimations = ref(false);
+
+const hasAnimationsFromResourceInfo = (resource: ResourceInfo | null) => {
+  if (!resource?.info) return false;
+  try {
+    const parsed = JSON.parse(resource.info) as {
+      anim?: unknown;
+      animations?: unknown;
+    };
+    return (
+      (Array.isArray(parsed.anim) && parsed.anim.length > 0) ||
+      (Array.isArray(parsed.animations) && parsed.animations.length > 0)
+    );
+  } catch {
+    return false;
+  }
+};
 
 const handleModelLoaded = (info: {
   size: { x: number; y: number; z: number };
@@ -322,11 +357,16 @@ const handleModelLoaded = (info: {
   anim?: { name: string; length: number }[];
 }) => {
   modelProgress.value = 100;
-  hasAnimations.value = !!(info.anim && info.anim.length > 0);
+  const hasAnimationsFromLoaded = !!(info.anim && info.anim.length > 0);
+  hasAnimations.value = hasAnimations.value || hasAnimationsFromLoaded;
 };
 
 const handleModelProgress = (progress: number) => {
   modelProgress.value = progress;
+};
+
+const handlePreviewInteracted = () => {
+  hasPreviewInteracted.value = true;
 };
 
 const handleDownload = async () => {
@@ -627,6 +667,7 @@ const formatItemDate = (dateStr?: string) => {
 
   .box-card {
     flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     border: none !important;
@@ -644,7 +685,8 @@ const formatItemDate = (dateStr?: string) => {
 
     #three {
       flex: 1;
-      min-height: 300px;
+      min-height: 0;
+      height: 100%;
       border-radius: var(--radius-lg, 16px);
       background: transparent !important;
     }
@@ -677,5 +719,48 @@ const formatItemDate = (dateStr?: string) => {
   bottom: 20px;
   left: 20px;
   right: 20px;
+}
+
+.preview-center-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 11px;
+  color: #fff;
+  background: rgba(30, 41, 59, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+  animation:
+    preview-hint-float 1.8s ease-in-out infinite,
+    preview-hint-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes preview-hint-float {
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
+  }
+  50% {
+    transform: translate(-50%, calc(-50% - 5px));
+  }
+}
+
+@keyframes preview-hint-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
+  }
 }
 </style>
