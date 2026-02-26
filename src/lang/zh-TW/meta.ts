@@ -28,11 +28,19 @@ export default {
         name: "實體名稱",
         author: "作者",
         updatedAt: "修改日期",
+        resources: "資源數",
       },
       properties: {
         type: "類型",
         entity: "實體",
         author: "作者",
+        resources: "使用資源數",
+      },
+      events: {
+        title: "信號",
+        inputs: "輸入",
+        outputs: "輸出",
+        empty: "無信號",
       },
     },
     create: {

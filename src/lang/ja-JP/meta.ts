@@ -28,11 +28,19 @@ export default {
         name: "エンティティ名",
         author: "作成者",
         updatedAt: "更新日",
+        resources: "リソース数",
       },
       properties: {
         type: "種類",
         entity: "エンティティ",
         author: "作成者",
+        resources: "使用リソース数",
+      },
+      events: {
+        title: "シグナル",
+        inputs: "入力",
+        outputs: "出力",
+        empty: "シグナルなし",
       },
     },
     create: {
