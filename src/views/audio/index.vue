@@ -208,7 +208,7 @@ const {
 } = useSelection();
 
 const uploadDialogVisible = ref(false);
-const fileType = ref("audio/mp3, audio/wav, audio/mpeg");
+const fileType = ref("audio/mp3, audio/wav");
 const viewDialogVisible = ref(false);
 const audioRef = ref<HTMLAudioElement | null>(null);
 

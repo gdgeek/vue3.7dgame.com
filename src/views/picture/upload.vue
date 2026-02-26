@@ -20,7 +20,7 @@ import MrPPUpload from "@/components/MrPP/MrPPUpload/index.vue";
 import { postPicture } from "@/api/v1/resources/index";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
-const fileType = ref("image/gif, image/jpeg, image/png");
+const fileType = ref("image/jpeg, image/png");
 const router = useRouter();
 
 let completedCount = 0;

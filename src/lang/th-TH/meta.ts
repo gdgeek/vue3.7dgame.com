@@ -114,6 +114,7 @@ export default {
       title: "เลือกทรัพยากร",
       replaceTitle: "แทนที่ทรัพยากร",
       select: "เลือก",
+      cancelSelect: "ยกเลิกการเลือก",
       putIn: "ใส่",
       replace: "แทนที่",
       putAllIn: "ใส่ทั้งหมด",

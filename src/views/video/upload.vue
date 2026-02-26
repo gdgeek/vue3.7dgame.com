@@ -21,7 +21,7 @@ import { postVideo } from "@/api/v1/resources/index";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 // 定义允许的文件类型
-const fileType = ref("video/mp4, video/mov, video/avi");
+const fileType = ref("video/mp4");
 const router = useRouter();
 
 let completedCount = 0;

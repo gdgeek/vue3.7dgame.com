@@ -199,7 +199,7 @@ const {
 } = useSelection();
 
 const uploadDialogVisible = ref(false);
-const fileType = ref("image/gif, image/jpeg, image/png, image/webp");
+const fileType = ref("image/jpeg, image/png");
 const viewDialogVisible = ref(false);
 const currentPictureId = ref<number | null>(null);
 

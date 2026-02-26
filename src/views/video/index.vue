@@ -104,6 +104,7 @@
         v-model="uploadDialogVisible"
         dir="video"
         :file-type="fileType"
+        display-formats="MP4 (H.264)"
         :max-size="80"
         :title="$t('video.uploadVideo')"
         @save-resource="saveVideo"
@@ -214,7 +215,7 @@ const {
 } = useSelection();
 
 const uploadDialogVisible = ref(false);
-const fileType = ref("video/mp4, video/webm");
+const fileType = ref("video/mp4");
 const viewDialogVisible = ref(false);
 const currentVideoId = ref<number | null>(null);
 

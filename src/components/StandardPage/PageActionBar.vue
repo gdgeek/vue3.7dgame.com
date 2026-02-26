@@ -97,6 +97,7 @@
               </button>
 
               <button
+                v-if="showNameSort"
                 class="sort-btn"
                 :class="{ active: isSortedByName }"
                 @click="toggleSort(sortByNameField)"
@@ -163,6 +164,7 @@ const props = withDefaults(
   {
     showSearch: true,
     showSort: true,
+    showNameSort: true,
     showViewToggle: true,
     defaultView: "grid",
     defaultSort: "-created_at",

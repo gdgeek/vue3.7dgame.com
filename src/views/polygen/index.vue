@@ -253,7 +253,7 @@ const handleCancelSelectAllPage = () => {
 
 // Dialog state
 const uploadDialogVisible = ref(false);
-const fileType = ref(".glb, .gltf, .obj, .fbx");
+const fileType = ref(".glb");
 const viewDialogVisible = ref(false);
 const currentPolygenId = ref<number | null>(null);
 

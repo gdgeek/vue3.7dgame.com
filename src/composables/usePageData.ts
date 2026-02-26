@@ -1,4 +1,5 @@
 import { logger } from "@/utils/logger";
+import { sortByNameWithPinyin } from "@/utils/nameSort";
 import { ref, reactive, computed, onMounted } from "vue";
 import type { ViewMode } from "@/components/StandardPage/types";
 import type { FetchParams, FetchResponse } from "@/types/api";
@@ -74,7 +75,22 @@ export function usePageData<T = unknown>(options: UsePageDataOptions<T>) {
       pagination.size = parseInt(String(pageSizeHeader ?? pageSize));
       pagination.total = parseInt(String(totalCountHeader ?? "0"));
 
-      items.value = response.data || [];
+      const fetchedItems = response.data || [];
+      items.value = sortByNameWithPinyin(
+        fetchedItems,
+        sorted.value,
+        (item) => {
+          const record = item as Record<string, unknown>;
+          const user = record.user as Record<string, unknown> | undefined;
+          const name =
+            record.name ??
+            record.title ??
+            user?.nickname ??
+            user?.username ??
+            "";
+          return String(name);
+        }
+      );
     } catch (error) {
       logger.error("Failed to fetch data:", error);
       items.value = [];
