@@ -107,3 +107,39 @@ describe("getDomainLanguage()", () => {
     expect(url).toContain("zh-TW");
   });
 });
+
+describe("domain-query response interceptor", () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    vi.resetModules();
+    mockAxiosInstance.get.mockResolvedValue({});
+    await import("@/api/domain-query");
+  });
+
+  it("passes through successful response", () => {
+    const resInterceptor =
+      mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[0];
+    const response = { data: { domain: "example.com" } };
+    expect(resInterceptor(response)).toBe(response.data);
+  });
+
+  it("rejects on network error when retry already attempted", async () => {
+    const errInterceptor =
+      mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[1];
+    const error = {
+      config: { _retry: true },
+      response: undefined,
+    };
+    await expect(errInterceptor(error)).rejects.toBe(error);
+  });
+
+  it("rejects on response error (non-network)", async () => {
+    const errInterceptor =
+      mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[1];
+    const error = {
+      config: { _retry: false },
+      response: { status: 404, data: {} },
+    };
+    await expect(errInterceptor(error)).rejects.toBe(error);
+  });
+});

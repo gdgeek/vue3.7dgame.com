@@ -325,4 +325,32 @@ describe("AiRodin API — HTTP methods", () => {
     await aiRodinApi.list("-created_at", "", 2);
     expect(request.mock.calls[0][0].url).toContain("page=2");
   });
+
+  it("file() calls GET with id query param", async () => {
+    await aiRodinApi.file(42);
+    const arg = request.mock.calls[0][0];
+    expect(arg.url).toContain("id=42");
+    expect(arg.method).toBe("get");
+  });
+
+  it("rodin() calls GET with query params", async () => {
+    await aiRodinApi.rodin({ task_uuid: "abc" });
+    const arg = request.mock.calls[0][0];
+    expect(arg.url).toContain("task_uuid=abc");
+    expect(arg.method).toBe("get");
+  });
+
+  it("check() calls GET with id query param", async () => {
+    await aiRodinApi.check(7);
+    const arg = request.mock.calls[0][0];
+    expect(arg.url).toContain("id=7");
+    expect(arg.method).toBe("get");
+  });
+
+  it("download() calls GET with id query param", async () => {
+    await aiRodinApi.download(99);
+    const arg = request.mock.calls[0][0];
+    expect(arg.url).toContain("id=99");
+    expect(arg.method).toBe("get");
+  });
 });
