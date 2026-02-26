@@ -16,6 +16,7 @@ export default {
     name: "名称",
     description: "描述",
     edit: "编辑",
+    rename: "重新命名",
     updateSuccess: "更新成功",
     createSuccess: "创建成功",
     createFailed: "创建失败",

@@ -15,6 +15,7 @@ export default {
     name: "名稱",
     description: "描述",
     edit: "編輯",
+    rename: "重新命名",
     back: "返回",
     updateSuccess: "更新成功",
     createSuccess: "創建成功",

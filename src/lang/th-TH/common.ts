@@ -15,6 +15,7 @@ export default {
     name: "ชื่อ",
     description: "คำอธิบาย",
     edit: "แก้ไข",
+    rename: "เปลี่ยนชื่อ",
     back: "กลับ",
     updateSuccess: "อัปเดตสำเร็จ",
     createSuccess: "สร้างสำเร็จ",
