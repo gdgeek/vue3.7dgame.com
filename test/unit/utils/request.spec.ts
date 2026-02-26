@@ -195,4 +195,70 @@ describe("response interceptor logic", () => {
     await errInterceptor(error).catch(() => {});
     expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
   });
+
+  it("handles 404 response by showing 404 error message", async () => {
+    const { ElMessage } = await import("element-plus");
+    await import("@/utils/request");
+
+    const errInterceptor =
+      mockService.interceptors.response.use.mock.calls[0]?.[1];
+    const error = {
+      message: "Not Found",
+      response: { status: 404, data: {} },
+      config: { _retry: true },
+    };
+    await errInterceptor(error).catch(() => {});
+    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
+  });
+
+  it("shows response.data.message for other error status codes", async () => {
+    const { ElMessage } = await import("element-plus");
+    await import("@/utils/request");
+
+    const errInterceptor =
+      mockService.interceptors.response.use.mock.calls[0]?.[1];
+    const error = {
+      message: "Bad Request",
+      response: { status: 400, data: { message: "Custom server message" } },
+      config: { _retry: true },
+    };
+    await errInterceptor(error).catch(() => {});
+    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "Custom server message" })
+    );
+  });
+
+  it("shows error.message when response.data.message is absent for other status codes", async () => {
+    const { ElMessage } = await import("element-plus");
+    await import("@/utils/request");
+
+    const errInterceptor =
+      mockService.interceptors.response.use.mock.calls[0]?.[1];
+    const error = {
+      message: "Conflict",
+      response: { status: 409, data: {} },
+      config: { _retry: true },
+    };
+    await errInterceptor(error).catch(() => {});
+    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "Conflict" })
+    );
+  });
+
+  it("logs and shows error message for non-Network errors without response", async () => {
+    const { ElMessage } = await import("element-plus");
+    const { logger } = await import("@/utils/logger");
+    await import("@/utils/request");
+
+    const errInterceptor =
+      mockService.interceptors.response.use.mock.calls[0]?.[1];
+    const error = {
+      message: "ECONNREFUSED",
+      response: undefined,
+      config: { _retry: true },
+    };
+    await errInterceptor(error).catch(() => {});
+    expect((logger as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
+    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
+  });
 });

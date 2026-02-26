@@ -92,4 +92,19 @@ describe("helper utils", () => {
       expect(result).toBe("https://example.com/api");
     });
   });
+
+  describe("ReplaceIP", () => {
+    it("should replace {ip} placeholder with current host IP", async () => {
+      const { ReplaceIP } = await import("@/utils/helper");
+      const result = ReplaceIP("http://{ip}:8080/api");
+      expect(result).toContain("www.example.com");
+      expect(result).not.toContain("{ip}");
+    });
+
+    it("should handle string without {ip} placeholder", async () => {
+      const { ReplaceIP } = await import("@/utils/helper");
+      const result = ReplaceIP("http://static.example.com/api");
+      expect(result).toBe("http://static.example.com/api");
+    });
+  });
 });

@@ -169,11 +169,48 @@ describe("EduClass API", () => {
   // -----------------------------------------------------------------------
   // Group operations
   // -----------------------------------------------------------------------
+  describe("searchClasses()", () => {
+    it("calls GET /v1/edu-class", async () => {
+      await classApi.searchClasses();
+      const { url, method } = request.mock.calls[0][0];
+      expect(url).toContain("/v1/edu-class");
+      expect(method).toBe("get");
+    });
+
+    it("includes ClassSearch[name] when search provided", async () => {
+      await classApi.searchClasses("-created_at", "Science");
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("ClassSearch");
+      expect(url).toContain("Science");
+    });
+
+    it("omits ClassSearch when search is empty", async () => {
+      await classApi.searchClasses("-created_at", "");
+      expect(request.mock.calls[0][0].url).not.toContain("ClassSearch");
+    });
+
+    it("includes page when page > 1", async () => {
+      await classApi.searchClasses("-created_at", "", 2);
+      expect(request.mock.calls[0][0].url).toContain("page=2");
+    });
+
+    it("omits page when page === 1", async () => {
+      await classApi.searchClasses("-created_at", "", 1);
+      expect(request.mock.calls[0][0].url).not.toContain("page=");
+    });
+  });
+
   describe("getClassGroups()", () => {
     it("calls GET /v1/edu-class/{id}/groups", async () => {
       await classApi.getClassGroups(2);
       const url: string = request.mock.calls[0][0].url;
       expect(url).toContain("/v1/edu-class/2/groups");
+    });
+
+    it("includes expand when expand param is provided", async () => {
+      await classApi.getClassGroups(2, "-created_at", "", 1, "verse");
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("expand=verse");
     });
 
     it("includes GroupSearch when search provided", async () => {
