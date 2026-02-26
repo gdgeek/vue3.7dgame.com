@@ -136,4 +136,26 @@ describe("Message static methods", () => {
     expect(props.type).toBe("error");
     expect(props.duration).toBe(3000);
   });
+
+  it("Message.success() accepts options object", () => {
+    Message.success({ message: "done", duration: 2000 });
+    const props = createVNode.mock.calls[0][1];
+    expect(props.message).toBe("done");
+    expect(props.type).toBe("success");
+    expect(props.duration).toBe(2000);
+  });
+
+  it("Message.warning() accepts options object", () => {
+    Message.warning({ message: "caution", duration: 4000 });
+    const props = createVNode.mock.calls[0][1];
+    expect(props.message).toBe("caution");
+    expect(props.type).toBe("warning");
+  });
+
+  it("Message.info() accepts options object", () => {
+    Message.info({ message: "note", duration: 1000 });
+    const props = createVNode.mock.calls[0][1];
+    expect(props.message).toBe("note");
+    expect(props.type).toBe("info");
+  });
 });

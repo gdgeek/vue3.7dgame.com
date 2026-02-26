@@ -238,6 +238,18 @@ describe("Group API", () => {
       const url: string = request.mock.calls[0][0].url;
       expect(url).toContain("page=3");
     });
+
+    it("includes per-page when perPage is not 20", async () => {
+      await groupApi.getGroupVerses(2, "-created_at", 1, 50);
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("per-page=50");
+    });
+
+    it("includes search when search string is provided", async () => {
+      await groupApi.getGroupVerses(2, "-created_at", 1, 20, "verse.image,verse.author", "keyword");
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("search=keyword");
+    });
   });
 
   // -----------------------------------------------------------------------

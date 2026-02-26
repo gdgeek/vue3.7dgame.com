@@ -182,6 +182,12 @@ describe("EduClass API", () => {
       expect(url).toContain("GroupSearch");
       expect(url).toContain("team");
     });
+
+    it("includes page param when page > 1", async () => {
+      await classApi.getClassGroups(2, "-created_at", "", 3);
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("page=3");
+    });
   });
 
   describe("createClassGroup()", () => {
@@ -231,6 +237,12 @@ describe("EduClass API", () => {
       const url: string = request.mock.calls[0][0].url;
       expect(url).toContain("/v1/edu-class/by-teacher");
       expect(url).toContain("user_id=12");
+    });
+
+    it("includes page param when page > 1", async () => {
+      await classApi.getClassesByTeacher(12, "-created_at", 2);
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("page=2");
     });
   });
 });
