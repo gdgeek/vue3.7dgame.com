@@ -131,6 +131,18 @@ describe("usePermissionStore", () => {
     expect(typeof result[0].component).toBe("function");
   });
 
+  it("transformRoutes sets component to the matching view module when found", async () => {
+    // "home/index" maps to "../../views/home/index.vue" which exists in the project,
+    // exercising the branch where a component IS found in the glob modules (line 67).
+    mockRouterData.value = [
+      { path: "/home", component: "home/index" },
+    ] as never;
+    const store = usePermissionStore();
+    const result = await store.generateRoutes();
+    expect(result).toHaveLength(1);
+    expect(typeof result[0].component).toBe("function");
+  });
+
   it("transformRoutes recursively processes children routes", async () => {
     mockRouterData.value = [
       {
