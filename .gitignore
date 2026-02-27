@@ -54,3 +54,4 @@ vite.config.ts.timestamp-*.mjs
 
 # Cleanup plan (temporary)
 .cleanup-plan.md
+.claude/
