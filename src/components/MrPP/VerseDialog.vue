@@ -128,9 +128,25 @@ type VerseItem = {
 const emit = defineEmits(["selected", "cancel"]);
 const { t } = useI18n();
 
-const { dialogVisible, active, sort, search, clearSearched, handleCurrentChange, openDialog } =
+const {
+  dialogVisible,
+  active,
+  sort,
+  search,
+  clearSearched,
+  handleCurrentChange,
+  openDialog,
+} =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useDialogList<VerseItem>((sorted, searched, page) => getVerses({ sort: sorted, search: searched, page, expand: "image" }) as any);
+  useDialogList<VerseItem>(
+    (sorted, searched, page) =>
+      getVerses({
+        sort: sorted,
+        search: searched,
+        page,
+        expand: "image",
+      }) as any
+  );
 
 const title = (item: VerseItem) => item.title || item.name || "title";
 

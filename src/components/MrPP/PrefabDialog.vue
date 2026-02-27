@@ -120,9 +120,20 @@ import { useDialogList } from "@/composables/useDialogList";
 const emit = defineEmits(["selected", "cancel"]);
 const { t } = useI18n();
 
-const { dialogVisible, active, sort, search, clearSearched, handleCurrentChange, openDialog } =
+const {
+  dialogVisible,
+  active,
+  sort,
+  search,
+  clearSearched,
+  handleCurrentChange,
+  openDialog,
+} =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useDialogList<prefabsData>((sorted, searched, page) => getPrefabs(sorted, searched, page, "image") as any);
+  useDialogList<prefabsData>(
+    (sorted, searched, page) =>
+      getPrefabs(sorted, searched, page, "image") as any
+  );
 
 const knightData = ref<InstanceType<typeof KnightDataDialog>>();
 const verse_id = ref(-1);

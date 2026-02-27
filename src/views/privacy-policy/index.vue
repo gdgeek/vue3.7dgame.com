@@ -12,7 +12,9 @@
     </el-tabs>
 
     <keep-alive>
-      <component :is="activeTab === 'privacy' ? PrivacyPolicyTab : TermsOfServiceTab" />
+      <component
+        :is="activeTab === 'privacy' ? PrivacyPolicyTab : TermsOfServiceTab"
+      ></component>
     </keep-alive>
   </div>
 </template>
@@ -22,10 +24,10 @@ import { ref, onMounted, defineAsyncComponent } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 const PrivacyPolicyTab = defineAsyncComponent(
-  () => import("./components/PrivacyPolicyTab.vue"),
+  () => import("./components/PrivacyPolicyTab.vue")
 );
 const TermsOfServiceTab = defineAsyncComponent(
-  () => import("./components/TermsOfServiceTab.vue"),
+  () => import("./components/TermsOfServiceTab.vue")
 );
 
 defineOptions({
