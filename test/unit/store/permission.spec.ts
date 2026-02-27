@@ -59,7 +59,9 @@ describe("usePermissionStore", () => {
   });
 
   it("does not change mixLeftMenus when path is not found", () => {
-    mockRouterData.value = [{ path: "/home", children: [{ path: "/sub" }] }] as never;
+    mockRouterData.value = [
+      { path: "/home", children: [{ path: "/sub" }] },
+    ] as never;
     const store = usePermissionStore();
     store.setMixLeftMenus("/nonexistent");
     expect(store.mixLeftMenus).toEqual([]);
@@ -131,15 +133,15 @@ describe("usePermissionStore", () => {
     expect(typeof result[0].component).toBe("function");
   });
 
-  it("transformRoutes assigns matched module component for existing view", async () => {
-    // src/views/home/index.vue exists in the project, so import.meta.glob resolves it
+  it("transformRoutes sets component to the matching view module when found", async () => {
+    // "home/index" maps to "../../views/home/index.vue" which exists in the project,
+    // exercising the branch where a component IS found in the glob modules (line 67).
     mockRouterData.value = [
       { path: "/home", component: "home/index" },
     ] as never;
     const store = usePermissionStore();
     const result = await store.generateRoutes();
     expect(result).toHaveLength(1);
-    // The component should be the resolved lazy loader (a function), not undefined
     expect(typeof result[0].component).toBe("function");
   });
 
@@ -183,7 +185,9 @@ describe("usePermissionStore", () => {
   // usePermissionStoreHook()
   // -----------------------------------------------------------------------
   it("usePermissionStoreHook() returns a store with expected interface", async () => {
-    const { usePermissionStoreHook } = await import("@/store/modules/permission");
+    const { usePermissionStoreHook } = await import(
+      "@/store/modules/permission"
+    );
     const hook = usePermissionStoreHook();
     expect(hook).toHaveProperty("routes");
     expect(hook).toHaveProperty("generateRoutes");
