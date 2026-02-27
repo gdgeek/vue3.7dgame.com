@@ -143,3 +143,36 @@ describe("domain-query response interceptor", () => {
     await expect(errInterceptor(error)).rejects.toBe(error);
   });
 });
+
+describe("domain-query request interceptor", () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    vi.resetModules();
+    mockAxiosInstance.get.mockResolvedValue({});
+    await import("@/api/domain-query");
+  });
+
+  it("sets baseURL from currentApi when config has relative URL", () => {
+    const reqInterceptor =
+      mockAxiosInstance.interceptors.request.use.mock.calls[0]?.[0];
+    const config = { baseURL: "/relative" };
+    const result = reqInterceptor(config);
+    // currentApi = PRIMARY_API = "https://domain.xrteeth.com"
+    expect(result.baseURL).toBe("https://domain.xrteeth.com");
+  });
+
+  it("leaves baseURL unchanged when it already starts with http", () => {
+    const reqInterceptor =
+      mockAxiosInstance.interceptors.request.use.mock.calls[0]?.[0];
+    const config = { baseURL: "https://other.api.com" };
+    const result = reqInterceptor(config);
+    expect(result.baseURL).toBe("https://other.api.com");
+  });
+
+  it("returns config object", () => {
+    const reqInterceptor =
+      mockAxiosInstance.interceptors.request.use.mock.calls[0]?.[0];
+    const config = { baseURL: "https://example.com" };
+    expect(reqInterceptor(config)).toBe(config);
+  });
+});

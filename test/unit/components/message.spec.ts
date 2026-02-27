@@ -90,6 +90,24 @@ describe("Message()", () => {
     close();
     expect(mockClose).toHaveBeenCalled();
   });
+
+  it("props.onClose callback triggers internal close (calls component exposed.close)", () => {
+    Message("onclose-test");
+    const props = createVNode.mock.calls[0][1];
+    // Trigger the onClose prop (simulating the component emitting close)
+    props.onClose();
+    expect(mockClose).toHaveBeenCalled();
+  });
+
+  it("props.onDestroy callback calls render with null to clean up container", () => {
+    Message("ondestroy-test");
+    const props = createVNode.mock.calls[0][1];
+    const callsBefore = vueRender.mock.calls.length;
+    props.onDestroy();
+    expect(vueRender.mock.calls.length).toBeGreaterThan(callsBefore);
+    const lastCall = vueRender.mock.calls[vueRender.mock.calls.length - 1];
+    expect(lastCall[0]).toBeNull();
+  });
 });
 
 describe("Message static methods", () => {
