@@ -66,32 +66,33 @@
 MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialog（250行→175行）均已重构。
 `ResourceDialog.vue` 使用略不同的独立 refs 风格，暂未重构，可后续跟进。
 
-#### 4. CSS 主题文件拆分（`theme-styles.scss` 9648 行）
+#### 4. CSS 主题文件拆分（`theme-styles.scss` 9648 行）⏳ 待处理
 - **位置**：`src/styles/themes/theme-styles.scss`
-- **问题**：全部打入初始 CSS bundle
+- **状态**：2026-02-27 确认仍为 9648 行，未处理
 - **建议**：按路由模块拆分，配合 Vite CSS code splitting 按需加载
 - **预计收益**：初始 CSS 减少 30–40%，改动量较大，需完整回归测试
 
-#### 5. `element-plus/dist/index.css` 全量样式
+#### 5. `element-plus/dist/index.css` 全量样式⏳ 待处理
 - **位置**：`src/main.ts` 第 84 行
-- **问题**：导入完整 Element Plus 样式（包含未使用的组件样式）
+- **状态**：2026-02-27 确认仍为全量导入
 - **建议**：删除全量导入，依赖 `ElementPlusResolver` 按需加载样式
 - **风险**：overlay、scrollbar 等全局样式可能依赖此文件，需仔细测试
 
 ### 低优先级
 
-#### 6. 大文件拆分（>800 行）
-以下文件过大，可拆分为子组件或 composable：
+#### 6. 大文件拆分（>800 行）⏳ 待处理
+以下文件过大，可拆分为子组件或 composable（2026-02-27 实测行数）：
 
 | 文件 | 行数 | 建议 |
 |------|------|------|
 | `src/views/meta/ScenePlayer.vue` | 2053 | 提取渲染逻辑、工具栏、面板为子组件 |
-| `src/views/meta/script.vue` | 1735 | 提取逻辑为 composable |
-| `src/views/privacy-policy/index.vue` | 1707 | 静态内容，按章节拆分 |
+| `src/views/meta/script.vue` | 1736 | 提取逻辑为 composable |
 | `src/views/verse/script.vue` | 1593 | 与 meta/script.vue 有大量相似逻辑，可共用 |
-| `src/views/meta-verse/index.vue` | 1176 | 提取弹窗和列表为子组件 |
+| `src/views/meta-verse/index.vue` | 1177 | 提取弹窗和列表为子组件 |
 | `src/views/audio/tts.vue` | 992 | 大型功能页面，可按区域拆分 |
-| `src/views/settings/edit.vue` | 939 | 各表单区块可拆分 |
+| `src/views/settings/edit.vue` | 1256 | 各表单区块可拆分 |
+
+> 注：`src/views/privacy-policy/index.vue` 已于 2026-02-27 重构，拆分为子组件并添加了 100% 测试覆盖。
 
 #### ~~7. `useTheme` composable 批量 DOM 操作~~ ⏭ 评估后跳过
 现代浏览器会自动批量处理同步 `setProperty` 调用（同一微任务内只触发一次重绘）。
