@@ -91,6 +91,10 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 | `src/views/meta-verse/index.vue` | 1177 | 提取弹窗和列表为子组件 |
 | `src/views/audio/tts.vue` | 992 | 大型功能页面，可按区域拆分 |
 | `src/views/settings/edit.vue` | 1256 | 各表单区块可拆分 |
+| `src/views/introduce/components/About.vue` | 1348 | 主要是静态轮播内容，拆分为 slide 数据 + 渲染组件 |
+| `src/views/web/components/News/index.vue` | 1087 | 抽取 NewsCard、NewsList 为独立组件 |
+| `src/views/web/components/Hero.vue` | 1052 | 拆分 hero sections |
+| `src/views/verse/ScenePlayer.vue` | 809 | meta/ScenePlayer 的复制版，考虑合并为通用组件 |
 
 > 注：`src/views/privacy-policy/index.vue` 已于 2026-02-27 重构，拆分为子组件并添加了 100% 测试覆盖。
 
@@ -101,6 +105,180 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 
 #### ~~8. `variables.module.scss` 使用确认~~ ✅ 已确认，无需操作（2026-02-25）
 3 个布局组件通过 CSS Modules 导入使用：AppMain/index.vue、SidebarMenu.vue、SidebarMixTopMenu.vue。保留。
+
+---
+
+## 新发现的改进项（2026-02-27 扫描）
+
+### 🔴 高优先级
+
+#### 9. 死代码：`src/assets/js/fontok.ts`（945 行）🗑️ 待删除
+- **问题**：包含 FontAwesome 图标名到 Unicode 码的完整映射表，**全项目无任何文件导入它**
+- **验证**：`grep -r "fontok" src/` 结果为 0
+- **操作**：直接删除该文件，减少约 945 行无用代码
+- **注意**：不要与 `@fortawesome/fontawesome-svg-core`（正常使用）混淆
+
+#### 10. `express` 出现在 production dependencies ⚠️
+- **位置**：`package.json` → `dependencies`（非 `devDependencies`）
+- **问题**：Express 是 Node.js 服务端框架，不应打包进前端 bundle
+- **操作**：检查其实际用途（疑似 mock server 或开发工具），移至 `devDependencies` 或删除
+- **验证**：`grep -r "from 'express'" src/` 看是否在源码中真实使用
+
+#### 11. 重复的 ScenePlayer 组件 ⚠️
+- **文件**：`src/views/meta/ScenePlayer.vue`（2053 行）和 `src/views/verse/ScenePlayer.vue`（809 行）
+- **问题**：两个组件功能高度重叠，维护时需同步修改两份代码
+- **建议**：合并为 `src/components/ScenePlayer/index.vue`，通过 props 区分 meta/verse 模式
+- **影响**：减少约 800 行重复代码，bug 修复只需一处
+
+#### 12. `meta/script.vue` 与 `verse/script.vue` 逻辑重复 ⚠️
+- **行数**：1736 + 1593 = 3329 行，高度相似
+- **重复内容**：GLTF loader 初始化、场景通信、代码对话框逻辑、iframe 通信
+- **建议**：提取公共逻辑为 `useSceneScript` composable，两个文件各自保留差异部分
+- **预计收益**：每个文件减少 40–50% 行数
+
+### 🟡 中优先级
+
+#### 13. 全局错误处理缺失 ⚠️
+- **现状**：`src/main.ts` 没有设置 `app.config.errorHandler`，`window.addEventListener('unhandledrejection')` 也未配置
+- **影响**：生产环境的 Vue 渲染错误、未捕获的 Promise 拒绝会静默失败，无法追踪
+- **建议**：
+  ```typescript
+  // src/main.ts
+  app.config.errorHandler = (err, instance, info) => {
+    console.error('[Vue Error]', err, info);
+    // 上报到监控系统（Sentry 等）
+  };
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error('[Unhandled Promise]', event.reason);
+  });
+  ```
+
+#### 14. 路由布局组件未懒加载
+- **问题**：`Structure`、`SimpleStructure`、`Empty` 等布局组件在路由文件顶部静态 import，会打入主 bundle
+- **涉及文件**：`campus.ts`（SimpleStructure）、`home.ts`（Structure、Empty）、`verse.ts`（null 组件待查）
+- **说明**：布局组件由于所有路由共用，懒加载收益有限，但应记录并评估
+
+#### 15. `src/store/modules/availableVoices.ts`（1311 行）纯数据文件
+- **问题**：1311 行的 TS 文件，全部是静态数据（音色列表映射），被打入主 bundle
+- **建议**：转为 JSON 文件，在需要时异步 `import()`，或使用 Vite 的 `?raw` 导入
+- **预计收益**：主 bundle 减少约 30–50 KB
+
+#### 16. `highlight.js` 版本过旧（^10.7.3）
+- **问题**：10.x 是 2021 年版本，11.x/12.x 已发布多年，旧版有已知 ReDoS 漏洞
+- **操作**：`pnpm update highlight.js vue-hljs`，检查 API 兼容性
+- **参考**：highlight.js v11+ 不再包含自动检测（`highlightAuto`），需调整用法
+
+#### 17. 主要 views 完全没有测试
+以下大型功能模块行数超过 1000 行但零测试覆盖：
+
+| 模块 | 总行数 | 优先级 |
+|------|-------|--------|
+| `src/views/web/`（落地页）| 5336 行 | 中（主要是内容展示） |
+| `src/views/campus/`（校园管理）| 1934 行 | 高（核心业务） |
+| `src/views/meta-verse/`（元宇宙管理）| 1771 行 | 高（核心业务） |
+| `src/views/introduce/`（产品介绍）| 1764 行 | 低（静态内容为主） |
+| `src/views/settings/`（系统设置）| 1708 行 | 中 |
+| `src/views/particle/`（粒子编辑器）| 1002 行 | 中 |
+| `src/views/picture/`（图片管理）| 826 行 | 中 |
+| `src/views/video/`（视频管理）| 869 行 | 中 |
+
+### 🟢 低优先级
+
+#### 18. `aos` 动画库仅在 `web/` 使用
+- **现状**：`aos` 在 `bbs.vue` 和 `buy.vue` 中使用，每次都重新 `import "aos/dist/aos.css"`
+- **建议**：将 `aos` 加入 Vite `manualChunks`，避免重复打包；或评估是否用 CSS animation 替代
+- **体积**：`aos` 约 6KB gzip
+
+#### 19. `src/views/web/` 组件无国际化
+- **问题**：落地页（Hero.vue、News/index.vue 等）包含大量硬编码中文内容
+- **但是**：若落地页为纯中文产品页面，可能是设计决策而非 bug
+- **操作**：与产品确认是否需要多语言落地页
+
+#### 20. 缺少 CI/CD 自动化
+- **现状**：无 GitHub Actions，测试仅手动运行
+- **建议**：
+  ```yaml
+  # .github/workflows/ci.yml
+  on: [push, pull_request]
+  jobs:
+    test:
+      steps:
+        - run: pnpm run type-check
+        - run: pnpm run lint:eslint
+        - run: pnpm run test:run
+  ```
+- **价值**：防止合并破坏性变更，确保 TypeScript any = 0 的状态持续维护
+
+#### 21. 缺少错误监控（Sentry）
+- **现状**：生产环境无异常监控，问题靠用户反馈发现
+- **建议**：接入 Sentry 或类似服务
+- **成本**：免费套餐通常够用
+
+---
+
+### 🔴 新增高优先级（来自深度扫描）
+
+#### 22. 6 个资源上传页面完全重复 🗑️
+- **文件**（每个约 55–59 行，内容几乎完全相同）：
+  - `src/views/audio/upload.vue`
+  - `src/views/video/upload.vue`
+  - `src/views/picture/upload.vue`
+  - `src/views/particle/upload.vue`
+  - `src/views/polygen/upload.vue`
+  - `src/views/voxel/upload.vue`
+- **建议**：合并为 `src/components/ResourceUploadPage.vue`，通过路由 `meta.resourceType` 区分类型
+- **预计收益**：删除约 300 行重复代码，未来只需维护一处
+
+#### 23. 6 个资源查看页面完全重复 🗑️
+- **文件**（同上目录的 `view.vue`，结构一致）：`audio/view.vue`、`video/view.vue`、`picture/view.vue`、`particle/view.vue`、`polygen/view.vue`、`voxel/view.vue`
+- **建议**：合并为 `src/components/ResourceViewPage.vue`，参数化媒体类型与预览组件
+
+#### 24. Token 绕过 Store 直接写 localStorage ⚠️ 安全
+- **位置**：`src/views/login/index.vue`、`src/views/register/index.vue`
+- **问题**：直接调用 `localStorage.setItem(TOKEN_KEY, token)` 而非通过 Token Store（Token Store 内部使用 SecureLS 加密）
+- **风险**：Token 以明文存储在 localStorage，与项目安全设计矛盾
+- **修复**：
+  ```typescript
+  // ❌ 现有代码
+  localStorage.setItem(TOKEN_KEY, token);
+
+  // ✅ 应改为
+  const tokenStore = useTokenStore();
+  tokenStore.setToken(token); // 内部使用 SecureLS 加密
+  ```
+
+---
+
+### 🟡 新增中优先级（来自深度扫描）
+
+#### 25. campus/teacher.vue 与 campus/student.vue 高度重复
+- **行数**：325 + 325 = 650 行，结构 90% 相同（仅 API 端点和字段不同）
+- **建议**：抽取 `useCampusMemberList` composable，两个文件变为 <100 行的薄包装
+
+#### 26. API 层导出风格不一致
+- **问题**：约 30% 的 API 文件使用 `export default { ... }` 对象，70% 使用 `export const` 函数
+- **不一致文件**：`src/api/v1/user.ts`、`src/api/auth/wechat.ts`、`src/api/user/server.ts`、`src/api/v1/email.ts`
+- **影响**：IDE 自动导入、tree-shaking 效果、代码风格一致性
+- **建议**：统一改为 `export const` 具名导出
+
+#### 27. `helper.ts` 与 `utilityFunctions.ts` 功能可能重叠
+- **文件**：`src/utils/helper.ts`（58 行）和 `src/utils/utilityFunctions.ts`（78 行）
+- **建议**：检查是否有功能重复，合并为单一文件（例如 `src/utils/helpers.ts`）
+
+#### 28. `rollup-plugin-visualizer` 与 `vite-plugin-visualizer` 重复引入
+- **位置**：`package.json` devDependencies
+- **问题**：两个 Bundle 分析插件功能几乎相同，只需保留一个
+- **建议**：删除 `rollup-plugin-visualizer`，保留 `vite-plugin-visualizer`（与 Vite 集成更好）
+
+#### 29. `element-resize-detector` 已停止维护
+- **版本**：^1.2.4（最后更新 2021 年）
+- **建议**：替换为原生 `ResizeObserver` API（现代浏览器均已支持），或使用 `@vueuse/core` 的 `useResizeObserver`
+
+#### 30. `availableVoices.ts` 中文情感数据未国际化
+- **文件**：`src/store/modules/availableVoices.ts`（1311 行）
+- **问题**：情感名称（"悲伤"、"高兴"、"生气" 等）硬编码中文，`emotionMap` 作为显示用字符串
+- **建议**：将中文 key 移至 `src/lang/` 翻译文件，`emotionMap` 仅存储英文 key → API 参数的映射
+- **顺带**：评估能否将纯数据转为 JSON 文件按需加载，减少主 bundle 体积
 
 ---
 
