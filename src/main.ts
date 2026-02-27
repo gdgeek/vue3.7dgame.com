@@ -1,5 +1,6 @@
 import { createApp } from "vue";
 import App from "./App.vue";
+import { logger } from "@/utils/logger";
 import setupPlugins from "@/plugins";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -205,6 +206,16 @@ watch(
 );
 
 const app = createApp(App);
+
+// 全局 Vue 错误处理：捕获渲染/生命周期中的未捕获错误
+app.config.errorHandler = (err, _instance, info) => {
+  logger.error("[Vue Error]", err, info);
+};
+
+// 捕获未被 .catch() 处理的 Promise 拒绝
+window.addEventListener("unhandledrejection", (event) => {
+  logger.error("[Unhandled Promise]", event.reason);
+});
 
 //const time = new Date().getTime();
 app.use(VueAppleLogin, VueAppleLoginConfig);
