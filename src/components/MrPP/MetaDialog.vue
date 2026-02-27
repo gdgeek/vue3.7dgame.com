@@ -116,9 +116,19 @@ const verse_id = ref(-1);
 const value = ref<unknown>(null);
 const { t } = useI18n();
 
-const { dialogVisible, active, sort, search, clearSearched, handleCurrentChange, openDialog } =
+const {
+  dialogVisible,
+  active,
+  sort,
+  search,
+  clearSearched,
+  handleCurrentChange,
+  openDialog,
+} =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useDialogList<metaInfo>((sorted, searched, page) => getMetas(sorted, searched, page, "image") as any);
+  useDialogList<metaInfo>(
+    (sorted, searched, page) => getMetas(sorted, searched, page, "image") as any
+  );
 
 type MetaSelection = {
   data: metaInfo;

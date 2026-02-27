@@ -145,7 +145,9 @@
 
           <el-collapse-item title="1.4 设备传感器数据" name="4">
             <div class="right-content">
-              <p>为了实现混合现实功能和空间交互，我们需要访问以下传感器数据：</p>
+              <p>
+                为了实现混合现实功能和空间交互，我们需要访问以下传感器数据：
+              </p>
               <ul>
                 <li>
                   <strong>摄像头数据</strong>
@@ -164,8 +166,12 @@
                     <li>数据实时处理，不存储原始图像</li>
                     <li>可随时通过权限设置关闭</li>
                     <li>用于游戏场景中的虚实融合</li>
-                    <li>人脸数据仅用于AR效果中的面部遮罩、位置跟踪和表情识别</li>
-                    <li>人脸数据全部在本地设备上实时处理，不会上传至服务器或共享给第三方</li>
+                    <li>
+                      人脸数据仅用于AR效果中的面部遮罩、位置跟踪和表情识别
+                    </li>
+                    <li>
+                      人脸数据全部在本地设备上实时处理，不会上传至服务器或共享给第三方
+                    </li>
                     <li>我们不会保存任何可识别个人身份的人脸数据</li>
                   </ul>
                 </li>
@@ -654,7 +660,9 @@
                   </ul>
                 </li>
               </ul>
-              <p>我们有权对违规内容进行下架、删除，并视情节严重程度对账号进行限制或封禁。</p>
+              <p>
+                我们有权对违规内容进行下架、删除，并视情节严重程度对账号进行限制或封禁。
+              </p>
             </div>
           </el-collapse-item>
         </el-collapse>
@@ -741,9 +749,17 @@
           border
           class="custom-table"
         >
-          <el-table-column prop="type" label="Cookie类型" width="180"></el-table-column>
+          <el-table-column
+            prop="type"
+            label="Cookie类型"
+            width="180"
+          ></el-table-column>
           <el-table-column prop="purpose" label="使用目的"></el-table-column>
-          <el-table-column prop="duration" label="保存时间" width="180"></el-table-column>
+          <el-table-column
+            prop="duration"
+            label="保存时间"
+            width="180"
+          ></el-table-column>
         </el-table>
       </section>
 
@@ -804,7 +820,8 @@ const cookieData = ref([
   },
   {
     type: "功能Cookie",
-    purpose: "存储用户偏好，如界面布局、3D视图设置、编程环境配置、语言选择、游戏设置等",
+    purpose:
+      "存储用户偏好，如界面布局、3D视图设置、编程环境配置、语言选择、游戏设置等",
     duration: "1年",
   },
   {
@@ -837,7 +854,8 @@ const cookieData = ref([
 const policyUpdates = ref([
   {
     date: "2025-04-16",
-    content: "隐私政策1.2.0版本发布，更新混合现实游戏平台功能及Rokid设备支持相关内容",
+    content:
+      "隐私政策1.2.0版本发布，更新混合现实游戏平台功能及Rokid设备支持相关内容",
   },
   {
     date: "2025-01-10",
@@ -845,7 +863,8 @@ const policyUpdates = ref([
   },
   {
     date: "2024-11-05",
-    content: "隐私政策1.0.0版本发布，全面覆盖混合现实功能、3D创作工具和游戏开发的隐私保护规范",
+    content:
+      "隐私政策1.0.0版本发布，全面覆盖混合现实功能、3D创作工具和游戏开发的隐私保护规范",
   },
 ]);
 </script>

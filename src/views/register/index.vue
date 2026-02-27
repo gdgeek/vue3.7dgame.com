@@ -113,14 +113,9 @@
         v-if="!appleIdToken"
         :isMobile="isMobile"
         ref="loginFormRef"
-        @enter="enter"
         @register="register"
       ></login-form>
-      <register-form
-        v-else
-        @enter="enter"
-        :idToken="appleIdToken"
-      ></register-form>
+      <register-form v-else :idToken="appleIdToken"></register-form>
     </div>
 
     <el-card
@@ -153,7 +148,7 @@
 
 <script setup lang="ts">
 import "@/assets/font/font.css";
-import { useRouter, LocationQuery, useRoute } from "vue-router";
+import {} from "vue-router";
 import { AppleIdToken } from "@/api/auth/model";
 import LoginForm from "@/components/LoginForm.vue";
 import { ThemeEnum } from "@/enums/ThemeEnum";
@@ -161,65 +156,13 @@ import { useSettingsStore } from "@/store/modules/settings";
 //import { useInfomationStore } from "@/store/modules/information";
 import { useDomainStore } from "@/store/modules/domain";
 import { useScreenStore } from "@/store";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
-
-const router = useRouter();
-const route = useRoute();
 //const informationStore = useInfomationStore();
 const domainStore = useDomainStore();
 const settingsStore = useSettingsStore();
-const { t } = useI18n();
 const isDark = ref<boolean>(settingsStore.theme === ThemeEnum.DARK);
 const loginFormRef = ref<InstanceType<typeof LoginForm>>();
 const screenStore = useScreenStore();
 const isMobile = computed(() => screenStore.isMobile);
-
-const parseRedirect = (): {
-  path: string;
-  queryParams: Record<string, string>;
-} => {
-  const query: LocationQuery = route.query;
-  const redirect = (query.redirect as string) ?? "/home/index";
-  const url = new URL(redirect, window.location.origin);
-  const path = url.pathname;
-  const queryParams: Record<string, string> = {};
-
-  url.searchParams.forEach((value, key) => {
-    queryParams[key] = value;
-  });
-
-  return { path, queryParams };
-};
-
-type LoginPayload = { auth?: string };
-type LoginFormPayload = { value?: unknown };
-
-const enter = async (
-  user: LoginPayload,
-  form: LoginFormPayload,
-  resolve: () => void,
-  reject: (message: string) => void
-) => {
-  try {
-    ElMessage.success(t("login.success"));
-    const token = user.auth;
-    if (token) {
-      localStorage.setItem(TOKEN_KEY, token);
-      nextTick();
-    } else {
-      ElMessage.error("The login response is missing the access_token");
-    }
-    // await userStore.getUserInfo();
-
-    // userStore.setupRefreshInterval(form.value);
-
-    const { path, queryParams } = parseRedirect();
-    router.push({ path: path, query: queryParams });
-    resolve();
-  } catch (e) {
-    reject(e instanceof Error ? e.message : String(e));
-  }
-};
 
 const appleIdToken = ref<AppleIdToken | null>(null);
 const register = (idToken: AppleIdToken) => {
