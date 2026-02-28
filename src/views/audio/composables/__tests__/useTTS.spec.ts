@@ -16,6 +16,7 @@ vi.mock("element-plus", () => ({
     warning: vi.fn(),
     success: vi.fn(),
     error: vi.fn(),
+    info: vi.fn(),
   },
   ElMessageBox: {
     prompt: vi.fn(),
@@ -186,5 +187,77 @@ describe("useTTS", () => {
     const tts = useTTS(props);
     tts.audioPlayerRef.value = null;
     expect(() => tts.onTextInput()).not.toThrow();
+  });
+
+  it("starts with isManualScrolling and isMouseHovering as false", () => {
+    const props = createProps();
+    const tts = useTTS(props);
+    expect(tts.isManualScrolling.value).toBe(false);
+    expect(tts.isMouseHovering.value).toBe(false);
+  });
+
+  it("starts with audioPlayerRef and textContainerRef as null", () => {
+    const props = createProps();
+    const tts = useTTS(props);
+    expect(tts.audioPlayerRef.value).toBeNull();
+    expect(tts.textContainerRef.value).toBeNull();
+  });
+
+  it("uploadAudio() warns when currentAudioBlob is null", async () => {
+    const { ElMessage } = await import("element-plus");
+    const props = createProps();
+    const tts = useTTS(props);
+    tts.currentAudioBlob.value = null;
+
+    await tts.uploadAudio();
+
+    expect(ElMessage.warning).toHaveBeenCalled();
+  });
+
+  it("uploadAudio() does not set isUploading when blob is null", async () => {
+    const props = createProps();
+    const tts = useTTS(props);
+    tts.currentAudioBlob.value = null;
+
+    await tts.uploadAudio();
+
+    expect(tts.isUploading.value).toBe(false);
+  });
+
+  it("uploadAudio() handles cancel dialog gracefully", async () => {
+    const { ElMessage, ElMessageBox } = await import("element-plus");
+    (ElMessageBox.prompt as ReturnType<typeof vi.fn>).mockRejectedValueOnce("cancel");
+
+    const props = createProps();
+    const tts = useTTS(props);
+    tts.currentAudioBlob.value = new Blob(["audio"], { type: "audio/mp3" });
+
+    await tts.uploadAudio();
+
+    expect(tts.isUploading.value).toBe(false);
+    // info message should be shown for cancel
+    expect(ElMessage.warning).not.toHaveBeenCalled();
+  });
+
+  it("synthesizeSpeech() sets isLoading=false after completion", async () => {
+    const props = createProps();
+    const tts = useTTS(props);
+
+    vi.mocked(axios.post).mockResolvedValueOnce({
+      data: { Audio: "base64content", SessionId: "123" },
+    });
+
+    const mockAudio = {
+      play: vi.fn(),
+      addEventListener: vi.fn(),
+      pause: vi.fn(),
+      currentTime: 0,
+      duration: 10,
+    } as unknown as HTMLAudioElement;
+    tts.audioPlayerRef.value = mockAudio;
+
+    await tts.synthesizeSpeech();
+
+    expect(tts.isLoading.value).toBe(false);
   });
 });
