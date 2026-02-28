@@ -86,9 +86,12 @@ const createVideoEntity = (): Entity => ({
 });
 describe("useModelLoader", () => {
   let loader: ReturnType<typeof useModelLoader>;
+  let ctx: Parameters<typeof useModelLoader>[0];
 
   beforeEach(() => {
-    loader = useModelLoader(createContext());
+    ctx = createContext();
+    loader = useModelLoader(ctx);
+    vi.restoreAllMocks();
   });
 
   it("should be defined", () => {
@@ -117,9 +120,90 @@ describe("useModelLoader", () => {
     const result = await loader.loadModel(resource, entity);
 
     expect(result).toBeDefined();
-    // Since we mocked Scene.add, verifying calls to it would be ideal
-    // But result returns the mesh, so we can check that.
-    // However, in mock implementations, types might be loose.
     expect(result && result instanceof THREE.Object3D).toBe(true);
+  });
+
+  it("should store audio source and resolve true", async () => {
+    const resource: Resource = {
+      type: "audio",
+      file: { url: "http://example.com/sound.mp3" },
+      id: 2,
+    };
+    const entity: Entity = {
+      type: "Sound",
+      parameters: { uuid: "audio-uuid-1", active: true },
+    };
+
+    const result = await loader.loadModel(resource, entity);
+
+    expect(result).toBe(true);
+    expect(ctx.sources.has("audio-uuid-1")).toBe(true);
+    const entry = ctx.sources.get("audio-uuid-1") as { type: string; data: { url: string } };
+    expect(entry.type).toBe("audio");
+    expect(entry.data.url).toContain("sound.mp3");
+  });
+
+  it("should load text resource and return a Mesh", async () => {
+    // jsdom does not implement canvas getContext — provide a minimal mock
+    const mockCtx = {
+      fillStyle: "",
+      font: "",
+      textAlign: "",
+      textBaseline: "",
+      fillText: vi.fn(),
+    };
+    HTMLCanvasElement.prototype.getContext = vi.fn(() => mockCtx) as any;
+
+    const resource: Resource = {
+      type: "text",
+      file: null,
+      id: 3,
+    };
+    const entity: Entity = {
+      type: "Text",
+      parameters: { uuid: "text-uuid-1", active: true, text: "Hello World" },
+    };
+
+    const result = await loader.loadModel(resource, entity);
+
+    expect(result).toBeDefined();
+    expect(result instanceof THREE.Mesh).toBe(true);
+    expect(ctx.sources.has("text-uuid-1")).toBe(true);
+
+    // Cleanup
+    delete (HTMLCanvasElement.prototype as any).getContext;
+  });
+
+  it("returns undefined for unknown resource type", async () => {
+    const resource: Resource = {
+      type: "unknown-type" as any,
+      file: null,
+      id: 99,
+    };
+    const entity: Entity = {
+      type: "Unknown" as any,
+      parameters: { uuid: "unknown-uuid", active: true },
+    };
+
+    const result = await loader.loadModel(resource, entity);
+
+    expect(result).toBeUndefined();
+  });
+
+  it("should load model (GLTF) resource and return Object3D", async () => {
+    const resource: Resource = {
+      type: "model",
+      file: { url: "http://example.com/model.gltf" },
+      id: 4,
+    };
+    const entity: Entity = {
+      type: "Model",
+      parameters: { uuid: "model-uuid-1", active: true },
+    };
+
+    const result = await loader.loadModel(resource, entity);
+
+    expect(result).toBeDefined();
+    expect(result instanceof THREE.Object3D).toBe(true);
   });
 });
