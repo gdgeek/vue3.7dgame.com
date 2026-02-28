@@ -172,6 +172,30 @@ describe("useCampusMemberList — handleDelete", () => {
     await handleDelete();
     expect(detailVisible.value).toBe(false);
   });
+
+  it("shows success message after successful delete", async () => {
+    const options = makeOptions();
+    const { openDetail, handleDelete } =
+      useCampusMemberList<TestMember>(options);
+
+    openDetail(makeMember(7));
+    await handleDelete();
+
+    expect(mockMessageSuccess).toHaveBeenCalledWith("manager.messages.removeSuccess");
+  });
+
+  it("does not delete when user cancels confirmation", async () => {
+    mockConfirm.mockRejectedValue(new Error("cancel"));
+    const options = makeOptions();
+    const { openDetail, handleDelete } =
+      useCampusMemberList<TestMember>(options);
+
+    openDetail(makeMember(7));
+    await handleDelete();
+
+    expect(options.deleteFn).not.toHaveBeenCalled();
+    expect(mockRefresh).not.toHaveBeenCalled();
+  });
 });
 
 // -----------------------------------------------------------------------
@@ -197,5 +221,22 @@ describe("useCampusMemberList — deletedWindow", () => {
 
     await deletedWindow(makeMember(5));
     expect(mockRefresh).toHaveBeenCalled();
+  });
+
+  it("shows success message after successful delete", async () => {
+    const options = makeOptions();
+    const { deletedWindow } = useCampusMemberList<TestMember>(options);
+
+    await deletedWindow(makeMember(5));
+    expect(mockMessageSuccess).toHaveBeenCalledWith("manager.messages.removeSuccess");
+  });
+
+  it("does not delete when user cancels confirmation", async () => {
+    mockConfirm.mockRejectedValue(new Error("cancel"));
+    const options = makeOptions();
+    const { deletedWindow } = useCampusMemberList<TestMember>(options);
+
+    await deletedWindow(makeMember(5));
+    expect(options.deleteFn).not.toHaveBeenCalled();
   });
 });
