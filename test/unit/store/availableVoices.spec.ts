@@ -1,103 +1,38 @@
 /**
  * Unit tests for src/store/modules/availableVoices.ts
- * Covers: emotionMap, reverseEmotionMap, and availableVoices data integrity.
+ *
+ * Note: emotionMap and reverseEmotionMap were removed in refactoring #30.
+ * Emotion values are now English API params stored directly in voice.emotions.
  */
 import { describe, it, expect } from "vitest";
 import {
-  emotionMap,
-  reverseEmotionMap,
   availableVoices,
+  type VoiceType,
 } from "@/store/modules/availableVoices";
 
-// -----------------------------------------------------------------------
-// emotionMap
-// -----------------------------------------------------------------------
-describe("emotionMap", () => {
-  it("maps 中性 to neutral", () => {
-    expect(emotionMap["中性"]).toBe("neutral");
-  });
-
-  it("maps 悲伤 to sad", () => {
-    expect(emotionMap["悲伤"]).toBe("sad");
-  });
-
-  it("maps 高兴 to happy", () => {
-    expect(emotionMap["高兴"]).toBe("happy");
-  });
-
-  it("maps 生气 to angry", () => {
-    expect(emotionMap["生气"]).toBe("angry");
-  });
-
-  it("maps 恐惧 to fear", () => {
-    expect(emotionMap["恐惧"]).toBe("fear");
-  });
-
-  it("maps 撒娇 to sajiao", () => {
-    expect(emotionMap["撒娇"]).toBe("sajiao");
-  });
-
-  it("maps 解说 to jieshuo", () => {
-    expect(emotionMap["解说"]).toBe("jieshuo");
-  });
-
-  it("has 17 emotion entries", () => {
-    expect(Object.keys(emotionMap)).toHaveLength(17);
-  });
-
-  it("all values are non-empty strings", () => {
-    for (const [, value] of Object.entries(emotionMap)) {
-      expect(typeof value).toBe("string");
-      expect(value.length).toBeGreaterThan(0);
-    }
-  });
-
-  it("all Chinese keys are non-empty strings", () => {
-    for (const key of Object.keys(emotionMap)) {
-      expect(typeof key).toBe("string");
-      expect(key.length).toBeGreaterThan(0);
-    }
-  });
-});
+// The 17 valid English emotion API params defined in #30
+const KNOWN_EMOTIONS = new Set([
+  "neutral",
+  "sad",
+  "happy",
+  "angry",
+  "fear",
+  "news",
+  "story",
+  "radio",
+  "poetry",
+  "call",
+  "sajiao",
+  "disgusted",
+  "amaze",
+  "peaceful",
+  "exciting",
+  "aojiao",
+  "jieshuo",
+]);
 
 // -----------------------------------------------------------------------
-// reverseEmotionMap
-// -----------------------------------------------------------------------
-describe("reverseEmotionMap", () => {
-  it("is the exact inverse of emotionMap", () => {
-    for (const [chinese, english] of Object.entries(emotionMap)) {
-      expect(reverseEmotionMap[english]).toBe(chinese);
-    }
-  });
-
-  it("maps neutral to 中性", () => {
-    expect(reverseEmotionMap["neutral"]).toBe("中性");
-  });
-
-  it("maps sad to 悲伤", () => {
-    expect(reverseEmotionMap["sad"]).toBe("悲伤");
-  });
-
-  it("maps sajiao to 撒娇", () => {
-    expect(reverseEmotionMap["sajiao"]).toBe("撒娇");
-  });
-
-  it("has same number of entries as emotionMap", () => {
-    expect(Object.keys(reverseEmotionMap)).toHaveLength(
-      Object.keys(emotionMap).length
-    );
-  });
-
-  it("double-reverse lookup returns original key", () => {
-    for (const [chinese, english] of Object.entries(emotionMap)) {
-      const reversedBack = reverseEmotionMap[english];
-      expect(reversedBack).toBe(chinese);
-    }
-  });
-});
-
-// -----------------------------------------------------------------------
-// availableVoices
+// availableVoices — structural integrity
 // -----------------------------------------------------------------------
 describe("availableVoices", () => {
   it("is a non-empty array", () => {
@@ -168,14 +103,6 @@ describe("availableVoices", () => {
     expect(langs.has("日文")).toBe(true);
   });
 
-  it("all emotion names in voices are valid emotionMap keys", () => {
-    for (const voice of availableVoices) {
-      for (const emotion of voice.emotions) {
-        expect(emotionMap).toHaveProperty(emotion);
-      }
-    }
-  });
-
   it("all sampleRate values are valid (8k, 16k, or 24k)", () => {
     const validRates = new Set(["8k", "16k", "24k"]);
     for (const voice of availableVoices) {
@@ -185,22 +112,88 @@ describe("availableVoices", () => {
     }
   });
 
-  it("contains the standard premium voice 智逍遥 with value 100510000", () => {
+  it("contains the premium voice 智逍遥 with value 100510000", () => {
     const voice = availableVoices.find((v) => v.value === 100510000);
     expect(voice).toBeDefined();
     expect(voice!.type).toBe("精品音色");
     expect(voice!.language).toBe("中文");
   });
 
-  it("contains the standard voice 智聆 with value 1002", () => {
-    const voice = availableVoices.find((v) => v.value === 1002);
+  it("contains the premium voice 智聆 with value 101002", () => {
+    const voice = availableVoices.find((v) => v.value === 101002);
     expect(voice).toBeDefined();
-    expect(voice!.type).toBe("标准音色");
+    expect(voice!.type).toBe("精品音色");
+  });
+});
+
+// -----------------------------------------------------------------------
+// availableVoices — emotion values (English API params since #30)
+// -----------------------------------------------------------------------
+describe("availableVoices emotion values (English API params)", () => {
+  it("all emotion strings are known English API params", () => {
+    for (const voice of availableVoices) {
+      for (const emotion of voice.emotions) {
+        expect(KNOWN_EMOTIONS.has(emotion)).toBe(true);
+      }
+    }
   });
 
-  it("multi-emotion voices have 中性 as one of their emotions", () => {
+  it("no voice has Chinese emotion strings", () => {
+    const chinesePattern = /[\u4e00-\u9fa5]/;
     for (const voice of availableVoices) {
-      expect(voice.emotions).toContain("中性");
+      for (const emotion of voice.emotions) {
+        expect(chinesePattern.test(emotion)).toBe(false);
+      }
+    }
+  });
+
+  it("all voices include 'neutral' as an emotion", () => {
+    for (const voice of availableVoices) {
+      expect(voice.emotions).toContain("neutral");
+    }
+  });
+
+  it("voice 301000 (爱小广) has multiple emotions including happy and sad", () => {
+    const voice = availableVoices.find((v) => v.value === 301000);
+    expect(voice).toBeDefined();
+    expect(voice!.emotions).toContain("happy");
+    expect(voice!.emotions).toContain("sad");
+    expect(voice!.emotions.length).toBeGreaterThan(1);
+  });
+
+  it("has exactly 17 distinct emotion types across all voices", () => {
+    const allEmotions = new Set(availableVoices.flatMap((v) => v.emotions));
+    expect(allEmotions.size).toBe(17);
+    for (const e of allEmotions) {
+      expect(KNOWN_EMOTIONS.has(e)).toBe(true);
+    }
+  });
+
+  it("simple voices have exactly one emotion: neutral", () => {
+    const voice = availableVoices.find((v) => v.value === 101002); // 智聆
+    expect(voice).toBeDefined();
+    expect(voice!.emotions).toEqual(["neutral"]);
+  });
+});
+
+// -----------------------------------------------------------------------
+// VoiceType interface shape
+// -----------------------------------------------------------------------
+describe("VoiceType shape", () => {
+  it("every voice satisfies the VoiceType interface", () => {
+    const requiredKeys: (keyof VoiceType)[] = [
+      "label",
+      "value",
+      "emotions",
+      "type",
+      "scene",
+      "language",
+      "sampleRate",
+    ];
+    for (const voice of availableVoices) {
+      for (const key of requiredKeys) {
+        expect(voice).toHaveProperty(key);
+      }
     }
   });
 });
