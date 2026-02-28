@@ -69,6 +69,18 @@ describe("useTTS", () => {
     checkTextLanguage: vi.fn(),
   });
 
+  it("starts with correct initial state", () => {
+    const props = createProps();
+    const tts = useTTS(props);
+    expect(tts.isLoading.value).toBe(false);
+    expect(tts.isUploading.value).toBe(false);
+    expect(tts.isPlaying.value).toBe(false);
+    expect(tts.audioUrl.value).toBe("");
+    expect(tts.currentAudioBlob.value).toBeNull();
+    expect(tts.highlightedText.value).toBe("");
+    expect(tts.normalText.value).toBe("");
+  });
+
   it("should warn if text is empty on synthesis", async () => {
     const props = createProps();
     props.text.value = "";
@@ -116,5 +128,63 @@ describe("useTTS", () => {
 
     expect(tts.isPlaying.value).toBe(true);
     expect(mockAudio.play).toHaveBeenCalled();
+  });
+
+  it("onAudioPlayerPlay() sets isPlaying to true", () => {
+    const props = createProps();
+    const tts = useTTS(props);
+    tts.onAudioPlayerPlay();
+    expect(tts.isPlaying.value).toBe(true);
+  });
+
+  it("onAudioPlayerPause() is a no-op function", () => {
+    const props = createProps();
+    const tts = useTTS(props);
+    expect(() => tts.onAudioPlayerPause()).not.toThrow();
+  });
+
+  it("onAudioPlayerEnded() resets playing state and updates highlights", () => {
+    const props = createProps();
+    props.text.value = "Hello World";
+    const tts = useTTS(props);
+    tts.isPlaying.value = true;
+    tts.highlightedText.value = "Hello";
+    tts.normalText.value = " World";
+
+    tts.onAudioPlayerEnded();
+
+    expect(tts.isPlaying.value).toBe(false);
+    expect(tts.highlightedText.value).toBe("Hello World");
+    expect(tts.normalText.value).toBe("");
+  });
+
+  it("onTextInput() resets highlight, calls checkTextLanguage, pauses audio", () => {
+    const props = createProps();
+    props.text.value = "New text";
+    const tts = useTTS(props);
+
+    const mockAudio = {
+      pause: vi.fn(),
+      play: vi.fn(),
+      addEventListener: vi.fn(),
+    } as unknown as HTMLAudioElement;
+    tts.audioPlayerRef.value = mockAudio;
+    tts.isPlaying.value = true;
+    tts.highlightedText.value = "old highlighted";
+
+    tts.onTextInput();
+
+    expect(tts.highlightedText.value).toBe("");
+    expect(tts.normalText.value).toBe("New text");
+    expect(tts.isPlaying.value).toBe(false);
+    expect(mockAudio.pause).toHaveBeenCalled();
+    expect(props.checkTextLanguage).toHaveBeenCalled();
+  });
+
+  it("onTextInput() without audio player does not throw", () => {
+    const props = createProps();
+    const tts = useTTS(props);
+    tts.audioPlayerRef.value = null;
+    expect(() => tts.onTextInput()).not.toThrow();
   });
 });
