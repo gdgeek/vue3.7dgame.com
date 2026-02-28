@@ -58,6 +58,82 @@ describe("sleep()", () => {
   });
 });
 
+describe("fileMD5()", () => {
+  let mockSparkInstance: {
+    append: ReturnType<typeof vi.fn>;
+    end: ReturnType<typeof vi.fn>;
+  };
+  let mockFileReader: {
+    readAsArrayBuffer: ReturnType<typeof vi.fn>;
+    onload: ((e: ProgressEvent<FileReader>) => void) | null;
+    onerror: (() => void) | null;
+  };
+
+  beforeEach(async () => {
+    vi.resetModules();
+    mockSparkInstance = { append: vi.fn(), end: vi.fn().mockReturnValue("abc123") };
+    const SparkMD5 = await import("spark-md5");
+    (SparkMD5.default.ArrayBuffer as ReturnType<typeof vi.fn>).mockImplementation(
+      () => mockSparkInstance
+    );
+
+    // Stub FileReader so it fires onload immediately
+    mockFileReader = {
+      readAsArrayBuffer: vi.fn().mockImplementation(function () {
+        setTimeout(() => {
+          if (mockFileReader.onload) {
+            mockFileReader.onload({
+              target: { result: new ArrayBuffer(8) },
+            } as unknown as ProgressEvent<FileReader>);
+          }
+        }, 0);
+      }),
+      onload: null,
+      onerror: null,
+    };
+    vi.spyOn(window, "FileReader").mockImplementation(
+      () => mockFileReader as unknown as FileReader
+    );
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("resolves with the md5 hash string from spark.end()", async () => {
+    const { fileMD5 } = await import("@/assets/js/file/base");
+    const file = new File(["hello"], "test.txt");
+    const result = await fileMD5(file);
+    expect(result).toBe("abc123");
+  });
+
+  it("calls spark.append with the array buffer", async () => {
+    const { fileMD5 } = await import("@/assets/js/file/base");
+    const file = new File(["hello"], "test.txt");
+    await fileMD5(file);
+    expect(mockSparkInstance.append).toHaveBeenCalled();
+  });
+
+  it("calls progress callback during processing", async () => {
+    const { fileMD5 } = await import("@/assets/js/file/base");
+    const mockProgress = vi.fn();
+    const file = new File(["hello"], "test.txt");
+    await fileMD5(file, mockProgress);
+    expect(mockProgress).toHaveBeenCalledWith(expect.any(Number));
+  });
+
+  it("rejects when FileReader fires an error", async () => {
+    const { fileMD5 } = await import("@/assets/js/file/base");
+    mockFileReader.readAsArrayBuffer.mockImplementation(function () {
+      setTimeout(() => {
+        if (mockFileReader.onerror) mockFileReader.onerror();
+      }, 0);
+    });
+    const file = new File(["hello"], "test.txt");
+    await expect(fileMD5(file)).rejects.toThrow("File reading failed");
+  });
+});
+
 describe("fileOpen()", () => {
   let mockInput: {
     type: string;
