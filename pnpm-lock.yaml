@@ -81,8 +81,8 @@ importers:
         specifier: ^2.9.4
         version: 2.9.7(vue@3.5.13(typescript@5.8.3))
       highlight.js:
-        specifier: ^10.7.3
-        version: 10.7.3
+        specifier: ^11.11.1
+        version: 11.11.1
       json-schema-editor-vue3:
         specifier: ^1.2.0
         version: 1.2.0(typescript@5.8.3)
@@ -143,9 +143,6 @@ importers:
       vue-cropper:
         specifier: ^1.1.4
         version: 1.1.4
-      vue-hljs:
-        specifier: ^3.0.1
-        version: 3.0.1(highlight.js@10.7.3)(vue@3.5.13(typescript@5.8.3))
       vue-i18n:
         specifier: 9.9.1
         version: 9.9.1(vue@3.5.13(typescript@5.8.3))
@@ -3452,8 +3449,9 @@ packages:
     resolution: {integrity: sha512-QFLV0taWQOZtvIRIAdBChesmogZrtuXvVWsFHZTk2SU+anspqZ2vMnoLg7IE1+Uk16N19APic1BuF8bC8c2m5g==}
     engines: {node: '>=8'}
 
-  highlight.js@10.7.3:
-    resolution: {integrity: sha512-tzcUFauisWKNHaRkN4Wjl/ZA07gENAjFl3J/c480dprkGTg5EQstgaNFqBfUqCq54kZRIEcreTsAgF/m2quD7A==}
+  highlight.js@11.11.1:
+    resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
+    engines: {node: '>=12.0.0'}
 
   homedir-polyfill@1.0.3:
     resolution: {integrity: sha512-eSmmWE5bZTK2Nou4g0AI3zZ9rswp7GRKoKXS1BLUkvPviOqs4YTN1djQIqrXy9k5gEtdLPy86JjRwsNM9tnDcA==}
@@ -5993,12 +5991,6 @@ packages:
     engines: {node: ^14.17.0 || >=16.0.0}
     peerDependencies:
       eslint: '>=6.0.0'
-
-  vue-hljs@3.0.1:
-    resolution: {integrity: sha512-o4Pw7bgHKCamdm2NeIVkX8Ck2GzDTDpa25+rV0LTDhosN5DFdJop3YaNm7hI6AfxCbVIwue87Cv/h/Nqp0khSQ==}
-    peerDependencies:
-      highlight.js: ^10.0.0
-      vue: ^3.0.0
 
   vue-i18n@9.9.1:
     resolution: {integrity: sha512-xyQ4VspLdNSPTKBFBPWa1tvtj+9HuockZwgFeD2OhxxXuC2CWeNvV4seu2o9+vbQOyQbhAM5Ez56oxUrrnTWdw==}
@@ -9811,7 +9803,7 @@ snapshots:
 
   hexoid@1.0.0: {}
 
-  highlight.js@10.7.3: {}
+  highlight.js@11.11.1: {}
 
   homedir-polyfill@1.0.3:
     dependencies:
@@ -12599,11 +12591,6 @@ snapshots:
       semver: 7.7.1
     transitivePeerDependencies:
       - supports-color
-
-  vue-hljs@3.0.1(highlight.js@10.7.3)(vue@3.5.13(typescript@5.8.3)):
-    dependencies:
-      highlight.js: 10.7.3
-      vue: 3.5.13(typescript@5.8.3)
 
   vue-i18n@9.9.1(vue@3.5.13(typescript@5.8.3)):
     dependencies:

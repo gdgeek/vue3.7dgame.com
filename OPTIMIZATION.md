@@ -130,20 +130,18 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 #### ~~13. 全局错误处理缺失~~ ✅ 已完成（2026-02-27）
 - 已在 `src/main.ts` 添加 `app.config.errorHandler` 和 `unhandledrejection` 监听，使用 `logger.error` 输出
 
-#### 14. 路由布局组件未懒加载
-- **问题**：`Structure`、`SimpleStructure`、`Empty` 等布局组件在路由文件顶部静态 import，会打入主 bundle
-- **涉及文件**：`campus.ts`（SimpleStructure）、`home.ts`（Structure、Empty）、`verse.ts`（null 组件待查）
-- **说明**：布局组件由于所有路由共用，懒加载收益有限，但应记录并评估
+#### ~~14. 路由布局组件未懒加载~~ ⏭ 不存在（2026-02-28）
+- 实测：`campus.ts`、`home.ts` 均已使用 `const X = () => import(...)` 形式懒加载，描述有误，无需处理
 
-#### 15. `src/store/modules/availableVoices.ts`（1311 行）纯数据文件
-- **问题**：1311 行的 TS 文件，全部是静态数据（音色列表映射），被打入主 bundle
-- **建议**：转为 JSON 文件，在需要时异步 `import()`，或使用 Vite 的 `?raw` 导入
-- **预计收益**：主 bundle 减少约 30–50 KB
+#### ~~15. `src/store/modules/availableVoices.ts`（1311 行）纯数据文件~~ ⏭ 不适用（2026-02-28）
+- 实测：`availableVoices` 经由 `import.meta.glob("../../views/**/**.vue")` 的懒加载链路（`tts.vue`），数据并不在主 bundle 中
+- 情感数据 i18n 已在 #30 中完成；JSON 外置无额外收益
 
-#### 16. `highlight.js` 版本过旧（^10.7.3）
-- **问题**：10.x 是 2021 年版本，11.x/12.x 已发布多年，旧版有已知 ReDoS 漏洞
-- **操作**：`pnpm update highlight.js vue-hljs`，检查 API 兼容性
-- **参考**：highlight.js v11+ 不再包含自动检测（`highlightAuto`），需调整用法
+#### ~~16. `highlight.js` 版本过旧（^10.7.3）~~ ✅ 已完成（2026-02-28）
+- 升级 `highlight.js` `^10.7.3` → `^11.11.1`，修复已知 ReDoS 漏洞
+- 移除未使用的 `vue-hljs@3.0.1` 依赖及其 `src/typings/vue-hljs.d.ts` 类型声明
+- API 完全兼容（`registerLanguage`、`highlightElement` 在 v11 接口不变）
+- 类型检查通过，无回归
 
 #### 17. 主要 views 完全没有测试
 以下大型功能模块行数超过 1000 行但零测试覆盖：
