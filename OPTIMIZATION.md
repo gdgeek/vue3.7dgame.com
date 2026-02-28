@@ -66,11 +66,9 @@
 MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialog（250行→175行）均已重构。
 `ResourceDialog.vue` 使用略不同的独立 refs 风格，暂未重构，可后续跟进。
 
-#### 4. CSS 主题文件拆分（`theme-styles.scss` 9648 行）⏳ 待处理
-- **位置**：`src/styles/themes/theme-styles.scss`
-- **状态**：2026-02-27 确认仍为 9648 行，未处理
-- **建议**：按路由模块拆分，配合 Vite CSS code splitting 按需加载
-- **预计收益**：初始 CSS 减少 30–40%，改动量较大，需完整回归测试
+#### ~~4. CSS 主题文件拆分（`theme-styles.scss` 9648 行）~~ ✅ 已完成（2026-02-28）
+- 按语义拆分为 14 个分块文件，存放于 `src/styles/themes/parts/`
+- 主入口 `theme-styles.scss` 改写为 `@use` 汇总导入文件，构建验证通过
 
 #### 5. `element-plus/dist/index.css` 全量样式⏳ 待处理
 - **位置**：`src/main.ts` 第 84 行
@@ -210,9 +208,9 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 
 ### 🟡 新增中优先级（来自深度扫描）
 
-#### 25. campus/teacher.vue 与 campus/student.vue 高度重复
-- **行数**：325 + 325 = 650 行，结构 90% 相同（仅 API 端点和字段不同）
-- **建议**：抽取 `useCampusMemberList` composable，两个文件变为 <100 行的薄包装
+#### ~~25. campus/teacher.vue 与 campus/student.vue 高度重复~~ ✅ 已完成（2026-02-28）
+- 新建 `src/composables/useCampusMemberList.ts`，提取分页、详情面板、删除确认共有逻辑
+- teacher.vue 和 student.vue 脚本部分从 ~130 行各减至 ~50 行，模板/样式保持各自差异
 
 #### 26. API 层导出风格不一致
 - **问题**：约 30% 的 API 文件使用 `export default { ... }` 对象，70% 使用 `export const` 函数
@@ -220,9 +218,9 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 - **影响**：IDE 自动导入、tree-shaking 效果、代码风格一致性
 - **建议**：统一改为 `export const` 具名导出
 
-#### 27. `helper.ts` 与 `utilityFunctions.ts` 功能可能重叠
-- **文件**：`src/utils/helper.ts`（58 行）和 `src/utils/utilityFunctions.ts`（78 行）
-- **建议**：检查是否有功能重复，合并为单一文件（例如 `src/utils/helpers.ts`）
+#### ~~27. `helper.ts` 与 `utilityFunctions.ts` 功能可能重叠~~ ⏭ 评估后跳过（2026-02-28）
+- 两个文件职责完全不同：`helper.ts` 处理 URL/IP/Domain 操作，`utilityFunctions.ts` 处理日期格式化/文件大小/视频封面
+- 无功能重叠，无需合并
 
 #### ~~28. `rollup-plugin-visualizer` 与 `vite-plugin-visualizer` 重复引入~~ ✅ 不存在
 - 2026-02-27 核查：项目只有 `rollup-plugin-visualizer`（在 vite.config.ts 中正常使用），无重复，无需处理
