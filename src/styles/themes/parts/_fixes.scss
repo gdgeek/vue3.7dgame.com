@@ -1,0 +1,456 @@
+/**
+ * 赛博科技+新粗犷主义主题修复补丁
+ */
+
+// ============================================
+// 赛博科技主题 - 侧边栏文字可见性修复
+// ============================================
+
+.theme-cyber-tech {
+  // 修复一级菜单激活项文字可见性
+  .sidebar-item-active {
+    .sidebar-text {
+      color: #00F2FF !important;
+      text-shadow: 0 0 10px rgba(0, 242, 255, 0.8) !important;
+      font-weight: 600 !important;
+    }
+    
+    .svg-inline--fa {
+      color: #00F2FF !important;
+      text-shadow: 0 0 10px rgba(0, 242, 255, 0.8) !important;
+    }
+  }
+  
+  // 修复二级菜单激活项文字可见性
+  .sidebar-subitem-active {
+    color: #00F2FF !important;
+    text-shadow: 0 0 8px rgba(0, 242, 255, 0.6) !important;
+    
+    .submenu-dot {
+      background: #00F2FF !important;
+      box-shadow: 0 0 8px rgba(0, 242, 255, 0.8) !important;
+    }
+  }
+  
+  // 修复实体/场景详情面板"进入编辑"按钮文字可见性
+  .detail-panel {
+    .enter-edit-btn {
+      color: #0B0E14 !important;
+      background: linear-gradient(135deg, #00F2FF 0%, #00BAFF 100%) !important;
+      text-shadow: none !important;
+      font-weight: 600 !important;
+      
+      &:hover {
+        background: linear-gradient(135deg, #33F5FF 0%, #33CCFF 100%) !important;
+      }
+    }
+  }
+  
+  // 列表视图"进入编辑"按钮
+  .list-row .enter-editor-btn {
+    color: #0B0E14 !important;
+    background: linear-gradient(135deg, #00F2FF 0%, #00BAFF 100%) !important;
+    text-shadow: none !important;
+    font-weight: 600 !important;
+    border: none !important;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.4) !important;
+    
+    &:hover {
+      background: linear-gradient(135deg, #33F5FF 0%, #33CCFF 100%) !important;
+      box-shadow: 0 0 25px rgba(0, 242, 255, 0.6) !important;
+    }
+  }
+}
+
+
+// ============================================
+// 新粗犷主义主题 - 综合修复
+// ============================================
+
+.theme-neo-brutalism {
+  // 1. 颜色多样化 - 使用更多混搭颜色（粉色、青色、紫色等）
+  
+  // 上传按钮使用粉色
+  .upload-btn {
+    background: #FF007A !important;
+    color: #FFFFFF !important;
+    
+    &:hover {
+      background: #FF3399 !important;
+    }
+  }
+  
+  // 编辑按钮使用青色
+  .edit-btn,
+  .scene-actions .edit-btn {
+    background: #00FFC2 !important;
+    color: #000000 !important;
+  }
+  
+  // 进入编辑器按钮使用紫色
+  .enter-editor-btn {
+    background: #9D4EDD !important;
+    color: #FFFFFF !important;
+    
+    &:hover {
+      background: #B76EE8 !important;
+    }
+  }
+  
+  // 详情面板进入编辑按钮使用青色
+  .detail-panel .enter-edit-btn {
+    background: #00FFC2 !important;
+    color: #000000 !important;
+  }
+  
+  // 下载按钮使用橙色
+  .download-btn {
+    background: #FF6B35 !important;
+    color: #FFFFFF !important;
+  }
+  
+  // 保存/确认按钮使用青色
+  .save-btn,
+  .confirm-btn {
+    background: #00FFC2 !important;
+    color: #000000 !important;
+  }
+  
+  // 标签使用多种颜色
+  .scene-tag:nth-child(1),
+  .list-tag:nth-child(1) {
+    background: #FF007A !important;
+    color: #FFFFFF !important;
+  }
+  
+  .scene-tag:nth-child(2),
+  .list-tag:nth-child(2) {
+    background: #00FFC2 !important;
+    color: #000000 !important;
+  }
+  
+  .scene-tag:nth-child(3),
+  .list-tag:nth-child(3) {
+    background: #9D4EDD !important;
+    color: #FFFFFF !important;
+  }
+  
+  // 视图切换激活状态使用青色
+  .view-btn.active {
+    background: #00FFC2 !important;
+    color: #000000 !important;
+  }
+  
+  // 排序按钮激活状态使用粉色
+  .sort-btn.active {
+    background: #FF007A !important;
+    color: #FFFFFF !important;
+  }
+  
+  // 分页按钮悬停使用青色
+  .page-btn:hover:not(:disabled) {
+    background: #00FFC2 !important;
+    color: #000000 !important;
+  }
+  
+  // 2. 侧边栏二级菜单激活项文字可见性修复
+  .sidebar-subitem-active {
+    background: #FF007A !important;
+    color: #FFFFFF !important;
+    border: 2px solid #000000 !important;
+    box-shadow: 2px 2px 0px #000000 !important;
+    
+    .submenu-dot {
+      background: #FFFFFF !important;
+    }
+    
+    span {
+      color: #FFFFFF !important;
+      font-weight: 700 !important;
+    }
+  }
+  
+  // 二级菜单悬停
+  .sidebar-subitem:hover:not(.sidebar-subitem-active) {
+    background: #FFF000 !important;
+    color: #000000 !important;
+    
+    .submenu-dot {
+      background: #000000 !important;
+    }
+  }
+  
+  // 3. Meta/Verse 页面头部操作栏统一样式
+  .meta-library,
+  .verse-library {
+    .header-controls {
+      .search-box .search-input {
+        background: #FFFFFF !important;
+        border: 3px solid #000000 !important;
+        box-shadow: 4px 4px 0px #000000 !important;
+      }
+      
+      .sort-buttons {
+        border-right: 3px solid #000000 !important;
+      }
+      
+      .sort-btn {
+        background: #FFFFFF !important;
+        border: 2px solid #000000 !important;
+        box-shadow: 3px 3px 0px #000000 !important;
+        
+        &.active {
+          background: #FF007A !important;
+          color: #FFFFFF !important;
+        }
+        
+        &:hover:not(.active) {
+          background: #FFF000 !important;
+        }
+      }
+      
+      .view-toggle {
+        background: #FFFFFF !important;
+        border: 2px solid #000000 !important;
+        box-shadow: 3px 3px 0px #000000 !important;
+      }
+      
+      .view-btn {
+        &.active {
+          background: #00FFC2 !important;
+          color: #000000 !important;
+        }
+      }
+      
+      .upload-btn {
+        background: #FF007A !important;
+        color: #FFFFFF !important;
+        border: 3px solid #000000 !important;
+        box-shadow: 4px 4px 0px #000000 !important;
+      }
+    }
+  }
+  
+  // 4. 标签筛选和可见性筛选按钮 - 新粗犷主义风格
+  .tag-filter-btn,
+  .visibility-filter-btn {
+    background: #FFFFFF !important;
+    border: 3px solid #000000 !important;
+    border-radius: 8px !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out !important;
+    
+    .svg-inline--fa {
+      color: #000000 !important;
+    }
+    
+    &:hover {
+      transform: translate(-2px, -2px) !important;
+      box-shadow: 6px 6px 0px #000000 !important;
+      background: #FFF000 !important;
+    }
+  }
+  
+  // 标签筛选按钮特殊颜色
+  .tag-filter-btn {
+    background: #E0F7FF !important;
+    
+    &:hover {
+      background: #00FFC2 !important;
+    }
+  }
+  
+  // 可见性筛选按钮特殊颜色
+  .visibility-filter-btn {
+    background: #FFE4F0 !important;
+    
+    &:hover {
+      background: #FF007A !important;
+      color: #FFFFFF !important;
+      
+      .svg-inline--fa,
+      span {
+        color: #FFFFFF !important;
+      }
+    }
+  }
+  
+  // 5. 下拉菜单 z-index 修复 + 新粗犷主义样式
+  .tag-dropdown,
+  .visibility-dropdown {
+    z-index: 1000 !important;
+    background: #FFFFFF !important;
+    border: 3px solid #000000 !important;
+    border-radius: 8px !important;
+    box-shadow: 6px 6px 0px #000000 !important;
+    
+    .tag-option,
+    .visibility-option {
+      font-weight: 600 !important;
+      border-bottom: 2px solid #000000 !important;
+      
+      &:last-child {
+        border-bottom: none !important;
+      }
+      
+      &:hover {
+        background: #FFF000 !important;
+      }
+      
+      &.selected {
+        background: #00FFC2 !important;
+        color: #000000 !important;
+      }
+    }
+  }
+  
+  .tag-dropdown {
+    .tag-checkbox {
+      border: 2px solid #000000 !important;
+      border-radius: 4px !important;
+      
+      .svg-inline--fa {
+        color: #000000 !important;
+      }
+    }
+    
+    .tag-option.selected .tag-checkbox {
+      background: #FF007A !important;
+      border-color: #000000 !important;
+      
+      .svg-inline--fa {
+        color: #FFFFFF !important;
+      }
+    }
+    
+    .tag-actions {
+      border-top: 3px solid #000000 !important;
+      
+      .clear-btn {
+        background: #FF6B35 !important;
+        color: #FFFFFF !important;
+        border: 2px solid #000000 !important;
+        border-radius: 6px !important;
+        box-shadow: 3px 3px 0px #000000 !important;
+        font-weight: 700 !important;
+        
+        &:hover {
+          transform: translate(-1px, -1px) !important;
+          box-shadow: 4px 4px 0px #000000 !important;
+        }
+      }
+    }
+  }
+  
+  // 表格表头使用多种颜色
+  .list-table th {
+    &:nth-child(odd) {
+      background: #FFF000 !important;
+    }
+    
+    &:nth-child(even) {
+      background: #00FFC2 !important;
+    }
+  }
+  
+  // 空状态按钮
+  .empty-state .upload-btn-secondary {
+    background: #9D4EDD !important;
+    color: #FFFFFF !important;
+    
+    &:hover {
+      background: #FF007A !important;
+    }
+  }
+  
+  // 详情面板标题栏使用青色
+  .detail-panel .panel-header {
+    background: #00FFC2 !important;
+  }
+  
+  // 信息块使用不同颜色
+  .detail-panel .info-block {
+    &:nth-child(odd) {
+      background: #FFE4F0 !important;
+    }
+    
+    &:nth-child(even) {
+      background: #E0F7FF !important;
+    }
+  }
+  
+  // 修复下拉菜单被卡片遮挡的问题
+  .verse-library,
+  .meta-library {
+    .library-header {
+      position: relative;
+      z-index: 100;
+    }
+    
+    .controls-row {
+      position: relative;
+      z-index: 100;
+    }
+    
+    .tag-filter,
+    .visibility-filter {
+      position: relative;
+      z-index: 100;
+    }
+    
+    .tag-dropdown,
+    .visibility-dropdown {
+      z-index: 9999 !important;
+    }
+    
+    .library-content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .resource-grid {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .scene-card {
+      position: relative;
+      z-index: 1;
+    }
+  }
+}
+
+// 确保 VerseLibrary 和 MetaLibrary 的下拉菜单 z-index 正确
+.verse-library,
+.meta-library {
+  .library-header {
+    position: relative;
+    z-index: 100;
+  }
+  
+  .tag-filter,
+  .visibility-filter {
+    position: relative;
+    z-index: 100;
+  }
+  
+  .tag-dropdown,
+  .visibility-dropdown {
+    z-index: 9999 !important;
+  }
+  
+  .library-content {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .resource-grid {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+

@@ -1,0 +1,189 @@
+/**
+ * 现代蓝主题（默认/日间模式）特殊样式
+ */
+
+// ============================================
+// 现代蓝主题（默认/日间模式）特殊样式
+// ============================================
+
+.theme-modern-blue {
+  // 柔和的卡片悬停
+  .ar-card,
+  .settings-card,
+  .resource-card,
+  .theme-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg, 0 12px 24px -4px rgba(0, 0, 0, 0.12));
+    }
+  }
+  
+  // 资源库现代风格
+  .resource-library {
+    background: var(--bg-page-gradient, linear-gradient(180deg, #f0f4f8 0%, #e2e8f0 100%)) !important;
+  }
+  
+  // 详情面板现代风格
+  .detail-panel {
+    background: var(--bg-card, #ffffff) !important;
+    
+    .download-btn {
+      background: var(--primary-gradient, linear-gradient(135deg, #00BAFF 0%, #0099DD 100%)) !important;
+      box-shadow: var(--shadow-primary, 0 8px 20px -4px rgba(0, 186, 255, 0.3)) !important;
+      
+      &:hover {
+        filter: brightness(1.1);
+      }
+    }
+  }
+  
+  // 对话框现代风格
+  .custom-confirm-dialog .el-dialog,
+  .custom-input-dialog .el-dialog {
+    .btn-primary {
+      background: var(--primary-gradient, linear-gradient(135deg, #00BAFF 0%, #0099DD 100%)) !important;
+    }
+  }
+  
+  // 上传模态框现代风格
+  .upload-modal {
+    .browse-btn,
+    .start-upload-btn {
+      background: var(--primary-gradient, linear-gradient(135deg, #00BAFF 0%, #0099DD 100%)) !important;
+      box-shadow: var(--shadow-primary, 0 6px 16px -4px rgba(0, 186, 255, 0.35)) !important;
+      
+      &:hover {
+        filter: brightness(1.1);
+      }
+    }
+  }
+  
+  // 侧边栏现代风格
+  .ar-sidebar {
+    background: var(--bg-sidebar, #ffffff) !important;
+  }
+  
+  .sidebar-item-active {
+    background: var(--primary-gradient, linear-gradient(135deg, #00BAFF 0%, #0099DD 100%)) !important;
+    box-shadow: var(--shadow-primary, 0 6px 16px -4px rgba(0, 186, 255, 0.35)) !important;
+  }
+  
+  // 渐变按钮
+  .btn-primary,
+  .el-button--primary,
+  .upload-btn {
+    background: var(--primary-gradient, linear-gradient(135deg, #00BAFF 0%, #0099DD 100%)) !important;
+    
+    &:hover {
+      filter: brightness(1.1);
+    }
+  }
+  
+  // 列表视图 - 现代柔和风格
+  .resource-list {
+    background: var(--bg-card, #ffffff) !important;
+    border: var(--border-width, 1px) solid var(--border-color, #e2e8f0) !important;
+    border-radius: var(--radius-lg, 24px) !important;
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05)) !important;
+    
+    .list-table {
+      th {
+        background: var(--bg-hover, #f8fafc) !important;
+        color: var(--text-secondary, #64748b) !important;
+        border-bottom: var(--border-width, 1px) solid var(--border-color, #e2e8f0) !important;
+      }
+      
+      td {
+        border-bottom: var(--border-width, 1px) solid var(--border-color, #e2e8f0) !important;
+        color: var(--text-primary, #1e293b) !important;
+      }
+    }
+    
+    .list-row {
+      &:hover {
+        background: var(--primary-light, rgba(0, 186, 255, 0.1)) !important;
+      }
+    }
+    
+    .row-thumbnail {
+      border: var(--border-width, 1px) solid var(--border-color, #e2e8f0) !important;
+      border-radius: var(--radius-sm, 12px) !important;
+      background: var(--bg-secondary, #f1f5f9) !important;
+    }
+    
+    .file-name {
+      color: var(--text-primary, #1e293b) !important;
+    }
+    
+    .enter-editor-btn {
+      background: var(--primary-gradient, linear-gradient(135deg, #00BAFF 0%, #0099DD 100%)) !important;
+      color: var(--text-inverse, #ffffff) !important;
+      border-radius: var(--radius-sm, 12px) !important;
+      box-shadow: var(--shadow-primary, 0 4px 12px rgba(0, 186, 255, 0.25)) !important;
+      
+      &:hover {
+        filter: brightness(1.1) !important;
+      }
+    }
+    
+    .list-tag {
+      background: var(--primary-light, rgba(0, 186, 255, 0.1)) !important;
+      color: var(--primary-color, #00BAFF) !important;
+      border-radius: var(--radius-full, 9999px) !important;
+    }
+    
+    .visibility-cell {
+      &.public {
+        color: var(--success-color, #22c55e) !important;
+      }
+      &.private {
+        color: var(--text-muted, #94a3b8) !important;
+      }
+    }
+    
+    .more-btn {
+      color: var(--text-secondary, #64748b) !important;
+      border-radius: var(--radius-sm, 12px) !important;
+      
+      &:hover {
+        background: var(--bg-hover, #f8fafc) !important;
+        color: var(--primary-color, #00BAFF) !important;
+      }
+    }
+    
+    .row-menu {
+      background: var(--bg-card, #ffffff) !important;
+      border: var(--border-width, 1px) solid var(--border-color, #e2e8f0) !important;
+      border-radius: var(--radius-md, 20px) !important;
+      box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12)) !important;
+      
+      .menu-item {
+        color: var(--text-primary, #1e293b) !important;
+        border-radius: calc(var(--radius-md, 20px) - 6px) !important;
+        
+        .svg-inline--fa {
+          color: var(--text-secondary, #64748b) !important;
+        }
+        
+        &:hover {
+          background: var(--bg-hover, #f8fafc) !important;
+        }
+        
+        &.danger {
+          color: var(--danger-color, #ef4444) !important;
+          
+          .svg-inline--fa {
+            color: var(--danger-color, #ef4444) !important;
+          }
+          
+          &:hover {
+            background: var(--danger-light, rgba(239, 68, 68, 0.1)) !important;
+          }
+        }
+      }
+    }
+  }
+}
+
