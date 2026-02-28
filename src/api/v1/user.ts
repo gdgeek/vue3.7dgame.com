@@ -39,8 +39,4 @@ export const info = () => {
   });
 };
 
-export default {
-  getUserCreation,
-  putUserData,
-  info,
-};
+

@@ -5,7 +5,7 @@ interface Job {
   status: string;
 }
 
-const schedule = (jobs: Job[]) => {
+export const schedule = (jobs: Job[]) => {
   const length: number = jobs.length;
   const max = length * 2;
   let count = 0;
@@ -23,7 +23,7 @@ const schedule = (jobs: Job[]) => {
   });
   return count / max;
 };
-const file = (id: number) => {
+export const file = (id: number) => {
   const url =
     import.meta.env.VITE_APP_AI_API +
     `/file${qs.stringify({ id: id.toString() }, true)}`;
@@ -33,7 +33,7 @@ const file = (id: number) => {
     method: "get",
   });
 };
-const rodin = (query: Record<string, string | number>) => {
+export const rodin = (query: Record<string, string | number>) => {
   const url = `${import.meta.env.VITE_APP_AI_API}/rodin${qs.stringify(
     query,
     true
@@ -44,7 +44,7 @@ const rodin = (query: Record<string, string | number>) => {
     method: "get",
   });
 };
-const check = (id: number) => {
+export const check = (id: number) => {
   const url =
     import.meta.env.VITE_APP_AI_API +
     `/check${qs.stringify({ id: id.toString() }, true)}`;
@@ -55,7 +55,7 @@ const check = (id: number) => {
   });
 };
 
-const download = (id: number) => {
+export const download = (id: number) => {
   const url =
     import.meta.env.VITE_APP_AI_API +
     `/download${qs.stringify({ id: id.toString() }, true)}`;
@@ -65,7 +65,7 @@ const download = (id: number) => {
     method: "get",
   });
 };
-const get = (id: number, expand: string = "resource,step") => {
+export const get = (id: number, expand: string = "resource,step") => {
   const query: Record<string, string | number> = {
     expand,
   };
@@ -75,13 +75,13 @@ const get = (id: number, expand: string = "resource,step") => {
     method: "get",
   });
 };
-const del = (id: number) => {
+export const del = (id: number) => {
   return request({
     url: `/v1/ai-rodin/${id}`,
     method: "delete",
   });
 };
-const list = (
+export const list = (
   sort: string = "-created_at",
   search: string = "",
   page: number = 0,
@@ -106,13 +106,4 @@ const list = (
     method: "get",
   });
 };
-export default {
-  rodin,
-  check,
-  download,
-  schedule,
-  file,
-  list,
-  del,
-  get,
-};
+

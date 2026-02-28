@@ -212,11 +212,11 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 - 新建 `src/composables/useCampusMemberList.ts`，提取分页、详情面板、删除确认共有逻辑
 - teacher.vue 和 student.vue 脚本部分从 ~130 行各减至 ~50 行，模板/样式保持各自差异
 
-#### 26. API 层导出风格不一致
-- **问题**：约 30% 的 API 文件使用 `export default { ... }` 对象，70% 使用 `export const` 函数
-- **不一致文件**：`src/api/v1/user.ts`、`src/api/auth/wechat.ts`、`src/api/user/server.ts`、`src/api/v1/email.ts`
-- **影响**：IDE 自动导入、tree-shaking 效果、代码风格一致性
-- **建议**：统一改为 `export const` 具名导出
+#### ~~26. API 层导出风格不一致~~ ✅ 已完成（2026-02-28）
+- 实际涉及 11 个文件（非原记录的 4 个）：`v1/ai-rodin`、`v1/auth`、`v1/wechat`、`v1/user`、`v1/files`、`v1/group`、`v1/password`、`v1/email`、`domain-query`（+ `menu/index`、`user/index` 保留 class 风格）
+- **Group A（删除冗余 export default）**：files/group/password/email/domain-query —— 调用方已使用具名导入，直接移除
+- **Group B（转换 + 更新调用方）**：ai-rodin（4 个调用方）、auth（3 个调用方）、wechat（3 个调用方）、user（1 个调用方）
+- 命名冲突使用别名解决（如 `rodinApi`、`authLogin`、`fetchUserInfo` 等）
 
 #### ~~27. `helper.ts` 与 `utilityFunctions.ts` 功能可能重叠~~ ⏭ 评估后跳过（2026-02-28）
 - 两个文件职责完全不同：`helper.ts` 处理 URL/IP/Domain 操作，`utilityFunctions.ts` 处理日期格式化/文件大小/视频封面

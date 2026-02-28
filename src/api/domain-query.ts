@@ -110,7 +110,4 @@ export const getDomainLanguage = (domain?: string, lang?: string) => {
   return service.get(`/api/query/language${qs.stringify(query, true)}`);
 };
 
-export default {
-  getDomainLanguage,
-  getDomainDefault,
-};
+

@@ -72,7 +72,7 @@ import { ThemeEnum } from "@/enums/ThemeEnum";
 import { onMounted, watch, ref } from "vue";
 import { useI18n } from "vue-i18n"; // Ensure you have this import
 
-import WechatApi from "@/api/v1/wechat";
+import { register as wechatRegister } from "@/api/v1/wechat";
 import { RegisterData } from "@/api/auth/model";
 import Token from "@/store/modules/token";
 import { createPasswordFormRules } from "@/utils/password-validator";
@@ -163,7 +163,7 @@ const register = async () => {
   registerFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        const response = await WechatApi.register({
+        const response = await wechatRegister({
           username: registerForm.value.username,
           password: registerForm.value.password,
           token: token.value,

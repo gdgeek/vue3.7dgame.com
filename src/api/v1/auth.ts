@@ -15,28 +15,28 @@ type LinkAccountResponse = {
   token?: TokenInfo;
 };
 
-const login = (data: LoginRequest) => {
+export const login = (data: LoginRequest) => {
   return request<LoginResponse>({
     url: `/v1/auth/login`,
     method: "post",
     data,
   });
 };
-const refresh = (refreshToken: string) => {
+export const refresh = (refreshToken: string) => {
   return request<RefreshTokenResponse>({
     url: `/v1/auth/refresh`,
     method: "post",
     data: { refreshToken },
   });
 };
-const link = (data: LinkAccountRequest) => {
+export const link = (data: LinkAccountRequest) => {
   return request<LinkAccountResponse>({
     url: `/v1/auth/link`,
     method: "post",
     data,
   });
 };
-const register = (data: RegisterRequest) => {
+export const register = (data: RegisterRequest) => {
   return request<RegisterResponse>({
     url: `/v1/auth/register`,
     method: "post",
@@ -44,7 +44,7 @@ const register = (data: RegisterRequest) => {
   });
 };
 
-const logout = () => {
+export const logout = () => {
   return new Promise((resolve) => {
     // localStorage.clear();
     resolve(true);
@@ -56,10 +56,4 @@ const logout = () => {
   });*/
 };
 
-export default {
-  login,
-  refresh,
-  link,
-  register,
-  logout,
-};
+

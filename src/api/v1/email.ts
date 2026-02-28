@@ -156,13 +156,4 @@ export const testEmailService = async (): Promise<
   return response.data;
 };
 
-export default {
-  getEmailStatus,
-  sendVerificationCode,
-  verifyEmailCode,
-  sendChangeConfirmation,
-  verifyChangeConfirmation,
-  unbindEmail,
-  getEmailCooldown,
-  testEmailService,
-};
+

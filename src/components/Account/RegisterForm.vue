@@ -102,7 +102,7 @@ import type { FormItemRule } from "element-plus";
 import { useRouter, LocationQuery, useRoute } from "vue-router";
 import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
-import WechatApi from "@/api/v1/wechat";
+import { register as wechatRegister } from "@/api/v1/wechat";
 import Token from "@/store/modules/token";
 import { createPasswordFormRules } from "@/utils/password-validator";
 import PasswordStrength from "@/components/PasswordStrength/index.vue";
@@ -188,7 +188,7 @@ const register = async () => {
     if (valid) {
       loading.value = true;
       try {
-        const response = await WechatApi.register({
+        const response = await wechatRegister({
           username: registerForm.value.username,
           password: registerForm.value.password,
           token: token.value,

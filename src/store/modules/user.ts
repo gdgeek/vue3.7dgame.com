@@ -1,13 +1,13 @@
 import { logger } from "@/utils/logger";
-import AuthAPI from "@/api/v1/auth";
+import { login as authLogin, logout as authLogout } from "@/api/v1/auth";
 //import { resetRouter } from "@/router";
 import { store } from "@/store";
 import { LoginData } from "@/api/auth/model";
 import { UserInfoType, _UserDataType } from "@/api/user/model";
-import Wechat from "@/api/v1/wechat";
+import { login as wechatLogin } from "@/api/v1/wechat";
 import type { WechatLoginRequest } from "@/api/v1/types/wechat";
 import Token from "@/store/modules/token";
-import UserAPI from "@/api/v1/user";
+import { putUserData, info as fetchUserInfo } from "@/api/v1/user";
 
 export const useUserStore = defineStore(
   "user",
@@ -16,7 +16,7 @@ export const useUserStore = defineStore(
     const userInfo = ref<UserInfoType | null>(defaultUserInfo);
 
     async function loginByWechat(data: WechatLoginRequest) {
-      const response = await Wechat.login(data);
+      const response = await wechatLogin(data);
       if (!response.data.success) {
         throw new Error("Login failed, please try again later.");
       }
@@ -85,7 +85,7 @@ export const useUserStore = defineStore(
      * @returns
      */
     async function login(loginData: LoginData) {
-      const response = await AuthAPI.login(loginData);
+      const response = await authLogin(loginData);
       if (!response.data.success) {
         throw new Error("Login failed, please try again later.");
       }
@@ -102,7 +102,7 @@ export const useUserStore = defineStore(
     const refreshInterval = ref<NodeJS.Timeout | null>(null);
     const setUserInfo = async (data: unknown) => {
       try {
-        const response = await UserAPI.putUserData(data);
+        const response = await putUserData(data);
         //  logger.error("getUserInfo response:", response);
         // 确保数据存在
         if (!response.data || !response.data.success) {
@@ -155,7 +155,7 @@ export const useUserStore = defineStore(
 
     const getUserInfo = async () => {
       try {
-        const response = await UserAPI.info();
+        const response = await fetchUserInfo();
         // 确保数据存在
         if (!response.data || !response.data.success) {
           logger.error("Verification failed, please Login again.");
@@ -186,7 +186,7 @@ export const useUserStore = defineStore(
       // 调用后端注销 API（忽略失败，确保本地清理总是执行）
       try {
         if (Token.hasToken()) {
-          await AuthAPI.logout();
+          await authLogout();
         }
       } catch (error) {
         logger.error("Backend logout failed:", error);

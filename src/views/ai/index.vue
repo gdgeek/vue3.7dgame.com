@@ -42,7 +42,7 @@ import { Message, MessageBox } from "@/components/Dialog";
 import CardListPage from "@/components/MrPP/CardListPage/index.vue";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
-import aiRodin from "@/api/v1/ai-rodin";
+import { list as listAiRodin, del as delAiRodin } from "@/api/v1/ai-rodin";
 import type {
   FetchParams,
   FetchResponse,
@@ -56,7 +56,7 @@ const cardListPageRef = ref<InstanceType<typeof CardListPage> | null>(null);
 const fetchAiRodins = async (
   params: FetchParams
 ): Promise<FetchResponse<AiRodinItem>> => {
-  return (await aiRodin.list(
+  return (await listAiRodin(
     params.sort,
     params.search,
     params.page
@@ -86,7 +86,7 @@ const deletedWindow = async (item: AiRodinItem, resetLoading: () => void) => {
         type: "warning",
       }
     );
-    await aiRodin.del(item.id);
+    await delAiRodin(item.id);
     cardListPageRef.value?.refresh();
     Message.success(t("meta.confirm.success"));
   } catch {

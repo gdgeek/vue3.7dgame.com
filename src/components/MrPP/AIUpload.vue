@@ -91,7 +91,13 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
-import AiRodin from "@/api/v1/ai-rodin";
+import {
+  rodin as rodinApi,
+  check as checkRodinApi,
+  schedule as calcSchedule,
+  download as downloadRodinApi,
+  file as aiFile,
+} from "@/api/v1/ai-rodin";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import { useI18n } from "vue-i18n";
 import { sleep } from "@/assets/js/helper";
@@ -149,22 +155,22 @@ const rodin = async () => {
   if (resource.value?.id) {
     query.resource_id = resource.value?.id;
   }
-  const response = await AiRodin.rodin(query);
+  const response = await rodinApi(query);
 
   progress.value.percentage = 10;
   const data = response.data;
   let schedule = 0;
   do {
     await sleep(10000);
-    const response2 = await AiRodin.check(data.id);
+    const response2 = await checkRodinApi(data.id);
     logger.log(response2.data.check);
-    schedule = AiRodin.schedule(response2.data.check.jobs);
+    schedule = calcSchedule(response2.data.check.jobs);
     progress.value.percentage = 10 + 70 * schedule;
   } while (schedule !== 1);
 
-  await AiRodin.download(data.id);
+  await downloadRodinApi(data.id);
   progress.value.percentage = 90;
-  const response4 = await AiRodin.file(data.id);
+  const response4 = await aiFile(data.id);
   progress.value.percentage = 100;
 
   return response4.data;
