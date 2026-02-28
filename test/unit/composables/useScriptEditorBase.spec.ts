@@ -570,4 +570,81 @@ describe("useScriptEditorBase", () => {
       unmount();
     });
   });
+
+  // ---- loadHighlightStyle ----
+  describe("loadHighlightStyle()", () => {
+    it("creates a new link tag when no existing highlight-style link", () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+
+      result.loadHighlightStyle(false);
+
+      const link = document.querySelector("#highlight-style") as HTMLLinkElement;
+      expect(link).not.toBeNull();
+      expect(link.href).toContain("a11y-light");
+      unmount();
+    });
+
+    it("uses dark URL when dark=true", () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+
+      result.loadHighlightStyle(true);
+
+      const link = document.querySelector("#highlight-style") as HTMLLinkElement;
+      expect(link).not.toBeNull();
+      expect(link.href).toContain("a11y-dark");
+      unmount();
+    });
+
+    it("updates href on existing link when called again", () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+
+      result.loadHighlightStyle(false); // creates link with light
+      result.loadHighlightStyle(true);  // updates to dark
+
+      const link = document.querySelector("#highlight-style") as HTMLLinkElement;
+      expect(link.href).toContain("a11y-dark");
+      unmount();
+    });
+  });
+
+  // ---- copyCode ----
+  describe("copyCode()", () => {
+    it("calls clipboard.writeText and shows success message", async () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+
+      const mockWriteText = vi.fn().mockResolvedValue(undefined);
+      Object.defineProperty(navigator, "clipboard", {
+        value: { writeText: mockWriteText },
+        configurable: true,
+      });
+
+      await result.copyCode("print('hello')");
+      expect(mockWriteText).toHaveBeenCalledWith("print('hello')");
+      expect(mockMessage.success).toHaveBeenCalled();
+      unmount();
+    });
+
+    it("shows error message when clipboard fails", async () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+
+      Object.defineProperty(navigator, "clipboard", {
+        value: { writeText: vi.fn().mockRejectedValue(new Error("denied")) },
+        configurable: true,
+      });
+
+      await result.copyCode("code");
+      expect(mockMessage.error).toHaveBeenCalled();
+      unmount();
+    });
+  });
 });
