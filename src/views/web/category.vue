@@ -10,8 +10,9 @@ import { logger } from "@/utils/logger";
 import "@/assets/font/font.css";
 import { useRoute, useRouter } from "vue-router";
 import News from "./components/News/index.vue";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import { useAOS } from "@/composables/useAOS";
+
+useAOS();
 
 const route = useRoute();
 const router = useRouter();
@@ -124,13 +125,6 @@ onMounted(() => {
   checkMobile();
   window.addEventListener("resize", checkMobile);
   window.addEventListener("scroll", handleScroll);
-
-  // 初始化AOS动画库
-  AOS.init({
-    duration: 1000,
-    once: false,
-    mirror: true,
-  });
 
   // 恢复滚动位置
   restoreScrollPosition();

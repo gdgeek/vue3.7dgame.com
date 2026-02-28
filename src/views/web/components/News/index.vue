@@ -239,8 +239,9 @@ import { Posts } from "@/api/home/wordpress";
 import DOMPurify from "dompurify";
 import { dayjs, formatDate as formatDateUtil } from "@/utils/dayjs";
 import { ElMessage } from "element-plus";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import { useAOS } from "@/composables/useAOS";
+
+useAOS({ duration: 800, once: false });
 
 const { t } = useI18n();
 
@@ -339,11 +340,6 @@ const displayNewsData = computed(() => {
 
 // 初始化并加载数据
 onMounted(() => {
-  // 初始化AOS动画
-  AOS.init({
-    duration: 800,
-    once: false,
-  });
 
   /*
   // 从URL查询参数中确定活跃标签

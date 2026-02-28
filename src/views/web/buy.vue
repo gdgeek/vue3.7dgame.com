@@ -9,7 +9,9 @@ import "@/assets/font/font.css";
 import Buy from "./components/Buy.vue";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
-import "aos/dist/aos.css";
+import { useAOS } from "@/composables/useAOS";
+
+useAOS();
 
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.theme === ThemeEnum.DARK);

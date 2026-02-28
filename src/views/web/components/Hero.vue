@@ -158,9 +158,10 @@
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useDomainStore } from "@/store/modules/domain";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import { useAOS } from "@/composables/useAOS";
 import { VideoPlay, ArrowDown, ArrowRight } from "@element-plus/icons-vue";
+
+useAOS();
 
 // 获取主题设置
 const settingsStore = useSettingsStore();
@@ -243,12 +244,6 @@ const scrollToAuthorization = () => {
 onMounted(() => {
   window.addEventListener("mousemove", handleMouseMove);
 
-  // 初始化AOS动画库
-  AOS.init({
-    duration: 1000,
-    once: false,
-    mirror: true,
-  });
 });
 
 onUnmounted(() => {

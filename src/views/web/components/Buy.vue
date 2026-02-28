@@ -100,11 +100,12 @@
 import { ref, onMounted, computed, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useSettingsStore } from "@/store/modules/settings";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import { useAOS } from "@/composables/useAOS";
 import { DataAnalysis, User, Cellphone, Star } from "@element-plus/icons-vue";
 import { ElMessageBox } from "element-plus";
 import type { Action } from "element-plus";
+
+useAOS({ duration: 1000, once: false });
 
 const { t } = useI18n();
 
@@ -203,12 +204,6 @@ const cases = [
 ];
 
 onMounted(() => {
-  // 初始化AOS动画
-  AOS.init({
-    duration: 1000,
-    once: false,
-  });
-
   // 添加鼠标移动监听
   window.addEventListener("mousemove", handleMouseMove);
 });

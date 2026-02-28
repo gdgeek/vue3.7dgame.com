@@ -141,8 +141,9 @@ import LangSelect from "@/components/LangSelect/index.vue";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useDomainStore } from "@/store/modules/domain";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import { useAOS } from "@/composables/useAOS";
+
+useAOS();
 
 const router = useRouter();
 const route = useRoute();
@@ -329,13 +330,6 @@ onMounted(() => {
   checkMobile();
   window.addEventListener("resize", checkMobile);
   window.addEventListener("scroll", handleScroll);
-
-  // 初始化AOS动画库
-  AOS.init({
-    duration: 1000,
-    once: false,
-    mirror: true,
-  });
 
   // 恢复滚动位置
   restoreScrollPosition();

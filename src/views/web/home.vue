@@ -18,10 +18,11 @@ import * as Buy from "./components/Buy.vue";
 import { useRouter, useRoute } from "vue-router";
 import * as News from "./components/News/index.vue";
 
-import AOS from "aos";
-import "aos/dist/aos.css";
+import { useAOS } from "@/composables/useAOS";
 import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
+
+useAOS();
 
 const router = useRouter();
 const route = useRoute();
@@ -124,13 +125,6 @@ onMounted(() => {
   }
   checkMobile();
   window.addEventListener("resize", checkMobile);
-
-  // 初始化AOS动画库
-  AOS.init({
-    duration: 1000,
-    once: false,
-    mirror: true,
-  });
 
   // 恢复滚动位置
   restoreScrollPosition();

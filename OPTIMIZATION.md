@@ -159,10 +159,11 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 
 ### 🟢 低优先级
 
-#### 18. `aos` 动画库仅在 `web/` 使用
-- **现状**：`aos` 在 `bbs.vue` 和 `buy.vue` 中使用，每次都重新 `import "aos/dist/aos.css"`
-- **建议**：将 `aos` 加入 Vite `manualChunks`，避免重复打包；或评估是否用 CSS animation 替代
-- **体积**：`aos` 约 6KB gzip
+#### ~~18. `aos` 动画库仅在 `web/` 使用~~ ✅ 已完成（2026-02-28）
+- 创建 `src/composables/useAOS.ts`，集中 CSS import 和 `AOS.init()` 调用
+- 移除 8 个文件（5 个路由视图 + 3 个组件）中的重复 `import AOS / import "aos/dist/aos.css"`
+- `vite.config.ts` manualChunks 新增 `'aos': ['aos']`，确保 AOS JS 在共享 chunk 中不重复打包
+- 各有差异配置的组件（`Buy.vue`、`News/index.vue`）保留各自的 options 参数
 
 #### 19. `src/views/web/` 组件无国际化
 - **问题**：落地页（Hero.vue、News/index.vue 等）包含大量硬编码中文内容
