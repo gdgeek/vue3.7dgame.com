@@ -35,4 +35,27 @@ describe("cn() class name utility", () => {
   it("handles object inputs (clsx syntax)", () => {
     expect(cn({ foo: true, bar: false, baz: true })).toBe("foo baz");
   });
+
+  it("ignores null and undefined inputs", () => {
+    expect(cn("foo", null, undefined, "bar")).toBe("foo bar");
+  });
+
+  it("merges arrays with conditional values", () => {
+    const active = true;
+    const disabled = false;
+    expect(cn("btn", active && "btn-active", disabled && "btn-disabled")).toBe(
+      "btn btn-active"
+    );
+  });
+
+  it("deduplicates conflicting Tailwind text colors (last wins)", () => {
+    // twMerge ensures only the last text color wins
+    const result = cn("text-red-500", "text-blue-500");
+    expect(result).toBe("text-blue-500");
+  });
+
+  it("handles mixed object and string inputs", () => {
+    const result = cn("base", { extra: true, hidden: false }, "final");
+    expect(result).toBe("base extra final");
+  });
 });
