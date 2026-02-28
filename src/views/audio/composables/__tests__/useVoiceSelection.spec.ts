@@ -51,13 +51,13 @@ describe("useVoiceSelection", () => {
     // Choose a voice with multiple emotions (e.g., 爱小广 - 301000)
     selectedVoiceType.value = 301000;
     await nextTick();
-    expect(availableEmotions.value).toContain("高兴");
-    expect(availableEmotions.value).toContain("悲伤");
+    expect(availableEmotions.value).toContain("happy");
+    expect(availableEmotions.value).toContain("sad");
 
     // Choose a standard voice (e.g., 智聆 - 101002)
     selectedVoiceType.value = 101002;
     await nextTick();
-    expect(availableEmotions.value).toEqual(["中性"]);
+    expect(availableEmotions.value).toEqual(["neutral"]);
   });
 
   it("should auto-select first available voice when filters change", async () => {

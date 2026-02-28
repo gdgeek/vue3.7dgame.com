@@ -4,7 +4,6 @@ import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import axios from "axios";
-import { emotionMap } from "@/store/modules/availableVoices";
 import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
 import { postAudio } from "@/api/v1/resources/index";
@@ -114,7 +113,7 @@ export function useTTS(props: UseTTSProps) {
               : 3,
         ModelType: props.voiceType.value === "精品音色" ? 1 : 0,
         ...(props.emotionCategory.value && {
-          EmotionCategory: emotionMap[props.emotionCategory.value] || "neutral",
+          EmotionCategory: props.emotionCategory.value,
           EmotionIntensity: props.emotionIntensity.value,
         }),
       };

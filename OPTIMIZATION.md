@@ -230,11 +230,13 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 - **改进**：新增 `onUnmounted` 钩子调用 `resizeObserver.disconnect()`（原代码无清理逻辑）
 - **删除**：`src/typings/element-resize-detector.d.ts` 类型声明文件及 npm 包
 
-#### 30. `availableVoices.ts` 中文情感数据未国际化
-- **文件**：`src/store/modules/availableVoices.ts`（1311 行）
-- **问题**：情感名称（"悲伤"、"高兴"、"生气" 等）硬编码中文，`emotionMap` 作为显示用字符串
-- **建议**：将中文 key 移至 `src/lang/` 翻译文件，`emotionMap` 仅存储英文 key → API 参数的映射
-- **顺带**：评估能否将纯数据转为 JSON 文件按需加载，减少主 bundle 体积
+#### ~~30. `availableVoices.ts` 中文情感数据未国际化~~ ✅ 已完成（2026-02-28）
+- 将 `availableVoices` 数组中所有 `emotions` 值从中文（`"悲伤"`）改为英文 API 参数（`"sad"`）
+- 删除 `emotionMap` 和 `reverseEmotionMap`（不再需要中文↔英文转换）
+- 新增 `tts.emotions.*` 翻译键至全部 5 个语言文件（zh-CN、en-US、zh-TW、ja-JP、th-TH）
+- `VoiceSelector.vue` 改为 `$t('tts.emotions.' + emotion)` 展示本地化情感名称
+- `useTTS.ts` 直接传 `emotionCategory.value` 给 API，无需 `emotionMap` 查表
+- **附注**：`availableVoices` 数据已在懒加载路由 chunk 中，非主 bundle，JSON 外置无额外收益
 
 ---
 
