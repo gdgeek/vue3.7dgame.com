@@ -131,4 +131,45 @@ describe("useVoiceSelection", () => {
 
     expect(emotionCategory.value).toBe("happy");
   });
+
+  it("emotionIntensity initializes to 100", () => {
+    const { emotionIntensity } = voiceSelection;
+    expect(emotionIntensity.value).toBe(100);
+  });
+
+  it("filters voices by voiceScene", async () => {
+    const { voiceScene, filteredVoices } = voiceSelection;
+    voiceScene.value = "通用女声";
+    await nextTick();
+    expect(filteredVoices.value.length).toBeGreaterThan(0);
+    expect(filteredVoices.value.every((v) => v.scene === "通用女声")).toBe(true);
+  });
+
+  it("filters voices by voiceType", async () => {
+    const { voiceType, filteredVoices } = voiceSelection;
+    voiceType.value = "精品音色";
+    await nextTick();
+    expect(filteredVoices.value.length).toBeGreaterThan(0);
+    expect(filteredVoices.value.every((v) => v.type === "精品音色")).toBe(true);
+  });
+
+  it("clearing voiceLanguage filter shows all voices", async () => {
+    const { voiceLanguage, filteredVoices } = voiceSelection;
+    const totalVoices = filteredVoices.value.length;
+
+    voiceLanguage.value = "英文";
+    await nextTick();
+    expect(filteredVoices.value.length).toBeLessThan(totalVoices);
+
+    voiceLanguage.value = "";
+    await nextTick();
+    expect(filteredVoices.value.length).toBe(totalVoices);
+  });
+
+  it("availableEmotions returns neutral for unknown voice ID", async () => {
+    const { selectedVoiceType, availableEmotions } = voiceSelection;
+    selectedVoiceType.value = 999999; // unknown ID
+    await nextTick();
+    expect(availableEmotions.value).toEqual(["neutral"]);
+  });
 });
