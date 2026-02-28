@@ -8,7 +8,7 @@ vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 
 describe("Group API", () => {
   let request: ReturnType<typeof vi.fn>;
-  let groupApi: typeof import("@/api/v1/group").default;
+  let groupApi: typeof import("@/api/v1/group");
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -16,7 +16,7 @@ describe("Group API", () => {
       typeof vi.fn
     >;
     request.mockResolvedValue({ data: {} });
-    groupApi = (await import("@/api/v1/group")).default;
+    groupApi = await import("@/api/v1/group");
   });
 
   // -----------------------------------------------------------------------

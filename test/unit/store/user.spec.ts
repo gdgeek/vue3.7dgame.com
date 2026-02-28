@@ -6,10 +6,11 @@ import { setActivePinia, createPinia } from "pinia";
 
 vi.mock("@/utils/logger", () => ({ logger: { error: vi.fn() } }));
 vi.mock("@/api/v1/auth", () => ({
-  default: { login: vi.fn(), logout: vi.fn() },
+  login: vi.fn(),
+  logout: vi.fn(),
 }));
 vi.mock("@/api/v1/wechat", () => ({
-  default: { login: vi.fn() },
+  login: vi.fn(),
 }));
 vi.mock("@/store/modules/token", () => ({
   default: {
@@ -20,7 +21,8 @@ vi.mock("@/store/modules/token", () => ({
   },
 }));
 vi.mock("@/api/v1/user", () => ({
-  default: { putUserData: vi.fn(), info: vi.fn() },
+  putUserData: vi.fn(),
+  info: vi.fn(),
 }));
 vi.mock("@/store", async () => {
   const { createPinia: cp } = await import("pinia");
@@ -41,10 +43,10 @@ describe("useUserStore", () => {
   beforeEach(async () => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
-    authApi = (await import("@/api/v1/auth")).default as never;
-    wechatApi = (await import("@/api/v1/wechat")).default as never;
+    authApi = await import("@/api/v1/auth") as never;
+    wechatApi = await import("@/api/v1/wechat") as never;
     token = (await import("@/store/modules/token")).default as never;
-    userApi = (await import("@/api/v1/user")).default as never;
+    userApi = await import("@/api/v1/user") as never;
     ({ useUserStore } = await import("@/store/modules/user"));
   });
 

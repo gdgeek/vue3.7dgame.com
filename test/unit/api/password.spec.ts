@@ -8,7 +8,7 @@ vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 
 describe("Password API", () => {
   let request: ReturnType<typeof vi.fn>;
-  let passwordApi: typeof import("@/api/v1/password").default;
+  let passwordApi: typeof import("@/api/v1/password");
   const base = env.email_api;
 
   beforeEach(async () => {
@@ -16,7 +16,7 @@ describe("Password API", () => {
     request = (await import("@/utils/request")).default as ReturnType<
       typeof vi.fn
     >;
-    passwordApi = (await import("@/api/v1/password")).default;
+    passwordApi = await import("@/api/v1/password");
   });
 
   // -----------------------------------------------------------------------

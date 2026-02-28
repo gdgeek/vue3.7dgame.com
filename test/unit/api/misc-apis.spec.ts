@@ -67,7 +67,7 @@ describe("Upload API", () => {
 // ============================================================
 describe("Files API", () => {
   let request: ReturnType<typeof vi.fn>;
-  let filesApi: typeof import("@/api/v1/files").default;
+  let filesApi: typeof import("@/api/v1/files");
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -75,12 +75,12 @@ describe("Files API", () => {
       typeof vi.fn
     >;
     request.mockResolvedValue({ data: {} });
-    filesApi = (await import("@/api/v1/files")).default;
+    filesApi = await import("@/api/v1/files");
   });
 
   it("calls POST /v1/files", async () => {
-    await filesApi.post({ url: "https://example.com/a.png" } as Parameters<
-      typeof filesApi.post
+    await filesApi.postFile({ url: "https://example.com/a.png" } as Parameters<
+      typeof filesApi.postFile
     >[0]);
     expect(request).toHaveBeenCalledWith(
       expect.objectContaining({ url: "/v1/files", method: "post" })
@@ -89,9 +89,9 @@ describe("Files API", () => {
 
   it("sends the file data as body", async () => {
     const data = { url: "https://example.com/b.jpg", name: "img" } as Parameters<
-      typeof filesApi.post
+      typeof filesApi.postFile
     >[0];
-    await filesApi.post(data);
+    await filesApi.postFile(data);
     expect(request.mock.calls[0][0].data).toEqual(data);
   });
 });

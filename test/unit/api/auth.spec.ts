@@ -8,14 +8,14 @@ vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 
 describe("Auth API", () => {
   let request: ReturnType<typeof vi.fn>;
-  let authApi: typeof import("@/api/v1/auth").default;
+  let authApi: typeof import("@/api/v1/auth");
 
   beforeEach(async () => {
     vi.clearAllMocks();
     request = (await import("@/utils/request")).default as ReturnType<
       typeof vi.fn
     >;
-    authApi = (await import("@/api/v1/auth")).default;
+    authApi = await import("@/api/v1/auth");
   });
 
   // -----------------------------------------------------------------------
