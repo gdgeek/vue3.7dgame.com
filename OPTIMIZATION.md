@@ -225,9 +225,10 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 #### ~~28. `rollup-plugin-visualizer` 与 `vite-plugin-visualizer` 重复引入~~ ✅ 不存在
 - 2026-02-27 核查：项目只有 `rollup-plugin-visualizer`（在 vite.config.ts 中正常使用），无重复，无需处理
 
-#### 29. `element-resize-detector` 已停止维护
-- **版本**：^1.2.4（最后更新 2021 年）
-- **建议**：替换为原生 `ResizeObserver` API（现代浏览器均已支持），或使用 `@vueuse/core` 的 `useResizeObserver`
+#### ~~29. `element-resize-detector` 已停止维护~~ ✅ 已完成（2026-02-28）
+- **替换**：`PolygenView.vue` 和 `Voxel.vue` 的 `ElementResizeDetector` → 原生 `ResizeObserver`
+- **改进**：新增 `onUnmounted` 钩子调用 `resizeObserver.disconnect()`（原代码无清理逻辑）
+- **删除**：`src/typings/element-resize-detector.d.ts` 类型声明文件及 npm 包
 
 #### 30. `availableVoices.ts` 中文情感数据未国际化
 - **文件**：`src/store/modules/availableVoices.ts`（1311 行）

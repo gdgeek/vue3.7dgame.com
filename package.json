@@ -85,7 +85,6 @@
     "dompurify": "^3.2.4",
     "element-china-area-data": "^6.1.0",
     "element-plus": "^2.9.4",
-    "element-resize-detector": "^1.2.4",
     "highlight.js": "^10.7.3",
     "json-schema-editor-vue3": "^1.2.0",
     "nprogress": "^0.2.0",
