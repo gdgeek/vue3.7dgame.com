@@ -647,4 +647,84 @@ describe("useScriptEditorBase", () => {
       unmount();
     });
   });
+
+  // ---- toggleFullscreen ----
+  describe("toggleFullscreen()", () => {
+    it("requests fullscreen on editor container when not in fullscreen", () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+
+      // Simulate no active fullscreen
+      Object.defineProperty(document, "fullscreenElement", {
+        value: null,
+        configurable: true,
+      });
+
+      // Attach an iframe with a parent so requestFullscreen exists
+      const iframe = document.createElement("iframe");
+      const parent = document.createElement("div");
+      parent.appendChild(iframe);
+      const mockRequestFullscreen = vi.fn().mockResolvedValue(undefined);
+      parent.requestFullscreen = mockRequestFullscreen;
+      (result.editor as any).value = iframe;
+
+      result.toggleFullscreen();
+
+      expect(mockRequestFullscreen).toHaveBeenCalled();
+      expect(result.isFullscreen.value).toBe(true);
+      unmount();
+    });
+
+    it("exits fullscreen when already in fullscreen mode", () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+
+      // Simulate active fullscreen
+      const fakeElement = document.createElement("div");
+      Object.defineProperty(document, "fullscreenElement", {
+        value: fakeElement,
+        configurable: true,
+      });
+      const mockExitFullscreen = vi.fn().mockResolvedValue(undefined);
+      document.exitFullscreen = mockExitFullscreen;
+
+      result.toggleFullscreen();
+
+      expect(mockExitFullscreen).toHaveBeenCalled();
+      expect(result.isFullscreen.value).toBe(false);
+
+      // Restore
+      Object.defineProperty(document, "fullscreenElement", {
+        value: null,
+        configurable: true,
+      });
+      unmount();
+    });
+  });
+
+  // ---- save ----
+  describe("save()", () => {
+    it("sets hasUnsavedChanges to false and sends save postMessage", () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+
+      // Set up a mock editor with contentWindow
+      const mockPostMessage = vi.fn();
+      const fakeContentWindow = { postMessage: mockPostMessage };
+      (result.editor as any).value = { contentWindow: fakeContentWindow };
+
+      result.hasUnsavedChanges.value = true;
+      result.save();
+
+      expect(result.hasUnsavedChanges.value).toBe(false);
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ action: "save" }),
+        "*"
+      );
+      unmount();
+    });
+  });
 });
