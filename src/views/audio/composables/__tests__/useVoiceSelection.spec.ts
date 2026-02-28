@@ -78,4 +78,57 @@ describe("useVoiceSelection", () => {
     const jingpinGroup = groupedVoices.value.find((g) => g.type === "精品音色");
     expect(jingpinGroup?.voices.length).toBeGreaterThan(0);
   });
+
+  it("filteredEmotions returns only neutral when voice has one emotion", async () => {
+    const { selectedVoiceType, filteredEmotions } = voiceSelection;
+    selectedVoiceType.value = 101002; // 智聆: only ['neutral']
+    await nextTick();
+    expect(filteredEmotions.value).toEqual(["neutral"]);
+  });
+
+  it("filteredEmotions excludes neutral when multiple emotions exist", async () => {
+    const { selectedVoiceType, filteredEmotions } = voiceSelection;
+    selectedVoiceType.value = 301000; // 爱小广: many emotions including neutral
+    await nextTick();
+    expect(filteredEmotions.value).not.toContain("neutral");
+    expect(filteredEmotions.value.length).toBeGreaterThan(0);
+  });
+
+  it("supportHighSampleRate is false for standard voices", async () => {
+    const { selectedVoiceType, supportHighSampleRate } = voiceSelection;
+    selectedVoiceType.value = 101002; // sampleRate: ['8k','16k']
+    await nextTick();
+    expect(supportHighSampleRate.value).toBe(false);
+  });
+
+  it("supportHighSampleRate is true for voices with 24k", async () => {
+    const { selectedVoiceType, supportHighSampleRate } = voiceSelection;
+    selectedVoiceType.value = 301030; // 爱小溪: ['8k','16k','24k']
+    await nextTick();
+    expect(supportHighSampleRate.value).toBe(true);
+  });
+
+  it("resets emotionCategory when changed voice does not support current emotion", async () => {
+    const { selectedVoiceType, emotionCategory } = voiceSelection;
+    selectedVoiceType.value = 301000; // many emotions
+    await nextTick();
+    emotionCategory.value = "happy";
+
+    selectedVoiceType.value = 101002; // only neutral
+    await nextTick();
+
+    expect(emotionCategory.value).toBe("");
+  });
+
+  it("keeps emotionCategory when new voice supports the current emotion", async () => {
+    const { selectedVoiceType, emotionCategory } = voiceSelection;
+    selectedVoiceType.value = 301000; // happy is available
+    await nextTick();
+    emotionCategory.value = "happy";
+
+    selectedVoiceType.value = 301001; // 爱小栋 also has happy
+    await nextTick();
+
+    expect(emotionCategory.value).toBe("happy");
+  });
 });
