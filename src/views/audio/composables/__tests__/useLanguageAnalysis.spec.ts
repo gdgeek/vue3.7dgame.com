@@ -247,3 +247,77 @@ describe("useLanguageAnalysis — suggestion", () => {
     );
   });
 });
+
+// -----------------------------------------------------------------------
+// Initial state
+// -----------------------------------------------------------------------
+describe("useLanguageAnalysis — initial state", () => {
+  it("languageAnalysis starts with all-zero counts", () => {
+    const analysis = useLanguageAnalysis();
+    const { languageAnalysis } = analysis;
+    expect(languageAnalysis.value.chineseCount).toBe(0);
+    expect(languageAnalysis.value.englishCount).toBe(0);
+    expect(languageAnalysis.value.japaneseCount).toBe(0);
+    expect(languageAnalysis.value.otherCount).toBe(0);
+    expect(languageAnalysis.value.totalChars).toBe(0);
+  });
+
+  it("languageAnalysis starts with empty detectedLanguage and suggestion", () => {
+    const analysis = useLanguageAnalysis();
+    const { languageAnalysis } = analysis;
+    expect(languageAnalysis.value.detectedLanguage).toBe("");
+    expect(languageAnalysis.value.suggestion).toBe("");
+    expect(languageAnalysis.value.isMultiLanguage).toBe(false);
+  });
+});
+
+// -----------------------------------------------------------------------
+// Other characters counting
+// -----------------------------------------------------------------------
+describe("useLanguageAnalysis — other character counting", () => {
+  let result: ReturnType<typeof useLanguageAnalysis>;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    result = useLanguageAnalysis();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.clearAllMocks();
+  });
+
+  it("counts punctuation and spaces as otherCount", () => {
+    const { voiceLanguage, autoSwitchLanguage } = makeRefs();
+    // "Hi!" — 2 letters + 1 punctuation
+    result.checkTextLanguage("Hi!", voiceLanguage, autoSwitchLanguage);
+    expect(result.languageAnalysis.value.otherCount).toBe(1);
+    expect(result.languageAnalysis.value.englishCount).toBe(2);
+  });
+
+  it("text with only digits has no language detected", () => {
+    const { voiceLanguage, autoSwitchLanguage } = makeRefs();
+    result.checkTextLanguage("12345", voiceLanguage, autoSwitchLanguage);
+    expect(result.languageAnalysis.value.detectedLanguage).toBe("");
+    expect(result.languageAnalysis.value.chineseCount).toBe(0);
+    expect(result.languageAnalysis.value.englishCount).toBe(0);
+    expect(result.languageAnalysis.value.japaneseCount).toBe(0);
+    expect(result.languageAnalysis.value.otherCount).toBe(5);
+  });
+
+  it("otherPercentage covers numbers in a mixed string", () => {
+    const { voiceLanguage, autoSwitchLanguage } = makeRefs();
+    // "abc123" — 3 english + 3 digits (other)
+    result.checkTextLanguage("abc123", voiceLanguage, autoSwitchLanguage);
+    expect(result.languageAnalysis.value.otherCount).toBe(3);
+    expect(result.languageAnalysis.value.englishCount).toBe(3);
+  });
+
+  it("pure Chinese text has 100% chinese percentage (approximately)", () => {
+    const { voiceLanguage, autoSwitchLanguage } = makeRefs();
+    result.checkTextLanguage("你好世界", voiceLanguage, autoSwitchLanguage);
+    expect(result.languageAnalysis.value.chinesePercentage).toBe(100);
+    expect(result.languageAnalysis.value.englishPercentage).toBe(0);
+    expect(result.languageAnalysis.value.japanesePercentage).toBe(0);
+  });
+});
