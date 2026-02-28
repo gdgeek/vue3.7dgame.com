@@ -360,3 +360,150 @@ describe("useEmailVerification Composable", () => {
     });
   });
 });
+
+// -----------------------------------------------------------------------
+// Computed properties and additional coverage
+// -----------------------------------------------------------------------
+describe("useEmailVerification — computed properties", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("currentEmail returns empty string when no email is bound", async () => {
+    mockedGetEmailStatus.mockResolvedValue({
+      success: true,
+      data: {
+        user_id: 1, username: "test", email: null,
+        email_verified: false, email_verified_at: null, email_verified_at_formatted: null,
+      },
+    });
+    const { currentEmail, loadStatus, cleanup } = useEmailVerification();
+    await loadStatus();
+    expect(currentEmail.value).toBe("");
+    cleanup();
+  });
+
+  it("currentEmail returns bound email when present", async () => {
+    mockedGetEmailStatus.mockResolvedValue({
+      success: true,
+      data: {
+        user_id: 1, username: "test", email: "user@example.com",
+        email_verified: true, email_verified_at: 1000, email_verified_at_formatted: "2024",
+      },
+    });
+    const { currentEmail, loadStatus, cleanup } = useEmailVerification();
+    await loadStatus();
+    expect(currentEmail.value).toBe("user@example.com");
+    cleanup();
+  });
+
+  it("hasBoundEmail returns false when no email", async () => {
+    mockedGetEmailStatus.mockResolvedValue({
+      success: true,
+      data: {
+        user_id: 1, username: "test", email: null,
+        email_verified: false, email_verified_at: null, email_verified_at_formatted: null,
+      },
+    });
+    const { hasBoundEmail, loadStatus, cleanup } = useEmailVerification();
+    await loadStatus();
+    expect(hasBoundEmail.value).toBe(false);
+    cleanup();
+  });
+
+  it("hasBoundEmail returns true when email is bound", async () => {
+    mockedGetEmailStatus.mockResolvedValue({
+      success: true,
+      data: {
+        user_id: 1, username: "test", email: "user@example.com",
+        email_verified: true, email_verified_at: 1000, email_verified_at_formatted: "2024",
+      },
+    });
+    const { hasBoundEmail, loadStatus, cleanup } = useEmailVerification();
+    await loadStatus();
+    expect(hasBoundEmail.value).toBe(true);
+    cleanup();
+  });
+
+  it("canVerifyNewCode is false when code is empty", () => {
+    const { canVerifyNewCode, newEmailForm, cleanup } = useEmailVerification();
+    newEmailForm.code = "";
+    expect(canVerifyNewCode.value).toBe(false);
+    cleanup();
+  });
+
+  it("canVerifyNewCode is true when code is filled", () => {
+    const { canVerifyNewCode, newEmailForm, cleanup } = useEmailVerification();
+    newEmailForm.code = "123456";
+    expect(canVerifyNewCode.value).toBe(true);
+    cleanup();
+  });
+});
+
+// -----------------------------------------------------------------------
+// verifyCodeForNewEmail
+// -----------------------------------------------------------------------
+describe("useEmailVerification — verifyCodeForNewEmail", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    mockedGetEmailStatus.mockResolvedValue({
+      success: true,
+      data: {
+        user_id: 1, username: "test", email: null,
+        email_verified: false, email_verified_at: null, email_verified_at_formatted: null,
+      },
+    });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("returns false when email or code is empty", async () => {
+    const { verifyCodeForNewEmail, newEmailForm, cleanup } = useEmailVerification();
+    newEmailForm.email = "";
+    newEmailForm.code = "";
+    const result = await verifyCodeForNewEmail();
+    expect(result).toBe(false);
+    cleanup();
+  });
+
+  it("calls verifyEmailCode with email and code", async () => {
+    const { verifyCodeForNewEmail, newEmailForm, cleanup } = useEmailVerification();
+    newEmailForm.email = "test@example.com";
+    newEmailForm.code = "123456";
+    vi.mocked(verifyEmailCode).mockResolvedValue({ success: true });
+    await verifyCodeForNewEmail();
+    expect(vi.mocked(verifyEmailCode)).toHaveBeenCalledWith(
+      expect.objectContaining({ email: "test@example.com", code: "123456" })
+    );
+    cleanup();
+  });
+
+  it("returns false when API returns success=false", async () => {
+    const { verifyCodeForNewEmail, newEmailForm, cleanup } = useEmailVerification();
+    newEmailForm.email = "test@example.com";
+    newEmailForm.code = "123456";
+    vi.mocked(verifyEmailCode).mockResolvedValue({ success: false, message: "Wrong code" });
+    const result = await verifyCodeForNewEmail();
+    expect(result).toBe(false);
+    cleanup();
+  });
+
+  it("returns true and clears code on success", async () => {
+    const { verifyCodeForNewEmail, newEmailForm, cleanup } = useEmailVerification();
+    newEmailForm.email = "test@example.com";
+    newEmailForm.code = "123456";
+    vi.mocked(verifyEmailCode).mockResolvedValue({ success: true });
+    const result = await verifyCodeForNewEmail();
+    expect(result).toBe(true);
+    expect(newEmailForm.code).toBe("");
+    cleanup();
+  });
+});
