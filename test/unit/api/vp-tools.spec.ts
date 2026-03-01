@@ -28,6 +28,18 @@ describe("Tools API", () => {
       expect.objectContaining({ url: "/v1/tools/user-linked", method: "get" })
     );
   });
+
+  it("getUserLinked() returns the request result", async () => {
+    const mockResp = { data: { linked: true } };
+    request.mockResolvedValue(mockResp);
+    const result = await toolsApi.getUserLinked();
+    expect(result).toEqual(mockResp);
+  });
+
+  it("getUserLinked() does not send a request body", async () => {
+    await toolsApi.getUserLinked();
+    expect(request.mock.calls[0][0].data).toBeUndefined();
+  });
 });
 
 // ============================================================
@@ -51,6 +63,13 @@ describe("VpGuide API", () => {
       expect(request).toHaveBeenCalledWith(
         expect.objectContaining({ url: "/v1/vp-guides", method: "post", data })
       );
+    });
+
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 10, name: "guide1" } };
+      request.mockResolvedValue(mockResp);
+      const result = await vpGuideApi.postVpGuide({ name: "guide1" });
+      expect(result).toEqual(mockResp);
     });
   });
 
@@ -84,6 +103,23 @@ describe("VpGuide API", () => {
       const url: string = request.mock.calls[0][0].url;
       expect(url).toContain("page=3");
     });
+
+    it("includes default expand=image,author,share when no expand provided", async () => {
+      await vpGuideApi.getVerses({});
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("expand=image");
+    });
+
+    it("uses custom expand when provided", async () => {
+      await vpGuideApi.getVerses({ expand: "author" });
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("expand=author");
+    });
+
+    it("omits page when page === 0 (default)", async () => {
+      await vpGuideApi.getVerses({ page: 0 });
+      expect(request.mock.calls[0][0].url).not.toContain("page=");
+    });
   });
 
   describe("getVpGuide()", () => {
@@ -92,6 +128,15 @@ describe("VpGuide API", () => {
       expect(request).toHaveBeenCalledWith(
         expect.objectContaining({ url: "/v1/vp-guides/7", method: "get" })
       );
+    });
+
+    it("different IDs produce different URLs", async () => {
+      await vpGuideApi.getVpGuide(1);
+      const url1: string = request.mock.calls[0][0].url;
+      vi.clearAllMocks();
+      await vpGuideApi.getVpGuide(2);
+      const url2: string = request.mock.calls[0][0].url;
+      expect(url1).not.toBe(url2);
     });
   });
 
@@ -113,6 +158,11 @@ describe("VpGuide API", () => {
     it("omits page when page <= 1", async () => {
       await vpGuideApi.getVpGuides(1);
       expect(request.mock.calls[0][0].url).not.toContain("page=1");
+    });
+
+    it("omits page when page === 0 (default)", async () => {
+      await vpGuideApi.getVpGuides(0);
+      expect(request.mock.calls[0][0].url).not.toContain("page=");
     });
   });
 
@@ -162,6 +212,14 @@ describe("VpMap API", () => {
         expect.objectContaining({ url: "/v1/vp-maps", method: "post", data })
       );
     });
+
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 7, name: "map-1" } };
+      request.mockResolvedValue(mockResp);
+      const data = { name: "map-1", verse_id: 10 } as Parameters<typeof vpMapApi.postVpMap>[0];
+      const result = await vpMapApi.postVpMap(data);
+      expect(result).toEqual(mockResp);
+    });
   });
 
   describe("deleteVpMap()", () => {
@@ -170,6 +228,11 @@ describe("VpMap API", () => {
       expect(request).toHaveBeenCalledWith(
         expect.objectContaining({ url: "/v1/vp-maps/4", method: "delete" })
       );
+    });
+
+    it("uses the correct id in the URL", async () => {
+      await vpMapApi.deleteVpMap(99);
+      expect(request.mock.calls[0][0].url).toBe("/v1/vp-maps/99");
     });
   });
 
@@ -190,6 +253,11 @@ describe("VpMap API", () => {
 
     it("omits page when page === 1", async () => {
       await vpMapApi.getVpMaps(1);
+      expect(request.mock.calls[0][0].url).not.toContain("page=");
+    });
+
+    it("omits page when called with no args (default page=1)", async () => {
+      await vpMapApi.getVpMaps();
       expect(request.mock.calls[0][0].url).not.toContain("page=");
     });
   });

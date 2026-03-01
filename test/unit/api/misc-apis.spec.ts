@@ -60,6 +60,19 @@ describe("Upload API", () => {
     await uploadFile(payload);
     expect(logger.error).toHaveBeenCalledWith(payload);
   });
+
+  it("returns the request result", async () => {
+    const mockResp = { data: { id: 99, url: "https://cdn/file.png" } };
+    request.mockResolvedValue(mockResp);
+    const result = await uploadFile({ name: "file.png" });
+    expect(result).toEqual(mockResp);
+  });
+
+  it("logger.error is called twice per invocation", async () => {
+    const { logger } = await import("@/utils/logger");
+    await uploadFile({ name: "x.glb" });
+    expect(logger.error).toHaveBeenCalledTimes(2);
+  });
 });
 
 // ============================================================
@@ -93,6 +106,13 @@ describe("Files API", () => {
     >[0];
     await filesApi.postFile(data);
     expect(request.mock.calls[0][0].data).toEqual(data);
+  });
+
+  it("returns the request result", async () => {
+    const mockResp = { data: { id: 1, url: "https://cdn/img.jpg" } };
+    request.mockResolvedValue(mockResp);
+    const result = await filesApi.postFile({ url: "https://example.com/img.jpg" } as Parameters<typeof filesApi.postFile>[0]);
+    expect(result).toEqual(mockResp);
   });
 });
 
@@ -173,6 +193,34 @@ describe("Person API", () => {
       const url: string = request.mock.calls[0][0].url;
       expect(url).toContain("page=3");
     });
+
+    it("includes custom sort in the URL", async () => {
+      await personApi.getPerson("created_at");
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("sort=created_at");
+    });
+
+    it("includes expand in the URL when provided", async () => {
+      await personApi.getPerson("-created_at", "", 1, "roles");
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("expand=roles");
+    });
+  });
+
+  describe("postPerson() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 5, username: "bob" } };
+      request.mockResolvedValue(mockResp);
+      const result = await personApi.postPerson({ username: "bob" });
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("deletePerson() — different IDs", () => {
+    it("uses the correct id in the URL", async () => {
+      await personApi.deletePerson(42);
+      expect(request.mock.calls[0][0].url).toBe("/v1/people/42");
+    });
   });
 });
 
@@ -240,6 +288,21 @@ describe("Multilanguage Verse API", () => {
       })
     );
   });
+
+  it("different IDs produce different GET URLs", async () => {
+    await mlApi.getMultilanguageVerse(1);
+    const url1: string = request.mock.calls[0][0].url;
+    vi.clearAllMocks();
+    await mlApi.getMultilanguageVerse(2);
+    const url2: string = request.mock.calls[0][0].url;
+    expect(url1).not.toBe(url2);
+  });
+
+  it("putMultilanguageVerse sends the full data payload", async () => {
+    const data = { description: "hello", name: "World" };
+    await mlApi.putMultilanguageVerse(10, data);
+    expect(request.mock.calls[0][0].data).toEqual(data);
+  });
 });
 
 // ============================================================
@@ -298,5 +361,26 @@ describe("Multilanguage Verses API", () => {
         method: "delete",
       })
     );
+  });
+
+  it("getlanguages URL contains the given verseId", async () => {
+    await mlvsApi.getlanguages(99);
+    const url: string = request.mock.calls[0][0].url;
+    expect(url).toContain("99");
+  });
+
+  it("different verseIds produce different getlanguages URLs", async () => {
+    await mlvsApi.getlanguages(1);
+    const url1: string = request.mock.calls[0][0].url;
+    vi.clearAllMocks();
+    await mlvsApi.getlanguages(2);
+    const url2: string = request.mock.calls[0][0].url;
+    expect(url1).not.toBe(url2);
+  });
+
+  it("postlanguages sends data in request body", async () => {
+    const data = { name: "Scene ZH", verse_id: 5 };
+    await mlvsApi.postlanguages(data);
+    expect(request.mock.calls[0][0].data).toEqual(data);
   });
 });

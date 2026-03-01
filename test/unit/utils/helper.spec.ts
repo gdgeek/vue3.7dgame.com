@@ -153,4 +153,41 @@ describe("helper utils", () => {
       expect(result).toContain("www.example.com");
     });
   });
+
+  describe("ReplaceURL — no placeholders", () => {
+    it("returns the string unchanged when no placeholders present", async () => {
+      vi.resetModules();
+      const { ReplaceURL } = await import("@/utils/helper");
+      const plain = "https://fixed.example.com/api";
+      expect(ReplaceURL(plain)).toBe(plain);
+    });
+  });
+
+  describe("GetCurrentUrl — http protocol", () => {
+    it("returns an http:// URL when protocol is http:", async () => {
+      Object.defineProperty(window, "location", {
+        value: { protocol: "http:", hostname: "dev.local", port: "8080", host: "dev.local:8080" },
+        writable: true,
+        configurable: true,
+      });
+      vi.resetModules();
+      const { GetCurrentUrl } = await import("@/utils/helper");
+      const result = GetCurrentUrl();
+      expect(result).toContain("http://");
+      expect(result).toContain("dev.local");
+    });
+  });
+
+  describe("GetIP — host without port", () => {
+    it("extracts just the hostname when no port is in host", async () => {
+      Object.defineProperty(window, "location", {
+        value: { protocol: "https:", hostname: "api.example.com", port: "", host: "api.example.com" },
+        writable: true,
+        configurable: true,
+      });
+      vi.resetModules();
+      const { GetIP } = await import("@/utils/helper");
+      expect(GetIP()).toBe("api.example.com");
+    });
+  });
 });

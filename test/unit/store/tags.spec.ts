@@ -183,4 +183,28 @@ describe("useTagsStore", () => {
     expect(store.tagsMap!.get(11)!.managed).toBe(1);
     expect(store.tagsMap!.get(12)!.name).toBe("C");
   });
+
+  it("managed=0 is correctly preserved (not treated as falsy)", async () => {
+    tagsApi.getTags.mockResolvedValue({
+      data: [{ id: 20, name: "T", info: JSON.stringify({}), managed: 0 }],
+    });
+    const store = useTagsStore();
+    await store.refreshTags();
+    expect(store.tagsMap!.get(20)!.managed).toBe(0);
+  });
+
+  it("useTagsStore called twice returns the same instance", () => {
+    const s1 = useTagsStore();
+    const s2 = useTagsStore();
+    expect(s1).toBe(s2);
+  });
+
+  it("tagsMap is a Map instance after refreshTags", async () => {
+    tagsApi.getTags.mockResolvedValue({
+      data: [{ id: 1, name: "T", info: JSON.stringify({}), managed: 0 }],
+    });
+    const store = useTagsStore();
+    await store.refreshTags();
+    expect(store.tagsMap).toBeInstanceOf(Map);
+  });
 });
