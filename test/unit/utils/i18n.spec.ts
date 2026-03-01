@@ -57,4 +57,20 @@ describe("translateRouteTitle()", () => {
     translateRouteTitle("dashboard");
     expect(i18n.global.t).toHaveBeenCalledWith("route.dashboard");
   });
+
+  it("returns title with spaces unchanged when no i18n key", () => {
+    i18n.global.te.mockReturnValue(false);
+    expect(translateRouteTitle("my page")).toBe("my page");
+  });
+
+  it("returns an empty string translation from t() when key exists but maps to empty", () => {
+    i18n.global.te.mockReturnValue(true);
+    i18n.global.t.mockReturnValue("");
+    expect(translateRouteTitle("blank")).toBe("");
+  });
+
+  it("handles title with special characters when key missing", () => {
+    i18n.global.te.mockReturnValue(false);
+    expect(translateRouteTitle("path/to/page")).toBe("path/to/page");
+  });
 });

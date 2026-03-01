@@ -85,6 +85,19 @@ describe("getVerseExportZip()", () => {
     await getVerseExportZip(5);
     expect(axiosGet.mock.calls[0][1].headers.Accept).toBe("application/zip");
   });
+
+  it("sets timeout to 120000", async () => {
+    token.getToken.mockReturnValue(null);
+    await getVerseExportZip(7);
+    expect(axiosGet.mock.calls[0][1].timeout).toBe(120000);
+  });
+
+  it("includes verseId in the URL for a different ID", async () => {
+    token.getToken.mockReturnValue(null);
+    await getVerseExportZip(123);
+    const url: string = axiosGet.mock.calls[0][0];
+    expect(url).toContain("/123/export-zip");
+  });
 });
 
 describe("postVerseImportJson()", () => {
@@ -151,5 +164,11 @@ describe("postVerseImportZip()", () => {
     expect(request.mock.calls[0][0].headers["Content-Type"]).toBe(
       "multipart/form-data"
     );
+  });
+
+  it("sets request timeout to 120000", async () => {
+    const file = new File(["data"], "scene.zip");
+    await postVerseImportZip(file);
+    expect(request.mock.calls[0][0].timeout).toBe(120000);
   });
 });

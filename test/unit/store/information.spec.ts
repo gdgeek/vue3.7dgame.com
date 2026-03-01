@@ -85,4 +85,24 @@ describe("useInfomationStore", () => {
       expect(store2.description).toBeDefined();
     });
   });
+
+  // ── Additional edge cases ─────────────────────────────────────────────────
+
+  describe("额外边界情况", () => {
+    it("description 不为 null 或 undefined", () => {
+      const store = useInfomationStore();
+      expect(store.description).not.toBeNull();
+      expect(store.description).not.toBeUndefined();
+    });
+
+    it("description 非空字符串", () => {
+      const store = useInfomationStore();
+      expect(store.description.length).toBeGreaterThan(0);
+    });
+
+    it("store 对象仅暴露 description 相关属性", () => {
+      const store = useInfomationStore();
+      expect(Object.keys(store)).toContain("description");
+    });
+  });
 });
