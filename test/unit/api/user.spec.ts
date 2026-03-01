@@ -97,5 +97,32 @@ describe("User API", () => {
       const callArg = request.mock.calls[0][0];
       expect(callArg.data).toBeUndefined();
     });
+
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 42, username: "bob" } };
+      request.mockResolvedValue(mockResp);
+      const result = await info();
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Additional edge cases
+  // -----------------------------------------------------------------------
+  describe("getUserCreation() — expand string", () => {
+    it("URL contains 'polygenCount' in expand", async () => {
+      request.mockResolvedValue({ data: {} });
+      await getUserCreation();
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("polygenCount");
+    });
+  });
+
+  describe("putUserData() — method", () => {
+    it("uses PUT method", async () => {
+      request.mockResolvedValue({ data: {} });
+      await putUserData({ nickname: "Charlie" });
+      expect(request.mock.calls[0][0].method).toBe("put");
+    });
   });
 });

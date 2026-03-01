@@ -125,4 +125,18 @@ describe("Tencent Cloud API", () => {
       );
     });
   });
+
+  describe("store() — method", () => {
+    it("uses GET method", async () => {
+      await tencentApi.store();
+      expect(request.mock.calls[0][0].method).toBe("get");
+    });
+  });
+
+  describe("token() — with only bucket", () => {
+    it("URL contains /v1/tencent-clouds/token even with just bucket", async () => {
+      await tencentApi.token("just-bucket");
+      expect(request.mock.calls[0][0].url).toContain("/v1/tencent-clouds/token");
+    });
+  });
 });
