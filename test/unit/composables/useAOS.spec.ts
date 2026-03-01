@@ -104,4 +104,19 @@ describe("useAOS()", () => {
     );
     unmount();
   });
+
+  it("AOS.init() is called with all three default properties", () => {
+    const unmount = mountWithAOS(() => useAOS());
+    const callArg = mockInit.mock.calls[0][0];
+    expect("duration" in callArg).toBe(true);
+    expect("once" in callArg).toBe(true);
+    expect("mirror" in callArg).toBe(true);
+    unmount();
+  });
+
+  it("AOS.init call count does not exceed 1 for a single mount", () => {
+    const unmount = mountWithAOS(() => useAOS());
+    expect(mockInit).toHaveBeenCalledTimes(1);
+    unmount();
+  });
 });

@@ -111,4 +111,32 @@ describe("useUnsavedChanges", () => {
     await nextTick();
     expect(hasUnsavedChanges.value).toBe(true);
   });
+
+  it("hasUnsavedChanges.value is a boolean", () => {
+    const content = ref("x");
+    const { hasUnsavedChanges } = useUnsavedChanges(content, () => "x");
+    expect(typeof hasUnsavedChanges.value).toBe("boolean");
+  });
+
+  it("content identical to baseline never triggers unsaved flag", async () => {
+    const content = ref("same");
+    const { hasUnsavedChanges } = useUnsavedChanges(content, () => "same");
+    content.value = "same"; // no-op change
+    await nextTick();
+    expect(hasUnsavedChanges.value).toBe(false);
+  });
+
+  it("markSaved after multiple changes resets flag exactly once", async () => {
+    const content = ref("a");
+    const { hasUnsavedChanges, markSaved } = useUnsavedChanges(content, () => "a");
+    content.value = "b";
+    await nextTick();
+    content.value = "c";
+    await nextTick();
+    expect(hasUnsavedChanges.value).toBe(true);
+    markSaved();
+    expect(hasUnsavedChanges.value).toBe(false);
+    markSaved(); // idempotent
+    expect(hasUnsavedChanges.value).toBe(false);
+  });
 });
