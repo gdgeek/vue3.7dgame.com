@@ -727,4 +727,81 @@ describe("useScriptEditorBase", () => {
       unmount();
     });
   });
+
+  // ---- toggleSceneFullscreen ----
+  describe("toggleSceneFullscreen()", () => {
+    it("requests fullscreen on .runArea element when not in fullscreen", () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+
+      Object.defineProperty(document, "fullscreenElement", {
+        value: null,
+        configurable: true,
+      });
+
+      const runArea = document.createElement("div");
+      runArea.className = "runArea";
+      const mockRequestFullscreen = vi.fn().mockResolvedValue(undefined);
+      runArea.requestFullscreen = mockRequestFullscreen;
+      document.body.appendChild(runArea);
+
+      result.toggleSceneFullscreen();
+
+      expect(mockRequestFullscreen).toHaveBeenCalled();
+      expect(result.isSceneFullscreen.value).toBe(true);
+
+      document.body.removeChild(runArea);
+      Object.defineProperty(document, "fullscreenElement", {
+        value: null,
+        configurable: true,
+      });
+      unmount();
+    });
+
+    it("does nothing when .runArea element is not found", () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+
+      Object.defineProperty(document, "fullscreenElement", {
+        value: null,
+        configurable: true,
+      });
+
+      // Ensure no .runArea exists in DOM
+      const existing = document.querySelector(".runArea");
+      if (existing) existing.remove();
+
+      result.toggleSceneFullscreen();
+
+      expect(result.isSceneFullscreen.value).toBe(false);
+      unmount();
+    });
+
+    it("exits fullscreen when already in scene fullscreen mode", () => {
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
+
+      const fakeEl = document.createElement("div");
+      Object.defineProperty(document, "fullscreenElement", {
+        value: fakeEl,
+        configurable: true,
+      });
+      const mockExitFullscreen = vi.fn().mockResolvedValue(undefined);
+      document.exitFullscreen = mockExitFullscreen;
+
+      result.toggleSceneFullscreen();
+
+      expect(mockExitFullscreen).toHaveBeenCalled();
+      expect(result.isSceneFullscreen.value).toBe(false);
+
+      Object.defineProperty(document, "fullscreenElement", {
+        value: null,
+        configurable: true,
+      });
+      unmount();
+    });
+  });
 });
