@@ -116,4 +116,29 @@ describe("hasAuth()", () => {
       expect(hasAuth(["superuser", "viewer"], "role")).toBe(false);
     });
   });
+
+  // ── edge cases ──────────────────────────────────────────────────────────
+  describe("edge cases", () => {
+    it("returns false for empty string perm when not in perms list", () => {
+      setUser(["editor"], ["sys:user:add"]);
+      expect(hasAuth("")).toBe(false);
+    });
+
+    it("returns false for empty array of perms (some() on empty array)", () => {
+      setUser(["editor"], ["sys:user:add"]);
+      expect(hasAuth([])).toBe(false);
+    });
+
+    it("returns false for role check with empty roles array", () => {
+      setUser([], ["sys:user:add"]);
+      expect(hasAuth("admin", "role")).toBe(false);
+    });
+
+    it("manager role returns true only for type=button, not type=role", () => {
+      setUser(["manager"], []);
+      expect(hasAuth("any:perm", "button")).toBe(true);
+      expect(hasAuth("manager", "role")).toBe(true); // manager IS in roles
+      expect(hasAuth("superuser", "role")).toBe(false);
+    });
+  });
 });
