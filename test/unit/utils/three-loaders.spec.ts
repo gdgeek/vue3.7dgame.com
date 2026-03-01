@@ -107,6 +107,18 @@ describe("getConfiguredGLTFLoader()", () => {
     getConfiguredGLTFLoader();
     expect(mockRendererDispose).toHaveBeenCalled();
   });
+
+  it("calls forceContextLoss on the temp renderer when available", async () => {
+    const { getConfiguredGLTFLoader } = await import("@/lib/three/loaders");
+    getConfiguredGLTFLoader();
+    expect(mockForceContextLoss).toHaveBeenCalled();
+  });
+
+  it("sets KTX2 transcoder path to /js/three.js/libs/basis/", async () => {
+    const { getConfiguredGLTFLoader } = await import("@/lib/three/loaders");
+    getConfiguredGLTFLoader();
+    expect(mockKTX2SetPath).toHaveBeenCalledWith("/js/three.js/libs/basis/");
+  });
 });
 
 describe("disposeKTX2Loader()", () => {
@@ -130,5 +142,26 @@ describe("disposeKTX2Loader()", () => {
     const { disposeKTX2Loader } = await import("@/lib/three/loaders");
     expect(() => disposeKTX2Loader()).not.toThrow();
     expect(mockKTX2Dispose).not.toHaveBeenCalled();
+  });
+
+  it("nulls out the cached KTX2 so a second call is also a no-op", async () => {
+    const { getConfiguredGLTFLoader, disposeKTX2Loader } = await import(
+      "@/lib/three/loaders"
+    );
+    getConfiguredGLTFLoader();
+    disposeKTX2Loader(); // first dispose — sets sharedKTX2 = null
+    vi.clearAllMocks();
+    disposeKTX2Loader(); // second call — sharedKTX2 is null, should not call dispose
+    expect(mockKTX2Dispose).not.toHaveBeenCalled();
+  });
+
+  it("KTX2Loader is created only once when getConfiguredGLTFLoader is called twice", async () => {
+    const { KTX2Loader } = await import(
+      "three/examples/jsm/loaders/KTX2Loader.js"
+    );
+    const { getConfiguredGLTFLoader } = await import("@/lib/three/loaders");
+    getConfiguredGLTFLoader();
+    getConfiguredGLTFLoader(); // second call — should reuse cached KTX2
+    expect(vi.mocked(KTX2Loader)).toHaveBeenCalledTimes(1);
   });
 });

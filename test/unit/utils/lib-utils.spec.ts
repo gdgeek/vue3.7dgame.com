@@ -58,4 +58,21 @@ describe("cn() class name utility", () => {
     const result = cn("base", { extra: true, hidden: false }, "final");
     expect(result).toBe("base extra final");
   });
+
+  it("returns empty string when all values in an object are false", () => {
+    expect(cn({ a: false, b: false, c: false })).toBe("");
+  });
+
+  it("returns empty string when only falsy values are passed", () => {
+    expect(cn(false as any, null, undefined, 0 as any)).toBe("");
+  });
+
+  it("handles an empty array input", () => {
+    expect(cn([])).toBe("");
+  });
+
+  it("deduplicates conflicting Tailwind margin classes (last wins)", () => {
+    const result = cn("m-4", "m-2");
+    expect(result).toBe("m-2");
+  });
 });

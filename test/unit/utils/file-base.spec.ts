@@ -225,4 +225,29 @@ describe("fileOpen()", () => {
     const files = await promise;
     expect((files[0] as any).extension).toBe("png");
   });
+
+  it("resolves with multiple files when multiple=true", async () => {
+    const { fileOpen } = await import("@/assets/js/file/base");
+    const f1 = new File(["a"], "a.glb");
+    const f2 = new File(["b"], "b.gltf");
+    const promise = fileOpen("*", true);
+
+    mockInput.onchange!({ target: { files: [f1, f2] } } as unknown as Event);
+
+    const files = await promise;
+    expect(files).toHaveLength(2);
+    expect((files[0] as any).extension).toBe("glb");
+    expect((files[1] as any).extension).toBe("gltf");
+  });
+
+  it("does not set extension property when filename has no dot", async () => {
+    const { fileOpen } = await import("@/assets/js/file/base");
+    const f = new File([""], "Makefile");
+    const promise = fileOpen("*");
+
+    mockInput.onchange!({ target: { files: [f] } } as unknown as Event);
+
+    const files = await promise;
+    expect((files[0] as any).extension).toBeUndefined();
+  });
 });

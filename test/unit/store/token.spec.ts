@@ -168,4 +168,29 @@ describe("Token store module", () => {
       expect(result?.refreshToken).toBe("new-refresh");
     });
   });
+
+  describe("边界情况", () => {
+    it("hasToken 在初始状态下返回 false (重复断言)", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+      expect(Token.hasToken()).toBe(false);
+      expect(Token.hasToken()).toBe(false); // 幂等
+    });
+
+    it("getToken 解析包含 null expires 的 token", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+      const token = makeToken({ expires: null as unknown as string });
+      Token.setToken(token);
+      const result = Token.getToken();
+      expect(result).not.toBeNull();
+      expect(result?.accessToken).toBe(token.accessToken);
+    });
+
+    it("setToken 后 localStorage 中包含正确的 token 字符串", async () => {
+      const Token = (await import("@/store/modules/token")).default;
+      const token = makeToken({ accessToken: "abc-xyz" });
+      Token.setToken(token);
+      const raw = localStorage.getItem("access_token");
+      expect(raw).toContain("abc-xyz");
+    });
+  });
 });
