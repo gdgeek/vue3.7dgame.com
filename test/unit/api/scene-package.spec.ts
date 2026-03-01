@@ -37,6 +37,22 @@ describe("getVerseExportJson()", () => {
     await getVerseExportJson(99);
     expect(request.mock.calls[0][0].url).toContain("/99/");
   });
+
+  it("returns the request result", async () => {
+    const mockResp = { data: { verse: {}, metas: [] } };
+    request.mockResolvedValue(mockResp);
+    const result = await getVerseExportJson(1);
+    expect(result).toEqual(mockResp);
+  });
+
+  it("different IDs produce different URLs", async () => {
+    await getVerseExportJson(1);
+    const url1: string = request.mock.calls[0][0].url;
+    vi.clearAllMocks();
+    await getVerseExportJson(2);
+    const url2: string = request.mock.calls[0][0].url;
+    expect(url1).not.toBe(url2);
+  });
 });
 
 describe("getVerseExportZip()", () => {
@@ -126,6 +142,13 @@ describe("postVerseImportJson()", () => {
     await postVerseImportJson(payload);
     expect(request.mock.calls[0][0].data).toEqual(payload);
   });
+
+  it("returns the request result", async () => {
+    const mockResp = { data: { id: 1 } };
+    request.mockResolvedValue(mockResp);
+    const result = await postVerseImportJson({ verse: {} as never, metas: [] });
+    expect(result).toEqual(mockResp);
+  });
 });
 
 describe("postVerseImportZip()", () => {
@@ -170,5 +193,13 @@ describe("postVerseImportZip()", () => {
     const file = new File(["data"], "scene.zip");
     await postVerseImportZip(file);
     expect(request.mock.calls[0][0].timeout).toBe(120000);
+  });
+
+  it("returns the request result", async () => {
+    const mockResp = { data: { id: 5 } };
+    request.mockResolvedValue(mockResp);
+    const file = new File(["data"], "scene.zip");
+    const result = await postVerseImportZip(file);
+    expect(result).toEqual(mockResp);
   });
 });
