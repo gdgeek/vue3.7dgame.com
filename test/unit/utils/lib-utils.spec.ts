@@ -75,4 +75,19 @@ describe("cn() class name utility", () => {
     const result = cn("m-4", "m-2");
     expect(result).toBe("m-2");
   });
+
+  it("preserves order of non-conflicting classes", () => {
+    const result = cn("a", "b", "c");
+    expect(result).toBe("a b c");
+  });
+
+  it("handles nested arrays", () => {
+    const result = cn(["a", ["b", "c"]]);
+    expect(result).toBe("a b c");
+  });
+
+  it("deduplicates conflicting Tailwind padding classes (last wins)", () => {
+    const result = cn("px-4", "px-2");
+    expect(result).toBe("px-2");
+  });
 });
