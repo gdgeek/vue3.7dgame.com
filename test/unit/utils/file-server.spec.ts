@@ -107,4 +107,34 @@ describe("server.ts", () => {
       expect(result).toBe("");
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Additional edge cases
+  // -------------------------------------------------------------------------
+  describe("fileUrl() — additional", () => {
+    it("returns a string for any input", () => {
+      const url = serverFile.fileUrl("test", ".txt");
+      expect(typeof url).toBe("string");
+    });
+
+    it("two different md5 values produce different URLs", () => {
+      const url1 = serverFile.fileUrl("md5-aaa", ".glb");
+      const url2 = serverFile.fileUrl("md5-bbb", ".glb");
+      expect(url1).not.toBe(url2);
+    });
+  });
+
+  describe("publicHandler() and privateHandler()", () => {
+    it("publicHandler resolves to an object", async () => {
+      const handler = await serverFile.publicHandler();
+      expect(typeof handler).toBe("object");
+      expect(handler).not.toBeNull();
+    });
+
+    it("privateHandler resolves to an object with different bucket than publicHandler", async () => {
+      const pub = await serverFile.publicHandler();
+      const priv = await serverFile.privateHandler();
+      expect(pub.bucket).not.toBe(priv.bucket);
+    });
+  });
 });

@@ -126,4 +126,18 @@ describe("downloadResource()", () => {
     const link = appendSpy.mock.calls[0][0] as HTMLAnchorElement;
     expect(link.href).toBe("blob:mock-url");
   });
+
+  it("creates link via document.createElement('a')", async () => {
+    const createElementSpy = vi.spyOn(document, "createElement");
+    const resource = { name: "my-model", file: { url: "https://cdn.example.com/model.glb" } };
+    await downloadResource(resource, ".glb", mockT, PREFIX);
+    expect(createElementSpy).toHaveBeenCalledWith("a");
+  });
+
+  it("link is removed from DOM via removeChild after download", async () => {
+    const removeChildSpy = vi.spyOn(document.body, "removeChild");
+    const resource = { name: "my-model", file: { url: "https://cdn.example.com/model.glb" } };
+    await downloadResource(resource, ".glb", mockT, PREFIX);
+    expect(removeChildSpy).toHaveBeenCalled();
+  });
 });

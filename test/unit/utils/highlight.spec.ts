@@ -128,5 +128,24 @@ describe("highlightDirective", () => {
 
       expect(mockHighlightElement).toHaveBeenCalledTimes(3);
     });
+
+    it("does not highlight code blocks outside of pre elements", () => {
+      const el = document.createElement("div");
+      el.innerHTML = "<code>plain code</code><pre><code>real block</code></pre>";
+
+      directive.updated!(el, {} as any, {} as any, {} as any);
+
+      // Only the `pre code` block should be highlighted, not bare `code`
+      expect(mockHighlightElement).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("directive has beforeMount and updated hooks", () => {
+    expect(typeof directive.beforeMount).toBe("function");
+    expect(typeof directive.updated).toBe("function");
+  });
+
+  it("registerLanguage is called exactly twice (lua + javascript)", () => {
+    expect(mockRegisterLanguage).toHaveBeenCalledTimes(2);
   });
 });
