@@ -188,4 +188,42 @@ describe("processModel()", () => {
     expect(mockRendererDispose).toHaveBeenCalled();
     expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock-url");
   });
+
+  it("info anim is empty array when model has no animations", async () => {
+    const mockBlob = new Blob(["img"], { type: "image/jpeg" });
+    mockToBlob.mockImplementation((cb: (b: Blob) => void) => cb(mockBlob));
+    mockGLTFLoad.mockImplementation((_url: string, onLoad: Function) => {
+      onLoad(makeGLTF([])); // no animations
+    });
+
+    const { processModel } = await import("@/utils/modelProcessor");
+    const result = await processModel(new File(["data"], "model.gltf"));
+    const info = JSON.parse(result.info);
+    expect(info.anim).toEqual([]);
+  });
+
+  it("info JSON string is valid JSON", async () => {
+    const mockBlob = new Blob(["img"], { type: "image/jpeg" });
+    mockToBlob.mockImplementation((cb: (b: Blob) => void) => cb(mockBlob));
+    mockGLTFLoad.mockImplementation((_url: string, onLoad: Function) => {
+      onLoad(makeGLTF());
+    });
+
+    const { processModel } = await import("@/utils/modelProcessor");
+    const result = await processModel(new File(["data"], "model.gltf"));
+    expect(() => JSON.parse(result.info)).not.toThrow();
+  });
+
+  it("faces count is non-negative", async () => {
+    const mockBlob = new Blob(["img"], { type: "image/jpeg" });
+    mockToBlob.mockImplementation((cb: (b: Blob) => void) => cb(mockBlob));
+    mockGLTFLoad.mockImplementation((_url: string, onLoad: Function) => {
+      onLoad(makeGLTF());
+    });
+
+    const { processModel } = await import("@/utils/modelProcessor");
+    const result = await processModel(new File(["data"], "model.gltf"));
+    const info = JSON.parse(result.info);
+    expect(info.faces).toBeGreaterThanOrEqual(0);
+  });
 });
