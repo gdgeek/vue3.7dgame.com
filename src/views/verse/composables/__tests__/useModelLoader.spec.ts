@@ -206,4 +206,56 @@ describe("useModelLoader", () => {
     expect(result).toBeDefined();
     expect(result instanceof THREE.Object3D).toBe(true);
   });
+
+  it("should load picture resource and return a Mesh", async () => {
+    // Simulate TextureLoader calling onLoad with a fake texture
+    const fakeTexture = {
+      colorSpace: "",
+      minFilter: 0,
+      magFilter: 0,
+      anisotropy: 0,
+      image: { width: 100, height: 50 },
+    } as unknown as THREE.Texture;
+
+    vi.mocked(THREE.TextureLoader).mockImplementation(
+      () =>
+        ({
+          load: vi.fn((url: string, onLoad: (t: THREE.Texture) => void) => {
+            onLoad(fakeTexture);
+          }),
+        }) as unknown as THREE.TextureLoader
+    );
+
+    const resource: Resource = {
+      type: "picture",
+      file: { url: "http://example.com/image.png" },
+      id: 5,
+    };
+    const entity: Entity = {
+      type: "Picture",
+      parameters: { uuid: "pic-uuid-1", active: true, width: 1, height: 1 },
+    };
+
+    const result = await loader.loadModel(resource, entity);
+
+    expect(result).toBeDefined();
+  });
+
+  it("audio resource with no file returns undefined (no file to load)", async () => {
+    const resource: Resource = {
+      type: "audio",
+      file: null,
+      id: 6,
+    };
+    const entity: Entity = {
+      type: "Sound",
+      parameters: { uuid: "audio-no-file", active: true },
+    };
+
+    const result = await loader.loadModel(resource, entity);
+
+    // When resource.file is null, audio block is skipped → falls through → undefined
+    expect(result).toBeUndefined();
+    expect(ctx.sources.has("audio-no-file")).toBe(false);
+  });
 });
