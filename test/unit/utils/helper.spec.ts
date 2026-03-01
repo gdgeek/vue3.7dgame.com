@@ -107,4 +107,50 @@ describe("helper utils", () => {
       expect(result).toBe("http://static.example.com/api");
     });
   });
+
+  describe("GetCurrentUrl — no port", () => {
+    it("should not include colon when port is empty", async () => {
+      Object.defineProperty(window, "location", {
+        value: { ...mockLocation, port: "" },
+        writable: true,
+      });
+      vi.resetModules();
+      const { GetCurrentUrl } = await import("@/utils/helper");
+      const result = GetCurrentUrl();
+      expect(result).not.toMatch(/:\d+$/);
+      expect(result).toContain("https://www.example.com");
+    });
+  });
+
+  describe("GetDomain — edge cases", () => {
+    it("returns domain without www for a short domain", async () => {
+      Object.defineProperty(window, "location", {
+        value: { ...mockLocation, hostname: "example.com" },
+        writable: true,
+      });
+      vi.resetModules();
+      const { GetDomain } = await import("@/utils/helper");
+      expect(GetDomain()).toBe("example.com");
+    });
+
+    it("strips www from a sub.domain.com hostname", async () => {
+      Object.defineProperty(window, "location", {
+        value: { ...mockLocation, hostname: "www.sub.domain.com" },
+        writable: true,
+      });
+      vi.resetModules();
+      const { GetDomain } = await import("@/utils/helper");
+      expect(GetDomain()).toBe("sub.domain.com");
+    });
+  });
+
+  describe("ReplaceURL — ip placeholder", () => {
+    it("should replace {ip} in template via ReplaceURL", async () => {
+      vi.resetModules();
+      const { ReplaceURL } = await import("@/utils/helper");
+      const result = ReplaceURL("http://{ip}/api");
+      expect(result).not.toContain("{ip}");
+      expect(result).toContain("www.example.com");
+    });
+  });
 });
