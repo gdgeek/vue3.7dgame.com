@@ -274,5 +274,42 @@ describe("Verse API", () => {
         })
       );
     });
+
+    it("returns the request result", async () => {
+      const mockResp = { data: { url: "https://cdn/photo.jpg" } };
+      request.mockResolvedValue(mockResp);
+      const result = await verseApi.takePhoto(1);
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("postVerse() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 77, name: "My Verse" } };
+      request.mockResolvedValue(mockResp);
+      const result = await verseApi.postVerse({ name: "My Verse" } as Parameters<typeof verseApi.postVerse>[0]);
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("addTag() — different IDs", () => {
+    it("embeds both verse ID and tag ID in the URL", async () => {
+      await verseApi.addTag(10, 20);
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("10");
+      expect(url).toContain("tags_id=20");
+    });
+  });
+
+  describe("addPublic() / removePublic() — different IDs", () => {
+    it("addPublic uses correct verse ID", async () => {
+      await verseApi.addPublic(99);
+      expect(request.mock.calls[0][0].url).toContain("/v1/verses/99/public");
+    });
+
+    it("removePublic uses correct verse ID", async () => {
+      await verseApi.removePublic(55);
+      expect(request.mock.calls[0][0].url).toContain("/v1/verses/55/public");
+    });
   });
 });
