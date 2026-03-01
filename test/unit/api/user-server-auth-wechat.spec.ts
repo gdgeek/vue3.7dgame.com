@@ -141,4 +141,46 @@ describe("UserAPI.getInfo()", () => {
     await UserAPI.getInfo();
     expect(request.mock.calls[0][0].data).toBeUndefined();
   });
+
+  it("returns the request result", async () => {
+    const mockData = { id: 1, username: "alice" };
+    request.mockResolvedValue({ data: mockData });
+    const result = await UserAPI.getInfo();
+    expect(result).toEqual({ data: mockData });
+  });
+});
+
+describe("user/server: bindEmail() — additional", () => {
+  let request: ReturnType<typeof vi.fn>;
+  let bindEmail: typeof import("@/api/user/server").bindEmail;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request.mockResolvedValue({ data: {} });
+    ({ bindEmail } = await import("@/api/user/server"));
+  });
+
+  it("uses POST method", async () => {
+    await bindEmail("a@b.com");
+    expect(request.mock.calls[0][0].method).toBe("post");
+  });
+});
+
+describe("auth/wechat: refresh() — empty token", () => {
+  let request: ReturnType<typeof vi.fn>;
+  let refresh: typeof import("@/api/auth/wechat").refresh;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request.mockResolvedValue({ data: {} });
+    ({ refresh } = await import("@/api/auth/wechat"));
+  });
+
+  it("handles empty string token", async () => {
+    await refresh("");
+    const callUrl: string = request.mock.calls[0][0].url;
+    expect(callUrl).toContain("token=");
+  });
 });
