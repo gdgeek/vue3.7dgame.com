@@ -175,6 +175,33 @@ describe("useFullscreen — toggleScene", () => {
   });
 });
 
+describe("useFullscreen — initial state", () => {
+  afterEach(() => {
+    setFullscreenElement(null);
+  });
+
+  it("isFullscreen starts as false", () => {
+    const { getResult, unmount } = mountUseFullscreen();
+    expect(getResult().isFullscreen.value).toBe(false);
+    unmount();
+  });
+
+  it("isSceneFullscreen starts as false", () => {
+    const { getResult, unmount } = mountUseFullscreen();
+    expect(getResult().isSceneFullscreen.value).toBe(false);
+    unmount();
+  });
+
+  it("toggleEditor does not affect isSceneFullscreen", () => {
+    const mockContainer = document.createElement("div");
+    mockContainer.requestFullscreen = vi.fn();
+    const { getResult, unmount } = mountUseFullscreen();
+    getResult().toggleEditor(mockContainer);
+    expect(getResult().isSceneFullscreen.value).toBe(false);
+    unmount();
+  });
+});
+
 describe("useFullscreen — fullscreenchange syncState", () => {
   afterEach(() => {
     setFullscreenElement(null);

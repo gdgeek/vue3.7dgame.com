@@ -145,4 +145,31 @@ describe("createLogger / Logger", () => {
       expect(consoleSpy.error).toHaveBeenCalledWith("", "context", obj);
     });
   });
+
+  // -----------------------------------------------------------------------
+  // createLogger — returns an object with all required methods
+  // -----------------------------------------------------------------------
+  describe("createLogger — returns full interface", () => {
+    it("returns an object with log, warn, error, info, debug methods", async () => {
+      const { createLogger } = await import("@/utils/logger");
+      const l = createLogger("TEST");
+      expect(typeof l.log).toBe("function");
+      expect(typeof l.warn).toBe("function");
+      expect(typeof l.error).toBe("function");
+      expect(typeof l.info).toBe("function");
+      expect(typeof l.debug).toBe("function");
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Multiple error calls are independently tracked
+  // -----------------------------------------------------------------------
+  describe("multiple error calls", () => {
+    it("each error() call increments call count", async () => {
+      const { logger } = await import("@/utils/logger");
+      logger.error("first");
+      logger.error("second");
+      expect(consoleSpy.error).toHaveBeenCalledTimes(2);
+    });
+  });
 });
