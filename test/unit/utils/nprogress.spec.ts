@@ -60,4 +60,25 @@ describe("nprogress util", () => {
     // configure should have been called once when the module was imported
     expect(NProgress.configure).toHaveBeenCalledTimes(1);
   });
+
+  it("easing is 'ease'", async () => {
+    const nprogress = await import("nprogress");
+    const NProgress = nprogress.default as { configure: ReturnType<typeof vi.fn> };
+    const configArg = NProgress.configure.mock.calls[0][0] as Record<string, unknown>;
+    expect(configArg.easing).toBe("ease");
+  });
+
+  it("speed is 500ms", async () => {
+    const nprogress = await import("nprogress");
+    const NProgress = nprogress.default as { configure: ReturnType<typeof vi.fn> };
+    const configArg = NProgress.configure.mock.calls[0][0] as Record<string, unknown>;
+    expect(configArg.speed).toBe(500);
+  });
+
+  it("trickleSpeed is 200ms", async () => {
+    const nprogress = await import("nprogress");
+    const NProgress = nprogress.default as { configure: ReturnType<typeof vi.fn> };
+    const configArg = NProgress.configure.mock.calls[0][0] as Record<string, unknown>;
+    expect(configArg.trickleSpeed).toBe(200);
+  });
 });
