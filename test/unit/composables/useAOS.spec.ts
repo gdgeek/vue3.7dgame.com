@@ -80,4 +80,28 @@ describe("useAOS()", () => {
   it("does not call AOS.init() before mount", () => {
     expect(mockInit).not.toHaveBeenCalled();
   });
+
+  it("empty options object still uses defaults for unspecified fields", () => {
+    const unmount = mountWithAOS(() => useAOS({}));
+    expect(mockInit).toHaveBeenCalledWith(
+      expect.objectContaining({ duration: 1000, once: false, mirror: true })
+    );
+    unmount();
+  });
+
+  it("calling useAOS twice mounts two components each calling AOS.init once", () => {
+    const u1 = mountWithAOS(() => useAOS());
+    const u2 = mountWithAOS(() => useAOS({ duration: 500 }));
+    expect(mockInit).toHaveBeenCalledTimes(2);
+    u1();
+    u2();
+  });
+
+  it("additional AOS option (easing) is passed through to AOS.init", () => {
+    const unmount = mountWithAOS(() => useAOS({ easing: "ease-in-out" } as any));
+    expect(mockInit).toHaveBeenCalledWith(
+      expect.objectContaining({ easing: "ease-in-out" })
+    );
+    unmount();
+  });
 });
