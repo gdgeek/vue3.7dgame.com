@@ -390,4 +390,21 @@ describe("legacy standalone API functions", () => {
     expect(arg.params.per_page).toBe("5");
     expect(arg.params.page).toBe("2");
   });
+
+  it("Article() with different ID produces different path", async () => {
+    await Article(10);
+    const path1 = wpRequest.mock.calls[0][0].url || wpRequest.mock.calls[0][0].params?.rest_route || "";
+    vi.clearAllMocks();
+    wpRequest.mockResolvedValue({ data: {} });
+    await Article(20);
+    const path2 = wpRequest.mock.calls[0][0].url || wpRequest.mock.calls[0][0].params?.rest_route || "";
+    expect(path1).not.toBe(path2);
+  });
+
+  it("Post() returns the request result", async () => {
+    const mockResp = { data: { id: 20, title: "Test" } };
+    wpRequest.mockResolvedValue(mockResp);
+    const result = await Post(20);
+    expect(result).toEqual(mockResp);
+  });
 });
