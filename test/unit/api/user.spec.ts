@@ -125,4 +125,31 @@ describe("User API", () => {
       expect(request.mock.calls[0][0].method).toBe("put");
     });
   });
+
+  describe("getUserCreation() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { pictureCount: 5, verseCount: 3 } };
+      request.mockResolvedValue(mockResp);
+      const result = await getUserCreation();
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("putUserData() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 1, nickname: "Alice" } };
+      request.mockResolvedValue(mockResp);
+      const result = await putUserData({ nickname: "Alice" });
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("info() — idempotent", () => {
+    it("calling info twice makes two requests", async () => {
+      request.mockResolvedValue({ data: {} });
+      await info();
+      await info();
+      expect(request).toHaveBeenCalledTimes(2);
+    });
+  });
 });

@@ -140,4 +140,24 @@ describe("downloadResource()", () => {
     await downloadResource(resource, ".glb", mockT, PREFIX);
     expect(removeChildSpy).toHaveBeenCalled();
   });
+
+  it("link.click() is called exactly once on successful download", async () => {
+    const resource = { name: "my-model", file: { url: "https://cdn.example.com/model.glb" } };
+    await downloadResource(resource, ".glb", mockT, PREFIX);
+    const clickSpy = vi.mocked(HTMLAnchorElement.prototype.click);
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("URL.createObjectURL is called exactly once per download", async () => {
+    const resource = { name: "my-model", file: { url: "https://cdn.example.com/model.glb" } };
+    await downloadResource(resource, ".glb", mockT, PREFIX);
+    expect(URL.createObjectURL as ReturnType<typeof vi.fn>).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not show ElMessage.success on fetch failure", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("fail"));
+    const resource = { name: "x", file: { url: "https://cdn.example.com/x.glb" } };
+    await downloadResource(resource, ".glb", mockT, PREFIX);
+    expect(elMessage.success).not.toHaveBeenCalled();
+  });
 });

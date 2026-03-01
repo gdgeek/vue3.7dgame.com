@@ -138,4 +138,40 @@ describe("Auth API", () => {
       expect(request.mock.calls[0][0].data).toEqual(payload);
     });
   });
+
+  describe("login() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { accessToken: "tok", refreshToken: "rtok" } };
+      request.mockResolvedValue(mockResp);
+      const result = await authApi.login({ username: "u", password: "p" });
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("register() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 1, username: "bob" } };
+      request.mockResolvedValue(mockResp);
+      const result = await authApi.register({ username: "bob", password: "p@ss", email: "b@b.com" } as Parameters<typeof authApi.register>[0]);
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("link() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { linked: true } };
+      request.mockResolvedValue(mockResp);
+      const result = await authApi.link({ provider: "github", code: "abc" } as Parameters<typeof authApi.link>[0]);
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("refresh() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { accessToken: "new-tok" } };
+      request.mockResolvedValue(mockResp);
+      const result = await authApi.refresh("rt-token");
+      expect(result).toEqual(mockResp);
+    });
+  });
 });
