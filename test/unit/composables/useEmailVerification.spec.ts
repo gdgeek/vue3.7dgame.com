@@ -507,3 +507,180 @@ describe("useEmailVerification — verifyCodeForNewEmail", () => {
     cleanup();
   });
 });
+
+// -----------------------------------------------------------------------
+// canSendNewCode computed
+// -----------------------------------------------------------------------
+describe("useEmailVerification — canSendNewCode computed", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("is false when email is empty", () => {
+    const { canSendNewCode, newEmailForm, cleanup } = useEmailVerification();
+    newEmailForm.email = "";
+    expect(canSendNewCode.value).toBe(false);
+    cleanup();
+  });
+
+  it("is true when email is filled and not loading or locked", () => {
+    const { canSendNewCode, newEmailForm, cleanup } = useEmailVerification();
+    newEmailForm.email = "test@example.com";
+    expect(canSendNewCode.value).toBe(true);
+    cleanup();
+  });
+
+  it("is false when email has only whitespace", () => {
+    const { canSendNewCode, newEmailForm, cleanup } = useEmailVerification();
+    newEmailForm.email = "   ";
+    expect(canSendNewCode.value).toBe(false);
+    cleanup();
+  });
+});
+
+// -----------------------------------------------------------------------
+// canSendOldConfirmCode computed
+// -----------------------------------------------------------------------
+describe("useEmailVerification — canSendOldConfirmCode computed", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("is true initially (not loading, cooldown=0)", () => {
+    const { canSendOldConfirmCode, cleanup } = useEmailVerification();
+    expect(canSendOldConfirmCode.value).toBe(true);
+    cleanup();
+  });
+});
+
+// -----------------------------------------------------------------------
+// canUnbind computed
+// -----------------------------------------------------------------------
+describe("useEmailVerification — canUnbind computed", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("is false when unbindForm.code is empty", () => {
+    const { canUnbind, unbindForm, cleanup } = useEmailVerification();
+    unbindForm.code = "";
+    expect(canUnbind.value).toBe(false);
+    cleanup();
+  });
+
+  it("is true when unbindForm.code is filled and not loading", () => {
+    const { canUnbind, unbindForm, cleanup } = useEmailVerification();
+    unbindForm.code = "654321";
+    expect(canUnbind.value).toBe(true);
+    cleanup();
+  });
+});
+
+// -----------------------------------------------------------------------
+// startUnbindFlow
+// -----------------------------------------------------------------------
+describe("useEmailVerification — startUnbindFlow", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("does nothing when no email is bound (hasBoundEmail=false)", () => {
+    const { startUnbindFlow, step, cleanup } = useEmailVerification();
+    // no email bound → step stays idle
+    startUnbindFlow();
+    expect(step.value).toBe("idle");
+    cleanup();
+  });
+
+  it("sets step to unbind_direct when email is bound but not verified", () => {
+    const { startUnbindFlow, step, status, cleanup } = useEmailVerification();
+    // Simulate bound but unverified email
+    status.value = {
+      user_id: 1,
+      username: "test",
+      email: "test@example.com",
+      email_verified: false,
+      email_verified_at: null,
+      email_verified_at_formatted: null,
+    };
+    startUnbindFlow();
+    expect(step.value).toBe("unbind_direct");
+    cleanup();
+  });
+});
+
+// -----------------------------------------------------------------------
+// startChangeFlow
+// -----------------------------------------------------------------------
+describe("useEmailVerification — startChangeFlow", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("does nothing when no email is bound", () => {
+    const { startChangeFlow, step, cleanup } = useEmailVerification();
+    startChangeFlow();
+    expect(step.value).toBe("idle");
+    cleanup();
+  });
+
+  it("sets step to change_confirm when email is bound and verified", () => {
+    const { startChangeFlow, step, status, cleanup } = useEmailVerification();
+    status.value = {
+      user_id: 1,
+      username: "test",
+      email: "test@example.com",
+      email_verified: true,
+      email_verified_at: null,
+      email_verified_at_formatted: null,
+    };
+    startChangeFlow();
+    expect(step.value).toBe("change_confirm");
+    cleanup();
+  });
+
+  it("clears form fields and error when called", () => {
+    const { startChangeFlow, step, status, error, oldEmailForm, newEmailForm, cleanup } = useEmailVerification();
+    status.value = {
+      user_id: 1,
+      username: "test",
+      email: "test@example.com",
+      email_verified: false,
+      email_verified_at: null,
+      email_verified_at_formatted: null,
+    };
+    error.value = "old error";
+    oldEmailForm.code = "111";
+    newEmailForm.code = "222";
+    startChangeFlow();
+    expect(error.value).toBeNull();
+    expect(oldEmailForm.code).toBe("");
+    expect(newEmailForm.code).toBe("");
+    cleanup();
+  });
+});
