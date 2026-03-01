@@ -199,8 +199,60 @@ describe("useCampusMemberList — handleDelete", () => {
 });
 
 // -----------------------------------------------------------------------
-// deletedWindow (list-level delete without opening panel)
+// additional edge cases
 // -----------------------------------------------------------------------
+describe("useCampusMemberList — additional state tests", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockConfirm.mockResolvedValue(true);
+  });
+
+  it("detailLoading starts as false", () => {
+    const { detailLoading } = useCampusMemberList<TestMember>(makeOptions());
+    expect(detailLoading.value).toBe(false);
+  });
+
+  it("detailVisible starts as false", () => {
+    const { detailVisible } = useCampusMemberList<TestMember>(makeOptions());
+    expect(detailVisible.value).toBe(false);
+  });
+
+  it("openDetail called twice updates to the second member", () => {
+    const { openDetail, currentMember } =
+      useCampusMemberList<TestMember>(makeOptions());
+    openDetail(makeMember(1));
+    openDetail(makeMember(2));
+    expect(currentMember.value?.id).toBe(2);
+  });
+
+  it("detailProperties returns empty array after handlePanelClose", () => {
+    const { openDetail, handlePanelClose, detailProperties } =
+      useCampusMemberList<TestMember>(makeOptions());
+    openDetail(makeMember(1));
+    expect(detailProperties.value.length).toBeGreaterThan(0);
+    handlePanelClose();
+    expect(detailProperties.value).toEqual([]);
+  });
+
+  it("deletedWindow does not change detailVisible", async () => {
+    const options = makeOptions();
+    const { deletedWindow, detailVisible } =
+      useCampusMemberList<TestMember>(options);
+    expect(detailVisible.value).toBe(false);
+    await deletedWindow(makeMember(3));
+    expect(detailVisible.value).toBe(false);
+  });
+
+  it("handleDelete does not call deleteFn when dialog is cancelled", async () => {
+    mockConfirm.mockRejectedValue("cancel");
+    const options = makeOptions();
+    const { openDetail, handleDelete } =
+      useCampusMemberList<TestMember>(options);
+    openDetail(makeMember(10));
+    await handleDelete();
+    expect(options.deleteFn).not.toHaveBeenCalled();
+  });
+});
 describe("useCampusMemberList — deletedWindow", () => {
   beforeEach(() => {
     vi.clearAllMocks();
