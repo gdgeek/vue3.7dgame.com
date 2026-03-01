@@ -184,3 +184,44 @@ describe("changeLanguage()", () => {
     expect(store.locale).toBeDefined();
   });
 });
+
+// -----------------------------------------------------------------------
+// Initial state
+// -----------------------------------------------------------------------
+describe("initial state", () => {
+  it("device starts as desktop", () => {
+    const store = useAppStore();
+    expect(store.device).toBe("desktop");
+  });
+
+  it("size starts as default value", () => {
+    const store = useAppStore();
+    expect(store.size).toBeTruthy();
+  });
+
+  it("activeTopMenuPath starts as empty string", () => {
+    const store = useAppStore();
+    expect(store.activeTopMenuPath).toBe("");
+  });
+});
+
+// -----------------------------------------------------------------------
+// Edge cases
+// -----------------------------------------------------------------------
+describe("openSideBar() when already open is idempotent", () => {
+  it("stays open after calling openSideBar twice", () => {
+    const store = useAppStore();
+    store.openSideBar();
+    store.openSideBar();
+    expect(store.sidebar.opened).toBe(true);
+  });
+});
+
+describe("closeSideBar() when already closed is idempotent", () => {
+  it("stays closed after calling closeSideBar twice", () => {
+    const store = useAppStore();
+    store.closeSideBar();
+    store.closeSideBar();
+    expect(store.sidebar.opened).toBe(false);
+  });
+});

@@ -143,4 +143,32 @@ describe("isExternal()", () => {
   it("returns false for empty string", () => {
     expect(isExternal("")).toBe(false);
   });
+
+  it("returns false for ftp:// (not in the regex)", () => {
+    expect(isExternal("ftp://example.com/file")).toBe(false);
+  });
+
+  it("returns true for https URL with path", () => {
+    expect(isExternal("https://example.com/a/b/c?q=1#section")).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Additional edge cases
+// ---------------------------------------------------------------------------
+describe("addClass() with leading space in className", () => {
+  it("adds class correctly even when className is just whitespace", () => {
+    const el = document.createElement("div");
+    el.className = " ";
+    addClass(el, "newcls");
+    expect(hasClass(el, "newcls")).toBe(true);
+  });
+});
+
+describe("removeClass() leaving only the class", () => {
+  it("removes the only class, resulting in no meaningful class", () => {
+    const el = makeEl("solo");
+    removeClass(el, "solo");
+    expect(hasClass(el, "solo")).toBe(false);
+  });
 });
