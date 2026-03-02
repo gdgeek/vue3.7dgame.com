@@ -112,23 +112,14 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 
 ### 🔴 高优先级
 
-#### 9. 死代码：`src/assets/js/fontok.ts`（945 行）🗑️ 待删除
-- **问题**：包含 FontAwesome 图标名到 Unicode 码的完整映射表，**全项目无任何文件导入它**
-- **验证**：`grep -r "fontok" src/` 结果为 0
-- **操作**：直接删除该文件，减少约 945 行无用代码
-- **注意**：不要与 `@fortawesome/fontawesome-svg-core`（正常使用）混淆
+#### ~~9. 死代码：`src/assets/js/fontok.ts`（945 行）~~ ✅ 已完成
+- 文件已被删除（验证：2026-02-27 确认已不存在）
 
-#### 10. `express` 出现在 production dependencies ⚠️
-- **位置**：`package.json` → `dependencies`（非 `devDependencies`）
-- **问题**：Express 是 Node.js 服务端框架，不应打包进前端 bundle
-- **操作**：检查其实际用途（疑似 mock server 或开发工具），移至 `devDependencies` 或删除
-- **验证**：`grep -r "from 'express'" src/` 看是否在源码中真实使用
+#### ~~10. `express` 出现在 production dependencies~~ ✅ 不存在
+- 2026-02-27 核查：`package.json` 中无 `express` 依赖，描述有误，无需处理
 
-#### 11. 重复的 ScenePlayer 组件 ⚠️
-- **文件**：`src/views/meta/ScenePlayer.vue`（2053 行）和 `src/views/verse/ScenePlayer.vue`（809 行）
-- **问题**：两个组件功能高度重叠，维护时需同步修改两份代码
-- **建议**：合并为 `src/components/ScenePlayer/index.vue`，通过 props 区分 meta/verse 模式
-- **影响**：减少约 800 行重复代码，bug 修复只需一处
+#### ~~11. 重复的 ScenePlayer 组件~~ ✅ 已完成
+- 已合并为共享组件，详见 commit: `refactor: merge duplicate ScenePlayer into shared component`
 
 #### 12. `meta/script.vue` 与 `verse/script.vue` 逻辑重复 ⚠️
 - **行数**：1736 + 1593 = 3329 行，高度相似
@@ -138,20 +129,8 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 
 ### 🟡 中优先级
 
-#### 13. 全局错误处理缺失 ⚠️
-- **现状**：`src/main.ts` 没有设置 `app.config.errorHandler`，`window.addEventListener('unhandledrejection')` 也未配置
-- **影响**：生产环境的 Vue 渲染错误、未捕获的 Promise 拒绝会静默失败，无法追踪
-- **建议**：
-  ```typescript
-  // src/main.ts
-  app.config.errorHandler = (err, instance, info) => {
-    console.error('[Vue Error]', err, info);
-    // 上报到监控系统（Sentry 等）
-  };
-  window.addEventListener('unhandledrejection', (event) => {
-    console.error('[Unhandled Promise]', event.reason);
-  });
-  ```
+#### ~~13. 全局错误处理缺失~~ ✅ 已完成（2026-02-27）
+- 已在 `src/main.ts` 添加 `app.config.errorHandler` 和 `unhandledrejection` 监听，使用 `logger.error` 输出
 
 #### 14. 路由布局组件未懒加载
 - **问题**：`Structure`、`SimpleStructure`、`Empty` 等布局组件在路由文件顶部静态 import，会打入主 bundle
@@ -218,34 +197,14 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 
 ### 🔴 新增高优先级（来自深度扫描）
 
-#### 22. 6 个资源上传页面完全重复 🗑️
-- **文件**（每个约 55–59 行，内容几乎完全相同）：
-  - `src/views/audio/upload.vue`
-  - `src/views/video/upload.vue`
-  - `src/views/picture/upload.vue`
-  - `src/views/particle/upload.vue`
-  - `src/views/polygen/upload.vue`
-  - `src/views/voxel/upload.vue`
-- **建议**：合并为 `src/components/ResourceUploadPage.vue`，通过路由 `meta.resourceType` 区分类型
-- **预计收益**：删除约 300 行重复代码，未来只需维护一处
+#### ~~22. 6 个资源上传页面完全重复~~ ✅ 不存在
+- 2026-02-27 核查：所有 `upload.vue` 文件已被删除，无需处理
 
-#### 23. 6 个资源查看页面完全重复 🗑️
-- **文件**（同上目录的 `view.vue`，结构一致）：`audio/view.vue`、`video/view.vue`、`picture/view.vue`、`particle/view.vue`、`polygen/view.vue`、`voxel/view.vue`
-- **建议**：合并为 `src/components/ResourceViewPage.vue`，参数化媒体类型与预览组件
+#### 23. 6 个资源查看页面差异过大，不适合合并 ⏭ 评估后跳过
+- **实际情况**：audio/video/picture/particle/polygen/voxel 的 view.vue 每个都有完全不同的预览逻辑（音频播放、视频帧截图、图片尺寸检测、3D 渲染等），强行合并风险高、收益有限
 
-#### 24. Token 绕过 Store 直接写 localStorage ⚠️ 安全
-- **位置**：`src/views/login/index.vue`、`src/views/register/index.vue`
-- **问题**：直接调用 `localStorage.setItem(TOKEN_KEY, token)` 而非通过 Token Store（Token Store 内部使用 SecureLS 加密）
-- **风险**：Token 以明文存储在 localStorage，与项目安全设计矛盾
-- **修复**：
-  ```typescript
-  // ❌ 现有代码
-  localStorage.setItem(TOKEN_KEY, token);
-
-  // ✅ 应改为
-  const tokenStore = useTokenStore();
-  tokenStore.setToken(token); // 内部使用 SecureLS 加密
-  ```
+#### ~~24. Token 绕过 Store 直接写 localStorage~~ ✅ 不存在
+- 2026-02-27 核查：login/register 均通过 `user.ts` store 中的 `Token.setToken()` 写入，无明文 localStorage 直写
 
 ---
 
@@ -265,10 +224,8 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 - **文件**：`src/utils/helper.ts`（58 行）和 `src/utils/utilityFunctions.ts`（78 行）
 - **建议**：检查是否有功能重复，合并为单一文件（例如 `src/utils/helpers.ts`）
 
-#### 28. `rollup-plugin-visualizer` 与 `vite-plugin-visualizer` 重复引入
-- **位置**：`package.json` devDependencies
-- **问题**：两个 Bundle 分析插件功能几乎相同，只需保留一个
-- **建议**：删除 `rollup-plugin-visualizer`，保留 `vite-plugin-visualizer`（与 Vite 集成更好）
+#### ~~28. `rollup-plugin-visualizer` 与 `vite-plugin-visualizer` 重复引入~~ ✅ 不存在
+- 2026-02-27 核查：项目只有 `rollup-plugin-visualizer`（在 vite.config.ts 中正常使用），无重复，无需处理
 
 #### 29. `element-resize-detector` 已停止维护
 - **版本**：^1.2.4（最后更新 2021 年）
