@@ -237,5 +237,32 @@ describe("Phototype API", () => {
       const url: string = request.mock.calls[0][0].url;
       expect(url).toContain("/v1/phototypes/abc");
     });
+
+    it("returns the request result", async () => {
+      const mockResp = { data: null };
+      request.mockResolvedValue(mockResp);
+      const result = await phApi.deletePhototype(1);
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("postPhototype() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 7, title: "New" } };
+      request.mockResolvedValue(mockResp);
+      const result = await phApi.postPhototype({ title: "New" } as Parameters<typeof phApi.postPhototype>[0]);
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("getPhototype() — different IDs", () => {
+    it("different IDs produce different URLs", async () => {
+      await phApi.getPhototype(1);
+      const url1: string = request.mock.calls[0][0].url;
+      vi.clearAllMocks();
+      await phApi.getPhototype(2);
+      const url2: string = request.mock.calls[0][0].url;
+      expect(url1).not.toBe(url2);
+    });
   });
 });

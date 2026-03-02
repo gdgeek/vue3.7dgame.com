@@ -199,6 +199,8 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
             ],
             // JSON Schema 编辑器（仅在 phototype/edit 中使用）
             "json-schema-editor": ["json-schema-editor-vue3"],
+            // AOS 动画库（仅 web/ 使用，独立 chunk 避免重复打包）
+            aos: ["aos"],
             // FontAwesome 图标
             fontawesome: [
               "@fortawesome/fontawesome-svg-core",

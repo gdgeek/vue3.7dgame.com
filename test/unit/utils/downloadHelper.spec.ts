@@ -126,4 +126,38 @@ describe("downloadResource()", () => {
     const link = appendSpy.mock.calls[0][0] as HTMLAnchorElement;
     expect(link.href).toBe("blob:mock-url");
   });
+
+  it("creates link via document.createElement('a')", async () => {
+    const createElementSpy = vi.spyOn(document, "createElement");
+    const resource = { name: "my-model", file: { url: "https://cdn.example.com/model.glb" } };
+    await downloadResource(resource, ".glb", mockT, PREFIX);
+    expect(createElementSpy).toHaveBeenCalledWith("a");
+  });
+
+  it("link is removed from DOM via removeChild after download", async () => {
+    const removeChildSpy = vi.spyOn(document.body, "removeChild");
+    const resource = { name: "my-model", file: { url: "https://cdn.example.com/model.glb" } };
+    await downloadResource(resource, ".glb", mockT, PREFIX);
+    expect(removeChildSpy).toHaveBeenCalled();
+  });
+
+  it("link.click() is called exactly once on successful download", async () => {
+    const resource = { name: "my-model", file: { url: "https://cdn.example.com/model.glb" } };
+    await downloadResource(resource, ".glb", mockT, PREFIX);
+    const clickSpy = vi.mocked(HTMLAnchorElement.prototype.click);
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("URL.createObjectURL is called exactly once per download", async () => {
+    const resource = { name: "my-model", file: { url: "https://cdn.example.com/model.glb" } };
+    await downloadResource(resource, ".glb", mockT, PREFIX);
+    expect(URL.createObjectURL as ReturnType<typeof vi.fn>).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not show ElMessage.success on fetch failure", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("fail"));
+    const resource = { name: "x", file: { url: "https://cdn.example.com/x.glb" } };
+    await downloadResource(resource, ".glb", mockT, PREFIX);
+    expect(elMessage.success).not.toHaveBeenCalled();
+  });
 });

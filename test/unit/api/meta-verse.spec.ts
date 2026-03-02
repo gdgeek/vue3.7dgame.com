@@ -261,6 +261,17 @@ describe("createVerseFromResource()", () => {
     ).rejects.toThrow("put verse error");
   });
 
+  it("putVerse data string is valid JSON", async () => {
+    await metaVerseApi.createVerseFromResource("Polygen", "Test Scene", mockResource);
+    const callArgs = (verseApi.putVerse as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(() => JSON.parse(callArgs[1].data)).not.toThrow();
+  });
+
+  it("postMeta is called exactly once", async () => {
+    await metaVerseApi.createVerseFromResource("Polygen", "Test Scene", mockResource);
+    expect(metaApi.postMeta).toHaveBeenCalledTimes(1);
+  });
+
   it("all API calls are made in sequence (total 5 calls)", async () => {
     const order: string[] = [];
     (verseApi.postVerse as ReturnType<typeof vi.fn>).mockImplementation(() => {

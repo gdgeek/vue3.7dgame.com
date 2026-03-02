@@ -8,14 +8,14 @@ import type {
   WechatRegisterResponse,
 } from "./types/wechat";
 
-const login = (data: WechatLoginRequest) => {
+export const login = (data: WechatLoginRequest) => {
   return request<WechatLoginResponse>({
     url: `/v1/wechat/login`,
     method: "post",
     data,
   });
 };
-const link = (data: WechatLinkRequest) => {
+export const link = (data: WechatLinkRequest) => {
   return request<WechatLinkResponse>({
     url: `/v1/wechat/link`,
     method: "post",
@@ -23,15 +23,11 @@ const link = (data: WechatLinkRequest) => {
   });
 };
 
-const register = (data: WechatRegisterRequest) => {
+export const register = (data: WechatRegisterRequest) => {
   return request<WechatRegisterResponse>({
     url: `/v1/wechat/register`,
     method: "post",
     data,
   });
 };
-export default {
-  login,
-  link,
-  register,
-};
+

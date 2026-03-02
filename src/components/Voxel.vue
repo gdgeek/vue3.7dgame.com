@@ -6,7 +6,6 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
-import ElementResizeDetector from "element-resize-detector";
 
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -44,6 +43,7 @@ const scene = new THREE.Scene();
 let camera: THREE.PerspectiveCamera | null = null;
 let renderer: THREE.WebGLRenderer | null = null;
 let sleep = false;
+let resizeObserver: ResizeObserver | null = null;
 
 const toFixedVector3 = (vec: THREE.Vector3, n: number) => {
   const result = new THREE.Vector3();
@@ -176,8 +176,7 @@ onMounted(() => {
     // renderer.render(scene, camera);
 
     // 监听容器尺寸变化
-    const erd = new ElementResizeDetector();
-    erd.listenTo(content, () => {
+    resizeObserver = new ResizeObserver(() => {
       if (!sleep && renderer && camera) {
         const width = content.clientWidth;
         const height = content.clientHeight;
@@ -186,6 +185,7 @@ onMounted(() => {
         camera.updateProjectionMatrix();
       }
     });
+    resizeObserver.observe(content);
 
     const animate = () => {
       if (!renderer || !camera) {
@@ -199,5 +199,9 @@ onMounted(() => {
     animate();
     refresh();
   }
+});
+
+onUnmounted(() => {
+  resizeObserver?.disconnect();
 });
 </script>

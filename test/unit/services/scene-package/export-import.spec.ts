@@ -144,6 +144,30 @@ describe("exportScene", () => {
 
     expect(result).toEqual({ success: true });
   });
+
+  it("uses fallback filename when Content-Disposition header is absent", async () => {
+    const mockResponse = {
+      data: new Blob(["zip-content"]),
+      headers: {},
+    };
+    vi.mocked(getVerseExportZip).mockResolvedValue(mockResponse as never);
+
+    await exportScene(77);
+
+    expect(mockLink.download).toBe("scene_77.zip");
+  });
+
+  it("creates a blob URL from the response data", async () => {
+    const blob = new Blob(["content"]);
+    vi.mocked(getVerseExportZip).mockResolvedValue({
+      data: blob,
+      headers: {},
+    } as never);
+
+    await exportScene(1);
+
+    expect(mockCreateObjectURL).toHaveBeenCalledWith(blob);
+  });
 });
 
 // ============================================================
@@ -210,5 +234,26 @@ describe("importScene", () => {
       verseId: 0,
       error: "导入失败，请重试",
     });
+  });
+
+  it("calls postVerseImportZip exactly once per importScene call", async () => {
+    const mockFile = new File(["content"], "scene.zip");
+    vi.mocked(postVerseImportZip).mockResolvedValue({
+      data: { verseId: 1, metaIdMap: {}, resourceIdMap: {} },
+    } as never);
+
+    await importScene(mockFile);
+    expect(postVerseImportZip).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns verseId=0 and success=false when API throws with empty message", async () => {
+    const mockFile = new File(["content"], "scene.zip");
+    vi.mocked(postVerseImportZip).mockRejectedValue(
+      new Error("")
+    );
+
+    const result = await importScene(mockFile);
+    expect(result.success).toBe(false);
+    expect(result.verseId).toBe(0);
   });
 });

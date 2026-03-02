@@ -8,7 +8,7 @@ import { onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAppStore } from "@/store/modules/app";
 
-import AuthAPI from "@/api/v1/auth";
+import { refresh as authRefresh } from "@/api/v1/auth";
 import Token from "@/store/modules/token";
 import { useUserStore } from "@/store/modules/user";
 
@@ -22,7 +22,7 @@ onMounted(async () => {
 
   if (refreshToken) {
     try {
-      const response = await AuthAPI.refresh(refreshToken as string);
+      const response = await authRefresh(refreshToken as string);
       Token.setToken(response.data.token);
 
       // 拉取并设置用户信息（使用 store 提供的方法）

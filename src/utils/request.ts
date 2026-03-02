@@ -2,7 +2,7 @@ import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { useRouter } from "@/router";
 import i18n from "@/lang";
 import { ElMessage } from "element-plus";
-import AuthAPI from "@/api/v1/auth";
+import { refresh as authRefresh } from "@/api/v1/auth";
 import env from "@/environment";
 import { ref, watch } from "vue";
 import Token from "@/store/modules/token";
@@ -86,7 +86,7 @@ const refreshToken = async () => {
   if (!token || !token.refreshToken) {
     throw new Error("No refresh token available");
   }
-  const response = await AuthAPI.refresh(token.refreshToken);
+  const response = await authRefresh(token.refreshToken);
   if (response.data) {
     Token.setToken(response.data.token);
   }

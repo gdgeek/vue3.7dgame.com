@@ -1,0 +1,206 @@
+/**
+ * 顶部导航栏/登录页面/面包屑/用户下拉菜单主题适配
+ */
+
+// ============================================
+// 顶部导航栏主题适配
+// ============================================
+
+.header-actions {
+  .icon-btn {
+    color: var(--text-secondary) !important;
+    border-radius: var(--radius-sm) !important;
+    
+    &:hover {
+      background: var(--bg-hover) !important;
+      color: var(--primary-color) !important;
+    }
+  }
+  
+  .theme-dropdown,
+  .language-dropdown {
+    .el-dropdown-menu {
+      background: var(--bg-card) !important;
+      border: var(--border-width) solid var(--border-color) !important;
+      border-radius: var(--radius-lg) !important;
+    }
+  }
+  
+  .theme-item,
+  .language-item {
+    color: var(--text-primary) !important;
+  }
+  
+  .theme-name,
+  .language-name {
+    color: var(--text-primary) !important;
+  }
+  
+  .theme-desc {
+    color: var(--text-muted) !important;
+  }
+  
+  .theme-check,
+  .language-check {
+    color: var(--primary-color) !important;
+  }
+}
+
+.theme-cyber-tech {
+  .header-actions {
+    .icon-btn {
+      color: #8BA3AD !important;
+      
+      &:hover {
+        background: rgba(0, 242, 255, 0.1) !important;
+        color: #00F2FF !important;
+      }
+    }
+    
+    .theme-dropdown .el-dropdown-menu,
+    .language-dropdown .el-dropdown-menu {
+      background: rgba(11, 14, 20, 0.95) !important;
+      backdrop-filter: blur(20px) !important;
+      border: 1px solid rgba(0, 242, 255, 0.2) !important;
+    }
+  }
+}
+
+.theme-deep-space {
+  .header-actions {
+    .icon-btn {
+      color: #B0B3B8 !important;
+      
+      &:hover {
+        background: #1C2128 !important;
+        color: #2D68FF !important;
+      }
+    }
+  }
+}
+
+
+// ============================================
+// 登录页面主题适配（基础样式）
+// ============================================
+
+.login-page {
+  font-family: var(--font-family) !important;
+  
+  .login-card {
+    background: var(--bg-card) !important;
+    border: var(--border-width) solid var(--border-color) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-lg) !important;
+  }
+  
+  .login-title {
+    color: var(--text-primary) !important;
+  }
+  
+  .login-subtitle {
+    color: var(--text-secondary) !important;
+  }
+  
+  .login-btn {
+    background: var(--primary-color) !important;
+    color: var(--text-inverse) !important;
+    border-radius: var(--radius-full) !important;
+    
+    &:hover {
+      background: var(--primary-hover) !important;
+    }
+  }
+}
+
+
+// ============================================
+// 面包屑导航主题适配
+// ============================================
+
+.breadcrumb-nav {
+  .breadcrumb-item {
+    color: var(--text-muted) !important;
+    
+    &:hover {
+      color: var(--primary-color) !important;
+    }
+    
+    &.active {
+      color: var(--text-primary) !important;
+    }
+  }
+  
+  .breadcrumb-separator {
+    color: var(--text-muted) !important;
+  }
+}
+
+
+// ============================================
+// 用户下拉菜单主题适配
+// ============================================
+
+.user-dropdown {
+  .user-info {
+    .user-name {
+      color: var(--text-primary) !important;
+    }
+    
+    .user-email {
+      color: var(--text-muted) !important;
+    }
+  }
+  
+  .dropdown-menu {
+    background: var(--bg-card) !important;
+    border: var(--border-width) solid var(--border-color) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-lg) !important;
+    
+    .menu-item {
+      color: var(--text-primary) !important;
+      border-radius: var(--radius-sm) !important;
+      
+      &:hover {
+        background: var(--bg-hover) !important;
+      }
+      
+      &.danger {
+        color: var(--danger-color) !important;
+        
+        &:hover {
+          background: var(--danger-light) !important;
+        }
+      }
+    }
+    
+    .menu-divider {
+      background: var(--border-color) !important;
+    }
+  }
+}
+
+.theme-cyber-tech {
+  .user-dropdown .dropdown-menu {
+    background: rgba(11, 14, 20, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(0, 242, 255, 0.2) !important;
+  }
+}
+
+.theme-neo-brutalism {
+  .user-dropdown .dropdown-menu {
+    background: #FFFFFF !important;
+    border: 3px solid #000000 !important;
+    box-shadow: 5px 5px 0px #000000 !important;
+  }
+}
+
+.theme-deep-space {
+  .user-dropdown .dropdown-menu {
+    background: #151921 !important;
+    border: 1px solid #21262D !important;
+  }
+}
+

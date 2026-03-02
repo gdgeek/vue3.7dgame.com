@@ -239,5 +239,37 @@ describe("Email API", () => {
       expect(arg.url).toBe("/v1/email/test");
       expect(arg.method).toBe("get");
     });
+
+    it("returns the response data from testEmailService", async () => {
+      const emailApi = await import("@/api/v1/email");
+      const payload = { success: true, data: { from: "a@b.com", to: "c@d.com", time: "now" } };
+      request.mockResolvedValue({ data: payload });
+      const result = await emailApi.testEmailService();
+      expect(result).toEqual(payload);
+    });
+  });
+
+  describe("verifyEmailCode — with change_token", () => {
+    it("includes change_token in request data when provided", async () => {
+      const emailApi = await import("@/api/v1/email");
+      request.mockResolvedValue({ data: { success: true } });
+      await emailApi.verifyEmailCode({
+        email: "u@e.com",
+        code: "111",
+        change_token: "tok-xyz",
+      });
+      const arg = request.mock.calls[0][0];
+      expect(arg.data.change_token).toBe("tok-xyz");
+    });
+  });
+
+  describe("getEmailCooldown — method", () => {
+    it("uses GET method", async () => {
+      const emailApi = await import("@/api/v1/email");
+      request.mockResolvedValue({ data: { success: true } });
+      await emailApi.getEmailCooldown();
+      const arg = request.mock.calls[0][0];
+      expect(arg.method).toBe("get");
+    });
   });
 });

@@ -60,6 +60,22 @@ describe("Cyber API", () => {
       await cyberApi.postCyber({} as never);
       expect(request.mock.calls[0][0].url).toBe("/v1/cybers");
     });
+
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 1, name: "new-cyber" } };
+      request.mockResolvedValue(mockResp);
+      const result = await cyberApi.postCyber({ name: "new-cyber" } as never);
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("putCyber() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 5, name: "updated" } };
+      request.mockResolvedValue(mockResp);
+      const result = await cyberApi.putCyber(5, { name: "updated" } as never);
+      expect(result).toEqual(mockResp);
+    });
   });
 });
 
@@ -123,6 +139,47 @@ describe("Tencent Cloud API", () => {
           method: "get",
         })
       );
+    });
+  });
+
+  describe("store() — method", () => {
+    it("uses GET method", async () => {
+      await tencentApi.store();
+      expect(request.mock.calls[0][0].method).toBe("get");
+    });
+  });
+
+  describe("token() — with only bucket", () => {
+    it("URL contains /v1/tencent-clouds/token even with just bucket", async () => {
+      await tencentApi.token("just-bucket");
+      expect(request.mock.calls[0][0].url).toContain("/v1/tencent-clouds/token");
+    });
+  });
+
+  describe("store() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { bucket: "my-bucket" } };
+      request.mockResolvedValue(mockResp);
+      const result = await tencentApi.store();
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("cloud() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { name: "cloud-config" } };
+      request.mockResolvedValue(mockResp);
+      const result = await tencentApi.cloud();
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("token() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { credentials: { tmpSecretId: "sid" } } };
+      request.mockResolvedValue(mockResp);
+      const result = await tencentApi.token("my-bucket");
+      expect(result).toEqual(mockResp);
     });
   });
 });

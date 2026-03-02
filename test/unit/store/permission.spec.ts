@@ -194,4 +194,36 @@ describe("usePermissionStore", () => {
     expect(hook).toHaveProperty("mixLeftMenus");
     expect(hook).toHaveProperty("setMixLeftMenus");
   });
+
+  // -----------------------------------------------------------------------
+  // Additional setMixLeftMenus edge cases
+  // -----------------------------------------------------------------------
+  it("setMixLeftMenus with empty children array sets mixLeftMenus to []", () => {
+    mockRouterData.value = [{ path: "/empty", children: [] }] as never;
+    const store = usePermissionStore();
+    store.setMixLeftMenus("/empty");
+    expect(store.mixLeftMenus).toEqual([]);
+  });
+
+  it("setMixLeftMenus matches by exact path", () => {
+    mockRouterData.value = [
+      { path: "/home", children: [{ path: "/home/sub" }] },
+      { path: "/homepage", children: [{ path: "/homepage/sub" }] },
+    ] as never;
+    const store = usePermissionStore();
+    store.setMixLeftMenus("/home");
+    expect(store.mixLeftMenus).toHaveLength(1);
+    expect((store.mixLeftMenus[0] as { path: string }).path).toBe("/home/sub");
+  });
+
+  it("generateRoutes with multiple top-level routes returns all of them", async () => {
+    mockRouterData.value = [
+      { path: "/a", component: "Layout", children: [] },
+      { path: "/b", component: "Layout", children: [] },
+      { path: "/c", component: "Layout", children: [] },
+    ] as never;
+    const store = usePermissionStore();
+    const result = await store.generateRoutes();
+    expect(result.length).toBeGreaterThanOrEqual(3);
+  });
 });

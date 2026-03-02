@@ -8,7 +8,7 @@ vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 
 describe("Group API", () => {
   let request: ReturnType<typeof vi.fn>;
-  let groupApi: typeof import("@/api/v1/group").default;
+  let groupApi: typeof import("@/api/v1/group");
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -16,7 +16,7 @@ describe("Group API", () => {
       typeof vi.fn
     >;
     request.mockResolvedValue({ data: {} });
-    groupApi = (await import("@/api/v1/group")).default;
+    groupApi = await import("@/api/v1/group");
   });
 
   // -----------------------------------------------------------------------
@@ -264,6 +264,34 @@ describe("Group API", () => {
           method: "delete",
         })
       );
+    });
+
+    it("uses the correct groupId and verseId in the URL", async () => {
+      await groupApi.deleteGroupVerse(42, 77);
+      expect(request.mock.calls[0][0].url).toBe("/v1/group/42/verse/77");
+    });
+  });
+
+  describe("createGroup() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 1, name: "New Group" } };
+      request.mockResolvedValue(mockResp);
+      const result = await groupApi.createGroup({ name: "New Group" } as Parameters<typeof groupApi.createGroup>[0]);
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("joinGroup() — different IDs", () => {
+    it("uses the correct ID in the URL", async () => {
+      await groupApi.joinGroup(99);
+      expect(request.mock.calls[0][0].url).toBe("/v1/group/99/join");
+    });
+  });
+
+  describe("deleteGroup() — correct ID", () => {
+    it("uses the correct ID in the DELETE URL", async () => {
+      await groupApi.deleteGroup(55);
+      expect(request.mock.calls[0][0].url).toBe("/v1/group/55");
     });
   });
 });

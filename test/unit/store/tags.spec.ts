@@ -143,4 +143,68 @@ describe("useTagsStore", () => {
     await store.refreshTags();
     expect(loggerMod.logger.error).toHaveBeenCalledWith(err);
   });
+
+  it("empty data array results in an empty Map (not null)", async () => {
+    tagsApi.getTags.mockResolvedValue({ data: [] });
+    const store = useTagsStore();
+    await store.refreshTags();
+    expect(store.tagsMap).not.toBeNull();
+    expect(store.tagsMap!.size).toBe(0);
+  });
+
+  it("second refreshTags call overwrites the previous tagsMap", async () => {
+    tagsApi.getTags.mockResolvedValueOnce({
+      data: [{ id: 1, name: "First", info: JSON.stringify({}), managed: 0 }],
+    });
+    const store = useTagsStore();
+    await store.refreshTags();
+    expect(store.tagsMap!.has(1)).toBe(true);
+
+    tagsApi.getTags.mockResolvedValueOnce({
+      data: [{ id: 2, name: "Second", info: JSON.stringify({}), managed: 0 }],
+    });
+    await store.refreshTags();
+    expect(store.tagsMap!.has(1)).toBe(false);
+    expect(store.tagsMap!.has(2)).toBe(true);
+  });
+
+  it("multiple tags in one call are all added to the map", async () => {
+    tagsApi.getTags.mockResolvedValue({
+      data: [
+        { id: 10, name: "A", info: JSON.stringify({ color: "#111" }), managed: 0 },
+        { id: 11, name: "B", info: JSON.stringify({ color: "#222" }), managed: 1 },
+        { id: 12, name: "C", info: JSON.stringify({ color: "#333" }), managed: 0 },
+      ],
+    });
+    const store = useTagsStore();
+    await store.refreshTags();
+    expect(store.tagsMap!.size).toBe(3);
+    expect(store.tagsMap!.get(10)!.color).toBe("#111");
+    expect(store.tagsMap!.get(11)!.managed).toBe(1);
+    expect(store.tagsMap!.get(12)!.name).toBe("C");
+  });
+
+  it("managed=0 is correctly preserved (not treated as falsy)", async () => {
+    tagsApi.getTags.mockResolvedValue({
+      data: [{ id: 20, name: "T", info: JSON.stringify({}), managed: 0 }],
+    });
+    const store = useTagsStore();
+    await store.refreshTags();
+    expect(store.tagsMap!.get(20)!.managed).toBe(0);
+  });
+
+  it("useTagsStore called twice returns the same instance", () => {
+    const s1 = useTagsStore();
+    const s2 = useTagsStore();
+    expect(s1).toBe(s2);
+  });
+
+  it("tagsMap is a Map instance after refreshTags", async () => {
+    tagsApi.getTags.mockResolvedValue({
+      data: [{ id: 1, name: "T", info: JSON.stringify({}), managed: 0 }],
+    });
+    const store = useTagsStore();
+    await store.refreshTags();
+    expect(store.tagsMap).toBeInstanceOf(Map);
+  });
 });

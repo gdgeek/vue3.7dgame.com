@@ -149,6 +149,34 @@ describe("EduStudent API", () => {
       );
     });
   });
+
+  describe("createStudent() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 5, name: "Bob" } };
+      request.mockResolvedValue(mockResp);
+      const result = await studentApi.createStudent({ name: "Bob" } as Parameters<typeof studentApi.createStudent>[0]);
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("updateStudent() — data payload", () => {
+    it("sends the data payload in PUT request", async () => {
+      const data = { name: "Updated Bob" };
+      await studentApi.updateStudent(4, data as Parameters<typeof studentApi.updateStudent>[1]);
+      expect(request.mock.calls[0][0].data).toEqual(data);
+    });
+  });
+
+  describe("getStudent() — different IDs", () => {
+    it("different IDs produce different URLs", async () => {
+      await studentApi.getStudent(1);
+      const url1: string = request.mock.calls[0][0].url;
+      vi.clearAllMocks();
+      await studentApi.getStudent(2);
+      const url2: string = request.mock.calls[0][0].url;
+      expect(url1).not.toBe(url2);
+    });
+  });
 });
 
 // ============================================================
@@ -259,6 +287,32 @@ describe("EduTeacher API", () => {
       expect(request).toHaveBeenCalledWith(
         expect.objectContaining({ url: "/v1/edu-teacher/2", method: "put" })
       );
+    });
+
+    it("sends the data payload in PUT request", async () => {
+      const data = { name: "New Teacher Name" };
+      await teacherApi.updateTeacher(5, data as Parameters<typeof teacherApi.updateTeacher>[1]);
+      expect(request.mock.calls[0][0].data).toEqual(data);
+    });
+  });
+
+  describe("createTeacher() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 3, name: "Prof X" } };
+      request.mockResolvedValue(mockResp);
+      const result = await teacherApi.createTeacher({ name: "Prof X" } as Parameters<typeof teacherApi.createTeacher>[0]);
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("getTeacher() — different IDs", () => {
+    it("two different IDs produce different URLs", async () => {
+      await teacherApi.getTeacher(1);
+      const url1: string = request.mock.calls[0][0].url;
+      vi.clearAllMocks();
+      await teacherApi.getTeacher(2);
+      const url2: string = request.mock.calls[0][0].url;
+      expect(url1).not.toBe(url2);
     });
   });
 });

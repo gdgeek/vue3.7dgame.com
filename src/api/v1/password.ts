@@ -75,9 +75,4 @@ export const changePassword = async (
   return response.data;
 };
 
-export default {
-  requestPasswordReset,
-  verifyResetCode,
-  resetPasswordByCode,
-  changePassword,
-};
+

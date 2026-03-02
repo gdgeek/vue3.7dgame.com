@@ -8,14 +8,14 @@ vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 
 describe("Auth API", () => {
   let request: ReturnType<typeof vi.fn>;
-  let authApi: typeof import("@/api/v1/auth").default;
+  let authApi: typeof import("@/api/v1/auth");
 
   beforeEach(async () => {
     vi.clearAllMocks();
     request = (await import("@/utils/request")).default as ReturnType<
       typeof vi.fn
     >;
-    authApi = (await import("@/api/v1/auth")).default;
+    authApi = await import("@/api/v1/auth");
   });
 
   // -----------------------------------------------------------------------
@@ -102,6 +102,76 @@ describe("Auth API", () => {
       const result = await authApi.logout();
       expect(result).toBe(true);
       expect(request).not.toHaveBeenCalled();
+    });
+
+    it("resolves to true regardless of call order", async () => {
+      const result = await authApi.logout();
+      expect(result).toBe(true);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Additional coverage
+  // -----------------------------------------------------------------------
+  describe("login() — method", () => {
+    it("uses POST method", async () => {
+      request.mockResolvedValue({ data: {} });
+      await authApi.login({ username: "u", password: "p" });
+      expect(request.mock.calls[0][0].method).toBe("post");
+    });
+  });
+
+  describe("refresh() — data shape", () => {
+    it("sends only refreshToken field in body", async () => {
+      request.mockResolvedValue({ data: {} });
+      await authApi.refresh("rt-token");
+      const data = request.mock.calls[0][0].data;
+      expect(Object.keys(data)).toEqual(["refreshToken"]);
+    });
+  });
+
+  describe("register() — sends all fields", () => {
+    it("sends all registration fields in body", async () => {
+      request.mockResolvedValue({ data: {} });
+      const payload = { username: "bob", password: "p@ss", email: "b@b.com" };
+      await authApi.register(payload as Parameters<typeof authApi.register>[0]);
+      expect(request.mock.calls[0][0].data).toEqual(payload);
+    });
+  });
+
+  describe("login() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { accessToken: "tok", refreshToken: "rtok" } };
+      request.mockResolvedValue(mockResp);
+      const result = await authApi.login({ username: "u", password: "p" });
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("register() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 1, username: "bob" } };
+      request.mockResolvedValue(mockResp);
+      const result = await authApi.register({ username: "bob", password: "p@ss", email: "b@b.com" } as Parameters<typeof authApi.register>[0]);
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("link() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { linked: true } };
+      request.mockResolvedValue(mockResp);
+      const result = await authApi.link({ provider: "github", code: "abc" } as Parameters<typeof authApi.link>[0]);
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("refresh() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { accessToken: "new-tok" } };
+      request.mockResolvedValue(mockResp);
+      const result = await authApi.refresh("rt-token");
+      expect(result).toEqual(mockResp);
     });
   });
 });

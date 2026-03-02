@@ -257,4 +257,39 @@ describe("Resources API", () => {
       expect(result.data.file.url).toBe("https://cdn.example.com/pic.png");
     });
   });
+
+  describe("postPolygen() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 5, type: "polygen" } };
+      request.mockResolvedValue(mockResp);
+      const result = await resourcesApi.postPolygen({ name: "test" });
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("getResources() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: [{ id: 1, type: "voxel" }] };
+      request.mockResolvedValue(mockResp);
+      const result = await resourcesApi.getResources("voxel");
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("putPolygen() — data payload", () => {
+    it("sends the data payload in the PUT request", async () => {
+      const data = { name: "updated-model", file_id: 99 };
+      await resourcesApi.putPolygen(3, data);
+      expect(request.mock.calls[0][0].data).toEqual(data);
+    });
+  });
+
+  describe("deletePolygen() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: null };
+      request.mockResolvedValue(mockResp);
+      const result = await resourcesApi.deletePolygen(1);
+      expect(result).toEqual(mockResp);
+    });
+  });
 });

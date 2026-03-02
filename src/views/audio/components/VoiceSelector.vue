@@ -144,7 +144,7 @@
               <el-option
                 v-for="emotion in filteredEmotions"
                 :key="emotion"
-                :label="emotion"
+                :label="$t('tts.emotions.' + emotion)"
                 :value="emotion"
               ></el-option>
             </el-select>

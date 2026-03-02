@@ -1,0 +1,572 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { buildScriptRuntime } from "@/composables/useScriptRuntime";
+import * as THREE from "three";
+
+vi.mock("@/utils/logger", () => ({
+  logger: { log: vi.fn(), error: vi.fn(), warn: vi.fn() },
+}));
+
+// --- 工具函数：创建 mock ScenePlayer ---
+function makeMockPlayer(
+  overrides: Partial<{
+    sources: Map<string, any>;
+    playAnimation: (uuid: string, animName: string) => void;
+    getAudioUrl: (uuid: string) => string | undefined;
+    playQueuedAudio: (
+      audio: HTMLAudioElement,
+      skipQueue?: boolean
+    ) => Promise<void>;
+  }> = {}
+) {
+  return {
+    sources: new Map<string, any>(),
+    playAnimation: vi.fn(),
+    getAudioUrl: vi.fn(),
+    playQueuedAudio: vi.fn().mockResolvedValue(undefined),
+    ...overrides,
+  };
+}
+
+// 创建带有 mesh 的 MeshWrapper mock
+function makeMeshWrapper(opts: { playAnimation?: boolean } = {}) {
+  const mesh = new THREE.Object3D();
+  return {
+    mesh,
+    playAnimation: opts.playAnimation !== false ? vi.fn() : undefined,
+  } as any;
+}
+
+describe("buildScriptRuntime", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // ----------------------------------------------------------------
+  // handleText
+  // ----------------------------------------------------------------
+  describe("handleText", () => {
+    it("源存在时返回 data", () => {
+      const player = makeMockPlayer();
+      player.sources.set("uuid-1", { type: "text", data: { text: "hello" } });
+      const { handleText } = buildScriptRuntime({ value: player });
+
+      expect(handleText("uuid-1")).toEqual({ text: "hello" });
+    });
+
+    it("源不存在时返回 null", () => {
+      const { handleText } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(handleText("missing-uuid")).toBeNull();
+    });
+
+    it("scenePlayer 为 null 时返回 null", () => {
+      const { handleText } = buildScriptRuntime({ value: null });
+      expect(handleText("uuid")).toBeNull();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // handleEntity
+  // ----------------------------------------------------------------
+  describe("handleEntity", () => {
+    it("源存在时返回 data", () => {
+      const player = makeMockPlayer();
+      player.sources.set("uuid-2", {
+        type: "mesh",
+        data: { mesh: new THREE.Object3D() },
+      });
+      const { handleEntity } = buildScriptRuntime({ value: player });
+
+      const result = handleEntity("uuid-2");
+      expect(result).toBeDefined();
+      expect((result as any).mesh).toBeInstanceOf(THREE.Object3D);
+    });
+
+    it("源不存在时返回 null", () => {
+      const { handleEntity } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(handleEntity("missing")).toBeNull();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // handleSound
+  // ----------------------------------------------------------------
+  describe("handleSound", () => {
+    it("URL 存在时返回 Audio 实例", () => {
+      const player = makeMockPlayer();
+      (player.getAudioUrl as ReturnType<typeof vi.fn>).mockReturnValue(
+        "https://example.com/sound.mp3"
+      );
+      const { handleSound } = buildScriptRuntime({ value: player });
+
+      const audio = handleSound("audio-uuid");
+      expect(audio).toBeInstanceOf(Audio);
+    });
+
+    it("URL 不存在时返回 undefined", () => {
+      const player = makeMockPlayer();
+      (player.getAudioUrl as ReturnType<typeof vi.fn>).mockReturnValue(
+        undefined
+      );
+      const { handleSound } = buildScriptRuntime({ value: player });
+
+      expect(handleSound("missing-audio")).toBeUndefined();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // polygen API
+  // ----------------------------------------------------------------
+  describe("polygen.playAnimation", () => {
+    it("调用 playAnimation 方法", () => {
+      const { polygen } = buildScriptRuntime({ value: makeMockPlayer() });
+      const instance = makeMeshWrapper();
+      polygen.playAnimation(instance, "walk");
+
+      expect(instance.playAnimation).toHaveBeenCalledWith("walk");
+    });
+
+    it("instance 为 null 时不抛出异常", () => {
+      const { polygen } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(() => polygen.playAnimation(null as any, "walk")).not.toThrow();
+    });
+
+    it("instance 没有 playAnimation 方法时不抛出异常", () => {
+      const { polygen } = buildScriptRuntime({ value: makeMockPlayer() });
+      const instance = makeMeshWrapper({ playAnimation: false });
+      expect(() =>
+        polygen.playAnimation(instance, "run")
+      ).not.toThrow();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // sound API
+  // ----------------------------------------------------------------
+  describe("sound.play", () => {
+    it("调用 scenePlayer.playQueuedAudio", async () => {
+      const player = makeMockPlayer();
+      const { sound } = buildScriptRuntime({ value: player });
+      const audio = new Audio();
+
+      await sound.play(audio, false);
+
+      expect(player.playQueuedAudio).toHaveBeenCalledWith(audio, false);
+    });
+
+    it("audio 为 undefined 时不调用 playQueuedAudio", async () => {
+      const player = makeMockPlayer();
+      const { sound } = buildScriptRuntime({ value: player });
+
+      await sound.play(undefined, false);
+
+      expect(player.playQueuedAudio).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("sound.createTask", () => {
+    it("audio 有效时返回 type=audio 的 task 对象", () => {
+      const { sound } = buildScriptRuntime({ value: makeMockPlayer() });
+      const audio = new Audio();
+      const task = sound.createTask(audio);
+
+      expect(task).not.toBeNull();
+      expect(task!.type).toBe("audio");
+      expect(typeof task!.execute).toBe("function");
+    });
+
+    it("audio 为 undefined 时返回 null", () => {
+      const { sound } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(sound.createTask(undefined)).toBeNull();
+    });
+  });
+
+  describe("sound.playTask", () => {
+    it("创建并立即执行 audio task", async () => {
+      const player = makeMockPlayer();
+      const { sound } = buildScriptRuntime({ value: player });
+      const audio = new Audio();
+
+      const task = sound.playTask(audio);
+
+      expect(task).not.toBeNull();
+      expect(task!.type).toBe("audio");
+      // playQueuedAudio should have been called
+      expect(player.playQueuedAudio).toHaveBeenCalledWith(audio);
+    });
+
+    it("audio 为 undefined 时返回 null", () => {
+      const { sound } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(sound.playTask(undefined)).toBeNull();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // helper API
+  // ----------------------------------------------------------------
+  describe("helper.handler", () => {
+    it("源存在时返回 data", () => {
+      const player = makeMockPlayer();
+      player.sources.set("uuid-h", { type: "helper", data: { x: 1 } });
+      const { helper } = buildScriptRuntime({ value: player });
+
+      expect(helper.handler("", "uuid-h")).toEqual({ x: 1 });
+    });
+
+    it("源不存在时返回 null", () => {
+      const { helper } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(helper.handler("", "missing")).toBeNull();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // tween API
+  // ----------------------------------------------------------------
+  describe("tween.to_object", () => {
+    it("创建包含位置信息的 tween 数据", () => {
+      const { tween } = buildScriptRuntime({ value: makeMockPlayer() });
+      const from = makeMeshWrapper();
+      const to = makeMeshWrapper();
+      from.mesh.position.set(0, 0, 0);
+      to.mesh.position.set(10, 5, 2);
+
+      const result = tween.to_object(from, to, 1.5, "LINEAR");
+
+      expect(result).not.toBeNull();
+      expect(result!.type).toBe("object");
+      expect(result!.duration).toBe(1.5);
+      expect(result!.easing).toBe("LINEAR");
+      expect(result!.endPos).toBeInstanceOf(THREE.Vector3);
+    });
+
+    it("from 为 null 时返回 null", () => {
+      const { tween } = buildScriptRuntime({ value: makeMockPlayer() });
+      const to = makeMeshWrapper();
+      expect(tween.to_object(null as any, to, 1, "LINEAR")).toBeNull();
+    });
+
+    it("to 为 null 时返回 null", () => {
+      const { tween } = buildScriptRuntime({ value: makeMockPlayer() });
+      const from = makeMeshWrapper();
+      expect(tween.to_object(from, null as any, 1, "LINEAR")).toBeNull();
+    });
+  });
+
+  describe("tween.to_data", () => {
+    it("创建包含旋转和缩放的 tween 数据", () => {
+      const { tween } = buildScriptRuntime({ value: makeMockPlayer() });
+      const obj = makeMeshWrapper();
+      const transformData = {
+        position: new THREE.Vector3(5, 0, 0),
+        rotation: new THREE.Vector3(0, 90, 0),
+        scale: new THREE.Vector3(2, 2, 2),
+      };
+
+      const result = tween.to_data(obj, transformData, 2.0, "EASE_IN");
+
+      expect(result).not.toBeNull();
+      expect(result!.type).toBe("data");
+      expect(result!.duration).toBe(2.0);
+      expect(result!.easing).toBe("EASE_IN");
+      expect(result!.endPos).toEqual(transformData.position);
+      expect(result!.endScale).toEqual(transformData.scale);
+    });
+
+    it("obj 为 null 时返回 null", () => {
+      const { tween } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(
+        tween.to_data(
+          null as any,
+          {
+            position: new THREE.Vector3(),
+            rotation: new THREE.Vector3(),
+            scale: new THREE.Vector3(1, 1, 1),
+          },
+          1,
+          "LINEAR"
+        )
+      ).toBeNull();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // task API
+  // ----------------------------------------------------------------
+  describe("task.array", () => {
+    it("LIST 类型返回所有元素", () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const result = task.array("LIST", [1, 2, 3]);
+      expect(result).toEqual([1, 2, 3]);
+    });
+
+    it("SET 类型去除重复元素", () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const result = task.array("SET", [1, 2, 2, 3, 3]);
+      expect(result).toEqual([1, 2, 3]);
+    });
+
+    it("未知类型默认按 LIST 处理", () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const result = task.array("UNKNOWN", [1, 2]);
+      expect(result).toEqual([1, 2]);
+    });
+  });
+
+  describe("task.sleep", () => {
+    it("返回一个函数", () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const sleepFn = task.sleep(1);
+      expect(typeof sleepFn).toBe("function");
+    });
+
+    it("返回的函数调用后返回 Promise", () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const sleepFn = task.sleep(0.001);
+      const result = sleepFn();
+      expect(result).toBeInstanceOf(Promise);
+    });
+  });
+
+  describe("task.execute", () => {
+    it("tweenData 为 null 时直接返回", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      await expect(task.execute(null)).resolves.toBeUndefined();
+    });
+
+    it("tweenData 为函数时直接调用", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const fn = vi.fn().mockResolvedValue(undefined);
+      await task.execute(fn);
+      expect(fn).toHaveBeenCalledOnce();
+    });
+
+    it("tweenData 为 Promise 时等待 Promise", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const resolved = Promise.resolve(42);
+      const result = await task.execute(resolved);
+      expect(result).toBe(42);
+    });
+  });
+
+  describe("task.circle", () => {
+    it("执行函数 N 次", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const fn = vi.fn().mockResolvedValue(undefined);
+
+      await task.circle(3, fn);
+
+      expect(fn).toHaveBeenCalledTimes(3);
+    });
+
+    it("count 为 0 时不执行", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const fn = vi.fn();
+
+      await task.circle(0, fn);
+
+      expect(fn).not.toHaveBeenCalled();
+    });
+
+    it("执行带 execute 方法的 task 对象", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const execute = vi.fn().mockResolvedValue(undefined);
+      const taskObj = { type: "custom", execute };
+
+      await task.circle(2, taskObj);
+
+      expect(execute).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // animation API
+  // ----------------------------------------------------------------
+  describe("animation.createTask", () => {
+    it("返回 type=animation 的 task 对象", () => {
+      const { animation } = buildScriptRuntime({ value: makeMockPlayer() });
+      const instance = makeMeshWrapper();
+      const task = animation.createTask(instance, "run");
+
+      expect(task).not.toBeNull();
+      expect(task!.type).toBe("animation");
+      expect(typeof task!.execute).toBe("function");
+    });
+
+    it("instance 为 null 时返回 null", () => {
+      const { animation } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(animation.createTask(null as any, "run")).toBeNull();
+    });
+
+    it("instance 没有 playAnimation 方法时返回 null", () => {
+      const { animation } = buildScriptRuntime({ value: makeMockPlayer() });
+      const instance = makeMeshWrapper({ playAnimation: false });
+      expect(animation.createTask(instance, "run")).toBeNull();
+    });
+
+    it("执行 task 时调用 playAnimation", async () => {
+      const { animation } = buildScriptRuntime({ value: makeMockPlayer() });
+      const instance = makeMeshWrapper();
+      const task = animation.createTask(instance, "jump");
+
+      await task!.execute!();
+
+      expect(instance.playAnimation).toHaveBeenCalledWith("jump");
+    });
+  });
+
+  describe("animation.playTask", () => {
+    it("创建并立即执行 animation task", () => {
+      const { animation } = buildScriptRuntime({ value: makeMockPlayer() });
+      const instance = makeMeshWrapper();
+      const task = animation.playTask(instance, "idle");
+
+      expect(task).not.toBeNull();
+      expect(instance.playAnimation).toHaveBeenCalledWith("idle");
+    });
+
+    it("instance 无效时返回 null", () => {
+      const { animation } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(animation.playTask(null as any, "idle")).toBeNull();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // event API
+  // ----------------------------------------------------------------
+  describe("event.trigger", () => {
+    it("不抛出异常（仅记录日志）", () => {
+      const { event } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(() => event.trigger("index", "evt-id")).not.toThrow();
+    });
+  });
+
+  describe("event extraEvent 扩展", () => {
+    it("extraEvent 中的方法可在 event 上调用", () => {
+      const signal = vi.fn();
+      const { event } = buildScriptRuntime({ value: makeMockPlayer() }, {
+        signal,
+      });
+
+      (event as any).signal("arg1");
+      expect(signal).toHaveBeenCalledWith("arg1");
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // text API
+  // ----------------------------------------------------------------
+  describe("text.setText", () => {
+    it("调用 object.setText", () => {
+      const { text } = buildScriptRuntime({ value: makeMockPlayer() });
+      const obj = { setText: vi.fn() };
+      text.setText(obj, "Hello World");
+
+      expect(obj.setText).toHaveBeenCalledWith("Hello World");
+    });
+
+    it("object 没有 setText 方法时不抛出异常", () => {
+      const { text } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(() => text.setText({ no: "setText" }, "hi")).not.toThrow();
+    });
+
+    it("object 为 null 时不抛出异常", () => {
+      const { text } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(() => text.setText(null, "hi")).not.toThrow();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // point API
+  // ----------------------------------------------------------------
+  describe("point.setVisual", () => {
+    it("调用 object.setVisibility", () => {
+      const { point } = buildScriptRuntime({ value: makeMockPlayer() });
+      const obj = { setVisibility: vi.fn() };
+      point.setVisual(obj, true);
+
+      expect(obj.setVisibility).toHaveBeenCalledWith(true);
+    });
+
+    it("object 没有 setVisibility 方法时不抛出异常", () => {
+      const { point } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(() => point.setVisual({ no: "setVisibility" }, false)).not.toThrow();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // transform
+  // ----------------------------------------------------------------
+  describe("transform", () => {
+    it("传入 Vector3 时返回正确的 transform", () => {
+      const { transform } = buildScriptRuntime({ value: makeMockPlayer() });
+      const pos = new THREE.Vector3(1, 2, 3);
+      const rot = new THREE.Vector3(0, 90, 0);
+      const scale = new THREE.Vector3(2, 2, 2);
+
+      const result = transform(pos, rot, scale);
+
+      expect(result.position).toBe(pos);
+      expect(result.rotation).toBe(rot);
+      expect(result.scale).toBe(scale);
+    });
+
+    it("非 Vector3 值时使用默认值", () => {
+      const { transform } = buildScriptRuntime({ value: makeMockPlayer() });
+      const result = transform(null, null, null);
+
+      expect(result.position).toBeInstanceOf(THREE.Vector3);
+      expect(result.rotation).toBeInstanceOf(THREE.Vector3);
+      // 默认 scale 是 (1, 1, 1)
+      expect(result.scale).toEqual(new THREE.Vector3(1, 1, 1));
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // argument API
+  // ----------------------------------------------------------------
+  describe("argument", () => {
+    it("argument.boolean 原样返回", () => {
+      const { argument } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(argument.boolean(true)).toBe(true);
+      expect(argument.boolean(false)).toBe(false);
+    });
+
+    it("argument.number 原样返回", () => {
+      const { argument } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(argument.number(42)).toBe(42);
+      expect(argument.number(-3.14)).toBe(-3.14);
+    });
+
+    it("argument.string 原样返回", () => {
+      const { argument } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(argument.string("hello")).toBe("hello");
+    });
+
+    it("argument.idPlayer 原样返回", () => {
+      const { argument } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(argument.idPlayer(7)).toBe(7);
+    });
+
+    it("argument.point 传入 Vector3 时原样返回", () => {
+      const { argument } = buildScriptRuntime({ value: makeMockPlayer() });
+      const v = new THREE.Vector3(1, 2, 3);
+      expect(argument.point(v)).toBe(v);
+    });
+
+    it("argument.point 传入非 Vector3 时返回默认 Vector3", () => {
+      const { argument } = buildScriptRuntime({ value: makeMockPlayer() });
+      expect(argument.point(null)).toBeInstanceOf(THREE.Vector3);
+    });
+
+    it("argument.range 返回中心点半径内的 Vector3", () => {
+      const { argument } = buildScriptRuntime({ value: makeMockPlayer() });
+      const center = new THREE.Vector3(0, 0, 0);
+      const radius = 5;
+
+      const result = argument.range(center, radius);
+
+      expect(result).toBeInstanceOf(THREE.Vector3);
+      const distance = result.distanceTo(center);
+      expect(distance).toBeLessThanOrEqual(radius + 1e-9);
+    });
+  });
+});

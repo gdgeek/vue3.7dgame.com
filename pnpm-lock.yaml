@@ -80,12 +80,9 @@ importers:
       element-plus:
         specifier: ^2.9.4
         version: 2.9.7(vue@3.5.13(typescript@5.8.3))
-      element-resize-detector:
-        specifier: ^1.2.4
-        version: 1.2.4
       highlight.js:
-        specifier: ^10.7.3
-        version: 10.7.3
+        specifier: ^11.11.1
+        version: 11.11.1
       json-schema-editor-vue3:
         specifier: ^1.2.0
         version: 1.2.0(typescript@5.8.3)
@@ -146,9 +143,6 @@ importers:
       vue-cropper:
         specifier: ^1.1.4
         version: 1.1.4
-      vue-hljs:
-        specifier: ^3.0.1
-        version: 3.0.1(highlight.js@10.7.3)(vue@3.5.13(typescript@5.8.3))
       vue-i18n:
         specifier: 9.9.1
         version: 9.9.1(vue@3.5.13(typescript@5.8.3))
@@ -2112,9 +2106,6 @@ packages:
     resolution: {integrity: sha512-5T6P4xPgpp0YDFvSWwEZ4NoE3aM4QBQXDzmVbraCkFj8zHM+mba8SyqB5DbZWyR7mYHo6Y7BdQo3MoA4m0TeQg==}
     engines: {node: '>=0.10.0'}
 
-  batch-processor@1.0.0:
-    resolution: {integrity: sha512-xoLQD8gmmR32MeuBHgH0Tzd5PuSZx71ZsbhVxOCRbgktZEPe4SQy7s9Z50uPp0F/f7iw2XmkHN2xkgbMfckMDA==}
-
   big.js@5.2.2:
     resolution: {integrity: sha512-vyL2OymJxmarO8gxMr0mhChsO9QGwhynfuu4+MHTAW6czfq9humCB7rKpUjDd9YUiDPU4mzpyupFSvOClAwbmQ==}
 
@@ -2819,9 +2810,6 @@ packages:
     peerDependencies:
       vue: ^3.2.0
 
-  element-resize-detector@1.2.4:
-    resolution: {integrity: sha512-Fl5Ftk6WwXE0wqCgNoseKWndjzZlDCwuPTcoVZfCP9R3EHQF8qUtr3YUPNETegRBOKqQKPW3n4kiIWngGi8tKg==}
-
   emoji-regex@10.4.0:
     resolution: {integrity: sha512-EC+0oUMY1Rqm4O6LLrgjtYDvcVYTy7chDnM4Q7030tP4Kwj3u/pR6gP9ygnp2CJMK5Gq+9Q2oqmrFJAz01DXjw==}
 
@@ -3461,8 +3449,9 @@ packages:
     resolution: {integrity: sha512-QFLV0taWQOZtvIRIAdBChesmogZrtuXvVWsFHZTk2SU+anspqZ2vMnoLg7IE1+Uk16N19APic1BuF8bC8c2m5g==}
     engines: {node: '>=8'}
 
-  highlight.js@10.7.3:
-    resolution: {integrity: sha512-tzcUFauisWKNHaRkN4Wjl/ZA07gENAjFl3J/c480dprkGTg5EQstgaNFqBfUqCq54kZRIEcreTsAgF/m2quD7A==}
+  highlight.js@11.11.1:
+    resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
+    engines: {node: '>=12.0.0'}
 
   homedir-polyfill@1.0.3:
     resolution: {integrity: sha512-eSmmWE5bZTK2Nou4g0AI3zZ9rswp7GRKoKXS1BLUkvPviOqs4YTN1djQIqrXy9k5gEtdLPy86JjRwsNM9tnDcA==}
@@ -6003,12 +5992,6 @@ packages:
     peerDependencies:
       eslint: '>=6.0.0'
 
-  vue-hljs@3.0.1:
-    resolution: {integrity: sha512-o4Pw7bgHKCamdm2NeIVkX8Ck2GzDTDpa25+rV0LTDhosN5DFdJop3YaNm7hI6AfxCbVIwue87Cv/h/Nqp0khSQ==}
-    peerDependencies:
-      highlight.js: ^10.0.0
-      vue: ^3.0.0
-
   vue-i18n@9.9.1:
     resolution: {integrity: sha512-xyQ4VspLdNSPTKBFBPWa1tvtj+9HuockZwgFeD2OhxxXuC2CWeNvV4seu2o9+vbQOyQbhAM5Ez56oxUrrnTWdw==}
     engines: {node: '>= 16'}
@@ -8250,8 +8233,6 @@ snapshots:
       mixin-deep: 1.3.2
       pascalcase: 0.1.1
 
-  batch-processor@1.0.0: {}
-
   big.js@5.2.2: {}
 
   binary-extensions@2.3.0: {}
@@ -9025,10 +9006,6 @@ snapshots:
       vue: 3.5.13(typescript@5.8.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
-
-  element-resize-detector@1.2.4:
-    dependencies:
-      batch-processor: 1.0.0
 
   emoji-regex@10.4.0: {}
 
@@ -9826,7 +9803,7 @@ snapshots:
 
   hexoid@1.0.0: {}
 
-  highlight.js@10.7.3: {}
+  highlight.js@11.11.1: {}
 
   homedir-polyfill@1.0.3:
     dependencies:
@@ -12614,11 +12591,6 @@ snapshots:
       semver: 7.7.1
     transitivePeerDependencies:
       - supports-color
-
-  vue-hljs@3.0.1(highlight.js@10.7.3)(vue@3.5.13(typescript@5.8.3)):
-    dependencies:
-      highlight.js: 10.7.3
-      vue: 3.5.13(typescript@5.8.3)
 
   vue-i18n@9.9.1(vue@3.5.13(typescript@5.8.3)):
     dependencies:

@@ -1,0 +1,263 @@
+/**
+ * Element Plus 全局下拉菜单主题适配
+ */
+
+// ============================================
+// Element Plus 全局下拉菜单主题适配
+// ============================================
+
+// 下拉菜单容器
+.el-dropdown-menu {
+  background: var(--bg-card) !important;
+  border: var(--border-width) solid var(--border-color) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-lg) !important;
+  padding: 6px !important;
+  overflow: hidden !important;
+  
+  .el-dropdown-menu__item {
+    color: var(--text-primary) !important;
+    border-radius: calc(var(--radius-md) - 6px) !important;
+    margin: 2px 0 !important;
+    padding: 10px 14px !important;
+    transition: all var(--transition-fast) !important;
+    
+    &:first-child {
+      margin-top: 0 !important;
+    }
+    
+    &:last-child {
+      margin-bottom: 0 !important;
+    }
+    
+    &:hover {
+      background: var(--bg-hover) !important;
+      color: var(--primary-color) !important;
+    }
+    
+    &.is-active,
+    &.selected {
+      background: var(--primary-light) !important;
+      color: var(--primary-color) !important;
+    }
+    
+    &.is-disabled {
+      color: var(--text-muted) !important;
+    }
+  }
+}
+
+// 下拉菜单 popper 容器
+.el-popper.el-dropdown__popper {
+  border-radius: var(--radius-md) !important;
+  overflow: hidden !important;
+  
+  // 箭头样式
+  .el-popper__arrow::before {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+  }
+}
+
+// Select 下拉菜单
+.el-select-dropdown {
+  background: var(--bg-card) !important;
+  border: var(--border-width) solid var(--border-color) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 6px !important;
+  overflow: hidden !important;
+  
+  .el-select-dropdown__item {
+    color: var(--text-primary) !important;
+    border-radius: calc(var(--radius-md) - 6px) !important;
+    margin: 2px 0 !important;
+    padding: 10px 14px !important;
+    transition: all var(--transition-fast) !important;
+    
+    &:first-child {
+      margin-top: 0 !important;
+    }
+    
+    &:last-child {
+      margin-bottom: 0 !important;
+    }
+    
+    &:hover {
+      background: var(--bg-hover) !important;
+    }
+    
+    &.selected,
+    &.is-selected {
+      color: var(--primary-color) !important;
+      background: var(--primary-light) !important;
+    }
+  }
+}
+
+// Select popper 容器
+.el-popper.el-select__popper {
+  border-radius: var(--radius-md) !important;
+  overflow: hidden !important;
+}
+
+// Popover 弹出框
+.el-popover {
+  background: var(--bg-card) !important;
+  border: var(--border-width) solid var(--border-color) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.el-message-box {
+  background: var(--bg-card) !important;
+  border: var(--border-width) solid var(--border-color) !important;
+  border-radius: var(--radius-lg) !important;
+  
+  .el-message-box__title {
+    color: var(--text-primary) !important;
+  }
+  
+  .el-message-box__message {
+    color: var(--text-secondary) !important;
+  }
+}
+
+// 各主题 Element Plus 特殊样式
+.theme-cyber-tech {
+  .el-dropdown-menu,
+  .el-select-dropdown,
+  .el-popover {
+    background: rgba(11, 14, 20, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(0, 242, 255, 0.2) !important;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 242, 255, 0.1) !important;
+  }
+  
+  .el-dropdown-menu__item,
+  .el-select-dropdown__item {
+    color: #E8F4F8 !important;
+    
+    &:hover {
+      background: rgba(0, 242, 255, 0.1) !important;
+      color: #00F2FF !important;
+    }
+    
+    &.is-active,
+    &.selected,
+    &.is-selected {
+      background: rgba(0, 242, 255, 0.15) !important;
+      color: #00F2FF !important;
+    }
+  }
+}
+
+.theme-neo-brutalism {
+  .el-dropdown-menu,
+  .el-select-dropdown,
+  .el-popover {
+    background: #FFFFFF !important;
+    border: 3px solid #000000 !important;
+    border-radius: 8px !important;
+    box-shadow: 5px 5px 0px #000000 !important;
+    padding: 4px !important;
+  }
+  
+  .el-dropdown-menu__item,
+  .el-select-dropdown__item {
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    
+    &:hover {
+      background: #FFF000 !important;
+      color: #000000 !important;
+    }
+    
+    &.is-active,
+    &.selected,
+    &.is-selected {
+      background: #FF007A !important;
+      color: #FFFFFF !important;
+    }
+  }
+}
+
+.theme-minimal-pure {
+  .el-dropdown-menu,
+  .el-select-dropdown,
+  .el-popover {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: 1px solid #e0e0e0 !important;
+    padding: 4px !important;
+  }
+  
+  .el-dropdown-menu__item,
+  .el-select-dropdown__item {
+    border-radius: 0 !important;
+    
+    &:hover {
+      background: #f5f5f5 !important;
+    }
+    
+    &.is-active,
+    &.selected,
+    &.is-selected {
+      background: #000000 !important;
+      color: #FFFFFF !important;
+    }
+  }
+}
+
+.theme-deep-space {
+  .el-dropdown-menu,
+  .el-select-dropdown,
+  .el-popover {
+    background: #151921 !important;
+    border: 1px solid #21262D !important;
+  }
+  
+  .el-dropdown-menu__item,
+  .el-select-dropdown__item {
+    color: #B0B3B8 !important;
+    
+    &:hover {
+      background: #1C2128 !important;
+      color: #FFFFFF !important;
+    }
+    
+    &.is-active,
+    &.selected,
+    &.is-selected {
+      color: #2D68FF !important;
+      background: rgba(45, 104, 255, 0.1) !important;
+    }
+  }
+}
+
+.theme-edu-friendly {
+  .el-dropdown-menu,
+  .el-select-dropdown,
+  .el-popover {
+    border-radius: 16px !important;
+    padding: 8px !important;
+  }
+  
+  .el-dropdown-menu__item,
+  .el-select-dropdown__item {
+    border-radius: 10px !important;
+    
+    &:hover {
+      background: rgba(255, 107, 53, 0.1) !important;
+      color: #FF6B35 !important;
+    }
+    
+    &.is-active,
+    &.selected,
+    &.is-selected {
+      background: rgba(255, 107, 53, 0.15) !important;
+      color: #FF6B35 !important;
+    }
+  }
+}
+
+

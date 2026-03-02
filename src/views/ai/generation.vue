@@ -9,7 +9,7 @@
 import { logger } from "@/utils/logger";
 import { ref, computed, onMounted, type Ref } from "vue";
 import { useRoute } from "vue-router";
-import aiRodin from "@/api/v1/ai-rodin";
+import { get as getAiRodin } from "@/api/v1/ai-rodin";
 const route = useRoute();
 
 import type { AiRodinItem } from "@/types/ai-rodin";
@@ -27,7 +27,7 @@ onMounted(async () => {
   if (id.value) {
     try {
       loading.value = true;
-      const response = await aiRodin.get(id.value);
+      const response = await getAiRodin(id.value);
       data.value = response.data;
     } catch (error) {
       logger.error(error);

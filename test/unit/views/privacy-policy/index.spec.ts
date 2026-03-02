@@ -195,4 +195,26 @@ describe("PrivacyPolicy index.vue", () => {
     expect(mockReplace).toHaveBeenCalledTimes(1);
     r.unmount();
   });
+
+  it("has exactly one ElTabs component in the DOM", async () => {
+    const r = await mountIndex();
+    const tabsCount = r.el.querySelectorAll('[data-stub="ElTabs"]').length;
+    expect(tabsCount).toBe(1);
+    r.unmount();
+  });
+
+  it("unknown query tab falls back to showing privacy tab", async () => {
+    const r = await mountIndex("unknown-tab");
+    await flushAll();
+    // activeTab defaults to 'privacy' for unknown values
+    expect(r.el.querySelector('[data-testid="privacy-tab"]')).not.toBeNull();
+    r.unmount();
+  });
+
+  it("router.replace is not called on initial mount without tab-click", async () => {
+    const r = await mountIndex();
+    await flushAll();
+    expect(mockReplace).not.toHaveBeenCalled();
+    r.unmount();
+  });
 });

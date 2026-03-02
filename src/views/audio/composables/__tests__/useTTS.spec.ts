@@ -16,6 +16,7 @@ vi.mock("element-plus", () => ({
     warning: vi.fn(),
     success: vi.fn(),
     error: vi.fn(),
+    info: vi.fn(),
   },
   ElMessageBox: {
     prompt: vi.fn(),
@@ -69,6 +70,18 @@ describe("useTTS", () => {
     checkTextLanguage: vi.fn(),
   });
 
+  it("starts with correct initial state", () => {
+    const props = createProps();
+    const tts = useTTS(props);
+    expect(tts.isLoading.value).toBe(false);
+    expect(tts.isUploading.value).toBe(false);
+    expect(tts.isPlaying.value).toBe(false);
+    expect(tts.audioUrl.value).toBe("");
+    expect(tts.currentAudioBlob.value).toBeNull();
+    expect(tts.highlightedText.value).toBe("");
+    expect(tts.normalText.value).toBe("");
+  });
+
   it("should warn if text is empty on synthesis", async () => {
     const props = createProps();
     props.text.value = "";
@@ -116,5 +129,135 @@ describe("useTTS", () => {
 
     expect(tts.isPlaying.value).toBe(true);
     expect(mockAudio.play).toHaveBeenCalled();
+  });
+
+  it("onAudioPlayerPlay() sets isPlaying to true", () => {
+    const props = createProps();
+    const tts = useTTS(props);
+    tts.onAudioPlayerPlay();
+    expect(tts.isPlaying.value).toBe(true);
+  });
+
+  it("onAudioPlayerPause() is a no-op function", () => {
+    const props = createProps();
+    const tts = useTTS(props);
+    expect(() => tts.onAudioPlayerPause()).not.toThrow();
+  });
+
+  it("onAudioPlayerEnded() resets playing state and updates highlights", () => {
+    const props = createProps();
+    props.text.value = "Hello World";
+    const tts = useTTS(props);
+    tts.isPlaying.value = true;
+    tts.highlightedText.value = "Hello";
+    tts.normalText.value = " World";
+
+    tts.onAudioPlayerEnded();
+
+    expect(tts.isPlaying.value).toBe(false);
+    expect(tts.highlightedText.value).toBe("Hello World");
+    expect(tts.normalText.value).toBe("");
+  });
+
+  it("onTextInput() resets highlight, calls checkTextLanguage, pauses audio", () => {
+    const props = createProps();
+    props.text.value = "New text";
+    const tts = useTTS(props);
+
+    const mockAudio = {
+      pause: vi.fn(),
+      play: vi.fn(),
+      addEventListener: vi.fn(),
+    } as unknown as HTMLAudioElement;
+    tts.audioPlayerRef.value = mockAudio;
+    tts.isPlaying.value = true;
+    tts.highlightedText.value = "old highlighted";
+
+    tts.onTextInput();
+
+    expect(tts.highlightedText.value).toBe("");
+    expect(tts.normalText.value).toBe("New text");
+    expect(tts.isPlaying.value).toBe(false);
+    expect(mockAudio.pause).toHaveBeenCalled();
+    expect(props.checkTextLanguage).toHaveBeenCalled();
+  });
+
+  it("onTextInput() without audio player does not throw", () => {
+    const props = createProps();
+    const tts = useTTS(props);
+    tts.audioPlayerRef.value = null;
+    expect(() => tts.onTextInput()).not.toThrow();
+  });
+
+  it("starts with isManualScrolling and isMouseHovering as false", () => {
+    const props = createProps();
+    const tts = useTTS(props);
+    expect(tts.isManualScrolling.value).toBe(false);
+    expect(tts.isMouseHovering.value).toBe(false);
+  });
+
+  it("starts with audioPlayerRef and textContainerRef as null", () => {
+    const props = createProps();
+    const tts = useTTS(props);
+    expect(tts.audioPlayerRef.value).toBeNull();
+    expect(tts.textContainerRef.value).toBeNull();
+  });
+
+  it("uploadAudio() warns when currentAudioBlob is null", async () => {
+    const { ElMessage } = await import("element-plus");
+    const props = createProps();
+    const tts = useTTS(props);
+    tts.currentAudioBlob.value = null;
+
+    await tts.uploadAudio();
+
+    expect(ElMessage.warning).toHaveBeenCalled();
+  });
+
+  it("uploadAudio() does not set isUploading when blob is null", async () => {
+    const props = createProps();
+    const tts = useTTS(props);
+    tts.currentAudioBlob.value = null;
+
+    await tts.uploadAudio();
+
+    expect(tts.isUploading.value).toBe(false);
+  });
+
+  it("uploadAudio() handles cancel dialog gracefully", async () => {
+    const { ElMessage, ElMessageBox } = await import("element-plus");
+    (ElMessageBox.prompt as ReturnType<typeof vi.fn>).mockRejectedValueOnce("cancel");
+
+    const props = createProps();
+    const tts = useTTS(props);
+    tts.currentAudioBlob.value = new Blob(["audio"], { type: "audio/mp3" });
+
+    await tts.uploadAudio();
+
+    expect(tts.isUploading.value).toBe(false);
+    // info message should be shown for cancel
+    expect(ElMessage.warning).not.toHaveBeenCalled();
+  });
+
+  it("synthesizeSpeech() sets isLoading=false after completion", async () => {
+    const props = createProps();
+    const tts = useTTS(props);
+
+    vi.mocked(axios.post).mockResolvedValueOnce({
+      data: { Audio: "base64content", SessionId: "123" },
+    });
+
+    const mockAudio = {
+      play: vi.fn(),
+      addEventListener: vi.fn(),
+      pause: vi.fn(),
+      currentTime: 0,
+      duration: 10,
+    } as unknown as HTMLAudioElement;
+    tts.audioPlayerRef.value = mockAudio;
+
+    await tts.synthesizeSpeech();
+
+    expect(tts.isLoading.value).toBe(false);
   });
 });

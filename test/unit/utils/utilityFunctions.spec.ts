@@ -126,5 +126,34 @@ describe("utilityFunctions", () => {
       const result = getVideoCover(url);
       expect(result).toMatch(/\?ci-process=snapshot/);
     });
+
+    it("appends snapshot params for .avi URLs", () => {
+      const result = getVideoCover("https://cdn.example.com/clip.avi");
+      expect(result).toContain("ci-process=snapshot");
+    });
+
+    it("returns image URL with different extensions unchanged", () => {
+      expect(getVideoCover("https://example.com/photo.png")).toBe("https://example.com/photo.png");
+      expect(getVideoCover("https://example.com/photo.gif")).toBe("https://example.com/photo.gif");
+    });
+  });
+
+  describe("formatFileSize — additional edge cases", () => {
+    it("should format 1 byte", () => {
+      expect(formatFileSize(1)).toBe("1 B");
+    });
+
+    it("should format 999 bytes as B (not KB)", () => {
+      expect(formatFileSize(999)).toBe("999 B");
+    });
+
+    it("should format 1023 bytes as B (boundary before KB)", () => {
+      expect(formatFileSize(1023)).toBe("1023 B");
+    });
+
+    it("should format 2.5 MB correctly", () => {
+      const result = formatFileSize(1024 * 1024 * 2.5);
+      expect(result).toBe("2.50 MB");
+    });
   });
 });

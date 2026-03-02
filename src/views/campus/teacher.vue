@@ -9,7 +9,7 @@
         @view-change="handleViewChange"
       >
         <template #actions>
-          <el-button type="primary" @click="addTeacher">
+          <el-button type="primary" @click="addMember">
             <font-awesome-icon
               :icon="['fas', 'plus']"
               style="font-size: 18px; margin-right: 4px"
@@ -95,7 +95,7 @@
             :icon="['fas', 'user']"
             :text="$t('manager.ui.noTeachers')"
             :action-text="$t('manager.createTeacher')"
-            @action="addTeacher"
+            @action="addMember"
           ></EmptyState>
         </template>
       </ViewContainer>
@@ -111,7 +111,7 @@
       <DetailPanel
         v-model="detailVisible"
         :title="$t('manager.ui.teacherDetail')"
-        :name="currentTeacher?.user?.nickname || ''"
+        :name="currentMember?.user?.nickname || ''"
         :loading="detailLoading"
         :properties="detailProperties"
         :placeholder-icon="['fas', 'user']"
@@ -125,9 +125,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { Message, MessageBox } from "@/components/Dialog";
 import {
   PageActionBar,
   ViewContainer,
@@ -138,33 +136,10 @@ import {
 } from "@/components/StandardPage";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { getTeachers, deleteTeacher } from "@/api/v1/edu-teacher";
-import { usePageData } from "@/composables/usePageData";
+import { useCampusMemberList } from "@/composables/useCampusMemberList";
 
 const { t } = useI18n();
 
-const {
-  items,
-  loading,
-  pagination,
-  viewMode,
-  totalPages,
-  refresh,
-  handleSearch,
-  handleSortChange,
-  handlePageChange,
-  handleViewChange,
-} = usePageData({
-  fetchFn: async (params) =>
-    await getTeachers(
-      params.sort,
-      params.search,
-      params.page,
-      "user,school,user.avatar"
-    ),
-});
-
-const detailVisible = ref(false);
-const detailLoading = ref(false);
 interface Teacher {
   id: number;
   subject?: string;
@@ -172,86 +147,55 @@ interface Teacher {
   user?: {
     nickname?: string;
     username?: string;
-    avatar?: {
-      url: string;
-    };
+    avatar?: { url: string };
   };
-  school?: {
-    name: string;
-  };
+  school?: { name: string };
 }
 
-const currentTeacher = ref<Teacher | null>(null);
-
-const detailProperties = computed(() => {
-  if (!currentTeacher.value) return [];
-  return [
+const {
+  items,
+  loading,
+  pagination,
+  viewMode,
+  totalPages,
+  detailVisible,
+  detailLoading,
+  currentMember,
+  detailProperties,
+  openDetail,
+  handlePanelClose,
+  addMember,
+  handleDelete,
+  deletedWindow,
+  handleSearch,
+  handleSortChange,
+  handlePageChange,
+  handleViewChange,
+} = useCampusMemberList<Teacher>({
+  fetchFn: async (params) =>
+    await getTeachers(params.sort, params.search, params.page, "user,school,user.avatar"),
+  deleteFn: deleteTeacher,
+  addPendingKey: "manager.ui.inviteTeacherPending",
+  removeConfirmKey: "manager.ui.removeTeacherConfirm",
+  detailPropertiesFn: (item, t) => [
     {
       label: t("manager.ui.teacherName"),
-      value:
-        currentTeacher.value.user?.nickname ||
-        currentTeacher.value.user?.username ||
-        "—",
+      value: item.user?.nickname || item.user?.username || "—",
     },
     {
       label: t("manager.ui.affiliatedSchool"),
-      value: currentTeacher.value.school?.name || "—",
+      value: item.school?.name || "—",
     },
     {
       label: t("manager.teacher.subject"),
-      value: currentTeacher.value.subject || "—",
+      value: item.subject || "—",
     },
     {
       label: t("manager.teacher.phone"),
-      value: currentTeacher.value.phone || "—",
+      value: item.phone || "—",
     },
-  ];
+  ],
 });
-
-const openDetail = (item: Teacher) => {
-  currentTeacher.value = item;
-  detailVisible.value = true;
-};
-
-const handlePanelClose = () => {
-  currentTeacher.value = null;
-};
-
-const addTeacher = () => {
-  Message.info(t("manager.ui.inviteTeacherPending"));
-};
-
-const handleDelete = async () => {
-  if (!currentTeacher.value) return;
-  try {
-    await MessageBox.confirm(
-      t("manager.ui.removeTeacherConfirm"),
-      t("manager.ui.removeConfirmTitle"),
-      {
-        type: "warning",
-      }
-    );
-    await deleteTeacher(currentTeacher.value.id);
-    detailVisible.value = false;
-    refresh();
-    Message.success(t("manager.messages.removeSuccess"));
-  } catch {}
-};
-
-const deletedWindow = async (item: Teacher) => {
-  try {
-    await MessageBox.confirm(
-      t("manager.ui.removeTeacherConfirm"),
-      t("manager.ui.removeConfirmTitle"),
-      {
-        type: "warning",
-      }
-    );
-    await deleteTeacher(item.id);
-    refresh();
-    Message.success(t("manager.messages.removeSuccess"));
-  } catch {}
-};
 </script>
 
 <style scoped lang="scss">

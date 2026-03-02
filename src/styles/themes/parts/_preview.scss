@@ -1,0 +1,960 @@
+/**
+ * 资源预览区域主题适配（各主题）
+ */
+
+// ============================================
+// 资源预览区域主题适配
+// ============================================
+
+// 通用预览窗口基础样式
+.preview-window,
+.image-preview-window,
+.video-preview-window,
+.audio-preview-window {
+  background: var(--bg-hover) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+// 模型动画控制栏
+.control-bar {
+  background: var(--bg-card) !important;
+  border-top: var(--border-width) solid var(--border-color) !important;
+  
+  .play-pause-btn {
+    background: var(--bg-hover) !important;
+    color: var(--text-primary) !important;
+    
+    &:hover {
+      background: var(--primary-light) !important;
+      color: var(--primary-color) !important;
+    }
+  }
+  
+  .animation-label {
+    color: var(--text-muted) !important;
+  }
+  
+  .animation-select {
+    background: var(--bg-card) !important;
+    border: var(--border-width) solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--radius-sm) !important;
+    
+    &:focus {
+      border-color: var(--primary-color) !important;
+      box-shadow: 0 0 0 3px var(--primary-light) !important;
+    }
+    
+    &:hover {
+      border-color: var(--primary-color) !important;
+    }
+  }
+  
+  .time-display {
+    background: var(--bg-hover) !important;
+    border-radius: var(--radius-sm) !important;
+  }
+  
+  .time-text {
+    color: var(--text-primary) !important;
+  }
+  
+  .time-separator {
+    color: var(--text-muted) !important;
+  }
+}
+
+
+// 音频播放控件
+.audio-preview-window {
+  background: linear-gradient(135deg, var(--bg-hover) 0%, var(--bg-active) 100%) !important;
+  
+  .audio-icon-wrapper {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%) !important;
+    box-shadow: 0 8px 32px var(--primary-light) !important;
+  }
+  
+  .audio-name {
+    color: var(--text-primary) !important;
+  }
+}
+
+.audio-player-controls {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: var(--radius-md) !important;
+  
+  .control-btn {
+    background: transparent !important;
+    color: var(--text-secondary) !important;
+    
+    &:hover {
+      background: var(--primary-light) !important;
+      color: var(--primary-color) !important;
+    }
+    
+    &.play-pause {
+      background: var(--primary-color) !important;
+      color: var(--text-inverse) !important;
+      
+      &:hover {
+        background: var(--primary-hover) !important;
+      }
+    }
+  }
+  
+  .time-display {
+    color: var(--text-secondary) !important;
+  }
+  
+  .progress-track {
+    background: rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .progress-fill {
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-hover) 100%) !important;
+  }
+  
+  .progress-thumb {
+    background: var(--primary-color) !important;
+    box-shadow: 0 2px 8px var(--primary-light) !important;
+  }
+}
+
+
+// 视频预览窗口
+.video-preview-window {
+  background: #000000 !important;
+  border-radius: var(--radius-md) !important;
+}
+
+// 图片预览窗口
+.image-preview-window {
+  background: linear-gradient(135deg, var(--bg-hover) 0%, var(--bg-active) 100%) !important;
+  border-radius: var(--radius-md) !important;
+  
+  .preview-placeholder .svg-inline--fa {
+    color: var(--text-muted) !important;
+  }
+}
+
+// 加载遮罩
+.loading-overlay {
+  background: rgba(255, 255, 255, 0.8) !important;
+}
+
+
+// ============================================
+// 赛博科技主题 - 资源预览控件
+// ============================================
+
+.theme-cyber-tech {
+  .preview-window,
+  .image-preview-window {
+    background: linear-gradient(135deg, #0B0E14 0%, #151921 100%) !important;
+    border: 1px solid rgba(0, 242, 255, 0.15) !important;
+  }
+  
+  .loading-overlay {
+    background: rgba(11, 14, 20, 0.9) !important;
+  }
+  
+  .control-bar {
+    background: rgba(11, 14, 20, 0.95) !important;
+    border-top: 1px solid rgba(0, 242, 255, 0.15) !important;
+    backdrop-filter: blur(10px) !important;
+    
+    .play-pause-btn {
+      background: rgba(0, 242, 255, 0.15) !important;
+      color: #00F2FF !important;
+      border: 1px solid rgba(0, 242, 255, 0.3) !important;
+      
+      &:hover {
+        background: rgba(0, 242, 255, 0.25) !important;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.4) !important;
+      }
+    }
+    
+    .animation-label {
+      color: #5A7078 !important;
+    }
+    
+    .animation-select {
+      background: rgba(18, 24, 32, 0.8) !important;
+      border: 1px solid rgba(0, 242, 255, 0.2) !important;
+      color: #E8F4FF !important;
+      
+      &:focus {
+        border-color: #00F2FF !important;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.3) !important;
+      }
+    }
+    
+    .time-display {
+      background: rgba(0, 242, 255, 0.08) !important;
+      border: 1px solid rgba(0, 242, 255, 0.15) !important;
+    }
+    
+    .time-text {
+      color: #00F2FF !important;
+      text-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
+    }
+  }
+
+  
+  .audio-preview-window {
+    background: linear-gradient(135deg, #0B0E14 0%, #151921 100%) !important;
+    border: 1px solid rgba(0, 242, 255, 0.15) !important;
+    
+    .audio-icon-wrapper {
+      background: linear-gradient(135deg, rgba(0, 242, 255, 0.2) 0%, rgba(0, 242, 255, 0.1) 100%) !important;
+      border: 1px solid rgba(0, 242, 255, 0.4) !important;
+      box-shadow: 0 0 30px rgba(0, 242, 255, 0.3), inset 0 0 20px rgba(0, 242, 255, 0.1) !important;
+      
+      .audio-icon {
+        color: #00F2FF !important;
+        text-shadow: 0 0 20px rgba(0, 242, 255, 0.8) !important;
+      }
+      
+      &.playing {
+        animation: cyber-pulse 1.5s ease-in-out infinite !important;
+      }
+    }
+    
+    .audio-name {
+      color: #E8F4FF !important;
+      text-shadow: 0 0 10px rgba(0, 242, 255, 0.3) !important;
+    }
+  }
+  
+  .audio-player-controls {
+    background: rgba(11, 14, 20, 0.9) !important;
+    border: 1px solid rgba(0, 242, 255, 0.2) !important;
+    
+    .control-btn {
+      color: #8BA3AD !important;
+      
+      &:hover {
+        background: rgba(0, 242, 255, 0.15) !important;
+        color: #00F2FF !important;
+      }
+      
+      &.play-pause {
+        background: linear-gradient(135deg, rgba(0, 242, 255, 0.2) 0%, rgba(0, 242, 255, 0.1) 100%) !important;
+        border: 1px solid rgba(0, 242, 255, 0.4) !important;
+        color: #00F2FF !important;
+        box-shadow: 0 0 20px rgba(0, 242, 255, 0.3) !important;
+        
+        &:hover {
+          box-shadow: 0 0 30px rgba(0, 242, 255, 0.5) !important;
+        }
+      }
+    }
+    
+    .time-display {
+      color: #00F2FF !important;
+    }
+    
+    .progress-track {
+      background: rgba(0, 242, 255, 0.1) !important;
+    }
+    
+    .progress-fill {
+      background: linear-gradient(90deg, #00F2FF 0%, #00D4E6 100%) !important;
+      box-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
+    }
+    
+    .progress-thumb {
+      background: #00F2FF !important;
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.6) !important;
+    }
+  }
+}
+
+@keyframes cyber-pulse {
+  0%, 100% { box-shadow: 0 0 30px rgba(0, 242, 255, 0.3), inset 0 0 20px rgba(0, 242, 255, 0.1); }
+  50% { box-shadow: 0 0 50px rgba(0, 242, 255, 0.5), inset 0 0 30px rgba(0, 242, 255, 0.2); }
+}
+
+
+// ============================================
+// 教育友好主题 - 资源预览控件
+// ============================================
+
+.theme-edu-friendly {
+  .preview-window,
+  .image-preview-window {
+    background: linear-gradient(135deg, #FFF8F5 0%, #FFE8DD 100%) !important;
+    border: 2px solid #FFE0CC !important;
+    border-radius: 20px !important;
+  }
+  
+  .loading-overlay {
+    background: rgba(255, 248, 245, 0.9) !important;
+  }
+  
+  .control-bar {
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFF8F5 100%) !important;
+    border-top: 2px solid #FFE0CC !important;
+    border-radius: 0 0 20px 20px !important;
+    
+    .play-pause-btn {
+      background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%) !important;
+      color: white !important;
+      border: none !important;
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3) !important;
+      
+      &:hover {
+        transform: scale(1.1) !important;
+        box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4) !important;
+      }
+    }
+    
+    .animation-label {
+      color: #8B6F5C !important;
+    }
+    
+    .animation-select {
+      background: #FFFFFF !important;
+      border: 2px solid #FFE0CC !important;
+      color: #2D1810 !important;
+      border-radius: 12px !important;
+      
+      &:focus {
+        border-color: #FF6B35 !important;
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15) !important;
+      }
+    }
+    
+    .time-display {
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 183, 71, 0.1) 100%) !important;
+      border-radius: 12px !important;
+    }
+    
+    .time-text {
+      color: #FF6B35 !important;
+    }
+  }
+
+  
+  .audio-preview-window {
+    background: linear-gradient(135deg, #FFF8F5 0%, #FFE8DD 100%) !important;
+    border: 2px solid #FFE0CC !important;
+    border-radius: 20px !important;
+    
+    .audio-icon-wrapper {
+      background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%) !important;
+      box-shadow: 0 8px 24px rgba(255, 107, 53, 0.35) !important;
+      
+      .audio-icon {
+        color: white !important;
+      }
+      
+      &.playing {
+        animation: edu-bounce-ring 1.5s ease-in-out infinite !important;
+      }
+    }
+    
+    .audio-name {
+      color: #2D1810 !important;
+    }
+  }
+  
+  .audio-player-controls {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 2px solid #FFE0CC !important;
+    border-radius: 20px !important;
+    
+    .control-btn {
+      color: #8B6F5C !important;
+      
+      &:hover {
+        background: rgba(255, 107, 53, 0.1) !important;
+        color: #FF6B35 !important;
+      }
+      
+      &.play-pause {
+        background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%) !important;
+        color: white !important;
+        box-shadow: 0 6px 16px rgba(255, 107, 53, 0.35) !important;
+        
+        &:hover {
+          transform: scale(1.08) !important;
+          box-shadow: 0 8px 20px rgba(255, 107, 53, 0.45) !important;
+        }
+      }
+    }
+    
+    .time-display {
+      color: #FF6B35 !important;
+    }
+    
+    .progress-track {
+      background: rgba(255, 107, 53, 0.15) !important;
+      border-radius: 6px !important;
+    }
+    
+    .progress-fill {
+      background: linear-gradient(90deg, #FF6B35 0%, #FFB347 100%) !important;
+      border-radius: 6px !important;
+    }
+    
+    .progress-thumb {
+      background: #FF6B35 !important;
+      box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4) !important;
+    }
+  }
+}
+
+@keyframes edu-bounce-ring {
+  0%, 100% { box-shadow: 0 8px 24px rgba(255, 107, 53, 0.35); transform: scale(1); }
+  50% { box-shadow: 0 12px 32px rgba(255, 107, 53, 0.5); transform: scale(1.05); }
+}
+
+
+// ============================================
+// 新粗犷主义主题 - 资源预览控件
+// ============================================
+
+.theme-neo-brutalism {
+  .preview-window,
+  .image-preview-window {
+    background: #E0F7FF !important;
+    border: 3px solid #000000 !important;
+    border-radius: 8px !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+  }
+  
+  .loading-overlay {
+    background: rgba(255, 255, 255, 0.95) !important;
+  }
+  
+  .control-bar {
+    background: #FFF000 !important;
+    border-top: 3px solid #000000 !important;
+    border-radius: 0 0 8px 8px !important;
+    
+    .play-pause-btn {
+      background: #FFFFFF !important;
+      color: #000000 !important;
+      border: 3px solid #000000 !important;
+      border-radius: 50% !important;
+      box-shadow: 3px 3px 0px #000000 !important;
+      
+      &:hover {
+        transform: translate(-2px, -2px) !important;
+        box-shadow: 5px 5px 0px #000000 !important;
+      }
+    }
+    
+    .animation-label {
+      color: #000000 !important;
+      font-weight: 700 !important;
+      text-transform: uppercase !important;
+    }
+    
+    .animation-select {
+      background: #FFFFFF !important;
+      border: 3px solid #000000 !important;
+      color: #000000 !important;
+      border-radius: 4px !important;
+      box-shadow: 3px 3px 0px #000000 !important;
+      font-weight: 600 !important;
+      
+      &:focus {
+        box-shadow: 5px 5px 0px #000000 !important;
+        transform: translate(-2px, -2px) !important;
+      }
+    }
+    
+    .time-display {
+      background: #FFFFFF !important;
+      border: 2px solid #000000 !important;
+      border-radius: 4px !important;
+    }
+    
+    .time-text {
+      color: #000000 !important;
+      font-weight: 700 !important;
+    }
+  }
+
+  
+  .audio-preview-window {
+    background: #E0F7FF !important;
+    border: 3px solid #000000 !important;
+    border-radius: 8px !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+    
+    .audio-icon-wrapper {
+      background: #FF007A !important;
+      border: 3px solid #000000 !important;
+      box-shadow: 4px 4px 0px #000000 !important;
+      
+      .audio-icon {
+        color: #FFFFFF !important;
+      }
+      
+      &.playing {
+        animation: brutal-shake 0.5s ease-in-out infinite !important;
+      }
+    }
+    
+    .audio-name {
+      color: #000000 !important;
+      font-weight: 900 !important;
+      text-transform: uppercase !important;
+    }
+  }
+  
+  .audio-player-controls {
+    background: #FFF000 !important;
+    border: 3px solid #000000 !important;
+    border-radius: 8px !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+    
+    .control-btn {
+      color: #000000 !important;
+      border: 2px solid transparent !important;
+      
+      &:hover {
+        background: #FFFFFF !important;
+        border-color: #000000 !important;
+      }
+      
+      &.play-pause {
+        background: #00FF88 !important;
+        color: #000000 !important;
+        border: 3px solid #000000 !important;
+        box-shadow: 3px 3px 0px #000000 !important;
+        
+        &:hover {
+          transform: translate(-2px, -2px) !important;
+          box-shadow: 5px 5px 0px #000000 !important;
+        }
+      }
+    }
+    
+    .time-display {
+      color: #000000 !important;
+      font-weight: 700 !important;
+    }
+    
+    .progress-track {
+      background: #FFFFFF !important;
+      border: 2px solid #000000 !important;
+      border-radius: 0 !important;
+    }
+    
+    .progress-fill {
+      background: #00FF88 !important;
+      border-radius: 0 !important;
+    }
+    
+    .progress-thumb {
+      background: #000000 !important;
+      border-radius: 0 !important;
+      width: 16px !important;
+      height: 16px !important;
+      box-shadow: none !important;
+    }
+  }
+}
+
+@keyframes brutal-shake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
+}
+
+
+// ============================================
+// 极简纯净主题 - 资源预览控件
+// ============================================
+
+.theme-minimal-pure {
+  .preview-window,
+  .image-preview-window {
+    background: #fafafa !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 0 !important;
+  }
+  
+  .loading-overlay {
+    background: rgba(255, 255, 255, 0.95) !important;
+  }
+  
+  .control-bar {
+    background: #ffffff !important;
+    border-top: 1px solid #e0e0e0 !important;
+    border-radius: 0 !important;
+    
+    .play-pause-btn {
+      background: #fafafa !important;
+      color: #000000 !important;
+      border: 1px solid #e0e0e0 !important;
+      border-radius: 0 !important;
+      
+      &:hover {
+        background: #000000 !important;
+        color: #ffffff !important;
+        border-color: #000000 !important;
+      }
+    }
+    
+    .animation-label {
+      color: #666666 !important;
+    }
+    
+    .animation-select {
+      background: #ffffff !important;
+      border: 1px solid #e0e0e0 !important;
+      color: #000000 !important;
+      border-radius: 0 !important;
+      
+      &:focus {
+        border-color: #000000 !important;
+        box-shadow: none !important;
+        border-width: 2px !important;
+      }
+    }
+    
+    .time-display {
+      background: #fafafa !important;
+      border-radius: 0 !important;
+    }
+    
+    .time-text {
+      color: #000000 !important;
+    }
+  }
+
+  
+  .audio-preview-window {
+    background: #fafafa !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 0 !important;
+    
+    .audio-icon-wrapper {
+      background: #000000 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      
+      .audio-icon {
+        color: #ffffff !important;
+      }
+    }
+    
+    .audio-name {
+      color: #000000 !important;
+      font-weight: 500 !important;
+    }
+  }
+  
+  .audio-player-controls {
+    background: #ffffff !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    
+    .control-btn {
+      color: #666666 !important;
+      border-radius: 0 !important;
+      
+      &:hover {
+        background: #fafafa !important;
+        color: #000000 !important;
+      }
+      
+      &.play-pause {
+        background: #000000 !important;
+        color: #ffffff !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        
+        &:hover {
+          background: #333333 !important;
+          transform: none !important;
+        }
+      }
+    }
+    
+    .time-display {
+      color: #666666 !important;
+    }
+    
+    .progress-track {
+      background: #e0e0e0 !important;
+      border-radius: 0 !important;
+    }
+    
+    .progress-fill {
+      background: #000000 !important;
+      border-radius: 0 !important;
+    }
+    
+    .progress-thumb {
+      background: #000000 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+  }
+}
+
+
+// ============================================
+// 深空专业暗黑主题 - 资源预览控件
+// ============================================
+
+.theme-deep-space {
+  .preview-window,
+  .image-preview-window {
+    background: linear-gradient(135deg, #11141B 0%, #151921 100%) !important;
+    border: 1px solid #21262D !important;
+  }
+  
+  .loading-overlay {
+    background: rgba(21, 25, 33, 0.95) !important;
+  }
+  
+  .control-bar {
+    background: #151921 !important;
+    border-top: 1px solid #21262D !important;
+    
+    .play-pause-btn {
+      background: #21262D !important;
+      color: #B0B3B8 !important;
+      border: 1px solid #30363D !important;
+      
+      &:hover {
+        background: rgba(45, 104, 255, 0.15) !important;
+        color: #2D68FF !important;
+        border-color: #2D68FF !important;
+      }
+    }
+    
+    .animation-label {
+      color: #63676D !important;
+    }
+    
+    .animation-select {
+      background: #21262D !important;
+      border: 1px solid #30363D !important;
+      color: #E6EDF3 !important;
+      
+      &:focus {
+        border-color: #2D68FF !important;
+        box-shadow: 0 0 0 3px rgba(45, 104, 255, 0.2) !important;
+      }
+    }
+    
+    .time-display {
+      background: #21262D !important;
+      border: 1px solid #30363D !important;
+    }
+    
+    .time-text {
+      color: #E6EDF3 !important;
+    }
+    
+    .time-separator {
+      color: #63676D !important;
+    }
+  }
+
+  
+  .audio-preview-window {
+    background: linear-gradient(135deg, #11141B 0%, #151921 100%) !important;
+    border: 1px solid #21262D !important;
+    
+    .audio-icon-wrapper {
+      background: linear-gradient(135deg, #1A3D8F 0%, #2D68FF 100%) !important;
+      box-shadow: 0 8px 32px rgba(45, 104, 255, 0.3) !important;
+      
+      .audio-icon {
+        color: #FFFFFF !important;
+      }
+      
+      &.playing {
+        animation: deep-space-pulse 1.5s ease-in-out infinite !important;
+      }
+    }
+    
+    .audio-name {
+      color: #E6EDF3 !important;
+    }
+  }
+  
+  .audio-player-controls {
+    background: rgba(21, 25, 33, 0.95) !important;
+    border: 1px solid #21262D !important;
+    
+    .control-btn {
+      color: #8B949E !important;
+      
+      &:hover {
+        background: rgba(45, 104, 255, 0.1) !important;
+        color: #2D68FF !important;
+      }
+      
+      &.play-pause {
+        background: linear-gradient(135deg, #1A3D8F 0%, #2D68FF 100%) !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 0 20px rgba(45, 104, 255, 0.3) !important;
+        
+        &:hover {
+          box-shadow: 0 0 30px rgba(45, 104, 255, 0.5) !important;
+        }
+      }
+    }
+    
+    .time-display {
+      color: #B0B3B8 !important;
+    }
+    
+    .progress-track {
+      background: #21262D !important;
+    }
+    
+    .progress-fill {
+      background: linear-gradient(90deg, #1A3D8F 0%, #2D68FF 100%) !important;
+    }
+    
+    .progress-thumb {
+      background: #2D68FF !important;
+      box-shadow: 0 0 10px rgba(45, 104, 255, 0.5) !important;
+    }
+  }
+}
+
+@keyframes deep-space-pulse {
+  0%, 100% { box-shadow: 0 8px 32px rgba(45, 104, 255, 0.3); }
+  50% { box-shadow: 0 8px 48px rgba(45, 104, 255, 0.5); }
+}
+
+
+// ============================================
+// 现代蓝主题 - 资源预览控件（默认/日间模式）
+// ============================================
+
+.theme-modern-blue {
+  .preview-window,
+  .image-preview-window {
+    background: var(--bg-page-gradient, linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%)) !important;
+    border-radius: var(--radius-sm, 12px) !important;
+  }
+  
+  .loading-overlay {
+    background: rgba(255, 255, 255, 0.9) !important;
+  }
+  
+  .control-bar {
+    background: var(--bg-hover, #f8fafc) !important;
+    border-top: 1px solid var(--border-color, #e2e8f0) !important;
+    
+    .play-pause-btn {
+      background: var(--bg-active, #f1f5f9) !important;
+      color: var(--text-primary, #1e293b) !important;
+      
+      &:hover {
+        background: var(--primary-light, rgba(0, 186, 255, 0.1)) !important;
+        color: var(--primary-color, #00BAFF) !important;
+      }
+    }
+    
+    .animation-label {
+      color: var(--text-muted, #94a3b8) !important;
+    }
+    
+    .animation-select {
+      background: var(--bg-card, #ffffff) !important;
+      border: 1px solid var(--border-color, #e2e8f0) !important;
+      color: var(--text-primary, #1e293b) !important;
+      
+      &:focus {
+        border-color: var(--primary-color, #00BAFF) !important;
+        box-shadow: 0 0 0 3px var(--primary-light, rgba(0, 186, 255, 0.1)) !important;
+      }
+      
+      &:hover {
+        border-color: var(--primary-color, #00BAFF) !important;
+      }
+    }
+    
+    .time-display {
+      background: var(--bg-active, #f1f5f9) !important;
+    }
+    
+    .time-text {
+      color: var(--text-primary, #1e293b) !important;
+    }
+    
+    .time-separator {
+      color: var(--text-muted, #94a3b8) !important;
+    }
+  }
+
+  
+  .audio-preview-window {
+    background: var(--bg-page-gradient, linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)) !important;
+    
+    .audio-icon-wrapper {
+      background: var(--primary-gradient, linear-gradient(135deg, #00BAFF 0%, #0099DD 100%)) !important;
+      box-shadow: var(--shadow-primary, 0 8px 32px rgba(0, 186, 255, 0.3)) !important;
+      
+      .audio-icon {
+        color: var(--text-inverse, white) !important;
+      }
+    }
+    
+    .audio-name {
+      color: var(--text-primary, #1e293b) !important;
+    }
+  }
+  
+  .audio-player-controls {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px) !important;
+    border-radius: var(--radius-md, 16px) !important;
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(0, 0, 0, 0.08)) !important;
+    
+    .control-btn {
+      color: var(--text-secondary, #64748b) !important;
+      
+      &:hover {
+        background: var(--primary-light, rgba(0, 186, 255, 0.1)) !important;
+        color: var(--primary-color, #00BAFF) !important;
+      }
+      
+      &.play-pause {
+        background: var(--primary-gradient, linear-gradient(135deg, #00BAFF 0%, #0099DD 100%)) !important;
+        color: var(--text-inverse, white) !important;
+        box-shadow: var(--shadow-primary, 0 4px 16px rgba(0, 186, 255, 0.35)) !important;
+        
+        &:hover {
+          filter: brightness(1.1);
+          transform: scale(1.05) !important;
+        }
+      }
+    }
+    
+    .time-display {
+      color: var(--text-secondary, #64748b) !important;
+    }
+    
+    .progress-track {
+      background: rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .progress-fill {
+      background: var(--primary-gradient, linear-gradient(90deg, #00BAFF 0%, #0099DD 100%)) !important;
+    }
+    
+    .progress-thumb {
+      background: var(--primary-color, #00BAFF) !important;
+      box-shadow: var(--shadow-primary, 0 2px 8px rgba(0, 186, 255, 0.4)) !important;
+    }
+  }
+}
+
+

@@ -112,6 +112,39 @@ describe("Prefab API", () => {
         expect.objectContaining({ url: "/v1/prefabs/8", method: "delete" })
       );
     });
+
+    it("uses the correct ID in the DELETE URL", async () => {
+      await prefabApi.deletePrefab(42);
+      expect(request.mock.calls[0][0].url).toBe("/v1/prefabs/42");
+    });
+  });
+
+  describe("getPrefab() — different IDs", () => {
+    it("different IDs produce different URLs", async () => {
+      await prefabApi.getPrefab(1);
+      const url1: string = request.mock.calls[0][0].url;
+      vi.clearAllMocks();
+      await prefabApi.getPrefab(2);
+      const url2: string = request.mock.calls[0][0].url;
+      expect(url1).not.toBe(url2);
+    });
+  });
+
+  describe("getPrefabs() — default expand", () => {
+    it("includes image in expand by default", async () => {
+      await prefabApi.getPrefabs();
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).toContain("expand=image");
+    });
+  });
+
+  describe("postPrefab() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 10, title: "New Prefab" } };
+      request.mockResolvedValue(mockResp);
+      const result = await prefabApi.postPrefab({ title: "New Prefab" } as Parameters<typeof prefabApi.postPrefab>[0]);
+      expect(result).toEqual(mockResp);
+    });
   });
 });
 
@@ -156,6 +189,19 @@ describe("Tags API", () => {
     const url: string = request.mock.calls[0][0].url;
     expect(url).toContain("prefab");
   });
+
+  it("returns the request result", async () => {
+    const mockResp = { data: [{ id: 1, name: "Scene" }] };
+    request.mockResolvedValue(mockResp);
+    const result = await tagsApi.getTags("scene");
+    expect(result).toEqual(mockResp);
+  });
+
+  it("omits TagsSearch when type is undefined", async () => {
+    await tagsApi.getTags(undefined);
+    const url: string = request.mock.calls[0][0].url;
+    expect(url).not.toContain("TagsSearch");
+  });
 });
 
 // ============================================================
@@ -185,5 +231,19 @@ describe("Site API", () => {
         data: payload,
       })
     );
+  });
+
+  it("returns the request result", async () => {
+    const mockResp = { data: { user: { id: 1 } } };
+    request.mockResolvedValue(mockResp);
+    const payload = { identityToken: "tok", authorizationCode: "code" };
+    const result = await PostSiteAppleId(payload as Parameters<typeof PostSiteAppleId>[0]);
+    expect(result).toEqual(mockResp);
+  });
+
+  it("sends the payload data in the request body", async () => {
+    const payload = { identityToken: "abc123", authorizationCode: "xyz" };
+    await PostSiteAppleId(payload as Parameters<typeof PostSiteAppleId>[0]);
+    expect(request.mock.calls[0][0].data).toEqual(payload);
   });
 });

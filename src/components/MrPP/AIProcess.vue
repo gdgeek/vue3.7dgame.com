@@ -70,7 +70,13 @@
 </template>
 
 <script setup lang="ts">
-import AiRodin from "@/api/v1/ai-rodin";
+import {
+  rodin as rodinApi,
+  check as checkRodinApi,
+  schedule as calcSchedule,
+  download as downloadRodinApi,
+  file as aiFile,
+} from "@/api/v1/ai-rodin";
 import { sleep } from "@/assets/js/helper";
 import { getPicture } from "@/api/v1/resources/index";
 import { useRouter } from "vue-router";
@@ -108,7 +114,7 @@ const rodin = async (step: number): Promise<AiRodinItem> => {
   progress.value.title = "AI Generating";
   let data: AiRodinItem = props.data;
   if (step === 1) {
-    const response = await AiRodin.rodin({
+    const response = await rodinApi({
       id: data.id,
     });
     data = response.data as AiRodinItem;
@@ -117,23 +123,23 @@ const rodin = async (step: number): Promise<AiRodinItem> => {
   if (step <= 3) {
     let schedule = 0;
     do {
-      const response2 = await AiRodin.check(data.id);
+      const response2 = await checkRodinApi(data.id);
       //console.log(response2.data.check);
       const jobs = Array.isArray(response2.data?.check?.jobs)
         ? (response2.data.check.jobs as AiJob[])
         : [];
-      schedule = AiRodin.schedule(jobs);
+      schedule = calcSchedule(jobs);
       progress.value.percentage = 10 + 70 * schedule;
       if (schedule !== 1) {
         await sleep(10000);
       }
     } while (schedule !== 1);
     progress.value.percentage = 80;
-    await AiRodin.download(data.id);
+    await downloadRodinApi(data.id);
   }
   progress.value.percentage = 90;
   if (step <= 4) {
-    const response4 = await AiRodin.file(data.id);
+    const response4 = await aiFile(data.id);
     progress.value.percentage = 100;
     return response4.data as AiRodinItem;
   }

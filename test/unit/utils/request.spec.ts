@@ -47,7 +47,7 @@ vi.mock("element-plus", () => ({
 }));
 
 vi.mock("@/api/v1/auth", () => ({
-  default: { refresh: vi.fn() },
+  refresh: vi.fn(),
 }));
 
 vi.mock("@/environment", () => ({
@@ -153,7 +153,7 @@ describe("request interceptor logic", () => {
 
   it("refreshes token when token is expiring soon (within 5 minutes)", async () => {
     const Token = (await import("@/store/modules/token")).default;
-    const AuthAPI = (await import("@/api/v1/auth")).default;
+    const AuthAPI = await import("@/api/v1/auth");
     // Token expiring in 2 minutes (< 5 minutes → expiring soon)
     const expiringToken = {
       accessToken: "old-token",
@@ -189,7 +189,7 @@ describe("request interceptor logic", () => {
 
   it("handles token refresh failure by calling handleUnauthorized", async () => {
     const Token = (await import("@/store/modules/token")).default;
-    const AuthAPI = (await import("@/api/v1/auth")).default;
+    const AuthAPI = await import("@/api/v1/auth");
     const expiringToken = {
       accessToken: "old-token",
       refreshToken: "refresh-token",
@@ -209,7 +209,7 @@ describe("request interceptor logic", () => {
 
   it("skips token refresh for whitelisted URLs", async () => {
     const Token = (await import("@/store/modules/token")).default;
-    const AuthAPI = (await import("@/api/v1/auth")).default;
+    const AuthAPI = await import("@/api/v1/auth");
     const expiringToken = {
       accessToken: "old-token",
       refreshToken: "refresh-token",

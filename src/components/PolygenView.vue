@@ -53,14 +53,13 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, onUnmounted } from "vue";
 import { useDark } from "@vueuse/core";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader.js"; // ★ 新增
-import ElementResizeDetector from "element-resize-detector";
 import { convertToHttps } from "@/assets/js/helper";
 
 // 将Vector3的坐标值固定到小数点后n位
@@ -105,6 +104,7 @@ const animationProgress = ref(0); // 动画进度（百分比）
 const currentAnimationTime = ref(0); // 当前动画时间（秒）
 const totalAnimationDuration = ref(0); // 总动画时长（秒）
 let currentAction: THREE.AnimationAction | null = null; // 当前播放的动画
+let resizeObserver: ResizeObserver | null = null;
 
 const isDark = useDark();
 
@@ -338,8 +338,7 @@ onMounted(() => {
     // 保持适量环境光
     scene.add(new THREE.AmbientLight(0xffffff, 1.2));
 
-    const erd = new ElementResizeDetector();
-    erd.listenTo(content, () => {
+    resizeObserver = new ResizeObserver(() => {
       if (!sleep && renderer && camera) {
         const width = content.clientWidth;
         const height = content.clientHeight;
@@ -348,6 +347,7 @@ onMounted(() => {
         camera.updateProjectionMatrix();
       }
     });
+    resizeObserver.observe(content);
 
     const animate = () => {
       if (!renderer || !camera) {
@@ -401,6 +401,10 @@ onMounted(() => {
     animate();
     refresh();
   }
+});
+
+onUnmounted(() => {
+  resizeObserver?.disconnect();
 });
 </script>
 

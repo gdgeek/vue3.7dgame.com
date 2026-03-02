@@ -8,7 +8,7 @@ vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 
 describe("Password API", () => {
   let request: ReturnType<typeof vi.fn>;
-  let passwordApi: typeof import("@/api/v1/password").default;
+  let passwordApi: typeof import("@/api/v1/password");
   const base = env.email_api;
 
   beforeEach(async () => {
@@ -16,7 +16,7 @@ describe("Password API", () => {
     request = (await import("@/utils/request")).default as ReturnType<
       typeof vi.fn
     >;
-    passwordApi = (await import("@/api/v1/password")).default;
+    passwordApi = await import("@/api/v1/password");
   });
 
   // -----------------------------------------------------------------------
@@ -113,6 +113,26 @@ describe("Password API", () => {
       request.mockResolvedValue({ data: mockData });
       const result = await passwordApi.changePassword("a", "b", "b");
       expect(result).toEqual(mockData);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Additional edge cases
+  // -----------------------------------------------------------------------
+  describe("resetPasswordByCode() — returns data", () => {
+    it("returns response data", async () => {
+      const payload = { success: true, message: "reset" };
+      request.mockResolvedValue({ data: payload });
+      const result = await passwordApi.resetPasswordByCode("u@e.com", "1234", "newP");
+      expect(result).toEqual(payload);
+    });
+  });
+
+  describe("verifyResetCode() — uses provided code", () => {
+    it("sends the exact code provided", async () => {
+      request.mockResolvedValue({ data: {} });
+      await passwordApi.verifyResetCode("u@e.com", "999888");
+      expect(request.mock.calls[0][0].data.code).toBe("999888");
     });
   });
 });

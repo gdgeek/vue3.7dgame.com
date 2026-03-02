@@ -139,7 +139,7 @@ describe("VpMap API", () => {
 // ============================================================
 describe("Wechat API", () => {
   let request: ReturnType<typeof vi.fn>;
-  let wechatApi: typeof import("@/api/v1/wechat").default;
+  let wechatApi: typeof import("@/api/v1/wechat");
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -147,7 +147,7 @@ describe("Wechat API", () => {
       typeof vi.fn
     >;
     request.mockResolvedValue({ data: {} });
-    wechatApi = (await import("@/api/v1/wechat")).default;
+    wechatApi = await import("@/api/v1/wechat");
   });
 
   it("login calls POST /v1/wechat/login", async () => {
@@ -209,7 +209,7 @@ describe("Tools API", () => {
 // ai-rodin: schedule() pure function
 // ============================================================
 describe("AiRodin — schedule() pure function", () => {
-  let aiRodinApi: typeof import("@/api/v1/ai-rodin").default;
+  let aiRodinApi: typeof import("@/api/v1/ai-rodin");
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -217,7 +217,7 @@ describe("AiRodin — schedule() pure function", () => {
       typeof vi.fn
     >;
     request.mockResolvedValue({ data: {} });
-    aiRodinApi = (await import("@/api/v1/ai-rodin")).default;
+    aiRodinApi = await import("@/api/v1/ai-rodin");
   });
 
   it("returns 0 for empty job list", () => {
@@ -282,7 +282,7 @@ describe("AiRodin — schedule() pure function", () => {
 // ============================================================
 describe("AiRodin API — HTTP methods", () => {
   let request: ReturnType<typeof vi.fn>;
-  let aiRodinApi: typeof import("@/api/v1/ai-rodin").default;
+  let aiRodinApi: typeof import("@/api/v1/ai-rodin");
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -290,7 +290,7 @@ describe("AiRodin API — HTTP methods", () => {
       typeof vi.fn
     >;
     request.mockResolvedValue({ data: {} });
-    aiRodinApi = (await import("@/api/v1/ai-rodin")).default;
+    aiRodinApi = await import("@/api/v1/ai-rodin");
   });
 
   it("get() calls GET /v1/ai-rodin/{id}", async () => {

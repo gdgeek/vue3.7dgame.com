@@ -66,11 +66,9 @@
 MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialog（250行→175行）均已重构。
 `ResourceDialog.vue` 使用略不同的独立 refs 风格，暂未重构，可后续跟进。
 
-#### 4. CSS 主题文件拆分（`theme-styles.scss` 9648 行）⏳ 待处理
-- **位置**：`src/styles/themes/theme-styles.scss`
-- **状态**：2026-02-27 确认仍为 9648 行，未处理
-- **建议**：按路由模块拆分，配合 Vite CSS code splitting 按需加载
-- **预计收益**：初始 CSS 减少 30–40%，改动量较大，需完整回归测试
+#### ~~4. CSS 主题文件拆分（`theme-styles.scss` 9648 行）~~ ✅ 已完成（2026-02-28）
+- 按语义拆分为 14 个分块文件，存放于 `src/styles/themes/parts/`
+- 主入口 `theme-styles.scss` 改写为 `@use` 汇总导入文件，构建验证通过
 
 #### 5. `element-plus/dist/index.css` 全量样式⏳ 待处理
 - **位置**：`src/main.ts` 第 84 行
@@ -132,20 +130,18 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 #### ~~13. 全局错误处理缺失~~ ✅ 已完成（2026-02-27）
 - 已在 `src/main.ts` 添加 `app.config.errorHandler` 和 `unhandledrejection` 监听，使用 `logger.error` 输出
 
-#### 14. 路由布局组件未懒加载
-- **问题**：`Structure`、`SimpleStructure`、`Empty` 等布局组件在路由文件顶部静态 import，会打入主 bundle
-- **涉及文件**：`campus.ts`（SimpleStructure）、`home.ts`（Structure、Empty）、`verse.ts`（null 组件待查）
-- **说明**：布局组件由于所有路由共用，懒加载收益有限，但应记录并评估
+#### ~~14. 路由布局组件未懒加载~~ ⏭ 不存在（2026-02-28）
+- 实测：`campus.ts`、`home.ts` 均已使用 `const X = () => import(...)` 形式懒加载，描述有误，无需处理
 
-#### 15. `src/store/modules/availableVoices.ts`（1311 行）纯数据文件
-- **问题**：1311 行的 TS 文件，全部是静态数据（音色列表映射），被打入主 bundle
-- **建议**：转为 JSON 文件，在需要时异步 `import()`，或使用 Vite 的 `?raw` 导入
-- **预计收益**：主 bundle 减少约 30–50 KB
+#### ~~15. `src/store/modules/availableVoices.ts`（1311 行）纯数据文件~~ ⏭ 不适用（2026-02-28）
+- 实测：`availableVoices` 经由 `import.meta.glob("../../views/**/**.vue")` 的懒加载链路（`tts.vue`），数据并不在主 bundle 中
+- 情感数据 i18n 已在 #30 中完成；JSON 外置无额外收益
 
-#### 16. `highlight.js` 版本过旧（^10.7.3）
-- **问题**：10.x 是 2021 年版本，11.x/12.x 已发布多年，旧版有已知 ReDoS 漏洞
-- **操作**：`pnpm update highlight.js vue-hljs`，检查 API 兼容性
-- **参考**：highlight.js v11+ 不再包含自动检测（`highlightAuto`），需调整用法
+#### ~~16. `highlight.js` 版本过旧（^10.7.3）~~ ✅ 已完成（2026-02-28）
+- 升级 `highlight.js` `^10.7.3` → `^11.11.1`，修复已知 ReDoS 漏洞
+- 移除未使用的 `vue-hljs@3.0.1` 依赖及其 `src/typings/vue-hljs.d.ts` 类型声明
+- API 完全兼容（`registerLanguage`、`highlightElement` 在 v11 接口不变）
+- 类型检查通过，无回归
 
 #### 17. 主要 views 完全没有测试
 以下大型功能模块行数超过 1000 行但零测试覆盖：
@@ -163,10 +159,11 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 
 ### 🟢 低优先级
 
-#### 18. `aos` 动画库仅在 `web/` 使用
-- **现状**：`aos` 在 `bbs.vue` 和 `buy.vue` 中使用，每次都重新 `import "aos/dist/aos.css"`
-- **建议**：将 `aos` 加入 Vite `manualChunks`，避免重复打包；或评估是否用 CSS animation 替代
-- **体积**：`aos` 约 6KB gzip
+#### ~~18. `aos` 动画库仅在 `web/` 使用~~ ✅ 已完成（2026-02-28）
+- 创建 `src/composables/useAOS.ts`，集中 CSS import 和 `AOS.init()` 调用
+- 移除 8 个文件（5 个路由视图 + 3 个组件）中的重复 `import AOS / import "aos/dist/aos.css"`
+- `vite.config.ts` manualChunks 新增 `'aos': ['aos']`，确保 AOS JS 在共享 chunk 中不重复打包
+- 各有差异配置的组件（`Buy.vue`、`News/index.vue`）保留各自的 options 参数
 
 #### 19. `src/views/web/` 组件无国际化
 - **问题**：落地页（Hero.vue、News/index.vue 等）包含大量硬编码中文内容
@@ -210,32 +207,35 @@ MetaDialog（290行→195行）、PrefabDialog（308行→210行）、VerseDialo
 
 ### 🟡 新增中优先级（来自深度扫描）
 
-#### 25. campus/teacher.vue 与 campus/student.vue 高度重复
-- **行数**：325 + 325 = 650 行，结构 90% 相同（仅 API 端点和字段不同）
-- **建议**：抽取 `useCampusMemberList` composable，两个文件变为 <100 行的薄包装
+#### ~~25. campus/teacher.vue 与 campus/student.vue 高度重复~~ ✅ 已完成（2026-02-28）
+- 新建 `src/composables/useCampusMemberList.ts`，提取分页、详情面板、删除确认共有逻辑
+- teacher.vue 和 student.vue 脚本部分从 ~130 行各减至 ~50 行，模板/样式保持各自差异
 
-#### 26. API 层导出风格不一致
-- **问题**：约 30% 的 API 文件使用 `export default { ... }` 对象，70% 使用 `export const` 函数
-- **不一致文件**：`src/api/v1/user.ts`、`src/api/auth/wechat.ts`、`src/api/user/server.ts`、`src/api/v1/email.ts`
-- **影响**：IDE 自动导入、tree-shaking 效果、代码风格一致性
-- **建议**：统一改为 `export const` 具名导出
+#### ~~26. API 层导出风格不一致~~ ✅ 已完成（2026-02-28）
+- 实际涉及 11 个文件（非原记录的 4 个）：`v1/ai-rodin`、`v1/auth`、`v1/wechat`、`v1/user`、`v1/files`、`v1/group`、`v1/password`、`v1/email`、`domain-query`（+ `menu/index`、`user/index` 保留 class 风格）
+- **Group A（删除冗余 export default）**：files/group/password/email/domain-query —— 调用方已使用具名导入，直接移除
+- **Group B（转换 + 更新调用方）**：ai-rodin（4 个调用方）、auth（3 个调用方）、wechat（3 个调用方）、user（1 个调用方）
+- 命名冲突使用别名解决（如 `rodinApi`、`authLogin`、`fetchUserInfo` 等）
 
-#### 27. `helper.ts` 与 `utilityFunctions.ts` 功能可能重叠
-- **文件**：`src/utils/helper.ts`（58 行）和 `src/utils/utilityFunctions.ts`（78 行）
-- **建议**：检查是否有功能重复，合并为单一文件（例如 `src/utils/helpers.ts`）
+#### ~~27. `helper.ts` 与 `utilityFunctions.ts` 功能可能重叠~~ ⏭ 评估后跳过（2026-02-28）
+- 两个文件职责完全不同：`helper.ts` 处理 URL/IP/Domain 操作，`utilityFunctions.ts` 处理日期格式化/文件大小/视频封面
+- 无功能重叠，无需合并
 
 #### ~~28. `rollup-plugin-visualizer` 与 `vite-plugin-visualizer` 重复引入~~ ✅ 不存在
 - 2026-02-27 核查：项目只有 `rollup-plugin-visualizer`（在 vite.config.ts 中正常使用），无重复，无需处理
 
-#### 29. `element-resize-detector` 已停止维护
-- **版本**：^1.2.4（最后更新 2021 年）
-- **建议**：替换为原生 `ResizeObserver` API（现代浏览器均已支持），或使用 `@vueuse/core` 的 `useResizeObserver`
+#### ~~29. `element-resize-detector` 已停止维护~~ ✅ 已完成（2026-02-28）
+- **替换**：`PolygenView.vue` 和 `Voxel.vue` 的 `ElementResizeDetector` → 原生 `ResizeObserver`
+- **改进**：新增 `onUnmounted` 钩子调用 `resizeObserver.disconnect()`（原代码无清理逻辑）
+- **删除**：`src/typings/element-resize-detector.d.ts` 类型声明文件及 npm 包
 
-#### 30. `availableVoices.ts` 中文情感数据未国际化
-- **文件**：`src/store/modules/availableVoices.ts`（1311 行）
-- **问题**：情感名称（"悲伤"、"高兴"、"生气" 等）硬编码中文，`emotionMap` 作为显示用字符串
-- **建议**：将中文 key 移至 `src/lang/` 翻译文件，`emotionMap` 仅存储英文 key → API 参数的映射
-- **顺带**：评估能否将纯数据转为 JSON 文件按需加载，减少主 bundle 体积
+#### ~~30. `availableVoices.ts` 中文情感数据未国际化~~ ✅ 已完成（2026-02-28）
+- 将 `availableVoices` 数组中所有 `emotions` 值从中文（`"悲伤"`）改为英文 API 参数（`"sad"`）
+- 删除 `emotionMap` 和 `reverseEmotionMap`（不再需要中文↔英文转换）
+- 新增 `tts.emotions.*` 翻译键至全部 5 个语言文件（zh-CN、en-US、zh-TW、ja-JP、th-TH）
+- `VoiceSelector.vue` 改为 `$t('tts.emotions.' + emotion)` 展示本地化情感名称
+- `useTTS.ts` 直接传 `emotionCategory.value` 给 API，无需 `emotionMap` 查表
+- **附注**：`availableVoices` 数据已在懒加载路由 chunk 中，非主 bundle，JSON 外置无额外收益
 
 ---
 

@@ -61,6 +61,17 @@ describe("wp axios instance", () => {
     expect(mockAxiosInstance.interceptors.response.use).toHaveBeenCalled();
     expect(service).toBe(mockAxiosInstance);
   });
+
+  it("calls axios.create to create the instance", async () => {
+    const axios = await import("axios");
+    await import("@/utils/wp");
+    expect(axios.default.create).toHaveBeenCalled();
+  });
+
+  it("exports the same instance that axios.create returns", async () => {
+    const { default: service } = await import("@/utils/wp");
+    expect(service).toBe(mockAxiosInstance);
+  });
 });
 
 describe("wp request interceptor", () => {

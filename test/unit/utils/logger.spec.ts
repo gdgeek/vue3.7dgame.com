@@ -145,4 +145,55 @@ describe("createLogger / Logger", () => {
       expect(consoleSpy.error).toHaveBeenCalledWith("", "context", obj);
     });
   });
+
+  // -----------------------------------------------------------------------
+  // createLogger — returns an object with all required methods
+  // -----------------------------------------------------------------------
+  describe("createLogger — returns full interface", () => {
+    it("returns an object with log, warn, error, info, debug methods", async () => {
+      const { createLogger } = await import("@/utils/logger");
+      const l = createLogger("TEST");
+      expect(typeof l.log).toBe("function");
+      expect(typeof l.warn).toBe("function");
+      expect(typeof l.error).toBe("function");
+      expect(typeof l.info).toBe("function");
+      expect(typeof l.debug).toBe("function");
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Multiple error calls are independently tracked
+  // -----------------------------------------------------------------------
+  describe("multiple error calls", () => {
+    it("each error() call increments call count", async () => {
+      const { logger } = await import("@/utils/logger");
+      logger.error("first");
+      logger.error("second");
+      expect(consoleSpy.error).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Robustness — no-arg calls
+  // -----------------------------------------------------------------------
+  describe("calling logger methods with no arguments", () => {
+    it("error() with no arguments does not throw", async () => {
+      const { logger } = await import("@/utils/logger");
+      expect(() => logger.error()).not.toThrow();
+    });
+
+    it("log() with no arguments does not throw", async () => {
+      const { logger } = await import("@/utils/logger");
+      expect(() => logger.log()).not.toThrow();
+    });
+  });
+
+  describe("createLogger returns non-null object", () => {
+    it("returns an object (not null)", async () => {
+      const { createLogger } = await import("@/utils/logger");
+      const l = createLogger("X");
+      expect(l).not.toBeNull();
+      expect(typeof l).toBe("object");
+    });
+  });
 });

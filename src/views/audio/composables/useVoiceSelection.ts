@@ -63,7 +63,7 @@ export function useVoiceSelection() {
     const selectedVoice = voicesList.find(
       (voice) => voice.value === selectedVoiceType.value
     );
-    return selectedVoice ? selectedVoice.emotions : ["中性"];
+    return selectedVoice ? selectedVoice.emotions : ["neutral"];
   });
 
   // Computed: Filtered Emotions (excluding '中性' if other options exist)
@@ -71,7 +71,7 @@ export function useVoiceSelection() {
     if (availableEmotions.value.length === 1) {
       return availableEmotions.value;
     }
-    return availableEmotions.value.filter((emotion) => emotion !== "中性");
+    return availableEmotions.value.filter((emotion) => emotion !== "neutral");
   });
 
   // Computed: Support High Sample Rate

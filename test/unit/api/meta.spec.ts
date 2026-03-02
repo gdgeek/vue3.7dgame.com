@@ -174,5 +174,48 @@ describe("Meta API", () => {
       const url: string = request.mock.calls[0][0].url;
       expect(url).toContain("/v1/metas/xyz");
     });
+
+    it("returns the request result", async () => {
+      const mockResp = { data: null };
+      request.mockResolvedValue(mockResp);
+      const result = await metaApi.deleteMeta(1);
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("postMeta() — return value", () => {
+    it("returns the request result", async () => {
+      const mockResp = { data: { id: 55, title: "Meta" } };
+      request.mockResolvedValue(mockResp);
+      const result = await metaApi.postMeta({ title: "Meta" } as Parameters<typeof metaApi.postMeta>[0]);
+      expect(result).toEqual(mockResp);
+    });
+  });
+
+  describe("putMeta() — data payload", () => {
+    it("sends the data payload in PUT request", async () => {
+      const payload = { title: "Updated Meta" };
+      await metaApi.putMeta(5, payload as Parameters<typeof metaApi.putMeta>[1]);
+      expect(request.mock.calls[0][0].data).toEqual(payload);
+    });
+  });
+
+  describe("getMetas() — page=0 omits page", () => {
+    it("does not include page= when page is 0", async () => {
+      await metaApi.getMetas("-created_at", "", 0);
+      const url: string = request.mock.calls[0][0].url;
+      expect(url).not.toContain("page=");
+    });
+  });
+
+  describe("getMeta() — different IDs", () => {
+    it("two different IDs produce different request URLs", async () => {
+      await metaApi.getMeta(1);
+      const url1: string = request.mock.calls[0][0].url;
+      vi.clearAllMocks();
+      await metaApi.getMeta(2);
+      const url2: string = request.mock.calls[0][0].url;
+      expect(url1).not.toBe(url2);
+    });
   });
 });

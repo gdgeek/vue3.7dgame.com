@@ -225,17 +225,4 @@ export const deleteGroupVerse = (groupId: number, verseId: number) => {
   });
 };
 
-export default {
-  getGroups,
-  getGroup,
-  createGroup,
-  updateGroup,
-  patchGroup,
-  deleteGroup,
-  getGroupOptions,
-  joinGroup,
-  leaveGroup,
-  createGroupVerse,
-  getGroupVerses,
-  deleteGroupVerse,
-};
+

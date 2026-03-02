@@ -1,0 +1,727 @@
+/**
+ * 我的主页 - 主题适配样式
+ */
+
+// ============================================
+// 我的主页 - 主题适配样式
+// ============================================
+
+// --- 1. 日间模式 (modern-blue) ---
+.theme-modern-blue {
+  .home-page {
+    background: var(--bg-page);
+  }
+
+  .home-header {
+    .home-header-overlay {
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.1) 100%);
+    }
+  }
+
+  .home-tabs {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    box-shadow: var(--shadow-sm);
+
+    :deep(.el-tabs__header) {
+      background: var(--bg-hover);
+    }
+
+    :deep(.el-tabs__item.is-active) {
+      color: var(--primary-color);
+    }
+  }
+
+  .document-card {
+    background: var(--bg-card);
+    box-shadow: var(--shadow-sm);
+
+    &:hover {
+      box-shadow: var(--shadow-md);
+    }
+  }
+
+  .document-box-card {
+    background: var(--bg-card);
+
+    &:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary-color);
+    }
+  }
+}
+
+// --- 2. 赛博科技 (cyber-tech) ---
+.theme-cyber-tech {
+  .home-page {
+    background: #0B0E14 !important;
+  }
+
+  .home-header {
+    .home-header-overlay {
+      background: linear-gradient(180deg, rgba(0, 242, 255, 0.05) 0%, rgba(11, 14, 20, 0.7) 100%) !important;
+    }
+
+    .home-avatar-child {
+      border-color: rgba(0, 242, 255, 0.5) !important;
+      box-shadow: 0 0 20px rgba(0, 242, 255, 0.3) !important;
+    }
+
+    .home-avatar-name {
+      text-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00F2FF 0%, #00BAFF 100%) !important;
+      color: #0B0E14 !important;
+      box-shadow: 0 0 20px rgba(0, 242, 255, 0.4) !important;
+
+      &:hover {
+        box-shadow: 0 0 30px rgba(0, 242, 255, 0.6) !important;
+      }
+    }
+
+    .btn-secondary {
+      border-color: rgba(0, 242, 255, 0.4) !important;
+      background: rgba(0, 242, 255, 0.1) !important;
+      backdrop-filter: blur(12px) !important;
+
+      &:hover {
+        background: rgba(0, 242, 255, 0.2) !important;
+        border-color: rgba(0, 242, 255, 0.6) !important;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.3) !important;
+      }
+    }
+  }
+
+  .home-tabs {
+    background: rgba(0, 242, 255, 0.05) !important;
+    border: 1px solid rgba(0, 242, 255, 0.2) !important;
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.1) !important;
+    backdrop-filter: blur(20px) !important;
+
+    :deep(.el-tabs__header) {
+      background: rgba(0, 242, 255, 0.08) !important;
+      border-bottom-color: rgba(0, 242, 255, 0.2) !important;
+    }
+
+    :deep(.el-tabs__item) {
+      color: #8B949E !important;
+
+      &:hover {
+        color: #00F2FF !important;
+        text-shadow: 0 0 8px rgba(0, 242, 255, 0.5) !important;
+      }
+
+      &.is-active {
+        color: #00F2FF !important;
+        text-shadow: 0 0 10px rgba(0, 242, 255, 0.6) !important;
+        background: rgba(0, 242, 255, 0.1) !important;
+      }
+    }
+  }
+
+  .document-card {
+    background: rgba(0, 242, 255, 0.05) !important;
+    border: 1px solid rgba(0, 242, 255, 0.2) !important;
+
+    :deep(.el-card__header) {
+      background: rgba(0, 242, 255, 0.08) !important;
+      border-bottom-color: rgba(0, 242, 255, 0.2) !important;
+    }
+
+    .document-title {
+      color: #E8F4FF !important;
+    }
+  }
+
+  .document-box-card {
+    background: rgba(0, 242, 255, 0.05) !important;
+    border: 1px solid rgba(0, 242, 255, 0.15) !important;
+
+    &:hover {
+      border-color: #00F2FF !important;
+      box-shadow: 0 0 20px rgba(0, 242, 255, 0.3) !important;
+    }
+
+    .document-list-title {
+      color: #E8F4FF !important;
+    }
+
+    .document-list-excerpt {
+      color: #8B949E !important;
+    }
+  }
+
+  .document-timeline {
+    :deep(.el-timeline-item__node) {
+      background: #00F2FF !important;
+      box-shadow: 0 0 8px rgba(0, 242, 255, 0.5) !important;
+    }
+
+    :deep(.el-timeline-item__tail) {
+      border-left-color: rgba(0, 242, 255, 0.2) !important;
+    }
+  }
+}
+
+// --- 3. 暖阳橙韵 (edu-friendly) ---
+.theme-edu-friendly {
+  --primary-color: #FF6B35;
+  --primary-hover: #FFB347;
+  --primary-light: rgba(255, 107, 53, 0.1);
+  --primary-dark: #cc562a;
+
+  --bg-page: #FFF8F5;
+  --bg-card: #FFFFFF; // Or keeps gradient? If gradient, might need a --bg-card-image var
+  --bg-hover: #FFE8DD;
+  --bg-active: #FFD8C2;
+  --bg-secondary: #FFF8F5;
+  --bg-tertiary: #FFE4DB;
+
+  --text-primary: #2D1810;
+  --text-secondary: #8B6E5F;
+  --text-muted: #bfa59a;
+
+  --border-color: #FFE4DB;
+  --border-color-hover: #FF6B35;
+
+  // Preserve specific gradient styles by overriding via specific classes effectively, 
+  // or define new variables for gradients if common. 
+  // For now, we set the main semantic variables.
+
+  .home-page {
+    background: var(--bg-page) !important;
+  }
+
+  .home-header {
+    .home-header-overlay {
+      background: linear-gradient(180deg, rgba(255, 107, 53, 0.05) 0%, rgba(255, 107, 53, 0.15) 100%) !important;
+    }
+
+    .home-avatar-child {
+      border-color: rgba(255, 255, 255, 0.9) !important;
+      border-radius: 20px !important;
+      box-shadow: 0 6px 20px rgba(255, 107, 53, 0.3) !important;
+    }
+    // ... keep complex component overrides that can't be purely mapped to generic vars yet
+  }
+
+
+  .document-card {
+    background: linear-gradient(135deg, #FFF8F5 0%, #FFE8DD 100%) !important;
+    border: 2px solid #FFE4DB !important;
+    border-radius: 20px !important;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+
+    &:hover {
+      transform: translateY(-4px) scale(1.01) !important;
+    }
+
+    .document-title {
+      color: #2D1810 !important;
+    }
+
+    .document-tag {
+      background: rgba(255, 107, 53, 0.15) !important;
+      color: #FF6B35 !important;
+
+      &:hover {
+        background: #FF6B35 !important;
+        color: #FFF8F5 !important;
+      }
+    }
+  }
+
+  .document-box-card {
+    background: #FFF8F5 !important;
+    border: 2px solid #FFE4DB !important;
+    border-radius: 20px !important;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+
+    &:hover {
+      transform: translateY(-4px) scale(1.02) !important;
+      border-color: #FF6B35 !important;
+      box-shadow: 0 8px 24px rgba(255, 107, 53, 0.2) !important;
+    }
+
+    .document-list-title {
+      color: #2D1810 !important;
+    }
+
+    .document-list-excerpt {
+      color: #8B6E5F !important;
+    }
+  }
+
+  .document-timeline {
+    :deep(.el-timeline-item__node) {
+      background: #FF6B35 !important;
+    }
+  }
+}
+
+// --- 4. 新粗犷主义 (neo-brutalism) ---
+.theme-neo-brutalism {
+  --primary-color: #FFF000;
+  --primary-hover: #F2E300;
+  --primary-light: rgba(255, 240, 0, 0.2);
+  --primary-dark: #ccbf00;
+
+  --bg-page: #FAFAF8;
+  --bg-card: #FFFFFF;
+  --bg-hover: #00FFC2;
+  --bg-active: #000000;
+  --bg-secondary: #FAFAF8;
+  --bg-tertiary: #FFFFFF;
+
+  --text-primary: #000000;
+  --text-secondary: #000000;
+  --text-muted: #333333;
+
+  --border-color: #000000;
+  --border-color-hover: #000000;
+  --border-width: 3px;
+  
+  --radius-sm: 8px;
+  --radius-md: 8px;
+  --radius-lg: 8px;
+  --radius-full: 8px;
+
+  --shadow-sm: 4px 4px 0px #000000;
+  --shadow-md: 5px 5px 0px #000000;
+  --shadow-lg: 8px 8px 0px #000000;
+
+  .home-page {
+    background: var(--bg-page) !important;
+  }
+
+  .home-header {
+    border-bottom: 3px solid #000000 !important;
+
+    .home-avatar-child {
+      border: 3px solid #000000 !important;
+      border-radius: 8px !important;
+      box-shadow: 4px 4px 0px #000000 !important;
+    }
+
+    .btn-primary {
+      background: #FFF000 !important;
+      color: #000000 !important;
+      border: 3px solid #000000 !important;
+      border-radius: 8px !important;
+      box-shadow: 4px 4px 0px #000000 !important;
+
+      &:hover {
+        transform: translate(-2px, -2px) !important;
+        box-shadow: 6px 6px 0px #000000 !important;
+      }
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.9) !important;
+      color: #000000 !important;
+      border: 3px solid #000000 !important;
+      border-radius: 8px !important;
+      box-shadow: 4px 4px 0px #000000 !important;
+      backdrop-filter: none !important;
+
+      &:hover {
+        transform: translate(-2px, -2px) !important;
+        box-shadow: 6px 6px 0px #000000 !important;
+        background: #00FFC2 !important;
+      }
+    }
+  }
+
+  .home-tabs {
+    background: #FFFFFF !important;
+    border: 3px solid #000000 !important;
+    border-radius: 8px !important;
+    box-shadow: 5px 5px 0px #000000 !important;
+
+    :deep(.el-tabs__header) {
+      background: #FFF000 !important;
+      border-bottom: 3px solid #000000 !important;
+    }
+
+    :deep(.el-tabs__item) {
+      color: #000000 !important;
+      font-weight: 700 !important;
+
+      &.is-active {
+        background: #FFFFFF !important;
+        color: #000000 !important;
+      }
+    }
+  }
+
+  .document-card {
+    background: #FFFFFF !important;
+    border: 3px solid #000000 !important;
+    border-radius: 8px !important;
+    box-shadow: 5px 5px 0px #000000 !important;
+
+    :deep(.el-card__header) {
+      background: #00FFC2 !important;
+      border-bottom: 3px solid #000000 !important;
+    }
+
+    .document-title {
+      color: #000000 !important;
+      font-weight: 800 !important;
+    }
+
+    .document-tag {
+      background: #FF007A !important;
+      color: #FFFFFF !important;
+      border-radius: 4px !important;
+      font-weight: 700 !important;
+
+      &:hover {
+        background: #9D4EDD !important;
+      }
+    }
+
+    &:hover {
+      transform: translate(-3px, -3px) !important;
+      box-shadow: 8px 8px 0px #000000 !important;
+    }
+  }
+
+  .document-box-card {
+    background: #FFFFFF !important;
+    border: 3px solid #000000 !important;
+    border-radius: 8px !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+
+    &:hover {
+      transform: translate(-3px, -3px) !important;
+      box-shadow: 7px 7px 0px #000000 !important;
+      border-color: #000000 !important;
+    }
+
+    .document-list-title {
+      color: #000000 !important;
+      font-weight: 800 !important;
+    }
+
+    .document-list-excerpt {
+      color: #333333 !important;
+    }
+  }
+
+  .document-timeline {
+    :deep(.el-timeline-item__node) {
+      background: #FF007A !important;
+      border: 2px solid #000000 !important;
+    }
+
+    :deep(.el-timeline-item__tail) {
+      border-left: 2px solid #000000 !important;
+    }
+  }
+}
+
+// --- 5. 夜间模式 (deep-space) ---
+.theme-deep-space {
+  --primary-color: #2D68FF;
+  --primary-hover: #1A3D8F;
+  --primary-light: rgba(45, 104, 255, 0.1);
+  --primary-dark: #1A3D8F;
+
+  --bg-page: #0B0E14;
+  --bg-card: #151921;
+  --bg-hover: #21262D; 
+  --bg-active: #30363d;
+  --bg-secondary: #0B0E14;
+  --bg-tertiary: #21262D;
+
+  --text-primary: #E6EDF3;
+  --text-secondary: #8B949E;
+  --text-muted: #6e7681;
+
+  --border-color: #30363d;
+  --border-color-hover: #8B949E;
+  --border-color-light: #21262D;
+  
+  --success-color: #238636;
+  --warning-color: #9e6a03;
+  --danger-color: #da3633;
+
+  .home-page {
+    background: var(--bg-page) !important;
+  }
+
+  .home-header {
+    .home-header-overlay {
+      background: linear-gradient(180deg, rgba(11, 14, 20, 0.3) 0%, rgba(11, 14, 20, 0.7) 100%) !important;
+    }
+
+    .home-avatar-child {
+      border-color: rgba(45, 104, 255, 0.4) !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1A3D8F 0%, #2D68FF 100%) !important;
+      box-shadow: 0 4px 16px rgba(45, 104, 255, 0.3) !important;
+
+      &:hover {
+        box-shadow: 0 4px 24px rgba(45, 104, 255, 0.5) !important;
+      }
+    }
+
+    .btn-secondary {
+      border-color: rgba(45, 104, 255, 0.3) !important;
+      background: rgba(45, 104, 255, 0.1) !important;
+
+      &:hover {
+        background: rgba(45, 104, 255, 0.2) !important;
+        border-color: rgba(45, 104, 255, 0.5) !important;
+      }
+    }
+  }
+
+  .home-tabs {
+    background: #151921 !important;
+    border: 1px solid #21262D !important;
+
+    :deep(.el-tabs__header) {
+      background: #11141B !important;
+      border-bottom-color: #21262D !important;
+    }
+
+    :deep(.el-tabs__item) {
+      color: #8B949E !important;
+
+      &:hover {
+        color: #2D68FF !important;
+      }
+
+      &.is-active {
+        color: #2D68FF !important;
+        background: #151921 !important;
+      }
+    }
+  }
+
+  .document-card {
+    background: #151921 !important;
+    border: 1px solid #21262D !important;
+
+    :deep(.el-card__header) {
+      background: #11141B !important;
+      border-bottom-color: #21262D !important;
+    }
+
+    .document-title {
+      color: #E6EDF3 !important;
+    }
+
+    .document-tag {
+      background: rgba(45, 104, 255, 0.15) !important;
+      color: #2D68FF !important;
+
+      &:hover {
+        background: #2D68FF !important;
+        color: #FFFFFF !important;
+      }
+    }
+
+    &:hover {
+      border-color: #2D68FF !important;
+      box-shadow: 0 0 20px rgba(45, 104, 255, 0.15) !important;
+    }
+  }
+
+  .document-box-card {
+    background: #151921 !important;
+    border: 1px solid #21262D !important;
+
+    &:hover {
+      border-color: #2D68FF !important;
+      box-shadow: 0 0 20px rgba(45, 104, 255, 0.2) !important;
+    }
+
+    .document-list-title {
+      color: #E6EDF3 !important;
+    }
+
+    .document-list-excerpt {
+      color: #8B949E !important;
+    }
+  }
+
+  .document-timeline {
+    :deep(.el-timeline-item__node) {
+      background: #2D68FF !important;
+    }
+
+    :deep(.el-timeline-item__tail) {
+      border-left-color: #21262D !important;
+    }
+  }
+
+  .document-list-category-tag {
+    background: rgba(45, 104, 255, 0.15) !important;
+    color: #2D68FF !important;
+  }
+}
+
+// --- 6. 极简纯净 (minimal-pure) ---
+.theme-minimal-pure {
+  --primary-color: #000000;
+  --primary-hover: #333333;
+  --primary-light: rgba(0, 0, 0, 0.1);
+  --primary-dark: #000000;
+
+  --bg-page: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-hover: #f0f0f0;
+  --bg-active: #e0e0e0;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #f0f0f0;
+
+  --text-primary: #000000;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+
+  --border-color: #e0e0e0;
+  --border-color-hover: #999999;
+  
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-full: 0;
+  
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+
+  .home-page {
+    background: var(--bg-page) !important;
+  }
+
+  .home-header {
+    .home-avatar-child {
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      border-color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    .btn-primary {
+      background: #000000 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+
+      &:hover {
+        background: #333333 !important;
+        transform: none !important;
+      }
+    }
+
+    .btn-secondary {
+      border-radius: 0 !important;
+      border: 1px solid rgba(255, 255, 255, 0.6) !important;
+      backdrop-filter: none !important;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
+      }
+    }
+  }
+
+  .home-tabs {
+    background: #FFFFFF !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    :deep(.el-tabs__header) {
+      background: #fafafa !important;
+      border-bottom: 1px solid #e0e0e0 !important;
+    }
+
+    :deep(.el-tabs__item) {
+      color: #666666 !important;
+
+      &.is-active {
+        color: #000000 !important;
+        background: #FFFFFF !important;
+        font-weight: 600 !important;
+      }
+    }
+  }
+
+  .document-card {
+    background: #FFFFFF !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    :deep(.el-card__header) {
+      background: #fafafa !important;
+    }
+
+    .document-title {
+      color: #000000 !important;
+    }
+
+    .document-tag {
+      background: #f0f0f0 !important;
+      color: #000000 !important;
+      border-radius: 0 !important;
+
+      &:hover {
+        background: #000000 !important;
+        color: #FFFFFF !important;
+      }
+    }
+
+    &:hover {
+      box-shadow: none !important;
+    }
+  }
+
+  .document-box-card {
+    background: #FFFFFF !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    &:hover {
+      border-color: #000000 !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+
+    .document-list-title {
+      color: #000000 !important;
+    }
+
+    .document-list-excerpt {
+      color: #666666 !important;
+    }
+  }
+
+  .document-timeline {
+    :deep(.el-timeline-item__node) {
+      background: #000000 !important;
+    }
+
+    :deep(.el-timeline-item__tail) {
+      border-left-color: #e0e0e0 !important;
+    }
+  }
+
+  .document-list-img {
+    border-radius: 0 !important;
+  }
+
+  .document-list-category-tag {
+    background: #f0f0f0 !important;
+    color: #000000 !important;
+    border-radius: 0 !important;
+  }
+}
