@@ -96,7 +96,7 @@ const refreshToken = async () => {
 service.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     // --- Failover Logic: Dynamic Base URL ---
-    if (currentApi && !config.baseURL?.startsWith("http")) {
+    if (currentApi && config.baseURL !== currentApi) {
       config.baseURL = currentApi;
     }
     // ----------------------------------------
