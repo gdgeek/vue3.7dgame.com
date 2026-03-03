@@ -63,7 +63,7 @@ import { Loading, Upload } from "@element-plus/icons-vue";
 
 import { importScene } from "@/services/scene-package/import-service";
 
-import type { UploadFile } from "element-plus";
+import type { UploadFile, UploadInstance } from "element-plus";
 
 // ============================================================================
 // Props & Emits
@@ -87,6 +87,11 @@ const state = ref<ImportState>("idle");
 const importing = ref(false);
 const importError = ref("");
 const newVerseId = ref(0);
+const uploadRef = ref<UploadInstance>();
+
+const clearUploadState = () => {
+  uploadRef.value?.clearFiles();
+};
 
 // ============================================================================
 // 方法
@@ -136,6 +141,7 @@ const handleNavigate = () => {
 const handleRetry = () => {
   state.value = "idle";
   importError.value = "";
+  clearUploadState();
 };
 
 const handleClose = () => {
@@ -149,6 +155,7 @@ const resetState = () => {
   importing.value = false;
   importError.value = "";
   newVerseId.value = 0;
+  clearUploadState();
 };
 </script>
 
