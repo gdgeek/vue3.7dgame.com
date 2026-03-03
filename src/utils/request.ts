@@ -96,6 +96,10 @@ const refreshToken = async () => {
 service.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     // --- Failover Logic: Dynamic Base URL ---
+    // 注意：此处故意只覆盖「非绝对地址」的 baseURL
+    // 以 http 开头的绝对地址表示调用方明确指定了目标，应保持不变
+    // failover 切换到 backup 后，retry 请求会在响应拦截器中显式设置
+    // config.baseURL = currentApi，从而绕过此处的 http 判断直接生效
     if (currentApi && !config.baseURL?.startsWith("http")) {
       config.baseURL = currentApi;
     }
