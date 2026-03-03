@@ -20,17 +20,8 @@ export function extractFilename(
   fallbackId: number
 ): string {
   if (contentDisposition) {
-    // filename*=UTF-8''encoded%20name.zip
-    const encodedMatch = contentDisposition.match(/filename\*\s*=\s*[^']*'[^']*'([^;]+)/i);
-    if (encodedMatch?.[1]) return decodeURIComponent(encodedMatch[1].trim());
-
-    // filename="scene package.zip"
-    const quotedMatch = contentDisposition.match(/filename\s*=\s*"([^"]+)"/i);
-    if (quotedMatch?.[1]) return quotedMatch[1];
-
-    // filename=scene.zip
-    const unquotedMatch = contentDisposition.match(/filename\s*=\s*([^;]+)/i);
-    if (unquotedMatch?.[1]) return unquotedMatch[1].trim();
+    const match = contentDisposition.match(/filename="?([^";\s]+)"?/);
+    if (match?.[1]) return match[1];
   }
   return `scene_${fallbackId}.zip`;
 }
