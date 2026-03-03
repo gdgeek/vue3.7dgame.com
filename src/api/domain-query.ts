@@ -62,6 +62,10 @@ service.interceptors.request.use((config) => {
 });
 
 // Response Interceptor: Failover Logic
+// 注意：后端响应格式为 { domain, data: { ... } }（两层结构）
+// 这里返回 response.data（即整个响应 JSON），调用方再取 .data 拿实际数据
+// 例如：getDomainDefault() 返回 { domain, data: DomainDefaultInfo }
+//       store 中再读 response.data 才得到 DomainDefaultInfo
 service.interceptors.response.use(
   (response) => response.data,
   async (error) => {
