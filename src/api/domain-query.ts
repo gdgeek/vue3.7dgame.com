@@ -63,7 +63,7 @@ service.interceptors.request.use((config) => {
 
 // Response Interceptor: Failover Logic
 service.interceptors.response.use(
-  (response) => response,
+  (response) => response.data,
   async (error) => {
     const { config, response } = error;
 
