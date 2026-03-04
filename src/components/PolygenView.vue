@@ -433,7 +433,6 @@ onMounted(() => {
 onUnmounted(() => {
   resizeObserver?.disconnect();
 });
-
 watch(
   () => props.file?.url,
   (url, prevUrl) => {
