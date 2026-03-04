@@ -43,16 +43,6 @@ export const metaRoutes: RouteRecordRaw[] = [
     component: () => import("@/views/meta/prefab-edit.vue"),
   },
   {
-    path: "/meta/meta-edit",
-    name: "MetaEdit",
-    meta: {
-      title: "meta.edit",
-      hidden: true,
-      private: true,
-    },
-    component: () => import("@/views/meta/meta-edit.vue"),
-  },
-  {
     path: "/meta/script",
     name: "MetaScript",
     meta: {
