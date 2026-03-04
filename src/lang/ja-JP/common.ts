@@ -154,6 +154,7 @@ export default {
     networkError: "ネットワークエラーです。ネットワーク接続を確認してください",
     serverError: "サーバー内部エラーです。しばらくしてから再度お試しください",
     error404: "リクエストに失敗しました。リソースが見つかりません (404)",
+    unknownError: "不明なエラー",
   },
   emailVerification: {
     codeSent: "認証コードがメールアドレスに送信されました",

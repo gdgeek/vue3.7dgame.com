@@ -44,6 +44,9 @@ jobs:
       - name: Run tests
         run: pnpm run test:run
 
+      - name: Coverage check (lines ≥ 70%)
+        run: pnpm run test:coverage
+
   # 构建（仅 push 到 main/master）
   build:
     name: Build & Push Docker Image

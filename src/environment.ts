@@ -66,7 +66,7 @@ const environment = {
   domain_info: ReplaceURL(
     window.__DOMAIN_INFO_API_URL__ ||
       import.meta.env.VITE_APP_DOMAIN_INFO_API_URL ||
-      "https://domain.xrteeth.com"
+      ""
   ),
   domain_info_backup: ReplaceURL(
     window.__BACKUP_DOMAIN_INFO_API_URL__ ||

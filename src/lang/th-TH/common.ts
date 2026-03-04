@@ -159,6 +159,7 @@ export default {
     networkError: "Network error, please check your internet connection",
     serverError: "Internal server error, please try again later",
     error404: "คำขอล้มเหลว ไม่พบทรัพยากร (404)",
+    unknownError: "ข้อผิดพลาดที่ไม่ทราบสาเหตุ",
   },
   web: {
     login: "เข้าสู่ระบบ",

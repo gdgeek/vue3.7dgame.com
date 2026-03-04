@@ -214,7 +214,7 @@ service.interceptors.response.use(
       if (error.message === "Network Error") {
         showErrorMessage(messages[1]);
       } else {
-        logger.error("未知错误", error.message);
+        logger.error(i18n.global.t("request.unknownError"), error.message);
 
         showErrorMessage(error.message);
       }
@@ -225,7 +225,7 @@ service.interceptors.response.use(
     } else if (response.status === 404) {
       showErrorMessage(i18n.global.t("request.error404"));
     } else if (response.status >= 500) {
-      logger.error("服务器内部错误", response);
+      logger.error(i18n.global.t("request.serverError"), response);
       // 服务器内部错误
       showErrorMessage(messages[2]);
     } else {

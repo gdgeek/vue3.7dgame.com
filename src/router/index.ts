@@ -160,7 +160,7 @@ const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
 };
 
 export const UpdateRoutes = async (ability: AnyAbility) => {
-  constantRoutes = JSON.parse(JSON.stringify(routes));
+  constantRoutes = structuredClone(routes);
   check(constantRoutes, ability);
   initRoutes();
 };

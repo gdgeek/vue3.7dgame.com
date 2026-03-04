@@ -156,6 +156,7 @@ export default {
     networkError: "Network error, please check your internet connection",
     serverError: "Internal server error, please try again later",
     error404: "Request failed, resource not found (404)",
+    unknownError: "Unknown error",
   },
   emailVerification: {
     codeSent: "Verification code has been sent to your email",
