@@ -137,7 +137,6 @@ const {
   handleCurrentChange,
   openDialog,
 } =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   useDialogList<VerseItem>(
     (sorted, searched, page) =>
       getVerses({
@@ -145,7 +144,7 @@ const {
         search: searched,
         page,
         expand: "image",
-      }) as any
+      }) as Promise<{ data: VerseItem[]; headers: Record<string, unknown> }>
   );
 
 const title = (item: VerseItem) => item.title || item.name || "title";

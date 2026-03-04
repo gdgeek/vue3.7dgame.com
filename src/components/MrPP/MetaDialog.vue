@@ -125,9 +125,8 @@ const {
   handleCurrentChange,
   openDialog,
 } =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   useDialogList<metaInfo>(
-    (sorted, searched, page) => getMetas(sorted, searched, page, "image") as any
+    (sorted, searched, page) => getMetas(sorted, searched, page, "image")
   );
 
 type MetaSelection = {

@@ -59,8 +59,8 @@
                 <span style="margin-right: 20px">
                   <strong>{{ $t("manager.school.principal") }}:</strong>
                   {{
-                    (school.principal as any)?.nickname ||
-                    (school.principal as any)?.username ||
+                    school.principal?.nickname ||
+                    school.principal?.username ||
                     "-"
                   }}
                 </span>
@@ -249,6 +249,7 @@ import { ref, computed, watch } from "vue";
 import { Plus } from "@element-plus/icons-vue";
 import { useI18n } from "vue-i18n";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { isAxiosError } from "axios";
 import CardListPage from "@/components/MrPP/CardListPage/index.vue";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import Id2Image from "@/components/Id2Image.vue";
@@ -430,11 +431,10 @@ const handleSaveEdit = async () => {
     refreshList();
   } catch (error: unknown) {
     logger.error("Failed to save class:", error);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((error as any).response?.status === 422) {
+    if (isAxiosError(error) && error.response?.status === 422) {
+      const data = error.response.data as Record<string, unknown> | undefined;
       const errorMsg =
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (error as any).response?.data?.message ||
+        (data?.["message"] as string | undefined) ||
         t("manager.errors.validationFailed");
       ElMessage.error(errorMsg);
     } else {
@@ -519,11 +519,10 @@ const handleSelectUser = async (user: userData) => {
     refreshList();
   } catch (error: unknown) {
     logger.error("Failed to add member:", error);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((error as any).response?.status === 422) {
+    if (isAxiosError(error) && error.response?.status === 422) {
+      const data = error.response.data as Record<string, unknown> | undefined;
       const errorMsg =
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (error as any).response?.data?.message ||
+        (data?.["message"] as string | undefined) ||
         t("manager.errors.alreadyInClass");
       ElMessage.error(errorMsg);
     } else {
@@ -557,11 +556,10 @@ const handleRemoveTeacher = async (teacher: TeacherInfo) => {
   } catch (error: unknown) {
     if (error !== "cancel") {
       logger.error("Failed to remove teacher:", error);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((error as any).response?.status === 422) {
+      if (isAxiosError(error) && error.response?.status === 422) {
+        const data = error.response.data as Record<string, unknown> | undefined;
         const errorMsg =
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (error as any).response?.data?.message ||
+          (data?.["message"] as string | undefined) ||
           t("manager.errors.removeFailed");
         ElMessage.error(errorMsg);
       } else {
@@ -595,11 +593,10 @@ const handleRemoveStudent = async (student: StudentInfo) => {
   } catch (error: unknown) {
     if (error !== "cancel") {
       logger.error("Failed to remove student:", error);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((error as any).response?.status === 422) {
+      if (isAxiosError(error) && error.response?.status === 422) {
+        const data = error.response.data as Record<string, unknown> | undefined;
         const errorMsg =
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (error as any).response?.data?.message ||
+          (data?.["message"] as string | undefined) ||
           t("manager.errors.removeFailed");
         ElMessage.error(errorMsg);
       } else {

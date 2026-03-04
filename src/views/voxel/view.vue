@@ -70,6 +70,7 @@ import { convertToLocalTime, formatFileSize } from "@/utils/utilityFunctions";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import MrppInfo from "@/components/MrPP/MrppInfo/index.vue";
 import { downloadResource } from "@/utils/downloadHelper";
+import type { FileHandler } from "@/assets/js/file/server";
 
 // 基本状态管理
 const loading = ref(false);
@@ -187,9 +188,8 @@ const downloadVoxel = async () => {
 // 加载体素数据
 const loadVoxelData = async () => {
   try {
-    const response = await getVoxel(id.value);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    voxelData.value = (response as any).data;
+    const response = (await getVoxel(id.value)) as { data: VoxelData };
+    voxelData.value = response.data;
   } catch (error) {
     logger.error(error);
   }
@@ -333,15 +333,14 @@ const saveFile = async (
   extension: string,
   info: VoxelInfo,
   file: File,
-  handler: unknown
+  handler: FileHandler
 ) => {
   extension = extension.startsWith(".") ? extension : `.${extension}`;
   const data: UploadFileType = {
     md5,
     key: md5 + extension,
     filename: file.name,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    url: store.fileUrl(md5, extension, handler as any, "screenshot/voxel"),
+    url: store.fileUrl(md5, extension, handler, "screenshot/voxel"),
   };
 
   // 保存缩略图并更新体素信息
