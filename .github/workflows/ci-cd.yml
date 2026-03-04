@@ -37,7 +37,6 @@ jobs:
 
       - name: Type check
         run: pnpm run type-check
-        continue-on-error: true
 
       - name: Lint
         run: pnpm run lint:eslint
