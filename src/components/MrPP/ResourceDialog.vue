@@ -810,8 +810,28 @@ defineExpose({
 
   :deep(.standard-card) {
     border: 1px solid
-      var(--resource-dialog-card-border-color, var(--border-color-hover, #cad5e3));
-    box-shadow: var(--resource-dialog-card-shadow, var(--shadow-sm));
+      var(--resource-dialog-card-border-color, var(--border-color, #e2e8f0));
+    box-shadow: var(--resource-dialog-card-shadow, none);
+  }
+
+  :deep(.standard-card:hover) {
+    border-color: var(
+      --resource-dialog-card-hover-border-color,
+      var(--border-color-hover, #cbd5e1)
+    );
+    box-shadow: var(
+      --resource-dialog-card-hover-shadow,
+      0 6px 16px rgba(15, 23, 42, 0.08)
+    );
+    transform: translateY(-2px);
+  }
+
+  :deep(.standard-card.is-selected) {
+    border-color: var(--resource-dialog-card-selected-border-color, var(--primary-color));
+    box-shadow: var(
+      --resource-dialog-card-selected-shadow,
+      0 0 0 2px var(--primary-light)
+    );
   }
 }
 
