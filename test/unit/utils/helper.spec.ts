@@ -190,4 +190,38 @@ describe("helper utils", () => {
       expect(GetIP()).toBe("api.example.com");
     });
   });
+
+  describe("GetIP — returns null when host is empty", () => {
+    it("returns null when window.location.host is an empty string", async () => {
+      // The regex /^([^:]+)/g cannot match an empty string, so ret === null
+      Object.defineProperty(window, "location", {
+        value: { protocol: "https:", hostname: "", port: "", host: "" },
+        writable: true,
+        configurable: true,
+      });
+      vi.resetModules();
+      const { GetIP } = await import("@/utils/helper");
+      expect(GetIP()).toBeNull();
+    });
+  });
+
+  describe("VueAppleLoginConfig", () => {
+    it("is exported with usePopup = true", async () => {
+      vi.resetModules();
+      const { VueAppleLoginConfig } = await import("@/utils/helper");
+      expect(VueAppleLoginConfig.usePopup).toBe(true);
+    });
+
+    it("has clientId set to com.mrpp.www", async () => {
+      vi.resetModules();
+      const { VueAppleLoginConfig } = await import("@/utils/helper");
+      expect(VueAppleLoginConfig.clientId).toBe("com.mrpp.www");
+    });
+
+    it("has a numeric state string", async () => {
+      vi.resetModules();
+      const { VueAppleLoginConfig } = await import("@/utils/helper");
+      expect(Number(VueAppleLoginConfig.state)).toBeGreaterThan(0);
+    });
+  });
 });

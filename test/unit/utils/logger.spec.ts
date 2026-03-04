@@ -4,6 +4,7 @@
  *
  * NOTE: In Vitest, import.meta.env.MODE === "test", so isDev is false.
  * That means log/warn/info/debug are silenced; only error is always active.
+ * Dev-mode branches are tested by stubbing import.meta.env.MODE = "development".
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
@@ -195,5 +196,99 @@ describe("createLogger / Logger", () => {
       expect(l).not.toBeNull();
       expect(typeof l).toBe("object");
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Dev-mode branches — stub MODE = "development" so isDev === true
+// These tests cover lines 17, 23, 33, 39 (the console.* calls inside if(isDev))
+// ---------------------------------------------------------------------------
+describe("Logger in development mode (isDev = true)", () => {
+  let consoleSpy: {
+    log: ReturnType<typeof vi.spyOn>;
+    warn: ReturnType<typeof vi.spyOn>;
+    info: ReturnType<typeof vi.spyOn>;
+    debug: ReturnType<typeof vi.spyOn>;
+  };
+
+  beforeEach(() => {
+    vi.stubEnv("MODE", "development");
+    vi.resetModules();
+    consoleSpy = {
+      log: vi.spyOn(console, "log").mockImplementation(() => undefined),
+      warn: vi.spyOn(console, "warn").mockImplementation(() => undefined),
+      info: vi.spyOn(console, "info").mockImplementation(() => undefined),
+      debug: vi.spyOn(console, "debug").mockImplementation(() => undefined),
+    };
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  it("log() calls console.log in dev mode", async () => {
+    const { logger } = await import("@/utils/logger");
+    logger.log("hello dev");
+    expect(consoleSpy.log).toHaveBeenCalledWith("", "hello dev");
+  });
+
+  it("warn() calls console.warn in dev mode", async () => {
+    const { logger } = await import("@/utils/logger");
+    logger.warn("watch out");
+    expect(consoleSpy.warn).toHaveBeenCalledWith("", "watch out");
+  });
+
+  it("info() calls console.info in dev mode", async () => {
+    const { logger } = await import("@/utils/logger");
+    logger.info("fyi dev");
+    expect(consoleSpy.info).toHaveBeenCalledWith("", "fyi dev");
+  });
+
+  it("debug() calls console.debug in dev mode", async () => {
+    const { logger } = await import("@/utils/logger");
+    logger.debug("trace dev");
+    expect(consoleSpy.debug).toHaveBeenCalledWith("", "trace dev");
+  });
+
+  it("prefixed logger uses [prefix] in log() in dev mode", async () => {
+    const { createLogger } = await import("@/utils/logger");
+    const devLogger = createLogger("SCENE");
+    devLogger.log("scene msg");
+    expect(consoleSpy.log).toHaveBeenCalledWith("[SCENE]", "scene msg");
+  });
+
+  it("prefixed logger uses [prefix] in warn() in dev mode", async () => {
+    const { createLogger } = await import("@/utils/logger");
+    const devLogger = createLogger("AUTH");
+    devLogger.warn("warn msg");
+    expect(consoleSpy.warn).toHaveBeenCalledWith("[AUTH]", "warn msg");
+  });
+
+  it("prefixed logger uses [prefix] in info() in dev mode", async () => {
+    const { createLogger } = await import("@/utils/logger");
+    const devLogger = createLogger("API");
+    devLogger.info("info msg");
+    expect(consoleSpy.info).toHaveBeenCalledWith("[API]", "info msg");
+  });
+
+  it("prefixed logger uses [prefix] in debug() in dev mode", async () => {
+    const { createLogger } = await import("@/utils/logger");
+    const devLogger = createLogger("DB");
+    devLogger.debug("debug msg");
+    expect(consoleSpy.debug).toHaveBeenCalledWith("[DB]", "debug msg");
+  });
+
+  it("empty-prefix logger uses empty string in log()", async () => {
+    const { createLogger } = await import("@/utils/logger");
+    const l = createLogger("");
+    l.log("no prefix");
+    expect(consoleSpy.log).toHaveBeenCalledWith("", "no prefix");
+  });
+
+  it("log() forwards multiple arguments in dev mode", async () => {
+    const { logger } = await import("@/utils/logger");
+    logger.log("a", "b", 42);
+    expect(consoleSpy.log).toHaveBeenCalledWith("", "a", "b", 42);
   });
 });

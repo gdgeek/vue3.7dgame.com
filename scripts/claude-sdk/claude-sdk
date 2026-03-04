@@ -1,0 +1,39 @@
+#!/bin/bash
+# Claude SDK 快捷入口
+# 用法:
+#   claude-sdk "你的提示词"
+#   claude-sdk -m review "src/views/Home.vue"
+#   claude-sdk -m task "重构登录模块"
+#   claude-sdk -i                          # 交互模式
+#   claude-sdk -t "检查服务状态"            # 带自定义工具
+#   claude-sdk -j "分析项目"               # JSON 输出
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+VENV="$HOME/claude-sdk-env"
+PROJECT_DIR="$HOME/projects/vue3.7dgame.com"
+
+# 确保代理可用
+export http_proxy=http://127.0.0.1:8118
+export https_proxy=http://127.0.0.1:8118
+
+# 激活虚拟环境
+source "$VENV/bin/activate"
+
+# 判断使用哪个脚本
+USE_CLIENT=0
+ARGS=()
+
+for arg in "$@"; do
+    if [ "$arg" = "-t" ] || [ "$arg" = "--with-tools" ]; then
+        USE_CLIENT=1
+    fi
+    ARGS+=("$arg")
+done
+
+if [ "$USE_CLIENT" -eq 1 ]; then
+    exec python3 "$SCRIPT_DIR/claude_client.py" --cwd "$PROJECT_DIR" "${ARGS[@]}"
+else
+    exec python3 "$SCRIPT_DIR/claude_runner.py" --cwd "$PROJECT_DIR" "${ARGS[@]}"
+fi

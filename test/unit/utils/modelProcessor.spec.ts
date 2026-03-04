@@ -76,6 +76,34 @@ function makeGLTFScene() {
   return group;
 }
 
+/** Scene with an INDEXED geometry — covers geometry.index branch (lines 77-78).
+ *  Uses dynamic import to share the same ESM module as modelProcessor. */
+async function makeGLTFSceneIndexed() {
+  const THREE = await import("three");
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]);
+  geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  geo.setIndex([0, 1, 2]); // 3 indices → 1 face
+  const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial());
+  const group = new THREE.Group();
+  group.add(mesh);
+  return group;
+}
+
+/** Scene with a NON-INDEXED geometry with position attribute — covers lines 79-81.
+ *  Uses dynamic import to share the same ESM module as modelProcessor. */
+async function makeGLTFSceneNonIndexedWithPosition() {
+  const THREE = await import("three");
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]); // 3 vertices
+  geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  // no setIndex → non-indexed path
+  const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial());
+  const group = new THREE.Group();
+  group.add(mesh);
+  return group;
+}
+
 function makeGLTF(animations: any[] = []) {
   return { scene: makeGLTFScene(), animations };
 }
@@ -225,5 +253,35 @@ describe("processModel()", () => {
     const result = await processModel(new File(["data"], "model.gltf"));
     const info = JSON.parse(result.info);
     expect(info.faces).toBeGreaterThanOrEqual(0);
+  });
+
+  it("counts faces via geometry.index when mesh has an index buffer", async () => {
+    const mockBlob = new Blob(["img"], { type: "image/jpeg" });
+    mockToBlob.mockImplementation((cb: (b: Blob) => void) => cb(mockBlob));
+    const indexedScene = await makeGLTFSceneIndexed();
+    mockGLTFLoad.mockImplementation((_url: string, onLoad: Function) => {
+      onLoad({ scene: indexedScene, animations: [] });
+    });
+
+    const { processModel } = await import("@/utils/modelProcessor");
+    const result = await processModel(new File(["data"], "model.gltf"));
+    const info = JSON.parse(result.info);
+    // 3 indices → 1 face
+    expect(info.faces).toBe(1);
+  });
+
+  it("counts faces via geometry.attributes.position when mesh has no index", async () => {
+    const mockBlob = new Blob(["img"], { type: "image/jpeg" });
+    mockToBlob.mockImplementation((cb: (b: Blob) => void) => cb(mockBlob));
+    const nonIndexedScene = await makeGLTFSceneNonIndexedWithPosition();
+    mockGLTFLoad.mockImplementation((_url: string, onLoad: Function) => {
+      onLoad({ scene: nonIndexedScene, animations: [] });
+    });
+
+    const { processModel } = await import("@/utils/modelProcessor");
+    const result = await processModel(new File(["data"], "model.gltf"));
+    const info = JSON.parse(result.info);
+    // 3 positions / 3 = 1 face
+    expect(info.faces).toBe(1);
   });
 });

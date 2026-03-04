@@ -5,16 +5,17 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Capture the axios service instance created at module level
+// Capture the axios service instance created at module level.
+// Made callable (via vi.fn base) so the failover path `return service(config)` works.
 const mockService = vi.hoisted(() => {
-  const inst = {
+  const fn = Object.assign(vi.fn().mockResolvedValue({ data: {} }), {
     interceptors: {
       request: { use: vi.fn() },
       response: { use: vi.fn() },
     },
     defaults: { headers: { common: {} } },
-  };
-  return inst;
+  });
+  return fn;
 });
 
 vi.mock("axios", () => ({
@@ -349,6 +350,118 @@ describe("response interceptor logic", () => {
     };
     await errInterceptor(error).catch(() => {});
     expect((logger as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
+    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// API failover logic — covers lines 195-210 (backup API switch)
+// ---------------------------------------------------------------------------
+describe("API failover response interceptor", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+  });
+
+  it("switches to backup API and retries when primary fails (no _retry, no response)", async () => {
+    const { logger } = await import("@/utils/logger");
+    await import("@/utils/request");
+
+    const errInterceptor =
+      mockService.interceptors.response.use.mock.calls[0]?.[1];
+
+    // _retry: false → triggers failover; BACKUP_API is set in mock env
+    const config = { url: "/v1/data", headers: {}, baseURL: "", _retry: false };
+    const error = { message: "Network Error", response: undefined, config };
+
+    // The failover sets _retry=true, then calls service(config) which is mockService (vi.fn)
+    await errInterceptor(error).catch(() => {});
+
+    // logger.warn should have been called with the failover message
+    expect(
+      (logger as { warn: ReturnType<typeof vi.fn> }).warn
+    ).toHaveBeenCalledWith(
+      expect.stringContaining("Failover")
+    );
+    // config should be marked as retried
+    expect(config._retry).toBe(true);
+    // mockService itself (the callable fn) should have been called with config
+    expect(mockService).toHaveBeenCalledWith(config);
+  });
+
+  it("does NOT switch to backup when _retry is already true", async () => {
+    const { ElMessage } = await import("element-plus");
+    await import("@/utils/request");
+
+    const errInterceptor =
+      mockService.interceptors.response.use.mock.calls[0]?.[1];
+
+    // _retry: true → already retried, skip failover → show network error
+    const error = {
+      message: "Network Error",
+      response: undefined,
+      config: { _retry: true },
+    };
+    await errInterceptor(error).catch(() => {});
+    // ElMessage.error should be called (network error message), not a retry
+    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
+  });
+
+  it("showErrorMessage skips empty messages", async () => {
+    const { ElMessage } = await import("element-plus");
+    await import("@/utils/request");
+
+    const errInterceptor =
+      mockService.interceptors.response.use.mock.calls[0]?.[1];
+
+    // A 400 response with an empty message string
+    const error = {
+      message: "",
+      response: { status: 400, data: { message: "" } },
+      config: { _retry: true },
+    };
+    await errInterceptor(error).catch(() => {});
+    // showErrorMessage returns early for empty strings → ElMessage.error not called
+    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// handleUnauthorized — isHandlingUnauthorized flag prevents double redirects
+// ---------------------------------------------------------------------------
+describe("handleUnauthorized deduplication", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+  });
+
+  it("rejects silently on second concurrent 401 while first is still processing", async () => {
+    const Token = (await import("@/store/modules/token")).default;
+    const { ElMessage } = await import("element-plus");
+    await import("@/utils/request");
+
+    const errInterceptor =
+      mockService.interceptors.response.use.mock.calls[0]?.[1];
+
+    const error = {
+      message: "Unauthorized",
+      response: { status: 401, data: {} },
+      config: { _retry: false },
+    };
+
+    // Fire two concurrent 401s — the second should be silently rejected
+    const [r1, r2] = await Promise.allSettled([
+      errInterceptor(error),
+      errInterceptor(error),
+    ]);
+
+    // Both should have rejected
+    expect(r1.status).toBe("rejected");
+    expect(r2.status).toBe("rejected");
+
+    // removeToken should be called by the first handler; the second is a no-op
+    expect(Token.removeToken).toHaveBeenCalled();
+    // ElMessage.error should be called (at least once) for the login-expired notice
     expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
   });
 });

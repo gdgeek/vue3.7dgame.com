@@ -273,7 +273,10 @@ describe("usePageData composable", () => {
 
   describe("handlePageChange()", () => {
     it("更新当前页码并触发 refresh", async () => {
-      const fetchFn = vi.fn().mockResolvedValue(makeFetchResponse<Item>([]));
+      // 让 mock 响应携带 page=4，避免 refresh 完成后将 current 覆盖回 1
+      const fetchFn = vi.fn().mockResolvedValue(
+        makeFetchResponse<Item>([], { "x-pagination-current-page": "4" })
+      );
       const { result, unmount } = withSetup(() =>
         usePageData<Item>({ fetchFn, immediate: false })
       );
