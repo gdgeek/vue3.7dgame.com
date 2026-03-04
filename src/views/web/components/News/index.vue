@@ -120,7 +120,7 @@
                   v-model:current-page="pagination.current"
                   :page-size="pagination.size"
                   :total="pagination.total"
-                  layout="prev, pager, next"
+                  layout="prev, pager, next, jumper"
                   background
                   @current-change="handlePageChange"
                 ></el-pagination>
