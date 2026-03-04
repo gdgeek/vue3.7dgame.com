@@ -44,7 +44,7 @@
           <div class="col-checkbox"></div>
           <div class="col-name">{{ t("meta.list.columns.name") }}</div>
           <div class="col-author">{{ t("meta.list.columns.author") }}</div>
-          <div class="col-date">{{ t("meta.list.columns.updatedAt") }}</div>
+          <div class="col-resources">{{ t("meta.list.columns.resources") }}</div>
           <div class="col-actions"></div>
         </template>
 
@@ -75,9 +75,7 @@
           <div class="col-author">
             {{ item.author?.nickname || item.author?.username || "—" }}
           </div>
-          <div class="col-date">
-            {{ formatItemDate(item.updated_at || item.created_at) }}
-          </div>
+          <div class="col-resources">{{ getResourceCount(item) }}</div>
           <div class="col-actions" @click.stop>
             <el-dropdown trigger="click">
               <font-awesome-icon
@@ -165,6 +163,75 @@
               class="hidden-input"
               @change="handleCoverUpload"
             />
+          </div>
+        </template>
+        <template #info>
+          <div class="events-section">
+            <div class="events-title">{{ t("meta.list.events.title") }}</div>
+
+            <div class="events-grid">
+              <div class="events-card">
+                <div class="events-card-title">
+                  {{ t("meta.list.events.inputs") }}
+                  <span class="events-count">{{ eventInputs.length }}</span>
+                </div>
+                <div v-if="eventInputs.length > 0" class="events-list">
+                  <div
+                    v-for="(eventItem, index) in eventInputs"
+                    :key="'in-' + index"
+                    class="events-item"
+                  >
+                    <span class="events-index">{{ index + 1 }}</span>
+                    <div class="events-main">
+                      <span class="events-title-text">{{ eventItem.title }}</span>
+                      <span
+                        v-if="eventItem.name && eventItem.name !== eventItem.title"
+                        class="events-name-sub"
+                      >
+                        {{ eventItem.name }}
+                      </span>
+                    </div>
+                    <span v-if="eventItem.type" class="events-type">{{
+                      eventItem.type
+                    }}</span>
+                  </div>
+                </div>
+                <div v-else class="events-empty">
+                  {{ t("meta.list.events.empty") }}
+                </div>
+              </div>
+
+              <div class="events-card">
+                <div class="events-card-title">
+                  {{ t("meta.list.events.outputs") }}
+                  <span class="events-count">{{ eventOutputs.length }}</span>
+                </div>
+                <div v-if="eventOutputs.length > 0" class="events-list">
+                  <div
+                    v-for="(eventItem, index) in eventOutputs"
+                    :key="'out-' + index"
+                    class="events-item"
+                  >
+                    <span class="events-index">{{ index + 1 }}</span>
+                    <div class="events-main">
+                      <span class="events-title-text">{{ eventItem.title }}</span>
+                      <span
+                        v-if="eventItem.name && eventItem.name !== eventItem.title"
+                        class="events-name-sub"
+                      >
+                        {{ eventItem.name }}
+                      </span>
+                    </div>
+                    <span v-if="eventItem.type" class="events-type">{{
+                      eventItem.type
+                    }}</span>
+                  </div>
+                </div>
+                <div v-else class="events-empty">
+                  {{ t("meta.list.events.empty") }}
+                </div>
+              </div>
+            </div>
           </div>
         </template>
       </DetailPanel>
@@ -255,6 +322,55 @@ import type { CardInfo } from "@/utils/types";
 const { t } = useI18n();
 const router = useRouter();
 
+const logMetaStructure = (scope: "list" | "detail", payload: unknown) => {
+  if (!payload || typeof payload !== "object") {
+    logger.info("[MetaStructure]", { scope, payloadType: typeof payload });
+    return;
+  }
+
+  if (scope === "list") {
+    const list = Array.isArray(payload) ? payload : [];
+    const first = list[0] as Record<string, unknown> | undefined;
+    logger.info("[MetaStructure]", {
+      scope,
+      count: list.length,
+      firstItemKeys: first ? Object.keys(first) : [],
+      firstItemRaw: first ?? null,
+      firstItemShape: first
+        ? {
+            idType: typeof first.id,
+            titleType: typeof first.title,
+            hasAuthor: !!first.author,
+            hasImage: !!first.image,
+            dataType: typeof first.data,
+            infoType: typeof first.info,
+            eventsType: typeof first.events,
+            metaCodeType: typeof first.metaCode,
+          }
+        : null,
+    });
+    return;
+  }
+
+  const detail = payload as Record<string, unknown>;
+  logger.info("[MetaStructure]", {
+    scope,
+    keys: Object.keys(detail),
+    detailRaw: detail,
+    shape: {
+      idType: typeof detail.id,
+      titleType: typeof detail.title,
+      hasAuthor: !!detail.author,
+      hasImage: !!detail.image,
+      dataType: typeof detail.data,
+      infoType: typeof detail.info,
+      eventsType: typeof detail.events,
+      prefabType: typeof detail.prefab,
+      metaCodeType: typeof detail.metaCode,
+    },
+  });
+};
+
 const {
   items,
   loading,
@@ -267,8 +383,16 @@ const {
   handlePageChange,
   handleViewChange,
 } = usePageData({
-  fetchFn: async (params) =>
-    await getMetas(params.sort, params.search, params.page),
+  fetchFn: async (params) => {
+    const response = await getMetas(
+      params.sort,
+      params.search,
+      params.page,
+      "image,author,resources"
+    );
+    logMetaStructure("list", response.data);
+    return response;
+  },
 });
 
 const detailVisible = ref(false);
@@ -398,8 +522,41 @@ const detailProperties = computed(() => {
         currentMeta.value.author?.username ||
         "—",
     },
+    {
+      label: t("meta.list.properties.resources"),
+      value: getResourceCount(currentMeta.value),
+    },
   ];
 });
+
+const getResourceCount = (item?: { resources?: unknown }) => {
+  return Array.isArray(item?.resources) ? item.resources.length : 0;
+};
+
+type MetaEventItem = { title: string; name: string; type: string };
+
+const normalizeEventList = (value: unknown): MetaEventItem[] => {
+  if (!Array.isArray(value)) return [];
+  return value.map((item, index) => {
+    const record =
+      item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+    const title = String(record.title ?? record.name ?? `#${index + 1}`);
+    const name = String(record.name ?? "");
+    const rawType = record.type;
+    return {
+      title,
+      name,
+      type: rawType === null || rawType === undefined ? "" : String(rawType),
+    };
+  });
+};
+
+const eventInputs = computed(() =>
+  normalizeEventList(currentMeta.value?.events?.inputs)
+);
+const eventOutputs = computed(() =>
+  normalizeEventList(currentMeta.value?.events?.outputs)
+);
 
 const openDetail = async (item: metaInfo) => {
   detailVisible.value = true;
@@ -408,6 +565,7 @@ const openDetail = async (item: metaInfo) => {
   try {
     const response = await getMeta(item.id, { expand: "image,author" });
     currentMeta.value = response.data;
+    logMetaStructure("detail", response.data);
   } catch (err) {
     Message.error(String(err));
   } finally {
@@ -594,11 +752,6 @@ const deletedWindow = async (item: metaInfo, resetLoading: () => void) => {
   }
 };
 
-const formatItemDate = (dateStr?: string) => {
-  if (!dateStr) return "—";
-  const d = new Date(dateStr);
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
-};
 </script>
 
 <style scoped lang="scss">
@@ -615,7 +768,7 @@ const formatItemDate = (dateStr?: string) => {
 }
 
 .col-size,
-.col-date {
+.col-author {
   width: 100px;
   text-align: right;
   font-size: var(--font-size-sm, 13px);
@@ -624,8 +777,13 @@ const formatItemDate = (dateStr?: string) => {
   padding-right: 24px;
 }
 
-.col-date {
-  width: 120px;
+.col-resources {
+  width: 90px;
+  text-align: right;
+  font-size: var(--font-size-sm, 13px);
+  color: var(--text-secondary, #64748b);
+  flex-shrink: 0;
+  padding-right: 24px;
 }
 
 .col-actions {
@@ -743,6 +901,125 @@ const formatItemDate = (dateStr?: string) => {
 
 .hidden-input {
   display: none;
+}
+
+.events-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.events-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.events-card {
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-md, 12px);
+  padding: 10px;
+  background: var(--bg-hover, #f8fafc);
+  min-height: 88px;
+}
+
+.events-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  margin-bottom: 8px;
+}
+
+.events-count {
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--primary-color, #03a9f4);
+  background: var(--primary-light, rgba(3, 169, 244, 0.12));
+}
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.events-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.events-index {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  background: var(--bg-hover, #f1f5f9);
+}
+
+.events-main {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.events-title-text {
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.events-name-sub {
+  font-size: 11px;
+  color: var(--text-muted, #94a3b8);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.events-type {
+  color: var(--text-secondary, #64748b);
+  background: var(--bg-hover, #f1f5f9);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 999px;
+  padding: 2px 8px;
+  flex-shrink: 0;
+}
+
+.events-empty {
+  font-size: 12px;
+  color: var(--text-muted, #94a3b8);
 }
 
 .selection-container {

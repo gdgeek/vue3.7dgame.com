@@ -28,11 +28,19 @@ export default {
         name: "Entity Name",
         author: "Author",
         updatedAt: "Updated At",
+        resources: "Resources",
       },
       properties: {
         type: "Type",
         entity: "Entity",
         author: "Author",
+        resources: "Resources Used",
+      },
+      events: {
+        title: "Signals",
+        inputs: "Inputs",
+        outputs: "Outputs",
+        empty: "No signals",
       },
     },
     create: {

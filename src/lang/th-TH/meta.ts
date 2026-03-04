@@ -28,11 +28,19 @@ export default {
         name: "ชื่อเอนทิตี",
         author: "ผู้เขียน",
         updatedAt: "วันที่แก้ไข",
+        resources: "จำนวนทรัพยากร",
       },
       properties: {
         type: "ประเภท",
         entity: "เอนทิตี",
         author: "ผู้เขียน",
+        resources: "จำนวนทรัพยากรที่ใช้",
+      },
+      events: {
+        title: "สัญญาณ",
+        inputs: "อินพุต",
+        outputs: "เอาต์พุต",
+        empty: "ไม่มีสัญญาณ",
       },
     },
     create: {
