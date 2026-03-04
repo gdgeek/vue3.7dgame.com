@@ -93,6 +93,56 @@ describe("useTheme", () => {
   });
 
   // ── setTheme ──────────────────────────────────────────────────────────────
+  //
+  // Branch supplement: lines 281-289
+  // if (themeName === "modern-blue" && customPrimaryColor.value) { … }
+  //
+  describe("setTheme() — custom-color branch (lines 281-289)", () => {
+    it("setTheme('modern-blue') with existing custom color applies custom shadow via generatePrimaryShadow", () => {
+      const { setTheme, setCustomPrimaryColor } = useTheme();
+      // Ensure we are on modern-blue so that setCustomPrimaryColor works
+      setTheme("modern-blue");
+      setCustomPrimaryColor("#FF6B35");
+
+      // Remove the CSS variable so we can verify it is re-applied by setTheme
+      document.documentElement.style.removeProperty("--shadow-primary");
+
+      // Calling setTheme("modern-blue") again triggers lines 282-289 because
+      // customPrimaryColor.value is now "#FF6B35" (truthy)
+      setTheme("modern-blue");
+
+      const shadow = document.documentElement.style.getPropertyValue("--shadow-primary");
+      expect(shadow).toBeTruthy();
+    });
+
+    it("setTheme('modern-blue') with custom color calls applyTheme and applyColorVariables for custom colors", () => {
+      const { setTheme, setCustomPrimaryColor } = useTheme();
+      setTheme("modern-blue");
+      setCustomPrimaryColor("#AA3399");
+
+      // Verify no throw and CSS primary-color is set (applyColorVariables was invoked)
+      expect(() => setTheme("modern-blue")).not.toThrow();
+      const primary = document.documentElement.style.getPropertyValue("--primary-color");
+      expect(primary).toBeTruthy();
+    });
+
+    it("setTheme to non-modern-blue theme takes the else branch (no custom colors)", () => {
+      const { setTheme } = useTheme();
+      const darkTheme = (globalThis as any).__themes__?.find((t: any) => t.isDark);
+
+      // Get a non-modern-blue theme
+      const { themes: allThemes } = (() => {
+        // themes is available via the beforeEach import
+        return { themes };
+      })();
+      const other = allThemes.find((t) => t.name !== "modern-blue");
+      if (!other) return;
+
+      // No custom color set → else branch is taken (just applyTheme)
+      expect(() => setTheme(other.name)).not.toThrow();
+      expect(document.body.getAttribute("data-theme")).toBe(other.name);
+    });
+  });
 
   describe("setTheme()", () => {
     it("切换到已知主题后 currentThemeName 更新", () => {

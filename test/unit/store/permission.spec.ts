@@ -226,4 +226,57 @@ describe("usePermissionStore", () => {
     const result = await store.generateRoutes();
     expect(result.length).toBeGreaterThanOrEqual(3);
   });
+
+  // -----------------------------------------------------------------------
+  // Branch coverage supplements
+  // -----------------------------------------------------------------------
+
+  it("setMixLeftMenus: matchedItem exists but children is null (falsy) → mixLeftMenus unchanged", () => {
+    // children: null is falsy, so the inner `if` branch is NOT taken
+    mockRouterData.value = [{ path: "/null-children", children: null }] as never;
+    const store = usePermissionStore();
+    store.setMixLeftMenus("/null-children");
+    expect(store.mixLeftMenus).toEqual([]);
+  });
+
+  it("setMixLeftMenus: multiple routes, only matching one's children are set", () => {
+    const c1 = [{ path: "/x/a" }];
+    const c2 = [{ path: "/y/b" }];
+    mockRouterData.value = [
+      { path: "/x", children: c1 },
+      { path: "/y", children: c2 },
+    ] as never;
+    const store = usePermissionStore();
+    store.setMixLeftMenus("/y");
+    expect(store.mixLeftMenus).toEqual(c2);
+  });
+
+  it("transformRoutes: route with no component property falls back to 404", async () => {
+    // component is undefined → toString() optional chain → undefined ≠ 'Layout'
+    // modules['../../views/undefined.vue'] → not found → 404 fallback
+    mockRouterData.value = [{ path: "/nocomp" }] as never;
+    const store = usePermissionStore();
+    const result = await store.generateRoutes();
+    expect(result).toHaveLength(1);
+    expect(typeof result[0].component).toBe("function");
+  });
+
+  it("transformRoutes: route with empty-string component falls back to 404", async () => {
+    // ''.toString() = '' ≠ 'Layout'; modules['../../views/.vue'] doesn't exist → 404
+    mockRouterData.value = [{ path: "/empty-comp", component: "" }] as never;
+    const store = usePermissionStore();
+    const result = await store.generateRoutes();
+    expect(result).toHaveLength(1);
+    expect(typeof result[0].component).toBe("function");
+  });
+
+  it("transformRoutes: children:[] (truthy) triggers recursive call and stays empty", async () => {
+    // [] is truthy, so transformRoutes([]) is called recursively → returns []
+    mockRouterData.value = [
+      { path: "/r", component: "Layout", children: [] },
+    ] as never;
+    const store = usePermissionStore();
+    const result = await store.generateRoutes();
+    expect(result[0].children).toEqual([]);
+  });
 });
