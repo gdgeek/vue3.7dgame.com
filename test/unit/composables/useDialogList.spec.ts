@@ -319,7 +319,10 @@ describe("useDialogList composable", () => {
   // ----------------------------------------------------------
   describe("handleCurrentChange()", () => {
     it("更新当前页码并触发 refresh", async () => {
-      const fetchFn = vi.fn().mockResolvedValue(makeResponse<Item>([]));
+      // 让 mock 响应携带 page=4，避免 refresh 完成后将 current 覆盖回 1
+      const fetchFn = vi.fn().mockResolvedValue(
+        makeResponse<Item>([], { "x-pagination-current-page": "4" })
+      );
       const { handleCurrentChange, active } = setupDialogList<Item>(fetchFn);
 
       handleCurrentChange(4);
@@ -345,7 +348,10 @@ describe("useDialogList composable", () => {
   // ----------------------------------------------------------
   describe("组合场景", () => {
     it("搜索后翻页，page 使用新 searched 参数", async () => {
-      const fetchFn = vi.fn().mockResolvedValue(makeResponse<Item>([]));
+      // 第一次调用（search）→ 返回 page=1；第二次调用（handleCurrentChange）→ 返回 page=3
+      const fetchFn = vi.fn()
+        .mockResolvedValueOnce(makeResponse<Item>([], { "x-pagination-current-page": "1" }))
+        .mockResolvedValueOnce(makeResponse<Item>([], { "x-pagination-current-page": "3" }));
       const { search, handleCurrentChange, active } = setupDialogList<Item>(fetchFn);
 
       search("vue");

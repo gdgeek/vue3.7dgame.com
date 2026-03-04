@@ -11,6 +11,29 @@ vi.mock("@/utils/logger", () => ({
   },
 }));
 
+/**
+ * Mock secure-ls：用 localStorage + JSON 模拟加密行为，
+ * 使测试断言可以直接读写 localStorage，同时验证 token.ts 的逻辑。
+ * - ls.get() 解析 JSON，遇到非法 JSON 时抛出异常（触发 token.ts 的 catch 分支）
+ * - ls.set() / ls.remove() 透明代理到 localStorage
+ */
+vi.mock("secure-ls", () => {
+  const SecureLS = vi.fn().mockImplementation(() => ({
+    set: vi.fn((key: string, data: unknown) => {
+      localStorage.setItem(key, JSON.stringify(data));
+    }),
+    get: vi.fn((key: string) => {
+      const raw = localStorage.getItem(key);
+      if (raw === null || raw === undefined) return null;
+      return JSON.parse(raw); // 非法 JSON 会 throw，token.ts 的 catch 负责处理
+    }),
+    remove: vi.fn((key: string) => {
+      localStorage.removeItem(key);
+    }),
+  }));
+  return { default: SecureLS };
+});
+
 const TOKEN_KEY = "access_token";
 
 const makeToken = (overrides: Partial<TokenInfo> = {}): TokenInfo => ({

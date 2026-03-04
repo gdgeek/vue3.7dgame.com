@@ -164,4 +164,52 @@ describe("disposeKTX2Loader()", () => {
     getConfiguredGLTFLoader(); // second call — should reuse cached KTX2
     expect(vi.mocked(KTX2Loader)).toHaveBeenCalledTimes(1);
   });
+
+  it("does not throw when dispose() itself throws (catch block covered)", async () => {
+    mockKTX2Dispose.mockImplementationOnce(() => {
+      throw new Error("dispose failed");
+    });
+    const { getConfiguredGLTFLoader, disposeKTX2Loader } = await import(
+      "@/lib/three/loaders"
+    );
+    getConfiguredGLTFLoader();
+    // disposeKTX2Loader wraps dispose() in try/catch — must not propagate
+    expect(() => disposeKTX2Loader()).not.toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// KTX2 initialization failure — covers catch block in getConfiguredGLTFLoader
+// ---------------------------------------------------------------------------
+describe("getConfiguredGLTFLoader() — KTX2 init failure", () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    vi.resetModules();
+  });
+
+  it("falls back gracefully when KTX2Loader.detectSupport throws", async () => {
+    mockDetectSupport.mockImplementationOnce(() => {
+      throw new Error("WebGL not supported");
+    });
+    const { logger } = await import("@/utils/logger");
+    const { getConfiguredGLTFLoader } = await import("@/lib/three/loaders");
+
+    expect(() => getConfiguredGLTFLoader()).not.toThrow();
+    expect(
+      (logger as { warn: ReturnType<typeof vi.fn> }).warn
+    ).toHaveBeenCalledWith(
+      expect.stringContaining("KTX2Loader"),
+      expect.any(Error)
+    );
+  });
+
+  it("returns a loader without KTX2 when initialization fails", async () => {
+    mockDetectSupport.mockImplementationOnce(() => {
+      throw new Error("WebGL not supported");
+    });
+    const { getConfiguredGLTFLoader } = await import("@/lib/three/loaders");
+    const loader = getConfiguredGLTFLoader();
+    expect(loader).toBeDefined();
+    expect(mockSetKTX2).not.toHaveBeenCalled();
+  });
 });
