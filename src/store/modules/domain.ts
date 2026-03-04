@@ -55,7 +55,7 @@ function getDomainForQuery(): string {
     /^10\./.test(domain) ||
     /^172\.(1[6-9]|2\d|3[01])\./.test(domain)
   ) {
-    domain = "d.xiading.hxgxonline.com";
+    domain = import.meta.env.VITE_APP_DEV_DOMAIN_FALLBACK || "";
   }
   return domain;
 }

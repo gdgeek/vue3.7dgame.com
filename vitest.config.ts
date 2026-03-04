@@ -84,13 +84,10 @@ export default defineConfig({
         "src/views/meta-verse/public.vue",
         "src/views/audio/**",
       ],
-      // 覆盖率阈值（可选，逐步启用）
-      // thresholds: {
-      //   lines: 50,
-      //   functions: 50,
-      //   branches: 50,
-      //   statements: 50,
-      // },
+      // 覆盖率阈值（保守起步，仅强制 lines≥70，逐步提高）
+      thresholds: {
+        lines: 70,
+      },
     },
     // 测试超时时间
     testTimeout: 10000,

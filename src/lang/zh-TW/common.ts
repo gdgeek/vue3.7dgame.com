@@ -154,6 +154,7 @@ export default {
     networkError: "網絡錯誤，請檢查您的網絡連接",
     serverError: "服務器內部錯誤，請稍後再試",
     error404: "請求失敗，未找到資源 (404)",
+    unknownError: "未知錯誤",
   },
   web: {
     login: "登錄平台",

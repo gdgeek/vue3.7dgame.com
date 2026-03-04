@@ -53,6 +53,7 @@ export default {
     networkError: "网络错误，请检查您的网络连接",
     serverError: "服务器内部错误，请稍后再试",
     error404: "请求失败，未找到资源 (404)",
+    unknownError: "未知错误",
   },
   emailVerification: {
     codeSent: "验证码已发送到您的邮箱",
