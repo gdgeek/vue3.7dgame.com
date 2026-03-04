@@ -328,3 +328,115 @@ describe("delAllViews()", () => {
     expect(store.visitedViews.some((x) => x.path === "/home")).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// delLeftViews — 覆盖第 155-157 行：同步清除 cachedViews 中左侧视图的缓存
+// ---------------------------------------------------------------------------
+describe("delLeftViews() — cachedViews 同步清除（lines 155-157）", () => {
+  it("删除左侧视图时同步从 cachedViews 移除对应缓存名称", async () => {
+    const store = useTagsViewStore();
+    const v1 = makeView({ keepAlive: true, name: "CacheLeft1" });
+    const v2 = makeView({ keepAlive: true, name: "CacheLeft2" });
+    const v3 = makeView({ keepAlive: true, name: "CacheTarget" });
+    store.addView(v1);
+    store.addView(v2);
+    store.addView(v3);
+
+    await store.delLeftViews(v3);
+
+    expect(store.cachedViews).not.toContain("CacheLeft1");
+    expect(store.cachedViews).not.toContain("CacheLeft2");
+    expect(store.cachedViews).toContain("CacheTarget");
+  });
+
+  it("左侧视图无 keepAlive 时 cachedViews 不受影响", async () => {
+    const store = useTagsViewStore();
+    const v1 = makeView({ keepAlive: false, name: "NoCache1" });
+    const v2 = makeView({ keepAlive: true, name: "CacheKeep" });
+    store.addView(v1);
+    store.addView(v2);
+
+    await store.delLeftViews(v2);
+
+    // v1 本来就不在 cachedViews（无 keepAlive），v2 的缓存不受影响
+    expect(store.cachedViews).toContain("CacheKeep");
+  });
+
+  it("目标 view 不在 visitedViews 中时提前返回，visitedViews 不变", () => {
+    const store = useTagsViewStore();
+    const v1 = makeView();
+    const v2 = makeView();
+    store.addVisitedView(v1);
+    store.addVisitedView(v2);
+    const originalLength = store.visitedViews.length;
+
+    // 不 await：currIndex=-1 时 Promise 不 resolve
+    const notExisting = makeView({ path: "/does-not-exist" });
+    store.delLeftViews(notExisting);
+
+    expect(store.visitedViews).toHaveLength(originalLength);
+  });
+
+  it("混合 affix 视图：affix 保留，非 affix 左侧视图被删除且缓存清除", async () => {
+    const store = useTagsViewStore();
+    const affixView = makeView({ affix: true, path: "/affix-left" });
+    const leftView = makeView({ keepAlive: true, name: "LeftNonAffix" });
+    const targetView = makeView({ name: "Target" });
+    store.addVisitedView(affixView);
+    store.addVisitedView(leftView);
+    store.addCachedView(leftView);
+    store.addVisitedView(targetView);
+
+    await store.delLeftViews(targetView);
+
+    expect(store.visitedViews.some((v) => v.path === affixView.path)).toBe(true);
+    expect(store.visitedViews.some((v) => v.path === leftView.path)).toBe(false);
+    expect(store.cachedViews).not.toContain("LeftNonAffix");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// delRightViews — 覆盖第 171-172 行：currIndex=-1 时提前返回
+// ---------------------------------------------------------------------------
+describe("delRightViews() — 目标不存在时提前返回（lines 171-172）", () => {
+  it("目标 view 不在 visitedViews 中时 visitedViews 不变", () => {
+    const store = useTagsViewStore();
+    const v1 = makeView();
+    const v2 = makeView();
+    store.addVisitedView(v1);
+    store.addVisitedView(v2);
+    const originalLength = store.visitedViews.length;
+
+    // 不 await：currIndex=-1 时 Promise 不 resolve
+    const notExisting = makeView({ path: "/not-in-store" });
+    store.delRightViews(notExisting);
+
+    expect(store.visitedViews).toHaveLength(originalLength);
+  });
+
+  it("目标 view 不存在时 cachedViews 不变", () => {
+    const store = useTagsViewStore();
+    const v = makeView({ keepAlive: true, name: "ShouldStay" });
+    store.addView(v);
+    const originalCacheLength = store.cachedViews.length;
+
+    const notExisting = makeView({ path: "/ghost" });
+    store.delRightViews(notExisting);
+
+    expect(store.cachedViews).toHaveLength(originalCacheLength);
+    expect(store.cachedViews).toContain("ShouldStay");
+  });
+
+  it("最后一个元素为目标时 visitedViews 只保留到该位置", async () => {
+    const store = useTagsViewStore();
+    const [v1, v2] = [makeView(), makeView()];
+    store.addVisitedView(v1);
+    store.addVisitedView(v2);
+
+    await store.delRightViews(v2);
+
+    expect(store.visitedViews).toHaveLength(2);
+    expect(store.visitedViews.some((v) => v.path === v1.path)).toBe(true);
+    expect(store.visitedViews.some((v) => v.path === v2.path)).toBe(true);
+  });
+});

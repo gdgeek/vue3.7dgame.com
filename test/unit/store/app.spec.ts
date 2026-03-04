@@ -30,7 +30,7 @@ vi.mock("element-plus/es/locale/lang/zh-tw", () => ({
 }));
 
 // Static import — resolved after mocks are set up
-import { useAppStore } from "@/store/modules/app";
+import { useAppStore, useAppStoreHook } from "@/store/modules/app";
 
 beforeEach(() => {
   setActivePinia(createPinia());
@@ -223,5 +223,50 @@ describe("closeSideBar() when already closed is idempotent", () => {
     store.closeSideBar();
     store.closeSideBar();
     expect(store.sidebar.opened).toBe(false);
+  });
+});
+
+// -----------------------------------------------------------------------
+// useAppStoreHook (lines 104-105)
+// -----------------------------------------------------------------------
+describe("useAppStoreHook()", () => {
+  it("返回合法的 store 实例（有 sidebar 属性）", () => {
+    const hook = useAppStoreHook();
+    expect(hook).toBeDefined();
+    expect(typeof hook.sidebar).toBe("object");
+    expect(typeof hook.sidebar.opened).toBe("boolean");
+  });
+
+  it("返回的实例包含 toggleSidebar 方法", () => {
+    const hook = useAppStoreHook();
+    expect(typeof hook.toggleSidebar).toBe("function");
+  });
+
+  it("返回的实例包含 changeLanguage 方法", () => {
+    const hook = useAppStoreHook();
+    expect(typeof hook.changeLanguage).toBe("function");
+  });
+
+  it("useAppStoreHook 与 useAppStore 返回相同类型的实例", () => {
+    const hook = useAppStoreHook();
+    // 两者都暴露相同的公开属性
+    expect(Object.keys(hook)).toEqual(
+      expect.arrayContaining([
+        "device",
+        "sidebar",
+        "language",
+        "locale",
+        "size",
+        "activeTopMenuPath",
+      ])
+    );
+  });
+
+  it("useAppStoreHook 返回的实例可以正常操作 sidebar", () => {
+    const hook = useAppStoreHook();
+    hook.openSideBar();
+    expect(hook.sidebar.opened).toBe(true);
+    hook.closeSideBar();
+    expect(hook.sidebar.opened).toBe(false);
   });
 });
