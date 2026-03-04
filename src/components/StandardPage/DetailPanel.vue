@@ -4,6 +4,7 @@
       <div
         v-if="modelValue"
         class="detail-panel-overlay"
+        :style="{ zIndex: String(overlayZIndex) }"
         @click.self="handleClose"
       >
         <Transition name="panel-slide">
@@ -201,6 +202,7 @@ interface Props {
   showDelete?: boolean;
   width?: string;
   actionLayout?: "stacked" | "grid";
+  zIndex?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -220,6 +222,7 @@ const props = withDefaults(defineProps<Props>(), {
   showDelete: true,
   width: "840px",
   actionLayout: "stacked",
+  zIndex: 2000,
 });
 
 const emit = defineEmits<{
@@ -232,6 +235,7 @@ const emit = defineEmits<{
 }>();
 
 const panelWidth = computed(() => props.width);
+const overlayZIndex = computed(() => props.zIndex);
 
 // Inline editing state
 const isEditing = ref(false);

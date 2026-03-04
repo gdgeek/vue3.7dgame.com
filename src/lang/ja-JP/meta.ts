@@ -134,6 +134,7 @@ export default {
       title: "リソースを選択",
       replaceTitle: "リソースを置き換える",
       select: "選択",
+      cancelSelect: "選択をキャンセル",
       putIn: "入れる",
       replace: "置き換え",
       putAllIn: "すべて入れる",

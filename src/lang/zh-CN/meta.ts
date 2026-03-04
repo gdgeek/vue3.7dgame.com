@@ -116,6 +116,7 @@ export default {
       title: "选择资源",
       replaceTitle: "替换资源",
       select: "选择",
+      cancelSelect: "取消选择",
       putIn: "放入",
       replace: "替换",
       putAllIn: "全部放入",

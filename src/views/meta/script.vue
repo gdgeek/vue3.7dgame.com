@@ -5,7 +5,7 @@
         <el-card v-loading="loading" class="box-card">
           <template #header>
             <div v-if="meta" class="clearfix">
-              <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
+              <el-link :href="`/meta/scene?id=${id}`" :underline="false">{{
                 meta.title
               }}</el-link>
               /【{{ $t("meta.script.title") }}】

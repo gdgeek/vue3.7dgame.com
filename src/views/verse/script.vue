@@ -5,7 +5,7 @@
         <el-card :loading="loading" class="box-card">
           <template #header>
             <div v-if="verse" class="clearfix">
-              <el-link :href="`/verse/view?id=${id}`" :underline="false">{{
+              <el-link :href="`/verse/scene?id=${id}`" :underline="false">{{
                 verse.name
               }}</el-link>
               /【{{ $t("verse.view.script.title") }}】

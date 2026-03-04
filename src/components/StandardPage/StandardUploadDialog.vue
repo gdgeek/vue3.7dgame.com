@@ -85,6 +85,7 @@ const props = withDefaults(
     modelValue: boolean;
     title?: string;
     fileType: string; // e.g., "audio/mp3, audio/wav" or ".glb, .gltf"
+    displayFormats?: string;
     dir: string;
     maxSize?: number; // MB
     multiple?: boolean;
@@ -93,6 +94,7 @@ const props = withDefaults(
   {
     title: "上传资源",
     fileType: "*",
+    displayFormats: "",
     dir: "",
     maxSize: 0,
     multiple: true,
@@ -139,6 +141,9 @@ const currentStageText = computed(() => {
 });
 
 const supportedFormats = computed(() => {
+  if (props.displayFormats && props.displayFormats.trim() !== "") {
+    return props.displayFormats;
+  }
   // Convert mime types or extensions to readable format
   // e.g., "audio/mp3, audio/wav" -> "MP3, WAV"
   // ".glb, .gltf" -> "GLB, GLTF"

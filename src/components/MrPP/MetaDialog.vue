@@ -45,7 +45,7 @@
                     <template #header>
                       <b class="card-title" nowrap>{{ title(item) }}</b>
                     </template>
-                    <router-link :to="'/meta/meta-edit?id=' + item.id">
+                    <router-link :to="'/meta/scene?id=' + item.id">
                       <Id2Image
                         :image="item.image ? item.image.url : null"
                         :id="item.id"
