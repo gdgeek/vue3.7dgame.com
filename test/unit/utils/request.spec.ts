@@ -465,3 +465,86 @@ describe("handleUnauthorized deduplication", () => {
     expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
   });
 });
+
+// ---------------------------------------------------------------------------
+// request interceptor error handler — line 148-149
+// ---------------------------------------------------------------------------
+describe("request interceptor error handler (line 148-149)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+  });
+
+  it("request interceptor error handler rejects with the original error", async () => {
+    await import("@/utils/request");
+
+    // The request interceptor is registered as: service.interceptors.request.use(success, error)
+    // We need the SECOND argument — the error handler (lines 147-149)
+    const reqErrHandler =
+      mockService.interceptors.request.use.mock.calls[0]?.[1];
+    expect(reqErrHandler).toBeDefined();
+
+    const originalError = new Error("request setup failed");
+    await expect(reqErrHandler(originalError)).rejects.toThrow(
+      "request setup failed"
+    );
+  });
+
+  it("request interceptor error handler returns a rejected Promise", async () => {
+    await import("@/utils/request");
+    const reqErrHandler =
+      mockService.interceptors.request.use.mock.calls[0]?.[1];
+
+    const result = reqErrHandler(new Error("oops"));
+    // Should be a Promise
+    expect(result).toBeInstanceOf(Promise);
+    // Should reject
+    await expect(result).rejects.toBeDefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// handleUnauthorized setTimeout callback — line 177
+// isHandlingUnauthorized resets after 1000ms
+// ---------------------------------------------------------------------------
+describe("handleUnauthorized setTimeout callback (line 177)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("isHandlingUnauthorized resets to false after 1000ms (allows next 401 through)", async () => {
+    const Token = (await import("@/store/modules/token")).default;
+    const { ElMessage } = await import("element-plus");
+    await import("@/utils/request");
+
+    const errInterceptor =
+      mockService.interceptors.response.use.mock.calls[0]?.[1];
+
+    const make401 = () => ({
+      message: "Unauthorized",
+      response: { status: 401, data: {} },
+      config: { _retry: false },
+    });
+
+    // First 401 — triggers handleUnauthorized, sets isHandlingUnauthorized=true
+    await errInterceptor(make401()).catch(() => {});
+
+    // removeToken called once
+    expect(Token.removeToken).toHaveBeenCalledTimes(1);
+
+    // Advance clock by 1000ms → setTimeout callback fires (line 177)
+    vi.advanceTimersByTime(1000);
+
+    // Now isHandlingUnauthorized should be false again.
+    // Fire another 401 — it should be handled again (not silently rejected)
+    await errInterceptor(make401()).catch(() => {});
+    // removeToken should now have been called a second time
+    expect(Token.removeToken).toHaveBeenCalledTimes(2);
+  });
+});
