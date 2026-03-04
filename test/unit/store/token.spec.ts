@@ -37,7 +37,10 @@ describe("Token store module", () => {
 
       const stored = localStorage.getItem(TOKEN_KEY);
       expect(stored).not.toBeNull();
-      expect(JSON.parse(stored!)).toEqual(token);
+      // stored is AES-encrypted, not plaintext JSON
+      expect(stored).not.toContain(token.accessToken);
+      // but round-trip via getToken() returns original value
+      expect(Token.getToken()).toEqual(token);
     });
 
     it("覆盖已有的 token", async () => {
@@ -62,7 +65,8 @@ describe("Token store module", () => {
       const Token = (await import("@/store/modules/token")).default;
       const token = makeToken();
 
-      localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
+      // Use setToken so the data is properly AES-encrypted before storing
+      Token.setToken(token);
 
       const result = Token.getToken();
       expect(result).toEqual(token);
@@ -72,10 +76,18 @@ describe("Token store module", () => {
     });
 
     it("localStorage 存储了非法 JSON 时返回 null 并记录错误", async () => {
+      const { AES } = await import("crypto-js");
       const { logger } = await import("@/utils/logger");
       const Token = (await import("@/store/modules/token")).default;
 
-      localStorage.setItem(TOKEN_KEY, "{ invalid json }");
+      // Encrypt a non-JSON string using the same default SECRET_KEY so that
+      // decryption succeeds but JSON.parse throws, triggering logger.error
+      const SECRET_KEY = "mrpp-default-token-secret-2024";
+      const encryptedNonJson = AES.encrypt(
+        "not-valid-json-content",
+        SECRET_KEY
+      ).toString();
+      localStorage.setItem(TOKEN_KEY, encryptedNonJson);
 
       const result = Token.getToken();
 
@@ -190,7 +202,11 @@ describe("Token store module", () => {
       const token = makeToken({ accessToken: "abc-xyz" });
       Token.setToken(token);
       const raw = localStorage.getItem("access_token");
-      expect(raw).toContain("abc-xyz");
+      // raw is AES-encrypted, so it must not contain the plaintext token
+      expect(raw).not.toBeNull();
+      expect(raw).not.toContain("abc-xyz");
+      // but getToken() correctly decrypts and returns the original value
+      expect(Token.getToken()?.accessToken).toBe("abc-xyz");
     });
   });
 });
