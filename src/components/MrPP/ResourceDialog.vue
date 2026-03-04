@@ -259,8 +259,8 @@ const sorted = ref("-created_at");
 const searched = ref("");
 
 // 响应式状态
-const selectedIds = ref<Array<number | string>>([]);
-const singleSelectedId = ref<number | string>();
+const selectedIds = ref<number[]>([]);
+const singleSelectedId = ref<number>();
 const dialogVisible = ref(false);
 const type = ref("polygen");
 const metaId = ref<number | null>(null);
@@ -299,7 +299,7 @@ const isSelected = (item: CardInfo): boolean => {
 };
 
 const getItemTitle = (item: CardInfo): string => {
-  return item.title ?? item.name ?? "title";
+  return item.name ?? "title";
 };
 
 const getTypeIcon = (type?: string): string[] => {
@@ -566,7 +566,7 @@ async function getDatas(input: DataInput): Promise<DataOutput> {
           context: item,
           type: item.type,
           created_at: item.created_at,
-          name: item.name ? item.name : item.title, // 使用name或title
+          name: item.name ?? "", // 使用 name
           image: item.image ? { url: item.image.url } : null,
           enabled: true,
         } as CardInfo;
@@ -589,7 +589,7 @@ async function getDatas(input: DataInput): Promise<DataOutput> {
       const sortedItems = sortByNameWithPinyin(
         items,
         sorted.value,
-        (item) => String(item.name ?? item.title ?? "")
+        (item) => String(item.name ?? "")
       );
       resolve({ items: sortedItems, pagination });
     } catch (error) {

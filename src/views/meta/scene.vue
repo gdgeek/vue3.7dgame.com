@@ -6,12 +6,12 @@
     ></phototype-dialog>
     <resource-dialog @selected="selected" :on-get-datas="getDatas" ref="dialog">
       <template #bar="{ item }">
-        <div v-if="item.type === 'audio'" class="info-container">
+        <div v-if="isAudioBarItem(item)" class="info-container">
           <audio
             id="audio"
             controls
             style="width: 100%; height: 30px"
-            :src="item.context.file.url"
+            :src="getAudioSource(item)"
             @play="handleAudioPlay"
           ></audio>
         </div>
@@ -71,6 +71,18 @@ const hasImageData = (value: unknown): value is { imageData: string } =>
 
 const isJsonSchema = (value: unknown): value is JsonSchema =>
   isRecord(value) && typeof value.type === "string";
+
+const isAudioBarItem = (
+  value: unknown
+): value is { type: "audio"; context: unknown } =>
+  isRecord(value) && value.type === "audio";
+
+const getAudioSource = (value: unknown): string => {
+  if (!isRecord(value) || !isRecord(value.context)) return "";
+  const file = value.context.file;
+  if (!isRecord(file) || typeof file.url !== "string") return "";
+  return file.url;
+};
 
 const currentPlayingAudio = ref<HTMLAudioElement | null>(null);
 
