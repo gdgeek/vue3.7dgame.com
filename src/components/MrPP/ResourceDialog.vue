@@ -84,7 +84,9 @@
                 :image="item.image?.url"
                 :title="getItemTitle(item)"
                 :meta="{
-                  date: item.created_at ? convertToLocalTime(item.created_at) : '',
+                  date: item.created_at
+                    ? convertToLocalTime(item.created_at)
+                    : '',
                 }"
                 :selected="isSelected(item)"
                 :selection-mode="mode !== 'replace' && multiple"
@@ -107,7 +109,11 @@
                         : $t("meta.ResourceDialog.select")
                     }}
                   </el-button>
-                  <el-button size="small" type="primary" @click="doSelect(item)">
+                  <el-button
+                    size="small"
+                    type="primary"
+                    @click="doSelect(item)"
+                  >
                     {{ $t("meta.ResourceDialog.putIn") }}
                   </el-button>
                 </template>
@@ -130,29 +136,11 @@
 
       <template #footer>
         <div class="dialog-footer">
-          <el-row :gutter="0">
-            <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-              <div class="pagination-center">
-                <el-pagination
-                  :current-page="active.pagination.current"
-                  :page-count="active.pagination.count"
-                  :page-size="active.pagination.size"
-                  :total="active.pagination.total"
-                  layout="prev, pager, next"
-                  background
-                  @current-change="handleCurrentChange"
-                ></el-pagination>
-                <span class="goto-label">Go to</span>
-                <el-input
-                  v-model="jumpPage"
-                  class="goto-input"
-                  size="small"
-                  @keyup.enter="applyJumpPage"
-                  @blur="applyJumpPage"
-                ></el-input>
-              </div>
-            </el-col>
-          </el-row>
+          <PagePagination
+            :current-page="active.pagination.current"
+            :total-pages="active.pagination.count || 1"
+            @page-change="handleCurrentChange"
+          ></PagePagination>
         </div>
       </template>
     </el-dialog>
@@ -223,7 +211,7 @@
 
 <script setup lang="ts">
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { ElMessage, ElMessageBox } from "element-plus";
 import {
@@ -241,7 +229,12 @@ import {
   getVideoCover,
 } from "@/utils/utilityFunctions";
 import { sortByNameWithPinyin } from "@/utils/nameSort";
-import { DetailPanel, PageActionBar, StandardCard } from "@/components/StandardPage";
+import {
+  DetailPanel,
+  PageActionBar,
+  PagePagination,
+  StandardCard,
+} from "@/components/StandardPage";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import PolygenView from "@/components/PolygenView.vue";
 import { printVector2, printVector3 } from "@/assets/js/helper";
@@ -266,7 +259,6 @@ const type = ref("polygen");
 const metaId = ref<number | null>(null);
 const value = ref<unknown>(null);
 const mode = ref<"normal" | "replace">("normal");
-const jumpPage = ref("1");
 const detailVisible = ref(false);
 const detailLoading = ref(false);
 const detailResource = ref<ResourceInfo | null>(null);
@@ -322,7 +314,9 @@ const getTypeIcon = (type?: string): string[] => {
   }
 };
 
-const detailType = computed(() => detailResource.value?.type || detailSourceItem.value?.type || "");
+const detailType = computed(
+  () => detailResource.value?.type || detailSourceItem.value?.type || ""
+);
 
 const detailTitle = computed(() => t("ui.resourceDetail"));
 
@@ -365,9 +359,13 @@ const detailTypeLabel = computed(() => {
 const detailPreviewUrl = computed(() => {
   if (!detailResource.value) return "";
   if (detailType.value === "video") {
-    return getVideoCover(detailResource.value.image?.url || detailResource.value.file?.url);
+    return getVideoCover(
+      detailResource.value.image?.url || detailResource.value.file?.url
+    );
   }
-  return detailResource.value.image?.url || detailResource.value.file?.url || "";
+  return (
+    detailResource.value.image?.url || detailResource.value.file?.url || ""
+  );
 });
 
 const detailProperties = computed(() => {
@@ -375,7 +373,10 @@ const detailProperties = computed(() => {
   const info = parseDetailInfo(detailResource.value.info);
   const props: Array<{ label: string; value: string | number }> = [
     { label: t("ui.type"), value: detailTypeLabel.value },
-    { label: t("ui.size"), value: formatSize(detailResource.value.file?.size || 0) },
+    {
+      label: t("ui.size"),
+      value: formatSize(detailResource.value.file?.size || 0),
+    },
     {
       label: t("ui.createdAt"),
       value: detailResource.value.created_at
@@ -408,7 +409,10 @@ const detailProperties = computed(() => {
     }
   }
 
-  if ((detailType.value === "video" || detailType.value === "audio") && info?.length) {
+  if (
+    (detailType.value === "video" || detailType.value === "audio") &&
+    info?.length
+  ) {
     props.push({
       label: t("ui.duration"),
       value: Number(info.length).toFixed(2) + "s",
@@ -445,7 +449,6 @@ const open = async (
 
   selectedIds.value = [];
   singleSelectedId.value = undefined;
-  jumpPage.value = "1";
 
   await refresh();
   dialogVisible.value = true;
@@ -586,10 +589,8 @@ async function getDatas(input: DataInput): Promise<DataOutput> {
           String(response.headers["x-pagination-total-count"] ?? "0")
         ),
       };
-      const sortedItems = sortByNameWithPinyin(
-        items,
-        sorted.value,
-        (item) => String(item.name ?? "")
+      const sortedItems = sortByNameWithPinyin(items, sorted.value, (item) =>
+        String(item.name ?? "")
       );
       resolve({ items: sortedItems, pagination });
     } catch (error) {
@@ -610,13 +611,6 @@ async function refresh() {
   //active.value.pagination = output.pagination;
 }
 
-watch(
-  () => active.value.pagination.current,
-  (page) => {
-    jumpPage.value = String(page || 1);
-  }
-);
-
 // 排序和搜索
 function sort(value: string) {
   sorted.value = value;
@@ -625,12 +619,6 @@ function sort(value: string) {
 
 function search(value: string) {
   searched.value = value;
-  active.value.pagination.current = 1;
-  refresh();
-}
-
-function clearSearched() {
-  searched.value = "";
   active.value.pagination.current = 1;
   refresh();
 }
@@ -659,7 +647,9 @@ function toggleSelection(item: CardInfo) {
 }
 
 function selectAllCurrentPage() {
-  const pageIds = active.value.items.filter((item) => item.enabled).map((item) => item.id);
+  const pageIds = active.value.items
+    .filter((item) => item.enabled)
+    .map((item) => item.id);
   selectedIds.value = Array.from(new Set([...selectedIds.value, ...pageIds]));
 }
 
@@ -720,21 +710,6 @@ function handleCurrentChange(page: number) {
   refresh();
 }
 
-function applyJumpPage() {
-  const target = Number.parseInt(jumpPage.value, 10);
-  if (Number.isNaN(target)) {
-    jumpPage.value = String(active.value.pagination.current || 1);
-    return;
-  }
-  const maxPage = active.value.pagination.count || 1;
-  const nextPage = Math.min(Math.max(target, 1), maxPage);
-  if (nextPage === active.value.pagination.current) {
-    jumpPage.value = String(nextPage);
-    return;
-  }
-  handleCurrentChange(nextPage);
-}
-
 // 对外暴露的方法
 defineExpose({
   openIt,
@@ -791,8 +766,7 @@ defineExpose({
   gap: var(--resource-dialog-grid-gap, 26px);
   max-height: 67vh;
   overflow: auto;
-  padding: 0
-    var(--resource-dialog-grid-padding-x, 20px)
+  padding: 0 var(--resource-dialog-grid-padding-x, 20px)
     var(--resource-dialog-grid-padding-bottom, 6px)
     var(--resource-dialog-grid-padding-x, 20px);
   justify-content: space-between;
@@ -827,7 +801,10 @@ defineExpose({
   }
 
   :deep(.standard-card.is-selected) {
-    border-color: var(--resource-dialog-card-selected-border-color, var(--primary-color));
+    border-color: var(
+      --resource-dialog-card-selected-border-color,
+      var(--primary-color)
+    );
     box-shadow: var(
       --resource-dialog-card-selected-shadow,
       0 0 0 2px var(--primary-light)
@@ -860,15 +837,12 @@ defineExpose({
   }
 }
 
-.pagination-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
 .dialog-footer {
   margin-top: 0;
+}
+
+.dialog-footer :deep(.page-pagination) {
+  padding: 12px 0 4px;
 }
 
 @media (max-width: 1680px) {
@@ -881,15 +855,6 @@ defineExpose({
   .resource-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
-}
-
-.goto-label {
-  color: var(--text-secondary, #64748b);
-  font-size: 14px;
-}
-
-.goto-input {
-  width: 64px;
 }
 
 .detail-image {

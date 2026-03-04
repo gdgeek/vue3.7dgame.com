@@ -37,7 +37,8 @@ export const getMetas = (
   sort = "-created_at",
   search = "",
   page = 0,
-  expand = "image,author"
+  expand = "image,author",
+  fields = ""
 ) => {
   const query: Record<string, unknown> = {};
   if (sort === "name") {
@@ -47,6 +48,9 @@ export const getMetas = (
   }
   query["expand"] = expand;
   query["sort"] = sort;
+  if (fields !== "") {
+    query["fields"] = fields;
+  }
 
   if (search !== "") {
     query["MetaSearch[title]"] = search;

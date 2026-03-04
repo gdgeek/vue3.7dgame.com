@@ -5,7 +5,7 @@
         <el-card :loading="loading" class="box-card">
           <template #header>
             <div v-if="verse" class="clearfix">
-              <el-link :href="`/verse/scene?id=${id}`" :underline="false">{{
+              <el-link :href="sceneEditorLink" :underline="false">{{
                 verse.name
               }}</el-link>
               /【{{ $t("verse.view.script.title") }}】
@@ -261,6 +261,14 @@ const metasJavaScriptCode = ref("");
 let map = new Map<string, Array<{ uuid: string; title: string }>>();
 
 const { t } = useI18n();
+
+const sceneEditorLink = computed(() => {
+  const editorLabel = t("route.project.sceneEditor");
+  const titleText = verse.value?.name
+    ? `${editorLabel}【${verse.value.name}】`
+    : editorLabel;
+  return `/verse/scene?id=${id.value}&title=${encodeURIComponent(titleText)}`;
+});
 
 const saveable = computed(() => verse.value!.editable);
 
@@ -626,7 +634,10 @@ const run = async () => {
 onMounted(async () => {
   try {
     loading.value = true;
-    const response = await getVerse(id.value, "metas, module, share, verseCode");
+    const response = await getVerse(
+      id.value,
+      "metas, module, share, verseCode"
+    );
     const response2 = await getVerse(
       id.value,
       "id,name,description,data,metas,resources,code,uuid,code",

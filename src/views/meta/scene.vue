@@ -194,9 +194,32 @@ let init = false;
 const ability = useAbility();
 const userStore = useUserStore();
 
+const decodeRouteText = (value: string): string => {
+  let decoded = value;
+  for (let i = 0; i < 2; i += 1) {
+    try {
+      const next = decodeURIComponent(decoded);
+      if (next === decoded) break;
+      decoded = next;
+    } catch {
+      break;
+    }
+  }
+  return decoded;
+};
+
+const extractBracketTitle = (value: string): string => {
+  const decoded = decodeRouteText(value).trim();
+  if (!decoded) return "";
+  const match = decoded.match(/【[^】]+】/);
+  return match ? match[0] : "";
+};
+
 // 计算属性
 const id = computed(() => parseInt(route.query.id as string));
-const title = computed(() => route.query.title?.slice(4) as string);
+const title = computed(() =>
+  extractBracketTitle((route.query.title as string) || "")
+);
 const src = computed(() => {
   const query: Record<string, string | number> = {
     language: appStore.language,
@@ -495,9 +518,7 @@ const handleMessage = async (e: MessageEvent) => {
           .find((route) => route.path === "/meta/script");
 
         if (scriptRoute && scriptRoute.meta.title) {
-          const metaTitle = translateRouteTitle(
-            scriptRoute.meta.title
-          ).toLowerCase();
+          const metaTitle = translateRouteTitle(scriptRoute.meta.title);
 
           router.push({
             path: "/meta/script",
@@ -584,6 +605,8 @@ onBeforeUnmount(() => {
   height: calc(100vh - 140px);
   border: 0;
   outline: none;
-  border-radius: 16px;
+  border-radius: var(--editor-frame-radius, 16px);
+  clip-path: inset(0 round var(--editor-frame-radius, 16px));
+  background: var(--bg-card, #fff);
 }
 </style>

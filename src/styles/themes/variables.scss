@@ -8,19 +8,19 @@
   // ============================================
   // 颜色变量
   // ============================================
-  
+
   // 主色调
-  --primary-color: #00BAFF;
-  --primary-hover: #0099DD;
+  --primary-color: #00baff;
+  --primary-hover: #0099dd;
   --primary-light: rgba(0, 186, 255, 0.1);
-  --primary-dark: #0077AA;
-  
+  --primary-dark: #0077aa;
+
   // 文字颜色
   --text-primary: #1e293b;
   --text-secondary: #64748b;
   --text-muted: #94a3b8;
   --text-inverse: #ffffff;
-  
+
   // 背景颜色
   --bg-page: #f0f4f8;
   --bg-card: #ffffff;
@@ -28,16 +28,16 @@
   --bg-active: #e2e8f0;
   --bg-secondary: #f1f5f9;
   --bg-tertiary: #e2e8f0;
-  
+
   // 兼容旧变量名
   --bg-color: var(--bg-page);
   --card-bg: var(--bg-card);
-  
+
   // 边框颜色
   --border-color: #e2e8f0;
   --border-color-hover: #94a3b8;
   --border-color-light: #f8fafc;
-  
+
   // 语义色
   --success-color: #22c55e;
   --success-light: rgba(34, 197, 94, 0.1);
@@ -47,33 +47,35 @@
   --danger-light: rgba(239, 68, 68, 0.1);
   --danger-bg: rgba(239, 68, 68, 0.1);
   --danger-border: #ef4444;
-  --info-color: #00BAFF;
+  --info-color: #00baff;
   --info-light: rgba(0, 186, 255, 0.1);
-  
+
   // ============================================
   // 风格变量
   // ============================================
-  
+
   // 圆角
   --radius-sm: 12px;
   --radius-md: 20px;
   --radius-lg: 24px;
   --radius-full: 9999px;
-  
+
   // 阴影
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-  
+
   // 间距
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
-  
+
   // 字体
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
   --font-size-xs: 12px;
   --font-size-sm: 13px;
   --font-size-md: 14px;
@@ -82,12 +84,12 @@
   --font-weight: 400;
   --font-weight-medium: 500;
   --font-weight-bold: 600;
-  
+
   // 动画
   --transition-fast: 0.15s ease;
   --transition-normal: 0.2s ease;
   --transition-slow: 0.3s ease;
-  
+
   // 边框
   --border-width: 1px;
 
@@ -109,6 +111,36 @@
   );
   --resource-dialog-audio-visual-shadow: 0 8px 32px var(--primary-light);
   --resource-dialog-audio-icon-color: var(--text-inverse);
+
+  // 模型预览动画控制条（资源管理）主题变量
+  --polygen-animbar-gap: 16px;
+  --polygen-animbar-padding: 16px;
+  --polygen-animbar-bg: var(--bg-card);
+  --polygen-animbar-border-top: var(--border-width) solid var(--border-color);
+  --polygen-anim-play-btn-size: 44px;
+  --polygen-anim-play-btn-bg: var(--bg-hover);
+  --polygen-anim-play-btn-border: var(--border-width) solid var(--border-color);
+  --polygen-anim-play-btn-hover-bg: var(--bg-active);
+  --polygen-anim-play-btn-disabled-opacity: 0.5;
+  --polygen-anim-play-icon-size: 24px;
+  --polygen-anim-play-icon-color: var(--text-secondary);
+  --polygen-anim-label-size: 12px;
+  --polygen-anim-label-color: var(--text-muted);
+  --polygen-anim-select-bg: var(--bg-hover);
+  --polygen-anim-select-border: var(--border-width) solid var(--border-color);
+  --polygen-anim-select-radius: var(--radius-md);
+  --polygen-anim-select-text-color: var(--text-primary);
+  --polygen-anim-progress-min-width: 180px;
+  --polygen-anim-progress-track-bg: var(--bg-active);
+  --polygen-anim-progress-fill-bg: var(--primary-color);
+  --polygen-anim-progress-thumb-size: 14px;
+  --polygen-anim-progress-thumb-border: 2px solid var(--primary-color);
+  --polygen-anim-time-size: var(--font-size-md);
+  --polygen-anim-time-weight: var(--font-weight-medium);
+  --polygen-anim-time-color: var(--text-secondary);
+
+  // 场景/实体编辑器 iframe 外框圆角
+  --editor-frame-radius: 16px;
 }
 
 // 深色模式默认值
@@ -118,21 +150,21 @@
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --text-inverse: #0f172a;
-  
+
   --bg-page: #0f172a;
   --bg-card: #1e293b;
   --bg-hover: #334155;
   --bg-active: #475569;
   --bg-secondary: #0f172a; // Darker background for secondary elements
   --bg-tertiary: #334155;
-  
+
   --bg-color: var(--bg-page);
   --card-bg: var(--bg-card);
-  
+
   --border-color: #334155;
   --border-color-hover: #64748b;
   --border-color-light: #1e293b;
-  
+
   --success-color: #4ade80;
   --success-light: rgba(74, 222, 128, 0.15);
   --warning-color: #fbbf24;

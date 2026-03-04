@@ -25,6 +25,7 @@ import { RouteLocationMatched, type LocationQuery } from "vue-router";
 import { useRouter } from "@/router";
 const router = useRouter();
 import { translateRouteTitle } from "@/utils/i18n";
+import i18n from "@/lang";
 const currentRoute = useRoute();
 
 // 使用 Map 存储路由路径和对应的查询参数
@@ -40,6 +41,96 @@ type BreadcrumbRoute = {
 };
 
 const routeQueryMap = ref(new Map<string, StoredQuery>());
+
+const getQueryString = (value: unknown): string => {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value) && typeof value[0] === "string") return value[0];
+  if (typeof value === "number") return String(value);
+  return "";
+};
+
+const decodeRouteText = (value: string): string => {
+  let decoded = value;
+  for (let i = 0; i < 2; i += 1) {
+    try {
+      const next = decodeURIComponent(decoded);
+      if (next === decoded) break;
+      decoded = next;
+    } catch {
+      break;
+    }
+  }
+  return decoded;
+};
+
+const extractNameFromRouteTitle = (title: string): string => {
+  const normalized = decodeRouteText(title).trim();
+  if (!normalized) return "";
+  const bracketMatch = normalized.match(/【([^】]+)】/);
+  if (bracketMatch?.[1]) {
+    return bracketMatch[1].trim();
+  }
+  return normalized;
+};
+
+const resolveSceneQuery = (scenePath: string): StoredQuery => {
+  const saved = routeQueryMap.value.get(scenePath) || {};
+  const id =
+    getQueryString(currentRoute.query.id) ||
+    getQueryString((saved as StoredQuery).id);
+  const title =
+    getQueryString(currentRoute.query.title) ||
+    getQueryString((saved as StoredQuery).title);
+
+  const query: StoredQuery = {};
+  if (id) query.id = id;
+  if (title) query.title = title;
+  return query;
+};
+
+const getScriptCrumbLabel = (moduleType: "meta" | "verse"): string => {
+  const key =
+    moduleType === "meta" ? "meta.script.title" : "verse.view.script.title";
+  const text = i18n.global.t(key);
+  return typeof text === "string" && text !== key ? text : "脚本";
+};
+
+const buildEditorBreadcrumbs = (
+  moduleType: "meta" | "verse",
+  isScript: boolean
+): Array<BreadcrumbRoute> => {
+  const isMeta = moduleType === "meta";
+  const scenePath = isMeta ? "/meta/scene" : "/verse/scene";
+  const modulePath = isMeta ? "/meta/list" : "/verse/index";
+  const moduleTitle = isMeta ? "meta.title" : "project.title";
+  const fallbackEditorTitle = isMeta
+    ? "meta.sceneEditor"
+    : "project.sceneEditor";
+  const sceneQuery = resolveSceneQuery(scenePath);
+  const entityName = extractNameFromRouteTitle(
+    getQueryString(sceneQuery.title)
+  );
+
+  const result: Array<BreadcrumbRoute> = [
+    { path: "/home/index", meta: { title: "dashboard" } },
+    { path: modulePath, meta: { title: moduleTitle } },
+    {
+      path: scenePath,
+      query: sceneQuery,
+      meta: { title: entityName || fallbackEditorTitle },
+    },
+  ];
+
+  if (isScript) {
+    result.push({
+      path: currentRoute.path,
+      query: normalizeQuery(currentRoute.query),
+      meta: { title: getScriptCrumbLabel(moduleType) },
+    });
+  }
+
+  return result;
+};
 
 function normalizeQuery(query: LocationQuery): StoredQuery {
   return Object.fromEntries(Object.entries(query));
@@ -85,63 +176,33 @@ function saveCurrentRouteQuery() {
 const breadcrumbs = ref<Array<BreadcrumbRoute>>([]);
 
 function getBreadcrumb() {
+  // 保存当前路由的查询参数
+  saveCurrentRouteQuery();
+
+  if (currentRoute.path === "/meta/scene") {
+    breadcrumbs.value = buildEditorBreadcrumbs("meta", false);
+    return;
+  }
+
+  if (currentRoute.path === "/meta/script") {
+    breadcrumbs.value = buildEditorBreadcrumbs("meta", true);
+    return;
+  }
+
+  if (currentRoute.path === "/verse/scene") {
+    breadcrumbs.value = buildEditorBreadcrumbs("verse", false);
+    return;
+  }
+
+  if (currentRoute.path === "/verse/script") {
+    breadcrumbs.value = buildEditorBreadcrumbs("verse", true);
+    return;
+  }
+
   // 过滤出包含 meta 和 title 的路由
   let matched = currentRoute.matched.filter(
     (item) => item.meta && item.meta.title
   );
-
-  // 保存当前路由的查询参数
-  saveCurrentRouteQuery();
-
-  // 判断是否是进入 script 模块
-  if (
-    currentRoute.path === "/verse/script" ||
-    currentRoute.path === "/meta/script"
-  ) {
-    // 确定基础路径和标题key
-    let basePath, titleKey;
-
-    if (currentRoute.path.includes("/verse/")) {
-      basePath = "/verse/scene";
-      titleKey = "project.sceneEditor";
-    } else {
-      // 从meta实体编辑进入脚本编辑
-      basePath = "/meta/scene";
-      titleKey = "meta.sceneEditor";
-    }
-
-    // 获取保存的场景编辑器的查询参数，如果没有则使用当前的
-    const savedSceneQuery = routeQueryMap.value.get(basePath) || {
-      id: currentRoute.query.id,
-      title: currentRoute.query.title,
-    };
-
-    logger.log("使用保存的场景查询参数:", basePath, savedSceneQuery);
-
-    // 创建 sceneBreadcrumb 对象，并携带保存的路由参数
-    const sceneBreadcrumb = {
-      path: basePath,
-      meta: { title: titleKey },
-      query: savedSceneQuery,
-    } as unknown as RouteLocationMatched;
-
-    // 查找 scene 在 matched 中的位置
-    const sceneIndex = matched.findIndex(
-      (item) => item.path === "/verse/scene" || item.path === "/meta/scene"
-    );
-
-    // 如果没有找到 scene，插入 sceneBreadcrumb
-    if (sceneIndex === -1) {
-      const scriptIndex = matched.findIndex(
-        (item) => item.path === "/verse/script" || item.path === "/meta/script"
-      );
-
-      // 在 script 的前面插入 sceneBreadcrumb
-      if (scriptIndex !== -1) {
-        matched.splice(scriptIndex, 0, sceneBreadcrumb);
-      }
-    }
-  }
 
   // 如果第一个面包屑不是 dashboard 则添加 dashboard
   const first = matched[0];
@@ -239,6 +300,7 @@ watch(
   () => currentRoute.query,
   () => {
     saveCurrentRouteQuery();
+    getBreadcrumb();
   },
   { deep: true }
 );

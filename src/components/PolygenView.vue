@@ -43,6 +43,20 @@
         </el-select>
       </div>
 
+      <div class="animation-progress-wrapper">
+        <el-slider
+          v-model="animationProgress"
+          class="animation-progress-slider"
+          :min="0"
+          :max="100"
+          :step="0.1"
+          :show-tooltip="false"
+          :disabled="animations.length === 0"
+          @input="handleProgressInput"
+          @change="handleProgressChange"
+        ></el-slider>
+      </div>
+
       <div class="animation-time">
         {{ formatTime(currentAnimationTime) }} /
         {{ formatTime(totalAnimationDuration) }}
@@ -104,6 +118,7 @@ const isShadowEnabled = ref(false); // 阴影开关状态
 const animationProgress = ref(0); // 动画进度（百分比）
 const currentAnimationTime = ref(0); // 当前动画时间（秒）
 const totalAnimationDuration = ref(0); // 总动画时长（秒）
+const isSeeking = ref(false); // 是否正在拖拽进度条
 let currentAction: THREE.AnimationAction | null = null; // 当前播放的动画
 let resizeObserver: ResizeObserver | null = null;
 let currentModel: THREE.Object3D | null = null;
@@ -137,6 +152,36 @@ const formatTime = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+};
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), max);
+
+const seekToProgress = (progressValue: number) => {
+  if (!mixer || !currentAction || animations.value.length === 0) return;
+  const selectedAnimation = animations.value[selectedAnimationIndex.value];
+  if (!selectedAnimation || selectedAnimation.duration <= 0) return;
+
+  const normalizedProgress = clamp(progressValue, 0, 100);
+  const targetTime = (normalizedProgress / 100) * selectedAnimation.duration;
+
+  currentAction.time = targetTime;
+  currentAction.enabled = true;
+  currentAnimationTime.value = targetTime;
+  animationProgress.value = normalizedProgress;
+  mixer.update(0);
+};
+
+const handleProgressInput = (value: number | number[]) => {
+  if (Array.isArray(value)) return;
+  isSeeking.value = true;
+  seekToProgress(value);
+};
+
+const handleProgressChange = (value: number | number[]) => {
+  if (Array.isArray(value)) return;
+  seekToProgress(value);
+  isSeeking.value = false;
 };
 
 // 动画切换
@@ -382,40 +427,19 @@ onMounted(() => {
       }
       const delta = clock.getDelta();
       if (mixer) {
-        // 只有在播放状态才更新动画
-        if (isAnimationPlaying.value) {
-          mixer.update(delta); // 更新动画
+        // 拖拽进度条时暂停自动推进，避免时间抖动
+        if (isAnimationPlaying.value && !isSeeking.value) {
+          mixer.update(delta);
+        }
 
-          // 更新动画进度
-          if (animations.value.length > 0) {
-            const selectedAnimation =
-              animations.value[selectedAnimationIndex.value];
-            if (selectedAnimation) {
-              // 判断是否是短动画（小于0.1秒）
-              const isShortAnimation = selectedAnimation.duration < 0.1;
-
-              // 更新当前动画时间
-              currentAnimationTime.value += delta;
-
-              // 对于短动画，一旦达到100%就保持不变
-              if (
-                isShortAnimation &&
-                currentAnimationTime.value >= selectedAnimation.duration
-              ) {
-                currentAnimationTime.value = selectedAnimation.duration;
-                animationProgress.value = 100;
-              } else {
-                // 正常动画循环逻辑
-                if (currentAnimationTime.value > selectedAnimation.duration) {
-                  currentAnimationTime.value =
-                    currentAnimationTime.value % selectedAnimation.duration;
-                }
-                // 计算进度百分比
-                animationProgress.value =
-                  (currentAnimationTime.value / selectedAnimation.duration) *
-                  100;
-              }
-            }
+        if (animations.value.length > 0 && currentAction) {
+          const selectedAnimation =
+            animations.value[selectedAnimationIndex.value];
+          if (selectedAnimation && selectedAnimation.duration > 0) {
+            const duration = selectedAnimation.duration;
+            const actionTime = currentAction.time % duration;
+            currentAnimationTime.value = actionTime;
+            animationProgress.value = (actionTime / duration) * 100;
           }
         }
       }
@@ -447,38 +471,44 @@ watch(
 .animation-bar {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: var(--bg-card, #fff);
-  border-top: 1px solid var(--border-color, #e2e8f0);
+  gap: var(--polygen-animbar-gap, 16px);
+  padding: var(--polygen-animbar-padding, 16px);
+  background: var(--polygen-animbar-bg, var(--bg-card, #fff));
+  border-top: var(
+    --polygen-animbar-border-top,
+    1px solid var(--border-color, #e2e8f0)
+  );
 }
 
 .animation-play-btn {
-  width: 44px;
-  height: 44px;
+  width: var(--polygen-anim-play-btn-size, 44px);
+  height: var(--polygen-anim-play-btn-size, 44px);
   border-radius: 50%;
-  background: var(--bg-hover, #f1f5f9);
-  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--polygen-anim-play-btn-bg, var(--bg-hover, #f1f5f9));
+  border: var(
+    --polygen-anim-play-btn-border,
+    1px solid var(--border-color, #e2e8f0)
+  );
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-normal, 0.2s ease);
   flex-shrink: 0;
 }
 
 .animation-play-btn:hover:not(.disabled) {
-  background: var(--bg-active, #e2e8f0);
+  background: var(--polygen-anim-play-btn-hover-bg, var(--bg-active, #e2e8f0));
 }
 
 .animation-play-btn.disabled {
-  opacity: 0.5;
+  opacity: var(--polygen-anim-play-btn-disabled-opacity, 0.5);
   cursor: not-allowed;
 }
 
 .animation-play-btn .svg-inline--fa {
-  font-size: 24px;
-  color: var(--text-secondary, #64748b);
+  font-size: var(--polygen-anim-play-icon-size, 24px);
+  color: var(--polygen-anim-play-icon-color, var(--text-secondary, #64748b));
 }
 
 .animation-select-wrapper {
@@ -490,8 +520,8 @@ watch(
 }
 
 .animation-label {
-  font-size: 12px;
-  color: var(--text-muted, #94a3b8);
+  font-size: var(--polygen-anim-label-size, 12px);
+  color: var(--polygen-anim-label-color, var(--text-muted, #94a3b8));
 }
 
 .animation-select {
@@ -499,20 +529,53 @@ watch(
 }
 
 .animation-select :deep(.el-input__wrapper) {
-  background: var(--bg-hover, #f8fafc);
-  border-radius: var(--radius-md, 12px);
+  background: var(--polygen-anim-select-bg, var(--bg-hover, #f8fafc));
+  border-radius: var(--polygen-anim-select-radius, var(--radius-md, 12px));
   box-shadow: none;
-  border: 1px solid var(--border-color, #e2e8f0);
+  border: var(
+    --polygen-anim-select-border,
+    1px solid var(--border-color, #e2e8f0)
+  );
 }
 
 .animation-select :deep(.el-input__inner) {
-  color: var(--text-primary, #1e293b);
+  color: var(--polygen-anim-select-text-color, var(--text-primary, #1e293b));
+}
+
+.animation-progress-wrapper {
+  flex: 1.4;
+  min-width: var(--polygen-anim-progress-min-width, 180px);
+}
+
+.animation-progress-slider {
+  width: 100%;
+}
+
+.animation-progress-slider :deep(.el-slider__runway) {
+  margin: 0;
+  background: var(--polygen-anim-progress-track-bg, var(--bg-active, #e2e8f0));
+}
+
+.animation-progress-slider :deep(.el-slider__bar) {
+  background: var(
+    --polygen-anim-progress-fill-bg,
+    var(--primary-color, #00baff)
+  );
+}
+
+.animation-progress-slider :deep(.el-slider__button) {
+  width: var(--polygen-anim-progress-thumb-size, 14px);
+  height: var(--polygen-anim-progress-thumb-size, 14px);
+  border: var(
+    --polygen-anim-progress-thumb-border,
+    2px solid var(--primary-color, #00baff)
+  );
 }
 
 .animation-time {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-secondary, #64748b);
+  font-size: var(--polygen-anim-time-size, 14px);
+  font-weight: var(--polygen-anim-time-weight, 500);
+  color: var(--polygen-anim-time-color, var(--text-secondary, #64748b));
   white-space: nowrap;
   flex-shrink: 0;
 }
