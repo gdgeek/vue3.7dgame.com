@@ -90,6 +90,21 @@
   
   // 边框
   --border-width: 1px;
+
+  // 资源导入弹窗（实体编辑）主题变量
+  --resource-dialog-grid-gap: 26px;
+  --resource-dialog-grid-padding-x: 20px;
+  --resource-dialog-grid-padding-bottom: 6px;
+  --resource-dialog-shell-offset-top: -6px;
+  --resource-dialog-card-border-color: var(--border-color-hover);
+  --resource-dialog-card-shadow: var(--shadow-sm);
+  --resource-dialog-audio-visual-bg: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--primary-dark)
+  );
+  --resource-dialog-audio-visual-shadow: 0 8px 32px var(--primary-light);
+  --resource-dialog-audio-icon-color: var(--text-inverse);
 }
 
 // 深色模式默认值

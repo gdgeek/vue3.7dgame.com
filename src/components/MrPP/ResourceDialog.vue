@@ -788,17 +788,20 @@ defineExpose({
 .resource-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 0.96fr));
-  gap: 26px;
+  gap: var(--resource-dialog-grid-gap, 26px);
   max-height: 67vh;
   overflow: auto;
-  padding: 0 20px 6px 20px;
+  padding: 0
+    var(--resource-dialog-grid-padding-x, 20px)
+    var(--resource-dialog-grid-padding-bottom, 6px)
+    var(--resource-dialog-grid-padding-x, 20px);
   justify-content: space-between;
 }
 
 .resource-list-shell {
   border: none !important;
   background: transparent !important;
-  margin-top: -6px;
+  margin-top: var(--resource-dialog-shell-offset-top, -6px);
 
   :deep(.el-card__body) {
     border: none !important;
@@ -806,8 +809,9 @@ defineExpose({
   }
 
   :deep(.standard-card) {
-    border: 1px solid #cad5e3;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    border: 1px solid
+      var(--resource-dialog-card-border-color, var(--border-color-hover, #cad5e3));
+    box-shadow: var(--resource-dialog-card-shadow, var(--shadow-sm));
   }
 }
 
@@ -947,19 +951,21 @@ defineExpose({
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: linear-gradient(
-    135deg,
-    var(--primary-color, #03a9f4),
-    var(--primary-dark, #0288d1)
+  background: var(
+    --resource-dialog-audio-visual-bg,
+    linear-gradient(135deg, var(--primary-color), var(--primary-dark))
   );
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 32px rgba(3, 169, 244, 0.3);
+  box-shadow: var(
+    --resource-dialog-audio-visual-shadow,
+    0 8px 32px var(--primary-light)
+  );
 
   .svg-inline--fa {
     font-size: 56px;
-    color: #fff;
+    color: var(--resource-dialog-audio-icon-color, var(--text-inverse, #fff));
   }
 }
 
