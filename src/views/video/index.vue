@@ -79,7 +79,7 @@
                     $t("video.viewVideo")
                   }}</el-dropdown-item>
                   <el-dropdown-item @click="namedWindow(item)">{{
-                    t("common.edit")
+                    t("common.rename")
                   }}</el-dropdown-item>
                   <el-dropdown-item @click="deletedWindow(item, () => {})">{{
                     t("common.delete")

@@ -15,6 +15,7 @@ export default {
     name: "名前",
     description: "説明",
     edit: "編集",
+    rename: "名前を変更",
     back: "戻る",
     updateSuccess: "更新成功",
     createSuccess: "作成成功",
