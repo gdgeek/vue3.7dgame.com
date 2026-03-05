@@ -748,4 +748,75 @@ describe("buildScriptRuntime", () => {
       expect(player.playQueuedAudio).toHaveBeenCalledWith(audio);
     });
   });
+
+  // ----------------------------------------------------------------
+  // task.circle — animation 类型任务 (line 269)
+  // ----------------------------------------------------------------
+  describe("task.circle — animation 类型任务", () => {
+    it("type='animation' 时调用 resolvedTask.execute", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const mockExecute = vi.fn().mockResolvedValue(undefined);
+      const animTask = { type: "animation", execute: mockExecute };
+      await task.circle(1, animTask);
+      expect(mockExecute).toHaveBeenCalledTimes(1);
+    });
+
+    it("type='animation' count=2 时调用 execute 两次", async () => {
+      vi.useFakeTimers();
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const mockExecute = vi.fn().mockResolvedValue(undefined);
+      const animTask = { type: "animation", execute: mockExecute };
+      const p = task.circle(2, animTask);
+      vi.runAllTimersAsync();
+      await p;
+      expect(mockExecute).toHaveBeenCalledTimes(2);
+      vi.useRealTimers();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // BOUNCE_IN_OUT easing — both branches (lines 236-238)
+  // requestAnimationFrame loop (line 362)
+  // ----------------------------------------------------------------
+  describe("BOUNCE_IN_OUT easing + requestAnimationFrame 循环", () => {
+    it("BOUNCE_IN_OUT duration=0 不抛异常（NaN 进度 → else 分支）", async () => {
+      const { task, tween } = buildScriptRuntime({ value: makeMockPlayer() });
+      const from = makeMeshWrapper();
+      const to = makeMeshWrapper();
+      from.mesh.position.set(0, 0, 0);
+      to.mesh.position.set(5, 0, 0);
+      const tweenData = tween.to_object(from, to, 0, "BOUNCE_IN_OUT");
+      await expect(task.execute(tweenData)).resolves.toBeUndefined();
+    });
+
+    it("BOUNCE_IN_OUT duration>0 走完动画循环（覆盖 t<0.5 和 requestAnimationFrame）", async () => {
+      vi.useFakeTimers();
+      // Mock requestAnimationFrame so it calls the callback via setTimeout(fn, 0)
+      const rafIds = new Map<number, () => void>();
+      let rafId = 0;
+      vi.stubGlobal("requestAnimationFrame", (cb: () => void) => {
+        const id = ++rafId;
+        rafIds.set(id, cb);
+        setTimeout(cb, 0);
+        return id;
+      });
+
+      const { task, tween } = buildScriptRuntime({ value: makeMockPlayer() });
+      const from = makeMeshWrapper();
+      const to = makeMeshWrapper();
+      from.mesh.position.set(0, 0, 0);
+      to.mesh.position.set(10, 0, 0);
+
+      // duration = 0.001 seconds → very short, so after 10ms it completes
+      const tweenData = tween.to_object(from, to, 0.001, "BOUNCE_IN_OUT");
+      const p = task.execute(tweenData);
+
+      // Advance time to complete the tween
+      await vi.advanceTimersByTimeAsync(100);
+      await p;
+
+      vi.unstubAllGlobals();
+      vi.useRealTimers();
+    });
+  });
 });
