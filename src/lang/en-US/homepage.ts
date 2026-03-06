@@ -42,6 +42,30 @@ export default {
         action: "Create Now",
       },
     },
+    concepts: {
+      title: "Concepts & Scope",
+      subtitle:
+        "Understand the model first: resources are assets, entities are reusable capability units, and scenes organize entities into an experience.",
+      flow: {
+        step1: "Step 1",
+        step2: "Step 2",
+        step3: "Step 3",
+        resource: "Resource Upload",
+        entity: "Entity Editing",
+        scene: "Scene Editing",
+      },
+      rule: "A scene can add entities only, not resources directly.",
+      entityEditor: {
+        badge: "You are editing: Entity",
+        title: "Entity Editor Scope",
+        desc: "Define entity structure, asset composition, and entity scripts. These capabilities are reusable across multiple scenes.",
+      },
+      sceneEditor: {
+        badge: "You are editing: Scene",
+        title: "Scene Editor Scope",
+        desc: "Define scene composition, entity placement, and scene scripts. These behaviors apply only to the current scene.",
+      },
+    },
     edit: {
       personalData: "Personal Data",
       personalDataStatement:

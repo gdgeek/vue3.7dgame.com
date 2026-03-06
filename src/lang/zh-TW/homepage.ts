@@ -41,6 +41,30 @@ export default {
         action: "立即建立",
       },
     },
+    concepts: {
+      title: "概念與職責",
+      subtitle:
+        "先理解關係再開始編輯：資源是素材，實體是可重用能力單元，場景負責組織實體並形成體驗。",
+      flow: {
+        step1: "第一步",
+        step2: "第二步",
+        step3: "第三步",
+        resource: "資源上傳",
+        entity: "實體編輯",
+        scene: "場景編輯",
+      },
+      rule: "場景只能添加實體，不能直接添加資源。",
+      entityEditor: {
+        badge: "您正在編輯：實體",
+        title: "實體編輯器作用範圍",
+        desc: "編輯實體結構、資源組合和實體腳本。這裡定義的是實體本身能力，重用到多個場景時保持一致。",
+      },
+      sceneEditor: {
+        badge: "您正在編輯：場景",
+        title: "場景編輯器作用範圍",
+        desc: "編輯場景編排、實體擺放與場景腳本。這裡定義的是場景級行為，只對當前場景生效。",
+      },
+    },
     edit: {
       personalData: "個人資料",
       personalDataStatement: "用戶昵稱、頭像、基本信息修改",

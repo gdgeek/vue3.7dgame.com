@@ -41,6 +41,30 @@ export default {
         action: "立即创建",
       },
     },
+    concepts: {
+      title: "概念与职责",
+      subtitle:
+        "先理解关系再开始编辑：资源是素材，实体是可复用能力单元，场景负责组织实体并形成体验。",
+      flow: {
+        step1: "第一步",
+        step2: "第二步",
+        step3: "第三步",
+        resource: "资源上传",
+        entity: "实体编辑",
+        scene: "场景编辑",
+      },
+      rule: "场景只能添加实体，不能直接添加资源。",
+      entityEditor: {
+        badge: "你正在编辑：实体",
+        title: "实体编辑器作用范围",
+        desc: "编辑实体结构、资源组合和实体脚本。这里定义的是实体本身能力，复用到多个场景时保持一致。",
+      },
+      sceneEditor: {
+        badge: "你正在编辑：场景",
+        title: "场景编辑器作用范围",
+        desc: "编辑场景编排、实体摆放与场景脚本。这里定义的是场景级行为，只对当前场景生效。",
+      },
+    },
     edit: {
       personalData: "个人资料",
       personalDataStatement: "用户昵称、头像、基本信息修改",
