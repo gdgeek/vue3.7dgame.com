@@ -1694,7 +1694,7 @@ const handleAudioPlay = (audio: HTMLAudioElement): Promise<void> => {
   });
 };
 
-const audioPlaybackQueue: { audio: HTMLAudioElement; resolve: Function }[] = [];
+const audioPlaybackQueue: { audio: HTMLAudioElement; resolve: (value: void | PromiseLike<void>) => void }[] = [];
 let isPlaying = false;
 
 /** 处理音频队列 */

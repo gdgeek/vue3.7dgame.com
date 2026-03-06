@@ -14,6 +14,7 @@ import { useUserStore } from "@/store/modules/user";
 import { ThemeEnum } from "@/enums/ThemeEnum";
 import { Message, MessageBox } from "@/components/Dialog";
 import { logger } from "@/utils/logger";
+import { safeAtob } from "@/utils/base64";
 import env from "@/environment";
 
 // ---------- 共享类型 ----------
@@ -216,7 +217,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
         {
           from: options.from,
           action,
-          data: JSON.parse(JSON.stringify(data)),
+          data: structuredClone(data),
         },
         "*"
       );
@@ -310,7 +311,11 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const decompressBlockly = (blocklyData: string): string => {
     if (blocklyData.startsWith("compressed:")) {
       const base64Str = blocklyData.substring(11);
-      const binaryString = atob(base64Str);
+      const binaryString = safeAtob(base64Str);
+      if (!binaryString) {
+        logger.warn("[decompressBlockly] Invalid base64 data, returning raw");
+        return blocklyData;
+      }
       const uint8Array = new Uint8Array(binaryString.length);
       for (let i = 0; i < binaryString.length; i++) {
         uint8Array[i] = binaryString.charCodeAt(i);

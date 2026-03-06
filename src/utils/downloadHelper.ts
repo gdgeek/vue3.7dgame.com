@@ -21,7 +21,7 @@ export interface DownloadableResource {
 export async function downloadResource(
   resource: DownloadableResource,
   fileExtension: string,
-  t: Function,
+  t: (key: string, ...args: unknown[]) => string,
   translationPrefix: string
 ): Promise<void> {
   try {

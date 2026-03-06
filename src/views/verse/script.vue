@@ -441,26 +441,33 @@ const resource = computed(() => {
 });
 
 // ---------- Verse 专有：handlePolygen（只返回 playAnimation）----------
-const handlePolygen = (uuid: string) => {
+const handlePolygen = async (uuid: string) => {
   if (!scenePlayer.value) {
     logger.error("ScenePlayer未初始化");
     return null;
   }
   const modelUuid = uuid.toString();
-  const getModel = (uuid: string, retries = 3) => {
-    const source = scenePlayer.value?.sources.get(uuid) as
-      | { type: string; data: unknown }
-      | undefined;
-    if (source && source.type === "model") {
-      return source.data as THREE.Object3D;
-    }
-    if (retries > 0) {
-      logger.log(`模型未找到，剩余重试次数: ${retries}`);
-      setTimeout(() => getModel(uuid, retries - 1), 100);
-    }
-    return null;
+  const getModelAsync = (uuid: string, retries = 3): Promise<THREE.Object3D | null> => {
+    return new Promise((resolve) => {
+      const attempt = (remaining: number) => {
+        const source = scenePlayer.value?.sources.get(uuid) as
+          | { type: string; data: unknown }
+          | undefined;
+        if (source?.type === "model" && source.data) {
+          resolve(source.data as THREE.Object3D);
+          return;
+        }
+        if (remaining > 0) {
+          logger.log(`模型未找到，剩余重试次数: ${remaining}`);
+          setTimeout(() => attempt(remaining - 1), 100);
+        } else {
+          resolve(null);
+        }
+      };
+      attempt(retries);
+    });
   };
-  const model = getModel(modelUuid);
+  const model = await getModelAsync(modelUuid);
   logger.log("查找模型:", {
     requestedUuid: modelUuid,
     availableModels: Array.from(scenePlayer.value.sources.keys()),

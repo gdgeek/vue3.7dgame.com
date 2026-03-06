@@ -8,6 +8,8 @@ import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
 import { postAudio } from "@/api/v1/resources/index";
 import type { UploadFileType } from "@/api/user/model";
+import environment from "@/environment";
+import { safeAtob } from "@/utils/base64";
 
 interface UseTTSProps {
   text: Ref<string>;
@@ -119,13 +121,17 @@ export function useTTS(props: UseTTSProps) {
       };
 
       const response = await axios.post(
-        "https://sound.bujiaban.com/tencentTTS",
+        environment.tts_api,
         params,
         { headers: { "Content-Type": "application/json" } }
       );
 
       if (response.data?.Audio) {
-        const audioData = atob(response.data.Audio);
+        const audioData = safeAtob(response.data.Audio);
+        if (!audioData) {
+          ElMessage.error(t("tts.synthesisError"));
+          return;
+        }
         const arrayBuffer = new ArrayBuffer(audioData.length);
         const uint8Array = new Uint8Array(arrayBuffer);
 

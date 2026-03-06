@@ -174,6 +174,7 @@ describe("domain-query.ts failover and health check", () => {
     it("returns response.data on success", async () => {
       await import("@/api/domain-query");
       const successInterceptor =
+        mockAxiosInstanceB.interceptors.response.use.mock.calls[1]?.[0] ??
         mockAxiosInstanceB.interceptors.response.use.mock.calls[0]?.[0];
 
       const response = { data: { lang: "zh-CN" } };

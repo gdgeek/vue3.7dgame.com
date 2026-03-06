@@ -1,4 +1,4 @@
-import { ref, Ref } from "vue";
+import { ref, Ref, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { ElMessage } from "element-plus";
 
@@ -35,7 +35,14 @@ export function useLanguageAnalysis() {
     detectedLanguage: "",
   });
 
-  let languageDetectionTimer: number | null = null;
+  let languageDetectionTimer: ReturnType<typeof setTimeout> | null = null;
+
+  onUnmounted(() => {
+    if (languageDetectionTimer) {
+      clearTimeout(languageDetectionTimer);
+      languageDetectionTimer = null;
+    }
+  });
 
   const updateLanguageSuggestion = () => {
     const { isMultiLanguage, detectedLanguage } = languageAnalysis.value;
@@ -150,10 +157,10 @@ export function useLanguageAnalysis() {
       ]);
 
       if (languageDetectionTimer) {
-        window.clearTimeout(languageDetectionTimer);
+        clearTimeout(languageDetectionTimer);
       }
 
-      languageDetectionTimer = window.setTimeout(() => {
+      languageDetectionTimer = setTimeout(() => {
         const detectedLanguageText =
           detectedLanguage === "中文"
             ? t("tts.chinese")

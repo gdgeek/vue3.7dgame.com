@@ -1,5 +1,6 @@
 import request from "@/utils/wp";
 import { useDomainStoreHook } from "@/store/modules/domain";
+import { logger } from "@/utils/logger";
 import type {
   NewsItem,
   NewsCategory,
@@ -73,7 +74,8 @@ const fetchAndCacheCategories = async (): Promise<
     const categories = await wordpressApi.getCategories();
     categoriesCache = new Map(categories.map((c) => [c.id, c]));
     return categoriesCache;
-  } catch {
+  } catch (error) {
+    logger.warn("[wordpress] Failed to fetch categories:", error);
     return new Map();
   }
 };

@@ -106,7 +106,7 @@ describe("domain-query.ts — startHealthCheck timer callback (lines 42-52)", ()
     await vi.advanceTimersByTimeAsync(30000);
 
     expect(mockLogger3.info).toHaveBeenCalledWith(
-      expect.stringContaining("Primary restored")
+      expect.stringContaining("Primary API restored")
     );
   });
 
