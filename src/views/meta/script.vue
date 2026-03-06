@@ -230,7 +230,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { CopyDocument } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { useRoute } from "vue-router";
@@ -265,6 +264,7 @@ type ScenePlayerExpose = {
     audio: HTMLAudioElement,
     skipQueue?: boolean
   ) => Promise<void> | void;
+  sceneInstanceId: string;
 };
 const scenePlayer = ref<ScenePlayerExpose | null>(null);
 const test = ref<MetaResourceIndex | null>(null);
@@ -491,7 +491,10 @@ const run = async () => {
   await waitForModels();
   if (!JavaScriptCode.value) return;
 
-  window.meta = {};
+  // 使用实例专属命名空间，避免多 ScenePlayer 实例时回调互相覆盖
+  const instanceId = scenePlayer.value!.sceneInstanceId;
+  window.__sceneCallbacks = window.__sceneCallbacks ?? {};
+  window.__sceneCallbacks[instanceId] = {};
   const {
     Vector3,
     polygen,
@@ -512,7 +515,7 @@ const run = async () => {
   try {
     const wrappedCode = `
         return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument, handleText, handleEntity) {
-          const meta = window.meta;
+          const meta = window.__sceneCallbacks['${instanceId}'];
           const index = ${meta.value?.id};
 
           ${JavaScriptCode.value}

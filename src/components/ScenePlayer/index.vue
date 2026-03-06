@@ -63,14 +63,9 @@ const mode = computed<"meta" | "verse">(() =>
   props.meta !== undefined ? "meta" : "verse"
 );
 
-// ─── Global window declarations ───────────────────────────────────────────────
+// ─── 实例唯一 ID（避免多 ScenePlayer 实例共享 window.meta/verse 导致回调互相覆盖）────
 
-declare global {
-  interface Window {
-    meta: { [key: string]: Function };
-    verse: { [key: string]: Function };
-  }
-}
+const sceneInstanceId = Math.random().toString(36).slice(2) + Date.now().toString(36);
 
 // ─── Internal types ───────────────────────────────────────────────────────────
 
@@ -334,17 +329,15 @@ const combineTransforms = (
 // ─── Model loading ────────────────────────────────────────────────────────────
 
 /**
- * 触发事件：根据当前模式调用 window.meta 或 window.verse 上的事件函数。
+ * 触发事件：通过实例专属的 __sceneCallbacks[sceneInstanceId] 命名空间调用事件函数，
+ * 避免多实例时互相覆盖。
  */
 const triggerEvent = async (eventId: string) => {
-  if (mode.value === "meta") {
-    if (window.meta && typeof window.meta[`@${eventId}`] === "function") {
-      await window.meta[`@${eventId}`]();
-    }
-  } else {
-    if (window.verse && typeof window.verse[`@${eventId}`] === "function") {
-      await window.verse[`@${eventId}`]();
-    }
+  const callbacks = window.__sceneCallbacks?.[sceneInstanceId];
+  if (!callbacks) return;
+  const handler = callbacks[`@${eventId}`];
+  if (typeof handler === "function") {
+    await handler();
   }
 };
 
@@ -2076,6 +2069,7 @@ defineExpose({
   playAnimation,
   getAudioUrl,
   playQueuedAudio,
+  sceneInstanceId,
 });
 </script>
 

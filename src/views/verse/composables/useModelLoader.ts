@@ -59,6 +59,8 @@ interface ModelLoaderContext {
   mouse: THREE.Vector2;
   raycaster: THREE.Raycaster;
   verse: Verse;
+  /** ScenePlayer 实例唯一 ID，用于访问 __sceneCallbacks 命名空间 */
+  sceneInstanceId?: string;
 }
 
 export function useModelLoader(context: ModelLoaderContext) {
@@ -71,6 +73,7 @@ export function useModelLoader(context: ModelLoaderContext) {
     mouse,
     raycaster,
     verse,
+    sceneInstanceId,
   } = context;
 
   const loadModel = async (
@@ -547,12 +550,12 @@ export function useModelLoader(context: ModelLoaderContext) {
 
                     if (intersects.length > 0) {
                       const eventId = actionComponent.parameters.uuid;
-                      if (
-                        window.verse &&
-                        typeof window.verse[`@${eventId}`] === "function"
-                      ) {
+                      const callbacks = sceneInstanceId
+                        ? window.__sceneCallbacks?.[sceneInstanceId]
+                        : undefined;
+                      if (callbacks && typeof callbacks[`@${eventId}`] === "function") {
                         try {
-                          await window.verse[`@${eventId}`]();
+                          await callbacks[`@${eventId}`]();
                         } catch (e) {
                           logger.error(e);
                         }

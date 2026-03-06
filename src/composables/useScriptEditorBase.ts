@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * 共享编辑器基础 composable，供 meta/script.vue 和 verse/script.vue 共用。
  * 包含所有与领域无关的状态管理、消息通信、全屏控制、代码格式化、

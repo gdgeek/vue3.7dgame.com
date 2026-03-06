@@ -99,7 +99,7 @@ export const useUserStore = defineStore(
       return true;
     }
 
-    const refreshInterval = ref<NodeJS.Timeout | null>(null);
+    // Token 刷新由 src/utils/request.ts 拦截器按需触发，无需在此维护定时器
     const setUserInfo = async (data: unknown) => {
       try {
         const response = await putUserData(data);
@@ -121,37 +121,14 @@ export const useUserStore = defineStore(
         userInfo.value.roles = user.roles;
         userInfo.value.userInfo = user.userInfo;
         userInfo.value.userData = user.userData;
-        userInfo.value.perms = perms;
+        // 使用服务端返回的权限数据，若未返回则使用空数组
+        userInfo.value.perms = user.perms ?? [];
 
         return userInfo.value;
       } catch (error) {
         logger.error("Error fetching user info:", error);
       }
     };
-    const perms: string[] = [
-      "sys:menu:delete",
-      "sys:dept:edit",
-      "sys:dict_type:add",
-      "sys:dict:edit",
-      "sys:dict:delete",
-      "sys:dict_type:edit",
-      "sys:menu:add",
-      "sys:user:add",
-      "sys:role:edit",
-      "sys:dept:delete",
-      "sys:user:edit",
-      "sys:user:delete",
-      "sys:user:password:reset",
-      "sys:dept:add",
-      "sys:role:delete",
-      "sys:dict_type:delete",
-      "sys:menu:edit",
-      "sys:dict:add",
-      "sys:role:add",
-      "sys:user:query",
-      "sys:user:export",
-      "sys:user:import",
-    ];
 
     const getUserInfo = async () => {
       try {
@@ -167,9 +144,9 @@ export const useUserStore = defineStore(
           return;
         }
 
-        // 更新 userInfo
+        // 更新 userInfo，使用服务端返回的权限数据
         userInfo.value = user;
-        userInfo.value.perms = perms;
+        userInfo.value.perms = user.perms ?? [];
 
         return userInfo.value;
       } catch (error) {
@@ -227,10 +204,6 @@ export const useUserStore = defineStore(
         perms: [],
       };
 
-      if (refreshInterval.value) {
-        clearInterval(refreshInterval.value);
-        refreshInterval.value = null;
-      }
     };
 
     return {
@@ -245,7 +218,6 @@ export const useUserStore = defineStore(
       getRole,
       isUserPermissionGreater,
       RoleEnum,
-      refreshInterval,
     };
   },
   {
