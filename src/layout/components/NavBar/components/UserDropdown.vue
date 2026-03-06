@@ -18,12 +18,15 @@
           class="dropdown-item"
           @click="closeMenu"
         >
-          <span class="material-symbols-outlined">settings</span>
+          <font-awesome-icon :icon="['fas', 'gear']" class="dropdown-icon" />
           <span>{{ t("ui.personalSettings") }}</span>
         </router-link>
         <div class="dropdown-divider"></div>
         <div class="dropdown-item danger" @click="handleLogout">
-          <span class="material-symbols-outlined">logout</span>
+          <font-awesome-icon
+            :icon="['fas', 'right-from-bracket']"
+            class="dropdown-icon"
+          />
           <span>{{ t("sidebar.logout") }}</span>
         </div>
       </div>
@@ -163,5 +166,11 @@ onUnmounted(() => {
 .dropdown-leave-to {
   opacity: 0;
   transform: translateY(-8px);
+}
+
+.dropdown-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
 }
 </style>

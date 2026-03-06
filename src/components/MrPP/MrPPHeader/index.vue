@@ -6,17 +6,11 @@
           <slot></slot>
           &nbsp;
           <el-button-group v-if="sorted !== ''" :inline="true">
-            <el-button
-              v-if="sorted_name"
-              size="small"
-              type="success"
-              :label="$t('MrppHeader.sortByName')"
-              icon="ChatDotSquare"
-              @click="sort(sortByName)"
-            >
+            <el-button v-if="sorted_name" size="small" type="success" :label="$t('MrppHeader.sortByName')"
+              icon="ChatDotSquare" @click="sort(sortByName)">
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByName")
-              }}</span>
+                }}</span>
               <el-icon v-if="sorted_up">
                 <ArrowUp></ArrowUp>
               </el-icon>
@@ -24,29 +18,17 @@
                 <ArrowDown></ArrowDown>
               </el-icon>
             </el-button>
-            <el-button
-              v-else
-              size="small"
-              type="info"
-              :label="$t('MrppHeader.sortByName')"
-              icon="ChatDotSquare"
-              @click="sort(sortByName)"
-            >
+            <el-button v-else size="small" type="info" :label="$t('MrppHeader.sortByName')" icon="ChatDotSquare"
+              @click="sort(sortByName)">
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByName")
-              }}</span>
+                }}</span>
             </el-button>
-            <el-button
-              v-if="sorted_created_at"
-              size="small"
-              type="success"
-              icon="Clock"
-              :label="$t('MrppHeader.sortByTime')"
-              @click="sort(sortByTime)"
-            >
+            <el-button v-if="sorted_created_at" size="small" type="success" icon="Clock"
+              :label="$t('MrppHeader.sortByTime')" @click="sort(sortByTime)">
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByTime")
-              }}</span>
+                }}</span>
               <el-icon v-if="sorted_up">
                 <ArrowUp></ArrowUp>
               </el-icon>
@@ -54,43 +36,22 @@
                 <ArrowDown></ArrowDown>
               </el-icon>
             </el-button>
-            <el-button
-              v-else
-              size="small"
-              type="info"
-              :label="$t('MrppHeader.sortByTime')"
-              icon="Clock"
-              @click="sort(sortByTime)"
-            >
+            <el-button v-else size="small" type="info" :label="$t('MrppHeader.sortByTime')" icon="Clock"
+              @click="sort(sortByTime)">
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByTime")
-              }}</span>
+                }}</span>
             </el-button>
           </el-button-group>
           &nbsp;
-          <tags-select
-            v-if="hasTags"
-            @tags-change="handleTagsChange"
-          ></tags-select>
+          <tags-select v-if="hasTags" @tags-change="handleTagsChange"></tags-select>
         </el-col>
         <el-col v-if="hasSearch" :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
-          <el-input
-            v-model="input"
-            size="small"
-            :placeholder="$t('MrppHeader.search')"
-            class="input-with-select"
-            clearable
-            @clear="search"
-            @keyup.enter="keyDown"
-          >
+          <el-input v-model="input" size="small" :placeholder="$t('MrppHeader.search')" class="input-with-select"
+            clearable @clear="search" @keyup.enter="keyDown">
             <!-- <template #append> -->
             <template #append>
-              <el-button
-                icon="Search"
-                size="small"
-                class="search"
-                @click="search"
-              ></el-button>
+              <el-button icon="Search" size="small" class="search" @click="search"></el-button>
             </template>
           </el-input>
         </el-col>
@@ -100,13 +61,11 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowDown, ArrowUp } from "@element-plus/icons-vue";
-import { logger } from "@/utils/logger";
 import TagsSelect from "@/components/TagsSelect.vue";
 import { ref, computed, watch } from "vue";
 
 const handleTagsChange = (tags: number[]) => {
-  logger.log("父组件收到标签变化:", tags);
+  console.log("父组件收到标签变化:", tags);
   emits("tags", tags);
   // 执行其他操作
 };
@@ -142,6 +101,7 @@ const props = defineProps({
 const emits = defineEmits(["search", "sort", "tags"]);
 
 const input = ref(props.searched);
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
 watch(
   () => props.searched,
@@ -157,8 +117,23 @@ const sorted_name = computed(() => props.sorted.includes(props.sortByName));
 const sorted_up = computed(() => !props.sorted.startsWith("-"));
 
 const search = () => {
-  logger.log("MrPPHeader: search triggered", input.value);
+  if (searchTimer) {
+    clearTimeout(searchTimer);
+    searchTimer = null;
+  }
+  console.log("MrPPHeader: search triggered", input.value);
   emits("search", input.value);
+};
+
+const scheduleSearch = (value: string) => {
+  if (searchTimer) {
+    clearTimeout(searchTimer);
+  }
+
+  searchTimer = setTimeout(() => {
+    emits("search", value);
+    searchTimer = null;
+  }, 200);
 };
 
 const sort = (value: string) => {
@@ -170,6 +145,26 @@ const keyDown = (e: KeyboardEvent) => {
     search();
   }
 };
+
+watch(
+  () => input.value,
+  (value) => {
+    if (value === props.searched) {
+      return;
+    }
+
+    if (value === "") {
+      if (searchTimer) {
+        clearTimeout(searchTimer);
+        searchTimer = null;
+      }
+      emits("search", "");
+      return;
+    }
+
+    scheduleSearch(value);
+  }
+);
 </script>
 
 <style scoped>

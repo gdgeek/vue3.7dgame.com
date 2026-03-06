@@ -2,6 +2,7 @@ import { logger } from "@/utils/logger";
 import { ref, reactive, computed, onMounted } from "vue";
 import type { ViewMode } from "@/components/StandardPage/types";
 import type { FetchParams, FetchResponse } from "@/types/api";
+import { sortByMultilingualField } from "@/utils/multilingualSort";
 
 export type { FetchParams, FetchResponse };
 
@@ -13,6 +14,10 @@ export interface UsePageDataOptions<T = unknown> {
   ) => Promise<FetchResponse<T>>;
   defaultSort?: string;
   pageSize?: number;
+  /**
+   * 对这些字段启用前端多语言自然排序（兼容中/英/日/泰与数字混排）
+   */
+  localeSortFields?: string[];
   /** 是否自动在挂载时加载 */
   immediate?: boolean;
 }
@@ -22,6 +27,7 @@ export function usePageData<T = unknown>(options: UsePageDataOptions<T>) {
     fetchFn,
     defaultSort = "-created_at",
     pageSize = 20,
+    localeSortFields = ["name", "title"],
     immediate = true,
   } = options;
 
@@ -74,7 +80,19 @@ export function usePageData<T = unknown>(options: UsePageDataOptions<T>) {
       pagination.size = parseInt(String(pageSizeHeader ?? pageSize));
       pagination.total = parseInt(String(totalCountHeader ?? "0"));
 
-      items.value = response.data || [];
+      const rawItems = response.data || [];
+      const descending = sorted.value.startsWith("-");
+      const sortField = descending ? sorted.value.slice(1) : sorted.value;
+
+      if (
+        localeSortFields.includes(sortField) &&
+        Array.isArray(rawItems) &&
+        rawItems.length > 0
+      ) {
+        items.value = sortByMultilingualField(rawItems, sortField, descending);
+      } else {
+        items.value = rawItems;
+      }
     } catch (error) {
       logger.error("Failed to fetch data:", error);
       items.value = [];

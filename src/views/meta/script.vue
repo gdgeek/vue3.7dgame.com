@@ -5,7 +5,7 @@
         <el-card v-loading="loading" class="box-card">
           <template #header>
             <div v-if="meta" class="clearfix">
-              <el-link :href="`/meta/meta-edit?id=${id}`" :underline="false">{{
+              <el-link :href="sceneEditorLink" :underline="false">{{
                 meta.title
               }}</el-link>
               /【{{ $t("meta.script.title") }}】
@@ -393,6 +393,14 @@ const {
 
 const { t } = useI18n();
 
+const sceneEditorLink = computed(() => {
+  const editorLabel = t("route.meta.sceneEditor");
+  const titleText = meta.value?.title
+    ? `${editorLabel}【${meta.value.title}】`
+    : editorLabel;
+  return `/meta/scene?id=${id.value}&title=${encodeURIComponent(titleText)}`;
+});
+
 // ---------- Meta 专有：handlePolygen（返回 mesh + playAnimation）----------
 const handlePolygen = async (uuid: string) => {
   if (!scenePlayer.value) {
@@ -602,9 +610,7 @@ onMounted(async () => {
             loader.load(
               modelUrl,
               (gltf) => {
-                const animationNames = gltf.animations.map(
-                  (clip) => clip.name
-                );
+                const animationNames = gltf.animations.map((clip) => clip.name);
                 const data = response.data.data as {
                   children?: { entities?: EntityNode[] };
                 };

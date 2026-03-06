@@ -97,6 +97,7 @@
               </button>
 
               <button
+                v-if="showNameSort"
                 class="sort-btn"
                 :class="{ active: isSortedByName }"
                 @click="toggleSort(sortByNameField)"
@@ -163,6 +164,7 @@ const props = withDefaults(
   {
     showSearch: true,
     showSort: true,
+    showNameSort: true,
     showViewToggle: true,
     defaultView: "grid",
     defaultSort: "-created_at",
@@ -187,6 +189,7 @@ const emit = defineEmits<{
 const searchValue = ref("");
 const currentSort = ref(props.defaultSort);
 const currentView = ref<ViewMode>(props.defaultView);
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
 const sortByNameField = computed(() => props.sortByName || "name");
 
@@ -199,7 +202,22 @@ const isSortedByName = computed(() =>
 const sortAscending = computed(() => !currentSort.value.startsWith("-"));
 
 const handleSearch = () => {
+  if (searchTimer) {
+    clearTimeout(searchTimer);
+    searchTimer = null;
+  }
   emit("search", searchValue.value);
+};
+
+const scheduleSearch = (value: string) => {
+  if (searchTimer) {
+    clearTimeout(searchTimer);
+  }
+
+  searchTimer = setTimeout(() => {
+    emit("search", value);
+    searchTimer = null;
+  }, 300);
 };
 
 const toggleSort = (field: string) => {
@@ -222,8 +240,15 @@ watch(
   () => searchValue.value,
   (val) => {
     if (val === "") {
+      if (searchTimer) {
+        clearTimeout(searchTimer);
+        searchTimer = null;
+      }
       emit("search", "");
+      return;
     }
+
+    scheduleSearch(val);
   }
 );
 

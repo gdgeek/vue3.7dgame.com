@@ -53,9 +53,24 @@ const knightDataRef = ref<InstanceType<typeof KnightDataDialog>>();
 //const prefabDialogRef = ref<InstanceType<typeof PrefabDialog>>();
 const metaDialogRef = ref<InstanceType<typeof MetaDialog>>();
 
+const decodeRouteText = (value: string): string => {
+  let decoded = value;
+  for (let i = 0; i < 2; i += 1) {
+    try {
+      const next = decodeURIComponent(decoded);
+      if (next === decoded) break;
+      decoded = next;
+    } catch {
+      break;
+    }
+  }
+  return decoded;
+};
+
 // 计算属性
 const title = computed(() => {
-  const match = (route.query.title as string)?.match(/【(.*?)】/);
+  const decodedTitle = decodeRouteText((route.query.title as string) || "");
+  const match = decodedTitle.match(/【(.*?)】/);
   return match ? match[0] : "";
 });
 
@@ -358,9 +373,7 @@ const handleMessage = async (e: MessageEvent) => {
           .find((route) => route.path === "/verse/script");
 
         if (scriptRoute && scriptRoute.meta.title) {
-          const metaTitle = translateRouteTitle(
-            scriptRoute.meta.title
-          ).toLowerCase();
+          const metaTitle = translateRouteTitle(scriptRoute.meta.title);
 
           router.push({
             path: "/verse/script",
@@ -497,7 +510,10 @@ onBeforeUnmount(() => {
 <style lang="scss" scoped>
 .content {
   height: calc(100vh - 140px);
-  border-style: solid;
-  border-width: 1px;
+  border: 0;
+  outline: none;
+  border-radius: var(--editor-frame-radius, 16px);
+  clip-path: inset(0 round var(--editor-frame-radius, 16px));
+  background: var(--bg-card, #fff);
 }
 </style>

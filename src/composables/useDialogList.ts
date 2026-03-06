@@ -54,6 +54,8 @@ export function useDialogList<T>(
   ) => Promise<{ data: T[]; headers?: Record<string, unknown> }>
 ) {
   const dialogVisible = ref(false);
+  const loading = ref(false);
+  let requestId = 0;
 
   // 使用显式 Ref 类型规避 Vue 泛型 ref 的 UnwrapRefSimple 冲突
   const active = ref<ActiveState<T>>({
@@ -64,15 +66,32 @@ export function useDialogList<T>(
   }) as Ref<ActiveState<T>>;
 
   const refresh = async () => {
-    const response = await fetchFn(
-      active.value.sorted,
-      active.value.searched,
-      active.value.pagination.current
-    );
-    active.value.items = response.data;
-    const h = response.headers;
-    if (h?.["x-pagination-current-page"] !== undefined) {
-      active.value.pagination = parsePaginationHeaders(h);
+    const currentRequestId = ++requestId;
+    loading.value = true;
+    try {
+      const response = await fetchFn(
+        active.value.sorted,
+        active.value.searched,
+        active.value.pagination.current
+      );
+
+      if (currentRequestId !== requestId) {
+        return;
+      }
+
+      active.value.items = response.data;
+      const h = response.headers;
+      if (h?.["x-pagination-current-page"] !== undefined) {
+        active.value.pagination = parsePaginationHeaders(h);
+      }
+    } catch {
+      if (currentRequestId === requestId) {
+        active.value.items = [];
+      }
+    } finally {
+      if (currentRequestId === requestId) {
+        loading.value = false;
+      }
     }
   };
 
@@ -88,22 +107,25 @@ export function useDialogList<T>(
   /** 重置状态并打开弹窗（可在组件 open() 中调用） */
   const openDialog = async () => {
     resetState();
-    await refresh();
     dialogVisible.value = true;
+    await refresh();
   };
 
   const sort = (value: string) => {
     active.value.sorted = value;
+    active.value.pagination.current = 1;
     refresh();
   };
 
   const search = (value: string) => {
     active.value.searched = value;
+    active.value.pagination.current = 1;
     refresh();
   };
 
   const clearSearched = () => {
     active.value.searched = "";
+    active.value.pagination.current = 1;
     refresh();
   };
 
@@ -114,6 +136,7 @@ export function useDialogList<T>(
 
   return {
     dialogVisible,
+    loading,
     active,
     refresh,
     resetState,

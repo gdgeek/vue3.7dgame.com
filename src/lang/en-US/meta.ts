@@ -148,6 +148,7 @@ export default {
       title: "Select Resource",
       replaceTitle: "Replace Resource",
       select: "Select",
+      cancelSelect: "Cancel Selection",
       putIn: "Put In",
       replace: "Replace",
       putAllIn: "Put All In",

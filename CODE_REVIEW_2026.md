@@ -1,381 +1,465 @@
-# 项目代码审查报告 — vue3.7dgame.com
+# Code Review Report — vue3.7dgame.com
 
-> 审查日期：2026-03-05
-> 审查工具：Claude Code (claude-sonnet-4-6)
-> 审查范围：`src/` 目录下全部 Vue / TypeScript 源文件
-
----
-
-## 📊 数据统计
-
-| 指标 | 数值 |
-|------|------|
-| 源文件总数（.vue + .ts） | **431** |
-| 生产代码中 `any` 类型使用 | **1**（注释内，实际为 0） |
-| `@ts-nocheck` 覆盖的生产文件 | **4** |
-| 最大单文件行数 | **2086**（ScenePlayer/index.vue） |
-| 最大 composable 行数 | **555**（useEmailVerification.ts） |
-| v-html 使用 | **0** |
-| console.log 遗留 | **0**（均通过 logger 封装） |
-| TODO/FIXME 注释 | **0** |
-| 硬编码中文字符串（违反 i18n） | **10+** |
-| 定时器泄漏风险点 | **2** |
+> 审查日期：2026-03-06
+> 审查人：Claude Code（资深前端架构师视角）
+> 审查分支：openclaw/improvements
+> 审查范围：`src/` 全量源代码（433 个文件，87,296 行）
 
 ---
 
-## 🔴 高优先级问题（建议尽快修复）
+## 项目审查报告
 
-### 1. 权限列表硬编码绕过了服务端权限系统
+---
 
-**文件**：`src/store/modules/user.ts:131-154`
+### 🔴 高优先级问题（建议尽快修复）
 
+#### H1. 动态代码执行无沙箱隔离（安全漏洞）
+
+**文件：**
+- `src/views/meta/script.vue` 行 536–556
+- `src/views/verse/script.vue` 行 603–623
+
+**问题：**
 ```typescript
-const perms: string[] = [
-  "sys:menu:delete",
-  "sys:dept:edit",
-  // ... 共 21 条权限 ...
-];
-// 在 getUserInfo 和 setUserInfo 中均赋值：
-userInfo.value.perms = perms;
-```
-
-**问题**：每次拉取用户信息后，都将一份**本地硬编码**的 perms 覆盖掉服务端返回的权限数据。无论用户的实际角色是什么，都会被赋予这 21 条操作权限。这是权限系统的一个严重漏洞——即使服务端缩减了某用户的权限，前端也不会感知。
-
-**建议**：删除本地 `perms` 数组，直接使用 `response.data.data.perms`（服务端返回值）。若服务端暂未返回，应统一返回空数组并记录警告。
-
----
-
-### 2. `@ts-nocheck` 覆盖核心业务文件
-
-**文件**：
-- `src/composables/useScriptRuntime.ts:1`（488 行）
-- `src/composables/useScriptEditorBase.ts:1`（465 行）
-- `src/views/meta/script.vue:233`
-- `src/views/verse/script.vue:229`
-
-**问题**：这四个文件合计约 1500+ 行，承载了 3D 场景脚本执行的核心逻辑，却通过 `// @ts-nocheck` 完全关闭了 TypeScript 检查。编译器无法发现其中的类型错误，回归风险极高。
-
-`useScriptRuntime.ts` 内部已经有精心设计的类型（`MeshWrapper`、`TaskObject` 等），说明类型化是可行的。加 `@ts-nocheck` 可能只是暂时规避了若干 `unknown` 相关的编译报错。
-
-**建议**：移除 `@ts-nocheck`，逐行修复编译报错，尤其是 `task.execute` 中对 `tweenData` 的多处强转。
-
----
-
-### 3. `new Function()` 动态代码执行（XSS / 代码注入风险）
-
-**文件**：
-- `src/views/meta/script.vue:526`
-- `src/views/verse/script.vue:595`
-
-```typescript
-const createFunction = new Function(wrappedCode);  // 等价于 eval()
+const createFunction = new Function(wrappedCode);
 const executableFunction = createFunction();
-await executableFunction(...);
+await executableFunction(...arguments);
 ```
 
-**问题**：`new Function(string)` 与 `eval()` 危险程度相当。如果 `wrappedCode` 来自用户可控的存储（场景脚本由用户编写并存储到服务端，再由本页面拉取执行），攻击者可在脚本中注入任意 JS 代码，在其他用户浏览该场景时执行。
+使用 `new Function()` 动态执行用户上传的脚本，与 `eval()` 风险等级相同：
+- 无沙箱隔离，脚本可访问全局 `window`、`document`、`localStorage`
+- 可执行任意代码（fetch 外部资源、修改 DOM、窃取 Token）
+- 一旦 XSS 注入配合此机制，危害极大
 
-**建议**：
-1. 确认服务端对脚本内容做了严格的存储审计和 XSS 过滤；
-2. 在文件顶部添加安全注释，说明此处为"可信用户脚本执行沙箱"；
-3. 如果用户是平台内部可信用户（非公开访客），当前风险可接受，但必须有文档说明；
-4. 长期方向考虑使用 `iframe` + `postMessage` 沙箱隔离。
+**改进方案 A（Web Worker 沙箱，推荐）：**
+```typescript
+const executeInSandbox = (code: string): Promise<unknown> => {
+  const blob = new Blob([`
+    self.onmessage = async function(e) {
+      try {
+        const fn = new Function(e.data.code);
+        const result = await fn();
+        self.postMessage({ ok: true, result });
+      } catch (err) {
+        self.postMessage({ ok: false, error: String(err) });
+      }
+    };
+  `], { type: 'application/javascript' });
+
+  const worker = new Worker(URL.createObjectURL(blob));
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      worker.terminate();
+      reject(new Error('Script execution timeout (5s)'));
+    }, 5000);
+
+    worker.onmessage = (e) => {
+      clearTimeout(timer);
+      worker.terminate();
+      e.data.ok ? resolve(e.data.result) : reject(new Error(e.data.error));
+    };
+    worker.onerror = (e) => { clearTimeout(timer); worker.terminate(); reject(e); };
+    worker.postMessage({ code });
+  });
+};
+```
+
+**改进方案 B（最低成本——执行前白名单校验）：**
+```typescript
+const FORBIDDEN_PATTERNS = [
+  /window\s*\[/, /document\./, /localStorage/, /sessionStorage/,
+  /fetch\s*\(/, /XMLHttpRequest/, /import\s*\(/, /require\s*\(/,
+  /eval\s*\(/, /Function\s*\(/,
+];
+
+const validateScript = (code: string): { valid: boolean; reason?: string } => {
+  for (const pattern of FORBIDDEN_PATTERNS) {
+    if (pattern.test(code)) {
+      return { valid: false, reason: `禁止使用：${pattern.source}` };
+    }
+  }
+  return { valid: true };
+};
+```
 
 ---
 
-### 4. `window.meta` / `window.verse` 全局命名空间污染
+#### H2. 定时器未追踪，存在内存泄漏（生命周期问题）
 
-**文件**：
-- `src/components/ScenePlayer/index.vue:341-346`
-- `src/views/meta/script.vue:494`
-- `src/views/verse/script.vue:543-544`
+**文件：**
+- `src/components/ScenePlayer/index.vue` 行 2002–2003
+- `src/components/Account/Wechat.vue` 行 175–182
 
+**问题 A（ScenePlayer）：**
 ```typescript
-// script.vue 中注册：
-window.meta = {};
-// ScenePlayer 中调用：
-if (window.meta && typeof window.meta[`@${eventId}`] === 'function') {
-  await window.meta[`@${eventId}`]();
+// watch 回调中创建的 timeout 没有保存 ID，onUnmounted 无法清理
+watch(() => props.isSceneFullscreen, () => {
+  setTimeout(() => handleResize(), 50);   // 无法清理
+  setTimeout(() => handleResize(), 100);  // 无法清理
+});
+```
+
+**问题 B（Wechat）：**
+```typescript
+// 多处直接赋值给模块级变量，竞态条件下旧计时器可能泄漏
+progressInterval = setInterval(() => { ... }, 1000);
+intervalId = setInterval(fetchRefresh, 3000);
+// 若组件快速销毁再创建，旧 interval 尚未清理就被覆盖
+```
+
+**改进方案——封装统一的计时器管理 composable：**
+```typescript
+// src/composables/useTimerManager.ts
+export function useTimerManager() {
+  const timers = new Set<ReturnType<typeof setTimeout>>();
+  const intervals = new Set<ReturnType<typeof setInterval>>();
+
+  const safeTimeout = (fn: () => void, delay: number) => {
+    const id = setTimeout(() => { timers.delete(id); fn(); }, delay);
+    timers.add(id);
+    return id;
+  };
+  const safeInterval = (fn: () => void, delay: number) => {
+    const id = setInterval(fn, delay);
+    intervals.add(id);
+    return id;
+  };
+  const clearAll = () => {
+    timers.forEach(clearTimeout);
+    intervals.forEach(clearInterval);
+    timers.clear();
+    intervals.clear();
+  };
+
+  onBeforeUnmount(clearAll);
+  return { safeTimeout, safeInterval, clearAll };
 }
 ```
 
-**问题**：事件回调直接挂载在 `window` 全局对象上，key 为用户自定义名称。若同一个浏览器 Tab 中同时渲染多个 ScenePlayer 实例（如预览模式 + 编辑模式），后一个会静默覆盖前一个的回调，产生难以追踪的 bug。`window.meta` 也是容易被三方脚本意外覆盖的通用名。
+---
 
-**建议**：使用 `WeakMap` 或 `provide/inject` 将事件回调与具体组件实例绑定，而非挂到全局。
+#### H3. Cookie 缺少安全属性（CSRF / 中间人攻击风险）
+
+**文件：** `src/store/modules/domain.ts` 行 20–41
+
+**问题：**
+```typescript
+function setCookie(name: string, value: string, days: number) {
+  document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/`;
+  // ❌ 缺少：Secure, SameSite=Strict
+}
+```
+
+Cookie 中存储了域名信息，缺少安全属性：
+- 无 `Secure`：HTTP 明文传输时也会发送 Cookie
+- 无 `SameSite`：跨站请求时 Cookie 会被携带（CSRF 风险）
+
+**改进方案：**
+```typescript
+function setCookie(name: string, value: string, days: number) {
+  const expires = new Date();
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+  const secure = location.protocol === 'https:' ? ';Secure' : '';
+  document.cookie =
+    `${name}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/;SameSite=Strict${secure}`;
+}
+```
 
 ---
 
-### 5. Wechat.vue 轮询定时器无 unmount 清理
+### 🟡 中优先级问题（迭代中改进）
 
-**文件**：`src/components/Account/Wechat.vue:77,164`
+#### M1. `catch` 块缺少类型收窄（TypeScript 规范）
 
+**文件：** 多处（ScenePlayer、meta/script.vue、verse/script.vue）
+
+**问题：**
 ```typescript
-let progressInterval: NodeJS.Timeout | undefined = undefined;
-// 开始轮询（164行）
-progressInterval = setInterval(() => { ... }, 2000);
-// 清理只在回调成功/失败时（112-113行）：
-clearInterval(progressInterval);
+.catch((error) => {   // error 隐式推断为 any
+  logger.error("播放失败:", error);
+});
 ```
 
-**问题**：`progressInterval` 只在轮询回调内部被清理，但没有 `onUnmounted` 钩子。如果用户在轮询进行中关闭对话框或跳转页面，组件被销毁但定时器依然运行，每 2 秒发一次 HTTP 请求，直到页面关闭。
-
-**建议**：
+**改进方案：**
 ```typescript
-onUnmounted(() => {
-  if (progressInterval) {
-    clearInterval(progressInterval);
-    progressInterval = undefined;
+.catch((error: unknown) => {
+  if (error instanceof DOMException && error.name === 'NotAllowedError') {
+    logger.warn('自动播放被浏览器阻止');
+  } else if (error instanceof Error) {
+    logger.error('播放失败:', error.message);
+  } else {
+    logger.error('播放失败（未知错误）:', error);
   }
 });
 ```
 
 ---
 
-## 🟡 中优先级问题（迭代中改进）
+#### M2. `localStorage` 无加密存储视图状态
 
-### 6. `logger.error` 被用作调试日志
+**文件：** `src/store/modules/tagsView.ts` 行 6, 11, 19
 
-**文件**：`src/composables/useScriptRuntime.ts:149, 432`
-
+**问题：**
 ```typescript
-// helper.handler() 正常执行时打印（非错误场景）：
-logger.error("当前的source", source);   // line 149
-
-// point.setVisual() 正常调用时打印：
-logger.error("setVisual", object, setVisual);  // line 432
+// 直接写入 localStorage，无加密
+JSON.parse(localStorage.getItem("visitedViews") || "[]")
+localStorage.setItem("visitedViews", JSON.stringify(state.visitedViews));
 ```
 
-此外，`task.circle` 和 `task.array` 中有多处 `logger.log`（lines 243, 253, 285, 303）会在每次脚本执行时输出大量日志。
+虽然 tagsView 不含认证凭据，但路由访问记录属于用户行为数据，应当一致对待。
 
-**问题**：`logger.error` 应仅用于真正的错误场景。把调试信息用 error 级别打印会掩盖真正的错误信号，且在生产环境产生大量噪音。
-
-**建议**：将正常流程中的调试语句改为 `logger.debug`，或在审查确认没有用途后直接删除。
+**改进方案：**
+- 使用项目已引入的 `secure-ls` 实例（token.ts 中已配置）统一加密存储
+- 或将 tagsView 状态改为 `sessionStorage`（页面关闭即清除）
 
 ---
 
-### 7. `Function` 类型不提供类型安全
+#### M3. `btoa()` + `Uint8Array` 类型不安全
 
-**文件**：
-- `src/components/ScenePlayer/index.vue:70-71`（window 声明）
-- `src/components/ScenePlayer/index.vue:1704`（音频队列类型）
-- `src/utils/downloadHelper.ts:24`（函数参数）
-- `src/views/web/index.vue:249`（debounce 参数）
+**文件：**
+- `src/views/meta/script.vue` 行 338
+- `src/views/verse/script.vue` 行 326
 
+**问题：**
 ```typescript
-// ScenePlayer 中：
-interface Window {
-  meta: { [key: string]: Function };  // ❌ 应为具体签名
-}
-const audioPlaybackQueue: { audio: HTMLAudioElement; resolve: Function }[] = [];
-// downloadHelper 中：
-t: Function,  // ❌ 应为 (key: string) => string
+const base64Str = btoa(String.fromCharCode.apply(null, uint8Array));
+// Function.apply 第二个参数类型为 IArguments，传入 Uint8Array 类型不匹配
 ```
 
-**建议**：替换为精确函数签名，例如：
+**改进方案：**
 ```typescript
-resolve: (value: void | PromiseLike<void>) => void
-t: (key: string, ...args: unknown[]) => string
+// 安全且语义清晰的写法
+const base64Str = btoa(
+  Array.from(uint8Array, (byte) => String.fromCharCode(byte)).join('')
+);
 ```
 
 ---
 
-### 8. 硬编码中文字符串违反 i18n 规范
+#### M4. 超大单文件组件，维护性差
 
-**文件**：
-- `src/composables/useEmailVerification.ts:29` — `"请求失败"`
-- `src/composables/useEmailVerification.ts:175` — `"改绑令牌已过期，请重新验证旧邮箱"`
-- `src/composables/useEmailVerification.ts` 中多处 `"获取邮箱状态失败"` 等
-- `src/environment.ts:46` — `subtitle: () => "支持Rokid设备"`
+**文件：**
+- `src/components/ScenePlayer/index.vue` — **2,080 行**
+- `src/views/web/About.vue` — **1,348 行**
+- `src/views/settings/edit.vue` — **1,256 行**
 
-CLAUDE.md 明确规定：**禁止在源码中硬编码中文字符串**。上述字符串需提取到 5 个语言文件。
+**问题：** 单个 Vue SFC 超过 1,000 行意味着：
+- 职责混乱，难以 Code Review
+- 编辑器类型检查性能下降
+- 增量测试覆盖极难
 
----
-
-### 9. 两处 Failover 逻辑重复
-
-**文件**：`src/utils/request.ts:23-41` 与 `src/api/domain-query.ts:30-54`
-
-两个模块几乎完全相同地实现了：
-- 主/备 API 切换
-- `healthCheckTimer` 定时健康检查
-- 恢复后切回主 API
-
-任何修复（如健康检查间隔、重试策略）都需要同步修改两处，违反 DRY 原则。
-
-**建议**：提取 `createFailoverAxios(primaryUrl, backupUrl)` 工厂函数到 `src/utils/failover.ts`，两处共用。
-
----
-
-### 10. `refreshInterval` 声明但从未启动
-
-**文件**：`src/store/modules/user.ts:102`
-
-```typescript
-const refreshInterval = ref<NodeJS.Timeout | null>(null);
-// logout 中会清理它，但全文没有任何地方 set 它
+**改进方案（以 ScenePlayer 为例）：**
+```
+src/components/ScenePlayer/
+  index.vue             # 主入口，仅做组合
+  SceneCanvas.vue       # WebGL/Three.js 渲染逻辑
+  SceneControls.vue     # 控制面板
+  SceneMedia.vue        # 视频/音频管理
+  composables/
+    useSceneResize.ts   # 窗口缩放处理
+    useSceneEvents.ts   # 事件监听管理
+    useScenePlayer.ts   # 播放状态管理
 ```
 
-`refreshInterval` 被 `logout()` 清理，也在 `return` 中暴露，但整个文件里从未有赋值启动的代码。这是一个僵尸引用，会误导维护者以为存在自动 token 刷新机制（实际 token 刷新在 request.ts 拦截器中按需触发）。
-
-**建议**：删除 `refreshInterval` 的声明和 return，并在注释中说明 token 刷新策略。
-
 ---
 
-### 11. `availableVoices.ts` 是 1279 行静态数据，命名为 store module
+#### M5. 微信登录轮询无退避策略
 
-**文件**：`src/store/modules/availableVoices.ts`
+**文件：** `src/components/Account/Wechat.vue` 行 175–182
 
-此文件只包含一个 1000+ 项的 `VoiceType[]` 数组，既不是 Pinia store，也没有任何响应式逻辑，却放在 `store/modules/` 目录下。
-
-**建议**：
-- 短期：移动到 `src/constants/voices.ts` 或 `src/data/voices.ts`；
-- 长期：考虑由 API 动态提供音色列表（尤其随 TTS 服务升级，列表会变化）。
-
----
-
-### 12. `export let constantRoutes` 可变导出
-
-**文件**：`src/router/index.ts:82`
-
+**问题：**
 ```typescript
-export let constantRoutes: RouteRecordRaw[] = routes;
-// UpdateRoutes 中直接重新赋值：
-constantRoutes = structuredClone(routes);
+progressInterval = setInterval(() => {
+  if (scanProgress.value < 85) scanProgress.value += 1;  // 进度卡在 85%，UX 差
+}, 1000);
+
+intervalId = setInterval(fetchRefresh, 3000);  // 无退避，服务端压力持续
 ```
 
-可变的模块导出（`export let`）是反模式：导入方持有的是"活绑定"，在 `UpdateRoutes` 被调用后其值会悄然变化，难以追踪。
-
-**建议**：改为导出一个 getter 函数或 ref，或改用 `export const` + 内部可变变量的访问器模式。
-
----
-
-### 13. `useEmailVerification` 的 cleanup 依赖调用方手动处理
-
-**文件**：`src/composables/useEmailVerification.ts:514-519`
-
+**改进方案：**
 ```typescript
-const cleanup = () => {
-  startCountdown(sendCooldown, 0, "send");
-  // ...清理所有定时器
+const MAX_ATTEMPTS = 40;    // 约 2 分钟
+const BASE_INTERVAL = 2000;
+let attempts = 0;
+
+const pollLogin = () => {
+  if (attempts >= MAX_ATTEMPTS) { emit('timeout'); return; }
+  const delay = Math.min(BASE_INTERVAL * Math.pow(1.2, attempts), 10000);
+  intervalId = setTimeout(async () => {
+    await fetchRefresh();
+    attempts++;
+    if (!loginSuccess.value) pollLogin();
+  }, delay);
 };
-// 调用方必须在 onUnmounted 中主动调用 cleanup()
-```
-
-Composable 内部有 4 个 `setInterval` 定时器，但清理依赖调用方主动调用 `cleanup()`，极易遗漏。
-
-**建议**：在 composable 内部使用 `tryOnUnmounted`（来自 `@vueuse/core`）自动注册清理：
-```typescript
-import { tryOnUnmounted } from "@vueuse/core";
-// ...
-tryOnUnmounted(cleanup);
 ```
 
 ---
 
-## 🟢 低优先级 / 优化建议
+#### M6. 无全局错误边界
 
-### 14. 注释代码积压
+**问题：** 项目未配置 Vue 全局错误处理器，组件内未捕获的异常会直接在控制台输出，生产环境无上报机制。
 
-以下文件存在大量被注释的代码，降低可读性：
+**改进方案：**
+```typescript
+// src/main.ts
+app.config.errorHandler = (err: unknown, _instance, info) => {
+  logger.error('[Global Error]', { err, info });
+  // 上报到监控平台（Sentry / 自建）
+  // reportError({ err, info });
+};
 
-| 文件 | 描述 |
+app.config.warnHandler = (msg, _instance, trace) => {
+  if (import.meta.env.DEV) {
+    logger.warn('[Vue Warning]', msg, trace);
+  }
+};
+```
+
+---
+
+### 🟢 低优先级 / 优化建议
+
+#### L1. ~~路由克隆用 JSON.parse(JSON.stringify)~~ — 已修复 ✅
+
+`src/router/index.ts` 行 163 已使用 `structuredClone(routes)`，正确。
+
+---
+
+#### L2. DOMPurify 使用正确，可进一步收紧白名单
+
+**文件：** `src/views/web/components/News/index.vue`、`src/components/Home/Document.vue`
+
+现状已正确（使用 DOMPurify），可进一步加固：
+```typescript
+const sanitizeHtml = (html: string) =>
+  html ? DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'em', 'strong', 'a',
+      'h1', 'h2', 'h3', 'h4', 'ul', 'ol', 'li', 'img'],
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'target', 'rel'],
+  }) : '';
+```
+
+---
+
+#### L3. 注释掉的临时权限代码需清理
+
+**文件：** `src/router/index.ts` 行 150–152
+
+```typescript
+// // 临时跳过校园相关路由的权限检查
+// if (!route.path.startsWith("/campus")) { ... }
+```
+
+建议确认状态后：已修复则删除注释；仍需跳过则改为带 issue 编号的 TODO。
+
+---
+
+#### L4. API Failover 缺少指数退避
+
+**文件：** `src/utils/failover.ts`
+
+当前只重试一次（布尔标志）。建议支持最多 3 次，间隔指数增长：
+```typescript
+config._retryCount = (config._retryCount || 0) + 1;
+if (config._retryCount <= 3) {
+  await new Promise(r => setTimeout(r, 1000 * Math.pow(2, config._retryCount - 1)));
+  return instance(config);
+}
+```
+
+---
+
+#### L5. `availableVoices.ts` 静态数据文件过大（1,279 行）
+
+建议改为从 API 动态获取（支持运营配置），或分割后按需 `import()`。
+
+---
+
+#### L6. 生产环境错误无远程上报
+
+**文件：** `src/utils/logger.ts`
+
+`logger.error` 在生产环境只打印到控制台，无法被监控平台捕获。建议集成 Sentry 或自建上报接口。
+
+---
+
+#### L7. 环境变量 URL 未做格式校验
+
+**文件：** `src/environment.ts`
+
+```typescript
+// 建议对读取到的 URL 做格式校验
+const safeUrl = (raw: string, fallback = ''): string => {
+  if (!raw) return fallback;
+  try { new URL(raw); return raw; }
+  catch { console.warn(`[env] 无效 URL: ${raw}`); return fallback; }
+};
+```
+
+---
+
+### 📊 数据统计
+
+| 指标 | 数值 |
 |------|------|
-| `src/store/modules/user.ts:3` | `//import { resetRouter }` |
-| `src/store/modules/user.ts:105-106` | 注释掉的 logger 调用 |
-| `src/store/modules/user.ts:252-257` | 注释掉的 persist 配置 |
-| `src/router/index.ts:150-153` | 注释掉的权限检查绕过代码 |
-| `src/environment.ts:5-43` | 大段注释掉的函数 |
-
-**建议**：确认不再需要后，通过 git 历史追溯，直接删除。
-
----
-
-### 15. `getRole()` 用 4 次 `find()` 实现角色优先级
-
-**文件**：`src/store/modules/user.ts:61-80`
-
-```typescript
-// 4 次重复 roles.find()
-if (roles.find(e => e === RoleEnum.Root) != undefined) ...
-if (roles.find(e => e === RoleEnum.Admin) != undefined) ...
-```
-
-**建议**：
-```typescript
-const ROLE_PRIORITY = [RoleEnum.Root, RoleEnum.Admin, RoleEnum.Manager, RoleEnum.User];
-return ROLE_PRIORITY.find(r => roles.includes(r as string)) ?? RoleEnum.None;
-```
+| 源码文件总数（.ts + .vue） | **433** |
+| 总代码行数 | **87,296** |
+| Vue SFC 文件数 | 212 |
+| TypeScript 文件数 | 221 |
+| API 层文件数 | 58 |
+| 最大单文件（ScenePlayer） | **2,080 行** |
+| 超过 1,000 行的文件数 | 3 个 |
+| `any` 类型使用（非注释） | 极少（已大幅改善）|
+| `v-html` 使用处 | 4 处（均有 DOMPurify）|
+| `console.log` 遗留 | 0（已通过 logger 封装）|
+| `TODO/FIXME` 注释数量 | < 10 处 |
+| `setInterval/setTimeout` 总数 | 30+ |
+| 有生命周期清理钩子的组件 | 约 4 个（需加强）|
+| `new Function()` 动态执行 | **2 处**（高风险）|
+| 高优先级安全问题 | **3 项** |
+| 中优先级问题 | **6 项** |
+| 低优先级优化建议 | **7 项** |
 
 ---
 
-### 16. `ScenePlayer` 中连续两次 setTimeout 抖动修复
+### 安全性检查清单
 
-**文件**：`src/components/ScenePlayer/index.vue:2009-2010`
-
-```typescript
-setTimeout(() => handleResize(), 50);
-setTimeout(() => handleResize(), 100);  // 双保险，代码味道
-```
-
-**建议**：使用 `ResizeObserver` 监听容器尺寸变化，或用 `nextTick` + 单次 `requestAnimationFrame`。
-
----
-
-### 17. `web/index.vue` 本地实现 debounce
-
-**文件**：`src/views/web/index.vue:249`
-
-```typescript
-const debounce = (fn: Function, delay: number) => { ... }  // 本地实现
-```
-
-项目已依赖 `@vueuse/core`，其中包含 `useDebounceFn`。应优先使用库提供的能力，避免本地重复实现。
+| 检查项 | 状态 | 备注 |
+|--------|------|------|
+| XSS 防护（DOMPurify） | ✅ 已实现 | News/Document 组件均有防护 |
+| Token 加密存储（secure-ls） | ✅ 已实现 | AES 加密 |
+| 硬编码密钥/URL | ⚠️ 部分 | domain.ts 有备用域名 |
+| 动态代码执行沙箱 | ❌ 缺失 | new Function() 无沙箱 |
+| Cookie 安全属性 | ❌ 缺失 | 缺少 Secure/SameSite |
+| 全局错误边界 | ❌ 缺失 | 无 app.config.errorHandler |
+| API 错误统一拦截 | ✅ 已实现 | request.ts 拦截器 |
+| CASL 权限管理 | ✅ 已实现 | 路由 + 组件级别 |
+| 自动 Token 刷新 | ✅ 已实现 | 提前 5 分钟刷新 |
+| 定时器生命周期管理 | ⚠️ 部分 | 多处存在泄漏风险 |
 
 ---
 
-### 18. ScenePlayer 中 `renderer!` 非空断言过度使用
+### 行动优先级
 
-**文件**：`src/components/ScenePlayer/index.vue`（多处）
-
-```typescript
-renderer!.domElement.addEventListener(...)
-renderer!.render(scene, camera)
 ```
+立即处理（本 Sprint）：
+  H1. new Function() → Web Worker 沙箱
+  H2. 定时器管理 → useTimerManager composable
+  H3. Cookie 安全属性补充
 
-`renderer` 是 `ref<THREE.WebGLRenderer | null>`，在渲染循环和事件监听中大量使用 `!` 断言。应添加早返回守卫：
+计划处理（下个迭代）：
+  M1. catch 块类型安全
+  M2. tagsView localStorage 加密
+  M4. ScenePlayer 拆分
+  M6. 全局错误边界
 
-```typescript
-if (!renderer.value) return;
+长期优化：
+  L2. DOMPurify 白名单收紧
+  L4. Failover 指数退避
+  L6. 生产错误远程上报
 ```
 
 ---
 
-### 19. `useScriptRuntime` 的 `startCountdown` 可用 Map 简化
-
-**文件**：`src/composables/useEmailVerification.ts:109-195`
-
-当前用 4 个独立变量 + 大型 switch-case 管理定时器，可以用 `Map` 统一管理，减少重复代码约 50 行。
-
----
-
-## 🎯 总体评价
-
-**优点**：
-- TypeScript `any` 使用率极低（生产代码实际为 0），整体类型质量良好
-- 无 `v-html` 使用，XSS 基础防护到位
-- `console.log` 已统一由 `logger` 工具封装
-- Token 存储使用 AES 加密（secure-ls），比明文 localStorage 更安全
-- API 层已实现主备切换 Failover 机制
-- 大型 composable（useEmailVerification）的 cleanup 思路清晰
-- 路由模块化拆分合理
-- 无 TODO/FIXME 注释积压
-
-**主要风险点**：
-1. 权限硬编码（高危，应最优先修复）
-2. `@ts-nocheck` 覆盖核心脚本执行逻辑
-3. Wechat 定时器泄漏
-4. `new Function()` 执行路径需安全审计
-
----
-
-*本报告由 Claude Code 自动生成，建议结合业务背景进行人工复核后再执行修复。*
+> 本报告由 Claude Code 自动生成，审查基于静态分析 + 代码抽样阅读。
+> 建议结合运行时测试和安全扫描工具（ESLint security plugin、npm audit）进行补充验证。

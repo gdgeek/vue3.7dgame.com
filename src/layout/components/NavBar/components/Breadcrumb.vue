@@ -12,8 +12,84 @@ import { useI18n } from "vue-i18n";
 const route = useRoute();
 const { t } = useI18n();
 
+const getQueryString = (value: unknown): string => {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value) && typeof value[0] === "string") return value[0];
+  if (typeof value === "number") return String(value);
+  return "";
+};
+
+const decodeRouteText = (value: string): string => {
+  let decoded = value;
+  for (let i = 0; i < 2; i += 1) {
+    try {
+      const next = decodeURIComponent(decoded);
+      if (next === decoded) break;
+      decoded = next;
+    } catch {
+      break;
+    }
+  }
+  return decoded;
+};
+
+const extractNameFromTitle = (title: string): string => {
+  const normalized = decodeRouteText(title).trim();
+  if (!normalized) return "";
+  const match = normalized.match(/【([^】]+)】/);
+  if (match?.[1]) return match[1].trim();
+  return normalized;
+};
+
+const getScriptLabel = (): string => {
+  const metaScript = t("meta.script.title");
+  if (metaScript && metaScript !== "meta.script.title") {
+    return String(metaScript);
+  }
+  const verseScript = t("verse.view.script.title");
+  if (verseScript && verseScript !== "verse.view.script.title") {
+    return String(verseScript);
+  }
+  return "脚本";
+};
+
+const resolveEditorName = (): string => {
+  const queryTitle = getQueryString(route.query.title);
+  if (queryTitle) return extractNameFromTitle(queryTitle);
+  const metaTitle =
+    typeof route.meta.title === "string" ? route.meta.title : "";
+  if (metaTitle) return extractNameFromTitle(metaTitle);
+  return "";
+};
+
 const breadcrumbText = computed(() => {
   const path = route.path;
+
+  const workspace = String(t("breadcrumb.workspace"));
+  const entity = String(t("sidebar.entity"));
+  const scene = String(t("sidebar.scene"));
+  const script = getScriptLabel();
+  const editorName = resolveEditorName();
+
+  if (path === "/meta/scene") {
+    const name = editorName || String(t("route.meta.sceneEditor"));
+    return [workspace, entity, name].join(" / ");
+  }
+
+  if (path === "/meta/script") {
+    const name = editorName || String(t("route.meta.sceneEditor"));
+    return [workspace, entity, name, script].join(" / ");
+  }
+
+  if (path === "/verse/scene") {
+    const name = editorName || String(t("route.project.sceneEditor"));
+    return [workspace, scene, name].join(" / ");
+  }
+
+  if (path === "/verse/script") {
+    const name = editorName || String(t("route.project.sceneEditor"));
+    return [workspace, scene, name, script].join(" / ");
+  }
 
   const breadcrumbMap: Record<string, string[]> = {
     "/home": ["breadcrumb.workspace", "sidebar.home"],
