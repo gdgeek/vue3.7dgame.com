@@ -13,8 +13,8 @@ describe("metaRoutes 路由模块", () => {
     expect(Array.isArray(metaRoutes)).toBe(true);
   });
 
-  it("metaRoutes 包含 6 条路由", () => {
-    expect(metaRoutes).toHaveLength(6);
+  it("metaRoutes 包含 5 条路由", () => {
+    expect(metaRoutes).toHaveLength(5);
   });
 
   it("每条路由都有 path 和 component 字段", () => {
@@ -108,14 +108,8 @@ describe("metaRoutes 路由模块", () => {
   // 具体路由：MetaEdit
   // -------------------------------------------------------------------------
   describe("MetaEdit 路由", () => {
-    const getRoute = () => metaRoutes.find((r) => r.name === "MetaEdit");
-
-    it("存在 MetaEdit 路由", () => {
-      expect(getRoute()).toBeDefined();
-    });
-
-    it("path 为 /meta/meta-edit", () => {
-      expect(getRoute()?.path).toBe("/meta/meta-edit");
+    it("MetaEdit 路由已移除，共有 5 条 meta 路由", () => {
+      expect(metaRoutes.length).toBe(5);
     });
   });
 
