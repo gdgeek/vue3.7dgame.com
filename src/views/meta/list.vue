@@ -285,13 +285,7 @@
 </template>
 
 <script setup lang="ts">
-import { logger } from "@/utils/logger";
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-// import { ElMessage, ElMessageBox } from "element-plus";
-import { Message, MessageBox } from "@/components/Dialog";
-import { v4 as uuidv4 } from "uuid";
 import {
   PageActionBar,
   ViewContainer,
@@ -301,75 +295,14 @@ import {
   DetailPanel,
 } from "@/components/StandardPage";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
-import {
-  getMetas,
-  postMeta,
-  deleteMeta,
-  putMeta,
-  getMeta,
-  putMetaCode,
-} from "@/api/v1/meta";
-import type { metaInfo } from "@/api/v1/meta";
-import { usePageData } from "@/composables/usePageData";
-import { useFileStore } from "@/store/modules/config";
-import { postFile } from "@/api/v1/files";
-import { getPicture } from "@/api/v1/resources/index";
-import type { UploadFileType } from "@/api/user/model";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import { FolderOpened, Upload } from "@element-plus/icons-vue";
-import type { CardInfo } from "@/utils/types";
+import { useMetaList, logMetaStructure } from "./list/composables/useMetaList";
+import { useMetaDetail } from "./list/composables/useMetaDetail";
+import { useMetaCoverUpload } from "./list/composables/useMetaCoverUpload";
+import { useMetaActions } from "./list/composables/useMetaActions";
 
 const { t } = useI18n();
-const router = useRouter();
-
-const logMetaStructure = (scope: "list" | "detail", payload: unknown) => {
-  if (!payload || typeof payload !== "object") {
-    logger.info("[MetaStructure]", { scope, payloadType: typeof payload });
-    return;
-  }
-
-  if (scope === "list") {
-    const list = Array.isArray(payload) ? payload : [];
-    const first = list[0] as Record<string, unknown> | undefined;
-    logger.info("[MetaStructure]", {
-      scope,
-      count: list.length,
-      firstItemKeys: first ? Object.keys(first) : [],
-      firstItemRaw: first ?? null,
-      firstItemShape: first
-        ? {
-            idType: typeof first.id,
-            titleType: typeof first.title,
-            hasAuthor: !!first.author,
-            hasImage: !!first.image,
-            dataType: typeof first.data,
-            infoType: typeof first.info,
-            eventsType: typeof first.events,
-            metaCodeType: typeof first.metaCode,
-          }
-        : null,
-    });
-    return;
-  }
-
-  const detail = payload as Record<string, unknown>;
-  logger.info("[MetaStructure]", {
-    scope,
-    keys: Object.keys(detail),
-    detailRaw: detail,
-    shape: {
-      idType: typeof detail.id,
-      titleType: typeof detail.title,
-      hasAuthor: !!detail.author,
-      hasImage: !!detail.image,
-      dataType: typeof detail.data,
-      infoType: typeof detail.info,
-      eventsType: typeof detail.events,
-      prefabType: typeof detail.prefab,
-      metaCodeType: typeof detail.metaCode,
-    },
-  });
-};
 
 const {
   items,
@@ -382,376 +315,40 @@ const {
   handleSortChange,
   handlePageChange,
   handleViewChange,
-} = usePageData({
-  fetchFn: async (params) => {
-    const response = await getMetas(
-      params.sort,
-      params.search,
-      params.page,
-      "image,author,resources"
-    );
-    logMetaStructure("list", response.data);
-    return response;
-  },
+  getResourceCount,
+} = useMetaList();
+
+const {
+  detailVisible,
+  detailLoading,
+  currentMeta,
+  detailProperties,
+  eventInputs,
+  eventOutputs,
+  openDetail,
+  handlePanelClose,
+  goToEditor,
+  handleGoToEditor,
+  handleCopy,
+  handleRename,
+  handleDelete,
+} = useMetaDetail({ refresh, logMetaStructure });
+
+const {
+  imageSelectDialogVisible,
+  resourceDialogRef,
+  fileInput,
+  triggerFileSelect,
+  openLocalUpload,
+  openResourceDialog,
+  onResourceSelected,
+  handleCoverUpload,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} = useMetaCoverUpload({ currentMeta: currentMeta as any, detailLoading, refresh });
+
+const { addMeta, copyWindow, namedWindow, deletedWindow } = useMetaActions({
+  refresh,
 });
-
-const detailVisible = ref(false);
-const detailLoading = ref(false);
-const currentMeta = ref<metaInfo | null>(null);
-
-// Image selection state
-const imageSelectDialogVisible = ref(false);
-const resourceDialogRef = ref<InstanceType<typeof ResourceDialog> | null>(null);
-const fileInput = ref<HTMLInputElement | null>(null);
-const fileStore = useFileStore();
-
-const triggerFileSelect = () => {
-  imageSelectDialogVisible.value = true;
-};
-
-const openLocalUpload = () => {
-  imageSelectDialogVisible.value = false;
-  fileInput.value?.click();
-};
-
-const openResourceDialog = () => {
-  imageSelectDialogVisible.value = false;
-  resourceDialogRef.value?.openIt({ type: "picture" });
-};
-
-const onResourceSelected = async (data: CardInfo) => {
-  const context =
-    typeof data.context === "object" && data.context !== null
-      ? (data.context as { image_id?: number })
-      : undefined;
-  const imageId = context?.image_id || data.image?.id || data.id;
-  if (imageId && currentMeta.value) {
-    detailLoading.value = true;
-    try {
-      let finalImageId = imageId;
-      if (data.type === "picture") {
-        const response = await getPicture(data.id);
-        finalImageId = response.data.image_id || response.data.file?.id;
-      }
-      await putMeta(String(currentMeta.value.id), { image_id: finalImageId });
-      Message.success(t("meta.metaEdit.image.updateSuccess"));
-      // Refresh details
-      const response = await getMeta(currentMeta.value.id, {
-        expand: "image,author",
-      });
-      currentMeta.value = response.data;
-      refresh();
-    } catch (error) {
-      logger.error("Failed to update meta image:", error);
-      Message.error(t("meta.metaEdit.image.updateError"));
-    } finally {
-      detailLoading.value = false;
-    }
-  }
-};
-
-const handleCoverUpload = async (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  const file = target.files?.[0];
-  if (!file) return;
-
-  if (!file.type.startsWith("image/")) {
-    Message.error(t("meta.list.selectImageFile"));
-    return;
-  }
-  if (file.size > 5 * 1024 * 1024) {
-    Message.error(t("meta.list.imageTooLarge"));
-    return;
-  }
-
-  detailLoading.value = true;
-  try {
-    const md5 = await fileStore.store.fileMD5(file);
-    const extension = file.name.substring(file.name.lastIndexOf("."));
-    const handler = await fileStore.store.publicHandler();
-    const dir = "picture";
-    const has = await fileStore.store.fileHas(md5, extension, handler, dir);
-
-    if (!has) {
-      await new Promise<void>((resolve, reject) => {
-        fileStore.store
-          .fileUpload(md5, extension, file, (_p: number) => {}, handler, dir)
-          .then(() => resolve())
-          .catch(reject);
-      });
-    }
-
-    const fileData: UploadFileType = {
-      filename: file.name,
-      md5,
-      key: md5 + extension,
-      url: fileStore.store.fileUrl(md5, extension, handler, dir),
-    };
-    const response = await postFile(fileData);
-    const imageId = response.data.id;
-
-    if (currentMeta.value) {
-      await putMeta(String(currentMeta.value.id), { image_id: imageId });
-      Message.success(t("meta.metaEdit.image.updateSuccess"));
-      const res = await getMeta(currentMeta.value.id, {
-        expand: "image,author",
-      });
-      currentMeta.value = res.data;
-      refresh();
-    }
-  } catch (error) {
-    logger.error("Upload failed", error);
-    Message.error(t("meta.metaEdit.image.updateError"));
-  } finally {
-    detailLoading.value = false;
-    target.value = "";
-  }
-};
-
-const detailProperties = computed(() => {
-  if (!currentMeta.value) return [];
-  return [
-    {
-      label: t("meta.list.properties.type"),
-      value: t("meta.list.properties.entity"),
-    },
-    {
-      label: t("meta.list.properties.author"),
-      value:
-        currentMeta.value.author?.nickname ||
-        currentMeta.value.author?.username ||
-        "—",
-    },
-    {
-      label: t("meta.list.properties.resources"),
-      value: getResourceCount(currentMeta.value),
-    },
-  ];
-});
-
-const getResourceCount = (item?: { resources?: unknown }) => {
-  return Array.isArray(item?.resources) ? item.resources.length : 0;
-};
-
-type MetaEventItem = { title: string; name: string; type: string };
-
-const normalizeEventList = (value: unknown): MetaEventItem[] => {
-  if (!Array.isArray(value)) return [];
-  return value.map((item, index) => {
-    const record =
-      item && typeof item === "object" ? (item as Record<string, unknown>) : {};
-    const title = String(record.title ?? record.name ?? `#${index + 1}`);
-    const name = String(record.name ?? "");
-    const rawType = record.type;
-    return {
-      title,
-      name,
-      type: rawType === null || rawType === undefined ? "" : String(rawType),
-    };
-  });
-};
-
-const eventInputs = computed(() =>
-  normalizeEventList(currentMeta.value?.events?.inputs)
-);
-const eventOutputs = computed(() =>
-  normalizeEventList(currentMeta.value?.events?.outputs)
-);
-
-const openDetail = async (item: metaInfo) => {
-  detailVisible.value = true;
-  detailLoading.value = true;
-
-  try {
-    const response = await getMeta(item.id, { expand: "image,author" });
-    currentMeta.value = response.data;
-    logMetaStructure("detail", response.data);
-  } catch (err) {
-    Message.error(String(err));
-  } finally {
-    detailLoading.value = false;
-  }
-};
-
-const handlePanelClose = () => {
-  currentMeta.value = null;
-};
-
-const goToEditor = (item: metaInfo) => {
-  const title = encodeURIComponent(
-    t("meta.list.editorTitle", {
-      name: item.title || t("meta.list.unnamed"),
-    })
-  );
-  router.push({ path: "/meta/scene", query: { id: item.id, title } });
-};
-
-const handleGoToEditor = () => {
-  if (currentMeta.value) {
-    goToEditor(currentMeta.value);
-  }
-};
-
-const handleCopy = async () => {
-  if (!currentMeta.value) return;
-  try {
-    const { value } = (await MessageBox.prompt(
-      t("meta.prompt.message1"),
-      t("meta.prompt.message2"),
-      {
-        confirmButtonText: t("meta.prompt.confirm"),
-        cancelButtonText: t("meta.prompt.cancel"),
-        defaultValue: `${currentMeta.value.title}${t("meta.list.copySuffix")}`,
-      }
-    )) as { value: string };
-    await copy(currentMeta.value.id, value);
-    Message.success(t("meta.prompt.success") + value);
-  } catch {
-    Message.info(t("meta.prompt.info"));
-  }
-};
-
-const copy = async (id: number, newTitle: string) => {
-  try {
-    const response = await getMeta(id, { expand: "image,author,metaCode" });
-    const meta = response.data;
-    const newMeta = {
-      title: newTitle,
-      uuid: uuidv4(),
-      image_id: meta.image_id,
-      data: meta.data,
-      info: meta.info,
-      events: meta.events,
-      prefab: meta.prefab,
-    };
-    const createResponse = await postMeta(newMeta);
-    const newMetaId = createResponse.data.id;
-    if (meta.metaCode) await putMetaCode(newMetaId, meta.metaCode);
-    refresh();
-  } catch (error) {
-    logger.error("Copy error:", error);
-    Message.error(t("meta.copyError"));
-  }
-};
-
-const handleRename = async (newName: string) => {
-  if (!currentMeta.value) return;
-  try {
-    await putMeta(String(currentMeta.value.id), { title: newName });
-    currentMeta.value.title = newName;
-    refresh();
-    Message.success(t("meta.prompt.success") + newName);
-  } catch (err) {
-    Message.error(String(err));
-  }
-};
-
-const handleDelete = async () => {
-  if (!currentMeta.value) return;
-  try {
-    await MessageBox.confirm(
-      t("meta.confirm.message1"),
-      t("meta.confirm.message2"),
-      {
-        confirmButtonText: t("meta.confirm.confirm"),
-        cancelButtonText: t("meta.confirm.cancel"),
-        type: "warning",
-      }
-    );
-    await deleteMeta(String(currentMeta.value.id));
-    detailVisible.value = false;
-    refresh();
-    Message.success(t("meta.confirm.success"));
-  } catch {
-    Message.info(t("meta.confirm.info"));
-  }
-};
-
-const generateDefaultName = (prefix: string) => {
-  const now = new Date();
-  const dateStr = now.toISOString().slice(0, 10);
-  const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, "-");
-  return `${prefix}_${dateStr}_${timeStr}`;
-};
-
-const addMeta = async () => {
-  try {
-    const { value } = (await MessageBox.prompt(
-      t("meta.create.namePlaceholder"),
-      t("meta.create.title"),
-      {
-        confirmButtonText: t("common.confirm"),
-        cancelButtonText: t("common.cancel"),
-        defaultValue: generateDefaultName(t("meta.create.defaultName")),
-        inputValidator: (val) =>
-          !val || !val.trim() ? t("meta.create.nameRequired") : true,
-      }
-    )) as { value: string };
-    await postMeta({ title: value.trim(), uuid: uuidv4() });
-    refresh();
-    Message.success(t("meta.create.success"));
-  } catch {
-    /* User cancelled */
-  }
-};
-
-const copyWindow = async (item: metaInfo) => {
-  try {
-    const { value } = (await MessageBox.prompt(
-      t("meta.prompt.message1"),
-      t("meta.prompt.message2"),
-      {
-        confirmButtonText: t("meta.prompt.confirm"),
-        cancelButtonText: t("meta.prompt.cancel"),
-        defaultValue: `${item.title}${t("meta.list.copySuffix")}`,
-      }
-    )) as { value: string };
-    await copy(item.id, value);
-    Message.success(t("meta.prompt.success") + value);
-  } catch {
-    Message.info(t("meta.prompt.info"));
-  }
-};
-
-const namedWindow = async (item: metaInfo) => {
-  try {
-    const { value } = (await MessageBox.prompt(
-      t("meta.prompt.message1"),
-      t("meta.prompt.message2"),
-      {
-        confirmButtonText: t("meta.prompt.confirm"),
-        cancelButtonText: t("meta.prompt.cancel"),
-        defaultValue: item.title,
-      }
-    )) as { value: string };
-    await putMeta(String(item.id), { title: value });
-    refresh();
-    Message.success(t("meta.prompt.success") + value);
-  } catch {
-    Message.info(t("meta.prompt.info"));
-  }
-};
-
-const deletedWindow = async (item: metaInfo, resetLoading: () => void) => {
-  try {
-    await MessageBox.confirm(
-      t("meta.confirm.message1"),
-      t("meta.confirm.message2"),
-      {
-        confirmButtonText: t("meta.confirm.confirm"),
-        cancelButtonText: t("meta.confirm.cancel"),
-        type: "warning",
-      }
-    );
-    await deleteMeta(String(item.id));
-    refresh();
-    Message.success(t("meta.confirm.success"));
-  } catch {
-    Message.info(t("meta.confirm.info"));
-    resetLoading();
-  }
-};
-
 </script>
 
 <style scoped lang="scss">
