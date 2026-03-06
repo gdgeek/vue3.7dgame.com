@@ -21,41 +21,41 @@
 
   <template v-if="step === 'manage'">
     <el-descriptions :column="1" border>
-      <el-descriptions-item label="当前邮箱">
+      <el-descriptions-item :label="$t('homepage.edit.currentEmail')">
         <el-tag type="success">{{ currentEmail }}</el-tag>
       </el-descriptions-item>
-      <el-descriptions-item label="验证状态">
+      <el-descriptions-item :label="$t('homepage.edit.verificationStatus')">
         <el-tag :type="isCurrentEmailVerified ? 'success' : 'warning'">
-          {{ isCurrentEmailVerified ? "已验证" : "未验证" }}
+          {{ isCurrentEmailVerified ? $t("homepage.edit.verified") : $t("homepage.edit.unverified") }}
         </el-tag>
       </el-descriptions-item>
     </el-descriptions>
 
     <div class="action-row">
       <el-button type="primary" @click="handleStartChange">
-        {{ isCurrentEmailVerified ? "改绑邮箱" : "绑定新邮箱" }}
+        {{ isCurrentEmailVerified ? $t("homepage.edit.changeEmailOrBind") : $t("homepage.edit.bindNewEmail") }}
       </el-button>
       <el-button type="danger" plain @click="handleStartUnbind">
-        {{ isCurrentEmailVerified ? "解绑邮箱" : "直接解绑" }}
+        {{ isCurrentEmailVerified ? $t("homepage.edit.unbindEmailBtn") : $t("homepage.edit.directUnbind") }}
       </el-button>
     </div>
   </template>
 
   <template v-else-if="step === 'change_confirm'">
-    <p class="desc-text">请先验证旧邮箱，获取改绑授权。</p>
+    <p class="desc-text">{{ $t("homepage.edit.verifyOldEmailFirst") }}</p>
     <el-form
       ref="oldCodeFormRef"
       :model="oldEmailForm"
       :rules="oldCodeRules"
       label-width="auto"
     >
-      <el-form-item label="旧邮箱验证码" prop="code">
+      <el-form-item :label="$t('homepage.edit.oldEmailCode')" prop="code">
         <div class="row-input-btn">
           <el-input
             v-model="oldEmailForm.code"
             maxlength="6"
             :disabled="loading || isLocked"
-            placeholder="请输入6位验证码"
+            :placeholder="$t('homepage.edit.enterSixDigitCode')"
             @input="handleOldCodeInput"
           ></el-input>
           <el-button
@@ -75,7 +75,7 @@
           :loading="loading"
           @click="handleVerifyOldCode"
         >
-          下一步
+          {{ $t("homepage.edit.nextStep") }}
         </el-button>
         <el-button @click="cancelCurrentAction">{{
           $t("common.cancel")
@@ -92,11 +92,11 @@
       show-icon
       style="margin-bottom: 12px"
     >
-      改绑授权剩余 {{ changeTokenLeft }} 秒
+      {{ $t("homepage.edit.changeAuthLeft", { seconds: changeTokenLeft }) }}
     </el-alert>
 
     <p v-else-if="!isCurrentEmailVerified" class="desc-text">
-      当前邮箱未验证，可直接绑定新邮箱，无需旧邮箱二次确认。
+      {{ $t("homepage.edit.bindDirectNoVerify") }}
     </p>
 
     <el-form
@@ -142,7 +142,7 @@
           :loading="loading"
           @click="handleVerifyNewEmail"
         >
-          确认改绑
+          {{ $t("homepage.edit.confirmChangeEmail") }}
         </el-button>
         <el-button @click="cancelCurrentAction">{{
           $t("common.cancel")
@@ -152,20 +152,20 @@
   </template>
 
   <template v-else-if="step === 'unbind_confirm'">
-    <p class="desc-text">解绑前需要验证旧邮箱。</p>
+    <p class="desc-text">{{ $t("homepage.edit.verifyBeforeUnbind") }}</p>
     <el-form
       ref="unbindFormRef"
       :model="unbindForm"
       :rules="unbindRules"
       label-width="auto"
     >
-      <el-form-item label="旧邮箱验证码" prop="code">
+      <el-form-item :label="$t('homepage.edit.oldEmailCode')" prop="code">
         <div class="row-input-btn">
           <el-input
             v-model="unbindForm.code"
             maxlength="6"
             :disabled="loading || isLocked"
-            placeholder="请输入6位验证码"
+            :placeholder="$t('homepage.edit.enterSixDigitCode')"
             @input="handleUnbindCodeInput"
           ></el-input>
           <el-button
@@ -185,7 +185,7 @@
           :loading="loading"
           @click="handleUnbind"
         >
-          确认解绑
+          {{ $t("homepage.edit.confirmUnbind") }}
         </el-button>
         <el-button @click="cancelCurrentAction">{{
           $t("common.cancel")
@@ -195,9 +195,9 @@
   </template>
 
   <template v-else-if="step === 'unbind_direct'">
-    <p class="desc-text">当前邮箱未验证，可直接解绑，无需验证码。</p>
+    <p class="desc-text">{{ $t("homepage.edit.unbindDirectNoVerify") }}</p>
     <el-button type="danger" :loading="loading" @click="handleUnbindDirect">
-      确认直接解绑
+      {{ $t("homepage.edit.confirmDirectUnbind") }}
     </el-button>
     <el-button class="cancel-btn" @click="cancelCurrentAction">
       {{ $t("common.cancel") }}
@@ -367,16 +367,16 @@ const unbindRules = ref<FormRules<typeof unbindForm>>({
 
 const newEmailCodeButtonText = computed(() => {
   if (sendCooldown.value > 0) {
-    return `${sendCooldown.value}秒后重试`;
+    return t("homepage.edit.retryAfterSeconds", { seconds: sendCooldown.value });
   }
   return t("homepage.edit.sendCode");
 });
 
 const oldConfirmButtonText = computed(() => {
   if (oldConfirmCooldown.value > 0) {
-    return `${oldConfirmCooldown.value}秒后重试`;
+    return t("homepage.edit.retryAfterSeconds", { seconds: oldConfirmCooldown.value });
   }
-  return "发送旧邮箱验证码";
+  return t("homepage.edit.sendOldEmailCode");
 });
 
 const handleNewCodeInput = (value: string) => {
@@ -451,7 +451,7 @@ const handleStartUnbind = () => {
 const handleSendOldConfirmCode = async () => {
   const success = await sendOldEmailConfirmationCode();
   if (success) {
-    ElMessage.success("验证码已发送到当前绑定邮箱");
+    ElMessage.success(t("emailVerification.sentToCurrentEmail"));
   }
 };
 
@@ -472,7 +472,7 @@ const handleVerifyOldCode = async () => {
 
   const success = await verifyOldEmailForChange();
   if (success) {
-    ElMessage.success("旧邮箱验证成功，请继续完成新邮箱绑定");
+    ElMessage.success(t("emailVerification.oldEmailVerified"));
   }
 };
 
@@ -493,14 +493,14 @@ const handleUnbind = async () => {
 
   const success = await unbindCurrentEmail(unbindForm.code);
   if (success) {
-    ElMessage.success("邮箱解绑成功");
+    ElMessage.success(t("emailVerification.unbindSuccess"));
   }
 };
 
 const handleUnbindDirect = async () => {
   const success = await unbindCurrentEmail();
   if (success) {
-    ElMessage.success("邮箱解绑成功");
+    ElMessage.success(t("emailVerification.unbindSuccess"));
   }
 };
 

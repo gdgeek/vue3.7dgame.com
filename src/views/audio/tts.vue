@@ -40,20 +40,20 @@
               <template v-if="voiceLanguage">
                 <el-tag
                   :type="
-                    voiceLanguage === '中文'
+                    voiceLanguage === 'zh'
                       ? 'danger'
-                      : voiceLanguage === '日文'
+                      : voiceLanguage === 'ja'
                         ? 'success'
                         : 'primary'
                   "
                   effect="dark"
                 >
                   {{
-                    voiceLanguage === "中文"
+                    voiceLanguage === "zh"
                       ? t("tts.chinese")
-                      : voiceLanguage === "英文"
+                      : voiceLanguage === "en"
                         ? t("tts.english")
-                        : voiceLanguage === "日文"
+                        : voiceLanguage === "ja"
                           ? t("tts.japanese")
                           : voiceLanguage
                   }}
@@ -125,16 +125,16 @@
               id="word"
               type="textarea"
               :placeholder="
-                voiceLanguage === '中文'
+                voiceLanguage === 'zh'
                   ? t('tts.inputChinesePlaceholder')
-                  : voiceLanguage === '英文'
+                  : voiceLanguage === 'en'
                     ? t('tts.inputEnglishPlaceholder')
-                    : voiceLanguage === '日文'
+                    : voiceLanguage === 'ja'
                       ? t('tts.inputJapanesePlaceholder')
                       : t('tts.inputPlaceholder')
               "
               v-model="text"
-              :maxlength="voiceLanguage === '英文' ? 500 : 150"
+              :maxlength="voiceLanguage === 'en' ? 500 : 150"
               :rows="4"
               show-word-limit
               :disabled="isLoading"
@@ -333,11 +333,11 @@ const onTextInput = () => {
 // Derived UI Computeds
 const getLanguageLimitText = computed(() => {
   switch (voiceLanguage.value) {
-    case "中文":
+    case "zh":
       return t("tts.chineseLimit");
-    case "英文":
+    case "en":
       return t("tts.englishLimit");
-    case "日文":
+    case "ja":
       return t("tts.japaneseLimit");
     default:
       return t("tts.selectLanguageFirst");

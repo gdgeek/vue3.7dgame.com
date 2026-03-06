@@ -148,6 +148,9 @@ export default {
   emailVerification: {
     codeSent: "驗證碼已發送到您的郵箱",
     verifySuccess: "郵箱驗證成功",
+    sentToCurrentEmail: "驗證碼已發送到當前綁定郵箱",
+    oldEmailVerified: "舊郵箱驗證成功，請繼續完成新郵箱綁定",
+    unbindSuccess: "郵箱解綁成功",
   },
   request: {
     loginExpired: "登錄過期，請重新登錄",

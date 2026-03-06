@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * 脚本运行时 API 构建器，供 meta/script.vue 和 verse/script.vue 共用。
  * 封装 tween / task / animation / sound / helper / text / point / transform / argument

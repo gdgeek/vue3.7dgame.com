@@ -568,5 +568,255 @@ describe("buildScriptRuntime", () => {
       const distance = result.distanceTo(center);
       expect(distance).toBeLessThanOrEqual(radius + 1e-9);
     });
+
+    it("argument.range 传入非 Vector3 centerPoint 时以原点为中心", () => {
+      const { argument } = buildScriptRuntime({ value: makeMockPlayer() });
+      const result = argument.range(null as any, 3);
+      expect(result).toBeInstanceOf(THREE.Vector3);
+      // 中心 = (0,0,0), 半径 = 3
+      const distance = result.distanceTo(new THREE.Vector3(0, 0, 0));
+      expect(distance).toBeLessThanOrEqual(3 + 1e-9);
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // task.circle — 额外未覆盖分支
+  // ----------------------------------------------------------------
+  describe("task.circle — 额外分支", () => {
+    it("count 为负数时不执行任务并调用 warn", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const { logger } = await import("@/utils/logger");
+      const fn = vi.fn();
+
+      await task.circle(-1, fn);
+
+      expect(fn).not.toHaveBeenCalled();
+      expect(
+        (logger as { warn: ReturnType<typeof vi.fn> }).warn
+      ).toHaveBeenCalled();
+    });
+
+    it("taskToRepeat 为 Promise 时等待其解析后执行", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const fn = vi.fn().mockResolvedValue(undefined);
+      const resolvedFnPromise = Promise.resolve(fn);
+
+      await task.circle(2, resolvedFnPromise);
+
+      expect(fn).toHaveBeenCalledTimes(2);
+    });
+
+    it("resolvedTask 为 audio 类型时调用 sound.play", async () => {
+      const player = makeMockPlayer();
+      const { task } = buildScriptRuntime({ value: player });
+      const audio = new Audio();
+      const audioTask = { type: "audio", data: audio };
+
+      await task.circle(1, audioTask);
+
+      // sound.play 内部调用 playQueuedAudio(audio, false)
+      expect(player.playQueuedAudio).toHaveBeenCalledWith(audio, false);
+    });
+
+    it("resolvedTask 为 animation 类型时调用其 execute", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const execute = vi.fn().mockResolvedValue(undefined);
+      const animTask = { type: "animation", execute };
+
+      await task.circle(1, animTask);
+
+      expect(execute).toHaveBeenCalledTimes(1);
+    });
+
+    it("resolvedTask 为未知类型时 warn 并提前 return", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const { logger } = await import("@/utils/logger");
+
+      // 非 null，非函数，无 execute 方法，type 不是 audio/animation
+      const unknownTask = { type: "xyz_unknown" };
+
+      await task.circle(3, unknownTask);
+
+      expect(
+        (logger as { warn: ReturnType<typeof vi.fn> }).warn
+      ).toHaveBeenCalled();
+    });
+
+    it("任务执行抛出异常时 logger.error 记录，循环仍继续", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const { logger } = await import("@/utils/logger");
+      const failFn = vi.fn().mockRejectedValue(new Error("task failed"));
+
+      await task.circle(2, failFn);
+
+      expect(
+        (logger as { error: ReturnType<typeof vi.fn> }).error
+      ).toHaveBeenCalled();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // task.array — 特殊元素类型
+  // ----------------------------------------------------------------
+  describe("task.array — 特殊元素类型", () => {
+    it("嵌套数组被递归处理", () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const result = task.array("LIST", [[1, 2], 3]);
+      expect(Array.isArray(result[0])).toBe(true);
+      expect(result[1]).toBe(3);
+    });
+
+    it("含 'url' 字段的对象被转换为字符串 'audio'", () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const result = task.array("LIST", [{ url: "https://example.com/a.mp3" }]);
+      expect(result[0]).toBe("audio");
+    });
+
+    it("含 'type' 字段的对象直接保留", () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const obj = { type: "animation", data: {} };
+      const result = task.array("LIST", [obj]);
+      expect(result[0]).toBe(obj);
+    });
+
+    it("Promise 元素被原样保留", () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const p = Promise.resolve(42);
+      const result = task.array("LIST", [p]);
+      expect(result[0]).toBe(p);
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // task.execute — tween 动画（type=object / type=data）
+  // ----------------------------------------------------------------
+  describe("task.execute — tween 动画执行", () => {
+    it("type='object'（duration=0）立即 resolve", async () => {
+      const { task, tween } = buildScriptRuntime({ value: makeMockPlayer() });
+      const from = makeMeshWrapper();
+      const to = makeMeshWrapper();
+      from.mesh.position.set(0, 0, 0);
+      to.mesh.position.set(10, 0, 0);
+
+      // duration=0 → elapsed/0 = Infinity or NaN → progress = NaN → !NaN<1 → resolve
+      const tweenData = tween.to_object(from, to, 0, "LINEAR");
+      await expect(task.execute(tweenData)).resolves.toBeUndefined();
+    });
+
+    it("type='data'（duration=0）立即 resolve", async () => {
+      const { task, tween } = buildScriptRuntime({ value: makeMockPlayer() });
+      const obj = makeMeshWrapper();
+      const transformData = {
+        position: new THREE.Vector3(5, 0, 0),
+        rotation: new THREE.Vector3(0, 45, 0),
+        scale: new THREE.Vector3(2, 2, 2),
+      };
+
+      const tweenData = tween.to_data(obj, transformData, 0, "LINEAR");
+      await expect(task.execute(tweenData)).resolves.toBeUndefined();
+    });
+
+    it("tweenData 为非对象原始值时直接返回", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      // "string" → !isRecord → return
+      await expect(
+        task.execute("not-an-object" as any)
+      ).resolves.toBeUndefined();
+    });
+
+    it("未知 easing 类型时降级使用 LINEAR", async () => {
+      const { task, tween } = buildScriptRuntime({ value: makeMockPlayer() });
+      const from = makeMeshWrapper();
+      const to = makeMeshWrapper();
+      const tweenData = tween.to_object(from, to, 0, "INVALID_EASING");
+      await expect(task.execute(tweenData)).resolves.toBeUndefined();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // sound.createTask — execute 内部逻辑
+  // ----------------------------------------------------------------
+  describe("sound.createTask — execute 内部调用", () => {
+    it("调用 task.execute() 触发 playQueuedAudio", async () => {
+      const player = makeMockPlayer();
+      const { sound } = buildScriptRuntime({ value: player });
+      const audio = new Audio();
+      const taskObj = sound.createTask(audio);
+
+      await taskObj!.execute!();
+
+      expect(player.playQueuedAudio).toHaveBeenCalledWith(audio);
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // task.circle — animation 类型任务 (line 269)
+  // ----------------------------------------------------------------
+  describe("task.circle — animation 类型任务", () => {
+    it("type='animation' 时调用 resolvedTask.execute", async () => {
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const mockExecute = vi.fn().mockResolvedValue(undefined);
+      const animTask = { type: "animation", execute: mockExecute };
+      await task.circle(1, animTask);
+      expect(mockExecute).toHaveBeenCalledTimes(1);
+    });
+
+    it("type='animation' count=2 时调用 execute 两次", async () => {
+      vi.useFakeTimers();
+      const { task } = buildScriptRuntime({ value: makeMockPlayer() });
+      const mockExecute = vi.fn().mockResolvedValue(undefined);
+      const animTask = { type: "animation", execute: mockExecute };
+      const p = task.circle(2, animTask);
+      vi.runAllTimersAsync();
+      await p;
+      expect(mockExecute).toHaveBeenCalledTimes(2);
+      vi.useRealTimers();
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // BOUNCE_IN_OUT easing — both branches (lines 236-238)
+  // requestAnimationFrame loop (line 362)
+  // ----------------------------------------------------------------
+  describe("BOUNCE_IN_OUT easing + requestAnimationFrame 循环", () => {
+    it("BOUNCE_IN_OUT duration=0 不抛异常（NaN 进度 → else 分支）", async () => {
+      const { task, tween } = buildScriptRuntime({ value: makeMockPlayer() });
+      const from = makeMeshWrapper();
+      const to = makeMeshWrapper();
+      from.mesh.position.set(0, 0, 0);
+      to.mesh.position.set(5, 0, 0);
+      const tweenData = tween.to_object(from, to, 0, "BOUNCE_IN_OUT");
+      await expect(task.execute(tweenData)).resolves.toBeUndefined();
+    });
+
+    it("BOUNCE_IN_OUT duration>0 走完动画循环（覆盖 t<0.5 和 requestAnimationFrame）", async () => {
+      vi.useFakeTimers();
+      // Mock requestAnimationFrame so it calls the callback via setTimeout(fn, 0)
+      const rafIds = new Map<number, () => void>();
+      let rafId = 0;
+      vi.stubGlobal("requestAnimationFrame", (cb: () => void) => {
+        const id = ++rafId;
+        rafIds.set(id, cb);
+        setTimeout(cb, 0);
+        return id;
+      });
+
+      const { task, tween } = buildScriptRuntime({ value: makeMockPlayer() });
+      const from = makeMeshWrapper();
+      const to = makeMeshWrapper();
+      from.mesh.position.set(0, 0, 0);
+      to.mesh.position.set(10, 0, 0);
+
+      // duration = 0.001 seconds → very short, so after 10ms it completes
+      const tweenData = tween.to_object(from, to, 0.001, "BOUNCE_IN_OUT");
+      const p = task.execute(tweenData);
+
+      // Advance time to complete the tween
+      await vi.advanceTimersByTimeAsync(100);
+      await p;
+
+      vi.unstubAllGlobals();
+      vi.useRealTimers();
+    });
   });
 });

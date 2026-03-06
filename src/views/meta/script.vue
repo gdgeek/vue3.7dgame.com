@@ -230,7 +230,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { CopyDocument } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { useRoute } from "vue-router";
@@ -265,6 +264,7 @@ type ScenePlayerExpose = {
     audio: HTMLAudioElement,
     skipQueue?: boolean
   ) => Promise<void> | void;
+  sceneInstanceId: string;
 };
 const scenePlayer = ref<ScenePlayerExpose | null>(null);
 const test = ref<MetaResourceIndex | null>(null);
@@ -402,26 +402,33 @@ const sceneEditorLink = computed(() => {
 });
 
 // ---------- Meta 专有：handlePolygen（返回 mesh + playAnimation）----------
-const handlePolygen = (uuid: string) => {
+const handlePolygen = async (uuid: string) => {
   if (!scenePlayer.value) {
     logger.error("ScenePlayer未初始化");
     return null;
   }
   const modelUuid = uuid.toString();
-  const getModel = (uuid: string, retries = 3) => {
-    const source = scenePlayer.value?.sources.get(uuid) as
-      | { type: string; data: { mesh?: THREE.Object3D } }
-      | undefined;
-    if (source && source.type === "model" && source.data.mesh) {
-      return source.data.mesh;
-    }
-    if (retries > 0) {
-      logger.log(`模型未找到，剩余重试次数: ${retries}`);
-      setTimeout(() => getModel(uuid, retries - 1), 100);
-    }
-    return null;
+  const getModelAsync = (uuid: string, retries = 3): Promise<THREE.Object3D | null> => {
+    return new Promise((resolve) => {
+      const attempt = (remaining: number) => {
+        const source = scenePlayer.value?.sources.get(uuid) as
+          | { type: string; data: { mesh?: THREE.Object3D } }
+          | undefined;
+        if (source?.type === "model" && source.data.mesh) {
+          resolve(source.data.mesh);
+          return;
+        }
+        if (remaining > 0) {
+          logger.log(`模型未找到，剩余重试次数: ${remaining}`);
+          setTimeout(() => attempt(remaining - 1), 100);
+        } else {
+          resolve(null);
+        }
+      };
+      attempt(retries);
+    });
   };
-  const model = getModel(modelUuid);
+  const model = await getModelAsync(modelUuid);
   logger.log("查找模型:", {
     requestedUuid: modelUuid,
     availableModels: Array.from(scenePlayer.value.sources.keys()),
@@ -499,7 +506,10 @@ const run = async () => {
   await waitForModels();
   if (!JavaScriptCode.value) return;
 
-  window.meta = {};
+  // 使用实例专属命名空间，避免多 ScenePlayer 实例时回调互相覆盖
+  const instanceId = scenePlayer.value!.sceneInstanceId;
+  window.__sceneCallbacks = window.__sceneCallbacks ?? {};
+  window.__sceneCallbacks[instanceId] = {};
   const {
     Vector3,
     polygen,
@@ -520,7 +530,7 @@ const run = async () => {
   try {
     const wrappedCode = `
         return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument, handleText, handleEntity) {
-          const meta = window.meta;
+          const meta = window.__sceneCallbacks['${instanceId}'];
           const index = ${meta.value?.id};
 
           ${JavaScriptCode.value}

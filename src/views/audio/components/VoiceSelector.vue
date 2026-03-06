@@ -39,9 +39,9 @@
             :disabled="autoSwitchLanguage"
           >
             <el-option :label="$t('tts.all')" value=""></el-option>
-            <el-option :label="$t('tts.chinese')" value="中文"></el-option>
-            <el-option :label="$t('tts.english')" value="英文"></el-option>
-            <el-option :label="$t('tts.japanese')" value="日文"></el-option>
+            <el-option :label="$t('tts.chinese')" value="zh"></el-option>
+            <el-option :label="$t('tts.english')" value="en"></el-option>
+            <el-option :label="$t('tts.japanese')" value="ja"></el-option>
           </el-select>
           <el-tooltip
             :content="$t('tts.openAutoSwitch')"
@@ -95,20 +95,20 @@
                 <el-tag
                   size="small"
                   :type="
-                    voice.language === '中文'
+                    voice.language === 'zh'
                       ? 'danger'
-                      : voice.language === '日文'
+                      : voice.language === 'ja'
                         ? 'success'
                         : 'primary'
                   "
                   effect="dark"
                 >
                   {{
-                    voice.language === "中文"
+                    voice.language === "zh"
                       ? $t("tts.chinese")
-                      : voice.language === "英文"
+                      : voice.language === "en"
                         ? $t("tts.english")
-                        : voice.language === "日文"
+                        : voice.language === "ja"
                           ? $t("tts.japanese")
                           : voice.language
                   }}

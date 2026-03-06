@@ -684,3 +684,250 @@ describe("useEmailVerification — startChangeFlow", () => {
     cleanup();
   });
 });
+
+// -----------------------------------------------------------------------
+// sendOldEmailConfirmationCode
+// （src/composables/useEmailVerification.ts — 未被先前测试覆盖的函数）
+// -----------------------------------------------------------------------
+describe("useEmailVerification — sendOldEmailConfirmationCode()", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("成功发送旧邮箱确认码后返回 true", async () => {
+    const { sendChangeConfirmation } = await import("@/api/v1/email");
+    vi.mocked(sendChangeConfirmation).mockResolvedValue({ success: true });
+
+    const { sendOldEmailConfirmationCode, cleanup } = useEmailVerification();
+    const result = await sendOldEmailConfirmationCode();
+
+    expect(result).toBe(true);
+    cleanup();
+  });
+
+  it("成功后 oldConfirmCooldown 开始倒计时", async () => {
+    const { sendChangeConfirmation } = await import("@/api/v1/email");
+    vi.mocked(sendChangeConfirmation).mockResolvedValue({ success: true });
+
+    const { sendOldEmailConfirmationCode, oldConfirmCooldown, cleanup } =
+      useEmailVerification();
+    await sendOldEmailConfirmationCode();
+
+    expect(oldConfirmCooldown.value).toBe(60);
+    cleanup();
+  });
+
+  it("API 返回 success=false 时返回 false 并设置 error", async () => {
+    const { sendChangeConfirmation } = await import("@/api/v1/email");
+    vi.mocked(sendChangeConfirmation).mockResolvedValue({
+      success: false,
+      message: "发送失败",
+    });
+
+    const { sendOldEmailConfirmationCode, error, cleanup } =
+      useEmailVerification();
+    const result = await sendOldEmailConfirmationCode();
+
+    expect(result).toBe(false);
+    expect(error.value).toBe("发送失败");
+    cleanup();
+  });
+
+  it("触发 RATE_LIMIT_EXCEEDED 时 oldConfirmCooldown 按 retry_after 设置", async () => {
+    const { sendChangeConfirmation } = await import("@/api/v1/email");
+    vi.mocked(sendChangeConfirmation).mockRejectedValue({
+      error: {
+        code: "RATE_LIMIT_EXCEEDED",
+        message: "请求过于频繁",
+        retry_after: 30,
+      },
+    });
+
+    const { sendOldEmailConfirmationCode, oldConfirmCooldown, cleanup } =
+      useEmailVerification();
+    const result = await sendOldEmailConfirmationCode();
+
+    expect(result).toBe(false);
+    expect(oldConfirmCooldown.value).toBe(30);
+    cleanup();
+  });
+
+  it("canSendOldConfirmCode 在冷却期间为 false", async () => {
+    const { sendChangeConfirmation } = await import("@/api/v1/email");
+    vi.mocked(sendChangeConfirmation).mockResolvedValue({ success: true });
+
+    const {
+      sendOldEmailConfirmationCode,
+      canSendOldConfirmCode,
+      cleanup,
+    } = useEmailVerification();
+
+    expect(canSendOldConfirmCode.value).toBe(true);
+    await sendOldEmailConfirmationCode();
+    expect(canSendOldConfirmCode.value).toBe(false);
+    cleanup();
+  });
+});
+
+// -----------------------------------------------------------------------
+// verifyOldEmailForChange
+// -----------------------------------------------------------------------
+describe("useEmailVerification — verifyOldEmailForChange()", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("code 为空时返回 false", async () => {
+    const { verifyOldEmailForChange, oldEmailForm, cleanup } =
+      useEmailVerification();
+    oldEmailForm.code = "";
+    const result = await verifyOldEmailForChange();
+    expect(result).toBe(false);
+    cleanup();
+  });
+
+  it("成功后 changeToken 被赋值，step 变为 change_verify", async () => {
+    const { verifyChangeConfirmation } = await import("@/api/v1/email");
+    vi.mocked(verifyChangeConfirmation).mockResolvedValue({
+      success: true,
+      data: { change_token: "tok-abc", expires_in: 300 },
+    });
+
+    const { verifyOldEmailForChange, oldEmailForm, step, changeToken, cleanup } =
+      useEmailVerification();
+    oldEmailForm.code = "123456";
+    const result = await verifyOldEmailForChange();
+
+    expect(result).toBe(true);
+    expect(changeToken.value).toBe("tok-abc");
+    expect(step.value).toBe("change_verify");
+    cleanup();
+  });
+
+  it("成功后 newEmailForm.code 被清空", async () => {
+    const { verifyChangeConfirmation } = await import("@/api/v1/email");
+    vi.mocked(verifyChangeConfirmation).mockResolvedValue({
+      success: true,
+      data: { change_token: "tok-abc", expires_in: 300 },
+    });
+
+    const { verifyOldEmailForChange, oldEmailForm, newEmailForm, cleanup } =
+      useEmailVerification();
+    oldEmailForm.code = "123456";
+    newEmailForm.code = "old-code";
+    await verifyOldEmailForChange();
+
+    expect(newEmailForm.code).toBe("");
+    cleanup();
+  });
+
+  it("API 返回 success=false 时返回 false 并设置 error", async () => {
+    const { verifyChangeConfirmation } = await import("@/api/v1/email");
+    vi.mocked(verifyChangeConfirmation).mockResolvedValue({
+      success: false,
+      message: "验证码错误",
+    });
+
+    const { verifyOldEmailForChange, oldEmailForm, error, cleanup } =
+      useEmailVerification();
+    oldEmailForm.code = "999999";
+    const result = await verifyOldEmailForChange();
+
+    expect(result).toBe(false);
+    expect(error.value).toBe("验证码错误");
+    cleanup();
+  });
+
+  it("canVerifyOldConfirmCode 在有 code 时为 true", () => {
+    const { canVerifyOldConfirmCode, oldEmailForm, cleanup } =
+      useEmailVerification();
+    oldEmailForm.code = "654321";
+    expect(canVerifyOldConfirmCode.value).toBe(true);
+    cleanup();
+  });
+
+  it("canVerifyOldConfirmCode 在 code 为空时为 false", () => {
+    const { canVerifyOldConfirmCode, oldEmailForm, cleanup } =
+      useEmailVerification();
+    oldEmailForm.code = "";
+    expect(canVerifyOldConfirmCode.value).toBe(false);
+    cleanup();
+  });
+});
+
+// -----------------------------------------------------------------------
+// refreshSendCooldown
+// -----------------------------------------------------------------------
+describe("useEmailVerification — refreshSendCooldown()", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("can_send=true 时 sendCooldown 保持为 0", async () => {
+    const { getEmailCooldown } = await import("@/api/v1/email");
+    vi.mocked(getEmailCooldown).mockResolvedValue({
+      success: true,
+      data: { can_send: true, retry_after: 0 },
+    });
+
+    const { refreshSendCooldown, sendCooldown, cleanup } =
+      useEmailVerification();
+    await refreshSendCooldown("test@example.com");
+
+    expect(sendCooldown.value).toBe(0);
+    cleanup();
+  });
+
+  it("can_send=false 时 sendCooldown 被设为 retry_after", async () => {
+    const { getEmailCooldown } = await import("@/api/v1/email");
+    vi.mocked(getEmailCooldown).mockResolvedValue({
+      success: true,
+      data: { can_send: false, retry_after: 45 },
+    });
+
+    const { refreshSendCooldown, sendCooldown, cleanup } =
+      useEmailVerification();
+    await refreshSendCooldown("test@example.com");
+
+    expect(sendCooldown.value).toBe(45);
+    cleanup();
+  });
+
+  it("API 抛出异常时不影响主流程（不 throw）", async () => {
+    const { getEmailCooldown } = await import("@/api/v1/email");
+    vi.mocked(getEmailCooldown).mockRejectedValue(new Error("网络错误"));
+
+    const { refreshSendCooldown, cleanup } = useEmailVerification();
+    await expect(
+      refreshSendCooldown("test@example.com")
+    ).resolves.not.toThrow();
+    cleanup();
+  });
+
+  it("可以不传 email 参数（无参调用）", async () => {
+    const { getEmailCooldown } = await import("@/api/v1/email");
+    vi.mocked(getEmailCooldown).mockResolvedValue({
+      success: true,
+      data: { can_send: true, retry_after: 0 },
+    });
+
+    const { refreshSendCooldown, cleanup } = useEmailVerification();
+    await expect(refreshSendCooldown()).resolves.not.toThrow();
+    cleanup();
+  });
+});

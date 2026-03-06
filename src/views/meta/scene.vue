@@ -172,6 +172,7 @@ import type { UpdateMetaRequest } from "@/api/v1/types/meta";
 import { useAppStore } from "@/store/modules/app";
 import { translateRouteTitle } from "@/utils/i18n";
 import env from "@/environment";
+import { safeAtob } from "@/utils/base64";
 import { useFileStore } from "@/store/modules/config";
 import { postFile } from "@/api/v1/files";
 import { AbilityEdit } from "@/utils/ability";
@@ -322,7 +323,7 @@ const postMessage = (action: string, data: unknown = {}) => {
       {
         from: "scene.meta.web",
         action,
-        data: JSON.parse(JSON.stringify(data)),
+        data: structuredClone(data),
       },
       "*"
     );
@@ -412,7 +413,11 @@ const handleUploadCover = async (data: unknown) => {
 
     // 将base64图片数据转换为Blob对象
     const imageData = data.imageData;
-    const byteString = atob(imageData.split(",")[1]);
+    const byteString = safeAtob(imageData.split(",")[1]);
+    if (!byteString) {
+      ElMessage.error(t("meta.scene.coverUploadError"));
+      return;
+    }
     const mimeType = imageData.split(",")[0].split(":")[1].split(";")[0];
     const ab = new ArrayBuffer(byteString.length);
     const ia = new Uint8Array(ab);

@@ -509,5 +509,146 @@ describe("useDomainStore", () => {
       const authorMeta = document.querySelector('meta[name="author"]');
       expect(authorMeta?.getAttribute("content")).toBe("Test Author");
     });
+
+    it("langInfo.title 为空时不更新 document.title", () => {
+      document.title = "original-title";
+      const store = useDomainStore();
+      store.langInfo = makeLangInfo({ title: "" });
+      store.updateDocumentMeta();
+      expect(document.title).toBe("original-title");
+    });
+  });
+
+  // ── refreshFromAPI cookie 缓存路径（lines 199-207）────────────────────────
+
+  describe("refreshFromAPI() — cookie 缓存命中", () => {
+    it("有效 cookie 缓存存在时先从缓存加载再由 API 覆盖", async () => {
+      const cachedLangInfo = makeLangInfo({ title: "从缓存加载" });
+      document.cookie = `domain_info_zh-CN=${encodeURIComponent(
+        JSON.stringify(cachedLangInfo)
+      )};path=/`;
+
+      getDomainLanguage.mockResolvedValue({
+        data: makeLangInfo({ title: "API新数据" }),
+      });
+
+      const store = useDomainStore();
+      await store.refreshFromAPI();
+
+      expect(store.langInfo?.title).toBe("API新数据");
+    });
+
+    it("cookie 缓存为无效 JSON 时 logger.warn 并继续请求 API", async () => {
+      const { logger } = await import("@/utils/logger");
+      document.cookie = `domain_info_zh-CN=INVALID_JSON;path=/`;
+
+      getDomainLanguage.mockResolvedValue({
+        data: makeLangInfo({ title: "正常API" }),
+      });
+
+      const store = useDomainStore();
+      await store.refreshFromAPI();
+
+      expect(
+        (logger as { warn: ReturnType<typeof vi.fn> }).warn
+      ).toHaveBeenCalled();
+      expect(store.langInfo?.title).toBe("正常API");
+    });
+
+    it("cookie 缓存命中时 updateDocumentMeta 被调用（title 被预设）", async () => {
+      const cachedLangInfo = makeLangInfo({ title: "缓存标题" });
+      document.cookie = `domain_info_zh-CN=${encodeURIComponent(
+        JSON.stringify(cachedLangInfo)
+      )};path=/`;
+
+      getDomainLanguage.mockResolvedValue({
+        data: makeLangInfo({ title: "最终标题" }),
+      });
+
+      const store = useDomainStore();
+      await store.refreshFromAPI();
+
+      // 最终 document.title 以 API 结果为准
+      expect(document.title).toBe("最终标题");
+    });
+  });
+
+  // ── fetchDefaultInfo cookie 缓存路径 ─────────────────────────────────────
+
+  describe("fetchDefaultInfo() — cookie 缓存命中", () => {
+    it("有效 cookie 存在时先从缓存加载再由 API 覆盖", async () => {
+      const cachedDefault = makeDefaultInfo({ homepage: "https://cached.com" });
+      document.cookie = `domain_default_info=${encodeURIComponent(
+        JSON.stringify(cachedDefault)
+      )};path=/`;
+
+      const freshDefault = makeDefaultInfo({ homepage: "https://fresh.com" });
+      getDomainDefault.mockResolvedValue({ data: freshDefault });
+
+      const store = useDomainStore();
+      await store.fetchDefaultInfo();
+
+      expect(store.defaultInfo?.homepage).toBe("https://fresh.com");
+    });
+
+    it("cookie 缓存为无效 JSON 时 logger.warn 并继续请求 API", async () => {
+      const { logger } = await import("@/utils/logger");
+      document.cookie = `domain_default_info=BAD_JSON;path=/`;
+
+      getDomainDefault.mockResolvedValue({ data: makeDefaultInfo() });
+
+      const store = useDomainStore();
+      await store.fetchDefaultInfo();
+
+      expect(
+        (logger as { warn: ReturnType<typeof vi.fn> }).warn
+      ).toHaveBeenCalled();
+    });
+  });
+
+  // ── fetchDefaultInfo 失败时使用非 Error 对象 ─────────────────────────────
+
+  describe("fetchDefaultInfo() — 失败时使用非 Error 对象", () => {
+    it("err 不是 Error 实例时 error 设为默认消息", async () => {
+      getDomainDefault.mockRejectedValue("string error");
+
+      const store = useDomainStore();
+      await store.fetchDefaultInfo();
+
+      expect(store.error).toBe("Failed to fetch default info");
+    });
+  });
+
+  // ── refreshFromAPI 失败时使用非 Error 对象 ──────────────────────────────
+
+  describe("refreshFromAPI() — 失败时使用非 Error 对象", () => {
+    it("err 不是 Error 实例时 error 设为默认消息", async () => {
+      getDomainLanguage.mockRejectedValue({ code: 500 });
+
+      const store = useDomainStore();
+      const result = await store.refreshFromAPI();
+
+      expect(result).toBeNull();
+      expect(store.error).toBe("Failed to fetch domain info");
+    });
+  });
+
+  // ── useDomainStoreHook（lines 272-273）────────────────────────────────────
+
+  describe("useDomainStoreHook()", () => {
+    it("调用 useDomainStoreHook 返回 useDomainStore 实例", async () => {
+      const { useDomainStoreHook } = await import("@/store/modules/domain");
+      const hook = useDomainStoreHook();
+      const direct = useDomainStore();
+      expect(hook).toBe(direct);
+    });
+
+    it("useDomainStoreHook 返回的 store 有正确的初始状态", async () => {
+      const { useDomainStoreHook } = await import("@/store/modules/domain");
+      const hook = useDomainStoreHook();
+      expect(hook.defaultInfo).toBeNull();
+      expect(hook.langInfo).toBeNull();
+      expect(hook.loading).toBe(false);
+    });
   });
 });

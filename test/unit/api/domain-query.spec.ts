@@ -117,7 +117,10 @@ describe("domain-query response interceptor", () => {
   });
 
   it("passes through successful response", () => {
+    // domain-query.ts adds its own response interceptor (response.data extraction)
+    // after the failover factory's interceptor, so it's at index 1
     const resInterceptor =
+      mockAxiosInstance.interceptors.response.use.mock.calls[1]?.[0] ??
       mockAxiosInstance.interceptors.response.use.mock.calls[0]?.[0];
     const response = { data: { domain: "example.com" } };
     expect(resInterceptor(response)).toBe(response.data);

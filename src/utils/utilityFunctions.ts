@@ -1,3 +1,19 @@
+/**
+ * 防抖函数：延迟执行 fn，在 delay 毫秒内重复调用时重置计时
+ */
+export const debounce = (
+  fn: (...args: unknown[]) => void,
+  delay: number
+): ((...args: unknown[]) => void) => {
+  let timer: number | null = null;
+  return (...args: unknown[]) => {
+    if (timer) clearTimeout(timer);
+    timer = window.setTimeout(() => {
+      fn(...args);
+    }, delay);
+  };
+};
+
 export const BeijingData = (utcDateString: string) => {
   const utcDate = new Date(utcDateString + "Z"); // 添加 'Z' 表示 UTC 时间
   const options: Intl.DateTimeFormatOptions = {

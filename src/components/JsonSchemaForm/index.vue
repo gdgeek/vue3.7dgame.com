@@ -73,11 +73,7 @@ const initDefaults = (schema: JsonSchema, model: Record<string, JsonValue>) => {
       // Set default if model value is undefined
       if (model[key] === undefined && propSchema.default !== undefined) {
         // Deep copy default value to avoid reference issues
-        try {
-          model[key] = JSON.parse(JSON.stringify(propSchema.default));
-        } catch (e) {
-          model[key] = propSchema.default as JsonValue;
-        }
+        model[key] = structuredClone(propSchema.default) as JsonValue;
       }
 
       // Recursively init defaults for nested objects (if they exist in model or are created)

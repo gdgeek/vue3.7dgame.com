@@ -408,5 +408,8 @@ export default {
       failed: "บันทึกฐานข้อมูลล้มเหลว",
       declared: "ข้อมูลไฟล์ถูกเก็บไว้ในฐานข้อมูล",
     },
+    maxSizeLimit: "Single file max {size}MB",
+    fileTooLarge: "File exceeds {size}MB limit",
+    fileSizeExceededList: "The following files exceed the {size}MB limit: {names}",
   },
 };

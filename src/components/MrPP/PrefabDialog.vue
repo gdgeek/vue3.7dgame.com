@@ -129,13 +129,28 @@ const {
   handleCurrentChange,
   openDialog,
 } =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   useDialogList<prefabsData>(
     (sorted, searched, page) =>
-      getPrefabs(sorted, searched, page, "image") as any
+      getPrefabs(sorted, searched, page, "image")
   );
 
 const knightData = ref<InstanceType<typeof KnightDataDialog>>();
+
+/** 镜像 KnightDataDialog 内部的 Schema / SchemaProperty 接口（未导出） */
+type KnightSchemaProperty = {
+  type: string;
+  title: string;
+  default?: unknown;
+  value?: unknown;
+  "ui:hidden"?: string;
+  "ui:options"?: { placeholder?: string; type?: string; rows?: number };
+  minLength?: number;
+};
+type KnightSchema = {
+  type: string;
+  required?: string[];
+  properties: Record<string, KnightSchemaProperty>;
+};
 const verse_id = ref(-1);
 const value = ref<unknown>(null);
 
@@ -149,10 +164,9 @@ const open = async (val?: unknown, v_id?: number) => {
 
 const setup = ({ data }: { data: prefabsData }) => {
   logger.error("setup", data);
-  if (data.data) {
+  if (data.data && data.info !== null) {
     knightData.value?.open({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      schema: data.info as any,
+      schema: data.info as unknown as KnightSchema,
       data: {},
       callback: (setup: Record<string, unknown>) => {
         selected({ data, setup: setup as Record<string, JsonValue> });

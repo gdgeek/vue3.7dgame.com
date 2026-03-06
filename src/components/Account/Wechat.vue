@@ -147,6 +147,17 @@ const fetchRefresh = async () => {
   }
 };
 
+onUnmounted(() => {
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = undefined;
+  }
+  if (progressInterval) {
+    clearInterval(progressInterval);
+    progressInterval = undefined;
+  }
+});
+
 let token: string | null = null;
 
 const login = async function () {

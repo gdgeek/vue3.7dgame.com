@@ -1,4 +1,4 @@
-import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
+import { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { useRouter } from "@/router";
 import i18n from "@/lang";
 import { ElMessage } from "element-plus";
@@ -7,6 +7,7 @@ import env from "@/environment";
 import { ref, watch } from "vue";
 import Token from "@/store/modules/token";
 import { logger } from "@/utils/logger";
+import { createFailoverAxios } from "@/utils/failover";
 
 const lang = ref(i18n.global.locale.value);
 watch(
@@ -15,31 +16,6 @@ watch(
     lang.value = newLang;
   }
 );
-
-// --- API Failover Configuration ---
-const PRIMARY_API = env.api;
-const BACKUP_API = env.backup_api;
-let currentApi = PRIMARY_API;
-let healthCheckTimer: ReturnType<typeof setInterval> | null = null;
-
-const startHealthCheck = () => {
-  if (healthCheckTimer || !PRIMARY_API) return;
-
-  healthCheckTimer = setInterval(async () => {
-    try {
-      await axios.get(`${PRIMARY_API}/health`, { timeout: 3000 });
-      logger.info("[API Failover] Primary API restored, switching back.");
-      currentApi = PRIMARY_API;
-      if (healthCheckTimer) {
-        clearInterval(healthCheckTimer);
-        healthCheckTimer = null;
-      }
-    } catch (e) {
-      // Primary still down
-    }
-  }, 30000);
-};
-// ----------------------------------
 
 // 动态错误消息
 const getMessageArray = () => {
@@ -74,11 +50,16 @@ const isTokenExpiringSoon = (token: { expires?: string }): boolean => {
   return expiryTime - currentTime < fiveMinutesMs;
 };
 
-// 创建 axios 实例
-const service = axios.create({
-  baseURL: currentApi,
-  timeout: 50000,
-  headers: { "Content-Type": "application/json;charset=utf-8" },
+// 创建带主备切换能力的 axios 实例
+const service = createFailoverAxios({
+  primaryUrl: env.api,
+  backupUrl: env.backup_api,
+  healthPath: "/health",
+  axiosConfig: {
+    timeout: 50000,
+    headers: { "Content-Type": "application/json;charset=utf-8" },
+  },
+  logTag: "[API Failover]",
 });
 
 const refreshToken = async () => {
@@ -92,15 +73,10 @@ const refreshToken = async () => {
   }
   return response.data;
 };
-// 请求拦截器
+
+// 请求拦截器（Token 刷新）
 service.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    // --- Failover Logic: Dynamic Base URL ---
-    if (currentApi && !config.baseURL?.startsWith("http")) {
-      config.baseURL = currentApi;
-    }
-    // ----------------------------------------
-
     const token = Token.getToken();
 
     // 设置token
@@ -180,42 +156,22 @@ function handleUnauthorized(router: ReturnType<typeof useRouter>) {
   return Promise.reject("");
 }
 
-// 响应拦截器
+// 响应拦截器（Auth / HTTP 错误处理）
+// 注意：主备切换已由 createFailoverAxios 的拦截器处理
 service.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
-  //
   async (error) => {
     const router = useRouter();
-    const { response, config } = error;
+    const { response } = error;
     const messages = getMessageArray();
-
-    // --- Failover Logic: Retry on Network Error ---
-    if (
-      !response &&
-      config &&
-      !config._retry &&
-      BACKUP_API &&
-      currentApi === PRIMARY_API
-    ) {
-      logger.warn(
-        "[API Failover] Primary API unreachable, switching to backup."
-      );
-      currentApi = BACKUP_API;
-      config._retry = true;
-      config.baseURL = currentApi;
-      startHealthCheck();
-      return service(config);
-    }
-    // --------------------------------------------
 
     if (!response) {
       if (error.message === "Network Error") {
         showErrorMessage(messages[1]);
       } else {
         logger.error(i18n.global.t("request.unknownError"), error.message);
-
         showErrorMessage(error.message);
       }
       return Promise.reject(error);

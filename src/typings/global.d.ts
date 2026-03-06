@@ -89,6 +89,11 @@ declare global {
     __BACKUP_API_URL__?: string;
     __DOMAIN_INFO_API_URL__?: string;
     __BACKUP_DOMAIN_INFO_API_URL__?: string;
+    /**
+     * 脚本运行时回调，按 ScenePlayer 实例 ID 隔离，避免多实例互相覆盖。
+     * key: sceneInstanceId，value: 该实例注册的事件处理函数映射。
+     */
+    __sceneCallbacks?: Record<string, Record<string, (...args: unknown[]) => unknown>>;
   }
 
   /**

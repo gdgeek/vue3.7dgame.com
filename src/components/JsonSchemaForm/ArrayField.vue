@@ -71,7 +71,7 @@ const removeItem = (index: number) => {
 const getDefaultValue = (itemSchema?: JsonSchema): JsonValue => {
   if (!itemSchema) return "";
   if (itemSchema.default !== undefined)
-    return JSON.parse(JSON.stringify(itemSchema.default));
+    return structuredClone(itemSchema.default) as JsonValue;
   if (itemSchema.type === "string") return "";
   if (itemSchema.type === "number" || itemSchema.type === "integer") return 0;
   if (itemSchema.type === "boolean") return false;

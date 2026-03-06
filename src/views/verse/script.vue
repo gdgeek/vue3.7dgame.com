@@ -226,7 +226,6 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
 import { logger } from "@/utils/logger";
 import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
@@ -414,7 +413,7 @@ const {
 const resource = computed(() => {
   const inputs: Array<{ title: string; index: string; uuid: string }> = [];
   const outputs: Array<{ title: string; index: string; uuid: string }> = [];
-  const metas = (verse.value?.metas || []) as VerseMeta[];
+  const metas = (verse.value?.metas || []) as unknown as VerseMeta[];
   metas.forEach((meta) => {
     const events = meta.events || {};
     const inputsList = events.inputs || [];
@@ -450,26 +449,33 @@ const resource = computed(() => {
 });
 
 // ---------- Verse 专有：handlePolygen（只返回 playAnimation）----------
-const handlePolygen = (uuid: string) => {
+const handlePolygen = async (uuid: string) => {
   if (!scenePlayer.value) {
     logger.error("ScenePlayer未初始化");
     return null;
   }
   const modelUuid = uuid.toString();
-  const getModel = (uuid: string, retries = 3) => {
-    const source = scenePlayer.value?.sources.get(uuid) as
-      | { type: string; data: unknown }
-      | undefined;
-    if (source && source.type === "model") {
-      return source.data as THREE.Object3D;
-    }
-    if (retries > 0) {
-      logger.log(`模型未找到，剩余重试次数: ${retries}`);
-      setTimeout(() => getModel(uuid, retries - 1), 100);
-    }
-    return null;
+  const getModelAsync = (uuid: string, retries = 3): Promise<THREE.Object3D | null> => {
+    return new Promise((resolve) => {
+      const attempt = (remaining: number) => {
+        const source = scenePlayer.value?.sources.get(uuid) as
+          | { type: string; data: unknown }
+          | undefined;
+        if (source?.type === "model" && source.data) {
+          resolve(source.data as THREE.Object3D);
+          return;
+        }
+        if (remaining > 0) {
+          logger.log(`模型未找到，剩余重试次数: ${remaining}`);
+          setTimeout(() => attempt(remaining - 1), 100);
+        } else {
+          resolve(null);
+        }
+      };
+      attempt(retries);
+    });
   };
-  const model = getModel(modelUuid);
+  const model = await getModelAsync(modelUuid);
   logger.log("查找模型:", {
     requestedUuid: modelUuid,
     availableModels: Array.from(scenePlayer.value.sources.keys()),
@@ -548,8 +554,10 @@ const run = async () => {
   await waitForModels();
 
   if (JavaScriptCode.value) {
-    window.meta = {};
-    window.verse = {};
+    // 使用实例专属命名空间，避免多 ScenePlayer 实例时回调互相覆盖
+    const instanceId = scenePlayer.value!.sceneInstanceId;
+    window.__sceneCallbacks = window.__sceneCallbacks ?? {};
+    window.__sceneCallbacks[instanceId] = {};
     const {
       Vector3,
       polygen,
@@ -586,8 +594,8 @@ const run = async () => {
     try {
       const wrappedCode = `
             return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument, handleText, handleEntity) {
-              const meta = window.meta;
-              const verse = window.verse;
+              const meta = window.__sceneCallbacks['${instanceId}'];
+              const verse = window.__sceneCallbacks['${instanceId}'];
               const index = ${verse.value?.id};
 
               ${metasJavaScriptCode.value}
@@ -645,9 +653,9 @@ onMounted(async () => {
     );
     verse.value = response.data;
     logger.error(verse.value);
-    verseMetasWithJsCodeData.value = response2.data;
-    metasJavaScriptCode.value = response2.data.metas
-      .map((meta: meta) => meta.script)
+    verseMetasWithJsCodeData.value = response2.data as unknown as VerseMetasWithJsCode;
+    metasJavaScriptCode.value = (response2.data.metas as unknown as meta[])
+      .map((m) => m.script)
       .join("\n");
     logger.log("Verse", verse.value);
     logger.log("metasJavaScriptCode", metasJavaScriptCode.value);

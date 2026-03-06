@@ -49,14 +49,14 @@ describe("useLanguageAnalysis — language detection", () => {
   it("detects pure Chinese text", () => {
     const { voiceLanguage, autoSwitchLanguage } = makeRefs();
     result.checkTextLanguage("你好世界", voiceLanguage, autoSwitchLanguage);
-    expect(result.languageAnalysis.value.detectedLanguage).toBe("中文");
+    expect(result.languageAnalysis.value.detectedLanguage).toBe("zh");
     expect(result.languageAnalysis.value.isMultiLanguage).toBe(false);
   });
 
   it("detects pure English text", () => {
     const { voiceLanguage, autoSwitchLanguage } = makeRefs();
     result.checkTextLanguage("hello world", voiceLanguage, autoSwitchLanguage);
-    expect(result.languageAnalysis.value.detectedLanguage).toBe("英文");
+    expect(result.languageAnalysis.value.detectedLanguage).toBe("en");
     expect(result.languageAnalysis.value.isMultiLanguage).toBe(false);
   });
 
@@ -67,7 +67,7 @@ describe("useLanguageAnalysis — language detection", () => {
       voiceLanguage,
       autoSwitchLanguage
     );
-    expect(result.languageAnalysis.value.detectedLanguage).toBe("日文");
+    expect(result.languageAnalysis.value.detectedLanguage).toBe("ja");
     expect(result.languageAnalysis.value.isMultiLanguage).toBe(false);
   });
 
@@ -94,7 +94,7 @@ describe("useLanguageAnalysis — language detection", () => {
     const { voiceLanguage, autoSwitchLanguage } = makeRefs();
     // 4 Chinese chars vs 1 English word (5 letters) → Chinese wins by char count
     result.checkTextLanguage("你好世界 hi", voiceLanguage, autoSwitchLanguage);
-    expect(result.languageAnalysis.value.detectedLanguage).toBe("中文");
+    expect(result.languageAnalysis.value.detectedLanguage).toBe("zh");
   });
 
   it("dominant language wins when mixed — English majority", () => {
@@ -104,7 +104,7 @@ describe("useLanguageAnalysis — language detection", () => {
       voiceLanguage,
       autoSwitchLanguage
     );
-    expect(result.languageAnalysis.value.detectedLanguage).toBe("英文");
+    expect(result.languageAnalysis.value.detectedLanguage).toBe("en");
   });
 });
 
@@ -178,27 +178,27 @@ describe("useLanguageAnalysis — auto language switching", () => {
   });
 
   it("switches voiceLanguage when autoSwitch is on and language differs", () => {
-    const { voiceLanguage, autoSwitchLanguage } = makeRefs("英文", true);
+    const { voiceLanguage, autoSwitchLanguage } = makeRefs("en", true);
     result.checkTextLanguage("你好世界", voiceLanguage, autoSwitchLanguage);
-    expect(voiceLanguage.value).toBe("中文");
+    expect(voiceLanguage.value).toBe("zh");
   });
 
   it("does not switch voiceLanguage when autoSwitch is off", () => {
-    const { voiceLanguage, autoSwitchLanguage } = makeRefs("英文", false);
+    const { voiceLanguage, autoSwitchLanguage } = makeRefs("en", false);
     result.checkTextLanguage("你好世界", voiceLanguage, autoSwitchLanguage);
-    expect(voiceLanguage.value).toBe("英文");
+    expect(voiceLanguage.value).toBe("en");
   });
 
   it("sets voiceLanguage when it is empty and autoSwitch is on", () => {
     const { voiceLanguage, autoSwitchLanguage } = makeRefs("", true);
     result.checkTextLanguage("hello world", voiceLanguage, autoSwitchLanguage);
-    expect(voiceLanguage.value).toBe("英文");
+    expect(voiceLanguage.value).toBe("en");
   });
 
   it("does not change voiceLanguage when language already matches", () => {
-    const { voiceLanguage, autoSwitchLanguage } = makeRefs("中文", true);
+    const { voiceLanguage, autoSwitchLanguage } = makeRefs("zh", true);
     result.checkTextLanguage("你好世界", voiceLanguage, autoSwitchLanguage);
-    expect(voiceLanguage.value).toBe("中文");
+    expect(voiceLanguage.value).toBe("zh");
   });
 });
 

@@ -805,3 +805,216 @@ describe("useScriptEditorBase", () => {
     });
   });
 });
+
+// ---------------------------------------------------------------------------
+// onBeforeUnmount 匿名回调 — 覆盖 lines 417-419, 422, 425
+//
+// 说明：
+//   onBeforeUnmount 中三个 document.removeEventListener 调用传入的是匿名函数。
+//   由于 removeEventListener 不调用其 callback 参数，这些回调在正常流程中不会执行。
+//   通过 spy 捕获传入的匿名回调，然后手动调用，达到代码覆盖目的。
+// ---------------------------------------------------------------------------
+describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // 确保 fullscreenElement 为 null
+    Object.defineProperty(document, "fullscreenElement", {
+      value: null,
+      configurable: true,
+    });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(document, "fullscreenElement", {
+      value: null,
+      configurable: true,
+    });
+  });
+
+  it("Escape 键且 showCodeDialog=true 时关闭对话框 (lines 417-418)", () => {
+    let capturedKeydownCallback: ((e: KeyboardEvent) => void) | undefined;
+
+    const spy = vi.spyOn(document, "removeEventListener").mockImplementation(
+      (event: string, callback: any) => {
+        if (event === "keydown" && typeof callback === "function") {
+          capturedKeydownCallback = callback;
+        }
+      }
+    );
+
+    const { result, unmount } = withSetup(() =>
+      useScriptEditorBase(makeOptions())
+    );
+    result.showCodeDialog.value = true;
+
+    // unmount → onBeforeUnmount → document.removeEventListener("keydown", anonymous)
+    unmount();
+    spy.mockRestore();
+
+    expect(capturedKeydownCallback).toBeDefined();
+    // 手动调用捕获到的匿名 callback（line 416-420 的函数体）
+    capturedKeydownCallback!({ key: "Escape" } as KeyboardEvent);
+    // line 418: showCodeDialog.value = false
+    expect(result.showCodeDialog.value).toBe(false);
+  });
+
+  it("Escape 键且 showCodeDialog=false 时不修改状态 (line 417 false branch)", () => {
+    let capturedKeydownCallback: ((e: KeyboardEvent) => void) | undefined;
+
+    const spy = vi.spyOn(document, "removeEventListener").mockImplementation(
+      (event: string, callback: any) => {
+        if (event === "keydown" && typeof callback === "function") {
+          capturedKeydownCallback = callback;
+        }
+      }
+    );
+
+    const { result, unmount } = withSetup(() =>
+      useScriptEditorBase(makeOptions())
+    );
+    result.showCodeDialog.value = false;
+
+    unmount();
+    spy.mockRestore();
+
+    capturedKeydownCallback!({ key: "Escape" } as KeyboardEvent);
+    // showCodeDialog 已经是 false，仍然是 false
+    expect(result.showCodeDialog.value).toBe(false);
+  });
+
+  it("非 Escape 键不触发关闭 (line 417 key!='Escape' branch)", () => {
+    let capturedKeydownCallback: ((e: KeyboardEvent) => void) | undefined;
+
+    const spy = vi.spyOn(document, "removeEventListener").mockImplementation(
+      (event: string, callback: any) => {
+        if (event === "keydown" && typeof callback === "function") {
+          capturedKeydownCallback = callback;
+        }
+      }
+    );
+
+    const { result, unmount } = withSetup(() =>
+      useScriptEditorBase(makeOptions())
+    );
+    result.showCodeDialog.value = true;
+
+    unmount();
+    spy.mockRestore();
+
+    capturedKeydownCallback!({ key: "Enter" } as KeyboardEvent);
+    // 非 Escape 键：showCodeDialog 保持 true
+    expect(result.showCodeDialog.value).toBe(true);
+  });
+
+  it("fullscreenchange 回调更新 isFullscreen (line 422)", () => {
+    const fullscreenCallbacks: (() => void)[] = [];
+
+    const spy = vi.spyOn(document, "removeEventListener").mockImplementation(
+      (event: string, callback: any) => {
+        if (event === "fullscreenchange" && typeof callback === "function") {
+          fullscreenCallbacks.push(callback);
+        }
+      }
+    );
+
+    const { result, unmount } = withSetup(() =>
+      useScriptEditorBase(makeOptions())
+    );
+    unmount();
+    spy.mockRestore();
+
+    // 第一个 fullscreenchange 回调对应 isFullscreen（line 422）
+    expect(fullscreenCallbacks.length).toBeGreaterThanOrEqual(1);
+
+    // 模拟进入全屏
+    Object.defineProperty(document, "fullscreenElement", {
+      value: document.createElement("div"),
+      configurable: true,
+    });
+    fullscreenCallbacks[0]!();
+    // line 422: isFullscreen.value = !!document.fullscreenElement → true
+    expect(result.isFullscreen.value).toBe(true);
+  });
+
+  it("fullscreenchange 回调退出全屏时 isFullscreen=false (line 422 falsy branch)", () => {
+    const fullscreenCallbacks: (() => void)[] = [];
+
+    const spy = vi.spyOn(document, "removeEventListener").mockImplementation(
+      (event: string, callback: any) => {
+        if (event === "fullscreenchange" && typeof callback === "function") {
+          fullscreenCallbacks.push(callback);
+        }
+      }
+    );
+
+    const { result, unmount } = withSetup(() =>
+      useScriptEditorBase(makeOptions())
+    );
+    result.isFullscreen.value = true; // 先设为 true
+    unmount();
+    spy.mockRestore();
+
+    // fullscreenElement = null → isFullscreen = false
+    Object.defineProperty(document, "fullscreenElement", {
+      value: null,
+      configurable: true,
+    });
+    fullscreenCallbacks[0]?.();
+    expect(result.isFullscreen.value).toBe(false);
+  });
+
+  it("第二个 fullscreenchange 回调更新 isSceneFullscreen (line 425)", () => {
+    const fullscreenCallbacks: (() => void)[] = [];
+
+    const spy = vi.spyOn(document, "removeEventListener").mockImplementation(
+      (event: string, callback: any) => {
+        if (event === "fullscreenchange" && typeof callback === "function") {
+          fullscreenCallbacks.push(callback);
+        }
+      }
+    );
+
+    const { result, unmount } = withSetup(() =>
+      useScriptEditorBase(makeOptions())
+    );
+    unmount();
+    spy.mockRestore();
+
+    // 第二个 fullscreenchange 回调对应 isSceneFullscreen（line 425）
+    expect(fullscreenCallbacks.length).toBeGreaterThanOrEqual(2);
+
+    Object.defineProperty(document, "fullscreenElement", {
+      value: document.createElement("div"),
+      configurable: true,
+    });
+    fullscreenCallbacks[1]!();
+    // line 425: isSceneFullscreen.value = !!document.fullscreenElement → true
+    expect(result.isSceneFullscreen.value).toBe(true);
+  });
+
+  it("第二个 fullscreenchange 回调退出全屏时 isSceneFullscreen=false (line 425 falsy branch)", () => {
+    const fullscreenCallbacks: (() => void)[] = [];
+
+    const spy = vi.spyOn(document, "removeEventListener").mockImplementation(
+      (event: string, callback: any) => {
+        if (event === "fullscreenchange" && typeof callback === "function") {
+          fullscreenCallbacks.push(callback);
+        }
+      }
+    );
+
+    const { result, unmount } = withSetup(() =>
+      useScriptEditorBase(makeOptions())
+    );
+    result.isSceneFullscreen.value = true;
+    unmount();
+    spy.mockRestore();
+
+    Object.defineProperty(document, "fullscreenElement", {
+      value: null,
+      configurable: true,
+    });
+    fullscreenCallbacks[1]?.();
+    expect(result.isSceneFullscreen.value).toBe(false);
+  });
+});

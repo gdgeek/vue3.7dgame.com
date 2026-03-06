@@ -73,18 +73,6 @@ const restoreScrollPosition = () => {
   }
 };
 
-// 防抖
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const debounce = (fn: Function, delay: number) => {
-  let timer: number | null = null;
-  return (...args: unknown[]) => {
-    if (timer) clearTimeout(timer);
-    timer = window.setTimeout(() => {
-      fn(...args);
-    }, delay);
-  };
-};
-
 const isMobile = ref(false);
 
 const checkMobile = () => {

@@ -227,19 +227,19 @@
               <div class="security-actions">
                 <template v-if="emailBound">
                   <el-button type="primary" @click="openEmailDialog('change')">
-                    改绑邮箱
+                    {{ $t("homepage.account.changeEmailAction") }}
                   </el-button>
                   <el-button
                     type="danger"
                     plain
                     @click="openEmailDialog('unbind')"
                   >
-                    解绑邮箱
+                    {{ $t("homepage.account.unbindEmailAction") }}
                   </el-button>
                 </template>
                 <template v-else>
                   <el-button type="primary" @click="openEmailDialog('bind')">
-                    绑定邮箱
+                    {{ $t("homepage.account.bindEmailAction") }}
                   </el-button>
                 </template>
               </div>
@@ -827,7 +827,7 @@ const resetPasswordForm = () => {
 const openPasswordDialog = () => {
   checkCurrentEmailVerified().then((verified) => {
     if (!verified) {
-      ElMessage.warning("邮箱未验证，请先完成邮箱验证后再修改密码");
+      ElMessage.warning(t("homepage.account.emailNotVerifiedWarning"));
       return;
     }
     dialogPasswordVisible.value = true;
@@ -868,7 +868,7 @@ const submitPasswordChange = () => {
     try {
       const verified = await checkCurrentEmailVerified();
       if (!verified) {
-        ElMessage.error("邮箱未验证，请先完成邮箱验证后再修改密码");
+        ElMessage.error(t("homepage.account.emailNotVerifiedWarning"));
         return;
       }
       const response = await changePassword(
@@ -951,7 +951,7 @@ const startRecoverCooldown = (seconds = RECOVER_SEND_COOLDOWN_SECONDS) => {
 const openRecoverDialog = async () => {
   const boundEmail = await getCurrentBoundEmail();
   if (!boundEmail) {
-    ElMessage.warning("当前账号未绑定邮箱，请先前往邮箱验证页面绑定邮箱");
+    ElMessage.warning(t("homepage.account.noEmailBound"));
     openEmailDialog("bind");
     return;
   }
@@ -963,7 +963,7 @@ const openRecoverDialog = async () => {
 const handleRecoverSendEmail = async () => {
   const email = recoverForm.value.email || currentBoundEmail.value;
   if (!email) {
-    ElMessage.warning("未获取到绑定邮箱，请刷新后重试");
+    ElMessage.warning(t("homepage.account.emailBoundNotFound"));
     return;
   }
 
@@ -989,7 +989,7 @@ const handleRecoverSendEmail = async () => {
 const handleRecoverVerifyCode = async () => {
   const email = recoverForm.value.email || currentBoundEmail.value;
   if (!email) {
-    ElMessage.warning("未获取到绑定邮箱，请刷新后重试");
+    ElMessage.warning(t("homepage.account.emailBoundNotFound"));
     return;
   }
 
@@ -1020,7 +1020,7 @@ const handleRecoverVerifyCode = async () => {
 const handleRecoverResetPassword = async () => {
   const email = recoverForm.value.email || currentBoundEmail.value;
   if (!email) {
-    ElMessage.warning("未获取到绑定邮箱，请刷新后重试");
+    ElMessage.warning(t("homepage.account.emailBoundNotFound"));
     return;
   }
 

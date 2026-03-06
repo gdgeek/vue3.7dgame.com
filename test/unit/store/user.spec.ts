@@ -233,15 +233,12 @@ describe("useUserStore", () => {
     expect(token.removeToken).toHaveBeenCalled();
   });
 
-  it("logout() clears active refreshInterval and sets it to null", async () => {
-    vi.useFakeTimers();
+  it("logout() completes cleanly without refreshInterval (token refresh handled by request.ts interceptor)", async () => {
     token.hasToken.mockReturnValue(false);
     const store = useUserStore();
-    const interval = setInterval(() => {}, 100000);
-    store.refreshInterval = interval as unknown as NodeJS.Timeout;
-    await store.logout();
-    expect(store.refreshInterval).toBeNull();
-    vi.useRealTimers();
+    // refreshInterval 已从 store 中移除，token 刷新由 request.ts 拦截器按需触发
+    await expect(store.logout()).resolves.toBeUndefined();
+    expect(store.userInfo?.roles).toEqual([]);
   });
 
   // -----------------------------------------------------------------------

@@ -142,6 +142,7 @@ import { ThemeEnum } from "@/enums/ThemeEnum";
 import { useSettingsStore } from "@/store/modules/settings";
 import { useDomainStore } from "@/store/modules/domain";
 import { useAOS } from "@/composables/useAOS";
+import { debounce } from "@/utils/utilityFunctions";
 
 useAOS();
 
@@ -243,17 +244,6 @@ const restoreScrollPosition = () => {
   } catch (e) {
     logger.error("恢复滚动位置失败:", e);
   }
-};
-
-// 防抖
-const debounce = (fn: Function, delay: number) => {
-  let timer: number | null = null;
-  return (...args: unknown[]) => {
-    if (timer) clearTimeout(timer);
-    timer = window.setTimeout(() => {
-      fn(...args);
-    }, delay);
-  };
 };
 
 // 使用防抖处理滚动事件

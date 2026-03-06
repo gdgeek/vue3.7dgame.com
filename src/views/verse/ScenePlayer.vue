@@ -33,5 +33,8 @@ defineExpose({
   playQueuedAudio(audio: HTMLAudioElement, skipQueue?: boolean) {
     return playerRef.value?.playQueuedAudio(audio, skipQueue);
   },
+  get sceneInstanceId() {
+    return playerRef.value?.sceneInstanceId ?? "";
+  },
 });
 </script>
