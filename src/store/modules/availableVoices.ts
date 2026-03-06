@@ -18,7 +18,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "阅读男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -27,7 +27,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "情感女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -36,7 +36,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -45,7 +45,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "客服女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -54,7 +54,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -63,7 +63,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -72,7 +72,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "助手女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -81,7 +81,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "客服女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -90,7 +90,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "知性女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -99,7 +99,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -108,7 +108,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "新闻女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -117,7 +117,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "新闻女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -126,7 +126,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "新闻男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -135,7 +135,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "新闻男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -144,7 +144,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "男童声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -153,7 +153,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "女童声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -162,7 +162,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "情感女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -171,7 +171,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "情感男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -180,7 +180,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "粤语女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -189,7 +189,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "新闻男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -198,7 +198,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "新闻男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -207,7 +207,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "新闻女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -216,7 +216,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "聊天女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -225,7 +225,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "聊天男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -234,7 +234,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "聊天女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -243,7 +243,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -252,7 +252,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -261,7 +261,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -270,7 +270,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -279,7 +279,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -288,7 +288,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -297,7 +297,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -306,7 +306,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "客服女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -315,7 +315,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "客服女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -324,7 +324,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "客服女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -333,7 +333,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -342,7 +342,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -351,7 +351,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "四川女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -360,7 +360,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "英文男声",
-    language: "英文",
+    language: "en",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -369,7 +369,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "英文女声",
-    language: "英文",
+    language: "en",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -378,7 +378,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -387,7 +387,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -396,7 +396,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -405,7 +405,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -414,7 +414,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "东北男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -423,7 +423,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "日语女声",
-    language: "日文",
+    language: "ja",
     sampleRate: ["8k", "16k"],
   },
 
@@ -445,7 +445,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -465,7 +465,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -485,7 +485,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -505,7 +505,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -525,7 +525,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -545,7 +545,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -565,7 +565,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -585,7 +585,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -605,7 +605,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -625,7 +625,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -645,7 +645,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -665,7 +665,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -685,7 +685,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -705,7 +705,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -725,7 +725,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -745,7 +745,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -765,7 +765,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -785,7 +785,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -805,7 +805,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -825,7 +825,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -845,7 +845,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -865,7 +865,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -885,7 +885,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -905,7 +905,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -925,7 +925,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -945,7 +945,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -965,7 +965,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -985,7 +985,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -1005,7 +1005,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -1025,7 +1025,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -1034,7 +1034,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "对话女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k", "24k"],
   },
   {
@@ -1043,7 +1043,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral", "happy", "angry", "sad", "fear", "amaze", "sajiao", "disgusted"],
     type: "精品音色",
     scene: "对话男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k", "24k"],
   },
   {
@@ -1052,7 +1052,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral", "happy", "angry", "sad", "fear", "amaze", "sajiao", "disgusted"],
     type: "精品音色",
     scene: "对话女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k", "24k"],
   },
   {
@@ -1061,7 +1061,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral", "happy", "angry", "sad", "fear", "amaze", "sajiao", "disgusted"],
     type: "精品音色",
     scene: "对话女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k", "24k"],
   },
   {
@@ -1070,7 +1070,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral", "happy", "angry", "sad", "fear", "amaze", "sajiao", "disgusted"],
     type: "精品音色",
     scene: "对话男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k", "24k"],
   },
   {
@@ -1079,7 +1079,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral", "happy", "angry", "sad", "fear", "amaze", "sajiao", "disgusted"],
     type: "精品音色",
     scene: "对话女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k", "24k"],
   },
   {
@@ -1088,7 +1088,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral", "happy", "angry", "sad", "fear", "amaze", "sajiao", "disgusted"],
     type: "精品音色",
     scene: "对话男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k", "24k"],
   },
   {
@@ -1097,7 +1097,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "精品音色",
     scene: "对话女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k", "24k"],
   },
   {
@@ -1116,7 +1116,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "对话女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k", "24k"],
   },
   {
@@ -1136,7 +1136,7 @@ export const availableVoices: VoiceType[] = [
     ],
     type: "精品音色",
     scene: "对话女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k", "24k"],
   },
   {
@@ -1145,7 +1145,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral", "happy", "angry", "sad", "fear", "radio", "exciting", "jieshuo"],
     type: "精品音色",
     scene: "对话男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k", "24k"],
   },
   {
@@ -1154,7 +1154,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral", "angry", "sad", "fear", "sajiao", "disgusted"],
     type: "精品音色",
     scene: "对话女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k", "24k"],
   },
 
@@ -1165,7 +1165,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "标准音色",
     scene: "阅读男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -1174,7 +1174,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "标准音色",
     scene: "情感女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -1183,7 +1183,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "标准音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -1192,7 +1192,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "标准音色",
     scene: "客服女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -1201,7 +1201,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "标准音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -1210,7 +1210,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "标准音色",
     scene: "通用女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -1219,7 +1219,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "标准音色",
     scene: "客服女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -1228,7 +1228,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "标准音色",
     scene: "知性女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -1237,7 +1237,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "标准音色",
     scene: "通用男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -1246,7 +1246,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "标准音色",
     scene: "情感女声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -1255,7 +1255,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "标准音色",
     scene: "情感男声",
-    language: "中文",
+    language: "zh",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -1264,7 +1264,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "标准音色",
     scene: "英文男声",
-    language: "英文",
+    language: "en",
     sampleRate: ["8k", "16k"],
   },
   {
@@ -1273,7 +1273,7 @@ export const availableVoices: VoiceType[] = [
     emotions: ["neutral"],
     type: "标准音色",
     scene: "英文女声",
-    language: "英文",
+    language: "en",
     sampleRate: ["8k", "16k"],
   },
 ];

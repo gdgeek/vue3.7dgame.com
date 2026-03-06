@@ -350,7 +350,7 @@ const loadModel = async (
   entity: EntityNode,
   parentActive: boolean = true
 ): Promise<THREE.Object3D | boolean | undefined> => {
-  logger.log("开始加载模型:", {
+  logger.log("[ScenePlayer] Loading model:", {
     entityType: entity.type,
     entityUUID: entity.parameters?.uuid,
     resourceType: resource.type,
@@ -442,7 +442,7 @@ const loadModel = async (
             if (intersects.length > 0) {
               if (video.paused) {
                 video.play().catch((error) => {
-                  logger.warn("视频播放失败:", error);
+                  logger.warn("[ScenePlayer] Video playback failed:", error);
                 });
               } else {
                 video.pause();
@@ -476,7 +476,7 @@ const loadModel = async (
           if (entity.parameters.play) {
             const handleFirstInteraction = () => {
               video.play().catch((error) => {
-                logger.warn("视频播放失败:", error);
+                logger.warn("[ScenePlayer] Video playback failed:", error);
               });
               document.removeEventListener("click", handleFirstInteraction);
               document.removeEventListener("touchstart", handleFirstInteraction);
@@ -489,11 +489,11 @@ const loadModel = async (
         });
 
         video.addEventListener("error", (error) => {
-          logger.error("视频加载失败:", error);
+          logger.error("[ScenePlayer] Video load failed:", error);
           reject(error);
         });
       } catch (error) {
-        logger.error("处理视频资源时出错:", error);
+        logger.error("[ScenePlayer] Error processing video resource:", error);
         reject(error);
       }
     });
@@ -592,7 +592,7 @@ const loadModel = async (
         data: { url: audioUrl },
       });
 
-      logger.log("音频资源加载完成:", { uuid, url: audioUrl });
+      logger.log("[ScenePlayer] Audio resource loaded:", { uuid, url: audioUrl });
       resolve(true);
     });
   }
@@ -673,7 +673,7 @@ const loadModel = async (
         threeScene.add(mesh);
         resolve(mesh);
       } catch (error) {
-        logger.error("创建文本实体失败:", error);
+        logger.error("[ScenePlayer] Failed to create text entity:", error);
         reject(error);
       }
     });
@@ -702,7 +702,7 @@ const loadModel = async (
               throw new Error("无效的VOX数据结构");
             }
 
-            logger.log("创建VOX模型:", {
+            logger.log("[ScenePlayer] Creating VOX model:", {
               size: chunk.size,
               dataLength: chunk.data.length,
               paletteLength: chunk.palette.length,
@@ -803,14 +803,14 @@ const loadModel = async (
 
               // 处理点击事件
               if (actionComponent) {
-                logger.log("发现点击触发组件:", actionComponent);
+                logger.log("[ScenePlayer] Found click trigger component:", actionComponent);
                 let isExecuting = false;
 
                 const handleClick = async (event: MouseEvent) => {
                   if (!voxMesh.visible) return;
                   if (!renderer || !camera) return;
                   if (isExecuting) {
-                    logger.log("事件正在执行中，请等待完成...");
+                    logger.log("[ScenePlayer] Event is already executing, please wait...");
                     return;
                   }
 
@@ -823,13 +823,13 @@ const loadModel = async (
                   const intersects = raycaster.intersectObject(voxMesh, true);
 
                   if (intersects.length > 0) {
-                    logger.log("体素模型被点击:", uuid);
+                    logger.log("[ScenePlayer] Voxel model clicked:", uuid);
                     const eventId = actionComponent.parameters.uuid;
                     try {
                       isExecuting = true;
                       await triggerEvent(eventId);
                     } catch (error) {
-                      logger.error("执行事件处理函数失败:", error);
+                      logger.error("[ScenePlayer] Failed to execute event handler:", error);
                     } finally {
                       isExecuting = false;
                     }
@@ -847,7 +847,7 @@ const loadModel = async (
 
               // 处理碰撞检测
               if (triggerComponent) {
-                logger.log("发现碰撞触发组件:", triggerComponent);
+                logger.log("[ScenePlayer] Found collision trigger component:", triggerComponent);
                 const boundingBox = new THREE.Box3();
                 boundingBox.setFromObject(voxMesh);
                 const lastPosition = voxMesh.position.clone();
@@ -873,10 +873,10 @@ const loadModel = async (
 
               // 处理自旋转
               if (rotateComponent) {
-                logger.log("发现自旋转组件:", rotateComponent);
+                logger.log("[ScenePlayer] Found auto-rotate component:", rotateComponent);
                 const speedValue = rotateComponent.parameters.speed;
                 if (!speedValue) {
-                  logger.warn("旋转组件缺少速度参数");
+                  logger.warn("[ScenePlayer] Rotate component missing speed parameter");
                   return;
                 }
                 const speed = {
@@ -909,7 +909,7 @@ const loadModel = async (
 
               // 处理可移动
               if (movedComponent) {
-                logger.log("发现可移动组件:", movedComponent);
+                logger.log("[ScenePlayer] Found movable component:", movedComponent);
 
                 const limit = movedComponent.parameters.limit ?? {
                   x: { enable: false, min: 0, max: 0 },
@@ -940,7 +940,7 @@ const loadModel = async (
                   const intersects = raycaster.intersectObject(voxMesh, true);
 
                   if (intersects.length > 0) {
-                    logger.log("开始拖拽体素模型:", entity.parameters.uuid);
+                    logger.log("[ScenePlayer] Start dragging voxel model:", entity.parameters.uuid);
                     dragState.isDragging = true;
                     dragState.draggedObject = voxMesh;
                     dragState.dragStartPosition.copy(voxMesh.position);
@@ -1015,13 +1015,13 @@ const loadModel = async (
 
                     dragState.draggedObject.position.copy(newPosition);
                     dragState.lastIntersection.copy(intersection);
-                    logger.log("移动体素到位置:", newPosition);
+                    logger.log("[ScenePlayer] Move voxel to position:", newPosition);
                   }
                 };
 
                 const onMouseUp = () => {
                   if (dragState.isDragging) {
-                    logger.log("结束拖拽体素");
+                    logger.log("[ScenePlayer] End voxel drag");
                     dragState.isDragging = false;
                     dragState.draggedObject = null;
                     controls.value!.enabled = true;
@@ -1044,7 +1044,7 @@ const loadModel = async (
                 };
               }
 
-              logger.log("VOX模型加载完成:", {
+              logger.log("[ScenePlayer] VOX model loaded:", {
                 uuid,
                 position: voxMesh.position.toArray(),
                 rotation: voxMesh.rotation.toArray(),
@@ -1068,13 +1068,13 @@ const loadModel = async (
             threeScene.add(voxMesh);
             resolve(voxMesh);
           } catch (error) {
-            logger.error("处理VOX数据时出错:", error);
+            logger.error("[ScenePlayer] Error processing VOX data:", error);
             reject(error);
           }
         },
         undefined,
         (error: unknown) => {
-          logger.error("VOX模型加载失败:", error);
+          logger.error("[ScenePlayer] VOX model load failed:", error);
           reject(error);
         }
       );
@@ -1102,7 +1102,7 @@ const loadModel = async (
           const uuid = entity.parameters.uuid.toString();
 
           if (!entity.parameters || !entity.parameters.uuid) {
-            logger.error("entity.parameters对象无效:", entity.parameters);
+            logger.error("[ScenePlayer] Invalid entity.parameters object:", entity.parameters);
             return reject(new Error("Invalid entity.parameters object"));
           }
 
@@ -1130,7 +1130,7 @@ const loadModel = async (
             const mixer = new THREE.AnimationMixer(model);
             mixers.set(entity.parameters.uuid, mixer);
             model.userData.animations = gltf.animations;
-            logger.log(`模型 ${entity.parameters.uuid} 动画加载完成:`, {
+            logger.log(`[ScenePlayer] Model ${entity.parameters.uuid} animation loaded:`, {
               animations: gltf.animations,
               animationNames: gltf.animations.map((a) => a.name),
             });
@@ -1188,14 +1188,14 @@ const loadModel = async (
             );
 
             if (actionComponent) {
-              logger.log("发现点击触发组件:", actionComponent);
+              logger.log("[ScenePlayer] Found click trigger component:", actionComponent);
               let isExecuting = false;
 
               const handleClick = async (event: MouseEvent) => {
                 if (!model.visible) return;
                 if (!renderer || !camera) return;
                 if (isExecuting) {
-                  logger.log("事件正在执行中，请等待完成...");
+                  logger.log("[ScenePlayer] Event is already executing, please wait...");
                   return;
                 }
 
@@ -1207,13 +1207,13 @@ const loadModel = async (
                 const intersects = raycaster.intersectObject(model, true);
 
                 if (intersects.length > 0) {
-                  logger.log("模型被点击:", entity.parameters.uuid);
+                  logger.log("[ScenePlayer] Model clicked:", entity.parameters.uuid);
                   const eventId = actionComponent.parameters.uuid;
                   try {
                     isExecuting = true;
                     await triggerEvent(eventId);
                   } catch (error) {
-                    logger.error("执行事件处理函数失败:", error);
+                    logger.error("[ScenePlayer] Failed to execute event handler:", error);
                   } finally {
                     isExecuting = false;
                   }
@@ -1241,7 +1241,7 @@ const loadModel = async (
             }
 
             if (triggerComponent) {
-              logger.log("发现碰撞触发组件:", triggerComponent);
+              logger.log("[ScenePlayer] Found collision trigger component:", triggerComponent);
 
               const boundingBox = new THREE.Box3();
               boundingBox.setFromObject(model);
@@ -1270,11 +1270,11 @@ const loadModel = async (
             }
 
             if (rotateComponent) {
-              logger.log("发现自旋转组件:", rotateComponent);
+              logger.log("[ScenePlayer] Found auto-rotate component:", rotateComponent);
 
               const speedValue = rotateComponent.parameters.speed;
               if (!speedValue) {
-                logger.warn("旋转组件缺少速度参数");
+                logger.warn("[ScenePlayer] Rotate component missing speed parameter");
                 return;
               }
               const speed = {
@@ -1316,7 +1316,7 @@ const loadModel = async (
             }
 
             if (movedComponent) {
-              logger.log("发现可移动组件:", movedComponent);
+              logger.log("[ScenePlayer] Found movable component:", movedComponent);
 
               const limit = movedComponent.parameters.limit ?? {
                 x: { enable: false, min: 0, max: 0 },
@@ -1347,7 +1347,7 @@ const loadModel = async (
                 const intersects = raycaster.intersectObject(model, true);
 
                 if (intersects.length > 0) {
-                  logger.log("开始拖拽模型:", entity.parameters.uuid);
+                  logger.log("[ScenePlayer] Start dragging model:", entity.parameters.uuid);
                   dragState.isDragging = true;
                   dragState.draggedObject = model;
                   dragState.dragStartPosition.copy(model.position);
@@ -1422,13 +1422,13 @@ const loadModel = async (
 
                   dragState.draggedObject.position.copy(newPosition);
                   dragState.lastIntersection.copy(intersection);
-                  logger.log("移动到位置:", newPosition);
+                  logger.log("[ScenePlayer] Move to position:", newPosition);
                 }
               };
 
               const onMouseUp = () => {
                 if (dragState.isDragging) {
-                  logger.log("结束拖拽");
+                  logger.log("[ScenePlayer] End drag");
                   dragState.isDragging = false;
                   dragState.draggedObject = null;
                   controls.value!.enabled = true;
@@ -1489,7 +1489,7 @@ const loadModel = async (
           );
         },
         (error) => {
-          logger.error("模型加载失败:", error);
+          logger.error("[ScenePlayer] Model load failed:", error);
           reject(error);
         }
       );
@@ -1519,7 +1519,7 @@ const processEntities = async (
         ? entity.parameters.active
         : true) && parentActive;
 
-    logger.log(`处理实体 [Level ${level}]:`, {
+    logger.log(`[ScenePlayer] Processing entity [Level ${level}]:`, {
       type: entity.type,
       name: entity.parameters?.name,
       uuid: entity.parameters?.uuid,
@@ -1550,16 +1550,16 @@ const processEntities = async (
           currentActive
         );
       } catch (error) {
-        logger.error("处理文本实体失败:", error);
+        logger.error("[ScenePlayer] Failed to process text entity:", error);
       }
     } else if (entity.type === "Entity") {
-      logger.log("处理Entity类型容器:", entity.parameters.uuid);
+      logger.log("[ScenePlayer] Processing Entity container:", entity.parameters.uuid);
       const entityData: SourceRecord = {
         type: "entity",
         data: {
           transform: entityTransform,
           setVisibility: () => {
-            logger.log("Entity不支持直接设置可见性");
+            logger.log("[ScenePlayer] Entity does not support direct visibility setting");
           },
         },
       };
@@ -1582,7 +1582,7 @@ const processEntities = async (
             currentActive
           );
         } catch (error) {
-          logger.error(`加载模型失败:`, error);
+          logger.error(`[ScenePlayer] Failed to load model:`, error);
         }
       }
     }
@@ -1619,7 +1619,7 @@ const parseVerseData = () => {
     try {
       return JSON.parse(props.verse.data) as { children?: { modules?: Entity[] } };
     } catch (error) {
-      logger.error("解析verse数据失败:", error);
+      logger.error("[ScenePlayer] Failed to parse verse data:", error);
       return null;
     }
   }
@@ -1646,9 +1646,9 @@ const initEventContainer = () => {
     if (meta?.events) {
       try {
         eventContainer.value[moduleParams.uuid] = meta.events;
-        logger.log(`Module ${moduleParams.uuid} 的事件已加载:`, meta.events);
+        logger.log(`[ScenePlayer] Module ${moduleParams.uuid} events loaded:`, meta.events);
       } catch (error) {
-        logger.error(`解析Module ${moduleParams.uuid} 的事件失败:`, error);
+        logger.error(`[ScenePlayer] Failed to parse Module ${moduleParams.uuid} events:`, error);
       }
     }
   });
@@ -1660,7 +1660,7 @@ const initEventContainer = () => {
 const getAudioUrl = (uuid: string): string | undefined => {
   const source = sources.get(uuid.toString());
   if (!source || source.type !== "audio") {
-    logger.error(`找不到UUID为 ${uuid} 的音频资源`);
+    logger.error(`[ScenePlayer] Audio resource not found for UUID: ${uuid}`);
     return undefined;
   }
   return (source.data as SourceAudioData).url;
@@ -1668,7 +1668,7 @@ const getAudioUrl = (uuid: string): string | undefined => {
 
 /** 音频播放处理 */
 const handleAudioPlay = (audio: HTMLAudioElement): Promise<void> => {
-  logger.log("开始处理音频播放:", {
+  logger.log("[ScenePlayer] Processing audio playback:", {
     src: audio.src,
     duration: audio.duration,
     currentTime: audio.currentTime,
@@ -1678,17 +1678,17 @@ const handleAudioPlay = (audio: HTMLAudioElement): Promise<void> => {
     audio.currentTime = 0;
 
     audio.onended = () => {
-      logger.log("音频播放完成:", { src: audio.src, duration: audio.duration });
+      logger.log("[ScenePlayer] Audio playback completed:", { src: audio.src, duration: audio.duration });
       resolve();
     };
 
     audio.onerror = () => {
-      logger.error("音频播放出错:", { src: audio.src, error: audio.error });
+      logger.error("[ScenePlayer] Audio playback error:", { src: audio.src, error: audio.error });
       resolve();
     };
 
     audio.play().catch((error) => {
-      logger.error("播放音频失败:", { src: audio.src, error });
+      logger.error("[ScenePlayer] Failed to play audio:", { src: audio.src, error });
       resolve();
     });
   });
@@ -1699,7 +1699,7 @@ let isPlaying = false;
 
 /** 处理音频队列 */
 const processAudioQueue = async () => {
-  logger.log("处理音频队列:", {
+  logger.log("[ScenePlayer] Processing audio queue:", {
     isPlaying,
     queueLength: audioPlaybackQueue.length,
   });
@@ -1710,7 +1710,7 @@ const processAudioQueue = async () => {
 
   while (audioPlaybackQueue.length > 0) {
     const current = audioPlaybackQueue[0];
-    logger.log("播放队列中的音频:", {
+    logger.log("[ScenePlayer] Playing audio in queue:", {
       src: current.audio.src,
       queueLength: audioPlaybackQueue.length,
     });
@@ -1720,7 +1720,7 @@ const processAudioQueue = async () => {
   }
 
   isPlaying = false;
-  logger.log("音频队列处理完成");
+  logger.log("[ScenePlayer] Audio queue processing complete");
 };
 
 /** 将音频加入播放队列，或跳过队列直接播放 */
@@ -1728,7 +1728,7 @@ const playQueuedAudio = async (
   audio: HTMLAudioElement,
   skipQueue: boolean = false
 ): Promise<void> => {
-  logger.log("添加音频到播放队列:", {
+  logger.log("[ScenePlayer] Adding audio to queue:", {
     src: audio.src,
     skipQueue,
     currentQueueLength: audioPlaybackQueue.length,
@@ -1750,7 +1750,7 @@ const playQueuedAudio = async (
 const playAnimation = (uuid: string, animationName: string) => {
   const source = sources.get(uuid.toString());
   if (!source || source.type !== "model") {
-    logger.error(`找不到UUID为 ${uuid} 的模型资源`);
+    logger.error(`[ScenePlayer] Model resource not found for UUID: ${uuid}`);
     return;
   }
 
@@ -1759,20 +1759,20 @@ const playAnimation = (uuid: string, animationName: string) => {
 
   if (!model) {
     logger.error(
-      `找不到UUID为 ${uuid} 的模型，可用模型:`,
+      `[ScenePlayer] Model not found for UUID: ${uuid}, available models:`,
       Array.from(sources.keys())
     );
     return;
   }
 
   if (!mixer) {
-    logger.error(`找不到UUID为 ${uuid} 的动画混合器`);
+    logger.error(`[ScenePlayer] Animation mixer not found for UUID: ${uuid}`);
     return;
   }
 
   const animations = model.userData?.animations;
   if (!animations || animations.length === 0) {
-    logger.error(`模型 ${uuid} 没有动画数据`);
+    logger.error(`[ScenePlayer] Model ${uuid} has no animation data`);
     return;
   }
 
@@ -1781,7 +1781,7 @@ const playAnimation = (uuid: string, animationName: string) => {
   );
   if (!clip) {
     logger.error(
-      `找不到动画 "${animationName}"，可用动画:`,
+      `[ScenePlayer] Animation "${animationName}" not found, available animations:`,
       animations.map((a: THREE.AnimationClip) => a.name)
     );
     return;
@@ -1846,17 +1846,17 @@ onMounted(async () => {
   if (mode.value === "meta" && props.meta) {
     // Meta 模式：直接从 meta.data 加载实体
     const metaData = props.meta.data;
-    logger.log("解析后的metaData:", metaData);
+    logger.log("[ScenePlayer] Parsed metaData:", metaData);
 
     if (isMetaData(metaData) && metaData.children?.entities) {
       await processEntities(metaData.children.entities);
     } else {
-      logger.error("metaData格式错误:", metaData);
+      logger.error("[ScenePlayer] Invalid metaData format:", metaData);
     }
   } else if (mode.value === "verse" && props.verse) {
     // Verse 模式：遍历 modules -> metas -> entities 三层结构
     const verseData = parseVerseData();
-    logger.log("解析后的verse全部数据:", props.verse);
+    logger.log("[ScenePlayer] Parsed verse data:", props.verse);
 
     if (verseData?.children?.modules) {
       for (const module of verseData.children.modules) {
@@ -1876,7 +1876,7 @@ onMounted(async () => {
               ? (JSON.parse(meta.data) as MetaData)
               : meta.data;
 
-          logger.log("解析后的metaData:", metaData);
+          logger.log("[ScenePlayer] Parsed metaData:", metaData);
 
           if (metaData.children?.entities) {
             await processEntities(
@@ -1889,7 +1889,7 @@ onMounted(async () => {
     }
 
     initEventContainer();
-    logger.log("事件容器:", eventContainer.value);
+    logger.log("[ScenePlayer] Event container:", eventContainer.value);
   }
 
   // ── 性能监控（Verse 模式启用 Stats）────────────────────────────────────
@@ -1953,13 +1953,13 @@ onMounted(async () => {
 
           if (isColliding && !collisionObj.isColliding) {
             collisionObj.isColliding = true;
-            logger.log("检测到碰撞:", {
+            logger.log("[ScenePlayer] Collision detected:", {
               source: collisionObj.sourceUuid,
               target: collisionObj.targetUuid,
             });
             // 使用统一的事件触发（根据模式调用 window.meta 或 window.verse）
             triggerEvent(collisionObj.eventUuid).catch((error) => {
-              logger.error("执行碰撞事件处理函数失败:", error);
+              logger.error("[ScenePlayer] Failed to execute collision event handler:", error);
             });
           } else if (!isColliding && collisionObj.isColliding) {
             collisionObj.isColliding = false;

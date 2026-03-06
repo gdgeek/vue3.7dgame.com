@@ -416,6 +416,7 @@ export default {
     stage3: "保存中...",
     maxSizeLimit: "单个文件最大 {size}MB",
     fileTooLarge: "文件超过 {size}MB 限制",
+    fileSizeExceededList: "以下文件超过 {size}MB 限制: {names}",
   },
   resource: {
     type: {

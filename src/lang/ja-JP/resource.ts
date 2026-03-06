@@ -405,5 +405,8 @@ export default {
       failed: "データベースへの保存に失敗しました",
       declared: "ファイルデータをデータベースに保存",
     },
+    maxSizeLimit: "Single file max {size}MB",
+    fileTooLarge: "File exceeds {size}MB limit",
+    fileSizeExceededList: "The following files exceed the {size}MB limit: {names}",
   },
 };

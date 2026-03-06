@@ -98,9 +98,9 @@ describe("availableVoices", () => {
 
   it("contains Chinese, English, and Japanese language voices", () => {
     const langs = new Set(availableVoices.map((v) => v.language));
-    expect(langs.has("中文")).toBe(true);
-    expect(langs.has("英文")).toBe(true);
-    expect(langs.has("日文")).toBe(true);
+    expect(langs.has("zh")).toBe(true);
+    expect(langs.has("en")).toBe(true);
+    expect(langs.has("ja")).toBe(true);
   });
 
   it("all sampleRate values are valid (8k, 16k, or 24k)", () => {
@@ -116,7 +116,7 @@ describe("availableVoices", () => {
     const voice = availableVoices.find((v) => v.value === 100510000);
     expect(voice).toBeDefined();
     expect(voice!.type).toBe("精品音色");
-    expect(voice!.language).toBe("中文");
+    expect(voice!.language).toBe("zh");
   });
 
   it("contains the premium voice 智聆 with value 101002", () => {

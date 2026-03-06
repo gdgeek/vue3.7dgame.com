@@ -403,5 +403,8 @@ export default {
       failed: "數據庫儲存失敗",
       declared: "文件數據存儲在數據庫中",
     },
+    maxSizeLimit: "單個文件最大 {size}MB",
+    fileTooLarge: "文件超過 {size}MB 限制",
+    fileSizeExceededList: "以下文件超過 {size}MB 限制: {names}",
   },
 };

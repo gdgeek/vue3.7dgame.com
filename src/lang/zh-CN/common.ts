@@ -58,6 +58,9 @@ export default {
   emailVerification: {
     codeSent: "验证码已发送到您的邮箱",
     verifySuccess: "邮箱验证成功",
+    sentToCurrentEmail: "验证码已发送到当前绑定邮箱",
+    oldEmailVerified: "旧邮箱验证成功，请继续完成新邮箱绑定",
+    unbindSuccess: "邮箱解绑成功",
   },
   sidebar: {
     home: "主页",

@@ -63,7 +63,7 @@ describe("useTTS", () => {
     selectedVoiceType: ref(101002),
     codec: ref("mp3"),
     sampleRate: ref(16000),
-    voiceLanguage: ref("中文"),
+    voiceLanguage: ref("zh"),
     voiceType: ref("精品音色"),
     emotionCategory: ref("neutral"),
     emotionIntensity: ref(100),

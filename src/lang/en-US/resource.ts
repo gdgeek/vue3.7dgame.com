@@ -419,6 +419,9 @@ export default {
     stage1: "Preprocessing...",
     stage2: "Uploading...",
     stage3: "Saving...",
+    maxSizeLimit: "Single file max {size}MB",
+    fileTooLarge: "File exceeds {size}MB limit",
+    fileSizeExceededList: "The following files exceed the {size}MB limit: {names}",
   },
   resource: {
     type: {

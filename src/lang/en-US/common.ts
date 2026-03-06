@@ -161,6 +161,9 @@ export default {
   emailVerification: {
     codeSent: "Verification code has been sent to your email",
     verifySuccess: "Email verified successfully",
+    sentToCurrentEmail: "Verification code sent to your current bound email",
+    oldEmailVerified: "Old email verified. Please continue to bind the new email.",
+    unbindSuccess: "Email unbound successfully",
   },
   web: {
     login: "Login",

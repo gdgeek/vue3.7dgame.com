@@ -153,6 +153,9 @@ export default {
   emailVerification: {
     codeSent: "ส่งรหัสยืนยันไปยังอีเมลของคุณแล้ว",
     verifySuccess: "ยืนยันอีเมลสำเร็จ",
+    sentToCurrentEmail: "Verification code sent to your current bound email",
+    oldEmailVerified: "Old email verified. Please continue to bind the new email.",
+    unbindSuccess: "Email unbound successfully",
   },
   request: {
     loginExpired: "Login expired, please log in again",

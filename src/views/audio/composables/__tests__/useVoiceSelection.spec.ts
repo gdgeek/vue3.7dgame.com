@@ -30,12 +30,12 @@ describe("useVoiceSelection", () => {
   it("should filter voices by language", () => {
     const { voiceLanguage, filteredVoices } = voiceSelection;
 
-    voiceLanguage.value = "英文";
+    voiceLanguage.value = "en";
     expect(filteredVoices.value.length).toBeGreaterThan(0);
-    expect(filteredVoices.value.every((v) => v.language === "英文")).toBe(true);
+    expect(filteredVoices.value.every((v) => v.language === "en")).toBe(true);
 
-    voiceLanguage.value = "中文";
-    expect(filteredVoices.value.every((v) => v.language === "中文")).toBe(true);
+    voiceLanguage.value = "zh";
+    expect(filteredVoices.value.every((v) => v.language === "zh")).toBe(true);
   });
 
   it("should provide available scenes based on all voices", () => {
@@ -64,7 +64,7 @@ describe("useVoiceSelection", () => {
     const { voiceLanguage, selectedVoiceType, filteredVoices } = voiceSelection;
 
     // Switch to English
-    voiceLanguage.value = "英文";
+    voiceLanguage.value = "en";
     await nextTick();
 
     const firstEnglishVoice = filteredVoices.value[0];
@@ -157,7 +157,7 @@ describe("useVoiceSelection", () => {
     const { voiceLanguage, filteredVoices } = voiceSelection;
     const totalVoices = filteredVoices.value.length;
 
-    voiceLanguage.value = "英文";
+    voiceLanguage.value = "en";
     await nextTick();
     expect(filteredVoices.value.length).toBeLessThan(totalVoices);
 

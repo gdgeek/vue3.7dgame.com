@@ -10,6 +10,7 @@ import { postAudio } from "@/api/v1/resources/index";
 import type { UploadFileType } from "@/api/user/model";
 import environment from "@/environment";
 import { safeAtob } from "@/utils/base64";
+import type { LanguageCode } from "@/types/language";
 
 interface UseTTSProps {
   text: Ref<string>;
@@ -99,6 +100,7 @@ export function useTTS(props: UseTTSProps) {
     try {
       isLoading.value = true;
 
+      const LANG_TO_PRIMARY: Record<LanguageCode, number> = { zh: 1, en: 2, ja: 3, other: 1 };
       const params = {
         Text: props.text.value,
         SessionId: `session-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -108,11 +110,7 @@ export function useTTS(props: UseTTSProps) {
         Codec: props.codec.value,
         SampleRate: props.sampleRate.value,
         PrimaryLanguage:
-          props.voiceLanguage.value === "中文"
-            ? 1
-            : props.voiceLanguage.value === "英文"
-              ? 2
-              : 3,
+          LANG_TO_PRIMARY[props.voiceLanguage.value as LanguageCode] ?? 3,
         ModelType: props.voiceType.value === "精品音色" ? 1 : 0,
         ...(props.emotionCategory.value && {
           EmotionCategory: props.emotionCategory.value,
@@ -166,7 +164,7 @@ export function useTTS(props: UseTTSProps) {
         throw new Error(t("tts.synthesisError"));
       }
     } catch (error) {
-      logger.error("语音合成错误:", error);
+      logger.error("[useTTS] Speech synthesis error:", error);
       ElMessage.error(t("tts.synthesisError"));
     } finally {
       isLoading.value = false;
@@ -202,7 +200,7 @@ export function useTTS(props: UseTTSProps) {
 
       const handler = await fileStore.store.publicHandler();
       const md5 = await fileStore.store.fileMD5(file, (p: number) => {
-        logger.log("MD5计算进度:", p);
+        logger.log("[useTTS] MD5 progress:", p);
       });
       const extension = `.${props.codec.value}`;
 
@@ -218,7 +216,7 @@ export function useTTS(props: UseTTSProps) {
           extension,
           file,
           (p: number) => {
-            logger.log("上传进度:", p);
+            logger.log("[useTTS] Upload progress:", p);
           },
           handler,
           "audio"
@@ -257,7 +255,7 @@ export function useTTS(props: UseTTSProps) {
         ElMessage.info(t("tts.uploadCanceled"));
         return;
       }
-      logger.error("上传错误:", error);
+      logger.error("[useTTS] Upload error:", error);
       ElMessage.error(t("tts.uploadError"));
     } finally {
       isUploading.value = false;

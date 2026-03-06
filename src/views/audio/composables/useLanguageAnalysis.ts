@@ -1,6 +1,7 @@
 import { ref, Ref, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { ElMessage } from "element-plus";
+import type { LanguageCode } from "@/types/language";
 
 export interface LanguageAnalysisData {
   chinesePercentage: number;
@@ -14,7 +15,7 @@ export interface LanguageAnalysisData {
   totalChars: number;
   suggestion: string;
   isMultiLanguage: boolean;
-  detectedLanguage: string;
+  detectedLanguage: LanguageCode | "";
 }
 
 export function useLanguageAnalysis() {
@@ -44,32 +45,30 @@ export function useLanguageAnalysis() {
     }
   });
 
+  const LANG_CODE_TO_I18N_KEY: Record<LanguageCode, string> = {
+    zh: "tts.chinese",
+    en: "tts.english",
+    ja: "tts.japanese",
+    other: "",
+  };
+
+  const getLangDisplayText = (code: LanguageCode | "") => {
+    if (!code || code === "other") return code;
+    return t(LANG_CODE_TO_I18N_KEY[code]);
+  };
+
   const updateLanguageSuggestion = () => {
     const { isMultiLanguage, detectedLanguage } = languageAnalysis.value;
 
     if (!detectedLanguage) return;
 
+    const detectedLanguageText = getLangDisplayText(detectedLanguage);
+
     if (isMultiLanguage) {
-      const detectedLanguageText =
-        detectedLanguage === "中文"
-          ? t("tts.chinese")
-          : detectedLanguage === "英文"
-            ? t("tts.english")
-            : detectedLanguage === "日文"
-              ? t("tts.japanese")
-              : detectedLanguage;
       languageAnalysis.value.suggestion = t("tts.mixedLanguageDetected", [
         detectedLanguageText,
       ]);
     } else {
-      const detectedLanguageText =
-        detectedLanguage === "中文"
-          ? t("tts.chinese")
-          : detectedLanguage === "英文"
-            ? t("tts.english")
-            : detectedLanguage === "日文"
-              ? t("tts.japanese")
-              : detectedLanguage;
       languageAnalysis.value.suggestion = t("tts.mainLanguageDetected", [
         detectedLanguageText,
       ]);
@@ -78,7 +77,7 @@ export function useLanguageAnalysis() {
 
   const checkTextLanguage = (
     text: string,
-    voiceLanguage: Ref<string>,
+    voiceLanguage: Ref<LanguageCode | string>,
     autoSwitchLanguage: Ref<boolean>
   ) => {
     if (!text) return;
@@ -119,7 +118,7 @@ export function useLanguageAnalysis() {
       detectedLanguage: "",
     };
 
-    let detectedLanguage = "";
+    let detectedLanguage: LanguageCode | "" = "";
     let isMultiLanguage = false;
     const maxCount = Math.max(chineseCount, japaneseCount, englishCount);
 
@@ -133,14 +132,14 @@ export function useLanguageAnalysis() {
       }
 
       if (chineseCount >= japaneseCount && chineseCount >= englishCount) {
-        detectedLanguage = "中文";
+        detectedLanguage = "zh";
       } else if (
         japaneseCount >= chineseCount &&
         japaneseCount >= englishCount
       ) {
-        detectedLanguage = "日文";
+        detectedLanguage = "ja";
       } else {
-        detectedLanguage = "英文";
+        detectedLanguage = "en";
       }
     }
 
@@ -161,14 +160,7 @@ export function useLanguageAnalysis() {
       }
 
       languageDetectionTimer = setTimeout(() => {
-        const detectedLanguageText =
-          detectedLanguage === "中文"
-            ? t("tts.chinese")
-            : detectedLanguage === "英文"
-              ? t("tts.english")
-              : detectedLanguage === "日文"
-                ? t("tts.japanese")
-                : detectedLanguage;
+        const detectedLanguageText = getLangDisplayText(detectedLanguage);
         ElMessage({
           message: `${languageInfo}，${
             autoSwitchLanguage.value
@@ -187,24 +179,9 @@ export function useLanguageAnalysis() {
         voiceLanguage.value &&
         detectedLanguage !== voiceLanguage.value
       ) {
-        const oldLanguage = voiceLanguage.value;
-        const oldLanguageText =
-          oldLanguage === "中文"
-            ? t("tts.chinese")
-            : oldLanguage === "英文"
-              ? t("tts.english")
-              : oldLanguage === "日文"
-                ? t("tts.japanese")
-                : oldLanguage;
+        const oldLanguageText = getLangDisplayText(voiceLanguage.value as LanguageCode | "");
         voiceLanguage.value = detectedLanguage;
-        const newLanguageText =
-          detectedLanguage === "中文"
-            ? t("tts.chinese")
-            : detectedLanguage === "英文"
-              ? t("tts.english")
-              : detectedLanguage === "日文"
-                ? t("tts.japanese")
-                : detectedLanguage;
+        const newLanguageText = getLangDisplayText(detectedLanguage);
         if (!isMultiLanguage) {
           ElMessage.success(
             t("tts.autoSwitchedLanguage", [oldLanguageText, newLanguageText])
@@ -214,14 +191,7 @@ export function useLanguageAnalysis() {
 
       if (detectedLanguage && !voiceLanguage.value) {
         voiceLanguage.value = detectedLanguage;
-        const detectedLanguageText =
-          detectedLanguage === "中文"
-            ? t("tts.chinese")
-            : detectedLanguage === "英文"
-              ? t("tts.english")
-              : detectedLanguage === "日文"
-                ? t("tts.japanese")
-                : detectedLanguage;
+        const detectedLanguageText = getLangDisplayText(detectedLanguage);
         if (!isMultiLanguage) {
           ElMessage.success(
             t("tts.autoDetectedLanguage", [detectedLanguageText])
@@ -230,15 +200,14 @@ export function useLanguageAnalysis() {
       }
     }
 
-    if (detectedLanguage === "中文" || detectedLanguage === "日文") {
+    if (detectedLanguage === "zh" || detectedLanguage === "ja") {
       if (text.length > 150) {
-        const detectedLanguageText =
-          detectedLanguage === "中文" ? t("tts.chinese") : t("tts.japanese");
+        const detectedLanguageText = getLangDisplayText(detectedLanguage);
         ElMessage.warning(
           t("tts.textLimitWarning", [detectedLanguageText, 150, text.length])
         );
       }
-    } else if (detectedLanguage === "英文") {
+    } else if (detectedLanguage === "en") {
       if (text.length > 500) {
         ElMessage.warning(
           t("tts.textLimitWarning", [t("tts.english"), 500, text.length])
