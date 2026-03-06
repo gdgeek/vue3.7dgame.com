@@ -2,10 +2,15 @@
 
 :root {
   /* 主色调 - 映射到全局主题变量 */
-  --ar-primary: var(--primary-color, #00BAFF);
-  --ar-primary-dark: var(--primary-dark, #0099DD);
-  --ar-primary-light: var(--primary-light, #33C8FF);
-  --ar-primary-alpha-10: rgba(0, 186, 255, 0.1); // Keep as is for now or use primary-light
+  --ar-primary: var(--primary-color, #00baff);
+  --ar-primary-dark: var(--primary-dark, #0099dd);
+  --ar-primary-light: var(--primary-light, #33c8ff);
+  --ar-primary-alpha-10: rgba(
+    0,
+    186,
+    255,
+    0.1
+  ); // Keep as is for now or use primary-light
   --ar-primary-alpha-20: rgba(0, 186, 255, 0.2);
 
   /* 背景色 */
@@ -16,7 +21,7 @@
   --menu-background: var(--bg-card, #ffffff);
   --menu-text: var(--text-secondary, #64748b);
   --menu-active-text: #ffffff;
-  --menu-active-bg: var(--primary-color, #00BAFF);
+  --menu-active-bg: var(--primary-color, #00baff);
   --menu-hover: var(--bg-hover, #f1f5f9);
   --sidebar-logo-background: var(--bg-card, #ffffff);
   --sidebar-border: var(--border-color, #e2e8f0);
@@ -37,7 +42,7 @@
 html.dark {
   /* 覆盖 Element Plus 页面背景色 */
   --el-bg-color-page: var(--bg-page);
-  
+
   /* Sidebar logo background transparency if needed, or just follow bg-card */
   --sidebar-logo-background: var(--bg-card);
 }
@@ -52,7 +57,7 @@ $menu-hover: var(--menu-hover);
 $sidebar-logo-background: var(--sidebar-logo-background);
 
 /* 布局尺寸 */
-$sidebar-width: 288px; // w-72 equivalent
+$sidebar-width: 288px;
 $sidebar-width-collapsed: 64px;
 $navbar-height: 64px;
 $tags-view-height: 34px;
@@ -67,9 +72,15 @@ $border-radius-3xl: 1.5rem;
 
 /* 阴影 */
 $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+$shadow-md:
+  0 4px 6px -1px rgba(0, 0, 0, 0.1),
+  0 2px 4px -2px rgba(0, 0, 0, 0.1);
+$shadow-lg:
+  0 10px 15px -3px rgba(0, 0, 0, 0.1),
+  0 4px 6px -4px rgba(0, 0, 0, 0.1);
+$shadow-xl:
+  0 20px 25px -5px rgba(0, 0, 0, 0.1),
+  0 8px 10px -6px rgba(0, 0, 0, 0.1);
 $shadow-primary: 0 10px 15px -3px rgba(0, 186, 255, 0.2);
 
 /* 过渡动画 */
@@ -78,4 +89,11 @@ $transition-normal: 200ms ease;
 $transition-slow: 300ms ease;
 
 /* 字体 */
-$font-family-base: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-family-base:
+  "Inter",
+  "Noto Sans SC",
+  -apple-system,
+  BlinkMacSystemFont,
+  "Segoe UI",
+  Roboto,
+  sans-serif;

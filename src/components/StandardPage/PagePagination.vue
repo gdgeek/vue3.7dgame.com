@@ -1,22 +1,43 @@
 <template>
-  <div class="page-pagination">
-    <el-button round class="page-btn" :disabled="currentPage <= 1" @click="changePage(currentPage - 1)">
-      <font-awesome-icon :icon="['fas', 'chevron-left']" class="btn-icon"
-        style="margin-right: 4px; font-size: 18px"></font-awesome-icon>
+  <div class="page-pagination" :class="{ sticky: props.sticky }">
+    <el-button
+      round
+      class="page-btn"
+      :disabled="currentPage <= 1"
+      @click="changePage(currentPage - 1)"
+    >
+      <font-awesome-icon
+        :icon="['fas', 'chevron-left']"
+        class="btn-icon"
+        style="margin-right: 4px; font-size: 18px"
+      ></font-awesome-icon>
       上一页
     </el-button>
 
     <span class="page-info">
       第
-      <el-input v-model="targetPageInput" class="page-input" size="small" @keyup.enter="jumpToPage"
-        @blur="jumpToPage"></el-input>
+      <el-input
+        v-model="targetPageInput"
+        class="page-input"
+        size="small"
+        @keyup.enter="jumpToPage"
+        @blur="jumpToPage"
+      ></el-input>
       页 / 共 {{ totalPages }} 页
     </span>
 
-    <el-button round class="page-btn" :disabled="currentPage >= totalPages" @click="changePage(currentPage + 1)">
+    <el-button
+      round
+      class="page-btn"
+      :disabled="currentPage >= totalPages"
+      @click="changePage(currentPage + 1)"
+    >
       下一页
-      <font-awesome-icon :icon="['fas', 'chevron-right']" class="btn-icon"
-        style="margin-left: 4px; font-size: 18px"></font-awesome-icon>
+      <font-awesome-icon
+        :icon="['fas', 'chevron-right']"
+        class="btn-icon"
+        style="margin-left: 4px; font-size: 18px"
+      ></font-awesome-icon>
     </el-button>
   </div>
 </template>
@@ -25,7 +46,9 @@
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import type { PagePaginationProps } from "./types";
 
-const props = defineProps<PagePaginationProps>();
+const props = withDefaults(defineProps<PagePaginationProps>(), {
+  sticky: false,
+});
 const emit = defineEmits<{
   (e: "page-change", page: number): void;
 }>();
@@ -87,6 +110,19 @@ onBeforeUnmount(() => {
   justify-content: center;
   gap: 16px;
   padding: 20px 0;
+
+  &.sticky {
+    position: sticky;
+    bottom: 10px;
+    z-index: 20;
+    width: fit-content;
+    margin: 12px auto 0;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-full, 9999px);
+    background: var(--bg-page, #f8fafc);
+    backdrop-filter: blur(6px);
+  }
 }
 
 .page-btn {

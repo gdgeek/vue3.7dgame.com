@@ -142,7 +142,9 @@ describe("useVoiceSelection", () => {
     voiceScene.value = "通用女声";
     await nextTick();
     expect(filteredVoices.value.length).toBeGreaterThan(0);
-    expect(filteredVoices.value.every((v) => v.scene === "通用女声")).toBe(true);
+    expect(filteredVoices.value.every((v) => v.scene === "通用女声")).toBe(
+      true
+    );
   });
 
   it("filters voices by voiceType", async () => {

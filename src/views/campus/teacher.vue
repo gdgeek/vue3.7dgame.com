@@ -173,7 +173,12 @@ const {
   handleViewChange,
 } = useCampusMemberList<Teacher>({
   fetchFn: async (params) =>
-    await getTeachers(params.sort, params.search, params.page, "user,school,user.avatar"),
+    await getTeachers(
+      params.sort,
+      params.search,
+      params.page,
+      "user,school,user.avatar"
+    ),
   deleteFn: deleteTeacher,
   addPendingKey: "manager.ui.inviteTeacherPending",
   removeConfirmKey: "manager.ui.removeTeacherConfirm",

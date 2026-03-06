@@ -74,5 +74,3 @@ export const changePassword = async (
   });
   return response.data;
 };
-
-

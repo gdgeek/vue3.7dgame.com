@@ -340,7 +340,6 @@ const displayNewsData = computed(() => {
 
 // 初始化并加载数据
 onMounted(() => {
-
   /*
   // 从URL查询参数中确定活跃标签
   const tabParam = route.query.tab;

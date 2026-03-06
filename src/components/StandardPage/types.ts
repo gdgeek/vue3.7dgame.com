@@ -2,6 +2,8 @@
 export interface PageActionBarProps {
   /** 页面标题, e.g. "所有音频素材" */
   title: string;
+  /** 是否显示页面标题 */
+  showTitle?: boolean;
   /** 副标题, e.g. "从我们精心设计的示例开始…" */
   subtitle?: string;
   /** 搜索框占位符 */
@@ -46,4 +48,5 @@ export interface ViewContainerProps<T = unknown> {
 export interface PagePaginationProps {
   currentPage: number;
   totalPages: number;
+  sticky?: boolean;
 }

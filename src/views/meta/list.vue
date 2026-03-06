@@ -3,11 +3,27 @@
     <div class="meta-list">
       <PageActionBar
         :title="t('meta.list.pageTitle')"
+        :show-title="false"
         :search-placeholder="t('meta.list.searchPlaceholder')"
-        @search="handleSearch"
-        @sort-change="handleSortChange"
+        @search="handleSearchWithScope"
+        @sort-change="handleSortChangeWithScope"
         @view-change="handleViewChange"
       >
+        <template #filters>
+          <ResourceScopeFilter
+            mode="scene"
+            :scene-id="selectedSceneId"
+            :entity-id="null"
+            :show-scene-select="true"
+            :show-entity-select="false"
+            :loading-scenes="loadingScenes"
+            :loading-scene-detail="loadingSceneDetail"
+            :loading-entity-detail="false"
+            :scenes="scenes"
+            :entities="[]"
+            @scene-change="handleSceneChange"
+          ></ResourceScopeFilter>
+        </template>
         <template #actions>
           <el-button type="primary" @click="addMeta">
             <font-awesome-icon
@@ -21,9 +37,12 @@
 
       <ViewContainer
         class="list-view"
-        :items="items"
+        :items="displayItems"
         :view-mode="viewMode"
         :loading="loading"
+        :show-empty="!loadingSceneDetail"
+        :breakpoints="denseResourceBreakpoints"
+        :card-gutter="denseResourceCardGutter"
         @row-click="openDetail"
       >
         <template #grid-card="{ item }">
@@ -44,7 +63,9 @@
           <div class="col-checkbox"></div>
           <div class="col-name">{{ t("meta.list.columns.name") }}</div>
           <div class="col-author">{{ t("meta.list.columns.author") }}</div>
-          <div class="col-resources">{{ t("meta.list.columns.resources") }}</div>
+          <div class="col-resources">
+            {{ t("meta.list.columns.resources") }}
+          </div>
           <div class="col-actions"></div>
         </template>
 
@@ -116,9 +137,10 @@
       </ViewContainer>
 
       <PagePagination
-        :current-page="pagination.current"
-        :total-pages="totalPages"
-        @page-change="handlePageChange"
+        :current-page="displayCurrentPage"
+        :total-pages="displayTotalPages"
+        :sticky="true"
+        @page-change="handlePageChangeWithScope"
       >
       </PagePagination>
 
@@ -183,9 +205,13 @@
                   >
                     <span class="events-index">{{ index + 1 }}</span>
                     <div class="events-main">
-                      <span class="events-title-text">{{ eventItem.title }}</span>
+                      <span class="events-title-text">{{
+                        eventItem.title
+                      }}</span>
                       <span
-                        v-if="eventItem.name && eventItem.name !== eventItem.title"
+                        v-if="
+                          eventItem.name && eventItem.name !== eventItem.title
+                        "
                         class="events-name-sub"
                       >
                         {{ eventItem.name }}
@@ -214,9 +240,13 @@
                   >
                     <span class="events-index">{{ index + 1 }}</span>
                     <div class="events-main">
-                      <span class="events-title-text">{{ eventItem.title }}</span>
+                      <span class="events-title-text">{{
+                        eventItem.title
+                      }}</span>
                       <span
-                        v-if="eventItem.name && eventItem.name !== eventItem.title"
+                        v-if="
+                          eventItem.name && eventItem.name !== eventItem.title
+                        "
                         class="events-name-sub"
                       >
                         {{ eventItem.name }}
@@ -286,7 +316,7 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
-import { ref, computed } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 // import { ElMessage, ElMessageBox } from "element-plus";
@@ -299,6 +329,7 @@ import {
   EmptyState,
   StandardCard,
   DetailPanel,
+  ResourceScopeFilter,
 } from "@/components/StandardPage";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import {
@@ -309,6 +340,7 @@ import {
   getMeta,
   putMetaCode,
 } from "@/api/v1/meta";
+import { getVerses, getVerse, type VerseData } from "@/api/v1/verse";
 import type { metaInfo } from "@/api/v1/meta";
 import { usePageData } from "@/composables/usePageData";
 import { useFileStore } from "@/store/modules/config";
@@ -318,9 +350,30 @@ import type { UploadFileType } from "@/api/user/model";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import { FolderOpened, Upload } from "@element-plus/icons-vue";
 import type { CardInfo } from "@/utils/types";
+import {
+  denseResourceBreakpoints,
+  denseResourceCardGutter,
+} from "@/utils/resourceGrid";
+import { sortByMultilingualField } from "@/utils/multilingualSort";
 
 const { t } = useI18n();
 const router = useRouter();
+
+type MetaListItem = {
+  id: number;
+  title: string;
+  name?: string;
+  created_at?: string;
+  updated_at?: string;
+  author?: {
+    nickname?: string;
+    username?: string;
+  };
+  image?: {
+    url?: string;
+  } | null;
+  resources?: unknown[];
+};
 
 const logMetaStructure = (scope: "list" | "detail", payload: unknown) => {
   if (!payload || typeof payload !== "object") {
@@ -382,17 +435,202 @@ const {
   handleSortChange,
   handlePageChange,
   handleViewChange,
-} = usePageData({
+} = usePageData<MetaListItem>({
   fetchFn: async (params) => {
     const response = await getMetas(
       params.sort,
       params.search,
       params.page,
-      "image,author,resources"
+      "image,author,resources",
+      "",
+      Number(params.pageSize) || 24
     );
     logMetaStructure("list", response.data);
     return response;
   },
+  pageSize: 24,
+});
+
+type SceneOption = {
+  id: number;
+  name: string;
+};
+
+const selectedSceneId = ref<number | null>(null);
+const scenes = ref<SceneOption[]>([]);
+const loadingScenes = ref(false);
+const loadingSceneDetail = ref(false);
+const scopedMetas = ref<MetaListItem[]>([]);
+const scopedSearch = ref("");
+const scopedSort = ref("-created_at");
+const scopedPage = ref(1);
+
+const isSceneFilterActive = computed(() => selectedSceneId.value !== null);
+
+const normalizeText = (value: unknown) =>
+  String(value || "")
+    .trim()
+    .toLowerCase();
+
+const sortScopedMetas = (list: MetaListItem[], sortValue: string) => {
+  const descending = sortValue.startsWith("-");
+  const field = descending ? sortValue.slice(1) : sortValue;
+
+  if (field === "name" || field === "title") {
+    return sortByMultilingualField(list, "title", descending);
+  }
+
+  return [...list].sort((a, b) => {
+    const key = field as keyof MetaListItem;
+    const aVal = new Date(String(a[key] || 0)).getTime();
+    const bVal = new Date(String(b[key] || 0)).getTime();
+    return descending ? bVal - aVal : aVal - bVal;
+  });
+};
+
+const searchedScopedMetas = computed(() => {
+  const keyword = normalizeText(scopedSearch.value);
+  if (!keyword) return scopedMetas.value;
+  const result: MetaListItem[] = [];
+  for (const item of scopedMetas.value) {
+    const label = String(item.title || item.name || "");
+    if (normalizeText(label).includes(keyword)) {
+      result.push(item);
+    }
+  }
+  return result;
+});
+
+const sortedScopedMetas = computed(() =>
+  sortScopedMetas(searchedScopedMetas.value, scopedSort.value)
+);
+
+const scopedTotalPages = computed(() =>
+  Math.max(1, Math.ceil(sortedScopedMetas.value.length / 24))
+);
+
+const pagedScopedMetas = computed(() => {
+  const start = (scopedPage.value - 1) * 24;
+  return sortedScopedMetas.value.slice(start, start + 24);
+});
+
+const displayItems = computed<MetaListItem[] | null>(() =>
+  isSceneFilterActive.value ? pagedScopedMetas.value : items.value
+);
+
+const displayCurrentPage = computed(() =>
+  isSceneFilterActive.value ? scopedPage.value : pagination.current
+);
+
+const displayTotalPages = computed(() =>
+  isSceneFilterActive.value ? scopedTotalPages.value : totalPages.value
+);
+
+watch(scopedTotalPages, (count) => {
+  if (scopedPage.value > count) {
+    scopedPage.value = count;
+  }
+});
+
+const resetScopedState = () => {
+  scopedSearch.value = "";
+  scopedSort.value = "-created_at";
+  scopedPage.value = 1;
+};
+
+const dedupeMetas = (metas: MetaListItem[]) => {
+  const map = new Map<number, MetaListItem>();
+  metas.forEach((meta) => {
+    const id = meta.id;
+    if (typeof id === "number") {
+      map.set(id, meta);
+    }
+  });
+  return Array.from(map.values());
+};
+
+const toSceneName = (scene: VerseData) =>
+  String(scene.name || `Scene-${scene.id}`).trim();
+
+const loadScenes = async () => {
+  loadingScenes.value = true;
+  try {
+    const allScenes: VerseData[] = [];
+    let page = 1;
+    let pageCount = 1;
+
+    do {
+      const response = await getVerses({
+        sort: "-updated_at",
+        page,
+        perPage: 100,
+      });
+      allScenes.push(...response.data);
+      pageCount = parseInt(
+        String(response.headers["x-pagination-page-count"] || "1")
+      );
+      page += 1;
+    } while (page <= pageCount);
+
+    scenes.value = allScenes.map((scene) => ({
+      id: scene.id,
+      name: toSceneName(scene),
+    }));
+  } finally {
+    loadingScenes.value = false;
+  }
+};
+
+const handleSceneChange = async (sceneId: number | null) => {
+  selectedSceneId.value = sceneId;
+  resetScopedState();
+
+  if (sceneId == null) {
+    scopedMetas.value = [];
+    handleSearch("");
+    return;
+  }
+
+  loadingSceneDetail.value = true;
+  try {
+    const response = await getVerse(sceneId, "metas");
+    const verseMetas = Array.isArray(response.data?.metas)
+      ? ((response.data.metas as unknown) as MetaListItem[])
+      : [];
+    scopedMetas.value = dedupeMetas(verseMetas);
+  } finally {
+    loadingSceneDetail.value = false;
+  }
+};
+
+const handleSearchWithScope = (value: string) => {
+  if (isSceneFilterActive.value) {
+    scopedSearch.value = value;
+    scopedPage.value = 1;
+    return;
+  }
+  handleSearch(value);
+};
+
+const handleSortChangeWithScope = (value: string) => {
+  if (isSceneFilterActive.value) {
+    scopedSort.value = value;
+    scopedPage.value = 1;
+    return;
+  }
+  handleSortChange(value);
+};
+
+const handlePageChangeWithScope = (page: number) => {
+  if (isSceneFilterActive.value) {
+    scopedPage.value = page;
+    return;
+  }
+  handlePageChange(page);
+};
+
+onMounted(async () => {
+  await loadScenes();
 });
 
 const detailVisible = ref(false);
@@ -558,7 +796,7 @@ const eventOutputs = computed(() =>
   normalizeEventList(currentMeta.value?.events?.outputs)
 );
 
-const openDetail = async (item: metaInfo) => {
+const openDetail = async (item: { id: number }) => {
   detailVisible.value = true;
   detailLoading.value = true;
 
@@ -577,7 +815,7 @@ const handlePanelClose = () => {
   currentMeta.value = null;
 };
 
-const goToEditor = (item: metaInfo) => {
+const goToEditor = (item: { id: number; title?: string; name?: string }) => {
   const title = encodeURIComponent(
     t("meta.list.editorTitle", {
       name: item.title || t("meta.list.unnamed"),
@@ -695,7 +933,7 @@ const addMeta = async () => {
   }
 };
 
-const copyWindow = async (item: metaInfo) => {
+const copyWindow = async (item: { id: number; title?: string }) => {
   try {
     const { value } = (await MessageBox.prompt(
       t("meta.prompt.message1"),
@@ -713,7 +951,7 @@ const copyWindow = async (item: metaInfo) => {
   }
 };
 
-const namedWindow = async (item: metaInfo) => {
+const namedWindow = async (item: { id: number; title?: string }) => {
   try {
     const { value } = (await MessageBox.prompt(
       t("meta.prompt.message1"),
@@ -732,7 +970,10 @@ const namedWindow = async (item: metaInfo) => {
   }
 };
 
-const deletedWindow = async (item: metaInfo, resetLoading: () => void) => {
+const deletedWindow = async (
+  item: { id: number },
+  resetLoading: () => void
+) => {
   try {
     await MessageBox.confirm(
       t("meta.confirm.message1"),
@@ -751,12 +992,11 @@ const deletedWindow = async (item: metaInfo, resetLoading: () => void) => {
     resetLoading();
   }
 };
-
 </script>
 
 <style scoped lang="scss">
 .meta-list {
-  padding: 20px;
+  padding: 12px;
 }
 
 .col-name {

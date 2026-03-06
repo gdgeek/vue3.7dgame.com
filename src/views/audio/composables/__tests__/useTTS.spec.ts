@@ -226,7 +226,9 @@ describe("useTTS", () => {
 
   it("uploadAudio() handles cancel dialog gracefully", async () => {
     const { ElMessage, ElMessageBox } = await import("element-plus");
-    (ElMessageBox.prompt as ReturnType<typeof vi.fn>).mockRejectedValueOnce("cancel");
+    (ElMessageBox.prompt as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      "cancel"
+    );
 
     const props = createProps();
     const tts = useTTS(props);

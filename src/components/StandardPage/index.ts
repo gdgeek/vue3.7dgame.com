@@ -5,4 +5,5 @@ export { default as PageFilter } from "./PageFilter.vue";
 export { default as EmptyState } from "./EmptyState.vue";
 export { default as StandardCard } from "./StandardCard.vue";
 export { default as DetailPanel } from "./DetailPanel.vue";
+export { default as ResourceScopeFilter } from "./ResourceScopeFilter.vue";
 export * from "./types";

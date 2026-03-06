@@ -1,44 +1,52 @@
 <template>
   <TransitionWrapper>
     <div class="verse-public">
-      <!-- Custom Hero Header -->
       <div class="hero-header">
-        <div class="header-main">
-          <div class="title-section">
-            <h1 class="hero-title">
-              {{ t("verse.publicPage.examplesTitle") }}
-            </h1>
-            <p class="hero-subtitle">
-              {{ t("verse.publicPage.examplesSubtitle") }}
-            </p>
+        <div class="toolbar-main">
+          <div class="hero-search-box">
+            <font-awesome-icon
+              :icon="['fas', 'search']"
+              class="search-icon"
+            ></font-awesome-icon>
+            <input
+              v-model="searchValue"
+              type="text"
+              class="hero-search-input"
+              :placeholder="t('verse.publicPage.searchExamples')"
+              @keyup.enter="handleHeroSearch"
+            />
           </div>
-          <div class="search-section">
-            <div class="hero-search-box">
-              <font-awesome-icon
-                :icon="['fas', 'search']"
-                class="search-icon"
-              ></font-awesome-icon>
-              <input
-                v-model="searchValue"
-                type="text"
-                class="hero-search-input"
-                :placeholder="t('verse.publicPage.searchExamples')"
-                @keyup.enter="handleHeroSearch"
-              />
-            </div>
-          </div>
-        </div>
 
-        <div class="header-tabs">
-          <div
-            v-for="tab in categories"
-            :key="tab.id"
-            class="tab-item"
-            :class="{ active: currentTab === tab.id }"
-            @click="selectTab(tab.id)"
-          >
-            {{ tab.name }}
+          <div class="category-filter">
+            <el-dropdown trigger="click">
+              <button class="filter-btn" type="button">
+                <font-awesome-icon
+                  :icon="['fas', 'filter']"
+                  class="filter-icon"
+                ></font-awesome-icon>
+                {{ t("ui.filter") }} · {{ currentCategoryName }}
+                <font-awesome-icon
+                  :icon="['fas', 'chevron-down']"
+                  class="filter-arrow"
+                ></font-awesome-icon>
+              </button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item
+                    v-for="tab in categories"
+                    :key="tab.id"
+                    @click="selectTab(tab.id)"
+                  >
+                    {{ tab.name }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
+
+          <p class="hero-subtitle">
+            {{ t("verse.publicPage.examplesSubtitle") }}
+          </p>
         </div>
       </div>
 
@@ -47,7 +55,8 @@
         :items="items"
         :view-mode="viewMode"
         :loading="loading"
-        :breakpoints="cardBreakpoints"
+        :breakpoints="denseResourceBreakpoints"
+        :card-gutter="denseResourceCardGutter"
         @row-click="openDetail"
       >
         <template #grid-card="{ item }">
@@ -118,6 +127,7 @@
       <PagePagination
         :current-page="pagination.current"
         :total-pages="totalPages"
+        :sticky="true"
         @page-change="handlePageChange"
       >
       </PagePagination>
@@ -213,6 +223,10 @@ import { getTags } from "@/api/v1/tags";
 import { usePageData } from "@/composables/usePageData";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
 import { ElMessage } from "element-plus";
+import {
+  denseResourceBreakpoints,
+  denseResourceCardGutter,
+} from "@/utils/resourceGrid";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -222,6 +236,12 @@ const categories = ref<{ id: number; name: string }[]>([
   { id: 0, name: t("verse.publicPage.allCategory") },
 ]);
 const currentTab = ref(0);
+const currentCategoryName = computed(() => {
+  const activeCategory = categories.value.find(
+    (item) => item.id === currentTab.value
+  );
+  return activeCategory?.name || t("verse.publicPage.allCategory");
+});
 
 // 从 API 加载标签分类
 onMounted(async () => {
@@ -263,18 +283,12 @@ const {
       sort: params.sort,
       search: params.search,
       page: params.page,
+      perPage: Number(params.pageSize) || 24,
       tags: params.tags,
       expand: "image,author,tags",
     }),
+  pageSize: 24,
 });
-
-const cardBreakpoints = {
-  4000: { rowPerView: 4 },
-  1200: { rowPerView: 4 },
-  800: { rowPerView: 3 },
-  500: { rowPerView: 2 },
-  300: { rowPerView: 1 },
-};
 
 const handleHeroSearch = () => {
   handleSearch(searchValue.value);
@@ -356,54 +370,48 @@ const goToScene = (item: VerseData) => {
 <style scoped lang="scss">
 .hero-header {
   background: #f8fafc;
-  padding: 48px 48px 0;
-  margin-bottom: 32px;
+  padding: 12px 20px;
+  margin-bottom: 10px;
   border-bottom: 1px solid #e2e8f0;
 
-  .header-main {
+  .toolbar-main {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 40px;
-  }
-
-  .hero-title {
-    font-size: 36px;
-    font-weight: 700;
-    color: #1e293b;
-    margin: 0 0 16px;
-    letter-spacing: -0.02em;
+    align-items: center;
+    gap: 12px;
   }
 
   .hero-subtitle {
-    font-size: 16px;
-    line-height: 1.6;
+    font-size: 14px;
+    line-height: 1.5;
     color: #64748b;
     margin: 0;
-    max-width: 600px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .hero-search-box {
     position: relative;
-    width: 320px;
+    width: 280px;
+    flex-shrink: 0;
 
     .search-icon {
       position: absolute;
-      left: 18px;
+      left: 16px;
       top: 50%;
       transform: translateY(-50%);
       color: #94a3b8;
-      font-size: 20px;
+      font-size: 18px;
     }
 
     .hero-search-input {
       width: 100%;
-      height: 52px;
-      padding: 0 12px 0 52px;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 26px;
+      height: 42px;
+      padding: 0 12px 0 44px;
+      border: 1px solid #e2e8f0;
+      border-radius: 21px;
       background: #fff;
-      font-size: 15px;
+      font-size: 14px;
       color: #1e293b;
       outline: none;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -414,49 +422,49 @@ const goToScene = (item: VerseData) => {
 
       &:focus {
         border-color: #03a9f4;
-        box-shadow: 0 0 0 4px rgba(3, 169, 244, 0.1);
+        box-shadow: 0 0 0 3px rgba(3, 169, 244, 0.1);
       }
     }
   }
 
-  .header-tabs {
-    display: flex;
-    gap: 40px;
+  .category-filter {
+    flex-shrink: 0;
 
-    .tab-item {
-      padding: 0 4px 16px;
-      font-size: 16px;
+    .filter-btn {
+      height: 42px;
+      padding: 0 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 21px;
+      background: #fff;
+      color: #334155;
+      font-size: 14px;
       font-weight: 500;
-      color: #64748b;
       cursor: pointer;
-      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       transition: all 0.2s ease;
 
       &:hover {
-        color: #1e293b;
+        border-color: #cbd5e1;
+        background: #f8fafc;
       }
+    }
 
-      &.active {
-        color: #03a9f4;
-        font-weight: 600;
+    .filter-icon {
+      color: #64748b;
+      font-size: 14px;
+    }
 
-        &::after {
-          content: "";
-          position: absolute;
-          bottom: -1px;
-          left: 0;
-          right: 0;
-          height: 3px;
-          background: #03a9f4;
-          border-radius: 3px 3px 0 0;
-        }
-      }
+    .filter-arrow {
+      color: #94a3b8;
+      font-size: 12px;
     }
   }
 }
 
 .list-view {
-  padding: 0 48px 48px;
+  padding: 0 20px 12px;
 
   :deep(.col-checkbox) {
     width: 40px;

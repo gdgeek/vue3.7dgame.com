@@ -239,7 +239,9 @@ const getResourceContent = (resource: ResourceLike): string | undefined =>
  * 查找资源：优先从当前模式的数据源中查找。
  * Meta 模式使用 props.meta.resources；Verse 模式使用 props.verse.resources。
  */
-const findResource = (resourceId: string | number): ResourceLike | undefined => {
+const findResource = (
+  resourceId: string | number
+): ResourceLike | undefined => {
   if (mode.value === "meta" && props.meta) {
     return props.meta.resources.find(
       (r) => r.id.toString() === resourceId.toString()
@@ -486,7 +488,10 @@ const loadModel = async (
                 logger.warn("视频播放失败:", error);
               });
               document.removeEventListener("click", handleFirstInteraction);
-              document.removeEventListener("touchstart", handleFirstInteraction);
+              document.removeEventListener(
+                "touchstart",
+                handleFirstInteraction
+              );
             };
             document.addEventListener("click", handleFirstInteraction);
             document.addEventListener("touchstart", handleFirstInteraction);
@@ -823,8 +828,7 @@ const loadModel = async (
 
                   const rect = renderer.domElement.getBoundingClientRect();
                   mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-                  mouse.y =
-                    -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
                   raycaster.setFromCamera(mouse, camera);
                   const intersects = raycaster.intersectObject(voxMesh, true);
@@ -938,10 +942,8 @@ const loadModel = async (
                   event.preventDefault();
                   if (!renderer || !camera) return;
                   const rect = renderer.domElement.getBoundingClientRect();
-                  mouse.x =
-                    ((event.clientX - rect.left) / rect.width) * 2 - 1;
-                  mouse.y =
-                    -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
                   raycaster.setFromCamera(mouse, camera);
                   const intersects = raycaster.intersectObject(voxMesh, true);
@@ -1345,10 +1347,8 @@ const loadModel = async (
                 event.preventDefault();
                 if (!renderer || !camera) return;
                 const rect = renderer.domElement.getBoundingClientRect();
-                mouse.x =
-                  ((event.clientX - rect.left) / rect.width) * 2 - 1;
-                mouse.y =
-                  -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObject(model, true);
@@ -1360,9 +1360,7 @@ const loadModel = async (
                   dragState.dragStartPosition.copy(model.position);
                   dragState.mouseStartPosition.copy(mouse);
                   const intersectPoint = intersects[0].point;
-                  dragState.dragOffset
-                    .copy(model.position)
-                    .sub(intersectPoint);
+                  dragState.dragOffset.copy(model.position).sub(intersectPoint);
                   dragState.lastIntersection.copy(intersectPoint);
                   controls.value!.enabled = false;
                 }
@@ -1624,7 +1622,9 @@ const parseVerseData = () => {
   if (!props.verse?.data) return null;
   if (typeof props.verse.data === "string") {
     try {
-      return JSON.parse(props.verse.data) as { children?: { modules?: Entity[] } };
+      return JSON.parse(props.verse.data) as {
+        children?: { modules?: Entity[] };
+      };
     } catch (error) {
       logger.error("解析verse数据失败:", error);
       return null;

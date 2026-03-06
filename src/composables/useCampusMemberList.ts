@@ -19,7 +19,10 @@ export interface CampusMemberListOptions<T extends MemberBase> {
   deleteFn: (id: number) => Promise<unknown>;
   addPendingKey: string;
   removeConfirmKey: string;
-  detailPropertiesFn: (item: T, t: (key: string) => string) => Array<{ label: string; value: string }>;
+  detailPropertiesFn: (
+    item: T,
+    t: (key: string) => string
+  ) => Array<{ label: string; value: string }>;
 }
 
 export function useCampusMemberList<T extends MemberBase>(

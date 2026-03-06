@@ -3,11 +3,12 @@
     <div class="polygen-index">
       <PageActionBar
         :title="t('polygen.listPageTitle')"
+        :show-title="false"
         :search-placeholder="t('polygen.searchPlaceholder')"
         :selection-count="selectedCount"
         :is-page-selected="isPageSelected"
-        @search="handleSearch"
-        @sort-change="handleSortChange"
+        @search="handleSearchWithScope"
+        @sort-change="handleSortChangeWithScope"
         @view-change="handleViewChange"
         @batch-download="handleBatchDownload"
         @batch-delete="handleBatchDelete"
@@ -15,6 +16,22 @@
         @select-all-page="handleSelectAllPage"
         @cancel-select-all-page="handleCancelSelectAllPage"
       >
+        <template #filters>
+          <ResourceScopeFilter
+            :mode="scopeFilter.scopeMode.value"
+            :scene-id="scopeFilter.selectedSceneId.value"
+            :entity-id="scopeFilter.selectedEntityId.value"
+            :show-scene-select="scopeFilter.showSceneSelect.value"
+            :show-entity-select="scopeFilter.showEntitySelect.value"
+            :loading-scenes="scopeFilter.loadingScenes.value"
+            :loading-scene-detail="scopeFilter.loadingSceneDetail.value"
+            :loading-entity-detail="scopeFilter.loadingEntityDetail.value"
+            :scenes="scopeFilter.scenes.value"
+            :entities="scopeFilter.entities.value"
+            @scene-change="handleSceneChangeWithReset"
+            @entity-change="scopeFilter.handleEntityChange"
+          ></ResourceScopeFilter>
+        </template>
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
             <font-awesome-icon
@@ -27,9 +44,12 @@
       </PageActionBar>
 
       <ViewContainer
-        :items="items"
+        :items="displayItems"
         :view-mode="viewMode"
         :loading="loading"
+        :show-empty="!scopeFilter.loadingSceneDetail.value"
+        :breakpoints="denseResourceBreakpoints"
+        :card-gutter="denseResourceCardGutter"
         @row-click="(item) => openViewDialog(item.id)"
       >
         <template #grid-card="{ item }">
@@ -104,9 +124,10 @@
       </ViewContainer>
 
       <PagePagination
-        :current-page="pagination.current"
-        :total-pages="totalPages"
-        @page-change="handlePageChange"
+        :current-page="displayCurrentPage"
+        :total-pages="displayTotalPages"
+        :sticky="true"
+        @page-change="handlePageChangeWithScope"
       >
       </PagePagination>
 
@@ -192,6 +213,7 @@ import {
   EmptyState,
   StandardCard,
   DetailPanel,
+  ResourceScopeFilter,
 } from "@/components/StandardPage";
 import StandardUploadDialog from "@/components/StandardPage/StandardUploadDialog.vue";
 import PolygenView from "@/components/PolygenView.vue";
@@ -212,6 +234,11 @@ import {
   formatFileSize as formatSize,
 } from "@/utils/utilityFunctions";
 import { printVector3 } from "@/assets/js/helper";
+import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
+import {
+  denseResourceBreakpoints,
+  denseResourceCardGutter,
+} from "@/utils/resourceGrid";
 
 const { t } = useI18n();
 
@@ -229,9 +256,58 @@ const {
   handleViewChange,
 } = usePageData<ResourceInfo>({
   fetchFn: async (params) => {
-    return await getPolygens(params.sort, params.search, params.page);
+    return await getPolygens(
+      params.sort,
+      params.search,
+      params.page,
+      Number(params.pageSize) || 24
+    );
   },
+  pageSize: 24,
 });
+
+const scopeFilter = useResourceScopeFilter("polygen", 24);
+
+const displayItems = computed<ResourceInfo[]>(() =>
+  scopeFilter.isFilterActive.value
+    ? scopeFilter.pagedResources.value
+    : items.value || []
+);
+
+const displayCurrentPage = computed(() =>
+  scopeFilter.isFilterActive.value
+    ? scopeFilter.localPage.value
+    : pagination.current
+);
+
+const displayTotalPages = computed(() =>
+  scopeFilter.isFilterActive.value
+    ? scopeFilter.totalPages.value
+    : totalPages.value
+);
+
+const handleSearchWithScope = (value: string) => {
+  if (scopeFilter.handleScopedSearch(value)) return;
+  handleSearch(value);
+};
+
+const handleSortChangeWithScope = (value: string) => {
+  if (scopeFilter.handleScopedSort(value)) return;
+  handleSortChange(value);
+};
+
+const handlePageChangeWithScope = (page: number) => {
+  if (scopeFilter.handleScopedPageChange(page)) return;
+  handlePageChange(page);
+};
+
+const handleSceneChangeWithReset = async (sceneId: number | null) => {
+  await scopeFilter.handleSceneChange(sceneId);
+  clearSelection();
+  if (sceneId == null) {
+    handleSearch("");
+  }
+};
 
 const {
   selectedCount,
@@ -245,22 +321,22 @@ const {
 } = useSelection();
 
 const isPageSelected = computed(() => {
-  if (!items.value || items.value.length === 0) return false;
-  return items.value.every((item) => isSelected(item.id));
+  if (!displayItems.value || displayItems.value.length === 0) return false;
+  return displayItems.value.every((item) => isSelected(item.id));
 });
 
 const handleSelectAllPage = () => {
-  if (items.value && items.value.length > 0) {
-    selectItems(items.value);
+  if (displayItems.value && displayItems.value.length > 0) {
+    selectItems(displayItems.value);
     Message.success(
-      t("polygen.selectPageSuccess", { count: items.value.length })
+      t("polygen.selectPageSuccess", { count: displayItems.value.length })
     );
   }
 };
 
 const handleCancelSelectAllPage = () => {
-  if (items.value && items.value.length > 0) {
-    deselectItems(items.value);
+  if (displayItems.value && displayItems.value.length > 0) {
+    deselectItems(displayItems.value);
     Message.success(t("polygen.cancelSelectPageSuccess"));
   }
 };
@@ -489,7 +565,7 @@ const deletedWindow = async (
 };
 
 const handleBatchDownload = () => {
-  const selected = getSelectedItems(items.value || []);
+  const selected = getSelectedItems(displayItems.value || []);
   Message.info(
     t("ui.batchDownloadDev", {
       count: selected.length,
@@ -499,7 +575,7 @@ const handleBatchDownload = () => {
 };
 
 const handleBatchDelete = async () => {
-  const selected = getSelectedItems(items.value || []);
+  const selected = getSelectedItems(displayItems.value || []);
   try {
     await MessageBox.confirm(
       t("ui.batchDeleteConfirm", {
@@ -545,7 +621,7 @@ const formatItemDate = (dateStr?: string) => {
 
 <style scoped lang="scss">
 .polygen-index {
-  padding: 20px;
+  padding: 12px;
 }
 
 // List view styles - using CSS variables for theme compatibility

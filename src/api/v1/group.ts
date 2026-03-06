@@ -224,5 +224,3 @@ export const deleteGroupVerse = (groupId: number, verseId: number) => {
     method: "delete",
   });
 };
-
-

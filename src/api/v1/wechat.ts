@@ -30,4 +30,3 @@ export const register = (data: WechatRegisterRequest) => {
     data,
   });
 };
-

@@ -38,7 +38,8 @@ export const getResources = (
   sort: string = "-created_at",
   search: string = "",
   page: number = 0,
-  expand: string = "image,author"
+  expand: string = "image,author",
+  perPage?: number
 ): Promise<AxiosResponse<ResourceInfo[]>> => {
   const query: Record<string, string | number> = {
     type,
@@ -52,6 +53,9 @@ export const getResources = (
   if (page > 0) {
     query["page"] = page;
   }
+  if (perPage && perPage > 0) {
+    query["per-page"] = perPage;
+  }
 
   const queryString = qs.stringify(query, true);
   return request<ResourceInfo[]>({
@@ -63,38 +67,44 @@ export const getResources = (
 export const getVoxels = (
   sort: string = "-created_at",
   search: string = "",
-  page: number = 0
-) => getResources("voxel", sort, search, page);
+  page: number = 0,
+  perPage?: number
+) => getResources("voxel", sort, search, page, "image,author", perPage);
 
 export const getPolygens = (
   sort: string = "-created_at",
   search: string = "",
-  page: number = 0
-) => getResources("polygen", sort, search, page);
+  page: number = 0,
+  perPage?: number
+) => getResources("polygen", sort, search, page, "image,author", perPage);
 
 export const getPictures = (
   sort: string = "-created_at",
   search: string = "",
-  page: number = 0
-) => getResources("picture", sort, search, page);
+  page: number = 0,
+  perPage?: number
+) => getResources("picture", sort, search, page, "image,author", perPage);
 
 export const getVideos = (
   sort: string = "-created_at",
   search: string = "",
-  page: number = 0
-) => getResources("video", sort, search, page);
+  page: number = 0,
+  perPage?: number
+) => getResources("video", sort, search, page, "image,author", perPage);
 
 export const getAudios = (
   sort: string = "-created_at",
   search: string = "",
-  page: number = 0
-) => getResources("audio", sort, search, page);
+  page: number = 0,
+  perPage?: number
+) => getResources("audio", sort, search, page, "image,author", perPage);
 
 export const getParticles = (
   sort: string = "-created_at",
   search: string = "",
-  page: number = 0
-) => getResources("particle", sort, search, page);
+  page: number = 0,
+  perPage?: number
+) => getResources("particle", sort, search, page, "image,author", perPage);
 
 // 修改资源
 const putResources = (id: number | string, resource: ResourcePut) => {

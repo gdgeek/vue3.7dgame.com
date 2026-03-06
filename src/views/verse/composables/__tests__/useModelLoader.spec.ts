@@ -138,7 +138,10 @@ describe("useModelLoader", () => {
 
     expect(result).toBe(true);
     expect(ctx.sources.has("audio-uuid-1")).toBe(true);
-    const entry = ctx.sources.get("audio-uuid-1") as { type: string; data: { url: string } };
+    const entry = ctx.sources.get("audio-uuid-1") as {
+      type: string;
+      data: { url: string };
+    };
     expect(entry.type).toBe("audio");
     expect(entry.data.url).toContain("sound.mp3");
   });

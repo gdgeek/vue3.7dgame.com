@@ -3,15 +3,35 @@
     <div class="audio-index">
       <PageActionBar
         :title="t('route.resourceManagement.audioManagement.audioList')"
+        :show-title="false"
         :search-placeholder="t('ui.search')"
         :selection-count="selectedCount"
-        @search="handleSearch"
-        @sort-change="handleSortChange"
+        :is-page-selected="isPageSelected"
+        @search="handleSearchWithScope"
+        @sort-change="handleSortChangeWithScope"
         @view-change="handleViewChange"
         @batch-download="handleBatchDownload"
         @batch-delete="handleBatchDelete"
         @cancel-selection="handleCancelSelection"
+        @select-all-page="handleSelectAllPage"
+        @cancel-select-all-page="handleCancelSelectAllPage"
       >
+        <template #filters>
+          <ResourceScopeFilter
+            :mode="scopeFilter.scopeMode.value"
+            :scene-id="scopeFilter.selectedSceneId.value"
+            :entity-id="scopeFilter.selectedEntityId.value"
+            :show-scene-select="scopeFilter.showSceneSelect.value"
+            :show-entity-select="scopeFilter.showEntitySelect.value"
+            :loading-scenes="scopeFilter.loadingScenes.value"
+            :loading-scene-detail="scopeFilter.loadingSceneDetail.value"
+            :loading-entity-detail="scopeFilter.loadingEntityDetail.value"
+            :scenes="scopeFilter.scenes.value"
+            :entities="scopeFilter.entities.value"
+            @scene-change="handleSceneChangeWithReset"
+            @entity-change="scopeFilter.handleEntityChange"
+          ></ResourceScopeFilter>
+        </template>
         <template #actions>
           <el-button type="primary" @click="openUploadDialog">
             <font-awesome-icon
@@ -24,9 +44,12 @@
       </PageActionBar>
 
       <ViewContainer
-        :items="items"
+        :items="displayItems"
         :view-mode="viewMode"
         :loading="loading"
+        :show-empty="!scopeFilter.loadingSceneDetail.value"
+        :breakpoints="denseResourceBreakpoints"
+        :card-gutter="denseResourceCardGutter"
         @row-click="(item) => openViewDialog(item.id)"
       >
         <template #grid-card="{ item }">
@@ -94,9 +117,10 @@
       </ViewContainer>
 
       <PagePagination
-        :current-page="pagination.current"
-        :total-pages="totalPages"
-        @page-change="handlePageChange"
+        :current-page="displayCurrentPage"
+        :total-pages="displayTotalPages"
+        :sticky="true"
+        @page-change="handlePageChangeWithScope"
       >
       </PagePagination>
 
@@ -161,6 +185,7 @@ import {
   PagePagination,
   StandardCard,
   DetailPanel,
+  ResourceScopeFilter,
 } from "@/components/StandardPage";
 import StandardUploadDialog from "@/components/StandardPage/StandardUploadDialog.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
@@ -179,6 +204,11 @@ import {
   convertToLocalTime,
   formatFileSize as formatSize,
 } from "@/utils/utilityFunctions";
+import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
+import {
+  denseResourceBreakpoints,
+  denseResourceCardGutter,
+} from "@/utils/resourceGrid";
 
 const { t } = useI18n();
 
@@ -195,8 +225,57 @@ const {
   handleViewChange,
 } = usePageData<ResourceInfo>({
   fetchFn: async (params) =>
-    await getAudios(params.sort, params.search, params.page),
+    await getAudios(
+      params.sort,
+      params.search,
+      params.page,
+      Number(params.pageSize) || 24
+    ),
+  pageSize: 24,
 });
+
+const scopeFilter = useResourceScopeFilter("audio", 24);
+
+const displayItems = computed<ResourceInfo[]>(() =>
+  scopeFilter.isFilterActive.value
+    ? scopeFilter.pagedResources.value
+    : items.value || []
+);
+
+const displayCurrentPage = computed(() =>
+  scopeFilter.isFilterActive.value
+    ? scopeFilter.localPage.value
+    : pagination.current
+);
+
+const displayTotalPages = computed(() =>
+  scopeFilter.isFilterActive.value
+    ? scopeFilter.totalPages.value
+    : totalPages.value
+);
+
+const handleSearchWithScope = (value: string) => {
+  if (scopeFilter.handleScopedSearch(value)) return;
+  handleSearch(value);
+};
+
+const handleSortChangeWithScope = (value: string) => {
+  if (scopeFilter.handleScopedSort(value)) return;
+  handleSortChange(value);
+};
+
+const handlePageChangeWithScope = (page: number) => {
+  if (scopeFilter.handleScopedPageChange(page)) return;
+  handlePageChange(page);
+};
+
+const handleSceneChangeWithReset = async (sceneId: number | null) => {
+  await scopeFilter.handleSceneChange(sceneId);
+  clearSelection();
+  if (sceneId == null) {
+    handleSearch("");
+  }
+};
 
 const {
   selectedCount,
@@ -205,7 +284,24 @@ const {
   toggleSelection,
   clearSelection,
   getSelectedItems,
+  selectItems,
+  deselectItems,
 } = useSelection();
+
+const isPageSelected = computed(() => {
+  if (!displayItems.value || displayItems.value.length === 0) return false;
+  return displayItems.value.every((item) => isSelected(item.id));
+});
+
+const handleSelectAllPage = () => {
+  if (!displayItems.value || displayItems.value.length === 0) return;
+  selectItems(displayItems.value);
+};
+
+const handleCancelSelectAllPage = () => {
+  if (!displayItems.value || displayItems.value.length === 0) return;
+  deselectItems(displayItems.value);
+};
 
 const uploadDialogVisible = ref(false);
 const fileType = ref("audio/mp3, audio/wav");
@@ -383,7 +479,7 @@ const deletedWindow = async (
 };
 
 const handleBatchDownload = () => {
-  const selected = getSelectedItems(items.value || []);
+  const selected = getSelectedItems(displayItems.value || []);
   Message.info(
     t("ui.batchDownloadDev", {
       count: selected.length,
@@ -393,7 +489,7 @@ const handleBatchDownload = () => {
 };
 
 const handleBatchDelete = async () => {
-  const selected = getSelectedItems(items.value || []);
+  const selected = getSelectedItems(displayItems.value || []);
   try {
     await MessageBox.confirm(
       t("ui.batchDeleteConfirm", {
@@ -445,7 +541,7 @@ const formatItemDate = (dateStr?: string) => {
 
 <style scoped lang="scss">
 .audio-index {
-  padding: 20px;
+  padding: 12px;
 }
 
 // List view styles - using CSS variables for theme compatibility

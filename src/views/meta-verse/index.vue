@@ -3,6 +3,7 @@
     <div class="verse-index">
       <PageActionBar
         :title="t('verse.listPage.myScenes')"
+        :show-title="false"
         :search-placeholder="t('verse.listPage.searchScenes')"
         :show-tags="true"
         @search="handleSearch"
@@ -38,6 +39,8 @@
         :items="items"
         :view-mode="viewMode"
         :loading="loading"
+        :breakpoints="denseResourceBreakpoints"
+        :card-gutter="denseResourceCardGutter"
         @row-click="openDetail"
       >
         <template #grid-card="{ item }">
@@ -126,6 +129,7 @@
       <PagePagination
         :current-page="pagination.current"
         :total-pages="totalPages"
+        :sticky="true"
         @page-change="handlePageChange"
       >
       </PagePagination>
@@ -360,6 +364,10 @@ import type { CardInfo } from "@/utils/types";
 import { usePageData } from "@/composables/usePageData";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
 import { useAbility } from "@casl/vue";
+import {
+  denseResourceBreakpoints,
+  denseResourceCardGutter,
+} from "@/utils/resourceGrid";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -383,9 +391,11 @@ const {
       sort: params.sort,
       search: params.search,
       page: params.page,
+      perPage: Number(params.pageSize) || 24,
       tags: params.tags,
       expand: "image,author",
     }),
+  pageSize: 24,
 });
 
 const detailVisible = ref(false);
@@ -830,7 +840,7 @@ const formatItemDate = (dateStr?: string) => {
 
 <style scoped lang="scss">
 .verse-index {
-  padding: 20px;
+  padding: 12px;
 }
 
 .col-name {
