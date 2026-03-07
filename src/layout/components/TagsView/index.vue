@@ -104,7 +104,7 @@ const left = ref(0);
 const top = ref(0);
 
 watch(
-  route,
+  () => route.fullPath,
   () => {
     addTags();
     moveToCurrentTag();
