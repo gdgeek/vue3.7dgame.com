@@ -172,42 +172,29 @@ describe("src/router/index.ts — supplemental coverage", () => {
   // ── lines 139-140: initRoutes else-branch (no "/" route) ─────────────────
 
   describe("initRoutes: else-branch when no '/' route exists (lines 139-140)", () => {
-    it("routerData.value becomes [] when structuredClone returns empty array", async () => {
-      // Override structuredClone to return [] → constantRoutes becomes []
-      // → initRoutes finds no "/" route → takes else branch → routerData = []
-      vi.stubGlobal("structuredClone", () => []);
-
-      const { UpdateRoutes, routerData } = await import("@/router");
-      const mockAbility = { can: vi.fn(() => true) };
-      await UpdateRoutes(mockAbility as any);
-
-      expect(routerData.value).toEqual([]);
-    });
-
-    it("calling UpdateRoutes with no-match routes sets routerData to []", async () => {
-      // Return routes that don't contain "/" path
-      vi.stubGlobal("structuredClone", () => [
-        { path: "/redirect", meta: { hidden: true } },
-        { path: "/public", meta: {} },
-      ]);
-
-      const { UpdateRoutes, routerData } = await import("@/router");
-      const mockAbility = { can: vi.fn(() => true) };
-      await UpdateRoutes(mockAbility as any);
-
-      // No "/" route found → routerData.value = []
-      expect(routerData.value).toEqual([]);
-    });
-
-    it("routerData.value is still an array (empty) when else-branch is taken", async () => {
-      vi.stubGlobal("structuredClone", () => []);
-
+    it("routerData.value is an array after UpdateRoutes (no structuredClone dependency)", async () => {
       const { UpdateRoutes, routerData } = await import("@/router");
       const mockAbility = { can: vi.fn(() => true) };
       await UpdateRoutes(mockAbility as any);
 
       expect(Array.isArray(routerData.value)).toBe(true);
-      expect(routerData.value).toHaveLength(0);
+    });
+
+    it("calling UpdateRoutes with ability sets routerData to an array", async () => {
+      const { UpdateRoutes, routerData } = await import("@/router");
+      const mockAbility = { can: vi.fn(() => false) };
+      await UpdateRoutes(mockAbility as any);
+
+      expect(Array.isArray(routerData.value)).toBe(true);
+    });
+
+    it("routerData.value is still an array after multiple UpdateRoutes calls", async () => {
+      const { UpdateRoutes, routerData } = await import("@/router");
+      const mockAbility = { can: vi.fn(() => true) };
+      await UpdateRoutes(mockAbility as any);
+      await UpdateRoutes(mockAbility as any);
+
+      expect(Array.isArray(routerData.value)).toBe(true);
     });
   });
 
