@@ -1,8 +1,3 @@
-src/api/v1/resources/model.ts
-src/api/v1/scene-package.ts
-src/api/v1/site.ts
-src/api/v1/tags.ts
-src/api/v1/tencent-cloud.ts
 src/api/v1/tools.ts
 src/api/v1/types/auth.ts
 src/api/v1/types/common.ts
