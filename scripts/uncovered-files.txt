@@ -1,13 +1,3 @@
-src/api/v1/meta-resource.ts
-src/api/v1/meta-verse.ts
-src/api/v1/meta.ts
-src/api/v1/multilanguage-verse.ts
-src/api/v1/multilanguage-verses.ts
-src/api/v1/password.ts
-src/api/v1/person.ts
-src/api/v1/phototype.ts
-src/api/v1/prefab.ts
-src/api/v1/resources/index.ts
 src/api/v1/resources/model.ts
 src/api/v1/scene-package.ts
 src/api/v1/site.ts
