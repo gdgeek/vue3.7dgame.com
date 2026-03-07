@@ -56,7 +56,7 @@
             <div class="item-thumb">
               <img
                 v-if="item.image?.url"
-                :src="item.image.url"
+                :src="toHttps(item.image.url)"
                 :alt="item.title"
               />
               <div v-else class="thumb-placeholder">
@@ -149,7 +149,7 @@
           <div class="meta-preview" @click="triggerFileSelect">
             <img
               v-if="currentMeta?.image?.url"
-              :src="currentMeta.image.url"
+              :src="toHttps(currentMeta.image.url)"
               :alt="currentMeta.title"
             />
             <div v-else class="preview-placeholder">
@@ -311,6 +311,7 @@ import { useMetaList, logMetaStructure } from "./list/composables/useMetaList";
 import { useMetaDetail } from "./list/composables/useMetaDetail";
 import { useMetaCoverUpload } from "./list/composables/useMetaCoverUpload";
 import { useMetaActions } from "./list/composables/useMetaActions";
+import { toHttps } from "@/utils/helper";
 
 const { t } = useI18n();
 

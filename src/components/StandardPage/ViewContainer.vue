@@ -45,7 +45,7 @@
                 <div class="item-thumb">
                   <img
                     v-if="item.image?.url"
-                    :src="item.image.url"
+                    :src="toHttps(item.image.url)"
                     :alt="item.name || item.title"
                   />
                   <div v-else class="thumb-placeholder">
@@ -110,6 +110,7 @@ import { computed } from "vue";
 import { Waterfall } from "vue-waterfall-plugin-next";
 import "vue-waterfall-plugin-next/dist/style.css";
 import type { ViewMode } from "./types";
+import { toHttps } from "@/utils/helper";
 
 interface Props {
   items: T[] | null;

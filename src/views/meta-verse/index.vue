@@ -74,7 +74,7 @@
             <div class="item-thumb">
               <img
                 v-if="item.image?.url"
-                :src="item.image.url"
+                :src="toHttps(item.image.url)"
                 :alt="item.name"
               />
               <div v-else class="thumb-placeholder">
@@ -164,7 +164,7 @@
           <div class="verse-preview" @click="triggerFileSelect">
             <img
               v-if="currentVerse?.image?.url"
-              :src="currentVerse.image.url"
+              :src="toHttps(currentVerse.image.url)"
               :alt="currentVerse.name"
             />
             <div v-else class="preview-placeholder">
@@ -339,6 +339,7 @@ import { useVersePermissions } from "./composables/useVersePermissions";
 import { useVerseDetail } from "./composables/useVerseDetail";
 import { useVerseCoverUpload } from "./composables/useVerseCoverUpload";
 import { useVerseCrud } from "./composables/useVerseCrud";
+import { toHttps } from "@/utils/helper";
 
 const { t } = useI18n();
 

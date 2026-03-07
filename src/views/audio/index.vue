@@ -138,7 +138,7 @@
             <audio
               v-if="currentAudio?.file?.url"
               ref="audioRef"
-              :src="currentAudio.file.url"
+              :src="toHttps(currentAudio.file.url)"
               controls
               class="audio-player"
             ></audio>
@@ -176,6 +176,7 @@ import { usePageData } from "@/composables/usePageData";
 import { useSelection } from "@/composables/useSelection";
 import { downloadResource } from "@/utils/downloadHelper";
 import {
+import { toHttps } from "@/utils/helper";
   convertToLocalTime,
   formatFileSize as formatSize,
 } from "@/utils/utilityFunctions";

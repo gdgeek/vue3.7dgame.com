@@ -54,7 +54,7 @@
             <div class="item-thumb">
               <img
                 v-if="item.image?.url"
-                :src="item.image.url"
+                :src="toHttps(item.image.url)"
                 :alt="item.name"
               />
               <div v-else class="thumb-placeholder">
@@ -129,7 +129,7 @@
         <template #preview>
           <img
             v-if="currentPicture?.file?.url"
-            :src="currentPicture.file.url"
+            :src="toHttps(currentPicture.file.url)"
             :alt="currentPicture.name"
           />
         </template>
@@ -169,6 +169,7 @@ import {
   formatFileSize as formatSize,
 } from "@/utils/utilityFunctions";
 import { printVector2 } from "@/assets/js/helper";
+import { toHttps } from "@/utils/helper";
 
 const { t } = useI18n();
 

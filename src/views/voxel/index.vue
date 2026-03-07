@@ -52,7 +52,7 @@
             <div class="item-thumb">
               <img
                 v-if="item.image?.url"
-                :src="item.image.url"
+                :src="toHttps(item.image.url)"
                 :alt="item.name"
               />
               <div v-else class="thumb-placeholder">
@@ -132,6 +132,7 @@ import {
 } from "@/api/v1/resources/index";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import { usePageData } from "@/composables/usePageData";
+import { toHttps } from "@/utils/helper";
 
 const { t } = useI18n();
 
