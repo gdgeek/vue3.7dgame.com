@@ -1,13 +1,3 @@
-src/ability.ts
-src/api/auth/model.ts
-src/api/auth/wechat.ts
-src/api/domain-query.ts
-src/api/home/wordpress.ts
-src/api/menu/index.ts
-src/api/menu/model.ts
-src/api/user/index.ts
-src/api/user/model.ts
-src/api/user/server.ts
 src/api/v1/ai-rodin.ts
 src/api/v1/auth.ts
 src/api/v1/cyber.ts
