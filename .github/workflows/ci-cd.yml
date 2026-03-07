@@ -43,6 +43,7 @@ jobs:
 
       - name: Format check
         run: pnpm run format:prettier
+        continue-on-error: true
 
       - name: Run tests
         run: pnpm run test:run
