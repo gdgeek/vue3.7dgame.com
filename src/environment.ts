@@ -55,6 +55,13 @@ const environment = {
       import.meta.env.VITE_APP_API_URL ||
       ""
   ),
+  password_api: ReplaceURL(
+    window.__PASSWORD_API_URL__ ||
+      import.meta.env.VITE_APP_PASSWORD_API_URL ||
+      window.__API_URL__ ||
+      import.meta.env.VITE_APP_API_URL ||
+      ""
+  ),
   doc: ReplaceURL(import.meta.env.VITE_APP_DOC_API || ""),
   blockly: ReplaceURL(import.meta.env.VITE_APP_BLOCKLY_URL || ""),
   editor: ReplaceURL(import.meta.env.VITE_APP_EDITOR_URL || ""),

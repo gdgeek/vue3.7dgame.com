@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 import env from "@/environment";
 
-const passwordApiBase = env.email_api;
+const passwordApiBase = env.password_api;
 
 export interface PasswordApiError {
   code: string;
