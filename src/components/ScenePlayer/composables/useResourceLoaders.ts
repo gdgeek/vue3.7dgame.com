@@ -105,6 +105,10 @@ export function combineTransforms(
 export function useResourceLoaders(ctx: LoaderContext) {
   const { threeScene, sources, mixers, findResource } = ctx;
 
+  /** Set to true on destroy() to prevent post-unmount async callbacks from mutating scene state. */
+  let _destroyed = false;
+  const destroy = () => { _destroyed = true; };
+
   /**
    * Returns the file URL from a ResourceLike, or an empty string if unavailable.
    */
@@ -208,6 +212,7 @@ export function useResourceLoaders(ctx: LoaderContext) {
           texture.format = THREE.RGBAFormat;
 
           video.addEventListener("loadedmetadata", () => {
+            if (_destroyed) return;
             const aspectRatio = video.videoWidth / video.videoHeight;
             const width = entity.parameters.width ?? 1;
 
@@ -320,6 +325,7 @@ export function useResourceLoaders(ctx: LoaderContext) {
         textureLoader.load(
           url,
           (texture) => {
+            if (_destroyed) return;
             texture.colorSpace = THREE.SRGBColorSpace;
             texture.minFilter = THREE.LinearFilter;
             texture.magFilter = THREE.LinearFilter;
@@ -467,6 +473,7 @@ export function useResourceLoaders(ctx: LoaderContext) {
         loader.load(
           url,
           async (chunks: unknown[]) => {
+            if (_destroyed) return;
             try {
               const chunk = chunks[0] as {
                 data: unknown[];
@@ -557,6 +564,7 @@ export function useResourceLoaders(ctx: LoaderContext) {
         loader.load(
           url,
           async (gltf) => {
+            if (_destroyed) return;
             const model = gltf.scene;
             setInitialVisibility(model);
             const uuid = entity.parameters.uuid.toString();
@@ -729,5 +737,5 @@ export function useResourceLoaders(ctx: LoaderContext) {
     }
   };
 
-  return { loadModel, processEntities };
+  return { loadModel, processEntities, destroy };
 }

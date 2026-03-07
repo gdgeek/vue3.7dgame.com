@@ -98,6 +98,8 @@ export const useBasicInfoForm = (deps: UseBasicInfoFormDeps) => {
           ElMessage.success(t("homepage.edit.rules.success"));
         } catch {
           ElMessage.error(t("homepage.edit.rules.error1"));
+        } finally {
+          deps.isLoading.value = false;
         }
       } else {
         ElMessage.error(t("homepage.edit.rules.error2"));

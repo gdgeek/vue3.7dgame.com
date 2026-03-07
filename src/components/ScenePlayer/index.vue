@@ -159,6 +159,9 @@ const isMetaData = (value: unknown): value is { children?: { entities?: unknown[
 
 // ─── onMounted: full scene initialisation ─────────────────────────────────────
 
+/** Holds the destroy() function returned by useResourceLoaders so onUnmounted can call it. */
+let destroyLoaders: (() => void) | null = null;
+
 onMounted(async () => {
   if (!scene.value) return;
 
@@ -255,7 +258,8 @@ onMounted(async () => {
 
   // ── Initialise resource loaders ───────────────────────────────────────────
 
-  const { processEntities } = useResourceLoaders(ctx);
+  const { processEntities, destroy } = useResourceLoaders(ctx);
+  destroyLoaders = destroy;
 
   // ── Load scene data ───────────────────────────────────────────────────────
 
@@ -345,6 +349,9 @@ const { getAudioUrl, playQueuedAudio, cleanup: cleanupAudio } = useSceneAudio(so
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
 
 onUnmounted(() => {
+  // Mark async loaders as destroyed so any in-flight callbacks become no-ops
+  destroyLoaders?.();
+
   // Clean up all sources: stop video elements and call any registered cleanup functions
   sources.forEach((source) => {
     if (source.type === "video") {

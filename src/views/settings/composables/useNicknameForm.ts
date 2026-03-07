@@ -65,6 +65,8 @@ export const useNicknameForm = (deps: UseNicknameFormDeps) => {
           ElMessage.success(t("homepage.edit.rules.nickname.success"));
         } catch {
           ElMessage.error(t("homepage.edit.rules.nickname.error3"));
+        } finally {
+          deps.isLoading.value = false;
         }
       } else {
         ElMessage.error(t("homepage.edit.rules.nickname.error4"));
