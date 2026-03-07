@@ -12,7 +12,7 @@ import { ref } from "vue";
 import SharedScenePlayer from "@/components/ScenePlayer/index.vue";
 import type { Verse } from "@/types/verse";
 
-const props = defineProps<{
+defineProps<{
   verse: Verse;
   isSceneFullscreen?: boolean;
 }>();

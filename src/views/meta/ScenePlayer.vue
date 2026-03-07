@@ -12,7 +12,7 @@ import { ref } from "vue";
 import SharedScenePlayer from "@/components/ScenePlayer/index.vue";
 import type { MetaInfo } from "@/api/v1/types/meta";
 
-const props = defineProps<{
+defineProps<{
   meta: MetaInfo;
   isSceneFullscreen?: boolean;
 }>();
