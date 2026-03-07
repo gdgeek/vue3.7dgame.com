@@ -1,7 +1,7 @@
 import { ref } from "vue";
 import { logger } from "@/utils/logger";
 import type { Verse, Entity } from "@/types/verse";
-import type { ModuleParameters, VerseMetaInfo, MetaData } from "../types";
+import type { ModuleParameters, VerseMetaInfo } from "../types";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;

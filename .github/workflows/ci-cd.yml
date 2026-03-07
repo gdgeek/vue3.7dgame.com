@@ -48,7 +48,7 @@ jobs:
       - name: Run tests
         run: pnpm run test:run
 
-      - name: Coverage check (lines ≥ 31%)
+      - name: Coverage check (lines ≥ 32%)
         run: pnpm run test:coverage
 
   # 构建（仅 push 到 main/master）

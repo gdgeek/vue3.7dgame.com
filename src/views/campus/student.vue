@@ -123,7 +123,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
 import {
   PageActionBar,
   ViewContainer,
@@ -135,8 +134,6 @@ import {
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { getStudents, deleteStudent } from "@/api/v1/edu-student";
 import { useCampusMemberList } from "@/composables/useCampusMemberList";
-
-const { t } = useI18n();
 
 interface Student {
   id: number;
