@@ -20,6 +20,8 @@ vi.mock("element-plus", () => ({
   // FormInstance / FormRules are types-only, no runtime mock needed
 }));
 
+const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
+
 describe("useBasicInfoForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -154,6 +156,26 @@ describe("useBasicInfoForm", () => {
 
       await saveInfo();
       expect(mockElMessage.error).toHaveBeenCalled();
+    });
+
+    it("resets isLoading to false when API request fails", async () => {
+      const useBasicInfoForm = await importComposable();
+      const deps = createDeps();
+      const { saveInfo, ruleFormRef } = useBasicInfoForm(deps);
+
+      ruleFormRef.value = {
+        validate: async (cb: (valid: boolean) => Promise<void>) => {
+          await cb(true);
+        },
+      } as never;
+      mockSetUserInfo.mockRejectedValueOnce(new Error("network failed"));
+
+      saveInfo();
+      await flushPromises();
+
+      expect(mockSetUserInfo).toHaveBeenCalled();
+      expect(mockElMessage.error).toHaveBeenCalled();
+      expect(deps.isLoading.value).toBe(false);
     });
   });
 });

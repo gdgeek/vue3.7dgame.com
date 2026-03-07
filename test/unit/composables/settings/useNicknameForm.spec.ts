@@ -15,6 +15,8 @@ vi.mock("element-plus", () => ({
   ElMessage: mockElMessage,
 }));
 
+const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
+
 describe("useNicknameForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -134,6 +136,29 @@ describe("useNicknameForm", () => {
       submitNickname();
 
       expect(mockElMessage.error).toHaveBeenCalled();
+    });
+
+    it("resets isLoading to false when API request fails", async () => {
+      const useNicknameForm = await importComposable();
+      const isLoading = ref(false);
+      const isDisable = ref(false);
+      const { submitNickname, nicknameForm, nickNameFormRef } = useNicknameForm({
+        isLoading,
+        isDisable,
+      });
+
+      nicknameForm.value.nickname = "FailedUser";
+      nickNameFormRef.value = {
+        validate: vi.fn().mockImplementation((cb: (valid: boolean) => void) => cb(true)),
+      } as never;
+      mockSetUserInfo.mockRejectedValueOnce(new Error("network failed"));
+
+      submitNickname();
+      await flushPromises();
+
+      expect(mockSetUserInfo).toHaveBeenCalledWith({ nickname: "FailedUser" });
+      expect(mockElMessage.error).toHaveBeenCalled();
+      expect(isLoading.value).toBe(false);
     });
   });
 });
