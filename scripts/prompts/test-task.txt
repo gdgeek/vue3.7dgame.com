@@ -1,0 +1,6 @@
+你是测试工程师，项目：/home/ubuntu/projects/vue3.7dgame.com（Vue 3 + TypeScript + Vitest）。
+未覆盖文件清单：scripts/uncovered-files.txt
+任务：从清单中取前 5 个文件，每个写 ≥8 个测试，放 test/unit/ 对应目录，vi.mock 外部依赖。
+写完运行：/home/ubuntu/.cache/node/corepack/v1/pnpm/9.15.0/bin/pnpm.cjs exec vitest run 验证。
+全部通过后：git add test/ && git commit -m "test: add coverage for [文件名]"
+然后从清单中删除已完成的文件并保存。

@@ -461,65 +461,78 @@
 <script setup lang="ts">
 import { useUserStore } from "@/store/modules/user";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
-import { ElMessage, FormInstance, FormRules } from "element-plus";
-import { FormItemRule } from "element-plus";
-import { _InfoType } from "@/api/user/model";
-import { getEmailStatus } from "@/api/v1/email";
-import {
-  changePassword,
-  requestPasswordReset,
-  verifyResetCode,
-  resetPasswordByCode,
-  type PasswordApiResponse,
-} from "@/api/v1/password";
-import { createPasswordFormRules } from "@/utils/password-validator";
+import { ElMessage } from "element-plus";
 import PasswordStrength from "@/components/PasswordStrength/index.vue";
 import { useRouter } from "vue-router";
 import EmailVerificationPanel from "@/components/Account/EmailVerificationPanel.vue";
 import ImageSelector from "@/components/MrPP/ImageSelector.vue";
+import { useEmailStatus } from "./composables/useEmailStatus";
+import { useNicknameForm } from "./composables/useNicknameForm";
+import { useBasicInfoForm } from "./composables/useBasicInfoForm";
+import { usePasswordManagement } from "./composables/usePasswordManagement";
+import { useRecoverPassword } from "./composables/useRecoverPassword";
 
-// 初始化store和ref
+// --- Shared state ---
+const { t } = useI18n();
 const userStore = useUserStore();
 const router = useRouter();
-const ruleFormRef = ref<FormInstance>();
-const nickNameFormRef = ref<FormInstance>();
-const { t } = useI18n();
-const isDisable = ref(false);
 const isLoading = ref(true);
-const dialogEmailVisible = ref(false);
-const emailDialogAction = ref<"default" | "bind" | "change" | "unbind">(
-  "default"
-);
-const emailBound = ref(false);
-const currentBoundEmail = ref("");
-const dialogPasswordVisible = ref(false);
-const dialogRecoverVisible = ref(false);
-const passwordSubmitting = ref(false);
-const recoverSending = ref(false);
-const recoverVerifying = ref(false);
-const recoverResetting = ref(false);
-const recoverCodeVerified = ref(false);
-const recoverCooldownSeconds = ref(0);
-const passwordFormRef = ref<FormInstance>();
-const recoverFormRef = ref<FormInstance>();
-let recoverCooldownTimer: ReturnType<typeof setInterval> | null = null;
-const RECOVER_SEND_COOLDOWN_SECONDS = 60;
+const isDisable = ref(false);
 
-const canSendRecoverCode = computed(
-  () => !recoverSending.value && recoverCooldownSeconds.value === 0
-);
-const canRecoverResetPassword = computed(
-  () => recoverCodeVerified.value && !recoverVerifying.value
-);
+// --- Email status composable ---
+const {
+  emailBound,
+  currentBoundEmail,
+  emailDialogAction,
+  dialogEmailVisible,
+  getApiErrorMessage,
+  checkCurrentEmailVerified,
+  getCurrentBoundEmail,
+  refreshEmailStatusSummary,
+  openEmailDialog,
+} = useEmailStatus();
 
-const recoverSendButtonText = computed(() => {
-  if (recoverCooldownSeconds.value > 0) {
-    return `${t("login.sendResetEmail")} (${recoverCooldownSeconds.value}s)`;
-  }
-  return t("login.sendResetEmail");
-});
+// --- Nickname form composable ---
+const { nickNameFormRef, nicknameForm, nicknameRules, submitNickname } =
+  useNicknameForm({ isLoading, isDisable });
 
-// 计算用户头像URL
+// --- Basic info form composable ---
+const { ruleFormRef, infoForm, infoRules, industryOptions, saveInfo } =
+  useBasicInfoForm({ isLoading, isDisable });
+
+// --- Password management composable ---
+const {
+  passwordFormRef,
+  passwordForm,
+  passwordRules,
+  dialogPasswordVisible,
+  passwordSubmitting,
+  resetPasswordForm,
+  openPasswordDialog,
+  submitPasswordChange,
+} = usePasswordManagement({ checkCurrentEmailVerified, router });
+
+// --- Password recovery composable ---
+const {
+  recoverFormRef,
+  recoverForm,
+  recoverRules,
+  dialogRecoverVisible,
+  recoverSending,
+  recoverVerifying,
+  recoverResetting,
+  recoverCodeVerified,
+  canSendRecoverCode,
+  canRecoverResetPassword,
+  recoverSendButtonText,
+  openRecoverDialog,
+  resetRecoverForm,
+  handleRecoverSendEmail,
+  handleRecoverVerifyCode,
+  handleRecoverResetPassword,
+} = useRecoverPassword({ getCurrentBoundEmail, getApiErrorMessage, openEmailDialog, router });
+
+// --- Avatar image URL (derived from user store) ---
 const imageUrl = computed(() => {
   if (
     userStore.userInfo == null ||
@@ -531,537 +544,12 @@ const imageUrl = computed(() => {
   return userStore.userInfo.userInfo.avatar.url;
 });
 
-// 昵称表单相关定义
-type nickNameType = {
-  nickname: string;
-};
-
-const nicknameForm = ref<nickNameType>({
-  nickname: "",
-});
-
-// 昵称验证规则
-type Arrayable<T> = T | T[];
-const nicknameRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
-  nickname: [
-    {
-      required: true,
-      message: t("homepage.edit.rules.nickname.message1"),
-      trigger: "blur",
-    },
-    {
-      min: 2,
-      message: t("homepage.edit.rules.nickname.message2"),
-      trigger: "blur",
-    },
-    {
-      validator: (rule, value, callback: (error?: Error) => void) => {
-        if (value === "") {
-          callback(new Error(t("homepage.edit.rules.nickname.error1")));
-        } else if (!/^[\u4e00-\u9fa5_a-zA-Z0-9-]+$/.test(value)) {
-          callback(new Error(t("homepage.edit.rules.nickname.error2")));
-        } else {
-          callback();
-        }
-      },
-      trigger: "blur",
-    },
-  ],
-};
-
-// 基本信息表单
-const infoForm = ref<_InfoType>({
-  sex: "man",
-  industry: "",
-  selectedOptions: [],
-  textarea: "",
-});
-
-// 基本信息验证规则
-const infoRules = ref<FormRules<_InfoType>>({
-  industry: [
-    {
-      required: true,
-      message: t("homepage.edit.rules.industry.message"),
-      trigger: "change",
-    },
-  ],
-  selectedOptions: [
-    {
-      required: true,
-      message: t("homepage.edit.rules.selectedOptions.message"),
-      trigger: "change",
-    },
-  ],
-  textarea: [
-    {
-      required: true,
-      message: t("homepage.edit.rules.textarea.message1"),
-      trigger: "blur",
-    },
-    {
-      min: 10,
-      message: t("homepage.edit.rules.textarea.message2"),
-      trigger: "blur",
-    },
-  ],
-});
-
-const passwordForm = ref({
-  oldPassword: null as string | null,
-  password: null as string | null,
-  checkPassword: null as string | null,
-});
-
-const passwordRules = computed(() => ({
-  oldPassword: [
-    {
-      required: true,
-      message: t("homepage.account.rules2.old.message1"),
-      trigger: "blur",
-    },
-    {
-      min: 6,
-      message: t("homepage.account.rules2.old.message2"),
-      trigger: "blur",
-    },
-    {
-      validator: (
-        _rule: unknown,
-        value: string,
-        callback: (error?: Error) => void
-      ) => {
-        if (value === "") {
-          callback(new Error(t("homepage.account.rules2.old.error1")));
-        } else if (value === passwordForm.value.password) {
-          callback(new Error(t("homepage.account.rules2.old.error2")));
-        } else {
-          callback();
-        }
-      },
-      trigger: "blur",
-    },
-  ],
-  password: [
-    ...createPasswordFormRules(t),
-    {
-      validator: (
-        _rule: unknown,
-        value: string,
-        callback: (error?: Error) => void
-      ) => {
-        if (!value) {
-          callback();
-          return;
-        }
-        if (value === passwordForm.value.oldPassword) {
-          callback(new Error(t("homepage.account.rules2.new.error2")));
-        } else {
-          if (passwordForm.value.checkPassword !== "") {
-            passwordFormRef.value?.validateField("checkPassword");
-          }
-          callback();
-        }
-      },
-      trigger: "blur",
-    },
-  ],
-  checkPassword: [
-    {
-      required: true,
-      message: t("homepage.account.rules2.check.message1"),
-      trigger: "blur",
-    },
-    {
-      validator: (
-        _rule: unknown,
-        value: string,
-        callback: (error?: Error) => void
-      ) => {
-        if (value === "") {
-          callback(new Error(t("homepage.account.rules2.check.error1")));
-        } else if (value !== passwordForm.value.password) {
-          callback(new Error(t("homepage.account.rules2.check.error2")));
-        } else {
-          callback();
-        }
-      },
-      trigger: "blur",
-    },
-  ],
-}));
-
-const recoverForm = ref({
-  email: "",
-  code: "",
-  password: "",
-  checkPassword: "",
-});
-
-const recoverRules = computed(() => ({
-  code: [
-    {
-      required: true,
-      message: t("login.forgotTokenRequired"),
-      trigger: "blur",
-    },
-    {
-      pattern: /^\d{6}$/,
-      message: t("homepage.edit.rules.code.invalid"),
-      trigger: "blur",
-    },
-  ],
-  password: [...createPasswordFormRules(t)],
-  checkPassword: [
-    {
-      required: true,
-      message: t("homepage.account.rules2.check.message1"),
-      trigger: "blur",
-    },
-    {
-      validator: (
-        _rule: unknown,
-        value: string,
-        callback: (error?: Error) => void
-      ) => {
-        if (!value) {
-          callback(new Error(t("homepage.account.rules2.check.error1")));
-          return;
-        }
-        if (value !== recoverForm.value.password) {
-          callback(new Error(t("homepage.account.rules2.check.error2")));
-          return;
-        }
-        callback();
-      },
-      trigger: "blur",
-    },
-  ],
-}));
-
-// 行业选项
-const industryOptions = computed(() => {
-  return [
-    {
-      label: t("homepage.edit.rules.industry.label1"),
-      value: t("homepage.edit.rules.industry.label1"),
-    },
-    {
-      label: t("homepage.edit.rules.industry.label2"),
-      value: t("homepage.edit.rules.industry.label2"),
-    },
-    {
-      label: t("homepage.edit.rules.industry.label3"),
-      value: t("homepage.edit.rules.industry.label3"),
-    },
-    {
-      label: t("homepage.edit.rules.industry.label4"),
-      value: t("homepage.edit.rules.industry.label4"),
-    },
-    {
-      label: t("homepage.edit.rules.industry.label5"),
-      value: t("homepage.edit.rules.industry.label5"),
-    },
-    {
-      label: t("homepage.edit.rules.industry.label6"),
-      value: t("homepage.edit.rules.industry.label6"),
-    },
-    {
-      label: t("homepage.edit.rules.industry.label7"),
-      value: t("homepage.edit.rules.industry.label7"),
-    },
-  ];
-});
-
-// 更新用户昵称
-const submitNickname = async () => {
-  isDisable.value = true;
-  setTimeout(() => {
-    isDisable.value = false; // 防重复提交，两秒后才能再次点击
-  }, 2000);
-
-  nickNameFormRef.value?.validate(async (valid: boolean) => {
-    if (valid) {
-      try {
-        isLoading.value = true;
-        await userStore.setUserInfo({ nickname: nicknameForm.value.nickname });
-        ElMessage.success(t("homepage.edit.rules.nickname.success"));
-      } catch (error) {
-        ElMessage.error(t("homepage.edit.rules.nickname.error3"));
-      }
-    } else {
-      ElMessage.error(t("homepage.edit.rules.nickname.error4"));
-    }
-  });
-};
-
-// 更新用户基本信息
-const saveInfo = () => {
-  isDisable.value = true;
-  setTimeout(() => {
-    isDisable.value = false; // 防重复提交，两秒后才能再次点击
-  }, 2000);
-
-  ruleFormRef.value?.validate(async (valid: boolean) => {
-    if (valid) {
-      try {
-        isLoading.value = true;
-        await userStore.setUserInfo({ info: infoForm.value });
-        ElMessage.success(t("homepage.edit.rules.success"));
-      } catch (error) {
-        ElMessage.error(t("homepage.edit.rules.error1"));
-      }
-    } else {
-      ElMessage.error(t("homepage.edit.rules.error2"));
-    }
-  });
-};
-
-const resetPasswordForm = () => {
-  passwordForm.value.oldPassword = null;
-  passwordForm.value.password = null;
-  passwordForm.value.checkPassword = null;
-  passwordFormRef.value?.clearValidate();
-};
-
-const openPasswordDialog = () => {
-  checkCurrentEmailVerified().then((verified) => {
-    if (!verified) {
-      ElMessage.warning(t("homepage.account.emailNotVerifiedWarning"));
-      return;
-    }
-    dialogPasswordVisible.value = true;
-  });
-};
-
-const openEmailDialog = (
-  action: "default" | "bind" | "change" | "unbind" = "default"
-) => {
-  emailDialogAction.value = action;
-  dialogEmailVisible.value = true;
-};
-
-const refreshEmailStatusSummary = async () => {
-  try {
-    const status = await getEmailStatus();
-    if (!status.success || !status.data) {
-      emailBound.value = false;
-      currentBoundEmail.value = "";
-      return;
-    }
-
-    emailBound.value = Boolean(status.data.email);
-    currentBoundEmail.value = status.data.email || "";
-  } catch (_error) {
-    emailBound.value = false;
-    currentBoundEmail.value = "";
-  }
-};
-
-const submitPasswordChange = () => {
-  passwordFormRef.value?.validate(async (valid: boolean) => {
-    if (!valid) {
-      ElMessage.error(t("homepage.account.validate1.error2"));
-      return;
-    }
-    passwordSubmitting.value = true;
-    try {
-      const verified = await checkCurrentEmailVerified();
-      if (!verified) {
-        ElMessage.error(t("homepage.account.emailNotVerifiedWarning"));
-        return;
-      }
-      const response = await changePassword(
-        passwordForm.value.oldPassword!,
-        passwordForm.value.password!,
-        passwordForm.value.checkPassword!
-      );
-      if (!response.success) {
-        ElMessage.error(
-          response.error?.message || t("homepage.account.validate1.error1")
-        );
-        return;
-      }
-      ElMessage.success(
-        response.message || t("homepage.account.validate1.success")
-      );
-      dialogPasswordVisible.value = false;
-      router.push("/site/logout");
-    } catch (_error) {
-      ElMessage.error(t("homepage.account.validate1.error1"));
-    } finally {
-      passwordSubmitting.value = false;
-    }
-  });
-};
-
-const getApiErrorMessage = (result: PasswordApiResponse, fallback: string) => {
-  return result.error?.message || result.message || fallback;
-};
-
-const checkCurrentEmailVerified = async () => {
-  try {
-    const status = await getEmailStatus();
-    return Boolean(status.success && status.data?.email_verified);
-  } catch (_error) {
-    return false;
-  }
-};
-
-const resetRecoverForm = () => {
-  recoverCodeVerified.value = false;
-  recoverForm.value.code = "";
-  recoverForm.value.password = "";
-  recoverForm.value.checkPassword = "";
-  recoverFormRef.value?.clearValidate();
-};
-
-const getCurrentBoundEmail = async () => {
-  try {
-    const status = await getEmailStatus();
-    if (!status.success || !status.data?.email) {
-      return "";
-    }
-    return status.data.email;
-  } catch (_error) {
-    return "";
-  }
-};
-
-const stopRecoverCooldown = () => {
-  if (recoverCooldownTimer) {
-    clearInterval(recoverCooldownTimer);
-    recoverCooldownTimer = null;
-  }
-};
-
-const startRecoverCooldown = (seconds = RECOVER_SEND_COOLDOWN_SECONDS) => {
-  stopRecoverCooldown();
-  recoverCooldownSeconds.value = seconds;
-  recoverCooldownTimer = setInterval(() => {
-    if (recoverCooldownSeconds.value <= 1) {
-      recoverCooldownSeconds.value = 0;
-      stopRecoverCooldown();
-      return;
-    }
-    recoverCooldownSeconds.value -= 1;
-  }, 1000);
-};
-
-const openRecoverDialog = async () => {
-  const boundEmail = await getCurrentBoundEmail();
-  if (!boundEmail) {
-    ElMessage.warning(t("homepage.account.noEmailBound"));
-    openEmailDialog("bind");
-    return;
-  }
-
-  recoverForm.value.email = boundEmail;
-  dialogRecoverVisible.value = true;
-};
-
-const handleRecoverSendEmail = async () => {
-  const email = recoverForm.value.email || currentBoundEmail.value;
-  if (!email) {
-    ElMessage.warning(t("homepage.account.emailBoundNotFound"));
-    return;
-  }
-
-  recoverCodeVerified.value = false;
-  recoverSending.value = true;
-  try {
-    const result = await requestPasswordReset(email);
-    if (!result.success) {
-      ElMessage.error(
-        getApiErrorMessage(result, t("login.requestResetFailedFallback"))
-      );
-      return;
-    }
-    ElMessage.success(result.message || t("login.requestResetSuccess"));
-    startRecoverCooldown();
-  } catch (_error) {
-    ElMessage.error(t("login.requestResetFailedFallback"));
-  } finally {
-    recoverSending.value = false;
-  }
-};
-
-const handleRecoverVerifyCode = async () => {
-  const email = recoverForm.value.email || currentBoundEmail.value;
-  if (!email) {
-    ElMessage.warning(t("homepage.account.emailBoundNotFound"));
-    return;
-  }
-
-  const valid = await recoverFormRef.value
-    ?.validateField("code")
-    .then(() => true)
-    .catch(() => false);
-  if (!valid) return;
-
-  recoverVerifying.value = true;
-  try {
-    const result = await verifyResetCode(email, recoverForm.value.code);
-    if (!result.success || result.valid === false) {
-      recoverCodeVerified.value = false;
-      ElMessage.error(getApiErrorMessage(result, t("login.verifyTokenFailed")));
-      return;
-    }
-    recoverCodeVerified.value = true;
-    ElMessage.success(result.message || t("login.verifyTokenSuccess"));
-  } catch (_error) {
-    recoverCodeVerified.value = false;
-    ElMessage.error(t("login.verifyTokenFailed"));
-  } finally {
-    recoverVerifying.value = false;
-  }
-};
-
-const handleRecoverResetPassword = async () => {
-  const email = recoverForm.value.email || currentBoundEmail.value;
-  if (!email) {
-    ElMessage.warning(t("homepage.account.emailBoundNotFound"));
-    return;
-  }
-
-  if (!recoverCodeVerified.value) {
-    ElMessage.warning(t("login.verifyTokenFirst"));
-    return;
-  }
-  const valid = await recoverFormRef.value
-    ?.validateField(["password", "checkPassword"])
-    .then(() => true)
-    .catch(() => false);
-  if (!valid) return;
-
-  recoverResetting.value = true;
-  try {
-    const result = await resetPasswordByCode(
-      email,
-      recoverForm.value.code,
-      recoverForm.value.password
-    );
-    if (!result.success) {
-      ElMessage.error(
-        getApiErrorMessage(result, t("login.resetPasswordFailedFallback"))
-      );
-      return;
-    }
-    ElMessage.success(result.message || t("login.resetPasswordSuccess"));
-    dialogRecoverVisible.value = false;
-    router.push("/site/logout");
-  } catch (_error) {
-    ElMessage.error(t("login.resetPasswordFailedFallback"));
-  } finally {
-    recoverResetting.value = false;
-  }
-};
-
+// --- Avatar upload handler ---
 const handleAvatarImageUpdate = async (payload: {
   imageId: number;
   itemId: number | null;
   imageUrl?: string;
-}) => {
+}): Promise<void> => {
   if (!payload.imageId) {
     ElMessage.error(t("homepage.edit.avatarCropping.error3"));
     return;
@@ -1070,38 +558,38 @@ const handleAvatarImageUpdate = async (payload: {
     isLoading.value = true;
     await userStore.setUserInfo({ avatar_id: payload.imageId });
     ElMessage.success(t("homepage.edit.avatarCropping.success"));
-  } catch (_error) {
+  } catch {
     ElMessage.error(t("homepage.edit.rules.error1"));
   } finally {
     isLoading.value = false;
   }
 };
 
+// --- Lifecycle ---
 onMounted(() => {
   refreshEmailStatusSummary();
 });
 
+// Sync form fields whenever relevant user fields update
 watch(
-  () => recoverForm.value.code,
-  () => {
-    recoverCodeVerified.value = false;
-  }
-);
-
-onUnmounted(() => {
-  stopRecoverCooldown();
-});
-
-// 监听用户信息变化，更新表单数据
-watch(
-  () => userStore.userInfo,
-  (newUserInfo) => {
-    if (newUserInfo == null || newUserInfo.id === 0) {
+  () => userStore.userInfo?.userData?.nickname,
+  (nickname) => {
+    if (userStore.userInfo == null || userStore.userInfo.id === 0) {
       return;
     }
 
-    const parsedInfo = newUserInfo.userInfo?.info;
-    nicknameForm.value.nickname = newUserInfo.userData?.nickname || "";
+    nicknameForm.value.nickname = nickname || "";
+    isLoading.value = false;
+  },
+  { immediate: true }
+);
+
+watch(
+  () => userStore.userInfo?.userInfo?.info,
+  (parsedInfo) => {
+    if (userStore.userInfo == null || userStore.userInfo.id === 0) {
+      return;
+    }
 
     if (parsedInfo) {
       infoForm.value.sex = parsedInfo.sex || "";
@@ -1112,7 +600,19 @@ watch(
 
     isLoading.value = false;
   },
-  { deep: true, immediate: true }
+  { immediate: true }
+);
+
+watch(
+  () => userStore.userInfo?.userInfo?.avatar,
+  () => {
+    if (userStore.userInfo == null || userStore.userInfo.id === 0) {
+      return;
+    }
+
+    isLoading.value = false;
+  },
+  { immediate: true }
 );
 </script>
 
