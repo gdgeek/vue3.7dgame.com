@@ -61,9 +61,11 @@ export const VueAppleLoginConfig = {
  * Normalize a URL's protocol to match the current page's protocol.
  * e.g. on HTTPS pages, http:// URLs become https://; on HTTP pages, https:// becomes http://.
  * Safe to call with any value (returns empty string for null/undefined).
+ * Falls back to https in non-browser environments.
  */
 export function toHttps(url: string | null | undefined): string {
   if (!url) return url ?? "";
-  const currentProtocol = window.location.protocol; // "https:" or "http:"
+  const currentProtocol =
+    typeof window !== "undefined" ? window.location.protocol : "https:";
   return url.replace(/^https?:/, currentProtocol);
 }
