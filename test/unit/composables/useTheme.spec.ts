@@ -64,7 +64,7 @@ describe("useTheme", () => {
     it("currentTheme 返回默认主题", () => {
       const { currentTheme } = useTheme();
       expect(currentTheme.value).toBeDefined();
-      expect(currentTheme.value.name).toBeTruthy();
+      expect(currentTheme.value.name).not.toBe("");
     });
 
     it("availableThemes 返回所有主题列表", () => {
@@ -115,7 +115,7 @@ describe("useTheme", () => {
 
       const shadow =
         document.documentElement.style.getPropertyValue("--shadow-primary");
-      expect(shadow).toBeTruthy();
+      expect(shadow).not.toBe("");
     });
 
     it("setTheme('modern-blue') with custom color calls applyTheme and applyColorVariables for custom colors", () => {
@@ -127,7 +127,7 @@ describe("useTheme", () => {
       expect(() => setTheme("modern-blue")).not.toThrow();
       const primary =
         document.documentElement.style.getPropertyValue("--primary-color");
-      expect(primary).toBeTruthy();
+      expect(primary).not.toBe("");
     });
 
     it("setTheme to non-modern-blue theme takes the else branch (no custom colors)", () => {
@@ -219,7 +219,7 @@ describe("useTheme", () => {
       // Verify at least one CSS variable was applied
       const primaryColor =
         document.documentElement.style.getPropertyValue("--primary-color");
-      expect(primaryColor).toBeTruthy();
+      expect(primaryColor).not.toBe("");
     });
 
     it("切换主题后同步更新 settingsStore", () => {
@@ -243,14 +243,14 @@ describe("useTheme", () => {
 
       const primaryColor =
         document.documentElement.style.getPropertyValue("--primary-color");
-      expect(primaryColor).toBeTruthy();
+      expect(primaryColor).not.toBe("");
     });
 
     it("初始化后 body[data-theme] 被设置", () => {
       const { initTheme } = useTheme();
       initTheme();
 
-      expect(document.body.getAttribute("data-theme")).toBeTruthy();
+      expect(document.body.getAttribute("data-theme")).not.toBeNull();
     });
   });
 
@@ -331,8 +331,8 @@ describe("useTheme", () => {
   describe("主题数据完整性", () => {
     it("每个主题都有 name、displayName、isDark、colors、style 字段", () => {
       themes.forEach((theme) => {
-        expect(theme.name).toBeTruthy();
-        expect(theme.displayName).toBeTruthy();
+        expect(theme.name).not.toBe("");
+        expect(theme.displayName).not.toBe("");
         expect(typeof theme.isDark).toBe("boolean");
         expect(theme.colors).toBeDefined();
         expect(theme.style).toBeDefined();
