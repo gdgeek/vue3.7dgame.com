@@ -11,6 +11,7 @@ describe("api/v1/password", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    vi.resetModules();
     request = (await import("@/utils/request")).default as ReturnType<
       typeof vi.fn
     >;
