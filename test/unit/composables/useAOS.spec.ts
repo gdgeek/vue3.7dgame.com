@@ -98,7 +98,9 @@ describe("useAOS()", () => {
   });
 
   it("additional AOS option (easing) is passed through to AOS.init", () => {
-    const unmount = mountWithAOS(() => useAOS({ easing: "ease-in-out" } as any));
+    const unmount = mountWithAOS(() =>
+      useAOS({ easing: "ease-in-out" } as any)
+    );
     expect(mockInit).toHaveBeenCalledWith(
       expect.objectContaining({ easing: "ease-in-out" })
     );

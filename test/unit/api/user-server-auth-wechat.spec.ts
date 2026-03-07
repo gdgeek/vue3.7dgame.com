@@ -22,7 +22,9 @@ describe("user/server: bindEmail()", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     ({ bindEmail } = await import("@/api/user/server"));
   });
@@ -36,7 +38,9 @@ describe("user/server: bindEmail()", () => {
 
   it("sends email in request body", async () => {
     await bindEmail("user@example.com");
-    expect(request.mock.calls[0][0].data).toEqual({ email: "user@example.com" });
+    expect(request.mock.calls[0][0].data).toEqual({
+      email: "user@example.com",
+    });
   });
 });
 
@@ -46,7 +50,9 @@ describe("user/server: resetPassword()", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     ({ resetPassword } = await import("@/api/user/server"));
   });
@@ -54,7 +60,10 @@ describe("user/server: resetPassword()", () => {
   it("calls POST /v1/servers/reset-password", async () => {
     await resetPassword("old-pw", "new-pw");
     expect(request).toHaveBeenCalledWith(
-      expect.objectContaining({ url: "/v1/servers/reset-password", method: "post" })
+      expect.objectContaining({
+        url: "/v1/servers/reset-password",
+        method: "post",
+      })
     );
   });
 
@@ -76,7 +85,9 @@ describe("auth/wechat: getQrcode()", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     ({ getQrcode } = await import("@/api/auth/wechat"));
   });
@@ -96,7 +107,9 @@ describe("auth/wechat: refresh()", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     ({ refresh } = await import("@/api/auth/wechat"));
   });
@@ -125,7 +138,9 @@ describe("UserAPI.getInfo()", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     ({ default: UserAPI } = await import("@/api/user/index"));
   });
@@ -156,7 +171,9 @@ describe("user/server: bindEmail() — additional", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     ({ bindEmail } = await import("@/api/user/server"));
   });
@@ -173,7 +190,9 @@ describe("auth/wechat: refresh() — empty token", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     ({ refresh } = await import("@/api/auth/wechat"));
   });

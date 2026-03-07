@@ -553,7 +553,10 @@ export function useModelLoader(context: ModelLoaderContext) {
                       const callbacks = sceneInstanceId
                         ? window.__sceneCallbacks?.[sceneInstanceId]
                         : undefined;
-                      if (callbacks && typeof callbacks[`@${eventId}`] === "function") {
+                      if (
+                        callbacks &&
+                        typeof callbacks[`@${eventId}`] === "function"
+                      ) {
                         try {
                           await callbacks[`@${eventId}`]();
                         } catch (e) {

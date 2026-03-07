@@ -6,11 +6,17 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // ---------------------------------------------------------------------------
 // Mock dependencies that need router/NProgress (not needed for hasAuth tests)
 // ---------------------------------------------------------------------------
-vi.mock("@/utils/nprogress", () => ({ default: { start: vi.fn(), done: vi.fn() } }));
-vi.mock("@/router", () => ({ useRouter: vi.fn(() => ({ beforeEach: vi.fn(), afterEach: vi.fn() })) }));
+vi.mock("@/utils/nprogress", () => ({
+  default: { start: vi.fn(), done: vi.fn() },
+}));
+vi.mock("@/router", () => ({
+  useRouter: vi.fn(() => ({ beforeEach: vi.fn(), afterEach: vi.fn() })),
+}));
 
 // Mock useUserStore to return controlled userInfo
-const mockUserInfo = vi.hoisted(() => ({ value: null as null | { roles: string[]; perms: string[] } }));
+const mockUserInfo = vi.hoisted(() => ({
+  value: null as null | { roles: string[]; perms: string[] },
+}));
 
 vi.mock("@/store", () => ({
   useUserStore: vi.fn(() => ({ userInfo: mockUserInfo.value })),

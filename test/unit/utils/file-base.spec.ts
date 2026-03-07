@@ -71,11 +71,14 @@ describe("fileMD5()", () => {
 
   beforeEach(async () => {
     vi.resetModules();
-    mockSparkInstance = { append: vi.fn(), end: vi.fn().mockReturnValue("abc123") };
+    mockSparkInstance = {
+      append: vi.fn(),
+      end: vi.fn().mockReturnValue("abc123"),
+    };
     const SparkMD5 = await import("spark-md5");
-    (SparkMD5.default.ArrayBuffer as ReturnType<typeof vi.fn>).mockImplementation(
-      () => mockSparkInstance
-    );
+    (
+      SparkMD5.default.ArrayBuffer as ReturnType<typeof vi.fn>
+    ).mockImplementation(() => mockSparkInstance);
 
     // Stub FileReader so it fires onload immediately
     mockFileReader = {

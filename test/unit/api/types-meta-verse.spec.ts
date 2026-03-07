@@ -48,7 +48,11 @@ describe("MetaCode 接口", () => {
   });
 
   it("可选字段 lua 和 js", () => {
-    const mc: MetaCode = { blockly: "<xml/>", lua: "print(1)", js: "console.log(1)" };
+    const mc: MetaCode = {
+      blockly: "<xml/>",
+      lua: "print(1)",
+      js: "console.log(1)",
+    };
     expect(mc.lua).toBe("print(1)");
     expect(mc.js).toBe("console.log(1)");
   });
@@ -64,7 +68,11 @@ describe("Events 和 EventInput/EventOutput 接口", () => {
   });
 
   it("EventInput 支持额外字段", () => {
-    const input: EventInput = { name: "onHover", type: "hover", required: true };
+    const input: EventInput = {
+      name: "onHover",
+      type: "hover",
+      required: true,
+    };
     expect(input["required"]).toBe(true);
   });
 
@@ -87,7 +95,15 @@ describe("MetaInfo 接口", () => {
       events: null,
       title: "场景标题",
       prefab: 0,
-      image: { id: 3, md5: "abc", type: "image/png", url: "//img", filename: "img.png", size: 1000, key: "k1" },
+      image: {
+        id: 3,
+        md5: "abc",
+        type: "image/png",
+        url: "//img",
+        filename: "img.png",
+        size: 1000,
+        key: "k1",
+      },
       resources: [],
       editable: true,
       viewable: true,
@@ -110,7 +126,15 @@ describe("MetaInfo 接口", () => {
       events: null,
       title: "T",
       prefab: 0,
-      image: { id: 0, md5: "", type: "", url: "", filename: "", size: 0, key: "" },
+      image: {
+        id: 0,
+        md5: "",
+        type: "",
+        url: "",
+        filename: "",
+        size: 0,
+        key: "",
+      },
       resources: [],
       editable: false,
       viewable: false,
@@ -178,7 +202,13 @@ describe("MetaListParams 接口", () => {
   });
 
   it("完整字段赋值", () => {
-    const p: MetaListParams = { page: 1, pageSize: 20, keyword: "test", prefab: 0, author_id: 1 };
+    const p: MetaListParams = {
+      page: 1,
+      pageSize: 20,
+      keyword: "test",
+      prefab: 0,
+      author_id: 1,
+    };
     expect(p.keyword).toBe("test");
     expect(p.pageSize).toBe(20);
   });
@@ -198,7 +228,15 @@ describe("MetaListResponse 接口", () => {
 
 describe("ImageDetails 接口", () => {
   it("必填字段赋值", () => {
-    const img: ImageDetails = { id: 1, md5: "abc", type: "image/png", url: "//img.png", filename: "img.png", size: 2048, key: "k1" };
+    const img: ImageDetails = {
+      id: 1,
+      md5: "abc",
+      type: "image/png",
+      url: "//img.png",
+      filename: "img.png",
+      size: 2048,
+      key: "k1",
+    };
     expect(img.id).toBe(1);
     expect(img.size).toBe(2048);
   });
@@ -227,7 +265,13 @@ describe("VerseShare 接口", () => {
 
 describe("VerseLanguage 接口", () => {
   it("字段赋值", () => {
-    const lang: VerseLanguage = { id: 1, verse_id: 2, language: "zh-CN", name: "中文", description: "中文版" };
+    const lang: VerseLanguage = {
+      id: 1,
+      verse_id: 2,
+      language: "zh-CN",
+      name: "中文",
+      description: "中文版",
+    };
     expect(lang.language).toBe("zh-CN");
   });
 });
@@ -246,7 +290,15 @@ describe("VerseCode 接口", () => {
 
 describe("Script 接口", () => {
   it("字段赋值", () => {
-    const s: Script = { id: 1, created_at: "2024-01-01", verse_id: 2, script: "code", title: "MyScript", uuid: "uuid-s", workspace: "{}" };
+    const s: Script = {
+      id: 1,
+      created_at: "2024-01-01",
+      verse_id: 2,
+      script: "code",
+      title: "MyScript",
+      uuid: "uuid-s",
+      workspace: "{}",
+    };
     expect(s.title).toBe("MyScript");
   });
 });
@@ -277,7 +329,15 @@ describe("VerseData 接口", () => {
       editable: true,
       viewable: true,
       verseRelease: null,
-      image: { id: 0, md5: "", type: "", url: "", filename: "", size: 0, key: "" },
+      image: {
+        id: 0,
+        md5: "",
+        type: "",
+        url: "",
+        filename: "",
+        size: 0,
+        key: "",
+      },
     };
     expect(vd.name).toBe("我的场景");
     expect(vd.verseRelease).toBeNull();
@@ -296,7 +356,15 @@ describe("VerseData 接口", () => {
       editable: false,
       viewable: false,
       verseRelease: { id: 1, code: "CODE" },
-      image: { id: 1, md5: "m", type: "t", url: "u", filename: "f", size: 0, key: "k" },
+      image: {
+        id: 1,
+        md5: "m",
+        type: "t",
+        url: "u",
+        filename: "f",
+        size: 0,
+        key: "k",
+      },
       public: true,
       languages: [],
       metas: [],
@@ -310,12 +378,22 @@ describe("VerseData 接口", () => {
 
 describe("PostVerseData 接口", () => {
   it("必填字段赋值", () => {
-    const pv: PostVerseData = { description: "desc", name: "场景名", uuid: "uuid-p" };
+    const pv: PostVerseData = {
+      description: "desc",
+      name: "场景名",
+      uuid: "uuid-p",
+    };
     expect(pv.name).toBe("场景名");
   });
 
   it("可选字段赋值", () => {
-    const pv: PostVerseData = { description: "d", name: "n", uuid: "u", image_id: 1, version: 2 };
+    const pv: PostVerseData = {
+      description: "d",
+      name: "n",
+      uuid: "u",
+      image_id: 1,
+      version: 2,
+    };
     expect(pv.image_id).toBe(1);
   });
 });
@@ -339,7 +417,13 @@ describe("VerseListParams 接口", () => {
   });
 
   it("完整字段赋值", () => {
-    const p: VerseListParams = { page: 1, pageSize: 10, keyword: "k", public: true, author_id: 5 };
+    const p: VerseListParams = {
+      page: 1,
+      pageSize: 10,
+      keyword: "k",
+      public: true,
+      author_id: 5,
+    };
     expect(p.keyword).toBe("k");
   });
 });
@@ -354,10 +438,26 @@ describe("VerseListResponse 接口", () => {
 describe("VerseDetailResponse 接口", () => {
   it("包含 VerseData", () => {
     const vd: VerseData = {
-      id: 1, author_id: 1, name: "V", info: null, description: null,
-      data: {}, version: 1, uuid: "u", editable: true, viewable: true,
+      id: 1,
+      author_id: 1,
+      name: "V",
+      info: null,
+      description: null,
+      data: {},
+      version: 1,
+      uuid: "u",
+      editable: true,
+      viewable: true,
       verseRelease: null,
-      image: { id: 0, md5: "", type: "", url: "", filename: "", size: 0, key: "" },
+      image: {
+        id: 0,
+        md5: "",
+        type: "",
+        url: "",
+        filename: "",
+        size: 0,
+        key: "",
+      },
     };
     const r: VerseDetailResponse = { data: vd };
     expect(r.data.name).toBe("V");
@@ -367,10 +467,26 @@ describe("VerseDetailResponse 接口", () => {
 describe("VerseCreateResponse 接口", () => {
   it("包含 message 可选字段", () => {
     const vd: VerseData = {
-      id: 1, author_id: 1, name: "N", info: null, description: null,
-      data: {}, version: 1, uuid: "u", editable: true, viewable: true,
+      id: 1,
+      author_id: 1,
+      name: "N",
+      info: null,
+      description: null,
+      data: {},
+      version: 1,
+      uuid: "u",
+      editable: true,
+      viewable: true,
       verseRelease: null,
-      image: { id: 0, md5: "", type: "", url: "", filename: "", size: 0, key: "" },
+      image: {
+        id: 0,
+        md5: "",
+        type: "",
+        url: "",
+        filename: "",
+        size: 0,
+        key: "",
+      },
     };
     const r: VerseCreateResponse = { data: vd, message: "created" };
     expect(r.message).toBe("created");

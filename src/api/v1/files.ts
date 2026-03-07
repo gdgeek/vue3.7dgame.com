@@ -8,4 +8,3 @@ export const postFile = (data: UploadFileType) => {
     data,
   });
 };
-

@@ -48,7 +48,9 @@ describe("Upload API", () => {
     });
 
     it("returns the request result", async () => {
-      const mockResp = { data: { id: 42, url: "https://cdn.example.com/model.fbx" } };
+      const mockResp = {
+        data: { id: 42, url: "https://cdn.example.com/model.fbx" },
+      };
       request.mockResolvedValue(mockResp);
       const result = await uploadApi.uploadFile({ name: "model.fbx" });
       expect(result).toEqual(mockResp);

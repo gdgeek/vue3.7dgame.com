@@ -13,7 +13,9 @@ describe("Prefab API", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     prefabApi = await import("@/api/v1/prefab");
   });
@@ -42,7 +44,9 @@ describe("Prefab API", () => {
   // -------------------------------------------------------------------------
   describe("postPrefab()", () => {
     it("calls POST /v1/prefabs with data", async () => {
-      const data = { title: "My Prefab", scene_id: 1 } as Parameters<typeof prefabApi.postPrefab>[0];
+      const data = { title: "My Prefab", scene_id: 1 } as Parameters<
+        typeof prefabApi.postPrefab
+      >[0];
       await prefabApi.postPrefab(data);
       expect(request).toHaveBeenCalledWith(
         expect.objectContaining({ url: "/v1/prefabs", method: "post", data })
@@ -52,7 +56,9 @@ describe("Prefab API", () => {
     it("returns the request result", async () => {
       const mockResp = { data: { id: 10, title: "My Prefab" } };
       request.mockResolvedValue(mockResp);
-      const result = await prefabApi.postPrefab({ title: "My Prefab" } as Parameters<typeof prefabApi.postPrefab>[0]);
+      const result = await prefabApi.postPrefab({
+        title: "My Prefab",
+      } as Parameters<typeof prefabApi.postPrefab>[0]);
       expect(result).toEqual(mockResp);
     });
   });
@@ -154,7 +160,9 @@ describe("Prefab API", () => {
   // -------------------------------------------------------------------------
   describe("putPrefab()", () => {
     it("calls PUT /v1/prefabs/{id} with data", async () => {
-      const data = { title: "Updated Prefab" } as Parameters<typeof prefabApi.putPrefab>[1];
+      const data = { title: "Updated Prefab" } as Parameters<
+        typeof prefabApi.putPrefab
+      >[1];
       await prefabApi.putPrefab(3, data);
       expect(request).toHaveBeenCalledWith(
         expect.objectContaining({ url: "/v1/prefabs/3", method: "put", data })
@@ -164,7 +172,9 @@ describe("Prefab API", () => {
     it("returns the request result", async () => {
       const mockResp = { data: { id: 3, title: "Updated Prefab" } };
       request.mockResolvedValue(mockResp);
-      const result = await prefabApi.putPrefab(3, { title: "Updated Prefab" } as Parameters<typeof prefabApi.putPrefab>[1]);
+      const result = await prefabApi.putPrefab(3, {
+        title: "Updated Prefab",
+      } as Parameters<typeof prefabApi.putPrefab>[1]);
       expect(result).toEqual(mockResp);
     });
   });

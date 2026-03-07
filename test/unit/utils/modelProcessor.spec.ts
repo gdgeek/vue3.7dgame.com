@@ -178,7 +178,12 @@ describe("processModel()", () => {
   it("rejects when GLTFLoader.load fires an error", async () => {
     const loadError = new Error("Load failed");
     mockGLTFLoad.mockImplementation(
-      (_url: string, _onLoad: Function, _onProgress: any, onError: Function) => {
+      (
+        _url: string,
+        _onLoad: Function,
+        _onProgress: any,
+        onError: Function
+      ) => {
         onError(loadError);
       }
     );

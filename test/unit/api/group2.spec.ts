@@ -16,7 +16,9 @@ describe("group2 — getGroupOptions (lines 121-125)", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     groupApi = await import("@/api/v1/group");
   });
@@ -54,7 +56,9 @@ describe("phototype — sort='title' and sort='-title' branches (lines 43,45-46)
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: [] });
     phApi = await import("@/api/v1/phototype");
   });

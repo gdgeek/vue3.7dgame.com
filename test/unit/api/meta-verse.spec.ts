@@ -46,9 +46,9 @@ describe("createVerseFromResource()", () => {
     (metaApi.postMeta as ReturnType<typeof vi.fn>).mockResolvedValue({
       data: { id: 200 },
     });
-    (metaResourceApi.postMetaResource as ReturnType<typeof vi.fn>).mockResolvedValue(
-      { data: {} }
-    );
+    (
+      metaResourceApi.postMetaResource as ReturnType<typeof vi.fn>
+    ).mockResolvedValue({ data: {} });
     (verseApi.putVerse as ReturnType<typeof vi.fn>).mockResolvedValue({
       data: { id: 100, updated: true },
     });
@@ -239,7 +239,11 @@ describe("createVerseFromResource()", () => {
       new Error("network error")
     );
     await expect(
-      metaVerseApi.createVerseFromResource("Polygen", "Test Scene", mockResource)
+      metaVerseApi.createVerseFromResource(
+        "Polygen",
+        "Test Scene",
+        mockResource
+      )
     ).rejects.toThrow("network error");
   });
 
@@ -248,7 +252,11 @@ describe("createVerseFromResource()", () => {
       new Error("meta error")
     );
     await expect(
-      metaVerseApi.createVerseFromResource("Polygen", "Test Scene", mockResource)
+      metaVerseApi.createVerseFromResource(
+        "Polygen",
+        "Test Scene",
+        mockResource
+      )
     ).rejects.toThrow("meta error");
   });
 
@@ -257,18 +265,31 @@ describe("createVerseFromResource()", () => {
       new Error("put verse error")
     );
     await expect(
-      metaVerseApi.createVerseFromResource("Polygen", "Test Scene", mockResource)
+      metaVerseApi.createVerseFromResource(
+        "Polygen",
+        "Test Scene",
+        mockResource
+      )
     ).rejects.toThrow("put verse error");
   });
 
   it("putVerse data string is valid JSON", async () => {
-    await metaVerseApi.createVerseFromResource("Polygen", "Test Scene", mockResource);
-    const callArgs = (verseApi.putVerse as ReturnType<typeof vi.fn>).mock.calls[0];
+    await metaVerseApi.createVerseFromResource(
+      "Polygen",
+      "Test Scene",
+      mockResource
+    );
+    const callArgs = (verseApi.putVerse as ReturnType<typeof vi.fn>).mock
+      .calls[0];
     expect(() => JSON.parse(callArgs[1].data)).not.toThrow();
   });
 
   it("postMeta is called exactly once", async () => {
-    await metaVerseApi.createVerseFromResource("Polygen", "Test Scene", mockResource);
+    await metaVerseApi.createVerseFromResource(
+      "Polygen",
+      "Test Scene",
+      mockResource
+    );
     expect(metaApi.postMeta).toHaveBeenCalledTimes(1);
   });
 
@@ -282,12 +303,12 @@ describe("createVerseFromResource()", () => {
       order.push("postMeta");
       return Promise.resolve({ data: { id: 200 } });
     });
-    (metaResourceApi.postMetaResource as ReturnType<typeof vi.fn>).mockImplementation(
-      () => {
-        order.push("postMetaResource");
-        return Promise.resolve({ data: {} });
-      }
-    );
+    (
+      metaResourceApi.postMetaResource as ReturnType<typeof vi.fn>
+    ).mockImplementation(() => {
+      order.push("postMetaResource");
+      return Promise.resolve({ data: {} });
+    });
     (verseApi.putVerse as ReturnType<typeof vi.fn>).mockImplementation(() => {
       order.push("putVerse");
       return Promise.resolve({ data: { id: 100 } });

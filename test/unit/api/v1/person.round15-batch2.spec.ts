@@ -8,7 +8,9 @@ describe("api/v1/person", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     api = await import("@/api/v1/person");
   });
@@ -16,18 +18,29 @@ describe("api/v1/person", () => {
   it("postPerson posts data", async () => {
     const data = { username: "u" };
     await api.postPerson(data);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/people", method: "post", data });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/people",
+      method: "post",
+      data,
+    });
   });
 
   it("deletePerson deletes by id", async () => {
     await api.deletePerson(2);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/people/2", method: "delete" });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/people/2",
+      method: "delete",
+    });
   });
 
   it("putPerson updates auth", async () => {
     const data = { id: 1, auth: "admin" };
     await api.putPerson(data);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/people/auth", method: "put", data });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/people/auth",
+      method: "put",
+      data,
+    });
   });
 
   it("getPerson includes default sort/expand", async () => {
@@ -40,7 +53,9 @@ describe("api/v1/person", () => {
 
   it("getPerson includes search conditionally", async () => {
     await api.getPerson("-created_at", "john");
-    expect(request.mock.calls[0][0].url).toContain("PersonSearch%5Busername%5D=john");
+    expect(request.mock.calls[0][0].url).toContain(
+      "PersonSearch%5Busername%5D=john"
+    );
   });
 
   it("getPerson omits search when empty", async () => {

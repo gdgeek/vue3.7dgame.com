@@ -123,8 +123,8 @@ describe("PrivacyPolicyTab", () => {
 
   it("timeline items carry the correct timestamps", () => {
     const items = result.el.querySelectorAll('[data-stub="ElTimelineItem"]');
-    const timestamps = Array.from(items).map((n) =>
-      (n as HTMLElement).dataset.ts,
+    const timestamps = Array.from(items).map(
+      (n) => (n as HTMLElement).dataset.ts
     );
     expect(timestamps).toContain("2025-04-16");
     expect(timestamps).toContain("2025-01-10");
@@ -138,7 +138,9 @@ describe("PrivacyPolicyTab", () => {
   it("renders the contact section", () => {
     const section = result.el.querySelector("section.contact");
     expect(section).not.toBeNull();
-    expect(section!.querySelector('[data-stub="ElDescriptions"]')).not.toBeNull();
+    expect(
+      section!.querySelector('[data-stub="ElDescriptions"]')
+    ).not.toBeNull();
   });
 
   it("contact section contains correct email address", () => {

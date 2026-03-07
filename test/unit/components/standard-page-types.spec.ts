@@ -7,48 +7,67 @@
 import { describe, it, expect, vi } from "vitest";
 
 // ── Mock Vue SFCs so they don't need a full build pipeline ──────────────
-vi.mock("@/components/StandardPage/PageActionBar.vue",  () => ({ default: { name: "PageActionBar"  } }));
-vi.mock("@/components/StandardPage/ViewContainer.vue",  () => ({ default: { name: "ViewContainer"  } }));
-vi.mock("@/components/StandardPage/PagePagination.vue", () => ({ default: { name: "PagePagination" } }));
-vi.mock("@/components/StandardPage/PageFilter.vue",     () => ({ default: { name: "PageFilter"     } }));
-vi.mock("@/components/StandardPage/EmptyState.vue",     () => ({ default: { name: "EmptyState"     } }));
-vi.mock("@/components/StandardPage/StandardCard.vue",   () => ({ default: { name: "StandardCard"   } }));
-vi.mock("@/components/StandardPage/DetailPanel.vue",    () => ({ default: { name: "DetailPanel"    } }));
-vi.mock("@/components/ThemeSwitcher/ThemeSwitcher.vue", () => ({ default: { name: "ThemeSwitcher"  } }));
+vi.mock("@/components/StandardPage/PageActionBar.vue", () => ({
+  default: { name: "PageActionBar" },
+}));
+vi.mock("@/components/StandardPage/ViewContainer.vue", () => ({
+  default: { name: "ViewContainer" },
+}));
+vi.mock("@/components/StandardPage/PagePagination.vue", () => ({
+  default: { name: "PagePagination" },
+}));
+vi.mock("@/components/StandardPage/PageFilter.vue", () => ({
+  default: { name: "PageFilter" },
+}));
+vi.mock("@/components/StandardPage/EmptyState.vue", () => ({
+  default: { name: "EmptyState" },
+}));
+vi.mock("@/components/StandardPage/StandardCard.vue", () => ({
+  default: { name: "StandardCard" },
+}));
+vi.mock("@/components/StandardPage/DetailPanel.vue", () => ({
+  default: { name: "DetailPanel" },
+}));
+vi.mock("@/components/ThemeSwitcher/ThemeSwitcher.vue", () => ({
+  default: { name: "ThemeSwitcher" },
+}));
 
 // ============================================================================
 // StandardPage/types.ts – runtime shape checks
 // ============================================================================
 describe("src/components/StandardPage/types.ts – type contracts", () => {
   it("PageActionBarProps accepts minimal required fields", () => {
-    const props: import("@/components/StandardPage/types").PageActionBarProps = {
-      title: "My Page",
-    };
+    const props: import("@/components/StandardPage/types").PageActionBarProps =
+      {
+        title: "My Page",
+      };
     expect(props.title).toBe("My Page");
   });
 
   it("PageActionBarProps optional fields default to undefined", () => {
-    const props: import("@/components/StandardPage/types").PageActionBarProps = {
-      title: "Test",
-    };
+    const props: import("@/components/StandardPage/types").PageActionBarProps =
+      {
+        title: "Test",
+      };
     expect(props.subtitle).toBeUndefined();
     expect(props.showSearch).toBeUndefined();
     expect(props.showSort).toBeUndefined();
   });
 
   it("PageActionBarProps accepts all optional fields", () => {
-    const props: import("@/components/StandardPage/types").PageActionBarProps = {
-      title: "Full",
-      subtitle: "sub",
-      searchPlaceholder: "search…",
-      showSearch: true,
-      showSort: false,
-      showViewToggle: true,
-      defaultView: "grid",
-      defaultSort: "-created_at",
-      sortByName: "name",
-      sortByTime: "created_at",
-    };
+    const props: import("@/components/StandardPage/types").PageActionBarProps =
+      {
+        title: "Full",
+        subtitle: "sub",
+        searchPlaceholder: "search…",
+        showSearch: true,
+        showSort: false,
+        showViewToggle: true,
+        defaultView: "grid",
+        defaultSort: "-created_at",
+        sortByName: "name",
+        sortByTime: "created_at",
+      };
     expect(props.defaultView).toBe("grid");
     expect(props.showSearch).toBe(true);
   });
@@ -70,7 +89,9 @@ describe("src/components/StandardPage/types.ts – type contracts", () => {
   });
 
   it("ViewContainerProps accepts items array and viewMode", () => {
-    const p: import("@/components/StandardPage/types").ViewContainerProps<{ id: number }> = {
+    const p: import("@/components/StandardPage/types").ViewContainerProps<{
+      id: number;
+    }> = {
       items: [{ id: 1 }],
       viewMode: "list",
     };

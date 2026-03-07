@@ -139,7 +139,10 @@ describe("useDomainStore — fetchDefaultInfo language & style lock (domain2)", 
     });
 
     it("fetchDefaultInfo still updates defaultInfo when lang is locked", async () => {
-      const info = makeDefaultInfo({ lang: "zh-CN", homepage: "https://locked.com" });
+      const info = makeDefaultInfo({
+        lang: "zh-CN",
+        homepage: "https://locked.com",
+      });
       getDomainDefault.mockResolvedValue({ data: info });
 
       const store = useDomainStore();
@@ -204,7 +207,10 @@ describe("useDomainStore — fetchDefaultInfo language & style lock (domain2)", 
     });
 
     it("style=1 still updates defaultInfo correctly", async () => {
-      const info = makeDefaultInfo({ style: 1, homepage: "https://styled.com" });
+      const info = makeDefaultInfo({
+        style: 1,
+        homepage: "https://styled.com",
+      });
       getDomainDefault.mockResolvedValue({ data: info });
 
       const store = useDomainStore();

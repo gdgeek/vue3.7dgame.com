@@ -125,7 +125,10 @@ const fetchGroup = async () => {
 // Loaded callback for MrPPVersePage
 const handleLoaded = async (
   data: { sorted: string; current: number; searched?: string },
-  result: (payload: { data: unknown[]; pagination: { current: number; count: number; size: number; total: number } }) => void
+  result: (payload: {
+    data: unknown[];
+    pagination: { current: number; count: number; size: number; total: number };
+  }) => void
 ) => {
   if (!groupId.value) {
     result({

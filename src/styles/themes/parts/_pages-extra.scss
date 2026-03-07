@@ -11,16 +11,16 @@
   .meta-library,
   .verse-library,
   .help-center {
-    background: #0B0E14 !important;
+    background: #0b0e14 !important;
   }
-  
+
   .library-title,
   .hero-title,
   .section-title {
-    color: #00F2FF !important;
+    color: #00f2ff !important;
     text-shadow: 0 0 20px rgba(0, 242, 255, 0.4) !important;
   }
-  
+
   .scene-card,
   .resource-card,
   .video-card,
@@ -30,13 +30,15 @@
     background: rgba(18, 24, 32, 0.75) !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
-    
+
     &:hover {
       border-color: rgba(0, 242, 255, 0.4) !important;
-      box-shadow: 0 0 30px rgba(0, 242, 255, 0.2), inset 0 0 0 1px rgba(0, 242, 255, 0.15) !important;
+      box-shadow:
+        0 0 30px rgba(0, 242, 255, 0.2),
+        inset 0 0 0 1px rgba(0, 242, 255, 0.15) !important;
     }
   }
-  
+
   // 微信交流群卡片 - 赛博科技风格
   .wechat-card {
     background: rgba(18, 24, 32, 0.85) !important;
@@ -45,45 +47,55 @@
     border: 1px solid rgba(0, 242, 255, 0.25) !important;
     position: relative;
     overflow: hidden;
-    
+
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(135deg, rgba(0, 242, 255, 0.1) 0%, transparent 50%, rgba(255, 51, 102, 0.05) 100%) !important;
+      background: linear-gradient(
+        135deg,
+        rgba(0, 242, 255, 0.1) 0%,
+        transparent 50%,
+        rgba(255, 51, 102, 0.05) 100%
+      ) !important;
       pointer-events: none;
     }
-    
+
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       top: -50%;
       left: -50%;
       width: 200%;
       height: 200%;
-      background: conic-gradient(from 0deg, transparent, rgba(0, 242, 255, 0.1), transparent 30%);
+      background: conic-gradient(
+        from 0deg,
+        transparent,
+        rgba(0, 242, 255, 0.1),
+        transparent 30%
+      );
       animation: cyber-rotate 8s linear infinite;
       pointer-events: none;
     }
-    
+
     .card-title {
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       text-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
     }
-    
+
     .card-desc {
-      color: #8B9DC3 !important;
+      color: #8b9dc3 !important;
     }
-    
+
     .qrcode-wrapper {
       border: 1px solid rgba(0, 242, 255, 0.3) !important;
       box-shadow: 0 0 20px rgba(0, 242, 255, 0.2) !important;
     }
   }
-  
+
   .app-footer {
     background: rgba(8, 10, 15, 0.95) !important;
     backdrop-filter: blur(20px) !important;
@@ -93,97 +105,109 @@
 }
 
 @keyframes cyber-rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
-
 
 // 教育友好主题
 .theme-edu-friendly {
   .meta-library,
   .verse-library {
-    background: linear-gradient(180deg, #FFF8F5 0%, #FFE8DD 100%) !important;
+    background: linear-gradient(180deg, #fff8f5 0%, #ffe8dd 100%) !important;
   }
-  
+
   .help-center {
-    background: linear-gradient(180deg, #FFF8F5 0%, #FFE8DD 100%) !important;
+    background: linear-gradient(180deg, #fff8f5 0%, #ffe8dd 100%) !important;
   }
-  
+
   .scene-card,
   .resource-card,
   .video-card {
     border-width: 2px !important;
-    
+
     &:hover {
       transform: translateY(-6px) scale(1.02) !important;
     }
   }
-  
+
   // 微信交流群卡片 - 教育友好风格
   .wechat-card {
-    background: linear-gradient(135deg, #FFFFFF 0%, #FFF8F5 100%) !important;
-    border: 2px solid #FFE0CC !important;
+    background: linear-gradient(135deg, #ffffff 0%, #fff8f5 100%) !important;
+    border: 2px solid #ffe0cc !important;
     border-radius: 28px !important;
     position: relative;
     overflow: hidden;
-    
+
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: -20px;
       right: -20px;
       width: 120px;
       height: 120px;
-      background: radial-gradient(circle, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
+      background: radial-gradient(
+        circle,
+        rgba(255, 107, 53, 0.15) 0%,
+        transparent 70%
+      );
       pointer-events: none;
     }
-    
+
     &::after {
-      content: '🎉';
+      content: "🎉";
       position: absolute;
       top: 16px;
       right: 16px;
       font-size: 24px;
       animation: edu-bounce 2s ease-in-out infinite;
     }
-    
+
     .card-title {
-      color: #FF6B35 !important;
+      color: #ff6b35 !important;
       font-weight: 700 !important;
     }
-    
+
     .card-desc {
-      color: #8B6F5C !important;
+      color: #8b6f5c !important;
     }
-    
+
     .qrcode-wrapper {
-      border: 2px solid #FFE0CC !important;
+      border: 2px solid #ffe0cc !important;
       border-radius: 16px !important;
-      background: #FFFFFF !important;
+      background: #ffffff !important;
     }
-    
+
     &:hover {
       transform: translateY(-4px) scale(1.01) !important;
       box-shadow: 0 12px 32px rgba(255, 107, 53, 0.2) !important;
     }
   }
-  
+
   .upload-btn,
   .edit-btn,
   .enter-editor-btn {
-    background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%) !important;
+    background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%) !important;
     box-shadow: 0 6px 16px -4px rgba(255, 107, 53, 0.35) !important;
   }
-  
+
   .app-footer {
-    background: linear-gradient(180deg, #ffffff 0%, #FFF8F5 100%) !important;
-    border-top-color: #FFE4DB !important;
+    background: linear-gradient(180deg, #ffffff 0%, #fff8f5 100%) !important;
+    border-top-color: #ffe4db !important;
   }
 }
 
 @keyframes edu-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 // 极简纯净主题
@@ -193,7 +217,7 @@
   .help-center {
     background: #ffffff !important;
   }
-  
+
   .scene-card,
   .resource-card,
   .video-card,
@@ -201,55 +225,55 @@
   .faq-item {
     border-radius: 0 !important;
     box-shadow: none !important;
-    
+
     &:hover {
       border-color: #000000 !important;
       transform: none !important;
     }
   }
-  
+
   // 微信交流群卡片 - 极简纯净风格
   .wechat-card {
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     border: 1px solid #000000 !important;
     border-radius: 0 !important;
-    
+
     &::before {
       display: none !important;
     }
-    
+
     .card-title {
       color: #000000 !important;
       font-weight: 500 !important;
       letter-spacing: 0.5px !important;
     }
-    
+
     .card-desc {
       color: #666666 !important;
     }
-    
+
     .qrcode-wrapper {
       border: 1px solid #000000 !important;
       border-radius: 0 !important;
-      background: #FFFFFF !important;
+      background: #ffffff !important;
     }
-    
+
     &:hover {
       border-width: 2px !important;
     }
   }
-  
+
   .upload-btn,
   .edit-btn,
   .enter-editor-btn {
     background: #000000 !important;
     border-radius: 0 !important;
-    
+
     &:hover {
       background: #333333 !important;
     }
   }
-  
+
   .app-footer {
     background: #fafafa !important;
     border-top-color: #e0e0e0 !important;
@@ -261,9 +285,9 @@
   .meta-library,
   .verse-library,
   .help-center {
-    background: #FAFAF8 !important;
+    background: #fafaf8 !important;
   }
-  
+
   .library-title,
   .hero-title,
   .section-title {
@@ -272,79 +296,79 @@
     letter-spacing: 2px !important;
     color: #000000 !important;
   }
-  
+
   .scene-card,
   .resource-card,
   .video-card,
   .doc-item,
   .faq-item {
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     border: 3px solid #000000 !important;
     border-radius: 8px !important;
     box-shadow: 5px 5px 0px #000000 !important;
-    
+
     &:hover {
       transform: translate(-3px, -3px) !important;
       box-shadow: 8px 8px 0px #000000 !important;
     }
   }
-  
+
   // 微信交流群卡片 - 新粗犷主义风格
   .wechat-card {
-    background: #00FF88 !important;
+    background: #00ff88 !important;
     border: 3px solid #000000 !important;
     border-radius: 8px !important;
     box-shadow: 6px 6px 0px #000000 !important;
     position: relative;
-    
+
     &::before {
       display: none !important;
     }
-    
+
     .card-title {
       color: #000000 !important;
       font-weight: 900 !important;
       text-transform: uppercase !important;
       letter-spacing: 1px !important;
     }
-    
+
     .card-desc {
       color: #000000 !important;
       font-weight: 500 !important;
     }
-    
+
     .qrcode-wrapper {
-      background: #FFFFFF !important;
+      background: #ffffff !important;
       border: 3px solid #000000 !important;
       border-radius: 4px !important;
       box-shadow: 4px 4px 0px #000000 !important;
     }
-    
+
     &:hover {
       transform: translate(-4px, -4px) !important;
       box-shadow: 10px 10px 0px #000000 !important;
     }
   }
-  
+
   .upload-btn,
   .edit-btn,
   .enter-editor-btn {
-    background: #FFF000 !important;
+    background: #fff000 !important;
     color: #000000 !important;
     border: 3px solid #000000 !important;
     border-radius: 8px !important;
     box-shadow: 4px 4px 0px #000000 !important;
     font-weight: 700 !important;
     text-transform: uppercase !important;
-    
+
     &:hover {
       transform: translate(-2px, -2px) !important;
       box-shadow: 6px 6px 0px #000000 !important;
     }
   }
-  
+
   .app-footer {
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     border-top: 3px solid #000000 !important;
   }
 }
@@ -354,141 +378,163 @@
   .meta-library,
   .verse-library,
   .help-center {
-    background: #0B0E14 !important;
+    background: #0b0e14 !important;
   }
-  
+
   .library-title,
   .hero-title,
   .section-title {
-    color: #FFFFFF !important;
+    color: #ffffff !important;
   }
-  
+
   .scene-card,
   .resource-card,
   .video-card,
   .doc-item,
   .faq-item {
     background: #151921 !important;
-    border: 1px solid #21262D !important;
-    
+    border: 1px solid #21262d !important;
+
     &:hover {
-      border-color: #30363D !important;
+      border-color: #30363d !important;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
     }
   }
-  
+
   // 微信交流群卡片 - 深空专业风格
   .wechat-card {
-    background: linear-gradient(135deg, #151921 0%, #1A1F2A 100%) !important;
-    border: 1px solid #21262D !important;
+    background: linear-gradient(135deg, #151921 0%, #1a1f2a 100%) !important;
+    border: 1px solid #21262d !important;
     position: relative;
     overflow: hidden;
-    
+
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(135deg, rgba(45, 104, 255, 0.08) 0%, transparent 60%) !important;
+      background: linear-gradient(
+        135deg,
+        rgba(45, 104, 255, 0.08) 0%,
+        transparent 60%
+      ) !important;
       pointer-events: none;
     }
-    
+
     .card-title {
-      color: #E6EDF3 !important;
+      color: #e6edf3 !important;
     }
-    
+
     .card-desc {
-      color: #8B949E !important;
+      color: #8b949e !important;
     }
-    
+
     .qrcode-wrapper {
-      background: #21262D !important;
-      border: 1px solid #30363D !important;
+      background: #21262d !important;
+      border: 1px solid #30363d !important;
     }
-    
+
     &:hover {
-      border-color: #2D68FF !important;
+      border-color: #2d68ff !important;
       box-shadow: 0 8px 32px rgba(45, 104, 255, 0.15) !important;
     }
   }
-  
+
   .upload-btn,
   .edit-btn,
   .enter-editor-btn {
-    background: linear-gradient(135deg, #1A3D8F 0%, #2D68FF 100%) !important;
+    background: linear-gradient(135deg, #1a3d8f 0%, #2d68ff 100%) !important;
     border: none !important;
-    color: #FFFFFF !important;
+    color: #ffffff !important;
   }
-  
+
   .app-footer {
-    background: #080A0F !important;
-    border-top: 1px solid #21262D !important;
+    background: #080a0f !important;
+    border-top: 1px solid #21262d !important;
   }
 }
-
 
 // 现代蓝主题
 .theme-modern-blue {
   .meta-library,
   .verse-library {
-    background: var(--bg-page-gradient, linear-gradient(180deg, #f0f4f8 0%, #e2e8f0 100%)) !important;
+    background: var(
+      --bg-page-gradient,
+      linear-gradient(180deg, #f0f4f8 0%, #e2e8f0 100%)
+    ) !important;
   }
-  
+
   .help-center {
-    background: var(--bg-page-gradient, linear-gradient(180deg, #f0f4f8 0%, #e2e8f0 100%)) !important;
+    background: var(
+      --bg-page-gradient,
+      linear-gradient(180deg, #f0f4f8 0%, #e2e8f0 100%)
+    ) !important;
   }
-  
+
   // 微信交流群卡片 - 现代蓝风格（默认）
   .wechat-card {
-    background: linear-gradient(135deg, var(--bg-card, #FFFFFF) 0%, var(--bg-hover, #F8FAFC) 100%) !important;
+    background: linear-gradient(
+      135deg,
+      var(--bg-card, #ffffff) 0%,
+      var(--bg-hover, #f8fafc) 100%
+    ) !important;
     border: 1px solid var(--primary-light, rgba(0, 186, 255, 0.2)) !important;
     position: relative;
     overflow: hidden;
-    
+
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(135deg, var(--primary-light, rgba(0, 186, 255, 0.08)) 0%, var(--success-light, rgba(34, 197, 94, 0.05)) 100%) !important;
+      background: linear-gradient(
+        135deg,
+        var(--primary-light, rgba(0, 186, 255, 0.08)) 0%,
+        var(--success-light, rgba(34, 197, 94, 0.05)) 100%
+      ) !important;
       pointer-events: none;
     }
-    
+
     .card-title {
       color: var(--text-primary, #1e293b) !important;
     }
-    
+
     .card-desc {
       color: var(--text-secondary, #64748b) !important;
     }
-    
+
     .qrcode-wrapper {
-      background: var(--bg-card, #FFFFFF) !important;
+      background: var(--bg-card, #ffffff) !important;
       border: 1px solid var(--border-color, #e2e8f0) !important;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
     }
-    
+
     &:hover {
       border-color: var(--primary-color, rgba(0, 186, 255, 0.4)) !important;
-      box-shadow: var(--shadow-primary, 0 8px 24px rgba(0, 186, 255, 0.12)) !important;
+      box-shadow: var(
+        --shadow-primary,
+        0 8px 24px rgba(0, 186, 255, 0.12)
+      ) !important;
     }
   }
-  
+
   .upload-btn,
   .edit-btn,
   .enter-editor-btn {
-    background: var(--primary-gradient, linear-gradient(135deg, #00BAFF 0%, #0099DD 100%)) !important;
+    background: var(
+      --primary-gradient,
+      linear-gradient(135deg, #00baff 0%, #0099dd 100%)
+    ) !important;
   }
-  
+
   .app-footer {
     background: var(--bg-card, #ffffff) !important;
   }
 }
-
 
 // ============================================
 // 视频教程页面主题适配
@@ -497,53 +543,52 @@
 .video-tutorials {
   background: var(--bg-page) !important;
   font-family: var(--font-family) !important;
-  
+
   .page-title {
     color: var(--text-primary) !important;
   }
-  
+
   .back-btn {
     color: var(--text-secondary) !important;
     border-radius: var(--radius-sm) !important;
-    
+
     &:hover {
       background: var(--bg-hover) !important;
       color: var(--primary-color) !important;
     }
   }
-  
+
   .video-list {
     .video-item {
       background: var(--bg-card) !important;
       border-color: var(--border-color) !important;
       border-radius: var(--radius-lg) !important;
-      
+
       &:hover {
         border-color: var(--primary-color) !important;
         box-shadow: var(--shadow-md) !important;
       }
-      
+
       &.active {
         border-color: var(--primary-color) !important;
         background: var(--primary-light) !important;
       }
     }
-    
+
     .video-title {
       color: var(--text-primary) !important;
     }
-    
+
     .video-desc {
       color: var(--text-secondary) !important;
     }
   }
-  
+
   .video-player-wrapper {
     background: var(--bg-card) !important;
     border-radius: var(--radius-lg) !important;
   }
 }
-
 
 // ============================================
 // 公开场景库页面主题适配（复用 verse-library 样式）
@@ -554,15 +599,15 @@
 // 各主题对视频教程页面的特殊样式
 .theme-cyber-tech {
   .video-tutorials {
-    background: #0B0E14 !important;
+    background: #0b0e14 !important;
   }
-  
+
   .video-item {
     border: 1px solid rgba(0, 242, 255, 0.15) !important;
     background: rgba(18, 24, 32, 0.75) !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
-    
+
     &:hover,
     &.active {
       border-color: rgba(0, 242, 255, 0.4) !important;
@@ -573,12 +618,12 @@
 
 .theme-edu-friendly {
   .video-tutorials {
-    background: linear-gradient(180deg, #FFF8F5 0%, #FFE8DD 100%) !important;
+    background: linear-gradient(180deg, #fff8f5 0%, #ffe8dd 100%) !important;
   }
-  
+
   .video-item {
     border-width: 2px !important;
-    
+
     &:hover {
       transform: translateY(-4px) !important;
     }
@@ -589,11 +634,11 @@
   .video-tutorials {
     background: #ffffff !important;
   }
-  
+
   .video-item {
     border-radius: 0 !important;
     box-shadow: none !important;
-    
+
     &:hover {
       border-color: #000000 !important;
       transform: none !important;
@@ -603,61 +648,63 @@
 
 .theme-modern-blue {
   .video-tutorials {
-    background: var(--bg-page-gradient, linear-gradient(180deg, #f0f4f8 0%, #e2e8f0 100%)) !important;
+    background: var(
+      --bg-page-gradient,
+      linear-gradient(180deg, #f0f4f8 0%, #e2e8f0 100%)
+    ) !important;
   }
 }
 
 .theme-neo-brutalism {
   .video-tutorials {
-    background: #FAFAF8 !important;
+    background: #fafaf8 !important;
   }
-  
+
   .video-item {
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     border: 3px solid #000000 !important;
     border-radius: 8px !important;
     box-shadow: 5px 5px 0px #000000 !important;
-    
+
     &:hover {
       transform: translate(-3px, -3px) !important;
       box-shadow: 8px 8px 0px #000000 !important;
     }
-    
+
     &.active {
-      background: #FFF000 !important;
+      background: #fff000 !important;
     }
   }
 }
 
 .theme-deep-space {
   .video-tutorials {
-    background: #0B0E14 !important;
+    background: #0b0e14 !important;
   }
-  
+
   .video-item {
     background: #151921 !important;
-    border: 1px solid #21262D !important;
-    
+    border: 1px solid #21262d !important;
+
     &:hover {
-      border-color: #30363D !important;
+      border-color: #30363d !important;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
     }
-    
+
     &.active {
-      border-color: #2D68FF !important;
+      border-color: #2d68ff !important;
       background: rgba(45, 104, 255, 0.1) !important;
     }
   }
-  
+
   .video-title {
-    color: #FFFFFF !important;
+    color: #ffffff !important;
   }
-  
+
   .video-desc {
-    color: #B0B3B8 !important;
+    color: #b0b3b8 !important;
   }
 }
-
 
 // ============================================
 // Meta 详情面板主题适配
@@ -667,7 +714,7 @@
   .cover-label {
     color: var(--text-primary) !important;
   }
-  
+
   .upload-placeholder {
     background: var(--bg-hover) !important;
     border-color: var(--border-color) !important;
@@ -677,7 +724,6 @@
 
 // MetaDetailPanel 和 VerseDetailPanel 已在 .detail-panel 中适配
 
-
 // ============================================
 // 设置页面主题适配
 // ============================================
@@ -686,206 +732,210 @@
   background: var(--bg-page) !important;
   font-family: var(--font-family) !important;
   min-height: 100vh;
-  
+
   .page-title {
     color: var(--text-primary) !important;
   }
-  
+
   .page-subtitle {
     color: var(--text-secondary) !important;
   }
-  
+
   .settings-card {
     background: var(--bg-card) !important;
     border: var(--border-width) solid var(--border-color) !important;
     border-radius: var(--radius-lg) !important;
-    
+
     .card-title {
       color: var(--text-primary) !important;
     }
   }
-  
+
   .avatar-placeholder {
     background: var(--bg-hover) !important;
     color: var(--text-muted) !important;
   }
-  
+
   .avatar-hint {
     color: var(--text-muted) !important;
   }
-  
+
   .btn-primary {
     background: var(--primary-color) !important;
     color: var(--text-inverse) !important;
     border-radius: var(--radius-full) !important;
-    
+
     &:hover {
       background: var(--primary-hover) !important;
     }
   }
-  
+
   .btn-secondary {
     background: var(--bg-card) !important;
     border: var(--border-width) solid var(--border-color) !important;
     color: var(--text-secondary) !important;
     border-radius: var(--radius-full) !important;
-    
+
     &:hover {
       border-color: var(--border-color-hover) !important;
       color: var(--text-primary) !important;
     }
   }
-  
+
   .btn-link {
     color: var(--primary-color) !important;
-    
+
     &:hover {
       color: var(--primary-hover) !important;
     }
   }
-  
+
   .security-item {
     border-bottom: var(--border-width) solid var(--border-color) !important;
-    
+
     .security-icon {
       background: var(--primary-light) !important;
       color: var(--primary-color) !important;
       border-radius: var(--radius-md) !important;
     }
-    
+
     .security-label {
       color: var(--text-primary) !important;
     }
-    
+
     .security-value {
       color: var(--text-muted) !important;
     }
   }
-  
+
   .subscription-card {
-    background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg-card) 100%) !important;
+    background: linear-gradient(
+      135deg,
+      var(--primary-light) 0%,
+      var(--bg-card) 100%
+    ) !important;
     border: var(--border-width) solid var(--primary-color) !important;
     border-radius: var(--radius-lg) !important;
-    
+
     .subscription-badge {
       background: var(--primary-color) !important;
       color: var(--text-inverse) !important;
     }
-    
+
     .subscription-title {
       color: var(--text-primary) !important;
     }
-    
+
     .subscription-desc {
       color: var(--text-secondary) !important;
     }
-    
+
     .subscription-expiry {
       color: var(--primary-color) !important;
     }
-    
+
     .subscription-decoration {
       color: var(--primary-light) !important;
     }
   }
-  
+
   .btn-outline {
     background: var(--bg-card) !important;
     border: var(--border-width) solid var(--primary-color) !important;
     color: var(--primary-color) !important;
     border-radius: var(--radius-full) !important;
-    
+
     &:hover {
       background: var(--primary-light) !important;
     }
   }
-  
+
   .danger-card {
     background: var(--danger-light) !important;
     border: var(--border-width) solid var(--danger-color) !important;
     border-radius: var(--radius-lg) !important;
-    
+
     .danger-title {
       color: var(--danger-color) !important;
     }
-    
+
     .danger-desc {
       color: var(--text-secondary) !important;
     }
   }
-  
+
   .btn-danger-link {
     color: var(--danger-color) !important;
-    
+
     &:hover {
       background: var(--danger-light) !important;
     }
   }
-  
+
   // 对话框样式
   .custom-dialog {
     .el-dialog {
       background: var(--bg-card) !important;
       border-radius: var(--radius-lg) !important;
     }
-    
+
     .dialog-title {
       color: var(--text-primary) !important;
     }
-    
+
     .dialog-hint-box {
       border-radius: var(--radius-md) !important;
-      
+
       &.info {
         background: var(--info-light) !important;
         color: var(--info-color) !important;
       }
-      
+
       &.warning {
         background: var(--warning-light) !important;
         color: var(--warning-color) !important;
       }
-      
+
       &.danger {
         background: var(--danger-light) !important;
         color: var(--danger-color) !important;
       }
     }
-    
+
     .dialog-btn-primary {
       background: var(--primary-color) !important;
       color: var(--text-inverse) !important;
       border-radius: var(--radius-full) !important;
-      
+
       &:hover {
         background: var(--primary-hover) !important;
       }
     }
-    
+
     .dialog-btn-secondary {
       background: var(--bg-card) !important;
       border: var(--border-width) solid var(--border-color) !important;
       color: var(--text-secondary) !important;
       border-radius: var(--radius-full) !important;
-      
+
       &:hover {
         border-color: var(--border-color-hover) !important;
       }
     }
   }
-  
+
   // 裁剪对话框
   .crop-dialog {
     .cropper-content {
       background: var(--bg-hover) !important;
       border-radius: var(--radius-md) !important;
     }
-    
+
     .tool-btn {
       background: var(--bg-hover) !important;
       color: var(--text-secondary) !important;
       border-radius: var(--radius-sm) !important;
-      
+
       &:hover {
         background: var(--bg-active) !important;
         color: var(--primary-color) !important;
@@ -897,24 +947,28 @@
 // 设置页面各主题特殊样式
 .theme-cyber-tech {
   .profile-settings {
-    background: #0B0E14 !important;
-    
+    background: #0b0e14 !important;
+
     .settings-card {
       background: rgba(18, 24, 32, 0.75) !important;
       backdrop-filter: blur(20px) !important;
       -webkit-backdrop-filter: blur(20px) !important;
       border: 1px solid rgba(0, 242, 255, 0.15) !important;
-      
+
       &:hover {
         border-color: rgba(0, 242, 255, 0.3) !important;
       }
     }
-    
+
     .subscription-card {
-      background: linear-gradient(135deg, rgba(0, 242, 255, 0.1) 0%, rgba(18, 24, 32, 0.75) 100%) !important;
+      background: linear-gradient(
+        135deg,
+        rgba(0, 242, 255, 0.1) 0%,
+        rgba(18, 24, 32, 0.75) 100%
+      ) !important;
       border-color: rgba(0, 242, 255, 0.3) !important;
     }
-    
+
     .danger-card {
       background: rgba(255, 51, 102, 0.1) !important;
       border-color: rgba(255, 51, 102, 0.3) !important;
@@ -924,23 +978,27 @@
 
 .theme-edu-friendly {
   .profile-settings {
-    background: linear-gradient(180deg, #FFF8F5 0%, #FFE8DD 100%) !important;
-    
+    background: linear-gradient(180deg, #fff8f5 0%, #ffe8dd 100%) !important;
+
     .settings-card {
       border-width: 2px !important;
-      
+
       &:hover {
         transform: translateY(-2px);
       }
     }
-    
+
     .subscription-card {
-      background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, #ffffff 100%) !important;
-      border-color: #FF6B35 !important;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 107, 53, 0.1) 0%,
+        #ffffff 100%
+      ) !important;
+      border-color: #ff6b35 !important;
     }
-    
+
     .btn-primary {
-      background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%) !important;
+      background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%) !important;
     }
   }
 }
@@ -948,23 +1006,23 @@
 .theme-minimal-pure {
   .profile-settings {
     background: #ffffff !important;
-    
+
     .settings-card,
     .subscription-card,
     .danger-card {
       border-radius: 0 !important;
       box-shadow: none !important;
     }
-    
+
     .btn-primary,
     .btn-secondary,
     .btn-outline {
       border-radius: 0 !important;
     }
-    
+
     .btn-primary {
       background: #000000 !important;
-      
+
       &:hover {
         background: #333333 !important;
       }
@@ -974,43 +1032,43 @@
 
 .theme-neo-brutalism {
   .profile-settings {
-    background: #FAFAF8 !important;
-    
+    background: #fafaf8 !important;
+
     .settings-card {
-      background: #FFFFFF !important;
+      background: #ffffff !important;
       border: 3px solid #000000 !important;
       border-radius: 8px !important;
       box-shadow: 5px 5px 0px #000000 !important;
-      
+
       &:hover {
         transform: translate(-2px, -2px) !important;
         box-shadow: 7px 7px 0px #000000 !important;
       }
     }
-    
+
     .subscription-card {
-      background: #FFF000 !important;
+      background: #fff000 !important;
       border: 3px solid #000000 !important;
       box-shadow: 5px 5px 0px #000000 !important;
     }
-    
+
     .danger-card {
-      background: #FF1744 !important;
+      background: #ff1744 !important;
       border: 3px solid #000000 !important;
       box-shadow: 5px 5px 0px #000000 !important;
-      
+
       .danger-title,
       .danger-desc {
-        color: #FFFFFF !important;
+        color: #ffffff !important;
       }
     }
-    
+
     .btn-primary {
-      background: #FFF000 !important;
+      background: #fff000 !important;
       color: #000000 !important;
       border: 3px solid #000000 !important;
       box-shadow: 4px 4px 0px #000000 !important;
-      
+
       &:hover {
         transform: translate(-2px, -2px) !important;
         box-shadow: 6px 6px 0px #000000 !important;
@@ -1021,35 +1079,45 @@
 
 .theme-deep-space {
   .profile-settings {
-    background: #0B0E14 !important;
-    
+    background: #0b0e14 !important;
+
     .settings-card {
       background: #151921 !important;
-      border: 1px solid #21262D !important;
+      border: 1px solid #21262d !important;
     }
-    
+
     .subscription-card {
-      background: linear-gradient(135deg, rgba(45, 104, 255, 0.1) 0%, #151921 100%) !important;
-      border-color: #2D68FF !important;
+      background: linear-gradient(
+        135deg,
+        rgba(45, 104, 255, 0.1) 0%,
+        #151921 100%
+      ) !important;
+      border-color: #2d68ff !important;
     }
-    
+
     .danger-card {
       background: rgba(248, 81, 73, 0.1) !important;
-      border-color: #F85149 !important;
+      border-color: #f85149 !important;
     }
-    
+
     .btn-primary {
-      background: linear-gradient(135deg, #1A3D8F 0%, #2D68FF 100%) !important;
+      background: linear-gradient(135deg, #1a3d8f 0%, #2d68ff 100%) !important;
     }
   }
 }
 
 .theme-modern-blue {
   .profile-settings {
-    background: var(--bg-page-gradient, linear-gradient(180deg, #f0f4f8 0%, #e2e8f0 100%)) !important;
-    
+    background: var(
+      --bg-page-gradient,
+      linear-gradient(180deg, #f0f4f8 0%, #e2e8f0 100%)
+    ) !important;
+
     .btn-primary {
-      background: var(--primary-gradient, linear-gradient(135deg, #00BAFF 0%, #0099DD 100%)) !important;
+      background: var(
+        --primary-gradient,
+        linear-gradient(135deg, #00baff 0%, #0099dd 100%)
+      ) !important;
     }
   }
 }
@@ -1065,96 +1133,96 @@
       border: 1px solid rgba(0, 242, 255, 0.2) !important;
       backdrop-filter: blur(20px) !important;
     }
-    
+
     .dialog-header {
       background: rgba(11, 14, 20, 0.95) !important;
       border-bottom-color: rgba(0, 242, 255, 0.15) !important;
     }
-    
+
     .dialog-title {
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       text-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
     }
-    
+
     .dialog-body {
       background: rgba(11, 14, 20, 0.95) !important;
     }
-    
+
     .dialog-hint-box {
       background: rgba(0, 242, 255, 0.08) !important;
       border: 1px solid rgba(0, 242, 255, 0.2) !important;
-      
+
       &.warning {
         background: rgba(255, 170, 0, 0.08) !important;
         border-color: rgba(255, 170, 0, 0.2) !important;
       }
-      
+
       &.danger {
         background: rgba(255, 51, 102, 0.08) !important;
         border-color: rgba(255, 51, 102, 0.2) !important;
       }
-      
+
       p {
-        color: #8B9DC3 !important;
+        color: #8b9dc3 !important;
       }
     }
-    
+
     .dialog-btns {
       background: rgba(11, 14, 20, 0.95) !important;
       border-top-color: rgba(0, 242, 255, 0.15) !important;
     }
-    
+
     .dialog-btn-primary {
-      background: linear-gradient(135deg, #00F2FF 0%, #00BAFF 100%) !important;
-      color: #0B0E14 !important;
+      background: linear-gradient(135deg, #00f2ff 0%, #00baff 100%) !important;
+      color: #0b0e14 !important;
       box-shadow: 0 0 20px rgba(0, 242, 255, 0.3) !important;
       border-radius: 4px !important;
     }
-    
+
     .dialog-btn-secondary {
       background: transparent !important;
       border: 1px solid rgba(0, 242, 255, 0.3) !important;
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       border-radius: 4px !important;
     }
-    
+
     .dialog-btn-danger {
-      background: linear-gradient(135deg, #FF3366 0%, #FF1744 100%) !important;
+      background: linear-gradient(135deg, #ff3366 0%, #ff1744 100%) !important;
       box-shadow: 0 0 20px rgba(255, 51, 102, 0.3) !important;
       border-radius: 4px !important;
     }
-    
+
     .tool-btn {
       background: rgba(18, 24, 32, 0.8) !important;
       border-color: rgba(0, 242, 255, 0.2) !important;
-      color: #8B9DC3 !important;
+      color: #8b9dc3 !important;
       border-radius: 4px !important;
-      
+
       &:hover {
-        border-color: #00F2FF !important;
-        color: #00F2FF !important;
+        border-color: #00f2ff !important;
+        color: #00f2ff !important;
         box-shadow: 0 0 10px rgba(0, 242, 255, 0.3) !important;
       }
     }
-    
+
     .custom-form {
       :deep(.el-input__wrapper) {
         background: rgba(18, 24, 32, 0.8) !important;
         border-color: rgba(0, 242, 255, 0.2) !important;
         border-radius: 4px !important;
-        
+
         &:focus-within {
-          border-color: #00F2FF !important;
+          border-color: #00f2ff !important;
           box-shadow: 0 0 10px rgba(0, 242, 255, 0.2) !important;
         }
       }
-      
+
       :deep(.el-input__inner) {
-        color: #E8F4FF !important;
+        color: #e8f4ff !important;
       }
-      
+
       :deep(.el-form-item__label) {
-        color: #8B9DC3 !important;
+        color: #8b9dc3 !important;
       }
     }
   }
@@ -1163,72 +1231,74 @@
 .theme-edu-friendly {
   .profile-settings .custom-dialog {
     :deep(.el-dialog) {
-      background: #FFFFFF !important;
-      border: 2px solid #FFE0CC !important;
+      background: #ffffff !important;
+      border: 2px solid #ffe0cc !important;
       border-radius: 28px !important;
     }
-    
+
     .dialog-header {
-      background: linear-gradient(135deg, #FFF8F5 0%, #FFE8DD 100%) !important;
-      border-bottom-color: #FFE0CC !important;
+      background: linear-gradient(135deg, #fff8f5 0%, #ffe8dd 100%) !important;
+      border-bottom-color: #ffe0cc !important;
     }
-    
+
     .dialog-title {
-      color: #FF6B35 !important;
+      color: #ff6b35 !important;
     }
-    
+
     .dialog-hint-box {
       border-radius: 16px !important;
-      
+
       &.info {
         background: rgba(255, 107, 53, 0.08) !important;
-        .svg-inline--fa { color: #FF6B35 !important; }
+        .svg-inline--fa {
+          color: #ff6b35 !important;
+        }
       }
     }
-    
+
     .dialog-btns {
-      background: #FFFFFF !important;
-      border-top-color: #FFE0CC !important;
+      background: #ffffff !important;
+      border-top-color: #ffe0cc !important;
     }
-    
+
     .dialog-btn-primary {
-      background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%) !important;
+      background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%) !important;
       border-radius: 24px !important;
-      
+
       &:hover {
         transform: scale(1.02);
       }
     }
-    
+
     .dialog-btn-secondary {
-      border-color: #FFE0CC !important;
-      color: #FF6B35 !important;
+      border-color: #ffe0cc !important;
+      color: #ff6b35 !important;
       border-radius: 24px !important;
     }
-    
+
     .dialog-btn-danger {
-      background: linear-gradient(135deg, #FF6B6B 0%, #FF4757 100%) !important;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%) !important;
       border-radius: 24px !important;
     }
-    
+
     .tool-btn {
-      border-color: #FFE0CC !important;
+      border-color: #ffe0cc !important;
       border-radius: 12px !important;
-      
+
       &:hover {
-        border-color: #FF6B35 !important;
-        color: #FF6B35 !important;
+        border-color: #ff6b35 !important;
+        color: #ff6b35 !important;
         background: rgba(255, 107, 53, 0.05) !important;
       }
     }
-    
+
     .custom-form {
       :deep(.el-input__wrapper) {
-        border-color: #FFE0CC !important;
+        border-color: #ffe0cc !important;
         border-radius: 12px !important;
-        
+
         &:focus-within {
-          border-color: #FF6B35 !important;
+          border-color: #ff6b35 !important;
           box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1) !important;
         }
       }
@@ -1239,97 +1309,102 @@
 .theme-neo-brutalism {
   .profile-settings .custom-dialog {
     :deep(.el-dialog) {
-      background: #FFFFFF !important;
+      background: #ffffff !important;
       border: 3px solid #000000 !important;
       border-radius: 8px !important;
       box-shadow: 8px 8px 0px #000000 !important;
     }
-    
+
     .dialog-header {
-      background: #FFF000 !important;
+      background: #fff000 !important;
       border-bottom: 3px solid #000000 !important;
     }
-    
+
     .dialog-title {
       color: #000000 !important;
       font-weight: 900 !important;
     }
-    
+
     .dialog-hint-box {
       border: 2px solid #000000 !important;
       border-radius: 4px !important;
-      
+
       &.info {
-        background: #E0F7FF !important;
+        background: #e0f7ff !important;
       }
-      
+
       &.warning {
-        background: #FFF000 !important;
+        background: #fff000 !important;
       }
-      
+
       &.danger {
-        background: #FF1744 !important;
-        p, .hint-title { color: #FFFFFF !important; }
-        .svg-inline--fa { color: #FFFFFF !important; }
+        background: #ff1744 !important;
+        p,
+        .hint-title {
+          color: #ffffff !important;
+        }
+        .svg-inline--fa {
+          color: #ffffff !important;
+        }
       }
     }
-    
+
     .dialog-btns {
-      background: #FFFFFF !important;
+      background: #ffffff !important;
       border-top: 3px solid #000000 !important;
     }
-    
+
     .dialog-btn-primary {
-      background: #FFF000 !important;
+      background: #fff000 !important;
       color: #000000 !important;
       border: 3px solid #000000 !important;
       border-radius: 4px !important;
       box-shadow: 4px 4px 0px #000000 !important;
-      
+
       &:hover {
         transform: translate(-2px, -2px) !important;
         box-shadow: 6px 6px 0px #000000 !important;
       }
     }
-    
+
     .dialog-btn-secondary {
-      background: #FFFFFF !important;
+      background: #ffffff !important;
       color: #000000 !important;
       border: 3px solid #000000 !important;
       border-radius: 4px !important;
       box-shadow: 4px 4px 0px #000000 !important;
-      
+
       &:hover {
         transform: translate(-2px, -2px) !important;
         box-shadow: 6px 6px 0px #000000 !important;
       }
     }
-    
+
     .dialog-btn-danger {
-      background: #FF1744 !important;
-      color: #FFFFFF !important;
+      background: #ff1744 !important;
+      color: #ffffff !important;
       border: 3px solid #000000 !important;
       border-radius: 4px !important;
       box-shadow: 4px 4px 0px #000000 !important;
     }
-    
+
     .tool-btn {
       border: 2px solid #000000 !important;
       border-radius: 4px !important;
       box-shadow: 3px 3px 0px #000000 !important;
-      
+
       &:hover {
         transform: translate(-1px, -1px) !important;
         box-shadow: 4px 4px 0px #000000 !important;
-        background: #FFF000 !important;
+        background: #fff000 !important;
       }
     }
-    
+
     .custom-form {
       :deep(.el-input__wrapper) {
         border: 2px solid #000000 !important;
         border-radius: 4px !important;
-        
+
         &:focus-within {
           box-shadow: 4px 4px 0px #000000 !important;
         }
@@ -1341,86 +1416,92 @@
 .theme-minimal-pure {
   .profile-settings .custom-dialog {
     :deep(.el-dialog) {
-      background: #FFFFFF !important;
+      background: #ffffff !important;
       border: 1px solid #000000 !important;
       border-radius: 0 !important;
       box-shadow: none !important;
     }
-    
+
     .dialog-header {
-      background: #FFFFFF !important;
+      background: #ffffff !important;
       border-bottom: 1px solid #000000 !important;
     }
-    
+
     .dialog-title {
       color: #000000 !important;
       font-weight: 500 !important;
     }
-    
+
     .dialog-hint-box {
       border-radius: 0 !important;
       border: 1px solid currentColor !important;
       background: transparent !important;
-      
+
       &.info {
         border-color: #000000 !important;
-        .svg-inline--fa { color: #000000 !important; }
+        .svg-inline--fa {
+          color: #000000 !important;
+        }
       }
-      
+
       &.warning {
         border-color: #666666 !important;
-        .svg-inline--fa { color: #666666 !important; }
+        .svg-inline--fa {
+          color: #666666 !important;
+        }
       }
-      
+
       &.danger {
         border-color: #000000 !important;
-        .svg-inline--fa { color: #000000 !important; }
+        .svg-inline--fa {
+          color: #000000 !important;
+        }
       }
     }
-    
+
     .dialog-btns {
-      background: #FFFFFF !important;
+      background: #ffffff !important;
       border-top: 1px solid #000000 !important;
     }
-    
+
     .dialog-btn-primary {
       background: #000000 !important;
-      color: #FFFFFF !important;
+      color: #ffffff !important;
       border-radius: 0 !important;
-      
+
       &:hover {
         background: #333333 !important;
       }
     }
-    
+
     .dialog-btn-secondary {
-      background: #FFFFFF !important;
+      background: #ffffff !important;
       color: #000000 !important;
       border: 1px solid #000000 !important;
       border-radius: 0 !important;
     }
-    
+
     .dialog-btn-danger {
       background: #000000 !important;
-      color: #FFFFFF !important;
+      color: #ffffff !important;
       border-radius: 0 !important;
     }
-    
+
     .tool-btn {
       border: 1px solid #000000 !important;
       border-radius: 0 !important;
-      
+
       &:hover {
         background: #000000 !important;
-        color: #FFFFFF !important;
+        color: #ffffff !important;
       }
     }
-    
+
     .custom-form {
       :deep(.el-input__wrapper) {
         border: 1px solid #000000 !important;
         border-radius: 0 !important;
-        
+
         &:focus-within {
           box-shadow: none !important;
           border-width: 2px !important;
@@ -1434,93 +1515,91 @@
   .profile-settings .custom-dialog {
     :deep(.el-dialog) {
       background: #151921 !important;
-      border: 1px solid #21262D !important;
+      border: 1px solid #21262d !important;
     }
-    
+
     .dialog-header {
       background: #151921 !important;
-      border-bottom-color: #21262D !important;
+      border-bottom-color: #21262d !important;
     }
-    
+
     .dialog-title {
-      color: #E6EDF3 !important;
+      color: #e6edf3 !important;
     }
-    
+
     .dialog-body {
       background: #151921 !important;
     }
-    
+
     .dialog-hint-box {
       background: rgba(45, 104, 255, 0.1) !important;
-      
+
       &.warning {
         background: rgba(210, 153, 34, 0.1) !important;
       }
-      
+
       &.danger {
         background: rgba(248, 81, 73, 0.1) !important;
       }
-      
+
       p {
-        color: #8B949E !important;
+        color: #8b949e !important;
       }
     }
-    
+
     .dialog-btns {
       background: #151921 !important;
-      border-top-color: #21262D !important;
+      border-top-color: #21262d !important;
     }
-    
+
     .dialog-btn-primary {
-      background: linear-gradient(135deg, #1A3D8F 0%, #2D68FF 100%) !important;
+      background: linear-gradient(135deg, #1a3d8f 0%, #2d68ff 100%) !important;
     }
-    
+
     .dialog-btn-secondary {
-      background: #21262D !important;
-      border-color: #30363D !important;
-      color: #8B949E !important;
-      
+      background: #21262d !important;
+      border-color: #30363d !important;
+      color: #8b949e !important;
+
       &:hover {
-        border-color: #2D68FF !important;
-        color: #E6EDF3 !important;
+        border-color: #2d68ff !important;
+        color: #e6edf3 !important;
       }
     }
-    
+
     .dialog-btn-danger {
-      background: linear-gradient(135deg, #B62324 0%, #F85149 100%) !important;
+      background: linear-gradient(135deg, #b62324 0%, #f85149 100%) !important;
     }
-    
+
     .tool-btn {
-      background: #21262D !important;
-      border-color: #30363D !important;
-      color: #8B949E !important;
-      
+      background: #21262d !important;
+      border-color: #30363d !important;
+      color: #8b949e !important;
+
       &:hover {
-        border-color: #2D68FF !important;
-        color: #2D68FF !important;
+        border-color: #2d68ff !important;
+        color: #2d68ff !important;
       }
     }
-    
+
     .custom-form {
       :deep(.el-input__wrapper) {
-        background: #21262D !important;
-        border-color: #30363D !important;
-        
+        background: #21262d !important;
+        border-color: #30363d !important;
+
         &:focus-within {
-          border-color: #2D68FF !important;
+          border-color: #2d68ff !important;
           box-shadow: 0 0 0 3px rgba(45, 104, 255, 0.2) !important;
         }
       }
-      
+
       :deep(.el-input__inner) {
-        color: #E6EDF3 !important;
+        color: #e6edf3 !important;
       }
-      
+
       :deep(.el-form-item__label) {
-        color: #8B949E !important;
+        color: #8b949e !important;
       }
     }
   }
 }
-
-

@@ -106,21 +106,23 @@ describe("src/components/JsonSchemaForm/types.ts – schema contracts", () => {
   });
 
   it("JsonSchemaObject has type 'object' with optional properties", () => {
-    const schema: import("@/components/JsonSchemaForm/types").JsonSchemaObject = {
-      type: "object",
-      properties: {
-        age: { type: "number" },
-      },
-    };
+    const schema: import("@/components/JsonSchemaForm/types").JsonSchemaObject =
+      {
+        type: "object",
+        properties: {
+          age: { type: "number" },
+        },
+      };
     expect(schema.type).toBe("object");
     expect(schema.properties?.age?.type).toBe("number");
   });
 
   it("JsonSchemaArray has type 'array' with optional items", () => {
-    const schema: import("@/components/JsonSchemaForm/types").JsonSchemaArray = {
-      type: "array",
-      items: { type: "string" },
-    };
+    const schema: import("@/components/JsonSchemaForm/types").JsonSchemaArray =
+      {
+        type: "array",
+        items: { type: "string" },
+      };
     expect(schema.type).toBe("array");
     expect(schema.items?.type).toBe("string");
   });
@@ -148,11 +150,12 @@ describe("src/components/JsonSchemaForm/types.ts – schema contracts", () => {
   });
 
   it("FormFooterConfig accepts show, okBtn, cancelBtn", () => {
-    const config: import("@/components/JsonSchemaForm/types").FormFooterConfig = {
-      show: true,
-      okBtn: "Submit",
-      cancelBtn: "Cancel",
-    };
+    const config: import("@/components/JsonSchemaForm/types").FormFooterConfig =
+      {
+        show: true,
+        okBtn: "Submit",
+        cancelBtn: "Cancel",
+      };
     expect(config.show).toBe(true);
     expect(config.okBtn).toBe("Submit");
   });
@@ -161,6 +164,8 @@ describe("src/components/JsonSchemaForm/types.ts – schema contracts", () => {
     const val: import("@/components/JsonSchemaForm/types").JsonValue = {
       nested: [1, "two", true, null],
     };
-    expect(Array.isArray((val as Record<string, unknown>)["nested"])).toBe(true);
+    expect(Array.isArray((val as Record<string, unknown>)["nested"])).toBe(
+      true
+    );
   });
 });

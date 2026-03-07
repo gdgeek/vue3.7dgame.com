@@ -106,7 +106,9 @@ describe("transformPost()", () => {
       ...basePost,
       jetpack_featured_media_url: "",
       _embedded: {
-        "wp:featuredmedia": [{ source_url: "https://cdn.example.com/embed.jpg" }],
+        "wp:featuredmedia": [
+          { source_url: "https://cdn.example.com/embed.jpg" },
+        ],
       },
     };
     const result = transformPost(post as never, new Map());
@@ -140,9 +142,15 @@ describe("transformPost()", () => {
       categories: [10],
       _embedded: undefined,
     };
-    const catMap = new Map([[10, { id: 10, name: "Science", slug: "science" }]]);
+    const catMap = new Map([
+      [10, { id: 10, name: "Science", slug: "science" }],
+    ]);
     const result = transformPost(post as never, catMap as never);
-    expect(result.category).toEqual({ id: 10, name: "Science", slug: "science" });
+    expect(result.category).toEqual({
+      id: 10,
+      name: "Science",
+      slug: "science",
+    });
   });
 
   it("uses default '未分类' category when no term or map match", () => {
@@ -257,7 +265,9 @@ describe("wordpressApi.getCategories()", () => {
     const rawCats = [{ id: 5, name: "Sports", slug: "sports", count: 7 }];
     wpRequest.mockResolvedValue({ data: rawCats });
     const result = await wordpressApi.getCategories();
-    expect(result).toEqual([{ id: 5, name: "Sports", slug: "sports", count: 7 }]);
+    expect(result).toEqual([
+      { id: 5, name: "Sports", slug: "sports", count: 7 },
+    ]);
   });
 });
 
@@ -357,7 +367,9 @@ describe("legacy standalone API functions", () => {
     const wp = await import("@/utils/wp");
     wpRequest = wp.default as ReturnType<typeof vi.fn>;
     wpRequest.mockResolvedValue({ data: {} });
-    ({ getCategory, Article, Post, Posts } = await import("@/api/home/wordpress"));
+    ({ getCategory, Article, Post, Posts } = await import(
+      "@/api/home/wordpress"
+    ));
   });
 
   it("getCategory() calls /categories/{id} endpoint", async () => {
@@ -393,11 +405,17 @@ describe("legacy standalone API functions", () => {
 
   it("Article() with different ID produces different path", async () => {
     await Article(10);
-    const path1 = wpRequest.mock.calls[0][0].url || wpRequest.mock.calls[0][0].params?.rest_route || "";
+    const path1 =
+      wpRequest.mock.calls[0][0].url ||
+      wpRequest.mock.calls[0][0].params?.rest_route ||
+      "";
     vi.clearAllMocks();
     wpRequest.mockResolvedValue({ data: {} });
     await Article(20);
-    const path2 = wpRequest.mock.calls[0][0].url || wpRequest.mock.calls[0][0].params?.rest_route || "";
+    const path2 =
+      wpRequest.mock.calls[0][0].url ||
+      wpRequest.mock.calls[0][0].params?.rest_route ||
+      "";
     expect(path1).not.toBe(path2);
   });
 

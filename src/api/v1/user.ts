@@ -38,5 +38,3 @@ export const info = () => {
     method: "get",
   });
 };
-
-

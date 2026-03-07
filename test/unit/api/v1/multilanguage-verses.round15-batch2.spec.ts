@@ -8,7 +8,9 @@ describe("api/v1/multilanguage-verses", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     api = await import("@/api/v1/multilanguage-verses");
   });
@@ -27,7 +29,12 @@ describe("api/v1/multilanguage-verses", () => {
   });
 
   it("postlanguages sends POST payload", async () => {
-    const data = { name: "cn", language: "zh", verse_id: 1, description: "desc" };
+    const data = {
+      name: "cn",
+      language: "zh",
+      verse_id: 1,
+      description: "desc",
+    };
     await api.postlanguages(data);
     expect(request).toHaveBeenCalledWith({
       url: "/v1/multilanguage-verses",
@@ -54,12 +61,17 @@ describe("api/v1/multilanguage-verses", () => {
 
   it("putlanguages propagates rejection", async () => {
     request.mockRejectedValue(new Error("update fail"));
-    await expect(api.putlanguages(10, { name: "x", description: "y" })).rejects.toThrow("update fail");
+    await expect(
+      api.putlanguages(10, { name: "x", description: "y" })
+    ).rejects.toThrow("update fail");
   });
 
   it("dellanguages sends delete request", async () => {
     await api.dellanguages(11);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/multilanguage-verses/11", method: "delete" });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/multilanguage-verses/11",
+      method: "delete",
+    });
   });
 
   it("dellanguages returns request response", async () => {

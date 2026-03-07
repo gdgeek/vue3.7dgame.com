@@ -31,13 +31,24 @@ describe("api/v1/meta-verse", () => {
     (verseApi.postVerse as any).mockResolvedValue({ data: { id: 100 } });
     (metaApi.postMeta as any).mockResolvedValue({ data: { id: 200 } });
     (metaResourceApi.postMetaResource as any).mockResolvedValue({ data: {} });
-    (verseApi.putVerse as any).mockResolvedValue({ data: { id: 100, updated: true } });
-    (metaApi.putMeta as any).mockResolvedValue({ data: { id: 200, updated: true } });
+    (verseApi.putVerse as any).mockResolvedValue({
+      data: { id: 100, updated: true },
+    });
+    (metaApi.putMeta as any).mockResolvedValue({
+      data: { id: 200, updated: true },
+    });
   });
 
   it("resolves updated verse/meta", async () => {
-    const result = await api.createVerseFromResource("Polygen", "Demo", resource as any);
-    expect(result).toEqual({ verse: { id: 100, updated: true }, meta: { id: 200, updated: true } });
+    const result = await api.createVerseFromResource(
+      "Polygen",
+      "Demo",
+      resource as any
+    );
+    expect(result).toEqual({
+      verse: { id: 100, updated: true },
+      meta: { id: 200, updated: true },
+    });
   });
 
   it("creates verse with uuid/version/image", async () => {
@@ -80,8 +91,16 @@ describe("api/v1/meta-verse", () => {
     const [, arg] = (metaApi.putMeta as any).mock.calls[0];
     const data = JSON.parse(arg.data);
     const entity = data.children.entities[0];
-    expect(entity.parameters.transform.scale).toEqual({ x: 0.25, y: 0.25, z: 0.25 });
-    expect(entity.parameters.transform.position).toEqual({ x: -0.25, y: -0.5, z: -0.75 });
+    expect(entity.parameters.transform.scale).toEqual({
+      x: 0.25,
+      y: 0.25,
+      z: 0.25,
+    });
+    expect(entity.parameters.transform.position).toEqual({
+      x: -0.25,
+      y: -0.5,
+      z: -0.75,
+    });
   });
 
   it("uses incoming entity type", async () => {
@@ -93,11 +112,15 @@ describe("api/v1/meta-verse", () => {
 
   it("rejects when initial verse creation fails", async () => {
     (verseApi.postVerse as any).mockRejectedValue(new Error("post verse fail"));
-    await expect(api.createVerseFromResource("Polygen", "Demo", resource as any)).rejects.toThrow("post verse fail");
+    await expect(
+      api.createVerseFromResource("Polygen", "Demo", resource as any)
+    ).rejects.toThrow("post verse fail");
   });
 
   it("rejects when meta update fails", async () => {
     (metaApi.putMeta as any).mockRejectedValue(new Error("put meta fail"));
-    await expect(api.createVerseFromResource("Polygen", "Demo", resource as any)).rejects.toThrow("put meta fail");
+    await expect(
+      api.createVerseFromResource("Polygen", "Demo", resource as any)
+    ).rejects.toThrow("put meta fail");
   });
 });

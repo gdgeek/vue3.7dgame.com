@@ -39,7 +39,9 @@ describe("src/api/domain-query.ts round15", () => {
     vi.clearAllMocks();
     vi.resetModules();
     mockService.get.mockResolvedValue({});
-    ({ getDomainDefault, getDomainLanguage } = await import("@/api/domain-query"));
+    ({ getDomainDefault, getDomainLanguage } = await import(
+      "@/api/domain-query"
+    ));
   });
 
   it("creates failover axios with expected config", () => {
@@ -59,7 +61,9 @@ describe("src/api/domain-query.ts round15", () => {
 
   it("getDomainDefault uses provided domain", async () => {
     await getDomainDefault("foo.com");
-    expect(mockService.get).toHaveBeenCalledWith("/api/query/default?domain=foo.com");
+    expect(mockService.get).toHaveBeenCalledWith(
+      "/api/query/default?domain=foo.com"
+    );
   });
 
   it("getDomainDefault falls back to window.location.hostname", async () => {
@@ -69,8 +73,13 @@ describe("src/api/domain-query.ts round15", () => {
       configurable: true,
     });
     await getDomainDefault();
-    expect(mockService.get).toHaveBeenCalledWith("/api/query/default?domain=fallback.com");
-    Object.defineProperty(window, "location", { value: oldLocation, configurable: true });
+    expect(mockService.get).toHaveBeenCalledWith(
+      "/api/query/default?domain=fallback.com"
+    );
+    Object.defineProperty(window, "location", {
+      value: oldLocation,
+      configurable: true,
+    });
   });
 
   it("getDomainLanguage uses provided domain and lang", async () => {
@@ -97,7 +106,10 @@ describe("src/api/domain-query.ts round15", () => {
     expect(mockService.get).toHaveBeenCalledWith(
       "/api/query/language?domain=host.local&lang=ja-JP"
     );
-    Object.defineProperty(window, "location", { value: oldLocation, configurable: true });
+    Object.defineProperty(window, "location", {
+      value: oldLocation,
+      configurable: true,
+    });
   });
 
   it("delegates query formatting to stringify with prefix", async () => {

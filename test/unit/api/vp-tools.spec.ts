@@ -17,7 +17,9 @@ describe("Tools API", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     toolsApi = await import("@/api/v1/tools");
   });
@@ -51,7 +53,9 @@ describe("VpGuide API", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     vpGuideApi = await import("@/api/v1/vp-guide");
   });
@@ -199,14 +203,18 @@ describe("VpMap API", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     vpMapApi = await import("@/api/v1/vp-map");
   });
 
   describe("postVpMap()", () => {
     it("calls POST /v1/vp-maps with data", async () => {
-      const data = { name: "map-1", verse_id: 10 } as Parameters<typeof vpMapApi.postVpMap>[0];
+      const data = { name: "map-1", verse_id: 10 } as Parameters<
+        typeof vpMapApi.postVpMap
+      >[0];
       await vpMapApi.postVpMap(data);
       expect(request).toHaveBeenCalledWith(
         expect.objectContaining({ url: "/v1/vp-maps", method: "post", data })
@@ -216,7 +224,9 @@ describe("VpMap API", () => {
     it("returns the request result", async () => {
       const mockResp = { data: { id: 7, name: "map-1" } };
       request.mockResolvedValue(mockResp);
-      const data = { name: "map-1", verse_id: 10 } as Parameters<typeof vpMapApi.postVpMap>[0];
+      const data = { name: "map-1", verse_id: 10 } as Parameters<
+        typeof vpMapApi.postVpMap
+      >[0];
       const result = await vpMapApi.postVpMap(data);
       expect(result).toEqual(mockResp);
     });

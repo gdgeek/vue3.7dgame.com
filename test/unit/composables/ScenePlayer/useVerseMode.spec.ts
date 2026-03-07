@@ -76,16 +76,16 @@ describe("useVerseMode", () => {
       const verse = {
         data: JSON.stringify({
           children: {
-            modules: [
-              { parameters: { meta_id: "1", uuid: "module-abc" } },
-            ],
+            modules: [{ parameters: { meta_id: "1", uuid: "module-abc" } }],
           },
         }),
         metas: [{ id: "1", data: null, events }],
         resources: [],
       };
 
-      const { initEventContainer, eventContainer } = useVerseMode(verse as never);
+      const { initEventContainer, eventContainer } = useVerseMode(
+        verse as never
+      );
       initEventContainer();
 
       expect(eventContainer.value["module-abc"]).toEqual(events);
@@ -105,7 +105,9 @@ describe("useVerseMode", () => {
         resources: [],
       };
 
-      const { initEventContainer, eventContainer } = useVerseMode(verse as never);
+      const { initEventContainer, eventContainer } = useVerseMode(
+        verse as never
+      );
       initEventContainer();
       expect(eventContainer.value).toEqual({});
     });
@@ -122,7 +124,9 @@ describe("useVerseMode", () => {
         resources: [],
       };
 
-      const { initEventContainer, eventContainer } = useVerseMode(verse as never);
+      const { initEventContainer, eventContainer } = useVerseMode(
+        verse as never
+      );
       initEventContainer();
       expect(eventContainer.value).toEqual({});
     });

@@ -128,11 +128,9 @@ const {
   clearSearched,
   handleCurrentChange,
   openDialog,
-} =
-  useDialogList<prefabsData>(
-    (sorted, searched, page) =>
-      getPrefabs(sorted, searched, page, "image")
-  );
+} = useDialogList<prefabsData>((sorted, searched, page) =>
+  getPrefabs(sorted, searched, page, "image")
+);
 
 const knightData = ref<InstanceType<typeof KnightDataDialog>>();
 

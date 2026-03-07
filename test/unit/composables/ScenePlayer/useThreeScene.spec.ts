@@ -122,7 +122,9 @@ describe("useThreeScene", () => {
     mockRenderer.dispose.mockClear();
     mockScene.add.mockClear();
     mockControlsDispose.mockClear();
-    const mod = await import("@/components/ScenePlayer/composables/useThreeScene");
+    const mod = await import(
+      "@/components/ScenePlayer/composables/useThreeScene"
+    );
     useThreeScene = mod.useThreeScene;
   });
 
@@ -155,7 +157,12 @@ describe("useThreeScene", () => {
     const { setupScene } = useThreeScene();
     const container = makeContainer();
     const controls = ref(null);
-    setupScene(container, { isDark: false, mode: "meta", controls, onFrame: vi.fn() });
+    setupScene(container, {
+      isDark: false,
+      mode: "meta",
+      controls,
+      onFrame: vi.fn(),
+    });
     expect(container.appendChild).toHaveBeenCalled();
   });
 
@@ -163,7 +170,12 @@ describe("useThreeScene", () => {
     const { setupScene } = useThreeScene();
     const container = makeContainer();
     const controls = ref(null);
-    setupScene(container, { isDark: false, mode: "meta", controls, onFrame: vi.fn() });
+    setupScene(container, {
+      isDark: false,
+      mode: "meta",
+      controls,
+      onFrame: vi.fn(),
+    });
     expect(mockRenderer.setClearColor).toHaveBeenCalledWith(0xeeeeee, 1);
   });
 
@@ -171,16 +183,28 @@ describe("useThreeScene", () => {
     const { setupScene } = useThreeScene();
     const container = makeContainer();
     const controls = ref(null);
-    setupScene(container, { isDark: true, mode: "meta", controls, onFrame: vi.fn() });
+    setupScene(container, {
+      isDark: true,
+      mode: "meta",
+      controls,
+      onFrame: vi.fn(),
+    });
     expect(mockRenderer.setClearColor).toHaveBeenCalledWith(0x242424, 1);
   });
 
   it("setupScene sets up OrbitControls and assigns to controls ref", async () => {
-    const { OrbitControls } = await import("three/examples/jsm/controls/OrbitControls.js");
+    const { OrbitControls } = await import(
+      "three/examples/jsm/controls/OrbitControls.js"
+    );
     const { setupScene } = useThreeScene();
     const container = makeContainer();
     const controls = ref(null);
-    setupScene(container, { isDark: false, mode: "meta", controls, onFrame: vi.fn() });
+    setupScene(container, {
+      isDark: false,
+      mode: "meta",
+      controls,
+      onFrame: vi.fn(),
+    });
     expect(OrbitControls).toHaveBeenCalled();
     expect(controls.value).toBeDefined();
   });
@@ -189,7 +213,12 @@ describe("useThreeScene", () => {
     const { setupScene } = useThreeScene();
     const container = makeContainer();
     const controls = ref(null);
-    setupScene(container, { isDark: false, mode: "meta", controls, onFrame: vi.fn() });
+    setupScene(container, {
+      isDark: false,
+      mode: "meta",
+      controls,
+      onFrame: vi.fn(),
+    });
     // AmbientLight + DirectionalLight + PointLight = 3 adds
     expect(mockScene.add).toHaveBeenCalledTimes(3);
   });
@@ -198,7 +227,12 @@ describe("useThreeScene", () => {
     const { setupScene } = useThreeScene();
     const container = makeContainer();
     const controls = ref(null);
-    setupScene(container, { isDark: false, mode: "meta", controls, onFrame: vi.fn() });
+    setupScene(container, {
+      isDark: false,
+      mode: "meta",
+      controls,
+      onFrame: vi.fn(),
+    });
     expect(mockResizeObserver.observe).toHaveBeenCalledWith(container);
   });
 
@@ -206,7 +240,12 @@ describe("useThreeScene", () => {
     const { setupScene } = useThreeScene();
     const container = makeContainer();
     const controls = ref(null);
-    setupScene(container, { isDark: false, mode: "verse", controls, onFrame: vi.fn() });
+    setupScene(container, {
+      isDark: false,
+      mode: "verse",
+      controls,
+      onFrame: vi.fn(),
+    });
     expect(requestAnimationFrame).toHaveBeenCalled();
   });
 
@@ -214,7 +253,12 @@ describe("useThreeScene", () => {
     const { setupScene, getRenderer } = useThreeScene();
     const container = makeContainer();
     const controls = ref(null);
-    setupScene(container, { isDark: false, mode: "meta", controls, onFrame: vi.fn() });
+    setupScene(container, {
+      isDark: false,
+      mode: "meta",
+      controls,
+      onFrame: vi.fn(),
+    });
     expect(getRenderer()).not.toBeNull();
   });
 
@@ -222,7 +266,12 @@ describe("useThreeScene", () => {
     const { setupScene, getCamera } = useThreeScene();
     const container = makeContainer();
     const controls = ref(null);
-    setupScene(container, { isDark: false, mode: "meta", controls, onFrame: vi.fn() });
+    setupScene(container, {
+      isDark: false,
+      mode: "meta",
+      controls,
+      onFrame: vi.fn(),
+    });
     expect(getCamera()).not.toBeNull();
   });
 
@@ -230,7 +279,12 @@ describe("useThreeScene", () => {
     const { setupScene, handleResize } = useThreeScene();
     const container = makeContainer();
     const controls = ref(null);
-    setupScene(container, { isDark: false, mode: "meta", controls, onFrame: vi.fn() });
+    setupScene(container, {
+      isDark: false,
+      mode: "meta",
+      controls,
+      onFrame: vi.fn(),
+    });
     mockRenderer.setSize.mockClear();
     handleResize(container);
     expect(mockCamera.updateProjectionMatrix).toHaveBeenCalled();
@@ -249,7 +303,12 @@ describe("useThreeScene", () => {
     const { setupScene, updateTheme } = useThreeScene();
     const container = makeContainer();
     const controls = ref(null);
-    setupScene(container, { isDark: false, mode: "meta", controls, onFrame: vi.fn() });
+    setupScene(container, {
+      isDark: false,
+      mode: "meta",
+      controls,
+      onFrame: vi.fn(),
+    });
     mockRenderer.setClearColor.mockClear();
     updateTheme(true);
     expect(mockRenderer.setClearColor).toHaveBeenCalledWith(0x242424, 1);
@@ -259,7 +318,12 @@ describe("useThreeScene", () => {
     const { setupScene, updateTheme } = useThreeScene();
     const container = makeContainer();
     const controls = ref(null);
-    setupScene(container, { isDark: false, mode: "meta", controls, onFrame: vi.fn() });
+    setupScene(container, {
+      isDark: false,
+      mode: "meta",
+      controls,
+      onFrame: vi.fn(),
+    });
     mockRenderer.setClearColor.mockClear();
     updateTheme(false);
     expect(mockRenderer.setClearColor).toHaveBeenCalledWith(0xeeeeee, 1);
@@ -275,7 +339,12 @@ describe("useThreeScene", () => {
     const { setupScene, cleanupScene } = useThreeScene();
     const container = makeContainer();
     const controls = ref(null);
-    setupScene(container, { isDark: false, mode: "meta", controls, onFrame: vi.fn() });
+    setupScene(container, {
+      isDark: false,
+      mode: "meta",
+      controls,
+      onFrame: vi.fn(),
+    });
     cleanupScene();
     expect(mockResizeObserver.disconnect).toHaveBeenCalled();
     expect(mockRenderer.dispose).toHaveBeenCalled();
@@ -287,7 +356,12 @@ describe("useThreeScene", () => {
     const { setupScene, cleanupScene } = useThreeScene();
     const container = makeContainer();
     const controls = ref(null);
-    setupScene(container, { isDark: false, mode: "meta", controls, onFrame: vi.fn() });
+    setupScene(container, {
+      isDark: false,
+      mode: "meta",
+      controls,
+      onFrame: vi.fn(),
+    });
     cleanupScene();
     expect(cancelAnimationFrame).toHaveBeenCalledWith(42);
   });
@@ -296,7 +370,12 @@ describe("useThreeScene", () => {
     const { setupScene, cleanupScene } = useThreeScene();
     const container = makeContainer();
     const controls = ref(null);
-    setupScene(container, { isDark: false, mode: "meta", controls, onFrame: vi.fn() });
+    setupScene(container, {
+      isDark: false,
+      mode: "meta",
+      controls,
+      onFrame: vi.fn(),
+    });
     cleanupScene();
     expect(mockControlsDispose).toHaveBeenCalled();
   });
@@ -316,9 +395,11 @@ describe("useThreeScene", () => {
   it("resetClock results in getClock() returning a valid Clock instance", async () => {
     const THREE = await import("three");
     const { getClock, resetClock } = useThreeScene();
-    const initialCallCount = (THREE.Clock as ReturnType<typeof vi.fn>).mock.calls.length;
+    const initialCallCount = (THREE.Clock as ReturnType<typeof vi.fn>).mock
+      .calls.length;
     resetClock();
-    const afterCallCount = (THREE.Clock as ReturnType<typeof vi.fn>).mock.calls.length;
+    const afterCallCount = (THREE.Clock as ReturnType<typeof vi.fn>).mock.calls
+      .length;
     // resetClock should have triggered one additional new THREE.Clock()
     expect(afterCallCount).toBeGreaterThan(initialCallCount);
     expect(getClock()).toBeDefined();

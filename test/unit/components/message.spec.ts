@@ -4,11 +4,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock the Vue component and rendering
-vi.mock("@/components/Dialog/Message.vue", () => ({ default: { name: "MockMessage" } }));
+vi.mock("@/components/Dialog/Message.vue", () => ({
+  default: { name: "MockMessage" },
+}));
 
 const mockClose = vi.fn();
 const mockEl = document.createElement("div");
-Object.defineProperty(mockEl, "offsetHeight", { value: 48, configurable: true });
+Object.defineProperty(mockEl, "offsetHeight", {
+  value: 48,
+  configurable: true,
+});
 const mockVnode = {
   el: mockEl,
   component: { exposed: { close: mockClose } },

@@ -138,8 +138,7 @@ describe("metaRoutes 路由模块", () => {
   // 具体路由：MetaSceneEditor
   // -------------------------------------------------------------------------
   describe("MetaSceneEditor 路由", () => {
-    const getRoute = () =>
-      metaRoutes.find((r) => r.name === "MetaSceneEditor");
+    const getRoute = () => metaRoutes.find((r) => r.name === "MetaSceneEditor");
 
     it("存在 MetaSceneEditor 路由", () => {
       expect(getRoute()).toBeDefined();

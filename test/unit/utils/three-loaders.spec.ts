@@ -75,9 +75,7 @@ describe("getConfiguredGLTFLoader()", () => {
   it("configures a DRACOLoader with the correct decoder path", async () => {
     const { getConfiguredGLTFLoader } = await import("@/lib/three/loaders");
     getConfiguredGLTFLoader();
-    expect(mockDRACOSetPath).toHaveBeenCalledWith(
-      "/js/three.js/libs/draco/"
-    );
+    expect(mockDRACOSetPath).toHaveBeenCalledWith("/js/three.js/libs/draco/");
   });
 
   it("calls setDRACOLoader on the GLTFLoader", async () => {

@@ -17,371 +17,379 @@
   .doc-item,
   .faq-item {
     background: #151921 !important;
-    border: 1px solid #21262D !important;
-    
+    border: 1px solid #21262d !important;
+
     &:hover {
-      border-color: #30363D !important;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(45, 104, 255, 0.1) !important;
+      border-color: #30363d !important;
+      box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(45, 104, 255, 0.1) !important;
     }
   }
-  
+
   // 资源库深色背景
   .resource-library,
   .meta-library,
   .verse-library,
   .help-center,
   .video-tutorials {
-    background: #0B0E14 !important;
+    background: #0b0e14 !important;
   }
-  
+
   // 详情面板
   .detail-panel {
     background: #151921 !important;
-    border-left: 1px solid #21262D !important;
-    
+    border-left: 1px solid #21262d !important;
+
     .panel-header {
-      border-bottom: 1px solid #21262D !important;
+      border-bottom: 1px solid #21262d !important;
     }
-    
+
     .panel-title {
-      color: #E6EDF3 !important;
+      color: #e6edf3 !important;
     }
-    
+
     .preview-module,
     .cover-preview {
-      border: 1px solid #21262D !important;
-      background: #11141B !important;
+      border: 1px solid #21262d !important;
+      background: #11141b !important;
     }
-    
+
     .cover-placeholder {
-      background: #11141B !important;
-      
+      background: #11141b !important;
+
       .svg-inline--fa {
-        color: #8B949E !important;
+        color: #8b949e !important;
       }
     }
-    
+
     .change-cover-btn {
       background: rgba(45, 104, 255, 0.2) !important;
-      color: #2D68FF !important;
-      
+      color: #2d68ff !important;
+
       &:hover {
         background: rgba(45, 104, 255, 0.3) !important;
       }
     }
-    
+
     .item-name {
-      color: #E6EDF3 !important;
+      color: #e6edf3 !important;
     }
-    
+
     // 修改名称按钮 - 深空专业风格
     .name-display .edit-btn {
       background: rgba(45, 104, 255, 0.15) !important;
-      color: #2D68FF !important;
+      color: #2d68ff !important;
       border: 1px solid rgba(45, 104, 255, 0.3) !important;
-      
+
       &:hover {
         background: rgba(45, 104, 255, 0.25) !important;
-        border-color: #2D68FF !important;
+        border-color: #2d68ff !important;
         box-shadow: 0 0 12px rgba(45, 104, 255, 0.3) !important;
       }
     }
-    
+
     .info-block {
-      background: #11141B !important;
-      border: 1px solid #21262D !important;
+      background: #11141b !important;
+      border: 1px solid #21262d !important;
     }
-    
+
     .info-label {
-      color: #63676D !important;
+      color: #63676d !important;
     }
-    
+
     .info-value {
-      color: #B0B3B8 !important;
+      color: #b0b3b8 !important;
     }
-    
+
     // 表单样式
     .form-label {
-      color: #8B949E !important;
+      color: #8b949e !important;
     }
-    
+
     .form-input,
     .form-textarea,
     .name-input {
-      background: #21262D !important;
-      border: 1px solid #30363D !important;
-      color: #E6EDF3 !important;
-      
+      background: #21262d !important;
+      border: 1px solid #30363d !important;
+      color: #e6edf3 !important;
+
       &::placeholder {
-        color: #63676D !important;
+        color: #63676d !important;
       }
-      
+
       &:focus {
-        border-color: #2D68FF !important;
+        border-color: #2d68ff !important;
         box-shadow: 0 0 0 3px rgba(45, 104, 255, 0.2) !important;
       }
     }
-    
+
     // 标签编辑器
     .tag-item {
       background: rgba(45, 104, 255, 0.15) !important;
-      color: #2D68FF !important;
+      color: #2d68ff !important;
     }
-    
+
     .tag-remove:hover {
-      background: #2D68FF !important;
-      color: #FFFFFF !important;
+      background: #2d68ff !important;
+      color: #ffffff !important;
     }
-    
+
     .no-tags {
-      color: #63676D !important;
+      color: #63676d !important;
     }
-    
+
     .tag-select {
-      background: #21262D !important;
-      border: 1px solid #30363D !important;
-      color: #E6EDF3 !important;
+      background: #21262d !important;
+      border: 1px solid #30363d !important;
+      color: #e6edf3 !important;
     }
-    
+
     .add-tag-btn {
-      background: linear-gradient(135deg, #1A3D8F 0%, #2D68FF 100%) !important;
-      color: #FFFFFF !important;
+      background: linear-gradient(135deg, #1a3d8f 0%, #2d68ff 100%) !important;
+      color: #ffffff !important;
     }
-    
+
     // 可见性切换
     .visibility-btn {
-      background: #21262D !important;
-      border: 2px solid #30363D !important;
-      color: #8B949E !important;
-      
+      background: #21262d !important;
+      border: 2px solid #30363d !important;
+      color: #8b949e !important;
+
       &:hover {
-        border-color: #2D68FF !important;
-        color: #2D68FF !important;
+        border-color: #2d68ff !important;
+        color: #2d68ff !important;
       }
-      
+
       &.active {
         background: rgba(45, 104, 255, 0.15) !important;
-        border-color: #2D68FF !important;
-        color: #2D68FF !important;
+        border-color: #2d68ff !important;
+        color: #2d68ff !important;
       }
     }
-    
+
     .panel-footer {
       background: #151921 !important;
-      border-top: 1px solid #21262D !important;
+      border-top: 1px solid #21262d !important;
     }
-    
+
     .download-btn,
     .enter-edit-btn {
-      background: linear-gradient(135deg, #1A3D8F 0%, #2D68FF 100%) !important;
+      background: linear-gradient(135deg, #1a3d8f 0%, #2d68ff 100%) !important;
       border: none !important;
-      color: #FFFFFF !important;
+      color: #ffffff !important;
       box-shadow: 0 0 20px rgba(45, 104, 255, 0.3) !important;
-      
+
       &:hover {
         box-shadow: 0 0 30px rgba(45, 104, 255, 0.5) !important;
       }
     }
-    
+
     .cancel-btn {
-      background: #21262D !important;
-      border: 1px solid #30363D !important;
-      color: #8B949E !important;
-      
+      background: #21262d !important;
+      border: 1px solid #30363d !important;
+      color: #8b949e !important;
+
       &:hover {
-        border-color: #2D68FF !important;
-        color: #E6EDF3 !important;
+        border-color: #2d68ff !important;
+        color: #e6edf3 !important;
       }
     }
-    
+
     .confirm-btn,
     .save-btn {
-      background: linear-gradient(135deg, #1A3D8F 0%, #2D68FF 100%) !important;
-      color: #FFFFFF !important;
+      background: linear-gradient(135deg, #1a3d8f 0%, #2d68ff 100%) !important;
+      color: #ffffff !important;
     }
-    
+
     .delete-btn {
-      color: #F85149 !important;
-      
+      color: #f85149 !important;
+
       &:hover {
         background: rgba(248, 81, 73, 0.1) !important;
       }
     }
-    
+
     .secondary-actions .download-btn {
       background: transparent !important;
-      border: 1px solid #30363D !important;
-      color: #8B949E !important;
+      border: 1px solid #30363d !important;
+      color: #8b949e !important;
       box-shadow: none !important;
-      
+
       &:hover {
-        border-color: #2D68FF !important;
-        color: #2D68FF !important;
+        border-color: #2d68ff !important;
+        color: #2d68ff !important;
       }
     }
   }
-  
+
   // 对话框
   .custom-confirm-dialog .el-dialog,
   .custom-input-dialog .el-dialog {
     background: #151921 !important;
-    border: 1px solid #21262D !important;
-    
+    border: 1px solid #21262d !important;
+
     .el-dialog__title {
-      color: #FFFFFF !important;
+      color: #ffffff !important;
     }
-    
+
     .confirm-box {
-      border: 1px solid #21262D !important;
-      
+      border: 1px solid #21262d !important;
+
       &.warning {
         background: rgba(210, 153, 34, 0.1) !important;
         border-color: rgba(210, 153, 34, 0.3) !important;
       }
-      
+
       &.danger {
         background: rgba(248, 81, 73, 0.1) !important;
         border-color: rgba(248, 81, 73, 0.3) !important;
       }
     }
-    
+
     .confirm-title {
-      color: #FFFFFF !important;
+      color: #ffffff !important;
     }
-    
+
     .confirm-desc {
-      color: #B0B3B8 !important;
+      color: #b0b3b8 !important;
     }
-    
+
     .btn-primary {
-      background: linear-gradient(135deg, #1A3D8F 0%, #2D68FF 100%) !important;
+      background: linear-gradient(135deg, #1a3d8f 0%, #2d68ff 100%) !important;
       border: none !important;
-      color: #FFFFFF !important;
+      color: #ffffff !important;
     }
-    
+
     .btn-secondary {
-      background: #21262D !important;
-      border: 1px solid #30363D !important;
-      color: #B0B3B8 !important;
-      
+      background: #21262d !important;
+      border: 1px solid #30363d !important;
+      color: #b0b3b8 !important;
+
       &:hover {
-        background: #30363D !important;
-        color: #FFFFFF !important;
+        background: #30363d !important;
+        color: #ffffff !important;
       }
     }
   }
-  
+
   // 上传模态框
   .upload-modal {
     background: #151921 !important;
-    border: 1px solid #21262D !important;
-    
+    border: 1px solid #21262d !important;
+
     .modal-title {
-      color: #FFFFFF !important;
+      color: #ffffff !important;
     }
-    
+
     .upload-zone {
-      border: 1px dashed #30363D !important;
-      background: #11141B !important;
-      
+      border: 1px dashed #30363d !important;
+      background: #11141b !important;
+
       &:hover,
       &.drag-active {
-        border-color: #2D68FF !important;
+        border-color: #2d68ff !important;
         background: rgba(45, 104, 255, 0.05) !important;
       }
     }
-    
+
     .upload-text {
-      color: #FFFFFF !important;
+      color: #ffffff !important;
     }
-    
+
     .upload-hint {
-      color: #63676D !important;
+      color: #63676d !important;
     }
-    
+
     .browse-btn,
     .start-upload-btn {
-      background: linear-gradient(135deg, #1A3D8F 0%, #2D68FF 100%) !important;
+      background: linear-gradient(135deg, #1a3d8f 0%, #2d68ff 100%) !important;
       border: none !important;
-      color: #FFFFFF !important;
+      color: #ffffff !important;
     }
-    
+
     .file-item {
-      background: #11141B !important;
-      border: 1px solid #21262D !important;
+      background: #11141b !important;
+      border: 1px solid #21262d !important;
     }
-    
+
     .file-name {
-      color: #FFFFFF !important;
+      color: #ffffff !important;
     }
-    
+
     .file-size {
-      color: #63676D !important;
+      color: #63676d !important;
     }
-    
+
     .progress-fill {
-      background: linear-gradient(90deg, #1A3D8F 0%, #2D68FF 100%) !important;
+      background: linear-gradient(90deg, #1a3d8f 0%, #2d68ff 100%) !important;
     }
   }
-  
+
   // 按钮
   .btn-primary,
   .el-button--primary,
   .upload-btn,
   .edit-btn,
   .enter-editor-btn {
-    background: linear-gradient(135deg, #1A3D8F 0%, #2D68FF 100%) !important;
+    background: linear-gradient(135deg, #1a3d8f 0%, #2d68ff 100%) !important;
     border: none !important;
-    color: #FFFFFF !important;
-    
+    color: #ffffff !important;
+
     &:hover {
       box-shadow: 0 0 20px rgba(45, 104, 255, 0.4) !important;
     }
   }
-  
+
   // 侧边栏
   .ar-sidebar {
-    background: #080A0F !important;
-    border-right: 1px solid #21262D !important;
+    background: #080a0f !important;
+    border-right: 1px solid #21262d !important;
   }
-  
+
   .sidebar-item {
-    color: #B0B3B8 !important;
-    
+    color: #b0b3b8 !important;
+
     &:hover {
-      background: #1C2128 !important;
-      color: #FFFFFF !important;
+      background: #1c2128 !important;
+      color: #ffffff !important;
     }
   }
-  
+
   .sidebar-item-active {
-    background: linear-gradient(90deg, rgba(45, 104, 255, 0.15) 0%, rgba(45, 104, 255, 0.05) 100%) !important;
-    border-left: 3px solid #2D68FF !important;
-    
+    background: linear-gradient(
+      90deg,
+      rgba(45, 104, 255, 0.15) 0%,
+      rgba(45, 104, 255, 0.05) 100%
+    ) !important;
+    border-left: 3px solid #2d68ff !important;
+
     .sidebar-text,
     .svg-inline--fa {
-      color: #4080FF !important;
+      color: #4080ff !important;
     }
   }
-  
+
   // 搜索框
   .search-input {
-    background: #11141B !important;
-    border: 1px solid #21262D !important;
-    color: #FFFFFF !important;
-    
+    background: #11141b !important;
+    border: 1px solid #21262d !important;
+    color: #ffffff !important;
+
     &::placeholder {
-      color: #63676D !important;
+      color: #63676d !important;
     }
-    
+
     &:focus {
-      border-color: #2D68FF !important;
+      border-color: #2d68ff !important;
       box-shadow: 0 0 0 3px rgba(45, 104, 255, 0.15) !important;
     }
   }
-  
+
   // 标题
-  h1, h2, h3,
+  h1,
+  h2,
+  h3,
   .page-title,
   .card-title,
   .panel-title,
@@ -389,154 +397,154 @@
   .modal-title,
   .hero-title,
   .section-title {
-    color: #FFFFFF !important;
+    color: #ffffff !important;
   }
-  
+
   // 二级标题 - 品牌蓝
   .subsection-title {
-    color: #4080FF !important;
+    color: #4080ff !important;
   }
-  
+
   // 底部信息栏
   .app-footer {
-    background: #080A0F !important;
-    border-top: 1px solid #21262D !important;
-    
+    background: #080a0f !important;
+    border-top: 1px solid #21262d !important;
+
     .footer-link {
-      color: #63676D !important;
-      
+      color: #63676d !important;
+
       &:hover {
-        color: #2D68FF !important;
+        color: #2d68ff !important;
       }
     }
   }
-  
+
   // 下拉菜单
   .card-dropdown-menu,
   .row-menu,
   .tag-dropdown,
   .visibility-dropdown {
     background: #151921 !important;
-    border: 1px solid #21262D !important;
-    
+    border: 1px solid #21262d !important;
+
     .menu-item {
-      color: #B0B3B8 !important;
-      
+      color: #b0b3b8 !important;
+
       &:hover {
-        background: #1C2128 !important;
-        color: #FFFFFF !important;
+        background: #1c2128 !important;
+        color: #ffffff !important;
       }
-      
+
       &.danger {
-        color: #F85149 !important;
-        
+        color: #f85149 !important;
+
         &:hover {
           background: rgba(248, 81, 73, 0.1) !important;
         }
       }
     }
   }
-  
+
   // 列表视图 - 深空专业风格
   .resource-list {
     background: #151921 !important;
-    border: 1px solid #21262D !important;
-    
+    border: 1px solid #21262d !important;
+
     .list-table {
       th {
-        background: #11141B !important;
-        color: #63676D !important;
-        border-bottom: 1px solid #21262D !important;
+        background: #11141b !important;
+        color: #63676d !important;
+        border-bottom: 1px solid #21262d !important;
       }
-      
+
       td {
-        color: #B0B3B8 !important;
-        border-bottom: 1px solid #21262D !important;
+        color: #b0b3b8 !important;
+        border-bottom: 1px solid #21262d !important;
       }
     }
-    
+
     .list-row {
       &:hover {
-        background: #1C2128 !important;
+        background: #1c2128 !important;
       }
-      
+
       &:last-child td {
         border-bottom: none !important;
       }
     }
-    
+
     .row-thumbnail {
-      border: 1px solid #21262D !important;
-      background: #11141B !important;
+      border: 1px solid #21262d !important;
+      background: #11141b !important;
     }
-    
+
     .file-name {
-      color: #E6EDF3 !important;
+      color: #e6edf3 !important;
     }
-    
+
     .enter-editor-btn {
-      background: linear-gradient(135deg, #1A3D8F 0%, #2D68FF 100%) !important;
-      color: #FFFFFF !important;
+      background: linear-gradient(135deg, #1a3d8f 0%, #2d68ff 100%) !important;
+      color: #ffffff !important;
       border: none !important;
       box-shadow: 0 0 15px rgba(45, 104, 255, 0.25) !important;
-      
+
       &:hover {
         box-shadow: 0 0 25px rgba(45, 104, 255, 0.4) !important;
       }
     }
-    
+
     .list-tag {
       background: rgba(45, 104, 255, 0.15) !important;
-      color: #2D68FF !important;
+      color: #2d68ff !important;
       border: 1px solid rgba(45, 104, 255, 0.3) !important;
     }
-    
+
     .visibility-cell {
       &.public {
-        color: #3FB950 !important;
+        color: #3fb950 !important;
       }
       &.private {
-        color: #63676D !important;
+        color: #63676d !important;
       }
     }
-    
+
     .more-btn {
-      color: #63676D !important;
-      
+      color: #63676d !important;
+
       &:hover {
-        background: #21262D !important;
-        color: #B0B3B8 !important;
+        background: #21262d !important;
+        color: #b0b3b8 !important;
       }
     }
-    
+
     .row-menu {
       background: #151921 !important;
-      border: 1px solid #21262D !important;
+      border: 1px solid #21262d !important;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
-      
+
       .menu-item {
-        color: #B0B3B8 !important;
-        
+        color: #b0b3b8 !important;
+
         .svg-inline--fa {
-          color: #63676D !important;
+          color: #63676d !important;
         }
-        
+
         &:hover {
-          background: #1C2128 !important;
-          color: #FFFFFF !important;
-          
+          background: #1c2128 !important;
+          color: #ffffff !important;
+
           .svg-inline--fa {
-            color: #B0B3B8 !important;
+            color: #b0b3b8 !important;
           }
         }
-        
+
         &.danger {
-          color: #F85149 !important;
-          
+          color: #f85149 !important;
+
           .svg-inline--fa {
-            color: #F85149 !important;
+            color: #f85149 !important;
           }
-          
+
           &:hover {
             background: rgba(248, 81, 73, 0.1) !important;
           }
@@ -544,109 +552,108 @@
       }
     }
   }
-  
+
   // 表格（兼容旧样式）
   .list-table {
     background: #151921 !important;
-    
+
     th {
-      background: #11141B !important;
-      color: #63676D !important;
-      border-bottom: 1px solid #21262D !important;
+      background: #11141b !important;
+      color: #63676d !important;
+      border-bottom: 1px solid #21262d !important;
     }
-    
+
     td {
-      color: #B0B3B8 !important;
-      border-bottom: 1px solid #21262D !important;
+      color: #b0b3b8 !important;
+      border-bottom: 1px solid #21262d !important;
     }
-    
+
     .list-row:hover {
-      background: #1C2128 !important;
+      background: #1c2128 !important;
     }
-    
+
     .file-name {
-      color: #FFFFFF !important;
+      color: #ffffff !important;
     }
   }
-  
+
   // 空状态
   .empty-state {
     .empty-icon {
-      color: #30363D !important;
+      color: #30363d !important;
     }
-    
+
     p {
-      color: #63676D !important;
+      color: #63676d !important;
     }
   }
-  
+
   // 分页按钮
   .page-btn {
-    background: #21262D !important;
-    border: 1px solid #30363D !important;
-    color: #B0B3B8 !important;
-    
+    background: #21262d !important;
+    border: 1px solid #30363d !important;
+    color: #b0b3b8 !important;
+
     &:hover:not(:disabled) {
-      background: #30363D !important;
-      color: #FFFFFF !important;
+      background: #30363d !important;
+      color: #ffffff !important;
     }
   }
-  
+
   // 视图切换
   .view-toggle {
-    background: #11141B !important;
-    border: 1px solid #21262D !important;
+    background: #11141b !important;
+    border: 1px solid #21262d !important;
   }
-  
+
   .view-btn {
-    color: #63676D !important;
-    
+    color: #63676d !important;
+
     &.active {
-      background: #21262D !important;
-      color: #2D68FF !important;
+      background: #21262d !important;
+      color: #2d68ff !important;
     }
   }
-  
+
   // 排序按钮
   .sort-btn {
-    color: #63676D !important;
-    
+    color: #63676d !important;
+
     &:hover {
-      color: #B0B3B8 !important;
+      color: #b0b3b8 !important;
     }
-    
+
     &.active {
-      color: #2D68FF !important;
+      color: #2d68ff !important;
     }
   }
-  
+
   // 进度条
   .progress-fill,
   .el-progress-bar__inner {
-    background: linear-gradient(90deg, #1A3D8F 0%, #2D68FF 100%) !important;
+    background: linear-gradient(90deg, #1a3d8f 0%, #2d68ff 100%) !important;
   }
-  
+
   // 输入框聚焦
   .el-input__wrapper {
-    background: #11141B !important;
-    border: 1px solid #21262D !important;
-    
+    background: #11141b !important;
+    border: 1px solid #21262d !important;
+
     &:hover {
-      border-color: #30363D !important;
+      border-color: #30363d !important;
     }
-    
+
     &:focus-within {
-      border-color: #2D68FF !important;
+      border-color: #2d68ff !important;
       box-shadow: 0 0 0 3px rgba(45, 104, 255, 0.15) !important;
     }
-    
+
     .el-input__inner {
-      color: #FFFFFF !important;
-      
+      color: #ffffff !important;
+
       &::placeholder {
-        color: #63676D !important;
+        color: #63676d !important;
       }
     }
   }
 }
-

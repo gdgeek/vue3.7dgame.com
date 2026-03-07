@@ -3,7 +3,11 @@
  * 验证 AiRodinQuality、AiRodinQuery、AiRodinItem 接口结构
  */
 import { describe, it, expect } from "vitest";
-import type { AiRodinQuality, AiRodinQuery, AiRodinItem } from "@/types/ai-rodin";
+import type {
+  AiRodinQuality,
+  AiRodinQuery,
+  AiRodinItem,
+} from "@/types/ai-rodin";
 
 describe("AiRodinQuality 类型", () => {
   it("可以是 high", () => {

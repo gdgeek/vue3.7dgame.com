@@ -9,7 +9,7 @@
 .theme-cyber-tech {
   // 细微扫描线效果
   &::after {
-    content: '';
+    content: "";
     position: fixed;
     top: 0;
     left: 0;
@@ -25,7 +25,7 @@
     pointer-events: none;
     z-index: 9998;
   }
-  
+
   // 玻璃质感卡片
   .ar-card,
   .settings-card,
@@ -39,24 +39,28 @@
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
     border: 1px solid rgba(0, 242, 255, 0.15) !important;
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.08), inset 0 0 0 1px rgba(0, 242, 255, 0.05) !important;
-    
+    box-shadow:
+      0 0 15px rgba(0, 242, 255, 0.08),
+      inset 0 0 0 1px rgba(0, 242, 255, 0.05) !important;
+
     &:hover {
       border-color: rgba(0, 242, 255, 0.4) !important;
-      box-shadow: 0 0 30px rgba(0, 242, 255, 0.2), inset 0 0 0 1px rgba(0, 242, 255, 0.15) !important;
+      box-shadow:
+        0 0 30px rgba(0, 242, 255, 0.2),
+        inset 0 0 0 1px rgba(0, 242, 255, 0.15) !important;
     }
   }
-  
+
   // 资源库玻璃背景
   .resource-library,
   .meta-library,
   .verse-library,
   .help-center,
   .video-tutorials {
-    background: #0B0E14 !important;
-    
+    background: #0b0e14 !important;
+
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: 0;
       left: 0;
@@ -66,217 +70,233 @@
       pointer-events: none;
       z-index: 0;
     }
-    
+
     > * {
       position: relative;
       z-index: 1;
     }
   }
-  
+
   // 详情面板玻璃质感
   .detail-panel {
     background: rgba(11, 14, 20, 0.95) !important;
     backdrop-filter: blur(30px) !important;
     -webkit-backdrop-filter: blur(30px) !important;
     border-left: 1px solid rgba(0, 242, 255, 0.2) !important;
-    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 242, 255, 0.1) !important;
-    
+    box-shadow:
+      -10px 0 40px rgba(0, 0, 0, 0.5),
+      0 0 30px rgba(0, 242, 255, 0.1) !important;
+
     .panel-header {
       border-bottom: 1px solid rgba(0, 242, 255, 0.15) !important;
-      background: linear-gradient(90deg, rgba(0, 242, 255, 0.05) 0%, transparent 100%) !important;
+      background: linear-gradient(
+        90deg,
+        rgba(0, 242, 255, 0.05) 0%,
+        transparent 100%
+      ) !important;
     }
-    
+
     .panel-title {
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       text-shadow: 0 0 20px rgba(0, 242, 255, 0.5) !important;
       font-weight: 500 !important;
     }
-    
+
     .preview-module,
     .cover-preview {
       border: 1px solid rgba(0, 242, 255, 0.2) !important;
       background: rgba(0, 242, 255, 0.03) !important;
-      box-shadow: 0 0 20px rgba(0, 242, 255, 0.1), inset 0 0 30px rgba(0, 242, 255, 0.02) !important;
+      box-shadow:
+        0 0 20px rgba(0, 242, 255, 0.1),
+        inset 0 0 30px rgba(0, 242, 255, 0.02) !important;
       border-radius: 8px !important;
     }
-    
+
     .cover-placeholder {
       background: rgba(0, 242, 255, 0.03) !important;
-      
+
       .svg-inline--fa {
         color: rgba(0, 242, 255, 0.5) !important;
       }
     }
-    
+
     .change-cover-btn {
       background: rgba(0, 242, 255, 0.2) !important;
       border: 1px solid rgba(0, 242, 255, 0.3) !important;
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       border-radius: 4px !important;
-      
+
       &:hover {
         background: rgba(0, 242, 255, 0.3) !important;
         box-shadow: 0 0 15px rgba(0, 242, 255, 0.3) !important;
       }
     }
-    
+
     .item-name {
-      color: #E8F4FF !important;
+      color: #e8f4ff !important;
     }
-    
+
     // 修改名称按钮 - 霓虹发光风格
     .name-display .edit-btn {
       background: rgba(0, 242, 255, 0.15) !important;
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       border: 1px solid rgba(0, 242, 255, 0.4) !important;
       box-shadow: 0 0 10px rgba(0, 242, 255, 0.2) !important;
-      
+
       &:hover {
         background: rgba(0, 242, 255, 0.25) !important;
         box-shadow: 0 0 20px rgba(0, 242, 255, 0.4) !important;
-        color: #00F2FF !important;
+        color: #00f2ff !important;
       }
     }
-    
+
     .info-block {
       background: rgba(0, 242, 255, 0.04) !important;
       border: 1px solid rgba(0, 242, 255, 0.1) !important;
       border-radius: 4px !important;
     }
-    
+
     .info-label {
-      color: #5A6A7A !important;
+      color: #5a6a7a !important;
     }
-    
+
     .info-value {
-      color: #B0C4DE !important;
+      color: #b0c4de !important;
     }
-    
+
     // 表单样式
     .form-label {
-      color: #8B9DC3 !important;
+      color: #8b9dc3 !important;
     }
-    
+
     .form-input,
     .form-textarea,
     .name-input {
       background: rgba(18, 24, 32, 0.8) !important;
       border: 1px solid rgba(0, 242, 255, 0.2) !important;
-      color: #E8F4FF !important;
+      color: #e8f4ff !important;
       border-radius: 4px !important;
-      
+
       &::placeholder {
-        color: #5A6A7A !important;
+        color: #5a6a7a !important;
       }
-      
+
       &:focus {
-        border-color: #00F2FF !important;
+        border-color: #00f2ff !important;
         box-shadow: 0 0 15px rgba(0, 242, 255, 0.2) !important;
       }
     }
-    
+
     // 标签编辑器
     .tag-item {
       background: rgba(0, 242, 255, 0.15) !important;
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       border: 1px solid rgba(0, 242, 255, 0.3) !important;
       border-radius: 4px !important;
     }
-    
+
     .tag-select {
       background: rgba(18, 24, 32, 0.8) !important;
       border: 1px solid rgba(0, 242, 255, 0.2) !important;
-      color: #E8F4FF !important;
+      color: #e8f4ff !important;
       border-radius: 4px !important;
     }
-    
+
     .add-tag-btn {
-      background: linear-gradient(135deg, #00F2FF 0%, #00BAFF 100%) !important;
-      color: #0B0E14 !important;
+      background: linear-gradient(135deg, #00f2ff 0%, #00baff 100%) !important;
+      color: #0b0e14 !important;
       border-radius: 4px !important;
       box-shadow: 0 0 15px rgba(0, 242, 255, 0.3) !important;
     }
-    
+
     // 可见性切换
     .visibility-btn {
       background: rgba(18, 24, 32, 0.8) !important;
       border: 1px solid rgba(0, 242, 255, 0.2) !important;
-      color: #8B9DC3 !important;
+      color: #8b9dc3 !important;
       border-radius: 4px !important;
-      
+
       &:hover {
         border-color: rgba(0, 242, 255, 0.4) !important;
-        color: #00F2FF !important;
+        color: #00f2ff !important;
       }
-      
+
       &.active {
         background: rgba(0, 242, 255, 0.15) !important;
-        border-color: #00F2FF !important;
-        color: #00F2FF !important;
+        border-color: #00f2ff !important;
+        color: #00f2ff !important;
         box-shadow: 0 0 15px rgba(0, 242, 255, 0.2) !important;
       }
     }
-    
+
     .panel-footer {
       background: rgba(11, 14, 20, 0.95) !important;
       border-top: 1px solid rgba(0, 242, 255, 0.15) !important;
     }
-    
+
     .download-btn,
     .enter-edit-btn {
-      background: linear-gradient(135deg, rgba(0, 242, 255, 0.2) 0%, rgba(0, 242, 255, 0.1) 100%) !important;
+      background: linear-gradient(
+        135deg,
+        rgba(0, 242, 255, 0.2) 0%,
+        rgba(0, 242, 255, 0.1) 100%
+      ) !important;
       border: 1px solid rgba(0, 242, 255, 0.4) !important;
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       box-shadow: 0 0 20px rgba(0, 242, 255, 0.3) !important;
       border-radius: 4px !important;
-      
+
       &:hover {
-        background: linear-gradient(135deg, rgba(0, 242, 255, 0.3) 0%, rgba(0, 242, 255, 0.15) 100%) !important;
+        background: linear-gradient(
+          135deg,
+          rgba(0, 242, 255, 0.3) 0%,
+          rgba(0, 242, 255, 0.15) 100%
+        ) !important;
         box-shadow: 0 0 35px rgba(0, 242, 255, 0.5) !important;
       }
     }
-    
+
     .cancel-btn,
     .confirm-btn,
     .save-btn {
       border-radius: 4px !important;
     }
-    
+
     .confirm-btn,
     .save-btn {
-      background: linear-gradient(135deg, #00F2FF 0%, #00BAFF 100%) !important;
-      color: #0B0E14 !important;
+      background: linear-gradient(135deg, #00f2ff 0%, #00baff 100%) !important;
+      color: #0b0e14 !important;
       box-shadow: 0 0 15px rgba(0, 242, 255, 0.3) !important;
     }
-    
+
     .cancel-btn {
       background: rgba(18, 24, 32, 0.8) !important;
       border: 1px solid rgba(0, 242, 255, 0.2) !important;
-      color: #8B9DC3 !important;
+      color: #8b9dc3 !important;
     }
-    
+
     .delete-btn {
-      color: #FF3366 !important;
+      color: #ff3366 !important;
       border-radius: 4px !important;
-      
+
       &:hover {
         background: rgba(255, 51, 102, 0.1) !important;
         box-shadow: 0 0 15px rgba(255, 51, 102, 0.2) !important;
       }
     }
-    
+
     .secondary-actions .download-btn {
       background: transparent !important;
       border: 1px solid rgba(0, 242, 255, 0.3) !important;
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       box-shadow: none !important;
-      
+
       &:hover {
         background: rgba(0, 242, 255, 0.1) !important;
       }
     }
   }
-  
+
   // 对话框玻璃质感
   .custom-confirm-dialog .el-dialog,
   .custom-input-dialog .el-dialog {
@@ -284,57 +304,67 @@
     backdrop-filter: blur(30px) !important;
     -webkit-backdrop-filter: blur(30px) !important;
     border: 1px solid rgba(0, 242, 255, 0.2) !important;
-    box-shadow: 0 0 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 242, 255, 0.15) !important;
-    
+    box-shadow:
+      0 0 60px rgba(0, 0, 0, 0.6),
+      0 0 40px rgba(0, 242, 255, 0.15) !important;
+
     .el-dialog__title {
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       text-shadow: 0 0 15px rgba(0, 242, 255, 0.5) !important;
     }
   }
-  
+
   // 上传模态框玻璃质感
   .upload-modal {
     background: rgba(11, 14, 20, 0.95) !important;
     backdrop-filter: blur(30px) !important;
     -webkit-backdrop-filter: blur(30px) !important;
     border: 1px solid rgba(0, 242, 255, 0.2) !important;
-    box-shadow: 0 0 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 242, 255, 0.15) !important;
-    
+    box-shadow:
+      0 0 60px rgba(0, 0, 0, 0.6),
+      0 0 40px rgba(0, 242, 255, 0.15) !important;
+
     .modal-title {
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       text-shadow: 0 0 15px rgba(0, 242, 255, 0.5) !important;
     }
-    
+
     .upload-zone {
       border: 1px dashed rgba(0, 242, 255, 0.3) !important;
       background: rgba(0, 242, 255, 0.02) !important;
-      
+
       &:hover,
       &.drag-active {
         border-color: rgba(0, 242, 255, 0.6) !important;
         background: rgba(0, 242, 255, 0.06) !important;
-        box-shadow: 0 0 30px rgba(0, 242, 255, 0.15), inset 0 0 20px rgba(0, 242, 255, 0.03) !important;
+        box-shadow:
+          0 0 30px rgba(0, 242, 255, 0.15),
+          inset 0 0 20px rgba(0, 242, 255, 0.03) !important;
       }
     }
-    
+
     .browse-btn,
     .start-upload-btn {
-      background: linear-gradient(135deg, rgba(0, 242, 255, 0.2) 0%, rgba(0, 242, 255, 0.1) 100%) !important;
+      background: linear-gradient(
+        135deg,
+        rgba(0, 242, 255, 0.2) 0%,
+        rgba(0, 242, 255, 0.1) 100%
+      ) !important;
       border: 1px solid rgba(0, 242, 255, 0.4) !important;
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       box-shadow: 0 0 15px rgba(0, 242, 255, 0.3) !important;
-      
+
       &:hover {
         box-shadow: 0 0 25px rgba(0, 242, 255, 0.5) !important;
       }
     }
-    
+
     .file-item {
       background: rgba(0, 242, 255, 0.04) !important;
       border: 1px solid rgba(0, 242, 255, 0.1) !important;
     }
   }
-  
+
   // 按钮霓虹发光效果
   .btn-primary,
   .el-button--primary,
@@ -343,57 +373,75 @@
   .save-btn,
   .edit-btn,
   .enter-editor-btn {
-    background: linear-gradient(135deg, rgba(0, 242, 255, 0.15) 0%, rgba(0, 242, 255, 0.08) 100%) !important;
+    background: linear-gradient(
+      135deg,
+      rgba(0, 242, 255, 0.15) 0%,
+      rgba(0, 242, 255, 0.08) 100%
+    ) !important;
     border: 1px solid rgba(0, 242, 255, 0.4) !important;
-    color: #00F2FF !important;
+    color: #00f2ff !important;
     box-shadow: 0 0 15px rgba(0, 242, 255, 0.25) !important;
     text-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
-    
+
     &:hover {
-      background: linear-gradient(135deg, rgba(0, 242, 255, 0.25) 0%, rgba(0, 242, 255, 0.12) 100%) !important;
+      background: linear-gradient(
+        135deg,
+        rgba(0, 242, 255, 0.25) 0%,
+        rgba(0, 242, 255, 0.12) 100%
+      ) !important;
       border-color: rgba(0, 242, 255, 0.6) !important;
       box-shadow: 0 0 30px rgba(0, 242, 255, 0.4) !important;
     }
   }
-  
+
   // 侧边栏玻璃质感
   .ar-sidebar {
     background: rgba(8, 10, 15, 0.95) !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
     border-right: 1px solid rgba(0, 242, 255, 0.12) !important;
-    
+
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(180deg, rgba(0, 242, 255, 0.03) 0%, transparent 40%);
+      background: linear-gradient(
+        180deg,
+        rgba(0, 242, 255, 0.03) 0%,
+        transparent 40%
+      );
       pointer-events: none;
       z-index: 0;
     }
-    
+
     > * {
       position: relative;
       z-index: 1;
     }
   }
-  
+
   // 侧边栏激活项
   .sidebar-item-active {
-    background: linear-gradient(90deg, rgba(0, 242, 255, 0.15) 0%, rgba(0, 242, 255, 0.05) 100%) !important;
+    background: linear-gradient(
+      90deg,
+      rgba(0, 242, 255, 0.15) 0%,
+      rgba(0, 242, 255, 0.05) 100%
+    ) !important;
     border: 1px solid rgba(0, 242, 255, 0.3) !important;
-    box-shadow: 0 0 20px rgba(0, 242, 255, 0.2), inset 0 0 10px rgba(0, 242, 255, 0.05) !important;
-    
+    box-shadow:
+      0 0 20px rgba(0, 242, 255, 0.2),
+      inset 0 0 10px rgba(0, 242, 255, 0.05) !important;
+
     .item-text,
     .svg-inline--fa {
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       text-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
     }
   }
-  
+
   // 输入框聚焦发光
   .el-input__wrapper:focus-within,
   input:focus,
@@ -402,171 +450,183 @@
   .name-input:focus,
   .custom-input:focus {
     border-color: rgba(0, 242, 255, 0.5) !important;
-    box-shadow: 0 0 20px rgba(0, 242, 255, 0.2), inset 0 0 10px rgba(0, 242, 255, 0.03) !important;
+    box-shadow:
+      0 0 20px rgba(0, 242, 255, 0.2),
+      inset 0 0 10px rgba(0, 242, 255, 0.03) !important;
   }
-  
+
   // 搜索框玻璃质感
   .search-input {
     background: rgba(0, 242, 255, 0.04) !important;
     border: 1px solid rgba(0, 242, 255, 0.15) !important;
-    color: #E8F4F8 !important;
-    
+    color: #e8f4f8 !important;
+
     &::placeholder {
-      color: #5A7078 !important;
+      color: #5a7078 !important;
     }
   }
-  
+
   // 标题霓虹发光
-  h1, h2, h3, 
-  .page-title, 
-  .card-title, 
-  .panel-title, 
+  h1,
+  h2,
+  h3,
+  .page-title,
+  .card-title,
+  .panel-title,
   .library-title,
   .modal-title,
   .hero-title,
   .section-title {
-    color: #00F2FF !important;
+    color: #00f2ff !important;
     text-shadow: 0 0 20px rgba(0, 242, 255, 0.4) !important;
   }
-  
+
   // 次要标题
   .subsection-title,
   .search-group-title {
-    color: #8BA3AD !important;
+    color: #8ba3ad !important;
   }
-  
+
   // 链接发光
-  a:not(.btn):not(.el-button), 
+  a:not(.btn):not(.el-button),
   .btn-link,
   .view-more-link {
-    color: #00F2FF !important;
-    
+    color: #00f2ff !important;
+
     &:hover {
       text-shadow: 0 0 12px rgba(0, 242, 255, 0.6) !important;
     }
   }
-  
+
   // 底部信息栏
   .app-footer {
     background: rgba(8, 10, 15, 0.95) !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
     border-top: 1px solid rgba(0, 242, 255, 0.12) !important;
-    
+
     .footer-link {
-      color: #5A7078 !important;
-      
+      color: #5a7078 !important;
+
       &:hover {
-        color: #00F2FF !important;
+        color: #00f2ff !important;
         text-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
       }
     }
-    
+
     .divider {
       color: rgba(0, 242, 255, 0.2) !important;
     }
   }
-  
+
   // 进度条霓虹效果
   .progress-fill,
   .el-progress-bar__inner {
-    background: linear-gradient(90deg, #00F2FF 0%, #00D4E6 100%) !important;
+    background: linear-gradient(90deg, #00f2ff 0%, #00d4e6 100%) !important;
     box-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
   }
-  
+
   // 列表视图 - 赛博科技风格
   .resource-list {
     background: rgba(11, 14, 20, 0.95) !important;
     border: 1px solid rgba(0, 242, 255, 0.2) !important;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3), 0 0 15px rgba(0, 242, 255, 0.08) !important;
-    
+    box-shadow:
+      0 0 30px rgba(0, 0, 0, 0.3),
+      0 0 15px rgba(0, 242, 255, 0.08) !important;
+
     .list-table {
       th {
         background: rgba(0, 242, 255, 0.06) !important;
-        color: #8BA3AD !important;
+        color: #8ba3ad !important;
         border-bottom: 1px solid rgba(0, 242, 255, 0.15) !important;
       }
-      
+
       td {
         border-bottom: 1px solid rgba(0, 242, 255, 0.08) !important;
-        color: #E8F4F8 !important;
+        color: #e8f4f8 !important;
       }
     }
-    
+
     .list-row {
       &:hover {
         background: rgba(0, 242, 255, 0.06) !important;
       }
     }
-    
+
     .row-thumbnail {
       border: 1px solid rgba(0, 242, 255, 0.2) !important;
       background: rgba(0, 242, 255, 0.03) !important;
     }
-    
+
     .file-name {
-      color: #E8F4F8 !important;
+      color: #e8f4f8 !important;
     }
-    
+
     .enter-editor-btn {
-      background: linear-gradient(135deg, rgba(0, 242, 255, 0.2) 0%, rgba(0, 242, 255, 0.1) 100%) !important;
+      background: linear-gradient(
+        135deg,
+        rgba(0, 242, 255, 0.2) 0%,
+        rgba(0, 242, 255, 0.1) 100%
+      ) !important;
       border: 1px solid rgba(0, 242, 255, 0.4) !important;
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       box-shadow: 0 0 12px rgba(0, 242, 255, 0.25) !important;
-      
+
       &:hover {
         box-shadow: 0 0 20px rgba(0, 242, 255, 0.4) !important;
       }
     }
-    
+
     .list-tag {
       background: rgba(0, 242, 255, 0.15) !important;
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       border: 1px solid rgba(0, 242, 255, 0.3) !important;
     }
-    
+
     .visibility-cell {
       &.public {
-        color: #00FF88 !important;
+        color: #00ff88 !important;
       }
       &.private {
-        color: #8BA3AD !important;
+        color: #8ba3ad !important;
       }
     }
-    
+
     .more-btn {
-      color: #8BA3AD !important;
-      
+      color: #8ba3ad !important;
+
       &:hover {
         background: rgba(0, 242, 255, 0.1) !important;
-        color: #00F2FF !important;
+        color: #00f2ff !important;
       }
     }
-    
+
     .row-menu {
       background: rgba(11, 14, 20, 0.95) !important;
       backdrop-filter: blur(20px) !important;
       border: 1px solid rgba(0, 242, 255, 0.2) !important;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 242, 255, 0.1) !important;
-      
+      box-shadow:
+        0 0 30px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(0, 242, 255, 0.1) !important;
+
       .menu-item {
-        color: #E8F4F8 !important;
-        
+        color: #e8f4f8 !important;
+
         .svg-inline--fa {
-          color: #8BA3AD !important;
+          color: #8ba3ad !important;
         }
-        
+
         &:hover {
           background: rgba(0, 242, 255, 0.1) !important;
         }
-        
+
         &.danger {
-          color: #FF3366 !important;
-          
+          color: #ff3366 !important;
+
           .svg-inline--fa {
-            color: #FF3366 !important;
+            color: #ff3366 !important;
           }
-          
+
           &:hover {
             background: rgba(255, 51, 102, 0.1) !important;
           }
@@ -574,24 +634,24 @@
       }
     }
   }
-  
+
   // 表格样式（兼容旧样式）
   .list-table {
     th {
       background: rgba(0, 242, 255, 0.05) !important;
-      color: #8BA3AD !important;
+      color: #8ba3ad !important;
       border-bottom: 1px solid rgba(0, 242, 255, 0.15) !important;
     }
-    
+
     td {
       border-bottom: 1px solid rgba(0, 242, 255, 0.08) !important;
     }
-    
+
     .list-row:hover {
       background: rgba(0, 242, 255, 0.06) !important;
     }
   }
-  
+
   // 下拉菜单玻璃质感
   .card-dropdown-menu,
   .row-menu,
@@ -601,76 +661,77 @@
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
     border: 1px solid rgba(0, 242, 255, 0.2) !important;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 242, 255, 0.1) !important;
-    
+    box-shadow:
+      0 0 30px rgba(0, 0, 0, 0.5),
+      0 0 20px rgba(0, 242, 255, 0.1) !important;
+
     .menu-item {
-      color: #E8F4F8 !important;
-      
+      color: #e8f4f8 !important;
+
       &:hover {
         background: rgba(0, 242, 255, 0.1) !important;
       }
-      
+
       &.danger {
-        color: #FF3366 !important;
-        
+        color: #ff3366 !important;
+
         &:hover {
           background: rgba(255, 51, 102, 0.1) !important;
         }
       }
     }
   }
-  
+
   // 空状态
   .empty-state {
     .empty-icon {
       color: rgba(0, 242, 255, 0.3) !important;
     }
-    
+
     p {
-      color: #5A7078 !important;
+      color: #5a7078 !important;
     }
   }
-  
+
   // 分页按钮
   .page-btn {
     background: rgba(0, 242, 255, 0.05) !important;
     border: 1px solid rgba(0, 242, 255, 0.2) !important;
-    color: #8BA3AD !important;
-    
+    color: #8ba3ad !important;
+
     &:hover:not(:disabled) {
       border-color: rgba(0, 242, 255, 0.4) !important;
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       box-shadow: 0 0 15px rgba(0, 242, 255, 0.2) !important;
     }
   }
-  
+
   // 视图切换按钮
   .view-toggle {
     background: rgba(0, 242, 255, 0.05) !important;
     border: 1px solid rgba(0, 242, 255, 0.15) !important;
   }
-  
+
   .view-btn {
-    color: #5A7078 !important;
-    
+    color: #5a7078 !important;
+
     &.active {
       background: rgba(0, 242, 255, 0.15) !important;
-      color: #00F2FF !important;
+      color: #00f2ff !important;
     }
   }
-  
+
   // 排序按钮
   .sort-btn {
-    color: #5A7078 !important;
-    
+    color: #5a7078 !important;
+
     &:hover {
-      color: #8BA3AD !important;
+      color: #8ba3ad !important;
     }
-    
+
     &.active {
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       background: rgba(0, 242, 255, 0.08) !important;
     }
   }
 }
-

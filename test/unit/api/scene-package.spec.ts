@@ -18,7 +18,9 @@ describe("getVerseExportJson()", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     ({ getVerseExportJson } = await import("@/api/v1/scene-package"));
   });
@@ -122,7 +124,9 @@ describe("postVerseImportJson()", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     ({ postVerseImportJson } = await import("@/api/v1/scene-package"));
   });
@@ -157,7 +161,9 @@ describe("postVerseImportZip()", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     ({ postVerseImportZip } = await import("@/api/v1/scene-package"));
   });

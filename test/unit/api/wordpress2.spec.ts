@@ -37,7 +37,7 @@ function setBaseURL(url: string) {
 
 describe("wordpress buildEndpoint — all branches", () => {
   // Import the API object (not the full module) to avoid naming collision
-  let api: typeof import("@/api/home/wordpress")["wordpressApi"];
+  let api: (typeof import("@/api/home/wordpress"))["wordpressApi"];
 
   beforeEach(async () => {
     vi.clearAllMocks();

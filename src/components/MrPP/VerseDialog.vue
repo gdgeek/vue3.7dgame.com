@@ -136,16 +136,15 @@ const {
   clearSearched,
   handleCurrentChange,
   openDialog,
-} =
-  useDialogList<VerseItem>(
-    (sorted, searched, page) =>
-      getVerses({
-        sort: sorted,
-        search: searched,
-        page,
-        expand: "image",
-      }) as Promise<{ data: VerseItem[]; headers: Record<string, unknown> }>
-  );
+} = useDialogList<VerseItem>(
+  (sorted, searched, page) =>
+    getVerses({
+      sort: sorted,
+      search: searched,
+      page,
+      expand: "image",
+    }) as Promise<{ data: VerseItem[]; headers: Record<string, unknown> }>
+);
 
 const title = (item: VerseItem) => item.title || item.name || "title";
 

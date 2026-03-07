@@ -73,7 +73,8 @@ const environment = {
       import.meta.env.VITE_APP_BACKUP_DOMAIN_INFO_API_URL ||
       ""
   ),
-  tts_api: import.meta.env.VITE_TTS_API_URL || "https://sound.bujiaban.com/tencentTTS",
+  tts_api:
+    import.meta.env.VITE_TTS_API_URL || "https://sound.bujiaban.com/tencentTTS",
   //a1: ReplaceURL(import.meta.env.VITE_APP_A1_API || ""),
   version: 1,
   subtitle,

@@ -148,9 +148,7 @@ describe("wp.ts — watch callback (lines 11-12)", () => {
     await import("@/utils/wp");
 
     if (capturedCallback) {
-      expect(() =>
-        (capturedCallback as (v: string) => void)("")
-      ).not.toThrow();
+      expect(() => (capturedCallback as (v: string) => void)("")).not.toThrow();
     }
   });
 

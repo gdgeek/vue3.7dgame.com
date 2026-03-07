@@ -222,8 +222,7 @@ export function buildScriptRuntime(
     LINEAR: (t) => t,
     EASE_IN: (t) => t * t,
     EASE_OUT: (t) => 1 - Math.pow(1 - t, 2),
-    EASE_IN_OUT: (t) =>
-      t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
+    EASE_IN_OUT: (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
     BOUNCE_IN: (t) => 1 - easingFunctions.BOUNCE_OUT(1 - t),
     BOUNCE_OUT: (t) => {
       if (t < 1 / 2.75) return 7.5625 * t * t;
@@ -259,8 +258,13 @@ export function buildScriptRuntime(
               typeof resolvedTask.execute === "function"
             ) {
               await resolvedTask.execute();
-            } else if (isRecord(resolvedTask) && resolvedTask.type === "audio") {
-              await sound.play(resolvedTask.data as HTMLAudioElement | undefined);
+            } else if (
+              isRecord(resolvedTask) &&
+              resolvedTask.type === "audio"
+            ) {
+              await sound.play(
+                resolvedTask.data as HTMLAudioElement | undefined
+              );
             } else if (
               isRecord(resolvedTask) &&
               resolvedTask.type === "animation"

@@ -17,10 +17,18 @@ vi.mock("@/router/modules/public", () => ({
 }));
 vi.mock("@/router/modules/home", () => ({
   homeRoutes: { path: "/home", name: "Home", meta: { hidden: false } },
-  settingsRoutes: { path: "/settings", name: "Settings", meta: { hidden: false } },
+  settingsRoutes: {
+    path: "/settings",
+    name: "Settings",
+    meta: { hidden: false },
+  },
 }));
 vi.mock("@/router/modules/resource", () => ({
-  resourceRoutes: { path: "/resource", name: "Resource", meta: { hidden: false } },
+  resourceRoutes: {
+    path: "/resource",
+    name: "Resource",
+    meta: { hidden: false },
+  },
 }));
 vi.mock("@/router/modules/meta", () => ({
   metaRoutes: [{ path: "/meta", name: "Meta", meta: { hidden: false } }],
@@ -137,9 +145,9 @@ describe("src/router/index.ts", () => {
     let cloneSpy: ReturnType<typeof vi.spyOn>;
 
     beforeEach(() => {
-      cloneSpy = vi.spyOn(globalThis, "structuredClone").mockImplementation(
-        cloneWithoutFns as typeof structuredClone
-      );
+      cloneSpy = vi
+        .spyOn(globalThis, "structuredClone")
+        .mockImplementation(cloneWithoutFns as typeof structuredClone);
     });
 
     afterEach(() => {
@@ -147,7 +155,9 @@ describe("src/router/index.ts", () => {
     });
 
     it("is an async function", () => {
-      const result = routerIndex.UpdateRoutes({ can: vi.fn(() => true) } as any);
+      const result = routerIndex.UpdateRoutes({
+        can: vi.fn(() => true),
+      } as any);
       expect(result).toBeInstanceOf(Promise);
     });
 
@@ -193,14 +203,18 @@ describe("src/router/index.ts", () => {
     it("re-runs check independently on each call (state reset)", async () => {
       const hideAbility = { can: vi.fn(() => false) };
       await routerIndex.UpdateRoutes(hideAbility as any);
-      const rootAfterHide = routerIndex.constantRoutes.find((r) => r.path === "/");
+      const rootAfterHide = routerIndex.constantRoutes.find(
+        (r) => r.path === "/"
+      );
       const allHidden = rootAfterHide?.children?.every(
         (c) => c.meta?.hidden === true
       );
 
       const showAbility = { can: vi.fn(() => true) };
       await routerIndex.UpdateRoutes(showAbility as any);
-      const rootAfterShow = routerIndex.constantRoutes.find((r) => r.path === "/");
+      const rootAfterShow = routerIndex.constantRoutes.find(
+        (r) => r.path === "/"
+      );
       const allShown = rootAfterShow?.children?.every(
         (c) => c.meta?.hidden === false
       );

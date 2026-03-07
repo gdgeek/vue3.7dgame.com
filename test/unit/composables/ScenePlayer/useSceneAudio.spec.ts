@@ -36,7 +36,10 @@ describe("useSceneAudio", () => {
 
   describe("getAudioUrl", () => {
     it("returns url for audio source", async () => {
-      sources.set("abc", { type: "audio", data: { url: "https://example.com/audio.mp3" } });
+      sources.set("abc", {
+        type: "audio",
+        data: { url: "https://example.com/audio.mp3" },
+      });
       const { getAudioUrl } = await getComposable();
       expect(getAudioUrl("abc")).toBe("https://example.com/audio.mp3");
     });

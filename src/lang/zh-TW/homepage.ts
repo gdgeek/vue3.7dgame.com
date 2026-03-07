@@ -91,7 +91,8 @@ export default {
       confirmUnbind: "確認解綁",
       unbindDirectNoVerify: "當前郵箱未驗證，可直接解綁，無需驗證碼。",
       confirmDirectUnbind: "確認直接解綁",
-      bindDirectNoVerify: "當前郵箱未驗證，可直接綁定新郵箱，無需舊郵箱二次確認。",
+      bindDirectNoVerify:
+        "當前郵箱未驗證，可直接綁定新郵箱，無需舊郵箱二次確認。",
       verifyEmail: "驗證郵箱",
       accountLocked: "賬戶已被鎖定，請 {time} 秒後再試",
       avatarCropping: {

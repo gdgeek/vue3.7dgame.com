@@ -5,7 +5,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 vi.mock("@/utils/logger", () => ({
-  logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn(), log: vi.fn() },
+  logger: {
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+    log: vi.fn(),
+  },
 }));
 
 describe("User API", () => {
@@ -16,7 +22,9 @@ describe("User API", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     const mod = await import("@/api/v1/user");
     getUserCreation = mod.getUserCreation;
     putUserData = mod.putUserData;

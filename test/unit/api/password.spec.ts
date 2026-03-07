@@ -123,7 +123,11 @@ describe("Password API", () => {
     it("returns response data", async () => {
       const payload = { success: true, message: "reset" };
       request.mockResolvedValue({ data: payload });
-      const result = await passwordApi.resetPasswordByCode("u@e.com", "1234", "newP");
+      const result = await passwordApi.resetPasswordByCode(
+        "u@e.com",
+        "1234",
+        "newP"
+      );
       expect(result).toEqual(payload);
     });
   });

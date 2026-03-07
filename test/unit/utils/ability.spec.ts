@@ -177,7 +177,13 @@ describe("AbilityRole", () => {
   });
 
   it("resolves all roles together with root winning", () => {
-    const instance = new AbilityRole(["guest", "user", "manager", "admin", "root"]);
+    const instance = new AbilityRole([
+      "guest",
+      "user",
+      "manager",
+      "admin",
+      "root",
+    ]);
     expect(instance.role).toBe("root");
   });
 });

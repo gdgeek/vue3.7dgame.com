@@ -43,7 +43,10 @@ describe("useUnsavedChanges", () => {
 
   it("markSaved() sets hasUnsavedChanges to false immediately", async () => {
     const content = ref("original");
-    const { hasUnsavedChanges, markSaved } = useUnsavedChanges(content, () => "original");
+    const { hasUnsavedChanges, markSaved } = useUnsavedChanges(
+      content,
+      () => "original"
+    );
     content.value = "changed";
     await nextTick();
     expect(hasUnsavedChanges.value).toBe(true);
@@ -53,7 +56,10 @@ describe("useUnsavedChanges", () => {
 
   it("markSaved() can be called even when already clean (no-op)", () => {
     const content = ref("same");
-    const { hasUnsavedChanges, markSaved } = useUnsavedChanges(content, () => "same");
+    const { hasUnsavedChanges, markSaved } = useUnsavedChanges(
+      content,
+      () => "same"
+    );
     markSaved();
     expect(hasUnsavedChanges.value).toBe(false);
   });
@@ -61,7 +67,10 @@ describe("useUnsavedChanges", () => {
   it("baseline getter is called on each content change", async () => {
     const content = ref("v1");
     let callCount = 0;
-    const getBaseline = () => { callCount++; return "baseline"; };
+    const getBaseline = () => {
+      callCount++;
+      return "baseline";
+    };
     useUnsavedChanges(content, getBaseline);
     content.value = "v2";
     await nextTick();

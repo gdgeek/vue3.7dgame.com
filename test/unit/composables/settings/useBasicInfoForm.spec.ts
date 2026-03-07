@@ -63,7 +63,9 @@ describe("useBasicInfoForm", () => {
     const useBasicInfoForm = await importComposable();
     const deps = createDeps();
     const { infoRules } = useBasicInfoForm(deps);
-    const industryRules = infoRules.value.industry as Array<{ required?: boolean }>;
+    const industryRules = infoRules.value.industry as Array<{
+      required?: boolean;
+    }>;
     expect(industryRules[0].required).toBe(true);
   });
 

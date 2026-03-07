@@ -53,7 +53,12 @@ describe("src/components/Dialog/index.ts – re-exports", () => {
     const mod = await import("@/components/Dialog/index");
     const keys = Object.keys(mod);
     expect(keys).toEqual(
-      expect.arrayContaining(["InputDialog", "ConfirmDialog", "Message", "MessageBox"])
+      expect.arrayContaining([
+        "InputDialog",
+        "ConfirmDialog",
+        "Message",
+        "MessageBox",
+      ])
     );
   });
 });

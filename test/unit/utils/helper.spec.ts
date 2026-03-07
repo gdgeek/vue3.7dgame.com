@@ -166,7 +166,12 @@ describe("helper utils", () => {
   describe("GetCurrentUrl — http protocol", () => {
     it("returns an http:// URL when protocol is http:", async () => {
       Object.defineProperty(window, "location", {
-        value: { protocol: "http:", hostname: "dev.local", port: "8080", host: "dev.local:8080" },
+        value: {
+          protocol: "http:",
+          hostname: "dev.local",
+          port: "8080",
+          host: "dev.local:8080",
+        },
         writable: true,
         configurable: true,
       });
@@ -181,7 +186,12 @@ describe("helper utils", () => {
   describe("GetIP — host without port", () => {
     it("extracts just the hostname when no port is in host", async () => {
       Object.defineProperty(window, "location", {
-        value: { protocol: "https:", hostname: "api.example.com", port: "", host: "api.example.com" },
+        value: {
+          protocol: "https:",
+          hostname: "api.example.com",
+          port: "",
+          host: "api.example.com",
+        },
         writable: true,
         configurable: true,
       });

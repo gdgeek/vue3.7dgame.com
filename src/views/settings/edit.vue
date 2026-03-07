@@ -530,7 +530,12 @@ const {
   handleRecoverSendEmail,
   handleRecoverVerifyCode,
   handleRecoverResetPassword,
-} = useRecoverPassword({ getCurrentBoundEmail, getApiErrorMessage, openEmailDialog, router });
+} = useRecoverPassword({
+  getCurrentBoundEmail,
+  getApiErrorMessage,
+  openEmailDialog,
+  router,
+});
 
 // --- Avatar image URL (derived from user store) ---
 const imageUrl = computed(() => {

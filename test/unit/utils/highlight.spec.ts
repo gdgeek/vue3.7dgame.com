@@ -34,10 +34,7 @@ describe("highlightDirective", () => {
   // Registration
   // -------------------------------------------------------------------------
   it("registers lua language on import", () => {
-    expect(mockRegisterLanguage).toHaveBeenCalledWith(
-      "lua",
-      expect.anything()
-    );
+    expect(mockRegisterLanguage).toHaveBeenCalledWith("lua", expect.anything());
   });
 
   it("registers javascript language on import", () => {
@@ -131,7 +128,8 @@ describe("highlightDirective", () => {
 
     it("does not highlight code blocks outside of pre elements", () => {
       const el = document.createElement("div");
-      el.innerHTML = "<code>plain code</code><pre><code>real block</code></pre>";
+      el.innerHTML =
+        "<code>plain code</code><pre><code>real block</code></pre>";
 
       directive.updated!(el, {} as any, {} as any, {} as any);
 

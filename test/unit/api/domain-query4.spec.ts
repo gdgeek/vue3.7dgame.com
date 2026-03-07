@@ -71,7 +71,9 @@ describe("domain-query.ts — startHealthCheck() !PRIMARY_API early return (line
     mockAxiosInstance.get.mockResolvedValue({
       data: { title: "Test", domain: "test.com" },
     });
-    await expect(mod.getDomainLanguage("test.com", "zh-CN")).resolves.toBeDefined();
+    await expect(
+      mod.getDomainLanguage("test.com", "zh-CN")
+    ).resolves.toBeDefined();
   });
 
   it("setInterval is NOT called when PRIMARY_API is falsy (early return branch)", async () => {

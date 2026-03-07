@@ -248,9 +248,7 @@ describe("importScene", () => {
 
   it("returns verseId=0 and success=false when API throws with empty message", async () => {
     const mockFile = new File(["content"], "scene.zip");
-    vi.mocked(postVerseImportZip).mockRejectedValue(
-      new Error("")
-    );
+    vi.mocked(postVerseImportZip).mockRejectedValue(new Error(""));
 
     const result = await importScene(mockFile);
     expect(result.success).toBe(false);

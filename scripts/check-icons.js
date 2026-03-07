@@ -62,7 +62,12 @@ for (const file of files) {
   let m;
   while ((m = namedImportRe.exec(script)) !== null) {
     for (const name of m[1].split(",")) {
-      importedNames.add(name.trim().split(/\s+as\s+/)[0].trim());
+      importedNames.add(
+        name
+          .trim()
+          .split(/\s+as\s+/)[0]
+          .trim()
+      );
     }
   }
   const defaultImportRe = /import\s+(\w+)\s+from\s+['"][^'"]+['"]/g;

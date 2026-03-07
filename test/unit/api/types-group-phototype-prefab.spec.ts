@@ -2,9 +2,21 @@
  * 类型模块单元测试 - src/api/v1/types/group.ts + phototype.ts + prefab.ts
  */
 import { describe, it, expect } from "vitest";
-import type { Group, GroupCreateData, GroupUpdateData } from "@/api/v1/types/group";
-import type { PhototypeType, CreatePhototypeRequest, UpdatePhototypeRequest } from "@/api/v1/types/phototype";
-import type { PrefabData, CreatePrefabRequest, UpdatePrefabRequest } from "@/api/v1/types/prefab";
+import type {
+  Group,
+  GroupCreateData,
+  GroupUpdateData,
+} from "@/api/v1/types/group";
+import type {
+  PhototypeType,
+  CreatePhototypeRequest,
+  UpdatePhototypeRequest,
+} from "@/api/v1/types/phototype";
+import type {
+  PrefabData,
+  CreatePrefabRequest,
+  UpdatePrefabRequest,
+} from "@/api/v1/types/prefab";
 
 // ============================================================
 // group.ts
@@ -147,7 +159,15 @@ describe("PrefabData 接口", () => {
       events: null,
       title: "My Prefab",
       prefab: 0,
-      image: { id: 1, md5: "", type: "image", url: "https://img.png", filename: "img.png", size: 0, key: "k1" },
+      image: {
+        id: 1,
+        md5: "",
+        type: "image",
+        url: "https://img.png",
+        filename: "img.png",
+        size: 0,
+        key: "k1",
+      },
       resources: [],
       editable: true,
       viewable: true,
@@ -159,10 +179,27 @@ describe("PrefabData 接口", () => {
 
   it("可选字段 custome/author/cyber", () => {
     const p: PrefabData = {
-      id: 2, author_id: 1, info: {}, data: "{}", image_id: 5,
-      uuid: "u2", events: null, title: "T", prefab: 1,
-      image: { id: 1, md5: "", type: "image", url: "", filename: "", size: 0, key: "" },
-      resources: [], editable: false, viewable: false,
+      id: 2,
+      author_id: 1,
+      info: {},
+      data: "{}",
+      image_id: 5,
+      uuid: "u2",
+      events: null,
+      title: "T",
+      prefab: 1,
+      image: {
+        id: 1,
+        md5: "",
+        type: "image",
+        url: "",
+        filename: "",
+        size: 0,
+        key: "",
+      },
+      resources: [],
+      editable: false,
+      viewable: false,
       custome: true,
       author: { id: 1, nickname: "Author", email: null, username: "auth1" },
     };
@@ -203,7 +240,12 @@ describe("UpdatePrefabRequest 接口", () => {
   });
 
   it("全字段赋值", () => {
-    const r: UpdatePrefabRequest = { id: 1, title: "Updated", data: "{}", image_id: 2 };
+    const r: UpdatePrefabRequest = {
+      id: 1,
+      title: "Updated",
+      data: "{}",
+      image_id: 2,
+    };
     expect(r.title).toBe("Updated");
   });
 });

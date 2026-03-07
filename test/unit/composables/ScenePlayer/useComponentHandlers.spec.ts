@@ -24,7 +24,9 @@ vi.mock("three", async () => {
     },
     Vector2: vi.fn().mockImplementation(() => ({ x: 0, y: 0 })),
     Vector3: vi.fn().mockImplementation(() => ({
-      x: 0, y: 0, z: 0,
+      x: 0,
+      y: 0,
+      z: 0,
       copy: vi.fn().mockReturnThis(),
       sub: vi.fn().mockReturnThis(),
       add: vi.fn().mockReturnThis(),
@@ -42,7 +44,9 @@ vi.mock("three", async () => {
     Object3D: vi.fn().mockImplementation(() => ({
       visible: true,
       position: {
-        x: 0, y: 0, z: 0,
+        x: 0,
+        y: 0,
+        z: 0,
         clone: vi.fn(() => ({ x: 0, y: 0, z: 0, copy: vi.fn() })),
         copy: vi.fn().mockReturnThis(),
         dot: vi.fn(() => 0),
@@ -142,7 +146,9 @@ describe("applyComponents", () => {
     const mesh = makeMesh();
     const ctx = makeCtx();
     const result = applyComponents({ mesh, uuid: "u1", components: [], ctx });
-    expect(typeof (result.data as { setVisibility: unknown }).setVisibility).toBe("function");
+    expect(
+      typeof (result.data as { setVisibility: unknown }).setVisibility
+    ).toBe("function");
   });
 
   it("setVisibility toggles mesh.visible", () => {
@@ -150,7 +156,9 @@ describe("applyComponents", () => {
     mesh.visible = true;
     const ctx = makeCtx();
     const result = applyComponents({ mesh, uuid: "u1", components: [], ctx });
-    (result.data as { setVisibility: (v: boolean) => void }).setVisibility(false);
+    (result.data as { setVisibility: (v: boolean) => void }).setVisibility(
+      false
+    );
     expect(mesh.visible).toBe(false);
   });
 
@@ -165,8 +173,11 @@ describe("applyComponents", () => {
         ctx,
       });
       expect(
-        (ctx.renderer as { domElement: { addEventListener: ReturnType<typeof vi.fn> } })
-          .domElement.addEventListener
+        (
+          ctx.renderer as {
+            domElement: { addEventListener: ReturnType<typeof vi.fn> };
+          }
+        ).domElement.addEventListener
       ).toHaveBeenCalledWith("click", expect.any(Function));
     });
 
@@ -183,8 +194,11 @@ describe("applyComponents", () => {
       expect(typeof cleanup).toBe("function");
       cleanup!();
       expect(
-        (ctx.renderer as { domElement: { removeEventListener: ReturnType<typeof vi.fn> } })
-          .domElement.removeEventListener
+        (
+          ctx.renderer as {
+            domElement: { removeEventListener: ReturnType<typeof vi.fn> };
+          }
+        ).domElement.removeEventListener
       ).toHaveBeenCalledWith("click", expect.any(Function));
     });
   });
@@ -238,7 +252,8 @@ describe("applyComponents", () => {
         ctx,
       });
       expect(
-        typeof (result.data as { updateBoundingBox?: unknown }).updateBoundingBox
+        typeof (result.data as { updateBoundingBox?: unknown })
+          .updateBoundingBox
       ).toBe("function");
     });
   });
@@ -327,8 +342,11 @@ describe("applyComponents", () => {
       expect(typeof cleanup).toBe("function");
       cleanup!();
       expect(
-        (ctx.renderer as { domElement: { removeEventListener: ReturnType<typeof vi.fn> } })
-          .domElement.removeEventListener
+        (
+          ctx.renderer as {
+            domElement: { removeEventListener: ReturnType<typeof vi.fn> };
+          }
+        ).domElement.removeEventListener
       ).toHaveBeenCalled();
     });
   });

@@ -100,7 +100,12 @@ export function useTTS(props: UseTTSProps) {
     try {
       isLoading.value = true;
 
-      const LANG_TO_PRIMARY: Record<LanguageCode, number> = { zh: 1, en: 2, ja: 3, other: 1 };
+      const LANG_TO_PRIMARY: Record<LanguageCode, number> = {
+        zh: 1,
+        en: 2,
+        ja: 3,
+        other: 1,
+      };
       const params = {
         Text: props.text.value,
         SessionId: `session-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -118,11 +123,9 @@ export function useTTS(props: UseTTSProps) {
         }),
       };
 
-      const response = await axios.post(
-        environment.tts_api,
-        params,
-        { headers: { "Content-Type": "application/json" } }
-      );
+      const response = await axios.post(environment.tts_api, params, {
+        headers: { "Content-Type": "application/json" },
+      });
 
       if (response.data?.Audio) {
         const audioData = safeAtob(response.data.Audio);

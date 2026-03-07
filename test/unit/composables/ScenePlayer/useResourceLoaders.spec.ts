@@ -18,7 +18,9 @@ vi.mock("@/lib/three/loaders", () => ({
 }));
 
 vi.mock("@/components/ScenePlayer/composables/useComponentHandlers", () => ({
-  applyComponents: vi.fn().mockReturnValue({ type: "model", data: { mesh: {} } }),
+  applyComponents: vi
+    .fn()
+    .mockReturnValue({ type: "model", data: { mesh: {} } }),
 }));
 
 describe("combineTransforms (pure utility)", () => {
@@ -197,7 +199,9 @@ describe("useResourceLoaders", () => {
       expect(ctx.sources.has("audio-123")).toBe(true);
       const source = ctx.sources.get("audio-123");
       expect(source?.type).toBe("audio");
-      expect((source?.data as { url: string }).url).toBe("https://example.com/sound.mp3");
+      expect((source?.data as { url: string }).url).toBe(
+        "https://example.com/sound.mp3"
+      );
     });
 
     it("converts http to https for audio URL", async () => {
@@ -211,12 +215,17 @@ describe("useResourceLoaders", () => {
         type: "audio",
         file: { url: "http://example.com/sound.mp3" },
       };
-      const entity = { type: "Sound", parameters: { uuid: "audio-456", active: true } };
+      const entity = {
+        type: "Sound",
+        parameters: { uuid: "audio-456", active: true },
+      };
 
       await loadModel(resource as never, entity as never);
 
       const source = ctx.sources.get("audio-456");
-      expect((source?.data as { url: string }).url).toBe("https://example.com/sound.mp3");
+      expect((source?.data as { url: string }).url).toBe(
+        "https://example.com/sound.mp3"
+      );
     });
   });
 
@@ -282,16 +291,26 @@ describe("useResourceLoaders", () => {
           if (_event === "loadedmetadata") loadedMetadataCallback = cb;
         },
       };
-      const createElementSpy = vi.spyOn(document, "createElement").mockReturnValueOnce(
-        fakeVideo as unknown as HTMLElement
-      );
+      const createElementSpy = vi
+        .spyOn(document, "createElement")
+        .mockReturnValueOnce(fakeVideo as unknown as HTMLElement);
 
       const { loadModel, destroy } = useResourceLoaders(ctx as never);
 
-      const resource = { type: "video", file: { url: "https://example.com/video.mp4" } };
+      const resource = {
+        type: "video",
+        file: { url: "https://example.com/video.mp4" },
+      };
       const entity = {
         type: "Video",
-        parameters: { uuid: "video-d1", active: true, loop: false, muted: false, volume: 1, play: false },
+        parameters: {
+          uuid: "video-d1",
+          active: true,
+          loop: false,
+          muted: false,
+          volume: 1,
+          play: false,
+        },
       };
 
       // Start loading without awaiting – promise stays pending until the event fires
@@ -318,16 +337,21 @@ describe("useResourceLoaders", () => {
       const ctx = makeCtx();
 
       let textureOnLoad: ((texture: unknown) => void) | null = null;
-      const loadSpy = vi.spyOn(THREE.TextureLoader.prototype, "load").mockImplementation(
-        (_url: string, onLoad?: (texture: unknown) => void) => {
-          if (onLoad) textureOnLoad = onLoad;
-          return undefined as never;
-        }
-      );
+      const loadSpy = vi
+        .spyOn(THREE.TextureLoader.prototype, "load")
+        .mockImplementation(
+          (_url: string, onLoad?: (texture: unknown) => void) => {
+            if (onLoad) textureOnLoad = onLoad;
+            return undefined as never;
+          }
+        );
 
       const { loadModel, destroy } = useResourceLoaders(ctx as never);
 
-      const resource = { type: "picture", file: { url: "https://example.com/image.png" } };
+      const resource = {
+        type: "picture",
+        file: { url: "https://example.com/image.png" },
+      };
       const entity = {
         type: "Picture",
         parameters: { uuid: "picture-d1", active: true, width: 1 },
@@ -357,15 +381,24 @@ describe("useResourceLoaders", () => {
       const ctx = makeCtx();
 
       let voxOnLoad: ((chunks: unknown[]) => Promise<void>) | null = null;
-      vi.mocked(VOXLoader).mockImplementation(() => ({
-        load: (_url: string, onLoad: (chunks: unknown[]) => Promise<void>) => {
-          voxOnLoad = onLoad;
-        },
-      }) as never);
+      vi.mocked(VOXLoader).mockImplementation(
+        () =>
+          ({
+            load: (
+              _url: string,
+              onLoad: (chunks: unknown[]) => Promise<void>
+            ) => {
+              voxOnLoad = onLoad;
+            },
+          }) as never
+      );
 
       const { loadModel, destroy } = useResourceLoaders(ctx as never);
 
-      const resource = { type: "voxel", file: { url: "https://example.com/model.vox" } };
+      const resource = {
+        type: "voxel",
+        file: { url: "https://example.com/model.vox" },
+      };
       const entity = {
         type: "Voxel",
         parameters: { uuid: "vox-d1", active: true },
@@ -379,7 +412,9 @@ describe("useResourceLoaders", () => {
 
       // Simulate VOX loader completing after destroy
       expect(voxOnLoad).not.toBeNull();
-      await voxOnLoad!([{ data: [1], size: { x: 1, y: 1, z: 1 }, palette: [] }]);
+      await voxOnLoad!([
+        { data: [1], size: { x: 1, y: 1, z: 1 }, palette: [] },
+      ]);
 
       // The guard must have prevented any scene mutation
       expect(ctx.threeScene.add).not.toHaveBeenCalled();
@@ -393,15 +428,21 @@ describe("useResourceLoaders", () => {
       const ctx = makeCtx();
 
       let gltfOnLoad: ((gltf: unknown) => Promise<void>) | null = null;
-      vi.mocked(getConfiguredGLTFLoader).mockImplementation(() => ({
-        load: (_url: string, onLoad: (gltf: unknown) => Promise<void>) => {
-          gltfOnLoad = onLoad;
-        },
-      }) as never);
+      vi.mocked(getConfiguredGLTFLoader).mockImplementation(
+        () =>
+          ({
+            load: (_url: string, onLoad: (gltf: unknown) => Promise<void>) => {
+              gltfOnLoad = onLoad;
+            },
+          }) as never
+      );
 
       const { loadModel, destroy } = useResourceLoaders(ctx as never);
 
-      const resource = { type: "model", file: { url: "https://example.com/model.gltf" } };
+      const resource = {
+        type: "model",
+        file: { url: "https://example.com/model.gltf" },
+      };
       const entity = {
         type: "Model",
         parameters: { uuid: "gltf-d1", active: true },

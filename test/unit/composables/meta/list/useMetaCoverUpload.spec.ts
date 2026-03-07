@@ -63,17 +63,17 @@ describe("useMetaCoverUpload", () => {
     const currentMeta = ref<ReturnType<typeof makeMeta> | null>(meta as never);
     const detailLoading = ref(false);
 
-    return import(
-      "@/views/meta/list/composables/useMetaCoverUpload"
-    ).then(({ useMetaCoverUpload }) => ({
-      composable: useMetaCoverUpload({
-        currentMeta: currentMeta as never,
+    return import("@/views/meta/list/composables/useMetaCoverUpload").then(
+      ({ useMetaCoverUpload }) => ({
+        composable: useMetaCoverUpload({
+          currentMeta: currentMeta as never,
+          detailLoading,
+          refresh: mockRefresh,
+        }),
+        currentMeta,
         detailLoading,
-        refresh: mockRefresh,
-      }),
-      currentMeta,
-      detailLoading,
-    }));
+      })
+    );
   };
 
   beforeEach(() => {
@@ -190,10 +190,16 @@ describe("useMetaCoverUpload", () => {
       mockFileStore.store.fileUrl.mockReturnValue("http://cdn/photo.jpg");
       mockPostFile.mockResolvedValue({ data: { id: 77 } });
       mockPutMeta.mockResolvedValue({});
-      mockGetMeta.mockResolvedValue({ data: makeMeta({ image: { url: "http://new.jpg" } }) });
+      mockGetMeta.mockResolvedValue({
+        data: makeMeta({ image: { url: "http://new.jpg" } }),
+      });
 
       const { composable, detailLoading } = await getComposable();
-      const event = makeFileEvent({ name: "photo.jpg", type: "image/jpeg", size: 1024 });
+      const event = makeFileEvent({
+        name: "photo.jpg",
+        type: "image/jpeg",
+        size: 1024,
+      });
 
       await composable.handleCoverUpload(event);
 
@@ -207,7 +213,11 @@ describe("useMetaCoverUpload", () => {
       mockFileStore.store.fileMD5.mockRejectedValue(new Error("MD5 failed"));
 
       const { composable } = await getComposable();
-      const event = makeFileEvent({ name: "photo.jpg", type: "image/jpeg", size: 512 });
+      const event = makeFileEvent({
+        name: "photo.jpg",
+        type: "image/jpeg",
+        size: 512,
+      });
 
       await composable.handleCoverUpload(event);
 

@@ -149,7 +149,9 @@ describe("src/assets/js/file/tencent-cloud.ts", () => {
     });
 
     it("calls getObjectUrl on the cos instance", () => {
-      mockCOS.instance.getObjectUrl.mockReturnValueOnce("https://cdn.example.com/abc.glb");
+      mockCOS.instance.getObjectUrl.mockReturnValueOnce(
+        "https://cdn.example.com/abc.glb"
+      );
       const result = tencentCloud.default.fileUrl("abc", ".glb", makeHandler());
       expect(mockCOS.instance.getObjectUrl).toHaveBeenCalledOnce();
       expect(result).toBe("https://cdn.example.com/abc.glb");
@@ -254,7 +256,12 @@ describe("src/assets/js/file/tencent-cloud.ts", () => {
         }
       );
       const progress = vi.fn();
-      await tencentCloud.default.fileDownload("f", ".json", progress, makeHandler());
+      await tencentCloud.default.fileDownload(
+        "f",
+        ".json",
+        progress,
+        makeHandler()
+      );
       expect(progress).toHaveBeenCalledWith(0.5);
     });
 
@@ -306,15 +313,29 @@ describe("src/assets/js/file/tencent-cloud.ts", () => {
       );
       const progress = vi.fn();
       const file = new File(["x"], "f.glb");
-      await tencentCloud.default.fileUpload("md5", ".glb", file, progress, makeHandler());
+      await tencentCloud.default.fileUpload(
+        "md5",
+        ".glb",
+        file,
+        progress,
+        makeHandler()
+      );
       expect(progress).toHaveBeenCalledWith(0.8);
     });
 
     it("rejects when uploadFile fails", async () => {
-      mockCOS.instance.uploadFile.mockRejectedValueOnce(new Error("upload fail"));
+      mockCOS.instance.uploadFile.mockRejectedValueOnce(
+        new Error("upload fail")
+      );
       const file = new File(["x"], "f.glb");
       await expect(
-        tencentCloud.default.fileUpload("md5", ".glb", file, vi.fn(), makeHandler())
+        tencentCloud.default.fileUpload(
+          "md5",
+          ".glb",
+          file,
+          vi.fn(),
+          makeHandler()
+        )
       ).rejects.toThrow("upload fail");
     });
   });
@@ -329,7 +350,9 @@ describe("src/assets/js/file/tencent-cloud.ts", () => {
     };
 
     beforeEach(() => {
-      (tencentApi.cloud as ReturnType<typeof vi.fn>).mockResolvedValue(cloudResp);
+      (tencentApi.cloud as ReturnType<typeof vi.fn>).mockResolvedValue(
+        cloudResp
+      );
       // token mock to make COS constructor's getAuthorization usable
       (tencentApi.token as ReturnType<typeof vi.fn>).mockResolvedValue({
         data: {

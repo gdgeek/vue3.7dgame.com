@@ -4,7 +4,12 @@
  */
 import * as THREE from "three";
 import { logger } from "@/utils/logger";
-import type { EntityComponent, SourceRecord, SourceModelData, LoaderContext } from "../types";
+import type {
+  EntityComponent,
+  SourceRecord,
+  SourceModelData,
+  LoaderContext,
+} from "../types";
 
 type ComponentHandlerOptions = {
   mesh: THREE.Object3D;
@@ -20,8 +25,17 @@ type ComponentHandlerOptions = {
 export function applyComponents(opts: ComponentHandlerOptions): SourceRecord {
   const { mesh, uuid, components, ctx } = opts;
   const {
-    renderer, camera, controls, mouse, raycaster,
-    sources, collisionObjects, rotatingObjects, moveableObjects, dragState, triggerEvent,
+    renderer,
+    camera,
+    controls,
+    mouse,
+    raycaster,
+    sources,
+    collisionObjects,
+    rotatingObjects,
+    moveableObjects,
+    dragState,
+    triggerEvent,
   } = ctx;
 
   const actionComponent = components.find((c) => c.type === "Action");
@@ -33,7 +47,9 @@ export function applyComponents(opts: ComponentHandlerOptions): SourceRecord {
     type: "model",
     data: {
       mesh,
-      setVisibility: (isVisible: boolean) => { mesh.visible = isVisible; },
+      setVisibility: (isVisible: boolean) => {
+        mesh.visible = isVisible;
+      },
       cleanup: undefined,
       updateBoundingBox: undefined,
       setRotating: undefined,
@@ -82,7 +98,10 @@ export function applyComponents(opts: ComponentHandlerOptions): SourceRecord {
 
   // ── Trigger component: collision detection ─────────────────────────────────
   if (triggerComponent) {
-    logger.log("[ScenePlayer] Found collision trigger component:", triggerComponent);
+    logger.log(
+      "[ScenePlayer] Found collision trigger component:",
+      triggerComponent
+    );
 
     const boundingBox = new THREE.Box3().setFromObject(mesh);
     const lastPosition = mesh.position.clone();
@@ -105,7 +124,9 @@ export function applyComponents(opts: ComponentHandlerOptions): SourceRecord {
 
     const existingSource = sources.get(uuid);
     if (existingSource && existingSource.type === "model") {
-      existingSource.data.updateBoundingBox = () => { boundingBox.setFromObject(mesh); };
+      existingSource.data.updateBoundingBox = () => {
+        boundingBox.setFromObject(mesh);
+      };
     }
   }
 
@@ -125,8 +146,12 @@ export function applyComponents(opts: ComponentHandlerOptions): SourceRecord {
 
       rotatingObjects.value.push({ mesh, speed, checkVisibility: true });
 
-      (sourceData.data as SourceModelData).setRotating = (isRotating: boolean) => {
-        const index = rotatingObjects.value.findIndex((obj) => obj.mesh === mesh);
+      (sourceData.data as SourceModelData).setRotating = (
+        isRotating: boolean
+      ) => {
+        const index = rotatingObjects.value.findIndex(
+          (obj) => obj.mesh === mesh
+        );
         if (index !== -1 && !isRotating) {
           rotatingObjects.value.splice(index, 1);
         } else if (index === -1 && isRotating) {
@@ -206,22 +231,32 @@ export function applyComponents(opts: ComponentHandlerOptions): SourceRecord {
         );
 
         const newPosition = new THREE.Vector3();
-        newPosition.lerpVectors(dragState.draggedObject.position, intersection, 0.5);
+        newPosition.lerpVectors(
+          dragState.draggedObject.position,
+          intersection,
+          0.5
+        );
 
         if (currentMoveable?.limit) {
           if (currentMoveable.limit.x.enable) {
             newPosition.x = THREE.MathUtils.clamp(
-              newPosition.x, currentMoveable.limit.x.min, currentMoveable.limit.x.max
+              newPosition.x,
+              currentMoveable.limit.x.min,
+              currentMoveable.limit.x.max
             );
           }
           if (currentMoveable.limit.y.enable) {
             newPosition.y = THREE.MathUtils.clamp(
-              newPosition.y, currentMoveable.limit.y.min, currentMoveable.limit.y.max
+              newPosition.y,
+              currentMoveable.limit.y.min,
+              currentMoveable.limit.y.max
             );
           }
           if (currentMoveable.limit.z.enable) {
             newPosition.z = THREE.MathUtils.clamp(
-              newPosition.z, currentMoveable.limit.z.min, currentMoveable.limit.z.max
+              newPosition.z,
+              currentMoveable.limit.z.min,
+              currentMoveable.limit.z.max
             );
           }
         }

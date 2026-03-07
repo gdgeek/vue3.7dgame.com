@@ -94,27 +94,37 @@ describe("campusRoutes 路由模块", () => {
   // -------------------------------------------------------------------------
   describe("子路由 meta.hidden 属性", () => {
     it("CampusSchool: hidden=false（在菜单显示）", () => {
-      const route = campusRoutes.children?.find((c) => c.name === "CampusSchool");
+      const route = campusRoutes.children?.find(
+        (c) => c.name === "CampusSchool"
+      );
       expect(route?.meta?.hidden).toBe(false);
     });
 
     it("CampusTeacher: hidden=false（在菜单显示）", () => {
-      const route = campusRoutes.children?.find((c) => c.name === "CampusTeacher");
+      const route = campusRoutes.children?.find(
+        (c) => c.name === "CampusTeacher"
+      );
       expect(route?.meta?.hidden).toBe(false);
     });
 
     it("CampusStudent: hidden=false（在菜单显示）", () => {
-      const route = campusRoutes.children?.find((c) => c.name === "CampusStudent");
+      const route = campusRoutes.children?.find(
+        (c) => c.name === "CampusStudent"
+      );
       expect(route?.meta?.hidden).toBe(false);
     });
 
     it("CampusGroup: hidden=true（隐藏路由）", () => {
-      const route = campusRoutes.children?.find((c) => c.name === "CampusGroup");
+      const route = campusRoutes.children?.find(
+        (c) => c.name === "CampusGroup"
+      );
       expect(route?.meta?.hidden).toBe(true);
     });
 
     it("CampusClass: hidden=true（隐藏路由）", () => {
-      const route = campusRoutes.children?.find((c) => c.name === "CampusClass");
+      const route = campusRoutes.children?.find(
+        (c) => c.name === "CampusClass"
+      );
       expect(route?.meta?.hidden).toBe(true);
     });
   });

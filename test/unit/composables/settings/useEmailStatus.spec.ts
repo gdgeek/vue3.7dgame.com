@@ -46,7 +46,8 @@ describe("useEmailStatus", () => {
       });
 
       const useEmailStatus = await importComposable();
-      const { emailBound, currentBoundEmail, refreshEmailStatusSummary } = useEmailStatus();
+      const { emailBound, currentBoundEmail, refreshEmailStatusSummary } =
+        useEmailStatus();
       await refreshEmailStatusSummary();
 
       expect(emailBound.value).toBe(true);
@@ -57,7 +58,8 @@ describe("useEmailStatus", () => {
       mockGetEmailStatus.mockResolvedValue({ success: false });
 
       const useEmailStatus = await importComposable();
-      const { emailBound, currentBoundEmail, refreshEmailStatusSummary } = useEmailStatus();
+      const { emailBound, currentBoundEmail, refreshEmailStatusSummary } =
+        useEmailStatus();
       await refreshEmailStatusSummary();
 
       expect(emailBound.value).toBe(false);
@@ -68,7 +70,8 @@ describe("useEmailStatus", () => {
       mockGetEmailStatus.mockRejectedValue(new Error("Network error"));
 
       const useEmailStatus = await importComposable();
-      const { emailBound, currentBoundEmail, refreshEmailStatusSummary } = useEmailStatus();
+      const { emailBound, currentBoundEmail, refreshEmailStatusSummary } =
+        useEmailStatus();
       await refreshEmailStatusSummary();
 
       expect(emailBound.value).toBe(false);
@@ -164,7 +167,10 @@ describe("useEmailStatus", () => {
     it("returns fallback when no error message", async () => {
       const useEmailStatus = await importComposable();
       const { getApiErrorMessage } = useEmailStatus();
-      const result = getApiErrorMessage({ success: false } as never, "Fallback");
+      const result = getApiErrorMessage(
+        { success: false } as never,
+        "Fallback"
+      );
       expect(result).toBe("Fallback");
     });
   });

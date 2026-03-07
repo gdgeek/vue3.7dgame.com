@@ -70,7 +70,9 @@ describe("addClass()", () => {
     const el = makeEl("already");
     addClass(el, "already");
     // Should not duplicate: count occurrences of 'already'
-    const occurrences = el.className.split(" ").filter((c) => c === "already").length;
+    const occurrences = el.className
+      .split(" ")
+      .filter((c) => c === "already").length;
     expect(occurrences).toBe(1);
   });
 });

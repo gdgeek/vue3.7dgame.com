@@ -107,7 +107,9 @@ export function useResourceLoaders(ctx: LoaderContext) {
 
   /** Set to true on destroy() to prevent post-unmount async callbacks from mutating scene state. */
   let _destroyed = false;
-  const destroy = () => { _destroyed = true; };
+  const destroy = () => {
+    _destroyed = true;
+  };
 
   /**
    * Returns the file URL from a ResourceLike, or an empty string if unavailable.
@@ -119,7 +121,10 @@ export function useResourceLoaders(ctx: LoaderContext) {
    * Returns the text content from a ResourceLike, or undefined.
    */
   const getResourceContent = (resource: ResourceLike): string | undefined => {
-    if ("content" in resource && typeof (resource as { content?: unknown }).content === "string") {
+    if (
+      "content" in resource &&
+      typeof (resource as { content?: unknown }).content === "string"
+    ) {
       return (resource as { content: string }).content;
     }
     return undefined;
@@ -128,7 +133,11 @@ export function useResourceLoaders(ctx: LoaderContext) {
   /**
    * Applies standard transform data (position/rotation/scale) to a Three.js object.
    */
-  const applyTransform = (mesh: THREE.Object3D, transform: TransformData, useRadians = false) => {
+  const applyTransform = (
+    mesh: THREE.Object3D,
+    transform: TransformData,
+    useRadians = false
+  ) => {
     mesh.position.set(
       transform.position.x,
       transform.position.y,
@@ -147,11 +156,7 @@ export function useResourceLoaders(ctx: LoaderContext) {
         THREE.MathUtils.degToRad(transform.rotate.z)
       );
     }
-    mesh.scale.set(
-      transform.scale.x,
-      transform.scale.y,
-      transform.scale.z
-    );
+    mesh.scale.set(transform.scale.x, transform.scale.y, transform.scale.z);
   };
 
   // ─── loadModel ──────────────────────────────────────────────────────────────
@@ -180,7 +185,9 @@ export function useResourceLoaders(ctx: LoaderContext) {
 
     // Effective visibility combines entity active flag with parent visibility
     const currentActive =
-      (entity.parameters?.active !== undefined ? entity.parameters.active : true) && parentActive;
+      (entity.parameters?.active !== undefined
+        ? entity.parameters.active
+        : true) && parentActive;
 
     const setInitialVisibility = (mesh: THREE.Object3D): boolean => {
       mesh.visible = currentActive;
@@ -261,7 +268,10 @@ export function useResourceLoaders(ctx: LoaderContext) {
               }
             };
 
-            ctx.renderer!.domElement.addEventListener("click", handleVideoClick);
+            ctx.renderer!.domElement.addEventListener(
+              "click",
+              handleVideoClick
+            );
 
             // Mutable reference so cleanup can remove the listener even if the
             // first interaction never fires before the component unmounts.
@@ -275,14 +285,25 @@ export function useResourceLoaders(ctx: LoaderContext) {
                 video,
                 texture,
                 cleanup: () => {
-                  ctx.renderer!.domElement.removeEventListener("click", handleVideoClick);
+                  ctx.renderer!.domElement.removeEventListener(
+                    "click",
+                    handleVideoClick
+                  );
                   if (handleFirstInteraction) {
-                    document.removeEventListener("click", handleFirstInteraction);
-                    document.removeEventListener("touchstart", handleFirstInteraction);
+                    document.removeEventListener(
+                      "click",
+                      handleFirstInteraction
+                    );
+                    document.removeEventListener(
+                      "touchstart",
+                      handleFirstInteraction
+                    );
                     handleFirstInteraction = null;
                   }
                 },
-                setVisibility: (isVisible: boolean) => { mesh.visible = isVisible; },
+                setVisibility: (isVisible: boolean) => {
+                  mesh.visible = isVisible;
+                },
               } as SourceVideoData,
             };
             sources.set(uuid, sourceData);
@@ -294,7 +315,10 @@ export function useResourceLoaders(ctx: LoaderContext) {
                   logger.warn("[ScenePlayer] Video auto-play failed:", error);
                 });
                 document.removeEventListener("click", handleFirstInteraction!);
-                document.removeEventListener("touchstart", handleFirstInteraction!);
+                document.removeEventListener(
+                  "touchstart",
+                  handleFirstInteraction!
+                );
                 handleFirstInteraction = null;
               };
               document.addEventListener("click", handleFirstInteraction);
@@ -320,7 +344,9 @@ export function useResourceLoaders(ctx: LoaderContext) {
     if (resource.type === "picture" || entity.type === "Picture") {
       return new Promise((resolve, reject) => {
         const textureLoader = new THREE.TextureLoader();
-        const url = getFileUrl(resource) ? convertToHttps(getFileUrl(resource)) : "";
+        const url = getFileUrl(resource)
+          ? convertToHttps(getFileUrl(resource))
+          : "";
 
         textureLoader.load(
           url,
@@ -371,7 +397,9 @@ export function useResourceLoaders(ctx: LoaderContext) {
               type: "picture",
               data: {
                 mesh,
-                setVisibility: (isVisible: boolean) => { mesh.visible = isVisible; },
+                setVisibility: (isVisible: boolean) => {
+                  mesh.visible = isVisible;
+                },
               },
             });
 
@@ -389,10 +417,15 @@ export function useResourceLoaders(ctx: LoaderContext) {
     if (resource.type === "audio" || entity.type === "Sound") {
       return new Promise((resolve) => {
         const uuid = entity.parameters.uuid.toString();
-        const audioUrl = getFileUrl(resource) ? convertToHttps(getFileUrl(resource)) : "";
+        const audioUrl = getFileUrl(resource)
+          ? convertToHttps(getFileUrl(resource))
+          : "";
 
         sources.set(uuid, { type: "audio", data: { url: audioUrl } });
-        logger.log("[ScenePlayer] Audio resource loaded:", { uuid, url: audioUrl });
+        logger.log("[ScenePlayer] Audio resource loaded:", {
+          uuid,
+          url: audioUrl,
+        });
         resolve(true);
       });
     }
@@ -403,7 +436,9 @@ export function useResourceLoaders(ctx: LoaderContext) {
       return new Promise((resolve, reject) => {
         try {
           const text =
-            entity.parameters.text ?? getResourceContent(resource) ?? "Default Text";
+            entity.parameters.text ??
+            getResourceContent(resource) ??
+            "Default Text";
           const canvas = document.createElement("canvas");
           const context = canvas.getContext("2d");
 
@@ -450,7 +485,9 @@ export function useResourceLoaders(ctx: LoaderContext) {
                 context.fillText(newText, canvas.width / 2, canvas.height / 2);
                 texture.needsUpdate = true;
               },
-              setVisibility: (isVisible: boolean) => { mesh.visible = isVisible; },
+              setVisibility: (isVisible: boolean) => {
+                mesh.visible = isVisible;
+              },
             },
           });
 
@@ -467,7 +504,9 @@ export function useResourceLoaders(ctx: LoaderContext) {
 
     if (resource.type === "voxel" || entity.type === "Voxel") {
       const loader = new VOXLoader();
-      const url = getFileUrl(resource) ? convertToHttps(getFileUrl(resource)) : "";
+      const url = getFileUrl(resource)
+        ? convertToHttps(getFileUrl(resource))
+        : "";
 
       return new Promise((resolve, reject) => {
         loader.load(
@@ -507,7 +546,10 @@ export function useResourceLoaders(ctx: LoaderContext) {
               voxMesh.receiveShadow = true;
 
               // Apply entity components via applyComponents (replaces ~250 lines of inline code)
-              if (entity.children?.components && entity.children.components.length > 0) {
+              if (
+                entity.children?.components &&
+                entity.children.components.length > 0
+              ) {
                 const sourceData = applyComponents({
                   mesh: voxMesh,
                   uuid,
@@ -529,7 +571,9 @@ export function useResourceLoaders(ctx: LoaderContext) {
                   type: "model",
                   data: {
                     mesh: voxMesh,
-                    setVisibility: (isVisible: boolean) => { voxMesh.visible = isVisible; },
+                    setVisibility: (isVisible: boolean) => {
+                      voxMesh.visible = isVisible;
+                    },
                   },
                 });
               }
@@ -554,7 +598,9 @@ export function useResourceLoaders(ctx: LoaderContext) {
 
     {
       const loader = getConfiguredGLTFLoader();
-      const url = getFileUrl(resource) ? convertToHttps(getFileUrl(resource)) : "";
+      const url = getFileUrl(resource)
+        ? convertToHttps(getFileUrl(resource))
+        : "";
 
       if (!url) {
         return Promise.reject(new Error("Resource is missing a file URL"));
@@ -570,7 +616,10 @@ export function useResourceLoaders(ctx: LoaderContext) {
             const uuid = entity.parameters.uuid.toString();
 
             if (!entity.parameters?.uuid) {
-              logger.error("[ScenePlayer] Invalid entity.parameters object:", entity.parameters);
+              logger.error(
+                "[ScenePlayer] Invalid entity.parameters object:",
+                entity.parameters
+              );
               return reject(new Error("Invalid entity.parameters object"));
             }
 
@@ -578,7 +627,11 @@ export function useResourceLoaders(ctx: LoaderContext) {
 
             // GLTF rotation is already in radians from the format
             if (entity.parameters?.transform) {
-              applyTransform(model, entity.parameters.transform, /* useRadians= */ true);
+              applyTransform(
+                model,
+                entity.parameters.transform,
+                /* useRadians= */ true
+              );
             }
 
             // Set up animation mixer if the model has animations
@@ -586,17 +639,23 @@ export function useResourceLoaders(ctx: LoaderContext) {
               const mixer = new THREE.AnimationMixer(model);
               mixers.set(entity.parameters.uuid, mixer);
               model.userData.animations = gltf.animations;
-              logger.log(`[ScenePlayer] Model ${entity.parameters.uuid} animations loaded:`, {
-                animations: gltf.animations,
-                animationNames: gltf.animations.map((a) => a.name),
-              });
+              logger.log(
+                `[ScenePlayer] Model ${entity.parameters.uuid} animations loaded:`,
+                {
+                  animations: gltf.animations,
+                  animationNames: gltf.animations.map((a) => a.name),
+                }
+              );
             }
 
             // Child entities are handled exclusively by processEntities to avoid
             // double-loading. loadModel only processes the current node.
 
             // Apply entity components via applyComponents (replaces ~250 lines of inline code)
-            if (entity.children?.components && entity.children.components.length > 0) {
+            if (
+              entity.children?.components &&
+              entity.children.components.length > 0
+            ) {
               const sourceData = applyComponents({
                 mesh: model,
                 uuid,
@@ -609,7 +668,9 @@ export function useResourceLoaders(ctx: LoaderContext) {
                 type: "model",
                 data: {
                   mesh: model,
-                  setVisibility: (isVisible: boolean) => { model.visible = isVisible; },
+                  setVisibility: (isVisible: boolean) => {
+                    model.visible = isVisible;
+                  },
                 },
               });
             }
@@ -655,7 +716,9 @@ export function useResourceLoaders(ctx: LoaderContext) {
       );
 
       const currentActive =
-        (entity.parameters?.active !== undefined ? entity.parameters.active : true) && parentActive;
+        (entity.parameters?.active !== undefined
+          ? entity.parameters.active
+          : true) && parentActive;
 
       logger.log(`[ScenePlayer] Processing entity [Level ${level}]:`, {
         type: entity.type,
@@ -691,13 +754,18 @@ export function useResourceLoaders(ctx: LoaderContext) {
           logger.error("[ScenePlayer] Failed to process text entity:", error);
         }
       } else if (entity.type === "Entity") {
-        logger.log("[ScenePlayer] Processing Entity container:", entity.parameters.uuid);
+        logger.log(
+          "[ScenePlayer] Processing Entity container:",
+          entity.parameters.uuid
+        );
         const entityData: import("../types").SourceRecord = {
           type: "entity",
           data: {
             transform: entityTransform,
             setVisibility: () => {
-              logger.log("[ScenePlayer] Entity container does not support direct visibility");
+              logger.log(
+                "[ScenePlayer] Entity container does not support direct visibility"
+              );
             },
           },
         };

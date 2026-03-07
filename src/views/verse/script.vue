@@ -455,7 +455,10 @@ const handlePolygen = async (uuid: string) => {
     return null;
   }
   const modelUuid = uuid.toString();
-  const getModelAsync = (uuid: string, retries = 3): Promise<THREE.Object3D | null> => {
+  const getModelAsync = (
+    uuid: string,
+    retries = 3
+  ): Promise<THREE.Object3D | null> => {
     return new Promise((resolve) => {
       const attempt = (remaining: number) => {
         const source = scenePlayer.value?.sources.get(uuid) as
@@ -653,7 +656,8 @@ onMounted(async () => {
     );
     verse.value = response.data;
     logger.error(verse.value);
-    verseMetasWithJsCodeData.value = response2.data as unknown as VerseMetasWithJsCode;
+    verseMetasWithJsCodeData.value =
+      response2.data as unknown as VerseMetasWithJsCode;
     metasJavaScriptCode.value = (response2.data.metas as unknown as meta[])
       .map((m) => m.script)
       .join("\n");

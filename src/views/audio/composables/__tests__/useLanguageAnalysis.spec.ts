@@ -79,7 +79,11 @@ describe("useLanguageAnalysis — language detection", () => {
 
   it("marks mixed Chinese+Japanese as multi-language", () => {
     const { voiceLanguage, autoSwitchLanguage } = makeRefs();
-    result.checkTextLanguage("你好こんにちは", voiceLanguage, autoSwitchLanguage);
+    result.checkTextLanguage(
+      "你好こんにちは",
+      voiceLanguage,
+      autoSwitchLanguage
+    );
     expect(result.languageAnalysis.value.isMultiLanguage).toBe(true);
   });
 
@@ -151,10 +155,22 @@ describe("useLanguageAnalysis — character counts", () => {
 
   it("percentages sum to approximately 100", () => {
     const { voiceLanguage, autoSwitchLanguage } = makeRefs();
-    result.checkTextLanguage("Hello 你好 こんにちは!", voiceLanguage, autoSwitchLanguage);
-    const { chinesePercentage, japanesePercentage, englishPercentage, otherPercentage } =
-      result.languageAnalysis.value;
-    const sum = chinesePercentage + japanesePercentage + englishPercentage + otherPercentage;
+    result.checkTextLanguage(
+      "Hello 你好 こんにちは!",
+      voiceLanguage,
+      autoSwitchLanguage
+    );
+    const {
+      chinesePercentage,
+      japanesePercentage,
+      englishPercentage,
+      otherPercentage,
+    } = result.languageAnalysis.value;
+    const sum =
+      chinesePercentage +
+      japanesePercentage +
+      englishPercentage +
+      otherPercentage;
     // Allow ±1 for rounding
     expect(sum).toBeGreaterThanOrEqual(99);
     expect(sum).toBeLessThanOrEqual(101);

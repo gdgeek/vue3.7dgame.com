@@ -22,33 +22,33 @@
 // ============================================
 // 全局主题样式 + 全局组件主题适配
 // ============================================
-@use 'parts/global';
+@use "parts/global";
 
 // ============================================
 // 各主题专属特殊样式
 // ============================================
-@use 'parts/theme-cyber-tech';
-@use 'parts/theme-edu-friendly';
-@use 'parts/theme-minimal-pure';
-@use 'parts/theme-neo-brutalism';
-@use 'parts/theme-modern-blue';
-@use 'parts/theme-deep-space';
+@use "parts/theme-cyber-tech";
+@use "parts/theme-edu-friendly";
+@use "parts/theme-minimal-pure";
+@use "parts/theme-neo-brutalism";
+@use "parts/theme-modern-blue";
+@use "parts/theme-deep-space";
 
 // ============================================
 // 页面主题适配
 // ============================================
-@use 'parts/pages';
-@use 'parts/pages-extra';
+@use "parts/pages";
+@use "parts/pages-extra";
 
 // ============================================
 // 组件主题适配
 // ============================================
-@use 'parts/element-plus';
-@use 'parts/navigation';
-@use 'parts/preview';
+@use "parts/element-plus";
+@use "parts/navigation";
+@use "parts/preview";
 
 // ============================================
 // 主题修复补丁 + 我的主页
 // ============================================
-@use 'parts/fixes';
-@use 'parts/homepage';
+@use "parts/fixes";
+@use "parts/homepage";

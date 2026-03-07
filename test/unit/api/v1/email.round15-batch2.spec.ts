@@ -14,7 +14,9 @@ describe("api/v1/email round15 batch2", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: { success: true } });
     api = await import("@/api/v1/email");
   });
@@ -45,7 +47,11 @@ describe("api/v1/email round15 batch2", () => {
     const payload = { email: "u@test.com", code: "123456" };
     await api.verifyEmailCode(payload);
     expect(request).toHaveBeenCalledWith(
-      expect.objectContaining({ url: "/v1/email/verify", method: "post", data: payload })
+      expect.objectContaining({
+        url: "/v1/email/verify",
+        method: "post",
+        data: payload,
+      })
     );
   });
 
@@ -59,7 +65,10 @@ describe("api/v1/email round15 batch2", () => {
   it("verifyChangeConfirmation posts code", async () => {
     await api.verifyChangeConfirmation("ABC");
     expect(request.mock.calls[0][0]).toEqual(
-      expect.objectContaining({ url: "/v1/email/verify-change-confirmation", data: { code: "ABC" } })
+      expect.objectContaining({
+        url: "/v1/email/verify-change-confirmation",
+        data: { code: "ABC" },
+      })
     );
   });
 
@@ -79,7 +88,11 @@ describe("api/v1/email round15 batch2", () => {
     await api.getEmailCooldown("u@test.com");
     await api.testEmailService();
     expect(request.mock.calls[0][0]).toEqual(
-      expect.objectContaining({ url: "/v1/email/cooldown", method: "get", params: { email: "u@test.com" } })
+      expect.objectContaining({
+        url: "/v1/email/cooldown",
+        method: "get",
+        params: { email: "u@test.com" },
+      })
     );
     expect(request.mock.calls[1][0]).toEqual(
       expect.objectContaining({ url: "/v1/email/test", method: "get" })

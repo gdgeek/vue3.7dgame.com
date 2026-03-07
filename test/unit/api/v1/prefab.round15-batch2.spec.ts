@@ -8,20 +8,29 @@ describe("api/v1/prefab", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     api = await import("@/api/v1/prefab");
   });
 
   it("deletePrefab sends delete", async () => {
     await api.deletePrefab(1);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/prefabs/1", method: "delete" });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/prefabs/1",
+      method: "delete",
+    });
   });
 
   it("postPrefab posts payload", async () => {
     const data = { title: "a" } as any;
     await api.postPrefab(data);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/prefabs", method: "post", data });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/prefabs",
+      method: "post",
+      data,
+    });
   });
 
   it("getPrefab includes expand query", async () => {
@@ -60,6 +69,10 @@ describe("api/v1/prefab", () => {
   it("putPrefab sends put payload", async () => {
     const data = { data: "{}" } as any;
     await api.putPrefab(8, data);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/prefabs/8", method: "put", data });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/prefabs/8",
+      method: "put",
+      data,
+    });
   });
 });

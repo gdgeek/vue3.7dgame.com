@@ -12,11 +12,15 @@ describe("src/ability.ts round15", () => {
   });
 
   it("allows create when authorId is 1", () => {
-    expect(ability.can("create", subject("Article", { authorId: 1 }))).toBe(true);
+    expect(ability.can("create", subject("Article", { authorId: 1 }))).toBe(
+      true
+    );
   });
 
   it("rejects create when authorId is 2", () => {
-    expect(ability.can("create", subject("Article", { authorId: 2 }))).toBe(false);
+    expect(ability.can("create", subject("Article", { authorId: 2 }))).toBe(
+      false
+    );
   });
 
   it("rejects create when authorId missing", () => {

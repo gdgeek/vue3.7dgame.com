@@ -149,7 +149,9 @@ const select = async () => {
       const oversizedFiles = files.filter((f: File) => f.size > maxBytes);
       if (oversizedFiles.length > 0) {
         const names = oversizedFiles.map((f: File) => f.name).join(", ");
-        ElMessage.error(t("upload.fileSizeExceededList", { size: props.maxSize, names }));
+        ElMessage.error(
+          t("upload.fileSizeExceededList", { size: props.maxSize, names })
+        );
         // 过滤掉超大文件
         const validFiles = files.filter((f: File) => f.size <= maxBytes);
         if (validFiles.length === 0) {

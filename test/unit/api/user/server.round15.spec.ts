@@ -9,7 +9,9 @@ describe("src/api/user/server.ts round15", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: { ok: true } });
     ({ bindEmail, resetPassword } = await import("@/api/user/server"));
   });

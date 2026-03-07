@@ -154,7 +154,9 @@ describe("EduStudent API", () => {
     it("returns the request result", async () => {
       const mockResp = { data: { id: 5, name: "Bob" } };
       request.mockResolvedValue(mockResp);
-      const result = await studentApi.createStudent({ name: "Bob" } as Parameters<typeof studentApi.createStudent>[0]);
+      const result = await studentApi.createStudent({
+        name: "Bob",
+      } as Parameters<typeof studentApi.createStudent>[0]);
       expect(result).toEqual(mockResp);
     });
   });
@@ -162,7 +164,10 @@ describe("EduStudent API", () => {
   describe("updateStudent() — data payload", () => {
     it("sends the data payload in PUT request", async () => {
       const data = { name: "Updated Bob" };
-      await studentApi.updateStudent(4, data as Parameters<typeof studentApi.updateStudent>[1]);
+      await studentApi.updateStudent(
+        4,
+        data as Parameters<typeof studentApi.updateStudent>[1]
+      );
       expect(request.mock.calls[0][0].data).toEqual(data);
     });
   });
@@ -291,7 +296,10 @@ describe("EduTeacher API", () => {
 
     it("sends the data payload in PUT request", async () => {
       const data = { name: "New Teacher Name" };
-      await teacherApi.updateTeacher(5, data as Parameters<typeof teacherApi.updateTeacher>[1]);
+      await teacherApi.updateTeacher(
+        5,
+        data as Parameters<typeof teacherApi.updateTeacher>[1]
+      );
       expect(request.mock.calls[0][0].data).toEqual(data);
     });
   });
@@ -300,7 +308,9 @@ describe("EduTeacher API", () => {
     it("returns the request result", async () => {
       const mockResp = { data: { id: 3, name: "Prof X" } };
       request.mockResolvedValue(mockResp);
-      const result = await teacherApi.createTeacher({ name: "Prof X" } as Parameters<typeof teacherApi.createTeacher>[0]);
+      const result = await teacherApi.createTeacher({
+        name: "Prof X",
+      } as Parameters<typeof teacherApi.createTeacher>[0]);
       expect(result).toEqual(mockResp);
     });
   });

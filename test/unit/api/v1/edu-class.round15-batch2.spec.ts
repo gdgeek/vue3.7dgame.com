@@ -8,7 +8,9 @@ describe("api/v1/edu-class round15 batch2", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     api = await import("@/api/v1/edu-class");
   });
@@ -68,10 +70,18 @@ describe("api/v1/edu-class round15 batch2", () => {
     await api.applyToClass(9);
     await api.leaveClass(9);
     expect(request.mock.calls[0][0]).toEqual(
-      expect.objectContaining({ url: "/v1/edu-class/apply", method: "post", data: { class_id: 9 } })
+      expect.objectContaining({
+        url: "/v1/edu-class/apply",
+        method: "post",
+        data: { class_id: 9 },
+      })
     );
     expect(request.mock.calls[1][0]).toEqual(
-      expect.objectContaining({ url: "/v1/edu-class/leave", method: "post", data: { class_id: 9 } })
+      expect.objectContaining({
+        url: "/v1/edu-class/leave",
+        method: "post",
+        data: { class_id: 9 },
+      })
     );
   });
 
@@ -83,9 +93,23 @@ describe("api/v1/edu-class round15 batch2", () => {
     await api.getClassesByTeacher(10, "-created_at", 3, "image");
     expect(request.mock.calls[0][0].url).toContain("/v1/edu-class/5/groups");
     expect(request.mock.calls[0][0].url).toContain("GroupSearch%5Bname%5D=g1");
-    expect(request.mock.calls[1][0]).toEqual(expect.objectContaining({ url: "/v1/edu-class/5/group", method: "post" }));
-    expect(request.mock.calls[2][0]).toEqual(expect.objectContaining({ url: "/v1/edu-class/5/teacher", method: "post", data: { user_id: 10 } }));
-    expect(request.mock.calls[3][0]).toEqual(expect.objectContaining({ url: "/v1/edu-class/5/teacher", method: "delete", data: { user_id: 10 } }));
+    expect(request.mock.calls[1][0]).toEqual(
+      expect.objectContaining({ url: "/v1/edu-class/5/group", method: "post" })
+    );
+    expect(request.mock.calls[2][0]).toEqual(
+      expect.objectContaining({
+        url: "/v1/edu-class/5/teacher",
+        method: "post",
+        data: { user_id: 10 },
+      })
+    );
+    expect(request.mock.calls[3][0]).toEqual(
+      expect.objectContaining({
+        url: "/v1/edu-class/5/teacher",
+        method: "delete",
+        data: { user_id: 10 },
+      })
+    );
     expect(request.mock.calls[4][0].url).toContain("/v1/edu-class/by-teacher");
   });
 });

@@ -131,7 +131,9 @@ describe("useMetaList", () => {
       const result = useMetaList();
 
       // Access the internal fetchFn through the mocked usePageData
-      const fetchFn = (result as unknown as { _fetchFn: (...args: unknown[]) => unknown })._fetchFn;
+      const fetchFn = (
+        result as unknown as { _fetchFn: (...args: unknown[]) => unknown }
+      )._fetchFn;
       if (fetchFn) {
         await fetchFn({ sort: "-created_at", search: "", page: 1 });
         expect(mockGetMetas).toHaveBeenCalledWith(

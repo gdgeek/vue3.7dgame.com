@@ -19,7 +19,7 @@ describe("useTagsStore", () => {
   beforeEach(async () => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
-    tagsApi = await import("@/api/v1/tags") as never;
+    tagsApi = (await import("@/api/v1/tags")) as never;
     loggerMod = await import("@/utils/logger");
     ({ useTagsStore } = await import("@/store/modules/tags"));
   });
@@ -42,7 +42,11 @@ describe("useTagsStore", () => {
         {
           id: 1,
           name: "Science",
-          info: JSON.stringify({ color: "#FF0000", type: "primary", explan: "Science tag" }),
+          info: JSON.stringify({
+            color: "#FF0000",
+            type: "primary",
+            explan: "Science tag",
+          }),
           managed: 0,
         },
       ],
@@ -77,7 +81,14 @@ describe("useTagsStore", () => {
 
   it("TagInfo.color is parsed from info.color", async () => {
     tagsApi.getTags.mockResolvedValue({
-      data: [{ id: 3, name: "T", info: JSON.stringify({ color: "#AABBCC" }), managed: 0 }],
+      data: [
+        {
+          id: 3,
+          name: "T",
+          info: JSON.stringify({ color: "#AABBCC" }),
+          managed: 0,
+        },
+      ],
     });
     const store = useTagsStore();
     await store.refreshTags();
@@ -86,7 +97,14 @@ describe("useTagsStore", () => {
 
   it("TagInfo.type is parsed from info.type", async () => {
     tagsApi.getTags.mockResolvedValue({
-      data: [{ id: 4, name: "T", info: JSON.stringify({ type: "special" }), managed: 0 }],
+      data: [
+        {
+          id: 4,
+          name: "T",
+          info: JSON.stringify({ type: "special" }),
+          managed: 0,
+        },
+      ],
     });
     const store = useTagsStore();
     await store.refreshTags();
@@ -95,7 +113,14 @@ describe("useTagsStore", () => {
 
   it("TagInfo.explan is parsed from info.explan", async () => {
     tagsApi.getTags.mockResolvedValue({
-      data: [{ id: 6, name: "T", info: JSON.stringify({ explan: "Explanation here" }), managed: 0 }],
+      data: [
+        {
+          id: 6,
+          name: "T",
+          info: JSON.stringify({ explan: "Explanation here" }),
+          managed: 0,
+        },
+      ],
     });
     const store = useTagsStore();
     await store.refreshTags();
@@ -171,9 +196,24 @@ describe("useTagsStore", () => {
   it("multiple tags in one call are all added to the map", async () => {
     tagsApi.getTags.mockResolvedValue({
       data: [
-        { id: 10, name: "A", info: JSON.stringify({ color: "#111" }), managed: 0 },
-        { id: 11, name: "B", info: JSON.stringify({ color: "#222" }), managed: 1 },
-        { id: 12, name: "C", info: JSON.stringify({ color: "#333" }), managed: 0 },
+        {
+          id: 10,
+          name: "A",
+          info: JSON.stringify({ color: "#111" }),
+          managed: 0,
+        },
+        {
+          id: 11,
+          name: "B",
+          info: JSON.stringify({ color: "#222" }),
+          managed: 1,
+        },
+        {
+          id: 12,
+          name: "C",
+          info: JSON.stringify({ color: "#333" }),
+          managed: 0,
+        },
       ],
     });
     const store = useTagsStore();

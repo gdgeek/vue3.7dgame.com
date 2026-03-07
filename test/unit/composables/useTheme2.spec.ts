@@ -41,7 +41,8 @@ describe("useTheme — initTheme() with customPrimaryColor set (lines 346-353)",
     expect(() => initTheme()).not.toThrow();
 
     // The shadow-primary CSS variable should be applied
-    const shadowPrimary = document.documentElement.style.getPropertyValue("--shadow-primary");
+    const shadowPrimary =
+      document.documentElement.style.getPropertyValue("--shadow-primary");
     expect(shadowPrimary).toBeTruthy();
   });
 
@@ -55,7 +56,8 @@ describe("useTheme — initTheme() with customPrimaryColor set (lines 346-353)",
     initTheme();
 
     // --primary-color should be set after applyColorVariables
-    const primaryColor = document.documentElement.style.getPropertyValue("--primary-color");
+    const primaryColor =
+      document.documentElement.style.getPropertyValue("--primary-color");
     expect(primaryColor).toBeTruthy();
   });
 
@@ -105,7 +107,8 @@ describe("useTheme — initTheme() with customPrimaryColor set (lines 346-353)",
 
     initTheme();
 
-    const shadow = document.documentElement.style.getPropertyValue("--shadow-primary");
+    const shadow =
+      document.documentElement.style.getPropertyValue("--shadow-primary");
     // generatePrimaryShadow should return a non-empty string
     expect(typeof shadow).toBe("string");
   });

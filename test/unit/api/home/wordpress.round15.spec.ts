@@ -9,7 +9,9 @@ const wpRequest = vi.hoisted(() => {
 const domainStoreHook = vi.hoisted(() => vi.fn(() => ({ blog: "" })));
 
 vi.mock("@/utils/wp", () => ({ default: wpRequest }));
-vi.mock("@/store/modules/domain", () => ({ useDomainStoreHook: domainStoreHook }));
+vi.mock("@/store/modules/domain", () => ({
+  useDomainStoreHook: domainStoreHook,
+}));
 vi.mock("@/utils/logger", () => ({
   logger: { warn: vi.fn(), info: vi.fn(), error: vi.fn() },
 }));
@@ -59,7 +61,9 @@ describe("src/api/home/wordpress.ts round15", () => {
       jetpack_featured_media_url: "https://img/j.jpg",
       _embedded: { "wp:featuredmedia": [{ source_url: "https://img/e.jpg" }] },
     };
-    expect(transformPost(post as never, new Map()).featuredImage).toBe("https://img/j.jpg");
+    expect(transformPost(post as never, new Map()).featuredImage).toBe(
+      "https://img/j.jpg"
+    );
   });
 
   it("transformPost falls back to embedded featured image", () => {
@@ -74,7 +78,9 @@ describe("src/api/home/wordpress.ts round15", () => {
       jetpack_featured_media_url: "",
       _embedded: { "wp:featuredmedia": [{ source_url: "https://img/e.jpg" }] },
     };
-    expect(transformPost(post as never, new Map()).featuredImage).toBe("https://img/e.jpg");
+    expect(transformPost(post as never, new Map()).featuredImage).toBe(
+      "https://img/e.jpg"
+    );
   });
 
   it("transformPost prefers embedded category over map", () => {
@@ -89,11 +95,15 @@ describe("src/api/home/wordpress.ts round15", () => {
       _embedded: { "wp:term": [[{ id: 5, name: "Embed", slug: "embed" }]] },
     };
     const map = new Map([[9, { id: 9, name: "Map", slug: "map" }]]);
-    expect(transformPost(post as never, map as never).category.name).toBe("Embed");
+    expect(transformPost(post as never, map as never).category.name).toBe(
+      "Embed"
+    );
   });
 
   it("getCategories uses rest_route mode when baseURL has no wp-json", async () => {
-    wpRequest.mockResolvedValue({ data: [{ id: 1, name: "N", slug: "n", count: 1 }] });
+    wpRequest.mockResolvedValue({
+      data: [{ id: 1, name: "N", slug: "n", count: 1 }],
+    });
     await wordpressApi.getCategories();
     const call = wpRequest.mock.calls[0][0];
     expect(call.url).toBe("");
@@ -102,7 +112,9 @@ describe("src/api/home/wordpress.ts round15", () => {
 
   it("getNews appends categories query and transforms posts", async () => {
     wpRequest
-      .mockResolvedValueOnce({ data: [{ id: 1, name: "News", slug: "news", count: 3 }] })
+      .mockResolvedValueOnce({
+        data: [{ id: 1, name: "News", slug: "news", count: 3 }],
+      })
       .mockResolvedValueOnce({
         data: [
           {
@@ -117,14 +129,20 @@ describe("src/api/home/wordpress.ts round15", () => {
         ],
       });
 
-    const list = await wordpressApi.getNews({ categories: [1, 2], page: 2, perPage: 5 });
+    const list = await wordpressApi.getNews({
+      categories: [1, 2],
+      page: 2,
+      perPage: 5,
+    });
     const postCall = wpRequest.mock.calls[1][0];
     expect(postCall.params.categories).toBe("1,2");
     expect(list[0].title).toBe("Title");
   });
 
   it("getCategoriesWithCache reuses fresh cache", async () => {
-    wpRequest.mockResolvedValue({ data: [{ id: 2, name: "A", slug: "a", count: 0 }] });
+    wpRequest.mockResolvedValue({
+      data: [{ id: 2, name: "A", slug: "a", count: 0 }],
+    });
     const first = await wordpressApi.getCategoriesWithCache();
     const second = await wordpressApi.getCategoriesWithCache();
     expect(first.isStale).toBe(false);
@@ -133,7 +151,9 @@ describe("src/api/home/wordpress.ts round15", () => {
   });
 
   it("clearCategoriesCache forces categories re-fetch", async () => {
-    wpRequest.mockResolvedValue({ data: [{ id: 3, name: "B", slug: "b", count: 1 }] });
+    wpRequest.mockResolvedValue({
+      data: [{ id: 3, name: "B", slug: "b", count: 1 }],
+    });
     await wordpressApi.getCategoriesWithCache();
     clearCategoriesCache();
     await wordpressApi.getCategoriesWithCache();

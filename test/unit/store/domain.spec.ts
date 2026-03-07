@@ -79,7 +79,9 @@ describe("useDomainStore", () => {
         .replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`);
     });
 
-    ({ getDomainDefault, getDomainLanguage } = await import("@/api/domain-query"));
+    ({ getDomainDefault, getDomainLanguage } = await import(
+      "@/api/domain-query"
+    ));
     ({ useAppStore } = await import("@/store/modules/app"));
     ({ useDomainStore } = await import("@/store/modules/domain"));
   });
@@ -340,8 +342,11 @@ describe("useDomainStore", () => {
       const store = useDomainStore();
       await store.fetchDefaultInfo();
 
-      const iconLink = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
-      expect(iconLink?.getAttribute("href")).toBe("https://example.com/icon.png");
+      const iconLink =
+        document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+      expect(iconLink?.getAttribute("href")).toBe(
+        "https://example.com/icon.png"
+      );
     });
   });
 

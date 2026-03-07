@@ -143,19 +143,46 @@ describe("useInfomationStore — information2 补充测试", () => {
           // === 与 information.ts lines 19-57 完全对齐 ===
           if (domainStr.toLowerCase().indexOf("u7gm.com") >= 0) {
             if (lang.value === "zh-CN") {
-              return [{ name: "上海游七网络科技有限公司", url: "https://u7gm.com" }];
+              return [
+                { name: "上海游七网络科技有限公司", url: "https://u7gm.com" },
+              ];
             } else if (lang.value === "ja-JP") {
-              return [{ name: "上海遊七ネットワーク技術有限公司", url: "https://u7gm.com" }];
+              return [
+                {
+                  name: "上海遊七ネットワーク技術有限公司",
+                  url: "https://u7gm.com",
+                },
+              ];
             } else {
-              return [{ name: "Shanghai U7 Game Network Technology Co., Ltd.", url: "https://u7gm.com" }];
+              return [
+                {
+                  name: "Shanghai U7 Game Network Technology Co., Ltd.",
+                  url: "https://u7gm.com",
+                },
+              ];
             }
           }
           if (lang.value === "zh-CN") {
-            return [{ name: "上海不加班网络科技有限公司", url: "https://bujiaban.com" }];
+            return [
+              {
+                name: "上海不加班网络科技有限公司",
+                url: "https://bujiaban.com",
+              },
+            ];
           } else if (lang.value === "ja-JP") {
-            return [{ name: "上海残業なしネットワーク技術有限公司", url: "https://bujiaban.com" }];
+            return [
+              {
+                name: "上海残業なしネットワーク技術有限公司",
+                url: "https://bujiaban.com",
+              },
+            ];
           } else {
-            return [{ name: "Shanghai No Overwork Network Technology Co., Ltd.", url: "https://bujiaban.com" }];
+            return [
+              {
+                name: "Shanghai No Overwork Network Technology Co., Ltd.",
+                url: "https://bujiaban.com",
+              },
+            ];
           }
         });
         result = companies.value;
@@ -179,7 +206,9 @@ describe("useInfomationStore — information2 补充测试", () => {
 
     it("domain=u7gm.com, lang=en-US → 返回 Shanghai U7 Game（英文）", () => {
       const result = runCompaniesComputed("u7gm.com", "en-US");
-      expect(result[0].name).toBe("Shanghai U7 Game Network Technology Co., Ltd.");
+      expect(result[0].name).toBe(
+        "Shanghai U7 Game Network Technology Co., Ltd."
+      );
     });
 
     it("domain=U7GM.COM（大写）→ 仍然走 u7gm.com 分支", () => {
@@ -202,7 +231,9 @@ describe("useInfomationStore — information2 补充测试", () => {
 
     it("domain=bujiaban.com, lang=en-US → 返回 Shanghai No Overwork（英文）", () => {
       const result = runCompaniesComputed("bujiaban.com", "en-US");
-      expect(result[0].name).toBe("Shanghai No Overwork Network Technology Co., Ltd.");
+      expect(result[0].name).toBe(
+        "Shanghai No Overwork Network Technology Co., Ltd."
+      );
     });
 
     it("domain=other.com, lang=zh-CN → 同样返回不加班中文版", () => {
@@ -236,9 +267,19 @@ describe("useInfomationStore — information2 补充测试", () => {
       scope.run(() => {
         const companies = computed(() => {
           if (lang.value === "zh-CN") {
-            return [{ name: "上海不加班网络科技有限公司", url: "https://bujiaban.com" }];
+            return [
+              {
+                name: "上海不加班网络科技有限公司",
+                url: "https://bujiaban.com",
+              },
+            ];
           } else {
-            return [{ name: "Shanghai No Overwork Network Technology Co., Ltd.", url: "https://bujiaban.com" }];
+            return [
+              {
+                name: "Shanghai No Overwork Network Technology Co., Ltd.",
+                url: "https://bujiaban.com",
+              },
+            ];
           }
         });
 
@@ -258,7 +299,9 @@ describe("useInfomationStore — information2 补充测试", () => {
       lang.value = "en-US";
       await nextTick();
 
-      expect(companiesValue.value[0].name).toBe("Shanghai No Overwork Network Technology Co., Ltd.");
+      expect(companiesValue.value[0].name).toBe(
+        "Shanghai No Overwork Network Technology Co., Ltd."
+      );
 
       scope.stop();
     });

@@ -123,16 +123,16 @@ describe("plugins/index", () => {
     plugin.install({} as never);
 
     expect(hoisted.setupDirective.mock.invocationCallOrder[0]).toBeLessThan(
-      hoisted.setupRouter.mock.invocationCallOrder[0],
+      hoisted.setupRouter.mock.invocationCallOrder[0]
     );
     expect(hoisted.setupRouter.mock.invocationCallOrder[0]).toBeLessThan(
-      hoisted.setupStore.mock.invocationCallOrder[0],
+      hoisted.setupStore.mock.invocationCallOrder[0]
     );
     expect(hoisted.setupStore.mock.invocationCallOrder[0]).toBeLessThan(
-      hoisted.setupI18n.mock.invocationCallOrder[0],
+      hoisted.setupI18n.mock.invocationCallOrder[0]
     );
     expect(hoisted.setupI18n.mock.invocationCallOrder[0]).toBeLessThan(
-      hoisted.setupPermission.mock.invocationCallOrder[0],
+      hoisted.setupPermission.mock.invocationCallOrder[0]
     );
   });
 

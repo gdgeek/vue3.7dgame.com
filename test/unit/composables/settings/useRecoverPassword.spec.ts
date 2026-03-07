@@ -29,9 +29,9 @@ const mockRouter = { push: mockPush };
 
 describe("useRecoverPassword", () => {
   const mockGetCurrentBoundEmail = vi.fn();
-  const mockGetApiErrorMessage = vi.fn().mockImplementation(
-    (_result: unknown, fallback: string) => fallback
-  );
+  const mockGetApiErrorMessage = vi
+    .fn()
+    .mockImplementation((_result: unknown, fallback: string) => fallback);
   const mockOpenEmailDialog = vi.fn();
 
   const makeDeps = () => ({
@@ -102,7 +102,10 @@ describe("useRecoverPassword", () => {
   describe("handleRecoverSendEmail", () => {
     it("sends reset email and starts cooldown on success", async () => {
       vi.useFakeTimers();
-      mockRequestPasswordReset.mockResolvedValue({ success: true, message: "Sent" });
+      mockRequestPasswordReset.mockResolvedValue({
+        success: true,
+        message: "Sent",
+      });
       const useRecoverPassword = await importComposable();
       const { handleRecoverSendEmail, recoverForm, recoverCooldownSeconds } =
         useRecoverPassword(makeDeps());
@@ -128,7 +131,8 @@ describe("useRecoverPassword", () => {
     it("shows error when API fails", async () => {
       mockRequestPasswordReset.mockResolvedValue({ success: false });
       const useRecoverPassword = await importComposable();
-      const { handleRecoverSendEmail, recoverForm } = useRecoverPassword(makeDeps());
+      const { handleRecoverSendEmail, recoverForm } =
+        useRecoverPassword(makeDeps());
 
       recoverForm.value.email = "user@example.com";
       await handleRecoverSendEmail();
@@ -139,7 +143,8 @@ describe("useRecoverPassword", () => {
     it("shows error on network failure", async () => {
       mockRequestPasswordReset.mockRejectedValue(new Error("network"));
       const useRecoverPassword = await importComposable();
-      const { handleRecoverSendEmail, recoverForm } = useRecoverPassword(makeDeps());
+      const { handleRecoverSendEmail, recoverForm } =
+        useRecoverPassword(makeDeps());
 
       recoverForm.value.email = "user@example.com";
       await handleRecoverSendEmail();
@@ -150,10 +155,17 @@ describe("useRecoverPassword", () => {
 
   describe("handleRecoverVerifyCode", () => {
     it("sets recoverCodeVerified on success", async () => {
-      mockVerifyResetCode.mockResolvedValue({ success: true, message: "Verified" });
+      mockVerifyResetCode.mockResolvedValue({
+        success: true,
+        message: "Verified",
+      });
       const useRecoverPassword = await importComposable();
-      const { handleRecoverVerifyCode, recoverForm, recoverFormRef, recoverCodeVerified } =
-        useRecoverPassword(makeDeps());
+      const {
+        handleRecoverVerifyCode,
+        recoverForm,
+        recoverFormRef,
+        recoverCodeVerified,
+      } = useRecoverPassword(makeDeps());
 
       recoverForm.value.email = "user@example.com";
       recoverForm.value.code = "123456";
@@ -171,8 +183,12 @@ describe("useRecoverPassword", () => {
     it("keeps recoverCodeVerified=false on verification failure", async () => {
       mockVerifyResetCode.mockResolvedValue({ success: false });
       const useRecoverPassword = await importComposable();
-      const { handleRecoverVerifyCode, recoverForm, recoverFormRef, recoverCodeVerified } =
-        useRecoverPassword(makeDeps());
+      const {
+        handleRecoverVerifyCode,
+        recoverForm,
+        recoverFormRef,
+        recoverCodeVerified,
+      } = useRecoverPassword(makeDeps());
 
       recoverForm.value.email = "user@example.com";
       recoverForm.value.code = "000000";
@@ -198,7 +214,10 @@ describe("useRecoverPassword", () => {
 
   describe("handleRecoverResetPassword", () => {
     it("navigates to logout on success", async () => {
-      mockResetPasswordByCode.mockResolvedValue({ success: true, message: "Reset" });
+      mockResetPasswordByCode.mockResolvedValue({
+        success: true,
+        message: "Reset",
+      });
       const useRecoverPassword = await importComposable();
       const {
         handleRecoverResetPassword,
@@ -232,7 +251,8 @@ describe("useRecoverPassword", () => {
 
     it("shows warning when code not verified", async () => {
       const useRecoverPassword = await importComposable();
-      const { handleRecoverResetPassword, recoverForm } = useRecoverPassword(makeDeps());
+      const { handleRecoverResetPassword, recoverForm } =
+        useRecoverPassword(makeDeps());
 
       recoverForm.value.email = "user@example.com";
       // recoverCodeVerified is false by default
@@ -246,8 +266,12 @@ describe("useRecoverPassword", () => {
   describe("resetRecoverForm", () => {
     it("clears form fields and resets verification", async () => {
       const useRecoverPassword = await importComposable();
-      const { resetRecoverForm, recoverForm, recoverCodeVerified, recoverFormRef } =
-        useRecoverPassword(makeDeps());
+      const {
+        resetRecoverForm,
+        recoverForm,
+        recoverCodeVerified,
+        recoverFormRef,
+      } = useRecoverPassword(makeDeps());
 
       recoverForm.value.code = "123456";
       recoverForm.value.password = "pass";
@@ -275,7 +299,10 @@ describe("useRecoverPassword", () => {
   describe("cooldown timer", () => {
     it("decrements cooldown each second", async () => {
       vi.useFakeTimers();
-      mockRequestPasswordReset.mockResolvedValue({ success: true, message: "" });
+      mockRequestPasswordReset.mockResolvedValue({
+        success: true,
+        message: "",
+      });
       const useRecoverPassword = await importComposable();
       const { handleRecoverSendEmail, recoverForm, recoverCooldownSeconds } =
         useRecoverPassword(makeDeps());

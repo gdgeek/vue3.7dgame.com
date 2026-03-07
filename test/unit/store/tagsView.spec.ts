@@ -389,8 +389,12 @@ describe("delLeftViews() — cachedViews 同步清除（lines 155-157）", () =>
 
     await store.delLeftViews(targetView);
 
-    expect(store.visitedViews.some((v) => v.path === affixView.path)).toBe(true);
-    expect(store.visitedViews.some((v) => v.path === leftView.path)).toBe(false);
+    expect(store.visitedViews.some((v) => v.path === affixView.path)).toBe(
+      true
+    );
+    expect(store.visitedViews.some((v) => v.path === leftView.path)).toBe(
+      false
+    );
     expect(store.cachedViews).not.toContain("LeftNonAffix");
   });
 });

@@ -177,7 +177,10 @@ describe("useFullscreen", () => {
   it("registers fullscreenchange listener on mount", async () => {
     const addSpy = vi.spyOn(document, "addEventListener");
     const { unmount } = await createMounted();
-    expect(addSpy).toHaveBeenCalledWith("fullscreenchange", expect.any(Function));
+    expect(addSpy).toHaveBeenCalledWith(
+      "fullscreenchange",
+      expect.any(Function)
+    );
     unmount();
   });
 
@@ -185,6 +188,9 @@ describe("useFullscreen", () => {
     const removeSpy = vi.spyOn(document, "removeEventListener");
     const { unmount } = await createMounted();
     unmount();
-    expect(removeSpy).toHaveBeenCalledWith("fullscreenchange", expect.any(Function));
+    expect(removeSpy).toHaveBeenCalledWith(
+      "fullscreenchange",
+      expect.any(Function)
+    );
   });
 });

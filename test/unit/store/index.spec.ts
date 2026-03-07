@@ -59,7 +59,8 @@ describe("store/index", () => {
   it("store has persistedstate plugin applied", async () => {
     const { createPinia } = await import("pinia");
     await import("@/store/index");
-    const mockStore = (createPinia as ReturnType<typeof vi.fn>).mock.results[0].value;
+    const mockStore = (createPinia as ReturnType<typeof vi.fn>).mock.results[0]
+      .value;
     expect(mockStore.use).toHaveBeenCalled();
   });
 

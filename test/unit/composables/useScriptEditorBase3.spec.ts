@@ -17,7 +17,10 @@ import { createApp, defineComponent, h, nextTick, reactive } from "vue";
 const mockSettingsState = reactive({ theme: "light" as string });
 const mockAppState = reactive({ language: "zh-CN" as string });
 const mockUserState = reactive({
-  userInfo: { id: 42, userData: {} } as { id: number; userData: Record<string, unknown> } | null,
+  userInfo: { id: 42, userData: {} } as {
+    id: number;
+    userData: Record<string, unknown>;
+  } | null,
   getRole: vi.fn(() => "editor"),
 });
 
@@ -30,7 +33,12 @@ const { mockInflate3, mockJsBeautify3, mockMessage3, mockMessageBox3 } =
   }));
 
 const mockOnBeforeRouteLeave3 = vi.hoisted(() => vi.fn());
-const mockLogger3 = vi.hoisted(() => ({ log: vi.fn(), error: vi.fn(), warn: vi.fn(), info: vi.fn() }));
+const mockLogger3 = vi.hoisted(() => ({
+  log: vi.fn(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  info: vi.fn(),
+}));
 
 vi.mock("vue-router", () => ({
   onBeforeRouteLeave: mockOnBeforeRouteLeave3,
@@ -134,9 +142,15 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
 
   describe("defineSingleAssignment: double-set (line 110)", () => {
     it("second action=update call logs 'cannot be assigned again'", async () => {
-      const { result, unmount } = withSetup(() => useScriptEditorBase(makeOptions()));
+      const { result, unmount } = withSetup(() =>
+        useScriptEditorBase(makeOptions())
+      );
 
-      const updateData = { lua: "print(1)", js: "console.log(1)", blocklyData: "xml" };
+      const updateData = {
+        lua: "print(1)",
+        js: "console.log(1)",
+        blocklyData: "xml",
+      };
 
       // First update: initLuaCode.set() runs with isAssigned=false
       await result.handleMessage(

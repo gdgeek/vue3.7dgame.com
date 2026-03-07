@@ -12,7 +12,9 @@ describe("src/api/auth/wechat.ts round15", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ ok: true });
     ({ getQrcode, refresh } = await import("@/api/auth/wechat"));
   });

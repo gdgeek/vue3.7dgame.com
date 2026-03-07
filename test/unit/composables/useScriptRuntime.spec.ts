@@ -133,9 +133,7 @@ describe("buildScriptRuntime", () => {
     it("instance 没有 playAnimation 方法时不抛出异常", () => {
       const { polygen } = buildScriptRuntime({ value: makeMockPlayer() });
       const instance = makeMeshWrapper({ playAnimation: false });
-      expect(() =>
-        polygen.playAnimation(instance, "run")
-      ).not.toThrow();
+      expect(() => polygen.playAnimation(instance, "run")).not.toThrow();
     });
   });
 
@@ -442,9 +440,12 @@ describe("buildScriptRuntime", () => {
   describe("event extraEvent 扩展", () => {
     it("extraEvent 中的方法可在 event 上调用", () => {
       const signal = vi.fn();
-      const { event } = buildScriptRuntime({ value: makeMockPlayer() }, {
-        signal,
-      });
+      const { event } = buildScriptRuntime(
+        { value: makeMockPlayer() },
+        {
+          signal,
+        }
+      );
 
       (event as any).signal("arg1");
       expect(signal).toHaveBeenCalledWith("arg1");
@@ -488,7 +489,9 @@ describe("buildScriptRuntime", () => {
 
     it("object 没有 setVisibility 方法时不抛出异常", () => {
       const { point } = buildScriptRuntime({ value: makeMockPlayer() });
-      expect(() => point.setVisual({ no: "setVisibility" }, false)).not.toThrow();
+      expect(() =>
+        point.setVisual({ no: "setVisibility" }, false)
+      ).not.toThrow();
     });
   });
 

@@ -3,7 +3,11 @@
  */
 import { describe, it, expect } from "vitest";
 import type { EduClass } from "@/api/v1/types/edu-class";
-import type { EduSchool, CreateSchoolRequest, UpdateSchoolRequest } from "@/api/v1/types/edu-school";
+import type {
+  EduSchool,
+  CreateSchoolRequest,
+  UpdateSchoolRequest,
+} from "@/api/v1/types/edu-school";
 import type {
   MetaResourceItem,
   CreateMetaResourceRequest,
@@ -124,7 +128,12 @@ describe("UpdateSchoolRequest 类型", () => {
 // ============================================================
 describe("MetaResourceItem 接口", () => {
   it("必填字段赋值", () => {
-    const item: MetaResourceItem = { id: 1, meta_id: 2, resource_id: 3, type: "model" };
+    const item: MetaResourceItem = {
+      id: 1,
+      meta_id: 2,
+      resource_id: 3,
+      type: "model",
+    };
     expect(item.id).toBe(1);
     expect(item.type).toBe("model");
   });
@@ -141,7 +150,13 @@ describe("MetaResourceItem 接口", () => {
   });
 
   it("支持索引额外字段", () => {
-    const item: MetaResourceItem = { id: 3, meta_id: 1, resource_id: 1, type: "audio", extra: "data" };
+    const item: MetaResourceItem = {
+      id: 3,
+      meta_id: 1,
+      resource_id: 1,
+      type: "audio",
+      extra: "data",
+    };
     expect(item["extra"]).toBe("data");
   });
 });
@@ -154,12 +169,20 @@ describe("CreateMetaResourceRequest 接口", () => {
   });
 
   it("meta_id 支持 string", () => {
-    const r: CreateMetaResourceRequest = { meta_id: "uuid-123", type: "picture" };
+    const r: CreateMetaResourceRequest = {
+      meta_id: "uuid-123",
+      type: "picture",
+    };
     expect(r.meta_id).toBe("uuid-123");
   });
 
   it("可选字段赋值", () => {
-    const r: CreateMetaResourceRequest = { meta_id: 1, type: "audio", resource_id: 10, info: "note" };
+    const r: CreateMetaResourceRequest = {
+      meta_id: 1,
+      type: "audio",
+      resource_id: 10,
+      info: "note",
+    };
     expect(r.resource_id).toBe(10);
     expect(r.info).toBe("note");
   });

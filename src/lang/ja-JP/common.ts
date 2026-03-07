@@ -160,7 +160,8 @@ export default {
     codeSent: "認証コードがメールアドレスに送信されました",
     verifySuccess: "メール認証に成功しました",
     sentToCurrentEmail: "Verification code sent to your current bound email",
-    oldEmailVerified: "Old email verified. Please continue to bind the new email.",
+    oldEmailVerified:
+      "Old email verified. Please continue to bind the new email.",
     unbindSuccess: "Email unbound successfully",
   },
   web: {

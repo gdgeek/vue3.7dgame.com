@@ -408,7 +408,10 @@ const handlePolygen = async (uuid: string) => {
     return null;
   }
   const modelUuid = uuid.toString();
-  const getModelAsync = (uuid: string, retries = 3): Promise<THREE.Object3D | null> => {
+  const getModelAsync = (
+    uuid: string,
+    retries = 3
+  ): Promise<THREE.Object3D | null> => {
     return new Promise((resolve) => {
       const attempt = (remaining: number) => {
         const source = scenePlayer.value?.sources.get(uuid) as

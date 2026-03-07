@@ -46,7 +46,10 @@ export function useSceneAudio(sources: Map<string, SourceRecord>) {
       };
 
       audio.play().catch((error) => {
-        logger.error("[ScenePlayer] Failed to play audio:", { src: audio.src, error });
+        logger.error("[ScenePlayer] Failed to play audio:", {
+          src: audio.src,
+          error,
+        });
         resolve();
       });
     });
