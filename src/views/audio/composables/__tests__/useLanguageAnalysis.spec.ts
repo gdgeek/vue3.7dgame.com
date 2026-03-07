@@ -5,7 +5,7 @@
  * checkTextLanguage().  Side effects (ElMessage, setTimeout) are mocked.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { ref } from "vue";
+import { ref, createApp, defineComponent } from "vue";
 import { useLanguageAnalysis } from "../useLanguageAnalysis";
 
 vi.mock("vue-i18n", () => ({
@@ -30,18 +30,41 @@ function makeRefs(lang = "", autoSwitch = false) {
   };
 }
 
+/**
+ * Run a composable inside a real Vue component instance so that lifecycle
+ * hooks like onUnmounted are registered correctly.
+ * Returns [result, unmount] — call unmount() in afterEach to clean up.
+ */
+function withSetup<T>(fn: () => T): [T, () => void] {
+  let result!: T;
+  const app = createApp(
+    defineComponent({
+      setup() {
+        result = fn();
+        return {};
+      },
+      render: () => null as unknown as ReturnType<typeof defineComponent>,
+    })
+  );
+  const el = document.createElement("div");
+  app.mount(el);
+  return [result, () => app.unmount()];
+}
+
 // -----------------------------------------------------------------------
 // Language detection
 // -----------------------------------------------------------------------
 describe("useLanguageAnalysis — language detection", () => {
   let result: ReturnType<typeof useLanguageAnalysis>;
+  let unmount: () => void;
 
   beforeEach(() => {
     vi.useFakeTimers();
-    result = useLanguageAnalysis();
+    [result, unmount] = withSetup(() => useLanguageAnalysis());
   });
 
   afterEach(() => {
+    unmount();
     vi.useRealTimers();
     vi.clearAllMocks();
   });
@@ -117,13 +140,15 @@ describe("useLanguageAnalysis — language detection", () => {
 // -----------------------------------------------------------------------
 describe("useLanguageAnalysis — character counts", () => {
   let result: ReturnType<typeof useLanguageAnalysis>;
+  let unmount: () => void;
 
   beforeEach(() => {
     vi.useFakeTimers();
-    result = useLanguageAnalysis();
+    [result, unmount] = withSetup(() => useLanguageAnalysis());
   });
 
   afterEach(() => {
+    unmount();
     vi.useRealTimers();
     vi.clearAllMocks();
   });
@@ -182,13 +207,15 @@ describe("useLanguageAnalysis — character counts", () => {
 // -----------------------------------------------------------------------
 describe("useLanguageAnalysis — auto language switching", () => {
   let result: ReturnType<typeof useLanguageAnalysis>;
+  let unmount: () => void;
 
   beforeEach(() => {
     vi.useFakeTimers();
-    result = useLanguageAnalysis();
+    [result, unmount] = withSetup(() => useLanguageAnalysis());
   });
 
   afterEach(() => {
+    unmount();
     vi.useRealTimers();
     vi.clearAllMocks();
   });
@@ -223,13 +250,15 @@ describe("useLanguageAnalysis — auto language switching", () => {
 // -----------------------------------------------------------------------
 describe("useLanguageAnalysis — suggestion", () => {
   let result: ReturnType<typeof useLanguageAnalysis>;
+  let unmount: () => void;
 
   beforeEach(() => {
     vi.useFakeTimers();
-    result = useLanguageAnalysis();
+    [result, unmount] = withSetup(() => useLanguageAnalysis());
   });
 
   afterEach(() => {
+    unmount();
     vi.useRealTimers();
     vi.clearAllMocks();
   });
@@ -269,21 +298,25 @@ describe("useLanguageAnalysis — suggestion", () => {
 // -----------------------------------------------------------------------
 describe("useLanguageAnalysis — initial state", () => {
   it("languageAnalysis starts with all-zero counts", () => {
-    const analysis = useLanguageAnalysis();
-    const { languageAnalysis } = analysis;
+    const [{ languageAnalysis }, unmount] = withSetup(() =>
+      useLanguageAnalysis()
+    );
     expect(languageAnalysis.value.chineseCount).toBe(0);
     expect(languageAnalysis.value.englishCount).toBe(0);
     expect(languageAnalysis.value.japaneseCount).toBe(0);
     expect(languageAnalysis.value.otherCount).toBe(0);
     expect(languageAnalysis.value.totalChars).toBe(0);
+    unmount();
   });
 
   it("languageAnalysis starts with empty detectedLanguage and suggestion", () => {
-    const analysis = useLanguageAnalysis();
-    const { languageAnalysis } = analysis;
+    const [{ languageAnalysis }, unmount] = withSetup(() =>
+      useLanguageAnalysis()
+    );
     expect(languageAnalysis.value.detectedLanguage).toBe("");
     expect(languageAnalysis.value.suggestion).toBe("");
     expect(languageAnalysis.value.isMultiLanguage).toBe(false);
+    unmount();
   });
 });
 
@@ -292,13 +325,15 @@ describe("useLanguageAnalysis — initial state", () => {
 // -----------------------------------------------------------------------
 describe("useLanguageAnalysis — other character counting", () => {
   let result: ReturnType<typeof useLanguageAnalysis>;
+  let unmount: () => void;
 
   beforeEach(() => {
     vi.useFakeTimers();
-    result = useLanguageAnalysis();
+    [result, unmount] = withSetup(() => useLanguageAnalysis());
   });
 
   afterEach(() => {
+    unmount();
     vi.useRealTimers();
     vi.clearAllMocks();
   });

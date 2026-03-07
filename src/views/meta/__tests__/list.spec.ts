@@ -902,6 +902,9 @@ describe("Entity Copy Function - Unit Tests", () => {
 
       // Mock ElMessage.error
       const mockElMessageError = vi.fn();
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
 
       // Mock loading state
       const copyLoadingMap = new Map<number, boolean>();
@@ -952,10 +955,13 @@ describe("Entity Copy Function - Unit Tests", () => {
       });
 
       // Verify error was handled
+      expect(consoleErrorSpy).toHaveBeenCalled();
       expect(mockElMessageError).toHaveBeenCalledWith("Copy failed");
 
       // Verify loading state was cleared
       expect(copyLoadingMap.get(originalId)).toBe(false);
+
+      consoleErrorSpy.mockRestore();
     });
   });
 
