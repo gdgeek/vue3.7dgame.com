@@ -84,9 +84,9 @@ export default defineConfig({
         "src/views/meta-verse/public.vue",
         "src/views/audio/**",
       ],
-      // 覆盖率阈值（当前组件层无测试，实际覆盖约23%；阈值随组件测试补充逐步提升）
+      // 覆盖率阈值（当前组件层实际覆盖约33%；阈值随组件测试补充逐步提升）
       thresholds: {
-        lines: 23,
+        lines: 33,
       },
     },
     // 测试超时时间

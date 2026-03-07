@@ -127,6 +127,9 @@ export const useUserStore = defineStore(
         return userInfo.value;
       } catch (error) {
         logger.error("Error fetching user info:", error);
+        throw error instanceof Error
+          ? error
+          : new Error("Error fetching user info");
       }
     };
 
@@ -151,6 +154,9 @@ export const useUserStore = defineStore(
         return userInfo.value;
       } catch (error) {
         logger.error("Error fetching user info:", error);
+        throw error instanceof Error
+          ? error
+          : new Error("Error fetching user info");
       }
     };
 
@@ -161,12 +167,15 @@ export const useUserStore = defineStore(
 
     const logout = async () => {
       // 调用后端注销 API（忽略失败，确保本地清理总是执行）
+      let logoutError: Error | null = null;
       try {
         if (Token.hasToken()) {
           await authLogout();
         }
       } catch (error) {
         logger.error("Backend logout failed:", error);
+        logoutError =
+          error instanceof Error ? error : new Error("Backend logout failed");
       }
 
       // 正确清除 token
@@ -204,6 +213,9 @@ export const useUserStore = defineStore(
         perms: [],
       };
 
+      if (logoutError) {
+        throw logoutError;
+      }
     };
 
     return {

@@ -30,23 +30,29 @@ vi.mock("@/store", async () => {
 });
 
 describe("useUserStore", () => {
-  let authApi: { login: ReturnType<typeof vi.fn>; logout: ReturnType<typeof vi.fn> };
+  let authApi: {
+    login: ReturnType<typeof vi.fn>;
+    logout: ReturnType<typeof vi.fn>;
+  };
   let wechatApi: { login: ReturnType<typeof vi.fn> };
   let token: {
     setToken: ReturnType<typeof vi.fn>;
     hasToken: ReturnType<typeof vi.fn>;
     removeToken: ReturnType<typeof vi.fn>;
   };
-  let userApi: { putUserData: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
+  let userApi: {
+    putUserData: ReturnType<typeof vi.fn>;
+    info: ReturnType<typeof vi.fn>;
+  };
   let useUserStore: typeof import("@/store/modules/user").useUserStore;
 
   beforeEach(async () => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
-    authApi = await import("@/api/v1/auth") as never;
-    wechatApi = await import("@/api/v1/wechat") as never;
+    authApi = (await import("@/api/v1/auth")) as never;
+    wechatApi = (await import("@/api/v1/wechat")) as never;
     token = (await import("@/store/modules/token")).default as never;
-    userApi = await import("@/api/v1/user") as never;
+    userApi = (await import("@/api/v1/user")) as never;
     ({ useUserStore } = await import("@/store/modules/user"));
   });
 
@@ -150,14 +156,18 @@ describe("useUserStore", () => {
   // login()
   // -----------------------------------------------------------------------
   it("login() calls Token.setToken on success", async () => {
-    authApi.login.mockResolvedValue({ data: { success: true, token: "tok-123" } });
+    authApi.login.mockResolvedValue({
+      data: { success: true, token: "tok-123" },
+    });
     const store = useUserStore();
     await store.login({ username: "u", password: "p" });
     expect(token.setToken).toHaveBeenCalledWith("tok-123");
   });
 
   it("login() returns true on success", async () => {
-    authApi.login.mockResolvedValue({ data: { success: true, token: "tok-123" } });
+    authApi.login.mockResolvedValue({
+      data: { success: true, token: "tok-123" },
+    });
     const store = useUserStore();
     const result = await store.login({ username: "u", password: "p" });
     expect(result).toBe(true);
@@ -166,20 +176,26 @@ describe("useUserStore", () => {
   it("login() throws when response.data.success is false", async () => {
     authApi.login.mockResolvedValue({ data: { success: false } });
     const store = useUserStore();
-    await expect(store.login({ username: "u", password: "p" })).rejects.toThrow();
+    await expect(
+      store.login({ username: "u", password: "p" })
+    ).rejects.toThrow();
   });
 
   it("login() throws when token is missing in response", async () => {
     authApi.login.mockResolvedValue({ data: { success: true, token: null } });
     const store = useUserStore();
-    await expect(store.login({ username: "u", password: "p" })).rejects.toThrow();
+    await expect(
+      store.login({ username: "u", password: "p" })
+    ).rejects.toThrow();
   });
 
   // -----------------------------------------------------------------------
   // loginByWechat()
   // -----------------------------------------------------------------------
   it("loginByWechat() calls Token.setToken on success", async () => {
-    wechatApi.login.mockResolvedValue({ data: { success: true, token: "wec-tok" } });
+    wechatApi.login.mockResolvedValue({
+      data: { success: true, token: "wec-tok" },
+    });
     const store = useUserStore();
     await store.loginByWechat({ code: "wx-code" } as never);
     expect(token.setToken).toHaveBeenCalledWith("wec-tok");
@@ -188,7 +204,9 @@ describe("useUserStore", () => {
   it("loginByWechat() throws when success is false", async () => {
     wechatApi.login.mockResolvedValue({ data: { success: false } });
     const store = useUserStore();
-    await expect(store.loginByWechat({ code: "bad" } as never)).rejects.toThrow();
+    await expect(
+      store.loginByWechat({ code: "bad" } as never)
+    ).rejects.toThrow();
   });
 
   // -----------------------------------------------------------------------
@@ -225,11 +243,11 @@ describe("useUserStore", () => {
     expect(store.userInfo!.id).toBe(0);
   });
 
-  it("logout() continues even when AuthAPI.logout throws", async () => {
+  it("logout() throws when AuthAPI.logout fails but still clears local token", async () => {
     token.hasToken.mockReturnValue(true);
     authApi.logout.mockRejectedValue(new Error("network error"));
     const store = useUserStore();
-    await expect(store.logout()).resolves.toBeUndefined();
+    await expect(store.logout()).rejects.toThrow("network error");
     expect(token.removeToken).toHaveBeenCalled();
   });
 
@@ -269,11 +287,10 @@ describe("useUserStore", () => {
     expect(result).toBeUndefined();
   });
 
-  it("getUserInfo() returns undefined on network error", async () => {
+  it("getUserInfo() throws on network error", async () => {
     userApi.info.mockRejectedValue(new Error("Network error"));
     const store = useUserStore();
-    const result = await store.getUserInfo();
-    expect(result).toBeUndefined();
+    await expect(store.getUserInfo()).rejects.toThrow("Network error");
   });
 
   // -----------------------------------------------------------------------
@@ -281,7 +298,9 @@ describe("useUserStore", () => {
   // -----------------------------------------------------------------------
   it("setUserInfo() updates userInfo on success", async () => {
     const mockUser = { id: 5, roles: ["admin"], userData: {}, userInfo: {} };
-    userApi.putUserData.mockResolvedValue({ data: { success: true, data: mockUser } });
+    userApi.putUserData.mockResolvedValue({
+      data: { success: true, data: mockUser },
+    });
     const store = useUserStore();
     const result = await store.setUserInfo({ nickname: "Alice" });
     expect(result).toBe(store.userInfo);
@@ -304,11 +323,10 @@ describe("useUserStore", () => {
     expect(result).toBeUndefined();
   });
 
-  it("setUserInfo() returns undefined on network error", async () => {
+  it("setUserInfo() throws on network error", async () => {
     userApi.putUserData.mockRejectedValue(new Error("API error"));
     const store = useUserStore();
-    const result = await store.setUserInfo({});
-    expect(result).toBeUndefined();
+    await expect(store.setUserInfo({})).rejects.toThrow("API error");
   });
 
   // -----------------------------------------------------------------------
