@@ -160,8 +160,10 @@ const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
 };
 
 export const UpdateRoutes = async (ability: AnyAbility) => {
-  constantRoutes = structuredClone(routes);
-  check(constantRoutes, ability);
+  // Avoid structuredClone which cannot serialize lazy-loaded route components.
+  // check() only mutates meta.hidden, so operating on the original routes is safe.
+  check(routes, ability);
+  constantRoutes = routes;
   initRoutes();
 };
 
