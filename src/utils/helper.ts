@@ -56,3 +56,15 @@ export const VueAppleLoginConfig = {
   state: Date.now().toString(),
   usePopup: true,
 };
+
+/**
+ * Force HTTP URLs from known COS domains to HTTPS to prevent Mixed Content warnings.
+ * Safe to call with any string (returns input unchanged if not applicable).
+ */
+export function toHttps(url: string | null | undefined): string {
+  if (!url) return url ?? "";
+  if (url.startsWith("http://")) {
+    return "https://" + url.slice(7);
+  }
+  return url;
+}
