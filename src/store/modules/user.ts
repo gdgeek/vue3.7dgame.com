@@ -100,6 +100,7 @@ export const useUserStore = defineStore(
     }
 
     // Token 刷新由 src/utils/request.ts 拦截器按需触发，无需在此维护定时器
+    /** 更新用户信息并同步到服务端。 */
     const setUserInfo = async (data: unknown) => {
       try {
         const response = await putUserData(data);
@@ -133,6 +134,7 @@ export const useUserStore = defineStore(
       }
     };
 
+    /** 从服务端拉取并更新当前用户信息。 */
     const getUserInfo = async () => {
       try {
         const response = await fetchUserInfo();
@@ -165,6 +167,7 @@ export const useUserStore = defineStore(
       password: "",
     });
 
+    /** 注销登录，清除 Token 和用户数据。 */
     const logout = async () => {
       // 调用后端注销 API（忽略失败，确保本地清理总是执行）
       let logoutError: Error | null = null;
