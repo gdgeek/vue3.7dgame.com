@@ -21,8 +21,8 @@ describe("api/v1/ai-rodin round15 batch2", () => {
     api = await import("@/api/v1/ai-rodin");
   });
 
-  it("schedule returns NaN for empty jobs", () => {
-    expect(Number.isNaN(api.schedule([]))).toBe(true);
+  it("schedule returns 0 for empty jobs", () => {
+    expect(api.schedule([])).toBe(0);
   });
 
   it("schedule counts done and generating states", () => {

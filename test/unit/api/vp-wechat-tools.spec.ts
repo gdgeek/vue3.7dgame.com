@@ -221,7 +221,7 @@ describe("AiRodin — schedule() pure function", () => {
   });
 
   it("returns 0 for empty job list", () => {
-    expect(aiRodinApi.schedule([])).toBeNaN(); // 0/0 = NaN
+    expect(aiRodinApi.schedule([])).toBe(0);
   });
 
   it("returns 0 for all unknown-status jobs", () => {
