@@ -21,6 +21,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { LazyImg } from "vue-waterfall-plugin-next";
+import { toHttps } from "@/utils/helper";
 const props = withDefaults(
   defineProps<{
     id?: number | string;
@@ -42,7 +43,7 @@ const loading = ref(true);
 
 const url = computed(() => {
   // 使用 Vite 的 new URL 方式解析静态资源路径
-  let imageUrl = props.image;
+  let imageUrl = toHttps(props.image);
   if (!imageUrl) {
     imageUrl = `https://api.dicebear.com/9.x/icons/svg?seed=${props.id}`;
   }
