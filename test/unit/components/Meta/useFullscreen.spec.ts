@@ -1,10 +1,11 @@
 /**
  * Unit tests for src/components/Meta/useFullscreen.ts
+ * Uses createApp + defineComponent for proper Vue lifecycle context.
  * Covers: initial state, toggleEditor, toggleScene, syncState,
  *         event listener registration/deregistration.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { effectScope } from "vue";
+import { createApp, defineComponent, h } from "vue";
 
 describe("useFullscreen", () => {
   beforeEach(() => {
@@ -35,48 +36,59 @@ describe("useFullscreen", () => {
     return { requestFullscreen: vi.fn() } as unknown as HTMLElement;
   }
 
-  async function createComposable() {
+  /** Mount a minimal component wrapping useFullscreen() to get proper lifecycle context. */
+  async function createMounted() {
     const { useFullscreen } = await import("@/components/Meta/useFullscreen");
-    let result: ReturnType<typeof useFullscreen>;
-    const scope = effectScope();
-    scope.run(() => {
-      result = useFullscreen();
+    let result!: ReturnType<typeof useFullscreen>;
+
+    const TestComponent = defineComponent({
+      setup() {
+        result = useFullscreen();
+        return result;
+      },
+      render() {
+        return h("div");
+      },
     });
-    return { result: result!, scope };
+
+    const el = document.createElement("div");
+    const app = createApp(TestComponent);
+    app.mount(el);
+    return { result, app, unmount: () => app.unmount() };
   }
 
   it("initial isFullscreen is false", async () => {
-    const { result, scope } = await createComposable();
+    const { result, unmount } = await createMounted();
     expect(result.isFullscreen.value).toBe(false);
-    scope.stop();
+    unmount();
   });
 
   it("initial isSceneFullscreen is false", async () => {
-    const { result, scope } = await createComposable();
+    const { result, unmount } = await createMounted();
     expect(result.isSceneFullscreen.value).toBe(false);
-    scope.stop();
+    unmount();
   });
 
   it("toggleEditor sets isFullscreen=true when not in fullscreen", async () => {
-    const { result, scope } = await createComposable();
+    const { result, unmount } = await createMounted();
     result.toggleEditor(makeEl());
     expect(result.isFullscreen.value).toBe(true);
-    scope.stop();
+    unmount();
   });
 
   it("toggleEditor calls requestFullscreen on provided element", async () => {
-    const { result, scope } = await createComposable();
+    const { result, unmount } = await createMounted();
     const el = makeEl();
     result.toggleEditor(el);
     expect(el.requestFullscreen).toHaveBeenCalled();
-    scope.stop();
+    unmount();
   });
 
   it("toggleEditor with null container still sets isFullscreen=true", async () => {
-    const { result, scope } = await createComposable();
+    const { result, unmount } = await createMounted();
     result.toggleEditor(null);
     expect(result.isFullscreen.value).toBe(true);
-    scope.stop();
+    unmount();
   });
 
   it("toggleEditor sets isFullscreen=false when already in fullscreen", async () => {
@@ -84,17 +96,17 @@ describe("useFullscreen", () => {
       value: document.body,
       configurable: true,
     });
-    const { result, scope } = await createComposable();
+    const { result, unmount } = await createMounted();
     result.toggleEditor(makeEl());
     expect(result.isFullscreen.value).toBe(false);
-    scope.stop();
+    unmount();
   });
 
   it("toggleScene sets isSceneFullscreen=true when not in fullscreen", async () => {
-    const { result, scope } = await createComposable();
+    const { result, unmount } = await createMounted();
     result.toggleScene(makeEl());
     expect(result.isSceneFullscreen.value).toBe(true);
-    scope.stop();
+    unmount();
   });
 
   it("toggleScene sets isSceneFullscreen=false when already in fullscreen", async () => {
@@ -102,28 +114,77 @@ describe("useFullscreen", () => {
       value: document.body,
       configurable: true,
     });
-    const { result, scope } = await createComposable();
+    const { result, unmount } = await createMounted();
     result.toggleScene(makeEl());
     expect(result.isSceneFullscreen.value).toBe(false);
-    scope.stop();
+    unmount();
   });
 
   it("returns toggleEditor and toggleScene functions", async () => {
-    const { result, scope } = await createComposable();
+    const { result, unmount } = await createMounted();
     expect(typeof result.toggleEditor).toBe("function");
     expect(typeof result.toggleScene).toBe("function");
-    scope.stop();
+    unmount();
   });
 
   it("toggleEditor without container does not throw", async () => {
-    const { result, scope } = await createComposable();
+    const { result, unmount } = await createMounted();
     expect(() => result.toggleEditor(undefined)).not.toThrow();
-    scope.stop();
+    unmount();
   });
 
   it("toggleScene without container does not throw", async () => {
-    const { result, scope } = await createComposable();
+    const { result, unmount } = await createMounted();
     expect(() => result.toggleScene(undefined)).not.toThrow();
-    scope.stop();
+    unmount();
+  });
+
+  it("syncState resets both flags to false when exiting fullscreen", async () => {
+    const { result, unmount } = await createMounted();
+    // Enter fullscreen via toggle
+    result.toggleEditor(makeEl());
+    expect(result.isFullscreen.value).toBe(true);
+
+    // Simulate fullscreenchange with no active element (exiting)
+    Object.defineProperty(document, "fullscreenElement", {
+      value: null,
+      configurable: true,
+      writable: true,
+    });
+    document.dispatchEvent(new Event("fullscreenchange"));
+
+    expect(result.isFullscreen.value).toBe(false);
+    expect(result.isSceneFullscreen.value).toBe(false);
+    unmount();
+  });
+
+  it("syncState does not reset flags when entering fullscreen", async () => {
+    const { result, unmount } = await createMounted();
+    result.toggleEditor(makeEl());
+    expect(result.isFullscreen.value).toBe(true);
+
+    // fullscreenchange while element is active → syncState is a no-op
+    Object.defineProperty(document, "fullscreenElement", {
+      value: document.body,
+      configurable: true,
+    });
+    document.dispatchEvent(new Event("fullscreenchange"));
+
+    expect(result.isFullscreen.value).toBe(true);
+    unmount();
+  });
+
+  it("registers fullscreenchange listener on mount", async () => {
+    const addSpy = vi.spyOn(document, "addEventListener");
+    const { unmount } = await createMounted();
+    expect(addSpy).toHaveBeenCalledWith("fullscreenchange", expect.any(Function));
+    unmount();
+  });
+
+  it("removes fullscreenchange listener on unmount", async () => {
+    const removeSpy = vi.spyOn(document, "removeEventListener");
+    const { unmount } = await createMounted();
+    unmount();
+    expect(removeSpy).toHaveBeenCalledWith("fullscreenchange", expect.any(Function));
   });
 });

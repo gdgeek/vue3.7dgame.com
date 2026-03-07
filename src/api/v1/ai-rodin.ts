@@ -6,6 +6,7 @@ interface Job {
 }
 
 export const schedule = (jobs: Job[]) => {
+  if (jobs.length === 0) return 0;
   const length: number = jobs.length;
   const max = length * 2;
   let count = 0;
