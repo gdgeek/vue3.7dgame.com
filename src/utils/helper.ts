@@ -58,13 +58,12 @@ export const VueAppleLoginConfig = {
 };
 
 /**
- * Force HTTP URLs from known COS domains to HTTPS to prevent Mixed Content warnings.
- * Safe to call with any string (returns input unchanged if not applicable).
+ * Normalize a URL's protocol to match the current page's protocol.
+ * e.g. on HTTPS pages, http:// URLs become https://; on HTTP pages, https:// becomes http://.
+ * Safe to call with any value (returns empty string for null/undefined).
  */
 export function toHttps(url: string | null | undefined): string {
   if (!url) return url ?? "";
-  if (url.startsWith("http://")) {
-    return "https://" + url.slice(7);
-  }
-  return url;
+  const currentProtocol = window.location.protocol; // "https:" or "http:"
+  return url.replace(/^https?:/, currentProtocol);
 }
