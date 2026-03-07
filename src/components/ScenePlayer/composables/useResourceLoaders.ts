@@ -483,34 +483,8 @@ export function useResourceLoaders(ctx: LoaderContext) {
               const uuid = entity.parameters.uuid.toString();
               voxMesh.uuid = uuid;
 
-              // Recursively load child entities
-              if (entity.children?.entities) {
-                const childMeshes = await Promise.all(
-                  entity.children.entities.map((childEntity: EntityNode) => {
-                    const resourceId = childEntity.parameters?.resource;
-                    if (resourceId) {
-                      const childResource = findResource(resourceId);
-                      if (childResource) {
-                        return loadModel(childResource, childEntity, currentActive && voxMesh.visible);
-                      }
-                    } else if (childEntity.type === "Text") {
-                      const textResource: ResourceLike = {
-                        type: "text",
-                        content: childEntity.parameters.text ?? "Default Text",
-                        id: childEntity.parameters.uuid ?? crypto.randomUUID(),
-                      };
-                      return loadModel(textResource, childEntity, currentActive && voxMesh.visible);
-                    }
-                    return null;
-                  })
-                );
-
-                childMeshes.forEach((childMesh) => {
-                  if (childMesh instanceof THREE.Object3D) {
-                    voxMesh.add(childMesh);
-                  }
-                });
-              }
+              // Child entities are handled exclusively by processEntities to avoid
+              // double-loading. loadModel only processes the current node.
 
               voxMesh.castShadow = true;
               voxMesh.receiveShadow = true;
@@ -600,34 +574,8 @@ export function useResourceLoaders(ctx: LoaderContext) {
               });
             }
 
-            // Recursively load child entities
-            if (entity.children?.entities) {
-              const childMeshes = await Promise.all(
-                entity.children.entities.map((childEntity: EntityNode) => {
-                  const resourceId = childEntity.parameters?.resource;
-                  if (resourceId) {
-                    const childResource = findResource(resourceId);
-                    if (childResource) {
-                      return loadModel(childResource, childEntity, currentActive && model.visible);
-                    }
-                  } else if (childEntity.type === "Text") {
-                    const textResource: ResourceLike = {
-                      type: "text",
-                      content: childEntity.parameters.text ?? "Default Text",
-                      id: childEntity.parameters.uuid ?? crypto.randomUUID(),
-                    };
-                    return loadModel(textResource, childEntity, currentActive && model.visible);
-                  }
-                  return null;
-                })
-              );
-
-              childMeshes.forEach((childMesh) => {
-                if (childMesh instanceof THREE.Object3D) {
-                  model.add(childMesh);
-                }
-              });
-            }
+            // Child entities are handled exclusively by processEntities to avoid
+            // double-loading. loadModel only processes the current node.
 
             // Apply entity components via applyComponents (replaces ~250 lines of inline code)
             if (entity.children?.components && entity.children.components.length > 0) {

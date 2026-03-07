@@ -49,6 +49,8 @@ export function useThreeScene() {
   let _controls: OrbitControls | null = null;
   let clock = new THREE.Clock();
   let resizeObserver: ResizeObserver | null = null;
+  let rafId: number | null = null;
+  let isDestroyed = false;
 
   // ─── handleResize ──────────────────────────────────────────────────────────
 
@@ -78,6 +80,7 @@ export function useThreeScene() {
    * @param options   - Scene configuration (theme, mode, controls ref, frame callback)
    */
   const setupScene = (container: HTMLDivElement, options: ThreeSceneOptions): void => {
+    isDestroyed = false;
     const { isDark, mode, controls, onFrame } = options;
 
     const width = container.clientWidth;
@@ -134,15 +137,16 @@ export function useThreeScene() {
 
     // ── Animation loop ────────────────────────────────────────────────────────
     const animate = () => {
+      if (isDestroyed) return;
       stats?.begin();
-      requestAnimationFrame(animate);
       const delta = clock.getDelta();
       onFrame(delta);
       _controls!.update();
       renderer!.render(threeScene, camera!);
       stats?.end();
+      rafId = requestAnimationFrame(animate);
     };
-    animate();
+    rafId = requestAnimationFrame(animate);
 
     logger.log("[ScenePlayer] Three.js scene initialised:", { mode, maxDistance, isDark });
 
@@ -169,10 +173,17 @@ export function useThreeScene() {
   // ─── Cleanup ───────────────────────────────────────────────────────────────
 
   /**
-   * Disconnects the ResizeObserver and disposes the WebGL renderer.
-   * Call this inside onUnmounted.
+   * Stops the animation loop, disposes OrbitControls and the WebGL renderer,
+   * and disconnects the ResizeObserver. Call this inside onUnmounted.
    */
   const cleanupScene = (): void => {
+    isDestroyed = true;
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    _controls?.dispose();
+    _controls = null;
     resizeObserver?.disconnect();
     if (renderer) {
       renderer.dispose();

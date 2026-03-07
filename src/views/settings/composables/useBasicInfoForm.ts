@@ -5,6 +5,7 @@ import type { FormInstance, FormRules } from "element-plus";
 import { useI18n } from "vue-i18n";
 import { useUserStore } from "@/store/modules/user";
 import type { _InfoType } from "@/api/user/model";
+import { useSubmitThrottle } from "./useSubmitThrottle";
 
 interface UseBasicInfoFormDeps {
   isLoading: Ref<boolean>;
@@ -15,6 +16,9 @@ export const useBasicInfoForm = (deps: UseBasicInfoFormDeps) => {
   const { t } = useI18n();
   const userStore = useUserStore();
   const ruleFormRef = ref<FormInstance>();
+  const { startSubmitThrottle } = useSubmitThrottle({
+    isDisable: deps.isDisable,
+  });
 
   const infoForm = ref<_InfoType>({
     sex: "man",
@@ -84,10 +88,7 @@ export const useBasicInfoForm = (deps: UseBasicInfoFormDeps) => {
   ]);
 
   const saveInfo = () => {
-    deps.isDisable.value = true;
-    setTimeout(() => {
-      deps.isDisable.value = false;
-    }, 2000);
+    startSubmitThrottle();
 
     ruleFormRef.value?.validate(async (valid: boolean) => {
       if (valid) {

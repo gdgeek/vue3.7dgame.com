@@ -522,11 +522,9 @@ const {
   recoverVerifying,
   recoverResetting,
   recoverCodeVerified,
-  recoverCooldownSeconds,
   canSendRecoverCode,
   canRecoverResetPassword,
   recoverSendButtonText,
-  stopRecoverCooldown,
   openRecoverDialog,
   resetRecoverForm,
   handleRecoverSendEmail,
@@ -572,16 +570,26 @@ onMounted(() => {
   refreshEmailStatusSummary();
 });
 
-// Sync form fields whenever the user store updates
+// Sync form fields whenever relevant user fields update
 watch(
-  () => userStore.userInfo,
-  (newUserInfo) => {
-    if (newUserInfo == null || newUserInfo.id === 0) {
+  () => userStore.userInfo?.userData?.nickname,
+  (nickname) => {
+    if (userStore.userInfo == null || userStore.userInfo.id === 0) {
       return;
     }
 
-    const parsedInfo = newUserInfo.userInfo?.info;
-    nicknameForm.value.nickname = newUserInfo.userData?.nickname || "";
+    nicknameForm.value.nickname = nickname || "";
+    isLoading.value = false;
+  },
+  { immediate: true }
+);
+
+watch(
+  () => userStore.userInfo?.userInfo?.info,
+  (parsedInfo) => {
+    if (userStore.userInfo == null || userStore.userInfo.id === 0) {
+      return;
+    }
 
     if (parsedInfo) {
       infoForm.value.sex = parsedInfo.sex || "";
@@ -592,7 +600,19 @@ watch(
 
     isLoading.value = false;
   },
-  { deep: true, immediate: true }
+  { immediate: true }
+);
+
+watch(
+  () => userStore.userInfo?.userInfo?.avatar,
+  () => {
+    if (userStore.userInfo == null || userStore.userInfo.id === 0) {
+      return;
+    }
+
+    isLoading.value = false;
+  },
+  { immediate: true }
 );
 </script>
 

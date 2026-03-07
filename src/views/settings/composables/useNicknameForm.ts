@@ -4,6 +4,7 @@ import { ElMessage } from "element-plus";
 import type { FormInstance, FormItemRule } from "element-plus";
 import { useI18n } from "vue-i18n";
 import { useUserStore } from "@/store/modules/user";
+import { useSubmitThrottle } from "./useSubmitThrottle";
 
 interface UseNicknameFormDeps {
   isLoading: Ref<boolean>;
@@ -18,6 +19,9 @@ export const useNicknameForm = (deps: UseNicknameFormDeps) => {
   const userStore = useUserStore();
   const nickNameFormRef = ref<FormInstance>();
   const nicknameForm = ref<NickNameType>({ nickname: "" });
+  const { startSubmitThrottle } = useSubmitThrottle({
+    isDisable: deps.isDisable,
+  });
 
   const nicknameRules: Partial<Record<string, Arrayable<FormItemRule>>> = {
     nickname: [
@@ -51,10 +55,7 @@ export const useNicknameForm = (deps: UseNicknameFormDeps) => {
   };
 
   const submitNickname = async () => {
-    deps.isDisable.value = true;
-    setTimeout(() => {
-      deps.isDisable.value = false;
-    }, 2000);
+    startSubmitThrottle();
 
     nickNameFormRef.value?.validate(async (valid: boolean) => {
       if (valid) {
