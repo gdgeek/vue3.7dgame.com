@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 vi.mock("@/environment", () => ({
-  default: { email_api: "https://email.example.com" },
+  default: { email_api: "https://email.example.com", password_api: "https://password.example.com" },
 }));
 
 describe("api/v1/password", () => {
@@ -21,7 +21,7 @@ describe("api/v1/password", () => {
     request.mockResolvedValue({ data: { success: true } });
     await api.requestPasswordReset("a@b.com");
     expect(request).toHaveBeenCalledWith({
-      baseURL: "https://email.example.com",
+      baseURL: "https://password.example.com",
       url: "/v1/password/request-reset",
       method: "post",
       data: { email: "a@b.com" },
@@ -40,7 +40,7 @@ describe("api/v1/password", () => {
     request.mockResolvedValue({ data: { valid: true } });
     await api.verifyResetCode("a@b.com", "123456");
     expect(request).toHaveBeenCalledWith({
-      baseURL: "https://email.example.com",
+      baseURL: "https://password.example.com",
       url: "/v1/password/verify-code",
       method: "post",
       data: { email: "a@b.com", code: "123456" },
@@ -59,7 +59,7 @@ describe("api/v1/password", () => {
     request.mockResolvedValue({ data: { success: true } });
     await api.resetPasswordByCode("a@b.com", "123456", "P@ss");
     expect(request).toHaveBeenCalledWith({
-      baseURL: "https://email.example.com",
+      baseURL: "https://password.example.com",
       url: "/v1/password/reset",
       method: "post",
       data: { email: "a@b.com", code: "123456", password: "P@ss" },
@@ -77,7 +77,7 @@ describe("api/v1/password", () => {
     request.mockResolvedValue({ data: { success: true } });
     await api.changePassword("old", "new", "new");
     expect(request).toHaveBeenCalledWith({
-      baseURL: "https://email.example.com",
+      baseURL: "https://password.example.com",
       url: "/v1/password/change",
       method: "post",
       data: {
