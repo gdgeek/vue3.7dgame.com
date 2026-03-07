@@ -20,6 +20,7 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
+    "format:prettier": "prettier --check src",
     "lint:eslint": "eslint  --fix --ext .ts,.js,.vue ./src ",
     "lint:prettier": "prettier --write \"**/*.{js,cjs,ts,json,tsx,css,less,scss,vue,html,md}\"",
     "lint:stylelint": "stylelint  \"**/*.{css,scss,vue}\" --fix",
