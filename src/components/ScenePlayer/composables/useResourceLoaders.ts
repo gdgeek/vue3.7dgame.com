@@ -258,6 +258,10 @@ export function useResourceLoaders(ctx: LoaderContext) {
 
             ctx.renderer!.domElement.addEventListener("click", handleVideoClick);
 
+            // Mutable reference so cleanup can remove the listener even if the
+            // first interaction never fires before the component unmounts.
+            let handleFirstInteraction: (() => void) | null = null;
+
             const uuid = entity.parameters.uuid.toString();
             const sourceData: SourceRecord = {
               type: "video",
@@ -267,6 +271,11 @@ export function useResourceLoaders(ctx: LoaderContext) {
                 texture,
                 cleanup: () => {
                   ctx.renderer!.domElement.removeEventListener("click", handleVideoClick);
+                  if (handleFirstInteraction) {
+                    document.removeEventListener("click", handleFirstInteraction);
+                    document.removeEventListener("touchstart", handleFirstInteraction);
+                    handleFirstInteraction = null;
+                  }
                 },
                 setVisibility: (isVisible: boolean) => { mesh.visible = isVisible; },
               } as SourceVideoData,
@@ -275,12 +284,13 @@ export function useResourceLoaders(ctx: LoaderContext) {
             threeScene.add(mesh);
 
             if (entity.parameters.play) {
-              const handleFirstInteraction = () => {
+              handleFirstInteraction = () => {
                 video.play().catch((error) => {
                   logger.warn("[ScenePlayer] Video auto-play failed:", error);
                 });
-                document.removeEventListener("click", handleFirstInteraction);
-                document.removeEventListener("touchstart", handleFirstInteraction);
+                document.removeEventListener("click", handleFirstInteraction!);
+                document.removeEventListener("touchstart", handleFirstInteraction!);
+                handleFirstInteraction = null;
               };
               document.addEventListener("click", handleFirstInteraction);
               document.addEventListener("touchstart", handleFirstInteraction);

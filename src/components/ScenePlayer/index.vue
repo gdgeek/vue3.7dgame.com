@@ -294,14 +294,21 @@ onMounted(async () => {
         );
 
         if (meta?.data) {
-          const metaData =
-            typeof meta.data === "string"
-              ? (JSON.parse(meta.data) as { children?: { entities?: import("./types").EntityNode[] } })
-              : (meta.data as { children?: { entities?: import("./types").EntityNode[] } });
+          let metaData: { children?: { entities?: import("./types").EntityNode[] } } | null = null;
+          if (typeof meta.data === "string") {
+            try {
+              metaData = JSON.parse(meta.data) as { children?: { entities?: import("./types").EntityNode[] } };
+            } catch (e) {
+              logger.warn("[ScenePlayer] Failed to parse meta.data JSON, skipping module:", e);
+              continue;
+            }
+          } else {
+            metaData = meta.data as { children?: { entities?: import("./types").EntityNode[] } };
+          }
 
           logger.log("[ScenePlayer] Parsed metaData:", metaData);
 
-          if (metaData.children?.entities) {
+          if (metaData?.children?.entities) {
             await processEntities(metaData.children.entities, moduleParams.transform);
           }
         }
@@ -338,15 +345,16 @@ const { getAudioUrl, playQueuedAudio, cleanup: cleanupAudio } = useSceneAudio(so
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
 
 onUnmounted(() => {
-  // Clean up video and audio sources
+  // Clean up all sources: stop video elements and call any registered cleanup functions
   sources.forEach((source) => {
     if (source.type === "video") {
       const videoData = source.data as import("./types").SourceVideoData;
       videoData.video.pause();
       videoData.video.src = "";
       videoData.video.load();
-      videoData.cleanup?.();
     }
+    // Call cleanup for any source type that provides one (video, model, picture, etc.)
+    (source.data as { cleanup?: () => void }).cleanup?.();
   });
 
   // Drain audio queue

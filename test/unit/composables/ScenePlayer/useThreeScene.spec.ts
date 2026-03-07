@@ -24,6 +24,8 @@ vi.mock("stats.js", () => {
 });
 
 // ── Mock OrbitControls ───────────────────────────────────────────────────────
+const mockControlsDispose = vi.fn();
+
 vi.mock("three/examples/jsm/controls/OrbitControls.js", () => ({
   OrbitControls: vi.fn().mockImplementation(() => ({
     enableDamping: false,
@@ -32,6 +34,7 @@ vi.mock("three/examples/jsm/controls/OrbitControls.js", () => ({
     minDistance: 0,
     maxDistance: 0,
     update: vi.fn(),
+    dispose: mockControlsDispose,
   })),
 }));
 
@@ -93,8 +96,9 @@ const mockResizeObserver = {
 };
 global.ResizeObserver = vi.fn().mockImplementation(() => mockResizeObserver);
 
-// ── Mock requestAnimationFrame to avoid infinite loop ─────────────────────────
-global.requestAnimationFrame = vi.fn().mockReturnValue(1);
+// ── Mock requestAnimationFrame / cancelAnimationFrame ─────────────────────────
+global.requestAnimationFrame = vi.fn().mockReturnValue(42);
+global.cancelAnimationFrame = vi.fn();
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 function makeContainer() {
@@ -117,6 +121,7 @@ describe("useThreeScene", () => {
     mockRenderer.setClearColor.mockClear();
     mockRenderer.dispose.mockClear();
     mockScene.add.mockClear();
+    mockControlsDispose.mockClear();
     const mod = await import("@/components/ScenePlayer/composables/useThreeScene");
     useThreeScene = mod.useThreeScene;
   });
@@ -278,9 +283,34 @@ describe("useThreeScene", () => {
     expect(mockRenderer.domElement.remove).toHaveBeenCalled();
   });
 
+  it("cleanupScene cancels the animation frame", () => {
+    const { setupScene, cleanupScene } = useThreeScene();
+    const container = makeContainer();
+    const controls = ref(null);
+    setupScene(container, { isDark: false, mode: "meta", controls, onFrame: vi.fn() });
+    cleanupScene();
+    expect(cancelAnimationFrame).toHaveBeenCalledWith(42);
+  });
+
+  it("cleanupScene disposes OrbitControls", () => {
+    const { setupScene, cleanupScene } = useThreeScene();
+    const container = makeContainer();
+    const controls = ref(null);
+    setupScene(container, { isDark: false, mode: "meta", controls, onFrame: vi.fn() });
+    cleanupScene();
+    expect(mockControlsDispose).toHaveBeenCalled();
+  });
+
   it("cleanupScene does not throw when renderer is null", () => {
     const { cleanupScene } = useThreeScene();
     expect(() => cleanupScene()).not.toThrow();
+  });
+
+  it("cleanupScene does not throw when called before setupScene (no controls)", () => {
+    const { cleanupScene } = useThreeScene();
+    // No setupScene called — controls and rafId are null
+    expect(() => cleanupScene()).not.toThrow();
+    expect(cancelAnimationFrame).not.toHaveBeenCalled();
   });
 
   it("resetClock results in getClock() returning a valid Clock instance", async () => {
