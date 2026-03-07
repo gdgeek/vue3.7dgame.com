@@ -44,7 +44,9 @@
           <div class="col-checkbox"></div>
           <div class="col-name">{{ t("meta.list.columns.name") }}</div>
           <div class="col-author">{{ t("meta.list.columns.author") }}</div>
-          <div class="col-resources">{{ t("meta.list.columns.resources") }}</div>
+          <div class="col-resources">
+            {{ t("meta.list.columns.resources") }}
+          </div>
           <div class="col-actions"></div>
         </template>
 
@@ -183,9 +185,13 @@
                   >
                     <span class="events-index">{{ index + 1 }}</span>
                     <div class="events-main">
-                      <span class="events-title-text">{{ eventItem.title }}</span>
+                      <span class="events-title-text">{{
+                        eventItem.title
+                      }}</span>
                       <span
-                        v-if="eventItem.name && eventItem.name !== eventItem.title"
+                        v-if="
+                          eventItem.name && eventItem.name !== eventItem.title
+                        "
                         class="events-name-sub"
                       >
                         {{ eventItem.name }}
@@ -214,9 +220,13 @@
                   >
                     <span class="events-index">{{ index + 1 }}</span>
                     <div class="events-main">
-                      <span class="events-title-text">{{ eventItem.title }}</span>
+                      <span class="events-title-text">{{
+                        eventItem.title
+                      }}</span>
                       <span
-                        v-if="eventItem.name && eventItem.name !== eventItem.title"
+                        v-if="
+                          eventItem.name && eventItem.name !== eventItem.title
+                        "
                         class="events-name-sub"
                       >
                         {{ eventItem.name }}
@@ -344,7 +354,11 @@ const {
   onResourceSelected,
   handleCoverUpload,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} = useMetaCoverUpload({ currentMeta: currentMeta as any, detailLoading, refresh });
+} = useMetaCoverUpload({
+  currentMeta: currentMeta as any,
+  detailLoading,
+  refresh,
+});
 
 const { addMeta, copyWindow, namedWindow, deletedWindow } = useMetaActions({
   refresh,

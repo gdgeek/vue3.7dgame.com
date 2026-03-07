@@ -25,9 +25,10 @@ describe("MetaResource API", () => {
 
   describe("postMetaResource()", () => {
     it("calls POST /v1/meta-resources", async () => {
-      await metaResourceApi.postMetaResource({ meta_id: 1, resource_id: 2 } as Parameters<
-        typeof metaResourceApi.postMetaResource
-      >[0]);
+      await metaResourceApi.postMetaResource({
+        meta_id: 1,
+        resource_id: 2,
+      } as Parameters<typeof metaResourceApi.postMetaResource>[0]);
       expect(request).toHaveBeenCalledWith(
         expect.objectContaining({ url: "/v1/meta-resources", method: "post" })
       );
@@ -55,7 +56,12 @@ describe("MetaResource API", () => {
     });
 
     it("includes ResourceSearch[name] when search provided", async () => {
-      await metaResourceApi.getMetaResources(1, "model", "-created_at", "robot");
+      await metaResourceApi.getMetaResources(
+        1,
+        "model",
+        "-created_at",
+        "robot"
+      );
       const url: string = request.mock.calls[0][0].url;
       expect(url).toContain("ResourceSearch");
       expect(url).toContain("robot");
@@ -81,9 +87,9 @@ describe("MetaResource API", () => {
 
   describe("putMetaResource()", () => {
     it("calls PUT /v1/meta-resources/{id}", async () => {
-      await metaResourceApi.putMetaResource(7, { name: "updated" } as Parameters<
-        typeof metaResourceApi.putMetaResource
-      >[1]);
+      await metaResourceApi.putMetaResource(7, {
+        name: "updated",
+      } as Parameters<typeof metaResourceApi.putMetaResource>[1]);
       expect(request).toHaveBeenCalledWith(
         expect.objectContaining({
           url: "/v1/meta-resources/7",
@@ -93,9 +99,10 @@ describe("MetaResource API", () => {
     });
 
     it("accepts string id", async () => {
-      await metaResourceApi.putMetaResource("abc", {} as Parameters<
-        typeof metaResourceApi.putMetaResource
-      >[1]);
+      await metaResourceApi.putMetaResource(
+        "abc",
+        {} as Parameters<typeof metaResourceApi.putMetaResource>[1]
+      );
       const url: string = request.mock.calls[0][0].url;
       expect(url).toContain("/v1/meta-resources/abc");
     });
@@ -213,9 +220,11 @@ describe("Phototype API", () => {
     });
 
     it("includes expand in URL", async () => {
-      await phApi.putPhototype(6, { title: "t" } as Parameters<
-        typeof phApi.putPhototype
-      >[1], "resource,image");
+      await phApi.putPhototype(
+        6,
+        { title: "t" } as Parameters<typeof phApi.putPhototype>[1],
+        "resource,image"
+      );
       const url: string = request.mock.calls[0][0].url;
       expect(url).toContain("expand=");
     });
@@ -250,7 +259,9 @@ describe("Phototype API", () => {
     it("returns the request result", async () => {
       const mockResp = { data: { id: 7, title: "New" } };
       request.mockResolvedValue(mockResp);
-      const result = await phApi.postPhototype({ title: "New" } as Parameters<typeof phApi.postPhototype>[0]);
+      const result = await phApi.postPhototype({ title: "New" } as Parameters<
+        typeof phApi.postPhototype
+      >[0]);
       expect(result).toEqual(mockResp);
     });
   });

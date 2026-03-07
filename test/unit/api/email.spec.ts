@@ -162,7 +162,10 @@ describe("Email API", () => {
 
     it("returns response.data", async () => {
       const emailApi = await import("@/api/v1/email");
-      const payload = { success: true, data: { email: "x@y.com", email_verified: true } };
+      const payload = {
+        success: true,
+        data: { email: "x@y.com", email_verified: true },
+      };
       request.mockResolvedValue({ data: payload });
       const result = await emailApi.getEmailStatus();
       expect(result).toEqual(payload);
@@ -242,7 +245,10 @@ describe("Email API", () => {
 
     it("returns the response data from testEmailService", async () => {
       const emailApi = await import("@/api/v1/email");
-      const payload = { success: true, data: { from: "a@b.com", to: "c@d.com", time: "now" } };
+      const payload = {
+        success: true,
+        data: { from: "a@b.com", to: "c@d.com", time: "now" },
+      };
       request.mockResolvedValue({ data: payload });
       const result = await emailApi.testEmailService();
       expect(result).toEqual(payload);

@@ -142,7 +142,9 @@ describe("Prefab API", () => {
     it("returns the request result", async () => {
       const mockResp = { data: { id: 10, title: "New Prefab" } };
       request.mockResolvedValue(mockResp);
-      const result = await prefabApi.postPrefab({ title: "New Prefab" } as Parameters<typeof prefabApi.postPrefab>[0]);
+      const result = await prefabApi.postPrefab({
+        title: "New Prefab",
+      } as Parameters<typeof prefabApi.postPrefab>[0]);
       expect(result).toEqual(mockResp);
     });
   });
@@ -167,7 +169,10 @@ describe("Tags API", () => {
   it("calls GET /v1/tags", async () => {
     await tagsApi.getTags();
     expect(request).toHaveBeenCalledWith(
-      expect.objectContaining({ url: expect.stringContaining("/v1/tags"), method: "get" })
+      expect.objectContaining({
+        url: expect.stringContaining("/v1/tags"),
+        method: "get",
+      })
     );
   });
 
@@ -237,7 +242,9 @@ describe("Site API", () => {
     const mockResp = { data: { user: { id: 1 } } };
     request.mockResolvedValue(mockResp);
     const payload = { identityToken: "tok", authorizationCode: "code" };
-    const result = await PostSiteAppleId(payload as Parameters<typeof PostSiteAppleId>[0]);
+    const result = await PostSiteAppleId(
+      payload as Parameters<typeof PostSiteAppleId>[0]
+    );
     expect(result).toEqual(mockResp);
   });
 

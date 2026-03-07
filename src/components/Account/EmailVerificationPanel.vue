@@ -26,17 +26,29 @@
       </el-descriptions-item>
       <el-descriptions-item :label="$t('homepage.edit.verificationStatus')">
         <el-tag :type="isCurrentEmailVerified ? 'success' : 'warning'">
-          {{ isCurrentEmailVerified ? $t("homepage.edit.verified") : $t("homepage.edit.unverified") }}
+          {{
+            isCurrentEmailVerified
+              ? $t("homepage.edit.verified")
+              : $t("homepage.edit.unverified")
+          }}
         </el-tag>
       </el-descriptions-item>
     </el-descriptions>
 
     <div class="action-row">
       <el-button type="primary" @click="handleStartChange">
-        {{ isCurrentEmailVerified ? $t("homepage.edit.changeEmailOrBind") : $t("homepage.edit.bindNewEmail") }}
+        {{
+          isCurrentEmailVerified
+            ? $t("homepage.edit.changeEmailOrBind")
+            : $t("homepage.edit.bindNewEmail")
+        }}
       </el-button>
       <el-button type="danger" plain @click="handleStartUnbind">
-        {{ isCurrentEmailVerified ? $t("homepage.edit.unbindEmailBtn") : $t("homepage.edit.directUnbind") }}
+        {{
+          isCurrentEmailVerified
+            ? $t("homepage.edit.unbindEmailBtn")
+            : $t("homepage.edit.directUnbind")
+        }}
       </el-button>
     </div>
   </template>
@@ -367,14 +379,18 @@ const unbindRules = ref<FormRules<typeof unbindForm>>({
 
 const newEmailCodeButtonText = computed(() => {
   if (sendCooldown.value > 0) {
-    return t("homepage.edit.retryAfterSeconds", { seconds: sendCooldown.value });
+    return t("homepage.edit.retryAfterSeconds", {
+      seconds: sendCooldown.value,
+    });
   }
   return t("homepage.edit.sendCode");
 });
 
 const oldConfirmButtonText = computed(() => {
   if (oldConfirmCooldown.value > 0) {
-    return t("homepage.edit.retryAfterSeconds", { seconds: oldConfirmCooldown.value });
+    return t("homepage.edit.retryAfterSeconds", {
+      seconds: oldConfirmCooldown.value,
+    });
   }
   return t("homepage.edit.sendOldEmailCode");
 });

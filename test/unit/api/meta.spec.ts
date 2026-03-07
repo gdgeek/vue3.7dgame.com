@@ -187,7 +187,9 @@ describe("Meta API", () => {
     it("returns the request result", async () => {
       const mockResp = { data: { id: 55, title: "Meta" } };
       request.mockResolvedValue(mockResp);
-      const result = await metaApi.postMeta({ title: "Meta" } as Parameters<typeof metaApi.postMeta>[0]);
+      const result = await metaApi.postMeta({ title: "Meta" } as Parameters<
+        typeof metaApi.postMeta
+      >[0]);
       expect(result).toEqual(mockResp);
     });
   });
@@ -195,7 +197,10 @@ describe("Meta API", () => {
   describe("putMeta() — data payload", () => {
     it("sends the data payload in PUT request", async () => {
       const payload = { title: "Updated Meta" };
-      await metaApi.putMeta(5, payload as Parameters<typeof metaApi.putMeta>[1]);
+      await metaApi.putMeta(
+        5,
+        payload as Parameters<typeof metaApi.putMeta>[1]
+      );
       expect(request.mock.calls[0][0].data).toEqual(payload);
     });
   });

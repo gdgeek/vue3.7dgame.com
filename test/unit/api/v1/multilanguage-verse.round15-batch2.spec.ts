@@ -8,7 +8,9 @@ describe("api/v1/multilanguage-verse", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: { ok: true } });
     api = await import("@/api/v1/multilanguage-verse");
   });
@@ -26,12 +28,22 @@ describe("api/v1/multilanguage-verse", () => {
   it("postMultilanguageVerse returns request result", async () => {
     const resp = { data: { id: 1 } };
     request.mockResolvedValue(resp);
-    await expect(api.postMultilanguageVerse({ description: "d", language: "en", name: "n", verse_id: 1 })).resolves.toEqual(resp);
+    await expect(
+      api.postMultilanguageVerse({
+        description: "d",
+        language: "en",
+        name: "n",
+        verse_id: 1,
+      })
+    ).resolves.toEqual(resp);
   });
 
   it("getMultilanguageVerse requests by id", async () => {
     await api.getMultilanguageVerse(3);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/multilanguage-verses/3", method: "get" });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/multilanguage-verses/3",
+      method: "get",
+    });
   });
 
   it("getMultilanguageVerse propagates rejection", async () => {
@@ -52,7 +64,9 @@ describe("api/v1/multilanguage-verse", () => {
   it("putMultilanguageVerse returns request result", async () => {
     const resp = { data: { id: 4, name: "n2" } };
     request.mockResolvedValue(resp);
-    await expect(api.putMultilanguageVerse(4, { name: "n2", description: "d2" })).resolves.toEqual(resp);
+    await expect(
+      api.putMultilanguageVerse(4, { name: "n2", description: "d2" })
+    ).resolves.toEqual(resp);
   });
 
   it("deleteMultilanguageVerse sends delete", async () => {

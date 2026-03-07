@@ -113,7 +113,11 @@ describe("beforeEach 守卫 — 有 token 时", () => {
 
   it("访问 /site/login 时重定向到 /home/index", async () => {
     const next = vi.fn();
-    await capturedBeforeEach!(makeTo({ path: "/site/login" }), makeFrom(), next);
+    await capturedBeforeEach!(
+      makeTo({ path: "/site/login" }),
+      makeFrom(),
+      next
+    );
     expect(next).toHaveBeenCalledWith({ path: "/home/index" });
   });
 
@@ -197,7 +201,11 @@ describe("beforeEach 守卫 — 有 token 时", () => {
 describe("beforeEach 守卫 — 无 token 时", () => {
   it("白名单 /site/login 直接放行", async () => {
     const next = vi.fn();
-    await capturedBeforeEach!(makeTo({ path: "/site/login" }), makeFrom(), next);
+    await capturedBeforeEach!(
+      makeTo({ path: "/site/login" }),
+      makeFrom(),
+      next
+    );
     expect(next).toHaveBeenCalledWith();
   });
 
@@ -231,11 +239,7 @@ describe("beforeEach 守卫 — 无 token 时", () => {
 
   it("非白名单路由重定向到 /web/index?redirect=...", async () => {
     const next = vi.fn();
-    await capturedBeforeEach!(
-      makeTo({ path: "/dashboard" }),
-      makeFrom(),
-      next
-    );
+    await capturedBeforeEach!(makeTo({ path: "/dashboard" }), makeFrom(), next);
     const redirectArg = next.mock.calls[0][0] as string;
     expect(redirectArg).toContain("/web/index?redirect=");
     expect(redirectArg).toContain(encodeURIComponent("/dashboard"));

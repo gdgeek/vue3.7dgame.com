@@ -152,7 +152,9 @@ describe("src/router/index.ts — supplemental coverage", () => {
       // resourceRoutes has component: { setup: () => ({}) } — no "name"
       // routerData is the children of "/" converted, so /resource is one of them
       // The component is undefined since the object has no "name" property
-      const resourceRoute = routerData.value.find((r) => r.path === "resource" || r.path === "/resource");
+      const resourceRoute = routerData.value.find(
+        (r) => r.path === "resource" || r.path === "/resource"
+      );
       // Whether or not the route is found, UpdateRoutes processed all child routes
       // including resourceRoutes (which has an object component without "name")
       expect(routerData.value.length).toBeGreaterThanOrEqual(0);

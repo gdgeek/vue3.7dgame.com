@@ -221,9 +221,7 @@ describe("buildMetaResourceIndex", () => {
       type: "Picture",
       parameters: { uuid: "pic-1", name: "Photo" },
       children: {
-        components: [
-          { type: "Moved", parameters: { uuid: "m1" } },
-        ],
+        components: [{ type: "Moved", parameters: { uuid: "m1" } }],
       },
     };
     const result = buildMetaResourceIndex(makeMeta(node));

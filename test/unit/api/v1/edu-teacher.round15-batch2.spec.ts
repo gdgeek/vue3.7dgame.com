@@ -8,7 +8,9 @@ describe("api/v1/edu-teacher round15 batch2", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     api = await import("@/api/v1/edu-teacher");
   });
@@ -30,7 +32,10 @@ describe("api/v1/edu-teacher round15 batch2", () => {
 
   it("getTeacher uses id endpoint", async () => {
     await api.getTeacher(12);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/edu-teacher/12", method: "get" });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/edu-teacher/12",
+      method: "get",
+    });
   });
 
   it("getTeacherMe uses /me and subject search", async () => {
@@ -44,22 +49,35 @@ describe("api/v1/edu-teacher round15 batch2", () => {
   it("createTeacher posts payload", async () => {
     const data = { user_id: 1 } as Parameters<typeof api.createTeacher>[0];
     await api.createTeacher(data);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/edu-teacher", method: "post", data });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/edu-teacher",
+      method: "post",
+      data,
+    });
   });
 
   it("updateTeacher puts payload", async () => {
     const data = { title: "Senior" } as Parameters<typeof api.updateTeacher>[1];
     await api.updateTeacher(8, data);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/edu-teacher/8", method: "put", data });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/edu-teacher/8",
+      method: "put",
+      data,
+    });
   });
 
   it("deleteTeacher calls delete endpoint", async () => {
     await api.deleteTeacher(9);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/edu-teacher/9", method: "delete" });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/edu-teacher/9",
+      method: "delete",
+    });
   });
 
   it("search omitted when empty", async () => {
     await api.getTeacherMe("-created_at", "", 1, "class");
-    expect(request.mock.calls[0][0].url).not.toContain("TeacherSearch%5Bsubject%5D");
+    expect(request.mock.calls[0][0].url).not.toContain(
+      "TeacherSearch%5Bsubject%5D"
+    );
   });
 });

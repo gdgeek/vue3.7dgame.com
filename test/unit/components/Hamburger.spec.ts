@@ -4,13 +4,7 @@
  * 通过 onToggleClick prop 捕获 emit，通过 DOM 事件触发 click
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
-import {
-  createApp,
-  reactive,
-  nextTick,
-  defineComponent,
-  type App,
-} from "vue";
+import { createApp, reactive, nextTick, defineComponent, type App } from "vue";
 import Hamburger from "@/components/Hamburger/index.vue";
 
 // ── font-awesome-icon stub ────────────────────────────────────────────────────
@@ -21,7 +15,8 @@ import Hamburger from "@/components/Hamburger/index.vue";
 const FontAwesomeIconStub = defineComponent({
   name: "FontAwesomeIcon",
   props: { icon: { type: Array, default: () => [] } },
-  template: '<span class="fa-stub" :data-icon="icon && icon[1] ? icon[1] : \'\'"></span>',
+  template:
+    '<span class="fa-stub" :data-icon="icon && icon[1] ? icon[1] : \'\'"></span>',
 });
 
 // ── 辅助函数 ──────────────────────────────────────────────────────────────────

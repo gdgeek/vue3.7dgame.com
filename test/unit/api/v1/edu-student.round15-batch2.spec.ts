@@ -8,7 +8,9 @@ describe("api/v1/edu-student round15 batch2", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     api = await import("@/api/v1/edu-student");
   });
@@ -30,24 +32,38 @@ describe("api/v1/edu-student round15 batch2", () => {
 
   it("getStudent uses view query endpoint", async () => {
     await api.getStudent(12);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/edu-student/view?id=12", method: "get" });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/edu-student/view?id=12",
+      method: "get",
+    });
   });
 
   it("createStudent posts payload", async () => {
     const data = { user_id: 1 } as Parameters<typeof api.createStudent>[0];
     await api.createStudent(data);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/edu-student", method: "post", data });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/edu-student",
+      method: "post",
+      data,
+    });
   });
 
   it("updateStudent uses PUT with id", async () => {
     const data = { note: "n" } as Parameters<typeof api.updateStudent>[1];
     await api.updateStudent(2, data);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/edu-student/2", method: "put", data });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/edu-student/2",
+      method: "put",
+      data,
+    });
   });
 
   it("deleteStudent uses DELETE with id", async () => {
     await api.deleteStudent(3);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/edu-student/3", method: "delete" });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/edu-student/3",
+      method: "delete",
+    });
   });
 
   it("getStudentMe hits /me endpoint", async () => {
@@ -64,7 +80,11 @@ describe("api/v1/edu-student round15 batch2", () => {
     expect(request.mock.calls[0][0].url).toContain("/v1/edu-student?");
     expect(request.mock.calls[0][0].url).toContain("page=2");
     expect(request.mock.calls[1][0]).toEqual(
-      expect.objectContaining({ url: "/v1/edu-student/join", method: "post", data: { class_id: 5 } })
+      expect.objectContaining({
+        url: "/v1/edu-student/join",
+        method: "post",
+        data: { class_id: 5 },
+      })
     );
   });
 });

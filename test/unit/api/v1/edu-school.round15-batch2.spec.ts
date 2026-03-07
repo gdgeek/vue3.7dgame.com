@@ -8,7 +8,9 @@ describe("api/v1/edu-school round15 batch2", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     api = await import("@/api/v1/edu-school");
   });
@@ -30,7 +32,9 @@ describe("api/v1/edu-school round15 batch2", () => {
 
   it("getSchool default expand included", async () => {
     await api.getSchool(7);
-    expect(request.mock.calls[0][0].url).toContain("/v1/edu-school/7?expand=image%2Cprincipal");
+    expect(request.mock.calls[0][0].url).toContain(
+      "/v1/edu-school/7?expand=image%2Cprincipal"
+    );
   });
 
   it("getSchool omits expand when empty", async () => {
@@ -43,18 +47,29 @@ describe("api/v1/edu-school round15 batch2", () => {
   it("createSchool posts payload", async () => {
     const data = { name: "s" } as Parameters<typeof api.createSchool>[0];
     await api.createSchool(data);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/edu-school", method: "post", data });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/edu-school",
+      method: "post",
+      data,
+    });
   });
 
   it("updateSchool puts payload", async () => {
     const data = { name: "s2" } as Parameters<typeof api.updateSchool>[1];
     await api.updateSchool(5, data);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/edu-school/5", method: "put", data });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/edu-school/5",
+      method: "put",
+      data,
+    });
   });
 
   it("deleteSchool hits delete endpoint", async () => {
     await api.deleteSchool(9);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/edu-school/9", method: "delete" });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/edu-school/9",
+      method: "delete",
+    });
   });
 
   it("getPrincipalSchools uses principal endpoint", async () => {

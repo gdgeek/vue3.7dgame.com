@@ -9,7 +9,11 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useEmailVerification } from "@/composables/useEmailVerification";
-import { verifyChangeConfirmation, unbindEmail, getEmailStatus } from "@/api/v1/email";
+import {
+  verifyChangeConfirmation,
+  unbindEmail,
+  getEmailStatus,
+} from "@/api/v1/email";
 
 vi.mock("@/api/v1/email", () => ({
   sendVerificationCode: vi.fn(),
@@ -71,7 +75,9 @@ describe("useEmailVerification — verifyOldEmailForChange() catch block", () =>
   });
 
   it("API throws Error → returns false without re-throwing", async () => {
-    vi.mocked(verifyChangeConfirmation).mockRejectedValue(new Error("network timeout"));
+    vi.mocked(verifyChangeConfirmation).mockRejectedValue(
+      new Error("network timeout")
+    );
 
     const composable = useEmailVerification();
     composable.oldEmailForm.code = "123456";
@@ -83,7 +89,9 @@ describe("useEmailVerification — verifyOldEmailForChange() catch block", () =>
   });
 
   it("API throws Error → loading is reset to false in finally", async () => {
-    vi.mocked(verifyChangeConfirmation).mockRejectedValue(new Error("server error"));
+    vi.mocked(verifyChangeConfirmation).mockRejectedValue(
+      new Error("server error")
+    );
 
     const composable = useEmailVerification();
     composable.oldEmailForm.code = "987654";
@@ -95,7 +103,10 @@ describe("useEmailVerification — verifyOldEmailForChange() catch block", () =>
   });
 
   it("API throws plain object → returns false without re-throwing", async () => {
-    vi.mocked(verifyChangeConfirmation).mockRejectedValue({ code: 422, message: "invalid code" });
+    vi.mocked(verifyChangeConfirmation).mockRejectedValue({
+      code: 422,
+      message: "invalid code",
+    });
 
     const composable = useEmailVerification();
     composable.oldEmailForm.code = "111111";

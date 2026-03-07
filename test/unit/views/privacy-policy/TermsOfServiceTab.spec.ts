@@ -115,7 +115,9 @@ describe("TermsOfServiceTab", () => {
   it("renders the contact section with descriptions", () => {
     const section = result.el.querySelector("section.contact");
     expect(section).not.toBeNull();
-    expect(section!.querySelector('[data-stub="ElDescriptions"]')).not.toBeNull();
+    expect(
+      section!.querySelector('[data-stub="ElDescriptions"]')
+    ).not.toBeNull();
   });
 
   it("contact section contains correct email address", () => {

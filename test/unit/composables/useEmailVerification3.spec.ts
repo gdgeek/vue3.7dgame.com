@@ -89,7 +89,10 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
     mockUserStore3.userInfo = null;
     mockUserStore3.getUserInfo = vi.fn().mockResolvedValue(undefined);
     mockedGetEmailStatus.mockResolvedValue(unboundEmailStatus);
-    mockedGetEmailCooldown.mockResolvedValue({ success: true, data: { can_send: true, retry_after: 0 } });
+    mockedGetEmailCooldown.mockResolvedValue({
+      success: true,
+      data: { can_send: true, retry_after: 0 },
+    });
   });
 
   afterEach(() => {
@@ -142,7 +145,8 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
         data: { error: { code: "AUTH_ERROR", message: "Unauthorized" } },
       });
 
-      const { sendCodeForNewEmail, newEmailForm, error } = useEmailVerification();
+      const { sendCodeForNewEmail, newEmailForm, error } =
+        useEmailVerification();
       newEmailForm.email = "test@example.com";
 
       await sendCodeForNewEmail();
@@ -155,7 +159,8 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
         data: { error: { code: "INVALID_CODE", message: "Code is wrong" } },
       });
 
-      const { verifyOldEmailForChange, oldEmailForm, error } = useEmailVerification();
+      const { verifyOldEmailForChange, oldEmailForm, error } =
+        useEmailVerification();
       oldEmailForm.code = "123456";
 
       await verifyOldEmailForChange();
@@ -178,7 +183,11 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
 
     it("loadStatus catch with { data: { code, message, retry_after } } → sets retry_after in lock timer for ACCOUNT_LOCKED", async () => {
       mockedGetEmailStatus.mockRejectedValue({
-        data: { code: "ACCOUNT_LOCKED", message: "Account locked", retry_after: 60 },
+        data: {
+          code: "ACCOUNT_LOCKED",
+          message: "Account locked",
+          retry_after: 60,
+        },
       });
 
       const { loadStatus, isLocked, lockTime } = useEmailVerification();
@@ -224,7 +233,13 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
         data: { change_token: "tok123", expires_in: 1 }, // 1 second
       });
 
-      const { loadStatus, verifyOldEmailForChange, oldEmailForm, step, changeToken } = useEmailVerification();
+      const {
+        loadStatus,
+        verifyOldEmailForChange,
+        oldEmailForm,
+        step,
+        changeToken,
+      } = useEmailVerification();
 
       await loadStatus();
       expect(step.value).toBe("manage");
@@ -251,8 +266,13 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
         data: { change_token: "tok456", expires_in: 1 },
       });
 
-      const { loadStatus, verifyOldEmailForChange, oldEmailForm, step, cancelCurrentAction } =
-        useEmailVerification();
+      const {
+        loadStatus,
+        verifyOldEmailForChange,
+        oldEmailForm,
+        step,
+        cancelCurrentAction,
+      } = useEmailVerification();
 
       await loadStatus();
 
@@ -442,7 +462,8 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
         message: "Email already bound",
       });
 
-      const { sendCodeForNewEmail, newEmailForm, error } = useEmailVerification();
+      const { sendCodeForNewEmail, newEmailForm, error } =
+        useEmailVerification();
       newEmailForm.email = "test@example.com";
 
       const result = await sendCodeForNewEmail();
@@ -456,7 +477,8 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
         success: false,
       } as unknown as Awaited<ReturnType<typeof sendVerificationCode>>);
 
-      const { sendCodeForNewEmail, newEmailForm, error } = useEmailVerification();
+      const { sendCodeForNewEmail, newEmailForm, error } =
+        useEmailVerification();
       newEmailForm.email = "test@example.com";
 
       await sendCodeForNewEmail();
@@ -467,7 +489,8 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
     it("loading reset to false after failure response", async () => {
       mockedSendVerificationCode.mockResolvedValue({ success: false });
 
-      const { sendCodeForNewEmail, newEmailForm, loading } = useEmailVerification();
+      const { sendCodeForNewEmail, newEmailForm, loading } =
+        useEmailVerification();
       newEmailForm.email = "test@example.com";
 
       await sendCodeForNewEmail();
@@ -487,7 +510,8 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
         data: { can_send: true, retry_after: 0 },
       });
 
-      const { sendCodeForNewEmail, newEmailForm, sendCooldown } = useEmailVerification();
+      const { sendCodeForNewEmail, newEmailForm, sendCooldown } =
+        useEmailVerification();
       newEmailForm.email = "test@example.com";
 
       await sendCodeForNewEmail();
@@ -504,7 +528,8 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
         data: { can_send: false, retry_after: 45 },
       });
 
-      const { sendCodeForNewEmail, newEmailForm, sendCooldown } = useEmailVerification();
+      const { sendCodeForNewEmail, newEmailForm, sendCooldown } =
+        useEmailVerification();
       newEmailForm.email = "test@example.com";
 
       await sendCodeForNewEmail();
@@ -516,7 +541,10 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
 
     it("send returns true on success", async () => {
       mockedSendVerificationCode.mockResolvedValue({ success: true });
-      mockedGetEmailCooldown.mockResolvedValue({ success: true, data: { can_send: true, retry_after: 0 } });
+      mockedGetEmailCooldown.mockResolvedValue({
+        success: true,
+        data: { can_send: true, retry_after: 0 },
+      });
 
       const { sendCodeForNewEmail, newEmailForm } = useEmailVerification();
       newEmailForm.email = "test@example.com";
@@ -532,10 +560,17 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
   describe("sendCodeForNewEmail catch block (lines 326-330)", () => {
     it("RATE_LIMIT_EXCEEDED with retry_after → startCountdown(retry_after)", async () => {
       mockedSendVerificationCode.mockRejectedValue({
-        data: { error: { code: "RATE_LIMIT_EXCEEDED", message: "Too fast", retry_after: 30 } },
+        data: {
+          error: {
+            code: "RATE_LIMIT_EXCEEDED",
+            message: "Too fast",
+            retry_after: 30,
+          },
+        },
       });
 
-      const { sendCodeForNewEmail, newEmailForm, sendCooldown } = useEmailVerification();
+      const { sendCodeForNewEmail, newEmailForm, sendCooldown } =
+        useEmailVerification();
       newEmailForm.email = "test@example.com";
 
       await sendCodeForNewEmail();
@@ -548,7 +583,8 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
         data: { error: { code: "RATE_LIMIT_EXCEEDED", message: "Too fast" } },
       });
 
-      const { sendCodeForNewEmail, newEmailForm, sendCooldown } = useEmailVerification();
+      const { sendCodeForNewEmail, newEmailForm, sendCooldown } =
+        useEmailVerification();
       newEmailForm.email = "test@example.com";
 
       await sendCodeForNewEmail();
@@ -570,7 +606,8 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
     it("loading is false after catch", async () => {
       mockedSendVerificationCode.mockRejectedValue(new Error("timeout"));
 
-      const { sendCodeForNewEmail, newEmailForm, loading } = useEmailVerification();
+      const { sendCodeForNewEmail, newEmailForm, loading } =
+        useEmailVerification();
       newEmailForm.email = "test@example.com";
 
       await sendCodeForNewEmail();
@@ -612,7 +649,8 @@ describe("useEmailVerification (part 3) — uncovered paths", () => {
       });
       mockedGetEmailStatus.mockResolvedValue(unboundEmailStatus);
 
-      const { verifyCodeForNewEmail, newEmailForm, step } = useEmailVerification();
+      const { verifyCodeForNewEmail, newEmailForm, step } =
+        useEmailVerification();
 
       step.value = "bind"; // not change_verify
       newEmailForm.email = "new@example.com";

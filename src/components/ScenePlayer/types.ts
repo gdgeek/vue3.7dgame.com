@@ -5,7 +5,12 @@
 import type * as THREE from "three";
 import type { Ref } from "vue";
 import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import type { CollisionObject, RotatingObject, MoveableObject, DragState } from "@/types/verse";
+import type {
+  CollisionObject,
+  RotatingObject,
+  MoveableObject,
+  DragState,
+} from "@/types/verse";
 
 // ─── Transform types ──────────────────────────────────────────────────────────
 
@@ -105,7 +110,10 @@ export type SourceTextData = {
   setVisibility: (isVisible: boolean) => void;
 };
 
-export type SourceEntityData = { transform: TransformData; setVisibility: () => void };
+export type SourceEntityData = {
+  transform: TransformData;
+  setVisibility: () => void;
+};
 
 export type SourceRecord =
   | { type: "model"; data: SourceModelData }
@@ -116,8 +124,18 @@ export type SourceRecord =
   | { type: "entity"; data: SourceEntityData };
 
 export type ResourceLike =
-  | { type: string; id?: string | number; content?: string; file?: { url: string } }
-  | { type: string; id?: string | number; file?: { url: string }; [key: string]: unknown };
+  | {
+      type: string;
+      id?: string | number;
+      content?: string;
+      file?: { url: string };
+    }
+  | {
+      type: string;
+      id?: string | number;
+      file?: { url: string };
+      [key: string]: unknown;
+    };
 
 // ─── Verse meta info type ─────────────────────────────────────────────────────
 

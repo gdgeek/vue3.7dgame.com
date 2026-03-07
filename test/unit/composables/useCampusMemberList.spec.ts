@@ -5,7 +5,10 @@
  * dialog helpers (Message, MessageBox) are mocked.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { useCampusMemberList, type MemberBase } from "@/composables/useCampusMemberList";
+import {
+  useCampusMemberList,
+  type MemberBase,
+} from "@/composables/useCampusMemberList";
 
 // -----------------------------------------------------------------------
 // Mocks — use vi.hoisted to avoid hoisting issues
@@ -181,7 +184,9 @@ describe("useCampusMemberList — handleDelete", () => {
     openDetail(makeMember(7));
     await handleDelete();
 
-    expect(mockMessageSuccess).toHaveBeenCalledWith("manager.messages.removeSuccess");
+    expect(mockMessageSuccess).toHaveBeenCalledWith(
+      "manager.messages.removeSuccess"
+    );
   });
 
   it("does not delete when user cancels confirmation", async () => {
@@ -280,7 +285,9 @@ describe("useCampusMemberList — deletedWindow", () => {
     const { deletedWindow } = useCampusMemberList<TestMember>(options);
 
     await deletedWindow(makeMember(5));
-    expect(mockMessageSuccess).toHaveBeenCalledWith("manager.messages.removeSuccess");
+    expect(mockMessageSuccess).toHaveBeenCalledWith(
+      "manager.messages.removeSuccess"
+    );
   });
 
   it("does not delete when user cancels confirmation", async () => {

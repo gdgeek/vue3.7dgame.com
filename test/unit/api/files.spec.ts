@@ -36,11 +36,13 @@ describe("Files API", () => {
     });
 
     it("returns the request result", async () => {
-      const mockResp = { data: { id: 1, url: "https://cdn.example.com/photo.png" } };
+      const mockResp = {
+        data: { id: 1, url: "https://cdn.example.com/photo.png" },
+      };
       request.mockResolvedValue(mockResp);
-      const result = await filesApi.postFile({ name: "photo.png" } as Parameters<
-        typeof filesApi.postFile
-      >[0]);
+      const result = await filesApi.postFile({
+        name: "photo.png",
+      } as Parameters<typeof filesApi.postFile>[0]);
       expect(result).toEqual(mockResp);
     });
 

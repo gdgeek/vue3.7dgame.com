@@ -19,8 +19,25 @@ vi.mock("three", async () => {
 });
 
 describe("useSceneAnimation", () => {
-  let sources: Map<string, { type: string; data: { mesh: { userData: { animations?: { name: string }[] } } } }>;
-  let mixers: Map<string, { stopAllAction: () => void; clipAction: (clip: unknown) => { reset: () => unknown; setLoop: () => unknown; fadeIn: () => unknown; play: () => void } }>;
+  let sources: Map<
+    string,
+    {
+      type: string;
+      data: { mesh: { userData: { animations?: { name: string }[] } } };
+    }
+  >;
+  let mixers: Map<
+    string,
+    {
+      stopAllAction: () => void;
+      clipAction: (clip: unknown) => {
+        reset: () => unknown;
+        setLoop: () => unknown;
+        fadeIn: () => unknown;
+        play: () => void;
+      };
+    }
+  >;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -32,7 +49,10 @@ describe("useSceneAnimation", () => {
     const { useSceneAnimation } = await import(
       "@/components/ScenePlayer/composables/useSceneAnimation"
     );
-    return useSceneAnimation(sources as Map<string, never>, mixers as Map<string, never>);
+    return useSceneAnimation(
+      sources as Map<string, never>,
+      mixers as Map<string, never>
+    );
   };
 
   describe("playAnimation", () => {
@@ -111,7 +131,10 @@ describe("useSceneAnimation", () => {
 
     it("logs error when source type is not model", async () => {
       const { logger } = await import("@/utils/logger");
-      sources.set("audio1", { type: "audio", data: { url: "test.mp3" } } as never);
+      sources.set("audio1", {
+        type: "audio",
+        data: { url: "test.mp3" },
+      } as never);
 
       const { playAnimation } = await getComposable();
       playAnimation("audio1", "Walk");

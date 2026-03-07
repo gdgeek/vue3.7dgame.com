@@ -243,7 +243,6 @@ const scrollToAuthorization = () => {
 
 onMounted(() => {
   window.addEventListener("mousemove", handleMouseMove);
-
 });
 
 onUnmounted(() => {

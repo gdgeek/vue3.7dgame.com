@@ -9,9 +9,9 @@
 // 侧边栏背景渐变
 .ar-sidebar {
   background: var(--bg-sidebar, var(--menu-background)) !important;
-  
+
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -21,7 +21,7 @@
     pointer-events: none;
     z-index: 0;
   }
-  
+
   > * {
     position: relative;
     z-index: 1;
@@ -32,9 +32,9 @@
 .ar-card,
 .settings-card {
   background: var(--bg-card, var(--ar-card-bg)) !important;
-  
+
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -45,7 +45,7 @@
     pointer-events: none;
     z-index: 0;
   }
-  
+
   > * {
     position: relative;
     z-index: 1;
@@ -57,10 +57,11 @@
   border-radius: var(--radius-lg, 20px) !important;
   border-color: var(--border-color, var(--ar-card-border)) !important;
   background: var(--bg-card, var(--ar-card-bg)) !important;
-  transition: transform var(--transition-normal, 0.2s),
-              box-shadow var(--transition-normal, 0.2s),
-              border-color var(--transition-normal, 0.2s) !important;
-  
+  transition:
+    transform var(--transition-normal, 0.2s),
+    box-shadow var(--transition-normal, 0.2s),
+    border-color var(--transition-normal, 0.2s) !important;
+
   &:hover {
     transform: var(--card-hover-transform, translateY(-2px));
     box-shadow: var(--card-hover-shadow, var(--shadow-lg));
@@ -73,51 +74,51 @@
   background: var(--bg-card, var(--ar-card-bg)) !important;
   border-color: var(--border-color, var(--ar-card-border)) !important;
   border-radius: var(--radius-lg, 20px) !important;
-  
+
   // 封面区域
   .cover-section {
     .cover-preview {
       border-radius: var(--radius-lg, 12px) !important;
       background: var(--bg-hover) !important;
     }
-    
+
     .cover-placeholder {
       background: var(--bg-hover) !important;
-      
+
       .svg-inline--fa {
         color: var(--text-muted) !important;
       }
     }
-    
+
     .change-cover-btn {
       border-radius: var(--radius-full, 20px) !important;
     }
   }
-  
+
   // 表单区域
   .form-section {
     .form-label {
       color: var(--text-secondary) !important;
     }
-    
+
     .form-input,
     .form-textarea {
       border: var(--border-width, 1px) solid var(--border-color) !important;
       border-radius: var(--radius-sm, 10px) !important;
       background: var(--bg-card) !important;
       color: var(--text-primary) !important;
-      
+
       &::placeholder {
         color: var(--text-muted) !important;
       }
-      
+
       &:focus {
         border-color: var(--primary-color) !important;
         box-shadow: 0 0 0 3px var(--primary-light) !important;
       }
     }
   }
-  
+
   // 标签编辑器
   .tags-editor {
     .tag-item {
@@ -125,40 +126,40 @@
       color: var(--primary-color) !important;
       border-radius: var(--radius-full, 20px) !important;
     }
-    
+
     .tag-remove {
       &:hover {
         background: var(--primary-color) !important;
         color: var(--text-inverse) !important;
       }
     }
-    
+
     .no-tags {
       color: var(--text-muted) !important;
     }
-    
+
     .tag-select {
       border: var(--border-width, 1px) solid var(--border-color) !important;
       border-radius: var(--radius-sm, 8px) !important;
       background: var(--bg-card) !important;
       color: var(--text-primary) !important;
-      
+
       &:focus {
         border-color: var(--primary-color) !important;
       }
     }
-    
+
     .add-tag-btn {
       background: var(--primary-color) !important;
       color: var(--text-inverse) !important;
       border-radius: var(--radius-sm, 8px) !important;
-      
+
       &:hover {
         background: var(--primary-hover) !important;
       }
     }
   }
-  
+
   // 可见性切换
   .visibility-toggle {
     .visibility-btn {
@@ -166,12 +167,12 @@
       border-radius: var(--radius-md, 12px) !important;
       background: var(--bg-card) !important;
       color: var(--text-secondary) !important;
-      
+
       &:hover {
         border-color: var(--primary-color) !important;
         color: var(--primary-color) !important;
       }
-      
+
       &.active {
         border-color: var(--primary-color) !important;
         background: var(--primary-light) !important;
@@ -179,29 +180,29 @@
       }
     }
   }
-  
+
   // 确认按钮
   .confirm-btn {
     background: var(--primary-color) !important;
     color: var(--text-inverse) !important;
     border-radius: var(--radius-sm, 8px) !important;
-    
+
     &:hover {
       background: var(--primary-hover) !important;
     }
   }
-  
+
   // 进入编辑按钮
   .enter-edit-btn {
     background: var(--primary-color) !important;
     color: var(--text-inverse) !important;
     border-radius: var(--radius-md, 12px) !important;
-    
+
     &:hover {
       background: var(--primary-hover) !important;
     }
   }
-  
+
   // 次要操作区
   .secondary-actions {
     .download-btn {
@@ -209,7 +210,7 @@
       border-radius: var(--radius-sm, 10px) !important;
       background: var(--bg-card) !important;
       color: var(--text-secondary) !important;
-      
+
       &:hover {
         border-color: var(--primary-color) !important;
         color: var(--primary-color) !important;
@@ -225,7 +226,7 @@
   background: var(--bg-card, var(--ar-card-bg)) !important;
   border-color: var(--border-color, var(--ar-card-border)) !important;
   font-family: var(--font-family) !important;
-  
+
   &:focus {
     border-color: var(--ar-primary) !important;
     box-shadow: 0 0 0 4px var(--ar-primary-alpha-10) !important;
@@ -254,46 +255,46 @@
 .meta-library {
   background: var(--bg-page) !important;
   font-family: var(--font-family) !important;
-  
+
   .library-title {
     color: var(--text-primary) !important;
   }
-  
+
   .header-divider {
     background: var(--border-color) !important;
   }
-  
+
   .search-box {
     .search-icon {
       color: var(--text-muted) !important;
     }
-    
+
     .search-input {
       border-color: var(--border-color) !important;
       border-radius: var(--radius-md) !important;
       background: var(--bg-card) !important;
       color: var(--text-primary) !important;
-      
+
       &::placeholder {
         color: var(--text-muted) !important;
       }
-      
+
       &:focus {
         border-color: var(--primary-color) !important;
         box-shadow: 0 0 0 3px var(--primary-light) !important;
       }
     }
   }
-  
+
   .sort-btn {
     color: var(--text-secondary) !important;
     border-radius: var(--radius-sm) !important;
-    
+
     &:hover {
       color: var(--text-primary) !important;
       background: var(--bg-active) !important;
     }
-    
+
     &.active {
       background: var(--bg-hover) !important;
       color: var(--primary-color) !important;
@@ -304,55 +305,55 @@
     background: var(--bg-hover) !important;
     border-radius: var(--radius-sm) !important;
   }
-  
+
   .view-btn {
     color: var(--text-secondary) !important;
     border-radius: var(--radius-sm) !important;
-    
+
     &:hover:not(.active) {
       color: var(--text-primary) !important;
     }
-    
+
     &.active {
       background: var(--bg-card) !important;
       color: var(--primary-color) !important;
     }
   }
-  
+
   .upload-btn {
     background: var(--primary-color) !important;
     color: var(--text-inverse) !important;
     border-radius: var(--radius-md) !important;
-    
+
     &:hover {
       background: var(--primary-hover) !important;
     }
   }
-  
+
   .resource-card {
     background: var(--bg-card) !important;
     border-radius: var(--radius-lg) !important;
-    
+
     &:hover {
       box-shadow: var(--shadow-lg) !important;
     }
   }
-  
+
   .card-thumbnail {
     background: var(--bg-hover) !important;
   }
-  
+
   .card-menu-btn {
     background: var(--bg-card) !important;
     color: var(--text-secondary) !important;
     border-radius: var(--radius-sm) !important;
   }
-  
+
   .card-dropdown-menu {
     background: var(--bg-card) !important;
     border-radius: var(--radius-md) !important;
     box-shadow: var(--shadow-lg) !important;
-    
+
     .menu-item {
       color: var(--text-primary) !important;
       border-radius: var(--radius-sm) !important;
@@ -360,55 +361,55 @@
       .svg-inline--fa {
         color: var(--text-secondary) !important;
       }
-      
+
       &:hover {
         background: var(--bg-hover) !important;
       }
-      
+
       &.danger {
         color: var(--danger-color) !important;
-        
+
         .svg-inline--fa {
           color: var(--danger-color) !important;
         }
-        
+
         &:hover {
           background: var(--danger-light) !important;
         }
       }
     }
   }
-  
+
   .card-info {
     background: var(--bg-card) !important;
   }
-  
+
   .card-title {
     color: var(--text-primary) !important;
   }
-  
+
   .card-date {
     color: var(--text-muted) !important;
   }
-  
+
   .resource-list {
     background: var(--bg-card) !important;
     border-radius: var(--radius-lg) !important;
   }
-  
+
   .list-table {
     th {
       background: var(--bg-hover) !important;
       color: var(--text-secondary) !important;
       border-bottom-color: var(--border-color) !important;
     }
-    
+
     td {
       color: var(--text-primary) !important;
       border-bottom-color: var(--border-color) !important;
     }
   }
-  
+
   .list-row {
     &:hover {
       background: var(--bg-hover) !important;
@@ -419,56 +420,56 @@
     background: var(--primary-color) !important;
     color: var(--text-inverse) !important;
     border-radius: var(--radius-sm) !important;
-    
+
     &:hover {
       background: var(--primary-hover) !important;
     }
   }
-  
+
   .row-thumbnail {
     background: var(--bg-hover) !important;
     border-radius: var(--radius-sm) !important;
   }
-  
+
   .file-name {
     color: var(--text-primary) !important;
   }
-  
+
   .more-btn {
     color: var(--text-secondary) !important;
     border-radius: var(--radius-sm) !important;
-    
+
     &:hover {
       background: var(--bg-hover) !important;
     }
   }
-  
+
   .row-menu {
     background: var(--bg-card) !important;
     border-radius: var(--radius-md) !important;
     box-shadow: var(--shadow-lg) !important;
-    
+
     .menu-item {
       color: var(--text-primary) !important;
       border-radius: var(--radius-sm) !important;
-      
+
       &:hover {
         background: var(--bg-hover) !important;
       }
-      
+
       &.danger {
         color: var(--danger-color) !important;
-        
+
         &:hover {
           background: var(--danger-light) !important;
         }
       }
     }
   }
-  
+
   .empty-state {
     color: var(--text-muted) !important;
-    
+
     .empty-icon {
       color: var(--text-muted) !important;
     }
@@ -478,39 +479,44 @@
     border-color: var(--primary-color) !important;
     color: var(--primary-color) !important;
     border-radius: var(--radius-md) !important;
-    
+
     &:hover {
       background: var(--primary-light) !important;
     }
   }
-  
+
   .page-btn {
     border-color: var(--border-color) !important;
     background: var(--bg-card) !important;
     color: var(--text-secondary) !important;
     border-radius: var(--radius-md) !important;
-    
+
     &:hover:not(:disabled) {
       border-color: var(--primary-color) !important;
       color: var(--primary-color) !important;
     }
   }
-  
+
   .page-info {
     color: var(--text-secondary) !important;
   }
-  
+
   .skeleton-card,
   .skeleton-list {
     background: var(--bg-card) !important;
     border-radius: var(--radius-md) !important;
   }
-  
+
   .skeleton-cover,
   .skeleton-title,
   .skeleton-meta,
   .skeleton-row {
-    background: linear-gradient(90deg, var(--bg-hover) 25%, var(--bg-active) 50%, var(--bg-hover) 75%) !important;
+    background: linear-gradient(
+      90deg,
+      var(--bg-hover) 25%,
+      var(--bg-active) 50%,
+      var(--bg-hover) 75%
+    ) !important;
   }
 }
 
@@ -521,11 +527,11 @@
 .verse-library {
   background: var(--bg-page) !important;
   font-family: var(--font-family) !important;
-  
+
   .library-title {
     color: var(--text-primary) !important;
   }
-  
+
   .header-divider {
     background: var(--border-color) !important;
   }
@@ -534,37 +540,37 @@
     .search-icon {
       color: var(--text-muted) !important;
     }
-    
+
     .search-input {
       border-color: var(--border-color) !important;
       border-radius: var(--radius-md) !important;
       background: var(--bg-card) !important;
       color: var(--text-primary) !important;
-      
+
       &::placeholder {
         color: var(--text-muted) !important;
       }
-      
+
       &:focus {
         border-color: var(--primary-color) !important;
         box-shadow: 0 0 0 3px var(--primary-light) !important;
       }
     }
   }
-  
+
   .tag-filter-btn,
   .visibility-filter-btn {
     border-color: var(--border-color) !important;
     border-radius: var(--radius-md) !important;
     background: var(--bg-card) !important;
     color: var(--text-secondary) !important;
-    
+
     &:hover {
       border-color: var(--primary-color) !important;
       color: var(--primary-color) !important;
     }
   }
-  
+
   .tag-dropdown,
   .visibility-dropdown {
     background: var(--bg-card) !important;
@@ -572,15 +578,15 @@
     border-radius: var(--radius-md) !important;
     box-shadow: var(--shadow-lg) !important;
   }
-  
+
   .tag-option,
   .visibility-option {
     color: var(--text-primary) !important;
-    
+
     &:hover {
       background: var(--bg-hover) !important;
     }
-    
+
     &.selected {
       background: var(--primary-light) !important;
     }
@@ -590,57 +596,57 @@
     border-color: var(--border-color) !important;
     background: var(--bg-card) !important;
   }
-  
+
   .clear-btn {
     background: var(--bg-hover) !important;
     color: var(--text-secondary) !important;
     border-radius: var(--radius-sm) !important;
-    
+
     &:hover {
       background: var(--bg-active) !important;
       color: var(--text-primary) !important;
     }
   }
-  
+
   .sort-btn {
     color: var(--text-secondary) !important;
     border-radius: var(--radius-sm) !important;
-    
+
     &:hover {
       color: var(--text-primary) !important;
       background: var(--bg-active) !important;
     }
-    
+
     &.active {
       background: var(--bg-hover) !important;
       color: var(--primary-color) !important;
     }
   }
-  
+
   .view-toggle {
     background: var(--bg-hover) !important;
     border-radius: var(--radius-sm) !important;
   }
-  
+
   .view-btn {
     color: var(--text-secondary) !important;
     border-radius: var(--radius-sm) !important;
-    
+
     &:hover:not(.active) {
       color: var(--text-primary) !important;
     }
-    
+
     &.active {
       background: var(--bg-card) !important;
       color: var(--primary-color) !important;
     }
   }
-  
+
   .upload-btn {
     background: var(--primary-color) !important;
     color: var(--text-inverse) !important;
     border-radius: var(--radius-md) !important;
-    
+
     &:hover {
       background: var(--primary-hover) !important;
     }
@@ -649,57 +655,57 @@
   .scene-card {
     background: var(--bg-card) !important;
     border-radius: var(--radius-lg) !important;
-    
+
     &:hover {
       box-shadow: var(--shadow-lg) !important;
     }
   }
-  
+
   .scene-thumbnail {
     background: var(--bg-hover) !important;
   }
-  
+
   .scene-tags {
     .scene-tag {
       background: rgba(0, 0, 0, 0.6) !important;
       border-radius: var(--radius-sm) !important;
     }
   }
-  
+
   .visibility-badge {
     border-radius: var(--radius-sm) !important;
   }
-  
+
   .scene-info {
     background: var(--bg-card) !important;
   }
-  
+
   .scene-title {
     color: var(--text-primary) !important;
   }
-  
+
   .scene-meta {
     color: var(--text-muted) !important;
   }
-  
+
   .scene-divider {
     background: var(--border-color) !important;
   }
-  
+
   .scene-actions {
     background: var(--bg-card) !important;
-    
+
     .edit-btn {
       background: var(--primary-color) !important;
       color: var(--text-inverse) !important;
       border-radius: var(--radius-sm) !important;
-      
+
       &:hover {
         background: var(--primary-hover) !important;
       }
     }
   }
-  
+
   .resource-list {
     background: var(--bg-card) !important;
     border-radius: var(--radius-lg) !important;
@@ -711,40 +717,40 @@
       color: var(--text-secondary) !important;
       border-bottom-color: var(--border-color) !important;
     }
-    
+
     td {
       color: var(--text-primary) !important;
       border-bottom-color: var(--border-color) !important;
     }
   }
-  
+
   .list-row {
     &:hover {
       background: var(--bg-hover) !important;
     }
   }
-  
+
   .enter-editor-btn {
     background: var(--primary-color) !important;
     color: var(--text-inverse) !important;
     border-radius: var(--radius-sm) !important;
-    
+
     &:hover {
       background: var(--primary-hover) !important;
     }
   }
-  
+
   .row-thumbnail {
     background: var(--bg-hover) !important;
     border-radius: var(--radius-sm) !important;
   }
-  
+
   .list-tag {
     background: var(--primary-light) !important;
     color: var(--primary-color) !important;
     border-radius: var(--radius-sm) !important;
   }
-  
+
   .visibility-cell {
     &.public {
       color: var(--success-color) !important;
@@ -753,11 +759,11 @@
       color: var(--text-muted) !important;
     }
   }
-  
+
   .more-btn {
     color: var(--text-secondary) !important;
     border-radius: var(--radius-sm) !important;
-    
+
     &:hover {
       background: var(--bg-hover) !important;
     }
@@ -767,60 +773,59 @@
     background: var(--bg-card) !important;
     border-radius: var(--radius-md) !important;
     box-shadow: var(--shadow-lg) !important;
-    
+
     .menu-item {
       color: var(--text-primary) !important;
       border-radius: var(--radius-sm) !important;
-      
+
       &:hover {
         background: var(--bg-hover) !important;
       }
-      
+
       &.danger {
         color: var(--danger-color) !important;
-        
+
         &:hover {
           background: var(--danger-light) !important;
         }
       }
     }
   }
-  
+
   .empty-state {
     color: var(--text-muted) !important;
-    
+
     .empty-icon {
       color: var(--text-muted) !important;
     }
   }
-  
+
   .upload-btn-secondary {
     border-color: var(--primary-color) !important;
     color: var(--primary-color) !important;
     border-radius: var(--radius-md) !important;
-    
+
     &:hover {
       background: var(--primary-light) !important;
     }
   }
-  
+
   .page-btn {
     border-color: var(--border-color) !important;
     background: var(--bg-card) !important;
     color: var(--text-secondary) !important;
     border-radius: var(--radius-md) !important;
-    
+
     &:hover:not(:disabled) {
       border-color: var(--primary-color) !important;
       color: var(--primary-color) !important;
     }
   }
-  
+
   .page-info {
     color: var(--text-secondary) !important;
   }
 }
-
 
 // ============================================
 // 帮助中心页面主题适配
@@ -829,51 +834,51 @@
 .help-center {
   background: var(--bg-page) !important;
   font-family: var(--font-family) !important;
-  
+
   .hero-title {
     color: var(--text-primary) !important;
   }
-  
+
   .hero-subtitle {
     color: var(--text-secondary) !important;
   }
-  
+
   .search-box {
     .search-icon {
       color: var(--text-muted) !important;
     }
-    
+
     .search-input {
       border-color: var(--border-color) !important;
       border-radius: var(--radius-full) !important;
       background: var(--bg-card) !important;
       color: var(--text-primary) !important;
-      
+
       &::placeholder {
         color: var(--text-muted) !important;
       }
-      
+
       &:focus {
         border-color: var(--primary-color) !important;
         box-shadow: 0 0 0 4px var(--primary-light) !important;
       }
     }
   }
-  
+
   .section-icon {
     color: var(--primary-color) !important;
   }
-  
+
   .section-title {
     color: var(--text-primary) !important;
   }
-  
+
   .clear-search {
     border-color: var(--border-color) !important;
     border-radius: var(--radius-full) !important;
     background: var(--bg-card) !important;
     color: var(--text-secondary) !important;
-    
+
     &:hover {
       border-color: var(--primary-color) !important;
       color: var(--primary-color) !important;
@@ -883,64 +888,64 @@
   .search-group-title {
     color: var(--text-secondary) !important;
   }
-  
+
   .no-results {
     background: var(--bg-card) !important;
     border-radius: var(--radius-lg) !important;
-    
+
     .svg-inline--fa {
       color: var(--text-muted) !important;
     }
-    
+
     p {
       color: var(--text-secondary) !important;
     }
   }
-  
+
   .subsection-title {
     color: var(--text-secondary) !important;
   }
-  
+
   .view-more-link {
     color: var(--primary-color) !important;
-    
+
     &:hover {
       color: var(--primary-hover) !important;
     }
   }
-  
+
   .video-card {
     background: var(--bg-card) !important;
     border-radius: var(--radius-lg) !important;
-    
+
     &:hover {
       box-shadow: var(--shadow-lg) !important;
     }
   }
-  
+
   .video-thumbnail {
     background: var(--border-color) !important;
-    
+
     .thumbnail-placeholder {
       .svg-inline--fa {
         color: var(--text-muted) !important;
       }
     }
-    
+
     .play-button {
       background: var(--bg-card) !important;
       border-radius: 50% !important;
-      
+
       .svg-inline--fa {
         color: var(--text-primary) !important;
       }
     }
   }
-  
+
   .video-title {
     color: var(--text-primary) !important;
   }
-  
+
   .video-desc {
     color: var(--text-secondary) !important;
   }
@@ -949,56 +954,56 @@
     background: var(--bg-card) !important;
     border-color: var(--border-color) !important;
     border-radius: var(--radius-md) !important;
-    
+
     &:hover {
       border-color: var(--primary-color) !important;
-      
+
       .doc-arrow {
         color: var(--primary-color) !important;
       }
     }
   }
-  
+
   .doc-icon {
     border-radius: var(--radius-md) !important;
-    
+
     .svg-inline--fa {
       color: var(--primary-color) !important;
     }
   }
-  
+
   .doc-title {
     color: var(--text-primary) !important;
   }
-  
+
   .doc-desc {
     color: var(--text-secondary) !important;
   }
-  
+
   .doc-arrow {
     color: var(--text-muted) !important;
   }
-  
+
   .faq-item {
     background: var(--bg-card) !important;
     border-color: var(--border-color) !important;
     border-radius: var(--radius-md) !important;
-    
+
     &.expanded {
       .faq-toggle {
         color: var(--primary-color) !important;
       }
     }
   }
-  
+
   .faq-question {
     color: var(--text-primary) !important;
-    
+
     .faq-toggle {
       color: var(--text-muted) !important;
     }
   }
-  
+
   .faq-answer {
     p {
       color: var(--text-secondary) !important;
@@ -1008,46 +1013,46 @@
   .help-card {
     border-radius: var(--radius-lg) !important;
   }
-  
+
   .wechat-card {
     border-color: rgba(0, 186, 255, 0.2) !important;
   }
-  
+
   .qrcode-wrapper {
     border-radius: var(--radius-md) !important;
     background: var(--bg-card) !important;
-    
+
     .qrcode-placeholder {
       background: var(--bg-card) !important;
-      
+
       .svg-inline--fa {
         color: var(--text-muted) !important;
       }
     }
   }
-  
+
   .email-card {
     background: var(--bg-card) !important;
     border-color: var(--border-color) !important;
   }
-  
+
   .email-icon {
     border-radius: var(--radius-lg) !important;
     background: var(--primary-light) !important;
-    
+
     .svg-inline--fa {
       color: var(--primary-color) !important;
     }
   }
-  
+
   .card-title {
     color: var(--text-primary) !important;
   }
-  
+
   .card-desc {
     color: var(--text-secondary) !important;
   }
-  
+
   .email-link {
     color: var(--primary-color) !important;
   }
@@ -1062,7 +1067,6 @@
     color: var(--text-muted) !important;
   }
 }
-
 
 // ============================================
 // 顶部导航栏主题适配（毛玻璃效果）
@@ -1093,7 +1097,7 @@
 
 .icon-btn {
   color: var(--text-secondary) !important;
-  
+
   &:hover {
     background: var(--bg-hover) !important;
     color: var(--primary-color) !important;
@@ -1110,24 +1114,24 @@
   .navbar-container,
   .header-glass {
     background-color: rgba(11, 14, 20, 0.85) !important;
-    border-bottom-color: #21262D !important;
+    border-bottom-color: #21262d !important;
   }
-  
+
   .breadcrumb-text {
-    color: #63676D !important;
+    color: #63676d !important;
   }
-  
+
   .icon-btn {
-    color: #B0B3B8 !important;
-    
+    color: #b0b3b8 !important;
+
     &:hover {
-      background: #1C2128 !important;
-      color: #2D68FF !important;
+      background: #1c2128 !important;
+      color: #2d68ff !important;
     }
   }
-  
+
   .user-avatar {
-    border-color: #2D68FF !important;
+    border-color: #2d68ff !important;
     box-shadow: 0 0 0 4px rgba(45, 104, 255, 0.15) !important;
   }
 }
@@ -1141,23 +1145,25 @@
     -webkit-backdrop-filter: blur(20px) !important;
     border-bottom: 1px solid rgba(0, 242, 255, 0.15) !important;
   }
-  
+
   .breadcrumb-text {
-    color: #5A7078 !important;
+    color: #5a7078 !important;
   }
-  
+
   .icon-btn {
-    color: #8BA3AD !important;
-    
+    color: #8ba3ad !important;
+
     &:hover {
       background: rgba(0, 242, 255, 0.1) !important;
-      color: #00F2FF !important;
+      color: #00f2ff !important;
     }
   }
-  
+
   .user-avatar {
-    border-color: #00F2FF !important;
-    box-shadow: 0 0 0 4px rgba(0, 242, 255, 0.12), 0 0 15px rgba(0, 242, 255, 0.2) !important;
+    border-color: #00f2ff !important;
+    box-shadow:
+      0 0 0 4px rgba(0, 242, 255, 0.12),
+      0 0 15px rgba(0, 242, 255, 0.2) !important;
   }
 }
 
@@ -1166,24 +1172,24 @@
   .navbar-container,
   .header-glass {
     background-color: rgba(255, 248, 245, 0.85) !important;
-    border-bottom: 2px solid #FFE4DB !important;
+    border-bottom: 2px solid #ffe4db !important;
   }
-  
+
   .breadcrumb-text {
     color: #999999 !important;
   }
-  
+
   .icon-btn {
     color: #666666 !important;
-    
+
     &:hover {
-      background: #FFF0EB !important;
-      color: #FF6B35 !important;
+      background: #fff0eb !important;
+      color: #ff6b35 !important;
     }
   }
-  
+
   .user-avatar {
-    border-color: #FF6B35 !important;
+    border-color: #ff6b35 !important;
     box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.12) !important;
   }
 }
@@ -1197,16 +1203,16 @@
     -webkit-backdrop-filter: none !important;
     border-bottom: 1px solid #e0e0e0 !important;
   }
-  
+
   .icon-btn {
     border-radius: 0 !important;
-    
+
     &:hover {
       background: #f5f5f5 !important;
       color: #000000 !important;
     }
   }
-  
+
   .user-avatar {
     border-color: #000000 !important;
     box-shadow: none !important;
@@ -1217,33 +1223,32 @@
 .theme-neo-brutalism {
   .navbar-container,
   .header-glass {
-    background-color: #FFFFFF !important;
+    background-color: #ffffff !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     border-bottom: 3px solid #000000 !important;
   }
-  
+
   .breadcrumb-text {
     font-weight: 900 !important;
     color: #333333 !important;
   }
-  
+
   .icon-btn {
     border-radius: 4px !important;
-    
+
     &:hover {
-      background: #FFF000 !important;
+      background: #fff000 !important;
       color: #000000 !important;
       box-shadow: 3px 3px 0px #000000 !important;
     }
   }
-  
+
   .user-avatar {
     border: 3px solid #000000 !important;
     box-shadow: 4px 4px 0px #000000 !important;
   }
 }
-
 
 // ============================================
 // 底部信息栏主题适配
@@ -1252,21 +1257,21 @@
 .app-footer {
   background: var(--bg-card) !important;
   border-top: var(--border-width) solid var(--border-color) !important;
-  
+
   .footer-logo {
     .logo-img {
       border-radius: var(--radius-sm) !important;
     }
   }
-  
+
   .footer-link {
     color: var(--text-muted) !important;
-    
+
     &:hover {
       color: var(--primary-color) !important;
     }
   }
-  
+
   .divider {
     color: var(--border-color) !important;
   }
@@ -1274,19 +1279,19 @@
 
 // 深色主题底部信息栏
 .theme-deep-space .app-footer {
-  background: #080A0F !important;
-  border-top: 1px solid #21262D !important;
-  
+  background: #080a0f !important;
+  border-top: 1px solid #21262d !important;
+
   .footer-link {
-    color: #63676D !important;
-    
+    color: #63676d !important;
+
     &:hover {
-      color: #2D68FF !important;
+      color: #2d68ff !important;
     }
   }
-  
+
   .divider {
-    color: #21262D !important;
+    color: #21262d !important;
   }
 }
 
@@ -1296,16 +1301,16 @@
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border-top: 1px solid rgba(0, 242, 255, 0.12) !important;
-  
+
   .footer-link {
-    color: #5A7078 !important;
-    
+    color: #5a7078 !important;
+
     &:hover {
-      color: #00F2FF !important;
+      color: #00f2ff !important;
       text-shadow: 0 0 10px rgba(0, 242, 255, 0.5) !important;
     }
   }
-  
+
   .divider {
     color: rgba(0, 242, 255, 0.2) !important;
   }
@@ -1313,19 +1318,19 @@
 
 // 暖阳橙韵主题底部信息栏
 .theme-edu-friendly .app-footer {
-  background: linear-gradient(180deg, #ffffff 0%, #FFF8F5 100%) !important;
-  border-top: 2px solid #FFE4DB !important;
-  
+  background: linear-gradient(180deg, #ffffff 0%, #fff8f5 100%) !important;
+  border-top: 2px solid #ffe4db !important;
+
   .footer-link {
     color: #999999 !important;
-    
+
     &:hover {
-      color: #FF6B35 !important;
+      color: #ff6b35 !important;
     }
   }
-  
+
   .divider {
-    color: #FFE4DB !important;
+    color: #ffe4db !important;
   }
 }
 
@@ -1333,15 +1338,15 @@
 .theme-minimal-pure .app-footer {
   background: #fafafa !important;
   border-top: 1px solid #e0e0e0 !important;
-  
+
   .footer-link {
     color: #999999 !important;
-    
+
     &:hover {
       color: #000000 !important;
     }
   }
-  
+
   .divider {
     color: #e0e0e0 !important;
   }
@@ -1349,21 +1354,20 @@
 
 // 新粗犷主义主题底部信息栏
 .theme-neo-brutalism .app-footer {
-  background: #FFFFFF !important;
+  background: #ffffff !important;
   border-top: 3px solid #000000 !important;
-  
+
   .footer-link {
     color: #333333 !important;
     font-weight: 600 !important;
-    
+
     &:hover {
-      color: #FF007A !important;
+      color: #ff007a !important;
     }
   }
-  
+
   .divider {
     color: #000000 !important;
     font-weight: 900 !important;
   }
 }
-

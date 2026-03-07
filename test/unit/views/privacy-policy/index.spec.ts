@@ -26,33 +26,27 @@ vi.mock("vue-router", () => ({
 // Fix: always include __esModule: true so Vue unwraps .default correctly.
 // ---------------------------------------------------------------------------
 
-vi.mock(
-  "@/views/privacy-policy/components/PrivacyPolicyTab.vue",
-  async () => {
-    const { defineComponent } = await import("vue");
-    return {
-      __esModule: true,
-      default: defineComponent({
-        name: "PrivacyPolicyTab",
-        template: '<div data-testid="privacy-tab">隐私政策内容</div>',
-      }),
-    };
-  },
-);
+vi.mock("@/views/privacy-policy/components/PrivacyPolicyTab.vue", async () => {
+  const { defineComponent } = await import("vue");
+  return {
+    __esModule: true,
+    default: defineComponent({
+      name: "PrivacyPolicyTab",
+      template: '<div data-testid="privacy-tab">隐私政策内容</div>',
+    }),
+  };
+});
 
-vi.mock(
-  "@/views/privacy-policy/components/TermsOfServiceTab.vue",
-  async () => {
-    const { defineComponent } = await import("vue");
-    return {
-      __esModule: true,
-      default: defineComponent({
-        name: "TermsOfServiceTab",
-        template: '<div data-testid="terms-tab">服务条款内容</div>',
-      }),
-    };
-  },
-);
+vi.mock("@/views/privacy-policy/components/TermsOfServiceTab.vue", async () => {
+  const { defineComponent } = await import("vue");
+  return {
+    __esModule: true,
+    default: defineComponent({
+      name: "TermsOfServiceTab",
+      template: '<div data-testid="terms-tab">服务条款内容</div>',
+    }),
+  };
+});
 
 // ---------------------------------------------------------------------------
 // Helper
@@ -98,7 +92,7 @@ describe("PrivacyPolicy index.vue", () => {
     expect(panes.length).toBe(2);
 
     const labels = Array.from(panes).map(
-      (n) => (n as HTMLElement).dataset.label,
+      (n) => (n as HTMLElement).dataset.label
     );
     expect(labels).toContain("隐私政策");
     expect(labels).toContain("服务条款");
@@ -165,7 +159,7 @@ describe("PrivacyPolicy index.vue", () => {
     expect(mockReplace).toHaveBeenCalledWith(
       expect.objectContaining({
         query: expect.objectContaining({ tab: "privacy" }),
-      }),
+      })
     );
     r.unmount();
   });
@@ -180,7 +174,7 @@ describe("PrivacyPolicy index.vue", () => {
     expect(mockReplace).toHaveBeenCalledWith(
       expect.objectContaining({
         query: expect.objectContaining({ tab: "terms" }),
-      }),
+      })
     );
     r.unmount();
   });

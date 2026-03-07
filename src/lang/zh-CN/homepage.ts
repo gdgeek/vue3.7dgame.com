@@ -91,7 +91,8 @@ export default {
       confirmUnbind: "确认解绑",
       unbindDirectNoVerify: "当前邮箱未验证，可直接解绑，无需验证码。",
       confirmDirectUnbind: "确认直接解绑",
-      bindDirectNoVerify: "当前邮箱未验证，可直接绑定新邮箱，无需旧邮箱二次确认。",
+      bindDirectNoVerify:
+        "当前邮箱未验证，可直接绑定新邮箱，无需旧邮箱二次确认。",
       verifyEmail: "验证邮箱",
       accountLocked: "账户已被锁定，请 {time} 秒后再试",
       avatarCropping: {

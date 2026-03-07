@@ -8,7 +8,11 @@ import {
 // useDialogList 不依赖 Vue 组件生命周期，直接调用即可
 // （与 usePageData 不同，它不使用 onMounted）
 function setupDialogList<T>(
-  fetchFn: (sorted: string, searched: string, page: number) => Promise<{ data: T[]; headers?: Record<string, unknown> }>
+  fetchFn: (
+    sorted: string,
+    searched: string,
+    page: number
+  ) => Promise<{ data: T[]; headers?: Record<string, unknown> }>
 ) {
   return useDialogList<T>(fetchFn);
 }
@@ -167,7 +171,9 @@ describe("useDialogList composable", () => {
     });
 
     it("响应头不含分页信息时 pagination 保持原值不变", async () => {
-      const fetchFn = vi.fn().mockResolvedValue(makeResponseNoHeaders<Item>([]));
+      const fetchFn = vi
+        .fn()
+        .mockResolvedValue(makeResponseNoHeaders<Item>([]));
       const { refresh, active } = setupDialogList<Item>(fetchFn);
 
       // 设置非默认值，验证不被覆盖
@@ -320,9 +326,11 @@ describe("useDialogList composable", () => {
   describe("handleCurrentChange()", () => {
     it("更新当前页码并触发 refresh", async () => {
       // 让 mock 响应携带 page=4，避免 refresh 完成后将 current 覆盖回 1
-      const fetchFn = vi.fn().mockResolvedValue(
-        makeResponse<Item>([], { "x-pagination-current-page": "4" })
-      );
+      const fetchFn = vi
+        .fn()
+        .mockResolvedValue(
+          makeResponse<Item>([], { "x-pagination-current-page": "4" })
+        );
       const { handleCurrentChange, active } = setupDialogList<Item>(fetchFn);
 
       handleCurrentChange(4);
@@ -349,10 +357,16 @@ describe("useDialogList composable", () => {
   describe("组合场景", () => {
     it("搜索后翻页，page 使用新 searched 参数", async () => {
       // 第一次调用（search）→ 返回 page=1；第二次调用（handleCurrentChange）→ 返回 page=3
-      const fetchFn = vi.fn()
-        .mockResolvedValueOnce(makeResponse<Item>([], { "x-pagination-current-page": "1" }))
-        .mockResolvedValueOnce(makeResponse<Item>([], { "x-pagination-current-page": "3" }));
-      const { search, handleCurrentChange, active } = setupDialogList<Item>(fetchFn);
+      const fetchFn = vi
+        .fn()
+        .mockResolvedValueOnce(
+          makeResponse<Item>([], { "x-pagination-current-page": "1" })
+        )
+        .mockResolvedValueOnce(
+          makeResponse<Item>([], { "x-pagination-current-page": "3" })
+        );
+      const { search, handleCurrentChange, active } =
+        setupDialogList<Item>(fetchFn);
 
       search("vue");
       await nextTick();

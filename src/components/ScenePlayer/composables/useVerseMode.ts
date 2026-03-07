@@ -36,7 +36,8 @@ export function useVerseMode(verse: Verse | undefined) {
       const meta = verse!.metas.find(
         (candidate): candidate is VerseMetaInfo =>
           isVerseMetaInfo(candidate) &&
-          String((candidate as VerseMetaInfo).id) === String(moduleParams.meta_id)
+          String((candidate as VerseMetaInfo).id) ===
+            String(moduleParams.meta_id)
       );
 
       if (meta?.events) {
@@ -56,5 +57,10 @@ export function useVerseMode(verse: Verse | undefined) {
     });
   };
 
-  return { eventContainer, parseVerseData, initEventContainer, isVerseMetaInfo };
+  return {
+    eventContainer,
+    parseVerseData,
+    initEventContainer,
+    isVerseMetaInfo,
+  };
 }

@@ -101,9 +101,10 @@ describe("Files API", () => {
   });
 
   it("sends the file data as body", async () => {
-    const data = { url: "https://example.com/b.jpg", name: "img" } as Parameters<
-      typeof filesApi.postFile
-    >[0];
+    const data = {
+      url: "https://example.com/b.jpg",
+      name: "img",
+    } as Parameters<typeof filesApi.postFile>[0];
     await filesApi.postFile(data);
     expect(request.mock.calls[0][0].data).toEqual(data);
   });
@@ -111,7 +112,9 @@ describe("Files API", () => {
   it("returns the request result", async () => {
     const mockResp = { data: { id: 1, url: "https://cdn/img.jpg" } };
     request.mockResolvedValue(mockResp);
-    const result = await filesApi.postFile({ url: "https://example.com/img.jpg" } as Parameters<typeof filesApi.postFile>[0]);
+    const result = await filesApi.postFile({
+      url: "https://example.com/img.jpg",
+    } as Parameters<typeof filesApi.postFile>[0]);
     expect(result).toEqual(mockResp);
   });
 });

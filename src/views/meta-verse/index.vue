@@ -19,14 +19,14 @@
           <el-button type="primary" @click="createWindow">
             <font-awesome-icon
               :icon="['fas', 'plus']"
-              style=" margin-right: 4px;font-size: 18px"
+              style="margin-right: 4px; font-size: 18px"
             ></font-awesome-icon>
             {{ $t("verse.page.title") }}
           </el-button>
           <el-button @click="openImportDialog">
             <font-awesome-icon
               :icon="['fas', 'upload']"
-              style=" margin-right: 4px;font-size: 18px"
+              style="margin-right: 4px; font-size: 18px"
             ></font-awesome-icon>
             {{ t("ui.importScene") }}
           </el-button>

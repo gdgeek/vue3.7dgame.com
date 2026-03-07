@@ -79,7 +79,10 @@ export function useThreeScene() {
    * @param container - The HTML div that will host the renderer canvas
    * @param options   - Scene configuration (theme, mode, controls ref, frame callback)
    */
-  const setupScene = (container: HTMLDivElement, options: ThreeSceneOptions): void => {
+  const setupScene = (
+    container: HTMLDivElement,
+    options: ThreeSceneOptions
+  ): void => {
     isDestroyed = false;
     const { isDark, mode, controls, onFrame } = options;
 
@@ -148,7 +151,11 @@ export function useThreeScene() {
     };
     rafId = requestAnimationFrame(animate);
 
-    logger.log("[ScenePlayer] Three.js scene initialised:", { mode, maxDistance, isDark });
+    logger.log("[ScenePlayer] Three.js scene initialised:", {
+      mode,
+      maxDistance,
+      isDark,
+    });
 
     // ── ResizeObserver ────────────────────────────────────────────────────────
     resizeObserver = new ResizeObserver(() => {

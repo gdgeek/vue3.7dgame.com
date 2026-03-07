@@ -35,25 +35,73 @@ vi.mock("@/router/modules/public", () => ({
   publicRoutes: [],
 }));
 vi.mock("@/router/modules/home", () => ({
-  homeRoutes: { path: "/home", name: "Home", component: () => {}, children: [], meta: { title: "home" } },
-  settingsRoutes: { path: "/settings", name: "Settings", component: () => {}, children: [], meta: {} },
+  homeRoutes: {
+    path: "/home",
+    name: "Home",
+    component: () => {},
+    children: [],
+    meta: { title: "home" },
+  },
+  settingsRoutes: {
+    path: "/settings",
+    name: "Settings",
+    component: () => {},
+    children: [],
+    meta: {},
+  },
 }));
 vi.mock("@/router/modules/resource", () => ({
-  resourceRoutes: { path: "/resource", name: "Resource", component: () => {}, children: [], meta: {} },
+  resourceRoutes: {
+    path: "/resource",
+    name: "Resource",
+    component: () => {},
+    children: [],
+    meta: {},
+  },
 }));
 vi.mock("@/router/modules/meta", () => ({
   metaRoutes: [],
 }));
 vi.mock("@/router/modules/verse", () => ({
-  verseRoutes: { path: "/verse", name: "Verse", component: () => {}, children: [], meta: {} },
-  aiRoutes: { path: "/ai", name: "AI", component: () => {}, children: [], meta: {} },
+  verseRoutes: {
+    path: "/verse",
+    name: "Verse",
+    component: () => {},
+    children: [],
+    meta: {},
+  },
+  aiRoutes: {
+    path: "/ai",
+    name: "AI",
+    component: () => {},
+    children: [],
+    meta: {},
+  },
 }));
 vi.mock("@/router/modules/campus", () => ({
-  campusRoutes: { path: "/campus", name: "Campus", component: () => {}, children: [], meta: {} },
+  campusRoutes: {
+    path: "/campus",
+    name: "Campus",
+    component: () => {},
+    children: [],
+    meta: {},
+  },
 }));
 vi.mock("@/router/modules/manager", () => ({
-  managerRoutes: { path: "/manager", name: "Manager", component: () => {}, children: [], meta: {} },
-  gameRoutes: { path: "/game", name: "Game", component: () => {}, children: [], meta: {} },
+  managerRoutes: {
+    path: "/manager",
+    name: "Manager",
+    component: () => {},
+    children: [],
+    meta: {},
+  },
+  gameRoutes: {
+    path: "/game",
+    name: "Game",
+    component: () => {},
+    children: [],
+    meta: {},
+  },
 }));
 
 // ── Mock ability utilities ────────────────────────────────────────────────────

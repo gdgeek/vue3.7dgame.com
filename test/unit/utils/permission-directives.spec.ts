@@ -30,7 +30,11 @@ function makeBinding(value: unknown): DirectiveBinding {
   return { value } as DirectiveBinding;
 }
 
-function callMounted(directive: { mounted?: Function }, el: HTMLElement, binding: DirectiveBinding) {
+function callMounted(
+  directive: { mounted?: Function },
+  el: HTMLElement,
+  binding: DirectiveBinding
+) {
   directive.mounted!(el, binding, null as any, null as any);
 }
 
@@ -103,7 +107,9 @@ describe("hasPerm directive", () => {
   it("does not throw when element has no parent", () => {
     mockHasAuth.mockReturnValue(false);
     const el = document.createElement("button"); // No parent
-    expect(() => callMounted(hasPerm, el, makeBinding(["any:perm"]))).not.toThrow();
+    expect(() =>
+      callMounted(hasPerm, el, makeBinding(["any:perm"]))
+    ).not.toThrow();
   });
 });
 
@@ -176,6 +182,8 @@ describe("hasRole directive", () => {
   it("does not throw when element has no parent (no-op removal)", () => {
     mockHasAuth.mockReturnValue(false);
     const el = document.createElement("div"); // No parent
-    expect(() => callMounted(hasRole, el, makeBinding(["admin"]))).not.toThrow();
+    expect(() =>
+      callMounted(hasRole, el, makeBinding(["admin"]))
+    ).not.toThrow();
   });
 });

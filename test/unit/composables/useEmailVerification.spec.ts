@@ -50,8 +50,13 @@ describe("useEmailVerification Composable", () => {
 
   describe("Property 2: 速率限制机制", () => {
     it("Feature: email-verification, Property 2: 速率限制机制 - 测试60秒倒计时", async () => {
-      const { sendCodeForNewEmail, sendCooldown, canSendNewCode, newEmailForm, cleanup } =
-        useEmailVerification();
+      const {
+        sendCodeForNewEmail,
+        sendCooldown,
+        canSendNewCode,
+        newEmailForm,
+        cleanup,
+      } = useEmailVerification();
 
       mockedSendVerificationCode.mockResolvedValue({
         success: true,
@@ -100,8 +105,13 @@ describe("useEmailVerification Composable", () => {
 
   describe("Property 8: 账户锁定机制", () => {
     it("Feature: email-verification, Property 8: 账户锁定机制 - 测试5次失败后锁定", async () => {
-      const { verifyCodeForNewEmail, isLocked, lockTime, newEmailForm, cleanup } =
-        useEmailVerification();
+      const {
+        verifyCodeForNewEmail,
+        isLocked,
+        lockTime,
+        newEmailForm,
+        cleanup,
+      } = useEmailVerification();
 
       mockedVerifyEmailCode.mockRejectedValue({
         error: {
@@ -171,8 +181,13 @@ describe("useEmailVerification Composable", () => {
     });
 
     it("should clear send cooldown on successful verification", async () => {
-      const { sendCodeForNewEmail, verifyCodeForNewEmail, sendCooldown, newEmailForm, cleanup } =
-        useEmailVerification();
+      const {
+        sendCodeForNewEmail,
+        verifyCodeForNewEmail,
+        sendCooldown,
+        newEmailForm,
+        cleanup,
+      } = useEmailVerification();
 
       mockedSendVerificationCode.mockResolvedValue({
         success: true,
@@ -211,7 +226,8 @@ describe("useEmailVerification Composable", () => {
 
   describe("unbindCurrentEmail()", () => {
     it("returns false immediately when email is verified but no code provided", async () => {
-      const { unbindCurrentEmail, loadStatus, cleanup } = useEmailVerification();
+      const { unbindCurrentEmail, loadStatus, cleanup } =
+        useEmailVerification();
 
       // Load status with email_verified = true
       mockedGetEmailStatus.mockResolvedValue({
@@ -233,7 +249,8 @@ describe("useEmailVerification Composable", () => {
     });
 
     it("calls unbindEmail and returns true on success when email is not verified", async () => {
-      const { unbindCurrentEmail, loadStatus, cleanup } = useEmailVerification();
+      const { unbindCurrentEmail, loadStatus, cleanup } =
+        useEmailVerification();
       const { unbindEmail } = await import("@/api/v1/email");
       vi.mocked(unbindEmail).mockResolvedValue({ success: true });
 
@@ -331,8 +348,15 @@ describe("useEmailVerification Composable", () => {
     });
 
     it("clears form fields and changeToken", async () => {
-      const { cancelCurrentAction, loadStatus, newEmailForm, unbindForm, oldEmailForm, changeToken, cleanup } =
-        useEmailVerification();
+      const {
+        cancelCurrentAction,
+        loadStatus,
+        newEmailForm,
+        unbindForm,
+        oldEmailForm,
+        changeToken,
+        cleanup,
+      } = useEmailVerification();
 
       mockedGetEmailStatus.mockResolvedValue({
         success: true,
@@ -378,8 +402,12 @@ describe("useEmailVerification — computed properties", () => {
     mockedGetEmailStatus.mockResolvedValue({
       success: true,
       data: {
-        user_id: 1, username: "test", email: null,
-        email_verified: false, email_verified_at: null, email_verified_at_formatted: null,
+        user_id: 1,
+        username: "test",
+        email: null,
+        email_verified: false,
+        email_verified_at: null,
+        email_verified_at_formatted: null,
       },
     });
     const { currentEmail, loadStatus, cleanup } = useEmailVerification();
@@ -392,8 +420,12 @@ describe("useEmailVerification — computed properties", () => {
     mockedGetEmailStatus.mockResolvedValue({
       success: true,
       data: {
-        user_id: 1, username: "test", email: "user@example.com",
-        email_verified: true, email_verified_at: 1000, email_verified_at_formatted: "2024",
+        user_id: 1,
+        username: "test",
+        email: "user@example.com",
+        email_verified: true,
+        email_verified_at: 1000,
+        email_verified_at_formatted: "2024",
       },
     });
     const { currentEmail, loadStatus, cleanup } = useEmailVerification();
@@ -406,8 +438,12 @@ describe("useEmailVerification — computed properties", () => {
     mockedGetEmailStatus.mockResolvedValue({
       success: true,
       data: {
-        user_id: 1, username: "test", email: null,
-        email_verified: false, email_verified_at: null, email_verified_at_formatted: null,
+        user_id: 1,
+        username: "test",
+        email: null,
+        email_verified: false,
+        email_verified_at: null,
+        email_verified_at_formatted: null,
       },
     });
     const { hasBoundEmail, loadStatus, cleanup } = useEmailVerification();
@@ -420,8 +456,12 @@ describe("useEmailVerification — computed properties", () => {
     mockedGetEmailStatus.mockResolvedValue({
       success: true,
       data: {
-        user_id: 1, username: "test", email: "user@example.com",
-        email_verified: true, email_verified_at: 1000, email_verified_at_formatted: "2024",
+        user_id: 1,
+        username: "test",
+        email: "user@example.com",
+        email_verified: true,
+        email_verified_at: 1000,
+        email_verified_at_formatted: "2024",
       },
     });
     const { hasBoundEmail, loadStatus, cleanup } = useEmailVerification();
@@ -455,8 +495,12 @@ describe("useEmailVerification — verifyCodeForNewEmail", () => {
     mockedGetEmailStatus.mockResolvedValue({
       success: true,
       data: {
-        user_id: 1, username: "test", email: null,
-        email_verified: false, email_verified_at: null, email_verified_at_formatted: null,
+        user_id: 1,
+        username: "test",
+        email: null,
+        email_verified: false,
+        email_verified_at: null,
+        email_verified_at_formatted: null,
       },
     });
   });
@@ -466,7 +510,8 @@ describe("useEmailVerification — verifyCodeForNewEmail", () => {
   });
 
   it("returns false when email or code is empty", async () => {
-    const { verifyCodeForNewEmail, newEmailForm, cleanup } = useEmailVerification();
+    const { verifyCodeForNewEmail, newEmailForm, cleanup } =
+      useEmailVerification();
     newEmailForm.email = "";
     newEmailForm.code = "";
     const result = await verifyCodeForNewEmail();
@@ -475,7 +520,8 @@ describe("useEmailVerification — verifyCodeForNewEmail", () => {
   });
 
   it("calls verifyEmailCode with email and code", async () => {
-    const { verifyCodeForNewEmail, newEmailForm, cleanup } = useEmailVerification();
+    const { verifyCodeForNewEmail, newEmailForm, cleanup } =
+      useEmailVerification();
     newEmailForm.email = "test@example.com";
     newEmailForm.code = "123456";
     vi.mocked(verifyEmailCode).mockResolvedValue({ success: true });
@@ -487,17 +533,22 @@ describe("useEmailVerification — verifyCodeForNewEmail", () => {
   });
 
   it("returns false when API returns success=false", async () => {
-    const { verifyCodeForNewEmail, newEmailForm, cleanup } = useEmailVerification();
+    const { verifyCodeForNewEmail, newEmailForm, cleanup } =
+      useEmailVerification();
     newEmailForm.email = "test@example.com";
     newEmailForm.code = "123456";
-    vi.mocked(verifyEmailCode).mockResolvedValue({ success: false, message: "Wrong code" });
+    vi.mocked(verifyEmailCode).mockResolvedValue({
+      success: false,
+      message: "Wrong code",
+    });
     const result = await verifyCodeForNewEmail();
     expect(result).toBe(false);
     cleanup();
   });
 
   it("returns true and clears code on success", async () => {
-    const { verifyCodeForNewEmail, newEmailForm, cleanup } = useEmailVerification();
+    const { verifyCodeForNewEmail, newEmailForm, cleanup } =
+      useEmailVerification();
     newEmailForm.email = "test@example.com";
     newEmailForm.code = "123456";
     vi.mocked(verifyEmailCode).mockResolvedValue({ success: true });
@@ -665,7 +716,15 @@ describe("useEmailVerification — startChangeFlow", () => {
   });
 
   it("clears form fields and error when called", () => {
-    const { startChangeFlow, step, status, error, oldEmailForm, newEmailForm, cleanup } = useEmailVerification();
+    const {
+      startChangeFlow,
+      step,
+      status,
+      error,
+      oldEmailForm,
+      newEmailForm,
+      cleanup,
+    } = useEmailVerification();
     status.value = {
       user_id: 1,
       username: "test",
@@ -761,11 +820,8 @@ describe("useEmailVerification — sendOldEmailConfirmationCode()", () => {
     const { sendChangeConfirmation } = await import("@/api/v1/email");
     vi.mocked(sendChangeConfirmation).mockResolvedValue({ success: true });
 
-    const {
-      sendOldEmailConfirmationCode,
-      canSendOldConfirmCode,
-      cleanup,
-    } = useEmailVerification();
+    const { sendOldEmailConfirmationCode, canSendOldConfirmCode, cleanup } =
+      useEmailVerification();
 
     expect(canSendOldConfirmCode.value).toBe(true);
     await sendOldEmailConfirmationCode();
@@ -803,8 +859,13 @@ describe("useEmailVerification — verifyOldEmailForChange()", () => {
       data: { change_token: "tok-abc", expires_in: 300 },
     });
 
-    const { verifyOldEmailForChange, oldEmailForm, step, changeToken, cleanup } =
-      useEmailVerification();
+    const {
+      verifyOldEmailForChange,
+      oldEmailForm,
+      step,
+      changeToken,
+      cleanup,
+    } = useEmailVerification();
     oldEmailForm.code = "123456";
     const result = await verifyOldEmailForChange();
 

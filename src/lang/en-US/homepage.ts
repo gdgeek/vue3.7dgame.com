@@ -87,15 +87,18 @@ export default {
       unbindEmailBtn: "Unbind Email",
       nextStep: "Next",
       changeAuthLeft: "Change authorization expires in {seconds}s",
-      verifyOldEmailFirst: "Please verify the old email to get change authorization.",
+      verifyOldEmailFirst:
+        "Please verify the old email to get change authorization.",
       oldEmailCode: "Old Email Code",
       enterSixDigitCode: "Please enter 6-digit code",
       confirmChangeEmail: "Confirm Change",
       verifyBeforeUnbind: "You need to verify the old email before unbinding.",
       confirmUnbind: "Confirm Unbind",
-      unbindDirectNoVerify: "Current email is unverified. You can unbind directly without a code.",
+      unbindDirectNoVerify:
+        "Current email is unverified. You can unbind directly without a code.",
       confirmDirectUnbind: "Confirm Direct Unbind",
-      bindDirectNoVerify: "Current email is unverified. You can bind a new email directly without re-confirming the old one.",
+      bindDirectNoVerify:
+        "Current email is unverified. You can bind a new email directly without re-confirming the old one.",
       verifyEmail: "Verify Email",
       accountLocked: "Account locked, please try again in {time} seconds",
       avatarCropping: {
@@ -205,9 +208,12 @@ export default {
         error1: "Email binding failed",
         error2: "Form validation failed",
       },
-      emailNotVerifiedWarning: "Email not verified. Please verify your email before changing password.",
-      noEmailBound: "No email bound to this account. Please bind an email first.",
-      emailBoundNotFound: "Could not retrieve bound email. Please refresh and try again.",
+      emailNotVerifiedWarning:
+        "Email not verified. Please verify your email before changing password.",
+      noEmailBound:
+        "No email bound to this account. Please bind an email first.",
+      emailBoundNotFound:
+        "Could not retrieve bound email. Please refresh and try again.",
       changeEmailAction: "Change Email",
       unbindEmailAction: "Unbind Email",
       bindEmailAction: "Bind Email",

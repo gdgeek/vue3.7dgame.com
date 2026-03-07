@@ -23,11 +23,18 @@ describe("src/api/menu/model.ts round15", () => {
   });
 
   it("Meta supports hidden/icon/title", () => {
-    expectTypeOf<Meta>().toMatchTypeOf<{ hidden?: boolean; icon?: string; title?: string }>();
+    expectTypeOf<Meta>().toMatchTypeOf<{
+      hidden?: boolean;
+      icon?: string;
+      title?: string;
+    }>();
   });
 
   it("Meta supports alwaysShow/keepAlive", () => {
-    expectTypeOf<Meta>().toMatchTypeOf<{ alwaysShow?: boolean; keepAlive?: boolean }>();
+    expectTypeOf<Meta>().toMatchTypeOf<{
+      alwaysShow?: boolean;
+      keepAlive?: boolean;
+    }>();
   });
 
   it("Meta supports roles and params", () => {

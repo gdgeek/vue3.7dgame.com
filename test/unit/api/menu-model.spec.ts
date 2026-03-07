@@ -37,9 +37,7 @@ describe("RouteVO 接口", () => {
   it("children 字段支持嵌套 RouteVO 数组", () => {
     const route: RouteVO = {
       path: "/parent",
-      children: [
-        { path: "/parent/child", name: "Child" },
-      ],
+      children: [{ path: "/parent/child", name: "Child" }],
     };
     expect(route.children).toHaveLength(1);
     expect(route.children![0].path).toBe("/parent/child");

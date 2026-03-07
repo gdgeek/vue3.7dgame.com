@@ -56,7 +56,14 @@ describe("Transform 接口", () => {
 
 describe("ResourceType 类型", () => {
   it("支持内置类型字符串", () => {
-    const types: ResourceType[] = ["model", "video", "picture", "audio", "text", "voxel"];
+    const types: ResourceType[] = [
+      "model",
+      "video",
+      "picture",
+      "audio",
+      "text",
+      "voxel",
+    ];
     expect(types).toHaveLength(6);
   });
 

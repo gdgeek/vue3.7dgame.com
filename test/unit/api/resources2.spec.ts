@@ -199,7 +199,9 @@ describe("Resources API (part 2) — uncovered functions", () => {
 
     it("rejects when request fails", async () => {
       request.mockRejectedValue(new Error("Server error"));
-      await expect(resourcesApi.getParticle(40)).rejects.toThrow("Server error");
+      await expect(resourcesApi.getParticle(40)).rejects.toThrow(
+        "Server error"
+      );
     });
   });
 
@@ -232,7 +234,9 @@ describe("Resources API (part 2) — uncovered functions", () => {
 
     it("rejects when request fails", async () => {
       request.mockRejectedValue(new Error("Network failure"));
-      await expect(resourcesApi.getAudio(50)).rejects.toThrow("Network failure");
+      await expect(resourcesApi.getAudio(50)).rejects.toThrow(
+        "Network failure"
+      );
     });
   });
 });

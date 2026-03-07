@@ -695,7 +695,9 @@ describe("Entity Copy Function - Unit Tests", () => {
       });
 
       // Mock postMeta to reject
-      (postMeta as ReturnType<typeof vi.fn>).mockRejectedValueOnce(postMetaError);
+      (postMeta as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+        postMetaError
+      );
 
       (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 

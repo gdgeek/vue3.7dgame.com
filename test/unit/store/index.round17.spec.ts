@@ -31,13 +31,25 @@ vi.mock("pinia-plugin-persistedstate", () => ({
 }));
 
 vi.mock("@/store/modules/app", () => ({ useAppStore: hoisted.useAppStore }));
-vi.mock("@/store/modules/config", () => ({ useConfigStore: hoisted.useConfigStore }));
-vi.mock("@/store/modules/permission", () => ({ usePermissionStore: hoisted.usePermissionStore }));
-vi.mock("@/store/modules/screen", () => ({ useScreenStore: hoisted.useScreenStore }));
-vi.mock("@/store/modules/settings", () => ({ useSettingsStore: hoisted.useSettingsStore }));
-vi.mock("@/store/modules/tagsView", () => ({ useTagsViewStore: hoisted.useTagsViewStore }));
+vi.mock("@/store/modules/config", () => ({
+  useConfigStore: hoisted.useConfigStore,
+}));
+vi.mock("@/store/modules/permission", () => ({
+  usePermissionStore: hoisted.usePermissionStore,
+}));
+vi.mock("@/store/modules/screen", () => ({
+  useScreenStore: hoisted.useScreenStore,
+}));
+vi.mock("@/store/modules/settings", () => ({
+  useSettingsStore: hoisted.useSettingsStore,
+}));
+vi.mock("@/store/modules/tagsView", () => ({
+  useTagsViewStore: hoisted.useTagsViewStore,
+}));
 vi.mock("@/store/modules/user", () => ({ useUserStore: hoisted.useUserStore }));
-vi.mock("@/store/modules/domain", () => ({ useDomainStore: hoisted.useDomainStore }));
+vi.mock("@/store/modules/domain", () => ({
+  useDomainStore: hoisted.useDomainStore,
+}));
 
 describe("src/store/index.ts (round17)", () => {
   beforeEach(() => {

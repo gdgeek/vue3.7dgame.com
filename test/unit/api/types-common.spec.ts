@@ -19,13 +19,24 @@ import type {
 
 describe("Author 接口", () => {
   it("必填字段赋值", () => {
-    const a: Author = { id: 1, nickname: "Test", email: null, username: "user1" };
+    const a: Author = {
+      id: 1,
+      nickname: "Test",
+      email: null,
+      username: "user1",
+    };
     expect(a.id).toBe(1);
     expect(a.email).toBeNull();
   });
 
   it("avatar 可选", () => {
-    const a: Author = { id: 2, nickname: "N", email: "a@b.com", username: "u2", avatar: "https://img" };
+    const a: Author = {
+      id: 2,
+      nickname: "N",
+      email: "a@b.com",
+      username: "u2",
+      avatar: "https://img",
+    };
     expect(a.avatar).toBeTruthy();
   });
 });
@@ -45,13 +56,23 @@ describe("PaginationParams 接口", () => {
 
 describe("PaginationResponse 接口", () => {
   it("泛型数据正确封装", () => {
-    const r: PaginationResponse<string> = { data: ["a", "b"], total: 2, page: 1, pageSize: 10 };
+    const r: PaginationResponse<string> = {
+      data: ["a", "b"],
+      total: 2,
+      page: 1,
+      pageSize: 10,
+    };
     expect(r.data).toHaveLength(2);
     expect(r.total).toBe(2);
   });
 
   it("空数据页", () => {
-    const r: PaginationResponse<number> = { data: [], total: 0, page: 1, pageSize: 10 };
+    const r: PaginationResponse<number> = {
+      data: [],
+      total: 0,
+      page: 1,
+      pageSize: 10,
+    };
     expect(r.data).toEqual([]);
   });
 });
@@ -64,7 +85,11 @@ describe("ApiResponse 接口", () => {
   });
 
   it("所有字段赋值", () => {
-    const r: ApiResponse<string> = { data: "ok", message: "success", code: 200 };
+    const r: ApiResponse<string> = {
+      data: "ok",
+      message: "success",
+      code: 200,
+    };
     expect(r.code).toBe(200);
     expect(r.message).toBe("success");
   });
@@ -79,7 +104,15 @@ describe("DeleteResponse 接口", () => {
 
 describe("FileInfo 接口", () => {
   it("所有必填字段赋值", () => {
-    const f: FileInfo = { id: 1, md5: "abc", type: "image", url: "https://x", filename: "a.jpg", size: 1024, key: "k1" };
+    const f: FileInfo = {
+      id: 1,
+      md5: "abc",
+      type: "image",
+      url: "https://x",
+      filename: "a.jpg",
+      size: 1024,
+      key: "k1",
+    };
     expect(f.id).toBe(1);
     expect(f.size).toBe(1024);
     expect(f.type).toBe("image");
@@ -111,7 +144,12 @@ describe("QueryValue / QueryParams 类型", () => {
   });
 
   it("QueryParams 是 QueryValue 的 Record", () => {
-    const q: QueryParams = { page: 1, search: "test", active: true, ids: [1, 2] };
+    const q: QueryParams = {
+      page: 1,
+      search: "test",
+      active: true,
+      ids: [1, 2],
+    };
     expect(q["page"]).toBe(1);
     expect(q["ids"]).toEqual([1, 2]);
   });

@@ -21,7 +21,12 @@ describe("LoginRequest 接口", () => {
   });
 
   it("captcha 和 captchaKey 可选", () => {
-    const r: LoginRequest = { username: "u", password: "p", captcha: "abc", captchaKey: "key1" };
+    const r: LoginRequest = {
+      username: "u",
+      password: "p",
+      captcha: "abc",
+      captchaKey: "key1",
+    };
     expect(r.captcha).toBe("abc");
     expect(r.captchaKey).toBe("key1");
   });
@@ -60,7 +65,11 @@ describe("LinkAccountRequest 接口", () => {
   });
 
   it("provider 为 google，state 可选", () => {
-    const r: LinkAccountRequest = { provider: "google", code: "g_code", state: "state123" };
+    const r: LinkAccountRequest = {
+      provider: "google",
+      code: "g_code",
+      state: "state123",
+    };
     expect(r.state).toBe("state123");
   });
 });
@@ -80,8 +89,11 @@ describe("TokenInfo 接口", () => {
 
   it("tokenType 可选", () => {
     const t: TokenInfo = {
-      token: "t", accessToken: "at", refreshToken: "rt",
-      expires: "2025-01-01", tokenType: "Bearer",
+      token: "t",
+      accessToken: "at",
+      refreshToken: "rt",
+      expires: "2025-01-01",
+      tokenType: "Bearer",
     };
     expect(t.tokenType).toBe("Bearer");
   });
@@ -90,7 +102,12 @@ describe("TokenInfo 接口", () => {
 describe("LoginResponse 接口", () => {
   it("token 为必填", () => {
     const r: LoginResponse = {
-      token: { token: "t", accessToken: "at", refreshToken: "rt", expires: "2025" },
+      token: {
+        token: "t",
+        accessToken: "at",
+        refreshToken: "rt",
+        expires: "2025",
+      },
     };
     expect(r.token.accessToken).toBe("at");
   });
@@ -98,8 +115,18 @@ describe("LoginResponse 接口", () => {
   it("success/user 可选", () => {
     const r: LoginResponse = {
       success: true,
-      token: { token: "t", accessToken: "at", refreshToken: "rt", expires: "2025" },
-      user: { id: 1, username: "user1", email: "a@b.com", avatar: "https://avatar" },
+      token: {
+        token: "t",
+        accessToken: "at",
+        refreshToken: "rt",
+        expires: "2025",
+      },
+      user: {
+        id: 1,
+        username: "user1",
+        email: "a@b.com",
+        avatar: "https://avatar",
+      },
     };
     expect(r.success).toBe(true);
     expect(r.user?.email).toBe("a@b.com");
@@ -109,7 +136,12 @@ describe("LoginResponse 接口", () => {
 describe("RefreshTokenResponse 接口", () => {
   it("token 必填", () => {
     const r: RefreshTokenResponse = {
-      token: { token: "t", accessToken: "new_at", refreshToken: "new_rt", expires: "2026" },
+      token: {
+        token: "t",
+        accessToken: "new_at",
+        refreshToken: "new_rt",
+        expires: "2026",
+      },
     };
     expect(r.token.accessToken).toBe("new_at");
   });
@@ -118,7 +150,12 @@ describe("RefreshTokenResponse 接口", () => {
 describe("RegisterResponse 接口", () => {
   it("token 和 user 均必填", () => {
     const r: RegisterResponse = {
-      token: { token: "t", accessToken: "at", refreshToken: "rt", expires: "2025" },
+      token: {
+        token: "t",
+        accessToken: "at",
+        refreshToken: "rt",
+        expires: "2025",
+      },
       user: { id: 1, username: "newuser" },
     };
     expect(r.user.id).toBe(1);

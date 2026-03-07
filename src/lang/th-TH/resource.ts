@@ -410,6 +410,7 @@ export default {
     },
     maxSizeLimit: "Single file max {size}MB",
     fileTooLarge: "File exceeds {size}MB limit",
-    fileSizeExceededList: "The following files exceed the {size}MB limit: {names}",
+    fileSizeExceededList:
+      "The following files exceed the {size}MB limit: {names}",
   },
 };

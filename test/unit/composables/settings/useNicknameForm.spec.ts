@@ -52,7 +52,13 @@ describe("useNicknameForm", () => {
       const isLoading = ref(false);
       const isDisable = ref(false);
       const { nicknameRules } = useNicknameForm({ isLoading, isDisable });
-      const rules = nicknameRules.nickname as Array<{ validator?: (rule: unknown, value: string, callback: (err?: Error) => void) => void }>;
+      const rules = nicknameRules.nickname as Array<{
+        validator?: (
+          rule: unknown,
+          value: string,
+          callback: (err?: Error) => void
+        ) => void;
+      }>;
       return rules.find((r) => r.validator)!.validator!;
     };
 
@@ -91,11 +97,16 @@ describe("useNicknameForm", () => {
       const useNicknameForm = await importComposable();
       const isLoading = ref(false);
       const isDisable = ref(false);
-      const { submitNickname, nickNameFormRef } = useNicknameForm({ isLoading, isDisable });
+      const { submitNickname, nickNameFormRef } = useNicknameForm({
+        isLoading,
+        isDisable,
+      });
 
       // Mock form ref validation
       nickNameFormRef.value = {
-        validate: vi.fn().mockImplementation((cb: (valid: boolean) => void) => cb(false)),
+        validate: vi
+          .fn()
+          .mockImplementation((cb: (valid: boolean) => void) => cb(false)),
       } as never;
 
       submitNickname();
@@ -110,11 +121,15 @@ describe("useNicknameForm", () => {
       const useNicknameForm = await importComposable();
       const isLoading = ref(false);
       const isDisable = ref(false);
-      const { submitNickname, nicknameForm, nickNameFormRef } = useNicknameForm({ isLoading, isDisable });
+      const { submitNickname, nicknameForm, nickNameFormRef } = useNicknameForm(
+        { isLoading, isDisable }
+      );
 
       nicknameForm.value.nickname = "TestUser";
       nickNameFormRef.value = {
-        validate: vi.fn().mockImplementation((cb: (valid: boolean) => void) => cb(true)),
+        validate: vi
+          .fn()
+          .mockImplementation((cb: (valid: boolean) => void) => cb(true)),
       } as never;
 
       mockSetUserInfo.mockResolvedValue(undefined);
@@ -127,10 +142,15 @@ describe("useNicknameForm", () => {
       const useNicknameForm = await importComposable();
       const isLoading = ref(false);
       const isDisable = ref(false);
-      const { submitNickname, nickNameFormRef } = useNicknameForm({ isLoading, isDisable });
+      const { submitNickname, nickNameFormRef } = useNicknameForm({
+        isLoading,
+        isDisable,
+      });
 
       nickNameFormRef.value = {
-        validate: vi.fn().mockImplementation((cb: (valid: boolean) => void) => cb(false)),
+        validate: vi
+          .fn()
+          .mockImplementation((cb: (valid: boolean) => void) => cb(false)),
       } as never;
 
       submitNickname();
@@ -142,14 +162,18 @@ describe("useNicknameForm", () => {
       const useNicknameForm = await importComposable();
       const isLoading = ref(false);
       const isDisable = ref(false);
-      const { submitNickname, nicknameForm, nickNameFormRef } = useNicknameForm({
-        isLoading,
-        isDisable,
-      });
+      const { submitNickname, nicknameForm, nickNameFormRef } = useNicknameForm(
+        {
+          isLoading,
+          isDisable,
+        }
+      );
 
       nicknameForm.value.nickname = "FailedUser";
       nickNameFormRef.value = {
-        validate: vi.fn().mockImplementation((cb: (valid: boolean) => void) => cb(true)),
+        validate: vi
+          .fn()
+          .mockImplementation((cb: (valid: boolean) => void) => cb(true)),
       } as never;
       mockSetUserInfo.mockRejectedValueOnce(new Error("network failed"));
 

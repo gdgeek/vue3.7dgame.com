@@ -133,8 +133,12 @@ describe("utilityFunctions", () => {
     });
 
     it("returns image URL with different extensions unchanged", () => {
-      expect(getVideoCover("https://example.com/photo.png")).toBe("https://example.com/photo.png");
-      expect(getVideoCover("https://example.com/photo.gif")).toBe("https://example.com/photo.gif");
+      expect(getVideoCover("https://example.com/photo.png")).toBe(
+        "https://example.com/photo.png"
+      );
+      expect(getVideoCover("https://example.com/photo.gif")).toBe(
+        "https://example.com/photo.gif"
+      );
     });
   });
 

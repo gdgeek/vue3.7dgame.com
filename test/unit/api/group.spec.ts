@@ -79,27 +79,17 @@ describe("Group API", () => {
     });
 
     it("appends additional filter params", async () => {
-      await groupApi.getGroups(
-        "-created_at",
-        "",
-        1,
-        20,
-        "image",
-        { status: "active" }
-      );
+      await groupApi.getGroups("-created_at", "", 1, 20, "image", {
+        status: "active",
+      });
       const url: string = request.mock.calls[0][0].url;
       expect(url).toContain("status=active");
     });
 
     it("ignores filter params with empty/null values", async () => {
-      await groupApi.getGroups(
-        "-created_at",
-        "",
-        1,
-        20,
-        "image",
-        { status: "" }
-      );
+      await groupApi.getGroups("-created_at", "", 1, 20, "image", {
+        status: "",
+      });
       const url: string = request.mock.calls[0][0].url;
       expect(url).not.toContain("status");
     });
@@ -112,7 +102,10 @@ describe("Group API", () => {
     it("calls GET /v1/group/{id}", async () => {
       await groupApi.getGroup(7);
       expect(request).toHaveBeenCalledWith(
-        expect.objectContaining({ url: expect.stringContaining("/v1/group/7"), method: "get" })
+        expect.objectContaining({
+          url: expect.stringContaining("/v1/group/7"),
+          method: "get",
+        })
       );
     });
 
@@ -246,7 +239,14 @@ describe("Group API", () => {
     });
 
     it("includes search when search string is provided", async () => {
-      await groupApi.getGroupVerses(2, "-created_at", 1, 20, "verse.image,verse.author", "keyword");
+      await groupApi.getGroupVerses(
+        2,
+        "-created_at",
+        1,
+        20,
+        "verse.image,verse.author",
+        "keyword"
+      );
       const url: string = request.mock.calls[0][0].url;
       expect(url).toContain("search=keyword");
     });
@@ -276,7 +276,9 @@ describe("Group API", () => {
     it("returns the request result", async () => {
       const mockResp = { data: { id: 1, name: "New Group" } };
       request.mockResolvedValue(mockResp);
-      const result = await groupApi.createGroup({ name: "New Group" } as Parameters<typeof groupApi.createGroup>[0]);
+      const result = await groupApi.createGroup({
+        name: "New Group",
+      } as Parameters<typeof groupApi.createGroup>[0]);
       expect(result).toEqual(mockResp);
     });
   });

@@ -233,7 +233,9 @@ describe("usePermissionStore", () => {
 
   it("setMixLeftMenus: matchedItem exists but children is null (falsy) → mixLeftMenus unchanged", () => {
     // children: null is falsy, so the inner `if` branch is NOT taken
-    mockRouterData.value = [{ path: "/null-children", children: null }] as never;
+    mockRouterData.value = [
+      { path: "/null-children", children: null },
+    ] as never;
     const store = usePermissionStore();
     store.setMixLeftMenus("/null-children");
     expect(store.mixLeftMenus).toEqual([]);

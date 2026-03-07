@@ -55,5 +55,3 @@ export const logout = () => {
     method: "delete",
   });*/
 };
-
-

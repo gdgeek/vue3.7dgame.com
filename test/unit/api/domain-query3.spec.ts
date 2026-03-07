@@ -75,8 +75,10 @@ describe("domain-query.ts — startHealthCheck timer callback (lines 42-52)", ()
 
   it("health check succeeds → currentApi restored to PRIMARY (request interceptor uses primary URL)", async () => {
     await import("@/api/domain-query");
-    const errInterceptor = mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
-    const reqInterceptor = mockAxiosInstance3.interceptors.request.use.mock.calls[0]?.[0];
+    const errInterceptor =
+      mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
+    const reqInterceptor =
+      mockAxiosInstance3.interceptors.request.use.mock.calls[0]?.[0];
 
     // Trigger failover → currentApi = BACKUP, healthCheckTimer registered
     await triggerFailover(errInterceptor);
@@ -98,7 +100,8 @@ describe("domain-query.ts — startHealthCheck timer callback (lines 42-52)", ()
 
   it("health check succeeds → logger.info called with recovery message", async () => {
     await import("@/api/domain-query");
-    const errInterceptor = mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
+    const errInterceptor =
+      mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
 
     await triggerFailover(errInterceptor);
 
@@ -112,7 +115,8 @@ describe("domain-query.ts — startHealthCheck timer callback (lines 42-52)", ()
 
   it("health check succeeds → axios.get called with /api/health endpoint", async () => {
     await import("@/api/domain-query");
-    const errInterceptor = mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
+    const errInterceptor =
+      mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
 
     await triggerFailover(errInterceptor);
 
@@ -127,7 +131,8 @@ describe("domain-query.ts — startHealthCheck timer callback (lines 42-52)", ()
 
   it("health check succeeds → interval timer is cleared (no further health checks)", async () => {
     await import("@/api/domain-query");
-    const errInterceptor = mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
+    const errInterceptor =
+      mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
 
     await triggerFailover(errInterceptor);
 
@@ -146,8 +151,10 @@ describe("domain-query.ts — startHealthCheck timer callback (lines 42-52)", ()
 
   it("health check fails → currentApi stays on backup", async () => {
     await import("@/api/domain-query");
-    const errInterceptor = mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
-    const reqInterceptor = mockAxiosInstance3.interceptors.request.use.mock.calls[0]?.[0];
+    const errInterceptor =
+      mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
+    const reqInterceptor =
+      mockAxiosInstance3.interceptors.request.use.mock.calls[0]?.[0];
 
     await triggerFailover(errInterceptor);
 
@@ -163,7 +170,8 @@ describe("domain-query.ts — startHealthCheck timer callback (lines 42-52)", ()
 
   it("health check fails → timer continues (another 30s fires another check)", async () => {
     await import("@/api/domain-query");
-    const errInterceptor = mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
+    const errInterceptor =
+      mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
 
     await triggerFailover(errInterceptor);
 
@@ -182,7 +190,8 @@ describe("domain-query.ts — startHealthCheck timer callback (lines 42-52)", ()
 
   it("health check fails → logger.info NOT called", async () => {
     await import("@/api/domain-query");
-    const errInterceptor = mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
+    const errInterceptor =
+      mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
 
     await triggerFailover(errInterceptor);
 
@@ -207,7 +216,8 @@ describe("domain-query.ts — startHealthCheck timer callback (lines 42-52)", ()
 
   it("second failover attempt with _retry=true → no new health check timer", async () => {
     await import("@/api/domain-query");
-    const errInterceptor = mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
+    const errInterceptor =
+      mockAxiosInstance3.interceptors.response.use.mock.calls[0]?.[1];
 
     // First failover: starts health check
     await triggerFailover(errInterceptor);
@@ -227,6 +237,8 @@ describe("domain-query.ts — startHealthCheck timer callback (lines 42-52)", ()
     await vi.advanceTimersByTimeAsync(30000);
 
     // Only one health check call (from the first failover's timer)
-    expect(mockAxiosGet3.mock.calls.length).toBeGreaterThanOrEqual(callCountBefore);
+    expect(mockAxiosGet3.mock.calls.length).toBeGreaterThanOrEqual(
+      callCountBefore
+    );
   });
 });

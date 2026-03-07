@@ -120,7 +120,9 @@ const { threeScene } = sceneSetup;
  * Finds a resource by ID from the current mode's data source.
  * Meta mode uses props.meta.resources; Verse mode uses props.verse.resources.
  */
-const findResource = (resourceId: string | number): ResourceLike | undefined => {
+const findResource = (
+  resourceId: string | number
+): ResourceLike | undefined => {
   if (mode.value === "meta" && props.meta) {
     return props.meta.resources.find(
       (r) => r.id.toString() === resourceId.toString()
@@ -154,7 +156,9 @@ const triggerEvent = async (eventId: string): Promise<void> => {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
-const isMetaData = (value: unknown): value is { children?: { entities?: unknown[] } } =>
+const isMetaData = (
+  value: unknown
+): value is { children?: { entities?: unknown[] } } =>
   isRecord(value) && ("children" in value || "entities" in value);
 
 // ─── onMounted: full scene initialisation ─────────────────────────────────────
@@ -231,7 +235,10 @@ onMounted(async () => {
               target: collisionObj.targetUuid,
             });
             triggerEvent(collisionObj.eventUuid).catch((error) => {
-              logger.error("[ScenePlayer] Collision event handler failed:", error);
+              logger.error(
+                "[ScenePlayer] Collision event handler failed:",
+                error
+              );
             });
           } else if (!isColliding && collisionObj.isColliding) {
             collisionObj.isColliding = false;
@@ -268,25 +275,33 @@ onMounted(async () => {
     logger.log("[ScenePlayer] Parsed metaData:", metaData);
 
     if (isMetaData(metaData) && metaData.children?.entities) {
-      await processEntities(metaData.children.entities as import("./types").EntityNode[]);
+      await processEntities(
+        metaData.children.entities as import("./types").EntityNode[]
+      );
     } else {
       logger.error("[ScenePlayer] Invalid metaData format:", metaData);
     }
   } else if (mode.value === "verse" && props.verse) {
-    const { parseVerseData, isVerseMetaInfo, initEventContainer, eventContainer } =
-      useVerseMode(props.verse);
+    const {
+      parseVerseData,
+      isVerseMetaInfo,
+      initEventContainer,
+      eventContainer,
+    } = useVerseMode(props.verse);
 
     const verseData = parseVerseData();
     logger.log("[ScenePlayer] Parsed verse data:", props.verse);
 
     if (verseData?.children?.modules) {
       for (const module of verseData.children.modules as Entity[]) {
-        const moduleParams = module.parameters as {
-          meta_id?: string | number;
-          uuid: string;
-          transform?: TransformData;
-          [key: string]: unknown;
-        } | undefined;
+        const moduleParams = module.parameters as
+          | {
+              meta_id?: string | number;
+              uuid: string;
+              transform?: TransformData;
+              [key: string]: unknown;
+            }
+          | undefined;
 
         if (!moduleParams?.meta_id) continue;
 
@@ -294,26 +309,39 @@ onMounted(async () => {
         const meta = props.verse.metas.find(
           (candidate): candidate is import("./types").VerseMetaInfo =>
             isVerseMetaInfo(candidate) &&
-            String((candidate as import("./types").VerseMetaInfo).id) === String(metaId)
+            String((candidate as import("./types").VerseMetaInfo).id) ===
+              String(metaId)
         );
 
         if (meta?.data) {
-          let metaData: { children?: { entities?: import("./types").EntityNode[] } } | null = null;
+          let metaData: {
+            children?: { entities?: import("./types").EntityNode[] };
+          } | null = null;
           if (typeof meta.data === "string") {
             try {
-              metaData = JSON.parse(meta.data) as { children?: { entities?: import("./types").EntityNode[] } };
+              metaData = JSON.parse(meta.data) as {
+                children?: { entities?: import("./types").EntityNode[] };
+              };
             } catch (e) {
-              logger.warn("[ScenePlayer] Failed to parse meta.data JSON, skipping module:", e);
+              logger.warn(
+                "[ScenePlayer] Failed to parse meta.data JSON, skipping module:",
+                e
+              );
               continue;
             }
           } else {
-            metaData = meta.data as { children?: { entities?: import("./types").EntityNode[] } };
+            metaData = meta.data as {
+              children?: { entities?: import("./types").EntityNode[] };
+            };
           }
 
           logger.log("[ScenePlayer] Parsed metaData:", metaData);
 
           if (metaData?.children?.entities) {
-            await processEntities(metaData.children.entities, moduleParams.transform);
+            await processEntities(
+              metaData.children.entities,
+              moduleParams.transform
+            );
           }
         }
       }
@@ -344,7 +372,11 @@ watch(isDark, (newValue) => {
 // ─── Composable-backed public API ─────────────────────────────────────────────
 
 const { playAnimation } = useSceneAnimation(sources, mixers);
-const { getAudioUrl, playQueuedAudio, cleanup: cleanupAudio } = useSceneAudio(sources);
+const {
+  getAudioUrl,
+  playQueuedAudio,
+  cleanup: cleanupAudio,
+} = useSceneAudio(sources);
 
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
 

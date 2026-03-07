@@ -5,7 +5,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("spark-md5", () => ({
-  default: { ArrayBuffer: vi.fn(() => ({ append: vi.fn(), end: vi.fn(() => "md5") })) },
+  default: {
+    ArrayBuffer: vi.fn(() => ({ append: vi.fn(), end: vi.fn(() => "md5") })),
+  },
 }));
 vi.mock("@/utils/logger", () => ({
   logger: { log: vi.fn(), error: vi.fn(), warn: vi.fn() },
@@ -72,7 +74,12 @@ describe("server.ts", () => {
     });
 
     it("includes dir in path when specified", () => {
-      const url = serverFile.fileUrl("file", ".glb", { bucket: "store" }, "models");
+      const url = serverFile.fileUrl(
+        "file",
+        ".glb",
+        { bucket: "store" },
+        "models"
+      );
       expect(url).toContain("models");
     });
   });

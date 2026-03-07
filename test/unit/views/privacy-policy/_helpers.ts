@@ -43,7 +43,7 @@ function makeSlotStub(stubName: string) {
               : null,
             slots.header?.() ?? [],
             slots.default?.() ?? [],
-          ],
+          ]
         );
     },
   });
@@ -76,7 +76,7 @@ export interface MountResult {
 
 export async function mountComponent(
   Component: Component,
-  props: Record<string, unknown> = {},
+  props: Record<string, unknown> = {}
 ): Promise<MountResult> {
   const el = document.createElement("div");
   const app = createApp(Component as any, props);
@@ -96,7 +96,7 @@ export async function mountComponent(
 /** Helper: collect textContent of all matching elements */
 export function textContents(root: HTMLElement, selector: string): string[] {
   return Array.from(root.querySelectorAll(selector)).map(
-    (n) => n.textContent?.trim() ?? "",
+    (n) => n.textContent?.trim() ?? ""
   );
 }
 

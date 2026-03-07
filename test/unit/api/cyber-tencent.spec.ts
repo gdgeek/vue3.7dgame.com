@@ -152,7 +152,9 @@ describe("Tencent Cloud API", () => {
   describe("token() — with only bucket", () => {
     it("URL contains /v1/tencent-clouds/token even with just bucket", async () => {
       await tencentApi.token("just-bucket");
-      expect(request.mock.calls[0][0].url).toContain("/v1/tencent-clouds/token");
+      expect(request.mock.calls[0][0].url).toContain(
+        "/v1/tencent-clouds/token"
+      );
     });
   });
 

@@ -3,13 +3,7 @@
  * 使用 Vue createApp 方式挂载（项目未安装 @vue/test-utils）
  */
 import { describe, it, expect, afterEach } from "vitest";
-import {
-  createApp,
-  reactive,
-  nextTick,
-  defineComponent,
-  type App,
-} from "vue";
+import { createApp, reactive, nextTick, defineComponent, type App } from "vue";
 import SvgIcon from "@/components/SvgIcon/index.vue";
 
 // ── 辅助函数 ─────────────────────────────────────────────────────────────────

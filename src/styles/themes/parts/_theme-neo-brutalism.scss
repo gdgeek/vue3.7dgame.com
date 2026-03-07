@@ -16,34 +16,36 @@
   .video-card,
   .doc-item,
   .faq-item {
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     border: 3px solid #000000 !important;
     border-radius: 8px !important;
     box-shadow: 5px 5px 0px #000000 !important;
-    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out !important;
-    
+    transition:
+      transform 0.1s ease-out,
+      box-shadow 0.1s ease-out !important;
+
     &:hover {
       transform: translate(-3px, -3px) !important;
       box-shadow: 8px 8px 0px #000000 !important;
     }
-    
+
     &:active {
       transform: translate(0, 0) !important;
       box-shadow: 3px 3px 0px #000000 !important;
     }
   }
-  
+
   // 资源库背景
   .resource-library,
   .meta-library,
   .verse-library,
   .help-center,
   .video-tutorials {
-    background: #FAFAF8 !important;
-    
+    background: #fafaf8 !important;
+
     // 波点装饰
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: 0;
       left: 0;
@@ -53,362 +55,362 @@
       pointer-events: none;
       z-index: 0;
     }
-    
+
     > * {
       position: relative;
       z-index: 1;
     }
   }
-  
+
   // 详情面板
   .detail-panel {
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     border-left: 3px solid #000000 !important;
     box-shadow: -5px 0 0 #000000 !important;
-    
+
     .panel-header {
       border-bottom: 3px solid #000000 !important;
-      background: #FFF000 !important;
+      background: #fff000 !important;
     }
-    
+
     .panel-title {
       font-weight: 900 !important;
       text-transform: uppercase !important;
       letter-spacing: 1px !important;
       color: #000000 !important;
     }
-    
+
     .preview-module,
     .cover-preview {
       border: 3px solid #000000 !important;
       border-radius: 8px !important;
       box-shadow: 4px 4px 0px #000000 !important;
     }
-    
+
     .cover-placeholder {
-      background: #E0F7FF !important;
-      
+      background: #e0f7ff !important;
+
       .svg-inline--fa {
         color: #000000 !important;
       }
     }
-    
+
     .change-cover-btn {
-      background: #FFF000 !important;
+      background: #fff000 !important;
       color: #000000 !important;
       border: 2px solid #000000 !important;
       border-radius: 4px !important;
       box-shadow: 2px 2px 0px #000000 !important;
-      
+
       &:hover {
         transform: translate(-1px, -1px) !important;
         box-shadow: 3px 3px 0px #000000 !important;
       }
     }
-    
+
     .item-name {
       font-weight: 900 !important;
       color: #000000 !important;
     }
-    
+
     // 修改名称按钮 - 粗犷硬朗风格
     .name-display .edit-btn {
-      background: #FF69B4 !important;
+      background: #ff69b4 !important;
       color: #000000 !important;
       border: 2px solid #000000 !important;
       border-radius: 4px !important;
       box-shadow: 2px 2px 0px #000000 !important;
-      
+
       &:hover {
-        background: #00FF88 !important;
+        background: #00ff88 !important;
         transform: translate(-1px, -1px) !important;
         box-shadow: 3px 3px 0px #000000 !important;
       }
     }
-    
+
     .info-block {
-      background: #FFF000 !important;
+      background: #fff000 !important;
       border: 2px solid #000000 !important;
       border-radius: 6px !important;
     }
-    
+
     .info-label {
       color: #000000 !important;
       font-weight: 700 !important;
       text-transform: uppercase !important;
     }
-    
+
     .info-value {
       color: #000000 !important;
       font-weight: 900 !important;
     }
-    
+
     // 表单样式
     .form-label {
       color: #000000 !important;
       font-weight: 700 !important;
       text-transform: uppercase !important;
     }
-    
+
     .form-input,
     .form-textarea,
     .name-input {
       border: 2px solid #000000 !important;
       border-radius: 4px !important;
-      
+
       &:focus {
         box-shadow: 4px 4px 0px #000000 !important;
       }
     }
-    
+
     // 标签编辑器
     .tag-item {
-      background: #00FF88 !important;
+      background: #00ff88 !important;
       color: #000000 !important;
       border: 2px solid #000000 !important;
       border-radius: 4px !important;
       font-weight: 700 !important;
     }
-    
+
     .tag-remove:hover {
       background: #000000 !important;
-      color: #FFFFFF !important;
+      color: #ffffff !important;
     }
-    
+
     .tag-select {
       border: 2px solid #000000 !important;
       border-radius: 4px !important;
     }
-    
+
     .add-tag-btn {
-      background: #FFF000 !important;
+      background: #fff000 !important;
       color: #000000 !important;
       border: 2px solid #000000 !important;
       border-radius: 4px !important;
       box-shadow: 3px 3px 0px #000000 !important;
       font-weight: 700 !important;
-      
+
       &:hover {
         transform: translate(-1px, -1px) !important;
         box-shadow: 4px 4px 0px #000000 !important;
       }
     }
-    
+
     // 可见性切换
     .visibility-btn {
       border: 2px solid #000000 !important;
       border-radius: 6px !important;
       font-weight: 700 !important;
-      
+
       &:hover {
-        background: #E0F7FF !important;
+        background: #e0f7ff !important;
       }
-      
+
       &.active {
-        background: #00FF88 !important;
+        background: #00ff88 !important;
         color: #000000 !important;
       }
     }
-    
+
     .panel-footer {
-      background: #FFFFFF !important;
+      background: #ffffff !important;
       border-top: 3px solid #000000 !important;
     }
-    
+
     .download-btn,
     .enter-edit-btn {
-      background: #FFF000 !important;
+      background: #fff000 !important;
       color: #000000 !important;
       border: 3px solid #000000 !important;
       border-radius: 8px !important;
       box-shadow: 4px 4px 0px #000000 !important;
       font-weight: 700 !important;
       text-transform: uppercase !important;
-      
+
       &:hover {
         transform: translate(-2px, -2px) !important;
         box-shadow: 6px 6px 0px #000000 !important;
       }
-      
+
       &:active {
         transform: translate(0, 0) !important;
         box-shadow: 2px 2px 0px #000000 !important;
       }
     }
-    
+
     .cancel-btn {
       border: 2px solid #000000 !important;
       border-radius: 4px !important;
       box-shadow: 3px 3px 0px #000000 !important;
       font-weight: 700 !important;
-      
+
       &:hover {
         transform: translate(-1px, -1px) !important;
         box-shadow: 4px 4px 0px #000000 !important;
       }
     }
-    
+
     .confirm-btn,
     .save-btn {
-      background: #00FF88 !important;
+      background: #00ff88 !important;
       color: #000000 !important;
       border: 2px solid #000000 !important;
       border-radius: 4px !important;
       box-shadow: 3px 3px 0px #000000 !important;
       font-weight: 700 !important;
-      
+
       &:hover {
         transform: translate(-1px, -1px) !important;
         box-shadow: 4px 4px 0px #000000 !important;
       }
     }
-    
+
     .delete-btn {
-      border: 2px solid #FF1744 !important;
-      color: #FF1744 !important;
+      border: 2px solid #ff1744 !important;
+      color: #ff1744 !important;
       border-radius: 6px !important;
       font-weight: 700 !important;
-      
+
       &:hover {
-        background: #FF1744 !important;
-        color: #FFFFFF !important;
+        background: #ff1744 !important;
+        color: #ffffff !important;
       }
     }
-    
+
     .secondary-actions .download-btn {
-      background: #FFFFFF !important;
+      background: #ffffff !important;
       box-shadow: 3px 3px 0px #000000 !important;
-      
+
       &:hover {
         transform: translate(-1px, -1px) !important;
         box-shadow: 4px 4px 0px #000000 !important;
       }
     }
   }
-  
+
   // 对话框
   .custom-confirm-dialog .el-dialog,
   .custom-input-dialog .el-dialog {
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     border: 3px solid #000000 !important;
     border-radius: 12px !important;
     box-shadow: 8px 8px 0px #000000 !important;
-    
+
     .el-dialog__title {
       font-weight: 900 !important;
       text-transform: uppercase !important;
     }
-    
+
     .confirm-box {
       border: 2px solid #000000 !important;
       border-radius: 8px !important;
-      
+
       &.warning {
-        background: #FFAB00 !important;
+        background: #ffab00 !important;
       }
-      
+
       &.danger {
-        background: #FF1744 !important;
-        
+        background: #ff1744 !important;
+
         .confirm-icon,
         .confirm-title {
-          color: #FFFFFF !important;
+          color: #ffffff !important;
         }
       }
     }
-    
+
     .btn-primary {
-      background: #FFF000 !important;
+      background: #fff000 !important;
       color: #000000 !important;
       border: 3px solid #000000 !important;
       border-radius: 8px !important;
       box-shadow: 4px 4px 0px #000000 !important;
       font-weight: 700 !important;
-      
+
       &:hover {
         transform: translate(-2px, -2px) !important;
         box-shadow: 6px 6px 0px #000000 !important;
       }
     }
-    
+
     .btn-secondary {
-      background: #FFFFFF !important;
+      background: #ffffff !important;
       color: #000000 !important;
       border: 3px solid #000000 !important;
       border-radius: 8px !important;
       box-shadow: 4px 4px 0px #000000 !important;
-      
+
       &:hover {
-        background: #F5F5F0 !important;
+        background: #f5f5f0 !important;
         transform: translate(-2px, -2px) !important;
         box-shadow: 6px 6px 0px #000000 !important;
       }
     }
-    
+
     .btn-danger {
-      background: #FF1744 !important;
-      color: #FFFFFF !important;
+      background: #ff1744 !important;
+      color: #ffffff !important;
       border: 3px solid #000000 !important;
     }
   }
-  
+
   // 上传模态框
   .upload-modal {
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     border: 3px solid #000000 !important;
     border-radius: 12px !important;
     box-shadow: 8px 8px 0px #000000 !important;
-    
+
     .modal-title {
       font-weight: 900 !important;
       text-transform: uppercase !important;
     }
-    
+
     .upload-zone {
       border: 3px dashed #000000 !important;
       border-radius: 8px !important;
-      background: #FAFAF8 !important;
-      
+      background: #fafaf8 !important;
+
       &:hover,
       &.drag-active {
-        background: #FFF000 !important;
+        background: #fff000 !important;
         border-style: solid !important;
       }
     }
-    
+
     .browse-btn,
     .start-upload-btn {
-      background: #FF007A !important;
-      color: #FFFFFF !important;
+      background: #ff007a !important;
+      color: #ffffff !important;
       border: 3px solid #000000 !important;
       border-radius: 8px !important;
       box-shadow: 4px 4px 0px #000000 !important;
       font-weight: 700 !important;
-      
+
       &:hover {
         transform: translate(-2px, -2px) !important;
         box-shadow: 6px 6px 0px #000000 !important;
       }
     }
-    
+
     .file-item {
-      background: #F5F5F0 !important;
+      background: #f5f5f0 !important;
       border: 2px solid #000000 !important;
       border-radius: 6px !important;
     }
-    
+
     .progress-fill {
-      background: #00FFC2 !important;
+      background: #00ffc2 !important;
     }
   }
-  
+
   // 按钮通用样式
   .btn-primary,
   .el-button--primary,
   .upload-btn,
   .edit-btn,
   .enter-editor-btn {
-    background: #FFF000 !important;
+    background: #fff000 !important;
     color: #000000 !important;
     border: 3px solid #000000 !important;
     border-radius: 8px !important;
@@ -416,90 +418,92 @@
     font-weight: 700 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.5px !important;
-    
+
     &:hover {
       transform: translate(-2px, -2px) !important;
       box-shadow: 6px 6px 0px #000000 !important;
     }
-    
+
     &:active {
       transform: translate(0, 0) !important;
       box-shadow: 2px 2px 0px #000000 !important;
     }
   }
-  
+
   // 次要按钮
   .btn-secondary,
   .page-btn,
   .view-btn,
   .sort-btn {
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     color: #000000 !important;
     border: 2px solid #000000 !important;
     border-radius: 6px !important;
     box-shadow: 3px 3px 0px #000000 !important;
     font-weight: 600 !important;
-    
+
     &:hover {
       transform: translate(-1px, -1px) !important;
       box-shadow: 4px 4px 0px #000000 !important;
     }
-    
+
     &.active {
-      background: #00FFC2 !important;
+      background: #00ffc2 !important;
     }
   }
-  
+
   // 侧边栏
   .ar-sidebar {
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     border-right: 3px solid #000000 !important;
   }
-  
+
   .sidebar-item {
     border: 2px solid transparent !important;
     border-radius: 8px !important;
     font-weight: 600 !important;
-    
+
     &:hover {
       border-color: #000000 !important;
-      background: #F5F5F0 !important;
+      background: #f5f5f0 !important;
     }
   }
-  
+
   .sidebar-item-active {
-    background: #FFF000 !important;
+    background: #fff000 !important;
     border: 2px solid #000000 !important;
     box-shadow: 3px 3px 0px #000000 !important;
-    
+
     .sidebar-text,
     .svg-inline--fa {
       color: #000000 !important;
       font-weight: 700 !important;
     }
   }
-  
+
   // 搜索框
   .search-input {
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     border: 3px solid #000000 !important;
     border-radius: 8px !important;
     box-shadow: 4px 4px 0px #000000 !important;
     font-weight: 500 !important;
-    
+
     &:focus {
       box-shadow: 6px 6px 0px #000000 !important;
       transform: translate(-2px, -2px);
     }
-    
+
     &::placeholder {
       color: #666666 !important;
       font-weight: 500 !important;
     }
   }
-  
+
   // 标题样式
-  h1, h2, h3,
+  h1,
+  h2,
+  h3,
   .page-title,
   .card-title,
   .panel-title,
@@ -511,247 +515,247 @@
     text-transform: uppercase !important;
     letter-spacing: 1px !important;
   }
-  
+
   // 底部信息栏
   .app-footer {
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     border-top: 3px solid #000000 !important;
-    
+
     .footer-link {
       font-weight: 600 !important;
-      
+
       &:hover {
-        color: #FF007A !important;
+        color: #ff007a !important;
       }
     }
   }
-  
+
   // 下拉菜单
   .card-dropdown-menu,
   .row-menu,
   .tag-dropdown,
   .visibility-dropdown {
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     border: 3px solid #000000 !important;
     border-radius: 8px !important;
     box-shadow: 5px 5px 0px #000000 !important;
-    
+
     .menu-item {
       font-weight: 600 !important;
       border-radius: 4px !important;
-      
+
       &:hover {
-        background: #FFF000 !important;
+        background: #fff000 !important;
       }
-      
+
       &.danger {
         &:hover {
-          background: #FF1744 !important;
-          color: #FFFFFF !important;
+          background: #ff1744 !important;
+          color: #ffffff !important;
         }
       }
     }
   }
-  
+
   // 标签
   .scene-tag,
   .list-tag {
-    background: #00FFC2 !important;
+    background: #00ffc2 !important;
     color: #000000 !important;
     border: 2px solid #000000 !important;
     border-radius: 4px !important;
     font-weight: 700 !important;
   }
-  
+
   // 视图切换
   .view-toggle {
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     border: 2px solid #000000 !important;
     border-radius: 8px !important;
     box-shadow: 3px 3px 0px #000000 !important;
   }
-  
+
   // 空状态
   .empty-state {
     .empty-icon {
       color: #000000 !important;
     }
-    
+
     p {
       font-weight: 600 !important;
     }
-    
+
     .upload-btn-secondary {
-      background: #FFFFFF !important;
+      background: #ffffff !important;
       border: 3px solid #000000 !important;
       color: #000000 !important;
       box-shadow: 4px 4px 0px #000000 !important;
-      
+
       &:hover {
-        background: #FF007A !important;
-        color: #FFFFFF !important;
+        background: #ff007a !important;
+        color: #ffffff !important;
       }
     }
   }
-  
+
   // 进度条
   .progress-fill,
   .el-progress-bar__inner {
-    background: #00FFC2 !important;
+    background: #00ffc2 !important;
     border-radius: 0 !important;
   }
-  
+
   // 列表视图 - 粗犷硬朗风格
   .resource-list {
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     border: 3px solid #000000 !important;
     border-radius: 8px !important;
     box-shadow: 5px 5px 0px #000000 !important;
-    
+
     .list-table {
       th {
-        background: #FFF000 !important;
+        background: #fff000 !important;
         color: #000000 !important;
         font-weight: 700 !important;
         text-transform: uppercase !important;
         border-bottom: 3px solid #000000 !important;
       }
-      
+
       td {
         border-bottom: 2px solid #000000 !important;
         color: #000000 !important;
       }
     }
-    
+
     .list-row {
       &:hover {
-        background: #F5F5F0 !important;
+        background: #f5f5f0 !important;
       }
-      
+
       &:last-child td {
         border-bottom: none !important;
       }
     }
-    
+
     .row-thumbnail {
       border: 2px solid #000000 !important;
       border-radius: 4px !important;
-      background: #E0F7FF !important;
+      background: #e0f7ff !important;
     }
-    
+
     .file-name {
       color: #000000 !important;
       font-weight: 700 !important;
     }
-    
+
     .enter-editor-btn {
-      background: #FF007A !important;
-      color: #FFFFFF !important;
+      background: #ff007a !important;
+      color: #ffffff !important;
       border: 2px solid #000000 !important;
       border-radius: 4px !important;
       box-shadow: 3px 3px 0px #000000 !important;
       font-weight: 700 !important;
       text-transform: uppercase !important;
-      
+
       &:hover {
         transform: translate(-2px, -2px) !important;
         box-shadow: 5px 5px 0px #000000 !important;
       }
     }
-    
+
     .list-tag {
-      background: #00FFC2 !important;
+      background: #00ffc2 !important;
       color: #000000 !important;
       border: 2px solid #000000 !important;
       border-radius: 4px !important;
       font-weight: 700 !important;
     }
-    
+
     .visibility-cell {
       font-weight: 700 !important;
-      
+
       &.public {
-        color: #00AA55 !important;
+        color: #00aa55 !important;
       }
       &.private {
         color: #666666 !important;
       }
     }
-    
+
     .more-btn {
       color: #000000 !important;
       border: 2px solid transparent !important;
       border-radius: 4px !important;
-      
+
       &:hover {
         border-color: #000000 !important;
-        background: #FFF000 !important;
+        background: #fff000 !important;
       }
     }
-    
+
     .row-menu {
-      background: #FFFFFF !important;
+      background: #ffffff !important;
       border: 3px solid #000000 !important;
       border-radius: 8px !important;
       box-shadow: 5px 5px 0px #000000 !important;
       padding: 4px !important;
-      
+
       .menu-item {
         color: #000000 !important;
         font-weight: 600 !important;
         border-radius: 4px !important;
-        
+
         .svg-inline--fa {
           color: #000000 !important;
         }
-        
+
         &:hover {
-          background: #FFF000 !important;
+          background: #fff000 !important;
         }
-        
+
         &.danger {
-          color: #FF1744 !important;
-          
+          color: #ff1744 !important;
+
           .svg-inline--fa {
-            color: #FF1744 !important;
+            color: #ff1744 !important;
           }
-          
+
           &:hover {
-            background: #FF1744 !important;
-            color: #FFFFFF !important;
-            
+            background: #ff1744 !important;
+            color: #ffffff !important;
+
             .svg-inline--fa {
-              color: #FFFFFF !important;
+              color: #ffffff !important;
             }
           }
         }
       }
     }
   }
-  
+
   // 表格（兼容旧样式）
   .list-table {
     border: 3px solid #000000 !important;
     border-radius: 8px !important;
     overflow: hidden;
-    
+
     th {
-      background: #FFF000 !important;
+      background: #fff000 !important;
       color: #000000 !important;
       font-weight: 700 !important;
       text-transform: uppercase !important;
       border-bottom: 3px solid #000000 !important;
     }
-    
+
     td {
       border-bottom: 2px solid #000000 !important;
     }
-    
+
     .list-row:hover {
-      background: #F5F5F0 !important;
+      background: #f5f5f0 !important;
     }
   }
-  
+
   // 输入框聚焦
   .el-input__wrapper:focus-within,
   input:focus,
@@ -773,87 +777,86 @@
   .video-card,
   .doc-item,
   .faq-item {
-    background: #2A2A2A !important;
-    border-color: #FFFFFF !important;
-    box-shadow: 5px 5px 0px #FFFFFF !important;
-    
+    background: #2a2a2a !important;
+    border-color: #ffffff !important;
+    box-shadow: 5px 5px 0px #ffffff !important;
+
     &:hover {
-      box-shadow: 8px 8px 0px #FFFFFF !important;
+      box-shadow: 8px 8px 0px #ffffff !important;
     }
   }
-  
+
   .resource-library,
   .meta-library,
   .verse-library,
   .help-center,
   .video-tutorials {
-    background: #1A1A1A !important;
-    
+    background: #1a1a1a !important;
+
     &::before {
       background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='2' cy='2' r='1.5' fill='%23FFFFFF' fill-opacity='0.08'/%3E%3C/svg%3E");
     }
   }
-  
+
   .detail-panel {
-    background: #2A2A2A !important;
-    border-left-color: #FFFFFF !important;
-    box-shadow: -5px 0 0 #FFFFFF !important;
-    
+    background: #2a2a2a !important;
+    border-left-color: #ffffff !important;
+    box-shadow: -5px 0 0 #ffffff !important;
+
     .panel-header {
-      border-bottom-color: #FFFFFF !important;
+      border-bottom-color: #ffffff !important;
     }
-    
+
     .preview-module {
-      border-color: #FFFFFF !important;
-      box-shadow: 4px 4px 0px #FFFFFF !important;
+      border-color: #ffffff !important;
+      box-shadow: 4px 4px 0px #ffffff !important;
     }
-    
+
     .info-block {
-      background: #FFF000 !important;
-      border-color: #FFFFFF !important;
+      background: #fff000 !important;
+      border-color: #ffffff !important;
     }
-    
+
     .download-btn {
-      border-color: #FFFFFF !important;
-      box-shadow: 4px 4px 0px #FFFFFF !important;
+      border-color: #ffffff !important;
+      box-shadow: 4px 4px 0px #ffffff !important;
     }
   }
-  
+
   .ar-sidebar {
-    background: #1A1A1A !important;
-    border-right-color: #FFFFFF !important;
+    background: #1a1a1a !important;
+    border-right-color: #ffffff !important;
   }
-  
+
   .sidebar-item-active {
-    border-color: #FFFFFF !important;
-    box-shadow: 3px 3px 0px #FFFFFF !important;
+    border-color: #ffffff !important;
+    box-shadow: 3px 3px 0px #ffffff !important;
   }
-  
+
   .search-input {
-    background: #2A2A2A !important;
-    border-color: #FFFFFF !important;
-    color: #FFFFFF !important;
-    box-shadow: 4px 4px 0px #FFFFFF !important;
+    background: #2a2a2a !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    box-shadow: 4px 4px 0px #ffffff !important;
   }
-  
+
   .app-footer {
-    background: #1A1A1A !important;
-    border-top-color: #FFFFFF !important;
+    background: #1a1a1a !important;
+    border-top-color: #ffffff !important;
   }
-  
+
   .btn-primary,
   .upload-btn,
   .download-btn {
-    border-color: #FFFFFF !important;
-    box-shadow: 4px 4px 0px #FFFFFF !important;
+    border-color: #ffffff !important;
+    box-shadow: 4px 4px 0px #ffffff !important;
   }
-  
+
   .btn-secondary,
   .page-btn {
-    background: #2A2A2A !important;
-    color: #FFFFFF !important;
-    border-color: #FFFFFF !important;
-    box-shadow: 3px 3px 0px #FFFFFF !important;
+    background: #2a2a2a !important;
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+    box-shadow: 3px 3px 0px #ffffff !important;
   }
 }
-

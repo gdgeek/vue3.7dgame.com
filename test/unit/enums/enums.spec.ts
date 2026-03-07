@@ -132,7 +132,11 @@ describe("ResultEnum", () => {
 
   it("三个响应码值各不相同", async () => {
     const { ResultEnum } = await import("@/enums/ResultEnum");
-    const values = [ResultEnum.SUCCESS, ResultEnum.ERROR, ResultEnum.TOKEN_INVALID];
+    const values = [
+      ResultEnum.SUCCESS,
+      ResultEnum.ERROR,
+      ResultEnum.TOKEN_INVALID,
+    ];
     expect(new Set(values).size).toBe(3);
   });
 

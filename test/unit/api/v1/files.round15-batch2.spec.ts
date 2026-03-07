@@ -8,7 +8,9 @@ describe("api/v1/files round15 batch2", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     api = await import("@/api/v1/files");
   });
@@ -28,7 +30,9 @@ describe("api/v1/files round15 batch2", () => {
   });
 
   it("postFile forwards object payload", async () => {
-    const data = { name: "a.png", size: 1 } as Parameters<typeof api.postFile>[0];
+    const data = { name: "a.png", size: 1 } as Parameters<
+      typeof api.postFile
+    >[0];
     await api.postFile(data);
     expect(request.mock.calls[0][0].data).toBe(data);
   });
@@ -36,7 +40,9 @@ describe("api/v1/files round15 batch2", () => {
   it("postFile forwards FormData payload", async () => {
     const formData = new FormData();
     formData.append("file", new Blob(["x"]), "x.txt");
-    await api.postFile(formData as unknown as Parameters<typeof api.postFile>[0]);
+    await api.postFile(
+      formData as unknown as Parameters<typeof api.postFile>[0]
+    );
     expect(request.mock.calls[0][0].data).toBe(formData);
   });
 
@@ -48,7 +54,9 @@ describe("api/v1/files round15 batch2", () => {
   it("postFile returns request promise value", async () => {
     const payload = { data: { id: 1 } };
     request.mockResolvedValue(payload);
-    await expect(api.postFile({} as Parameters<typeof api.postFile>[0])).resolves.toEqual(payload);
+    await expect(
+      api.postFile({} as Parameters<typeof api.postFile>[0])
+    ).resolves.toEqual(payload);
   });
 
   it("multiple postFile calls keep last payload", async () => {

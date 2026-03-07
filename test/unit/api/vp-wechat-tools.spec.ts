@@ -268,10 +268,7 @@ describe("AiRodin — schedule() pure function", () => {
   });
 
   it("all generating → returns 0.5", () => {
-    const jobs = [
-      { status: "generating" },
-      { status: "generating" },
-    ];
+    const jobs = [{ status: "generating" }, { status: "generating" }];
     // count=2, max=4 → 0.5
     expect(aiRodinApi.schedule(jobs)).toBe(0.5);
   });

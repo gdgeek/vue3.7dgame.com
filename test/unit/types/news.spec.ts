@@ -134,7 +134,9 @@ describe("WPPost 接口", () => {
         "wp:term": [[{ id: 1, name: "Cat", slug: "cat" }]],
       },
     };
-    expect(post._embedded?.["wp:featuredmedia"]?.[0].source_url).toContain("img");
+    expect(post._embedded?.["wp:featuredmedia"]?.[0].source_url).toContain(
+      "img"
+    );
   });
 });
 

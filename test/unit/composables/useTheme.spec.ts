@@ -53,7 +53,9 @@ describe("useTheme", () => {
     }));
 
     ({ useTheme } = await import("@/composables/useTheme"));
-    ({ themes, defaultTheme, getTheme } = await import("@/styles/themes/index"));
+    ({ themes, defaultTheme, getTheme } = await import(
+      "@/styles/themes/index"
+    ));
   });
 
   // ── Computed properties ──────────────────────────────────────────────────
@@ -111,7 +113,8 @@ describe("useTheme", () => {
       // customPrimaryColor.value is now "#FF6B35" (truthy)
       setTheme("modern-blue");
 
-      const shadow = document.documentElement.style.getPropertyValue("--shadow-primary");
+      const shadow =
+        document.documentElement.style.getPropertyValue("--shadow-primary");
       expect(shadow).toBeTruthy();
     });
 
@@ -122,13 +125,16 @@ describe("useTheme", () => {
 
       // Verify no throw and CSS primary-color is set (applyColorVariables was invoked)
       expect(() => setTheme("modern-blue")).not.toThrow();
-      const primary = document.documentElement.style.getPropertyValue("--primary-color");
+      const primary =
+        document.documentElement.style.getPropertyValue("--primary-color");
       expect(primary).toBeTruthy();
     });
 
     it("setTheme to non-modern-blue theme takes the else branch (no custom colors)", () => {
       const { setTheme } = useTheme();
-      const darkTheme = (globalThis as any).__themes__?.find((t: any) => t.isDark);
+      const darkTheme = (globalThis as any).__themes__?.find(
+        (t: any) => t.isDark
+      );
 
       // Get a non-modern-blue theme
       const { themes: allThemes } = (() => {
@@ -175,7 +181,9 @@ describe("useTheme", () => {
       const targetTheme = themes[0];
 
       setTheme(targetTheme.name);
-      expect(document.body.classList.contains(`theme-${targetTheme.name}`)).toBe(true);
+      expect(
+        document.body.classList.contains(`theme-${targetTheme.name}`)
+      ).toBe(true);
     });
 
     it("切换到深色主题后 body 添加 dark-mode 类", () => {
@@ -209,7 +217,8 @@ describe("useTheme", () => {
       setTheme(targetTheme.name);
 
       // Verify at least one CSS variable was applied
-      const primaryColor = document.documentElement.style.getPropertyValue("--primary-color");
+      const primaryColor =
+        document.documentElement.style.getPropertyValue("--primary-color");
       expect(primaryColor).toBeTruthy();
     });
 
@@ -232,7 +241,8 @@ describe("useTheme", () => {
       const { initTheme } = useTheme();
       initTheme();
 
-      const primaryColor = document.documentElement.style.getPropertyValue("--primary-color");
+      const primaryColor =
+        document.documentElement.style.getPropertyValue("--primary-color");
       expect(primaryColor).toBeTruthy();
     });
 
@@ -261,7 +271,8 @@ describe("useTheme", () => {
     });
 
     it("modern-blue 主题下设置颜色后 getCustomPrimaryColor 返回该颜色", () => {
-      const { setTheme, setCustomPrimaryColor, getCustomPrimaryColor } = useTheme();
+      const { setTheme, setCustomPrimaryColor, getCustomPrimaryColor } =
+        useTheme();
 
       const modernTheme = getTheme("modern-blue");
       if (!modernTheme) return;
@@ -273,7 +284,8 @@ describe("useTheme", () => {
     });
 
     it("传入 null 时 getCustomPrimaryColor 返回 null", () => {
-      const { setTheme, setCustomPrimaryColor, getCustomPrimaryColor } = useTheme();
+      const { setTheme, setCustomPrimaryColor, getCustomPrimaryColor } =
+        useTheme();
 
       const modernTheme = getTheme("modern-blue");
       if (!modernTheme) return;

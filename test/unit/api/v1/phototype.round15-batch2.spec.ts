@@ -8,7 +8,9 @@ describe("api/v1/phototype", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     api = await import("@/api/v1/phototype");
   });
@@ -16,7 +18,11 @@ describe("api/v1/phototype", () => {
   it("postPhototype posts data", async () => {
     const data = { title: "p" } as any;
     await api.postPhototype(data);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/phototypes", method: "post", data });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/phototypes",
+      method: "post",
+      data,
+    });
   });
 
   it("getPhototype includes default expand", async () => {
@@ -63,6 +69,9 @@ describe("api/v1/phototype", () => {
 
   it("deletePhototype sends delete", async () => {
     await api.deletePhototype("p1");
-    expect(request).toHaveBeenCalledWith({ url: "/v1/phototypes/p1", method: "delete" });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/phototypes/p1",
+      method: "delete",
+    });
   });
 });

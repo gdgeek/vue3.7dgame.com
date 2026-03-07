@@ -63,10 +63,11 @@ describe("usePasswordManagement", () => {
     it("opens dialog when email is verified", async () => {
       mockCheckCurrentEmailVerified.mockResolvedValue(true);
       const usePasswordManagement = await importComposable();
-      const { dialogPasswordVisible, openPasswordDialog } = usePasswordManagement({
-        checkCurrentEmailVerified: mockCheckCurrentEmailVerified,
-        router: mockRouter as never,
-      });
+      const { dialogPasswordVisible, openPasswordDialog } =
+        usePasswordManagement({
+          checkCurrentEmailVerified: mockCheckCurrentEmailVerified,
+          router: mockRouter as never,
+        });
 
       await openPasswordDialog();
       expect(dialogPasswordVisible.value).toBe(true);
@@ -75,10 +76,11 @@ describe("usePasswordManagement", () => {
     it("shows warning when email not verified", async () => {
       mockCheckCurrentEmailVerified.mockResolvedValue(false);
       const usePasswordManagement = await importComposable();
-      const { dialogPasswordVisible, openPasswordDialog } = usePasswordManagement({
-        checkCurrentEmailVerified: mockCheckCurrentEmailVerified,
-        router: mockRouter as never,
-      });
+      const { dialogPasswordVisible, openPasswordDialog } =
+        usePasswordManagement({
+          checkCurrentEmailVerified: mockCheckCurrentEmailVerified,
+          router: mockRouter as never,
+        });
 
       await openPasswordDialog();
       expect(dialogPasswordVisible.value).toBe(false);
@@ -89,10 +91,11 @@ describe("usePasswordManagement", () => {
   describe("resetPasswordForm", () => {
     it("clears all password fields", async () => {
       const usePasswordManagement = await importComposable();
-      const { passwordForm, passwordFormRef, resetPasswordForm } = usePasswordManagement({
-        checkCurrentEmailVerified: mockCheckCurrentEmailVerified,
-        router: mockRouter as never,
-      });
+      const { passwordForm, passwordFormRef, resetPasswordForm } =
+        usePasswordManagement({
+          checkCurrentEmailVerified: mockCheckCurrentEmailVerified,
+          router: mockRouter as never,
+        });
 
       passwordForm.value.oldPassword = "old";
       passwordForm.value.password = "new";
@@ -113,23 +116,30 @@ describe("usePasswordManagement", () => {
       mockChangePassword.mockResolvedValue({ success: true, message: "ok" });
 
       const usePasswordManagement = await importComposable();
-      const { passwordForm, passwordFormRef, submitPasswordChange } = usePasswordManagement({
-        checkCurrentEmailVerified: mockCheckCurrentEmailVerified,
-        router: mockRouter as never,
-      });
+      const { passwordForm, passwordFormRef, submitPasswordChange } =
+        usePasswordManagement({
+          checkCurrentEmailVerified: mockCheckCurrentEmailVerified,
+          router: mockRouter as never,
+        });
 
       passwordForm.value.oldPassword = "oldPass";
       passwordForm.value.password = "newPass123";
       passwordForm.value.checkPassword = "newPass123";
 
       passwordFormRef.value = {
-        validate: vi.fn().mockImplementation((cb: (valid: boolean) => void) => cb(true)),
+        validate: vi
+          .fn()
+          .mockImplementation((cb: (valid: boolean) => void) => cb(true)),
       } as never;
 
       submitPasswordChange();
       await flushPromises();
 
-      expect(mockChangePassword).toHaveBeenCalledWith("oldPass", "newPass123", "newPass123");
+      expect(mockChangePassword).toHaveBeenCalledWith(
+        "oldPass",
+        "newPass123",
+        "newPass123"
+      );
       expect(mockElMessage.success).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledWith("/site/logout");
     });
@@ -142,7 +152,9 @@ describe("usePasswordManagement", () => {
       });
 
       passwordFormRef.value = {
-        validate: vi.fn().mockImplementation((cb: (valid: boolean) => void) => cb(false)),
+        validate: vi
+          .fn()
+          .mockImplementation((cb: (valid: boolean) => void) => cb(false)),
       } as never;
 
       submitPasswordChange();
@@ -151,7 +163,10 @@ describe("usePasswordManagement", () => {
 
     it("shows error when API returns failure", async () => {
       mockCheckCurrentEmailVerified.mockResolvedValue(true);
-      mockChangePassword.mockResolvedValue({ success: false, error: { message: "Wrong password" } });
+      mockChangePassword.mockResolvedValue({
+        success: false,
+        error: { message: "Wrong password" },
+      });
 
       const usePasswordManagement = await importComposable();
       const { passwordFormRef, submitPasswordChange } = usePasswordManagement({
@@ -160,7 +175,9 @@ describe("usePasswordManagement", () => {
       });
 
       passwordFormRef.value = {
-        validate: vi.fn().mockImplementation((cb: (valid: boolean) => void) => cb(true)),
+        validate: vi
+          .fn()
+          .mockImplementation((cb: (valid: boolean) => void) => cb(true)),
       } as never;
 
       submitPasswordChange();
@@ -177,7 +194,9 @@ describe("usePasswordManagement", () => {
         router: mockRouter as never,
       });
 
-      const rules = passwordRules.value.oldPassword as Array<{ validator?: (r: unknown, v: string, cb: (e?: Error) => void) => void }>;
+      const rules = passwordRules.value.oldPassword as Array<{
+        validator?: (r: unknown, v: string, cb: (e?: Error) => void) => void;
+      }>;
       const validator = rules.find((r) => r.validator)!.validator!;
       const callback = vi.fn();
       validator({}, "", callback);

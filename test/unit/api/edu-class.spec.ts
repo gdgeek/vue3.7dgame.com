@@ -16,7 +16,9 @@ describe("Edu-Class API", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: [] });
     eduClassApi = await import("@/api/v1/edu-class");
   });
@@ -86,7 +88,10 @@ describe("Edu-Class API", () => {
     it("calls GET /v1/edu-class/{id}", async () => {
       await eduClassApi.getClass(5);
       expect(request).toHaveBeenCalledWith(
-        expect.objectContaining({ url: expect.stringContaining("/v1/edu-class/5"), method: "get" })
+        expect.objectContaining({
+          url: expect.stringContaining("/v1/edu-class/5"),
+          method: "get",
+        })
       );
     });
 

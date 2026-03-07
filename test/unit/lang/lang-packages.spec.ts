@@ -78,7 +78,10 @@ describe("zh-TW 语言包", () => {
 
 describe("多语言包结构一致性", () => {
   it("各语言包均包含公共基础命名空间", () => {
-    const langs = { zhCN, enUS, jaJP, thTH, zhTW } as Record<string, Record<string, unknown>>;
+    const langs = { zhCN, enUS, jaJP, thTH, zhTW } as Record<
+      string,
+      Record<string, unknown>
+    >;
     for (const [name, lang] of Object.entries(langs)) {
       for (const key of EXPECTED_KEYS) {
         expect(lang, `${name} 缺少 "${key}"`).toHaveProperty(key);

@@ -81,8 +81,17 @@ describe("src/api/user/model.ts round15", () => {
   });
 
   it("UserQuery/UserPageVO/UserForm basic compatibility", () => {
-    expectTypeOf<UserQuery>().toMatchTypeOf<{ keywords?: string; status?: number }>();
-    expectTypeOf<UserPageVO>().toMatchTypeOf<{ username?: string; id?: number }>();
-    expectTypeOf<UserForm>().toMatchTypeOf<{ username?: string; roleIds?: number[] }>();
+    expectTypeOf<UserQuery>().toMatchTypeOf<{
+      keywords?: string;
+      status?: number;
+    }>();
+    expectTypeOf<UserPageVO>().toMatchTypeOf<{
+      username?: string;
+      id?: number;
+    }>();
+    expectTypeOf<UserForm>().toMatchTypeOf<{
+      username?: string;
+      roleIds?: number[];
+    }>();
   });
 });

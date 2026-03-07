@@ -120,9 +120,8 @@ describe("changeThemeColor()", () => {
     const store = useSettingsStore();
     store.changeThemeColor("#123456");
     await nextTick();
-    const val = document.documentElement.style.getPropertyValue(
-      "--el-color-primary"
-    );
+    const val =
+      document.documentElement.style.getPropertyValue("--el-color-primary");
     expect(val).toBe("#123456");
   });
 
@@ -133,9 +132,8 @@ describe("changeThemeColor()", () => {
     store.changeThemeColor("#112233");
     await nextTick();
     expect(store.themeColor).toBe("#112233");
-    const val = document.documentElement.style.getPropertyValue(
-      "--el-color-primary"
-    );
+    const val =
+      document.documentElement.style.getPropertyValue("--el-color-primary");
     expect(val).toBe("#112233");
   });
 });

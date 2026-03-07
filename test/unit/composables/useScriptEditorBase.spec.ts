@@ -2,13 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createApp, defineComponent, h } from "vue";
 
 // --- 提升 mock 变量，确保在工厂函数中可用 ---
-const { mockInflate, mockJsBeautify, mockMessage, mockMessageBox } =
-  vi.hoisted(() => ({
+const { mockInflate, mockJsBeautify, mockMessage, mockMessageBox } = vi.hoisted(
+  () => ({
     mockInflate: vi.fn(() => "decompressed-content"),
     mockJsBeautify: vi.fn((code: string) => `formatted:${code}`),
     mockMessage: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
     mockMessageBox: { confirm: vi.fn() },
-  }));
+  })
+);
 
 // --- Mocks ---
 vi.mock("vue-router", () => ({
@@ -580,7 +581,9 @@ describe("useScriptEditorBase", () => {
 
       result.loadHighlightStyle(false);
 
-      const link = document.querySelector("#highlight-style") as HTMLLinkElement;
+      const link = document.querySelector(
+        "#highlight-style"
+      ) as HTMLLinkElement;
       expect(link).not.toBeNull();
       expect(link.href).toContain("a11y-light");
       unmount();
@@ -593,7 +596,9 @@ describe("useScriptEditorBase", () => {
 
       result.loadHighlightStyle(true);
 
-      const link = document.querySelector("#highlight-style") as HTMLLinkElement;
+      const link = document.querySelector(
+        "#highlight-style"
+      ) as HTMLLinkElement;
       expect(link).not.toBeNull();
       expect(link.href).toContain("a11y-dark");
       unmount();
@@ -605,9 +610,11 @@ describe("useScriptEditorBase", () => {
       );
 
       result.loadHighlightStyle(false); // creates link with light
-      result.loadHighlightStyle(true);  // updates to dark
+      result.loadHighlightStyle(true); // updates to dark
 
-      const link = document.querySelector("#highlight-style") as HTMLLinkElement;
+      const link = document.querySelector(
+        "#highlight-style"
+      ) as HTMLLinkElement;
       expect(link.href).toContain("a11y-dark");
       unmount();
     });
@@ -834,13 +841,13 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
   it("Escape 键且 showCodeDialog=true 时关闭对话框 (lines 417-418)", () => {
     let capturedKeydownCallback: ((e: KeyboardEvent) => void) | undefined;
 
-    const spy = vi.spyOn(document, "removeEventListener").mockImplementation(
-      (event: string, callback: any) => {
+    const spy = vi
+      .spyOn(document, "removeEventListener")
+      .mockImplementation((event: string, callback: any) => {
         if (event === "keydown" && typeof callback === "function") {
           capturedKeydownCallback = callback;
         }
-      }
-    );
+      });
 
     const { result, unmount } = withSetup(() =>
       useScriptEditorBase(makeOptions())
@@ -861,13 +868,13 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
   it("Escape 键且 showCodeDialog=false 时不修改状态 (line 417 false branch)", () => {
     let capturedKeydownCallback: ((e: KeyboardEvent) => void) | undefined;
 
-    const spy = vi.spyOn(document, "removeEventListener").mockImplementation(
-      (event: string, callback: any) => {
+    const spy = vi
+      .spyOn(document, "removeEventListener")
+      .mockImplementation((event: string, callback: any) => {
         if (event === "keydown" && typeof callback === "function") {
           capturedKeydownCallback = callback;
         }
-      }
-    );
+      });
 
     const { result, unmount } = withSetup(() =>
       useScriptEditorBase(makeOptions())
@@ -885,13 +892,13 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
   it("非 Escape 键不触发关闭 (line 417 key!='Escape' branch)", () => {
     let capturedKeydownCallback: ((e: KeyboardEvent) => void) | undefined;
 
-    const spy = vi.spyOn(document, "removeEventListener").mockImplementation(
-      (event: string, callback: any) => {
+    const spy = vi
+      .spyOn(document, "removeEventListener")
+      .mockImplementation((event: string, callback: any) => {
         if (event === "keydown" && typeof callback === "function") {
           capturedKeydownCallback = callback;
         }
-      }
-    );
+      });
 
     const { result, unmount } = withSetup(() =>
       useScriptEditorBase(makeOptions())
@@ -909,13 +916,13 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
   it("fullscreenchange 回调更新 isFullscreen (line 422)", () => {
     const fullscreenCallbacks: (() => void)[] = [];
 
-    const spy = vi.spyOn(document, "removeEventListener").mockImplementation(
-      (event: string, callback: any) => {
+    const spy = vi
+      .spyOn(document, "removeEventListener")
+      .mockImplementation((event: string, callback: any) => {
         if (event === "fullscreenchange" && typeof callback === "function") {
           fullscreenCallbacks.push(callback);
         }
-      }
-    );
+      });
 
     const { result, unmount } = withSetup(() =>
       useScriptEditorBase(makeOptions())
@@ -939,13 +946,13 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
   it("fullscreenchange 回调退出全屏时 isFullscreen=false (line 422 falsy branch)", () => {
     const fullscreenCallbacks: (() => void)[] = [];
 
-    const spy = vi.spyOn(document, "removeEventListener").mockImplementation(
-      (event: string, callback: any) => {
+    const spy = vi
+      .spyOn(document, "removeEventListener")
+      .mockImplementation((event: string, callback: any) => {
         if (event === "fullscreenchange" && typeof callback === "function") {
           fullscreenCallbacks.push(callback);
         }
-      }
-    );
+      });
 
     const { result, unmount } = withSetup(() =>
       useScriptEditorBase(makeOptions())
@@ -966,13 +973,13 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
   it("第二个 fullscreenchange 回调更新 isSceneFullscreen (line 425)", () => {
     const fullscreenCallbacks: (() => void)[] = [];
 
-    const spy = vi.spyOn(document, "removeEventListener").mockImplementation(
-      (event: string, callback: any) => {
+    const spy = vi
+      .spyOn(document, "removeEventListener")
+      .mockImplementation((event: string, callback: any) => {
         if (event === "fullscreenchange" && typeof callback === "function") {
           fullscreenCallbacks.push(callback);
         }
-      }
-    );
+      });
 
     const { result, unmount } = withSetup(() =>
       useScriptEditorBase(makeOptions())
@@ -995,13 +1002,13 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
   it("第二个 fullscreenchange 回调退出全屏时 isSceneFullscreen=false (line 425 falsy branch)", () => {
     const fullscreenCallbacks: (() => void)[] = [];
 
-    const spy = vi.spyOn(document, "removeEventListener").mockImplementation(
-      (event: string, callback: any) => {
+    const spy = vi
+      .spyOn(document, "removeEventListener")
+      .mockImplementation((event: string, callback: any) => {
         if (event === "fullscreenchange" && typeof callback === "function") {
           fullscreenCallbacks.push(callback);
         }
-      }
-    );
+      });
 
     const { result, unmount } = withSetup(() =>
       useScriptEditorBase(makeOptions())

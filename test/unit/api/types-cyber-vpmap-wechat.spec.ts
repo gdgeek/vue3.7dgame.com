@@ -2,12 +2,23 @@
  * 类型模块单元测试 - src/api/v1/types/cyber.ts + vp-map.ts + wechat.ts
  */
 import { describe, it, expect } from "vitest";
-import type { CyberType, CreateCyberRequest, UpdateCyberRequest } from "@/api/v1/types/cyber";
-import type { VpMapGuide, VpMap, CreateVpMapRequest } from "@/api/v1/types/vp-map";
 import type {
-  WechatLoginRequest, WechatLoginResponse,
-  WechatLinkRequest, WechatLinkResponse,
-  WechatRegisterRequest, WechatRegisterResponse,
+  CyberType,
+  CreateCyberRequest,
+  UpdateCyberRequest,
+} from "@/api/v1/types/cyber";
+import type {
+  VpMapGuide,
+  VpMap,
+  CreateVpMapRequest,
+} from "@/api/v1/types/vp-map";
+import type {
+  WechatLoginRequest,
+  WechatLoginResponse,
+  WechatLinkRequest,
+  WechatLinkResponse,
+  WechatRegisterRequest,
+  WechatRegisterResponse,
 } from "@/api/v1/types/wechat";
 
 // ============================================================
@@ -58,7 +69,12 @@ describe("VpMapGuide 接口", () => {
   });
 
   it("level 可选嵌套对象", () => {
-    const g: VpMapGuide = { id: 2, order: 1, level_id: 3, level: { id: 3, name: "Level 1" } };
+    const g: VpMapGuide = {
+      id: 2,
+      order: 1,
+      level_id: 3,
+      level: { id: 3, name: "Level 1" },
+    };
     expect(g.level?.name).toBe("Level 1");
   });
 
@@ -108,7 +124,12 @@ describe("WechatLoginRequest 接口", () => {
 describe("WechatLoginResponse 接口", () => {
   it("必填 token 字段", () => {
     const r: WechatLoginResponse = {
-      token: { accessToken: "at", refreshToken: "rt", tokenType: "Bearer", expiresIn: 3600 },
+      token: {
+        accessToken: "at",
+        refreshToken: "rt",
+        tokenType: "Bearer",
+        expiresIn: 3600,
+      },
     };
     expect(r.token.accessToken).toBe("at");
   });
@@ -117,7 +138,12 @@ describe("WechatLoginResponse 接口", () => {
     const r: WechatLoginResponse = {
       success: true,
       message: "ok",
-      token: { accessToken: "at", refreshToken: "rt", tokenType: "Bearer", expiresIn: 3600 },
+      token: {
+        accessToken: "at",
+        refreshToken: "rt",
+        tokenType: "Bearer",
+        expiresIn: 3600,
+      },
       user: { id: 1, username: "u1", nickname: "Nick" },
     };
     expect(r.success).toBe(true);
@@ -139,18 +165,32 @@ describe("WechatLinkRequest / WechatLinkResponse", () => {
 
 describe("WechatRegisterRequest / WechatRegisterResponse", () => {
   it("WechatRegisterRequest 必填字段", () => {
-    const r: WechatRegisterRequest = { token: "t", username: "u", password: "p" };
+    const r: WechatRegisterRequest = {
+      token: "t",
+      username: "u",
+      password: "p",
+    };
     expect(r.username).toBe("u");
   });
 
   it("WechatRegisterRequest nickname 可选", () => {
-    const r: WechatRegisterRequest = { token: "t", username: "u", password: "p", nickname: "Nick" };
+    const r: WechatRegisterRequest = {
+      token: "t",
+      username: "u",
+      password: "p",
+      nickname: "Nick",
+    };
     expect(r.nickname).toBe("Nick");
   });
 
   it("WechatRegisterResponse token 必填", () => {
     const r: WechatRegisterResponse = {
-      token: { accessToken: "at", refreshToken: "rt", tokenType: "Bearer", expiresIn: 3600 },
+      token: {
+        accessToken: "at",
+        refreshToken: "rt",
+        tokenType: "Bearer",
+        expiresIn: 3600,
+      },
     };
     expect(r.token.tokenType).toBe("Bearer");
   });

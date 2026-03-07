@@ -118,18 +118,18 @@ describe("EduSchool API", () => {
 
     it("sends data payload", async () => {
       const data = { name: "Academy" };
-      await schoolApi.createSchool(data as Parameters<
-        typeof schoolApi.createSchool
-      >[0]);
+      await schoolApi.createSchool(
+        data as Parameters<typeof schoolApi.createSchool>[0]
+      );
       expect(request.mock.calls[0][0].data).toEqual(data);
     });
 
     it("returns the request result", async () => {
       const mockResp = { data: { id: 10, name: "Academy" } };
       request.mockResolvedValue(mockResp);
-      const result = await schoolApi.createSchool({ name: "Academy" } as Parameters<
-        typeof schoolApi.createSchool
-      >[0]);
+      const result = await schoolApi.createSchool({
+        name: "Academy",
+      } as Parameters<typeof schoolApi.createSchool>[0]);
       expect(result).toEqual(mockResp);
     });
   });
@@ -149,9 +149,10 @@ describe("EduSchool API", () => {
 
     it("sends the data payload", async () => {
       const data = { name: "Renamed School" };
-      await schoolApi.updateSchool(3, data as Parameters<
-        typeof schoolApi.updateSchool
-      >[1]);
+      await schoolApi.updateSchool(
+        3,
+        data as Parameters<typeof schoolApi.updateSchool>[1]
+      );
       expect(request.mock.calls[0][0].data).toEqual(data);
     });
   });

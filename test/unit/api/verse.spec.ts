@@ -287,7 +287,9 @@ describe("Verse API", () => {
     it("returns the request result", async () => {
       const mockResp = { data: { id: 77, name: "My Verse" } };
       request.mockResolvedValue(mockResp);
-      const result = await verseApi.postVerse({ name: "My Verse" } as Parameters<typeof verseApi.postVerse>[0]);
+      const result = await verseApi.postVerse({
+        name: "My Verse",
+      } as Parameters<typeof verseApi.postVerse>[0]);
       expect(result).toEqual(mockResp);
     });
   });

@@ -37,7 +37,8 @@ describe("useSubmitThrottle", () => {
 
   it("disables submit during throttle window and restores after timeout", () => {
     vi.useFakeTimers();
-    const { startSubmitThrottle, getIsDisable, unmount } = mountUseSubmitThrottle(500);
+    const { startSubmitThrottle, getIsDisable, unmount } =
+      mountUseSubmitThrottle(500);
 
     startSubmitThrottle();
     expect(getIsDisable()).toBe(true);
@@ -54,7 +55,8 @@ describe("useSubmitThrottle", () => {
   it("cleans timer on unmount and restores disabled flag", () => {
     vi.useFakeTimers();
     const clearTimeoutSpy = vi.spyOn(globalThis, "clearTimeout");
-    const { startSubmitThrottle, getIsDisable, unmount } = mountUseSubmitThrottle(500);
+    const { startSubmitThrottle, getIsDisable, unmount } =
+      mountUseSubmitThrottle(500);
 
     startSubmitThrottle();
     expect(getIsDisable()).toBe(true);

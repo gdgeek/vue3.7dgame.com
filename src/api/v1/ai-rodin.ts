@@ -107,4 +107,3 @@ export const list = (
     method: "get",
   });
 };
-

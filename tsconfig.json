@@ -9,23 +9,14 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "lib": [
-      "esnext",
-      "dom"
-    ],
+    "lib": ["esnext", "dom"],
     "baseUrl": ".",
     "allowJs": true,
     // "checkJs": false,
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     },
-    "types": [
-      "vite/client",
-      "unplugin-icons/types/vue",
-      "element-plus/global"
-    ],
+    "types": ["vite/client", "unplugin-icons/types/vue", "element-plus/global"],
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "allowSyntheticDefaultImports": true /* 允许默认导入 */,
     "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,

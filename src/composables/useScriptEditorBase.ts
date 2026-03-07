@@ -89,13 +89,15 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const hasUnsavedChanges = ref<boolean>(false);
   const editor = ref<HTMLIFrameElement | null>(null);
   const src = ref(env.blockly + "?language=" + appStore.language);
-  const isDark = computed<boolean>(() => settingsStore.theme === ThemeEnum.DARK);
+  const isDark = computed<boolean>(
+    () => settingsStore.theme === ThemeEnum.DARK
+  );
 
   let ready = false;
   let saveResolve: (() => void) | null = null;
 
   // ---- 单次赋值工具（用于记录初始 LuaCode 以检测变更） ----
-  const defineSingleAssignment = <T,>(initialValue: T) => {
+  const defineSingleAssignment = <T>(initialValue: T) => {
     let value = initialValue;
     let isAssigned = false;
     return {

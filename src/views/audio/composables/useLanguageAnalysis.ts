@@ -179,7 +179,9 @@ export function useLanguageAnalysis() {
         voiceLanguage.value &&
         detectedLanguage !== voiceLanguage.value
       ) {
-        const oldLanguageText = getLangDisplayText(voiceLanguage.value as LanguageCode | "");
+        const oldLanguageText = getLangDisplayText(
+          voiceLanguage.value as LanguageCode | ""
+        );
         voiceLanguage.value = detectedLanguage;
         const newLanguageText = getLangDisplayText(detectedLanguage);
         if (!isMultiLanguage) {

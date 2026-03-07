@@ -5,8 +5,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
 
 vi.mock("@/environment", () => ({ default: { useCloud: vi.fn() } }));
-vi.mock("@/assets/js/file/tencent-cloud", () => ({ default: { name: "tencent-cloud" } }));
-vi.mock("@/assets/js/file/server", () => ({ default: { name: "local-server" } }));
+vi.mock("@/assets/js/file/tencent-cloud", () => ({
+  default: { name: "tencent-cloud" },
+}));
+vi.mock("@/assets/js/file/server", () => ({
+  default: { name: "local-server" },
+}));
 
 describe("useFileStore", () => {
   beforeEach(() => {
@@ -67,7 +71,9 @@ describe("useFileStore", () => {
   it("cloud store has a different name than local-server store", async () => {
     const env = (await import("@/environment")).default;
     (env.useCloud as ReturnType<typeof vi.fn>).mockReturnValue(true);
-    const { useFileStore: useCloudStore } = await import("@/store/modules/config");
+    const { useFileStore: useCloudStore } = await import(
+      "@/store/modules/config"
+    );
     const cloudStore = useCloudStore();
     const cloudName = (cloudStore.store as { name: string }).name;
 
@@ -77,7 +83,9 @@ describe("useFileStore", () => {
     vi.clearAllMocks();
     const env2 = (await import("@/environment")).default;
     (env2.useCloud as ReturnType<typeof vi.fn>).mockReturnValue(false);
-    const { useFileStore: useLocalStore } = await import("@/store/modules/config");
+    const { useFileStore: useLocalStore } = await import(
+      "@/store/modules/config"
+    );
     const localStore = useLocalStore();
     const localName = (localStore.store as { name: string }).name;
 

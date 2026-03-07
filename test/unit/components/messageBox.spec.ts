@@ -125,7 +125,10 @@ describe("MessageBox.prompt()", () => {
     const promise = MessageBox.prompt("Enter name:");
     const props = getPromptProps();
     props.onConfirm("John Doe");
-    await expect(promise).resolves.toEqual({ value: "John Doe", action: "confirm" });
+    await expect(promise).resolves.toEqual({
+      value: "John Doe",
+      action: "confirm",
+    });
   });
 
   it("rejects with 'cancel' when onCancel is called", async () => {

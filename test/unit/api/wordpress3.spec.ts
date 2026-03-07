@@ -126,7 +126,9 @@ describe("wordpress.ts — fetchAndCacheCategories() catch block (lines 76-78)",
 
     // Second getNews call: categories succeed (request returns { data: [...] })
     mockRequest
-      .mockResolvedValueOnce({ data: [{ id: 1, name: "Tech", count: 5, slug: "tech" }] })
+      .mockResolvedValueOnce({
+        data: [{ id: 1, name: "Tech", count: 5, slug: "tech" }],
+      })
       .mockResolvedValueOnce({ data: [] });
 
     await expect(mod.wordpressApi.getNews()).resolves.toEqual([]);
@@ -159,7 +161,9 @@ describe("wordpress.ts — fetchAndCacheCategories() catch block (lines 76-78)",
   it("getNews() with successful categories maps them correctly", async () => {
     // getCategories() calls request() which returns { data: [...] }
     mockRequest
-      .mockResolvedValueOnce({ data: [{ id: 3, name: "Science", count: 10, slug: "science" }] })
+      .mockResolvedValueOnce({
+        data: [{ id: 3, name: "Science", count: 10, slug: "science" }],
+      })
       .mockResolvedValueOnce({
         data: [
           {

@@ -66,7 +66,10 @@ describe("FetchResponse 接口", () => {
   });
 
   it("data 支持泛型类型", () => {
-    interface Item { id: number; name: string }
+    interface Item {
+      id: number;
+      name: string;
+    }
     const r: FetchResponse<Item> = {
       data: [{ id: 1, name: "test" }],
       headers: {},

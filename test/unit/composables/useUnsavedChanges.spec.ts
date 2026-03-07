@@ -128,7 +128,10 @@ describe("useUnsavedChanges", () => {
 
   it("markSaved after multiple changes resets flag exactly once", async () => {
     const content = ref("a");
-    const { hasUnsavedChanges, markSaved } = useUnsavedChanges(content, () => "a");
+    const { hasUnsavedChanges, markSaved } = useUnsavedChanges(
+      content,
+      () => "a"
+    );
     content.value = "b";
     await nextTick();
     content.value = "c";

@@ -8,7 +8,9 @@ describe("api/v1/meta", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     api = await import("@/api/v1/meta");
   });
@@ -16,7 +18,11 @@ describe("api/v1/meta", () => {
   it("postMeta posts to /v1/metas", async () => {
     const data = { title: "m" } as any;
     await api.postMeta(data);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/metas", method: "post", data });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/metas",
+      method: "post",
+      data,
+    });
   });
 
   it("putMetaCode puts to code endpoint", async () => {
@@ -64,11 +70,18 @@ describe("api/v1/meta", () => {
   it("putMeta sends PUT payload", async () => {
     const data = { data: "{}" } as any;
     await api.putMeta(11, data);
-    expect(request).toHaveBeenCalledWith({ url: "/v1/metas/11", method: "put", data });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/metas/11",
+      method: "put",
+      data,
+    });
   });
 
   it("deleteMeta sends DELETE", async () => {
     await api.deleteMeta("abc");
-    expect(request).toHaveBeenCalledWith({ url: "/v1/metas/abc", method: "delete" });
+    expect(request).toHaveBeenCalledWith({
+      url: "/v1/metas/abc",
+      method: "delete",
+    });
   });
 });

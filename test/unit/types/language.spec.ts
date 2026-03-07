@@ -54,10 +54,14 @@ describe("LanguageCode", () => {
   it("can be used as a switch discriminant", () => {
     const getLabel = (code: LanguageCode): string => {
       switch (code) {
-        case "zh": return "中文";
-        case "en": return "English";
-        case "ja": return "日本語";
-        case "other": return "Other";
+        case "zh":
+          return "中文";
+        case "en":
+          return "English";
+        case "ja":
+          return "日本語";
+        case "other":
+          return "Other";
       }
     };
     expect(getLabel("zh")).toBe("中文");

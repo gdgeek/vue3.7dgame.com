@@ -14,7 +14,9 @@ vi.mock("@/lang/index", () => ({
 }));
 
 describe("translateRouteTitle()", () => {
-  let i18n: { global: { te: ReturnType<typeof vi.fn>; t: ReturnType<typeof vi.fn> } };
+  let i18n: {
+    global: { te: ReturnType<typeof vi.fn>; t: ReturnType<typeof vi.fn> };
+  };
   let translateRouteTitle: (title: string | undefined) => string;
 
   beforeEach(async () => {

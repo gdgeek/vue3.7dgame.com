@@ -22,15 +22,25 @@ describe("src/api/auth/model.ts round15", () => {
   });
 
   it("LinkData shape", () => {
-    expectTypeOf<LinkData>().toMatchTypeOf<{ username: string; password: string }>();
+    expectTypeOf<LinkData>().toMatchTypeOf<{
+      username: string;
+      password: string;
+    }>();
   });
 
   it("AppleIdToken shape", () => {
-    expectTypeOf<AppleIdToken>().toMatchTypeOf<{ apple_id: string; token: string }>();
+    expectTypeOf<AppleIdToken>().toMatchTypeOf<{
+      apple_id: string;
+      token: string;
+    }>();
   });
 
   it("AppleData shape", () => {
-    expectTypeOf<AppleData>().toMatchTypeOf<{ key: string; url: string; data: unknown }>();
+    expectTypeOf<AppleData>().toMatchTypeOf<{
+      key: string;
+      url: string;
+      data: unknown;
+    }>();
   });
 
   it("AppleIdTokenAndUserPassData shape", () => {
@@ -61,7 +71,10 @@ describe("src/api/auth/model.ts round15", () => {
   });
 
   it("LoginData shape", () => {
-    expectTypeOf<LoginData>().toMatchTypeOf<{ username: string; password: string }>();
+    expectTypeOf<LoginData>().toMatchTypeOf<{
+      username: string;
+      password: string;
+    }>();
   });
 
   it("LoginResult shape", () => {

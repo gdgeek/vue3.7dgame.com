@@ -3,10 +3,7 @@
  * Covers: compareNameWithPinyin, sortByNameWithPinyin
  */
 import { describe, it, expect } from "vitest";
-import {
-  compareNameWithPinyin,
-  sortByNameWithPinyin,
-} from "@/utils/nameSort";
+import { compareNameWithPinyin, sortByNameWithPinyin } from "@/utils/nameSort";
 
 describe("compareNameWithPinyin", () => {
   it("returns 0 for identical names", () => {

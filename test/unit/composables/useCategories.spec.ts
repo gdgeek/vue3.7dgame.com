@@ -29,9 +29,7 @@ import { wordpressApi } from "@/api/home/wordpress";
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-const makeCategory = (
-  overrides: Partial<NewsCategory> = {}
-): NewsCategory => ({
+const makeCategory = (overrides: Partial<NewsCategory> = {}): NewsCategory => ({
   id: 1,
   name: "Tech",
   slug: "tech",
@@ -80,7 +78,10 @@ describe("filterCategories() — empty count removal", () => {
   });
 
   it("keeps all categories when all have count > 0", () => {
-    const cats = [makeCategory({ id: 1, count: 1 }), makeCategory({ id: 2, count: 10 })];
+    const cats = [
+      makeCategory({ id: 1, count: 1 }),
+      makeCategory({ id: 2, count: 10 }),
+    ];
     expect(filterCategories(cats)).toHaveLength(2);
   });
 
@@ -192,8 +193,12 @@ describe("filterCategories() — excludeCategories blacklist", () => {
 const flushAsync = () => new Promise<void>((r) => setTimeout(r, 0));
 
 describe("useCategories() composable", () => {
-  const mockGetWithCache = wordpressApi.getCategoriesWithCache as ReturnType<typeof vi.fn>;
-  const mockGetCategories = wordpressApi.getCategories as ReturnType<typeof vi.fn>;
+  const mockGetWithCache = wordpressApi.getCategoriesWithCache as ReturnType<
+    typeof vi.fn
+  >;
+  const mockGetCategories = wordpressApi.getCategories as ReturnType<
+    typeof vi.fn
+  >;
 
   beforeEach(() => {
     vi.clearAllMocks();

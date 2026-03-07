@@ -6,11 +6,17 @@
           <slot></slot>
           &nbsp;
           <el-button-group v-if="sorted !== ''" :inline="true">
-            <el-button v-if="sorted_name" size="small" type="success" :label="$t('MrppHeader.sortByName')"
-              icon="ChatDotSquare" @click="sort(sortByName)">
+            <el-button
+              v-if="sorted_name"
+              size="small"
+              type="success"
+              :label="$t('MrppHeader.sortByName')"
+              icon="ChatDotSquare"
+              @click="sort(sortByName)"
+            >
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByName")
-                }}</span>
+              }}</span>
               <el-icon v-if="sorted_up">
                 <ArrowUp></ArrowUp>
               </el-icon>
@@ -18,17 +24,29 @@
                 <ArrowDown></ArrowDown>
               </el-icon>
             </el-button>
-            <el-button v-else size="small" type="info" :label="$t('MrppHeader.sortByName')" icon="ChatDotSquare"
-              @click="sort(sortByName)">
+            <el-button
+              v-else
+              size="small"
+              type="info"
+              :label="$t('MrppHeader.sortByName')"
+              icon="ChatDotSquare"
+              @click="sort(sortByName)"
+            >
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByName")
-                }}</span>
+              }}</span>
             </el-button>
-            <el-button v-if="sorted_created_at" size="small" type="success" icon="Clock"
-              :label="$t('MrppHeader.sortByTime')" @click="sort(sortByTime)">
+            <el-button
+              v-if="sorted_created_at"
+              size="small"
+              type="success"
+              icon="Clock"
+              :label="$t('MrppHeader.sortByTime')"
+              @click="sort(sortByTime)"
+            >
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByTime")
-                }}</span>
+              }}</span>
               <el-icon v-if="sorted_up">
                 <ArrowUp></ArrowUp>
               </el-icon>
@@ -36,22 +54,43 @@
                 <ArrowDown></ArrowDown>
               </el-icon>
             </el-button>
-            <el-button v-else size="small" type="info" :label="$t('MrppHeader.sortByTime')" icon="Clock"
-              @click="sort(sortByTime)">
+            <el-button
+              v-else
+              size="small"
+              type="info"
+              :label="$t('MrppHeader.sortByTime')"
+              icon="Clock"
+              @click="sort(sortByTime)"
+            >
               <span class="hidden-sm-and-down">{{
                 $t("MrppHeader.sortByTime")
-                }}</span>
+              }}</span>
             </el-button>
           </el-button-group>
           &nbsp;
-          <tags-select v-if="hasTags" @tags-change="handleTagsChange"></tags-select>
+          <tags-select
+            v-if="hasTags"
+            @tags-change="handleTagsChange"
+          ></tags-select>
         </el-col>
         <el-col v-if="hasSearch" :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
-          <el-input v-model="input" size="small" :placeholder="$t('MrppHeader.search')" class="input-with-select"
-            clearable @clear="search" @keyup.enter="keyDown">
+          <el-input
+            v-model="input"
+            size="small"
+            :placeholder="$t('MrppHeader.search')"
+            class="input-with-select"
+            clearable
+            @clear="search"
+            @keyup.enter="keyDown"
+          >
             <!-- <template #append> -->
             <template #append>
-              <el-button icon="Search" size="small" class="search" @click="search"></el-button>
+              <el-button
+                icon="Search"
+                size="small"
+                class="search"
+                @click="search"
+              ></el-button>
             </template>
           </el-input>
         </el-col>

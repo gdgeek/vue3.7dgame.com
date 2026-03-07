@@ -3,7 +3,15 @@
  * Covers: schedule (pure logic), file, rodin, check, download (AI endpoint helpers),
  *         get / del / list (REST CRUD on /v1/ai-rodin).
  */
-import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  beforeAll,
+  afterAll,
+} from "vitest";
 
 vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 
@@ -22,7 +30,9 @@ describe("AI-Rodin API", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     aiRodinApi = await import("@/api/v1/ai-rodin");
   });
@@ -60,7 +70,11 @@ describe("AI-Rodin API", () => {
 
     it("calculates mixed statuses correctly", () => {
       // done(+2) + generating(+1) + unknown(+0) = 3, max = 3*2 = 6 → 0.5
-      const jobs = [{ status: "done" }, { status: "generating" }, { status: "queued" }];
+      const jobs = [
+        { status: "done" },
+        { status: "generating" },
+        { status: "queued" },
+      ];
       expect(aiRodinApi.schedule(jobs)).toBeCloseTo(3 / 6);
     });
   });

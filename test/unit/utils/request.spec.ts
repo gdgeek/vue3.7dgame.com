@@ -179,7 +179,7 @@ describe("request interceptor logic", () => {
     (Token.getToken as ReturnType<typeof vi.fn>)
       .mockReturnValueOnce(expiringToken) // request interceptor
       .mockReturnValueOnce(expiringToken) // inside refreshToken()
-      .mockReturnValue(newToken);          // after refresh
+      .mockReturnValue(newToken); // after refresh
     (AuthAPI.refresh as ReturnType<typeof vi.fn>).mockResolvedValue({
       data: { token: newToken },
     });
@@ -204,7 +204,9 @@ describe("request interceptor logic", () => {
       expires: new Date(Date.now() + 1 * 60 * 1000).toISOString(),
     };
     (Token.getToken as ReturnType<typeof vi.fn>).mockReturnValue(expiringToken);
-    (AuthAPI.refresh as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("refresh failed"));
+    (AuthAPI.refresh as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new Error("refresh failed")
+    );
 
     await import("@/utils/request");
     const reqInterceptor =
@@ -259,9 +261,15 @@ describe("response interceptor logic", () => {
     const errInterceptor =
       mockService.interceptors.response.use.mock.calls[0]?.[1];
     // Set _retry: true to bypass failover logic and reach the error message branch
-    const error = { message: "Network Error", response: undefined, config: { _retry: true } };
+    const error = {
+      message: "Network Error",
+      response: undefined,
+      config: { _retry: true },
+    };
     await errInterceptor(error).catch(() => {});
-    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
+    expect(
+      (ElMessage as { error: ReturnType<typeof vi.fn> }).error
+    ).toHaveBeenCalled();
   });
 
   it("handles 401 response by calling removeToken", async () => {
@@ -291,7 +299,9 @@ describe("response interceptor logic", () => {
       config: { _retry: true },
     };
     await errInterceptor(error).catch(() => {});
-    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
+    expect(
+      (ElMessage as { error: ReturnType<typeof vi.fn> }).error
+    ).toHaveBeenCalled();
   });
 
   it("handles 404 response by showing 404 error message", async () => {
@@ -306,7 +316,9 @@ describe("response interceptor logic", () => {
       config: { _retry: true },
     };
     await errInterceptor(error).catch(() => {});
-    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
+    expect(
+      (ElMessage as { error: ReturnType<typeof vi.fn> }).error
+    ).toHaveBeenCalled();
   });
 
   it("shows response.data.message for other error status codes", async () => {
@@ -321,7 +333,9 @@ describe("response interceptor logic", () => {
       config: { _retry: true },
     };
     await errInterceptor(error).catch(() => {});
-    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalledWith(
+    expect(
+      (ElMessage as { error: ReturnType<typeof vi.fn> }).error
+    ).toHaveBeenCalledWith(
       expect.objectContaining({ message: "Custom server message" })
     );
   });
@@ -338,9 +352,9 @@ describe("response interceptor logic", () => {
       config: { _retry: true },
     };
     await errInterceptor(error).catch(() => {});
-    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Conflict" })
-    );
+    expect(
+      (ElMessage as { error: ReturnType<typeof vi.fn> }).error
+    ).toHaveBeenCalledWith(expect.objectContaining({ message: "Conflict" }));
   });
 
   it("logs and shows error message for non-Network errors without response", async () => {
@@ -356,8 +370,12 @@ describe("response interceptor logic", () => {
       config: { _retry: true },
     };
     await errInterceptor(error).catch(() => {});
-    expect((logger as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
-    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
+    expect(
+      (logger as { error: ReturnType<typeof vi.fn> }).error
+    ).toHaveBeenCalled();
+    expect(
+      (ElMessage as { error: ReturnType<typeof vi.fn> }).error
+    ).toHaveBeenCalled();
   });
 });
 
@@ -388,9 +406,7 @@ describe("API failover response interceptor", () => {
     // logger.warn should have been called with the failover message
     expect(
       (logger as { warn: ReturnType<typeof vi.fn> }).warn
-    ).toHaveBeenCalledWith(
-      expect.stringContaining("Failover")
-    );
+    ).toHaveBeenCalledWith(expect.stringContaining("Failover"));
     // config should be marked as retried
     expect(config._retry).toBe(true);
     // mockService itself (the callable fn) should have been called with config
@@ -412,7 +428,9 @@ describe("API failover response interceptor", () => {
     };
     await errInterceptor(error).catch(() => {});
     // ElMessage.error should be called (network error message), not a retry
-    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
+    expect(
+      (ElMessage as { error: ReturnType<typeof vi.fn> }).error
+    ).toHaveBeenCalled();
   });
 
   it("showErrorMessage skips empty messages", async () => {
@@ -430,7 +448,9 @@ describe("API failover response interceptor", () => {
     };
     await errInterceptor(error).catch(() => {});
     // showErrorMessage returns early for empty strings → ElMessage.error not called
-    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).not.toHaveBeenCalled();
+    expect(
+      (ElMessage as { error: ReturnType<typeof vi.fn> }).error
+    ).not.toHaveBeenCalled();
   });
 });
 
@@ -470,7 +490,9 @@ describe("handleUnauthorized deduplication", () => {
     // removeToken should be called by the first handler; the second is a no-op
     expect(Token.removeToken).toHaveBeenCalled();
     // ElMessage.error should be called (at least once) for the login-expired notice
-    expect((ElMessage as { error: ReturnType<typeof vi.fn> }).error).toHaveBeenCalled();
+    expect(
+      (ElMessage as { error: ReturnType<typeof vi.fn> }).error
+    ).toHaveBeenCalled();
   });
 });
 
@@ -603,7 +625,7 @@ describe("refreshToken guard (lines 87-88) — token without refreshToken", () =
       expires: new Date(Date.now() + 2 * 60 * 1000).toISOString(),
     };
     (Token.getToken as ReturnType<typeof vi.fn>)
-      .mockReturnValueOnce(expiringToken)   // request interceptor
+      .mockReturnValueOnce(expiringToken) // request interceptor
       .mockReturnValueOnce(tokenWithoutRefresh); // inside refreshToken()
 
     await import("@/utils/request");
@@ -642,7 +664,11 @@ describe("startHealthCheck interval body (lines 29-39)", () => {
     const errInterceptor =
       mockService.interceptors.response.use.mock.calls[0]?.[1];
     const config = { url: "/v1/data", headers: {}, baseURL: "", _retry: false };
-    await errInterceptor({ message: "Network Error", response: undefined, config }).catch(() => {});
+    await errInterceptor({
+      message: "Network Error",
+      response: undefined,
+      config,
+    }).catch(() => {});
 
     // Health check should now be running; advance 30 seconds
     await vi.advanceTimersByTimeAsync(30000);
@@ -656,13 +682,19 @@ describe("startHealthCheck interval body (lines 29-39)", () => {
   it("interval callback: primary still down → stays on backup (catch branch)", async () => {
     const axiosMod = await import("axios");
     // axios.get rejects (primary is still down)
-    (axiosMod.default.get as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("still down"));
+    (axiosMod.default.get as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new Error("still down")
+    );
     await import("@/utils/request");
 
     const errInterceptor =
       mockService.interceptors.response.use.mock.calls[0]?.[1];
     const config = { url: "/v1/data", headers: {}, baseURL: "", _retry: false };
-    await errInterceptor({ message: "Network Error", response: undefined, config }).catch(() => {});
+    await errInterceptor({
+      message: "Network Error",
+      response: undefined,
+      config,
+    }).catch(() => {});
 
     // Advance 30s → health check fires → catches error (no throw)
     await vi.advanceTimersByTimeAsync(30000);
@@ -688,7 +720,10 @@ describe("lang watcher callback (lines 15-16)", () => {
 
     // The watch was registered; get its callback
     if (watchSpy.mock.calls.length > 0) {
-      const [, callback] = watchSpy.mock.calls[0] as [unknown, (v: string) => void];
+      const [, callback] = watchSpy.mock.calls[0] as [
+        unknown,
+        (v: string) => void,
+      ];
       if (typeof callback === "function") {
         // Calling the callback should not throw
         expect(() => callback("en-US")).not.toThrow();

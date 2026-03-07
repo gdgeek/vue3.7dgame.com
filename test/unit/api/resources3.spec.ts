@@ -24,7 +24,9 @@ describe("Resources API (part 3) — getPolygen / getVoxel / getPicture", () => 
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     resourcesApi = await import("@/api/v1/resources/index");
   });
@@ -35,7 +37,9 @@ describe("Resources API (part 3) — getPolygen / getVoxel / getPicture", () => 
     it("calls GET /v1/resources/{id} with type=polygen", async () => {
       await resourcesApi.getPolygen(1);
       expect(request).toHaveBeenCalledWith(
-        expect.objectContaining({ url: expect.stringContaining("/v1/resources/1") })
+        expect.objectContaining({
+          url: expect.stringContaining("/v1/resources/1"),
+        })
       );
     });
 
@@ -67,7 +71,9 @@ describe("Resources API (part 3) — getPolygen / getVoxel / getPicture", () => 
 
     it("rejects when request fails (line 211)", async () => {
       request.mockRejectedValue(new Error("polygen fetch error"));
-      await expect(resourcesApi.getPolygen(1)).rejects.toThrow("polygen fetch error");
+      await expect(resourcesApi.getPolygen(1)).rejects.toThrow(
+        "polygen fetch error"
+      );
     });
 
     it("rejects with non-Error objects (line 211)", async () => {
@@ -82,7 +88,9 @@ describe("Resources API (part 3) — getPolygen / getVoxel / getPicture", () => 
     it("calls GET /v1/resources/{id} with type=voxel", async () => {
       await resourcesApi.getVoxel(2);
       expect(request).toHaveBeenCalledWith(
-        expect.objectContaining({ url: expect.stringContaining("/v1/resources/2") })
+        expect.objectContaining({
+          url: expect.stringContaining("/v1/resources/2"),
+        })
       );
     });
 
@@ -104,7 +112,9 @@ describe("Resources API (part 3) — getPolygen / getVoxel / getPicture", () => 
 
     it("rejects when request fails (line 229)", async () => {
       request.mockRejectedValue(new Error("voxel fetch error"));
-      await expect(resourcesApi.getVoxel(2)).rejects.toThrow("voxel fetch error");
+      await expect(resourcesApi.getVoxel(2)).rejects.toThrow(
+        "voxel fetch error"
+      );
     });
 
     it("rejects with string errors (line 229)", async () => {
@@ -119,7 +129,9 @@ describe("Resources API (part 3) — getPolygen / getVoxel / getPicture", () => 
     it("calls GET /v1/resources/{id} with type=picture", async () => {
       await resourcesApi.getPicture(3);
       expect(request).toHaveBeenCalledWith(
-        expect.objectContaining({ url: expect.stringContaining("/v1/resources/3") })
+        expect.objectContaining({
+          url: expect.stringContaining("/v1/resources/3"),
+        })
       );
     });
 
@@ -141,12 +153,16 @@ describe("Resources API (part 3) — getPolygen / getVoxel / getPicture", () => 
 
     it("rejects when request fails (line 247)", async () => {
       request.mockRejectedValue(new Error("picture fetch error"));
-      await expect(resourcesApi.getPicture(3)).rejects.toThrow("picture fetch error");
+      await expect(resourcesApi.getPicture(3)).rejects.toThrow(
+        "picture fetch error"
+      );
     });
 
     it("rejects with network error objects (line 247)", async () => {
       request.mockRejectedValue({ code: "ECONNREFUSED" });
-      await expect(resourcesApi.getPicture(3)).rejects.toEqual({ code: "ECONNREFUSED" });
+      await expect(resourcesApi.getPicture(3)).rejects.toEqual({
+        code: "ECONNREFUSED",
+      });
     });
   });
 });

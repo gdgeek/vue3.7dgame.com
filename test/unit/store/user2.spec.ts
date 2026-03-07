@@ -88,9 +88,9 @@ describe("useUserStore — loginByWechat null token (supplemental)", () => {
   it("loginByWechat() throws with the exact message when token is null", async () => {
     wechatApi.login.mockResolvedValue({ data: { success: true, token: null } });
     const store = useUserStore();
-    await expect(
-      store.loginByWechat({ code: "c" } as never)
-    ).rejects.toThrow("The login response is missing the access_token");
+    await expect(store.loginByWechat({ code: "c" } as never)).rejects.toThrow(
+      "The login response is missing the access_token"
+    );
   });
 
   it("loginByWechat() does NOT throw when success=true and token is a valid string", async () => {
@@ -104,19 +104,21 @@ describe("useUserStore — loginByWechat null token (supplemental)", () => {
   });
 
   it("loginByWechat() throws 'Login failed' when success=false", async () => {
-    wechatApi.login.mockResolvedValue({ data: { success: false, token: null } });
+    wechatApi.login.mockResolvedValue({
+      data: { success: false, token: null },
+    });
     const store = useUserStore();
-    await expect(
-      store.loginByWechat({ code: "bad" } as never)
-    ).rejects.toThrow("Login failed");
+    await expect(store.loginByWechat({ code: "bad" } as never)).rejects.toThrow(
+      "Login failed"
+    );
   });
 
   it("loginByWechat() propagates network errors", async () => {
     wechatApi.login.mockRejectedValue(new Error("Network error"));
     const store = useUserStore();
-    await expect(
-      store.loginByWechat({ code: "c" } as never)
-    ).rejects.toThrow("Network error");
+    await expect(store.loginByWechat({ code: "c" } as never)).rejects.toThrow(
+      "Network error"
+    );
   });
 
   it("loginByWechat() does not call Token.setToken when token is null", async () => {
@@ -125,9 +127,7 @@ describe("useUserStore — loginByWechat null token (supplemental)", () => {
     };
     wechatApi.login.mockResolvedValue({ data: { success: true, token: null } });
     const store = useUserStore();
-    await expect(
-      store.loginByWechat({ code: "c" } as never)
-    ).rejects.toThrow();
+    await expect(store.loginByWechat({ code: "c" } as never)).rejects.toThrow();
     expect(Token.setToken).not.toHaveBeenCalled();
   });
 });

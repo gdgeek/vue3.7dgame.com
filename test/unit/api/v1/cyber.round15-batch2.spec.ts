@@ -8,7 +8,9 @@ describe("api/v1/cyber round15 batch2", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    request = (await import("@/utils/request")).default as ReturnType<typeof vi.fn>;
+    request = (await import("@/utils/request")).default as ReturnType<
+      typeof vi.fn
+    >;
     request.mockResolvedValue({ data: {} });
     api = await import("@/api/v1/cyber");
   });
@@ -22,7 +24,9 @@ describe("api/v1/cyber round15 batch2", () => {
   });
 
   it("putCyber calls request once", async () => {
-    await api.putCyber(10, { title: "x" } as Parameters<typeof api.putCyber>[1]);
+    await api.putCyber(10, { title: "x" } as Parameters<
+      typeof api.putCyber
+    >[1]);
     expect(request).toHaveBeenCalledTimes(1);
   });
 
@@ -52,6 +56,8 @@ describe("api/v1/cyber round15 batch2", () => {
   it("postCyber returns request result", async () => {
     const payload = { data: { id: 7 } };
     request.mockResolvedValue(payload);
-    await expect(api.postCyber({} as Parameters<typeof api.postCyber>[0])).resolves.toEqual(payload);
+    await expect(
+      api.postCyber({} as Parameters<typeof api.postCyber>[0])
+    ).resolves.toEqual(payload);
   });
 });

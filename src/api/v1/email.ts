@@ -155,5 +155,3 @@ export const testEmailService = async (): Promise<
   });
   return response.data;
 };
-
-

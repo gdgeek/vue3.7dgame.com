@@ -66,7 +66,11 @@ describe("Auth API", () => {
   describe("register()", () => {
     it("calls POST /v1/auth/register", async () => {
       request.mockResolvedValue({ data: {} });
-      await authApi.register({ username: "bob", password: "p@ss", email: "b@b.com" });
+      await authApi.register({
+        username: "bob",
+        password: "p@ss",
+        email: "b@b.com",
+      });
       expect(request).toHaveBeenCalledWith(
         expect.objectContaining({
           url: "/v1/auth/register",
@@ -152,7 +156,11 @@ describe("Auth API", () => {
     it("returns the request result", async () => {
       const mockResp = { data: { id: 1, username: "bob" } };
       request.mockResolvedValue(mockResp);
-      const result = await authApi.register({ username: "bob", password: "p@ss", email: "b@b.com" } as Parameters<typeof authApi.register>[0]);
+      const result = await authApi.register({
+        username: "bob",
+        password: "p@ss",
+        email: "b@b.com",
+      } as Parameters<typeof authApi.register>[0]);
       expect(result).toEqual(mockResp);
     });
   });
@@ -161,7 +169,10 @@ describe("Auth API", () => {
     it("returns the request result", async () => {
       const mockResp = { data: { linked: true } };
       request.mockResolvedValue(mockResp);
-      const result = await authApi.link({ provider: "github", code: "abc" } as Parameters<typeof authApi.link>[0]);
+      const result = await authApi.link({
+        provider: "github",
+        code: "abc",
+      } as Parameters<typeof authApi.link>[0]);
       expect(result).toEqual(mockResp);
     });
   });

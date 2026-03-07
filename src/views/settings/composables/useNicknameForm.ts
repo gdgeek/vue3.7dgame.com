@@ -61,7 +61,9 @@ export const useNicknameForm = (deps: UseNicknameFormDeps) => {
       if (valid) {
         try {
           deps.isLoading.value = true;
-          await userStore.setUserInfo({ nickname: nicknameForm.value.nickname });
+          await userStore.setUserInfo({
+            nickname: nicknameForm.value.nickname,
+          });
           ElMessage.success(t("homepage.edit.rules.nickname.success"));
         } catch {
           ElMessage.error(t("homepage.edit.rules.nickname.error3"));
