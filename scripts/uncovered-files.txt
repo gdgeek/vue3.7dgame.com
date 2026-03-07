@@ -1,13 +1,3 @@
-src/api/v1/ai-rodin.ts
-src/api/v1/auth.ts
-src/api/v1/cyber.ts
-src/api/v1/edu-class.ts
-src/api/v1/edu-school.ts
-src/api/v1/edu-student.ts
-src/api/v1/edu-teacher.ts
-src/api/v1/email.ts
-src/api/v1/files.ts
-src/api/v1/group.ts
 src/api/v1/meta-resource.ts
 src/api/v1/meta-verse.ts
 src/api/v1/meta.ts
