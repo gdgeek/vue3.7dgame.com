@@ -32,10 +32,7 @@ describe("AI-Rodin API", () => {
   // -------------------------------------------------------------------------
   describe("schedule()", () => {
     it("returns 0 for an empty job list", () => {
-      // 0 / 0 → NaN guard: length === 0, max === 0 → NaN; test documents current behaviour
-      const result = aiRodinApi.schedule([]);
-      // count=0, max=0 → 0/0 = NaN
-      expect(isNaN(result)).toBe(true);
+      expect(aiRodinApi.schedule([])).toBe(0);
     });
 
     it("returns 1 when all jobs are done", () => {
