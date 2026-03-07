@@ -579,14 +579,16 @@ describe("Entity Copy Function - Unit Tests", () => {
       const originalId = 1100;
       const newTitle = "Failed Get";
       const errorMessage = "Failed to fetch entity";
+      const getMetaError = new Error(errorMessage);
 
       // Mock getMeta to reject
-      (getMeta as ReturnType<typeof vi.fn>).mockRejectedValue(
-        new Error(errorMessage)
-      );
+      (getMeta as ReturnType<typeof vi.fn>).mockRejectedValueOnce(getMetaError);
 
       // Mock ElMessage.error
       const mockElMessageError = vi.fn();
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
 
       // Mock loading state
       const copyLoadingMap = new Map<number, boolean>();
@@ -626,10 +628,17 @@ describe("Entity Copy Function - Unit Tests", () => {
       };
 
       // Act: Execute the copy function
-      await copy(originalId, newTitle);
+      let thrownError: unknown;
+      try {
+        await copy(originalId, newTitle);
+      } catch (error) {
+        thrownError = error;
+      }
 
       // Assert: Verify error handling
+      expect(thrownError).toBeUndefined();
       expect(getMeta).toHaveBeenCalledWith(originalId);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(getMetaError);
       expect(mockElMessageError).toHaveBeenCalledWith("Copy failed");
 
       // Verify postMeta and putMetaCode were NOT called
@@ -638,6 +647,8 @@ describe("Entity Copy Function - Unit Tests", () => {
 
       // Verify loading state was cleared
       expect(copyLoadingMap.get(originalId)).toBe(false);
+
+      consoleErrorSpy.mockRestore();
     });
 
     it("should display error message when postMeta fails", async () => {
@@ -646,6 +657,7 @@ describe("Entity Copy Function - Unit Tests", () => {
       const newTitle = "Failed Post";
       const newUuid = "failed-post-uuid";
       const errorMessage = "Failed to create entity";
+      const postMetaError = new Error(errorMessage);
 
       const originalMeta: metaInfo = {
         id: originalId,
@@ -683,14 +695,15 @@ describe("Entity Copy Function - Unit Tests", () => {
       });
 
       // Mock postMeta to reject
-      (postMeta as ReturnType<typeof vi.fn>).mockRejectedValue(
-        new Error(errorMessage)
-      );
+      (postMeta as ReturnType<typeof vi.fn>).mockRejectedValueOnce(postMetaError);
 
       (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue(newUuid);
 
       // Mock ElMessage.error
       const mockElMessageError = vi.fn();
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
 
       // Mock loading state
       const copyLoadingMap = new Map<number, boolean>();
@@ -730,9 +743,15 @@ describe("Entity Copy Function - Unit Tests", () => {
       };
 
       // Act: Execute the copy function
-      await copy(originalId, newTitle);
+      let thrownError: unknown;
+      try {
+        await copy(originalId, newTitle);
+      } catch (error) {
+        thrownError = error;
+      }
 
       // Assert: Verify error handling
+      expect(thrownError).toBeUndefined();
       expect(getMeta).toHaveBeenCalledWith(originalId);
       expect(postMeta).toHaveBeenCalledWith({
         title: newTitle,
@@ -743,6 +762,7 @@ describe("Entity Copy Function - Unit Tests", () => {
         events: originalMeta.events,
         prefab: originalMeta.prefab,
       });
+      expect(consoleErrorSpy).toHaveBeenCalledWith(postMetaError);
       expect(mockElMessageError).toHaveBeenCalledWith("Copy failed");
 
       // Verify putMetaCode was NOT called (postMeta failed)
@@ -750,20 +770,24 @@ describe("Entity Copy Function - Unit Tests", () => {
 
       // Verify loading state was cleared
       expect(copyLoadingMap.get(originalId)).toBe(false);
+
+      consoleErrorSpy.mockRestore();
     });
 
     it("should clear loading state even when error occurs", async () => {
       // Arrange: Setup test data
       const originalId = 1300;
       const newTitle = "Loading State Test";
+      const getMetaError = new Error("Test error");
 
       // Mock getMeta to reject
-      (getMeta as ReturnType<typeof vi.fn>).mockRejectedValue(
-        new Error("Test error")
-      );
+      (getMeta as ReturnType<typeof vi.fn>).mockRejectedValueOnce(getMetaError);
 
       // Mock ElMessage.error
       const mockElMessageError = vi.fn();
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
 
       // Mock loading state
       const copyLoadingMap = new Map<number, boolean>();
@@ -805,11 +829,20 @@ describe("Entity Copy Function - Unit Tests", () => {
       // Act: Verify loading state before, during, and after
       expect(copyLoadingMap.get(originalId)).toBeUndefined();
 
-      await copy(originalId, newTitle);
+      let thrownError: unknown;
+      try {
+        await copy(originalId, newTitle);
+      } catch (error) {
+        thrownError = error;
+      }
 
       // Assert: Verify loading state was set and then cleared
+      expect(thrownError).toBeUndefined();
       expect(copyLoadingMap.get(originalId)).toBe(false);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(getMetaError);
       expect(mockElMessageError).toHaveBeenCalled();
+
+      consoleErrorSpy.mockRestore();
     });
 
     it("should handle error when putMetaCode fails but entity is already created", async () => {
