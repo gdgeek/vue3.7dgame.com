@@ -176,10 +176,10 @@ import { usePageData } from "@/composables/usePageData";
 import { useSelection } from "@/composables/useSelection";
 import { downloadResource } from "@/utils/downloadHelper";
 import {
-import { toHttps } from "@/utils/helper";
   convertToLocalTime,
   formatFileSize as formatSize,
 } from "@/utils/utilityFunctions";
+import { toHttps } from "@/utils/helper";
 
 const { t } = useI18n();
 
