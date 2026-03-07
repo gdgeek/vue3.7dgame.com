@@ -1,8 +1,3 @@
-src/api/v1/tools.ts
-src/api/v1/types/auth.ts
-src/api/v1/types/common.ts
-src/api/v1/types/cyber.ts
-src/api/v1/types/edu-class.ts
 src/api/v1/types/edu-school.ts
 src/api/v1/types/edu/student.ts
 src/api/v1/types/edu/teacher.ts
