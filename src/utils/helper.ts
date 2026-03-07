@@ -4,12 +4,14 @@ export type MessageType = {
   data: unknown;
 };
 export function GetCurrentUrl() {
+  if (typeof window === "undefined") return "";
   const fullUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ""}`;
   logger.log(`Full URL: ${fullUrl}`);
   return fullUrl;
 }
 
 export function GetIP(): string | null {
+  if (typeof window === "undefined") return null;
   const reg = /^([^:]+)/g;
   const ret = reg.exec(window.location.host);
   if (ret !== null) {
@@ -19,6 +21,7 @@ export function GetIP(): string | null {
 }
 export function GetDomain(): string {
   {
+    if (typeof window === "undefined") return "";
     const hostname = window.location.hostname;
 
     // 检查是否是 IP 地址或 localhost
@@ -46,6 +49,7 @@ export function ReplaceURL(input: string): string {
   return input;
 }
 function GetScheme(): string {
+  if (typeof window === "undefined") return "https:";
   return window.location.protocol;
 }
 
