@@ -49,13 +49,15 @@ function GetScheme(): string {
   return window.location.protocol;
 }
 
-export const VueAppleLoginConfig = {
-  clientId: "com.mrpp.www",
-  scope: "name email",
-  redirectURI: GetCurrentUrl(),
-  state: Date.now().toString(),
-  usePopup: true,
-};
+export function getVueAppleLoginConfig() {
+  return {
+    clientId: "com.mrpp.www",
+    scope: "name email",
+    redirectURI: GetCurrentUrl(),
+    state: Date.now().toString(),
+    usePopup: true,
+  };
+}
 
 /**
  * Normalize a URL's protocol to match the current page's protocol.

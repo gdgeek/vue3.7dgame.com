@@ -46,3 +46,65 @@ describe("useVersePermissions", () => {
     expect(result.canViewSceneFilter.value).toBe(false);
   });
 });
+
+describe("useVersePermissions — role-based permission switching", () => {
+  it("canManage is true and canViewSceneFilter is false for manager-only role", async () => {
+    vi.doMock("@casl/vue", () => ({
+      useAbility: () => ({ can: (action: string) => action === "manager" }),
+    }));
+    vi.resetModules();
+    const { useVersePermissions: useVP } = await import(
+      "@/views/meta-verse/composables/useVersePermissions"
+    );
+    const result = mountComposable(() => useVP());
+    expect(result.canManage.value).toBe(true);
+    expect(result.canViewSceneFilter.value).toBe(false);
+    vi.doUnmock("@casl/vue");
+    vi.resetModules();
+  });
+
+  it("canManage and canViewSceneFilter are both true for admin role", async () => {
+    vi.doMock("@casl/vue", () => ({
+      useAbility: () => ({ can: (action: string) => action === "admin" }),
+    }));
+    vi.resetModules();
+    const { useVersePermissions: useVP } = await import(
+      "@/views/meta-verse/composables/useVersePermissions"
+    );
+    const result = mountComposable(() => useVP());
+    expect(result.canManage.value).toBe(true);
+    expect(result.canViewSceneFilter.value).toBe(true);
+    vi.doUnmock("@casl/vue");
+    vi.resetModules();
+  });
+
+  it("canManage and canViewSceneFilter are both true for root role", async () => {
+    vi.doMock("@casl/vue", () => ({
+      useAbility: () => ({ can: (action: string) => action === "root" }),
+    }));
+    vi.resetModules();
+    const { useVersePermissions: useVP } = await import(
+      "@/views/meta-verse/composables/useVersePermissions"
+    );
+    const result = mountComposable(() => useVP());
+    expect(result.canManage.value).toBe(true);
+    expect(result.canViewSceneFilter.value).toBe(true);
+    vi.doUnmock("@casl/vue");
+    vi.resetModules();
+  });
+
+  it("canManage and canViewSceneFilter are both false for unprivileged user", async () => {
+    vi.doMock("@casl/vue", () => ({
+      useAbility: () => ({ can: () => false }),
+    }));
+    vi.resetModules();
+    const { useVersePermissions: useVP } = await import(
+      "@/views/meta-verse/composables/useVersePermissions"
+    );
+    const result = mountComposable(() => useVP());
+    expect(result.canManage.value).toBe(false);
+    expect(result.canViewSceneFilter.value).toBe(false);
+    vi.doUnmock("@casl/vue");
+    vi.resetModules();
+  });
+});
