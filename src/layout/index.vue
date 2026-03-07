@@ -118,7 +118,7 @@ function toggleSidebar() {
 }
 
 const route = useRoute();
-watch(route, () => {
+watch(() => route.fullPath, () => {
   if (isMobile.value && isOpenSidebar.value) {
     appStore.closeSideBar();
   }
