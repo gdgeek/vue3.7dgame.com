@@ -54,7 +54,7 @@
             <div class="item-thumb">
               <img
                 v-if="item.image?.url"
-                :src="item.image.url"
+                :src="toHttps(item.image.url)"
                 :alt="item.name"
               />
               <div v-else class="thumb-placeholder">
@@ -139,6 +139,7 @@ import {
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { getSchools, deleteSchool } from "@/api/v1/edu-school";
 import { usePageData } from "@/composables/usePageData";
+import { toHttps } from "@/utils/helper";
 
 const { t } = useI18n();
 

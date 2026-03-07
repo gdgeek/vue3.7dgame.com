@@ -55,7 +55,7 @@
             <div class="item-thumb">
               <img
                 v-if="item.user?.avatar?.url"
-                :src="item.user.avatar.url"
+                :src="toHttps(item.user.avatar.url)"
                 :alt="item.user.nickname"
               />
               <div v-else class="thumb-placeholder">
@@ -134,6 +134,7 @@ import {
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 import { getStudents, deleteStudent } from "@/api/v1/edu-student";
 import { useCampusMemberList } from "@/composables/useCampusMemberList";
+import { toHttps } from "@/utils/helper";
 
 interface Student {
   id: number;

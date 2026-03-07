@@ -187,14 +187,14 @@
           <audio
             v-if="detailResource?.file?.url"
             ref="audioRef"
-            :src="detailResource.file.url"
+            :src="toHttps(detailResource.file.url)"
             controls
             class="audio-player"
           ></audio>
         </div>
         <video
           v-else-if="detailType === 'video' && detailResource?.file?.url"
-          :src="detailResource.file.url"
+          :src="toHttps(detailResource.file.url)"
           controls
           class="detail-video"
         ></video>
@@ -238,6 +238,7 @@ import {
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import PolygenView from "@/components/PolygenView.vue";
 import { printVector2, printVector3 } from "@/assets/js/helper";
+import { toHttps } from "@/utils/helper";
 
 const props = withDefaults(
   defineProps<{

@@ -57,7 +57,7 @@
             <div class="item-thumb">
               <img
                 v-if="item.image?.url"
-                :src="item.image.url"
+                :src="toHttps(item.image.url)"
                 :alt="item.name"
               />
               <div v-else class="thumb-placeholder">
@@ -212,6 +212,7 @@ import {
   formatFileSize as formatSize,
 } from "@/utils/utilityFunctions";
 import { printVector3 } from "@/assets/js/helper";
+import { toHttps } from "@/utils/helper";
 
 const { t } = useI18n();
 

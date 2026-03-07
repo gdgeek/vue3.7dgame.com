@@ -130,7 +130,7 @@
         <template #preview>
           <video
             v-if="currentVideo?.file?.url"
-            :src="currentVideo.file.url"
+            :src="toHttps(currentVideo.file.url)"
             controls
             class="video-preview"
           ></video>
@@ -172,6 +172,7 @@ import {
   getVideoCover,
 } from "@/utils/utilityFunctions";
 import { printVector2 } from "@/assets/js/helper";
+import { toHttps } from "@/utils/helper";
 
 const { t } = useI18n();
 

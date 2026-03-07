@@ -85,7 +85,7 @@
             <div class="item-thumb">
               <img
                 v-if="item.image?.url"
-                :src="item.image.url"
+                :src="toHttps(item.image.url)"
                 :alt="item.name"
               />
               <div v-else class="thumb-placeholder">
@@ -142,7 +142,7 @@
           <div class="verse-preview">
             <img
               v-if="currentVerse?.image?.url"
-              :src="currentVerse.image.url"
+              :src="toHttps(currentVerse.image.url)"
               :alt="currentVerse.name"
             />
             <div v-else class="preview-placeholder">
@@ -213,6 +213,7 @@ import { getTags } from "@/api/v1/tags";
 import { usePageData } from "@/composables/usePageData";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
 import { ElMessage } from "element-plus";
+import { toHttps } from "@/utils/helper";
 
 const { t } = useI18n();
 const router = useRouter();
