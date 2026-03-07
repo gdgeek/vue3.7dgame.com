@@ -354,7 +354,8 @@ const {
   onResourceSelected,
   handleCoverUpload,
 } = useMetaCoverUpload({
-  currentMeta,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  currentMeta: currentMeta as any,
   detailLoading,
   refresh,
 });
