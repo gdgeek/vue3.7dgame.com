@@ -215,23 +215,23 @@ describe("helper utils", () => {
     });
   });
 
-  describe("VueAppleLoginConfig", () => {
+  describe("getVueAppleLoginConfig", () => {
     it("is exported with usePopup = true", async () => {
       vi.resetModules();
-      const { VueAppleLoginConfig } = await import("@/utils/helper");
-      expect(VueAppleLoginConfig.usePopup).toBe(true);
+      const { getVueAppleLoginConfig } = await import("@/utils/helper");
+      expect(getVueAppleLoginConfig().usePopup).toBe(true);
     });
 
     it("has clientId set to com.mrpp.www", async () => {
       vi.resetModules();
-      const { VueAppleLoginConfig } = await import("@/utils/helper");
-      expect(VueAppleLoginConfig.clientId).toBe("com.mrpp.www");
+      const { getVueAppleLoginConfig } = await import("@/utils/helper");
+      expect(getVueAppleLoginConfig().clientId).toBe("com.mrpp.www");
     });
 
     it("has a numeric state string", async () => {
       vi.resetModules();
-      const { VueAppleLoginConfig } = await import("@/utils/helper");
-      expect(Number(VueAppleLoginConfig.state)).toBeGreaterThan(0);
+      const { getVueAppleLoginConfig } = await import("@/utils/helper");
+      expect(Number(getVueAppleLoginConfig().state)).toBeGreaterThan(0);
     });
   });
 });

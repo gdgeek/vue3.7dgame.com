@@ -80,7 +80,7 @@ import {
   faSquareMinus,
   faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
-import { VueAppleLoginConfig } from "@/utils/helper";
+import { getVueAppleLoginConfig } from "@/utils/helper";
 import "element-plus/dist/index.css";
 import { ability } from "@/ability";
 
@@ -218,7 +218,7 @@ window.addEventListener("unhandledrejection", (event) => {
 });
 
 //const time = new Date().getTime();
-app.use(VueAppleLogin, VueAppleLoginConfig);
+app.use(VueAppleLogin, getVueAppleLoginConfig());
 
 app.use(abilitiesPlugin, ability, {
   useGlobalProperties: true,

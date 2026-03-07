@@ -82,8 +82,6 @@ export default defineConfig({
         "src/views/verse/composables/useModelLoader.ts",
         "src/views/meta-verse/index.vue",
         "src/views/meta-verse/public.vue",
-        "src/views/meta-verse/composables/**",
-        "src/views/audio/**",
       ],
       // 覆盖率阈值（当前组件层实际覆盖约33%；阈值随组件测试补充逐步提升）
       thresholds: {
