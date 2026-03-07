@@ -260,4 +260,165 @@ describe("useResourceLoaders", () => {
       await expect(processEntities(entities as never)).resolves.toBeUndefined();
     });
   });
+
+  describe("destroy() guard – async callbacks are skipped after destroy()", () => {
+    it("video: loadedmetadata callback does not execute after destroy()", async () => {
+      const { useResourceLoaders } = await import(
+        "@/components/ScenePlayer/composables/useResourceLoaders"
+      );
+      const ctx = makeCtx();
+
+      let loadedMetadataCallback: (() => void) | null = null;
+      const fakeVideo = {
+        src: "",
+        crossOrigin: "",
+        loop: false,
+        muted: false,
+        playsInline: false,
+        volume: 1,
+        videoWidth: 640,
+        videoHeight: 480,
+        addEventListener: (_event: string, cb: () => void) => {
+          if (_event === "loadedmetadata") loadedMetadataCallback = cb;
+        },
+      };
+      const createElementSpy = vi.spyOn(document, "createElement").mockReturnValueOnce(
+        fakeVideo as unknown as HTMLElement
+      );
+
+      const { loadModel, destroy } = useResourceLoaders(ctx as never);
+
+      const resource = { type: "video", file: { url: "https://example.com/video.mp4" } };
+      const entity = {
+        type: "Video",
+        parameters: { uuid: "video-d1", active: true, loop: false, muted: false, volume: 1, play: false },
+      };
+
+      // Start loading without awaiting – promise stays pending until the event fires
+      loadModel(resource as never, entity as never);
+
+      // Mark as destroyed before the async event arrives
+      destroy();
+
+      // Simulate loadedmetadata firing after destroy
+      expect(loadedMetadataCallback).not.toBeNull();
+      loadedMetadataCallback!();
+
+      // The guard `if (_destroyed) return` must have fired – scene must be untouched
+      expect(ctx.threeScene.add).not.toHaveBeenCalled();
+
+      createElementSpy.mockRestore();
+    });
+
+    it("picture: texture load callback does not execute after destroy()", async () => {
+      const { useResourceLoaders } = await import(
+        "@/components/ScenePlayer/composables/useResourceLoaders"
+      );
+      const THREE = await import("three");
+      const ctx = makeCtx();
+
+      let textureOnLoad: ((texture: unknown) => void) | null = null;
+      const loadSpy = vi.spyOn(THREE.TextureLoader.prototype, "load").mockImplementation(
+        (_url: string, onLoad?: (texture: unknown) => void) => {
+          if (onLoad) textureOnLoad = onLoad;
+          return undefined as never;
+        }
+      );
+
+      const { loadModel, destroy } = useResourceLoaders(ctx as never);
+
+      const resource = { type: "picture", file: { url: "https://example.com/image.png" } };
+      const entity = {
+        type: "Picture",
+        parameters: { uuid: "picture-d1", active: true, width: 1 },
+      };
+
+      // Start loading without awaiting
+      loadModel(resource as never, entity as never);
+
+      // Destroy before the callback fires
+      destroy();
+
+      // Simulate texture loaded after destroy
+      expect(textureOnLoad).not.toBeNull();
+      textureOnLoad!({ image: { width: 100, height: 100 } });
+
+      // The guard must have prevented any scene mutation
+      expect(ctx.threeScene.add).not.toHaveBeenCalled();
+
+      loadSpy.mockRestore();
+    });
+
+    it("VOX: loader success callback does not execute after destroy()", async () => {
+      const { useResourceLoaders } = await import(
+        "@/components/ScenePlayer/composables/useResourceLoaders"
+      );
+      const { VOXLoader } = await import("@/assets/js/voxel/VOXLoader.js");
+      const ctx = makeCtx();
+
+      let voxOnLoad: ((chunks: unknown[]) => Promise<void>) | null = null;
+      vi.mocked(VOXLoader).mockImplementation(() => ({
+        load: (_url: string, onLoad: (chunks: unknown[]) => Promise<void>) => {
+          voxOnLoad = onLoad;
+        },
+      }) as never);
+
+      const { loadModel, destroy } = useResourceLoaders(ctx as never);
+
+      const resource = { type: "voxel", file: { url: "https://example.com/model.vox" } };
+      const entity = {
+        type: "Voxel",
+        parameters: { uuid: "vox-d1", active: true },
+      };
+
+      // Start loading without awaiting
+      loadModel(resource as never, entity as never);
+
+      // Destroy before the callback fires
+      destroy();
+
+      // Simulate VOX loader completing after destroy
+      expect(voxOnLoad).not.toBeNull();
+      await voxOnLoad!([{ data: [1], size: { x: 1, y: 1, z: 1 }, palette: [] }]);
+
+      // The guard must have prevented any scene mutation
+      expect(ctx.threeScene.add).not.toHaveBeenCalled();
+    });
+
+    it("GLTF: loader success callback does not execute after destroy()", async () => {
+      const { useResourceLoaders } = await import(
+        "@/components/ScenePlayer/composables/useResourceLoaders"
+      );
+      const { getConfiguredGLTFLoader } = await import("@/lib/three/loaders");
+      const ctx = makeCtx();
+
+      let gltfOnLoad: ((gltf: unknown) => Promise<void>) | null = null;
+      vi.mocked(getConfiguredGLTFLoader).mockImplementation(() => ({
+        load: (_url: string, onLoad: (gltf: unknown) => Promise<void>) => {
+          gltfOnLoad = onLoad;
+        },
+      }) as never);
+
+      const { loadModel, destroy } = useResourceLoaders(ctx as never);
+
+      const resource = { type: "model", file: { url: "https://example.com/model.gltf" } };
+      const entity = {
+        type: "Model",
+        parameters: { uuid: "gltf-d1", active: true },
+      };
+
+      // Start loading without awaiting
+      loadModel(resource as never, entity as never);
+
+      // Destroy before the callback fires
+      destroy();
+
+      // Simulate GLTF loader completing after destroy
+      expect(gltfOnLoad).not.toBeNull();
+      await gltfOnLoad!({ scene: {}, animations: [] });
+
+      // The guard must have prevented any scene mutation
+      expect(ctx.threeScene.add).not.toHaveBeenCalled();
+    });
+  });
 });
