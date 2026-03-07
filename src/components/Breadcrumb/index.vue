@@ -295,14 +295,13 @@ watch(
   }
 );
 
-// 监听查询参数变化，更新保存的查询参数
+// 监听完整路径变化（包含 query），避免 deep watch 路由对象
 watch(
-  () => currentRoute.query,
+  () => currentRoute.fullPath,
   () => {
     saveCurrentRouteQuery();
     getBreadcrumb();
-  },
-  { deep: true }
+  }
 );
 
 onBeforeMount(() => {

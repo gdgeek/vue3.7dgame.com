@@ -10,15 +10,59 @@ export const useTagsViewStore = defineStore("tagsView", () => {
   const cachedViews = ref<string[]>(
     JSON.parse(localStorage.getItem("cachedViews") || "[]")
   );
+
+  function toSerializable(value: unknown): unknown {
+    if (value === null) {
+      return null;
+    }
+    const valueType = typeof value;
+    if (
+      valueType === "string" ||
+      valueType === "number" ||
+      valueType === "boolean"
+    ) {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return value
+        .map((item) => toSerializable(item))
+        .filter((item) => item !== undefined);
+    }
+    if (valueType === "object") {
+      const serializableObject: Record<string, unknown> = {};
+      for (const [key, item] of Object.entries(
+        value as Record<string, unknown>
+      )) {
+        const serializableItem = toSerializable(item);
+        if (serializableItem !== undefined) {
+          serializableObject[key] = serializableItem;
+        }
+      }
+      return serializableObject;
+    }
+    return undefined;
+  }
+
+  function toSerializableTagView(view: TagView): TagView {
+    return {
+      name: view.name,
+      title: view.title,
+      path: view.path,
+      fullPath: view.fullPath,
+      icon: view.icon,
+      affix: view.affix,
+      keepAlive: view.keepAlive,
+      query: toSerializable(view.query) as TagView["query"],
+    };
+  }
   /**
    * 监听 visitedViews 的变化，将新值保存到 localStorage
    */
   watch(
-    visitedViews,
+    () => visitedViews.value.map((view) => toSerializableTagView(view)),
     (newViews) => {
       localStorage.setItem("visitedViews", JSON.stringify(newViews));
-    },
-    { deep: true }
+    }
   );
 
   /**
