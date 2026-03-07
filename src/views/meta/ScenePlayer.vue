@@ -4,7 +4,7 @@
     ref="playerRef"
     :meta="meta"
     :is-scene-fullscreen="isSceneFullscreen"
-  />
+  ></SharedScenePlayer>
 </template>
 
 <script setup lang="ts">
