@@ -17,14 +17,7 @@ const mockSettingsStore = { tagsView: false };
 vi.mock("@/store", () => ({
   useTagsViewStore: vi.fn(() => mockTagsViewStore),
   useSettingsStore: vi.fn(() => mockSettingsStore),
-<<<<<<< HEAD
   useAppStore: vi.fn(() => ({ sidebar: { opened: true }, toggleSidebar: vi.fn() })),
-=======
-  useAppStore: vi.fn(() => ({
-    sidebar: { opened: true },
-    toggleSidebar: vi.fn(),
-  })),
->>>>>>> openclaw/improvements
 }));
 
 const RouterViewStub = defineComponent({

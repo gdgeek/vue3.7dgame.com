@@ -47,14 +47,8 @@ const ElCardStub = defineComponent({
 });
 const ElButtonStub = defineComponent({
   name: "ElButton",
-<<<<<<< HEAD
   template: "<button class='el-btn-stub' @click=\"$emit('click')\"><slot /></button>",
   emits: ["click"],
-=======
-  emits: ["click"],
-  template:
-    "<button class='el-btn-stub' @click=\"$emit('click')\"><slot /></button>",
->>>>>>> openclaw/improvements
 });
 const ElIconStub = defineComponent({
   name: "ElIcon",
@@ -67,15 +61,9 @@ async function mount() {
   );
   const el = document.createElement("div");
   const app = createApp(IntroduceDocument as Parameters<typeof createApp>[0]);
-<<<<<<< HEAD
   app.component("el-card", ElCardStub);
   app.component("el-button", ElButtonStub);
   app.component("el-icon", ElIconStub);
-=======
-  app.component("ElCard", ElCardStub);
-  app.component("ElButton", ElButtonStub);
-  app.component("ElIcon", ElIconStub);
->>>>>>> openclaw/improvements
   app.mount(el);
   cleanups.push(() => app.unmount());
   await nextTick();
