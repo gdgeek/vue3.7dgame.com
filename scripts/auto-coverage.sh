@@ -63,21 +63,21 @@ merge_to_develop() {
 wait_ci() {
   sleep 20
   local run_id=$(gh run list --branch develop --limit 1 --json databaseId -q '.[0].databaseId')
-  log "CI Run: $run_id，等待中..."
+  log "CI Run: $run_id，等待中..." >&2
   local i=0
   while [ $i -lt 25 ]; do
     sleep 30; i=$((i+1))
     local status=$(gh run list --branch develop --limit 1 --json status -q '.[0].status')
     [ "$status" = "completed" ] && break
-    [ $((i % 4)) -eq 0 ] && log "CI 进行中... ($((i*30))s)"
+    [ $((i % 4)) -eq 0 ] && log "CI 进行中... ($((i*30))s)" >&2
   done
   gh run list --branch develop --limit 1 --json conclusion -q '.[0].conclusion'
 }
 
 get_coverage() {
-  log "测量覆盖率（约3分钟）..."
+  log "测量覆盖率（约3分钟）..." >&2
   local out=$($PNPM exec vitest run --coverage 2>&1 | grep "All files" | head -1)
-  log "覆盖输出: $out"
+  log "覆盖输出: $out" >&2
   echo "$out" | awk '{print $4}' | tr -d '%'
 }
 
