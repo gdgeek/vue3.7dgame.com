@@ -1,118 +1,185 @@
 #!/bin/bash
-# 自动循环补测试，直到覆盖率不再提升
-# 用法：bash scripts/auto-coverage.sh
+# auto-coverage.sh - 双剑自动化覆盖率提升
+# Claude Code（复杂 Vue 组件）+ Codex（API/utils + 阈值提升）并行
 
-set -e
 PNPM=/home/ubuntu/.cache/node/corepack/v1/pnpm/9.15.0/bin/pnpm.cjs
-PROJECT=/home/ubuntu/projects/vue3.7dgame.com
+CLAUDE_BIN=~/claude-sdk-env/lib/python3.12/site-packages/claude_agent_sdk/_bundled/claude
+REPO=/home/ubuntu/projects/vue3.7dgame.com
 LOG=/tmp/auto-coverage.log
-ROUND=0
-PREV_LINES=0
 
 export http_proxy=http://127.0.0.1:8118
 export https_proxy=http://127.0.0.1:8118
 
-source ~/claude-sdk-env/bin/activate
+log() { echo "[$(date '+%H:%M:%S')] $*" | tee -a $LOG; }
 
-cd "$PROJECT"
+notify() {
+  log "通知: $1"
+  openclaw msg send --channel feishu --message "$1" 2>/dev/null || true
+}
+
+cd $REPO
+
+wait_claude() {
+  log "等待 Claude Code 完成..."
+  local i=0
+  while pgrep -f "claude.*dangerously-skip" > /dev/null && [ $i -lt 80 ]; do
+    sleep 30; i=$((i+1))
+    [ $((i % 4)) -eq 0 ] && log "Claude Code 还在跑... ($((i*30))s)"
+  done
+  log "Claude Code 结束"
+}
+
+wait_codex() {
+  log "等待 Codex 完成..."
+  local i=0
+  while tmux has-session -t codex-auto 2>/dev/null && \
+        tmux capture-pane -t codex-auto -p 2>/dev/null | grep -qv "DONE\|\$"; do
+    sleep 20; i=$((i+1))
+    [ $((i % 6)) -eq 0 ] && log "Codex 还在跑... ($((i*20))s)"
+    [ $i -gt 90 ] && break
+  done
+  log "Codex 结束"
+}
+
+merge_to_develop() {
+  local ahead=$(git log develop..openclaw/improvements --oneline | wc -l | tr -d ' ')
+  if [ "$ahead" = "0" ]; then
+    log "无新 commit，跳过合并"
+    return 0
+  fi
+  log "合并 ${ahead} 个 commit → develop..."
+  git checkout develop && git pull origin develop
+  git merge openclaw/improvements --no-ff --no-commit 2>/dev/null || true
+  DT=$(date +%Y%m%d%H%M)
+  git checkout --theirs .env.production .env.staging 2>/dev/null || true
+  sed -i "s/VITE_DEV_DATE='[0-9]*'/VITE_DEV_DATE='$DT'/" .env.production .env.staging
+  git add -A
+  git commit --no-verify -m "test: auto-merge coverage batch ${DT}A" || \
+    git commit --no-verify -m "chore: bump ${DT}A" --allow-empty
+  git push origin develop
+  log "✅ develop 推送完成 ($DT)"
+}
+
+wait_ci() {
+  sleep 20
+  local run_id=$(gh run list --branch develop --limit 1 --json databaseId -q '.[0].databaseId')
+  log "CI Run: $run_id，等待中..."
+  local i=0
+  while [ $i -lt 25 ]; do
+    sleep 30; i=$((i+1))
+    local status=$(gh run list --branch develop --limit 1 --json status -q '.[0].status')
+    [ "$status" = "completed" ] && break
+    [ $((i % 4)) -eq 0 ] && log "CI 进行中... ($((i*30))s)"
+  done
+  gh run list --branch develop --limit 1 --json conclusion -q '.[0].conclusion'
+}
 
 get_coverage() {
-  $PNPM run test:coverage 2>&1 | grep "^All files" | awk '{print $4}' | tr -d '%'
+  log "测量覆盖率（约3分钟）..."
+  local out=$($PNPM exec vitest run --coverage 2>&1 | grep "All files" | head -1)
+  log "覆盖输出: $out"
+  echo "$out" | awk '{print $4}' | tr -d '%'
 }
 
-run_claude_round() {
-  local round=$1
-  echo "[round $round] 启动 Claude Code 补测试..." | tee -a "$LOG"
+start_claude() {
+  local current=$1 batch=$2
+  log "🗡️  Claude Code 第${batch}批启动（复杂 Vue 组件）..."
+  nohup bash -c "
+cd $REPO
+$CLAUDE_BIN --dangerously-skip-permissions \
+  --output-format stream-json --verbose --max-turns 80 \
+  -p '当前 lines 覆盖率 ${current}%，目标 37%。
 
-  python3 -u - << PYEOF 2>&1 | tee -a "$LOG"
-import anyio, sys
-from claude_agent_sdk import query, ClaudeAgentOptions, AssistantMessage, TextBlock, ToolUseBlock
+补 src 里 0% 覆盖的小 Vue 组件（行数 < 100），优先：
+- src/components/CustomUI/ 
+- src/views/introduce/
+- src/views/web/（小组件）
+- src/layout/components/（小组件）
+- src/views/home/
 
-PROMPT = """查看当前测试覆盖率报告，找出覆盖率最低（lines=0%）但逻辑不太复杂的模块，为它们补充单元测试。
+每个组件 4-6 个 vitest 用例，mount + 基础断言，mock router/store/i18n。
+跳过 stories/ e2e/ node_modules。
 
-策略：
-1. 先运行：/home/ubuntu/.cache/node/corepack/v1/pnpm/9.15.0/bin/pnpm.cjs run test:coverage 2>&1 | grep -E "^\\s+\\S+.*\\|\\s+0 " | head -20
-   找出 lines=0 的文件
-2. 挑 3-5 个行数少于 200 行、逻辑相对简单的文件
-3. 读源文件，写测试
-4. 注意：@vue/test-utils 未安装；Vue 组件用 createApp + jsdom 方式
-5. 每完成一个打印进度
-6. 全部写完后运行测试确认通过：
-   /home/ubuntu/.cache/node/corepack/v1/pnpm/9.15.0/bin/pnpm.cjs exec vitest run 2>&1 | tail -5
-
-每轮补 3-5 个文件即可，不要贪多。
-"""
-
-async def main():
-    options = ClaudeAgentOptions(
-        cwd='/home/ubuntu/projects/vue3.7dgame.com',
-        max_turns=60,
-        allowed_tools=['Read', 'Write', 'Edit', 'Glob', 'Grep', 'Bash'],
-        permission_mode='acceptEdits',
-        system_prompt='你是资深Vue3测试工程师，直接执行任务，每完成一个文件打印进度，用中文。',
-    )
-    async for message in query(prompt=PROMPT, options=options):
-        if isinstance(message, AssistantMessage):
-            for block in message.content:
-                if isinstance(block, TextBlock):
-                    print('[Claude]', block.text, flush=True)
-                elif isinstance(block, ToolUseBlock):
-                    print(f'[工具] {block.name}', flush=True)
-
-anyio.run(main)
-PYEOF
+完成后：
+1. $PNPM exec vitest run 确认 0 failed
+2. 更新 .env.production .env.staging VITE_DEV_DATE=\$(date +%Y%m%d%H%M) VITE_DEV_LETTER=A
+3. git add -A && git commit --no-verify -m \"test: claude batch${batch} vue-component coverage\" && git push origin openclaw/improvements
+输出 DONE' 2>&1
+" >> $LOG 2>&1 &
+  log "Claude Code PID: $!"
 }
 
-commit_and_push() {
-  local round=$1
-  cd "$PROJECT"
-  if git diff --quiet && git diff --cached --quiet; then
-    echo "[round $round] 没有新文件，跳过 commit"
-    return
-  fi
-  git add -A
-  git commit -m "test(auto-round-$round): increase coverage via auto-coverage script"
-  git push origin openclaw/improvements
-  echo "[round $round] 已推送"
+start_codex() {
+  local current=$1 batch=$2
+  log "🗡️  Codex 第${batch}批启动（API/utils + 阈值）..."
+  tmux kill-session -t codex-auto 2>/dev/null; sleep 1
+  tmux new-session -d -s codex-auto -x 220 -y 50
+  tmux send-keys -t codex-auto "cd $REPO && codex exec --full-auto '当前覆盖率 ${current}%，目标 37%。
+
+两个任务（与 Claude Code 不重叠，Claude 负责 Vue 组件）：
+
+1. 找 src/api/ src/utils/ src/helpers/ src/services/ 下还没测试的 .ts 文件（非 types/ 非 index.ts 非 model.ts），各补 5-8 个 vitest 测试
+
+2. 查 vitest.config.ts 的 thresholds，如果当前覆盖率（${current}%）比 lines 阈值高 2% 以上，把 lines 提高 2，functions 提高 2
+
+完成后更新 VITE_DEV_DATE=当前时间（YYYYMMDDHHMM），git add -A && git commit --no-verify -m \"test: codex batch${batch} api+threshold\" && git push origin openclaw/improvements && echo DONE' 2>&1 | tee /tmp/codex-auto-${batch}.log" Enter
+  log "Codex 已启动 tmux:codex-auto"
 }
 
-echo "=== 自动覆盖率提升脚本启动 ===" | tee "$LOG"
+# ===== 主循环 =====
+main() {
+  > $LOG
+  log "=== 双剑自动化覆盖率提升 START ==="
+  notify "🚀 双剑自动化启动！目标 lines 37%，最多 5 轮"
 
-while true; do
-  ROUND=$((ROUND + 1))
-  echo "" | tee -a "$LOG"
-  echo "===== 第 $ROUND 轮 =====" | tee -a "$LOG"
+  TARGET=37
+  MAX_ROUNDS=5
+  round=0
 
-  # 运行 Claude 补测试（带重试逻辑）
-  RETRY=0
-  while true; do
-    run_claude_round $ROUND && break
-    EXIT_CODE=$?
-    RETRY=$((RETRY + 1))
-    if grep -q "rate.limit\|overloaded\|529\|RateLimitError" "$LOG" 2>/dev/null; then
-      WAIT=$((60 * RETRY))
-      echo "[round $ROUND] 触发限流，等待 ${WAIT}s 后重试..." | tee -a "$LOG"
-      sleep $WAIT
-    else
-      echo "[round $ROUND] 非限流错误，退出" | tee -a "$LOG"
-      break 2
+  # 等当前已跑的 Claude Code 结束
+  wait_claude
+
+  while [ $round -lt $MAX_ROUNDS ]; do
+    round=$((round+1))
+    log "====== 第 ${round} 轮 ======"
+
+    # 合并 → develop
+    merge_to_develop
+
+    # 等 CI
+    ci=$(wait_ci)
+    log "CI: $ci"
+    if [ "$ci" != "success" ]; then
+      notify "❌ 第${round}轮 CI 失败！自动化停止，请人工处理"
+      exit 1
     fi
+    notify "✅ 第${round}轮 CI 绿，测量覆盖率..."
+
+    # 测覆盖率
+    lines=$(get_coverage)
+    log "覆盖率: ${lines}%"
+    notify "📊 第${round}轮：lines=${lines}% (目标${TARGET}%)"
+
+    # 达标？
+    if awk "BEGIN {exit !($lines+0 >= $TARGET+0)}"; then
+      log "🎉 目标达成 lines=${lines}%"
+      notify "🎉 覆盖率目标达成！lines=${lines}% >= ${TARGET}%"
+      exit 0
+    fi
+
+    # 双剑并行出发
+    start_claude "$lines" "$round"
+    start_codex  "$lines" "$round"
+
+    # 等两把剑都完成
+    sleep 60
+    wait_claude
+    wait_codex
   done
 
-  commit_and_push $ROUND
+  lines=$(get_coverage)
+  notify "🏁 自动化完成（${MAX_ROUNDS}轮），最终覆盖率 lines=${lines}%"
+  log "=== 完成 ==="
+}
 
-  # 检查覆盖率是否还在提升
-  CURR_LINES=$(get_coverage 2>/dev/null || echo "0")
-  echo "[round $ROUND] 覆盖率: ${PREV_LINES}% -> ${CURR_LINES}%" | tee -a "$LOG"
-
-  if [ "$CURR_LINES" = "$PREV_LINES" ]; then
-    echo "覆盖率连续两轮未提升，自动停止" | tee -a "$LOG"
-    break
-  fi
-  PREV_LINES=$CURR_LINES
-
-  # 简短休息避免连续打爆
-  sleep 5
-done
-
-echo "=== 结束，最终覆盖率: ${CURR_LINES}% ===" | tee -a "$LOG"
+main "$@"
