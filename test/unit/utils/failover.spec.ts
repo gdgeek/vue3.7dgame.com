@@ -263,7 +263,9 @@ describe("createFailoverAxios", () => {
     const logger = (await import("@/utils/logger")).logger;
 
     mockService.mockResolvedValueOnce({ data: "backup-ok" });
-    (axios.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ status: 200 });
+    (axios.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      status: 200,
+    });
 
     await errorHandler({
       config: { _retry: false, baseURL: "" },
@@ -303,7 +305,7 @@ describe("createFailoverAxios", () => {
     await vi.advanceTimersByTimeAsync(60000);
 
     expect(axios.get).toHaveBeenCalledTimes(2);
-    expect((logger.info as ReturnType<typeof vi.fn>)).not.toHaveBeenCalled();
+    expect(logger.info as ReturnType<typeof vi.fn>).not.toHaveBeenCalled();
     vi.useRealTimers();
   });
 });

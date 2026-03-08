@@ -1,8 +1,15 @@
-/**
- * Tests for src/layout/structure/simple.vue
- */
 import { describe, it, expect, afterEach } from "vitest";
 import { createApp, defineComponent } from "vue";
+
+const ElContainerStub = defineComponent({
+  name: "ElContainer",
+  template: "<div class='el-container-stub'><slot /></div>",
+});
+
+const ElMainStub = defineComponent({
+  name: "ElMain",
+  template: "<main class='el-main-stub'><slot /></main>",
+});
 
 const RouterViewStub = defineComponent({
   name: "RouterView",
@@ -16,9 +23,11 @@ afterEach(() => {
 });
 
 async function mount() {
-  const { default: Simple } = await import("@/layout/structure/simple.vue");
+  const Comp = (await import("@/layout/structure/simple.vue")).default;
   const el = document.createElement("div");
-  const app = createApp(Simple as Parameters<typeof createApp>[0]);
+  const app = createApp(Comp as Parameters<typeof createApp>[0]);
+  app.component("ElContainer", ElContainerStub);
+  app.component("ElMain", ElMainStub);
   app.component("RouterView", RouterViewStub);
   app.mount(el);
   cleanups.push(() => app.unmount());
@@ -26,29 +35,30 @@ async function mount() {
 }
 
 describe("layout/structure/simple.vue", () => {
-  it("mounts without throwing", async () => {
-    await expect(mount()).resolves.toBeDefined();
+  it("mounts successfully", async () => {
+    const { el } = await mount();
+    expect(el).toBeDefined();
   });
 
-  it("renders a root div element", async () => {
+  it("renders outer wrapper div", async () => {
     const { el } = await mount();
     expect(el.querySelector("div")).not.toBeNull();
   });
 
-  it("renders el-container inside", async () => {
+  it("renders el-container and el-main", async () => {
     const { el } = await mount();
-    // el-container renders as div or its stub
-    expect(el.innerHTML).toBeTruthy();
+    expect(el.querySelector(".el-container-stub")).not.toBeNull();
+    expect(el.querySelector(".el-main-stub")).not.toBeNull();
   });
 
-  it("renders router-view stub", async () => {
+  it("renders router-view inside main section", async () => {
     const { el } = await mount();
-    expect(el.querySelector(".router-view-stub")).not.toBeNull();
+    const main = el.querySelector(".el-main-stub");
+    expect(main?.querySelector(".router-view-stub")).not.toBeNull();
   });
 
-  it("does not render sidebar or navbar", async () => {
+  it("has exactly one router-view", async () => {
     const { el } = await mount();
-    expect(el.querySelector(".sidebar")).toBeNull();
-    expect(el.querySelector(".navbar")).toBeNull();
+    expect(el.querySelectorAll(".router-view-stub")).toHaveLength(1);
   });
 });
