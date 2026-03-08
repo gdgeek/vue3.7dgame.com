@@ -10,7 +10,7 @@ import {
 
 vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 
-describe("api/v1/ai-rodin round15 batch2", () => {
+describe("api/v1/ai-rodin", () => {
   let request: ReturnType<typeof vi.fn>;
   let api: typeof import("@/api/v1/ai-rodin");
 

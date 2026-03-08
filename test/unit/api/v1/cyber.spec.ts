@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 
-describe("api/v1/cyber round15 batch2", () => {
+describe("api/v1/cyber", () => {
   let request: ReturnType<typeof vi.fn>;
   let api: typeof import("@/api/v1/cyber");
 
