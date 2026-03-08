@@ -1,18 +1,12 @@
-/**
- * Tests for src/views/campus/class.vue
- * Shows ClassDetail when classId query param is present, otherwise el-empty.
- */
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { createApp, defineComponent } from "vue";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { createApp, defineComponent, h } from "vue";
 
 const mockRouteQuery: Record<string, string> = {};
 const mockDomainStore = { title: "TestPlatform" };
+let emitClassLoaded: ((payload: { name?: string }) => void) | null = null;
 
 vi.mock("vue-router", () => ({
   useRoute: vi.fn(() => ({ query: mockRouteQuery })),
-  useRouter: vi.fn(() => ({ push: vi.fn() })),
-  createRouter: vi.fn(() => ({})),
-  createWebHistory: vi.fn(() => ({})),
 }));
 
 vi.mock("@/store/modules/domain", () => ({
@@ -20,13 +14,27 @@ vi.mock("@/store/modules/domain", () => ({
 }));
 
 vi.mock("@/views/campus/components/ClassDetail.vue", async () => {
-  const { defineComponent: dc } = await import("vue");
+  const { defineComponent: dc, h: vh } = await import("vue");
   return {
     default: dc({
       name: "ClassDetail",
-      props: ["classId"],
+      props: {
+        classId: {
+          type: Number,
+          required: true,
+        },
+      },
       emits: ["class-loaded"],
-      template: "<div class='class-detail-stub' :data-id='classId'></div>",
+      setup(props, { emit }) {
+        emitClassLoaded = (payload: { name?: string }) => {
+          emit("class-loaded", payload);
+        };
+        return () =>
+          vh("div", {
+            class: "class-detail-stub",
+            "data-class-id": String(props.classId),
+          });
+      },
     }),
   };
 });
@@ -34,16 +42,25 @@ vi.mock("@/views/campus/components/ClassDetail.vue", async () => {
 const ElEmptyStub = defineComponent({
   name: "ElEmpty",
   props: ["description"],
-  template: "<div class='el-empty-stub' :data-desc='description'></div>",
+  setup(props) {
+    return () => h("div", { class: "el-empty-stub", "data-desc": String(props.description) });
+  },
 });
 
 const cleanups: (() => void)[] = [];
+const originalTitle = document.title;
+
+beforeEach(() => {
+  delete mockRouteQuery.class_id;
+  mockDomainStore.title = "TestPlatform";
+  emitClassLoaded = null;
+  document.title = originalTitle;
+});
+
 afterEach(() => {
   cleanups.forEach((fn) => fn());
   cleanups.length = 0;
   vi.resetModules();
-  delete mockRouteQuery.class_id;
-  mockDomainStore.title = "TestPlatform";
 });
 
 async function mount() {
@@ -58,35 +75,45 @@ async function mount() {
 }
 
 describe("views/campus/class.vue", () => {
-  it("mounts without throwing (no classId)", async () => {
-    await expect(mount()).resolves.toBeDefined();
-  });
-
-  it("renders .class-page-container", async () => {
-    const { el } = await mount();
-    expect(el.querySelector(".class-page-container")).not.toBeNull();
-  });
-
-  it("shows el-empty when no class_id query param", async () => {
+  it("shows empty state when class_id is missing", async () => {
     const { el } = await mount();
     expect(el.querySelector(".el-empty-stub")).not.toBeNull();
-  });
-
-  it("does not show ClassDetail when no class_id", async () => {
-    const { el } = await mount();
     expect(el.querySelector(".class-detail-stub")).toBeNull();
   });
 
-  it("shows ClassDetail when class_id query param is provided", async () => {
+  it("renders ClassDetail when class_id is provided", async () => {
     mockRouteQuery.class_id = "7";
     const { el } = await mount();
     expect(el.querySelector(".class-detail-stub")).not.toBeNull();
+    expect(el.querySelector(".class-detail-stub")?.getAttribute("data-class-id")).toBe("7");
   });
 
-  it("passes classId prop to ClassDetail", async () => {
-    mockRouteQuery.class_id = "15";
+  it("falls back to empty state for invalid class_id", async () => {
+    mockRouteQuery.class_id = "abc";
     const { el } = await mount();
-    const stub = el.querySelector(".class-detail-stub");
-    expect(stub?.getAttribute("data-id")).toBe("15");
+    expect(el.querySelector(".class-detail-stub")).toBeNull();
+    expect(el.querySelector(".el-empty-stub")).not.toBeNull();
+  });
+
+  it("updates document title with class name and store title", async () => {
+    mockRouteQuery.class_id = "10";
+    await mount();
+    emitClassLoaded?.({ name: "Class A" });
+    expect(document.title).toBe("Class A - TestPlatform");
+  });
+
+  it("uses store title when class name is empty", async () => {
+    mockRouteQuery.class_id = "10";
+    await mount();
+    emitClassLoaded?.({});
+    expect(document.title).toBe("TestPlatform");
+  });
+
+  it("uses default site title when store title is empty", async () => {
+    mockRouteQuery.class_id = "10";
+    mockDomainStore.title = "";
+    await mount();
+    emitClassLoaded?.({});
+    expect(document.title).toBe("XR UGC平台（XRUGC.com）");
   });
 });

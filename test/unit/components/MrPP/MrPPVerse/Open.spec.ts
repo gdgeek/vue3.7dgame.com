@@ -1,28 +1,21 @@
-/**
- * Tests for src/components/MrPP/MrPPVerse/Open.vue
- * Shows two el-card panels: one for opening scene to project,
- * one for generating a share code.
- */
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { createApp, defineComponent } from "vue";
 
-vi.mock("vue-i18n", () => ({
-  useI18n: vi.fn(() => ({ t: (k: string) => k })),
-}));
-
 const ElCardStub = defineComponent({
   name: "ElCard",
-  template: "<div class='el-card'><slot /><slot name='header' /></div>",
+  template: "<section class='el-card-stub'><slot name='header' /><slot /></section>",
 });
+
 const ElButtonStub = defineComponent({
   name: "ElButton",
   props: ["type", "size"],
-  template: "<button class='el-button'><slot /></button>",
+  template: "<button class='el-button-stub'><slot /></button>",
 });
+
 const FontAwesomeIconStub = defineComponent({
   name: "FontAwesomeIcon",
   props: ["icon"],
-  template: "<span class='fa-icon'></span>",
+  template: "<i class='fa-icon-stub' :data-icon='icon'></i>",
 });
 
 const cleanups: (() => void)[] = [];
@@ -33,11 +26,11 @@ afterEach(() => {
 });
 
 async function mount() {
-  const { default: Open } = await import(
+  const { default: OpenPanel } = await import(
     "@/components/MrPP/MrPPVerse/Open.vue"
   );
   const el = document.createElement("div");
-  const app = createApp(Open as Parameters<typeof createApp>[0]);
+  const app = createApp(OpenPanel as Parameters<typeof createApp>[0]);
   app.component("ElCard", ElCardStub);
   app.component("ElButton", ElButtonStub);
   app.component("FontAwesomeIcon", FontAwesomeIconStub);
@@ -52,31 +45,28 @@ describe("components/MrPP/MrPPVerse/Open.vue", () => {
     await expect(mount()).resolves.toBeDefined();
   });
 
-  it("renders outer div container", async () => {
+  it("renders two card sections", async () => {
     const { el } = await mount();
-    expect(el.querySelector("div")).not.toBeNull();
+    expect(el.querySelectorAll(".el-card-stub").length).toBe(2);
   });
 
-  it("renders two el-card panels", async () => {
+  it("renders header texts", async () => {
     const { el } = await mount();
-    const cards = el.querySelectorAll(".el-card");
-    expect(cards.length).toBeGreaterThanOrEqual(2);
+    expect(el.textContent).toContain("开放场景给项目（管理员专用）");
+    expect(el.textContent).toContain("生成共享码（24小时）");
   });
 
-  it("renders el-button elements", async () => {
-    const { el } = await mount();
-    const buttons = el.querySelectorAll(".el-button");
-    expect(buttons.length).toBeGreaterThanOrEqual(1);
-  });
-
-  it("contains font-awesome-icon stubs", async () => {
-    const { el } = await mount();
-    const icons = el.querySelectorAll(".fa-icon");
-    expect(icons.length).toBeGreaterThan(0);
-  });
-
-  it("renders i18n key for verseOpen", async () => {
+  it("shows open label and does not render close label", async () => {
     const { el } = await mount();
     expect(el.textContent).toContain("verse.view.verseOpen");
+    expect(el.textContent).not.toContain("verse.view.verseClose");
+  });
+
+  it("renders two buttons and icon markers", async () => {
+    const { el } = await mount();
+    expect(el.querySelectorAll(".el-button-stub").length).toBe(2);
+    expect(el.querySelectorAll(".fa-icon-stub").length).toBe(2);
+    expect(el.querySelector(".fa-icon-stub[data-icon='eye']")).not.toBeNull();
+    expect(el.querySelector(".fa-icon-stub[data-icon='eye-slash']")).not.toBeNull();
   });
 });
