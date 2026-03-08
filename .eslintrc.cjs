@@ -54,7 +54,7 @@ module.exports = {
 
     "@typescript-eslint/no-empty-function": "off", // 关闭空方法检查
     // 逐步启用类型检查规则（先警告，后续可改为 error）
-    "@typescript-eslint/no-explicit-any": "warn", // 警告 any 类型
+    "@typescript-eslint/no-explicit-any": "error", // 禁止 any 类型
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/ban-ts-comment": "off",

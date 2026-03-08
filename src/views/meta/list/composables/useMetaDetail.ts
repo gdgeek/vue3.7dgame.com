@@ -107,6 +107,7 @@ export function useMetaDetail({
 
   const handleGoToEditor = (): void => {
     if (currentMeta.value) {
+      // metaInfo 类型在此处触发 TS2589（实例化过深），临时保留 as any。
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       goToEditor(currentMeta.value as any);
     }
