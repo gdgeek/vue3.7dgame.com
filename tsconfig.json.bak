@@ -5,7 +5,6 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "strict": false,
-    "noImplicitAny": true,
     "noLib": false,
     "sourceMap": true,
     "resolveJsonModule": true,

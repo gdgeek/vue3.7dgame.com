@@ -35,7 +35,7 @@ const currentRoute = useRoute();
 const props = defineProps({
   menuList: {
     required: true,
-    default: () => {
+    default: (): RouteRecordRaw[] => {
       return [];
     },
     type: Array as PropType<RouteRecordRaw[]>,

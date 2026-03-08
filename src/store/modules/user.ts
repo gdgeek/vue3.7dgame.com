@@ -29,7 +29,13 @@ export const useUserStore = defineStore(
       }
       return true;
     }
-    const RoleEnum = {
+    const RoleEnum: {
+      Root: string;
+      Admin: string;
+      Manager: string;
+      User: string;
+      None: null;
+    } = {
       Root: "root",
       Admin: "admin",
       Manager: "manager",
