@@ -182,4 +182,130 @@ describe("createFailoverAxios", () => {
       expect.objectContaining({ timeout: 5000 })
     );
   });
+
+  it("does not switch to backup when error has response", async () => {
+    const { createFailoverAxios } = await import("@/utils/failover");
+    createFailoverAxios({
+      primaryUrl: "https://primary.example.com",
+      backupUrl: "https://backup.example.com",
+    });
+    const { error: errorHandler } = responseHandlers[0];
+    const fakeError = {
+      config: { _retry: false, baseURL: "https://primary.example.com" },
+      response: { status: 500 },
+    };
+
+    await expect(errorHandler(fakeError)).rejects.toEqual(fakeError);
+    expect(mockService).not.toHaveBeenCalled();
+  });
+
+  it("does not switch to backup when config is missing", async () => {
+    const { createFailoverAxios } = await import("@/utils/failover");
+    createFailoverAxios({
+      primaryUrl: "https://primary.example.com",
+      backupUrl: "https://backup.example.com",
+    });
+    const { error: errorHandler } = responseHandlers[0];
+    const fakeError = { response: undefined };
+
+    await expect(errorHandler(fakeError)).rejects.toEqual(fakeError);
+    expect(mockService).not.toHaveBeenCalled();
+  });
+
+  it("does not switch when backupUrl is empty", async () => {
+    const { createFailoverAxios } = await import("@/utils/failover");
+    createFailoverAxios({
+      primaryUrl: "https://primary.example.com",
+      backupUrl: "",
+    });
+    const { error: errorHandler } = responseHandlers[0];
+    const fakeError = {
+      config: { _retry: false, baseURL: "https://primary.example.com" },
+      response: undefined,
+    };
+
+    await expect(errorHandler(fakeError)).rejects.toEqual(fakeError);
+    expect(mockService).not.toHaveBeenCalled();
+  });
+
+  it("after switching to backup, request interceptor uses backup baseURL", async () => {
+    const { createFailoverAxios } = await import("@/utils/failover");
+    createFailoverAxios({
+      primaryUrl: "https://primary.example.com",
+      backupUrl: "https://backup.example.com",
+    });
+    const { error: errorHandler } = responseHandlers[0];
+    const reqHandler = requestHandlers[0] as (
+      c: Record<string, unknown>
+    ) => Record<string, unknown>;
+    mockService.mockResolvedValueOnce({ data: "backup-ok" });
+
+    await errorHandler({
+      config: { _retry: false, baseURL: "" },
+      response: undefined,
+    });
+
+    const cfg = reqHandler({ baseURL: "" });
+    expect((cfg as Record<string, unknown>).baseURL).toBe(
+      "https://backup.example.com"
+    );
+  });
+
+  it("starts health check and probes primary health endpoint after failover", async () => {
+    vi.useFakeTimers();
+    const { createFailoverAxios } = await import("@/utils/failover");
+    createFailoverAxios({
+      primaryUrl: "https://primary.example.com",
+      backupUrl: "https://backup.example.com",
+      healthPath: "/healthz",
+    });
+    const { error: errorHandler } = responseHandlers[0];
+    const logger = (await import("@/utils/logger")).logger;
+
+    mockService.mockResolvedValueOnce({ data: "backup-ok" });
+    (axios.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      status: 200,
+    });
+
+    await errorHandler({
+      config: { _retry: false, baseURL: "" },
+      response: undefined,
+    });
+
+    await vi.advanceTimersByTimeAsync(30000);
+
+    expect(axios.get).toHaveBeenCalledWith(
+      "https://primary.example.com/healthz",
+      { timeout: 3000 }
+    );
+    expect((logger.info as ReturnType<typeof vi.fn>).mock.calls.length).toBe(1);
+    vi.useRealTimers();
+  });
+
+  it("health check keeps retrying when primary is still down", async () => {
+    vi.useFakeTimers();
+    const { createFailoverAxios } = await import("@/utils/failover");
+    createFailoverAxios({
+      primaryUrl: "https://primary.example.com",
+      backupUrl: "https://backup.example.com",
+    });
+    const { error: errorHandler } = responseHandlers[0];
+    const logger = (await import("@/utils/logger")).logger;
+
+    mockService.mockResolvedValueOnce({ data: "backup-ok" });
+    (axios.get as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new Error("still down")
+    );
+
+    await errorHandler({
+      config: { _retry: false, baseURL: "" },
+      response: undefined,
+    });
+
+    await vi.advanceTimersByTimeAsync(60000);
+
+    expect(axios.get).toHaveBeenCalledTimes(2);
+    expect(logger.info as ReturnType<typeof vi.fn>).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
 });
