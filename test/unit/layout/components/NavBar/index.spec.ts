@@ -5,7 +5,14 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { createApp, defineComponent, nextTick } from "vue";
 
 const mockToggleSidebar = vi.fn();
+<<<<<<< HEAD
 const mockAppStore = { sidebar: { opened: true }, toggleSidebar: mockToggleSidebar };
+=======
+const mockAppStore = {
+  sidebar: { opened: true },
+  toggleSidebar: mockToggleSidebar,
+};
+>>>>>>> openclaw/improvements
 
 vi.mock("@/store", () => ({
   useAppStore: vi.fn(() => mockAppStore),
@@ -13,17 +20,44 @@ vi.mock("@/store", () => ({
 
 vi.mock("@/layout/components/NavBar/components/Breadcrumb.vue", async () => {
   const { defineComponent: dc } = await import("vue");
+<<<<<<< HEAD
   return { default: dc({ name: "Breadcrumb", template: '<div class="breadcrumb-stub"></div>' }) };
+=======
+  return {
+    default: dc({
+      name: "Breadcrumb",
+      template: '<div class="breadcrumb-stub"></div>',
+    }),
+  };
+>>>>>>> openclaw/improvements
 });
 
 vi.mock("@/layout/components/NavBar/components/HeaderActions.vue", async () => {
   const { defineComponent: dc } = await import("vue");
+<<<<<<< HEAD
   return { default: dc({ name: "HeaderActions", template: '<div class="header-actions-stub"></div>' }) };
+=======
+  return {
+    default: dc({
+      name: "HeaderActions",
+      template: '<div class="header-actions-stub"></div>',
+    }),
+  };
+>>>>>>> openclaw/improvements
 });
 
 vi.mock("@/layout/components/NavBar/components/UserDropdown.vue", async () => {
   const { defineComponent: dc } = await import("vue");
+<<<<<<< HEAD
   return { default: dc({ name: "UserDropdown", template: '<div class="user-dropdown-stub"></div>' }) };
+=======
+  return {
+    default: dc({
+      name: "UserDropdown",
+      template: '<div class="user-dropdown-stub"></div>',
+    }),
+  };
+>>>>>>> openclaw/improvements
 });
 
 vi.mock("@/components/Hamburger/index.vue", async () => {
@@ -33,7 +67,12 @@ vi.mock("@/components/Hamburger/index.vue", async () => {
       name: "Hamburger",
       props: ["isActive"],
       emits: ["toggle-click"],
+<<<<<<< HEAD
       template: '<button class="hamburger-stub" @click="$emit(\'toggle-click\')"></button>',
+=======
+      template:
+        '<button class="hamburger-stub" @click="$emit(\'toggle-click\')"></button>',
+>>>>>>> openclaw/improvements
     }),
   };
 });

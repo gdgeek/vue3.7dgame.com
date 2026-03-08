@@ -43,7 +43,11 @@ async function mount() {
   );
   const el = document.createElement("div");
   const app = createApp(IntroduceCategory as Parameters<typeof createApp>[0]);
+<<<<<<< HEAD
   app.component("el-card", ElCardStub);
+=======
+  app.component("ElCard", ElCardStub);
+>>>>>>> openclaw/improvements
   app.mount(el);
   cleanups.push(() => app.unmount());
   await nextTick();
