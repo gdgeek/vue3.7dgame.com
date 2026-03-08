@@ -216,19 +216,19 @@ describe("helper utils", () => {
   });
 
   describe("getVueAppleLoginConfig", () => {
-    it("is exported with usePopup = true", async () => {
+    it("returns config with usePopup = true", async () => {
       vi.resetModules();
       const { getVueAppleLoginConfig } = await import("@/utils/helper");
       expect(getVueAppleLoginConfig().usePopup).toBe(true);
     });
 
-    it("has clientId set to com.mrpp.www", async () => {
+    it("returns config with clientId set to com.mrpp.www", async () => {
       vi.resetModules();
       const { getVueAppleLoginConfig } = await import("@/utils/helper");
       expect(getVueAppleLoginConfig().clientId).toBe("com.mrpp.www");
     });
 
-    it("has a numeric state string", async () => {
+    it("returns config with a numeric state string", async () => {
       vi.resetModules();
       const { getVueAppleLoginConfig } = await import("@/utils/helper");
       expect(Number(getVueAppleLoginConfig().state)).toBeGreaterThan(0);

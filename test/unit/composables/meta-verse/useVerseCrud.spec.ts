@@ -91,3 +91,62 @@ describe("useVerseCrud", () => {
     expect(formatted).toMatch(/\d{4}\/\d{2}\/\d{2}/);
   });
 });
+
+describe("useVerseCrud — API error paths", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("submitCreate logs error when postVerse rejects", async () => {
+    const { postVerse } = await import("@/api/v1/verse");
+    const { logger } = await import("@/utils/logger");
+    vi.mocked(postVerse).mockRejectedValueOnce(new Error("API failure"));
+    const currentVerse = ref<null>(null);
+    const crudOpts = { refresh: vi.fn(), currentVerse, detailVisible: ref(false) };
+    const result = mountComposable(() => useVerseCrud(crudOpts));
+    await result.submitCreate({ name: "test", description: "" }, null);
+    expect(vi.mocked(logger.error)).toHaveBeenCalled();
+  });
+
+  it("handleDelete returns early and never calls deleteVerse when currentVerse is null", async () => {
+    const { deleteVerse } = await import("@/api/v1/verse");
+    const currentVerse = ref<null>(null);
+    const crudOpts = { refresh: vi.fn(), currentVerse, detailVisible: ref(false) };
+    const result = mountComposable(() => useVerseCrud(crudOpts));
+    await result.handleDelete();
+    expect(vi.mocked(deleteVerse)).not.toHaveBeenCalled();
+  });
+
+  it("handleDelete calls Message.info on deleteVerse failure", async () => {
+    const { deleteVerse } = await import("@/api/v1/verse");
+    const { MessageBox, Message } = await import("@/components/Dialog");
+    vi.mocked(MessageBox.confirm).mockResolvedValueOnce(undefined as never);
+    vi.mocked(deleteVerse).mockRejectedValueOnce(new Error("delete failed"));
+    const currentVerse = ref({ id: 99, name: "scene" } as Parameters<typeof useVerseCrud>[0]["currentVerse"]["value"] & object);
+    const crudOpts = { refresh: vi.fn(), currentVerse, detailVisible: ref(false) };
+    const result = mountComposable(() => useVerseCrud(crudOpts));
+    await result.handleDelete();
+    expect(vi.mocked(Message.info)).toHaveBeenCalled();
+  });
+
+  it("handleRename does nothing when currentVerse is null", async () => {
+    const { putVerse } = await import("@/api/v1/verse");
+    const currentVerse = ref<null>(null);
+    const crudOpts = { refresh: vi.fn(), currentVerse, detailVisible: ref(false) };
+    const result = mountComposable(() => useVerseCrud(crudOpts));
+    await result.handleRename("new name");
+    expect(vi.mocked(putVerse)).not.toHaveBeenCalled();
+  });
+
+  it("handleRename shows Message.error when putVerse rejects", async () => {
+    const { putVerse } = await import("@/api/v1/verse");
+    const { Message } = await import("@/components/Dialog");
+    vi.mocked(putVerse).mockRejectedValueOnce(new Error("put failed"));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const currentVerse = ref({ id: 5, name: "old name" } as any);
+    const refresh = vi.fn();
+    const crudOpts = { refresh, currentVerse, detailVisible: ref(false) };
+    const result = mountComposable(() => useVerseCrud(crudOpts));
+    await result.handleRename("new name");
+    expect(vi.mocked(Message.error)).toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
+  });
+});

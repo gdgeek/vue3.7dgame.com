@@ -18,7 +18,10 @@
           class="dropdown-item"
           @click="closeMenu"
         >
-          <font-awesome-icon :icon="['fas', 'gear']" class="dropdown-icon" />
+          <font-awesome-icon
+            :icon="['fas', 'gear']"
+            class="dropdown-icon"
+          ></font-awesome-icon>
           <span>{{ t("ui.personalSettings") }}</span>
         </router-link>
         <div class="dropdown-divider"></div>
@@ -26,7 +29,7 @@
           <font-awesome-icon
             :icon="['fas', 'right-from-bracket']"
             class="dropdown-icon"
-          />
+          ></font-awesome-icon>
           <span>{{ t("sidebar.logout") }}</span>
         </div>
       </div>

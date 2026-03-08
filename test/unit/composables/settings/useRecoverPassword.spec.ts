@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { createApp, defineComponent } from "vue";
 
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({ t: (key: string) => key }),
@@ -45,6 +46,14 @@ describe("useRecoverPassword", () => {
     vi.clearAllMocks();
   });
 
+  /** Track the mounted app so afterEach can unmount it */
+  let _cleanup: (() => void) | null = null;
+
+  afterEach(() => {
+    _cleanup?.();
+    _cleanup = null;
+  });
+
   const importComposable = async () => {
     const { useRecoverPassword } = await import(
       "@/views/settings/composables/useRecoverPassword"
@@ -52,22 +61,41 @@ describe("useRecoverPassword", () => {
     return useRecoverPassword;
   };
 
+  /**
+   * Mount the composable inside a real Vue component instance so that
+   * lifecycle hooks (onUnmounted, watch) are properly associated.
+   * The mounted app is cleaned up in the afterEach above.
+   */
+  const mountComposable = async (deps: ReturnType<typeof makeDeps>) => {
+    const useRecoverPassword = await importComposable();
+    let result!: ReturnType<typeof useRecoverPassword>;
+    const app = createApp(
+      defineComponent({
+        setup() {
+          result = useRecoverPassword(deps);
+          return {};
+        },
+        render: () => null as unknown as ReturnType<typeof defineComponent>,
+      })
+    );
+    app.mount(document.createElement("div"));
+    _cleanup = () => app.unmount();
+    return result;
+  };
+
   describe("initial state", () => {
     it("starts with dialogRecoverVisible = false", async () => {
-      const useRecoverPassword = await importComposable();
-      const { dialogRecoverVisible } = useRecoverPassword(makeDeps());
+      const { dialogRecoverVisible } = await mountComposable(makeDeps());
       expect(dialogRecoverVisible.value).toBe(false);
     });
 
     it("starts with recoverCodeVerified = false", async () => {
-      const useRecoverPassword = await importComposable();
-      const { recoverCodeVerified } = useRecoverPassword(makeDeps());
+      const { recoverCodeVerified } = await mountComposable(makeDeps());
       expect(recoverCodeVerified.value).toBe(false);
     });
 
     it("starts with zero cooldown", async () => {
-      const useRecoverPassword = await importComposable();
-      const { recoverCooldownSeconds } = useRecoverPassword(makeDeps());
+      const { recoverCooldownSeconds } = await mountComposable(makeDeps());
       expect(recoverCooldownSeconds.value).toBe(0);
     });
   });
@@ -75,9 +103,8 @@ describe("useRecoverPassword", () => {
   describe("openRecoverDialog", () => {
     it("opens dialog with bound email", async () => {
       mockGetCurrentBoundEmail.mockResolvedValue("user@example.com");
-      const useRecoverPassword = await importComposable();
       const { openRecoverDialog, dialogRecoverVisible, recoverForm } =
-        useRecoverPassword(makeDeps());
+        await mountComposable(makeDeps());
 
       await openRecoverDialog();
 
@@ -87,9 +114,8 @@ describe("useRecoverPassword", () => {
 
     it("opens email bind dialog when no email bound", async () => {
       mockGetCurrentBoundEmail.mockResolvedValue("");
-      const useRecoverPassword = await importComposable();
       const { openRecoverDialog, dialogRecoverVisible } =
-        useRecoverPassword(makeDeps());
+        await mountComposable(makeDeps());
 
       await openRecoverDialog();
 
@@ -106,9 +132,8 @@ describe("useRecoverPassword", () => {
         success: true,
         message: "Sent",
       });
-      const useRecoverPassword = await importComposable();
       const { handleRecoverSendEmail, recoverForm, recoverCooldownSeconds } =
-        useRecoverPassword(makeDeps());
+        await mountComposable(makeDeps());
 
       recoverForm.value.email = "user@example.com";
       await handleRecoverSendEmail();
@@ -120,8 +145,7 @@ describe("useRecoverPassword", () => {
     });
 
     it("shows warning when email is missing", async () => {
-      const useRecoverPassword = await importComposable();
-      const { handleRecoverSendEmail } = useRecoverPassword(makeDeps());
+      const { handleRecoverSendEmail } = await mountComposable(makeDeps());
 
       await handleRecoverSendEmail();
       expect(mockElMessage.warning).toHaveBeenCalled();
@@ -130,9 +154,8 @@ describe("useRecoverPassword", () => {
 
     it("shows error when API fails", async () => {
       mockRequestPasswordReset.mockResolvedValue({ success: false });
-      const useRecoverPassword = await importComposable();
       const { handleRecoverSendEmail, recoverForm } =
-        useRecoverPassword(makeDeps());
+        await mountComposable(makeDeps());
 
       recoverForm.value.email = "user@example.com";
       await handleRecoverSendEmail();
@@ -142,9 +165,8 @@ describe("useRecoverPassword", () => {
 
     it("shows error on network failure", async () => {
       mockRequestPasswordReset.mockRejectedValue(new Error("network"));
-      const useRecoverPassword = await importComposable();
       const { handleRecoverSendEmail, recoverForm } =
-        useRecoverPassword(makeDeps());
+        await mountComposable(makeDeps());
 
       recoverForm.value.email = "user@example.com";
       await handleRecoverSendEmail();
@@ -159,13 +181,12 @@ describe("useRecoverPassword", () => {
         success: true,
         message: "Verified",
       });
-      const useRecoverPassword = await importComposable();
       const {
         handleRecoverVerifyCode,
         recoverForm,
         recoverFormRef,
         recoverCodeVerified,
-      } = useRecoverPassword(makeDeps());
+      } = await mountComposable(makeDeps());
 
       recoverForm.value.email = "user@example.com";
       recoverForm.value.code = "123456";
@@ -182,13 +203,12 @@ describe("useRecoverPassword", () => {
 
     it("keeps recoverCodeVerified=false on verification failure", async () => {
       mockVerifyResetCode.mockResolvedValue({ success: false });
-      const useRecoverPassword = await importComposable();
       const {
         handleRecoverVerifyCode,
         recoverForm,
         recoverFormRef,
         recoverCodeVerified,
-      } = useRecoverPassword(makeDeps());
+      } = await mountComposable(makeDeps());
 
       recoverForm.value.email = "user@example.com";
       recoverForm.value.code = "000000";
@@ -204,8 +224,7 @@ describe("useRecoverPassword", () => {
     });
 
     it("shows warning when email is missing", async () => {
-      const useRecoverPassword = await importComposable();
-      const { handleRecoverVerifyCode } = useRecoverPassword(makeDeps());
+      const { handleRecoverVerifyCode } = await mountComposable(makeDeps());
 
       await handleRecoverVerifyCode();
       expect(mockElMessage.warning).toHaveBeenCalled();
@@ -218,14 +237,13 @@ describe("useRecoverPassword", () => {
         success: true,
         message: "Reset",
       });
-      const useRecoverPassword = await importComposable();
       const {
         handleRecoverResetPassword,
         recoverForm,
         recoverFormRef,
         recoverCodeVerified,
         dialogRecoverVisible,
-      } = useRecoverPassword(makeDeps());
+      } = await mountComposable(makeDeps());
 
       recoverForm.value.email = "user@example.com";
       recoverForm.value.code = "123456";
@@ -250,9 +268,8 @@ describe("useRecoverPassword", () => {
     });
 
     it("shows warning when code not verified", async () => {
-      const useRecoverPassword = await importComposable();
       const { handleRecoverResetPassword, recoverForm } =
-        useRecoverPassword(makeDeps());
+        await mountComposable(makeDeps());
 
       recoverForm.value.email = "user@example.com";
       // recoverCodeVerified is false by default
@@ -265,13 +282,12 @@ describe("useRecoverPassword", () => {
 
   describe("resetRecoverForm", () => {
     it("clears form fields and resets verification", async () => {
-      const useRecoverPassword = await importComposable();
       const {
         resetRecoverForm,
         recoverForm,
         recoverCodeVerified,
         recoverFormRef,
-      } = useRecoverPassword(makeDeps());
+      } = await mountComposable(makeDeps());
 
       recoverForm.value.code = "123456";
       recoverForm.value.password = "pass";
@@ -290,8 +306,7 @@ describe("useRecoverPassword", () => {
 
   describe("canSendRecoverCode", () => {
     it("is true when not sending and no cooldown", async () => {
-      const useRecoverPassword = await importComposable();
-      const { canSendRecoverCode } = useRecoverPassword(makeDeps());
+      const { canSendRecoverCode } = await mountComposable(makeDeps());
       expect(canSendRecoverCode.value).toBe(true);
     });
   });
@@ -303,9 +318,8 @@ describe("useRecoverPassword", () => {
         success: true,
         message: "",
       });
-      const useRecoverPassword = await importComposable();
       const { handleRecoverSendEmail, recoverForm, recoverCooldownSeconds } =
-        useRecoverPassword(makeDeps());
+        await mountComposable(makeDeps());
 
       recoverForm.value.email = "test@test.com";
       await handleRecoverSendEmail();
