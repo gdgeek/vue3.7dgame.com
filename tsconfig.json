@@ -6,6 +6,7 @@
     "moduleResolution": "bundler",
     "strict": false,
     "noImplicitAny": true,
+    "strictNullChecks": true,
     "noLib": false,
     "sourceMap": true,
     "resolveJsonModule": true,
