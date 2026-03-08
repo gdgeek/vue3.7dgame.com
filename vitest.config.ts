@@ -85,7 +85,7 @@ export default defineConfig({
       ],
       // 覆盖率阈值（当前组件层实际覆盖约33%；阈值随组件测试补充逐步提升）
       thresholds: {
-        lines: 35,
+        lines: 36,
         functions: 67,
       },
     },

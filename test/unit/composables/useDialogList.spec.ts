@@ -185,6 +185,89 @@ describe("useDialogList composable", () => {
       expect(active.value.pagination.current).toBe(5);
       expect(active.value.pagination.count).toBe(10);
     });
+
+    it("并发 refresh 时仅最后一次请求结果生效（旧请求结果被丢弃）", async () => {
+      let resolveFirst: ((value: { data: Item[] }) => void) | null = null;
+      let resolveSecond: ((value: { data: Item[] }) => void) | null = null;
+      const fetchFn = vi
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise<{ data: Item[] }>((resolve) => {
+              resolveFirst = resolve;
+            })
+        )
+        .mockImplementationOnce(
+          () =>
+            new Promise<{ data: Item[] }>((resolve) => {
+              resolveSecond = resolve;
+            })
+        );
+
+      const { refresh, active, loading } = setupDialogList<Item>(fetchFn);
+      const p1 = refresh();
+      const p2 = refresh();
+
+      expect(loading.value).toBe(true);
+      resolveFirst?.({ data: [{ id: 1, name: "old" }] });
+      await p1;
+      expect(active.value.items).toEqual([]);
+      expect(loading.value).toBe(true);
+
+      resolveSecond?.({ data: [{ id: 2, name: "latest" }] });
+      await p2;
+      expect(active.value.items).toEqual([{ id: 2, name: "latest" }]);
+      expect(loading.value).toBe(false);
+    });
+
+    it("当前请求失败时会清空 items", async () => {
+      const fetchFn = vi.fn().mockRejectedValue(new Error("boom"));
+      const { refresh, active, loading } = setupDialogList<Item>(fetchFn);
+      active.value.items = [{ id: 9, name: "keep" }];
+
+      await refresh();
+
+      expect(active.value.items).toEqual([]);
+      expect(loading.value).toBe(false);
+    });
+
+    it("旧请求失败不会覆盖新请求结果", async () => {
+      let rejectFirst: ((reason?: unknown) => void) | null = null;
+      let resolveSecond:
+        | ((value: { data: Item[]; headers?: Record<string, unknown> }) => void)
+        | null = null;
+      const fetchFn = vi
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise<{ data: Item[] }>((_, reject) => {
+              rejectFirst = reject;
+            })
+        )
+        .mockImplementationOnce(
+          () =>
+            new Promise<{ data: Item[]; headers?: Record<string, unknown> }>(
+              (resolve) => {
+                resolveSecond = resolve;
+              }
+            )
+        );
+
+      const { refresh, active, loading } = setupDialogList<Item>(fetchFn);
+      const p1 = refresh();
+      const p2 = refresh();
+
+      rejectFirst?.(new Error("stale failed"));
+      await p1;
+      expect(active.value.items).toEqual([]);
+      expect(loading.value).toBe(true);
+
+      resolveSecond?.(makeResponse([{ id: 7, name: "new" }]));
+      await p2;
+
+      expect(active.value.items).toEqual([{ id: 7, name: "new" }]);
+      expect(loading.value).toBe(false);
+    });
   });
 
   // ----------------------------------------------------------
@@ -281,6 +364,18 @@ describe("useDialogList composable", () => {
 
       expect(active.value.sorted).toBe("-updated_at");
     });
+
+    it("sort 会将当前页重置为 1", async () => {
+      const fetchFn = vi.fn().mockResolvedValue(makeResponse<Item>([]));
+      const { sort, active } = setupDialogList<Item>(fetchFn);
+      active.value.pagination.current = 6;
+
+      sort("name");
+      await nextTick();
+
+      expect(active.value.pagination.current).toBe(1);
+      expect(fetchFn).toHaveBeenCalledWith("name", "", 1);
+    });
   });
 
   // ----------------------------------------------------------
@@ -296,6 +391,18 @@ describe("useDialogList composable", () => {
 
       expect(active.value.searched).toBe("keyword");
       expect(fetchFn).toHaveBeenCalledWith("-created_at", "keyword", 1);
+    });
+
+    it("search 会将当前页重置为 1", async () => {
+      const fetchFn = vi.fn().mockResolvedValue(makeResponse<Item>([]));
+      const { search, active } = setupDialogList<Item>(fetchFn);
+      active.value.pagination.current = 9;
+
+      search("abc");
+      await nextTick();
+
+      expect(active.value.pagination.current).toBe(1);
+      expect(fetchFn).toHaveBeenCalledWith("-created_at", "abc", 1);
     });
   });
 
