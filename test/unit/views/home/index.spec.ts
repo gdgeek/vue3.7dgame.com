@@ -68,6 +68,30 @@ async function mount(props: Record<string, unknown> = {}) {
     props: ["icon"],
     template: '<i class="fa-stub"></i>',
   });
+  app.component("el-divider", {
+    name: "ElDivider",
+    template: '<div class="el-divider-stub"><slot /></div>',
+  });
+  app.component("el-skeleton", {
+    name: "ElSkeleton",
+    template: '<div class="el-skeleton-stub"></div>',
+  });
+  app.component("el-button", {
+    name: "ElButton",
+    template: '<button class="el-button-stub"><slot /></button>',
+  });
+  app.component("el-empty", {
+    name: "ElEmpty",
+    template: '<div class="el-empty-stub"><slot /></div>',
+  });
+  app.component("el-tab-pane", {
+    name: "ElTabPane",
+    template: '<div class="el-tab-pane-stub"><slot /></div>',
+  });
+  app.component("el-tabs", {
+    name: "ElTabs",
+    template: '<div class="el-tabs-stub"><slot /></div>',
+  });
   app.mount(el);
   cleanups.push(() => app.unmount());
   await nextTick();

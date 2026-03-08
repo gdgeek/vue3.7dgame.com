@@ -30,6 +30,10 @@ async function mount(props: Record<string, unknown> = {}) {
   const el = document.createElement("div");
   const app = createApp(SidebarMenuItemTitle as Parameters<typeof createApp>[0], props);
   app.component("svg-icon", SvgIconStub);
+  app.component("el-icon", {
+    name: "ElIcon",
+    template: '<i class="sub-el-icon"><slot /></i>',
+  });
   app.mount(el);
   cleanups.push(() => app.unmount());
   await nextTick();

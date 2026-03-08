@@ -21,6 +21,11 @@ function mount(props: Record<string, unknown> = {}) {
     props: ["style"],
     template: '<div class="el-card-stub"><slot /></div>',
   });
+  app.directive("loading", {
+    mounted: () => undefined,
+    updated: () => undefined,
+    unmounted: () => undefined,
+  });
   app.mount(el);
   cleanups.push(() => app.unmount());
   return { el };

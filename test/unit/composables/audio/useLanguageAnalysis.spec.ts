@@ -6,7 +6,7 @@
  * and the debounced timer for multi-language notifications.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { ref } from "vue";
+import { ref, createApp, defineComponent, h } from "vue";
 
 // ── Module-level mock stubs ────────────────────────────────────────────────────
 // Vitest hoists variables starting with "mock" before vi.mock factories run.
@@ -47,16 +47,38 @@ vi.mock("element-plus", () => ({
 import { useLanguageAnalysis } from "@/views/audio/composables/useLanguageAnalysis";
 
 // ── Setup / teardown ──────────────────────────────────────────────────────────
+const cleanups: Array<() => void> = [];
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
+afterEach(() => {
+  cleanups.forEach((cleanup) => cleanup());
+  cleanups.length = 0;
+});
+
+function mountUseLanguageAnalysis() {
+  let result: ReturnType<typeof useLanguageAnalysis>;
+  const app = createApp(
+    defineComponent({
+      setup() {
+        result = useLanguageAnalysis();
+        return () => h("div");
+      },
+    })
+  );
+  const el = document.createElement("div");
+  app.mount(el);
+  cleanups.push(() => app.unmount());
+  return result!;
+}
+
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe("useLanguageAnalysis — initial state", () => {
   it("initialises all counts and flags to zero / empty", () => {
-    const { languageAnalysis } = useLanguageAnalysis();
+    const { languageAnalysis } = mountUseLanguageAnalysis();
     const a = languageAnalysis.value;
     expect(a.chineseCount).toBe(0);
     expect(a.englishCount).toBe(0);
@@ -70,7 +92,7 @@ describe("useLanguageAnalysis — initial state", () => {
 
 describe("useLanguageAnalysis — checkTextLanguage", () => {
   it("returns early without updating state when text is empty", () => {
-    const { languageAnalysis, checkTextLanguage } = useLanguageAnalysis();
+    const { languageAnalysis, checkTextLanguage } = mountUseLanguageAnalysis();
     const lang = ref("zh");
     const auto = ref(true);
 
@@ -81,7 +103,7 @@ describe("useLanguageAnalysis — checkTextLanguage", () => {
   });
 
   it("detects pure Chinese text and sets correct counts", () => {
-    const { languageAnalysis, checkTextLanguage } = useLanguageAnalysis();
+    const { languageAnalysis, checkTextLanguage } = mountUseLanguageAnalysis();
     const lang = ref("");
     const auto = ref(false);
 
@@ -94,7 +116,7 @@ describe("useLanguageAnalysis — checkTextLanguage", () => {
   });
 
   it("detects pure English text correctly", () => {
-    const { languageAnalysis, checkTextLanguage } = useLanguageAnalysis();
+    const { languageAnalysis, checkTextLanguage } = mountUseLanguageAnalysis();
     const lang = ref("");
     const auto = ref(false);
 
@@ -106,7 +128,7 @@ describe("useLanguageAnalysis — checkTextLanguage", () => {
   });
 
   it("detects pure Japanese hiragana text correctly", () => {
-    const { languageAnalysis, checkTextLanguage } = useLanguageAnalysis();
+    const { languageAnalysis, checkTextLanguage } = mountUseLanguageAnalysis();
     const lang = ref("");
     const auto = ref(false);
 
@@ -118,7 +140,7 @@ describe("useLanguageAnalysis — checkTextLanguage", () => {
   });
 
   it("flags mixed Chinese + English as multi-language and picks the dominant language", () => {
-    const { languageAnalysis, checkTextLanguage } = useLanguageAnalysis();
+    const { languageAnalysis, checkTextLanguage } = mountUseLanguageAnalysis();
     const lang = ref("zh");
     const auto = ref(false);
 
@@ -130,7 +152,7 @@ describe("useLanguageAnalysis — checkTextLanguage", () => {
   });
 
   it("sets suggestion text for single-language text", () => {
-    const { languageAnalysis, checkTextLanguage } = useLanguageAnalysis();
+    const { languageAnalysis, checkTextLanguage } = mountUseLanguageAnalysis();
     const lang = ref("");
     const auto = ref(false);
 
@@ -142,7 +164,7 @@ describe("useLanguageAnalysis — checkTextLanguage", () => {
   });
 
   it("sets multi-language suggestion for mixed text", () => {
-    const { languageAnalysis, checkTextLanguage } = useLanguageAnalysis();
+    const { languageAnalysis, checkTextLanguage } = mountUseLanguageAnalysis();
     const lang = ref("zh");
     const auto = ref(false);
 
@@ -155,7 +177,7 @@ describe("useLanguageAnalysis — checkTextLanguage", () => {
   });
 
   it("auto-switches voiceLanguage when detected language differs from current", () => {
-    const { checkTextLanguage } = useLanguageAnalysis();
+    const { checkTextLanguage } = mountUseLanguageAnalysis();
     const lang = ref<string>("zh");
     const auto = ref(true);
 
@@ -166,7 +188,7 @@ describe("useLanguageAnalysis — checkTextLanguage", () => {
   });
 
   it("auto-sets voiceLanguage when it is empty", () => {
-    const { checkTextLanguage } = useLanguageAnalysis();
+    const { checkTextLanguage } = mountUseLanguageAnalysis();
     const lang = ref<string>("");
     const auto = ref(true);
 
@@ -177,7 +199,7 @@ describe("useLanguageAnalysis — checkTextLanguage", () => {
   });
 
   it("shows ElMessage.warning when Chinese text exceeds 150 characters", () => {
-    const { checkTextLanguage } = useLanguageAnalysis();
+    const { checkTextLanguage } = mountUseLanguageAnalysis();
     const lang = ref("zh");
     const auto = ref(false);
 
@@ -195,7 +217,7 @@ describe("useLanguageAnalysis — debounced ElMessage for mixed language", () =>
   afterEach(() => vi.useRealTimers());
 
   it("fires ElMessage after 3000 ms for multi-language text longer than 10 chars", () => {
-    const { checkTextLanguage } = useLanguageAnalysis();
+    const { checkTextLanguage } = mountUseLanguageAnalysis();
     const lang = ref("zh");
     const auto = ref(false);
 

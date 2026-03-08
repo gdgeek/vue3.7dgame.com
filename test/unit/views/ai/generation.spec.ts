@@ -55,6 +55,11 @@ async function mount() {
   );
   const el = document.createElement("div");
   const app = createApp(GenerationView as Parameters<typeof createApp>[0]);
+  app.directive("loading", {
+    mounted: () => undefined,
+    updated: () => undefined,
+    unmounted: () => undefined,
+  });
   app.mount(el);
   cleanups.push(() => app.unmount());
   await nextTick();

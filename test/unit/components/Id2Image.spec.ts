@@ -27,6 +27,16 @@ async function mount(props: Record<string, unknown> = {}) {
   const { default: Id2Image } = await import("@/components/Id2Image.vue");
   const el = document.createElement("div");
   const app = createApp(Id2Image as Parameters<typeof createApp>[0], props);
+  app.component("el-image", {
+    name: "ElImage",
+    props: ["src", "fit"],
+    template: "<img class='el-image-stub' :src='src' />",
+  });
+  app.directive("loading", {
+    mounted: () => undefined,
+    updated: () => undefined,
+    unmounted: () => undefined,
+  });
   app.mount(el);
   cleanups.push(() => app.unmount());
   return { el };
