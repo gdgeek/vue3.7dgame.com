@@ -77,12 +77,12 @@ const updateMeta = async (type: string, meta: Meta, resource: Resource) => {
             resource: resource.id,
           },
           children: {
-            entities: [],
-            components: [],
+            entities: [] as unknown[],
+            components: [] as unknown[],
           },
         },
       ],
-      addons: [],
+      addons: [] as unknown[],
     },
   };
 
