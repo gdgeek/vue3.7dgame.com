@@ -1,385 +1,55 @@
-# 实现计划：插件化架构系统
+# 实现计划：插件宿主框架
 
 ## 概述
 
-基于设计文档，将插件系统分为核心类型定义、基础组件实现、服务层、安全与沙箱、UI 集成、示例插件等阶段，逐步构建完整的插件化架构。每个任务增量构建，确保无孤立代码。
+基于简化后的设计文档，插件系统是一个轻量级宿主框架：通过 iframe 加载外部插件 URL，通过 Token 认证，通过 PostMessage 通信。不包含任何插件源码、SDK 或沙箱执行引擎。
 
 ## 任务
 
-- [ ] 1. 定义核心类型与接口
-  - [ ] 1.1 创建插件类型定义文件 `src/plugin-system/types/plugin.ts`
-    - 定义 `PluginType`, `PluginState`, `PluginStateTransition`, `PluginError` 类型
-    - 定义 `PluginMetadata`, `PluginFilter`, `LoadedPlugin`, `PluginInstance`, `PluginContext` 接口
-    - 定义 `Permission`, `PluginDependency`, `PluginConfig` 接口
-    - _需求: 1.1, 7.1, 11.1_
-  - [ ] 1.2 创建清单类型定义文件 `src/plugin-system/types/manifest.ts`
-    - 定义 `PluginManifest` 接口，包含必需字段（name, version, type, entryPoint, permissions）和可选字段
-    - 定义 `FrontendPluginConfig`, `BackendPluginConfig`, `HybridPluginConfig` 接口
-    - 定义 `LifecycleHooks`, `JSONSchema`, `PluginConfigSchema` 接口
-    - _需求: 15.1, 15.2, 9.1_
-  - [ ] 1.3 创建消息类型定义文件 `src/plugin-system/types/message.ts`
-    - 定义 `Message`, `MessageType`, `MessageSource`, `MessageTarget`, `MessagePayload`, `MessageMetadata` 接口
-    - 定义 `RequestMessage`, `ResponseMessage`, `EventMessage` 扩展接口
-    - 定义 `PluginConnection`, `MessageHandler`, `Unsubscribe` 类型
-    - _需求: 2.2, 4.3, 6.5_
-  - [ ] 1.4 创建状态与配置类型定义文件 `src/plugin-system/types/state.ts`
-    - 定义 `PluginSystemConfig`, `SystemSettings`, `MenuConfig`, `MenuGroup` 接口
-    - 定义 `ValidationResult`, `ValidationError` 接口
-    - 定义 `ResourceUsage`, `ResourceLimits`, `SandboxConfig`, `Sandbox` 接口
-    - 定义 `PluginMetrics`, `HealthStatus`, `Alert`, `AlertThreshold` 接口
-    - _需求: 8.6, 9.3, 14.2_
-  - [ ] 1.5 创建类型统一导出文件 `src/plugin-system/types/index.ts`
-    - 从所有类型文件统一导出
-    - _需求: 1.1_
+- [x] 1. 定义类型
+  - [x] 1.1 创建 `src/plugin-system/types/manifest.ts` - 定义 PluginManifest, PluginsConfig, MenuGroup 接口
+  - [x] 1.2 创建 `src/plugin-system/types/index.ts` - 定义 PluginState, PluginInfo, PluginMessage, PluginMessageType, ValidationResult 类型，并统一导出 manifest.ts 的类型
 
-- [ ] 2. 实现工具层
-  - [ ] 2.1 创建日志工具 `src/plugin-system/utils/logger.ts`
-    - 实现 `PluginLogger` 类，支持 debug/info/warn/error 级别
-    - 日志条目包含 pluginId、timestamp、level、message、context
-    - 确保 Token 值不出现在日志中（正则过滤 JWT 格式字符串）
-    - _需求: 5.5, 10.2, 14.1_
-  - [ ]* 2.2 编写 logger 属性测试
-    - **属性 13: Token Security in Logs**
-    - **验证: 需求 5.5**
-  - [ ] 2.3 创建验证工具 `src/plugin-system/utils/validator.ts`
-    - 实现 `ManifestValidator` 类，验证清单必需字段（name, version, type, entryPoint, permissions）
-    - 验证语义化版本号格式（major.minor.patch）
-    - 验证配置值是否符合 JSON Schema
-    - 返回包含字段名和违规类型的描述性错误
-    - _需求: 1.2, 1.3, 9.3, 15.1, 15.3_
-  - [ ]* 2.4 编写 validator 属性测试 - 无效清单拒绝
-    - **属性 2: Invalid Manifest Rejection**
-    - **验证: 需求 1.3, 15.3**
-  - [ ]* 2.5 编写 validator 属性测试 - 清单必需字段
-    - **属性 40: Manifest Required Fields**
-    - **验证: 需求 15.1**
-  - [ ]* 2.6 编写 validator 属性测试 - 清单可选字段
-    - **属性 41: Manifest Optional Fields Acceptance**
-    - **验证: 需求 15.2**
-  - [ ]* 2.7 编写 validator 属性测试 - 版本字段格式
-    - **属性 30: Manifest Version Field Presence**
-    - **验证: 需求 11.1, 15.1**
-  - [ ] 2.8 创建安全工具 `src/plugin-system/utils/security.ts`
-    - 实现 `MessageSanitizer` 类，清理消息中的 XSS 内容（script 标签、javascript: URL、事件处理器）
-    - 实现 `MessageValidator` 类，验证消息必需字段、类型、大小限制（1MB）
-    - _需求: 8.3_
-  - [ ]* 2.9 编写 security 属性测试 - 消息验证与清理
-    - **属性 21: Message Validation and Sanitization**
-    - **验证: 需求 8.3**
+- [x] 2. 实现核心模块
+  - [x] 2.1 创建 `src/plugin-system/core/PluginRegistry.ts` - 实现插件注册/注销/查询/清单验证（IPluginRegistry 接口）
+  - [ ]* 2.2 编写 PluginRegistry 属性测试 - Property 1: 注册往返, Property 2: 无效清单拒绝, Property 3: 有效清单接受, Property 4: 查询过滤
+  - [x] 2.3 创建 `src/plugin-system/core/MessageBus.ts` - 实现 PostMessage 双向通信、origin 验证、订阅机制（IMessageBus 接口）
+  - [ ]* 2.4 编写 MessageBus 属性测试 - Property 7: 消息来源验证, Property 8: 消息往返
+  - [x] 2.5 创建 `src/plugin-system/core/PluginLoader.ts` - 实现 iframe 创建/销毁、Token 注入、sandbox 设置（IPluginLoader 接口）
+  - [ ]* 2.6 编写 PluginLoader 属性测试 - Property 5: Token 注入, Property 9: iframe 沙箱属性, Property 10: 卸载清理
 
-- [ ] 3. 检查点 - 确保所有测试通过
-  - 确保所有测试通过，如有问题请询问用户。
+- [x] 3. 实现服务层
+  - [x] 3.1 创建 `src/plugin-system/services/AuthService.ts` - 封装现有 Token store，提供 getAccessToken/onTokenChange/isAuthenticated
+  - [ ]* 3.2 编写 AuthService 属性测试 - Property 6: Token 刷新传播, Property 14: Token 不泄露
+  - [x] 3.3 创建 `src/plugin-system/services/ConfigService.ts` - 先加载静态 plugins.json 作为默认配置，再检查 `useDomainStore().defaultInfo` 中是否有 plugins 字段，有则按 id 合并覆盖（domain 优先）；domain 无 plugins 字段时只用静态配置；实现缓存和 refreshConfig
+  - [ ]* 3.4 编写 ConfigService 属性测试 - Property 16: 配置合并与降级（domain 有/无 plugins 字段两种场景）
 
-- [ ] 4. 实现插件注册表
-  - [ ] 4.1 创建 `src/plugin-system/core/PluginRegistry.ts`
-    - 实现 `IPluginRegistry` 接口：register, unregister, getManifest, getMetadata, query, exists, validateManifest, checkCompatibility, getAll, updateMetadata
-    - 注册时调用 ManifestValidator 验证清单格式
-    - 支持按 type, name, capability 查询插件
-    - 注销时从注册表移除并通知活跃实例
-    - 实现清单缓存以减少重复查询
-    - _需求: 1.1, 1.2, 1.3, 1.4, 1.5, 11.5, 13.5_
-  - [ ]* 4.2 编写注册表属性测试 - 注册完整性
-    - **属性 1: Plugin Registration Maintains Registry Integrity**
-    - **验证: 需求 1.1, 1.2, 1.4**
-  - [ ]* 4.3 编写注册表属性测试 - 注销清理
-    - **属性 3: Plugin Unregistration Cleanup**
-    - **验证: 需求 1.5**
-  - [ ]* 4.4 编写注册表属性测试 - 清单缓存
-    - **属性 36: Manifest Caching**
-    - **验证: 需求 13.5**
-  - [ ]* 4.5 编写注册表属性测试 - 框架兼容性检查
-    - **属性 34: Framework Compatibility Check**
-    - **验证: 需求 11.5**
+- [x] 4. 检查点 - 确保所有测试通过
 
-- [ ] 5. 实现消息总线
-  - [ ] 5.1 创建 `src/plugin-system/core/MessageBus.ts`
-    - 实现 `IMessageBus` 接口：sendToPlugin, sendToFramework, broadcast, subscribe, unsubscribe, registerPlugin, unregisterPlugin, validateMessage, sanitizeMessage
-    - 集成 MessageValidator 和 MessageSanitizer 进行消息验证和清理
-    - 支持 iframe (PostMessage)、HTTP、WebSocket 三种连接类型
-    - 实现请求-响应模式（带超时和重试）
-    - 实现发布-订阅模式
-    - 开发模式下记录所有通信日志
-    - _需求: 2.2, 2.3, 4.3, 6.5, 6.6, 8.3, 12.2_
-  - [ ]* 5.2 编写消息总线属性测试 - 消息往返
-    - **属性 5: Message Bus Round-Trip**
-    - **验证: 需求 2.2, 4.3**
-  - [ ]* 5.3 编写消息总线属性测试 - 发布订阅通知
-    - **属性 16: Pub-Sub Notification Delivery**
-    - **验证: 需求 6.5**
+- [x] 5. 实现核心协调器
+  - [x] 5.1 创建 `src/plugin-system/core/PluginSystem.ts` - 协调 Registry/Loader/MessageBus/AuthService/ConfigService，管理插件生命周期和状态机
+  - [ ]* 5.2 编写 PluginSystem 属性测试 - Property 11: 状态有效性, Property 12: 错误隔离, Property 13: 生命周期日志, Property 15: 懒加载
+  - [x] 5.3 创建 `src/plugin-system/index.ts` - 入口文件，导出 PluginSystem 实例和 Vue 插件安装方法
 
-- [ ] 6. 实现认证服务
-  - [ ] 6.1 创建 `src/plugin-system/services/AuthService.ts`
-    - 实现 `IAuthService` 接口：getToken, setToken, refreshToken, validateToken, clearToken, onTokenChange, isTokenExpired
-    - 实现 Token 自动刷新（过期前 5 分钟刷新）
-    - Token 刷新后广播通知所有活跃插件
-    - Token 无效或过期时终止插件会话并提示重新认证
-    - _需求: 5.1, 5.2, 5.3, 5.4, 5.5_
-  - [ ]* 6.2 编写认证服务属性测试 - Token 注入
-    - **属性 6: Token Injection for All Plugin Types**
-    - **验证: 需求 2.4, 5.1, 5.2**
-  - [ ]* 6.3 编写认证服务属性测试 - Token 刷新传播
-    - **属性 12: Token Refresh Propagation**
-    - **验证: 需求 5.3**
+- [x] 6. 实现状态管理和 API
+  - [x] 6.1 创建 `src/store/modules/plugin-system.ts` - Pinia store，封装 PluginSystem 方法，管理 UI 状态
+  - [x] 6.2 创建 `src/api/plugins/index.ts` - 插件相关 API 调用（如有后端接口）
 
-- [ ] 7. 实现数据存储服务
-  - [ ] 7.1 创建 `src/plugin-system/services/DataStoreService.ts`
-    - 实现 `IDataStore` 接口：set, get, delete, has, keys, clear, subscribe, publish, share
-    - 按 pluginId 进行数据命名空间隔离
-    - 支持发布-订阅模式，数据变化时通知订阅者
-    - 支持跨插件数据共享（需显式授权）
-    - _需求: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
-  - [ ]* 7.2 编写数据存储属性测试 - 数据往返
-    - **属性 14: Data Store Round-Trip**
-    - **验证: 需求 6.1, 6.2**
-  - [ ]* 7.3 编写数据存储属性测试 - 命名空间隔离
-    - **属性 15: Data Store Namespace Isolation**
-    - **验证: 需求 6.4**
+- [x] 7. 实现 UI 组件
+  - [x] 7.1 创建 `src/plugin-system/components/PluginMenu.vue` - 侧边栏分组菜单，点击加载插件
+  - [x] 7.2 创建 `src/plugin-system/views/PluginContainer.vue` - iframe 容器，显示加载/错误状态
+  - [x] 7.3 创建 `src/plugin-system/views/PluginLayout.vue` - 布局组件（菜单 + 容器）
 
-- [ ] 8. 检查点 - 确保所有测试通过
-  - 确保所有测试通过，如有问题请询问用户。
+- [x] 8. 集成路由和配置
+  - [x] 8.1 在 `src/router/index.ts` 中添加 `/plugins/:pluginId?` 路由
+  - [x] 8.2 创建 `public/config/plugins.json` - 插件配置文件
 
-- [ ] 9. 实现沙箱管理器
-  - [ ] 9.1 创建 `src/plugin-system/core/PluginSandbox.ts`
-    - 实现 `IPluginSandbox` 接口：createSandbox, destroySandbox, getSandbox, monitorResources, setResourceLimits
-    - 创建 iframe 时设置 sandbox 属性（allow-scripts, allow-same-origin 等）
-    - 设置 CSP 策略（default-src, script-src, style-src 等）
-    - 禁止插件直接访问主框架全局变量
-    - 实现资源监控（内存、CPU、网络请求、DOM 节点数）
-    - 超出资源限制时暂停插件并记录日志
-    - _需求: 2.1, 8.1, 8.2, 8.4, 8.5, 8.6_
-  - [ ]* 9.2 编写沙箱属性测试 - iframe 沙箱隔离
-    - **属性 4: Frontend Plugin Sandbox Isolation**
-    - **验证: 需求 2.1, 8.1, 8.2**
-  - [ ]* 9.3 编写沙箱属性测试 - CSP 头强制
-    - **属性 22: CSP Header Enforcement**
-    - **验证: 需求 8.4**
-  - [ ]* 9.4 编写沙箱属性测试 - 资源限制强制
-    - **属性 23: Resource Limit Enforcement**
-    - **验证: 需求 8.6**
-
-- [ ] 10. 实现插件加载器
-  - [ ] 10.1 创建 `src/plugin-system/core/PluginLoader.ts`
-    - 实现 `IPluginLoader` 接口：load, unload, reload, preload, getLoaded, isLoaded
-    - 根据插件类型创建不同的运行环境：
-      - Frontend: 创建 iframe 沙箱，注入 Token 和配置
-      - Backend: 建立 HTTP 连接，配置表单组件
-      - Hybrid: 同时初始化 iframe 和后端连接
-    - 实现懒加载：非 autoLoad 插件不在启动时初始化
-    - 卸载时销毁 iframe 并释放资源
-    - _需求: 2.1, 2.4, 2.6, 3.1, 4.1, 4.2, 13.4_
-  - [ ]* 10.2 编写加载器属性测试 - 插件卸载清理
-    - **属性 7: Plugin Cleanup on Unload**
-    - **验证: 需求 2.6**
-  - [ ]* 10.3 编写加载器属性测试 - 混合插件双初始化
-    - **属性 10: Hybrid Plugin Dual Initialization**
-    - **验证: 需求 4.1, 4.2**
-  - [ ]* 10.4 编写加载器属性测试 - 懒加载行为
-    - **属性 35: Lazy Loading Behavior**
-    - **验证: 需求 13.4**
-
-- [ ] 11. 实现监控服务
-  - [ ] 11.1 创建 `src/plugin-system/services/MonitoringService.ts`
-    - 实现 `IMonitoringService` 接口：logEvent, logError, recordMetric, getMetrics, getHealthStatus, setAlertThreshold, onAlert
-    - 记录所有插件生命周期事件（load, activate, suspend, unload, error）
-    - 收集插件指标：uptime, errorRate, avgResponseTime, resourceUsage, requestCount
-    - 错误率超过 10% 时触发告警
-    - 错误日志包含 pluginId、timestamp、error message、stack trace
-    - _需求: 10.2, 14.1, 14.2, 14.3, 14.4_
-  - [ ]* 11.2 编写监控服务属性测试 - 生命周期事件日志
-    - **属性 37: Lifecycle Event Logging**
-    - **验证: 需求 14.1**
-  - [ ]* 11.3 编写监控服务属性测试 - 插件指标可用性
-    - **属性 38: Plugin Metrics Availability**
-    - **验证: 需求 14.2, 12.3**
-  - [ ]* 11.4 编写监控服务属性测试 - 错误率告警阈值
-    - **属性 39: Error Rate Alert Threshold**
-    - **验证: 需求 14.4**
-  - [ ]* 11.5 编写监控服务属性测试 - 错误日志完整性
-    - **属性 28: Error Logging Completeness**
-    - **验证: 需求 10.2, 14.1**
-
-- [ ] 12. 实现配置管理服务
-  - [ ] 12.1 创建 `src/plugin-system/services/ConfigService.ts`
-    - 实现 `IConfigService` 接口：loadConfig, getPluginConfig, updatePluginConfig, setPluginEnabled, validateConfig, resetPluginConfig, exportConfig, importConfig, onConfigChange
-    - 从 `public/config/plugins.json` 加载全局配置
-    - 合并环境变量与清单默认值（环境变量优先）
-    - 验证配置值是否符合清单中定义的 schema
-    - 支持运行时配置更新（热重载插件通知）
-    - _需求: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6_
-  - [ ]* 12.2 编写配置服务属性测试 - 配置加载与合并
-    - **属性 24: Configuration Loading and Merging**
-    - **验证: 需求 9.1, 9.2**
-  - [ ]* 12.3 编写配置服务属性测试 - 配置 Schema 验证
-    - **属性 25: Configuration Schema Validation**
-    - **验证: 需求 9.3**
-  - [ ]* 12.4 编写配置服务属性测试 - 运行时配置更新
-    - **属性 26: Runtime Configuration Updates**
-    - **验证: 需求 9.5**
-
-- [ ] 13. 检查点 - 确保所有测试通过
-  - 确保所有测试通过，如有问题请询问用户。
-
-- [ ] 14. 实现插件系统核心
-  - [ ] 14.1 创建 `src/plugin-system/core/PluginSystem.ts`
-    - 实现 `IPluginSystem` 接口：initialize, registerPlugin, unregisterPlugin, loadPlugin, unloadPlugin, activatePlugin, suspendPlugin, getPluginState, getAllPlugins, queryPlugins, destroy
-    - 协调 PluginRegistry, PluginLoader, MessageBus, PluginSandbox, AuthService, DataStoreService, MonitoringService, ConfigService
-    - 实现插件状态机：unloaded → loading → active → suspended → unloading → unloaded，拒绝无效转换
-    - 执行生命周期钩子（onInit, onActivate, onSuspend, onDestroy）
-    - 初始化和清理操作强制 30 秒超时
-    - 初始化失败时记录错误并标记插件为 failed
-    - 插件连续失败 3 次（5 分钟内）自动禁用
-    - 支持多版本插件同时加载（pluginId@version 格式）
-    - _需求: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 10.1, 10.3, 10.4, 10.5, 10.6, 11.2_
-  - [ ]* 14.2 编写插件系统属性测试 - 状态机有效性
-    - **属性 17: Plugin State Machine Validity**
-    - **验证: 需求 7.1**
-  - [ ]* 14.3 编写插件系统属性测试 - 生命周期钩子执行
-    - **属性 18: Lifecycle Hook Execution**
-    - **验证: 需求 7.2, 7.4**
-  - [ ]* 14.4 编写插件系统属性测试 - 暂停状态保持
-    - **属性 19: State Preservation on Suspend**
-    - **验证: 需求 7.3**
-  - [ ]* 14.5 编写插件系统属性测试 - 初始化超时强制
-    - **属性 20: Initialization Timeout Enforcement**
-    - **验证: 需求 7.6**
-  - [ ]* 14.6 编写插件系统属性测试 - 错误隔离
-    - **属性 27: Error Isolation Between Plugins**
-    - **验证: 需求 10.1, 10.6**
-  - [ ]* 14.7 编写插件系统属性测试 - 失败后重载
-    - **属性 29: Plugin Reload After Failure**
-    - **验证: 需求 10.4**
-  - [ ]* 14.8 编写插件系统属性测试 - 多版本共存
-    - **属性 31: Multi-Version Plugin Coexistence**
-    - **验证: 需求 11.2**
-
-- [ ] 15. 实现后端插件请求处理与混合插件消息转发
-  - [ ] 15.1 在 PluginSystem 中实现后端插件调用流程
-    - 显示 Modal 表单收集用户输入
-    - 提交时发送数据和 Token 到后端端点
-    - 处理响应并在 Modal 中显示结果
-    - 请求失败时显示错误信息并允许重试
-    - _需求: 3.1, 3.2, 3.4, 3.5, 3.6_
-  - [ ]* 15.2 编写后端插件属性测试 - 请求格式
-    - **属性 8: Backend Plugin Request Format**
-    - **验证: 需求 3.2, 3.3**
-  - [ ]* 15.3 编写后端插件属性测试 - 响应结构
-    - **属性 9: Backend Response Structure**
-    - **验证: 需求 3.4**
-  - [ ] 15.4 实现混合插件前后端消息转发
-    - 前端 iframe 消息通过 MessageBus 转发到后端
-    - 转发时附加 Token 到消息元数据
-    - 维护混合插件的会话状态
-    - _需求: 4.3, 4.4, 4.5_
-  - [ ]* 15.5 编写混合插件属性测试 - 消息转发带 Token
-    - **属性 11: Hybrid Plugin Message Forwarding with Token**
-    - **验证: 需求 4.4**
-
-- [ ] 16. 检查点 - 确保所有测试通过
-  - 确保所有测试通过，如有问题请询问用户。
-
-- [ ] 17. 实现 Pinia 状态管理
-  - [ ] 17.1 创建 `src/store/modules/plugin-system.ts`
-    - 使用 Pinia defineStore 创建 `usePluginStore`
-    - 管理插件系统配置、插件列表、活跃插件状态
-    - 封装 PluginSystem 核心方法：loadConfig, loadPlugin, activatePlugin, suspendPlugin, unloadPlugin
-    - 提供 showNotification 方法
-    - _需求: 7.1, 1.4_
-
-- [ ] 18. 实现插件 API 层
-  - [ ] 18.1 创建 `src/api/plugins/registry.ts`
-    - 实现插件注册、注销、查询、详情的 HTTP API 调用
-    - _需求: 1.1, 1.4, 1.5_
-  - [ ] 18.2 创建 `src/api/plugins/backend-plugins.ts`
-    - 实现后端插件请求调用，包含 Token 在 Authorization 头中
-    - _需求: 3.2, 3.3_
-  - [ ] 18.3 创建 `src/api/plugins/data-store.ts`
-    - 实现数据存储 CRUD API 调用（set, get, delete, list, subscribe, share）
-    - _需求: 6.1, 6.2, 6.3_
-
-- [ ] 19. 实现 UI 组件
-  - [ ] 19.1 创建插件菜单组件 `src/plugin-system/components/PluginMenu.vue`
-    - 从配置和注册表构建分组菜单
-    - 支持分组折叠/展开
-    - 点击菜单项加载并激活插件
-    - 显示插件图标、标签、徽章
-    - 禁用状态的插件不可点击
-    - _需求: 1.4, 13.4_
-  - [ ] 19.2 创建插件容器组件 `src/plugin-system/views/PluginContainer.vue`
-    - 根据插件类型渲染不同内容：
-      - Frontend: 渲染 iframe
-      - Backend: 渲染 Modal 表单
-      - Hybrid: 渲染 iframe + 后端连接
-    - 显示加载状态和错误状态
-    - 提供重载失败插件的按钮
-    - _需求: 2.1, 3.1, 4.1, 10.3, 10.4_
-  - [ ] 19.3 创建插件布局组件 `src/plugin-system/views/PluginLayout.vue`
-    - 作为插件路由的父布局
-    - 集成 PluginMenu 到侧边栏
-    - _需求: 1.4_
-
-- [ ] 20. 实现路由集成与系统入口
-  - [ ] 20.1 创建插件系统入口文件 `src/plugin-system/index.ts`
-    - 导出 PluginSystem 实例和初始化方法
-    - 提供 Vue 插件安装方法（app.use）
-    - _需求: 7.1_
-  - [ ] 20.2 在 `src/router/index.ts` 中添加插件系统路由
-    - 添加 `/plugins` 路由及 `:pluginId` 子路由
-    - 保持现有路由不变，确保向后兼容
-    - _需求: 13.4_
-
-- [ ] 21. 检查点 - 确保所有测试通过
-  - 确保所有测试通过，如有问题请询问用户。
-
-- [ ] 22. 实现 Plugin SDK
-  - [ ] 22.1 创建 `src/plugin-system/sdk/PluginSDK.ts`
-    - 实现 `PluginSDK` 接口：request, emit, on, once, off
-    - 实现 storage 子接口：get, set, delete, has, keys, clear, subscribe
-    - 实现 utils 子接口：showNotification, showModal, showConfirm, copyToClipboard
-    - 实现 info 属性：pluginId, version, config
-    - 使用 PostMessage 与主框架通信
-    - 请求超时 5 秒，支持重试
-    - _需求: 2.2, 6.1, 12.5_
-
-- [ ] 23. 创建插件配置文件与示例插件清单
-  - [ ] 23.1 创建全局插件配置 `public/config/plugins.json`
-    - 包含 version, plugins, menuGroups, settings 字段
-    - 配置示例插件条目（code-editor, blockly-editor, data-processor）
-    - 配置菜单分组（开发工具、工具、分析）
-    - _需求: 9.1_
-  - [ ] 23.2 创建前端示例插件清单 `src/plugin-system/plugins/frontend/simple-editor/manifest.json`
-    - 包含所有必需字段和前端插件特定配置
-    - _需求: 15.1, 15.2, 12.6_
-  - [ ] 23.3 创建后端示例插件清单和表单 `src/plugin-system/plugins/backend/data-processor/manifest.json` 和 `ProcessorForm.vue`
-    - 包含后端插件特定配置（endpoint, method, formComponent）
-    - 实现数据处理表单组件
-    - _需求: 3.1, 12.6, 15.1_
-  - [ ] 23.4 创建混合示例插件清单 `src/plugin-system/plugins/hybrid/analytics-dashboard/manifest.json`
-    - 包含混合插件特定配置（frontend + backend）
-    - _需求: 4.1, 12.6, 15.1_
-
-- [ ] 24. 版本管理与数据迁移
-  - [ ] 24.1 在 PluginRegistry 中实现版本管理功能
-    - 支持多版本插件同时加载（pluginId@version 格式）
-    - 升级时迁移现有插件数据到新版本格式
-    - 支持 24 小时内回滚到之前版本
-    - _需求: 11.2, 11.3, 11.4_
-  - [ ]* 24.2 编写版本管理属性测试 - 数据迁移
-    - **属性 32: Plugin Data Migration on Upgrade**
-    - **验证: 需求 11.3**
-  - [ ]* 24.3 编写版本管理属性测试 - 版本回滚
-    - **属性 33: Version Rollback**
-    - **验证: 需求 11.4**
-
-- [ ] 25. 最终检查点 - 确保所有测试通过
-  - 确保所有测试通过，如有问题请询问用户。
+- [x] 9. 最终检查点 - 确保所有测试通过
 
 ## 备注
 
-- 标记 `*` 的任务为可选任务，可跳过以加快 MVP 进度
-- 每个任务引用了具体的需求编号以确保可追溯性
-- 检查点确保增量验证
-- 属性测试验证设计文档中定义的通用正确性属性
-- 单元测试验证具体示例和边界情况
-- 所有代码使用 TypeScript，遵循项目 ESLint 规则（禁止 any 类型）
-- 测试文件放在 `test/unit/plugin-system/` 和 `test/properties/plugin-system/` 目录下
-- 属性测试使用 fast-check 库，每个属性至少运行 100 次迭代
+- 标记 `*` 的任务为属性测试任务（可选但推荐）
+- 属性测试使用 fast-check 库，每个属性至少 100 次迭代
+- 测试文件放在 `test/unit/plugin-system/` 目录下
+- 所有代码使用 TypeScript，禁止 any 类型，2 空格缩进
+- 使用 pnpm 管理依赖

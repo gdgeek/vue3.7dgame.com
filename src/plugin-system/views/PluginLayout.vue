@@ -24,10 +24,10 @@ function handlePluginSelect(pluginId: string) {
 <template>
   <div class="plugin-layout">
     <aside class="plugin-layout__sidebar">
-      <PluginMenu @select="handlePluginSelect" />
+      <PluginMenu @select="handlePluginSelect"></PluginMenu>
     </aside>
     <main class="plugin-layout__content">
-      <PluginContainer :plugin-id="activePluginId" />
+      <PluginContainer :plugin-id="activePluginId"></PluginContainer>
     </main>
   </div>
 </template>
@@ -40,10 +40,10 @@ function handlePluginSelect(pluginId: string) {
 }
 
 .plugin-layout__sidebar {
-  width: 220px;
   flex-shrink: 0;
-  border-right: 1px solid var(--el-border-color-light, #e4e7ed);
+  width: 220px;
   overflow-y: auto;
+  border-right: 1px solid var(--el-border-color-light, #e4e7ed);
 }
 
 .plugin-layout__content {
