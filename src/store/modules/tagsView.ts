@@ -2,17 +2,22 @@ import SecureLS from "secure-ls";
 const ls = new SecureLS({ encodingType: "aes" });
 
 export const useTagsViewStore = defineStore("tagsView", () => {
-  // const visitedViews = ref<TagView[]>([]);
-  // const cachedViews = ref<string[]>([]);
+  // 安全读取 SecureLS 数据，防止 JSON 解析失败或数据类型异常导致崩溃
+  function safeGetArray<T>(key: string): T[] {
+    try {
+      const value = ls.get(key);
+      return Array.isArray(value) ? value : [];
+    } catch {
+      ls.remove(key);
+      return [];
+    }
+  }
+
   // 定义已访问的视图数组，初始值从 localStorage 获取，防止数据丢失
-  const visitedViews = ref<TagView[]>(
-    (ls.get("visitedViews") as TagView[] | null) || []
-  );
+  const visitedViews = ref<TagView[]>(safeGetArray<TagView>("visitedViews"));
 
   // 定义缓存视图数组，初始值从 localStorage 获取
-  const cachedViews = ref<string[]>(
-    (ls.get("cachedViews") as string[] | null) || []
-  );
+  const cachedViews = ref<string[]>(safeGetArray<string>("cachedViews"));
 
   function toSerializable(value: unknown): unknown {
     if (value === null) {
