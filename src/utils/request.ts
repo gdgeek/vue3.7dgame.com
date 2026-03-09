@@ -169,11 +169,11 @@ service.interceptors.response.use(
     const messages = getMessageArray();
 
     if (!response) {
-      if (error.message === "Network Error") {
+      if (axiosError.message === "Network Error") {
         showErrorMessage(messages[1]);
       } else {
-        logger.error(i18n.global.t("request.unknownError"), error.message);
-        showErrorMessage(error.message);
+        logger.error(i18n.global.t("request.unknownError"), axiosError.message);
+        showErrorMessage(axiosError.message);
       }
       return Promise.reject(error);
     }
@@ -186,7 +186,8 @@ service.interceptors.response.use(
       // 服务器内部错误
       showErrorMessage(messages[2]);
     } else {
-      const message = response.data.message || error.message;
+      const data = response.data as Record<string, unknown> | undefined;
+      const message = (data?.message as string) || axiosError.message;
       showErrorMessage(message);
     }
 
