@@ -8,14 +8,41 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
+import { ref } from "vue";
+
+const mockStorage = vi.hoisted(() => new Map<string, unknown>());
+
+vi.mock("@vueuse/core", () => ({
+  useStorage: (key: string, initialValue: unknown) =>
+    ref(mockStorage.has(key) ? mockStorage.get(key) : initialValue),
+}));
+
+function resetStorage() {
+  mockStorage.clear();
+}
+
+function setStorageItem(key: string, value: string) {
+  if (value === "null") {
+    mockStorage.set(key, null);
+    return;
+  }
+  try {
+    mockStorage.set(key, JSON.parse(value));
+  } catch {
+    mockStorage.set(key, value);
+  }
+}
 
 // ── Tests for initTheme with custom primary color (lines 346-353) ─────────
 
 describe("useTheme — initTheme() with customPrimaryColor set (lines 346-353)", () => {
+  const themeKey = "appTheme:localhost";
+  const customColorKey = "customPrimaryColor:localhost";
+
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
-    localStorage.clear();
+    resetStorage();
     vi.resetModules();
 
     vi.mock("@/store/modules/settings", () => ({
@@ -32,8 +59,8 @@ describe("useTheme — initTheme() with customPrimaryColor set (lines 346-353)",
 
   it("initTheme applies --shadow-primary when modern-blue + customPrimaryColor", async () => {
     // Set persistent storage so module-level useStorage picks them up
-    localStorage.setItem("appTheme", "modern-blue");
-    localStorage.setItem("customPrimaryColor", JSON.stringify("#FF6B35"));
+    setStorageItem(themeKey, "modern-blue");
+    setStorageItem(customColorKey, JSON.stringify("#FF6B35"));
 
     const { useTheme } = await import("@/composables/useTheme");
     const { initTheme } = useTheme();
@@ -47,8 +74,8 @@ describe("useTheme — initTheme() with customPrimaryColor set (lines 346-353)",
   });
 
   it("initTheme applies color variables when modern-blue + customPrimaryColor", async () => {
-    localStorage.setItem("appTheme", "modern-blue");
-    localStorage.setItem("customPrimaryColor", JSON.stringify("#1890FF"));
+    setStorageItem(themeKey, "modern-blue");
+    setStorageItem(customColorKey, JSON.stringify("#1890FF"));
 
     const { useTheme } = await import("@/composables/useTheme");
     const { initTheme } = useTheme();
@@ -62,8 +89,8 @@ describe("useTheme — initTheme() with customPrimaryColor set (lines 346-353)",
   });
 
   it("initTheme on non-modern-blue theme does NOT apply shadow-primary from custom color", async () => {
-    localStorage.setItem("appTheme", "dark");
-    localStorage.setItem("customPrimaryColor", JSON.stringify("#FF6B35"));
+    setStorageItem(themeKey, "dark");
+    setStorageItem(customColorKey, JSON.stringify("#FF6B35"));
 
     const { useTheme } = await import("@/composables/useTheme");
     const { initTheme } = useTheme();
@@ -79,8 +106,8 @@ describe("useTheme — initTheme() with customPrimaryColor set (lines 346-353)",
   });
 
   it("initTheme with null customPrimaryColor does NOT enter the custom color block", async () => {
-    localStorage.setItem("appTheme", "modern-blue");
-    localStorage.setItem("customPrimaryColor", "null");
+    setStorageItem(themeKey, "modern-blue");
+    setStorageItem(customColorKey, "null");
 
     const { useTheme } = await import("@/composables/useTheme");
     const { initTheme } = useTheme();
@@ -89,8 +116,8 @@ describe("useTheme — initTheme() with customPrimaryColor set (lines 346-353)",
   });
 
   it("initTheme with empty string customPrimaryColor does NOT enter custom block", async () => {
-    localStorage.setItem("appTheme", "modern-blue");
-    localStorage.setItem("customPrimaryColor", JSON.stringify(""));
+    setStorageItem(themeKey, "modern-blue");
+    setStorageItem(customColorKey, JSON.stringify(""));
 
     const { useTheme } = await import("@/composables/useTheme");
     const { initTheme } = useTheme();
@@ -99,8 +126,8 @@ describe("useTheme — initTheme() with customPrimaryColor set (lines 346-353)",
   });
 
   it("initTheme with valid custom color produces a non-empty shadow value", async () => {
-    localStorage.setItem("appTheme", "modern-blue");
-    localStorage.setItem("customPrimaryColor", JSON.stringify("#FF6B35"));
+    setStorageItem(themeKey, "modern-blue");
+    setStorageItem(customColorKey, JSON.stringify("#FF6B35"));
 
     const { useTheme } = await import("@/composables/useTheme");
     const { initTheme } = useTheme();
@@ -117,10 +144,12 @@ describe("useTheme — initTheme() with customPrimaryColor set (lines 346-353)",
 // ── Tests for applyThemeToStore catch block (line 270) ───────────────────
 
 describe("useTheme — applyThemeToStore catch block (line 270)", () => {
+  const themeKey = "appTheme:localhost";
+
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
-    localStorage.clear();
+    resetStorage();
     vi.resetModules();
 
     vi.mock("@/utils/logger", () => ({
@@ -140,7 +169,7 @@ describe("useTheme — applyThemeToStore catch block (line 270)", () => {
       }),
     }));
 
-    localStorage.setItem("appTheme", "modern-blue");
+    setStorageItem(themeKey, "modern-blue");
 
     const { useTheme } = await import("@/composables/useTheme");
     const { setTheme } = useTheme();
@@ -157,7 +186,7 @@ describe("useTheme — applyThemeToStore catch block (line 270)", () => {
       }),
     }));
 
-    localStorage.setItem("appTheme", "modern-blue");
+    setStorageItem(themeKey, "modern-blue");
 
     const { useTheme } = await import("@/composables/useTheme");
     const { initTheme } = useTheme();

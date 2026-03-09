@@ -1,4 +1,5 @@
 import defaultSettings from "@/settings";
+import { getDomainStorageKey } from "@/utils/domain";
 
 // 导入 Element Plus 中英文语言包
 import zhCn from "element-plus/es/locale/lang/zh-cn";
@@ -11,7 +12,10 @@ export const useAppStore = defineStore("app", () => {
   // state
   const device = useStorage("device", DeviceEnum.DESKTOP);
   const size = useStorage("size", defaultSettings.size);
-  const language = useStorage("language", defaultSettings.language);
+  const language = useStorage(
+    getDomainStorageKey("language"),
+    defaultSettings.language
+  );
   const sidebarStatus = useStorage("sidebarStatus", SidebarStatusEnum.CLOSED);
   const locale = ref<typeof zhCn | Record<string, unknown>>(zhCn); // 默认使用中文
 

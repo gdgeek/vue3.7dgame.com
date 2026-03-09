@@ -76,6 +76,7 @@ describe("useDomainStore — getDomainForQuery() private IP fallback (domain3)",
     setActivePinia(createPinia());
     vi.clearAllMocks();
     vi.resetModules();
+    vi.stubEnv("VITE_APP_DEV_DOMAIN_FALLBACK", "d.xrugc.com");
 
     // Clear document cookies
     document.cookie.split(";").forEach((c) => {

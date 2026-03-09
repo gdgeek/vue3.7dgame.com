@@ -60,6 +60,14 @@ function makeDefaultInfo(overrides = {}) {
   };
 }
 
+function setHostname(hostname: string) {
+  Object.defineProperty(window, "location", {
+    value: { ...window.location, hostname },
+    writable: true,
+    configurable: true,
+  });
+}
+
 // ── Tests ──────────────────────────────────────────────────────────────────
 
 describe("useDomainStore", () => {
@@ -320,6 +328,24 @@ describe("useDomainStore", () => {
       expect(store.defaultInfo).toEqual(info);
     });
 
+    it("defaultInfo cookie 按域名隔离，避免不同域名串缓存", async () => {
+      setHostname("localhost");
+      vi.stubEnv("VITE_APP_DEV_DOMAIN_FALLBACK", "d.xrugc.com");
+      document.cookie = `domain_default_info_d.xrugc.com=${encodeURIComponent(
+        JSON.stringify(
+          makeDefaultInfo({ homepage: "https://cached.xrugc.com" })
+        )
+      )};path=/`;
+      getDomainDefault.mockResolvedValue({
+        data: makeDefaultInfo({ homepage: "https://fresh.xrugc.com" }),
+      });
+
+      const store = useDomainStore();
+      await store.fetchDefaultInfo();
+
+      expect(store.defaultInfo?.homepage).toBe("https://fresh.xrugc.com");
+    });
+
     it("失败时设置 error", async () => {
       getDomainDefault.mockRejectedValue(new Error("Network error"));
 
@@ -361,6 +387,23 @@ describe("useDomainStore", () => {
       await store.refreshFromAPI();
 
       expect(store.langInfo).toEqual(langInfo);
+    });
+
+    it("language cookie 按域名隔离，避免不同域名串语言配置", async () => {
+      setHostname("localhost");
+      vi.stubEnv("VITE_APP_DEV_DOMAIN_FALLBACK", "d.xrugc.com");
+      document.cookie = `domain_info_d.xrugc.com_zh-CN=${encodeURIComponent(
+        JSON.stringify(makeLangInfo({ title: "Cached XRUGC Title" }))
+      )};path=/`;
+      getDomainLanguage.mockResolvedValue({
+        data: makeLangInfo({ title: "Fresh XRUGC Title" }),
+      });
+
+      const store = useDomainStore();
+      await store.refreshFromAPI();
+
+      expect(store.langInfo?.title).toBe("Fresh XRUGC Title");
+      expect(store.currentLang).toBe("zh-CN");
     });
 
     it("成功时设置 currentLang", async () => {
@@ -529,7 +572,7 @@ describe("useDomainStore", () => {
   describe("refreshFromAPI() — cookie 缓存命中", () => {
     it("有效 cookie 缓存存在时先从缓存加载再由 API 覆盖", async () => {
       const cachedLangInfo = makeLangInfo({ title: "从缓存加载" });
-      document.cookie = `domain_info_zh-CN=${encodeURIComponent(
+      document.cookie = `domain_info_localhost_zh-CN=${encodeURIComponent(
         JSON.stringify(cachedLangInfo)
       )};path=/`;
 
@@ -543,9 +586,9 @@ describe("useDomainStore", () => {
       expect(store.langInfo?.title).toBe("API新数据");
     });
 
-    it("cookie 缓存为无效 JSON 时 logger.warn 并继续请求 API", async () => {
-      const { logger } = await import("@/utils/logger");
-      document.cookie = `domain_info_zh-CN=INVALID_JSON;path=/`;
+    it("cookie 缓存为无效 JSON 时继续请求 API", async () => {
+      setHostname("localhost");
+      document.cookie = "domain_info_localhost_zh-CN=INVALID_JSON;path=/";
 
       getDomainLanguage.mockResolvedValue({
         data: makeLangInfo({ title: "正常API" }),
@@ -554,15 +597,13 @@ describe("useDomainStore", () => {
       const store = useDomainStore();
       await store.refreshFromAPI();
 
-      expect(
-        (logger as { warn: ReturnType<typeof vi.fn> }).warn
-      ).toHaveBeenCalled();
+      expect(getDomainLanguage).toHaveBeenCalledOnce();
       expect(store.langInfo?.title).toBe("正常API");
     });
 
     it("cookie 缓存命中时 updateDocumentMeta 被调用（title 被预设）", async () => {
       const cachedLangInfo = makeLangInfo({ title: "缓存标题" });
-      document.cookie = `domain_info_zh-CN=${encodeURIComponent(
+      document.cookie = `domain_info_localhost_zh-CN=${encodeURIComponent(
         JSON.stringify(cachedLangInfo)
       )};path=/`;
 
@@ -583,7 +624,7 @@ describe("useDomainStore", () => {
   describe("fetchDefaultInfo() — cookie 缓存命中", () => {
     it("有效 cookie 存在时先从缓存加载再由 API 覆盖", async () => {
       const cachedDefault = makeDefaultInfo({ homepage: "https://cached.com" });
-      document.cookie = `domain_default_info=${encodeURIComponent(
+      document.cookie = `domain_default_info_localhost=${encodeURIComponent(
         JSON.stringify(cachedDefault)
       )};path=/`;
 
@@ -596,18 +637,16 @@ describe("useDomainStore", () => {
       expect(store.defaultInfo?.homepage).toBe("https://fresh.com");
     });
 
-    it("cookie 缓存为无效 JSON 时 logger.warn 并继续请求 API", async () => {
-      const { logger } = await import("@/utils/logger");
-      document.cookie = `domain_default_info=BAD_JSON;path=/`;
+    it("cookie 缓存为无效 JSON 时继续请求 API", async () => {
+      setHostname("localhost");
+      document.cookie = "domain_default_info_localhost=BAD_JSON;path=/";
 
       getDomainDefault.mockResolvedValue({ data: makeDefaultInfo() });
 
       const store = useDomainStore();
       await store.fetchDefaultInfo();
 
-      expect(
-        (logger as { warn: ReturnType<typeof vi.fn> }).warn
-      ).toHaveBeenCalled();
+      expect(getDomainDefault).toHaveBeenCalledOnce();
     });
   });
 

@@ -7,6 +7,7 @@ import {
   type DomainLanguageInfo,
 } from "@/api/domain-query";
 import { store } from "@/store";
+import { getDomainForQuery } from "@/utils/domain";
 
 // 支持的语言列表（与 LanguageEnum 保持一致）
 const SUPPORTED_LANGUAGES = new Set([
@@ -18,7 +19,6 @@ const SUPPORTED_LANGUAGES = new Set([
 ]);
 
 const DOMAIN_COOKIE_KEY_PREFIX = "domain_info_";
-const DOMAIN_DEFAULT_COOKIE_KEY = "domain_default_info";
 const COOKIE_EXPIRY_DAYS = 7;
 
 // Cookie helper functions
@@ -42,22 +42,11 @@ function getCookie(name: string): string | null {
 
 // Get cookie key for specific language
 function getLangCookieKey(lang: string): string {
-  return `${DOMAIN_COOKIE_KEY_PREFIX}${lang}`;
+  return `${DOMAIN_COOKIE_KEY_PREFIX}${getDomainForQuery()}_${lang}`;
 }
 
-function getDomainForQuery(): string {
-  let domain = window.location.hostname;
-  // 本地开发环境使用特定域名（localhost、127.0.0.1、局域网 IP）
-  if (
-    domain === "localhost" ||
-    domain === "127.0.0.1" ||
-    /^192\.168\./.test(domain) ||
-    /^10\./.test(domain) ||
-    /^172\.(1[6-9]|2\d|3[01])\./.test(domain)
-  ) {
-    domain = import.meta.env.VITE_APP_DEV_DOMAIN_FALLBACK || "";
-  }
-  return domain;
+function getDefaultCookieKey(): string {
+  return `domain_default_info_${getDomainForQuery()}`;
 }
 
 interface DomainState {
@@ -110,7 +99,7 @@ export const useDomainStore = defineStore("domain", {
      */
     async fetchDefaultInfo() {
       // Try cookie cache first
-      const cachedData = getCookie(DOMAIN_DEFAULT_COOKIE_KEY);
+      const cachedData = getCookie(getDefaultCookieKey());
       if (cachedData) {
         try {
           this.defaultInfo = JSON.parse(cachedData);
@@ -125,7 +114,7 @@ export const useDomainStore = defineStore("domain", {
           await getDomainDefault(domain);
         this.defaultInfo = response.data;
         setCookie(
-          DOMAIN_DEFAULT_COOKIE_KEY,
+          getDefaultCookieKey(),
           JSON.stringify(this.defaultInfo),
           COOKIE_EXPIRY_DAYS
         );
@@ -149,7 +138,7 @@ export const useDomainStore = defineStore("domain", {
         const themeIndex = this.defaultInfo.style - 1;
         const targetTheme = availableThemes.value[themeIndex];
         if (targetTheme) {
-          setTheme(targetTheme.name);
+          setTheme(targetTheme.name, { syncUrl: false });
         }
       }
 

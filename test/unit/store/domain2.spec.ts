@@ -162,7 +162,9 @@ describe("useDomainStore — fetchDefaultInfo language & style lock (domain2)", 
       const store = useDomainStore();
       await store.fetchDefaultInfo();
 
-      expect(mockSetTheme).toHaveBeenCalledWith("modern-blue");
+      expect(mockSetTheme).toHaveBeenCalledWith("modern-blue", {
+        syncUrl: false,
+      });
     });
 
     it("style=2 triggers setTheme with second available theme (index 1)", async () => {
@@ -172,7 +174,9 @@ describe("useDomainStore — fetchDefaultInfo language & style lock (domain2)", 
       const store = useDomainStore();
       await store.fetchDefaultInfo();
 
-      expect(mockSetTheme).toHaveBeenCalledWith("dark");
+      expect(mockSetTheme).toHaveBeenCalledWith("dark", {
+        syncUrl: false,
+      });
     });
 
     it("style=3 triggers setTheme with third available theme (index 2)", async () => {
@@ -182,7 +186,9 @@ describe("useDomainStore — fetchDefaultInfo language & style lock (domain2)", 
       const store = useDomainStore();
       await store.fetchDefaultInfo();
 
-      expect(mockSetTheme).toHaveBeenCalledWith("nature");
+      expect(mockSetTheme).toHaveBeenCalledWith("nature", {
+        syncUrl: false,
+      });
     });
 
     it("style=99 (out of bounds) does NOT call setTheme (targetTheme is undefined)", async () => {
@@ -231,7 +237,9 @@ describe("useDomainStore — fetchDefaultInfo language & style lock (domain2)", 
       await store.fetchDefaultInfo();
 
       expect(mockLoadLanguageAsync).toHaveBeenCalledWith("zh-CN");
-      expect(mockSetTheme).toHaveBeenCalledWith("modern-blue");
+      expect(mockSetTheme).toHaveBeenCalledWith("modern-blue", {
+        syncUrl: false,
+      });
     });
   });
 });

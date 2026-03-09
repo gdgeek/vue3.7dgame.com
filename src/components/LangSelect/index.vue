@@ -25,6 +25,7 @@ import { useAppStore } from "@/store/modules/app";
 import { useDomainStore } from "@/store/modules/domain";
 import { LanguageEnum } from "@/enums/LanguageEnum";
 import { loadLanguageAsync } from "@/lang/index";
+import { updateViewPreferenceQuery } from "@/utils/view-preferences";
 
 defineProps({
   size: {
@@ -54,6 +55,7 @@ const currentLangLabel = computed(() => {
 
 async function handleLanguageChange(lang: string) {
   await loadLanguageAsync(lang);
+  updateViewPreferenceQuery({ lang });
   // Refresh domain data for new language
   await domainStore.refreshFromAPI();
   ElMessage.success(t("langSelect.message.success"));
@@ -63,10 +65,10 @@ async function handleLanguageChange(lang: string) {
 <style scoped>
 .lang-trigger {
   display: flex;
-  align-items: center;
   gap: 6px;
-  cursor: pointer;
+  align-items: center;
   color: inherit;
+  cursor: pointer;
 }
 
 .lang-text {

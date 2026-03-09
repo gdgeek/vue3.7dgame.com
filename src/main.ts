@@ -171,6 +171,11 @@ import { useRouter } from "@/router";
 import { translateRouteTitle } from "./utils/i18n";
 import { useAppStore, store } from "./store";
 import { useDomainStore } from "./store/modules/domain";
+import { useTheme } from "./composables/useTheme";
+import {
+  getViewPreferenceQuery,
+  updateViewPreferenceQuery,
+} from "./utils/view-preferences";
 const router = useRouter();
 const domainStore = useDomainStore(store);
 
@@ -228,15 +233,36 @@ app.directive("highlight", highlightDirective);
 app.use(setupPlugins);
 //app.use(ElementPlus);
 import { loadLanguageAsync } from "@/lang";
+const { initTheme, setTheme, currentThemeName } = useTheme();
 
-// 加载当前语言包
-loadLanguageAsync(appStore.language).then(() => {
+async function bootstrap() {
+  await domainStore.fetchDomainInfo();
+  const preferenceQuery = getViewPreferenceQuery();
+  if (preferenceQuery.theme) {
+    setTheme(preferenceQuery.theme, { syncUrl: false });
+  }
+  if (preferenceQuery.lang) {
+    await loadLanguageAsync(preferenceQuery.lang);
+  } else {
+    await loadLanguageAsync(appStore.language);
+  }
+  initTheme();
+  updateViewPreferenceQuery({
+    lang: appStore.language,
+    theme: currentThemeName.value,
+  });
   app.mount("#app");
-  // 确保路由就绪后，再更新页面标题（修复刷新时标题多语言不生效的问题）
-  router.isReady().then(() => {
-    const metaTitle = router.currentRoute.value.meta.title as string;
-    if (metaTitle) {
-      updateTitle(metaTitle);
-    }
+  await router.isReady();
+  const metaTitle = router.currentRoute.value.meta.title as string;
+  if (metaTitle) {
+    updateTitle(metaTitle);
+  }
+}
+
+bootstrap().catch((err) => {
+  logger.error("[Bootstrap Error]", err);
+  initTheme();
+  loadLanguageAsync(appStore.language).finally(() => {
+    app.mount("#app");
   });
 });

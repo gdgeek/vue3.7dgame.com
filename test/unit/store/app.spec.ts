@@ -32,9 +32,17 @@ vi.mock("element-plus/es/locale/lang/zh-tw", () => ({
 // Static import — resolved after mocks are set up
 import { useAppStore, useAppStoreHook } from "@/store/modules/app";
 
+function resetStorage() {
+  if (typeof localStorage.clear === "function") {
+    localStorage.clear();
+    return;
+  }
+  Object.keys(localStorage).forEach((key) => localStorage.removeItem(key));
+}
+
 beforeEach(() => {
   setActivePinia(createPinia());
-  localStorage.clear();
+  resetStorage();
 });
 
 // -----------------------------------------------------------------------

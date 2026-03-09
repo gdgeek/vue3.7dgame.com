@@ -19,13 +19,21 @@ import {
 } from "@/styles/themes";
 import { useSettingsStore } from "@/store/modules/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
+import { getDomainStorageKey } from "@/utils/domain";
+import {
+  getValidTheme,
+  updateViewPreferenceQuery,
+} from "@/utils/view-preferences";
 
 // 当前主题名称（持久化到 localStorage）
-const currentThemeName = useStorage<string>("appTheme", defaultTheme.name);
+const currentThemeName = useStorage<string>(
+  getDomainStorageKey("appTheme"),
+  defaultTheme.name
+);
 
 // 自定义主题色（仅用于日间模式）
 const customPrimaryColor = useStorage<string | null>(
-  "customPrimaryColor",
+  getDomainStorageKey("customPrimaryColor"),
   null
 );
 
@@ -273,12 +281,16 @@ export function useTheme() {
   /**
    * 切换主题
    */
-  function setTheme(themeName: string) {
-    const theme = getTheme(themeName);
+  function setTheme(
+    themeName: string,
+    options: { syncUrl?: boolean } = { syncUrl: true }
+  ) {
+    const validThemeName = getValidTheme(themeName);
+    const theme = validThemeName ? getTheme(validThemeName) : undefined;
     if (theme) {
-      currentThemeName.value = themeName;
+      currentThemeName.value = theme.name;
       // 切换主题时，如果是日间模式且有自定义主题色，应用自定义色
-      if (themeName === "modern-blue" && customPrimaryColor.value) {
+      if (theme.name === "modern-blue" && customPrimaryColor.value) {
         applyTheme(theme);
         const customColors = generateModernColors(customPrimaryColor.value);
         applyColorVariables(customColors);
@@ -290,6 +302,10 @@ export function useTheme() {
       } else {
         // 非日间模式，清除自定义主题色的应用
         applyTheme(theme);
+      }
+
+      if (options.syncUrl !== false) {
+        updateViewPreferenceQuery({ theme: theme.name });
       }
     }
   }

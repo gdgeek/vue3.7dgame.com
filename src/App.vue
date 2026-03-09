@@ -46,8 +46,9 @@ watch(
 );
 
 onMounted(async () => {
-  // Fetch domain SEO info on app startup
-  await domainStore.fetchDomainInfo();
+  if (!domainStore.isLoaded) {
+    await domainStore.fetchDomainInfo();
+  }
 
   const hasToken = Token.getToken();
   if (hasToken) {
@@ -94,6 +95,7 @@ canvas {
   top: 0;
   left: 0;
   z-index: 9999;
+
   /* 确保 canvas 在最上层 */
 }
 </style>
