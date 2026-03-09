@@ -423,6 +423,7 @@ export default {
       saveBasicFirst: "Please save basic information first",
       condition: "Condition",
       defaultValue: "Default Value",
+      invalidJson: "Invalid JSON format, please fix before saving",
     },
     prompt: {
       message1: "Please enter phototype name",

@@ -359,6 +359,7 @@ export default {
       saveBasicFirst: "请先保存基本信息",
       condition: "条件",
       defaultValue: "默认值",
+      invalidJson: "JSON 格式错误，请修正后再保存",
     },
     prompt: {
       message1: "请输入原型名称",

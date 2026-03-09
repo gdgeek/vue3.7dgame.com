@@ -411,6 +411,7 @@ export default {
       saveBasicFirst: "กรุณาบันทึกข้อมูลพื้นฐานก่อน",
       condition: "เงื่อนไข",
       defaultValue: "ค่าเริ่มต้น",
+      invalidJson: "รูปแบบ JSON ไม่ถูกต้อง กรุณาแก้ไขก่อนบันทึก",
     },
     prompt: {
       message1: "กรุณาใส่ชื่อต้นแบบ",

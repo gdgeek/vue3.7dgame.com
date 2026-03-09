@@ -402,6 +402,7 @@ export default {
       saveBasicFirst: "請先保存基本信息",
       condition: "條件",
       defaultValue: "默認值",
+      invalidJson: "JSON 格式錯誤，請修正後再儲存",
     },
     prompt: {
       message1: "請輸入原型名稱",
