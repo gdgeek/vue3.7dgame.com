@@ -69,7 +69,8 @@ describe("usePasswordManagement", () => {
           router: mockRouter as never,
         });
 
-      await openPasswordDialog();
+      openPasswordDialog();
+      await flushPromises();
       expect(dialogPasswordVisible.value).toBe(true);
     });
 
@@ -82,7 +83,8 @@ describe("usePasswordManagement", () => {
           router: mockRouter as never,
         });
 
-      await openPasswordDialog();
+      openPasswordDialog();
+      await flushPromises();
       expect(dialogPasswordVisible.value).toBe(false);
       expect(mockElMessage.warning).toHaveBeenCalled();
     });

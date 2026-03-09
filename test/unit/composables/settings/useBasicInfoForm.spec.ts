@@ -160,12 +160,13 @@ describe("useBasicInfoForm", () => {
       );
 
       ruleFormRef.value = {
-        validate: async (cb: (valid: boolean) => Promise<void>) => {
-          await cb(true);
+        validate: (cb: (valid: boolean) => void) => {
+          cb(true);
         },
       } as never;
 
-      await saveInfo();
+      saveInfo();
+      await flushPromises();
       expect(mockSetUserInfo).toHaveBeenCalled();
       expect(mockElMessage.success).toHaveBeenCalled();
     });
@@ -178,12 +179,13 @@ describe("useBasicInfoForm", () => {
       );
 
       ruleFormRef.value = {
-        validate: async (cb: (valid: boolean) => Promise<void>) => {
-          await cb(false);
+        validate: (cb: (valid: boolean) => void) => {
+          cb(false);
         },
       } as never;
 
-      await saveInfo();
+      saveInfo();
+      await flushPromises();
       expect(mockElMessage.error).toHaveBeenCalled();
     });
 
@@ -195,8 +197,8 @@ describe("useBasicInfoForm", () => {
       );
 
       ruleFormRef.value = {
-        validate: async (cb: (valid: boolean) => Promise<void>) => {
-          await cb(true);
+        validate: (cb: (valid: boolean) => void) => {
+          cb(true);
         },
       } as never;
       mockSetUserInfo.mockRejectedValueOnce(new Error("network failed"));

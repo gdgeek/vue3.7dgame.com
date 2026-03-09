@@ -1,8 +1,33 @@
 /**
  * Unit tests for src/store/modules/tagsView.ts
  */
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
+
+const secureLsStore = vi.hoisted(() => {
+  const data: Record<string, unknown> = {};
+  return {
+    data,
+    clear: () => {
+      for (const key of Object.keys(data)) {
+        delete data[key];
+      }
+    },
+  };
+});
+
+vi.mock("secure-ls", () => ({
+  default: vi.fn().mockImplementation(() => ({
+    get: (key: string) => secureLsStore.data[key] ?? null,
+    set: (key: string, value: unknown) => {
+      secureLsStore.data[key] = value;
+    },
+    remove: (key: string) => {
+      delete secureLsStore.data[key];
+    },
+  })),
+}));
+
 import { useTagsViewStore } from "@/store/modules/tagsView";
 
 // ---------------------------------------------------------------------------
@@ -21,6 +46,7 @@ const makeView = (overrides: Partial<TagView> = {}): TagView => ({
 // Setup
 // ---------------------------------------------------------------------------
 beforeEach(() => {
+  secureLsStore.clear();
   setActivePinia(createPinia());
   localStorage.clear();
   idCounter = 0;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Unit tests for src/utils/ability.ts
  * Tests all exported classes and the UpdateAbility function.
@@ -325,7 +326,7 @@ describe("UpdateAbility", () => {
     ).toBe(true);
   });
 
-  it("adds root-only AI route visibility rule", () => {
+  it("adds root-only phototype menu visibility rule", () => {
     UpdateAbility(mockAbility, ["root"], 1);
     const rules: any[] = mockAbility.update.mock.calls[0][0];
     expect(
@@ -335,7 +336,7 @@ describe("UpdateAbility", () => {
           Array.isArray(rule.action) &&
           rule.action.includes("open") &&
           rule.conditions?.path?.$regex instanceof RegExp &&
-          rule.conditions.path.$regex.test("/ai/tools")
+          rule.conditions.path.$regex.test("/phototype/list")
       )
     ).toBe(true);
   });

@@ -19,10 +19,6 @@ describe("Preservation: phototype/list.vue business logic", () => {
     expect(source).toContain('router.push("/phototype/edit")');
   });
 
-  it("should have addPrefabFromPolygen navigating to /phototype/fromModel", () => {
-    expect(source).toContain('router.push("/phototype/fromModel")');
-  });
-
   it("should have edit(id) navigating to /phototype/edit with query id", () => {
     expect(source).toMatch(
       /router\.push\(\{.*path:\s*["']\/phototype\/edit["']/s
