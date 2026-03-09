@@ -84,7 +84,6 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,prefix=
             type=ref,event=branch
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/publish' }}
 
