@@ -21,6 +21,8 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
+import SecureLS from "secure-ls";
+const ls = new SecureLS({ encodingType: "aes" });
 import { RouteLocationMatched, type LocationQuery } from "vue-router";
 import { useRouter } from "@/router";
 const router = useRouter();
@@ -136,28 +138,23 @@ function normalizeQuery(query: LocationQuery): StoredQuery {
   return Object.fromEntries(Object.entries(query));
 }
 
-// 从 localStorage 加载保存的路由参数
+// 从 secure-ls 加载保存的路由参数
 function loadRouteQueryMap() {
   try {
-    const savedMap = localStorage.getItem("routeQueryMap");
-    if (savedMap) {
-      const parsedMap = JSON.parse(savedMap);
-      if (parsedMap && typeof parsedMap === "object") {
-        routeQueryMap.value = new Map(
-          Object.entries(parsedMap as Record<string, StoredQuery>)
-        );
-      }
+    const savedMap = ls.get("routeQueryMap") as Record<string, StoredQuery> | null;
+    if (savedMap && typeof savedMap === "object") {
+      routeQueryMap.value = new Map(Object.entries(savedMap));
     }
   } catch (error) {
     logger.error("加载路由参数失败:", error);
   }
 }
 
-// 保存路由参数到 localStorage
+// 保存路由参数到 secure-ls
 function saveRouteQueryMap() {
   try {
     const mapObject = Object.fromEntries(routeQueryMap.value);
-    localStorage.setItem("routeQueryMap", JSON.stringify(mapObject));
+    ls.set("routeQueryMap", mapObject);
   } catch (error) {
     logger.error("保存路由参数失败:", error);
   }

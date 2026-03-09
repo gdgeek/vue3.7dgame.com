@@ -162,9 +162,10 @@ service.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
-  async (error) => {
+  async (error: unknown) => {
     const router = useRouter();
-    const { response } = error;
+    const axiosError = error as import("axios").AxiosError;
+    const { response } = axiosError;
     const messages = getMessageArray();
 
     if (!response) {
