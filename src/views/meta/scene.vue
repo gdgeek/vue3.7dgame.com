@@ -579,7 +579,8 @@ const refresh = async () => {
 
     // 发送元数据和可用资源类型到编辑器
     postMessage("load", {
-      data: meta.data,
+      uuid: meta.data.uuid, // MetaInfo 的 uuid 属性
+      data: meta.data.data, // 场景数据
       saveable: saveable(meta.data),
       availableResourceTypes: availableTypes,
       user: {
@@ -608,10 +609,10 @@ onBeforeUnmount(() => {
 <style lang="scss" scoped>
 .content {
   height: calc(100vh - 140px);
-  border: 0;
-  outline: none;
-  border-radius: var(--editor-frame-radius, 16px);
   clip-path: inset(0 round var(--editor-frame-radius, 16px));
   background: var(--bg-card, #fff);
+  border: 0;
+  border-radius: var(--editor-frame-radius, 16px);
+  outline: none;
 }
 </style>
