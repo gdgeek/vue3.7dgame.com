@@ -114,7 +114,7 @@ service.interceptors.request.use(
         } catch (err) {
           // 刷新失败 -> 跳转登录
           const router = useRouter();
-          return handleUnauthorized(router);
+          return handleUnauthorized(router, err);
         }
       }
     }
@@ -133,10 +133,15 @@ function showErrorMessage(message: string, duration = 5000) {
 // Flag to prevent multiple unauthorized handlers from executing
 let isHandlingUnauthorized = false;
 
-function handleUnauthorized(router: ReturnType<typeof useRouter>) {
+function handleUnauthorized(
+  router: ReturnType<typeof useRouter>,
+  error?: unknown
+) {
+  const rejectionReason = error ?? new Error("Unauthorized");
+
   // If already handling unauthorized, just reject silently
   if (isHandlingUnauthorized) {
-    return Promise.reject("");
+    return Promise.reject(rejectionReason);
   }
 
   isHandlingUnauthorized = true;
@@ -153,7 +158,7 @@ function handleUnauthorized(router: ReturnType<typeof useRouter>) {
     isHandlingUnauthorized = false;
   }, 1000);
 
-  return Promise.reject("");
+  return Promise.reject(rejectionReason);
 }
 
 // 响应拦截器（Auth / HTTP 错误处理）
@@ -178,7 +183,7 @@ service.interceptors.response.use(
       return Promise.reject(error);
     }
     if (response.status === 401) {
-      return handleUnauthorized(router);
+      return handleUnauthorized(router, error);
     } else if (response.status === 404) {
       showErrorMessage(i18n.global.t("request.error404"));
     } else if (response.status >= 500) {
@@ -191,7 +196,7 @@ service.interceptors.response.use(
       showErrorMessage(message);
     }
 
-    return Promise.reject(response);
+    return Promise.reject(error);
   }
 );
 
