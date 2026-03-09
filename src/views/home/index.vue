@@ -38,7 +38,6 @@
       <el-tabs
         v-if="env.local()"
         type="border-card"
-        lazy
         class="home-local-tabs"
       >
         <el-tab-pane :label="domainStore.title">

@@ -2,7 +2,7 @@
   <div class="script">
     <el-container>
       <el-main>
-        <el-card :loading="loading" class="box-card">
+        <el-card v-loading="loading" class="box-card">
           <template #header>
             <div v-if="verse" class="clearfix">
               <el-link :href="sceneEditorLink" :underline="false">{{

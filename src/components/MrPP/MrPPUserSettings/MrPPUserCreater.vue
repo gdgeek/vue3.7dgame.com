@@ -13,7 +13,6 @@
       <div class="box-item">
         <el-descriptions
           v-if="creation"
-          label-class-name="info-content-label"
           :column="2"
           size="small"
           border

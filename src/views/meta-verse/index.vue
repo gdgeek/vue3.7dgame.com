@@ -4,7 +4,6 @@
       <PageActionBar
         :title="t('verse.listPage.myScenes')"
         :search-placeholder="t('verse.listPage.searchScenes')"
-        :show-tags="true"
         @search="handleSearch"
         @sort-change="handleSortChange"
         @view-change="handleViewChange"

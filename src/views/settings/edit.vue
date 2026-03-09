@@ -11,7 +11,7 @@
               <small>{{ $t("homepage.edit.personalDataStatement") }}</small>
             </div>
           </el-col>
-          <el-col align="right">
+          <el-col style="text-align: right">
             <span>
               <router-link to="/home/index">
                 <el-button size="small">{{

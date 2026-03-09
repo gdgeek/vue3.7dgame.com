@@ -17,7 +17,7 @@
       @refresh="handleRefresh"
     >
       <template #header-actions>
-        <el-button-group :inline="true">
+        <el-button-group>
           <el-button size="small" type="primary" @click="handleCreate">
             <font-awesome-icon icon="plus"></font-awesome-icon>
             &nbsp;

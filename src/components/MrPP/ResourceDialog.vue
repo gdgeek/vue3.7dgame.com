@@ -4,7 +4,6 @@
       v-model="dialogVisible"
       class="resource-dialog"
       width="90%"
-      height="100px"
       top="2vh"
       :show-close="false"
       @close="doClose"

@@ -16,13 +16,11 @@
         <LazyImg
           v-if="item.avatar == null"
           style="width: 100%; height: auto"
-          fit="contain"
           :url="`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${item.username}`"
         ></LazyImg>
         <LazyImg
           v-if="item.avatar"
           style="width: 100%; height: auto"
-          fit="contain"
           :url="item.avatar.url"
         ></LazyImg>
         <div style="padding: 14px">

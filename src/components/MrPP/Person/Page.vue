@@ -3,7 +3,6 @@
     <PersonCreator
       v-if="props.created"
       ref="createdDialogRef"
-      :close-on-click-modal="false"
       :dialog-title="$t('manager.title')"
       @refresh="refresh"
       :dialog-submit="$t('manager.title')"
@@ -18,7 +17,7 @@
           @search="search"
           @sort="sort"
         >
-          <el-button-group :inline="true">
+          <el-button-group>
             <el-button
               v-if="props.created"
               size="small"

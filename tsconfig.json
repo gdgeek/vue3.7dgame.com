@@ -27,7 +27,7 @@
     "jsxFragmentFactory": "Fragment"
   },
   "vueCompilerOptions": {
-    "strictTemplates": false
+    "strictTemplates": true
   },
   "include": [
     "src/**/*.ts",

@@ -19,7 +19,7 @@
               }}{{ $t("game.map.title2") }}</el-tag
             >
             &nbsp;
-            <el-button-group :inline="true">
+            <el-button-group>
               <el-button size="small" type="primary" @click="addGuide">
                 <font-awesome-icon icon="plus"></font-awesome-icon>
                 &nbsp;

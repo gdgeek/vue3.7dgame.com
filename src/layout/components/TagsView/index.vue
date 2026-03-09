@@ -1,9 +1,7 @@
 <template>
-  <div class="tags-container">
+  <div class="tags-container" @wheel.prevent="handleScroll">
     <el-scrollbar
       class="scroll-container"
-      :vertical="false"
-      @wheel.prevent="handleScroll"
     >
       <router-link
         ref="tagRef"
@@ -17,7 +15,6 @@
         {{ translateRouteTitle(tag.title) }}
         <i-ep-close
           class="close-icon"
-          size="12px"
           v-if="!isAffix(tag)"
           @click.prevent.stop="closeSelectedTag(tag)"
         ></i-ep-close>

@@ -1,7 +1,6 @@
 <template>
   <div>
     <el-descriptions
-      label-class-name="info-content-label"
       :column="1"
       size="small"
       border

@@ -4,7 +4,6 @@
       v-if="lazy"
       :url="url"
       style="width: 100%; height: 100%"
-      :fit="fit"
       @success="loading = false"
       @error="loading = false"
     ></LazyImg>

@@ -111,11 +111,10 @@
     <div class="content">
       <login-form
         v-if="!appleIdToken"
-        :isMobile="isMobile"
         ref="loginFormRef"
         @register="register"
       ></login-form>
-      <register-form v-else :idToken="appleIdToken"></register-form>
+      <register-form v-else></register-form>
     </div>
 
     <el-card

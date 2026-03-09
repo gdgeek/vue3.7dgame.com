@@ -14,7 +14,6 @@
 
       <el-form
         v-loading="loading"
-        :element-loading-text="progress.title"
         label-width="auto"
       >
         <el-form-item

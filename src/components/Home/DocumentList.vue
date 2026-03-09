@@ -40,7 +40,7 @@
           {{ category.name }}
         </span>
       </el-tooltip>
-      <el-timeline v-if="data" :reverse="reverse" class="document-timeline">
+      <el-timeline v-if="data" class="document-timeline">
         <el-timeline-item
           v-for="(item, index) in data"
           :key="index"

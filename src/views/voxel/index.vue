@@ -30,7 +30,7 @@
           >
             <template #enter>
               <router-link :to="`/resource/voxel/view?id=${item.id}`">
-                <el-button-group :inline="true">
+                <el-button-group>
                   <el-button
                     v-if="item.info === null || item.image === null"
                     type="warning"

@@ -37,7 +37,7 @@
           ></json-schema-editor>
           <br />
           <el-card class="box-card" style="min-height: 500px">
-            <codemirror v-model="jsonStr" :readOnly="false"></codemirror>
+            <codemirror></codemirror>
           </el-card>
           <br />
           <el-button

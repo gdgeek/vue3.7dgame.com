@@ -19,7 +19,7 @@
       </template>
       <div class="cropper-content">
         <div class="cropper" style="text-align: center">
-          <vueCropper
+          <VueCropper
             ref="cropperRef"
             :img="option.img"
             :output-size="option.outputSize"
@@ -39,7 +39,7 @@
             :auto-crop-height="option.autoCropHeight"
             @crop-moving="cropMoving"
           >
-          </vueCropper>
+          </VueCropper>
         </div>
       </div>
 

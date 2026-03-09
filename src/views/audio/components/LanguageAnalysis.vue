@@ -22,7 +22,6 @@
             :color="getProgressColor(type)"
             :show-text="false"
             :stroke-width="8"
-            :track-color="isDark ? '#444' : '#e4e7ed'"
             class="language-progress"
           ></el-progress>
         </div>
