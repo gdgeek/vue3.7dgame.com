@@ -140,7 +140,7 @@ const postsState = ref<LoadState>("loading");
 const errorMessage = ref<string | null>(null);
 
 // 初始化响应式数据
-const reverse = ref(false);
+
 const category = ref<Category | null>(null);
 const data = ref<Item[] | null>(null);
 const pagination = ref<Pagination>({

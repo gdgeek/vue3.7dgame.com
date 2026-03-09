@@ -211,16 +211,6 @@ const saveChanges = async () => {
   }
 };
 
-const jsonStr = computed({
-  get: () => JSON.stringify(tree.value, null, 2),
-  set: (newVal) => {
-    try {
-      tree.value = JSON.parse(newVal);
-    } catch (e) {
-      logger.error("Invalid JSON format", e);
-    }
-  },
-});
 const phototype = ref<PhototypeType | null>(null);
 const refresh = async () => {
   // 如果没有 id，说明是新建，初始化空数据
