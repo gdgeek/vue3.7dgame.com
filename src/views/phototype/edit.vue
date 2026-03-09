@@ -236,7 +236,9 @@ watch(dataJson, (value) => {
     const parsed = JSON.parse(value) as Record<string, JsonValue>;
     const currentData = phototype.value.data;
     const transform =
-      currentData && typeof currentData === "object" && !Array.isArray(currentData)
+      currentData &&
+      typeof currentData === "object" &&
+      !Array.isArray(currentData)
         ? (currentData as Record<string, JsonValue>).transform
         : undefined;
     phototype.value.data =
