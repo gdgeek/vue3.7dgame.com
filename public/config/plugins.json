@@ -1,0 +1,43 @@
+{
+  "version": "1.0.0",
+  "menuGroups": [
+    {
+      "id": "editors",
+      "name": "编辑工具",
+      "icon": "Edit",
+      "order": 1
+    },
+    {
+      "id": "tools",
+      "name": "实用工具",
+      "icon": "Tools",
+      "order": 2
+    }
+  ],
+  "plugins": [
+    {
+      "id": "code-editor",
+      "name": "代码编辑器",
+      "description": "在线代码编辑器",
+      "url": "https://editor.example.com",
+      "icon": "EditPen",
+      "group": "editors",
+      "enabled": true,
+      "order": 1,
+      "allowedOrigin": "https://editor.example.com",
+      "version": "1.0.0"
+    },
+    {
+      "id": "blockly-editor",
+      "name": "Blockly 编辑器",
+      "description": "可视化编程工具",
+      "url": "https://blockly.example.com",
+      "icon": "Grid",
+      "group": "editors",
+      "enabled": true,
+      "order": 2,
+      "allowedOrigin": "https://blockly.example.com",
+      "version": "1.0.0"
+    }
+  ]
+}
