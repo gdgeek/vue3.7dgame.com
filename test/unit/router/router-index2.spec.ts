@@ -81,6 +81,14 @@ vi.mock("@/router/modules/manager", () => ({
     meta: {},
   },
 }));
+vi.mock("@/router/modules/plugin", () => ({
+  pluginRoutes: {
+    path: "/plugins/:pluginId?",
+    name: "Plugins",
+    component: () => {},
+    meta: { title: "plugin.title", hidden: false, keepAlive: false },
+  },
+}));
 
 // ── Mock ability utilities ────────────────────────────────────────────────────
 vi.mock("@/utils/ability", () => ({

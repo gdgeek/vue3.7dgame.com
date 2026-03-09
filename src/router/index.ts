@@ -17,6 +17,7 @@ import { resourceRoutes } from "./modules/resource";
 import { metaRoutes } from "./modules/meta";
 import { verseRoutes } from "./modules/verse";
 import { managerRoutes, gameRoutes } from "./modules/manager";
+import { pluginRoutes } from "./modules/plugin";
 
 // 静态路由
 const routes: RouteRecordRaw[] = [
@@ -58,6 +59,8 @@ const routes: RouteRecordRaw[] = [
       managerRoutes,
       // 游戏
       gameRoutes,
+      // 插件系统
+      pluginRoutes,
 
       // 错误页面
       {
