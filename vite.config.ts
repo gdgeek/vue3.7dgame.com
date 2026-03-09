@@ -213,17 +213,15 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
           // 用于命名代码拆分时创建的共享块的输出命名
           chunkFileNames: "js/[name].[hash].js",
           // 用于输出静态资源的命名，[ext]表示文件扩展名
-          assetFileNames: (assetInfo: { name: string }) => {
-            const info = assetInfo.name.split(".");
+          assetFileNames: (assetInfo: { name?: string }) => {
+            const name = assetInfo.name ?? "unknown";
+            const info = name.split(".");
             let extType = info[info.length - 1];
-            // console.log('文件信息', assetInfo.name)
-            if (
-              /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(assetInfo.name)
-            ) {
+            if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(name)) {
               extType = "media";
-            } else if (/\.(png|jpe?g|gif|svg)(\?.*)?$/.test(assetInfo.name)) {
+            } else if (/\.(png|jpe?g|gif|svg)(\?.*)?$/.test(name)) {
               extType = "img";
-            } else if (/\.(woff2?|eot|ttf|otf)(\?.*)?$/i.test(assetInfo.name)) {
+            } else if (/\.(woff2?|eot|ttf|otf)(\?.*)?$/i.test(name)) {
               extType = "fonts";
             }
             return `${extType}/[name].[hash].[ext]`;
