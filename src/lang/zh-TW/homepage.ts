@@ -42,16 +42,18 @@ export default {
       },
     },
     concepts: {
-      title: "概念與職責",
+      title: "創作流程",
       subtitle:
         "先理解關係再開始編輯：資源是素材，實體是可重用能力單元，場景負責組織實體並形成體驗。",
       flow: {
         step1: "第一步",
         step2: "第二步",
         step3: "第三步",
+        step4: "第四步",
         resource: "資源上傳",
         entity: "實體編輯",
         scene: "場景編輯",
+        publish: "場景發布",
       },
       rule: "場景只能添加實體，不能直接添加資源。",
       entityEditor: {

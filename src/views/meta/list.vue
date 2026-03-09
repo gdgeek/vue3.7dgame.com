@@ -354,7 +354,7 @@ import {
   denseResourceBreakpoints,
   denseResourceCardGutter,
 } from "@/utils/resourceGrid";
-import { sortByMultilingualField } from "@/utils/multilingualSort";
+import { compareMultilingualText } from "@/utils/multilingualSort";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -372,56 +372,9 @@ type MetaListItem = {
   image?: {
     url?: string;
   } | null;
+  resource_count?: number;
+  resources_count?: number;
   resources?: unknown[];
-};
-
-const logMetaStructure = (scope: "list" | "detail", payload: unknown) => {
-  if (!payload || typeof payload !== "object") {
-    logger.info("[MetaStructure]", { scope, payloadType: typeof payload });
-    return;
-  }
-
-  if (scope === "list") {
-    const list = Array.isArray(payload) ? payload : [];
-    const first = list[0] as Record<string, unknown> | undefined;
-    logger.info("[MetaStructure]", {
-      scope,
-      count: list.length,
-      firstItemKeys: first ? Object.keys(first) : [],
-      firstItemRaw: first ?? null,
-      firstItemShape: first
-        ? {
-            idType: typeof first.id,
-            titleType: typeof first.title,
-            hasAuthor: !!first.author,
-            hasImage: !!first.image,
-            dataType: typeof first.data,
-            infoType: typeof first.info,
-            eventsType: typeof first.events,
-            metaCodeType: typeof first.metaCode,
-          }
-        : null,
-    });
-    return;
-  }
-
-  const detail = payload as Record<string, unknown>;
-  logger.info("[MetaStructure]", {
-    scope,
-    keys: Object.keys(detail),
-    detailRaw: detail,
-    shape: {
-      idType: typeof detail.id,
-      titleType: typeof detail.title,
-      hasAuthor: !!detail.author,
-      hasImage: !!detail.image,
-      dataType: typeof detail.data,
-      infoType: typeof detail.info,
-      eventsType: typeof detail.events,
-      prefabType: typeof detail.prefab,
-      metaCodeType: typeof detail.metaCode,
-    },
-  });
 };
 
 const {
@@ -441,11 +394,10 @@ const {
       params.sort,
       params.search,
       params.page,
-      "image,author,resources",
-      "",
+      "image,author",
+      "id,title,name,created_at,updated_at,image,author,resource_count,resources_count",
       Number(params.pageSize) || 24
     );
-    logMetaStructure("list", response.data);
     return response;
   },
   pageSize: 24,
@@ -472,18 +424,62 @@ const normalizeText = (value: unknown) =>
     .trim()
     .toLowerCase();
 
+const parseTimeValue = (value: unknown) => {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value !== "string") return 0;
+  const text = value.trim();
+  if (!text) return 0;
+  const direct = Date.parse(text);
+  if (!Number.isNaN(direct)) return direct;
+  const normalized = text.replace(/-/g, "/");
+  const fallback = Date.parse(normalized);
+  return Number.isNaN(fallback) ? 0 : fallback;
+};
+
+const getMetaDisplayName = (item: MetaListItem) =>
+  String(item.title || item.name || "");
+
+const getMetaSortTime = (item: MetaListItem, field: string) => {
+  if (field === "created_at") {
+    return (
+      parseTimeValue(item.created_at) ||
+      parseTimeValue(item.updated_at) ||
+      parseTimeValue((item as Record<string, unknown>).createdAt) ||
+      parseTimeValue((item as Record<string, unknown>).updatedAt)
+    );
+  }
+  if (field === "updated_at") {
+    return (
+      parseTimeValue(item.updated_at) ||
+      parseTimeValue(item.created_at) ||
+      parseTimeValue((item as Record<string, unknown>).updatedAt) ||
+      parseTimeValue((item as Record<string, unknown>).createdAt)
+    );
+  }
+  return parseTimeValue((item as Record<string, unknown>)[field]);
+};
+
 const sortScopedMetas = (list: MetaListItem[], sortValue: string) => {
   const descending = sortValue.startsWith("-");
   const field = descending ? sortValue.slice(1) : sortValue;
 
   if (field === "name" || field === "title") {
-    return sortByMultilingualField(list, "title", descending);
+    return [...list].sort((a, b) => {
+      const compared = compareMultilingualText(
+        getMetaDisplayName(a),
+        getMetaDisplayName(b)
+      );
+      if (compared !== 0) return descending ? -compared : compared;
+      return descending ? b.id - a.id : a.id - b.id;
+    });
   }
 
   return [...list].sort((a, b) => {
-    const key = field as keyof MetaListItem;
-    const aVal = new Date(String(a[key] || 0)).getTime();
-    const bVal = new Date(String(b[key] || 0)).getTime();
+    const aVal = getMetaSortTime(a, field);
+    const bVal = getMetaSortTime(b, field);
+    if (aVal === bVal) {
+      return descending ? b.id - a.id : a.id - b.id;
+    }
     return descending ? bVal - aVal : aVal - bVal;
   });
 };
@@ -595,7 +591,7 @@ const handleSceneChange = async (sceneId: number | null) => {
   try {
     const response = await getVerse(sceneId, "metas");
     const verseMetas = Array.isArray(response.data?.metas)
-      ? ((response.data.metas as unknown) as MetaListItem[])
+      ? (response.data.metas as unknown as MetaListItem[])
       : [];
     scopedMetas.value = dedupeMetas(verseMetas);
   } finally {
@@ -767,7 +763,17 @@ const detailProperties = computed(() => {
   ];
 });
 
-const getResourceCount = (item?: { resources?: unknown }) => {
+const getResourceCount = (item?: {
+  resources?: unknown;
+  resource_count?: number;
+  resources_count?: number;
+}) => {
+  if (typeof item?.resource_count === "number") {
+    return item.resource_count;
+  }
+  if (typeof item?.resources_count === "number") {
+    return item.resources_count;
+  }
   return Array.isArray(item?.resources) ? item.resources.length : 0;
 };
 
@@ -801,9 +807,10 @@ const openDetail = async (item: { id: number }) => {
   detailLoading.value = true;
 
   try {
-    const response = await getMeta(item.id, { expand: "image,author" });
+    const response = await getMeta(item.id, {
+      expand: "image,author,resources",
+    });
     currentMeta.value = response.data;
-    logMetaStructure("detail", response.data);
   } catch (err) {
     Message.error(String(err));
   } finally {

@@ -159,8 +159,26 @@ const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   });
 };
 
+const cloneRouteRecord = (route: RouteRecordRaw): RouteRecordRaw => {
+  const cloned: RouteRecordRaw = {
+    ...route,
+    meta: route.meta
+      ? { ...(route.meta as Record<string, unknown>) }
+      : route.meta,
+  };
+
+  if (route.children) {
+    cloned.children = route.children.map((child) => cloneRouteRecord(child));
+  }
+
+  return cloned;
+};
+
+const cloneRoutes = (source: RouteRecordRaw[]) =>
+  source.map((route) => cloneRouteRecord(route));
+
 export const UpdateRoutes = async (ability: AnyAbility) => {
-  constantRoutes = structuredClone(routes);
+  constantRoutes = cloneRoutes(routes);
   check(constantRoutes, ability);
   initRoutes();
 };

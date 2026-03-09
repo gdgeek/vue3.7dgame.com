@@ -4,57 +4,65 @@
       <HomeHeader></HomeHeader>
       <el-divider class="home-divider"></el-divider>
 
-      <section class="concept-guide">
-        <div class="section-header concept-header">
-          <font-awesome-icon
-            :icon="['fas', 'sitemap']"
-            class="header-icon"
-          ></font-awesome-icon>
-          <h2 class="section-title">{{ t("homepage.concepts.title") }}</h2>
-        </div>
+      <div class="section-header">
+        <font-awesome-icon
+          :icon="['fas', 'circle-question']"
+          class="header-icon"
+        ></font-awesome-icon>
+        <h2 class="section-title">{{ t("homepage.concepts.title") }}</h2>
+      </div>
 
+      <section class="concept-guide">
         <p class="concept-subtitle">{{ t("homepage.concepts.subtitle") }}</p>
 
         <div class="concept-flow">
           <div class="flow-node">
-            <span class="node-kicker">{{ t("homepage.concepts.flow.step1") }}</span>
+            <span class="node-kicker">{{
+              t("homepage.concepts.flow.step1")
+            }}</span>
             <strong>{{ t("homepage.concepts.flow.resource") }}</strong>
           </div>
           <div class="flow-arrow">→</div>
           <div class="flow-node">
-            <span class="node-kicker">{{ t("homepage.concepts.flow.step2") }}</span>
+            <span class="node-kicker">{{
+              t("homepage.concepts.flow.step2")
+            }}</span>
             <strong>{{ t("homepage.concepts.flow.entity") }}</strong>
           </div>
           <div class="flow-arrow">→</div>
           <div class="flow-node">
-            <span class="node-kicker">{{ t("homepage.concepts.flow.step3") }}</span>
+            <span class="node-kicker">{{
+              t("homepage.concepts.flow.step3")
+            }}</span>
             <strong>{{ t("homepage.concepts.flow.scene") }}</strong>
           </div>
-        </div>
-
-        <div class="concept-rule">
-          <font-awesome-icon :icon="['fas', 'circle-info']"></font-awesome-icon>
-          <span>{{ t("homepage.concepts.rule") }}</span>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">
+            <span class="node-kicker">{{
+              t("homepage.concepts.flow.step4")
+            }}</span>
+            <strong>{{ t("homepage.concepts.flow.publish") }}</strong>
+          </div>
         </div>
 
         <div class="scope-grid">
           <article class="scope-card entity-scope">
             <header class="scope-head">
-              <span class="scope-badge">{{
-                t("homepage.concepts.entityEditor.badge")
-              }}</span>
               <h3>{{ t("homepage.concepts.entityEditor.title") }}</h3>
             </header>
             <p>{{ t("homepage.concepts.entityEditor.desc") }}</p>
           </article>
           <article class="scope-card scene-scope">
             <header class="scope-head">
-              <span class="scope-badge">{{
-                t("homepage.concepts.sceneEditor.badge")
-              }}</span>
               <h3>{{ t("homepage.concepts.sceneEditor.title") }}</h3>
             </header>
             <p>{{ t("homepage.concepts.sceneEditor.desc") }}</p>
+            <p class="scope-note">
+              <font-awesome-icon
+                :icon="['fas', 'triangle-exclamation']"
+              ></font-awesome-icon>
+              <span>{{ t("homepage.concepts.rule") }}</span>
+            </p>
           </article>
         </div>
       </section>
@@ -191,18 +199,12 @@ const { items, loading, error, retry } = useCategories({
   padding: 24px;
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-lg);
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--primary-color) 8%, white) 0%,
-      var(--bg-card) 30%,
-      var(--bg-card) 100%
-    );
-}
-
-.concept-header {
-  margin-top: 0;
-  margin-bottom: 8px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--primary-color) 8%, white) 0%,
+    var(--bg-card) 30%,
+    var(--bg-card) 100%
+  );
 }
 
 .concept-subtitle {
@@ -213,13 +215,14 @@ const { items, loading, error, retry } = useCategories({
 
 .concept-flow {
   display: grid;
-  grid-template-columns: 1fr auto 1fr auto 1fr;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
   gap: 10px;
   align-items: center;
 }
 
 .flow-node {
-  border: var(--border-width) solid color-mix(in srgb, var(--primary-color) 26%, var(--border-color));
+  border: var(--border-width) solid
+    color-mix(in srgb, var(--primary-color) 26%, var(--border-color));
   background: color-mix(in srgb, var(--primary-color) 6%, var(--bg-card));
   border-radius: 14px;
   padding: 14px 16px;
@@ -246,17 +249,6 @@ const { items, loading, error, retry } = useCategories({
   font-size: 20px;
 }
 
-.concept-rule {
-  margin-top: 14px;
-  border-radius: 12px;
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: color-mix(in srgb, var(--primary-color) 10%, var(--bg-card));
-  color: var(--text-primary);
-}
-
 .scope-grid {
   margin-top: 14px;
   display: grid;
@@ -274,19 +266,7 @@ const { items, loading, error, retry } = useCategories({
 .scope-head {
   display: flex;
   align-items: center;
-  gap: 10px;
   margin-bottom: 8px;
-}
-
-.scope-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  background: color-mix(in srgb, var(--primary-color) 14%, var(--bg-card));
-  color: var(--primary-color);
 }
 
 .scope-card h3 {
@@ -299,6 +279,17 @@ const { items, loading, error, retry } = useCategories({
   margin: 0;
   line-height: 1.65;
   color: var(--text-secondary);
+}
+
+.scope-note {
+  margin-top: 8px !important;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: color-mix(in srgb, var(--primary-color) 10%, var(--bg-card));
+  color: var(--text-primary) !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 @media (max-width: 1024px) {

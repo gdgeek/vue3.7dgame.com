@@ -42,16 +42,18 @@ export default {
       },
     },
     concepts: {
-      title: "概念与职责",
+      title: "创作流程",
       subtitle:
         "先理解关系再开始编辑：资源是素材，实体是可复用能力单元，场景负责组织实体并形成体验。",
       flow: {
         step1: "第一步",
         step2: "第二步",
         step3: "第三步",
+        step4: "第四步",
         resource: "资源上传",
         entity: "实体编辑",
         scene: "场景编辑",
+        publish: "场景发布",
       },
       rule: "场景只能添加实体，不能直接添加资源。",
       entityEditor: {

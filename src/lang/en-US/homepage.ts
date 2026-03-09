@@ -43,16 +43,18 @@ export default {
       },
     },
     concepts: {
-      title: "Concepts & Scope",
+      title: "Creation Flow",
       subtitle:
         "Understand the model first: resources are assets, entities are reusable capability units, and scenes organize entities into an experience.",
       flow: {
         step1: "Step 1",
         step2: "Step 2",
         step3: "Step 3",
+        step4: "Step 4",
         resource: "Resource Upload",
         entity: "Entity Editing",
         scene: "Scene Editing",
+        publish: "Scene Publish",
       },
       rule: "A scene can add entities only, not resources directly.",
       entityEditor: {
