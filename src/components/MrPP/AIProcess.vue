@@ -12,10 +12,7 @@
         </div>
       </template>
 
-      <el-form
-        v-loading="loading"
-        label-width="auto"
-      >
+      <el-form v-loading="loading" label-width="auto">
         <el-form-item
           v-if="imageUrl"
           :label="$t('ai.generation.form.image')"

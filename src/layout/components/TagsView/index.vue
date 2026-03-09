@@ -1,8 +1,6 @@
 <template>
   <div class="tags-container" @wheel.prevent="handleScroll">
-    <el-scrollbar
-      class="scroll-container"
-    >
+    <el-scrollbar class="scroll-container">
       <router-link
         ref="tagRef"
         v-for="tag in visitedViews"

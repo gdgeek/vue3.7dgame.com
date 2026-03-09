@@ -35,11 +35,7 @@
       <!-- 正常状态：传递 items 给 Book -->
       <Book v-else :items="items"></Book>
 
-      <el-tabs
-        v-if="env.local()"
-        type="border-card"
-        class="home-local-tabs"
-      >
+      <el-tabs v-if="env.local()" type="border-card" class="home-local-tabs">
         <el-tab-pane :label="domainStore.title">
           <LocalPage></LocalPage>
         </el-tab-pane>
