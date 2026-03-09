@@ -60,3 +60,10 @@ inclusion: auto
 - TODO 格式：`// TODO: [描述] - [日期]`
 - FIXME 格式：`// FIXME: [描述] - [日期]`
 - 复杂业务逻辑必须有注释
+
+
+## 文件写入规则
+
+- 禁止使用 `cat` 或 shell 管道方式写入文件
+- 大文件写入使用 `fsWrite` + `fsAppend` 工具（分段写入）
+- 如果工具不可用，使用 `python3 -c` 方式写入文件

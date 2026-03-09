@@ -1,115 +1,166 @@
-# Findings: Plugin System Design Update
+# Findings: Language & Style Settings Management
 
-## Current State Analysis
+## Current Implementation Analysis
 
-### Existing Design Document Structure
-1. Overview - ✓ Complete
-2. Architecture - ✓ Complete
-3. Components and Interfaces - ✓ Complete
-4. Data Models - ✓ Complete
-5. Communication Protocol - ✓ Complete
-6. Security Design - ✓ Complete
-7. API Design - ✓ Complete (includes all API sections)
+### Language Management
+- **Store**: `src/store/modules/app.ts` - `useAppStore()`
+- **State**: `language` ref using `useStorage("language", defaultSettings.language)`
+- **Default**: `LanguageEnum.ZH_CN` (from `src/settings.ts`)
+- **Supported Languages**: 
+  - `zh-CN` (Simplified Chinese)
+  - `en-US` (English)
+  - `ja-JP` (Japanese)
+  - `th-TH` (Thai)
+  - `zh-TW` (Traditional Chinese)
+- **Switching**: `changeLanguage(val: string)` async method in app store
+- **i18n Setup**: `src/lang/index.ts` with dynamic language loading via `loadLanguageAsync()`
+- **Persistence**: Already persisted to localStorage via `useStorage()`
+- **UI Component**: `src/components/LangSelect/index.vue` and `src/layout/components/NavBar/components/HeaderActions.vue`
 
-### What Needs to Be Added
+### Style/Theme Management - Two-Layer System
 
-#### 1. JSON Configuration Management (NEW)
-- Configuration file structure and location
-- Plugin configuration schema
-- Menu configuration
-- Runtime configuration management
-- Configuration validation
+#### Layer 1: Legacy Settings Store
+- **Store**: `src/store/modules/settings.ts` - `useSettingsStore()`
+- **Theme State**: `theme` ref (light/dark) using `useStorage("theme", defaultSettings.theme)`
+- **Layout State**: `layout` ref (left/top/mix) using `useStorage("layout", defaultSettings.layout)`
+- **Theme Color**: `themeColor` ref using `useStorage("themeColor", defaultSettings.themeColor)`
+- **Other Settings**: `tagsView`, `fixedHeader`, `sidebarLogo`, `watermarkEnabled` (all persisted)
+- **Methods**: `changeTheme()`, `changeLayout()`, `changeThemeColor()`
+- **Persistence**: localStorage via `useStorage()`
 
-#### 2. Left Sidebar Menu Integration (NEW)
-- Menu structure and grouping
-- Dynamic menu loading from configuration
-- Vue component implementation
-- Menu state management with Pinia
+#### Layer 2: Modern Theme Composable
+- **Location**: `src/composables/useTheme.ts`
+- **Theme Names**: Stored in `currentThemeName` (localStorage key: `appTheme`)
+- **Custom Colors**: `customPrimaryColor` (localStorage key: `customPrimaryColor`)
+- **CSS Variables**: Comprehensive system with 100+ CSS custom properties
+- **Available Themes**: Multiple theme objects (modern-blue, deep-space, cyber-tech, edu-friendly, neo-brutalism, minimal-pure)
+- **Methods**: `setTheme()`, `setCustomPrimaryColor()`, `initTheme()`
+- **Initialization**: Called in app startup to apply theme variables
 
-#### 3. Example Plugins (NEW)
-- Frontend Plugin Example (simple text editor)
-- Backend Plugin Example (data processor)
-- Hybrid Plugin Example (analytics dashboard)
-- Each with complete code and manifest
+### Domain-Level Settings Control
+- **Store**: `src/store/modules/domain.ts` - `useDomainStore()`
+- **Locking Mechanism**: 
+  - `isLanguageLocked`: Prevents language switching if domain specifies a language
+  - `isStyleLocked`: Prevents theme switching if domain specifies a style (style > 0)
+- **API Integration**: Fetches domain configuration from backend
+- **Favicon Support**: Can set custom favicon per domain
+- **Caching**: Uses cookies with 7-day expiry for domain info
 
-#### 4. Backward Compatibility (NEW)
-- How existing editor/blockly remain unchanged
-- Migration path to plugin system (future)
-- Coexistence strategy
+### Router Setup
+- **Location**: `src/router/index.ts`
+- **History Mode**: `createWebHistory()` (no hash mode)
+- **Scroll Behavior**: Resets to top on navigation
+- **Current State**: No query parameter handling for settings
 
-#### 5. Correctness Properties (REQUIRED BY WORKFLOW)
-- Prework analysis of all acceptance criteria
-- Property reflection to eliminate redundancy
-- Formal correctness properties with "for all" statements
-- Requirements traceability
+### UI Components for Settings
+- **Settings Drawer**: `src/layout/components/Settings/index.vue`
+  - Theme toggle (light/dark)
+  - Theme color picker
+  - Layout selector
+  - Tags view, fixed header, sidebar logo toggles
+- **NavBar**: `src/layout/components/NavBar/index.vue`
+  - Contains HeaderActions component
+- **Language Switching**: `src/layout/components/NavBar/components/HeaderActions.vue`
+  - Dropdown with all supported languages
+  - Checks `domainStore.isLanguageLocked` to hide if locked
+- **Theme Switching**: Same HeaderActions component
+  - Dropdown with all available themes
+  - Checks `domainStore.isStyleLocked` to hide if locked
 
-#### 6. Error Handling (REQUIRED BY WORKFLOW)
-- Error types and handling strategies
-- Recovery mechanisms
-- User-facing error messages
+### App Initialization Flow
+1. `src/main.ts` - Entry point
+   - Creates app instance
+   - Loads language from app store: `loadLanguageAsync(appStore.language)`
+   - Mounts app after language is ready
+2. `src/App.vue` - Root component
+   - Fetches domain info on mount: `domainStore.fetchDomainInfo()`
+   - This triggers language lock if domain specifies one
+   - This triggers theme lock if domain specifies one
+3. `src/composables/useTheme.ts` - Theme initialization
+   - Called during app setup
+   - Applies CSS variables to document root
+   - Syncs with settings store
 
-#### 7. Testing Strategy (REQUIRED BY WORKFLOW)
-- Unit testing approach
-- Property-based testing configuration
-- Test coverage requirements
+## Key Findings
 
-## Technical Decisions
+1. **Dual Persistence System**: 
+   - Both language and style settings use `useStorage()` from `@vueuse/core`
+   - Automatically persisted to localStorage
+   - No URL query parameters currently used
 
-### Configuration File Location
-`public/config/plugins.json` - accessible at runtime, can be updated without rebuild
+2. **No URL Query Parameters**: 
+   - Settings are NOT synced with URL query parameters
+   - Only localStorage is used for persistence
+   - This means settings don't survive across different domains/browsers
 
-### Menu Integration Approach
-- Use Pinia store for plugin state management
-- Vue component for menu rendering
-- Dynamic loading based on JSON configuration
-- Support for menu grouping and ordering
+3. **Store Architecture**: 
+   - App store: Handles language and device settings
+   - Settings store: Handles theme, layout, and UI toggles
+   - Domain store: Handles domain-level overrides and locking
+   - All use Pinia with persistedstate plugin
 
-### Example Plugin Complexity
-- Keep examples minimal but functional
-- Demonstrate key patterns for each type
-- Include complete manifest files
-- Provide development documentation
+4. **Domain-Level Control**: 
+   - Backend can lock language/theme per domain
+   - Prevents users from changing settings on certain domains
+   - Useful for branded/white-label deployments
 
-## Next Steps
-1. Insert JSON Configuration section with complete schema
-2. Insert Left Sidebar Menu Integration with Vue component
-3. Insert Example Plugins section with 3 complete examples
-4. Insert Backward Compatibility section
-5. Perform prework analysis for Correctness Properties
-6. Write Correctness Properties section
-7. Write Error Handling section
-8. Write Testing Strategy section
+5. **Settings Scope**:
+   - Language: Global (affects all i18n)
+   - Theme: Global (affects CSS variables and Element Plus)
+   - Layout: Global (affects sidebar/header positioning)
+   - Theme Color: Global (affects primary color)
+   - Other toggles: Global (affects UI features)
 
+6. **Initialization Order Matters**:
+   - Language must load before app mounts (for i18n)
+   - Domain info fetches after app mounts (for locking)
+   - Theme applies after both are ready
 
-## Property Reflection
+## Implementation Strategy for URL Persistence
 
-After analyzing all acceptance criteria, I identified the following redundancies and consolidation opportunities:
+### Phase 1: Query Parameter Sync
+- Read query params on app initialization
+- Override localStorage values if query params present
+- Update query params when settings change
 
-### Redundant Properties to Consolidate:
+### Phase 2: Router Integration
+- Create composable `useSettingsSync()` to manage query param sync
+- Hook into router navigation
+- Update URL without page reload using `router.push()`
 
-1. **Token Injection (5.1, 2.4, 4.4)**: Multiple criteria about token provision can be combined into one property about all plugins receiving tokens upon initialization.
+### Phase 3: Settings Components Update
+- Modify Settings drawer to update URL
+- Modify language switcher to update URL
+- Ensure bidirectional sync
 
-2. **Message Validation (8.3, 1.2, 9.3, 15.3)**: Multiple validation requirements can be consolidated into properties about validation working correctly for different input types.
+### Files to Modify
+1. `src/main.ts` - Add query param reading on init
+2. `src/router/index.ts` - Add query param handling
+3. `src/store/modules/app.ts` - Add URL sync to changeLanguage()
+4. `src/store/modules/settings.ts` - Add URL sync to change methods
+5. Create `src/composables/useSettingsSync.ts` - New composable for sync logic
+6. `src/layout/components/NavBar/components/HeaderActions.vue` - Update language switcher
 
-3. **Error Logging (10.2, 14.1)**: Both require logging with specific fields - can be combined into one property about error logs containing required information.
+### Query Parameter Format
+```
+?lang=en-US&theme=dark&layout=left&themeColor=%23409EFF
+```
 
-4. **Lifecycle Hooks (7.2, 7.4)**: Both about hook execution - can be combined into one property about lifecycle hooks being called at appropriate times.
-
-5. **Data Store Round-Trip (6.2)**: This is a classic round-trip property that validates both write and read.
-
-6. **Plugin Isolation (8.1, 8.2, 10.1)**: Multiple criteria about isolation can be combined into properties about plugins not affecting each other.
-
-7. **Configuration Loading (9.1, 9.2)**: Both about configuration - can combine into property about config being correctly loaded and merged.
-
-8. **Manifest Required Fields (15.1, 11.1)**: Both about manifest structure - can combine.
-
-### Properties to Keep Separate:
-
-- State transitions (7.1) - unique state machine property
-- Message delivery (2.2, 4.3) - different plugin types
-- Resource limits (8.6) - specific enforcement property
-- Version management (11.2, 11.3, 11.4, 11.5) - each tests different aspect
-- Lazy loading (13.4) - specific optimization property
-
-### Final Property Count Estimate:
-After consolidation: ~35-40 testable properties (down from ~60 testable criteria)
+## Files Analyzed
+- src/main.ts
+- src/settings.ts
+- src/composables/useTheme.ts
+- src/lang/index.ts
+- src/utils/i18n.ts
+- src/store/modules/app.ts
+- src/store/modules/settings.ts
+- src/store/index.ts
+- src/router/index.ts
+- src/enums/ThemeEnum.ts
+- src/enums/LanguageEnum.ts
+- src/components/LangSelect/index.vue
+- src/layout/components/Settings/index.vue
+- src/layout/components/NavBar/index.vue
+- src/layout/components/NavBar/components/HeaderActions.vue
+- src/store/modules/domain.ts
+- src/App.vue
