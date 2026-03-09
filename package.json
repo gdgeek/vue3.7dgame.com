@@ -21,7 +21,7 @@
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "format:prettier": "prettier --check src",
-    "lint": "eslint --fix --ext .ts,.js,.vue ./src && prettier --write \"**/*.{js,cjs,ts,json,tsx,css,less,scss,vue,html,md}\" && stylelint \"**/*.{css,scss,vue}\" --fix",
+    "lint": "eslint --fix --ext .ts,.js,.vue ./src && prettier --write \"**/*.{js,cjs,ts,json,tsx,css,less,scss,vue,html,md}\"",
     "lint:fix": "pnpm run lint:eslint:fix && pnpm run lint:prettier:fix && pnpm run lint:stylelint:fix",
     "lint:eslint": "eslint --ext .ts,.js,.vue ./src",
     "lint:eslint:fix": "eslint --fix --ext .ts,.js,.vue ./src",
