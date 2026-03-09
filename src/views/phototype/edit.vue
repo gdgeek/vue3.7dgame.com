@@ -1,7 +1,7 @@
 <template>
   <div>
     <br />
-    <el-row :gutter="20" style="margin: 0px 18px 0">
+    <el-row :gutter="20" style="margin: 0 18px">
       <el-col :sm="16">
         <el-card class="box-card">
           <template #header>
@@ -93,8 +93,12 @@
 
 <script setup lang="ts">
 // @ts-ignore
-import JsonSchemaEditor from "json-schema-editor-vue3";
+import JsonSchemaEditorPlugin from "json-schema-editor-vue3";
 import "json-schema-editor-vue3/lib/json-schema-editor-vue3.css";
+
+// The package exports a Vue plugin object { 0: Component, install: fn }
+// We need to extract the actual component to use it directly in the template
+const JsonSchemaEditor = JsonSchemaEditorPlugin[0] ?? JsonSchemaEditorPlugin;
 import { logger } from "@/utils/logger";
 import { getPhototype, putPhototype, postPhototype } from "@/api/v1/phototype";
 import type { PhototypeType } from "@/api/v1/types/phototype";
@@ -292,17 +296,17 @@ const extraSetting = {
 </script>
 <style>
 * {
+  box-sizing: border-box;
   padding: 0;
   margin: 0;
-  box-sizing: border-box;
 }
 
 .title {
-  text-align: center;
+  height: 100px;
   font-size: 40px;
   font-weight: bold;
-  height: 100px;
   line-height: 100px;
+  text-align: center;
 }
 
 .version {
@@ -310,21 +314,21 @@ const extraSetting = {
 }
 
 .desc {
-  padding: 20px;
   width: 80vw;
   min-width: 800px;
-  margin: auto;
+  padding: 20px;
   padding: 0 3em;
+  margin: auto;
   font-size: 1.2em;
 }
 
 .container {
   display: flex;
-  padding: 20px;
+  justify-content: center;
   width: 80vw;
   min-width: 800px;
-  justify-content: center;
   height: calc(100vh - 150px);
+  padding: 20px;
   margin: auto;
 }
 
@@ -334,15 +338,14 @@ const extraSetting = {
 }
 
 .schema {
-  margin-left: 0px;
-  margin-right: 10px;
   width: 100%;
   height: 400px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
   padding: 12px;
+  margin-right: 10px;
+  margin-left: 0;
+  overflow: hidden auto;
+  border: 1px solid rgb(0 0 0 / 10%);
+  border-radius: 8px;
 }
 
 .CodeMirror {
@@ -351,10 +354,10 @@ const extraSetting = {
 
 .vue-codemirror {
   flex: 1;
-  margin: 0 24px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
   min-height: 300px;
+  margin: 0 24px;
   overflow: auto;
+  border: 1px solid rgb(0 0 0 / 10%);
   border-radius: 6px;
 }
 </style>

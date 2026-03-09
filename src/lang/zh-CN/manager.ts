@@ -347,6 +347,8 @@ export default {
     create: "创建原型",
     fromModel: "从模型",
     typeName: "预制体",
+    listPageTitle: "所有预制体",
+    emptyText: "暂无预制体",
     edit: {
       jsonFormat: "JSON 格式",
       name: "名称",

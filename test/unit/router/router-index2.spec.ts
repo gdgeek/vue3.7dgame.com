@@ -64,22 +64,6 @@ vi.mock("@/router/modules/verse", () => ({
     children: [],
     meta: {},
   },
-  aiRoutes: {
-    path: "/ai",
-    name: "AI",
-    component: () => {},
-    children: [],
-    meta: {},
-  },
-}));
-vi.mock("@/router/modules/campus", () => ({
-  campusRoutes: {
-    path: "/campus",
-    name: "Campus",
-    component: () => {},
-    children: [],
-    meta: {},
-  },
 }));
 vi.mock("@/router/modules/manager", () => ({
   managerRoutes: {
@@ -111,10 +95,15 @@ describe("src/router/index.ts — supplemental coverage", () => {
   const originalStructuredClone = globalThis.structuredClone;
 
   function shallowCloneRoutes(routes: unknown[]): unknown[] {
-    return routes.map((r: any) => ({
-      ...r,
-      children: r.children ? shallowCloneRoutes(r.children) : undefined,
-    }));
+    return routes.map((r) => {
+      const route = r as Record<string, unknown>;
+      return {
+        ...route,
+        children: route.children
+          ? shallowCloneRoutes(route.children as unknown[])
+          : undefined,
+      };
+    });
   }
 
   beforeEach(() => {
@@ -136,7 +125,7 @@ describe("src/router/index.ts — supplemental coverage", () => {
     it("component is an object with 'name' → convertRoutes extracts the name", async () => {
       const { UpdateRoutes, routerData } = await import("@/router");
       const mockAbility = { can: vi.fn(() => true) };
-      await UpdateRoutes(mockAbility as any);
+      await UpdateRoutes(mockAbility as { can: ReturnType<typeof vi.fn> });
 
       // HomeRoutes has component: { name: "HomeComponent" }
       // After convertRoutes, one of routerData entries should have component === "HomeComponent"
@@ -147,12 +136,12 @@ describe("src/router/index.ts — supplemental coverage", () => {
     it("component is an object WITHOUT 'name' → getComponentName returns undefined (lines 108-111)", async () => {
       const { UpdateRoutes, routerData } = await import("@/router");
       const mockAbility = { can: vi.fn(() => true) };
-      await UpdateRoutes(mockAbility as any);
+      await UpdateRoutes(mockAbility as { can: ReturnType<typeof vi.fn> });
 
       // resourceRoutes has component: { setup: () => ({}) } — no "name"
       // routerData is the children of "/" converted, so /resource is one of them
       // The component is undefined since the object has no "name" property
-      const resourceRoute = routerData.value.find(
+      const _resourceRoute = routerData.value.find(
         (r) => r.path === "resource" || r.path === "/resource"
       );
       // Whether or not the route is found, UpdateRoutes processed all child routes
@@ -161,7 +150,7 @@ describe("src/router/index.ts — supplemental coverage", () => {
     });
 
     it("component is a function with .name → getComponentName returns function name", async () => {
-      function NamedComponent() {}
+      function _NamedComponent() {}
       // We can't easily change what's in the mock, but we can verify via useRouter
       const { useRouter, routerData } = await import("@/router");
       useRouter();
@@ -175,7 +164,7 @@ describe("src/router/index.ts — supplemental coverage", () => {
     it("routerData.value is an array after UpdateRoutes (no structuredClone dependency)", async () => {
       const { UpdateRoutes, routerData } = await import("@/router");
       const mockAbility = { can: vi.fn(() => true) };
-      await UpdateRoutes(mockAbility as any);
+      await UpdateRoutes(mockAbility as { can: ReturnType<typeof vi.fn> });
 
       expect(Array.isArray(routerData.value)).toBe(true);
     });
@@ -183,7 +172,7 @@ describe("src/router/index.ts — supplemental coverage", () => {
     it("calling UpdateRoutes with ability sets routerData to an array", async () => {
       const { UpdateRoutes, routerData } = await import("@/router");
       const mockAbility = { can: vi.fn(() => false) };
-      await UpdateRoutes(mockAbility as any);
+      await UpdateRoutes(mockAbility as { can: ReturnType<typeof vi.fn> });
 
       expect(Array.isArray(routerData.value)).toBe(true);
     });
@@ -191,8 +180,8 @@ describe("src/router/index.ts — supplemental coverage", () => {
     it("routerData.value is still an array after multiple UpdateRoutes calls", async () => {
       const { UpdateRoutes, routerData } = await import("@/router");
       const mockAbility = { can: vi.fn(() => true) };
-      await UpdateRoutes(mockAbility as any);
-      await UpdateRoutes(mockAbility as any);
+      await UpdateRoutes(mockAbility as { can: ReturnType<typeof vi.fn> });
+      await UpdateRoutes(mockAbility as { can: ReturnType<typeof vi.fn> });
 
       expect(Array.isArray(routerData.value)).toBe(true);
     });
@@ -204,11 +193,11 @@ describe("src/router/index.ts — supplemental coverage", () => {
     it("component is undefined → getComponentName returns undefined", async () => {
       const { UpdateRoutes, routerData } = await import("@/router");
       const mockAbility = { can: vi.fn(() => true) };
-      await UpdateRoutes(mockAbility as any);
+      await UpdateRoutes(mockAbility as { can: ReturnType<typeof vi.fn> });
 
       // "/" route has undefined component (component: Layout which is a function)
       // other routes may have undefined components if not specified
-      const rootRoute = routerData.value.find((r) => r.path === "/redirect");
+      const _rootRoute = routerData.value.find((r) => r.path === "/redirect");
       // redirect route doesn't appear in routerData as it's not under "/"
       expect(Array.isArray(routerData.value)).toBe(true);
     });

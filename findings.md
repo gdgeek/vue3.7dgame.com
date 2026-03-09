@@ -1,161 +1,115 @@
-# TypeScript Build Errors - Type System Analysis
+# Findings: Plugin System Design Update
 
-## Key Findings
+## Current State Analysis
 
-### 1. Token Type Issue (CRITICAL)
-**File**: `src/store/modules/token.ts`
-**Problem**: Token is typed as `unknown` instead of `TokenInfo`
-**Impact**: 
-- Line 84 in `src/utils/request.ts`: `token.refreshToken` - property access on unknown type
-- Line 106 in `src/utils/request.ts`: `token.accessToken` - property access on unknown type
-- Line 154 in `src/api/v1/scene-package.ts`: `token.accessToken` - property access on unknown type
+### Existing Design Document Structure
+1. Overview - ✓ Complete
+2. Architecture - ✓ Complete
+3. Components and Interfaces - ✓ Complete
+4. Data Models - ✓ Complete
+5. Communication Protocol - ✓ Complete
+6. Security Design - ✓ Complete
+7. API Design - ✓ Complete (includes all API sections)
 
-**Solution**: Define proper `TokenInfo` type in token.ts
-```typescript
-import type { TokenInfo } from "@/api/v1/types/auth";
+### What Needs to Be Added
 
-function getToken(): TokenInfo | null {
-  // ... implementation
-}
+#### 1. JSON Configuration Management (NEW)
+- Configuration file structure and location
+- Plugin configuration schema
+- Menu configuration
+- Runtime configuration management
+- Configuration validation
 
-function setToken(token: TokenInfo) {
-  // ... implementation
-}
-```
+#### 2. Left Sidebar Menu Integration (NEW)
+- Menu structure and grouping
+- Dynamic menu loading from configuration
+- Vue component implementation
+- Menu state management with Pinia
 
-### 2. ViewContainer Items Type (CRITICAL)
-**File**: `src/components/StandardPage/ViewContainer.vue`
-**Problem**: `items` prop is typed as `T[] | null` but used as `unknown[]` in template
-**Root Cause**: `ViewContainerProps<T = unknown>` defaults to `unknown` type
-**Impact**: Type safety lost when using the component
+#### 3. Example Plugins (NEW)
+- Frontend Plugin Example (simple text editor)
+- Backend Plugin Example (data processor)
+- Hybrid Plugin Example (analytics dashboard)
+- Each with complete code and manifest
 
-**Solution**: Keep generic type parameter and ensure proper typing at usage sites
+#### 4. Backward Compatibility (NEW)
+- How existing editor/blockly remain unchanged
+- Migration path to plugin system (future)
+- Coexistence strategy
 
-### 3. FetchResponse Pattern (MULTIPLE DEFINITIONS)
-**Files**: 
-- `src/composables/usePageData.ts` - defines `FetchResponse<T>`
-- `src/components/MrPP/CardListPage/types.ts` - defines `FetchResponse<T>`
+#### 5. Correctness Properties (REQUIRED BY WORKFLOW)
+- Prework analysis of all acceptance criteria
+- Property reflection to eliminate redundancy
+- Formal correctness properties with "for all" statements
+- Requirements traceability
 
-**Problem**: Duplicate type definitions across codebase
-**Solution**: Create single source of truth in `src/types/api.ts`
+#### 6. Error Handling (REQUIRED BY WORKFLOW)
+- Error types and handling strategies
+- Recovery mechanisms
+- User-facing error messages
 
-### 4. CardInfo Type Definition
-**File**: `src/utils/types.ts`
-**Status**: ✅ Well-defined
-**Structure**:
-```typescript
-export type CardInfo = {
-  id: number;
-  image: { id?: number; url: string } | null;
-  type: string;
-  created_at: string;
-  name: string;
-  context: unknown;
-  enabled: boolean;
-};
-```
+#### 7. Testing Strategy (REQUIRED BY WORKFLOW)
+- Unit testing approach
+- Property-based testing configuration
+- Test coverage requirements
 
-### 5. TabItem Type Definition
-**File**: `src/types/news.ts`
-**Status**: ✅ Well-defined
-**Structure**:
-```typescript
-export interface TabItem {
-  label: string;
-  type: "document" | "category";
-  id: number;
-}
-```
+## Technical Decisions
 
-### 6. ViewContainerProps Type Definition
-**File**: `src/components/StandardPage/types.ts`
-**Status**: ✅ Well-defined with generic
-**Structure**:
-```typescript
-export interface ViewContainerProps<T = unknown> {
-  items: T[] | null;
-  viewMode: ViewMode;
-  loading?: boolean;
-  showEmpty?: boolean;
-  emptyText?: string;
-  cardWidth?: number;
-  cardGutter?: number;
-  breakpoints?: Record<number, { rowPerView: number }>;
-}
-```
+### Configuration File Location
+`public/config/plugins.json` - accessible at runtime, can be updated without rebuild
 
-### 7. VerseData Type Definition
-**File**: `src/api/v1/types/verse.ts`
-**Status**: ✅ Well-defined
-**Key Properties**:
-- `id: number`
-- `name: string`
-- `data: JsonValue`
-- `metas?: MetaInfo[]`
-- `verseCode?: VerseCode | null`
+### Menu Integration Approach
+- Use Pinia store for plugin state management
+- Vue component for menu rendering
+- Dynamic loading based on JSON configuration
+- Support for menu grouping and ordering
 
-### 8. TokenInfo Type Definition
-**File**: `src/api/v1/types/auth.ts`
-**Status**: ✅ Well-defined
-**Structure**:
-```typescript
-export interface TokenInfo {
-  token: string;
-  accessToken: string;
-  refreshToken: string;
-  expires: string;
-  tokenType?: string;
-}
-```
+### Example Plugin Complexity
+- Keep examples minimal but functional
+- Demonstrate key patterns for each type
+- Include complete manifest files
+- Provide development documentation
 
-## Type System Patterns
+## Next Steps
+1. Insert JSON Configuration section with complete schema
+2. Insert Left Sidebar Menu Integration with Vue component
+3. Insert Example Plugins section with 3 complete examples
+4. Insert Backward Compatibility section
+5. Perform prework analysis for Correctness Properties
+6. Write Correctness Properties section
+7. Write Error Handling section
+8. Write Testing Strategy section
 
-### Pattern 1: Generic List Components
-```typescript
-// ViewContainerProps uses generic T
-export interface ViewContainerProps<T = unknown> {
-  items: T[] | null;
-  // ...
-}
 
-// Usage should specify type:
-// <ViewContainer :items="cardList" /> where cardList: CardInfo[]
-```
+## Property Reflection
 
-### Pattern 2: API Response Wrapper
-```typescript
-export interface FetchResponse<T = unknown> {
-  data: T[];
-  headers: Record<string, PaginationHeaderValue>;
-}
+After analyzing all acceptance criteria, I identified the following redundancies and consolidation opportunities:
 
-// Usage:
-const response = await fetchFn(params); // FetchResponse<CardInfo>
-```
+### Redundant Properties to Consolidate:
 
-### Pattern 3: Token Management
-```typescript
-// Should be:
-function getToken(): TokenInfo | null
-function setToken(token: TokenInfo): void
+1. **Token Injection (5.1, 2.4, 4.4)**: Multiple criteria about token provision can be combined into one property about all plugins receiving tokens upon initialization.
 
-// NOT:
-function getToken(): unknown | null
-function setToken(token: unknown): void
-```
+2. **Message Validation (8.3, 1.2, 9.3, 15.3)**: Multiple validation requirements can be consolidated into properties about validation working correctly for different input types.
 
-## Recommended Fixes (Priority Order)
+3. **Error Logging (10.2, 14.1)**: Both require logging with specific fields - can be combined into one property about error logs containing required information.
 
-1. **HIGH**: Fix `src/store/modules/token.ts` - use `TokenInfo` type
-2. **HIGH**: Consolidate `FetchResponse` definitions
-3. **MEDIUM**: Add proper type annotations at component usage sites
-4. **MEDIUM**: Review `src/types/verse.ts` - `metas: unknown[]` should be `MetaInfo[]`
-5. **LOW**: Clean up `as unknown` casts in non-critical files
+4. **Lifecycle Hooks (7.2, 7.4)**: Both about hook execution - can be combined into one property about lifecycle hooks being called at appropriate times.
 
-## Files to Update
+5. **Data Store Round-Trip (6.2)**: This is a classic round-trip property that validates both write and read.
 
-- `src/store/modules/token.ts` - Add TokenInfo import and type annotations
-- `src/types/api.ts` - Create centralized FetchResponse definition
-- `src/types/verse.ts` - Fix metas type from unknown[] to MetaInfo[]
-- `src/composables/usePageData.ts` - Import FetchResponse from centralized location
-- `src/components/MrPP/CardListPage/types.ts` - Import FetchResponse from centralized location
+6. **Plugin Isolation (8.1, 8.2, 10.1)**: Multiple criteria about isolation can be combined into properties about plugins not affecting each other.
+
+7. **Configuration Loading (9.1, 9.2)**: Both about configuration - can combine into property about config being correctly loaded and merged.
+
+8. **Manifest Required Fields (15.1, 11.1)**: Both about manifest structure - can combine.
+
+### Properties to Keep Separate:
+
+- State transitions (7.1) - unique state machine property
+- Message delivery (2.2, 4.3) - different plugin types
+- Resource limits (8.6) - specific enforcement property
+- Version management (11.2, 11.3, 11.4, 11.5) - each tests different aspect
+- Lazy loading (13.4) - specific optimization property
+
+### Final Property Count Estimate:
+After consolidation: ~35-40 testable properties (down from ~60 testable criteria)

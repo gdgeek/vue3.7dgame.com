@@ -12,7 +12,7 @@ fileMatchPattern: "**/*.ts"
 - 启用 `strict` 模式
 - 避免类型断言（`as`），除非确实必要
 - 使用类型守卫（type guards）而非断言
-- 泛型优先于 `any`
+- 坚决避免 `any` 类型
 
 ## 常用模式
 

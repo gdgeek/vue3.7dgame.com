@@ -35,10 +35,6 @@ vi.mock("@/router/modules/meta", () => ({
 }));
 vi.mock("@/router/modules/verse", () => ({
   verseRoutes: { path: "/verse", name: "Verse", meta: { hidden: false } },
-  aiRoutes: { path: "/ai", name: "AI", meta: { hidden: false } },
-}));
-vi.mock("@/router/modules/campus", () => ({
-  campusRoutes: { path: "/campus", name: "Campus", meta: { hidden: false } },
 }));
 vi.mock("@/router/modules/manager", () => ({
   managerRoutes: { path: "/manager", name: "Manager", meta: { hidden: false } },
@@ -74,13 +70,15 @@ describe("src/router/index.ts", () => {
   describe("setupRouter(app)", () => {
     it("calls app.use() exactly once", () => {
       const mockApp = { use: mockAppUse };
-      routerIndex.setupRouter(mockApp as any);
+      routerIndex.setupRouter(mockApp as { use: ReturnType<typeof vi.fn> });
       expect(mockAppUse).toHaveBeenCalledOnce();
     });
 
     it("does not throw", () => {
       const mockApp = { use: vi.fn() };
-      expect(() => routerIndex.setupRouter(mockApp as any)).not.toThrow();
+      expect(() =>
+        routerIndex.setupRouter(mockApp as { use: ReturnType<typeof vi.fn> })
+      ).not.toThrow();
     });
   });
 
@@ -157,19 +155,23 @@ describe("src/router/index.ts", () => {
     it("is an async function", () => {
       const result = routerIndex.UpdateRoutes({
         can: vi.fn(() => true),
-      } as any);
+      } as { can: ReturnType<typeof vi.fn> });
       expect(result).toBeInstanceOf(Promise);
     });
 
     it("populates routerData after call", async () => {
       const ability = { can: vi.fn(() => true) };
-      await routerIndex.UpdateRoutes(ability as any);
+      await routerIndex.UpdateRoutes(
+        ability as { can: ReturnType<typeof vi.fn> }
+      );
       expect(Array.isArray(routerIndex.routerData.value)).toBe(true);
     });
 
     it("hides routes when ability.can returns false", async () => {
       const ability = { can: vi.fn(() => false) };
-      await routerIndex.UpdateRoutes(ability as any);
+      await routerIndex.UpdateRoutes(
+        ability as { can: ReturnType<typeof vi.fn> }
+      );
       const rootRoute = routerIndex.constantRoutes.find((r) => r.path === "/");
       if (rootRoute?.children) {
         rootRoute.children.forEach((child) => {
@@ -182,7 +184,9 @@ describe("src/router/index.ts", () => {
 
     it("shows routes when ability.can returns true", async () => {
       const ability = { can: vi.fn(() => true) };
-      await routerIndex.UpdateRoutes(ability as any);
+      await routerIndex.UpdateRoutes(
+        ability as { can: ReturnType<typeof vi.fn> }
+      );
       const rootRoute = routerIndex.constantRoutes.find((r) => r.path === "/");
       if (rootRoute?.children) {
         rootRoute.children.forEach((child) => {
@@ -196,13 +200,17 @@ describe("src/router/index.ts", () => {
     it("ability.can is called for each route that has a meta", async () => {
       const canMock = vi.fn(() => true);
       const ability = { can: canMock };
-      await routerIndex.UpdateRoutes(ability as any);
+      await routerIndex.UpdateRoutes(
+        ability as { can: ReturnType<typeof vi.fn> }
+      );
       expect(canMock).toHaveBeenCalled();
     });
 
     it("re-runs check independently on each call (state reset)", async () => {
       const hideAbility = { can: vi.fn(() => false) };
-      await routerIndex.UpdateRoutes(hideAbility as any);
+      await routerIndex.UpdateRoutes(
+        hideAbility as { can: ReturnType<typeof vi.fn> }
+      );
       const rootAfterHide = routerIndex.constantRoutes.find(
         (r) => r.path === "/"
       );
@@ -211,7 +219,9 @@ describe("src/router/index.ts", () => {
       );
 
       const showAbility = { can: vi.fn(() => true) };
-      await routerIndex.UpdateRoutes(showAbility as any);
+      await routerIndex.UpdateRoutes(
+        showAbility as { can: ReturnType<typeof vi.fn> }
+      );
       const rootAfterShow = routerIndex.constantRoutes.find(
         (r) => r.path === "/"
       );

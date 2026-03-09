@@ -70,22 +70,6 @@ vi.mock("@/router/modules/verse", () => ({
     children: [],
     meta: {},
   },
-  aiRoutes: {
-    path: "/ai",
-    name: "AI",
-    component: () => {},
-    children: [],
-    meta: {},
-  },
-}));
-vi.mock("@/router/modules/campus", () => ({
-  campusRoutes: {
-    path: "/campus",
-    name: "Campus",
-    component: () => {},
-    children: [],
-    meta: {},
-  },
 }));
 vi.mock("@/router/modules/manager", () => ({
   managerRoutes: {
@@ -114,10 +98,15 @@ vi.mock("@/utils/ability", () => ({
 // ── Mock structuredClone (router uses it, but functions can't be cloned in jsdom) ──
 const originalStructuredClone = globalThis.structuredClone;
 function shallowCloneRoutes(routes: unknown[]): unknown[] {
-  return routes.map((r: any) => ({
-    ...r,
-    children: r.children ? shallowCloneRoutes(r.children) : undefined,
-  }));
+  return routes.map((r) => {
+    const route = r as Record<string, unknown>;
+    return {
+      ...route,
+      children: route.children
+        ? shallowCloneRoutes(route.children as unknown[])
+        : undefined,
+    };
+  });
 }
 
 // ── Tests ────────────────────────────────────────────────────────────────────
@@ -142,7 +131,7 @@ describe("src/router/index.ts", () => {
     it("calls app.use with the router instance", async () => {
       const { setupRouter } = await import("@/router");
       const app = { use: vi.fn() };
-      setupRouter(app as any);
+      setupRouter(app as { use: ReturnType<typeof vi.fn> });
       expect(app.use).toHaveBeenCalledWith(mockRouter);
     });
   });
@@ -178,14 +167,14 @@ describe("src/router/index.ts", () => {
       const mockAbility = {
         can: vi.fn(() => true),
       };
-      await UpdateRoutes(mockAbility as any);
+      await UpdateRoutes(mockAbility as { can: ReturnType<typeof vi.fn> });
       expect(mockAbility.can).toHaveBeenCalled();
     });
 
     it("sets meta.hidden=false when ability.can returns true", async () => {
       const { UpdateRoutes, constantRoutes } = await import("@/router");
       const mockAbility = { can: vi.fn(() => true) };
-      await UpdateRoutes(mockAbility as any);
+      await UpdateRoutes(mockAbility as { can: ReturnType<typeof vi.fn> });
       // All top-level routes with meta should have hidden=false (can open = true → !true = false)
       const routeWithMeta = constantRoutes.find(
         (r) => r.meta && r.path === "/redirect"
@@ -198,7 +187,7 @@ describe("src/router/index.ts", () => {
     it("sets meta.hidden=true when ability.can returns false", async () => {
       const { UpdateRoutes, constantRoutes } = await import("@/router");
       const mockAbility = { can: vi.fn(() => false) };
-      await UpdateRoutes(mockAbility as any);
+      await UpdateRoutes(mockAbility as { can: ReturnType<typeof vi.fn> });
       const routeWithMeta = constantRoutes.find(
         (r) => r.meta && r.path === "/redirect"
       );
@@ -216,7 +205,7 @@ describe("src/router/index.ts", () => {
           return true;
         }),
       };
-      await UpdateRoutes(mockAbility as any);
+      await UpdateRoutes(mockAbility as { can: ReturnType<typeof vi.fn> });
       // Should be called for redirect route + its children + "/" route children
       expect(callCount).toBeGreaterThan(2);
     });
@@ -224,7 +213,9 @@ describe("src/router/index.ts", () => {
     it("does not throw when ability.can always returns false", async () => {
       const { UpdateRoutes } = await import("@/router");
       const mockAbility = { can: vi.fn(() => false) };
-      await expect(UpdateRoutes(mockAbility as any)).resolves.toBeUndefined();
+      await expect(
+        UpdateRoutes(mockAbility as { can: ReturnType<typeof vi.fn> })
+      ).resolves.toBeUndefined();
     });
   });
 

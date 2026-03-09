@@ -399,6 +399,8 @@ export default {
     create: "สร้างต้นแบบ",
     fromModel: "จากโมเดล",
     typeName: "พรีแฟบ",
+    listPageTitle: "พรีแฟบทั้งหมด",
+    emptyText: "ยังไม่มีพรีแฟบ",
     edit: {
       jsonFormat: "รูปแบบ JSON",
       name: "ชื่อ",

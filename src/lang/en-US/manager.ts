@@ -411,6 +411,8 @@ export default {
     create: "Create Phototype",
     fromModel: "From Model",
     typeName: "Prefab",
+    listPageTitle: "All Prefabs",
+    emptyText: "No prefabs yet",
     edit: {
       jsonFormat: "JSON Format",
       name: "Name",

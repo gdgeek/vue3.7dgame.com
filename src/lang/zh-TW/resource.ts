@@ -407,4 +407,9 @@ export default {
     fileTooLarge: "文件超過 {size}MB 限制",
     fileSizeExceededList: "以下文件超過 {size}MB 限制: {names}",
   },
+  resource: {
+    type: {
+      picture: "圖片",
+    },
+  },
 };

@@ -395,6 +395,8 @@ export default {
     create: "プロトタイプ作成",
     fromModel: "モデルから",
     typeName: "プレハブ",
+    listPageTitle: "すべてのプレハブ",
+    emptyText: "プレハブがありません",
     edit: {
       jsonFormat: "JSON 形式",
       name: "名称",

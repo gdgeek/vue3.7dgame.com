@@ -390,6 +390,8 @@ export default {
     create: "創建原型",
     fromModel: "從模型",
     typeName: "預製體",
+    listPageTitle: "所有預製體",
+    emptyText: "暫無預製體",
     edit: {
       jsonFormat: "JSON 格式",
       name: "名稱",

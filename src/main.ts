@@ -80,6 +80,7 @@ import {
   faSquareMinus,
   faChevronUp,
   faFloppyDisk,
+  faAppleWhole,
 } from "@fortawesome/free-solid-svg-icons";
 import { getVueAppleLoginConfig } from "@/utils/helper";
 import "element-plus/dist/index.css";
@@ -158,7 +159,8 @@ library.add(
   faCheckDouble,
   faSquareMinus,
   faChevronUp,
-  faFloppyDisk
+  faFloppyDisk,
+  faAppleWhole
 );
 
 // 本地SVG图标

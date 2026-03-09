@@ -1,5 +1,4 @@
 <template>
-  {{ searched }}
   <div class="verse-index">
     <PersonCreator
       v-if="props.created"

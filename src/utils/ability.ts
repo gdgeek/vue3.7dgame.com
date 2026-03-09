@@ -127,8 +127,6 @@ export function UpdateAbility(
       can("people", AbilityRole.name, { role: "admin" }); //超级管理员可以管理管理员
       can("phototype", "all");
       menu = menu.concat([/^\/phototype(\/|$)/]);
-      menu = menu.concat([/^\/ai(\/|$)/]); // AI功能仅root用户可用
-      menu = menu.concat([/^\/campus(\/|$)/]); //学校管理
     }
 
     menu.forEach((item) => {

@@ -263,59 +263,59 @@
           </div>
         </template>
       </DetailPanel>
+
+      <!-- Selection Method Dialog -->
+      <el-dialog
+        v-model="imageSelectDialogVisible"
+        :title="$t('meta.metaEdit.selectImageMethod')"
+        width="500px"
+        align-center
+        :close-on-click-modal="false"
+        append-to-body
+      >
+        <div class="selection-container">
+          <div class="selection-card" @click="openResourceDialog">
+            <div class="card-icon">
+              <el-icon :size="32">
+                <FolderOpened></FolderOpened>
+              </el-icon>
+            </div>
+            <div class="card-title">
+              {{ $t("meta.metaEdit.selectFromResource") }}
+            </div>
+            <div class="card-description">
+              {{ $t("imageSelector.selectFromResourceDesc") }}
+            </div>
+          </div>
+
+          <div class="selection-card" @click="openLocalUpload">
+            <div class="card-icon">
+              <el-icon :size="32">
+                <Upload></Upload>
+              </el-icon>
+            </div>
+            <div class="card-title">{{ $t("meta.metaEdit.uploadLocal") }}</div>
+            <div class="card-description">
+              {{ $t("imageSelector.uploadLocalDesc") }}
+            </div>
+          </div>
+        </div>
+      </el-dialog>
+
+      <!-- Resource Dialog -->
+      <ResourceDialog
+        :multiple="false"
+        @selected="onResourceSelected"
+        ref="resourceDialogRef"
+      ></ResourceDialog>
+
+      <!-- Import Dialog -->
+      <ImportDialog
+        v-model="importDialogVisible"
+        @success="handleImportSuccess"
+      ></ImportDialog>
     </div>
   </TransitionWrapper>
-
-  <!-- Selection Method Dialog -->
-  <el-dialog
-    v-model="imageSelectDialogVisible"
-    :title="$t('meta.metaEdit.selectImageMethod')"
-    width="500px"
-    align-center
-    :close-on-click-modal="false"
-    append-to-body
-  >
-    <div class="selection-container">
-      <div class="selection-card" @click="openResourceDialog">
-        <div class="card-icon">
-          <el-icon :size="32">
-            <FolderOpened></FolderOpened>
-          </el-icon>
-        </div>
-        <div class="card-title">
-          {{ $t("meta.metaEdit.selectFromResource") }}
-        </div>
-        <div class="card-description">
-          {{ $t("imageSelector.selectFromResourceDesc") }}
-        </div>
-      </div>
-
-      <div class="selection-card" @click="openLocalUpload">
-        <div class="card-icon">
-          <el-icon :size="32">
-            <Upload></Upload>
-          </el-icon>
-        </div>
-        <div class="card-title">{{ $t("meta.metaEdit.uploadLocal") }}</div>
-        <div class="card-description">
-          {{ $t("imageSelector.uploadLocalDesc") }}
-        </div>
-      </div>
-    </div>
-  </el-dialog>
-
-  <!-- Resource Dialog -->
-  <ResourceDialog
-    :multiple="false"
-    @selected="onResourceSelected"
-    ref="resourceDialogRef"
-  ></ResourceDialog>
-
-  <!-- Import Dialog -->
-  <ImportDialog
-    v-model="importDialogVisible"
-    @success="handleImportSuccess"
-  ></ImportDialog>
 </template>
 
 <script setup lang="ts">

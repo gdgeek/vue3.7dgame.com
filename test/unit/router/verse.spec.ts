@@ -1,9 +1,9 @@
 /**
- * 路由模块单元测试 - Verse / AI 路由 (verse.ts)
- * 验证 verseRoutes 和 aiRoutes 的结构完整性
+ * 路由模块单元测试 - Verse 路由 (verse.ts)
+ * 验证 verseRoutes 的结构完整性
  */
 import { describe, it, expect } from "vitest";
-import { verseRoutes, aiRoutes } from "@/router/modules/verse";
+import { verseRoutes } from "@/router/modules/verse";
 
 // ============================================================================
 // verseRoutes
@@ -62,7 +62,7 @@ describe("verseRoutes 路由模块", () => {
     it("包含 /verse/view 子路由（private）", () => {
       const r = verseRoutes.children!.find((c) => c.path === "/verse/view");
       expect(r).toBeDefined();
-      expect((r?.meta as any)?.private).toBe(true);
+      expect((r?.meta as Record<string, unknown>)?.private).toBe(true);
     });
 
     it("包含 /verse/script 子路由（keepAlive）", () => {
@@ -79,60 +79,6 @@ describe("verseRoutes 路由模块", () => {
 
     it("所有子路由 component 为函数（懒加载）", () => {
       for (const r of verseRoutes.children!) {
-        expect(typeof r.component).toBe("function");
-      }
-    });
-  });
-});
-
-// ============================================================================
-// aiRoutes
-// ============================================================================
-describe("aiRoutes 路由模块", () => {
-  describe("根路由基本属性", () => {
-    it("path 为 /ai", () => {
-      expect(aiRoutes.path).toBe("/ai");
-    });
-
-    it("name 为 AI", () => {
-      expect(aiRoutes.name).toBe("AI");
-    });
-
-    it("component 为 null", () => {
-      expect(aiRoutes.component).toBeNull();
-    });
-  });
-
-  describe("根路由 meta 属性", () => {
-    it("meta.title 为 ai.title", () => {
-      expect(aiRoutes.meta?.title).toBe("ai.title");
-    });
-
-    it("meta.hidden 为 false（菜单中可见）", () => {
-      expect(aiRoutes.meta?.hidden).toBe(false);
-    });
-  });
-
-  describe("子路由列表", () => {
-    it("children 包含 2 个子路由", () => {
-      expect(aiRoutes.children?.length).toBe(2);
-    });
-
-    it("包含 /ai/list 子路由", () => {
-      const r = aiRoutes.children!.find((c) => c.path === "/ai/list");
-      expect(r).toBeDefined();
-      expect(r?.name).toBe("AIList");
-      expect(r?.meta?.keepAlive).toBe(true);
-    });
-
-    it("包含 /ai/generation 子路由", () => {
-      const r = aiRoutes.children!.find((c) => c.path === "/ai/generation");
-      expect(r).toBeDefined();
-      expect(r?.name).toBe("AIGeneration");
-    });
-
-    it("子路由 component 均为函数（懒加载）", () => {
-      for (const r of aiRoutes.children!) {
         expect(typeof r.component).toBe("function");
       }
     });
