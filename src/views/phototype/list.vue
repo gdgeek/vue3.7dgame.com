@@ -18,7 +18,7 @@
           <el-button type="primary" @click="addPrefab">
             <font-awesome-icon
               :icon="['fas', 'plus']"
-              style=" margin-right: 4px;font-size: 18px"
+              style="margin-right: 4px; font-size: 18px"
             ></font-awesome-icon>
             {{ $t("phototype.create") }}
           </el-button>

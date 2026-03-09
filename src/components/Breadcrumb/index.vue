@@ -141,7 +141,10 @@ function normalizeQuery(query: LocationQuery): StoredQuery {
 // 从 secure-ls 加载保存的路由参数
 function loadRouteQueryMap() {
   try {
-    const savedMap = ls.get("routeQueryMap") as Record<string, StoredQuery> | null;
+    const savedMap = ls.get("routeQueryMap") as Record<
+      string,
+      StoredQuery
+    > | null;
     if (savedMap && typeof savedMap === "object") {
       routeQueryMap.value = new Map(Object.entries(savedMap));
     }
