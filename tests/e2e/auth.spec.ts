@@ -20,10 +20,14 @@ test.describe("Auth and login page basic checks", () => {
     await page.waitForLoadState("networkidle");
 
     await expect(page.locator(".nav-container")).toBeVisible();
-    await expect(page.locator(".nav-right .login-button").first()).toBeVisible();
+    await expect(
+      page.locator(".nav-right .login-button").first()
+    ).toBeVisible();
   });
 
-  test("Click login button opens login dialog with required form fields", async ({ page }) => {
+  test("Click login button opens login dialog with required form fields", async ({
+    page,
+  }) => {
     await page.goto("/web/index");
     await page.waitForLoadState("networkidle");
 
@@ -34,16 +38,24 @@ test.describe("Auth and login page basic checks", () => {
     await expect(
       page.locator(".name-password-form .login-form .el-input input").first()
     ).toBeVisible();
-    await expect(page.locator(".name-password-form input[type='password']")).toBeVisible();
-    await expect(page.locator(".name-password-form .login-button").first()).toBeVisible();
+    await expect(
+      page.locator(".name-password-form input[type='password']")
+    ).toBeVisible();
+    await expect(
+      page.locator(".name-password-form .login-button").first()
+    ).toBeVisible();
   });
 
-  test("Forgot password dialog can be opened from login form", async ({ page }) => {
+  test("Forgot password dialog can be opened from login form", async ({
+    page,
+  }) => {
     await page.goto("/web/index");
     await page.waitForLoadState("networkidle");
 
     await page.locator(".nav-right .login-button").first().click();
-    await expect(page.locator(".name-password-form .forgot-password")).toBeVisible();
+    await expect(
+      page.locator(".name-password-form .forgot-password")
+    ).toBeVisible();
 
     await page.locator(".name-password-form .forgot-password").click();
 
