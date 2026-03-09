@@ -43,14 +43,21 @@ async function handleRetry() {
     <!-- 加载状态 -->
     <div v-if="loading" class="plugin-container__loading">
       <el-icon class="is-loading" :size="32">
-        <Loading />
+        <Loading></Loading>
       </el-icon>
       <p>插件加载中...</p>
     </div>
 
     <!-- 错误状态 -->
-    <div v-else-if="error || activePlugin?.state === 'error'" class="plugin-container__error">
-      <el-result icon="error" :title="'插件加载失败'" :sub-title="activePlugin?.lastError || error">
+    <div
+      v-else-if="error || activePlugin?.state === 'error'"
+      class="plugin-container__error"
+    >
+      <el-result
+        icon="error"
+        :title="'插件加载失败'"
+        :sub-title="activePlugin?.lastError || error || undefined"
+      >
         <template #extra>
           <el-button type="primary" @click="handleRetry">重试</el-button>
         </template>
@@ -59,11 +66,11 @@ async function handleRetry() {
 
     <!-- 空状态 -->
     <div v-else-if="!pluginId" class="plugin-container__empty">
-      <el-empty description="请从左侧菜单选择一个插件" />
+      <el-empty description="请从左侧菜单选择一个插件"></el-empty>
     </div>
 
     <!-- iframe 容器 -->
-    <div ref="containerRef" class="plugin-container__iframe" />
+    <div ref="containerRef" class="plugin-container__iframe"></div>
   </div>
 </template>
 
