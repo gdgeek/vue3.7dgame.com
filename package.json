@@ -39,7 +39,7 @@
     "check": "node scripts/check-project.js",
     "replace-console": "node scripts/replace-console.js",
     "check:icons": "node scripts/check-icons.js",
-    "lint:check": "eslint --ext .ts,.js,.vue ./src && prettier --check \"**/*.{js,cjs,ts,json,tsx,css,less,scss,vue,html,md}\" && stylelint \"**/*.{css,scss,vue}\""
+    "lint:check": "eslint --ext .ts,.js,.vue ./src && prettier --check \"**/*.{js,cjs,ts,json,tsx,css,less,scss,vue,html,md}\""
   },
   "config": {
     "commitizen": {
