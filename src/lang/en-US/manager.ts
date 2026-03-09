@@ -411,6 +411,8 @@ export default {
     create: "Create Phototype",
     fromModel: "From Model",
     typeName: "Prefab",
+    listPageTitle: "All Prefabs",
+    emptyText: "No prefabs yet",
     edit: {
       jsonFormat: "JSON Format",
       name: "Name",
@@ -421,6 +423,7 @@ export default {
       saveBasicFirst: "Please save basic information first",
       condition: "Condition",
       defaultValue: "Default Value",
+      invalidJson: "Invalid JSON format, please fix before saving",
     },
     prompt: {
       message1: "Please enter phototype name",

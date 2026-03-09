@@ -4,6 +4,24 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ---------------------------------------------------------------------------
+// Mock SecureLS (ESM compatibility)
+// ---------------------------------------------------------------------------
+vi.mock("secure-ls", () => {
+  const store: Record<string, unknown> = {};
+  return {
+    default: vi.fn().mockImplementation(() => ({
+      get: (key: string) => store[key] ?? null,
+      set: (key: string, value: unknown) => {
+        store[key] = value;
+      },
+      remove: (key: string) => {
+        delete store[key];
+      },
+    })),
+  };
+});
+
+// ---------------------------------------------------------------------------
 // Mock dependencies that need router/NProgress (not needed for hasAuth tests)
 // ---------------------------------------------------------------------------
 vi.mock("@/utils/nprogress", () => ({

@@ -114,7 +114,7 @@ service.interceptors.request.use(
         } catch (err) {
           // 刷新失败 -> 跳转登录
           const router = useRouter();
-          return handleUnauthorized(router);
+          return handleUnauthorized(router, err);
         }
       }
     }
@@ -133,10 +133,15 @@ function showErrorMessage(message: string, duration = 5000) {
 // Flag to prevent multiple unauthorized handlers from executing
 let isHandlingUnauthorized = false;
 
-function handleUnauthorized(router: ReturnType<typeof useRouter>) {
+function handleUnauthorized(
+  router: ReturnType<typeof useRouter>,
+  error?: unknown
+) {
+  const rejectionReason = error ?? new Error("Unauthorized");
+
   // If already handling unauthorized, just reject silently
   if (isHandlingUnauthorized) {
-    return Promise.reject("");
+    return Promise.reject(rejectionReason);
   }
 
   isHandlingUnauthorized = true;
@@ -153,7 +158,7 @@ function handleUnauthorized(router: ReturnType<typeof useRouter>) {
     isHandlingUnauthorized = false;
   }, 1000);
 
-  return Promise.reject("");
+  return Promise.reject(rejectionReason);
 }
 
 // 响应拦截器（Auth / HTTP 错误处理）
@@ -162,22 +167,23 @@ service.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
-  async (error) => {
+  async (error: unknown) => {
     const router = useRouter();
-    const { response } = error;
+    const axiosError = error as import("axios").AxiosError;
+    const { response } = axiosError;
     const messages = getMessageArray();
 
     if (!response) {
-      if (error.message === "Network Error") {
+      if (axiosError.message === "Network Error") {
         showErrorMessage(messages[1]);
       } else {
-        logger.error(i18n.global.t("request.unknownError"), error.message);
-        showErrorMessage(error.message);
+        logger.error(i18n.global.t("request.unknownError"), axiosError.message);
+        showErrorMessage(axiosError.message);
       }
       return Promise.reject(error);
     }
     if (response.status === 401) {
-      return handleUnauthorized(router);
+      return handleUnauthorized(router, error);
     } else if (response.status === 404) {
       showErrorMessage(i18n.global.t("request.error404"));
     } else if (response.status >= 500) {
@@ -185,11 +191,12 @@ service.interceptors.response.use(
       // 服务器内部错误
       showErrorMessage(messages[2]);
     } else {
-      const message = response.data.message || error.message;
+      const data = response.data as Record<string, unknown> | undefined;
+      const message = (data?.message as string) || axiosError.message;
       showErrorMessage(message);
     }
 
-    return Promise.reject(response);
+    return Promise.reject(error);
   }
 );
 

@@ -6,7 +6,9 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { createApp, defineComponent } from "vue";
 
 const mockAppStore = { language: "zh-CN" };
-const mockDomainStore = { refreshFromAPI: vi.fn().mockResolvedValue(undefined) };
+const mockDomainStore = {
+  refreshFromAPI: vi.fn().mockResolvedValue(undefined),
+};
 
 vi.mock("@/store/modules/app", () => ({
   useAppStore: vi.fn(() => mockAppStore),
@@ -17,7 +19,13 @@ vi.mock("@/store/modules/domain", () => ({
 }));
 
 vi.mock("@/enums/LanguageEnum", () => ({
-  LanguageEnum: { ZH_CN: "zh-CN", EN: "en", JA: "ja", ZH_TW: "zh-TW", TH: "th" },
+  LanguageEnum: {
+    ZH_CN: "zh-CN",
+    EN: "en",
+    JA: "ja",
+    ZH_TW: "zh-TW",
+    TH: "th",
+  },
 }));
 
 vi.mock("@/lang/index", () => ({
@@ -40,7 +48,8 @@ const ElDropdownMenuStub = defineComponent({
 const ElDropdownItemStub = defineComponent({
   name: "ElDropdownItem",
   props: ["disabled", "command"],
-  template: "<div class='el-dropdown-item' :data-command='command'><slot /></div>",
+  template:
+    "<div class='el-dropdown-item' :data-command='command'><slot /></div>",
 });
 const SvgIconStub = defineComponent({
   name: "SvgIcon",
@@ -95,9 +104,9 @@ describe("components/LangSelect/index.vue", () => {
 
   it("all language commands are present", async () => {
     const { el } = await mount();
-    const commands = Array.from(
-      el.querySelectorAll(".el-dropdown-item")
-    ).map((i) => i.getAttribute("data-command"));
+    const commands = Array.from(el.querySelectorAll(".el-dropdown-item")).map(
+      (i) => i.getAttribute("data-command")
+    );
     expect(commands).toContain("zh-CN");
     expect(commands).toContain("en");
     expect(commands).toContain("ja");

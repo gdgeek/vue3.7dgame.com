@@ -43,7 +43,7 @@
       <template #footer>
         <slot name="enter">入口</slot>
 
-        <el-button-group v-if="showActions" style="float: right" :inline="true">
+        <el-button-group v-if="showActions" style="float: right">
           <el-button
             type="success"
             size="small"

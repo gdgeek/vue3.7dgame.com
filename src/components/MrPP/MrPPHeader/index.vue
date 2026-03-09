@@ -5,12 +5,11 @@
         <el-col :xs="16" :sm="16" :md="16" :lg="16" :xl="16">
           <slot></slot>
           &nbsp;
-          <el-button-group v-if="sorted !== ''" :inline="true">
+          <el-button-group v-if="sorted !== ''">
             <el-button
               v-if="sorted_name"
               size="small"
               type="success"
-              :label="$t('MrppHeader.sortByName')"
               icon="ChatDotSquare"
               @click="sort(sortByName)"
             >
@@ -28,7 +27,6 @@
               v-else
               size="small"
               type="info"
-              :label="$t('MrppHeader.sortByName')"
               icon="ChatDotSquare"
               @click="sort(sortByName)"
             >
@@ -41,7 +39,6 @@
               size="small"
               type="success"
               icon="Clock"
-              :label="$t('MrppHeader.sortByTime')"
               @click="sort(sortByTime)"
             >
               <span class="hidden-sm-and-down">{{
@@ -58,7 +55,6 @@
               v-else
               size="small"
               type="info"
-              :label="$t('MrppHeader.sortByTime')"
               icon="Clock"
               @click="sort(sortByTime)"
             >

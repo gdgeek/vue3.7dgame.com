@@ -32,9 +32,7 @@ afterEach(() => {
 });
 
 async function mountCategoryPage(): Promise<{ el: HTMLElement; app: App }> {
-  const { default: CategoryPage } = await import(
-    "@/views/home/category.vue"
-  );
+  const { default: CategoryPage } = await import("@/views/home/category.vue");
   const el = document.createElement("div");
   const app = createApp(CategoryPage as Parameters<typeof createApp>[0]);
   app.mount(el);

@@ -6,7 +6,10 @@ import { createApp, defineComponent, nextTick } from "vue";
 
 // ─── Mock stores ───────────────────────────────────────────────────────────────
 const mockSettingsStore = { sidebarLogo: true, theme: "light" };
-const mockDomainStore = { title: "TestApp", icon: "https://example.com/icon.png" };
+const mockDomainStore = {
+  title: "TestApp",
+  icon: "https://example.com/icon.png",
+};
 
 vi.mock("@/store", () => ({
   useSettingsStore: vi.fn(() => mockSettingsStore),
@@ -46,8 +49,8 @@ async function mount(props: Record<string, unknown> = {}) {
     collapse: false,
     ...props,
   });
-  app.component("router-link", RouterLinkStub);
-  app.component("el-tooltip", ElTooltipStub);
+  app.component("RouterLink", RouterLinkStub);
+  app.component("ElTooltip", ElTooltipStub);
   app.mount(el);
   cleanups.push(() => app.unmount());
   await nextTick();

@@ -13,7 +13,8 @@ vi.mock("@/utils/index", () => ({
 const RouterLinkStub = defineComponent({
   name: "RouterLink",
   props: { to: { type: [String, Object], default: "" } },
-  template: '<a class="router-link-stub" :data-to="JSON.stringify(to)"><slot /></a>',
+  template:
+    '<a class="router-link-stub" :data-to="JSON.stringify(to)"><slot /></a>',
 });
 
 const cleanups: (() => void)[] = [];
@@ -32,10 +33,10 @@ function mountAppLink(opts: MountOpts): { el: HTMLElement; app: App } {
 }
 
 describe("AppLink", () => {
-  async function mount(opts: MountOpts): Promise<{ el: HTMLElement; app: App }> {
-    const { default: AppLink } = await import(
-      "@/components/AppLink/index.vue"
-    );
+  async function mount(
+    opts: MountOpts
+  ): Promise<{ el: HTMLElement; app: App }> {
+    const { default: AppLink } = await import("@/components/AppLink/index.vue");
     const el = document.createElement("div");
     const app = createApp(AppLink, { to: opts.to });
     app.component("RouterLink", RouterLinkStub);
@@ -45,7 +46,9 @@ describe("AppLink", () => {
   }
 
   it("mounts without throwing for external URL", async () => {
-    await expect(mount({ to: { path: "http://example.com" } })).resolves.not.toThrow();
+    await expect(
+      mount({ to: { path: "http://example.com" } })
+    ).resolves.not.toThrow();
   });
 
   it("renders an <a> tag for external URL", async () => {
@@ -81,13 +84,12 @@ describe("AppLink", () => {
   });
 
   it("renders slot content for external URL", async () => {
-    const { default: AppLink } = await import(
-      "@/components/AppLink/index.vue"
-    );
+    const { default: AppLink } = await import("@/components/AppLink/index.vue");
     const el = document.createElement("div");
     const Wrapper = defineComponent({
       components: { AppLink, RouterLink: RouterLinkStub },
-      template: '<AppLink :to="{ path: \'http://ext.com\' }"><span class="child">link text</span></AppLink>',
+      template:
+        '<AppLink :to="{ path: \'http://ext.com\' }"><span class="child">link text</span></AppLink>',
     });
     const app = createApp(Wrapper);
     app.component("RouterLink", RouterLinkStub);
@@ -98,13 +100,12 @@ describe("AppLink", () => {
   });
 
   it("renders slot content for internal URL", async () => {
-    const { default: AppLink } = await import(
-      "@/components/AppLink/index.vue"
-    );
+    const { default: AppLink } = await import("@/components/AppLink/index.vue");
     const el = document.createElement("div");
     const Wrapper = defineComponent({
       components: { AppLink, RouterLink: RouterLinkStub },
-      template: '<AppLink :to="{ path: \'/home\' }"><span class="inner">inner</span></AppLink>',
+      template:
+        '<AppLink :to="{ path: \'/home\' }"><span class="inner">inner</span></AppLink>',
     });
     const app = createApp(Wrapper);
     app.component("RouterLink", RouterLinkStub);

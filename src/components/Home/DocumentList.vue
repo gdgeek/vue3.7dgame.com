@@ -40,7 +40,7 @@
           {{ category.name }}
         </span>
       </el-tooltip>
-      <el-timeline v-if="data" :reverse="reverse" class="document-timeline">
+      <el-timeline v-if="data" class="document-timeline">
         <el-timeline-item
           v-for="(item, index) in data"
           :key="index"
@@ -140,7 +140,7 @@ const postsState = ref<LoadState>("loading");
 const errorMessage = ref<string | null>(null);
 
 // 初始化响应式数据
-const reverse = ref(false);
+
 const category = ref<Category | null>(null);
 const data = ref<Item[] | null>(null);
 const pagination = ref<Pagination>({

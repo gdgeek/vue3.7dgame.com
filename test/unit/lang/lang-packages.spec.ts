@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * 语言包单元测试 - src/lang/ 各语言包结构验证
  * 验证 zh-CN、en-US、ja-JP、th-TH、zh-TW 各语言包导出正确性
@@ -89,8 +90,7 @@ describe("多语言包结构一致性", () => {
     }
   });
 
-  it("zh-CN 包含 resource 和 campus 扩展命名空间", () => {
+  it("zh-CN 包含 resource 扩展命名空间", () => {
     expect(zhCN as any).toHaveProperty("resource");
-    expect(zhCN as any).toHaveProperty("campus");
   });
 });

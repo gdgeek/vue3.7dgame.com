@@ -390,6 +390,8 @@ export default {
     create: "創建原型",
     fromModel: "從模型",
     typeName: "預製體",
+    listPageTitle: "所有預製體",
+    emptyText: "暫無預製體",
     edit: {
       jsonFormat: "JSON 格式",
       name: "名稱",
@@ -400,6 +402,7 @@ export default {
       saveBasicFirst: "請先保存基本信息",
       condition: "條件",
       defaultValue: "默認值",
+      invalidJson: "JSON 格式錯誤，請修正後再儲存",
     },
     prompt: {
       message1: "請輸入原型名稱",

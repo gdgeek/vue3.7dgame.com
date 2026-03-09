@@ -14,7 +14,7 @@
               }}</small>
             </div>
           </el-col>
-          <el-col align="right">
+          <el-col style="text-align: right">
             <router-link to="/settings/edit">
               <el-button size="small">{{ $t("common.back") }}</el-button>
             </router-link>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Unit tests for src/store/index.ts
  *
@@ -12,6 +13,22 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
+
+// ── Mock SecureLS (ESM compatibility) ─────────────────────────────────────────
+vi.mock("secure-ls", () => {
+  const store: Record<string, unknown> = {};
+  return {
+    default: vi.fn().mockImplementation(() => ({
+      get: (key: string) => store[key] ?? null,
+      set: (key: string, value: unknown) => {
+        store[key] = value;
+      },
+      remove: (key: string) => {
+        delete store[key];
+      },
+    })),
+  };
+});
 
 // ── 阻断有模块级副作用的传递依赖 ───────────────────────────────────────────────
 vi.mock("@/lang", () => ({
@@ -58,25 +75,25 @@ describe("src/store/index.ts", () => {
     it("调用 app.use() 恰好一次", async () => {
       setActivePinia(createPinia());
       const { setupStore } = await import("@/store");
-      const mockApp = { use: vi.fn() };
-      setupStore(mockApp as any);
+      const mockApp = { use: vi.fn() } as any;
+      setupStore(mockApp);
       expect(mockApp.use).toHaveBeenCalledTimes(1);
     });
 
     it("将 store（pinia 实例）传入 app.use()", async () => {
       setActivePinia(createPinia());
       const { setupStore, store } = await import("@/store");
-      const mockApp = { use: vi.fn() };
-      setupStore(mockApp as any);
+      const mockApp = { use: vi.fn() } as any;
+      setupStore(mockApp);
       expect(mockApp.use).toHaveBeenCalledWith(store);
     });
 
     it("多次调用 setupStore 每次都注册到 app", async () => {
       setActivePinia(createPinia());
       const { setupStore } = await import("@/store");
-      const mockApp = { use: vi.fn() };
-      setupStore(mockApp as any);
-      setupStore(mockApp as any);
+      const mockApp = { use: vi.fn() } as any;
+      setupStore(mockApp);
+      setupStore(mockApp);
       expect(mockApp.use).toHaveBeenCalledTimes(2);
     });
   });

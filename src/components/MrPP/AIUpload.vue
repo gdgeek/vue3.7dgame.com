@@ -27,7 +27,6 @@
       </template>
       <el-form
         v-loading="loading"
-        :element-loading-text="progress.title"
         ref="formRef"
         :rules="rules"
         :model="form"

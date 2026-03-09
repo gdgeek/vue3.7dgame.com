@@ -3,7 +3,6 @@
     <div :class="['box2', { 'dark-theme': isDark }]">
       <h1>{{ $t("login.h1") }}</h1>
       <h4>{{ $t("login.h4") }}</h4>
-      1234
       <br />
       <el-card style="width: 100%" shadow="never">
         <span>登录账号</span>

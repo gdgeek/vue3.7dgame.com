@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ref } from "vue";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { ref, createApp, defineComponent, h } from "vue";
 
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({ t: (key: string) => key }),
@@ -16,10 +16,31 @@ vi.mock("element-plus", () => ({
 }));
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
+const cleanups: Array<() => void> = [];
+
+function mountInSetup<T>(factory: () => T): T {
+  let result: T;
+  const app = createApp(
+    defineComponent({
+      setup() {
+        result = factory();
+        return () => h("div");
+      },
+    })
+  );
+  const el = document.createElement("div");
+  app.mount(el);
+  cleanups.push(() => app.unmount());
+  return result!;
+}
 
 describe("useNicknameForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+  afterEach(() => {
+    cleanups.forEach((cleanup) => cleanup());
+    cleanups.length = 0;
   });
 
   const importComposable = async () => {
@@ -33,7 +54,9 @@ describe("useNicknameForm", () => {
     const useNicknameForm = await importComposable();
     const isLoading = ref(false);
     const isDisable = ref(false);
-    const { nicknameForm } = useNicknameForm({ isLoading, isDisable });
+    const { nicknameForm } = mountInSetup(() =>
+      useNicknameForm({ isLoading, isDisable })
+    );
     expect(nicknameForm.value.nickname).toBe("");
   });
 
@@ -41,7 +64,9 @@ describe("useNicknameForm", () => {
     const useNicknameForm = await importComposable();
     const isLoading = ref(false);
     const isDisable = ref(false);
-    const { nicknameRules } = useNicknameForm({ isLoading, isDisable });
+    const { nicknameRules } = mountInSetup(() =>
+      useNicknameForm({ isLoading, isDisable })
+    );
     expect(nicknameRules).toHaveProperty("nickname");
     expect(Array.isArray(nicknameRules.nickname)).toBe(true);
   });
@@ -51,7 +76,9 @@ describe("useNicknameForm", () => {
       const useNicknameForm = await importComposable();
       const isLoading = ref(false);
       const isDisable = ref(false);
-      const { nicknameRules } = useNicknameForm({ isLoading, isDisable });
+      const { nicknameRules } = mountInSetup(() =>
+        useNicknameForm({ isLoading, isDisable })
+      );
       const rules = nicknameRules.nickname as Array<{
         validator?: (
           rule: unknown,
@@ -97,10 +124,12 @@ describe("useNicknameForm", () => {
       const useNicknameForm = await importComposable();
       const isLoading = ref(false);
       const isDisable = ref(false);
-      const { submitNickname, nickNameFormRef } = useNicknameForm({
-        isLoading,
-        isDisable,
-      });
+      const { submitNickname, nickNameFormRef } = mountInSetup(() =>
+        useNicknameForm({
+          isLoading,
+          isDisable,
+        })
+      );
 
       // Mock form ref validation
       nickNameFormRef.value = {
@@ -121,8 +150,8 @@ describe("useNicknameForm", () => {
       const useNicknameForm = await importComposable();
       const isLoading = ref(false);
       const isDisable = ref(false);
-      const { submitNickname, nicknameForm, nickNameFormRef } = useNicknameForm(
-        { isLoading, isDisable }
+      const { submitNickname, nicknameForm, nickNameFormRef } = mountInSetup(
+        () => useNicknameForm({ isLoading, isDisable })
       );
 
       nicknameForm.value.nickname = "TestUser";
@@ -142,10 +171,12 @@ describe("useNicknameForm", () => {
       const useNicknameForm = await importComposable();
       const isLoading = ref(false);
       const isDisable = ref(false);
-      const { submitNickname, nickNameFormRef } = useNicknameForm({
-        isLoading,
-        isDisable,
-      });
+      const { submitNickname, nickNameFormRef } = mountInSetup(() =>
+        useNicknameForm({
+          isLoading,
+          isDisable,
+        })
+      );
 
       nickNameFormRef.value = {
         validate: vi
@@ -162,11 +193,12 @@ describe("useNicknameForm", () => {
       const useNicknameForm = await importComposable();
       const isLoading = ref(false);
       const isDisable = ref(false);
-      const { submitNickname, nicknameForm, nickNameFormRef } = useNicknameForm(
-        {
-          isLoading,
-          isDisable,
-        }
+      const { submitNickname, nicknameForm, nickNameFormRef } = mountInSetup(
+        () =>
+          useNicknameForm({
+            isLoading,
+            isDisable,
+          })
       );
 
       nicknameForm.value.nickname = "FailedUser";

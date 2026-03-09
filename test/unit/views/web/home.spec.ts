@@ -31,7 +31,10 @@ vi.mock("@/composables/useAOS", () => ({
 
 vi.mock("vue-router", () => ({
   useRoute: vi.fn(() => ({ query: {}, path: "/web/home" })),
-  useRouter: vi.fn(() => ({ push: vi.fn(), beforeEach: vi.fn(() => () => {}) })),
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    beforeEach: vi.fn(() => () => {}),
+  })),
   createRouter: vi.fn(() => ({})),
   createWebHistory: vi.fn(() => ({})),
   createWebHashHistory: vi.fn(() => ({})),
@@ -58,7 +61,12 @@ vi.mock("@/views/web/components/Buy.vue", () => ({
 }));
 
 vi.mock("@/views/web/components/News/index.vue", () => ({
-  default: { name: "News", props: ["activeTabName"], template: "<div></div>", __v_isRef: false },
+  default: {
+    name: "News",
+    props: ["activeTabName"],
+    template: "<div></div>",
+    __v_isRef: false,
+  },
   __v_isRef: false,
 }));
 

@@ -413,4 +413,9 @@ export default {
     fileSizeExceededList:
       "The following files exceed the {size}MB limit: {names}",
   },
+  resource: {
+    type: {
+      picture: "รูปภาพ",
+    },
+  },
 };

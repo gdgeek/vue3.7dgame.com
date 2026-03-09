@@ -4,7 +4,6 @@
       v-model="dialogVisible"
       class="resource-dialog"
       width="90%"
-      height="100px"
       top="2vh"
       :show-close="false"
       @close="doClose"
@@ -443,8 +442,8 @@ const open = async (
     pagination: { current: 1, count: 1, size: 20, total: 20 },
   };
 
-  type.value = newType;
-  metaId.value = meta_id;
+  type.value = newType ?? type.value;
+  metaId.value = meta_id ?? null;
   value.value = newValue;
   mode.value = openMode; // 设置打开模式
 

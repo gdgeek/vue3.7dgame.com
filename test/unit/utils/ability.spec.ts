@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Unit tests for src/utils/ability.ts
  * Tests all exported classes and the UpdateAbility function.
@@ -262,5 +263,112 @@ describe("UpdateAbility", () => {
     expect(() => UpdateAbility(mockAbility, ["manager"], 1)).not.toThrow();
     const rules: unknown[] = mockAbility.update.mock.calls[0][0];
     expect(rules.length).toBeGreaterThan(0);
+  });
+
+  it("adds base site navigation rules for guests", () => {
+    UpdateAbility(mockAbility, [], 7);
+    const rules: any[] = mockAbility.update.mock.calls[0][0];
+    expect(
+      rules.some(
+        (rule) =>
+          rule.subject === AbilityRouter.name &&
+          rule.action === "goto" &&
+          rule.conditions?.path === "/site/index"
+      )
+    ).toBe(true);
+  });
+
+  it("adds edit permission for user resource types", () => {
+    UpdateAbility(mockAbility, ["user"], 7);
+    const rules: any[] = mockAbility.update.mock.calls[0][0];
+    expect(
+      rules.some(
+        (rule) =>
+          rule.subject === AbilityEdit.name &&
+          rule.action === "edit" &&
+          rule.conditions?.type === "polygen"
+      )
+    ).toBe(true);
+  });
+
+  it("binds work ownership rules to the given userId", () => {
+    UpdateAbility(mockAbility, ["user"], 321);
+    const rules: any[] = mockAbility.update.mock.calls[0][0];
+    expect(
+      rules.some(
+        (rule) =>
+          rule.subject === AbilityWorks.name &&
+          Array.isArray(rule.action) &&
+          rule.action.includes("update") &&
+          rule.conditions?.id === 321
+      )
+    ).toBe(true);
+  });
+
+  it("adds admin people management rules", () => {
+    UpdateAbility(mockAbility, ["admin"], 1);
+    const rules: any[] = mockAbility.update.mock.calls[0][0];
+    expect(
+      rules.some(
+        (rule) =>
+          rule.subject === AbilityRole.name &&
+          rule.action === "people" &&
+          rule.conditions?.role === "manager"
+      )
+    ).toBe(true);
+    expect(
+      rules.some(
+        (rule) =>
+          rule.subject === AbilityRole.name &&
+          rule.action === "people" &&
+          rule.conditions?.role === "user"
+      )
+    ).toBe(true);
+  });
+
+  it("adds root-only phototype menu visibility rule", () => {
+    UpdateAbility(mockAbility, ["root"], 1);
+    const rules: any[] = mockAbility.update.mock.calls[0][0];
+    expect(
+      rules.some(
+        (rule) =>
+          rule.subject === AbilityRouter.name &&
+          Array.isArray(rule.action) &&
+          rule.action.includes("open") &&
+          rule.conditions?.path?.$regex instanceof RegExp &&
+          rule.conditions.path.$regex.test("/phototype/list")
+      )
+    ).toBe(true);
+  });
+
+  it("supports regex edit rule branch when edit list contains RegExp", () => {
+    const originalConcat = Array.prototype.concat;
+    const concatSpy = vi
+      .spyOn(Array.prototype, "concat")
+      .mockImplementation(function (...args: any[]) {
+        const result = originalConcat.apply(this, args as any);
+        if (
+          Array.isArray(this) &&
+          this.length === 0 &&
+          Array.isArray(args[0]) &&
+          args[0].includes("polygen")
+        ) {
+          return [...(result as any[]), /^regex-edit$/];
+        }
+        return result;
+      });
+
+    UpdateAbility(mockAbility, ["user"], 7);
+    const rules: any[] = mockAbility.update.mock.calls[0][0];
+    expect(
+      rules.some(
+        (rule) =>
+          rule.subject === AbilityEdit.name &&
+          rule.action === "edit" &&
+          rule.conditions?.type?.$regex instanceof RegExp &&
+          rule.conditions.type.$regex.test("regex-edit")
+      )
+    ).toBe(true);
+    concatSpy.mockRestore();
   });
 });

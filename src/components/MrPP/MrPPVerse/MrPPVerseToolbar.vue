@@ -10,7 +10,7 @@
     ></mr-p-p-verse-window-create>
     <!-- 按钮组 -->
 
-    <el-button-group v-if="verse" style="float: right" :inline="true">
+    <el-button-group v-if="verse" style="float: right">
       <el-button
         v-if="saveable"
         type="success"

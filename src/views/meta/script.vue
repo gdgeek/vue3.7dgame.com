@@ -36,10 +36,10 @@
               <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
                 <el-main
                   style="
-                    margin: 0;
-                    padding: 0;
-                    height: 70vh;
                     position: relative;
+                    height: 70vh;
+                    padding: 0;
+                    margin: 0;
                   "
                 >
                   <div class="fullscreen-controls">
@@ -118,7 +118,7 @@
                             <pre>
                     <code :class="currentCodeType">{{
                       currentCode
-                      }}</code>
+                    }}</code>
                   </pre>
                           </div>
                         </div>
@@ -127,7 +127,7 @@
                   </el-dialog>
 
                   <iframe
-                    style="margin: 0; padding: 0; height: 100%; width: 100%"
+                    style="width: 100%; height: 100%; padding: 0; margin: 0"
                     id="editor"
                     ref="editor"
                     :src="src"
@@ -221,7 +221,8 @@
               ref="scenePlayer"
               :meta="meta"
               :is-scene-fullscreen="isSceneFullscreen"
-            ></ScenePlayer>
+            >
+            </ScenePlayer>
           </div>
         </el-card>
       </el-main>
@@ -230,7 +231,7 @@
 </template>
 
 <script setup lang="ts">
-import { CopyDocument } from "@element-plus/icons-vue";
+import { CopyDocument, FullScreen, Aim } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { useRoute } from "vue-router";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
@@ -674,7 +675,7 @@ defineExpose({ run });
 }
 
 .dark-theme .hljs {
-  background-color: rgb(24, 24, 24) !important;
+  background-color: rgb(24 24 24) !important;
 }
 
 .light-theme .hljs {
@@ -704,9 +705,9 @@ defineExpose({ run });
 }
 
 .code-container2 {
+  position: relative;
   max-height: 80vh;
   overflow-y: auto;
-  position: relative;
 }
 
 .copy-button2 {
@@ -725,7 +726,7 @@ defineExpose({ run });
 }
 
 .dark-theme :deep(.hljs) {
-  background-color: rgb(24, 24, 24) !important;
+  background-color: rgb(24 24 24) !important;
 }
 
 .light-theme :deep(.hljs) {

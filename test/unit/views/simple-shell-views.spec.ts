@@ -69,16 +69,12 @@ describe("layout/empty/index.vue", () => {
 // ─── settings/orderform.vue ──────────────────────────────────────────────────
 describe("settings/orderform.vue", () => {
   it("mounts without throwing", async () => {
-    const { default: View } = await import(
-      "@/views/settings/orderform.vue"
-    );
+    const { default: View } = await import("@/views/settings/orderform.vue");
     expect(() => mountComponent(View)).not.toThrow();
   });
 
   it("renders a section element", async () => {
-    const { default: View } = await import(
-      "@/views/settings/orderform.vue"
-    );
+    const { default: View } = await import("@/views/settings/orderform.vue");
     const { el } = mountComponent(View);
     expect(el.querySelector("section")).not.toBeNull();
   });
@@ -101,16 +97,12 @@ describe("settings/pay.vue", () => {
 // ─── settings/people.vue ─────────────────────────────────────────────────────
 describe("settings/people.vue", () => {
   it("mounts without throwing", async () => {
-    const { default: View } = await import(
-      "@/views/settings/people.vue"
-    );
+    const { default: View } = await import("@/views/settings/people.vue");
     expect(() => mountComponent(View)).not.toThrow();
   });
 
   it("renders a section element", async () => {
-    const { default: View } = await import(
-      "@/views/settings/people.vue"
-    );
+    const { default: View } = await import("@/views/settings/people.vue");
     const { el } = mountComponent(View);
     expect(el.querySelector("section")).not.toBeNull();
   });
@@ -133,24 +125,18 @@ describe("settings/user.vue", () => {
 // ─── dashboard/index.vue ─────────────────────────────────────────────────────
 describe("dashboard/index.vue", () => {
   it("mounts without throwing", async () => {
-    const { default: Dashboard } = await import(
-      "@/views/dashboard/index.vue"
-    );
+    const { default: Dashboard } = await import("@/views/dashboard/index.vue");
     expect(() => mountComponent(Dashboard)).not.toThrow();
   });
 
   it("renders the main container div", async () => {
-    const { default: Dashboard } = await import(
-      "@/views/dashboard/index.vue"
-    );
+    const { default: Dashboard } = await import("@/views/dashboard/index.vue");
     const { el } = mountComponent(Dashboard);
     expect(el.querySelector(".app-container")).not.toBeNull();
   });
 
   it("contains the platform title text", async () => {
-    const { default: Dashboard } = await import(
-      "@/views/dashboard/index.vue"
-    );
+    const { default: Dashboard } = await import("@/views/dashboard/index.vue");
     const { el } = mountComponent(Dashboard);
     expect(el.textContent).toContain("Mixed Reality Programming Platform");
   });

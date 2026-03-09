@@ -3,7 +3,6 @@
     <el-dialog
       v-model="dialogVisible"
       width="95%"
-      height="95px"
       :show-close="false"
       @close="cancel"
     >

@@ -78,7 +78,6 @@
       :multiple="false"
       @save-resource="savePicture"
       @success="handleUploadSuccess"
-      append-to-body
     >
       {{ $t("imageSelector.uploadFile") }}
     </mr-p-p-upload-dialog>

@@ -37,8 +37,7 @@ vi.mock("@/components/MrPP/MrPPCard/index.vue", () => ({
 const ElDialogStub = defineComponent({
   name: "ElDialog",
   props: ["modelValue", "title"],
-  template:
-    "<div class='el-dialog-stub' v-if='modelValue'><slot /></div>",
+  template: "<div class='el-dialog-stub' v-if='modelValue'><slot /></div>",
 });
 
 const ElButtonGroupStub = defineComponent({
@@ -49,7 +48,8 @@ const ElButtonGroupStub = defineComponent({
 const ElButtonStub = defineComponent({
   name: "ElButton",
   emits: ["click"],
-  template: "<button class='open-detail-btn' @click='$emit(\"click\")'><slot /></button>",
+  template:
+    "<button class='open-detail-btn' @click='$emit(\"click\")'><slot /></button>",
 });
 
 const cleanups: (() => void)[] = [];

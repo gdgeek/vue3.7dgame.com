@@ -399,6 +399,8 @@ export default {
     create: "สร้างต้นแบบ",
     fromModel: "จากโมเดล",
     typeName: "พรีแฟบ",
+    listPageTitle: "พรีแฟบทั้งหมด",
+    emptyText: "ยังไม่มีพรีแฟบ",
     edit: {
       jsonFormat: "รูปแบบ JSON",
       name: "ชื่อ",
@@ -409,6 +411,7 @@ export default {
       saveBasicFirst: "กรุณาบันทึกข้อมูลพื้นฐานก่อน",
       condition: "เงื่อนไข",
       defaultValue: "ค่าเริ่มต้น",
+      invalidJson: "รูปแบบ JSON ไม่ถูกต้อง กรุณาแก้ไขก่อนบันทึก",
     },
     prompt: {
       message1: "กรุณาใส่ชื่อต้นแบบ",

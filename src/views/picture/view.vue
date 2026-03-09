@@ -14,8 +14,6 @@
                 id="image"
                 ref="image"
                 v-loading="expire"
-                :element-loading-text="$t('picture.view.loadingText')"
-                element-loading-background="rgba(255,255, 255, 0.3)"
                 style="height: 300px; width: auto"
                 :src="picture"
                 fit="contain"

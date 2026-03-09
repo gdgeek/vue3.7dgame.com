@@ -347,6 +347,8 @@ export default {
     create: "创建原型",
     fromModel: "从模型",
     typeName: "预制体",
+    listPageTitle: "所有预制体",
+    emptyText: "暂无预制体",
     edit: {
       jsonFormat: "JSON 格式",
       name: "名称",
@@ -357,6 +359,7 @@ export default {
       saveBasicFirst: "请先保存基本信息",
       condition: "条件",
       defaultValue: "默认值",
+      invalidJson: "JSON 格式错误，请修正后再保存",
     },
     prompt: {
       message1: "请输入原型名称",

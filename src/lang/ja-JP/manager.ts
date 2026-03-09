@@ -395,6 +395,8 @@ export default {
     create: "プロトタイプ作成",
     fromModel: "モデルから",
     typeName: "プレハブ",
+    listPageTitle: "すべてのプレハブ",
+    emptyText: "プレハブがありません",
     edit: {
       jsonFormat: "JSON 形式",
       name: "名称",
@@ -405,6 +407,7 @@ export default {
       saveBasicFirst: "先に基本情報を保存してください",
       condition: "条件",
       defaultValue: "デフォルト値",
+      invalidJson: "JSON 形式エラー、保存前に修正してください",
     },
     prompt: {
       message1: "プロトタイプ名を入力してください",

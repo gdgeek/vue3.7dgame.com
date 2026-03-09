@@ -1,11 +1,6 @@
 <template>
   <div>
-    <el-descriptions
-      label-class-name="info-content-label"
-      :column="1"
-      size="small"
-      border
-    >
+    <el-descriptions :column="1" size="small" border>
       <!-- <el-descriptions-item v-for="(item, index) in props.list" :key="index">
         <template #label>
           <font-awesome-icon class="icon" :icon="item.icon"></font-awesome-icon>

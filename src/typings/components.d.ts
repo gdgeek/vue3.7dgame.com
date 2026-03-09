@@ -109,8 +109,22 @@ declare module "vue" {
     TagsView: (typeof import("./../layout/components/TagsView/index.vue"))["default"];
     ThemeColorPicker: (typeof import("./../layout/components/Settings/components/ThemeColorPicker.vue"))["default"];
     WangEditor: (typeof import("./../components/WangEditor/index.vue"))["default"];
-  }
-  export interface ComponentCustomProperties {
-    vLoading: (typeof import("element-plus/es"))["ElLoadingDirective"];
+    FontAwesomeIcon: (typeof import("@fortawesome/vue-fontawesome"))["FontAwesomeIcon"];
+    NamePassword: (typeof import("./../components/Account/NamePassword.vue"))["default"];
+    RegisterForm: (typeof import("./../components/Account/RegisterForm.vue"))["default"];
+    Wechat: (typeof import("./../components/Account/Wechat.vue"))["default"];
+    ImageSelector: (typeof import("./../components/MrPP/ImageSelector.vue"))["default"];
+    VueCropper: (typeof import("vue-cropper"))["VueCropper"];
+    RadiantText: (typeof import("./../components/CustomUI/RadiantText.vue"))["default"];
+    Hero: (typeof import("./../views/web/components/Hero.vue"))["default"];
+    Footer: (typeof import("./../layout/components/NavBar/components/Footer.vue"))["default"];
+    Partner: (typeof import("./../views/introduce/components/Partner.vue"))["default"];
+    About: (typeof import("./../views/introduce/components/About.vue"))["default"];
+    Bilibili: (typeof import("./../views/web/components/Bilibili.vue"))["default"];
+    ArrowUp: (typeof import("@element-plus/icons-vue"))["ArrowUp"];
+    ArrowDown: (typeof import("@element-plus/icons-vue"))["ArrowDown"];
+    Male: (typeof import("@element-plus/icons-vue"))["Male"];
+    Female: (typeof import("@element-plus/icons-vue"))["Female"];
+    Loading: (typeof import("@element-plus/icons-vue"))["Loading"];
   }
 }

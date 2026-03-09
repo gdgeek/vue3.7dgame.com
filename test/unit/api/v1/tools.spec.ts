@@ -36,5 +36,35 @@ describe("tools API", () => {
       await toolsApi.getUserLinked();
       expect(request).toHaveBeenCalledTimes(1);
     });
+
+    it("does not send request body data", async () => {
+      await toolsApi.getUserLinked();
+      expect(request.mock.calls[0][0].data).toBeUndefined();
+    });
+
+    it("uses only url and method config keys", async () => {
+      await toolsApi.getUserLinked();
+      const config = request.mock.calls[0][0];
+      expect(Object.keys(config).sort()).toEqual(["method", "url"]);
+    });
+
+    it("is idempotent across repeated calls", async () => {
+      await toolsApi.getUserLinked();
+      await toolsApi.getUserLinked();
+      expect(request).toHaveBeenCalledTimes(2);
+      expect(request.mock.calls[0][0]).toEqual(request.mock.calls[1][0]);
+    });
+
+    it("returns resolved primitive payload unchanged", async () => {
+      const primitiveResp = { data: "ok" };
+      request.mockResolvedValueOnce(primitiveResp);
+      const result = await toolsApi.getUserLinked();
+      expect(result).toBe(primitiveResp);
+    });
+
+    it("propagates request rejection", async () => {
+      request.mockRejectedValueOnce(new Error("timeout"));
+      await expect(toolsApi.getUserLinked()).rejects.toThrow("timeout");
+    });
   });
 });

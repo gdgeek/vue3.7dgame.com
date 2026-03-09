@@ -22,9 +22,7 @@ afterEach(() => {
 });
 
 async function mountRedirect(): Promise<{ el: HTMLElement; app: App }> {
-  const { default: RedirectView } = await import(
-    "@/views/redirect/index.vue"
-  );
+  const { default: RedirectView } = await import("@/views/redirect/index.vue");
   const el = document.createElement("div");
   const app = createApp(RedirectView as Parameters<typeof createApp>[0]);
   app.mount(el);

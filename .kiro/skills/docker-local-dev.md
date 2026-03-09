@@ -52,6 +52,6 @@ if (domainStore.homepage && !import.meta.env.DEV) {
 }
 ```
 
-原因：本地开发时 `getDomainForQuery()` 会把 `localhost` 映射到 `d.xiading.hxgxonline.com`，如果该域名在后端配置了 `homepage` 字段，页面会直接跳走。
+原因：本地开发时 `getDomainForQuery()` 会把 `localhost` 映射到 `d.dev.xrugc.com`，如果该域名在后端配置了 `homepage` 字段，页面会直接跳走。
 
 修法：加 `!import.meta.env.DEV` 判断，跳过本地环境的跳转。

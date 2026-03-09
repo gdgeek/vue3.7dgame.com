@@ -6,7 +6,6 @@
   <el-tabs
     v-else
     type="border-card"
-    lazy
     v-model="activeTab"
     @tab-click="handleTabClick"
     class="home-tabs"

@@ -2,7 +2,7 @@
   <div class="script">
     <el-container>
       <el-main>
-        <el-card :loading="loading" class="box-card">
+        <el-card v-loading="loading" class="box-card">
           <template #header>
             <div v-if="verse" class="clearfix">
               <el-link :href="sceneEditorLink" :underline="false">{{
@@ -36,10 +36,10 @@
               <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
                 <el-main
                   style="
-                    margin: 0;
-                    padding: 0;
-                    height: 70vh;
                     position: relative;
+                    height: 70vh;
+                    padding: 0;
+                    margin: 0;
                   "
                 >
                   <div class="fullscreen-controls">
@@ -129,7 +129,7 @@
                   </el-dialog>
 
                   <iframe
-                    style="margin: 0; padding: 0; height: 100%; width: 100%"
+                    style="width: 100%; height: 100%; padding: 0; margin: 0"
                     id="editor"
                     ref="editor"
                     :src="src"
@@ -246,8 +246,11 @@ import {
   useScriptEditorBase,
   type EditorPostPayload,
 } from "@/composables/useScriptEditorBase";
-import { buildScriptRuntime } from "@/composables/useScriptRuntime";
-import { CopyDocument } from "@element-plus/icons-vue";
+import {
+  buildScriptRuntime,
+  type ScenePlayerLike,
+} from "@/composables/useScriptRuntime";
+import { CopyDocument, FullScreen, Aim } from "@element-plus/icons-vue";
 
 // ---------- Verse 专有状态 ----------
 const loading = ref(false);
@@ -461,7 +464,7 @@ const handlePolygen = async (uuid: string) => {
   ): Promise<THREE.Object3D | null> => {
     return new Promise((resolve) => {
       const attempt = (remaining: number) => {
-        const source = scenePlayer.value?.sources.get(uuid) as
+        const source = scenePlayer.value?.sources?.get(uuid) as
           | { type: string; data: unknown }
           | undefined;
         if (source?.type === "model" && source.data) {
@@ -481,8 +484,8 @@ const handlePolygen = async (uuid: string) => {
   const model = await getModelAsync(modelUuid);
   logger.log("查找模型:", {
     requestedUuid: modelUuid,
-    availableModels: Array.from(scenePlayer.value.sources.keys()),
-    modelExists: scenePlayer.value.sources.has(modelUuid),
+    availableModels: Array.from(scenePlayer.value?.sources?.keys() ?? []),
+    modelExists: scenePlayer.value?.sources?.has(modelUuid) ?? false,
     foundModel: model,
   });
   if (!model) {
@@ -523,8 +526,8 @@ const run = async () => {
           let count = 0;
           for (const entity of entities) {
             count++;
-            if (entity.children?.entities?.length > 0) {
-              count += countEntities(entity.children.entities);
+            if ((entity.children?.entities?.length ?? 0) > 0) {
+              count += countEntities(entity.children?.entities ?? []);
             }
           }
           return count;
@@ -537,16 +540,16 @@ const run = async () => {
             expectedModels += countEntities(metaData.children.entities);
           }
         }
-        if (scenePlayer.value?.sources.size === expectedModels) {
+        if (scenePlayer.value?.sources?.size === expectedModels) {
           logger.error("所有资源加载完成:", {
             expected: expectedModels,
-            loaded: scenePlayer.value!.sources.size,
+            loaded: scenePlayer.value?.sources?.size,
           });
           resolve(true);
         } else {
           logger.log("等待资源加载...", {
             expected: expectedModels,
-            current: scenePlayer.value?.sources.size || 0,
+            current: scenePlayer.value?.sources?.size || 0,
           });
           setTimeout(checkModels, 100);
         }
@@ -575,11 +578,18 @@ const run = async () => {
       point,
       transform,
       argument,
-    } = buildScriptRuntime(scenePlayer, {
-      signal: (moduleUuid: string, eventUuid: string, parameter?: unknown) => {
-        logger.log("触发事件:", moduleUuid, eventUuid, parameter);
-      },
-    });
+    } = buildScriptRuntime(
+      scenePlayer as { value: ScenePlayerLike | null | undefined },
+      {
+        signal: (
+          moduleUuid: string,
+          eventUuid: string,
+          parameter?: unknown
+        ) => {
+          logger.log("触发事件:", moduleUuid, eventUuid, parameter);
+        },
+      }
+    );
 
     // verse event 还包含 signal
     const event = {
@@ -592,7 +602,9 @@ const run = async () => {
     };
 
     // handleSound 直接从 runtime 中取
-    const handleSound = buildScriptRuntime(scenePlayer).handleSound;
+    const handleSound = buildScriptRuntime(
+      scenePlayer as { value: ScenePlayerLike | null | undefined }
+    ).handleSound;
 
     try {
       const wrappedCode = `
@@ -703,7 +715,7 @@ onMounted(async () => {
 }
 
 .dark-theme .hljs {
-  background-color: rgb(24, 24, 24) !important;
+  background-color: rgb(24 24 24) !important;
 }
 
 .light-theme .hljs {
@@ -733,9 +745,9 @@ onMounted(async () => {
 }
 
 .code-container2 {
+  position: relative;
   max-height: 80vh;
   overflow-y: auto;
-  position: relative;
 }
 
 .copy-button2 {
@@ -754,7 +766,7 @@ onMounted(async () => {
 }
 
 .dark-theme :deep(.hljs) {
-  background-color: rgb(24, 24, 24) !important;
+  background-color: rgb(24 24 24) !important;
 }
 
 .light-theme :deep(.hljs) {

@@ -49,6 +49,8 @@ describe("components/TagsSelect.vue", () => {
     cleanups.push(() => app.unmount());
     await Promise.resolve();
     await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
     return { el };
   }
 
@@ -64,7 +66,8 @@ describe("components/TagsSelect.vue", () => {
 
   it("maps api tags to PageFilter options", async () => {
     const { el } = await mount();
-    const options = el.querySelector(".page-filter-stub")?.getAttribute("data-options") ?? "";
+    const options =
+      el.querySelector(".page-filter-stub")?.getAttribute("data-options") ?? "";
 
     expect(options).toContain('"label":"tag-1"');
     expect(options).toContain('"value":1');

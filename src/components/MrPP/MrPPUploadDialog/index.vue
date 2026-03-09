@@ -130,7 +130,7 @@ import { useFileStore } from "@/store/modules/config";
 import { UploadFileType } from "@/api/user/model";
 import { postFile } from "@/api/v1/files";
 import { FileHandler } from "@/assets/js/file/server";
-import { Delete, Document } from "@element-plus/icons-vue";
+import { Delete, Document, UploadFilled } from "@element-plus/icons-vue";
 import { processModel } from "@/utils/modelProcessor";
 
 const { t } = useI18n();
@@ -611,21 +611,21 @@ defineExpose({
 }
 
 .box-card-header h3 {
-  margin: 0 0 4px 0;
+  margin: 0 0 4px;
 }
 
 .header-declared {
-  color: #909399;
   font-size: 13px;
+  color: #909399;
 }
 
 .size-limit-badge {
-  background-color: #409eff;
-  color: #fff;
   padding: 4px 10px;
-  border-radius: 4px;
   font-size: 12px;
+  color: #fff;
   white-space: nowrap;
+  background-color: #409eff;
+  border-radius: 4px;
 }
 
 .progress-item {
@@ -635,14 +635,14 @@ defineExpose({
 .effect-type-selector {
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
   padding-bottom: 10px;
+  margin-bottom: 15px;
   border-bottom: 1px dashed #eee;
 }
 
 .batch-progress {
-  margin-top: 15px;
   padding-top: 10px;
+  margin-top: 15px;
   border-top: 1px dashed #eee;
 }
 
@@ -652,8 +652,8 @@ defineExpose({
 
 .stage-info {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 10px;
 }
 
@@ -664,24 +664,24 @@ defineExpose({
 }
 
 .stage-number {
+  padding: 2px 8px;
   font-size: 12px;
   color: #909399;
   background: #f4f4f5;
-  padding: 2px 8px;
   border-radius: 10px;
 }
 
 .selected-files {
+  padding: 10px;
   margin-top: 15px;
   border-radius: 4px;
-  padding: 10px;
   transition: all 0.3s ease;
 }
 
 .files-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 8px;
   font-weight: bold;
 }
@@ -707,8 +707,8 @@ defineExpose({
 }
 
 .file-size {
-  color: #909399;
   font-size: 12px;
+  color: #909399;
 }
 
 @keyframes fadeIn {
@@ -724,8 +724,8 @@ defineExpose({
 }
 
 .upload-dialog :deep(.el-dialog__header) {
-  border-bottom: 1px solid #ebeef5;
   padding-bottom: 15px;
+  border-bottom: 1px solid #ebeef5;
 }
 
 .upload-dialog :deep(.el-dialog__body) {

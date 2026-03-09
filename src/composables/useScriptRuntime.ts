@@ -392,7 +392,7 @@ export function buildScriptRuntime(
       return {
         type: "animation",
         execute: async () => {
-          polygenInstance.playAnimation(animationName);
+          polygenInstance.playAnimation!(animationName);
         },
         data: { instance: polygenInstance, animationName },
       };

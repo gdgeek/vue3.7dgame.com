@@ -1,15 +1,23 @@
+import SecureLS from "secure-ls";
+const ls = new SecureLS({ encodingType: "aes" });
+
 export const useTagsViewStore = defineStore("tagsView", () => {
-  // const visitedViews = ref<TagView[]>([]);
-  // const cachedViews = ref<string[]>([]);
+  // 安全读取 SecureLS 数据，防止 JSON 解析失败或数据类型异常导致崩溃
+  function safeGetArray<T>(key: string): T[] {
+    try {
+      const value = ls.get(key);
+      return Array.isArray(value) ? value : [];
+    } catch {
+      ls.remove(key);
+      return [];
+    }
+  }
+
   // 定义已访问的视图数组，初始值从 localStorage 获取，防止数据丢失
-  const visitedViews = ref<TagView[]>(
-    JSON.parse(localStorage.getItem("visitedViews") || "[]")
-  );
+  const visitedViews = ref<TagView[]>(safeGetArray<TagView>("visitedViews"));
 
   // 定义缓存视图数组，初始值从 localStorage 获取
-  const cachedViews = ref<string[]>(
-    JSON.parse(localStorage.getItem("cachedViews") || "[]")
-  );
+  const cachedViews = ref<string[]>(safeGetArray<string>("cachedViews"));
 
   function toSerializable(value: unknown): unknown {
     if (value === null) {
@@ -61,7 +69,7 @@ export const useTagsViewStore = defineStore("tagsView", () => {
   watch(
     () => visitedViews.value.map((view) => toSerializableTagView(view)),
     (newViews) => {
-      localStorage.setItem("visitedViews", JSON.stringify(newViews));
+      ls.set("visitedViews", newViews);
     }
   );
 

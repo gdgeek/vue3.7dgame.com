@@ -181,26 +181,6 @@
           </div>
         </router-link>
 
-        <!-- AI 创作 (Conditional) -->
-        <div
-          v-if="ability.can('open', new AbilityRouter('/ai'))"
-          class="nav-group"
-        >
-          <router-link to="/ai/list" custom v-slot="{ isActive, navigate }">
-            <div
-              class="sidebar-item"
-              :class="{ 'sidebar-item-active': isActive }"
-              @click="navigate"
-            >
-              <font-awesome-icon
-                :icon="['fas', 'robot']"
-                class="sidebar-icon"
-              ></font-awesome-icon>
-              <span class="item-text">{{ t("sidebar.aiCreation") }}</span>
-            </div>
-          </router-link>
-        </div>
-
         <!-- 场景 (可展开) -->
         <div class="nav-group">
           <el-popover
@@ -286,120 +266,6 @@
               >
                 <span class="submenu-dot"></span>
                 <span>{{ t("sidebar.systemRecommend") }}</span>
-              </div>
-            </router-link>
-          </div>
-        </div>
-
-        <!-- 校园管理 (Conditional) -->
-        <div
-          v-if="ability.can('open', new AbilityRouter('/campus'))"
-          class="nav-group"
-        >
-          <el-popover
-            placement="right"
-            :width="200"
-            trigger="hover"
-            :disabled="!collapsed"
-            popper-class="sidebar-submenu-popover"
-          >
-            <template #reference>
-              <div class="menu-trigger-wrapper">
-                <div class="sidebar-item">
-                  <font-awesome-icon
-                    :icon="['fas', 'building']"
-                    class="sidebar-icon"
-                  ></font-awesome-icon>
-                  <span class="item-text">{{
-                    t("sidebar.campusManagement")
-                  }}</span>
-                </div>
-              </div>
-            </template>
-            <div class="popover-menu">
-              <router-link
-                to="/campus/school"
-                custom
-                v-slot="{ isActive, navigate }"
-              >
-                <div
-                  class="popover-item"
-                  :class="{ active: isActive }"
-                  @click="navigate"
-                >
-                  <span>{{ t("sidebar.schoolManagement") }}</span>
-                </div>
-              </router-link>
-              <router-link
-                to="/campus/teacher"
-                custom
-                v-slot="{ isActive, navigate }"
-              >
-                <div
-                  class="popover-item"
-                  :class="{ active: isActive }"
-                  @click="navigate"
-                >
-                  <span>{{ t("sidebar.teacherManagement") }}</span>
-                </div>
-              </router-link>
-              <router-link
-                to="/campus/student"
-                custom
-                v-slot="{ isActive, navigate }"
-              >
-                <div
-                  class="popover-item"
-                  :class="{ active: isActive }"
-                  @click="navigate"
-                >
-                  <span>{{ t("sidebar.studentManagement") }}</span>
-                </div>
-              </router-link>
-            </div>
-          </el-popover>
-
-          <div v-show="!collapsed" class="submenu">
-            <router-link
-              to="/campus/school"
-              custom
-              v-slot="{ isActive, navigate }"
-            >
-              <div
-                class="sidebar-subitem"
-                :class="{ 'sidebar-subitem-active': isActive }"
-                @click="navigate"
-              >
-                <span class="submenu-dot"></span>
-                <span>{{ t("sidebar.schoolManagement") }}</span>
-              </div>
-            </router-link>
-            <router-link
-              to="/campus/teacher"
-              custom
-              v-slot="{ isActive, navigate }"
-            >
-              <div
-                class="sidebar-subitem"
-                :class="{ 'sidebar-subitem-active': isActive }"
-                @click="navigate"
-              >
-                <span class="submenu-dot"></span>
-                <span>{{ t("sidebar.teacherManagement") }}</span>
-              </div>
-            </router-link>
-            <router-link
-              to="/campus/student"
-              custom
-              v-slot="{ isActive, navigate }"
-            >
-              <div
-                class="sidebar-subitem"
-                :class="{ 'sidebar-subitem-active': isActive }"
-                @click="navigate"
-              >
-                <span class="submenu-dot"></span>
-                <span>{{ t("sidebar.studentManagement") }}</span>
               </div>
             </router-link>
           </div>
@@ -613,8 +479,8 @@ const confirmLogout = async () => {
 
     .sidebar-item {
       justify-content: center;
-      padding: 0;
       height: 40px; // Reduce height from 44px to 40px for compact look
+      padding: 0;
       margin-bottom: 0; // Ensure no extra margin
 
       .sidebar-icon {
@@ -630,18 +496,18 @@ const confirmLogout = async () => {
 
 .sidebar-logo {
   display: flex;
-  align-items: center;
   gap: 12px;
+  align-items: center;
   padding: 16px;
   margin-bottom: 24px;
 
   .logo-icon {
+    flex-shrink: 0;
     width: 40px;
     height: 40px;
-    border-radius: 12px;
     overflow: hidden;
-    box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
-    flex-shrink: 0;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm, 0 1px 2px rgb(0 0 0 / 5%));
 
     img {
       width: 100%;
@@ -651,16 +517,16 @@ const confirmLogout = async () => {
   }
 
   .logo-text {
-    font-weight: 700;
+    overflow: hidden;
     font-size: 18px;
-    letter-spacing: -0.025em;
+    font-weight: 700;
     color: var(--ar-text-primary);
+    letter-spacing: -0.025em;
     white-space: nowrap;
     opacity: 1;
     transition:
       opacity 0.2s,
       width 0.2s;
-    overflow: hidden;
   }
 }
 
@@ -676,9 +542,9 @@ const confirmLogout = async () => {
 }
 
 .item-text {
+  width: auto;
   white-space: nowrap;
   opacity: 1;
-  width: auto;
   transition:
     opacity 0.2s,
     width 0.2s;
@@ -686,16 +552,16 @@ const confirmLogout = async () => {
 
 .collapsed {
   .logo-text {
-    opacity: 0;
     width: 0;
     margin: 0;
+    opacity: 0;
     // Removed display: none to allow transition
   }
 
   .item-text {
-    opacity: 0;
     width: 0;
     margin: 0;
+    opacity: 0;
     // Removed display: none to allow transition
   }
 }
@@ -714,11 +580,11 @@ const confirmLogout = async () => {
 }
 
 .sidebar-bottom {
-  margin-top: auto;
-  padding-top: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding-top: 16px;
+  margin-top: auto;
 }
 
 .bottom-links {
@@ -731,7 +597,7 @@ const confirmLogout = async () => {
   color: var(--ar-text-danger) !important;
 
   &:hover {
-    background-color: var(--danger-light, rgba(239, 68, 68, 0.1)) !important;
+    background-color: var(--danger-light, rgb(239 68 68 / 10%)) !important;
   }
 
   .sidebar-icon {
@@ -741,9 +607,9 @@ const confirmLogout = async () => {
 
 .sidebar-item {
   .sidebar-icon {
+    width: 24px;
     margin-right: 12px;
     font-size: 20px;
-    width: 24px;
     text-align: center;
   }
 }

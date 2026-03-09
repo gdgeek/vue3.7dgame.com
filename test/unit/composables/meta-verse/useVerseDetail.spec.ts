@@ -115,7 +115,9 @@ describe("useVerseDetail — error paths", () => {
   it("openDetail fetches tags when canManage is true", async () => {
     const { getVerse } = await import("@/api/v1/verse");
     const { getTags } = await import("@/api/v1/tags");
-    vi.mocked(getVerse).mockResolvedValueOnce({ data: { id: 3, name: "v", description: "" } } as never);
+    vi.mocked(getVerse).mockResolvedValueOnce({
+      data: { id: 3, name: "v", description: "" },
+    } as never);
     vi.mocked(getTags).mockResolvedValueOnce({ data: [] } as never);
     const detailOpts = { refresh: vi.fn(), canManage: ref(true) };
     const result = mountComposable(() => useVerseDetail(detailOpts));
@@ -127,7 +129,9 @@ describe("useVerseDetail — error paths", () => {
   it("openDetail does NOT fetch tags when canManage is false", async () => {
     const { getVerse } = await import("@/api/v1/verse");
     const { getTags } = await import("@/api/v1/tags");
-    vi.mocked(getVerse).mockResolvedValueOnce({ data: { id: 4, name: "v", description: "" } } as never);
+    vi.mocked(getVerse).mockResolvedValueOnce({
+      data: { id: 4, name: "v", description: "" },
+    } as never);
     const detailOpts = { refresh: vi.fn(), canManage: ref(false) };
     const result = mountComposable(() => useVerseDetail(detailOpts));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -137,7 +141,9 @@ describe("useVerseDetail — error paths", () => {
 
   it("handlePanelClose resets detailVisible and currentVerse", async () => {
     const { getVerse } = await import("@/api/v1/verse");
-    vi.mocked(getVerse).mockResolvedValueOnce({ data: { id: 5, name: "v", description: "" } } as never);
+    vi.mocked(getVerse).mockResolvedValueOnce({
+      data: { id: 5, name: "v", description: "" },
+    } as never);
     const detailOpts = { refresh: vi.fn(), canManage: ref(false) };
     const result = mountComposable(() => useVerseDetail(detailOpts));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

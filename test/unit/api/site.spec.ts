@@ -48,5 +48,41 @@ describe("Site API", () => {
       const result = await siteApi.PostSiteAppleId(applePayload);
       expect(result).toEqual(mockResp);
     });
+
+    it("calls request exactly once per invocation", async () => {
+      await siteApi.PostSiteAppleId(applePayload);
+      expect(request).toHaveBeenCalledTimes(1);
+    });
+
+    it("passes the original payload object by reference", async () => {
+      await siteApi.PostSiteAppleId(applePayload);
+      expect(request.mock.calls[0][0].data).toBe(applePayload);
+    });
+
+    it("keeps method as post for minimal payloads", async () => {
+      const minimalPayload = {} as Parameters<
+        typeof siteApi.PostSiteAppleId
+      >[0];
+      await siteApi.PostSiteAppleId(minimalPayload);
+      expect(request.mock.calls[0][0].method).toBe("post");
+    });
+
+    it("supports extended payload fields without stripping", async () => {
+      const extendedPayload = {
+        ...applePayload,
+        state: "nonce-001",
+        user: { email: "dev@example.com" },
+      } as Parameters<typeof siteApi.PostSiteAppleId>[0];
+
+      await siteApi.PostSiteAppleId(extendedPayload);
+      expect(request.mock.calls[0][0].data).toEqual(extendedPayload);
+    });
+
+    it("propagates request rejection", async () => {
+      request.mockRejectedValueOnce(new Error("network-down"));
+      await expect(siteApi.PostSiteAppleId(applePayload)).rejects.toThrow(
+        "network-down"
+      );
+    });
   });
 });

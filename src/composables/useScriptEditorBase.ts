@@ -212,6 +212,15 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     }
   };
 
+  // ---- 安全深拷贝（structuredClone 无法处理 Vue 响应式代理等对象） ----
+  const safeClone = (value: unknown): unknown => {
+    try {
+      return structuredClone(value);
+    } catch {
+      return JSON.parse(JSON.stringify(value));
+    }
+  };
+
   // ---- 向 Blockly iframe 发送消息 ----
   const postMessage = (action: string, data: unknown = {}) => {
     if (editor.value && editor.value.contentWindow) {
@@ -219,7 +228,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
         {
           from: options.from,
           action,
-          data: structuredClone(data),
+          data: safeClone(data),
         },
         "*"
       );

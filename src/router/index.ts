@@ -15,9 +15,9 @@ import { publicRoutes } from "./modules/public";
 import { homeRoutes, settingsRoutes } from "./modules/home";
 import { resourceRoutes } from "./modules/resource";
 import { metaRoutes } from "./modules/meta";
-import { verseRoutes, aiRoutes } from "./modules/verse";
-import { campusRoutes } from "./modules/campus";
+import { verseRoutes } from "./modules/verse";
 import { managerRoutes, gameRoutes } from "./modules/manager";
+import { pluginRoutes } from "./modules/plugin";
 
 // 静态路由
 const routes: RouteRecordRaw[] = [
@@ -53,16 +53,14 @@ const routes: RouteRecordRaw[] = [
       resourceRoutes,
       // Meta 相关
       ...metaRoutes,
-      // AI 相关
-      aiRoutes,
       // Verse/项目相关
       verseRoutes,
-      // 校园管理
-      campusRoutes,
       // 管理后台
       managerRoutes,
       // 游戏
       gameRoutes,
+      // 插件系统
+      pluginRoutes,
 
       // 错误页面
       {
@@ -147,10 +145,6 @@ const check = (route: RouteRecordRaw[], ability: AnyAbility) => {
   const can = ability.can.bind(ability);
   route.forEach((route) => {
     if (route.meta) {
-      // // 临时跳过校园相关路由的权限检查
-      // if (!route.path.startsWith("/campus")) {
-      //   route.meta.hidden = !can("open", new AbilityRouter(route.path));
-      // }
       route.meta.hidden = !can("open", new AbilityRouter(route.path));
     }
     if (route.children) {

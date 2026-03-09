@@ -58,7 +58,6 @@
 
             <el-form-item
               v-else
-              v-model="emailForm.email"
               :label="$t('homepage.account.label1')"
               prop="email"
             >

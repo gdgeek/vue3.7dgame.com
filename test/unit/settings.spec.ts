@@ -42,9 +42,10 @@ describe("defaultSettings (src/settings.ts)", () => {
       expect(s.title).toBe("test-app");
     });
 
-    it("version 来自 __APP_INFO__.pkg.version", async () => {
+    it("version 来自构建时间戳", async () => {
       const { default: s } = await import("@/settings");
-      expect(s.version).toBe("0.0.0-test");
+      // buildTimestamp: 0 → 1970.01.01.0000 (UTC)
+      expect(s.version).toMatch(/^\d{4}\.\d{2}\.\d{2}\.\d{4}$/);
     });
 
     it("showSettings 默认为 true", async () => {

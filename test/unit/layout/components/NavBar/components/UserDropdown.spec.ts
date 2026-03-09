@@ -26,7 +26,15 @@ vi.mock("@/components/Dialog/ConfirmDialog.vue", async () => {
   return {
     default: dc({
       name: "ConfirmDialog",
-      props: ["modelValue", "title", "message", "description", "type", "confirmText", "cancelText"],
+      props: [
+        "modelValue",
+        "title",
+        "message",
+        "description",
+        "type",
+        "confirmText",
+        "cancelText",
+      ],
       emits: ["confirm", "update:modelValue"],
       template: '<div class="confirm-dialog-stub"></div>',
     }),
@@ -61,8 +69,8 @@ async function mount(userInfo: unknown = null) {
   );
   const el = document.createElement("div");
   const app = createApp(UserDropdown as Parameters<typeof createApp>[0]);
-  app.component("router-link", RouterLinkStub);
-  app.component("font-awesome-icon", FontAwesomeIconStub);
+  app.component("RouterLink", RouterLinkStub);
+  app.component("FontAwesomeIcon", FontAwesomeIconStub);
   app.mount(el);
   cleanups.push(() => app.unmount());
   await nextTick();

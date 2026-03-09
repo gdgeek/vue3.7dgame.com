@@ -16,7 +16,10 @@ vi.mock("vue-router", () => ({
 vi.mock("@/components/TransitionWrapper.vue", async () => {
   const { defineComponent: dc } = await import("vue");
   return {
-    default: dc({ name: "TransitionWrapper", template: "<div class='tw-stub'><slot /></div>" }),
+    default: dc({
+      name: "TransitionWrapper",
+      template: "<div class='tw-stub'><slot /></div>",
+    }),
   };
 });
 

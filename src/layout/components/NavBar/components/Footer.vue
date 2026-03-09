@@ -26,9 +26,13 @@ const domainStore = useDomainStore();
 const settingsStore = useSettingsStore();
 
 const isDarkMode = computed(() => settingsStore.theme === ThemeEnum.DARK);
-const DEV_DATE = String(import.meta.env.VITE_DEV_DATE || "202602251637");
-const DEV_LETTER = String(import.meta.env.VITE_DEV_LETTER || "A");
-const versionTag = computed(() => `${DEV_DATE}${DEV_LETTER}`);
+const { buildTimestamp } = __APP_INFO__;
+const d = new Date(buildTimestamp);
+const pad = (n: number) => String(n).padStart(2, "0");
+const versionTag = computed(
+  () =>
+    `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`
+);
 
 defineProps<{
   maxwidth?: boolean;
@@ -43,14 +47,14 @@ defineProps<{
 }
 
 .footer-content {
-  max-width: 1400px;
-  margin: 0 auto;
   display: flex;
+  gap: 24px;
   align-items: center;
   justify-content: flex-end; // Changed from space-between to align right
-  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
 
-  @media (max-width: 640px) {
+  @media (width <= 640px) {
     flex-direction: column;
     gap: 12px;
   }
@@ -69,12 +73,12 @@ defineProps<{
 
 .footer-links {
   display: flex;
-  align-items: center;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
   justify-content: flex-end;
 
-  @media (max-width: 640px) {
+  @media (width <= 640px) {
     justify-content: center;
   }
 }
@@ -82,8 +86,8 @@ defineProps<{
 .footer-link {
   font-size: 12px;
   text-decoration: none;
-  transition: color 0.2s;
   white-space: nowrap;
+  transition: color 0.2s;
 }
 
 .divider {
@@ -92,7 +96,7 @@ defineProps<{
 
 .footer-version {
   font-size: 12px;
-  opacity: 0.8;
   white-space: nowrap;
+  opacity: 0.8;
 }
 </style>

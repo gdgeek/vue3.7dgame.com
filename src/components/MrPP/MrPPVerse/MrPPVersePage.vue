@@ -17,7 +17,7 @@
         @search="search"
         @sort="sort"
       >
-        <el-button-group :inline="true">
+        <el-button-group>
           <!-- Default create button when created=true -->
           <el-button
             v-if="created"

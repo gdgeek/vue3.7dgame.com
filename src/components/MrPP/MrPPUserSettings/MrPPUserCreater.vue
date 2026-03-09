@@ -11,13 +11,7 @@
         </div>
       </template>
       <div class="box-item">
-        <el-descriptions
-          v-if="creation"
-          label-class-name="info-content-label"
-          :column="2"
-          size="small"
-          border
-        >
+        <el-descriptions v-if="creation" :column="2" size="small" border>
           <el-descriptions-item>
             <template #label>
               <router-link

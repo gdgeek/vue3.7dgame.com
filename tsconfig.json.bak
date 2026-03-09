@@ -1,0 +1,51 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "useDefineForClassFields": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": false,
+    "noLib": false,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "lib": ["esnext", "dom"],
+    "baseUrl": ".",
+    "allowJs": true,
+    // "checkJs": false,
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "types": ["vite/client", "unplugin-icons/types/vue", "element-plus/global"],
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+    "allowSyntheticDefaultImports": true /* 允许默认导入 */,
+    "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
+    "jsx": "preserve",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment"
+  },
+  "vueCompilerOptions": {
+    "strictTemplates": false
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "src/typings/**/*.d.ts",
+    "mock/**/*.ts",
+    "vite.config.ts",
+    "src/assets/test/blockly/code.js",
+    "src/assets/js/fontok.ts",
+    "src/assets/test/blockly/storage.js",
+    "src/utils/utilityFunctions.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.js",
+    "src/stories",
+    "**/*.stories.ts",
+    "**/__tests__/**",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
+}

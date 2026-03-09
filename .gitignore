@@ -55,3 +55,6 @@ vite.config.ts.timestamp-*.mjs
 # Cleanup plan (temporary)
 .cleanup-plan.md
 .claude/
+
+# Playwright reports
+playwright-report/
