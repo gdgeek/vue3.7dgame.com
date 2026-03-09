@@ -99,38 +99,3 @@ jobs:
             BUILD_MODE=production
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  # 部署
-  deploy:
-    name: Deploy to Portainer
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/publish'
-
-    steps:
-      - name: Trigger Portainer Webhook
-        run: |
-          echo "🚀 Triggering Portainer deployment..."
-
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}")
-          HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
-          BODY=$(echo "$RESPONSE" | sed '$d')
-
-          echo "Response Code: $HTTP_CODE"
-          echo "Response Body: $BODY"
-
-          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
-            echo "✅ Deployment triggered successfully!"
-          else
-            echo "❌ Deployment failed with status code: $HTTP_CODE"
-            exit 1
-          fi
-
-      - name: Deployment Summary
-        run: |
-          echo "## 🎉 Deployment Complete!" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Actor**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Timestamp**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
