@@ -29,7 +29,7 @@ async function mount(props: Record<string, unknown> = {}) {
     ThemeColorPicker as Parameters<typeof createApp>[0],
     props
   );
-  app.component("el-color-picker", ElColorPickerStub);
+  app.component("ElColorPicker", ElColorPickerStub);
   app.mount(el);
   cleanups.push(() => app.unmount());
   await nextTick();
@@ -65,6 +65,8 @@ describe("layout/components/Settings/components/ThemeColorPicker.vue", () => {
   });
 
   it("accepts string modelValue without throwing", async () => {
-    await expect(mount({ modelValue: "rgb(255, 120, 0)" })).resolves.toBeDefined();
+    await expect(
+      mount({ modelValue: "rgb(255, 120, 0)" })
+    ).resolves.toBeDefined();
   });
 });

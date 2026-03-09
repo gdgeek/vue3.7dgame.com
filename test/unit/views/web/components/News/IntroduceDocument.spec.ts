@@ -47,8 +47,9 @@ const ElCardStub = defineComponent({
 });
 const ElButtonStub = defineComponent({
   name: "ElButton",
-  template: "<button class='el-btn-stub' @click=\"$emit('click')\"><slot /></button>",
   emits: ["click"],
+  template:
+    "<button class='el-btn-stub' @click=\"$emit('click')\"><slot /></button>",
 });
 const ElIconStub = defineComponent({
   name: "ElIcon",
@@ -61,9 +62,9 @@ async function mount() {
   );
   const el = document.createElement("div");
   const app = createApp(IntroduceDocument as Parameters<typeof createApp>[0]);
-  app.component("el-card", ElCardStub);
-  app.component("el-button", ElButtonStub);
-  app.component("el-icon", ElIconStub);
+  app.component("ElCard", ElCardStub);
+  app.component("ElButton", ElButtonStub);
+  app.component("ElIcon", ElIconStub);
   app.mount(el);
   cleanups.push(() => app.unmount());
   await nextTick();

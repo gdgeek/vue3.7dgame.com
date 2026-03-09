@@ -2,7 +2,9 @@ import { describe, it, expect, vi } from "vitest";
 import { createApp, defineComponent, h, ref } from "vue";
 
 vi.mock("vue-i18n", () => ({
-  useI18n: () => ({ t: (k: string, opts?: Record<string, unknown>) => (opts ? k : k) }),
+  useI18n: () => ({
+    t: (k: string, opts?: Record<string, unknown>) => (opts ? k : k),
+  }),
 }));
 
 vi.mock("vue-router", () => ({
@@ -100,7 +102,11 @@ describe("useVerseCrud — API error paths", () => {
     const { logger } = await import("@/utils/logger");
     vi.mocked(postVerse).mockRejectedValueOnce(new Error("API failure"));
     const currentVerse = ref<null>(null);
-    const crudOpts = { refresh: vi.fn(), currentVerse, detailVisible: ref(false) };
+    const crudOpts = {
+      refresh: vi.fn(),
+      currentVerse,
+      detailVisible: ref(false),
+    };
     const result = mountComposable(() => useVerseCrud(crudOpts));
     await result.submitCreate({ name: "test", description: "" }, null);
     expect(vi.mocked(logger.error)).toHaveBeenCalled();
@@ -109,7 +115,11 @@ describe("useVerseCrud — API error paths", () => {
   it("handleDelete returns early and never calls deleteVerse when currentVerse is null", async () => {
     const { deleteVerse } = await import("@/api/v1/verse");
     const currentVerse = ref<null>(null);
-    const crudOpts = { refresh: vi.fn(), currentVerse, detailVisible: ref(false) };
+    const crudOpts = {
+      refresh: vi.fn(),
+      currentVerse,
+      detailVisible: ref(false),
+    };
     const result = mountComposable(() => useVerseCrud(crudOpts));
     await result.handleDelete();
     expect(vi.mocked(deleteVerse)).not.toHaveBeenCalled();
@@ -120,8 +130,15 @@ describe("useVerseCrud — API error paths", () => {
     const { MessageBox, Message } = await import("@/components/Dialog");
     vi.mocked(MessageBox.confirm).mockResolvedValueOnce(undefined as never);
     vi.mocked(deleteVerse).mockRejectedValueOnce(new Error("delete failed"));
-    const currentVerse = ref({ id: 99, name: "scene" } as Parameters<typeof useVerseCrud>[0]["currentVerse"]["value"] & object);
-    const crudOpts = { refresh: vi.fn(), currentVerse, detailVisible: ref(false) };
+    const currentVerse = ref({ id: 99, name: "scene" } as Parameters<
+      typeof useVerseCrud
+    >[0]["currentVerse"]["value"] &
+      object);
+    const crudOpts = {
+      refresh: vi.fn(),
+      currentVerse,
+      detailVisible: ref(false),
+    };
     const result = mountComposable(() => useVerseCrud(crudOpts));
     await result.handleDelete();
     expect(vi.mocked(Message.info)).toHaveBeenCalled();
@@ -130,7 +147,11 @@ describe("useVerseCrud — API error paths", () => {
   it("handleRename does nothing when currentVerse is null", async () => {
     const { putVerse } = await import("@/api/v1/verse");
     const currentVerse = ref<null>(null);
-    const crudOpts = { refresh: vi.fn(), currentVerse, detailVisible: ref(false) };
+    const crudOpts = {
+      refresh: vi.fn(),
+      currentVerse,
+      detailVisible: ref(false),
+    };
     const result = mountComposable(() => useVerseCrud(crudOpts));
     await result.handleRename("new name");
     expect(vi.mocked(putVerse)).not.toHaveBeenCalled();

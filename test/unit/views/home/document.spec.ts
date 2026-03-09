@@ -32,9 +32,7 @@ afterEach(() => {
 });
 
 async function mountDocumentPage(): Promise<{ el: HTMLElement; app: App }> {
-  const { default: DocumentPage } = await import(
-    "@/views/home/document.vue"
-  );
+  const { default: DocumentPage } = await import("@/views/home/document.vue");
   const el = document.createElement("div");
   const app = createApp(DocumentPage as Parameters<typeof createApp>[0]);
   app.mount(el);
@@ -62,13 +60,17 @@ describe("views/home/document.vue", () => {
   it("passes parsed postId to Document component", async () => {
     mockRoute.query = { id: "42" };
     const { el } = await mountDocumentPage();
-    const stub = el.querySelector('[data-testid="document-stub"]') as HTMLElement;
+    const stub = el.querySelector(
+      '[data-testid="document-stub"]'
+    ) as HTMLElement;
     expect(stub?.dataset.postId).toBe("42");
   });
 
   it("passes category=true to Document component", async () => {
     const { el } = await mountDocumentPage();
-    const stub = el.querySelector('[data-testid="document-stub"]') as HTMLElement;
+    const stub = el.querySelector(
+      '[data-testid="document-stub"]'
+    ) as HTMLElement;
     expect(stub?.dataset.category).toBe("true");
   });
 });

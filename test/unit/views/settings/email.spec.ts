@@ -12,14 +12,20 @@ vi.mock("vue-i18n", () => ({
 vi.mock("@/components/TransitionWrapper.vue", async () => {
   const { defineComponent: dc } = await import("vue");
   return {
-    default: dc({ name: "TransitionWrapper", template: "<div class='tw-stub'><slot /></div>" }),
+    default: dc({
+      name: "TransitionWrapper",
+      template: "<div class='tw-stub'><slot /></div>",
+    }),
   };
 });
 
 vi.mock("@/components/Account/EmailVerificationPanel.vue", async () => {
   const { defineComponent: dc } = await import("vue");
   return {
-    default: dc({ name: "EmailVerificationPanel", template: "<div class='email-panel-stub'></div>" }),
+    default: dc({
+      name: "EmailVerificationPanel",
+      template: "<div class='email-panel-stub'></div>",
+    }),
   };
 });
 
@@ -59,9 +65,7 @@ afterEach(() => {
 });
 
 async function mount() {
-  const { default: EmailView } = await import(
-    "@/views/settings/email.vue"
-  );
+  const { default: EmailView } = await import("@/views/settings/email.vue");
   const el = document.createElement("div");
   const app = createApp(EmailView as Parameters<typeof createApp>[0]);
   app.component("ElCard", ElCardStub);

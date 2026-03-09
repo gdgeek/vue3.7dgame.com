@@ -44,7 +44,10 @@ vi.mock("vue-i18n", () => ({
 
 // ─── Mock VueUse ─────────────────────────────────────────────────────────────
 vi.mock("@vueuse/core", () => ({
-  useFullscreen: vi.fn(() => ({ isFullscreen: { value: false }, toggle: vi.fn() })),
+  useFullscreen: vi.fn(() => ({
+    isFullscreen: { value: false },
+    toggle: vi.fn(),
+  })),
 }));
 
 // ─── Stubs ────────────────────────────────────────────────────────────────────
@@ -62,7 +65,8 @@ const LangSelectStub = defineComponent({
 const ElDropdownStub = defineComponent({
   name: "ElDropdown",
   props: ["trigger"],
-  template: '<div class="el-dropdown-stub"><slot /><slot name="dropdown" /></div>',
+  template:
+    '<div class="el-dropdown-stub"><slot /><slot name="dropdown" /></div>',
 });
 
 const ElDropdownMenuStub = defineComponent({
@@ -104,12 +108,12 @@ async function mount() {
   const app = createApp(NavbarRight as Parameters<typeof createApp>[0]);
   // Provide $t as global property so template can call $t(...)
   app.config.globalProperties.$t = (k: string) => k;
-  app.component("svg-icon", SvgIconStub);
-  app.component("lang-select", LangSelectStub);
-  app.component("el-dropdown", ElDropdownStub);
-  app.component("el-dropdown-menu", ElDropdownMenuStub);
-  app.component("el-dropdown-item", ElDropdownItemStub);
-  app.component("el-avatar", ElAvatarStub);
+  app.component("SvgIcon", SvgIconStub);
+  app.component("LangSelect", LangSelectStub);
+  app.component("ElDropdown", ElDropdownStub);
+  app.component("ElDropdownMenu", ElDropdownMenuStub);
+  app.component("ElDropdownItem", ElDropdownItemStub);
+  app.component("ElAvatar", ElAvatarStub);
   app.component("RouterLink", RouterLinkStub);
   app.mount(el);
   cleanups.push(() => app.unmount());

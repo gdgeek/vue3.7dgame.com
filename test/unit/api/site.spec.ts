@@ -60,7 +60,9 @@ describe("Site API", () => {
     });
 
     it("keeps method as post for minimal payloads", async () => {
-      const minimalPayload = {} as Parameters<typeof siteApi.PostSiteAppleId>[0];
+      const minimalPayload = {} as Parameters<
+        typeof siteApi.PostSiteAppleId
+      >[0];
       await siteApi.PostSiteAppleId(minimalPayload);
       expect(request.mock.calls[0][0].method).toBe("post");
     });

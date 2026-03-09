@@ -38,10 +38,13 @@ async function mount() {
   );
   const el = document.createElement("div");
   const app = createApp(IntroduceIndex as Parameters<typeof createApp>[0]);
-  app.component("About", defineComponent({
-    name: "About",
-    template: "<div class='about-stub'></div>",
-  }));
+  app.component(
+    "About",
+    defineComponent({
+      name: "About",
+      template: "<div class='about-stub'></div>",
+    })
+  );
   app.mount(el);
   cleanups.push(() => app.unmount());
   return { el };

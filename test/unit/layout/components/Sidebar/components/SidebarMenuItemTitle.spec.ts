@@ -28,9 +28,12 @@ async function mount(props: Record<string, unknown> = {}) {
     "@/layout/components/Sidebar/components/SidebarMenuItemTitle.vue"
   );
   const el = document.createElement("div");
-  const app = createApp(SidebarMenuItemTitle as Parameters<typeof createApp>[0], props);
-  app.component("svg-icon", SvgIconStub);
-  app.component("el-icon", {
+  const app = createApp(
+    SidebarMenuItemTitle as Parameters<typeof createApp>[0],
+    props
+  );
+  app.component("SvgIcon", SvgIconStub);
+  app.component("ElIcon", {
     name: "ElIcon",
     template: '<i class="sub-el-icon"><slot /></i>',
   });

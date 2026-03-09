@@ -27,7 +27,7 @@ async function mount(props: Record<string, unknown> = {}) {
   const { default: Id2Image } = await import("@/components/Id2Image.vue");
   const el = document.createElement("div");
   const app = createApp(Id2Image as Parameters<typeof createApp>[0], props);
-  app.component("el-image", {
+  app.component("ElImage", {
     name: "ElImage",
     props: ["src", "fit"],
     template: "<img class='el-image-stub' :src='src' />",
@@ -64,7 +64,10 @@ describe("Id2Image.vue", () => {
   });
 
   it("mounts with explicit image URL", async () => {
-    const { el } = await mount({ image: "https://example.com/img.png", lazy: false });
+    const { el } = await mount({
+      image: "https://example.com/img.png",
+      lazy: false,
+    });
     expect(el.querySelector(".image-wrapper")).not.toBeNull();
   });
 

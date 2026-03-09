@@ -21,7 +21,9 @@ afterEach(() => {
   vi.resetModules();
 });
 
-async function mount(props: Record<string, unknown> = { text: "https://example.com" }) {
+async function mount(
+  props: Record<string, unknown> = { text: "https://example.com" }
+) {
   const { default: Qrcode } = await import("@/components/Account/Qrcode.vue");
   const el = document.createElement("div");
   const app = createApp(Qrcode as Parameters<typeof createApp>[0], props);
@@ -65,7 +67,11 @@ describe("Account/Qrcode.vue", () => {
     await expect(
       mount({
         text: "custom",
-        options: { width: 200, margin: 2, color: { dark: "#111", light: "#eee" } },
+        options: {
+          width: 200,
+          margin: 2,
+          color: { dark: "#111", light: "#eee" },
+        },
       })
     ).resolves.toBeDefined();
   });

@@ -32,23 +32,46 @@ vi.mock("@/composables/useCategories", () => ({
 // ─── Mock child components ────────────────────────────────────────────────────
 vi.mock("@/components/Home/Book.vue", async () => {
   const { defineComponent: dc } = await import("vue");
-  return { default: dc({ name: "Book", props: ["items"], template: '<div class="book-stub"></div>' }) };
+  return {
+    default: dc({
+      name: "Book",
+      props: ["items"],
+      template: '<div class="book-stub"></div>',
+    }),
+  };
 });
 vi.mock("@/components/Home/LocalPage.vue", async () => {
   const { defineComponent: dc } = await import("vue");
-  return { default: dc({ name: "LocalPage", template: '<div class="local-page-stub"></div>' }) };
+  return {
+    default: dc({
+      name: "LocalPage",
+      template: '<div class="local-page-stub"></div>',
+    }),
+  };
 });
 vi.mock("@/components/Home/HomeHeader.vue", async () => {
   const { defineComponent: dc } = await import("vue");
-  return { default: dc({ name: "HomeHeader", template: '<div class="home-header-stub"></div>' }) };
+  return {
+    default: dc({
+      name: "HomeHeader",
+      template: '<div class="home-header-stub"></div>',
+    }),
+  };
 });
 vi.mock("@/components/Home/QuickStart.vue", async () => {
   const { defineComponent: dc } = await import("vue");
-  return { default: dc({ name: "QuickStart", template: '<div class="quick-start-stub"></div>' }) };
+  return {
+    default: dc({
+      name: "QuickStart",
+      template: '<div class="quick-start-stub"></div>',
+    }),
+  };
 });
 vi.mock("@/components/TransitionWrapper.vue", async () => {
   const { defineComponent: dc } = await import("vue");
-  return { default: dc({ name: "TransitionWrapper", template: '<div><slot /></div>' }) };
+  return {
+    default: dc({ name: "TransitionWrapper", template: "<div><slot /></div>" }),
+  };
 });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -63,32 +86,32 @@ async function mount(props: Record<string, unknown> = {}) {
   const { default: HomePage } = await import("@/views/home/index.vue");
   const el = document.createElement("div");
   const app = createApp(HomePage as Parameters<typeof createApp>[0], props);
-  app.component("font-awesome-icon", {
+  app.component("FontAwesomeIcon", {
     name: "FontAwesomeIcon",
     props: ["icon"],
     template: '<i class="fa-stub"></i>',
   });
-  app.component("el-divider", {
+  app.component("ElDivider", {
     name: "ElDivider",
     template: '<div class="el-divider-stub"><slot /></div>',
   });
-  app.component("el-skeleton", {
+  app.component("ElSkeleton", {
     name: "ElSkeleton",
     template: '<div class="el-skeleton-stub"></div>',
   });
-  app.component("el-button", {
+  app.component("ElButton", {
     name: "ElButton",
     template: '<button class="el-button-stub"><slot /></button>',
   });
-  app.component("el-empty", {
+  app.component("ElEmpty", {
     name: "ElEmpty",
     template: '<div class="el-empty-stub"><slot /></div>',
   });
-  app.component("el-tab-pane", {
+  app.component("ElTabPane", {
     name: "ElTabPane",
     template: '<div class="el-tab-pane-stub"><slot /></div>',
   });
-  app.component("el-tabs", {
+  app.component("ElTabs", {
     name: "ElTabs",
     template: '<div class="el-tabs-stub"><slot /></div>',
   });

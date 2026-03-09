@@ -2,7 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 vi.mock("@/environment", () => ({
-  default: { email_api: "https://email.example.com", password_api: "https://password.example.com" },
+  default: {
+    email_api: "https://email.example.com",
+    password_api: "https://password.example.com",
+  },
 }));
 
 describe("api/v1/password", () => {

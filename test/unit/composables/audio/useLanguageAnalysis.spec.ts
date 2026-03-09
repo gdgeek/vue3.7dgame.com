@@ -32,15 +32,12 @@ vi.mock("vue-i18n", () => ({
 
 vi.mock("element-plus", () => ({
   // Wrap each stub in a lambda so the variable is NOT evaluated at factory time.
-  ElMessage: Object.assign(
-    (...args: unknown[]) => mockElMessage(...args),
-    {
-      success: (...args: unknown[]) => mockElMessageSuccess(...args),
-      warning: (...args: unknown[]) => mockElMessageWarning(...args),
-      info: (...args: unknown[]) => mockElMessageInfo(...args),
-      error: (...args: unknown[]) => mockElMessageError(...args),
-    }
-  ),
+  ElMessage: Object.assign((...args: unknown[]) => mockElMessage(...args), {
+    success: (...args: unknown[]) => mockElMessageSuccess(...args),
+    warning: (...args: unknown[]) => mockElMessageWarning(...args),
+    info: (...args: unknown[]) => mockElMessageInfo(...args),
+    error: (...args: unknown[]) => mockElMessageError(...args),
+  }),
   ElMessageBox: { prompt: vi.fn() },
 }));
 

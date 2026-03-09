@@ -7,9 +7,9 @@ describe("utils/types batch3", () => {
   });
 
   it("CardInfo image can be null", () => {
-    expectTypeOf<CardInfo>().toHaveProperty("image").toEqualTypeOf<
-      { id?: number; url: string } | null
-    >();
+    expectTypeOf<CardInfo>()
+      .toHaveProperty("image")
+      .toEqualTypeOf<{ id?: number; url: string } | null>();
   });
 
   it("CardInfo context is unknown", () => {
@@ -26,9 +26,9 @@ describe("utils/types batch3", () => {
   });
 
   it("DataOutput items is CardInfo array", () => {
-    expectTypeOf<DataOutput>().toHaveProperty("items").toEqualTypeOf<
-      CardInfo[]
-    >();
+    expectTypeOf<DataOutput>()
+      .toHaveProperty("items")
+      .toEqualTypeOf<CardInfo[]>();
   });
 
   it("DataOutput pagination fields are numbers", () => {

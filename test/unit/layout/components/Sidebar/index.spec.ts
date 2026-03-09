@@ -22,7 +22,8 @@ vi.mock("@/layout/components/Sidebar/SidebarLeft.vue", async () => {
     default: dc({
       name: "SidebarLeft",
       props: ["collapsed"],
-      template: '<div class="sidebar-left-stub" :data-collapsed="String(collapsed)"></div>',
+      template:
+        '<div class="sidebar-left-stub" :data-collapsed="String(collapsed)"></div>',
     }),
   };
 });
@@ -69,7 +70,7 @@ async function mount(storeOverride: Partial<typeof mockSettingsStore> = {}) {
   app.component("SidebarMixTopMenu", SidebarMixTopMenuStub);
   app.component("NavbarRight", NavbarRightStub);
   app.component("SidebarMenu", SidebarMenuStub);
-  app.component("el-scrollbar", ElScrollbarStub);
+  app.component("ElScrollbar", ElScrollbarStub);
   app.mount(el);
   cleanups.push(() => app.unmount());
   return { el };

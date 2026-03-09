@@ -17,7 +17,10 @@ const mockSettingsStore = { tagsView: false };
 vi.mock("@/store", () => ({
   useTagsViewStore: vi.fn(() => mockTagsViewStore),
   useSettingsStore: vi.fn(() => mockSettingsStore),
-  useAppStore: vi.fn(() => ({ sidebar: { opened: true }, toggleSidebar: vi.fn() })),
+  useAppStore: vi.fn(() => ({
+    sidebar: { opened: true },
+    toggleSidebar: vi.fn(),
+  })),
 }));
 
 const RouterViewStub = defineComponent({

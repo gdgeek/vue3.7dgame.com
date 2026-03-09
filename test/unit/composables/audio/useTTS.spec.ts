@@ -260,8 +260,13 @@ describe("useTTS — audio player event handlers", () => {
   it("onTextInput resets highlights, pauses the player and calls checkTextLanguage", () => {
     const checkTextLanguage = vi.fn();
     const props = makeProps({ checkTextLanguage });
-    const { onTextInput, highlightedText, normalText, isPlaying, audioPlayerRef } =
-      useTTS(props);
+    const {
+      onTextInput,
+      highlightedText,
+      normalText,
+      isPlaying,
+      audioPlayerRef,
+    } = useTTS(props);
 
     const mockAudio = { pause: vi.fn() } as unknown as HTMLAudioElement;
     audioPlayerRef.value = mockAudio;

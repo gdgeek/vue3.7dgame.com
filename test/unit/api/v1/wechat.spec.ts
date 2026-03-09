@@ -60,8 +60,9 @@ describe("api/v1/wechat", () => {
     const resolved = { data: { token: "t1" } };
     request.mockResolvedValueOnce(resolved);
 
-    await expect(api.login({ code: "x" } as Parameters<typeof api.login>[0]))
-      .resolves.toBe(resolved);
+    await expect(
+      api.login({ code: "x" } as Parameters<typeof api.login>[0])
+    ).resolves.toBe(resolved);
   });
 
   it("forwards request rejection from link", async () => {

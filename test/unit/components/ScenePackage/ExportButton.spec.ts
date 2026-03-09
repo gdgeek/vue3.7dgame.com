@@ -35,7 +35,8 @@ const ElButtonStub = defineComponent({
   name: "ElButton",
   props: ["type", "loading", "icon"],
   emits: ["click"],
-  template: "<button class='el-button-stub' @click=\"$emit('click')\"><slot /></button>",
+  template:
+    "<button class='el-button-stub' @click=\"$emit('click')\"><slot /></button>",
 });
 
 const cleanups: (() => void)[] = [];

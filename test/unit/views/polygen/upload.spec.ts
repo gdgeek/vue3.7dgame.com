@@ -28,7 +28,8 @@ vi.mock("@/components/TransitionWrapper.vue", async () => {
     default: dc({
       name: "TransitionWrapper",
       setup(_, { slots }) {
-        return () => vh("div", { class: "transition-wrapper-stub" }, slots.default?.());
+        return () =>
+          vh("div", { class: "transition-wrapper-stub" }, slots.default?.());
       },
     }),
   };
@@ -133,7 +134,10 @@ describe("views/polygen/upload.vue", () => {
     triggerSaveResource?.("model.glb", 7, 2, callback);
     await flush();
 
-    expect(postPolygenMock).toHaveBeenCalledWith({ name: "model.glb", file_id: 7 });
+    expect(postPolygenMock).toHaveBeenCalledWith({
+      name: "model.glb",
+      file_id: 7,
+    });
     expect(callback).toHaveBeenCalledTimes(1);
     expect(pushMock).not.toHaveBeenCalled();
   });

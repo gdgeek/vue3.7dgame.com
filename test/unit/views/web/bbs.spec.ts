@@ -96,6 +96,8 @@ describe("views/web/bbs.vue", () => {
 
   it("does not have dark-theme class when light theme", async () => {
     const { el } = await mount();
-    expect(el.querySelector(".app-container")!.classList.contains("dark-theme")).toBe(false);
+    expect(
+      el.querySelector(".app-container")!.classList.contains("dark-theme")
+    ).toBe(false);
   });
 });

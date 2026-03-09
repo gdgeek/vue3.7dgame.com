@@ -52,7 +52,13 @@ const ElScrollbarStub = defineComponent({
 
 const ElMenuStub = defineComponent({
   name: "ElMenu",
-  props: ["mode", "defaultActive", "backgroundColor", "textColor", "activeTextColor"],
+  props: [
+    "mode",
+    "defaultActive",
+    "backgroundColor",
+    "textColor",
+    "activeTextColor",
+  ],
   emits: ["select"],
   template: '<nav class="el-menu-stub"><slot /></nav>',
 });
@@ -83,10 +89,10 @@ async function mount() {
   );
   const el = document.createElement("div");
   const app = createApp(SidebarMixTopMenu as Parameters<typeof createApp>[0]);
-  app.component("el-scrollbar", ElScrollbarStub);
-  app.component("el-menu", ElMenuStub);
-  app.component("el-menu-item", ElMenuItemStub);
-  app.component("svg-icon", SvgIconStub);
+  app.component("ElScrollbar", ElScrollbarStub);
+  app.component("ElMenu", ElMenuStub);
+  app.component("ElMenuItem", ElMenuItemStub);
+  app.component("SvgIcon", SvgIconStub);
   app.mount(el);
   cleanups.push(() => app.unmount());
   await nextTick();

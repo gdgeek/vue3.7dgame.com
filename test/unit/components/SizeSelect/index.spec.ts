@@ -33,7 +33,8 @@ const ElDropdownMenuStub = defineComponent({
 const ElDropdownItemStub = defineComponent({
   name: "ElDropdownItem",
   props: ["disabled", "command"],
-  template: "<div class='el-dropdown-item' :data-command='command'><slot /></div>",
+  template:
+    "<div class='el-dropdown-item' :data-command='command'><slot /></div>",
 });
 const SvgIconStub = defineComponent({
   name: "SvgIcon",
@@ -98,9 +99,9 @@ describe("components/SizeSelect/index.vue", () => {
 
   it("dropdown item commands match SizeEnum values", async () => {
     const { el } = await mount();
-    const commands = Array.from(
-      el.querySelectorAll(".el-dropdown-item")
-    ).map((item) => item.getAttribute("data-command"));
+    const commands = Array.from(el.querySelectorAll(".el-dropdown-item")).map(
+      (item) => item.getAttribute("data-command")
+    );
     expect(commands).toContain("default");
     expect(commands).toContain("large");
     expect(commands).toContain("small");

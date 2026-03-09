@@ -17,7 +17,9 @@ afterEach(() => {
   cleanups.length = 0;
 });
 
-async function mountEmptyState(props: Record<string, unknown> = {}): Promise<{ el: HTMLElement; app: App }> {
+async function mountEmptyState(
+  props: Record<string, unknown> = {}
+): Promise<{ el: HTMLElement; app: App }> {
   const { default: EmptyState } = await import(
     "@/components/StandardPage/EmptyState.vue"
   );
@@ -67,7 +69,9 @@ describe("EmptyState", () => {
   it("renders action button when actionText is provided", async () => {
     const { el } = await mountEmptyState({ actionText: "Add Item" });
     expect(el.querySelector(".empty-action")).not.toBeNull();
-    expect(el.querySelector(".empty-action")!.textContent).toContain("Add Item");
+    expect(el.querySelector(".empty-action")!.textContent).toContain(
+      "Add Item"
+    );
   });
 
   it("emits 'action' event when button is clicked", async () => {

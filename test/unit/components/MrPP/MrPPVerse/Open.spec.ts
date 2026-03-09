@@ -3,7 +3,8 @@ import { createApp, defineComponent } from "vue";
 
 const ElCardStub = defineComponent({
   name: "ElCard",
-  template: "<section class='el-card-stub'><slot name='header' /><slot /></section>",
+  template:
+    "<section class='el-card-stub'><slot name='header' /><slot /></section>",
 });
 
 const ElButtonStub = defineComponent({
@@ -67,6 +68,8 @@ describe("components/MrPP/MrPPVerse/Open.vue", () => {
     expect(el.querySelectorAll(".el-button-stub").length).toBe(2);
     expect(el.querySelectorAll(".fa-icon-stub").length).toBe(2);
     expect(el.querySelector(".fa-icon-stub[data-icon='eye']")).not.toBeNull();
-    expect(el.querySelector(".fa-icon-stub[data-icon='eye-slash']")).not.toBeNull();
+    expect(
+      el.querySelector(".fa-icon-stub[data-icon='eye-slash']")
+    ).not.toBeNull();
   });
 });

@@ -156,7 +156,9 @@ describe("useModelLoader", () => {
       fillText: vi.fn(),
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (HTMLCanvasElement.prototype as unknown as Record<string, unknown>).getContext = vi.fn(() => mockCtx);
+    (
+      HTMLCanvasElement.prototype as unknown as Record<string, unknown>
+    ).getContext = vi.fn(() => mockCtx);
 
     const resource: Resource = {
       type: "text",
@@ -175,7 +177,8 @@ describe("useModelLoader", () => {
     expect(ctx.sources.has("text-uuid-1")).toBe(true);
 
     // Cleanup
-    delete (HTMLCanvasElement.prototype as unknown as Record<string, unknown>).getContext;
+    delete (HTMLCanvasElement.prototype as unknown as Record<string, unknown>)
+      .getContext;
   });
 
   it("returns undefined for unknown resource type", async () => {
