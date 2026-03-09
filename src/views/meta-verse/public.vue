@@ -356,32 +356,32 @@ const goToScene = (item: VerseData) => {
 
 <style scoped lang="scss">
 .hero-header {
-  background: #f8fafc;
   padding: 48px 48px 0;
   margin-bottom: 32px;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--bg-card, #f8fafc);
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
 
   .header-main {
     display: flex;
-    justify-content: space-between;
     align-items: flex-start;
+    justify-content: space-between;
     margin-bottom: 40px;
   }
 
   .hero-title {
+    margin: 0 0 16px;
     font-size: 36px;
     font-weight: 700;
-    color: #1e293b;
-    margin: 0 0 16px;
+    color: var(--text-primary, #1e293b);
     letter-spacing: -0.02em;
   }
 
   .hero-subtitle {
+    max-width: 600px;
+    margin: 0;
     font-size: 16px;
     line-height: 1.6;
-    color: #64748b;
-    margin: 0;
-    max-width: 600px;
+    color: var(--text-secondary, #64748b);
   }
 
   .hero-search-box {
@@ -390,32 +390,32 @@ const goToScene = (item: VerseData) => {
 
     .search-icon {
       position: absolute;
-      left: 18px;
       top: 50%;
-      transform: translateY(-50%);
-      color: #94a3b8;
+      left: 18px;
       font-size: 20px;
+      color: var(--text-muted, #94a3b8);
+      transform: translateY(-50%);
     }
 
     .hero-search-input {
       width: 100%;
       height: 52px;
       padding: 0 12px 0 52px;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 26px;
-      background: #fff;
       font-size: 15px;
-      color: #1e293b;
+      color: var(--text-primary, #1e293b);
+      background: var(--bg-page, #fff);
+      border: 1.5px solid var(--border-color, #e2e8f0);
+      border-radius: 26px;
       outline: none;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
       &::placeholder {
-        color: #94a3b8;
+        color: var(--text-muted, #94a3b8);
       }
 
       &:focus {
-        border-color: #03a9f4;
-        box-shadow: 0 0 0 4px rgba(3, 169, 244, 0.1);
+        border-color: var(--primary-color, #03a9f4);
+        box-shadow: 0 0 0 4px var(--primary-light, rgb(3 169 244 / 10%));
       }
     }
   }
@@ -425,30 +425,31 @@ const goToScene = (item: VerseData) => {
     gap: 40px;
 
     .tab-item {
+      position: relative;
       padding: 0 4px 16px;
       font-size: 16px;
       font-weight: 500;
-      color: #64748b;
+      color: var(--text-secondary, #64748b);
       cursor: pointer;
-      position: relative;
       transition: all 0.2s ease;
 
       &:hover {
-        color: #1e293b;
+        color: var(--text-primary, #1e293b);
+        background: var(--bg-hover, transparent);
       }
 
       &.active {
-        color: #03a9f4;
         font-weight: 600;
+        color: var(--primary-color, #03a9f4);
 
         &::after {
-          content: "";
           position: absolute;
+          right: 0;
           bottom: -1px;
           left: 0;
-          right: 0;
           height: 3px;
-          background: #03a9f4;
+          content: "";
+          background: var(--primary-color, #03a9f4);
           border-radius: 3px 3px 0 0;
         }
       }
@@ -464,16 +465,16 @@ const goToScene = (item: VerseData) => {
   }
 
   .item-thumb {
-    width: 52px;
-    height: 52px;
-    border-radius: 12px;
-    overflow: hidden;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    overflow: hidden;
+    background: var(--bg-hover, #f8fafc);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 12px;
 
     img {
       width: 100%;
@@ -485,56 +486,56 @@ const goToScene = (item: VerseData) => {
   .item-name {
     font-size: 14px;
     font-weight: 500;
-    color: #1e293b;
+    color: var(--text-primary, #1e293b);
   }
 
   .col-author,
   .col-date {
     width: 120px;
-    text-align: right;
-    font-size: 13px;
-    color: #64748b;
     padding-right: 24px;
-    white-space: nowrap;
     overflow: hidden;
+    font-size: 13px;
+    color: var(--text-secondary, #64748b);
+    text-align: right;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .btn-hover-action {
-    opacity: 0;
-    visibility: hidden;
-    height: 28px;
-    padding: 0 16px;
-    margin-left: 8px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 14px;
+    height: 28px;
+    padding: 0 16px;
+    margin-left: 8px;
     font-size: 12px;
-    background: #03a9f4;
+    color: var(--text-inverse, white);
+    visibility: hidden;
+    background: var(--primary-color, #03a9f4);
     border: none;
-    color: white;
+    border-radius: 14px;
+    opacity: 0;
     transition: all 0.25s ease;
 
     &:hover {
-      background: #039be5;
+      background: var(--primary-hover, #039be5);
     }
   }
 
   :deep(.list-row:hover) {
     .btn-hover-action {
-      opacity: 1;
       visibility: visible;
+      opacity: 1;
     }
   }
 }
 
 .verse-preview {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
 
   img {
     width: 100%;
@@ -575,10 +576,10 @@ const goToScene = (item: VerseData) => {
 }
 
 .description-text {
+  margin: 0;
   font-size: 14px;
   line-height: 1.6;
   color: var(--text-secondary, #64748b);
-  margin: 0;
   white-space: pre-wrap;
 }
 

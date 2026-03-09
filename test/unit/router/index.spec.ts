@@ -11,6 +11,29 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+type GuardTarget = {
+  path: string;
+  query: Record<string, string>;
+  hash: string;
+  params: Record<string, string>;
+  name?: string;
+};
+
+type GuardResult =
+  | true
+  | {
+      path?: string;
+      name?: string;
+      params?: Record<string, string>;
+      query: Record<string, string>;
+      hash: string;
+      replace: true;
+    };
+
+type MockAbility = {
+  can: () => boolean;
+};
+
 // ── Mock vue-router ──────────────────────────────────────────────────────────
 const mockRouter = vi.hoisted(() => ({
   push: vi.fn(),
@@ -23,11 +46,28 @@ const mockRouter = vi.hoisted(() => ({
   getRoutes: vi.fn(() => []),
 }));
 
+const routerBeforeEachGuards = vi.hoisted(
+  () => [] as Array<(to: GuardTarget) => GuardResult>
+);
+
+mockRouter.beforeEach.mockImplementation(
+  (guard: (to: GuardTarget) => GuardResult) => {
+    routerBeforeEachGuards.push(guard);
+  }
+);
+
 vi.mock("vue-router", () => ({
   createRouter: vi.fn(() => mockRouter),
   createWebHistory: vi.fn(() => ({})),
   useRoute: vi.fn(),
   useRouter: vi.fn(() => mockRouter),
+}));
+
+vi.mock("@/utils/view-preferences", () => ({
+  getViewPreferenceQuery: vi.fn(() => ({
+    lang: "ja-JP",
+    theme: "deep-space",
+  })),
 }));
 
 // ── Mock route modules ───────────────────────────────────────────────────────
@@ -114,10 +154,18 @@ vi.mock("@/utils/ability", () => ({
 // ── Mock structuredClone (router uses it, but functions can't be cloned in jsdom) ──
 const originalStructuredClone = globalThis.structuredClone;
 function shallowCloneRoutes(routes: unknown[]): unknown[] {
-  return routes.map((r: any) => ({
-    ...r,
-    children: r.children ? shallowCloneRoutes(r.children) : undefined,
-  }));
+  return routes.map((route) => {
+    const routeRecord = route as {
+      children?: unknown[];
+      [key: string]: unknown;
+    };
+    return {
+      ...routeRecord,
+      children: routeRecord.children
+        ? shallowCloneRoutes(routeRecord.children)
+        : undefined,
+    };
+  });
 }
 
 // ── Tests ────────────────────────────────────────────────────────────────────
@@ -126,6 +174,7 @@ describe("src/router/index.ts", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
+    routerBeforeEachGuards.length = 0;
     // Stub structuredClone to handle function-component routes
     vi.stubGlobal("structuredClone", (val: unknown) => {
       if (Array.isArray(val)) return shallowCloneRoutes(val);
@@ -142,7 +191,7 @@ describe("src/router/index.ts", () => {
     it("calls app.use with the router instance", async () => {
       const { setupRouter } = await import("@/router");
       const app = { use: vi.fn() };
-      setupRouter(app as any);
+      setupRouter(app as { use: typeof app.use });
       expect(app.use).toHaveBeenCalledWith(mockRouter);
     });
   });
@@ -169,6 +218,30 @@ describe("src/router/index.ts", () => {
       const r2 = useRouter();
       expect(r1).toBe(r2);
     });
+
+    it("preserves lang/theme query on route changes when target query is missing", async () => {
+      await import("@/router");
+      const guard = routerBeforeEachGuards[0];
+      expect(guard).toBeDefined();
+
+      const result = guard({
+        path: "/resource/polygen/index",
+        query: {},
+        hash: "",
+        params: {},
+        name: undefined,
+      });
+
+      expect(result).toEqual({
+        path: "/resource/polygen/index",
+        query: {
+          lang: "ja-JP",
+          theme: "deep-space",
+        },
+        hash: "",
+        replace: true,
+      });
+    });
   });
 
   // ── UpdateRoutes ─────────────────────────────────────────────────────────
@@ -178,14 +251,14 @@ describe("src/router/index.ts", () => {
       const mockAbility = {
         can: vi.fn(() => true),
       };
-      await UpdateRoutes(mockAbility as any);
+      await UpdateRoutes(mockAbility as MockAbility);
       expect(mockAbility.can).toHaveBeenCalled();
     });
 
     it("sets meta.hidden=false when ability.can returns true", async () => {
       const { UpdateRoutes, constantRoutes } = await import("@/router");
       const mockAbility = { can: vi.fn(() => true) };
-      await UpdateRoutes(mockAbility as any);
+      await UpdateRoutes(mockAbility as MockAbility);
       // All top-level routes with meta should have hidden=false (can open = true → !true = false)
       const routeWithMeta = constantRoutes.find(
         (r) => r.meta && r.path === "/redirect"
@@ -198,7 +271,7 @@ describe("src/router/index.ts", () => {
     it("sets meta.hidden=true when ability.can returns false", async () => {
       const { UpdateRoutes, constantRoutes } = await import("@/router");
       const mockAbility = { can: vi.fn(() => false) };
-      await UpdateRoutes(mockAbility as any);
+      await UpdateRoutes(mockAbility as MockAbility);
       const routeWithMeta = constantRoutes.find(
         (r) => r.meta && r.path === "/redirect"
       );
@@ -216,7 +289,7 @@ describe("src/router/index.ts", () => {
           return true;
         }),
       };
-      await UpdateRoutes(mockAbility as any);
+      await UpdateRoutes(mockAbility as MockAbility);
       // Should be called for redirect route + its children + "/" route children
       expect(callCount).toBeGreaterThan(2);
     });
@@ -224,7 +297,9 @@ describe("src/router/index.ts", () => {
     it("does not throw when ability.can always returns false", async () => {
       const { UpdateRoutes } = await import("@/router");
       const mockAbility = { can: vi.fn(() => false) };
-      await expect(UpdateRoutes(mockAbility as any)).resolves.toBeUndefined();
+      await expect(
+        UpdateRoutes(mockAbility as MockAbility)
+      ).resolves.toBeUndefined();
     });
   });
 

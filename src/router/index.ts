@@ -6,6 +6,7 @@ import type { App } from "vue";
 import { ref } from "vue";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import { Meta, RouteVO } from "@/api/menu/model";
+import { getViewPreferenceQuery } from "@/utils/view-preferences";
 
 // 布局组件
 export const Layout = () => import("@/layout/index.vue");
@@ -89,6 +90,43 @@ const router = createRouter({
   routes: constantRoutes,
   // 刷新时，滚动条位置还原
   scrollBehavior: () => ({ left: 0, top: 0 }),
+});
+
+router.beforeEach((to) => {
+  const currentPreference = getViewPreferenceQuery();
+  const mergedQuery = { ...to.query } as Record<string, unknown>;
+  let changed = false;
+
+  if (currentPreference.lang && mergedQuery.lang == null) {
+    mergedQuery.lang = currentPreference.lang;
+    changed = true;
+  }
+
+  if (currentPreference.theme && mergedQuery.theme == null) {
+    mergedQuery.theme = currentPreference.theme;
+    changed = true;
+  }
+
+  if (!changed) {
+    return true;
+  }
+
+  if (to.name) {
+    return {
+      name: to.name,
+      params: to.params,
+      query: mergedQuery,
+      hash: to.hash,
+      replace: true,
+    };
+  }
+
+  return {
+    path: to.path,
+    query: mergedQuery,
+    hash: to.hash,
+    replace: true,
+  };
 });
 
 // 全局注册 router
