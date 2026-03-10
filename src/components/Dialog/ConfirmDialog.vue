@@ -1,21 +1,31 @@
 <template>
   <el-dialog
     v-model="visible"
-    :title="title"
-    width="420px"
+    :title="hideTitle ? '' : title"
+    :width="width"
     append-to-body
     destroy-on-close
-    class="custom-confirm-dialog"
+    :class="[
+      'custom-confirm-dialog',
+      { 'compact-dialog': compact, 'no-title': hideTitle },
+    ]"
     :close-on-click-modal="false"
     :show-close="false"
   >
-    <div class="dialog-content">
-      <div class="confirm-box" :class="type">
+    <div class="dialog-content" :class="{ 'compact-content': compact }">
+      <div
+        class="confirm-box"
+        :class="[type, { 'is-centered': centeredText || compact }]"
+      >
         <font-awesome-icon
+          v-if="!compact"
           :icon="iconName"
           class="confirm-icon"
         ></font-awesome-icon>
-        <div class="confirm-text">
+        <div
+          class="confirm-text"
+          :class="{ centered: centeredText || compact }"
+        >
           <p class="confirm-title">{{ message }}</p>
           <p v-if="description" class="confirm-desc">{{ description }}</p>
         </div>
@@ -39,6 +49,10 @@ const props = withDefaults(
   defineProps<{
     modelValue: boolean;
     title?: string;
+    width?: string;
+    hideTitle?: boolean;
+    compact?: boolean;
+    centeredText?: boolean;
     message: string;
     description?: string;
     type?: "warning" | "danger" | "info" | "success";
@@ -47,6 +61,10 @@ const props = withDefaults(
   }>(),
   {
     title: "确认",
+    width: "420px",
+    hideTitle: false,
+    compact: false,
+    centeredText: false,
     description: "",
     type: "warning",
     confirmText: "确认",
@@ -123,6 +141,27 @@ const handleCancel = () => {
   }
 }
 
+.custom-confirm-dialog.no-title {
+  .el-dialog__header {
+    display: none;
+    padding: 0;
+  }
+
+  .el-dialog__body {
+    padding-top: 18px;
+  }
+}
+
+.custom-confirm-dialog.compact-dialog {
+  .el-dialog {
+    border-radius: 16px;
+  }
+
+  .el-dialog__body {
+    padding: 18px 20px 20px;
+  }
+}
+
 // Removed redundant .dark override
 </style>
 
@@ -131,6 +170,10 @@ const handleCancel = () => {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.dialog-content.compact-content {
+  gap: 16px;
 }
 
 .confirm-box {
@@ -182,11 +225,22 @@ const handleCancel = () => {
   flex: 1;
 }
 
+.confirm-text.centered {
+  width: 100%;
+  text-align: center;
+}
+
 .confirm-title {
   font-size: 15px;
   font-weight: 500;
   color: var(--text-primary, #1e293b);
   margin: 0 0 6px;
+}
+
+.compact-content .confirm-title {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.45;
 }
 
 .confirm-desc {
@@ -200,6 +254,20 @@ const handleCancel = () => {
   display: flex;
   justify-content: center;
   gap: 12px;
+}
+
+.confirm-box.is-centered {
+  justify-content: center;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.compact-content .btn-primary,
+.compact-content .btn-secondary,
+.compact-content .btn-danger {
+  height: 40px;
+  padding: 0 26px;
+  font-size: 16px;
 }
 
 .btn-primary {

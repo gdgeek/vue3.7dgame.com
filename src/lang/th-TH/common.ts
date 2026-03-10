@@ -31,6 +31,12 @@ export default {
     button: {
       save: "บันทึก",
     },
+    scriptSaveConfirm: {
+      title: "แจ้งเตือน",
+      message: "ต้องการบันทึกสคริปต์ปัจจุบันหรือไม่?",
+      confirm: "ใช่",
+      cancel: "ไม่",
+    },
     message: {
       createSuccess: "สร้างสำเร็จ",
       saveSuccess: "บันทึกสำเร็จ",

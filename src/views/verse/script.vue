@@ -3,18 +3,16 @@
     <el-container>
       <el-main>
         <el-card :loading="loading" class="box-card">
-          <template #header>
-            <div v-if="verse" class="clearfix">
-              <el-link :href="sceneEditorLink" :underline="false">{{
-                verse.name
-              }}</el-link>
-              /【{{ $t("verse.view.script.title") }}】
-
-              <!--<el-button type="primary" size="small" @click="run">测试运行</el-button>
-              <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
-                返回
-              </el-button>-->
-              <el-button-group style="float: right">
+          <el-container v-if="!disabled">
+            <div class="script-tabs-wrapper">
+              <div v-if="verse" class="script-tabs-actions">
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="goBackToSceneEditor"
+                >
+                  {{ $t("route.project.sceneEditor") }}
+                </el-button>
                 <el-button
                   v-if="saveable"
                   type="primary"
@@ -27,177 +25,188 @@
                   ></font-awesome-icon>
                   {{ $t("verse.view.script.save") }}
                 </el-button>
-              </el-button-group>
-            </div>
-          </template>
-
-          <el-container v-if="!disabled">
-            <el-tabs v-model="activeName" type="card" style="width: 100%">
-              <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
-                <el-main
-                  style="
-                    margin: 0;
-                    padding: 0;
-                    height: 70vh;
-                    position: relative;
-                  "
+              </div>
+              <el-tabs v-model="activeName" type="card" style="width: 100%">
+                <el-tab-pane
+                  :label="$t('verse.view.script.edit')"
+                  name="blockly"
                 >
-                  <div class="fullscreen-controls">
-                    <el-button-group>
-                      <el-button
-                        class="fullscreen-btn"
-                        size="small"
-                        type="primary"
-                        plain
-                        @click="toggleFullscreen"
-                      >
-                        <el-icon>
-                          <FullScreen v-if="!isFullscreen"></FullScreen>
-                          <Aim v-else></Aim>
-                        </el-icon>
-                      </el-button>
-                      <template v-if="isFullscreen">
-                        <el-button
-                          size="small"
-                          type="primary"
-                          @click="showFullscreenCode('lua')"
-                        >
-                          Lua
-                        </el-button>
-                        <el-button
-                          size="small"
-                          color="#F7DF1E"
-                          style="margin-right: 10px"
-                          @click="showFullscreenCode('javascript')"
-                        >
-                          JavaScript
-                        </el-button>
-                        <el-button
-                          size="small"
-                          type="primary"
-                          style="margin-right: 10px"
-                          @click="run"
-                        >
-                          测试运行
-                        </el-button>
-                        <el-button
-                          v-if="saveable"
-                          size="small"
-                          type="primary"
-                          style="margin-right: 50px"
-                          @click="save"
-                        >
-                          <font-awesome-icon
-                            class="icon"
-                            icon="save"
-                          ></font-awesome-icon>
-                          {{ $t("verse.view.script.save") }}
-                        </el-button>
-                      </template>
-                    </el-button-group>
-                  </div>
-
-                  <el-dialog
-                    v-model="showCodeDialog"
-                    :title="codeDialogTitle"
-                    fullscreen
-                    :show-close="true"
-                    :close-on-click-modal="false"
-                    :close-on-press-escape="true"
+                  <el-main
+                    style="
+                      margin: 0;
+                      padding: 0;
+                      height: 70vh;
+                      position: relative;
+                    "
                   >
-                    <div class="code-dialog-content">
-                      <el-card :class="isDark ? 'dark-theme' : 'light-theme'">
-                        <div v-highlight>
-                          <div class="code-container2">
-                            <el-button
-                              class="copy-button2"
-                              text
-                              @click="copyCode(currentCode)"
-                            >
-                              <el-icon class="icon">
-                                <CopyDocument></CopyDocument>
-                              </el-icon>
-                              {{ $t("copy.title") }}
-                            </el-button>
-                            <pre>
+                    <div class="fullscreen-controls">
+                      <el-button-group>
+                        <el-button
+                          class="fullscreen-btn"
+                          size="small"
+                          type="primary"
+                          plain
+                          @click="toggleFullscreen"
+                        >
+                          <el-icon>
+                            <FullScreen v-if="!isFullscreen"></FullScreen>
+                            <Aim v-else></Aim>
+                          </el-icon>
+                        </el-button>
+                        <template v-if="isFullscreen">
+                          <el-button
+                            size="small"
+                            type="primary"
+                            @click="showFullscreenCode('lua')"
+                          >
+                            Lua
+                          </el-button>
+                          <el-button
+                            size="small"
+                            color="#F7DF1E"
+                            style="margin-right: 10px"
+                            @click="showFullscreenCode('javascript')"
+                          >
+                            JavaScript
+                          </el-button>
+                          <el-button
+                            size="small"
+                            type="primary"
+                            style="margin-right: 10px"
+                            @click="run"
+                          >
+                            测试运行
+                          </el-button>
+                          <el-button
+                            v-if="saveable"
+                            size="small"
+                            type="primary"
+                            style="margin-right: 50px"
+                            @click="save"
+                          >
+                            <font-awesome-icon
+                              class="icon"
+                              icon="save"
+                            ></font-awesome-icon>
+                            {{ $t("verse.view.script.save") }}
+                          </el-button>
+                        </template>
+                      </el-button-group>
+                    </div>
+
+                    <el-dialog
+                      v-model="showCodeDialog"
+                      :title="codeDialogTitle"
+                      fullscreen
+                      :show-close="true"
+                      :close-on-click-modal="false"
+                      :close-on-press-escape="true"
+                    >
+                      <div class="code-dialog-content">
+                        <el-card :class="isDark ? 'dark-theme' : 'light-theme'">
+                          <div v-highlight>
+                            <div class="code-container2">
+                              <el-button
+                                class="copy-button2"
+                                text
+                                @click="copyCode(currentCode)"
+                              >
+                                <el-icon class="icon">
+                                  <CopyDocument></CopyDocument>
+                                </el-icon>
+                                {{ $t("copy.title") }}
+                              </el-button>
+                              <pre>
                     <code :class="currentCodeType">{{ currentCode }}</code>
                   </pre>
+                            </div>
                           </div>
-                        </div>
-                      </el-card>
-                    </div>
-                  </el-dialog>
+                        </el-card>
+                      </div>
+                    </el-dialog>
 
-                  <iframe
-                    style="margin: 0; padding: 0; height: 100%; width: 100%"
-                    id="editor"
-                    ref="editor"
-                    :src="src"
-                  ></iframe>
-                </el-main>
-              </el-tab-pane>
-              <el-tab-pane :label="$t('verse.view.script.code')" name="script">
-                <el-card v-if="activeName === 'script'" class="box-card">
-                  <div v-highlight>
-                    <el-tabs v-model="languageName">
-                      <el-tab-pane label="Lua" name="lua">
-                        <template #label>
-                          <span style="display: flex; align-items: center">
-                            <img
-                              src="/lua.png"
-                              style="width: 25px; margin-right: 5px"
-                              alt=""
-                            />
-                            <span>Lua</span>
-                          </span>
-                        </template>
-                        <div class="code-container">
-                          <el-button
-                            class="copy-button"
-                            text
-                            @click="copyCode(LuaCode)"
-                            ><el-icon class="icon">
-                              <CopyDocument></CopyDocument> </el-icon
-                            >{{ $t("copy.title") }}</el-button
-                          >
-                          <pre>
+                    <iframe
+                      style="margin: 0; padding: 0; height: 100%; width: 100%"
+                      id="editor"
+                      ref="editor"
+                      :src="src"
+                    ></iframe>
+                  </el-main>
+                </el-tab-pane>
+                <el-tab-pane
+                  :label="$t('verse.view.script.code')"
+                  name="script"
+                >
+                  <el-card v-if="activeName === 'script'" class="box-card">
+                    <div v-highlight>
+                      <el-tabs v-model="languageName">
+                        <el-tab-pane label="Lua" name="lua">
+                          <template #label>
+                            <span style="display: flex; align-items: center">
+                              <img
+                                src="/lua.png"
+                                style="width: 25px; margin-right: 5px"
+                                alt=""
+                              />
+                              <span>Lua</span>
+                            </span>
+                          </template>
+                          <div class="code-container">
+                            <el-button
+                              class="copy-button"
+                              text
+                              @click="copyCode(LuaCode)"
+                              ><el-icon class="icon">
+                                <CopyDocument></CopyDocument> </el-icon
+                              >{{ $t("copy.title") }}</el-button
+                            >
+                            <pre>
                   <code class="lua">{{ LuaCode }}</code>
                 </pre>
-                        </div>
-                      </el-tab-pane>
-                      <el-tab-pane label="JavaScript" name="javascript">
-                        <template #label>
-                          <span style="display: flex; align-items: center">
-                            <img
-                              src="/javascript.png"
-                              style="width: 25px; margin-right: 5px"
-                              alt=""
-                            />
-                            <span>JavaScript</span>
-                          </span>
-                        </template>
-                        <div class="code-container">
-                          <el-button
-                            class="copy-button"
-                            text
-                            @click="copyCode(JavaScriptCode)"
-                            ><el-icon class="icon">
-                              <CopyDocument></CopyDocument> </el-icon
-                            >{{ $t("copy.title") }}</el-button
-                          >
-                          <pre>
+                          </div>
+                        </el-tab-pane>
+                        <el-tab-pane label="JavaScript" name="javascript">
+                          <template #label>
+                            <span style="display: flex; align-items: center">
+                              <img
+                                src="/javascript.png"
+                                style="width: 25px; margin-right: 5px"
+                                alt=""
+                              />
+                              <span>JavaScript</span>
+                            </span>
+                          </template>
+                          <div class="code-container">
+                            <el-button
+                              class="copy-button"
+                              text
+                              @click="copyCode(JavaScriptCode)"
+                              ><el-icon class="icon">
+                                <CopyDocument></CopyDocument> </el-icon
+                              >{{ $t("copy.title") }}</el-button
+                            >
+                            <pre>
                   <code class="javascript">{{ JavaScriptCode }}</code>
                 </pre>
-                        </div>
-                      </el-tab-pane>
-                    </el-tabs>
-                  </div>
-                </el-card>
-              </el-tab-pane>
-            </el-tabs>
+                          </div>
+                        </el-tab-pane>
+                      </el-tabs>
+                    </div>
+                  </el-card>
+                </el-tab-pane>
+              </el-tabs>
+            </div>
           </el-container>
           <div v-if="disabled" class="runArea">
             <div class="scene-fullscreen-controls">
+              <el-button
+                class="scene-exit-btn"
+                size="small"
+                type="primary"
+                @click="disabled = false"
+              >
+                {{ $t("common.back") }}
+              </el-button>
               <el-button
                 class="scene-fullscreen-btn"
                 size="small"
@@ -229,7 +238,7 @@
 // @ts-nocheck
 import { logger } from "@/utils/logger";
 import { ref, computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import {
   getVerse,
   putVerseCode,
@@ -238,7 +247,7 @@ import {
   type VerseMetasWithJsCode,
 } from "@/api/v1/verse";
 import { useI18n } from "vue-i18n";
-import { Message, MessageBox } from "@/components/Dialog";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { takePhoto } from "@/api/v1/verse";
 import pako from "pako";
 import ScenePlayer from "./ScenePlayer.vue";
@@ -255,6 +264,7 @@ const loading = ref(false);
 const verse = ref<VerseData>();
 const verseMetasWithJsCodeData = ref<VerseMetasWithJsCode>();
 const route = useRoute();
+const router = useRouter();
 const id = computed(() => parseInt(route.query.id as string));
 const metasJavaScriptCode = ref("");
 // map 用于记录每个 meta_id 在场景中对应的实体列表
@@ -270,7 +280,15 @@ const sceneEditorLink = computed(() => {
   return `/verse/scene?id=${id.value}&title=${encodeURIComponent(titleText)}`;
 });
 
-const saveable = computed(() => verse.value!.editable);
+const goBackToSceneEditor = async () => {
+  const canLeave = await resolveUnsavedChangesBeforeLeave({
+    showDiscardInfo: false,
+  });
+  if (!canLeave) return;
+  router.push(sceneEditorLink.value);
+};
+
+const saveable = computed(() => Boolean(verse.value?.editable));
 
 type ScenePlayerInstance = InstanceType<typeof ScenePlayer>;
 const scenePlayer = ref<ScenePlayerInstance>();
@@ -321,11 +339,11 @@ const initEditor = () => {
 // ---------- postScript（Verse 版：保存 + 发布流程）----------
 const postScript = async (message: EditorPostPayload) => {
   if (verse.value === null) {
-    Message.error(t("verse.view.script.error1"));
+    ElMessage.error(t("verse.view.script.error1"));
     return;
   }
   if (!verse.value!.editable) {
-    Message.error(t("verse.view.script.error2"));
+    ElMessage.error(t("verse.view.script.error2"));
     return;
   }
 
@@ -342,11 +360,14 @@ const postScript = async (message: EditorPostPayload) => {
     lua: message.lua,
   });
 
-  Message.success(t("verse.view.script.success"));
-  MessageBox.confirm(
+  ElMessage.success(t("verse.view.script.success"));
+  ElMessageBox.confirm(
     t("verse.view.sceneEditor.saveAndPublishConfirm"),
     t("verse.view.sceneEditor.publishScene"),
     {
+      showClose: true,
+      distinguishCancelAndClose: true,
+      closeOnClickModal: false,
       confirmButtonText: t("verse.view.sceneEditor.confirm"),
       cancelButtonText: t("verse.view.sceneEditor.cancel"),
       type: "warning",
@@ -354,16 +375,10 @@ const postScript = async (message: EditorPostPayload) => {
   )
     .then(async () => {
       await takePhoto(id.value);
-      Message({
-        type: "success",
-        message: t("verse.view.sceneEditor.publishSuccess"),
-      });
+      ElMessage.success(t("verse.view.sceneEditor.publishSuccess"));
     })
     .catch(() => {
-      Message({
-        type: "info",
-        message: t("verse.view.sceneEditor.publishCanceled"),
-      });
+      ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
     });
 };
 
@@ -381,6 +396,7 @@ const {
   currentCodeType,
   codeDialogTitle,
   unsavedBlocklyData,
+  resolveUnsavedChangesBeforeLeave,
   editor,
   src,
   isDark,
@@ -667,7 +683,7 @@ onMounted(async () => {
     }
     initEditor();
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : String(error));
+    ElMessage.error(error instanceof Error ? error.message : String(error));
   } finally {
     loading.value = false;
   }
@@ -696,6 +712,39 @@ onMounted(async () => {
 
 .light-theme .hljs {
   background-color: #fafafa !important;
+}
+
+.script-tabs-wrapper {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-width: 0;
+}
+
+.script-tabs-actions {
+  position: absolute;
+  top: 4px;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.script-tabs-wrapper :deep(.el-tabs__header) {
+  padding-right: 280px;
+}
+
+@media (max-width: 768px) {
+  .script-tabs-actions {
+    position: static;
+    margin-bottom: 8px;
+    justify-content: flex-end;
+  }
+
+  .script-tabs-wrapper :deep(.el-tabs__header) {
+    padding-right: 0;
+  }
 }
 
 .fullscreen-btn {
@@ -764,6 +813,10 @@ onMounted(async () => {
 
 .scene-fullscreen-btn {
   opacity: 0.8;
+}
+
+.scene-exit-btn {
+  margin-right: 8px;
 }
 
 /* 全屏时的样式 */

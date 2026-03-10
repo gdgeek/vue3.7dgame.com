@@ -30,6 +30,12 @@ export default {
     button: {
       save: "保存",
     },
+    scriptSaveConfirm: {
+      title: "提示",
+      message: "是否保存當前腳本",
+      confirm: "是",
+      cancel: "否",
+    },
     message: {
       createSuccess: "創建成功",
       saveSuccess: "保存成功",

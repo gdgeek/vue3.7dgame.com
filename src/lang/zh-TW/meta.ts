@@ -102,6 +102,7 @@ export default {
     },
     script: {
       title: "腳本",
+      entityEditor: "實體編輯",
       save: "保存",
       error1: "沒有實體信息",
       error2: "沒有編輯權限",

@@ -129,6 +129,7 @@ export default {
     },
     script: {
       title: "Script",
+      entityEditor: "Entity Editor",
       save: "Save",
       error1: "No metadata available",
       error2: "No permission to edit",

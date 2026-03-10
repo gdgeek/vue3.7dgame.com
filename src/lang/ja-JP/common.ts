@@ -30,6 +30,12 @@ export default {
     button: {
       save: "保存",
     },
+    scriptSaveConfirm: {
+      title: "確認",
+      message: "現在のスクリプトを保存しますか？",
+      confirm: "はい",
+      cancel: "いいえ",
+    },
     message: {
       createSuccess: "作成成功",
       saveSuccess: "保存成功",

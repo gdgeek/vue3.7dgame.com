@@ -31,6 +31,12 @@ export default {
     button: {
       save: "Save",
     },
+    scriptSaveConfirm: {
+      title: "Prompt",
+      message: "Do you want to save the current script?",
+      confirm: "Yes",
+      cancel: "No",
+    },
     message: {
       createSuccess: "Created successfully",
       saveSuccess: "Saved successfully",

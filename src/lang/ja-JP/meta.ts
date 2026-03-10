@@ -115,6 +115,7 @@ export default {
     },
     script: {
       title: "スクリプト",
+      entityEditor: "エンティティ編集",
       save: "保存",
       error1: "メタ情報がありません",
       error2: "編集権限がありません",
