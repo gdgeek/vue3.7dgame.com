@@ -319,11 +319,18 @@ const saveable = (data: unknown) => {
 // 向编辑器发送消息
 const postMessage = (action: string, data: unknown = {}) => {
   if (editor.value && editor.value.contentWindow) {
+    const rawData = toRaw(data);
+    let clonedData: unknown;
+    try {
+      clonedData = structuredClone(rawData);
+    } catch {
+      clonedData = JSON.parse(JSON.stringify(rawData));
+    }
     editor.value.contentWindow.postMessage(
       {
         from: "scene.meta.web",
         action,
-        data: structuredClone(data),
+        data: clonedData,
       },
       "*"
     );

@@ -23,7 +23,7 @@
 import { logger } from "@/utils/logger";
 import { takePhoto } from "@/api/v1/verse";
 import { useRoute, useRouter } from "vue-router";
-import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
+import { computed, onMounted, onBeforeUnmount, ref, watch, toRaw } from "vue";
 //import PrefabDialog from "@/components/MrPP/PrefabDialog.vue";
 import MetaDialog from "@/components/MrPP/MetaDialog.vue";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
@@ -117,6 +117,11 @@ const refresh = async () => {
   verse.value = response.data;
   saveable.value = verse.value ? verse.value.editable : false;
 
+  if (!verse.value) {
+    logger.error("refresh: verse data is null/undefined, skip postMessage");
+    return;
+  }
+
   postMessage("load", {
     id: id.value,
     data: verse.value,
@@ -181,11 +186,18 @@ const isCoverUploadPayload = (value: unknown): value is CoverUploadPayload =>
 
 const postMessage = (action: string, data: unknown) => {
   if (editor.value && editor.value.contentWindow) {
+    const rawData = toRaw(data);
+    let clonedData: unknown;
+    try {
+      clonedData = structuredClone(rawData);
+    } catch {
+      clonedData = JSON.parse(JSON.stringify(rawData));
+    }
     editor.value.contentWindow.postMessage(
       {
         from: "scene.verse.web",
         action,
-        data: structuredClone(data),
+        data: clonedData,
       },
       "*"
     );
@@ -510,10 +522,10 @@ onBeforeUnmount(() => {
 <style lang="scss" scoped>
 .content {
   height: calc(100vh - 140px);
-  border: 0;
-  outline: none;
-  border-radius: var(--editor-frame-radius, 16px);
   clip-path: inset(0 round var(--editor-frame-radius, 16px));
   background: var(--bg-card, #fff);
+  border: 0;
+  border-radius: var(--editor-frame-radius, 16px);
+  outline: none;
 }
 </style>

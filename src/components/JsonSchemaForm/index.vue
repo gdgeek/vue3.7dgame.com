@@ -73,7 +73,13 @@ const initDefaults = (schema: JsonSchema, model: Record<string, JsonValue>) => {
       // Set default if model value is undefined
       if (model[key] === undefined && propSchema.default !== undefined) {
         // Deep copy default value to avoid reference issues
-        model[key] = structuredClone(propSchema.default) as JsonValue;
+        try {
+          model[key] = structuredClone(propSchema.default) as JsonValue;
+        } catch {
+          model[key] = JSON.parse(
+            JSON.stringify(propSchema.default)
+          ) as JsonValue;
+        }
       }
 
       // Recursively init defaults for nested objects (if they exist in model or are created)
@@ -133,8 +139,8 @@ defineExpose({
 }
 
 .form-footer {
-  margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+  margin-top: 20px;
 }
 </style>

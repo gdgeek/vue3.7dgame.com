@@ -70,8 +70,13 @@ const removeItem = (index: number) => {
 
 const getDefaultValue = (itemSchema?: JsonSchema): JsonValue => {
   if (!itemSchema) return "";
-  if (itemSchema.default !== undefined)
-    return structuredClone(itemSchema.default) as JsonValue;
+  if (itemSchema.default !== undefined) {
+    try {
+      return structuredClone(itemSchema.default) as JsonValue;
+    } catch {
+      return JSON.parse(JSON.stringify(itemSchema.default)) as JsonValue;
+    }
+  }
   if (itemSchema.type === "string") return "";
   if (itemSchema.type === "number" || itemSchema.type === "integer") return 0;
   if (itemSchema.type === "boolean") return false;
@@ -83,31 +88,31 @@ const getDefaultValue = (itemSchema?: JsonSchema): JsonValue => {
 
 <style scoped>
 .array-field {
-  border: 1px dashed #dcdfe6;
   padding: 10px;
+  border: 1px dashed #dcdfe6;
   border-radius: 4px;
 }
 
 .array-item {
+  padding: 10px;
   margin-bottom: 10px;
+  background-color: #fafafa;
   border: 1px solid #ebeef5;
   border-radius: 4px;
-  padding: 10px;
-  background-color: #fafafa;
 }
 
 .item-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  padding-bottom: 5px;
   margin-bottom: 10px;
   border-bottom: 1px solid #ebeef5;
-  padding-bottom: 5px;
 }
 
 .item-title {
-  font-weight: bold;
   font-size: 13px;
+  font-weight: bold;
   color: #606266;
 }
 </style>
