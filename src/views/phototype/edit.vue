@@ -37,7 +37,7 @@
           ></json-schema-editor>
           <br />
           <el-card class="box-card" style="min-height: 500px">
-            <codemirror v-model="dataJson"></codemirror>
+            <codemirror v-model="jsonStr"></codemirror>
           </el-card>
           <br />
           <el-button
@@ -102,7 +102,6 @@ const JsonSchemaEditor = JsonSchemaEditorPlugin[0] ?? JsonSchemaEditorPlugin;
 import { logger } from "@/utils/logger";
 import { getPhototype, putPhototype, postPhototype } from "@/api/v1/phototype";
 import type { PhototypeType } from "@/api/v1/types/phototype";
-import type { JsonValue } from "@/api/v1/types/common";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import Codemirror from "@/components/Codemirror.vue";
 import Resource from "@/components/Resource.vue";
@@ -216,36 +215,13 @@ const saveChanges = async () => {
 
 const phototype = ref<PhototypeType | null>(null);
 
-// JSON 字符串绑定到 Codemirror（排除 transform 字段）
-const dataJson = ref<string>("{}");
-
-// 辅助函数：把 data 对象序列化为编辑器显示字符串（排除 transform）
-function serializeDataForEditor(data: JsonValue | null | undefined): string {
-  if (!data || typeof data !== "object" || Array.isArray(data)) return "{}";
-  const asRecord = data as Record<string, JsonValue>;
-  const filtered = Object.fromEntries(
-    Object.entries(asRecord).filter(([k]) => k !== "transform")
-  );
-  return JSON.stringify(filtered, null, 2);
-}
-
-// 当编辑器内容变化时，尝试解析并写回 phototype.data（保留 transform）
-watch(dataJson, (value) => {
-  if (!phototype.value) return;
-  try {
-    const parsed = JSON.parse(value) as Record<string, JsonValue>;
-    const currentData = phototype.value.data;
-    const transform =
-      currentData &&
-      typeof currentData === "object" &&
-      !Array.isArray(currentData)
-        ? (currentData as Record<string, JsonValue>).transform
-        : undefined;
-    phototype.value.data =
-      transform !== undefined ? { ...parsed, transform } : { ...parsed };
-  } catch {
-    ElMessage.warning(t("phototype.edit.invalidJson"));
-  }
+const jsonStr = computed({
+  get: () => JSON.stringify(tree.value, null, 2),
+  set: (newVal: string) => {
+    try {
+      tree.value = JSON.parse(newVal);
+    } catch (e) {}
+  },
 });
 
 const refresh = async () => {
@@ -263,7 +239,6 @@ const refresh = async () => {
       },
       schema: null,
     };
-    dataJson.value = "{}";
     tree.value = {
       root: {
         type: "object",
@@ -276,7 +251,6 @@ const refresh = async () => {
   try {
     const response = await getPhototype(id.value);
     phototype.value = response.data;
-    dataJson.value = serializeDataForEditor(phototype.value?.data);
     if (phototype.value) {
       if (!phototype.value.data) {
         phototype.value.data = {};
