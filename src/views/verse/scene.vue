@@ -1,7 +1,11 @@
 <template>
   <div class="verse-scene">
     <KnightDataDialog ref="knightDataRef" v-show="false"></KnightDataDialog>
-    <MetaDialog @selected="selected" ref="metaDialogRef" v-show="false"></MetaDialog>
+    <MetaDialog
+      @selected="selected"
+      ref="metaDialogRef"
+      v-show="false"
+    ></MetaDialog>
     <!--<PrefabDialog @selected="selected" ref="prefabDialogRef"></PrefabDialog>-->
     <el-container class="editor-wrapper">
       <el-main class="editor-container">
