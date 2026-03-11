@@ -570,8 +570,8 @@ const refresh = async () => {
 
     // 发送元数据和可用资源类型到编辑器
     postMessage("load", {
-      uuid: meta.data.uuid, // MetaInfo 的 uuid 属性
-      data: meta.data.data, // 场景数据
+
+      data: meta.data, // 场景数据
       saveable: saveable(meta.data),
       availableResourceTypes: availableTypes,
       user: {
