@@ -264,6 +264,39 @@
             </div>
           </div>
         </template>
+        <template #property-used-scenes>
+          <div class="used-scenes-value">
+            <template v-if="usedSceneOptions.length === 0">
+              {{ t("meta.list.properties.noScenes") }}
+            </template>
+            <template v-else>
+              <div ref="usedScenesControlsRef" class="used-scenes-controls">
+                <el-select
+                  v-model="selectedUsedSceneId"
+                  class="used-scenes-select"
+                  size="small"
+                  popper-class="detail-link-select-popper detail-link-select-popper-scene"
+                  @visible-change="handleUsedScenesDropdownVisible"
+                >
+                  <el-option
+                    v-for="scene in usedSceneOptions"
+                    :key="scene.id"
+                    :label="scene.name"
+                    :value="scene.id"
+                  ></el-option>
+                </el-select>
+                <el-button
+                  type="primary"
+                  class="used-scenes-enter-btn"
+                  size="small"
+                  @click="handleEnterSelectedScene"
+                >
+                  {{ t("meta.list.properties.enterScene") }}
+                </el-button>
+              </div>
+            </template>
+          </div>
+        </template>
       </DetailPanel>
     </div>
 
@@ -760,6 +793,14 @@ const detailProperties = computed(() => {
       label: t("meta.list.properties.resources"),
       value: getResourceCount(currentMeta.value),
     },
+    {
+      label: t("meta.list.properties.scenes"),
+      value:
+        usedSceneOptions.value.length > 0
+          ? usedSceneOptions.value[0].name
+          : t("meta.list.properties.noScenes"),
+      slotName: "used-scenes",
+    },
   ];
 });
 
@@ -776,6 +817,51 @@ const getResourceCount = (item?: {
   }
   return Array.isArray(item?.resources) ? item.resources.length : 0;
 };
+
+const selectedUsedSceneId = ref<number | null>(null);
+const usedScenesControlsRef = ref<HTMLElement | null>(null);
+
+const getUsedSceneOptions = (item?: metaInfo | null) => {
+  const verseMetas = Array.isArray(item?.verseMetas) ? item.verseMetas : [];
+  if (verseMetas.length === 0) return [] as SceneOption[];
+
+  const sceneNameMap = new Map<number, string>();
+  scenes.value.forEach((scene) => {
+    sceneNameMap.set(scene.id, scene.name);
+  });
+
+  const usedSceneOptions: SceneOption[] = [];
+  const seenSceneIds = new Set<number>();
+
+  verseMetas.forEach((relation) => {
+    const verseId = relation?.verse_id;
+    if (typeof verseId !== "number" || seenSceneIds.has(verseId)) return;
+    seenSceneIds.add(verseId);
+    usedSceneOptions.push({
+      id: verseId,
+      name:
+        sceneNameMap.get(verseId) ||
+        `${t("meta.list.properties.sceneFallback")}${verseId}`,
+    });
+  });
+
+  return usedSceneOptions;
+};
+
+const usedSceneOptions = computed(() => getUsedSceneOptions(currentMeta.value));
+
+watch(
+  () => usedSceneOptions.value,
+  (options) => {
+    const hasCurrentSelection =
+      selectedUsedSceneId.value !== null &&
+      options.some((scene) => scene.id === selectedUsedSceneId.value);
+    selectedUsedSceneId.value = hasCurrentSelection
+      ? selectedUsedSceneId.value
+      : (options[0]?.id ?? null);
+  },
+  { immediate: true }
+);
 
 type MetaEventItem = { title: string; name: string; type: string };
 
@@ -808,7 +894,7 @@ const openDetail = async (item: { id: number }) => {
 
   try {
     const response = await getMeta(item.id, {
-      expand: "image,author,resources",
+      expand: "image,author,resources,verseMetas",
     });
     currentMeta.value = response.data;
   } catch (err) {
@@ -831,10 +917,42 @@ const goToEditor = (item: { id: number; title?: string; name?: string }) => {
   router.push({ path: "/meta/scene", query: { id: item.id, title } });
 };
 
+const goToSceneEditor = (sceneId: number, sceneName?: string) => {
+  const title = encodeURIComponent(
+    t("verse.listPage.editorTitle", {
+      name: sceneName || t("verse.listPage.unnamed"),
+    })
+  );
+  router.push({ path: "/verse/scene", query: { id: sceneId, title } });
+};
+
 const handleGoToEditor = () => {
   if (currentMeta.value) {
     goToEditor(currentMeta.value);
   }
+};
+
+const handleEnterSelectedScene = () => {
+  if (selectedUsedSceneId.value === null) return;
+  const selectedScene = usedSceneOptions.value.find(
+    (scene) => scene.id === selectedUsedSceneId.value
+  );
+  goToSceneEditor(selectedUsedSceneId.value, selectedScene?.name);
+};
+
+const updateUsedScenesDropdownWidth = () => {
+  if (typeof document === "undefined") return;
+  const controlsWidth = usedScenesControlsRef.value?.offsetWidth;
+  if (!controlsWidth) return;
+  document.documentElement.style.setProperty(
+    "--detail-link-select-scene-width",
+    `${controlsWidth}px`
+  );
+};
+
+const handleUsedScenesDropdownVisible = (visible: boolean) => {
+  if (!visible) return;
+  updateUsedScenesDropdownWidth();
 };
 
 const handleCopy = async () => {
@@ -1267,6 +1385,104 @@ const deletedWindow = async (
 .events-empty {
   font-size: 12px;
   color: var(--text-muted, #94a3b8);
+}
+
+.used-scenes-value {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.used-scenes-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.used-scenes-select {
+  flex: 1;
+  min-width: 120px;
+
+  :deep(.el-select__wrapper) {
+    min-height: 24px;
+    align-items: center;
+  }
+
+  :deep(.el-select__selection) {
+    min-width: 0;
+    align-items: center;
+  }
+
+  :deep(.el-select__selected-item),
+  :deep(.el-select__placeholder) {
+    width: 100%;
+    text-align: center;
+    line-height: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.used-scenes-enter-btn {
+  flex-shrink: 0;
+  height: 24px;
+  padding: 0 10px;
+  font-size: 12px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+:global(.detail-link-select-popper .el-select-dropdown__item) {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+:global(.detail-link-select-popper-scene.el-select__popper) {
+  width: var(--detail-link-select-scene-width) !important;
+  min-width: var(--detail-link-select-scene-width) !important;
+  padding: 0 !important;
+}
+
+:global(
+  .detail-link-select-popper-scene.el-select__popper .el-select-dropdown
+) {
+  width: 100% !important;
+  min-width: 100% !important;
+}
+
+:global(
+  .detail-link-select-popper.el-select__popper .el-select-dropdown__item.hover,
+  .detail-link-select-popper.el-select__popper .el-select-dropdown__item:hover,
+  .detail-link-select-popper.el-select__popper
+    .el-select-dropdown__item.is-hovering
+) {
+  background: var(--primary-light, rgba(3, 169, 244, 0.12)) !important;
+  color: var(--primary-color, #03a9f4) !important;
+}
+
+:global(
+  .detail-link-select-popper.el-select__popper
+    .el-select-dropdown__item.selected:not(.hover):not(.is-hovering):not(
+      :hover
+    ),
+  .detail-link-select-popper.el-select__popper
+    .el-select-dropdown__item.is-selected:not(.hover):not(.is-hovering):not(
+      :hover
+    )
+) {
+  background: transparent !important;
+  color: var(--primary-color, #03a9f4) !important;
+  font-weight: 500 !important;
 }
 
 .selection-container {

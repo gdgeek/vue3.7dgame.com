@@ -177,7 +177,6 @@
               :file="currentPolygen.file"
               :has-animations="hasAnimations"
               @loaded="handleModelLoaded"
-              @progress="handleModelProgress"
             ></polygen-view>
             <div
               v-show="isPreviewHovered && !hasPreviewInteracted"
@@ -185,12 +184,6 @@
             >
               <font-awesome-icon :icon="['fas', 'hand']"></font-awesome-icon>
             </div>
-            <el-progress
-              v-if="modelProgress < 100"
-              :percentage="modelProgress"
-              :stroke-width="4"
-              class="model-progress"
-            ></el-progress>
           </div>
           <div v-else class="preview-placeholder">
             <font-awesome-icon :icon="['fas', 'cube']"></font-awesome-icon>
@@ -233,7 +226,6 @@ import {
   convertToLocalTime,
   formatFileSize as formatSize,
 } from "@/utils/utilityFunctions";
-import { printVector3 } from "@/assets/js/helper";
 import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
 import {
   denseResourceBreakpoints,
@@ -349,16 +341,27 @@ const viewDialogVisible = ref(false);
 // Detail panel state
 const currentPolygen = ref<ResourceInfo | null>(null);
 const detailLoading = ref(false);
-const modelProgress = ref(0);
 const polygenViewRef = ref<InstanceType<typeof PolygenView> | null>(null);
 const isPreviewHovered = ref(false);
 const hasPreviewInteracted = ref(false);
+const loadedModelStats = ref<{ faces?: number; vertices?: number } | null>(
+  null
+);
+
+const formatModelStat = (value: unknown) => {
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) && numericValue > 0
+    ? numericValue.toLocaleString()
+    : "—";
+};
 
 const detailProperties = computed(() => {
   if (!currentPolygen.value) return [];
   const info = currentPolygen.value.info
     ? JSON.parse(currentPolygen.value.info)
     : null;
+  const faces = info?.faces ?? loadedModelStats.value?.faces;
+  const vertices = info?.vertices ?? loadedModelStats.value?.vertices;
   return [
     { label: t("ui.type"), value: t("polygen.typeName") },
     {
@@ -369,12 +372,8 @@ const detailProperties = computed(() => {
       label: t("ui.createdAt"),
       value: convertToLocalTime(currentPolygen.value.created_at),
     },
-    ...(info?.size
-      ? [{ label: t("ui.dimensions"), value: printVector3(info.size) + " (m)" }]
-      : []),
-    ...(info?.faces
-      ? [{ label: t("ui.modelFaces"), value: info.faces.toLocaleString() }]
-      : []),
+    { label: t("ui.modelFaces"), value: formatModelStat(faces) },
+    { label: t("ui.modelVertices"), value: formatModelStat(vertices) },
   ];
 });
 
@@ -385,8 +384,8 @@ const openUploadDialog = () => {
 const openViewDialog = async (id: number) => {
   viewDialogVisible.value = true;
   detailLoading.value = true;
-  modelProgress.value = 0;
   hasAnimations.value = false;
+  loadedModelStats.value = null;
 
   try {
     const response = (await getPolygen(id)) as { data: ResourceInfo };
@@ -403,10 +402,10 @@ const openViewDialog = async (id: number) => {
 
 const handlePanelClose = () => {
   currentPolygen.value = null;
-  modelProgress.value = 0;
   hasAnimations.value = false;
   isPreviewHovered.value = false;
   hasPreviewInteracted.value = false;
+  loadedModelStats.value = null;
 };
 
 const hasAnimations = ref(false);
@@ -430,15 +429,16 @@ const hasAnimationsFromResourceInfo = (resource: ResourceInfo | null) => {
 const handleModelLoaded = (info: {
   size: { x: number; y: number; z: number };
   center: { x: number; y: number; z: number };
+  faces?: number;
+  vertices?: number;
   anim?: { name: string; length: number }[];
 }) => {
-  modelProgress.value = 100;
   const hasAnimationsFromLoaded = !!(info.anim && info.anim.length > 0);
   hasAnimations.value = hasAnimations.value || hasAnimationsFromLoaded;
-};
-
-const handleModelProgress = (progress: number) => {
-  modelProgress.value = progress;
+  loadedModelStats.value = {
+    faces: info.faces,
+    vertices: info.vertices,
+  };
 };
 
 const handlePreviewInteracted = () => {
@@ -788,13 +788,6 @@ const formatItemDate = (dateStr?: string) => {
   .svg-inline--fa {
     font-size: 48px;
   }
-}
-
-.model-progress {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
 }
 
 .preview-center-hint {

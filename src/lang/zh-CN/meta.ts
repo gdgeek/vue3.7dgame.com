@@ -36,6 +36,10 @@ export default {
         entity: "实体",
         author: "作者",
         resources: "使用资源数",
+        scenes: "已使用场景",
+        noScenes: "未被场景使用",
+        sceneFallback: "场景#",
+        enterScene: "进入该场景",
       },
       events: {
         title: "信号",

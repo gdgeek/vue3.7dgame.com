@@ -35,6 +35,10 @@ export default {
         entity: "實體",
         author: "作者",
         resources: "使用資源數",
+        scenes: "已使用場景",
+        noScenes: "未被場景使用",
+        sceneFallback: "場景#",
+        enterScene: "進入該場景",
       },
       events: {
         title: "信號",

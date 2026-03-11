@@ -57,6 +57,11 @@ type MetaPayload = {
   };
 };
 
+type UnsavedChangesResultPayload = {
+  requestId: string;
+  changed: boolean;
+};
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
@@ -76,6 +81,13 @@ const isAudioBarItem = (
   value: unknown
 ): value is { type: "audio"; context: unknown } =>
   isRecord(value) && value.type === "audio";
+
+const isUnsavedChangesResultPayload = (
+  value: unknown
+): value is UnsavedChangesResultPayload =>
+  isRecord(value) &&
+  typeof value.requestId === "string" &&
+  typeof value.changed === "boolean";
 
 const getAudioSource = (value: unknown): string => {
   if (!isRecord(value) || !isRecord(value.context)) return "";
@@ -164,7 +176,7 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
     }
   });
 };
-import { useRoute, useRouter } from "vue-router";
+import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import PhototypeDialog from "@/components/MrPP/PhototypeDialog.vue";
 import { putMeta, getMeta } from "@/api/v1/meta";
@@ -193,6 +205,9 @@ const editor = ref<HTMLIFrameElement | null>();
 let init = false;
 const ability = useAbility();
 const userStore = useUserStore();
+let unsavedCheckSeed = 0;
+const pendingUnsavedChecks = new Map<string, (changed: boolean) => void>();
+let pendingLeaveSaveResolver: ((result: boolean) => void) | null = null;
 
 const decodeRouteText = (value: string): string => {
   let decoded = value;
@@ -331,6 +346,86 @@ const postMessage = (action: string, data: unknown = {}) => {
   }
 };
 
+const confirmSaveCurrentEntity = () =>
+  ElMessageBox.confirm(t("common.entitySaveConfirm.message"), "", {
+    showClose: true,
+    center: true,
+    distinguishCancelAndClose: true,
+    closeOnClickModal: false,
+    closeOnPressEscape: true,
+    showCancelButton: true,
+    customClass: "script-save-confirm-box",
+    confirmButtonText: t("common.entitySaveConfirm.confirm"),
+    cancelButtonText: t("common.entitySaveConfirm.cancel"),
+  });
+
+const queryUnsavedChangesBeforeLeave = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if (!editor.value || !editor.value.contentWindow) {
+      resolve(false);
+      return;
+    }
+
+    const requestId = `meta_${Date.now()}_${++unsavedCheckSeed}`;
+    const timeout = window.setTimeout(() => {
+      pendingUnsavedChecks.delete(requestId);
+      resolve(false);
+    }, 1200);
+
+    pendingUnsavedChecks.set(requestId, (changed) => {
+      window.clearTimeout(timeout);
+      pendingUnsavedChecks.delete(requestId);
+      resolve(changed);
+    });
+
+    postMessage("check-unsaved-changes", { requestId });
+  });
+};
+
+const waitForLeaveSaveResult = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const timeout = window.setTimeout(() => {
+      if (pendingLeaveSaveResolver) {
+        pendingLeaveSaveResolver = null;
+      }
+      resolve(false);
+    }, 3000);
+
+    pendingLeaveSaveResolver = (result: boolean) => {
+      window.clearTimeout(timeout);
+      pendingLeaveSaveResolver = null;
+      resolve(result);
+    };
+  });
+};
+
+const resolveLeaveSave = (result: boolean) => {
+  if (!pendingLeaveSaveResolver) return;
+  const resolver = pendingLeaveSaveResolver;
+  pendingLeaveSaveResolver = null;
+  resolver(result);
+};
+
+const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
+  const changed = await queryUnsavedChangesBeforeLeave();
+
+  if (!changed) {
+    return true;
+  }
+
+  try {
+    await confirmSaveCurrentEntity();
+  } catch (action) {
+    if (action === "cancel") {
+      return true;
+    }
+    return false;
+  }
+
+  postMessage("save-before-leave", {});
+  return waitForLeaveSaveResult();
+};
+
 // 获取可用的资源类型
 const getAvailableResourceTypes = () => {
   const resourceTypes = [
@@ -355,10 +450,10 @@ const saveMeta = async ({
 }: {
   meta: MetaPayload;
   events: unknown;
-}) => {
+}): Promise<boolean> => {
   if (!saveable) {
     ElMessage.info(t("meta.scene.info"));
-    return;
+    return true;
   }
 
   // 在上传前处理 meta 数据，确保 name 唯一
@@ -397,8 +492,10 @@ const saveMeta = async ({
       events: events as import("@/api/v1/types/meta").Events | null,
     });
     ElMessage.success(t("meta.scene.success"));
+    return true;
   } catch (error) {
     ElMessage.error(t("meta.scene.saveError"));
+    return false;
   }
 };
 
@@ -495,12 +592,34 @@ const handleMessage = async (e: MessageEvent) => {
 
   switch (action) {
     case "save-meta":
-      saveMeta(data);
+      resolveLeaveSave(
+        await saveMeta(data as { meta: MetaPayload; events: unknown })
+      );
       // ElMessage.success("储存完成");
       break;
 
     case "save-meta-none":
       ElMessage.warning(t("meta.scene.noChanges"));
+      resolveLeaveSave(true);
+      break;
+
+    case "save-meta-before-leave":
+      resolveLeaveSave(
+        await saveMeta(data as { meta: MetaPayload; events: unknown })
+      );
+      break;
+
+    case "save-meta-before-leave-none":
+      resolveLeaveSave(true);
+      break;
+
+    case "unsaved-changes-result":
+      if (isUnsavedChangesResultPayload(data)) {
+        const resolver = pendingUnsavedChecks.get(data.requestId);
+        if (resolver) {
+          resolver(Boolean(data.changed));
+        }
+      }
       break;
 
     case "load-resource":
@@ -595,8 +714,18 @@ onMounted(() => {
   window.addEventListener("message", handleMessage);
 });
 
+onBeforeRouteLeave(async (_to, _from, next) => {
+  const canLeave = await resolveUnsavedBeforeLeave();
+  next(canLeave);
+});
+
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
+  pendingUnsavedChecks.clear();
+  if (pendingLeaveSaveResolver) {
+    pendingLeaveSaveResolver(false);
+    pendingLeaveSaveResolver = null;
+  }
 });
 </script>
 

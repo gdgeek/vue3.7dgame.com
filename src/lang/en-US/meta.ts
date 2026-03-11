@@ -35,6 +35,10 @@ export default {
         entity: "Entity",
         author: "Author",
         resources: "Resources Used",
+        scenes: "Used In Scenes",
+        noScenes: "Not used in any scene",
+        sceneFallback: "Scene #",
+        enterScene: "Open This Scene",
       },
       events: {
         title: "Signals",

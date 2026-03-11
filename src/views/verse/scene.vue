@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
 import { takePhoto } from "@/api/v1/verse";
-import { useRoute, useRouter } from "vue-router";
+import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 //import PrefabDialog from "@/components/MrPP/PrefabDialog.vue";
 import MetaDialog from "@/components/MrPP/MetaDialog.vue";
@@ -46,6 +46,9 @@ const editor = ref<HTMLIFrameElement>();
 import qs from "querystringify";
 let init = false;
 const saveable = ref(false);
+let unsavedCheckSeed = 0;
+const pendingUnsavedChecks = new Map<string, (changed: boolean) => void>();
+let pendingLeaveSaveResolver: ((result: boolean) => void) | null = null;
 
 // 对话框引用
 const knightDataRef = ref<InstanceType<typeof KnightDataDialog>>();
@@ -169,6 +172,11 @@ type CoverUploadPayload = {
   imageData: string;
 };
 
+type UnsavedChangesResultPayload = {
+  requestId: string;
+  changed: boolean;
+};
+
 const isEditorMessage = (value: unknown): value is EditorMessage =>
   isRecord(value) && typeof value.action === "string";
 
@@ -177,6 +185,13 @@ const isPrefabSetupPayload = (value: unknown): value is PrefabSetupPayload =>
 
 const isCoverUploadPayload = (value: unknown): value is CoverUploadPayload =>
   isRecord(value) && typeof value.imageData === "string";
+
+const isUnsavedChangesResultPayload = (
+  value: unknown
+): value is UnsavedChangesResultPayload =>
+  isRecord(value) &&
+  typeof value.requestId === "string" &&
+  typeof value.changed === "boolean";
 
 const postMessage = (action: string, data: unknown) => {
   if (editor.value && editor.value.contentWindow) {
@@ -191,6 +206,86 @@ const postMessage = (action: string, data: unknown) => {
   } else {
     ElMessage.error(t("verse.view.sceneEditor.error1"));
   }
+};
+
+const confirmSaveCurrentScene = () =>
+  ElMessageBox.confirm(t("common.sceneSaveConfirm.message"), "", {
+    showClose: true,
+    center: true,
+    distinguishCancelAndClose: true,
+    closeOnClickModal: false,
+    closeOnPressEscape: true,
+    showCancelButton: true,
+    customClass: "script-save-confirm-box",
+    confirmButtonText: t("common.sceneSaveConfirm.confirm"),
+    cancelButtonText: t("common.sceneSaveConfirm.cancel"),
+  });
+
+const queryUnsavedChangesBeforeLeave = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if (!editor.value || !editor.value.contentWindow) {
+      resolve(false);
+      return;
+    }
+
+    const requestId = `verse_${Date.now()}_${++unsavedCheckSeed}`;
+    const timeout = window.setTimeout(() => {
+      pendingUnsavedChecks.delete(requestId);
+      resolve(false);
+    }, 1200);
+
+    pendingUnsavedChecks.set(requestId, (changed) => {
+      window.clearTimeout(timeout);
+      pendingUnsavedChecks.delete(requestId);
+      resolve(changed);
+    });
+
+    postMessage("check-unsaved-changes", { requestId });
+  });
+};
+
+const waitForLeaveSaveResult = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const timeout = window.setTimeout(() => {
+      if (pendingLeaveSaveResolver) {
+        pendingLeaveSaveResolver = null;
+      }
+      resolve(false);
+    }, 3000);
+
+    pendingLeaveSaveResolver = (result: boolean) => {
+      window.clearTimeout(timeout);
+      pendingLeaveSaveResolver = null;
+      resolve(result);
+    };
+  });
+};
+
+const resolveLeaveSave = (result: boolean) => {
+  if (!pendingLeaveSaveResolver) return;
+  const resolver = pendingLeaveSaveResolver;
+  pendingLeaveSaveResolver = null;
+  resolver(result);
+};
+
+const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
+  const changed = await queryUnsavedChangesBeforeLeave();
+
+  if (!changed) {
+    return true;
+  }
+
+  try {
+    await confirmSaveCurrentScene();
+  } catch (action) {
+    if (action === "cancel") {
+      return true;
+    }
+    return false;
+  }
+
+  postMessage("save-before-leave", {});
+  return waitForLeaveSaveResult();
 };
 
 // 设置预制件属性
@@ -288,6 +383,54 @@ const saveVerse = async (data: unknown) => {
     });
 };
 
+const saveVerseBeforeLeave = async (data: unknown): Promise<boolean> => {
+  const payload = data as VerseEditorPayload;
+  if (!payload.verse) {
+    return false;
+  }
+
+  const verse = payload.verse;
+
+  if (!saveable.value) {
+    ElMessage.info(t("verse.view.sceneEditor.info3"));
+    return true;
+  }
+
+  const retitleVerses = (verses: VerseModule[]) => {
+    const titleCount: Record<string, number> = {};
+
+    verses.forEach((item) => {
+      const title = item.parameters.title;
+      const match = title.match(/^(.*?)(?: \((\d+)\))?$/);
+      const baseTitle = match?.[1]?.trim() || title;
+      const currentCount = match?.[2] ? parseInt(match[2], 10) : 0;
+
+      if (!titleCount[baseTitle]) {
+        titleCount[baseTitle] = currentCount > 0 ? currentCount : 1;
+      } else {
+        titleCount[baseTitle]++;
+      }
+
+      const newCount = titleCount[baseTitle];
+      item.parameters.title =
+        newCount > 1 ? `${baseTitle} (${newCount})` : baseTitle;
+    });
+  };
+
+  if (verse?.children?.modules) {
+    retitleVerses(verse.children.modules);
+  }
+
+  try {
+    await putVerse(id.value, { data: verse as unknown as JsonValue });
+    ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
+    return true;
+  } catch {
+    ElMessage.error(t("verse.view.sceneEditor.error1"));
+    return false;
+  }
+};
+
 //发布场景
 const releaseVerse = async (data: unknown) => {
   const payload = data as VerseEditorPayload;
@@ -352,7 +495,7 @@ const handleMessage = async (e: MessageEvent) => {
     //    break;
 
     case "save-verse":
-      saveVerse(data);
+      await saveVerse(data);
       ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
 
       break;
@@ -363,6 +506,24 @@ const handleMessage = async (e: MessageEvent) => {
 
     case "save-verse-none":
       ElMessage.warning(t("verse.view.sceneEditor.noChanges"));
+      resolveLeaveSave(true);
+      break;
+
+    case "save-verse-before-leave":
+      resolveLeaveSave(await saveVerseBeforeLeave(data));
+      break;
+
+    case "save-verse-before-leave-none":
+      resolveLeaveSave(true);
+      break;
+
+    case "unsaved-changes-result":
+      if (isUnsavedChangesResultPayload(data)) {
+        const resolver = pendingUnsavedChecks.get(data.requestId);
+        if (resolver) {
+          resolver(Boolean(data.changed));
+        }
+      }
       break;
 
     case "goto":
@@ -497,8 +658,18 @@ onMounted(() => {
   window.addEventListener("message", handleMessage);
 });
 
+onBeforeRouteLeave(async (_to, _from, next) => {
+  const canLeave = await resolveUnsavedBeforeLeave();
+  next(canLeave);
+});
+
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
+  pendingUnsavedChecks.clear();
+  if (pendingLeaveSaveResolver) {
+    pendingLeaveSaveResolver(false);
+    pendingLeaveSaveResolver = null;
+  }
 });
 </script>
 

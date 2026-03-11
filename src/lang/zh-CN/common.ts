@@ -36,6 +36,18 @@ export default {
       confirm: "是",
       cancel: "否",
     },
+    sceneSaveConfirm: {
+      title: "提示",
+      message: "是否保存当前场景",
+      confirm: "是",
+      cancel: "否",
+    },
+    entitySaveConfirm: {
+      title: "提示",
+      message: "是否保存当前实体",
+      confirm: "是",
+      cancel: "否",
+    },
     message: {
       createSuccess: "创建成功",
       saveSuccess: "保存成功",
@@ -129,6 +141,7 @@ export default {
     resolution: "分辨率",
     duration: "时长",
     modelFaces: "模型面数",
+    modelVertices: "模型顶点数",
     preparing: "准备中...",
     filter: "筛选",
     viewInfo: "查看信息",

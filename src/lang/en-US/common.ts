@@ -37,6 +37,18 @@ export default {
       confirm: "Yes",
       cancel: "No",
     },
+    sceneSaveConfirm: {
+      title: "Prompt",
+      message: "Do you want to save the current scene?",
+      confirm: "Yes",
+      cancel: "No",
+    },
+    entitySaveConfirm: {
+      title: "Prompt",
+      message: "Do you want to save the current entity?",
+      confirm: "Yes",
+      cancel: "No",
+    },
     message: {
       createSuccess: "Created successfully",
       saveSuccess: "Saved successfully",
@@ -108,6 +120,7 @@ export default {
     resolution: "Resolution",
     duration: "Duration",
     modelFaces: "Faces",
+    modelVertices: "Vertices",
     gridView: "Grid View",
     listView: "List View",
     resourceDetail: "Resource Details",

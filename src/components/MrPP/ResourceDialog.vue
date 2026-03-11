@@ -169,14 +169,7 @@
           <polygen-view
             :file="detailResource.file"
             @loaded="handleModelLoaded"
-            @progress="handleModelProgress"
           ></polygen-view>
-          <el-progress
-            v-if="modelProgress < 100"
-            :percentage="modelProgress"
-            :stroke-width="4"
-            class="model-progress"
-          ></el-progress>
         </div>
         <div v-else-if="detailType === 'audio'" class="audio-preview">
           <div class="audio-visual">
@@ -237,7 +230,7 @@ import {
 } from "@/components/StandardPage";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import PolygenView from "@/components/PolygenView.vue";
-import { printVector2, printVector3 } from "@/assets/js/helper";
+import { printVector2 } from "@/assets/js/helper";
 
 const props = withDefaults(
   defineProps<{
@@ -263,9 +256,11 @@ const detailVisible = ref(false);
 const detailLoading = ref(false);
 const detailResource = ref<ResourceInfo | null>(null);
 const detailSourceItem = ref<CardInfo | null>(null);
-const modelProgress = ref(0);
 const hasAnimations = ref(false);
 const audioRef = ref<HTMLAudioElement | null>(null);
+const loadedModelStats = ref<{ faces?: number; vertices?: number } | null>(
+  null
+);
 
 const active = ref<DataOutput>({
   items: [],
@@ -324,7 +319,19 @@ const detailPlaceholderIcon = computed(() => getTypeIcon(detailType.value));
 
 type Vector2 = { x: number; y: number };
 type Vector3 = { x: number; y: number; z: number };
-type DetailInfo = { size?: Vector2 | Vector3; faces?: number; length?: number };
+type DetailInfo = {
+  size?: Vector2 | Vector3;
+  faces?: number;
+  vertices?: number;
+  length?: number;
+};
+
+const formatModelStat = (value: unknown) => {
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) && numericValue > 0
+    ? numericValue.toLocaleString()
+    : "—";
+};
 
 const parseDetailInfo = (raw?: string | null): DetailInfo | null => {
   if (!raw) return null;
@@ -386,18 +393,16 @@ const detailProperties = computed(() => {
   ];
 
   if (detailType.value === "polygen") {
-    if (info?.size) {
-      props.push({
-        label: t("ui.dimensions"),
-        value: printVector3(info.size as Vector3) + " (m)",
-      });
-    }
-    if (info?.faces) {
-      props.push({
-        label: t("ui.modelFaces"),
-        value: Number(info.faces).toLocaleString(),
-      });
-    }
+    const faces = info?.faces ?? loadedModelStats.value?.faces;
+    const vertices = info?.vertices ?? loadedModelStats.value?.vertices;
+    props.push({
+      label: t("ui.modelFaces"),
+      value: formatModelStat(faces),
+    });
+    props.push({
+      label: t("ui.modelVertices"),
+      value: formatModelStat(vertices),
+    });
   }
 
   if (detailType.value === "picture" || detailType.value === "video") {
@@ -479,8 +484,8 @@ const handleViewInfo = (item: CardInfo) => {
   detailSourceItem.value = item;
   detailVisible.value = true;
   detailLoading.value = true;
-  modelProgress.value = 0;
   hasAnimations.value = false;
+  loadedModelStats.value = null;
 
   const id = item.id;
   const type = item.type;
@@ -532,21 +537,22 @@ const handleDetailClose = () => {
   detailResource.value = null;
   detailSourceItem.value = null;
   detailLoading.value = false;
-  modelProgress.value = 0;
   hasAnimations.value = false;
+  loadedModelStats.value = null;
 };
 
 const handleModelLoaded = (info: {
   size: { x: number; y: number; z: number };
   center: { x: number; y: number; z: number };
+  faces?: number;
+  vertices?: number;
   anim?: { name: string; length: number }[];
 }) => {
-  modelProgress.value = 100;
   hasAnimations.value = !!(info.anim && info.anim.length > 0);
-};
-
-const handleModelProgress = (progress: number) => {
-  modelProgress.value = progress;
+  loadedModelStats.value = {
+    faces: info.faces,
+    vertices: info.vertices,
+  };
 };
 async function getDatas(input: DataInput): Promise<DataOutput> {
   if (props.onGetDatas) {
@@ -912,13 +918,6 @@ defineExpose({
   min-height: 300px;
   border-radius: var(--radius-lg, 16px);
   background: transparent !important;
-}
-
-.model-progress {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
 }
 
 .audio-preview {

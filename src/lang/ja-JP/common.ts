@@ -36,6 +36,18 @@ export default {
       confirm: "はい",
       cancel: "いいえ",
     },
+    sceneSaveConfirm: {
+      title: "確認",
+      message: "現在のシーンを保存しますか？",
+      confirm: "はい",
+      cancel: "いいえ",
+    },
+    entitySaveConfirm: {
+      title: "確認",
+      message: "現在のエンティティを保存しますか？",
+      confirm: "はい",
+      cancel: "いいえ",
+    },
     message: {
       createSuccess: "作成成功",
       saveSuccess: "保存成功",
@@ -107,6 +119,7 @@ export default {
     resolution: "解像度",
     duration: "長さ",
     modelFaces: "面数",
+    modelVertices: "頂点数",
     gridView: "グリッド表示",
     listView: "リスト表示",
     resourceDetail: "リソース詳細",

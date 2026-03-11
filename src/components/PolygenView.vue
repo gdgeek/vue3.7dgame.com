@@ -8,18 +8,38 @@
 
     <!-- Animation Controls - Visible only when animations exist -->
     <div class="animation-bar" v-if="showAnimationBar">
-      <div
-        class="animation-play-btn"
-        :class="{ disabled: animations.length === 0 }"
-        @click="animations.length > 0 && toggleAnimation(!isAnimationPlaying)"
-      >
-        <font-awesome-icon
-          :icon="['fas', isAnimationPlaying ? 'pause' : 'play']"
-        ></font-awesome-icon>
+      <div class="animation-main-controls">
+        <div
+          class="animation-play-btn"
+          :class="{ disabled: animations.length === 0 }"
+          @click="animations.length > 0 && toggleAnimation(!isAnimationPlaying)"
+        >
+          <font-awesome-icon
+            :icon="['fas', isAnimationPlaying ? 'pause' : 'play']"
+          ></font-awesome-icon>
+        </div>
+
+        <div class="animation-progress-wrapper">
+          <el-slider
+            v-model="animationProgress"
+            class="animation-progress-slider"
+            :min="0"
+            :max="100"
+            :step="0.1"
+            :show-tooltip="false"
+            :disabled="animations.length === 0"
+            @input="handleProgressInput"
+            @change="handleProgressChange"
+          ></el-slider>
+        </div>
+
+        <div class="animation-time">
+          {{ formatTime(currentAnimationTime) }} /
+          {{ formatTime(totalAnimationDuration) }}
+        </div>
       </div>
 
       <div class="animation-select-wrapper">
-        <span class="animation-label">动画</span>
         <el-select
           v-model="selectedAnimationIndex"
           @change="playAnimation"
@@ -41,25 +61,6 @@
             :value="index"
           ></el-option>
         </el-select>
-      </div>
-
-      <div class="animation-progress-wrapper">
-        <el-slider
-          v-model="animationProgress"
-          class="animation-progress-slider"
-          :min="0"
-          :max="100"
-          :step="0.1"
-          :show-tooltip="false"
-          :disabled="animations.length === 0"
-          @input="handleProgressInput"
-          @change="handleProgressChange"
-        ></el-slider>
-      </div>
-
-      <div class="animation-time">
-        {{ formatTime(currentAnimationTime) }} /
-        {{ formatTime(totalAnimationDuration) }}
       </div>
     </div>
   </el-card>
@@ -96,6 +97,8 @@ const emit = defineEmits<{
     data: {
       size: THREE.Vector3;
       center: THREE.Vector3;
+      faces?: number;
+      vertices?: number;
       anim?: { name: string; length: number }[];
     }
   ): void;
@@ -156,6 +159,25 @@ const formatTime = (seconds: number) => {
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
+
+const collectModelStats = (model: THREE.Object3D) => {
+  let faces = 0;
+  let vertices = 0;
+
+  model.traverse((child) => {
+    if (!(child instanceof THREE.Mesh)) return;
+
+    const position = child.geometry?.getAttribute("position");
+    if (!position) return;
+
+    vertices += position.count;
+    faces += child.geometry.index
+      ? Math.floor(child.geometry.index.count / 3)
+      : Math.floor(position.count / 3);
+  });
+
+  return { faces, vertices };
+};
 
 const seekToProgress = (progressValue: number) => {
   if (!mixer || !currentAction || animations.value.length === 0) return;
@@ -306,6 +328,8 @@ const refresh = () => {
         }
       });
 
+      const { faces, vertices } = collectModelStats(model);
+
       scene?.add(model);
       currentModel = model;
 
@@ -318,6 +342,8 @@ const refresh = () => {
       emit("loaded", {
         size: toFixedVector3(size, 5),
         center: toFixedVector3(center, 5),
+        faces,
+        vertices,
         anim: animationsInfo,
       });
     },
@@ -472,12 +498,22 @@ watch(
   display: flex;
   align-items: center;
   gap: var(--polygen-animbar-gap, 16px);
-  padding: var(--polygen-animbar-padding, 16px);
+  padding: var(--polygen-animbar-padding-top, 12px)
+    var(--polygen-animbar-padding-x, 16px)
+    var(--polygen-animbar-padding-bottom, 8px);
   background: var(--polygen-animbar-bg, var(--bg-card, #fff));
   border-top: var(
     --polygen-animbar-border-top,
     1px solid var(--border-color, #e2e8f0)
   );
+}
+
+.animation-main-controls {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--polygen-anim-main-gap, 12px);
 }
 
 .animation-play-btn {
@@ -512,16 +548,13 @@ watch(
 }
 
 .animation-select-wrapper {
-  flex: 1;
+  width: var(--polygen-anim-select-width, 220px);
+  max-width: 100%;
+  margin-left: auto;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-
-.animation-label {
-  font-size: var(--polygen-anim-label-size, 12px);
-  color: var(--polygen-anim-label-color, var(--text-muted, #94a3b8));
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 160px;
 }
 
 .animation-select {
@@ -543,8 +576,8 @@ watch(
 }
 
 .animation-progress-wrapper {
-  flex: 1.4;
-  min-width: var(--polygen-anim-progress-min-width, 180px);
+  flex: 1;
+  min-width: var(--polygen-anim-progress-min-width, 120px);
 }
 
 .animation-progress-slider {
@@ -578,5 +611,22 @@ watch(
   color: var(--polygen-anim-time-color, var(--text-secondary, #64748b));
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+@media (max-width: 860px) {
+  .animation-bar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .animation-main-controls {
+    width: 100%;
+  }
+
+  .animation-select-wrapper {
+    width: 100%;
+    margin-left: 0;
+    min-width: 0;
+  }
 }
 </style>

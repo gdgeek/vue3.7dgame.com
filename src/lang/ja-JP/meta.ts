@@ -35,6 +35,10 @@ export default {
         entity: "エンティティ",
         author: "作成者",
         resources: "使用リソース数",
+        scenes: "使用シーン",
+        noScenes: "どのシーンでも未使用",
+        sceneFallback: "シーン#",
+        enterScene: "このシーンへ",
       },
       events: {
         title: "シグナル",

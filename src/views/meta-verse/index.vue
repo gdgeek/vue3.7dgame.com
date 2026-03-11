@@ -266,6 +266,42 @@
             </div>
           </div>
         </template>
+        <template #property-loaded-entities>
+          <div class="loaded-entities-value">
+            <template v-if="loadedEntityOptions.length === 0">
+              {{ t("verse.listPage.noLoadedEntities") }}
+            </template>
+            <template v-else>
+              <div
+                ref="loadedEntitiesControlsRef"
+                class="loaded-entities-controls"
+              >
+                <el-select
+                  v-model="selectedLoadedEntityId"
+                  class="loaded-entities-select"
+                  size="small"
+                  popper-class="detail-link-select-popper detail-link-select-popper-entity"
+                  @visible-change="handleLoadedEntitiesDropdownVisible"
+                >
+                  <el-option
+                    v-for="entity in loadedEntityOptions"
+                    :key="entity.id"
+                    :label="entity.name"
+                    :value="entity.id"
+                  ></el-option>
+                </el-select>
+                <el-button
+                  type="primary"
+                  class="loaded-entities-enter-btn"
+                  size="small"
+                  @click="handleEnterSelectedEntity"
+                >
+                  {{ t("verse.listPage.enterEntity") }}
+                </el-button>
+              </div>
+            </template>
+          </div>
+        </template>
       </DetailPanel>
     </div>
   </TransitionWrapper>
@@ -325,7 +361,7 @@
 <script setup lang="ts">
 import { FolderOpened } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { Message, MessageBox } from "@/components/Dialog";
@@ -436,6 +472,69 @@ const handleImportSuccess = (_verseId: number) => {
   refresh();
   Message.success(t("verse.listPage.importSuccess"));
 };
+
+const normalizeEntityName = (value: unknown) => String(value || "").trim();
+
+type LoadedEntityOption = {
+  id: number | string;
+  name: string;
+};
+
+const selectedLoadedEntityId = ref<number | string | null>(null);
+const loadedEntitiesControlsRef = ref<HTMLElement | null>(null);
+
+const loadedEntityOptions = computed<LoadedEntityOption[]>(() => {
+  if (!currentVerse.value || !Array.isArray(currentVerse.value.metas)) {
+    return [];
+  }
+
+  const options: LoadedEntityOption[] = [];
+  const seenMetaIds = new Set<number | string>();
+
+  currentVerse.value.metas.forEach((meta) => {
+    const metaId = meta?.id;
+    if (metaId !== undefined && metaId !== null) {
+      if (seenMetaIds.has(metaId)) return;
+      seenMetaIds.add(metaId);
+    }
+
+    const title = normalizeEntityName(
+      (meta as { title?: string | null }).title
+    );
+    const name = normalizeEntityName((meta as { name?: string | null }).name);
+
+    if (title) {
+      options.push({ id: metaId, name: title });
+      return;
+    }
+    if (name) {
+      options.push({ id: metaId, name });
+      return;
+    }
+    if (metaId !== undefined && metaId !== null) {
+      options.push({
+        id: metaId,
+        name: `${t("verse.listPage.entityFallback")}${metaId}`,
+      });
+    }
+  });
+
+  return options;
+});
+
+watch(
+  () => loadedEntityOptions.value,
+  (options) => {
+    const hasCurrentSelection =
+      selectedLoadedEntityId.value !== null &&
+      options.some((entity) => entity.id === selectedLoadedEntityId.value);
+    selectedLoadedEntityId.value = hasCurrentSelection
+      ? selectedLoadedEntityId.value
+      : (options[0]?.id ?? null);
+  },
+  { immediate: true }
+);
+
 const detailProperties = computed(() => {
   if (!currentVerse.value) return [];
   return [
@@ -446,6 +545,18 @@ const detailProperties = computed(() => {
         currentVerse.value.author?.nickname ||
         currentVerse.value.author?.username ||
         "—",
+    },
+    {
+      label: t("verse.listPage.sceneId"),
+      value: currentVerse.value.id,
+    },
+    {
+      label: t("verse.listPage.loadedEntities"),
+      value:
+        loadedEntityOptions.value.length > 0
+          ? loadedEntityOptions.value[0].name
+          : t("verse.listPage.noLoadedEntities"),
+      slotName: "loaded-entities",
     },
     {
       label: t("verse.listPage.createdTime"),
@@ -582,7 +693,7 @@ const openDetail = async (item: VerseData) => {
   detailLoading.value = true;
 
   try {
-    const response = await getVerse(item.id, "image,author,verseTags");
+    const response = await getVerse(item.id, "image,author,verseTags,metas");
     currentVerse.value = response.data;
     editingDescription.value = response.data.description || "";
 
@@ -688,10 +799,42 @@ const goToEditor = (item: VerseData) => {
   router.push({ path: "/verse/scene", query: { id: item.id, title } });
 };
 
+const goToEntityEditor = (entityId: number | string, entityName?: string) => {
+  const title = encodeURIComponent(
+    t("meta.list.editorTitle", {
+      name: entityName || t("meta.list.unnamed"),
+    })
+  );
+  router.push({ path: "/meta/scene", query: { id: entityId, title } });
+};
+
 const handleGoToEditor = () => {
   if (currentVerse.value) {
     goToEditor(currentVerse.value);
   }
+};
+
+const handleEnterSelectedEntity = () => {
+  if (selectedLoadedEntityId.value === null) return;
+  const selectedEntity = loadedEntityOptions.value.find(
+    (entity) => entity.id === selectedLoadedEntityId.value
+  );
+  goToEntityEditor(selectedLoadedEntityId.value, selectedEntity?.name);
+};
+
+const updateLoadedEntitiesDropdownWidth = () => {
+  if (typeof document === "undefined") return;
+  const controlsWidth = loadedEntitiesControlsRef.value?.offsetWidth;
+  if (!controlsWidth) return;
+  document.documentElement.style.setProperty(
+    "--detail-link-select-entity-width",
+    `${controlsWidth}px`
+  );
+};
+
+const handleLoadedEntitiesDropdownVisible = (visible: boolean) => {
+  if (!visible) return;
+  updateLoadedEntitiesDropdownWidth();
 };
 
 const _handleCopy = async () => {
@@ -985,6 +1128,104 @@ const formatItemDate = (dateStr?: string) => {
 
 .hidden-input {
   display: none;
+}
+
+.loaded-entities-value {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.loaded-entities-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.loaded-entities-select {
+  flex: 1;
+  min-width: 120px;
+
+  :deep(.el-select__wrapper) {
+    min-height: 24px;
+    align-items: center;
+  }
+
+  :deep(.el-select__selection) {
+    min-width: 0;
+    align-items: center;
+  }
+
+  :deep(.el-select__selected-item),
+  :deep(.el-select__placeholder) {
+    width: 100%;
+    text-align: center;
+    line-height: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.loaded-entities-enter-btn {
+  flex-shrink: 0;
+  height: 24px;
+  padding: 0 10px;
+  font-size: 12px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+:global(.detail-link-select-popper .el-select-dropdown__item) {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+:global(.detail-link-select-popper-entity.el-select__popper) {
+  width: var(--detail-link-select-entity-width) !important;
+  min-width: var(--detail-link-select-entity-width) !important;
+  padding: 0 !important;
+}
+
+:global(
+  .detail-link-select-popper-entity.el-select__popper .el-select-dropdown
+) {
+  width: 100% !important;
+  min-width: 100% !important;
+}
+
+:global(
+  .detail-link-select-popper.el-select__popper .el-select-dropdown__item.hover,
+  .detail-link-select-popper.el-select__popper .el-select-dropdown__item:hover,
+  .detail-link-select-popper.el-select__popper
+    .el-select-dropdown__item.is-hovering
+) {
+  background: var(--primary-light, rgba(3, 169, 244, 0.12)) !important;
+  color: var(--primary-color, #03a9f4) !important;
+}
+
+:global(
+  .detail-link-select-popper.el-select__popper
+    .el-select-dropdown__item.selected:not(.hover):not(.is-hovering):not(
+      :hover
+    ),
+  .detail-link-select-popper.el-select__popper
+    .el-select-dropdown__item.is-selected:not(.hover):not(.is-hovering):not(
+      :hover
+    )
+) {
+  background: transparent !important;
+  color: var(--primary-color, #03a9f4) !important;
+  font-weight: 500 !important;
 }
 
 .preview-placeholder {

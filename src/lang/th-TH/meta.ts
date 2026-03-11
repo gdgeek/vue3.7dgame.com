@@ -35,6 +35,10 @@ export default {
         entity: "เอนทิตี",
         author: "ผู้เขียน",
         resources: "จำนวนทรัพยากรที่ใช้",
+        scenes: "ฉากที่ใช้งานอยู่",
+        noScenes: "ยังไม่ได้ใช้ในฉาก",
+        sceneFallback: "ฉาก#",
+        enterScene: "ไปยังฉากนี้",
       },
       events: {
         title: "สัญญาณ",

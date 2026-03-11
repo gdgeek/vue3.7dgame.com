@@ -83,7 +83,16 @@
                     class="info-row"
                   >
                     <span class="info-label">{{ item.label }}</span>
-                    <span class="info-value">{{ item.value }}</span>
+                    <div class="info-value">
+                      <template v-if="item.slotName">
+                        <slot :name="`property-${item.slotName}`" :item="item">
+                          {{ item.value }}
+                        </slot>
+                      </template>
+                      <template v-else>
+                        {{ item.value }}
+                      </template>
+                    </div>
                   </div>
                 </div>
 
@@ -182,6 +191,7 @@ const { t } = useI18n();
 interface PropertyItem {
   label: string;
   value: string | number;
+  slotName?: string;
 }
 
 interface Props {
