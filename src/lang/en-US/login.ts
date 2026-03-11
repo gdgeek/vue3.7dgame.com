@@ -27,6 +27,7 @@ export default {
     },
     success: "Login Successful",
     error: "Form Validation Failed",
+    loginFailed: "Login failed, please try again later",
     createAccount: "Create Account",
     repassword: "Confirm Password",
     create: "Create",

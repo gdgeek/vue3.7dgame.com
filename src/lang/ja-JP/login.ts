@@ -27,6 +27,7 @@ export default {
     },
     success: "ログイン成功",
     error: "フォーム検証に失敗しました",
+    loginFailed: "ログインに失敗しました。しばらくしてから再試行してください",
     createAccount: "アカウントを作成",
     repassword: "パスワードを確認",
     create: "作成",

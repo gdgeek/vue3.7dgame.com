@@ -307,7 +307,10 @@ const submit = () => {
         router.push({ path: path, query: queryParams });
       } catch (e) {
         loading.value = false;
-        Message.error(t("login.error"));
+        // Display specific error message from API
+        const errorMessage =
+          e instanceof Error ? e.message : t("login.loginFailed");
+        Message.error(errorMessage);
       }
     } else {
       Message.warning(t("login.error"));
@@ -432,8 +435,8 @@ const handleResetPassword = async () => {
     padding-bottom: 6px;
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-primary, #333);
     line-height: 1;
+    color: var(--text-primary, #333);
   }
 }
 
@@ -443,20 +446,20 @@ const handleResetPassword = async () => {
 
   :deep(.el-input__wrapper) {
     padding: 0 12px;
-    border-radius: 8px;
     background-color: var(--bg-hover, #f8f8f8);
+    border-radius: 8px;
     box-shadow: 0 0 0 1px var(--border-color, #e0e0e0) inset;
     transition: all 0.3s;
 
     &.is-focus {
-      box-shadow: 0 0 0 1px var(--primary-color, #00a8ab) inset;
       background-color: var(--bg-card, #fff);
+      box-shadow: 0 0 0 1px var(--primary-color, #00a8ab) inset;
     }
   }
 
   :deep(.el-input__inner) {
-    color: var(--text-primary, #333);
     font-size: 14px;
+    color: var(--text-primary, #333);
 
     &::placeholder {
       color: var(--text-muted, #94a3b8);
@@ -464,16 +467,16 @@ const handleResetPassword = async () => {
   }
 
   .input-icon {
+    margin-right: 8px;
     font-size: 16px;
     color: var(--text-muted, #999);
-    margin-right: 8px;
   }
 }
 
 .login-options {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
+  justify-content: flex-end;
   margin-bottom: 16px;
 
   .forgot-password {
@@ -503,17 +506,17 @@ const handleResetPassword = async () => {
   width: 100%;
   height: 42px;
   font-size: 16px;
-  border-radius: 8px;
-  background: var(--primary-color, #00a8ab);
-  border: none;
   font-weight: 500;
   color: #fff;
+  background: var(--primary-color, #00a8ab);
+  border: none;
+  border-radius: 8px;
   transition: all 0.3s ease;
 
   &:hover {
-    transform: translateY(-1px);
     background: var(--primary-hover, #008385);
-    box-shadow: var(--shadow-lg, 0 8px 15px rgba(0, 0, 0, 0.1));
+    box-shadow: var(--shadow-lg, 0 8px 15px rgb(0 0 0 / 10%));
+    transform: translateY(-1px);
   }
 
   &:active {
@@ -522,9 +525,9 @@ const handleResetPassword = async () => {
 }
 
 .register-link {
-  text-align: center;
   font-size: 14px;
   color: var(--text-secondary, #666);
+  text-align: center;
 
   a {
     margin-left: 4px;

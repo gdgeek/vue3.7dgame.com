@@ -26,6 +26,7 @@ export default {
     },
     success: "登录成功",
     error: "表单检验未通过",
+    loginFailed: "登录失败，请稍后重试",
     createAccount: "创建新账号",
     repassword: "确认密码",
     create: "创建",

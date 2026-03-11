@@ -91,18 +91,38 @@ export const useUserStore = defineStore(
      * @returns
      */
     async function login(loginData: LoginData) {
-      const response = await authLogin(loginData);
-      if (!response.data.success) {
+      try {
+        const response = await authLogin(loginData);
+        if (!response.data.success) {
+          // Extract error message from API response
+          const errorData = response.data as unknown as { message?: string };
+          const errorMessage =
+            errorData.message || "Login failed, please try again later.";
+          throw new Error(errorMessage);
+        }
+        const token = response.data.token;
+
+        if (token) {
+          Token.setToken(token);
+        } else {
+          throw new Error("The login response is missing the access_token");
+        }
+        return true;
+      } catch (error) {
+        // Re-throw with preserved error message from API
+        if (error instanceof Error) {
+          throw error;
+        }
+        // Handle axios errors
+        const axiosError = error as {
+          response?: { data?: { message?: string } };
+        };
+        const apiMessage = axiosError.response?.data?.message;
+        if (apiMessage) {
+          throw new Error(apiMessage);
+        }
         throw new Error("Login failed, please try again later.");
       }
-      const token = response.data.token;
-
-      if (token) {
-        Token.setToken(token);
-      } else {
-        throw new Error("The login response is missing the access_token");
-      }
-      return true;
     }
 
     // Token 刷新由 src/utils/request.ts 拦截器按需触发，无需在此维护定时器
