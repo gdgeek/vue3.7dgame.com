@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "AI Bug 耻辱记录",
+  "description": "当 AI 完成任务后，检查是否引入了 bug。如果发现问题，自动记录到 docs/ai-shame-book.md 耻辱手册中，包含日期、文件、bug 描述、原因分析和修复方式。",
+  "version": "1",
+  "when": {
+    "type": "postToolUse",
+    "toolTypes": [
+      "write"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "检查刚才的写入操作是否可能引入 bug（如删除了关键逻辑、改变了变量绑定语义、破坏了数据流等）。如果发现潜在问题，立即将其追加记录到 docs/ai-shame-book.md 文件中，格式为表格行：| # | 日期 | 文件 | Bug 描述 | 原因分析 | 修复方式 |。如果没有发现问题，不需要做任何操作。"
+  }
+}
