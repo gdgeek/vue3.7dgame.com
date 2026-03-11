@@ -36,7 +36,8 @@ export const getPhototypes = (
   sort = "-created_at",
   search = "",
   page = 0,
-  expand = "resource,image,author"
+  expand = "resource,image,author",
+  perPage?: number
 ): Promise<AxiosResponse<PhototypeType[]>> => {
   const query: Record<string, unknown> = {};
   if (sort === "title") {
@@ -52,6 +53,9 @@ export const getPhototypes = (
   }
   if (page > 1) {
     query["page"] = page;
+  }
+  if (perPage && perPage > 0) {
+    query["per-page"] = perPage;
   }
   const url = `/v1/phototypes${qs.stringify(query, true)}`;
 

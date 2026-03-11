@@ -264,7 +264,7 @@ const loadedModelStats = ref<{ faces?: number; vertices?: number } | null>(
 
 const active = ref<DataOutput>({
   items: [],
-  pagination: { current: 1, count: 1, size: 20, total: 20 },
+  pagination: { current: 1, count: 1, size: 24, total: 24 },
 });
 
 const emit = defineEmits<{
@@ -444,7 +444,7 @@ const open = async (
     items: [],
     // sorted: "-created_at",
     // searched: "",
-    pagination: { current: 1, count: 1, size: 20, total: 20 },
+    pagination: { current: 1, count: 1, size: 24, total: 24 },
   };
 
   type.value = newType;
@@ -566,7 +566,8 @@ async function getDatas(input: DataInput): Promise<DataOutput> {
         sorted.value,
         searched.value,
         input.current,
-        "image"
+        "image",
+        24
       );
       console.log("获取数据", response.data);
       const items = response.data.map((item: ResourceInfo) => {
@@ -589,7 +590,7 @@ async function getDatas(input: DataInput): Promise<DataOutput> {
           String(response.headers["x-pagination-page-count"] ?? "1")
         ),
         size: parseInt(
-          String(response.headers["x-pagination-per-page"] ?? "20")
+          String(response.headers["x-pagination-per-page"] ?? "24")
         ),
         total: parseInt(
           String(response.headers["x-pagination-total-count"] ?? "0")

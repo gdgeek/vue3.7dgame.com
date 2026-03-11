@@ -168,6 +168,10 @@ const formatDate = (dateStr?: string) => {
   min-height: 300px;
 }
 
+.grid-view {
+  width: 100%;
+}
+
 // ===== List Mode - Modern Card Design =====
 .list-view {
   width: 100%;

@@ -48,18 +48,33 @@
             :image="item.image?.url"
             :title="item.name || t('verse.listPage.unnamed')"
             :description="item.description"
-            :meta="{
-              author: item.author?.nickname || item.author?.username,
-              date: formatItemDate(item.created_at),
-            }"
-            :action-text="t('verse.listPage.enterEditor')"
-            :action-icon="['fas', 'pen-to-square']"
             :type-icon="['fas', 'layer-group']"
             :placeholder-icon="['fas', 'layer-group']"
             :show-checkbox="false"
             @view="openDetail(item)"
-            @action="goToEditor(item)"
           >
+            <template #actions>
+              <div class="dual-card-actions">
+                <button
+                  class="dual-card-action-btn"
+                  @click.stop="goToEditor(item)"
+                >
+                  <font-awesome-icon
+                    :icon="['fas', 'pen-to-square']"
+                  ></font-awesome-icon>
+                  {{ t("route.project.sceneEditor") }}
+                </button>
+                <button
+                  class="dual-card-action-btn"
+                  @click.stop="goToScriptEditor(item)"
+                >
+                  <font-awesome-icon
+                    :icon="['fas', 'file-lines']"
+                  ></font-awesome-icon>
+                  {{ t("route.project.scriptEditor") }}
+                </button>
+              </div>
+            </template>
           </StandardCard>
         </template>
 
@@ -153,17 +168,48 @@
         width="560px"
         :show-delete="true"
         action-layout="grid"
-        :secondary-action="true"
-        :secondary-action-text="t('verse.listPage.enterEditor')"
         :download-text="t('ui.exportScene')"
         :download-icon="['fas', 'download']"
         :delete-text="t('verse.listPage.deleteScene')"
         @download="handleExport"
         @rename="handleRename"
         @delete="handleDelete"
-        @secondary="handleGoToEditor"
         @close="handlePanelClose"
       >
+        <template #actions>
+          <button
+            class="btn-pill-primary dual-primary-btn"
+            @click="handleGoToEditor"
+          >
+            <font-awesome-icon
+              :icon="['fas', 'pen-to-square']"
+            ></font-awesome-icon>
+            {{ t("route.project.sceneEditor") }}
+          </button>
+          <button
+            class="btn-pill-primary dual-primary-btn"
+            @click="handleGoToScriptEditor"
+          >
+            <font-awesome-icon
+              :icon="['fas', 'file-lines']"
+            ></font-awesome-icon>
+            {{ t("route.project.scriptEditor") }}
+          </button>
+          <div class="actions-row">
+            <button class="btn-pill-secondary" @click="handleExport">
+              <font-awesome-icon
+                :icon="['fas', 'download']"
+              ></font-awesome-icon>
+              {{ t("ui.exportScene") }}
+            </button>
+            <button class="btn-pill-danger" @click="handleDelete">
+              <font-awesome-icon
+                :icon="['fas', 'trash-can']"
+              ></font-awesome-icon>
+              {{ t("verse.listPage.deleteScene") }}
+            </button>
+          </div>
+        </template>
         <template #preview>
           <div class="verse-preview" @click="triggerFileSelect">
             <img
@@ -799,6 +845,16 @@ const goToEditor = (item: VerseData) => {
   router.push({ path: "/verse/scene", query: { id: item.id, title } });
 };
 
+const goToScriptEditor = (item: VerseData) => {
+  const scriptTitle = encodeURIComponent(
+    `${t("route.project.scriptEditor")}【${item.name || t("verse.listPage.unnamed")}】`
+  );
+  router.push({
+    path: "/verse/script",
+    query: { id: item.id, title: scriptTitle },
+  });
+};
+
 const goToEntityEditor = (entityId: number | string, entityName?: string) => {
   const title = encodeURIComponent(
     t("meta.list.editorTitle", {
@@ -811,6 +867,12 @@ const goToEntityEditor = (entityId: number | string, entityName?: string) => {
 const handleGoToEditor = () => {
   if (currentVerse.value) {
     goToEditor(currentVerse.value);
+  }
+};
+
+const handleGoToScriptEditor = () => {
+  if (currentVerse.value) {
+    goToScriptEditor(currentVerse.value);
   }
 };
 
@@ -1378,6 +1440,41 @@ const formatItemDate = (dateStr?: string) => {
 }
 
 .list-view {
+  :deep(.dual-card-actions) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
+  }
+
+  :deep(.dual-card-action-btn) {
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: none;
+    background: var(--bg-hover, #f8fafc);
+    color: var(--text-secondary, #64748b);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  :deep(.dual-card-action-btn + .dual-card-action-btn) {
+    border-left: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
+  }
+
+  :deep(.dual-card-action-btn:hover) {
+    color: var(--primary-color, #03a9f4);
+    background: var(--bg-active, #eef7ff);
+  }
+
+  :deep(.standard-card .card-content) {
+    padding: 10px 14px;
+    gap: 4px;
+  }
+
   :deep(.col-checkbox) {
     width: 40px;
   }
@@ -1431,5 +1528,26 @@ const formatItemDate = (dateStr?: string) => {
       visibility: visible;
     }
   }
+}
+
+:deep(.panel-actions .dual-primary-btn) {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: var(--primary-color, #03a9f4);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+:deep(.panel-actions .dual-primary-btn:hover) {
+  background: var(--primary-hover, #039be5);
 }
 </style>

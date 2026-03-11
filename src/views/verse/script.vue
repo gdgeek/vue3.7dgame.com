@@ -26,107 +26,21 @@
                   {{ $t("verse.view.script.save") }}
                 </el-button>
               </div>
-              <el-tabs v-model="activeName" type="card" style="width: 100%">
+              <el-tabs
+                v-model="activeName"
+                class="script-main-tabs"
+                type="card"
+                style="width: 100%"
+              >
                 <el-tab-pane
                   :label="$t('verse.view.script.edit')"
                   name="blockly"
                 >
-                  <el-main
-                    style="
-                      margin: 0;
-                      padding: 0;
-                      height: 70vh;
-                      position: relative;
-                    "
-                  >
-                    <div class="fullscreen-controls">
-                      <el-button-group>
-                        <el-button
-                          class="fullscreen-btn"
-                          size="small"
-                          type="primary"
-                          plain
-                          @click="toggleFullscreen"
-                        >
-                          <el-icon>
-                            <FullScreen v-if="!isFullscreen"></FullScreen>
-                            <Aim v-else></Aim>
-                          </el-icon>
-                        </el-button>
-                        <template v-if="isFullscreen">
-                          <el-button
-                            size="small"
-                            type="primary"
-                            @click="showFullscreenCode('lua')"
-                          >
-                            Lua
-                          </el-button>
-                          <el-button
-                            size="small"
-                            color="#F7DF1E"
-                            style="margin-right: 10px"
-                            @click="showFullscreenCode('javascript')"
-                          >
-                            JavaScript
-                          </el-button>
-                          <el-button
-                            size="small"
-                            type="primary"
-                            style="margin-right: 10px"
-                            @click="run"
-                          >
-                            测试运行
-                          </el-button>
-                          <el-button
-                            v-if="saveable"
-                            size="small"
-                            type="primary"
-                            style="margin-right: 50px"
-                            @click="save"
-                          >
-                            <font-awesome-icon
-                              class="icon"
-                              icon="save"
-                            ></font-awesome-icon>
-                            {{ $t("verse.view.script.save") }}
-                          </el-button>
-                        </template>
-                      </el-button-group>
-                    </div>
-
-                    <el-dialog
-                      v-model="showCodeDialog"
-                      :title="codeDialogTitle"
-                      fullscreen
-                      :show-close="true"
-                      :close-on-click-modal="false"
-                      :close-on-press-escape="true"
-                    >
-                      <div class="code-dialog-content">
-                        <el-card :class="isDark ? 'dark-theme' : 'light-theme'">
-                          <div v-highlight>
-                            <div class="code-container2">
-                              <el-button
-                                class="copy-button2"
-                                text
-                                @click="copyCode(currentCode)"
-                              >
-                                <el-icon class="icon">
-                                  <CopyDocument></CopyDocument>
-                                </el-icon>
-                                {{ $t("copy.title") }}
-                              </el-button>
-                              <pre>
-                    <code :class="currentCodeType">{{ currentCode }}</code>
-                  </pre>
-                            </div>
-                          </div>
-                        </el-card>
-                      </div>
-                    </el-dialog>
-
+                  <el-main class="blockly-editor-main">
                     <iframe
                       style="margin: 0; padding: 0; height: 100%; width: 100%"
+                      class="blockly-editor-frame"
+                      scrolling="no"
                       id="editor"
                       ref="editor"
                       :src="src"
@@ -214,10 +128,9 @@
                 plain
                 @click="toggleSceneFullscreen"
               >
-                <el-icon>
-                  <FullScreen v-if="!isSceneFullscreen"></FullScreen>
-                  <Aim v-else></Aim>
-                </el-icon>
+                <font-awesome-icon
+                  :icon="['fas', isSceneFullscreen ? 'compress' : 'expand']"
+                ></font-awesome-icon>
               </el-button>
             </div>
             <ScenePlayer
@@ -391,19 +304,11 @@ const {
   disabled,
   isSceneFullscreen,
   isFullscreen,
-  showCodeDialog,
-  currentCode,
-  currentCodeType,
-  codeDialogTitle,
   unsavedBlocklyData,
   resolveUnsavedChangesBeforeLeave,
   editor,
   src,
-  isDark,
-  toggleFullscreen,
-  showFullscreenCode,
   toggleSceneFullscreen,
-  copyCode,
   postMessage,
   save,
   decompressBlockly,
@@ -505,7 +410,7 @@ const handlePolygen = (uuid: string) => {
 };
 
 // ---------- Verse 专有：run ----------
-const run = async () => {
+const _run = async () => {
   const wasFullscreen = isFullscreen.value;
   if (wasFullscreen) {
     document.exitFullscreen();
@@ -732,7 +637,67 @@ onMounted(async () => {
 }
 
 .script-tabs-wrapper :deep(.el-tabs__header) {
+  margin: 0 !important;
   padding-right: 280px;
+  border-bottom: none !important;
+  position: relative;
+  top: -4px;
+}
+
+.script-tabs-wrapper :deep(.el-tabs--card > .el-tabs__header .el-tabs__nav) {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.script-tabs-wrapper :deep(.el-tabs--card > .el-tabs__header .el-tabs__item) {
+  border: 0.5px solid #d6deea !important;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.script-tabs-wrapper
+  :deep(.el-tabs--card > .el-tabs__header .el-tabs__item + .el-tabs__item) {
+  margin-left: 8px;
+}
+
+.script-tabs-wrapper
+  :deep(.el-tabs--card > .el-tabs__header .el-tabs__item.is-active) {
+  color: #06a7ee;
+  background: #fff;
+  border: 0.5px solid #06a7ee !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.script-tabs-wrapper :deep(.el-tabs__nav-wrap::after) {
+  display: none !important;
+  content: none !important;
+  height: 0 !important;
+}
+
+.script-tabs-wrapper :deep(.el-tabs__content) {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.blockly-editor-main {
+  margin: 0;
+  margin-top: 0;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  height: calc(100vh - 185px);
+  min-height: 520px;
+}
+
+.blockly-editor-frame {
+  border: 0;
+  display: block;
 }
 
 @media (max-width: 768px) {
@@ -745,49 +710,6 @@ onMounted(async () => {
   .script-tabs-wrapper :deep(.el-tabs__header) {
     padding-right: 0;
   }
-}
-
-.fullscreen-btn {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  z-index: 100;
-}
-
-/* 全屏时的样式 */
-:fullscreen .el-main {
-  height: 100vh !important;
-  padding: 0;
-}
-
-:fullscreen iframe {
-  height: 100vh !important;
-}
-
-.code-dialog-content {
-  height: 100%;
-  overflow: hidden;
-}
-
-.code-container2 {
-  max-height: 80vh;
-  overflow-y: auto;
-  position: relative;
-}
-
-.copy-button2 {
-  position: absolute;
-  top: 35px;
-  right: 0;
-  z-index: 1;
-}
-
-.fullscreen-controls {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  z-index: 100;
-  padding-right: 10px;
 }
 
 .dark-theme :deep(.hljs) {
@@ -813,6 +735,14 @@ onMounted(async () => {
 
 .scene-fullscreen-btn {
   opacity: 0.8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scene-fullscreen-btn :deep(.svg-inline--fa) {
+  font-size: 14px;
+  line-height: 1;
 }
 
 .scene-exit-btn {

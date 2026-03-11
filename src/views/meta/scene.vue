@@ -113,7 +113,9 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
         const response = await getPhototypes(
           input.sorted,
           input.searched,
-          input.current
+          input.current,
+          "resource,image,author",
+          24
         );
 
         logger.error(response.data);
@@ -143,7 +145,8 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
           input.sorted,
           input.searched,
           input.current,
-          "image"
+          "image",
+          24
         );
 
         const items = response.data.map((item: ResourceListItem) => {

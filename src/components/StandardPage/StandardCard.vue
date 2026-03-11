@@ -80,12 +80,16 @@
     </div>
 
     <!-- Action Footer -->
-    <div v-if="actionText" class="card-action" @click.stop="$emit('action')">
-      <font-awesome-icon
-        :icon="actionIcon"
-        class="action-icon"
-      ></font-awesome-icon>
-      <span class="action-text">{{ actionText }}</span>
+    <div v-if="$slots.actions || actionText" class="card-action-group">
+      <slot name="actions">
+        <div class="card-action" @click.stop="$emit('action')">
+          <font-awesome-icon
+            :icon="actionIcon"
+            class="action-icon"
+          ></font-awesome-icon>
+          <span class="action-text">{{ actionText }}</span>
+        </div>
+      </slot>
     </div>
   </div>
 </template>
@@ -439,5 +443,10 @@ const toggleSelect = () => {
 .card-action:hover .action-icon,
 .card-action:hover .action-text {
   color: var(--primary-color, #00baff);
+}
+
+.card-action-group {
+  background: var(--bg-hover, #f8fafc);
+  border-top: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
 }
 </style>
