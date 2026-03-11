@@ -68,6 +68,7 @@ export default {
     adminCenter: "Admin Center",
     userManagement: "User Management",
     prefabManagement: "Prefab Management",
+    tools: "Tools",
     logout: "Sign Out",
     logoutConfirmTitle: "Sign Out",
     logoutConfirmMessage: "Are you sure you want to sign out?",

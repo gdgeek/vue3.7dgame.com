@@ -81,6 +81,7 @@ export default {
     adminCenter: "管理中心",
     userManagement: "用户管理",
     prefabManagement: "预制体管理",
+    tools: "实用工具",
     logout: "退出登录",
     logoutConfirmTitle: "退出登录",
     logoutConfirmMessage: "确定要退出登录吗？",

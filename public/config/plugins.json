@@ -16,6 +16,18 @@
   ],
   "plugins": [
     {
+      "id": "counter",
+      "name": "计数器",
+      "description": "简单的计数器插件示例",
+      "url": "http://localhost:8085",
+      "icon": "DataAnalysis",
+      "group": "tools",
+      "enabled": true,
+      "order": 1,
+      "allowedOrigin": "http://localhost:8085",
+      "version": "1.0.0"
+    },
+    {
       "id": "code-editor",
       "name": "代码编辑器",
       "description": "在线代码编辑器",

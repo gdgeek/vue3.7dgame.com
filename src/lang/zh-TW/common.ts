@@ -67,6 +67,7 @@ export default {
     adminCenter: "管理中心",
     userManagement: "用戶管理",
     prefabManagement: "預製體管理",
+    tools: "實用工具",
     logout: "登出",
     logoutConfirmTitle: "登出",
     logoutConfirmMessage: "確定要登出嗎？",

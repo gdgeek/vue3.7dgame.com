@@ -64,6 +64,7 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       try {
         await pluginSystem.initialize();
         this.initialized = true;
+        this.config = pluginSystem.getConfig();
         const pluginsMap = new Map<string, PluginInfo>();
         for (const p of pluginSystem.getAllPlugins()) {
           pluginsMap.set(p.pluginId, p);

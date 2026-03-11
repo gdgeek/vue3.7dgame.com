@@ -67,6 +67,7 @@ export default {
     adminCenter: "管理センター",
     userManagement: "ユーザー管理",
     prefabManagement: "プレハブ管理",
+    tools: "ユーティリティ",
     logout: "ログアウト",
     logoutConfirmTitle: "ログアウト",
     logoutConfirmMessage: "ログアウトしてもよろしいですか？",

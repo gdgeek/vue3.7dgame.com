@@ -68,6 +68,7 @@ export default {
     adminCenter: "ศูนย์ผู้ดูแล",
     userManagement: "การจัดการผู้ใช้",
     prefabManagement: "การจัดการพรีแฟบ",
+    tools: "เครื่องมือ",
     logout: "ออกจากระบบ",
     logoutConfirmTitle: "ออกจากระบบ",
     logoutConfirmMessage: "คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ",

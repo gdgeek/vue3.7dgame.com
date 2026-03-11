@@ -209,6 +209,11 @@ export class PluginSystem {
     return Array.from(this.plugins.values());
   }
 
+  /** 获取插件配置 */
+  getConfig() {
+    return this.configService.getConfig();
+  }
+
   /** 销毁插件系统，卸载所有插件并清理资源 */
   async destroy(): Promise<void> {
     logger.info("Destroying PluginSystem...");
