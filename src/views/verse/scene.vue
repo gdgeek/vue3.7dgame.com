@@ -1,10 +1,10 @@
 <template>
   <div class="verse-scene">
-    <KnightDataDialog ref="knightDataRef"></KnightDataDialog>
-    <MetaDialog @selected="selected" ref="metaDialogRef"></MetaDialog>
+    <KnightDataDialog ref="knightDataRef" v-show="false"></KnightDataDialog>
+    <MetaDialog @selected="selected" ref="metaDialogRef" v-show="false"></MetaDialog>
     <!--<PrefabDialog @selected="selected" ref="prefabDialogRef"></PrefabDialog>-->
-    <el-container>
-      <el-main>
+    <el-container class="editor-wrapper">
+      <el-main class="editor-container">
         <iframe
           id="editor"
           ref="editor"
@@ -520,12 +520,37 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+.verse-scene {
+  height: calc(100vh - 60px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-wrapper {
+  flex: 1;
+  height: 100%;
+}
+
+.editor-container {
+  padding: 0 !important;
+  height: 100%;
+  overflow: hidden;
+}
+
 .content {
-  height: calc(100vh - 140px);
-  clip-path: inset(0 round var(--editor-frame-radius, 16px));
+  height: 100%;
+  width: 100%;
   background: var(--bg-card, #fff);
   border: 0;
-  border-radius: var(--editor-frame-radius, 16px);
   outline: none;
+  display: block;
+}
+</style>
+
+<style lang="scss">
+/* 隐藏当前页面的 footer */
+.main-container:has(.verse-scene) > footer {
+  display: none !important;
 }
 </style>

@@ -1,32 +1,17 @@
 <template>
   <div class="verse-scene">
-    <phototype-dialog
-      @selected="selectedPhototype"
-      ref="phototypeDialogRef"
-    ></phototype-dialog>
-    <resource-dialog @selected="selected" :on-get-datas="getDatas" ref="dialog">
+    <phototype-dialog @selected="selectedPhototype" ref="phototypeDialogRef" v-show="false"></phototype-dialog>
+    <resource-dialog @selected="selected" :on-get-datas="getDatas" ref="dialog" v-show="false">
       <template #bar="{ item }">
         <div v-if="isAudioBarItem(item)" class="info-container">
-          <audio
-            id="audio"
-            controls
-            style="width: 100%; height: 30px"
-            :src="getAudioSource(item)"
-            @play="handleAudioPlay"
-          ></audio>
+          <audio id="audio" controls style="width: 100%; height: 30px" :src="getAudioSource(item)"
+            @play="handleAudioPlay"></audio>
         </div>
       </template>
     </resource-dialog>
-    <el-container>
-      <el-main>
-        <iframe
-          ref="editor"
-          id="editor"
-          :src="src"
-          class="content"
-          height="100%"
-          width="100%"
-        ></iframe>
+    <el-container class="editor-wrapper">
+      <el-main class="editor-container">
+        <iframe ref="editor" id="editor" :src="src" class="content" height="100%" width="100%"></iframe>
       </el-main>
     </el-container>
   </div>
@@ -461,7 +446,7 @@ const handleUploadCover = async (data: unknown) => {
         md5,
         extension,
         file,
-        (_progress: unknown) => {},
+        (_progress: unknown) => { },
         handler,
         "backup"
       );
@@ -582,7 +567,6 @@ const refresh = async () => {
   try {
     const meta = await getMeta(id.value);
     const availableTypes = getAvailableResourceTypes();
-    logger.log(availableTypes);
 
     // 发送元数据和可用资源类型到编辑器
     postMessage("load", {
@@ -614,12 +598,37 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+.verse-scene {
+  height: calc(100vh - 60px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-wrapper {
+  flex: 1;
+  height: 100%;
+}
+
+.editor-container {
+  padding: 0 !important;
+  height: 100%;
+  overflow: hidden;
+}
+
 .content {
-  height: calc(100vh - 140px);
-  clip-path: inset(0 round var(--editor-frame-radius, 16px));
+  height: 100%;
+  width: 100%;
   background: var(--bg-card, #fff);
   border: 0;
-  border-radius: var(--editor-frame-radius, 16px);
   outline: none;
+  display: block;
+}
+</style>
+
+<style lang="scss">
+/* 隐藏当前页面的 footer */
+.main-container:has(.verse-scene)>footer {
+  display: none !important;
 }
 </style>

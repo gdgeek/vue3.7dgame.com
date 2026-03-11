@@ -141,10 +141,11 @@ describe("PluginRegistry", () => {
     });
 
     it("should report multiple errors at once", () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const manifest = createValidManifest({
         id: "",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         name: "" as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         enabled: 1 as any,
       });
       const result = registry.validateManifest(manifest);
