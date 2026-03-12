@@ -58,7 +58,10 @@ function handleIframeLoad() {
     },
   };
 
-  iframeRef.value.contentWindow.postMessage(initMessage, manifest.allowedOrigin);
+  iframeRef.value.contentWindow.postMessage(
+    initMessage,
+    manifest.allowedOrigin
+  );
 }
 
 function handleIframeError() {
@@ -106,9 +109,16 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- iframe 载入插件 -->
-    <iframe v-if="pluginUrl" ref="iframeRef" :src="pluginUrl" class="plugin-page__iframe"
-      :title="pluginInfo?.name ?? '插件'" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-      @load="handleIframeLoad" @error="handleIframeError"></iframe>
+    <iframe
+      v-if="pluginUrl"
+      ref="iframeRef"
+      :src="pluginUrl"
+      class="plugin-page__iframe"
+      :title="pluginInfo?.name ?? '插件'"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+      @load="handleIframeLoad"
+      @error="handleIframeError"
+    ></iframe>
   </div>
 </template>
 
@@ -144,7 +154,7 @@ onBeforeUnmount(() => {
 
 <style lang="scss">
 /* 隐藏插件页面的 footer */
-.main-container:has(.plugin-page)>footer {
+.main-container:has(.plugin-page) > footer {
   display: none !important;
 }
 </style>
