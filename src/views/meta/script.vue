@@ -6,6 +6,22 @@
           <el-container v-if="!disabled">
             <div class="script-tabs-wrapper">
               <div v-if="meta" class="script-tabs-actions">
+                <el-select
+                  v-model="selectedUsedSceneId"
+                  class="script-used-scenes-select"
+                  size="small"
+                  :placeholder="usedSceneSelectPlaceholder"
+                  :disabled="usedSceneOptions.length === 0"
+                  popper-class="script-used-scenes-popper"
+                  @change="handleUsedSceneChange"
+                >
+                  <el-option
+                    v-for="scene in usedSceneOptions"
+                    :key="scene.id"
+                    :label="scene.name"
+                    :value="scene.id"
+                  ></el-option>
+                </el-select>
                 <el-button
                   type="primary"
                   size="small"
@@ -152,6 +168,7 @@ import { logger } from "@/utils/logger";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
+import { getVerses } from "@/api/v1/verse";
 import * as THREE from "three";
 import { getConfiguredGLTFLoader } from "@/lib/three/loaders";
 import { convertToHttps } from "@/assets/js/helper";
@@ -303,6 +320,40 @@ const {
 
 const { t } = useI18n();
 
+type SceneOption = {
+  id: number;
+  name: string;
+};
+
+const selectedUsedSceneId = ref<number | null>(null);
+const sceneNameMap = ref<Map<number, string>>(new Map());
+
+const usedSceneOptions = computed<SceneOption[]>(() => {
+  const verseMetas = Array.isArray(meta.value?.verseMetas)
+    ? meta.value.verseMetas
+    : [];
+  if (verseMetas.length === 0) return [];
+
+  const options: SceneOption[] = [];
+  const seen = new Set<number>();
+
+  verseMetas.forEach((relation) => {
+    const verseId = relation?.verse_id;
+    if (typeof verseId !== "number" || seen.has(verseId)) return;
+    seen.add(verseId);
+    options.push({
+      id: verseId,
+      name:
+        sceneNameMap.value.get(verseId) ||
+        `${t("meta.list.properties.sceneFallback")}${verseId}`,
+    });
+  });
+
+  return options;
+});
+
+const usedSceneSelectPlaceholder = "已使用场景";
+
 const sceneEditorLink = computed(() => {
   const editorLabel = t("route.meta.sceneEditor");
   const titleText = meta.value?.title
@@ -317,6 +368,56 @@ const goBackToSceneEditor = async () => {
   });
   if (!canLeave) return;
   router.push(sceneEditorLink.value);
+};
+
+const goToUsedSceneEditor = async (sceneId: number, sceneName?: string) => {
+  const canLeave = await resolveUnsavedChangesBeforeLeave({
+    showDiscardInfo: false,
+  });
+  if (!canLeave) return;
+
+  const title = encodeURIComponent(
+    t("verse.listPage.editorTitle", {
+      name: sceneName || t("verse.listPage.unnamed"),
+    })
+  );
+  router.push({ path: "/verse/scene", query: { id: sceneId, title } });
+};
+
+const handleUsedSceneChange = async (sceneId: number) => {
+  const selected = usedSceneOptions.value.find((scene) => scene.id === sceneId);
+  await goToUsedSceneEditor(sceneId, selected?.name);
+};
+
+const loadSceneNameMap = async () => {
+  try {
+    const scenes: Array<{ id: number; name?: string }> = [];
+    let page = 1;
+    let pageCount = 1;
+
+    do {
+      const response = await getVerses({
+        sort: "-updated_at",
+        page,
+        perPage: 100,
+      });
+      scenes.push(
+        ...response.data.map((scene) => ({ id: scene.id, name: scene.name }))
+      );
+      pageCount = parseInt(
+        String(response.headers["x-pagination-page-count"] || "1")
+      );
+      page += 1;
+    } while (page <= pageCount);
+
+    const map = new Map<number, string>();
+    scenes.forEach((scene) => {
+      map.set(scene.id, String(scene.name || `Scene-${scene.id}`));
+    });
+    sceneNameMap.value = map;
+  } catch (error) {
+    logger.error("loadSceneNameMap error", error);
+  }
 };
 
 // ---------- Meta 专有：handlePolygen（返回 mesh + playAnimation）----------
@@ -482,8 +583,9 @@ const run = async () => {
 onMounted(async () => {
   try {
     loading.value = true;
+    await loadSceneNameMap();
     const response = await getMeta(id.value, {
-      expand: "cyber,event,share,metaCode",
+      expand: "cyber,event,share,metaCode,verseMetas",
     });
     logger.log("response数据", response);
 
@@ -603,6 +705,37 @@ defineExpose({ run });
   align-items: center;
 }
 
+.script-used-scenes-select {
+  width: 180px;
+}
+
+.script-used-scenes-select :deep(.el-select__wrapper) {
+  min-height: 32px;
+  align-items: center;
+}
+
+.script-used-scenes-select :deep(.el-select__placeholder),
+.script-used-scenes-select :deep(.el-select__selected-item) {
+  text-align: center;
+  line-height: 20px;
+}
+
+:global(.script-used-scenes-popper .el-select-dropdown__item) {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+}
+
+:global(
+  .script-used-scenes-popper .el-select-dropdown__item.hover,
+  .script-used-scenes-popper .el-select-dropdown__item:hover,
+  .script-used-scenes-popper .el-select-dropdown__item.is-hovering
+) {
+  background-color: var(--ar-primary-alpha-10) !important;
+  color: var(--ar-primary) !important;
+  font-weight: var(--font-weight-medium, 500) !important;
+}
+
 .script-tabs-wrapper :deep(.el-tabs__header) {
   margin: 0 !important;
   padding-right: 280px;
@@ -671,11 +804,16 @@ defineExpose({ run });
   .script-tabs-actions {
     position: static;
     margin-bottom: 8px;
+    flex-wrap: wrap;
     justify-content: flex-end;
   }
 
   .script-tabs-wrapper :deep(.el-tabs__header) {
     padding-right: 0;
+  }
+
+  .script-used-scenes-select {
+    width: 100%;
   }
 }
 

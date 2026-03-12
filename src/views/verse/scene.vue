@@ -135,6 +135,50 @@ const refresh = async () => {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
+const toMetaId = (value: unknown): number | null => {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number.parseInt(value, 10);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+};
+
+const pickMetaNameFromPayload = (payload: Record<string, unknown>): string => {
+  const candidates = [
+    payload.meta_title,
+    payload.meta_name,
+    payload.title,
+    payload.name,
+    payload.metaTitle,
+    payload.metaName,
+  ];
+  const found = candidates.find(
+    (value) => typeof value === "string" && value.trim().length > 0
+  );
+  return typeof found === "string" ? found.trim() : "";
+};
+
+const buildMetaSceneTitle = (
+  metaId: number,
+  payload: Record<string, unknown>
+): string => {
+  const payloadName = pickMetaNameFromPayload(payload);
+  const matchedMeta = Array.isArray(verse.value?.metas)
+    ? verse.value?.metas.find((item) => item.id === metaId)
+    : undefined;
+  const metaName =
+    payloadName ||
+    String(matchedMeta?.title || matchedMeta?.name || "").trim() ||
+    String(t("meta.list.unnamed"));
+
+  return encodeURIComponent(
+    t("meta.list.editorTitle", {
+      name: metaName,
+    })
+  );
+};
+
 type PrefabSetupPayload = {
   meta_id: number | string;
   data: string;
@@ -473,9 +517,12 @@ const handleMessage = async (e: MessageEvent) => {
   switch (action) {
     case "edit-meta":
       if (isRecord(data)) {
+        const metaId = toMetaId(data.meta_id);
+        if (metaId === null) break;
+        const title = buildMetaSceneTitle(metaId, data);
         router.push({
           path: "/meta/scene",
-          query: { id: data.meta_id as string },
+          query: { id: String(metaId), title },
         });
       }
       break;
