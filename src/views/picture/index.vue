@@ -192,6 +192,7 @@ import { downloadResource } from "@/utils/downloadHelper";
 import {
   convertToLocalTime,
   formatFileSize as formatSize,
+  getResourceFormat,
 } from "@/utils/utilityFunctions";
 import { printVector2 } from "@/assets/js/helper";
 import { toHttps } from "@/utils/helper";
@@ -311,8 +312,8 @@ const detailProperties = computed(() => {
     : null;
   return [
     {
-      label: t("verse.listPage.type"),
-      value: t("route.resourceManagement.pictureManagement.title"),
+      label: t("ui.format"),
+      value: getResourceFormat(currentPicture.value.file),
     },
     { label: t("ui.size"), value: formatSize(currentPicture.value.file?.size) },
     {

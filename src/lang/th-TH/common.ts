@@ -115,6 +115,7 @@ export default {
     batchDelete: "ลบแบบชุด",
     time: "เวลา",
     type: "ประเภท",
+    format: "รูปแบบ",
     size: "ขนาด",
     createdAt: "เวลาที่สร้าง",
     dimensions: "ขนาดมิติ",

@@ -5,16 +5,19 @@
       <div class="title-area">
         <h2 v-if="showTitle" class="page-title">{{ title }}</h2>
         <p v-if="subtitle" class="page-subtitle">{{ subtitle }}</p>
-        <!-- Selection count -->
-        <p v-if="selectionCount > 0" class="selection-count">
-          {{ t("ui.selected", { count: selectionCount }) }}
-        </p>
       </div>
     </div>
 
     <!-- Row 2: Controls toolbar -->
     <div class="controls-row">
       <div class="controls-left">
+        <p
+          v-if="selectionCount > 0"
+          class="selection-count selection-count-inline"
+        >
+          {{ t("ui.selected", { count: selectionCount }) }}
+        </p>
+
         <!-- Search - Hide in selection mode -->
         <div v-if="showSearch && selectionCount === 0" class="search-box">
           <font-awesome-icon
@@ -194,9 +197,7 @@ let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
 const sortByNameField = computed(() => props.sortByName || "name");
 const showTitle = computed(() => props.showTitle);
-const showTitleRow = computed(
-  () => showTitle.value || !!props.subtitle || props.selectionCount > 0
-);
+const showTitleRow = computed(() => showTitle.value || !!props.subtitle);
 
 const isSortedByTime = computed(() =>
   currentSort.value.includes(props.sortByTime)
@@ -316,6 +317,12 @@ defineExpose({
   color: var(--primary-color, #00baff);
   font-weight: var(--font-weight-medium, 500);
   line-height: 1.5;
+}
+
+.selection-count-inline {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
 }
 
 .select-all-btn {

@@ -218,6 +218,7 @@ import {
 import {
   convertToLocalTime,
   formatFileSize as formatSize,
+  getResourceFormat,
   getVideoCover,
 } from "@/utils/utilityFunctions";
 import { sortByNameWithPinyin } from "@/utils/nameSort";
@@ -344,25 +345,6 @@ const parseDetailInfo = (raw?: string | null): DetailInfo | null => {
   return null;
 };
 
-const detailTypeLabel = computed(() => {
-  switch (detailType.value) {
-    case "polygen":
-      return t("polygen.typeName");
-    case "picture":
-      return t("route.resourceManagement.pictureManagement.title");
-    case "video":
-      return t("video.typeName");
-    case "audio":
-      return t("route.resourceManagement.audioManagement.title");
-    case "voxel":
-      return "Voxel";
-    case "particle":
-      return "Particle";
-    default:
-      return detailType.value || "-";
-  }
-});
-
 const detailPreviewUrl = computed(() => {
   if (!detailResource.value) return "";
   if (detailType.value === "video") {
@@ -379,7 +361,10 @@ const detailProperties = computed(() => {
   if (!detailResource.value) return [];
   const info = parseDetailInfo(detailResource.value.info);
   const props: Array<{ label: string; value: string | number }> = [
-    { label: t("ui.type"), value: detailTypeLabel.value },
+    {
+      label: t("ui.format"),
+      value: getResourceFormat(detailResource.value.file),
+    },
     {
       label: t("ui.size"),
       value: formatSize(detailResource.value.file?.size || 0),

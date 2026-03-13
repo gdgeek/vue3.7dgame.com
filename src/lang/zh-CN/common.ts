@@ -139,6 +139,7 @@ export default {
     deleteResource: "删除此资源",
     useInEditor: "在编辑器中使用",
     type: "类型",
+    format: "格式",
     size: "大小",
     createdAt: "创建时间",
     dimensions: "尺寸",

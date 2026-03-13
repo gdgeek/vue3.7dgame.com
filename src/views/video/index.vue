@@ -194,6 +194,7 @@ import { downloadResource } from "@/utils/downloadHelper";
 import {
   convertToLocalTime,
   formatFileSize as formatSize,
+  getResourceFormat,
   getVideoCover,
 } from "@/utils/utilityFunctions";
 import { printVector2 } from "@/assets/js/helper";
@@ -324,7 +325,10 @@ const detailProperties = computed(() => {
   if (!currentVideo.value) return [];
   const info = parseVideoInfo(currentVideo.value.info);
   const props = [
-    { label: t("ui.type"), value: t("video.typeName") },
+    {
+      label: t("ui.format"),
+      value: getResourceFormat(currentVideo.value.file),
+    },
     { label: t("ui.size"), value: formatSize(currentVideo.value.file?.size) },
     {
       label: t("ui.createdAt"),

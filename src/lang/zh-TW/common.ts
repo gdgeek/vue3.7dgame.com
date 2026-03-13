@@ -113,6 +113,7 @@ export default {
     batchDelete: "批次刪除",
     time: "時間",
     type: "類型",
+    format: "格式",
     size: "大小",
     createdAt: "建立時間",
     dimensions: "尺寸",

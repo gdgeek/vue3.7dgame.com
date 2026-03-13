@@ -115,6 +115,7 @@ export default {
     batchDelete: "Batch Delete",
     time: "Time",
     type: "Type",
+    format: "Format",
     size: "Size",
     createdAt: "Created At",
     dimensions: "Dimensions",

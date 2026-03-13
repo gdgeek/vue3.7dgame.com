@@ -114,6 +114,7 @@ export default {
     batchDelete: "一括削除",
     time: "時間",
     type: "種類",
+    format: "形式",
     size: "サイズ",
     createdAt: "作成日時",
     dimensions: "寸法",

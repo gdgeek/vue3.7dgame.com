@@ -71,6 +71,36 @@ export const formatFileSize = (size: number) => {
 };
 
 /**
+ * Get resource format text from filename first, then MIME type.
+ * Example: "model.glb" -> "glb", "video/mp4" -> "mp4".
+ */
+export const getResourceFormat = (file?: {
+  filename?: string | null;
+  type?: string | null;
+}) => {
+  const fileName = file?.filename?.trim();
+  if (fileName) {
+    const dotIndex = fileName.lastIndexOf(".");
+    if (dotIndex > -1 && dotIndex < fileName.length - 1) {
+      return fileName.slice(dotIndex + 1).toLowerCase();
+    }
+  }
+
+  const mimeType = file?.type?.trim();
+  if (mimeType) {
+    const slashIndex = mimeType.lastIndexOf("/");
+    const subtype = (
+      slashIndex > -1 ? mimeType.slice(slashIndex + 1) : mimeType
+    )
+      .split(";")[0]
+      .trim();
+    if (subtype) return subtype.toLowerCase();
+  }
+
+  return "—";
+};
+
+/**
  * Identify if a URL is a video file and append COS snapshot parameters if needed.
  * @param url The image/video URL
  * @returns The snapshot URL if it's a video, otherwise the original URL

@@ -203,6 +203,7 @@ import { downloadResource } from "@/utils/downloadHelper";
 import {
   convertToLocalTime,
   formatFileSize as formatSize,
+  getResourceFormat,
 } from "@/utils/utilityFunctions";
 import { toHttps } from "@/utils/helper";
 import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
@@ -320,8 +321,8 @@ const detailProperties = computed(() => {
     : null;
   const props = [
     {
-      label: t("verse.listPage.type"),
-      value: t("route.resourceManagement.audioManagement.title"),
+      label: t("ui.format"),
+      value: getResourceFormat(currentAudio.value.file),
     },
     { label: t("ui.size"), value: formatSize(currentAudio.value.file?.size) },
     {

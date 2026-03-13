@@ -225,6 +225,7 @@ import { downloadResource } from "@/utils/downloadHelper";
 import {
   convertToLocalTime,
   formatFileSize as formatSize,
+  getResourceFormat,
 } from "@/utils/utilityFunctions";
 import { toHttps } from "@/utils/helper";
 import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
@@ -364,7 +365,10 @@ const detailProperties = computed(() => {
   const faces = info?.faces ?? loadedModelStats.value?.faces;
   const vertices = info?.vertices ?? loadedModelStats.value?.vertices;
   return [
-    { label: t("ui.type"), value: t("polygen.typeName") },
+    {
+      label: t("ui.format"),
+      value: getResourceFormat(currentPolygen.value.file),
+    },
     {
       label: t("ui.size"),
       value: formatSize(currentPolygen.value.file?.size || 0),
