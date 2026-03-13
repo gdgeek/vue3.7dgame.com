@@ -77,7 +77,7 @@ const routes: RouteRecordRaw[] = [
   },
 ];
 
-export let constantRoutes: RouteRecordRaw[] = routes;
+export const constantRoutes: RouteRecordRaw[] = routes;
 
 /**
  * 创建路由
@@ -172,7 +172,8 @@ const cloneRoutes = (source: RouteRecordRaw[]) =>
   source.map((route) => cloneRouteRecord(route));
 
 export const UpdateRoutes = async (ability: AnyAbility) => {
-  constantRoutes = cloneRoutes(routes);
+  const nextRoutes = cloneRoutes(routes);
+  constantRoutes.splice(0, constantRoutes.length, ...nextRoutes);
   check(constantRoutes, ability);
   initRoutes();
 };

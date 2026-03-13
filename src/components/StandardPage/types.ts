@@ -10,6 +10,8 @@ export interface PageActionBarProps {
   searchPlaceholder?: string;
   /** 是否显示搜索框 */
   showSearch?: boolean;
+  /** 兼容旧页面：是否显示标签筛选 */
+  showTags?: boolean;
   /** 是否显示排序按钮 */
   showSort?: boolean;
   /** 是否显示名称排序按钮 */

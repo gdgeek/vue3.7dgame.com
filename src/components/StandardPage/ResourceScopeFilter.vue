@@ -2,7 +2,7 @@
   <div class="resource-scope-filter">
     <el-select
       v-if="showSceneSelect"
-      :model-value="sceneId"
+      :model-value="sceneId ?? undefined"
       class="scene-select"
       :fit-input-width="true"
       clearable
@@ -25,7 +25,7 @@
 
     <el-select
       v-if="showEntitySelect"
-      :model-value="entityId"
+      :model-value="entityId ?? undefined"
       class="entity-select"
       :fit-input-width="true"
       clearable

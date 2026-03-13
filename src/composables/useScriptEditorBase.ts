@@ -12,7 +12,7 @@ import { useSettingsStore } from "@/store/modules/settings";
 import { useAppStore } from "@/store/modules/app";
 import { useUserStore } from "@/store/modules/user";
 import { ThemeEnum } from "@/enums/ThemeEnum";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { Message, MessageBox } from "@/components/Dialog";
 import { logger } from "@/utils/logger";
 import { safeAtob } from "@/utils/base64";
 import env from "@/environment";
@@ -185,9 +185,9 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const copyCode = async (code: string) => {
     try {
       await navigator.clipboard.writeText(code);
-      ElMessage.success(t("copy.success"));
+      Message.success(t("copy.success"));
     } catch (_error) {
-      ElMessage.error(t("copy.error"));
+      Message.error(t("copy.error"));
     }
   };
 
@@ -237,7 +237,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
         "*"
       );
     } else {
-      ElMessage.error(t(options.i18nKeys.error3));
+      Message.error(t(options.i18nKeys.error3));
     }
   };
 
@@ -267,17 +267,15 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   };
 
   const confirmSaveScript = () => {
-    return ElMessageBox.confirm(t("common.scriptSaveConfirm.message"), "", {
-      showClose: true,
-      center: true,
-      distinguishCancelAndClose: true,
-      closeOnClickModal: false,
-      closeOnPressEscape: true,
-      showCancelButton: true,
-      customClass: "script-save-confirm-box",
-      confirmButtonText: t("common.scriptSaveConfirm.confirm"),
-      cancelButtonText: t("common.scriptSaveConfirm.cancel"),
-    });
+    return MessageBox.confirm(
+      t(options.i18nKeys.leaveMessage1),
+      t(options.i18nKeys.leaveMessage2),
+      {
+        type: "warning",
+        confirmButtonText: t(options.i18nKeys.leaveConfirm),
+        cancelButtonText: t(options.i18nKeys.leaveCancel),
+      }
+    );
   };
 
   const resolveUnsavedChangesBeforeLeave = async (
@@ -295,7 +293,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
       if (action === "cancel") {
         hasUnsavedChanges.value = false;
         if (showDiscardInfo) {
-          ElMessage.info(t(options.i18nKeys.leaveInfo));
+          Message.info(t(options.i18nKeys.leaveInfo));
         }
         return true;
       }
@@ -311,7 +309,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
       await save();
       return true;
     } catch (_error) {
-      ElMessage.error(t(options.i18nKeys.leaveError));
+      Message.error(t(options.i18nKeys.leaveError));
       return false;
     }
   };
@@ -348,7 +346,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
         });
       } else if (params.action === "post") {
         if (!isEditorPostPayload(params.data)) {
-          ElMessage.error(t(options.i18nKeys.error1));
+          Message.error(t(options.i18nKeys.error1));
           return;
         }
         await options.onPost(params.data);
@@ -357,7 +355,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
           saveResolve = null;
         }
       } else if (params.action === "post:no-change") {
-        ElMessage.info(t(options.i18nKeys.info));
+        Message.info(t(options.i18nKeys.info));
       } else if (params.action === "update") {
         if (!isEditorUpdatePayload(params.data)) return;
         LuaCode.value =
@@ -429,7 +427,11 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     const canLeave = await resolveUnsavedChangesBeforeLeave({
       showDiscardInfo: true,
     });
-    next(canLeave);
+    if (canLeave) {
+      next();
+      return;
+    }
+    next(false);
   });
 
   // ---- onMounted：注册共享事件监听 ----

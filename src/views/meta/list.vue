@@ -322,7 +322,7 @@
             <template v-else>
               <div ref="usedScenesControlsRef" class="used-scenes-controls">
                 <el-select
-                  v-model="selectedUsedSceneId"
+                  v-model="selectedUsedSceneModel"
                   class="used-scenes-select"
                   size="small"
                   popper-class="detail-link-select-popper detail-link-select-popper-scene"
@@ -869,9 +869,23 @@ const getResourceCount = (item?: {
 };
 
 const selectedUsedSceneId = ref<number | null>(null);
+const selectedUsedSceneModel = computed<number | undefined>({
+  get: () => selectedUsedSceneId.value ?? undefined,
+  set: (value) => {
+    selectedUsedSceneId.value = value ?? null;
+  },
+});
 const usedScenesControlsRef = ref<HTMLElement | null>(null);
 
-const getUsedSceneOptions = (item?: metaInfo | null) => {
+type MetaVerseRelation = {
+  verse_id?: number | null;
+};
+
+type MetaSceneUsageSource = {
+  verseMetas?: MetaVerseRelation[] | null;
+} | null;
+
+const getUsedSceneOptions = (item?: MetaSceneUsageSource) => {
   const verseMetas = Array.isArray(item?.verseMetas) ? item.verseMetas : [];
   if (verseMetas.length === 0) return [] as SceneOption[];
 
@@ -898,7 +912,9 @@ const getUsedSceneOptions = (item?: metaInfo | null) => {
   return usedSceneOptions;
 };
 
-const usedSceneOptions = computed(() => getUsedSceneOptions(currentMeta.value));
+const usedSceneOptions = computed<SceneOption[]>(() =>
+  getUsedSceneOptions(currentMeta.value as MetaSceneUsageSource)
+);
 
 watch(
   () => usedSceneOptions.value,

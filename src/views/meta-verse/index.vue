@@ -323,7 +323,7 @@
                 class="loaded-entities-controls"
               >
                 <el-select
-                  v-model="selectedLoadedEntityId"
+                  v-model="selectedLoadedEntityModel"
                   class="loaded-entities-select"
                   size="small"
                   popper-class="detail-link-select-popper detail-link-select-popper-entity"
@@ -405,7 +405,7 @@
 </template>
 
 <script setup lang="ts">
-import { FolderOpened } from "@element-plus/icons-vue";
+import { FolderOpened, Upload } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -527,6 +527,12 @@ type LoadedEntityOption = {
 };
 
 const selectedLoadedEntityId = ref<number | string | null>(null);
+const selectedLoadedEntityModel = computed<number | string | undefined>({
+  get: () => selectedLoadedEntityId.value ?? undefined,
+  set: (value) => {
+    selectedLoadedEntityId.value = value ?? null;
+  },
+});
 const loadedEntitiesControlsRef = ref<HTMLElement | null>(null);
 
 const loadedEntityOptions = computed<LoadedEntityOption[]>(() => {

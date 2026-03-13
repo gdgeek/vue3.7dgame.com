@@ -32,7 +32,9 @@ function handleSelect(pluginId: string) {
         <el-icon>
           <component :is="group.icon"></component>
         </el-icon>
-        <span>{{ resolveI18nName(group.name, group.nameI18n, appStore.language) }}</span>
+        <span>{{
+          resolveI18nName(group.name, group.nameI18n, appStore.language)
+        }}</span>
       </template>
       <el-menu-item
         v-for="plugin in getGroupPlugins(group.id)"
@@ -44,7 +46,9 @@ function handleSelect(pluginId: string) {
         <el-icon>
           <component :is="plugin.icon"></component>
         </el-icon>
-        <span>{{ resolveI18nName(plugin.name, plugin.nameI18n, appStore.language) }}</span>
+        <span>{{
+          resolveI18nName(plugin.name, plugin.nameI18n, appStore.language)
+        }}</span>
         <el-tag
           v-if="plugin.state === 'error'"
           type="danger"

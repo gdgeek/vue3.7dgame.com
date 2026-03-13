@@ -123,10 +123,17 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- iframe 载入插件 -->
-    <iframe v-if="pluginUrl" ref="iframeRef" :src="pluginUrl" class="plugin-page__iframe"
+    <iframe
+      v-if="pluginUrl"
+      ref="iframeRef"
+      :src="pluginUrl"
+      class="plugin-page__iframe"
       :title="pluginInfo?.name ?? '插件'"
       sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-      allow="clipboard-write; clipboard-read" @load="handleIframeLoad" @error="handleIframeError"></iframe>
+      allow="clipboard-write; clipboard-read"
+      @load="handleIframeLoad"
+      @error="handleIframeError"
+    ></iframe>
   </div>
 </template>
 
@@ -162,7 +169,7 @@ onBeforeUnmount(() => {
 
 <style lang="scss">
 /* 隐藏插件页面的 footer */
-.main-container:has(.plugin-page)>footer {
+.main-container:has(.plugin-page) > footer {
   display: none !important;
 }
 </style>
