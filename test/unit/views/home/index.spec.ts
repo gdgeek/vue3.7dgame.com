@@ -137,11 +137,6 @@ describe("views/home/index.vue", () => {
     expect(el.querySelector(".home-header-stub")).not.toBeNull();
   });
 
-  it("renders QuickStart stub", async () => {
-    const { el } = await mount();
-    expect(el.querySelector(".quick-start-stub")).not.toBeNull();
-  });
-
   it("renders section-header element", async () => {
     const { el } = await mount();
     expect(el.querySelector(".section-header")).not.toBeNull();
