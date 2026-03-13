@@ -10,7 +10,6 @@ export default {
     login: "ログイン",
     loginCode: "ログインコード",
     scanTip: "携帯電話でQRコードをスキャンしてログインしてください",
-    scanSubTip: "スキャン後に自動で登録またはログインします",
     rules: {
       username: {
         message1: "ユーザー名を入力してください",

@@ -580,10 +580,6 @@ const detailProperties = computed(() => {
         "—",
     },
     {
-      label: t("verse.listPage.sceneId"),
-      value: currentVerse.value.id,
-    },
-    {
       label: t("verse.listPage.loadedEntities"),
       value:
         loadedEntityOptions.value.length > 0

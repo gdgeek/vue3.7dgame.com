@@ -10,7 +10,6 @@ export default {
     login: "登錄",
     loginCode: "登錄碼",
     scanTip: "請使用手機掃描二維碼登錄",
-    scanSubTip: "掃碼後自動註冊或登錄",
     rules: {
       username: {
         message1: "請輸入用戶名",

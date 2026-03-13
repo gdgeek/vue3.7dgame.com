@@ -4,7 +4,7 @@
     <MetaDialog @selected="selected" ref="metaDialogRef"></MetaDialog>
     <!--<PrefabDialog @selected="selected" ref="prefabDialogRef"></PrefabDialog>-->
     <el-container>
-      <el-main>
+      <el-main style="padding: 0; overflow: hidden">
         <iframe
           id="editor"
           ref="editor"
@@ -721,12 +721,26 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+.verse-scene {
+  height: calc(100vh - 60px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .content {
-  height: calc(100vh - 140px);
+  height: 100%;
+  width: 100%;
   border: 0;
   outline: none;
-  border-radius: var(--editor-frame-radius, 16px);
-  clip-path: inset(0 round var(--editor-frame-radius, 16px));
+  display: block;
   background: var(--bg-card, #fff);
+}
+</style>
+
+<style lang="scss">
+/* 隐藏当前页面的 footer */
+.main-container:has(.verse-scene) > footer {
+  display: none !important;
 }
 </style>

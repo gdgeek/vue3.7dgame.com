@@ -9,7 +9,6 @@ export default {
     login: "登录",
     loginCode: "登录码",
     scanTip: "请使用手机扫描二维码登录",
-    scanSubTip: "扫码后自动注册或者登录",
     rules: {
       username: {
         message1: "请输入用户名",

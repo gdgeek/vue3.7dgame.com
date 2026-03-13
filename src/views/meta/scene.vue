@@ -24,21 +24,6 @@
       </template>
     </resource-dialog>
     <el-container class="editor-wrapper">
-      <div class="scene-actions">
-        <el-button-group>
-          <el-button type="primary" @click="handleCreateScene">
-            <el-icon>
-              <Plus></Plus>
-            </el-icon>
-            <span>{{ t("route.verse.createVerse") }}</span>
-          </el-button>
-          <el-button type="primary" @click="handleImportScene">
-            <el-icon>
-              <Upload></Upload>
-            </el-icon>
-          </el-button>
-        </el-button-group>
-      </div>
       <el-main class="editor-container">
         <iframe
           ref="editor"
@@ -216,7 +201,6 @@ import { AbilityEdit } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
 import { useUserStore } from "@/store/modules/user";
 import { until } from "@vueuse/core";
-import { Plus, Upload } from "@element-plus/icons-vue";
 
 import qs from "querystringify";
 
@@ -572,16 +556,6 @@ const getAvailableResourceTypes = () => {
   );
 };
 
-// 处理创建场景
-const handleCreateScene = () => {
-  postMessage("create-scene");
-};
-
-// 处理导入场景
-const handleImportScene = () => {
-  postMessage("import-scene");
-};
-
 // 保存元数据
 const saveMeta = async ({
   meta,
@@ -907,32 +881,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-.scene-actions {
-  padding: 12px 16px;
-  background: var(--bg-card, #fff);
-  border-bottom: 1px solid var(--el-border-color-light);
-  display: flex;
-  align-items: center;
-
-  :deep(.el-button-group) {
-    display: inline-flex;
-
-    .el-button {
-      border-radius: 0;
-
-      &:first-child {
-        border-top-left-radius: 4px;
-        border-bottom-left-radius: 4px;
-      }
-
-      &:last-child {
-        border-top-right-radius: 4px;
-        border-bottom-right-radius: 4px;
-      }
-    }
-  }
+  border-radius: 0 !important;
 }
 
 .editor-wrapper {
@@ -940,12 +889,15 @@ onBeforeUnmount(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
+  border-radius: 0 !important;
 }
 
 .editor-container {
   padding: 0 !important;
   flex: 1;
   overflow: hidden;
+  border-radius: 0 !important;
 }
 
 .content {
@@ -955,6 +907,7 @@ onBeforeUnmount(() => {
   border: 0;
   outline: none;
   display: block;
+  border-radius: 0 !important;
 }
 </style>
 

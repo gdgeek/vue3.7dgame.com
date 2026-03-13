@@ -6,6 +6,7 @@ export default {
     },
     listPage: {
       myScenes: "ฉากของฉัน",
+      createScene: "สร้างฉาก",
       searchScenes: "ค้นหาฉาก...",
       sceneName: "ชื่อฉาก",
       author: "ผู้เขียน",
