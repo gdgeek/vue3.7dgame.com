@@ -171,12 +171,15 @@ service.interceptors.response.use(
     const router = useRouter();
     const axiosError = error as import("axios").AxiosError;
     const { response } = axiosError;
+    const skipErrorMessage = Boolean(axiosError.config?.skipErrorMessage);
     const messages = getMessageArray();
 
     if (!response) {
       if (axiosError.message === "Network Error") {
-        showErrorMessage(messages[1]);
-      } else {
+        if (!skipErrorMessage) {
+          showErrorMessage(messages[1]);
+        }
+      } else if (!skipErrorMessage) {
         logger.error(i18n.global.t("request.unknownError"), axiosError.message);
         showErrorMessage(axiosError.message);
       }
@@ -185,15 +188,21 @@ service.interceptors.response.use(
     if (response.status === 401) {
       return handleUnauthorized(router, error);
     } else if (response.status === 404) {
-      showErrorMessage(i18n.global.t("request.error404"));
+      if (!skipErrorMessage) {
+        showErrorMessage(i18n.global.t("request.error404"));
+      }
     } else if (response.status >= 500) {
       logger.error(i18n.global.t("request.serverError"), response);
       // 服务器内部错误
-      showErrorMessage(messages[2]);
+      if (!skipErrorMessage) {
+        showErrorMessage(messages[2]);
+      }
     } else {
       const data = response.data as Record<string, unknown> | undefined;
       const message = (data?.message as string) || axiosError.message;
-      showErrorMessage(message);
+      if (!skipErrorMessage) {
+        showErrorMessage(message);
+      }
     }
 
     return Promise.reject(error);

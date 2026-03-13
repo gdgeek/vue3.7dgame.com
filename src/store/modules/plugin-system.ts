@@ -56,7 +56,9 @@ export const usePluginSystemStore = defineStore("plugin-system", {
     },
 
     enabledPlugins(state): PluginInfo[] {
-      const enabled = Array.from(state.plugins.values()).filter((p) => p.enabled);
+      const enabled = Array.from(state.plugins.values()).filter(
+        (p) => p.enabled
+      );
       // 过滤掉没有任何权限的插件
       return enabled.filter((p) => {
         const actions = state.pluginPermissions[p.pluginId];
@@ -104,25 +106,33 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       const token = Token.getToken();
       if (!token?.accessToken) return;
 
-      const enabledIds = Array.from(this.plugins.values() as Iterable<PluginInfo>)
+      const enabledIds = Array.from(
+        this.plugins.values() as Iterable<PluginInfo>
+      )
         .filter((p) => p.enabled)
         .map((p) => p.pluginId);
 
-      await Promise.allSettled(
-        enabledIds.map(async (pluginId) => {
-          try {
-            const res = await request.get("/v1/plugin/allowed-actions", {
-              params: { plugin_name: pluginId },
-            });
-            if (res.data?.code === 0) {
-              this.pluginPermissions[pluginId] =
-                res.data.data?.actions ?? [];
-            }
-          } catch {
-            // API 不可用或网络错误时不隐藏插件
+      let permissionApiUnavailable = false;
+
+      for (const pluginId of enabledIds) {
+        if (permissionApiUnavailable) break;
+        try {
+          const res = await request.get("/v1/plugin/allowed-actions", {
+            params: { plugin_name: pluginId },
+            skipErrorMessage: true,
+          });
+          if (res.data?.code === 0) {
+            this.pluginPermissions[pluginId] = res.data.data?.actions ?? [];
           }
-        })
-      );
+        } catch (err) {
+          const status = (err as { response?: { status?: number } })?.response
+            ?.status;
+          if (status === 404) {
+            permissionApiUnavailable = true;
+          }
+          // API 不可用或网络错误时不隐藏插件
+        }
+      }
     },
 
     async activatePlugin(pluginId: string, container: HTMLElement) {
