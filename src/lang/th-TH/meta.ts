@@ -35,6 +35,10 @@ export default {
         entity: "เอนทิตี",
         author: "ผู้เขียน",
         resources: "จำนวนทรัพยากรที่ใช้",
+        scenes: "ฉากที่ใช้งานอยู่",
+        noScenes: "ยังไม่ได้ใช้ในฉาก",
+        sceneFallback: "ฉาก#",
+        enterScene: "ไปยังฉากนี้",
       },
       events: {
         title: "สัญญาณ",
@@ -103,6 +107,7 @@ export default {
     },
     script: {
       title: "สคริปต์",
+      entityEditor: "แก้ไขเอนทิตี",
       save: "บันทึก",
       error1: "ไม่มีข้อมูลเอนทิตี",
       error2: "ไม่มีสิทธิ์แก้ไข",

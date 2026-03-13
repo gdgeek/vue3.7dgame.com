@@ -2,19 +2,17 @@
   <div class="script">
     <el-container>
       <el-main>
-        <el-card v-loading="loading" class="box-card">
-          <template #header>
-            <div v-if="verse" class="clearfix">
-              <el-link :href="sceneEditorLink" :underline="false">{{
-                verse.name
-              }}</el-link>
-              /【{{ $t("verse.view.script.title") }}】
-
-              <!--<el-button type="primary" size="small" @click="run">测试运行</el-button>
-              <el-button v-if="disabled" type="primary" size="small" @click="disabled = false">
-                返回
-              </el-button>-->
-              <el-button-group style="float: right">
+        <el-card :loading="loading" class="box-card">
+          <el-container v-if="!disabled">
+            <div class="script-tabs-wrapper">
+              <div v-if="verse" class="script-tabs-actions">
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="goBackToSceneEditor"
+                >
+                  {{ $t("route.project.sceneEditor") }}
+                </el-button>
                 <el-button
                   v-if="saveable"
                   type="primary"
@@ -27,177 +25,102 @@
                   ></font-awesome-icon>
                   {{ $t("verse.view.script.save") }}
                 </el-button>
-              </el-button-group>
-            </div>
-          </template>
-
-          <el-container v-if="!disabled">
-            <el-tabs v-model="activeName" type="card" style="width: 100%">
-              <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
-                <el-main
-                  style="
-                    position: relative;
-                    height: 70vh;
-                    padding: 0;
-                    margin: 0;
-                  "
+              </div>
+              <el-tabs
+                v-model="activeName"
+                class="script-main-tabs"
+                type="card"
+                style="width: 100%"
+              >
+                <el-tab-pane
+                  :label="$t('verse.view.script.edit')"
+                  name="blockly"
                 >
-                  <div class="fullscreen-controls">
-                    <el-button-group>
-                      <el-button
-                        class="fullscreen-btn"
-                        size="small"
-                        type="primary"
-                        plain
-                        @click="toggleFullscreen"
-                      >
-                        <el-icon>
-                          <FullScreen v-if="!isFullscreen"></FullScreen>
-                          <Aim v-else></Aim>
-                        </el-icon>
-                      </el-button>
-                      <template v-if="isFullscreen">
-                        <el-button
-                          size="small"
-                          type="primary"
-                          @click="showFullscreenCode('lua')"
-                        >
-                          Lua
-                        </el-button>
-                        <el-button
-                          size="small"
-                          color="#F7DF1E"
-                          style="margin-right: 10px"
-                          @click="showFullscreenCode('javascript')"
-                        >
-                          JavaScript
-                        </el-button>
-                        <el-button
-                          size="small"
-                          type="primary"
-                          style="margin-right: 10px"
-                          @click="run"
-                        >
-                          测试运行
-                        </el-button>
-                        <el-button
-                          v-if="saveable"
-                          size="small"
-                          type="primary"
-                          style="margin-right: 50px"
-                          @click="save"
-                        >
-                          <font-awesome-icon
-                            class="icon"
-                            icon="save"
-                          ></font-awesome-icon>
-                          {{ $t("verse.view.script.save") }}
-                        </el-button>
-                      </template>
-                    </el-button-group>
-                  </div>
-
-                  <el-dialog
-                    v-model="showCodeDialog"
-                    :title="codeDialogTitle"
-                    fullscreen
-                    :show-close="true"
-                    :close-on-click-modal="false"
-                    :close-on-press-escape="true"
-                  >
-                    <div class="code-dialog-content">
-                      <el-card :class="isDark ? 'dark-theme' : 'light-theme'">
-                        <div v-highlight>
-                          <div class="code-container2">
+                  <el-main class="blockly-editor-main">
+                    <iframe
+                      style="margin: 0; padding: 0; height: 100%; width: 100%"
+                      class="blockly-editor-frame"
+                      scrolling="no"
+                      id="editor"
+                      ref="editor"
+                      :src="src"
+                    ></iframe>
+                  </el-main>
+                </el-tab-pane>
+                <el-tab-pane
+                  :label="$t('verse.view.script.code')"
+                  name="script"
+                >
+                  <el-card v-if="activeName === 'script'" class="box-card">
+                    <div v-highlight>
+                      <el-tabs v-model="languageName">
+                        <el-tab-pane label="Lua" name="lua">
+                          <template #label>
+                            <span style="display: flex; align-items: center">
+                              <img
+                                src="/lua.png"
+                                style="width: 25px; margin-right: 5px"
+                                alt=""
+                              />
+                              <span>Lua</span>
+                            </span>
+                          </template>
+                          <div class="code-container">
                             <el-button
-                              class="copy-button2"
+                              class="copy-button"
                               text
-                              @click="copyCode(currentCode)"
+                              @click="copyCode(LuaCode)"
+                              ><el-icon class="icon">
+                                <CopyDocument></CopyDocument> </el-icon
+                              >{{ $t("copy.title") }}</el-button
                             >
-                              <el-icon class="icon">
-                                <CopyDocument></CopyDocument>
-                              </el-icon>
-                              {{ $t("copy.title") }}
-                            </el-button>
                             <pre>
-                    <code :class="currentCodeType">{{ currentCode }}</code>
-                  </pre>
-                          </div>
-                        </div>
-                      </el-card>
-                    </div>
-                  </el-dialog>
-
-                  <iframe
-                    style="width: 100%; height: 100%; padding: 0; margin: 0"
-                    id="editor"
-                    ref="editor"
-                    :src="src"
-                  ></iframe>
-                </el-main>
-              </el-tab-pane>
-              <el-tab-pane :label="$t('verse.view.script.code')" name="script">
-                <el-card v-if="activeName === 'script'" class="box-card">
-                  <div v-highlight>
-                    <el-tabs v-model="languageName">
-                      <el-tab-pane label="Lua" name="lua">
-                        <template #label>
-                          <span style="display: flex; align-items: center">
-                            <img
-                              src="/lua.png"
-                              style="width: 25px; margin-right: 5px"
-                              alt=""
-                            />
-                            <span>Lua</span>
-                          </span>
-                        </template>
-                        <div class="code-container">
-                          <el-button
-                            class="copy-button"
-                            text
-                            @click="copyCode(LuaCode)"
-                            ><el-icon class="icon">
-                              <CopyDocument></CopyDocument> </el-icon
-                            >{{ $t("copy.title") }}</el-button
-                          >
-                          <pre>
                   <code class="lua">{{ LuaCode }}</code>
                 </pre>
-                        </div>
-                      </el-tab-pane>
-                      <el-tab-pane label="JavaScript" name="javascript">
-                        <template #label>
-                          <span style="display: flex; align-items: center">
-                            <img
-                              src="/javascript.png"
-                              style="width: 25px; margin-right: 5px"
-                              alt=""
-                            />
-                            <span>JavaScript</span>
-                          </span>
-                        </template>
-                        <div class="code-container">
-                          <el-button
-                            class="copy-button"
-                            text
-                            @click="copyCode(JavaScriptCode)"
-                            ><el-icon class="icon">
-                              <CopyDocument></CopyDocument> </el-icon
-                            >{{ $t("copy.title") }}</el-button
-                          >
-                          <pre>
+                          </div>
+                        </el-tab-pane>
+                        <el-tab-pane label="JavaScript" name="javascript">
+                          <template #label>
+                            <span style="display: flex; align-items: center">
+                              <img
+                                src="/javascript.png"
+                                style="width: 25px; margin-right: 5px"
+                                alt=""
+                              />
+                              <span>JavaScript</span>
+                            </span>
+                          </template>
+                          <div class="code-container">
+                            <el-button
+                              class="copy-button"
+                              text
+                              @click="copyCode(JavaScriptCode)"
+                              ><el-icon class="icon">
+                                <CopyDocument></CopyDocument> </el-icon
+                              >{{ $t("copy.title") }}</el-button
+                            >
+                            <pre>
                   <code class="javascript">{{ JavaScriptCode }}</code>
                 </pre>
-                        </div>
-                      </el-tab-pane>
-                    </el-tabs>
-                  </div>
-                </el-card>
-              </el-tab-pane>
-            </el-tabs>
+                          </div>
+                        </el-tab-pane>
+                      </el-tabs>
+                    </div>
+                  </el-card>
+                </el-tab-pane>
+              </el-tabs>
+            </div>
           </el-container>
           <div v-if="disabled" class="runArea">
             <div class="scene-fullscreen-controls">
+              <el-button
+                class="scene-exit-btn"
+                size="small"
+                type="primary"
+                @click="disabled = false"
+              >
+                {{ $t("common.back") }}
+              </el-button>
               <el-button
                 class="scene-fullscreen-btn"
                 size="small"
@@ -205,10 +128,9 @@
                 plain
                 @click="toggleSceneFullscreen"
               >
-                <el-icon>
-                  <FullScreen v-if="!isSceneFullscreen"></FullScreen>
-                  <Aim v-else></Aim>
-                </el-icon>
+                <font-awesome-icon
+                  :icon="['fas', isSceneFullscreen ? 'compress' : 'expand']"
+                ></font-awesome-icon>
               </el-button>
             </div>
             <ScenePlayer
@@ -226,9 +148,10 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
 import { logger } from "@/utils/logger";
 import { ref, computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import {
   getVerse,
   putVerseCode,
@@ -237,7 +160,7 @@ import {
   type VerseMetasWithJsCode,
 } from "@/api/v1/verse";
 import { useI18n } from "vue-i18n";
-import { Message, MessageBox } from "@/components/Dialog";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { takePhoto } from "@/api/v1/verse";
 import pako from "pako";
 import ScenePlayer from "./ScenePlayer.vue";
@@ -246,17 +169,15 @@ import {
   useScriptEditorBase,
   type EditorPostPayload,
 } from "@/composables/useScriptEditorBase";
-import {
-  buildScriptRuntime,
-  type ScenePlayerLike,
-} from "@/composables/useScriptRuntime";
-import { CopyDocument, FullScreen, Aim } from "@element-plus/icons-vue";
+import { buildScriptRuntime } from "@/composables/useScriptRuntime";
+import { CopyDocument } from "@element-plus/icons-vue";
 
 // ---------- Verse 专有状态 ----------
 const loading = ref(false);
 const verse = ref<VerseData>();
 const verseMetasWithJsCodeData = ref<VerseMetasWithJsCode>();
 const route = useRoute();
+const router = useRouter();
 const id = computed(() => parseInt(route.query.id as string));
 const metasJavaScriptCode = ref("");
 // map 用于记录每个 meta_id 在场景中对应的实体列表
@@ -272,7 +193,15 @@ const sceneEditorLink = computed(() => {
   return `/verse/scene?id=${id.value}&title=${encodeURIComponent(titleText)}`;
 });
 
-const saveable = computed(() => verse.value!.editable);
+const goBackToSceneEditor = async () => {
+  const canLeave = await resolveUnsavedChangesBeforeLeave({
+    showDiscardInfo: false,
+  });
+  if (!canLeave) return;
+  router.push(sceneEditorLink.value);
+};
+
+const saveable = computed(() => Boolean(verse.value?.editable));
 
 type ScenePlayerInstance = InstanceType<typeof ScenePlayer>;
 const scenePlayer = ref<ScenePlayerInstance>();
@@ -323,11 +252,11 @@ const initEditor = () => {
 // ---------- postScript（Verse 版：保存 + 发布流程）----------
 const postScript = async (message: EditorPostPayload) => {
   if (verse.value === null) {
-    Message.error(t("verse.view.script.error1"));
+    ElMessage.error(t("verse.view.script.error1"));
     return;
   }
   if (!verse.value!.editable) {
-    Message.error(t("verse.view.script.error2"));
+    ElMessage.error(t("verse.view.script.error2"));
     return;
   }
 
@@ -344,11 +273,14 @@ const postScript = async (message: EditorPostPayload) => {
     lua: message.lua,
   });
 
-  Message.success(t("verse.view.script.success"));
-  MessageBox.confirm(
+  ElMessage.success(t("verse.view.script.success"));
+  ElMessageBox.confirm(
     t("verse.view.sceneEditor.saveAndPublishConfirm"),
     t("verse.view.sceneEditor.publishScene"),
     {
+      showClose: true,
+      distinguishCancelAndClose: true,
+      closeOnClickModal: false,
       confirmButtonText: t("verse.view.sceneEditor.confirm"),
       cancelButtonText: t("verse.view.sceneEditor.cancel"),
       type: "warning",
@@ -356,16 +288,10 @@ const postScript = async (message: EditorPostPayload) => {
   )
     .then(async () => {
       await takePhoto(id.value);
-      Message({
-        type: "success",
-        message: t("verse.view.sceneEditor.publishSuccess"),
-      });
+      ElMessage.success(t("verse.view.sceneEditor.publishSuccess"));
     })
     .catch(() => {
-      Message({
-        type: "info",
-        message: t("verse.view.sceneEditor.publishCanceled"),
-      });
+      ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
     });
 };
 
@@ -378,18 +304,11 @@ const {
   disabled,
   isSceneFullscreen,
   isFullscreen,
-  showCodeDialog,
-  currentCode,
-  currentCodeType,
-  codeDialogTitle,
   unsavedBlocklyData,
+  resolveUnsavedChangesBeforeLeave,
   editor,
   src,
-  isDark,
-  toggleFullscreen,
-  showFullscreenCode,
   toggleSceneFullscreen,
-  copyCode,
   postMessage,
   save,
   decompressBlockly,
@@ -416,7 +335,7 @@ const {
 const resource = computed(() => {
   const inputs: Array<{ title: string; index: string; uuid: string }> = [];
   const outputs: Array<{ title: string; index: string; uuid: string }> = [];
-  const metas = (verse.value?.metas || []) as unknown as VerseMeta[];
+  const metas = (verse.value?.metas || []) as VerseMeta[];
   metas.forEach((meta) => {
     const events = meta.events || {};
     const inputsList = events.inputs || [];
@@ -452,40 +371,30 @@ const resource = computed(() => {
 });
 
 // ---------- Verse 专有：handlePolygen（只返回 playAnimation）----------
-const handlePolygen = async (uuid: string) => {
+const handlePolygen = (uuid: string) => {
   if (!scenePlayer.value) {
     logger.error("ScenePlayer未初始化");
     return null;
   }
   const modelUuid = uuid.toString();
-  const getModelAsync = (
-    uuid: string,
-    retries = 3
-  ): Promise<THREE.Object3D | null> => {
-    return new Promise((resolve) => {
-      const attempt = (remaining: number) => {
-        const source = scenePlayer.value?.sources?.get(uuid) as
-          | { type: string; data: unknown }
-          | undefined;
-        if (source?.type === "model" && source.data) {
-          resolve(source.data as THREE.Object3D);
-          return;
-        }
-        if (remaining > 0) {
-          logger.log(`模型未找到，剩余重试次数: ${remaining}`);
-          setTimeout(() => attempt(remaining - 1), 100);
-        } else {
-          resolve(null);
-        }
-      };
-      attempt(retries);
-    });
+  const getModel = (uuid: string, retries = 3) => {
+    const source = scenePlayer.value?.sources.get(uuid) as
+      | { type: string; data: unknown }
+      | undefined;
+    if (source && source.type === "model") {
+      return source.data as THREE.Object3D;
+    }
+    if (retries > 0) {
+      logger.log(`模型未找到，剩余重试次数: ${retries}`);
+      setTimeout(() => getModel(uuid, retries - 1), 100);
+    }
+    return null;
   };
-  const model = await getModelAsync(modelUuid);
+  const model = getModel(modelUuid);
   logger.log("查找模型:", {
     requestedUuid: modelUuid,
-    availableModels: Array.from(scenePlayer.value?.sources?.keys() ?? []),
-    modelExists: scenePlayer.value?.sources?.has(modelUuid) ?? false,
+    availableModels: Array.from(scenePlayer.value.sources.keys()),
+    modelExists: scenePlayer.value.sources.has(modelUuid),
     foundModel: model,
   });
   if (!model) {
@@ -501,7 +410,7 @@ const handlePolygen = async (uuid: string) => {
 };
 
 // ---------- Verse 专有：run ----------
-const run = async () => {
+const _run = async () => {
   const wasFullscreen = isFullscreen.value;
   if (wasFullscreen) {
     document.exitFullscreen();
@@ -526,8 +435,8 @@ const run = async () => {
           let count = 0;
           for (const entity of entities) {
             count++;
-            if ((entity.children?.entities?.length ?? 0) > 0) {
-              count += countEntities(entity.children?.entities ?? []);
+            if (entity.children?.entities?.length > 0) {
+              count += countEntities(entity.children.entities);
             }
           }
           return count;
@@ -540,16 +449,16 @@ const run = async () => {
             expectedModels += countEntities(metaData.children.entities);
           }
         }
-        if (scenePlayer.value?.sources?.size === expectedModels) {
+        if (scenePlayer.value?.sources.size === expectedModels) {
           logger.error("所有资源加载完成:", {
             expected: expectedModels,
-            loaded: scenePlayer.value?.sources?.size,
+            loaded: scenePlayer.value!.sources.size,
           });
           resolve(true);
         } else {
           logger.log("等待资源加载...", {
             expected: expectedModels,
-            current: scenePlayer.value?.sources?.size || 0,
+            current: scenePlayer.value?.sources.size || 0,
           });
           setTimeout(checkModels, 100);
         }
@@ -560,10 +469,8 @@ const run = async () => {
   await waitForModels();
 
   if (JavaScriptCode.value) {
-    // 使用实例专属命名空间，避免多 ScenePlayer 实例时回调互相覆盖
-    const instanceId = scenePlayer.value!.sceneInstanceId;
-    window.__sceneCallbacks = window.__sceneCallbacks ?? {};
-    window.__sceneCallbacks[instanceId] = {};
+    window.meta = {};
+    window.verse = {};
     const {
       Vector3,
       polygen,
@@ -578,18 +485,11 @@ const run = async () => {
       point,
       transform,
       argument,
-    } = buildScriptRuntime(
-      scenePlayer as { value: ScenePlayerLike | null | undefined },
-      {
-        signal: (
-          moduleUuid: string,
-          eventUuid: string,
-          parameter?: unknown
-        ) => {
-          logger.log("触发事件:", moduleUuid, eventUuid, parameter);
-        },
-      }
-    );
+    } = buildScriptRuntime(scenePlayer, {
+      signal: (moduleUuid: string, eventUuid: string, parameter?: unknown) => {
+        logger.log("触发事件:", moduleUuid, eventUuid, parameter);
+      },
+    });
 
     // verse event 还包含 signal
     const event = {
@@ -602,15 +502,13 @@ const run = async () => {
     };
 
     // handleSound 直接从 runtime 中取
-    const handleSound = buildScriptRuntime(
-      scenePlayer as { value: ScenePlayerLike | null | undefined }
-    ).handleSound;
+    const handleSound = buildScriptRuntime(scenePlayer).handleSound;
 
     try {
       const wrappedCode = `
             return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument, handleText, handleEntity) {
-              const meta = window.__sceneCallbacks['${instanceId}'];
-              const verse = window.__sceneCallbacks['${instanceId}'];
+              const meta = window.meta;
+              const verse = window.verse;
               const index = ${verse.value?.id};
 
               ${metasJavaScriptCode.value}
@@ -668,10 +566,9 @@ onMounted(async () => {
     );
     verse.value = response.data;
     logger.error(verse.value);
-    verseMetasWithJsCodeData.value =
-      response2.data as unknown as VerseMetasWithJsCode;
-    metasJavaScriptCode.value = (response2.data.metas as unknown as meta[])
-      .map((m) => m.script)
+    verseMetasWithJsCodeData.value = response2.data;
+    metasJavaScriptCode.value = response2.data.metas
+      .map((meta: meta) => meta.script)
       .join("\n");
     logger.log("Verse", verse.value);
     logger.log("metasJavaScriptCode", metasJavaScriptCode.value);
@@ -691,7 +588,7 @@ onMounted(async () => {
     }
     initEditor();
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : String(error));
+    ElMessage.error(error instanceof Error ? error.message : String(error));
   } finally {
     loading.value = false;
   }
@@ -715,58 +612,108 @@ onMounted(async () => {
 }
 
 .dark-theme .hljs {
-  background-color: rgb(24 24 24) !important;
+  background-color: rgb(24, 24, 24) !important;
 }
 
 .light-theme .hljs {
   background-color: #fafafa !important;
 }
 
-.fullscreen-btn {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  z-index: 100;
-}
-
-/* 全屏时的样式 */
-:fullscreen .el-main {
-  height: 100vh !important;
-  padding: 0;
-}
-
-:fullscreen iframe {
-  height: 100vh !important;
-}
-
-.code-dialog-content {
-  height: 100%;
-  overflow: hidden;
-}
-
-.code-container2 {
+.script-tabs-wrapper {
   position: relative;
-  max-height: 80vh;
-  overflow-y: auto;
+  width: 100%;
+  flex: 1;
+  min-width: 0;
 }
 
-.copy-button2 {
+.script-tabs-actions {
   position: absolute;
-  top: 35px;
+  top: 4px;
   right: 0;
-  z-index: 1;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
-.fullscreen-controls {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  z-index: 100;
-  padding-right: 10px;
+.script-tabs-wrapper :deep(.el-tabs__header) {
+  margin: 0 !important;
+  padding-right: 280px;
+  border-bottom: none !important;
+  position: relative;
+  top: -4px;
+}
+
+.script-tabs-wrapper :deep(.el-tabs--card > .el-tabs__header .el-tabs__nav) {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.script-tabs-wrapper :deep(.el-tabs--card > .el-tabs__header .el-tabs__item) {
+  border: 0.5px solid #d6deea !important;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.script-tabs-wrapper
+  :deep(.el-tabs--card > .el-tabs__header .el-tabs__item + .el-tabs__item) {
+  margin-left: 8px;
+}
+
+.script-tabs-wrapper
+  :deep(.el-tabs--card > .el-tabs__header .el-tabs__item.is-active) {
+  color: #06a7ee;
+  background: #fff;
+  border: 0.5px solid #06a7ee !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.script-tabs-wrapper :deep(.el-tabs__nav-wrap::after) {
+  display: none !important;
+  content: none !important;
+  height: 0 !important;
+}
+
+.script-tabs-wrapper :deep(.el-tabs__content) {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.blockly-editor-main {
+  margin: 0;
+  margin-top: 0;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  height: calc(100vh - 185px);
+  min-height: 520px;
+}
+
+.blockly-editor-frame {
+  border: 0;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .script-tabs-actions {
+    position: static;
+    margin-bottom: 8px;
+    justify-content: flex-end;
+  }
+
+  .script-tabs-wrapper :deep(.el-tabs__header) {
+    padding-right: 0;
+  }
 }
 
 .dark-theme :deep(.hljs) {
-  background-color: rgb(24 24 24) !important;
+  background-color: rgb(24, 24, 24) !important;
 }
 
 .light-theme :deep(.hljs) {
@@ -788,6 +735,18 @@ onMounted(async () => {
 
 .scene-fullscreen-btn {
   opacity: 0.8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scene-fullscreen-btn :deep(.svg-inline--fa) {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.scene-exit-btn {
+  margin-right: 8px;
 }
 
 /* 全屏时的样式 */

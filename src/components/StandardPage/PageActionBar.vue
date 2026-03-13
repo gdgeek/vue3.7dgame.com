@@ -1,9 +1,9 @@
 <template>
   <div class="page-action-bar">
     <!-- Row 1: Title line -->
-    <div class="title-row">
+    <div v-if="showTitleRow" class="title-row">
       <div class="title-area">
-        <h2 class="page-title">{{ title }}</h2>
+        <h2 v-if="showTitle" class="page-title">{{ title }}</h2>
         <p v-if="subtitle" class="page-subtitle">{{ subtitle }}</p>
         <!-- Selection count -->
         <p v-if="selectionCount > 0" class="selection-count">
@@ -162,6 +162,7 @@ const props = withDefaults(
     PageActionBarProps & { selectionCount?: number; isPageSelected?: boolean }
   >(),
   {
+    showTitle: true,
     showSearch: true,
     showSort: true,
     showNameSort: true,
@@ -192,6 +193,10 @@ const currentView = ref<ViewMode>(props.defaultView);
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
 const sortByNameField = computed(() => props.sortByName || "name");
+const showTitle = computed(() => props.showTitle);
+const showTitleRow = computed(
+  () => showTitle.value || !!props.subtitle || props.selectionCount > 0
+);
 
 const isSortedByTime = computed(() =>
   currentSort.value.includes(props.sortByTime)

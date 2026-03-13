@@ -5,6 +5,12 @@ import InputDialog from "./InputDialog.vue";
 interface ConfirmOptions {
   title?: string;
   type?: "warning" | "danger" | "info" | "success";
+  width?: string;
+  hideTitle?: boolean;
+  compact?: boolean;
+  centeredText?: boolean;
+  confirmText?: string;
+  cancelText?: string;
   confirmButtonText?: string;
   cancelButtonText?: string;
   description?: string;
@@ -31,17 +37,28 @@ const MessageBox = {
       if (options) opts = options;
     } else if (typeof titleOrOptions === "object") {
       opts = titleOrOptions;
-      if (opts.title) title = opts.title;
+      if (Object.prototype.hasOwnProperty.call(opts, "title")) {
+        title = opts.title || "";
+      }
     }
 
     return new Promise<void>((resolve, reject) => {
       const container = document.createElement("div");
+      const {
+        confirmText,
+        cancelText,
+        confirmButtonText,
+        cancelButtonText,
+        ...restOpts
+      } = opts;
 
       const props = {
         modelValue: true,
         message,
         title,
-        ...opts,
+        ...restOpts,
+        confirmText: confirmText || confirmButtonText,
+        cancelText: cancelText || cancelButtonText,
         "onUpdate:modelValue": (val: boolean) => {
           if (!val) {
             // Delay unmount to allow animation if needed, but for now strict close

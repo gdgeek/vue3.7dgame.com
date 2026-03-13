@@ -83,7 +83,16 @@
                     class="info-row"
                   >
                     <span class="info-label">{{ item.label }}</span>
-                    <span class="info-value">{{ item.value }}</span>
+                    <div class="info-value">
+                      <template v-if="item.slotName">
+                        <slot :name="`property-${item.slotName}`" :item="item">
+                          {{ item.value }}
+                        </slot>
+                      </template>
+                      <template v-else>
+                        {{ item.value }}
+                      </template>
+                    </div>
                   </div>
                 </div>
 
@@ -182,6 +191,7 @@ const { t } = useI18n();
 interface PropertyItem {
   label: string;
   value: string | number;
+  slotName?: string;
 }
 
 interface Props {
@@ -585,6 +595,72 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* Slot actions: dual primary buttons + bottom row actions */
+.panel-actions :deep(.dual-primary-btn) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: var(--radius-md, 12px);
+  background: var(--primary-color, #03a9f4);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal, 0.2s ease);
+}
+
+.panel-actions :deep(.dual-primary-btn:hover) {
+  background: var(--primary-hover, var(--primary-dark, #0288d1));
+  transform: translateY(-1px);
+}
+
+.panel-actions :deep(.actions-row) {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.panel-actions :deep(.actions-row .btn-pill-secondary),
+.panel-actions :deep(.actions-row .btn-pill-danger) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  border-radius: var(--radius-md, 12px);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.15s ease);
+}
+
+.panel-actions :deep(.actions-row .btn-pill-secondary) {
+  border: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
+  background: var(--bg-card, #fff);
+  color: var(--text-secondary, #64748b);
+}
+
+.panel-actions :deep(.actions-row .btn-pill-secondary:hover) {
+  border-color: var(--primary-color, #03a9f4);
+  color: var(--primary-color, #03a9f4);
+}
+
+.panel-actions :deep(.actions-row .btn-pill-danger) {
+  border: var(--border-width, 1px) solid #fecaca;
+  background: #fff;
+  color: #ef4444;
+}
+
+.panel-actions :deep(.actions-row .btn-pill-danger:hover) {
+  background: #fef2f2;
+  border-color: #fca5a5;
 }
 
 .btn-primary-full {

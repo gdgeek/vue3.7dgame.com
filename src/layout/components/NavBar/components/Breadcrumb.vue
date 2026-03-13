@@ -58,7 +58,14 @@ const resolveEditorName = (): string => {
   if (queryTitle) return extractNameFromTitle(queryTitle);
   const metaTitle =
     typeof route.meta.title === "string" ? route.meta.title : "";
-  if (metaTitle) return extractNameFromTitle(metaTitle);
+  if (metaTitle) {
+    const translatedTitle = String(t(metaTitle));
+    const normalizedTitle =
+      translatedTitle && translatedTitle !== metaTitle
+        ? translatedTitle
+        : metaTitle;
+    return extractNameFromTitle(normalizedTitle);
+  }
   return "";
 };
 

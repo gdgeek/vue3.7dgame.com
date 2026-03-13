@@ -30,6 +30,24 @@ export default {
     button: {
       save: "保存",
     },
+    scriptSaveConfirm: {
+      title: "提示",
+      message: "是否保存當前腳本",
+      confirm: "是",
+      cancel: "否",
+    },
+    sceneSaveConfirm: {
+      title: "提示",
+      message: "是否保存當前場景",
+      confirm: "是",
+      cancel: "否",
+    },
+    entitySaveConfirm: {
+      title: "提示",
+      message: "是否保存當前實體",
+      confirm: "是",
+      cancel: "否",
+    },
     message: {
       createSuccess: "創建成功",
       saveSuccess: "保存成功",
@@ -101,6 +119,7 @@ export default {
     resolution: "解析度",
     duration: "時長",
     modelFaces: "模型面數",
+    modelVertices: "模型頂點數",
     gridView: "網格視圖",
     listView: "列表視圖",
     resourceDetail: "資源詳情",

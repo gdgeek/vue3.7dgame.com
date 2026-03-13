@@ -1,5 +1,5 @@
 <template>
-  <div class="page-pagination">
+  <div class="page-pagination" :class="{ sticky: props.sticky }">
     <el-button
       round
       class="page-btn"
@@ -46,7 +46,9 @@
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import type { PagePaginationProps } from "./types";
 
-const props = defineProps<PagePaginationProps>();
+const props = withDefaults(defineProps<PagePaginationProps>(), {
+  sticky: false,
+});
 const emit = defineEmits<{
   (e: "page-change", page: number): void;
 }>();
@@ -108,6 +110,19 @@ onBeforeUnmount(() => {
   justify-content: center;
   gap: 16px;
   padding: 20px 0;
+
+  &.sticky {
+    position: sticky;
+    bottom: 10px;
+    z-index: 20;
+    width: fit-content;
+    margin: 12px auto 0;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-full, 9999px);
+    background: var(--bg-page, #f8fafc);
+    backdrop-filter: blur(6px);
+  }
 }
 
 .page-btn {

@@ -35,6 +35,10 @@ export default {
         entity: "Entity",
         author: "Author",
         resources: "Resources Used",
+        scenes: "Used In Scenes",
+        noScenes: "Not used in any scene",
+        sceneFallback: "Scene #",
+        enterScene: "Open This Scene",
       },
       events: {
         title: "Signals",
@@ -129,6 +133,7 @@ export default {
     },
     script: {
       title: "Script",
+      entityEditor: "Entity Editor",
       save: "Save",
       error1: "No metadata available",
       error2: "No permission to edit",

@@ -38,7 +38,8 @@ export const getMetas = (
   search = "",
   page = 0,
   expand = "image,author",
-  fields = ""
+  fields = "",
+  perPage?: number
 ) => {
   const query: Record<string, unknown> = {};
   if (sort === "name") {
@@ -57,6 +58,9 @@ export const getMetas = (
   }
   if (page > 1) {
     query["page"] = page;
+  }
+  if (perPage && perPage > 0) {
+    query["per-page"] = perPage;
   }
 
   return request<MetaInfo[]>({

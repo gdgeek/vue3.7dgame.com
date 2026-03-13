@@ -63,6 +63,11 @@ type MetaPayload = {
   };
 };
 
+type UnsavedChangesResultPayload = {
+  requestId: string;
+  changed: boolean;
+};
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
@@ -82,6 +87,13 @@ const isAudioBarItem = (
   value: unknown
 ): value is { type: "audio"; context: unknown } =>
   isRecord(value) && value.type === "audio";
+
+const isUnsavedChangesResultPayload = (
+  value: unknown
+): value is UnsavedChangesResultPayload =>
+  isRecord(value) &&
+  typeof value.requestId === "string" &&
+  typeof value.changed === "boolean";
 
 const getAudioSource = (value: unknown): string => {
   if (!isRecord(value) || !isRecord(value.context)) return "";
@@ -107,7 +119,9 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
         const response = await getPhototypes(
           input.sorted,
           input.searched,
-          input.current
+          input.current,
+          "resource,image,author",
+          24
         );
 
         logger.error(response.data);
@@ -137,7 +151,8 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
           input.sorted,
           input.searched,
           input.current,
-          "image"
+          "image",
+          24
         );
 
         const items = response.data.map((item: ResourceListItem) => {
@@ -170,11 +185,12 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
     }
   });
 };
-import { useRoute, useRouter } from "vue-router";
+import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import PhototypeDialog from "@/components/MrPP/PhototypeDialog.vue";
 import { putMeta, getMeta } from "@/api/v1/meta";
 import type { UpdateMetaRequest } from "@/api/v1/types/meta";
+import { getVerses, type VerseData } from "@/api/v1/verse";
 import { useAppStore } from "@/store/modules/app";
 import { translateRouteTitle } from "@/utils/i18n";
 import env from "@/environment";
@@ -200,6 +216,104 @@ const editor = ref<HTMLIFrameElement | null>();
 let init = false;
 const ability = useAbility();
 const userStore = useUserStore();
+let unsavedCheckSeed = 0;
+const pendingUnsavedChecks = new Map<string, (changed: boolean) => void>();
+let pendingLeaveSaveResolver: ((result: boolean) => void) | null = null;
+
+type EntitySceneItem = {
+  id: number;
+  name: string;
+};
+
+const extractEntitySceneIds = (verseMetas: unknown): number[] => {
+  if (!Array.isArray(verseMetas)) return [];
+  const ids = verseMetas
+    .map((item) => {
+      if (!isRecord(item)) return null;
+      const raw = item.verse_id;
+      const id = typeof raw === "number" ? raw : Number(raw);
+      return Number.isFinite(id) ? id : null;
+    })
+    .filter((id): id is number => id !== null);
+
+  return Array.from(new Set(ids));
+};
+
+const getScenePageCount = (headers: unknown): number => {
+  if (!isRecord(headers)) return 1;
+  const raw = headers["x-pagination-page-count"];
+  const count = Number.parseInt(String(raw ?? "1"), 10);
+  return Number.isFinite(count) && count > 0 ? count : 1;
+};
+
+const sceneDisplayName = (scene: VerseData): string => {
+  const rawName = typeof scene.name === "string" ? scene.name.trim() : "";
+  if (rawName) return rawName;
+  return `${t("meta.list.properties.sceneFallback")}${scene.id}`;
+};
+
+const getEntityScenes = async (
+  verseMetas: unknown
+): Promise<EntitySceneItem[]> => {
+  const sceneIds = extractEntitySceneIds(verseMetas);
+  if (sceneIds.length === 0) return [];
+
+  const sceneIdSet = new Set(sceneIds);
+  const sceneNameMap = new Map<number, string>();
+  let page = 1;
+  let pageCount = 1;
+
+  try {
+    do {
+      const response = await getVerses({
+        sort: "-updated_at",
+        page,
+        perPage: 100,
+      });
+
+      const rows = Array.isArray(response.data) ? response.data : [];
+      rows.forEach((scene) => {
+        if (sceneIdSet.has(scene.id) && !sceneNameMap.has(scene.id)) {
+          sceneNameMap.set(scene.id, sceneDisplayName(scene));
+        }
+      });
+
+      pageCount = getScenePageCount(response.headers);
+      page += 1;
+    } while (page <= pageCount && sceneNameMap.size < sceneIds.length);
+  } catch (error) {
+    logger.error("Failed to load entity scenes", error);
+  }
+
+  return sceneIds.map((sceneId) => ({
+    id: sceneId,
+    name:
+      sceneNameMap.get(sceneId) ||
+      `${t("meta.list.properties.sceneFallback")}${sceneId}`,
+  }));
+};
+
+const findSceneIdByName = async (sceneName: string): Promise<number | null> => {
+  const name = sceneName.trim();
+  if (!name) return null;
+
+  try {
+    const response = await getVerses({
+      sort: "-updated_at",
+      search: name,
+      page: 1,
+      perPage: 50,
+    });
+    const rows = Array.isArray(response.data) ? response.data : [];
+    if (rows.length === 0) return null;
+
+    const exact = rows.find((scene) => sceneDisplayName(scene) === name);
+    return exact?.id ?? rows[0].id ?? null;
+  } catch (error) {
+    logger.error("Failed to resolve scene by name", error);
+    return null;
+  }
+};
 
 const decodeRouteText = (value: string): string => {
   let decoded = value;
@@ -345,6 +459,86 @@ const postMessage = (action: string, data: unknown = {}) => {
   }
 };
 
+const confirmSaveCurrentEntity = () =>
+  ElMessageBox.confirm(t("common.entitySaveConfirm.message"), "", {
+    showClose: true,
+    center: true,
+    distinguishCancelAndClose: true,
+    closeOnClickModal: false,
+    closeOnPressEscape: true,
+    showCancelButton: true,
+    customClass: "script-save-confirm-box",
+    confirmButtonText: t("common.entitySaveConfirm.confirm"),
+    cancelButtonText: t("common.entitySaveConfirm.cancel"),
+  });
+
+const queryUnsavedChangesBeforeLeave = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if (!editor.value || !editor.value.contentWindow) {
+      resolve(false);
+      return;
+    }
+
+    const requestId = `meta_${Date.now()}_${++unsavedCheckSeed}`;
+    const timeout = window.setTimeout(() => {
+      pendingUnsavedChecks.delete(requestId);
+      resolve(false);
+    }, 1200);
+
+    pendingUnsavedChecks.set(requestId, (changed) => {
+      window.clearTimeout(timeout);
+      pendingUnsavedChecks.delete(requestId);
+      resolve(changed);
+    });
+
+    postMessage("check-unsaved-changes", { requestId });
+  });
+};
+
+const waitForLeaveSaveResult = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const timeout = window.setTimeout(() => {
+      if (pendingLeaveSaveResolver) {
+        pendingLeaveSaveResolver = null;
+      }
+      resolve(false);
+    }, 3000);
+
+    pendingLeaveSaveResolver = (result: boolean) => {
+      window.clearTimeout(timeout);
+      pendingLeaveSaveResolver = null;
+      resolve(result);
+    };
+  });
+};
+
+const resolveLeaveSave = (result: boolean) => {
+  if (!pendingLeaveSaveResolver) return;
+  const resolver = pendingLeaveSaveResolver;
+  pendingLeaveSaveResolver = null;
+  resolver(result);
+};
+
+const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
+  const changed = await queryUnsavedChangesBeforeLeave();
+
+  if (!changed) {
+    return true;
+  }
+
+  try {
+    await confirmSaveCurrentEntity();
+  } catch (action) {
+    if (action === "cancel") {
+      return true;
+    }
+    return false;
+  }
+
+  postMessage("save-before-leave", {});
+  return waitForLeaveSaveResult();
+};
+
 // 获取可用的资源类型
 const getAvailableResourceTypes = () => {
   const resourceTypes = [
@@ -369,10 +563,10 @@ const saveMeta = async ({
 }: {
   meta: MetaPayload;
   events: unknown;
-}) => {
+}): Promise<boolean> => {
   if (!saveable) {
     ElMessage.info(t("meta.scene.info"));
-    return;
+    return true;
   }
 
   // 在上传前处理 meta 数据，确保 name 唯一
@@ -411,8 +605,10 @@ const saveMeta = async ({
       events: events as import("@/api/v1/types/meta").Events | null,
     });
     ElMessage.success(t("meta.scene.success"));
+    return true;
   } catch (error) {
     ElMessage.error(t("meta.scene.saveError"));
+    return false;
   }
 };
 
@@ -513,12 +709,34 @@ const handleMessage = async (e: MessageEvent) => {
 
   switch (action) {
     case "save-meta":
-      saveMeta(data);
+      resolveLeaveSave(
+        await saveMeta(data as { meta: MetaPayload; events: unknown })
+      );
       // ElMessage.success("储存完成");
       break;
 
     case "save-meta-none":
       ElMessage.warning(t("meta.scene.noChanges"));
+      resolveLeaveSave(true);
+      break;
+
+    case "save-meta-before-leave":
+      resolveLeaveSave(
+        await saveMeta(data as { meta: MetaPayload; events: unknown })
+      );
+      break;
+
+    case "save-meta-before-leave-none":
+      resolveLeaveSave(true);
+      break;
+
+    case "unsaved-changes-result":
+      if (isUnsavedChangesResultPayload(data)) {
+        const resolver = pendingUnsavedChecks.get(data.requestId);
+        if (resolver) {
+          resolver(Boolean(data.changed));
+        }
+      }
       break;
 
     case "load-resource":
@@ -530,7 +748,7 @@ const handleMessage = async (e: MessageEvent) => {
       break;
 
     case "goto":
-      if (data.target === "blockly.js") {
+      if (isRecord(data) && data.target === "blockly.js") {
         const scriptRoute = router
           .getRoutes()
           .find((route) => route.path === "/meta/script");
@@ -546,7 +764,32 @@ const handleMessage = async (e: MessageEvent) => {
             },
           });
         }
-      } else if (data.data === "rete.js") {
+      } else if (isRecord(data) && data.target === "verse.scene") {
+        const rawSceneId = data.sceneId;
+        let sceneId =
+          typeof rawSceneId === "number" ? rawSceneId : Number(rawSceneId);
+        const sceneName =
+          typeof data.sceneName === "string" && data.sceneName.trim()
+            ? data.sceneName.trim()
+            : t("verse.listPage.unnamed");
+
+        if (!Number.isFinite(sceneId)) {
+          const resolvedSceneId = await findSceneIdByName(sceneName);
+          if (resolvedSceneId === null) {
+            break;
+          }
+          sceneId = resolvedSceneId;
+        }
+
+        const sceneTitle = encodeURIComponent(
+          t("verse.listPage.editorTitle", { name: sceneName })
+        );
+
+        router.push({
+          path: "/verse/scene",
+          query: { id: sceneId, title: sceneTitle },
+        });
+      } else if (isRecord(data) && data.data === "rete.js") {
         router.push({
           path: "/meta/rete-meta",
           query: { id: id.value, title: title.value },
@@ -586,14 +829,19 @@ const handleMessage = async (e: MessageEvent) => {
 // 刷新元数据
 const refresh = async () => {
   try {
-    const meta = await getMeta(id.value);
+    const metaResponse = await getMeta(id.value, { expand: "verseMetas" });
+    const meta = metaResponse.data;
     const availableTypes = getAvailableResourceTypes();
+    const entityScenes = await getEntityScenes(meta.verseMetas);
+    logger.log(availableTypes);
 
     // 发送元数据和可用资源类型到编辑器
     postMessage("load", {
-      data: meta.data, // 场景数据
-      saveable: saveable(meta.data),
+      data: meta,
+      saveable: saveable(meta),
       availableResourceTypes: availableTypes,
+      entityScenes,
+      entitySceneNames: entityScenes.map((scene) => scene.name),
       user: {
         id: userStore.userInfo?.id || null,
         //roles: userStore.userInfo?.roles || [],
@@ -612,8 +860,18 @@ onMounted(() => {
   window.addEventListener("message", handleMessage);
 });
 
+onBeforeRouteLeave(async (_to, _from, next) => {
+  const canLeave = await resolveUnsavedBeforeLeave();
+  next(canLeave);
+});
+
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
+  pendingUnsavedChecks.clear();
+  if (pendingLeaveSaveResolver) {
+    pendingLeaveSaveResolver(false);
+    pendingLeaveSaveResolver = null;
+  }
 });
 </script>
 

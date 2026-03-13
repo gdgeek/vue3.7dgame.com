@@ -3,24 +3,32 @@
     <el-container>
       <el-main>
         <el-card v-loading="loading" class="box-card">
-          <template #header>
-            <div v-if="meta" class="clearfix">
-              <el-link :href="sceneEditorLink" :underline="false">{{
-                meta.title
-              }}</el-link>
-              /【{{ $t("meta.script.title") }}】
-              <!--
-              <el-button type="primary" size="small" @click="run">测试运行</el-button>
-              -->
-              <el-button
-                v-if="disabled"
-                type="primary"
-                size="small"
-                @click="disabled = false"
-              >
-                返回
-              </el-button>
-              <el-button-group style="float: right">
+          <el-container v-if="!disabled">
+            <div class="script-tabs-wrapper">
+              <div v-if="meta" class="script-tabs-actions">
+                <el-select
+                  v-model="selectedUsedSceneId"
+                  class="script-used-scenes-select"
+                  size="small"
+                  :placeholder="usedSceneSelectPlaceholder"
+                  :disabled="usedSceneOptions.length === 0"
+                  popper-class="script-used-scenes-popper"
+                  @change="handleUsedSceneChange"
+                >
+                  <el-option
+                    v-for="scene in usedSceneOptions"
+                    :key="scene.id"
+                    :label="scene.name"
+                    :value="scene.id"
+                  ></el-option>
+                </el-select>
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="goBackToSceneEditor"
+                >
+                  {{ $t("meta.script.entityEditor") }}
+                </el-button>
                 <el-button type="primary" size="small" @click="save">
                   <font-awesome-icon
                     class="icon"
@@ -28,181 +36,106 @@
                   ></font-awesome-icon>
                   {{ $t("meta.script.save") }}
                 </el-button>
-              </el-button-group>
-            </div>
-          </template>
-          <el-container v-if="!disabled">
-            <el-tabs v-model="activeName" type="card" style="width: 100%">
-              <el-tab-pane :label="$t('verse.view.script.edit')" name="blockly">
-                <el-main
-                  style="
-                    position: relative;
-                    height: 70vh;
-                    padding: 0;
-                    margin: 0;
-                  "
-                >
-                  <div class="fullscreen-controls">
-                    <el-button-group>
-                      <el-button
-                        class="fullscreen-btn"
-                        size="small"
-                        type="primary"
-                        plain
-                        @click="toggleFullscreen"
-                      >
-                        <el-icon>
-                          <FullScreen v-if="!isFullscreen"></FullScreen>
-                          <Aim v-else></Aim>
-                        </el-icon>
-                      </el-button>
-                      <template v-if="isFullscreen">
-                        <el-button
-                          size="small"
-                          type="primary"
-                          @click="showFullscreenCode('lua')"
-                        >
-                          Lua
-                        </el-button>
-                        <el-button
-                          size="small"
-                          color="#F7DF1E"
-                          style="margin-right: 10px"
-                          @click="showFullscreenCode('javascript')"
-                        >
-                          JavaScript
-                        </el-button>
-                        <!--
-                        <el-button size="small" type="primary" style="margin-right: 10px" @click="run">
-                          测试运行
-                        </el-button>
-                        -->
-                        <el-button
-                          size="small"
-                          type="primary"
-                          style="margin-right: 50px"
-                          @click="save"
-                        >
-                          <font-awesome-icon
-                            class="icon"
-                            icon="save"
-                          ></font-awesome-icon>
-                          {{ $t("meta.script.save") }}
-                        </el-button>
-                      </template>
-                    </el-button-group>
-                  </div>
-
-                  <el-dialog
-                    v-model="showCodeDialog"
-                    :title="codeDialogTitle"
-                    fullscreen
-                    :show-close="true"
-                    :close-on-click-modal="false"
-                    :close-on-press-escape="true"
-                  >
-                    <div class="code-dialog-content">
-                      <el-card :class="isDark ? 'dark-theme' : 'light-theme'">
-                        <div v-highlight>
-                          <div class="code-container2">
-                            <el-button
-                              class="copy-button2"
-                              text
-                              @click="copyCode(currentCode)"
-                            >
-                              <el-icon class="icon">
-                                <CopyDocument></CopyDocument>
-                              </el-icon>
-                              {{ $t("copy.title") }}
-                            </el-button>
-                            <pre>
-                    <code :class="currentCodeType">{{
-                      currentCode
-                    }}</code>
-                  </pre>
-                          </div>
-                        </div>
-                      </el-card>
-                    </div>
-                  </el-dialog>
-
-                  <iframe
-                    style="width: 100%; height: 100%; padding: 0; margin: 0"
-                    id="editor"
-                    ref="editor"
-                    :src="src"
-                  ></iframe>
-                </el-main>
-              </el-tab-pane>
-              <el-tab-pane
-                :label="$t('verse.view.script.code') || 'Script Code'"
-                name="script"
+              </div>
+              <el-tabs
+                v-model="activeName"
+                class="script-main-tabs"
+                type="card"
+                style="width: 100%"
               >
-                <el-card
-                  v-if="activeName === 'script'"
-                  class="box-card"
-                  :class="isDark ? 'dark-theme' : 'light-theme'"
+                <el-tab-pane
+                  :label="$t('verse.view.script.edit')"
+                  name="blockly"
                 >
-                  <div v-highlight>
-                    <el-tabs v-model="languageName">
-                      <el-tab-pane label="Lua" name="lua">
-                        <template #label>
-                          <span style="display: flex; align-items: center">
-                            <img
-                              src="/lua.png"
-                              style="width: 25px; margin-right: 5px"
-                              alt=""
-                            />
-                            <span>Lua</span>
-                          </span>
-                        </template>
-                        <div class="code-container">
-                          <el-button
-                            class="copy-button"
-                            text
-                            @click="copyCode(LuaCode)"
-                            ><el-icon class="icon">
-                              <CopyDocument></CopyDocument> </el-icon
-                            >{{ $t("copy.title") || "Copy" }}</el-button
-                          >
-                          <pre>
+                  <el-main class="blockly-editor-main">
+                    <iframe
+                      style="margin: 0; padding: 0; height: 100%; width: 100%"
+                      class="blockly-editor-frame"
+                      scrolling="no"
+                      id="editor"
+                      ref="editor"
+                      :src="src"
+                    ></iframe>
+                  </el-main>
+                </el-tab-pane>
+                <el-tab-pane
+                  :label="$t('verse.view.script.code') || 'Script Code'"
+                  name="script"
+                >
+                  <el-card
+                    v-if="activeName === 'script'"
+                    class="box-card"
+                    :class="isDark ? 'dark-theme' : 'light-theme'"
+                  >
+                    <div v-highlight>
+                      <el-tabs v-model="languageName">
+                        <el-tab-pane label="Lua" name="lua">
+                          <template #label>
+                            <span style="display: flex; align-items: center">
+                              <img
+                                src="/lua.png"
+                                style="width: 25px; margin-right: 5px"
+                                alt=""
+                              />
+                              <span>Lua</span>
+                            </span>
+                          </template>
+                          <div class="code-container">
+                            <el-button
+                              class="copy-button"
+                              text
+                              @click="copyCode(LuaCode)"
+                              ><el-icon class="icon">
+                                <CopyDocument></CopyDocument> </el-icon
+                              >{{ $t("copy.title") || "Copy" }}</el-button
+                            >
+                            <pre>
                   <code class="lua">{{ LuaCode }}</code>
                 </pre>
-                        </div>
-                      </el-tab-pane>
-                      <el-tab-pane label="JavaScript" name="javascript">
-                        <template #label>
-                          <span style="display: flex; align-items: center">
-                            <img
-                              src="/javascript.png"
-                              style="width: 25px; margin-right: 5px"
-                              alt=""
-                            />
-                            <span>JavaScript</span>
-                          </span>
-                        </template>
-                        <div class="code-container">
-                          <el-button
-                            class="copy-button"
-                            text
-                            @click="copyCode(JavaScriptCode)"
-                            ><el-icon class="icon">
-                              <CopyDocument></CopyDocument> </el-icon
-                            >{{ $t("copy.title") }}</el-button
-                          >
-                          <pre>
+                          </div>
+                        </el-tab-pane>
+                        <el-tab-pane label="JavaScript" name="javascript">
+                          <template #label>
+                            <span style="display: flex; align-items: center">
+                              <img
+                                src="/javascript.png"
+                                style="width: 25px; margin-right: 5px"
+                                alt=""
+                              />
+                              <span>JavaScript</span>
+                            </span>
+                          </template>
+                          <div class="code-container">
+                            <el-button
+                              class="copy-button"
+                              text
+                              @click="copyCode(JavaScriptCode)"
+                              ><el-icon class="icon">
+                                <CopyDocument></CopyDocument> </el-icon
+                              >{{ $t("copy.title") }}</el-button
+                            >
+                            <pre>
                   <code class="javascript">{{ JavaScriptCode }}</code>
                 </pre>
-                        </div>
-                      </el-tab-pane>
-                    </el-tabs>
-                  </div>
-                </el-card>
-              </el-tab-pane>
-            </el-tabs>
+                          </div>
+                        </el-tab-pane>
+                      </el-tabs>
+                    </div>
+                  </el-card>
+                </el-tab-pane>
+              </el-tabs>
+            </div>
           </el-container>
           <div v-if="disabled" class="runArea">
             <div class="scene-fullscreen-controls">
+              <el-button
+                class="scene-exit-btn"
+                size="small"
+                type="primary"
+                @click="disabled = false"
+              >
+                {{ $t("common.back") }}
+              </el-button>
               <el-button
                 class="scene-fullscreen-btn"
                 size="small"
@@ -210,10 +143,9 @@
                 plain
                 @click="toggleSceneFullscreen"
               >
-                <el-icon>
-                  <FullScreen v-if="!isSceneFullscreen"></FullScreen>
-                  <Aim v-else></Aim>
-                </el-icon>
+                <font-awesome-icon
+                  :icon="['fas', isSceneFullscreen ? 'compress' : 'expand']"
+                ></font-awesome-icon>
               </el-button>
             </div>
             <ScenePlayer
@@ -221,8 +153,7 @@
               ref="scenePlayer"
               :meta="meta"
               :is-scene-fullscreen="isSceneFullscreen"
-            >
-            </ScenePlayer>
+            ></ScenePlayer>
           </div>
         </el-card>
       </el-main>
@@ -231,11 +162,13 @@
 </template>
 
 <script setup lang="ts">
-import { CopyDocument, FullScreen, Aim } from "@element-plus/icons-vue";
+// @ts-nocheck
+import { CopyDocument } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
-import { Message } from "@/components/Dialog";
+import { getVerses } from "@/api/v1/verse";
 import * as THREE from "three";
 import { getConfiguredGLTFLoader } from "@/lib/three/loaders";
 import { convertToHttps } from "@/assets/js/helper";
@@ -254,6 +187,7 @@ import { buildScriptRuntime } from "@/composables/useScriptRuntime";
 const loading = ref(false);
 const meta = ref<metaInfo | null>(null);
 const route = useRoute();
+const router = useRouter();
 const id = computed(() => parseInt(route.query.id as string));
 const loader = getConfiguredGLTFLoader();
 
@@ -265,7 +199,6 @@ type ScenePlayerExpose = {
     audio: HTMLAudioElement,
     skipQueue?: boolean
   ) => Promise<void> | void;
-  sceneInstanceId: string;
 };
 const scenePlayer = ref<ScenePlayerExpose | null>(null);
 const test = ref<MetaResourceIndex | null>(null);
@@ -325,11 +258,11 @@ const initEditor = () => {
 // ---------- postScript（Meta 版：保存到服务端，无发布流程）----------
 const postScript = async (message: EditorPostPayload) => {
   if (meta.value === null) {
-    Message.error(t("meta.script.error1"));
+    ElMessage.error(t("meta.script.error1"));
     return;
   }
   if (!meta.value.editable) {
-    Message.error(t("meta.script.error2"));
+    ElMessage.error(t("meta.script.error2"));
     return;
   }
 
@@ -346,7 +279,7 @@ const postScript = async (message: EditorPostPayload) => {
     js: message.js,
   });
 
-  Message.success(t("meta.script.success"));
+  ElMessage.success(t("meta.script.success"));
 };
 
 // ---------- 共享编辑器 composable ----------
@@ -357,19 +290,12 @@ const {
   JavaScriptCode,
   disabled,
   isSceneFullscreen,
-  isFullscreen,
-  showCodeDialog,
-  currentCode,
-  currentCodeType,
-  codeDialogTitle,
   unsavedBlocklyData,
+  resolveUnsavedChangesBeforeLeave,
   editor,
   src,
   isDark,
-  toggleFullscreen,
-  showFullscreenCode,
   toggleSceneFullscreen,
-  copyCode,
   postMessage,
   save,
   decompressBlockly,
@@ -394,6 +320,40 @@ const {
 
 const { t } = useI18n();
 
+type SceneOption = {
+  id: number;
+  name: string;
+};
+
+const selectedUsedSceneId = ref<number | null>(null);
+const sceneNameMap = ref<Map<number, string>>(new Map());
+
+const usedSceneOptions = computed<SceneOption[]>(() => {
+  const verseMetas = Array.isArray(meta.value?.verseMetas)
+    ? meta.value.verseMetas
+    : [];
+  if (verseMetas.length === 0) return [];
+
+  const options: SceneOption[] = [];
+  const seen = new Set<number>();
+
+  verseMetas.forEach((relation) => {
+    const verseId = relation?.verse_id;
+    if (typeof verseId !== "number" || seen.has(verseId)) return;
+    seen.add(verseId);
+    options.push({
+      id: verseId,
+      name:
+        sceneNameMap.value.get(verseId) ||
+        `${t("meta.list.properties.sceneFallback")}${verseId}`,
+    });
+  });
+
+  return options;
+});
+
+const usedSceneSelectPlaceholder = "已使用场景";
+
 const sceneEditorLink = computed(() => {
   const editorLabel = t("route.meta.sceneEditor");
   const titleText = meta.value?.title
@@ -402,37 +362,85 @@ const sceneEditorLink = computed(() => {
   return `/meta/scene?id=${id.value}&title=${encodeURIComponent(titleText)}`;
 });
 
+const goBackToSceneEditor = async () => {
+  const canLeave = await resolveUnsavedChangesBeforeLeave({
+    showDiscardInfo: false,
+  });
+  if (!canLeave) return;
+  router.push(sceneEditorLink.value);
+};
+
+const goToUsedSceneEditor = async (sceneId: number, sceneName?: string) => {
+  const canLeave = await resolveUnsavedChangesBeforeLeave({
+    showDiscardInfo: false,
+  });
+  if (!canLeave) return;
+
+  const title = encodeURIComponent(
+    t("verse.listPage.editorTitle", {
+      name: sceneName || t("verse.listPage.unnamed"),
+    })
+  );
+  router.push({ path: "/verse/scene", query: { id: sceneId, title } });
+};
+
+const handleUsedSceneChange = async (sceneId: number) => {
+  const selected = usedSceneOptions.value.find((scene) => scene.id === sceneId);
+  await goToUsedSceneEditor(sceneId, selected?.name);
+};
+
+const loadSceneNameMap = async () => {
+  try {
+    const scenes: Array<{ id: number; name?: string }> = [];
+    let page = 1;
+    let pageCount = 1;
+
+    do {
+      const response = await getVerses({
+        sort: "-updated_at",
+        page,
+        perPage: 100,
+      });
+      scenes.push(
+        ...response.data.map((scene) => ({ id: scene.id, name: scene.name }))
+      );
+      pageCount = parseInt(
+        String(response.headers["x-pagination-page-count"] || "1")
+      );
+      page += 1;
+    } while (page <= pageCount);
+
+    const map = new Map<number, string>();
+    scenes.forEach((scene) => {
+      map.set(scene.id, String(scene.name || `Scene-${scene.id}`));
+    });
+    sceneNameMap.value = map;
+  } catch (error) {
+    logger.error("loadSceneNameMap error", error);
+  }
+};
+
 // ---------- Meta 专有：handlePolygen（返回 mesh + playAnimation）----------
-const handlePolygen = async (uuid: string) => {
+const handlePolygen = (uuid: string) => {
   if (!scenePlayer.value) {
     logger.error("ScenePlayer未初始化");
     return null;
   }
   const modelUuid = uuid.toString();
-  const getModelAsync = (
-    uuid: string,
-    retries = 3
-  ): Promise<THREE.Object3D | null> => {
-    return new Promise((resolve) => {
-      const attempt = (remaining: number) => {
-        const source = scenePlayer.value?.sources.get(uuid) as
-          | { type: string; data: { mesh?: THREE.Object3D } }
-          | undefined;
-        if (source?.type === "model" && source.data.mesh) {
-          resolve(source.data.mesh);
-          return;
-        }
-        if (remaining > 0) {
-          logger.log(`模型未找到，剩余重试次数: ${remaining}`);
-          setTimeout(() => attempt(remaining - 1), 100);
-        } else {
-          resolve(null);
-        }
-      };
-      attempt(retries);
-    });
+  const getModel = (uuid: string, retries = 3) => {
+    const source = scenePlayer.value?.sources.get(uuid) as
+      | { type: string; data: { mesh?: THREE.Object3D } }
+      | undefined;
+    if (source && source.type === "model" && source.data.mesh) {
+      return source.data.mesh;
+    }
+    if (retries > 0) {
+      logger.log(`模型未找到，剩余重试次数: ${retries}`);
+      setTimeout(() => getModel(uuid, retries - 1), 100);
+    }
+    return null;
   };
-  const model = await getModelAsync(modelUuid);
+  const model = getModel(modelUuid);
   logger.log("查找模型:", {
     requestedUuid: modelUuid,
     availableModels: Array.from(scenePlayer.value.sources.keys()),
@@ -510,10 +518,7 @@ const run = async () => {
   await waitForModels();
   if (!JavaScriptCode.value) return;
 
-  // 使用实例专属命名空间，避免多 ScenePlayer 实例时回调互相覆盖
-  const instanceId = scenePlayer.value!.sceneInstanceId;
-  window.__sceneCallbacks = window.__sceneCallbacks ?? {};
-  window.__sceneCallbacks[instanceId] = {};
+  window.meta = {};
   const {
     Vector3,
     polygen,
@@ -534,7 +539,7 @@ const run = async () => {
   try {
     const wrappedCode = `
         return async function(handlePolygen, polygen, handleSound, sound, THREE, task, tween, helper, animation, event, text, point, transform, Vector3, argument, handleText, handleEntity) {
-          const meta = window.__sceneCallbacks['${instanceId}'];
+          const meta = window.meta;
           const index = ${meta.value?.id};
 
           ${JavaScriptCode.value}
@@ -578,8 +583,9 @@ const run = async () => {
 onMounted(async () => {
   try {
     loading.value = true;
+    await loadSceneNameMap();
     const response = await getMeta(id.value, {
-      expand: "cyber,event,share,metaCode",
+      expand: "cyber,event,share,metaCode,verseMetas",
     });
     logger.log("response数据", response);
 
@@ -649,7 +655,7 @@ onMounted(async () => {
 
     initEditor();
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : String(error));
+    ElMessage.error(error instanceof Error ? error.message : String(error));
   } finally {
     loading.value = false;
   }
@@ -675,58 +681,144 @@ defineExpose({ run });
 }
 
 .dark-theme .hljs {
-  background-color: rgb(24 24 24) !important;
+  background-color: rgb(24, 24, 24) !important;
 }
 
 .light-theme .hljs {
   background-color: #fafafa !important;
 }
 
-.fullscreen-btn {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  z-index: 100;
-}
-
-/* 全屏时的样式 */
-:fullscreen .el-main {
-  height: 100vh !important;
-  padding: 0;
-}
-
-:fullscreen iframe {
-  height: 100vh !important;
-}
-
-.code-dialog-content {
-  height: 100%;
-  overflow: hidden;
-}
-
-.code-container2 {
+.script-tabs-wrapper {
   position: relative;
-  max-height: 80vh;
-  overflow-y: auto;
+  width: 100%;
+  flex: 1;
+  min-width: 0;
 }
 
-.copy-button2 {
+.script-tabs-actions {
   position: absolute;
-  top: 35px;
+  top: 4px;
   right: 0;
-  z-index: 1;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
-.fullscreen-controls {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  z-index: 100;
-  padding-right: 10px;
+.script-used-scenes-select {
+  width: 180px;
+}
+
+.script-used-scenes-select :deep(.el-select__wrapper) {
+  min-height: 32px;
+  align-items: center;
+}
+
+.script-used-scenes-select :deep(.el-select__placeholder),
+.script-used-scenes-select :deep(.el-select__selected-item) {
+  text-align: center;
+  line-height: 20px;
+}
+
+:global(.script-used-scenes-popper .el-select-dropdown__item) {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+}
+
+:global(
+  .script-used-scenes-popper .el-select-dropdown__item.hover,
+  .script-used-scenes-popper .el-select-dropdown__item:hover,
+  .script-used-scenes-popper .el-select-dropdown__item.is-hovering
+) {
+  background-color: var(--ar-primary-alpha-10) !important;
+  color: var(--ar-primary) !important;
+  font-weight: var(--font-weight-medium, 500) !important;
+}
+
+.script-tabs-wrapper :deep(.el-tabs__header) {
+  margin: 0 !important;
+  padding-right: 280px;
+  border-bottom: none !important;
+  position: relative;
+  top: -4px;
+}
+
+.script-tabs-wrapper :deep(.el-tabs--card > .el-tabs__header .el-tabs__nav) {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.script-tabs-wrapper :deep(.el-tabs--card > .el-tabs__header .el-tabs__item) {
+  border: 0.5px solid #d6deea !important;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.script-tabs-wrapper
+  :deep(.el-tabs--card > .el-tabs__header .el-tabs__item + .el-tabs__item) {
+  margin-left: 8px;
+}
+
+.script-tabs-wrapper
+  :deep(.el-tabs--card > .el-tabs__header .el-tabs__item.is-active) {
+  color: #06a7ee;
+  background: #fff;
+  border: 0.5px solid #06a7ee !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.script-tabs-wrapper :deep(.el-tabs__nav-wrap::after) {
+  display: none !important;
+  content: none !important;
+  height: 0 !important;
+}
+
+.script-tabs-wrapper :deep(.el-tabs__content) {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.blockly-editor-main {
+  margin: 0;
+  margin-top: 0;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  height: calc(100vh - 185px);
+  min-height: 520px;
+}
+
+.blockly-editor-frame {
+  border: 0;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .script-tabs-actions {
+    position: static;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .script-tabs-wrapper :deep(.el-tabs__header) {
+    padding-right: 0;
+  }
+
+  .script-used-scenes-select {
+    width: 100%;
+  }
 }
 
 .dark-theme :deep(.hljs) {
-  background-color: rgb(24 24 24) !important;
+  background-color: rgb(24, 24, 24) !important;
 }
 
 .light-theme :deep(.hljs) {
@@ -748,6 +840,18 @@ defineExpose({ run });
 
 .scene-fullscreen-btn {
   opacity: 0.8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scene-fullscreen-btn :deep(.svg-inline--fa) {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.scene-exit-btn {
+  margin-right: 8px;
 }
 
 /* 全屏时的样式 */

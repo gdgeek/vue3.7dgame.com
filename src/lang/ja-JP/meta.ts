@@ -35,6 +35,10 @@ export default {
         entity: "エンティティ",
         author: "作成者",
         resources: "使用リソース数",
+        scenes: "使用シーン",
+        noScenes: "どのシーンでも未使用",
+        sceneFallback: "シーン#",
+        enterScene: "このシーンへ",
       },
       events: {
         title: "シグナル",
@@ -104,6 +108,7 @@ export default {
     },
     script: {
       title: "スクリプト",
+      entityEditor: "エンティティ編集",
       save: "保存",
       error1: "メタ情報がありません",
       error2: "編集権限がありません",

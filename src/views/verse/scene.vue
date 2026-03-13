@@ -1,14 +1,10 @@
 <template>
   <div class="verse-scene">
-    <KnightDataDialog ref="knightDataRef" v-show="false"></KnightDataDialog>
-    <MetaDialog
-      @selected="selected"
-      ref="metaDialogRef"
-      v-show="false"
-    ></MetaDialog>
+    <KnightDataDialog ref="knightDataRef"></KnightDataDialog>
+    <MetaDialog @selected="selected" ref="metaDialogRef"></MetaDialog>
     <!--<PrefabDialog @selected="selected" ref="prefabDialogRef"></PrefabDialog>-->
-    <el-container class="editor-wrapper">
-      <el-main class="editor-container">
+    <el-container>
+      <el-main>
         <iframe
           id="editor"
           ref="editor"
@@ -26,8 +22,8 @@
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
 import { takePhoto } from "@/api/v1/verse";
-import { useRoute, useRouter } from "vue-router";
-import { computed, onMounted, onBeforeUnmount, ref, watch, toRaw } from "vue";
+import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
+import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 //import PrefabDialog from "@/components/MrPP/PrefabDialog.vue";
 import MetaDialog from "@/components/MrPP/MetaDialog.vue";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
@@ -38,7 +34,6 @@ import { useAppStore } from "@/store/modules/app";
 import { useUserStore } from "@/store/modules/user";
 import { translateRouteTitle } from "@/utils/i18n";
 import env from "@/environment";
-import { safeAtob } from "@/utils/base64";
 import { useFileStore } from "@/store/modules/config";
 
 // 组件状态
@@ -51,6 +46,9 @@ const editor = ref<HTMLIFrameElement>();
 import qs from "querystringify";
 let init = false;
 const saveable = ref(false);
+let unsavedCheckSeed = 0;
+const pendingUnsavedChecks = new Map<string, (changed: boolean) => void>();
+let pendingLeaveSaveResolver: ((result: boolean) => void) | null = null;
 
 // 对话框引用
 const knightDataRef = ref<InstanceType<typeof KnightDataDialog>>();
@@ -121,11 +119,6 @@ const refresh = async () => {
   verse.value = response.data;
   saveable.value = verse.value ? verse.value.editable : false;
 
-  if (!verse.value) {
-    logger.error("refresh: verse data is null/undefined, skip postMessage");
-    return;
-  }
-
   postMessage("load", {
     id: id.value,
     data: verse.value,
@@ -141,6 +134,50 @@ const refresh = async () => {
 // 向编辑器发送消息
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
+
+const toMetaId = (value: unknown): number | null => {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number.parseInt(value, 10);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+};
+
+const pickMetaNameFromPayload = (payload: Record<string, unknown>): string => {
+  const candidates = [
+    payload.meta_title,
+    payload.meta_name,
+    payload.title,
+    payload.name,
+    payload.metaTitle,
+    payload.metaName,
+  ];
+  const found = candidates.find(
+    (value) => typeof value === "string" && value.trim().length > 0
+  );
+  return typeof found === "string" ? found.trim() : "";
+};
+
+const buildMetaSceneTitle = (
+  metaId: number,
+  payload: Record<string, unknown>
+): string => {
+  const payloadName = pickMetaNameFromPayload(payload);
+  const matchedMeta = Array.isArray(verse.value?.metas)
+    ? verse.value?.metas.find((item) => item.id === metaId)
+    : undefined;
+  const metaName =
+    payloadName ||
+    String(matchedMeta?.title || matchedMeta?.name || "").trim() ||
+    String(t("meta.list.unnamed"));
+
+  return encodeURIComponent(
+    t("meta.list.editorTitle", {
+      name: metaName,
+    })
+  );
+};
 
 type PrefabSetupPayload = {
   meta_id: number | string;
@@ -179,6 +216,11 @@ type CoverUploadPayload = {
   imageData: string;
 };
 
+type UnsavedChangesResultPayload = {
+  requestId: string;
+  changed: boolean;
+};
+
 const isEditorMessage = (value: unknown): value is EditorMessage =>
   isRecord(value) && typeof value.action === "string";
 
@@ -188,26 +230,106 @@ const isPrefabSetupPayload = (value: unknown): value is PrefabSetupPayload =>
 const isCoverUploadPayload = (value: unknown): value is CoverUploadPayload =>
   isRecord(value) && typeof value.imageData === "string";
 
+const isUnsavedChangesResultPayload = (
+  value: unknown
+): value is UnsavedChangesResultPayload =>
+  isRecord(value) &&
+  typeof value.requestId === "string" &&
+  typeof value.changed === "boolean";
+
 const postMessage = (action: string, data: unknown) => {
   if (editor.value && editor.value.contentWindow) {
-    const rawData = toRaw(data);
-    let clonedData: unknown;
-    try {
-      clonedData = structuredClone(rawData);
-    } catch {
-      clonedData = JSON.parse(JSON.stringify(rawData));
-    }
     editor.value.contentWindow.postMessage(
       {
         from: "scene.verse.web",
         action,
-        data: clonedData,
+        data: JSON.parse(JSON.stringify(data)),
       },
       "*"
     );
   } else {
     ElMessage.error(t("verse.view.sceneEditor.error1"));
   }
+};
+
+const confirmSaveCurrentScene = () =>
+  ElMessageBox.confirm(t("common.sceneSaveConfirm.message"), "", {
+    showClose: true,
+    center: true,
+    distinguishCancelAndClose: true,
+    closeOnClickModal: false,
+    closeOnPressEscape: true,
+    showCancelButton: true,
+    customClass: "script-save-confirm-box",
+    confirmButtonText: t("common.sceneSaveConfirm.confirm"),
+    cancelButtonText: t("common.sceneSaveConfirm.cancel"),
+  });
+
+const queryUnsavedChangesBeforeLeave = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if (!editor.value || !editor.value.contentWindow) {
+      resolve(false);
+      return;
+    }
+
+    const requestId = `verse_${Date.now()}_${++unsavedCheckSeed}`;
+    const timeout = window.setTimeout(() => {
+      pendingUnsavedChecks.delete(requestId);
+      resolve(false);
+    }, 1200);
+
+    pendingUnsavedChecks.set(requestId, (changed) => {
+      window.clearTimeout(timeout);
+      pendingUnsavedChecks.delete(requestId);
+      resolve(changed);
+    });
+
+    postMessage("check-unsaved-changes", { requestId });
+  });
+};
+
+const waitForLeaveSaveResult = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const timeout = window.setTimeout(() => {
+      if (pendingLeaveSaveResolver) {
+        pendingLeaveSaveResolver = null;
+      }
+      resolve(false);
+    }, 3000);
+
+    pendingLeaveSaveResolver = (result: boolean) => {
+      window.clearTimeout(timeout);
+      pendingLeaveSaveResolver = null;
+      resolve(result);
+    };
+  });
+};
+
+const resolveLeaveSave = (result: boolean) => {
+  if (!pendingLeaveSaveResolver) return;
+  const resolver = pendingLeaveSaveResolver;
+  pendingLeaveSaveResolver = null;
+  resolver(result);
+};
+
+const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
+  const changed = await queryUnsavedChangesBeforeLeave();
+
+  if (!changed) {
+    return true;
+  }
+
+  try {
+    await confirmSaveCurrentScene();
+  } catch (action) {
+    if (action === "cancel") {
+      return true;
+    }
+    return false;
+  }
+
+  postMessage("save-before-leave", {});
+  return waitForLeaveSaveResult();
 };
 
 // 设置预制件属性
@@ -305,6 +427,54 @@ const saveVerse = async (data: unknown) => {
     });
 };
 
+const saveVerseBeforeLeave = async (data: unknown): Promise<boolean> => {
+  const payload = data as VerseEditorPayload;
+  if (!payload.verse) {
+    return false;
+  }
+
+  const verse = payload.verse;
+
+  if (!saveable.value) {
+    ElMessage.info(t("verse.view.sceneEditor.info3"));
+    return true;
+  }
+
+  const retitleVerses = (verses: VerseModule[]) => {
+    const titleCount: Record<string, number> = {};
+
+    verses.forEach((item) => {
+      const title = item.parameters.title;
+      const match = title.match(/^(.*?)(?: \((\d+)\))?$/);
+      const baseTitle = match?.[1]?.trim() || title;
+      const currentCount = match?.[2] ? parseInt(match[2], 10) : 0;
+
+      if (!titleCount[baseTitle]) {
+        titleCount[baseTitle] = currentCount > 0 ? currentCount : 1;
+      } else {
+        titleCount[baseTitle]++;
+      }
+
+      const newCount = titleCount[baseTitle];
+      item.parameters.title =
+        newCount > 1 ? `${baseTitle} (${newCount})` : baseTitle;
+    });
+  };
+
+  if (verse?.children?.modules) {
+    retitleVerses(verse.children.modules);
+  }
+
+  try {
+    await putVerse(id.value, { data: verse as unknown as JsonValue });
+    ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
+    return true;
+  } catch {
+    ElMessage.error(t("verse.view.sceneEditor.error1"));
+    return false;
+  }
+};
+
 //发布场景
 const releaseVerse = async (data: unknown) => {
   const payload = data as VerseEditorPayload;
@@ -347,9 +517,12 @@ const handleMessage = async (e: MessageEvent) => {
   switch (action) {
     case "edit-meta":
       if (isRecord(data)) {
+        const metaId = toMetaId(data.meta_id);
+        if (metaId === null) break;
+        const title = buildMetaSceneTitle(metaId, data);
         router.push({
           path: "/meta/scene",
-          query: { id: data.meta_id as string },
+          query: { id: String(metaId), title },
         });
       }
       break;
@@ -369,7 +542,7 @@ const handleMessage = async (e: MessageEvent) => {
     //    break;
 
     case "save-verse":
-      saveVerse(data);
+      await saveVerse(data);
       ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
 
       break;
@@ -380,6 +553,24 @@ const handleMessage = async (e: MessageEvent) => {
 
     case "save-verse-none":
       ElMessage.warning(t("verse.view.sceneEditor.noChanges"));
+      resolveLeaveSave(true);
+      break;
+
+    case "save-verse-before-leave":
+      resolveLeaveSave(await saveVerseBeforeLeave(data));
+      break;
+
+    case "save-verse-before-leave-none":
+      resolveLeaveSave(true);
+      break;
+
+    case "unsaved-changes-result":
+      if (isUnsavedChangesResultPayload(data)) {
+        const resolver = pendingUnsavedChecks.get(data.requestId);
+        if (resolver) {
+          resolver(Boolean(data.changed));
+        }
+      }
       break;
 
     case "goto":
@@ -431,11 +622,7 @@ const handleUploadCover = async (data: unknown) => {
 
     // 将base64图片数据转换为Blob对象
     const imageData = data.imageData;
-    const byteString = safeAtob(imageData.split(",")[1]);
-    if (!byteString) {
-      ElMessage.error(t("verse.view.sceneEditor.coverUploadError"));
-      return;
-    }
+    const byteString = atob(imageData.split(",")[1]);
     const mimeType = imageData.split(",")[0].split(":")[1].split(";")[0];
     const ab = new ArrayBuffer(byteString.length);
     const ia = new Uint8Array(ab);
@@ -518,43 +705,28 @@ onMounted(() => {
   window.addEventListener("message", handleMessage);
 });
 
+onBeforeRouteLeave(async (_to, _from, next) => {
+  const canLeave = await resolveUnsavedBeforeLeave();
+  next(canLeave);
+});
+
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
+  pendingUnsavedChecks.clear();
+  if (pendingLeaveSaveResolver) {
+    pendingLeaveSaveResolver(false);
+    pendingLeaveSaveResolver = null;
+  }
 });
 </script>
 
 <style lang="scss" scoped>
-.verse-scene {
-  height: calc(100vh - 60px);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.editor-wrapper {
-  flex: 1;
-  height: 100%;
-}
-
-.editor-container {
-  padding: 0 !important;
-  height: 100%;
-  overflow: hidden;
-}
-
 .content {
-  height: 100%;
-  width: 100%;
-  background: var(--bg-card, #fff);
+  height: calc(100vh - 140px);
   border: 0;
   outline: none;
-  display: block;
-}
-</style>
-
-<style lang="scss">
-/* 隐藏当前页面的 footer */
-.main-container:has(.verse-scene) > footer {
-  display: none !important;
+  border-radius: var(--editor-frame-radius, 16px);
+  clip-path: inset(0 round var(--editor-frame-radius, 16px));
+  background: var(--bg-card, #fff);
 }
 </style>

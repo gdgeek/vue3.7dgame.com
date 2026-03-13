@@ -83,6 +83,7 @@ export interface VersesParams {
   sort?: string;
   search?: string;
   page?: number;
+  perPage?: number;
   expand?: string;
   tags?: number[]; // 假设tags是数字ID数组，如果是其他类型可以相应调整
 }
@@ -91,6 +92,7 @@ const createQueryParams = ({
   sort,
   search,
   page,
+  perPage,
   expand,
   tags,
 }: VersesParams): Record<string, unknown> => {
@@ -103,6 +105,9 @@ const createQueryParams = ({
 
   if (page && page > 1) {
     query["page"] = page;
+  }
+  if (perPage && perPage > 0) {
+    query["per-page"] = perPage;
   }
   if (tags && tags.length > 0) {
     query["tags"] = tags;

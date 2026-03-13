@@ -31,6 +31,24 @@ export default {
     button: {
       save: "บันทึก",
     },
+    scriptSaveConfirm: {
+      title: "แจ้งเตือน",
+      message: "ต้องการบันทึกสคริปต์ปัจจุบันหรือไม่?",
+      confirm: "ใช่",
+      cancel: "ไม่",
+    },
+    sceneSaveConfirm: {
+      title: "แจ้งเตือน",
+      message: "ต้องการบันทึกฉากปัจจุบันหรือไม่?",
+      confirm: "ใช่",
+      cancel: "ไม่",
+    },
+    entitySaveConfirm: {
+      title: "แจ้งเตือน",
+      message: "ต้องการบันทึกเอนทิตีปัจจุบันหรือไม่?",
+      confirm: "ใช่",
+      cancel: "ไม่",
+    },
     message: {
       createSuccess: "สร้างสำเร็จ",
       saveSuccess: "บันทึกสำเร็จ",
@@ -103,6 +121,7 @@ export default {
     resolution: "ความละเอียด",
     duration: "ระยะเวลา",
     modelFaces: "จำนวนหน้าโมเดล",
+    modelVertices: "จำนวนจุดยอดโมเดล",
     gridView: "มุมมองตาราง",
     listView: "มุมมองรายการ",
     resourceDetail: "รายละเอียดทรัพยากร",

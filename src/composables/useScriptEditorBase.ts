@@ -12,7 +12,7 @@ import { useSettingsStore } from "@/store/modules/settings";
 import { useAppStore } from "@/store/modules/app";
 import { useUserStore } from "@/store/modules/user";
 import { ThemeEnum } from "@/enums/ThemeEnum";
-import { Message, MessageBox } from "@/components/Dialog";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { logger } from "@/utils/logger";
 import { safeAtob } from "@/utils/base64";
 import env from "@/environment";
@@ -63,6 +63,10 @@ export type UseScriptEditorBaseOptions = {
    * initEditor 内部应自行检查 data 是否已加载。
    */
   onReady: () => void;
+};
+
+type ResolveUnsavedChangesOptions = {
+  showDiscardInfo?: boolean;
 };
 
 // ---------- composable 主体 ----------
@@ -181,9 +185,9 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const copyCode = async (code: string) => {
     try {
       await navigator.clipboard.writeText(code);
-      Message.success(t("copy.success"));
+      ElMessage.success(t("copy.success"));
     } catch (_error) {
-      Message.error(t("copy.error"));
+      ElMessage.error(t("copy.error"));
     }
   };
 
@@ -233,7 +237,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
         "*"
       );
     } else {
-      Message.error(t(options.i18nKeys.error3));
+      ElMessage.error(t(options.i18nKeys.error3));
     }
   };
 
@@ -260,6 +264,56 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
       saveResolve = resolve;
       postMessage("save", { language: ["lua", "js"], data: {} });
     });
+  };
+
+  const confirmSaveScript = () => {
+    return ElMessageBox.confirm(t("common.scriptSaveConfirm.message"), "", {
+      showClose: true,
+      center: true,
+      distinguishCancelAndClose: true,
+      closeOnClickModal: false,
+      closeOnPressEscape: true,
+      showCancelButton: true,
+      customClass: "script-save-confirm-box",
+      confirmButtonText: t("common.scriptSaveConfirm.confirm"),
+      cancelButtonText: t("common.scriptSaveConfirm.cancel"),
+    });
+  };
+
+  const resolveUnsavedChangesBeforeLeave = async (
+    leaveOptions: ResolveUnsavedChangesOptions = {}
+  ): Promise<boolean> => {
+    if (!hasUnsavedChanges.value) {
+      return true;
+    }
+
+    const showDiscardInfo = leaveOptions.showDiscardInfo ?? true;
+
+    try {
+      await confirmSaveScript();
+    } catch (action) {
+      if (action === "cancel") {
+        hasUnsavedChanges.value = false;
+        if (showDiscardInfo) {
+          ElMessage.info(t(options.i18nKeys.leaveInfo));
+        }
+        return true;
+      }
+
+      if (action === "close") {
+        return false;
+      }
+
+      return false;
+    }
+
+    try {
+      await save();
+      return true;
+    } catch (_error) {
+      ElMessage.error(t(options.i18nKeys.leaveError));
+      return false;
+    }
   };
 
   // ---- 页面关闭拦截 ----
@@ -294,7 +348,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
         });
       } else if (params.action === "post") {
         if (!isEditorPostPayload(params.data)) {
-          Message.error(t(options.i18nKeys.error1));
+          ElMessage.error(t(options.i18nKeys.error1));
           return;
         }
         await options.onPost(params.data);
@@ -303,7 +357,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
           saveResolve = null;
         }
       } else if (params.action === "post:no-change") {
-        Message.info(t(options.i18nKeys.info));
+        ElMessage.info(t(options.i18nKeys.info));
       } else if (params.action === "update") {
         if (!isEditorUpdatePayload(params.data)) return;
         LuaCode.value =
@@ -372,36 +426,10 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
 
   // ---- 离开路由守卫（未保存变更提示） ----
   onBeforeRouteLeave(async (to, from, next) => {
-    if (hasUnsavedChanges.value) {
-      try {
-        await MessageBox.confirm(
-          t(options.i18nKeys.leaveMessage1),
-          t(options.i18nKeys.leaveMessage2),
-          {
-            confirmButtonText: t(options.i18nKeys.leaveConfirm),
-            cancelButtonText: t(options.i18nKeys.leaveCancel),
-            type: "warning",
-          }
-        );
-        try {
-          await save();
-          next();
-        } catch (error) {
-          Message.error(t(options.i18nKeys.leaveError));
-          next(false);
-        }
-      } catch (action) {
-        if (action === "cancel") {
-          hasUnsavedChanges.value = false;
-          Message.info(t(options.i18nKeys.leaveInfo));
-          next();
-        } else {
-          next(false);
-        }
-      }
-    } else {
-      next();
-    }
+    const canLeave = await resolveUnsavedChangesBeforeLeave({
+      showDiscardInfo: true,
+    });
+    next(canLeave);
   });
 
   // ---- onMounted：注册共享事件监听 ----
@@ -473,6 +501,7 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     handleKeyDown,
     handleMessage,
     decompressBlockly,
+    resolveUnsavedChangesBeforeLeave,
     // ready 状态访问
     isReady,
     setReady,
