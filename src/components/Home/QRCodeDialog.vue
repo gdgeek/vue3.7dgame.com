@@ -29,7 +29,6 @@
           </div>
         </div>
         <p class="qrcode-tip">{{ t("login.scanTip") }}</p>
-        <p class="qrcode-subtip">{{ t("login.scanSubTip") }}</p>
       </div>
     </el-dialog>
   </div>

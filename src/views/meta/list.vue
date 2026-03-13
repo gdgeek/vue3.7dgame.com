@@ -22,7 +22,8 @@
             :scenes="scenes"
             :entities="[]"
             @scene-change="handleSceneChange"
-          ></ResourceScopeFilter>
+          >
+          </ResourceScopeFilter>
         </template>
         <template #actions>
           <el-button type="primary" @click="addMeta">
@@ -55,24 +56,15 @@
             @view="openDetail(item)"
           >
             <template #actions>
-              <div class="dual-card-actions">
+              <div class="single-card-actions">
                 <button
-                  class="dual-card-action-btn"
+                  class="single-card-action-btn"
                   @click.stop="goToEditor(item)"
                 >
                   <font-awesome-icon
                     :icon="['fas', 'pen-to-square']"
                   ></font-awesome-icon>
                   {{ t("route.meta.sceneEditor") }}
-                </button>
-                <button
-                  class="dual-card-action-btn"
-                  @click.stop="goToScriptEditor(item)"
-                >
-                  <font-awesome-icon
-                    :icon="['fas', 'file-lines']"
-                  ></font-awesome-icon>
-                  {{ t("route.meta.scriptEditor") }}
                 </button>
               </div>
             </template>
@@ -185,22 +177,13 @@
       >
         <template #actions>
           <button
-            class="btn-pill-primary dual-primary-btn"
+            class="btn-pill-primary single-primary-btn"
             @click="handleGoToEditor"
           >
             <font-awesome-icon
               :icon="['fas', 'pen-to-square']"
             ></font-awesome-icon>
             {{ t("route.meta.sceneEditor") }}
-          </button>
-          <button
-            class="btn-pill-primary dual-primary-btn"
-            @click="handleGoToScriptEditor"
-          >
-            <font-awesome-icon
-              :icon="['fas', 'file-lines']"
-            ></font-awesome-icon>
-            {{ t("route.meta.scriptEditor") }}
           </button>
           <div class="actions-row">
             <button class="btn-pill-secondary" @click="handleCopy">
@@ -1631,13 +1614,13 @@ const deletedWindow = async (
 }
 
 .list-view {
-  :deep(.dual-card-actions) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+  :deep(.single-card-actions) {
+    display: flex;
     border-top: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
   }
 
-  :deep(.dual-card-action-btn) {
+  :deep(.single-card-action-btn) {
+    width: 100%;
     height: 44px;
     display: inline-flex;
     align-items: center;
@@ -1652,11 +1635,7 @@ const deletedWindow = async (
     transition: all 0.2s ease;
   }
 
-  :deep(.dual-card-action-btn + .dual-card-action-btn) {
-    border-left: var(--border-width, 1px) solid var(--border-color, #e2e8f0);
-  }
-
-  :deep(.dual-card-action-btn:hover) {
+  :deep(.single-card-action-btn:hover) {
     color: var(--primary-color, #03a9f4);
     background: var(--bg-active, #eef7ff);
   }
@@ -1721,7 +1700,7 @@ const deletedWindow = async (
   }
 }
 
-:deep(.panel-actions .dual-primary-btn) {
+:deep(.panel-actions .single-primary-btn) {
   width: 100%;
   height: 44px;
   border: none;
@@ -1738,7 +1717,7 @@ const deletedWindow = async (
   transition: all 0.2s ease;
 }
 
-:deep(.panel-actions .dual-primary-btn:hover) {
+:deep(.panel-actions .single-primary-btn:hover) {
   background: var(--primary-hover, #039be5);
 }
 </style>

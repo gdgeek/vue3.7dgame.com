@@ -32,7 +32,6 @@
 
         <div class="qrcode-tips">
           <p class="main-tip">{{ t("login.scanTip") }}</p>
-          <p class="sub-tip">{{ t("login.scanSubTip") }}</p>
         </div>
 
         <div class="loading-status" v-if="isScanning">

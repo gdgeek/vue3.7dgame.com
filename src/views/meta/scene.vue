@@ -1,11 +1,25 @@
 <template>
   <div class="verse-scene">
-    <phototype-dialog @selected="selectedPhototype" ref="phototypeDialogRef" v-show="false"></phototype-dialog>
-    <resource-dialog @selected="selected" :on-get-datas="getDatas" ref="dialog" v-show="false">
+    <phototype-dialog
+      @selected="selectedPhototype"
+      ref="phototypeDialogRef"
+      v-show="false"
+    ></phototype-dialog>
+    <resource-dialog
+      @selected="selected"
+      :on-get-datas="getDatas"
+      ref="dialog"
+      v-show="false"
+    >
       <template #bar="{ item }">
         <div v-if="isAudioBarItem(item)" class="info-container">
-          <audio id="audio" controls style="width: 100%; height: 30px" :src="getAudioSource(item)"
-            @play="handleAudioPlay"></audio>
+          <audio
+            id="audio"
+            controls
+            style="width: 100%; height: 30px"
+            :src="getAudioSource(item)"
+            @play="handleAudioPlay"
+          ></audio>
         </div>
       </template>
     </resource-dialog>
@@ -26,7 +40,14 @@
         </el-button-group>
       </div>
       <el-main class="editor-container">
-        <iframe ref="editor" id="editor" :src="src" class="content" height="100%" width="100%"></iframe>
+        <iframe
+          ref="editor"
+          id="editor"
+          :src="src"
+          class="content"
+          height="100%"
+          width="100%"
+        ></iframe>
       </el-main>
     </el-container>
   </div>
@@ -668,7 +689,7 @@ const handleUploadCover = async (data: unknown) => {
         md5,
         extension,
         file,
-        (_progress: unknown) => { },
+        (_progress: unknown) => {},
         handler,
         "backup"
       );
@@ -939,7 +960,7 @@ onBeforeUnmount(() => {
 
 <style lang="scss">
 /* 隐藏当前页面的 footer */
-.main-container:has(.verse-scene)>footer {
+.main-container:has(.verse-scene) > footer {
   display: none !important;
 }
 </style>
