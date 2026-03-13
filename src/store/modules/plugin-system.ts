@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import { pluginSystem } from "@/plugin-system";
 import { store } from "@/store";
 import type { PluginInfo, PluginsConfig, MenuGroup } from "@/plugin-system";
+import Token from "@/store/modules/token";
+import request from "@/utils/request";
 
 interface PluginSystemState {
   initialized: boolean;
@@ -10,6 +12,8 @@ interface PluginSystemState {
   activePluginId: string | null;
   loading: boolean;
   error: string | null;
+  /** 每个插件的允许操作列表，key 为 pluginId */
+  pluginPermissions: Record<string, string[]>;
 }
 
 export const usePluginSystemStore = defineStore("plugin-system", {
@@ -20,6 +24,7 @@ export const usePluginSystemStore = defineStore("plugin-system", {
     activePluginId: null,
     loading: false,
     error: null,
+    pluginPermissions: {},
   }),
 
   getters: {
@@ -32,6 +37,11 @@ export const usePluginSystemStore = defineStore("plugin-system", {
     pluginsByGroup(state): Map<string, PluginInfo[]> {
       const grouped = new Map<string, PluginInfo[]>();
       for (const plugin of state.plugins.values()) {
+        if (!plugin.enabled) continue;
+        // 过滤掉没有任何权限的插件
+        const actions = state.pluginPermissions[plugin.pluginId];
+        if (actions !== undefined && actions.length === 0) continue;
+
         const list = grouped.get(plugin.group) ?? [];
         list.push(plugin);
         grouped.set(plugin.group, list);
@@ -46,7 +56,13 @@ export const usePluginSystemStore = defineStore("plugin-system", {
     },
 
     enabledPlugins(state): PluginInfo[] {
-      return Array.from(state.plugins.values()).filter((p) => p.enabled);
+      const enabled = Array.from(state.plugins.values()).filter((p) => p.enabled);
+      // 过滤掉没有任何权限的插件
+      return enabled.filter((p) => {
+        const actions = state.pluginPermissions[p.pluginId];
+        // 权限尚未加载时（undefined）先显示，加载完为空数组则隐藏
+        return actions === undefined || actions.length > 0;
+      });
     },
 
     menuGroups(state): MenuGroup[] {
@@ -70,6 +86,9 @@ export const usePluginSystemStore = defineStore("plugin-system", {
           pluginsMap.set(p.pluginId, p);
         }
         this.plugins = pluginsMap;
+
+        // 异步加载各插件的权限（不阻塞初始化）
+        this.fetchAllPluginPermissions();
       } catch (err: unknown) {
         this.error =
           err instanceof Error
@@ -78,6 +97,32 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       } finally {
         this.loading = false;
       }
+    },
+
+    /** 批量获取所有已启用插件的权限 */
+    async fetchAllPluginPermissions() {
+      const token = Token.getToken();
+      if (!token?.accessToken) return;
+
+      const enabledIds = Array.from(this.plugins.values() as Iterable<PluginInfo>)
+        .filter((p) => p.enabled)
+        .map((p) => p.pluginId);
+
+      await Promise.allSettled(
+        enabledIds.map(async (pluginId) => {
+          try {
+            const res = await request.get("/v1/plugin/allowed-actions", {
+              params: { plugin_name: pluginId },
+            });
+            if (res.data?.code === 0) {
+              this.pluginPermissions[pluginId] =
+                res.data.data?.actions ?? [];
+            }
+          } catch {
+            // API 不可用或网络错误时不隐藏插件
+          }
+        })
+      );
     },
 
     async activatePlugin(pluginId: string, container: HTMLElement) {
@@ -134,6 +179,7 @@ export const usePluginSystemStore = defineStore("plugin-system", {
         this.initialized = false;
         this.plugins = new Map();
         this.activePluginId = null;
+        this.pluginPermissions = {};
         await this.init();
       } catch (err: unknown) {
         this.error =

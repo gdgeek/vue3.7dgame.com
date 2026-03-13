@@ -2,10 +2,15 @@
 import { ref, watch, computed, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
 import { usePluginSystemStore } from "@/store/modules/plugin-system";
+import { useAppStoreHook } from "@/store/modules/app";
+import { useTheme } from "@/composables/useTheme";
+import { Loading } from "@element-plus/icons-vue";
 import Token from "@/store/modules/token";
 
 const route = useRoute();
 const store = usePluginSystemStore();
+const appStore = useAppStoreHook();
+const { currentThemeName } = useTheme();
 const iframeRef = ref<HTMLIFrameElement>();
 
 const pluginId = computed(() => route.params.pluginId as string | undefined);
@@ -21,7 +26,12 @@ const pluginManifest = computed(() => {
   return store.config.plugins.find((p) => p.id === pluginId.value);
 });
 
-const pluginUrl = computed(() => pluginManifest.value?.url ?? "");
+const pluginUrl = computed(() => {
+  const baseUrl = pluginManifest.value?.url ?? "";
+  if (!baseUrl) return "";
+  const separator = baseUrl.includes("?") ? "&" : "?";
+  return `${baseUrl}${separator}lang=${appStore.language}&theme=${currentThemeName.value}`;
+});
 
 const loading = ref(false);
 const error = ref<string | null>(null);
@@ -49,12 +59,16 @@ function handleIframeLoad() {
   const manifest = pluginManifest.value;
   if (!manifest || !iframeRef.value?.contentWindow) return;
 
+  // 优先使用 accessToken（JWT），fallback 到 token 字段
+  const tokenInfo = Token.getToken();
+  const jwt = tokenInfo?.accessToken || tokenInfo?.token || "";
+
   const initMessage = {
     type: "INIT" as const,
     id: `init-${manifest.id}-${Date.now()}`,
     payload: {
-      token: Token.getToken()?.token ?? "",
-      config: manifest.extraConfig ?? {},
+      token: jwt,
+      config: JSON.parse(JSON.stringify(manifest.extraConfig ?? {})),
     },
   };
 
@@ -109,16 +123,10 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- iframe 载入插件 -->
-    <iframe
-      v-if="pluginUrl"
-      ref="iframeRef"
-      :src="pluginUrl"
-      class="plugin-page__iframe"
+    <iframe v-if="pluginUrl" ref="iframeRef" :src="pluginUrl" class="plugin-page__iframe"
       :title="pluginInfo?.name ?? '插件'"
-      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-      @load="handleIframeLoad"
-      @error="handleIframeError"
-    ></iframe>
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+      allow="clipboard-write; clipboard-read" @load="handleIframeLoad" @error="handleIframeError"></iframe>
   </div>
 </template>
 
@@ -154,7 +162,7 @@ onBeforeUnmount(() => {
 
 <style lang="scss">
 /* 隐藏插件页面的 footer */
-.main-container:has(.plugin-page) > footer {
+.main-container:has(.plugin-page)>footer {
   display: none !important;
 }
 </style>

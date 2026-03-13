@@ -256,6 +256,7 @@ export class PluginSystem {
     return {
       pluginId: manifest.id,
       name: manifest.name,
+      nameI18n: manifest.nameI18n,
       description: manifest.description,
       icon: manifest.icon,
       group: manifest.group,

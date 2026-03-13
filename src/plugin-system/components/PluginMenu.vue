@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { usePluginSystemStore } from "@/store/modules/plugin-system";
+import { useAppStoreHook } from "@/store/modules/app";
+import { resolveI18nName } from "@/plugin-system/utils/i18n";
 
 import type { PluginInfo } from "@/plugin-system/types";
 
@@ -9,6 +11,7 @@ const emit = defineEmits<{
 }>();
 
 const store = usePluginSystemStore();
+const appStore = useAppStoreHook();
 
 const menuGroups = computed(() => store.menuGroups);
 const activePluginId = computed(() => store.activePluginId ?? "");
@@ -29,7 +32,7 @@ function handleSelect(pluginId: string) {
         <el-icon>
           <component :is="group.icon"></component>
         </el-icon>
-        <span>{{ group.name }}</span>
+        <span>{{ resolveI18nName(group.name, group.nameI18n, appStore.language) }}</span>
       </template>
       <el-menu-item
         v-for="plugin in getGroupPlugins(group.id)"
@@ -41,7 +44,7 @@ function handleSelect(pluginId: string) {
         <el-icon>
           <component :is="plugin.icon"></component>
         </el-icon>
-        <span>{{ plugin.name }}</span>
+        <span>{{ resolveI18nName(plugin.name, plugin.nameI18n, appStore.language) }}</span>
         <el-tag
           v-if="plugin.state === 'error'"
           type="danger"

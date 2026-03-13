@@ -8,6 +8,7 @@ export type PluginState = "unloaded" | "loading" | "active" | "error";
 export interface PluginInfo {
   pluginId: string;
   name: string;
+  nameI18n?: Record<string, string>;
   description: string;
   icon: string;
   group: string;

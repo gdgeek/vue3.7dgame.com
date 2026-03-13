@@ -2,8 +2,10 @@
 export interface PluginManifest {
   /** 插件唯一标识 */
   id: string;
-  /** 显示名称 */
+  /** 显示名称（默认/回退） */
   name: string;
+  /** 多语言名称（可选） */
+  nameI18n?: Record<string, string>;
   /** 插件描述 */
   description: string;
   /** 插件入口 URL（外部应用地址） */
@@ -39,8 +41,10 @@ export interface PluginsConfig {
 export interface MenuGroup {
   /** 分组标识 */
   id: string;
-  /** 分组显示名称 */
+  /** 分组显示名称（默认/回退） */
   name: string;
+  /** 分组多语言名称（可选） */
+  nameI18n?: Record<string, string>;
   /** 分组图标 */
   icon: string;
   /** 排序权重 */

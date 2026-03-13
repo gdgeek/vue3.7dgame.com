@@ -11,6 +11,7 @@ function install(app: App): void {
 }
 
 export { pluginSystem, install };
+export { resolveI18nName } from "./utils/i18n";
 export type { PluginSystem };
 
 // Re-export types for convenience
