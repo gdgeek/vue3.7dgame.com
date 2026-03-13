@@ -5,10 +5,7 @@
       <el-divider class="home-divider"></el-divider>
 
       <div class="section-header">
-        <font-awesome-icon
-          :icon="['fas', 'circle-question']"
-          class="header-icon"
-        ></font-awesome-icon>
+        <font-awesome-icon :icon="['fas', 'circle-question']" class="header-icon"></font-awesome-icon>
         <h2 class="section-title">{{ t("homepage.concepts.title") }}</h2>
       </div>
 
@@ -16,28 +13,37 @@
         <p class="concept-subtitle">{{ t("homepage.concepts.subtitle") }}</p>
 
         <div class="concept-flow">
-          <div class="flow-node">
+          <div class="flow-node clickable" @click="handleFlowAction('/resource/polygen/index')">
+            <div class="node-icon-wrapper">
+              <font-awesome-icon :icon="['fas', 'cloud-arrow-up']" class="node-icon"></font-awesome-icon>
+            </div>
             <span class="node-kicker">{{
               t("homepage.concepts.flow.step1")
             }}</span>
             <strong>{{ t("homepage.concepts.flow.resource") }}</strong>
           </div>
           <div class="flow-arrow">→</div>
-          <div class="flow-node">
+          <div class="flow-node clickable" @click="handleFlowAction('/meta/list')">
+            <div class="node-icon-wrapper">
+              <font-awesome-icon :icon="['fas', 'pen-to-square']" class="node-icon"></font-awesome-icon>
+            </div>
             <span class="node-kicker">{{
               t("homepage.concepts.flow.step2")
             }}</span>
             <strong>{{ t("homepage.concepts.flow.entity") }}</strong>
           </div>
           <div class="flow-arrow">→</div>
-          <div class="flow-node">
+          <div class="flow-node clickable" @click="handleFlowAction('/verse/index')">
+            <div class="node-icon-wrapper">
+              <font-awesome-icon :icon="['fas', 'square-plus']" class="node-icon"></font-awesome-icon>
+            </div>
             <span class="node-kicker">{{
               t("homepage.concepts.flow.step3")
             }}</span>
             <strong>{{ t("homepage.concepts.flow.scene") }}</strong>
           </div>
           <div class="flow-arrow">→</div>
-          <div class="flow-node">
+          <div class="flow-node flow-node-plain">
             <span class="node-kicker">{{
               t("homepage.concepts.flow.step4")
             }}</span>
@@ -58,22 +64,15 @@
             </header>
             <p>{{ t("homepage.concepts.sceneEditor.desc") }}</p>
             <p class="scope-note">
-              <font-awesome-icon
-                :icon="['fas', 'triangle-exclamation']"
-              ></font-awesome-icon>
+              <font-awesome-icon :icon="['fas', 'triangle-exclamation']"></font-awesome-icon>
               <span>{{ t("homepage.concepts.rule") }}</span>
             </p>
           </article>
         </div>
       </section>
 
-      <QuickStart></QuickStart>
-
       <div class="section-header">
-        <font-awesome-icon
-          :icon="['fas', 'bullhorn']"
-          class="header-icon"
-        ></font-awesome-icon>
+        <font-awesome-icon :icon="['fas', 'bullhorn']" class="header-icon"></font-awesome-icon>
         <h2 class="section-title">
           {{ t("homepage.announcements.title") }}
         </h2>
@@ -114,6 +113,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 
 import { useDomainStore } from "@/store/modules/domain";
 import environment from "@/environment";
@@ -121,7 +121,6 @@ import { useCategories } from "@/composables/useCategories";
 import Book from "@/components/Home/Book.vue";
 import LocalPage from "@/components/Home/LocalPage.vue";
 import HomeHeader from "@/components/Home/HomeHeader.vue";
-import QuickStart from "@/components/Home/QuickStart.vue";
 import TransitionWrapper from "@/components/TransitionWrapper.vue";
 
 import type { TabItem } from "@/types/news";
@@ -135,12 +134,17 @@ const props = defineProps<{
 const domainStore = useDomainStore();
 const env = computed(() => environment);
 const { t } = useI18n();
+const router = useRouter();
 
 const { items, loading, error, retry } = useCategories({
   includeCategories: props.includeCategories,
   excludeCategories: props.excludeCategories,
   pinnedItems: props.pinnedItems,
 });
+
+const handleFlowAction = (path: string) => {
+  router.push(path);
+};
 </script>
 
 <style lang="scss" scoped>
@@ -194,12 +198,10 @@ const { items, loading, error, retry } = useCategories({
   padding: 24px;
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-lg);
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--primary-color) 8%, white) 0%,
-    var(--bg-card) 30%,
-    var(--bg-card) 100%
-  );
+  background: linear-gradient(135deg,
+      color-mix(in srgb, var(--primary-color) 8%, white) 0%,
+      var(--bg-card) 30%,
+      var(--bg-card) 100%);
 }
 
 .concept-subtitle {
@@ -216,8 +218,7 @@ const { items, loading, error, retry } = useCategories({
 }
 
 .flow-node {
-  border: var(--border-width) solid
-    color-mix(in srgb, var(--primary-color) 26%, var(--border-color));
+  border: var(--border-width) solid color-mix(in srgb, var(--primary-color) 26%, var(--border-color));
   background: color-mix(in srgb, var(--primary-color) 6%, var(--bg-card));
   border-radius: 14px;
   padding: 14px 16px;
@@ -226,6 +227,49 @@ const { items, loading, error, retry } = useCategories({
   flex-direction: column;
   justify-content: center;
   gap: 4px;
+  position: relative;
+
+  &.clickable {
+    cursor: pointer;
+    transition: all var(--transition-normal);
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary-color);
+      background: color-mix(in srgb, var(--primary-color) 10%, var(--bg-card));
+
+      .node-icon {
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  &.flow-node-plain {
+    border: var(--border-width) solid var(--border-color);
+    background: var(--bg-card);
+    min-height: 60px;
+    padding: 10px 16px;
+  }
+}
+
+.node-icon-wrapper {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--primary-color) 15%, transparent);
+}
+
+.node-icon {
+  font-size: 16px;
+  color: var(--primary-color);
+  transition: transform var(--transition-normal);
 }
 
 .node-kicker {
