@@ -1,38 +1,32 @@
 <template>
   <div class="verse-scene">
-    <phototype-dialog
-      @selected="selectedPhototype"
-      ref="phototypeDialogRef"
-      v-show="false"
-    ></phototype-dialog>
-    <resource-dialog
-      @selected="selected"
-      :on-get-datas="getDatas"
-      ref="dialog"
-      v-show="false"
-    >
+    <phototype-dialog @selected="selectedPhototype" ref="phototypeDialogRef" v-show="false"></phototype-dialog>
+    <resource-dialog @selected="selected" :on-get-datas="getDatas" ref="dialog" v-show="false">
       <template #bar="{ item }">
         <div v-if="isAudioBarItem(item)" class="info-container">
-          <audio
-            id="audio"
-            controls
-            style="width: 100%; height: 30px"
-            :src="getAudioSource(item)"
-            @play="handleAudioPlay"
-          ></audio>
+          <audio id="audio" controls style="width: 100%; height: 30px" :src="getAudioSource(item)"
+            @play="handleAudioPlay"></audio>
         </div>
       </template>
     </resource-dialog>
     <el-container class="editor-wrapper">
+      <div class="scene-actions">
+        <el-button-group>
+          <el-button type="primary" @click="handleCreateScene">
+            <el-icon>
+              <Plus />
+            </el-icon>
+            <span>{{ t("route.verse.createVerse") }}</span>
+          </el-button>
+          <el-button type="primary" @click="handleImportScene">
+            <el-icon>
+              <Upload />
+            </el-icon>
+          </el-button>
+        </el-button-group>
+      </div>
       <el-main class="editor-container">
-        <iframe
-          ref="editor"
-          id="editor"
-          :src="src"
-          class="content"
-          height="100%"
-          width="100%"
-        ></iframe>
+        <iframe ref="editor" id="editor" :src="src" class="content" height="100%" width="100%"></iframe>
       </el-main>
     </el-container>
   </div>
@@ -201,6 +195,7 @@ import { AbilityEdit } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
 import { useUserStore } from "@/store/modules/user";
 import { until } from "@vueuse/core";
+import { Plus, Upload } from "@element-plus/icons-vue";
 
 import qs from "querystringify";
 
@@ -556,6 +551,16 @@ const getAvailableResourceTypes = () => {
   );
 };
 
+// 处理创建场景
+const handleCreateScene = () => {
+  postMessage("create-scene");
+};
+
+// 处理导入场景
+const handleImportScene = () => {
+  postMessage("import-scene");
+};
+
 // 保存元数据
 const saveMeta = async ({
   meta,
@@ -663,7 +668,7 @@ const handleUploadCover = async (data: unknown) => {
         md5,
         extension,
         file,
-        (_progress: unknown) => {},
+        (_progress: unknown) => { },
         handler,
         "backup"
       );
@@ -883,14 +888,42 @@ onBeforeUnmount(() => {
   flex-direction: column;
 }
 
+.scene-actions {
+  padding: 12px 16px;
+  background: var(--bg-card, #fff);
+  border-bottom: 1px solid var(--el-border-color-light);
+  display: flex;
+  align-items: center;
+
+  :deep(.el-button-group) {
+    display: inline-flex;
+
+    .el-button {
+      border-radius: 0;
+
+      &:first-child {
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+      }
+
+      &:last-child {
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+      }
+    }
+  }
+}
+
 .editor-wrapper {
   flex: 1;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .editor-container {
   padding: 0 !important;
-  height: 100%;
+  flex: 1;
   overflow: hidden;
 }
 
@@ -906,7 +939,7 @@ onBeforeUnmount(() => {
 
 <style lang="scss">
 /* 隐藏当前页面的 footer */
-.main-container:has(.verse-scene) > footer {
+.main-container:has(.verse-scene)>footer {
   display: none !important;
 }
 </style>
