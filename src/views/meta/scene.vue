@@ -28,13 +28,13 @@
         <el-button-group>
           <el-button type="primary" @click="handleCreateScene">
             <el-icon>
-              <Plus />
+              <Plus></Plus>
             </el-icon>
             <span>{{ t("route.verse.createVerse") }}</span>
           </el-button>
           <el-button type="primary" @click="handleImportScene">
             <el-icon>
-              <Upload />
+              <Upload></Upload>
             </el-icon>
           </el-button>
         </el-button-group>

@@ -832,16 +832,6 @@ const goToEditor = (item: VerseData) => {
   router.push({ path: "/verse/scene", query: { id: item.id, title } });
 };
 
-const goToScriptEditor = (item: VerseData) => {
-  const scriptTitle = encodeURIComponent(
-    `${t("route.project.scriptEditor")}【${item.name || t("verse.listPage.unnamed")}】`
-  );
-  router.push({
-    path: "/verse/script",
-    query: { id: item.id, title: scriptTitle },
-  });
-};
-
 const goToEntityEditor = (entityId: number | string, entityName?: string) => {
   const title = encodeURIComponent(
     t("meta.list.editorTitle", {

@@ -966,20 +966,6 @@ const goToEditor = (item: { id: number; title?: string; name?: string }) => {
   router.push({ path: "/meta/scene", query: { id: item.id, title } });
 };
 
-const goToScriptEditor = (item: {
-  id: number;
-  title?: string;
-  name?: string;
-}) => {
-  const scriptTitle = encodeURIComponent(
-    `${t("route.meta.scriptEditor")}【${item.title || item.name || t("meta.list.unnamed")}】`
-  );
-  router.push({
-    path: "/meta/script",
-    query: { id: item.id, title: scriptTitle },
-  });
-};
-
 const goToSceneEditor = (sceneId: number, sceneName?: string) => {
   const title = encodeURIComponent(
     t("verse.listPage.editorTitle", {
@@ -992,12 +978,6 @@ const goToSceneEditor = (sceneId: number, sceneName?: string) => {
 const handleGoToEditor = () => {
   if (currentMeta.value) {
     goToEditor(currentMeta.value);
-  }
-};
-
-const handleGoToScriptEditor = () => {
-  if (currentMeta.value) {
-    goToScriptEditor(currentMeta.value);
   }
 };
 
