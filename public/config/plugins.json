@@ -2,19 +2,6 @@
   "version": "1.0.0",
   "menuGroups": [
     {
-      "id": "editors",
-      "name": "编辑工具",
-      "nameI18n": {
-        "zh-CN": "编辑工具",
-        "zh-TW": "編輯工具",
-        "en-US": "Editing Tools",
-        "ja-JP": "編集ツール",
-        "th-TH": "เครื่องมือแก้ไข"
-      },
-      "icon": "Edit",
-      "order": 1
-    },
-    {
       "id": "tools",
       "name": "实用工具",
       "nameI18n": {
@@ -30,25 +17,6 @@
   ],
   "plugins": [
     {
-      "id": "counter",
-      "name": "计数器",
-      "nameI18n": {
-        "zh-CN": "计数器",
-        "zh-TW": "計數器",
-        "en-US": "Counter",
-        "ja-JP": "カウンター",
-        "th-TH": "ตัวนับ"
-      },
-      "description": "简单的计数器插件示例",
-      "url": "http://localhost:8085",
-      "icon": "DataAnalysis",
-      "group": "tools",
-      "enabled": true,
-      "order": 1,
-      "allowedOrigin": "http://localhost:8085",
-      "version": "1.0.0"
-    },
-    {
       "id": "user-management",
       "name": "用户管理",
       "nameI18n": {
@@ -59,54 +27,16 @@
         "th-TH": "การจัดการผู้ใช้"
       },
       "description": "用户增删改查管理工具",
-      "url": "http://localhost:3003",
+      "url": "__VITE_PLUGIN_USER_MGMT_URL__",
       "icon": "User",
       "group": "tools",
       "enabled": true,
       "order": 2,
-      "allowedOrigin": "http://localhost:3003",
+      "allowedOrigin": "__VITE_PLUGIN_USER_MGMT_URL__",
       "version": "1.0.0",
       "extraConfig": {
-        "apiBaseUrl": "http://localhost:8086/api"
+        "apiBaseUrl": "__VITE_PLUGIN_USER_MGMT_API__"
       }
-    },
-    {
-      "id": "code-editor",
-      "name": "代码编辑器",
-      "nameI18n": {
-        "zh-CN": "代码编辑器",
-        "zh-TW": "代碼編輯器",
-        "en-US": "Code Editor",
-        "ja-JP": "コードエディタ",
-        "th-TH": "โปรแกรมแก้ไขโค้ด"
-      },
-      "description": "在线代码编辑器",
-      "url": "https://editor.example.com",
-      "icon": "EditPen",
-      "group": "editors",
-      "enabled": true,
-      "order": 1,
-      "allowedOrigin": "https://editor.example.com",
-      "version": "1.0.0"
-    },
-    {
-      "id": "blockly-editor",
-      "name": "Blockly 编辑器",
-      "nameI18n": {
-        "zh-CN": "Blockly 编辑器",
-        "zh-TW": "Blockly 編輯器",
-        "en-US": "Blockly Editor",
-        "ja-JP": "Blockly エディタ",
-        "th-TH": "Blockly เอดิเตอร์"
-      },
-      "description": "可视化编程工具",
-      "url": "https://blockly.example.com",
-      "icon": "Grid",
-      "group": "editors",
-      "enabled": true,
-      "order": 2,
-      "allowedOrigin": "https://blockly.example.com",
-      "version": "1.0.0"
     }
   ]
 }

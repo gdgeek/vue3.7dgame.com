@@ -38,9 +38,9 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       const grouped = new Map<string, PluginInfo[]>();
       for (const plugin of state.plugins.values()) {
         if (!plugin.enabled) continue;
-        // 过滤掉没有任何权限的插件
+        // 默认关闭：只有 API 成功返回了非空 actions 才显示
         const actions = state.pluginPermissions[plugin.pluginId];
-        if (actions !== undefined && actions.length === 0) continue;
+        if (!actions || actions.length === 0) continue;
 
         const list = grouped.get(plugin.group) ?? [];
         list.push(plugin);
@@ -59,11 +59,10 @@ export const usePluginSystemStore = defineStore("plugin-system", {
       const enabled = Array.from(state.plugins.values()).filter(
         (p) => p.enabled
       );
-      // 过滤掉没有任何权限的插件
+      // 默认关闭：只有 API 成功返回了非空 actions 才显示
       return enabled.filter((p) => {
         const actions = state.pluginPermissions[p.pluginId];
-        // 权限尚未加载时（undefined）先显示，加载完为空数组则隐藏
-        return actions === undefined || actions.length > 0;
+        return actions !== undefined && actions.length > 0;
       });
     },
 
@@ -112,6 +111,11 @@ export const usePluginSystemStore = defineStore("plugin-system", {
         .filter((p) => p.enabled)
         .map((p) => p.pluginId);
 
+      // 默认全部关闭（空数组），只有 API 成功返回才打开
+      for (const pluginId of enabledIds) {
+        this.pluginPermissions[pluginId] = [];
+      }
+
       let permissionApiUnavailable = false;
 
       for (const pluginId of enabledIds) {
@@ -124,13 +128,14 @@ export const usePluginSystemStore = defineStore("plugin-system", {
           if (res.data?.code === 0) {
             this.pluginPermissions[pluginId] = res.data.data?.actions ?? [];
           }
+          // code !== 0 时保持默认空数组（关闭）
         } catch (err) {
           const status = (err as { response?: { status?: number } })?.response
             ?.status;
           if (status === 404) {
             permissionApiUnavailable = true;
           }
-          // API 不可用或网络错误时不隐藏插件
+          // API 失败时保持默认空数组（关闭）
         }
       }
     },
