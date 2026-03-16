@@ -58,3 +58,6 @@ vite.config.ts.timestamp-*.mjs
 
 # Playwright reports
 playwright-report/
+
+# pnpm store
+.pnpm-store/
