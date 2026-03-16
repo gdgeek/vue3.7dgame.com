@@ -177,7 +177,7 @@
       >
         <template #actions>
           <button
-            class="btn-pill-primary single-primary-btn"
+            class="btn-pill-primary enter-edit-btn"
             @click="handleGoToEditor"
           >
             <font-awesome-icon
@@ -1680,24 +1680,7 @@ const deletedWindow = async (
   }
 }
 
-:deep(.panel-actions .single-primary-btn) {
+:deep(.panel-actions .enter-edit-btn) {
   width: 100%;
-  height: 44px;
-  border: none;
-  border-radius: 999px;
-  background: var(--primary-color, #03a9f4);
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-:deep(.panel-actions .single-primary-btn:hover) {
-  background: var(--primary-hover, #039be5);
 }
 </style>

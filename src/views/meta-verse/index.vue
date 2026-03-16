@@ -168,7 +168,7 @@
       >
         <template #actions>
           <button
-            class="btn-pill-primary single-primary-btn"
+            class="btn-pill-primary enter-edit-btn"
             @click="handleGoToEditor"
           >
             <font-awesome-icon
