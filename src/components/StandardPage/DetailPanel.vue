@@ -783,14 +783,14 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 48px;
+  gap: 6px;
+  height: 38px;
   border: 1.5px solid var(--border-color, #e2e8f0);
   background: var(--bg-card, #fff);
   color: var(--text-secondary, #64748b);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
-  border-radius: 24px;
+  border-radius: 19px;
   cursor: pointer;
   transition: all var(--transition-fast, 0.15s ease);
 
@@ -801,7 +801,7 @@ onUnmounted(() => {
   }
 
   .svg-inline--fa {
-    font-size: 20px;
+    font-size: 14px;
   }
 }
 
@@ -810,14 +810,14 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 48px;
+  gap: 6px;
+  height: 38px;
   border: none;
   background: transparent;
   color: var(--danger-color, #ef4444);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
-  border-radius: 24px;
+  border-radius: 19px;
   cursor: pointer;
   transition: all var(--transition-fast, 0.15s ease);
 
@@ -826,7 +826,7 @@ onUnmounted(() => {
   }
 
   .svg-inline--fa {
-    font-size: 20px;
+    font-size: 14px;
   }
 }
 
