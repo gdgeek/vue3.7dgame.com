@@ -183,12 +183,12 @@ describe("useMetaDetail", () => {
   });
 
   describe("detailProperties", () => {
-    it("returns 3 properties when meta is loaded", async () => {
+    it("returns 4 properties when meta is loaded", async () => {
       mockGetMeta.mockResolvedValue({ data: makeMeta() });
       const { openDetail, detailProperties } = await getComposable();
 
       await openDetail(makeMeta() as never);
-      expect(detailProperties.value).toHaveLength(3);
+      expect(detailProperties.value).toHaveLength(4);
     });
 
     it("shows author nickname", async () => {
