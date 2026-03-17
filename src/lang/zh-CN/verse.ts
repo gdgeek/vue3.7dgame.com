@@ -176,6 +176,10 @@ export default {
       metaDialog: {
         title: "选择实体",
         select: "选择",
+        cancelSelect: "取消选择",
+        putIn: "放入",
+        putAllIn: "放入已选",
+        noItemSelected: "请至少选择一个实体",
         create: "新 建",
         cancel: "取 消",
         input1: "请输入Model名称",

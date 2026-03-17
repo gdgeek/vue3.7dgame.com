@@ -15,12 +15,34 @@
             class="dialog-action-bar"
             :title="$t('verse.view.metaDialog.title')"
             :search-placeholder="$t('ui.search')"
-            :show-view-toggle="false"
+            :show-view-toggle="true"
             :default-sort="active.sorted"
             @search="search"
             @sort-change="sort"
+            @view-change="handleViewChange"
           >
             <template #actions>
+              <el-button
+                v-if="selectedIds.length > 0"
+                type="primary"
+                @click="putSelected"
+              >
+                {{ $t("verse.view.metaDialog.putAllIn") }}
+              </el-button>
+              <el-button
+                v-if="!isPageSelected"
+                :disabled="active.items.length === 0"
+                @click="selectAllCurrentPage"
+              >
+                {{ $t("ui.selectAllPage") }}
+              </el-button>
+              <el-button
+                v-else
+                :disabled="active.items.length === 0"
+                @click="clearCurrentPageSelection"
+              >
+                {{ $t("ui.cancelSelectAll") }}
+              </el-button>
               <el-button type="primary" @click="create">
                 {{ $t("verse.view.metaDialog.create") }}
               </el-button>
@@ -38,36 +60,98 @@
         shadow="never"
         :body-style="{ padding: '0' }"
       >
-        <div v-if="active.items?.length" class="resource-grid meta-grid">
-          <div
-            v-for="item in active.items"
-            :key="item.id"
-            class="resource-item"
-          >
-            <StandardCard
-              :image="item.image?.url || ''"
-              :title="title(item)"
-              :meta="{
-                date: item.created_at
-                  ? convertToLocalTime(item.created_at)
-                  : '',
-              }"
-              :selection-mode="false"
-              :show-checkbox="false"
-              :type-icon="['fas', 'cube']"
-              :placeholder-icon="['fas', 'cube']"
-            ></StandardCard>
-            <div class="card-actions">
-              <el-button
-                size="small"
-                type="primary"
-                @click="selected({ data: item })"
-              >
-                {{ $t("verse.view.metaDialog.select") }}
-              </el-button>
+        <ViewContainer
+          v-if="active.items?.length"
+          class="resource-view-container"
+          :items="active.items"
+          :view-mode="viewMode"
+          :show-empty="false"
+          :card-gutter="26"
+          @row-click="handleRowClick"
+        >
+          <template #grid-card="{ item }">
+            <div class="resource-item">
+              <StandardCard
+                :image="item.image?.url || ''"
+                :title="title(item)"
+                :meta="{
+                  date: item.created_at
+                    ? convertToLocalTime(item.created_at)
+                    : '',
+                }"
+                :selected="isSelected(item)"
+                :selection-mode="true"
+                :show-checkbox="true"
+                :type-icon="['fas', 'puzzle-piece']"
+                :placeholder-icon="['fas', 'puzzle-piece']"
+                @select="() => toggleSelection(item)"
+                @view="() => handleViewInfo(item)"
+              ></StandardCard>
+              <div class="card-actions">
+                <el-button size="small" @click="toggleSelection(item)">
+                  {{
+                    isSelected(item)
+                      ? $t("verse.view.metaDialog.cancelSelect")
+                      : $t("verse.view.metaDialog.select")
+                  }}
+                </el-button>
+                <el-button size="small" type="primary" @click="putSingle(item)">
+                  {{ $t("verse.view.metaDialog.putIn") }}
+                </el-button>
+              </div>
             </div>
-          </div>
-        </div>
+          </template>
+
+          <template #list-header>
+            <div class="col-checkbox"></div>
+            <div class="col-name">{{ $t("common.name") }}</div>
+            <div class="col-date">{{ $t("ui.createdAt") }}</div>
+            <div class="col-actions"></div>
+          </template>
+
+          <template #list-item="{ item }">
+            <div class="col-checkbox" @click.stop>
+              <el-checkbox
+                :model-value="isSelected(item)"
+                @change="() => toggleSelection(item)"
+              ></el-checkbox>
+            </div>
+            <div class="col-name">
+              <div class="item-thumb" @click.stop="handleViewInfo(item)">
+                <img
+                  v-if="item.image?.url"
+                  :src="item.image.url"
+                  :alt="title(item)"
+                />
+                <div v-else class="thumb-placeholder">
+                  <font-awesome-icon
+                    :icon="['fas', 'puzzle-piece']"
+                  ></font-awesome-icon>
+                </div>
+              </div>
+              <span class="item-name" :title="title(item)">
+                {{ title(item) }}
+              </span>
+            </div>
+            <div class="col-date">
+              {{ item.created_at ? convertToLocalTime(item.created_at) : "-" }}
+            </div>
+            <div class="col-actions" @click.stop>
+              <div class="list-actions">
+                <el-button size="small" @click="toggleSelection(item)">
+                  {{
+                    isSelected(item)
+                      ? $t("verse.view.metaDialog.cancelSelect")
+                      : $t("verse.view.metaDialog.select")
+                  }}
+                </el-button>
+                <el-button size="small" type="primary" @click="putSingle(item)">
+                  {{ $t("verse.view.metaDialog.putIn") }}
+                </el-button>
+              </div>
+            </div>
+          </template>
+        </ViewContainer>
         <template v-else>
           <el-skeleton></el-skeleton>
         </template>
@@ -83,20 +167,63 @@
         </div>
       </template>
     </el-dialog>
+
+    <DetailPanel
+      v-model="detailVisible"
+      :title="$t('meta.list.detailTitle')"
+      :name="detailMetaTitle"
+      :loading="detailLoading"
+      :editable="false"
+      :show-delete="false"
+      :secondary-action="false"
+      :z-index="6000"
+      width="520px"
+      :properties="detailProperties"
+      :placeholder-icon="['fas', 'puzzle-piece']"
+      :download-text="$t('verse.view.metaDialog.putIn')"
+      :download-icon="['fas', 'plus']"
+      @download="putFromDetail"
+      @close="handleDetailClose"
+    >
+      <template #preview>
+        <img
+          v-if="detailMeta?.image?.url"
+          :src="detailMeta.image.url"
+          :alt="detailMetaTitle"
+          class="detail-image"
+        />
+        <div v-else class="detail-preview-placeholder">
+          <font-awesome-icon
+            :icon="['fas', 'puzzle-piece']"
+          ></font-awesome-icon>
+        </div>
+      </template>
+      <template #info>
+        <SignalInfoPanel
+          :inputs="eventInputs"
+          :outputs="eventOutputs"
+        ></SignalInfoPanel>
+      </template>
+    </DetailPanel>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from "vue";
 import { v4 as uuidv4 } from "uuid";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { getMetas, metaInfo, postMeta } from "@/api/v1/meta";
+import { getMeta, getMetas, metaInfo, postMeta } from "@/api/v1/meta";
 import { convertToLocalTime } from "@/utils/utilityFunctions";
 import {
+  DetailPanel,
   PageActionBar,
   PagePagination,
   StandardCard,
+  ViewContainer,
 } from "@/components/StandardPage";
+import SignalInfoPanel from "@/components/Meta/SignalInfoPanel.vue";
 import { useDialogList } from "@/composables/useDialogList";
+import type { ViewMode } from "@/components/StandardPage/types";
 
 const emit = defineEmits(["selected", "cancel"]);
 
@@ -105,6 +232,13 @@ const metaCache = new Map<
   string,
   { data: metaInfo[]; headers?: Record<string, unknown> }
 >();
+const selectedIds = ref<number[]>([]);
+const viewMode = ref<ViewMode>("grid");
+const selectedMetaMap = new Map<number, metaInfo>();
+const detailVisible = ref(false);
+const detailLoading = ref(false);
+const detailMeta = ref<metaInfo | null>(null);
+const detailSourceItem = ref<metaInfo | null>(null);
 
 const {
   dialogVisible,
@@ -124,34 +258,199 @@ const {
     searched,
     page,
     "image",
-    "id,title,name,created_at,image"
+    "id,title,name,created_at,image",
+    24
   )) as { data: metaInfo[]; headers?: Record<string, unknown> };
 
   metaCache.set(key, response);
   return response;
 });
 
-type MetaSelection = {
-  data: metaInfo;
-  title?: string;
-};
-
 const title = (item: metaInfo) => {
   return item.title || item.name || "title";
 };
 
-const open = async (_newValue?: unknown, _newVerseId?: number) => {
-  await openDialog();
+const isSelected = (item: metaInfo): boolean => {
+  return selectedIds.value.includes(item.id);
 };
 
-const selected = async (data: MetaSelection | null) => {
-  if (data) {
-    data.title = data.data.title;
-    emit("selected", data);
-  } else {
-    emit("selected", null);
+const toggleSelection = (item: metaInfo) => {
+  if (isSelected(item)) {
+    selectedIds.value = selectedIds.value.filter((id) => id !== item.id);
+    selectedMetaMap.delete(item.id);
+    return;
+  }
+  selectedIds.value = [...selectedIds.value, item.id];
+  selectedMetaMap.set(item.id, item);
+};
+
+const clearSelection = () => {
+  selectedIds.value = [];
+  selectedMetaMap.clear();
+};
+
+const getResourceCount = (item?: {
+  resources?: unknown;
+  resource_count?: number;
+  resources_count?: number;
+}) => {
+  if (typeof item?.resource_count === "number") {
+    return item.resource_count;
+  }
+  if (typeof item?.resources_count === "number") {
+    return item.resources_count;
+  }
+  return Array.isArray(item?.resources) ? item.resources.length : 0;
+};
+
+type MetaEventItem = { title: string; name: string; type: string };
+
+const normalizeEventList = (value: unknown): MetaEventItem[] => {
+  if (!Array.isArray(value)) return [];
+  return value.map((item, index) => {
+    const record =
+      item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+    const title = String(record.title ?? record.name ?? `#${index + 1}`);
+    const name = String(record.name ?? "");
+    const rawType = record.type;
+    return {
+      title,
+      name,
+      type: rawType === null || rawType === undefined ? "" : String(rawType),
+    };
+  });
+};
+
+const eventInputs = computed(() =>
+  normalizeEventList(detailMeta.value?.events?.inputs)
+);
+const eventOutputs = computed(() =>
+  normalizeEventList(detailMeta.value?.events?.outputs)
+);
+
+const detailMetaTitle = computed(() => {
+  const item = detailMeta.value || detailSourceItem.value;
+  return item?.title || item?.name || t("meta.list.unnamed");
+});
+
+const detailProperties = computed(() => {
+  const item = detailMeta.value || detailSourceItem.value;
+  if (!item) return [];
+  return [
+    {
+      label: t("meta.list.properties.type"),
+      value: t("meta.list.properties.entity"),
+    },
+    {
+      label: t("meta.list.properties.author"),
+      value: item.author?.nickname || item.author?.username || "—",
+    },
+    {
+      label: t("meta.list.properties.resources"),
+      value: getResourceCount(item),
+    },
+    {
+      label: t("ui.createdAt"),
+      value: item.created_at ? convertToLocalTime(item.created_at) : "-",
+    },
+  ];
+});
+
+const isPageSelected = computed(() => {
+  if (active.value.items.length === 0) return false;
+  return active.value.items.every((item) =>
+    selectedIds.value.includes(item.id)
+  );
+});
+
+const handleViewInfo = async (item: metaInfo) => {
+  detailVisible.value = true;
+  detailLoading.value = true;
+  detailSourceItem.value = item;
+
+  try {
+    const response = await getMeta(item.id, {
+      expand: "image,author,resources",
+    });
+    detailMeta.value = response.data;
+  } catch (err) {
+    detailMeta.value = item;
+    ElMessage.error(String(err));
+  } finally {
+    detailLoading.value = false;
+  }
+};
+
+const handleDetailClose = () => {
+  detailMeta.value = null;
+  detailSourceItem.value = null;
+  detailLoading.value = false;
+};
+
+const emitSelectedMeta = (item: metaInfo) => {
+  emit("selected", {
+    data: item,
+    title: item.title,
+  });
+};
+
+const putSingle = (item: metaInfo) => {
+  emitSelectedMeta(item);
+  dialogVisible.value = false;
+};
+
+const putSelected = () => {
+  if (selectedIds.value.length === 0) {
+    ElMessage.warning(t("verse.view.metaDialog.noItemSelected"));
+    return;
+  }
+
+  for (const id of selectedIds.value) {
+    const selectedMeta =
+      selectedMetaMap.get(id) ||
+      active.value.items.find((item) => item.id === id);
+    if (selectedMeta) {
+      emitSelectedMeta(selectedMeta);
+    }
   }
   dialogVisible.value = false;
+};
+
+const selectAllCurrentPage = () => {
+  const ids = active.value.items.map((item) => item.id);
+  selectedIds.value = Array.from(new Set([...selectedIds.value, ...ids]));
+  for (const item of active.value.items) {
+    selectedMetaMap.set(item.id, item);
+  }
+};
+
+const clearCurrentPageSelection = () => {
+  const pageIdSet = new Set(active.value.items.map((item) => item.id));
+  selectedIds.value = selectedIds.value.filter((id) => !pageIdSet.has(id));
+  for (const item of active.value.items) {
+    selectedMetaMap.delete(item.id);
+  }
+};
+
+const handleViewChange = (mode: ViewMode) => {
+  viewMode.value = mode;
+};
+
+const handleRowClick = (item: metaInfo) => {
+  handleViewInfo(item);
+};
+
+const putFromDetail = () => {
+  const target = detailMeta.value || detailSourceItem.value;
+  if (!target) return;
+  putSingle(target);
+};
+
+const open = async (_newValue?: unknown, _newVerseId?: number) => {
+  clearSelection();
+  detailVisible.value = false;
+  handleDetailClose();
+  await openDialog();
 };
 
 const input = async (text: string): Promise<string> => {
@@ -179,10 +478,13 @@ const create = async () => {
     uuid: uuidv4(),
   });
   metaCache.clear();
-  selected({ data: response.data });
+  putSingle(response.data);
 };
 
 const cancel = () => {
+  clearSelection();
+  detailVisible.value = false;
+  handleDetailClose();
   emit("cancel");
 };
 
@@ -235,16 +537,12 @@ defineExpose({
   }
 }
 
-.resource-grid {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 0.96fr));
-  gap: var(--resource-dialog-grid-gap, 26px);
+.resource-view-container {
   max-height: 67vh;
   overflow: auto;
   padding: 0 var(--resource-dialog-grid-padding-x, 20px)
     var(--resource-dialog-grid-padding-bottom, 6px)
     var(--resource-dialog-grid-padding-x, 20px);
-  justify-content: space-between;
 }
 
 .resource-list-shell {
@@ -274,10 +572,104 @@ defineExpose({
     );
     transform: translateY(-2px);
   }
+
+  :deep(.standard-card.is-selected) {
+    border-color: var(
+      --resource-dialog-card-selected-border-color,
+      var(--primary-color)
+    );
+    box-shadow: var(
+      --resource-dialog-card-selected-shadow,
+      0 0 0 2px var(--primary-light)
+    );
+  }
 }
 
 .resource-item {
   min-width: 0;
+}
+
+.col-checkbox {
+  width: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.col-name {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.col-date {
+  width: 180px;
+  text-align: right;
+  font-size: var(--font-size-sm, 13px);
+  color: var(--text-secondary, #64748b);
+  flex-shrink: 0;
+  padding-right: 16px;
+}
+
+.col-actions {
+  width: 220px;
+  flex-shrink: 0;
+}
+
+.item-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm, 12px);
+  overflow: hidden;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--bg-secondary, #f1f5f9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.thumb-placeholder {
+  color: var(--text-muted, #94a3b8);
+
+  .svg-inline--fa {
+    font-size: 20px;
+  }
+}
+
+.item-name {
+  font-size: var(--font-size-md, 14px);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--text-primary, #1e293b);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+
+  :deep(.el-button) {
+    min-width: 72px;
+    height: 30px;
+    padding: 0 12px;
+    margin: 0;
+    border-radius: 999px;
+    font-size: 13px;
+  }
 }
 
 .card-actions {
@@ -305,15 +697,23 @@ defineExpose({
   padding: 12px 0 4px;
 }
 
-@media (max-width: 1680px) {
-  .resource-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
+.detail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-@media (max-width: 1360px) {
-  .resource-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+.detail-preview-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary, #f1f5f9);
+  color: var(--text-secondary, #94a3b8);
+
+  .svg-inline--fa {
+    font-size: 64px;
   }
 }
 </style>

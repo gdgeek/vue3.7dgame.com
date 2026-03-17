@@ -21,14 +21,22 @@
               )
             "
             :search-placeholder="$t('ui.search')"
-            :show-view-toggle="false"
-            :show-name-sort="false"
+            :show-view-toggle="true"
+            :show-name-sort="true"
             :default-sort="sorted"
             @search="search"
             @sort-change="sort"
+            @view-change="handleViewChange"
           >
             <template #actions>
               <template v-if="mode !== 'replace'">
+                <el-button
+                  v-if="multiple && selectedIds.length > 0"
+                  type="primary"
+                  @click="doBatchSelect()"
+                >
+                  {{ $t("meta.ResourceDialog.putAllIn") }}
+                </el-button>
                 <el-button
                   v-if="multiple && !isPageSelected"
                   :disabled="active.items.length === 0"
@@ -43,21 +51,6 @@
                 >
                   {{ $t("ui.cancelSelectAll") }}
                 </el-button>
-                <el-button
-                  v-if="multiple"
-                  type="primary"
-                  :disabled="selectedIds.length === 0"
-                  @click="doBatchSelect()"
-                >
-                  {{ $t("meta.ResourceDialog.putAllIn") }}
-                </el-button>
-                <el-button
-                  v-if="multiple"
-                  :disabled="selectedIds.length === 0"
-                  @click="doEmpty()"
-                >
-                  {{ $t("meta.ResourceDialog.empty") }}
-                </el-button>
               </template>
               <el-button @click="dialogVisible = false">
                 {{ $t("meta.ResourceDialog.cancel") }}
@@ -71,31 +64,106 @@
         shadow="never"
         :body-style="{ padding: '0' }"
       >
-        <div v-if="active.items?.length" class="resource-grid">
-          <div
-            v-for="item in active.items"
-            :key="item.id"
-            class="resource-item"
-            :class="{ disabled: !item.enabled }"
-          >
-            <div v-loading="!item.enabled">
-              <StandardCard
-                :image="item.image?.url"
-                :title="getItemTitle(item)"
-                :meta="{
-                  date: item.created_at
-                    ? convertToLocalTime(item.created_at)
-                    : '',
-                }"
-                :selected="isSelected(item)"
-                :selection-mode="mode !== 'replace' && multiple"
-                :type-icon="getTypeIcon(item.type)"
-                :placeholder-icon="getTypeIcon(item.type)"
-                @select="() => toggleSelection(item)"
-                @view="() => handleViewInfo(item)"
-              ></StandardCard>
-              <slot name="bar" :item="item"></slot>
-              <div class="card-actions">
+        <ViewContainer
+          v-if="active.items?.length"
+          class="resource-view-container"
+          :items="active.items"
+          :view-mode="viewMode"
+          :show-empty="false"
+          :card-gutter="26"
+          @row-click="handleRowClick"
+        >
+          <template #grid-card="{ item }">
+            <div class="resource-item" :class="{ disabled: !item.enabled }">
+              <div v-loading="!item.enabled">
+                <StandardCard
+                  :image="item.image?.url"
+                  :title="getItemTitle(item)"
+                  :meta="{
+                    date: item.created_at
+                      ? convertToLocalTime(item.created_at)
+                      : '',
+                  }"
+                  :selected="isSelected(item)"
+                  :selection-mode="mode !== 'replace' && multiple"
+                  :type-icon="getTypeIcon(item.type)"
+                  :placeholder-icon="getTypeIcon(item.type)"
+                  @select="() => toggleSelection(item)"
+                  @view="() => handleViewInfo(item)"
+                ></StandardCard>
+                <slot name="bar" :item="item"></slot>
+                <div class="card-actions">
+                  <template v-if="mode !== 'replace'">
+                    <el-button
+                      v-if="multiple"
+                      size="small"
+                      @click="toggleSelection(item)"
+                    >
+                      {{
+                        isSelected(item)
+                          ? $t("meta.ResourceDialog.cancelSelect")
+                          : $t("meta.ResourceDialog.select")
+                      }}
+                    </el-button>
+                    <el-button
+                      size="small"
+                      type="primary"
+                      @click="doSelect(item)"
+                    >
+                      {{ $t("meta.ResourceDialog.putIn") }}
+                    </el-button>
+                  </template>
+                  <el-button
+                    v-else
+                    size="small"
+                    type="primary"
+                    @click="doReplace(item)"
+                  >
+                    {{ $t("meta.ResourceDialog.replace") }}
+                  </el-button>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template #list-header>
+            <div class="col-checkbox"></div>
+            <div class="col-name">{{ $t("common.name") }}</div>
+            <div class="col-date">{{ $t("ui.createdAt") }}</div>
+            <div class="col-actions"></div>
+          </template>
+
+          <template #list-item="{ item }">
+            <div class="col-checkbox" @click.stop>
+              <el-checkbox
+                v-if="mode !== 'replace' && multiple"
+                :model-value="isSelected(item)"
+                :disabled="!item.enabled"
+                @change="() => toggleSelection(item)"
+              ></el-checkbox>
+            </div>
+            <div class="col-name">
+              <div class="item-thumb" @click.stop="handleViewInfo(item)">
+                <img
+                  v-if="item.image?.url"
+                  :src="toHttps(item.image.url)"
+                  :alt="getItemTitle(item)"
+                />
+                <div v-else class="thumb-placeholder">
+                  <font-awesome-icon
+                    :icon="getTypeIcon(item.type)"
+                  ></font-awesome-icon>
+                </div>
+              </div>
+              <span class="item-name" :title="getItemTitle(item)">
+                {{ getItemTitle(item) }}
+              </span>
+            </div>
+            <div class="col-date">
+              {{ item.created_at ? convertToLocalTime(item.created_at) : "-" }}
+            </div>
+            <div class="col-actions" @click.stop>
+              <div class="list-actions">
                 <template v-if="mode !== 'replace'">
                   <el-button
                     v-if="multiple"
@@ -126,8 +194,8 @@
                 </el-button>
               </div>
             </div>
-          </div>
-        </div>
+          </template>
+        </ViewContainer>
         <template v-else>
           <el-skeleton></el-skeleton>
         </template>
@@ -227,11 +295,13 @@ import {
   PageActionBar,
   PagePagination,
   StandardCard,
+  ViewContainer,
 } from "@/components/StandardPage";
 import type { ResourceInfo } from "@/api/v1/resources/model";
 import PolygenView from "@/components/PolygenView.vue";
 import { printVector2 } from "@/assets/js/helper";
 import { toHttps } from "@/utils/helper";
+import type { ViewMode } from "@/components/StandardPage/types";
 
 const props = withDefaults(
   defineProps<{
@@ -253,6 +323,7 @@ const type = ref("polygen");
 const metaId = ref<number | null>(null);
 const value = ref<unknown>(null);
 const mode = ref<"normal" | "replace">("normal");
+const viewMode = ref<ViewMode>("grid");
 const detailVisible = ref(false);
 const detailLoading = ref(false);
 const detailResource = ref<ResourceInfo | null>(null);
@@ -539,6 +610,14 @@ const handleModelLoaded = (info: {
     vertices: info.vertices,
   };
 };
+
+const handleViewChange = (mode: ViewMode) => {
+  viewMode.value = mode;
+};
+
+const handleRowClick = (item: CardInfo) => {
+  handleViewInfo(item);
+};
 async function getDatas(input: DataInput): Promise<DataOutput> {
   if (props.onGetDatas) {
     return props.onGetDatas(input);
@@ -621,11 +700,6 @@ function doSelect(data: CardInfo) {
   detailVisible.value = false;
   handleDetailClose();
   dialogVisible.value = false;
-}
-
-function doEmpty() {
-  value.value = null;
-  selectedIds.value = [];
 }
 
 function toggleSelection(item: CardInfo) {
@@ -752,16 +826,12 @@ defineExpose({
   }
 }
 
-.resource-grid {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 0.96fr));
-  gap: var(--resource-dialog-grid-gap, 26px);
+.resource-view-container {
   max-height: 67vh;
   overflow: auto;
   padding: 0 var(--resource-dialog-grid-padding-x, 20px)
     var(--resource-dialog-grid-padding-bottom, 6px)
     var(--resource-dialog-grid-padding-x, 20px);
-  justify-content: space-between;
 }
 
 .resource-list-shell {
@@ -812,6 +882,89 @@ defineExpose({
   }
 }
 
+.col-checkbox {
+  width: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.col-name {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.col-date {
+  width: 180px;
+  text-align: right;
+  font-size: var(--font-size-sm, 13px);
+  color: var(--text-secondary, #64748b);
+  flex-shrink: 0;
+  padding-right: 16px;
+}
+
+.col-actions {
+  width: 240px;
+  flex-shrink: 0;
+}
+
+.item-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm, 12px);
+  overflow: hidden;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--bg-secondary, #f1f5f9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.thumb-placeholder {
+  color: var(--text-muted, #94a3b8);
+
+  .svg-inline--fa {
+    font-size: 20px;
+  }
+}
+
+.item-name {
+  font-size: var(--font-size-md, 14px);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--text-primary, #1e293b);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+
+  :deep(.el-button) {
+    min-width: 72px;
+    height: 30px;
+    padding: 0 12px;
+    margin: 0;
+    border-radius: 999px;
+    font-size: 13px;
+  }
+}
+
 .card-actions {
   display: flex;
   gap: 10px;
@@ -835,18 +988,6 @@ defineExpose({
 
 .dialog-footer :deep(.page-pagination) {
   padding: 12px 0 4px;
-}
-
-@media (max-width: 1680px) {
-  .resource-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 1360px) {
-  .resource-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
 }
 
 .detail-image {

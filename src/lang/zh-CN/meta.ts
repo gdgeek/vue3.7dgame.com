@@ -124,7 +124,7 @@ export default {
       cancelSelect: "取消选择",
       putIn: "放入",
       replace: "替换",
-      putAllIn: "全部放入",
+      putAllIn: "放入已选",
       empty: "清 空",
       cancel: "取 消",
       noItemSelected: "请至少选择一个资源",

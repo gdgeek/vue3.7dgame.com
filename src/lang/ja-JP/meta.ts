@@ -131,7 +131,7 @@ export default {
       cancelSelect: "選択をキャンセル",
       putIn: "入れる",
       replace: "置き換え",
-      putAllIn: "すべて入れる",
+      putAllIn: "選択項目を入れる",
       empty: "空にする",
       cancel: "キャンセル",
       noItemSelected: "少なくとも1つのリソースを選択してください",
