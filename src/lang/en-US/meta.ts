@@ -156,7 +156,7 @@ export default {
       cancelSelect: "Cancel Selection",
       putIn: "Put In",
       replace: "Replace",
-      putAllIn: "Put All In",
+      putAllIn: "Put Selected",
       empty: "Clear",
       cancel: "Cancel",
       noItemSelected: "Please select at least one resource",

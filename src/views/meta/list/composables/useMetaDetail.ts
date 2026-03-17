@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import { Message, MessageBox } from "@/components/Dialog";
 import { logger } from "@/utils/logger";
 import { v4 as uuidv4 } from "uuid";
+import { convertToLocalTime } from "@/utils/utilityFunctions";
 import {
   getMeta,
   putMeta,
@@ -66,6 +67,12 @@ export function useMetaDetail({
         value: Array.isArray(currentMeta.value.resources)
           ? currentMeta.value.resources.length
           : 0,
+      },
+      {
+        label: t("ui.createdAt"),
+        value: currentMeta.value.created_at
+          ? convertToLocalTime(currentMeta.value.created_at)
+          : "-",
       },
     ];
   });

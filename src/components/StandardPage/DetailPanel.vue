@@ -620,6 +620,21 @@ onUnmounted(() => {
   transform: translateY(-1px);
 }
 
+/* Slot primary action (entity/scene edit) should match legacy large size */
+.panel-actions :deep(.enter-edit-btn) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  width: 100% !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  border-radius: 26px !important;
+}
+
 .panel-actions :deep(.actions-row) {
   display: grid;
   grid-template-columns: 1fr 1fr;

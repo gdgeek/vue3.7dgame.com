@@ -1493,6 +1493,20 @@ const formatItemDate = (dateStr?: string) => {
   }
 }
 
+.enter-edit-btn {
+  width: 100%;
+  height: 52px !important;
+  min-height: 52px !important;
+  border-radius: 26px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
 :deep(.panel-actions .dual-primary-btn) {
   width: 100%;
   height: 44px;

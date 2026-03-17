@@ -248,6 +248,10 @@ export default {
       metaDialog: {
         title: "選擇實體",
         select: "選擇",
+        cancelSelect: "取消選擇",
+        putIn: "放入",
+        putAllIn: "放入已選",
+        noItemSelected: "請至少選擇一個實體",
         create: "新 建",
         cancel: "取 消",
         input1: "請輸入Model名稱",

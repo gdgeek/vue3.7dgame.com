@@ -130,7 +130,7 @@ export default {
       cancelSelect: "ยกเลิกการเลือก",
       putIn: "ใส่",
       replace: "แทนที่",
-      putAllIn: "ใส่ทั้งหมด",
+      putAllIn: "ใส่ที่เลือก",
       empty: "ล้าง",
       cancel: "ยกเลิก",
       noItemSelected: "กรุณาเลือกทรัพยากรอย่างน้อยหนึ่งรายการ",

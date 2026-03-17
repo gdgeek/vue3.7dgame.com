@@ -253,6 +253,10 @@ export default {
       metaDialog: {
         title: "Select Entity",
         select: "Select",
+        cancelSelect: "Cancel Select",
+        putIn: "Put In",
+        putAllIn: "Put Selected",
+        noItemSelected: "Please select at least one entity",
         create: "Create New",
         cancel: "Cancel",
         input1: "Please enter Model name",

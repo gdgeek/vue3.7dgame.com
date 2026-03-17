@@ -221,81 +221,10 @@
           </div>
         </template>
         <template #info>
-          <div class="events-section">
-            <div class="events-title">{{ t("meta.list.events.title") }}</div>
-
-            <div class="events-grid">
-              <div class="events-card">
-                <div class="events-card-title">
-                  {{ t("meta.list.events.inputs") }}
-                  <span class="events-count">{{ eventInputs.length }}</span>
-                </div>
-                <div v-if="eventInputs.length > 0" class="events-list">
-                  <div
-                    v-for="(eventItem, index) in eventInputs"
-                    :key="'in-' + index"
-                    class="events-item"
-                  >
-                    <span class="events-index">{{ index + 1 }}</span>
-                    <div class="events-main">
-                      <span class="events-title-text">{{
-                        eventItem.title
-                      }}</span>
-                      <span
-                        v-if="
-                          eventItem.name && eventItem.name !== eventItem.title
-                        "
-                        class="events-name-sub"
-                      >
-                        {{ eventItem.name }}
-                      </span>
-                    </div>
-                    <span v-if="eventItem.type" class="events-type">{{
-                      eventItem.type
-                    }}</span>
-                  </div>
-                </div>
-                <div v-else class="events-empty">
-                  {{ t("meta.list.events.empty") }}
-                </div>
-              </div>
-
-              <div class="events-card">
-                <div class="events-card-title">
-                  {{ t("meta.list.events.outputs") }}
-                  <span class="events-count">{{ eventOutputs.length }}</span>
-                </div>
-                <div v-if="eventOutputs.length > 0" class="events-list">
-                  <div
-                    v-for="(eventItem, index) in eventOutputs"
-                    :key="'out-' + index"
-                    class="events-item"
-                  >
-                    <span class="events-index">{{ index + 1 }}</span>
-                    <div class="events-main">
-                      <span class="events-title-text">{{
-                        eventItem.title
-                      }}</span>
-                      <span
-                        v-if="
-                          eventItem.name && eventItem.name !== eventItem.title
-                        "
-                        class="events-name-sub"
-                      >
-                        {{ eventItem.name }}
-                      </span>
-                    </div>
-                    <span v-if="eventItem.type" class="events-type">{{
-                      eventItem.type
-                    }}</span>
-                  </div>
-                </div>
-                <div v-else class="events-empty">
-                  {{ t("meta.list.events.empty") }}
-                </div>
-              </div>
-            </div>
-          </div>
+          <SignalInfoPanel
+            :inputs="eventInputs"
+            :outputs="eventOutputs"
+          ></SignalInfoPanel>
         </template>
         <template #property-used-scenes>
           <div class="used-scenes-value">
@@ -414,6 +343,7 @@ import { postFile } from "@/api/v1/files";
 import { getPicture } from "@/api/v1/resources/index";
 import type { UploadFileType } from "@/api/user/model";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
+import SignalInfoPanel from "@/components/Meta/SignalInfoPanel.vue";
 import { FolderOpened, Upload } from "@element-plus/icons-vue";
 import type { CardInfo } from "@/utils/types";
 import {
@@ -421,6 +351,7 @@ import {
   denseResourceCardGutter,
 } from "@/utils/resourceGrid";
 import { compareMultilingualText } from "@/utils/multilingualSort";
+import { convertToLocalTime } from "@/utils/utilityFunctions";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -833,6 +764,12 @@ const detailProperties = computed(() => {
           ? usedSceneOptions.value[0].name
           : t("meta.list.properties.noScenes"),
       slotName: "used-scenes",
+    },
+    {
+      label: t("ui.createdAt"),
+      value: currentMeta.value.created_at
+        ? convertToLocalTime(currentMeta.value.created_at)
+        : "-",
     },
   ];
 });
@@ -1680,7 +1617,17 @@ const deletedWindow = async (
   }
 }
 
-:deep(.panel-actions .enter-edit-btn) {
+.enter-edit-btn {
   width: 100%;
+  height: 52px !important;
+  min-height: 52px !important;
+  border-radius: 26px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
 }
 </style>
