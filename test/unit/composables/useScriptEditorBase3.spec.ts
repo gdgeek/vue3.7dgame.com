@@ -24,12 +24,12 @@ const mockUserState = reactive({
   getRole: vi.fn(() => "editor"),
 });
 
-const { mockInflate3, mockJsBeautify3, mockMessage3, mockMessageBox3 } =
+const { mockInflate3, mockJsBeautify3, mockMessage3, mockElMessageBox3 } =
   vi.hoisted(() => ({
     mockInflate3: vi.fn(() => "decompressed"),
     mockJsBeautify3: vi.fn((code: string) => `fmt:${code}`),
     mockMessage3: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
-    mockMessageBox3: { confirm: vi.fn() },
+    mockElMessageBox3: { confirm: vi.fn() },
   }));
 
 const mockOnBeforeRouteLeave3 = vi.hoisted(() => vi.fn());
@@ -62,7 +62,10 @@ vi.mock("@/store/modules/user", () => ({
 
 vi.mock("@/components/Dialog", () => ({
   Message: mockMessage3,
-  MessageBox: mockMessageBox3,
+}));
+
+vi.mock("element-plus", () => ({
+  ElMessageBox: mockElMessageBox3,
 }));
 
 vi.mock("@/utils/logger", () => ({
@@ -481,7 +484,7 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
     });
 
     it("hasUnsavedChanges + confirm + save succeeds → next() called (lines 371-373)", async () => {
-      mockMessageBox3.confirm.mockResolvedValue(undefined); // user confirmed
+      mockElMessageBox3.confirm.mockResolvedValue(undefined); // user confirmed
       const onPost = vi.fn().mockResolvedValue(undefined);
 
       const { result, unmount } = withSetup(() =>
@@ -515,8 +518,8 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
       unmount();
     });
 
-    it("hasUnsavedChanges + confirm resolves → MessageBox.confirm was called with expected options", async () => {
-      mockMessageBox3.confirm.mockResolvedValue(undefined);
+    it("hasUnsavedChanges + confirm resolves → ElMessageBox.confirm was called with expected options", async () => {
+      mockElMessageBox3.confirm.mockResolvedValue(undefined);
       const onPost = vi.fn().mockResolvedValue(undefined);
 
       const { result, unmount } = withSetup(() =>
@@ -540,18 +543,22 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
 
       await guardPromise;
 
-      // MessageBox.confirm was called with the i18n keys
-      expect(mockMessageBox3.confirm).toHaveBeenCalledWith(
+      // ElMessageBox.confirm was called with the i18n keys
+      expect(mockElMessageBox3.confirm).toHaveBeenCalledWith(
         "i18n.leaveMessage1",
-        "i18n.leaveMessage2",
-        expect.objectContaining({ type: "warning" })
+        "",
+        expect.objectContaining({
+          customClass: "script-save-confirm-box",
+          showClose: true,
+          showCancelButton: true,
+        })
       );
 
       unmount();
     });
 
     it("hasUnsavedChanges + cancel → hasUnsavedChanges=false + info + next() (lines 378-382)", async () => {
-      mockMessageBox3.confirm.mockRejectedValue("cancel");
+      mockElMessageBox3.confirm.mockRejectedValue("cancel");
 
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
@@ -573,7 +580,7 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
 
     it("hasUnsavedChanges + other rejection → next(false) (lines 383-385)", async () => {
       // action is not "cancel" — could be dismissed/backdrop click
-      mockMessageBox3.confirm.mockRejectedValue("close");
+      mockElMessageBox3.confirm.mockRejectedValue("close");
 
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
