@@ -238,7 +238,7 @@ export default {
         edit: "逻辑编辑",
         code: "代码查看",
         leave: {
-          message1: "发现有未保存的修改，是否保存",
+          message1: "是否保存当前脚本",
           message2: "提示",
           confirm: "是",
           cancel: "否",

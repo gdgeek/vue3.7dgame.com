@@ -12,7 +12,8 @@ import { useSettingsStore } from "@/store/modules/settings";
 import { useAppStore } from "@/store/modules/app";
 import { useUserStore } from "@/store/modules/user";
 import { ThemeEnum } from "@/enums/ThemeEnum";
-import { Message, MessageBox } from "@/components/Dialog";
+import { ElMessageBox } from "element-plus";
+import { Message } from "@/components/Dialog";
 import { logger } from "@/utils/logger";
 import { safeAtob } from "@/utils/base64";
 import env from "@/environment";
@@ -267,15 +268,17 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   };
 
   const confirmSaveScript = () => {
-    return MessageBox.confirm(
-      t(options.i18nKeys.leaveMessage1),
-      t(options.i18nKeys.leaveMessage2),
-      {
-        type: "warning",
-        confirmButtonText: t(options.i18nKeys.leaveConfirm),
-        cancelButtonText: t(options.i18nKeys.leaveCancel),
-      }
-    );
+    return ElMessageBox.confirm(t(options.i18nKeys.leaveMessage1), "", {
+      showClose: true,
+      center: true,
+      distinguishCancelAndClose: true,
+      closeOnClickModal: false,
+      closeOnPressEscape: true,
+      showCancelButton: true,
+      customClass: "script-save-confirm-box",
+      confirmButtonText: t(options.i18nKeys.leaveConfirm),
+      cancelButtonText: t(options.i18nKeys.leaveCancel),
+    });
   };
 
   const resolveUnsavedChangesBeforeLeave = async (

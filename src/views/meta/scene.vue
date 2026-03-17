@@ -219,6 +219,9 @@ const userStore = useUserStore();
 let unsavedCheckSeed = 0;
 const pendingUnsavedChecks = new Map<string, (changed: boolean) => void>();
 let pendingLeaveSaveResolver: ((result: boolean) => void) | null = null;
+const hasUnsavedChangesBeforeUnload = ref(false);
+let unsavedCheckPollingTimer: number | null = null;
+let isPollingUnsavedChanges = false;
 
 type EntitySceneItem = {
   id: number;
@@ -495,6 +498,19 @@ const queryUnsavedChangesBeforeLeave = (): Promise<boolean> => {
   });
 };
 
+const syncUnsavedChangesForBeforeUnload = async () => {
+  if (isPollingUnsavedChanges) return;
+  if (!editor.value || !editor.value.contentWindow) return;
+
+  isPollingUnsavedChanges = true;
+  try {
+    const changed = await queryUnsavedChangesBeforeLeave();
+    hasUnsavedChangesBeforeUnload.value = changed;
+  } finally {
+    isPollingUnsavedChanges = false;
+  }
+};
+
 const waitForLeaveSaveResult = (): Promise<boolean> => {
   return new Promise((resolve) => {
     const timeout = window.setTimeout(() => {
@@ -521,6 +537,7 @@ const resolveLeaveSave = (result: boolean) => {
 
 const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
   const changed = await queryUnsavedChangesBeforeLeave();
+  hasUnsavedChangesBeforeUnload.value = changed;
 
   if (!changed) {
     return true;
@@ -537,6 +554,12 @@ const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
 
   postMessage("save-before-leave", {});
   return waitForLeaveSaveResult();
+};
+
+const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+  if (!hasUnsavedChangesBeforeUnload.value) return;
+  event.preventDefault();
+  event.returnValue = "";
 };
 
 // 获取可用的资源类型
@@ -709,29 +732,50 @@ const handleMessage = async (e: MessageEvent) => {
 
   switch (action) {
     case "save-meta":
-      resolveLeaveSave(
-        await saveMeta(data as { meta: MetaPayload; events: unknown })
-      );
+      {
+        const result = await saveMeta(
+          data as {
+            meta: MetaPayload;
+            events: unknown;
+          }
+        );
+        if (result) {
+          hasUnsavedChangesBeforeUnload.value = false;
+        }
+        resolveLeaveSave(result);
+      }
       // ElMessage.success("储存完成");
       break;
 
     case "save-meta-none":
       ElMessage.warning(t("meta.scene.noChanges"));
+      hasUnsavedChangesBeforeUnload.value = false;
       resolveLeaveSave(true);
       break;
 
     case "save-meta-before-leave":
-      resolveLeaveSave(
-        await saveMeta(data as { meta: MetaPayload; events: unknown })
-      );
+      {
+        const result = await saveMeta(
+          data as {
+            meta: MetaPayload;
+            events: unknown;
+          }
+        );
+        if (result) {
+          hasUnsavedChangesBeforeUnload.value = false;
+        }
+        resolveLeaveSave(result);
+      }
       break;
 
     case "save-meta-before-leave-none":
+      hasUnsavedChangesBeforeUnload.value = false;
       resolveLeaveSave(true);
       break;
 
     case "unsaved-changes-result":
       if (isUnsavedChangesResultPayload(data)) {
+        hasUnsavedChangesBeforeUnload.value = Boolean(data.changed);
         const resolver = pendingUnsavedChecks.get(data.requestId);
         if (resolver) {
           resolver(Boolean(data.changed));
@@ -807,6 +851,7 @@ const handleMessage = async (e: MessageEvent) => {
       break;
 
     case "ready":
+      hasUnsavedChangesBeforeUnload.value = false;
       if (!init) {
         init = true;
         await refresh();
@@ -858,6 +903,11 @@ const refresh = async () => {
 // 生命周期钩子
 onMounted(() => {
   window.addEventListener("message", handleMessage);
+  window.addEventListener("beforeunload", handleBeforeUnload);
+  void syncUnsavedChangesForBeforeUnload();
+  unsavedCheckPollingTimer = window.setInterval(() => {
+    void syncUnsavedChangesForBeforeUnload();
+  }, 2000);
 });
 
 onBeforeRouteLeave(async (_to, _from, next) => {
@@ -867,6 +917,11 @@ onBeforeRouteLeave(async (_to, _from, next) => {
 
 onBeforeUnmount(() => {
   window.removeEventListener("message", handleMessage);
+  window.removeEventListener("beforeunload", handleBeforeUnload);
+  if (unsavedCheckPollingTimer !== null) {
+    window.clearInterval(unsavedCheckPollingTimer);
+    unsavedCheckPollingTimer = null;
+  }
   pendingUnsavedChecks.clear();
   if (pendingLeaveSaveResolver) {
     pendingLeaveSaveResolver(false);
