@@ -114,7 +114,7 @@ export default {
       success: "腳本保存成功",
       info: "沒有修改",
       leave: {
-        message1: "發現有未保存的修改，是否保存",
+        message1: "是否保存當前腳本",
         message2: "提示",
         confirm: "是",
         cancel: "否",

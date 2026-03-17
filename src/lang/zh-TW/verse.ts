@@ -312,7 +312,7 @@ export default {
         edit: "邏輯編輯",
         code: "代碼查看",
         leave: {
-          message1: "發現有未保存的修改，是否保存",
+          message1: "是否保存當前腳本",
           message2: "提示",
           confirm: "是",
           cancel: "否",
