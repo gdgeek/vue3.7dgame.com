@@ -106,7 +106,7 @@ export default {
     logoutConfirmDesc: "退出后需要重新登录才能访问您的账户。",
   },
   breadcrumb: {
-    workspace: "工作台",
+    workspace: "主页",
     support: "支持",
     helpCenter: "帮助中心",
     videoTutorial: "视频教程",

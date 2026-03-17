@@ -4,7 +4,7 @@ export default {
     create: { defaultName: "新场景" },
     listPage: {
       myScenes: "我的场景",
-      createScene: "创建场景",
+      createScene: "新建场景",
       searchScenes: "搜索场景...",
       sceneName: "场景名称",
       author: "作者",

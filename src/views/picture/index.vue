@@ -112,6 +112,15 @@
             </el-dropdown>
           </div>
         </template>
+
+        <template #empty>
+          <EmptyState
+            :icon="['fas', 'image']"
+            :text="t('common.noData')"
+            :action-text="t('picture.uploadPicture')"
+            @action="openUploadDialog"
+          ></EmptyState>
+        </template>
       </ViewContainer>
 
       <PagePagination
@@ -172,6 +181,7 @@ import {
   PageActionBar,
   ViewContainer,
   PagePagination,
+  EmptyState,
   StandardCard,
   DetailPanel,
   ResourceScopeFilter,

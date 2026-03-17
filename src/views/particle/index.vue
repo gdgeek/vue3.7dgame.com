@@ -90,6 +90,15 @@
             </el-dropdown>
           </div>
         </template>
+
+        <template #empty>
+          <EmptyState
+            :icon="['fas', 'circle-dot']"
+            :text="t('common.noData')"
+            :action-text="t('particle.uploadParticle')"
+            @action="openUploadDialog"
+          ></EmptyState>
+        </template>
       </ViewContainer>
 
       <PagePagination
@@ -122,6 +131,7 @@ import {
   PageActionBar,
   ViewContainer,
   PagePagination,
+  EmptyState,
 } from "@/components/StandardPage";
 import MrPPCard from "@/components/MrPP/MrPPCard/index.vue";
 import MrPPUploadDialog from "@/components/MrPP/MrPPUploadDialog/index.vue";

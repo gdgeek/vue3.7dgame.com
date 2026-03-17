@@ -20,7 +20,7 @@
               :icon="['fas', 'plus']"
               style="margin-right: 4px; font-size: 18px"
             ></font-awesome-icon>
-            {{ $t("meta.title") }}
+            {{ t("meta.list.createAction") }}
           </el-button>
         </template>
       </PageActionBar>
@@ -88,7 +88,7 @@
           <EmptyState
             :icon="['fas', 'cubes']"
             :text="t('meta.emptyText')"
-            :action-text="t('meta.title')"
+            :action-text="t('meta.list.createAction')"
             @action="addPrefab"
           ></EmptyState>
         </template>

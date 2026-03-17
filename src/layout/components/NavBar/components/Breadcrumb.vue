@@ -1,15 +1,37 @@
 <template>
   <nav class="breadcrumb-nav">
-    <span class="breadcrumb-text">{{ breadcrumbText }}</span>
+    <template
+      v-for="(item, index) in breadcrumbItems"
+      :key="`${item.label}-${index}`"
+    >
+      <component
+        :is="item.clickable ? 'button' : 'span'"
+        :type="item.clickable ? 'button' : undefined"
+        class="crumb-link"
+        :class="{
+          'is-clickable': item.clickable,
+          'is-current': item.isCurrent,
+          'is-static': !item.clickable,
+        }"
+        @click="handleNavigate(item)"
+      >
+        {{ item.label }}
+      </component>
+      <span v-if="index < breadcrumbItems.length - 1" class="crumb-separator">
+        /
+      </span>
+    </template>
   </nav>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import type { RouteLocationRaw } from "vue-router";
 import { useI18n } from "vue-i18n";
 
 const route = useRoute();
+const router = useRouter();
 const { t } = useI18n();
 
 const getQueryString = (value: unknown): string => {
@@ -69,7 +91,112 @@ const resolveEditorName = (): string => {
   return "";
 };
 
-const breadcrumbText = computed(() => {
+interface BreadcrumbSegment {
+  label: string;
+  to?: RouteLocationRaw;
+  clickable: boolean;
+  isCurrent: boolean;
+}
+
+const HOME_PATH: RouteLocationRaw = { path: "/home/index" };
+const ENTITY_LIST_PATH: RouteLocationRaw = { path: "/meta/list" };
+const SCENE_LIST_PATH: RouteLocationRaw = { path: "/verse/index" };
+
+const resolveMapSegments = (
+  path: string
+): Array<{ key: string; to?: RouteLocationRaw; clickable?: boolean }> => {
+  const breadcrumbMap: Record<
+    string,
+    Array<{ key: string; to?: RouteLocationRaw; clickable?: boolean }>
+  > = {
+    "/home": [{ key: "breadcrumb.workspace" }],
+    "/home/index": [{ key: "breadcrumb.workspace" }],
+    "/resource": [
+      { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
+      { key: "sidebar.resources" },
+    ],
+    "/resource/polygen/index": [
+      { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
+      { key: "sidebar.resources" },
+      { key: "sidebar.model" },
+    ],
+    "/resource/picture/index": [
+      { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
+      { key: "sidebar.resources" },
+      { key: "sidebar.picture" },
+    ],
+    "/resource/audio/index": [
+      { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
+      { key: "sidebar.resources" },
+      { key: "sidebar.audio" },
+    ],
+    "/resource/video/index": [
+      { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
+      { key: "sidebar.resources" },
+      { key: "sidebar.video" },
+    ],
+    "/meta/list": [
+      { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
+      { key: "sidebar.entity" },
+    ],
+    "/meta/phototype/index": [
+      { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
+      { key: "sidebar.entity" },
+    ],
+    "/verse": [
+      { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
+      { key: "sidebar.scene" },
+    ],
+    "/verse/index": [
+      { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
+      { key: "sidebar.scene" },
+      { key: "sidebar.selfCreated" },
+    ],
+    "/verse/public": [
+      { key: "breadcrumb.workspace", to: HOME_PATH, clickable: true },
+      { key: "sidebar.scene" },
+      { key: "sidebar.systemRecommend" },
+    ],
+    "/help": [{ key: "breadcrumb.support" }],
+    "/help/index": [
+      { key: "breadcrumb.support" },
+      { key: "breadcrumb.helpCenter" },
+    ],
+    "/help/videos": [
+      { key: "breadcrumb.support" },
+      { key: "breadcrumb.helpCenter" },
+      { key: "breadcrumb.videoTutorial" },
+    ],
+    "/settings": [{ key: "breadcrumb.settings" }],
+    "/settings/edit": [
+      { key: "breadcrumb.settings" },
+      { key: "breadcrumb.profile" },
+    ],
+    "/settings/email": [
+      { key: "breadcrumb.settings" },
+      { key: "homepage.edit.emailVerification" },
+    ],
+    "/settings/account": [
+      { key: "breadcrumb.settings" },
+      { key: "breadcrumb.accountSecurity" },
+    ],
+  };
+
+  if (breadcrumbMap[path]) {
+    return breadcrumbMap[path];
+  }
+
+  const prefixKey = Object.keys(breadcrumbMap)
+    .sort((a, b) => b.length - a.length)
+    .find((key) => path.startsWith(`${key}/`) || path.startsWith(`${key}?`));
+  if (prefixKey) {
+    return breadcrumbMap[prefixKey];
+  }
+
+  return [{ key: "breadcrumb.workspace" }];
+};
+
+const breadcrumbItems = computed<BreadcrumbSegment[]>(() => {
   const path = route.path;
 
   const workspace = String(t("breadcrumb.workspace"));
@@ -78,109 +205,132 @@ const breadcrumbText = computed(() => {
   const script = getScriptLabel();
   const editorName = resolveEditorName();
 
+  const buildSegments = (
+    segments: Array<{
+      label: string;
+      to?: RouteLocationRaw;
+      clickable?: boolean;
+    }>
+  ): BreadcrumbSegment[] => {
+    const lastIndex = segments.length - 1;
+    return segments.map((segment, index) => {
+      const isCurrent = index === lastIndex;
+      const canClick =
+        !isCurrent && Boolean(segment.clickable) && Boolean(segment.to);
+      return {
+        label: segment.label,
+        to: segment.to,
+        clickable: canClick,
+        isCurrent,
+      };
+    });
+  };
+
   if (path === "/meta/scene") {
     const name = editorName || String(t("route.meta.sceneEditor"));
-    return [workspace, entity, name].join(" / ");
+    return buildSegments([
+      { label: workspace, to: HOME_PATH, clickable: true },
+      { label: entity, to: ENTITY_LIST_PATH, clickable: true },
+      { label: name },
+    ]);
   }
 
   if (path === "/meta/script") {
     const name = editorName || String(t("route.meta.sceneEditor"));
-    return [workspace, entity, name, script].join(" / ");
+    return buildSegments([
+      { label: workspace, to: HOME_PATH, clickable: true },
+      { label: entity, to: ENTITY_LIST_PATH, clickable: true },
+      {
+        label: name,
+        to: { path: "/meta/scene", query: route.query },
+        clickable: true,
+      },
+      { label: script },
+    ]);
   }
 
   if (path === "/verse/scene") {
     const name = editorName || String(t("route.project.sceneEditor"));
-    return [workspace, scene, name].join(" / ");
+    return buildSegments([
+      { label: workspace, to: HOME_PATH, clickable: true },
+      { label: scene, to: SCENE_LIST_PATH, clickable: true },
+      { label: name },
+    ]);
   }
 
   if (path === "/verse/script") {
     const name = editorName || String(t("route.project.sceneEditor"));
-    return [workspace, scene, name, script].join(" / ");
+    return buildSegments([
+      { label: workspace, to: HOME_PATH, clickable: true },
+      { label: scene, to: SCENE_LIST_PATH, clickable: true },
+      {
+        label: name,
+        to: { path: "/verse/scene", query: route.query },
+        clickable: true,
+      },
+      { label: script },
+    ]);
   }
 
-  const breadcrumbMap: Record<string, string[]> = {
-    "/home": ["breadcrumb.workspace", "sidebar.home"],
-    "/home/index": ["breadcrumb.workspace", "sidebar.home"],
-
-    "/resource": ["breadcrumb.workspace", "sidebar.resources"],
-    "/resource/polygen/index": [
-      "breadcrumb.workspace",
-      "sidebar.resources",
-      "sidebar.model",
-    ],
-    "/resource/picture/index": [
-      "breadcrumb.workspace",
-      "sidebar.resources",
-      "sidebar.picture",
-    ],
-    "/resource/audio/index": [
-      "breadcrumb.workspace",
-      "sidebar.resources",
-      "sidebar.audio",
-    ],
-    "/resource/video/index": [
-      "breadcrumb.workspace",
-      "sidebar.resources",
-      "sidebar.video",
-    ],
-
-    "/meta/list": ["breadcrumb.workspace", "sidebar.entity"],
-    "/meta/phototype/index": ["breadcrumb.workspace", "sidebar.entity"],
-
-    "/verse": ["breadcrumb.workspace", "sidebar.scene"],
-    "/verse/index": [
-      "breadcrumb.workspace",
-      "sidebar.scene",
-      "sidebar.selfCreated",
-    ],
-    "/verse/public": [
-      "breadcrumb.workspace",
-      "sidebar.scene",
-      "sidebar.systemRecommend",
-    ],
-
-    "/help": ["breadcrumb.support", "breadcrumb.helpCenter"],
-    "/help/index": ["breadcrumb.support", "breadcrumb.helpCenter"],
-    "/help/videos": [
-      "breadcrumb.support",
-      "breadcrumb.helpCenter",
-      "breadcrumb.videoTutorial",
-    ],
-
-    "/settings": ["breadcrumb.settings"],
-    "/settings/edit": ["breadcrumb.settings", "breadcrumb.profile"],
-    "/settings/email": [
-      "breadcrumb.settings",
-      "homepage.edit.emailVerification",
-    ],
-    "/settings/account": ["breadcrumb.settings", "breadcrumb.accountSecurity"],
-  };
-
-  if (breadcrumbMap[path]) {
-    return breadcrumbMap[path].map((key) => t(key)).join(" / ");
-  }
-
-  for (const [key, value] of Object.entries(breadcrumbMap)) {
-    if (path.startsWith(key + "/") || path.startsWith(key + "?")) {
-      return value.map((item) => t(item)).join(" / ");
-    }
-  }
-
-  return t("breadcrumb.workspace");
+  const segments = resolveMapSegments(path);
+  return buildSegments(
+    segments.map((segment) => ({
+      label: String(t(segment.key)),
+      to: segment.to,
+      clickable: segment.clickable,
+    }))
+  );
 });
+
+const handleNavigate = (item: BreadcrumbSegment) => {
+  if (!item.clickable || !item.to) return;
+  router.push(item.to);
+};
 </script>
 
 <style lang="scss" scoped>
 .breadcrumb-nav {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-.breadcrumb-text {
-  font-size: 12px;
+.crumb-link {
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  color: var(--ar-text-muted) !important;
+  text-transform: none;
+  letter-spacing: 0;
+  background: transparent;
+  border: none;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+
+  &.is-clickable {
+    color: #409eff !important;
+    cursor: pointer;
+
+    &:hover {
+      color: #1d4ed8 !important;
+      text-decoration: none;
+    }
+  }
+
+  &.is-static,
+  &.is-current {
+    color: var(--ar-text-muted) !important;
+    cursor: default;
+  }
+}
+
+.crumb-separator {
+  font-size: 13px;
+  line-height: 20px;
   color: var(--ar-text-muted);
 }
 </style>

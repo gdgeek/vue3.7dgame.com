@@ -114,6 +114,15 @@
             </el-dropdown>
           </div>
         </template>
+
+        <template #empty>
+          <EmptyState
+            :icon="['fas', 'headphones']"
+            :text="t('common.noData')"
+            :action-text="t('audio.uploadAudio')"
+            @action="openUploadDialog"
+          ></EmptyState>
+        </template>
       </ViewContainer>
 
       <PagePagination
@@ -183,6 +192,7 @@ import {
   PageActionBar,
   ViewContainer,
   PagePagination,
+  EmptyState,
   StandardCard,
   DetailPanel,
   ResourceScopeFilter,

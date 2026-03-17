@@ -27,7 +27,9 @@
           >
             <font-awesome-icon icon="plus"></font-awesome-icon>
             &nbsp;
-            <span class="hidden-sm-and-down">{{ $t("verse.page.title") }}</span>
+            <span class="hidden-sm-and-down">{{
+              $t("verse.listPage.createScene")
+            }}</span>
           </el-button>
           <!-- Slot for custom header actions -->
           <slot name="header-actions"></slot>

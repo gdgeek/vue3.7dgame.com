@@ -92,7 +92,7 @@ export default {
     logoutConfirmDesc: "登出後需要重新登入才能存取您的帳戶。",
   },
   breadcrumb: {
-    workspace: "工作台",
+    workspace: "主頁",
     support: "支援",
     helpCenter: "幫助中心",
     videoTutorial: "影片教學",

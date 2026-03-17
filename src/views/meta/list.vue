@@ -31,7 +31,7 @@
               :icon="['fas', 'plus']"
               style="font-size: 18px; margin-right: 4px"
             ></font-awesome-icon>
-            {{ $t("meta.title") }}
+            {{ t("meta.list.createAction") }}
           </el-button>
         </template>
       </PageActionBar>

@@ -22,13 +22,14 @@
               :icon="['fas', 'plus']"
               style="font-size: 18px; margin-right: 4px"
             ></font-awesome-icon>
-            {{ $t("verse.page.title") }}
+            {{ t("verse.listPage.createScene") }}
           </el-button>
           <el-button @click="openImportDialog">
             <font-awesome-icon
               :icon="['fas', 'upload']"
               style="font-size: 18px; margin-right: 4px"
             ></font-awesome-icon>
+            {{ t("ui.importScene") }}
           </el-button>
         </template>
       </PageActionBar>
@@ -128,6 +129,15 @@
               </template>
             </el-dropdown>
           </div>
+        </template>
+
+        <template #empty>
+          <EmptyState
+            :icon="['fas', 'layer-group']"
+            :text="t('route.project.noVerses')"
+            :action-text="t('verse.listPage.createScene')"
+            @action="createWindow"
+          ></EmptyState>
         </template>
       </ViewContainer>
 
@@ -397,6 +407,7 @@ import {
   PageActionBar,
   ViewContainer,
   PagePagination,
+  EmptyState,
   StandardCard,
   DetailPanel,
 } from "@/components/StandardPage";
