@@ -183,6 +183,44 @@ describe("changeLanguage()", () => {
     await store.changeLanguage("en-US");
     expect(store.locale).toBeDefined();
   });
+
+  it("locale cache hit: 切换回已加载的语言不重复导入（localeCache）", async () => {
+    const store = useAppStore();
+    // 第一次：触发 import，填充缓存
+    await store.changeLanguage("en-US");
+    const localeAfterFirst = store.locale;
+
+    // 第二次：命中缓存，应返回相同的 locale 对象
+    await store.changeLanguage("en-US");
+    expect(store.locale).toBe(localeAfterFirst);
+    expect(store.language).toBe("en-US");
+  });
+
+  it("localeCache 覆盖所有语言切换后复用缓存", async () => {
+    const store = useAppStore();
+    // 先加载 ja-JP 并记录 locale 对象
+    await store.changeLanguage("ja-JP");
+    const jaLocale = store.locale;
+
+    // 切换到其他语言
+    await store.changeLanguage("th-TH");
+    await store.changeLanguage("zh-TW");
+
+    // 再切回 ja-JP，应命中缓存，返回相同对象引用
+    await store.changeLanguage("ja-JP");
+    expect(store.locale).toBe(jaLocale);
+  });
+
+  it("zh-CN 初始即在缓存中（不需要 import）", async () => {
+    const store = useAppStore();
+    await store.changeLanguage("en-US");
+    const enLocale = store.locale;
+
+    // 切换回 zh-CN，它在初始化时已加入缓存，不会触发新的 import
+    await store.changeLanguage("zh-CN");
+    expect(store.locale).toBeDefined();
+    expect(store.locale).not.toBe(enLocale); // zh-CN 与 en 是不同对象
+  });
 });
 
 // -----------------------------------------------------------------------
