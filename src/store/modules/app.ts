@@ -3,6 +3,10 @@ import defaultSettings from "@/settings";
 // 导入 Element Plus 中英文语言包
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 import { store } from "@/store";
+
+// 缓存已导入的语言包，避免重复 import()
+const localeCache = new Map<string, typeof zhCn>();
+localeCache.set("zh-CN", zhCn);
 import { DeviceEnum } from "@/enums/DeviceEnum";
 import { SidebarStatusEnum } from "@/enums/SidebarStatusEnum";
 
@@ -53,27 +57,37 @@ export const useAppStore = defineStore("app", () => {
    */
   async function changeLanguage(val: string) {
     language.value = val;
+
+    // 命中缓存，直接使用
+    if (localeCache.has(val)) {
+      locale.value = localeCache.get(val)!;
+      return;
+    }
+
+    let imported: typeof zhCn;
     switch (val) {
       case "en-US":
-        locale.value = (await import("element-plus/es/locale/lang/en"))
+        imported = (await import("element-plus/es/locale/lang/en"))
           .default as unknown as typeof zhCn;
         break;
       case "ja-JP":
-        locale.value = (await import("element-plus/es/locale/lang/ja"))
+        imported = (await import("element-plus/es/locale/lang/ja"))
           .default as unknown as typeof zhCn;
         break;
       case "th-TH":
-        locale.value = (await import("element-plus/es/locale/lang/th"))
+        imported = (await import("element-plus/es/locale/lang/th"))
           .default as unknown as typeof zhCn;
         break;
       case "zh-TW":
-        locale.value = (await import("element-plus/es/locale/lang/zh-tw"))
+        imported = (await import("element-plus/es/locale/lang/zh-tw"))
           .default as unknown as typeof zhCn;
         break;
       case "zh-CN":
       default:
-        locale.value = zhCn;
+        imported = zhCn;
     }
+    localeCache.set(val, imported);
+    locale.value = imported;
   }
   /**
    * 混合模式顶部切换

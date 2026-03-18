@@ -1,6 +1,13 @@
 import { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { useRouter } from "@/router";
 import i18n from "@/lang";
+
+// 缓存 router 实例，避免每次错误处理都重新调用 useRouter()
+let _router: ReturnType<typeof useRouter> | null = null;
+const getRouter = () => {
+  if (!_router) _router = useRouter();
+  return _router;
+};
 import { ElMessage } from "element-plus";
 import { refresh as authRefresh } from "@/api/v1/auth";
 import env from "@/environment";
@@ -113,8 +120,7 @@ service.interceptors.request.use(
           }
         } catch (err) {
           // 刷新失败 -> 跳转登录
-          const router = useRouter();
-          return handleUnauthorized(router, err);
+          return handleUnauthorized(getRouter(), err);
         }
       }
     }
@@ -168,7 +174,7 @@ service.interceptors.response.use(
     return response;
   },
   async (error: unknown) => {
-    const router = useRouter();
+    const router = getRouter();
     const axiosError = error as import("axios").AxiosError;
     const { response } = axiosError;
     const skipErrorMessage = Boolean(axiosError.config?.skipErrorMessage);

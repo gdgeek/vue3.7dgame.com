@@ -47,6 +47,7 @@
                     v-if="item.image?.url"
                     :src="toHttps(item.image.url)"
                     :alt="item.name || item.title"
+                    loading="lazy"
                   />
                   <div v-else class="thumb-placeholder">
                     <font-awesome-icon
