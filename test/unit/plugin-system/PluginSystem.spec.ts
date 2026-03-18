@@ -745,4 +745,104 @@ describe("PluginSystem", () => {
       errorSpy.mockRestore();
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Invalid state transition (lines 287-290)
+  // -------------------------------------------------------------------------
+
+  describe("invalid state transition", () => {
+    it("throws on invalid transition active → loading (lines 287-290)", async () => {
+      await system.initialize();
+      const container = createContainer();
+
+      // Load plugin successfully → active state
+      await system.loadPlugin("plugin-a", container);
+      expect(system.getPluginState("plugin-a")).toBe("active");
+
+      // Try to load again without unloading (active → loading is invalid)
+      await expect(
+        system.loadPlugin("plugin-a", container)
+      ).rejects.toThrow(/Invalid state transition/);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // handlePluginReady (lines 309-320)
+  // -------------------------------------------------------------------------
+
+  describe("handlePluginReady", () => {
+    it("does not throw when PLUGIN_READY received for unknown plugin (lines 310-313)", async () => {
+      await system.initialize();
+
+      // Capture the PLUGIN_READY callback registered via messageBus.onMessageType
+      const onMessageTypeCalls = (
+        messageBus.onMessageType as ReturnType<typeof vi.fn>
+      ).mock.calls;
+      const pluginReadyCall = onMessageTypeCalls.find(
+        ([type]: [string]) => type === "PLUGIN_READY"
+      );
+      expect(pluginReadyCall).toBeDefined();
+      const pluginReadyHandler = pluginReadyCall![1] as (
+        pluginId: string
+      ) => void;
+
+      // Fire for an unknown plugin — should not throw, just log warning and return
+      expect(() => pluginReadyHandler("unknown-plugin-id")).not.toThrow();
+      // State of all registered plugins should be unaffected
+      expect(system.getPluginState("plugin-a")).toBe("unloaded");
+    });
+
+    it("transitions loading → active when PLUGIN_READY fires for loading plugin (lines 317-319)", async () => {
+      // Make loader.load never resolve so plugin stays in loading state
+      let resolveLoad!: (value: unknown) => void;
+      (loader.load as ReturnType<typeof vi.fn>).mockImplementationOnce(
+        (_pluginId: string, manifest: PluginManifest, _container: HTMLElement) =>
+          new Promise((res) => {
+            resolveLoad = res;
+          })
+      );
+
+      await system.initialize();
+
+      // Capture the PLUGIN_READY handler
+      const onMessageTypeCalls = (
+        messageBus.onMessageType as ReturnType<typeof vi.fn>
+      ).mock.calls;
+      const pluginReadyCall = onMessageTypeCalls.find(
+        ([type]: [string]) => type === "PLUGIN_READY"
+      );
+      const pluginReadyHandler = pluginReadyCall![1] as (
+        pluginId: string
+      ) => void;
+
+      // Start loading without awaiting (plugin stays in loading state)
+      const container = createContainer();
+      const loadPromise = system.loadPlugin("plugin-a", container);
+
+      // Plugin should be in loading state now
+      expect(system.getPluginState("plugin-a")).toBe("loading");
+
+      // Fire PLUGIN_READY — should trigger loading → active transition
+      pluginReadyHandler("plugin-a");
+
+      expect(system.getPluginState("plugin-a")).toBe("active");
+
+      // Resolve the load (the loading→active was already done by PLUGIN_READY)
+      const iframe = document.createElement("iframe");
+      Object.defineProperty(iframe, "contentWindow", {
+        value: { postMessage: vi.fn() },
+        writable: true,
+      });
+      resolveLoad({
+        pluginId: "plugin-a",
+        iframe,
+        origin: "https://test.com",
+        state: "active",
+        loadedAt: Date.now(),
+      });
+      // The loadPlugin will try to transitionState again but plugin is already active
+      // active → active is also invalid, so let the promise settle without checking result
+      await loadPromise.catch(() => {/* expected invalid transition */});
+    });
+  });
 });
