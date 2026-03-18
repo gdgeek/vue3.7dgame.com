@@ -10,6 +10,7 @@
         @toggle-click="toggleSideBar"
       ></Hamburger>
       <Breadcrumb></Breadcrumb>
+      <EditorVersionToolbar></EditorVersionToolbar>
     </div>
 
     <!-- 右侧 - 操作按钮和用户信息 -->
@@ -23,6 +24,7 @@
 <script setup lang="ts">
 import { useAppStore } from "@/store";
 import Breadcrumb from "./components/Breadcrumb.vue";
+import EditorVersionToolbar from "./components/EditorVersionToolbar.vue";
 import HeaderActions from "./components/HeaderActions.vue";
 import UserDropdown from "./components/UserDropdown.vue";
 import Hamburger from "@/components/Hamburger/index.vue";

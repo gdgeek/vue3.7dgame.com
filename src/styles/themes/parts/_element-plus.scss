@@ -159,6 +159,88 @@
   }
 }
 
+// 全局消息提示：统一为浅色提示条风格，并按类型区分颜色
+.el-message {
+  min-width: auto !important;
+  max-width: min(420px, calc(100vw - 32px)) !important;
+  padding: 10px 16px !important;
+  border-radius: 14px !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+  box-shadow: 0 8px 24px rgba(31, 41, 55, 0.08) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  animation: el-message-slide-down 0.3s ease-out !important;
+
+  .el-message__content {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+  }
+
+  .el-message__icon {
+    font-size: 16px !important;
+    margin-right: 8px !important;
+  }
+
+  .el-message__closeBtn {
+    font-size: 14px !important;
+    margin-left: 12px !important;
+  }
+}
+
+@keyframes el-message-slide-down {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.el-message--success {
+  background: #f4fbef !important;
+  border-color: #d8efc9 !important;
+
+  .el-message__icon,
+  .el-message__content {
+    color: #67c23a !important;
+  }
+}
+
+.el-message--warning {
+  background: #fff8e8 !important;
+  border-color: #f5e1a5 !important;
+
+  .el-message__icon,
+  .el-message__content {
+    color: #e6a23c !important;
+  }
+}
+
+.el-message--error {
+  background: #fff1f0 !important;
+  border-color: #f6c9c6 !important;
+
+  .el-message__icon,
+  .el-message__content {
+    color: #f56c6c !important;
+  }
+}
+
+.el-message--info {
+  background: #eef8ff !important;
+  border-color: #cfe8fb !important;
+
+  .el-message__icon,
+  .el-message__content {
+    color: #409eff !important;
+  }
+}
+
 // 各主题 Element Plus 特殊样式
 .theme-cyber-tech {
   .el-dropdown-menu,

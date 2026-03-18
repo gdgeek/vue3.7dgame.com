@@ -26,6 +26,7 @@
     <el-container class="editor-wrapper">
       <el-main class="editor-container">
         <iframe
+          :key="editorFrameKey"
           ref="editor"
           id="editor"
           :src="src"
@@ -35,13 +36,32 @@
         ></iframe>
       </el-main>
     </el-container>
+    <ScriptDraftDialog
+      :model-value="versionDialogVisible"
+      :versions="draftVersions"
+      :auto-save-enabled="autoSaveEnabled"
+      :auto-save-interval-seconds="autoSaveIntervalSeconds"
+      @update:model-value="versionDialogVisible = $event"
+      @update:auto-save-enabled="autoSaveEnabled = $event"
+      @update:auto-save-interval-seconds="autoSaveIntervalSeconds = $event"
+      @clear-history="clearDraftHistory"
+      @restore="restoreDraftVersion"
+    ></ScriptDraftDialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
 import type { CardInfo, DataInput, DataOutput } from "@/utils/types";
-import { getResources } from "@/api/v1/resources";
+import {
+  getAudio,
+  getParticle,
+  getPolygen,
+  getPicture,
+  getResources,
+  getVideo,
+  getVoxel,
+} from "@/api/v1/resources";
 import { getPhototypes } from "@/api/v1/phototype";
 import type { PhototypeType } from "@/api/v1/types/phototype";
 import type { ResourceInfo } from "@/api/v1/resources/model";
@@ -61,6 +81,19 @@ type MetaPayload = {
   children?: {
     entities?: MetaEntity[];
   };
+};
+
+type RestorableResourceType =
+  | "polygen"
+  | "picture"
+  | "video"
+  | "voxel"
+  | "audio"
+  | "particle";
+
+type MetaResourceRef = {
+  id: number;
+  type: RestorableResourceType;
 };
 
 type UnsavedChangesResultPayload = {
@@ -94,6 +127,9 @@ const isUnsavedChangesResultPayload = (
   isRecord(value) &&
   typeof value.requestId === "string" &&
   typeof value.changed === "boolean";
+
+const DEFAULT_AUTO_SAVE_INTERVAL_SECONDS = 300;
+const DRAFT_SETTINGS_VERSION = 2;
 
 const getAudioSource = (value: unknown): string => {
   if (!isRecord(value) || !isRecord(value.context)) return "";
@@ -188,7 +224,9 @@ const getDatas = (input: DataInput): Promise<DataOutput> => {
 import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import ResourceDialog from "@/components/MrPP/ResourceDialog.vue";
 import PhototypeDialog from "@/components/MrPP/PhototypeDialog.vue";
-import { putMeta, getMeta } from "@/api/v1/meta";
+import ScriptDraftDialog from "@/components/ScriptDraftDialog.vue";
+import { Message } from "@/components/Dialog";
+import { putMeta, getMeta, type metaInfo } from "@/api/v1/meta";
 import type { UpdateMetaRequest } from "@/api/v1/types/meta";
 import { getVerses, type VerseData } from "@/api/v1/verse";
 import { useAppStore } from "@/store/modules/app";
@@ -201,6 +239,14 @@ import { AbilityEdit } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
 import { useUserStore } from "@/store/modules/user";
 import { until } from "@vueuse/core";
+import {
+  useEditorVersionToolbar,
+  type EditorToolbarStatus,
+} from "@/composables/useEditorVersionToolbar";
+import type {
+  ScriptDraftVersion,
+  ScriptSaveTrigger,
+} from "@/composables/useScriptEditorBase";
 
 import qs from "querystringify";
 
@@ -222,10 +268,450 @@ let pendingLeaveSaveResolver: ((result: boolean) => void) | null = null;
 const hasUnsavedChangesBeforeUnload = ref(false);
 let unsavedCheckPollingTimer: number | null = null;
 let isPollingUnsavedChanges = false;
+const editorFrameKey = ref(0);
+const isRestoringDraft = ref(false);
+const metaDetail = ref<unknown>(null);
+const entityScenes = ref<EntitySceneItem[]>([]);
+const versionDialogVisible = ref(false);
+const draftVersions = ref<ScriptDraftVersion[]>([]);
+const autoSaveEnabled = ref(true);
+const autoSaveIntervalSeconds = ref(DEFAULT_AUTO_SAVE_INTERVAL_SECONDS);
+const isSavingVersion = ref(false);
+const lastSaveTrigger = ref<ScriptSaveTrigger | null>(null);
+const lastSavedAt = ref<string | null>(null);
+const pendingRestorePayload = ref<{
+  meta?: MetaPayload;
+  events?: unknown;
+} | null>(null);
+let currentSaveTrigger: ScriptSaveTrigger = "manual";
+let autoSaveTimer: number | null = null;
+let pendingSceneSavePromise: Promise<boolean> | null = null;
+
+const toolbarOwner = "meta-scene-editor";
+const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
+  useEditorVersionToolbar();
+const toolbarStatus = computed<EditorToolbarStatus>(() => {
+  if (isSavingVersion.value) return "saving";
+  if (pendingRestorePayload.value || hasUnsavedChangesBeforeUnload.value) {
+    return "dirty";
+  }
+  if (lastSaveTrigger.value === "auto" && lastSavedAt.value) {
+    return "autosaved";
+  }
+  return "saved";
+});
+
+const safeClone = <T,>(value: T): T => {
+  try {
+    return structuredClone(value);
+  } catch {
+    return JSON.parse(JSON.stringify(value));
+  }
+};
+
+const buildSceneDraftStorageKey = computed(() =>
+  Number.isFinite(id.value) ? `scene-draft:meta:${id.value}` : null
+);
+
+const buildSceneDraftSettingsKey = computed(() =>
+  buildSceneDraftStorageKey.value
+    ? `${buildSceneDraftStorageKey.value}:settings`
+    : null
+);
 
 type EntitySceneItem = {
   id: number;
   name: string;
+};
+
+const normalizeRestorableResourceType = (
+  type: unknown
+): RestorableResourceType | null => {
+  if (typeof type !== "string") return null;
+  switch (type.toLowerCase()) {
+    case "polygen":
+      return "polygen";
+    case "picture":
+      return "picture";
+    case "video":
+      return "video";
+    case "voxel":
+      return "voxel";
+    case "audio":
+    case "sound":
+      return "audio";
+    case "particle":
+      return "particle";
+    default:
+      return null;
+  }
+};
+
+const collectMetaResourceRefs = (
+  value: unknown,
+  refs: MetaResourceRef[] = []
+): MetaResourceRef[] => {
+  if (!isRecord(value)) return refs;
+
+  const normalizedType = normalizeRestorableResourceType(value.type);
+  const parameters = isRecord(value.parameters) ? value.parameters : null;
+  const rawResourceId = parameters?.resource;
+  const resourceId =
+    typeof rawResourceId === "number" ? rawResourceId : Number(rawResourceId);
+
+  if (normalizedType && Number.isFinite(resourceId)) {
+    refs.push({ id: resourceId, type: normalizedType });
+  }
+
+  const children = isRecord(value.children) ? value.children : null;
+  if (!children) return refs;
+
+  Object.values(children).forEach((child) => {
+    if (Array.isArray(child)) {
+      child.forEach((item) => {
+        collectMetaResourceRefs(item, refs);
+      });
+      return;
+    }
+    collectMetaResourceRefs(child, refs);
+  });
+
+  return refs;
+};
+
+const fetchResourceByRef = async (
+  ref: MetaResourceRef
+): Promise<ResourceInfo | null> => {
+  try {
+    switch (ref.type) {
+      case "polygen":
+        return (
+          (await getPolygen(ref.id)) as {
+            data: ResourceInfo;
+          }
+        ).data;
+      case "picture":
+        return (await getPicture(ref.id)).data;
+      case "video":
+        return (await getVideo(ref.id)).data;
+      case "voxel":
+        return (
+          (await getVoxel(ref.id)) as {
+            data: ResourceInfo;
+          }
+        ).data;
+      case "audio":
+        return (await getAudio(ref.id)).data;
+      case "particle":
+        return (await getParticle(ref.id)).data;
+      default:
+        return null;
+    }
+  } catch (error) {
+    logger.error("Failed to hydrate restored meta resource", ref, error);
+    return null;
+  }
+};
+
+const hydrateMetaResources = async (
+  metaData: unknown,
+  currentResources: ResourceInfo[] = []
+) => {
+  const refs = collectMetaResourceRefs(metaData);
+  if (refs.length === 0) return [];
+
+  const uniqueRefs = Array.from(
+    new Map(refs.map((ref) => [`${ref.type}:${ref.id}`, ref])).values()
+  );
+  const existingMap = new Map(
+    currentResources.map((resource) => [
+      `${resource.type}:${resource.id}`,
+      resource,
+    ])
+  );
+  const missingRefs = uniqueRefs.filter(
+    (ref) => !existingMap.has(`${ref.type}:${ref.id}`)
+  );
+
+  if (missingRefs.length > 0) {
+    const results = await Promise.all(
+      missingRefs.map(async (ref) => ({
+        key: `${ref.type}:${ref.id}`,
+        resource: await fetchResourceByRef(ref),
+      }))
+    );
+    results.forEach(({ key, resource }) => {
+      if (resource) {
+        existingMap.set(key, resource);
+      }
+    });
+  }
+
+  return uniqueRefs
+    .map((ref) => existingMap.get(`${ref.type}:${ref.id}`))
+    .filter((resource): resource is ResourceInfo => Boolean(resource));
+};
+
+const collectMetaEntityNames = (
+  entities: MetaEntity[] | undefined,
+  names: string[] = []
+) => {
+  (entities || []).forEach((entity) => {
+    const name =
+      typeof entity?.parameters?.name === "string"
+        ? entity.parameters.name.trim()
+        : "";
+    if (name) {
+      names.push(name);
+    }
+    collectMetaEntityNames(entity.children?.entities, names);
+  });
+  return names;
+};
+
+const formatMetaDraftSummary = (payload: {
+  meta?: MetaPayload;
+  events?: unknown;
+}) => {
+  const names = collectMetaEntityNames(payload.meta?.children?.entities);
+  if (names.length === 0) {
+    return t("common.scriptDraft.emptySummary");
+  }
+  const preview = names.slice(0, 3).join("、");
+  const extra = names.length > 3 ? ` +${names.length - 3}` : "";
+  return `${preview}${extra}`;
+};
+
+const formatMetaDraftChangeSummary = (
+  payload: {
+    meta?: MetaPayload;
+    events?: unknown;
+  },
+  previousVersion?: ScriptDraftVersion
+) => {
+  if (!previousVersion) {
+    return formatMetaDraftSummary(payload);
+  }
+  const currentNames = collectMetaEntityNames(payload.meta?.children?.entities);
+  const previousPayload = isRecord(previousVersion.blocklyData)
+    ? (previousVersion.blocklyData as { meta?: MetaPayload })
+    : {};
+  const previousNames = collectMetaEntityNames(
+    previousPayload.meta?.children?.entities
+  );
+  const addedNames = currentNames.filter(
+    (name) => !previousNames.includes(name)
+  );
+  if (addedNames.length > 0) {
+    return `新增 ${addedNames.slice(0, 3).join("、")}`;
+  }
+  const removedNames = previousNames.filter(
+    (name) => !currentNames.includes(name)
+  );
+  if (removedNames.length > 0) {
+    return `删除 ${removedNames.slice(0, 3).join("、")}`;
+  }
+  for (let index = 0; index < currentNames.length; index += 1) {
+    if (currentNames[index] !== previousNames[index]) {
+      return `修改 ${currentNames[index] || previousNames[index]}`;
+    }
+  }
+  return formatMetaDraftSummary(payload);
+};
+
+const persistSceneDraftVersions = () => {
+  if (!buildSceneDraftStorageKey.value) return;
+  try {
+    window.localStorage.setItem(
+      buildSceneDraftStorageKey.value,
+      JSON.stringify(draftVersions.value)
+    );
+  } catch (error) {
+    logger.error("persistSceneDraftVersions error", error);
+  }
+};
+
+const persistSceneDraftSettings = () => {
+  if (!buildSceneDraftSettingsKey.value) return;
+  try {
+    window.localStorage.setItem(
+      buildSceneDraftSettingsKey.value,
+      JSON.stringify({
+        settingsVersion: DRAFT_SETTINGS_VERSION,
+        autoSaveEnabled: autoSaveEnabled.value,
+        autoSaveIntervalSeconds: autoSaveIntervalSeconds.value,
+      })
+    );
+  } catch (error) {
+    logger.error("persistSceneDraftSettings error", error);
+  }
+};
+
+const normalizeAutoSaveInterval = (parsed: Record<string, unknown>) => {
+  const interval = Number(parsed.autoSaveIntervalSeconds);
+  if (!Number.isFinite(interval) || interval < 60) {
+    return DEFAULT_AUTO_SAVE_INTERVAL_SECONDS;
+  }
+  const settingsVersion = Number(parsed.settingsVersion || 0);
+  if (settingsVersion < DRAFT_SETTINGS_VERSION && interval === 60) {
+    return DEFAULT_AUTO_SAVE_INTERVAL_SECONDS;
+  }
+  return interval;
+};
+
+const loadSceneDraftState = () => {
+  draftVersions.value = [];
+  autoSaveEnabled.value = true;
+  autoSaveIntervalSeconds.value = DEFAULT_AUTO_SAVE_INTERVAL_SECONDS;
+
+  if (!buildSceneDraftStorageKey.value || !buildSceneDraftSettingsKey.value) {
+    return;
+  }
+
+  try {
+    const rawVersions = window.localStorage.getItem(
+      buildSceneDraftStorageKey.value
+    );
+    if (rawVersions) {
+      const parsed = JSON.parse(rawVersions);
+      if (Array.isArray(parsed)) {
+        draftVersions.value = parsed;
+        const latestVersion = parsed[0] as ScriptDraftVersion | undefined;
+        if (latestVersion) {
+          lastSaveTrigger.value = latestVersion.trigger;
+          lastSavedAt.value = latestVersion.savedAt;
+        }
+      }
+    }
+  } catch (error) {
+    logger.error("loadSceneDraftState versions error", error);
+  }
+
+  try {
+    const rawSettings = window.localStorage.getItem(
+      buildSceneDraftSettingsKey.value
+    );
+    if (rawSettings) {
+      const parsed = JSON.parse(rawSettings);
+      autoSaveEnabled.value = parsed.autoSaveEnabled !== false;
+      if (parsed && typeof parsed === "object") {
+        autoSaveIntervalSeconds.value = normalizeAutoSaveInterval(
+          parsed as Record<string, unknown>
+        );
+      }
+    }
+  } catch (error) {
+    logger.error("loadSceneDraftState settings error", error);
+  }
+};
+
+const addSceneDraftVersion = (
+  payload: {
+    meta?: MetaPayload;
+    events?: unknown;
+  },
+  trigger: ScriptSaveTrigger
+) => {
+  const latestVersion = draftVersions.value[0];
+  const nextVersion: ScriptDraftVersion = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    savedAt: new Date().toISOString(),
+    trigger,
+    summary: formatMetaDraftChangeSummary(payload, latestVersion),
+    blocklyData: safeClone(payload),
+    lua: "",
+    js: "",
+  };
+  const nextSignature = JSON.stringify(nextVersion.blocklyData ?? null);
+  const latestSignature = latestVersion
+    ? JSON.stringify(latestVersion.blocklyData ?? null)
+    : "";
+  if (latestSignature === nextSignature) {
+    return null;
+  }
+  draftVersions.value = [nextVersion, ...draftVersions.value].slice(0, 20);
+  persistSceneDraftVersions();
+  return nextVersion.savedAt;
+};
+
+const openVersionDialog = () => {
+  versionDialogVisible.value = true;
+};
+
+const clearDraftHistory = () => {
+  draftVersions.value = [];
+  pendingRestorePayload.value = null;
+  if (!buildSceneDraftStorageKey.value) return;
+  try {
+    window.localStorage.removeItem(buildSceneDraftStorageKey.value);
+  } catch (error) {
+    logger.error("clearMetaSceneDraftHistory error", error);
+  }
+};
+
+const restoreDraftVersion = async (draftId: string) => {
+  if (isRestoringDraft.value) return;
+  const target = draftVersions.value.find((draft) => draft.id === draftId);
+  if (!target || !metaDetail.value) return;
+  versionDialogVisible.value = false;
+  isRestoringDraft.value = true;
+  const currentMetaDetailRef = metaDetail.value as metaInfo;
+  const payload = isRecord(target.blocklyData) ? target.blocklyData : {};
+  const restoredMeta = payload.meta as MetaPayload | undefined;
+  const restoredEvents = payload.events;
+  const nextMetaDetail = JSON.parse(
+    JSON.stringify(currentMetaDetailRef)
+  ) as metaInfo;
+  const currentMetaDetail = currentMetaDetailRef as unknown as {
+    data?: unknown;
+    events?: unknown;
+  };
+  const nextDataSource: unknown =
+    restoredMeta ?? currentMetaDetail.data ?? null;
+  const nextEventsSource: unknown = restoredEvents ?? currentMetaDetail.events;
+  nextMetaDetail.data = JSON.parse(JSON.stringify(nextDataSource));
+  nextMetaDetail.events = JSON.parse(JSON.stringify(nextEventsSource)) as
+    | import("@/api/v1/types/meta").Events
+    | null;
+  nextMetaDetail.resources = await hydrateMetaResources(
+    nextDataSource,
+    Array.isArray(currentMetaDetailRef.resources)
+      ? currentMetaDetailRef.resources
+      : []
+  );
+  metaDetail.value = nextMetaDetail;
+  pendingRestorePayload.value = {
+    meta: JSON.parse(JSON.stringify(nextDataSource)) as MetaPayload,
+    events: JSON.parse(JSON.stringify(nextEventsSource)),
+  };
+  editorFrameKey.value += 1;
+  hasUnsavedChangesBeforeUnload.value = true;
+  Message.success(t("common.scriptDraft.restoreSuccess"));
+};
+
+const clearAutoSaveTimer = () => {
+  if (autoSaveTimer !== null) {
+    window.clearInterval(autoSaveTimer);
+    autoSaveTimer = null;
+  }
+};
+
+const restartAutoSaveTimer = () => {
+  clearAutoSaveTimer();
+  if (!autoSaveEnabled.value || !buildSceneDraftStorageKey.value) return;
+
+  autoSaveTimer = window.setInterval(async () => {
+    if (!pendingRestorePayload.value && !hasUnsavedChangesBeforeUnload.value) {
+      return;
+    }
+    if (isSavingVersion.value || pendingSceneSavePromise) return;
+    if (!metaDetail.value || !saveable(metaDetail.value as metaInfo)) return;
+    try {
+      await requestSceneSave("auto");
+    } catch (error) {
+      logger.error("meta scene auto save failed", error);
+    }
+  }, autoSaveIntervalSeconds.value * 1000);
 };
 
 const extractEntitySceneIds = (verseMetas: unknown): number[] => {
@@ -505,7 +991,9 @@ const syncUnsavedChangesForBeforeUnload = async () => {
   isPollingUnsavedChanges = true;
   try {
     const changed = await queryUnsavedChangesBeforeLeave();
-    hasUnsavedChangesBeforeUnload.value = changed;
+    hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
+      ? true
+      : changed;
   } finally {
     isPollingUnsavedChanges = false;
   }
@@ -535,9 +1023,26 @@ const resolveLeaveSave = (result: boolean) => {
   resolver(result);
 };
 
+const requestSceneSave = (trigger: ScriptSaveTrigger) => {
+  if (pendingSceneSavePromise) return pendingSceneSavePromise;
+  currentSaveTrigger = trigger;
+  isSavingVersion.value = true;
+  postMessage("save-before-leave", {});
+  pendingSceneSavePromise = waitForLeaveSaveResult().finally(() => {
+    pendingSceneSavePromise = null;
+    isSavingVersion.value = false;
+  });
+  return pendingSceneSavePromise;
+};
+
 const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
+  if (pendingRestorePayload.value) {
+    hasUnsavedChangesBeforeUnload.value = true;
+  }
   const changed = await queryUnsavedChangesBeforeLeave();
-  hasUnsavedChangesBeforeUnload.value = changed;
+  hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
+    ? true
+    : changed;
 
   if (!changed) {
     return true;
@@ -552,8 +1057,7 @@ const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
     return false;
   }
 
-  postMessage("save-before-leave", {});
-  return waitForLeaveSaveResult();
+  return requestSceneSave("manual");
 };
 
 const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -580,14 +1084,17 @@ const getAvailableResourceTypes = () => {
 };
 
 // 保存元数据
-const saveMeta = async ({
-  meta,
-  events,
-}: {
-  meta: MetaPayload;
-  events: unknown;
-}): Promise<boolean> => {
-  if (!saveable) {
+const saveMeta = async (
+  {
+    meta,
+    events,
+  }: {
+    meta: MetaPayload;
+    events: unknown;
+  },
+  trigger: ScriptSaveTrigger = "manual"
+): Promise<boolean> => {
+  if (!metaDetail.value || !saveable(metaDetail.value as metaInfo)) {
     ElMessage.info(t("meta.scene.info"));
     return true;
   }
@@ -627,7 +1134,20 @@ const saveMeta = async ({
       data: meta,
       events: events as import("@/api/v1/types/meta").Events | null,
     });
-    ElMessage.success(t("meta.scene.success"));
+    if (metaDetail.value) {
+      const currentMetaDetail = metaDetail.value as metaInfo;
+      const nextMetaDetail = JSON.parse(
+        JSON.stringify(currentMetaDetail)
+      ) as metaInfo;
+      nextMetaDetail.data = JSON.parse(JSON.stringify(meta));
+      nextMetaDetail.events = JSON.parse(
+        JSON.stringify(events as import("@/api/v1/types/meta").Events | null)
+      ) as import("@/api/v1/types/meta").Events | null;
+      metaDetail.value = nextMetaDetail;
+    }
+    if (trigger === "manual") {
+      Message.success(t("meta.scene.success"));
+    }
     return true;
   } catch (error) {
     ElMessage.error(t("meta.scene.saveError"));
@@ -733,52 +1253,134 @@ const handleMessage = async (e: MessageEvent) => {
   switch (action) {
     case "save-meta":
       {
+        currentSaveTrigger = "manual";
+        isSavingVersion.value = true;
         const result = await saveMeta(
           data as {
             meta: MetaPayload;
             events: unknown;
-          }
+          },
+          currentSaveTrigger
         );
         if (result) {
+          const payload = data as { meta: MetaPayload; events: unknown };
+          const savedAt = addSceneDraftVersion(payload, currentSaveTrigger);
           hasUnsavedChangesBeforeUnload.value = false;
+          pendingRestorePayload.value = null;
+          lastSaveTrigger.value = currentSaveTrigger;
+          lastSavedAt.value = savedAt || new Date().toISOString();
         }
+        isSavingVersion.value = false;
         resolveLeaveSave(result);
       }
-      // ElMessage.success("储存完成");
       break;
 
     case "save-meta-none":
+      if (pendingRestorePayload.value) {
+        const restoredPayload = pendingRestorePayload.value;
+        const result = await saveMeta(
+          {
+            meta: restoredPayload.meta as MetaPayload,
+            events: restoredPayload.events,
+          },
+          currentSaveTrigger
+        );
+        if (result) {
+          const savedAt = addSceneDraftVersion(
+            {
+              meta: restoredPayload.meta,
+              events: restoredPayload.events,
+            },
+            currentSaveTrigger
+          );
+          pendingRestorePayload.value = null;
+          hasUnsavedChangesBeforeUnload.value = false;
+          lastSaveTrigger.value = currentSaveTrigger;
+          lastSavedAt.value = savedAt || new Date().toISOString();
+        }
+        isSavingVersion.value = false;
+        resolveLeaveSave(result);
+        break;
+      }
+      lastSaveTrigger.value = currentSaveTrigger;
+      lastSavedAt.value = new Date().toISOString();
       ElMessage.warning(t("meta.scene.noChanges"));
       hasUnsavedChangesBeforeUnload.value = false;
+      isSavingVersion.value = false;
       resolveLeaveSave(true);
       break;
 
     case "save-meta-before-leave":
       {
+        isSavingVersion.value = true;
         const result = await saveMeta(
           data as {
             meta: MetaPayload;
             events: unknown;
-          }
+          },
+          currentSaveTrigger
         );
         if (result) {
+          const payload = data as { meta: MetaPayload; events: unknown };
+          const savedAt = addSceneDraftVersion(payload, currentSaveTrigger);
           hasUnsavedChangesBeforeUnload.value = false;
+          pendingRestorePayload.value = null;
+          lastSaveTrigger.value = currentSaveTrigger;
+          lastSavedAt.value = savedAt || new Date().toISOString();
+          if (currentSaveTrigger === "auto") {
+            Message.success(t("common.scriptDraft.autoSavedNotice"));
+          }
         }
+        isSavingVersion.value = false;
         resolveLeaveSave(result);
       }
       break;
 
     case "save-meta-before-leave-none":
+      if (pendingRestorePayload.value) {
+        const restoredPayload = pendingRestorePayload.value;
+        const result = await saveMeta(
+          {
+            meta: restoredPayload.meta as MetaPayload,
+            events: restoredPayload.events,
+          },
+          currentSaveTrigger
+        );
+        if (result) {
+          const savedAt = addSceneDraftVersion(
+            {
+              meta: restoredPayload.meta,
+              events: restoredPayload.events,
+            },
+            currentSaveTrigger
+          );
+          pendingRestorePayload.value = null;
+          hasUnsavedChangesBeforeUnload.value = false;
+          lastSaveTrigger.value = currentSaveTrigger;
+          lastSavedAt.value = savedAt || new Date().toISOString();
+          if (currentSaveTrigger === "auto") {
+            Message.success(t("common.scriptDraft.autoSavedNotice"));
+          }
+        }
+        isSavingVersion.value = false;
+        resolveLeaveSave(result);
+        break;
+      }
+      lastSaveTrigger.value = currentSaveTrigger;
+      lastSavedAt.value = new Date().toISOString();
       hasUnsavedChangesBeforeUnload.value = false;
+      isSavingVersion.value = false;
       resolveLeaveSave(true);
       break;
 
     case "unsaved-changes-result":
       if (isUnsavedChangesResultPayload(data)) {
-        hasUnsavedChangesBeforeUnload.value = Boolean(data.changed);
+        hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
+          ? true
+          : Boolean(data.changed);
         const resolver = pendingUnsavedChecks.get(data.requestId);
         if (resolver) {
-          resolver(Boolean(data.changed));
+          resolver(pendingRestorePayload.value ? true : Boolean(data.changed));
         }
       }
       break;
@@ -852,7 +1454,12 @@ const handleMessage = async (e: MessageEvent) => {
 
     case "ready":
       hasUnsavedChangesBeforeUnload.value = false;
-      if (!init) {
+      if (isRestoringDraft.value && metaDetail.value) {
+        isRestoringDraft.value = false;
+        const restoredMetaDetail = metaDetail.value as unknown as metaInfo;
+        pushMetaToEditor(restoredMetaDetail);
+        hasUnsavedChangesBeforeUnload.value = true;
+      } else if (!init) {
         init = true;
         await refresh();
       } else {
@@ -871,37 +1478,44 @@ const handleMessage = async (e: MessageEvent) => {
   }
 };
 
+const pushMetaToEditor = (meta: metaInfo) => {
+  const availableTypes = getAvailableResourceTypes();
+  postMessage("load", {
+    data: meta,
+    saveable: saveable(meta),
+    availableResourceTypes: availableTypes,
+    entityScenes: entityScenes.value,
+    entitySceneNames: entityScenes.value.map((scene) => scene.name),
+    user: {
+      id: userStore.userInfo?.id || null,
+      role: userStore.getRole(),
+    },
+    system: {
+      a1: import.meta.env.VITE_APP_A1_API,
+    },
+  });
+};
+
 // 刷新元数据
 const refresh = async () => {
   try {
     const metaResponse = await getMeta(id.value, { expand: "verseMetas" });
-    const meta = metaResponse.data;
-    const availableTypes = getAvailableResourceTypes();
-    const entityScenes = await getEntityScenes(meta.verseMetas);
-    logger.log(availableTypes);
-
-    // 发送元数据和可用资源类型到编辑器
-    postMessage("load", {
-      data: meta,
-      saveable: saveable(meta),
-      availableResourceTypes: availableTypes,
-      entityScenes,
-      entitySceneNames: entityScenes.map((scene) => scene.name),
-      user: {
-        id: userStore.userInfo?.id || null,
-        //roles: userStore.userInfo?.roles || [],
-        role: userStore.getRole(), // 获取用户角色
-      },
-      system: {
-        a1: import.meta.env.VITE_APP_A1_API,
-      },
-    });
+    const nextMetaDetail = metaResponse.data as metaInfo;
+    metaDetail.value = nextMetaDetail;
+    entityScenes.value = await getEntityScenes(nextMetaDetail.verseMetas);
+    pushMetaToEditor(nextMetaDetail);
   } catch (error) {
     logger.error(error);
   }
 };
 // 生命周期钩子
 onMounted(() => {
+  loadSceneDraftState();
+  registerToolbar(toolbarOwner, {
+    status: toolbarStatus.value,
+    onOpen: openVersionDialog,
+  });
+  restartAutoSaveTimer();
   window.addEventListener("message", handleMessage);
   window.addEventListener("beforeunload", handleBeforeUnload);
   void syncUnsavedChangesForBeforeUnload();
@@ -915,7 +1529,18 @@ onBeforeRouteLeave(async (_to, _from, next) => {
   next(canLeave);
 });
 
+watch(toolbarStatus, (status) => {
+  updateToolbarStatus(toolbarOwner, status);
+});
+
+watch([autoSaveEnabled, autoSaveIntervalSeconds], () => {
+  persistSceneDraftSettings();
+  restartAutoSaveTimer();
+});
+
 onBeforeUnmount(() => {
+  unregisterToolbar(toolbarOwner);
+  clearAutoSaveTimer();
   window.removeEventListener("message", handleMessage);
   window.removeEventListener("beforeunload", handleBeforeUnload);
   if (unsavedCheckPollingTimer !== null) {

@@ -6,6 +6,7 @@
     <el-container>
       <el-main style="padding: 0; overflow: hidden">
         <iframe
+          :key="editorFrameKey"
           id="editor"
           ref="editor"
           :src="src"
@@ -16,6 +17,17 @@
         ></iframe>
       </el-main>
     </el-container>
+    <ScriptDraftDialog
+      :model-value="versionDialogVisible"
+      :versions="draftVersions"
+      :auto-save-enabled="autoSaveEnabled"
+      :auto-save-interval-seconds="autoSaveIntervalSeconds"
+      @update:model-value="versionDialogVisible = $event"
+      @update:auto-save-enabled="autoSaveEnabled = $event"
+      @update:auto-save-interval-seconds="autoSaveIntervalSeconds = $event"
+      @clear-history="clearDraftHistory"
+      @restore="restoreDraftVersion"
+    ></ScriptDraftDialog>
   </div>
 </template>
 
@@ -27,6 +39,8 @@ import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 //import PrefabDialog from "@/components/MrPP/PrefabDialog.vue";
 import MetaDialog from "@/components/MrPP/MetaDialog.vue";
 import KnightDataDialog from "@/components/MrPP/KnightDataDialog.vue";
+import ScriptDraftDialog from "@/components/ScriptDraftDialog.vue";
+import { Message } from "@/components/Dialog";
 import { putVerse, getVerse, VerseData } from "@/api/v1/verse";
 import type { JsonValue } from "@/api/v1/types/common";
 import { getPrefab } from "@/api/v1/prefab";
@@ -35,6 +49,14 @@ import { useUserStore } from "@/store/modules/user";
 import { translateRouteTitle } from "@/utils/i18n";
 import env from "@/environment";
 import { useFileStore } from "@/store/modules/config";
+import {
+  useEditorVersionToolbar,
+  type EditorToolbarStatus,
+} from "@/composables/useEditorVersionToolbar";
+import type {
+  ScriptDraftVersion,
+  ScriptSaveTrigger,
+} from "@/composables/useScriptEditorBase";
 
 // 组件状态
 const userStore = useUserStore();
@@ -49,6 +71,56 @@ const saveable = ref(false);
 let unsavedCheckSeed = 0;
 const pendingUnsavedChecks = new Map<string, (changed: boolean) => void>();
 let pendingLeaveSaveResolver: ((result: boolean) => void) | null = null;
+const hasUnsavedChangesBeforeUnload = ref(false);
+let unsavedCheckPollingTimer: number | null = null;
+let isPollingUnsavedChanges = false;
+const editorFrameKey = ref(0);
+const isRestoringDraft = ref(false);
+const versionDialogVisible = ref(false);
+const draftVersions = ref<ScriptDraftVersion[]>([]);
+const autoSaveEnabled = ref(true);
+const DEFAULT_AUTO_SAVE_INTERVAL_SECONDS = 300;
+const DRAFT_SETTINGS_VERSION = 2;
+const autoSaveIntervalSeconds = ref(DEFAULT_AUTO_SAVE_INTERVAL_SECONDS);
+const isSavingVersion = ref(false);
+const lastSaveTrigger = ref<ScriptSaveTrigger | null>(null);
+const lastSavedAt = ref<string | null>(null);
+const pendingRestorePayload = ref<VerseEditorPayload | null>(null);
+let currentSaveTrigger: ScriptSaveTrigger = "manual";
+let autoSaveTimer: number | null = null;
+let pendingSceneSavePromise: Promise<boolean> | null = null;
+
+const toolbarOwner = "verse-scene-editor";
+const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
+  useEditorVersionToolbar();
+const toolbarStatus = computed<EditorToolbarStatus>(() => {
+  if (isSavingVersion.value) return "saving";
+  if (pendingRestorePayload.value || hasUnsavedChangesBeforeUnload.value) {
+    return "dirty";
+  }
+  if (lastSaveTrigger.value === "auto" && lastSavedAt.value) {
+    return "autosaved";
+  }
+  return "saved";
+});
+
+const safeClone = <T,>(value: T): T => {
+  try {
+    return structuredClone(value);
+  } catch {
+    return JSON.parse(JSON.stringify(value));
+  }
+};
+
+const buildSceneDraftStorageKey = computed(() =>
+  Number.isFinite(id.value) ? `scene-draft:verse:${id.value}` : null
+);
+
+const buildSceneDraftSettingsKey = computed(() =>
+  buildSceneDraftStorageKey.value
+    ? `${buildSceneDraftStorageKey.value}:settings`
+    : null
+);
 
 // 对话框引用
 const knightDataRef = ref<InstanceType<typeof KnightDataDialog>>();
@@ -113,22 +185,26 @@ watch(
   { deep: true }
 );
 const verse = ref<VerseData | null>(null);
+const pushVerseToEditor = (nextVerse: VerseData) => {
+  postMessage("load", {
+    id: id.value,
+    data: nextVerse,
+    saveable: saveable.value,
+    user: {
+      id: userStore.userInfo?.id || null,
+      role: userStore.getRole(),
+    },
+  });
+};
+
 // 刷新场景数据
 const refresh = async () => {
   const response = await getVerse(id.value, "metas, resources");
   verse.value = response.data;
   saveable.value = verse.value ? verse.value.editable : false;
-
-  postMessage("load", {
-    id: id.value,
-    data: verse.value,
-    saveable: saveable.value,
-    user: {
-      id: userStore.userInfo?.id || null,
-      //roles: userStore.userInfo?.roles || [],
-      role: userStore.getRole(),
-    },
-  });
+  if (verse.value) {
+    pushVerseToEditor(verse.value);
+  }
 };
 
 // 向编辑器发送消息
@@ -221,6 +297,238 @@ type UnsavedChangesResultPayload = {
   changed: boolean;
 };
 
+const collectVerseModuleTitles = (
+  modules: VerseModule[] | undefined,
+  titles: string[] = []
+) => {
+  (modules || []).forEach((module) => {
+    const title =
+      typeof module?.parameters?.title === "string"
+        ? module.parameters.title.trim()
+        : "";
+    if (title) {
+      titles.push(title);
+    }
+  });
+  return titles;
+};
+
+const formatVerseDraftSummary = (payload: VerseEditorPayload) => {
+  const titles = collectVerseModuleTitles(payload.verse?.children?.modules);
+  if (titles.length === 0) {
+    return t("common.scriptDraft.emptySummary");
+  }
+  const preview = titles.slice(0, 3).join("、");
+  const extra = titles.length > 3 ? ` +${titles.length - 3}` : "";
+  return `${preview}${extra}`;
+};
+
+const formatVerseDraftChangeSummary = (
+  payload: VerseEditorPayload,
+  previousVersion?: ScriptDraftVersion
+) => {
+  if (!previousVersion) {
+    return formatVerseDraftSummary(payload);
+  }
+  const currentTitles = collectVerseModuleTitles(
+    payload.verse?.children?.modules
+  );
+  const previousPayload = isRecord(previousVersion.blocklyData)
+    ? (previousVersion.blocklyData as VerseEditorPayload)
+    : {};
+  const previousTitles = collectVerseModuleTitles(
+    previousPayload.verse?.children?.modules
+  );
+  const addedTitles = currentTitles.filter(
+    (title) => !previousTitles.includes(title)
+  );
+  if (addedTitles.length > 0) {
+    return `新增 ${addedTitles.slice(0, 3).join("、")}`;
+  }
+  const removedTitles = previousTitles.filter(
+    (title) => !currentTitles.includes(title)
+  );
+  if (removedTitles.length > 0) {
+    return `删除 ${removedTitles.slice(0, 3).join("、")}`;
+  }
+  for (let index = 0; index < currentTitles.length; index += 1) {
+    if (currentTitles[index] !== previousTitles[index]) {
+      return `修改 ${currentTitles[index] || previousTitles[index]}`;
+    }
+  }
+  return formatVerseDraftSummary(payload);
+};
+
+const persistSceneDraftVersions = () => {
+  if (!buildSceneDraftStorageKey.value) return;
+  try {
+    window.localStorage.setItem(
+      buildSceneDraftStorageKey.value,
+      JSON.stringify(draftVersions.value)
+    );
+  } catch (error) {
+    logger.error("persistVerseSceneDraftVersions error", error);
+  }
+};
+
+const persistSceneDraftSettings = () => {
+  if (!buildSceneDraftSettingsKey.value) return;
+  try {
+    window.localStorage.setItem(
+      buildSceneDraftSettingsKey.value,
+      JSON.stringify({
+        settingsVersion: DRAFT_SETTINGS_VERSION,
+        autoSaveEnabled: autoSaveEnabled.value,
+        autoSaveIntervalSeconds: autoSaveIntervalSeconds.value,
+      })
+    );
+  } catch (error) {
+    logger.error("persistVerseSceneDraftSettings error", error);
+  }
+};
+
+const normalizeAutoSaveInterval = (parsed: Record<string, unknown>) => {
+  const interval = Number(parsed.autoSaveIntervalSeconds);
+  if (!Number.isFinite(interval) || interval < 60) {
+    return DEFAULT_AUTO_SAVE_INTERVAL_SECONDS;
+  }
+  const settingsVersion = Number(parsed.settingsVersion || 0);
+  if (settingsVersion < DRAFT_SETTINGS_VERSION && interval === 60) {
+    return DEFAULT_AUTO_SAVE_INTERVAL_SECONDS;
+  }
+  return interval;
+};
+
+const loadSceneDraftState = () => {
+  draftVersions.value = [];
+  autoSaveEnabled.value = true;
+  autoSaveIntervalSeconds.value = DEFAULT_AUTO_SAVE_INTERVAL_SECONDS;
+
+  if (!buildSceneDraftStorageKey.value || !buildSceneDraftSettingsKey.value) {
+    return;
+  }
+
+  try {
+    const rawVersions = window.localStorage.getItem(
+      buildSceneDraftStorageKey.value
+    );
+    if (rawVersions) {
+      const parsed = JSON.parse(rawVersions);
+      if (Array.isArray(parsed)) {
+        draftVersions.value = parsed;
+        const latestVersion = parsed[0] as ScriptDraftVersion | undefined;
+        if (latestVersion) {
+          lastSaveTrigger.value = latestVersion.trigger;
+          lastSavedAt.value = latestVersion.savedAt;
+        }
+      }
+    }
+  } catch (error) {
+    logger.error("loadVerseSceneDraftState versions error", error);
+  }
+
+  try {
+    const rawSettings = window.localStorage.getItem(
+      buildSceneDraftSettingsKey.value
+    );
+    if (rawSettings) {
+      const parsed = JSON.parse(rawSettings);
+      autoSaveEnabled.value = parsed.autoSaveEnabled !== false;
+      if (parsed && typeof parsed === "object") {
+        autoSaveIntervalSeconds.value = normalizeAutoSaveInterval(
+          parsed as Record<string, unknown>
+        );
+      }
+    }
+  } catch (error) {
+    logger.error("loadVerseSceneDraftState settings error", error);
+  }
+};
+
+const addSceneDraftVersion = (
+  payload: VerseEditorPayload,
+  trigger: ScriptSaveTrigger
+) => {
+  const latestVersion = draftVersions.value[0];
+  const nextVersion: ScriptDraftVersion = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    savedAt: new Date().toISOString(),
+    trigger,
+    summary: formatVerseDraftChangeSummary(payload, latestVersion),
+    blocklyData: safeClone(payload),
+    lua: "",
+    js: "",
+  };
+  const nextSignature = JSON.stringify(nextVersion.blocklyData ?? null);
+  const latestSignature = latestVersion
+    ? JSON.stringify(latestVersion.blocklyData ?? null)
+    : "";
+  if (latestSignature === nextSignature) {
+    return null;
+  }
+  draftVersions.value = [nextVersion, ...draftVersions.value].slice(0, 20);
+  persistSceneDraftVersions();
+  return nextVersion.savedAt;
+};
+
+const openVersionDialog = () => {
+  versionDialogVisible.value = true;
+};
+
+const clearDraftHistory = () => {
+  draftVersions.value = [];
+  pendingRestorePayload.value = null;
+  if (!buildSceneDraftStorageKey.value) return;
+  try {
+    window.localStorage.removeItem(buildSceneDraftStorageKey.value);
+  } catch (error) {
+    logger.error("clearVerseSceneDraftHistory error", error);
+  }
+};
+
+const restoreDraftVersion = (draftId: string) => {
+  const target = draftVersions.value.find((draft) => draft.id === draftId);
+  if (!target || !verse.value) return;
+  const payload = isRecord(target.blocklyData)
+    ? (target.blocklyData as VerseEditorPayload)
+    : {};
+  verse.value = {
+    ...verse.value,
+    data: safeClone(payload.verse ?? verse.value.data),
+  };
+  pendingRestorePayload.value = safeClone(payload);
+  isRestoringDraft.value = true;
+  editorFrameKey.value += 1;
+  hasUnsavedChangesBeforeUnload.value = true;
+  Message.success(t("common.scriptDraft.restoreSuccess"));
+  versionDialogVisible.value = false;
+};
+
+const clearAutoSaveTimer = () => {
+  if (autoSaveTimer !== null) {
+    window.clearInterval(autoSaveTimer);
+    autoSaveTimer = null;
+  }
+};
+
+const restartAutoSaveTimer = () => {
+  clearAutoSaveTimer();
+  if (!autoSaveEnabled.value || !buildSceneDraftStorageKey.value) return;
+
+  autoSaveTimer = window.setInterval(async () => {
+    if (!pendingRestorePayload.value && !hasUnsavedChangesBeforeUnload.value) {
+      return;
+    }
+    if (isSavingVersion.value || pendingSceneSavePromise) return;
+    if (!verse.value?.editable) return;
+    try {
+      await requestSceneSave("auto");
+    } catch (error) {
+      logger.error("verse scene auto save failed", error);
+    }
+  }, autoSaveIntervalSeconds.value * 1000);
+};
+
 const isEditorMessage = (value: unknown): value is EditorMessage =>
   isRecord(value) && typeof value.action === "string";
 
@@ -288,6 +596,21 @@ const queryUnsavedChangesBeforeLeave = (): Promise<boolean> => {
   });
 };
 
+const syncUnsavedChangesForBeforeUnload = async () => {
+  if (isPollingUnsavedChanges) return;
+  if (!editor.value || !editor.value.contentWindow) return;
+
+  isPollingUnsavedChanges = true;
+  try {
+    const changed = await queryUnsavedChangesBeforeLeave();
+    hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
+      ? true
+      : changed;
+  } finally {
+    isPollingUnsavedChanges = false;
+  }
+};
+
 const waitForLeaveSaveResult = (): Promise<boolean> => {
   return new Promise((resolve) => {
     const timeout = window.setTimeout(() => {
@@ -312,8 +635,26 @@ const resolveLeaveSave = (result: boolean) => {
   resolver(result);
 };
 
+const requestSceneSave = (trigger: ScriptSaveTrigger) => {
+  if (pendingSceneSavePromise) return pendingSceneSavePromise;
+  currentSaveTrigger = trigger;
+  isSavingVersion.value = true;
+  postMessage("save-before-leave", {});
+  pendingSceneSavePromise = waitForLeaveSaveResult().finally(() => {
+    pendingSceneSavePromise = null;
+    isSavingVersion.value = false;
+  });
+  return pendingSceneSavePromise;
+};
+
 const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
+  if (pendingRestorePayload.value) {
+    hasUnsavedChangesBeforeUnload.value = true;
+  }
   const changed = await queryUnsavedChangesBeforeLeave();
+  hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
+    ? true
+    : changed;
 
   if (!changed) {
     return true;
@@ -328,8 +669,13 @@ const resolveUnsavedBeforeLeave = async (): Promise<boolean> => {
     return false;
   }
 
-  postMessage("save-before-leave", {});
-  return waitForLeaveSaveResult();
+  return requestSceneSave("manual");
+};
+
+const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+  if (!hasUnsavedChangesBeforeUnload.value) return;
+  event.preventDefault();
+  event.returnValue = "";
 };
 
 // 设置预制件属性
@@ -360,7 +706,10 @@ const selected = async ({ data, setup, title }: SelectedMetaPayload) => {
 };
 
 // 保存场景数据
-const saveVerse = async (data: unknown) => {
+const saveVerse = async (
+  data: unknown,
+  trigger: ScriptSaveTrigger = "manual"
+) => {
   const payload = data as VerseEditorPayload;
   if (!payload.verse) {
     return;
@@ -402,32 +751,43 @@ const saveVerse = async (data: unknown) => {
     retitleVerses(verse.children.modules);
   }
   await putVerse(id.value, { data: verse as unknown as JsonValue });
+  if (verse.value) {
+    verse.value = {
+      ...verse.value,
+      data: safeClone(verse),
+    };
+  }
 
-  ElMessageBox.confirm(
-    t("verse.view.sceneEditor.saveAndPublishConfirm"),
-    t("verse.view.sceneEditor.publishScene"),
-    {
-      confirmButtonText: t("verse.view.sceneEditor.confirm"),
-      cancelButtonText: t("verse.view.sceneEditor.cancel"),
-      type: "warning",
-    }
-  )
-    .then(async () => {
-      await takePhoto(id.value);
-      ElMessage({
-        type: "success",
-        message: t("verse.view.sceneEditor.publishSuccess"),
+  if (trigger === "manual") {
+    ElMessageBox.confirm(
+      t("verse.view.sceneEditor.saveAndPublishConfirm"),
+      t("verse.view.sceneEditor.publishScene"),
+      {
+        confirmButtonText: t("verse.view.sceneEditor.confirm"),
+        cancelButtonText: t("verse.view.sceneEditor.cancel"),
+        type: "warning",
+      }
+    )
+      .then(async () => {
+        await takePhoto(id.value);
+        ElMessage({
+          type: "success",
+          message: t("verse.view.sceneEditor.publishSuccess"),
+        });
+      })
+      .catch(() => {
+        ElMessage({
+          type: "info",
+          message: t("verse.view.sceneEditor.publishCanceled"),
+        });
       });
-    })
-    .catch(() => {
-      ElMessage({
-        type: "info",
-        message: t("verse.view.sceneEditor.publishCanceled"),
-      });
-    });
+  }
 };
 
-const saveVerseBeforeLeave = async (data: unknown): Promise<boolean> => {
+const saveVerseBeforeLeave = async (
+  data: unknown,
+  trigger: ScriptSaveTrigger = currentSaveTrigger
+): Promise<boolean> => {
   const payload = data as VerseEditorPayload;
   if (!payload.verse) {
     return false;
@@ -467,7 +827,15 @@ const saveVerseBeforeLeave = async (data: unknown): Promise<boolean> => {
 
   try {
     await putVerse(id.value, { data: verse as unknown as JsonValue });
-    ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
+    if (verse.value) {
+      verse.value = {
+        ...verse.value,
+        data: safeClone(verse),
+      };
+    }
+    if (trigger === "manual") {
+      ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
+    }
     return true;
   } catch {
     ElMessage.error(t("verse.view.sceneEditor.error1"));
@@ -542,7 +910,20 @@ const handleMessage = async (e: MessageEvent) => {
     //    break;
 
     case "save-verse":
-      await saveVerse(data);
+      currentSaveTrigger = "manual";
+      isSavingVersion.value = true;
+      await saveVerse(data, currentSaveTrigger);
+      if (isRecord(data) && data.verse) {
+        const savedAt = addSceneDraftVersion(
+          data as VerseEditorPayload,
+          currentSaveTrigger
+        );
+        pendingRestorePayload.value = null;
+        lastSaveTrigger.value = currentSaveTrigger;
+        lastSavedAt.value = savedAt || new Date().toISOString();
+      }
+      hasUnsavedChangesBeforeUnload.value = false;
+      isSavingVersion.value = false;
       ElMessage.success(t("verse.view.sceneEditor.saveCompleted"));
 
       break;
@@ -552,23 +933,90 @@ const handleMessage = async (e: MessageEvent) => {
       break;
 
     case "save-verse-none":
+      if (pendingRestorePayload.value) {
+        const restoredPayload = pendingRestorePayload.value;
+        await saveVerse(restoredPayload, currentSaveTrigger);
+        const savedAt = addSceneDraftVersion(
+          restoredPayload,
+          currentSaveTrigger
+        );
+        pendingRestorePayload.value = null;
+        hasUnsavedChangesBeforeUnload.value = false;
+        lastSaveTrigger.value = currentSaveTrigger;
+        lastSavedAt.value = savedAt || new Date().toISOString();
+        isSavingVersion.value = false;
+        resolveLeaveSave(true);
+        break;
+      }
+      lastSaveTrigger.value = currentSaveTrigger;
+      lastSavedAt.value = new Date().toISOString();
       ElMessage.warning(t("verse.view.sceneEditor.noChanges"));
+      hasUnsavedChangesBeforeUnload.value = false;
+      isSavingVersion.value = false;
       resolveLeaveSave(true);
       break;
 
     case "save-verse-before-leave":
-      resolveLeaveSave(await saveVerseBeforeLeave(data));
+      {
+        isSavingVersion.value = true;
+        const result = await saveVerseBeforeLeave(data, currentSaveTrigger);
+        if (result && isRecord(data) && data.verse) {
+          const savedAt = addSceneDraftVersion(
+            data as VerseEditorPayload,
+            currentSaveTrigger
+          );
+          pendingRestorePayload.value = null;
+          lastSaveTrigger.value = currentSaveTrigger;
+          lastSavedAt.value = savedAt || new Date().toISOString();
+          hasUnsavedChangesBeforeUnload.value = false;
+          if (currentSaveTrigger === "auto") {
+            Message.success(t("common.scriptDraft.autoSavedNotice"));
+          }
+        }
+        isSavingVersion.value = false;
+        resolveLeaveSave(result);
+      }
       break;
 
     case "save-verse-before-leave-none":
+      if (pendingRestorePayload.value) {
+        const restoredPayload = pendingRestorePayload.value;
+        const result = await saveVerseBeforeLeave(
+          restoredPayload,
+          currentSaveTrigger
+        );
+        if (result) {
+          const savedAt = addSceneDraftVersion(
+            restoredPayload,
+            currentSaveTrigger
+          );
+          pendingRestorePayload.value = null;
+          hasUnsavedChangesBeforeUnload.value = false;
+          lastSaveTrigger.value = currentSaveTrigger;
+          lastSavedAt.value = savedAt || new Date().toISOString();
+          if (currentSaveTrigger === "auto") {
+            Message.success(t("common.scriptDraft.autoSavedNotice"));
+          }
+        }
+        isSavingVersion.value = false;
+        resolveLeaveSave(result);
+        break;
+      }
+      lastSaveTrigger.value = currentSaveTrigger;
+      lastSavedAt.value = new Date().toISOString();
+      hasUnsavedChangesBeforeUnload.value = false;
+      isSavingVersion.value = false;
       resolveLeaveSave(true);
       break;
 
     case "unsaved-changes-result":
       if (isUnsavedChangesResultPayload(data)) {
+        hasUnsavedChangesBeforeUnload.value = pendingRestorePayload.value
+          ? true
+          : Boolean(data.changed);
         const resolver = pendingUnsavedChecks.get(data.requestId);
         if (resolver) {
-          resolver(Boolean(data.changed));
+          resolver(pendingRestorePayload.value ? true : Boolean(data.changed));
         }
       }
       break;
@@ -594,7 +1042,11 @@ const handleMessage = async (e: MessageEvent) => {
       break;
 
     case "ready":
-      if (!init) {
+      if (isRestoringDraft.value && verse.value) {
+        isRestoringDraft.value = false;
+        pushVerseToEditor(verse.value);
+        hasUnsavedChangesBeforeUnload.value = true;
+      } else if (!init) {
         init = true;
         refresh();
       } else {
@@ -702,7 +1154,18 @@ const handleUploadCover = async (data: unknown) => {
 
 // 生命周期钩子
 onMounted(() => {
+  loadSceneDraftState();
+  registerToolbar(toolbarOwner, {
+    status: toolbarStatus.value,
+    onOpen: openVersionDialog,
+  });
+  restartAutoSaveTimer();
   window.addEventListener("message", handleMessage);
+  window.addEventListener("beforeunload", handleBeforeUnload);
+  void syncUnsavedChangesForBeforeUnload();
+  unsavedCheckPollingTimer = window.setInterval(() => {
+    void syncUnsavedChangesForBeforeUnload();
+  }, 2000);
 });
 
 onBeforeRouteLeave(async (_to, _from, next) => {
@@ -710,8 +1173,24 @@ onBeforeRouteLeave(async (_to, _from, next) => {
   next(canLeave);
 });
 
+watch(toolbarStatus, (status) => {
+  updateToolbarStatus(toolbarOwner, status);
+});
+
+watch([autoSaveEnabled, autoSaveIntervalSeconds], () => {
+  persistSceneDraftSettings();
+  restartAutoSaveTimer();
+});
+
 onBeforeUnmount(() => {
+  unregisterToolbar(toolbarOwner);
+  clearAutoSaveTimer();
   window.removeEventListener("message", handleMessage);
+  window.removeEventListener("beforeunload", handleBeforeUnload);
+  if (unsavedCheckPollingTimer !== null) {
+    window.clearInterval(unsavedCheckPollingTimer);
+    unsavedCheckPollingTimer = null;
+  }
   pendingUnsavedChecks.clear();
   if (pendingLeaveSaveResolver) {
     pendingLeaveSaveResolver(false);

@@ -38,6 +38,7 @@
                 >
                   <el-main class="blockly-editor-main">
                     <iframe
+                      :key="editorFrameKey"
                       style="margin: 0; padding: 0; height: 100%; width: 100%"
                       class="blockly-editor-frame"
                       scrolling="no"
@@ -142,6 +143,17 @@
             </ScenePlayer>
           </div>
         </el-card>
+        <ScriptDraftDialog
+          :model-value="versionDialogVisible"
+          :versions="draftVersions"
+          :auto-save-enabled="autoSaveEnabled"
+          :auto-save-interval-seconds="autoSaveIntervalSeconds"
+          @update:model-value="versionDialogVisible = $event"
+          @update:auto-save-enabled="autoSaveEnabled = $event"
+          @update:auto-save-interval-seconds="autoSaveIntervalSeconds = $event"
+          @clear-history="clearDraftHistory"
+          @restore="restoreDraftVersion"
+        ></ScriptDraftDialog>
       </el-main>
     </el-container>
   </div>
@@ -150,7 +162,7 @@
 <script setup lang="ts">
 // @ts-nocheck
 import { logger } from "@/utils/logger";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   getVerse,
@@ -162,15 +174,22 @@ import {
 import { useI18n } from "vue-i18n";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { takePhoto } from "@/api/v1/verse";
+import { Message } from "@/components/Dialog";
 import pako from "pako";
 import ScenePlayer from "./ScenePlayer.vue";
 import * as THREE from "three";
 import {
   useScriptEditorBase,
   type EditorPostPayload,
+  type ScriptSaveTrigger,
 } from "@/composables/useScriptEditorBase";
 import { buildScriptRuntime } from "@/composables/useScriptRuntime";
 import { CopyDocument } from "@element-plus/icons-vue";
+import ScriptDraftDialog from "@/components/ScriptDraftDialog.vue";
+import {
+  useEditorVersionToolbar,
+  type EditorToolbarStatus,
+} from "@/composables/useEditorVersionToolbar";
 
 // ---------- Verse 专有状态 ----------
 const loading = ref(false);
@@ -227,14 +246,15 @@ type VerseMeta = {
 };
 
 // ---------- initEditor（Verse 版）----------
-const initEditor = () => {
+const initEditor = (overrideData?: unknown) => {
   if (!verse.value) return;
   if (!isReady()) return;
 
   try {
     let blocklyData = verse.value.verseCode?.blockly || "{}";
     blocklyData = decompressBlockly(blocklyData);
-    const data = unsavedBlocklyData.value ?? JSON.parse(blocklyData);
+    const data =
+      overrideData ?? unsavedBlocklyData.value ?? JSON.parse(blocklyData);
     postMessage("init", {
       language: ["lua", "js"],
       style: ["base", "verse"],
@@ -250,7 +270,10 @@ const initEditor = () => {
 };
 
 // ---------- postScript（Verse 版：保存 + 发布流程）----------
-const postScript = async (message: EditorPostPayload) => {
+const postScript = async (
+  message: EditorPostPayload,
+  context: { trigger: ScriptSaveTrigger }
+) => {
   if (verse.value === null) {
     ElMessage.error(t("verse.view.script.error1"));
     return;
@@ -273,27 +296,33 @@ const postScript = async (message: EditorPostPayload) => {
     lua: message.lua,
   });
 
-  ElMessage.success(t("verse.view.script.success"));
-  ElMessageBox.confirm(
-    t("verse.view.sceneEditor.saveAndPublishConfirm"),
-    t("verse.view.sceneEditor.publishScene"),
-    {
-      showClose: true,
-      distinguishCancelAndClose: true,
-      closeOnClickModal: false,
-      confirmButtonText: t("verse.view.sceneEditor.confirm"),
-      cancelButtonText: t("verse.view.sceneEditor.cancel"),
-      type: "warning",
-    }
-  )
-    .then(async () => {
-      await takePhoto(id.value);
-      ElMessage.success(t("verse.view.sceneEditor.publishSuccess"));
-    })
-    .catch(() => {
-      ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
-    });
+  if (context.trigger === "manual") {
+    Message.success(t("verse.view.script.success"));
+    ElMessageBox.confirm(
+      t("verse.view.sceneEditor.saveAndPublishConfirm"),
+      t("verse.view.sceneEditor.publishScene"),
+      {
+        showClose: true,
+        distinguishCancelAndClose: true,
+        closeOnClickModal: false,
+        confirmButtonText: t("verse.view.sceneEditor.confirm"),
+        cancelButtonText: t("verse.view.sceneEditor.cancel"),
+        type: "warning",
+      }
+    )
+      .then(async () => {
+        await takePhoto(id.value);
+        ElMessage.success(t("verse.view.sceneEditor.publishSuccess"));
+      })
+      .catch(() => {
+        ElMessage.info(t("verse.view.sceneEditor.publishCanceled"));
+      });
+  }
 };
+
+const draftStorageKey = computed(() =>
+  Number.isFinite(id.value) ? `script-draft:verse:${id.value}` : null
+);
 
 // ---------- 共享编辑器 composable ----------
 const {
@@ -306,11 +335,24 @@ const {
   isFullscreen,
   unsavedBlocklyData,
   resolveUnsavedChangesBeforeLeave,
+  hasUnsavedChanges,
+  draftVersions,
+  versionDialogVisible,
+  autoSaveEnabled,
+  autoSaveIntervalSeconds,
+  isSaving,
+  lastSaveTrigger,
+  lastSavedAt,
+  editorFrameKey,
   editor,
   src,
   toggleSceneFullscreen,
   postMessage,
   save,
+  openVersionDialog,
+  clearDraftHistory,
+  restoreDraftVersion,
+  reloadEditorFrame,
   decompressBlockly,
   isReady,
 } = useScriptEditorBase({
@@ -329,6 +371,36 @@ const {
   },
   onPost: postScript,
   onReady: initEditor,
+  getDraftStorageKey: () => draftStorageKey.value,
+  canSave: () => Boolean(verse.value?.editable),
+  onRestoreDraft: () => reloadEditorFrame(),
+});
+
+const toolbarOwner = "verse-script-editor";
+const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
+  useEditorVersionToolbar();
+const toolbarStatus = computed<EditorToolbarStatus>(() => {
+  if (isSaving.value) return "saving";
+  if (hasUnsavedChanges.value) return "dirty";
+  if (lastSaveTrigger.value === "auto" && lastSavedAt.value) {
+    return "autosaved";
+  }
+  return "saved";
+});
+
+onMounted(() => {
+  registerToolbar(toolbarOwner, {
+    status: toolbarStatus.value,
+    onOpen: openVersionDialog,
+  });
+});
+
+watch(toolbarStatus, (status) => {
+  updateToolbarStatus(toolbarOwner, status);
+});
+
+onBeforeUnmount(() => {
+  unregisterToolbar(toolbarOwner);
 });
 
 // ---------- resource computed（Verse 专有：构建事件 inputs/outputs）----------
