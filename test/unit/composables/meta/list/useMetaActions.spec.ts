@@ -192,6 +192,73 @@ describe("useMetaActions", () => {
     });
   });
 
+  describe("copyWindow — error path (lines 46-48)", () => {
+    it("logs error and shows error message when getMeta fails inside copy()", async () => {
+      const { logger } = await import("@/utils/logger");
+      mockMessageBox.prompt.mockResolvedValue({ value: "Copy" });
+      mockGetMeta.mockRejectedValueOnce(new Error("network failure"));
+
+      const { copyWindow } = await getComposable();
+      await copyWindow(makeMeta() as never);
+
+      expect(vi.mocked(logger.error)).toHaveBeenCalled();
+      expect(mockMessage.error).toHaveBeenCalled();
+    });
+
+    it("logs error and shows error message when postMeta fails inside copy()", async () => {
+      const { logger } = await import("@/utils/logger");
+      const meta = makeMeta();
+      mockMessageBox.prompt.mockResolvedValue({ value: "Copy" });
+      mockGetMeta.mockResolvedValueOnce({ data: meta });
+      mockPostMeta.mockRejectedValueOnce(new Error("server error"));
+
+      const { copyWindow } = await getComposable();
+      await copyWindow(meta as never);
+
+      expect(vi.mocked(logger.error)).toHaveBeenCalled();
+      expect(mockMessage.error).toHaveBeenCalled();
+    });
+  });
+
+  describe("addMeta — inputValidator (line 61)", () => {
+    it("inputValidator returns error key when value is empty", async () => {
+      mockMessageBox.prompt.mockRejectedValue(new Error("cancelled"));
+      const { addMeta } = await getComposable();
+      await addMeta();
+
+      const promptCall = mockMessageBox.prompt.mock.calls[0];
+      const options = promptCall[2] as {
+        inputValidator: (val: string) => string | boolean;
+      };
+      expect(options.inputValidator("")).not.toBe(true);
+      expect(typeof options.inputValidator("")).toBe("string");
+    });
+
+    it("inputValidator returns true when value is non-empty", async () => {
+      mockMessageBox.prompt.mockRejectedValue(new Error("cancelled"));
+      const { addMeta } = await getComposable();
+      await addMeta();
+
+      const promptCall = mockMessageBox.prompt.mock.calls[0];
+      const options = promptCall[2] as {
+        inputValidator: (val: string) => string | boolean;
+      };
+      expect(options.inputValidator("Valid Name")).toBe(true);
+    });
+
+    it("inputValidator returns error key when value is only whitespace", async () => {
+      mockMessageBox.prompt.mockRejectedValue(new Error("cancelled"));
+      const { addMeta } = await getComposable();
+      await addMeta();
+
+      const promptCall = mockMessageBox.prompt.mock.calls[0];
+      const options = promptCall[2] as {
+        inputValidator: (val: string) => string | boolean;
+      };
+      expect(options.inputValidator("   ")).not.toBe(true);
+    });
+  });
+
   describe("deletedWindow", () => {
     it("deletes meta after confirmation", async () => {
       mockMessageBox.confirm.mockResolvedValue(undefined);

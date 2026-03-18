@@ -357,5 +357,65 @@ describe("useMetaDetail", () => {
       );
       expect(mockRefresh).toHaveBeenCalled();
     });
+
+    it("shows error when copy postMeta fails (lines 141-143)", async () => {
+      const { logger } = await import("@/utils/logger");
+      const meta = makeMeta();
+      // First getMeta call: openDetail; second getMeta call: copy() internal fetch
+      mockGetMeta
+        .mockResolvedValueOnce({ data: meta })
+        .mockResolvedValueOnce({ data: { ...meta, metaCode: null } });
+      mockMessageBox.prompt.mockResolvedValue({ value: "Copy" });
+      mockPostMeta.mockRejectedValueOnce(new Error("post failed"));
+
+      const { openDetail, handleCopy } = await getComposable();
+      await openDetail(meta as never);
+      await handleCopy();
+
+      expect(vi.mocked(logger.error)).toHaveBeenCalled();
+      expect(mockMessage.error).toHaveBeenCalled();
+    });
+  });
+
+  describe("detailProperties — missing author and date coverage", () => {
+    it("shows '—' when author has no nickname or username (line 63)", async () => {
+      const meta = makeMeta({ author: {} });
+      mockGetMeta.mockResolvedValue({ data: meta });
+      const { openDetail, detailProperties } = await getComposable();
+
+      await openDetail(meta as never);
+
+      const authorProp = detailProperties.value.find((p) =>
+        p.label.includes("author")
+      );
+      expect(authorProp?.value).toBe("—");
+    });
+
+    it("shows 0 when resources is not an array (line 69)", async () => {
+      const meta = makeMeta({ resources: undefined });
+      mockGetMeta.mockResolvedValue({ data: meta });
+      const { openDetail, detailProperties } = await getComposable();
+
+      await openDetail(meta as never);
+
+      const resourcesProp = detailProperties.value.find((p) =>
+        p.label.includes("resources")
+      );
+      expect(resourcesProp?.value).toBe(0);
+    });
+
+    it("calls convertToLocalTime when created_at is present (line 74)", async () => {
+      const meta = makeMeta({ created_at: "2024-06-01T00:00:00Z" });
+      mockGetMeta.mockResolvedValue({ data: meta });
+      const { openDetail, detailProperties } = await getComposable();
+
+      await openDetail(meta as never);
+
+      const dateProp = detailProperties.value.find((p) =>
+        p.label.includes("createdAt")
+      );
+      // convertToLocalTime is mocked via utilityFunctions or used directly — just check it's not "-"
+      expect(dateProp?.value).not.toBe("-");
+    });
   });
 });
