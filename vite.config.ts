@@ -140,7 +140,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         openInEditorHost: `http://localhost:${env.VITE_APP_PORT}`,
       }),
       visualizer({
-        open: true,
+        open: false,
         gzipSize: true,
         brotliSize: true,
         filename: "stats.html",

@@ -159,4 +159,81 @@ describe("src/api/home/wordpress.ts round15", () => {
     await wordpressApi.getCategoriesWithCache();
     expect(wpRequest).toHaveBeenCalledTimes(2);
   });
+
+  describe("refreshInFlight 并发去重", () => {
+    it("无缓存时并发多次调用只发起一个网络请求", async () => {
+      let resolveRequest!: (v: { data: unknown[] }) => void;
+      wpRequest.mockImplementationOnce(
+        () => new Promise((r) => (resolveRequest = r))
+      );
+
+      // 同时发起 3 次（均无缓存）
+      const [p1, p2, p3] = [
+        wordpressApi.getCategoriesWithCache(),
+        wordpressApi.getCategoriesWithCache(),
+        wordpressApi.getCategoriesWithCache(),
+      ];
+
+      resolveRequest({ data: [{ id: 10, name: "C", slug: "c", count: 0 }] });
+      const [r1, r2, r3] = await Promise.all([p1, p2, p3]);
+
+      // 只应发起 1 次请求
+      expect(wpRequest).toHaveBeenCalledTimes(1);
+      // 三次调用拿到相同数据
+      expect(r1.data).toEqual(r2.data);
+      expect(r2.data).toEqual(r3.data);
+      expect(r1.isStale).toBe(false);
+    });
+
+    it("缓存过期时并发调用只触发一次后台刷新", async () => {
+      // 先写入一个已过期的缓存
+      const CACHE_MAX_AGE = 5 * 60 * 1000;
+      vi.useFakeTimers();
+
+      wpRequest.mockResolvedValue({
+        data: [{ id: 20, name: "D", slug: "d", count: 0 }],
+      });
+
+      // 第一次请求，建立缓存
+      await wordpressApi.getCategoriesWithCache();
+      expect(wpRequest).toHaveBeenCalledTimes(1);
+
+      // 推进时间让缓存过期
+      vi.advanceTimersByTime(CACHE_MAX_AGE + 1000);
+
+      // 此时缓存 stale，并发 3 次调用
+      const [s1, s2, s3] = await Promise.all([
+        wordpressApi.getCategoriesWithCache(),
+        wordpressApi.getCategoriesWithCache(),
+        wordpressApi.getCategoriesWithCache(),
+      ]);
+
+      // 均返回 stale 标记
+      expect(s1.isStale).toBe(true);
+      expect(s2.isStale).toBe(true);
+      expect(s3.isStale).toBe(true);
+
+      // 等待后台刷新完成
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // 后台刷新只发起了 1 次（共 2 次：1 次初始 + 1 次刷新）
+      expect(wpRequest).toHaveBeenCalledTimes(2);
+
+      vi.useRealTimers();
+    });
+
+    it("clearCategoriesCache 同时清除 refreshInFlight，下次请求重新发起", async () => {
+      wpRequest.mockResolvedValue({
+        data: [{ id: 30, name: "E", slug: "e", count: 0 }],
+      });
+
+      await wordpressApi.getCategoriesWithCache();
+      clearCategoriesCache();
+
+      // 清除后再请求，应重新发起
+      await wordpressApi.getCategoriesWithCache();
+      expect(wpRequest).toHaveBeenCalledTimes(2);
+    });
+  });
 });

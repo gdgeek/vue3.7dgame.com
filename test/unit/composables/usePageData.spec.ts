@@ -386,4 +386,113 @@ describe("usePageData composable", () => {
       unmount();
     });
   });
+
+  describe("fetchSeq 竞态防护", () => {
+    it("后发的请求先返回时，先发的响应被丢弃，items 保留最新结果", async () => {
+      // 模拟慢请求（第1次）和快请求（第2次）
+      let resolveFirst!: (v: FetchResponse<Item>) => void;
+      let resolveSecond!: (v: FetchResponse<Item>) => void;
+
+      const fetchFn = vi
+        .fn()
+        .mockImplementationOnce(
+          () => new Promise<FetchResponse<Item>>((r) => (resolveFirst = r))
+        )
+        .mockImplementationOnce(
+          () => new Promise<FetchResponse<Item>>((r) => (resolveSecond = r))
+        );
+
+      const { result, unmount } = withSetup(() =>
+        usePageData<Item>({ fetchFn, immediate: false })
+      );
+
+      // 同时发起两次请求
+      const p1 = result.refresh(); // seq=1，慢
+      const p2 = result.refresh(); // seq=2，快
+
+      // 第2次（最新）先返回
+      resolveSecond(makeFetchResponse<Item>([{ id: 2, name: "newest" }]));
+      await p2;
+
+      // 第1次（过期）后返回
+      resolveFirst(makeFetchResponse<Item>([{ id: 1, name: "stale" }]));
+      await p1;
+
+      // items 应保留第2次的结果
+      expect(result.items.value).toEqual([{ id: 2, name: "newest" }]);
+      expect(result.loading.value).toBe(false);
+      unmount();
+    });
+
+    it("过期响应不会更新 loading 为 false（由最新请求负责）", async () => {
+      let resolveFirst!: (v: FetchResponse<Item>) => void;
+      let resolveSecond!: (v: FetchResponse<Item>) => void;
+
+      const fetchFn = vi
+        .fn()
+        .mockImplementationOnce(
+          () => new Promise<FetchResponse<Item>>((r) => (resolveFirst = r))
+        )
+        .mockImplementationOnce(
+          () => new Promise<FetchResponse<Item>>((r) => (resolveSecond = r))
+        );
+
+      const { result, unmount } = withSetup(() =>
+        usePageData<Item>({ fetchFn, immediate: false })
+      );
+
+      const p1 = result.refresh(); // seq=1
+      const p2 = result.refresh(); // seq=2
+
+      // 第2次先完成
+      resolveSecond(makeFetchResponse<Item>([]));
+      await p2;
+      expect(result.loading.value).toBe(false);
+
+      // 第1次（过期）完成后 loading 仍为 false，不受干扰
+      resolveFirst(makeFetchResponse<Item>([]));
+      await p1;
+      expect(result.loading.value).toBe(false);
+      unmount();
+    });
+
+    it("过期请求的错误不会覆盖 items", async () => {
+      let rejectFirst!: (e: Error) => void;
+      let resolveSecond!: (v: FetchResponse<Item>) => void;
+
+      const fetchFn = vi
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise<FetchResponse<Item>>((_, r) => (rejectFirst = r))
+        )
+        .mockImplementationOnce(
+          () => new Promise<FetchResponse<Item>>((r) => (resolveSecond = r))
+        );
+
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      const { result, unmount } = withSetup(() =>
+        usePageData<Item>({ fetchFn, immediate: false })
+      );
+
+      const p1 = result.refresh(); // seq=1，将会 reject
+      const p2 = result.refresh(); // seq=2，成功
+
+      // 第2次先成功
+      resolveSecond(makeFetchResponse<Item>([{ id: 99, name: "ok" }]));
+      await p2;
+      expect(result.items.value).toEqual([{ id: 99, name: "ok" }]);
+
+      // 第1次（过期）reject，不应覆盖 items
+      rejectFirst(new Error("stale error"));
+      await p1;
+      expect(result.items.value).toEqual([{ id: 99, name: "ok" }]);
+
+      consoleSpy.mockRestore();
+      unmount();
+    });
+  });
 });

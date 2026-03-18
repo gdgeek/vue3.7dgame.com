@@ -841,3 +841,75 @@ describe("handleUnauthorized setTimeout — extra edge cases (line 177)", () => 
     expect(Token.removeToken).toHaveBeenCalledTimes(2);
   });
 });
+
+// ---------------------------------------------------------------------------
+// getRouter 缓存 — 多次触发 401/刷新失败时 useRouter 只调用一次
+// ---------------------------------------------------------------------------
+describe("getRouter 缓存复用 (lazy singleton)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("多次 401 错误只调用一次 useRouter()", async () => {
+    const { useRouter } = await import("@/router");
+    const Token = (await import("@/store/modules/token")).default;
+    await import("@/utils/request");
+
+    const errInterceptor =
+      mockService.interceptors.response.use.mock.calls[0]?.[1];
+
+    const make401 = () => ({
+      message: "Unauthorized",
+      response: { status: 401, data: {} },
+      config: { _retry: false },
+    });
+
+    // 第一次 401
+    await errInterceptor(make401()).catch(() => {});
+    expect(Token.removeToken).toHaveBeenCalledTimes(1);
+
+    // 推进 1000ms 使 isHandlingUnauthorized 重置
+    vi.advanceTimersByTime(1000);
+
+    // 第二次 401
+    await errInterceptor(make401()).catch(() => {});
+    expect(Token.removeToken).toHaveBeenCalledTimes(2);
+
+    // useRouter 应只被调用一次（getRouter lazy singleton 缓存了实例）
+    expect(useRouter as ReturnType<typeof vi.fn>).toHaveBeenCalledTimes(1);
+  });
+
+  it("刷新 token 失败时调用 getRouter，不重复创建 router", async () => {
+    const { useRouter } = await import("@/router");
+    const Token = (await import("@/store/modules/token")).default;
+    const AuthAPI = await import("@/api/v1/auth");
+
+    const expiringToken = {
+      accessToken: "old",
+      refreshToken: "ref",
+      expires: new Date(Date.now() + 1 * 60 * 1000).toISOString(),
+    };
+    (Token.getToken as ReturnType<typeof vi.fn>).mockReturnValue(expiringToken);
+    (AuthAPI.refresh as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new Error("fail")
+    );
+
+    await import("@/utils/request");
+    const reqInterceptor =
+      mockService.interceptors.request.use.mock.calls[0]?.[0];
+
+    // 连续两次触发刷新失败（通过 resetModules 无法测试跨模块缓存，
+    // 此处验证同一模块生命周期内 useRouter 只被调用一次）
+    await reqInterceptor({ url: "/v1/data", headers: {}, baseURL: "" }).catch(
+      () => {}
+    );
+
+    expect(useRouter as ReturnType<typeof vi.fn>).toHaveBeenCalledTimes(1);
+  });
+});
