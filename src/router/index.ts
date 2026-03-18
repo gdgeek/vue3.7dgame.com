@@ -178,7 +178,13 @@ export const UpdateRoutes = async (ability: AnyAbility) => {
   initRoutes();
 };
 
+// 标记 initRoutes 是否已完成首次初始化，避免每次 useRouter() 都重复执行
+let routesInitialized = false;
+
 export const useRouter = () => {
-  initRoutes();
+  if (!routesInitialized) {
+    routesInitialized = true;
+    initRoutes();
+  }
   return router;
 };

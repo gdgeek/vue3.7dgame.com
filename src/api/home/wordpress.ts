@@ -84,6 +84,7 @@ const fetchAndCacheCategories = async (): Promise<
 export const clearCategoriesCache = (): void => {
   categoriesCache = null;
   categoriesFullCache = null;
+  refreshInFlight = null;
 };
 
 // ---- stale-while-revalidate 缓存 ----
@@ -95,6 +96,9 @@ interface CacheEntry<T> {
 
 let categoriesFullCache: CacheEntry<NewsCategory[]> | null = null;
 const CACHE_MAX_AGE = 5 * 60 * 1000; // 5 分钟
+
+// 正在进行中的后台刷新 Promise，防止同一时刻多个过期请求并发刷新
+let refreshInFlight: Promise<NewsCategory[]> | null = null;
 
 // ---- rest_route 兼容工具 ----
 
@@ -203,13 +207,32 @@ export const wordpressApi = {
       if (age < CACHE_MAX_AGE) {
         return { data: categoriesFullCache.data, isStale: false };
       }
-      // 缓存已过期，返回旧数据并标记为 stale
+      // 缓存已过期，返回旧数据并触发后台刷新（去重：已有进行中则复用）
+      if (!refreshInFlight) {
+        refreshInFlight = this.getCategories().then((data) => {
+          categoriesFullCache = { data, timestamp: Date.now() };
+          refreshInFlight = null;
+          return data;
+        }).catch((err) => {
+          refreshInFlight = null;
+          throw err;
+        });
+      }
       return { data: categoriesFullCache.data, isStale: true };
     }
 
-    // 无缓存，直接请求并写入缓存
-    const data = await this.getCategories();
-    categoriesFullCache = { data, timestamp: Date.now() };
+    // 无缓存，直接请求并写入缓存（同时防止并发重复请求）
+    if (!refreshInFlight) {
+      refreshInFlight = this.getCategories().then((data) => {
+        categoriesFullCache = { data, timestamp: Date.now() };
+        refreshInFlight = null;
+        return data;
+      }).catch((err) => {
+        refreshInFlight = null;
+        throw err;
+      });
+    }
+    const data = await refreshInFlight;
     return { data, isStale: false };
   },
 

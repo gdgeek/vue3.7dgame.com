@@ -54,8 +54,12 @@ export function usePageData<T = unknown>(options: UsePageDataOptions<T>) {
   // Computed total pages
   const totalPages = computed(() => pagination.count || 1);
 
+  // 请求序号：用于丢弃过期响应，防止快速翻页/搜索时旧请求覆盖新结果
+  let fetchSeq = 0;
+
   // Fetch
   const refresh = async () => {
+    const seq = ++fetchSeq;
     loading.value = true;
     try {
       const params: FetchParams = {
@@ -68,6 +72,9 @@ export function usePageData<T = unknown>(options: UsePageDataOptions<T>) {
       }
 
       const response = await fetchFn(params);
+
+      // 响应已过期，丢弃
+      if (seq !== fetchSeq) return;
 
       // Parse pagination headers
       const currentPageHeader = response.headers["x-pagination-current-page"];
@@ -94,10 +101,11 @@ export function usePageData<T = unknown>(options: UsePageDataOptions<T>) {
         items.value = rawItems;
       }
     } catch (error) {
+      if (seq !== fetchSeq) return;
       logger.error("Failed to fetch data:", error);
       items.value = [];
     } finally {
-      loading.value = false;
+      if (seq === fetchSeq) loading.value = false;
     }
   };
 
