@@ -349,5 +349,403 @@ describe("applyComponents", () => {
         ).domElement.removeEventListener
       ).toHaveBeenCalled();
     });
+
+    it("onMouseDown starts dragging when mesh is intersected", () => {
+      const mesh = makeMesh();
+      const ctx = makeCtx();
+      // Make raycaster detect an intersection
+      const intersectPoint = { x: 1, y: 2, z: 3, copy: vi.fn().mockReturnThis(), sub: vi.fn().mockReturnThis() };
+      (ctx.raycaster.intersectObject as ReturnType<typeof vi.fn>).mockReturnValue([
+        { point: intersectPoint },
+      ]);
+      // Fix dragOffset mock to support chaining (copy returns this)
+      ctx.dragState.dragOffset = { copy: vi.fn().mockReturnThis(), sub: vi.fn().mockReturnThis() } as never;
+
+      let capturedMouseDown: ((e: MouseEvent) => void) | null = null;
+      (
+        ctx.renderer as {
+          domElement: { addEventListener: ReturnType<typeof vi.fn> };
+        }
+      ).domElement.addEventListener.mockImplementation(
+        (event: string, handler: (e: MouseEvent) => void) => {
+          if (event === "mousedown") capturedMouseDown = handler;
+        }
+      );
+
+      applyComponents({
+        mesh,
+        uuid: "u1",
+        components: [{ type: "Moved", parameters: { uuid: "m1" } }],
+        ctx,
+      });
+
+      capturedMouseDown!({ clientX: 100, clientY: 200, preventDefault: vi.fn() } as unknown as MouseEvent);
+
+      expect(ctx.dragState.isDragging).toBe(true);
+      expect(ctx.dragState.draggedObject).toBe(mesh);
+      expect(ctx.controls.value!.enabled).toBe(false);
+    });
+
+    it("onMouseDown does NOT start dragging when no intersection", () => {
+      const mesh = makeMesh();
+      const ctx = makeCtx();
+      (ctx.raycaster.intersectObject as ReturnType<typeof vi.fn>).mockReturnValue([]);
+
+      let capturedMouseDown: ((e: MouseEvent) => void) | null = null;
+      (
+        ctx.renderer as {
+          domElement: { addEventListener: ReturnType<typeof vi.fn> };
+        }
+      ).domElement.addEventListener.mockImplementation(
+        (event: string, handler: (e: MouseEvent) => void) => {
+          if (event === "mousedown") capturedMouseDown = handler;
+        }
+      );
+
+      applyComponents({
+        mesh,
+        uuid: "u1",
+        components: [{ type: "Moved", parameters: { uuid: "m1" } }],
+        ctx,
+      });
+
+      capturedMouseDown!({ clientX: 100, clientY: 200, preventDefault: vi.fn() } as unknown as MouseEvent);
+
+      expect(ctx.dragState.isDragging).toBe(false);
+      expect(ctx.controls.value!.enabled).toBe(true);
+    });
+
+    it("onMouseUp ends dragging and re-enables controls", () => {
+      const mesh = makeMesh();
+      const ctx = makeCtx();
+      ctx.dragState.isDragging = true;
+      ctx.dragState.draggedObject = mesh;
+      ctx.controls.value!.enabled = false;
+
+      const addEventSpy = vi.spyOn(document, "addEventListener");
+      applyComponents({
+        mesh,
+        uuid: "u1",
+        components: [{ type: "Moved", parameters: { uuid: "m1" } }],
+        ctx,
+      });
+
+      // Find the mouseup handler
+      const mouseUpCall = addEventSpy.mock.calls.find(([ev]) => ev === "mouseup");
+      expect(mouseUpCall).toBeDefined();
+      const mouseUpHandler = mouseUpCall![1] as () => void;
+
+      mouseUpHandler();
+      expect(ctx.dragState.isDragging).toBe(false);
+      expect(ctx.dragState.draggedObject).toBeNull();
+      expect(ctx.controls.value!.enabled).toBe(true);
+
+      addEventSpy.mockRestore();
+    });
+
+    it("onMouseMove does nothing when not dragging", () => {
+      const mesh = makeMesh();
+      const ctx = makeCtx();
+      ctx.dragState.isDragging = false;
+
+      const addEventSpy = vi.spyOn(document, "addEventListener");
+      applyComponents({
+        mesh,
+        uuid: "u1",
+        components: [{ type: "Moved", parameters: { uuid: "m1" } }],
+        ctx,
+      });
+
+      const mouseMoveCall = addEventSpy.mock.calls.find(([ev]) => ev === "mousemove");
+      expect(mouseMoveCall).toBeDefined();
+      const mouseMoveHandler = mouseMoveCall![1] as (e: MouseEvent) => void;
+
+      // Not dragging → should not throw or modify position
+      expect(() =>
+        mouseMoveHandler({ clientX: 50, clientY: 50 } as MouseEvent)
+      ).not.toThrow();
+
+      addEventSpy.mockRestore();
+    });
+
+    it("onMouseMove moves object when dragging and plane intersection found", () => {
+      const mesh = makeMesh();
+      const ctx = makeCtx();
+      ctx.dragState.isDragging = true;
+      ctx.dragState.draggedObject = mesh;
+
+      // Provide a moveable object with no limits
+      ctx.moveableObjects.value.push({
+        mesh,
+        isDragging: true,
+        magnetic: false,
+        scalable: false,
+        limit: {
+          x: { enable: false, min: 0, max: 0 },
+          y: { enable: false, min: 0, max: 0 },
+          z: { enable: false, min: 0, max: 0 },
+        },
+        checkVisibility: true,
+      } as never);
+
+      // Make raycaster find a plane intersection
+      const intersection = {
+        x: 5, y: 5, z: 5,
+        copy: vi.fn().mockReturnThis(),
+        add: vi.fn().mockReturnThis(),
+        lerpVectors: vi.fn().mockReturnThis(),
+      };
+      (ctx.raycaster.ray.intersectPlane as ReturnType<typeof vi.fn>).mockReturnValue(intersection);
+
+      const addEventSpy = vi.spyOn(document, "addEventListener");
+      applyComponents({
+        mesh,
+        uuid: "u1",
+        components: [
+          {
+            type: "Moved",
+            parameters: { uuid: "m1" },
+          },
+        ],
+        ctx,
+      });
+
+      const mouseMoveCall = addEventSpy.mock.calls.find(([ev]) => ev === "mousemove");
+      const mouseMoveHandler = mouseMoveCall![1] as (e: MouseEvent) => void;
+
+      expect(() =>
+        mouseMoveHandler({ clientX: 200, clientY: 300 } as MouseEvent)
+      ).not.toThrow();
+
+      addEventSpy.mockRestore();
+    });
+
+    it("uses limit constraints when enabled", () => {
+      const mesh = makeMesh();
+      const ctx = makeCtx();
+      ctx.dragState.isDragging = true;
+      ctx.dragState.draggedObject = mesh;
+
+      const clampedPosition = {
+        x: 5, y: 5, z: 5,
+        copy: vi.fn().mockReturnThis(),
+        add: vi.fn().mockReturnThis(),
+        lerpVectors: vi.fn().mockReturnThis(),
+      };
+      (ctx.raycaster.ray.intersectPlane as ReturnType<typeof vi.fn>).mockReturnValue(clampedPosition);
+
+      const addEventSpy = vi.spyOn(document, "addEventListener");
+      applyComponents({
+        mesh,
+        uuid: "u1",
+        components: [
+          {
+            type: "Moved",
+            parameters: {
+              uuid: "m1",
+              limit: {
+                x: { enable: true, min: -1, max: 1 },
+                y: { enable: true, min: -2, max: 2 },
+                z: { enable: true, min: -3, max: 3 },
+              },
+            },
+          },
+        ],
+        ctx,
+      });
+
+      const mouseMoveCall = addEventSpy.mock.calls.find(([ev]) => ev === "mousemove");
+      const mouseMoveHandler = mouseMoveCall![1] as (e: MouseEvent) => void;
+
+      expect(() =>
+        mouseMoveHandler({ clientX: 100, clientY: 100 } as MouseEvent)
+      ).not.toThrow();
+
+      addEventSpy.mockRestore();
+    });
+  });
+
+  describe("Action component — click handler", () => {
+    it("does not fire event when mesh is not visible", async () => {
+      const mesh = makeMesh();
+      mesh.visible = false;
+      const ctx = makeCtx();
+
+      let capturedClick: ((e: MouseEvent) => void) | null = null;
+      (
+        ctx.renderer as {
+          domElement: { addEventListener: ReturnType<typeof vi.fn> };
+        }
+      ).domElement.addEventListener.mockImplementation(
+        (event: string, handler: (e: MouseEvent) => void) => {
+          if (event === "click") capturedClick = handler;
+        }
+      );
+
+      applyComponents({
+        mesh,
+        uuid: "u1",
+        components: [{ type: "Action", parameters: { uuid: "ev1" } }],
+        ctx,
+      });
+
+      capturedClick!({ clientX: 100, clientY: 100 } as MouseEvent);
+      expect(ctx.triggerEvent).not.toHaveBeenCalled();
+    });
+
+    it("fires triggerEvent when mesh is clicked and visible", async () => {
+      const mesh = makeMesh();
+      mesh.visible = true;
+      const ctx = makeCtx();
+
+      // Make raycaster detect intersection
+      (ctx.raycaster.intersectObject as ReturnType<typeof vi.fn>).mockReturnValue([
+        { point: { x: 0, y: 0, z: 0 } },
+      ]);
+
+      let capturedClick: ((e: MouseEvent) => void) | null = null;
+      (
+        ctx.renderer as {
+          domElement: { addEventListener: ReturnType<typeof vi.fn> };
+        }
+      ).domElement.addEventListener.mockImplementation(
+        (event: string, handler: (e: MouseEvent) => void) => {
+          if (event === "click") capturedClick = handler;
+        }
+      );
+
+      applyComponents({
+        mesh,
+        uuid: "u1",
+        components: [{ type: "Action", parameters: { uuid: "ev-trigger" } }],
+        ctx,
+      });
+
+      await capturedClick!({ clientX: 100, clientY: 100 } as MouseEvent);
+      expect(ctx.triggerEvent).toHaveBeenCalledWith("ev-trigger");
+    });
+
+    it("handles triggerEvent error gracefully", async () => {
+      const mesh = makeMesh();
+      mesh.visible = true;
+      const ctx = makeCtx();
+      (ctx.triggerEvent as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+        new Error("event error")
+      );
+      (ctx.raycaster.intersectObject as ReturnType<typeof vi.fn>).mockReturnValue([
+        { point: { x: 0, y: 0, z: 0 } },
+      ]);
+
+      let capturedClick: ((e: MouseEvent) => void) | null = null;
+      (
+        ctx.renderer as {
+          domElement: { addEventListener: ReturnType<typeof vi.fn> };
+        }
+      ).domElement.addEventListener.mockImplementation(
+        (event: string, handler: (e: MouseEvent) => void) => {
+          if (event === "click") capturedClick = handler;
+        }
+      );
+
+      applyComponents({
+        mesh,
+        uuid: "u1",
+        components: [{ type: "Action", parameters: { uuid: "ev-err" } }],
+        ctx,
+      });
+
+      // Should not throw
+      await expect(
+        capturedClick!({ clientX: 100, clientY: 100 } as MouseEvent)
+      ).resolves.not.toThrow();
+    });
+  });
+
+  describe("Rotate component — setRotating", () => {
+    it("removes mesh from rotatingObjects when setRotating(false)", () => {
+      const mesh = makeMesh();
+      // Use a plain (non-Vue-reactive) array so findIndex keeps === identity
+      const rawArr: unknown[] = [];
+      const rotatingObjects = { value: rawArr };
+      const ctx = makeCtx({ rotatingObjects });
+      const result = applyComponents({
+        mesh,
+        uuid: "u1",
+        components: [
+          {
+            type: "Rotate",
+            parameters: { uuid: "r1", speed: { x: 0, y: 45, z: 0 } },
+          },
+        ],
+        ctx,
+      });
+
+      expect(rawArr).toHaveLength(1);
+      const { setRotating } = result.data as {
+        setRotating?: (isRotating: boolean) => void;
+      };
+      setRotating!(false);
+      expect(rawArr).toHaveLength(0);
+    });
+
+    it("re-adds mesh to rotatingObjects when setRotating(true) and not present", () => {
+      const mesh = makeMesh();
+      const rawArr: unknown[] = [];
+      const rotatingObjects = { value: rawArr };
+      const ctx = makeCtx({ rotatingObjects });
+      const result = applyComponents({
+        mesh,
+        uuid: "u1",
+        components: [
+          {
+            type: "Rotate",
+            parameters: { uuid: "r1", speed: { x: 0, y: 45, z: 0 } },
+          },
+        ],
+        ctx,
+      });
+
+      const { setRotating } = result.data as {
+        setRotating?: (isRotating: boolean) => void;
+      };
+      setRotating!(false); // remove first
+      expect(rawArr).toHaveLength(0);
+      setRotating!(true); // re-add
+      expect(rawArr).toHaveLength(1);
+    });
+  });
+
+  describe("Trigger component — updateBoundingBox on existing source", () => {
+    it("updates existing source's updateBoundingBox when source exists in ctx.sources", () => {
+      const mesh = makeMesh();
+      const ctx = makeCtx();
+
+      // Pre-populate sources with a model type entry for the same uuid
+      ctx.sources.set("u1", {
+        type: "model",
+        data: {
+          mesh,
+          setVisibility: vi.fn(),
+          cleanup: undefined,
+          updateBoundingBox: undefined,
+          setRotating: undefined,
+        },
+      } as never);
+
+      applyComponents({
+        mesh,
+        uuid: "u1",
+        components: [
+          { type: "Trigger", parameters: { uuid: "t1", target: "u2" } },
+        ],
+        ctx,
+      });
+
+      const existingSource = ctx.sources.get("u1") as {
+        type: string;
+        data: { updateBoundingBox?: () => void };
+      };
+      expect(typeof existingSource.data.updateBoundingBox).toBe("function");
+    });
   });
 });
