@@ -256,6 +256,46 @@ describe("useTTS — uploadAudio", () => {
   });
 });
 
+describe("useTTS — uploadAudio error paths", () => {
+  it("shows error when postFile returns no id (lines 254-255, 261-262)", async () => {
+    const { logger } = await import("@/utils/logger");
+    mocks.elMessageBoxPrompt.mockResolvedValue({ value: "My Audio" });
+    // postFile returns data without id → triggers else branch at line 254
+    mocks.postFile.mockResolvedValue({ data: {} });
+
+    const props = makeProps();
+    const { currentAudioBlob, uploadAudio } = useTTS(props);
+    currentAudioBlob.value = new Blob(["audio"], { type: "audio/mp3" });
+
+    await uploadAudio();
+
+    expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
+      expect.stringContaining("Upload error"),
+      expect.any(Error)
+    );
+    expect(mocks.elMessageError).toHaveBeenCalledWith("tts.uploadError");
+    expect(mocks.routerPush).not.toHaveBeenCalled();
+  });
+
+  it("shows error when postAudio returns no id (line 251, then 261-262)", async () => {
+    const { logger } = await import("@/utils/logger");
+    mocks.elMessageBoxPrompt.mockResolvedValue({ value: "My Audio" });
+    mocks.postFile.mockResolvedValue({ data: { id: 10 } });
+    // postAudio returns data without id → triggers throw at line 251
+    mocks.postAudio.mockResolvedValue({ data: {} });
+
+    const props = makeProps();
+    const { currentAudioBlob, uploadAudio } = useTTS(props);
+    currentAudioBlob.value = new Blob(["audio"], { type: "audio/mp3" });
+
+    await uploadAudio();
+
+    expect(vi.mocked(logger.error)).toHaveBeenCalled();
+    expect(mocks.elMessageError).toHaveBeenCalledWith("tts.uploadError");
+    expect(mocks.routerPush).not.toHaveBeenCalled();
+  });
+});
+
 describe("useTTS — audio player event handlers", () => {
   it("onTextInput resets highlights, pauses the player and calls checkTextLanguage", () => {
     const checkTextLanguage = vi.fn();

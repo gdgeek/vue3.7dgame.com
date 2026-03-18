@@ -73,7 +73,7 @@ describe("useSceneAudio", () => {
       await expect(promise).resolves.toBeUndefined();
     });
 
-    it("resolves even when audio errors", async () => {
+    it("resolves even when audio.play() rejects", async () => {
       const { playQueuedAudio } = await getComposable();
       const audio = createAudioMock();
       audio.play = vi.fn().mockRejectedValue(new Error("autoplay blocked"));
@@ -81,6 +81,27 @@ describe("useSceneAudio", () => {
       const promise = playQueuedAudio(audio);
 
       await expect(promise).resolves.toBeUndefined();
+    });
+
+    it("resolves and logs error when audio.onerror fires (lines 41-46)", async () => {
+      const { logger } = await import("@/utils/logger");
+      const { playQueuedAudio } = await getComposable();
+      const audio = createAudioMock();
+      // Prevent play() from resolving automatically
+      audio.play = vi.fn().mockReturnValue(new Promise(() => {}));
+
+      const promise = playQueuedAudio(audio);
+
+      // Trigger the onerror callback
+      if (audio.onerror) {
+        (audio.onerror as () => void)();
+      }
+
+      await expect(promise).resolves.toBeUndefined();
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining("Audio playback error"),
+        expect.any(Object)
+      );
     });
 
     it("skipQueue plays audio directly without queueing", async () => {
