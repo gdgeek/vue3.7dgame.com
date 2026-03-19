@@ -3,6 +3,7 @@
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { createApp, nextTick } from "vue";
+import type { PropType } from "vue";
 
 // ─── Mock stores ───────────────────────────────────────────────────────────────
 vi.mock("@/store/modules/domain", () => ({
@@ -19,24 +20,13 @@ vi.mock("vue-i18n", () => ({
   useI18n: vi.fn(() => ({ t: (k: string) => k })),
 }));
 
-// ─── Mock composable ──────────────────────────────────────────────────────────
-vi.mock("@/composables/useCategories", () => ({
-  useCategories: vi.fn(() => ({
-    items: [],
-    loading: false,
-    error: null,
-    retry: vi.fn(),
-  })),
-}));
-
 // ─── Mock child components ────────────────────────────────────────────────────
-vi.mock("@/components/Home/Book.vue", async () => {
+vi.mock("@/components/Home/PlatformOverview.vue", async () => {
   const { defineComponent: dc } = await import("vue");
   return {
     default: dc({
-      name: "Book",
-      props: ["items"],
-      template: '<div class="book-stub"></div>',
+      name: "PlatformOverview",
+      template: '<div class="platform-overview-stub"></div>',
     }),
   };
 });
@@ -88,7 +78,12 @@ async function mount(props: Record<string, unknown> = {}) {
   const app = createApp(HomePage as Parameters<typeof createApp>[0], props);
   app.component("FontAwesomeIcon", {
     name: "FontAwesomeIcon",
-    props: ["icon"],
+    props: {
+      icon: {
+        type: [Array, String] as PropType<string | string[]>,
+        default: "",
+      },
+    },
     template: '<i class="fa-stub"></i>',
   });
   app.component("ElDivider", {
@@ -142,10 +137,8 @@ describe("views/home/index.vue", () => {
     expect(el.querySelector(".section-header")).not.toBeNull();
   });
 
-  it("shows empty state when items is empty array", async () => {
+  it("renders platform overview content", async () => {
     const { el } = await mount();
-    // book-stub should not be rendered (items empty), home-empty should be rendered
-    expect(el.querySelector(".book-stub")).toBeNull();
-    expect(el.querySelector(".home-empty")).not.toBeNull();
+    expect(el.querySelector(".platform-overview-stub")).not.toBeNull();
   });
 });
