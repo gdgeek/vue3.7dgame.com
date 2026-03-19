@@ -2,7 +2,7 @@
  * Tests for src/layout/components/NavBar/index.vue
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { createApp, defineComponent, nextTick } from "vue";
+import { createApp, nextTick } from "vue";
 
 const mockToggleSidebar = vi.fn();
 const mockAppStore = {
@@ -14,6 +14,12 @@ vi.mock("@/store", () => ({
   useAppStore: vi.fn(() => mockAppStore),
 }));
 
+vi.mock("vue-i18n", () => ({
+  useI18n: vi.fn(() => ({
+    t: (key: string) => key,
+  })),
+}));
+
 vi.mock("@/layout/components/NavBar/components/Breadcrumb.vue", async () => {
   const { defineComponent: dc } = await import("vue");
   return {
@@ -23,6 +29,19 @@ vi.mock("@/layout/components/NavBar/components/Breadcrumb.vue", async () => {
     }),
   };
 });
+
+vi.mock(
+  "@/layout/components/NavBar/components/EditorVersionToolbar.vue",
+  async () => {
+    const { defineComponent: dc } = await import("vue");
+    return {
+      default: dc({
+        name: "EditorVersionToolbar",
+        template: '<div class="editor-version-toolbar-stub"></div>',
+      }),
+    };
+  }
+);
 
 vi.mock("@/layout/components/NavBar/components/HeaderActions.vue", async () => {
   const { defineComponent: dc } = await import("vue");
@@ -100,6 +119,11 @@ describe("layout/components/NavBar/index.vue", () => {
   it("renders HeaderActions stub", async () => {
     const { el } = await mount();
     expect(el.querySelector(".header-actions-stub")).not.toBeNull();
+  });
+
+  it("renders EditorVersionToolbar stub", async () => {
+    const { el } = await mount();
+    expect(el.querySelector(".editor-version-toolbar-stub")).not.toBeNull();
   });
 
   it("clicking hamburger calls appStore.toggleSidebar", async () => {
