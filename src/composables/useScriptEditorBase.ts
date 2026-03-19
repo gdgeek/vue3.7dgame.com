@@ -37,6 +37,20 @@ export type EditorEventPayload = {
   data?: unknown;
 };
 
+export type ScriptSaveTrigger = "manual" | "auto";
+
+export type ScriptDraftVersion = {
+  id: string;
+  savedAt: string;
+  trigger: ScriptSaveTrigger;
+  summary: string;
+  summaryI18nKey?: string;
+  summaryI18nParams?: Record<string, string>;
+  blocklyData: unknown;
+  lua: string;
+  js: string;
+};
+
 /** 两个页面中需要区分的 i18n 键 */
 export type ScriptEditorI18nKeys = {
   error1: string;
@@ -58,17 +72,33 @@ export type UseScriptEditorBaseOptions = {
   /** i18n 键映射 */
   i18nKeys: ScriptEditorI18nKeys;
   /** 保存到服务端的回调（meta/verse 各自实现） */
-  onPost: (data: EditorPostPayload) => Promise<void>;
+  onPost: (
+    data: EditorPostPayload,
+    context: { trigger: ScriptSaveTrigger }
+  ) => Promise<void>;
   /**
    * 编辑器就绪 / 语言切换时的回调（meta/verse 各自实现 initEditor）。
    * initEditor 内部应自行检查 data 是否已加载。
    */
   onReady: () => void;
+  /** 草稿存储 key（按脚本区分） */
+  getDraftStorageKey?: () => string | null;
+  /** 当前脚本是否允许保存 */
+  canSave?: () => boolean;
+  /** 回滚到历史版本时，由页面负责重新初始化 iframe */
+  onRestoreDraft?: (blocklyData: unknown) => void;
 };
 
 type ResolveUnsavedChangesOptions = {
   showDiscardInfo?: boolean;
 };
+
+export type SaveRequestOptions = {
+  suppressNoChangeInfo?: boolean;
+};
+
+const DEFAULT_AUTO_SAVE_INTERVAL_SECONDS = 300;
+const DRAFT_SETTINGS_VERSION = 2;
 
 // ---------- composable 主体 ----------
 
@@ -92,6 +122,14 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const codeDialogTitle = ref("");
   const unsavedBlocklyData = ref<unknown>(null);
   const hasUnsavedChanges = ref<boolean>(false);
+  const draftVersions = ref<ScriptDraftVersion[]>([]);
+  const versionDialogVisible = ref(false);
+  const autoSaveEnabled = ref(true);
+  const autoSaveIntervalSeconds = ref(DEFAULT_AUTO_SAVE_INTERVAL_SECONDS);
+  const isSaving = ref(false);
+  const lastSaveTrigger = ref<ScriptSaveTrigger | null>(null);
+  const lastSavedAt = ref<string | null>(null);
+  const editorFrameKey = ref(0);
   const editor = ref<HTMLIFrameElement | null>(null);
   const src = ref(env.blockly + "?language=" + appStore.language);
   const isDark = computed<boolean>(
@@ -100,26 +138,347 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
 
   let ready = false;
   let saveResolve: (() => void) | null = null;
+  let saveReject: ((reason?: unknown) => void) | null = null;
+  let saveTimer: number | null = null;
+  let currentSaveTrigger: ScriptSaveTrigger = "manual";
+  let currentSaveOptions: SaveRequestOptions = {};
+  let hasInitializedSavedSnapshot = false;
+  let lastSavedSignature = "";
+  let pendingSavePromise: Promise<void> | null = null;
+  let pendingRestorePayload: EditorPostPayload | null = null;
 
-  // ---- 单次赋值工具（用于记录初始 LuaCode 以检测变更） ----
-  const defineSingleAssignment = <T>(initialValue: T) => {
-    let value = initialValue;
-    let isAssigned = false;
-    return {
-      get() {
-        return value;
-      },
-      set(newValue: T) {
-        if (!isAssigned) {
-          value = newValue;
-          isAssigned = true;
-        } else {
-          logger.log("cannot be assigned again");
+  const canSaveCurrentScript = () =>
+    typeof options.canSave === "function" ? options.canSave() : true;
+
+  const getDraftStorageKey = () => options.getDraftStorageKey?.() || null;
+
+  const getDraftSettingsKey = () => {
+    const key = getDraftStorageKey();
+    return key ? `${key}:settings` : null;
+  };
+
+  const safeStringify = (value: unknown) => {
+    try {
+      return JSON.stringify(value ?? null);
+    } catch {
+      return "null";
+    }
+  };
+
+  const buildSnapshotSignature = (payload: {
+    lua: string;
+    js: string;
+    blocklyData: unknown;
+  }) => safeStringify(payload);
+
+  const buildRuntimeLua = (lua: string) =>
+    `local ${options.luaLocalVar} = {}\nlocal index = ''\n${lua}`;
+
+  const applyEditorCodes = (payload: {
+    lua: string;
+    js: string;
+    blocklyData: unknown;
+  }) => {
+    unsavedBlocklyData.value = safeClone(payload.blocklyData);
+    LuaCode.value = buildRuntimeLua(payload.lua);
+    JavaScriptCode.value = formatJavaScript(payload.js);
+    const nextSignature = buildSnapshotSignature(payload);
+    hasUnsavedChanges.value = nextSignature !== lastSavedSignature;
+  };
+
+  const markCurrentPayloadAsSaved = (payload: {
+    lua: string;
+    js: string;
+    blocklyData: unknown;
+  }) => {
+    lastSavedSignature = buildSnapshotSignature(payload);
+    hasInitializedSavedSnapshot = true;
+    hasUnsavedChanges.value = false;
+  };
+
+  const formatDraftSummary = (
+    payload: { lua: string; js: string },
+    previousVersion?: ScriptDraftVersion
+  ): {
+    summary: string;
+    summaryI18nKey?: string;
+    summaryI18nParams?: Record<string, string>;
+  } => {
+    const getChangedLine = (currentContent: string, previousContent = "") => {
+      const currentLines = currentContent
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+      const previousLines = previousContent
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+      const maxLength = Math.max(currentLines.length, previousLines.length);
+      for (let index = 0; index < maxLength; index += 1) {
+        if (currentLines[index] !== previousLines[index]) {
+          if (currentLines[index]) {
+            return {
+              summary: currentLines[index],
+            };
+          }
+          if (previousLines[index]) {
+            return {
+              summary: t("common.scriptDraft.summaryRemoved", {
+                items: previousLines[index],
+              }),
+              summaryI18nKey: "common.scriptDraft.summaryRemoved",
+              summaryI18nParams: {
+                items: previousLines[index],
+              },
+            };
+          }
         }
-      },
+      }
+      return null;
+    };
+
+    if (previousVersion) {
+      const changedLuaLine = getChangedLine(payload.lua, previousVersion.lua);
+      if (changedLuaLine) {
+        return {
+          ...changedLuaLine,
+          summary: changedLuaLine.summary.replace(/\s+/g, " ").slice(0, 72),
+          summaryI18nParams: changedLuaLine.summaryI18nParams
+            ? Object.fromEntries(
+                Object.entries(changedLuaLine.summaryI18nParams).map(
+                  ([key, value]) => [
+                    key,
+                    value.replace(/\s+/g, " ").slice(0, 72),
+                  ]
+                )
+              )
+            : undefined,
+        };
+      }
+      const changedJsLine = getChangedLine(payload.js, previousVersion.js);
+      if (changedJsLine) {
+        return {
+          ...changedJsLine,
+          summary: changedJsLine.summary.replace(/\s+/g, " ").slice(0, 72),
+          summaryI18nParams: changedJsLine.summaryI18nParams
+            ? Object.fromEntries(
+                Object.entries(changedJsLine.summaryI18nParams).map(
+                  ([key, value]) => [
+                    key,
+                    value.replace(/\s+/g, " ").slice(0, 72),
+                  ]
+                )
+              )
+            : undefined,
+        };
+      }
+    }
+
+    const candidate = [payload.lua, payload.js]
+      .flatMap((content) => content.split("\n"))
+      .map((line) => line.trim())
+      .find((line) => line.length > 0);
+    if (!candidate) {
+      return {
+        summary: t("common.scriptDraft.emptySummary"),
+        summaryI18nKey: "common.scriptDraft.emptySummary",
+      };
+    }
+    return {
+      summary: candidate.replace(/\s+/g, " ").slice(0, 72),
     };
   };
-  const initLuaCode = defineSingleAssignment("");
+
+  const persistDraftVersions = () => {
+    const key = getDraftStorageKey();
+    if (!key) return;
+    try {
+      window.localStorage.setItem(key, JSON.stringify(draftVersions.value));
+    } catch (error) {
+      logger.error("persistDraftVersions error", error);
+    }
+  };
+
+  const persistDraftSettings = () => {
+    const key = getDraftSettingsKey();
+    if (!key) return;
+    try {
+      window.localStorage.setItem(
+        key,
+        JSON.stringify({
+          settingsVersion: DRAFT_SETTINGS_VERSION,
+          autoSaveEnabled: autoSaveEnabled.value,
+          autoSaveIntervalSeconds: autoSaveIntervalSeconds.value,
+        })
+      );
+    } catch (error) {
+      logger.error("persistDraftSettings error", error);
+    }
+  };
+
+  const normalizeAutoSaveInterval = (parsed: Record<string, unknown>) => {
+    const interval = Number(parsed.autoSaveIntervalSeconds);
+    if (!Number.isFinite(interval) || interval < 60) {
+      return DEFAULT_AUTO_SAVE_INTERVAL_SECONDS;
+    }
+    const settingsVersion = Number(parsed.settingsVersion || 0);
+    if (settingsVersion < DRAFT_SETTINGS_VERSION && interval === 60) {
+      return DEFAULT_AUTO_SAVE_INTERVAL_SECONDS;
+    }
+    return interval;
+  };
+
+  const loadDraftState = () => {
+    const draftKey = getDraftStorageKey();
+    const settingsKey = getDraftSettingsKey();
+
+    draftVersions.value = [];
+    autoSaveEnabled.value = true;
+    autoSaveIntervalSeconds.value = DEFAULT_AUTO_SAVE_INTERVAL_SECONDS;
+
+    if (!draftKey || !settingsKey) return;
+
+    try {
+      const rawVersions = window.localStorage.getItem(draftKey);
+      if (rawVersions) {
+        const parsed = JSON.parse(rawVersions);
+        if (Array.isArray(parsed)) {
+          draftVersions.value = parsed;
+          const latestVersion = parsed[0] as ScriptDraftVersion | undefined;
+          if (latestVersion) {
+            lastSaveTrigger.value = latestVersion.trigger;
+            lastSavedAt.value = latestVersion.savedAt;
+          }
+        }
+      }
+    } catch (error) {
+      logger.error("loadDraftState versions error", error);
+    }
+
+    try {
+      const rawSettings = window.localStorage.getItem(settingsKey);
+      if (rawSettings) {
+        const parsed = JSON.parse(rawSettings);
+        autoSaveEnabled.value = parsed.autoSaveEnabled !== false;
+        if (parsed && typeof parsed === "object") {
+          autoSaveIntervalSeconds.value = normalizeAutoSaveInterval(
+            parsed as Record<string, unknown>
+          );
+        }
+      }
+    } catch (error) {
+      logger.error("loadDraftState settings error", error);
+    }
+  };
+
+  const addDraftVersion = (
+    payload: EditorPostPayload,
+    trigger: ScriptSaveTrigger
+  ): string | null => {
+    const latestVersion = draftVersions.value[0];
+    const nextSummary = formatDraftSummary(payload, latestVersion);
+    const nextVersion: ScriptDraftVersion = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      savedAt: new Date().toISOString(),
+      trigger,
+      summary: nextSummary.summary,
+      summaryI18nKey: nextSummary.summaryI18nKey,
+      summaryI18nParams: nextSummary.summaryI18nParams,
+      blocklyData: safeClone(payload.data),
+      lua: payload.lua,
+      js: payload.js,
+    };
+
+    const nextSignature = buildSnapshotSignature({
+      lua: payload.lua,
+      js: payload.js,
+      blocklyData: payload.data,
+    });
+    const latestSignature = latestVersion
+      ? buildSnapshotSignature({
+          lua: latestVersion.lua,
+          js: latestVersion.js,
+          blocklyData: latestVersion.blocklyData,
+        })
+      : "";
+
+    if (latestSignature === nextSignature) {
+      return null;
+    }
+
+    draftVersions.value = [nextVersion, ...draftVersions.value].slice(0, 20);
+    persistDraftVersions();
+    return nextVersion.savedAt;
+  };
+
+  const openVersionDialog = () => {
+    versionDialogVisible.value = true;
+  };
+
+  const closeVersionDialog = () => {
+    versionDialogVisible.value = false;
+  };
+
+  const clearDraftHistory = () => {
+    draftVersions.value = [];
+    pendingRestorePayload = null;
+    const key = getDraftStorageKey();
+    if (!key) return;
+    try {
+      window.localStorage.removeItem(key);
+    } catch (error) {
+      logger.error("clearDraftHistory error", error);
+    }
+  };
+
+  const restoreDraftVersion = (draftId: string) => {
+    const target = draftVersions.value.find((draft) => draft.id === draftId);
+    if (!target) return;
+    pendingRestorePayload = {
+      data: safeClone(target.blocklyData),
+      lua: target.lua,
+      js: target.js,
+    };
+
+    applyEditorCodes({
+      lua: target.lua,
+      js: target.js,
+      blocklyData: target.blocklyData,
+    });
+    activeName.value = "blockly";
+    options.onRestoreDraft?.(safeClone(target.blocklyData));
+    Message.success(t("common.scriptDraft.restoreSuccess"));
+    versionDialogVisible.value = false;
+  };
+
+  const clearAutoSaveTimer = () => {
+    if (saveTimer !== null) {
+      window.clearInterval(saveTimer);
+      saveTimer = null;
+    }
+  };
+
+  const reloadEditorFrame = () => {
+    ready = false;
+    editorFrameKey.value += 1;
+  };
+
+  const restartAutoSaveTimer = () => {
+    clearAutoSaveTimer();
+    if (!autoSaveEnabled.value) return;
+    if (!getDraftStorageKey()) return;
+
+    saveTimer = window.setInterval(async () => {
+      if (!hasUnsavedChanges.value) return;
+      if (!canSaveCurrentScript()) return;
+      if (isSaving.value) return;
+      try {
+        await save("auto", { suppressNoChangeInfo: true });
+      } catch (error) {
+        logger.error("auto save failed", error);
+      }
+    }, autoSaveIntervalSeconds.value * 1000);
+  };
 
   // ---- 编辑器全屏 ----
   const toggleFullscreen = () => {
@@ -259,12 +618,25 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   };
 
   // ---- 保存 ----
-  const save = (): Promise<void> => {
-    hasUnsavedChanges.value = false;
-    return new Promise<void>((resolve) => {
+  const save = (
+    triggerOrEvent?: ScriptSaveTrigger | MouseEvent,
+    saveOptions: SaveRequestOptions = {}
+  ): Promise<void> => {
+    if (isSaving.value && pendingSavePromise) {
+      return pendingSavePromise;
+    }
+
+    currentSaveTrigger =
+      typeof triggerOrEvent === "string" ? triggerOrEvent : "manual";
+    currentSaveOptions = saveOptions;
+    isSaving.value = true;
+
+    pendingSavePromise = new Promise<void>((resolve, reject) => {
       saveResolve = resolve;
+      saveReject = reject;
       postMessage("save", { language: ["lua", "js"], data: {} });
     });
+    return pendingSavePromise;
   };
 
   const confirmSaveScript = () => {
@@ -325,14 +697,6 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     }
   };
 
-  // ---- Ctrl+S 快捷保存 ----
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-      e.preventDefault();
-      save();
-    }
-  };
-
   // ---- iframe 消息处理 ----
   const handleMessage = async (e: MessageEvent) => {
     try {
@@ -350,25 +714,106 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
       } else if (params.action === "post") {
         if (!isEditorPostPayload(params.data)) {
           Message.error(t(options.i18nKeys.error1));
+          isSaving.value = false;
+          if (saveReject) {
+            saveReject(new Error("invalid save payload"));
+            saveReject = null;
+          }
+          pendingSavePromise = null;
           return;
         }
-        await options.onPost(params.data);
+        await options.onPost(params.data, { trigger: currentSaveTrigger });
+        pendingRestorePayload = null;
+        const savedAt = addDraftVersion(params.data, currentSaveTrigger);
+        markCurrentPayloadAsSaved({
+          lua: params.data.lua,
+          js: params.data.js,
+          blocklyData: params.data.data,
+        });
+        lastSaveTrigger.value = currentSaveTrigger;
+        lastSavedAt.value = savedAt || new Date().toISOString();
+        isSaving.value = false;
+        if (currentSaveTrigger === "auto") {
+          Message.success(t("common.scriptDraft.autoSavedNotice"));
+        }
         if (saveResolve) {
           saveResolve();
           saveResolve = null;
         }
+        saveReject = null;
+        pendingSavePromise = null;
       } else if (params.action === "post:no-change") {
-        Message.info(t(options.i18nKeys.info));
+        if (pendingRestorePayload && hasUnsavedChanges.value) {
+          await options.onPost(pendingRestorePayload, {
+            trigger: currentSaveTrigger,
+          });
+          const savedAt = addDraftVersion(
+            pendingRestorePayload,
+            currentSaveTrigger
+          );
+          markCurrentPayloadAsSaved({
+            lua: pendingRestorePayload.lua,
+            js: pendingRestorePayload.js,
+            blocklyData: pendingRestorePayload.data,
+          });
+          lastSaveTrigger.value = currentSaveTrigger;
+          lastSavedAt.value = savedAt || new Date().toISOString();
+          if (currentSaveTrigger === "auto") {
+            Message.success(t("common.scriptDraft.autoSavedNotice"));
+          }
+          pendingRestorePayload = null;
+          isSaving.value = false;
+          if (saveResolve) {
+            saveResolve();
+            saveResolve = null;
+          }
+          saveReject = null;
+          pendingSavePromise = null;
+          return;
+        }
+        isSaving.value = false;
+        lastSaveTrigger.value = currentSaveTrigger;
+        lastSavedAt.value = new Date().toISOString();
+        if (!currentSaveOptions.suppressNoChangeInfo) {
+          Message.info(t(options.i18nKeys.info));
+        }
+        if (saveResolve) {
+          saveResolve();
+          saveResolve = null;
+        }
+        saveReject = null;
+        pendingSavePromise = null;
       } else if (params.action === "update") {
         if (!isEditorUpdatePayload(params.data)) return;
-        LuaCode.value =
-          `local ${options.luaLocalVar} = {}\nlocal index = ''\n` +
-          params.data.lua;
-        JavaScriptCode.value = formatJavaScript(params.data.js);
-        initLuaCode.set(LuaCode.value);
-        handleBlocklyChange(params.data.blocklyData);
+        if (pendingRestorePayload) {
+          const nextSignature = buildSnapshotSignature({
+            lua: params.data.lua,
+            js: params.data.js,
+            blocklyData: params.data.blocklyData,
+          });
+          const restoreSignature = buildSnapshotSignature({
+            lua: pendingRestorePayload.lua,
+            js: pendingRestorePayload.js,
+            blocklyData: pendingRestorePayload.data,
+          });
+          if (nextSignature !== restoreSignature) {
+            pendingRestorePayload = null;
+          }
+        }
+        applyEditorCodes(params.data);
+        if (!hasInitializedSavedSnapshot) {
+          markCurrentPayloadAsSaved(params.data);
+        }
       }
     } catch (_e) {
+      isSaving.value = false;
+      hasUnsavedChanges.value = true;
+      if (saveReject) {
+        saveReject(_e);
+        saveReject = null;
+      }
+      saveResolve = null;
+      pendingSavePromise = null;
       logger.log("ex:" + String(_e));
     }
   };
@@ -410,8 +855,18 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     }
   );
 
-  watch(LuaCode, (newValue) => {
-    hasUnsavedChanges.value = newValue !== initLuaCode.get();
+  watch(
+    () => options.getDraftStorageKey?.(),
+    () => {
+      loadDraftState();
+      restartAutoSaveTimer();
+    },
+    { immediate: true }
+  );
+
+  watch([autoSaveEnabled, autoSaveIntervalSeconds], () => {
+    persistDraftSettings();
+    restartAutoSaveTimer();
   });
 
   watch(
@@ -440,7 +895,6 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   // ---- onMounted：注册共享事件监听 ----
   onMounted(() => {
     window.addEventListener("message", handleMessage);
-    window.addEventListener("keydown", handleKeyDown);
     loadHighlightStyle(isDark.value);
     window.addEventListener("beforeunload", handleBeforeUnload);
     document.addEventListener("keydown", (e) => {
@@ -458,9 +912,9 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
 
   // ---- onBeforeUnmount：注销事件监听 ----
   onBeforeUnmount(() => {
+    clearAutoSaveTimer();
     window.removeEventListener("message", handleMessage);
     window.removeEventListener("beforeunload", handleBeforeUnload);
-    window.removeEventListener("keydown", handleKeyDown);
     document.removeEventListener("keydown", (e) => {
       if (e.key === "Escape" && showCodeDialog.value) {
         showCodeDialog.value = false;
@@ -489,6 +943,14 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     codeDialogTitle,
     unsavedBlocklyData,
     hasUnsavedChanges,
+    draftVersions,
+    versionDialogVisible,
+    autoSaveEnabled,
+    autoSaveIntervalSeconds,
+    isSaving,
+    lastSaveTrigger,
+    lastSavedAt,
+    editorFrameKey,
     editor,
     src,
     isDark,
@@ -502,8 +964,12 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     formatJavaScript,
     postMessage,
     save,
+    openVersionDialog,
+    closeVersionDialog,
+    restoreDraftVersion,
+    clearDraftHistory,
+    reloadEditorFrame,
     handleBeforeUnload,
-    handleKeyDown,
     handleMessage,
     decompressBlockly,
     resolveUnsavedChangesBeforeLeave,

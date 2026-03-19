@@ -49,6 +49,7 @@
                 >
                   <el-main class="blockly-editor-main">
                     <iframe
+                      :key="editorFrameKey"
                       style="margin: 0; padding: 0; height: 100%; width: 100%"
                       class="blockly-editor-frame"
                       scrolling="no"
@@ -156,6 +157,17 @@
             ></ScenePlayer>
           </div>
         </el-card>
+        <ScriptDraftDialog
+          :model-value="versionDialogVisible"
+          :versions="draftVersions"
+          :auto-save-enabled="autoSaveEnabled"
+          :auto-save-interval-seconds="autoSaveIntervalSeconds"
+          @update:model-value="versionDialogVisible = $event"
+          @update:auto-save-enabled="autoSaveEnabled = $event"
+          @update:auto-save-interval-seconds="autoSaveIntervalSeconds = $event"
+          @clear-history="clearDraftHistory"
+          @restore="restoreDraftVersion"
+        ></ScriptDraftDialog>
       </el-main>
     </el-container>
   </div>
@@ -163,12 +175,14 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { CopyDocument } from "@element-plus/icons-vue";
 import { logger } from "@/utils/logger";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { getMeta, metaInfo, putMetaCode } from "@/api/v1/meta";
 import { getVerses } from "@/api/v1/verse";
+import { Message } from "@/components/Dialog";
 import * as THREE from "three";
 import { getConfiguredGLTFLoader } from "@/lib/three/loaders";
 import { convertToHttps } from "@/assets/js/helper";
@@ -180,8 +194,14 @@ import ScenePlayer from "./ScenePlayer.vue";
 import {
   useScriptEditorBase,
   type EditorPostPayload,
+  type ScriptSaveTrigger,
 } from "@/composables/useScriptEditorBase";
 import { buildScriptRuntime } from "@/composables/useScriptRuntime";
+import ScriptDraftDialog from "@/components/ScriptDraftDialog.vue";
+import {
+  useEditorVersionToolbar,
+  type EditorToolbarStatus,
+} from "@/composables/useEditorVersionToolbar";
 
 // ---------- Meta 专有状态 ----------
 const loading = ref(false);
@@ -232,14 +252,15 @@ type EntityNode = {
 };
 
 // ---------- initEditor（Meta 版）----------
-const initEditor = () => {
+const initEditor = (overrideData?: unknown) => {
   if (!meta.value) return;
   if (!isReady()) return;
 
   let blocklyData = meta.value.metaCode?.blockly || "{}";
   try {
     blocklyData = decompressBlockly(blocklyData);
-    const data = unsavedBlocklyData.value ?? JSON.parse(blocklyData);
+    const data =
+      overrideData ?? unsavedBlocklyData.value ?? JSON.parse(blocklyData);
     test.value = getResource(meta.value);
     postMessage("init", {
       language: ["lua", "js"],
@@ -256,7 +277,10 @@ const initEditor = () => {
 };
 
 // ---------- postScript（Meta 版：保存到服务端，无发布流程）----------
-const postScript = async (message: EditorPostPayload) => {
+const postScript = async (
+  message: EditorPostPayload,
+  context: { trigger: ScriptSaveTrigger }
+) => {
   if (meta.value === null) {
     ElMessage.error(t("meta.script.error1"));
     return;
@@ -279,8 +303,14 @@ const postScript = async (message: EditorPostPayload) => {
     js: message.js,
   });
 
-  ElMessage.success(t("meta.script.success"));
+  if (context.trigger === "manual") {
+    Message.success(t("meta.script.success"));
+  }
 };
+
+const draftStorageKey = computed(() =>
+  Number.isFinite(id.value) ? `script-draft:meta:${id.value}` : null
+);
 
 // ---------- 共享编辑器 composable ----------
 const {
@@ -292,12 +322,25 @@ const {
   isSceneFullscreen,
   unsavedBlocklyData,
   resolveUnsavedChangesBeforeLeave,
+  hasUnsavedChanges,
+  draftVersions,
+  versionDialogVisible,
+  autoSaveEnabled,
+  autoSaveIntervalSeconds,
+  isSaving,
+  lastSaveTrigger,
+  lastSavedAt,
+  editorFrameKey,
   editor,
   src,
   isDark,
   toggleSceneFullscreen,
   postMessage,
   save,
+  openVersionDialog,
+  clearDraftHistory,
+  restoreDraftVersion,
+  reloadEditorFrame,
   decompressBlockly,
   isReady,
 } = useScriptEditorBase({
@@ -316,6 +359,36 @@ const {
   },
   onPost: postScript,
   onReady: initEditor,
+  getDraftStorageKey: () => draftStorageKey.value,
+  canSave: () => Boolean(meta.value?.editable),
+  onRestoreDraft: () => reloadEditorFrame(),
+});
+
+const toolbarOwner = "meta-script-editor";
+const { registerToolbar, updateToolbarStatus, unregisterToolbar } =
+  useEditorVersionToolbar();
+const toolbarStatus = computed<EditorToolbarStatus>(() => {
+  if (isSaving.value) return "saving";
+  if (hasUnsavedChanges.value) return "dirty";
+  if (lastSaveTrigger.value === "auto" && lastSavedAt.value) {
+    return "autosaved";
+  }
+  return "saved";
+});
+
+onMounted(() => {
+  registerToolbar(toolbarOwner, {
+    status: toolbarStatus.value,
+    onOpen: openVersionDialog,
+  });
+});
+
+watch(toolbarStatus, (status) => {
+  updateToolbarStatus(toolbarOwner, status);
+});
+
+onBeforeUnmount(() => {
+  unregisterToolbar(toolbarOwner);
 });
 
 const { t } = useI18n();

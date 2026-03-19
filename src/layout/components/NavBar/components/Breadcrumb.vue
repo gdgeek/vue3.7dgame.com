@@ -16,6 +16,10 @@
         @click="handleNavigate(item)"
       >
         {{ item.label }}
+        <span
+          v-if="item.isCurrent && showUnsavedDot"
+          class="crumb-unsaved-dot"
+        ></span>
       </component>
       <span v-if="index < breadcrumbItems.length - 1" class="crumb-separator">
         /
@@ -29,10 +33,18 @@ import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { RouteLocationRaw } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { useEditorVersionToolbar } from "@/composables/useEditorVersionToolbar";
 
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
+const { editorVersionToolbarState } = useEditorVersionToolbar();
+
+const showUnsavedDot = computed(
+  () =>
+    editorVersionToolbarState.active &&
+    editorVersionToolbarState.status === "dirty"
+);
 
 const getQueryString = (value: unknown): string => {
   if (typeof value === "string") return value;
@@ -297,6 +309,8 @@ const handleNavigate = (item: BreadcrumbSegment) => {
 }
 
 .crumb-link {
+  display: inline-flex;
+  align-items: center;
   padding: 0;
   margin: 0;
   font-size: 14px;
@@ -326,6 +340,15 @@ const handleNavigate = (item: BreadcrumbSegment) => {
     color: var(--ar-text-muted) !important;
     cursor: default;
   }
+}
+
+.crumb-unsaved-dot {
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: #f59a23;
+  flex-shrink: 0;
 }
 
 .crumb-separator {

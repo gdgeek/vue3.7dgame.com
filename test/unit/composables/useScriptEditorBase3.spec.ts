@@ -141,37 +141,40 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
     mockUserState.getRole.mockReturnValue("editor");
   });
 
-  // ── Line ~110: defineSingleAssignment double-set ────────────────────────
+  // ── update path: repeated updates should still refresh editor state ─────
 
-  describe("defineSingleAssignment: double-set (line 110)", () => {
-    it("second action=update call logs 'cannot be assigned again'", async () => {
+  describe("repeated update handling", () => {
+    it("second action=update call still refreshes latest code", async () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
       );
 
-      const updateData = {
+      const firstUpdateData = {
         lua: "print(1)",
         js: "console.log(1)",
         blocklyData: "xml",
       };
+      const secondUpdateData = {
+        lua: "print(2)",
+        js: "console.log(2)",
+        blocklyData: "xml-2",
+      };
 
-      // First update: initLuaCode.set() runs with isAssigned=false
       await result.handleMessage(
         new MessageEvent("message", {
-          data: { action: "update", data: updateData },
+          data: { action: "update", data: firstUpdateData },
         })
       );
 
-      // Second update: initLuaCode.set() runs with isAssigned=true → else branch (line 110)
       await result.handleMessage(
         new MessageEvent("message", {
-          data: { action: "update", data: updateData },
+          data: { action: "update", data: secondUpdateData },
         })
       );
 
-      expect(mockLogger3.log).toHaveBeenCalledWith(
-        expect.stringContaining("cannot be assigned again")
-      );
+      expect(result.LuaCode.value).toContain("print(2)");
+      expect(result.JavaScriptCode.value).toBe("fmt:console.log(2)");
+      expect(result.unsavedBlocklyData.value).toBe("xml-2");
 
       unmount();
     });
@@ -351,7 +354,7 @@ describe("useScriptEditorBase (part 3) — uncovered paths", () => {
 
     it("changing language calls onReady", async () => {
       const onReady = vi.fn();
-      const { result, unmount } = withSetup(() =>
+      const { unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions({ onReady }))
       );
 

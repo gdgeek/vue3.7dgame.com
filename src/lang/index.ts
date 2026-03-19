@@ -2,10 +2,17 @@ import { logger } from "@/utils/logger";
 import type { App } from "vue";
 import { createI18n } from "vue-i18n";
 import { useAppStoreHook } from "@/store/modules/app";
+import defaultSettings from "@/settings";
 // 本地语言包（模块化结构）
 import zhCnLocale from "./zh-CN";
 
-const appStore = useAppStoreHook();
+const getInitialLocale = () => {
+  if (typeof window === "undefined") {
+    return defaultSettings.language;
+  }
+
+  return window.localStorage.getItem("language") || defaultSettings.language;
+};
 
 const messages = {
   "zh-CN": {
@@ -15,7 +22,7 @@ const messages = {
 
 const i18n = createI18n({
   legacy: false,
-  locale: appStore.language as string,
+  locale: getInitialLocale(),
   messages: messages,
   globalInjection: true,
 });
@@ -30,6 +37,7 @@ export function setupI18n(app: App<Element>) {
  * @param locale 语言标识
  */
 export const loadLanguageAsync = async (locale: string) => {
+  const appStore = useAppStoreHook();
   // 检查语言是否已经加载（不仅在 availableLocales 中，还要有实际的消息内容）
   const messages = i18n.global.getLocaleMessage(locale);
   const hasMessages = messages && Object.keys(messages).length > 0;

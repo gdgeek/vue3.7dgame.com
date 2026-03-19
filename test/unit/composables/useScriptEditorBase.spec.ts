@@ -58,6 +58,14 @@ import {
   type UseScriptEditorBaseOptions,
 } from "@/composables/useScriptEditorBase";
 
+type MockBeforeUnloadEvent = Pick<BeforeUnloadEvent, "preventDefault"> & {
+  returnValue: string;
+};
+
+type MockIframe = Pick<HTMLIFrameElement, "contentWindow">;
+
+type MockMessageEvent = Pick<MessageEvent, "data">;
+
 // --- 工具函数：在 Vue 组件上下文中挂载 composable ---
 function withSetup<T>(composable: () => T): { result: T; unmount: () => void } {
   let result!: T;
@@ -293,7 +301,10 @@ describe("useScriptEditorBase", () => {
         useScriptEditorBase(makeOptions())
       );
       result.hasUnsavedChanges.value = true;
-      const event = { preventDefault: vi.fn(), returnValue: "" } as any;
+      const event = {
+        preventDefault: vi.fn(),
+        returnValue: "",
+      } as MockBeforeUnloadEvent;
       result.handleBeforeUnload(event);
 
       expect(event.preventDefault).toHaveBeenCalled();
@@ -305,87 +316,13 @@ describe("useScriptEditorBase", () => {
         useScriptEditorBase(makeOptions())
       );
       result.hasUnsavedChanges.value = false;
-      const event = { preventDefault: vi.fn(), returnValue: "" } as any;
+      const event = {
+        preventDefault: vi.fn(),
+        returnValue: "",
+      } as MockBeforeUnloadEvent;
       result.handleBeforeUnload(event);
 
       expect(event.preventDefault).not.toHaveBeenCalled();
-      unmount();
-    });
-  });
-
-  // ----------------------------------------------------------------
-  // handleKeyDown
-  // ----------------------------------------------------------------
-  describe("handleKeyDown", () => {
-    function makeKeyEvent(opts: {
-      ctrlKey?: boolean;
-      metaKey?: boolean;
-      key: string;
-    }) {
-      return {
-        ctrlKey: opts.ctrlKey ?? false,
-        metaKey: opts.metaKey ?? false,
-        key: opts.key,
-        preventDefault: vi.fn(),
-      } as any;
-    }
-
-    it("Ctrl+S 调用 postMessage 发送 save 命令", () => {
-      const { result, unmount } = withSetup(() =>
-        useScriptEditorBase(makeOptions())
-      );
-      const mockContentWindow = { postMessage: vi.fn() };
-      result.editor.value = { contentWindow: mockContentWindow } as any;
-
-      result.handleKeyDown(makeKeyEvent({ ctrlKey: true, key: "s" }));
-
-      expect(mockContentWindow.postMessage).toHaveBeenCalledWith(
-        expect.objectContaining({ action: "save" }),
-        "*"
-      );
-      unmount();
-    });
-
-    it("Meta+S（macOS）同样触发 save", () => {
-      const { result, unmount } = withSetup(() =>
-        useScriptEditorBase(makeOptions())
-      );
-      const mockContentWindow = { postMessage: vi.fn() };
-      result.editor.value = { contentWindow: mockContentWindow } as any;
-
-      result.handleKeyDown(makeKeyEvent({ metaKey: true, key: "s" }));
-
-      expect(mockContentWindow.postMessage).toHaveBeenCalledWith(
-        expect.objectContaining({ action: "save" }),
-        "*"
-      );
-      unmount();
-    });
-
-    it("Ctrl+S 调用 event.preventDefault 阻止默认行为", () => {
-      const { result, unmount } = withSetup(() =>
-        useScriptEditorBase(makeOptions())
-      );
-      result.editor.value = {
-        contentWindow: { postMessage: vi.fn() },
-      } as any;
-      const event = makeKeyEvent({ ctrlKey: true, key: "s" });
-      result.handleKeyDown(event);
-
-      expect(event.preventDefault).toHaveBeenCalled();
-      unmount();
-    });
-
-    it("其他按键不触发 save", () => {
-      const { result, unmount } = withSetup(() =>
-        useScriptEditorBase(makeOptions())
-      );
-      const mockContentWindow = { postMessage: vi.fn() };
-      result.editor.value = { contentWindow: mockContentWindow } as any;
-
-      result.handleKeyDown(makeKeyEvent({ ctrlKey: false, key: "a" }));
-
-      expect(mockContentWindow.postMessage).not.toHaveBeenCalled();
       unmount();
     });
   });
@@ -399,7 +336,9 @@ describe("useScriptEditorBase", () => {
         useScriptEditorBase(makeOptions())
       );
       const mockContentWindow = { postMessage: vi.fn() };
-      result.editor.value = { contentWindow: mockContentWindow } as any;
+      result.editor.value = {
+        contentWindow: mockContentWindow,
+      } as MockIframe as HTMLIFrameElement;
 
       result.postMessage("test-action", { key: "value" });
 
@@ -425,7 +364,9 @@ describe("useScriptEditorBase", () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
       );
-      result.editor.value = { contentWindow: null } as any;
+      result.editor.value = {
+        contentWindow: null,
+      } as MockIframe as HTMLIFrameElement;
       result.postMessage("any", {});
 
       expect(mockMessage.error).toHaveBeenCalledWith("i18n.error3");
@@ -444,9 +385,11 @@ describe("useScriptEditorBase", () => {
       );
       result.editor.value = {
         contentWindow: { postMessage: vi.fn() },
-      } as any;
+      } as MockIframe as HTMLIFrameElement;
 
-      await result.handleMessage({ data: { action: "ready" } } as any);
+      await result.handleMessage({
+        data: { action: "ready" },
+      } as MockMessageEvent as MessageEvent);
 
       expect(onReady).toHaveBeenCalledOnce();
       expect(result.isReady()).toBe(true);
@@ -458,9 +401,13 @@ describe("useScriptEditorBase", () => {
         useScriptEditorBase(makeOptions())
       );
       const mockPost = vi.fn();
-      result.editor.value = { contentWindow: { postMessage: mockPost } } as any;
+      result.editor.value = {
+        contentWindow: { postMessage: mockPost },
+      } as MockIframe as HTMLIFrameElement;
 
-      await result.handleMessage({ data: { action: "ready" } } as any);
+      await result.handleMessage({
+        data: { action: "ready" },
+      } as MockMessageEvent as MessageEvent);
 
       expect(mockPost).toHaveBeenCalledWith(
         expect.objectContaining({ action: "user-info" }),
@@ -480,10 +427,11 @@ describe("useScriptEditorBase", () => {
           action: "post",
           data: { lua: "local x=1", js: "var x=1;", data: {} },
         },
-      } as any);
+      } as MockMessageEvent as MessageEvent);
 
       expect(onPost).toHaveBeenCalledWith(
-        expect.objectContaining({ lua: "local x=1", js: "var x=1;" })
+        expect.objectContaining({ lua: "local x=1", js: "var x=1;" }),
+        expect.objectContaining({ trigger: "manual" })
       );
       unmount();
     });
@@ -496,7 +444,7 @@ describe("useScriptEditorBase", () => {
 
       await result.handleMessage({
         data: { action: "post", data: { lua: 123, js: "ok" } },
-      } as any);
+      } as MockMessageEvent as MessageEvent);
 
       expect(mockMessage.error).toHaveBeenCalledWith("i18n.error1");
       expect(onPost).not.toHaveBeenCalled();
@@ -510,7 +458,7 @@ describe("useScriptEditorBase", () => {
 
       await result.handleMessage({
         data: { action: "post:no-change" },
-      } as any);
+      } as MockMessageEvent as MessageEvent);
 
       expect(mockMessage.info).toHaveBeenCalledWith("i18n.info");
       unmount();
@@ -526,7 +474,7 @@ describe("useScriptEditorBase", () => {
           action: "update",
           data: { lua: "x = 1", js: "var x=1;", blocklyData: {} },
         },
-      } as any);
+      } as MockMessageEvent as MessageEvent);
 
       expect(result.LuaCode.value).toBe(
         "local meta = {}\nlocal index = ''\nx = 1"
@@ -542,7 +490,7 @@ describe("useScriptEditorBase", () => {
 
       await result.handleMessage({
         data: { action: "update", data: { lua: "ok", js: 999 } },
-      } as any);
+      } as MockMessageEvent as MessageEvent);
 
       expect(result.LuaCode.value).toBe("");
       unmount();
@@ -554,7 +502,9 @@ describe("useScriptEditorBase", () => {
         useScriptEditorBase(makeOptions({ onPost }))
       );
 
-      await result.handleMessage({ data: {} } as any);
+      await result.handleMessage({
+        data: {},
+      } as MockMessageEvent as MessageEvent);
 
       expect(onPost).not.toHaveBeenCalled();
       unmount();
@@ -566,7 +516,7 @@ describe("useScriptEditorBase", () => {
       );
 
       await expect(
-        result.handleMessage({ data: null } as any)
+        result.handleMessage({ data: null } as MockMessageEvent as MessageEvent)
       ).resolves.not.toThrow();
       unmount();
     });
@@ -674,7 +624,7 @@ describe("useScriptEditorBase", () => {
       parent.appendChild(iframe);
       const mockRequestFullscreen = vi.fn().mockResolvedValue(undefined);
       parent.requestFullscreen = mockRequestFullscreen;
-      (result.editor as any).value = iframe;
+      result.editor.value = iframe;
 
       result.toggleFullscreen();
 
@@ -713,7 +663,7 @@ describe("useScriptEditorBase", () => {
 
   // ---- save ----
   describe("save()", () => {
-    it("sets hasUnsavedChanges to false and sends save postMessage", () => {
+    it("preserves hasUnsavedChanges and sends save postMessage", () => {
       const { result, unmount } = withSetup(() =>
         useScriptEditorBase(makeOptions())
       );
@@ -721,12 +671,14 @@ describe("useScriptEditorBase", () => {
       // Set up a mock editor with contentWindow
       const mockPostMessage = vi.fn();
       const fakeContentWindow = { postMessage: mockPostMessage };
-      (result.editor as any).value = { contentWindow: fakeContentWindow };
+      result.editor.value = {
+        contentWindow: fakeContentWindow,
+      } as MockIframe as HTMLIFrameElement;
 
       result.hasUnsavedChanges.value = true;
       result.save();
 
-      expect(result.hasUnsavedChanges.value).toBe(false);
+      expect(result.hasUnsavedChanges.value).toBe(true);
       expect(mockPostMessage).toHaveBeenCalledWith(
         expect.objectContaining({ action: "save" }),
         "*"
@@ -843,11 +795,16 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
 
     const spy = vi
       .spyOn(document, "removeEventListener")
-      .mockImplementation((event: string, callback: any) => {
-        if (event === "keydown" && typeof callback === "function") {
-          capturedKeydownCallback = callback;
+      .mockImplementation(
+        (
+          event: string,
+          callback: EventListenerOrEventListenerObject | null
+        ) => {
+          if (event === "keydown" && typeof callback === "function") {
+            capturedKeydownCallback = callback as (e: KeyboardEvent) => void;
+          }
         }
-      });
+      );
 
     const { result, unmount } = withSetup(() =>
       useScriptEditorBase(makeOptions())
@@ -870,11 +827,16 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
 
     const spy = vi
       .spyOn(document, "removeEventListener")
-      .mockImplementation((event: string, callback: any) => {
-        if (event === "keydown" && typeof callback === "function") {
-          capturedKeydownCallback = callback;
+      .mockImplementation(
+        (
+          event: string,
+          callback: EventListenerOrEventListenerObject | null
+        ) => {
+          if (event === "keydown" && typeof callback === "function") {
+            capturedKeydownCallback = callback as (e: KeyboardEvent) => void;
+          }
         }
-      });
+      );
 
     const { result, unmount } = withSetup(() =>
       useScriptEditorBase(makeOptions())
@@ -894,11 +856,16 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
 
     const spy = vi
       .spyOn(document, "removeEventListener")
-      .mockImplementation((event: string, callback: any) => {
-        if (event === "keydown" && typeof callback === "function") {
-          capturedKeydownCallback = callback;
+      .mockImplementation(
+        (
+          event: string,
+          callback: EventListenerOrEventListenerObject | null
+        ) => {
+          if (event === "keydown" && typeof callback === "function") {
+            capturedKeydownCallback = callback as (e: KeyboardEvent) => void;
+          }
         }
-      });
+      );
 
     const { result, unmount } = withSetup(() =>
       useScriptEditorBase(makeOptions())
@@ -918,11 +885,16 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
 
     const spy = vi
       .spyOn(document, "removeEventListener")
-      .mockImplementation((event: string, callback: any) => {
-        if (event === "fullscreenchange" && typeof callback === "function") {
-          fullscreenCallbacks.push(callback);
+      .mockImplementation(
+        (
+          event: string,
+          callback: EventListenerOrEventListenerObject | null
+        ) => {
+          if (event === "fullscreenchange" && typeof callback === "function") {
+            fullscreenCallbacks.push(callback as () => void);
+          }
         }
-      });
+      );
 
     const { result, unmount } = withSetup(() =>
       useScriptEditorBase(makeOptions())
@@ -948,11 +920,16 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
 
     const spy = vi
       .spyOn(document, "removeEventListener")
-      .mockImplementation((event: string, callback: any) => {
-        if (event === "fullscreenchange" && typeof callback === "function") {
-          fullscreenCallbacks.push(callback);
+      .mockImplementation(
+        (
+          event: string,
+          callback: EventListenerOrEventListenerObject | null
+        ) => {
+          if (event === "fullscreenchange" && typeof callback === "function") {
+            fullscreenCallbacks.push(callback as () => void);
+          }
         }
-      });
+      );
 
     const { result, unmount } = withSetup(() =>
       useScriptEditorBase(makeOptions())
@@ -975,11 +952,16 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
 
     const spy = vi
       .spyOn(document, "removeEventListener")
-      .mockImplementation((event: string, callback: any) => {
-        if (event === "fullscreenchange" && typeof callback === "function") {
-          fullscreenCallbacks.push(callback);
+      .mockImplementation(
+        (
+          event: string,
+          callback: EventListenerOrEventListenerObject | null
+        ) => {
+          if (event === "fullscreenchange" && typeof callback === "function") {
+            fullscreenCallbacks.push(callback as () => void);
+          }
         }
-      });
+      );
 
     const { result, unmount } = withSetup(() =>
       useScriptEditorBase(makeOptions())
@@ -1004,11 +986,16 @@ describe("onBeforeUnmount 匿名回调（lines 417-419, 422, 425）", () => {
 
     const spy = vi
       .spyOn(document, "removeEventListener")
-      .mockImplementation((event: string, callback: any) => {
-        if (event === "fullscreenchange" && typeof callback === "function") {
-          fullscreenCallbacks.push(callback);
+      .mockImplementation(
+        (
+          event: string,
+          callback: EventListenerOrEventListenerObject | null
+        ) => {
+          if (event === "fullscreenchange" && typeof callback === "function") {
+            fullscreenCallbacks.push(callback as () => void);
+          }
         }
-      });
+      );
 
     const { result, unmount } = withSetup(() =>
       useScriptEditorBase(makeOptions())

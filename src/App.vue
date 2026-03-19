@@ -10,15 +10,24 @@
       </keep-alive>
     </transition>
   </router-view> -->
-  <router-view v-slot="{ Component, route }">
-    <transition name="page" mode="out-in" :key="route.fullPath">
-      <component :is="Component"></component>
-    </transition>
-  </router-view>
+  <el-config-provider :locale="elementLocale">
+    <router-view v-slot="{ Component, route }">
+      <transition name="page" mode="out-in" :key="route.fullPath">
+        <component :is="Component"></component>
+      </transition>
+    </router-view>
+  </el-config-provider>
 </template>
 <script setup>
 import { UpdateAbility } from "@/utils/ability";
 import { useAbility } from "@casl/vue";
+import { ElConfigProvider } from "element-plus";
+import en from "element-plus/es/locale/lang/en";
+import ja from "element-plus/es/locale/lang/ja";
+import th from "element-plus/es/locale/lang/th";
+import zhCn from "element-plus/es/locale/lang/zh-cn";
+import zhTw from "element-plus/es/locale/lang/zh-tw";
+import { useAppStore } from "@/store/modules/app";
 import { useUserStore } from "@/store/modules/user";
 import { useDomainStore } from "@/store/modules/domain";
 import { UpdateRoutes } from "@/router";
@@ -28,6 +37,19 @@ import { disposeKTX2Loader } from "@/lib/three/loaders";
 const userStore = useUserStore();
 const domainStore = useDomainStore();
 const ability = useAbility(); // 提取到 setup 顶层
+const appStore = useAppStore();
+
+const elementLocaleMap = {
+  "zh-CN": zhCn,
+  "zh-TW": zhTw,
+  "en-US": en,
+  "ja-JP": ja,
+  "th-TH": th,
+};
+
+const elementLocale = computed(
+  () => elementLocaleMap[appStore.language] || zhCn
+);
 
 watch(
   () => userStore.userInfo,
