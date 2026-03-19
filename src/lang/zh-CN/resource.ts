@@ -149,6 +149,7 @@ export default {
   picture: {
     uploadPicture: "上传图片",
     viewPicture: "查看图片",
+    emptyText: "暂无图片",
     prompt: {
       message1: "请输入新名称",
       message2: "修改图片名称",
@@ -201,6 +202,7 @@ export default {
     uploadVideo: "上传视频",
     listPageTitle: "所有视频素材",
     searchPlaceholder: "搜索视频...",
+    emptyText: "暂无视频",
     detailsTitle: "视频详情",
     downloadText: "下载视频",
     deleteText: "删除此视频",
@@ -266,6 +268,7 @@ export default {
   audio: {
     uploadAudio: "上传音频",
     viewAudio: "查看音频",
+    emptyText: "暂无音频",
     prompt: {
       message1: "请输入新名称",
       message2: "修改音频名称",

@@ -7,6 +7,7 @@ export default {
     listPage: {
       myScenes: "My Scenes",
       createScene: "Create Scene",
+      emptyText: "No scenes yet",
       searchScenes: "Search scenes...",
       sceneName: "Scene Name",
       author: "Author",

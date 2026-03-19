@@ -5,6 +5,7 @@ export default {
     listPage: {
       myScenes: "我的场景",
       createScene: "新建场景",
+      emptyText: "暂无场景",
       searchScenes: "搜索场景...",
       sceneName: "场景名称",
       author: "作者",

@@ -118,7 +118,7 @@
         <template #empty>
           <EmptyState
             :icon="['fas', 'headphones']"
-            :text="t('common.noData')"
+            :text="t('audio.emptyText')"
             :action-text="t('audio.uploadAudio')"
             @action="openUploadDialog"
           ></EmptyState>

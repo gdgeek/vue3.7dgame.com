@@ -7,6 +7,7 @@ export default {
     listPage: {
       myScenes: "マイシーン",
       createScene: "シーンを作成",
+      emptyText: "シーンがありません",
       searchScenes: "シーンを検索...",
       sceneName: "シーン名",
       author: "作成者",

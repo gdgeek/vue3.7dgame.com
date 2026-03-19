@@ -7,6 +7,7 @@ export default {
     listPage: {
       myScenes: "我的場景",
       createScene: "創建場景",
+      emptyText: "暫無場景",
       searchScenes: "搜尋場景...",
       sceneName: "場景名稱",
       author: "作者",

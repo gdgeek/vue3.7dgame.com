@@ -146,6 +146,7 @@ export default {
   picture: {
     uploadPicture: "画像をアップロード",
     viewPicture: "画像を表示",
+    emptyText: "画像がありません",
     prompt: {
       message1: "新しい名前を入力してください",
       message2: "画像名を変更",
@@ -197,6 +198,7 @@ export default {
     uploadVideo: "ビデオをアップロード",
     listPageTitle: "すべての動画素材",
     searchPlaceholder: "動画を検索...",
+    emptyText: "動画がありません",
     detailsTitle: "動画詳細",
     downloadText: "動画をダウンロード",
     deleteText: "この動画を削除",
@@ -261,6 +263,7 @@ export default {
   audio: {
     uploadAudio: "音声をアップロード",
     viewAudio: "音声を表示",
+    emptyText: "音声がありません",
     prompt: {
       message1: "新しい名前を入力してください",
       message2: "音声名を変更",

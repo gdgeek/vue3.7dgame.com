@@ -150,6 +150,7 @@ export default {
   picture: {
     uploadPicture: "Upload Picture",
     viewPicture: "View Picture",
+    emptyText: "No pictures yet",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Polygen name",
@@ -202,6 +203,7 @@ export default {
     uploadVideo: "Upload Video",
     listPageTitle: "All Video Assets",
     searchPlaceholder: "Search videos...",
+    emptyText: "No videos yet",
     detailsTitle: "Video Details",
     downloadText: "Download Video",
     deleteText: "Delete This Video",
@@ -268,6 +270,7 @@ export default {
   audio: {
     uploadAudio: "Upload Audio",
     viewAudio: "View Audio",
+    emptyText: "No audio yet",
     prompt: {
       message1: "Please enter a new name",
       message2: "Edit Audio name",

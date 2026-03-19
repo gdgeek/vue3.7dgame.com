@@ -116,7 +116,7 @@
         <template #empty>
           <EmptyState
             :icon="['fas', 'image']"
-            :text="t('common.noData')"
+            :text="t('picture.emptyText')"
             :action-text="t('picture.uploadPicture')"
             @action="openUploadDialog"
           ></EmptyState>

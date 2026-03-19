@@ -134,7 +134,7 @@
         <template #empty>
           <EmptyState
             :icon="['fas', 'layer-group']"
-            :text="t('route.project.noVerses')"
+            :text="t('verse.listPage.emptyText')"
             :action-text="t('verse.listPage.createScene')"
             @action="createWindow"
           ></EmptyState>

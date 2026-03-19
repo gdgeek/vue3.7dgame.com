@@ -207,7 +207,7 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import {
@@ -233,6 +233,7 @@ const { t } = useI18n();
 const router = useRouter();
 
 const searchValue = ref("");
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
 const categories = ref<{ id: number; name: string }[]>([
   { id: 0, name: t("verse.publicPage.allCategory") },
 ]);
@@ -292,7 +293,22 @@ const {
 });
 
 const handleHeroSearch = () => {
+  if (searchTimer) {
+    clearTimeout(searchTimer);
+    searchTimer = null;
+  }
   handleSearch(searchValue.value);
+};
+
+const scheduleSearch = (value: string) => {
+  if (searchTimer) {
+    clearTimeout(searchTimer);
+  }
+
+  searchTimer = setTimeout(() => {
+    handleSearch(value);
+    searchTimer = null;
+  }, 300);
 };
 
 const selectTab = (id: number) => {
@@ -357,6 +373,26 @@ const handleGoToPage = () => {
     goToScene(currentVerse.value);
   }
 };
+
+watch(searchValue, (value) => {
+  if (value === "") {
+    if (searchTimer) {
+      clearTimeout(searchTimer);
+      searchTimer = null;
+    }
+    handleSearch("");
+    return;
+  }
+
+  scheduleSearch(value);
+});
+
+onBeforeUnmount(() => {
+  if (searchTimer) {
+    clearTimeout(searchTimer);
+    searchTimer = null;
+  }
+});
 
 const goToScene = (item: VerseData) => {
   const title = encodeURIComponent(

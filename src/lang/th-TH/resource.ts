@@ -148,6 +148,7 @@ export default {
   picture: {
     uploadPicture: "อัปโหลดรูปภาพ",
     viewPicture: "ดูรูปภาพ",
+    emptyText: "ยังไม่มีรูปภาพ",
     prompt: {
       message1: "กรุณากรอกชื่อใหม่",
       message2: "แก้ไขชื่อรูปภาพ",
@@ -199,6 +200,7 @@ export default {
     uploadVideo: "อัปโหลดวิดีโอ",
     listPageTitle: "ทรัพยากรวิดีโอทั้งหมด",
     searchPlaceholder: "ค้นหาวิดีโอ...",
+    emptyText: "ยังไม่มีวิดีโอ",
     detailsTitle: "รายละเอียดวิดีโอ",
     downloadText: "ดาวน์โหลดวิดีโอ",
     deleteText: "ลบวิดีโอนี้",
@@ -264,6 +266,7 @@ export default {
   audio: {
     uploadAudio: "อัปโหลดเสียง",
     viewAudio: "ดูเสียง",
+    emptyText: "ยังไม่มีเสียง",
     prompt: {
       message1: "กรุณากรอกชื่อใหม่",
       message2: "แก้ไขชื่อเสียง",

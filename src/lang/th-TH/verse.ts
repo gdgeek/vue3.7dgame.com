@@ -7,6 +7,7 @@ export default {
     listPage: {
       myScenes: "ฉากของฉัน",
       createScene: "สร้างฉาก",
+      emptyText: "ยังไม่มีฉาก",
       searchScenes: "ค้นหาฉาก...",
       sceneName: "ชื่อฉาก",
       author: "ผู้เขียน",
