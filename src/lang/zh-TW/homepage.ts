@@ -11,7 +11,165 @@ export default {
       subtitle: "探索 AR 的無限可能，開啟您的創意之旅。",
     },
     announcements: {
-      title: "平台公告",
+      title: "平台整體介紹",
+    },
+    overview: {
+      nav: {
+        home: "主頁",
+        resources: "素材庫",
+        entities: "實體",
+        scenes: "場景",
+        management: "管理中心",
+      },
+      hero: {
+        eyebrow: "XR UGC PLATFORM",
+        title: "一站式 XR 內容創作與發布平台",
+        description:
+          "平台圍繞「資源管理、實體封裝、場景搭建、互動邏輯、作品發布」構建完整創作鏈路，幫助團隊在同一套系統中完成內容生產、編輯調試和最終交付。",
+        actions: {
+          resources: "查看素材庫",
+          entities: "查看實體",
+          scenes: "查看場景",
+        },
+        preview: {
+          main: {
+            label: "主平台",
+            title: "資源與專案管理",
+          },
+          build: {
+            label: "內容搭建模組",
+            title: "空間與展示編排",
+          },
+          interaction: {
+            label: "互動配置模組",
+            title: "邏輯與行為設定",
+          },
+          footer: "資源、場景、互動邏輯與發布統一銜接",
+        },
+      },
+      sections: {
+        structure: {
+          kicker: "平台結構",
+          title: "平台由 3 個核心部分組成",
+        },
+        capabilities: {
+          kicker: "核心能力",
+          title: "從素材到作品交付的完整鏈路",
+        },
+        workflow: {
+          kicker: "工作方式",
+          title: "平台中的內容如何流轉",
+        },
+        value: {
+          kicker: "產品價值",
+          title: "這套平台適合哪些業務場景",
+        },
+        collaboration: {
+          kicker: "模組協同",
+          title: "平台各部分如何協同工作",
+        },
+      },
+      structure: {
+        platform: {
+          title: "主平台",
+          desc: "負責帳號、資源、實體、場景和發布流程的統一管理，是整個平台的業務入口。",
+          tag: "統一管理中心",
+        },
+        builder: {
+          title: "內容搭建模組",
+          desc: "負責三維空間內容搭建、物件擺放和展示結構編排，承接平台中的內容組裝工作。",
+          tag: "展示編排能力",
+        },
+        interaction: {
+          title: "互動配置模組",
+          desc: "負責可視化邏輯配置和行為編排，為內容補充互動體驗與流程控制。",
+          tag: "互動能力配置",
+        },
+      },
+      capabilities: {
+        resource: {
+          title: "資源管理",
+          desc: "統一管理模型、圖片、影片、音訊、粒子等內容素材。",
+        },
+        entity: {
+          title: "實體封裝",
+          desc: "將素材整理為可重複使用的內容單元，方便在多個場景中反覆使用。",
+        },
+        building: {
+          title: "內容搭建",
+          desc: "透過內容搭建模組完成空間佈局、物件擺放與展示編排。",
+        },
+        interaction: {
+          title: "互動邏輯",
+          desc: "透過可視化方式配置點擊、動畫、流程與物件聯動等互動效果。",
+        },
+        delivery: {
+          title: "發布交付",
+          desc: "統一進行保存、發布與展示管理，形成面向終端的作品輸出。",
+        },
+      },
+      workflow: {
+        step1: {
+          title: "上傳資源",
+          desc: "將模型或多媒體內容匯入平台資源庫。",
+        },
+        step2: {
+          title: "建立實體",
+          desc: "將資源組織為可重複使用的內容單元，沉澱統一能力。",
+        },
+        step3: {
+          title: "編輯場景",
+          desc: "把實體加入場景，並完成空間佈局和展示編排。",
+        },
+        step4: {
+          title: "配置邏輯",
+          desc: "為實體或場景增加互動行為與流程控制。",
+        },
+        step5: {
+          title: "保存發布",
+          desc: "確認內容狀態後輸出可展示、可分享的最終作品。",
+        },
+      },
+      value: {
+        scenariosTitle: "適用場景",
+        advantagesTitle: "平台優勢",
+        scenarios: {
+          education: {
+            title: "教育培訓",
+            desc: "適合創客教育、XR 教學內容搭建和互動式課程展示。",
+          },
+          branding: {
+            title: "品牌展示",
+            desc: "適合產品展示、活動傳播、品牌空間和行銷互動內容製作。",
+          },
+          exhibition: {
+            title: "數位展陳",
+            desc: "適合數位展館、文旅展示、展廳導覽和沉浸式內容表達。",
+          },
+          delivery: {
+            title: "專案交付",
+            desc: "適合團隊協同完成 XR 內容專案，並統一管理資源與發布結果。",
+          },
+        },
+        advantages: {
+          item1:
+            "主平台、內容搭建模組、互動配置模組協同工作，減少工具切換成本。",
+          item2: "支援從素材管理到作品發布的完整閉環，便於內容團隊統一協作。",
+          item3: "透過實體重用機制，提高專案重用率和後續維護效率。",
+          item4: "可視化邏輯配置降低互動設定門檻，適合非純技術團隊使用。",
+          item5: "平台結構清晰，適合對外介紹、客戶演示和後續專案擴展。",
+        },
+      },
+      collaboration: {
+        build: {
+          title: "內容搭建模組",
+          desc: "主平台負責專案和資料管理，內容搭建模組負責空間佈局、物件擺放和展示結構整理。",
+        },
+        interaction: {
+          title: "互動配置模組",
+          desc: "互動配置模組用於設定點擊、動畫、流程與物件聯動等行為，幫助內容從靜態展示升級為可互動體驗。",
+        },
+      },
     },
     myCreation: {
       title: "我的創作",

@@ -11,7 +11,165 @@ export default {
       subtitle: "探索 AR 的无限可能，开启您的创意之旅。",
     },
     announcements: {
-      title: "平台公告",
+      title: "平台整体介绍",
+    },
+    overview: {
+      nav: {
+        home: "主页",
+        resources: "素材库",
+        entities: "实体",
+        scenes: "场景",
+        management: "管理中心",
+      },
+      hero: {
+        eyebrow: "XR UGC PLATFORM",
+        title: "一站式 XR 内容创作与发布平台",
+        description:
+          "平台围绕“资源管理、实体封装、场景搭建、交互逻辑、作品发布”构建完整创作链路，帮助团队在同一套系统中完成内容生产、编辑调试和最终交付。",
+        actions: {
+          resources: "查看素材库",
+          entities: "查看实体",
+          scenes: "查看场景",
+        },
+        preview: {
+          main: {
+            label: "主平台",
+            title: "资源与项目管理",
+          },
+          build: {
+            label: "内容搭建模块",
+            title: "空间与展示编排",
+          },
+          interaction: {
+            label: "交互配置模块",
+            title: "逻辑与行为设置",
+          },
+          footer: "资源、场景、交互逻辑与发布统一衔接",
+        },
+      },
+      sections: {
+        structure: {
+          kicker: "平台结构",
+          title: "平台由 3 个核心部分组成",
+        },
+        capabilities: {
+          kicker: "核心能力",
+          title: "从素材到作品交付的完整链路",
+        },
+        workflow: {
+          kicker: "工作方式",
+          title: "平台中的内容如何流转",
+        },
+        value: {
+          kicker: "产品价值",
+          title: "这套平台适合哪些业务场景",
+        },
+        collaboration: {
+          kicker: "模块协同",
+          title: "平台各部分如何协同工作",
+        },
+      },
+      structure: {
+        platform: {
+          title: "主平台",
+          desc: "负责账号、资源、实体、场景和发布流程的统一管理，是整个平台的业务入口。",
+          tag: "统一管理中心",
+        },
+        builder: {
+          title: "内容搭建模块",
+          desc: "负责三维空间内容搭建、对象摆放和展示结构编排，承接平台中的内容组装工作。",
+          tag: "展示编排能力",
+        },
+        interaction: {
+          title: "交互配置模块",
+          desc: "负责可视化逻辑配置和行为编排，为内容补充交互体验与流程控制。",
+          tag: "互动能力配置",
+        },
+      },
+      capabilities: {
+        resource: {
+          title: "资源管理",
+          desc: "统一管理模型、图片、视频、音频、粒子等内容素材。",
+        },
+        entity: {
+          title: "实体封装",
+          desc: "把素材整理为可复用内容单元，方便在多个场景中重复使用。",
+        },
+        building: {
+          title: "内容搭建",
+          desc: "通过内容搭建模块完成空间布局、对象摆放与展示编排。",
+        },
+        interaction: {
+          title: "交互逻辑",
+          desc: "通过可视化方式配置点击、动画、流程与对象联动等互动效果。",
+        },
+        delivery: {
+          title: "发布交付",
+          desc: "统一进行保存、发布与展示管理，形成面向终端的作品输出。",
+        },
+      },
+      workflow: {
+        step1: {
+          title: "上传资源",
+          desc: "将模型或多媒体内容导入平台资源库。",
+        },
+        step2: {
+          title: "创建实体",
+          desc: "将资源组织为可复用的内容单元，沉淀统一能力。",
+        },
+        step3: {
+          title: "编辑场景",
+          desc: "把实体加入场景，并完成空间布局和展示编排。",
+        },
+        step4: {
+          title: "配置逻辑",
+          desc: "为实体或场景增加互动行为与流程控制。",
+        },
+        step5: {
+          title: "保存发布",
+          desc: "确认内容状态后输出可展示、可分享的最终作品。",
+        },
+      },
+      value: {
+        scenariosTitle: "适用场景",
+        advantagesTitle: "平台优势",
+        scenarios: {
+          education: {
+            title: "教育培训",
+            desc: "适合创客教育、XR 教学内容搭建和互动式课程展示。",
+          },
+          branding: {
+            title: "品牌展示",
+            desc: "适合产品展示、活动传播、品牌空间和营销互动内容制作。",
+          },
+          exhibition: {
+            title: "数字展陈",
+            desc: "适合数字展馆、文旅展示、展厅导览和沉浸式内容表达。",
+          },
+          delivery: {
+            title: "项目交付",
+            desc: "适合团队协同完成 XR 内容项目，并统一管理资源与发布结果。",
+          },
+        },
+        advantages: {
+          item1:
+            "主平台、内容搭建模块、交互配置模块协同工作，减少工具切换成本。",
+          item2: "支持从素材管理到作品发布的完整闭环，便于内容团队统一协作。",
+          item3: "通过实体复用机制，提高项目复用率和后续维护效率。",
+          item4: "可视化逻辑配置降低交互设置门槛，适合非纯技术团队使用。",
+          item5: "平台结构清晰，适合对外介绍、客户演示和后续项目扩展。",
+        },
+      },
+      collaboration: {
+        build: {
+          title: "内容搭建模块",
+          desc: "主平台负责项目和数据管理，内容搭建模块负责空间布局、对象摆放和展示结构整理。",
+        },
+        interaction: {
+          title: "交互配置模块",
+          desc: "交互配置模块用于设置点击、动画、流程与对象联动等行为，帮助内容从静态展示升级为可互动体验。",
+        },
+      },
     },
     myCreation: {
       title: "我的创作",

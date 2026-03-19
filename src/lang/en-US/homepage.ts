@@ -12,7 +12,170 @@ export default {
         "Explore the infinite possibilities of AR and start your creative journey.",
     },
     announcements: {
-      title: "Announcements",
+      title: "Platform Overview",
+    },
+    overview: {
+      nav: {
+        home: "Home",
+        resources: "Resources",
+        entities: "Entities",
+        scenes: "Scenes",
+        management: "Management",
+      },
+      hero: {
+        eyebrow: "XR UGC PLATFORM",
+        title: "An Integrated XR Content Creation and Publishing Platform",
+        description:
+          "The platform connects asset management, entity packaging, scene building, interaction design, and publishing into one complete workflow, helping teams produce, edit, test, and deliver content in a single system.",
+        actions: {
+          resources: "View Resources",
+          entities: "View Entities",
+          scenes: "View Scenes",
+        },
+        preview: {
+          main: {
+            label: "Main Platform",
+            title: "Asset and Project Management",
+          },
+          build: {
+            label: "Content Building Module",
+            title: "Spatial Layout and Presentation",
+          },
+          interaction: {
+            label: "Interaction Module",
+            title: "Logic and Behavior Setup",
+          },
+          footer:
+            "Assets, scenes, interaction, and publishing work as one flow.",
+        },
+      },
+      sections: {
+        structure: {
+          kicker: "Platform Structure",
+          title: "The platform consists of 3 core parts",
+        },
+        capabilities: {
+          kicker: "Core Capabilities",
+          title: "A complete path from assets to final delivery",
+        },
+        workflow: {
+          kicker: "Workflow",
+          title: "How content moves through the platform",
+        },
+        value: {
+          kicker: "Product Value",
+          title: "What business scenarios this platform supports",
+        },
+        collaboration: {
+          kicker: "Module Collaboration",
+          title: "How the platform modules work together",
+        },
+      },
+      structure: {
+        platform: {
+          title: "Main Platform",
+          desc: "Handles unified management of accounts, assets, entities, scenes, and publishing workflows, and serves as the main business entry of the platform.",
+          tag: "Unified Management Center",
+        },
+        builder: {
+          title: "Content Building Module",
+          desc: "Supports 3D spatial construction, object placement, and presentation layout as the main assembly area for content.",
+          tag: "Presentation Composition",
+        },
+        interaction: {
+          title: "Interaction Module",
+          desc: "Provides visual logic configuration and behavior orchestration to add interactive experiences and flow control.",
+          tag: "Interactive Capability Setup",
+        },
+      },
+      capabilities: {
+        resource: {
+          title: "Asset Management",
+          desc: "Manage models, images, video, audio, particles, and other content assets in one place.",
+        },
+        entity: {
+          title: "Entity Packaging",
+          desc: "Organize assets into reusable content units that can be used across multiple scenes.",
+        },
+        building: {
+          title: "Content Building",
+          desc: "Use the building module to handle layout, object placement, and presentation structure.",
+        },
+        interaction: {
+          title: "Interaction Logic",
+          desc: "Configure clicks, animations, flows, and object linkage through visual interaction setup.",
+        },
+        delivery: {
+          title: "Publishing and Delivery",
+          desc: "Handle save, publish, and presentation management as one unified output process.",
+        },
+      },
+      workflow: {
+        step1: {
+          title: "Upload Assets",
+          desc: "Import models or multimedia content into the platform asset library.",
+        },
+        step2: {
+          title: "Create Entities",
+          desc: "Turn assets into reusable content units with shared capabilities.",
+        },
+        step3: {
+          title: "Build Scenes",
+          desc: "Add entities into scenes and arrange layout and presentation structure.",
+        },
+        step4: {
+          title: "Configure Interactions",
+          desc: "Add behavior logic and flow control for entities or scenes.",
+        },
+        step5: {
+          title: "Save and Publish",
+          desc: "Confirm the content status and deliver a final experience that can be displayed and shared.",
+        },
+      },
+      value: {
+        scenariosTitle: "Use Cases",
+        advantagesTitle: "Platform Advantages",
+        scenarios: {
+          education: {
+            title: "Education and Training",
+            desc: "Suitable for maker education, XR learning content, and interactive course presentation.",
+          },
+          branding: {
+            title: "Brand Experiences",
+            desc: "Suitable for product showcases, events, branded spaces, and marketing interaction content.",
+          },
+          exhibition: {
+            title: "Digital Exhibition",
+            desc: "Suitable for digital museums, cultural showcases, exhibition halls, and immersive presentation.",
+          },
+          delivery: {
+            title: "Project Delivery",
+            desc: "Suitable for teams delivering XR projects with unified resource and publishing management.",
+          },
+        },
+        advantages: {
+          item1:
+            "The main platform, building module, and interaction module work together to reduce tool switching.",
+          item2:
+            "Supports a complete loop from asset management to final publishing for better team collaboration.",
+          item3:
+            "Reusable entities improve project reuse and later maintenance efficiency.",
+          item4:
+            "Visual logic configuration lowers the interaction setup barrier for non-technical teams.",
+          item5:
+            "The platform structure is clear and suitable for customer presentations and future expansion.",
+        },
+      },
+      collaboration: {
+        build: {
+          title: "Content Building Module",
+          desc: "The main platform manages projects and data, while the building module handles spatial layout, object placement, and presentation organization.",
+        },
+        interaction: {
+          title: "Interaction Module",
+          desc: "The interaction module defines click actions, animation, process flow, and object linkage to turn static content into interactive experiences.",
+        },
+      },
     },
     myCreation: {
       title: "Creation",
