@@ -21,6 +21,7 @@
 import { computed, ref } from "vue";
 import { LazyImg } from "vue-waterfall-plugin-next";
 import { toHttps } from "@/utils/helper";
+import { getDefaultAvatarUrl } from "@/utils/avatar";
 const props = withDefaults(
   defineProps<{
     id?: number | string;
@@ -44,7 +45,7 @@ const url = computed(() => {
   // 使用 Vite 的 new URL 方式解析静态资源路径
   let imageUrl = toHttps(props.image);
   if (!imageUrl) {
-    imageUrl = `https://api.dicebear.com/9.x/icons/svg?seed=${props.id}`;
+    imageUrl = getDefaultAvatarUrl(props.id);
   }
 
   // Check if it's a Tencent Cloud COS URL

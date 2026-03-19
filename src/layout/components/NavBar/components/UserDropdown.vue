@@ -55,6 +55,7 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import ConfirmDialog from "@/components/Dialog/ConfirmDialog.vue";
 import { useUserStore } from "@/store";
+import { getUserAvatarUrl } from "@/utils/avatar";
 
 const { t } = useI18n();
 
@@ -86,11 +87,11 @@ const accountType = computed(() => {
 
 // 从用户数据中获取头像URL
 const avatarUrl = computed(() => {
-  if (userStore.userInfo?.userInfo?.avatar?.url) {
-    return userStore.userInfo.userInfo.avatar.url;
-  }
-  // 默认头像
-  return "/local/ar_logo.png";
+  const username = userStore.userInfo?.userData?.username ?? "user";
+  return getUserAvatarUrl(
+    userStore.userInfo?.userInfo?.avatar?.url,
+    username
+  );
 });
 
 const toggleMenu = () => {

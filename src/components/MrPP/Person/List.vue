@@ -14,14 +14,8 @@
     <template #default="{ item }">
       <el-card style="width: 100%" :body-style="{ padding: '0px' }">
         <LazyImg
-          v-if="item.avatar == null"
           style="width: 100%; height: auto"
-          :url="`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${item.username}`"
-        ></LazyImg>
-        <LazyImg
-          v-if="item.avatar"
-          style="width: 100%; height: auto"
-          :url="item.avatar.url"
+          :url="getUserAvatarUrl(item.avatar?.url, item.username)"
         ></LazyImg>
         <div style="padding: 14px">
           <span>{{ item.username }}</span>
@@ -83,6 +77,7 @@
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
 import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import { getUserAvatarUrl } from "@/utils/avatar";
 import "vue-waterfall-plugin-next/dist/style.css";
 import { deletePerson, putPerson, userData } from "@/api/v1/person";
 import { useUserStore } from "@/store/modules/user";

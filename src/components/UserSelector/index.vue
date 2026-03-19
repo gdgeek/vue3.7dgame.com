@@ -35,17 +35,14 @@
           >
             <div class="image-container">
               <el-image
-                :src="
-                  user.avatar?.url ||
-                  `https://api.dicebear.com/9.x/glass/svg?seed=${user.username}`
-                "
+                :src="getUserAvatarUrl(user.avatar?.url, user.username)"
                 fit="cover"
                 class="image"
               >
                 <template #error>
                   <div class="image-slot">
                     <img
-                      :src="`https://api.dicebear.com/9.x/glass/svg?seed=${user.username}`"
+                      :src="getDefaultAvatarUrl(user.username)"
                       class="image"
                     />
                   </div>
@@ -97,6 +94,7 @@ import { ref, watch } from "vue";
 import { getPerson, type userData } from "@/api/v1/person";
 import { useI18n } from "vue-i18n";
 import MrPPHeader from "@/components/MrPP/MrPPHeader/index.vue";
+import { getUserAvatarUrl, getDefaultAvatarUrl } from "@/utils/avatar";
 
 const {} = useI18n();
 

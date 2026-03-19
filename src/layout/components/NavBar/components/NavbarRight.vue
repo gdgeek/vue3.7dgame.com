@@ -35,13 +35,11 @@
           class="rounded-md mr-10px w24px w24px"
         />
 
-        <el-avatar
+        <img
           v-else
-          shape="square"
-          :size="24"
-          class="mr-10px"
-          src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"
-        ></el-avatar>
+          :src="getUserAvatarUrl(null, nickname || 'user')"
+          class="rounded-md mr-10px w24px w24px"
+        />
 
         <span :class="['gradient-text', { mobile: isMobile }]">{{
           nickname
@@ -80,6 +78,7 @@
 import { logger } from "@/utils/logger";
 import { useAppStore, useUserStore, useSettingsStore } from "@/store";
 import { useDomainStore } from "@/store/modules/domain";
+import { getUserAvatarUrl } from "@/utils/avatar";
 
 import defaultSettings from "@/settings";
 import { DeviceEnum } from "@/enums/DeviceEnum";
