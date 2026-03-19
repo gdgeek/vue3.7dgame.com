@@ -326,9 +326,20 @@ const formatVerseDraftSummary = (payload: VerseEditorPayload) => {
 const formatVerseDraftChangeSummary = (
   payload: VerseEditorPayload,
   previousVersion?: ScriptDraftVersion
-) => {
+): {
+  summary: string;
+  summaryI18nKey?: string;
+  summaryI18nParams?: Record<string, string>;
+} => {
+  const fallbackSummary = formatVerseDraftSummary(payload);
   if (!previousVersion) {
-    return formatVerseDraftSummary(payload);
+    return {
+      summary: fallbackSummary,
+      summaryI18nKey:
+        fallbackSummary === t("common.scriptDraft.emptySummary")
+          ? "common.scriptDraft.emptySummary"
+          : undefined,
+    };
   }
   const currentTitles = collectVerseModuleTitles(
     payload.verse?.children?.modules
@@ -343,20 +354,41 @@ const formatVerseDraftChangeSummary = (
     (title) => !previousTitles.includes(title)
   );
   if (addedTitles.length > 0) {
-    return `新增 ${addedTitles.slice(0, 3).join("、")}`;
+    const items = addedTitles.slice(0, 3).join("、");
+    return {
+      summary: t("common.scriptDraft.summaryAdded", { items }),
+      summaryI18nKey: "common.scriptDraft.summaryAdded",
+      summaryI18nParams: { items },
+    };
   }
   const removedTitles = previousTitles.filter(
     (title) => !currentTitles.includes(title)
   );
   if (removedTitles.length > 0) {
-    return `删除 ${removedTitles.slice(0, 3).join("、")}`;
+    const items = removedTitles.slice(0, 3).join("、");
+    return {
+      summary: t("common.scriptDraft.summaryRemoved", { items }),
+      summaryI18nKey: "common.scriptDraft.summaryRemoved",
+      summaryI18nParams: { items },
+    };
   }
   for (let index = 0; index < currentTitles.length; index += 1) {
     if (currentTitles[index] !== previousTitles[index]) {
-      return `修改 ${currentTitles[index] || previousTitles[index]}`;
+      const items = currentTitles[index] || previousTitles[index];
+      return {
+        summary: t("common.scriptDraft.summaryModified", { items }),
+        summaryI18nKey: "common.scriptDraft.summaryModified",
+        summaryI18nParams: { items },
+      };
     }
   }
-  return formatVerseDraftSummary(payload);
+  return {
+    summary: fallbackSummary,
+    summaryI18nKey:
+      fallbackSummary === t("common.scriptDraft.emptySummary")
+        ? "common.scriptDraft.emptySummary"
+        : undefined,
+  };
 };
 
 const persistSceneDraftVersions = () => {
@@ -450,11 +482,14 @@ const addSceneDraftVersion = (
   trigger: ScriptSaveTrigger
 ) => {
   const latestVersion = draftVersions.value[0];
+  const nextSummary = formatVerseDraftChangeSummary(payload, latestVersion);
   const nextVersion: ScriptDraftVersion = {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     savedAt: new Date().toISOString(),
     trigger,
-    summary: formatVerseDraftChangeSummary(payload, latestVersion),
+    summary: nextSummary.summary,
+    summaryI18nKey: nextSummary.summaryI18nKey,
+    summaryI18nParams: nextSummary.summaryI18nParams,
     blocklyData: safeClone(payload),
     lua: "",
     js: "",

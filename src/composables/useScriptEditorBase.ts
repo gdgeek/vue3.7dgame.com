@@ -44,6 +44,8 @@ export type ScriptDraftVersion = {
   savedAt: string;
   trigger: ScriptSaveTrigger;
   summary: string;
+  summaryI18nKey?: string;
+  summaryI18nParams?: Record<string, string>;
   blocklyData: unknown;
   lua: string;
   js: string;
@@ -197,7 +199,11 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
   const formatDraftSummary = (
     payload: { lua: string; js: string },
     previousVersion?: ScriptDraftVersion
-  ) => {
+  ): {
+    summary: string;
+    summaryI18nKey?: string;
+    summaryI18nParams?: Record<string, string>;
+  } => {
     const getChangedLine = (currentContent: string, previousContent = "") => {
       const currentLines = currentContent
         .split("\n")
@@ -210,23 +216,61 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
       const maxLength = Math.max(currentLines.length, previousLines.length);
       for (let index = 0; index < maxLength; index += 1) {
         if (currentLines[index] !== previousLines[index]) {
-          if (currentLines[index]) return currentLines[index];
+          if (currentLines[index]) {
+            return {
+              summary: currentLines[index],
+            };
+          }
           if (previousLines[index]) {
-            return `删除 ${previousLines[index]}`;
+            return {
+              summary: t("common.scriptDraft.summaryRemoved", {
+                items: previousLines[index],
+              }),
+              summaryI18nKey: "common.scriptDraft.summaryRemoved",
+              summaryI18nParams: {
+                items: previousLines[index],
+              },
+            };
           }
         }
       }
-      return "";
+      return null;
     };
 
     if (previousVersion) {
       const changedLuaLine = getChangedLine(payload.lua, previousVersion.lua);
       if (changedLuaLine) {
-        return changedLuaLine.replace(/\s+/g, " ").slice(0, 72);
+        return {
+          ...changedLuaLine,
+          summary: changedLuaLine.summary.replace(/\s+/g, " ").slice(0, 72),
+          summaryI18nParams: changedLuaLine.summaryI18nParams
+            ? Object.fromEntries(
+                Object.entries(changedLuaLine.summaryI18nParams).map(
+                  ([key, value]) => [
+                    key,
+                    value.replace(/\s+/g, " ").slice(0, 72),
+                  ]
+                )
+              )
+            : undefined,
+        };
       }
       const changedJsLine = getChangedLine(payload.js, previousVersion.js);
       if (changedJsLine) {
-        return changedJsLine.replace(/\s+/g, " ").slice(0, 72);
+        return {
+          ...changedJsLine,
+          summary: changedJsLine.summary.replace(/\s+/g, " ").slice(0, 72),
+          summaryI18nParams: changedJsLine.summaryI18nParams
+            ? Object.fromEntries(
+                Object.entries(changedJsLine.summaryI18nParams).map(
+                  ([key, value]) => [
+                    key,
+                    value.replace(/\s+/g, " ").slice(0, 72),
+                  ]
+                )
+              )
+            : undefined,
+        };
       }
     }
 
@@ -234,8 +278,15 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
       .flatMap((content) => content.split("\n"))
       .map((line) => line.trim())
       .find((line) => line.length > 0);
-    if (!candidate) return t("common.scriptDraft.emptySummary");
-    return candidate.replace(/\s+/g, " ").slice(0, 72);
+    if (!candidate) {
+      return {
+        summary: t("common.scriptDraft.emptySummary"),
+        summaryI18nKey: "common.scriptDraft.emptySummary",
+      };
+    }
+    return {
+      summary: candidate.replace(/\s+/g, " ").slice(0, 72),
+    };
   };
 
   const persistDraftVersions = () => {
@@ -325,11 +376,14 @@ export function useScriptEditorBase(options: UseScriptEditorBaseOptions) {
     trigger: ScriptSaveTrigger
   ): string | null => {
     const latestVersion = draftVersions.value[0];
+    const nextSummary = formatDraftSummary(payload, latestVersion);
     const nextVersion: ScriptDraftVersion = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       savedAt: new Date().toISOString(),
       trigger,
-      summary: formatDraftSummary(payload, latestVersion),
+      summary: nextSummary.summary,
+      summaryI18nKey: nextSummary.summaryI18nKey,
+      summaryI18nParams: nextSummary.summaryI18nParams,
       blocklyData: safeClone(payload.data),
       lua: payload.lua,
       js: payload.js,

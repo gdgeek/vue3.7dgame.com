@@ -488,9 +488,20 @@ const formatMetaDraftChangeSummary = (
     events?: unknown;
   },
   previousVersion?: ScriptDraftVersion
-) => {
+): {
+  summary: string;
+  summaryI18nKey?: string;
+  summaryI18nParams?: Record<string, string>;
+} => {
+  const fallbackSummary = formatMetaDraftSummary(payload);
   if (!previousVersion) {
-    return formatMetaDraftSummary(payload);
+    return {
+      summary: fallbackSummary,
+      summaryI18nKey:
+        fallbackSummary === t("common.scriptDraft.emptySummary")
+          ? "common.scriptDraft.emptySummary"
+          : undefined,
+    };
   }
   const currentNames = collectMetaEntityNames(payload.meta?.children?.entities);
   const previousPayload = isRecord(previousVersion.blocklyData)
@@ -503,20 +514,41 @@ const formatMetaDraftChangeSummary = (
     (name) => !previousNames.includes(name)
   );
   if (addedNames.length > 0) {
-    return `新增 ${addedNames.slice(0, 3).join("、")}`;
+    const items = addedNames.slice(0, 3).join("、");
+    return {
+      summary: t("common.scriptDraft.summaryAdded", { items }),
+      summaryI18nKey: "common.scriptDraft.summaryAdded",
+      summaryI18nParams: { items },
+    };
   }
   const removedNames = previousNames.filter(
     (name) => !currentNames.includes(name)
   );
   if (removedNames.length > 0) {
-    return `删除 ${removedNames.slice(0, 3).join("、")}`;
+    const items = removedNames.slice(0, 3).join("、");
+    return {
+      summary: t("common.scriptDraft.summaryRemoved", { items }),
+      summaryI18nKey: "common.scriptDraft.summaryRemoved",
+      summaryI18nParams: { items },
+    };
   }
   for (let index = 0; index < currentNames.length; index += 1) {
     if (currentNames[index] !== previousNames[index]) {
-      return `修改 ${currentNames[index] || previousNames[index]}`;
+      const items = currentNames[index] || previousNames[index];
+      return {
+        summary: t("common.scriptDraft.summaryModified", { items }),
+        summaryI18nKey: "common.scriptDraft.summaryModified",
+        summaryI18nParams: { items },
+      };
     }
   }
-  return formatMetaDraftSummary(payload);
+  return {
+    summary: fallbackSummary,
+    summaryI18nKey:
+      fallbackSummary === t("common.scriptDraft.emptySummary")
+        ? "common.scriptDraft.emptySummary"
+        : undefined,
+  };
 };
 
 const persistSceneDraftVersions = () => {
@@ -613,11 +645,14 @@ const addSceneDraftVersion = (
   trigger: ScriptSaveTrigger
 ) => {
   const latestVersion = draftVersions.value[0];
+  const nextSummary = formatMetaDraftChangeSummary(payload, latestVersion);
   const nextVersion: ScriptDraftVersion = {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     savedAt: new Date().toISOString(),
     trigger,
-    summary: formatMetaDraftChangeSummary(payload, latestVersion),
+    summary: nextSummary.summary,
+    summaryI18nKey: nextSummary.summaryI18nKey,
+    summaryI18nParams: nextSummary.summaryI18nParams,
     blocklyData: safeClone(payload),
     lua: "",
     js: "",

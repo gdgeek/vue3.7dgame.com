@@ -11,11 +11,11 @@
         class="btn-icon"
         style="margin-right: 4px; font-size: 18px"
       ></font-awesome-icon>
-      上一页
+      {{ t("ui.paginationPrev") }}
     </el-button>
 
     <span class="page-info">
-      第
+      {{ t("ui.paginationPrefix") }}
       <el-input
         v-model="targetPageInput"
         class="page-input"
@@ -23,7 +23,7 @@
         @keyup.enter="jumpToPage"
         @blur="jumpToPage"
       ></el-input>
-      页 / 共 {{ totalPages }} 页
+      {{ t("ui.paginationSuffix", { total: totalPages }) }}
     </span>
 
     <el-button
@@ -32,7 +32,7 @@
       :disabled="currentPage >= totalPages"
       @click="changePage(currentPage + 1)"
     >
-      下一页
+      {{ t("ui.paginationNext") }}
       <font-awesome-icon
         :icon="['fas', 'chevron-right']"
         class="btn-icon"
@@ -44,6 +44,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import type { PagePaginationProps } from "./types";
 
 const props = withDefaults(defineProps<PagePaginationProps>(), {
@@ -52,6 +53,7 @@ const props = withDefaults(defineProps<PagePaginationProps>(), {
 const emit = defineEmits<{
   (e: "page-change", page: number): void;
 }>();
+const { t } = useI18n();
 
 const safeTotalPages = computed(() => Math.max(1, props.totalPages || 1));
 const targetPageInput = ref(String(props.currentPage));
