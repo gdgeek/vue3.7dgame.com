@@ -1,6 +1,8 @@
 dist
+coverage
 node_modules
 public
+.claude
 .husky
 .vscode
 .idea

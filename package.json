@@ -29,6 +29,7 @@
     "lint:prettier:fix": "prettier --write \"**/*.{js,cjs,ts,json,tsx,css,less,scss,vue,html,md}\"",
     "lint:stylelint": "stylelint \"**/*.{css,scss,vue}\"",
     "lint:stylelint:fix": "stylelint \"**/*.{css,scss,vue}\" --fix",
+    "lint:stylelint:ci": "stylelint --allow-empty-input \"src/{api,assets,composables,directive,enums,lang,lib,plugins,router,services,store,types,typings,utils}/**/*.{css,scss,vue}\"",
     "lint:lint-staged": "lint-staged",
     "preinstall": "npx only-allow pnpm",
     "prepare": "husky",
@@ -39,7 +40,7 @@
     "check": "node scripts/check-project.js",
     "replace-console": "node scripts/replace-console.js",
     "check:icons": "node scripts/check-icons.js",
-    "lint:check": "eslint --ext .ts,.js,.vue ./src && prettier --check \"**/*.{js,cjs,ts,json,tsx,css,less,scss,vue,html,md}\""
+    "lint:check": "eslint --ext .ts,.js,.vue ./src && prettier --check \"**/*.{js,cjs,ts,json,tsx,css,less,scss,vue,html,md}\" && pnpm run lint:stylelint:ci"
   },
   "config": {
     "commitizen": {

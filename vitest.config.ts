@@ -35,16 +35,19 @@ export default defineConfig({
     // 包含的测试文件
     include: ["test/**/*.{test,spec}.{js,ts}", "src/**/*.{test,spec}.{js,ts}"],
     // 排除的文件
-    exclude: ["node_modules", "dist"],
+    exclude: ["node_modules", "dist", "coverage", ".claude"],
     // 覆盖率配置
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
       reportsDirectory: "./coverage",
+      all: false,
       exclude: [
         // build/tool configs
         "node_modules",
         "dist",
+        "coverage/**",
+        ".claude/**",
         "**/*.d.ts",
         "test/**",
         "vite.config.ts",
