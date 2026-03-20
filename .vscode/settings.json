@@ -81,5 +81,5 @@
   "[vue]": {
     "editor.defaultFormatter": "Vue.volar"
   },
-  "kiroAgent.configureMCP": "Disabled",
+  "kiroAgent.configureMCP": "Enabled",
 }
