@@ -1,7 +1,4 @@
 import request from "@/utils/request";
-import env from "@/environment";
-
-const emailApiBase = env.email_api;
 
 // API响应基础类型
 export interface ApiResponse<T = unknown> {
@@ -69,7 +66,6 @@ export interface TestEmailData {
 
 export const getEmailStatus = async (): Promise<ApiResponse<EmailStatus>> => {
   const response = await request<ApiResponse<EmailStatus>>({
-    baseURL: emailApiBase,
     url: "/v1/email/status",
     method: "get",
   });
@@ -80,7 +76,6 @@ export const sendVerificationCode = async (
   email: string
 ): Promise<ApiResponse> => {
   const response = await request<ApiResponse>({
-    baseURL: emailApiBase,
     url: "/v1/email/send-verification",
     method: "post",
     data: { email },
@@ -92,7 +87,6 @@ export const verifyEmailCode = async (
   payload: VerifyEmailRequest
 ): Promise<ApiResponse<VerifyEmailData>> => {
   const response = await request<ApiResponse<VerifyEmailData>>({
-    baseURL: emailApiBase,
     url: "/v1/email/verify",
     method: "post",
     data: payload,
@@ -102,7 +96,6 @@ export const verifyEmailCode = async (
 
 export const sendChangeConfirmation = async (): Promise<ApiResponse> => {
   const response = await request<ApiResponse>({
-    baseURL: emailApiBase,
     url: "/v1/email/send-change-confirmation",
     method: "post",
   });
@@ -113,7 +106,6 @@ export const verifyChangeConfirmation = async (
   code: string
 ): Promise<ApiResponse<VerifyChangeConfirmationData>> => {
   const response = await request<ApiResponse<VerifyChangeConfirmationData>>({
-    baseURL: emailApiBase,
     url: "/v1/email/verify-change-confirmation",
     method: "post",
     data: { code },
@@ -125,7 +117,6 @@ export const unbindEmail = async (
   code?: string
 ): Promise<ApiResponse<UnbindEmailData>> => {
   const response = await request<ApiResponse<UnbindEmailData>>({
-    baseURL: emailApiBase,
     url: "/v1/email/unbind",
     method: "post",
     data: code ? { code } : {},
@@ -137,7 +128,6 @@ export const getEmailCooldown = async (
   email?: string
 ): Promise<ApiResponse<EmailCooldown>> => {
   const response = await request<ApiResponse<EmailCooldown>>({
-    baseURL: emailApiBase,
     url: "/v1/email/cooldown",
     method: "get",
     params: email ? { email } : {},
@@ -149,7 +139,6 @@ export const testEmailService = async (): Promise<
   ApiResponse<TestEmailData>
 > => {
   const response = await request<ApiResponse<TestEmailData>>({
-    baseURL: emailApiBase,
     url: "/v1/email/test",
     method: "get",
   });

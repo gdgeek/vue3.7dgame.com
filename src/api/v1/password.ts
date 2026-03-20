@@ -1,7 +1,4 @@
 import request from "@/utils/request";
-import env from "@/environment";
-
-const passwordApiBase = env.password_api;
 
 export interface PasswordApiError {
   code: string;
@@ -22,7 +19,6 @@ export const requestPasswordReset = async (
   email: string
 ): Promise<PasswordApiResponse> => {
   const response = await request<PasswordApiResponse>({
-    baseURL: passwordApiBase,
     url: "/v1/password/request-reset",
     method: "post",
     data: { email },
@@ -35,7 +31,6 @@ export const verifyResetCode = async (
   code: string
 ): Promise<PasswordApiResponse> => {
   const response = await request<PasswordApiResponse>({
-    baseURL: passwordApiBase,
     url: "/v1/password/verify-code",
     method: "post",
     data: { email, code },
@@ -49,7 +44,6 @@ export const resetPasswordByCode = async (
   password: string
 ): Promise<PasswordApiResponse> => {
   const response = await request<PasswordApiResponse>({
-    baseURL: passwordApiBase,
     url: "/v1/password/reset",
     method: "post",
     data: { email, code, password },
@@ -63,7 +57,6 @@ export const changePassword = async (
   confirmPassword: string
 ): Promise<PasswordApiResponse> => {
   const response = await request<PasswordApiResponse>({
-    baseURL: passwordApiBase,
     url: "/v1/password/change",
     method: "post",
     data: {

@@ -2,14 +2,12 @@
  * Unit tests for src/api/v1/password.ts
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import env from "@/environment";
 
 vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 
 describe("Password API", () => {
   let request: ReturnType<typeof vi.fn>;
   let passwordApi: typeof import("@/api/v1/password");
-  const base = env.email_api;
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -28,7 +26,6 @@ describe("Password API", () => {
       await passwordApi.requestPasswordReset("user@example.com");
       expect(request).toHaveBeenCalledWith(
         expect.objectContaining({
-          baseURL: base,
           url: "/v1/password/request-reset",
           method: "post",
           data: { email: "user@example.com" },
@@ -53,7 +50,6 @@ describe("Password API", () => {
       await passwordApi.verifyResetCode("user@example.com", "123456");
       expect(request).toHaveBeenCalledWith(
         expect.objectContaining({
-          baseURL: base,
           url: "/v1/password/verify-code",
           method: "post",
           data: { email: "user@example.com", code: "123456" },
@@ -78,7 +74,6 @@ describe("Password API", () => {
       await passwordApi.resetPasswordByCode("u@e.com", "654321", "newP@ss");
       expect(request).toHaveBeenCalledWith(
         expect.objectContaining({
-          baseURL: base,
           url: "/v1/password/reset",
           method: "post",
           data: { email: "u@e.com", code: "654321", password: "newP@ss" },
@@ -96,7 +91,6 @@ describe("Password API", () => {
       await passwordApi.changePassword("OldPass1!", "NewPass2!", "NewPass2!");
       expect(request).toHaveBeenCalledWith(
         expect.objectContaining({
-          baseURL: base,
           url: "/v1/password/change",
           method: "post",
           data: {

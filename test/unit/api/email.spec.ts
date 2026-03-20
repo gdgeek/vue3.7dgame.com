@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import env from "@/environment";
 
 // Mock request module before importing the email API
 vi.mock("@/utils/request", () => ({
@@ -10,11 +9,9 @@ describe("Email API", () => {
   let sendVerificationCode: any;
   let verifyEmailCode: any;
   let request: any;
-  let emailApiBase: string;
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    emailApiBase = env.email_api;
 
     // Import after mocking
     request = (await import("@/utils/request")).default;
@@ -37,7 +34,6 @@ describe("Email API", () => {
       const result = await sendVerificationCode("test@example.com");
 
       expect(request).toHaveBeenCalledWith({
-        baseURL: emailApiBase,
         url: "/v1/email/send-verification",
         method: "post",
         data: { email: "test@example.com" },
@@ -97,7 +93,6 @@ describe("Email API", () => {
       });
 
       expect(request).toHaveBeenCalledWith({
-        baseURL: emailApiBase,
         url: "/v1/email/verify",
         method: "post",
         data: { email: "test@example.com", code: "123456" },
@@ -149,12 +144,11 @@ describe("Email API", () => {
   });
 
   describe("getEmailStatus", () => {
-    it("calls GET /v1/email/status with emailApiBase", async () => {
+    it("calls GET /v1/email/status", async () => {
       const emailApi = await import("@/api/v1/email");
       request.mockResolvedValue({ data: { success: true, data: {} } });
       await emailApi.getEmailStatus();
       expect(request).toHaveBeenCalledWith({
-        baseURL: emailApiBase,
         url: "/v1/email/status",
         method: "get",
       });
@@ -180,7 +174,6 @@ describe("Email API", () => {
       const arg = request.mock.calls[0][0];
       expect(arg.url).toBe("/v1/email/send-change-confirmation");
       expect(arg.method).toBe("post");
-      expect(arg.baseURL).toBe(emailApiBase);
     });
   });
 

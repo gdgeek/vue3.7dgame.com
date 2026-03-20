@@ -48,25 +48,10 @@ function subtitle(): string {
 const environment = {
   ip: GetIP(),
   api: ReplaceURL(window.__API_URL__ || import.meta.env.VITE_APP_API_URL || ""),
-  email_api: ReplaceURL(
-    window.__EMAIL_API_URL__ ||
-      import.meta.env.VITE_APP_EMAIL_API_URL ||
-      window.__API_URL__ ||
-      import.meta.env.VITE_APP_API_URL ||
-      ""
-  ),
-  password_api: ReplaceURL(
-    window.__PASSWORD_API_URL__ ||
-      import.meta.env.VITE_APP_PASSWORD_API_URL ||
-      window.__API_URL__ ||
-      import.meta.env.VITE_APP_API_URL ||
-      ""
-  ),
   doc: ReplaceURL(import.meta.env.VITE_APP_DOC_API || ""),
   blockly: ReplaceURL(import.meta.env.VITE_APP_BLOCKLY_URL || ""),
   editor: ReplaceURL(import.meta.env.VITE_APP_EDITOR_URL || ""),
   auth_api: ReplaceURL(import.meta.env.VITE_APP_AUTH_API || ""),
-  ai: ReplaceURL(import.meta.env.VITE_APP_AI_API || ""),
   backup_api: ReplaceURL(
     window.__BACKUP_API_URL__ || import.meta.env.VITE_APP_BACKUP_API_URL || ""
   ),
@@ -80,8 +65,6 @@ const environment = {
       import.meta.env.VITE_APP_BACKUP_DOMAIN_INFO_API_URL ||
       ""
   ),
-  tts_api:
-    import.meta.env.VITE_TTS_API_URL || "https://sound.bujiaban.com/tencentTTS",
   //a1: ReplaceURL(import.meta.env.VITE_APP_A1_API || ""),
   version: 1,
   subtitle,

@@ -14,7 +14,6 @@ services:
       - VITE_APP_BACKUP_API_URL=https://api.tmrpp.com
       - VITE_APP_DOMAIN_INFO_API_URL=https://domain.xrteeth.com
       - VITE_APP_BACKUP_DOMAIN_INFO_API_URL=https://domain.tmrpp.com
-      - VITE_APP_AI_API=https://ai.xrteeth.com
       - NGINX_PORT=80
       - VITE_APP_PORT=3000
     command: pnpm run dev --host

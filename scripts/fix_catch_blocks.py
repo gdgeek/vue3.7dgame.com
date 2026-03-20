@@ -2,14 +2,6 @@
 """Fix catch blocks where error is now unknown instead of any."""
 
 fixes = {
-    "src/components/MrPP/AIProcess.vue": [
-        ("} catch (e) {\n    ElMessage.error(e.message);",
-         "} catch (e) {\n    ElMessage.error(e instanceof Error ? e.message : String(e));"),
-    ],
-    "src/components/MrPP/AIUpload.vue": [
-        ("} catch (e) {\n        ElMessage.error(e.message);",
-         "} catch (e) {\n        ElMessage.error(e instanceof Error ? e.message : String(e));"),
-    ],
     "src/composables/useEmailVerification.ts": [
         ("    } catch (err) {\n      error.value = err.error?.message",
          "    } catch (err) {\n      const apiErr = err as { error?: { message?: string; code?: string; retry_after?: number } };\n      error.value = apiErr.error?.message"),

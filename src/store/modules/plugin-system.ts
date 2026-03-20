@@ -138,6 +138,13 @@ export const usePluginSystemStore = defineStore("plugin-system", {
           // API 失败时保持默认空数组（关闭）
         }
       }
+
+      // 权限 API 不可用时（如后端尚未实现），默认开放所有插件
+      if (permissionApiUnavailable) {
+        for (const pluginId of enabledIds) {
+          this.pluginPermissions[pluginId] = ["*"];
+        }
+      }
     },
 
     async activatePlugin(pluginId: string, container: HTMLElement) {

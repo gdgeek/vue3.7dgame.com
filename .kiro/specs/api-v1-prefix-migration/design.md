@@ -125,7 +125,6 @@ interface EnvironmentConfig {
   VITE_APP_API_URL: string;  // Added for staging
   VITE_APP_BLOCKLY_URL: string;
   VITE_APP_EDITOR_URL: string;
-  VITE_APP_AI_API: string;
   VITE_APP_AUTH_API: string;
   VITE_APP_A1_API: string;
   VITE_APP_BASE_MODE: string;

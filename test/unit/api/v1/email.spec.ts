@@ -1,11 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/environment", () => ({
-  default: {
-    email_api: "https://email.example.test",
-  },
-}));
-
 vi.mock("@/utils/request", () => ({ default: vi.fn() }));
 
 describe("api/v1/email", () => {
@@ -25,7 +19,6 @@ describe("api/v1/email", () => {
     await api.getEmailStatus();
     expect(request).toHaveBeenCalledWith(
       expect.objectContaining({
-        baseURL: "https://email.example.test",
         url: "/v1/email/status",
         method: "get",
       })
