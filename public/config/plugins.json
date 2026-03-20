@@ -27,12 +27,12 @@
         "th-TH": "การจัดการผู้ใช้"
       },
       "description": "用户增删改查管理工具",
-      "url": "__VITE_PLUGIN_USER_MGMT_URL__",
+      "url": "https://user-manager.plugins.xrugc.com/",
       "icon": "User",
       "group": "tools",
       "enabled": true,
       "order": 2,
-      "allowedOrigin": "__VITE_PLUGIN_USER_MGMT_URL__",
+      "allowedOrigin": "https://user-manager.plugins.xrugc.com",
       "version": "1.0.0"
     }
   ]

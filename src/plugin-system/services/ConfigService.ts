@@ -47,36 +47,6 @@ function mergePlugins(
 }
 
 /**
- * Replace `__VITE_*__` placeholders in plugin config with actual env values.
- * `public/` files are copied as-is by Vite, so we resolve them at runtime.
- */
-function resolveEnvPlaceholders(config: PluginsConfig): PluginsConfig {
-  const envMap: Record<string, string> = {
-    __VITE_PLUGIN_USER_MGMT_URL__:
-      import.meta.env.VITE_PLUGIN_USER_MGMT_URL ?? "",
-  };
-
-  const replace = (value: string): string => {
-    let result = value;
-    for (const [placeholder, envValue] of Object.entries(envMap)) {
-      result = result.replaceAll(placeholder, envValue);
-    }
-    return result;
-  };
-
-  return {
-    ...config,
-    plugins: config.plugins.map((p) => ({
-      ...p,
-      url: replace(p.url),
-      allowedOrigin: p.allowedOrigin
-        ? replace(p.allowedOrigin)
-        : p.allowedOrigin,
-    })),
-  };
-}
-
-/**
  * ConfigService — 插件配置加载服务
  *
  * 加载策略：
@@ -85,7 +55,6 @@ function resolveEnvPlaceholders(config: PluginsConfig): PluginsConfig {
  * 3. 如果 domain 有插件配置：按 id 合并，domain 覆盖静态配置
  * 4. 如果 domain 无插件配置：直接使用静态配置
  * 5. domain 信息尚未加载时不阻塞，降级使用静态配置
- * 6. 所有配置加载后，替换 `__VITE_*__` 占位符为实际环境变量值
  */
 export class ConfigService {
   /** Cached merged config */
@@ -126,7 +95,7 @@ export class ConfigService {
       );
     }
 
-    this.cachedConfig = resolveEnvPlaceholders(finalConfig);
+    this.cachedConfig = finalConfig;
     return this.cachedConfig;
   }
 
