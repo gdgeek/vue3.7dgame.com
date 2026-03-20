@@ -16,7 +16,7 @@ import {
   Setting,
 } from "@element-plus/icons-vue";
 
-import type { PluginInfo, PluginManifest, MenuGroup } from "@/plugin-system/types";
+import type { PluginManifest } from "@/plugin-system/types";
 import type { TabPaneName } from "element-plus";
 
 const store = usePluginSystemStore();
@@ -32,7 +32,6 @@ const config = computed(() => store.config);
 const plugins = computed(() => Array.from(store.plugins.values()));
 const menuGroups = computed(() => store.menuGroups);
 const enabledPlugins = computed(() => store.enabledPlugins);
-const activePlugin = computed(() => store.activePlugin);
 const permissions = computed(() => store.pluginPermissions);
 
 const stateStats = computed(() => {
@@ -44,7 +43,9 @@ const stateStats = computed(() => {
   return stats;
 });
 
-const configManifests = computed<PluginManifest[]>(() => config.value?.plugins ?? []);
+const configManifests = computed<PluginManifest[]>(
+  () => config.value?.plugins ?? []
+);
 
 // --- Actions ---
 
@@ -69,7 +70,9 @@ async function handleRefresh() {
   }
 }
 
-function stateTagType(state: string): "success" | "warning" | "danger" | "info" {
+function stateTagType(
+  state: string
+): "success" | "warning" | "danger" | "info" {
   switch (state) {
     case "active":
       return "success";
@@ -108,7 +111,7 @@ onMounted(() => {
     <div class="plugin-debug__header">
       <div class="plugin-debug__title">
         <el-icon :size="24">
-          <Setting />
+          <Setting></Setting>
         </el-icon>
         <h2>插件系统调试面板</h2>
       </div>
@@ -116,69 +119,88 @@ onMounted(() => {
         <el-tag :type="store.initialized ? 'success' : 'warning'" size="large">
           {{ store.initialized ? "已初始化" : "未初始化" }}
         </el-tag>
-        <el-button type="primary" :icon="Refresh" :loading="refreshing" @click="handleRefresh">
+        <el-button
+          type="primary"
+          :icon="Refresh"
+          :loading="refreshing"
+          @click="handleRefresh"
+        >
           刷新配置
         </el-button>
       </div>
     </div>
 
     <!-- Error banner -->
-    <el-alert v-if="initError || store.error" :title="initError || store.error || ''" type="error" show-icon closable
-      class="plugin-debug__alert" />
+    <el-alert
+      v-if="initError || store.error"
+      :title="initError || store.error || ''"
+      type="error"
+      show-icon
+      closable
+      class="plugin-debug__alert"
+    ></el-alert>
 
     <!-- Stats cards -->
     <el-row :gutter="16" class="plugin-debug__stats">
       <el-col :span="4">
         <el-card shadow="hover">
           <el-statistic title="总插件数" :value="stateStats.total">
-            <template #prefix><el-icon>
-                <Document />
-              </el-icon></template>
+            <template #prefix
+              ><el-icon> <Document></Document> </el-icon
+            ></template>
           </el-statistic>
         </el-card>
       </el-col>
       <el-col :span="4">
         <el-card shadow="hover">
           <el-statistic title="已启用" :value="enabledPlugins.length">
-            <template #prefix><el-icon color="#67c23a">
-                <SuccessFilled />
-              </el-icon></template>
+            <template #prefix>
+              <el-icon color="#67c23a">
+                <SuccessFilled></SuccessFilled>
+              </el-icon>
+            </template>
           </el-statistic>
         </el-card>
       </el-col>
       <el-col :span="4">
         <el-card shadow="hover">
           <el-statistic title="Active" :value="stateStats.active">
-            <template #prefix><el-icon color="#67c23a">
-                <Connection />
-              </el-icon></template>
+            <template #prefix
+              ><el-icon color="#67c23a"> <Connection></Connection> </el-icon
+            ></template>
           </el-statistic>
         </el-card>
       </el-col>
       <el-col :span="4">
         <el-card shadow="hover">
           <el-statistic title="Loading" :value="stateStats.loading">
-            <template #prefix><el-icon color="#e6a23c">
-                <LoadingIcon />
-              </el-icon></template>
+            <template #prefix>
+              <el-icon color="#e6a23c">
+                <LoadingIcon></LoadingIcon>
+              </el-icon>
+            </template>
           </el-statistic>
         </el-card>
       </el-col>
       <el-col :span="4">
         <el-card shadow="hover">
           <el-statistic title="Error" :value="stateStats.error">
-            <template #prefix><el-icon color="#f56c6c">
-                <CircleCloseFilled />
-              </el-icon></template>
+            <template #prefix>
+              <el-icon color="#f56c6c">
+                <CircleCloseFilled></CircleCloseFilled>
+              </el-icon>
+            </template>
           </el-statistic>
         </el-card>
       </el-col>
       <el-col :span="4">
         <el-card shadow="hover">
           <el-statistic title="Unloaded" :value="stateStats.unloaded">
-            <template #prefix><el-icon color="#909399">
-                <InfoFilled />
-              </el-icon></template>
+            <template #prefix>
+              <el-icon color="#909399">
+                <InfoFilled></InfoFilled>
+              </el-icon>
+            </template>
           </el-statistic>
         </el-card>
       </el-col>
@@ -199,7 +221,10 @@ onMounted(() => {
             {{ configManifests.length }}
           </el-descriptions-item>
           <el-descriptions-item label="Store 初始化">
-            <el-tag :type="store.initialized ? 'success' : 'danger'" size="small">
+            <el-tag
+              :type="store.initialized ? 'success' : 'danger'"
+              size="small"
+            >
               {{ store.initialized }}
             </el-tag>
           </el-descriptions-item>
@@ -215,7 +240,11 @@ onMounted(() => {
       <!-- Tab 2: Plugin List (runtime) -->
       <el-tab-pane label="运行时插件" name="runtime">
         <el-table :data="plugins" stripe border style="width: 100%">
-          <el-table-column prop="pluginId" label="Plugin ID" width="180" />
+          <el-table-column
+            prop="pluginId"
+            label="Plugin ID"
+            width="180"
+          ></el-table-column>
           <el-table-column label="名称" width="160">
             <template #default="{ row }">
               {{ resolveI18nName(row.name, row.nameI18n, appStore.language) }}
@@ -231,10 +260,10 @@ onMounted(() => {
           <el-table-column label="启用" width="80" align="center">
             <template #default="{ row }">
               <el-icon v-if="row.enabled" color="#67c23a">
-                <SuccessFilled />
+                <SuccessFilled></SuccessFilled>
               </el-icon>
               <el-icon v-else color="#f56c6c">
-                <CircleCloseFilled />
+                <CircleCloseFilled></CircleCloseFilled>
               </el-icon>
             </template>
           </el-table-column>
@@ -245,12 +274,32 @@ onMounted(() => {
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="group" label="分组" width="120" />
-          <el-table-column prop="order" label="排序" width="80" align="center" />
-          <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
-          <el-table-column label="错误信息" min-width="200" show-overflow-tooltip>
+          <el-table-column
+            prop="group"
+            label="分组"
+            width="120"
+          ></el-table-column>
+          <el-table-column
+            prop="order"
+            label="排序"
+            width="80"
+            align="center"
+          ></el-table-column>
+          <el-table-column
+            prop="description"
+            label="描述"
+            min-width="200"
+            show-overflow-tooltip
+          ></el-table-column>
+          <el-table-column
+            label="错误信息"
+            min-width="200"
+            show-overflow-tooltip
+          >
             <template #default="{ row }">
-              <span v-if="row.lastError" style="color: #f56c6c">{{ row.lastError }}</span>
+              <span v-if="row.lastError" style="color: #f56c6c">{{
+                row.lastError
+              }}</span>
               <span v-else style="color: #909399">—</span>
             </template>
           </el-table-column>
@@ -260,16 +309,25 @@ onMounted(() => {
       <!-- Tab 3: Manifest Config -->
       <el-tab-pane label="清单配置" name="manifest">
         <el-table :data="configManifests" stripe border style="width: 100%">
-          <el-table-column prop="id" label="ID" width="180" />
+          <el-table-column prop="id" label="ID" width="180"></el-table-column>
           <el-table-column label="名称" width="160">
             <template #default="{ row }">
               {{ resolveI18nName(row.name, row.nameI18n, appStore.language) }}
             </template>
           </el-table-column>
-          <el-table-column prop="version" label="版本" width="100" />
+          <el-table-column
+            prop="version"
+            label="版本"
+            width="100"
+          ></el-table-column>
           <el-table-column label="URL" min-width="280" show-overflow-tooltip>
             <template #default="{ row }">
-              <el-link type="primary" :href="row.url" target="_blank" :underline="false">
+              <el-link
+                type="primary"
+                :href="row.url"
+                target="_blank"
+                :underline="false"
+              >
                 {{ row.url }}
               </el-link>
             </template>
@@ -277,28 +335,53 @@ onMounted(() => {
           <el-table-column label="启用" width="80" align="center">
             <template #default="{ row }">
               <el-icon v-if="row.enabled" color="#67c23a">
-                <SuccessFilled />
+                <SuccessFilled></SuccessFilled>
               </el-icon>
               <el-icon v-else color="#f56c6c">
-                <CircleCloseFilled />
+                <CircleCloseFilled></CircleCloseFilled>
               </el-icon>
             </template>
           </el-table-column>
-          <el-table-column prop="allowedOrigin" label="Allowed Origin" min-width="200" show-overflow-tooltip />
-          <el-table-column prop="sandbox" label="Sandbox" min-width="200" show-overflow-tooltip>
+          <el-table-column
+            prop="allowedOrigin"
+            label="Allowed Origin"
+            min-width="200"
+            show-overflow-tooltip
+          ></el-table-column>
+          <el-table-column
+            prop="sandbox"
+            label="Sandbox"
+            min-width="200"
+            show-overflow-tooltip
+          >
             <template #default="{ row }">
               {{ row.sandbox ?? "allow-scripts allow-same-origin (默认)" }}
             </template>
           </el-table-column>
-          <el-table-column prop="group" label="分组" width="100" />
-          <el-table-column prop="order" label="排序" width="80" align="center" />
+          <el-table-column
+            prop="group"
+            label="分组"
+            width="100"
+          ></el-table-column>
+          <el-table-column
+            prop="order"
+            label="排序"
+            width="80"
+            align="center"
+          ></el-table-column>
           <el-table-column label="extraConfig" min-width="200">
             <template #default="{ row }">
-              <el-popover v-if="row.extraConfig && Object.keys(row.extraConfig).length" trigger="hover" width="400">
+              <el-popover
+                v-if="row.extraConfig && Object.keys(row.extraConfig).length"
+                trigger="hover"
+                width="400"
+              >
                 <template #reference>
                   <el-button link type="primary" size="small">查看</el-button>
                 </template>
-                <pre style="font-size: 12px; margin: 0">{{ JSON.stringify(row.extraConfig, null, 2) }}</pre>
+                <pre style="font-size: 12px; margin: 0">{{
+                  JSON.stringify(row.extraConfig, null, 2)
+                }}</pre>
               </el-popover>
               <span v-else style="color: #909399">—</span>
             </template>
@@ -309,7 +392,11 @@ onMounted(() => {
       <!-- Tab 4: Menu Groups -->
       <el-tab-pane label="菜单分组" name="groups">
         <el-table :data="menuGroups" stripe border style="width: 100%">
-          <el-table-column prop="id" label="分组 ID" width="180" />
+          <el-table-column
+            prop="id"
+            label="分组 ID"
+            width="180"
+          ></el-table-column>
           <el-table-column label="名称" width="200">
             <template #default="{ row }">
               {{ resolveI18nName(row.name, row.nameI18n, appStore.language) }}
@@ -318,16 +405,26 @@ onMounted(() => {
           <el-table-column prop="icon" label="图标" width="120">
             <template #default="{ row }">
               <el-icon>
-                <component :is="row.icon" />
+                <component :is="row.icon"></component>
               </el-icon>
               <span style="margin-left: 8px">{{ row.icon }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="order" label="排序" width="100" align="center" />
+          <el-table-column
+            prop="order"
+            label="排序"
+            width="100"
+            align="center"
+          ></el-table-column>
           <el-table-column label="i18n 名称" min-width="300">
             <template #default="{ row }">
               <template v-if="row.nameI18n">
-                <el-tag v-for="(val, lang) in row.nameI18n" :key="lang" size="small" class="plugin-debug__i18n-tag">
+                <el-tag
+                  v-for="(val, lang) in row.nameI18n"
+                  :key="lang"
+                  size="small"
+                  class="plugin-debug__i18n-tag"
+                >
                   {{ lang }}: {{ val }}
                 </el-tag>
               </template>
@@ -337,8 +434,13 @@ onMounted(() => {
           <el-table-column label="关联插件" min-width="200">
             <template #default="{ row }">
               <template v-if="store.pluginsByGroup.get(row.id)?.length">
-                <el-tag v-for="p in store.pluginsByGroup.get(row.id)" :key="p.pluginId" size="small" type="info"
-                  class="plugin-debug__i18n-tag">
+                <el-tag
+                  v-for="p in store.pluginsByGroup.get(row.id)"
+                  :key="p.pluginId"
+                  size="small"
+                  type="info"
+                  class="plugin-debug__i18n-tag"
+                >
                   {{ p.pluginId }}
                 </el-tag>
               </template>
@@ -351,7 +453,11 @@ onMounted(() => {
       <!-- Tab 5: Permissions -->
       <el-tab-pane label="权限详情" name="permissions">
         <el-table :data="plugins" stripe border style="width: 100%">
-          <el-table-column prop="pluginId" label="Plugin ID" width="200" />
+          <el-table-column
+            prop="pluginId"
+            label="Plugin ID"
+            width="200"
+          ></el-table-column>
           <el-table-column label="名称" width="160">
             <template #default="{ row }">
               {{ resolveI18nName(row.name, row.nameI18n, appStore.language) }}
@@ -367,8 +473,13 @@ onMounted(() => {
           <el-table-column label="Actions 列表" min-width="300">
             <template #default="{ row }">
               <template v-if="permissions[row.pluginId]?.length">
-                <el-tag v-for="action in permissions[row.pluginId]" :key="action" size="small" type="success"
-                  class="plugin-debug__i18n-tag">
+                <el-tag
+                  v-for="action in permissions[row.pluginId]"
+                  :key="action"
+                  size="small"
+                  type="success"
+                  class="plugin-debug__i18n-tag"
+                >
                   {{ action }}
                 </el-tag>
               </template>
@@ -378,10 +489,10 @@ onMounted(() => {
           <el-table-column label="菜单可见" width="120" align="center">
             <template #default="{ row }">
               <el-icon v-if="permissions[row.pluginId]?.length" color="#67c23a">
-                <SuccessFilled />
+                <SuccessFilled></SuccessFilled>
               </el-icon>
               <el-icon v-else color="#f56c6c">
-                <CircleCloseFilled />
+                <CircleCloseFilled></CircleCloseFilled>
               </el-icon>
             </template>
           </el-table-column>
@@ -389,20 +500,26 @@ onMounted(() => {
             <template #default="{ row }">
               <span v-if="!permissions[row.pluginId]" style="color: #e6a23c">
                 <el-icon>
-                  <Warning />
-                </el-icon> 权限尚未获取
+                  <Warning></Warning>
+                </el-icon>
+                权限尚未获取
               </span>
-              <span v-else-if="permissions[row.pluginId].length === 0" style="color: #f56c6c">
+              <span
+                v-else-if="permissions[row.pluginId].length === 0"
+                style="color: #f56c6c"
+              >
                 <el-icon>
-                  <Lock />
-                </el-icon> API 返回空 actions，插件在菜单中隐藏
+                  <Lock></Lock>
+                </el-icon>
+                API 返回空 actions，插件在菜单中隐藏
               </span>
-              <span v-else-if="permissions[row.pluginId].includes('*')" style="color: #67c23a">
+              <span
+                v-else-if="permissions[row.pluginId].includes('*')"
+                style="color: #67c23a"
+              >
                 全部权限（可能是权限 API 404 回退）
               </span>
-              <span v-else style="color: #67c23a">
-                有限权限，插件可见
-              </span>
+              <span v-else style="color: #67c23a"> 有限权限，插件可见 </span>
             </template>
           </el-table-column>
         </el-table>
@@ -412,24 +529,36 @@ onMounted(() => {
       <el-tab-pane label="原始 JSON" name="raw">
         <el-collapse>
           <el-collapse-item title="plugins.json 配置" name="config">
-            <pre class="plugin-debug__json">{{ JSON.stringify(config, null, 2) }}</pre>
+            <pre class="plugin-debug__json">{{
+              JSON.stringify(config, null, 2)
+            }}</pre>
           </el-collapse-item>
           <el-collapse-item title="运行时插件 Map" name="plugins-map">
-            <pre class="plugin-debug__json">{{ JSON.stringify(plugins, null, 2) }}</pre>
+            <pre class="plugin-debug__json">{{
+              JSON.stringify(plugins, null, 2)
+            }}</pre>
           </el-collapse-item>
           <el-collapse-item title="权限数据" name="perms">
-            <pre class="plugin-debug__json">{{ JSON.stringify(permissions, null, 2) }}</pre>
+            <pre class="plugin-debug__json">{{
+              JSON.stringify(permissions, null, 2)
+            }}</pre>
           </el-collapse-item>
           <el-collapse-item title="Store 状态" name="store-state">
-            <pre class="plugin-debug__json">{{ JSON.stringify({
-              initialized: store.initialized,
-              loading: store.loading,
-              error: store.error,
-              activePluginId: store.activePluginId,
-              pluginCount: plugins.length,
-              enabledCount: enabledPlugins.length,
-              menuGroupCount: menuGroups.length,
-            }, null, 2) }}</pre>
+            <pre class="plugin-debug__json">{{
+              JSON.stringify(
+                {
+                  initialized: store.initialized,
+                  loading: store.loading,
+                  error: store.error,
+                  activePluginId: store.activePluginId,
+                  pluginCount: plugins.length,
+                  enabledCount: enabledPlugins.length,
+                  menuGroupCount: menuGroups.length,
+                },
+                null,
+                2
+              )
+            }}</pre>
           </el-collapse-item>
         </el-collapse>
       </el-tab-pane>
