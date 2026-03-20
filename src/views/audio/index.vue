@@ -54,10 +54,7 @@
       >
         <template #grid-card="{ item }">
           <StandardCard
-            :image="
-              item.image?.url ||
-              `https://api.dicebear.com/9.x/thumbs/svg?seed=${item.id}`
-            "
+            :image="item.image?.url || getDefaultAvatarUrl(item.id, 'thumbs')"
             :title="item.name || t('ui.unnamed')"
             :meta="{ date: formatItemDate(item.updated_at || item.created_at) }"
             :selected="isSelected(item.id)"
@@ -79,10 +76,7 @@
           <div class="col-name">
             <div class="item-thumb">
               <img
-                :src="
-                  item.image?.url ||
-                  `https://api.dicebear.com/9.x/thumbs/svg?seed=${item.id}`
-                "
+                :src="item.image?.url || getDefaultAvatarUrl(item.id, 'thumbs')"
                 :alt="item.name"
               />
             </div>
@@ -216,6 +210,7 @@ import {
   getResourceFormat,
 } from "@/utils/utilityFunctions";
 import { toHttps } from "@/utils/helper";
+import { getDefaultAvatarUrl } from "@/utils/avatar";
 import { useResourceScopeFilter } from "@/composables/useResourceScopeFilter";
 import {
   denseResourceBreakpoints,

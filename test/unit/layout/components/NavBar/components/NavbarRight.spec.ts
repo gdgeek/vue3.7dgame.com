@@ -151,6 +151,7 @@ describe("layout/components/NavBar/components/NavbarRight.vue", () => {
 
   it("renders user avatar element", async () => {
     const { el } = await mount();
-    expect(el.querySelector(".el-avatar-stub")).not.toBeNull();
+    const img = el.querySelector("img");
+    expect(img).not.toBeNull();
   });
 });

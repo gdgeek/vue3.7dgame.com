@@ -88,10 +88,7 @@ const accountType = computed(() => {
 // 从用户数据中获取头像URL
 const avatarUrl = computed(() => {
   const username = userStore.userInfo?.userData?.username ?? "user";
-  return getUserAvatarUrl(
-    userStore.userInfo?.userInfo?.avatar?.url,
-    username
-  );
+  return getUserAvatarUrl(userStore.userInfo?.userInfo?.avatar?.url, username);
 });
 
 const toggleMenu = () => {

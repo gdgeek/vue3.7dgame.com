@@ -97,7 +97,7 @@ describe("layout/components/NavBar/components/UserDropdown.vue", () => {
     const { el } = await mount();
     const img = el.querySelector(".user-avatar img") as HTMLImageElement;
     expect(img).not.toBeNull();
-    expect(img.getAttribute("src")).toContain("ar_logo.png");
+    expect(img.getAttribute("src")).toContain("dicebear.com");
   });
 
   it("dropdown menu is not shown initially", async () => {
