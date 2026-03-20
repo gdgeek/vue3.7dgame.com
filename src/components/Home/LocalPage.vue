@@ -27,7 +27,7 @@ const value = ref<string>(
 );
 const size = ref<number>(400);
 
-const ip = computed(() => environment.ip);
+const ip = computed(() => window.location.hostname);
 
 // Define onResize function at the top level
 const onResize = () => {

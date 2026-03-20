@@ -29,7 +29,7 @@ CMD ["pnpm", "run", "dev", "--host"]
 FROM nginx:alpine
 
 # 将自定义的 Nginx 配置文件复制到容器中
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf.template /etc/nginx/conf.d/default.conf.template
 
 # 将构建的文件复制到 Nginx 默认的静态文件目录
 COPY --from=build /app/dist /usr/share/nginx/html

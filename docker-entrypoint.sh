@@ -1,21 +1,15 @@
 #!/bin/sh
-# 如果设置了 APP_API_URL 环境变量，替换构建时的默认值
-if [ -n "$APP_API_URL" ]; then
-  find /usr/share/nginx/html -type f -name '*.js' -exec sed -i "s|{scheme}//api.{domain}|${APP_API_URL}|g" {} +
-  echo "API URL replaced with: $APP_API_URL"
-fi
 
-if [ -n "$APP_AUTH_API" ]; then
-  find /usr/share/nginx/html -type f -name '*.js' -exec sed -i "s|{scheme}//auth.{domain}|${APP_AUTH_API}|g" {} +
-  echo "Auth API replaced with: $APP_AUTH_API"
-fi
+# 1. 使用 envsubst 将环境变量注入 Nginx 配置模板
+envsubst '${APP_API_URL} ${APP_BACKUP_API_URL}' \
+  < /etc/nginx/conf.d/default.conf.template \
+  > /etc/nginx/conf.d/default.conf
 
-if [ -n "$APP_AI_API" ]; then
-  find /usr/share/nginx/html -type f -name '*.js' -exec sed -i "s|https://rodin.01xr.com|${APP_AI_API}|g" {} +
-  echo "AI API replaced with: $APP_AI_API"
-fi
+echo "Nginx config generated with:"
+echo "  APP_API_URL=${APP_API_URL}"
+echo "  APP_BACKUP_API_URL=${APP_BACKUP_API_URL}"
 
-# Inject global variables into index.html for Failover support
+# 2. 注入全局变量到 index.html（用于 failover 等场景）
 INJECT="<script>"
 [ -n "$APP_API_URL" ] && INJECT="${INJECT}window.__API_URL__='${APP_API_URL}';"
 [ -n "$APP_BACKUP_API_URL" ] && INJECT="${INJECT}window.__BACKUP_API_URL__='${APP_BACKUP_API_URL}';"
@@ -28,5 +22,5 @@ if [ "$INJECT" != "<script></script>" ]; then
   echo "Injected global variables into index.html"
 fi
 
-# 启动 nginx
+# 3. 启动 nginx
 exec nginx -g 'daemon off;'

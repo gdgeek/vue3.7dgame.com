@@ -1,0 +1,147 @@
+server {
+    listen 80;
+    server_name localhost;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # ============ Gzip 压缩配置 ============
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_min_length 1024;
+    gzip_types
+        text/plain
+        text/css
+        text/javascript
+        text/xml
+        application/json
+        application/javascript
+        application/x-javascript
+        application/xml
+        application/xml+rss
+        application/vnd.ms-fontobject
+        application/x-font-ttf
+        font/opentype
+        image/svg+xml
+        image/x-icon;
+
+    # ============ 反向代理 - 主 API ============
+    location /api/ {
+        set $backend_api "${APP_API_URL}";
+
+        proxy_pass $backend_api/;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # GEEK 自定义请求头
+        proxy_set_header X-GEEK-Proxy "true";
+        proxy_set_header X-GEEK-Real-IP $remote_addr;
+        proxy_set_header X-GEEK-Source "nginx";
+
+        # WebSocket 支持
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # 超时配置
+        proxy_connect_timeout 60s;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+
+        # 请求体大小
+        client_max_body_size 50m;
+    }
+
+    # ============ 反向代理 - 备用 API ============
+    location /api-backup/ {
+        set $backup_api "${APP_BACKUP_API_URL}";
+
+        proxy_pass $backup_api/;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # GEEK 自定义请求头
+        proxy_set_header X-GEEK-Proxy "true";
+        proxy_set_header X-GEEK-Real-IP $remote_addr;
+        proxy_set_header X-GEEK-Source "nginx";
+
+        # WebSocket 支持
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # 超时配置
+        proxy_connect_timeout 60s;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+
+        # 请求体大小
+        client_max_body_size 50m;
+    }
+
+    # ============ 自定义 JSON 错误响应 ============
+    error_page 502 /502.json;
+    location = /502.json {
+        internal;
+        default_type application/json;
+        return 502 '{"error": "Bad Gateway", "status": 502}';
+    }
+
+    error_page 503 /503.json;
+    location = /503.json {
+        internal;
+        default_type application/json;
+        return 503 '{"error": "Service Unavailable", "status": 503}';
+    }
+
+    error_page 504 /504.json;
+    location = /504.json {
+        internal;
+        default_type application/json;
+        return 504 '{"error": "Gateway Timeout", "status": 504}';
+    }
+
+    # ============ 缓存策略 ============
+    # JS/CSS 文件带 hash，长期缓存
+    location ~* \.(?:js|css)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # 字体文件长期缓存
+    location ~* \.(?:woff2?|eot|ttf|otf)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # 图片缓存 30 天
+    location ~* \.(?:png|jpg|jpeg|gif|webp|svg|ico)$ {
+        expires 30d;
+        add_header Cache-Control "public";
+        try_files $uri =404;
+    }
+
+    # HTML 不缓存（确保用户获取最新版本）
+    location ~* \.html$ {
+        expires -1;
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    error_page 404 /index.html;
+    location = /index.html {
+        internal;
+    }
+}

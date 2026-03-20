@@ -1,7 +1,3 @@
-import { GetIP, ReplaceIP, ReplaceURL } from "./utils/helper";
-function useCloud(): boolean {
-  return import.meta.env.VITE_APP_BASE_MODE !== "local";
-}
 /*
 function mrpp(): boolean {
   return import.meta.env.VITE_APP_BASE_MODE === "mrpp.com";
@@ -13,10 +9,6 @@ function mrcn(): boolean {
     import.meta.env.VITE_APP_BASE_MODE === "7dgame.com"
   );
 }*/
-
-function local(): boolean {
-  return import.meta.env.VITE_APP_BASE_MODE === "local";
-}
 
 /*
 function title(): string {
@@ -42,35 +34,29 @@ function title(): string {
   return ""; // Fallback to domainStore.author
 }
 */
-function subtitle(): string {
-  return "支持Rokid设备";
-}
+
 const environment = {
-  ip: GetIP(),
-  api: ReplaceURL(window.__API_URL__ || import.meta.env.VITE_APP_API_URL || ""),
-  doc: ReplaceURL(import.meta.env.VITE_APP_DOC_API || ""),
-  blockly: ReplaceURL(import.meta.env.VITE_APP_BLOCKLY_URL || ""),
-  editor: ReplaceURL(import.meta.env.VITE_APP_EDITOR_URL || ""),
-  auth_api: ReplaceURL(import.meta.env.VITE_APP_AUTH_API || ""),
-  backup_api: ReplaceURL(
-    window.__BACKUP_API_URL__ || import.meta.env.VITE_APP_BACKUP_API_URL || ""
-  ),
-  domain_info: ReplaceURL(
-    window.__DOMAIN_INFO_API_URL__ ||
+  api: import.meta.env.DEV ? import.meta.env.VITE_APP_API_URL || "" : "/api",
+  backup_api: import.meta.env.DEV
+    ? import.meta.env.VITE_APP_BACKUP_API_URL || ""
+    : "/api-backup",
+  doc: import.meta.env.VITE_APP_DOC_API || "",
+  blockly: import.meta.env.VITE_APP_BLOCKLY_URL || "",
+  editor: import.meta.env.VITE_APP_EDITOR_URL || "",
+  domain_info: import.meta.env.DEV
+    ? import.meta.env.VITE_APP_DOMAIN_INFO_API_URL || ""
+    : window.__DOMAIN_INFO_API_URL__ ||
       import.meta.env.VITE_APP_DOMAIN_INFO_API_URL ||
-      ""
-  ),
-  domain_info_backup: ReplaceURL(
-    window.__BACKUP_DOMAIN_INFO_API_URL__ ||
+      "",
+  domain_info_backup: import.meta.env.DEV
+    ? import.meta.env.VITE_APP_BACKUP_DOMAIN_INFO_API_URL || ""
+    : window.__BACKUP_DOMAIN_INFO_API_URL__ ||
       import.meta.env.VITE_APP_BACKUP_DOMAIN_INFO_API_URL ||
-      ""
-  ),
-  //a1: ReplaceURL(import.meta.env.VITE_APP_A1_API || ""),
+      "",
   version: 1,
-  subtitle,
-  useCloud,
-  local,
-  replaceIP: ReplaceIP,
+  subtitle: () => "支持Rokid设备",
+  useCloud: () => import.meta.env.VITE_APP_BASE_MODE !== "local",
+  local: () => import.meta.env.VITE_APP_BASE_MODE === "local",
 };
 
 export default environment;

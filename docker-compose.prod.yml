@@ -1,0 +1,20 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vue3-prod
+    ports:
+      - "80:80"
+    environment:
+      - APP_API_URL=https://api.xrteeth.com
+      - APP_BACKUP_API_URL=https://api.tmrpp.com
+      - APP_DOMAIN_INFO_API_URL=https://domain.xrteeth.com
+      - APP_BACKUP_DOMAIN_INFO_API_URL=https://domain.tmrpp.com
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

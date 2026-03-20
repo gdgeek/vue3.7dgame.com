@@ -55,7 +55,6 @@ vi.mock("@/environment", () => ({
   default: {
     api: "https://primary.api.com",
     backup_api: "https://backup.api.com",
-    auth_api: "",
     useCloud: vi.fn(() => false),
   },
 }));
