@@ -33,10 +33,7 @@
       "enabled": true,
       "order": 2,
       "allowedOrigin": "__VITE_PLUGIN_USER_MGMT_URL__",
-      "version": "1.0.0",
-      "extraConfig": {
-        "apiBaseUrl": "__VITE_PLUGIN_USER_MGMT_API__"
-      }
+      "version": "1.0.0"
     }
   ]
 }
