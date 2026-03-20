@@ -88,6 +88,12 @@ vi.mock("@/router/modules/plugin", () => ({
     component: () => {},
     meta: { title: "plugin.title", hidden: false, keepAlive: false },
   },
+  pluginDebugRoute: {
+    path: "/plugin-debug",
+    name: "PluginDebug",
+    component: () => {},
+    meta: { title: "插件调试", hidden: true, keepAlive: false },
+  },
 }));
 
 // ── Mock ability utilities ────────────────────────────────────────────────────
