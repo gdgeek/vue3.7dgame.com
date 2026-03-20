@@ -17,3 +17,18 @@ export const pluginRoutes: RouteRecordRaw = {
     params: null,
   },
 };
+
+/** 插件系统调试页面 — 显示所有插件信息，仅开发环境使用 */
+export const pluginDebugRoute: RouteRecordRaw = {
+  path: "/plugin-debug",
+  component: () => import("@/plugin-system/views/PluginDebug.vue"),
+  name: "PluginDebug",
+  meta: {
+    title: "插件调试",
+    icon: "el-icon-Setting",
+    hidden: true,
+    keepAlive: false,
+    alwaysShow: false,
+    params: null,
+  },
+};
