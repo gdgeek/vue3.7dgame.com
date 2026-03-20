@@ -62,7 +62,7 @@ body {
     transition: all 0.3s ease;
 
     &.mobile {
-      width: 430;
+      width: 430px;
       height: 100%;
     }
 
@@ -73,14 +73,14 @@ body {
       width: 90%;
       height: 90%;
       padding: 25px;
+      color: var(--text-primary, #333);
       // border: 1px solid var(--border-color, #ebeefe); // Removed border to clean up UI inside card
       border-radius: var(--radius-md, 4px);
       transition: all 0.3s ease;
-      color: var(--text-primary, #333);
 
       h1 {
         margin-top: 0;
-        font-family: "KaiTi", sans-serif;
+        font-family: KaiTi, sans-serif;
         font-size: 36px;
         font-weight: 400;
         color: var(--text-primary);
@@ -88,7 +88,7 @@ body {
 
       h4 {
         margin-top: 0;
-        font-family: "KaiTi", sans-serif;
+        font-family: KaiTi, sans-serif;
         font-size: 18px;
         font-weight: 400;
         color: var(--text-secondary);

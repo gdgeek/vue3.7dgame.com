@@ -52,6 +52,7 @@ const toggleSidebar = () => {
 <style lang="scss" scoped>
 .has-logo {
   .el-scrollbar {
+    /* stylelint-disable-next-line declaration-property-value-no-unknown */
     height: calc(100vh - $navbar-height);
   }
 }

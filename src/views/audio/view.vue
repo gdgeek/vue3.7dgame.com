@@ -2,7 +2,7 @@
   <TransitionWrapper>
     <div class="document-index">
       <br />
-      <el-row :gutter="20" style="margin: 0px 18px 0">
+      <el-row :gutter="20" style="margin: 0 18px">
         <el-col :sm="16">
           <el-card class="box-card">
             <template #header>
@@ -349,48 +349,42 @@ onMounted(async () => {
   position: relative;
   width: 100%;
   height: 350px;
-  background: rgb(238, 174, 202);
+  background: rgb(238 174 202);
   background: radial-gradient(
     circle,
-    rgba(238, 174, 202, 1) 0%,
-    rgb(169, 196, 228) 100%
+    rgb(238 174 202 / 100%) 0%,
+    rgb(169 196 228) 100%
   );
 }
 
 .audio-box {
   position: relative;
-  margin: auto;
-  margin-top: 26px;
   width: 200px;
   height: 200px;
+  margin: auto;
+  margin-top: 26px;
 }
 
 .audio-record {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto;
+  inset: 0;
   width: 200px;
   height: 200px;
-  border-radius: 50%;
+  margin: auto;
   background: url("/media/bg/audio-record.jpg") center no-repeat;
   background-size: cover;
+  border-radius: 50%;
 }
 
 .audio-record-image {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto;
+  inset: 0;
   width: 106px;
   height: 106px;
-  border-radius: 50%;
+  margin: auto;
   background: url("/media/bg/audio-img.jpg") center no-repeat;
   background-size: 113%;
+  border-radius: 50%;
 }
 
 .audio-record-play {
@@ -403,7 +397,7 @@ onMounted(async () => {
 
 @keyframes spin {
   0% {
-    transform: rotate(0edg);
+    transform: rotate(0deg);
   }
 
   100% {
@@ -413,7 +407,7 @@ onMounted(async () => {
 
 @keyframes recordfast {
   0% {
-    transform: rotate(0edg);
+    transform: rotate(0deg);
   }
 
   100% {

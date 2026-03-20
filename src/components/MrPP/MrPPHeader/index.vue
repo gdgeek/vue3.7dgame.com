@@ -97,10 +97,11 @@
 
 <script setup lang="ts">
 import TagsSelect from "@/components/TagsSelect.vue";
+import { logger } from "@/utils/logger";
 import { ref, computed, watch } from "vue";
 
 const handleTagsChange = (tags: number[]) => {
-  console.log("父组件收到标签变化:", tags);
+  logger.debug("父组件收到标签变化:", tags);
   emits("tags", tags);
   // 执行其他操作
 };
@@ -156,7 +157,7 @@ const search = () => {
     clearTimeout(searchTimer);
     searchTimer = null;
   }
-  console.log("MrPPHeader: search triggered", input.value);
+  logger.debug("MrPPHeader: search triggered", input.value);
   emits("search", input.value);
 };
 
@@ -204,8 +205,8 @@ watch(
 
 <style scoped>
 .mrpp-title {
+  padding: 0;
   font-size: 15px;
-  padding: 0px 0px 0px 0px;
   color: #666;
 }
 

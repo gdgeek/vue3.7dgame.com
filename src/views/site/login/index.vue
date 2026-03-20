@@ -65,7 +65,7 @@ body {
     transition: all 0.3s ease;
 
     &.mobile {
-      width: 430;
+      width: 430px;
       height: 100%;
     }
 
@@ -76,11 +76,11 @@ body {
       width: 90%;
       height: 90%;
       padding: 25px;
+      color: var(--text-primary, #333);
+      background-color: var(--bg-card, #fff);
       border: 1px solid var(--border-color, #ebeefe);
       border-radius: 4px;
       transition: all 0.3s ease;
-      background-color: var(--bg-card, #fff);
-      color: var(--text-primary, #333);
 
       &:hover {
         box-shadow: var(--shadow-md, 0 0 10px rgb(0 0 0 / 10%));

@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { logger } from "@/utils/logger";
-import { ref, computed, watch, withDefaults } from "vue";
+import { ref, computed, watch } from "vue";
 import SchemaField from "./SchemaField.vue";
 import {
   ElMessage,

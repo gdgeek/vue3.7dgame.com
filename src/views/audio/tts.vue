@@ -347,30 +347,31 @@ const getLanguageLimitText = computed(() => {
 
 <style scoped lang="scss">
 .tencent-tts {
-  width: 100%;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+  min-height: 100vh;
   padding: 2rem;
-  transition: all 0.3s ease;
   opacity: 1;
+  transition: all 0.3s ease;
   transform: translateX(0);
 }
 
 .main-content {
-  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 1.5rem;
+  align-items: center;
+  width: 100%;
+  padding: 2rem;
+  color: v-bind('isDark ? "#e0e0e0" : "inherit"');
   background-color: v-bind('isDark ? "#1e1e1e" : "#fff"');
   border-radius: 16px;
-  padding: 2rem;
+  /* stylelint-disable-next-line declaration-property-value-no-unknown */
   box-shadow: v-bind(
     'isDark ? "0 4px 20px rgba(0, 0, 0, 0.2)" : "0 4px 20px rgba(0, 0, 0, 0.05)"'
   );
-  color: v-bind('isDark ? "#e0e0e0" : "inherit"');
   transition:
     background-color 0.3s ease,
     color 0.3s ease,
@@ -379,11 +380,11 @@ const getLanguageLimitText = computed(() => {
 
 // 音色选择区域
 .voice-select-section {
-  width: 100%;
-  margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
+  margin-bottom: 1rem;
 }
 
 .voice-filters {
@@ -392,18 +393,18 @@ const getLanguageLimitText = computed(() => {
   margin-bottom: 1rem;
 
   .filter-item {
-    flex: 1;
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 0.5rem;
   }
 }
 
 .voice-type {
-  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  width: 100%;
 }
 
 // 音色选择
@@ -411,8 +412,8 @@ const getLanguageLimitText = computed(() => {
   width: 100%;
 
   :deep(.el-input__wrapper) {
-    border-radius: 12px;
     padding: 0.5rem;
+    border-radius: 12px;
 
     &:hover {
       border-color: #409eff;
@@ -420,17 +421,17 @@ const getLanguageLimitText = computed(() => {
 
     &.is-focus {
       border-color: #409eff;
-      box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
+      box-shadow: 0 0 0 2px rgb(64 158 255 / 10%);
     }
   }
 }
 
 // 参数设置区域
 .params-section {
-  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  width: 100%;
   margin-bottom: 1rem;
 
   .param-row {
@@ -439,8 +440,8 @@ const getLanguageLimitText = computed(() => {
     width: 100%;
 
     .param-item {
-      flex: 1;
       display: flex;
+      flex: 1;
       flex-direction: column;
       gap: 0.5rem;
     }
@@ -459,8 +460,8 @@ const getLanguageLimitText = computed(() => {
 
       .emotion-type,
       .emotion-intensity {
-        flex: 1;
         display: flex;
+        flex: 1;
         flex-direction: column;
         gap: 0.5rem;
       }
@@ -479,20 +480,20 @@ const getLanguageLimitText = computed(() => {
 
 // 文本输入区域
 .input-section {
-  width: 100%;
   position: relative;
+  width: 100%;
 
   .tag-actions-container {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     margin-bottom: 0.5rem;
   }
 
   .language-tag {
     display: flex;
-    align-items: center;
     gap: 0.5rem;
+    align-items: center;
 
     .el-tag {
       font-size: 0.9rem;
@@ -513,17 +514,17 @@ const getLanguageLimitText = computed(() => {
   // 语言分析组件
   .language-analysis {
     position: relative;
-    margin: 0 0 1rem;
+    z-index: 10;
     padding: 1rem;
-    border-radius: 8px;
+    margin: 0 0 1rem;
     background-color: v-bind('isDark ? "#2a2a2a" : "#f5f7fa"');
     border: 1px solid v-bind('isDark ? "#444" : "#e4e7ed"');
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 8px;
+    box-shadow: none;
     opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     transform: translateY(-10px);
     animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    z-index: 10;
-    box-shadow: none;
 
     @keyframes slideIn {
       from {
@@ -539,25 +540,25 @@ const getLanguageLimitText = computed(() => {
 
     .analysis-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       margin-bottom: 0.8rem;
       opacity: 0;
       animation: fadeIn 0.5s ease 0.2s forwards;
 
       .analysis-title {
-        font-weight: 600;
-        font-size: 0.9rem;
-        color: v-bind('isDark ? "#e0e0e0" : "#606266"');
         position: relative;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: v-bind('isDark ? "#e0e0e0" : "#606266"');
 
         &::after {
-          content: "";
           position: absolute;
           bottom: -4px;
           left: 0;
           width: 0;
           height: 2px;
+          content: "";
           background: #409eff;
           animation: lineGrow 0.6s ease-out 0.5s forwards;
         }
@@ -572,8 +573,8 @@ const getLanguageLimitText = computed(() => {
       animation: fadeIn 0.5s ease 0.3s forwards;
 
       .language-bars {
-        flex: 1;
         display: flex;
+        flex: 1;
         flex-direction: column;
         gap: 0.8rem;
       }
@@ -581,12 +582,12 @@ const getLanguageLimitText = computed(() => {
       .language-chart {
         flex: 1;
         height: 200px;
-        border-radius: 8px;
         overflow: hidden;
+        border: 1px solid v-bind('isDark ? "#444" : "#e4e7ed"');
+        border-radius: 8px;
+        box-shadow: none;
         opacity: 0;
         animation: fadeIn 0.5s ease 0.4s forwards;
-        box-shadow: none;
-        border: 1px solid v-bind('isDark ? "#444" : "#e4e7ed"');
       }
     }
 
@@ -608,11 +609,11 @@ const getLanguageLimitText = computed(() => {
       }
 
       .bar-label {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
         font-size: 0.8rem;
         color: v-bind('isDark ? "#bbb" : "#606266"');
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
 
         &.chinese {
           color: #f56c6c;
@@ -638,23 +639,20 @@ const getLanguageLimitText = computed(() => {
         }
 
         :deep(.el-progress-bar__inner) {
-          border-radius: 4px;
-          transition: width 0.3s ease-out;
           position: relative;
           overflow: hidden;
+          border-radius: 4px;
+          transition: width 0.3s ease-out;
 
           &::after {
-            content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
+            content: "";
             background: linear-gradient(
               90deg,
-              rgba(255, 255, 255, 0) 0%,
-              rgba(255, 255, 255, 0.1) 50%,
-              rgba(255, 255, 255, 0) 100%
+              rgb(255 255 255 / 0%) 0%,
+              rgb(255 255 255 / 10%) 50%,
+              rgb(255 255 255 / 0%) 100%
             );
             transform: translateX(-100%);
             animation: shimmer 2s infinite;
@@ -669,8 +667,8 @@ const getLanguageLimitText = computed(() => {
       animation: fadeIn 0.5s ease 0.6s forwards;
 
       :deep(.el-alert) {
-        box-shadow: none;
         border: 1px solid v-bind('isDark ? "#444" : "#e4e7ed"');
+        box-shadow: none;
       }
     }
 
@@ -723,23 +721,23 @@ const getLanguageLimitText = computed(() => {
     position: absolute;
     top: 0;
     left: 0;
+    box-sizing: border-box;
     width: 100%;
     height: 100%;
-    overflow-y: auto;
     padding: 1rem;
-    border-radius: 12px;
-    background-color: v-bind('isDark ? "#2c2c2c" : "#fff"');
-    border: 1px solid v-bind('isDark ? "#444" : "#dcdfe6"');
+    overflow-y: auto;
+    font-family: inherit;
     font-size: 1rem;
     line-height: 1.5;
-    scroll-behavior: smooth;
-    font-family: inherit;
-    text-align: left;
-    white-space: pre-wrap;
-    word-break: break-word;
-    transition: all 0.3s ease;
     color: v-bind('isDark ? "#e0e0e0" : "#606266"');
-    box-sizing: border-box;
+    text-align: left;
+    word-break: break-word;
+    white-space: pre-wrap;
+    background-color: v-bind('isDark ? "#2c2c2c" : "#fff"');
+    border: 1px solid v-bind('isDark ? "#444" : "#dcdfe6"');
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    scroll-behavior: smooth;
 
     &::-webkit-scrollbar {
       width: 8px;
@@ -760,14 +758,14 @@ const getLanguageLimitText = computed(() => {
     }
 
     .empty-text {
+      padding: 2rem 0;
       color: v-bind('isDark ? "#777" : "#999"');
       text-align: center;
-      padding: 2rem 0;
     }
 
     .highlighted-text {
-      color: v-bind('isDark ? "#ff8c38" : "#FF6700"');
       font-weight: 500;
+      color: v-bind('isDark ? "#ff8c38" : "#FF6700"');
       transition: color 0.3s ease;
     }
 
@@ -785,19 +783,19 @@ const getLanguageLimitText = computed(() => {
   }
 
   :deep(.el-textarea__inner) {
-    border-radius: 12px;
+    height: 100% !important; // 强制高度为100%
     padding: 1rem;
     font-size: 1rem;
-    border: 1px solid v-bind('isDark ? "#444" : "#dcdfe6"');
-    background-color: v-bind('isDark ? "#2c2c2c" : "#fff"');
     color: v-bind('isDark ? "#e0e0e0" : "#606266"');
-    transition: all 0.3s ease;
-    height: 100% !important; // 强制高度为100%
     resize: none; // 禁止用户调整大小
+    background-color: v-bind('isDark ? "#2c2c2c" : "#fff"');
+    border: 1px solid v-bind('isDark ? "#444" : "#dcdfe6"');
+    border-radius: 12px;
+    transition: all 0.3s ease;
 
     &:focus {
       border-color: #409eff;
-      box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
+      box-shadow: 0 0 0 2px rgb(64 158 255 / 10%);
     }
 
     &::placeholder {
@@ -807,24 +805,24 @@ const getLanguageLimitText = computed(() => {
 }
 
 .preview-section {
-  width: 100%;
-  margin: 1rem 0;
   display: flex;
   justify-content: center;
+  width: 100%;
+  margin: 1rem 0;
 
   .audio-player {
     width: 100%;
+    min-height: 54px;
     border-radius: 12px;
     outline: none;
-    min-height: 54px;
   }
 }
 
 .action-section {
-  width: 100%;
   display: flex;
-  justify-content: center;
   gap: 1rem;
+  justify-content: center;
+  width: 100%;
   margin: 1rem 0;
 
   .action-button {
@@ -833,12 +831,12 @@ const getLanguageLimitText = computed(() => {
     font-size: 1.1rem;
     font-weight: 600;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(64, 158, 255, 0.2);
+    box-shadow: 0 4px 12px rgb(64 158 255 / 20%);
     transition: all 0.3s ease;
 
     &:hover:not(:disabled) {
+      box-shadow: 0 8px 16px rgb(64 158 255 / 30%);
       transform: translateY(-3px);
-      box-shadow: 0 8px 16px rgba(64, 158, 255, 0.3);
     }
 
     &:disabled {
@@ -847,10 +845,10 @@ const getLanguageLimitText = computed(() => {
   }
 
   .upload-button {
-    box-shadow: 0 4px 12px rgba(103, 194, 58, 0.2);
+    box-shadow: 0 4px 12px rgb(103 194 58 / 20%);
 
     &:hover:not(:disabled) {
-      box-shadow: 0 8px 16px rgba(103, 194, 58, 0.3);
+      box-shadow: 0 8px 16px rgb(103 194 58 / 30%);
     }
   }
 }
@@ -887,15 +885,15 @@ const getLanguageLimitText = computed(() => {
     transition: all 0.3s ease;
 
     &:hover {
+      box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
       transform: translateY(-2px);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
   }
 }
 
 .dialog-footer {
-  text-align: right;
   margin-top: 1rem;
+  text-align: right;
 }
 
 // 通用样式
@@ -907,8 +905,8 @@ const getLanguageLimitText = computed(() => {
 
 .voice-option {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
 
   .voice-tags {
@@ -929,7 +927,7 @@ const getLanguageLimitText = computed(() => {
   padding: 0 12px;
 }
 
-@media (max-width: 1200px) {
+@media (width <= 1200px) {
   .tencent-tts {
     width: 100%;
     padding: 1rem;
@@ -959,7 +957,7 @@ const getLanguageLimitText = computed(() => {
   }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .tencent-tts {
     width: 100%;
     padding: 0;
