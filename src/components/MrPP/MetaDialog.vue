@@ -387,19 +387,35 @@ const handleDetailClose = () => {
   detailLoading.value = false;
 };
 
-const emitSelectedMeta = (item: metaInfo) => {
+const resolveMetaForSceneInsert = async (item: metaInfo): Promise<metaInfo> => {
+  const hasMetaData = item?.data !== undefined && item?.data !== null;
+  const hasResources = Array.isArray(item?.resources);
+  if (hasMetaData && hasResources) return item;
+
+  try {
+    const response = await getMeta(item.id, {
+      expand: "resources",
+    });
+    return response.data;
+  } catch {
+    return item;
+  }
+};
+
+const emitSelectedMeta = async (item: metaInfo) => {
+  const completeMeta = await resolveMetaForSceneInsert(item);
   emit("selected", {
-    data: item,
-    title: item.title,
+    data: completeMeta,
+    title: completeMeta.title || item.title,
   });
 };
 
-const putSingle = (item: metaInfo) => {
-  emitSelectedMeta(item);
+const putSingle = async (item: metaInfo) => {
+  await emitSelectedMeta(item);
   dialogVisible.value = false;
 };
 
-const putSelected = () => {
+const putSelected = async () => {
   if (selectedIds.value.length === 0) {
     ElMessage.warning(t("verse.view.metaDialog.noItemSelected"));
     return;
@@ -410,7 +426,7 @@ const putSelected = () => {
       selectedMetaMap.get(id) ||
       active.value.items.find((item) => item.id === id);
     if (selectedMeta) {
-      emitSelectedMeta(selectedMeta);
+      await emitSelectedMeta(selectedMeta);
     }
   }
   dialogVisible.value = false;
