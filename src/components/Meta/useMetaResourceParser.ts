@@ -102,12 +102,13 @@ function parsePoint(
   const animations = node.parameters?.animations ?? null;
   const isPolygen = nodeType === "polygen";
   const isPicture = nodeType === "picture";
+  const isEntity = nodeType === "entity";
   const isPhototype = nodeType === "phototype";
 
   let hasMoved = false;
   let hasRotate = false;
   let hasTooltips = false;
-  if ((isPolygen || isPicture) && node.children?.components) {
+  if ((isPolygen || isPicture || isEntity) && node.children?.components) {
     const comps = node.children.components;
     hasMoved = comps.some((c) => c.type === "Moved");
     hasRotate = comps.some((c) => c.type === "Rotate");
@@ -121,6 +122,7 @@ function parsePoint(
       ? { animations, moved: hasMoved, rotate: hasRotate, hasTooltips }
       : {}),
     ...(isPicture ? { moved: hasMoved, rotate: hasRotate, hasTooltips } : {}),
+    ...(isEntity ? { moved: hasMoved, rotate: hasRotate, hasTooltips } : {}),
     ...(isPhototype ? { data: node.parameters.data ?? null } : {}),
   };
 }
