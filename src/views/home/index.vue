@@ -6,6 +6,96 @@
 
       <div class="section-header">
         <font-awesome-icon
+          :icon="['fas', 'circle-question']"
+          class="header-icon"
+        ></font-awesome-icon>
+        <h2 class="section-title">{{ t("homepage.concepts.title") }}</h2>
+      </div>
+
+      <section class="concept-guide">
+        <p class="concept-subtitle">{{ t("homepage.concepts.subtitle") }}</p>
+
+        <div class="concept-flow">
+          <div
+            class="flow-node clickable"
+            @click="handleFlowAction('/resource/polygen/index')"
+          >
+            <div class="node-icon-wrapper">
+              <font-awesome-icon
+                :icon="['fas', 'cloud-arrow-up']"
+                class="node-icon"
+              ></font-awesome-icon>
+            </div>
+            <span class="node-kicker">{{
+              t("homepage.concepts.flow.step1")
+            }}</span>
+            <strong>{{ t("homepage.concepts.flow.resource") }}</strong>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div
+            class="flow-node clickable"
+            @click="handleFlowAction('/meta/list')"
+          >
+            <div class="node-icon-wrapper">
+              <font-awesome-icon
+                :icon="['fas', 'pen-to-square']"
+                class="node-icon"
+              ></font-awesome-icon>
+            </div>
+            <span class="node-kicker">{{
+              t("homepage.concepts.flow.step2")
+            }}</span>
+            <strong>{{ t("homepage.concepts.flow.entity") }}</strong>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div
+            class="flow-node clickable"
+            @click="handleFlowAction('/verse/index')"
+          >
+            <div class="node-icon-wrapper">
+              <font-awesome-icon
+                :icon="['fas', 'square-plus']"
+                class="node-icon"
+              ></font-awesome-icon>
+            </div>
+            <span class="node-kicker">{{
+              t("homepage.concepts.flow.step3")
+            }}</span>
+            <strong>{{ t("homepage.concepts.flow.scene") }}</strong>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-node-plain">
+            <span class="node-kicker">{{
+              t("homepage.concepts.flow.step4")
+            }}</span>
+            <strong>{{ t("homepage.concepts.flow.publish") }}</strong>
+          </div>
+        </div>
+
+        <div class="scope-grid">
+          <article class="scope-card entity-scope">
+            <header class="scope-head">
+              <h3>{{ t("homepage.concepts.entityEditor.title") }}</h3>
+            </header>
+            <p>{{ t("homepage.concepts.entityEditor.desc") }}</p>
+          </article>
+          <article class="scope-card scene-scope">
+            <header class="scope-head">
+              <h3>{{ t("homepage.concepts.sceneEditor.title") }}</h3>
+            </header>
+            <p>{{ t("homepage.concepts.sceneEditor.desc") }}</p>
+            <p class="scope-note">
+              <font-awesome-icon
+                :icon="['fas', 'triangle-exclamation']"
+              ></font-awesome-icon>
+              <span>{{ t("homepage.concepts.rule") }}</span>
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <div class="section-header">
+        <font-awesome-icon
           :icon="['fas', 'bullhorn']"
           class="header-icon"
         ></font-awesome-icon>
@@ -31,6 +121,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 
 import { useDomainStore } from "@/store/modules/domain";
 import environment from "@/environment";
@@ -42,6 +133,11 @@ import TransitionWrapper from "@/components/TransitionWrapper.vue";
 const domainStore = useDomainStore();
 const env = computed(() => environment);
 const { t } = useI18n();
+const router = useRouter();
+
+const handleFlowAction = (path: string) => {
+  router.push(path);
+};
 </script>
 
 <style lang="scss" scoped>
@@ -88,6 +184,154 @@ const { t } = useI18n();
 .home-divider {
   margin: var(--spacing-xl) 0;
   border-color: var(--border-color);
+}
+
+.concept-guide {
+  margin-bottom: 28px;
+  padding: 24px;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--primary-color) 8%, white) 0%,
+    var(--bg-card) 30%,
+    var(--bg-card) 100%
+  );
+}
+
+.concept-subtitle {
+  margin: 0 0 18px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.concept-flow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.flow-node {
+  border: var(--border-width) solid
+    color-mix(in srgb, var(--primary-color) 26%, var(--border-color));
+  background: color-mix(in srgb, var(--primary-color) 6%, var(--bg-card));
+  border-radius: 14px;
+  padding: 14px 16px;
+  min-height: 78px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  position: relative;
+
+  strong {
+    font-size: 16px;
+    color: var(--text-primary);
+  }
+}
+
+.flow-node-plain {
+  background: color-mix(in srgb, var(--primary-color) 3%, var(--bg-card));
+}
+
+.clickable {
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: color-mix(
+      in srgb,
+      var(--primary-color) 42%,
+      var(--border-color)
+    );
+  }
+}
+
+.node-icon-wrapper {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--primary-color) 14%, var(--bg-card));
+}
+
+.node-icon {
+  color: var(--primary-color);
+  font-size: 14px;
+}
+
+.node-kicker {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.flow-arrow {
+  color: var(--text-secondary);
+  font-size: 20px;
+  text-align: center;
+}
+
+.scope-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.scope-card {
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 14px;
+  background: var(--bg-card);
+  padding: 14px 16px;
+
+  p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.65;
+  }
+}
+
+.scope-head {
+  margin-bottom: 8px;
+
+  h3 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--text-primary);
+  }
+}
+
+.scope-note {
+  margin-top: 10px !important;
+  color: var(--warning-color, #f59e0b) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 1200px) {
+  .concept-flow {
+    grid-template-columns: 1fr;
+  }
+
+  .flow-arrow {
+    transform: rotate(90deg);
+    margin: -2px 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .scope-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .home-local-tabs {
